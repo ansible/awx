@@ -8,7 +8,17 @@
   template:
     src: docker-compose.yml.j2
     dest: "{{ docker_compose_dir }}/docker-compose.yml"
+  register: awx_compose_config
 
 - name: Start the containers
   docker_service:
     project_src: "{{ docker_compose_dir }}"
+  register: awx_compose_start
+    
+- name: Update CA trust in awx_web container
+  command: docker exec awx_web_1 '/usr/bin/update-ca-trust'
+  when: awx_compose_config.changed or awx_compose_start.changed
+
+- name: Update CA trust in awx_task container
+  command: docker exec awx_task_1 '/usr/bin/update-ca-trust'
+  when: awx_compose_config.changed or awx_compose_start.changed
