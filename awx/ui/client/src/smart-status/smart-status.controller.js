@@ -4,11 +4,36 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$scope', '$filter', 'i18n',
-    function ($scope, $filter, i18n) {
+export default ['$scope', '$filter', 'i18n', 'JobsStrings',
+    function ($scope, $filter, i18n, JobsStrings) {
+
+        const strings = JobsStrings;
 
         function isFailureState(status) {
             return status === 'failed' || status === 'error' || status === 'canceled';
+        }
+
+        function getTranslatedStatusString(status) {
+            switch (status) {
+                case 'new':
+                    return strings.get('list.NEW');
+                case 'pending':
+                    return strings.get('list.PENDING');
+                case 'waiting':
+                    return strings.get('list.WAITING');
+                case 'running':
+                    return strings.get('list.RUNNING');
+                case 'successful':
+                    return strings.get('list.SUCCESSFUL');
+                case 'failed':
+                    return strings.get('list.FAILED');
+                case 'error':
+                    return strings.get('list.ERROR');
+                case 'canceled':
+                    return strings.get('list.CANCELED');
+                default:
+                    return status;
+            }
         }
 
         function init(){
@@ -37,7 +62,7 @@ export default ['$scope', '$filter', 'i18n',
                     jobId: job.id,
                     sortDate: job.finished || "running" + job.id,
                     finished: finished,
-                    status_tip: `${i18n._('JOB ID')}: ${job.id} <br>${i18n._('STATUS')}: ${job.status.toUpperCase()} <br>${i18n._('FINISHED')}: ${finished}`,
+                    status_tip: `${i18n._('JOB ID')}: ${job.id} <br>${i18n._('STATUS')}: ${getTranslatedStatusString(job.status).toUpperCase()} <br>${i18n._('FINISHED')}: ${finished}`,
                     detailsUrl: detailsBaseUrl + job.id
                 };
 
