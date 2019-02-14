@@ -11,7 +11,7 @@ describe('<AnsibleSelect />', () => {
         value="foo"
         name="bar"
         onChange={() => { }}
-        labelName={label}
+        label={label}
         data={mockData}
       />
     );
@@ -24,7 +24,7 @@ describe('<AnsibleSelect />', () => {
         value="foo"
         name="bar"
         onChange={() => { }}
-        labelName={label}
+        label={label}
         data={mockData}
       />
     );
@@ -39,7 +39,7 @@ describe('<AnsibleSelect />', () => {
         value="foo"
         name="bar"
         onChange={() => { }}
-        labelName={label}
+        label={label}
         data={null}
       />
     );
@@ -49,9 +49,10 @@ describe('<AnsibleSelect />', () => {
   test('Returns correct select options if defaultSelected props is passed', () => {
     const wrapper = mount(
       <AnsibleSelect
-        selected="foo"
-        selectChange={() => { }}
-        labelName={label}
+        value="foo"
+        name="bar"
+        onChange={() => { }}
+        label={label}
         data={mockData}
         defaultSelected={mockData[1]}
       />
