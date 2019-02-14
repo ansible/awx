@@ -45,8 +45,22 @@ from awx.main.constants import (
     ACTIVE_STATES,
     CENSOR_VALUE,
 )
-from awx.main.models import * # noqa
-from awx.main.models.base import NEW_JOB_TYPE_CHOICES
+from awx.main.models import (
+    ActivityStream, AdHocCommand, AdHocCommandEvent, Credential,
+    CredentialType, CustomInventoryScript, Fact, Group, Host, Instance,
+    InstanceGroup, Inventory, InventorySource, InventoryUpdate,
+    InventoryUpdateEvent, Job, JobEvent, JobHostSummary, JobLaunchConfig,
+    JobTemplate, Label, Notification, NotificationTemplate, OAuth2AccessToken,
+    OAuth2Application, Organization, Project, ProjectUpdate,
+    ProjectUpdateEvent, RefreshToken, Role, Schedule, SystemJob,
+    SystemJobEvent, SystemJobTemplate, Team, UnifiedJob, UnifiedJobTemplate,
+    UserSessionMembership, V1Credential, WorkflowJob, WorkflowJobNode,
+    WorkflowJobTemplate, WorkflowJobTemplateNode, StdoutMaxBytesExceeded
+)
+from awx.main.models.base import VERBOSITY_CHOICES, NEW_JOB_TYPE_CHOICES
+from awx.main.models.rbac import (
+    get_roles_on_resource, role_summary_fields_generator
+)
 from awx.main.fields import ImplicitRoleField, JSONBField
 from awx.main.utils import (
     get_type_for_model, get_model_for_type, timestamp_apiformat,

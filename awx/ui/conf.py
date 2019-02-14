@@ -6,7 +6,7 @@ from django.utils.translation import ugettext_lazy as _
 
 # Tower
 from awx.conf import register, fields
-from awx.ui.fields import *  # noqa
+from awx.ui.fields import PendoTrackingStateField, CustomLogoField  # noqa
 
 
 register(

@@ -9,8 +9,8 @@ from rest_framework.exceptions import MethodNotAllowed, PermissionDenied
 from rest_framework import permissions
 
 # AWX
-from awx.main.access import * # noqa
-from awx.main.models import * # noqa
+from awx.main.access import check_user_access
+from awx.main.models import Inventory, UnifiedJob
 from awx.main.utils import get_object_or_400
 
 logger = logging.getLogger('awx.api.permissions')

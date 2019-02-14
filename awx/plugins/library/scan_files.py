@@ -101,7 +101,7 @@ EXAMPLES = '''
 
 
 def main():
-    module = AnsibleModule(
+    module = AnsibleModule(  # noqa
         argument_spec = dict(paths=dict(required=True, type='list'),
                              recursive=dict(required=False, default='no', type='bool'),
                              get_checksum=dict(required=False, default='no', type='bool')))

@@ -8,7 +8,10 @@ from django.core.validators import URLValidator
 from django.utils.translation import ugettext_lazy as _
 
 # Django REST Framework
-from rest_framework.fields import *  # noqa
+from rest_framework.fields import (  # noqa
+    BooleanField, CharField, ChoiceField, DictField, EmailField, IntegerField,
+    ListField, NullBooleanField
+)
 
 logger = logging.getLogger('awx.conf.fields')
 
