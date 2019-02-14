@@ -308,8 +308,10 @@ class BaseCallbackModule(CallbackBase):
             changed=stats.changed,
             dark=stats.dark,
             failures=stats.failures,
+            ignored=stats.ignored,
             ok=stats.ok,
             processed=stats.processed,
+            rescued=stats.rescued,
             skipped=stats.skipped
         )
 

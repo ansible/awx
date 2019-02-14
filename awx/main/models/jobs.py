@@ -1123,8 +1123,10 @@ class JobHostSummary(CreatedModifiedModel):
     changed = models.PositiveIntegerField(default=0, editable=False)
     dark = models.PositiveIntegerField(default=0, editable=False)
     failures = models.PositiveIntegerField(default=0, editable=False)
+    ignored = models.PositiveIntegerField(default=0, editable=False)
     ok = models.PositiveIntegerField(default=0, editable=False)
     processed = models.PositiveIntegerField(default=0, editable=False)
+    rescued = models.PositiveIntegerField(default=0, editable=False)
     skipped = models.PositiveIntegerField(default=0, editable=False)
     failed = models.BooleanField(default=False, editable=False)
 
