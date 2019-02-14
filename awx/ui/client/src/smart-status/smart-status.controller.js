@@ -34,7 +34,7 @@ export default ['$scope', '$filter', 'i18n', 'JobsStrings',
                 default:
                     return status;
             }
-        };
+        }
 
         function init(){
             var singleJobStatus = true;
