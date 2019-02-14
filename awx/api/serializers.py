@@ -893,7 +893,7 @@ class UserSerializer(BaseSerializer):
         model = User
         fields = ('*', '-name', '-description', '-modified',
                   'username', 'first_name', 'last_name',
-                  'email', 'is_superuser', 'is_system_auditor', 'password', 'ldap_dn', 'external_account')
+                  'email', 'is_superuser', 'is_system_auditor', 'password', 'ldap_dn', 'last_login', 'external_account')
 
     def to_representation(self, obj):  # TODO: Remove in 3.3
         ret = super(UserSerializer, self).to_representation(obj)
