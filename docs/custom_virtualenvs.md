@@ -90,8 +90,8 @@ Now create an initContainer stanza.  You can subsititute your own custom images 
 
     initContainers:
         - image: 'centos:7'
-        - name: init-my-custom-venv
-        - command:
+          name: init-my-custom-venv
+          command:
             - sh
             - '-c'
             - >-
@@ -103,11 +103,11 @@ Now create an initContainer stanza.  You can subsititute your own custom images 
               /var/lib/awx/venv/my-custom-venv/bin/pip install python-memcached psutil &&
               /var/lib/awx/venv/my-custom-venv/bin/pip install -U "ansible == X.Y.Z" &&
               /var/lib/awx/venv/my-custom-venv/bin/pip install -U custom-python-module
-        - volumeMounts:
+          volumeMounts:
             - mountPath: /var/lib/awx/venv/my-custom-venv
               name: custom-venv
 
-Fiinally in the awx-celery container stanza add the shared volume as a mount.
+Fiinally in the awx-celery and awx-web containers stanza add the shared volume as a mount.
 
     volumeMounts:
         - mountPath: /var/lib/awx/venv/my-custom-venv
