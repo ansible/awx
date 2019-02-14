@@ -1,10 +1,10 @@
 <!-- todo: styling, markup, css etc. - disposition according to project lib conventions -->
 <div class="at-u-floatRight">
-    <span ng-show="!vm.hideCounts" class="at-Panel-label">plays</span>
+    <span ng-show="!vm.hideCounts" class="at-Panel-label">{{:: vm.strings.get('stats.PLAYS')}}</span>
     <span ng-show="!vm.hideCounts && vm.running" class="at-Panel-headingTitleBadge at-Panel-headingTitleBadge--inline">...</span>
     <span ng-show="!vm.hideCounts && !vm.running" class="at-Panel-headingTitleBadge at-Panel-headingTitleBadge--inline">{{ vm.plays || 0 }}</span>
 
-    <span ng-show="!vm.hideCounts" class="at-Panel-label">tasks</span>
+    <span ng-show="!vm.hideCounts" class="at-Panel-label">{{:: vm.strings.get('stats.TASKS')}}</span>
     <span ng-show="!vm.hideCounts && vm.running" class="at-Panel-headingTitleBadge at-Panel-headingTitleBadge--inline">...</span>
     <span ng-show="!vm.hideCounts && !vm.running" class="at-Panel-headingTitleBadge at-Panel-headingTitleBadge--inline">{{ vm.tasks || 0 }}</span>
 
