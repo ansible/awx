@@ -3,6 +3,18 @@ import {
   Chip
 } from '@patternfly/react-core';
 
+const selectedRowStyling = {
+  paddingTop: '15px',
+  paddingBottom: '5px',
+  borderLeft: '0',
+  borderRight: '0'
+};
+
+const selectedLabelStyling = {
+  fontSize: '14px',
+  fontWeight: 'bold'
+};
+
 class SelectedList extends Component {
   constructor (props) {
     super(props);
@@ -23,8 +35,8 @@ class SelectedList extends Component {
     const { showOverflow } = this.state;
     return (
       <div className="awx-selectedList">
-        <div className="pf-l-split">
-          <div className="pf-l-split__item pf-u-align-items-center">
+        <div className="pf-l-split" style={selectedRowStyling}>
+          <div className="pf-l-split__item pf-u-align-items-center" style={selectedLabelStyling}>
             {label}
           </div>
           <div className="pf-l-split__item">

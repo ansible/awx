@@ -1,7 +1,6 @@
 import React from 'react';
 
 import {
-  FormGroup,
   Select,
   SelectOption,
 } from '@patternfly/react-core';
@@ -25,32 +24,28 @@ class AnsibleSelect extends React.Component {
     return null;
   }
 
-  onSelectChange (val) {
-    const { selectChange } = this.props;
-    selectChange(val);
+  onSelectChange (val, event) {
+    const { onChange, name } = this.props;
+    event.target.name = name;
+    onChange(val, event);
   }
 
   render () {
     const { count } = this.state;
-    const { labelName, selected, data, defaultSelected } = this.props;
+    const { label = '', value, data, defaultSelected } = this.props;
     let elem;
     if (count > 1) {
       elem = (
-        <FormGroup label={labelName} fieldId="ansible-select">
-          <Select value={selected} onChange={this.onSelectChange} aria-label="Select Input">
-            <SelectOption key="" value="" label={`Use Default ${labelName}`} />
-            {data.map((datum) => (datum !== defaultSelected
-              ? (<SelectOption key={datum} value={datum} label={datum} />) : null))
-            }
-          </Select>
-        </FormGroup>
+        <Select value={value} onChange={this.onSelectChange} aria-label="Select Input">
+          {data.map((datum) => (datum === defaultSelected
+            ? (<SelectOption key="" value="" label={`Use Default ${label}`} />) : (<SelectOption key={datum} value={datum} label={datum} />)))
+          }
+        </Select>
       );
     } else {
       elem = null;
     }
-
     return elem;
   }
 }
-
 export default AnsibleSelect;

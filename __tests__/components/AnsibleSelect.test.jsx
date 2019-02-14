@@ -8,19 +8,22 @@ describe('<AnsibleSelect />', () => {
   test('initially renders succesfully', async () => {
     mount(
       <AnsibleSelect
-        selected="foo"
-        selectChange={() => { }}
+        value="foo"
+        name="bar"
+        onChange={() => { }}
         labelName={label}
         data={mockData}
       />
     );
   });
+
   test('calls "onSelectChange" on dropdown select change', () => {
     const spy = jest.spyOn(AnsibleSelect.prototype, 'onSelectChange');
     const wrapper = mount(
       <AnsibleSelect
-        selected="foo"
-        selectChange={() => { }}
+        value="foo"
+        name="bar"
+        onChange={() => { }}
         labelName={label}
         data={mockData}
       />
@@ -29,11 +32,13 @@ describe('<AnsibleSelect />', () => {
     wrapper.find('select').simulate('change');
     expect(spy).toHaveBeenCalled();
   });
+
   test('content not rendered when data property is falsey', () => {
     const wrapper = mount(
       <AnsibleSelect
-        selected="foo"
-        selectChange={() => { }}
+        value="foo"
+        name="bar"
+        onChange={() => { }}
         labelName={label}
         data={null}
       />
