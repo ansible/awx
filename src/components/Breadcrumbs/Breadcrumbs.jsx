@@ -1,4 +1,5 @@
 import React, { Fragment } from 'react';
+import PropTypes from 'prop-types';
 import {
   PageSection,
   PageSectionVariants,
@@ -66,6 +67,14 @@ const Crumb = ({ breadcrumbConfig, match }) => {
       />
     </Fragment>
   );
+};
+
+Breadcrumbs.propTypes = {
+  breadcrumbConfig: PropTypes.objectOf(PropTypes.string).isRequired,
+};
+
+Crumb.propTypes = {
+  breadcrumbConfig: PropTypes.objectOf(PropTypes.string).isRequired,
 };
 
 export default withRouter(Breadcrumbs);

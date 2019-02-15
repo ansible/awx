@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { I18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
@@ -36,7 +37,6 @@ class DataListToolbar extends React.Component {
     super(props);
 
     const { sortedColumnKey } = this.props;
-
     this.state = {
       isSearchDropdownOpen: false,
       isSortDropdownOpen: false,
@@ -281,5 +281,30 @@ class DataListToolbar extends React.Component {
     );
   }
 }
+
+DataListToolbar.propTypes = {
+  addUrl: PropTypes.string,
+  columns: PropTypes.arrayOf(PropTypes.object).isRequired,
+  isAllSelected: PropTypes.bool,
+  onSearch: PropTypes.func,
+  onSelectAll: PropTypes.func,
+  onSort: PropTypes.func,
+  showDelete: PropTypes.bool,
+  showSelectAll: PropTypes.bool,
+  sortOrder: PropTypes.string,
+  sortedColumnKey: PropTypes.string,
+};
+
+DataListToolbar.defaultProps = {
+  addUrl: null,
+  onSearch: null,
+  onSelectAll: null,
+  onSort: null,
+  showDelete: false,
+  showSelectAll: false,
+  sortOrder: 'ascending',
+  sortedColumnKey: 'name',
+  isAllSelected: false,
+};
 
 export default DataListToolbar;

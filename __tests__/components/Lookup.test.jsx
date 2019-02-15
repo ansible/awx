@@ -3,7 +3,7 @@ import { mount } from 'enzyme';
 import { I18nProvider } from '@lingui/react';
 import Lookup from '../../src/components/Lookup';
 
-let mockData = [{ name: 'foo', id: 1, isChecked: false }];
+let mockData = [{ name: 'foo', id: 1 }];
 describe('<Lookup />', () => {
   test('initially renders succesfully', () => {
     mount(
@@ -85,7 +85,7 @@ describe('<Lookup />', () => {
   });
   test('calls "toggleSelected" when remove icon is clicked', () => {
     const spy = jest.spyOn(Lookup.prototype, 'toggleSelected');
-    mockData = [{ name: 'foo', id: 1, isChecked: false }, { name: 'bar', id: 2, isChecked: true }];
+    mockData = [{ name: 'foo', id: 1 }, { name: 'bar', id: 2 }];
     const wrapper = mount(
       <I18nProvider>
         <Lookup
@@ -103,20 +103,21 @@ describe('<Lookup />', () => {
   });
   test('"wrapTags" method properly handles data', () => {
     const spy = jest.spyOn(Lookup.prototype, 'wrapTags');
-    mockData = [{ name: 'foo', id: 0, isChecked: false }, { name: 'bar', id: 1, isChecked: false }];
+    mockData = [{ name: 'foo', id: 0 }, { name: 'bar', id: 1 }];
     const wrapper = mount(
       <I18nProvider>
         <Lookup
           lookup_header="Foo Bar"
           onLookupSave={() => { }}
-          data={mockData}
+          value={mockData}
           selected={[]}
+          getItems={() => { }}
         />
       </I18nProvider>
     );
     expect(spy).toHaveBeenCalled();
     const pill = wrapper.find('span.awx-c-tag--pill');
-    expect(pill).toHaveLength(0);
+    expect(pill).toHaveLength(2);
   });
   test('toggleSelected successfully adds/removes row from lookupSelectedItems state', () => {
     mockData = [{ name: 'foo', id: 1 }];
@@ -125,8 +126,9 @@ describe('<Lookup />', () => {
         <Lookup
           lookup_header="Foo Bar"
           onLookupSave={() => { }}
-          data={mockData}
+          value={mockData}
           selected={[]}
+          getItems={() => { }}
         />
       </I18nProvider>
     ).find('Lookup');

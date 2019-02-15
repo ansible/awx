@@ -39,8 +39,6 @@ class OrganizationsList extends Component {
     order_by: 'name',
   };
 
-  pageSizeOptions = [5, 10, 25, 50];
-
   constructor (props) {
     super(props);
 
@@ -207,7 +205,6 @@ class OrganizationsList extends Component {
       selected,
     } = this.state;
     const { match } = this.props;
-
     return (
       <PageSection variant={medium}>
         <Card>
@@ -258,7 +255,6 @@ class OrganizationsList extends Component {
                 page={page}
                 pageCount={pageCount}
                 page_size={page_size}
-                pageSizeOptions={this.pageSizeOptions}
                 onSetPage={this.onSetPage}
               />
               { loading ? <div>loading...</div> : '' }

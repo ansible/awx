@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import { I18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -21,7 +22,7 @@ const buttonGroupStyle = {
   marginRight: '20px'
 };
 
-export default ({ onSubmit, submitDisabled, onCancel }) => (
+const FormActionGroup = ({ onSubmit, submitDisabled, onCancel }) => (
   <I18n>
     {({ i18n }) => (
       <ActionGroup style={formActionGroupStyle}>
@@ -37,3 +38,15 @@ export default ({ onSubmit, submitDisabled, onCancel }) => (
     )}
   </I18n>
 );
+
+FormActionGroup.propTypes = {
+  onCancel: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired,
+  submitDisabled: PropTypes.bool,
+};
+
+FormActionGroup.defaultProps = {
+  submitDisabled: true,
+};
+
+export default FormActionGroup;

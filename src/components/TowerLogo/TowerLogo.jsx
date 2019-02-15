@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import { I18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -57,5 +58,13 @@ class TowerLogo extends Component {
     );
   }
 }
+
+TowerLogo.propTypes = {
+  linkTo: PropTypes.string,
+};
+
+TowerLogo.defaultProps = {
+  linkTo: null,
+};
 
 export default withRouter(TowerLogo);

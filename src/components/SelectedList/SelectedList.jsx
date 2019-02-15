@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import {
   Chip
 } from '@patternfly/react-core';
@@ -69,5 +70,17 @@ class SelectedList extends Component {
     );
   }
 }
+
+SelectedList.propTypes = {
+  label: PropTypes.string,
+  onRemove: PropTypes.func.isRequired,
+  selected: PropTypes.arrayOf(PropTypes.object).isRequired,
+  showOverflowAfter: PropTypes.number,
+};
+
+SelectedList.defaultProps = {
+  label: 'Selected',
+  showOverflowAfter: 5,
+};
 
 export default SelectedList;

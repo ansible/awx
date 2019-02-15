@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import {
   withRouter
 } from 'react-router-dom';
@@ -54,5 +55,11 @@ class NavExpandableGroup extends Component {
     );
   }
 }
+
+NavExpandableGroup.propTypes = {
+  groupId: PropTypes.string.isRequired,
+  groupTitle: PropTypes.string.isRequired,
+  routes: PropTypes.arrayOf(PropTypes.object).isRequired,
+};
 
 export default withRouter(NavExpandableGroup);

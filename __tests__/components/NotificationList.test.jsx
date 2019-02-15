@@ -112,9 +112,9 @@ describe('<Notifications />', () => {
     const getNotificationsFn = jest.fn().mockResolvedValue({
       data: {
         results: [
-          { id: 1 },
-          { id: 2 },
-          { id: 3 }
+          { id: 1, notification_type: 'slack' },
+          { id: 2, notification_type: 'email' },
+          { id: 3, notification_type: 'github' }
         ]
       }
     });

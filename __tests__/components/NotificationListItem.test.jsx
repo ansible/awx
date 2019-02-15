@@ -6,6 +6,7 @@ import NotificationListItem from '../../src/components/NotificationsList/Notific
 
 describe('<NotificationListItem />', () => {
   let wrapper;
+  const toggleNotification = jest.fn();
 
   afterEach(() => {
     if (wrapper) {
@@ -18,7 +19,12 @@ describe('<NotificationListItem />', () => {
     wrapper = mount(
       <I18nProvider>
         <MemoryRouter>
-          <NotificationListItem />
+          <NotificationListItem
+            itemId={9000}
+            toggleNotification={toggleNotification}
+            detailUrl="/foo"
+            notificationType="slack"
+          />
         </MemoryRouter>
       </I18nProvider>
     );
@@ -26,7 +32,6 @@ describe('<NotificationListItem />', () => {
   });
 
   test('handles success click when toggle is on', () => {
-    const toggleNotification = jest.fn();
     wrapper = mount(
       <I18nProvider>
         <MemoryRouter>
@@ -34,6 +39,8 @@ describe('<NotificationListItem />', () => {
             itemId={9000}
             successTurnedOn
             toggleNotification={toggleNotification}
+            detailUrl="/foo"
+            notificationType="slack"
           />
         </MemoryRouter>
       </I18nProvider>
@@ -43,7 +50,6 @@ describe('<NotificationListItem />', () => {
   });
 
   test('handles success click when toggle is off', () => {
-    const toggleNotification = jest.fn();
     wrapper = mount(
       <I18nProvider>
         <MemoryRouter>
@@ -51,6 +57,8 @@ describe('<NotificationListItem />', () => {
             itemId={9000}
             successTurnedOn={false}
             toggleNotification={toggleNotification}
+            detailUrl="/foo"
+            notificationType="slack"
           />
         </MemoryRouter>
       </I18nProvider>
@@ -60,7 +68,6 @@ describe('<NotificationListItem />', () => {
   });
 
   test('handles error click when toggle is on', () => {
-    const toggleNotification = jest.fn();
     wrapper = mount(
       <I18nProvider>
         <MemoryRouter>
@@ -68,6 +75,8 @@ describe('<NotificationListItem />', () => {
             itemId={9000}
             errorTurnedOn
             toggleNotification={toggleNotification}
+            detailUrl="/foo"
+            notificationType="slack"
           />
         </MemoryRouter>
       </I18nProvider>
@@ -77,7 +86,6 @@ describe('<NotificationListItem />', () => {
   });
 
   test('handles error click when toggle is off', () => {
-    const toggleNotification = jest.fn();
     wrapper = mount(
       <I18nProvider>
         <MemoryRouter>
@@ -85,6 +93,8 @@ describe('<NotificationListItem />', () => {
             itemId={9000}
             errorTurnedOn={false}
             toggleNotification={toggleNotification}
+            detailUrl="/foo"
+            notificationType="slack"
           />
         </MemoryRouter>
       </I18nProvider>

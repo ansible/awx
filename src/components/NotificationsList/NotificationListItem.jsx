@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { I18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
@@ -20,7 +21,6 @@ class NotificationListItem extends React.Component {
       errorTurnedOn,
       toggleNotification
     } = this.props;
-
     const capText = {
       textTransform: 'capitalize'
     };
@@ -68,6 +68,22 @@ class NotificationListItem extends React.Component {
     );
   }
 }
+
+NotificationListItem.propTypes = {
+  detailUrl: PropTypes.string.isRequired,
+  errorTurnedOn: PropTypes.bool,
+  itemId: PropTypes.number.isRequired,
+  name: PropTypes.string,
+  notificationType: PropTypes.string.isRequired,
+  successTurnedOn: PropTypes.bool,
+  toggleNotification: PropTypes.func.isRequired,
+};
+
+NotificationListItem.defaultProps = {
+  errorTurnedOn: false,
+  name: null,
+  successTurnedOn: false,
+};
 
 export default NotificationListItem;
 

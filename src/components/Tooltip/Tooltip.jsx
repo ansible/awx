@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 class Tooltip extends React.Component {
   transforms = {
@@ -73,5 +74,15 @@ class Tooltip extends React.Component {
     );
   }
 }
+
+Tooltip.propTypes = {
+  children: PropTypes.element.isRequired,
+  message: PropTypes.string.isRequired,
+  position: PropTypes.string,
+};
+
+Tooltip.defaultProps = {
+  position: 'top',
+};
 
 export default Tooltip;

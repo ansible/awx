@@ -1,5 +1,5 @@
 import React, { Fragment } from 'react';
-
+import PropTypes from 'prop-types';
 import { SearchIcon, CubesIcon } from '@patternfly/react-icons';
 import {
   Modal,
@@ -125,7 +125,7 @@ class Lookup extends React.Component {
 
   render () {
     const { isModalOpen, lookupSelectedItems, error, results, count, page, page_size } = this.state;
-    const { lookupHeader = 'items', value } = this.props;
+    const { lookupHeader, value } = this.props;
 
     return (
       <I18n>
@@ -174,6 +174,7 @@ class Lookup extends React.Component {
                     pageCount={Math.ceil(count / page_size)}
                     page_size={page_size}
                     onSetPage={this.onSetPage}
+                    pageSizeOptions={null}
                     style={paginationStyling}
                   />
                 </Fragment>
@@ -194,4 +195,18 @@ class Lookup extends React.Component {
     );
   }
 }
+
+Lookup.propTypes = {
+  getItems: PropTypes.func.isRequired,
+  lookupHeader: PropTypes.string,
+  name: PropTypes.string,
+  onLookupSave: PropTypes.func.isRequired,
+  value: PropTypes.arrayOf(PropTypes.object).isRequired,
+};
+
+Lookup.defaultProps = {
+  lookupHeader: 'items',
+  name: null,
+};
+
 export default Lookup;

@@ -2,6 +2,7 @@ import React, {
   Component,
   Fragment
 } from 'react';
+import PropTypes from 'prop-types';
 import { Title, EmptyState, EmptyStateIcon, EmptyStateBody } from '@patternfly/react-core';
 import { CubesIcon } from '@patternfly/react-icons';
 import { I18n, i18nMark } from '@lingui/react';
@@ -28,8 +29,6 @@ class Notifications extends Component {
     page_size: 5,
     order_by: 'name',
   };
-
-  pageSizeOptions = [5, 10, 25, 50];
 
   constructor (props) {
     super(props);
@@ -286,7 +285,6 @@ class Notifications extends Component {
       successTemplateIds,
       errorTemplateIds
     } = this.state;
-
     return (
       <Fragment>
         {noInitialResults && (
@@ -326,8 +324,6 @@ class Notifications extends Component {
                       name={o.name}
                       notificationType={o.notification_type}
                       detailUrl={`/notifications/${o.id}`}
-                      isSelected={selected.includes(o.id)}
-                      onSelect={() => this.onSelect(o.id)}
                       toggleNotification={this.toggleNotification}
                       errorTurnedOn={errorTemplateIds.includes(o.id)}
                       successTurnedOn={successTemplateIds.includes(o.id)}
@@ -341,7 +337,6 @@ class Notifications extends Component {
               page={page}
               pageCount={pageCount}
               page_size={page_size}
-              pageSizeOptions={this.pageSizeOptions}
               onSetPage={this.onSetPage}
             />
           </Fragment>
@@ -352,5 +347,13 @@ class Notifications extends Component {
     );
   }
 }
+
+Notifications.propType = {
+  getError: PropTypes.func.isRequired,
+  getNotifications: PropTypes.func.isRequired,
+  getSuccess: PropTypes.func.isRequired,
+  postError: PropTypes.func.isRequired,
+  postSuccess: PropTypes.func.isRequired,
+};
 
 export default Notifications;
