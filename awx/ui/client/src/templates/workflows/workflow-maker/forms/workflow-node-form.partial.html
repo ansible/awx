@@ -1,5 +1,5 @@
 <div ng-show="nodeFormDataLoaded">
-    <div class="WorkflowMaker-formTitle">{{nodeConfig.mode === 'edit' ? nodeConfig.node.fullUnifiedJobTemplateObject.name || nodeConfig.node.unifiedJobTemplate.name : strings.get('workflow_maker.ADD_A_TEMPLATE')}}</div>
+    <div class="WorkflowMaker-formTitle">{{nodeConfig.mode === 'edit' ? nodeConfig.node.fullUnifiedJobTemplateObject.name || nodeConfig.node.unifiedJobTemplate.name : strings.get('workflow_maker.ADD_A_NODE')}}</div>
     <div class="Form-tabHolder" ng-show="!readOnly">
         <div class="Form-tab WorkflowMaker-formTab" ng-class="{'is-selected': activeTab === 'jobs'}" ng-click="activeTab = 'jobs'">{{strings.get('workflow_maker.JOBS')}}</div>
         <div class="Form-tab WorkflowMaker-formTab" ng-class="{'is-selected': activeTab === 'project_syncs'}" ng-click="activeTab = 'project_syncs'">{{strings.get('workflow_maker.PROJECT_SYNC')}}</div>
