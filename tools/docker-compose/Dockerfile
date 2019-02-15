@@ -66,7 +66,7 @@ ENTRYPOINT ["/tini", "--"]
 CMD /start_development.sh
 
 # Pre-create things that we need to write to
-RUN for dir in /var/lib/awx/ /projects /.ansible /var/log/nginx /var/lib/nginx /.local; \
+RUN for dir in /var/lib/awx/ /var/log/tower/ /projects /.ansible /var/log/nginx /var/lib/nginx /.local; \
   do mkdir -p $dir; chmod -R g+rwx $dir; chgrp -R root $dir; done
 
 RUN for file in /etc/passwd /etc/supervisord.conf \

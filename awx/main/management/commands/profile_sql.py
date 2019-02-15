@@ -6,7 +6,7 @@ from awx.main.tasks import profile_sql
 class Command(BaseCommand):
     """
     Enable or disable SQL Profiling across all Python processes.
-    SQL profile data will be recorded at /var/lib/awx/profile/
+    SQL profile data will be recorded at /var/log/tower/profile
     """
 
     def add_arguments(self, parser):

@@ -34,7 +34,7 @@ perf_logger = logging.getLogger('awx.analytics.performance')
 
 class TimingMiddleware(threading.local):
 
-    dest = '/var/lib/awx/profile'
+    dest = '/var/log/tower/profile'
 
     def process_request(self, request):
         self.start_time = time.time()

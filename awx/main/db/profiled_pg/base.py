@@ -17,7 +17,7 @@ __all__ = ['DatabaseWrapper']
 
 class RecordedQueryLog(object):
 
-    def __init__(self, log, db, dest='/var/lib/awx/profile'):
+    def __init__(self, log, db, dest='/var/log/tower/profile'):
         self.log = log
         self.db = db
         self.dest = dest
