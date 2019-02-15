@@ -15,6 +15,7 @@ Have questions about this document or anything not covered here? Feel free to re
 * [Working with React](#working-with-react)
   * [Class constructors vs Class properties](#class-constructors-vs-class-properties)
   * [Binding](#binding)
+  * [Typechecking with PropTypes](#typechecking-with-proptypes)
 * [Testing](#testing)
   * [Jest](#jest)
   * [Enzyme](#enzyme)
@@ -90,35 +91,25 @@ It is good practice to bind our class methods within our class constructor metho
   2. [Performance advantages](https://stackoverflow.com/a/44844916).
   3. Ease of [testing](https://github.com/airbnb/enzyme/issues/365).
 
-### Component Lifecycle
+### Typechecking with PropTypes
+Shared components should have their prop values typechecked. This will help catch bugs when components get refactored/renamed.
+```javascript
+About.propTypes = {
+  ansible_version: PropTypes.string,
+  isOpen: PropTypes.bool,
+  onClose: PropTypes.func.isRequired,
+  version: PropTypes.string,
+};
 
-A React Component has various [lifecylce methods](http://projects.wojtekmaj.pl/react-lifecycle-methods-diagram/). Understanding the basic  lifecycle of a Component will help you determine which method to utilize for your specific need. Below are some general guidelines:
+About.defaultProps = {
+  ansible_version: null,
+  isOpen: false,
+  version: null,
+};
+```
 
-BAD:
-  Use `render` method to make asynchronous calls.
-  ```javascript
-      render () {
-        const { data } = await api.get(API_CONFIG);
 
-        return(<div>`Hello, ${data.usename}!`</div>);
-      }
-  ```
-GOOD:
-  Use `componentDidMount()` method to make asynchronous calls to retrieve data a Componenet may need.
-  ```javascript
-      async componentDidMount () {
-        try {
-          const { data } = await api.get(API_CONFIG);
-          this.setState({ data });
-        } catch (error) {
-          this.setState({ error });
-        }
-      }
 
-      render() {
-        return(<div>`Hello, ${this.state.data.usename}!`</div>)
-      }
-  ```
 ## Testing
 All code, new or otherwise, should have at least 80% test coverage.
 ### Jest
