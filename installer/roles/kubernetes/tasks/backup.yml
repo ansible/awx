@@ -55,6 +55,7 @@
           --port={{ pg_port | default('5432') }} \
           --username='{{ pg_username }}' \
           --dbname='{{ pg_database }}'" > {{ playbook_dir }}/tower-openshift-backup-{{ now }}/tower.db
+  no_log: yes
 
 - name: Copy inventory into backup directory
   copy:
