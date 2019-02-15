@@ -73,7 +73,7 @@ data:
     DATABASES = {
         'default': {
             'ATOMIC_REQUESTS': True,
-            'ENGINE': 'django.db.backends.postgresql',
+            'ENGINE': 'awx.main.db.profiled_pg',
             'NAME': "awx",
             'USER': "awx",
             'PASSWORD': "awx",

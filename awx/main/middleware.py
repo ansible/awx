@@ -34,7 +34,7 @@ perf_logger = logging.getLogger('awx.analytics.performance')
 
 class TimingMiddleware(threading.local):
 
-    dest = '/var/lib/awx/profile'
+    dest = '/var/log/tower/profile'
 
     def process_request(self, request):
         self.start_time = time.time()
@@ -57,7 +57,7 @@ class TimingMiddleware(threading.local):
     def save_profile_file(self, request):
         if not os.path.isdir(self.dest):
             os.makedirs(self.dest)
-        filename = '%.3fs-%s' % (pstats.Stats(self.prof).total_tt, uuid.uuid4())
+        filename = '%.3fs-%s.pstats' % (pstats.Stats(self.prof).total_tt, uuid.uuid4())
         filepath = os.path.join(self.dest, filename)
         with open(filepath, 'w') as f:
             f.write('%s %s\n' % (request.method, request.get_full_path()))

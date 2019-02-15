@@ -113,13 +113,13 @@ def get_memoize_cache():
     return cache
 
 
-def memoize(ttl=60, cache_key=None, track_function=False):
+def memoize(ttl=60, cache_key=None, track_function=False, cache=None):
     '''
     Decorator to wrap a function and cache its result.
     '''
     if cache_key and track_function:
         raise IllegalArgumentError("Can not specify cache_key when track_function is True")
-    cache = get_memoize_cache()
+    cache = cache or get_memoize_cache()
 
     def memoize_decorator(f):
         @wraps(f)

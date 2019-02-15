@@ -24,7 +24,7 @@ MANAGERS = ADMINS
 # Database settings to use PostgreSQL for development.
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
+        'ENGINE': 'awx.main.db.profiled_pg',
         'NAME': 'awx-dev',
         'USER': 'awx-dev',
         'PASSWORD': 'AWXsome1',

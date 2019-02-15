@@ -75,7 +75,7 @@ LOGGING['handlers']['management_playbooks'] = {'class': 'logging.NullHandler'}
 DATABASES = {
     'default': {
         'ATOMIC_REQUESTS': True,
-        'ENGINE': 'django.db.backends.postgresql',
+        'ENGINE': 'awx.main.db.profiled_pg',
         'NAME': os.getenv("DATABASE_NAME", None),
         'USER': os.getenv("DATABASE_USER", None),
         'PASSWORD': os.getenv("DATABASE_PASSWORD", None),
