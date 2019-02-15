@@ -19,6 +19,7 @@ from __future__ import (absolute_import, division, print_function)
 
 # Python
 import codecs
+import collections
 import contextlib
 import json
 import os
@@ -66,6 +67,7 @@ class BaseCallbackModule(CallbackBase):
     def __init__(self):
         super(BaseCallbackModule, self).__init__()
         self.task_uuids = set()
+        self.duplicate_task_counts = collections.defaultdict(lambda: 1)
 
     @contextlib.contextmanager
     def capture_event_data(self, event, **event_data):
@@ -229,10 +231,19 @@ class BaseCallbackModule(CallbackBase):
         # FIXME: Flag task path output as vv.
         task_uuid = str(task._uuid)
         if task_uuid in self.task_uuids:
-            # FIXME: When this task UUID repeats, it means the play is using the
-            # free strategy, so different hosts may be running different tasks
-            # within a play.
-            return
+            # When this task UUID repeats, it means the play is using the
+            # free strategy (or serial:1) so different hosts may be running
+            # different tasks within a play (where duplicate UUIDS are common).
+            #
+            # When this is the case, modify the UUID slightly to append
+            # a counter so we can still _track_ duplicate events, but also
+            # avoid breaking the display in these scenarios.
+            self.duplicate_task_counts[task_uuid] += 1
+
+            task_uuid = '_'.join([
+                task_uuid,
+                str(self.duplicate_task_counts[task_uuid])
+            ])
         self.task_uuids.add(task_uuid)
         self.set_task(task)
         event_data = dict(
