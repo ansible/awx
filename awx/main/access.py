@@ -336,6 +336,9 @@ class BaseAccess(object):
             return
 
         inventory = get_object_from_data('inventory', Inventory, data)
+        if inventory is None:  # In this case a missing inventory error is launched
+            return             # further down the line, so just ignore it.
+
         org = inventory.organization
         if org is None or org.max_hosts == 0:
             return
