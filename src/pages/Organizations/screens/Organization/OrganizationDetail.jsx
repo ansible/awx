@@ -135,7 +135,7 @@ class OrganizationDetail extends Component {
                 value={modified}
               />
             </div>
-            <div style={{ display: 'flex', flexDirection: 'row-reverse' }}>
+            <div style={{ display: 'flex', flexDirection: 'row-reverse', marginTop: '20px' }}>
               <Link to={`/organizations/${match.params.id}/edit`}>
                 <Button><Trans>Edit</Trans></Button>
               </Link>
