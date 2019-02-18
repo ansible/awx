@@ -1,5 +1,3 @@
-import itertools
-
 import pytest
 
 from awx.api.versioning import reverse
@@ -7,7 +5,7 @@ from awx.api.versioning import reverse
 
 @pytest.fixture
 def organization_resource_creator(organization, user):
-    def rf(users, admins, job_templates, projects, inventories, teams, hosts):
+    def rf(users, admins, job_templates, projects, inventories, teams):
 
         # Associate one resource of every type with the organization
         for i in range(users):
@@ -19,10 +17,7 @@ def organization_resource_creator(organization, user):
         for i in range(teams):
             organization.teams.create(name='org-team %s' % i)
         for i in range(inventories):
-            organization.inventories.create(name="associated-inv %s" % i)
-        for i, inventory in zip(range(hosts), itertools.cycle(organization.inventories.all())):
-            # evenly distribute the hosts over all of the org's inventories
-            inventory.hosts.create(name="host %s" % i)
+            inventory = organization.inventories.create(name="associated-inv %s" % i)
         for i in range(projects):
             organization.projects.create(name="test-proj %s" % i,
                                          description="test-proj-desc")
@@ -53,8 +48,7 @@ COUNTS_PRIMES = {
     'job_templates': 3,
     'projects': 3,
     'inventories': 7,
-    'teams': 5,
-    'hosts': 7,
+    'teams': 5
 }
 COUNTS_ZEROS = {
     'users': 0,
@@ -62,8 +56,7 @@ COUNTS_ZEROS = {
     'job_templates': 0,
     'projects': 0,
     'inventories': 0,
-    'teams': 0,
-    'hosts': 0,
+    'teams': 0
 }
 
 
@@ -91,7 +84,6 @@ def test_org_counts_detail_member(resourced_organization, user, get):
     response = get(reverse('api:organization_detail',
                    kwargs={'pk': resourced_organization.pk}), member_user)
     assert response.status_code == 200
-    assert response.data['max_hosts'] == 0
 
     counts = response.data['summary_fields']['related_field_counts']
     assert counts == {
@@ -100,8 +92,7 @@ def test_org_counts_detail_member(resourced_organization, user, get):
         'job_templates': 0,
         'projects': 0,
         'inventories': 0,
-        'teams': 0,
-        'hosts': 7,
+        'teams': 0
     }
 
 
@@ -123,17 +114,16 @@ def test_org_counts_list_member(resourced_organization, user, get):
     member_user = resourced_organization.member_role.members.get(username='org-member 1')
     response = get(reverse('api:organization_list'), member_user)
     assert response.status_code == 200
-    assert response.data['results'][0]['max_hosts'] == 0
 
     counts = response.data['results'][0]['summary_fields']['related_field_counts']
+
     assert counts == {
         'users': COUNTS_PRIMES['users'],  # Policy is that members can see other users and admins
         'admins': COUNTS_PRIMES['admins'],
         'job_templates': 0,
         'projects': 0,
         'inventories': 0,
-        'teams': 0,
-        'hosts': 7,
+        'teams': 0
     }
 
 
@@ -240,6 +230,5 @@ def test_JT_associated_with_project(organizations, project, user, get):
         'job_templates': 1,
         'projects': 1,
         'inventories': 0,
-        'teams': 0,
-        'hosts': 0,
+        'teams': 0
     }

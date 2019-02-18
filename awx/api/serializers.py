@@ -1259,7 +1259,7 @@ class OrganizationSerializer(BaseSerializer):
         if counts_dict is not None and summary_dict is not None:
             if obj.id not in counts_dict:
                 summary_dict['related_field_counts'] = {
-                    'inventories': 0, 'teams': 0, 'users': 0, 'hosts': 0,
+                    'inventories': 0, 'teams': 0, 'users': 0,
                     'job_templates': 0, 'admins': 0, 'projects': 0}
             else:
                 summary_dict['related_field_counts'] = counts_dict[obj.id]
