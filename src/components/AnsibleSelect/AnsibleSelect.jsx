@@ -2,8 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import {
-  Select,
-  SelectOption,
+  FormSelect,
+  FormSelectOption,
 } from '@patternfly/react-core';
 
 class AnsibleSelect extends React.Component {
@@ -21,11 +21,11 @@ class AnsibleSelect extends React.Component {
   render () {
     const { label, value, data, defaultSelected } = this.props;
     return (
-      <Select value={value} onChange={this.onSelectChange} aria-label="Select Input">
+      <FormSelect value={value} onChange={this.onSelectChange} aria-label="Select Input">
         {data.map((datum) => (datum === defaultSelected
-          ? (<SelectOption key="" value="" label={`Use Default ${label}`} />) : (<SelectOption key={datum} value={datum} label={datum} />)))
+          ? (<FormSelectOption key="" value="" label={`Use Default ${label}`} />) : (<FormSelectOption key={datum} value={datum} label={datum} />)))
         }
-      </Select>
+      </FormSelect>
     );
   }
 }

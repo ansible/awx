@@ -44,6 +44,6 @@ describe('<AnsibleSelect />', () => {
         defaultSelected={mockData[1]}
       />
     );
-    expect(wrapper.find('Select')).toHaveLength(1);
+    expect(wrapper.find('FormSelect')).toHaveLength(1);
   });
 });
