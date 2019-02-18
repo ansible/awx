@@ -141,3 +141,7 @@ secret_key=awxsecret
 # which makes include "optional" - i.e. not fail
 # if file is absent
 #extra_nginx_include="/etc/nginx/awx_extra[.]conf"
+
+# Additional volumes to mount into awx_task container (local_docker only)
+# e.g., to make NFS shares accessible for jobs via named docker volume
+#additional_task_volumes=['mynamedvolume:/mnt/mynamedvolume:z', '/tmp/foo:/mnt/foo:z']

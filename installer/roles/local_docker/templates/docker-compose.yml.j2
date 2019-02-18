@@ -72,6 +72,11 @@ services:
     {% if ca_trust_dir is defined %}
       - "{{ ca_trust_dir +':/etc/pki/ca-trust/source/anchors:ro' }}"
     {% endif %}
+    {% if additional_task_volumes is defined %}
+    {% for additional_task_volume in additional_task_volumes %}
+      - "{{ additional_task_volume }}"
+    {% endfor %}
+    {% endif %}
     {% if (awx_container_search_domains is defined) and (',' in awx_container_search_domains) %}
     {% set awx_container_search_domains_list = awx_container_search_domains.split(',') %}
     dns_search:
@@ -123,3 +128,14 @@ services:
       POSTGRES_DB: {{ pg_database }}
       PGDATA: /var/lib/postgresql/data/pgdata
   {% endif %}
+
+{% if additional_task_volumes is defined %}
+{% set named_volumes = additional_task_volumes | reject("match", "^[^:]*/[^:]*:[^:]*(:.*)?") | list %}
+{% if named_volumes %}
+volumes:
+{% for named_volume in named_volumes %}
+  {{ named_volume.split(':')[0] }}:
+    external: true
+{% endfor %}
+{% endif %}
+{% endif %}
