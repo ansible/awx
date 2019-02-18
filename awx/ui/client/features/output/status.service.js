@@ -32,7 +32,7 @@ function JobStatusService (moment, message) {
             counts: {
                 plays: 0,
                 tasks: 0,
-                hosts: 1,
+                hosts: 0,
             },
             hosts: {},
             status: model.get('status'),
