@@ -9,7 +9,6 @@ import {
   TextListItem
 } from '@patternfly/react-core';
 
-import heroImg from '@patternfly/patternfly-next/assets/images/pfbg_992.jpg';
 import brandImg from '../../images/tower-logo-white.svg';
 import logoImg from '../../images/tower-logo-login.svg';
 
@@ -53,13 +52,12 @@ class About extends React.Component {
           <AboutModal
             isOpen={isOpen}
             onClose={onClose}
-            productName="Ansible Tower"
+            productName={i18n._(t`Ansible Tower`)}
             trademark={i18n._(t`Copyright 2018 Red Hat, Inc.`)}
             brandImageSrc={brandImg}
             brandImageAlt={i18n._(t`Brand Image`)}
             logoImageSrc={logoImg}
             logoImageAlt={i18n._(t`AboutModal Logo`)}
-            heroImageSrc={heroImg}
           >
             <pre>
               { speechBubble }
