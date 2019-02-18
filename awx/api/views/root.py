@@ -101,7 +101,6 @@ class ApiVersionRootView(APIView):
         data['credentials'] = reverse('api:credential_list', request=request)
         if get_request_version(request) > 1:
             data['credential_types'] = reverse('api:credential_type_list', request=request)
-            data['credential_input_sources'] = reverse('api:credential_input_source_list', request=request)
             data['applications'] = reverse('api:o_auth2_application_list', request=request)
             data['tokens'] = reverse('api:o_auth2_token_list', request=request)
         data['inventory'] = reverse('api:inventory_list', request=request)
