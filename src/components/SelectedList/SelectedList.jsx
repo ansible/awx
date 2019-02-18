@@ -12,6 +12,7 @@ const selectedRowStyling = {
 };
 
 const selectedLabelStyling = {
+  alignSelf: 'center',
   fontSize: '14px',
   fontWeight: 'bold'
 };
@@ -37,7 +38,7 @@ class SelectedList extends Component {
     return (
       <div className="awx-selectedList">
         <div className="pf-l-split" style={selectedRowStyling}>
-          <div className="pf-l-split__item pf-u-align-items-center" style={selectedLabelStyling}>
+          <div className="pf-l-split__item" style={selectedLabelStyling}>
             {label}
           </div>
           <div className="pf-l-split__item">

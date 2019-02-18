@@ -94,7 +94,7 @@ class OrganizationDetail extends Component {
     return (
       <I18n>
         {({ i18n }) => (
-          <CardBody className="pf-u-pt-lg">
+          <CardBody>
             <div className="pf-l-grid pf-m-gutter pf-m-all-12-col-on-md pf-m-all-6-col-on-lg pf-m-all-4-col-on-xl">
               <Detail
                 label={i18n._(t`Name`)}
@@ -135,7 +135,7 @@ class OrganizationDetail extends Component {
                 value={modified}
               />
             </div>
-            <div className="pf-u-display-flex pf-u-flex-direction-row-reverse pf-u-ml-auto pf-u-mt-md">
+            <div style={{ display: 'flex', flexDirection: 'row-reverse' }}>
               <Link to={`/organizations/${match.params.id}/edit`}>
                 <Button><Trans>Edit</Trans></Button>
               </Link>

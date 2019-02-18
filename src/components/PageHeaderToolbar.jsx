@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Link } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
 import { I18n } from '@lingui/react';
@@ -55,6 +54,10 @@ class PageHeaderToolbar extends Component {
     const { isHelpOpen, isUserOpen } = this.state;
     const { isAboutDisabled, onAboutClick, onLogoutClick } = this.props;
 
+    const dropdownIconColor = {
+      color: 'white'
+    };
+
     return (
       <I18n>
         {({ i18n }) => (
@@ -68,6 +71,7 @@ class PageHeaderToolbar extends Component {
                   toggle={(
                     <DropdownToggle
                       onToggle={this.onHelpToggle}
+                      style={dropdownIconColor}
                     >
                       <QuestionCircleIcon />
                     </DropdownToggle>
@@ -99,15 +103,17 @@ class PageHeaderToolbar extends Component {
                   toggle={(
                     <DropdownToggle
                       onToggle={this.onUserToggle}
+                      style={dropdownIconColor}
                     >
                       <UserIcon />
                     </DropdownToggle>
                   )}
                   dropdownItems={[
-                    <DropdownItem key="user">
-                      <Link to="/home">
-                        {i18n._(t`User Details`)}
-                      </Link>
+                    <DropdownItem
+                      key="user"
+                      href="#/home"
+                    >
+                      {i18n._(t`User Details`)}
                     </DropdownItem>,
                     <DropdownItem
                       key="logout"

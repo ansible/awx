@@ -1,3 +1,8 @@
+// https://github.com/patternfly/patternfly-react/issues/1294
+#app {
+  height: 100%;
+}
+
 //
 // masthead overrides
 //
@@ -44,7 +49,6 @@
     }
 
     .pf-c-nav__simple-list .pf-c-nav__link {
-      --pf-c-nav__simple-list-link--PaddingLeft: 24px;
       --pf-c-nav__simple-list-link--PaddingBottom: 6px;
       --pf-c-nav__simple-list-link--PaddingTop: 6px;
     }
@@ -71,16 +75,6 @@
 }
 
 //
-// toolbar overrides
-//
-
-.pf-l-toolbar {
-  align-self: center;
-  height: 60px;
-}
-
-
-//
 // data list overrides
 //
 
@@ -99,7 +93,7 @@
 
 .pf-c-data-list__item {
   --pf-c-data-list__item--PaddingLeft: 20px;
-  --pf-c-data-list__item--PaddingRight: 0px;
+  --pf-c-data-list__item--PaddingRight: 20px;
 }
 
 .pf-c-data-list__check {
@@ -116,8 +110,24 @@
   margin-right: 20px;
 }
 
-.pf-c-data-list__cell a {
-  margin-right: 8px;
+.pf-c-data-list__cell {
+  --pf-c-data-list__cell--PaddingTop: 16px;
+  --pf-c-data-list__cell--PaddingBottom: 16px;
+  --pf-c-data-list__cell-cell--PaddingTop: 16px;
+
+  a {
+    margin-right: 8px;
+  }
+}
+
+//
+// switch overrides
+//
+// https://github.com/patternfly/patternfly-next/issues/915
+.pf-c-switch {
+  .pf-c-switch__label::before {
+    display: none;
+  }
 }
 
 //
@@ -144,17 +154,13 @@
 }
 
 //
-// data list overrides
-//
-
-.pf-c-data-list__item {
-  --pf-c-data-list__item--PaddingLeft: 20px;
-  --pf-c-data-list__item--PaddingRight: 20px;
-}
-
-//
 // pf modal overrides
 //
+
+.pf-c-modal-box {
+  --pf-c-modal-box--Width: 550px;
+  --pf-c-modal-box--MaxWidth: 550px;
+}
 
 .pf-c-modal-box__footer {
   --pf-c-modal-box__footer--PaddingTop: 20px;
@@ -189,6 +195,10 @@
   padding: 0;
 }
 
+.pf-c-card__body {
+  --pf-c-card__body--PaddingTop: 24px;
+}
+
 //
 // pf empty state overrides
 //
@@ -205,11 +215,10 @@
 
 .awx-lookup {
   min-height: 36px;
-}
 
-.awx-c-modal {
-  width: 550px;
-  margin: 0;
+  .pf-c-form-control {
+    --pf-c-form-control--Height: auto;
+  }
 }
 
 .awx-c-icon--remove {
