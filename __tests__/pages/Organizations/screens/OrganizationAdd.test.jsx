@@ -2,6 +2,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { MemoryRouter } from 'react-router-dom';
 import { I18nProvider } from '@lingui/react';
+import { ConfigContext } from '../../../../src/context';
 import OrganizationAdd from '../../../../src/pages/Organizations/screens/OrganizationAdd';
 
 describe('<OrganizationAdd />', () => {
@@ -156,5 +157,38 @@ describe('<OrganizationAdd />', () => {
       name: 'mock org'
     });
     expect(createInstanceGroupsFn).toHaveBeenCalledWith('/api/v2/organizations/1/instance_groups', 1);
+  });
+
+  test('AnsibleSelect component renders if there are virtual environments', () => {
+    const config = {
+      custom_virtualenvs: ['foo', 'bar'],
+    };
+    const wrapper = mount(
+      <MemoryRouter>
+        <I18nProvider>
+          <ConfigContext.Provider value={config}>
+            <OrganizationAdd api={{}} />
+          </ConfigContext.Provider>
+        </I18nProvider>
+      </MemoryRouter>
+    ).find('OrganizationAdd').find('AnsibleSelect');
+    expect(wrapper.find('Select')).toHaveLength(1);
+    expect(wrapper.find('SelectOption')).toHaveLength(2);
+  });
+
+  test('AnsibleSelect component does not render if there are 0 virtual environments', () => {
+    const config = {
+      custom_virtualenvs: [],
+    };
+    const wrapper = mount(
+      <MemoryRouter>
+        <I18nProvider>
+          <ConfigContext.Provider value={config}>
+            <OrganizationAdd api={{}} />
+          </ConfigContext.Provider>
+        </I18nProvider>
+      </MemoryRouter>
+    ).find('OrganizationAdd').find('AnsibleSelect');
+    expect(wrapper.find('Select')).toHaveLength(0);
   });
 });
