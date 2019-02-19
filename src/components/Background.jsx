@@ -4,6 +4,7 @@ import {
   BackgroundImage,
   BackgroundImageSrc,
 } from '@patternfly/react-core';
+import bgFilter from '@patternfly/patternfly/assets/images/background-filter.svg';
 
 const backgroundImageConfig = {
   [BackgroundImageSrc.xs]: '/assets/images/pfbg_576.jpg',
@@ -11,7 +12,7 @@ const backgroundImageConfig = {
   [BackgroundImageSrc.sm]: '/assets/images/pfbg_768.jpg',
   [BackgroundImageSrc.sm2x]: '/assets/images/pfbg_768@2x.jpg',
   [BackgroundImageSrc.lg]: '/assets/images/pfbg_2000.jpg',
-  [BackgroundImageSrc.filter]: '/assets/images/background-filter.svg#image_overlay',
+  [BackgroundImageSrc.filter]: `${bgFilter}#image_overlay`,
 };
 
 export default ({ children }) => (

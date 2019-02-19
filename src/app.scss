@@ -83,9 +83,6 @@
   --pf-global--target-size--MinWidth: 32px;
   --pf-global--FontSize--md: 14px;
 
-  --pf-c-data-list__item--PaddingTop: 16px;
-  --pf-c-data-list__item--PaddingBottom: 16px;
-
   .pf-c-badge:not(:last-child), .pf-c-switch:not(:last-child) {
     margin-right: 18px;
   }
@@ -94,6 +91,8 @@
 .pf-c-data-list__item {
   --pf-c-data-list__item--PaddingLeft: 20px;
   --pf-c-data-list__item--PaddingRight: 20px;
+
+  align-items: center;
 }
 
 .pf-c-data-list__check {
@@ -157,9 +156,10 @@
 // pf modal overrides
 //
 
-.pf-c-modal-box {
-  --pf-c-modal-box--Width: 550px;
-  --pf-c-modal-box--MaxWidth: 550px;
+.awx-c-modal.pf-c-modal-box {
+  margin: 0;
+  padding: 20px;
+  width: 550px;
 }
 
 .pf-c-modal-box__footer {
