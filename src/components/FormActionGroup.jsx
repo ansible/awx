@@ -46,7 +46,7 @@ FormActionGroup.propTypes = {
 };
 
 FormActionGroup.defaultProps = {
-  submitDisabled: true,
+  submitDisabled: false,
 };
 
 export default FormActionGroup;
