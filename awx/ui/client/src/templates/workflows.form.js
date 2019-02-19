@@ -147,6 +147,13 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n) {
                     ngClick: 'formSave()',    //$scope.function to call on click, optional
                     ngDisabled: "workflow_job_template_form.$invalid || can_edit!==true", //Disable when $pristine or $invalid, optional and when can_edit = false, for permission reasons
                     ngShow: '(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)'
+                },
+                launch: {
+                    component: 'at-launch-template',
+                    templateObj: 'workflow_job_template_obj',
+                    ngShow: '(workflow_job_template_obj.summary_fields.user_capabilities.start || canAddWorkflowJobTemplate)',
+                    ngDisabled: 'disableLaunch || workflow_job_template_form.$dirty',
+                    showTextButton: 'true'
                 }
             },
 

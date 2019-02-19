@@ -31,6 +31,7 @@
             const jobTemplate = resolvedModels[0];
 
             $scope.canAddJobTemplate = jobTemplate.options('actions.POST');
+            $scope.disableLaunch = true;
 
             // apply form definition's default field values
             GenerateForm.applyDefaults(form, $scope);

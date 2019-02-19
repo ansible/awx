@@ -1656,90 +1656,94 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             if (typeof this.form.buttons[btn] === 'object') {
                                 button = this.form.buttons[btn];
 
-                                // Set default color and label for Save and Reset
-                                if (btn === 'save') {
-                                    button.label = i18n._('Save');
-                                    button['class'] = 'Form-saveButton';
-                                }
-                                if (btn === 'select') {
-                                    button.label = i18n._('Select');
-                                    button['class'] = 'Form-saveButton';
-                                }
-                                if (btn === 'cancel') {
-                                    button.label = i18n._('Cancel');
-                                    button['class'] = 'Form-cancelButton';
-                                }
-                                if (btn === 'close') {
-                                    button.label = i18n._('Close');
-                                    button['class'] = 'Form-cancelButton';
-                                }
-                                if (btn === 'launch') {
-                                    button.label = i18n._('Launch');
-                                    button['class'] = 'Form-launchButton';
-                                }
-                                if (btn === 'add_survey') {
-                                    button.label = i18n._('Add Survey');
-                                    button['class'] = 'Form-surveyButton';
-                                }
-                                if (btn === 'edit_survey') {
-                                    button.label =  i18n._('Edit Survey');
-                                    button['class'] = 'Form-surveyButton';
-                                }
-                                if (btn === 'view_survey') {
-                                    button.label = i18n._('View Survey');
-                                    button['class'] = 'Form-surveyButton';
-                                }
-                                if (btn === 'workflow_visualizer') {
-                                    button.label = i18n._('Workflow Visualizer');
-                                    button['class'] = 'Form-primaryButton';
-                                }
-
-                                // Build button HTML
-                                html += "<button type=\"button\" ";
-                                html += "class=\"btn btn-sm";
-                                html += (button['class']) ? " " + button['class'] : "";
-                                html += "\" ";
-                                html += "id=\"" + this.form.name + "_" + btn + "_btn\" ";
-
-                                if(button.ngShow){
-                                    html += this.attr(button, 'ngShow');
-                                }
-                                if (button.ngClick) {
-                                    html += this.attr(button, 'ngClick');
-                                }
-                                if (button.awFeature) {
-                                    html += this.attr(button, 'awFeature');
-                                }
-                                if (button.ngDisabled) {
-                                    ngDisabled = (button.ngDisabled===true) ? `${this.form.name}_form.$invalid ||  ${this.form.name}_form.$pending`: button.ngDisabled;
-                                    if (btn !== 'reset') {
-                                        //html += "ng-disabled=\"" + this.form.name + "_form.$pristine || " + this.form.name + "_form.$invalid";
-
-                                        if (button.disabled && button.disable !== true) {
-                                            // Allow disabled to overrule ng-disabled. Used for permissions.
-                                            // Example: system auditor can view but not update. Form validity
-                                            // is no longer a concern but ng-disabled will update disabled
-                                            // status on render so we stop applying it here.
-                                        } else {
-                                            html += "ng-disabled=\"" + ngDisabled;
-                                            //html += (this.form.allowReadonly) ? " || " + this.form.name + "ReadOnly == true" : "";
-                                            html += "\" ";
-                                        }
-
-                                    } else {
-                                        //html += "ng-disabled=\"" + this.form.name + "_form.$pristine";
-                                        //html += (this.form.allowReadonly) ? " || " + this.form.name + "ReadOnly == true" : "";
-                                        //html += "\" ";
+                                if (button.component === 'at-launch-template') {
+                                    html += `<at-launch-template template="${button.templateObj}" ng-show="${button.ngShow}" disabled="${button.ngDisabled}" show-text-button="${button.showTextButton}"></at-launch-template>`;
+                                } else {
+                                    // Set default color and label for Save and Reset
+                                    if (btn === 'save') {
+                                        button.label = i18n._('Save');
+                                        button['class'] = 'Form-saveButton';
                                     }
+                                    if (btn === 'select') {
+                                        button.label = i18n._('Select');
+                                        button['class'] = 'Form-saveButton';
+                                    }
+                                    if (btn === 'cancel') {
+                                        button.label = i18n._('Cancel');
+                                        button['class'] = 'Form-cancelButton';
+                                    }
+                                    if (btn === 'close') {
+                                        button.label = i18n._('Close');
+                                        button['class'] = 'Form-cancelButton';
+                                    }
+                                    if (btn === 'launch') {
+                                        button.label = i18n._('Launch');
+                                        button['class'] = 'Form-launchButton';
+                                    }
+                                    if (btn === 'add_survey') {
+                                        button.label = i18n._('Add Survey');
+                                        button['class'] = 'Form-surveyButton';
+                                    }
+                                    if (btn === 'edit_survey') {
+                                        button.label =  i18n._('Edit Survey');
+                                        button['class'] = 'Form-surveyButton';
+                                    }
+                                    if (btn === 'view_survey') {
+                                        button.label = i18n._('View Survey');
+                                        button['class'] = 'Form-surveyButton';
+                                    }
+                                    if (btn === 'workflow_visualizer') {
+                                        button.label = i18n._('Workflow Visualizer');
+                                        button['class'] = 'Form-primaryButton';
+                                    }
+
+                                    // Build button HTML
+                                    html += "<button type=\"button\" ";
+                                    html += "class=\"btn btn-sm";
+                                    html += (button['class']) ? " " + button['class'] : "";
+                                    html += "\" ";
+                                    html += "id=\"" + this.form.name + "_" + btn + "_btn\" ";
+
+                                    if(button.ngShow){
+                                        html += this.attr(button, 'ngShow');
+                                    }
+                                    if (button.ngClick) {
+                                        html += this.attr(button, 'ngClick');
+                                    }
+                                    if (button.awFeature) {
+                                        html += this.attr(button, 'awFeature');
+                                    }
+                                    if (button.ngDisabled) {
+                                        ngDisabled = (button.ngDisabled===true) ? `${this.form.name}_form.$invalid ||  ${this.form.name}_form.$pending`: button.ngDisabled;
+                                        if (btn !== 'reset') {
+                                            //html += "ng-disabled=\"" + this.form.name + "_form.$pristine || " + this.form.name + "_form.$invalid";
+
+                                            if (button.disabled && button.disable !== true) {
+                                                // Allow disabled to overrule ng-disabled. Used for permissions.
+                                                // Example: system auditor can view but not update. Form validity
+                                                // is no longer a concern but ng-disabled will update disabled
+                                                // status on render so we stop applying it here.
+                                            } else {
+                                                html += "ng-disabled=\"" + ngDisabled;
+                                                //html += (this.form.allowReadonly) ? " || " + this.form.name + "ReadOnly == true" : "";
+                                                html += "\" ";
+                                            }
+
+                                        } else {
+                                            //html += "ng-disabled=\"" + this.form.name + "_form.$pristine";
+                                            //html += (this.form.allowReadonly) ? " || " + this.form.name + "ReadOnly == true" : "";
+                                            //html += "\" ";
+                                        }
+                                    }
+                                    if (button.disabled && button.disable !== true) {
+                                        html += ` disabled="disabled" `;
+                                    }
+                                    if(button.awToolTip) {
+                                        html += " aw-tool-tip='" + button.awToolTip + "' data-placement='" + button.dataPlacement + "' data-tip-watch='" + button.dataTipWatch + "'";
+                                    }
+                                    html += ">";
+                                    html += " " + button.label + "</button>\n";
                                 }
-                                if (button.disabled && button.disable !== true) {
-                                    html += ` disabled="disabled" `;
-                                }
-                                if(button.awToolTip) {
-                                    html += " aw-tool-tip='" + button.awToolTip + "' data-placement='" + button.dataPlacement + "' data-tip-watch='" + button.dataTipWatch + "'";
-                                }
-                                html += ">";
-                                html += " " + button.label + "</button>\n";
                             }
                         }
                         html += "</div><!-- buttons -->\n";

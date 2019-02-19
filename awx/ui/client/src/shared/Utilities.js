@@ -591,6 +591,7 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                     addNew = params.addNew,
                     scope = params.scope,
                     selectOptions = params.options,
+                    callback = params.callback,
                     model = params.model,
                     original_options,
                     minimumResultsForSearch = params.minimumResultsForSearch ? params.minimumResultsForSearch : Infinity;
@@ -702,6 +703,10 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                         }
 
                         $(element).trigger('change');
+                    }
+
+                    if (callback) {
+                        scope.$emit(callback);
                     }
 
                 });

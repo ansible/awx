@@ -45,6 +45,7 @@ export default
                 id = $stateParams.job_template_id,
                 callback,
                 choicesCount = 0,
+                select2Count = 0,
                 instance_group_url = defaultUrl + id + '/instance_groups';
 
             init();
@@ -184,32 +185,70 @@ export default
             function jobTemplateLoadFinished(){
                 CreateSelect2({
                     element:'#job_template_job_type',
-                    multiple: false
+                    multiple: false,
+                    callback: 'select2Loaded',
+                    scope: $scope
                 });
 
                 CreateSelect2({
                     element:'#playbook-select',
-                    multiple: false
+                    multiple: false,
+                    callback: 'select2Loaded',
+                    scope: $scope
                 });
 
                 CreateSelect2({
                     element:'#job_template_job_tags',
                     multiple: true,
-                    addNew: true
+                    addNew: true,
+                    callback: 'select2Loaded',
+                    scope: $scope
                 });
 
                 CreateSelect2({
                     element:'#job_template_skip_tags',
                     multiple: true,
-                    addNew: true
+                    addNew: true,
+                    callback: 'select2Loaded',
+                    scope: $scope
                 });
 
                 CreateSelect2({
                     element: '#job_template_custom_virtualenv',
                     multiple: false,
-                    opts: $scope.custom_virtualenvs_options
+                    opts: $scope.custom_virtualenvs_options,
+                    callback: 'select2Loaded',
+                    scope: $scope
                 });
             }
+
+            $scope.$on('select2Loaded', () => {
+                select2Count++;
+                if (select2Count === 10) {
+                    $scope.$emit('select2LoadFinished');
+                }
+            });
+
+            $scope.$on('select2LoadFinished', () => {
+                // updates based on lookups will initially set the form as dirty.
+                // we need to set it as pristine when it contains the values given by the api
+                // so that we can enable launching when the two are the same
+                $scope.job_template_form.$setPristine();
+                // this is used to set the overall form as dirty for the values
+                // that don't actually set this internally (lookups, toggles and code mirrors).
+                $scope.$watchGroup([
+                    'inventory',
+                    'project',
+                    'multiCredential.selectedCredentials',
+                    'extra_vars',
+                    'diff_mode',
+                    'instance_groups'
+                ], (val, prevVal) => {
+                    if (!_.isEqual(val, prevVal)) {
+                        $scope.job_template_form.$setDirty();
+                    }
+                });
+            });
 
             $scope.toggleForm = function(key) {
                 $scope[key] = !$scope[key];

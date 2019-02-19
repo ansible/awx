@@ -105,7 +105,9 @@ function ComponentsStrings (BaseString) {
     };
 
     ns.launchTemplate = {
-        DEFAULT: t.s('Start a job using this template')
+        DEFAULT: t.s('Start a job using this template'),
+        DISABLED: t.s('Please save before launching this template.'),
+        BUTTON_LABEL: t.s('LAUNCH')
     };
 
     ns.list = {
