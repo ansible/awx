@@ -47,7 +47,7 @@ __all__ = ['get_object_or_400', 'camelcase_to_underscore', 'memoize', 'memoize_d
            'wrap_args_with_proot', 'build_proot_temp_dir', 'check_proot_installed', 'model_to_dict',
            'model_instance_diff', 'timestamp_apiformat', 'parse_yaml_or_json', 'RequireDebugTrueOrTest',
            'has_model_field_prefetched', 'set_environ', 'IllegalArgumentError', 'get_custom_venv_choices', 'get_external_account',
-           'task_manager_bulk_reschedule', 'schedule_task_manager']
+           'task_manager_bulk_reschedule', 'schedule_task_manager', 'classproperty']
 
 
 def get_object_or_400(klass, *args, **kwargs):
@@ -1113,3 +1113,17 @@ def get_external_account(user):
             getattr(settings, 'TACACSPLUS_HOST', None)) and user.enterprise_auth.all():
         account_type = "enterprise"
     return account_type
+
+
+class classproperty:
+
+    def __init__(self, fget=None, fset=None, fdel=None, doc=None):
+        self.fget = fget
+        self.fset = fset
+        self.fdel = fdel
+        if doc is None and fget is not None:
+            doc = fget.__doc__
+        self.__doc__ = doc
+
+    def __get__(self, instance, ownerclass):
+        return self.fget(ownerclass)
