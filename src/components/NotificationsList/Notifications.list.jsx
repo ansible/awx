@@ -54,7 +54,6 @@ class Notifications extends Component {
     this.onSort = this.onSort.bind(this);
     this.onSetPage = this.onSetPage.bind(this);
     this.onSelectAll = this.onSelectAll.bind(this);
-    this.onSelect = this.onSelect.bind(this);
     this.toggleNotification = this.toggleNotification.bind(this);
     this.updateUrl = this.updateUrl.bind(this);
     this.postToError = this.postToError.bind(this);
@@ -111,18 +110,6 @@ class Notifications extends Component {
     const selected = isSelected ? results.map(o => o.id) : [];
 
     this.setState({ selected });
-  };
-
-  onSelect = id => {
-    const { selected } = this.state;
-
-    const isSelected = selected.includes(id);
-
-    if (isSelected) {
-      this.setState({ selected: selected.filter(s => s !== id) });
-    } else {
-      this.setState({ selected: selected.concat(id) });
-    }
   };
 
   toggleNotification = (id, isCurrentlyOn, status) => {
