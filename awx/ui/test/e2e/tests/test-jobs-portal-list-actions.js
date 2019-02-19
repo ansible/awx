@@ -17,6 +17,7 @@ module.exports = {
                 data = { admin, job };
 
                 client.login(data.admin.username);
+                client.resizeWindow(1200, 800);
                 client.waitForAngular();
 
                 done();
