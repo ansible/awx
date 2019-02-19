@@ -160,6 +160,10 @@
   margin: 0;
   padding: 20px;
   width: 550px;
+
+  .pf-c-button:not(:last-child) {
+    margin-right: 20px;
+  }
 }
 
 .pf-c-modal-box__footer {
