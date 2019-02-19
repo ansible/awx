@@ -810,7 +810,6 @@ function OutputIndexController (
             onStop () {
                 lockFollow = true;
                 stopFollowing();
-                stopListening();
                 status.updateStats();
                 status.dispatch();
                 status.sync();

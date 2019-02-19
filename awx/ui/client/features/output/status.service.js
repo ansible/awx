@@ -95,6 +95,9 @@ function JobStatusService (moment, message) {
 
         if (isJobStatusEvent) {
             this.setJobStatus(data.status);
+            if (JOB_STATUS_FINISHED.includes(data.status)) {
+                this.sync();
+            }
             this.dispatch();
         } else if (isProjectStatusEvent) {
             this.setProjectStatus(data.status);
