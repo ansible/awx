@@ -1354,6 +1354,40 @@ def test_openstack_create_ok(post, organization, admin, version, params):
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize('verify_ssl, expected', [
+    [None, True],
+    [True, True],
+    [False, False],
+])
+def test_openstack_verify_ssl(get, post, organization, admin, verify_ssl, expected):
+    openstack = CredentialType.defaults['openstack']()
+    openstack.save()
+    inputs = {
+        'username': 'some_user',
+        'password': 'some_password',
+        'project': 'some_project',
+        'host': 'some_host',
+    }
+    if verify_ssl is not None:
+        inputs['verify_ssl'] = verify_ssl
+    params = {
+        'credential_type': openstack.id,
+        'inputs': inputs,
+        'name': 'Best credential ever',
+        'organization': organization.id
+    }
+    response = post(
+        reverse('api:credential_list', kwargs={'version': 'v2'}),
+        params,
+        admin
+    )
+    assert response.status_code == 201
+
+    cred = Credential.objects.get(pk=response.data['id'])
+    assert cred.get_input('verify_ssl') == expected
+
+
+@pytest.mark.django_db
 @pytest.mark.parametrize('version, params', [
     ['v1', {}],
     ['v2', {

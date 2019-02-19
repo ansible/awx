@@ -671,6 +671,7 @@ class CredentialTypeInputField(JSONSchemaField):
                             'multiline': {'type': 'boolean'},
                             'secret': {'type': 'boolean'},
                             'ask_at_runtime': {'type': 'boolean'},
+                            'default': {},
                         },
                         'additionalProperties': False,
                         'required': ['id', 'label'],
@@ -713,6 +714,14 @@ class CredentialTypeInputField(JSONSchemaField):
             if 'type' not in field:
                 # If no type is specified, default to string
                 field['type'] = 'string'
+
+            if 'default' in field:
+                default = field['default']
+                _type = {'string': str, 'boolean': bool}[field['type']]
+                if type(default) != _type:
+                    raise django_exceptions.ValidationError(
+                        _('{} is not a {}').format(default, field['type'])
+                    )
 
             for key in ('choices', 'multiline', 'format', 'secret',):
                 if key in field and field['type'] != 'string':

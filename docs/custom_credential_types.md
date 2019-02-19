@@ -136,6 +136,12 @@ ordered fields for that type:
             "multiline": false               # if true, the field should be rendered
                                              # as multi-line for input entry
                                              # (only applicable to `type=string`)
+            "default": "default value"       # optional, can be used to provide a
+                                             # default value if the field is left empty
+                                             # when creating a credential of this type
+                                             # credential forms will use this value
+                                             # as a prefill when making credentials of
+                                             # this type
         },{
             # field 2...
         },{

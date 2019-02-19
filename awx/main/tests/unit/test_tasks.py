@@ -106,7 +106,7 @@ def test_safe_env_returns_new_copy():
 
 
 @pytest.mark.parametrize("source,expected", [
-    (False, False), (True, True)
+    (None, True), (False, False), (True, True)
 ])
 def test_openstack_client_config_generation(mocker, source, expected):
     update = tasks.RunInventoryUpdate()
@@ -116,9 +116,10 @@ def test_openstack_client_config_generation(mocker, source, expected):
         'username': 'demo',
         'password': 'secrete',
         'project': 'demo-project',
-        'domain': 'my-demo-domain',
-        'verify_ssl': source,
+        'domain': 'my-demo-domain'
     }
+    if source is not None:
+        inputs['verify_ssl'] = source
     credential = Credential(pk=1, credential_type=credential_type, inputs=inputs)
 
     cred_method = mocker.Mock(return_value=credential)
