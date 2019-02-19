@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { Button } from '@patternfly/react-core';
 import { TimesIcon } from '@patternfly/react-icons';
@@ -34,5 +35,22 @@ const Tabs = ({ children, labelText, closeButton }) => (
     }
   </div>
 );
+
+Tabs.propTypes = {
+  children: PropTypes.oneOfType([
+    PropTypes.arrayOf(PropTypes.node),
+    PropTypes.node
+  ]).isRequired,
+  labelText: PropTypes.string,
+  closeButton: PropTypes.shape({
+    text: PropTypes.string,
+    link: PropTypes.string,
+  }),
+};
+
+Tabs.defaultProps = {
+  labelText: null,
+  closeButton: null,
+};
 
 export default Tabs;

@@ -2,6 +2,7 @@ import React, {
   Component,
   Fragment
 } from 'react';
+import PropTypes from 'prop-types';
 import { Title, EmptyState, EmptyStateIcon, EmptyStateBody } from '@patternfly/react-core';
 import { CubesIcon } from '@patternfly/react-icons';
 import { I18n, i18nMark } from '@lingui/react';
@@ -29,8 +30,6 @@ class Notifications extends Component {
     order_by: 'name',
   };
 
-  pageSizeOptions = [5, 10, 25, 50];
-
   constructor (props) {
     super(props);
 
@@ -55,7 +54,6 @@ class Notifications extends Component {
     this.onSort = this.onSort.bind(this);
     this.onSetPage = this.onSetPage.bind(this);
     this.onSelectAll = this.onSelectAll.bind(this);
-    this.onSelect = this.onSelect.bind(this);
     this.toggleNotification = this.toggleNotification.bind(this);
     this.updateUrl = this.updateUrl.bind(this);
     this.postToError = this.postToError.bind(this);
@@ -112,18 +110,6 @@ class Notifications extends Component {
     const selected = isSelected ? results.map(o => o.id) : [];
 
     this.setState({ selected });
-  };
-
-  onSelect = id => {
-    const { selected } = this.state;
-
-    const isSelected = selected.includes(id);
-
-    if (isSelected) {
-      this.setState({ selected: selected.filter(s => s !== id) });
-    } else {
-      this.setState({ selected: selected.concat(id) });
-    }
   };
 
   toggleNotification = (id, isCurrentlyOn, status) => {
@@ -286,7 +272,6 @@ class Notifications extends Component {
       successTemplateIds,
       errorTemplateIds
     } = this.state;
-
     return (
       <Fragment>
         {noInitialResults && (
@@ -326,8 +311,6 @@ class Notifications extends Component {
                       name={o.name}
                       notificationType={o.notification_type}
                       detailUrl={`/notifications/${o.id}`}
-                      isSelected={selected.includes(o.id)}
-                      onSelect={() => this.onSelect(o.id)}
                       toggleNotification={this.toggleNotification}
                       errorTurnedOn={errorTemplateIds.includes(o.id)}
                       successTurnedOn={successTemplateIds.includes(o.id)}
@@ -341,7 +324,6 @@ class Notifications extends Component {
               page={page}
               pageCount={pageCount}
               page_size={page_size}
-              pageSizeOptions={this.pageSizeOptions}
               onSetPage={this.onSetPage}
             />
           </Fragment>
@@ -352,5 +334,13 @@ class Notifications extends Component {
     );
   }
 }
+
+Notifications.propType = {
+  getError: PropTypes.func.isRequired,
+  getNotifications: PropTypes.func.isRequired,
+  getSuccess: PropTypes.func.isRequired,
+  postError: PropTypes.func.isRequired,
+  postSuccess: PropTypes.func.isRequired,
+};
 
 export default Notifications;

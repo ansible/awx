@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
@@ -125,5 +126,15 @@ class PageHeaderToolbar extends Component {
     );
   }
 }
+
+PageHeaderToolbar.propTypes = {
+  isAboutDisabled: PropTypes.bool,
+  onAboutClick: PropTypes.func.isRequired,
+  onLogoutClick: PropTypes.func.isRequired,
+};
+
+PageHeaderToolbar.defaultProps = {
+  isAboutDisabled: false,
+};
 
 export default PageHeaderToolbar;

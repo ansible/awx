@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import {
   Select,
@@ -11,19 +12,6 @@ class AnsibleSelect extends React.Component {
     this.onSelectChange = this.onSelectChange.bind(this);
   }
 
-  state = {
-    count: 1,
-  }
-
-  static getDerivedStateFromProps (nexProps) {
-    if (nexProps.data) {
-      return {
-        count: nexProps.data.length,
-      };
-    }
-    return null;
-  }
-
   onSelectChange (val, event) {
     const { onChange, name } = this.props;
     event.target.name = name;
@@ -31,21 +19,30 @@ class AnsibleSelect extends React.Component {
   }
 
   render () {
-    const { count } = this.state;
-    const { label = '', value, data, defaultSelected } = this.props;
-    let elem;
-    if (count > 1) {
-      elem = (
-        <Select value={value} onChange={this.onSelectChange} aria-label="Select Input">
-          {data.map((datum) => (datum === defaultSelected
-            ? (<SelectOption key="" value="" label={`Use Default ${label}`} />) : (<SelectOption key={datum} value={datum} label={datum} />)))
-          }
-        </Select>
-      );
-    } else {
-      elem = null;
-    }
-    return elem;
+    const { label, value, data, defaultSelected } = this.props;
+    return (
+      <Select value={value} onChange={this.onSelectChange} aria-label="Select Input">
+        {data.map((datum) => (datum === defaultSelected
+          ? (<SelectOption key="" value="" label={`Use Default ${label}`} />) : (<SelectOption key={datum} value={datum} label={datum} />)))
+        }
+      </Select>
+    );
   }
 }
+
+AnsibleSelect.defaultProps = {
+  data: [],
+  label: 'Ansible Select',
+  defaultSelected: null,
+};
+
+AnsibleSelect.propTypes = {
+  data: PropTypes.arrayOf(PropTypes.string),
+  defaultSelected: PropTypes.string,
+  label: PropTypes.string,
+  name: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
+  value: PropTypes.string.isRequired,
+};
+
 export default AnsibleSelect;

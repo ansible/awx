@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { I18n } from '@lingui/react';
 import { Trans, t } from '@lingui/macro';
 import {
@@ -223,5 +224,20 @@ class Pagination extends Component {
     );
   }
 }
+
+Pagination.propTypes = {
+  count: PropTypes.number,
+  onSetPage: PropTypes.func.isRequired,
+  page: PropTypes.number.isRequired,
+  pageCount: PropTypes.number,
+  pageSizeOptions: PropTypes.arrayOf(PropTypes.number),
+  page_size: PropTypes.number.isRequired,
+};
+
+Pagination.defaultProps = {
+  count: null,
+  pageCount: null,
+  pageSizeOptions: [5, 10, 25, 50],
+};
 
 export default Pagination;

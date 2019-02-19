@@ -1,11 +1,12 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { I18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
   Checkbox,
 } from '@patternfly/react-core';
 
-export default ({
+const CheckboxListItem = ({
   itemId,
   name,
   isSelected,
@@ -32,3 +33,12 @@ export default ({
     </div>
   </li>
 );
+
+CheckboxListItem.propTypes = {
+  itemId: PropTypes.number.isRequired,
+  name: PropTypes.string.isRequired,
+  isSelected: PropTypes.bool.isRequired,
+  onSelect: PropTypes.func.isRequired,
+};
+
+export default CheckboxListItem;

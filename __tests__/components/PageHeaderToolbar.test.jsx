@@ -8,17 +8,24 @@ import PageHeaderToolbar from '../../src/components/PageHeaderToolbar';
 describe('PageHeaderToolbar', () => {
   const pageHelpDropdownSelector = 'Dropdown QuestionCircleIcon';
   const pageUserDropdownSelector = 'Dropdown UserIcon';
+  const onAboutClick = jest.fn();
+  const onLogoutClick = jest.fn();
 
   test('expected content is rendered on initialization', () => {
-    const wrapper = mount(<I18nProvider><PageHeaderToolbar /></I18nProvider>);
+    const wrapper = mount(
+      <I18nProvider>
+        <PageHeaderToolbar
+          onAboutClick={onAboutClick}
+          onLogoutClick={onLogoutClick}
+        />
+      </I18nProvider>
+    );
 
     expect(wrapper.find(pageHelpDropdownSelector)).toHaveLength(1);
     expect(wrapper.find(pageUserDropdownSelector)).toHaveLength(1);
   });
 
   test('dropdowns have expected items and callbacks', () => {
-    const onAboutClick = jest.fn();
-    const onLogoutClick = jest.fn();
     const wrapper = mount(
       <MemoryRouter>
         <I18nProvider>

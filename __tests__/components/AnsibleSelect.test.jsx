@@ -33,19 +33,6 @@ describe('<AnsibleSelect />', () => {
     expect(spy).toHaveBeenCalled();
   });
 
-  test('content not rendered when data property is falsey', () => {
-    const wrapper = mount(
-      <AnsibleSelect
-        value="foo"
-        name="bar"
-        onChange={() => { }}
-        label={label}
-        data={null}
-      />
-    );
-    expect(wrapper.find('FormGroup')).toHaveLength(0);
-    expect(wrapper.find('Select')).toHaveLength(0);
-  });
   test('Returns correct select options if defaultSelected props is passed', () => {
     const wrapper = mount(
       <AnsibleSelect

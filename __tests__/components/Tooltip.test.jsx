@@ -7,14 +7,24 @@ describe('<Tooltip />', () => {
   let content;
   let mouseOverHandler;
   let mouseOutHandler;
+  const child = (<span>foo</span>);
+  const message = 'hi';
 
   test('initially renders without crashing', () => {
-    elem = mount(<Tooltip />);
+    elem = mount(
+      <Tooltip message={message}>
+        {child}
+      </Tooltip>
+    );
     expect(elem.length).toBe(1);
   });
 
   test('shows/hides with mouse over and leave', () => {
-    elem = mount(<Tooltip />);
+    elem = mount(
+      <Tooltip message={message}>
+        {child}
+      </Tooltip>
+    );
     mouseOverHandler = elem.find('.mouseOverHandler');
     mouseOutHandler = elem.find('.mouseOutHandler');
     expect(elem.state().isDisplayed).toBe(false);
@@ -34,7 +44,11 @@ describe('<Tooltip />', () => {
   });
 
   test('shows/hides with focus and blur', () => {
-    elem = mount(<Tooltip />);
+    elem = mount(
+      <Tooltip message={message}>
+        {child}
+      </Tooltip>
+    );
     mouseOverHandler = elem.find('.mouseOverHandler');
     mouseOutHandler = elem.find('.mouseOutHandler');
     expect(elem.state().isDisplayed).toBe(false);
