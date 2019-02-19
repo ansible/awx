@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-
+import { I18n } from '@lingui/react';
+import { t } from '@lingui/macro';
 import {
   FormSelect,
   FormSelectOption,
@@ -21,11 +22,15 @@ class AnsibleSelect extends React.Component {
   render () {
     const { label, value, data, defaultSelected } = this.props;
     return (
-      <FormSelect value={value} onChange={this.onSelectChange} aria-label="Select Input">
-        {data.map((datum) => (datum === defaultSelected
-          ? (<FormSelectOption key="" value="" label={`Use Default ${label}`} />) : (<FormSelectOption key={datum} value={datum} label={datum} />)))
-        }
-      </FormSelect>
+      <I18n>
+        {({ i18n }) => (
+          <FormSelect value={value} onChange={this.onSelectChange} aria-label={i18n._(t`Select Input`)}>
+            {data.map((datum) => (datum === defaultSelected
+              ? (<FormSelectOption key="" value="" label={i18n._(t`Use Default ${label}`)} />) : (<FormSelectOption key={datum} value={datum} label={datum} />)))
+            }
+          </FormSelect>
+        )}
+      </I18n>
     );
   }
 }

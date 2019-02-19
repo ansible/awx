@@ -52,7 +52,7 @@ class About extends React.Component {
           <AboutModal
             isOpen={isOpen}
             onClose={onClose}
-            productName={i18n._(t`Ansible Tower`)}
+            productName="Ansible Tower"
             trademark={i18n._(t`Copyright 2018 Red Hat, Inc.`)}
             brandImageSrc={brandImg}
             brandImageAlt={i18n._(t`Brand Image`)}
