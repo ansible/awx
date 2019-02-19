@@ -4,18 +4,24 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$scope', '$rootScope','Wait',
+export default ['$scope', '$rootScope','Wait', '$timeout',
     'Rest', 'GetBasePath', 'ProcessErrors', 'graphData',
-    function($scope, $rootScope, Wait,
+    function($scope, $rootScope, Wait, $timeout,
     Rest, GetBasePath, ProcessErrors, graphData) {
 
         var dataCount = 0;
         let launchModalOpen = false;
         let refreshAfterLaunchClose = false;
+        let pendingRefresh = false;
+        let refreshTimerRunning = false;
 
         $scope.$on('ws-jobs', function () {
             if (!launchModalOpen) {
-                refreshLists();
+                if (!refreshTimerRunning) {
+                    refreshLists();
+                } else {
+                    pendingRefresh = true;
+                }
             } else {
                 refreshAfterLaunchClose = true;
             }
@@ -137,6 +143,15 @@ export default ['$scope', '$rootScope','Wait',
             .catch(({data, status}) => {
                 ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get dashboard jobs list: ' + status });
             });
+            pendingRefresh = false;
+            refreshTimerRunning = true;
+            $timeout(() => {
+                if (pendingRefresh) {
+                    refreshLists();
+                } else {
+                    refreshTimerRunning = false;
+                }
+            }, 5000);
         }
 
     }

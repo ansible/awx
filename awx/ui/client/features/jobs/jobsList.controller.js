@@ -17,7 +17,8 @@ function ListJobsController (
     ProcessErrors,
     Wait,
     Rest,
-    SearchBasePath
+    SearchBasePath,
+    $timeout
 ) {
     const vm = this || {};
     const [unifiedJob] = resolvedModels;
@@ -30,6 +31,8 @@ function ListJobsController (
 
     let launchModalOpen = false;
     let refreshAfterLaunchClose = false;
+    let pendingRefresh = false;
+    let refreshTimerRunning = false;
 
     vm.searchBasePath = SearchBasePath;
 
@@ -44,7 +47,11 @@ function ListJobsController (
 
     $scope.$on('ws-jobs', () => {
         if (!launchModalOpen) {
-            refreshJobs();
+            if (!refreshTimerRunning) {
+                refreshJobs();
+            } else {
+                pendingRefresh = true;
+            }
         } else {
             refreshAfterLaunchClose = true;
         }
@@ -235,6 +242,15 @@ function ListJobsController (
                 vm.jobs = data.results;
                 vm.job_dataset = data;
             });
+        pendingRefresh = false;
+        refreshTimerRunning = true;
+        $timeout(() => {
+            if (pendingRefresh) {
+                refreshJobs();
+            } else {
+                refreshTimerRunning = false;
+            }
+        }, 5000);
     }
 
     vm.isCollapsed = true;
@@ -260,7 +276,8 @@ ListJobsController.$inject = [
     'ProcessErrors',
     'Wait',
     'Rest',
-    'SearchBasePath'
+    'SearchBasePath',
+    '$timeout'
 ];
 
 export default ListJobsController;

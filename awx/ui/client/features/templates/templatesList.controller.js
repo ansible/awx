@@ -23,7 +23,8 @@ function ListTemplatesController(
     Wait,
     qs,
     GetBasePath,
-    ngToast
+    ngToast,
+    $timeout
 ) {
     const vm = this || {};
     const [jobTemplate, workflowTemplate] = resolvedModels;
@@ -33,6 +34,8 @@ function ListTemplatesController(
 
     let launchModalOpen = false;
     let refreshAfterLaunchClose = false;
+    let pendingRefresh = false;
+    let refreshTimerRunning = false;
 
     vm.strings = strings;
     vm.templateTypes = mapChoices(choices);
@@ -76,7 +79,11 @@ function ListTemplatesController(
 
     $scope.$on(`ws-jobs`, () => {
         if (!launchModalOpen) {
-            refreshTemplates();
+            if (!refreshTimerRunning) {
+                refreshTemplates();
+            } else {
+                pendingRefresh = true;
+            }
         } else {
             refreshAfterLaunchClose = true;
         }
@@ -205,6 +212,15 @@ function ListTemplatesController(
                 vm.templates = vm.dataset.results;
             })
             .finally(() => Wait('stop'));
+        pendingRefresh = false;
+        refreshTimerRunning = true;
+        $timeout(() => {
+            if (pendingRefresh) {
+                refreshTemplates();
+            } else {
+                refreshTimerRunning = false;
+            }
+        }, 5000);
     }
 
     function createErrorHandler(path, action) {
@@ -414,7 +430,8 @@ ListTemplatesController.$inject = [
     'Wait',
     'QuerySet',
     'GetBasePath',
-    'ngToast'
+    'ngToast',
+    '$timeout'
 ];
 
 export default ListTemplatesController;
