@@ -1418,6 +1418,8 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             "ng-show='ldap_user'>LDAP</span>";
                         html+= "<span class=\"Form-title--is_external_account\" "+
                             "ng-show='external_account'>{{external_account}}</span>";
+                        html+= "<span class=\"Form-title--last_login\" "+
+                            "ng-show='last_login'>" + i18n._("Last logged in: ") + "{{ last_login | longDate }}</span>";
                     }
                     if(this.form.name === "smartinventory"){
                         html+= "<span class=\"Form-title--is_smartinventory\" "+
