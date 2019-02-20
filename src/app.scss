@@ -159,6 +159,14 @@
 .awx-c-modal.pf-c-modal-box {
   margin: 0;
   width: 600px;
+
+  .pf-c-modal-box__body {
+    overflow: visible;
+  }
+
+  .pf-c-modal-box__footer > .pf-c-button:not(:last-child) {
+    margin-right: 20px;
+  }
 }
 
 .pf-c-modal-box__footer {
