@@ -1265,6 +1265,20 @@ class OrganizationSerializer(BaseSerializer):
                 summary_dict['related_field_counts'] = counts_dict[obj.id]
         return summary_dict
 
+    def validate(self, attrs):
+        obj = self.instance
+        view = self.context['view']
+
+        obj_limit = getattr(obj, 'max_hosts', None)
+        api_limit = attrs.get('max_hosts')
+
+        if not view.request.user.is_superuser:
+            if api_limit is not None and api_limit != obj_limit:
+                # Only allow superusers to edit the max_hosts field
+                raise serializers.ValidationError(_('Cannot change max_hosts.'))
+
+        return super(OrganizationSerializer, self).validate(attrs)
+
 
 class ProjectOptionsSerializer(BaseSerializer):
 
