@@ -100,6 +100,7 @@ class LoggedLoginView(auth_views.LoginView):
 
             return ret
         else:
+            logger.warn(smart_text(u"Login failed for user {}".format(self.request.POST['username'])))
             ret.status_code = 401
             return ret
 
