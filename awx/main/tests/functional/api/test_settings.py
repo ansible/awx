@@ -75,9 +75,11 @@ def test_awx_task_env_validity(get, patch, admin, value, expected):
     url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'jobs'})
     patch(url, user=admin, data={'AWX_TASK_ENV': value}, expect=expected)
 
+    resp = get(url, user=admin)
     if expected == 200:
-        resp = get(url, user=admin)
         assert resp.data['AWX_TASK_ENV'] == dict((k, str(v)) for k, v in value.items())
+    else:
+        assert resp.data['AWX_TASK_ENV'] == dict()
 
 
 @pytest.mark.django_db
