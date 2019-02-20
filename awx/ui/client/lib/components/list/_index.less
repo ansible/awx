@@ -118,8 +118,13 @@
 }
 
 .at-Row--collapsed {
-    max-height: 50px;
+    .at-Row-container--wrapped {
+        visibility: hidden;
+        opacity: 0;
+        height: 0;
+    }
 }
+
 .at-Row--active {
     border-left: @at-border-style-list-active-indicator;
     border-top-left-radius: @at-border-radius;
@@ -212,6 +217,10 @@
 .at-Row-container--wrapped {
     display: flex;
     flex-wrap: wrap;
+    visibility: visible;
+    opacity: 1;
+    height: auto;
+    transition: visibility 0s, opacity 0.25s linear;
 }
 
 .at-RowItem--isHeaderLink {
@@ -354,7 +363,7 @@
     .at-Row--collapsed {
         max-height: 60px;
     }
-    .at-Row-actions {   
+    .at-Row-actions {
         align-items: center;
     }
 
