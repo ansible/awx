@@ -105,7 +105,10 @@ def test_safe_env_returns_new_copy():
     assert build_safe_env(env) is not env
 
 
-def test_openstack_client_config_generation(mocker):
+@pytest.mark.parametrize("source,expected", [
+    (None, True), (False, False), (True, True)
+])
+def test_openstack_client_config_generation(mocker, source, expected):
     update = tasks.RunInventoryUpdate()
     credential_type = CredentialType.defaults['openstack']()
     inputs = {
@@ -113,8 +116,10 @@ def test_openstack_client_config_generation(mocker):
         'username': 'demo',
         'password': 'secrete',
         'project': 'demo-project',
-        'domain': 'my-demo-domain',
+        'domain': 'my-demo-domain'
     }
+    if source is not None:
+        inputs['verify_ssl'] = source
     credential = Credential(pk=1, credential_type=credential_type, inputs=inputs)
 
     cred_method = mocker.Mock(return_value=credential)
@@ -136,7 +141,8 @@ def test_openstack_client_config_generation(mocker):
                 'username': 'demo',
                 'domain_name': 'my-demo-domain',
             },
-            'private': True
+            'verify': expected,
+            'private': True,
         }
     }
 
@@ -153,6 +159,7 @@ def test_openstack_client_config_generation_with_private_source_vars(mocker, sou
         'password': 'secrete',
         'project': 'demo-project',
         'domain': None,
+        'verify_ssl': True,
     }
     credential = Credential(pk=1, credential_type=credential_type, inputs=inputs)
 
@@ -174,6 +181,7 @@ def test_openstack_client_config_generation_with_private_source_vars(mocker, sou
                 'project_name': 'demo-project',
                 'username': 'demo'
             },
+            'verify': True,
             'private': expected
         }
     }
@@ -1145,6 +1153,7 @@ class TestJobCredentials(TestJobExecution):
                 '      password: secret',
                 '      project_name: tenant-name',
                 '      username: bob',
+                '    verify: true',
                 ''
             ])
             return ['successful', 0]

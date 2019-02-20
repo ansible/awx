@@ -445,6 +445,9 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
             try:
                 return decrypt_field(self, field_name)
             except AttributeError:
+                for field in self.credential_type.inputs.get('fields', []):
+                    if field['id'] == field_name and 'default' in field:
+                        return field['default']
                 if 'default' in kwargs:
                     return kwargs['default']
                 raise AttributeError
@@ -452,6 +455,9 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
             return self.inputs[field_name]
         if 'default' in kwargs:
             return kwargs['default']
+        for field in self.credential_type.inputs.get('fields', []):
+            if field['id'] == field_name and 'default' in field:
+                return field['default']
         raise AttributeError(field_name)
 
     def has_input(self, field_name):
@@ -970,6 +976,11 @@ ManagedCredentialType(
                                        'It is only needed for Keystone v3 authentication '
                                        'URLs. Refer to Ansible Tower documentation for '
                                        'common scenarios.')
+        }, {
+            'id': 'verify_ssl',
+            'label': ugettext_noop('Verify SSL'),
+            'type': 'boolean',
+            'default': True,
         }],
         'required': ['username', 'password', 'host', 'project']
     }
