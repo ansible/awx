@@ -1,6 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
+import { I18n, i18nMark } from '@lingui/react';
+import { t } from '@lingui/macro';
 import {
   PageSection,
   Form,
@@ -98,60 +100,71 @@ class OrganizationAdd extends React.Component {
       error
     } = this.state;
     const enabled = name.length > 0; // TODO: add better form validation
+    const instanceGroupsLookupColumns = [
+      { name: i18nMark('Name'), key: 'name', isSortable: true },
+      { name: i18nMark('Modified'), key: 'modified', isSortable: false, isNumeric: true },
+      { name: i18nMark('Created'), key: 'created', isSortable: false, isNumeric: true }
+    ];
 
     return (
       <PageSection>
         <Card>
           <CardBody>
             <Form autoComplete="off">
-              <Gallery gutter="md">
-                <FormGroup
-                  label="Name"
-                  isRequired
-                  fieldId="add-org-form-name"
-                >
-                  <TextInput
-                    isRequired
-                    id="add-org-form-name"
-                    name="name"
-                    value={name}
-                    onChange={this.onFieldChange}
-                  />
-                </FormGroup>
-                <FormGroup label="Description" fieldId="add-org-form-description">
-                  <TextInput
-                    id="add-org-form-description"
-                    name="description"
-                    value={description}
-                    onChange={this.onFieldChange}
-                  />
-                </FormGroup>
-                <FormGroup label="Instance Groups" fieldId="add-org-form-instance-groups">
-                  <Lookup
-                    lookupHeader="Instance Groups"
-                    name="instanceGroups"
-                    value={instanceGroups}
-                    onLookupSave={this.onLookupSave}
-                    getItems={this.getInstanceGroups}
-                  />
-                </FormGroup>
-                <ConfigContext.Consumer>
-                  {({ custom_virtualenvs }) => (
-                    custom_virtualenvs && custom_virtualenvs.length > 1 && (
-                      <FormGroup label="Ansible Environment" fieldId="add-org-custom-virtualenv">
-                        <AnsibleSelect
-                          label="Ansible Environment"
-                          name="custom_virtualenv"
-                          value={custom_virtualenv}
-                          onChange={this.onFieldChange}
-                          data={custom_virtualenvs}
-                          defaultSelected={defaultEnv}
-                        />
-                      </FormGroup>
-                    )
-                  )}
-                </ConfigContext.Consumer>
-              </Gallery>
+              <I18n>
+                {({ i18n }) => (
+                  <Gallery gutter="md">
+                    <FormGroup
+                      label={i18n._(t`Name`)}
+                      isRequired
+                      fieldId="add-org-form-name"
+                    >
+                      <TextInput
+                        isRequired
+                        id="add-org-form-name"
+                        name="name"
+                        value={name}
+                        onChange={this.onFieldChange}
+                      />
+                    </FormGroup>
+                    <FormGroup label={i18n._(t`Description`)} fieldId="add-org-form-description">
+                      <TextInput
+                        id="add-org-form-description"
+                        name="description"
+                        value={description}
+                        onChange={this.onFieldChange}
+                      />
+                    </FormGroup>
+                    <FormGroup label={i18n._(t`Instance Groups`)} fieldId="add-org-form-instance-groups">
+                      <Lookup
+                        lookupHeader={i18n._(t`Instance Groups`)}
+                        name="instanceGroups"
+                        value={instanceGroups}
+                        onLookupSave={this.onLookupSave}
+                        getItems={this.getInstanceGroups}
+                        columns={instanceGroupsLookupColumns}
+                        sortedColumnKey="name"
+                      />
+                    </FormGroup>
+                    <ConfigContext.Consumer>
+                      {({ custom_virtualenvs }) => (
+                        custom_virtualenvs && custom_virtualenvs.length > 1 && (
+                          <FormGroup label={i18n._(t`Ansible Environment`)} fieldId="add-org-custom-virtualenv">
+                            <AnsibleSelect
+                              label={i18n._(t`Ansible Environment`)}
+                              name="custom_virtualenv"
+                              value={custom_virtualenv}
+                              onChange={this.onFieldChange}
+                              data={custom_virtualenvs}
+                              defaultSelected={defaultEnv}
+                            />
+                          </FormGroup>
+                        )
+                      )}
+                    </ConfigContext.Consumer>
+                  </Gallery>
+                )}
+              </I18n>
               <FormActionGroup
                 onSubmit={this.onSubmit}
                 submitDisabled={!enabled}

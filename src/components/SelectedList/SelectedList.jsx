@@ -4,6 +4,8 @@ import {
   Chip
 } from '@patternfly/react-core';
 
+import VerticalSeparator from '../VerticalSeparator';
+
 const selectedRowStyling = {
   paddingTop: '15px',
   paddingBottom: '5px',
@@ -41,6 +43,7 @@ class SelectedList extends Component {
           <div className="pf-l-split__item" style={selectedLabelStyling}>
             {label}
           </div>
+          <VerticalSeparator />
           <div className="pf-l-split__item">
             <div className="pf-c-chip-group">
               {selected

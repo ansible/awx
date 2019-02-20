@@ -13,6 +13,7 @@ import { I18n } from '@lingui/react';
 import { Trans, t } from '@lingui/macro';
 
 import CheckboxListItem from '../ListItem';
+import DataListToolbar from '../DataListToolbar';
 import SelectedList from '../SelectedList';
 import Pagination from '../Pagination';
 
@@ -34,7 +35,9 @@ class Lookup extends React.Component {
       count: 0,
       page: 1,
       page_size: 5,
-      error: null
+      error: null,
+      sortOrder: 'ascending',
+      sortedColumnKey: props.sortedColumnKey
     };
     this.onSetPage = this.onSetPage.bind(this);
     this.handleModalToggle = this.handleModalToggle.bind(this);
@@ -42,6 +45,8 @@ class Lookup extends React.Component {
     this.toggleSelected = this.toggleSelected.bind(this);
     this.saveModal = this.saveModal.bind(this);
     this.getData = this.getData.bind(this);
+    this.onSearch = this.onSearch.bind(this);
+    this.onSort = this.onSort.bind(this);
   }
 
   componentDidMount () {
@@ -49,18 +54,35 @@ class Lookup extends React.Component {
     this.getData({ page_size, page });
   }
 
-  async getData (queryParams) {
+  onSearch () {
+    const { sortedColumnKey, sortOrder } = this.state;
+    this.onSort(sortedColumnKey, sortOrder);
+  }
+
+  onSort (sortedColumnKey, sortOrder) {
+    this.setState({ page: 1, sortedColumnKey, sortOrder }, this.getData);
+  }
+
+  async getData () {
     const { getItems } = this.props;
-    const { page } = queryParams;
+    const { page, page_size, sortedColumnKey, sortOrder } = this.state;
 
     this.setState({ error: false });
+
+    const queryParams = {
+      page,
+      page_size
+    };
+
+    if (sortedColumnKey) {
+      queryParams.order_by = sortOrder === 'descending' ? `-${sortedColumnKey}` : sortedColumnKey;
+    }
 
     try {
       const { data } = await getItems(queryParams);
       const { results, count } = data;
 
       const stateToUpdate = {
-        page,
         results,
         count
       };
@@ -74,7 +96,7 @@ class Lookup extends React.Component {
   onSetPage = async (pageNumber, pageSize) => {
     const page = parseInt(pageNumber, 10);
     const page_size = parseInt(pageSize, 10);
-    this.getData({ page_size, page });
+    this.setState({ page, page_size }, this.getData);
   };
 
   toggleSelected (row) {
@@ -124,8 +146,18 @@ class Lookup extends React.Component {
   }
 
   render () {
-    const { isModalOpen, lookupSelectedItems, error, results, count, page, page_size } = this.state;
-    const { lookupHeader, value } = this.props;
+    const {
+      isModalOpen,
+      lookupSelectedItems,
+      error,
+      results,
+      count,
+      page,
+      page_size,
+      sortedColumnKey,
+      sortOrder
+    } = this.state;
+    const { lookupHeader = 'items', value, columns } = this.props;
 
     return (
       <I18n>
@@ -157,6 +189,14 @@ class Lookup extends React.Component {
                 </EmptyState>
               ) : (
                 <Fragment>
+                  <DataListToolbar
+                    sortedColumnKey={sortedColumnKey}
+                    sortOrder={sortOrder}
+                    columns={columns}
+                    onSearch={this.onSearch}
+                    onSort={this.onSort}
+                    isLookup
+                  />
                   <ul className="pf-c-data-list awx-c-list">
                     {results.map(i => (
                       <CheckboxListItem

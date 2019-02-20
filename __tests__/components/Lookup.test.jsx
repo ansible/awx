@@ -3,7 +3,10 @@ import { mount } from 'enzyme';
 import { I18nProvider } from '@lingui/react';
 import Lookup from '../../src/components/Lookup';
 
-let mockData = [{ name: 'foo', id: 1 }];
+let mockData = [{ name: 'foo', id: 1, isChecked: false }];
+const mockColumns = [
+  { name: 'Name', key: 'name', isSortable: true }
+];
 describe('<Lookup />', () => {
   test('initially renders succesfully', () => {
     mount(
@@ -14,6 +17,8 @@ describe('<Lookup />', () => {
           value={mockData}
           onLookupSave={() => { }}
           getItems={() => { }}
+          columns={mockColumns}
+          sortedColumnKey="name"
         />
       </I18nProvider>
     );
@@ -27,6 +32,8 @@ describe('<Lookup />', () => {
           value={mockData}
           onLookupSave={() => { }}
           getItems={() => ({ data: { results: [{ name: 'test instance', id: 1 }] } })}
+          columns={mockColumns}
+          sortedColumnKey="name"
         />
       </I18nProvider>
     ).find('Lookup');
@@ -47,6 +54,8 @@ describe('<Lookup />', () => {
           value={mockSelected}
           onLookupSave={() => { }}
           getItems={() => { }}
+          columns={mockColumns}
+          sortedColumnKey="name"
         />
       </I18nProvider>
     ).find('Lookup');
@@ -72,6 +81,8 @@ describe('<Lookup />', () => {
           value={mockSelected}
           onLookupSave={() => { }}
           getItems={() => ({ data: { results: [{ name: 'test instance', id: 1 }] } })}
+          columns={mockColumns}
+          sortedColumnKey="name"
         />
       </I18nProvider>
     );
@@ -94,6 +105,8 @@ describe('<Lookup />', () => {
           value={mockData}
           onLookupSave={() => { }}
           getItems={() => { }}
+          columns={mockColumns}
+          sortedColumnKey="name"
         />
       </I18nProvider>
     );
@@ -112,6 +125,8 @@ describe('<Lookup />', () => {
           value={mockData}
           selected={[]}
           getItems={() => { }}
+          columns={mockColumns}
+          sortedColumnKey="name"
         />
       </I18nProvider>
     );
@@ -129,6 +144,8 @@ describe('<Lookup />', () => {
           value={mockData}
           selected={[]}
           getItems={() => { }}
+          columns={mockColumns}
+          sortedColumnKey="name"
         />
       </I18nProvider>
     ).find('Lookup');
@@ -173,5 +190,43 @@ describe('<Lookup />', () => {
       id: 1,
       name: 'foo'
     }], 'fooBar');
+  });
+  test('onSort sets state and calls getData ', () => {
+    const spy = jest.spyOn(Lookup.prototype, 'getData');
+    const wrapper = mount(
+      <I18nProvider>
+        <Lookup
+          lookup_header="Foo Bar"
+          onLookupSave={() => { }}
+          data={mockData}
+          selected={[]}
+          columns={mockColumns}
+          sortedColumnKey="name"
+        />
+      </I18nProvider>
+    ).find('Lookup');
+    wrapper.instance().onSort('id', 'descending');
+    expect(wrapper.state('sortedColumnKey')).toEqual('id');
+    expect(wrapper.state('sortOrder')).toEqual('descending');
+    expect(spy).toHaveBeenCalled();
+  });
+  test('onSetPage sets state and calls getData ', () => {
+    const spy = jest.spyOn(Lookup.prototype, 'getData');
+    const wrapper = mount(
+      <I18nProvider>
+        <Lookup
+          lookup_header="Foo Bar"
+          onLookupSave={() => { }}
+          data={mockData}
+          selected={[]}
+          columns={mockColumns}
+          sortedColumnKey="name"
+        />
+      </I18nProvider>
+    ).find('Lookup');
+    wrapper.instance().onSetPage(2, 10);
+    expect(wrapper.state('page')).toEqual(2);
+    expect(wrapper.state('page_size')).toEqual(10);
+    expect(spy).toHaveBeenCalled();
   });
 });

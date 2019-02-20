@@ -158,10 +158,13 @@
 
 .awx-c-modal.pf-c-modal-box {
   margin: 0;
-  padding: 20px;
-  width: 550px;
+  width: 600px;
 
-  .pf-c-button:not(:last-child) {
+  .pf-c-modal-box__body {
+    overflow: visible;
+  }
+
+  .pf-c-modal-box__footer > .pf-c-button:not(:last-child) {
     margin-right: 20px;
   }
 }
@@ -233,7 +236,6 @@
 }
 
 .awx-c-list {
-  border-top: 1px solid #d7d7d7;
   border-bottom: 1px solid #d7d7d7;
 }
 
