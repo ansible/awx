@@ -46,7 +46,9 @@ export default
                 callback,
                 choicesCount = 0,
                 select2Count = 0,
-                instance_group_url = defaultUrl + id + '/instance_groups';
+                instance_group_url = defaultUrl + id + '/instance_groups',
+                select2LoadDefer = [],
+                launchHasBeenEnabled = false;
 
             init();
             function init() {
@@ -169,86 +171,71 @@ export default
             };
 
             function sync_playbook_select2() {
-                CreateSelect2({
+                select2LoadDefer.push(CreateSelect2({
                     element:'#playbook-select',
                     multiple: false
-                });
+                }));
             }
 
             function sync_verbosity_select2() {
-                CreateSelect2({
+                select2LoadDefer.push(CreateSelect2({
                     element:'#job_template_verbosity',
                     multiple: false
-                });
+                }));
             }
 
             function jobTemplateLoadFinished(){
-                CreateSelect2({
+                select2LoadDefer.push(CreateSelect2({
                     element:'#job_template_job_type',
-                    multiple: false,
-                    callback: 'select2Loaded',
-                    scope: $scope
-                });
+                    multiple: false
+                }));
 
-                CreateSelect2({
+                select2LoadDefer.push(CreateSelect2({
                     element:'#playbook-select',
-                    multiple: false,
-                    callback: 'select2Loaded',
-                    scope: $scope
-                });
+                    multiple: false
+                }));
 
-                CreateSelect2({
+                select2LoadDefer.push(CreateSelect2({
                     element:'#job_template_job_tags',
                     multiple: true,
-                    addNew: true,
-                    callback: 'select2Loaded',
-                    scope: $scope
-                });
+                    addNew: true
+                }));
 
-                CreateSelect2({
+                select2LoadDefer.push(CreateSelect2({
                     element:'#job_template_skip_tags',
                     multiple: true,
-                    addNew: true,
-                    callback: 'select2Loaded',
-                    scope: $scope
-                });
+                    addNew: true
+                }));
 
-                CreateSelect2({
+                select2LoadDefer.push(CreateSelect2({
                     element: '#job_template_custom_virtualenv',
                     multiple: false,
-                    opts: $scope.custom_virtualenvs_options,
-                    callback: 'select2Loaded',
-                    scope: $scope
-                });
-            }
+                    opts: $scope.custom_virtualenvs_options
+                }));
 
-            $scope.$on('select2Loaded', () => {
-                select2Count++;
-                if (select2Count === 10) {
-                    $scope.$emit('select2LoadFinished');
+                if (!launchHasBeenEnabled) {
+                    $q.all(select2LoadDefer).then(() => {
+                        // updates based on lookups will initially set the form as dirty.
+                        // we need to set it as pristine when it contains the values given by the api
+                        // so that we can enable launching when the two are the same
+                        $scope.job_template_form.$setPristine();
+                        // this is used to set the overall form as dirty for the values
+                        // that don't actually set this internally (lookups, toggles and code mirrors).
+                        $scope.$watchGroup([
+                            'inventory',
+                            'project',
+                            'multiCredential.selectedCredentials',
+                            'extra_vars',
+                            'diff_mode',
+                            'instance_groups'
+                        ], (val, prevVal) => {
+                            if (!_.isEqual(val, prevVal)) {
+                                $scope.job_template_form.$setDirty();
+                            }
+                        });
+                    });
                 }
-            });
-
-            $scope.$on('select2LoadFinished', () => {
-                // updates based on lookups will initially set the form as dirty.
-                // we need to set it as pristine when it contains the values given by the api
-                // so that we can enable launching when the two are the same
-                $scope.job_template_form.$setPristine();
-                // this is used to set the overall form as dirty for the values
-                // that don't actually set this internally (lookups, toggles and code mirrors).
-                $scope.$watchGroup([
-                    'inventory',
-                    'project',
-                    'multiCredential.selectedCredentials',
-                    'extra_vars',
-                    'diff_mode',
-                    'instance_groups'
-                ], (val, prevVal) => {
-                    if (!_.isEqual(val, prevVal)) {
-                        $scope.job_template_form.$setDirty();
-                    }
-                });
-            });
+            }
 
             $scope.toggleForm = function(key) {
                 $scope[key] = !$scope[key];
@@ -298,8 +285,8 @@ export default
                     variable: 'extra_vars',
                     onChange: callback
                 });
-
                 jobTemplateLoadFinished();
+                launchHasBeenEnabled = true;
             });
 
             Wait('start');
@@ -497,12 +484,12 @@ export default
                 .map(i => ({id: i.id + "",
                     test: i.name}));
 
-            CreateSelect2({
+            select2LoadDefer.push(CreateSelect2({
                 element:'#job_template_labels',
                 multiple: true,
                 addNew: true,
                 opts: opts
-            });
+            }));
 
             $scope.$emit("choicesReady");
 

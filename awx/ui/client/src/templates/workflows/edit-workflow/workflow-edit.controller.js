@@ -257,22 +257,11 @@ export default [
 
         // Select2-ify the lables input
         CreateSelect2({
-            scope: $scope,
             element:'#workflow_job_template_labels',
             multiple: true,
             addNew: true,
-            opts,
-            callback: 'select2Loaded'
-        });
-
-        $scope.$on('select2Loaded', () => {
-            select2Count++;
-            if (select2Count === 1) {
-                $scope.$emit('select2LoadFinished');
-            }
-        });
-
-        $scope.$on('select2LoadFinished', () => {
+            opts
+        }).then(() => {
             // updates based on lookups will initially set the form as dirty.
             // we need to set it as pristine when it contains the values given by the api
             // so that we can enable launching when the two are the same
