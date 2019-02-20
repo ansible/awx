@@ -22,7 +22,7 @@ django-taggit==0.22.2
 djangorestframework==3.7.7
 djangorestframework-yaml==1.0.3
 irc==16.2
-jinja2=2.10
+jinja2==2.10
 jsonschema==2.6.0
 Markdown==2.6.11    # used for formatting API help
 ordereddict==1.1
@@ -38,7 +38,6 @@ python-radius==1.0
 python3-saml==1.4.0
 social-auth-core==3.0.0
 social-auth-app-django==2.1.0
-redbaron==0.6.3
 requests<2.16  # Older versions rely on certify
 requests-futures==0.9.7
 service-identity==17.0.0
