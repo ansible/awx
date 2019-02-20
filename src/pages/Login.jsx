@@ -77,9 +77,11 @@ class AWXLogin extends Component {
             <LoginForm
               usernameLabel={i18n._(t`Username`)}
               passwordLabel={i18n._(t`Password`)}
-              passwordHelperTextInvalid={i18n._(t`Invalid username or password. Please try again.`)}
+              showHelperText={!isInputValid}
+              helperText={i18n._(t`Invalid username or password. Please try again.`)}
               usernameValue={username}
               passwordValue={password}
+              isValidUsername={isInputValid}
               isValidPassword={isInputValid}
               onChangeUsername={this.onChangeUsername}
               onChangePassword={this.onChangePassword}

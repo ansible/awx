@@ -10,7 +10,10 @@
   --pf-global--link--Color: #484848;
   --pf-global--link--Color--hover: #484848;
   --pf-global--link--TextDecoration--hover: none;
-  --pf-global--FontWeight--normal: 700;
+
+  align-items: center;
+  flex-direction: row;
+  justify-content: space-between;
 
   &:before {
     border-bottom: 1px solid var(--pf-c-tabs__item--BorderColor);
@@ -27,6 +30,7 @@
     --pf-c-tabs__button--PaddingLeft: 20px;
     --pf-c-tabs__button--PaddingRight: 20px;
     display: block;
+    font-weight: 700;
 
     &:after {
       content: '';

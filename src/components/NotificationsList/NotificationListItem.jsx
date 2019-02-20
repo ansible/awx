@@ -28,27 +28,23 @@ class NotificationListItem extends React.Component {
     return (
       <I18n>
         {({ i18n }) => (
-          <li key={itemId} className="pf-c-data-list__item pf-u-flex-row pf-u-align-items-center">
-            <div className="pf-c-data-list__cell pf-u-flex-row">
-              <div className="pf-u-display-inline-flex">
-                <Link
-                  to={{
-                    pathname: detailUrl
-                  }}
-                >
-                  <b>{name}</b>
-                </Link>
-              </div>
+          <li key={itemId} className="pf-c-data-list__item">
+            <div className="pf-c-data-list__cell" style={{ display: 'flex' }}>
+              <Link
+                to={{
+                  pathname: detailUrl
+                }}
+              >
+                <b>{name}</b>
+              </Link>
               <Badge
                 style={capText}
-                className="pf-u-display-inline-flex"
                 isRead
               >
                 {notificationType}
               </Badge>
             </div>
-            <div className="pf-c-data-list__cell" />
-            <div className="pf-c-data-list__cell pf-u-display-flex pf-u-justify-content-flex-end">
+            <div className="pf-c-data-list__cell" style={{ display: 'flex', justifyContent: 'flex-end' }}>
               <Switch
                 label={i18n._(t`Successful`)}
                 isChecked={successTurnedOn}

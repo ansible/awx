@@ -172,8 +172,8 @@ describe('<OrganizationAdd />', () => {
         </I18nProvider>
       </MemoryRouter>
     ).find('OrganizationAdd').find('AnsibleSelect');
-    expect(wrapper.find('Select')).toHaveLength(1);
-    expect(wrapper.find('SelectOption')).toHaveLength(2);
+    expect(wrapper.find('FormSelect')).toHaveLength(1);
+    expect(wrapper.find('FormSelectOption')).toHaveLength(2);
   });
 
   test('AnsibleSelect component does not render if there are 0 virtual environments', () => {
@@ -189,6 +189,6 @@ describe('<OrganizationAdd />', () => {
         </I18nProvider>
       </MemoryRouter>
     ).find('OrganizationAdd').find('AnsibleSelect');
-    expect(wrapper.find('Select')).toHaveLength(0);
+    expect(wrapper.find('FormSelect')).toHaveLength(0);
   });
 });
