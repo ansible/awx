@@ -113,7 +113,8 @@ class DataListToolbar extends React.Component {
       addUrl,
       showExpandCollapse,
       showDelete,
-      showSelectAll
+      showSelectAll,
+      isLookup
     } = this.props;
     const {
       isSearchDropdownOpen,
@@ -155,7 +156,7 @@ class DataListToolbar extends React.Component {
           <div className="awx-toolbar">
             <Level>
               <LevelItem style={{ display: 'flex', flexBasis: '700px' }}>
-                <Toolbar style={{ marginLeft: showSelectAll ? '20px' : '0px', flexGrow: '1' }}>
+                <Toolbar style={{ marginLeft: isLookup ? '0px' : '20px', flexGrow: '1' }}>
                   { showSelectAll && (
                     <ToolbarGroup>
                       <ToolbarItem>

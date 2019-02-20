@@ -195,6 +195,7 @@ class Lookup extends React.Component {
                     columns={columns}
                     onSearch={this.onSearch}
                     onSort={this.onSort}
+                    isLookup
                   />
                   <ul className="pf-c-data-list awx-c-list">
                     {results.map(i => (
