@@ -528,10 +528,8 @@ class TestGenericRun(TestJobExecution):
         self.task.run(self.pk)
 
     def test_awx_task_env(self):
-        patch = mock.patch('awx.main.tasks.settings.AWX_TASK_ENV', {'FOO': 'BAR'})
-        patch.start()
-
-        self.task.run(self.pk)
+        with mock.patch('awx.main.tasks.settings.AWX_TASK_ENV', {'FOO': 'BAR'}):
+            self.task.run(self.pk)
 
         assert self.run_pexpect.call_count == 1
         call_args, _ = self.run_pexpect.call_args_list[0]
@@ -584,16 +582,11 @@ class TestGenericRun(TestJobExecution):
         [{'ANSIBLE_LIBRARY': '/foo/bar'}, '/foo/bar:/awx_devel/awx/plugins/library'],
     ])
     def test_fact_cache_usage_with_ansible_library(self, task_env, ansible_library_env):
-        patch = mock.patch('awx.main.tasks.settings.AWX_TASK_ENV', task_env)
-        patch.start()
-
         self.instance.use_fact_cache = True
-        start_mock = mock.Mock()
-        patch = mock.patch.object(Job, 'start_job_fact_cache', start_mock)
-        self.patches.append(patch)
-        patch.start()
-
-        self.task.run(self.pk)
+        with mock.patch('awx.main.tasks.settings.AWX_TASK_ENV', task_env):
+            start_mock = mock.Mock()
+            with mock.patch.object(Job, 'start_job_fact_cache', start_mock):
+                self.task.run(self.pk)
         call_args, _ = self.run_pexpect.call_args_list[0]
         args, cwd, env, stdout = call_args
         assert env['ANSIBLE_LIBRARY'] == ansible_library_env
@@ -1682,10 +1675,8 @@ class TestJobCredentials(TestJobExecution):
         assert self.instance.job_env['AZURE_PASSWORD'] == tasks.HIDDEN_PASSWORD
 
     def test_awx_task_env(self):
-        patch = mock.patch('awx.main.tasks.settings.AWX_TASK_ENV', {'FOO': 'BAR'})
-        patch.start()
-
-        self.task.run(self.pk)
+        with mock.patch('awx.main.tasks.settings.AWX_TASK_ENV', {'FOO': 'BAR'}):
+            self.task.run(self.pk)
 
         assert self.run_pexpect.call_count == 1
         call_args, _ = self.run_pexpect.call_args_list[0]
@@ -1800,10 +1791,8 @@ class TestProjectUpdateCredentials(TestJobExecution):
 
     def test_awx_task_env(self, scm_type):
         self.instance.scm_type = scm_type
-        patch = mock.patch('awx.main.tasks.settings.AWX_TASK_ENV', {'FOO': 'BAR'})
-        patch.start()
-
-        self.task.run(self.pk)
+        with mock.patch('awx.main.tasks.settings.AWX_TASK_ENV', {'FOO': 'BAR'}):
+            self.task.run(self.pk)
 
         assert self.run_pexpect.call_count == 1
         call_args, _ = self.run_pexpect.call_args_list[0]
@@ -2274,10 +2263,8 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             return cred
         self.instance.get_cloud_credential = get_cred
 
-        patch = mock.patch('awx.main.tasks.settings.AWX_TASK_ENV', {'FOO': 'BAR'})
-        patch.start()
-
-        self.task.run(self.pk)
+        with mock.patch('awx.main.tasks.settings.AWX_TASK_ENV', {'FOO': 'BAR'}):
+            self.task.run(self.pk)
 
         assert self.run_pexpect.call_count == 1
         call_args, _ = self.run_pexpect.call_args_list[0]
