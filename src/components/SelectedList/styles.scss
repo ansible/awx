@@ -15,15 +15,6 @@
     white-space: nowrap;
     height: 30px;
   }
-  .pf-l-split__item:not(:last-child):after {
-    content: "";
-    background-color: var(--awx-selectedList--BorderColor);
-    width: 1px;
-    height: 30px;
-    display: block;
-    margin-left: 20px;
-    margin-right: 20px;
-  }
   .pf-c-chip {
     margin-right: 10px;
     margin-bottom: 10px;

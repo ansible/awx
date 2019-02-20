@@ -28,16 +28,6 @@
     --pf-l-toolbar__group--MarginLeft: 0px;
 }
 
-.awx-toolbar .pf-l-toolbar__group:after {
-  content: "";
-  background-color: #d7d7d7;
-  width: 1px;
-  height: 30px;
-  display: block;
-  margin-left: 20px;
-  margin-right: 20px;
-}
-
 .awx-toolbar button.pf-c-button {
   height: 30px;
   padding: 0px;
@@ -46,12 +36,6 @@
 .awx-toolbar .pf-c-input-group {
   min-height: 0px;
   height: 30px;
-
-  input {
-    height: 30px;
-    padding: 0 10px;
-    width: 300px;
-  }
 
   .pf-m-tertiary {
     width: 34px;

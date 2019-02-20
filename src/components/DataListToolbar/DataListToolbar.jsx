@@ -31,6 +31,11 @@ import {
 } from 'react-router-dom';
 
 import Tooltip from '../Tooltip';
+import VerticalSeparator from '../VerticalSeparator';
+
+const flexGrowStyling = {
+  flexGrow: '1'
+};
 
 class DataListToolbar extends React.Component {
   constructor (props) {
@@ -111,7 +116,6 @@ class DataListToolbar extends React.Component {
       showSelectAll
     } = this.props;
     const {
-      // isActionDropdownOpen,
       isSearchDropdownOpen,
       isSortDropdownOpen,
       searchKey,
@@ -150,8 +154,8 @@ class DataListToolbar extends React.Component {
         {({ i18n }) => (
           <div className="awx-toolbar">
             <Level>
-              <LevelItem>
-                <Toolbar style={{ marginLeft: '20px' }}>
+              <LevelItem style={{ display: 'flex', flexBasis: '700px' }}>
+                <Toolbar style={{ marginLeft: showSelectAll ? '20px' : '0px', flexGrow: '1' }}>
                   { showSelectAll && (
                     <ToolbarGroup>
                       <ToolbarItem>
@@ -162,10 +166,11 @@ class DataListToolbar extends React.Component {
                           id="select-all"
                         />
                       </ToolbarItem>
+                      <VerticalSeparator />
                     </ToolbarGroup>
                   )}
-                  <ToolbarGroup>
-                    <ToolbarItem>
+                  <ToolbarGroup style={flexGrowStyling}>
+                    <ToolbarItem style={flexGrowStyling}>
                       <div className="pf-c-input-group">
                         <Dropdown
                           className="searchKeyDropdown"
@@ -187,6 +192,7 @@ class DataListToolbar extends React.Component {
                           aria-label={i18n._(t`Search text input`)}
                           value={searchValue}
                           onChange={this.handleSearchInputChange}
+                          style={{ height: '30px' }}
                         />
                         <Button
                           variant="tertiary"
@@ -197,26 +203,29 @@ class DataListToolbar extends React.Component {
                         </Button>
                       </div>
                     </ToolbarItem>
+                    <VerticalSeparator />
                   </ToolbarGroup>
                   <ToolbarGroup
                     className="sortDropdownGroup"
                   >
-                    <ToolbarItem>
-                      <Dropdown
-                        onToggle={this.onSortDropdownToggle}
-                        onSelect={this.onSortDropdownSelect}
-                        direction={up}
-                        isOpen={isSortDropdownOpen}
-                        toggle={(
-                          <DropdownToggle
-                            onToggle={this.onSortDropdownToggle}
-                          >
-                            {sortedColumnName}
-                          </DropdownToggle>
-                        )}
-                        dropdownItems={sortDropdownItems}
-                      />
-                    </ToolbarItem>
+                    { sortDropdownItems.length > 1 && (
+                      <ToolbarItem>
+                        <Dropdown
+                          onToggle={this.onSortDropdownToggle}
+                          onSelect={this.onSortDropdownSelect}
+                          direction={up}
+                          isOpen={isSortDropdownOpen}
+                          toggle={(
+                            <DropdownToggle
+                              onToggle={this.onSortDropdownToggle}
+                            >
+                              {sortedColumnName}
+                            </DropdownToggle>
+                          )}
+                          dropdownItems={sortDropdownItems}
+                        />
+                      </ToolbarItem>
+                    )}
                     <ToolbarItem>
                       <Button
                         onClick={this.onSort}
@@ -226,6 +235,9 @@ class DataListToolbar extends React.Component {
                         <SortIcon />
                       </Button>
                     </ToolbarItem>
+                    { (showExpandCollapse || showDelete || addUrl) && (
+                      <VerticalSeparator />
+                    )}
                   </ToolbarGroup>
                   {showExpandCollapse && (
                     <ToolbarGroup>
@@ -245,6 +257,9 @@ class DataListToolbar extends React.Component {
                           <EqualsIcon />
                         </Button>
                       </ToolbarItem>
+                      { (showDelete || addUrl) && (
+                        <VerticalSeparator />
+                      )}
                     </ToolbarGroup>
                   )}
                 </Toolbar>
