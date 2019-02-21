@@ -36,7 +36,7 @@ class TestComputedFields:
         job = Job.objects.create(name='fake-job', inventory=inventory)
         with mocker.patch.object(update_inventory_computed_fields, 'delay'):
             job.delete()
-            update_inventory_computed_fields.delay.assert_called_once_with(inventory.id, True)
+            update_inventory_computed_fields.delay.assert_called_once_with(inventory.id)
 
     def test_disable_computed_fields(self, mocker, inventory):
         job = Job.objects.create(name='fake-job', inventory=inventory)

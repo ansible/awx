@@ -141,7 +141,7 @@ def emit_update_inventory_computed_fields(sender, **kwargs):
     except Inventory.DoesNotExist:
         pass
     else:
-        update_inventory_computed_fields.delay(inventory.id, True)
+        update_inventory_computed_fields.delay(inventory.id)
 
 
 def emit_update_inventory_on_created_or_deleted(sender, **kwargs):
@@ -162,7 +162,7 @@ def emit_update_inventory_on_created_or_deleted(sender, **kwargs):
         pass
     else:
         if inventory is not None:
-            update_inventory_computed_fields.delay(inventory.id, True)
+            update_inventory_computed_fields.delay(inventory.id)
 
 
 def rebuild_role_ancestor_list(reverse, model, instance, pk_set, action, **kwargs):
@@ -235,14 +235,6 @@ def save_related_job_templates(sender, instance, **kwargs):
 
 
 def connect_computed_field_signals():
-    post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Host)
-    post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=Host)
-    post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Group)
-    post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=Group)
-    m2m_changed.connect(emit_update_inventory_computed_fields, sender=Group.hosts.through)
-    m2m_changed.connect(emit_update_inventory_computed_fields, sender=Group.parents.through)
-    m2m_changed.connect(emit_update_inventory_computed_fields, sender=Host.inventory_sources.through)
-    m2m_changed.connect(emit_update_inventory_computed_fields, sender=Group.inventory_sources.through)
     post_save.connect(emit_update_inventory_on_created_or_deleted, sender=InventorySource)
     post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=InventorySource)
     post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Job)
@@ -379,14 +371,6 @@ def disable_activity_stream():
 
 @contextlib.contextmanager
 def disable_computed_fields():
-    post_save.disconnect(emit_update_inventory_on_created_or_deleted, sender=Host)
-    post_delete.disconnect(emit_update_inventory_on_created_or_deleted, sender=Host)
-    post_save.disconnect(emit_update_inventory_on_created_or_deleted, sender=Group)
-    post_delete.disconnect(emit_update_inventory_on_created_or_deleted, sender=Group)
-    m2m_changed.disconnect(emit_update_inventory_computed_fields, sender=Group.hosts.through)
-    m2m_changed.disconnect(emit_update_inventory_computed_fields, sender=Group.parents.through)
-    m2m_changed.disconnect(emit_update_inventory_computed_fields, sender=Host.inventory_sources.through)
-    m2m_changed.disconnect(emit_update_inventory_computed_fields, sender=Group.inventory_sources.through)
     post_save.disconnect(emit_update_inventory_on_created_or_deleted, sender=InventorySource)
     post_delete.disconnect(emit_update_inventory_on_created_or_deleted, sender=InventorySource)
     post_save.disconnect(emit_update_inventory_on_created_or_deleted, sender=Job)

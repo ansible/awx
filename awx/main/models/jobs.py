@@ -1161,7 +1161,6 @@ class JobHostSummary(CreatedModifiedModel):
             update_fields.append('last_job_host_summary_id')
         if update_fields:
             self.host.save(update_fields=update_fields)
-        #self.host.update_computed_fields()
 
 
 class SystemJobOptions(BaseModel):
