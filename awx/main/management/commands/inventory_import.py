@@ -1104,7 +1104,8 @@ class Command(BaseCommand):
                 self.inventory_source.status = status
                 self.inventory_source.save(update_fields=['status'])
 
-        if exc and isinstance(exc, CommandError):
-            sys.exit(1)
-        elif exc:
+        if exc:
+            logger.error(str(exc))
+            if isinstance(exc, CommandError):
+                sys.exit(1)
             raise exc
