@@ -1,1 +1,2 @@
 pycurl  # requires system package version
+enum34  # causes problems with python3
