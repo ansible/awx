@@ -48,6 +48,7 @@ function TemplatesStrings (BaseString) {
         SKIP_TAGS: t.s('Skip Tags'),
         JOB_TAGS: t.s('Job Tags'),
         LIMIT: t.s('Limit'),
+        LIMIT_HELP: t.s('Provide a host pattern to further constrain the list of hosts that will be managed or affected by the playbook. Multiple patterns are allowed. Refer to Ansible documentation for more information and examples on patterns.'),
         JOB_TYPE: t.s('Job Type'),
         VERBOSITY: t.s('Verbosity'),
         CHOOSE_JOB_TYPE: t.s('Choose a job type'),
