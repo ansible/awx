@@ -221,10 +221,14 @@ export default
                         $scope.job_template_form.$setPristine();
                         // this is used to set the overall form as dirty for the values
                         // that don't actually set this internally (lookups, toggles and code mirrors).
+                        $scope.$watchCollection('multiCredential.selectedCredentials', (val, prevVal) => {
+                            if (!_.isEqual(val, prevVal)) {
+                                $scope.job_template_form.$setDirty();
+                            }
+                        });
                         $scope.$watchGroup([
                             'inventory',
                             'project',
-                            'multiCredential.selectedCredentials',
                             'extra_vars',
                             'diff_mode',
                             'instance_groups'
