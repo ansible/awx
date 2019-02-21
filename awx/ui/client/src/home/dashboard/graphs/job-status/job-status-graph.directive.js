@@ -48,10 +48,6 @@ function JobStatusGraph($window, adjustGraphSize, templateUrl, i18n, moment, gra
                         });
                 }
 
-                scope.$on('jobStatusChange', function(event, status){
-                    recreateGraph(scope.period, scope.jobType, status);
-                });
-
                 function createGraph(period, jobtype, data, status){
                     scope.period = period;
                     scope.jobType = jobtype;
@@ -171,7 +167,7 @@ function JobStatusGraph($window, adjustGraphSize, templateUrl, i18n, moment, gra
                                     <i class="fa fa-angle-down DashboardGraphs-filterIcon"></i>
                                 </a>`);
 
-                        scope.$broadcast("jobStatusChange", job_status);
+                        recreateGraph(scope.period, scope.jobType, job_status);
                     });
 
                     adjustGraphSize(job_status_chart, element);

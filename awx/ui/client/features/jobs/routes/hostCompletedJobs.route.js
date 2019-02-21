@@ -16,6 +16,13 @@ export default {
             squash: ''
         }
     },
+    data: {
+        socket: {
+            groups: {
+                jobs: ['status_changed']
+            }
+        }
+    },
     ncyBreadcrumb: {
         label: N_('COMPLETED JOBS')
     },
