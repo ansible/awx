@@ -6,27 +6,27 @@ from hvac import Client
 hashi_inputs = {
     'fields': [{
         'id': 'url',
-        'label': 'Hashivault Server URL',
+        'label': 'Server URL',
         'type': 'string',
-        'help_text': 'The Hashivault server url.'
+        'help_text': 'The URL to the HashiCorp Vault',
     }, {
         'id': 'secret_path',
         'label': 'Secret Path',
         'type': 'string',
-        'help_text': 'The path to the secret.'
+        'help_text': 'The path to the secret e.g., /some-engine/some-secret/',
     }, {
         'id': 'secret_field',
         'label': 'Secret Field',
         'type': 'string',
-        'help_text': 'The data field to access on the secret.'
+        'help_text': 'The name of the key to look up in the secret.',
     }, {
         'id': 'token',
         'label': 'Token',
         'type': 'string',
         'secret': True,
-        'help_text': 'An access token for the Hashivault server.'
+        'help_text': 'The access token used to authenticate to the Vault server',
     }],
-    'required': ['url', 'secret_path', 'token'],
+    'required': ['url', 'secret_path', 'secret_field', 'token'],
 }
 
 
@@ -45,4 +45,4 @@ def hashi_backend(**kwargs):
     return response['data']
 
 
-hashivault_plugin = CredentialPlugin('Hashivault', inputs=hashi_inputs, backend=hashi_backend)
+hashivault_plugin = CredentialPlugin('HashiCorp Vault KV Lookup', inputs=hashi_inputs, backend=hashi_backend)
