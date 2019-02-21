@@ -148,6 +148,7 @@ describe('Controller: WorkflowAdd', () => {
                 variables: undefined,
                 allow_simultaneous: undefined,
                 ask_inventory_on_launch: false,
+                ask_variables_on_launch: false,
                 extra_vars: undefined
             });
         });
