@@ -43,7 +43,10 @@ from . import injectors as builtin_injectors
 __all__ = ['Credential', 'CredentialType', 'CredentialInputSource', 'V1Credential', 'build_safe_env']
 
 logger = logging.getLogger('awx.main.models.credential')
-credential_plugins = [ep.load() for ep in iter_entry_points('awx.credential_plugins')]
+credential_plugins = dict(
+    (ep.name, ep.load())
+    for ep in iter_entry_points('awx.credential_plugins')
+)
 
 HIDDEN_PASSWORD = '**********'
 
@@ -606,9 +609,9 @@ class CredentialType(CommonModelNameNotUnique):
             created.save()
 
     @classmethod
-    def load_plugin(cls, plugin):
+    def load_plugin(cls, ns, plugin):
         ManagedCredentialType(
-            namespace=plugin.name.lower(),
+            namespace=ns,
             name=plugin.name,
             kind='external',
             inputs=plugin.inputs
@@ -1328,8 +1331,10 @@ class CredentialInputSource(PrimordialModel):
         super(CredentialInputSource, self).save(*args, **kwargs)
 
     def get_input_value(self):
-        plugin_name = self.source_credential.credential_type.name
-        [backend] = [p.backend for p in credential_plugins if p.name == plugin_name]
+        [backend] = [
+            plugin.backend for ns, plugin in credential_plugins.items()
+            if ns == self.source_credential.credential_type.namespace
+        ]
 
         backend_kwargs = {}
         for field_name, value in self.source_credential.inputs.items():
@@ -1344,5 +1349,5 @@ class CredentialInputSource(PrimordialModel):
         return reverse(view_name, kwargs={'pk': self.pk}, request=request)
 
 
-for plugin in credential_plugins:
-    CredentialType.load_plugin(plugin)
+for ns, plugin in credential_plugins.items():
+    CredentialType.load_plugin(ns, plugin)
