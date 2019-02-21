@@ -5,7 +5,7 @@ NOTE: before running `pip-compile`, please copy-paste contents in `requirements/
 At the end of `requirements/requirements.in`, pip and setuptools need to have their versions pinned.
 
 ```
-virtualenv /buildit
+python3 -m venvpip install pip-tools /buildit
 source /buildit/bin/activate
 pip install pip-tools
 pip install pip --upgrade
