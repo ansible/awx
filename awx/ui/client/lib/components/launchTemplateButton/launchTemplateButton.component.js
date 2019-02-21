@@ -21,7 +21,7 @@ function atLaunchTemplateCtrl (
     const jobTemplate = new JobTemplate();
     const workflowTemplate = new WorkflowTemplate();
     vm.strings = componentsStrings;
-    vm.strings.get('launchTemplate.DEFAULT');
+    vm.launchTooltip = vm.strings.get('launchTemplate.DEFAULT');
 
     $scope.$watch('vm.disabled', (val) => {
         vm.launchTooltip = (val) ? vm.strings.get('launchTemplate.DISABLED') : vm.strings.get('launchTemplate.DEFAULT');
