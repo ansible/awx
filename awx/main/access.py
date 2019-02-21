@@ -353,7 +353,7 @@ class BaseAccess(object):
             host_exists = Host.objects.filter(inventory__organization=org.id, name=add_host_name).exists()
             if not host_exists and active_count == org.max_hosts:
                 raise PermissionDenied(
-                    _("Organization host limit of %s has been exceeded, %s hosts active.") %
+                    _("Organization host limit of %s would be exceeded, %s hosts active.") %
                     (org.max_hosts, active_count))
 
     def get_user_capabilities(self, obj, method_list=[], parent_obj=None, capabilities_cache={}):
