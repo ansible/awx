@@ -45,7 +45,6 @@ export default
                 id = $stateParams.job_template_id,
                 callback,
                 choicesCount = 0,
-                select2Count = 0,
                 instance_group_url = defaultUrl + id + '/instance_groups',
                 select2LoadDefer = [],
                 launchHasBeenEnabled = false;

@@ -17,7 +17,6 @@ export default [
         TemplatesService, Rest, ToggleNotification, OrgAdminLookup, availableLabels, selectedLabels, workflowJobTemplateData, i18n,
         workflowLaunch, $transitions, WorkflowJobTemplate, Inventory, isNotificationAdmin
     ) {
-        let select2Count = 0;
 
         $scope.missingTemplates = _.has(workflowLaunch, 'node_templates_missing') && workflowLaunch.node_templates_missing.length > 0 ? true : false;
 
