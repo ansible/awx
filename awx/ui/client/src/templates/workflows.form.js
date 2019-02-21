@@ -115,6 +115,10 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n) {
                     dataTitle: i18n._('Extra Variables'),
                     dataPlacement: 'right',
                     dataContainer: "body",
+                    subCheckbox: {
+                        variable: 'ask_variables_on_launch',
+                        text: i18n._('Prompt on launch')
+                    },
                     ngDisabled: '!(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)' // TODO: get working
                 },
                 checkbox_group: {
