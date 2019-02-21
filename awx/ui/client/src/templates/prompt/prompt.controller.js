@@ -52,12 +52,10 @@ export default [ 'ProcessErrors', 'CredentialTypeModel', 'TemplatesStrings',
                     .then( (response) => {
                         vm.promptDataClone.prompts.credentials.credentialTypes = {};
                         vm.promptDataClone.prompts.credentials.credentialTypeOptions = [];
-                        let machineCredTypeId = null;
                         response.data.results.forEach((credentialTypeRow => {
                             vm.promptDataClone.prompts.credentials.credentialTypes[credentialTypeRow.id] = credentialTypeRow.kind;
                             if(credentialTypeRow.kind.match(/^(cloud|net|ssh|vault)$/)) {
                                 if(credentialTypeRow.kind === 'ssh') {
-                                    machineCredTypeId = credentialTypeRow.id;
                                     vm.promptDataClone.prompts.credentials.credentialKind = credentialTypeRow.id.toString();
                                 }
                                 vm.promptDataClone.prompts.credentials.credentialTypeOptions.push({

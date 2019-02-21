@@ -56,6 +56,7 @@ export default [
         $scope.parseType = 'yaml';
         $scope.includeWorkflowMaker = false;
         $scope.ask_inventory_on_launch = workflowJobTemplateData.ask_inventory_on_launch;
+        $scope.ask_variables_on_launch = (workflowJobTemplateData.ask_variables_on_launch) ? true : false;
 
         if (Inventory){
             $scope.inventory = Inventory.id;
@@ -92,6 +93,7 @@ export default [
                 }
 
                 data.ask_inventory_on_launch = Boolean($scope.ask_inventory_on_launch);
+                data.ask_variables_on_launch = Boolean($scope.ask_variables_on_launch);
 
                 data.extra_vars = ToJSON($scope.parseType,
                     $scope.variables, true);

@@ -4495,8 +4495,8 @@ class WorkflowJobLaunchSerializer(BaseSerializer):
         fields = ('ask_inventory_on_launch', 'can_start_without_user_input', 'defaults', 'extra_vars',
                   'inventory', 'survey_enabled', 'variables_needed_to_start',
                   'node_templates_missing', 'node_prompts_rejected',
-                  'workflow_job_template_data', 'survey_enabled')
-        read_only_fields = ('ask_inventory_on_launch',)
+                  'workflow_job_template_data', 'survey_enabled', 'ask_variables_on_launch')
+        read_only_fields = ('ask_inventory_on_launch', 'ask_variables_on_launch')
 
     def get_survey_enabled(self, obj):
         if obj:
