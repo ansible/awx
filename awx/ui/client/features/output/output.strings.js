@@ -57,6 +57,7 @@ function OutputStrings (BaseString) {
         EXTRA_VARS: t.s('Extra Variables'),
         FINISHED: t.s('Finished'),
         FORKS: t.s('Forks'),
+        HOST_LIMIT_ERROR: t.s('Host Limit Error'),
         INSTANCE_GROUP: t.s('Instance Group'),
         INVENTORY: t.s('Inventory'),
         INVENTORY_SCM: t.s('Source Project'),

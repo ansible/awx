@@ -38,7 +38,6 @@ export default ['$scope', '$location', '$stateParams', 'OrgAdminLookup',
                 }
             });
 
-            $scope.$emit("HideOrgListHeader");
             $scope.instance_groups = InstanceGroupsData;
             const virtualEnvs = ConfigData.custom_virtualenvs || [];
             $scope.custom_virtualenvs_visible = virtualEnvs.length > 1;

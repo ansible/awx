@@ -17,9 +17,9 @@
             url: function(){
                 return '';
             },
-            error: function(data, status) {
-                ProcessErrors($rootScope, data.data, status, null, { hdr: 'Error!',
-                msg: 'Call to ' + this.url + '. GET returned: ' + status });
+            error: function(data) {
+                ProcessErrors($rootScope, data.data, data.status, null, { hdr: 'Error!',
+                msg: 'Call to ' + this.url + '. GET returned: ' + data.status });
             },
             success: function(data){
                 return data;

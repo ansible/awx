@@ -24,8 +24,6 @@ export default ['$scope', '$rootScope', '$location', '$stateParams',
         init();
 
         function init(){
-            // @issue What is this doing, why
-            $scope.$emit("HideOrgListHeader");
             const virtualEnvs = ConfigData.custom_virtualenvs || [];
             $scope.custom_virtualenvs_visible = virtualEnvs.length > 1;
             $scope.custom_virtualenvs_options = virtualEnvs.filter(
@@ -43,15 +41,15 @@ export default ['$scope', '$rootScope', '$location', '$stateParams',
 
         // Save
         $scope.formSave = function() {
+            var fld, params = {};
             Wait('start');
+            for (fld in form.fields) {
+                params[fld] = $scope[fld];
+            }
             var url = GetBasePath(base);
             url += (base !== 'organizations') ? $stateParams.project_id + '/organizations/' : '';
             Rest.setUrl(url);
-            Rest.post({
-                    name: $scope.name,
-                    description: $scope.description,
-                    custom_virtualenv: $scope.custom_virtualenv
-                })
+            Rest.post(params)
                 .then(({data}) => {
                     const organization_id = data.id,
                         instance_group_url = data.related.instance_groups;
