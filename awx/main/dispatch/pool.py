@@ -120,7 +120,8 @@ class PoolWorker(object):
         # this worker
         for uuid in finished:
             self.messages_finished += 1
-            del self.managed_tasks[uuid]
+            if uuid in self.managed_tasks:
+                del self.managed_tasks[uuid]
 
     @property
     def current_task(self):
