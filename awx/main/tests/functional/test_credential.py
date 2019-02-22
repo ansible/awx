@@ -76,10 +76,12 @@ GLqbpJyX2r3p/Rmo6mLY71SqpA==
 def test_default_cred_types():
     assert sorted(CredentialType.defaults.keys()) == [
         'aws',
+        'azure_kv',
         'azure_rm',
         'cloudforms',
         'gce',
-        'hashivault',
+        'hashivault_kv',
+        'hashivault_ssh',
         'insights',
         'net',
         'openstack',
