@@ -114,8 +114,7 @@ describe('<Lookup />', () => {
     removeIcon.simulate('click');
     expect(spy).toHaveBeenCalled();
   });
-  test('"wrapTags" method properly handles data', () => {
-    const spy = jest.spyOn(Lookup.prototype, 'wrapTags');
+  test('renders chips from prop value', () => {
     mockData = [{ name: 'foo', id: 0 }, { name: 'bar', id: 1 }];
     const wrapper = mount(
       <I18nProvider>
@@ -130,9 +129,10 @@ describe('<Lookup />', () => {
         />
       </I18nProvider>
     );
-    expect(spy).toHaveBeenCalled();
-    const pill = wrapper.find('span.awx-c-tag--pill');
-    expect(pill).toHaveLength(2);
+    const chip = wrapper.find('li.pf-c-chip');
+    const overflowChip = wrapper.find('.pf-c-chip.pf-m-overflow');
+    expect(chip).toHaveLength(1);
+    expect(overflowChip).toHaveLength(1);
   });
   test('toggleSelected successfully adds/removes row from lookupSelectedItems state', () => {
     mockData = [{ name: 'foo', id: 1 }];

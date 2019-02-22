@@ -2,6 +2,8 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { SearchIcon, CubesIcon } from '@patternfly/react-icons';
 import {
+  Chip,
+  ChipGroup,
   Modal,
   Button,
   EmptyState,
@@ -134,17 +136,6 @@ class Lookup extends React.Component {
     this.handleModalToggle();
   }
 
-  wrapTags (tags = []) {
-    return tags.map(tag => (
-      <span className="awx-c-tag--pill" key={tag.id}>
-        {tag.name}
-        <Button className="awx-c-icon--remove" id={tag.id} onClick={() => this.toggleSelected(tag)}>
-          x
-        </Button>
-      </span>
-    ));
-  }
-
   render () {
     const {
       isModalOpen,
@@ -159,6 +150,19 @@ class Lookup extends React.Component {
     } = this.state;
     const { lookupHeader = 'items', value, columns } = this.props;
 
+    let chips = null;
+    if (value) {
+      chips = (
+        <ChipGroup>
+          {value.map(chip => (
+            <Chip key={chip.id} onClick={() => this.toggleSelected(chip)}>
+              {chip.name}
+            </Chip>
+          ))}
+        </ChipGroup>
+      );
+    }
+
     return (
       <I18n>
         {({ i18n }) => (
@@ -166,7 +170,7 @@ class Lookup extends React.Component {
             <Button className="pf-c-input-group__text" aria-label="search" id="search" onClick={this.handleModalToggle}>
               <SearchIcon />
             </Button>
-            <div className="pf-c-form-control">{this.wrapTags(value)}</div>
+            <div className="pf-c-form-control">{chips}</div>
             <Modal
               className="awx-c-modal"
               title={`Select ${lookupHeader}`}

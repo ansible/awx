@@ -228,24 +228,8 @@
   }
 }
 
-.awx-c-icon--remove {
-  padding-left: 10px;
-  &:hover {
-    cursor: pointer;
-  }
-}
-
 .awx-c-list {
   border-bottom: 1px solid #d7d7d7;
-}
-
-.awx-c-tag--pill {
-  color: var(--pf-global--BackgroundColor--light-100);
-  background-color: rgb(0, 123, 186);
-  border-radius: 3px;
-  margin: 1px 2px;
-  padding: 0 10px;
-  display: inline-block;
 }
 
 .at-c-listCardBody {
