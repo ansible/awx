@@ -5,6 +5,9 @@
 import pytest
 from unittest import mock
 import os
+from contextlib import contextmanager
+from io import StringIO
+import logging
 
 # Django
 from django.core.management.base import CommandError
@@ -82,14 +85,22 @@ class MockLoader:
         return self._data
 
 
-def mock_logging(self):
-    pass
+@contextmanager
+def capture_stdout():
+    try:
+        stdout = StringIO()
+        handler = logging.StreamHandler(stdout)
+        handler.setLevel(logging.DEBUG)
+        update_logger = logging.getLogger('awx.main.commands.inventory_import')
+        update_logger.addHandler(handler)
+        yield stdout
+    finally:
+        update_logger.removeHandler(handler)
 
 
 @pytest.mark.django_db
 @pytest.mark.inventory_import
 @mock.patch.object(inventory_import.Command, 'check_license', mock.MagicMock())
-@mock.patch.object(inventory_import.Command, 'set_logging_level', mock_logging)
 class TestInvalidOptionsFunctional:
 
     def test_invalid_options_invalid_source(self, inventory):
@@ -120,19 +131,14 @@ class TestInvalidOptionsFunctional:
 @pytest.mark.django_db
 @pytest.mark.inventory_import
 @mock.patch.object(inventory_import.Command, 'check_license', new=mock.MagicMock())
-@mock.patch.object(inventory_import.Command, 'set_logging_level', new=mock_logging)
 class TestINIImports:
 
     @mock.patch.object(inventory_import, 'AnsibleInventoryLoader', MockLoader)
-    def test_inventory_single_ini_import(self, inventory, capsys):
+    def test_inventory_single_ini_import(self, inventory):
         inventory_import.AnsibleInventoryLoader._data = TEST_INVENTORY_CONTENT
         cmd = inventory_import.Command()
-        r = cmd.handle(
-            inventory_id=inventory.pk, source=__file__,
-            method='backport')
-        out, err = capsys.readouterr()
+        r = cmd.handle(inventory_id=inventory.pk, verbosity=0, source=__file__)
         assert r is None
-        assert out == ''
 
         assert set(inventory.groups.values_list('name', flat=True)) == set([
             'servers', 'dbservers', 'webservers', 'others'])
@@ -200,6 +206,46 @@ class TestINIImports:
         assert h.variables_dict == {"some_hostvar": "foobar"}
 
     @mock.patch.object(inventory_import, 'AnsibleInventoryLoader', MockLoader)
+    def test_existing_children_memberships_are_seen(self, inventory):
+        inventory_import.AnsibleInventoryLoader._data = {
+            "_meta": {
+                "hostvars": {"foo": {}}
+            },
+            "all": {
+                "children": ["parent_group", "child_group"]
+            },
+            "parent_group": {
+                "children": ["child_group"]
+            },
+            "child_group": {
+                "hosts": ["foo"]
+            }
+        }
+        inv_src = inventory.inventory_sources.create(name='bar')
+        inv_update1 = inv_src.create_unified_job()
+
+        cmd = inventory_import.Command()
+        with capture_stdout() as stdout:
+            with mock.patch.dict(os.environ, {
+                    'INVENTORY_SOURCE_ID': str(inv_src.pk),
+                    'INVENTORY_UPDATE_ID': str(inv_update1.pk)}):
+                cmd.handle(inventory_id=inventory.pk, verbosity=2, source=__file__)
+            result_stdout = stdout.getvalue()
+        assert inventory.hosts.count() == 1  # sanity
+        assert 'Group "child_group" added as child of "parent_group"' in result_stdout
+
+        inv_update2 = inv_src.create_unified_job()
+
+        cmd = inventory_import.Command()
+        with capture_stdout() as stdout:
+            with mock.patch.dict(os.environ, {
+                    'INVENTORY_SOURCE_ID': str(inv_src.pk),
+                    'INVENTORY_UPDATE_ID': str(inv_update2.pk)}):
+                cmd.handle(inventory_id=inventory.pk, verbosity=2, source=__file__)
+            result_stdout = stdout.getvalue()
+        assert 'Group "child_group" already child of group "parent_group"' in result_stdout
+
+    @mock.patch.object(inventory_import, 'AnsibleInventoryLoader', MockLoader)
     def test_memberships_are_respected(self, inventory):
         """This tests that if import 1 added a group-group and group-host memberhip
         that import 2 will not remove those memberships, even when adding
@@ -229,8 +275,7 @@ class TestINIImports:
         inv_src2 = inventory.inventory_sources.create(
             name='bar', overwrite=True
         )
-        os.environ['INVENTORY_SOURCE_ID'] = str(inv_src2.pk)
-        os.environ['INVENTORY_UPDATE_ID'] = str(inv_src2.create_unified_job().pk)
+        inv_update2 = inv_src2.create_unified_job()
         # scenario where groups are already imported, and overwrite is true
         inv_src2.groups.add(inventory.groups.get(name='is_a_parent'))
         inv_src2.groups.add(inventory.groups.get(name='has_a_host'))
@@ -247,10 +292,10 @@ class TestINIImports:
             }
         }
         cmd = inventory_import.Command()
-        cmd.handle(inventory_id=inventory.pk, source=__file__, overwrite=True)
-
-        del os.environ['INVENTORY_SOURCE_ID']
-        del os.environ['INVENTORY_UPDATE_ID']
+        with mock.patch.dict(os.environ, {
+                'INVENTORY_SOURCE_ID': str(inv_src2.pk),
+                'INVENTORY_UPDATE_ID': str(inv_update2.pk)}):
+            cmd.handle(inventory_id=inventory.pk, source=__file__, overwrite=True)
 
         # the overwriting import did not destroy relationships from first import
         parent_group = inventory.groups.get(name='is_a_parent')

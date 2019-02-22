@@ -78,7 +78,6 @@ class AnsibleInventoryLoader(object):
         self.source_dir = functioning_dir(self.source)
         self.is_custom = is_custom
         self.tmp_private_dir = None
-        self.method = 'ansible-inventory'
         if venv_path:
             self.venv_path = venv_path
         else:
@@ -174,8 +173,8 @@ class AnsibleInventoryLoader(object):
         if self.tmp_private_dir:
             shutil.rmtree(self.tmp_private_dir, True)
         if proc.returncode != 0:
-            raise RuntimeError('%s failed (rc=%d) with stdout:\n%s\nstderr:\n%s' % (
-                self.method, proc.returncode, stdout, stderr))
+            raise RuntimeError('ansible-inventory failed (rc=%d) with stdout:\n%s\nstderr:\n%s' % (
+                proc.returncode, stdout, stderr))
 
         for line in stderr.splitlines():
             logger.error(line)
@@ -435,6 +434,7 @@ class Command(BaseCommand):
         hosts_qs = self.inventory_source.hosts
         # Build list of all host pks, remove all that should not be deleted.
         del_host_pks = set(self._existing_host_pks())  # makes mutable copy
+        initial_host_count = len(del_host_pks)
         if self.instance_id_var:
             all_instance_ids = list(self.mem_instance_id_map.keys())
             instance_ids = []
@@ -459,10 +459,15 @@ class Command(BaseCommand):
                 host_name = host.name
                 host.delete()
                 logger.debug('Deleted host "%s"', host_name)
+        if all_del_pks:
+            logger.warning('Deleted {} hosts, out of previous total of {}'.format(
+                len(all_del_pks), initial_host_count
+            ))
+        else:
+            logger.info('No hosts were deleted, total of {}'.format(initial_host_count))
         if settings.SQL_DEBUG:
-            logger.warning('host deletions took %d queries for %d hosts',
-                           len(connection.queries) - queries_before,
-                           len(all_del_pks))
+            logger.warning('host deletions took %d queries',
+                           len(connection.queries) - queries_before)
 
     def _delete_groups(self):
         '''
@@ -476,6 +481,7 @@ class Command(BaseCommand):
         groups_qs = self.inventory_source.groups.all()
         # Build list of all group pks, remove those that should not be deleted.
         del_group_pks = set(groups_qs.values_list('pk', flat=True))
+        initial_group_count = len(del_group_pks)
         all_group_names = list(self.all_group.all_groups.keys())
         for offset in range(0, len(all_group_names), self._batch_size):
             group_names = all_group_names[offset:(offset + self._batch_size)]
@@ -496,10 +502,15 @@ class Command(BaseCommand):
                 with ignore_inventory_computed_fields():
                     group.delete()
                 logger.debug('Group "%s" deleted', group_name)
+        if all_del_pks:
+            logger.warning('Deleted {} groups, out of previous total of {}'.format(
+                len(all_del_pks), initial_group_count
+            ))
+        else:
+            logger.info('No groups were deleted, total of {}'.format(initial_group_count))
         if settings.SQL_DEBUG:
-            logger.warning('group deletions took %d queries for %d groups',
-                           len(connection.queries) - queries_before,
-                           len(all_del_pks))
+            logger.warning('group deletions took %d queries',
+                           len(connection.queries) - queries_before)
 
     def _delete_group_children_and_hosts(self):
         '''
@@ -511,8 +522,12 @@ class Command(BaseCommand):
         # FIXME: Optimize performance!
         if settings.SQL_DEBUG:
             queries_before = len(connection.queries)
-        group_group_count = 0
-        group_host_count = 0
+        group_group_count = sum(len(group.children) for group in self.all_group.all_groups.values())
+        prior_group_group_count = 0
+        group_group_removals = 0
+        group_host_count = sum(len(group.hosts) for group in self.all_group.all_groups.values())
+        prior_group_host_count = 0
+        group_host_removals = 0
         db_groups = self.inventory_source.groups
         # Set of all group names managed by this inventory source
         all_source_group_names = frozenset(self.all_group.all_groups.keys())
@@ -528,6 +543,7 @@ class Command(BaseCommand):
             # Delete child group relationships not present in imported data.
             db_children = db_group.children
             db_children_name_pk_map = dict(db_children.values_list('name', 'pk'))
+            prior_group_group_count += len(all_source_group_names & set(db_children_name_pk_map.keys()))
             # Exclude child groups from removal list if they were returned by
             # the import, because this parent-child relationship has not changed
             mem_children = self.all_group.all_groups[db_group.name].children
@@ -544,7 +560,7 @@ class Command(BaseCommand):
             for offset in range(0, len(del_child_group_pks), self._batch_size):
                 child_group_pks = del_child_group_pks[offset:(offset + self._batch_size)]
                 for db_child in db_children.filter(pk__in=child_group_pks):
-                    group_group_count += 1
+                    group_group_removals += 1
                     db_group.children.remove(db_child)
                     logger.debug('Group "%s" removed from group "%s"',
                                  db_child.name, db_group.name)
@@ -556,6 +572,7 @@ class Command(BaseCommand):
             # by this specific inventory source, because
             # those relationships are outside of the dominion of this inventory source
             del_host_pks = del_host_pks & all_source_host_pks
+            prior_group_host_count += len(del_host_pks)
             # Exclude child hosts from removal list if they were returned by
             # the import, because this group-host relationship has not changed
             mem_hosts = self.all_group.all_groups[db_group.name].hosts
@@ -577,16 +594,29 @@ class Command(BaseCommand):
             for offset in range(0, len(del_host_pks), self._batch_size):
                 del_pks = del_host_pks[offset:(offset + self._batch_size)]
                 for db_host in db_hosts.filter(pk__in=del_pks):
-                    group_host_count += 1
                     if db_host not in db_group.hosts.all():
                         continue
+                    group_host_removals += 1
                     db_group.hosts.remove(db_host)
                     logger.debug('Host "%s" removed from group "%s"',
                                  db_host.name, db_group.name)
+        logger.info('Source returned {} group children memberships versus {} existing'.format(
+            group_group_count, prior_group_group_count
+        ))
+        if group_group_removals:
+            logger.warning('Removed {} group children memberships'.format(group_group_removals))
+        else:
+            logger.info('No group children were removed')
+        logger.info('Source returned {} group host memberships versus {} existing'.format(
+            group_host_count, prior_group_host_count
+        ))
+        if group_host_removals:
+            logger.warning('Removed {} group host memberships'.format(group_host_removals))
+        else:
+            logger.info('No group hosts were removed')
         if settings.SQL_DEBUG:
-            logger.warning('group-group and group-host deletions took %d queries for %d relationships',
-                           len(connection.queries) - queries_before,
-                           group_group_count + group_host_count)
+            logger.warning('group-group and group-host deletions took %d queries',
+                           len(connection.queries) - queries_before)
 
     def _update_inventory(self):
         '''
@@ -642,24 +672,32 @@ class Command(BaseCommand):
                     logger.debug('Group "%s" variables unmodified', group.name)
                 existing_group_names.add(group.name)
                 self._batch_add_m2m(self.inventory_source.groups, group)
+        added_group_count = 0
         for group_name in all_group_names:
             if group_name in existing_group_names:
                 continue
             mem_group = self.all_group.all_groups[group_name]
-            group = self.inventory.groups.update_or_create(
+            group, created = self.inventory.groups.update_or_create(
                 name=group_name,
                 defaults={
                     'variables':json.dumps(mem_group.variables),
                     'description':'imported'
                 }
-            )[0]
+            )
+            if created:
+                added_group_count += 1
             logger.debug('Group "%s" added', group.name)
             self._batch_add_m2m(self.inventory_source.groups, group)
         self._batch_add_m2m(self.inventory_source.groups, flush=True)
+
+        if added_group_count:
+            logger.info('Created {} groups'.format(added_group_count))
+        elif self.all_group.all_groups:
+            logger.info('No new groups created')
+
         if settings.SQL_DEBUG:
-            logger.warning('group updates took %d queries for %d groups',
-                           len(connection.queries) - queries_before,
-                           len(self.all_group.all_groups))
+            logger.warning('group updates took %d queries',
+                           len(connection.queries) - queries_before)
 
     def _update_db_host_from_mem_host(self, db_host, mem_host):
         # Update host variables.
@@ -771,6 +809,8 @@ class Command(BaseCommand):
                 mem_host_names_to_update.discard(mem_host.name)
 
         # Create any new hosts.
+        added_host_count = 0
+        added_host_disabled_count = 0
         for mem_host_name in sorted(mem_host_names_to_update):
             mem_host = self.all_group.all_hosts[mem_host_name]
             host_attrs = dict(variables=json.dumps(mem_host.variables),
@@ -781,19 +821,28 @@ class Command(BaseCommand):
             if self.instance_id_var:
                 instance_id = self._get_instance_id(mem_host.variables)
                 host_attrs['instance_id'] = instance_id
-            db_host = self.inventory.hosts.update_or_create(name=mem_host_name, defaults=host_attrs)[0]
+            db_host, created = self.inventory.hosts.update_or_create(name=mem_host_name, defaults=host_attrs)
             if enabled is False:
                 logger.debug('Host "%s" added (disabled)', mem_host_name)
             else:
                 logger.debug('Host "%s" added', mem_host_name)
+            if created:
+                added_host_count += 1
+                if enabled is False:
+                    added_host_disabled_count += 1
             self._batch_add_m2m(self.inventory_source.hosts, db_host)
 
         self._batch_add_m2m(self.inventory_source.hosts, flush=True)
 
+        if added_host_count:
+            logger.info('Created {} hosts ({} disabled)'.format(
+                added_host_count, added_host_disabled_count
+            ))
+        elif self.all_group.all_hosts:
+            logger.info('No new hosts created')
+
         if settings.SQL_DEBUG:
-            logger.warning('host updates took %d queries for %d hosts',
-                           len(connection.queries) - queries_before,
-                           len(self.all_group.all_hosts))
+            logger.warning('host updates took %d queries', len(connection.queries) - queries_before)
 
     @transaction.atomic
     def _create_update_group_children(self):
@@ -804,6 +853,7 @@ class Command(BaseCommand):
             queries_before = len(connection.queries)
         all_group_names = sorted([k for k,v in self.all_group.all_groups.items() if v.children])
         group_group_count = 0
+        group_group_additions = 0
         for offset in range(0, len(all_group_names), self._batch_size):
             group_names = all_group_names[offset:(offset + self._batch_size)]
             for db_group in self.inventory.groups.filter(name__in=group_names):
@@ -813,15 +863,23 @@ class Command(BaseCommand):
                 for offset2 in range(0, len(all_child_names), self._batch_size):
                     child_names = all_child_names[offset2:(offset2 + self._batch_size)]
                     db_children_qs = self.inventory.groups.filter(name__in=child_names)
-                    for db_child in db_children_qs.filter(children__id=db_group.id):
+                    for db_child in db_children_qs.filter(parents__id=db_group.id):
                         logger.debug('Group "%s" already child of group "%s"', db_child.name, db_group.name)
-                    for db_child in db_children_qs.exclude(children__id=db_group.id):
+                    for db_child in db_children_qs.exclude(parents__id=db_group.id):
                         self._batch_add_m2m(db_group.children, db_child)
-                    logger.debug('Group "%s" added as child of "%s"', db_child.name, db_group.name)
+                        group_group_additions += 1
+                        logger.debug('Group "%s" added as child of "%s"', db_child.name, db_group.name)
                 self._batch_add_m2m(db_group.children, flush=True)
+
+        if group_group_additions:
+            logger.info('Added {} group children memberships out of {} from source'.format(
+                group_group_additions, group_group_count
+            ))
+        elif group_group_count:
+            logger.info('No group children memberships added out of {}'.format(group_group_count))
+
         if settings.SQL_DEBUG:
-            logger.warning('Group-group updates took %d queries for %d group-group relationships',
-                           len(connection.queries) - queries_before, group_group_count)
+            logger.warning('Group-group updates took %d queries', len(connection.queries) - queries_before)
 
     @transaction.atomic
     def _create_update_group_hosts(self):
@@ -831,6 +889,7 @@ class Command(BaseCommand):
             queries_before = len(connection.queries)
         all_group_names = sorted([k for k,v in self.all_group.all_groups.items() if v.hosts])
         group_host_count = 0
+        group_host_additions = 0
         for offset in range(0, len(all_group_names), self._batch_size):
             group_names = all_group_names[offset:(offset + self._batch_size)]
             for db_group in self.inventory.groups.filter(name__in=group_names):
@@ -844,6 +903,7 @@ class Command(BaseCommand):
                         logger.debug('Host "%s" already in group "%s"', db_host.name, db_group.name)
                     for db_host in db_hosts_qs.exclude(groups__id=db_group.id):
                         self._batch_add_m2m(db_group.hosts, db_host)
+                        group_host_additions += 1
                         logger.debug('Host "%s" added to group "%s"', db_host.name, db_group.name)
                 all_instance_ids = sorted([h.instance_id for h in mem_group.hosts if h.instance_id])
                 for offset2 in range(0, len(all_instance_ids), self._batch_size):
@@ -853,11 +913,22 @@ class Command(BaseCommand):
                         logger.debug('Host "%s" already in group "%s"', db_host.name, db_group.name)
                     for db_host in db_hosts_qs.exclude(groups__id=db_group.id):
                         self._batch_add_m2m(db_group.hosts, db_host)
+                        group_host_additions += 1
                         logger.debug('Host "%s" added to group "%s"', db_host.name, db_group.name)
                 self._batch_add_m2m(db_group.hosts, flush=True)
+
+        if group_host_additions:
+            logger.info('Added {} group host memberships out of {} from source'.format(
+                group_host_additions, group_host_count
+            ))
+        elif group_host_count:
+            logger.info('No group host memberships added out of {} from source'.format(
+                group_host_count
+            ))
+
         if settings.SQL_DEBUG:
-            logger.warning('Group-host updates took %d queries for %d group-host relationships',
-                           len(connection.queries) - queries_before, group_host_count)
+            logger.warning('Group-host updates took %d queries',
+                           len(connection.queries) - queries_before)
 
     def load_into_database(self):
         '''
