@@ -37,7 +37,7 @@ azure_keyvault_inputs = {
 }
 
 
-def azure_keyvault_backend(**kwargs):
+def azure_keyvault_backend(raw, **kwargs):
     url = kwargs['url']
 
     def auth_callback(server, resource, scope):
