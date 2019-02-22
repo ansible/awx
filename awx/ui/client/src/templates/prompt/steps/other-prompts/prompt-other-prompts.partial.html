@@ -22,6 +22,9 @@
     <div class="form-group Form-formGroup Form-formGroup--singleColumn" ng-if="promptData.launchConf.ask_limit_on_launch">
         <label for="limit">
             <span class="Form-inputLabel">{{:: vm.strings.get('prompt.LIMIT') }}</span>
+            <a id="awp-limit" href="" aw-pop-over="{{:: vm.strings.get('prompt.LIMIT_HELP') }}" data-placement="right" data-container="body" over-title="{{:: vm.strings.get('prompt.LIMIT') }}" class="help-link" data-original-title="" title="" tabindex="-1">
+                <i class="fa fa-question-circle"></i>
+            </a>
         </label>
         <div>
             <input
