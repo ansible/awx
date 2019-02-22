@@ -40,12 +40,10 @@ from django.db import transaction # noqa
 # awx
 from awx.main.models import (  # noqa
     Credential, CredentialType, Group, Host, Inventory, Job, JobEvent,
-    JobHostSummary, JobTemplate, Label, Organization, Project,
+    JobHostSummary, JobTemplate, Label, Organization, PrimordialModel, Project,
     Team, User, WorkflowJobTemplate, WorkflowJobTemplateNode,
     batch_role_ancestor_rebuilding,
 )
-
-from awx.main.models.base import PrimordialModel
 
 from awx.main.signals import ( # noqa
     disable_activity_stream,

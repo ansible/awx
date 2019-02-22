@@ -7,7 +7,7 @@ from django.db.models.signals import pre_delete  # noqa
 
 # AWX
 from awx.main.models.base import (  # noqa
-    BaseModel, prevent_search, CLOUD_INVENTORY_SOURCES, VERBOSITY_CHOICES
+    BaseModel, PrimordialModel, prevent_search, CLOUD_INVENTORY_SOURCES, VERBOSITY_CHOICES
 )
 from awx.main.models.unified_jobs import (  # noqa
     UnifiedJob, UnifiedJobTemplate, StdoutMaxBytesExceeded
