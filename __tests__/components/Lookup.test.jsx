@@ -60,7 +60,7 @@ describe('<Lookup />', () => {
       </I18nProvider>
     ).find('Lookup');
     expect(spy).not.toHaveBeenCalled();
-    expect(wrapper.state('lookupSelectedItems')).toEqual([]);
+    expect(wrapper.state('lookupSelectedItems')).toEqual(mockSelected);
     const searchItem = wrapper.find('.pf-c-input-group__text#search');
     searchItem.first().simulate('click');
     expect(spy).toHaveBeenCalled();
@@ -110,7 +110,7 @@ describe('<Lookup />', () => {
         />
       </I18nProvider>
     );
-    const removeIcon = wrapper.find('.awx-c-icon--remove').first();
+    const removeIcon = wrapper.find('button[aria-label="close"]').first();
     removeIcon.simulate('click');
     expect(spy).toHaveBeenCalled();
   });
@@ -135,14 +135,13 @@ describe('<Lookup />', () => {
     expect(overflowChip).toHaveLength(1);
   });
   test('toggleSelected successfully adds/removes row from lookupSelectedItems state', () => {
-    mockData = [{ name: 'foo', id: 1 }];
+    mockData = [];
     const wrapper = mount(
       <I18nProvider>
         <Lookup
           lookup_header="Foo Bar"
           onLookupSave={() => { }}
           value={mockData}
-          selected={[]}
           getItems={() => { }}
           columns={mockColumns}
           sortedColumnKey="name"
@@ -164,7 +163,7 @@ describe('<Lookup />', () => {
     expect(wrapper.state('lookupSelectedItems')).toEqual([]);
   });
   test('saveModal calls callback with selected items', () => {
-    mockData = [{ name: 'foo', id: 1 }];
+    mockData = [];
     const onLookupSaveFn = jest.fn();
     const wrapper = mount(
       <I18nProvider>
@@ -198,10 +197,10 @@ describe('<Lookup />', () => {
         <Lookup
           lookup_header="Foo Bar"
           onLookupSave={() => { }}
-          data={mockData}
-          selected={[]}
+          value={mockData}
           columns={mockColumns}
           sortedColumnKey="name"
+          getItems={() => { }}
         />
       </I18nProvider>
     ).find('Lookup');
@@ -217,10 +216,10 @@ describe('<Lookup />', () => {
         <Lookup
           lookup_header="Foo Bar"
           onLookupSave={() => { }}
-          data={mockData}
-          selected={[]}
+          value={mockData}
           columns={mockColumns}
           sortedColumnKey="name"
+          getItems={() => { }}
         />
       </I18nProvider>
     ).find('Lookup');
