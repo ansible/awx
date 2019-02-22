@@ -110,7 +110,7 @@ class APIClient {
     return this.http.get(API_INSTANCE_GROUPS, { params });
   }
 
-  createInstanceGroups (url, id) {
+  associateInstanceGroup (url, id) {
     return this.http.post(url, { id });
   }
 }

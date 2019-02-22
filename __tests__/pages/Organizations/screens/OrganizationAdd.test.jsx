@@ -71,7 +71,7 @@ describe('<OrganizationAdd />', () => {
   test('Successful form submission triggers redirect', (done) => {
     const onSuccess = jest.spyOn(OrganizationAdd.WrappedComponent.prototype, 'onSuccess');
     const mockedResp = { data: { id: 1, related: { instance_groups: '/bar' } } };
-    const api = { createOrganization: jest.fn().mockResolvedValue(mockedResp), createInstanceGroups: jest.fn().mockResolvedValue('done') };
+    const api = { createOrganization: jest.fn().mockResolvedValue(mockedResp), associateInstanceGroup: jest.fn().mockResolvedValue('done') };
     const wrapper = mount(
       <MemoryRouter>
         <I18nProvider>
@@ -131,10 +131,10 @@ describe('<OrganizationAdd />', () => {
         }
       }
     });
-    const createInstanceGroupsFn = jest.fn().mockResolvedValue('done');
+    const associateInstanceGroupFn = jest.fn().mockResolvedValue('done');
     const api = {
       createOrganization: createOrganizationFn,
-      createInstanceGroups: createInstanceGroupsFn
+      associateInstanceGroup: associateInstanceGroupFn
     };
     const wrapper = mount(
       <MemoryRouter>
@@ -156,7 +156,7 @@ describe('<OrganizationAdd />', () => {
       description: '',
       name: 'mock org'
     });
-    expect(createInstanceGroupsFn).toHaveBeenCalledWith('/api/v2/organizations/1/instance_groups', 1);
+    expect(associateInstanceGroupFn).toHaveBeenCalledWith('/api/v2/organizations/1/instance_groups', 1);
   });
 
   test('AnsibleSelect component renders if there are virtual environments', () => {
