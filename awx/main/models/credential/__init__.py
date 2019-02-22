@@ -809,6 +809,11 @@ ManagedCredentialType(
             'secret': True,
             'multiline': True
         }, {
+            'id': 'ssh_public_key_data',
+            'label': ugettext_noop('Signed SSH Certificate'),
+            'type': 'string',
+            'multiline': True,
+        }, {
             'id': 'ssh_key_unlock',
             'label': ugettext_noop('Private Key Passphrase'),
             'type': 'string',
@@ -1342,7 +1347,10 @@ class CredentialInputSource(PrimordialModel):
                 backend_kwargs[field_name] = decrypt_field(self.source_credential, field_name)
             else:
                 backend_kwargs[field_name] = value
-        return backend(**backend_kwargs)
+        return backend(
+            self.target_credential.inputs.get(self.input_field_name),
+            **backend_kwargs
+        )
 
     def get_absolute_url(self, request=None):
         view_name = 'api:credential_input_source_detail'

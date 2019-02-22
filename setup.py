@@ -115,7 +115,8 @@ setup(
             'awx-manage = awx:manage',
         ],
         'awx.credential_plugins': [
-            'hashivault = awx.main.credential_plugins.hashivault:hashivault_plugin',
+            'hashivault_kv = awx.main.credential_plugins.hashivault:hashivault_kv_plugin',
+            'hashivault_ssh = awx.main.credential_plugins.hashivault:hashivault_ssh_plugin',
             'azure_kv = awx.main.credential_plugins.azure_kv:azure_keyvault_plugin',
         ]
     },

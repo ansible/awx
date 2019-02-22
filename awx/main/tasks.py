@@ -772,7 +772,12 @@ class BaseTask(object):
             'credentials': {
                 <awx.main.models.Credential>: '/path/to/decrypted/data',
                 <awx.main.models.Credential>: '/path/to/decrypted/data',
-                <awx.main.models.Credential>: '/path/to/decrypted/data',
+                ...
+            },
+            'certificates': {
+                <awx.main.models.Credential>: /path/to/signed/ssh/certificate,
+                <awx.main.models.Credential>: /path/to/signed/ssh/certificate,
+                ...
             }
         }
         '''
@@ -787,7 +792,6 @@ class BaseTask(object):
                 # and we're running an earlier version (<6.5).
                 if 'OPENSSH PRIVATE KEY' in data and not openssh_keys_supported:
                     raise RuntimeError(OPENSSH_KEY_ERROR)
-            for credential, data in private_data.get('credentials', {}).items():
                 # OpenSSH formatted keys must have a trailing newline to be
                 # accepted by ssh-add.
                 if 'OPENSSH PRIVATE KEY' in data and not data.endswith('\n'):
@@ -813,6 +817,13 @@ class BaseTask(object):
                     f.close()
                     os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
                 private_data_files['credentials'][credential] = path
+            for credential, data in private_data.get('certificates', {}).items():
+                name = 'credential_%d-cert.pub' % credential.pk
+                path = os.path.join(kwargs['private_data_dir'], name)
+                with open(path, 'w') as f:
+                    f.write(data)
+                    f.close()
+                os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
         return private_data_files
 
     def build_passwords(self, instance, runtime_passwords):
@@ -1269,7 +1280,12 @@ class RunJob(BaseTask):
             'credentials': {
                 <awx.main.models.Credential>: <credential_decrypted_ssh_key_data>,
                 <awx.main.models.Credential>: <credential_decrypted_ssh_key_data>,
-                <awx.main.models.Credential>: <credential_decrypted_ssh_key_data>
+                ...
+            },
+            'certificates': {
+                <awx.main.models.Credential>: <signed SSH certifacte data>,
+                <awx.main.models.Credential>: <signed SSH certifacte data>,
+                ...
             }
         }
         '''
@@ -1279,6 +1295,8 @@ class RunJob(BaseTask):
             # back (they will be written to a temporary file).
             if credential.has_input('ssh_key_data'):
                 private_data['credentials'][credential] = credential.get_input('ssh_key_data', default='')
+            if credential.has_input('ssh_public_key_data'):
+                private_data.setdefault('certificates', {})[credential] = credential.get_input('ssh_public_key_data', default='')
 
             if credential.kind == 'openstack':
                 openstack_auth = dict(auth_url=credential.get_input('host', default=''),
@@ -2187,7 +2205,12 @@ class RunAdHocCommand(BaseTask):
             'credentials': {
                 <awx.main.models.Credential>: <credential_decrypted_ssh_key_data>,
                 <awx.main.models.Credential>: <credential_decrypted_ssh_key_data>,
-                <awx.main.models.Credential>: <credential_decrypted_ssh_key_data>
+                ...
+            },
+            'certificates': {
+                <awx.main.models.Credential>: <signed SSH certifacte data>,
+                <awx.main.models.Credential>: <signed SSH certifacte data>,
+                ...
             }
         }
         '''
@@ -2197,6 +2220,8 @@ class RunAdHocCommand(BaseTask):
         private_data = {'credentials': {}}
         if creds and creds.has_input('ssh_key_data'):
             private_data['credentials'][creds] = creds.get_input('ssh_key_data', default='')
+        if creds and creds.has_input('ssh_public_key_data'):
+            private_data.setdefault('certificates', {})[creds] = creds.get_input('ssh_public_key_data', default='')
         return private_data
 
     def build_passwords(self, ad_hoc_command, runtime_passwords):
