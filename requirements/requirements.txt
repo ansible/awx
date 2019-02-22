@@ -4,6 +4,7 @@
 #
 #    pip-compile requirements/requirements.in
 #
+adal==1.2.1               # via msrestazure
 amqp==2.3.2               # via kombu
 ansible-runner==1.3.1
 appdirs==1.4.2
@@ -14,13 +15,18 @@ asn1crypto==0.24.0        # via cryptography
 attrs==18.2.0             # via automat, service-identity, twisted
 autobahn==19.2.1          # via daphne
 automat==0.7.0            # via twisted
+azure-common==1.1.18      # via azure-keyvault
+azure-keyvault==1.1.0
+azure-nspkg==3.0.2        # via azure-keyvault
 billiard==3.5.0.5         # via celery
 boto==2.47.0
 celery==4.2.1
+certifi==2018.11.29       # via msrest, requests
 cffi==1.12.1              # via cryptography
 channels==1.1.8
+chardet==3.0.4            # via requests
 constantly==15.1.0        # via twisted
-cryptography==2.5         # via pyopenssl
+cryptography==2.5         # via adal, azure-keyvault, pyopenssl
 daphne==1.3.0
 defusedxml==0.5.0
 django-auth-ldap==1.7.0
@@ -41,11 +47,11 @@ djangorestframework==3.7.7
 future==0.16.0            # via django-radius
 hvac==0.7.1
 hyperlink==18.0.0         # via twisted
-idna==2.8                 # via hyperlink
+idna==2.8                 # via hyperlink, requests
 incremental==17.5.0       # via twisted
 inflect==2.1.0            # via jaraco.itertools
 irc==16.2
-isodate==0.6.0            # via python3-saml
+isodate==0.6.0            # via msrest, python3-saml
 jaraco.classes==2.0       # via jaraco.collections
 jaraco.collections==2.0   # via irc, jaraco.text
 jaraco.functools==2.0     # via irc, jaraco.text, tempora
@@ -62,6 +68,8 @@ markdown==2.6.11
 markupsafe==1.1.0         # via jinja2
 more-itertools==6.0.0     # via irc, jaraco.functools, jaraco.itertools
 msgpack-python==0.5.6     # via asgi-amqp
+msrest==0.6.4             # via azure-keyvault, msrestazure
+msrestazure==0.6.0        # via azure-keyvault
 netaddr==0.7.19           # via pyrad
 oauthlib==2.0.6           # via django-oauth-toolkit, requests-oauthlib, social-auth-core
 ordereddict==1.1
@@ -75,7 +83,7 @@ pyasn1==0.4.5             # via pyasn1-modules, python-ldap, service-identity
 pycparser==2.19           # via cffi
 pygerduty==0.37.0
 pyhamcrest==1.9.0         # via twisted
-pyjwt==1.7.1              # via social-auth-core, twilio
+pyjwt==1.7.1              # via adal, social-auth-core, twilio
 pyopenssl==19.0.0         # via service-identity
 pyparsing==2.2.0
 pyrad==2.1                # via django-radius
@@ -90,8 +98,8 @@ python3-saml==1.4.0
 pytz==2018.9              # via celery, django, irc, tempora, twilio
 pyyaml==3.13              # via djangorestframework-yaml
 requests-futures==0.9.7
-requests-oauthlib==1.2.0  # via social-auth-core
-requests[security]==2.15.1
+requests-oauthlib==1.2.0  # via msrest, social-auth-core
+requests[security]==2.21.0
 service-identity==17.0.0
 simplejson==3.16.0        # via uwsgitop
 six==1.12.0               # via asgi-amqp, asgiref, autobahn, automat, cryptography, django-extensions, irc, isodate, jaraco.classes, jaraco.collections, jaraco.itertools, jaraco.logging, jaraco.stream, pygerduty, pyhamcrest, pyopenssl, pyrad, python-dateutil, python-memcached, slackclient, social-auth-app-django, social-auth-core, tacacs-plus, tempora, twilio, txaio, websocket-client
@@ -104,6 +112,7 @@ twilio==6.10.4
 twisted==18.9.0           # via daphne
 txaio==18.8.1             # via autobahn
 typing==3.6.6             # via django-extensions
+urllib3==1.24.1           # via requests
 uwsgi==2.0.17
 uwsgitop==0.10.0
 vine==1.2.0               # via amqp

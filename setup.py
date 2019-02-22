@@ -116,6 +116,7 @@ setup(
         ],
         'awx.credential_plugins': [
             'hashivault = awx.main.credential_plugins.hashivault:hashivault_plugin',
+            'azure_kv = awx.main.credential_plugins.azure_kv:azure_keyvault_plugin',
         ]
     },
     data_files = proc_data_files([
