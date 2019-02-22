@@ -40,10 +40,13 @@ from django.db import transaction # noqa
 # awx
 from awx.main.models import (  # noqa
     Credential, CredentialType, Group, Host, Inventory, Job, JobEvent,
-    JobHostSummary, JobTemplate, Label, Organization, PrimordialModel, Project,
+    JobHostSummary, JobTemplate, Label, Organization, Project,
     Team, User, WorkflowJobTemplate, WorkflowJobTemplateNode,
     batch_role_ancestor_rebuilding,
 )
+
+from awx.main.models.base import PrimordialModel
+
 from awx.main.signals import ( # noqa
     disable_activity_stream,
     disable_computed_fields
@@ -695,7 +698,7 @@ def make_the_data():
                     continue
                 # Bulk create in chunks with maximum chunk size
                 MAX_BULK_CREATE = 100
-                for j in range((n / MAX_BULK_CREATE) + 1):
+                for j in range((n // MAX_BULK_CREATE) + 1):
                     n_subgroup = MAX_BULK_CREATE
                     if j == n / MAX_BULK_CREATE:
                         # on final pass, create the remainder
