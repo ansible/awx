@@ -30,9 +30,10 @@ const paginationStyling = {
 class Lookup extends React.Component {
   constructor (props) {
     super(props);
+
     this.state = {
       isModalOpen: false,
-      lookupSelectedItems: [],
+      lookupSelectedItems: props.value || [],
       results: [],
       count: 0,
       page: 1,
@@ -43,7 +44,6 @@ class Lookup extends React.Component {
     };
     this.onSetPage = this.onSetPage.bind(this);
     this.handleModalToggle = this.handleModalToggle.bind(this);
-    this.wrapTags = this.wrapTags.bind(this);
     this.toggleSelected = this.toggleSelected.bind(this);
     this.saveModal = this.saveModal.bind(this);
     this.getData = this.getData.bind(this);
