@@ -68,14 +68,14 @@ def test_job_host_summary_representation(host):
     job = Job.objects.create(name='foo')
     jhs = JobHostSummary.objects.create(
         host=host, job=job,
-        changed=1, dark=2, failures=3, ok=4, processed=5, skipped=6
+        changed=1, dark=2, failures=3, ignored=4, ok=5, processed=6, rescued=7, skipped=8
     )
-    assert 'single-host changed=1 dark=2 failures=3 ok=4 processed=5 skipped=6' == str(jhs)
+    assert 'single-host changed=1 dark=2 failures=3 ignored=4 ok=5 processed=6 rescued=7 skipped=8' == str(jhs)
 
     # Representation should be robust to deleted related items
     jhs = JobHostSummary.objects.get(pk=jhs.id)
     host.delete()
-    assert 'N/A changed=1 dark=2 failures=3 ok=4 processed=5 skipped=6' == str(jhs)
+    assert 'N/A changed=1 dark=2 failures=3 ignored=4 ok=5 processed=6 rescued=7 skipped=8' == str(jhs)
 
 
 @pytest.mark.django_db

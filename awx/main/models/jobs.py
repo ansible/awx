@@ -1133,9 +1133,9 @@ class JobHostSummary(CreatedModifiedModel):
     def __str__(self):
         host = getattr_dne(self, 'host')
         hostname = host.name if host else 'N/A'
-        return '%s changed=%d dark=%d failures=%d ok=%d processed=%d skipped=%s' % \
-            (hostname, self.changed, self.dark, self.failures, self.ok,
-             self.processed, self.skipped)
+        return '%s changed=%d dark=%d failures=%d ignored=%d ok=%d processed=%d rescued=%d skipped=%s' % \
+            (hostname, self.changed, self.dark, self.failures, self.ignored, self.ok,
+             self.processed, self.rescued, self.skipped)
 
     def get_absolute_url(self, request=None):
         return reverse('api:job_host_summary_detail', kwargs={'pk': self.pk}, request=request)
