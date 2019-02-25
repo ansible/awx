@@ -577,6 +577,16 @@ class CredentialType(CommonModelNameNotUnique):
             if field.get('ask_at_runtime', False) is True
         ]
 
+    @property
+    def plugin(self):
+        if self.kind != 'external':
+            raise AttributeError('plugin')
+        [plugin] = [
+            plugin for ns, plugin in credential_plugins.items()
+            if ns == self.namespace
+        ]
+        return plugin
+
     def default_for_field(self, field_id):
         for field in self.inputs.get('fields', []):
             if field['id'] == field_id:
@@ -1336,11 +1346,7 @@ class CredentialInputSource(PrimordialModel):
         super(CredentialInputSource, self).save(*args, **kwargs)
 
     def get_input_value(self):
-        [backend] = [
-            plugin.backend for ns, plugin in credential_plugins.items()
-            if ns == self.source_credential.credential_type.namespace
-        ]
-
+        backend = self.source_credential.credential_type.plugin.backend
         backend_kwargs = {}
         for field_name, value in self.source_credential.inputs.items():
             if field_name in self.source_credential.credential_type.secret_fields:
