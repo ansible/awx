@@ -26,6 +26,11 @@ function CredentialsStrings (BaseString) {
         PANEL_TITLE: t.s('NEW CREDENTIAL')
     };
 
+    ns.edit = {
+        TEST_PASSED: t.s('Test passed.'),
+        TEST_FAILED: t.s('Test failed.')
+    };
+
     ns.permissions = {
         TITLE: t.s('CREDENTIALS PERMISSIONS')
     };
