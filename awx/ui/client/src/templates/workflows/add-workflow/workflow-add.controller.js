@@ -26,6 +26,7 @@ export default [
          $scope.canEditInventory = true;
          $scope.parseType = 'yaml';
          $scope.can_edit = true;
+         $scope.disableLaunch = true;
          // apply form definition's default field values
          GenerateForm.applyDefaults(form, $scope);
 

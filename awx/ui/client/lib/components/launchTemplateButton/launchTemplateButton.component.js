@@ -3,7 +3,9 @@ import templateUrl from './launchTemplateButton.partial.html';
 const atLaunchTemplate = {
     templateUrl,
     bindings: {
-        template: '<'
+        template: '<',
+        showTextButton: '<',
+        disabled: '='
     },
     controller: ['JobTemplateModel', 'WorkflowJobTemplateModel', 'PromptService', '$state',
         'ComponentsStrings', 'ProcessErrors', '$scope', 'TemplatesStrings', 'Alert',
@@ -19,6 +21,11 @@ function atLaunchTemplateCtrl (
     const jobTemplate = new JobTemplate();
     const workflowTemplate = new WorkflowTemplate();
     vm.strings = componentsStrings;
+    vm.launchTooltip = vm.strings.get('launchTemplate.DEFAULT');
+
+    $scope.$watch('vm.disabled', (val) => {
+        vm.launchTooltip = (val) ? vm.strings.get('launchTemplate.DISABLED') : vm.strings.get('launchTemplate.DEFAULT');
+    });
 
     const createErrorHandler = (path, action) =>
         ({ data, status }) => {
@@ -28,101 +35,103 @@ function atLaunchTemplateCtrl (
         };
 
     vm.startLaunchTemplate = () => {
-        if (vm.template.type === 'job_template') {
-            const selectedJobTemplate = jobTemplate.create();
-            const preLaunchPromises = [
-                selectedJobTemplate.getLaunch(vm.template.id),
-                selectedJobTemplate.optionsLaunch(vm.template.id),
-            ];
+        if (!vm.disabled) {
+            if (vm.template.type === 'job_template') {
+                const selectedJobTemplate = jobTemplate.create();
+                const preLaunchPromises = [
+                    selectedJobTemplate.getLaunch(vm.template.id),
+                    selectedJobTemplate.optionsLaunch(vm.template.id),
+                ];
 
-            Promise.all(preLaunchPromises)
-                .then(([launchData, launchOptions]) => {
-                    if (selectedJobTemplate.canLaunchWithoutPrompt()) {
-                        selectedJobTemplate
-                            .postLaunch({ id: vm.template.id })
-                            .then(({ data }) => {
-                                /* Slice Jobs: Redirect to WF Details page if returned
-                                job type is a WF job */
-                                if (data.type === 'workflow_job' && data.workflow_job !== null) {
-                                    $state.go('workflowResults', { id: data.workflow_job }, { reload: true });
-                                } else {
-                                    $state.go('output', { id: data.job, type: 'playbook' }, { reload: true });
-                                }
-                            });
-                    } else {
-                        const promptData = {
-                            launchConf: launchData.data,
-                            launchOptions: launchOptions.data,
-                            template: vm.template.id,
-                            templateType: vm.template.type,
-                            prompts: PromptService.processPromptValues({
+                Promise.all(preLaunchPromises)
+                    .then(([launchData, launchOptions]) => {
+                        if (selectedJobTemplate.canLaunchWithoutPrompt()) {
+                            selectedJobTemplate
+                                .postLaunch({ id: vm.template.id })
+                                .then(({ data }) => {
+                                    /* Slice Jobs: Redirect to WF Details page if returned
+                                    job type is a WF job */
+                                    if (data.type === 'workflow_job' && data.workflow_job !== null) {
+                                        $state.go('workflowResults', { id: data.workflow_job }, { reload: true });
+                                    } else {
+                                        $state.go('output', { id: data.job, type: 'playbook' }, { reload: true });
+                                    }
+                                });
+                        } else {
+                            const promptData = {
                                 launchConf: launchData.data,
-                                launchOptions: launchOptions.data
-                            }),
-                            triggerModalOpen: true
-                        };
+                                launchOptions: launchOptions.data,
+                                template: vm.template.id,
+                                templateType: vm.template.type,
+                                prompts: PromptService.processPromptValues({
+                                    launchConf: launchData.data,
+                                    launchOptions: launchOptions.data
+                                }),
+                                triggerModalOpen: true
+                            };
 
-                        if (launchData.data.survey_enabled) {
-                            selectedJobTemplate.getSurveyQuestions(vm.template.id)
-                                .then(({ data }) => {
-                                    const processed = PromptService.processSurveyQuestions({
-                                        surveyQuestions: data.spec
+                            if (launchData.data.survey_enabled) {
+                                selectedJobTemplate.getSurveyQuestions(vm.template.id)
+                                    .then(({ data }) => {
+                                        const processed = PromptService.processSurveyQuestions({
+                                            surveyQuestions: data.spec
+                                        });
+                                        promptData.surveyQuestions = processed.surveyQuestions;
+                                        vm.promptData = promptData;
                                     });
-                                    promptData.surveyQuestions = processed.surveyQuestions;
-                                    vm.promptData = promptData;
+                            } else {
+                                vm.promptData = promptData;
+                            }
+                        }
+                    });
+            } else if (vm.template.type === 'workflow_job_template') {
+                const selectedWorkflowJobTemplate = workflowTemplate.create();
+                const preLaunchPromises = [
+                    selectedWorkflowJobTemplate.request('get', vm.template.id),
+                    selectedWorkflowJobTemplate.getLaunch(vm.template.id),
+                    selectedWorkflowJobTemplate.optionsLaunch(vm.template.id),
+                ];
+
+                Promise.all(preLaunchPromises)
+                    .then(([wfjtData, launchData, launchOptions]) => {
+                        if (selectedWorkflowJobTemplate.canLaunchWithoutPrompt()) {
+                            selectedWorkflowJobTemplate
+                                .postLaunch({ id: vm.template.id })
+                                .then(({ data }) => {
+                                    $state.go('workflowResults', { id: data.workflow_job }, { reload: true });
                                 });
                         } else {
-                            vm.promptData = promptData;
-                        }
-                    }
-                });
-        } else if (vm.template.type === 'workflow_job_template') {
-            const selectedWorkflowJobTemplate = workflowTemplate.create();
-            const preLaunchPromises = [
-                selectedWorkflowJobTemplate.request('get', vm.template.id),
-                selectedWorkflowJobTemplate.getLaunch(vm.template.id),
-                selectedWorkflowJobTemplate.optionsLaunch(vm.template.id),
-            ];
+                            launchData.data.defaults.extra_vars = wfjtData.data.extra_vars;
 
-            Promise.all(preLaunchPromises)
-                .then(([wfjtData, launchData, launchOptions]) => {
-                    if (selectedWorkflowJobTemplate.canLaunchWithoutPrompt()) {
-                        selectedWorkflowJobTemplate
-                            .postLaunch({ id: vm.template.id })
-                            .then(({ data }) => {
-                                $state.go('workflowResults', { id: data.workflow_job }, { reload: true });
-                            });
-                    } else {
-                        launchData.data.defaults.extra_vars = wfjtData.data.extra_vars;
-
-                        const promptData = {
-                            launchConf: selectedWorkflowJobTemplate.getLaunchConf(),
-                            launchOptions: launchOptions.data,
-                            template: vm.template.id,
-                            templateType: vm.template.type,
-                            prompts: PromptService.processPromptValues({
+                            const promptData = {
                                 launchConf: selectedWorkflowJobTemplate.getLaunchConf(),
-                                launchOptions: launchOptions.data
-                            }),
-                            triggerModalOpen: true,
-                        };
+                                launchOptions: launchOptions.data,
+                                template: vm.template.id,
+                                templateType: vm.template.type,
+                                prompts: PromptService.processPromptValues({
+                                    launchConf: selectedWorkflowJobTemplate.getLaunchConf(),
+                                    launchOptions: launchOptions.data
+                                }),
+                                triggerModalOpen: true,
+                            };
 
-                        if (launchData.data.survey_enabled) {
-                            selectedWorkflowJobTemplate.getSurveyQuestions(vm.template.id)
-                                .then(({ data }) => {
-                                    const processed = PromptService.processSurveyQuestions({
-                                        surveyQuestions: data.spec
+                            if (launchData.data.survey_enabled) {
+                                selectedWorkflowJobTemplate.getSurveyQuestions(vm.template.id)
+                                    .then(({ data }) => {
+                                        const processed = PromptService.processSurveyQuestions({
+                                            surveyQuestions: data.spec
+                                        });
+                                        promptData.surveyQuestions = processed.surveyQuestions;
+                                        vm.promptData = promptData;
                                     });
-                                    promptData.surveyQuestions = processed.surveyQuestions;
-                                    vm.promptData = promptData;
-                                });
-                        } else {
-                            vm.promptData = promptData;
+                            } else {
+                                vm.promptData = promptData;
+                            }
                         }
-                    }
-                });
-        } else {
-            Alert(templatesStrings.get('error.UNKNOWN'), templatesStrings.get('alert.UNKNOWN_LAUNCH'));
+                    });
+            } else {
+                Alert(templatesStrings.get('error.UNKNOWN'), templatesStrings.get('alert.UNKNOWN_LAUNCH'));
+            }
         }
     };
 

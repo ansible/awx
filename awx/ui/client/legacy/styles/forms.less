@@ -169,11 +169,14 @@
     border-color: @default-icon;
 }
 
-.Form-tab--disabled {
+.Form-tab--disabled,
+.Form-button--disabled {
     opacity: 0.65;
+    color: @btn-txt;
 }
 
-.Form-tab--disabled:hover {
+.Form-tab--disabled:hover,
+.Form-button--disabled:hover {
     color: @btn-txt;
     background-color: @btn-bg;
     cursor:not-allowed!important;
@@ -548,7 +551,6 @@ input[type='radio']:checked:before {
     }
 }
 
-.FormToggle {}
 .FormToggle-container {
     margin: 0 0 0 10px;
     display: initial;
@@ -607,7 +609,7 @@ input[type='radio']:checked:before {
     display: flex;
     justify-content: flex-end;
 
-    button:last-of-type {
+    button {
         margin-left: 20px;
     }
 }
@@ -658,7 +660,6 @@ input[type='radio']:checked:before {
     transition: background-color 0.2s;
     padding-left:15px;
     padding-right: 15px;
-    margin-left: 20px;
 }
 
 .Form-cancelButton:hover {
@@ -677,12 +678,17 @@ input[type='radio']:checked:before {
     margin-bottom: 20px;
 }
 
+.Form-buttons .Form-primaryButton {
+    margin-right: 0;
+}
+
 .Form-primaryButton:hover {
     background-color: @default-link-hov;
     color: @default-bg;
 }
 
-.Form-primaryButton.Form-tab--disabled:hover {
+.Form-primaryButton.Form-tab--disabled:hover,
+.Form-primaryButton.Form-button--disabled:hover {
     background-color: @default-link;
 }
 
