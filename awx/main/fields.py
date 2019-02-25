@@ -480,6 +480,69 @@ def format_ssh_private_key(value):
     return True
 
 
+class DynamicCredentialInputField(JSONSchemaField):
+    """
+    Used to validate JSON for
+    `awx.main.models.credential:CredentialInputSource().metadata`.
+
+    Metadata for input sources is represented as a dictionary e.g.,
+    {'secret_path': '/kv/somebody', 'secret_key': 'password'}
+
+    For the data to be valid, the keys of this dictionary should correspond
+    with the metadata field (and datatypes) defined in the associated
+    target CredentialType e.g.,
+    """
+
+    def schema(self, credential_type):
+        # determine the defined fields for the associated credential type
+        properties = {}
+        for field in credential_type.inputs.get('metadata', []):
+            field = field.copy()
+            properties[field['id']] = field
+            if field.get('choices', []):
+                field['enum'] = list(field['choices'])[:]
+        return {
+            'type': 'object',
+            'properties': properties,
+            'additionalProperties': False,
+        }
+
+    def validate(self, value, model_instance):
+        if not isinstance(value, dict):
+            return super(DynamicCredentialInputField, self).validate(value, model_instance)
+
+        super(JSONSchemaField, self).validate(value, model_instance)
+        credential_type = model_instance.source_credential.credential_type
+        errors = {}
+        for error in Draft4Validator(
+            self.schema(credential_type),
+            format_checker=self.format_checker
+        ).iter_errors(value):
+            if error.validator == 'pattern' and 'error' in error.schema:
+                error.message = error.schema['error'].format(instance=error.instance)
+            if 'id' not in error.schema:
+                # If the error is not for a specific field, it's specific to
+                # `inputs` in general
+                raise django_exceptions.ValidationError(
+                    error.message,
+                    code='invalid',
+                    params={'value': value},
+                )
+            errors[error.schema['id']] = [error.message]
+
+        defined_metadata = [field.get('id') for field in credential_type.inputs.get('metadata', [])]
+        for field in credential_type.inputs.get('required', []):
+            if field in defined_metadata and not value.get(field, None):
+                errors[field] = [_('required for %s') % (
+                    credential_type.name
+                )]
+
+        if errors:
+            raise serializers.ValidationError({
+                'metadata': errors
+            })
+
+
 class CredentialInputField(JSONSchemaField):
     """
     Used to validate JSON for
@@ -593,8 +656,9 @@ class CredentialInputField(JSONSchemaField):
             errors[error.schema['id']] = [error.message]
 
         inputs = model_instance.credential_type.inputs
+        defined_fields = model_instance.credential_type.defined_fields
         for field in inputs.get('required', []):
-            if not value.get(field, None):
+            if field in defined_fields and not value.get(field, None):
                 errors[field] = [_('required for %s') % (
                     model_instance.credential_type.name
                 )]
@@ -603,7 +667,7 @@ class CredentialInputField(JSONSchemaField):
         # represented without complicated JSON schema
         if (
                 model_instance.credential_type.managed_by_tower is True and
-                'ssh_key_unlock' in model_instance.credential_type.defined_fields
+                'ssh_key_unlock' in defined_fields
         ):
 
             # in order to properly test the necessity of `ssh_key_unlock`, we

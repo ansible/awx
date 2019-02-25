@@ -265,7 +265,16 @@ def credentialtype_external():
             'secret': True,
             'help_text': 'An access token for the server.'
         }],
-        'required': ['url', 'token'],
+        'metadata': [{
+            'id': 'key',
+            'label': 'Key',
+            'type': 'string'
+        }, {
+            'id': 'version',
+            'label': 'Version',
+            'type': 'string'
+        }],
+        'required': ['url', 'token', 'key'],
     }
     external_type = CredentialType(
         kind='external',

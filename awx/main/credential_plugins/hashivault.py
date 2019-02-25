@@ -1,3 +1,4 @@
+import copy
 import os
 import pathlib
 
@@ -18,7 +19,8 @@ base_inputs = {
         'type': 'string',
         'secret': True,
         'help_text': 'The access token used to authenticate to the Vault server',
-    }, {
+    }],
+    'metadata': [{
         'id': 'secret_path',
         'label': 'Path to Secret',
         'type': 'string',
@@ -27,50 +29,49 @@ base_inputs = {
     'required': ['url', 'token', 'secret_path'],
 }
 
-hashi_kv_inputs = {
-    'fields': base_inputs['fields'] + [{
-        'id': 'secret_field',
-        'label': 'Key Name',
-        'type': 'string',
-        'help_text': 'The name of the key to look up in the secret.',
-    }, {
-        'id': 'secret_version',
-        'label': 'Secret Version (v2 only)',
-        'type': 'string',
-        'help_text': 'Used to specify a specific secret version (if left empty, the latest version will be used).',
-    }, {
-        'id': 'api_version',
-        'label': 'API Version',
-        'choices': ['v1', 'v2'],
-        'help_text': 'API v1 is for static key/value lookups.  API v2 is for versioned key/value lookups.',
-        'default': 'v1',
-    }],
-    'required': base_inputs['required'] + ['secret_field', 'api_version']
-}
+hashi_kv_inputs = copy.deepcopy(base_inputs)
+hashi_kv_inputs['fields'].append({
+    'id': 'api_version',
+    'label': 'API Version',
+    'choices': ['v1', 'v2'],
+    'help_text': 'API v1 is for static key/value lookups.  API v2 is for versioned key/value lookups.',
+    'default': 'v1',
+})
+hashi_kv_inputs['metadata'].extend([{
+    'id': 'secret_key',
+    'label': 'Key Name',
+    'type': 'string',
+    'help_text': 'The name of the key to look up in the secret.',
+}, {
+    'id': 'secret_version',
+    'label': 'Secret Version (v2 only)',
+    'type': 'string',
+    'help_text': 'Used to specify a specific secret version (if left empty, the latest version will be used).',
+}])
+hashi_kv_inputs['required'].extend(['api_version', 'secret_key'])
 
-hashi_ssh_inputs = {
-    'fields': base_inputs['fields'] + [{
-        'id': 'role',
-        'label': 'Role Name',
-        'type': 'string',
-        'help_text': 'The name of the role used to sign.'
-    }, {
-        'id': 'valid_principals',
-        'label': 'Valid Principals',
-        'type': 'string',
-        'help_text': 'Valid principals (either usernames or hostnames) that the certificate should be signed for.',
-    }],
-    'required': base_inputs['required'] + ['role']
-}
+hashi_ssh_inputs = copy.deepcopy(base_inputs)
+hashi_ssh_inputs['metadata'].extend([{
+    'id': 'role',
+    'label': 'Role Name',
+    'type': 'string',
+    'help_text': 'The name of the role used to sign.'
+}, {
+    'id': 'valid_principals',
+    'label': 'Valid Principals',
+    'type': 'string',
+    'help_text': 'Valid principals (either usernames or hostnames) that the certificate should be signed for.',
+}])
+hashi_ssh_inputs['required'].extend(['role'])
 
 
 def kv_backend(raw, **kwargs):
     token = kwargs['token']
     url = kwargs['url']
     secret_path = kwargs['secret_path']
-    secret_field = kwargs.get('secret_field', None)
+    secret_key = kwargs.get('secret_key', None)
 
-    api_version = kwargs.get('api_version', None)
+    api_version = kwargs['api_version']
 
     client = Client(url=url, token=token, verify=True)
     if api_version == 'v2':
@@ -99,12 +100,12 @@ def kv_backend(raw, **kwargs):
             'could not read secret {} from {}'.format(secret_path, url)
         )
 
-    if secret_field:
+    if secret_key:
         try:
-            return response['data'][secret_field]
+            return response['data'][secret_key]
         except KeyError:
             raise RuntimeError(
-                '{} is not present at {}'.format(secret_field, secret_path)
+                '{} is not present at {}'.format(secret_key, secret_path)
             )
     return response['data']
 

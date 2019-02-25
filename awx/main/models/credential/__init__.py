@@ -23,7 +23,8 @@ from django.utils.encoding import force_text
 from awx.api.versioning import reverse
 from awx.main.fields import (ImplicitRoleField, CredentialInputField,
                              CredentialTypeInputField,
-                             CredentialTypeInjectorField)
+                             CredentialTypeInjectorField,
+                             DynamicCredentialInputField,)
 from awx.main.utils import decrypt_field, classproperty
 from awx.main.utils.safe_yaml import safe_dump
 from awx.main.validators import validate_ssh_private_key
@@ -1325,6 +1326,10 @@ class CredentialInputSource(PrimordialModel):
     input_field_name = models.CharField(
         max_length=1024,
     )
+    metadata = DynamicCredentialInputField(
+        blank=True,
+        default={}
+    )
 
     def clean_target_credential(self):
         if self.target_credential.kind == 'external':
@@ -1353,6 +1358,8 @@ class CredentialInputSource(PrimordialModel):
                 backend_kwargs[field_name] = decrypt_field(self.source_credential, field_name)
             else:
                 backend_kwargs[field_name] = value
+
+        backend_kwargs.update(self.metadata)
         return backend(
             self.target_credential.inputs.get(self.input_field_name),
             **backend_kwargs
