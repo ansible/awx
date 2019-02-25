@@ -7,7 +7,6 @@ import {
   CardBody,
   Form,
   FormGroup,
-  Gallery,
   TextInput,
 } from '@patternfly/react-core';
 
@@ -201,10 +200,10 @@ class OrganizationEdit extends Component {
 
     return (
       <CardBody>
-        <Form>
-          <I18n>
-            {({ i18n }) => (
-              <Gallery gutter="md">
+        <I18n>
+          {({ i18n }) => (
+            <Form autoComplete="off">
+              <div style={{ display: 'grid', gridGap: '20px', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>
                 <FormGroup
                   fieldId="edit-org-form-name"
                   helperTextInvalid={name.helperTextInvalid}
@@ -218,7 +217,6 @@ class OrganizationEdit extends Component {
                     isValid={name.isValid}
                     name="name"
                     onChange={this.onFieldChange}
-                    type="text"
                     value={name.value || ''}
                   />
                 </FormGroup>
@@ -230,27 +228,8 @@ class OrganizationEdit extends Component {
                     id="edit-org-form-description"
                     name="description"
                     onChange={this.onFieldChange}
-                    type="text"
                     value={description.value || ''}
                   />
-                </FormGroup>
-                <FormGroup
-                  fieldId="edit-org-form-instance-groups"
-                  label={i18n._(t`Instance Groups`)}
-                >
-                  { instanceGroups.value
-                    && (
-                      <Lookup
-                        columns={instanceGroupsLookupColumns}
-                        getItems={this.getInstanceGroups}
-                        lookupHeader="Instance Groups"
-                        name="instanceGroups"
-                        onLookupSave={this.onLookupSave}
-                        sortedColumnKey="name"
-                        value={instanceGroups.value}
-                      />
-                    )
-                  }
                 </FormGroup>
                 <ConfigContext.Consumer>
                   {({ custom_virtualenvs }) => (
@@ -271,16 +250,34 @@ class OrganizationEdit extends Component {
                     )
                   )}
                 </ConfigContext.Consumer>
-              </Gallery>
-            )}
-          </I18n>
-          <FormActionGroup
-            onCancel={this.onCancel}
-            onSubmit={this.onSubmit}
-            submitDisabled={!formIsValid}
-          />
-          { error ? <div>error</div> : '' }
-        </Form>
+              </div>
+              <FormGroup
+                fieldId="edit-org-form-instance-groups"
+                label={i18n._(t`Instance Groups`)}
+              >
+                { instanceGroups.value
+                  && (
+                    <Lookup
+                      columns={instanceGroupsLookupColumns}
+                      getItems={this.getInstanceGroups}
+                      lookupHeader={i18n._(t`Instance Groups`)}
+                      name="instanceGroups"
+                      onLookupSave={this.onLookupSave}
+                      sortedColumnKey="name"
+                      value={instanceGroups.value}
+                    />
+                  )
+                }
+              </FormGroup>
+              <FormActionGroup
+                onCancel={this.onCancel}
+                onSubmit={this.onSubmit}
+                submitDisabled={!formIsValid}
+              />
+              { error ? <div>error</div> : '' }
+            </Form>
+          )}
+        </I18n>
       </CardBody>
     );
   }

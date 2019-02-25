@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { SearchIcon, CubesIcon } from '@patternfly/react-icons';
 import {
   Chip,
-  ChipGroup,
   Modal,
   Button,
   EmptyState,
@@ -150,18 +149,15 @@ class Lookup extends React.Component {
     } = this.state;
     const { lookupHeader = 'items', value, columns } = this.props;
 
-    let chips = null;
-    if (value) {
-      chips = (
-        <ChipGroup>
-          {value.map(chip => (
-            <Chip key={chip.id} onClick={() => this.toggleSelected(chip)}>
-              {chip.name}
-            </Chip>
-          ))}
-        </ChipGroup>
-      );
-    }
+    const chips = value ? (
+      <div className="pf-c-chip-group">
+        {value.map(chip => (
+          <Chip key={chip.id} onClick={() => this.toggleSelected(chip)}>
+            {chip.name}
+          </Chip>
+        ))}
+      </div>
+    ) : null;
 
     return (
       <I18n>
