@@ -2833,6 +2833,7 @@ class CredentialInputSourceSerializer(BaseSerializer):
             'type',
             'url',
             'input_field_name',
+            'metadata',
             'target_credential',
             'source_credential',
             'source_credential_type',

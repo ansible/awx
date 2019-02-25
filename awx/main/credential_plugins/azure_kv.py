@@ -22,7 +22,8 @@ azure_keyvault_inputs = {
         'id': 'tenant',
         'label': 'Tenant ID',
         'type': 'string'
-    }, {
+    }],
+    'metadata': [{
         'id': 'secret_field',
         'label': 'Secret Name',
         'type': 'string',
@@ -33,7 +34,7 @@ azure_keyvault_inputs = {
         'type': 'string',
         'help_text': 'Used to specify a specific secret version (if left empty, the latest version will be used).',
     }],
-    'required': ['url', 'client', 'secret', 'tenant'],
+    'required': ['url', 'client', 'secret', 'tenant', 'secret_field'],
 }
 
 
