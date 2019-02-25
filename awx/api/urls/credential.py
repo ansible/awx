@@ -13,6 +13,7 @@ from awx.api.views import (
     CredentialOwnerTeamsList,
     CredentialCopy,
     CredentialInputSourceSubList,
+    CredentialExternalTest,
 )
 
 
@@ -26,6 +27,7 @@ urls = [
     url(r'^(?P<pk>[0-9]+)/owner_teams/$', CredentialOwnerTeamsList.as_view(), name='credential_owner_teams_list'),
     url(r'^(?P<pk>[0-9]+)/copy/$', CredentialCopy.as_view(), name='credential_copy'),
     url(r'^(?P<pk>[0-9]+)/input_sources/$', CredentialInputSourceSubList.as_view(), name='credential_input_source_sublist'),
+    url(r'^(?P<pk>[0-9]+)/test/$', CredentialExternalTest.as_view(), name='credential_external_test'),
 ]
 
 __all__ = ['urls']
