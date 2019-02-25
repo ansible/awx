@@ -84,6 +84,7 @@ psutil==5.4.3
 ptyprocess==0.5.2         # via pexpect
 pyasn1==0.4.2             # via paramiko
 pycparser==2.18           # via cffi
+pycryptodome==3.7.3
 pycurl==7.43.0.1          # via ovirt-engine-sdk-python
 pygments==2.2.0           # via azure-cli-core, knack
 pyjwt==1.6.0              # via adal, azure-cli-core
