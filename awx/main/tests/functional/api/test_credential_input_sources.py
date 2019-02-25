@@ -15,6 +15,7 @@ def test_associate_credential_input_source(get, post, admin, vault_credential, e
     params = {
         'source_credential': external_credential.pk,
         'input_field_name': 'vault_password',
+        'metadata': {'key': 'some_example_key'},
         'associate': True
     }
     response = post(sublist_url, params, admin)
@@ -31,6 +32,8 @@ def test_associate_credential_input_source(get, post, admin, vault_credential, e
         kwargs={'version': 'v2'}
     ), admin).data['count'] == 1
     assert CredentialInputSource.objects.count() == 1
+    input_source = CredentialInputSource.objects.first()
+    assert input_source.metadata == {'key': 'some_example_key'}
 
     # detach
     params = {
@@ -48,6 +51,29 @@ def test_associate_credential_input_source(get, post, admin, vault_credential, e
         kwargs={'version': 'v2'}
     ), admin).data['count'] == 0
     assert CredentialInputSource.objects.count() == 0
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('metadata', [
+    {},  # key is required
+    {'key': None},  # must be a string
+    {'key': 123},  # must be a string
+    {'extraneous': 'foo'},  # invalid parameter
+])
+def test_associate_credential_input_source_with_invalid_metadata(get, post, admin, vault_credential, external_credential, metadata):
+    sublist_url = reverse(
+        'api:credential_input_source_sublist',
+        kwargs={'version': 'v2', 'pk': vault_credential.pk}
+    )
+
+    params = {
+        'source_credential': external_credential.pk,
+        'input_field_name': 'vault_password',
+        'metadata': metadata,
+        'associate': True
+    }
+    response = post(sublist_url, params, admin)
+    assert response.status_code == 400
 
 
 @pytest.mark.django_db
@@ -73,6 +99,7 @@ def test_create_credential_input_source_with_external_target_returns_400(post, a
         'source_credential': external_credential.pk,
         'input_field_name': 'token',
         'associate': True,
+        'metadata': {'key': 'some_key'},
     }
     response = post(sublist_url, params, admin)
     assert response.status_code == 400
@@ -102,7 +129,8 @@ def test_create_credential_input_source_with_undefined_input_returns_400(post, a
     )
     params = {
         'source_credential': external_credential.pk,
-        'input_field_name': 'not_defined_for_credential_type'
+        'input_field_name': 'not_defined_for_credential_type',
+        'metadata': {'key': 'some_key'}
     }
     response = post(sublist_url, params, admin)
     assert response.status_code == 400
