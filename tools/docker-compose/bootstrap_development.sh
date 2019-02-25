@@ -17,8 +17,8 @@ ansible -i "127.0.0.1," -c local -v -m wait_for -a "host=${RABBITMQ_HOST} port=5
 #/etc/init.d/ssh start
 
 
-ansible -i "127.0.0.1," -c local -v -m postgresql_user -U postgres -a "name=awx-dev password=AWXsome1 login_user=postgres login_host=postgres" all
-ansible -i "127.0.0.1," -c local -v -m postgresql_db -U postgres -a "name=awx-dev owner=awx-dev login_user=postgres login_host=postgres" all
+ansible -i "127.0.0.1," -c local -v -m postgresql_user --become-user postgres -a "name=awx-dev password=AWXsome1 login_user=postgres login_host=postgres" all
+ansible -i "127.0.0.1," -c local -v -m postgresql_db --become-user postgres -a "name=awx-dev owner=awx-dev login_user=postgres login_host=postgres" all
 
 # Move to the source directory so we can bootstrap
 if [ -f "/awx_devel/manage.py" ]; then
