@@ -32,7 +32,7 @@ class Lookup extends React.Component {
 
     this.state = {
       isModalOpen: false,
-      lookupSelectedItems: props.value || [],
+      lookupSelectedItems: [...props.value] || [],
       results: [],
       count: 0,
       page: 1,
@@ -101,16 +101,26 @@ class Lookup extends React.Component {
   };
 
   toggleSelected (row) {
-    const { lookupSelectedItems } = this.state;
-    const selectedIndex = lookupSelectedItems
+    const { name, onLookupSave } = this.props;
+    const { lookupSelectedItems: updatedSelectedItems, isModalOpen } = this.state;
+
+    const selectedIndex = updatedSelectedItems
       .findIndex(selectedRow => selectedRow.id === row.id);
+
     if (selectedIndex > -1) {
-      lookupSelectedItems.splice(selectedIndex, 1);
-      this.setState({ lookupSelectedItems });
+      updatedSelectedItems.splice(selectedIndex, 1);
+      this.setState({ lookupSelectedItems: updatedSelectedItems });
     } else {
       this.setState(prevState => ({
         lookupSelectedItems: [...prevState.lookupSelectedItems, row]
       }));
+    }
+
+    // Updates the selected items from parent state
+    // This handles the case where the user removes chips from the lookup input
+    // while the modal is closed
+    if (!isModalOpen) {
+      onLookupSave(updatedSelectedItems, name);
     }
   }
 
