@@ -4,7 +4,9 @@ function AddCredentialsController (
     $scope,
     strings,
     componentsStrings,
-    ConfigService
+    ConfigService,
+    ngToast,
+    $filter
 ) {
     const vm = this || {};
 
@@ -36,6 +38,7 @@ function AddCredentialsController (
     vm.form.credential_type._route = 'credentials.add.credentialType';
     vm.form.credential_type._model = credentialType;
     vm.form.credential_type._placeholder = strings.get('inputs.CREDENTIAL_TYPE_PLACEHOLDER');
+    vm.isTestable = credentialType.get('kind') === 'external';
 
     const gceFileInputSchema = {
         id: 'gce_service_account_key',
@@ -62,11 +65,52 @@ function AddCredentialsController (
                 become._choices = Array.from(apiConfig.become_methods, method => method[0]);
             }
 
+            vm.isTestable = credentialType.get('kind') === 'external';
+
             return fields;
         },
         _source: vm.form.credential_type,
         _reference: 'vm.form.inputs',
         _key: 'inputs'
+    };
+
+    vm.form.secondary = ({ inputs }) => {
+        const name = $filter('sanitize')(credentialType.get('name'));
+        const endpoint = `${credentialType.get('id')}/test/`;
+
+        return credentialType.http.post({ url: endpoint, data: { inputs }, replace: false })
+            .then(() => {
+                ngToast.success({
+                    content: `
+                        <div class="Toast-wrapper">
+                            <div class="Toast-icon">
+                                <i class="fa fa-check-circle Toast-successIcon"></i>
+                            </div>
+                            <div>
+                                <b>${name}:</b> ${strings.get('edit.TEST_PASSED')}
+                            </div>
+                        </div>`,
+                    dismissButton: false,
+                    dismissOnTimeout: true
+                });
+            })
+            .catch(({ data }) => {
+                const msg = data.inputs ? `${$filter('sanitize')(data.inputs)}` : strings.get('edit.TEST_FAILED');
+
+                ngToast.danger({
+                    content: `
+                        <div class="Toast-wrapper">
+                            <div class="Toast-icon">
+                                <i class="fa fa-exclamation-triangle Toast-successIcon"></i>
+                            </div>
+                            <div>
+                                <b>${name}:</b> ${msg}
+                            </div>
+                        </div>`,
+                    dismissButton: false,
+                    dismissOnTimeout: true
+                });
+            });
     };
 
     vm.form.save = data => {
@@ -149,7 +193,9 @@ AddCredentialsController.$inject = [
     '$scope',
     'CredentialsStrings',
     'ComponentsStrings',
-    'ConfigService'
+    'ConfigService',
+    'ngToast',
+    '$filter'
 ];
 
 export default AddCredentialsController;

@@ -73,6 +73,7 @@ function BaseStringService (namespace) {
     this.COPY = t.s('COPY');
     this.YES = t.s('YES');
     this.CLOSE = t.s('CLOSE');
+    this.TEST = t.s('TEST');
     this.SUCCESSFUL_CREATION = resource => t.s('{{ resource }} successfully created', { resource: $filter('sanitize')(resource) });
 
     this.deleteResource = {

@@ -153,17 +153,22 @@ function httpPost (config = {}) {
     const req = {
         method: 'POST',
         url: this.path,
-        data: config.data
+        data: config.data,
     };
 
     if (config.url) {
         req.url = `${this.path}${config.url}`;
     }
 
+    if (!('replace' in config)) {
+        config.replace = true;
+    }
+
     return $http(req)
         .then(res => {
-            this.model.GET = res.data;
-
+            if (config.replace) {
+                this.model.GET = res.data;
+            }
             return res;
         });
 }

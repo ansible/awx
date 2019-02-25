@@ -23,6 +23,9 @@ function atFormActionController ($state, strings) {
             case 'save':
                 vm.setSaveDefaults();
                 break;
+            case 'secondary':
+                vm.setSecondaryDefaults();
+                break;
             default:
                 vm.setCustomDefaults();
         }
@@ -42,6 +45,13 @@ function atFormActionController ($state, strings) {
         scope.fill = '';
         scope.color = 'success';
         scope.action = () => { form.submit(); };
+    };
+
+    vm.setSecondaryDefaults = () => {
+        scope.text = strings.get('TEST');
+        scope.fill = '';
+        scope.color = 'info';
+        scope.action = () => { form.submitSecondary(); };
     };
 }
 
