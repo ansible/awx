@@ -128,11 +128,9 @@ describe('<Lookup />', () => {
           sortedColumnKey="name"
         />
       </I18nProvider>
-    );
+    ).find('Lookup');
     const chip = wrapper.find('li.pf-c-chip');
-    const overflowChip = wrapper.find('.pf-c-chip.pf-m-overflow');
-    expect(chip).toHaveLength(1);
-    expect(overflowChip).toHaveLength(1);
+    expect(chip).toHaveLength(2);
   });
   test('toggleSelected successfully adds/removes row from lookupSelectedItems state', () => {
     mockData = [];
