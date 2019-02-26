@@ -824,6 +824,7 @@ ManagedCredentialType(
             'label': ugettext_noop('Signed SSH Certificate'),
             'type': 'string',
             'multiline': True,
+            'secret': True,
         }, {
             'id': 'ssh_key_unlock',
             'label': ugettext_noop('Private Key Passphrase'),
@@ -1360,8 +1361,11 @@ class CredentialInputSource(PrimordialModel):
                 backend_kwargs[field_name] = value
 
         backend_kwargs.update(self.metadata)
+        raw = self.target_credential.inputs.get(self.input_field_name)
+        if self.input_field_name in self.target_credential.credential_type.secret_fields:
+            raw = decrypt_field(self.target_credential, self.input_field_name)
         return backend(
-            self.target_credential.inputs.get(self.input_field_name),
+            raw,
             **backend_kwargs
         )
 
