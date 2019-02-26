@@ -1,10 +1,11 @@
 import copy
 import os
 import pathlib
+from urllib.parse import urljoin
 
 from .plugin import CredentialPlugin
 
-from hvac import Client
+import requests
 
 
 base_inputs = {
@@ -67,63 +68,65 @@ hashi_ssh_inputs['required'].extend(['role'])
 
 def kv_backend(raw, **kwargs):
     token = kwargs['token']
-    url = kwargs['url']
+    url = urljoin(kwargs['url'], 'v1')
     secret_path = kwargs['secret_path']
     secret_key = kwargs.get('secret_key', None)
 
     api_version = kwargs['api_version']
 
-    client = Client(url=url, token=token, verify=True)
+    sess = requests.Session()
+    sess.headers['Authorization'] = 'Bearer {}'.format(token)
     if api_version == 'v2':
+        params = {}
+        if kwargs.get('secret_version'):
+            params['version'] = kwargs['secret_version']
         try:
             mount_point, *path = pathlib.Path(secret_path.lstrip(os.sep)).parts
-            os.path.join(*path)
-            response = client.secrets.kv.v2.read_secret_version(
-                mount_point=mount_point,
-                path=os.path.join(*path),
-                version=kwargs.get('secret_version', None)
-            )['data']
+            '/'.join(*path)
         except Exception:
-            raise RuntimeError(
-                'could not read secret {} from {}'.format(secret_path, url)
-            )
-    else:
-        try:
-            response = client.read(secret_path)
-        except Exception:
-            raise RuntimeError(
-                'could not read secret {} from {}'.format(secret_path, url)
-            )
-
-    if response is None:
-        raise RuntimeError(
-            'could not read secret {} from {}'.format(secret_path, url)
+            mount_point, path = secret_path, []
+        # https://www.vaultproject.io/api/secret/kv/kv-v2.html#read-secret-version
+        response = sess.get(
+            '/'.join([url, mount_point, 'data'] + path).rstrip('/'),
+            params=params
         )
+        response.raise_for_status()
+        json = response.json()['data']
+    else:
+        # https://www.vaultproject.io/api/secret/kv/kv-v1.html#read-secret
+        response = sess.get('/'.join([url, secret_path]).rstrip('/'))
+        response.raise_for_status()
+        json = response.json()
 
     if secret_key:
         try:
-            return response['data'][secret_key]
+            return json['data'][secret_key]
         except KeyError:
             raise RuntimeError(
                 '{} is not present at {}'.format(secret_key, secret_path)
             )
-    return response['data']
+    return json['data']
 
 
 def ssh_backend(raw, **kwargs):
     token = kwargs['token']
-    url = kwargs['url']
+    url = urljoin(kwargs['url'], 'v1')
+    secret_path = kwargs['secret_path']
+    role = kwargs['role']
 
-    client = Client(url=url, token=token, verify=True)
+    sess = requests.Session()
+    sess.headers['Authorization'] = 'Bearer {}'.format(token)
     json = {
         'public_key': raw
     }
     if kwargs.get('valid_principals'):
         json['valid_principals'] = kwargs['valid_principals']
-    resp = client._adapter.post(
-        '/v1/{}/sign/{}'.format(kwargs['secret_path'], kwargs['role']),
-        json=json,
+    # https://www.vaultproject.io/api/secret/ssh/index.html#sign-ssh-key
+    resp = sess.post(
+        '/'.join([url, secret_path, 'sign', role]).rstrip('/'),
+        json=json
     )
+    resp.raise_for_status()
     return resp.json()['data']['signed_key']
 
 
