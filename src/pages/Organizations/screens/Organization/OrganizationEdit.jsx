@@ -43,8 +43,8 @@ class OrganizationEdit extends Component {
           value: ''
         },
         instanceGroups: {
-          value: null,
-          initialValue: null
+          value: [],
+          initialValue: []
         },
         custom_virtualenv: {
           value: '',
@@ -84,11 +84,10 @@ class OrganizationEdit extends Component {
     updatedFormEl.value = value;
     updatedForm[targetName] = updatedFormEl;
 
-    let formIsValid = true;
-    if (updatedFormEl.validation) {
-      updatedFormEl.isValid = this.checkValidity(updatedFormEl.value, updatedFormEl.validation);
-      formIsValid = updatedFormEl.isValid && formIsValid;
-    }
+    updatedFormEl.isValid = (updatedFormEl.validation)
+      ? this.checkValidity(updatedFormEl.value, updatedFormEl.validation) : true;
+
+    const formIsValid = (updatedFormEl.validation) ? updatedFormEl.isValid : true;
 
     this.setState({ form: updatedForm, formIsValid });
   }
@@ -148,10 +147,9 @@ class OrganizationEdit extends Component {
   }
 
   checkValidity = (value, validation) => {
-    let isValid = true;
-    if (validation.required) {
-      isValid = value.trim() !== '' && isValid;
-    }
+    const isValid = (validation.required)
+      ? (value.trim() !== '') : true;
+
     return isValid;
   }
 
@@ -255,19 +253,15 @@ class OrganizationEdit extends Component {
                 fieldId="edit-org-form-instance-groups"
                 label={i18n._(t`Instance Groups`)}
               >
-                { instanceGroups.value
-                  && (
-                    <Lookup
-                      columns={instanceGroupsLookupColumns}
-                      getItems={this.getInstanceGroups}
-                      lookupHeader={i18n._(t`Instance Groups`)}
-                      name="instanceGroups"
-                      onLookupSave={this.onLookupSave}
-                      sortedColumnKey="name"
-                      value={instanceGroups.value}
-                    />
-                  )
-                }
+                <Lookup
+                  columns={instanceGroupsLookupColumns}
+                  getItems={this.getInstanceGroups}
+                  lookupHeader={i18n._(t`Instance Groups`)}
+                  name="instanceGroups"
+                  onLookupSave={this.onLookupSave}
+                  sortedColumnKey="name"
+                  value={instanceGroups.value}
+                />
               </FormGroup>
               <FormActionGroup
                 onCancel={this.onCancel}
