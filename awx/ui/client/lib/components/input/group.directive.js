@@ -48,7 +48,7 @@ function AtInputGroupController ($scope, $compile) {
 
         state._value = source._value;
 
-        const inputs = state._get(source._value);
+        const inputs = state._get(form);
         const group = vm.createComponentConfigs(inputs);
 
         vm.insert(group);
@@ -66,7 +66,9 @@ function AtInputGroupController ($scope, $compile) {
                     _element: vm.createComponent(input, i),
                     _key: 'inputs',
                     _group: true,
-                    _groupIndex: i
+                    _groupIndex: i,
+                    _onInputLookup: state._onInputLookup,
+                    _onRemoveTag: state._onRemoveTag,
                 }, input));
             });
         }
@@ -160,7 +162,6 @@ function AtInputGroupController ($scope, $compile) {
             </${input._component}>`);
 
         $compile(component)(scope.$parent);
-
         return component;
     };
 
