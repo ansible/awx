@@ -15,18 +15,18 @@ function categorizeByKind () {
     }));
 }
 
-function mergeInputProperties () {
-    if (!this.has('inputs.fields')) {
+function mergeInputProperties (key = 'fields') {
+    if (!this.has(`inputs.${key}`)) {
         return undefined;
     }
 
     const required = this.get('inputs.required');
 
-    return this.get('inputs.fields').forEach((field, i) => {
+    return this.get(`inputs.${key}`).forEach((field, i) => {
         if (!required || required.indexOf(field.id) === -1) {
-            this.set(`inputs.fields[${i}].required`, false);
+            this.set(`inputs.${key}[${i}].required`, false);
         } else {
-            this.set(`inputs.fields[${i}].required`, true);
+            this.set(`inputs.${key}[${i}].required`, true);
         }
     });
 }

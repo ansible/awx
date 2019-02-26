@@ -5,7 +5,10 @@ function atInputTextLink (scope, element, attrs, controllers) {
     const inputController = controllers[1];
 
     if (scope.tab === '1') {
-        element.find('input')[0].focus();
+        const el = element.find('input')[0];
+        if (el) {
+            el.focus();
+        }
     }
 
     inputController.init(scope, element, formController);
@@ -20,8 +23,14 @@ function AtInputTextController (baseInputController) {
         baseInputController.call(vm, 'input', _scope_, element, form);
         scope = _scope_;
 
-        vm.check();
         scope.$watch('state._value', () => vm.check());
+    };
+
+    vm.onLookupClick = () => {
+        if (scope.state._onInputLookup) {
+            const { id, label, required, type } = scope.state;
+            scope.state._onInputLookup({ id, label, required, type });
+        }
     };
 }
 

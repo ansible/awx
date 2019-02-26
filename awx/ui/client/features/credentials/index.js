@@ -2,6 +2,8 @@ import LegacyCredentials from './legacy.credentials';
 import AddController from './add-credentials.controller';
 import EditController from './edit-credentials.controller';
 import CredentialsStrings from './credentials.strings';
+import InputSourceLookupComponent from './input-source-lookup.component';
+import ExternalTestComponent from './external-test.component';
 
 const MODULE_NAME = 'at.features.credentials';
 
@@ -40,7 +42,8 @@ function CredentialsResolve (
 
             const dependents = {
                 credentialType: new CredentialType('get', typeId),
-                organization: new Organization('get', orgId)
+                organization: new Organization('get', orgId),
+                credentialInputSources: models.credential.extend('GET', 'input_sources')
             };
             dependents.isOrgCredAdmin = dependents.organization.then((org) => org.search({ role_level: 'credential_admin_role' }));
 
@@ -139,6 +142,8 @@ angular
     .controller('EditController', EditController)
     .service('LegacyCredentialsService', LegacyCredentials)
     .service('CredentialsStrings', CredentialsStrings)
+    .component('atInputSourceLookup', InputSourceLookupComponent)
+    .component('atExternalCredentialTest', ExternalTestComponent)
     .run(CredentialsRun);
 
 export default MODULE_NAME;
