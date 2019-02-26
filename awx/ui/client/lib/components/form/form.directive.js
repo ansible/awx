@@ -87,13 +87,8 @@ function AtFormController (eventService, strings) {
         if (!vm.state.isValid) {
             return;
         }
-
-        vm.state.disabled = true;
-
         const data = vm.getSubmitData();
-
-        scope.state.secondary(data)
-            .finally(() => { vm.state.disabled = false; });
+        scope.state.secondary(data);
     };
 
     vm.submit = () => {

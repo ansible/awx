@@ -61,7 +61,9 @@ function BaseStringService (namespace) {
     this.CANCEL = t.s('CANCEL');
     this.CLOSE = t.s('CLOSE');
     this.SAVE = t.s('SAVE');
+    this.SELECT = t.s('SELECT');
     this.OK = t.s('OK');
+    this.RUN = t.s('RUN');
     this.NEXT = t.s('NEXT');
     this.SHOW = t.s('SHOW');
     this.HIDE = t.s('HIDE');
