@@ -2,6 +2,7 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { SearchIcon, CubesIcon } from '@patternfly/react-icons';
 import {
+  Chip,
   Modal,
   Button,
   EmptyState,
@@ -28,9 +29,10 @@ const paginationStyling = {
 class Lookup extends React.Component {
   constructor (props) {
     super(props);
+
     this.state = {
       isModalOpen: false,
-      lookupSelectedItems: [],
+      lookupSelectedItems: [...props.value] || [],
       results: [],
       count: 0,
       page: 1,
@@ -41,7 +43,6 @@ class Lookup extends React.Component {
     };
     this.onSetPage = this.onSetPage.bind(this);
     this.handleModalToggle = this.handleModalToggle.bind(this);
-    this.wrapTags = this.wrapTags.bind(this);
     this.toggleSelected = this.toggleSelected.bind(this);
     this.saveModal = this.saveModal.bind(this);
     this.getData = this.getData.bind(this);
@@ -100,16 +101,26 @@ class Lookup extends React.Component {
   };
 
   toggleSelected (row) {
-    const { lookupSelectedItems } = this.state;
-    const selectedIndex = lookupSelectedItems
+    const { name, onLookupSave } = this.props;
+    const { lookupSelectedItems: updatedSelectedItems, isModalOpen } = this.state;
+
+    const selectedIndex = updatedSelectedItems
       .findIndex(selectedRow => selectedRow.id === row.id);
+
     if (selectedIndex > -1) {
-      lookupSelectedItems.splice(selectedIndex, 1);
-      this.setState({ lookupSelectedItems });
+      updatedSelectedItems.splice(selectedIndex, 1);
+      this.setState({ lookupSelectedItems: updatedSelectedItems });
     } else {
       this.setState(prevState => ({
         lookupSelectedItems: [...prevState.lookupSelectedItems, row]
       }));
+    }
+
+    // Updates the selected items from parent state
+    // This handles the case where the user removes chips from the lookup input
+    // while the modal is closed
+    if (!isModalOpen) {
+      onLookupSave(updatedSelectedItems, name);
     }
   }
 
@@ -134,17 +145,6 @@ class Lookup extends React.Component {
     this.handleModalToggle();
   }
 
-  wrapTags (tags = []) {
-    return tags.map(tag => (
-      <span className="awx-c-tag--pill" key={tag.id}>
-        {tag.name}
-        <Button className="awx-c-icon--remove" id={tag.id} onClick={() => this.toggleSelected(tag)}>
-          x
-        </Button>
-      </span>
-    ));
-  }
-
   render () {
     const {
       isModalOpen,
@@ -159,6 +159,16 @@ class Lookup extends React.Component {
     } = this.state;
     const { lookupHeader = 'items', value, columns } = this.props;
 
+    const chips = value ? (
+      <div className="pf-c-chip-group">
+        {value.map(chip => (
+          <Chip key={chip.id} onClick={() => this.toggleSelected(chip)}>
+            {chip.name}
+          </Chip>
+        ))}
+      </div>
+    ) : null;
+
     return (
       <I18n>
         {({ i18n }) => (
@@ -166,7 +176,7 @@ class Lookup extends React.Component {
             <Button className="pf-c-input-group__text" aria-label="search" id="search" onClick={this.handleModalToggle}>
               <SearchIcon />
             </Button>
-            <div className="pf-c-form-control">{this.wrapTags(value)}</div>
+            <div className="pf-c-form-control">{chips}</div>
             <Modal
               className="awx-c-modal"
               title={`Select ${lookupHeader}`}

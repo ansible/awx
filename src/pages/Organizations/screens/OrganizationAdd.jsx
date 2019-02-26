@@ -61,7 +61,7 @@ class OrganizationAdd extends React.Component {
       try {
         if (instanceGroups.length > 0) {
           instanceGroups.forEach(async (select) => {
-            await api.createInstanceGroups(instanceGroupsUrl, select.id);
+            await api.associateInstanceGroup(instanceGroupsUrl, select.id);
           });
         }
       } catch (err) {

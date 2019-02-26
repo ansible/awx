@@ -119,14 +119,18 @@ class Organization extends Component {
               to="/organizations/:id/details"
               exact
             />
-            <Route
-              path="/organizations/:id/edit"
-              render={() => (
-                <OrganizationEdit
-                  match={match}
-                />
-              )}
-            />
+            {organization && (
+              <Route
+                path="/organizations/:id/edit"
+                render={() => (
+                  <OrganizationEdit
+                    api={api}
+                    match={match}
+                    organization={organization}
+                  />
+                )}
+              />
+            )}
             {organization && (
               <Route
                 path="/organizations/:id/details"
