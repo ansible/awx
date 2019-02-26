@@ -66,10 +66,10 @@ class APIClient {
     return this.http.post(API_ORGANIZATIONS, data);
   }
 
-  getOrganzationAccessList (id) {
+  getOrganzationAccessList (id, params = {}) {
     const endpoint = `${API_ORGANIZATIONS}${id}/access_list/`;
 
-    return this.http.get(endpoint);
+    return this.http.get(endpoint, { params });
   }
 
   getOrganizationDetails (id) {
@@ -82,24 +82,6 @@ class APIClient {
     const endpoint = `${API_ORGANIZATIONS}${id}/instance_groups/`;
 
     return this.http.get(endpoint, { params });
-  }
-
-  getOrganizationUserRoles (id) {
-    const endpoint = `${API_USERS}${id}/roles/`;
-
-    return this.http.get(endpoint);
-  }
-
-  getUserTeams (id) {
-    const endpoint = `${API_USERS}${id}/teams/`;
-
-    return this.http.get(endpoint);
-  }
-
-  getTeamRoles (id) {
-    const endpoint = `${API_TEAMS}${id}/roles/`;
-
-    return this.http.get(endpoint);
   }
 
   getOrganizationNotifications (id, params = {}) {
@@ -138,6 +120,24 @@ class APIClient {
 
   createInstanceGroups (url, id) {
     return this.http.post(url, { id });
+  }
+
+  getUserRoles (id) {
+    const endpoint = `${API_USERS}${id}/roles/`;
+
+    return this.http.get(endpoint);
+  }
+
+  getUserTeams (id) {
+    const endpoint = `${API_USERS}${id}/teams/`;
+
+    return this.http.get(endpoint);
+  }
+
+  getTeamRoles (id) {
+    const endpoint = `${API_TEAMS}${id}/roles/`;
+
+    return this.http.get(endpoint);
   }
 }
 
