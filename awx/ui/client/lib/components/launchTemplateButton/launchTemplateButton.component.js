@@ -38,9 +38,10 @@ function atLaunchTemplateCtrl (
         if (!vm.disabled) {
             if (vm.template.type === 'job_template') {
                 const selectedJobTemplate = jobTemplate.create();
+                const getLaunch = selectedJobTemplate.getLaunch(vm.template.id).catch(createErrorHandler(templatesStrings.get('error.JOB_TEMPLATE_NOT_FOUND'), 'GET'));
+                const optionsLaunch = selectedJobTemplate.optionsLaunch(vm.template.id).catch(createErrorHandler(templatesStrings.get('error.JOB_TEMPLATE_NOT_FOUND'), 'GET'));
                 const preLaunchPromises = [
-                    selectedJobTemplate.getLaunch(vm.template.id),
-                    selectedJobTemplate.optionsLaunch(vm.template.id),
+                    getLaunch, optionsLaunch
                 ];
 
                 Promise.all(preLaunchPromises)
@@ -86,10 +87,12 @@ function atLaunchTemplateCtrl (
                     });
             } else if (vm.template.type === 'workflow_job_template') {
                 const selectedWorkflowJobTemplate = workflowTemplate.create();
+                const getLaunch = selectedWorkflowJobTemplate.getLaunch(vm.template.id).catch(createErrorHandler(templatesStrings.get('error.WORKFLOW_TEMPLATE_NOT_FOUND'), 'GET'));
+                const optionsLaunch = selectedWorkflowJobTemplate.optionsLaunch(vm.template.id).catch(createErrorHandler(templatesStrings.get('error.WORKFLOW_TEMPLATE_NOT_FOUND'), 'GET'));
                 const preLaunchPromises = [
                     selectedWorkflowJobTemplate.request('get', vm.template.id),
-                    selectedWorkflowJobTemplate.getLaunch(vm.template.id),
-                    selectedWorkflowJobTemplate.optionsLaunch(vm.template.id),
+                    getLaunch,
+                    optionsLaunch
                 ];
 
                 Promise.all(preLaunchPromises)
@@ -163,14 +166,14 @@ function atLaunchTemplateCtrl (
                 } else {
                     $state.go('output', { id: launchRes.data.job, type: 'playbook' }, { reload: true });
                 }
-            }).catch(createErrorHandler('launch job template', 'POST'));
+            }).catch(createErrorHandler(templatesStrings.get('error.JOB_TEMPLATE_NOT_FOUND'), 'POST'));
         } else if (vm.promptData.templateType === 'workflow_job_template') {
             workflowTemplate.create().postLaunch({
                 id: vm.promptData.template,
                 launchData: jobLaunchData
             }).then((launchRes) => {
                 $state.go('workflowResults', { id: launchRes.data.workflow_job }, { reload: true });
-            }).catch(createErrorHandler('launch workflow job template', 'POST'));
+            }).catch(createErrorHandler(templatesStrings.get('error.JOB_TEMPLATE_NOT_FOUND'), 'POST'));
         }
     };
 }

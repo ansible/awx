@@ -84,7 +84,9 @@ function TemplatesStrings (BaseString) {
         UNKNOWN: t.s('Unable to determine template type.'),
         SCHEDULE: t.s('Unable to schedule job.'),
         COPY: t.s('Unable to copy template.'),
-        INVALID: t.s('Resources are missing from this template.')
+        INVALID: t.s('Resources are missing from this template.'),
+        WORKFLOW_TEMPLATE_NOT_FOUND: t.s('launch workflow job template'),
+        JOB_TEMPLATE_NOT_FOUND: t.s('launch job template'),
     };
 
     ns.warnings = {
