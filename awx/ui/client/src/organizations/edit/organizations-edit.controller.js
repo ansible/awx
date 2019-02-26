@@ -56,7 +56,7 @@ export default ['$scope', '$location', '$stateParams', 'OrgAdminLookup',
 
             $scope.organization_name = data.name;
             for (fld in form.fields) {
-                if (data[fld]) {
+                if (typeof data[fld] !== 'undefined') {
                     $scope[fld] = data[fld];
                     master[fld] = data[fld];
                 }
@@ -96,6 +96,9 @@ export default ['$scope', '$location', '$stateParams', 'OrgAdminLookup',
             Wait('start');
             for (fld in form.fields) {
                 params[fld] = $scope[fld];
+            }
+            if (!params.max_hosts || params.max_hosts === '') {
+                params.max_hosts = 0;
             }
             Rest.setUrl(defaultUrl + id + '/');
             Rest.put(params)

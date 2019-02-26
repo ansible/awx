@@ -46,6 +46,9 @@ export default ['$scope', '$rootScope', '$location', '$stateParams',
             for (fld in form.fields) {
                 params[fld] = $scope[fld];
             }
+            if (!params.max_hosts || params.max_hosts === '') {
+                params.max_hosts = 0;
+            }
             var url = GetBasePath(base);
             url += (base !== 'organizations') ? $stateParams.project_id + '/organizations/' : '';
             Rest.setUrl(url);
@@ -71,7 +74,7 @@ export default ['$scope', '$rootScope', '$location', '$stateParams',
                     let explanation = _.has(data, "name") ? data.name[0] : "";
                     ProcessErrors($scope, data, status, OrganizationForm, {
                         hdr: 'Error!',
-                        msg: `Failed to save organization. PUT status: ${status}. ${explanation}`
+                        msg: `Failed to save organization. POST status: ${status}. ${explanation}`
                     });
                 });
         };
