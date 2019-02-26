@@ -14,6 +14,7 @@ import {
   PageSection
 } from '@patternfly/react-core';
 
+import OrganizationAccess from './OrganizationAccess';
 import OrganizationDetail from './OrganizationDetail';
 import OrganizationEdit from './OrganizationEdit';
 import OrganizationNotifications from './OrganizationNotifications';
@@ -141,7 +142,14 @@ class Organization extends Component {
             )}
             <Route
               path="/organizations/:id/access"
-              render={() => <CardBody><h1><Trans>Access</Trans></h1></CardBody>}
+              render={() => (
+                <OrganizationAccess
+                  api={api}
+                  match={match}
+                  location={location}
+                  history={history}
+                />
+              )}
             />
             <Route
               path="/organizations/:id/teams"

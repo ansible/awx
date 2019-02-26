@@ -5,6 +5,8 @@ const API_V2 = `${API_ROOT}v2/`;
 const API_CONFIG = `${API_V2}config/`;
 const API_ORGANIZATIONS = `${API_V2}organizations/`;
 const API_INSTANCE_GROUPS = `${API_V2}instance_groups/`;
+const API_USERS = `${API_V2}users/`;
+const API_TEAMS = `${API_V2}teams/`;
 
 const LOGIN_CONTENT_TYPE = 'application/x-www-form-urlencoded';
 
@@ -64,6 +66,12 @@ class APIClient {
     return this.http.post(API_ORGANIZATIONS, data);
   }
 
+  getOrganzationAccessList (id) {
+    const endpoint = `${API_ORGANIZATIONS}${id}/access_list/`;
+
+    return this.http.get(endpoint);
+  }
+
   getOrganizationDetails (id) {
     const endpoint = `${API_ORGANIZATIONS}${id}/`;
 
@@ -74,6 +82,24 @@ class APIClient {
     const endpoint = `${API_ORGANIZATIONS}${id}/instance_groups/`;
 
     return this.http.get(endpoint, { params });
+  }
+
+  getOrganizationUserRoles (id) {
+    const endpoint = `${API_USERS}${id}/roles/`;
+
+    return this.http.get(endpoint);
+  }
+
+  getUserTeams (id) {
+    const endpoint = `${API_USERS}${id}/teams/`;
+
+    return this.http.get(endpoint);
+  }
+
+  getTeamRoles (id) {
+    const endpoint = `${API_TEAMS}${id}/roles/`;
+
+    return this.http.get(endpoint);
   }
 
   getOrganizationNotifications (id, params = {}) {
