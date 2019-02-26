@@ -13,8 +13,7 @@
     <span ng-show="!vm.hideCounts && !vm.running" class="at-Panel-headingTitleBadge at-Panel-headingTitleBadge--inline">{{ vm.hosts || 1 }}</span>
 
     <span class="at-Panel-label">{{:: vm.strings.get('stats.ELAPSED') }}</span>
-    <span ng-show="vm.running" class="at-Panel-headingTitleBadge at-Panel-headingTitleBadge--inline">...</span>
-    <span ng-show="!vm.running" class="at-Panel-headingTitleBadge at-Panel-headingTitleBadge--inline">
+    <span class="at-Panel-headingTitleBadge at-Panel-headingTitleBadge--inline">
         {{ (vm.elapsed * 1000 || 0) | duration: "hh:mm:ss"}}
     </span>
 
