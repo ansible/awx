@@ -25,14 +25,14 @@ function PromptService (Empty, $filter)  {
               hasDefaultExtraVars = _.get(params, 'launchConf.defaults.extra_vars');
 
         if(hasCurrentExtraVars && hasDefaultExtraVars) {
-            extraVars = _.merge(jsyaml.safeLoad(params.launchConf.defaults.extra_vars), params.currentValues.extra_data);
+            extraVars = jsyaml.safeDump(_.merge(jsyaml.safeLoad(params.launchConf.defaults.extra_vars), params.currentValues.extra_data));
         } else if(hasCurrentExtraVars) {
             extraVars = params.currentValues.extra_data;
         } else if(hasDefaultExtraVars) {
-            extraVars = jsyaml.safeLoad(params.launchConf.defaults.extra_vars);
+            extraVars = params.launchConf.defaults.extra_vars;
         }
 
-        prompts.variables.value = extraVars && extraVars !== '' ? '---\n' + jsyaml.safeDump(extraVars) : '---\n';
+        prompts.variables.value = extraVars && extraVars !== '' ? extraVars : '---\n';
         prompts.verbosity.choices = _.get(params, 'launchOptions.actions.POST.verbosity.choices', []).map(c => ({label: c[1], value: c[0]}));
         prompts.verbosity.value = _.has(params, 'currentValues.verbosity') && params.currentValues.verbosity ? _.find(prompts.verbosity.choices, item => item.value === params.currentValues.verbosity) : _.find(prompts.verbosity.choices, item => item.value === params.launchConf.defaults.verbosity);
         prompts.jobType.choices = _.get(params, 'launchOptions.actions.POST.job_type.choices', []).map(c => ({label: c[1], value: c[0]}));
