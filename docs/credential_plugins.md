@@ -173,3 +173,22 @@ def my_key_signer(unsigned_value_from_awx, **kwargs):
         public_data=unsigned_value_from_awx
     )
 ```
+
+Programmatic Secret Fetching
+----------------------------
+If you want to programmatically fetch secrets from a supported external secret
+management system (for example, if you wanted to compose an AWX database connection
+string in `/etc/tower/conf.d/postgres.py` using an external system rather than
+storing the password in plaintext on your disk), doing so is fairly easy:
+
+```python
+from awx.main.credential_plugins import hashivault
+hashivault.hashivault_kv_plugin.backend(
+    '',
+    url='https://hcv.example.org',
+    token='some-valid-token',
+    api_version='v2',
+    secret_path='/path/to/secret',
+    secret_key='dbpass'
+)
+```
