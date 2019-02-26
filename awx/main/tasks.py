@@ -70,6 +70,7 @@ from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja
 from awx.main.utils.reload import stop_local_services
 from awx.main.utils.pglock import advisory_lock
 from awx.main.consumers import emit_channel_notification
+from awx.main import analytics
 from awx.conf import settings_registry
 
 from rest_framework.exceptions import PermissionDenied
