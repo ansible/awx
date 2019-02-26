@@ -1,5 +1,6 @@
 from .plugin import CredentialPlugin
 
+from django.utils.translation import ugettext_lazy as _
 from azure.keyvault import KeyVaultClient, KeyVaultAuthentication
 from azure.common.credentials import ServicePrincipalCredentials
 
@@ -7,32 +8,32 @@ from azure.common.credentials import ServicePrincipalCredentials
 azure_keyvault_inputs = {
     'fields': [{
         'id': 'url',
-        'label': 'Vault URL (DNS Name)',
+        'label': _('Vault URL (DNS Name)'),
         'type': 'string',
     }, {
         'id': 'client',
-        'label': 'Client ID',
+        'label': _('Client ID'),
         'type': 'string'
     }, {
         'id': 'secret',
-        'label': 'Client Secret',
+        'label': _('Client Secret'),
         'type': 'string',
         'secret': True,
     }, {
         'id': 'tenant',
-        'label': 'Tenant ID',
+        'label': _('Tenant ID'),
         'type': 'string'
     }],
     'metadata': [{
         'id': 'secret_field',
-        'label': 'Secret Name',
+        'label': _('Secret Name'),
         'type': 'string',
-        'help_text': 'The name of the secret to look up.',
+        'help_text': _('The name of the secret to look up.'),
     }, {
         'id': 'secret_version',
-        'label': 'Secret Version',
+        'label': _('Secret Version'),
         'type': 'string',
-        'help_text': 'Used to specify a specific secret version (if left empty, the latest version will be used).',
+        'help_text': _('Used to specify a specific secret version (if left empty, the latest version will be used).'),
     }],
     'required': ['url', 'client', 'secret', 'tenant', 'secret_field'],
 }

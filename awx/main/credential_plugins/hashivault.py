@@ -6,26 +6,27 @@ from urllib.parse import urljoin
 from .plugin import CredentialPlugin
 
 import requests
+from django.utils.translation import ugettext_lazy as _
 
 
 base_inputs = {
     'fields': [{
         'id': 'url',
-        'label': 'Server URL',
+        'label': _('Server URL'),
         'type': 'string',
-        'help_text': 'The URL to the HashiCorp Vault',
+        'help_text': _('The URL to the HashiCorp Vault'),
     }, {
         'id': 'token',
-        'label': 'Token',
+        'label': _('Token'),
         'type': 'string',
         'secret': True,
-        'help_text': 'The access token used to authenticate to the Vault server',
+        'help_text': _('The access token used to authenticate to the Vault server'),
     }],
     'metadata': [{
         'id': 'secret_path',
-        'label': 'Path to Secret',
+        'label': _('Path to Secret'),
         'type': 'string',
-        'help_text': 'The path to the secret e.g., /some-engine/some-secret/',
+        'help_text': _('The path to the secret e.g., /some-engine/some-secret/'),
     }],
     'required': ['url', 'token', 'secret_path'],
 }
@@ -33,35 +34,35 @@ base_inputs = {
 hashi_kv_inputs = copy.deepcopy(base_inputs)
 hashi_kv_inputs['fields'].append({
     'id': 'api_version',
-    'label': 'API Version',
+    'label': _('API Version'),
     'choices': ['v1', 'v2'],
-    'help_text': 'API v1 is for static key/value lookups.  API v2 is for versioned key/value lookups.',
+    'help_text': _('API v1 is for static key/value lookups.  API v2 is for versioned key/value lookups.'),
     'default': 'v1',
 })
 hashi_kv_inputs['metadata'].extend([{
     'id': 'secret_key',
-    'label': 'Key Name',
+    'label': _('Key Name'),
     'type': 'string',
-    'help_text': 'The name of the key to look up in the secret.',
+    'help_text': _('The name of the key to look up in the secret.'),
 }, {
     'id': 'secret_version',
-    'label': 'Secret Version (v2 only)',
+    'label': _('Secret Version (v2 only)'),
     'type': 'string',
-    'help_text': 'Used to specify a specific secret version (if left empty, the latest version will be used).',
+    'help_text': _('Used to specify a specific secret version (if left empty, the latest version will be used).'),
 }])
 hashi_kv_inputs['required'].extend(['api_version', 'secret_key'])
 
 hashi_ssh_inputs = copy.deepcopy(base_inputs)
 hashi_ssh_inputs['metadata'].extend([{
     'id': 'role',
-    'label': 'Role Name',
+    'label': _('Role Name'),
     'type': 'string',
-    'help_text': 'The name of the role used to sign.'
+    'help_text': _('The name of the role used to sign.')
 }, {
     'id': 'valid_principals',
-    'label': 'Valid Principals',
+    'label': _('Valid Principals'),
     'type': 'string',
-    'help_text': 'Valid principals (either usernames or hostnames) that the certificate should be signed for.',
+    'help_text': _('Valid principals (either usernames or hostnames) that the certificate should be signed for.'),
 }])
 hashi_ssh_inputs['required'].extend(['role'])
 
