@@ -1165,15 +1165,42 @@ class CredentialAccess(BaseAccess):
 
 class CredentialInputSourceAccess(BaseAccess):
     '''
-    I can see credential input sources when:
-     - I'm a superuser (TODO: Update)
-    I can create credential input sources when:
-     - I'm a superuser (TODO: Update)
-    I can delete credential input sources when:
-     - I'm a superuser (TODO: Update)
+    I can see a CredentialInputSource when:
+     - I can see the associated target_credential
+    I can create/change a CredentialInputSource when:
+     - I'm an admin of the associated target_credential
+     - I have use access to the associated source credential
+    I can delete a CredentialInputSource when:
+     - I'm an admin of the associated target_credential
     '''
 
     model = CredentialInputSource
+
+    def filtered_queryset(self):
+        return CredentialInputSource.objects.filter(
+            target_credential__in=Credential.accessible_pk_qs(self.user, 'read_role'))
+
+    @check_superuser
+    def can_read(self, obj):
+        return self.user in obj.target_credential.read_role
+
+    @check_superuser
+    def can_add(self, data):
+        return (
+            self.check_related('target_credential', Credential, data, role_field='admin_role') and
+            self.check_related('source_credential', Credential, data, role_field='use_role')
+        )
+
+    @check_superuser
+    def can_change(self, obj, data):
+        if self.can_add(data) is False:
+            return False
+
+        return self.user in obj.target_credential.admin_role
+
+    @check_superuser
+    def can_delete(self, obj):
+        return self.user in obj.target_credential.admin_role
 
 
 class TeamAccess(BaseAccess):
