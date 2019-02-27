@@ -1467,7 +1467,7 @@ class CredentialInputSourceSubList(SubListCreateAttachDetachAPIView):
     model = models.CredentialInputSource
     serializer_class = serializers.CredentialInputSourceSerializer
     parent_model = models.Credential
-    relationship = 'input_source'
+    relationship = 'input_sources'
     parent_key = 'target_credential'
 
 
