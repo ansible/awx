@@ -284,10 +284,6 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         'admin_role',
     ])
 
-    def __init__(self, *args, **kwargs):
-        super(Credential, self).__init__(*args, **kwargs)
-        self.dynamic_input_fields = self._get_dynamic_input_field_names()
-
     def __getattr__(self, item):
         if item != 'inputs':
             if item in V1Credential.FIELDS:
@@ -376,6 +372,14 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
             else:
                 needed.append('vault_password')
         return needed
+
+    @property
+    def dynamic_input_fields(self):
+        dynamic_input_fields = getattr(self, '_dynamic_input_fields', None)
+        if dynamic_input_fields is None:
+            self._dynamic_input_fields = self._get_dynamic_input_field_names()
+            return self._dynamic_input_fields
+        return dynamic_input_fields
 
     def _password_field_allows_ask(self, field):
         return field in self.credential_type.askable_fields
