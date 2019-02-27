@@ -47,6 +47,7 @@ dockerhub_base=ansible
 # memcached_mem_limit=2
 # management_cpu_limit=2000
 # management_mem_limit=2
+memcached_port=11211
 
 # Common Docker parameters
 awx_task_hostname=awx
@@ -90,6 +91,7 @@ pg_port=5432
 # RabbitMQ Configuration
 rabbitmq_password=awxpass
 rabbitmq_erlang_cookie=cookiemonster
+rabbitmq_port=5672
 
 # Use a local distribution build container image for building the AWX package
 # This is helpful if you don't want to bother installing the build-time dependencies as

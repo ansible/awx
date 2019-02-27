@@ -157,6 +157,10 @@ spec:
               value: {{ pg_hostname|default('postgresql') }}
             - name: DATABASE_PORT
               value: "{{ pg_port|default('5432') }}"
+            - name: RABBIT_PORT
+              value: "{{ rabbitmq_port|default('5672') }}"
+            - name: MEMCACHED_PORT
+              value: "{{ memcached_port|default('11211') }}"
             - name: DATABASE_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -205,6 +209,10 @@ spec:
               value: {{ pg_hostname|default('postgresql') }}
             - name: DATABASE_PORT
               value: "{{ pg_port|default('5432') }}"
+            - name: RABBIT_PORT
+              value: "{{ rabbitmq_port|default('5672') }}"
+            - name: MEMCACHED_PORT
+              value: "{{ memcached_port|default('11211') }}"
             - name: DATABASE_PASSWORD
               valueFrom:
                 secretKeyRef:
