@@ -35,9 +35,9 @@ class Migration(migrations.Migration):
                 ('metadata', awx.main.fields.DynamicCredentialInputField(blank=True, default={})),
                 ('created_by', models.ForeignKey(default=None, editable=False, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name="{'class': 'credentialinputsource', 'model_name': 'credentialinputsource', 'app_label': 'main'}(class)s_created+", to=settings.AUTH_USER_MODEL)),
                 ('modified_by', models.ForeignKey(default=None, editable=False, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name="{'class': 'credentialinputsource', 'model_name': 'credentialinputsource', 'app_label': 'main'}(class)s_modified+", to=settings.AUTH_USER_MODEL)),
-                ('source_credential', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='target_input_source', to='main.Credential')),
+                ('source_credential', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='target_input_sources', to='main.Credential')),
                 ('tags', taggit.managers.TaggableManager(blank=True, help_text='A comma-separated list of tags.', through='taggit.TaggedItem', to='taggit.Tag', verbose_name='Tags')),
-                ('target_credential', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='input_source', to='main.Credential')),
+                ('target_credential', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='input_sources', to='main.Credential')),
             ],
         ),
         migrations.AlterField(
