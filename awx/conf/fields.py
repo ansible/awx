@@ -1,4 +1,5 @@
 # Python
+import os
 import logging
 import urllib.parse as urlparse
 from collections import OrderedDict
@@ -94,6 +95,26 @@ class StringListBooleanField(ListField):
         except TypeError:
             pass
         self.fail('type_error', input_type=type(data))
+
+
+class StringListPathField(StringListField):
+
+    default_error_messages = {
+        'type_error': _('Expected list of strings but got {input_type} instead.'),
+        'path_error': _('{path} is not a valid path choice.'),
+    }
+
+    def to_internal_value(self, paths):
+        if isinstance(paths, (list, tuple)):
+            for p in paths:
+                if not isinstance(p, str):
+                    self.fail('type_error', input_type=type(p))
+                if not os.path.exists(p):
+                    self.fail('path_error', path=p)
+
+            return super(StringListPathField, self).to_internal_value(sorted({os.path.normpath(path) for path in paths}))
+        else:
+            self.fail('type_error', input_type=type(paths))
 
 
 class URLField(CharField):

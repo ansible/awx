@@ -177,9 +177,18 @@ def test_get_custom_venv_choices():
 
     with TemporaryDirectory(dir=settings.BASE_VENV_PATH, prefix='tmp') as temp_dir:
         os.makedirs(os.path.join(temp_dir, 'bin', 'activate'))
-        assert sorted(common.get_custom_venv_choices()) == [
+
+        custom_venv_dir = os.path.join(temp_dir, 'custom')
+        custom_venv_1 = os.path.join(custom_venv_dir, 'venv-1')
+        custom_venv_awx = os.path.join(custom_venv_dir, 'custom', 'awx')
+
+        os.makedirs(os.path.join(custom_venv_1, 'bin', 'activate'))
+        os.makedirs(os.path.join(custom_venv_awx, 'bin', 'activate'))
+
+        assert sorted(common.get_custom_venv_choices([custom_venv_dir])) == [
             bundled_venv,
-            os.path.join(temp_dir, '')
+            os.path.join(temp_dir, ''),
+            os.path.join(custom_venv_1, '')
         ]
 
 
