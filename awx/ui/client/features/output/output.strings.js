@@ -22,6 +22,7 @@ function OutputStrings (BaseString) {
         CREDENTIAL: t.s('View the Credential'),
         EXPAND_OUTPUT: t.s('Expand Output'),
         EXTRA_VARS: t.s('Read-only view of extra variables added to the job template'),
+        HOST_LIMIT: t.s('When this field is true, the job\'s inventory belongs to an organization that has exceeded it\'s limit of hosts as defined by the system administrator.'),
         INVENTORY: t.s('View the Inventory'),
         INVENTORY_SCM: t.s('View the Project'),
         INVENTORY_SCM_JOB: t.s('View Project checkout results'),

@@ -242,9 +242,10 @@ function getHostLimitErrorDetails () {
     }
 
     const label = strings.get('labels.HOST_LIMIT_ERROR');
+    const tooltip = strings.get('tooltips.HOST_LIMIT');
     const value = resource.model.get('org_host_limit_error');
 
-    return { label, value };
+    return { tooltip, label, value };
 }
 
 function getLaunchedByDetails () {
