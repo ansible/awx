@@ -1,5 +1,5 @@
 import React from 'react';
-import AccessList from '../../../../components/AccessList/Access.list';
+import AccessList from '../../../../components/AccessList';
 
 class OrganizationAccess extends React.Component {
   constructor (props) {

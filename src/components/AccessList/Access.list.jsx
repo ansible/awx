@@ -14,8 +14,8 @@ import {
 } from 'react-router-dom';
 
 import BasicChip from '../BasicChip/BasicChip';
-import Pagination from '../Pagination/Pagination';
-import DataListToolbar from '../DataListToolbar/DataListToolbar';
+import Pagination from '../Pagination';
+import DataListToolbar from '../DataListToolbar';
 
 import {
   parseQueryString,
@@ -91,7 +91,6 @@ class AccessList extends React.Component {
       page,
       page_size,
       count: null,
-      results: [],
       sortOrder: 'ascending',
       sortedColumnKey: 'username',
       isCompact: true,
@@ -107,19 +106,22 @@ class AccessList extends React.Component {
 
   componentDidMount () {
     const queryParams = this.getQueryParams();
-
-    this.fetchOrgAccessList(queryParams);
+    try {
+      this.fetchOrgAccessList(queryParams);
+    } catch (error) {
+      this.setState({ error });
+    }
   }
 
-  onExpand = () => {
+  onExpand () {
     this.setState({ isCompact: false });
   }
 
-  onCompact = () => {
+  onCompact () {
     this.setState({ isCompact: true });
   }
 
-  onSetPage = (pageNumber, pageSize) => {
+  onSetPage (pageNumber, pageSize) {
     const { sortOrder, sortedColumnKey } = this.state;
     const page = parseInt(pageNumber, 10);
     const page_size = parseInt(pageSize, 10);
@@ -132,18 +134,9 @@ class AccessList extends React.Component {
     const queryParams = this.getQueryParams({ page, page_size, order_by });
 
     this.fetchOrgAccessList(queryParams);
-  };
-
-  getQueryParams (overrides = {}) {
-    const { location } = this.props;
-    const { search } = location;
-
-    const searchParams = parseQueryString(search.substring(1));
-
-    return Object.assign({}, this.defaultParams, searchParams, overrides);
   }
 
-  onSort = (sortedColumnKey, sortOrder) => {
+  onSort (sortedColumnKey, sortOrder) {
     const { page_size } = this.state;
 
     let order_by = sortedColumnKey;
@@ -155,7 +148,16 @@ class AccessList extends React.Component {
     const queryParams = this.getQueryParams({ order_by, page_size });
 
     this.fetchOrgAccessList(queryParams);
-  };
+  }
+
+  getQueryParams (overrides = {}) {
+    const { location } = this.props;
+    const { search } = location;
+
+    const searchParams = parseQueryString(search.substring(1));
+
+    return Object.assign({}, this.defaultParams, searchParams, overrides);
+  }
 
   async fetchOrgAccessList (queryParams) {
     const { match, getAccessList, getUserRoles, getTeamRoles, getUserTeams } = this.props;
@@ -186,7 +188,7 @@ class AccessList extends React.Component {
         results,
       };
 
-      results.map(async result => {
+      results.forEach(async result => {
         result.user_roles = [];
         result.team_roles = [];
         // Grab each Role Type and set as a top-level value
@@ -197,7 +199,7 @@ class AccessList extends React.Component {
         // Grab User Roles and set as a top-level value
         try {
           const resp = await getUserRoles(result.id);
-          const roles = resp.data.results;
+          const roles = resp.data.results || [];
           roles.forEach(role => {
             result.user_roles.push(role);
           });
@@ -209,14 +211,18 @@ class AccessList extends React.Component {
         // Grab Team Roles and set as a top-level value
         try {
           const team_data = await getUserTeams(result.id);
-          const teams = team_data.data.results;
+          const teams = team_data.data.results || [];
           teams.forEach(async team => {
-            let team_roles = await getTeamRoles(team.id);
-            team_roles = team_roles.data.results;
-            team_roles.forEach(role => {
-              result.team_roles.push(role);
-            });
-            this.setState(stateToUpdate);
+            try {
+              let team_roles = await getTeamRoles(team.id);
+              team_roles = team_roles.data.results || [];
+              team_roles.forEach(role => {
+                result.team_roles.push(role);
+              });
+              this.setState(stateToUpdate);
+            } catch (error) {
+              this.setState({ error });
+            }
           });
         } catch (error) {
           this.setState({ error });
@@ -239,85 +245,90 @@ class AccessList extends React.Component {
       sortOrder,
       isCompact,
     } = this.state;
-
-    if (!results) {
-      return null;
-    }
     return (
-      <I18n>
-        {({ i18n }) => (
+      <Fragment>
+        {!results && (
+          <h1>Loading...</h1> // TODO: replace with something nicer
+        )}
+        {results && (
           <Fragment>
             <DataListToolbar
               sortedColumnKey={sortedColumnKey}
               sortOrder={sortOrder}
               columns={this.columns}
-              onSearch={() => {}}
+              onSearch={() => { }}
               onSort={this.onSort}
               onCompact={this.onCompact}
               onExpand={this.onExpand}
               isCompact={isCompact}
               showExpandCollapse
             />
-            <DataList aria-label={i18n._(t`Access List`)}>
-              {results.map(result => (
-                <DataListItem aria-labelledby={i18n._(t`access-list-item`)} key={result.id}>
-                  <DataListCell>
-                    <Detail
-                      label={result.username}
-                      value={result.roleType}
-                      url={result.url}
-                      isBadge
-                    />
-                    {result.first_name || result.last_name ? (
-                      <Detail
-                        label={i18n._(t`Name`)}
-                        value={`${result.first_name} ${result.last_name}`}
-                        url={null}
-                        customStyles={isCompact ? hiddenStyle : null}
-                      />
-                    ) : (
-                      null
-                    )}
-                  </DataListCell>
-                  <DataListCell>
-                    <Detail
-                      label=" "
-                      value=" "
-                      url={null}
-                      customStyles={isCompact ? hiddenStyle : null}
-                    />
-                    {result.user_roles.length > 0 && (
-                      <ul style={isCompact
-                        ? { ...userRolesWrapperStyle, ...hiddenStyle }
-                        : userRolesWrapperStyle}
-                      >
-                        <Text component={TextVariants.h6} style={detailLabelStyle}>{i18n._(t`User Roles`)}</Text>
-                        {result.user_roles.map(role => (
-                          <BasicChip
-                            key={role.id}
-                            text={role.name}
+            <Fragment>
+              <I18n>
+                {({ i18n }) => (
+                  <DataList aria-label={i18n._(t`Access List`)}>
+                    {results.map(result => (
+                      <DataListItem aria-labelledby={i18n._(t`access-list-item`)} key={result.id}>
+                        <DataListCell>
+                          <Detail
+                            label={result.username}
+                            value={result.roleType}
+                            url={result.url}
+                            isBadge
                           />
-                        ))}
-                      </ul>
-                    )}
-                    {result.team_roles.length > 0 && (
-                      <ul style={isCompact
-                        ? { ...userRolesWrapperStyle, ...hiddenStyle }
-                        : userRolesWrapperStyle}
-                      >
-                        <Text component={TextVariants.h6} style={detailLabelStyle}>{i18n._(t`Team Roles`)}</Text>
-                        {result.team_roles.map(role => (
-                          <BasicChip
-                            key={role.id}
-                            text={role.name}
+                          {result.first_name || result.last_name ? (
+                            <Detail
+                              label={i18n._(t`Name`)}
+                              value={`${result.first_name} ${result.last_name}`}
+                              url={null}
+                              customStyles={isCompact ? hiddenStyle : null}
+                            />
+                          ) : (
+                            null
+                          )}
+                        </DataListCell>
+                        <DataListCell>
+                          <Detail
+                            label=" "
+                            value=" "
+                            url={null}
+                            customStyles={isCompact ? hiddenStyle : null}
                           />
-                        ))}
-                      </ul>
-                    )}
-                  </DataListCell>
-                </DataListItem>
-              ))}
-            </DataList>
+                          {result.user_roles.length > 0 && (
+                            <ul style={isCompact
+                              ? { ...userRolesWrapperStyle, ...hiddenStyle }
+                              : userRolesWrapperStyle}
+                            >
+                              <Text component={TextVariants.h6} style={detailLabelStyle}>{i18n._(t`User Roles`)}</Text>
+                              {result.user_roles.map(role => (
+                                <BasicChip
+                                  key={role.id}
+                                  text={role.name}
+                                />
+                              ))}
+                            </ul>
+                          )}
+                          {result.team_roles.length > 0 && (
+                            <ul style={isCompact
+                              ? { ...userRolesWrapperStyle, ...hiddenStyle }
+                              : userRolesWrapperStyle}
+                            >
+                              <Text component={TextVariants.h6} style={detailLabelStyle}>{i18n._(t`Team Roles`)}</Text>
+                              {result.team_roles.map(role => (
+                                <BasicChip
+                                  key={role.id}
+                                  text={role.name}
+                                />
+                              ))}
+                            </ul>
+                          )}
+                        </DataListCell>
+                      </DataListItem>
+                    ))}
+                  </DataList>
+                )}
+              </I18n>
+            </Fragment>
             <Pagination
               count={count}
               page={page}
@@ -325,10 +336,11 @@ class AccessList extends React.Component {
               page_size={page_size}
               onSetPage={this.onSetPage}
             />
-            { error ? <div>{error}</div> : '' }
+            {error ? <div>{error}</div> : ''}
           </Fragment>
         )}
-      </I18n>
+      </Fragment>
+
     );
   }
 }
