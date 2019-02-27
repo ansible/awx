@@ -1460,7 +1460,7 @@ class CredentialInputSourceList(ListCreateAPIView):
     serializer_class = serializers.CredentialInputSourceSerializer
 
 
-class CredentialInputSourceSubList(SubListCreateAttachDetachAPIView):
+class CredentialInputSourceSubList(SubListCreateAPIView):
 
     view_name = _("Credential Input Sources")
 
