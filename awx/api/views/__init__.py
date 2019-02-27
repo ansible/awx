@@ -1453,7 +1453,7 @@ class CredentialInputSourceDetail(RetrieveUpdateDestroyAPIView):
     serializer_class = serializers.CredentialInputSourceSerializer
 
 
-class CredentialInputSourceList(ListAPIView):
+class CredentialInputSourceList(ListCreateAPIView):
 
     view_name = _("Credential Input Sources")
 
