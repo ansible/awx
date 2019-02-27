@@ -99,12 +99,22 @@
 .at-List-container {
     border: @at-border-default-width solid @at-color-list-border;
     border-radius: @at-border-radius;
+
+    & > div:last-of-type {
+        border-bottom-left-radius:@at-border-radius;
+    }
 }
 
 // Remove top left and right rounded corners of a list if there is a toolbar above it
 .at-List-toolbar--attached + .at-List > .at-List-container {
     border-top-left-radius: 0;
     border-top-right-radius: 0;
+}
+
+.at-List-toolbar--attached + .at-List > .at-List-container{
+    .at-Row--active {
+        border-top-left-radius: 0;
+    }
 }
 
 .at-List-toolbar--attached + .at-List {
