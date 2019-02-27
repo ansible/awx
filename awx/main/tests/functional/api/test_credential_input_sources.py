@@ -77,16 +77,18 @@ def test_associate_credential_input_source_with_invalid_metadata(get, post, admi
 
 
 @pytest.mark.django_db
-def test_cannot_create_from_list(get, post, admin, vault_credential, external_credential):
+def test_create_from_list(get, post, admin, vault_credential, external_credential):
     params = {
         'source_credential': external_credential.pk,
         'target_credential': vault_credential.pk,
         'input_field_name': 'vault_password',
+        'metadata': {'key': 'some_example_key'},
     }
     assert post(reverse(
         'api:credential_input_source_list',
         kwargs={'version': 'v2'}
-    ), params, admin).status_code == 405
+    ), params, admin).status_code == 201
+    assert CredentialInputSource.objects.count() == 1
 
 
 @pytest.mark.django_db
@@ -208,6 +210,37 @@ def test_input_source_detail_rbac(get, post, patch, delete, admin, alice,
 
 
 @pytest.mark.django_db
+def test_input_source_create_rbac(get, post, patch, delete, alice,
+                                  vault_credential, external_credential,
+                                  other_external_credential):
+    sublist_url = reverse(
+        'api:credential_input_source_list',
+        kwargs={'version': 'v2'}
+    )
+    params = {
+        'target_credential': vault_credential.pk,
+        'source_credential': external_credential.pk,
+        'input_field_name': 'vault_password',
+        'metadata': {'key': 'some_key'},
+    }
+
+    # alice can't create the inv source because she has access to neither credential
+    response = post(sublist_url, params, alice)
+    assert response.status_code == 403
+
+    # alice still can't because she can't use the source credential
+    vault_credential.admin_role.members.add(alice)
+    response = post(sublist_url, params, alice)
+    assert response.status_code == 403
+
+    # alice can create an input source if she has permissions on both credentials
+    external_credential.use_role.members.add(alice)
+    response = post(sublist_url, params, alice)
+    assert response.status_code == 201
+    assert CredentialInputSource.objects.count() == 1
+
+
+@pytest.mark.django_db
 def test_input_source_rbac_swap_target_credential(get, post, put, patch, admin, alice,
                                                   machine_credential, vault_credential,
                                                   external_credential):
@@ -278,7 +311,7 @@ def test_create_credential_input_source_with_undefined_input_returns_400(post, a
     }
     response = post(sublist_url, params, admin)
     assert response.status_code == 400
-    assert response.data['input_field_name'] == ['Input field must be defined on target credential.']
+    assert response.data['input_field_name'] == ['Input field must be defined on target credential (options are vault_id, vault_password).']
 
 
 @pytest.mark.django_db

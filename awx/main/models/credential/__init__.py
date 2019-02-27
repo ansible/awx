@@ -1343,8 +1343,13 @@ class CredentialInputSource(PrimordialModel):
         return self.source_credential
 
     def clean_input_field_name(self):
-        if self.input_field_name not in self.target_credential.credential_type.defined_fields:
-            raise ValidationError(_('Input field must be defined on target credential.'))
+        defined_fields = self.target_credential.credential_type.defined_fields
+        if self.input_field_name not in defined_fields:
+            raise ValidationError(_(
+                'Input field must be defined on target credential (options are {}).'.format(
+                    ', '.join(sorted(defined_fields))
+                )
+            ))
         return self.input_field_name
 
     def save(self, *args, **kwargs):
