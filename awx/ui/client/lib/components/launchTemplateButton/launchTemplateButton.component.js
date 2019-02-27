@@ -56,7 +56,8 @@ function atLaunchTemplateCtrl (
                                     } else {
                                         $state.go('output', { id: data.job, type: 'playbook' }, { reload: true });
                                     }
-                                });
+                                })
+                                .catch(createErrorHandler('launch job template', 'POST'));
                         } else {
                             const promptData = {
                                 launchConf: launchData.data,
@@ -78,12 +79,14 @@ function atLaunchTemplateCtrl (
                                         });
                                         promptData.surveyQuestions = processed.surveyQuestions;
                                         vm.promptData = promptData;
-                                    });
+                                    })
+                                    .catch(createErrorHandler('get survey questions', 'GET'));
                             } else {
                                 vm.promptData = promptData;
                             }
                         }
-                    });
+                    })
+                    .catch(createErrorHandler('get launch options', 'GET'));
             } else if (vm.template.type === 'workflow_job_template') {
                 const selectedWorkflowJobTemplate = workflowTemplate.create();
                 const preLaunchPromises = [
@@ -99,7 +102,8 @@ function atLaunchTemplateCtrl (
                                 .postLaunch({ id: vm.template.id })
                                 .then(({ data }) => {
                                     $state.go('workflowResults', { id: data.workflow_job }, { reload: true });
-                                });
+                                })
+                                .catch(createErrorHandler('launch workflow job template', 'POST'));
                         } else {
                             launchData.data.defaults.extra_vars = wfjtData.data.extra_vars;
 
@@ -128,7 +132,8 @@ function atLaunchTemplateCtrl (
                                 vm.promptData = promptData;
                             }
                         }
-                    });
+                    })
+                    .catch(createErrorHandler('get launch options', 'GET'));
             } else {
                 Alert(templatesStrings.get('error.UNKNOWN'), templatesStrings.get('alert.UNKNOWN_LAUNCH'));
             }
