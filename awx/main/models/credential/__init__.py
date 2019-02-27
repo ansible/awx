@@ -1314,13 +1314,13 @@ class CredentialInputSource(PrimordialModel):
 
     target_credential = models.ForeignKey(
         'Credential',
-        related_name='input_source',
+        related_name='input_sources',
         on_delete=models.CASCADE,
         null=True,
     )
     source_credential = models.ForeignKey(
         'Credential',
-        related_name='target_input_source',
+        related_name='target_input_sources',
         on_delete=models.CASCADE,
         null=True,
     )
