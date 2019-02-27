@@ -198,10 +198,11 @@ describe('<Lookup />', () => {
         <Lookup
           lookup_header="Foo Bar"
           onLookupSave={() => { }}
-          data={mockData}
+          value={mockData}
           selected={[]}
           columns={mockColumns}
           sortedColumnKey="name"
+          getItems={() => { }}
         />
       </I18nProvider>
     ).find('Lookup');
@@ -217,10 +218,11 @@ describe('<Lookup />', () => {
         <Lookup
           lookup_header="Foo Bar"
           onLookupSave={() => { }}
-          data={mockData}
+          value={mockData}
           selected={[]}
           columns={mockColumns}
           sortedColumnKey="name"
+          getItems={() => { }}
         />
       </I18nProvider>
     ).find('Lookup');

@@ -12,6 +12,11 @@ describe('<Notifications />', () => {
           <Notifications
             match={{ path: '/organizations/:id/?tab=notifications', url: '/organizations/:id/?tab=notifications' }}
             location={{ search: '', pathname: '/organizations/:id/?tab=notifications' }}
+            getError={jest.fn()}
+            getNotifications={jest.fn()}
+            getSuccess={jest.fn()}
+            postError={jest.fn()}
+            postSuccess={jest.fn()}
           />
         </I18nProvider>
       </MemoryRouter>
@@ -25,6 +30,11 @@ describe('<Notifications />', () => {
           <Notifications
             match={{ path: '/organizations/:id/?tab=notifications', url: '/organizations/:id/?tab=notifications' }}
             location={{ search: '', pathname: '/organizations/:id/?tab=notifications' }}
+            getError={jest.fn()}
+            getNotifications={jest.fn()}
+            getSuccess={jest.fn()}
+            postError={jest.fn()}
+            postSuccess={jest.fn()}
           />
         </I18nProvider>
       </MemoryRouter>
@@ -39,6 +49,11 @@ describe('<Notifications />', () => {
           <Notifications
             match={{ path: '/organizations/:id/?tab=notifications', url: '/organizations/:id/?tab=notifications' }}
             location={{ search: '', pathname: '/organizations/:id/?tab=notifications' }}
+            getError={jest.fn()}
+            getNotifications={jest.fn()}
+            getSuccess={jest.fn()}
+            postError={jest.fn()}
+            postSuccess={jest.fn()}
           />
         </I18nProvider>
       </MemoryRouter>
@@ -54,6 +69,10 @@ describe('<Notifications />', () => {
           <Notifications
             match={{ path: '/organizations/:id/?tab=notifications', url: '/organizations/:id/?tab=notifications', params: { id: 1 } }}
             location={{ search: '', pathname: '/organizations/:id/?tab=notifications' }}
+            getError={jest.fn()}
+            getNotifications={jest.fn()}
+            getSuccess={jest.fn()}
+            postError={jest.fn()}
             postSuccess={postSuccessFn}
           />
         </I18nProvider>
@@ -75,6 +94,11 @@ describe('<Notifications />', () => {
           <Notifications
             match={{ path: '/organizations/:id/?tab=notifications', url: '/organizations/:id/?tab=notifications' }}
             location={{ search: '', pathname: '/organizations/:id/?tab=notifications' }}
+            getError={jest.fn()}
+            getNotifications={jest.fn()}
+            getSuccess={jest.fn()}
+            postError={jest.fn()}
+            postSuccess={jest.fn()}
           />
         </I18nProvider>
       </MemoryRouter>
@@ -90,7 +114,11 @@ describe('<Notifications />', () => {
           <Notifications
             match={{ path: '/organizations/:id/?tab=notifications', url: '/organizations/:id/?tab=notifications', params: { id: 1 } }}
             location={{ search: '', pathname: '/organizations/:id/?tab=notifications' }}
+            getError={jest.fn()}
+            getNotifications={jest.fn()}
+            getSuccess={jest.fn()}
             postError={postErrorFn}
+            postSuccess={jest.fn()}
           />
         </I18nProvider>
       </MemoryRouter>
@@ -141,6 +169,8 @@ describe('<Notifications />', () => {
             getNotifications={getNotificationsFn}
             getSuccess={getSuccessFn}
             getError={getErrorFn}
+            postError={jest.fn()}
+            postSuccess={jest.fn()}
           />
         </I18nProvider>
       </MemoryRouter>
