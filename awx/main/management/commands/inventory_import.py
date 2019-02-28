@@ -904,9 +904,26 @@ class Command(BaseCommand):
                 logger.error(LICENSE_MESSAGE % d)
             raise CommandError('License count exceeded!')
 
+    def check_org_host_limit(self):
+        license_info = get_licenser().validate()
+        if license_info.get('license_type', 'UNLICENSED') == 'open':
+            return
+
+        org = self.inventory.organization
+        if org is None or org.max_hosts == 0:
+            return
+
+        active_count = Host.objects.org_active_count(org.id)
+        if active_count > org.max_hosts:
+            raise CommandError('Host limit for organization exceeded!')
+
     def mark_license_failure(self, save=True):
         self.inventory_update.license_error = True
         self.inventory_update.save(update_fields=['license_error'])
+
+    def mark_org_limits_failure(self, save=True):
+        self.inventory_update.org_host_limit_error = True
+        self.inventory_update.save(update_fields=['org_host_limit_error'])
 
     def handle(self, *args, **options):
         self.verbosity = int(options.get('verbosity', 1))
@@ -959,6 +976,13 @@ class Command(BaseCommand):
             self.check_license()
         except CommandError as e:
             self.mark_license_failure(save=True)
+            raise e
+
+        try:
+            # Check the per-org host limits
+            self.check_org_host_limit()
+        except CommandError as e:
+            self.mark_org_limits_failure(save=True)
             raise e
 
         status, tb, exc = 'error', '', None
@@ -1032,9 +1056,17 @@ class Command(BaseCommand):
                         # If the license is not valid, a CommandError will be thrown, 
                         # and inventory update will be marked as invalid.
                         # with transaction.atomic() will roll back the changes.
+                        license_fail = True
                         self.check_license()
+
+                        # Check the per-org host limits
+                        license_fail = False
+                        self.check_org_host_limit()
                 except CommandError as e:
-                    self.mark_license_failure()
+                    if license_fail:
+                        self.mark_license_failure()
+                    else:
+                        self.mark_org_limits_failure()
                     raise e
 
                 if settings.SQL_DEBUG:
@@ -1062,7 +1094,6 @@ class Command(BaseCommand):
             else:
                 tb = traceback.format_exc()
                 exc = e
-            transaction.rollback()
 
         if self.invoked_from_dispatcher is False:
             with ignore_inventory_computed_fields():
@@ -1073,7 +1104,8 @@ class Command(BaseCommand):
                 self.inventory_source.status = status
                 self.inventory_source.save(update_fields=['status'])
 
-        if exc and isinstance(exc, CommandError):
-            sys.exit(1)
-        elif exc:
+        if exc:
+            logger.error(str(exc))
+            if isinstance(exc, CommandError):
+                sys.exit(1)
             raise exc

@@ -200,6 +200,30 @@ def test_update_organization(get, put, organization, alice, bob):
 
 
 @pytest.mark.django_db
+def test_update_organization_max_hosts(get, put, organization, admin, alice, bob):
+    # Admin users can get and update max_hosts
+    data = get(reverse('api:organization_detail', kwargs={'pk': organization.id}), user=admin, expect=200).data
+    assert organization.max_hosts == 0
+    data['max_hosts'] = 3
+    put(reverse('api:organization_detail', kwargs={'pk': organization.id}), data, user=admin, expect=200)
+    organization.refresh_from_db()
+    assert organization.max_hosts == 3
+
+    # Organization admins can get the data and can update other fields, but not max_hosts
+    organization.admin_role.members.add(alice)
+    data = get(reverse('api:organization_detail', kwargs={'pk': organization.id}), user=alice, expect=200).data
+    data['max_hosts'] = 5
+    put(reverse('api:organization_detail', kwargs={'pk': organization.id}), data, user=alice, expect=400)
+    organization.refresh_from_db()
+    assert organization.max_hosts == 3
+
+    # Ordinary users shouldn't be able to update either.
+    put(reverse('api:organization_detail', kwargs={'pk': organization.id}), data, user=bob, expect=403)
+    organization.refresh_from_db()
+    assert organization.max_hosts == 3
+
+
+@pytest.mark.django_db
 @mock.patch('awx.main.access.BaseAccess.check_license', lambda *a, **kw: True)
 def test_delete_organization(delete, organization, admin):
     delete(reverse('api:organization_detail', kwargs={'pk': organization.id}), user=admin, expect=204)

@@ -23,6 +23,19 @@ def test_admin_executing_permissions(deploy_jobtemplate, inventory, machine_cred
 
 @pytest.mark.django_db
 @pytest.mark.job_permissions
+def test_admin_executing_permissions_with_limits(deploy_jobtemplate, inventory, user):
+    admin_user = user('admin-user', True)
+
+    inventory.organization.max_hosts = 1
+    inventory.organization.save()
+    inventory.hosts.create(name="Existing host 1")
+    inventory.hosts.create(name="Existing host 2")
+
+    assert admin_user.can_access(JobTemplate, 'start', deploy_jobtemplate)
+
+
+@pytest.mark.django_db
+@pytest.mark.job_permissions
 def test_job_template_start_access(deploy_jobtemplate, user):
     common_user = user('test-user', False)
     deploy_jobtemplate.execute_role.members.add(common_user)

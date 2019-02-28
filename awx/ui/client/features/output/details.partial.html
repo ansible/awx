@@ -81,6 +81,26 @@
     </div>
 </div>
 
+<!-- HOST LIMIT ERROR DETAIL -->
+<div class="JobResults-resultRow" ng-show="vm.hostLimitError">
+    <label class="JobResults-resultRowLabel">
+        {{ vm.hostLimitError.label }}
+        <a id="awp-hostLimitError"
+            href=""
+            aw-pop-over="{{ vm.hostLimitError.tooltip }}"
+            data-placement="top"
+            data-container="body"
+            class="help-link"
+            title="{{ vm.hostLimitError.label }}"
+            tabindex="-1">
+                <i class="fa fa-question-circle"></i>
+        </a>
+    </label>
+    <div class="JobResults-resultRowText">
+        {{ vm.hostLimitError.value }}
+    </div>
+</div>
+
 <!-- START TIME DETAIL -->
 <div class="JobResults-resultRow" ng-if="vm.started">
     <label class="JobResults-resultRowLabel">{{ vm.started.label }}</label>

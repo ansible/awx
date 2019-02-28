@@ -1229,7 +1229,7 @@ class OrganizationSerializer(BaseSerializer):
 
     class Meta:
         model = Organization
-        fields = ('*', 'custom_virtualenv',)
+        fields = ('*', 'max_hosts', 'custom_virtualenv',)
 
     def get_related(self, obj):
         res = super(OrganizationSerializer, self).get_related(obj)
@@ -1264,6 +1264,20 @@ class OrganizationSerializer(BaseSerializer):
             else:
                 summary_dict['related_field_counts'] = counts_dict[obj.id]
         return summary_dict
+
+    def validate(self, attrs):
+        obj = self.instance
+        view = self.context['view']
+
+        obj_limit = getattr(obj, 'max_hosts', None)
+        api_limit = attrs.get('max_hosts')
+
+        if not view.request.user.is_superuser:
+            if api_limit is not None and api_limit != obj_limit:
+                # Only allow superusers to edit the max_hosts field
+                raise serializers.ValidationError(_('Cannot change max_hosts.'))
+
+        return super(OrganizationSerializer, self).validate(attrs)
 
 
 class ProjectOptionsSerializer(BaseSerializer):
@@ -2202,8 +2216,8 @@ class InventoryUpdateSerializer(UnifiedJobSerializer, InventorySourceOptionsSeri
 
     class Meta:
         model = InventoryUpdate
-        fields = ('*', 'inventory', 'inventory_source', 'license_error', 'source_project_update',
-                  'custom_virtualenv', '-controller_node',)
+        fields = ('*', 'inventory', 'inventory_source', 'license_error', 'org_host_limit_error',
+                  'source_project_update', 'custom_virtualenv', '-controller_node',)
 
     def get_related(self, obj):
         res = super(InventoryUpdateSerializer, self).get_related(obj)

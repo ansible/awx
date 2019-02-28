@@ -1653,6 +1653,10 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
         default=False,
         editable=False,
     )
+    org_host_limit_error = models.BooleanField(
+        default=False,
+        editable=False,
+    )
     source_project_update = models.ForeignKey(
         'ProjectUpdate',
         related_name='scm_inventory_updates',

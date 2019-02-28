@@ -5,9 +5,9 @@
  *************************************************/
 
 export default ['$state', '$stateParams', '$scope', 'RelatedHostsFormDefinition', 'ParseTypeChange',
-                'GenerateForm', 'HostsService', 'rbacUiControlService', 'GetBasePath', 'ToJSON', 'canAdd',
+                'GenerateForm', 'HostsService', 'GetBasePath', 'ToJSON', 'canAdd',
                 function($state, $stateParams, $scope, RelatedHostsFormDefinition, ParseTypeChange,
-                         GenerateForm, HostsService, rbacUiControlService, GetBasePath, ToJSON, canAdd) {
+                         GenerateForm, HostsService, GetBasePath, ToJSON, canAdd) {
 
         init();
 
