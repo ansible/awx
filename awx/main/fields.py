@@ -655,13 +655,7 @@ class CredentialInputField(JSONSchemaField):
                 )
             errors[error.schema['id']] = [error.message]
 
-        inputs = model_instance.credential_type.inputs
         defined_fields = model_instance.credential_type.defined_fields
-        for field in inputs.get('required', []):
-            if field in defined_fields and not value.get(field, None):
-                errors[field] = [_('required for %s') % (
-                    model_instance.credential_type.name
-                )]
 
         # `ssh_key_unlock` requirements are very specific and can't be
         # represented without complicated JSON schema

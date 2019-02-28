@@ -291,15 +291,17 @@ class TestJobExecution(object):
 
         # mock the job.credentials M2M relation so we can avoid DB access
         job._credentials = []
-        patch = mock.patch.object(UnifiedJob, 'credentials', mock.Mock(**{
+        mocked = mock.Mock(**{
             'all': lambda: job._credentials,
             'add': job._credentials.append,
             'filter.return_value': mock.Mock(
                 __iter__ = lambda *args: iter(job._credentials),
                 first = lambda: job._credentials[0]
             ),
-            'spec_set': ['all', 'add', 'filter']
-        }))
+            'prefetch_related': lambda _: mocked,
+            'spec_set': ['all', 'add', 'filter', 'prefetch_related']
+        })
+        patch = mock.patch.object(UnifiedJob, 'credentials', mocked)
         self.patches.append(patch)
         patch.start()
 
