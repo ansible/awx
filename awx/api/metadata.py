@@ -238,12 +238,10 @@ class JobTypeMetadata(Metadata):
         res = super(JobTypeMetadata, self).get_field_info(field)
 
         if field.field_name == 'job_type':
-            index = 0
-            for choice in res['choices']:
-                if choice[0] == 'scan':
-                    res['choices'].pop(index)
-                    break
-                index += 1
+            res['choices'] = [
+                choice for choice in res['choices']
+                if choice[0] != 'scan'
+            ]
         return res
 
 
@@ -253,7 +251,7 @@ class SublistAttachDetatchMetadata(Metadata):
         actions = super(SublistAttachDetatchMetadata, self).determine_actions(request, view)
         method = 'POST'
         if method in actions:
-            for field in actions[method]:
+            for field in list(actions[method].keys()):
                 if field == 'id':
                     continue
                 actions[method].pop(field)
