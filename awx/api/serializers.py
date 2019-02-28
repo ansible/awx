@@ -133,6 +133,8 @@ SUMMARIZABLE_FK_FIELDS = {
     'notification_template': DEFAULT_SUMMARY_FIELDS,
     'instance_group': {'id', 'name', 'controller_id'},
     'insights_credential': DEFAULT_SUMMARY_FIELDS,
+    'source_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'credential_type_id'),
+    'target_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'credential_type_id'),
 }
 
 
@@ -2817,29 +2819,16 @@ class CredentialSerializerCreate(CredentialSerializer):
 
 
 class CredentialInputSourceSerializer(BaseSerializer):
-    source_credential_name = serializers.SerializerMethodField(
-        read_only=True,
-        help_text=_('The name of the source credential.')
-    )
-    source_credential_type = serializers.SerializerMethodField(
-        read_only=True,
-        help_text=_('The credential type of the source credential.')
-    )
 
     class Meta:
         model = CredentialInputSource
         fields = (
-            'id',
-            'type',
-            'url',
+            '*',
             'input_field_name',
             'metadata',
             'target_credential',
             'source_credential',
-            'source_credential_type',
-            'source_credential_name',
-            'created',
-            'modified',
+            '-name',
         )
         extra_kwargs = {
             'input_field_name': {'required': True},
@@ -2847,11 +2836,11 @@ class CredentialInputSourceSerializer(BaseSerializer):
             'source_credential': {'required': True},
         }
 
-    def get_source_credential_name(self, obj):
-        return obj.source_credential.name
-
-    def get_source_credential_type(self, obj):
-        return obj.source_credential.credential_type.id
+    def get_related(self, obj):
+        res = super(CredentialInputSourceSerializer, self).get_related(obj)
+        res['source_credential'] = obj.source_credential.get_absolute_url(request=self.context.get('request'))
+        res['target_credential'] = obj.target_credential.get_absolute_url(request=self.context.get('request'))
+        return res
 
 
 class UserCredentialSerializerCreate(CredentialSerializerCreate):
