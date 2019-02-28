@@ -18,6 +18,7 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _, ugettext_noop
 from django.core.exceptions import ValidationError
 from django.utils.encoding import force_text
+from django.utils.functional import cached_property
 
 # AWX
 from awx.api.versioning import reverse
@@ -373,13 +374,9 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
                 needed.append('vault_password')
         return needed
 
-    @property
+    @cached_property
     def dynamic_input_fields(self):
-        dynamic_input_fields = getattr(self, '_dynamic_input_fields', None)
-        if dynamic_input_fields is None:
-            self._dynamic_input_fields = self._get_dynamic_input_field_names()
-            return self._dynamic_input_fields
-        return dynamic_input_fields
+        return [obj.input_field_name for obj in self.input_sources.all()]
 
     def _password_field_allows_ask(self, field):
         return field in self.credential_type.askable_fields
@@ -458,7 +455,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         :param field_name(str):        The name of the input field.
         :param default(optional[str]): A default return value to use.
         """
-        if field_name in self.dynamic_input_fields:
+        if self.kind != 'external' and field_name in self.dynamic_input_fields:
             return self._get_dynamic_input(field_name)
         if field_name in self.credential_type.secret_fields:
             try:
@@ -484,13 +481,12 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
             return True
         return field_name in self.inputs and self.inputs[field_name] not in ('', None)
 
-    def _get_dynamic_input_field_names(self):
-        input_sources = CredentialInputSource.objects.filter(target_credential=self)
-        return [obj.input_field_name for obj in input_sources]
-
     def _get_dynamic_input(self, field_name):
-        input_sources = CredentialInputSource.objects.filter(target_credential=self)
-        return input_sources.filter(input_field_name=field_name).first().get_input_value()
+        for input_source in self.input_sources.all():
+            if input_source.input_field_name == field_name:
+                return input_source.get_input_value()
+        else:
+            raise ValueError('{} is not a dynamic input field'.format(field_name))
 
 
 class CredentialType(CommonModelNameNotUnique):
@@ -1355,10 +1351,6 @@ class CredentialInputSource(PrimordialModel):
                 )
             ))
         return self.input_field_name
-
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        super(CredentialInputSource, self).save(*args, **kwargs)
 
     def get_input_value(self):
         backend = self.source_credential.credential_type.plugin.backend
