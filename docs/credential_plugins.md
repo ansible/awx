@@ -36,7 +36,9 @@ the Machine Credential.
 Note that you can perform these lookups on *any* credential field - not just
 the `password` field for Machine credentials.  You could just as easily create
 an AWS credential and use lookups to retrieve the Access Key and Secret Key
-from an external secret management system.
+from an external secret management system.  Also note that external credential
+sources cannot ever be used to look up secrets for other external credential
+sources.
 
 Writing Custom Credential Plugins
 ---------------------------------
