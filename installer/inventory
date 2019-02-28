@@ -52,7 +52,7 @@ dockerhub_base=ansible
 awx_task_hostname=awx
 awx_web_hostname=awxweb
 postgres_data_dir=/tmp/pgdocker
-host_port=443
+host_port=80
 #ssl_certificate=
 
 # Docker Compose Install

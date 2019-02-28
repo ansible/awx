@@ -53,10 +53,6 @@ RUN rm -rf /tmp/*
 
 RUN echo "{{ awx_version }}" > /var/lib/awx/.tower_version
 ADD nginx.conf /etc/nginx/nginx.conf
-RUN openssl req -newkey rsa:4906 -nodes -keyout key.pem -x509 -days 365 -out certificate.pem -subj "/CN=localhost/" && \
-    cat certificate.pem key.pem > /etc/nginx/awxweb.pem && \
-    chmod 0600 /etc/nginx/awxweb.pem && \
-    rm certificate.pem key.pem
 ADD supervisor.conf /supervisor.conf
 ADD supervisor_task.conf /supervisor_task.conf
 ADD launch_awx.sh /usr/bin/launch_awx.sh

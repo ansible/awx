@@ -129,7 +129,7 @@
 
 - name: Stage nginx.conf
   template:
-    src: nginx.conf
+    src: nginx.conf.j2
     dest: "{{ docker_base_path }}/nginx.conf"
   delegate_to: localhost
 
