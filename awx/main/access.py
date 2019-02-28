@@ -1137,6 +1137,7 @@ class CredentialInputSourceAccess(BaseAccess):
     '''
 
     model = CredentialInputSource
+    select_related = ('target_credential', 'source_credential')
 
     def filtered_queryset(self):
         return CredentialInputSource.objects.filter(
