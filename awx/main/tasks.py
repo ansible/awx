@@ -819,7 +819,7 @@ class BaseTask(object):
                 private_data_files['credentials'][credential] = path
             for credential, data in private_data.get('certificates', {}).items():
                 name = 'credential_%d-cert.pub' % credential.pk
-                path = os.path.join(kwargs['private_data_dir'], name)
+                path = os.path.join(private_data_dir, name)
                 with open(path, 'w') as f:
                     f.write(data)
                     f.close()
@@ -1290,7 +1290,7 @@ class RunJob(BaseTask):
         }
         '''
         private_data = {'credentials': {}}
-        for credential in job.credentials.all():
+        for credential in job.credentials.prefetch_related('input_sources__source_credential').all():
             # If we were sent SSH credentials, decrypt them and send them
             # back (they will be written to a temporary file).
             if credential.has_input('ssh_key_data'):
@@ -1521,7 +1521,7 @@ class RunJob(BaseTask):
         return self._write_extra_vars_file(private_data_dir, extra_vars, safe_dict)
 
     def build_credentials_list(self, job):
-        return job.credentials.all()
+        return job.credentials.prefetch_related('input_sources__source_credential').all()
 
     def get_password_prompts(self, passwords={}):
         d = super(RunJob, self).get_password_prompts(passwords)
