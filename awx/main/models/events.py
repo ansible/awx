@@ -483,7 +483,7 @@ class JobEvent(BasePlaybookEvent):
             job = self.job
             for host in hostnames:
                 host_stats = {}
-                for stat in ('changed', 'dark', 'failures', 'ok', 'processed', 'skipped'):
+                for stat in ('changed', 'dark', 'failures', 'ignored', 'ok', 'processed', 'rescued', 'skipped'):
                     try:
                         host_stats[stat] = self.event_data.get(stat, {}).get(host, 0)
                     except AttributeError:  # in case event_data[stat] isn't a dict.

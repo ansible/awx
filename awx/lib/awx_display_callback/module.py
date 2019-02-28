@@ -329,8 +329,10 @@ class BaseCallbackModule(CallbackBase):
             changed=stats.changed,
             dark=stats.dark,
             failures=stats.failures,
+            ignored=getattr(stats, 'ignored', 0),
             ok=stats.ok,
             processed=stats.processed,
+            rescued=getattr(stats, 'rescued', 0),
             skipped=stats.skipped
         )
 
