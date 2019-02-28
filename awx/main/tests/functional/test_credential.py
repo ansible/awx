@@ -184,7 +184,7 @@ def test_ssh_key_data_validation(organization, kind, ssh_key_data, ssh_key_unloc
 @pytest.mark.django_db
 @pytest.mark.parametrize('inputs, valid', [
     ({'vault_password': 'some-pass'}, True),
-    ({}, False),
+    ({}, True),
     ({'vault_password': 'dev-pass', 'vault_id': 'dev'}, True),
     ({'vault_password': 'dev-pass', 'vault_id': 'dev@prompt'}, False),  # @ not allowed
 ])
