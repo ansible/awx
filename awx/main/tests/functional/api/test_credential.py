@@ -763,7 +763,7 @@ def test_falsey_field_data(get, post, organization, admin, field_value):
         'credential_type': net.pk,
         'organization': organization.id,
         'inputs': {
-            'username': 'joe-user',  # username is required
+            'username': 'joe-user',
             'authorize': field_value
         }
     }
@@ -952,9 +952,15 @@ def test_vault_password_required(post, organization, admin):
         },
         admin
     )
-    assert response.status_code == 400
-    assert response.data['inputs'] == {'vault_password': ['required for Vault']}
-    assert Credential.objects.count() == 0
+    assert response.status_code == 201
+    assert Credential.objects.count() == 1
+
+    # vault_password must be specified by launch time
+    j = Job()
+    j.save()
+    j.credentials.add(Credential.objects.first())
+    assert j.pre_start() == (False, None)
+    assert 'required fields (vault_password)' in j.job_explanation
 
 
 #
@@ -1236,14 +1242,15 @@ def test_aws_create_fail_required_fields(post, organization, admin, version, par
         params,
         admin
     )
-    assert response.status_code == 400
+    assert response.status_code == 201
+    assert Credential.objects.count() == 1
 
-    assert Credential.objects.count() == 0
-    errors = response.data
-    if version == 'v2':
-        errors = response.data['inputs']
-    assert errors['username'] == ['required for %s' % aws.name]
-    assert errors['password'] == ['required for %s' % aws.name]
+    # username and password must be specified by launch time
+    j = Job()
+    j.save()
+    j.credentials.add(Credential.objects.first())
+    assert j.pre_start() == (False, None)
+    assert 'required fields (password, username)' in j.job_explanation
 
 
 #
@@ -1307,15 +1314,15 @@ def test_vmware_create_fail_required_fields(post, organization, admin, version, 
         params,
         admin
     )
-    assert response.status_code == 400
+    assert response.status_code == 201
+    assert Credential.objects.count() == 1
 
-    assert Credential.objects.count() == 0
-    errors = response.data
-    if version == 'v2':
-        errors = response.data['inputs']
-    assert errors['username'] == ['required for %s' % vmware.name]
-    assert errors['password'] == ['required for %s' % vmware.name]
-    assert errors['host'] == ['required for %s' % vmware.name]
+    # username, password, and host must be specified by launch time
+    j = Job()
+    j.save()
+    j.credentials.add(Credential.objects.first())
+    assert j.pre_start() == (False, None)
+    assert 'required fields (host, password, username)' in j.job_explanation
 
 
 #
@@ -1406,14 +1413,14 @@ def test_openstack_create_fail_required_fields(post, organization, admin, versio
         params,
         admin
     )
-    assert response.status_code == 400
-    errors = response.data
-    if version == 'v2':
-        errors = response.data['inputs']
-    assert errors['username'] == ['required for %s' % openstack.name]
-    assert errors['password'] == ['required for %s' % openstack.name]
-    assert errors['host'] == ['required for %s' % openstack.name]
-    assert errors['project'] == ['required for %s' % openstack.name]
+    assert response.status_code == 201
+
+    # username, password, host, and project must be specified by launch time
+    j = Job()
+    j.save()
+    j.credentials.add(Credential.objects.first())
+    assert j.pre_start() == (False, None)
+    assert 'required fields (host, password, project, username)' in j.job_explanation
 
 
 @pytest.mark.django_db
