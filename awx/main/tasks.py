@@ -1020,7 +1020,7 @@ class BaseTask(object):
             # handle custom injectors specified on the CredentialType
             credentials = []
             if isinstance(instance, Job):
-                credentials = instance.credentials.all()
+                credentials = instance.credentials.prefetch_related('input_sources__source_credential').all()
             elif isinstance(instance, InventoryUpdate):
                 # TODO: allow multiple custom creds for inv updates
                 credentials = [instance.get_cloud_credential()]
@@ -1170,7 +1170,7 @@ class RunJob(BaseTask):
         }
         '''
         private_data = {'credentials': {}}
-        for credential in job.credentials.all():
+        for credential in job.credentials.prefetch_related('input_sources__source_credential').all():
             # If we were sent SSH credentials, decrypt them and send them
             # back (they will be written to a temporary file).
             if credential.has_input('ssh_key_data'):
