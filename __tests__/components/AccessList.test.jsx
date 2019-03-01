@@ -31,19 +31,6 @@ const mockUserRoles = [
   }
 ];
 
-const mockUserTeams = [
-  {
-    id: 3,
-  }
-];
-
-const mockTeamRoles = [
-  {
-    id: 4,
-    name: 'baz',
-  }
-];
-
 describe('<AccessList />', () => {
   test('initially renders succesfully', () => {
     mount(
@@ -54,8 +41,6 @@ describe('<AccessList />', () => {
             location={{ search: '', pathname: '/organizations/1/access' }}
             getAccessList={() => {}}
             getUserRoles={() => {}}
-            getUserTeams={() => {}}
-            getTeamRoles={() => {}}
           />
         </MemoryRouter>
       </I18nProvider>
@@ -71,8 +56,6 @@ describe('<AccessList />', () => {
             location={{ search: '', pathname: '/organizations/1/access' }}
             getAccessList={() => ({ data: { count: 1, results: mockResults } })}
             getUserRoles={() => ({ data: { results: mockUserRoles } })}
-            getUserTeams={() => ({ data: { results: mockUserTeams } })}
-            getTeamRoles={() => ({ data: { results: mockTeamRoles } })}
           />
         </MemoryRouter>
       </I18nProvider>
@@ -95,8 +78,6 @@ describe('<AccessList />', () => {
             location={{ search: '', pathname: '/organizations/1/access' }}
             getAccessList={() => ({ data: { count: 1, results: mockResults } })}
             getUserRoles={() => ({ data: { results: mockUserRoles } })}
-            getUserTeams={() => ({ data: { results: mockUserTeams } })}
-            getTeamRoles={() => ({ data: { results: mockTeamRoles } })}
           />
         </MemoryRouter>
       </I18nProvider>
@@ -124,8 +105,6 @@ describe('<AccessList />', () => {
             location={{ search: '', pathname: '/organizations/1/access' }}
             getAccessList={() => ({ data: { count: 1, results: mockResults } })}
             getUserRoles={() => ({ data: { results: mockUserRoles } })}
-            getUserTeams={() => ({ data: { results: mockUserTeams } })}
-            getTeamRoles={() => ({ data: { results: mockTeamRoles } })}
           />
         </MemoryRouter>
       </I18nProvider>

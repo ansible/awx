@@ -10,12 +10,6 @@ const mockAPIAccessList = {
 const mockAPIRoles = {
   bar: 'baz',
 };
-const mockAPITeams = {
-  qux: 'quux',
-};
-const mockAPITeamRoles = {
-  quuz: 'quuz',
-};
 
 const mockGetOrganzationAccessList = jest.fn(() => (
   Promise.resolve(mockAPIAccessList)
@@ -23,14 +17,6 @@ const mockGetOrganzationAccessList = jest.fn(() => (
 
 const mockGetUserRoles = jest.fn(() => (
   Promise.resolve(mockAPIRoles)
-));
-
-const mockGetUserTeams = jest.fn(() => (
-  Promise.resolve(mockAPITeams)
-));
-
-const mockGetTeamRoles = jest.fn(() => (
-  Promise.resolve(mockAPITeamRoles)
 ));
 
 describe('<OrganizationAccess />', () => {
@@ -44,8 +30,6 @@ describe('<OrganizationAccess />', () => {
           api={{
             getOrganzationAccessList: jest.fn(),
             getUserRoles: jest.fn(),
-            getUserTeams: jest.fn(),
-            getTeamRoles: jest.fn(),
           }}
         />
       </MemoryRouter>
@@ -62,8 +46,6 @@ describe('<OrganizationAccess />', () => {
           api={{
             getOrganzationAccessList: mockGetOrganzationAccessList,
             getUserRoles: mockGetUserRoles,
-            getUserTeams: mockGetUserTeams,
-            getTeamRoles: mockGetTeamRoles,
           }}
         />
       </MemoryRouter>
@@ -72,9 +54,5 @@ describe('<OrganizationAccess />', () => {
     expect(accessList).toEqual(mockAPIAccessList);
     const userRoles = await wrapper.instance().getUserRoles();
     expect(userRoles).toEqual(mockAPIRoles);
-    const userTeams = await wrapper.instance().getUserTeams();
-    expect(userTeams).toEqual(mockAPITeams);
-    const teamRoles = await wrapper.instance().getTeamRoles();
-    expect(teamRoles).toEqual(mockAPITeamRoles);
   });
 });

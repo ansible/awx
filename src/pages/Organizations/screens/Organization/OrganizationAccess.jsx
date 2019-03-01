@@ -7,8 +7,6 @@ class OrganizationAccess extends React.Component {
 
     this.getOrgAccessList = this.getOrgAccessList.bind(this);
     this.getUserRoles = this.getUserRoles.bind(this);
-    this.getUserTeams = this.getUserTeams.bind(this);
-    this.getTeamRoles = this.getTeamRoles.bind(this);
   }
 
   getOrgAccessList (id, params) {
@@ -19,16 +17,6 @@ class OrganizationAccess extends React.Component {
   getUserRoles (id) {
     const { api } = this.props;
     return api.getUserRoles(id);
-  }
-
-  getUserTeams (id) {
-    const { api } = this.props;
-    return api.getUserTeams(id);
-  }
-
-  getTeamRoles (id) {
-    const { api } = this.props;
-    return api.getTeamRoles(id);
   }
 
   render () {
@@ -42,8 +30,6 @@ class OrganizationAccess extends React.Component {
       <AccessList
         getAccessList={this.getOrgAccessList}
         getUserRoles={this.getUserRoles}
-        getUserTeams={this.getUserTeams}
-        getTeamRoles={this.getTeamRoles}
         match={match}
         location={location}
         history={history}

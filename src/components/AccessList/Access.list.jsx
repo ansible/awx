@@ -71,15 +71,15 @@ const Detail = ({ label, value, url, isBadge, customStyles }) => {
 
 class AccessList extends React.Component {
   columns = [
+    { name: i18nMark('Name'), key: 'first_name', isSortable: true },
     { name: i18nMark('Username'), key: 'username', isSortable: true },
-    { name: i18nMark('First Name'), key: 'first_name', isSortable: true, isNumeric: true },
-    { name: i18nMark('Last Name'), key: 'last_name', isSortable: true, isNumeric: true },
+    { name: i18nMark('Last Name'), key: 'last_name', isSortable: true },
   ];
 
   defaultParams = {
     page: 1,
     page_size: 5,
-    order_by: 'username',
+    order_by: 'first_name',
   };
 
   constructor (props) {
@@ -102,6 +102,9 @@ class AccessList extends React.Component {
     this.onCompact = this.onCompact.bind(this);
     this.onSort = this.onSort.bind(this);
     this.getQueryParams = this.getQueryParams.bind(this);
+    this.getRoleType = this.getRoleType.bind(this);
+    this.fetchUserRoles = this.fetchUserRoles.bind(this);
+    this.getTeamRoles = this.getTeamRoles.bind(this);
   }
 
   componentDidMount () {
@@ -127,6 +130,7 @@ class AccessList extends React.Component {
     const page_size = parseInt(pageSize, 10);
     let order_by = sortedColumnKey;
 
+    // Preserve sort order when paginating
     if (sortOrder === 'descending') {
       order_by = `-${order_by}`;
     }
@@ -159,8 +163,39 @@ class AccessList extends React.Component {
     return Object.assign({}, this.defaultParams, searchParams, overrides);
   }
 
+  getTeamRoles (arr) {
+    this.arr = arr;
+    const filtered = this.arr.filter(entry => entry.role.team_id);
+    return filtered.reduce((val, item) => {
+      if (item.role.team_id) {
+        const { role } = item;
+        val = role;
+      }
+      return val;
+    }, {});
+  }
+
+  getRoleType (arr, index, type) {
+    return Object.values(arr).filter(value => value.length > 0).map(roleType => {
+      if (type === 'user') {
+        return roleType[index].role.name;
+      }
+      if (type === 'team') {
+        return this.getTeamRoles(roleType);
+      }
+      return null;
+    });
+  }
+
+  async fetchUserRoles (id) {
+    const { getUserRoles } = this.props;
+    const { data: { results: userRoles = [] } } = await getUserRoles(id);
+
+    return userRoles;
+  }
+
   async fetchOrgAccessList (queryParams) {
-    const { match, getAccessList, getUserRoles, getTeamRoles, getUserTeams } = this.props;
+    const { match, getAccessList } = this.props;
 
     const { page, page_size, order_by } = queryParams;
 
@@ -189,41 +224,19 @@ class AccessList extends React.Component {
       };
 
       results.forEach(async result => {
-        result.user_roles = [];
-        result.team_roles = [];
+        result.userRoles = [];
+        result.teamRoles = [];
+        result.directRole = null;
+
         // Grab each Role Type and set as a top-level value
-        Object.values(result.summary_fields).filter(value => value.length > 0).forEach(roleType => {
-          result.roleType = roleType[0].role.name;
-        });
+        result.directRole = this.getRoleType(result.summary_fields, 0, 'user') || null;
+        result.teamRoles = this.getRoleType(result.summary_fields, 1, 'team').filter(teamRole => teamRole.id);
 
         // Grab User Roles and set as a top-level value
         try {
-          const resp = await getUserRoles(result.id);
-          const roles = resp.data.results || [];
-          roles.forEach(role => {
-            result.user_roles.push(role);
-          });
+          const roles = await this.fetchUserRoles(result.id);
+          roles.map(role => result.userRoles.push(role));
           this.setState(stateToUpdate);
-        } catch (error) {
-          this.setState({ error });
-        }
-
-        // Grab Team Roles and set as a top-level value
-        try {
-          const team_data = await getUserTeams(result.id);
-          const teams = team_data.data.results || [];
-          teams.forEach(async team => {
-            try {
-              let team_roles = await getTeamRoles(team.id);
-              team_roles = team_roles.data.results || [];
-              team_roles.forEach(role => {
-                result.team_roles.push(role);
-              });
-              this.setState(stateToUpdate);
-            } catch (error) {
-              this.setState({ error });
-            }
-          });
         } catch (error) {
           this.setState({ error });
         }
@@ -247,8 +260,16 @@ class AccessList extends React.Component {
     } = this.state;
     return (
       <Fragment>
-        {!results && (
-          <h1>Loading...</h1> // TODO: replace with something nicer
+        {!error && !results && (
+          <h1>Loading...</h1> // TODO: replace with proper loading state
+        )}
+        {error && !results && (
+          <Fragment>
+            <div>{error.message}</div>
+            {error.response && (
+              <div>{error.response.data.detail}</div>
+            )}
+          </Fragment> // TODO: replace with proper error handling
         )}
         {results && (
           <Fragment>
@@ -272,7 +293,7 @@ class AccessList extends React.Component {
                         <DataListCell>
                           <Detail
                             label={result.username}
-                            value={result.roleType}
+                            value={result.directRole}
                             url={result.url}
                             isBadge
                           />
@@ -294,13 +315,13 @@ class AccessList extends React.Component {
                             url={null}
                             customStyles={isCompact ? hiddenStyle : null}
                           />
-                          {result.user_roles.length > 0 && (
+                          {result.userRoles.length > 0 && (
                             <ul style={isCompact
                               ? { ...userRolesWrapperStyle, ...hiddenStyle }
                               : userRolesWrapperStyle}
                             >
                               <Text component={TextVariants.h6} style={detailLabelStyle}>{i18n._(t`User Roles`)}</Text>
-                              {result.user_roles.map(role => (
+                              {result.userRoles.map(role => (
                                 <BasicChip
                                   key={role.id}
                                   text={role.name}
@@ -308,13 +329,13 @@ class AccessList extends React.Component {
                               ))}
                             </ul>
                           )}
-                          {result.team_roles.length > 0 && (
+                          {result.teamRoles.length > 0 && (
                             <ul style={isCompact
                               ? { ...userRolesWrapperStyle, ...hiddenStyle }
                               : userRolesWrapperStyle}
                             >
                               <Text component={TextVariants.h6} style={detailLabelStyle}>{i18n._(t`Team Roles`)}</Text>
-                              {result.team_roles.map(role => (
+                              {result.teamRoles.map(role => (
                                 <BasicChip
                                   key={role.id}
                                   text={role.name}
@@ -336,7 +357,6 @@ class AccessList extends React.Component {
               page_size={page_size}
               onSetPage={this.onSetPage}
             />
-            {error ? <div>{error}</div> : ''}
           </Fragment>
         )}
       </Fragment>
@@ -348,8 +368,6 @@ class AccessList extends React.Component {
 AccessList.propTypes = {
   getAccessList: PropTypes.func.isRequired,
   getUserRoles: PropTypes.func.isRequired,
-  getUserTeams: PropTypes.func.isRequired,
-  getTeamRoles: PropTypes.func.isRequired,
 };
 
 export default AccessList;

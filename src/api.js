@@ -6,7 +6,6 @@ const API_CONFIG = `${API_V2}config/`;
 const API_ORGANIZATIONS = `${API_V2}organizations/`;
 const API_INSTANCE_GROUPS = `${API_V2}instance_groups/`;
 const API_USERS = `${API_V2}users/`;
-const API_TEAMS = `${API_V2}teams/`;
 
 const LOGIN_CONTENT_TYPE = 'application/x-www-form-urlencoded';
 
@@ -124,18 +123,6 @@ class APIClient {
 
   getUserRoles (id) {
     const endpoint = `${API_USERS}${id}/roles/`;
-
-    return this.http.get(endpoint);
-  }
-
-  getUserTeams (id) {
-    const endpoint = `${API_USERS}${id}/teams/`;
-
-    return this.http.get(endpoint);
-  }
-
-  getTeamRoles (id) {
-    const endpoint = `${API_TEAMS}${id}/roles/`;
 
     return this.http.get(endpoint);
   }
