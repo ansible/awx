@@ -3,21 +3,14 @@
 # The following variables will be set by the runner of this playbook:
 # src: /tmp/some/path/private_data_dir
 # dest: /tmp/some/path/
-# proot_temp_dir: /tmp/some/path
 
 - name: Prepare data, dispatch job in isolated environment.
   hosts: all
   gather_facts: false
   vars:
-      secret: "{{ lookup('pipe', 'cat ' + src + '/env') }}"
+    secret: "{{ lookup('pipe', 'cat ' + src + '/env/ssh_key') }}"
 
   tasks:
-
-    - name: create a proot/bwrap temp dir (if necessary)
-      synchronize:
-        src: "{{proot_temp_dir}}"
-        dest: "{{dest}}"
-      when: proot_temp_dir is defined
 
     - name: synchronize job environment with isolated host
       synchronize:
@@ -25,14 +18,19 @@
         src: "{{src}}"
         dest: "{{dest}}"
 
+    - stat: path="{{src}}/env/ssh_key"
+      register: key
+
     - name: create a named pipe for secret environment data
-      command: "mkfifo {{src}}/env"
+      command: "mkfifo {{src}}/env/ssh_key"
+      when: key.stat.exists
 
     - name: spawn the playbook
-      command: "awx-expect start {{src}}"
+      command: "ansible-runner start {{src}} -p {{playbook}} -i {{ident}}"
 
     - name: write the secret environment data
       mkfifo:
         content: "{{secret}}"
-        path: "{{src}}/env"
+        path: "{{src}}/env/ssh_key"
+      when: key.stat.exists
       no_log: True

@@ -51,7 +51,7 @@ def main():
                 try:
                     re_match = re.match(r'\/tmp\/ansible_awx_\d+_.+', path)
                     if re_match is not None:
-                        if subprocess.check_call(['awx-expect', 'is-alive', path]) == 0:
+                        if subprocess.check_call(['ansible-runner', 'is-alive', path]) == 0:
                             continue
                         else:
                             module.debug('Deleting path {} its job has completed.'.format(path))

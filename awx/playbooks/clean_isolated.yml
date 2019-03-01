@@ -11,7 +11,7 @@
   tasks:
 
     - name: cancel the job
-      command: "awx-expect stop {{private_data_dir}}"
+      command: "ansible-runner stop {{private_data_dir}}"
       ignore_errors: yes
 
     - name: remove build artifacts

@@ -63,9 +63,6 @@ index aa8b304..eb05f91 100644
 +	virtualenv $(VENV_BASE)/my-custom-env
 +	$(VENV_BASE)/my-custom-env/bin/pip install python-memcached psutil
 +
- requirements_isolated:
-    if [ ! -d "$(VENV_BASE)/awx" ]; then \
-        virtualenv --system-site-packages $(VENV_BASE)/awx && \
 diff --git a/installer/image_build/templates/Dockerfile.j2 b/installer/image_build/templates/Dockerfile.j2
 index d69e2c9..a08bae5 100644
 --- a/installer/image_build/templates/Dockerfile.j2

@@ -16,6 +16,7 @@ import stat
 import tempfile
 import time
 import traceback
+from distutils.dir_util import copy_tree
 from distutils.version import LooseVersion as Version
 import yaml
 import fcntl
@@ -776,7 +777,7 @@ class BaseTask(object):
                         if e.errno != errno.EEXIST:
                             raise
                     path = os.path.join(private_data_dir, 'env', 'ssh_key')
-                    ansible_runner.utils.open_fifo_write(path, data.encode()) 
+                    ansible_runner.utils.open_fifo_write(path, data.encode())
                     private_data_files['credentials']['ssh'] = path
                 # Ansible network modules do not yet support ssh-agent.
                 # Instead, ssh private key file is explicitly passed via an
@@ -936,29 +937,6 @@ class BaseTask(object):
         '''
         return OrderedDict()
 
-    def get_stdout_handle(self, instance):
-        '''
-        Return an virtual file object for capturing stdout and/or events.
-        '''
-        dispatcher = CallbackQueueDispatcher()
-
-        if isinstance(instance, (Job, AdHocCommand, ProjectUpdate)):
-            def event_callback(event_data):
-                event_data.setdefault(self.event_data_key, instance.id)
-                if 'uuid' in event_data:
-                    cache_event = cache.get('ev-{}'.format(event_data['uuid']), None)
-                    if cache_event is not None:
-                        event_data.update(json.loads(cache_event))
-                dispatcher.dispatch(event_data)
-
-            return OutputEventFilter(event_callback)
-        else:
-            def event_callback(event_data):
-                event_data.setdefault(self.event_data_key, instance.id)
-                dispatcher.dispatch(event_data)
-
-            return OutputVerboseFilter(event_callback)
-
     def pre_run_hook(self, instance):
         '''
         Hook for any steps to run before the job/task starts
@@ -1056,13 +1034,6 @@ class BaseTask(object):
                     )
             self.write_args_file(private_data_dir, args)
 
-            if instance.is_isolated() is False:
-                stdout_handle = self.get_stdout_handle(instance)
-            else:
-                stdout_handle = isolated_manager.IsolatedManager.get_stdout_handle(
-                    instance, private_data_dir, event_data_key=self.event_data_key)
-            # If there is an SSH key path defined, wrap args with ssh-agent.
-            ssh_key_path = self.get_ssh_key_path(instance, private_data_files)
             # If we're executing on an isolated host, don't bother adding the
             # key to the agent in this environment
             instance = self.update_model(pk, job_args=json.dumps(safe_args),
@@ -1078,122 +1049,123 @@ class BaseTask(object):
             )
             instance = self.update_model(instance.pk, output_replacements=output_replacements)
 
-            # TODO: Satisfy isolated, refactor this to a single should_use_proot()
-            # call when isolated migrated to runner
+            def event_handler(self, instance, event_data):
+                should_write_event = False
+                dispatcher = CallbackQueueDispatcher()
+                event_data.setdefault(self.event_data_key, instance.id)
+                dispatcher.dispatch(event_data)
+                self.event_ct += 1
+
+                '''
+                Handle artifacts
+                '''
+                if event_data.get('event_data', {}).get('artifact_data', {}):
+                    instance.artifacts = event_data['event_data']['artifact_data']
+                    instance.save(update_fields=['artifacts'])
+
+                return should_write_event
+
+            def cancel_callback(instance):
+                instance = self.update_model(pk)
+                if instance.cancel_flag or instance.status == 'canceled':
+                    cancel_wait = (now() - instance.modified).seconds if instance.modified else 0
+                    if cancel_wait > 5:
+                        logger.warn('Request to cancel {} took {} seconds to complete.'.format(instance.log_format, cancel_wait))
+                    return True
+                return False
+
+            def finished_callback(self, instance, runner_obj):
+                dispatcher = CallbackQueueDispatcher()
+                event_data = {
+                    'event': 'EOF',
+                    'final_counter': self.event_ct,
+                }
+                event_data.setdefault(self.event_data_key, instance.id)
+                dispatcher.dispatch(event_data)
+
+            params = {
+                'ident': instance.id,
+                'private_data_dir': private_data_dir,
+                'project_dir': cwd,
+                'playbook': self.build_playbook_path_relative_to_cwd(instance, private_data_dir),
+                'inventory': self.build_inventory(instance, private_data_dir),
+                'passwords': expect_passwords,
+                'envvars': env,
+                'event_handler': functools.partial(event_handler, self, instance),
+                'cancel_callback': functools.partial(cancel_callback, instance),
+                'finished_callback': functools.partial(finished_callback, self, instance),
+                'settings': {
+                    'idle_timeout': self.get_idle_timeout() or "",
+                    'job_timeout': self.get_instance_timeout(instance),
+                    'pexpect_timeout': getattr(settings, 'PEXPECT_TIMEOUT', 5),
+                }
+            }
+
             if self.should_use_proot(instance):
-                proot_temp_dir = build_proot_temp_dir()
+                process_isolation_params = {
+                    'process_isolation': True,
+                    'process_isolation_path': settings.AWX_PROOT_BASE_PATH,
+                    'process_isolation_show_paths': self.proot_show_paths + [private_data_dir, cwd],
+                    'process_isolation_hide_paths': [
+                        settings.AWX_PROOT_BASE_PATH,
+                        '/etc/tower',
+                        '/var/lib/awx',
+                        '/var/log',
+                        settings.PROJECTS_ROOT,
+                        settings.JOBOUTPUT_ROOT,
+                    ] + getattr(settings, 'AWX_PROOT_HIDE_PATHS', None) or [],
+                    'process_isolation_ro_paths': [],
+                }
+                if settings.AWX_PROOT_SHOW_PATHS:
+                    process_isolation_params['process_isolation_show_paths'].extend(settings.AWX_PROOT_SHOW_PATHS)
+                if settings.ANSIBLE_VENV_PATH:
+                    process_isolation_params['process_isolation_ro_paths'].append(settings.ANSIBLE_VENV_PATH)
+                if settings.AWX_VENV_PATH:
+                    process_isolation_params['process_isolation_ro_paths'].append(settings.AWX_VENV_PATH)
+                if proot_custom_virtualenv:
+                    process_isolation_params['process_isolation_ro_paths'].append(proot_custom_virtualenv)
+                params = {**params, **process_isolation_params}
+
+            if isinstance(instance, AdHocCommand):
+                params['module'] = self.build_module_name(instance)
+                params['module_args'] = self.build_module_args(instance)
+
+            if getattr(instance, 'use_fact_cache', False):
+                # Enable Ansible fact cache.
+                params['fact_cache_type'] = 'jsonfile'
+            else:
+                # Disable Ansible fact cache.
+                params['fact_cache_type'] = ''
+
+            '''
+            Delete parameters if the values are None or empty array
+            '''
+            for v in ['passwords', 'playbook', 'inventory']:
+                if not params[v]:
+                    del params[v]
 
             if instance.is_isolated() is True:
-                manager_instance = isolated_manager.IsolatedManager(
-                    args, cwd, env, stdout_handle, ssh_key_path, **_kw
+                playbook = params['playbook']
+                shutil.move(
+                    params.pop('inventory'),
+                    os.path.join(private_data_dir, 'inventory')
                 )
+                copy_tree(cwd, os.path.join(private_data_dir, 'project'))
+                ansible_runner.utils.dump_artifacts(params)
+                manager_instance = isolated_manager.IsolatedManager(env, **_kw)
                 status, rc = manager_instance.run(instance,
                                                   private_data_dir,
-                                                  proot_temp_dir)
+                                                  playbook,
+                                                  event_data_key=self.event_data_key)
             else:
-                def event_handler(self, instance, event_data):
-                    should_write_event = False
-                    dispatcher = CallbackQueueDispatcher()
-                    event_data.setdefault(self.event_data_key, instance.id)
-                    dispatcher.dispatch(event_data)
-                    self.event_ct += 1
-
-                    '''
-                    Handle artifacts
-                    '''
-                    if event_data.get('event_data', {}).get('artifact_data', {}):
-                        instance.artifacts = event_data['event_data']['artifact_data']
-                        instance.save(update_fields=['artifacts'])
-
-                    return should_write_event
-
-                def cancel_callback(instance):
-                    instance = self.update_model(pk)
-                    if instance.cancel_flag or instance.status == 'canceled':
-                        cancel_wait = (now() - instance.modified).seconds if instance.modified else 0
-                        if cancel_wait > 5:
-                            logger.warn('Request to cancel {} took {} seconds to complete.'.format(instance.log_format, cancel_wait))
-                        return True
-                    return False
-
-                def finished_callback(self, instance, runner_obj):
-                    dispatcher = CallbackQueueDispatcher()
-                    event_data = {
-                        'event': 'EOF',
-                        'final_counter': self.event_ct,
-                    }
-                    event_data.setdefault(self.event_data_key, instance.id)
-                    dispatcher.dispatch(event_data)
-
-                params = {
-                    'ident': instance.id,
-                    'private_data_dir': private_data_dir,
-                    'project_dir': cwd,
-                    'playbook': self.build_playbook_path_relative_to_cwd(instance, private_data_dir),
-                    'inventory': self.build_inventory(instance, private_data_dir),
-                    'passwords': expect_passwords,
-                    'envvars': env,
-                    'event_handler': functools.partial(event_handler, self, instance),
-                    'cancel_callback': functools.partial(cancel_callback, instance),
-                    'finished_callback': functools.partial(finished_callback, self, instance),
-                    'settings': {
-                        'idle_timeout': self.get_idle_timeout() or "",
-                        'job_timeout': self.get_instance_timeout(instance),
-                        'pexpect_timeout': getattr(settings, 'PEXPECT_TIMEOUT', 5),
-                    }
-                }
-
-                if self.should_use_proot(instance):
-                    process_isolation_params = {
-                        'process_isolation': True,
-                        'process_isolation_path': settings.AWX_PROOT_BASE_PATH,
-                        'process_isolation_show_paths': self.proot_show_paths + [private_data_dir, cwd],
-                        'process_isolation_hide_paths': [
-                            settings.AWX_PROOT_BASE_PATH,
-                            '/etc/tower',
-                            '/var/lib/awx',
-                            '/var/log',
-                            settings.PROJECTS_ROOT,
-                            settings.JOBOUTPUT_ROOT,
-                        ] + getattr(settings, 'AWX_PROOT_HIDE_PATHS', None) or [],
-                        'process_isolation_ro_paths': [],
-                    }
-                    if settings.AWX_PROOT_SHOW_PATHS:
-                        process_isolation_params['process_isolation_show_paths'].extend(settings.AWX_PROOT_SHOW_PATHS)
-                    if settings.ANSIBLE_VENV_PATH:
-                        process_isolation_params['process_isolation_ro_paths'].append(settings.ANSIBLE_VENV_PATH)
-                    if settings.AWX_VENV_PATH:
-                        process_isolation_params['process_isolation_ro_paths'].append(settings.AWX_VENV_PATH)
-                    if proot_custom_virtualenv:
-                        process_isolation_params['process_isolation_ro_paths'].append(proot_custom_virtualenv)
-                    params = {**params, **process_isolation_params}
-
-                if isinstance(instance, AdHocCommand):
-                    params['module'] = self.build_module_name(instance)
-                    params['module_args'] = self.build_module_args(instance)
-
-                if getattr(instance, 'use_fact_cache', False):
-                    # Enable Ansible fact cache.
-                    params['fact_cache_type'] = 'jsonfile'
-                else:
-                    # Disable Ansible fact cache.
-                    params['fact_cache_type'] = ''
-
-                '''
-                Delete parameters if the values are None or empty array
-                '''
-                for v in ['passwords', 'playbook', 'inventory']:
-                    if not params[v]:
-                        del params[v]
-
                 res = ansible_runner.interface.run(**params)
                 status = res.status
                 rc = res.rc
 
-                if status == 'timeout':
-                    instance.job_explanation = "Job terminated due to timeout"
-                    status = 'failed'
-                    extra_update_fields['job_explanation'] = instance.job_explanation
+            if status == 'timeout':
+                instance.job_explanation = "Job terminated due to timeout"
+                status = 'failed'
+                extra_update_fields['job_explanation'] = instance.job_explanation
 
         except Exception:
             # run_pexpect does not throw exceptions for cancel or timeout
@@ -1225,21 +1197,6 @@ class BaseTask(object):
                 raise AwxTaskError.TaskCancel(instance, rc)
             else:
                 raise AwxTaskError.TaskError(instance, rc)
-
-    def get_ssh_key_path(self, instance, private_data_files):
-        '''
-        If using an SSH key, return the path for use by ssh-agent.
-        '''
-        if 'ssh' in private_data_files.get('credentials', {}):
-            return private_data_files['credentials']['ssh']
-        '''
-        Note: Don't inject network ssh key data into ssh-agent for network
-        credentials because the ansible modules do not yet support it.
-        We will want to add back in support when/if Ansible network modules
-        support this.
-        '''
-
-        return ''
 
 
 @task()

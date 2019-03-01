@@ -28,7 +28,7 @@ class Command(BaseCommand):
             args = [
                 'ansible', 'all', '-i', '{},'.format(hostname), '-u',
                 settings.AWX_ISOLATED_USERNAME, '-T5', '-m', 'shell',
-                '-a', 'awx-expect -h', '-vvv'
+                '-a', 'ansible-runner --version', '-vvv'
             ]
             if all([
                 getattr(settings, 'AWX_ISOLATED_KEY_GENERATION', False) is True,

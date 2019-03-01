@@ -61,7 +61,7 @@ Example location of a private data directory:
 The following command would run the playbook corresponding to that job.
 
 ```bash
-awx-expect start /tmp/ansible_awx_29_OM6Mnx/
+ansible-runner start /tmp/ansible_awx_29_OM6Mnx/ -p some_playbook.yml
 ```
 
-Other awx-expect commands include `start`, `is-alive`, and `stop`.
+Other ansible-runner commands include `start`, `is-alive`, and `stop`.
