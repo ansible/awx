@@ -1362,13 +1362,7 @@ class CredentialInputSource(PrimordialModel):
                 backend_kwargs[field_name] = value
 
         backend_kwargs.update(self.metadata)
-        raw = self.target_credential.inputs.get(self.input_field_name)
-        if self.input_field_name in self.target_credential.credential_type.secret_fields:
-            raw = decrypt_field(self.target_credential, self.input_field_name)
-        return backend(
-            raw,
-            **backend_kwargs
-        )
+        return backend(**backend_kwargs)
 
     def get_absolute_url(self, request=None):
         view_name = 'api:credential_input_source_detail'
