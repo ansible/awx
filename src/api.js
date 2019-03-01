@@ -77,6 +77,12 @@ class APIClient {
     return this.http.get(endpoint);
   }
 
+  updateOrganizationDetails (id, data) {
+    const endpoint = `${API_ORGANIZATIONS}${id}/`;
+
+    return this.http.patch(endpoint, data);
+  }
+
   getOrganizationInstanceGroups (id, params = {}) {
     const endpoint = `${API_ORGANIZATIONS}${id}/instance_groups/`;
 
@@ -117,8 +123,12 @@ class APIClient {
     return this.http.get(API_INSTANCE_GROUPS, { params });
   }
 
-  createInstanceGroups (url, id) {
+  associateInstanceGroup (url, id) {
     return this.http.post(url, { id });
+  }
+
+  disassociateInstanceGroup (url, id) {
+    return this.http.post(url, { id, disassociate: true });
   }
 
   getUserRoles (id) {
