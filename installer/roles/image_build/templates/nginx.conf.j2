@@ -36,7 +36,14 @@ http {
     }
 
     server {
+        {% if ssl_certificate is defined %}
+        listen 8052 ssl default_server;
+
+        ssl_certificate /etc/nginx/awxweb.pem;
+        ssl_certificate_key /etc/nginx/awxweb.pem;
+        {% else %}
         listen 8052 default_server;
+        {% endif %}
 
         # If you have a domain name, this is where to add it
         server_name _;

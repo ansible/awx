@@ -441,6 +441,10 @@ Before starting the build process, review the [inventory](./installer/inventory)
 
 > Provide a port number that can be mapped from the Docker daemon host to the web server running inside the AWX container. Defaults to *80*.
 
+*ssl_certificate*
+
+> Optionally, provide the path to a file that contains a certificate and its private key.
+
 *use_docker_compose*
 
 > Switch to ``true`` to use Docker Compose instead of the standalone Docker install.
@@ -527,7 +531,7 @@ After the playbook run completes, Docker will report up to 5 running containers.
 ```bash
 CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                                NAMES
 e240ed8209cd        awx_task:1.0.0.8    "/tini -- /bin/sh ..."   2 minutes ago       Up About a minute   8052/tcp                             awx_task
-1cfd02601690        awx_web:1.0.0.8     "/tini -- /bin/sh ..."   2 minutes ago       Up About a minute   0.0.0.0:80->8052/tcp                 awx_web
+1cfd02601690        awx_web:1.0.0.8     "/tini -- /bin/sh ..."   2 minutes ago       Up About a minute   0.0.0.0:443->8052/tcp                 awx_web
 55a552142bcd        memcached:alpine    "docker-entrypoint..."   2 minutes ago       Up 2 minutes        11211/tcp                            memcached
 84011c072aad        rabbitmq:3          "docker-entrypoint..."   2 minutes ago       Up 2 minutes        4369/tcp, 5671-5672/tcp, 25672/tcp   rabbitmq
 97e196120ab3        postgres:9.6        "docker-entrypoint..."   2 minutes ago       Up 2 minutes        5432/tcp                             postgres
