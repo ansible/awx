@@ -16,14 +16,14 @@
 }
 
 .LabelList-tag, .JobSubmission-previewTag {
-    border-radius: 5px;
-    padding: 2px 10px;
-    font-size: 12px;
-    color: @default-interface-txt;
     background-color: @default-list-header-bg;
+    border-radius: 5px;
+    color: @default-interface-txt;
+    display: inline-block;
+    font-size: 12px;
     margin-right: 5px;
     max-width: 100%;
-    display: inline-block;
+    padding: 2px 10px;
 }
 
 .LabelList-seeMoreLess {
@@ -71,7 +71,6 @@
 .LabelList-name {
     flex: initial;
     max-width: 100%;
-    word-break: break-word;
 }
 
 .LabelList-tag--deletable > .LabelList-name {
@@ -96,8 +95,9 @@
     cursor: not-allowed;
     background-color: @default-list-header-bg;
     .LabelList-tag {
-        color: @default-bg;
         background-color: @default-icon;
+        color: @default-bg;
+        margin: 4px 5px 5px 5px;
     }
 }
 
