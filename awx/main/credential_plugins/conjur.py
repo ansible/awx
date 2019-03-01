@@ -47,7 +47,7 @@ conjur_inputs = {
 }
 
 
-def conjur_backend(raw, **kwargs):
+def conjur_backend(**kwargs):
     url = kwargs['url']
     api_key = kwargs['api_key']
     account = quote_plus(kwargs['account'])

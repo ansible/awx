@@ -124,22 +124,6 @@ setuptools.setup(
 )
 ```
 
-Fetching vs. Transforming Credential Data
------------------------------------------
-While _most_ credential plugins will be used to _fetch_ secrets from external
-systems, they can also be used to *transform* data from Tower _using_ an
-external secret management system.  An example use case is generating signed
-public keys:
-
-```python
-def my_key_signer(unsigned_value_from_awx, **kwargs):
-    return some_libary.sign(
-        url=kwargs['url'],
-        token=kwargs['token'],
-        public_data=unsigned_value_from_awx
-    )
-```
-
 Programmatic Secret Fetching
 ----------------------------
 If you want to programmatically fetch secrets from a supported external secret
@@ -288,7 +272,7 @@ HTTP/1.1 200 OK
     -H "Authorization: Bearer <token>" \
     -H "Content-Type: application/json" \
     -X POST \
-    -d '{"user": N, "credential_type": 1, "name": "My SSH", "inputs": {"username": "example", "ssh_key_data": "RSA KEY DATA", "ssh_public_key_data": "UNSIGNED PUBLIC KEY DATA"}}'
+    -d '{"user": N, "credential_type": 1, "name": "My SSH", "inputs": {"username": "example", "ssh_key_data": "RSA KEY DATA"}}'
 
 HTTP/1.1 201 Created
 {
@@ -320,7 +304,7 @@ HTTP/1.1 201 Created
     -H "Authorization: Bearer <token>" \
     -H "Content-Type: application/json" \
     -X POST \
-    -d '{"source_credential": 2, "input_field_name": "password", "metadata": {"secret_path": "/ssh/", "role": "example-role"}}'
+    -d '{"source_credential": 2, "input_field_name": "password", "metadata": {"public_key": "UNSIGNED PUBLIC KEY", "secret_path": "/ssh/", "role": "example-role"}}'
 HTTP/1.1 201 Created
 ```
 

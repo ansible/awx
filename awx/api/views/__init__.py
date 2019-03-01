@@ -1440,8 +1440,11 @@ class CredentialExternalTest(SubDetailAPIView):
                 backend_kwargs[field_name] = value
         backend_kwargs.update(request.data.get('metadata', {}))
         try:
-            obj.credential_type.plugin.backend(None, **backend_kwargs)
+            obj.credential_type.plugin.backend(**backend_kwargs)
             return Response({}, status=status.HTTP_202_ACCEPTED)
+        except requests.exceptions.HTTPError as exc:
+            message = 'HTTP {}\n{}'.format(exc.response.status_code, exc.response.text)
+            return Response({'inputs': message}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as exc:
             return Response({'inputs': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -1489,8 +1492,11 @@ class CredentialTypeExternalTest(SubDetailAPIView):
         backend_kwargs = request.data.get('inputs', {})
         backend_kwargs.update(request.data.get('metadata', {}))
         try:
-            obj.plugin.backend(None, **backend_kwargs)
+            obj.plugin.backend(**backend_kwargs)
             return Response({}, status=status.HTTP_202_ACCEPTED)
+        except requests.exceptions.HTTPError as exc:
+            message = 'HTTP {}\n{}'.format(exc.response.status_code, exc.response.text)
+            return Response({'inputs': message}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as exc:
             return Response({'inputs': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
 
