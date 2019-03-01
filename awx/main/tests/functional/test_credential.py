@@ -79,6 +79,7 @@ def test_default_cred_types():
         'azure_kv',
         'azure_rm',
         'cloudforms',
+        'conjur',
         'gce',
         'hashivault_kv',
         'hashivault_ssh',
