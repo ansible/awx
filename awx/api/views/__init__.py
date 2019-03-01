@@ -1421,8 +1421,8 @@ class CredentialCopy(CopyAPIView):
 
 class CredentialExternalTest(SubDetailAPIView):
     """
-    Test updates to the input values of an external credential before
-    saving them.
+    Test updates to the input values and metadata of an external credential
+    before saving them.
     """
 
     view_name = _('External Credential Test')
@@ -1432,14 +1432,15 @@ class CredentialExternalTest(SubDetailAPIView):
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
-        test_inputs = {}
+        backend_kwargs = {}
+        for field_name, value in obj.inputs.items():
+            backend_kwargs[field_name] = obj.get_input(field_name)
         for field_name, value in request.data.get('inputs', {}).items():
-            if value == '$encrypted$':
-                test_inputs[field_name] = obj.get_input(field_name)
-            else:
-                test_inputs[field_name] = value
+            if value != '$encrypted$':
+                backend_kwargs[field_name] = value
+        backend_kwargs.update(request.data.get('metadata', {}))
         try:
-            obj.credential_type.plugin.backend(None, **test_inputs)
+            obj.credential_type.plugin.backend(None, **backend_kwargs)
             return Response({}, status=status.HTTP_202_ACCEPTED)
         except Exception as exc:
             return Response({'inputs': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
@@ -1485,9 +1486,10 @@ class CredentialTypeExternalTest(SubDetailAPIView):
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
-        test_inputs = request.data.get('inputs', {})
+        backend_kwargs = request.data.get('inputs', {})
+        backend_kwargs.update(request.data.get('metadata', {}))
         try:
-            obj.plugin.backend(None, **test_inputs)
+            obj.plugin.backend(None, **backend_kwargs)
             return Response({}, status=status.HTTP_202_ACCEPTED)
         except Exception as exc:
             return Response({'inputs': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
