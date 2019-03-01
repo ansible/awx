@@ -53,7 +53,12 @@ hashi_kv_inputs['metadata'].extend([{
 hashi_kv_inputs['required'].extend(['api_version', 'secret_key'])
 
 hashi_ssh_inputs = copy.deepcopy(base_inputs)
-hashi_ssh_inputs['metadata'].extend([{
+hashi_ssh_inputs['metadata'] = [{
+    'id': 'public_key',
+    'label': _('Unsigned Public Key'),
+    'type': 'string',
+    'multiline': True,
+}] + hashi_ssh_inputs['metadata'] + [{
     'id': 'role',
     'label': _('Role Name'),
     'type': 'string',
@@ -63,11 +68,11 @@ hashi_ssh_inputs['metadata'].extend([{
     'label': _('Valid Principals'),
     'type': 'string',
     'help_text': _('Valid principals (either usernames or hostnames) that the certificate should be signed for.'),
-}])
-hashi_ssh_inputs['required'].extend(['role'])
+}]
+hashi_ssh_inputs['required'].extend(['public_key', 'role'])
 
 
-def kv_backend(raw, **kwargs):
+def kv_backend(**kwargs):
     token = kwargs['token']
     url = urljoin(kwargs['url'], 'v1')
     secret_path = kwargs['secret_path']
@@ -109,7 +114,7 @@ def kv_backend(raw, **kwargs):
     return json['data']
 
 
-def ssh_backend(raw, **kwargs):
+def ssh_backend(**kwargs):
     token = kwargs['token']
     url = urljoin(kwargs['url'], 'v1')
     secret_path = kwargs['secret_path']
@@ -118,7 +123,7 @@ def ssh_backend(raw, **kwargs):
     sess = requests.Session()
     sess.headers['Authorization'] = 'Bearer {}'.format(token)
     json = {
-        'public_key': raw
+        'public_key': kwargs['public_key']
     }
     if kwargs.get('valid_principals'):
         json['valid_principals'] = kwargs['valid_principals']
