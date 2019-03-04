@@ -110,59 +110,24 @@ function EditCredentialsController (
 
     vm.form.inputs = {
         _get ({ getSubmitData }) {
-            let fields;
+            const apiConfig = ConfigService.get();
 
             credentialType.mergeInputProperties();
-
-            if (credentialType.get('id') === credential.get('credential_type')) {
-                fields = credential.assignInputGroupValues(credentialType.get('inputs.fields'));
-            } else {
-                fields = credentialType.get('inputs.fields');
-            }
+            const fields = credential.assignInputGroupValues(apiConfig, credentialType);
 
             if (credentialType.get('name') === 'Google Compute Engine') {
                 fields.splice(2, 0, gceFileInputSchema);
-
                 $scope.$watch(`vm.form.${gceFileInputSchema.id}._value`, vm.gceOnFileInputChanged);
                 $scope.$watch('vm.form.ssh_key_data._isBeingReplaced', vm.gceOnReplaceKeyChanged);
-            } else if (credentialType.get('name') === 'Machine') {
-                const apiConfig = ConfigService.get();
-                const become = fields.find((field) => field.id === 'become_method');
-                become._isDynamic = true;
-                become._choices = Array.from(apiConfig.become_methods, method => method[0]);
-                // Add the value to the choices if it doesn't exist in the preset list
-                if (become._value && become._value !== '') {
-                    const optionMatches = become._choices
-                        .findIndex((option) => option === become._value);
-                    if (optionMatches === -1) {
-                        become._choices.push(become._value);
-                    }
-                }
             }
-
-            vm.isTestable = (isEditable && credentialType.get('kind') === 'external');
-            vm.getSubmitData = getSubmitData;
 
             vm.inputSources.initialItems = credential.get('related.input_sources.results');
-            if (credential.get('credential_type') !== credentialType.get('id')) {
-                vm.inputSources.items = [];
-            } else {
+            vm.inputSources.items = [];
+            if (credential.get('credential_type') === credentialType.get('id')) {
                 vm.inputSources.items = credential.get('related.input_sources.results');
             }
-
-            const linkedFieldNames = vm.inputSources.items
-                .map(({ input_field_name }) => input_field_name);
-
-            fields = fields.map((field) => {
-                field.tagMode = isEditable && credentialType.get('kind') !== 'external';
-                if (linkedFieldNames.includes(field.id)) {
-                    field.asTag = true;
-                    const { summary_fields } = vm.inputSources.items
-                        .find(({ input_field_name }) => input_field_name === field.id);
-                    field._value = summary_fields.source_credential.name;
-                }
-                return field;
-            });
+            vm.isTestable = (isEditable && credentialType.get('kind') === 'external');
+            vm.getSubmitData = getSubmitData;
 
             return fields;
         },

@@ -1,3 +1,4 @@
+/* eslint camelcase: 0 */
 const ENCRYPTED_VALUE = '$encrypted$';
 
 let Base;
@@ -29,12 +30,23 @@ function createFormSchema (method, config) {
     return schema;
 }
 
-function assignInputGroupValues (inputs) {
+function assignInputGroupValues (apiConfig, credentialType) {
+    let inputs = credentialType.get('inputs.fields');
+
     if (!inputs) {
         return [];
     }
 
-    return inputs.map(input => {
+    if (this.has('credential_type')) {
+        if (credentialType.get('id') !== this.get('credential_type')) {
+            inputs.forEach(field => {
+                field.tagMode = this.isEditable() && credentialType.get('kind') !== 'external';
+            });
+            return inputs;
+        }
+    }
+
+    inputs = inputs.map(input => {
         const value = this.get(`inputs.${input.id}`);
 
         input._value = value;
@@ -42,6 +54,36 @@ function assignInputGroupValues (inputs) {
 
         return input;
     });
+
+    if (credentialType.get('name') === 'Machine') {
+        const become = inputs.find((field) => field.id === 'become_method');
+        become._isDynamic = true;
+        become._choices = Array.from(apiConfig.become_methods, method => method[0]);
+        // Add the value to the choices if it doesn't exist in the preset list
+        if (become._value && become._value !== '') {
+            const optionMatches = become._choices
+                .findIndex((option) => option === become._value);
+            if (optionMatches === -1) {
+                become._choices.push(become._value);
+            }
+        }
+    }
+
+    const linkedFieldNames = (this.get('related.input_sources.results') || [])
+        .map(({ input_field_name }) => input_field_name);
+
+    inputs = inputs.map((field) => {
+        field.tagMode = this.isEditable() && credentialType.get('kind') !== 'external';
+        if (linkedFieldNames.includes(field.id)) {
+            field.asTag = true;
+            const { summary_fields } = this.get('related.input_sources.results')
+                .find(({ input_field_name }) => input_field_name === field.id);
+            field._value = summary_fields.source_credential.name;
+        }
+        return field;
+    });
+
+    return inputs;
 }
 
 function setDependentResources (id) {
