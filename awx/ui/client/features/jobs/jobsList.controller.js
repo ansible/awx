@@ -39,7 +39,6 @@ function ListJobsController (
     vm.list = { iterator, name };
     vm.job_dataset = Dataset.data;
     vm.jobs = Dataset.data.results;
-    vm.querySet = $state.params.job_search;
 
     $scope.$watch('vm.job_dataset.count', () => {
         $scope.$emit('updateCount', vm.job_dataset.count, 'jobs');
