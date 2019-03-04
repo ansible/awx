@@ -20,7 +20,7 @@ function EditCredentialsController (
         credential,
         credentialType,
         organization,
-        isOrgCredAdmin,
+        isOrgEditableByUser,
     } = models;
 
     const omit = ['user', 'team', 'inputs'];
@@ -75,14 +75,7 @@ function EditCredentialsController (
         vm.form.disabled = !isEditable;
     }
 
-    const isOrgAdmin = _.some(me.get('related.admin_of_organizations.results'), (org) => org.id === organization.get('id'));
-    const isSuperuser = me.get('is_superuser');
-    const isCurrentAuthor = Boolean(credential.get('summary_fields.created_by.id') === me.get('id'));
-    vm.form.organization._disabled = true;
-
-    if (isSuperuser || isOrgAdmin || isOrgCredAdmin || (credential.get('organization') === null && isCurrentAuthor)) {
-        vm.form.organization._disabled = false;
-    }
+    vm.form.organization._disabled = !isOrgEditableByUser;
 
     vm.form.organization._resource = 'organization';
     vm.form.organization._model = organization;
