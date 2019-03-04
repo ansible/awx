@@ -1,6 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+const toolTipContent = {
+  padding: '10px',
+  minWidth: '100px',
+}
+
 class Tooltip extends React.Component {
   transforms = {
     top: {
@@ -42,7 +47,10 @@ class Tooltip extends React.Component {
     const {
       isDisplayed
     } = this.state;
-
+    
+    if (message === '') {
+      return null;
+    }
     return (
       <span
         style={{ position: 'relative' }}
@@ -56,8 +64,8 @@ class Tooltip extends React.Component {
               style={{ position: 'absolute', zIndex: '10', ...this.transforms[position] }}
               className={`pf-c-tooltip pf-m-${position}`}
             >
-              <div className="pf-c-tooltip__arrow" />
-              <div className="pf-c-tooltip__content">
+              <div className="pf-c-tooltip__arrow"/>
+              <div className="pf-c-tooltip__content" style={toolTipContent}>
                 { message }
               </div>
             </div>

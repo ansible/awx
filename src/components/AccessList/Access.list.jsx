@@ -16,6 +16,7 @@ import {
 import BasicChip from '../BasicChip/BasicChip';
 import Pagination from '../Pagination';
 import DataListToolbar from '../DataListToolbar';
+import Tooltip from '../Tooltip';
 
 import {
   parseQueryString,
@@ -46,6 +47,15 @@ const hiddenStyle = {
   display: 'none',
 };
 
+const badgeStyle = {
+  borderRadius: 'var(--pf-global--BorderRadius--sm)',
+  height: '24px',
+}
+
+const badgeTextStyle = {
+  lineHeight: '24px',
+}
+
 const Detail = ({ label, value, url, isBadge, customStyles }) => {
   let detail = null;
   if (value) {
@@ -57,8 +67,8 @@ const Detail = ({ label, value, url, isBadge, customStyles }) => {
           </Link>) : (<Text component={TextVariants.h6} style={detailLabelStyle}>{label}</Text>
         )}
         {isBadge ? (
-          <Badge isRead>
-            <Text component={TextVariants.p} style={detailValueStyle}>{value}</Text>
+          <Badge style={badgeStyle} isRead>
+            <Text component={TextVariants.p} style={{...detailValueStyle, ...badgeTextStyle}}>{value}</Text>
           </Badge>
         ) : (
           <Text component={TextVariants.p} style={detailValueStyle}>{value}</Text>
@@ -93,7 +103,7 @@ class AccessList extends React.Component {
       count: null,
       sortOrder: 'ascending',
       sortedColumnKey: 'username',
-      isCompact: true,
+      isCompact: false,
     };
 
     this.fetchOrgAccessList = this.fetchOrgAccessList.bind(this);
@@ -321,12 +331,30 @@ class AccessList extends React.Component {
                               : userRolesWrapperStyle}
                             >
                               <Text component={TextVariants.h6} style={detailLabelStyle}>{i18n._(t`User Roles`)}</Text>
-                              {result.userRoles.map(role => (
-                                <BasicChip
-                                  key={role.id}
-                                  text={role.name}
-                                />
-                              ))}
+                              {result.userRoles.map(role => {
+                                // Show tooltips for associated Org/Team of role name displayed
+                                if (role.summary_fields.resource_name) {
+                                  return (
+                                    <Tooltip
+                                      message={role.summary_fields.resource_name}
+                                      position="top"
+                                      key={role.id}
+                                    >
+                                       <BasicChip
+                                        key={role.id}
+                                        text={role.name}
+                                      />
+                                    </Tooltip>
+                                  )
+                                } else {
+                                  return (
+                                    <BasicChip
+                                      key={role.id}
+                                      text={role.name}
+                                    />
+                                  )
+                                }
+                              })}
                             </ul>
                           )}
                           {result.teamRoles.length > 0 && (

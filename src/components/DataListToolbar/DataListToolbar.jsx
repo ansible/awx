@@ -264,21 +264,21 @@ class DataListToolbar extends React.Component {
                       <ToolbarItem>
                         <Button
                           variant="plain"
-                          aria-label={i18n._(t`Expand`)}
-                          onClick={this.onExpand}
-                          style={!isCompact ? ToolbarActiveStyle : null}
-                        >
-                          <EqualsIcon />
-                        </Button>
-                      </ToolbarItem>
-                      <ToolbarItem>
-                        <Button
-                          variant="plain"
                           aria-label={i18n._(t`Collapse`)}
                           onClick={this.onCompact}
                           style={isCompact ? ToolbarActiveStyle : null}
                         >
                           <BarsIcon />
+                        </Button>
+                      </ToolbarItem>
+                      <ToolbarItem>
+                        <Button
+                          variant="plain"
+                          aria-label={i18n._(t`Expand`)}
+                          onClick={this.onExpand}
+                          style={!isCompact ? ToolbarActiveStyle : null}
+                        >
+                          <EqualsIcon />
                         </Button>
                       </ToolbarItem>
                       { (showDelete || addUrl) && (
