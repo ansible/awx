@@ -11,10 +11,13 @@ function AddCredentialsController (
     Wait,
     $filter,
     CredentialType,
+    GetBasePath,
+    Rest,
 ) {
     const vm = this || {};
 
     const { me, credential, credentialType, organization } = models;
+    const isExternal = credentialType.get('kind') === 'external';
 
     vm.mode = 'add';
     vm.strings = strings;
@@ -44,44 +47,6 @@ function AddCredentialsController (
     vm.form.credential_type._placeholder = strings.get('inputs.CREDENTIAL_TYPE_PLACEHOLDER');
     vm.isTestable = credentialType.get('kind') === 'external';
 
-    vm.inputSources = {
-        field: null,
-        credentialId: null,
-        credentialTypeId: null,
-        credentialTypeName: null,
-        tabs: {
-            credential: {
-                _active: true,
-                _disabled: false,
-            },
-            metadata: {
-                _active: false,
-                _disabled: false,
-            }
-        },
-        metadata: {},
-        form: {
-            inputs: {
-                _get: () => vm.inputSources.metadata,
-                _reference: 'vm.form.inputs',
-                _key: 'inputs',
-                _source: { _value: {} },
-            }
-        },
-        items: [],
-    };
-    vm.externalTest = {
-        metadata: null,
-        form: {
-            inputs: {
-                _get: () => vm.externalTest.metadata,
-                _reference: 'vm.form.inputs',
-                _key: 'inputs',
-                _source: { _value: {} },
-            }
-        },
-    };
-
     const gceFileInputSchema = {
         id: 'gce_service_account_key',
         type: 'file',
@@ -106,12 +71,20 @@ function AddCredentialsController (
                 become._isDynamic = true;
                 become._choices = Array.from(apiConfig.become_methods, method => method[0]);
             }
-            vm.isTestable = credentialType.get('kind') === 'external';
+            vm.isTestable = (credentialType.get('kind') === 'external');
             vm.getSubmitData = getSubmitData;
 
+            vm.inputSources.items = [];
+            const linkedFieldNames = vm.inputSources.items
+                .map(({ input_field_name }) => input_field_name);
+
             fields = fields.map((field) => {
-                if (credentialType.get('kind') !== 'external') {
-                    field.tagMode = true;
+                field.tagMode = credentialType.get('kind') !== 'external';
+                if (linkedFieldNames.includes(field.id)) {
+                    field.asTag = true;
+                    const { summary_fields } = vm.inputSources.items
+                        .find(({ input_field_name }) => input_field_name === field.id);
+                    field._value = summary_fields.source_credential.name;
                 }
                 return field;
             });
@@ -129,45 +102,102 @@ function AddCredentialsController (
         _key: 'inputs'
     };
 
+    vm.externalTest = {
+        form: {
+            inputs: {
+                _get: () => vm.externalTest.metadataInputs,
+                _reference: 'vm.form.inputs',
+                _key: 'inputs',
+                _source: { _value: {} },
+            },
+        },
+        metadataInputs: null,
+    };
+    vm.inputSources = {
+        tabs: {
+            credential: {
+                _active: true,
+                _disabled: false,
+            },
+            metadata: {
+                _active: false,
+                _disabled: false,
+            }
+        },
+        form: {
+            inputs: {
+                _get: () => vm.inputSources.metadataInputs,
+                _reference: 'vm.form.inputs',
+                _key: 'inputs',
+                _source: { _value: {} },
+            },
+        },
+        field: null,
+        credentialTypeId: null,
+        credentialTypeName: null,
+        credentialId: null,
+        credentialName: null,
+        metadataInputs: null,
+        initialItems: credential.get('related.input_sources.results'),
+        items: credential.get('related.input_sources.results'),
+    };
+
     vm.onInputSourceClear = (field) => {
         vm.form[field].tagMode = true;
         vm.form[field].asTag = false;
+        vm.form[field]._value = '';
+        vm.inputSources.items = vm.inputSources.items
+            .filter(({ input_field_name }) => input_field_name !== field);
     };
 
-    vm.setTab = (name) => {
+    function setInputSourceTab (name) {
         const metaIsActive = name === 'metadata';
         vm.inputSources.tabs.credential._active = !metaIsActive;
         vm.inputSources.tabs.credential._disabled = false;
         vm.inputSources.tabs.metadata._active = metaIsActive;
         vm.inputSources.tabs.metadata._disabled = false;
-    };
+    }
 
-    vm.unsetTabs = () => {
+    function unsetInputSourceTabs () {
         vm.inputSources.tabs.credential._active = false;
         vm.inputSources.tabs.credential._disabled = false;
         vm.inputSources.tabs.metadata._active = false;
         vm.inputSources.tabs.metadata._disabled = false;
-    };
+    }
 
     vm.onInputSourceOpen = (field) => {
-        vm.inputSources.field = field;
-        vm.setTab('credential');
         const sourceItem = vm.inputSources.items
             .find(({ input_field_name }) => input_field_name === field);
         if (sourceItem) {
             const { source_credential, summary_fields } = sourceItem;
-            const { source_credential: { credential_type_id } } = summary_fields;
+            const { source_credential: { credential_type_id, name } } = summary_fields;
             vm.inputSources.credentialId = source_credential;
+            vm.inputSources.credentialName = name;
             vm.inputSources.credentialTypeId = credential_type_id;
             vm.inputSources._value = credential_type_id;
         }
+        setInputSourceTab('credential');
+        vm.inputSources.field = field;
     };
 
     vm.onInputSourceClose = () => {
         vm.inputSources.field = null;
-        vm.inputSources.metadata = null;
-        vm.unsetTabs();
+        vm.inputSources.credentialId = null;
+        vm.inputSources.credentialName = null;
+        vm.inputSources.metadataInputs = null;
+        unsetInputSourceTabs();
     };
+
+    /**
+     * Extract the current set of input values from the metadata form and reshape them to a
+     * metadata object that can be sent to the api later or reloaded when re-opening the form.
+     */
+    function getMetadataFormSubmitData ({ inputs }) {
+        const metadata = Object.assign({}, ...inputs._group
+            .filter(({ _value }) => _value !== undefined)
+            .map(({ id, _value }) => ({ [id]: _value })));
+        return metadata;
+    }
 
     vm.onInputSourceNext = () => {
         const { field, credentialId, credentialTypeId } = vm.inputSources;
@@ -175,74 +205,81 @@ function AddCredentialsController (
         new CredentialType('get', credentialTypeId)
             .then(model => {
                 model.mergeInputProperties('metadata');
-                vm.inputSources.metadata = model.get('inputs.metadata');
+                vm.inputSources.metadataInputs = model.get('inputs.metadata');
                 vm.inputSources.credentialTypeName = model.get('name');
                 const [metavals] = vm.inputSources.items
                     .filter(({ input_field_name }) => input_field_name === field)
                     .filter(({ source_credential }) => source_credential === credentialId)
                     .map(({ metadata }) => metadata);
                 Object.keys(metavals || {}).forEach(key => {
-                    const obj = vm.inputSources.metadata.find(o => o.id === key);
+                    const obj = vm.inputSources.metadataInputs.find(o => o.id === key);
                     if (obj) obj._value = metavals[key];
                 });
-                vm.setTab('metadata');
+                setInputSourceTab('metadata');
             })
             .finally(() => Wait('stop'));
     };
 
     vm.onInputSourceSelect = () => {
-        const { field, credentialId } = vm.inputSources;
+        const { field, credentialId, credentialName, credentialTypeId } = vm.inputSources;
+        const metadata = getMetadataFormSubmitData(vm.inputSources.form);
         vm.inputSources.items = vm.inputSources.items
             .filter(({ input_field_name }) => input_field_name !== field)
             .concat([{
+                metadata,
                 input_field_name: field,
                 source_credential: credentialId,
                 target_credential: credential.get('id'),
+                summary_fields: {
+                    source_credential: {
+                        name: credentialName,
+                        credential_type_id: credentialTypeId
+                    }
+                },
             }]);
         vm.inputSources.field = null;
-        vm.inputSources.metadata = null;
-        vm.unsetTabs();
+        vm.inputSources.metadataInputs = null;
+        unsetInputSourceTabs();
+        vm.form[field]._value = credentialName;
+        vm.form[field].asTag = true;
     };
 
     vm.onInputSourceTabSelect = (name) => {
         if (name === 'metadata') {
             vm.onInputSourceNext();
         } else {
-            vm.setTab('credential');
+            setInputSourceTab('credential');
         }
     };
 
-    vm.onInputSourceRowClick = ({ id, credential_type }) => {
+    vm.onInputSourceRowClick = ({ id, credential_type, name }) => {
         vm.inputSources.credentialId = id;
+        vm.inputSources.credentialName = name;
         vm.inputSources.credentialTypeId = credential_type;
         vm.inputSources._value = credential_type;
     };
 
     vm.onInputSourceTest = () => {
-        const metadata = Object.assign({}, ...vm.inputSources.form.inputs._group
-            .filter(({ _value }) => _value !== undefined)
-            .map(({ id, _value }) => ({ [id]: _value })));
+        const metadata = getMetadataFormSubmitData(vm.inputSources.form);
         const name = $filter('sanitize')(vm.inputSources.credentialTypeName);
         const endpoint = `${vm.inputSources.credentialId}/test/`;
-
-        return vm.runTest({ name, model: credential, endpoint, data: { metadata } });
+        return runTest({ name, model: credential, endpoint, data: { metadata } });
     };
 
-    vm.onExternalTestClick = () => {
+    function onExternalTestOpen () {
         credentialType.mergeInputProperties('metadata');
-        vm.externalTest.metadata = credentialType.get('inputs.metadata');
-    };
+        vm.externalTest.metadataInputs = credentialType.get('inputs.metadata');
+    }
+    vm.form.secondary = onExternalTestOpen;
 
     vm.onExternalTestClose = () => {
-        vm.externalTest.metadata = null;
+        vm.externalTest.metadataInputs = null;
     };
 
     vm.onExternalTest = () => {
         const name = $filter('sanitize')(credentialType.get('name'));
         const { inputs } = vm.getSubmitData();
-        const metadata = Object.assign({}, ...vm.externalTest.form.inputs._group
-            .filter(({ _value }) => _value !== undefined)
-            .map(({ id, _value }) => ({ [id]: _value })));
+        const metadata = getMetadataFormSubmitData(vm.externalTest.form);
 
         let model;
         if (credential.get('credential_type') !== credentialType.get('id')) {
@@ -252,49 +289,57 @@ function AddCredentialsController (
         }
 
         const endpoint = `${model.get('id')}/test/`;
-        return vm.runTest({ name, model, endpoint, data: { inputs, metadata } });
+        return runTest({ name, model, endpoint, data: { inputs, metadata } });
     };
-    vm.form.secondary = vm.onExternalTestClick;
 
-    vm.runTest = ({ name, model, endpoint, data: { inputs, metadata } }) => {
+    vm.filterInputSourceCredentialResults = (data) => {
+        if (isExternal) {
+            data.results = data.results.filter(({ id }) => id !== credential.get('id'));
+        }
+        return data;
+    };
+
+    function runTest ({ name, model, endpoint, data: { inputs, metadata } }) {
         return model.http.post({ url: endpoint, data: { inputs, metadata }, replace: false })
             .then(() => {
+                const icon = 'fa-check-circle';
+                const msg = strings.get('edit.TEST_PASSED');
+                const content = buildTestNotificationContent({ name, icon, msg });
                 ngToast.success({
-                    content: vm.buildTestNotificationContent({
-                        name,
-                        icon: 'fa-check-circle',
-                        msg: strings.get('edit.TEST_PASSED'),
-                    }),
+                    content,
                     dismissButton: false,
                     dismissOnTimeout: true
                 });
             })
             .catch(({ data }) => {
-                const msg = data.inputs
-                    ? `${$filter('sanitize')(data.inputs)}`
-                    : strings.get('edit.TEST_FAILED');
+                const icon = 'fa-exclamation-triangle';
+                const msg = data.inputs || strings.get('edit.TEST_FAILED');
+                const content = buildTestNotificationContent({ name, icon, msg });
                 ngToast.danger({
-                    content: vm.buildTestNotificationContent({
-                        name,
-                        msg,
-                        icon: 'fa-exclamation-triangle'
-                    }),
+                    content,
                     dismissButton: false,
                     dismissOnTimeout: true
                 });
             });
-    };
+    }
 
-    vm.buildTestNotificationContent = ({ name, msg, icon }) => (
-        `<div class="Toast-wrapper">
+    function buildTestNotificationContent ({ name, msg, icon }) {
+        const sanitize = $filter('sanitize');
+        const content = `<div class="Toast-wrapper">
             <div class="Toast-icon">
                 <i class="fa ${icon} Toast-successIcon"></i>
             </div>
             <div>
-                <b>${name}:</b> ${msg}
+                <b>${sanitize(name)}:</b> ${sanitize(msg)}
             </div>
-        </div>`
-    );
+        </div>`;
+        return content;
+    }
+
+    function createInputSource (data) {
+        Rest.setUrl(GetBasePath('credential_input_sources'));
+        return Rest.post(data);
+    }
 
     vm.form.save = data => {
         data.user = me.get('id');
@@ -303,14 +348,25 @@ function AddCredentialsController (
             delete data.inputs[gceFileInputSchema.id];
         }
 
-        const filteredInputs = _.omit(data.inputs, (value) => value === '');
+        const updatedLinkedFieldNames = vm.inputSources.items
+            .map(({ input_field_name }) => input_field_name);
+        const sourcesToAssociate = [...vm.inputSources.items];
+
+        // remove inputs with empty string values
+        let filteredInputs = _.omit(data.inputs, (value) => value === '');
+        // remove inputs that are to be linked to an external credential
+        filteredInputs = _.omit(filteredInputs, updatedLinkedFieldNames);
         data.inputs = filteredInputs;
 
-        return credential.request('post', { data });
+        return credential.request('post', { data })
+            .then(() => {
+                sourcesToAssociate.forEach(obj => { obj.target_credential = credential.get('id'); });
+                return Promise.all(sourcesToAssociate.map(createInputSource));
+            });
     };
 
-    vm.form.onSaveSuccess = res => {
-        $state.go('credentials.edit', { credential_id: res.data.id }, { reload: true });
+    vm.form.onSaveSuccess = () => {
+        $state.go('credentials.edit', { credential_id: credential.get('id') }, { reload: true });
     };
 
     vm.gceOnFileInputChanged = (value, oldValue) => {
@@ -381,6 +437,8 @@ AddCredentialsController.$inject = [
     'Wait',
     '$filter',
     'CredentialTypeModel',
+    'GetBasePath',
+    'Rest',
 ];
 
 export default AddCredentialsController;
