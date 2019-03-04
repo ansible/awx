@@ -58,36 +58,19 @@ function AddCredentialsController (
 
     vm.form.inputs = {
         _get: ({ getSubmitData }) => {
-            credentialType.mergeInputProperties();
+            const apiConfig = ConfigService.get();
 
-            let fields = credentialType.get('inputs.fields');
+            credentialType.mergeInputProperties();
+            const fields = credential.assignInputGroupValues(apiConfig, credentialType);
 
             if (credentialType.get('name') === 'Google Compute Engine') {
                 fields.splice(2, 0, gceFileInputSchema);
                 $scope.$watch(`vm.form.${gceFileInputSchema.id}._value`, vm.gceOnFileInputChanged);
-            } else if (credentialType.get('name') === 'Machine') {
-                const apiConfig = ConfigService.get();
-                const become = fields.find((field) => field.id === 'become_method');
-                become._isDynamic = true;
-                become._choices = Array.from(apiConfig.become_methods, method => method[0]);
             }
-            vm.isTestable = (credentialType.get('kind') === 'external');
+
             vm.getSubmitData = getSubmitData;
-
+            vm.isTestable = credentialType.get('kind') === 'external';
             vm.inputSources.items = [];
-            const linkedFieldNames = vm.inputSources.items
-                .map(({ input_field_name }) => input_field_name);
-
-            fields = fields.map((field) => {
-                field.tagMode = credentialType.get('kind') !== 'external';
-                if (linkedFieldNames.includes(field.id)) {
-                    field.asTag = true;
-                    const { summary_fields } = vm.inputSources.items
-                        .find(({ input_field_name }) => input_field_name === field.id);
-                    field._value = summary_fields.source_credential.name;
-                }
-                return field;
-            });
 
             return fields;
         },
