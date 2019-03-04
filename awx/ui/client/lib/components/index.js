@@ -1,8 +1,10 @@
 import atLibServices from '~services';
 
 import actionGroup from '~components/action/action-group.directive';
+import actionButton from '~components/action/action-button.component';
 import divider from '~components/utility/divider.directive';
 import dynamicSelect from '~components/input/dynamic-select.directive';
+import easyModal from '~components/easy-modal/easy-modal.component';
 import form from '~components/form/form.directive';
 import formAction from '~components/form/action.directive';
 import inputCheckbox from '~components/input/checkbox.directive';
@@ -20,6 +22,7 @@ import inputTextareaSecret from '~components/input/textarea-secret.directive';
 import launchTemplate from '~components/launchTemplateButton/launchTemplateButton.component';
 import layout from '~components/layout/layout.directive';
 import list from '~components/list/list.directive';
+import lookupList from '~components/lookup-list/lookup-list.component';
 import modal from '~components/modal/modal.directive';
 import panel from '~components/panel/panel.directive';
 import panelBody from '~components/panel/body.directive';
@@ -53,8 +56,10 @@ angular
         atCodeMirror
     ])
     .directive('atActionGroup', actionGroup)
+    .component('atActionButton', actionButton)
     .directive('atDivider', divider)
     .directive('atDynamicSelect', dynamicSelect)
+    .component('atEasyModal', easyModal)
     .directive('atForm', form)
     .directive('atFormAction', formAction)
     .directive('atInputCheckbox', inputCheckbox)
@@ -72,6 +77,7 @@ angular
     .component('atLaunchTemplate', launchTemplate)
     .directive('atLayout', layout)
     .directive('atList', list)
+    .component('atLookupList', lookupList)
     .directive('atListToolbar', toolbar)
     .component('atRelaunch', relaunch)
     .directive('atRow', row)

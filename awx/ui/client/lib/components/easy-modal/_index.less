@@ -1,0 +1,27 @@
+.at-EasyModal-body {
+    font-size: @at-font-size;
+    padding: @at-padding-panel 0;
+}
+
+.at-EasyModal-dismiss {
+    .at-mixin-ButtonIcon();
+    font-size: @at-font-size-modal-dismiss;
+    color: @at-color-icon-dismiss;
+    text-align: right;
+}
+
+.at-EasyModal-heading {
+    margin: 0;
+    overflow: visible;
+
+    & > .at-EasyModal-dismiss {
+        margin: 0;
+    }
+}
+
+.at-EasyModal-title {
+    margin: 0;
+    padding: 0;
+
+    .at-mixin-Heading(@at-font-size-modal-heading);
+}

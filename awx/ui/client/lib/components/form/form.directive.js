@@ -30,7 +30,6 @@ function AtFormController (eventService, strings) {
         ({ modal } = scope[scope.ns]);
 
         vm.state.disabled = scope.state.disabled;
-
         vm.setListeners();
     };
 
@@ -203,6 +202,7 @@ function AtFormController (eventService, strings) {
 
         if (isValid !== vm.state.isValid) {
             vm.state.isValid = isValid;
+            scope.state.isValid = vm.state.isValid;
         }
     };
 

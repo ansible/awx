@@ -3,7 +3,7 @@ import AddController from './add-credentials.controller';
 import EditController from './edit-credentials.controller';
 import CredentialsStrings from './credentials.strings';
 import InputSourceLookupComponent from './input-source-lookup.component';
-import ExternalTestComponent from './external-test.component';
+import ExternalTestModalComponent from './external-test-modal.component';
 
 const MODULE_NAME = 'at.features.credentials';
 
@@ -143,7 +143,7 @@ angular
     .service('LegacyCredentialsService', LegacyCredentials)
     .service('CredentialsStrings', CredentialsStrings)
     .component('atInputSourceLookup', InputSourceLookupComponent)
-    .component('atExternalCredentialTest', ExternalTestComponent)
+    .component('atExternalCredentialTest', ExternalTestModalComponent)
     .run(CredentialsRun);
 
 export default MODULE_NAME;
