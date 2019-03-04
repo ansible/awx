@@ -27,7 +27,6 @@ function projectsListController (
     };
     vm.dataset = Dataset.data;
     vm.projects = Dataset.data.results;
-    vm.querySet = $state.params.project_search;
 
     $scope.$watch('vm.dataset.count', () => {
         $scope.$emit('updateCount', vm.dataset.count, 'projects');
@@ -48,7 +47,18 @@ function projectsListController (
         } else {
             vm.activeId = '';
         }
+        setToolbarSort();
     }, true);
+
+    function setToolbarSort () {
+        const orderByValue = _.get($state.params, 'project_search.order_by');
+        const sortValue = _.find(vm.toolbarSortOptions, (option) => option.value === orderByValue);
+        if (sortValue) {
+            vm.toolbarSortValue = sortValue;
+        } else {
+            vm.toolbarSortValue = toolbarSortDefault;
+        }
+    }
 
     const toolbarSortDefault = {
         label: `${strings.get('sort.NAME_ASCENDING')}`,
@@ -69,7 +79,7 @@ function projectsListController (
         vm.toolbarSortValue = sort;
 
         const queryParams = Object.assign(
-            vm.querySet,
+            $state.params.project_search,
             { order_by: sort.value }
         );
 
