@@ -1,6 +1,6 @@
 /* eslint camelcase: 0 */
 /* eslint arrow-body-style: 0 */
-function EditCredentialsController (
+function AddEditCredentialsController (
     models,
     $state,
     $scope,
@@ -26,32 +26,84 @@ function EditCredentialsController (
     const omit = ['user', 'team', 'inputs'];
     const isEditable = credential.isEditable();
     const isExternal = credentialType.get('kind') === 'external';
+    const mode = $state.current.name.startsWith('credentials.add') ? 'add' : 'edit';
 
-    vm.mode = 'edit';
+    vm.mode = mode;
     vm.strings = strings;
-    vm.panelTitle = credential.get('name');
 
-    vm.tab = {
-        details: {
-            _active: true,
-            _go: 'credentials.edit',
-            _params: { credential_id: credential.get('id') }
-        },
-        permissions: {
-            _go: 'credentials.edit.permissions',
-            _params: { credential_id: credential.get('id') }
-        }
-    };
+    if (mode === 'edit') {
+        vm.panelTitle = credential.get('name');
+        vm.tab = {
+            details: {
+                _active: true,
+                _go: 'credentials.edit',
+                _params: { credential_id: credential.get('id') }
+            },
+            permissions: {
+                _go: 'credentials.edit.permissions',
+                _params: { credential_id: credential.get('id') }
+            }
+        };
 
-    $scope.$watch('$state.current.name', (value) => {
-        if (/credentials.edit($|\.organization$|\.credentialType$)/.test(value)) {
-            vm.tab.details._active = true;
-            vm.tab.permissions._active = false;
+        if (isEditable) {
+            vm.form = credential.createFormSchema('put', { omit });
         } else {
-            vm.tab.permissions._active = true;
-            vm.tab.details._active = false;
+            vm.form = credential.createFormSchema({ omit });
+            vm.form.disabled = !isEditable;
         }
-    });
+
+        vm.form.organization._disabled = !isOrgEditableByUser;
+        // Only exists for permissions compatibility
+        $scope.credential_obj = credential.get();
+
+        vm.form.organization._resource = 'organization';
+        vm.form.organization._model = organization;
+        vm.form.organization._route = 'credentials.edit.organization';
+        vm.form.organization._value = credential.get('summary_fields.organization.id');
+        vm.form.organization._displayValue = credential.get('summary_fields.organization.name');
+        vm.form.organization._placeholder = strings.get('inputs.ORGANIZATION_PLACEHOLDER');
+
+        vm.form.credential_type._resource = 'credential_type';
+        vm.form.credential_type._model = credentialType;
+        vm.form.credential_type._route = 'credentials.edit.credentialType';
+        vm.form.credential_type._placeholder = strings.get('inputs.CREDENTIAL_TYPE_PLACEHOLDER');
+        vm.form.credential_type._value = credentialType.get('id');
+        vm.form.credential_type._displayValue = credentialType.get('name');
+        vm.isTestable = (isEditable && credentialType.get('kind') === 'external');
+
+        $scope.$watch('$state.current.name', (value) => {
+            if (/credentials.edit($|\.organization$|\.credentialType$)/.test(value)) {
+                vm.tab.details._active = true;
+                vm.tab.permissions._active = false;
+            } else {
+                vm.tab.permissions._active = true;
+                vm.tab.details._active = false;
+            }
+        });
+    } else if (mode === 'add') {
+        vm.panelTitle = strings.get('add.PANEL_TITLE');
+        vm.tab = {
+            details: { _active: true },
+            permissions: { _disabled: true }
+        };
+        vm.form = credential.createFormSchema('post', {
+            omit: ['user', 'team', 'inputs']
+        });
+
+        vm.form._formName = 'credential';
+        vm.form.disabled = !credential.isCreatable();
+
+        vm.form.organization._resource = 'organization';
+        vm.form.organization._route = 'credentials.add.organization';
+        vm.form.organization._model = organization;
+        vm.form.organization._placeholder = strings.get('inputs.ORGANIZATION_PLACEHOLDER');
+
+        vm.form.credential_type._resource = 'credential_type';
+        vm.form.credential_type._route = 'credentials.add.credentialType';
+        vm.form.credential_type._model = credentialType;
+        vm.form.credential_type._placeholder = strings.get('inputs.CREDENTIAL_TYPE_PLACEHOLDER');
+        vm.isTestable = credentialType.get('kind') === 'external';
+    }
 
     $scope.$watch('organization', () => {
         if ($scope.organization) {
@@ -64,33 +116,6 @@ function EditCredentialsController (
             vm.form.credential_type._idFromModal = $scope.credential_type;
         }
     });
-
-    // Only exists for permissions compatibility
-    $scope.credential_obj = credential.get();
-
-    if (isEditable) {
-        vm.form = credential.createFormSchema('put', { omit });
-    } else {
-        vm.form = credential.createFormSchema({ omit });
-        vm.form.disabled = !isEditable;
-    }
-
-    vm.form.organization._disabled = !isOrgEditableByUser;
-
-    vm.form.organization._resource = 'organization';
-    vm.form.organization._model = organization;
-    vm.form.organization._route = 'credentials.edit.organization';
-    vm.form.organization._value = credential.get('summary_fields.organization.id');
-    vm.form.organization._displayValue = credential.get('summary_fields.organization.name');
-    vm.form.organization._placeholder = strings.get('inputs.ORGANIZATION_PLACEHOLDER');
-
-    vm.form.credential_type._resource = 'credential_type';
-    vm.form.credential_type._model = credentialType;
-    vm.form.credential_type._route = 'credentials.edit.credentialType';
-    vm.form.credential_type._value = credentialType.get('id');
-    vm.form.credential_type._displayValue = credentialType.get('name');
-    vm.form.credential_type._placeholder = strings.get('inputs.CREDENTIAL_TYPE_PLACEHOLDER');
-    vm.isTestable = (isEditable && credentialType.get('kind') === 'external');
 
     const gceFileInputSchema = {
         id: 'gce_service_account_key',
@@ -110,8 +135,8 @@ function EditCredentialsController (
 
             if (credentialType.get('name') === 'Google Compute Engine') {
                 fields.splice(2, 0, gceFileInputSchema);
-                $scope.$watch(`vm.form.${gceFileInputSchema.id}._value`, vm.gceOnFileInputChanged);
-                $scope.$watch('vm.form.ssh_key_data._isBeingReplaced', vm.gceOnReplaceKeyChanged);
+                $scope.$watch(`vm.form.${gceFileInputSchema.id}._value`, gceOnFileInputChanged);
+                $scope.$watch('vm.form.ssh_key_data._isBeingReplaced', gceOnReplaceKeyChanged);
             }
 
             vm.inputSources.initialItems = credential.get('related.input_sources.results');
@@ -177,14 +202,6 @@ function EditCredentialsController (
         items: credential.get('related.input_sources.results'),
     };
 
-    vm.onInputSourceClear = (field) => {
-        vm.form[field].tagMode = true;
-        vm.form[field].asTag = false;
-        vm.form[field]._value = '';
-        vm.inputSources.items = vm.inputSources.items
-            .filter(({ input_field_name }) => input_field_name !== field);
-    };
-
     function setInputSourceTab (name) {
         const metaIsActive = name === 'metadata';
         vm.inputSources.tabs.credential._active = !metaIsActive;
@@ -199,6 +216,14 @@ function EditCredentialsController (
         vm.inputSources.tabs.metadata._active = false;
         vm.inputSources.tabs.metadata._disabled = false;
     }
+
+    vm.onInputSourceClear = (field) => {
+        vm.form[field].tagMode = true;
+        vm.form[field].asTag = false;
+        vm.form[field]._value = '';
+        vm.inputSources.items = vm.inputSources.items
+            .filter(({ input_field_name }) => input_field_name !== field);
+    };
 
     vm.onInputSourceOpen = (field) => {
         // We get here when the input source lookup modal for a field is opened. If source
@@ -427,12 +452,36 @@ function EditCredentialsController (
         return Rest.post(data);
     }
 
+    function create (data) {
+        data.user = me.get('id');
+
+        if (_.get(data.inputs, gceFileInputSchema.id)) {
+            delete data.inputs[gceFileInputSchema.id];
+        }
+
+        const updatedLinkedFieldNames = vm.inputSources.items
+            .map(({ input_field_name }) => input_field_name);
+        const sourcesToAssociate = [...vm.inputSources.items];
+
+        // remove inputs with empty string values
+        let filteredInputs = _.omit(data.inputs, (value) => value === '');
+        // remove inputs that are to be linked to an external credential
+        filteredInputs = _.omit(filteredInputs, updatedLinkedFieldNames);
+        data.inputs = filteredInputs;
+
+        return credential.request('post', { data })
+            .then(() => {
+                sourcesToAssociate.forEach(obj => { obj.target_credential = credential.get('id'); });
+                return Promise.all(sourcesToAssociate.map(createInputSource));
+            });
+    }
+
     /**
      * If a credential's `credential_type` is changed while editing, the inputs associated with
      * the old type need to be cleared before saving the inputs associated with the new type.
      * Otherwise inputs are merged together making the request invalid.
      */
-    vm.form.save = data => {
+    function update (data) {
         data.user = me.get('id');
         credential.unset('inputs');
 
@@ -466,22 +515,29 @@ function EditCredentialsController (
         return Promise.all(sourcesToDisassociate.map(deleteInputSource))
             .then(() => credential.request('put', { data }))
             .then(() => Promise.all(sourcesToAssociate.map(createInputSource)));
+    }
+
+    vm.form.save = data => {
+        if (mode === 'edit') {
+            return update(data);
+        }
+        return create(data);
     };
 
     vm.form.onSaveSuccess = () => {
         $state.go('credentials.edit', { credential_id: credential.get('id') }, { reload: true });
     };
 
-    vm.gceOnReplaceKeyChanged = value => {
+    function gceOnReplaceKeyChanged (value) {
         vm.form[gceFileInputSchema.id]._disabled = !value;
-    };
+    }
 
-    vm.gceOnFileInputChanged = (value, oldValue) => {
+    function gceOnFileInputChanged (value, oldValue) {
         if (value === oldValue) return;
 
         const gceFileIsLoaded = !!value;
         const gceFileInputState = vm.form[gceFileInputSchema.id];
-        const { obj, error } = vm.gceParseFileInput(value);
+        const { obj, error } = gceParseFileInput(value);
 
         gceFileInputState._isValid = !error;
         gceFileInputState._message = error ? componentsStrings.get('message.INVALID_INPUT') : '';
@@ -505,9 +561,9 @@ function EditCredentialsController (
             vm.form.ssh_key_data._value = gceFileInputPreEditValues.ssh_key_data;
             vm.form.username._value = gceFileInputPreEditValues.username;
         }
-    };
+    }
 
-    vm.gceParseFileInput = value => {
+    function gceParseFileInput (value) {
         let obj;
         let error;
 
@@ -518,10 +574,10 @@ function EditCredentialsController (
         }
 
         return { obj, error };
-    };
+    }
 }
 
-EditCredentialsController.$inject = [
+AddEditCredentialsController.$inject = [
     'resolvedModels',
     '$state',
     '$scope',
@@ -536,4 +592,4 @@ EditCredentialsController.$inject = [
     'Rest',
 ];
 
-export default EditCredentialsController;
+export default AddEditCredentialsController;
