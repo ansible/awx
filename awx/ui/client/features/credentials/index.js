@@ -45,13 +45,21 @@ function CredentialsResolve (
                 organization: new Organization('get', orgId),
                 credentialInputSources: models.credential.extend('GET', 'input_sources')
             };
+
             dependents.isOrgCredAdmin = dependents.organization.then((org) => org.search({ role_level: 'credential_admin_role' }));
 
             return $q.all(dependents)
                 .then(related => {
                     models.credentialType = related.credentialType;
                     models.organization = related.organization;
-                    models.isOrgCredAdmin = related.isOrgCredAdmin;
+
+                    const isOrgAdmin = _.some(models.me.get('related.admin_of_organizations.results'), (org) => org.id === models.organization.get('id'));
+                    const isSuperuser = models.me.get('is_superuser');
+                    const isCurrentAuthor = Boolean(models.credential.get('summary_fields.created_by.id') === models.me.get('id'));
+
+                    models.isOrgEditableByUser = (isSuperuser || isOrgAdmin
+                        || related.isOrgCredAdmin
+                        || (models.credential.get('organization') === null && isCurrentAuthor));
 
                     return models;
                 });
