@@ -131,7 +131,12 @@ function TemplatesStrings (BaseString) {
         NEW_LINK: t.s('Please click on an available node to form a new link.'),
         UNLINK: t.s('UNLINK'),
         READ_ONLY_PROMPT_VALUES: t.s('The following promptable values were provided when this node was created:'),
-        READ_ONLY_NO_PROMPT_VALUES: t.s('No promptable values were provided when this node was created.')
+        READ_ONLY_NO_PROMPT_VALUES: t.s('No promptable values were provided when this node was created.'),
+        UNSAVED_CHANGES_HEADER: t.s('WARNING: UNSAVED CHANGES'),
+        UNSAVED_CHANGES_PROMPT_TEXT: t.s('Are you sure you want to exit the Workflow Creator without saving your changes?'),
+        EXIT: t.s('EXIT'),
+        CANCEL: t.s('CANCEL'),
+        SAVE_AND_EXIT: t.s('SAVE & EXIT')
     };
 }
 

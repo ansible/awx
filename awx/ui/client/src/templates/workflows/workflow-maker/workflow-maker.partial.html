@@ -17,8 +17,38 @@
                     <div class="Prompt-bodyQuery">{{strings.get('workflow_maker.DELETE_NODE_PROMPT_TEXT')}}</div>
                 </div>
                 <div class="Modal-footer">
-                    <button ng-click="cancelDeleteNode()" class="btn Modal-defaultButton Modal-footerButton">{{strings.get('CANCEL')}}</a>
-                    <button ng-click="confirmDeleteNode()" class="btn Modal-footerButton ng-binding Modal-errorButton">{{strings.get('DELETE')}}</a>
+                    <button ng-click="cancelDeleteNode()" class="btn Modal-defaultButton Modal-footerButton">{{strings.get('CANCEL')}}</button>
+                    <button ng-click="confirmDeleteNode()" class="btn Modal-footerButton ng-binding Modal-errorButton">{{strings.get('DELETE')}}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="WorkflowMaker-unsavedChangesOverlay" ng-show="unsavedChangesVisible">
+        <div class="modal-dialog">
+            <div class="Modal-content modal-content">
+                <div class="Modal-header">
+                    <div class="Modal-title">
+                        <span>{{strings.get('workflow_maker.UNSAVED_CHANGES_HEADER')}}</span>
+                    </div>
+                    <div class="Modal-exitHolder">
+                        <button class="close Modal-exit" ng-click="cancelUnsavedChanges()">
+                            <i class="fa fa-times-circle"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="Modal-body ng-binding">
+                    <div class="Prompt-bodyQuery">{{strings.get('workflow_maker.UNSAVED_CHANGES_PROMPT_TEXT')}}</div>
+                </div>
+                <div class="Modal-footer">
+                    <button ng-click="closeDialog()" class="btn Modal-footerButton Modal-errorButton">{{strings.get('workflow_maker.EXIT')}}</button>
+                    <button ng-click="cancelUnsavedChanges()" class="btn Modal-footerButton Modal-defaultButton">{{strings.get('workflow_maker.CANCEL')}}</button>
+                    <button
+                        ng-hide="formState.showNodeForm || formState.showLinkForm"
+                        ng-click="saveWorkflowMaker()"
+                        class="btn Modal-footerButton btn-success"
+                    >
+                        {{strings.get('workflow_maker.SAVE_AND_EXIT')}}
+                </button>
                 </div>
             </div>
         </div>

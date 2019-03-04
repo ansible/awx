@@ -63,10 +63,15 @@ export default ['templateUrl', 'CreateDialog', 'Wait', '$state', '$window',
                 });
 
                 scope.closeDialog = function() {
-                    $('#workflow-modal-dialog').dialog('destroy');
-                    $('body').removeClass('WorkflowMaker-preventBodyScrolling');
+                    if (scope.workflowChangesUnsaved || scope.workflowChangesStarted) {
+                        scope.unsavedChangesVisible = true;
+                    } else {
+                        scope.unsavedChangesVisible = false;
+                        $('#workflow-modal-dialog').dialog('destroy');
+                        $('body').removeClass('WorkflowMaker-preventBodyScrolling');
 
-                    $state.go('^');
+                        $state.go('^');
+                    }
                 };
 
                 function onResize(){
