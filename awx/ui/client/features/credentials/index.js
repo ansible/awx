@@ -1,6 +1,5 @@
 import LegacyCredentials from './legacy.credentials';
-import AddController from './add-credentials.controller';
-import EditController from './edit-credentials.controller';
+import AddEditController from './add-edit-credentials.controller';
 import CredentialsStrings from './credentials.strings';
 import InputSourceLookupComponent from './input-source-lookup.component';
 import ExternalTestModalComponent from './external-test-modal.component';
@@ -97,7 +96,7 @@ function CredentialsRun ($stateExtender, legacy, strings) {
         views: {
             'add@credentials': {
                 templateUrl: addEditTemplate,
-                controller: AddController,
+                controller: AddEditController,
                 controllerAs: 'vm'
             }
         },
@@ -120,7 +119,7 @@ function CredentialsRun ($stateExtender, legacy, strings) {
         views: {
             'edit@credentials': {
                 templateUrl: addEditTemplate,
-                controller: EditController,
+                controller: AddEditController,
                 controllerAs: 'vm'
             }
         },
@@ -146,8 +145,7 @@ CredentialsRun.$inject = [
 
 angular
     .module(MODULE_NAME, [])
-    .controller('AddController', AddController)
-    .controller('EditController', EditController)
+    .controller('AddEditController', AddEditController)
     .service('LegacyCredentialsService', LegacyCredentials)
     .service('CredentialsStrings', CredentialsStrings)
     .component('atInputSourceLookup', InputSourceLookupComponent)
