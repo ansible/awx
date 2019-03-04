@@ -27,6 +27,8 @@ function projectsListController (
     };
     vm.dataset = Dataset.data;
     vm.projects = Dataset.data.results;
+    vm.querySet = $state.params.project_search;
+
     $scope.$watch('vm.dataset.count', () => {
         $scope.$emit('updateCount', vm.dataset.count, 'projects');
     });
@@ -47,6 +49,36 @@ function projectsListController (
             vm.activeId = '';
         }
     }, true);
+
+    const toolbarSortDefault = {
+        label: `${strings.get('sort.NAME_ASCENDING')}`,
+        value: 'name'
+    };
+
+    vm.toolbarSortOptions = [
+        toolbarSortDefault,
+        {
+            label: `${strings.get('sort.NAME_DESCENDING')}`,
+            value: '-name'
+        }
+    ];
+
+    vm.toolbarSortValue = toolbarSortDefault;
+
+    vm.onToolbarSort = (sort) => {
+        vm.toolbarSortValue = sort;
+
+        const queryParams = Object.assign(
+            vm.querySet,
+            { order_by: sort.value }
+        );
+
+        qs.search(GetBasePath(vm.list.basePath), queryParams)
+            .then(({ data }) => {
+                vm.dataset = data;
+                vm.projects = vm.dataset.results;
+            });
+    };
 
     $scope.$on('ws-jobs', (e, data) => {
         $log.debug(data);

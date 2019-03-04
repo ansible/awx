@@ -21,10 +21,13 @@
     </div>
     <at-list-toolbar
         ng-if="vm.projects.length > 0"
-        sort-only="false"
-        on-collapse="vm.onCollapse"
         on-expand="vm.onExpand"
-        is-collapsed="vm.isCollapsed">
+        on-collapse="vm.onCollapse"
+        is-collapsed="vm.isCollapsed"
+        sort-only="false"
+        sort-value="vm.toolbarSortValue"
+        sort-options="vm.toolbarSortOptions"
+        on-sort="vm.onToolbarSort">
     </at-list-toolbar>
     <at-list results="vm.projects">
         <at-row ng-repeat="project in vm.projects"
@@ -44,7 +47,7 @@
                         <div aw-tool-tip="{{ project.scm_update_tooltip }}"
                         data-tip-watch="project.scm_update_tooltip"
                         data-placement="top">
-                            <div class="at-RowAction" 
+                            <div class="at-RowAction"
                                 ng-class="{'at-RowAction--disabled': project.scm_update_disabled }"
                                 ng-click="vm.SCMUpdate(project.id, $event)"
                                 ng-show="project.summary_fields.user_capabilities.start">
@@ -56,16 +59,16 @@
                         </at-row-action>
                         <at-row-action icon="fa-trash" ng-click="vm.deleteProject(project.id, project.name)"
                             ng-show="(project.status !== 'updating'
-                            && project.status !== 'running' 
-                            && project.status !== 'pending' 
-                            && project.status !== 'waiting')  
+                            && project.status !== 'running'
+                            && project.status !== 'pending'
+                            && project.status !== 'waiting')
                             && project.summary_fields.user_capabilities.delete">
                         </at-row-action>
                         <at-row-action icon="fa-minus-circle" ng-click="vm.cancelUpdate(project)"
-                            ng-show="(project.status == 'updating' 
-                            || project.status == 'running' 
-                            || project.status == 'pending' 
-                            || project.status == 'waiting') 
+                            ng-show="(project.status == 'updating'
+                            || project.status == 'running'
+                            || project.status == 'pending'
+                            || project.status == 'waiting')
                             && project.summary_fields.user_capabilities.start">
                         </at-row-action>
                     </div>
@@ -77,7 +80,7 @@
                         </div>
                         <at-truncate string="{{ project.scm_revision }}" maxLength="7"></at-truncate>
                     </div>
-                    <at-row-item 
+                    <at-row-item
                         label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_ORGANIZATION')}}"
                         value="{{ project.summary_fields.organization.name }}"
                         value-link="/#/organizations/{{ project.organization }}">
@@ -98,6 +101,7 @@
         collection="vm.projects"
         dataset="vm.dataset"
         iterator="project"
-        base-path="projects">
+        base-path="projects"
+        query-set="vm.querySet">
     </paginate>
 </at-panel-body>
