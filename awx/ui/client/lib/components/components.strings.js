@@ -113,6 +113,12 @@ function ComponentsStrings (BaseString) {
     ns.list = {
         DEFAULT_EMPTY_LIST: t.s('Please add items to this list.')
     };
+
+    ns.toolbar = {
+        COMPACT: t.s('Compact'),
+        EXPANDED: t.s('Expanded'),
+        SORT_BY: t.s('SORT BY')
+    };
 }
 
 ComponentsStrings.$inject = ['BaseStringService'];
