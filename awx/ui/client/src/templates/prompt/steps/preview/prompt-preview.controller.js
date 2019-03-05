@@ -25,7 +25,7 @@ export default
                 return [...tags.reduce((map, tag) => map.has(tag.value) ? map : map.set(tag.value, tag), new Map()).values()];
             };
 
-            vm.init = (_scope_, _launch_) => {
+            vm.init = (_scope_) => {
                 scope = _scope_;
 
                 vm.showJobTags = true;
