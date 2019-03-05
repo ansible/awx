@@ -13,6 +13,7 @@ function projectsListController (
 ) {
     const vm = this || {};
     const [ProjectModel] = resolvedModels;
+    let paginateQuerySet = null;
     $scope.canAdd = ProjectModel.options('actions.POST');
 
     vm.strings = strings;
@@ -75,13 +76,27 @@ function projectsListController (
 
     vm.toolbarSortValue = toolbarSortDefault;
 
+    // Temporary hack to retrieve $scope.querySet from the paginate directive.
+    // Remove this event listener once the page and page_size params
+    // are represented in the url.
+    $scope.$on('updateDataset', (event, dataset, queryset) => {
+        paginateQuerySet = queryset;
+    });
+
     vm.onToolbarSort = (sort) => {
         vm.toolbarSortValue = sort;
 
         const queryParams = Object.assign(
+            {},
             $state.params.project_search,
+            paginateQuerySet,
             { order_by: sort.value }
         );
+
+        // Update URL with params
+        $state.go('.', {
+            project_search: queryParams
+        }, { notify: false, location: 'replace' });
 
         qs.search(GetBasePath(vm.list.basePath), queryParams)
             .then(({ data }) => {

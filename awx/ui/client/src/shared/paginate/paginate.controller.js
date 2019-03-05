@@ -55,7 +55,7 @@ export default ['$scope', '$stateParams', '$state', '$filter', 'GetBasePath', 'Q
                 }
                 $scope.dataset = res.data;
                 $scope.collection = res.data.results;
-                $scope.$emit('updateDataset', res.data);
+                $scope.$emit('updateDataset', res.data, queryset);
             });
         };
 
