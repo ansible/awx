@@ -7,11 +7,11 @@
 export default ['$scope', 'TemplatesService',
     'ProcessErrors', '$q',
     'PromptService', 'TemplatesStrings', 'WorkflowChartService',
-    'Wait', '$state', '$transitions',
+    'Wait', '$state',
     function ($scope, TemplatesService,
         ProcessErrors, $q,
         PromptService, TemplatesStrings, WorkflowChartService,
-        Wait, $state, $transitions
+        Wait, $state
     ) {
 
         let deletedNodeIds = [];
@@ -37,7 +37,7 @@ export default ['$scope', 'TemplatesService',
 
         $scope.cancelUnsavedChanges = () => {
             $scope.unsavedChangesVisible = false;
-        }
+        };
 
         let getNodes = () => {
             Wait('start');
