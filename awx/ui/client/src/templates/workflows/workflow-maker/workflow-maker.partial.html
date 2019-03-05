@@ -40,7 +40,7 @@
                     <div class="Prompt-bodyQuery">{{strings.get('workflow_maker.UNSAVED_CHANGES_PROMPT_TEXT')}}</div>
                 </div>
                 <div class="Modal-footer">
-                    <button ng-click="closeDialog()" class="btn Modal-footerButton Modal-errorButton">{{strings.get('workflow_maker.EXIT')}}</button>
+                    <button ng-click="closeDialog(true)" class="btn Modal-footerButton Modal-errorButton">{{strings.get('workflow_maker.EXIT')}}</button>
                     <button ng-click="cancelUnsavedChanges()" class="btn Modal-footerButton Modal-defaultButton">{{strings.get('workflow_maker.CANCEL')}}</button>
                     <button
                         ng-hide="formState.showNodeForm || formState.showLinkForm"

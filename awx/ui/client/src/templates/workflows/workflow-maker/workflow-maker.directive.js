@@ -62,15 +62,15 @@ export default ['templateUrl', 'CreateDialog', 'Wait', '$state', '$window',
                     scope.$broadcast("refreshWorkflowChart");
                 });
 
-                scope.closeDialog = function() {
-                    if (scope.workflowChangesUnsaved || scope.workflowChangesStarted) {
-                        scope.unsavedChangesVisible = true;
-                    } else {
+                scope.closeDialog = function(exitWithUnsavedChanges) {
+                    if (exitWithUnsavedChanges || !(scope.workflowChangesUnsaved || scope.workflowChangesStarted)) {
                         scope.unsavedChangesVisible = false;
                         $('#workflow-modal-dialog').dialog('destroy');
                         $('body').removeClass('WorkflowMaker-preventBodyScrolling');
 
                         $state.go('^');
+                    } else {
+                        scope.unsavedChangesVisible = true;
                     }
                 };
 
