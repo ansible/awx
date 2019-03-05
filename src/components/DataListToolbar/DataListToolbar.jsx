@@ -24,7 +24,7 @@ import {
   SortNumericDownIcon,
   SortNumericUpIcon,
   TrashAltIcon,
-  PlusIcon
+  PlusIcon,
 } from '@patternfly/react-icons';
 import {
   Link
@@ -35,6 +35,12 @@ import VerticalSeparator from '../VerticalSeparator';
 
 const flexGrowStyling = {
   flexGrow: '1'
+};
+
+const ToolbarActiveStyle = {
+  backgroundColor: '#007bba',
+  color: 'white',
+  padding: '0 5px',
 };
 
 class DataListToolbar extends React.Component {
@@ -56,6 +62,18 @@ class DataListToolbar extends React.Component {
     this.onSearchDropdownSelect = this.onSearchDropdownSelect.bind(this);
     this.onSearch = this.onSearch.bind(this);
     this.onSort = this.onSort.bind(this);
+    this.onExpand = this.onExpand.bind(this);
+    this.onCompact = this.onCompact.bind(this);
+  }
+
+  onExpand () {
+    const { onExpand } = this.props;
+    onExpand();
+  }
+
+  onCompact () {
+    const { onCompact } = this.props;
+    onCompact();
   }
 
   onSortDropdownToggle (isSortDropdownOpen) {
@@ -114,7 +132,8 @@ class DataListToolbar extends React.Component {
       showExpandCollapse,
       showDelete,
       showSelectAll,
-      isLookup
+      isLookup,
+      isCompact,
     } = this.props;
     const {
       isSearchDropdownOpen,
@@ -245,7 +264,9 @@ class DataListToolbar extends React.Component {
                       <ToolbarItem>
                         <Button
                           variant="plain"
-                          aria-label={i18n._(t`Expand`)}
+                          aria-label={i18n._(t`Collapse`)}
+                          onClick={this.onCompact}
+                          style={isCompact ? ToolbarActiveStyle : null}
                         >
                           <BarsIcon />
                         </Button>
@@ -253,7 +274,9 @@ class DataListToolbar extends React.Component {
                       <ToolbarItem>
                         <Button
                           variant="plain"
-                          aria-label={i18n._(t`Collapse`)}
+                          aria-label={i18n._(t`Expand`)}
+                          onClick={this.onExpand}
+                          style={!isCompact ? ToolbarActiveStyle : null}
                         >
                           <EqualsIcon />
                         </Button>
@@ -306,6 +329,7 @@ DataListToolbar.propTypes = {
   onSelectAll: PropTypes.func,
   onSort: PropTypes.func,
   showDelete: PropTypes.bool,
+  showExpandCollapse: PropTypes.bool,
   showSelectAll: PropTypes.bool,
   sortOrder: PropTypes.string,
   sortedColumnKey: PropTypes.string,
@@ -317,6 +341,7 @@ DataListToolbar.defaultProps = {
   onSelectAll: null,
   onSort: null,
   showDelete: false,
+  showExpandCollapse: false,
   showSelectAll: false,
   sortOrder: 'ascending',
   sortedColumnKey: 'name',

@@ -335,7 +335,7 @@ class Notifications extends Component {
   }
 }
 
-Notifications.propType = {
+Notifications.propTypes = {
   getError: PropTypes.func.isRequired,
   getNotifications: PropTypes.func.isRequired,
   getSuccess: PropTypes.func.isRequired,

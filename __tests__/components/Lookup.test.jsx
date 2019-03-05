@@ -196,6 +196,7 @@ describe('<Lookup />', () => {
           lookup_header="Foo Bar"
           onLookupSave={() => { }}
           value={mockData}
+          selected={[]}
           columns={mockColumns}
           sortedColumnKey="name"
           getItems={() => { }}
@@ -215,6 +216,7 @@ describe('<Lookup />', () => {
           lookup_header="Foo Bar"
           onLookupSave={() => { }}
           value={mockData}
+          selected={[]}
           columns={mockColumns}
           sortedColumnKey="name"
           getItems={() => { }}
