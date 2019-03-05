@@ -102,7 +102,8 @@ class DeprecatedCredentialField(serializers.IntegerField):
 
     def to_internal_value(self, pk):
         try:
+            pk = int(pk)
             Credential.objects.get(pk=pk)
-        except ObjectDoesNotExist:
+        except (ObjectDoesNotExist, ValueError):
             raise serializers.ValidationError(_('Credential {} does not exist').format(pk))
         return pk
