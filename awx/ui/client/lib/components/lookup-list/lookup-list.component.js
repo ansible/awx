@@ -15,7 +15,8 @@ function LookupListController (GetBasePath, Rest, strings) {
         Rest.get({ params })
             .then(({ data }) => {
                 setData(resultsFilter(data));
-            });
+            })
+            .finally(() => vm.onReady());
     };
 
     function setData ({ results, count }) {
@@ -43,6 +44,7 @@ export default {
     bindings: {
         onSelect: '=',
         onRowClick: '=',
+        onReady: '=',
         selectedId: '=',
         resourceName: '@',
         baseParams: '=',
