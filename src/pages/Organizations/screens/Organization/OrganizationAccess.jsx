@@ -6,17 +6,11 @@ class OrganizationAccess extends React.Component {
     super(props);
 
     this.getOrgAccessList = this.getOrgAccessList.bind(this);
-    this.getUserRoles = this.getUserRoles.bind(this);
   }
 
   getOrgAccessList (id, params) {
     const { api } = this.props;
     return api.getOrganzationAccessList(id, params);
-  }
-
-  getUserRoles (id) {
-    const { api } = this.props;
-    return api.getUserRoles(id);
   }
 
   render () {
@@ -29,7 +23,6 @@ class OrganizationAccess extends React.Component {
     return (
       <AccessList
         getAccessList={this.getOrgAccessList}
-        getUserRoles={this.getUserRoles}
         match={match}
         location={location}
         history={history}

@@ -7,16 +7,9 @@ import OrganizationAccess from '../../../../../src/pages/Organizations/screens/O
 const mockAPIAccessList = {
   foo: 'bar',
 };
-const mockAPIRoles = {
-  bar: 'baz',
-};
 
 const mockGetOrganzationAccessList = jest.fn(() => (
   Promise.resolve(mockAPIAccessList)
-));
-
-const mockGetUserRoles = jest.fn(() => (
-  Promise.resolve(mockAPIRoles)
 ));
 
 describe('<OrganizationAccess />', () => {
@@ -29,7 +22,6 @@ describe('<OrganizationAccess />', () => {
           params={{}}
           api={{
             getOrganzationAccessList: jest.fn(),
-            getUserRoles: jest.fn(),
           }}
         />
       </MemoryRouter>
@@ -45,14 +37,11 @@ describe('<OrganizationAccess />', () => {
           params={{}}
           api={{
             getOrganzationAccessList: mockGetOrganzationAccessList,
-            getUserRoles: mockGetUserRoles,
           }}
         />
       </MemoryRouter>
     ).find('OrganizationAccess');
     const accessList = await wrapper.instance().getOrgAccessList();
     expect(accessList).toEqual(mockAPIAccessList);
-    const userRoles = await wrapper.instance().getUserRoles();
-    expect(userRoles).toEqual(mockAPIRoles);
   });
 });

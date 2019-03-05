@@ -17,17 +17,11 @@ const mockResults = [
         {
           role: {
             name: 'foo',
+            id: 2,
           }
         }
-      ]
+      ],
     }
-  }
-];
-
-const mockUserRoles = [
-  {
-    id: 2,
-    name: 'bar',
   }
 ];
 
@@ -40,7 +34,6 @@ describe('<AccessList />', () => {
             match={{ path: '/organizations/:id', url: '/organizations/1', params: { id: '1' } }}
             location={{ search: '', pathname: '/organizations/1/access' }}
             getAccessList={() => {}}
-            getUserRoles={() => {}}
           />
         </MemoryRouter>
       </I18nProvider>
@@ -55,7 +48,6 @@ describe('<AccessList />', () => {
             match={{ path: '/organizations/:id', url: '/organizations/1', params: { id: '0' } }}
             location={{ search: '', pathname: '/organizations/1/access' }}
             getAccessList={() => ({ data: { count: 1, results: mockResults } })}
-            getUserRoles={() => ({ data: { results: mockUserRoles } })}
           />
         </MemoryRouter>
       </I18nProvider>
@@ -77,7 +69,6 @@ describe('<AccessList />', () => {
             match={{ path: '/organizations/:id', url: '/organizations/1', params: { id: '0' } }}
             location={{ search: '', pathname: '/organizations/1/access' }}
             getAccessList={() => ({ data: { count: 1, results: mockResults } })}
-            getUserRoles={() => ({ data: { results: mockUserRoles } })}
           />
         </MemoryRouter>
       </I18nProvider>
@@ -104,7 +95,6 @@ describe('<AccessList />', () => {
             match={{ path: '/organizations/:id', url: '/organizations/1', params: { id: '0' } }}
             location={{ search: '', pathname: '/organizations/1/access' }}
             getAccessList={() => ({ data: { count: 1, results: mockResults } })}
-            getUserRoles={() => ({ data: { results: mockUserRoles } })}
           />
         </MemoryRouter>
       </I18nProvider>
@@ -115,6 +105,55 @@ describe('<AccessList />', () => {
       const rendered = wrapper.update();
       rendered.find('button[aria-label="Sort"]').simulate('click');
       expect(onSort).toHaveBeenCalled();
+      done();
+    });
+  });
+
+  test('getTeamRoles returns empty array if dataset is missing team_id attribute', (done) => {
+    const mockData = [
+      {
+        id: 1,
+        username: 'boo',
+        url: '/foo/bar/',
+        first_name: 'john',
+        last_name: 'smith',
+        summary_fields: {
+          foo: [
+            {
+              role: {
+                name: 'foo',
+                id: 2,
+              }
+            }
+          ],
+          direct_access: [
+            {
+              role: {
+                name: 'team user',
+                id: 3,
+              }
+            }
+          ]
+        }
+      }
+    ];
+    const wrapper = mount(
+      <I18nProvider>
+        <MemoryRouter>
+          <AccessList
+            match={{ path: '/organizations/:id', url: '/organizations/1', params: { id: '0' } }}
+            location={{ search: '', pathname: '/organizations/1/access' }}
+            getAccessList={() => ({ data: { count: 1, results: mockData } })}
+          />
+        </MemoryRouter>
+      </I18nProvider>
+    ).find('AccessList');
+
+    setImmediate(() => {
+      const { results } = wrapper.state();
+      results.forEach(result => {
+        expect(result.teamRoles).toEqual([]);
+      });
       done();
     });
   });

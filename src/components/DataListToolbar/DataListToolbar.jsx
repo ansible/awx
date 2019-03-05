@@ -38,7 +38,7 @@ const flexGrowStyling = {
 };
 
 const ToolbarActiveStyle = {
-  backgroundColor: 'rgb(0, 123, 186)',
+  backgroundColor: '#007bba',
   color: 'white',
   padding: '0 5px',
 };

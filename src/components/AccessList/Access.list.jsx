@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 import {
   DataList, DataListItem, DataListCell, Text,
-  TextContent, TextVariants, Badge
+  TextContent, TextVariants
 } from '@patternfly/react-core';
 
 import { I18n, i18nMark } from '@lingui/react';
@@ -16,7 +16,6 @@ import {
 import BasicChip from '../BasicChip/BasicChip';
 import Pagination from '../Pagination';
 import DataListToolbar from '../DataListToolbar';
-import Tooltip from '../Tooltip';
 
 import {
   parseQueryString,
@@ -47,16 +46,7 @@ const hiddenStyle = {
   display: 'none',
 };
 
-const badgeStyle = {
-  borderRadius: 'var(--pf-global--BorderRadius--sm)',
-  height: '24px',
-}
-
-const badgeTextStyle = {
-  lineHeight: '24px',
-}
-
-const Detail = ({ label, value, url, isBadge, customStyles }) => {
+const Detail = ({ label, value, url, customStyles }) => {
   let detail = null;
   if (value) {
     detail = (
@@ -66,17 +56,27 @@ const Detail = ({ label, value, url, isBadge, customStyles }) => {
             <Text component={TextVariants.h6} style={detailLabelStyle}>{label}</Text>
           </Link>) : (<Text component={TextVariants.h6} style={detailLabelStyle}>{label}</Text>
         )}
-        {isBadge ? (
-          <Badge style={badgeStyle} isRead>
-            <Text component={TextVariants.p} style={{...detailValueStyle, ...badgeTextStyle}}>{value}</Text>
-          </Badge>
-        ) : (
-          <Text component={TextVariants.p} style={detailValueStyle}>{value}</Text>
-        )}
+        <Text component={TextVariants.p} style={detailValueStyle}>{value}</Text>
       </TextContent>
     );
   }
   return detail;
+};
+
+const UserName = ({ value, url }) => {
+  let username = null;
+  if (value) {
+    username = (
+      <TextContent style={detailWrapperStyle}>
+        {url ? (
+          <Link to={{ pathname: url }}>
+            <Text component={TextVariants.h6} style={detailLabelStyle}>{value}</Text>
+          </Link>) : (<Text component={TextVariants.h6} style={detailLabelStyle}>{value}</Text>
+        )}
+      </TextContent>
+    );
+  }
+  return username;
 };
 
 class AccessList extends React.Component {
@@ -112,8 +112,6 @@ class AccessList extends React.Component {
     this.onCompact = this.onCompact.bind(this);
     this.onSort = this.onSort.bind(this);
     this.getQueryParams = this.getQueryParams.bind(this);
-    this.getRoleType = this.getRoleType.bind(this);
-    this.fetchUserRoles = this.fetchUserRoles.bind(this);
     this.getTeamRoles = this.getTeamRoles.bind(this);
   }
 
@@ -173,36 +171,22 @@ class AccessList extends React.Component {
     return Object.assign({}, this.defaultParams, searchParams, overrides);
   }
 
-  getTeamRoles (arr) {
-    this.arr = arr;
-    const filtered = this.arr.filter(entry => entry.role.team_id);
-    return filtered.reduce((val, item) => {
-      if (item.role.team_id) {
-        const { role } = item;
-        val = role;
+  getRoles = roles => Object.values(roles)
+    .reduce((val, role) => {
+      if (role.length > 0) {
+        val.push(role[0].role);
       }
       return val;
-    }, {});
-  }
+    }, []);
 
-  getRoleType (arr, index, type) {
-    return Object.values(arr).filter(value => value.length > 0).map(roleType => {
-      if (type === 'user') {
-        return roleType[index].role.name;
+  getTeamRoles = roles => roles
+    .reduce((val, item) => {
+      if (item.role.team_id) {
+        const { role } = item;
+        val.push(role);
       }
-      if (type === 'team') {
-        return this.getTeamRoles(roleType);
-      }
-      return null;
-    });
-  }
-
-  async fetchUserRoles (id) {
-    const { getUserRoles } = this.props;
-    const { data: { results: userRoles = [] } } = await getUserRoles(id);
-
-    return userRoles;
-  }
+      return val;
+    }, []);
 
   async fetchOrgAccessList (queryParams) {
     const { match, getAccessList } = this.props;
@@ -232,25 +216,15 @@ class AccessList extends React.Component {
         sortedColumnKey,
         results,
       };
-
-      results.forEach(async result => {
-        result.userRoles = [];
-        result.teamRoles = [];
-        result.directRole = null;
-
-        // Grab each Role Type and set as a top-level value
-        result.directRole = this.getRoleType(result.summary_fields, 0, 'user') || null;
-        result.teamRoles = this.getRoleType(result.summary_fields, 1, 'team').filter(teamRole => teamRole.id);
-
-        // Grab User Roles and set as a top-level value
-        try {
-          const roles = await this.fetchUserRoles(result.id);
-          roles.map(role => result.userRoles.push(role));
-          this.setState(stateToUpdate);
-        } catch (error) {
-          this.setState({ error });
+      results.forEach((result) => {
+        if (result.summary_fields.direct_access) {
+          result.teamRoles = this.getTeamRoles(result.summary_fields.direct_access);
+        } else {
+          result.teamRoles = [];
         }
+        result.userRoles = this.getRoles(result.summary_fields) || [];
       });
+      this.setState(stateToUpdate);
     } catch (error) {
       this.setState({ error });
     }
@@ -301,11 +275,9 @@ class AccessList extends React.Component {
                     {results.map(result => (
                       <DataListItem aria-labelledby={i18n._(t`access-list-item`)} key={result.id}>
                         <DataListCell>
-                          <Detail
-                            label={result.username}
-                            value={result.directRole}
+                          <UserName
+                            value={result.username}
                             url={result.url}
-                            isBadge
                           />
                           {result.first_name || result.last_name ? (
                             <Detail
@@ -331,30 +303,12 @@ class AccessList extends React.Component {
                               : userRolesWrapperStyle}
                             >
                               <Text component={TextVariants.h6} style={detailLabelStyle}>{i18n._(t`User Roles`)}</Text>
-                              {result.userRoles.map(role => {
-                                // Show tooltips for associated Org/Team of role name displayed
-                                if (role.summary_fields.resource_name) {
-                                  return (
-                                    <Tooltip
-                                      message={role.summary_fields.resource_name}
-                                      position="top"
-                                      key={role.id}
-                                    >
-                                       <BasicChip
-                                        key={role.id}
-                                        text={role.name}
-                                      />
-                                    </Tooltip>
-                                  )
-                                } else {
-                                  return (
-                                    <BasicChip
-                                      key={role.id}
-                                      text={role.name}
-                                    />
-                                  )
-                                }
-                              })}
+                              {result.userRoles.map(role => (
+                                <BasicChip
+                                  key={role.id}
+                                  text={role.name}
+                                />
+                              ))}
                             </ul>
                           )}
                           {result.teamRoles.length > 0 && (
@@ -388,14 +342,12 @@ class AccessList extends React.Component {
           </Fragment>
         )}
       </Fragment>
-
     );
   }
 }
 
 AccessList.propTypes = {
   getAccessList: PropTypes.func.isRequired,
-  getUserRoles: PropTypes.func.isRequired,
 };
 
 export default AccessList;
