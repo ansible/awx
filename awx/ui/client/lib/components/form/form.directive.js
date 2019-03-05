@@ -202,7 +202,10 @@ function AtFormController (eventService, strings) {
 
         if (isValid !== vm.state.isValid) {
             vm.state.isValid = isValid;
-            scope.state.isValid = vm.state.isValid;
+        }
+
+        if (isValid !== scope.state.isValid) {
+            scope.state.isValid = isValid;
         }
     };
 

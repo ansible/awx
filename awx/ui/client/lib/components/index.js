@@ -1,7 +1,7 @@
 import atLibServices from '~services';
 
 import actionGroup from '~components/action/action-group.directive';
-import actionButton from '~components/action/action-button.component';
+import actionButton from '~components/action/action-button.directive';
 import divider from '~components/utility/divider.directive';
 import dynamicSelect from '~components/input/dynamic-select.directive';
 import easyModal from '~components/easy-modal/easy-modal.component';
@@ -56,7 +56,7 @@ angular
         atCodeMirror
     ])
     .directive('atActionGroup', actionGroup)
-    .component('atActionButton', actionButton)
+    .directive('atActionButton', actionButton)
     .directive('atDivider', divider)
     .directive('atDynamicSelect', dynamicSelect)
     .component('atEasyModal', easyModal)
