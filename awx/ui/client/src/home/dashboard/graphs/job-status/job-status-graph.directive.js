@@ -139,7 +139,6 @@ function JobStatusGraph($window, adjustGraphSize, templateUrl, i18n, moment, gra
 
                     //On click, update with new data
                     $('.m').off('click').on("click", function(){
-                        console.log('click');
                         job_type = this.getAttribute("id");
 
                         $('#type-dropdown-display')
