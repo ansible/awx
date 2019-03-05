@@ -338,7 +338,7 @@ function AddEditCredentialsController (
         }
     };
 
-    vm.onInputSourceRowClick = ({ id, credential_type, name }) => {
+    vm.onInputSourceItemSelect = ({ id, credential_type, name }) => {
         vm.inputSources.credentialId = id;
         vm.inputSources.credentialName = name;
         vm.inputSources.credentialTypeId = credential_type;
