@@ -14,10 +14,13 @@
     </div>
     <at-list-toolbar
         ng-if="vm.jobs.length > 0"
-        sort-only="false"
-        on-collapse="vm.onCollapse"
         on-expand="vm.onExpand"
-        is-collapsed="vm.isCollapsed">
+        on-collapse="vm.onCollapse"
+        is-collapsed="vm.isCollapsed"
+        sort-only="false"
+        sort-value="vm.toolbarSortValue"
+        sort-options="vm.toolbarSortOptions"
+        on-sort="vm.onToolbarSort">
     </at-list-toolbar>
     <at-list results="vm.jobs" empty-list-reason="{{ vm.emptyListReason }}">
         <!-- TODO: implement resources are missing red indicator as present in mockup -->

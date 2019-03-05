@@ -28,6 +28,7 @@ function ListJobsController (
     // smart-search
     const name = 'jobs';
     const iterator = 'job';
+    let paginateQuerySet = null;
 
     let launchModalOpen = false;
     let refreshAfterLaunchClose = false;
@@ -39,6 +40,63 @@ function ListJobsController (
     vm.list = { iterator, name };
     vm.job_dataset = Dataset.data;
     vm.jobs = Dataset.data.results;
+
+    $scope.$watch('$state.params', () => {
+        setToolbarSort();
+    }, true);
+
+    function setToolbarSort () {
+        const orderByValue = _.get($state.params, 'job_search.order_by');
+        const sortValue = _.find(vm.toolbarSortOptions, (option) => option.value === orderByValue);
+        if (sortValue) {
+            vm.toolbarSortValue = sortValue;
+        } else {
+            vm.toolbarSortValue = toolbarSortDefault;
+        }
+    }
+
+    const toolbarSortDefault = {
+        label: `${strings.get('sort.FINISH_TIME')}`,
+        value: '-finished'
+    };
+
+    vm.toolbarSortOptions = [
+        { label: `${strings.get('sort.NAME_ASCENDING')}`, value: 'name' },
+        { label: `${strings.get('sort.NAME_DESCENDING')}`, value: '-name' },
+        { label: `${strings.get('sort.START_TIME')}`, value: 'finished' },
+        toolbarSortDefault
+    ];
+
+    vm.toolbarSortValue = toolbarSortDefault;
+
+    // Temporary hack to retrieve $scope.querySet from the paginate directive.
+    // Remove this event listener once the page and page_size params
+    // are represented in the url.
+    $scope.$on('updateDataset', (event, dataset, queryset) => {
+        paginateQuerySet = queryset;
+    });
+
+    vm.onToolbarSort = (sort) => {
+        vm.toolbarSortValue = sort;
+
+        const queryParams = Object.assign(
+            {},
+            $state.params.job_search,
+            paginateQuerySet,
+            { order_by: sort.value }
+        );
+
+        // Update URL with params
+        $state.go('.', {
+            job_search: queryParams
+        }, { notify: false, location: 'replace' });
+
+        qs.search(SearchBasePath, queryParams)
+            .then(({ data }) => {
+                vm.jobs = data.results;
+                vm.job_dataset = data;
+            });
+    };
 
     $scope.$watch('vm.job_dataset.count', () => {
         $scope.$emit('updateCount', vm.job_dataset.count, 'jobs');
