@@ -42,8 +42,7 @@ export default {
     controller: LookupListController,
     controllerAs: 'vm',
     bindings: {
-        onSelect: '=',
-        onRowClick: '=',
+        onItemSelect: '=',
         onReady: '=',
         selectedId: '=',
         resourceName: '@',

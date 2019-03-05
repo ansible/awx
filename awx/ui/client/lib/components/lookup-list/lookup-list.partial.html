@@ -63,13 +63,13 @@
                         <input type="radio"
                             name="check_{{ vm.resourceName }}_{{ obj.id }}"
                             ng-checked="obj.id === vm.selectedId"
-                            ng-click="vm.onRowClick(obj)"
+                            ng-click="vm.onItemSelect(obj)"
                         >
                     </div>
                     <div class="d-flex h-100">
                         <div
                             class="List-tableCell name-column col-sm-12"
-                             ng-click="vm.onRowClick(obj)"
+                             ng-click="vm.onItemSelect(obj)"
                         >
                             {{ obj.name }}
                         </div>

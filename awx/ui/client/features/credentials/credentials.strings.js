@@ -32,6 +32,8 @@ function CredentialsStrings (BaseString) {
         METADATA: t.s('METADATA'),
         NO_MATCH: t.s('No records matched your search.'),
         NO_RECORDS: t.s('No external credentials available.'),
+        SELECTED: t.s('selected'),
+        NONE_SELECTED: t.s('No credential selected'),
     };
 
     ns.add = {
