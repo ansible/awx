@@ -21,6 +21,7 @@ services:
     image: ${DEV_DOCKER_TAG_BASE}/awx_devel:${TAG}
     hostname: awx_1
     environment:
+      CURRENT_UID:
       RABBITMQ_HOST: rabbitmq_1
       RABBITMQ_USER: guest
       RABBITMQ_PASS: guest
@@ -39,6 +40,7 @@ services:
     image: ${DEV_DOCKER_TAG_BASE}/awx_devel:${TAG}
     hostname: awx_2
     environment:
+      CURRENT_UID:
       RABBITMQ_HOST: rabbitmq_2
       RABBITMQ_USER: guest
       RABBITMQ_PASS: guest
@@ -57,6 +59,7 @@ services:
     image: ${DEV_DOCKER_TAG_BASE}/awx_devel:${TAG}
     hostname: awx_3
     environment:
+      CURRENT_UID:
       RABBITMQ_HOST: rabbitmq_3
       RABBITMQ_USER: guest
       RABBITMQ_PASS: guest
@@ -76,14 +79,14 @@ services:
     image: ${DEV_DOCKER_TAG_BASE}/rabbit_cluster_node:latest
     hostname: rabbitmq_2
     container_name: tools_rabbitmq_2_1
-    environment: 
+    environment:
       - CLUSTERED=true
       - CLUSTER_WITH=rabbitmq_1
   rabbitmq_3:
     image: ${DEV_DOCKER_TAG_BASE}/rabbit_cluster_node:latest
     hostname: rabbitmq_3
     container_name: tools_rabbitmq_3_1
-    environment: 
+    environment:
       - CLUSTERED=true
       - CLUSTER_WITH=rabbitmq_1
   postgres:
