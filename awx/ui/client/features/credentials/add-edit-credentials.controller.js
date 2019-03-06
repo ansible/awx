@@ -221,6 +221,7 @@ function AddEditCredentialsController (
         vm.form[field].tagMode = true;
         vm.form[field].asTag = false;
         vm.form[field]._value = '';
+        vm.form[field]._tagValue = '';
         vm.inputSources.items = vm.inputSources.items
             .filter(({ input_field_name }) => input_field_name !== field);
     };
@@ -239,7 +240,13 @@ function AddEditCredentialsController (
             vm.inputSources.credentialName = name;
             vm.inputSources.credentialTypeId = credential_type_id;
             vm.inputSources._value = credential_type_id;
+        } else {
+            vm.inputSources.credentialId = null;
+            vm.inputSources.credentialName = null;
+            vm.inputSources.credentialTypeId = null;
+            vm.inputSources._value = null;
         }
+
         setInputSourceTab('credential');
         vm.inputSources.field = field;
     };
@@ -324,7 +331,8 @@ function AddEditCredentialsController (
         vm.inputSources.metadataInputs = null;
         unsetInputSourceTabs();
         // We've linked this field to a credential, so display value as a credential tag
-        vm.form[field]._value = credentialName;
+        vm.form[field]._value = '';
+        vm.form[field]._tagValue = credentialName;
         vm.form[field].asTag = true;
     };
 

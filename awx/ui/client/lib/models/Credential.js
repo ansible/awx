@@ -78,7 +78,7 @@ function assignInputGroupValues (apiConfig, credentialType) {
             field.asTag = true;
             const { summary_fields } = this.get('related.input_sources.results')
                 .find(({ input_field_name }) => input_field_name === field.id);
-            field._value = summary_fields.source_credential.name;
+            field._tagValue = summary_fields.source_credential.name;
         }
         return field;
     });
