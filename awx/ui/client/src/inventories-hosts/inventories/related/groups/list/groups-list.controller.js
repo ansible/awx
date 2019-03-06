@@ -18,7 +18,6 @@
         init();
 
         function init(){
-            $scope.showOnlyRootGroups = true;
             $scope.inventory_id = $stateParams.inventory_id;
             $scope.canAdhoc = inventoryData.summary_fields.user_capabilities.adhoc;
             $scope.canAdd = canAdd;
