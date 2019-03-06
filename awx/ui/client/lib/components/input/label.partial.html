@@ -6,6 +6,7 @@
     <div ng-if="state._displayPromptOnLaunch" class="at-InputLabel-checkbox pull-right">
         <label class="at-InputLabel-checkboxLabel">
             <input type="checkbox"
+                   ng-disabled="state.asTag"
                    ng-model="state._promptOnLaunch"
                    ng-change="vm.togglePromptOnLaunch()" />
             <p>{{:: vm.strings.get('label.PROMPT_ON_LAUNCH') }}</p>
