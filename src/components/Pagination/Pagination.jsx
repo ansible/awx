@@ -116,7 +116,12 @@ class Pagination extends Component {
     const isOnFirst = page === 1;
     const isOnLast = page === pageCount;
 
-    const itemCount = isOnLast ? count % page_size : page_size;
+    let itemCount;
+    if (!isOnLast || count === page_size) {
+      itemCount = page_size;
+    } else {
+      itemCount = count % page_size;
+    }
     const itemMin = ((page - 1) * page_size) + 1;
     const itemMax = itemMin + itemCount - 1;
 
@@ -154,7 +159,7 @@ class Pagination extends Component {
             )}
             <div className="awx-pagination__counts">
               <div className="awx-pagination__item-count">
-                <Trans>{`Items ${itemMin} - ${itemMax} of ${count}`}</Trans>
+                <Trans>{`Items ${itemMin} – ${itemMax} of ${count}`}</Trans>
               </div>
               {pageCount !== 1 && (
                 <div className="awx-pagination__page-count">
