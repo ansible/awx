@@ -127,7 +127,11 @@
         };
 
         $scope.editGroup = function(id){
-            $state.go('inventories.edit.groups.edit', {group_id: id});
+            if ($state.includes('inventories.edit.groups')) {
+                $state.go('inventories.edit.groups.edit', {group_id: id});
+            } else if ($state.includes('inventories.edit.rootGroups')) {
+                $state.go('inventories.edit.rootGroups.edit', {group_id: id});
+            }
         };
 
         $scope.goToGroupGroups = function(id){

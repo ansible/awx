@@ -219,7 +219,7 @@ table, tbody {
 }
 
 .List-actionHolder--leftAlign {
-    margin-left: 52%;
+    margin-left: 50%;
     justify-content: flex-start;
     button {
        height: 34px;
@@ -230,6 +230,15 @@ table, tbody {
     align-items: center;
     display: flex;
     margin-bottom: -34px;
+
+    .List-buttonDefault {
+        margin-left: 20px;
+    }
+
+    .List-toggleButton {
+        height: 30px;
+        line-height: 14px;
+    }
 }
 
 .List-auxAction {
@@ -270,6 +279,10 @@ table, tbody {
 
 .List-buttonDefault[disabled] {
     opacity: 0.65;
+}
+
+.List-actionButton {
+    margin-left: 20px;
 }
 
 .List-searchDropdown {

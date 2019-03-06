@@ -6,7 +6,7 @@ export default {
         skip:true
     },
     views: {
-        'modal@inventories.edit.groups.edit': {
+        'modal@^.^': {
             templateProvider: function() {
                 return `<associate-hosts save-function="associateHosts(selectedItems)"></associate-hosts>`;
             },

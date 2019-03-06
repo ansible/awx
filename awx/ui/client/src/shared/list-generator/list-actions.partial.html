@@ -1,6 +1,9 @@
-<span ng-repeat="(name, options) in list.actions" class="List-action" ng-hide="isHiddenByOptions(options) ||
-            hiddenOnCurrentPage(options.basePaths) ||
-            hiddenInCurrentMode(options.mode)">
+<span ng-repeat="(name, options) in list.actions" class="List-action" ng-if="!isHiddenByOptions(options) &&
+            !hiddenOnCurrentPage(options.basePaths) &&
+            !hiddenInCurrentMode(options.mode)">
+    <div class="btn-group" ng-if="options.type && options.type === 'toggle'">
+        <button ng-repeat="button in options.buttons" class="btn List-toggleButton" ng-class="{{button.ngClass}}" ng-click="$eval(button.ngClick)">{{button.text}}</button>
+    </div>
     <div ng-if="options.type && options.type === 'template'" ng-include="options.template" ng-show="{{options.ngShow}}"></div>
     <div class="List-action--showTooltipOnDisabled" ng-if="options.showTipWhenDisabled" aw-tool-tip="{{options.awToolTip}}" data-tip-watch="{{options.dataTipWatch}}" data-placement="{{options.dataPlacement}}" data-container="{{options.dataContainer}}" data-title="{{options.dataTitle}}" data-tooltip-inner-class="{{options.tooltipInnerClass}}">
         <div class="btn-group" ng-if="options.type === 'buttonDropdown'" ng-disabled="{{options.ngDisabled}}">
