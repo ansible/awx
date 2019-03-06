@@ -45,6 +45,7 @@ function AtInputTextareaSecretController (baseInputController, eventService) {
     };
 
     vm.onIsBeingReplacedChanged = () => {
+        if (!scope.state) return;
         if (!scope.state._touched) return;
 
         vm.onRevertReplaceToggle();
