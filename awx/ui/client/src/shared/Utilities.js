@@ -78,7 +78,7 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
             $('#alert2-modal-msg').html(msg);
 
             alertClass = (cls) ? cls : 'alert-danger'; //default alert class is alert-danger
-            local_backdrop = (backdrop === undefined) ? "static" : backdrop;
+            local_backdrop = (backdrop === undefined || backdrop === null) ? "static" : backdrop;
 
             $('#alert2-modal-msg').attr({ "class": "alert " + alertClass });
             $('#alert-modal2').modal({
@@ -107,7 +107,7 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
             $('#alertHeader').html(hdr);
             $('#alert-modal-msg').html(msg);
             alertClass = (cls) ? cls : 'alert-danger'; //default alert class is alert-danger
-            local_backdrop = (backdrop === undefined) ? "static" : backdrop;
+            local_backdrop = (backdrop === undefined || backdrop === null) ? "static" : backdrop;
 
             $('#alert-modal-msg').attr({ "class": "alert " + alertClass });
             $('#alert-modal').modal({
