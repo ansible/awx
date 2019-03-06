@@ -12,6 +12,7 @@ from django.contrib.sessions.models import Session
 from awx.main.analytics import register
 
 
+
 #
 # This module is used to define metrics collected by awx.main.analytics.gather()
 # Each function is decorated with a key name, and should return a data
@@ -28,6 +29,7 @@ from awx.main.analytics import register
 # data _since_ the last report date - i.e., new data in the last 24 hours)
 #
 
+
 @register('config')
 def config(since):
     license_info = get_license(show_key=False)
@@ -42,7 +44,6 @@ def config(since):
         'authentication_backends': settings.AUTHENTICATION_BACKENDS,
         'logging_aggregators': settings.LOG_AGGREGATOR_LOGGERS
     }
-
 
 @register('counts')
 def counts(since):
@@ -77,23 +78,21 @@ def counts(since):
 @register('org_counts')
 def org_counts(since):
     counts = {}
-    for org in models.Organization.objects.annotate(
-            num_users=Count('member_role__members', distinct=True), 
-            num_teams=Count('teams', distinct=True)):  # use .only()
+    for org in models.Organization.objects.annotate(num_users=Count('member_role__members', distinct=True), 
+                                                    num_teams=Count('teams', distinct=True)):  # Use .values to make a dict of only the fields we can about where
         counts[org.id] = {'name': org.name,
-                          'users': org.num_users,
-                          'teams': org.num_teams
-                          }
+                            'users': org.num_users,
+                            'teams': org.num_teams
+                            }
     return counts
     
     
 @register('cred_type_counts')
 def cred_type_counts(since):
     counts = {}
-    for cred_type in models.CredentialType.objects.annotate(
-            num_credentials=Count('credentials', distinct=True)):  
+    for cred_type in models.CredentialType.objects.annotate(num_credentials=Count('credentials', distinct=True)):  
         counts[cred_type.id] = {'name': cred_type.name,
-                                'credential_count': cred_type.num_credentials
+                                  'credential_count': cred_type.num_credentials
                                 }
     return counts
     
@@ -102,14 +101,13 @@ def cred_type_counts(since):
 def inventory_counts(since):
     counts = {}
     from django.db.models import Count
-    for inv in models.Inventory.objects.annotate(
-            num_sources=Count('inventory_sources', distinct=True), 
-            num_hosts=Count('hosts', distinct=True)).only('id', 'name', 'kind'):
+    for inv in models.Inventory.objects.annotate(num_sources=Count('inventory_sources', distinct=True), 
+                                                 num_hosts=Count('hosts', distinct=True)).only('id', 'name', 'kind'):
         counts[inv.id] = {'name': inv.name,
-                          'kind': inv.kind,
-                          'hosts': inv.num_hosts,
-                          'sources': inv.num_sources
-                          }
+                            'kind': inv.kind,
+                            'hosts': inv.num_hosts,
+                            'sources': inv.num_sources
+                            }
     return counts
 
 
@@ -126,48 +124,24 @@ def projects_by_scm_type(since):
     return counts
 
 
-@register('job_counts')   # TODO: evaluate if we want this (was not an ask)  Also, may think about annotating rather than grabbing objects for efficiency 
-def job_counts(since):    # TODO: Optimize -- for example, all of these are going to need to be restrained to the last 24 hours/INSIGHTS_SCHEDULE
+@register('job_counts')
+def job_counts(since):    #TODO: Optimize -- for example, all of these are going to need to be restrained to the last 24 hours/INSIGHTS_SCHEDULE
     counts = {}
     counts['total_jobs'] = models.UnifiedJob.objects.all().count()
-    counts['successful_jobs'] = models.UnifiedJob.objects.filter(status='successful').count()
-    counts['cancelled_jobs'] = models.UnifiedJob.objects.filter(status='canceled').count()
-    counts['failed_jobs'] = models.UnifiedJob.objects.filter(status='failed').count()               
-    counts['error_jobs'] = models.UnifiedJob.objects.filter(status='error').count()   # Do we also want to include error, new, pending, waiting, running?
-    counts['new_jobs'] = models.UnifiedJob.objects.filter(status='new').count()       # Also, how much of this do we want `per instance`
-    counts['pending_jobs'] = models.UnifiedJob.objects.filter(status='pending').count()
-    counts['waiting_jobs'] = models.UnifiedJob.objects.filter(status='waiting').count()
-    counts['running_jobs'] = models.UnifiedJob.objects.filter(status='running').count()
-                                
-        
-    # These will later be used to optimize the jobs_running and jobs_total python properties ^^
-    # jobs_running = models.UnifiedJob.objects.filter(execution_node=instance, status__in=('running', 'waiting',)).count()
-    # jobs_total = models.UnifiedJob.objects.filter(execution_node=instance).count()
-        
-    return counts
-    
-    
-@register('job_counts_instance')
-def job_counts_instance(since):
-    counts = {}
+    counts['status'] = dict(models.UnifiedJob.objects.values_list('status').annotate(Count('status')))
     for instance in models.Instance.objects.all():
         counts[instance.id] = {'uuid': instance.uuid,
-                               'jobs_total': instance.jobs_total,       # this is _all_ jobs run by that node
-                               'jobs_running': instance.jobs_running,   # this is jobs in running & waiting state
-                               'launch_type': {'manual': models.UnifiedJob.objects.filter(launch_type='manual').count(), # I can definitely condense this
-                                               'relaunch': models.UnifiedJob.objects.filter(launch_type='relaunch').count(),
-                                               'scheduled': models.UnifiedJob.objects.filter(launch_type='scheduled').count(),
-                                               'callback': models.UnifiedJob.objects.filter(launch_type='callback').count(),
-                                               'dependency': models.UnifiedJob.objects.filter(launch_type='dependency').count(),
-                                               'sync': models.UnifiedJob.objects.filter(launch_type='workflow').count(),
-                                               'scm': models.UnifiedJob.objects.filter(launch_type='scm').count()
-                                               }
-                               }
+                                'jobs_total': models.UnifiedJob.objects.filter(execution_node=instance.hostname, status__in=('running', 'waiting',)).count(),
+                                'jobs_running': models.UnifiedJob.objects.filter(execution_node=instance.hostname).count(),   # jobs in running & waiting state
+                                'launch_type': dict(models.UnifiedJob.objects.filter(execution_node=instance.hostname).values_list('launch_type').annotate(Count('launch_type')))
+                                }
     return counts
+    
     
     
 @register('jobs')
 def jobs(since):
     counts = {}
+    jobs = models.Job.objects.filter(created__gt=since)
     counts['latest_jobs'] = models.Job.objects.filter(created__gt=since).count()
     return counts
