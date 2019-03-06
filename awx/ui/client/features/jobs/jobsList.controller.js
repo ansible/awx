@@ -28,7 +28,7 @@ function ListJobsController (
     // smart-search
     const name = 'jobs';
     const iterator = 'job';
-    let paginateQuerySet = null;
+    let paginateQuerySet = {};
 
     let launchModalOpen = false;
     let refreshAfterLaunchClose = false;

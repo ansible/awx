@@ -13,7 +13,7 @@ function projectsListController (
 ) {
     const vm = this || {};
     const [ProjectModel] = resolvedModels;
-    let paginateQuerySet = null;
+    let paginateQuerySet = {};
     $scope.canAdd = ProjectModel.options('actions.POST');
 
     vm.strings = strings;
