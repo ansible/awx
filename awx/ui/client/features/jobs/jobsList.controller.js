@@ -45,6 +45,11 @@ function ListJobsController (
         setToolbarSort();
     }, true);
 
+    const toolbarSortDefault = {
+        label: `${strings.get('sort.FINISH_TIME')}`,
+        value: '-finished'
+    };
+
     function setToolbarSort () {
         const orderByValue = _.get($state.params, 'job_search.order_by');
         const sortValue = _.find(vm.toolbarSortOptions, (option) => option.value === orderByValue);
@@ -54,11 +59,6 @@ function ListJobsController (
             vm.toolbarSortValue = toolbarSortDefault;
         }
     }
-
-    const toolbarSortDefault = {
-        label: `${strings.get('sort.FINISH_TIME')}`,
-        value: '-finished'
-    };
 
     vm.toolbarSortOptions = [
         { label: `${strings.get('sort.NAME_ASCENDING')}`, value: 'name' },
