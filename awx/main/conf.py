@@ -302,6 +302,16 @@ register(
 )
 
 register(
+    'INSIGHTS_DATA_ENABLED',
+    field_class=fields.BooleanField,
+    default=False,
+    label=_('Insights Analytics Data'),
+    help_text=_('Enables Tower to gather analytics data about itself and send it to Insights.'),
+    category=_('Jobs'),
+    category_slug='jobs',
+)
+
+register(
     'AWX_ROLES_ENABLED',
     field_class=fields.BooleanField,
     default=True,

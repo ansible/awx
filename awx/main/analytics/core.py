@@ -31,7 +31,7 @@ def _valid_license():
         logger.exception("A valid license was not found:")
         return False
     return True
-
+    
 
 def register(key):
     """
@@ -72,6 +72,10 @@ def gather(dest=None, module=None):
     max_interval = now() - timedelta(days=7)
     if last_run < max_interval or not last_run:
         last_run = max_interval
+
+    if settings.INSIGHTS_DATA_ENABLED:
+        logger.exception("Insights not enabled.  Analytics data not gathered.")
+        return
 
     if _valid_license() is False:
         logger.exception("Invalid License provided, or No License Provided")
