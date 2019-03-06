@@ -71,23 +71,10 @@
 .at-List-toolbar-item {
     padding: 2px 10px;
     border-left: 1px solid @at-color-list-border;
-    border-right: 1px solid @at-color-list-border;
 
     &:hover {
         cursor: pointer;
         background: @at-gray-f2;
-    }
-
-    &:first-of-type {
-        border-right: none;
-    }
-
-    &:last-of-type {
-        border: none;
-    }
-
-    &:first-child {
-        border-left: 1px solid @at-color-list-border;
     }
 
     &.active {
@@ -98,12 +85,6 @@
 
 .at-List-toolbarDropdown {
     border-top-right-radius: @at-border-radius;
-    padding: 2px 10px;
-
-    &:hover {
-        cursor: pointer;
-        background: @at-gray-f2;
-    }
 
     &-toggle {
         background: none;
