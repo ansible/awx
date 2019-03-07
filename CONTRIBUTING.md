@@ -83,12 +83,10 @@ If you're not using Docker for Mac, or Docker for Windows, you may need, or choo
 (host)$ pip install docker-compose
 ```
 
-#### Node and npm
+#### Frontend Development
 
-The AWX UI requires the following:
+See [the ui development documentation](awx/ui/README.md).
 
-- Node 8.x LTS
-- NPM 6.x LTS
 
 ### Build the environment
 
