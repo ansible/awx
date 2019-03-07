@@ -16,10 +16,8 @@ RUN yum -y update && yum -y install openssh-server ansible mg vim tmux \
   libstdc++.so.6 gcc cyrus-sasl-devel cyrus-sasl openldap-devel libffi-devel \
   xmlsec1-devel swig krb5-devel xmlsec1-openssl xmlsec1 \
   xmlsec1-openssl-devel libtool-ltdl-devel rabbitmq-server bubblewrap \
-  zanata-python-client gettext gcc-c++ libcurl-devel bzip2 rsync \
-  libXcomposite libXcursor libXdamage libXext libXfixes libXi libXrender \
-  libXtst cups-libs libXScrnSaver libXrandr alsa-lib pango cairo \
-  atk at-spi2-atk gtk3 gdk-pixbuf2
+  zanata-python-client gettext gcc-c++ libcurl-devel bzip2 \
+  rsync
 
 RUN ln -s /usr/bin/python36 /usr/bin/python3
 
