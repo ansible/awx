@@ -54,6 +54,7 @@ make ui-test-ci
 # run e2e tests - see awx/ui/test/e2e for more information
 npm --prefix awx/ui run e2e
 ```
+**Note**: Unit tests are run on your host machine and not in the development containers.
 
 ## Adding dependencies
 ```shell
