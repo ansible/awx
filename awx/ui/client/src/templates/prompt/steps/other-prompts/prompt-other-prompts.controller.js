@@ -11,11 +11,9 @@ export default
             vm.strings = strings;
 
             let scope;
-            let launch;
 
-            vm.init = (_scope_, _launch_) => {
+            vm.init = (_scope_) => {
                 scope = _scope_;
-                launch = _launch_;
 
                 scope.parseType = 'yaml';
 
