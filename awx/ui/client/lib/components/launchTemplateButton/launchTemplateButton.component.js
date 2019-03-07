@@ -68,6 +68,7 @@ function atLaunchTemplateCtrl (
                                     launchConf: launchData.data,
                                     launchOptions: launchOptions.data,
                                     template: vm.template.id,
+                                    templateName: vm.template.name,
                                     templateType: vm.template.type,
                                     prompts: PromptService.processPromptValues({
                                         launchConf: launchData.data,
@@ -122,6 +123,7 @@ function atLaunchTemplateCtrl (
                                     launchConf: selectedWorkflowJobTemplate.getLaunchConf(),
                                     launchOptions: launchOptions.data,
                                     template: vm.template.id,
+                                    templateName: vm.template.name,
                                     templateType: vm.template.type,
                                     prompts: PromptService.processPromptValues({
                                         launchConf: selectedWorkflowJobTemplate.getLaunchConf(),

@@ -1,5 +1,5 @@
-export default [ 'ProcessErrors', 'CredentialTypeModel', 'TemplatesStrings',
-    function (ProcessErrors, CredentialType, strings) {
+export default [ 'ProcessErrors', 'CredentialTypeModel', 'TemplatesStrings', '$filter',
+    function (ProcessErrors, CredentialType, strings, $filter) {
 
         const vm = this || {};
 
@@ -181,7 +181,7 @@ export default [ 'ProcessErrors', 'CredentialTypeModel', 'TemplatesStrings',
                         }
                         vm.steps.preview.tab.order = order;
                         vm.steps.preview.tab._disabled = vm.readOnlyPrompts ? false : true;
-                        modal.show(strings.get('prompt.PROMPT'));
+                        modal.show($filter('sanitize')(vm.promptDataClone.templateName));
                         vm.promptData.triggerModalOpen = false;
 
                         modal.onClose = () => {
