@@ -34,6 +34,7 @@ describe('<AccessList />', () => {
             match={{ path: '/organizations/:id', url: '/organizations/1', params: { id: '1' } }}
             location={{ search: '', pathname: '/organizations/1/access' }}
             getAccessList={() => {}}
+            removeRole={() => {}}
           />
         </MemoryRouter>
       </I18nProvider>
@@ -48,6 +49,7 @@ describe('<AccessList />', () => {
             match={{ path: '/organizations/:id', url: '/organizations/1', params: { id: '0' } }}
             location={{ search: '', pathname: '/organizations/1/access' }}
             getAccessList={() => ({ data: { count: 1, results: mockResults } })}
+            removeRole={() => {}}
           />
         </MemoryRouter>
       </I18nProvider>
@@ -69,6 +71,7 @@ describe('<AccessList />', () => {
             match={{ path: '/organizations/:id', url: '/organizations/1', params: { id: '0' } }}
             location={{ search: '', pathname: '/organizations/1/access' }}
             getAccessList={() => ({ data: { count: 1, results: mockResults } })}
+            removeRole={() => {}}
           />
         </MemoryRouter>
       </I18nProvider>
@@ -95,6 +98,7 @@ describe('<AccessList />', () => {
             match={{ path: '/organizations/:id', url: '/organizations/1', params: { id: '0' } }}
             location={{ search: '', pathname: '/organizations/1/access' }}
             getAccessList={() => ({ data: { count: 1, results: mockResults } })}
+            removeRole={() => {}}
           />
         </MemoryRouter>
       </I18nProvider>
@@ -144,6 +148,7 @@ describe('<AccessList />', () => {
             match={{ path: '/organizations/:id', url: '/organizations/1', params: { id: '0' } }}
             location={{ search: '', pathname: '/organizations/1/access' }}
             getAccessList={() => ({ data: { count: 1, results: mockData } })}
+            removeRole={() => {}}
           />
         </MemoryRouter>
       </I18nProvider>
@@ -154,6 +159,38 @@ describe('<AccessList />', () => {
       results.forEach(result => {
         expect(result.teamRoles).toEqual([]);
       });
+      done();
+    });
+  });
+
+  test('test handleWarning, confirmDelete, and removeRole methods for Alert component', async (done) => {
+    const handleWarning = jest.spyOn(AccessList.prototype, 'handleWarning');
+    const confirmDelete = jest.spyOn(AccessList.prototype, 'confirmDelete');
+    const removeRole = jest.spyOn(AccessList.prototype, 'removeRole');
+    const wrapper = mount(
+      <I18nProvider>
+        <MemoryRouter>
+          <AccessList
+            match={{ path: '/organizations/:id', url: '/organizations/1', params: { id: '0' } }}
+            location={{ search: '', pathname: '/organizations/1/access' }}
+            getAccessList={() => ({ data: { count: 1, results: mockResults } })}
+            removeRole={() => {}}
+          />
+        </MemoryRouter>
+      </I18nProvider>
+    ).find('AccessList');
+    expect(handleWarning).not.toHaveBeenCalled();
+    expect(confirmDelete).not.toHaveBeenCalled();
+    expect(removeRole).not.toHaveBeenCalled();
+
+    setImmediate(() => {
+      const rendered = wrapper.update().find('ChipButton');
+      rendered.find('button[aria-label="close"]').simulate('click');
+      expect(handleWarning).toHaveBeenCalled();
+      const alert = wrapper.update().find('Alert');
+      alert.find('button[aria-label="confirm-delete"]').simulate('click');
+      expect(confirmDelete).toHaveBeenCalled();
+      expect(removeRole).toHaveBeenCalled();
       done();
     });
   });

@@ -220,14 +220,6 @@
 // and bem style, as well as moved into component-based scss files
 //
 
-.awx-lookup {
-  min-height: 36px;
-
-  .pf-c-form-control {
-    --pf-c-form-control--Height: auto;
-  }
-}
-
 .awx-c-list {
   border-bottom: 1px solid #d7d7d7;
 }
@@ -237,4 +229,29 @@
   --pf-c-card__footer--PaddingY: 0;
   --pf-c-card__body--PaddingX: 0;
   --pf-c-card__body--PaddingY: 0;
+}
+
+
+.awx-c-card {
+  position: relative;
+}
+
+.awx-c-alert {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+.pf-c-alert {
+  position: absolute;
+  width: 100%;
+
+  & button {
+    margin-right: 20px;
+  }
+}
+
+.pf-c-alert__icon > svg {
+  fill: white;
 }

@@ -155,14 +155,14 @@ describe('APIClient (api.js)', () => {
     done();
   });
 
-  test('disassociateInstanceGroup calls expected http method with expected data', async (done) => {
+  test('disassociate calls expected http method with expected data', async (done) => {
     const createPromise = () => Promise.resolve();
     const mockHttp = ({ post: jest.fn(createPromise) });
 
     const api = new APIClient(mockHttp);
     const url = 'foo/bar/';
     const id = 1;
-    await api.disassociateInstanceGroup(url, id);
+    await api.disassociate(url, id);
 
     expect(mockHttp.post).toHaveBeenCalledTimes(1);
     expect(mockHttp.post.mock.calls[0][0]).toEqual(url);
