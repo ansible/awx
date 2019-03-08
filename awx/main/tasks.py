@@ -801,7 +801,7 @@ class BaseTask(object):
             '': '',
         }
 
-    def build_extra_vars_file(self, instance, private_data_dir, passwords, display=False):
+    def build_extra_vars_file(self, instance, private_data_dir, passwords):
         '''
         Build ansible yaml file filled with extra vars to be passed via -e@file.yml
         '''
@@ -906,9 +906,6 @@ class BaseTask(object):
         os.chmod(path, stat.S_IRUSR)
         return path
 
-    def build_safe_args(self, instance, private_data_dir, passwords):
-        return self.build_args(instance, private_data_dir, passwords)
-
     def build_cwd(self, instance, private_data_dir):
         raise NotImplementedError
 
@@ -957,10 +954,10 @@ class BaseTask(object):
         '''
         Run the job/task and capture its output.
         '''
-        instance = self.update_model(pk, status='running',
-                                     start_args='')  # blank field to remove encrypted passwords
+        self.instance = self.update_model(pk, status='running',
+                                          start_args='')  # blank field to remove encrypted passwords
 
-        instance.websocket_emit_status("running")
+        self.instance.websocket_emit_status("running")
         status, rc, tb = 'error', None, ''
         output_replacements = []
         extra_update_fields = {}
@@ -970,74 +967,68 @@ class BaseTask(object):
         private_data_dir = None
 
         try:
-            isolated = instance.is_isolated()
-            self.pre_run_hook(instance)
-            if instance.cancel_flag:
-                instance = self.update_model(instance.pk, status='canceled')
-            if instance.status != 'running':
+            isolated = self.instance.is_isolated()
+            self.pre_run_hook(self.instance)
+            if self.instance.cancel_flag:
+                self.instance = self.update_model(self.instance.pk, status='canceled')
+            if self.instance.status != 'running':
                 # Stop the task chain and prevent starting the job if it has
                 # already been canceled.
-                instance = self.update_model(pk)
-                status = instance.status
-                raise RuntimeError('not starting %s task' % instance.status)
+                self.instance = self.update_model(pk)
+                status = self.instance.status
+                raise RuntimeError('not starting %s task' % self.instance.status)
 
             if not os.path.exists(settings.AWX_PROOT_BASE_PATH):
                 raise RuntimeError('AWX_PROOT_BASE_PATH=%s does not exist' % settings.AWX_PROOT_BASE_PATH)
 
             # store a record of the venv used at runtime
-            if hasattr(instance, 'custom_virtualenv'):
-                self.update_model(pk, custom_virtualenv=getattr(instance, 'ansible_virtualenv_path', settings.ANSIBLE_VENV_PATH))
-            private_data_dir = self.build_private_data_dir(instance)
+            if hasattr(self.instance, 'custom_virtualenv'):
+                self.update_model(pk, custom_virtualenv=getattr(self.instance, 'ansible_virtualenv_path', settings.ANSIBLE_VENV_PATH))
+            private_data_dir = self.build_private_data_dir(self.instance)
 
             # Fetch "cached" fact data from prior runs and put on the disk
             # where ansible expects to find it
-            if getattr(instance, 'use_fact_cache', False):
-                instance.start_job_fact_cache(
-                    os.path.join(private_data_dir, 'artifacts', str(instance.id), 'fact_cache'),
+            if getattr(self.instance, 'use_fact_cache', False):
+                self.instance.start_job_fact_cache(
+                    os.path.join(private_data_dir, 'artifacts', str(self.instance.id), 'fact_cache'),
                     fact_modification_times,
                 )
 
             # May have to serialize the value
-            private_data_files = self.build_private_data_files(instance, private_data_dir)
-            passwords = self.build_passwords(instance, kwargs)
+            private_data_files = self.build_private_data_files(self.instance, private_data_dir)
+            passwords = self.build_passwords(self.instance, kwargs)
             proot_custom_virtualenv = None
-            if getattr(instance, 'ansible_virtualenv_path', settings.ANSIBLE_VENV_PATH) != settings.ANSIBLE_VENV_PATH:
-                proot_custom_virtualenv = instance.ansible_virtualenv_path
-            self.build_extra_vars_file(instance, private_data_dir, passwords)
-            args = self.build_args(instance, private_data_dir, passwords)
-            safe_args = self.build_safe_args(instance, private_data_dir, passwords)
+            if getattr(self.instance, 'ansible_virtualenv_path', settings.ANSIBLE_VENV_PATH) != settings.ANSIBLE_VENV_PATH:
+                proot_custom_virtualenv = self.instance.ansible_virtualenv_path
+            self.build_extra_vars_file(self.instance, private_data_dir, passwords)
+            args = self.build_args(self.instance, private_data_dir, passwords)
             # TODO: output_replacements hurts my head right now
-            #output_replacements = self.build_output_replacements(instance, **kwargs)
+            #output_replacements = self.build_output_replacements(self.instance, **kwargs)
             output_replacements = []
-            cwd = self.build_cwd(instance, private_data_dir)
-            env = self.build_env(instance, private_data_dir, isolated,
+            cwd = self.build_cwd(self.instance, private_data_dir)
+            env = self.build_env(self.instance, private_data_dir, isolated,
                                  private_data_files=private_data_files)
             safe_env = build_safe_env(env)
 
             # handle custom injectors specified on the CredentialType
             credentials = []
-            if isinstance(instance, Job):
-                credentials = instance.credentials.all()
-            elif isinstance(instance, InventoryUpdate):
+            if isinstance(self.instance, Job):
+                credentials = self.instance.credentials.all()
+            elif isinstance(self.instance, InventoryUpdate):
                 # TODO: allow multiple custom creds for inv updates
-                credentials = [instance.get_cloud_credential()]
-            elif isinstance(instance, Project):
+                credentials = [self.instance.get_cloud_credential()]
+            elif isinstance(self.instance, Project):
                 # once (or if) project updates
                 # move from a .credential -> .credentials model, we can
                 # lose this block
-                credentials = [instance.credential]
+                credentials = [self.instance.credential]
 
             for credential in credentials:
                 if credential:
                     credential.credential_type.inject_credential(
-                        credential, env, safe_env, args, safe_args, private_data_dir
+                        credential, env, safe_env, args, private_data_dir
                     )
             self.write_args_file(private_data_dir, args)
-
-            # If we're executing on an isolated host, don't bother adding the
-            # key to the agent in this environment
-            instance = self.update_model(pk, job_args=json.dumps(safe_args),
-                                         job_cwd=cwd, job_env=safe_env)
 
             expect_passwords = {}
             password_prompts = self.get_password_prompts(passwords)
@@ -1047,12 +1038,12 @@ class BaseTask(object):
                 extra_update_fields=extra_update_fields,
                 proot_cmd=getattr(settings, 'AWX_PROOT_CMD', 'bwrap'),
             )
-            instance = self.update_model(instance.pk, output_replacements=output_replacements)
+            self.instance = self.update_model(self.instance.pk, output_replacements=output_replacements)
 
-            def event_handler(self, instance, event_data):
+            def event_handler(self, event_data):
                 should_write_event = False
                 dispatcher = CallbackQueueDispatcher()
-                event_data.setdefault(self.event_data_key, instance.id)
+                event_data.setdefault(self.event_data_key, self.instance.id)
                 dispatcher.dispatch(event_data)
                 self.event_ct += 1
 
@@ -1060,48 +1051,55 @@ class BaseTask(object):
                 Handle artifacts
                 '''
                 if event_data.get('event_data', {}).get('artifact_data', {}):
-                    instance.artifacts = event_data['event_data']['artifact_data']
-                    instance.save(update_fields=['artifacts'])
+                    self.instance.artifacts = event_data['event_data']['artifact_data']
+                    self.instance.save(update_fields=['artifacts'])
 
                 return should_write_event
 
-            def cancel_callback(instance):
-                instance = self.update_model(pk)
-                if instance.cancel_flag or instance.status == 'canceled':
-                    cancel_wait = (now() - instance.modified).seconds if instance.modified else 0
+            def cancel_callback(self):
+                self.instance = self.update_model(self.instance.pk)
+                if self.instance.cancel_flag or self.instance.status == 'canceled':
+                    cancel_wait = (now() - self.instance.modified).seconds if self.instance.modified else 0
                     if cancel_wait > 5:
-                        logger.warn('Request to cancel {} took {} seconds to complete.'.format(instance.log_format, cancel_wait))
+                        logger.warn('Request to cancel {} took {} seconds to complete.'.format(self.instance.log_format, cancel_wait))
                     return True
                 return False
 
-            def finished_callback(self, instance, runner_obj):
+            def finished_callback(self, runner_obj):
                 dispatcher = CallbackQueueDispatcher()
                 event_data = {
                     'event': 'EOF',
                     'final_counter': self.event_ct,
                 }
-                event_data.setdefault(self.event_data_key, instance.id)
+                event_data.setdefault(self.event_data_key, self.instance.id)
                 dispatcher.dispatch(event_data)
 
+            def status_handler(self, status_data, runner_config):
+                if status_data['status'] == 'starting':
+                    self.instance = self.update_model(pk, job_args=json.dumps(runner_config.command),
+                                                      job_cwd=runner_config.cwd, job_env=runner_config.env)
+
+
             params = {
-                'ident': instance.id,
+                'ident': self.instance.id,
                 'private_data_dir': private_data_dir,
                 'project_dir': cwd,
-                'playbook': self.build_playbook_path_relative_to_cwd(instance, private_data_dir),
-                'inventory': self.build_inventory(instance, private_data_dir),
+                'playbook': self.build_playbook_path_relative_to_cwd(self.instance, private_data_dir),
+                'inventory': self.build_inventory(self.instance, private_data_dir),
                 'passwords': expect_passwords,
                 'envvars': env,
-                'event_handler': functools.partial(event_handler, self, instance),
-                'cancel_callback': functools.partial(cancel_callback, instance),
-                'finished_callback': functools.partial(finished_callback, self, instance),
+                'event_handler': functools.partial(event_handler, self),
+                'cancel_callback': functools.partial(cancel_callback, self),
+                'finished_callback': functools.partial(finished_callback, self),
+                'status_handler': functools.partial(status_handler, self),
                 'settings': {
                     'idle_timeout': self.get_idle_timeout() or "",
-                    'job_timeout': self.get_instance_timeout(instance),
+                    'job_timeout': self.get_instance_timeout(self.instance),
                     'pexpect_timeout': getattr(settings, 'PEXPECT_TIMEOUT', 5),
                 }
             }
 
-            if self.should_use_proot(instance):
+            if self.should_use_proot(self.instance):
                 process_isolation_params = {
                     'process_isolation': True,
                     'process_isolation_path': settings.AWX_PROOT_BASE_PATH,
@@ -1126,11 +1124,11 @@ class BaseTask(object):
                     process_isolation_params['process_isolation_ro_paths'].append(proot_custom_virtualenv)
                 params = {**params, **process_isolation_params}
 
-            if isinstance(instance, AdHocCommand):
-                params['module'] = self.build_module_name(instance)
-                params['module_args'] = self.build_module_args(instance)
+            if isinstance(self.instance, AdHocCommand):
+                params['module'] = self.build_module_name(self.instance)
+                params['module_args'] = self.build_module_args(self.instance)
 
-            if getattr(instance, 'use_fact_cache', False):
+            if getattr(self.instance, 'use_fact_cache', False):
                 # Enable Ansible fact cache.
                 params['fact_cache_type'] = 'jsonfile'
             else:
@@ -1144,7 +1142,7 @@ class BaseTask(object):
                 if not params[v]:
                     del params[v]
 
-            if instance.is_isolated() is True:
+            if self.instance.is_isolated() is True:
                 playbook = params['playbook']
                 shutil.move(
                     params.pop('inventory'),
@@ -1153,7 +1151,7 @@ class BaseTask(object):
                 copy_tree(cwd, os.path.join(private_data_dir, 'project'))
                 ansible_runner.utils.dump_artifacts(params)
                 manager_instance = isolated_manager.IsolatedManager(env, **_kw)
-                status, rc = manager_instance.run(instance,
+                status, rc = manager_instance.run(self.instance,
                                                   private_data_dir,
                                                   playbook,
                                                   event_data_key=self.event_data_key)
@@ -1163,40 +1161,40 @@ class BaseTask(object):
                 rc = res.rc
 
             if status == 'timeout':
-                instance.job_explanation = "Job terminated due to timeout"
+                self.instance.job_explanation = "Job terminated due to timeout"
                 status = 'failed'
-                extra_update_fields['job_explanation'] = instance.job_explanation
+                extra_update_fields['job_explanation'] = self.instance.job_explanation
 
         except Exception:
             # run_pexpect does not throw exceptions for cancel or timeout
             # this could catch programming or file system errors
             tb = traceback.format_exc()
-            logger.exception('%s Exception occurred while running task', instance.log_format)
+            logger.exception('%s Exception occurred while running task', self.instance.log_format)
         finally:
-            logger.info('%s finished running, producing %s events.', instance.log_format, self.event_ct)
+            logger.info('%s finished running, producing %s events.', self.instance.log_format, self.event_ct)
 
         try:
-            self.post_run_hook(instance, status)
+            self.post_run_hook(self.instance, status)
         except Exception:
-            logger.exception('{} Post run hook errored.'.format(instance.log_format))
+            logger.exception('{} Post run hook errored.'.format(self.instance.log_format))
 
-        instance = self.update_model(pk)
-        instance = self.update_model(pk, status=status, result_traceback=tb,
-                                     output_replacements=output_replacements,
-                                     emitted_events=self.event_ct,
-                                     **extra_update_fields)
+        self.instance = self.update_model(pk)
+        self.instance = self.update_model(pk, status=status, result_traceback=tb,
+                                          output_replacements=output_replacements,
+                                          emitted_events=self.event_ct,
+                                          **extra_update_fields)
 
         try:
-            self.final_run_hook(instance, status, private_data_dir, fact_modification_times)
+            self.final_run_hook(self.instance, status, private_data_dir, fact_modification_times)
         except Exception:
-            logger.exception('{} Final run hook errored.'.format(instance.log_format))
+            logger.exception('{} Final run hook errored.'.format(self.instance.log_format))
 
-        instance.websocket_emit_status(status)
+        self.instance.websocket_emit_status(status)
         if status != 'successful':
             if status == 'canceled':
-                raise AwxTaskError.TaskCancel(instance, rc)
+                raise AwxTaskError.TaskCancel(self.instance, rc)
             else:
-                raise AwxTaskError.TaskError(instance, rc)
+                raise AwxTaskError.TaskError(self.instance, rc)
 
 
 @task()
@@ -1357,7 +1355,7 @@ class RunJob(BaseTask):
 
         return env
 
-    def build_args(self, job, private_data_dir, passwords, display=False):
+    def build_args(self, job, private_data_dir, passwords):
         '''
         Build command line argument list for running ansible-playbook,
         optionally using ssh-agent for public/private key authentication.
@@ -1421,9 +1419,6 @@ class RunJob(BaseTask):
 
         return args
 
-    def build_safe_args(self, job, private_data_dir, passwords):
-        return self.build_args(job, private_data_dir, passwords, display=True)
-
     def build_cwd(self, job, private_data_dir):
         cwd = job.project.get_project_path()
         if not cwd:
@@ -1435,16 +1430,12 @@ class RunJob(BaseTask):
     def build_playbook_path_relative_to_cwd(self, job, private_data_dir):
         return os.path.join(job.playbook)
 
-    def build_extra_vars_file(self, job, private_data_dir, passwords, display=False):
+    def build_extra_vars_file(self, job, private_data_dir, passwords):
         # Define special extra_vars for AWX, combine with job.extra_vars.
         extra_vars = job.awx_meta_vars()
 
         if job.extra_vars_dict:
-            # TODO: Is display needed here? We are building a file that isn't visible
-            if display and job.job_template:
-                extra_vars.update(json.loads(job.display_extra_vars()))
-            else:
-                extra_vars.update(json.loads(job.decrypted_extra_vars()))
+            extra_vars.update(json.loads(job.decrypted_extra_vars()))
 
         # By default, all extra vars disallow Jinja2 template usage for
         # security reasons; top level key-values defined in JT.extra_vars, however,
@@ -1687,14 +1678,6 @@ class RunProjectUpdate(BaseTask):
             'roles_enabled': getattr(settings, 'AWX_ROLES_ENABLED', True)
         })
         self._write_extra_vars_file(private_data_dir, extra_vars)
-
-    def build_safe_args(self, project_update, private_data_dir, passwords):
-        pwdict = dict(passwords.items())
-        for pw_name, pw_val in list(pwdict.items()):
-            if pw_name in ('', 'yes', 'no', 'scm_username'):
-                continue
-            pwdict[pw_name] = HIDDEN_PASSWORD
-        return self.build_args(project_update, private_data_dir, passwords)
 
     def build_cwd(self, project_update, private_data_dir):
         return self.get_path_to('..', 'playbooks')
@@ -2432,7 +2415,7 @@ class RunAdHocCommand(BaseTask):
 
         return args
 
-    def build_extra_vars_file(self, ad_hoc_command, private_data_dir, passwords={}, display=False):
+    def build_extra_vars_file(self, ad_hoc_command, private_data_dir, passwords={}):
         extra_vars = ad_hoc_command.awx_meta_vars()
 
         if ad_hoc_command.extra_vars_dict:
