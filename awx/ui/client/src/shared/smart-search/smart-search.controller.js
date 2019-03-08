@@ -46,7 +46,7 @@ function SmartSearchController (
                     qs.search(path, queryset).then((res) => {
                         $scope.dataset = res.data;
                         $scope.collection = res.data.results;
-                        $scope.$emit('updateDataset', res.data);
+                        $scope.$emit('updateDataset', res.data, queryset);
                     });
 
                     $scope.searchTerm = null;
@@ -77,7 +77,7 @@ function SmartSearchController (
             }
             $scope.dataset = res.data;
             $scope.collection = res.data.results;
-            $scope.$emit('updateDataset', res.data);
+            $scope.$emit('updateDataset', res.data, queryset);
         });
 
         $scope.searchTerm = null;
@@ -164,7 +164,6 @@ function SmartSearchController (
                     $scope.searchPlaceholder = i18n._('Search');
                 }
             });
-
             listenForTransitionSuccess();
         });
 
@@ -205,7 +204,7 @@ function SmartSearchController (
                     }
                     $scope.dataset = data;
                     $scope.collection = data.results;
-                    $scope.$emit('updateDataset', data);
+                    $scope.$emit('updateDataset', data, queryset);
                 })
                 .catch(() => revertSearch(unmodifiedQueryset));
 
@@ -241,7 +240,7 @@ function SmartSearchController (
                 }
                 $scope.dataset = data;
                 $scope.collection = data.results;
-                $scope.$emit('updateDataset', data);
+                $scope.$emit('updateDataset', data, queryset);
             });
 
         generateSearchTags();
@@ -271,7 +270,7 @@ function SmartSearchController (
                 }
                 $scope.dataset = data;
                 $scope.collection = data.results;
-                $scope.$emit('updateDataset', data);
+                $scope.$emit('updateDataset', data, queryset);
             });
 
         $scope.searchTags = qs.stripDefaultParams(queryset, defaults);

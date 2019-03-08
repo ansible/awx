@@ -4,6 +4,13 @@ function JobsStrings (BaseString) {
     const { t } = this;
     const ns = this.jobs;
 
+    ns.sort = {
+        NAME_ASCENDING: t.s('Name (Ascending)'),
+        NAME_DESCENDING: t.s('Name (Descending)'),
+        START_TIME: t.s('Start Time'),
+        FINISH_TIME: t.s('Finish Time')
+    };
+
     ns.list = {
         PANEL_TITLE: t.s('JOBS'),
         ROW_ITEM_LABEL_STARTED: t.s('Started'),

@@ -8,7 +8,7 @@ export default ['templateUrl',
                 dataset: '=',
                 iterator: '@',
                 basePath: '@',
-                querySet: '=',
+                querySet: '=?',
                 maxVisiblePages: '@',
                 hideViewPerPage: '='
             },
