@@ -135,7 +135,7 @@ class OrganizationAdd extends React.Component {
                         onChange={this.onFieldChange}
                       />
                     </FormGroup>
-                    <FormGroup label={i18n._(t`Instance Groups`)} fieldId="add-org-form-instance-groups">
+                    <FormGroup label={i18n._(t`Instance Groups`)} helperText={i18n._(t`Select the Instance Groups for this Organization to run on.`)} fieldId="add-org-form-instance-groups">
                       <Lookup
                         lookupHeader={i18n._(t`Instance Groups`)}
                         name="instanceGroups"
@@ -149,7 +149,7 @@ class OrganizationAdd extends React.Component {
                     <ConfigContext.Consumer>
                       {({ custom_virtualenvs }) => (
                         custom_virtualenvs && custom_virtualenvs.length > 1 && (
-                          <FormGroup label={i18n._(t`Ansible Environment`)} fieldId="add-org-custom-virtualenv">
+                          <FormGroup label={i18n._(t`Ansible Environment`)} helperText={i18n._(t`Select the custom Python virtual environment for this organization to run on.`)} fieldId="add-org-custom-virtualenv">
                             <AnsibleSelect
                               label={i18n._(t`Ansible Environment`)}
                               name="custom_virtualenv"
