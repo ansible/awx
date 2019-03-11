@@ -95,13 +95,21 @@ export default ['i18n', function(i18n) {
                             key: true,
                             label: i18n._('User'),
                             linkBase: 'users',
-                            columnClass: 'col-sm-6'
+                            columnClass: 'col-sm-3'
+                        },
+                        first_name: {
+                            label: i18n._('First Name'),
+                            columnClass: 'col-sm-3'
+                        },
+                        last_name: {
+                            label: i18n._('Last Name'),
+                            columnClass: 'col-sm-3'
                         },
                         role: {
                             label: i18n._('Role'),
                             type: 'role',
                             nosort: true,
-                            columnClass: 'col-sm-6'
+                            columnClass: 'col-sm-3'
                         }
                     }
                 },
