@@ -8,10 +8,8 @@ function ListApplicationsController (
     $scope,
     $state,
     Dataset,
-    GetBasePath,
     ProcessErrors,
     Prompt,
-    qs,
     resolvedModels,
     strings,
     Wait
@@ -160,10 +158,8 @@ ListApplicationsController.$inject = [
     '$scope',
     '$state',
     'Dataset',
-    'GetBasePath',
     'ProcessErrors',
     'Prompt',
-    'QuerySet',
     'resolvedModels',
     'ApplicationsStrings',
     'Wait'
