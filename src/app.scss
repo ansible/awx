@@ -216,6 +216,10 @@
   --pf-c-tooltip__content--PaddingBottom: 0.71rem;
   --pf-c-tooltip__content--PaddingLeft: 0.71rem;
 }
+// higher specificity needed to override PF styles added dynamically to page
+.pf-c-tooltip .pf-c-tooltip__content {
+  text-align: left;
+}
 
 //
 // pf empty state overrides

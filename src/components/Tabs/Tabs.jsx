@@ -1,9 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
-import { Button } from '@patternfly/react-core';
+import { Button, Tooltip } from '@patternfly/react-core';
 import { TimesIcon } from '@patternfly/react-icons';
-import Tooltip from '../Tooltip';
 import './tabs.scss';
 
 const Tabs = ({ children, labelText, closeButton }) => (
@@ -17,7 +16,7 @@ const Tabs = ({ children, labelText, closeButton }) => (
     {closeButton
       && (
         <Tooltip
-          message={closeButton.text}
+          content={closeButton.text}
           position="top"
         >
           <Link to={closeButton.link}>
