@@ -95,7 +95,7 @@ and
 }
 ```
 These can be entered via Configure-Tower-in-Tower by making a POST to
-`/api/v1/settings/logging/`.
+`/api/v2/settings/logging/`.
 
 ### Connecting Logstash to 3rd Party Receivers
 

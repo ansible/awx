@@ -34,7 +34,7 @@ class Command(BaseCommand):
                             scm_update_cache_timeout=0,
                             organization=o)
                 p.save(skip_update=True)
-                ssh_type = CredentialType.from_v1_kind('ssh')
+                ssh_type = CredentialType.objects.filter(namespace='ssh').first()
                 c = Credential.objects.create(credential_type=ssh_type,
                                               name='Demo Credential',
                                               inputs={

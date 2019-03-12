@@ -118,7 +118,7 @@ register(
     default=_load_default_license_from_file,
     label=_('License'),
     help_text=_('The license controls which features and functionality are '
-                'enabled. Use /api/v1/config/ to update or change '
+                'enabled. Use /api/v2/config/ to update or change '
                 'the license.'),
     category=_('System'),
     category_slug='system',

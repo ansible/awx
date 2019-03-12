@@ -794,7 +794,7 @@ class BaseTask(object):
                     data += '\n'
                 # For credentials used with ssh-add, write to a named pipe which
                 # will be read then closed, instead of leaving the SSH key on disk.
-                if credential and credential.kind in ('ssh', 'scm') and not ssh_too_old:
+                if credential and credential.credential_type.namespace in ('ssh', 'scm') and not ssh_too_old:
                     try:
                         os.mkdir(os.path.join(private_data_dir, 'env'))
                     except OSError as e:
@@ -1324,7 +1324,7 @@ class RunJob(BaseTask):
         and ansible-vault.
         '''
         passwords = super(RunJob, self).build_passwords(job, runtime_passwords)
-        cred = job.get_deprecated_credential('ssh')
+        cred = job.machine_credential
         if cred:
             for field in ('ssh_key_unlock', 'ssh_password', 'become_password', 'vault_password'):
                 value = runtime_passwords.get(field, cred.get_input('password' if field == 'ssh_password' else field, default=''))
@@ -1408,6 +1408,9 @@ class RunJob(BaseTask):
 
         # Set environment variables for cloud credentials.
         cred_files = private_data_files.get('credentials', {})
+        for cloud_cred in job.cloud_credentials:
+            if cloud_cred and cloud_cred.credential_type.namespace == 'openstack':
+                env['OS_CLIENT_CONFIG_FILE'] = cred_files.get(cloud_cred, '')
 
         for network_cred in job.network_credentials:
             env['ANSIBLE_NET_USERNAME'] = network_cred.get_input('username', default='')
@@ -1429,7 +1432,7 @@ class RunJob(BaseTask):
         Build command line argument list for running ansible-playbook,
         optionally using ssh-agent for public/private key authentication.
         '''
-        creds = job.get_deprecated_credential('ssh')
+        creds = job.machine_credential
 
         ssh_username, become_username, become_method = '', '', ''
         if creds:
@@ -2226,9 +2229,9 @@ class RunAdHocCommand(BaseTask):
         creds = ad_hoc_command.credential
         ssh_username, become_username, become_method = '', '', ''
         if creds:
-            ssh_username = creds.username
-            become_method = creds.become_method
-            become_username = creds.become_username
+            ssh_username = creds.get_input('username', default='')
+            become_method = creds.get_input('become_method', default='')
+            become_username = creds.get_input('become_username', default='')
         else:
             become_method = None
             become_username = ""

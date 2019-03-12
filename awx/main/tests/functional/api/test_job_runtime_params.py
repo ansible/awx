@@ -309,8 +309,8 @@ def test_job_launch_with_default_creds(machine_credential, vault_credential, dep
 
     prompted_fields, ignored_fields, errors = deploy_jobtemplate._accept_or_ignore_job_kwargs(**kv)
     job_obj = deploy_jobtemplate.create_unified_job(**prompted_fields)
-    assert job_obj.credential == machine_credential.pk
-    assert job_obj.vault_credential == vault_credential.pk
+    assert job_obj.machine_credential.pk == machine_credential.pk
+    assert job_obj.vault_credentials[0].pk == vault_credential.pk
 
 
 @pytest.mark.django_db
@@ -350,14 +350,14 @@ def test_job_launch_with_empty_creds(machine_credential, vault_credential, deplo
 
     prompted_fields, ignored_fields, errors = deploy_jobtemplate._accept_or_ignore_job_kwargs(**serializer.validated_data)
     job_obj = deploy_jobtemplate.create_unified_job(**prompted_fields)
-    assert job_obj.credential is deploy_jobtemplate.credential
-    assert job_obj.vault_credential is deploy_jobtemplate.vault_credential
+    assert job_obj.machine_credential.pk == deploy_jobtemplate.machine_credential.pk
+    assert job_obj.vault_credentials[0].pk == deploy_jobtemplate.vault_credentials[0].pk
 
 
 @pytest.mark.django_db
 def test_job_launch_fails_with_missing_vault_password(machine_credential, vault_credential,
                                                       deploy_jobtemplate, post, rando):
-    vault_credential.vault_password = 'ASK'
+    vault_credential.inputs['vault_password'] = 'ASK'
     vault_credential.save()
     deploy_jobtemplate.credentials.add(vault_credential)
     deploy_jobtemplate.execute_role.members.add(rando)
@@ -440,7 +440,7 @@ def test_job_launch_fails_with_missing_multivault_password(machine_credential, v
 @pytest.mark.django_db
 def test_job_launch_fails_with_missing_ssh_password(machine_credential, deploy_jobtemplate, post,
                                                     rando):
-    machine_credential.password = 'ASK'
+    machine_credential.inputs['password'] = 'ASK'
     machine_credential.save()
     deploy_jobtemplate.credentials.add(machine_credential)
     deploy_jobtemplate.execute_role.members.add(rando)
@@ -457,9 +457,9 @@ def test_job_launch_fails_with_missing_ssh_password(machine_credential, deploy_j
 @pytest.mark.django_db
 def test_job_launch_fails_with_missing_vault_and_ssh_password(machine_credential, vault_credential,
                                                               deploy_jobtemplate, post, rando):
-    vault_credential.vault_password = 'ASK'
+    vault_credential.inputs['vault_password'] = 'ASK'
     vault_credential.save()
-    machine_credential.password = 'ASK'
+    machine_credential.inputs['password'] = 'ASK'
     machine_credential.save()
     deploy_jobtemplate.credentials.add(machine_credential)
     deploy_jobtemplate.credentials.add(vault_credential)
@@ -477,7 +477,7 @@ def test_job_launch_fails_with_missing_vault_and_ssh_password(machine_credential
 @pytest.mark.django_db
 def test_job_launch_pass_with_prompted_vault_password(machine_credential, vault_credential,
                                                       deploy_jobtemplate, post, rando):
-    vault_credential.vault_password = 'ASK'
+    vault_credential.inputs['vault_password'] = 'ASK'
     vault_credential.save()
     deploy_jobtemplate.credentials.add(machine_credential)
     deploy_jobtemplate.credentials.add(vault_credential)

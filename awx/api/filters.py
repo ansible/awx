@@ -24,20 +24,6 @@ from rest_framework.filters import BaseFilterBackend
 # AWX
 from awx.main.utils import get_type_for_model, to_python_boolean
 from awx.main.utils.db import get_all_field_names
-from awx.main.models.credential import CredentialType
-
-
-class V1CredentialFilterBackend(BaseFilterBackend):
-    '''
-    For /api/v1/ requests, filter out v2 (custom) credentials
-    '''
-
-    def filter_queryset(self, request, queryset, view):
-        # TODO: remove in 3.3
-        from awx.api.versioning import get_request_version
-        if get_request_version(request) == 1:
-            queryset = queryset.filter(credential_type__managed_by_tower=True)
-        return queryset
 
 
 class TypeFilterBackend(BaseFilterBackend):
@@ -291,39 +277,6 @@ class FieldLookupBackend(BaseFilterBackend):
                 if key.startswith('not__'):
                     key = key[5:]
                     q_not = True
-
-                # Make legacy v1 Job/Template fields work for backwards compatability
-                # TODO: remove after API v1 deprecation period
-                if queryset.model._meta.object_name in ('JobTemplate', 'Job') and key in (
-                        'credential', 'vault_credential', 'cloud_credential', 'network_credential'
-                ) or queryset.model._meta.object_name in ('InventorySource', 'InventoryUpdate') and key == 'credential':
-                    key = 'credentials'
-
-                # Make legacy v1 Credential fields work for backwards compatability
-                # TODO: remove after API v1 deprecation period
-                #
-                # convert v1 `Credential.kind` queries to `Credential.credential_type__pk`
-                if queryset.model._meta.object_name == 'Credential' and key == 'kind':
-                    key = key.replace('kind', 'credential_type')
-
-                    if 'ssh' in values:
-                        # In 3.2, SSH and Vault became separate credential types, but in the v1 API,
-                        # they're both still "kind=ssh"
-                        # under the hood, convert `/api/v1/credentials/?kind=ssh` to
-                        # `/api/v1/credentials/?or__credential_type=<ssh_pk>&or__credential_type=<vault_pk>`
-                        values = set(values)
-                        values.add('vault')
-                        values = list(values)
-                        q_or = True
-
-                    for i, kind in enumerate(values):
-                        if kind == 'vault':
-                            type_ = CredentialType.objects.get(kind=kind)
-                        else:
-                            type_ = CredentialType.from_v1_kind(kind)
-                        if type_ is None:
-                            raise ParseError(_('cannot filter on kind %s') % kind)
-                        values[i] = type_.pk
 
                 # Convert value(s) to python and add to the appropriate list.
                 for value in values:

@@ -6,7 +6,6 @@ from django.conf.urls import url
 from awx.api.views import (
     JobList,
     JobDetail,
-    JobStart,
     JobCancel,
     JobRelaunch,
     JobCreateSchedule,
@@ -23,7 +22,6 @@ from awx.api.views import (
 urls = [
     url(r'^$', JobList.as_view(), name='job_list'),
     url(r'^(?P<pk>[0-9]+)/$', JobDetail.as_view(), name='job_detail'),
-    url(r'^(?P<pk>[0-9]+)/start/$', JobStart.as_view(), name='job_start'),  # Todo: Remove In 3.3
     url(r'^(?P<pk>[0-9]+)/cancel/$', JobCancel.as_view(), name='job_cancel'),
     url(r'^(?P<pk>[0-9]+)/relaunch/$', JobRelaunch.as_view(), name='job_relaunch'),
     url(r'^(?P<pk>[0-9]+)/create_schedule/$', JobCreateSchedule.as_view(), name='job_create_schedule'),

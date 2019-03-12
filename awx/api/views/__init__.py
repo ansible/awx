@@ -62,7 +62,6 @@ from wsgiref.util import FileWrapper
 # AWX
 from awx.main.tasks import send_notifications, update_inventory_computed_fields
 from awx.main.access import get_user_queryset, HostAccess
-from awx.api.filters import V1CredentialFilterBackend
 from awx.api.generics import (
     APIView, BaseUsersList, CopyAPIView, DeleteLastUnattachLabelMixin,
     GenericAPIView, ListAPIView, ListCreateAPIView,
@@ -72,7 +71,7 @@ from awx.api.generics import (
     SubListCreateAPIView, SubListCreateAttachDetachAPIView,
     SubListDestroyAPIView, get_view_name
 )
-from awx.api.versioning import reverse, get_request_version
+from awx.api.versioning import reverse
 from awx.conf.license import get_license
 from awx.main import models
 from awx.main.utils import (
@@ -96,7 +95,7 @@ from awx.api.permissions import (
 )
 from awx.api import renderers
 from awx.api import serializers
-from awx.api.metadata import RoleMetadata, JobTypeMetadata
+from awx.api.metadata import RoleMetadata
 from awx.main.constants import ACTIVE_STATES
 from awx.main.scheduler.dag_workflow import WorkflowDAG
 from awx.api.views.mixin import (
@@ -143,10 +142,9 @@ from awx.api.views.root import ( # noqa
     ApiRootView,
     ApiOAuthAuthorizationRootView,
     ApiVersionRootView,
-    ApiV1RootView,
     ApiV2RootView,
-    ApiV1PingView,
-    ApiV1ConfigView,
+    ApiV2PingView,
+    ApiV2ConfigView,
 )
 
 
@@ -1246,22 +1244,10 @@ class CredentialTypeActivityStreamList(SubListAPIView):
     search_fields = ('changes',)
 
 
-# remove in 3.3
-class CredentialViewMixin(object):
-
-    @property
-    def related_search_fields(self):
-        ret = super(CredentialViewMixin, self).related_search_fields
-        if get_request_version(self.request) == 1 and 'credential_type__search' in ret:
-            ret.remove('credential_type__search')
-        return ret
-
-
-class CredentialList(CredentialViewMixin, ListCreateAPIView):
+class CredentialList(ListCreateAPIView):
 
     model = models.Credential
     serializer_class = serializers.CredentialSerializerCreate
-    filter_backends = ListCreateAPIView.filter_backends + [V1CredentialFilterBackend]
 
 
 class CredentialOwnerUsersList(SubListAPIView):
@@ -1289,13 +1275,12 @@ class CredentialOwnerTeamsList(SubListAPIView):
         return self.model.objects.filter(pk__in=teams)
 
 
-class UserCredentialsList(CredentialViewMixin, SubListCreateAPIView):
+class UserCredentialsList(SubListCreateAPIView):
 
     model = models.Credential
     serializer_class = serializers.UserCredentialSerializerCreate
     parent_model = models.User
     parent_key = 'user'
-    filter_backends = SubListCreateAPIView.filter_backends + [V1CredentialFilterBackend]
 
     def get_queryset(self):
         user = self.get_parent_object()
@@ -1306,13 +1291,12 @@ class UserCredentialsList(CredentialViewMixin, SubListCreateAPIView):
         return user_creds & visible_creds
 
 
-class TeamCredentialsList(CredentialViewMixin, SubListCreateAPIView):
+class TeamCredentialsList(SubListCreateAPIView):
 
     model = models.Credential
     serializer_class = serializers.TeamCredentialSerializerCreate
     parent_model = models.Team
     parent_key = 'team'
-    filter_backends = SubListCreateAPIView.filter_backends + [V1CredentialFilterBackend]
 
     def get_queryset(self):
         team = self.get_parent_object()
@@ -1323,13 +1307,12 @@ class TeamCredentialsList(CredentialViewMixin, SubListCreateAPIView):
         return (team_creds & visible_creds).distinct()
 
 
-class OrganizationCredentialList(CredentialViewMixin, SubListCreateAPIView):
+class OrganizationCredentialList(SubListCreateAPIView):
 
     model = models.Credential
     serializer_class = serializers.OrganizationCredentialSerializerCreate
     parent_model = models.Organization
     parent_key = 'organization'
-    filter_backends = SubListCreateAPIView.filter_backends + [V1CredentialFilterBackend]
 
     def get_queryset(self):
         organization = self.get_parent_object()
@@ -1348,7 +1331,6 @@ class CredentialDetail(RetrieveUpdateDestroyAPIView):
 
     model = models.Credential
     serializer_class = serializers.CredentialSerializer
-    filter_backends = RetrieveUpdateDestroyAPIView.filter_backends + [V1CredentialFilterBackend]
 
 
 class CredentialActivityStreamList(SubListAPIView):
@@ -1754,10 +1736,10 @@ class EnforceParentRelationshipMixin(object):
     * Tower uses a shallow (2-deep only) url pattern. For example:
 
     When an object hangs off of a parent object you would have the url of the
-    form /api/v1/parent_model/34/child_model. If you then wanted a child of the
-    child model you would NOT do /api/v1/parent_model/34/child_model/87/child_child_model
-    Instead, you would access the child_child_model via /api/v1/child_child_model/87/
-    and you would create child_child_model's off of /api/v1/child_model/87/child_child_model_set
+    form /api/v2/parent_model/34/child_model. If you then wanted a child of the
+    child model you would NOT do /api/v2/parent_model/34/child_model/87/child_child_model
+    Instead, you would access the child_child_model via /api/v2/child_child_model/87/
+    and you would create child_child_model's off of /api/v2/child_model/87/child_child_model_set
     Now, when creating child_child_model related to child_model you still want to
     link child_child_model to parent_model. That's what this class is for
     '''
@@ -1899,11 +1881,6 @@ class GroupDetail(RelatedJobsPreventDeleteMixin, ControlledByScmMixin, RetrieveU
         obj = self.get_object()
         if not request.user.can_access(self.model, 'delete', obj):
             raise PermissionDenied()
-        if get_request_version(request) == 1:  # TODO: deletion of automatic inventory_source, remove in 3.3
-            try:
-                obj.deprecated_inventory_source.delete()
-            except models.Group.deprecated_inventory_source.RelatedObjectDoesNotExist:
-                pass
         obj.delete_recursive()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -2092,13 +2069,6 @@ class InventorySourceList(ListCreateAPIView):
     model = models.InventorySource
     serializer_class = serializers.InventorySourceSerializer
     always_allow_superuser = False
-
-    @property
-    def allowed_methods(self):
-        methods = super(InventorySourceList, self).allowed_methods
-        if get_request_version(getattr(self, 'request', None)) == 1:
-            methods.remove('POST')
-        return methods
 
 
 class InventorySourceDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
@@ -2290,7 +2260,6 @@ class InventoryUpdateNotificationsList(SubListAPIView):
 class JobTemplateList(ListCreateAPIView):
 
     model = models.JobTemplate
-    metadata_class = JobTypeMetadata
     serializer_class = serializers.JobTemplateSerializer
     always_allow_superuser = False
 
@@ -2305,7 +2274,6 @@ class JobTemplateList(ListCreateAPIView):
 class JobTemplateDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
 
     model = models.JobTemplate
-    metadata_class = JobTypeMetadata
     serializer_class = serializers.JobTemplateSerializer
     always_allow_superuser = False
 
@@ -2314,7 +2282,6 @@ class JobTemplateLaunch(RetrieveAPIView):
 
     model = models.JobTemplate
     obj_permission_type = 'start'
-    metadata_class = JobTypeMetadata
     serializer_class = serializers.JobLaunchSerializer
     always_allow_superuser = False
 
@@ -2358,65 +2325,44 @@ class JobTemplateLaunch(RetrieveAPIView):
         ignored_fields = {}
         modern_data = data.copy()
 
-        for fd in ('credential', 'vault_credential', 'inventory'):
-            id_fd = '{}_id'.format(fd)
-            if fd not in modern_data and id_fd in modern_data:
-                modern_data[fd] = modern_data[id_fd]
-
-        # This block causes `extra_credentials` to _always_ raise error if
-        # the launch endpoint if we're accessing `/api/v1/`
-        if get_request_version(self.request) == 1 and 'extra_credentials' in modern_data:
-            raise ParseError({"extra_credentials": _(
-                "Field is not allowed for use with v1 API."
-            )})
+        id_fd = '{}_id'.format('inventory')
+        if 'inventory' not in modern_data and id_fd in modern_data:
+            modern_data['inventory'] = modern_data[id_fd]
 
         # Automatically convert legacy launch credential arguments into a list of `.credentials`
-        if 'credentials' in modern_data and (
-            'credential' in modern_data or
-            'vault_credential' in modern_data or
-            'extra_credentials' in modern_data
-        ):
+        if 'credentials' in modern_data and 'extra_credentials' in modern_data:
             raise ParseError({"error": _(
-                "'credentials' cannot be used in combination with 'credential', 'vault_credential', or 'extra_credentials'."
+                "'credentials' cannot be used in combination with 'extra_credentials'."
             )})
 
-        if (
-            'credential' in modern_data or
-            'vault_credential' in modern_data or
-            'extra_credentials' in modern_data
-        ):
+        if 'extra_credentials' in modern_data:
             # make a list of the current credentials
             existing_credentials = obj.credentials.all()
             template_credentials = list(existing_credentials)  # save copy of existing
             new_credentials = []
-            for key, conditional, _type, type_repr in (
-                ('credential', lambda cred: cred.credential_type.kind != 'ssh', int, 'pk value'),
-                ('vault_credential', lambda cred: cred.credential_type.kind != 'vault', int, 'pk value'),
-                ('extra_credentials', lambda cred: cred.credential_type.kind not in ('cloud', 'net'), Iterable, 'a list')
-            ):
-                if key in modern_data:
-                    # if a specific deprecated key is specified, remove all
-                    # credentials of _that_ type from the list of current
-                    # credentials
-                    existing_credentials = filter(conditional, existing_credentials)
-                    prompted_value = modern_data.pop(key)
+            if 'extra_credentials' in modern_data:
+                existing_credentials = [
+                    cred for cred in existing_credentials
+                    if cred.credential_type.kind not in ('cloud', 'net')
+                ]
+                prompted_value = modern_data.pop('extra_credentials')
 
-                    # validate type, since these are not covered by a serializer
-                    if not isinstance(prompted_value, _type):
-                        msg = _(
-                            "Incorrect type. Expected {}, received {}."
-                        ).format(type_repr, prompted_value.__class__.__name__)
-                        raise ParseError({key: [msg], 'credentials': [msg]})
+                # validate type, since these are not covered by a serializer
+                if not isinstance(prompted_value, Iterable):
+                    msg = _(
+                        "Incorrect type. Expected a list received {}."
+                    ).format(prompted_value.__class__.__name__)
+                    raise ParseError({'extra_credentials': [msg], 'credentials': [msg]})
 
-                    # add the deprecated credential specified in the request
-                    if not isinstance(prompted_value, Iterable) or isinstance(prompted_value, str):
-                        prompted_value = [prompted_value]
+                # add the deprecated credential specified in the request
+                if not isinstance(prompted_value, Iterable) or isinstance(prompted_value, str):
+                    prompted_value = [prompted_value]
 
-                    # If user gave extra_credentials, special case to use exactly
-                    # the given list without merging with JT credentials
-                    if key == 'extra_credentials' and prompted_value:
-                        obj._deprecated_credential_launch = True  # signal to not merge credentials
-                    new_credentials.extend(prompted_value)
+                # If user gave extra_credentials, special case to use exactly
+                # the given list without merging with JT credentials
+                if prompted_value:
+                    obj._deprecated_credential_launch = True  # signal to not merge credentials
+                new_credentials.extend(prompted_value)
 
             # combine the list of "new" and the filtered list of "old"
             new_credentials.extend([cred.pk for cred in existing_credentials])
@@ -2926,20 +2872,13 @@ class JobTemplateCallback(GenericAPIView):
         return Response(status=status.HTTP_201_CREATED, headers=headers)
 
 
-class JobTemplateJobsList(SubListCreateAPIView):
+class JobTemplateJobsList(SubListAPIView):
 
     model = models.Job
     serializer_class = serializers.JobListSerializer
     parent_model = models.JobTemplate
     relationship = 'jobs'
     parent_key = 'job_template'
-
-    @property
-    def allowed_methods(self):
-        methods = super(JobTemplateJobsList, self).allowed_methods
-        if get_request_version(getattr(self, 'request', None)) > 1:
-            methods.remove('POST')
-        return methods
 
 
 class JobTemplateSliceWorkflowJobsList(SubListCreateAPIView):
@@ -3135,8 +3074,6 @@ class WorkflowJobTemplateCopy(CopyAPIView):
     copy_return_serializer_class = serializers.WorkflowJobTemplateSerializer
 
     def get(self, request, *args, **kwargs):
-        if get_request_version(request) < 2:
-            return self.v1_not_allowed()
         obj = self.get_object()
         if not request.user.can_access(obj.__class__, 'read', obj):
             raise PermissionDenied()
@@ -3493,55 +3430,16 @@ class SystemJobTemplateNotificationTemplatesSuccessList(SubListCreateAttachDetac
     relationship = 'notification_templates_success'
 
 
-class JobList(ListCreateAPIView):
+class JobList(ListAPIView):
 
     model = models.Job
-    metadata_class = JobTypeMetadata
     serializer_class = serializers.JobListSerializer
 
-    @property
-    def allowed_methods(self):
-        methods = super(JobList, self).allowed_methods
-        if get_request_version(getattr(self, 'request', None)) > 1:
-            methods.remove('POST')
-        return methods
 
-    # NOTE: Remove in 3.3, switch ListCreateAPIView to ListAPIView
-    def post(self, request, *args, **kwargs):
-        if get_request_version(self.request) > 1:
-            return Response({"error": _("POST not allowed for Job launching in version 2 of the api")},
-                            status=status.HTTP_405_METHOD_NOT_ALLOWED)
-        return super(JobList, self).post(request, *args, **kwargs)
-
-
-class JobDetail(UnifiedJobDeletionMixin, RetrieveUpdateDestroyAPIView):
+class JobDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
 
     model = models.Job
-    metadata_class = JobTypeMetadata
     serializer_class = serializers.JobDetailSerializer
-
-    # NOTE: When removing the V1 API in 3.4, delete the following four methods,
-    # and let this class inherit from RetrieveDestroyAPIView instead of
-    # RetrieveUpdateDestroyAPIView.
-    @property
-    def allowed_methods(self):
-        methods = super(JobDetail, self).allowed_methods
-        if get_request_version(getattr(self, 'request', None)) > 1:
-            methods.remove('PUT')
-            methods.remove('PATCH')
-        return methods
-
-    def put(self, request, *args, **kwargs):
-        if get_request_version(self.request) > 1:
-            return Response({"error": _("PUT not allowed for Job Details in version 2 of the API")},
-                            status=status.HTTP_405_METHOD_NOT_ALLOWED)
-        return super(JobDetail, self).put(request, *args, **kwargs)
-
-    def patch(self, request, *args, **kwargs):
-        if get_request_version(self.request) > 1:
-            return Response({"error": _("PUT not allowed for Job Details in version 2 of the API")},
-                            status=status.HTTP_405_METHOD_NOT_ALLOWED)
-        return super(JobDetail, self).patch(request, *args, **kwargs)
 
     def update(self, request, *args, **kwargs):
         obj = self.get_object()
@@ -3589,44 +3487,6 @@ class JobActivityStreamList(SubListAPIView):
     parent_model = models.Job
     relationship = 'activitystream_set'
     search_fields = ('changes',)
-
-
-# TODO: remove endpoint in 3.3
-class JobStart(GenericAPIView):
-
-    model = models.Job
-    obj_permission_type = 'start'
-    serializer_class = serializers.EmptySerializer
-    deprecated = True
-
-    def v2_not_allowed(self):
-        return Response({'detail': 'Action only possible through v1 API.'},
-                        status=status.HTTP_404_NOT_FOUND)
-
-    def get(self, request, *args, **kwargs):
-        if get_request_version(request) > 1:
-            return self.v2_not_allowed()
-        obj = self.get_object()
-        data = dict(
-            can_start=obj.can_start,
-        )
-        if obj.can_start:
-            data['passwords_needed_to_start'] = obj.passwords_needed_to_start
-        return Response(data)
-
-    def post(self, request, *args, **kwargs):
-        if get_request_version(request) > 1:
-            return self.v2_not_allowed()
-        obj = self.get_object()
-        if obj.can_start:
-            result = obj.signal_start(**request.data)
-            if not result:
-                data = dict(passwords_needed_to_start=obj.passwords_needed_to_start)
-                return Response(data, status=status.HTTP_400_BAD_REQUEST)
-            else:
-                return Response(status=status.HTTP_202_ACCEPTED)
-        else:
-            return self.http_method_not_allowed(request, *args, **kwargs)
 
 
 class JobCancel(RetrieveAPIView):

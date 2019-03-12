@@ -24,7 +24,7 @@ from awx.api.generics import (
     RetrieveUpdateDestroyAPIView,
 )
 from awx.api.permissions import IsSuperUser
-from awx.api.versioning import reverse, get_request_version
+from awx.api.versioning import reverse
 from awx.main.utils import camelcase_to_underscore
 from awx.main.utils.handlers import AWXProxyHandler, LoggingConnectivityException
 from awx.main.tasks import handle_setting_changes
@@ -34,13 +34,6 @@ from awx.conf import settings_registry
 
 
 SettingCategory = collections.namedtuple('SettingCategory', ('url', 'slug', 'name'))
-
-VERSION_SPECIFIC_CATEGORIES_TO_EXCLUDE = {
-    1: set([
-        'named-url',
-    ]),
-    2: set([]),
-}
 
 
 class SettingCategoryList(ListAPIView):
@@ -60,8 +53,6 @@ class SettingCategoryList(ListAPIView):
         else:
             categories = {}
         for category_slug in sorted(categories.keys()):
-            if category_slug in VERSION_SPECIFIC_CATEGORIES_TO_EXCLUDE[get_request_version(self.request)]:
-                continue
             url = reverse('api:setting_singleton_detail', kwargs={'category_slug': category_slug}, request=self.request)
             setting_categories.append(SettingCategory(url, category_slug, categories[category_slug]))
         return setting_categories
@@ -77,8 +68,6 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
         self.category_slug = self.kwargs.get('category_slug', 'all')
         all_category_slugs = list(settings_registry.get_registered_categories().keys())
-        for slug_to_delete in VERSION_SPECIFIC_CATEGORIES_TO_EXCLUDE[get_request_version(self.request)]:
-            all_category_slugs.remove(slug_to_delete)
         if self.request.user.is_superuser or getattr(self.request.user, 'is_system_auditor', False):
             category_slugs = all_category_slugs
         else:
@@ -90,7 +79,6 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
 
         registered_settings = settings_registry.get_registered_settings(
             category_slug=self.category_slug, read_only=False,
-            slugs_to_ignore=VERSION_SPECIFIC_CATEGORIES_TO_EXCLUDE[get_request_version(self.request)]
         )
         if self.category_slug == 'user':
             return Setting.objects.filter(key__in=registered_settings, user=self.request.user)
@@ -101,7 +89,6 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
         settings_qs = self.get_queryset()
         registered_settings = settings_registry.get_registered_settings(
             category_slug=self.category_slug,
-            slugs_to_ignore=VERSION_SPECIFIC_CATEGORIES_TO_EXCLUDE[get_request_version(self.request)]
         )
         all_settings = {}
         for setting in settings_qs:

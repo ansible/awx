@@ -262,52 +262,6 @@ endpoint:
     }
 
 
-API Backwards Compatability
----------------------------
-
-`/api/v1/credentials/` still exists in Tower 3.2, and it transparently works as
-before with minimal surprises by attempting to translate `/api/v1/` requests to
-the new ``Credential`` and ``Credential Type`` models.
-
-* When creating or modifying a ``Job Template`` through `v1` of the API,
-  old-style credential assignment will transparently map to the new model.  For
-  example, the following `POST`'ed payload:
-
-      {
-        credential: <pk>,
-        vault_credential: <pk>,
-        cloud_credential: <pk>,
-        network_credential: <pk>,
-      }
-
-  ...would transparently update ``JobTemplate.extra_credentials`` to a list
-  containing both the cloud and network ``Credentials``.
-
-  Similarly, an `HTTP GET /api/v1/job_credentials/N/` will populate
-  `cloud_credential`, and `network_credential` with the *most recently applied*
-  matching credential in the list.
-
-* Custom ``Credentials`` will not be returned in the ``v1`` API; if a user
-  defines their own ``Credential Type``, its credentials won't show up in the
-  ``v1`` API.
-
-* ``HTTP POST`` requests to ``/api/v1/credentials/`` will transparently map
-  old-style attributes (i.e., ``username``, ``password``, ``ssh_key_data``) to
-  the appropriate new-style model.  Similarly, ``HTTP GET
-  /api/v1/credentials/N/`` requests will continue to contain old-style
-  key-value mappings in their payloads.
-
-* Vault credentials are a new first-level type of credential in Tower 3.2.
-  As such, any ``Credentials`` pre-Tower 3.2 that contain *both* SSH and Vault
-  parameters will be migrated to separate distinct ``Credentials``
-  post-migration.
-
-  For example, if your Tower 3.1 installation has one ``Credential`` with
-  a defined ``username``, ``password``, and ``vault_password``, after migration
-  *two* ``Credentials`` will exist (one which contains the ``username`` and
-  ``password``, and another which contains only the ``vault_password``).
-
-
 Additional Criteria
 -------------------
 * Rackspace is being removed from official support in Tower 3.2.  Pre-existing

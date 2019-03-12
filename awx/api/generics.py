@@ -34,7 +34,7 @@ from rest_framework.negotiation import DefaultContentNegotiation
 # AWX
 from awx.api.filters import FieldLookupBackend
 from awx.main.models import (
-    UnifiedJob, UnifiedJobTemplate, User, Role
+    UnifiedJob, UnifiedJobTemplate, User, Role, Credential
 )
 from awx.main.access import access_registry
 from awx.main.utils import (
@@ -46,7 +46,7 @@ from awx.main.utils import (
 )
 from awx.main.utils.db import get_all_field_names
 from awx.api.serializers import ResourceAccessListElementSerializer, CopySerializer, UserSerializer
-from awx.api.versioning import URLPathVersioning, get_request_version
+from awx.api.versioning import URLPathVersioning
 from awx.api.metadata import SublistAttachDetatchMetadata, Metadata
 
 __all__ = ['APIView', 'GenericAPIView', 'ListAPIView', 'SimpleListAPIView',
@@ -287,12 +287,6 @@ class APIView(views.APIView):
             template_basename = camelcase_to_underscore(klass.__name__)
             template_list.append('api/%s.md' % template_basename)
         context = self.get_description_context()
-
-        # "v2" -> 2
-        default_version = int(settings.REST_FRAMEWORK['DEFAULT_VERSION'].lstrip('v'))
-        request_version = get_request_version(self.request)
-        if request_version is not None and request_version < default_version:
-            context['deprecated'] = True
 
         description = render_to_string(template_list, context)
         if context.get('deprecated') and context.get('swagger_method') is None:
@@ -842,10 +836,6 @@ class CopyAPIView(GenericAPIView):
     new_in_330 = True
     new_in_api_v2 = True
 
-    def v1_not_allowed(self):
-        return Response({'detail': 'Action only possible starting with v2 API.'},
-                        status=status.HTTP_404_NOT_FOUND)
-
     def _get_copy_return_serializer(self, *args, **kwargs):
         if not self.copy_return_serializer_class:
             return self.get_serializer(*args, **kwargs)
@@ -859,15 +849,15 @@ class CopyAPIView(GenericAPIView):
     def _decrypt_model_field_if_needed(obj, field_name, field_val):
         if field_name in getattr(type(obj), 'REENCRYPTION_BLACKLIST_AT_COPY', []):
             return field_val
-        if isinstance(field_val, dict):
+        if isinstance(obj, Credential) and field_name == 'inputs':
+            for secret in obj.credential_type.secret_fields:
+                if secret in field_val:
+                    field_val[secret] = decrypt_field(obj, secret)
+        elif isinstance(field_val, dict):
             for sub_field in field_val:
                 if isinstance(sub_field, str) \
                         and isinstance(field_val[sub_field], str):
-                    try:
-                        field_val[sub_field] = decrypt_field(obj, field_name, sub_field)
-                    except AttributeError:
-                        # Catching the corner case with v1 credential fields
-                        field_val[sub_field] = decrypt_field(obj, sub_field)
+                    field_val[sub_field] = decrypt_field(obj, field_name, sub_field)
         elif isinstance(field_val, str):
             try:
                 field_val = decrypt_field(obj, field_name)
@@ -952,8 +942,6 @@ class CopyAPIView(GenericAPIView):
         return ret
 
     def get(self, request, *args, **kwargs):
-        if get_request_version(request) < 2:
-            return self.v1_not_allowed()
         obj = self.get_object()
         if not request.user.can_access(obj.__class__, 'read', obj):
             raise PermissionDenied()
@@ -968,8 +956,6 @@ class CopyAPIView(GenericAPIView):
         return Response({'can_copy': can_copy})
 
     def post(self, request, *args, **kwargs):
-        if get_request_version(request) < 2:
-            return self.v1_not_allowed()
         obj = self.get_object()
         create_kwargs = self._build_create_dict(obj)
         create_kwargs_check = {}

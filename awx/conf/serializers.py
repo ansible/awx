@@ -88,7 +88,7 @@ class SettingSingletonSerializer(serializers.Serializer):
                 continue
             extra_kwargs = {}
             # Make LICENSE and AWX_ISOLATED_KEY_GENERATION read-only here;
-            # LICENSE is only updated via /api/v1/config/
+            # LICENSE is only updated via /api/v2/config/
             # AWX_ISOLATED_KEY_GENERATION is only set/unset via the setup playbook
             if key in ('LICENSE', 'AWX_ISOLATED_KEY_GENERATION'):
                 extra_kwargs['read_only'] = True

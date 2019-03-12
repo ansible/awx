@@ -22,5 +22,5 @@ def version(request):
             context.get('view'),
             'deprecated',
             False
-        ) or request.path.startswith('/api/v1/')
+        )
     }

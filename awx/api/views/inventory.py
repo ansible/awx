@@ -44,7 +44,6 @@ from awx.api.serializers import (
     InstanceGroupSerializer,
     InventoryUpdateEventSerializer,
     CustomInventoryScriptSerializer,
-    InventoryDetailSerializer,
     JobTemplateSerializer,
 )
 from awx.api.views.mixin import (
@@ -119,7 +118,7 @@ class InventoryList(ListCreateAPIView):
 class InventoryDetail(RelatedJobsPreventDeleteMixin, ControlledByScmMixin, RetrieveUpdateDestroyAPIView):
 
     model = Inventory
-    serializer_class = InventoryDetailSerializer
+    serializer_class = InventorySerializer
 
     def update(self, request, *args, **kwargs):
         obj = self.get_object()
