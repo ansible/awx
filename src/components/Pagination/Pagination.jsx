@@ -89,9 +89,8 @@ class Pagination extends Component {
 
   onSelectPageSize ({ target }) {
     const { onSetPage } = this.props;
-
     const page = 1;
-    const page_size = parseInt(target.innerText, 10);
+    const page_size = parseInt(target.innerText || target.textContent, 10);
 
     this.setState({ isOpen: false });
 
