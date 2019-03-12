@@ -1469,7 +1469,13 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                 `aw-tip-placement="${collection.dataPlacement}" ` +
                                 `data-tip-watch="${collection.dataTipWatch}" `;
                             }
-                            let relatedTabSelected = this.form.activeEditState ? `$state.includes('${this.form.activeEditState}.${itm}') || $state.includes('${this.form.stateTree}.edit.${itm}')` : `$state.includes('${this.form.stateTree}.edit.${itm}')`;
+                            let relatedTabSelected;
+                            if (this.form.related[itm].tabSelected) {
+                                relatedTabSelected = this.form.related[itm].tabSelected;
+                            } else {
+                                relatedTabSelected = this.form.activeEditState ? `$state.includes('${this.form.activeEditState}.${itm}') || $state.includes('${this.form.stateTree}.edit.${itm}')` : `$state.includes('${this.form.stateTree}.edit.${itm}')`;
+                            }
+                             
                             html += `ng-class="{'is-selected' : ${relatedTabSelected}` ;
                             if(this.form.related[itm].disabled){
                                 html += `, 'Form-tab--disabled' : ${this.form.related[itm].disabled }`;

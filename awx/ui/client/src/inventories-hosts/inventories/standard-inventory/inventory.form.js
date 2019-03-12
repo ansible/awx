@@ -149,6 +149,7 @@ function(i18n) {
                 include: "GroupList",
                 title: i18n._('Groups'),
                 iterator: 'group',
+                tabSelected: `$state.includes('inventories.edit.groups') || $state.includes('inventories.edit.rootGroups')`,
                 skipGenerator: true
             },
             hosts: {

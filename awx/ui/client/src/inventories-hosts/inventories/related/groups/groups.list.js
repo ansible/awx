@@ -52,6 +52,22 @@
                 actionClass: 'btn List-buttonDefault',
                 buttonContent: i18n._('REFRESH')
             },
+            groupsToggle: {
+                mode: 'all',
+                type: 'toggle',
+                buttons: [
+                    {
+                        text: i18n._('ALL GROUPS'),
+                        ngClick: "$state.go('inventories.edit.groups')",
+                        ngClass: "{'btn-primary': $state.includes('inventories.edit.groups'), 'Button-primary--hollow': $state.includes('inventories.edit.rootGroups')}"
+                    },
+                    {
+                        text: i18n._('ROOT GROUPS'),
+                        ngClick: "$state.go('inventories.edit.rootGroups')",
+                        ngClass: "{'btn-primary': $state.includes('inventories.edit.rootGroups'), 'Button-primary--hollow': $state.includes('inventories.edit.groups')}"
+                    }
+                ]
+            },
             launch: {
                 mode: 'all',
                 ngDisabled: '!groupsSelected',

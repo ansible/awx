@@ -6,7 +6,7 @@ export default {
         skip:true
     },
     views: {
-        'modal@inventories.edit.groups.edit': {
+        'modal@^.^': {
             templateProvider: function() {
                 return `<associate-groups save-function="associateGroups(selectedItems)"></associate-groups>`;
             },
