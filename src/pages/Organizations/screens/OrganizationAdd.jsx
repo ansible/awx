@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import { I18n, i18nMark } from '@lingui/react';
@@ -11,7 +11,9 @@ import {
   Gallery,
   Card,
   CardBody,
+  Tooltip,
 } from '@patternfly/react-core';
+import { QuestionCircleIcon } from '@patternfly/react-icons';
 
 import { ConfigContext } from '../../../context';
 import Lookup from '../../../components/Lookup';
@@ -135,7 +137,21 @@ class OrganizationAdd extends React.Component {
                         onChange={this.onFieldChange}
                       />
                     </FormGroup>
-                    <FormGroup label={i18n._(t`Instance Groups`)} helperText={i18n._(t`Select the Instance Groups for this Organization to run on.`)} fieldId="add-org-form-instance-groups">
+                    <FormGroup
+                      label={(
+                        <Fragment>
+                          {i18n._(t`Instance Groups`)}
+                          {' '}
+                          <Tooltip
+                            position="right"
+                            content={i18n._(t`Select the Instance Groups for this Organization to run on.`)}
+                          >
+                            <QuestionCircleIcon />
+                          </Tooltip>
+                        </Fragment>
+                      )}
+                      fieldId="add-org-form-instance-groups"
+                    >
                       <Lookup
                         lookupHeader={i18n._(t`Instance Groups`)}
                         name="instanceGroups"
@@ -149,7 +165,21 @@ class OrganizationAdd extends React.Component {
                     <ConfigContext.Consumer>
                       {({ custom_virtualenvs }) => (
                         custom_virtualenvs && custom_virtualenvs.length > 1 && (
-                          <FormGroup label={i18n._(t`Ansible Environment`)} helperText={i18n._(t`Select the custom Python virtual environment for this organization to run on.`)} fieldId="add-org-custom-virtualenv">
+                          <FormGroup
+                            label={(
+                              <Fragment>
+                                {i18n._(t`Ansible Environment`)}
+                                {' '}
+                                <Tooltip
+                                  position="right"
+                                  content={i18n._(t`Select the custom Python virtual environment for this organization to run on.`)}
+                                >
+                                  <QuestionCircleIcon />
+                                </Tooltip>
+                              </Fragment>
+                            )}
+                            fieldId="add-org-custom-virtualenv"
+                          >
                             <AnsibleSelect
                               label={i18n._(t`Ansible Environment`)}
                               name="custom_virtualenv"
