@@ -13,6 +13,17 @@ from rest_framework.views import APIView
 from rest_framework_swagger import renderers
 
 
+class SuperUserSchemaGenerator(SchemaGenerator):
+
+    def has_view_permissions(self, path, method, view):
+        #
+        # Generate the Swagger schema as if you were a superuser and
+        # permissions didn't matter; this short-circuits the schema path
+        # discovery to include _all_ potential paths in the API.
+        #
+        return True
+
+
 class AutoSchema(DRFAuthSchema):
 
     def get_link(self, path, method, base_url):
@@ -59,7 +70,7 @@ class SwaggerSchemaView(APIView):
     ]
 
     def get(self, request):
-        generator = SchemaGenerator(
+        generator = SuperUserSchemaGenerator(
             title='Ansible Tower API',
             patterns=None,
             urlconf=None
