@@ -34,6 +34,7 @@ class NotificationListItem extends React.Component {
                 to={{
                   pathname: detailUrl
                 }}
+                style={{ marginRight: '1.5em' }}
               >
                 <b>{name}</b>
               </Link>
@@ -82,4 +83,3 @@ NotificationListItem.defaultProps = {
 };
 
 export default NotificationListItem;
-
