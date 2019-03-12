@@ -307,8 +307,8 @@ register(
     default=False,
     label=_('Insights Analytics Data'),
     help_text=_('Enables Tower to gather analytics data about itself and send it to Insights.'),
-    category=_('Jobs'),
-    category_slug='jobs',
+    category=_('System'),
+    category_slug='system',
 )
 
 register(

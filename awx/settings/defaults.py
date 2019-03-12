@@ -672,11 +672,10 @@ AWX_AUTO_DEPROVISION_INSTANCES = False
 # Note: This setting may be overridden by database settings.
 PENDO_TRACKING_STATE = "off"
 
-# Enables Insights data collection for Ansible Tower.  Defaults to the value of PENDO_TRACKING_STATE
-if PENDO_TRACKING_STATE == "off":
-    INSIGHTS_DATA_ENABLED = False
-else:
-    INSIGHTS_DATA_ENABLED = True
+# Enables Insights data collection for Ansible Tower.
+# Note: This setting may be overridden by database settings.
+INSIGHTS_DATA_ENABLED = False
+
 
 # Default list of modules allowed for ad hoc commands.
 # Note: This setting may be overridden by database settings.

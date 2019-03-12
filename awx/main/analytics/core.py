@@ -1,4 +1,3 @@
-import codecs
 import inspect
 import json
 import logging
@@ -31,7 +30,7 @@ def _valid_license():
         logger.exception("A valid license was not found:")
         return False
     return True
-    
+
 
 def register(key):
     """
@@ -59,8 +58,6 @@ def gather(dest=None, module=None):
     :pararm module: the module to search for registered analytic collector
                     functions; defaults to awx.main.analytics.collectors
     """
-    import time                 # TODO: Remove this
-    start_time = time.time()    # TODO: Remove this
     
     run_now = now()
     state = TowerAnalyticsState.get_solo()
@@ -73,8 +70,8 @@ def gather(dest=None, module=None):
     if last_run < max_interval or not last_run:
         last_run = max_interval
 
-    if settings.INSIGHTS_DATA_ENABLED:
-        logger.exception("Insights not enabled.  Analytics data not gathered.")
+    if not settings.INSIGHTS_DATA_ENABLED:
+        logger.exception("Insights analytics not enabled")
         return
 
     if _valid_license() is False:
@@ -90,14 +87,18 @@ def gather(dest=None, module=None):
         if inspect.isfunction(func) and hasattr(func, '__awx_analytics_key__'):
             key = func.__awx_analytics_key__
             path = '{}.json'.format(os.path.join(dest, key))
-            with codecs.open(path, 'w', encoding='utf-8') as f:
+            with open(path, 'w', encoding='utf-8') as f:
                 try:
                     json.dump(func(last_run), f)
                 except Exception:
                     logger.exception("Could not generate metric {}.json".format(key))
                     f.close()
                     os.remove(f.name)
-
+    try:
+        collectors.copy_tables(since=last_run, full_path=dest)
+    except Exception:
+        logger.exception("Could not copy tables")
+        
     # can't use isoformat() since it has colons, which GNU tar doesn't like
     tarname = '_'.join([
         settings.SYSTEM_UUID,
@@ -109,7 +110,6 @@ def gather(dest=None, module=None):
         dest
     )
     shutil.rmtree(dest)
-    print("Analytics Time --- %s seconds ---" % (time.time() - start_time))  # TODO: Remove this
     return tgz
 
 
