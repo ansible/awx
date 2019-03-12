@@ -134,8 +134,8 @@ virtualenv_ansible_py3:
 		if [ ! -d "$(VENV_BASE)" ]; then \
 			mkdir $(VENV_BASE); \
 		fi; \
-		if [ ! -d "$(VENV_BASE)/ansible3" ]; then \
-			python3 -m venv --system-site-packages $(VENV_BASE)/ansible3; \
+		if [ ! -d "$(VENV_BASE)/ansible" ]; then \
+			$(PYTHON) -m venv --system-site-packages $(VENV_BASE)/ansible; \
 		fi; \
 	fi
 
@@ -145,7 +145,7 @@ virtualenv_awx:
 			mkdir $(VENV_BASE); \
 		fi; \
 		if [ ! -d "$(VENV_BASE)/awx" ]; then \
-			$(PYTHON) -m venv $(VENV_BASE)/awx; \
+			$(PYTHON) -m venv --system-site-packages $(VENV_BASE)/awx; \
 		fi; \
 	fi
 
@@ -158,9 +158,9 @@ requirements_ansible: virtualenv_ansible
 	$(VENV_BASE)/ansible/bin/pip uninstall --yes -r requirements/requirements_ansible_uninstall.txt
 
 requirements_ansible_py3: virtualenv_ansible_py3
-	cat requirements/requirements_ansible.txt requirements/requirements_ansible_git.txt | $(VENV_BASE)/ansible3/bin/pip3 install $(PIP_OPTIONS) --no-binary $(SRC_ONLY_PKGS) --ignore-installed -r /dev/stdin
-	$(VENV_BASE)/ansible3/bin/pip3 install ansible  # can't inherit from system ansible, it's py2
-	$(VENV_BASE)/ansible3/bin/pip3 uninstall --yes -r requirements/requirements_ansible_uninstall.txt
+	cat requirements/requirements_ansible.txt requirements/requirements_ansible_git.txt | $(VENV_BASE)/ansible/bin/pip3 install $(PIP_OPTIONS) --no-binary $(SRC_ONLY_PKGS) --ignore-installed -r /dev/stdin
+	$(VENV_BASE)/ansible/bin/pip3 install ansible  # can't inherit from system ansible, it's py2
+	$(VENV_BASE)/ansible/bin/pip3 uninstall --yes -r requirements/requirements_ansible_uninstall.txt
 
 requirements_ansible_dev:
 	if [ "$(VENV_BASE)" ]; then \
@@ -189,7 +189,7 @@ requirements_awx_dev:
 
 requirements: requirements_ansible requirements_awx
 
-requirements_dev: requirements requirements_ansible_py3 requirements_awx_dev requirements_ansible_dev
+requirements_dev: requirements requirements_awx_dev requirements_ansible_dev
 
 requirements_test: requirements
 

@@ -173,14 +173,12 @@ def test_extract_ansible_vars():
 
 def test_get_custom_venv_choices():
     bundled_venv = os.path.join(settings.BASE_VENV_PATH, 'ansible', '')
-    bundled_venv_py3 = os.path.join(settings.BASE_VENV_PATH, 'ansible3', '')
-    assert sorted(common.get_custom_venv_choices()) == [bundled_venv, bundled_venv_py3]
+    assert sorted(common.get_custom_venv_choices()) == [bundled_venv]
 
     with TemporaryDirectory(dir=settings.BASE_VENV_PATH, prefix='tmp') as temp_dir:
         os.makedirs(os.path.join(temp_dir, 'bin', 'activate'))
         assert sorted(common.get_custom_venv_choices()) == [
             bundled_venv,
-            bundled_venv_py3,
             os.path.join(temp_dir, '')
         ]
 
