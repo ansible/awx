@@ -206,34 +206,73 @@ describe('<Pagination />', () => {
     expect(itemCount.text()).toEqual('Items 1 – 3 of 3');
   });
 
-  // test('submit a new page by typing in input works', () => {
-  //   const textInputSelector = '.awx-pagination__page-input.pf-c-form-control';
-  //   const submitFormSelector = '.awx-pagination__page-input-form';
-  //   const onSetPage = jest.fn();
+  test('submitting a new page by typing in input works', () => {
+    const textInputSelector = '.awx-pagination__page-input.pf-c-form-control';
+    const submitFormSelector = '.awx-pagination__page-input-form';
+    const onSetPage = jest.fn();
 
-  //   pagination = mount(
-  //     <I18nProvider>
-  //       <Pagination
-  //         count={21}
-  //         page={1}
-  //         pageCount={5}
-  //         page_size={5}
-  //         pageSizeOptions={[5, 10, 25, 50]}
-  //         onSetPage={onSetPage}
-  //       />
-  //     </I18nProvider>
-  //   );
-  //   pagination.instance().onPageChange = jest.fn();
+    pagination = mount(
+      <I18nProvider>
+        <Pagination
+          count={21}
+          page={1}
+          pageCount={5}
+          page_size={5}
+          pageSizeOptions={[5, 10, 25, 50]}
+          onSetPage={onSetPage}
+        />
+      </I18nProvider>
+    );
+    const paginationElem = pagination.find('Pagination');
+    expect(paginationElem.state().value).toBe(1);
+    const textInput = pagination.find(textInputSelector);
+    expect(textInput.length).toBe(1);
+    expect(textInput.at(0).prop('value')).toBe(1);
+    const input = pagination.find('TextInput');
+    expect(input.prop('value')).toBe(1);
+    input.prop('onChange')(2);
+    pagination.update();
+    const submitForm = pagination.find(submitFormSelector);
+    expect(submitForm.length).toBe(1);
+    submitForm.simulate('submit');
+    expect(pagination.find('TextInput').prop('value')).toBe(2);
+    // assert onPageChange was called
+    expect(paginationElem.state().value).toBe(2);
+  });
 
-  //   const textInput = pagination.find(textInputSelector);
-  //   expect(textInput.length).toBe(1);
-  //   textInput.simulate('change', { target: { value: '2' } });
+  test('submitting a new page by typing in input does not work when invalid', () => {
+    const textInputSelector = '.awx-pagination__page-input.pf-c-form-control';
+    const submitFormSelector = '.awx-pagination__page-input-form';
+    const onSetPage = jest.fn();
 
-  //   const submitForm = pagination.find(submitFormSelector);
-  //   expect(submitForm.length).toBe(1);
-  //   submitForm.simulate('submit');
-  //   expect(pagination.instance().onPageChange).toBeCalledWith(2)
-  // });
+    pagination = mount(
+      <I18nProvider>
+        <Pagination
+          count={21}
+          page={1}
+          pageCount={5}
+          page_size={5}
+          pageSizeOptions={[5, 10, 25, 50]}
+          onSetPage={onSetPage}
+        />
+      </I18nProvider>
+    );
+    const paginationElem = pagination.find('Pagination');
+    expect(paginationElem.state().value).toBe(1);
+    const textInput = pagination.find(textInputSelector);
+    expect(textInput.length).toBe(1);
+    expect(textInput.at(0).prop('value')).toBe(1);
+    const input = pagination.find('TextInput');
+    expect(input.prop('value')).toBe(1);
+    input.prop('onChange')('!invalid');
+    pagination.update();
+    const submitForm = pagination.find(submitFormSelector);
+    expect(submitForm.length).toBe(1);
+    submitForm.simulate('submit');
+    expect(pagination.find('TextInput').prop('value')).toBe(1);
+    // assert onPageChange was not called
+    expect(paginationElem.state().value).toBe(1);
+  });
 
   test('text input page change is not displayed when only 1 page', () => {
     const onSetPage = jest.fn();
@@ -269,25 +308,36 @@ describe('<Pagination />', () => {
     expect(pageInput.length).toBe(1);
   });
 
-  // test('make sure componentDidUpdate calls onPageChange', () => {
-  //   const onSetPage = jest.fn();
+  test('make sure componentDidUpdate calls onPageChange', () => {
+    const onSetPage = jest.fn();
 
-  //   pagination = mount(
-  //     <I18nProvider>
-  //       <Pagination
-  //         count={7}
-  //         page={1}
-  //         pageCount={2}
-  //         page_size={5}
-  //         pageSizeOptions={[5, 10, 25, 50]}
-  //         onSetPage={onSetPage}
-  //       />
-  //     </I18nProvider>
-  //   );
-  //   pagination.instance().onPageChange = jest.fn();
-  //   pagination.setProps({ page: 2 });
-  //   pagination.update();
-  //   expect(pagination.instance().onPageChange).toHaveBeenCalledTimes(1);
-  //   expect(pagination.instance().onPageChange).toBeCalledWith(2);
-  // });
+    pagination = mount(
+      <I18nProvider>
+        <Pagination
+          count={7}
+          page={1}
+          pageCount={2}
+          page_size={5}
+          pageSizeOptions={[5, 10, 25, 50]}
+          onSetPage={onSetPage}
+        />
+      </I18nProvider>
+    );
+    const paginationElem = pagination.find('Pagination');
+    expect(paginationElem.state().value).toBe(1);
+    pagination.setProps({
+      children: (
+        <Pagination
+          count={7}
+          page={2}
+          pageCount={2}
+          page_size={5}
+          pageSizeOptions={[5, 10, 25, 50]}
+          onSetPage={onSetPage}
+        />
+      )
+    });
+    paginationElem.update();
+    expect(paginationElem.state().value).toBe(2);
+  });
 });
