@@ -207,6 +207,17 @@
 }
 
 //
+// pf tooltip overrides
+//
+
+.pf-c-tooltip__content {
+  --pf-c-tooltip__content--PaddingTop: 0.71rem;
+  --pf-c-tooltip__content--PaddingRight: 0.71rem;
+  --pf-c-tooltip__content--PaddingBottom: 0.71rem;
+  --pf-c-tooltip__content--PaddingLeft: 0.71rem;
+}
+
+//
 // pf empty state overrides
 //
 
@@ -237,4 +248,8 @@
   --pf-c-card__footer--PaddingY: 0;
   --pf-c-card__body--PaddingX: 0;
   --pf-c-card__body--PaddingY: 0;
+}
+
+.at-u-textRight {
+  text-align: right;
 }

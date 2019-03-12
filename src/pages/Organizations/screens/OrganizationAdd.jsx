@@ -10,10 +10,12 @@ import {
   TextInput,
   Gallery,
   Card,
+  CardHeader,
   CardBody,
+  Button,
   Tooltip,
 } from '@patternfly/react-core';
-import { QuestionCircleIcon } from '@patternfly/react-icons';
+import { QuestionCircleIcon, TimesIcon } from '@patternfly/react-icons';
 
 import { ConfigContext } from '../../../context';
 import Lookup from '../../../components/Lookup';
@@ -110,11 +112,25 @@ class OrganizationAdd extends React.Component {
 
     return (
       <PageSection>
-        <Card>
-          <CardBody>
-            <Form autoComplete="off">
-              <I18n>
-                {({ i18n }) => (
+        <I18n>
+          {({ i18n }) => (
+            <Card>
+              <CardHeader className="at-u-textRight">
+                <Tooltip
+                  content={i18n._(t`Close`)}
+                  position="top"
+                >
+                  <Button
+                    variant="plain"
+                    aria-label={i18n._(t`Close`)}
+                    onClick={this.onCancel}
+                  >
+                    <TimesIcon />
+                  </Button>
+                </Tooltip>
+              </CardHeader>
+              <CardBody>
+                <Form autoComplete="off">
                   <Gallery gutter="md">
                     <FormGroup
                       label={i18n._(t`Name`)}
@@ -193,17 +209,17 @@ class OrganizationAdd extends React.Component {
                       )}
                     </ConfigContext.Consumer>
                   </Gallery>
-                )}
-              </I18n>
-              <FormActionGroup
-                onSubmit={this.onSubmit}
-                submitDisabled={!enabled}
-                onCancel={this.onCancel}
-              />
-              {error ? <div>error</div> : ''}
-            </Form>
-          </CardBody>
-        </Card>
+                  <FormActionGroup
+                    onSubmit={this.onSubmit}
+                    submitDisabled={!enabled}
+                    onCancel={this.onCancel}
+                  />
+                  {error ? <div>error</div> : ''}
+                </Form>
+              </CardBody>
+            </Card>
+          )}
+        </I18n>
       </PageSection>
     );
   }
