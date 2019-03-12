@@ -175,6 +175,9 @@ class SettingsRegistry(object):
         # `PENDO_TRACKING_STATE` is disabled for the open source awx license
         if setting == 'PENDO_TRACKING_STATE' and get_license().get('license_type') == 'open':
             field_instance.read_only = True
+        
+        if setting == 'INSIGHTS_DATA_ENABLED' and get_license().get('license_type') == 'open':
+            field_instance.read_only = True
 
         return field_instance
 
