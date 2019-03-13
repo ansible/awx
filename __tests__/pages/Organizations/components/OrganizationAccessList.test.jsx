@@ -3,7 +3,7 @@ import { mount } from 'enzyme';
 import { MemoryRouter } from 'react-router-dom';
 import { I18nProvider } from '@lingui/react';
 
-import AccessList from '../../src/components/AccessList';
+import OrganizationAccessList from '../../../../src/pages/Organizations/components/OrganizationAccessList';
 
 const mockData = [
   {
@@ -25,12 +25,12 @@ const mockData = [
   }
 ];
 
-describe('<AccessList />', () => {
+describe('<OrganizationAccessList />', () => {
   test('initially renders succesfully', () => {
     mount(
       <I18nProvider>
         <MemoryRouter>
-          <AccessList
+          <OrganizationAccessList
             match={{ path: '/organizations/:id', url: '/organizations/1', params: { id: '1' } }}
             location={{ search: '', pathname: '/organizations/1/access' }}
             getAccessList={() => {}}
@@ -45,7 +45,7 @@ describe('<AccessList />', () => {
     const wrapper = mount(
       <I18nProvider>
         <MemoryRouter>
-          <AccessList
+          <OrganizationAccessList
             match={{ path: '/organizations/:id', url: '/organizations/1', params: { id: '0' } }}
             location={{ search: '', pathname: '/organizations/1/access' }}
             getAccessList={() => ({ data: { count: 1, results: mockData } })}
@@ -53,7 +53,7 @@ describe('<AccessList />', () => {
           />
         </MemoryRouter>
       </I18nProvider>
-    ).find('AccessList');
+    ).find('OrganizationAccessList');
 
     setImmediate(() => {
       expect(wrapper.state().results).toEqual(mockData);
@@ -62,12 +62,12 @@ describe('<AccessList />', () => {
   });
 
   test('onExpand and onCompact methods called when user clicks on Expand and Compact icons respectively', async (done) => {
-    const onExpand = jest.spyOn(AccessList.prototype, 'onExpand');
-    const onCompact = jest.spyOn(AccessList.prototype, 'onCompact');
+    const onExpand = jest.spyOn(OrganizationAccessList.prototype, 'onExpand');
+    const onCompact = jest.spyOn(OrganizationAccessList.prototype, 'onCompact');
     const wrapper = mount(
       <I18nProvider>
         <MemoryRouter>
-          <AccessList
+          <OrganizationAccessList
             match={{ path: '/organizations/:id', url: '/organizations/1', params: { id: '0' } }}
             location={{ search: '', pathname: '/organizations/1/access' }}
             getAccessList={() => ({ data: { count: 1, results: mockData } })}
@@ -75,7 +75,7 @@ describe('<AccessList />', () => {
           />
         </MemoryRouter>
       </I18nProvider>
-    ).find('AccessList');
+    ).find('OrganizationAccessList');
     expect(onExpand).not.toHaveBeenCalled();
     expect(onCompact).not.toHaveBeenCalled();
 
@@ -90,11 +90,11 @@ describe('<AccessList />', () => {
   });
 
   test('onSort being passed properly to DataListToolbar component', async (done) => {
-    const onSort = jest.spyOn(AccessList.prototype, 'onSort');
+    const onSort = jest.spyOn(OrganizationAccessList.prototype, 'onSort');
     const wrapper = mount(
       <I18nProvider>
         <MemoryRouter>
-          <AccessList
+          <OrganizationAccessList
             match={{ path: '/organizations/:id', url: '/organizations/1', params: { id: '0' } }}
             location={{ search: '', pathname: '/organizations/1/access' }}
             getAccessList={() => ({ data: { count: 1, results: mockData } })}
@@ -102,7 +102,7 @@ describe('<AccessList />', () => {
           />
         </MemoryRouter>
       </I18nProvider>
-    ).find('AccessList');
+    ).find('OrganizationAccessList');
     expect(onSort).not.toHaveBeenCalled();
 
     setImmediate(() => {
@@ -117,7 +117,7 @@ describe('<AccessList />', () => {
     const wrapper = mount(
       <I18nProvider>
         <MemoryRouter>
-          <AccessList
+          <OrganizationAccessList
             match={{ path: '/organizations/:id', url: '/organizations/1', params: { id: '0' } }}
             location={{ search: '', pathname: '/organizations/1/access' }}
             getAccessList={() => ({ data: { count: 1, results: mockData } })}
@@ -125,7 +125,7 @@ describe('<AccessList />', () => {
           />
         </MemoryRouter>
       </I18nProvider>
-    ).find('AccessList');
+    ).find('OrganizationAccessList');
 
     setImmediate(() => {
       const { results } = wrapper.state();
@@ -137,13 +137,13 @@ describe('<AccessList />', () => {
   });
 
   test('test handleWarning, confirmDelete, and removeRole methods for Alert component', (done) => {
-    const handleWarning = jest.spyOn(AccessList.prototype, 'handleWarning');
-    const confirmDelete = jest.spyOn(AccessList.prototype, 'confirmDelete');
-    const removeRole = jest.spyOn(AccessList.prototype, 'removeAccessRole');
+    const handleWarning = jest.spyOn(OrganizationAccessList.prototype, 'handleWarning');
+    const confirmDelete = jest.spyOn(OrganizationAccessList.prototype, 'confirmDelete');
+    const removeRole = jest.spyOn(OrganizationAccessList.prototype, 'removeAccessRole');
     const wrapper = mount(
       <I18nProvider>
         <MemoryRouter>
-          <AccessList
+          <OrganizationAccessList
             match={{ path: '/organizations/:id', url: '/organizations/1', params: { id: '0' } }}
             location={{ search: '', pathname: '/organizations/1/access' }}
             getAccessList={() => ({ data: { count: 1, results: mockData } })}
@@ -151,7 +151,7 @@ describe('<AccessList />', () => {
           />
         </MemoryRouter>
       </I18nProvider>
-    ).find('AccessList');
+    ).find('OrganizationAccessList');
     expect(handleWarning).not.toHaveBeenCalled();
     expect(confirmDelete).not.toHaveBeenCalled();
     expect(removeRole).not.toHaveBeenCalled();
@@ -172,7 +172,7 @@ describe('<AccessList />', () => {
     const wrapper = mount(
       <I18nProvider>
         <MemoryRouter>
-          <AccessList
+          <OrganizationAccessList
             match={{ path: '/organizations/:id', url: '/organizations/1', params: { id: '0' } }}
             location={{ search: '', pathname: '/organizations/1/access' }}
             getAccessList={() => ({ data: { count: 1, results: mockData } })}
@@ -180,7 +180,7 @@ describe('<AccessList />', () => {
           />
         </MemoryRouter>
       </I18nProvider>
-    ).find('AccessList');
+    ).find('OrganizationAccessList');
 
     setImmediate(() => {
       const expected = [
