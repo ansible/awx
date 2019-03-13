@@ -13,12 +13,12 @@ import {
   Link
 } from 'react-router-dom';
 
-import Pagination from '../Pagination';
-import DataListToolbar from '../DataListToolbar';
+import Pagination from '../../../components/Pagination';
+import DataListToolbar from '../../../components/DataListToolbar';
 
 import {
   parseQueryString,
-} from '../../qs';
+} from '../../../qs';
 
 const userRolesWrapperStyle = {
   display: 'flex',
@@ -82,7 +82,7 @@ const UserName = ({ value, url }) => {
   return username;
 };
 
-class AccessList extends React.Component {
+class OrganizationAccessList extends React.Component {
   columns = [
     { name: i18nMark('Name'), key: 'first_name', isSortable: true },
     { name: i18nMark('Username'), key: 'username', isSortable: true },
@@ -426,9 +426,9 @@ class AccessList extends React.Component {
   }
 }
 
-AccessList.propTypes = {
+OrganizationAccessList.propTypes = {
   getAccessList: PropTypes.func.isRequired,
   removeRole: PropTypes.func.isRequired,
 };
 
-export default AccessList;
+export default OrganizationAccessList;

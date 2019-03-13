@@ -1,5 +1,5 @@
 import React from 'react';
-import AccessList from '../../../../components/AccessList';
+import OrganizationAccessList from '../../components/OrganizationAccessList';
 
 class OrganizationAccess extends React.Component {
   constructor (props) {
@@ -27,7 +27,7 @@ class OrganizationAccess extends React.Component {
     } = this.props;
 
     return (
-      <AccessList
+      <OrganizationAccessList
         getAccessList={this.getOrgAccessList}
         removeRole={this.removeRole}
         match={match}
