@@ -116,7 +116,7 @@ class AccessList extends React.Component {
     this.onCompact = this.onCompact.bind(this);
     this.onSort = this.onSort.bind(this);
     this.getQueryParams = this.getQueryParams.bind(this);
-    this.removeRole = this.removeRole.bind(this);
+    this.removeAccessRole = this.removeAccessRole.bind(this);
     this.handleWarning = this.handleWarning.bind(this);
     this.hideWarning = this.hideWarning.bind(this);
     this.confirmDelete = this.confirmDelete.bind(this);
@@ -225,8 +225,8 @@ class AccessList extends React.Component {
           }
         });
 
-        result.teamRoles = teamRoles || [];
-        result.userRoles = userRoles || [];
+        result.teamRoles = teamRoles;
+        result.userRoles = userRoles;
       });
       this.setState(stateToUpdate);
     } catch (error) {
@@ -234,10 +234,14 @@ class AccessList extends React.Component {
     }
   }
 
-  async removeRole (roleId, resourceId, type) {
+  async removeAccessRole (roleId, resourceId, type) {
     const { removeRole } = this.props;
     const url = `/api/v2/${type}/${resourceId}/roles/`;
-    await removeRole(url, roleId);
+    try {
+      await removeRole(url, roleId);
+    } catch (error) {
+      this.setState({ error });
+    }
     const queryParams = this.getQueryParams();
     try {
       this.fetchOrgAccessList(queryParams);
@@ -280,7 +284,7 @@ class AccessList extends React.Component {
 
   confirmDelete () {
     const { deleteType, deleteResourceId, deleteRoleId } = this.state;
-    this.removeRole(deleteRoleId, deleteResourceId, deleteType);
+    this.removeAccessRole(deleteRoleId, deleteResourceId, deleteType);
   }
 
   render () {

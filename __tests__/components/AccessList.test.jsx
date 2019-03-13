@@ -114,7 +114,6 @@ describe('<AccessList />', () => {
   });
 
   test('getTeamRoles returns empty array if dataset is missing team_id attribute', (done) => {
-    
     const wrapper = mount(
       <I18nProvider>
         <MemoryRouter>
@@ -140,7 +139,7 @@ describe('<AccessList />', () => {
   test('test handleWarning, confirmDelete, and removeRole methods for Alert component', (done) => {
     const handleWarning = jest.spyOn(AccessList.prototype, 'handleWarning');
     const confirmDelete = jest.spyOn(AccessList.prototype, 'confirmDelete');
-    const removeRole = jest.spyOn(AccessList.prototype, 'removeRole');
+    const removeRole = jest.spyOn(AccessList.prototype, 'removeAccessRole');
     const wrapper = mount(
       <I18nProvider>
         <MemoryRouter>
@@ -182,19 +181,13 @@ describe('<AccessList />', () => {
         </MemoryRouter>
       </I18nProvider>
     ).find('AccessList');
-    
-    expect(wrapper.state().warningMsg).not.toBeDefined;
-    expect(wrapper.state().warningTitle).not.toBeDefined;
-    expect(wrapper.state().deleteType).not.toBeDefined;
-    expect(wrapper.state().deleteRoleId).not.toBeDefined;
-    expect(wrapper.state().deleteResourceId).not.toBeDefined;
 
     setImmediate(() => {
       const expected = [
         {
           deleteType: 'users'
         },
-        { 
+        {
           deleteRoleId: mockData[0].summary_fields.foo[0].role.id
         },
         {
@@ -208,10 +201,10 @@ describe('<AccessList />', () => {
       expect(wrapper.state().warningTitle).not.toBe(null);
       expect(wrapper.state().warningMsg).not.toBe(null);
       expected.forEach(criteria => {
-        for (const prop in criteria) {
-          expect(wrapper.state()[prop]).toEqual(criteria[prop]);
-        }
-      })
+        Object.keys(criteria).forEach(key => {
+          expect(wrapper.state()[key]).toEqual(criteria[key]);
+        });
+      });
       done();
     });
   });
