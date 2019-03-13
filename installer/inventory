@@ -27,7 +27,7 @@ dockerhub_base=ansible
 # pg_mem_limit=2
 
 # Kubernetes and Openshift Install Resource Requests
-# This are the request and limit values for a pod's container for task/web/rabbitmq/memcached/management.
+# These are the request and limit values for a pod's container for task/web/rabbitmq/memcached/management.
 # The total amount of requested resources for a pod is the sum of all
 # resources requested by all containers in the pod
 # A cpu_request of 1500 is 1.5 cores for the container to start out with.
