@@ -1,6 +1,6 @@
 import React from 'react';
 import { mount } from 'enzyme';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, Router } from 'react-router-dom';
 import { I18nProvider } from '@lingui/react';
 import { ConfigContext } from '../../../../src/context';
 import OrganizationAdd from '../../../../src/pages/Organizations/screens/OrganizationAdd';
@@ -18,6 +18,7 @@ describe('<OrganizationAdd />', () => {
       </MemoryRouter>
     );
   });
+
   test('calls "onFieldChange" when input values change', () => {
     const spy = jest.spyOn(OrganizationAdd.WrappedComponent.prototype, 'onFieldChange');
     const wrapper = mount(
@@ -35,6 +36,7 @@ describe('<OrganizationAdd />', () => {
     wrapper.find('input#add-org-form-description').simulate('change', { target: { value: 'bar' } });
     expect(spy).toHaveBeenCalledTimes(2);
   });
+
   test('calls "onSubmit" when Save button is clicked', () => {
     const spy = jest.spyOn(OrganizationAdd.WrappedComponent.prototype, 'onSubmit');
     const wrapper = mount(
@@ -51,6 +53,7 @@ describe('<OrganizationAdd />', () => {
     wrapper.find('button[aria-label="Save"]').prop('onClick')();
     expect(spy).toBeCalled();
   });
+
   test('calls "onCancel" when Cancel button is clicked', () => {
     const spy = jest.spyOn(OrganizationAdd.WrappedComponent.prototype, 'onCancel');
     const wrapper = mount(
@@ -66,6 +69,25 @@ describe('<OrganizationAdd />', () => {
     expect(spy).not.toHaveBeenCalled();
     wrapper.find('button[aria-label="Cancel"]').prop('onClick')();
     expect(spy).toBeCalled();
+  });
+
+  test('calls "onCancel" when close button (x) is clicked', () => {
+    const wrapper = mount(
+      <MemoryRouter initialEntries={['/organizations/add']} initialIndex={0}>
+        <I18nProvider>
+          <OrganizationAdd
+            match={{ path: '/organizations/add', url: '/organizations/add' }}
+            location={{ search: '', pathname: '/organizations/add' }}
+          />
+        </I18nProvider>
+      </MemoryRouter>
+    );
+    const history = wrapper.find(Router).prop('history');
+    expect(history.length).toBe(1);
+    expect(history.location.pathname).toEqual('/organizations/add');
+    wrapper.find('button[aria-label="Close"]').prop('onClick')();
+    expect(history.length).toBe(2);
+    expect(history.location.pathname).toEqual('/organizations');
   });
 
   test('Successful form submission triggers redirect', (done) => {

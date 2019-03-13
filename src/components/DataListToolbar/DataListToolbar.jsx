@@ -15,6 +15,7 @@ import {
   Toolbar,
   ToolbarGroup,
   ToolbarItem,
+  Tooltip,
 } from '@patternfly/react-core';
 import {
   BarsIcon,
@@ -30,7 +31,6 @@ import {
   Link
 } from 'react-router-dom';
 
-import Tooltip from '../Tooltip';
 import VerticalSeparator from '../VerticalSeparator';
 
 const flexGrowStyling = {
@@ -291,7 +291,7 @@ class DataListToolbar extends React.Component {
               <LevelItem>
                 { showDelete && (
                   <Tooltip
-                    message={i18n._(t`Delete`)}
+                    content={i18n._(t`Delete`)}
                     position="top"
                   >
                     <Button

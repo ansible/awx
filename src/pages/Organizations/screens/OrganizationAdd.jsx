@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import { I18n, i18nMark } from '@lingui/react';
@@ -10,8 +10,12 @@ import {
   TextInput,
   Gallery,
   Card,
+  CardHeader,
   CardBody,
+  Button,
+  Tooltip,
 } from '@patternfly/react-core';
+import { QuestionCircleIcon, TimesIcon } from '@patternfly/react-icons';
 
 import { ConfigContext } from '../../../context';
 import Lookup from '../../../components/Lookup';
@@ -108,11 +112,25 @@ class OrganizationAdd extends React.Component {
 
     return (
       <PageSection>
-        <Card>
-          <CardBody>
-            <Form autoComplete="off">
-              <I18n>
-                {({ i18n }) => (
+        <I18n>
+          {({ i18n }) => (
+            <Card>
+              <CardHeader className="at-u-textRight">
+                <Tooltip
+                  content={i18n._(t`Close`)}
+                  position="top"
+                >
+                  <Button
+                    variant="plain"
+                    aria-label={i18n._(t`Close`)}
+                    onClick={this.onCancel}
+                  >
+                    <TimesIcon />
+                  </Button>
+                </Tooltip>
+              </CardHeader>
+              <CardBody>
+                <Form autoComplete="off">
                   <Gallery gutter="md">
                     <FormGroup
                       label={i18n._(t`Name`)}
@@ -135,7 +153,21 @@ class OrganizationAdd extends React.Component {
                         onChange={this.onFieldChange}
                       />
                     </FormGroup>
-                    <FormGroup label={i18n._(t`Instance Groups`)} fieldId="add-org-form-instance-groups">
+                    <FormGroup
+                      label={(
+                        <Fragment>
+                          {i18n._(t`Instance Groups`)}
+                          {' '}
+                          <Tooltip
+                            position="right"
+                            content={i18n._(t`Select the Instance Groups for this Organization to run on.`)}
+                          >
+                            <QuestionCircleIcon />
+                          </Tooltip>
+                        </Fragment>
+                      )}
+                      fieldId="add-org-form-instance-groups"
+                    >
                       <Lookup
                         lookupHeader={i18n._(t`Instance Groups`)}
                         name="instanceGroups"
@@ -149,7 +181,21 @@ class OrganizationAdd extends React.Component {
                     <ConfigContext.Consumer>
                       {({ custom_virtualenvs }) => (
                         custom_virtualenvs && custom_virtualenvs.length > 1 && (
-                          <FormGroup label={i18n._(t`Ansible Environment`)} fieldId="add-org-custom-virtualenv">
+                          <FormGroup
+                            label={(
+                              <Fragment>
+                                {i18n._(t`Ansible Environment`)}
+                                {' '}
+                                <Tooltip
+                                  position="right"
+                                  content={i18n._(t`Select the custom Python virtual environment for this organization to run on.`)}
+                                >
+                                  <QuestionCircleIcon />
+                                </Tooltip>
+                              </Fragment>
+                            )}
+                            fieldId="add-org-custom-virtualenv"
+                          >
                             <AnsibleSelect
                               label={i18n._(t`Ansible Environment`)}
                               name="custom_virtualenv"
@@ -163,17 +209,17 @@ class OrganizationAdd extends React.Component {
                       )}
                     </ConfigContext.Consumer>
                   </Gallery>
-                )}
-              </I18n>
-              <FormActionGroup
-                onSubmit={this.onSubmit}
-                submitDisabled={!enabled}
-                onCancel={this.onCancel}
-              />
-              {error ? <div>error</div> : ''}
-            </Form>
-          </CardBody>
-        </Card>
+                  <FormActionGroup
+                    onSubmit={this.onSubmit}
+                    submitDisabled={!enabled}
+                    onCancel={this.onCancel}
+                  />
+                  {error ? <div>error</div> : ''}
+                </Form>
+              </CardBody>
+            </Card>
+          )}
+        </I18n>
       </PageSection>
     );
   }
