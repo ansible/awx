@@ -207,6 +207,21 @@
 }
 
 //
+// pf tooltip overrides
+//
+
+.pf-c-tooltip__content {
+  --pf-c-tooltip__content--PaddingTop: 0.71rem;
+  --pf-c-tooltip__content--PaddingRight: 0.71rem;
+  --pf-c-tooltip__content--PaddingBottom: 0.71rem;
+  --pf-c-tooltip__content--PaddingLeft: 0.71rem;
+}
+// higher specificity needed to override PF styles added dynamically to page
+.pf-c-tooltip .pf-c-tooltip__content {
+  text-align: left;
+}
+
+//
 // pf empty state overrides
 //
 
@@ -219,6 +234,13 @@
 // note that these should be given a consistent prefix
 // and bem style, as well as moved into component-based scss files
 //
+.awx-lookup {
+  min-height: 36px;
+
+  .pf-c-form-control {
+    --pf-c-form-control--Height: auto;
+  }
+}
 
 .awx-c-list {
   border-bottom: 1px solid #d7d7d7;
@@ -236,22 +258,20 @@
   position: relative;
 }
 
-.awx-c-alert {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-}
-
 .pf-c-alert {
   position: absolute;
   width: 100%;
+  z-index: 20;
 
-  & button {
+  button {
     margin-right: 20px;
   }
 }
 
-.pf-c-alert__icon > svg {
-  fill: white;
+.pf-c-alert__icon {
+  --pf-c-alert__icon--Color: white;
+}
+
+.at-u-textRight {
+  text-align: right;
 }

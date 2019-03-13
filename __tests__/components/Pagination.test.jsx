@@ -119,6 +119,63 @@ describe('<Pagination />', () => {
     pageSizeDropdownItems.at(1).simulate('click');
   });
 
+  test('itemCount displays correctly', () => {
+    const onSetPage = jest.fn();
+
+    pagination = mount(
+      <I18nProvider>
+        <Pagination
+          count={7}
+          page={1}
+          pageCount={2}
+          page_size={5}
+          pageSizeOptions={[5, 10, 25, 50]}
+          onSetPage={onSetPage}
+        />
+      </I18nProvider>
+    );
+    const itemCount = pagination.find('.awx-pagination__item-count');
+    expect(itemCount.text()).toEqual('Items 1 – 5 of 7');
+  });
+
+  test('itemCount matching pageSize displays correctly', () => {
+    const onSetPage = jest.fn();
+
+    pagination = mount(
+      <I18nProvider>
+        <Pagination
+          count={5}
+          page={1}
+          pageCount={1}
+          page_size={5}
+          pageSizeOptions={[5, 10, 25, 50]}
+          onSetPage={onSetPage}
+        />
+      </I18nProvider>
+    );
+    const itemCount = pagination.find('.awx-pagination__item-count');
+    expect(itemCount.text()).toEqual('Items 1 – 5 of 5');
+  });
+
+  test('itemCount less than pageSize displays correctly', () => {
+    const onSetPage = jest.fn();
+
+    pagination = mount(
+      <I18nProvider>
+        <Pagination
+          count={3}
+          page={1}
+          pageCount={1}
+          page_size={5}
+          pageSizeOptions={[5, 10, 25, 50]}
+          onSetPage={onSetPage}
+        />
+      </I18nProvider>
+    );
+    const itemCount = pagination.find('.awx-pagination__item-count');
+    expect(itemCount.text()).toEqual('Items 1 – 3 of 3');
+  });
+
   test('submit a new page by typing in input works', () => {
     const textInputSelector = '.awx-pagination__page-input.pf-c-form-control';
     const submitFormSelector = '.awx-pagination__page-input-form';
