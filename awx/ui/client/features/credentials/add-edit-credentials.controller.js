@@ -141,6 +141,7 @@ function AddEditCredentialsController (
 
             vm.inputSources.initialItems = credential.get('related.input_sources.results');
             vm.inputSources.items = [];
+            vm.inputSources.changedInputFields = [];
             if (credential.get('credential_type') === credentialType.get('id')) {
                 vm.inputSources.items = credential.get('related.input_sources.results');
             }
@@ -198,6 +199,7 @@ function AddEditCredentialsController (
         credentialId: null,
         credentialName: null,
         metadataInputs: null,
+        changedInputFields: [],
         initialItems: credential.get('related.input_sources.results'),
         items: credential.get('related.input_sources.results'),
     };
@@ -224,6 +226,7 @@ function AddEditCredentialsController (
         vm.form[field]._tagValue = '';
         vm.inputSources.items = vm.inputSources.items
             .filter(({ input_field_name }) => input_field_name !== field);
+        vm.inputSources.changedInputFields.push(field);
     };
 
     vm.onInputSourceOpen = (field) => {
@@ -325,6 +328,8 @@ function AddEditCredentialsController (
                     }
                 },
             }]);
+        // Record that this field was changed
+        vm.inputSources.changedInputFields.push(field);
         // Now that we've extracted and stored the selected source credential and metadata values
         // for this field, we clear the state for the source credential lookup and metadata form.
         vm.inputSources.field = null;
@@ -502,15 +507,17 @@ function AddEditCredentialsController (
         const updatedLinkedFieldNames = vm.inputSources.items
             .map(({ input_field_name }) => input_field_name);
 
-        const fieldsToDisassociate = [...initialLinkedFieldNames]
-            .filter(name => !updatedLinkedFieldNames.includes(name));
-        const fieldsToAssociate = [...updatedLinkedFieldNames]
-            .filter(name => !initialLinkedFieldNames.includes(name));
+        const fieldsToDisassociate = initialLinkedFieldNames
+            .filter(name => !updatedLinkedFieldNames.includes(name))
+            .concat(updatedLinkedFieldNames)
+            .filter(name => vm.inputSources.changedInputFields.includes(name));
+        const fieldsToAssociate = updatedLinkedFieldNames
+            .filter(name => vm.inputSources.changedInputFields.includes(name));
 
-        const sourcesToDisassociate = [...fieldsToDisassociate]
+        const sourcesToDisassociate = fieldsToDisassociate
             .map(name => vm.inputSources.initialItems
                 .find(({ input_field_name }) => input_field_name === name));
-        const sourcesToAssociate = [...fieldsToAssociate]
+        const sourcesToAssociate = fieldsToAssociate
             .map(name => vm.inputSources.items
                 .find(({ input_field_name }) => input_field_name === name));
 
