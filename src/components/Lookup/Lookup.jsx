@@ -225,6 +225,7 @@ class Lookup extends React.Component {
                     page_size={page_size}
                     onSetPage={this.onSetPage}
                     pageSizeOptions={null}
+                    showPageSizeOptions={false}
                     style={paginationStyling}
                   />
                 </Fragment>

@@ -137,20 +137,6 @@ describe('<Pagination />', () => {
     );
     let itemCount = pagination.find('.awx-pagination__item-count');
     expect(itemCount.text()).toEqual('Items 1 – 5 of 7');
-    pagination = mount(
-      <I18nProvider>
-        <Pagination
-          count={7}
-          page={1}
-          pageCount={1}
-          page_size={10}
-          pageSizeOptions={[5, 10, 25, 50]}
-          onSetPage={onSetPage}
-        />
-      </I18nProvider>
-    );
-    itemCount = pagination.find('.awx-pagination__item-count');
-    expect(itemCount.text()).toEqual('Items 1 – 7 of 7');
 
     pagination = mount(
       <I18nProvider>
@@ -339,5 +325,25 @@ describe('<Pagination />', () => {
     });
     paginationElem.update();
     expect(paginationElem.state().value).toBe(2);
+  });
+
+  test('when showPageSizeOptions is passed as false there should not be a dropdown in the DOM', () => {
+    const pageSizeDropdownSelector = '.awx-pagination__page-size-selection';
+    const onSetPage = jest.fn();
+
+    pagination = mount(
+      <I18nProvider>
+        <Pagination
+          count={21}
+          page={1}
+          pageCount={5}
+          page_size={5}
+          showPageSizeOptions={false}
+          onSetPage={onSetPage}
+        />
+      </I18nProvider>
+    );
+    const pageSizeDropdown = pagination.find(pageSizeDropdownSelector);
+    expect(pageSizeDropdown.length).toBe(0);
   });
 });
