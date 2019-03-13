@@ -1,5 +1,6 @@
 function SmartSearchController (
     $scope,
+    $rootScope,
     $state,
     $stateParams,
     $transitions,
@@ -111,10 +112,13 @@ function SmartSearchController (
     configService.getConfig()
         .then(config => {
             let version;
-
-            try {
-                [version] = config.version.split('-');
-            } catch (err) {
+            if ($rootScope.BRAND_NAME === 'Tower') {
+                try {
+                    [version] = config.version.split('-');
+                } catch (err) {
+                    version = 'latest';
+                }
+            } else {
                 version = 'latest';
             }
 
@@ -279,6 +283,7 @@ function SmartSearchController (
 
 SmartSearchController.$inject = [
     '$scope',
+    '$rootScope',
     '$state',
     '$stateParams',
     '$transitions',
