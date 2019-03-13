@@ -89,9 +89,8 @@ class Pagination extends Component {
 
   onSelectPageSize ({ target }) {
     const { onSetPage } = this.props;
-
     const page = 1;
-    const page_size = parseInt(target.innerText, 10);
+    const page_size = parseInt(target.innerText || target.textContent, 10);
 
     this.setState({ isOpen: false });
 
@@ -106,6 +105,7 @@ class Pagination extends Component {
       pageCount,
       page_size,
       pageSizeOptions,
+      showPageSizeOptions,
       style
     } = this.props;
     const { value, isOpen } = this.state;
@@ -129,7 +129,7 @@ class Pagination extends Component {
       <I18n>
         {({ i18n }) => (
           <div className="awx-pagination" style={style}>
-            {opts && (
+            {showPageSizeOptions && (
               <div className="awx-pagination__page-size-selection">
                 <Trans>Items Per Page</Trans>
                 <Dropdown
@@ -237,12 +237,14 @@ Pagination.propTypes = {
   pageCount: PropTypes.number,
   pageSizeOptions: PropTypes.arrayOf(PropTypes.number),
   page_size: PropTypes.number.isRequired,
+  showPageSizeOptions: PropTypes.bool
 };
 
 Pagination.defaultProps = {
   count: null,
   pageCount: null,
   pageSizeOptions: [5, 10, 25, 50],
+  showPageSizeOptions: true
 };
 
 export default Pagination;

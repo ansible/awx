@@ -117,6 +117,7 @@ describe('<Pagination />', () => {
     const pageSizeDropdownItems = pagination.find(pageSizeDropdownItemsSelector);
     expect(pageSizeDropdownItems.length).toBe(3);
     pageSizeDropdownItems.at(1).simulate('click');
+    expect(onSetPage).toBeCalledWith(1, 25);
   });
 
   test('itemCount displays correctly', () => {
@@ -134,8 +135,23 @@ describe('<Pagination />', () => {
         />
       </I18nProvider>
     );
-    const itemCount = pagination.find('.awx-pagination__item-count');
+    let itemCount = pagination.find('.awx-pagination__item-count');
     expect(itemCount.text()).toEqual('Items 1 – 5 of 7');
+
+    pagination = mount(
+      <I18nProvider>
+        <Pagination
+          count={7}
+          page={2}
+          pageCount={2}
+          page_size={5}
+          pageSizeOptions={[5, 10, 25, 50]}
+          onSetPage={onSetPage}
+        />
+      </I18nProvider>
+    );
+    itemCount = pagination.find('.awx-pagination__item-count');
+    expect(itemCount.text()).toEqual('Items 6 – 7 of 7');
   });
 
   test('itemCount matching pageSize displays correctly', () => {
@@ -176,7 +192,7 @@ describe('<Pagination />', () => {
     expect(itemCount.text()).toEqual('Items 1 – 3 of 3');
   });
 
-  test('submit a new page by typing in input works', () => {
+  test('submitting a new page by typing in input works', () => {
     const textInputSelector = '.awx-pagination__page-input.pf-c-form-control';
     const submitFormSelector = '.awx-pagination__page-input-form';
     const onSetPage = jest.fn();
@@ -193,22 +209,60 @@ describe('<Pagination />', () => {
         />
       </I18nProvider>
     );
-
+    const paginationElem = pagination.find('Pagination');
+    expect(paginationElem.state().value).toBe(1);
     const textInput = pagination.find(textInputSelector);
     expect(textInput.length).toBe(1);
-    textInput.simulate('change');
-    pagination.setProps({ page: 2 });
-
+    expect(textInput.at(0).prop('value')).toBe(1);
+    const input = pagination.find('TextInput');
+    expect(input.prop('value')).toBe(1);
+    input.prop('onChange')(2);
+    pagination.update();
     const submitForm = pagination.find(submitFormSelector);
     expect(submitForm.length).toBe(1);
     submitForm.simulate('submit');
-    pagination.find('Pagination').instance().setState({ value: 'invalid' });
-    submitForm.simulate('submit');
+    expect(pagination.find('TextInput').prop('value')).toBe(2);
+    // assert onPageChange was called
+    expect(paginationElem.state().value).toBe(2);
   });
 
-  test('text input page change is disabled when only 1 page', () => {
+  test('submitting a new page by typing in input does not work when invalid', () => {
+    const textInputSelector = '.awx-pagination__page-input.pf-c-form-control';
+    const submitFormSelector = '.awx-pagination__page-input-form';
     const onSetPage = jest.fn();
 
+    pagination = mount(
+      <I18nProvider>
+        <Pagination
+          count={21}
+          page={1}
+          pageCount={5}
+          page_size={5}
+          pageSizeOptions={[5, 10, 25, 50]}
+          onSetPage={onSetPage}
+        />
+      </I18nProvider>
+    );
+    const paginationElem = pagination.find('Pagination');
+    expect(paginationElem.state().value).toBe(1);
+    const textInput = pagination.find(textInputSelector);
+    expect(textInput.length).toBe(1);
+    expect(textInput.at(0).prop('value')).toBe(1);
+    const input = pagination.find('TextInput');
+    expect(input.prop('value')).toBe(1);
+    input.prop('onChange')('!invalid');
+    pagination.update();
+    const submitForm = pagination.find(submitFormSelector);
+    expect(submitForm.length).toBe(1);
+    submitForm.simulate('submit');
+    expect(pagination.find('TextInput').prop('value')).toBe(1);
+    // assert onPageChange was not called
+    expect(paginationElem.state().value).toBe(1);
+  });
+
+  test('text input page change is not displayed when only 1 page', () => {
+    const onSetPage = jest.fn();
+    const pageNumber = 'input[aria-label="Page Number"]';
     pagination = mount(
       <I18nProvider>
         <Pagination
@@ -221,5 +275,75 @@ describe('<Pagination />', () => {
         />
       </I18nProvider>
     );
+    let pageInput = pagination.find(pageNumber);
+    expect(pageInput.length).toBe(0);
+
+    pagination = mount(
+      <I18nProvider>
+        <Pagination
+          count={11}
+          page={1}
+          pageCount={3}
+          page_size={5}
+          pageSizeOptions={[5, 10, 25, 50]}
+          onSetPage={onSetPage}
+        />
+      </I18nProvider>
+    );
+    pageInput = pagination.find(pageNumber);
+    expect(pageInput.length).toBe(1);
+  });
+
+  test('make sure componentDidUpdate calls onPageChange', () => {
+    const onSetPage = jest.fn();
+
+    pagination = mount(
+      <I18nProvider>
+        <Pagination
+          count={7}
+          page={1}
+          pageCount={2}
+          page_size={5}
+          pageSizeOptions={[5, 10, 25, 50]}
+          onSetPage={onSetPage}
+        />
+      </I18nProvider>
+    );
+    const paginationElem = pagination.find('Pagination');
+    expect(paginationElem.state().value).toBe(1);
+    pagination.setProps({
+      children: (
+        <Pagination
+          count={7}
+          page={2}
+          pageCount={2}
+          page_size={5}
+          pageSizeOptions={[5, 10, 25, 50]}
+          onSetPage={onSetPage}
+        />
+      )
+    });
+    paginationElem.update();
+    expect(paginationElem.state().value).toBe(2);
+  });
+
+  test('when showPageSizeOptions is passed as false there should not be a dropdown in the DOM', () => {
+    const pageSizeDropdownSelector = '.awx-pagination__page-size-selection';
+    const onSetPage = jest.fn();
+
+    pagination = mount(
+      <I18nProvider>
+        <Pagination
+          count={21}
+          page={1}
+          pageCount={5}
+          page_size={5}
+          showPageSizeOptions={false}
+          onSetPage={onSetPage}
+        />
+      </I18nProvider>
+    );
+    const pageSizeDropdown = pagination.find(pageSizeDropdownSelector);
+    expect(pageSizeDropdown.length).toBe(0);
   });
 });
