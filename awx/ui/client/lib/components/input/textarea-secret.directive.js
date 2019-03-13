@@ -93,6 +93,13 @@ function AtInputTextareaSecretController (baseInputController, eventService) {
             input.value = '';
         });
     };
+
+    vm.onLookupClick = () => {
+        if (scope.state._onInputLookup) {
+            const { id, label, required, type } = scope.state;
+            scope.state._onInputLookup({ id, label, required, type });
+        }
+    };
 }
 
 AtInputTextareaSecretController.$inject = [
