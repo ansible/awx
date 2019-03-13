@@ -806,6 +806,30 @@ class BaseTask(object):
         Build ansible yaml file filled with extra vars to be passed via -e@file.yml
         '''
 
+    def build_params_process_isolation(self, instance, private_data_dir, cwd):
+        '''
+        Build ansible runner .run() parameters for process isolation.
+        '''
+        process_isolation_params = dict()
+        if self.should_use_proot(instance):
+            process_isolation_params = {
+                'process_isolation': True,
+                'process_isolation_path': settings.AWX_PROOT_BASE_PATH,
+                'process_isolation_show_paths': self.proot_show_paths + [private_data_dir, cwd] + settings.AWX_PROOT_SHOW_PATHS,
+                'process_isolation_hide_paths': [
+                    settings.AWX_PROOT_BASE_PATH,
+                    '/etc/tower',
+                    '/var/lib/awx',
+                    '/var/log',
+                    settings.PROJECTS_ROOT,
+                    settings.JOBOUTPUT_ROOT,
+                ] + getattr(settings, 'AWX_PROOT_HIDE_PATHS', None) or [],
+                'process_isolation_ro_paths': [settings.ANSIBLE_VENV_PATH, settings.AWX_VENV_PATH],
+            }
+            if getattr(instance, 'ansible_virtualenv_path', settings.ANSIBLE_VENV_PATH) != settings.ANSIBLE_VENV_PATH:
+                process_isolation_params['process_isolation_ro_paths'].append(instance.ansible_virtualenv_path)
+        return process_isolation_params
+
     def _write_extra_vars_file(self, private_data_dir, vars, safe_dict={}):
         env_path = os.path.join(private_data_dir, 'env')
         try:
@@ -912,6 +936,9 @@ class BaseTask(object):
     def build_output_replacements(self, instance, passwords={}):
         return []
 
+    def build_credentials_list(self, instance):
+        return []
+
     def get_idle_timeout(self):
         return None
 
@@ -949,11 +976,64 @@ class BaseTask(object):
         Hook for any steps to run after job/task is marked as complete.
         '''
 
+    def event_handler(self, event_data):
+        '''
+        Ansible runner callback for events
+        '''
+        should_write_event = False
+        dispatcher = CallbackQueueDispatcher()
+        event_data.setdefault(self.event_data_key, self.instance.id)
+        dispatcher.dispatch(event_data)
+        self.event_ct += 1
+
+        '''
+        Handle artifacts
+        '''
+        if event_data.get('event_data', {}).get('artifact_data', {}):
+            self.instance.artifacts = event_data['event_data']['artifact_data']
+            self.instance.save(update_fields=['artifacts'])
+
+        return should_write_event
+
+    def cancel_callback(self):
+        '''
+        Ansible runner callback to tell the job when/if it is canceled
+        '''
+        self.instance = self.update_model(self.instance.pk)
+        if self.instance.cancel_flag or self.instance.status == 'canceled':
+            cancel_wait = (now() - self.instance.modified).seconds if self.instance.modified else 0
+            if cancel_wait > 5:
+                logger.warn('Request to cancel {} took {} seconds to complete.'.format(self.instance.log_format, cancel_wait))
+            return True
+        return False
+
+    def finished_callback(self, runner_obj):
+        '''
+        Ansible runner callback triggered on finished run
+        '''
+        dispatcher = CallbackQueueDispatcher()
+        event_data = {
+            'event': 'EOF',
+            'final_counter': self.event_ct,
+        }
+        event_data.setdefault(self.event_data_key, self.instance.id)
+        dispatcher.dispatch(event_data)
+
+    def status_handler(self, status_data, runner_config):
+        '''
+        Ansible runner callback triggered on status transition
+        '''
+        if status_data['status'] == 'starting':
+            self.instance = self.update_model(self.instance.pk, job_args=json.dumps(runner_config.command),
+                                              job_cwd=runner_config.cwd, job_env=runner_config.env)
+
+
     @with_path_cleanup
     def run(self, pk, **kwargs):
         '''
         Run the job/task and capture its output.
         '''
+        # self.instance because of the update_model pattern and when it's used in callback handlers
         self.instance = self.update_model(pk, status='running',
                                           start_args='')  # blank field to remove encrypted passwords
 
@@ -997,31 +1077,20 @@ class BaseTask(object):
             # May have to serialize the value
             private_data_files = self.build_private_data_files(self.instance, private_data_dir)
             passwords = self.build_passwords(self.instance, kwargs)
-            proot_custom_virtualenv = None
-            if getattr(self.instance, 'ansible_virtualenv_path', settings.ANSIBLE_VENV_PATH) != settings.ANSIBLE_VENV_PATH:
-                proot_custom_virtualenv = self.instance.ansible_virtualenv_path
             self.build_extra_vars_file(self.instance, private_data_dir, passwords)
             args = self.build_args(self.instance, private_data_dir, passwords)
             # TODO: output_replacements hurts my head right now
             #output_replacements = self.build_output_replacements(self.instance, **kwargs)
             output_replacements = []
             cwd = self.build_cwd(self.instance, private_data_dir)
+            process_isolation_params = self.build_params_process_isolation(self.instance,
+                                                                           private_data_dir,
+                                                                           cwd)
             env = self.build_env(self.instance, private_data_dir, isolated,
                                  private_data_files=private_data_files)
             safe_env = build_safe_env(env)
 
-            # handle custom injectors specified on the CredentialType
-            credentials = []
-            if isinstance(self.instance, Job):
-                credentials = self.instance.credentials.all()
-            elif isinstance(self.instance, InventoryUpdate):
-                # TODO: allow multiple custom creds for inv updates
-                credentials = [self.instance.get_cloud_credential()]
-            elif isinstance(self.instance, Project):
-                # once (or if) project updates
-                # move from a .credential -> .credentials model, we can
-                # lose this block
-                credentials = [self.instance.credential]
+            credentials = self.build_credentials_list(self.instance)
 
             for credential in credentials:
                 if credential:
@@ -1040,46 +1109,6 @@ class BaseTask(object):
             )
             self.instance = self.update_model(self.instance.pk, output_replacements=output_replacements)
 
-            def event_handler(self, event_data):
-                should_write_event = False
-                dispatcher = CallbackQueueDispatcher()
-                event_data.setdefault(self.event_data_key, self.instance.id)
-                dispatcher.dispatch(event_data)
-                self.event_ct += 1
-
-                '''
-                Handle artifacts
-                '''
-                if event_data.get('event_data', {}).get('artifact_data', {}):
-                    self.instance.artifacts = event_data['event_data']['artifact_data']
-                    self.instance.save(update_fields=['artifacts'])
-
-                return should_write_event
-
-            def cancel_callback(self):
-                self.instance = self.update_model(self.instance.pk)
-                if self.instance.cancel_flag or self.instance.status == 'canceled':
-                    cancel_wait = (now() - self.instance.modified).seconds if self.instance.modified else 0
-                    if cancel_wait > 5:
-                        logger.warn('Request to cancel {} took {} seconds to complete.'.format(self.instance.log_format, cancel_wait))
-                    return True
-                return False
-
-            def finished_callback(self, runner_obj):
-                dispatcher = CallbackQueueDispatcher()
-                event_data = {
-                    'event': 'EOF',
-                    'final_counter': self.event_ct,
-                }
-                event_data.setdefault(self.event_data_key, self.instance.id)
-                dispatcher.dispatch(event_data)
-
-            def status_handler(self, status_data, runner_config):
-                if status_data['status'] == 'starting':
-                    self.instance = self.update_model(pk, job_args=json.dumps(runner_config.command),
-                                                      job_cwd=runner_config.cwd, job_env=runner_config.env)
-
-
             params = {
                 'ident': self.instance.id,
                 'private_data_dir': private_data_dir,
@@ -1088,41 +1117,17 @@ class BaseTask(object):
                 'inventory': self.build_inventory(self.instance, private_data_dir),
                 'passwords': expect_passwords,
                 'envvars': env,
-                'event_handler': functools.partial(event_handler, self),
-                'cancel_callback': functools.partial(cancel_callback, self),
-                'finished_callback': functools.partial(finished_callback, self),
-                'status_handler': functools.partial(status_handler, self),
+                'event_handler': self.event_handler,
+                'cancel_callback': self.cancel_callback,
+                'finished_callback': self.finished_callback,
+                'status_handler': self.status_handler,
                 'settings': {
                     'idle_timeout': self.get_idle_timeout() or "",
                     'job_timeout': self.get_instance_timeout(self.instance),
                     'pexpect_timeout': getattr(settings, 'PEXPECT_TIMEOUT', 5),
-                }
+                },
+                **process_isolation_params,
             }
-
-            if self.should_use_proot(self.instance):
-                process_isolation_params = {
-                    'process_isolation': True,
-                    'process_isolation_path': settings.AWX_PROOT_BASE_PATH,
-                    'process_isolation_show_paths': self.proot_show_paths + [private_data_dir, cwd],
-                    'process_isolation_hide_paths': [
-                        settings.AWX_PROOT_BASE_PATH,
-                        '/etc/tower',
-                        '/var/lib/awx',
-                        '/var/log',
-                        settings.PROJECTS_ROOT,
-                        settings.JOBOUTPUT_ROOT,
-                    ] + getattr(settings, 'AWX_PROOT_HIDE_PATHS', None) or [],
-                    'process_isolation_ro_paths': [],
-                }
-                if settings.AWX_PROOT_SHOW_PATHS:
-                    process_isolation_params['process_isolation_show_paths'].extend(settings.AWX_PROOT_SHOW_PATHS)
-                if settings.ANSIBLE_VENV_PATH:
-                    process_isolation_params['process_isolation_ro_paths'].append(settings.ANSIBLE_VENV_PATH)
-                if settings.AWX_VENV_PATH:
-                    process_isolation_params['process_isolation_ro_paths'].append(settings.AWX_VENV_PATH)
-                if proot_custom_virtualenv:
-                    process_isolation_params['process_isolation_ro_paths'].append(proot_custom_virtualenv)
-                params = {**params, **process_isolation_params}
 
             if isinstance(self.instance, AdHocCommand):
                 params['module'] = self.build_module_name(self.instance)
@@ -1447,6 +1452,9 @@ class RunJob(BaseTask):
             safe_dict = job.job_template.extra_vars_dict
 
         return self._write_extra_vars_file(private_data_dir, extra_vars, safe_dict)
+
+    def build_credentials_list(self, job):
+        return job.credentials.all()
 
     def get_idle_timeout(self):
         return getattr(settings, 'JOB_RUN_IDLE_TIMEOUT', None)
@@ -2250,6 +2258,10 @@ class RunInventoryUpdate(BaseTask):
 
     def build_playbook_path_relative_to_cwd(self, inventory_update, private_data_dir):
         return None
+
+    def build_credentials_list(self, inventory_update):
+        # TODO: allow multiple custom creds for inv updates
+        return [inventory_update.get_cloud_credential()]
 
     def get_idle_timeout(self):
         return getattr(settings, 'INVENTORY_UPDATE_IDLE_TIMEOUT', None)
