@@ -22,12 +22,14 @@ function AtInputSecretController (baseInputController) {
         scope = _scope_;
         scope.type = 'password';
         scope.state._show = false;
+        scope.state._showHideText = vm.strings.get('SHOW');
 
         if (!scope.state._value || scope.state._promptOnLaunch) {
             scope.mode = 'input';
         } else {
             scope.mode = 'encrypted';
             scope.state._placeholder = vm.strings.get('ENCRYPTED');
+            scope.state._buttonText = vm.strings.get('REPLACE');
         }
 
         vm.check();
@@ -49,9 +51,11 @@ function AtInputSecretController (baseInputController) {
         if (scope.type === 'password') {
             scope.type = 'text';
             scope.state._show = true;
+            scope.state._showHideText = vm.strings.get('HIDE');
         } else {
             scope.type = 'password';
             scope.state._show = false;
+            scope.state._showHideText = vm.strings.get('SHOW');
         }
     };
 
