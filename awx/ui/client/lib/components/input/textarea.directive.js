@@ -13,11 +13,20 @@ function atInputTextareaLink (scope, element, attrs, controllers) {
 
 function AtInputTextareaController (baseInputController) {
     const vm = this || {};
+    let scope;
 
-    vm.init = (scope, element, form) => {
-        baseInputController.call(vm, 'input', scope, element, form);
+    vm.init = (_scope_, element, form) => {
+        baseInputController.call(vm, 'input', _scope_, element, form);
+        scope = _scope_;
 
         vm.check();
+    };
+
+    vm.onLookupClick = () => {
+        if (scope.state._onInputLookup) {
+            const { id, label, required, type } = scope.state;
+            scope.state._onInputLookup({ id, label, required, type });
+        }
     };
 }
 
