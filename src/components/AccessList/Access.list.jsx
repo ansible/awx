@@ -103,7 +103,7 @@ class AccessList extends React.Component {
     this.state = {
       page,
       page_size,
-      count: null,
+      count: 0,
       sortOrder: 'ascending',
       sortedColumnKey: 'username',
       isCompact: false,
@@ -193,7 +193,7 @@ class AccessList extends React.Component {
 
     try {
       const { data:
-        { count = null, results = null }
+        { count = 0, results = [] }
       } = await getAccessList(match.params.id, queryParams);
       const pageCount = Math.ceil(count / page_size);
 

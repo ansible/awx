@@ -5,7 +5,7 @@ import { I18nProvider } from '@lingui/react';
 
 import AccessList from '../../src/components/AccessList';
 
-const mockResults = [
+const mockData = [
   {
     id: 1,
     username: 'boo',
@@ -48,7 +48,7 @@ describe('<AccessList />', () => {
           <AccessList
             match={{ path: '/organizations/:id', url: '/organizations/1', params: { id: '0' } }}
             location={{ search: '', pathname: '/organizations/1/access' }}
-            getAccessList={() => ({ data: { count: 1, results: mockResults } })}
+            getAccessList={() => ({ data: { count: 1, results: mockData } })}
             removeRole={() => {}}
           />
         </MemoryRouter>
@@ -56,7 +56,7 @@ describe('<AccessList />', () => {
     ).find('AccessList');
 
     setImmediate(() => {
-      expect(wrapper.state().results).toEqual(mockResults);
+      expect(wrapper.state().results).toEqual(mockData);
       done();
     });
   });
@@ -70,7 +70,7 @@ describe('<AccessList />', () => {
           <AccessList
             match={{ path: '/organizations/:id', url: '/organizations/1', params: { id: '0' } }}
             location={{ search: '', pathname: '/organizations/1/access' }}
-            getAccessList={() => ({ data: { count: 1, results: mockResults } })}
+            getAccessList={() => ({ data: { count: 1, results: mockData } })}
             removeRole={() => {}}
           />
         </MemoryRouter>
@@ -97,7 +97,7 @@ describe('<AccessList />', () => {
           <AccessList
             match={{ path: '/organizations/:id', url: '/organizations/1', params: { id: '0' } }}
             location={{ search: '', pathname: '/organizations/1/access' }}
-            getAccessList={() => ({ data: { count: 1, results: mockResults } })}
+            getAccessList={() => ({ data: { count: 1, results: mockData } })}
             removeRole={() => {}}
           />
         </MemoryRouter>
@@ -114,33 +114,7 @@ describe('<AccessList />', () => {
   });
 
   test('getTeamRoles returns empty array if dataset is missing team_id attribute', (done) => {
-    const mockData = [
-      {
-        id: 1,
-        username: 'boo',
-        url: '/foo/bar/',
-        first_name: 'john',
-        last_name: 'smith',
-        summary_fields: {
-          foo: [
-            {
-              role: {
-                name: 'foo',
-                id: 2,
-              }
-            }
-          ],
-          direct_access: [
-            {
-              role: {
-                name: 'team user',
-                id: 3,
-              }
-            }
-          ]
-        }
-      }
-    ];
+    
     const wrapper = mount(
       <I18nProvider>
         <MemoryRouter>
@@ -163,7 +137,7 @@ describe('<AccessList />', () => {
     });
   });
 
-  test('test handleWarning, confirmDelete, and removeRole methods for Alert component', async (done) => {
+  test('test handleWarning, confirmDelete, and removeRole methods for Alert component', (done) => {
     const handleWarning = jest.spyOn(AccessList.prototype, 'handleWarning');
     const confirmDelete = jest.spyOn(AccessList.prototype, 'confirmDelete');
     const removeRole = jest.spyOn(AccessList.prototype, 'removeRole');
@@ -173,7 +147,7 @@ describe('<AccessList />', () => {
           <AccessList
             match={{ path: '/organizations/:id', url: '/organizations/1', params: { id: '0' } }}
             location={{ search: '', pathname: '/organizations/1/access' }}
-            getAccessList={() => ({ data: { count: 1, results: mockResults } })}
+            getAccessList={() => ({ data: { count: 1, results: mockData } })}
             removeRole={() => {}}
           />
         </MemoryRouter>
@@ -191,6 +165,53 @@ describe('<AccessList />', () => {
       alert.find('button[aria-label="confirm-delete"]').simulate('click');
       expect(confirmDelete).toHaveBeenCalled();
       expect(removeRole).toHaveBeenCalled();
+      done();
+    });
+  });
+
+  test('state is set appropriately when a user tries deleting a role', (done) => {
+    const wrapper = mount(
+      <I18nProvider>
+        <MemoryRouter>
+          <AccessList
+            match={{ path: '/organizations/:id', url: '/organizations/1', params: { id: '0' } }}
+            location={{ search: '', pathname: '/organizations/1/access' }}
+            getAccessList={() => ({ data: { count: 1, results: mockData } })}
+            removeRole={() => {}}
+          />
+        </MemoryRouter>
+      </I18nProvider>
+    ).find('AccessList');
+    
+    expect(wrapper.state().warningMsg).not.toBeDefined;
+    expect(wrapper.state().warningTitle).not.toBeDefined;
+    expect(wrapper.state().deleteType).not.toBeDefined;
+    expect(wrapper.state().deleteRoleId).not.toBeDefined;
+    expect(wrapper.state().deleteResourceId).not.toBeDefined;
+
+    setImmediate(() => {
+      const expected = [
+        {
+          deleteType: 'users'
+        },
+        { 
+          deleteRoleId: mockData[0].summary_fields.foo[0].role.id
+        },
+        {
+          deleteResourceId: mockData[0].id
+        }
+      ];
+      const rendered = wrapper.update().find('ChipButton');
+      rendered.find('button[aria-label="close"]').simulate('click');
+      const alert = wrapper.update().find('Alert');
+      alert.find('button[aria-label="confirm-delete"]').simulate('click');
+      expect(wrapper.state().warningTitle).not.toBe(null);
+      expect(wrapper.state().warningMsg).not.toBe(null);
+      expected.forEach(criteria => {
+        for (const prop in criteria) {
+          expect(wrapper.state()[prop]).toEqual(criteria[prop]);
+        }
+      })
       done();
     });
   });

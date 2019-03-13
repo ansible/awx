@@ -8,17 +8,13 @@ const mockAPIAccessList = {
   foo: 'bar',
 };
 
-const mockGetOrganzationAccessList = jest.fn(() => (
-  Promise.resolve(mockAPIAccessList)
-));
+const mockGetOrganzationAccessList = () => Promise.resolve(mockAPIAccessList);
 
 const mockResponse = {
   status: 'success',
 };
 
-const mockRemoveRole = jest.fn(() => (
-  Promise.resolve(mockResponse)
-));
+const mockRemoveRole = () => Promise.resolve(mockResponse);
 
 describe('<OrganizationAccess />', () => {
   test('initially renders succesfully', () => {
