@@ -60,7 +60,7 @@ import pytz
 from wsgiref.util import FileWrapper
 
 # AWX
-from awx.main.tasks import send_notifications
+from awx.main.tasks import send_notifications, update_inventory_computed_fields
 from awx.main.access import get_user_queryset
 from awx.api.filters import V1CredentialFilterBackend
 from awx.api.generics import (
@@ -83,6 +83,7 @@ from awx.main.utils import (
     getattrd,
     get_pk_from_dict,
     schedule_task_manager,
+    ignore_inventory_computed_fields
 )
 from awx.main.utils.encryption import encrypt_value
 from awx.main.utils.filters import SmartFilter
@@ -2079,12 +2080,16 @@ class InventorySourceHostsList(HostRelatedSearchMixin, SubListDestroyAPIView):
     check_sub_obj_permission = False
 
     def perform_list_destroy(self, instance_list):
-        # Activity stream doesn't record disassociation here anyway
-        # no signals-related reason to not bulk-delete
-        models.Host.groups.through.objects.filter(
-            host__inventory_sources=self.get_parent_object()
-        ).delete()
-        return super(InventorySourceHostsList, self).perform_list_destroy(instance_list)
+        inv_source = self.get_parent_object()
+        with ignore_inventory_computed_fields():
+            # Activity stream doesn't record disassociation here anyway
+            # no signals-related reason to not bulk-delete
+            models.Host.groups.through.objects.filter(
+                host__inventory_sources=inv_source
+            ).delete()
+            r = super(InventorySourceHostsList, self).perform_list_destroy(instance_list)
+        update_inventory_computed_fields.delay(inv_source.inventory_id, True)
+        return r
 
 
 class InventorySourceGroupsList(SubListDestroyAPIView):
@@ -2096,11 +2101,15 @@ class InventorySourceGroupsList(SubListDestroyAPIView):
     check_sub_obj_permission = False
 
     def perform_list_destroy(self, instance_list):
-        # Same arguments for bulk delete as with host list
-        models.Group.hosts.through.objects.filter(
-            group__inventory_sources=self.get_parent_object()
-        ).delete()
-        return super(InventorySourceGroupsList, self).perform_list_destroy(instance_list)
+        inv_source = self.get_parent_object()
+        with ignore_inventory_computed_fields():
+            # Same arguments for bulk delete as with host list
+            models.Group.hosts.through.objects.filter(
+                group__inventory_sources=inv_source
+            ).delete()
+            r = super(InventorySourceGroupsList, self).perform_list_destroy(instance_list)
+        update_inventory_computed_fields.delay(inv_source.inventory_id, True)
+        return r
 
 
 class InventorySourceUpdatesList(SubListAPIView):
