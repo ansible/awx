@@ -2,7 +2,7 @@
 # All Rights Reserved.
 
 from django.conf.urls import url, include
-from django.conf import settings  # NOQA
+from django.conf import settings
 from awx.main.views import (
     handle_400,
     handle_403,
