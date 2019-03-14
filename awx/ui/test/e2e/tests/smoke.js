@@ -9,7 +9,7 @@ const initializeData = () => {
     data.MACHINE_CREDENTIAL_NAME = `credential-machine-${id}`;
     data.ORGANIZATION_NAME = `organization-${id}`;
     data.PROJECT_NAME = `project-${id}`;
-    data.PROJECT_URL = 'https://github.com/jlaska/ansible-playbooks';
+    data.PROJECT_URL = 'https://github.com/ansible/test-playbooks';
     data.PROJECT_BRANCH = 'master';
     data.PLAYBOOK_NAME = 'multivault.yml';
     data.TEMPLATE_NAME = `template-${id}`;

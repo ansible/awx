@@ -376,7 +376,7 @@ def make_the_data():
                         organization=org,
                         defaults=dict(
                             created_by=next(creator_gen), modified_by=next(modifier_gen),
-                            scm_url='https://github.com/jlaska/ansible-playbooks.git',
+                            scm_url='https://github.com/ansible/test-playbooks.git',
                             scm_type='git',
                             playbook_files=[
                                 "check.yml", "debug-50.yml", "debug.yml", "debug2.yml",
