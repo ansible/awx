@@ -38,7 +38,7 @@
                 label: i18n._('Groups'),
                 key: true,
                 uiSref: "inventories.edit.groups.edit({group_id:group.id})",
-                columnClass: 'col-lg-6 col-md-6 col-sm-6 col-xs-6',
+                columnClass: 'col-lg-10 col-md-10 col-sm-10 col-xs-10',
                 class: 'InventoryManage-breakWord',
             }
         },
@@ -98,7 +98,7 @@
 
         fieldActions: {
 
-            columnClass: 'col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right',
+            columnClass: 'col-lg-2 col-md-2 col-sm-2 col-xs-2 text-right',
 
             edit: {
                 //label: 'Edit',
