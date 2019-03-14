@@ -39,7 +39,7 @@ describe('<Search />', () => {
     expect(onSearch).toBeCalledWith('test-321');
   });
 
-  test('onSearchDropdownToggle properly updates state', async () => {
+  test('handleDropdownToggle properly updates state', async () => {
     const columns = [{ name: 'Name', key: 'name', isSortable: true }];
     const onSearch = jest.fn();
     const wrapper = mount(
@@ -52,11 +52,11 @@ describe('<Search />', () => {
       </I18nProvider>
     ).find('Search');
     expect(wrapper.state('isSearchDropdownOpen')).toEqual(false);
-    wrapper.instance().onSearchDropdownToggle(true);
+    wrapper.instance().handleDropdownToggle(true);
     expect(wrapper.state('isSearchDropdownOpen')).toEqual(true);
   });
 
-  test('onSearchDropdownSelect properly updates state', async () => {
+  test('handleDropdownSelect properly updates state', async () => {
     const columns = [
       { name: 'Name', key: 'name', isSortable: true },
       { name: 'Description', key: 'description', isSortable: true }
@@ -72,7 +72,7 @@ describe('<Search />', () => {
       </I18nProvider>
     ).find('Search');
     expect(wrapper.state('searchKey')).toEqual('name');
-    wrapper.instance().onSearchDropdownSelect({ target: { innerText: 'Description' } });
+    wrapper.instance().handleDropdownSelect({ target: { innerText: 'Description' } });
     expect(wrapper.state('searchKey')).toEqual('description');
   });
 });

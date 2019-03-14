@@ -24,16 +24,16 @@ class Sort extends React.Component {
       isSortDropdownOpen: false,
     };
 
-    this.onSortDropdownToggle = this.onSortDropdownToggle.bind(this);
-    this.onSortDropdownSelect = this.onSortDropdownSelect.bind(this);
-    this.onSort = this.onSort.bind(this);
+    this.handleDropdownToggle = this.handleDropdownToggle.bind(this);
+    this.handleDropdownSelect = this.handleDropdownSelect.bind(this);
+    this.handleSort = this.handleSort.bind(this);
   }
 
-  onSortDropdownToggle (isSortDropdownOpen) {
+  handleDropdownToggle (isSortDropdownOpen) {
     this.setState({ isSortDropdownOpen });
   }
 
-  onSortDropdownSelect ({ target }) {
+  handleDropdownSelect ({ target }) {
     const { columns, onSort, sortOrder } = this.props;
     const { innerText } = target;
 
@@ -43,7 +43,7 @@ class Sort extends React.Component {
     onSort(searchKey, sortOrder);
   }
 
-  onSort () {
+  handleSort () {
     const { onSort, sortedColumnKey, sortOrder } = this.props;
     const newSortOrder = sortOrder === 'ascending' ? 'descending' : 'ascending';
 
@@ -86,13 +86,13 @@ class Sort extends React.Component {
             { sortDropdownItems.length > 1 && (
               <Dropdown
                 style={{ marginRight: '20px' }}
-                onToggle={this.onSortDropdownToggle}
-                onSelect={this.onSortDropdownSelect}
+                onToggle={this.handleDropdownToggle}
+                onSelect={this.handleDropdownSelect}
                 direction={up}
                 isOpen={isSortDropdownOpen}
                 toggle={(
                   <DropdownToggle
-                    onToggle={this.onSortDropdownToggle}
+                    onToggle={this.handleDropdownToggle}
                   >
                     {sortedColumnName}
                   </DropdownToggle>
@@ -101,7 +101,7 @@ class Sort extends React.Component {
               />
             )}
             <Button
-              onClick={this.onSort}
+              onClick={this.handleSort}
               variant="plain"
               aria-label={i18n._(t`Sort`)}
             >

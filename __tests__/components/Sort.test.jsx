@@ -110,7 +110,7 @@ describe('<Sort />', () => {
       </I18nProvider>
     ).find('Sort');
 
-    wrapper.instance().onSortDropdownSelect({ target: { innerText: 'Bar' } });
+    wrapper.instance().handleDropdownSelect({ target: { innerText: 'Bar' } });
     expect(onSort).toBeCalledWith('bar', 'ascending');
   });
 
@@ -135,7 +135,7 @@ describe('<Sort />', () => {
       </I18nProvider>
     ).find('Sort');
     expect(wrapper.state('isSortDropdownOpen')).toEqual(false);
-    wrapper.instance().onSortDropdownToggle(true);
+    wrapper.instance().handleDropdownToggle(true);
     expect(wrapper.state('isSortDropdownOpen')).toEqual(true);
   });
 

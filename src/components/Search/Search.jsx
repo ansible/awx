@@ -23,16 +23,16 @@ class Search extends React.Component {
     };
 
     this.handleSearchInputChange = this.handleSearchInputChange.bind(this);
-    this.onSearchDropdownToggle = this.onSearchDropdownToggle.bind(this);
-    this.onSearchDropdownSelect = this.onSearchDropdownSelect.bind(this);
-    this.onSearch = this.onSearch.bind(this);
+    this.handleDropdownToggle = this.handleDropdownToggle.bind(this);
+    this.handleDropdownSelect = this.handleDropdownSelect.bind(this);
+    this.handleSearch = this.handleSearch.bind(this);
   }
 
-  onSearchDropdownToggle (isSearchDropdownOpen) {
+  handleDropdownToggle (isSearchDropdownOpen) {
     this.setState({ isSearchDropdownOpen });
   }
 
-  onSearchDropdownSelect ({ target }) {
+  handleDropdownSelect ({ target }) {
     const { columns } = this.props;
     const { innerText } = target;
 
@@ -40,7 +40,7 @@ class Search extends React.Component {
     this.setState({ isSearchDropdownOpen: false, searchKey });
   }
 
-  onSearch () {
+  handleSearch () {
     const { searchValue } = this.state;
     const { onSearch } = this.props;
 
@@ -78,13 +78,13 @@ class Search extends React.Component {
           <div className="pf-c-input-group">
             <Dropdown
               className="searchKeyDropdown"
-              onToggle={this.onSearchDropdownToggle}
-              onSelect={this.onSearchDropdownSelect}
+              onToggle={this.handleDropdownToggle}
+              onSelect={this.handleDropdownSelect}
               direction={up}
               isOpen={isSearchDropdownOpen}
               toggle={(
                 <DropdownToggle
-                  onToggle={this.onSearchDropdownToggle}
+                  onToggle={this.handleDropdownToggle}
                 >
                   {searchColumnName}
                 </DropdownToggle>
@@ -101,7 +101,7 @@ class Search extends React.Component {
             <Button
               variant="tertiary"
               aria-label={i18n._(t`Search`)}
-              onClick={this.onSearch}
+              onClick={this.handleSearch}
             >
               <i className="fas fa-search" aria-hidden="true" />
             </Button>
