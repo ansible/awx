@@ -26,6 +26,10 @@ const mockData = [
 ];
 
 describe('<OrganizationAccessList />', () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   test('initially renders succesfully', () => {
     mount(
       <I18nProvider>
