@@ -45,10 +45,6 @@ const hiddenStyle = {
   display: 'none',
 };
 
-const buttonGroupStyle = {
-  float: 'right',
-};
-
 const Detail = ({ label, value, url, customStyles }) => {
   let detail = null;
   if (value) {
@@ -335,7 +331,7 @@ class OrganizationAccessList extends React.Component {
                 action={<AlertActionCloseButton onClose={this.hideWarning} />}
               >
                 {warningMsg}
-                <span style={buttonGroupStyle}>
+                <span className="awx-c-form-action-group">
                   <Button variant="danger" aria-label="confirm-delete" onClick={this.confirmDelete}>Delete</Button>
                   <Button variant="secondary" onClick={this.hideWarning}>Cancel</Button>
                 </span>

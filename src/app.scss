@@ -258,14 +258,24 @@
   position: relative;
 }
 
+// PF Alert notification component overrides
+.pf-c-alert__title {
+  --pf-c-alert__title--PaddingTop: 20px;
+  --pf-c-alert__title--PaddingRight: 20px;
+  --pf-c-alert__title--PaddingBottom: 20px;
+  --pf-c-alert__title--PaddingLeft: 20px;
+}
+
+.pf-c-alert__description {
+  --pf-c-alert__description--PaddingRight: 20px;
+  --pf-c-alert__description--PaddingBottom: 20px;
+  --pf-c-alert__description--PaddingLeft: 20px;
+}
+
 .pf-c-alert {
   position: absolute;
   width: 100%;
   z-index: 20;
-
-  button {
-    margin-right: 20px;
-  }
 }
 
 .pf-c-alert__icon {
@@ -281,4 +291,14 @@
   height: 24px;
   margin-right: 10px;
   margin-bottom: 10px;
+}
+
+.awx-c-form-action-group {
+  float: right;
+  display: block;
+
+  .pf-m-danger {
+    margin-top: 20px;
+    margin-right: 20px;
+  }
 }
