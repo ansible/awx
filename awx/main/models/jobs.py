@@ -503,6 +503,10 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         default=None,
         on_delete=models.SET_NULL,
     )
+    runner_job_ident = models.TextField(
+        blank=True,
+        default='',
+    )
     hosts = models.ManyToManyField(
         'Host',
         related_name='jobs',

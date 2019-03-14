@@ -436,6 +436,8 @@ DEVSERVER_DEFAULT_PORT = '8013'
 os.environ.setdefault('DJANGO_LIVE_TEST_SERVER_ADDRESS', 'localhost:9013-9199')
 
 BROKER_DURABILITY = True
+RUNNER_RECEIVER_URL = "tcp://*:5556"
+
 BROKER_POOL_LIMIT = None
 BROKER_URL = 'amqp://guest:guest@localhost:5672//'
 CELERY_DEFAULT_QUEUE = 'awx_private_queue'

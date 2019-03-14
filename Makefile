@@ -261,6 +261,7 @@ server_noattach:
 	tmux split-window -h 'exec make runworker'
 	tmux split-window -v 'exec make nginx'
 	tmux new-window 'exec make receiver'
+	tmux split-window -v 'exec make runner_receiver'
 	tmux select-window -t awx:2
 	tmux rename-window 'Extra Services'
 	tmux select-window -t awx:0
@@ -317,12 +318,19 @@ dispatcher:
 	$(PYTHON) manage.py run_dispatcher
 
 
-# Run to start the zeromq callback receiver
+# Run to start the dispatcher-based callback receiver
 receiver:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	$(PYTHON) manage.py run_callback_receiver
+
+# Run to start the Runner event receiver
+runner_receiver:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/awx/bin/activate; \
+	fi; \
+	$(PYTHON) manage.py runner_receiver
 
 nginx:
 	nginx -g "daemon off;"

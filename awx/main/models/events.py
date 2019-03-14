@@ -345,7 +345,7 @@ class BasePlaybookEvent(CreatedModifiedModel):
                     update_fields.append(field)
 
             # Update host related field from host_name.
-            if hasattr(self, 'job') and not self.host_id and self.host_name:
+            if hasattr(self, 'job') and not self.host_id and self.host_name and self.job.inventory:
                 if self.job.inventory.kind == 'smart':
                     # optimization to avoid calling inventory.hosts, which
                     # can take a long time to run under some circumstances
@@ -383,7 +383,8 @@ class BasePlaybookEvent(CreatedModifiedModel):
                 hostnames = self._hostnames()
                 self._update_host_summary_from_stats(hostnames)
                 try:
-                    self.job.inventory.update_computed_fields()
+                    if self.job.inventory:
+                        self.job.inventory.update_computed_fields()
                 except DatabaseError:
                     logger.exception('Computed fields database error saving event {}'.format(self.pk))
 
@@ -472,11 +473,12 @@ class JobEvent(BasePlaybookEvent):
                     hostnames.update(v.keys())
             except AttributeError: # In case event_data or v isn't a dict.
                 pass
-        qs = self.job.inventory.hosts.all()
-        qs = qs.filter(models.Q(name__in=hostnames) | models.Q(pk__in=extra_host_pks))
-        qs = qs.exclude(job_events__pk=self.id).only('id')
-        for host in qs:
-            self.hosts.add(host)
+        if self.job.inventory:
+            qs = self.job.inventory.hosts.all()
+            qs = qs.filter(models.Q(name__in=hostnames) | models.Q(pk__in=extra_host_pks))
+            qs = qs.exclude(job_events__pk=self.id).only('id')
+            for host in qs:
+                self.hosts.add(host)
         if self.parent_uuid:
             parent = JobEvent.objects.filter(uuid=self.parent_uuid)
             if parent.exists():
