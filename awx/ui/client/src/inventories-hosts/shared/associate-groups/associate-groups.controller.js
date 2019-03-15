@@ -5,9 +5,9 @@
  *************************************************/
 
  export default ['$scope', '$rootScope', 'ProcessErrors', 'GetBasePath', 'generateList',
- '$state', 'Rest', '$q', 'Wait', '$window', 'QuerySet', 'GroupList',
+ '$state', 'Rest', '$q', 'Wait', '$window', 'QuerySet', 'GroupList', 'i18n',
  function($scope, $rootScope, ProcessErrors, GetBasePath, generateList,
-     $state, Rest, $q, Wait, $window, qs, GroupList) {
+     $state, Rest, $q, Wait, $window, qs, GroupList, i18n) {
      $scope.$on("linkLists", function() {
 
          init();
@@ -26,6 +26,8 @@
              if($state.params.group_id) {
                  $scope.associate_group_default_params.not__id = $state.params.group_id;
                  $scope.associate_group_queryset.not__id = $state.params.group_id;
+                 $scope.associate_group_default_params.not__parents = $state.params.group_id;
+                 $scope.associate_group_queryset.not__parents = $state.params.group_id;
              }
 
              let list = _.cloneDeep(GroupList);
@@ -39,6 +41,7 @@
                  selectedRows: 'selectedItems',
                  availableRows: 'associate_groups'
              };
+             list.emptyListText = i18n._('No groups to add');
              delete list.actions;
              delete list.fieldActions;
              delete list.fields.failed_hosts;

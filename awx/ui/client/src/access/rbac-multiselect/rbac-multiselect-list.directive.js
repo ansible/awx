@@ -17,6 +17,7 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
             allSelected: '=',
             view: '@',
             dataset: '=',
+            defaultParams: '=?',
             objectType: '='
         },
         template: "<div class='addPermissionsList-inner'></div>",
@@ -149,6 +150,11 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
 
             scope.list = list;
             scope[`${list.iterator}_dataset`] = scope.dataset.data;
+
+            if (scope.defaultParams) {
+                scope[`${list.iterator}_default_params`] = scope.defaultParams;
+            }
+
             scope[`${list.name}`] = scope[`${list.iterator}_dataset`].results;
 
             scope.$watch(list.name, function(){

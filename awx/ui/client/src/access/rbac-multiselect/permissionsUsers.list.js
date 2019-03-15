@@ -15,7 +15,7 @@
         multiSelectExtended: true,
         index: false,
         hover: true,
-        emptyListText : i18n._('No Users exist'),
+        emptyListText: i18n._('No Users to add'),
         disableRow: "{{ objectType === 'organization' && user.summary_fields.user_capabilities.edit === false }}",
         disableRowValue: "objectType === 'organization' && user.summary_fields.user_capabilities.edit === false",
         disableTooltip: {

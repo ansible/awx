@@ -5,9 +5,9 @@
  *************************************************/
 
  export default ['$scope', '$rootScope', 'ProcessErrors', 'GetBasePath', 'generateList',
- '$state', 'Rest', '$q', 'Wait', '$window', 'QuerySet', 'RelatedHostsListDefinition',
+ '$state', 'Rest', '$q', 'Wait', '$window', 'QuerySet', 'RelatedHostsListDefinition', 'i18n',
  function($scope, $rootScope, ProcessErrors, GetBasePath, generateList,
-     $state, Rest, $q, Wait, $window, qs, RelatedHostsListDefinition) {
+     $state, Rest, $q, Wait, $window, qs, RelatedHostsListDefinition, i18n) {
      $scope.$on("linkLists", function() {
 
          init();
@@ -23,6 +23,11 @@
                  page_size: 5
              };
 
+             if ($state.params.group_id) {
+                 $scope.associate_host_default_params.not__groups = $state.params.group_id;
+                 $scope.associate_host_queryset.not__groups = $state.params.group_id;
+             }
+
              let list = _.cloneDeep(RelatedHostsListDefinition);
              list.basePath = GetBasePath('inventory') + $state.params.inventory_id + '/hosts';
              list.iterator = 'associate_host';
@@ -36,6 +41,7 @@
                  selectedRows: 'selectedItems',
                  availableRows: 'associate_hosts'
              };
+             list.emptyListText = i18n._('No hosts to add');
              delete list.fields.toggleHost;
              delete list.fields.active_failures;
              delete list.fields.groups;

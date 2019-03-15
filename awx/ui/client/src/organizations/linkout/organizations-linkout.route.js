@@ -54,7 +54,7 @@ let lists = [{
         OrgUsersDataset: ['OrgUserList', 'QuerySet', '$stateParams', 'GetBasePath',
             function(list, qs, $stateParams, GetBasePath) {
                 let path = GetBasePath(list.basePath) || list.basePath;
-                return qs.search(path, $stateParams.user_search);
+                return qs.search(path, $stateParams.org_user_search);
             }
         ],
         OrgUserList: ['UserList', 'GetBasePath', '$stateParams', 'i18n', function(UserList, GetBasePath, $stateParams, i18n) {

@@ -584,27 +584,97 @@ function($injector, $stateExtender, $log, i18n) {
                     squashSearchUrl: true,
                     url: '/add-user',
                     params: {
-                        user_search: {
+                        add_user_search: {
                             value: { order_by: 'username', page_size: '5' },
-                            dynamic: true,
+                            dynamic: true
                         }
                     },
                     views: {
                         [`modal@${formStateDefinition.name}`]: {
-                            template: `<add-rbac-resource users-dataset="$resolve.usersDataset" selected="allSelected" resource-data="$resolve.resourceData" without-team-permissions="true" title="` + i18n._('Add Users') + `"></add-rbac-resource>`
+                            template: `<add-rbac-resource default-params="$resolve.defaultParams" users-dataset="$resolve.usersDataset" selected="allSelected" resource-data="$resolve.resourceData" without-team-permissions="true" title="` + i18n._('Add Users') + `"></add-rbac-resource>`
                         }
                     },
                     ncyBreadcrumb:{
                         skip:true
                     },
                     resolve: {
-                        usersDataset: ['addPermissionsUsersList', 'QuerySet', '$stateParams', 'GetBasePath',
-                            function(list, qs, $stateParams, GetBasePath) {
-                                let path = GetBasePath(list.basePath) || GetBasePath(list.name);
-                                return qs.search(path, $stateParams.user_search);
-
+                        orgId:  ['$stateParams', 'Rest', 'GetBasePath', function($stateParams, Rest, GetBasePath) {
+                            let id;
+                            if ($stateParams.team_id) {
+                                Rest.setUrl(GetBasePath('teams') + `${$stateParams.team_id}`);
+                                id = Rest.get().then(({data}) => {
+                                    return data.summary_fields.organization.id;
+                                });
+                            } else {
+                                id = null;
                             }
-                        ]
+                            return id;
+                        }],
+                        teamRoles:  ['$stateParams', 'Rest', 'GetBasePath', 'i18n', function($stateParams, Rest, GetBasePath, i18n) {
+                            let roles = null;
+                            if ($stateParams.team_id) {
+                                const basePath = GetBasePath('teams') + `${$stateParams.team_id}/object_roles`;
+                                Rest.setUrl(basePath);
+                                roles = Rest.get().then(({data}) => {
+                                    return data.results
+                                        .filter(({name}) => name === i18n._('Member') || name === i18n._('Admin'))
+                                        .map(({id}) => id)
+                                        .join(',');
+                                });
+                            }
+                            return roles;
+                        }],
+                        orgAdminRole:  ['$stateParams', 'orgId', 'Rest', 'GetBasePath', 'i18n',
+                            function($stateParams, orgId, Rest, GetBasePath, i18n) {
+                                let orgIdToCheck = $stateParams.organization_id || orgId;
+                                let role = null;
+                                if (orgIdToCheck) {
+                                    const basePath = GetBasePath('organizations') + `${orgIdToCheck}/object_roles`;
+                                    Rest.setUrl(basePath);
+                                    role = Rest.get().then(({data}) => {
+                                        return data.results
+                                            .filter(({name}) => name === i18n._('Admin'))
+                                            .map(({id}) => id)[0];
+                                    });
+                                }
+                                return role;
+                        }],
+                        orgMemberRole:  ['$stateParams', 'Rest', 'GetBasePath', 'i18n', function($stateParams, Rest, GetBasePath, i18n) {
+                            let role = null;
+                            if ($stateParams.organization_id) {
+                                const basePath = GetBasePath('organizations') + `${$stateParams.organization_id}/object_roles`;
+                                Rest.setUrl(basePath);
+                                role = Rest.get().then(({data}) => {
+                                    return data.results
+                                        .filter(({name}) => name === i18n._('Member'))
+                                        .map(({id}) => id)[0];
+                                });
+                            }
+                            return role;
+                        }],
+                        rolesToExclude: ['teamRoles', 'orgAdminRole', 'orgMemberRole', '$stateParams',
+                            function(teamRoles, orgAdminRole, orgMemberRole, $stateParams) {
+                                let roles = null;
+                                if ($stateParams.team_id) {
+                                    roles = `${teamRoles},${orgAdminRole}`;
+                                } else if ($stateParams.organization_id) {
+                                    roles = `${orgAdminRole},${orgMemberRole}`;
+                                }
+                                return roles;
+                        }],
+                        usersDataset: ['addPermissionsUsersList', 'QuerySet', '$stateParams', 'GetBasePath', 'rolesToExclude',
+                            function(list, qs, $stateParams, GetBasePath, rolesToExclude) {
+                                let path = GetBasePath(list.basePath) || GetBasePath(list.name);
+                                if (rolesToExclude) {
+                                    $stateParams.add_user_search.not__roles__in = rolesToExclude;
+                                    $stateParams.add_user_search.is_superuser = 'false';
+                                }
+                                return qs.search(path, $stateParams.add_user_search);
+                            }
+                        ],
+                        defaultParams: ['$stateParams', 'usersDataset', function($stateParams) {
+                            return $stateParams.add_user_search;
+                        }]
                     },
                     onExit: function($state) {
                         if ($state.transition) {
