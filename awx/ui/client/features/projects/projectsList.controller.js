@@ -80,6 +80,8 @@ function projectsListController (
     // Remove this event listener once the page and page_size params
     // are represented in the url.
     $scope.$on('updateDataset', (event, dataset, queryset) => {
+        vm.dataset = dataset;
+        vm.projects = dataset.results;
         paginateQuerySet = queryset;
     });
 
@@ -97,12 +99,6 @@ function projectsListController (
         $state.go('.', {
             project_search: queryParams
         }, { notify: false, location: 'replace' });
-
-        qs.search(GetBasePath(vm.list.basePath), queryParams)
-            .then(({ data }) => {
-                vm.dataset = data;
-                vm.projects = vm.dataset.results;
-            });
     };
 
     $scope.$on('ws-jobs', (e, data) => {

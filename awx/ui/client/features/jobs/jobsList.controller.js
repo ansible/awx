@@ -74,6 +74,8 @@ function ListJobsController (
     // are represented in the url.
     $scope.$on('updateDataset', (event, dataset, queryset) => {
         paginateQuerySet = queryset;
+        vm.jobs = dataset.results;
+        vm.job_dataset = dataset;
     });
 
     vm.onToolbarSort = (sort) => {
@@ -90,12 +92,6 @@ function ListJobsController (
         $state.go('.', {
             job_search: queryParams
         }, { notify: false, location: 'replace' });
-
-        qs.search(SearchBasePath, queryParams)
-            .then(({ data }) => {
-                vm.jobs = data.results;
-                vm.job_dataset = data;
-            });
     };
 
     $scope.$watch('vm.job_dataset.count', () => {

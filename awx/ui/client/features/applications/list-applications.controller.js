@@ -12,10 +12,11 @@ function ListApplicationsController (
     Prompt,
     resolvedModels,
     strings,
-    Wait,
+    Wait
 ) {
     const vm = this || {};
     const application = resolvedModels;
+    let paginateQuerySet = {};
 
     vm.strings = strings;
     vm.activeId = $state.params.application_id;
@@ -32,14 +33,60 @@ function ListApplicationsController (
     $scope[key] = Dataset.data;
     vm.applicationsCount = Dataset.data.count;
     $scope[name] = Dataset.data.results;
-    $scope.$on('updateDataset', (e, dataset) => {
+
+    $scope.$on('updateDataset', (e, dataset, queryset) => {
         $scope[key] = dataset;
         $scope[name] = dataset.results;
         vm.applicationsCount = dataset.count;
+        // Remove paginateQuerySet once the page and page_size params
+        // are represented in the url.
+        paginateQuerySet = queryset;
     });
 
     vm.tooltips = {
         add: strings.get('tooltips.ADD')
+    };
+
+    const toolbarSortDefault = {
+        label: `${strings.get('sort.NAME_ASCENDING')}`,
+        value: 'name'
+    };
+
+    vm.toolbarSortOptions = [
+        toolbarSortDefault,
+        { label: `${strings.get('sort.NAME_DESCENDING')}`, value: '-name' }
+    ];
+
+    vm.toolbarSortValue = toolbarSortDefault;
+
+    function setToolbarSort () {
+        const orderByValue = _.get($state.params, 'application_search.order_by');
+        const sortValue = _.find(vm.toolbarSortOptions, (option) => option.value === orderByValue);
+        if (sortValue) {
+            vm.toolbarSortValue = sortValue;
+        } else {
+            vm.toolbarSortValue = toolbarSortDefault;
+        }
+    }
+
+    $scope.$watch('$state.params', () => {
+        setToolbarSort();
+    }, true);
+
+    vm.onToolbarSort = (sort) => {
+        vm.toolbarSortValue = sort;
+
+        const queryParams = Object.assign(
+            {},
+            $state.params.application_search,
+            paginateQuerySet,
+            { order_by: sort.value }
+        );
+
+        // Update URL with params
+        $state.go('.', {
+            application_search: queryParams
+        }, { notify: false, location: 'replace' });
     };
 
     vm.getModified = app => {
