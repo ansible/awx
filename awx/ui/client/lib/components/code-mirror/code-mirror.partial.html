@@ -44,15 +44,15 @@
     <textarea
         ng-disabled="disabled"
         rows="6"
-        ng-model="variables"
-        name="variables"
+        ng-model="variables.value"
+        name="variablesName"
         class="form-control Form-textArea"
         id="{{ vm.name }}">
     </textarea>
     <at-code-mirror-modal
         name="{{ vm.modalName }}"
         ng-if="vm.expanded"
-        variables="{{ variables }}"
+        variables="variables"
         tooltip="{{ tooltip || vm.strings.get('code_mirror.tooltip.TOOLTIP') }}"
         label="{{ label || vm.strings.get('code_mirror.label.VARIABLES') }}"
         disabled="{{ disabled || false }}"

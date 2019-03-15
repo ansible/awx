@@ -11,21 +11,30 @@ function atCodeMirrorController (
     ParseVariableString
 ) {
     const vm = this;
-    const variables = `${$scope.name}_variables`;
+    const variablesName = `${$scope.name}_variables`;
     function init (vars, name) {
+        console.log('init', $scope, vars);
         if ($scope.disabled === 'true') {
             $scope.disabled = true;
         } else if ($scope.disabled === 'false') {
             $scope.disabled = false;
         }
-        $scope[variables] = ParseVariableString(_.cloneDeep(vars));
+        $scope.variablesName = variablesName;
+        // $scope[variablesName] = ParseVariableString(_.cloneDeep(vars));
+        $scope.variables = {
+            value: ParseVariableString(_.cloneDeep(vars)),
+        };
+        $scope.value = $scope.variables.value;
         $scope.parseType = ParseType;
         const options = {
             scope: $scope,
-            variable: variables,
+            variable: 'value', // variablesName,
             parse_variable: ParseVariable,
             field_id: name,
-            readOnly: $scope.disabled
+            readOnly: $scope.disabled,
+            onChange: (value) => {
+                console.log('change', value);
+            },
         };
         ParseTypeChange(options);
     }
@@ -41,7 +50,7 @@ function atCodeMirrorController (
         vm.expanded = false;
     }
 
-    vm.variables = variables;
+    // vm.variablesName = variablesName;
     vm.name = $scope.name;
     vm.modalName = `${vm.name}_modal`;
     vm.strings = strings;

@@ -11,10 +11,10 @@ function atCodeMirrorModalController (
     $scope,
     strings,
     ParseTypeChange,
-    ParseVariableString
+    // ParseVariableString
 ) {
     const vm = this;
-    const variables = `${$scope.name}_variables`;
+    const variablesName = `${$scope.name}_variables`;
     function resize () {
         if ($scope.disabled === 'true') {
             $scope.disabled = true;
@@ -28,7 +28,7 @@ function atCodeMirrorModalController (
     }
 
     function toggle () {
-        $scope.parseTypeChange('parseType', variables);
+        $scope.parseTypeChange('parseType', variablesName);
         setTimeout(resize, 0);
     }
 
@@ -39,11 +39,12 @@ function atCodeMirrorModalController (
             $scope.disabled = false;
         }
         $(CodeMirrorModalID).modal('show');
-        $scope[variables] = ParseVariableString(_.cloneDeep(vars));
+        // $scope[variablesName] = ParseVariableString(_.cloneDeep(vars));
         $scope.parseType = ParseType;
+        $scope.value = $scope.variables.value;
         const options = {
             scope: $scope,
-            variable: variables,
+            variable: 'value', // variablesName,
             parse_variable: ParseVariable,
             field_id: name,
             readOnly: $scope.disabled
@@ -58,15 +59,19 @@ function atCodeMirrorModalController (
         $(`${CodeMirrorModalID} .modal-dialog`).on('resize', resize);
     }
 
-    vm.variables = variables;
+    vm.variablesName = variablesName;
     vm.name = $scope.name;
     vm.strings = strings;
     vm.toggle = toggle;
+    $scope.close = () => {
+        $scope.variables.value = $scope.value;
+        $scope.closeFn();
+    };
     if ($scope.init) {
         $scope.init = init;
     }
     angular.element(document).ready(() => {
-        init($scope.variables, $scope.name);
+        init($scope.variablesName, $scope.name);
     });
 }
 
@@ -90,7 +95,7 @@ function atCodeMirrorModal () {
             label: '@',
             labelClass: '@',
             tooltip: '@',
-            variables: '@',
+            variables: '=',
             name: '@',
             closeFn: '&'
         }
