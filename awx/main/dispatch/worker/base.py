@@ -4,6 +4,7 @@
 import os
 import logging
 import signal
+import sys
 from uuid import UUID
 from queue import Empty as QueueEmpty
 
@@ -13,7 +14,10 @@ from kombu.mixins import ConsumerMixin
 
 from awx.main.dispatch.pool import WorkerPool
 
-logger = logging.getLogger('awx.main.dispatch')
+if 'run_callback_receiver' in sys.argv:
+    logger = logging.getLogger('awx.main.commands.run_callback_receiver')
+else:
+    logger = logging.getLogger('awx.main.dispatch')
 
 
 def signame(sig):
@@ -108,7 +112,7 @@ class AWXConsumer(ConsumerMixin):
 
     def stop(self, signum, frame):
         self.should_stop = True  # this makes the kombu mixin stop consuming
-        logger.debug('received {}, stopping'.format(signame(signum)))
+        logger.warn('received {}, stopping'.format(signame(signum)))
         self.worker.on_stop()
         raise SystemExit()
 
