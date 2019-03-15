@@ -1,6 +1,7 @@
 import logging
 import os
 import random
+import sys
 import traceback
 from uuid import uuid4
 
@@ -18,7 +19,10 @@ import psutil
 from awx.main.models import UnifiedJob
 from awx.main.dispatch import reaper
 
-logger = logging.getLogger('awx.main.dispatch')
+if 'run_callback_receiver' in sys.argv:
+    logger = logging.getLogger('awx.main.commands.run_callback_receiver')
+else:
+    logger = logging.getLogger('awx.main.dispatch')
 
 
 class PoolWorker(object):
