@@ -53,15 +53,12 @@
                 </div>
             </div>
             <div class="modal-body">
-                {{extra_variables}}
-                :
-                {{variables.value}}
                 <textarea
                     ng-disabled="disabled"
-                    ng-model="extra_variables"
+                    ng-model="modalVars"
                     name="extra_variables"
                     class="form-control Form-textArea"
-                    id="{{ vm.name }}">
+                    id="variables_modal">
                 </textarea>
             </div>
             <div class="modal-footer">

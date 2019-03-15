@@ -81,6 +81,7 @@ function(i18n) {
             // },
             inventory_variables: {
                 realName: 'variables',
+                root: 'inventory',
                 label: i18n._('Variables'),
                 type: 'code_mirror',
                 class: 'Form-formGroup--fullWidth',

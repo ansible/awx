@@ -23,7 +23,7 @@
                             type="radio"
                             value="yaml"
                             ng-model="parseType"
-                            ng-change="parseTypeChange('parseType', vm.variables)"
+                            ng-change="parseTypeChange('parseType', 'variables')"
                             class="ng-pristine ng-untouched ng-valid ng-not-empty">
                                 {{ vm.strings.get('label.YAML')}}
                     </label>
@@ -32,7 +32,7 @@
                             type="radio"
                             value="json"
                             ng-model="parseType"
-                            ng-change="parseTypeChange('parseType', vm.variables)"
+                            ng-change="parseTypeChange('parseType', 'variables')"
                             class="ng-pristine ng-untouched ng-valid ng-not-empty">
                                 {{ vm.strings.get('label.JSON')}}
                     </label>
@@ -44,18 +44,18 @@
     <textarea
         ng-disabled="disabled"
         rows="6"
-        ng-model="variables.value"
-        name="variablesName"
+        ng-model="variables"
+        name="{{ vm.name }}_variables"
         class="form-control Form-textArea"
-        id="{{ vm.name }}">
+        id="{{ vm.name }}_variables">
     </textarea>
     <at-code-mirror-modal
-        name="{{ vm.modalName }}"
+        name="{{ vm.name }}"
         ng-if="vm.expanded"
-        variables="variables"
+        modal-vars="variables"
         tooltip="{{ tooltip || vm.strings.get('code_mirror.tooltip.TOOLTIP') }}"
         label="{{ label || vm.strings.get('code_mirror.label.VARIABLES') }}"
         disabled="{{ disabled || false }}"
-        close-fn="vm.close()">
+        close-fn="vm.close">
     </at-code-mirror-modal>
 </div>
