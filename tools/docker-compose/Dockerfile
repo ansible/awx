@@ -7,7 +7,7 @@ ADD Makefile /tmp/Makefile
 RUN mkdir /tmp/requirements
 
 RUN yum -y update && yum -y install curl epel-release && yum -y install https://centos7.iuscommunity.org/ius-release.rpm
-RUN yum -y localinstall http://download.postgresql.org/pub/repos/yum/9.4/redhat/rhel-6-x86_64/pgdg-centos94-9.4-3.noarch.rpm
+RUN yum -y localinstall https://download.postgresql.org/pub/repos/yum/9.4/redhat/rhel-6-x86_64/pgdg-centos94-9.4-3.noarch.rpm
 RUN curl --silent --location https://rpm.nodesource.com/setup_8.x | bash -
 
 RUN yum -y update && yum -y install openssh-server ansible mg vim tmux \
