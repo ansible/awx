@@ -117,7 +117,7 @@
 
          $scope.testNotification = function() {
              var name = $filter('sanitize')(this.notification_template.name),
-                 pending_retries = 10;
+                 pending_retries = 25;
 
              Rest.setUrl(defaultUrl + this.notification_template.id + '/test/');
              Rest.post({})
@@ -131,7 +131,7 @@
                      } else {
                          ProcessErrors($scope, data, status, null, {
                              hdr: 'Error!',
-                             msg: 'Call to notifcatin templates failed. Notification returned status: ' + status
+                             msg: 'Call to notification templates failed. Notification returned status: ' + status
                          });
                      }
                  })
@@ -152,9 +152,14 @@
                                      content: `<i class="fa fa-check-circle Toast-successIcon"></i> <b>${name}:</b> Notification sent.`
                                  });
                                  $state.reload();
+                             } else if (res && res.data && res.data.status && res.data.status === "failed" && res.data.error === "timed out") {
+                                 ngToast.danger({
+                                     content: `<div><i class="fa fa-exclamation-triangle Toast-successIcon"></i> <b>${name}:</b> ${i18n._("Notification timed out.")}</div>`
+                                 });
+                                 $state.reload();
                              } else if (res && res.data && res.data.status && res.data.status === "failed") {
                                  ngToast.danger({
-                                     content: `<i class="fa fa-exclamation-triangle Toast-successIcon"></i> <b>${name}:</b> Notification failed.`
+                                     content: `<div><i class="fa fa-exclamation-triangle Toast-successIcon"></i> <b>${name}:</b> Notification failed.</div><div>${res.data.error}</div>`
                                  });
                                  $state.reload();
                              } else if (res && res.data && res.data.status && res.data.status === "pending" && pending_retries > 0) {

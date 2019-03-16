@@ -17,7 +17,8 @@ class CustomEmailBackend(EmailBackend):
                        "use_tls": {"label": "Use TLS", "type": "bool"},
                        "use_ssl": {"label": "Use SSL", "type": "bool"},
                        "sender": {"label": "Sender Email", "type": "string"},
-                       "recipients": {"label": "Recipient List", "type": "list"}}
+                       "recipients": {"label": "Recipient List", "type": "list"},
+                       "timeout": {"label": "Timeout", "type": "int"}}
     recipient_parameter = "recipients"
     sender_parameter = "sender"
 
