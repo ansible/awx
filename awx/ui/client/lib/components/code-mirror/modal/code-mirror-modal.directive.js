@@ -1,8 +1,6 @@
 const templateUrl = require('~components/code-mirror/modal/code-mirror-modal.partial.html');
 
 const CodeMirrorModalID = '#CodeMirror-modal';
-// const ParseVariable = 'parseType';
-const ParseType = 'yaml';
 const ModalHeight = '#CodeMirror-modal .modal-dialog';
 const ModalHeader = '.atCodeMirror-label';
 const ModalFooter = '.CodeMirror-modalControls';
@@ -13,7 +11,6 @@ function atCodeMirrorModalController (
     ParseTypeChange
 ) {
     const vm = this;
-    // const variablesName = `${$scope.name}_variables`;
     function resize () {
         if ($scope.disabled === 'true') {
             $scope.disabled = true;
@@ -27,7 +24,7 @@ function atCodeMirrorModalController (
     }
 
     function toggle () {
-        $scope.parseTypeChange('parseType', 'modalVars');
+        $scope.parseTypeChange('modalParseType', 'modalVars');
         setTimeout(resize, 0);
     }
 
@@ -38,11 +35,10 @@ function atCodeMirrorModalController (
             $scope.disabled = false;
         }
         $(CodeMirrorModalID).modal('show');
-        $scope.parseType = ParseType;
         ParseTypeChange({
             scope: $scope,
             variable: 'modalVars',
-            parse_variable: 'parseType',
+            parse_variable: 'modalParseType',
             field_id: 'variables_modal',
             readOnly: $scope.disabled
         });
@@ -60,7 +56,7 @@ function atCodeMirrorModalController (
     $scope.close = () => {
         $scope.closeFn({
             values: $scope.modalVars,
-            parseType: $scope.parseType,
+            parseType: $scope.modalParseType,
         });
     };
     if ($scope.init) {
@@ -91,7 +87,7 @@ function atCodeMirrorModal () {
             labelClass: '@',
             tooltip: '@',
             modalVars: '=',
-            parseType: '=',
+            modalParseType: '=',
             name: '@',
             closeFn: '&'
         }

@@ -27,6 +27,10 @@ function atCodeMirrorController (
             field_id: `${$scope.name}_variables`,
             readOnly: $scope.disabled
         });
+
+        $scope.$watch(variablesName, () => {
+            $scope.variables = $scope[variablesName];
+        });
     }
 
     function expand () {
