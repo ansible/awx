@@ -1,15 +1,20 @@
 const templateUrl = require('~components/dialog/dialog.partial.html');
 
-const overlaySelector = '.at-Dialog';
+const overlayClass = 'at-Dialog';
 
-function DialogController ($element) {
+function DialogController () {
     const vm = this || {};
 
-    vm.$onInit = () => {
-        const [el] = $element;
-        const overlay = el.querySelector(overlaySelector);
-        overlay.style.display = 'block';
-        overlay.style.opacity = 1;
+    vm.handleClick = ({ target }) => {
+        if (!vm.onClose) {
+            return;
+        }
+
+        const targetElement = $(target);
+
+        if (targetElement.hasClass(overlayClass)) {
+            vm.onClose();
+        }
     };
 }
 

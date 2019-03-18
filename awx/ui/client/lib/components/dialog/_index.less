@@ -1,3 +1,19 @@
+.at-Dialog {
+    display: block;
+    border: none;
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.3);
+    animation-name: at-DialogFadeIn;
+    animation-iteration-count: 1;
+    animation-timing-function: ease-in;
+    animation-duration: 0.3s;
+}
+
+@keyframes at-DialogFadeIn {
+    0%   { opacity: 0; background: rgba(0, 0, 0, 0); }
+    100% { opacity: 1; background: rgba(0, 0, 0, 0.3); }
+}
+
 .at-Dialog-body {
     font-size: @at-font-size;
     padding: @at-padding-panel 0;
