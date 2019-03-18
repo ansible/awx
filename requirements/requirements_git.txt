@@ -1,4 +1,4 @@
 git+https://github.com/ansible/ansiconv.git@tower_1.0.0#egg=ansiconv
 git+https://github.com/ansible/django-qsstats-magic.git@py3#egg=django-qsstats-magic
 git+https://github.com/ansible/django-jsonbfield@fix-sqlite_serialization#egg=jsonbfield
-git+https://github.com/ansible/ansible-runner@master#egg=ansible_runner
+git+https://github.com/chrismeyersfsu/ansible-runner@t34#egg=ansible_runner
