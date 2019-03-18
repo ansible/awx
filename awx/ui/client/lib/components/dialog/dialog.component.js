@@ -1,8 +1,8 @@
-const templateUrl = require('~components/easy-modal/easy-modal.partial.html');
+const templateUrl = require('~components/dialog/dialog.partial.html');
 
-const overlaySelector = '.at-EasyModal';
+const overlaySelector = '.at-Dialog';
 
-function EasyModalController ($element) {
+function DialogController ($element) {
     const vm = this || {};
 
     vm.$onInit = () => {
@@ -13,13 +13,13 @@ function EasyModalController ($element) {
     };
 }
 
-EasyModalController.$inject = [
+DialogController.$inject = [
     '$element',
 ];
 
 export default {
     templateUrl,
-    controller: EasyModalController,
+    controller: DialogController,
     controllerAs: 'vm',
     transclude: true,
     bindings: {
