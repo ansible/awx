@@ -4788,7 +4788,7 @@ msgstr "正常に保存が実行されました!"
 
 #: client/src/scheduler/scheduler.strings.js:50
 msgid "Schedule Description"
-msgstr "説明のスケジュール"
+msgstr "スケジュールの詳細"
 
 #: client/src/management-jobs/card/card.partial.html:28
 msgid "Schedule Management Job"
