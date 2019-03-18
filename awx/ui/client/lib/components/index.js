@@ -2,9 +2,9 @@ import atLibServices from '~services';
 
 import actionGroup from '~components/action/action-group.directive';
 import actionButton from '~components/action/action-button.directive';
+import dialog from '~components/dialog/dialog.component';
 import divider from '~components/utility/divider.directive';
 import dynamicSelect from '~components/input/dynamic-select.directive';
-import easyModal from '~components/easy-modal/easy-modal.component';
 import form from '~components/form/form.directive';
 import formAction from '~components/form/action.directive';
 import inputCheckbox from '~components/input/checkbox.directive';
@@ -57,9 +57,9 @@ angular
     ])
     .directive('atActionGroup', actionGroup)
     .directive('atActionButton', actionButton)
+    .component('atDialog', dialog)
     .directive('atDivider', divider)
     .directive('atDynamicSelect', dynamicSelect)
-    .component('atEasyModal', easyModal)
     .directive('atForm', form)
     .directive('atFormAction', formAction)
     .directive('atInputCheckbox', inputCheckbox)
