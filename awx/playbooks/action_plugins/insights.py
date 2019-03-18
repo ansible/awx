@@ -9,8 +9,9 @@ from ansible.plugins.action import ActionBase
 
 class ActionModule(ActionBase):
 
-    def save_playbook(self, proj_path, plan, content):
-        fname = '{}-{}.yml'.format(plan.get('name', None) or 'insights-plan', plan['maintenance_id'])
+    def save_playbook(self, proj_path, remediation, content):
+        fname = '{}-{}.yml'.format(
+            remediation.get('name', None) or 'insights-remediation', remediation['id'])
         file_path = os.path.join(proj_path, fname)
         with open(file_path, 'wb') as f:
             f.write(content)
@@ -55,7 +56,7 @@ class ActionModule(ActionBase):
         }
 
         
-        url = '{}/r/insights/v3/maintenance?ansible=true'.format(insights_url)
+        url = '{}/r/insights/platform/remediations/v1/remediations?sort=-updated_at'.format(insights_url)
 
         res = session.get(url, headers=headers, timeout=120)
 
@@ -79,8 +80,9 @@ class ActionModule(ActionBase):
             result['version'] = version
             return result
 
-        for item in res.json():
-            url = '{}/r/insights/v3/maintenance/{}/playbook'.format(insights_url, item['maintenance_id'])
+        for item in res.json()['remediations']:
+            url = '{}/r/insights/platform/remediations/v1/remediations/{}/playbook'.format(
+                insights_url, item['id'])
             res = session.get(url, timeout=120)
             if res.status_code != 200:
                 result['failed'] = True
