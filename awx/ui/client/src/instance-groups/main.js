@@ -190,7 +190,8 @@ function InstanceGroupsRun ($stateExtender, strings) {
         params: {
             instance_search: {
                 value: {
-                    order_by: 'hostname'
+                    order_by: 'hostname',
+                    page_size: '10'
                 },
                 dynamic: true
             }
