@@ -8,9 +8,13 @@ const mockAPIAccessList = {
   foo: 'bar',
 };
 
-const mockGetOrganzationAccessList = jest.fn(() => (
-  Promise.resolve(mockAPIAccessList)
-));
+const mockGetOrganzationAccessList = () => Promise.resolve(mockAPIAccessList);
+
+const mockResponse = {
+  status: 'success',
+};
+
+const mockRemoveRole = () => Promise.resolve(mockResponse);
 
 describe('<OrganizationAccess />', () => {
   test('initially renders succesfully', () => {
@@ -37,11 +41,14 @@ describe('<OrganizationAccess />', () => {
           params={{}}
           api={{
             getOrganzationAccessList: mockGetOrganzationAccessList,
+            disassociate: mockRemoveRole
           }}
         />
       </MemoryRouter>
     ).find('OrganizationAccess');
     const accessList = await wrapper.instance().getOrgAccessList();
     expect(accessList).toEqual(mockAPIAccessList);
+    const resp = await wrapper.instance().removeRole(2, 3, 'users');
+    expect(resp).toEqual(mockResponse);
   });
 });

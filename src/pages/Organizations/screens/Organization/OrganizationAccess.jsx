@@ -1,16 +1,22 @@
 import React from 'react';
-import AccessList from '../../../../components/AccessList';
+import OrganizationAccessList from '../../components/OrganizationAccessList';
 
 class OrganizationAccess extends React.Component {
   constructor (props) {
     super(props);
 
     this.getOrgAccessList = this.getOrgAccessList.bind(this);
+    this.removeRole = this.removeRole.bind(this);
   }
 
   getOrgAccessList (id, params) {
     const { api } = this.props;
     return api.getOrganzationAccessList(id, params);
+  }
+
+  removeRole (url, id) {
+    const { api } = this.props;
+    return api.disassociate(url, id);
   }
 
   render () {
@@ -21,8 +27,9 @@ class OrganizationAccess extends React.Component {
     } = this.props;
 
     return (
-      <AccessList
+      <OrganizationAccessList
         getAccessList={this.getOrgAccessList}
+        removeRole={this.removeRole}
         match={match}
         location={location}
         history={history}

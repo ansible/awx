@@ -234,7 +234,6 @@
 // note that these should be given a consistent prefix
 // and bem style, as well as moved into component-based scss files
 //
-
 .awx-lookup {
   min-height: 36px;
 
@@ -254,6 +253,52 @@
   --pf-c-card__body--PaddingY: 0;
 }
 
+
+.awx-c-card {
+  position: relative;
+}
+
+// PF Alert notification component overrides
+.pf-c-alert__title {
+  --pf-c-alert__title--PaddingTop: 20px;
+  --pf-c-alert__title--PaddingRight: 20px;
+  --pf-c-alert__title--PaddingBottom: 20px;
+  --pf-c-alert__title--PaddingLeft: 20px;
+}
+
+.pf-c-alert__description {
+  --pf-c-alert__description--PaddingRight: 20px;
+  --pf-c-alert__description--PaddingBottom: 20px;
+  --pf-c-alert__description--PaddingLeft: 20px;
+}
+
+.pf-c-alert {
+  position: absolute;
+  width: 100%;
+  z-index: 20;
+}
+
+.pf-c-alert__icon {
+  --pf-c-alert__icon--Color: white;
+}
+
 .at-u-textRight {
   text-align: right;
+}
+
+.awx-c-chip {
+  padding: 3px 0;
+  height: 24px;
+  margin-right: 10px;
+  margin-bottom: 10px;
+}
+
+.awx-c-form-action-group {
+  float: right;
+  display: block;
+
+  .pf-m-danger {
+    margin-top: 20px;
+    margin-right: 20px;
+  }
 }

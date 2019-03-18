@@ -126,7 +126,7 @@ class APIClient {
     return this.http.post(url, { id });
   }
 
-  disassociateInstanceGroup (url, id) {
+  disassociate (url, id) {
     return this.http.post(url, { id, disassociate: true });
   }
 }

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 import {
   DataList, DataListItem, DataListCell, Text,
-  TextContent, TextVariants
+  TextContent, TextVariants, Chip, Alert, AlertActionCloseButton, Button
 } from '@patternfly/react-core';
 
 import { I18n, i18nMark } from '@lingui/react';
@@ -13,13 +13,12 @@ import {
   Link
 } from 'react-router-dom';
 
-import BasicChip from '../BasicChip/BasicChip';
-import Pagination from '../Pagination';
-import DataListToolbar from '../DataListToolbar';
+import Pagination from '../../../components/Pagination';
+import DataListToolbar from '../../../components/DataListToolbar';
 
 import {
   parseQueryString,
-} from '../../qs';
+} from '../../../qs';
 
 const userRolesWrapperStyle = {
   display: 'flex',
@@ -79,7 +78,7 @@ const UserName = ({ value, url }) => {
   return username;
 };
 
-class AccessList extends React.Component {
+class OrganizationAccessList extends React.Component {
   columns = [
     { name: i18nMark('Name'), key: 'first_name', isSortable: true },
     { name: i18nMark('Username'), key: 'username', isSortable: true },
@@ -100,10 +99,17 @@ class AccessList extends React.Component {
     this.state = {
       page,
       page_size,
-      count: null,
+      count: 0,
       sortOrder: 'ascending',
       sortedColumnKey: 'username',
       isCompact: false,
+      showWarning: false,
+      warningTitle: '',
+      warningMsg: '',
+      deleteType: '',
+      deleteRoleId: null,
+      deleteResourceId: null,
+      results: [],
     };
 
     this.fetchOrgAccessList = this.fetchOrgAccessList.bind(this);
@@ -112,7 +118,10 @@ class AccessList extends React.Component {
     this.onCompact = this.onCompact.bind(this);
     this.onSort = this.onSort.bind(this);
     this.getQueryParams = this.getQueryParams.bind(this);
-    this.getTeamRoles = this.getTeamRoles.bind(this);
+    this.removeAccessRole = this.removeAccessRole.bind(this);
+    this.handleWarning = this.handleWarning.bind(this);
+    this.hideWarning = this.hideWarning.bind(this);
+    this.confirmDelete = this.confirmDelete.bind(this);
   }
 
   componentDidMount () {
@@ -171,23 +180,6 @@ class AccessList extends React.Component {
     return Object.assign({}, this.defaultParams, searchParams, overrides);
   }
 
-  getRoles = roles => Object.values(roles)
-    .reduce((val, role) => {
-      if (role.length > 0) {
-        val.push(role[0].role);
-      }
-      return val;
-    }, []);
-
-  getTeamRoles = roles => roles
-    .reduce((val, item) => {
-      if (item.role.team_id) {
-        const { role } = item;
-        val.push(role);
-      }
-      return val;
-    }, []);
-
   async fetchOrgAccessList (queryParams) {
     const { match, getAccessList } = this.props;
 
@@ -203,7 +195,7 @@ class AccessList extends React.Component {
 
     try {
       const { data:
-        { count = null, results = null }
+        { count = 0, results = [] }
       } = await getAccessList(match.params.id, queryParams);
       const pageCount = Math.ceil(count / page_size);
 
@@ -216,18 +208,85 @@ class AccessList extends React.Component {
         sortedColumnKey,
         results,
       };
+
       results.forEach((result) => {
-        if (result.summary_fields.direct_access) {
-          result.teamRoles = this.getTeamRoles(result.summary_fields.direct_access);
-        } else {
-          result.teamRoles = [];
-        }
-        result.userRoles = this.getRoles(result.summary_fields) || [];
+        // Separate out roles into user roles or team roles
+        // based on whether or not a team_id attribute is present
+        const teamRoles = [];
+        const userRoles = [];
+        Object.values(result.summary_fields).forEach(field => {
+          if (field.length > 0) {
+            field.forEach(item => {
+              const { role } = item;
+              if (role.team_id) {
+                teamRoles.push(role);
+              } else {
+                userRoles.push(role);
+              }
+            });
+          }
+        });
+
+        result.teamRoles = teamRoles;
+        result.userRoles = userRoles;
       });
       this.setState(stateToUpdate);
     } catch (error) {
       this.setState({ error });
     }
+  }
+
+  async removeAccessRole (roleId, resourceId, type) {
+    const { removeRole } = this.props;
+    const url = `/api/v2/${type}/${resourceId}/roles/`;
+    try {
+      await removeRole(url, roleId);
+    } catch (error) {
+      this.setState({ error });
+    }
+    const queryParams = this.getQueryParams();
+    try {
+      this.fetchOrgAccessList(queryParams);
+    } catch (error) {
+      this.setState({ error });
+    }
+    this.setState({ showWarning: false });
+  }
+
+  handleWarning (roleName, roleId, resourceName, resourceId, type) {
+    let warningTitle;
+    let warningMsg;
+
+    if (type === 'users') {
+      warningTitle = i18nMark('User Access Removal');
+      warningMsg = i18nMark(`Please confirm that you would like to remove ${roleName}
+      access from ${resourceName}.`);
+    }
+    if (type === 'teams') {
+      warningTitle = i18nMark('Team Access Removal');
+      warningMsg = i18nMark(`Please confirm that you would like to remove ${roleName}
+      access from the team ${resourceName}. This will affect all
+      members of the team. If you would like to only remove access
+      for this particular user, please remove them from the team.`);
+    }
+
+    this.setState({
+      showWarning: true,
+      warningMsg,
+      warningTitle,
+      deleteType: type,
+      deleteRoleId: roleId,
+      deleteResourceId: resourceId
+    });
+  }
+
+  hideWarning () {
+    this.setState({ showWarning: false });
+  }
+
+  confirmDelete () {
+    const { deleteType, deleteResourceId, deleteRoleId } = this.state;
+    this.removeAccessRole(deleteRoleId, deleteResourceId, deleteType);
   }
 
   render () {
@@ -241,13 +300,16 @@ class AccessList extends React.Component {
       sortedColumnKey,
       sortOrder,
       isCompact,
+      warningMsg,
+      warningTitle,
+      showWarning
     } = this.state;
     return (
       <Fragment>
-        {!error && !results && (
+        {!error && results.length <= 0 && (
           <h1>Loading...</h1> // TODO: replace with proper loading state
         )}
-        {error && !results && (
+        {error && results.length <= 0 && (
           <Fragment>
             <div>{error.message}</div>
             {error.response && (
@@ -255,7 +317,7 @@ class AccessList extends React.Component {
             )}
           </Fragment> // TODO: replace with proper error handling
         )}
-        {results && (
+        {results.length > 0 && (
           <Fragment>
             <DataListToolbar
               sortedColumnKey={sortedColumnKey}
@@ -268,6 +330,20 @@ class AccessList extends React.Component {
               isCompact={isCompact}
               showExpandCollapse
             />
+            {showWarning && (
+              <Alert
+                variant="danger"
+                title={warningTitle}
+                action={<AlertActionCloseButton onClose={this.hideWarning} />}
+              >
+                {warningMsg}
+                <span className="awx-c-form-action-group">
+                  <Button variant="danger" aria-label="confirm-delete" onClick={this.confirmDelete}>Delete</Button>
+                  <Button variant="secondary" onClick={this.hideWarning}>Cancel</Button>
+                </span>
+              </Alert>
+            )}
+
             <Fragment>
               <I18n>
                 {({ i18n }) => (
@@ -304,10 +380,13 @@ class AccessList extends React.Component {
                             >
                               <Text component={TextVariants.h6} style={detailLabelStyle}>{i18n._(t`User Roles`)}</Text>
                               {result.userRoles.map(role => (
-                                <BasicChip
+                                <Chip
                                   key={role.id}
-                                  text={role.name}
-                                />
+                                  className="awx-c-chip"
+                                  onClick={() => this.handleWarning(role.name, role.id, result.username, result.id, 'users')}
+                                >
+                                  {role.name}
+                                </Chip>
                               ))}
                             </ul>
                           )}
@@ -318,10 +397,13 @@ class AccessList extends React.Component {
                             >
                               <Text component={TextVariants.h6} style={detailLabelStyle}>{i18n._(t`Team Roles`)}</Text>
                               {result.teamRoles.map(role => (
-                                <BasicChip
+                                <Chip
                                   key={role.id}
-                                  text={role.name}
-                                />
+                                  className="awx-c-chip"
+                                  onClick={() => this.handleWarning(role.name, role.id, role.team_name, role.team_id, 'teams')}
+                                >
+                                  {role.name}
+                                </Chip>
                               ))}
                             </ul>
                           )}
@@ -346,8 +428,9 @@ class AccessList extends React.Component {
   }
 }
 
-AccessList.propTypes = {
+OrganizationAccessList.propTypes = {
   getAccessList: PropTypes.func.isRequired,
+  removeRole: PropTypes.func.isRequired,
 };
 
-export default AccessList;
+export default OrganizationAccessList;

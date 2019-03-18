@@ -183,7 +183,7 @@ describe('<OrganizationEdit />', () => {
       getOrganizationInstanceGroups: getOrganizationInstanceGroupsFn,
       updateOrganizationDetails: updateOrganizationDetailsFn,
       associateInstanceGroup: associateInstanceGroupFn,
-      disassociateInstanceGroup: disassociateInstanceGroupFn
+      disassociate: disassociateInstanceGroupFn
     };
     const wrapper = mount(
       <I18nProvider>

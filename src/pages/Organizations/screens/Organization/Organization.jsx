@@ -112,7 +112,7 @@ class Organization extends Component {
 
     return (
       <PageSection>
-        <Card>
+        <Card className="awx-c-card">
           { cardHeader }
           <Switch>
             <Redirect

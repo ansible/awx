@@ -171,7 +171,7 @@ class OrganizationEdit extends Component {
         await api.associateInstanceGroup(url, id);
       }));
       await Promise.all(groupsToDisassociate.map(async id => {
-        await api.disassociateInstanceGroup(url, id);
+        await api.disassociate(url, id);
       }));
     } catch (err) {
       this.setState({ error: err });
