@@ -23,7 +23,7 @@
                             type="radio"
                             value="yaml"
                             ng-model="parseType"
-                            ng-change="parseTypeChange('parseType', 'variables')"
+                            ng-change="parseTypeChange('parseType', vm.variablesName)"
                             class="ng-pristine ng-untouched ng-valid ng-not-empty">
                                 {{ vm.strings.get('label.YAML')}}
                     </label>
@@ -32,7 +32,7 @@
                             type="radio"
                             value="json"
                             ng-model="parseType"
-                            ng-change="parseTypeChange('parseType', 'variables')"
+                            ng-change="parseTypeChange('parseType', vm.variablesName)"
                             class="ng-pristine ng-untouched ng-valid ng-not-empty">
                                 {{ vm.strings.get('label.JSON')}}
                     </label>

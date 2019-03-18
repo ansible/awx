@@ -1370,7 +1370,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += `class="${field.class}" `;
                         html += `label="${field.label}" `;
                         html += `tooltip="${field.awPopOver}" `;
-                        html += `name="${field.root}" `;
+                        html += `name="${fld}" `;
                         html += `variables="${field.variables}" `;
                         html += '></at-code-mirror>';
                     }

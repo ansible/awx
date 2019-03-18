@@ -40,11 +40,11 @@
             $rootScope.breadcrumb.host_name = host.name;
  			$scope.description = host.description;
 			$scope.host_variables = getVars(host.variables);
-        	ParseTypeChange({
-        		scope: $scope,
-        		field_id: 'host_host_variables',
-        		variable: 'host_variables',
-        	});
+        	// ParseTypeChange({
+        	// 	scope: $scope,
+        	// 	field_id: 'host_host_variables',
+        	// 	variable: 'host_variables',
+        	// });
  		};
 
 		// Adding this function b/c sometimes extra vars are returned to the

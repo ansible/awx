@@ -9,18 +9,19 @@ function atCodeMirrorController (
     ParseTypeChange
 ) {
     const vm = this;
+    const variablesName = `${$scope.name}_variables`;
     function init () {
         if ($scope.disabled === 'true') {
             $scope.disabled = true;
         } else if ($scope.disabled === 'false') {
             $scope.disabled = false;
         }
-        $scope.value = $scope.variables.value;
         $scope.parseType = ParseType;
 
+        $scope[variablesName] = $scope.variables;
         ParseTypeChange({
             scope: $scope,
-            variable: 'variables',
+            variable: variablesName,
             parse_variable: 'parseType',
             field_id: `${$scope.name}_variables`,
             readOnly: $scope.disabled
@@ -37,10 +38,11 @@ function atCodeMirrorController (
         // user changes the format from yaml to json in the
         // modal but CM in the form is set to YAML
         $scope.variables = varsFromModal;
+        $scope[variablesName] = $scope.variables;
         // New set of variables from the modal, reinit codemirror
         ParseTypeChange({
             scope: $scope,
-            variable: 'variables',
+            variable: variablesName,
             parse_variable: 'parseType',
             field_id: `${$scope.name}_variables`,
             readOnly: $scope.disabled
@@ -56,6 +58,7 @@ function atCodeMirrorController (
     vm.expanded = false;
     vm.close = close;
     vm.expand = expand;
+    vm.variablesName = variablesName;
     if ($scope.init) {
         $scope.init = init;
     }

@@ -13,7 +13,7 @@ function atCodeMirrorModalController (
     ParseTypeChange
 ) {
     const vm = this;
-    const variablesName = `${$scope.name}_variables`;
+    // const variablesName = `${$scope.name}_variables`;
     function resize () {
         if ($scope.disabled === 'true') {
             $scope.disabled = true;
@@ -53,8 +53,6 @@ function atCodeMirrorModalController (
             minWidth: 600
         });
         $(`${CodeMirrorModalID} .modal-dialog`).on('resize', resize);
-
-        $scope.foovars = 'testing';
     }
 
     vm.strings = strings;

@@ -65,12 +65,15 @@ function(i18n) {
                     type: 'text'
                 },
                 variables: {
+                    root: 'host_variables',
                     label: i18n._('Variables'),
-                    type: 'textarea',
+                    type: 'code_mirror',
                     rows: 6,
+                    variables: 'variables',
                     class: 'Form-formGroup--fullWidth',
                     "default": "---",
-                    awPopOver: "<p>" + i18n._("Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two.") + "</p>" +
+                    awPopOver: i18n._('Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two.'),
+                    _awPopOver: "<p>" + i18n._("Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two.") + "</p>" +
                         "JSON:<br />\n" +
                         "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
                         "YAML:<br />\n" +
