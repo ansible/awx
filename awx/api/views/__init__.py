@@ -1635,49 +1635,72 @@ class HostInsights(GenericAPIView):
         }
         return session.get(url, headers=headers, timeout=120)
 
-    def get_insights(self, url, username, password):
+    def _call_insights_api(self, url, username, password):
         try:
             res = self._get_insights(url, username, password)
         except requests.exceptions.SSLError:
-            return (dict(error=_('SSLError while trying to connect to {}').format(url)), status.HTTP_502_BAD_GATEWAY)
+            return (dict(error=_('SSLError while trying to connect to {}').format(url)),
+                    status.HTTP_502_BAD_GATEWAY)
         except requests.exceptions.Timeout:
-            return (dict(error=_('Request to {} timed out.').format(url)), status.HTTP_504_GATEWAY_TIMEOUT)
+            return (dict(error=_('Request to {} timed out.').format(url)),
+                    status.HTTP_504_GATEWAY_TIMEOUT)
         except requests.exceptions.RequestException as e:
-            return (dict(error=_('Unknown exception {} while trying to GET {}').format(e, url)), status.HTTP_502_BAD_GATEWAY)
+            return (dict(error=_('Unknown exception {} while trying to GET {}').format(e, url)),
+                    status.HTTP_502_BAD_GATEWAY)
 
         if res.status_code == 401:
-            return (dict(error=_('Unauthorized access. Please check your Insights Credential username and password.')), status.HTTP_502_BAD_GATEWAY)
+            msg = _('Unauthorized access. Please check your Insights Credential username and password.')
+            return (dict(error=msg), status.HTTP_502_BAD_GATEWAY)
         elif res.status_code != 200:
-            return (dict(error=_(
-                'Failed to gather reports and maintenance plans from Insights API at URL {}. Server responded with {} status code and message {}'
-            ).format(url, res.status_code, res.content)), status.HTTP_502_BAD_GATEWAY)
+            msg = _(
+                'Failed to access the Insights API at URL {}.'
+                ' Server responded with {} status code and message {}'
+            ).format(url, res.status_code, res.content)
+            return (dict(error=msg), status.HTTP_502_BAD_GATEWAY)
 
         try:
-            filtered_insights_content = filter_insights_api_response(res.json())
-            return (dict(insights_content=filtered_insights_content), status.HTTP_200_OK)
+            res.json()
         except ValueError:
-            return (dict(error=_('Expected JSON response from Insights but instead got {}').format(res.content)), status.HTTP_502_BAD_GATEWAY)
+            return (dict(error=_('Expected JSON response from Insights but instead got {}').format(res.content)),
+                    status.HTTP_502_BAD_GATEWAY)
+
+        return res
+
+    def get_insights(self, url, username, password):
+        res = self._call_insights_api(url, username, password)
+        if isinstance(res, tuple):  # This value was constructed based on a bad response from the API.
+            return res
+
+        filtered_insights_content = filter_insights_api_response(res.json())
+        return (dict(insights_content=filtered_insights_content), status.HTTP_200_OK)
 
     def get(self, request, *args, **kwargs):
         host = self.get_object()
         cred = None
 
         if host.insights_system_id is None:
-            return Response(dict(error=_('This host is not recognized as an Insights host.')), status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                dict(error=_('This host is not recognized as an Insights host.')),
+                status=status.HTTP_404_NOT_FOUND
+            )
 
         if host.inventory and host.inventory.insights_credential:
             cred = host.inventory.insights_credential
         else:
-            return Response(dict(error=_('The Insights Credential for "{}" was not found.').format(host.inventory.name)), status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                dict(error=_('The Insights Credential for "{}" was not found.').format(host.inventory.name)),
+                status=status.HTTP_404_NOT_FOUND
+            )
 
         # FIXME: I know that this isn't correct, we need to do an
         # additional API call to /hosts to find what the Platform ID
         # is for this host based on its Insights system ID.
         platform_id = host.insights_system_id
 
+        (username, password) = self._extract_insights_creds(cred)
+
         url = '{}/r/insights/platform/advisor/v1/system/{}/reports/'.format(
             settings.INSIGHTS_URL_BASE, platform_id)
-        (username, password) = self._extract_insights_creds(cred)
         (msg, err_code) = self.get_insights(url, username, password)
         return Response(msg, status=err_code)
 

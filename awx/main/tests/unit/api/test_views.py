@@ -148,7 +148,7 @@ class TestHostInsights():
 
         (msg, code) = view.get_insights('https://myexample.com/whocares/me/', 'ignore', 'ignore')
         assert msg['error'] == (
-            'Failed to gather reports and maintenance plans from Insights API at URL'
+            'Failed to access the Insights API at URL'
             ' https://myexample.com/whocares/me/. Server responded with 500 status code '
             'and message mock 500 err msg')
 
