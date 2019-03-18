@@ -1692,16 +1692,18 @@ class HostInsights(GenericAPIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        # FIXME: I know that this isn't correct, we need to do an
-        # additional API call to /hosts to find what the Platform ID
-        # is for this host based on its Insights system ID.
-        platform_id = host.insights_system_id
-
         (username, password) = self._extract_insights_creds(cred)
 
-        url = '{}/r/insights/platform/advisor/v1/system/{}/reports/'.format(
+        host_url = '{}/r/insights/platform/inventory/api/v1/hosts?insights_id={}'.format(
+            settings.INSIGHTS_URL_BASE, host.insights_system_id)
+        res = self._call_insights_api(host_url, username, password)
+        if isinstance(res, tuple):  # This value was constructed based on a bad response from the API.
+            return Response(res[0], status=res[1])
+        platform_id = res.json()['results'][0]['id']
+
+        reports_url = '{}/r/insights/platform/advisor/v1/system/{}/reports/'.format(
             settings.INSIGHTS_URL_BASE, platform_id)
-        (msg, err_code) = self.get_insights(url, username, password)
+        (msg, err_code) = self.get_insights(reports_url, username, password)
         return Response(msg, status=err_code)
 
 
