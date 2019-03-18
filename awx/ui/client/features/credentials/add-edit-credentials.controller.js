@@ -269,10 +269,12 @@ function AddEditCredentialsController (
      * metadata object that can be sent to the api later or reloaded when re-opening the form.
      */
     function getMetadataFormSubmitData ({ inputs }) {
-        const metadata = Object.assign({}, ...inputs._group
-            .filter(({ _value }) => _value !== undefined)
-            .map(({ id, _value }) => ({ [id]: _value })));
-        return metadata;
+        return inputs._group.reduce((metadata, { id, _value }) => {
+            if (_value !== undefined) {
+                metadata[id] = _value;
+            }
+            return metadata;
+        }, {});
     }
 
     vm.onInputSourceNext = () => {
@@ -287,7 +289,7 @@ function AddEditCredentialsController (
                 // field_name->source_credential link already exists. This occurs one of two ways:
                 //
                 // 1. This field->source_credential link already exists in the API and so we're
-                //    reflecting the current state as it exists on the backend.
+                //    showing the current state as it exists on the backend.
                 // 2. The metadata form for this specific field->source_credential combination was
                 //    set during a prior visit to this lookup and so we're reflecting the most
                 //    recent set of (unsaved) metadata values provided by the user for this field.
@@ -312,7 +314,7 @@ function AddEditCredentialsController (
         const { field, credentialId, credentialName, credentialTypeId } = vm.inputSources;
         const metadata = getMetadataFormSubmitData(vm.inputSources.form);
         // Remove any input source objects already stored for this field then store the metadata
-        // and currently selected source credential as a valid credential input source object that
+        // and currently selected source credential as a credential input source object that
         // can be sent to the api later or reloaded into the form if it is reopened.
         vm.inputSources.items = vm.inputSources.items
             .filter(({ input_field_name }) => input_field_name !== field)
