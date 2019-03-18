@@ -47,7 +47,7 @@ Each of these have their own configuration and behavioral semantics and testing 
 
 ## Email
 
-The email notification type supports a wide variety of smtp servers and has support for ssl/tls connections.
+The email notification type supports a wide variety of smtp servers and has support for ssl/tls connections and timeouts.
 
 ### Testing considerations
 
