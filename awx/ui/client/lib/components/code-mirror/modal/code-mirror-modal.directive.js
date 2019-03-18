@@ -58,7 +58,10 @@ function atCodeMirrorModalController (
     vm.strings = strings;
     vm.toggle = toggle;
     $scope.close = () => {
-        $scope.closeFn()($scope.modalVars);
+        $scope.closeFn({
+            values: $scope.modalVars,
+            parseType: $scope.parseType,
+        });
     };
     if ($scope.init) {
         $scope.init = init;
@@ -88,6 +91,7 @@ function atCodeMirrorModal () {
             labelClass: '@',
             tooltip: '@',
             modalVars: '=',
+            parseType: '=',
             name: '@',
             closeFn: '&'
         }

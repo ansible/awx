@@ -18,6 +18,7 @@ function atCodeMirrorController (
         }
         $scope.parseType = ParseType;
 
+        $scope.variablesName = variablesName;
         $scope[variablesName] = $scope.variables;
         ParseTypeChange({
             scope: $scope,
@@ -32,13 +33,14 @@ function atCodeMirrorController (
         vm.expanded = true;
     }
 
-    function close (varsFromModal) {
+    function close (varsFromModal, parseTypeFromModal) {
         // TODO: make sure that the variables format matches
         // parseType before re-initializing CodeMirror.  Ex)
         // user changes the format from yaml to json in the
         // modal but CM in the form is set to YAML
         $scope.variables = varsFromModal;
         $scope[variablesName] = $scope.variables;
+        $scope.parseType = parseTypeFromModal;
         // New set of variables from the modal, reinit codemirror
         ParseTypeChange({
             scope: $scope,
@@ -59,6 +61,7 @@ function atCodeMirrorController (
     vm.close = close;
     vm.expand = expand;
     vm.variablesName = variablesName;
+    vm.parseType = $scope.parseType;
     if ($scope.init) {
         $scope.init = init;
     }
