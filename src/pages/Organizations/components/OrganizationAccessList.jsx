@@ -104,6 +104,12 @@ class OrganizationAccessList extends React.Component {
       sortedColumnKey: 'username',
       isCompact: false,
       showWarning: false,
+      warningTitle: '',
+      warningMsg: '',
+      deleteType: '',
+      deleteRoleId: null,
+      deleteResourceId: null,
+      results: [],
     };
 
     this.fetchOrgAccessList = this.fetchOrgAccessList.bind(this);
@@ -300,10 +306,10 @@ class OrganizationAccessList extends React.Component {
     } = this.state;
     return (
       <Fragment>
-        {!error && !results && (
+        {!error && results.length <= 0 && (
           <h1>Loading...</h1> // TODO: replace with proper loading state
         )}
-        {error && !results && (
+        {error && results.length <= 0 && (
           <Fragment>
             <div>{error.message}</div>
             {error.response && (
@@ -311,7 +317,7 @@ class OrganizationAccessList extends React.Component {
             )}
           </Fragment> // TODO: replace with proper error handling
         )}
-        {results && (
+        {results.length > 0 && (
           <Fragment>
             <DataListToolbar
               sortedColumnKey={sortedColumnKey}
