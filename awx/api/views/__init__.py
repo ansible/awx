@@ -1670,7 +1670,13 @@ class HostInsights(GenericAPIView):
         else:
             return Response(dict(error=_('The Insights Credential for "{}" was not found.').format(host.inventory.name)), status=status.HTTP_404_NOT_FOUND)
 
-        url = settings.INSIGHTS_URL_BASE + '/r/insights/v3/systems/{}/reports/'.format(host.insights_system_id)
+        # FIXME: I know that this isn't correct, we need to do an
+        # additional API call to /hosts to find what the Platform ID
+        # is for this host based on its Insights system ID.
+        platform_id = host.insights_system_id
+
+        url = '{}/r/insights/platform/advisor/v1/system/{}/reports/'.format(
+            settings.INSIGHTS_URL_BASE, platform_id)
         (username, password) = self._extract_insights_creds(cred)
         (msg, err_code) = self.get_insights(url, username, password)
         return Response(msg, status=err_code)
