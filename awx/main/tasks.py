@@ -54,7 +54,6 @@ from awx.main.models import (
     UnifiedJob, Notification,
     Inventory, SmartInventoryMembership,
     Job, AdHocCommand, ProjectUpdate, InventoryUpdate, SystemJob,
-    Project,
     JobEvent, ProjectUpdateEvent, InventoryUpdateEvent, AdHocCommandEvent, SystemJobEvent,
     build_safe_env
 )
@@ -65,8 +64,8 @@ from awx.main.expect import isolated_manager
 from awx.main.dispatch.publish import task
 from awx.main.dispatch import get_local_queuename, reaper
 from awx.main.utils import (get_ssh_version, update_scm_url,
-                            build_proot_temp_dir, get_licenser,
-                            OutputEventFilter, OutputVerboseFilter, ignore_inventory_computed_fields,
+                            get_licenser,
+                            ignore_inventory_computed_fields,
                             ignore_inventory_group_removal, extract_ansible_vars, schedule_task_manager)
 from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja
 from awx.main.utils.reload import stop_local_services
@@ -961,6 +960,12 @@ class BaseTask(object):
         '''
         return OrderedDict()
 
+    def create_expect_passwords_data_struct(self, password_prompts, passwords):
+        expect_passwords = {}
+        for k, v in password_prompts.items():
+            expect_passwords[k] = passwords.get(v, '') or ''
+        return expect_passwords
+
     def pre_run_hook(self, instance):
         '''
         Hook for any steps to run before the job/task starts
@@ -1041,7 +1046,6 @@ class BaseTask(object):
         status, rc, tb = 'error', None, ''
         output_replacements = []
         extra_update_fields = {}
-        stdout_handle = None
         fact_modification_times = {}
         self.event_ct = 0
         private_data_dir = None
@@ -1099,10 +1103,10 @@ class BaseTask(object):
                     )
             self.write_args_file(private_data_dir, args)
 
-            expect_passwords = {}
             password_prompts = self.get_password_prompts(passwords)
-            for k, v in password_prompts.items():
-                expect_passwords[k] = passwords.get(v, '') or ''
+            expect_passwords = self.create_expect_passwords_data_struct(password_prompts, passwords)
+
+            # TODO: Probably remove this when cleaning up isolated path
             _kw = dict(
                 extra_update_fields=extra_update_fields,
                 proot_cmd=getattr(settings, 'AWX_PROOT_CMD', 'bwrap'),
@@ -1369,9 +1373,9 @@ class RunJob(BaseTask):
 
         ssh_username, become_username, become_method = '', '', ''
         if creds:
-            ssh_username = creds.username
-            become_method = creds.become_method
-            become_username = creds.become_username
+            ssh_username = creds.get_input('username', default='')
+            become_method = creds.get_input('become_method', default='')
+            become_username = creds.get_input('become_username', default='')
         else:
             become_method = None
             become_username = ""
@@ -2140,7 +2144,7 @@ class RunInventoryUpdate(BaseTask):
             'cloudforms': 'CLOUDFORMS_INI_PATH'
         }
         if inventory_update.source in ini_mapping:
-            cred_data = private_data_files.get('credentials', '')
+            cred_data = private_data_files.get('credentials', {})
             env[ini_mapping[inventory_update.source]] = cred_data.get(
                 inventory_update.get_cloud_credential(), ''
             )

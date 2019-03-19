@@ -4,6 +4,8 @@ In older version of Ansible Tower we used a system called `proot` to isolate tow
 
 For Tower 3.1 and later we have switched to using `bubblewrap` which is a much lighter weight and maintained process isolation system.
 
+Tower 3.4 forward uses the process isolation feature in ansible runner to achieve process isolation.
+
 ### Activating Process Isolation
 
 By default `bubblewrap` is enabled, this can be turned off via Tower Config or from a tower settings file:
