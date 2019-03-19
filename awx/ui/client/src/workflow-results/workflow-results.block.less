@@ -18,19 +18,27 @@
 
 .WorkflowResults-leftSide {
     .OnePlusTwo-left--panel(100%, @breakpoint-md);
-    height: ~"calc(100vh - 177px)";
+    height: ~"calc(100vh - 120px)";
     min-height: 350px;
-
+    display:flex;
     .card {
+        width: 100%;
         overflow: scroll;
+    }
+    @media screen and (width: @breakpoint-md - 1px){
+        width: 100%;
     }
 }
 
 .WorkflowResults-rightSide {
     .OnePlusTwo-right--panel(100%, @breakpoint-md);
-    height: ~"calc(100vh - 177px)";
+    height: ~"calc(100vh - 120px)";
     min-height: 350px;
     min-width: 0;
+    display:flex;
+    .card {
+        width:100%
+    }
 
     @media (max-width: @breakpoint-md - 1px) {
         padding-right: 15px;
