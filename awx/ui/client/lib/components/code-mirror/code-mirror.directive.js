@@ -77,6 +77,14 @@ function atCodeMirrorController (
             return true;
         }
 
+        if (typeof str !== 'string') {
+            const yamlStr = jsyaml.safeDump(str);
+            // jsyaml.safeDump doesn't process an empty object correctly
+            if (yamlStr === '{}\n') {
+                return '---';
+            }
+            return yamlStr;
+        }
         if (str === '' || str === '{}') {
             return '---';
         } else if (IsJsonString(str)) {

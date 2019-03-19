@@ -1,10 +1,13 @@
 <form class="Form ng-pristine ng-valid ng-valid-required" name="host_form" id="host_form" autocomplete="off" novalidate="">
     <div class="form-group Form-formGroup Form-formGroup--fullWidth">
-        <label class="Form-inputLabelContainer " for="facts">
-		          <span class="Form-inputLabel" translate>FACTS</span>
-         </label>
-         <div>
-             <textarea rows="6"  ng-model="facts" name="facts" class="form-control Form-textArea Form-formGroup--fullWidth" id="host_facts"></textarea>
-         </div>
+        <at-code-mirror
+          id="host_facts"
+          name="facts"
+          class="Form-textArea Form-formGroup--fullWidth"
+          label="facts"
+          variables="facts"
+          tooltip=""
+          disabled="true"
+        ></at-code-mirror>
      </div>
 </form>
