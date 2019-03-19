@@ -95,7 +95,7 @@ describe('<Pagination />', () => {
 
   test('changing pageSize works', () => {
     const pageSizeDropdownToggleSelector = 'DropdownToggle DropdownToggle[className="togglePageSize"]';
-    const pageSizeDropdownItemsSelector = 'DropdownItem';
+    const pageSizeDropdownItemsSelector = 'DropdownItem button';
     const onSetPage = jest.fn();
 
     pagination = mount(

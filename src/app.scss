@@ -95,20 +95,6 @@
   align-items: center;
 }
 
-.pf-c-data-list__check {
-  --pf-c-data-list__check--MarginRight: 0;
-}
-
-.pf-c-data-list__check:after {
-  content: "";
-  background-color: #d7d7d7;
-  width: 1px;
-  height: 25px;
-  display: block;
-  margin-left: 20px;
-  margin-right: 20px;
-}
-
 .pf-c-data-list__cell {
   --pf-c-data-list__cell--PaddingTop: 16px;
   --pf-c-data-list__cell--PaddingBottom: 16px;
