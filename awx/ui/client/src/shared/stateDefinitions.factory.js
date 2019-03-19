@@ -581,8 +581,8 @@ function($injector, $stateExtender, $log, i18n) {
 
                 states.push($stateExtender.buildDefinition({
                     name: `${formStateDefinition.name}.users.add`,
-                    squashSearchUrl: true,
                     url: '/add-user',
+                    searchPrefix: 'add_user',
                     params: {
                         add_user_search: {
                             value: { order_by: 'username', page_size: '5' },
@@ -591,7 +591,7 @@ function($injector, $stateExtender, $log, i18n) {
                     },
                     views: {
                         [`modal@${formStateDefinition.name}`]: {
-                            template: `<add-rbac-resource default-params="$resolve.defaultParams" users-dataset="$resolve.usersDataset" selected="allSelected" resource-data="$resolve.resourceData" without-team-permissions="true" title="` + i18n._('Add Users') + `" only-member-role="true"></add-rbac-resource>`
+                            template: `<add-rbac-resource default-params="$resolve.defaultParams" users-dataset="$resolve.usersDataset" selected="allSelected" resource-data="$resolve.resourceData" without-team-permissions="true" title="` + i18n._('Add Users') + `" only-member-role="true" query-prefix="add_user"></add-rbac-resource>`
                         }
                     },
                     ncyBreadcrumb:{

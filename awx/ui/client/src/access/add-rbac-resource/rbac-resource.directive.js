@@ -18,6 +18,7 @@ export default ['templateUrl', '$state',
                 resourceData: '=',
                 withoutTeamPermissions: '@',
                 onlyMemberRole: '@',
+                queryPrefix: '@',
                 title: '@'
             },
             controller: controller,

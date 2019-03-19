@@ -18,7 +18,8 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
             view: '@',
             dataset: '=',
             defaultParams: '=?',
-            objectType: '='
+            objectType: '=',
+            queryPrefix: '@'
         },
         template: "<div class='addPermissionsList-inner'></div>",
         link: function(scope, element, attrs, ctrl) {
@@ -35,6 +36,9 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
                 Organizations: OrganizationList
             };
             list = _.cloneDeep(listMap[scope.view]);
+            if (scope.queryPrefix) {
+                list.iterator = scope.queryPrefix;
+            }
             list.multiSelect = true;
             list.multiSelectExtended = true;
             list.listTitleBadge = false;
@@ -93,7 +97,9 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
                     list.fields.name.columnClass = 'col-sm-12';
                     break;
                 case 'Users':
-                    list.querySet = { order_by: 'username', page_size: '5' };
+                    if (!scope.queryPrefix) {
+                        list.querySet = { order_by: 'username', page_size: '5' };
+                    }
                     list.fields = {
                         username: list.fields.username,
                         first_name: list.fields.first_name,

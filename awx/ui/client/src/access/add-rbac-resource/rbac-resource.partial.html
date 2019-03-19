@@ -45,7 +45,7 @@
                 </div>
 
                 <div id="AddPermissions-users" class="AddPermissions-list" ng-show="tab.users">
-                    <rbac-multiselect-list view="Users" all-selected="allSelected" default-params="defaultParams" dataset="usersDataset" object-type="object.type"></rbac-multiselect-list>
+                    <rbac-multiselect-list view="Users" all-selected="allSelected" default-params="defaultParams" dataset="usersDataset" object-type="object.type" query-prefix="{{ queryPrefix }}"></rbac-multiselect-list>
                 </div>
                 <div id="AddPermissions-teams" class="AddPermissions-list" ng-if="tab.teams">
                     <rbac-multiselect-list view="Teams" all-selected="allSelected" dataset="teamsDataset" object-type="object.type"></rbac-multiselect-list>
