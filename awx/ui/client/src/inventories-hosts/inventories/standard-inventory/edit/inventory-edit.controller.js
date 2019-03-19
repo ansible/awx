@@ -40,13 +40,6 @@ function InventoriesEdit($scope, $location,
         $scope.instance_groups = InstanceGroupsData;
         $scope.canRemediate = CanRemediate;
 
-        // ParseTypeChange({
-        //     scope: $scope,
-        //     variable: 'inventory_variables',
-        //     parse_variable: 'parseType',
-        //     field_id: 'inventory_inventory_variables'
-        // });
-
         OrgAdminLookup.checkForRoleLevelAdminAccess(inventoryData.organization, 'inventory_admin_role')
             .then(function(canEditOrg){
                 $scope.canEditOrg = canEditOrg;

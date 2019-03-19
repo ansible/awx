@@ -1,7 +1,6 @@
 const templateUrl = require('~components/code-mirror/code-mirror.partial.html');
 
 const CodeMirrorModalID = '#CodeMirror-modal';
-const ParseType = 'yaml';
 
 function atCodeMirrorController (
     $scope,
@@ -10,13 +9,15 @@ function atCodeMirrorController (
 ) {
     const vm = this;
     const variablesName = `${$scope.name}_variables`;
+
     function init () {
         if ($scope.disabled === 'true') {
             $scope.disabled = true;
         } else if ($scope.disabled === 'false') {
             $scope.disabled = false;
         }
-        $scope.parseType = ParseType;
+        $scope.variables = sanitizeVars($scope.variables);
+        $scope.parseType = 'yaml';
 
         $scope.variablesName = variablesName;
         $scope[variablesName] = $scope.variables;
@@ -59,6 +60,32 @@ function atCodeMirrorController (
         vm.expanded = false;
     }
 
+    // Adding this function b/c sometimes extra vars are returned to the
+    // UI as a string (ex: "foo: bar"), and other times as a
+    // json-object-string (ex: "{"foo": "bar"}"). CodeMirror wouldn't know
+    // how to prettify the latter. The latter occurs when host vars were
+    // system generated and not user-input (such as adding a cloud host);
+    function sanitizeVars (str) {
+        // Quick function to test if the host vars are a json-object-string,
+        // by testing if they can be converted to a JSON object w/o error.
+        function IsJsonString (varStr) {
+            try {
+                JSON.parse(varStr);
+            } catch (e) {
+                return false;
+            }
+            return true;
+        }
+
+        if (str === '' || str === '{}') {
+            return '---';
+        } else if (IsJsonString(str)) {
+            str = JSON.parse(str);
+            return jsyaml.safeDump(str);
+        }
+        return str;
+    }
+
     vm.name = $scope.name;
     vm.strings = strings;
     vm.expanded = false;
@@ -70,7 +97,7 @@ function atCodeMirrorController (
         $scope.init = init;
     }
     angular.element(document).ready(() => {
-        init($scope.variables, $scope.name);
+        init();
     });
 }
 

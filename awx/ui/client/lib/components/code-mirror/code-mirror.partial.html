@@ -18,7 +18,7 @@
              </a>
              <div class="atCodeMirror-toggleContainer FormToggle-container">
                  <div class="btn-group">
-                    <label ng-class="{'btn-primary': parseType === 'yaml','Button-primary--hollow' : parseType === 'json'}" class="btn btn-xs btn-primary">
+                    <label ng-class="{'btn-primary': parseType === 'yaml','Button-primary--hollow' : parseType === 'json'}" class="btn btn-xs">
                         <input
                             type="radio"
                             value="yaml"
@@ -27,7 +27,7 @@
                             class="ng-pristine ng-untouched ng-valid ng-not-empty">
                                 {{ vm.strings.get('label.YAML')}}
                     </label>
-                    <label ng-class="{'btn-primary': parseType === 'json','Button-primary--hollow' : parseType === 'yaml'}" class="btn btn-xs Button-primary--hollow">
+                    <label ng-class="{'btn-primary': parseType === 'json','Button-primary--hollow' : parseType === 'yaml'}" class="btn btn-xs">
                         <input
                             type="radio"
                             value="json"
