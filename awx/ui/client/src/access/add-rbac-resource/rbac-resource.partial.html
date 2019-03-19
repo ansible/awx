@@ -20,7 +20,7 @@
             </div>
             <div class="AddPermissions-body">
                 <div class="AddPermissions-directions">
-                    <span class="AddPermissions-directionNumber">
+                    <span class="AddPermissions-directionNumber" ng-hide='onlyMemberRole === "true"'>
                         1
                     </span>
                     <div ng-hide='withoutTeamPermissions' translate>
@@ -51,7 +51,7 @@
                     <rbac-multiselect-list view="Teams" all-selected="allSelected" dataset="teamsDataset" object-type="object.type"></rbac-multiselect-list>
                 </div>
 
-                <span ng-show="hasSelectedRows()">
+                <span ng-show="hasSelectedRows() && !onlyMemberRole">
                     <div class="AddPermissions-separator"></div>
                     <div class="AddPermissions-directions">
                         <span class="AddPermissions-directionNumber">
@@ -110,7 +110,7 @@
                     <button type="button"
                         class="btn btn-sm Form-saveButton"
                         ng-click="updatePermissions()"
-                        ng-disabled="userRoleForm.$invalid || !allSelected || !hasSelectedRows()" translate>
+                        ng-disabled="(onlyMemberRole === 'true' && !hasSelectedRows()) && (userRoleForm.$invalid || !allSelected || !hasSelectedRows())" translate>
                         Save
                     </button>
                 </div>

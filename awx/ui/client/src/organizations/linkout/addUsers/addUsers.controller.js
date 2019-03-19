@@ -28,11 +28,9 @@ function($scope, $rootScope, ProcessErrors, GetBasePath, generateList,
         if ($scope.addType === 'Administrators') {
             Rest.setUrl(GetBasePath('organizations') + `${$state.params.organization_id}/object_roles`);
             Rest.get().then(({data}) => {
-                notAdminAlreadyParams.not__roles__in = data.results
+                notAdminAlreadyParams.not__roles = data.results
                     .filter(({name}) => name === i18n._('Admin'))
-                    .map(({id}) => id)
-                    .join(',');
-                notAdminAlreadyParams.is_superuser = 'false';              
+                    .map(({id}) => id)[0];            
                 init();
             });
         } else {

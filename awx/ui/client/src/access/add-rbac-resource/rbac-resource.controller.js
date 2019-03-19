@@ -119,11 +119,16 @@ export default ['$rootScope', '$scope', 'GetBasePath', 'Rest', '$q', 'Wait', 'Pr
                 var url = GetBasePath(selectedValue.type + "s") + selectedValue.id +
                     "/roles/";
 
-                 (selectedValue.roles || [])
-                    .map(function(role) {
-                        Rest.setUrl(url);
-                        requests.push(Rest.post({ "id": role.value || role.id }));
-                    });
+                if (scope.onlyMemberRole === 'true') {
+                    Rest.setUrl(url);
+                    requests.push(Rest.post({ "id": scope.roles.member_role.id }));
+                } else {
+                    (selectedValue.roles || [])
+                        .map(function(role) {
+                            Rest.setUrl(url);
+                            requests.push(Rest.post({ "id": role.value || role.id }));
+                        });
+                }
             });
         });
 

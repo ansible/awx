@@ -17,6 +17,7 @@ export default ['templateUrl', '$state',
                 teamsDataset: '=',
                 resourceData: '=',
                 withoutTeamPermissions: '@',
+                onlyMemberRole: '@',
                 title: '@'
             },
             controller: controller,
