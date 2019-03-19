@@ -13,7 +13,8 @@
                 class="help-link"
                 data-original-title="{{ label || vm.strings.get('code_mirror.label.VARIABLES') }}"
                 title="{{ label || vm.strings.get('code_mirror.label.VARIABLES') }}"
-                tabindex="-1">
+                tabindex="-1"
+                ng-if="tooltip">
                  <i class="fa fa-question-circle"></i>
              </a>
              <div class="atCodeMirror-toggleContainer FormToggle-container">
