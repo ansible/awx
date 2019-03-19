@@ -1880,7 +1880,7 @@ class PluginFileInjector(object):
         env.update(injector_env)
         return env
 
-    def _get_shared_env(self, inventory_update, private_data_dir, private_data_files, safe=False):
+    def _get_shared_env(self, inventory_update, private_data_dir, private_data_files):
         """By default, we will apply the standard managed_by_tower injectors
         for the script injection
         """
@@ -1894,31 +1894,28 @@ class PluginFileInjector(object):
             cred_kind = inventory_update.source.replace('ec2', 'aws')
             if cred_kind in dir(builtin_injectors):
                 getattr(builtin_injectors, cred_kind)(credential, injected_env, private_data_dir)
-                if safe:
-                    from awx.main.models.credential import build_safe_env
-                    return build_safe_env(injected_env)
         elif self.base_injector == 'template':
             injected_env['INVENTORY_UPDATE_ID'] = str(inventory_update.pk)  # so injector knows this is inventory
             safe_env = injected_env.copy()
             args = []
-            safe_args = []
             credential.credential_type.inject_credential(
-                credential, injected_env, safe_env, args, safe_args, private_data_dir
+                credential, injected_env, safe_env, args, private_data_dir
             )
-            if safe:
-                return safe_env
+            # NOTE: safe_env is handled externally to injector class by build_safe_env static method
+            # that means that managed_by_tower injectors must only inject detectable env keys
+            # enforcement of this is accomplished by tests
         return injected_env
 
-    def get_plugin_env(self, inventory_update, private_data_dir, private_data_files, safe=False):
-        return self._get_shared_env(inventory_update, private_data_dir, private_data_files, safe)
+    def get_plugin_env(self, inventory_update, private_data_dir, private_data_files):
+        return self._get_shared_env(inventory_update, private_data_dir, private_data_files)
 
-    def get_script_env(self, inventory_update, private_data_dir, private_data_files, safe=False):
-        injected_env = self._get_shared_env(inventory_update, private_data_dir, private_data_files, safe)
+    def get_script_env(self, inventory_update, private_data_dir, private_data_files):
+        injected_env = self._get_shared_env(inventory_update, private_data_dir, private_data_files)
 
         # Put in env var reference to private ini data files, if relevant
         if self.ini_env_reference:
             credential = inventory_update.get_cloud_credential()
-            cred_data = private_data_files.get('credentials', '')
+            cred_data = private_data_files['credentials']
             injected_env[self.ini_env_reference] = cred_data[credential]
 
         return injected_env
@@ -1952,7 +1949,8 @@ class PluginFileInjector(object):
 
 class azure_rm(PluginFileInjector):
     plugin_name = 'azure_rm'
-    initial_version = '2.8'  # Driven by unsafe group names issue, hostvars
+    # FIXME: https://github.com/ansible/ansible/issues/54065 need resolving to enable
+    # initial_version = '2.8'  # Driven by unsafe group names issue, hostvars
     ini_env_reference = 'AZURE_INI_PATH'
     base_injector = 'managed'
 
@@ -2074,7 +2072,8 @@ class azure_rm(PluginFileInjector):
 
 class ec2(PluginFileInjector):
     plugin_name = 'aws_ec2'
-    initial_version = '2.8'  # Driven by unsafe group names issue, parent_group templating, hostvars
+    # blocked by https://github.com/ansible/ansible/issues/54059
+    # initial_version = '2.8'  # Driven by unsafe group names issue, parent_group templating, hostvars
     ini_env_reference = 'EC2_INI_PATH'
     base_injector = 'managed'
 
@@ -2402,7 +2401,7 @@ class gce(PluginFileInjector):
             ret['zones'] = inventory_update.source_regions.split(',')
         return ret
 
-    def get_plugin_env(self, inventory_update, private_data_dir, private_data_files, safe=False):
+    def get_plugin_env(self, inventory_update, private_data_dir, private_data_files):
         # gce wants everything defined in inventory & cred files
         # this explicitly turns off injection of environment variables
         return {}
@@ -2616,7 +2615,7 @@ class satellite6(PluginFileInjector):
 
         return self.dump_cp(cp, credential)
 
-    def get_plugin_env(self, inventory_update, private_data_dir, private_data_files, safe=False):
+    def get_plugin_env(self, inventory_update, private_data_dir, private_data_files):
         # this assumes that this is merged
         # https://github.com/ansible/ansible/pull/52693
         credential = inventory_update.get_cloud_credential()

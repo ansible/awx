@@ -16,7 +16,7 @@ keyed_groups:
 - key: location
   prefix: ''
   separator: ''
-- key: tags.keys() if tags else []
+- key: tags.keys() | list if tags else []
   prefix: ''
   separator: ''
 - key: security_group

@@ -2071,7 +2071,7 @@ class RunInventoryUpdate(BaseTask):
                         getattr(settings, '%s_INSTANCE_ID_VAR' % src.upper()),])
         # Add arguments for the source inventory script
         args.append('--source')
-        args.append(self.build_inventory(inventory_update, private_data_dir))
+        args.append(self.psuedo_build_inventory(inventory_update, private_data_dir))
         if src == 'custom':
             args.append("--custom")
         args.append('-v%d' % inventory_update.verbosity)
@@ -2080,6 +2080,15 @@ class RunInventoryUpdate(BaseTask):
         return args
 
     def build_inventory(self, inventory_update, private_data_dir):
+        return None  # what runner expects in order to not deal with inventory
+
+    def psuedo_build_inventory(self, inventory_update, private_data_dir):
+        """Inventory imports are ran through a management command
+        we pass the inventory in args to that command, so this is not considered
+        to be "Ansible" inventory (by runner) even though it is
+        Eventually, we would like to cut out the management command,
+        and thus use this as the real inventory
+        """
         src = inventory_update.source
 
         injector = None
@@ -2133,7 +2142,7 @@ class RunInventoryUpdate(BaseTask):
 
     def build_credentials_list(self, inventory_update):
         # All credentials not used by inventory source injector
-        return [inventory_update.get_extra_credentials()]
+        return inventory_update.get_extra_credentials()
 
     def get_idle_timeout(self):
         return getattr(settings, 'INVENTORY_UPDATE_IDLE_TIMEOUT', None)

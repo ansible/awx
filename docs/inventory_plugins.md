@@ -1,7 +1,6 @@
 # Transition to Ansible Inventory Plugins
 Inventory updates change from using scripts which are vendored as executable
-python scripts in the AWX folder `awx/plugins/inventory` (taken originally from
-Ansible folder `contrib/inventory`) to using dynamically-generated
+python scripts to using dynamically-generated
 YAML files which conform to the specifications of the `auto` inventory plugin
 which are then parsed by their respective inventory plugin.
 
@@ -86,12 +85,8 @@ construction used in compatibility mode to help get a sense of what
 new names replace old names.
 
 If you turn compatibility mode off or downgrade Ansible, you should
-consider turning on `overwrite` and `overwrite_vars` to get rid of stale
+turn on `overwrite` and `overwrite_vars` to get rid of stale
 variables (and potentially groups) no longer returned by the import.
-
-In many cases, the host names will change. In all cases, accurate host
-tracking will still be maintained via the host `instance_id`.
-(after: https://github.com/ansible/awx/pull/3362)
 
 Group names will be sanitized with compatibility mode turned off.
 That means that characters such as "-" will
@@ -113,23 +108,13 @@ mode on. To maintain backward compatibility,
 the old names are added back where they have the same meaning as a
 variable returned by the plugin. New names are not removed.
 
-Some hostvars will be lost, because of general deprecation needs.
-
- - ec2, see https://github.com/ansible/ansible/issues/52358
- - gce (see https://github.com/ansible/ansible/issues/51884)
-   - `gce_uuid` this came from libcloud and isn't a true GCP field
-     inventory plugins have moved away from libcloud
-
- The syntax of some hostvars, for some values, will change.
-
-  - ec2
-    - old: "ec2_block_devices": {"sda1": "vol-xxxxxx"}
-    - new: "ec2_block_devices": {"/dev/sda1": "vol-xxxxxx"}
+A small number of hostvars will be lost because of general deprecation needs.
 
 #### Host names
 
-Host names might change, but tracking host identity via `instance_id`
-will still be reliable.
+In many cases, the host names will change. In all cases, accurate host
+tracking will still be maintained via the host `instance_id`.
+(after: https://github.com/ansible/awx/pull/3362)
 
 ## How do I write my own Inventory File?
 

@@ -32,6 +32,7 @@ from awx.main.models import (
     CustomInventoryScript,
     build_safe_env
 )
+from awx.main.models.credential import ManagedCredentialType
 
 from awx.main import tasks
 from awx.main.utils import encrypt_field, encrypt_value
@@ -163,12 +164,12 @@ def test_openstack_client_config_generation(mocker, source, expected, private_da
         inputs['verify_ssl'] = source
     credential = Credential(pk=1, credential_type=credential_type, inputs=inputs)
 
-    cred_method = mocker.Mock(return_value=credential)
     inventory_update = mocker.Mock(**{
         'source': 'openstack',
         'source_vars_dict': {},
-        'get_cloud_credential': cred_method,
-        'get_extra_credentials': lambda x: []
+        'get_cloud_credential': mocker.Mock(return_value=credential),
+        'get_extra_credentials': lambda x: [],
+        'ansible_virtualenv_path': '/venv/foo'
     })
     cloud_config = update.build_private_data(inventory_update, private_data_dir)
     cloud_credential = yaml.load(
@@ -205,12 +206,12 @@ def test_openstack_client_config_generation_with_private_source_vars(mocker, sou
     }
     credential = Credential(pk=1, credential_type=credential_type, inputs=inputs)
 
-    cred_method = mocker.Mock(return_value=credential)
     inventory_update = mocker.Mock(**{
         'source': 'openstack',
         'source_vars_dict': {'private': source},
-        'get_cloud_credential': cred_method,
-        'get_extra_credentials': lambda x: []
+        'get_cloud_credential': mocker.Mock(return_value=credential),
+        'get_extra_credentials': lambda x: [],
+        'ansible_virtualenv_path': '/venv/foo'
     })
     cloud_config = update.build_private_data(inventory_update, private_data_dir)
     cloud_credential = yaml.load(
@@ -1841,13 +1842,9 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
         env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
 
-        safe_env = {}
-        credentials = task.build_credentials_list(inventory_update)
-        for credential in credentials:
-            if credential:
-                credential.credential_type.inject_credential(
-                    credential, env, safe_env, [], private_data_dir
-                )
+        injector = InventorySource.injectors['ec2']('2.7')
+        env = injector.get_script_env(inventory_update, private_data_dir, private_data_files)
+        safe_env = build_safe_env(env)
 
         assert env['AWS_ACCESS_KEY_ID'] == 'bob'
         assert env['AWS_SECRET_ACCESS_KEY'] == 'secret'
@@ -1921,13 +1918,10 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
         env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
 
-        safe_env = {}
-        credentials = task.build_credentials_list(inventory_update)
-        for credential in credentials:
-            if credential:
-                credential.credential_type.inject_credential(
-                    credential, env, safe_env, [], private_data_dir
-                )
+
+        injector = InventorySource.injectors['azure_rm']('2.7')
+        env = injector.get_script_env(inventory_update, private_data_dir, private_data_files)
+        safe_env = build_safe_env(env)
 
         assert env['AZURE_CLIENT_ID'] == 'some-client'
         assert env['AZURE_SECRET'] == 'some-secret'
@@ -1975,13 +1969,10 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
         env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
 
-        safe_env = {}
-        credentials = task.build_credentials_list(inventory_update)
-        for credential in credentials:
-            if credential:
-                credential.credential_type.inject_credential(
-                    credential, env, safe_env, [], private_data_dir
-                )
+
+        injector = InventorySource.injectors['azure_rm']('2.7')
+        env = injector.get_script_env(inventory_update, private_data_dir, private_data_files)
+        safe_env = build_safe_env(env)
 
         assert env['AZURE_SUBSCRIPTION_ID'] == 'some-subscription'
         assert env['AZURE_AD_USER'] == 'bob'
@@ -2048,7 +2039,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         with mock.patch('awx.main.models.inventory.gce.initial_version', None):
             run('')
 
-            self.instance.source_regions = 'us-east-4'
+            inventory_update.source_regions = 'us-east-4'
             run('us-east-4')
 
     def test_openstack_source(self, inventory_update, private_data_dir, mocker):
@@ -2187,13 +2178,9 @@ class TestInventoryUpdateCredentials(TestJobExecution):
 
         env = task.build_env(inventory_update, private_data_dir, False)
 
-        safe_env = {}
-        credentials = task.build_credentials_list(inventory_update)
-        for credential in credentials:
-            if credential:
-                credential.credential_type.inject_credential(
-                    credential, env, safe_env, [], private_data_dir
-                )
+        injector = InventorySource.injectors['tower']('2.7')
+        env = injector.get_script_env(inventory_update, private_data_dir, {})
+        safe_env = build_safe_env(env)
 
         assert env['TOWER_HOST'] == 'https://tower.example.org'
         assert env['TOWER_USERNAME'] == 'bob'
@@ -2315,3 +2302,27 @@ def test_aquire_lock_acquisition_fail_logged(fcntl_flock, logging_getLogger, os_
         ProjectUpdate.acquire_lock(instance)
     os_close.assert_called_with(3)
     assert logger.err.called_with("I/O error({0}) while trying to aquire lock on file [{1}]: {2}".format(3, 'this_file_does_not_exist', 'dummy message'))
+
+
+@pytest.mark.parametrize('injector_cls', [
+    cls for cls in ManagedCredentialType.registry.values() if cls.injectors
+])
+def test_managed_injector_redaction(injector_cls):
+    """See awx.main.models.inventory.PluginFileInjector._get_shared_env
+    The ordering within awx.main.tasks.BaseTask and contract with build_env
+    requires that all managed_by_tower injectors are safely redacted by the
+    static method build_safe_env without having to employ the safe namespace
+    as in inject_credential
+
+    This test enforces that condition uniformly to prevent password leakages
+    """
+    secrets = set()
+    for element in injector_cls.inputs.get('fields', []):
+        if element.get('secret', False):
+            secrets.add(element['id'])
+    env = {}
+    for env_name, template in injector_cls.injectors.get('env', {}).items():
+        for secret_field_name in secrets:
+            if secret_field_name in template:
+                env[env_name] = 'very_secret_value'
+    assert 'very_secret_value' not in str(build_safe_env(env))

@@ -3,6 +3,7 @@ from unittest import mock
 import os
 import json
 import re
+from collections import namedtuple
 
 from awx.main.tasks import RunInventoryUpdate
 from awx.main.models import InventorySource, Credential, CredentialType, UnifiedJob
@@ -151,6 +152,8 @@ def read_content(private_data_dir, raw_env, inventory_update):
     dir_contents = {}
     references = {}
     for filename in os.listdir(private_data_dir):
+        if filename in ('args', 'project'):
+            continue  # Ansible runner
         abs_file_path = os.path.join(private_data_dir, filename)
         if abs_file_path in inverse_env:
             env_key = inverse_env[abs_file_path]
@@ -248,17 +251,17 @@ def test_inventory_update_injected_content(this_kind, script_or_plugin, inventor
     if use_plugin and InventorySource.injectors[this_kind].plugin_name is None:
         pytest.skip('Use of inventory plugin is not enabled for this source')
 
-    def substitute_run(args, cwd, call_env, stdout_handle, **_kw):
+    def substitute_run(envvars=None, **_kw):
         """This method will replace run_pexpect
         instead of running, it will read the private data directory contents
         It will make assertions that the contents are correct
         If MAKE_INVENTORY_REFERENCE_FILES is set, it will produce reference files
         """
-        private_data_dir = call_env.pop('AWX_PRIVATE_DATA_DIR')
-        assert call_env.pop('ANSIBLE_INVENTORY_ENABLED') == ('auto' if use_plugin else 'script')
-        assert call_env.pop('ANSIBLE_TRANSFORM_INVALID_GROUP_CHARS') == 'never'
+        private_data_dir = envvars.pop('AWX_PRIVATE_DATA_DIR')
+        assert envvars.pop('ANSIBLE_INVENTORY_ENABLED') == ('auto' if use_plugin else 'script')
+        assert envvars.pop('ANSIBLE_TRANSFORM_INVALID_GROUP_CHARS') == 'never'
         set_files = bool(os.getenv("MAKE_INVENTORY_REFERENCE_FILES", 'false').lower()[0] not in ['f', '0'])
-        env, content = read_content(private_data_dir, call_env, inventory_update)
+        env, content = read_content(private_data_dir, envvars, inventory_update)
         base_dir = os.path.join(DATA, script_or_plugin)
         if not os.path.exists(base_dir):
             os.mkdir(base_dir)
@@ -290,7 +293,8 @@ def test_inventory_update_injected_content(this_kind, script_or_plugin, inventor
             except FileNotFoundError:
                 ref_env = {}
             assert ref_env == env
-        return ('successful', 0)
+        Res = namedtuple('Result', ['status', 'rc'])
+        return Res('successful', 0)
 
     mock_licenser = mock.Mock(return_value=mock.Mock(
         validate=mock.Mock(return_value={'license_type': 'open'})
@@ -303,8 +307,8 @@ def test_inventory_update_injected_content(this_kind, script_or_plugin, inventor
         with mock.patch('awx.main.models.inventory.PluginFileInjector.should_use_plugin', return_value=use_plugin):
             # Also do not send websocket status updates
             with mock.patch.object(UnifiedJob, 'websocket_emit_status', mock.Mock()):
-                # The point of this test is that we replace run_pexpect with assertions
-                with mock.patch('awx.main.expect.run.run_pexpect', substitute_run):
+                # The point of this test is that we replace run with assertions
+                with mock.patch('awx.main.tasks.ansible_runner.interface.run', substitute_run):
                     # mocking the licenser is necessary for the tower source
                     with mock.patch('awx.main.models.inventory.get_licenser', mock_licenser):
                         # so this sets up everything for a run and then yields control over to substitute_run
