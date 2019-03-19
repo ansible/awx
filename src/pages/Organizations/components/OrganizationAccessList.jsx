@@ -305,125 +305,122 @@ class OrganizationAccessList extends React.Component {
       showWarning
     } = this.state;
     return (
-      <Fragment>
-        {!error && results.length <= 0 && (
-          <h1>Loading...</h1> // TODO: replace with proper loading state
-        )}
-        {error && results.length <= 0 && (
+      <I18n>
+        {({ i18n }) => (
           <Fragment>
-            <div>{error.message}</div>
-            {error.response && (
-              <div>{error.response.data.detail}</div>
+            {!error && results.length <= 0 && (
+              <h1>Loading...</h1> // TODO: replace with proper loading state
             )}
-          </Fragment> // TODO: replace with proper error handling
-        )}
-        {results.length > 0 && (
-          <Fragment>
-            <DataListToolbar
-              sortedColumnKey={sortedColumnKey}
-              sortOrder={sortOrder}
-              columns={this.columns}
-              onSearch={() => { }}
-              onSort={this.onSort}
-              onCompact={this.onCompact}
-              onExpand={this.onExpand}
-              isCompact={isCompact}
-              showExpandCollapse
-            />
-            {showWarning && (
-              <Alert
-                variant="danger"
-                title={warningTitle}
-                action={<AlertActionCloseButton onClose={this.hideWarning} />}
-              >
-                {warningMsg}
-                <span className="awx-c-form-action-group">
-                  <Button variant="danger" aria-label="confirm-delete" onClick={this.confirmDelete}>Delete</Button>
-                  <Button variant="secondary" onClick={this.hideWarning}>Cancel</Button>
-                </span>
-              </Alert>
+            {error && results.length <= 0 && (
+              <Fragment>
+                <div>{error.message}</div>
+                {error.response && (
+                  <div>{error.response.data.detail}</div>
+                )}
+              </Fragment> // TODO: replace with proper error handling
             )}
-
-            <Fragment>
-              <I18n>
-                {({ i18n }) => (
-                  <DataList aria-label={i18n._(t`Access List`)}>
-                    {results.map(result => (
-                      <DataListItem aria-labelledby={i18n._(t`access-list-item`)} key={result.id}>
-                        <DataListCell>
-                          <UserName
-                            value={result.username}
-                            url={result.url}
-                          />
-                          {result.first_name || result.last_name ? (
-                            <Detail
-                              label={i18n._(t`Name`)}
-                              value={`${result.first_name} ${result.last_name}`}
-                              url={null}
-                              customStyles={isCompact ? hiddenStyle : null}
-                            />
-                          ) : (
-                            null
-                          )}
-                        </DataListCell>
-                        <DataListCell>
+            {results.length > 0 && (
+              <Fragment>
+                <DataListToolbar
+                  sortedColumnKey={sortedColumnKey}
+                  sortOrder={sortOrder}
+                  columns={this.columns}
+                  onSearch={() => { }}
+                  onSort={this.onSort}
+                  onCompact={this.onCompact}
+                  onExpand={this.onExpand}
+                  isCompact={isCompact}
+                  showExpandCollapse
+                />
+                {showWarning && (
+                  <Alert
+                    variant="danger"
+                    title={warningTitle}
+                    action={<AlertActionCloseButton onClose={this.hideWarning} />}
+                  >
+                    {warningMsg}
+                    <span className="awx-c-form-action-group">
+                      <Button variant="danger" aria-label="confirm-delete" onClick={this.confirmDelete}>Delete</Button>
+                      <Button variant="secondary" onClick={this.hideWarning}>Cancel</Button>
+                    </span>
+                  </Alert>
+                )}
+                <DataList aria-label={i18n._(t`Access List`)}>
+                  {results.map(result => (
+                    <DataListItem aria-labelledby={i18n._(t`access-list-item`)} key={result.id}>
+                      <DataListCell>
+                        <UserName
+                          value={result.username}
+                          url={result.url}
+                        />
+                        {result.first_name || result.last_name ? (
                           <Detail
-                            label=" "
-                            value=" "
+                            label={i18n._(t`Name`)}
+                            value={`${result.first_name} ${result.last_name}`}
                             url={null}
                             customStyles={isCompact ? hiddenStyle : null}
                           />
-                          {result.userRoles.length > 0 && (
-                            <ul style={isCompact
-                              ? { ...userRolesWrapperStyle, ...hiddenStyle }
-                              : userRolesWrapperStyle}
-                            >
-                              <Text component={TextVariants.h6} style={detailLabelStyle}>{i18n._(t`User Roles`)}</Text>
-                              {result.userRoles.map(role => (
-                                <Chip
-                                  key={role.id}
-                                  className="awx-c-chip"
-                                  onClick={() => this.handleWarning(role.name, role.id, result.username, result.id, 'users')}
-                                >
-                                  {role.name}
-                                </Chip>
-                              ))}
-                            </ul>
-                          )}
-                          {result.teamRoles.length > 0 && (
-                            <ul style={isCompact
-                              ? { ...userRolesWrapperStyle, ...hiddenStyle }
-                              : userRolesWrapperStyle}
-                            >
-                              <Text component={TextVariants.h6} style={detailLabelStyle}>{i18n._(t`Team Roles`)}</Text>
-                              {result.teamRoles.map(role => (
-                                <Chip
-                                  key={role.id}
-                                  className="awx-c-chip"
-                                  onClick={() => this.handleWarning(role.name, role.id, role.team_name, role.team_id, 'teams')}
-                                >
-                                  {role.name}
-                                </Chip>
-                              ))}
-                            </ul>
-                          )}
-                        </DataListCell>
-                      </DataListItem>
-                    ))}
-                  </DataList>
-                )}
-              </I18n>
-            </Fragment>
-            <Pagination
-              count={count}
-              page={page}
-              pageCount={pageCount}
-              page_size={page_size}
-              onSetPage={this.onSetPage}
-            />
+                        ) : (
+                          null
+                        )}
+                      </DataListCell>
+                      <DataListCell>
+                        <Detail
+                          label=" "
+                          value=" "
+                          url={null}
+                          customStyles={isCompact ? hiddenStyle : null}
+                        />
+                        {result.userRoles.length > 0 && (
+                          <ul style={isCompact
+                            ? { ...userRolesWrapperStyle, ...hiddenStyle }
+                            : userRolesWrapperStyle}
+                          >
+                            <Text component={TextVariants.h6} style={detailLabelStyle}>{i18n._(t`User Roles`)}</Text>
+                            {result.userRoles.map(role => (
+                              <Chip
+                                key={role.id}
+                                className="awx-c-chip"
+                                onClick={() => this.handleWarning(role.name, role.id, result.username, result.id, 'users')}
+                              >
+                                {role.name}
+                              </Chip>
+                            ))}
+                          </ul>
+                        )}
+                        {result.teamRoles.length > 0 && (
+                          <ul style={isCompact
+                            ? { ...userRolesWrapperStyle, ...hiddenStyle }
+                            : userRolesWrapperStyle}
+                          >
+                            <Text component={TextVariants.h6} style={detailLabelStyle}>{i18n._(t`Team Roles`)}</Text>
+                            {result.teamRoles.map(role => (
+                              <Chip
+                                key={role.id}
+                                className="awx-c-chip"
+                                onClick={() => this.handleWarning(role.name, role.id, role.team_name, role.team_id, 'teams')}
+                              >
+                                {role.name}
+                              </Chip>
+                            ))}
+                          </ul>
+                        )}
+                      </DataListCell>
+                    </DataListItem>
+                  ))}
+                </DataList>
+                <Pagination
+                  count={count}
+                  page={page}
+                  pageCount={pageCount}
+                  page_size={page_size}
+                  onSetPage={this.onSetPage}
+                />
+              </Fragment>
+            )}
           </Fragment>
         )}
-      </Fragment>
+      </I18n>
     );
   }
 }
