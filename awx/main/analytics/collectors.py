@@ -142,7 +142,7 @@ def projects_by_scm_type(since):
 def instance_info(since):
     info = {}
     instances = models.Instance.objects.values_list('hostname').annotate().values(
-        'uuid', 'version', 'capacity', 'cpu', 'memory', 'managed_by_policy', 'hostname', 'last_isolated_check')
+        'uuid', 'version', 'capacity', 'cpu', 'memory', 'managed_by_policy', 'hostname', 'last_isolated_check', 'enabled')
     for instance in instances:
         info = {'uuid': instance['uuid'],
                 'version': instance['version'],
@@ -151,6 +151,7 @@ def instance_info(since):
                 'memory': instance['memory'],
                 'managed_by_policy': instance['managed_by_policy'],
                 'last_isolated_check': instance['last_isolated_check'],
+                'enabled': instance['enabled']
                 }
     return info
 
@@ -195,7 +196,7 @@ def copy_tables(since, full_path):
                               main_jobevent.uuid,
                               main_jobevent.parent_uuid,
                               main_jobevent.event, 
-                              main_jobevent.event_data::json->'task_action'
+                              main_jobevent.event_data::json->'task_action',
                               main_jobevent.failed, 
                               main_jobevent.changed, 
                               main_jobevent.playbook, 
@@ -204,7 +205,7 @@ def copy_tables(since, full_path):
                               main_jobevent.role, 
                               main_jobevent.job_id, 
                               main_jobevent.host_id, 
-                              main_jobevent.host_name, 
+                              main_jobevent.host_name
                               FROM main_jobevent 
                               WHERE main_jobevent.created > {}
                               ORDER BY main_jobevent.id ASC) to stdout'''.format(since.strftime("'%Y-%m-%d %H:%M:%S'"))

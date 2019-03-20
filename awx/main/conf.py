@@ -305,8 +305,8 @@ register(
     'INSIGHTS_DATA_ENABLED',
     field_class=fields.BooleanField,
     default=False,
-    label=_('Insights Analytics Data'),
-    help_text=_('Enables Tower to gather analytics data about itself and send it to Insights.'),
+    label=_('Gather data for Automation Insights'),
+    help_text=_('Enables Tower to gather data on automation and send it to Red Hat Insights.'),
     category=_('System'),
     category_slug='system',
 )
