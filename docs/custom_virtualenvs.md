@@ -107,7 +107,7 @@ Now create an initContainer stanza.  You can subsititute your own custom images 
             - mountPath: /var/lib/awx/venv/my-custom-venv
               name: custom-venv
 
-Fiinally in the awx-celery and awx-web containers stanza add the shared volume as a mount.
+Finally in the awx-celery and awx-web containers stanza add the shared volume as a mount.
 
     volumeMounts:
         - mountPath: /var/lib/awx/venv/my-custom-venv
