@@ -985,6 +985,14 @@ class BaseTask(object):
         '''
         Ansible runner callback for events
         '''
+
+        '''
+        Ansible runner puts a parent_uuid on each event, no matter what the type.
+        AWX only saves the parent_uuid if the event is for a Job.
+        '''
+        if event_data.get(self.event_data_key, None):
+            if event_data[self.event_data_key] != 'job_id':
+                event_data.pop('parent_uuid', None)
         should_write_event = False
         dispatcher = CallbackQueueDispatcher()
         event_data.setdefault(self.event_data_key, self.instance.id)
