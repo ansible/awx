@@ -5,7 +5,6 @@
 #    pip-compile --output-file requirements/requirements_ansible.txt requirements/requirements_ansible.in
 #
 adal==0.5.0               # via msrestazure
-apache-libcloud==2.2.1
 appdirs==1.4.3            # via openstacksdk, os-client-config
 applicationinsights==0.11.1  # via azure-cli-core
 argcomplete==1.9.4        # via azure-cli-core, knack
