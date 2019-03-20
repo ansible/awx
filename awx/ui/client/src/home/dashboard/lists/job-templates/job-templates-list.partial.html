@@ -53,7 +53,9 @@
     <div class="DashboardList-container">
         <p class="DashboardList-noJobs"><translate>No job templates were recently used.</translate><br />
         <!-- TODO: Seems $sce.trustAsHtml() does not work here. -->
-        <translate>You can create a job template <a href="#/templates/add_job_template">here</a>.</translate></p>
+        <div ng-show="canAddJobTemplate">
+            <translate>You can create a job template <a href="#/templates/add_job_template">here</a>.</translate></p>
+        </div>
     </div>
 </div>
 <prompt prompt-data="promptData" on-finish="launchJob()"></prompt>
