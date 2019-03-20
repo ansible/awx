@@ -23,11 +23,14 @@
                  page_size: 5
              };
 
-             if($state.params.group_id) {
+             if ($state.params.group_id) {
                  $scope.associate_group_default_params.not__id = $state.params.group_id;
                  $scope.associate_group_queryset.not__id = $state.params.group_id;
                  $scope.associate_group_default_params.not__parents = $state.params.group_id;
                  $scope.associate_group_queryset.not__parents = $state.params.group_id;
+             } else if ($state.params.host_id) {
+                 $scope.associate_group_default_params.not__hosts = $state.params.host_id;
+                 $scope.associate_group_queryset.not__hosts = $state.params.host_id;
              }
 
              let list = _.cloneDeep(GroupList);
