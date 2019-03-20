@@ -39,10 +39,6 @@ function atCodeMirrorController (
     }
 
     function close (varsFromModal, parseTypeFromModal) {
-        // TODO: make sure that the variables format matches
-        // parseType before re-initializing CodeMirror.  Ex)
-        // user changes the format from yaml to json in the
-        // modal but CM in the form is set to YAML
         $scope.variables = varsFromModal;
         $scope[variablesName] = $scope.variables;
         $scope.parseType = parseTypeFromModal;
@@ -61,10 +57,10 @@ function atCodeMirrorController (
     }
 
     // Adding this function b/c sometimes extra vars are returned to the
-    // UI as a string (ex: "foo: bar"), and other times as a
-    // json-object-string (ex: "{"foo": "bar"}"). CodeMirror wouldn't know
-    // how to prettify the latter. The latter occurs when host vars were
-    // system generated and not user-input (such as adding a cloud host);
+    // UI as yaml (ex: "foo: bar"), and other times as a
+    // json-object-string (ex: "{"foo": "bar"}"). The latter typically
+    // occurs when host vars were system generated and not user-input
+    // (such as adding a cloud host);
     function sanitizeVars (str) {
         // Quick function to test if the host vars are a json-object-string,
         // by testing if they can be converted to a JSON object w/o error.
