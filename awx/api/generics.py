@@ -101,7 +101,7 @@ class LoggedLoginView(auth_views.LoginView):
             return ret
         else:
             if 'username' in self.request.POST:
-                logger.warn(smart_text(u"Login failed for user {}".format(self.request.POST.get('username'))))
+                logger.warn(smart_text(u"Login failed for user {} from {}".format(self.request.POST.get('username'),request.META.get('REMOTE_ADDR', None))))
             ret.status_code = 401
             return ret
 
