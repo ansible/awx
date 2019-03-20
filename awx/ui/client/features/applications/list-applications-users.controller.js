@@ -7,31 +7,70 @@ function ListApplicationsUsersController (
     $filter,
     $scope,
     Dataset,
-    resolvedModels,
     strings,
-    $stateParams,
+    $state,
     GetBasePath
 ) {
     const vm = this || {};
-    // const application = resolvedModels;
-
     vm.strings = strings;
+
     // smart-search
     const name = 'users';
     const iterator = 'user';
-    const key = 'user_dataset';
+    let paginateQuerySet = {};
 
-    $scope.list = { iterator, name, basePath: 'applications' };
-    $scope.collection = { iterator };
-    $scope.tokenBasePath = `${GetBasePath('applications')}${$stateParams.application_id}/tokens`;
-    $scope[key] = Dataset.data;
-    vm.usersCount = Dataset.data.count;
-    $scope[name] = Dataset.data.results;
-    $scope.$on('updateDataset', (e, dataset) => {
-        $scope[key] = dataset;
-        $scope[name] = dataset.results;
-        vm.usersCount = dataset.count;
+    vm.user_dataset = Dataset.data;
+    vm.users = Dataset.data.results;
+    vm.list = { iterator, name, basePath: 'applications' };
+    vm.basePath = `${GetBasePath('applications')}${$state.params.application_id}/tokens`;
+
+    $scope.$on('updateDataset', (e, dataset, queryset) => {
+        vm.user_dataset = dataset;
+        vm.users = dataset.results;
+        paginateQuerySet = queryset;
     });
+
+    $scope.$watchCollection('$state.params', () => {
+        setToolbarSort();
+    });
+
+    const toolbarSortDefault = {
+        label: `${strings.get('sort.USERNAME_ASCENDING')}`,
+        value: 'user__username'
+    };
+
+    vm.toolbarSortOptions = [
+        toolbarSortDefault,
+        {
+            label: `${strings.get('sort.USERNAME_DESCENDING')}`,
+            value: '-user__username'
+        }
+    ];
+
+    function setToolbarSort () {
+        const orderByValue = _.get($state.params, 'user_search.order_by');
+        const sortValue = _.find(vm.toolbarSortOptions, (option) => option.value === orderByValue);
+        if (sortValue) {
+            vm.toolbarSortValue = sortValue;
+        } else {
+            vm.toolbarSortValue = toolbarSortDefault;
+        }
+    }
+
+    vm.onToolbarSort = (sort) => {
+        vm.toolbarSortValue = sort;
+        const queryParams = Object.assign(
+            {},
+            $state.params.user_search,
+            paginateQuerySet,
+            { order_by: sort.value }
+        );
+
+        // Update URL with params
+        $state.go('.', {
+            user_search: queryParams
+        }, { notify: false, location: 'replace' });
+    };
 
     vm.getLastUsed = user => {
         const lastUsed = _.get(user, 'last_used');
@@ -56,9 +95,8 @@ ListApplicationsUsersController.$inject = [
     '$filter',
     '$scope',
     'Dataset',
-    'resolvedModels',
     'ApplicationsStrings',
-    '$stateParams',
+    '$state',
     'GetBasePath'
 ];
 

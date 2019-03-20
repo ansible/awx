@@ -91,6 +91,14 @@ function ApplicationsRun ($stateExtender, strings) {
                 controllerAs: 'vm'
             }
         },
+        params: {
+            application_search: {
+                value: {
+                    order_by: 'name',
+                    page_size: 10
+                },
+            }
+        },
         searchPrefix: 'application',
         resolve: {
             resolvedModels: [
@@ -291,8 +299,8 @@ function ApplicationsRun ($stateExtender, strings) {
         params: {
             user_search: {
                 value: {
-                    order_by: 'user',
-                    page_size: 20
+                    order_by: 'user__username',
+                    page_size: 10
                 },
                 dynamic: true
             }
