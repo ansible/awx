@@ -91,15 +91,15 @@ function ApplicationsRun ($stateExtender, strings) {
                 controllerAs: 'vm'
             }
         },
+        searchPrefix: 'application',
         params: {
             application_search: {
                 value: {
-                    order_by: 'name',
-                    page_size: 10
-                },
+                    page_size: 10,
+                    order_by: 'name'
+                }
             }
         },
-        searchPrefix: 'application',
         resolve: {
             resolvedModels: [
                 'ApplicationModel',
