@@ -1372,7 +1372,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += `tooltip="${field.awPopOver}" `;
                         html += `name="${fld}" `;
                         html += `variables="${field.variables}" `;
-                        html += `ng-disabled="${field.ngDisabled}" `
+                        html += `ng-disabled="${field.ngDisabled}" `;
                         html += '></at-code-mirror>';
                     }
 
