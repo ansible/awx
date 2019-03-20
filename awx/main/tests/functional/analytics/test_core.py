@@ -5,6 +5,7 @@ import tarfile
 
 import pytest
 
+from django.conf import settings
 from awx.main.analytics import gather, register
 
 
@@ -25,6 +26,7 @@ def throws_error(since):
 
 @pytest.mark.django_db
 def test_gather():
+    settings.INSIGHTS_DATA_ENABLED = True
     tgz = gather(module=importlib.import_module(__name__))
     files = {}
     with tarfile.open(tgz, "r:gz") as archive:
@@ -42,3 +44,4 @@ def test_gather():
         os.remove(tgz)
     except Exception:
         pass
+        

@@ -26,7 +26,7 @@ def test_empty():
         "team": 0,
         "user": 0,
         "workflow_job_template": 0,
-        'unified_job': 0
+        "unified_job": 0
     }
 
 

@@ -70,13 +70,14 @@ def gather(dest=None, module=None):
     if last_run < max_interval or not last_run:
         last_run = max_interval
 
-    if not settings.INSIGHTS_DATA_ENABLED:
-        logger.exception("Insights analytics not enabled")
-        return
 
     if _valid_license() is False:
         logger.exception("Invalid License provided, or No License Provided")
         return
+        
+    if not settings.INSIGHTS_DATA_ENABLED:
+        logger.error("Insights analytics not enabled")
+        return "Error: Insights analytics not enabled"
 
     if module is None:
         from awx.main.analytics import collectors
