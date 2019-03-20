@@ -1037,8 +1037,15 @@ class BaseTask(object):
         Ansible runner callback triggered on status transition
         '''
         if status_data['status'] == 'starting':
+            job_env = dict(runner_config.env)
+            '''
+            Take the safe environment variables and overwrite 
+            '''
+            for k, v in self.safe_env.items():
+                if k in job_env:
+                    job_env[k] = v
             self.instance = self.update_model(self.instance.pk, job_args=json.dumps(runner_config.command),
-                                              job_cwd=runner_config.cwd, job_env=runner_config.env)
+                                              job_cwd=runner_config.cwd, job_env=job_env)
 
 
     @with_path_cleanup
@@ -1056,6 +1063,11 @@ class BaseTask(object):
         extra_update_fields = {}
         fact_modification_times = {}
         self.event_ct = 0
+
+        '''
+        Needs to be an object property because status_handler uses it in a callback context
+        '''
+        self.safe_env = {}
         private_data_dir = None
 
         try:
@@ -1100,14 +1112,14 @@ class BaseTask(object):
                                                                            cwd)
             env = self.build_env(self.instance, private_data_dir, isolated,
                                  private_data_files=private_data_files)
-            safe_env = build_safe_env(env)
+            self.safe_env = build_safe_env(env)
 
             credentials = self.build_credentials_list(self.instance)
 
             for credential in credentials:
                 if credential:
                     credential.credential_type.inject_credential(
-                        credential, env, safe_env, args, private_data_dir
+                        credential, env, self.safe_env, args, private_data_dir
                     )
             self.write_args_file(private_data_dir, args)
 

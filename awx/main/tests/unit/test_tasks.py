@@ -417,15 +417,16 @@ class TestGenericRun():
             pass
         task = tasks.RunJob()
         task.instance = job
+        task.safe_env = {'secret_key': 'redacted_value'}
         task.update_model = mock.Mock(wraps=update_model_wrapper)
         runner_config = MockMe()
         runner_config.command = {'foo': 'bar'}
         runner_config.cwd = '/foobar'
-        runner_config.env = {'switch': 'blade', 'foot': 'ball'}
+        runner_config.env = {'switch': 'blade', 'foot': 'ball', 'secret_key': 'secret_value'}
         task.status_handler({'status': 'starting'}, runner_config)
 
         task.update_model.assert_called_with(1, job_args=json.dumps({'foo': 'bar'}),
-                                             job_cwd='/foobar', job_env={'switch': 'blade', 'foot': 'ball'})
+                                             job_cwd='/foobar', job_env={'switch': 'blade', 'foot': 'ball', 'secret_key': 'redacted_value'})
 
 
     def test_uses_process_isolation(self, settings):
