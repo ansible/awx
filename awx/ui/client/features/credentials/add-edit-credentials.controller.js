@@ -518,10 +518,12 @@ function AddEditCredentialsController (
 
         const sourcesToDisassociate = fieldsToDisassociate
             .map(name => vm.inputSources.initialItems
-                .find(({ input_field_name }) => input_field_name === name));
+                .find(({ input_field_name }) => input_field_name === name))
+            .filter(source => source !== undefined);
         const sourcesToAssociate = fieldsToAssociate
             .map(name => vm.inputSources.items
-                .find(({ input_field_name }) => input_field_name === name));
+                .find(({ input_field_name }) => input_field_name === name))
+            .filter(source => source !== undefined);
 
         // remove inputs with empty string values
         let filteredInputs = _.omit(data.inputs, (value) => value === '');
