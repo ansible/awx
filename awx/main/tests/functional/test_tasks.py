@@ -126,6 +126,7 @@ class TestIsolatedManagementTask:
         inst.save()
         return inst
 
+    @pytest.mark.skip(reason='fix after runner merge')
     def test_old_version(self, control_instance, old_version):
         update_capacity = isolated_manager.IsolatedManager.update_capacity
 
