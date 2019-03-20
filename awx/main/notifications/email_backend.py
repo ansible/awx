@@ -22,6 +22,14 @@ class CustomEmailBackend(EmailBackend):
     recipient_parameter = "recipients"
     sender_parameter = "sender"
 
+    def __init__(self, timeout=None, **kwargs):
+        self.timeout = timeout
+        if timeout is None:
+            self.timeout == 30
+        if not (1 <= timeout <= 120):
+            raise ValueError("Email timeout range needs to be between 1 and 120 seconds")
+        return super(CustomEmailBackend, self).__init__(timeout, **kwargs)
+
     def format_body(self, body):
         if "body" in body:
             body_actual = body['body']
