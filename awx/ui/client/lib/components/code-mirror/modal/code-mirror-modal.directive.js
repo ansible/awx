@@ -28,6 +28,13 @@ function atCodeMirrorModalController (
         setTimeout(resize, 0);
     }
 
+    $scope.close = () => {
+        $scope.closeFn({
+            values: $scope.modalVars,
+            parseType: $scope.modalParseType,
+        });
+    };
+
     function init () {
         if ($scope.disabled === 'true') {
             $scope.disabled = true;
@@ -43,7 +50,7 @@ function atCodeMirrorModalController (
             readOnly: $scope.disabled
         });
         resize();
-        $(CodeMirrorModalID).on('hidden.bs.modal', $scope.closeFn);
+        $(CodeMirrorModalID).on('hidden.bs.modal', $scope.close);
         $(`${CodeMirrorModalID} .modal-dialog`).resizable({
             minHeight: 523,
             minWidth: 600
@@ -53,12 +60,6 @@ function atCodeMirrorModalController (
 
     vm.strings = strings;
     vm.toggle = toggle;
-    $scope.close = () => {
-        $scope.closeFn({
-            values: $scope.modalVars,
-            parseType: $scope.modalParseType,
-        });
-    };
     if ($scope.init) {
         $scope.init = init;
     }
