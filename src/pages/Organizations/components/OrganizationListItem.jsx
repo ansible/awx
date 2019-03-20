@@ -9,6 +9,8 @@ import {
   Link
 } from 'react-router-dom';
 
+import VerticalSeparator from '../../../components/VerticalSeparator';
+
 export default ({
   itemId,
   name,
@@ -19,18 +21,17 @@ export default ({
   detailUrl,
 }) => (
   <li key={itemId} className="pf-c-data-list__item" aria-labelledby="check-action-item1">
-    <div className="pf-c-data-list__check">
-      <I18n>
-        {({ i18n }) => (
-          <Checkbox
-            checked={isSelected}
-            onChange={onSelect}
-            aria-label={i18n._(t`select organization ${itemId}`)}
-            id={`select-organization-${itemId}`}
-          />
-        )}
-      </I18n>
-    </div>
+    <I18n>
+      {({ i18n }) => (
+        <Checkbox
+          checked={isSelected}
+          onChange={onSelect}
+          aria-label={i18n._(t`select organization ${itemId}`)}
+          id={`select-organization-${itemId}`}
+        />
+      )}
+    </I18n>
+    <VerticalSeparator />
     <div className="pf-c-data-list__cell">
       <span id="check-action-item1">
         <Link

@@ -109,7 +109,7 @@ class Pagination extends Component {
       style
     } = this.props;
     const { value, isOpen } = this.state;
-    let opts;
+    let opts = [];
     if (pageSizeOptions) {
       opts = pageSizeOptions.slice().reverse().filter(o => o !== page_size);
     }
@@ -124,6 +124,15 @@ class Pagination extends Component {
     }
     const itemMin = ((page - 1) * page_size) + 1;
     const itemMax = itemMin + itemCount - 1;
+
+    const dropdownItems = opts.map(option => (
+      <DropdownItem
+        key={option}
+        component="button"
+      >
+        {option}
+      </DropdownItem>
+    ));
 
     return (
       <I18n>
@@ -145,16 +154,8 @@ class Pagination extends Component {
                       {page_size}
                     </DropdownToggle>
                   )}
-                >
-                  {opts.map(option => (
-                    <DropdownItem
-                      key={option}
-                      component="button"
-                    >
-                      {option}
-                    </DropdownItem>
-                  ))}
-                </Dropdown>
+                  dropdownItems={dropdownItems}
+                />
               </div>
             )}
             <div className="awx-pagination__counts">
