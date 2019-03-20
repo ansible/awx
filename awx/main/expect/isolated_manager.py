@@ -1,5 +1,3 @@
-import base64
-import codecs
 import json
 import os
 import shutil
@@ -11,11 +9,10 @@ import logging
 from io import StringIO
 
 from django.conf import settings
-from django.utils.encoding import smart_bytes, smart_str
 
 import awx
 from awx.main.expect import run
-from awx.main.utils import OutputEventFilter, get_system_task_capacity
+from awx.main.utils import get_system_task_capacity
 from awx.main.queue import CallbackQueueDispatcher
 
 logger = logging.getLogger('awx.isolated.manager')

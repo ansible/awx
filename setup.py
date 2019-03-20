@@ -7,7 +7,6 @@ import os
 import glob
 import sys
 from setuptools import setup
-from distutils.command.sdist import sdist
 
 
 # Paths we'll use later

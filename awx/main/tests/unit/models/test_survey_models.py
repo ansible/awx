@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
-import tempfile
 import json
-import yaml
 import pytest
 from itertools import count
 
 from awx.main.utils.encryption import encrypt_value
-from awx.main.tasks import RunJob
 from awx.main.models import (
     Job,
     JobTemplate,
@@ -15,7 +12,6 @@ from awx.main.models import (
     Project,
     Inventory
 )
-from awx.main.utils.safe_yaml import SafeLoader
 
 ENCRYPTED_SECRET = encrypt_value('secret')
 

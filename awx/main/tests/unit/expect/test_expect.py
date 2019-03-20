@@ -2,12 +2,10 @@
 
 import os
 import pytest
-import re
 import shutil
 import stat
 import tempfile
 import time
-from collections import OrderedDict
 from io import StringIO
 from unittest import mock
 
