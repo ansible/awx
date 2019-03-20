@@ -47,25 +47,13 @@ module.exports = {
             .setValue('@confirmPassword', store.user.password)
             .click('@save');
         client.waitForSpinny();
-        users.section.list.section.search
-            .setValue('@input', store.user.username)
-            .click('@searchButton');
-        client.waitForSpinny();
-        users.waitForElementNotPresent(`${row}:nth-of-type(2)`);
-        users.expect.element('.List-titleBadge').text.to.contain('1');
-        users.expect.element(row).text.contain(store.user.username);
+        users.search(store.user.username);
     },
     'edit an user': client => {
         const users = client.page.users();
         users.load();
         client.waitForSpinny();
-        users.section.list.section.search
-            .setValue('@input', store.user.username)
-            .click('@searchButton');
-        client.waitForSpinny();
-        users.waitForElementNotPresent(`${row}:nth-of-type(2)`);
-        users.expect.element('.List-titleBadge').text.to.contain('1');
-        users.expect.element(row).text.contain(store.user.username);
+        users.search(store.user.username);
         const editButton = `${row} i[class*="fa-pencil"]`;
         users.waitForElementVisible(editButton).click(editButton);
         users.section.edit
@@ -74,12 +62,32 @@ module.exports = {
             .setValue('@lastName', store.user.lastName)
             .click('@save');
         client.waitForSpinny();
-        users.section.list.section.search
-            .setValue('@input', store.user.username)
-            .click('@searchButton');
-        client.waitForSpinny();
-        users.waitForElementNotPresent(`${row}:nth-of-type(2)`);
+        users.search(store.user.username);
         users.expect.element(row).text.contain(`${store.user.username}\n${store.user.firstName[0].toUpperCase() + store.user.firstName.slice(1)}\n${store.user.lastName}`);
+    },
+    'check if the new user can login': (client) => {
+        client.logout();
+        client.login(store.user.username, store.user.password);
+        client.logout();
+        client.login();
+    },
+    'delete the user': (client) => {
+        const users = client.page.users();
+        users.load();
+        client.waitForSpinny();
+        users.search(store.user.username);
+        const deleteButton = `${row} i[class*="fa-trash-o"]`;
+        const modalAction = '.modal-dialog #prompt_action_btn';
+        users
+            .waitForElementVisible(deleteButton)
+            .click(deleteButton)
+            .waitForElementVisible(modalAction)
+            .click(modalAction)
+            .waitForSpinny();
+        const searchResults = '.List-searchNoResults';
+        users
+            .waitForElementVisible(searchResults)
+            .expect.element(searchResults).text.contain('No records matched your search.');
     },
     after: client => {
         client.end();

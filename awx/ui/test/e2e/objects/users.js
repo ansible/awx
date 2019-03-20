@@ -9,6 +9,8 @@ import pagination from './sections/pagination';
 import permissions from './sections/permissions';
 import search from './sections/search';
 
+const row = '#users_table .List-tableRow';
+
 const details = createFormSection({
     selector: 'form',
     props: {
@@ -39,6 +41,15 @@ module.exports = {
         load () {
             this.api.url('data:,'); // https://github.com/nightwatchjs/nightwatch/issues/1724
             return this.navigate();
+        },
+        search (username) {
+            this.section.list.section.search
+                .setValue('@input', username)
+                .click('@searchButton');
+            this.waitForSpinny();
+            this.waitForElementNotPresent(`${row}:nth-of-type(2)`);
+            this.expect.element('.List-titleBadge').text.to.contain('1');
+            this.expect.element(row).text.contain(username);
         },
     }],
     sections: {
