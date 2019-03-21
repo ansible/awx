@@ -288,16 +288,18 @@ const waitForJob = endpoint => {
     });
 };
 
-const getUpdatedProject = (namespace = session) => getProject(namespace)
-    .then(project => {
-        const updateURL = project.related.current_update;
-
-        if (updateURL) {
-            return waitForJob(updateURL).then(() => project);
-        }
-
-        return project;
-    });
+const getUpdatedProject = (namespace = session) => {
+    const promises = [
+        getProject(namespace),
+    ];
+    return Promise.all(promises)
+        .then(([project]) => {
+            post(`/api/v2/projects/${project.id}/update/`, {})
+                .then(update => waitForJob(update.data.url))
+                .then(() => { project = getProject(namespace); });
+            return project;
+        });
+};
 
 /* Retrieves a job template, and creates it if it does not exist.
  * name prefix. This function also runs getOrCreate for an inventory,

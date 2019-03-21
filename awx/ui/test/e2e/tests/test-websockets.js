@@ -1,24 +1,29 @@
-/* Websocket tests. These tests verify that the sparkline (colored box rows which
- * display job status) update correctly as the jobs progress.
+/* Websocket tests. These tests verify that items like the sparkline (colored box rows which
+ * display job status) and other status icons update correctly as the jobs progress.
  */
 
 import {
     getInventorySource,
+    getOrganization,
     getProject,
-    getJob
+    getJob,
+    getUpdatedProject
 } from '../fixtures';
 
-let data;
-const spinny = '//*[contains(@class, "spinny")]';
-const dashboard = '//at-side-nav-item[contains(@name, "DASHBOARD")]';
+import {
+    AWX_E2E_URL,
+    AWX_E2E_TIMEOUT_LONG,
+    AWX_E2E_TIMEOUT_MEDIUM,
+} from '../settings';
 
-// UI elements for recently run job templates on the dashboard.
+let data;
+
+// Xpath selectors for recently run job templates on the dashboard.
 const successfulJt = '//a[contains(text(), "test-websockets-successful")]/../..';
 const failedJt = '//a[contains(text(), "test-websockets-failed")]/../..';
 const sparklineIcon = '//div[contains(@class, "SmartStatus-iconContainer")]';
 
-// Sparkline icon statuses.
-// Running is blinking green, successful is green, fail/error/cancellation is red.
+// Xpath selectors for sparkline icon statuses.
 const running = '//div[@ng-show="job.status === \'running\'"]';
 const success = '//div[contains(@class, "SmartStatus-iconIndicator--success")]';
 const fail = '//div[contains(@class, "SmartStatus-iconIndicator--failed")]';
@@ -26,18 +31,18 @@ const fail = '//div[contains(@class, "SmartStatus-iconIndicator--failed")]';
 module.exports = {
 
     before: (client, done) => {
-        // Jobs only display on the dashboard if they have been run at least once.
         const resources = [
             getInventorySource('test-websockets'),
             getProject('test-websockets', 'https://github.com/ansible/test-playbooks'),
-            // launch job templates once before running tests.
+            getOrganization('test-websockets'),
+            // launch job templates once before running tests so that they appear on the dashboard.
             getJob('test-websockets', 'debug.yml', 'test-websockets-successful', done),
             getJob('test-websockets', 'fail_unless.yml', 'test-websockets-failed', done)
         ];
 
         Promise.all(resources)
-            .then(([inventory, project, jt1, jt2]) => {
-                data = { inventory, project, jt1, jt2 };
+            .then(([inventory, project, org, jt1, jt2]) => {
+                data = { inventory, project, org, jt1, jt2 };
                 done();
             });
 
@@ -48,28 +53,101 @@ module.exports = {
     },
 
     'Test job template status updates for a successful job on dashboard': client => {
-        client.useXpath().findThenClick(dashboard);
+        client
+            .useCss()
+            .navigateTo(`${AWX_E2E_URL}/#/home`);
         getJob('test-websockets', 'debug.yml', 'test-websockets-successful');
-        client.expect.element(spinny).to.not.be.visible.before(5000);
-        client.expect.element(`${sparklineIcon}[1]${running}`)
-            .to.be.visible.before(5000);
 
-        // Allow a maximum amount of 30 seconds for the job to complete.
-        client.expect.element(`${successfulJt}${sparklineIcon}[1]${success}`)
-            .to.be.present.after(30000);
+        client.expect.element('.spinny')
+            .to.not.be.visible.before(AWX_E2E_TIMEOUT_MEDIUM);
+        client.useXpath().expect.element(`${sparklineIcon}[1]${running}`)
+            .to.be.visible.before(AWX_E2E_TIMEOUT_MEDIUM);
+        client.useXpath().expect.element(`${successfulJt}${sparklineIcon}[1]${success}`)
+            .to.be.present.before(AWX_E2E_TIMEOUT_LONG);
     },
 
     'Test job template status updates for a failed job on dashboard': client => {
-        client.useXpath().findThenClick(dashboard);
+        client
+            .useCss()
+            .navigateTo(`${AWX_E2E_URL}/#/home`);
         getJob('test-websockets', 'fail_unless.yml', 'test-websockets-failed');
 
-        client.expect.element(spinny).to.not.be.visible.before(5000);
-        client.expect.element(`${sparklineIcon}[1]${running}`)
-            .to.be.visible.before(5000);
+        client.expect.element('.spinny')
+            .to.not.be.visible.before(AWX_E2E_TIMEOUT_MEDIUM);
+        client.useXpath().expect.element(`${sparklineIcon}[1]${running}`)
+            .to.be.visible.before(AWX_E2E_TIMEOUT_MEDIUM);
+        client.useXpath().expect.element(`${failedJt}${sparklineIcon}[1]${fail}`)
+            .to.be.present.before(AWX_E2E_TIMEOUT_LONG);
+    },
 
-        // Allow a maximum amount of 30 seconds for the job to complete.
-        client.expect.element(`${failedJt}${sparklineIcon}[1]${fail}`)
-            .to.be.present.after(30000);
+    'Test projects list blinking icon': client => {
+        client
+            .useCss()
+            .findThenClick('[ui-sref=projects]', 'css')
+            .clearValue('.SmartSearch-input')
+            .setValue(
+                '.SmartSearch-input',
+                ['name.iexact:"test-websockets-project"', client.Keys.ENTER]
+            );
+        getUpdatedProject('test-websockets');
+
+        client.expect.element('i.icon-job-running')
+            .to.be.visible.before(AWX_E2E_TIMEOUT_MEDIUM);
+        client.expect.element('i.icon-job-success')
+            .to.be.visible.before(AWX_E2E_TIMEOUT_LONG);
+    },
+
+    'Test successful job within an organization view': client => {
+        client
+            .useCss()
+            .navigateTo(`${AWX_E2E_URL}/#/organizations/${data.org.id}/job_templates`)
+            .clearValue('[ui-view=templatesList] .SmartSearch-input')
+            .setValue(
+                '[ui-view=templatesList] .SmartSearch-input',
+                ['test-websockets-successful', client.Keys.ENTER]
+            );
+        getJob('test-websockets', 'debug.yml', 'test-websockets-successful');
+
+        client.expect.element('.spinny')
+            .to.not.be.visible.before(AWX_E2E_TIMEOUT_MEDIUM);
+        client.useXpath().expect.element(`${sparklineIcon}[1]${running}`)
+            .to.be.visible.before(AWX_E2E_TIMEOUT_MEDIUM);
+        client.useXpath().expect.element(`${sparklineIcon}[1]${success}`)
+            .to.be.present.before(AWX_E2E_TIMEOUT_LONG);
+    },
+    'Test failed job within an organization view': client => {
+        client
+            .useCss()
+            .navigateTo(`${AWX_E2E_URL}/#/organizations/${data.org.id}/job_templates`)
+            .clearValue('[ui-view=templatesList] .SmartSearch-input')
+            .setValue(
+                '[ui-view=templatesList] .SmartSearch-input',
+                ['test-websockets-failed', client.Keys.ENTER]
+            );
+        getJob('test-websockets', 'debug.yml', 'test-websockets-failed');
+
+        client.expect.element('.spinny')
+            .to.not.be.visible.before(AWX_E2E_TIMEOUT_MEDIUM);
+        client.useXpath().expect.element(`${sparklineIcon}[1]${running}`)
+            .to.be.visible.before(AWX_E2E_TIMEOUT_MEDIUM);
+        client.useXpath().expect.element(`${sparklineIcon}[1]${fail}`)
+            .to.be.present.before(AWX_E2E_TIMEOUT_LONG);
+    },
+    'Test project blinking icon within an organization view': client => {
+        client
+            .useCss()
+            .navigateTo(`${AWX_E2E_URL}/#/organizations/${data.org.id}/projects`)
+            .clearValue('.projectsList .SmartSearch-input')
+            .setValue(
+                '.projectsList .SmartSearch-input',
+                ['test-websockets-project', client.Keys.ENTER]
+            );
+        getUpdatedProject('test-websockets');
+
+        client.expect.element('i.icon-job-running')
+            .to.be.visible.before(AWX_E2E_TIMEOUT_MEDIUM);
+        client.expect.element('i.icon-job-success')
+            .to.be.visible.before(AWX_E2E_TIMEOUT_LONG);
     },
 
     after: client => {
