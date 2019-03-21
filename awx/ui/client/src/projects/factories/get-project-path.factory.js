@@ -1,5 +1,5 @@
 export default
-    function GetProjectPath(Alert, Rest, GetBasePath, ProcessErrors) {
+    function GetProjectPath(i18n, Rest, GetBasePath, ProcessErrors) {
         return function(params) {
             var scope = params.scope,
                 master = params.master;
@@ -53,7 +53,7 @@ export default
                             }
                         }
                     }
-                    scope.base_dir = data.project_base_dir;
+                    scope.base_dir = data.project_base_dir || i18n._('You do not have access to view this property');
                     master.local_path = scope.local_path;
                     master.base_dir = scope.base_dir; // Keep in master object so that it doesn't get
                     // wiped out on form reset.
@@ -65,13 +65,13 @@ export default
                 })
                 .catch(({data, status}) => {
                     ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                        msg: 'Failed to access API config. GET status: ' + status });
+                        msg: i18n._('Failed to access API config. GET status: ') + status });
                 });
         };
     }
 
 GetProjectPath.$inject =
-    [   'Alert',
+    [   'i18n',
         'Rest',
         'GetBasePath',
         'ProcessErrors'
