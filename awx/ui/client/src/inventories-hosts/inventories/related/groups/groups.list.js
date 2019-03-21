@@ -16,7 +16,7 @@
         multiSelect: true,
         trackBy: 'group.id',
         basePath:  'api/v2/inventories/{{$stateParams.inventory_id}}/groups/',
-        layoutClass: 'List-staticColumnLayout--inventoryGroups',
+        layoutClass: 'List-staticColumnLayout--groups',
         staticColumns: [
             {
                 field: 'failed_hosts',
