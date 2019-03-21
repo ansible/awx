@@ -5081,7 +5081,6 @@ class ActivityStreamSerializer(BaseSerializer):
                                     if fval is not None:
                                         workflow_job_template_item[field] = fval
                                 summary_fields['workflow_job_template'].append(workflow_job_template_item)
-# to adhere to DRY principles, the above can eventually be combined into a helper method
                         if fk == 'schedule':
                             unified_job_template = getattr(thisItem, 'unified_job_template', None)
                             if unified_job_template is not None:
