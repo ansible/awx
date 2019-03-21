@@ -1,5 +1,3 @@
-# GCE
-apache-libcloud==2.2.1
 # Azure
 # azure deps from https://github.com/ansible/ansible/blob/stable-2.7/packaging/requirements/requirements-azure.txt
 packaging
