@@ -16,9 +16,9 @@ Have questions about this document or anything not covered here? Feel free to re
   * [Class constructors vs Class properties](#class-constructors-vs-class-properties)
   * [Binding](#binding)
   * [Typechecking with PropTypes](#typechecking-with-proptypes)
-* [Testing](#testing)
-  * [Jest](#jest)
-  * [Enzyme](#enzyme)
+  * [Naming Functions](#naming-functions)
+  * [Default State Initialization](#default-state-initialization)
+
 
 ## Things to know prior to submitting code
 
@@ -108,48 +108,33 @@ About.defaultProps = {
 };
 ```
 
+### Naming Functions
+Here are the guidelines for how to name functions.
 
+| Naming Convention   |      Description   |
+|----------|-------------|
+|`handle<x>`| Use for methods that process events |
+|`on<x>`| Use for component prop names |
+|`toggle<x>`| Use for methods that flip one value to the opposite value |
+|`show<x>`| Use for methods that always set a value to show or add an element |
+|`hide<x>`| Use for methods that always set a value to hide or remove an element |
+|`create<x>`| Use for methods that make API `POST` requests |
+|`read<x>`| Use for methods that make API `GET` requests |
+|`update<x>`| Use for methods that make API `PATCH` requests |
+|`destroy<x>`| Use for methods that make API `DESTROY` requests |
+|`replace<x>`| Use for methods that make API `PUT` requests |
+|`disassociate<x>`| Use for methods that pass `{ disassociate: true }` as a data param to an endpoint |
+|`associate<x>`| Use for methods that pass a resource id as a data param to an endpoint |
 
-## Testing
-All code, new or otherwise, should have at least 80% test coverage.
-### Jest
-We use (Jest)[https://jestjs.io/] for our JS testing framework.
-Like many other JS test frameworks (Karma, Mocha, etc), Jest includes their own `spyOn` method as a way for us to test our class methods.
-```javascript
-  const spy = jest.spyOn(MyButton.prototype, 'onSubmit');
-```
+### Default State Initialization
+When declaring empty initial states, prefer the following instead of leaving them undefined:
 
-Jest also allows us to mock the data we expect from an external dependency, such as an API.
 ```javascript
-  axios.get.mockImplementation((endpoint) => {
-    if (endpoint === '/api/v2/config') {
-      return new Promise((resolve, reject) => {
-        resolve({ data: { foo: 'bar' });
-      });
-    }
-    else {
-      return 'get results';
-    }
-  });
-```
-
-### Enzyme
-We use (Enzyme)[https://airbnb.io/enzyme/] to test our React Components.
-### Mounting Components wrapped with withRouter
-If you are testing a Component wrapped in React Router's `withRouter` class, you can mount the component by wrapping it with the `<MemoryRouter>` component.
-```javascript
-  test('initially renders succesfully', () => {
-    mount(
-       <MemoryRouter>
-        <OrganizationAdd
-          match={{ path: '/organizations/add', url: '/organizations/add' }}
-          location={{ search: '', pathname: '/organizations/add' }}
-        />
-      </MemoryRouter>
-     );
-   });
-```
-You can test the wrapped Component's methods like so:
-```javascript
-  const spy = jest.spyOn(OrganizationAdd.WrappedComponent.prototype, 'onCancel');
+this.state = {
+  somethingA: null,
+  somethingB: [],
+  somethingC: 0,
+  somethingD: {},
+  somethingE: '',
+}
 ```
