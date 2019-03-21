@@ -54,6 +54,9 @@ export default ['i18n', function(i18n) {
             REMOTE_HOST_HEADERS: {
                 type: 'textarea',
                 reset: 'REMOTE_HOST_HEADERS'
+            },
+            INSIGHTS_DATA_ENABLED: {
+                type: 'toggleSwitch'
             }
         },
 

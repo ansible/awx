@@ -115,25 +115,38 @@
 					<div id="eula_notice"
 						class="License-eulaNotice">{{ license.eula }}</div>
 					<div class="form-group License-detailsGroup">
-						<div class="checkbox">
+						<div class="License-analyticsCheckbox checkbox">
 							<label class="License-details--label">
 								<input type="checkbox" ng-model="newLicense.eula" ng-disabled="!user_is_superuser" required>
 								<translate>I agree to the End User License Agreement</translate>
 							</label>
 						</div>
 					</div>
-					<div class="form-group License-detailsGroup License-detailsGroup--withSeparator" ng-if="licenseMissing">
-						<div class="checkbox">
-							<label class="License-details--label">
-								<input type="checkbox" ng-model="newLicense.pendo" ng-disabled="!user_is_superuser" required>
-								<translate>By default, Tower collects and transmits analytics data on Tower usage to Red Hat. This data is used to enhance future releases of the Tower Software and help streamline customer experience and success. For more information, see
-										<a target="_blank"
-												href="http://docs.ansible.com/ansible-tower/latest/html/installandreference/user-data.html#index-0">
-												this Tower documentation page
-										</a>.  Uncheck this box to disable this feature.
-								</translate>
-							</label>
+					<div class="License-subTitleText" ng-if="licenseMissing">
+						<translate>Tracking and Analytics</translate>
+					</div>
+					<div class="form-group License-detailsGroup" ng-if="licenseMissing">
+						<span class="License-helperText">
+							<translate>By default, Tower collects and transmits analytics data on Tower usage to Red Hat.  You can uncheck these boxes to disable sending data to these services:</translate>
+						</span>
+						<div class="License-analyticsCheckboxGroup">
+							<div class="License-analyticsCheckbox checkbox">
+									<input type="checkbox" ng-model="newLicense.pendo" ng-disabled="!user_is_superuser" required>
+									<translate>Pendo</translate>
+							</div>
+							<div class="License-analyticsCheckbox checkbox">
+									<input type="checkbox" ng-model="newLicense.insights" ng-disabled="!user_is_superuser" required>
+									<translate>Insights</translate>
+							</div>
 						</div>
+						<span class="License-helperText">
+							<translate>For more information about track and analytics, see
+									<a target="_blank"
+											href="http://docs.ansible.com/ansible-tower/latest/html/installandreference/user-data.html#index-0">
+											this Tower documentation page
+									</a>.
+							</translate>
+						</span>
 					</div>
 					<div>
 						<button ng-click="submit()" class="btn btn-success pull-right" ng-disabled="newLicense.file.license_key == null || newLicense.eula == null || !user_is_superuser" translate>Submit</button>

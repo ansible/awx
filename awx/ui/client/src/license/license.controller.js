@@ -9,9 +9,9 @@ import {N_} from "../i18n";
 export default
     ['Wait', '$state', '$scope', '$rootScope',
     'ProcessErrors', 'CheckLicense', 'moment','$window',
-    'ConfigService', 'FeaturesService', 'pendoService', 'i18n', 'config',
+    'ConfigService', 'FeaturesService', 'pendoService', 'insightsEnablementService', 'i18n', 'config',
     function(Wait, $state, $scope, $rootScope, ProcessErrors, CheckLicense, moment,
-    $window, ConfigService, FeaturesService, pendoService, i18n, config) {
+    $window, ConfigService, FeaturesService, pendoService, insightsEnablementService, i18n, config) {
 
         const calcDaysRemaining = function(seconds) {
       	 		// calculate the number of days remaining on the license
@@ -54,7 +54,8 @@ export default
             $scope.valid = CheckLicense.valid($scope.license.license_info);
             $scope.compliant = $scope.license.license_info.compliant;
             $scope.newLicense = {
-                pendo: true
+                pendo: true,
+                insights: true
             };
         };
 
@@ -114,6 +115,13 @@ export default
                                         } else {
                                             pendoService.updatePendoTrackingState('off');
                                         }
+
+                                        if ($scope.newLicense.insights) {
+                                            insightsEnablementService.updateInsightsTrackingState(true);
+                                        } else {
+                                            insightsEnablementService.updateInsightsTrackingState(false);
+                                        }
+
                                         $state.go('dashboard', {
                                 	          licenseMissing: false
                                         });
