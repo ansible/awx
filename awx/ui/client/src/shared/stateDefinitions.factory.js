@@ -581,30 +581,45 @@ function($injector, $stateExtender, $log, i18n) {
 
                 states.push($stateExtender.buildDefinition({
                     name: `${formStateDefinition.name}.users.add`,
-                    squashSearchUrl: true,
                     url: '/add-user',
+                    searchPrefix: 'add_user',
                     params: {
-                        user_search: {
+                        add_user_search: {
                             value: { order_by: 'username', page_size: '5' },
-                            dynamic: true,
+                            dynamic: true
                         }
                     },
                     views: {
                         [`modal@${formStateDefinition.name}`]: {
-                            template: `<add-rbac-resource users-dataset="$resolve.usersDataset" selected="allSelected" resource-data="$resolve.resourceData" without-team-permissions="true" title="` + i18n._('Add Users') + `"></add-rbac-resource>`
+                            template: `<add-rbac-resource default-params="$resolve.defaultParams" users-dataset="$resolve.usersDataset" selected="allSelected" resource-data="$resolve.resourceData" without-team-permissions="true" title="` + i18n._('Add Users') + `" only-member-role="true" query-prefix="add_user"></add-rbac-resource>`
                         }
                     },
                     ncyBreadcrumb:{
                         skip:true
                     },
                     resolve: {
-                        usersDataset: ['addPermissionsUsersList', 'QuerySet', '$stateParams', 'GetBasePath',
-                            function(list, qs, $stateParams, GetBasePath) {
+                        roleToExclude: ['$stateParams', 'Rest', 'GetBasePath', 'i18n', function($stateParams, Rest, GetBasePath, i18n) {
+                                const basePath = ($stateParams.team_id) ? GetBasePath('teams') + `${$stateParams.team_id}/object_roles` :
+                                    GetBasePath('organizations') + `${$stateParams.organization_id}/object_roles`;
+                                Rest.setUrl(basePath);
+                                return Rest.get().then(({data}) => {
+                                    return data.results
+                                        .filter(({name}) => name === i18n._('Member'))
+                                        .map(({id}) => id)[0];
+                                });
+                        }],
+                        usersDataset: ['addPermissionsUsersList', 'QuerySet', '$stateParams', 'GetBasePath', 'roleToExclude',
+                            function(list, qs, $stateParams, GetBasePath, roleToExclude) {
                                 let path = GetBasePath(list.basePath) || GetBasePath(list.name);
-                                return qs.search(path, $stateParams.user_search);
-
+                                if (roleToExclude) {
+                                    $stateParams.add_user_search.not__roles = roleToExclude;
+                                }
+                                return qs.search(path, $stateParams.add_user_search);
                             }
-                        ]
+                        ],
+                        defaultParams: ['$stateParams', 'usersDataset', function($stateParams) {
+                            return $stateParams.add_user_search;
+                        }]
                     },
                     onExit: function($state) {
                         if ($state.transition) {

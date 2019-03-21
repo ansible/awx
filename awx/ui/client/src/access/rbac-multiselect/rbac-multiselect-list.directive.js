@@ -17,7 +17,9 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
             allSelected: '=',
             view: '@',
             dataset: '=',
-            objectType: '='
+            defaultParams: '=?',
+            objectType: '=',
+            queryPrefix: '@'
         },
         template: "<div class='addPermissionsList-inner'></div>",
         link: function(scope, element, attrs, ctrl) {
@@ -34,6 +36,9 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
                 Organizations: OrganizationList
             };
             list = _.cloneDeep(listMap[scope.view]);
+            if (scope.queryPrefix) {
+                list.iterator = scope.queryPrefix;
+            }
             list.multiSelect = true;
             list.multiSelectExtended = true;
             list.listTitleBadge = false;
@@ -92,7 +97,9 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
                     list.fields.name.columnClass = 'col-sm-12';
                     break;
                 case 'Users':
-                    list.querySet = { order_by: 'username', page_size: '5' };
+                    if (!scope.queryPrefix) {
+                        list.querySet = { order_by: 'username', page_size: '5' };
+                    }
                     list.fields = {
                         username: list.fields.username,
                         first_name: list.fields.first_name,
@@ -149,6 +156,11 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
 
             scope.list = list;
             scope[`${list.iterator}_dataset`] = scope.dataset.data;
+
+            if (scope.defaultParams) {
+                scope[`${list.iterator}_default_params`] = scope.defaultParams;
+            }
+
             scope[`${list.name}`] = scope[`${list.iterator}_dataset`].results;
 
             scope.$watch(list.name, function(){

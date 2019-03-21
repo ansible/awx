@@ -12,9 +12,9 @@
  */
 
 export default ['$scope', '$rootScope', 'ProcessErrors', 'GetBasePath', 'generateList',
-'$state', 'Rest', '$q', 'Wait', '$window', 'QuerySet', 'UserList',
+'$state', 'Rest', '$q', 'Wait', '$window', 'QuerySet', 'UserList', 'i18n',
 function($scope, $rootScope, ProcessErrors, GetBasePath, generateList,
-    $state, Rest, $q, Wait, $window, qs, UserList) {
+    $state, Rest, $q, Wait, $window, qs, UserList, i18n) {
     $scope.$on("linkLists", function() {
 
         if ($state.current.name.split(".")[1] === "users") {
@@ -23,18 +23,30 @@ function($scope, $rootScope, ProcessErrors, GetBasePath, generateList,
             $scope.addType = "Administrators";
         }
 
-        init();
+        let notAdminAlreadyParams = {};
+
+        if ($scope.addType === 'Administrators') {
+            Rest.setUrl(GetBasePath('organizations') + `${$state.params.organization_id}/object_roles`);
+            Rest.get().then(({data}) => {
+                notAdminAlreadyParams.not__roles = data.results
+                    .filter(({name}) => name === i18n._('Admin'))
+                    .map(({id}) => id)[0];            
+                init();
+            });
+        } else {
+            init();
+        }
 
         function init(){
-            $scope.add_user_default_params = {
+            $scope.add_user_default_params = Object.assign({
                 order_by: 'username',
                 page_size: 5
-            };
+            }, notAdminAlreadyParams);
 
-            $scope.add_user_queryset = {
+            $scope.add_user_queryset = Object.assign({
                 order_by: 'username',
                 page_size: 5
-            };
+            }, notAdminAlreadyParams);
 
             let list = _.cloneDeep(UserList);
             list.basePath = 'users';
@@ -46,6 +58,9 @@ function($scope, $rootScope, ProcessErrors, GetBasePath, generateList,
             list.fields.first_name.columnClass = 'col-sm-4';
             list.fields.last_name.columnClass = 'col-sm-4';
             list.layoutClass = 'List-staticColumnLayout--statusOrCheckbox';
+            if ($scope.addType === 'Administrators') {
+                list.emptyListText = i18n._('No users available to add as adminstrators');
+            }
             delete list.actions;
             delete list.fieldActions;
 

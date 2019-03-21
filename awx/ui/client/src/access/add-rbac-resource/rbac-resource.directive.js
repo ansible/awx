@@ -12,10 +12,13 @@ export default ['templateUrl', '$state',
         return {
             restrict: 'E',
             scope: {
+                defaultParams: '=?',
                 usersDataset: '=',
                 teamsDataset: '=',
                 resourceData: '=',
                 withoutTeamPermissions: '@',
+                onlyMemberRole: '@',
+                queryPrefix: '@',
                 title: '@'
             },
             controller: controller,

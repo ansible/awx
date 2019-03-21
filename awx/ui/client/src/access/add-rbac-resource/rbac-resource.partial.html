@@ -20,7 +20,7 @@
             </div>
             <div class="AddPermissions-body">
                 <div class="AddPermissions-directions">
-                    <span class="AddPermissions-directionNumber">
+                    <span class="AddPermissions-directionNumber" ng-hide='onlyMemberRole === "true"'>
                         1
                     </span>
                     <div ng-hide='withoutTeamPermissions' translate>
@@ -45,13 +45,13 @@
                 </div>
 
                 <div id="AddPermissions-users" class="AddPermissions-list" ng-show="tab.users">
-                    <rbac-multiselect-list view="Users" all-selected="allSelected" dataset="usersDataset" object-type="object.type"></rbac-multiselect-list>
+                    <rbac-multiselect-list view="Users" all-selected="allSelected" default-params="defaultParams" dataset="usersDataset" object-type="object.type" query-prefix="{{ queryPrefix }}"></rbac-multiselect-list>
                 </div>
                 <div id="AddPermissions-teams" class="AddPermissions-list" ng-if="tab.teams">
                     <rbac-multiselect-list view="Teams" all-selected="allSelected" dataset="teamsDataset" object-type="object.type"></rbac-multiselect-list>
                 </div>
 
-                <span ng-show="hasSelectedRows()">
+                <span ng-show="hasSelectedRows() && !onlyMemberRole">
                     <div class="AddPermissions-separator"></div>
                     <div class="AddPermissions-directions">
                         <span class="AddPermissions-directionNumber">
@@ -110,7 +110,7 @@
                     <button type="button"
                         class="btn btn-sm Form-saveButton"
                         ng-click="updatePermissions()"
-                        ng-disabled="userRoleForm.$invalid || !allSelected || !hasSelectedRows()" translate>
+                        ng-disabled="(onlyMemberRole === 'true' && !hasSelectedRows()) && (userRoleForm.$invalid || !allSelected || !hasSelectedRows())" translate>
                         Save
                     </button>
                 </div>
