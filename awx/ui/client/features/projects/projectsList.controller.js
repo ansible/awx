@@ -13,6 +13,7 @@ function projectsListController (
 ) {
     const vm = this || {};
     const [ProjectModel] = resolvedModels;
+    let paginateQuerySet = {};
     $scope.canAdd = ProjectModel.options('actions.POST');
 
     vm.strings = strings;
@@ -27,6 +28,7 @@ function projectsListController (
     };
     vm.dataset = Dataset.data;
     vm.projects = Dataset.data.results;
+
     $scope.$watch('vm.dataset.count', () => {
         $scope.$emit('updateCount', vm.dataset.count, 'projects');
     });
@@ -46,7 +48,58 @@ function projectsListController (
         } else {
             vm.activeId = '';
         }
+        setToolbarSort();
     }, true);
+
+    function setToolbarSort () {
+        const orderByValue = _.get($state.params, 'project_search.order_by');
+        const sortValue = _.find(vm.toolbarSortOptions, (option) => option.value === orderByValue);
+        if (sortValue) {
+            vm.toolbarSortValue = sortValue;
+        } else {
+            vm.toolbarSortValue = toolbarSortDefault;
+        }
+    }
+
+    const toolbarSortDefault = {
+        label: `${strings.get('sort.NAME_ASCENDING')}`,
+        value: 'name'
+    };
+
+    vm.toolbarSortOptions = [
+        toolbarSortDefault,
+        {
+            label: `${strings.get('sort.NAME_DESCENDING')}`,
+            value: '-name'
+        }
+    ];
+
+    vm.toolbarSortValue = toolbarSortDefault;
+
+    // Temporary hack to retrieve $scope.querySet from the paginate directive.
+    // Remove this event listener once the page and page_size params
+    // are represented in the url.
+    $scope.$on('updateDataset', (event, dataset, queryset) => {
+        vm.dataset = dataset;
+        vm.projects = dataset.results;
+        paginateQuerySet = queryset;
+    });
+
+    vm.onToolbarSort = (sort) => {
+        vm.toolbarSortValue = sort;
+
+        const queryParams = Object.assign(
+            {},
+            $state.params.project_search,
+            paginateQuerySet,
+            { order_by: sort.value }
+        );
+
+        // Update URL with params
+        $state.go('.', {
+            project_search: queryParams
+        }, { notify: false, location: 'replace' });
+    };
 
     $scope.$on('ws-jobs', (e, data) => {
         $log.debug(data);
@@ -194,7 +247,7 @@ function projectsListController (
                     dismissButton: false,
                     dismissOnTimeout: true
                 });
-                $state.go('.', null, { reload: true });
+                reloadList();
             })
             .catch(createErrorHandler('copy project', 'GET'))
             .finally(() => Wait('stop'));
@@ -417,6 +470,16 @@ function projectsListController (
         }
         return tooltip;
     }
+
+    vm.isCollapsed = true;
+
+    vm.onCollapse = () => {
+        vm.isCollapsed = true;
+    };
+
+    vm.onExpand = () => {
+        vm.isCollapsed = false;
+    };
 }
 
 projectsListController.$inject = [

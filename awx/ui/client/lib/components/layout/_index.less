@@ -1,6 +1,6 @@
 .at-Layout {
     min-height: 100vh;
-    width: 100vw;
+    width: 100%;
     display: flex;
 
     &-topNav {
@@ -49,6 +49,7 @@
                     width: @main-menu-width;
                     margin: @main-menu-margin;
                     flex: initial;
+                    pointer-events: none;
                 }
             }
 
@@ -106,6 +107,7 @@
             display: flex;
             cursor: pointer;
             font-size: 13px;
+            line-height: 1.42857143;
                 i {
                     cursor: pointer;
                     color: @at-color-side-nav-item-icon;
@@ -198,7 +200,6 @@
 
     &-main {
         display: flex;
-        height: 100%;
         width: 100%;
         flex-direction: column;
         padding-bottom: @at-space-4x;

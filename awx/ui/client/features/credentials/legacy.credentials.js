@@ -67,7 +67,7 @@ function LegacyCredentialsService () {
                 actions: {
                     add: {
                         ngClick: '$state.go(\'.add\')',
-                        label: 'Add',
+                        label: N_('Add'),
                         awToolTip: N_('Add a permission'),
                         actionClass: 'at-Button--add',
                         actionId: 'button-add',
@@ -79,19 +79,19 @@ function LegacyCredentialsService () {
                         key: true,
                         label: N_('User'),
                         linkBase: 'users',
-                        class: 'col-lg-3 col-md-3 col-sm-3 col-xs-4'
+                        columnClass: 'col-lg-3 col-md-3 col-sm-3 col-xs-4'
                     },
                     role: {
                         label: N_('Role'),
                         type: 'role',
                         nosort: true,
-                        class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4'
+                        columnClass: 'col-lg-4 col-md-4 col-sm-4 col-xs-4'
                     },
                     team_roles: {
                         label: N_('Team Roles'),
                         type: 'team_roles',
                         nosort: true,
-                        class: 'col-lg-5 col-md-5 col-sm-5 col-xs-4'
+                        columnClass: 'col-lg-5 col-md-5 col-sm-5 col-xs-4'
                     }
                 }
             }),

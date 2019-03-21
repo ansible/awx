@@ -7,7 +7,7 @@ import pytest
 from uuid import uuid4
 import json
 import yaml
-import mock
+from unittest import mock
 
 from backports.tempfile import TemporaryDirectory
 from django.conf import settings
@@ -173,7 +173,7 @@ def test_extract_ansible_vars():
 
 def test_get_custom_venv_choices():
     bundled_venv = os.path.join(settings.BASE_VENV_PATH, 'ansible', '')
-    assert common.get_custom_venv_choices() == [bundled_venv]
+    assert sorted(common.get_custom_venv_choices()) == [bundled_venv]
 
     with TemporaryDirectory(dir=settings.BASE_VENV_PATH, prefix='tmp') as temp_dir:
         os.makedirs(os.path.join(temp_dir, 'bin', 'activate'))

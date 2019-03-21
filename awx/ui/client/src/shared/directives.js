@@ -100,10 +100,12 @@ function(SettingsUtils, i18n, $rootScope) {
         },
         template: `
                 <div class="input-group">
-                      <label class="input-group-addon Form-filePicker--pickerButton" id="filePickerButton" for="filePicker" ng-click="update($event)">${browseText}</label>
-                      <input type="text" class="form-control Form-filePicker--textBox" id="filePickerText" placeholder="${placeholderText}" readonly>
-                      <input type="file" name="file" class="Form-filePicker" id="filePicker"  onchange="angular.element(this).scope().fileChange(this.files)"/>
-                    </div>
+                    <span class="input-group-btn input-group-prepend">
+                        <label class="btn Form-browseButton" id="filePickerButton" for="filePicker" ng-click="update($event)">${browseText}</label>
+                    </span>
+                    <input type="text" class="form-control Form-filePicker--textBox" id="filePickerText" placeholder="${placeholderText}" readonly>
+                    <input type="file" name="file" class="Form-filePicker" id="filePicker"  onchange="angular.element(this).scope().fileChange(this.files)"/>
+                </div>
 
                 <div ng-if="imagePresent" class="Form-filePicker--selectedFile">
                 ${uploadedText}
@@ -795,7 +797,7 @@ function(SettingsUtils, i18n, $rootScope) {
             let tooltipInnerClass = (attrs.tooltipInnerClass || attrs.tooltipinnerclass) ? (attrs.tooltipInnerClass || attrs.tooltipinnerclass) : '';
             let tooltipOuterClass = attrs.tooltipOuterClass ? attrs.tooltipOuterClass : '';
 
-            template = '<div class="tooltip Tooltip ' + tooltipOuterClass + '" role="tooltip"><div class="tooltip-arrow Tooltip-arrow"></div><div class="tooltip-inner Tooltip-inner ' + tooltipInnerClass + '"></div></div>';
+            template = '<div class="tooltip Tooltip ' + tooltipOuterClass + '" role="tooltip"><div class="tooltip-arrow Tooltip-arrow arrow"></div><div class="tooltip-inner Tooltip-inner ' + tooltipInnerClass + '"></div></div>';
 
             // This block helps clean up tooltips that may get orphaned by a click event
             $(element).on('mouseenter', function(event) {
@@ -836,7 +838,8 @@ function(SettingsUtils, i18n, $rootScope) {
                 title: attrs.awToolTip,
                 container: container,
                 trigger: 'hover',
-                template: template
+                template: template,
+                boundary: 'window'
             });
 
             if (attrs.tipWatch) {
@@ -844,7 +847,7 @@ function(SettingsUtils, i18n, $rootScope) {
                 scope.$watch(attrs.tipWatch, function(newVal) {
                     // Where did fixTitle come from?:
                     //   http://stackoverflow.com/questions/9501921/change-twitter-bootstrap-tooltip-content-on-click
-                    $(element).tooltip('hide').attr('data-original-title', newVal).tooltip('fixTitle');
+                    $(element).tooltip('hide').attr('data-original-title', newVal).tooltip('_fixTitle');
                 });
             }
         }
@@ -866,11 +869,11 @@ function(SettingsUtils, i18n, $rootScope) {
             title = (attrs.overTitle) ? attrs.overTitle : (attrs.popoverTitle) ? attrs.popoverTitle : 'Help',
             container = (attrs.container !== undefined) ? attrs.container : false,
             trigger = (attrs.trigger !== undefined) ? attrs.trigger : 'manual',
-            template = '<div class="popover" role="tooltip"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>',
+            template = '<div class="popover" role="tooltip"><div class="arrow"></div><h3 class="popover-header"></h3><div class="popover-body"></div></div>',
             id_to_close = "";
 
         if (element[0].id) {
-            template = '<div id="' + element[0].id + '_popover_container" class="popover" role="tooltip"><div class="arrow"></div><h3 id="' + element[0].id + '_popover_title" class="popover-title" translate></h3><div id="' + element[0].id + '_popover_content" class="popover-content" translate></div></div>';
+            template = '<div id="' + element[0].id + '_popover_container" class="popover" role="tooltip"><div class="arrow"></div><h3 id="' + element[0].id + '_popover_title" class="popover-header" translate></h3><div id="' + element[0].id + '_popover_content" class="popover-body" translate></div></div>';
         }
 
         scope.triggerPopover = function(e) {

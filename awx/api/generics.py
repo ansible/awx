@@ -5,8 +5,7 @@
 import inspect
 import logging
 import time
-import six
-import urllib
+import urllib.parse
 
 # Django
 from django.conf import settings
@@ -32,14 +31,19 @@ from rest_framework.permissions import AllowAny
 from rest_framework.renderers import StaticHTMLRenderer, JSONRenderer
 from rest_framework.negotiation import DefaultContentNegotiation
 
-# cryptography
-from cryptography.fernet import InvalidToken
-
 # AWX
 from awx.api.filters import FieldLookupBackend
-from awx.main.models import *  # noqa
+from awx.main.models import (
+    UnifiedJob, UnifiedJobTemplate, User, Role
+)
 from awx.main.access import access_registry
-from awx.main.utils import * # noqa
+from awx.main.utils import (
+    camelcase_to_underscore,
+    get_search_fields,
+    getattrd,
+    get_object_or_400,
+    decrypt_field
+)
 from awx.main.utils.db import get_all_field_names
 from awx.api.serializers import ResourceAccessListElementSerializer, CopySerializer, UserSerializer
 from awx.api.versioning import URLPathVersioning, get_request_version
@@ -90,11 +94,14 @@ class LoggedLoginView(auth_views.LoginView):
             logger.info(smart_text(u"User {} logged in.".format(self.request.user.username)))
             ret.set_cookie('userLoggedIn', 'true')
             current_user = UserSerializer(self.request.user)
-            current_user = JSONRenderer().render(current_user.data)
-            current_user = urllib.quote('%s' % current_user, '')
+            current_user = smart_text(JSONRenderer().render(current_user.data))
+            current_user = urllib.parse.quote('%s' % current_user, '')
             ret.set_cookie('current_user', current_user, secure=settings.SESSION_COOKIE_SECURE or None)
+
             return ret
         else:
+            if 'username' in self.request.POST:
+                logger.warn(smart_text(u"Login failed for user {} from {}".format(self.request.POST.get('username'),request.META.get('REMOTE_ADDR', None))))
             ret.status_code = 401
             return ret
 
@@ -304,7 +311,7 @@ class APIView(views.APIView):
         # submitted data was rejected.
         request_method = getattr(self, '_raw_data_request_method', None)
         response_status = getattr(self, '_raw_data_response_status', 0)
-        if request_method in ('POST', 'PUT', 'PATCH') and response_status in xrange(400, 500):
+        if request_method in ('POST', 'PUT', 'PATCH') and response_status in range(400, 500):
             return self.request.data.copy()
 
         return data
@@ -347,7 +354,7 @@ class GenericAPIView(generics.GenericAPIView, APIView):
         # form.
         if hasattr(self, '_raw_data_form_marker'):
             # Always remove read only fields from serializer.
-            for name, field in serializer.fields.items():
+            for name, field in list(serializer.fields.items()):
                 if getattr(field, 'read_only', None):
                     del serializer.fields[name]
             serializer._data = self.update_raw_data(serializer.data)
@@ -747,7 +754,7 @@ class SubListAttachDetachAPIView(SubListCreateAttachDetachAPIView):
     def update_raw_data(self, data):
         request_method = getattr(self, '_raw_data_request_method', None)
         response_status = getattr(self, '_raw_data_response_status', 0)
-        if request_method == 'POST' and response_status in xrange(400, 500):
+        if request_method == 'POST' and response_status in range(400, 500):
             return super(SubListAttachDetachAPIView, self).update_raw_data(data)
         return {'id': None}
 
@@ -853,15 +860,18 @@ class CopyAPIView(GenericAPIView):
             return field_val
         if isinstance(field_val, dict):
             for sub_field in field_val:
-                if isinstance(sub_field, six.string_types) \
-                        and isinstance(field_val[sub_field], six.string_types):
+                if isinstance(sub_field, str) \
+                        and isinstance(field_val[sub_field], str):
                     try:
                         field_val[sub_field] = decrypt_field(obj, field_name, sub_field)
-                    except InvalidToken:
+                    except AttributeError:
                         # Catching the corner case with v1 credential fields
                         field_val[sub_field] = decrypt_field(obj, sub_field)
-        elif isinstance(field_val, six.string_types):
-            field_val = decrypt_field(obj, field_name)
+        elif isinstance(field_val, str):
+            try:
+                field_val = decrypt_field(obj, field_name)
+            except AttributeError:
+                return field_val
         return field_val
 
     def _build_create_dict(self, obj):
@@ -915,7 +925,7 @@ class CopyAPIView(GenericAPIView):
                     obj, field.name, field_val
                 )
         new_obj = model.objects.create(**create_kwargs)
-        logger.debug(six.text_type('Deep copy: Created new object {}({})').format(
+        logger.debug('Deep copy: Created new object {}({})'.format(
             new_obj, model
         ))
         # Need to save separatedly because Djang-crum get_current_user would

@@ -1,3 +1,8 @@
+import collections
+import inspect
+import json
+import re
+
 # Python LDAP
 import ldap
 import awx
@@ -13,15 +18,23 @@ from django_auth_ldap.config import (
     LDAPSearchUnion,
 )
 
+from rest_framework.fields import empty
+
 # This must be imported so get_subclasses picks it up
 from awx.sso.ldap_group_types import PosixUIDGroupType  # noqa
 
 # Tower
 from awx.conf import fields
-from awx.conf.fields import *  # noqa
 from awx.conf.license import feature_enabled
 from awx.main.validators import validate_certificate
-from awx.sso.validators import *  # noqa
+from awx.sso.validators import (  # noqa
+    validate_ldap_dn,
+    validate_ldap_bind_dn,
+    validate_ldap_dn_with_user,
+    validate_ldap_filter,
+    validate_ldap_filter_with_user,
+    validate_tacacsplus_disallow_nonascii,
+)
 
 
 def get_subclasses(cls):
@@ -51,7 +64,7 @@ class DependsOnMixin():
         Then fall back to the raw value from the setting in the DB.
         """
         from django.conf import settings
-        dependent_key = iter(self.depends_on).next()
+        dependent_key = next(iter(self.depends_on))
 
         if self.context:
             request = self.context.get('request', None)
@@ -160,7 +173,7 @@ class AuthenticationBackendsField(fields.StringListField):
             if not required_feature or feature_enabled(required_feature):
                 if all([getattr(settings, rs, None) for rs in required_settings]):
                     continue
-            backends = filter(lambda x: x != backend, backends)
+            backends = [x for x in backends if x != backend]
         return backends
 
 
@@ -198,7 +211,8 @@ class LDAPConnectionOptionsField(fields.DictField):
         valid_options = dict([(v, k) for k, v in ldap.OPT_NAMES_DICT.items()])
         invalid_options = set(data.keys()) - set(valid_options.keys())
         if invalid_options:
-            options_display = json.dumps(list(invalid_options)).lstrip('[').rstrip(']')
+            invalid_options = sorted(list(invalid_options))
+            options_display = json.dumps(invalid_options).lstrip('[').rstrip(']')
             self.fail('invalid_options', invalid_options=options_display)
         # Convert named options to their integer constants.
         internal_data = {}
@@ -224,7 +238,7 @@ class LDAPDNListField(fields.StringListField):
 
     def __init__(self, **kwargs):
         super(LDAPDNListField, self).__init__(**kwargs)
-        self.validators.append(lambda dn: map(validate_ldap_dn, dn))
+        self.validators.append(lambda dn: list(map(validate_ldap_dn, dn)))
 
     def run_validation(self, data=empty):
         if not isinstance(data, (list, tuple)):
@@ -338,7 +352,7 @@ class LDAPSearchUnionField(fields.ListField):
         data = super(LDAPSearchUnionField, self).to_internal_value(data)
         if len(data) == 0:
             return None
-        if len(data) == 3 and isinstance(data[0], basestring):
+        if len(data) == 3 and isinstance(data[0], str):
             return self.ldap_search_field_class().run_validation(data)
         else:
             search_args = []
@@ -367,7 +381,8 @@ class LDAPUserAttrMapField(fields.DictField):
         data = super(LDAPUserAttrMapField, self).to_internal_value(data)
         invalid_attrs = (set(data.keys()) - self.valid_user_attrs)
         if invalid_attrs:
-            attrs_display = json.dumps(list(invalid_attrs)).lstrip('[').rstrip(']')
+            invalid_attrs = sorted(list(invalid_attrs))
+            attrs_display = json.dumps(invalid_attrs).lstrip('[').rstrip(']')
             self.fail('invalid_attrs', invalid_attrs=attrs_display)
         return data
 
@@ -432,7 +447,8 @@ class LDAPGroupTypeParamsField(fields.DictField, DependsOnMixin):
 
         invalid_keys = set(value.keys()) - set(inspect.getargspec(group_type_cls.__init__).args[1:])
         if invalid_keys:
-            keys_display = json.dumps(list(invalid_keys)).lstrip('[').rstrip(']')
+            invalid_keys = sorted(list(invalid_keys))
+            keys_display = json.dumps(invalid_keys).lstrip('[').rstrip(']')
             self.fail('invalid_keys', invalid_keys=keys_display)
         return value
 
@@ -491,13 +507,16 @@ class BaseDictWithChildField(fields.DictField):
                 continue
             elif key not in data:
                 missing_keys.add(key)
+        missing_keys = sorted(list(missing_keys))
         if missing_keys and (data or not self.allow_blank):
-            keys_display = json.dumps(list(missing_keys)).lstrip('[').rstrip(']')
+            missing_keys = sorted(list(missing_keys))
+            keys_display = json.dumps(missing_keys).lstrip('[').rstrip(']')
             self.fail('missing_keys', missing_keys=keys_display)
         if not self.allow_unknown_keys:
             invalid_keys = set(data.keys()) - set(self.child_fields.keys())
             if invalid_keys:
-                keys_display = json.dumps(list(invalid_keys)).lstrip('[').rstrip(']')
+                invalid_keys = sorted(list(invalid_keys))
+                keys_display = json.dumps(invalid_keys).lstrip('[').rstrip(']')
                 self.fail('invalid_keys', invalid_keys=keys_display)
         for k, v in data.items():
             child_field = self.child_fields.get(k, None)
@@ -542,21 +561,6 @@ class LDAPSingleTeamMapField(BaseDictWithChildField):
 class LDAPTeamMapField(fields.DictField):
 
     child = LDAPSingleTeamMapField()
-
-
-class RADIUSSecretField(fields.CharField):
-
-    def run_validation(self, data=empty):
-        value = super(RADIUSSecretField, self).run_validation(data)
-        if isinstance(value, unicode):
-            value = value.encode('utf-8')
-        return value
-
-    def to_internal_value(self, value):
-        value = super(RADIUSSecretField, self).to_internal_value(value)
-        if isinstance(value, unicode):
-            value = value.encode('utf-8')
-        return value
 
 
 class SocialMapStringRegexField(fields.CharField):
@@ -605,7 +609,7 @@ class SocialMapField(fields.ListField):
             return False
         elif value in fields.NullBooleanField.NULL_VALUES:
             return None
-        elif isinstance(value, (basestring, type(re.compile('')))):
+        elif isinstance(value, (str, type(re.compile('')))):
             return self.child.to_representation(value)
         else:
             self.fail('type_error', input_type=type(value))
@@ -619,7 +623,7 @@ class SocialMapField(fields.ListField):
             return False
         elif data in fields.NullBooleanField.NULL_VALUES:
             return None
-        elif isinstance(data, basestring):
+        elif isinstance(data, str):
             return self.child.run_validation(data)
         else:
             self.fail('type_error', input_type=type(data))
@@ -688,7 +692,8 @@ class SAMLOrgInfoField(fields.DictField):
             if not re.match(r'^[a-z]{2}(?:-[a-z]{2})??$', key, re.I):
                 invalid_keys.add(key)
         if invalid_keys:
-            keys_display = json.dumps(list(invalid_keys)).lstrip('[').rstrip(']')
+            invalid_keys = sorted(list(invalid_keys))
+            keys_display = json.dumps(invalid_keys).lstrip('[').rstrip(']')
             self.fail('invalid_lang_code', invalid_lang_codes=keys_display)
         return data
 

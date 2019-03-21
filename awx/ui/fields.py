@@ -3,6 +3,7 @@
 
 # Python
 import base64
+import binascii
 import re
 
 # Django
@@ -38,6 +39,6 @@ class CustomLogoField(fields.CharField):
         b64data = match.group(1)
         try:
             base64.b64decode(b64data)
-        except TypeError:
+        except (TypeError, binascii.Error):
             self.fail('invalid_data')
         return data

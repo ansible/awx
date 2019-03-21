@@ -95,10 +95,10 @@ export default function BuildAnchor($log, $filter) {
              const name = $filter('sanitize')(obj.name || obj.username);
 
              if (url) {
-                return ` <a href=\"${url}\"> ${name} </a> `;
+                return ` <a href=\"${url}\">&nbsp;${name}&nbsp;</a> `;
              }
 
-             return ` <span> ${name} </span> `;
+             return ` <span>&nbsp;${name}&nbsp;</span> `;
          }
          catch(err){
              $log.debug(err);

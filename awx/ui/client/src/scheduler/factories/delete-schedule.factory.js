@@ -1,6 +1,6 @@
 export default
     function DeleteSchedule(GetBasePath, Rest, Wait, $state,
-        ProcessErrors, Prompt, Find, $location, $filter) {
+        ProcessErrors, Prompt, Find, $location, $filter, i18n) {
         return function(params) {
             var scope = params.scope,
                 id = params.id,
@@ -55,9 +55,9 @@ export default
             Prompt({
                 hdr: hdr,
                 resourceName: $filter('sanitize')(schedule.name),
-                body: '<div class="Prompt-bodyQuery">Are you sure you want to delete this schedule?</div>',
+                body: `<div class="Prompt-bodyQuery">${i18n._('Are you sure you want to delete this schedule?')}</div>`,
                 action: action,
-                actionText: 'DELETE',
+                actionText: i18n._('DELETE'),
                 backdrop: false
             });
         };
@@ -66,5 +66,5 @@ export default
 DeleteSchedule.$inject =
     [   'GetBasePath','Rest', 'Wait', '$state',
         'ProcessErrors', 'Prompt', 'Find', '$location',
-        '$filter'
+        '$filter', 'i18n'
     ];

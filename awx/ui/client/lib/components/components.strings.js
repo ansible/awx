@@ -89,7 +89,11 @@ function ComponentsStrings (BaseString) {
         VIEWS_HEADER: t.s('Views'),
         RESOURCES_HEADER: t.s('Resources'),
         ACCESS_HEADER: t.s('Access'),
-        ADMINISTRATION_HEADER: t.s('Administration')
+        ADMINISTRATION_HEADER: t.s('Administration'),
+        AUTHENTICATION: t.s('Authentication'),
+        SYSTEM: t.s('System'),
+        USER_INTERFACE: t.s('User Interface'),
+        LICENSE: t.s('License')
     };
 
     ns.relaunch = {
@@ -101,11 +105,19 @@ function ComponentsStrings (BaseString) {
     };
 
     ns.launchTemplate = {
-        DEFAULT: t.s('Start a job using this template')
+        DEFAULT: t.s('Start a job using this template'),
+        DISABLED: t.s('Please save before launching this template.'),
+        BUTTON_LABEL: t.s('LAUNCH')
     };
 
     ns.list = {
         DEFAULT_EMPTY_LIST: t.s('Please add items to this list.')
+    };
+
+    ns.toolbar = {
+        COMPACT: t.s('Compact'),
+        EXPANDED: t.s('Expanded'),
+        SORT_BY: t.s('SORT BY')
     };
 }
 

@@ -1,10 +1,54 @@
-import mock
+from unittest import mock
 import pytest
 
 from awx.main.models import (Job, JobEvent, ProjectUpdate, ProjectUpdateEvent,
                              AdHocCommand, AdHocCommandEvent, InventoryUpdate,
                              InventorySource, InventoryUpdateEvent, SystemJob,
                              SystemJobEvent)
+
+
+@pytest.mark.django_db
+@mock.patch('awx.main.consumers.emit_channel_notification')
+def test_parent_changed(emit):
+    j = Job()
+    j.save()
+    JobEvent.create_from_data(job_id=j.pk, uuid='abc123', event='playbook_on_task_start')
+    assert JobEvent.objects.count() == 1
+    for e in JobEvent.objects.all():
+        assert e.changed is False
+
+    JobEvent.create_from_data(
+        job_id=j.pk,
+        parent_uuid='abc123',
+        event='runner_on_ok',
+        event_data={
+            'res': {'changed': ['localhost']}
+        }
+    )
+    assert JobEvent.objects.count() == 2
+    for e in JobEvent.objects.all():
+        assert e.changed is True
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('event', JobEvent.FAILED_EVENTS)
+@mock.patch('awx.main.consumers.emit_channel_notification')
+def test_parent_failed(emit, event):
+    j = Job()
+    j.save()
+    JobEvent.create_from_data(job_id=j.pk, uuid='abc123', event='playbook_on_task_start')
+    assert JobEvent.objects.count() == 1
+    for e in JobEvent.objects.all():
+        assert e.failed is False
+
+    JobEvent.create_from_data(
+        job_id=j.pk,
+        parent_uuid='abc123',
+        event=event
+    )
+    assert JobEvent.objects.count() == 2
+    for e in JobEvent.objects.all():
+        assert e.failed is True
 
 
 @pytest.mark.django_db

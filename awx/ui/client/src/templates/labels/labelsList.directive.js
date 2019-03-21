@@ -9,7 +9,8 @@ export default
         '$q',
         '$filter',
         '$state',
-        function(templateUrl, Wait, Rest, GetBasePath, ProcessErrors, Prompt, $q, $filter, $state) {
+        'i18n',
+        function(templateUrl, Wait, Rest, GetBasePath, ProcessErrors, Prompt, $q, $filter, $state, i18n) {
             return {
                 restrict: 'E',
                 scope: {
@@ -89,10 +90,10 @@ export default
                         };
 
                         Prompt({
-                            hdr: 'Remove Label from ' + template.name ,
+                            hdr: i18n._('Remove Label from ') + template.name,
                             body: '<div class="Prompt-bodyQuery">Confirm  the removal of the <span class="Prompt-emphasis">' + $filter('sanitize')(label.name) + '</span> label.</div>',
                             action: action,
-                            actionText: 'REMOVE'
+                            actionText: i18n._('REMOVE')
                         });
                     };
 

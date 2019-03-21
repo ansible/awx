@@ -18,7 +18,7 @@ from django.utils.translation import ugettext_lazy as _
 
 # AWX
 from awx.api.versioning import reverse
-from awx.main.models.base import * # noqa
+from awx.main.models.base import PrimordialModel
 from awx.main.models.jobs import LaunchTimeConfig
 from awx.main.utils import ignore_inventory_computed_fields
 from awx.main.consumers import emit_channel_notification
@@ -61,11 +61,12 @@ class ScheduleManager(ScheduleFilterMethods, models.Manager):
         return ScheduleQuerySet(self.model, using=self._db)
 
 
-class Schedule(CommonModel, LaunchTimeConfig):
+class Schedule(PrimordialModel, LaunchTimeConfig):
 
     class Meta:
         app_label = 'main'
         ordering = ['-next_run']
+        unique_together = ('unified_job_template', 'name')
 
     objects = ScheduleManager()
 
@@ -73,6 +74,9 @@ class Schedule(CommonModel, LaunchTimeConfig):
         'UnifiedJobTemplate',
         related_name='schedules',
         on_delete=models.CASCADE,
+    )
+    name = models.CharField(
+        max_length=512,
     )
     enabled = models.BooleanField(
         default=True,
@@ -209,7 +213,7 @@ class Schedule(CommonModel, LaunchTimeConfig):
                 pass
         return x
 
-    def __unicode__(self):
+    def __str__(self):
         return u'%s_t%s_%s_%s' % (self.name, self.unified_job_template.id, self.id, self.next_run)
 
     def get_absolute_url(self, request=None):

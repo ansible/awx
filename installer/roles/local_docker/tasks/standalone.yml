@@ -86,6 +86,7 @@
       {{
         ([project_data_dir + ':/var/lib/awx/projects:z'] if project_data_dir is defined else [])
         + ([ca_trust_dir + ':/etc/pki/ca-trust/source/anchors:ro'] if ca_trust_dir is defined else [])
+        + ([ssl_certificate + ':/etc/nginx/awxweb.pem:ro'] if ssl_certificate is defined else [])
       }}
     user: root
     ports:
@@ -104,6 +105,7 @@
       DATABASE_PASSWORD: "{{ pg_password }}"
       DATABASE_PORT: "{{ pg_port }}"
       DATABASE_HOST: "{{ pg_hostname_actual }}"
+      DATABASE_SSLMODE: "{{ pg_sslmode | default(omit) }}"
       RABBITMQ_USER: "{{ rabbitmq_default_username }}"
       RABBITMQ_PASSWORD: "{{ rabbitmq_default_password }}"
       RABBITMQ_HOST: "rabbitmq"
@@ -145,6 +147,7 @@
       DATABASE_PASSWORD: "{{ pg_password }}"
       DATABASE_HOST: "{{ pg_hostname_actual }}"
       DATABASE_PORT: "{{ pg_port }}"
+      DATABASE_SSLMODE: "{{ pg_sslmode | default(omit) }}"
       RABBITMQ_USER: "{{ rabbitmq_default_username }}"
       RABBITMQ_PASSWORD: "{{ rabbitmq_default_password }}"
       RABBITMQ_HOST: "rabbitmq"
@@ -154,3 +157,8 @@
       MEMCACHED_PORT: "11211"
       AWX_ADMIN_USER: "{{ admin_user|default('admin') }}"
       AWX_ADMIN_PASSWORD: "{{ admin_password|default('password') }}"
+  register: awx_task_container
+
+- name: Update CA trust in awx_task container
+  command: docker exec awx_task '/usr/bin/update-ca-trust'
+  when: awx_task_container.changed

@@ -34,7 +34,11 @@ import sys
 import json
 import requests
 from requests.auth import HTTPBasicAuth
-from urlparse import urljoin
+
+try:
+    from urlparse import urljoin
+except ImportError:
+    from urllib.parse import urljoin
 
 
 def parse_configuration():

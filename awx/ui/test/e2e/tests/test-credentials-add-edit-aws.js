@@ -118,18 +118,17 @@ module.exports = {
     },
     'credential is searchable after saving': client => {
         const credentials = client.page.credentials();
+        const row = '#credentials_table .List-tableRow';
 
         const { search } = credentials.section.list.section;
-        const { table } = credentials.section.list.section;
 
         search
             .waitForElementVisible('@input')
             .setValue('@input', `name:${store.credential.name}`)
             .click('@searchButton');
 
-        table.waitForRowCount(1);
-        table.findRowByText(store.credential.name)
-            .waitForElementVisible('@self');
+        credentials.waitForElementNotPresent(`${row}:nth-of-type(2)`);
+        credentials.expect.element(row).text.contain(store.credential.name);
 
         client.end();
     }

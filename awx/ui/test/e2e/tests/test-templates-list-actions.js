@@ -54,7 +54,7 @@ module.exports = {
         templates.waitForElementNotVisible('div.spinny');
 
         const activityStream = 'bread-crumb > div i[class$="icon-activity-stream"]';
-        const activityRow = '#activities_table tr td[class*="description-column"] a';
+        const activityRow = '#activities_table .List-tableCell[class*="description-column"] a';
         const toast = 'div[class="Toast-icon"]';
 
         templates.waitForElementNotPresent(toast);
@@ -114,7 +114,7 @@ module.exports = {
             .waitForAngular();
 
         const activityStream = 'bread-crumb > div i[class$="icon-activity-stream"]';
-        const activityRow = '#activities_table tr td[class*="description-column"] a';
+        const activityRow = '#activities_table .List-tableCell[class*="description-column"] a';
         const toast = 'div[class="Toast-icon"]';
 
         templates.waitForElementNotPresent(toast);

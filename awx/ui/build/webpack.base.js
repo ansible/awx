@@ -27,6 +27,8 @@ const APP_ENTRY = path.join(SRC_PATH, 'app.js');
 const VENDOR_ENTRY = path.join(SRC_PATH, 'vendor.js');
 const INDEX_ENTRY = path.join(CLIENT_PATH, 'index.template.ejs');
 const INDEX_OUTPUT = path.join(UI_PATH, 'templates/ui/index.html');
+const INSTALL_RUNNING_ENTRY = path.join(CLIENT_PATH, 'installing.template.ejs');
+const INSTALL_RUNNING_OUTPUT = path.join(UI_PATH, 'templates/ui/installing.html');
 const THEME_ENTRY = path.join(LIB_PATH, 'theme', 'index.less');
 const OUTPUT = 'js/[name].[chunkhash].js';
 const CHUNKS = ['vendor', 'app'];
@@ -193,7 +195,15 @@ const base = {
             inject: false,
             chunks: CHUNKS,
             chunksSortMode: chunk => (chunk.names[0] === 'vendor' ? -1 : 1)
-        })
+        }),
+        new HtmlWebpackPlugin({
+            alwaysWriteToDisk: true,
+            template: INSTALL_RUNNING_ENTRY,
+            filename: INSTALL_RUNNING_OUTPUT,
+            inject: false,
+            chunks: CHUNKS,
+            chunksSortMode: chunk => (chunk.names[0] === 'vendor' ? -1 : 1)
+        }),
     ],
     resolve: {
         alias: {

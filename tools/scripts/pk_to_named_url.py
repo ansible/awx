@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import argparse
-import six
+import urllib.parse
 
 import requests
 
@@ -10,7 +10,7 @@ NAMED_URL_RES_INNER_DILIMITER = "-"
 NAMED_URL_RES_DILIMITER_ENCODE = "%2D"
 URL_PATH_RESERVED_CHARSET = {}
 for c in ';/?:@=&[]':
-    URL_PATH_RESERVED_CHARSET[c] = six.moves.urllib.parse.quote(c, safe='')
+    URL_PATH_RESERVED_CHARSET[c] = urllib.parse.quote(c, safe='')
 
 
 def _get_named_url_graph(url, auth):

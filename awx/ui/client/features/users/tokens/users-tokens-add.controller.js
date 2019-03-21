@@ -1,6 +1,6 @@
 function AddTokensController (
     models, $state, strings, Alert, Wait,
-    $filter, ProcessErrors, $scope
+    $filter, ProcessErrors, $scope, i18n
 ) {
     const vm = this || {};
     const { application, token, user } = models;
@@ -12,7 +12,7 @@ function AddTokensController (
     vm.form = {
         application: {
             type: 'field',
-            label: 'Application',
+            label: i18n._('Application'),
             id: 'application',
             required: false,
             help_text: strings.get('add.APPLICATION_HELP_TEXT'),
@@ -23,7 +23,7 @@ function AddTokensController (
         },
         description: {
             type: 'String',
-            label: 'Description',
+            label: i18n._('Description'),
             id: 'description',
             required: false
         },
@@ -35,7 +35,7 @@ function AddTokensController (
             ],
             help_text: strings.get('add.SCOPE_HELP_TEXT'),
             id: 'scope',
-            label: 'Scope',
+            label: i18n._('Scope'),
             required: true,
             _component: 'at-input-select',
             _data: [
@@ -116,7 +116,8 @@ AddTokensController.$inject = [
     'Wait',
     '$filter',
     'ProcessErrors',
-    '$scope'
+    '$scope',
+    'i18n'
 ];
 
 export default AddTokensController;

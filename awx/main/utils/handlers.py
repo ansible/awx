@@ -6,10 +6,9 @@ import logging
 import json
 import requests
 import time
-import urlparse
 import socket
 import select
-import six
+from urllib import parse as urlparse
 from concurrent.futures import ThreadPoolExecutor
 from requests.exceptions import RequestException
 
@@ -211,7 +210,7 @@ def _encode_payload_for_socket(payload):
     encoded_payload = payload
     if isinstance(encoded_payload, dict):
         encoded_payload = json.dumps(encoded_payload, ensure_ascii=False)
-    if isinstance(encoded_payload, six.text_type):
+    if isinstance(encoded_payload, str):
         encoded_payload = encoded_payload.encode('utf-8')
     return encoded_payload
 
@@ -237,7 +236,7 @@ class TCPHandler(BaseHandler):
         except Exception as e:
             ret = SocketResult(False, "Error sending message from %s: %s" %
                                (TCPHandler.__name__,
-                                ' '.join(six.text_type(arg) for arg in e.args)))
+                                ' '.join(str(arg) for arg in e.args)))
             logger.exception(ret.reason)
         finally:
             sok.close()
@@ -334,7 +333,7 @@ class AWXProxyHandler(logging.Handler):
         handler = self.get_handler(custom_settings=custom_settings, force_create=True)
         handler.setFormatter(LogstashFormatter())
         logger = logging.getLogger(__file__)
-        fn, lno, func = logger.findCaller()
+        fn, lno, func, _ = logger.findCaller()
         record = logger.makeRecord('awx', 10, fn, lno,
                                    'AWX Connection Test', tuple(),
                                    None, func)

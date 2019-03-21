@@ -1,7 +1,7 @@
 <div class="License-container"
 	ng-class="{'License-container--missing': licenseMissing}">
 	<div class="License-details" ng-hide="licenseMissing">
-		<div class="Panel">
+		<div class="card at-Panel">
 			<div class="List-titleText" translate>Details</div>
 			<div class="License-fields">
 				<div class="License-field">
@@ -72,7 +72,7 @@
 		</div>
 	</div>
 	<div class="License-management" ng-class="{'License-management--missingLicense' : licenseMissing}">
-		<div class="Panel">
+		<div class="card at-Panel">
 			<div class="List-titleText">{{title}}</div>
 			<div class="License-body">
 				<div class="License-helperText" ng-if="licenseMissing" translate>Welcome to Ansible Tower! Please complete the steps below to acquire a license.</div>

@@ -30,7 +30,13 @@
                 </button>
             </div>
         </div>
-
+        <at-list-toolbar
+            ng-if="vm.applicationsCount > 0"
+            sort-only="true"
+            sort-value="vm.toolbarSortValue"
+            sort-options="vm.toolbarSortOptions"
+            on-sort="vm.onToolbarSort">
+        </at-list-toolbar>
         <at-list results="applications">
             <at-row ng-repeat="application in applications"
                 ng-class="{'at-Row--active': (application.id === vm.activeId)}">
@@ -61,7 +67,6 @@
         base-path="applications"
         iterator="application"
         dataset="application_dataset"
-        collection="applications"
-        query-set="application_queryset">
+        collection="applications">
     </paginate>
 </at-panel>

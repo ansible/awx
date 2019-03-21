@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import StringIO
-import mock
 import os
 import pytest
 import re
@@ -10,15 +8,17 @@ import stat
 import tempfile
 import time
 from collections import OrderedDict
+from io import StringIO
+from unittest import mock
 
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
+from django.utils.encoding import smart_str, smart_bytes
 
 from awx.main.expect import run, isolated_manager
 
 from django.conf import settings
-import six
 
 HERE, FILENAME = os.path.split(__file__)
 
@@ -32,11 +32,11 @@ def rsa_key(request):
         backend=default_backend()
     )
     return (
-        key.private_bytes(
+        smart_str(key.private_bytes(
             encoding=serialization.Encoding.PEM,
             format=serialization.PrivateFormat.TraditionalOpenSSL,
-            encryption_algorithm=serialization.BestAvailableEncryption(passphrase)
-        ),
+            encryption_algorithm=serialization.BestAvailableEncryption(smart_bytes(passphrase))
+        )),
         passphrase
     )
 
@@ -58,7 +58,7 @@ def mock_sleep(request):
 
 
 def test_simple_spawn():
-    stdout = StringIO.StringIO()
+    stdout = StringIO()
     status, rc = run.run_pexpect(
         ['ls', '-la'],
         HERE,
@@ -72,7 +72,7 @@ def test_simple_spawn():
 
 
 def test_error_rc():
-    stdout = StringIO.StringIO()
+    stdout = StringIO()
     status, rc = run.run_pexpect(
         ['ls', '-nonsense'],
         HERE,
@@ -86,7 +86,7 @@ def test_error_rc():
 
 
 def test_cancel_callback_error():
-    stdout = StringIO.StringIO()
+    stdout = StringIO()
 
     def bad_callback():
         raise Exception('unique exception')
@@ -106,9 +106,9 @@ def test_cancel_callback_error():
 
 
 @pytest.mark.timeout(3)  # https://github.com/ansible/tower/issues/2391#issuecomment-401946895
-@pytest.mark.parametrize('value', ['abc123', six.u('Iñtërnâtiônàlizætiøn')])
+@pytest.mark.parametrize('value', ['abc123', 'Iñtërnâtiônàlizætiøn'])
 def test_env_vars(value):
-    stdout = StringIO.StringIO()
+    stdout = StringIO()
     status, rc = run.run_pexpect(
         ['python', '-c', 'import os; print os.getenv("X_MY_ENV")'],
         HERE,
@@ -122,7 +122,7 @@ def test_env_vars(value):
 
 
 def test_password_prompt():
-    stdout = StringIO.StringIO()
+    stdout = StringIO()
     expect_passwords = OrderedDict()
     expect_passwords[re.compile(r'Password:\s*?$', re.M)] = 'secret123'
     status, rc = run.run_pexpect(
@@ -139,7 +139,7 @@ def test_password_prompt():
 
 
 def test_job_timeout():
-    stdout = StringIO.StringIO()
+    stdout = StringIO()
     extra_update_fields={}
     status, rc = run.run_pexpect(
         ['python', '-c', 'import time; time.sleep(5)'],
@@ -156,7 +156,7 @@ def test_job_timeout():
 
 
 def test_manual_cancellation():
-    stdout = StringIO.StringIO()
+    stdout = StringIO()
     status, rc = run.run_pexpect(
         ['python', '-c', 'print raw_input("Password: ")'],
         HERE,
@@ -172,7 +172,7 @@ def test_manual_cancellation():
 def test_build_isolated_job_data(private_data_dir, rsa_key):
     pem, passphrase = rsa_key
     mgr = isolated_manager.IsolatedManager(
-        ['ls', '-la'], HERE, {}, StringIO.StringIO(), ''
+        ['ls', '-la'], HERE, {}, StringIO(), ''
     )
     mgr.private_data_dir = private_data_dir
     mgr.build_isolated_job_data()
@@ -209,7 +209,7 @@ def test_run_isolated_job(private_data_dir, rsa_key):
     env = {'JOB_ID': '1'}
     pem, passphrase = rsa_key
     mgr = isolated_manager.IsolatedManager(
-        ['ls', '-la'], HERE, env, StringIO.StringIO(), ''
+        ['ls', '-la'], HERE, env, StringIO(), ''
     )
     mgr.private_data_dir = private_data_dir
     secrets = {
@@ -220,7 +220,7 @@ def test_run_isolated_job(private_data_dir, rsa_key):
         'ssh_key_data': pem
     }
     mgr.build_isolated_job_data()
-    stdout = StringIO.StringIO()
+    stdout = StringIO()
     # Mock environment variables for callback module
     with mock.patch('os.getenv') as env_mock:
         env_mock.return_value = '/path/to/awx/lib'
@@ -239,7 +239,7 @@ def test_run_isolated_adhoc_command(private_data_dir, rsa_key):
     env = {'AD_HOC_COMMAND_ID': '1'}
     pem, passphrase = rsa_key
     mgr = isolated_manager.IsolatedManager(
-        ['pwd'], HERE, env, StringIO.StringIO(), ''
+        ['pwd'], HERE, env, StringIO(), ''
     )
     mgr.private_data_dir = private_data_dir
     secrets = {
@@ -250,7 +250,7 @@ def test_run_isolated_adhoc_command(private_data_dir, rsa_key):
         'ssh_key_data': pem
     }
     mgr.build_isolated_job_data()
-    stdout = StringIO.StringIO()
+    stdout = StringIO()
     # Mock environment variables for callback module
     with mock.patch('os.getenv') as env_mock:
         env_mock.return_value = '/path/to/awx/lib'
@@ -270,7 +270,7 @@ def test_run_isolated_adhoc_command(private_data_dir, rsa_key):
 
 def test_check_isolated_job(private_data_dir, rsa_key):
     pem, passphrase = rsa_key
-    stdout = StringIO.StringIO()
+    stdout = StringIO()
     mgr = isolated_manager.IsolatedManager(['ls', '-la'], HERE, {}, stdout, '')
     mgr.private_data_dir = private_data_dir
     mgr.instance = mock.Mock(id=123, pk=123, verbosity=5, spec_set=['id', 'pk', 'verbosity'])
@@ -318,51 +318,9 @@ def test_check_isolated_job(private_data_dir, rsa_key):
         )
 
 
-def test_check_isolated_job_with_multibyte_unicode(private_data_dir):
-    """
-    Ensure that multibyte unicode is properly synced when stdout only
-    contains the first part of the multibyte character
-
-    see: https://github.com/ansible/tower/issues/2315
-    """
-    def raw_output():
-        yield ('failed', '\xe8\xb5\xb7\xe5')  # 起 <partial byte>
-        yield ('successful', '\xe8\xb5\xb7\xe5\x8b\x95')  # 起動
-    raw_output = raw_output()
-    stdout = StringIO.StringIO()
-    mgr = isolated_manager.IsolatedManager(['ls', '-la'], HERE, {}, stdout, '')
-    mgr.private_data_dir = private_data_dir
-    mgr.instance = mock.Mock(id=123, pk=123, verbosity=5, spec_set=['id', 'pk', 'verbosity'])
-    mgr.started_at = time.time()
-    mgr.host = 'isolated-host'
-
-    os.mkdir(os.path.join(private_data_dir, 'artifacts'))
-    with mock.patch('awx.main.expect.run.run_pexpect') as run_pexpect:
-
-        def _synchronize_job_artifacts(args, cwd, env, buff, **kw):
-            buff.write('checking job status...')
-            status, out = next(raw_output)
-            for filename, data in (
-                ['status', status],
-                ['rc', '0'],
-                ['stdout', out]
-            ):
-                with open(os.path.join(private_data_dir, 'artifacts', filename), 'w') as f:
-                    f.write(data)
-                    f.flush()
-            return (status, 0)
-
-        run_pexpect.side_effect = _synchronize_job_artifacts
-        with mock.patch.object(mgr, '_missing_artifacts') as missing_artifacts:
-            missing_artifacts.return_value = False
-            status, rc = mgr.check(interval=0)
-
-        assert stdout.getvalue() == '起動'
-
-
 def test_check_isolated_job_timeout(private_data_dir, rsa_key):
     pem, passphrase = rsa_key
-    stdout = StringIO.StringIO()
+    stdout = StringIO()
     extra_update_fields = {}
     mgr = isolated_manager.IsolatedManager(['ls', '-la'], HERE, {}, stdout, '',
                                            job_timeout=1,

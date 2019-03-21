@@ -129,7 +129,7 @@
 
 - name: Stage nginx.conf
   template:
-    src: nginx.conf
+    src: nginx.conf.j2
     dest: "{{ docker_base_path }}/nginx.conf"
   delegate_to: localhost
 
@@ -191,6 +191,7 @@
     dockerfile: Dockerfile
     name: "{{ web_image }}"
     tag: "{{ awx_version }}"
+    force: yes
   delegate_to: localhost
 
 - name: Build base task image
@@ -204,6 +205,7 @@
     name: "{{ task_image }}"
     tag: "{{ awx_version }}"
     pull: no
+    force: yes
   delegate_to: localhost
 
 - name: Tag task and web images as latest

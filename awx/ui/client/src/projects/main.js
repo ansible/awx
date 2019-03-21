@@ -90,6 +90,24 @@ angular.module('Projects', [])
                     breadcrumbs: { 
                         edit: '{{breadcrumb.project_name}}'
                     },
+                    resolve: {
+                        edit: {
+                            isNotificationAdmin: ['Rest', 'ProcessErrors', 'GetBasePath', 'i18n',
+                                function(Rest, ProcessErrors, GetBasePath, i18n) {
+                                    Rest.setUrl(`${GetBasePath('organizations')}?role_level=notification_admin_role&page_size=1`);
+                                    return Rest.get()
+                                        .then(({data}) => {
+                                            return data.count > 0;
+                                        })
+                                        .catch(({data, status}) => {
+                                            ProcessErrors(null, data, status, null, {
+                                                hdr: i18n._('Error!'),
+                                                msg: i18n._('Failed to get organizations for which this user is a notification administrator. GET returned ') + status
+                                            });
+                                    });
+                            }]
+                        }
+                    }
                 })
                 .then(res => {
                     const stateIndex = res.states.findIndex(s => s.name === projectsEditName);

@@ -43,3 +43,14 @@ npm --prefix awx/ui run e2e -- --filter="test-credentials*"
 **Note:**
 - Use `npm --prefix awx/ui run e2e -- --help` to see additional usage information for the test runner.
 - All example commands in this document assume that you are working from the root directory of the awx project.
+
+#### File Overview
+All nightwatch.js tests are present in the `tests` directory. When writing 
+these tests, you may import needed functions from [fixtures.js](fixtures.js), which provides a convenient way to create resources needed for tests 
+via API, which might include organizations, users, and job templates.
+
+The `commands` directory provides extra functions for the client object in 
+nightwatch.js tests. These functions are automatically made available for use by the
+client object. For more information on these functions and how to 
+create your own, refer to the [nightwatch.js documentation on custom commands]
+(http://nightwatchjs.org/guide/#writing-custom-commands).

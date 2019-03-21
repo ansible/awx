@@ -3,7 +3,7 @@
 
 # Python
 import logging
-from urlparse import urljoin
+from urllib.parse import urljoin
 
 # Django
 from django.conf import settings
@@ -14,9 +14,11 @@ from django.core.exceptions import ValidationError
 
 # AWX
 from awx.api.versioning import reverse
-from awx.main.models.base import * # noqa
+from awx.main.models.base import (
+    prevent_search, AD_HOC_JOB_TYPE_CHOICES, VERBOSITY_CHOICES, VarsDictProperty
+)
 from awx.main.models.events import AdHocCommandEvent
-from awx.main.models.unified_jobs import * # noqa
+from awx.main.models.unified_jobs import UnifiedJob
 from awx.main.models.notifications import JobNotificationMixin, NotificationTemplate
 
 logger = logging.getLogger('awx.main.models.ad_hoc_commands')
@@ -43,8 +45,7 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
         null=True,
         on_delete=models.SET_NULL,
     )
-    limit = models.CharField(
-        max_length=1024,
+    limit = models.TextField(
         blank=True,
         default='',
     )
@@ -109,7 +110,7 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
         return self.limit
 
     def clean_module_name(self):
-        if type(self.module_name) not in (str, unicode):
+        if type(self.module_name) is not str:
             raise ValidationError(_("Invalid type for ad hoc command"))
         module_name = self.module_name.strip() or 'command'
         if module_name not in settings.AD_HOC_COMMANDS:
@@ -117,7 +118,7 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
         return module_name
 
     def clean_module_args(self):
-        if type(self.module_args) not in (str, unicode):
+        if type(self.module_args) is not str:
             raise ValidationError(_("Invalid type for ad hoc command"))
         module_args = self.module_args
         if self.module_name in ('command', 'shell') and not module_args:

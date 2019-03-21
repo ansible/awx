@@ -2,7 +2,6 @@
 # All Rights Reserved.
 
 # Python
-#import urlparse
 import logging
 
 # Django
@@ -37,7 +36,7 @@ from awx.main.redact import REPLACE_STR
 from awx.main.fields import JSONField
 
 from copy import copy
-from urlparse import urljoin
+from urllib.parse import urljoin
 
 __all__ = ['WorkflowJobTemplate', 'WorkflowJob', 'WorkflowJobOptions', 'WorkflowJobNode', 'WorkflowJobTemplateNode',]
 
@@ -277,6 +276,8 @@ class WorkflowJobNode(WorkflowNodeBase):
             data['extra_vars'] = extra_vars
         # ensure that unified jobs created by WorkflowJobs are marked
         data['_eager_fields'] = {'launch_type': 'workflow'}
+        if self.workflow_job and self.workflow_job.created_by:
+            data['_eager_fields']['created_by'] = self.workflow_job.created_by
         # Extra processing in the case that this is a slice job
         if 'job_slice' in self.ancestor_artifacts and is_root_node:
             data['_eager_fields']['allow_simultaneous'] = True
@@ -406,7 +407,11 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
 
     @property
     def cache_timeout_blocked(self):
-        # TODO: don't allow running of job template if same workflow template running
+        if WorkflowJob.objects.filter(workflow_job_template=self,
+                                      status__in=['pending', 'waiting', 'running']).count() >= getattr(settings, 'SCHEDULE_MAX_JOBS', 10):
+            logger.error("Workflow Job template %s could not be started because there are more than %s other jobs from that template waiting to run" %
+                         (self.name, getattr(settings, 'SCHEDULE_MAX_JOBS', 10)))
+            return True
         return False
 
     @property

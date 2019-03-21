@@ -38,7 +38,8 @@ export default {
             delete list.fieldActions.delete;
             delete list.fieldActions.edit;
             delete list.fieldActions.view.ngShow;
-            list.fields.toggleHost.ngDisabled = true;
+            let toggleHost = list.staticColumns.find((el) => { return el.field === 'toggleHost'; });
+            toggleHost.content.ngDisabled = true;
             list.fields.name.columnClass = 'col-lg-8 col-md-11 col-sm-8 col-xs-7';
             return list;
         }],

@@ -8,9 +8,8 @@ import logging
 import os
 import time
 import json
-from urlparse import urljoin
+from urllib.parse import urljoin
 
-import six
 
 # Django
 from django.conf import settings
@@ -26,9 +25,16 @@ from rest_framework.exceptions import ParseError
 
 # AWX
 from awx.api.versioning import reverse
-from awx.main.models.base import * # noqa
+from awx.main.models.base import (
+    BaseModel, CreatedModifiedModel,
+    prevent_search,
+    JOB_TYPE_CHOICES, VERBOSITY_CHOICES,
+    VarsDictProperty
+)
 from awx.main.models.events import JobEvent, SystemJobEvent
-from awx.main.models.unified_jobs import * # noqa
+from awx.main.models.unified_jobs import (
+    UnifiedJobTemplate, UnifiedJob
+)
 from awx.main.models.notifications import (
     NotificationTemplate,
     JobNotificationMixin,
@@ -94,8 +100,7 @@ class JobOptions(BaseModel):
         blank=True,
         default=0,
     )
-    limit = models.CharField(
-        max_length=1024,
+    limit = models.TextField(
         blank=True,
         default='',
     )
@@ -347,8 +352,8 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
             except JobLaunchConfig.DoesNotExist:
                 wj_config = JobLaunchConfig()
             actual_inventory = wj_config.inventory if wj_config.inventory else self.inventory
-            for idx in xrange(min(self.job_slice_count,
-                                  actual_inventory.hosts.count())):
+            for idx in range(min(self.job_slice_count,
+                                 actual_inventory.hosts.count())):
                 create_kwargs = dict(workflow_job=job,
                                      unified_job_template=self,
                                      ancestor_artifacts=dict(job_slice=idx + 1))
@@ -452,7 +457,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
 
     @property
     def cache_timeout_blocked(self):
-        if Job.objects.filter(job_template=self, status__in=['pending', 'waiting', 'running']).count() > getattr(settings, 'SCHEDULE_MAX_JOBS', 10):
+        if Job.objects.filter(job_template=self, status__in=['pending', 'waiting', 'running']).count() >= getattr(settings, 'SCHEDULE_MAX_JOBS', 10):
             logger.error("Job template %s could not be started because there are more than %s other jobs from that template waiting to run" %
                          (self.name, getattr(settings, 'SCHEDULE_MAX_JOBS', 10)))
             return True
@@ -490,7 +495,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         return UnifiedJob.objects.filter(unified_job_template=self)
 
 
-class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskManagerJobMixin):
+class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskManagerJobMixin, CustomVirtualEnvMixin):
     '''
     A job applies a project (with playbook) to an inventory source with a given
     credential.  It represents a single invocation of ansible-playbook with the
@@ -695,7 +700,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
             count_hosts = Host.objects.filter(inventory__jobs__pk=self.pk).count()
             if self.job_slice_count > 1:
                 # Integer division intentional
-                count_hosts = (count_hosts + self.job_slice_count - self.job_slice_number) / self.job_slice_count
+                count_hosts = (count_hosts + self.job_slice_count - self.job_slice_number) // self.job_slice_count
         return min(count_hosts, 5 if self.forks == 0 else self.forks) + 1
 
     @property
@@ -807,7 +812,10 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
     def get_notification_friendly_name(self):
         return "Job"
 
-    def _get_inventory_hosts(self, only=['name', 'ansible_facts', 'ansible_facts_modified', 'modified',]):
+    def _get_inventory_hosts(
+        self,
+        only=['name', 'ansible_facts', 'ansible_facts_modified', 'modified', 'inventory_id']
+    ):
         if not self.inventory:
             return []
         return self.inventory.hosts.only(*only)
@@ -823,7 +831,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
             timeout = now() - datetime.timedelta(seconds=timeout)
             hosts = hosts.filter(ansible_facts_modified__gte=timeout)
         for host in hosts:
-            filepath = os.sep.join(map(six.text_type, [destination, host.name]))
+            filepath = os.sep.join(map(str, [destination, host.name]))
             if not os.path.realpath(filepath).startswith(destination):
                 system_tracking_logger.error('facts for host {} could not be cached'.format(smart_str(host.name)))
                 continue
@@ -840,7 +848,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
     def finish_job_fact_cache(self, destination, modification_times):
         destination = os.path.join(destination, 'facts')
         for host in self._get_inventory_hosts():
-            filepath = os.sep.join(map(six.text_type, [destination, host.name]))
+            filepath = os.sep.join(map(str, [destination, host.name]))
             if not os.path.realpath(filepath).startswith(destination):
                 system_tracking_logger.error('facts for host {} could not be cached'.format(smart_str(host.name)))
                 continue
@@ -1115,17 +1123,19 @@ class JobHostSummary(CreatedModifiedModel):
     changed = models.PositiveIntegerField(default=0, editable=False)
     dark = models.PositiveIntegerField(default=0, editable=False)
     failures = models.PositiveIntegerField(default=0, editable=False)
+    ignored = models.PositiveIntegerField(default=0, editable=False)
     ok = models.PositiveIntegerField(default=0, editable=False)
     processed = models.PositiveIntegerField(default=0, editable=False)
+    rescued = models.PositiveIntegerField(default=0, editable=False)
     skipped = models.PositiveIntegerField(default=0, editable=False)
     failed = models.BooleanField(default=False, editable=False)
 
-    def __unicode__(self):
+    def __str__(self):
         host = getattr_dne(self, 'host')
         hostname = host.name if host else 'N/A'
-        return '%s changed=%d dark=%d failures=%d ok=%d processed=%d skipped=%s' % \
-            (hostname, self.changed, self.dark, self.failures, self.ok,
-             self.processed, self.skipped)
+        return '%s changed=%d dark=%d failures=%d ignored=%d ok=%d processed=%d rescued=%d skipped=%s' % \
+            (hostname, self.changed, self.dark, self.failures, self.ignored, self.ok,
+             self.processed, self.rescued, self.skipped)
 
     def get_absolute_url(self, request=None):
         return reverse('api:job_host_summary_detail', kwargs={'pk': self.pk}, request=request)

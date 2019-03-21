@@ -37,6 +37,7 @@ function(i18n) {
                                " set by the inventory sync process.") +
                         "</p>",
                     dataTitle: i18n._('Host Enabled'),
+                    dataPlacement: "right",
                     ngDisabled: '!host.summary_fields.user_capabilities.edit || host.has_inventory_sources || isSmartInvHost'
                 }
             },

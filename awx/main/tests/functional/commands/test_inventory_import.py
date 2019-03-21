@@ -3,7 +3,8 @@
 
 # Python
 import pytest
-import mock
+from unittest import mock
+import os
 
 # Django
 from django.core.management.base import CommandError
@@ -11,7 +12,6 @@ from django.core.management.base import CommandError
 # AWX
 from awx.main.management.commands import inventory_import
 from awx.main.models import Inventory, Host, Group
-from awx.main.utils.mem_inventory import dict_to_mem_data
 
 
 TEST_INVENTORY_CONTENT = {
@@ -73,7 +73,13 @@ TEST_INVENTORY_CONTENT = {
 }
 
 
-TEST_MEM_OBJECTS = dict_to_mem_data(TEST_INVENTORY_CONTENT)
+class MockLoader:
+
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def load(self):
+        return self._data
 
 
 def mock_logging(self):
@@ -86,41 +92,40 @@ def mock_logging(self):
 @mock.patch.object(inventory_import.Command, 'set_logging_level', mock_logging)
 class TestInvalidOptionsFunctional:
 
-    @mock.patch.object(inventory_import.InstanceGroup.objects, 'get', new=mock.MagicMock(return_value=None))
     def test_invalid_options_invalid_source(self, inventory):
         # Give invalid file to the command
         cmd = inventory_import.Command()
         with mock.patch('django.db.transaction.rollback'):
-            with pytest.raises(IOError) as err:
+            with pytest.raises(OSError) as err:
                 cmd.handle(
                     inventory_id=inventory.id,
                     source='/tmp/pytest-of-root/pytest-7/inv_files0-invalid')
-        assert 'Source does not exist' in err.value.message
+        assert 'Source does not exist' in str(err.value)
 
     def test_invalid_inventory_id(self):
         cmd = inventory_import.Command()
         with pytest.raises(CommandError) as err:
             cmd.handle(inventory_id=42, source='/notapath/shouldnotmatter')
-        assert 'id = 42' in err.value.message
-        assert 'cannot be found' in err.value.message
+        assert 'id = 42' in str(err.value)
+        assert 'cannot be found' in str(err.value)
 
     def test_invalid_inventory_name(self):
         cmd = inventory_import.Command()
         with pytest.raises(CommandError) as err:
             cmd.handle(inventory_name='fooservers', source='/notapath/shouldnotmatter')
-        assert 'name = fooservers' in err.value.message
-        assert 'cannot be found' in err.value.message
+        assert 'name = fooservers' in str(err.value)
+        assert 'cannot be found' in str(err.value)
 
 
 @pytest.mark.django_db
 @pytest.mark.inventory_import
-@mock.patch.object(inventory_import.InstanceGroup.objects, 'get', new=mock.MagicMock(return_value=None))
 @mock.patch.object(inventory_import.Command, 'check_license', new=mock.MagicMock())
 @mock.patch.object(inventory_import.Command, 'set_logging_level', new=mock_logging)
 class TestINIImports:
 
-    @mock.patch.object(inventory_import.AnsibleInventoryLoader, 'load', mock.MagicMock(return_value=TEST_MEM_OBJECTS))
+    @mock.patch.object(inventory_import, 'AnsibleInventoryLoader', MockLoader)
     def test_inventory_single_ini_import(self, inventory, capsys):
+        inventory_import.AnsibleInventoryLoader._data = TEST_INVENTORY_CONTENT
         cmd = inventory_import.Command()
         r = cmd.handle(
             inventory_id=inventory.pk, source=__file__,
@@ -174,52 +179,103 @@ class TestINIImports:
         assert reloaded_inv.inventory_sources.count() == 1
         assert reloaded_inv.inventory_sources.all()[0].source == 'file'
 
-    @mock.patch.object(
-        inventory_import, 'load_inventory_source', mock.MagicMock(
-            return_value=dict_to_mem_data(
-                {
-                    "_meta": {
-                        "hostvars": {"foo": {"some_hostvar": "foobar"}}
-                    },
-                    "all": {
-                        "children": ["ungrouped"]
-                    },
-                    "ungrouped": {
-                        "hosts": ["foo"]
-                    }
-                }).all_group
-        )
-    )
+    @mock.patch.object(inventory_import, 'AnsibleInventoryLoader', MockLoader)
     def test_hostvars_are_saved(self, inventory):
+        inventory_import.AnsibleInventoryLoader._data = {
+            "_meta": {
+                "hostvars": {"foo": {"some_hostvar": "foobar"}}
+            },
+            "all": {
+                "children": ["ungrouped"]
+            },
+            "ungrouped": {
+                "hosts": ["foo"]
+            }
+        }
         cmd = inventory_import.Command()
-        cmd.handle(inventory_id=inventory.pk, source='doesnt matter')
+        cmd.handle(inventory_id=inventory.pk, source=__file__)
         assert inventory.hosts.count() == 1
         h = inventory.hosts.all()[0]
         assert h.name == 'foo'
         assert h.variables_dict == {"some_hostvar": "foobar"}
 
-    @mock.patch.object(
-        inventory_import, 'load_inventory_source', mock.MagicMock(
-            return_value=dict_to_mem_data(
-                {
-                    "_meta": {
-                        "hostvars": {}
-                    },
-                    "all": {
-                        "children": ["fooland", "barland"]
-                    },
-                    "fooland": {
-                        "children": ["barland"]
-                    },
-                    "barland": {
-                        "children": ["fooland"]
-                    }
-                }).all_group
-        )
-    )
-    def test_recursive_group_error(self, inventory):
+    @mock.patch.object(inventory_import, 'AnsibleInventoryLoader', MockLoader)
+    def test_memberships_are_respected(self, inventory):
+        """This tests that if import 1 added a group-group and group-host memberhip
+        that import 2 will not remove those memberships, even when adding
+        importing the same parent groups
+        """
+        inventory_import.AnsibleInventoryLoader._data = {
+            "_meta": {
+                "hostvars": {"foo": {}}
+            },
+            "all": {
+                "children": ["ungrouped", "is_a_parent", "has_a_host", "is_a_child"]
+            },
+            "is_a_parent": {
+                "children": ["is_a_child"]
+            },
+            "has_a_host": {
+                "hosts": ["foo"]
+            },
+            "ungrouped": {
+                "hosts": []
+            }
+        }
         cmd = inventory_import.Command()
-        cmd.handle(inventory_id=inventory.pk, source='doesnt matter')
+        cmd.handle(inventory_id=inventory.pk, source=__file__)
+        assert inventory.hosts.count() == 1  # baseline worked
+
+        inv_src2 = inventory.inventory_sources.create(
+            name='bar', overwrite=True
+        )
+        os.environ['INVENTORY_SOURCE_ID'] = str(inv_src2.pk)
+        os.environ['INVENTORY_UPDATE_ID'] = str(inv_src2.create_unified_job().pk)
+        # scenario where groups are already imported, and overwrite is true
+        inv_src2.groups.add(inventory.groups.get(name='is_a_parent'))
+        inv_src2.groups.add(inventory.groups.get(name='has_a_host'))
+
+        inventory_import.AnsibleInventoryLoader._data = {
+            "_meta": {
+                "hostvars": {"bar": {}}
+            },
+            "all": {
+                "children": ["ungrouped", "is_a_parent", "has_a_host"]
+            },
+            "ungrouped": {
+                "hosts": ["bar"]
+            }
+        }
+        cmd = inventory_import.Command()
+        cmd.handle(inventory_id=inventory.pk, source=__file__, overwrite=True)
+
+        del os.environ['INVENTORY_SOURCE_ID']
+        del os.environ['INVENTORY_UPDATE_ID']
+
+        # the overwriting import did not destroy relationships from first import
+        parent_group = inventory.groups.get(name='is_a_parent')
+        assert parent_group.children.count() == 1
+        has_host_group = inventory.groups.get(name='has_a_host')
+        assert has_host_group.hosts.count() == 1
+
+    @mock.patch.object(inventory_import, 'AnsibleInventoryLoader', MockLoader)
+    def test_recursive_group_error(self, inventory):
+        inventory_import.AnsibleInventoryLoader._data = {
+            "_meta": {
+                "hostvars": {}
+            },
+            "all": {
+                "children": ["fooland", "barland"]
+            },
+            "fooland": {
+                "children": ["barland"]
+            },
+            "barland": {
+                "children": ["fooland"]
+            }
+        }
+        cmd = inventory_import.Command()
+        cmd.handle(inventory_id=inventory.pk, source=__file__)
 
 
 @pytest.mark.django_db

@@ -4,7 +4,7 @@ import json
 
 # Django
 from django.conf import settings
-from django.utils import six
+from django.utils.encoding import smart_str
 from django.utils.translation import ugettext_lazy as _
 
 # Django REST Framework
@@ -25,7 +25,7 @@ class JSONParser(parsers.JSONParser):
         encoding = parser_context.get('encoding', settings.DEFAULT_CHARSET)
 
         try:
-            data = stream.read().decode(encoding)
+            data = smart_str(stream.read(), encoding=encoding)
             if not data:
                 return {}
             obj = json.loads(data, object_pairs_hook=OrderedDict)
@@ -33,4 +33,4 @@ class JSONParser(parsers.JSONParser):
                 raise ParseError(_('JSON parse error - not a JSON object'))
             return obj
         except ValueError as exc:
-            raise ParseError(_('JSON parse error - %s\nPossible cause: trailing comma.' % six.text_type(exc)))
+            raise ParseError(_('JSON parse error - %s\nPossible cause: trailing comma.' % str(exc)))

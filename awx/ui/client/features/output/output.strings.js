@@ -14,6 +14,7 @@ function OutputStrings (BaseString) {
     };
 
     ns.tooltips = {
+        ARTIFACTS: t.s('Read-only view of artifacts added to the job template'),
         CANCEL: t.s('Cancel'),
         COLLAPSE_OUTPUT: t.s('Collapse Output'),
         DELETE: t.s('Delete'),
@@ -21,7 +22,10 @@ function OutputStrings (BaseString) {
         CREDENTIAL: t.s('View the Credential'),
         EXPAND_OUTPUT: t.s('Expand Output'),
         EXTRA_VARS: t.s('Read-only view of extra variables added to the job template'),
+        HOST_LIMIT: t.s('When this field is true, the job\'s inventory belongs to an organization that has exceeded it\'s limit of hosts as defined by the system administrator.'),
         INVENTORY: t.s('View the Inventory'),
+        INVENTORY_SCM: t.s('View the Project'),
+        INVENTORY_SCM_JOB: t.s('View Project checkout results'),
         JOB_TEMPLATE: t.s('View the Job Template'),
         SLICE_JOB_DETAILS: t.s('Job is one of several from a JT that slices on inventory'),
         PROJECT: t.s('View the Project'),
@@ -47,12 +51,17 @@ function OutputStrings (BaseString) {
     };
 
     ns.labels = {
+        ARTIFACTS: t.s('Artifacts'),
         CREDENTIAL: t.s('Credential'),
+        ENVIRONMENT: t.s('Environment'),
+        EXECUTION_NODE: t.s('Execution Node'),
         EXTRA_VARS: t.s('Extra Variables'),
         FINISHED: t.s('Finished'),
         FORKS: t.s('Forks'),
+        HOST_LIMIT_ERROR: t.s('Host Limit Error'),
         INSTANCE_GROUP: t.s('Instance Group'),
         INVENTORY: t.s('Inventory'),
+        INVENTORY_SCM: t.s('Source Project'),
         JOB_EXPLANATION: t.s('Explanation'),
         JOB_TAGS: t.s('Job Tags'),
         JOB_TEMPLATE: t.s('Job Template'),
@@ -114,6 +123,12 @@ function OutputStrings (BaseString) {
         NO_RESULT_FOUND: t.s('No result found'),
         STANDARD_OUT: t.s('Standard Out'),
         STANDARD_ERROR: t.s('Standard Error')
+    };
+
+    ns.workflow_status = {
+        SUCCESSFUL: t.s('SUCCESSFUL'),
+        FAILED: t.s('FAILED'),
+        NO_JOBS_FINISHED: t.s('NO JOBS FINISHED')
     };
 }
 

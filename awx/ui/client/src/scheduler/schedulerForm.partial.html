@@ -1,4 +1,4 @@
-<div id="htmlTemplate" class=" SchedulerFormPanel Panel" ng-hide="hideForm">
+<div id="htmlTemplate" class="card at-Panel" ng-hide="hideForm">
     <div class="Form-header">
         <div class="Form-title" ng-show="!isEdit">{{ schedulerName || strings.get('state.CREATE_SCHEDULE') }}</div>
         <div class="Form-title" ng-show="isEdit">{{ schedulerName || strings.get('state.EDIT_SCHEDULE') }}</div>
@@ -29,7 +29,7 @@
                     id="schedulerName"
                     ng-model="schedulerName" required
                     ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd) || credentialRequiresPassword"
-                    placeholder="Schedule name">
+                    placeholder="{{strings.get('form.SCHEDULE_NAME')}}">
                 <div class="error"
                     ng-show="scheduler_form.$dirty && scheduler_form.schedulerName.$error.required">
                     {{ strings.get('form.NAME_REQUIRED_MESSAGE') }}
@@ -40,11 +40,10 @@
                     <span class="red-text">*</span>
                     {{ strings.get('form.START_DATE') }}
                 </label>
-                <div class="input-group Form-inputGroup SchedulerForm-inputGroup--date">
-                    <scheduler-date-picker date="schedulerStartDt"
-                        disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd) || credentialRequiresPassword">
-                    </scheduler-date-picker>
-                </div>
+                <scheduler-date-picker date="schedulerStartDt"
+                    class="input-group Form-inputGroup SchedulerForm-inputGroup--date"
+                    disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd) || credentialRequiresPassword">
+                </scheduler-date-picker>
                 <div class="error"
                     ng-show="scheduler_form_schedulerStartDt_error"
                     ng-bind="scheduler_form_schedulerStartDt_error">
@@ -72,7 +71,7 @@
                             ScheduleTime-input SpinnerInput"
                         aw-spinner="schedulerStartHour"
                         ng-model="schedulerStartHour"
-                        placeholder="HH24"
+                        placeholder="{{strings.get('form.HH24')}}"
                         aw-min="0" min="0" aw-max="23"
                         max="23" data-zero-pad="2" required
                         ng-change="timeChange()" >
@@ -88,7 +87,7 @@
                             SchedulerTime-input SpinnerInput"
                         aw-spinner="schedulerStartMinute"
                         ng-model="schedulerStartMinute"
-                        placeholder="MM"
+                        placeholder="{{strings.get('form.MM')}}"
                         min="0" max="59" data-zero-pad="2"
                         required
                         ng-change="timeChange()" >
@@ -104,7 +103,7 @@
                             SchedulerTime-input SpinnerInput"
                         aw-spinner="schedulerStartSecond"
                         ng-model="schedulerStartSecond"
-                        placeholder="SS"
+                        placeholder="{{strings.get('form.SS')}}"
                         min="0" max="59" data-zero-pad="2"
                         required
                         ng-change="timeChange()" >
@@ -490,11 +489,10 @@
                         <span class="red-text">*</span>
                         {{ strings.get('form.END_DATE') }}
                     </label>
-                    <div class="input-group Form-inputGroup SchedulerForm-inputGroup--date">
-                        <scheduler-date-picker date="$parent.schedulerEndDt"
-                          disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd) || credentialRequiresPassword">
-                        </scheduler-date-picker>
-                    </div>
+                    <scheduler-date-picker date="$parent.schedulerEndDt"
+                        class="input-group Form-inputGroup SchedulerForm-inputGroup--date"
+                        disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd) || credentialRequiresPassword">
+                    </scheduler-date-picker>
                     <div class="error"
                         ng-show="$parent.scheduler_endDt_error">
                         {{ strings.get('form.PROVIDE_VALID_DATE') }}
@@ -523,7 +521,7 @@
                                 ScheduleTime-input SpinnerInput"
                             aw-spinner="$parent.schedulerEndHour"
                             ng-model="$parent.schedulerEndHour"
-                            placeholder="HH24"
+                            placeholder="{{strings.get('form.HH24')}}"
                             aw-min="0" min="0" aw-max="23"
                             max="23" data-zero-pad="2" required
                             ng-change="schedulerEndChange('schedulerEndHour', $parent.schedulerEndHour)" >
@@ -539,7 +537,7 @@
                                 SchedulerTime-input SpinnerInput"
                             aw-spinner="$parent.schedulerEndMinute"
                             ng-model="$parent.schedulerEndMinute"
-                            placeholder="MM"
+                            placeholder="{{strings.get('form.MM')}}"
                             min="0" max="59" data-zero-pad="2"
                             required
                             ng-change="schedulerEndChange('schedulerEndMinute', $parent.schedulerEndMinute)" >
@@ -555,7 +553,7 @@
                                 SchedulerTime-input SpinnerInput"
                             aw-spinner="$parent.schedulerEndSecond"
                             ng-model="$parent.schedulerEndSecond"
-                            placeholder="SS"
+                            placeholder="{{strings.get('form.SS')}}"
                             min="0" max="59" data-zero-pad="2"
                             required
                             ng-change="schedulerEndChange('schedulerEndSecond', $parent.schedulerEndSecond)" >

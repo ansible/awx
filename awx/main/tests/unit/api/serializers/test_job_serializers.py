@@ -1,10 +1,8 @@
 # Python
 from collections import namedtuple
 import pytest
-import mock
+from unittest import mock
 import json
-
-from six.moves import xrange
 
 # AWX
 from awx.api.serializers import (
@@ -47,12 +45,12 @@ def job(mocker, job_template, project_update):
 
 @pytest.fixture
 def labels(mocker):
-    return [Label(id=x, name='label-%d' % x) for x in xrange(0, 25)]
+    return [Label(id=x, name='label-%d' % x) for x in range(0, 25)]
 
 
 @pytest.fixture
 def jobs(mocker):
-    return [Job(id=x, name='job-%d' % x) for x in xrange(0, 25)]
+    return [Job(id=x, name='job-%d' % x) for x in range(0, 25)]
 
 
 @mock.patch('awx.api.serializers.UnifiedJobTemplateSerializer.get_related', lambda x,y: {})

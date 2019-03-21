@@ -4,23 +4,22 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
-    'rbacUiControlService', 'ToJSON', 'ParseTypeChange', 'GroupsService',
+export default ['$state', '$scope', 'ParseVariableString', 'ParseTypeChange',
     'GetChoices', 'GetBasePath', 'CreateSelect2', 'GetSourceTypeOptions',
     'SourcesService', 'inventoryData', 'inventorySourcesOptions', 'Empty',
     'Wait', 'Rest', 'Alert', '$rootScope', 'i18n', 'InventoryHostsStrings',
-    'ProcessErrors', 'inventorySource',
-    function($state, $stateParams, $scope, ParseVariableString,
-        rbacUiControlService, ToJSON,ParseTypeChange, GroupsService,
+    'ProcessErrors', 'inventorySource', 'isNotificationAdmin',
+    function($state, $scope, ParseVariableString, ParseTypeChange,
         GetChoices, GetBasePath, CreateSelect2, GetSourceTypeOptions,
         SourcesService, inventoryData, inventorySourcesOptions, Empty,
         Wait, Rest, Alert, $rootScope, i18n, InventoryHostsStrings,
-        ProcessErrors, inventorySource) {
+        ProcessErrors, inventorySource, isNotificationAdmin) {
 
         const inventorySourceData = inventorySource.get();
 
         $scope.projectBasePath = GetBasePath('projects') + '?not__status=never updated';
         $scope.canAdd = inventorySourcesOptions.actions.POST;
+        $scope.isNotificationAdmin = isNotificationAdmin || false;
         // instantiate expected $scope values from inventorySourceData
         _.assign($scope,
             {credential: inventorySourceData.credential},
@@ -392,13 +391,6 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
                 });
             }
 
-            if (source === 'scm') {
-              $scope.overwrite_vars = true;
-              $scope.inventory_source_form.inventory_file.$setPristine();
-            } else {
-              $scope.overwrite_vars = false;
-            }
-
             // reset fields
             $scope.group_by_choices = source === 'ec2' ? $scope.ec2_group_by : null;
             // azure_rm regions choices are keyed as "azure" in an OPTIONS request to the inventory_sources endpoint
@@ -409,6 +401,7 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
             $scope.credential_name = null;
             $scope.group_by = null;
             $scope.group_by_choices = [];
+            $scope.overwrite_vars = false;
 
             initRegionSelect();
 

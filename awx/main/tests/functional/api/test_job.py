@@ -1,6 +1,6 @@
 # Python
 import pytest
-import mock
+from unittest import mock
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from crum import impersonate

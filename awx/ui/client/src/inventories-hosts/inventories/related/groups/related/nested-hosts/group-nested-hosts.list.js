@@ -18,40 +18,49 @@ export default ['i18n', function(i18n) {
         multiSelect: true,
         trackBy: 'nested_host.id',
         basePath:  'api/v2/groups/{{$stateParams.group_id}}/all_hosts/',
+        layoutClass: 'List-staticColumnLayout--hostsWithCheckbox',
+        staticColumns: [
+            {
+                field: 'toggleHost',
+                content: {
+                    ngDisabled: '!nested_host.summary_fields.user_capabilities.edit || nested_host.has_inventory_sources',
+                    label: '',
+                    columnClass: 'List-staticColumn--toggle',
+                    type: "toggle",
+                    ngClick: "toggleHost($event, nested_host)",
+                    awToolTip: "<p>" +
+                        i18n._("Indicates if a host is available and should be included in running jobs.") +
+                        "</p><p>" +
+                        i18n._("For hosts that are part of an external" +
+                               " inventory, this flag cannot be changed. It will be" +
+                               " set by the inventory sync process.") +
+                        "</p>",
+                    dataPlacement: "right",
+                    nosort: true,
+                }
+            },
+            {
+                field: 'active_failures',
+                content: {
+                    label: '',
+                    iconOnly: true,
+                    nosort: true,
+                    // do not remove this ng-click directive
+                    // the list generator case to handle fields without ng-click
+                    // cannot handle the aw-* directives
+                    ngClick: 'noop()',
+                    awPopOver: "{{ nested_host.job_status_html }}",
+                    dataTitle: "{{ nested_host.job_status_title }}",
+                    awToolTip: "{{ nested_host.badgeToolTip }}",
+                    dataPlacement: 'top',
+                    icon: "{{ 'fa icon-job-' + nested_host.active_failures }}",
+                    id: 'active-failures-action',
+                    columnClass: 'status-column List-staticColumn--smallStatus'
+                }
+            }
+        ],
 
         fields: {
-            toggleHost: {
-                ngDisabled: '!nested_host.summary_fields.user_capabilities.edit || nested_host.has_inventory_sources',
-                label: '',
-                columnClass: 'List-staticColumn--toggle',
-                type: "toggle",
-                ngClick: "toggleHost($event, nested_host)",
-                awToolTip: "<p>" +
-                    i18n._("Indicates if a host is available and should be included in running jobs.") +
-                    "</p><p>" +
-                    i18n._("For hosts that are part of an external" +
-                           " inventory, this flag cannot be changed. It will be" +
-                           " set by the inventory sync process.") +
-                    "</p>",
-                dataPlacement: "right",
-                nosort: true,
-            },
-            active_failures: {
-                label: '',
-                iconOnly: true,
-                nosort: true,
-                // do not remove this ng-click directive
-                // the list generator case to handle fields without ng-click
-                // cannot handle the aw-* directives
-                ngClick: 'noop()',
-                awPopOver: "{{ nested_host.job_status_html }}",
-                dataTitle: "{{ nested_host.job_status_title }}",
-                awToolTip: "{{ nested_host.badgeToolTip }}",
-                dataPlacement: 'top',
-                icon: "{{ 'fa icon-job-' + nested_host.active_failures }}",
-                id: 'active-failures-action',
-                columnClass: 'status-column List-staticColumn--smallStatus'
-            },
             name: {
                 key: true,
                 label: i18n._('Hosts'),

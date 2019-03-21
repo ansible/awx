@@ -1,8 +1,7 @@
-import mock
+from unittest import mock
 import pytest
 import json
 
-import six
 
 from awx.api.versioning import reverse
 from awx.main.utils import timestamp_apiformat
@@ -107,7 +106,7 @@ def test_content(hosts, fact_scans, get, user, fact_ansible_json, monkeypatch_js
 
     assert fact_known.host_id == response.data['host']
     # TODO: Just make response.data['facts'] when we're only dealing with postgres, or if jsonfields ever fixes this bug
-    assert fact_ansible_json == (json.loads(response.data['facts']) if isinstance(response.data['facts'], six.text_type) else response.data['facts'])
+    assert fact_ansible_json == (json.loads(response.data['facts']) if isinstance(response.data['facts'], str) else response.data['facts'])
     assert timestamp_apiformat(fact_known.timestamp) == response.data['timestamp']
     assert fact_known.module == response.data['module']
 
@@ -119,7 +118,7 @@ def _test_search_by_module(hosts, fact_scans, get, user, fact_json, module_name)
     (fact_known, response) = setup_common(hosts, fact_scans, get, user, module_name=module_name, get_params=params)
 
     # TODO: Just make response.data['facts'] when we're only dealing with postgres, or if jsonfields ever fixes this bug
-    assert fact_json == (json.loads(response.data['facts']) if isinstance(response.data['facts'], six.text_type) else response.data['facts'])
+    assert fact_json == (json.loads(response.data['facts']) if isinstance(response.data['facts'], str) else response.data['facts'])
     assert timestamp_apiformat(fact_known.timestamp) == response.data['timestamp']
     assert module_name == response.data['module']
 

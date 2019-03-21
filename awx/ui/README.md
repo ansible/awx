@@ -54,25 +54,17 @@ make ui-test-ci
 # run e2e tests - see awx/ui/test/e2e for more information
 npm --prefix awx/ui run e2e
 ```
+**Note**: Unit tests are run on your host machine and not in the development containers.
 
 ## Adding dependencies
-```shell
-# add a development or build dependency
-npm install --prefix awx/ui --save-dev dev-package@1.2.3
-
-# add a production dependency
-npm install --prefix awx/ui --save prod-package@1.23
-
-# add the updated package.json and lock files to scm
-git add awx/ui/package.json awx/ui/package-lock.json
-```
-
-## Adding exact dependencies
 ```shell
 # add an exact development or build dependency
 npm install --prefix awx/ui --save-dev --save-exact dev-package@1.2.3
 # add an exact production dependency
 npm install --prefix awx/ui --save --save-exact prod-package@1.23
+
+# add the updated package.json and package-lock.json files to scm
+git add awx/ui/package.json awx/ui/package-lock.json
 ```
 
 ## Removing dependencies

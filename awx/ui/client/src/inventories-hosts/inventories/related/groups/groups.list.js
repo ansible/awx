@@ -16,23 +16,29 @@
         multiSelect: true,
         trackBy: 'group.id',
         basePath:  'api/v2/inventories/{{$stateParams.inventory_id}}/groups/',
+        layoutClass: 'List-staticColumnLayout--inventoryGroups',
+        staticColumns: [
+            {
+                field: 'failed_hosts',
+                content: {
+                    label: '',
+                    nosort: true,
+                    mode: 'all',
+                    iconOnly: true,
+                    awToolTip: "{{ group.hosts_status_tip }}",
+                    dataPlacement: "top",
+                    icon: "{{ 'fa icon-job-' + group.hosts_status_class }}",
+                    columnClass: 'status-column'
+                }
+            }
+        ],
 
         fields: {
-            failed_hosts: {
-                label: '',
-                nosort: true,
-                mode: 'all',
-                iconOnly: true,
-                awToolTip: "{{ group.hosts_status_tip }}",
-                dataPlacement: "top",
-                icon: "{{ 'fa icon-job-' + group.hosts_status_class }}",
-                columnClass: 'status-column List-staticColumn--smallStatus'
-            },
             name: {
                 label: i18n._('Groups'),
                 key: true,
                 uiSref: "inventories.edit.groups.edit({group_id:group.id})",
-                columnClass: 'col-lg-6 col-md-6 col-sm-6 col-xs-6',
+                columnClass: 'col-lg-10 col-md-10 col-sm-10 col-xs-10',
                 class: 'InventoryManage-breakWord',
             }
         },
@@ -45,6 +51,22 @@
                 ngShow: "socketStatus == 'error'",
                 actionClass: 'btn List-buttonDefault',
                 buttonContent: i18n._('REFRESH')
+            },
+            groupsToggle: {
+                mode: 'all',
+                type: 'toggle',
+                buttons: [
+                    {
+                        text: i18n._('ALL GROUPS'),
+                        ngClick: "$state.go('inventories.edit.groups')",
+                        ngClass: "{'btn-primary': $state.includes('inventories.edit.groups'), 'Button-primary--hollow': $state.includes('inventories.edit.rootGroups')}"
+                    },
+                    {
+                        text: i18n._('ROOT GROUPS'),
+                        ngClick: "$state.go('inventories.edit.rootGroups')",
+                        ngClass: "{'btn-primary': $state.includes('inventories.edit.rootGroups'), 'Button-primary--hollow': $state.includes('inventories.edit.groups')}"
+                    }
+                ]
             },
             launch: {
                 mode: 'all',
@@ -76,7 +98,7 @@
 
         fieldActions: {
 
-            columnClass: 'col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right',
+            columnClass: 'col-lg-2 col-md-2 col-sm-2 col-xs-2 text-right',
 
             edit: {
                 //label: 'Edit',

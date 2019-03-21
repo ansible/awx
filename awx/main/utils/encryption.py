@@ -3,10 +3,9 @@ import hashlib
 import logging
 from collections import namedtuple
 
-import six
 from cryptography.fernet import Fernet, InvalidToken
 from cryptography.hazmat.backends import default_backend
-from django.utils.encoding import smart_str
+from django.utils.encoding import smart_str, smart_bytes
 
 
 __all__ = ['get_encryption_key',
@@ -47,10 +46,10 @@ def get_encryption_key(field_name, pk=None):
     '''
     from django.conf import settings
     h = hashlib.sha512()
-    h.update(settings.SECRET_KEY)
+    h.update(smart_bytes(settings.SECRET_KEY))
     if pk is not None:
-        h.update(str(pk))
-    h.update(field_name)
+        h.update(smart_bytes(str(pk)))
+    h.update(smart_bytes(field_name))
     return base64.urlsafe_b64encode(h.digest())
 
 
@@ -59,29 +58,29 @@ def encrypt_value(value, pk=None):
     return encrypt_field(TransientField(pk=pk, value=value), 'value')
 
 
-def encrypt_field(instance, field_name, ask=False, subfield=None, skip_utf8=False):
+def encrypt_field(instance, field_name, ask=False, subfield=None):
     '''
     Return content of the given instance and field name encrypted.
     '''
-    value = getattr(instance, field_name)
+    try:
+        value = instance.inputs[field_name]
+    except (TypeError, AttributeError):
+        value = getattr(instance, field_name)
+    except KeyError:
+        raise AttributeError(field_name)
+
     if isinstance(value, dict) and subfield is not None:
         value = value[subfield]
+    if value is None:
+        return None
+    value = smart_str(value)
     if not value or value.startswith('$encrypted$') or (ask and value == 'ASK'):
         return value
-    if skip_utf8:
-        utf8 = False
-    else:
-        utf8 = type(value) == six.text_type
-    value = smart_str(value)
     key = get_encryption_key(field_name, getattr(instance, 'pk', None))
     f = Fernet256(key)
-    encrypted = f.encrypt(value)
-    b64data = base64.b64encode(encrypted)
-    tokens = ['$encrypted', 'AESCBC', b64data]
-    if utf8:
-        # If the value to encrypt is utf-8, we need to add a marker so we
-        # know to decode the data when it's decrypted later
-        tokens.insert(1, 'UTF8')
+    encrypted = f.encrypt(smart_bytes(value))
+    b64data = smart_str(base64.b64encode(encrypted))
+    tokens = ['$encrypted', 'UTF8', 'AESCBC', b64data]
     return '$'.join(tokens)
 
 
@@ -97,25 +96,29 @@ def decrypt_value(encryption_key, value):
     encrypted = base64.b64decode(b64data)
     f = Fernet256(encryption_key)
     value = f.decrypt(encrypted)
-    # If the encrypted string contained a UTF8 marker, decode the data
-    if utf8:
-        value = value.decode('utf-8')
-    return value
+    return smart_str(value)
 
 
 def decrypt_field(instance, field_name, subfield=None):
     '''
     Return content of the given instance and field name decrypted.
     '''
-    value = getattr(instance, field_name)
+    try:
+        value = instance.inputs[field_name]
+    except (TypeError, AttributeError):
+        value = getattr(instance, field_name)
+    except KeyError:
+        raise AttributeError(field_name)
+
     if isinstance(value, dict) and subfield is not None:
         value = value[subfield]
+    value = smart_str(value)
     if not value or not value.startswith('$encrypted$'):
         return value
     key = get_encryption_key(field_name, getattr(instance, 'pk', None))
 
     try:
-        return decrypt_value(key, value)
+        return smart_str(decrypt_value(key, value))
     except InvalidToken:
         logger.exception(
             "Failed to decrypt `%s(pk=%s).%s`; if you've recently restored from "
@@ -140,6 +143,6 @@ def encrypt_dict(data, fields):
 
 
 def is_encrypted(value):
-    if not isinstance(value, six.string_types):
+    if not isinstance(value, str):
         return False
     return value.startswith('$encrypted$') and len(value) > len('$encrypted$')

@@ -5,7 +5,8 @@ export default {
     name: "inventories.edit.groups",
     url: "/groups?{group_search:queryset}",
     resolve: {
-        Dataset: ['GroupList', 'QuerySet', '$stateParams', 'GetBasePath', '$interpolate', '$rootScope',
+        listDefinition: ['GroupList', (list) => list],
+        Dataset: ['listDefinition', 'QuerySet', '$stateParams', 'GetBasePath', '$interpolate', '$rootScope',
             (list, qs, $stateParams, GetBasePath, $interpolate, $rootScope) => {
                 // allow related list definitions to use interpolated $rootScope / $stateParams in basePath field
                 let path, interpolator;
@@ -43,12 +44,12 @@ export default {
     },
     ncyBreadcrumb: {
         parent: "inventories.edit",
-        label: N_("GROUPS")
+        label: N_("ALL GROUPS")
     },
     views: {
         'related': {
-            templateProvider: function(GroupList, generateList, $templateRequest, $stateParams, GetBasePath) {
-                let list = _.cloneDeep(GroupList);
+            templateProvider: function(listDefinition, generateList, $templateRequest, $stateParams, GetBasePath) {
+                let list = _.cloneDeep(listDefinition);
                 if($stateParams && $stateParams.group) {
                     list.basePath = GetBasePath('groups') + _.last($stateParams.group) + '/children';
                 }

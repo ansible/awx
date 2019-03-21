@@ -17,7 +17,8 @@ function ListJobsController (
     ProcessErrors,
     Wait,
     Rest,
-    SearchBasePath
+    SearchBasePath,
+    $timeout
 ) {
     const vm = this || {};
     const [unifiedJob] = resolvedModels;
@@ -27,16 +28,71 @@ function ListJobsController (
     // smart-search
     const name = 'jobs';
     const iterator = 'job';
+    let paginateQuerySet = {};
 
     let launchModalOpen = false;
     let refreshAfterLaunchClose = false;
+    let pendingRefresh = false;
+    let refreshTimerRunning = false;
 
     vm.searchBasePath = SearchBasePath;
 
     vm.list = { iterator, name };
     vm.job_dataset = Dataset.data;
     vm.jobs = Dataset.data.results;
-    vm.querySet = $state.params.job_search;
+
+    $scope.$watch('$state.params', () => {
+        setToolbarSort();
+    }, true);
+
+    const toolbarSortDefault = {
+        label: `${strings.get('sort.FINISH_TIME')}`,
+        value: '-finished'
+    };
+
+    function setToolbarSort () {
+        const orderByValue = _.get($state.params, 'job_search.order_by');
+        const sortValue = _.find(vm.toolbarSortOptions, (option) => option.value === orderByValue);
+        if (sortValue) {
+            vm.toolbarSortValue = sortValue;
+        } else {
+            vm.toolbarSortValue = toolbarSortDefault;
+        }
+    }
+
+    vm.toolbarSortOptions = [
+        { label: `${strings.get('sort.NAME_ASCENDING')}`, value: 'name' },
+        { label: `${strings.get('sort.NAME_DESCENDING')}`, value: '-name' },
+        { label: `${strings.get('sort.START_TIME')}`, value: 'finished' },
+        toolbarSortDefault
+    ];
+
+    vm.toolbarSortValue = toolbarSortDefault;
+
+    // Temporary hack to retrieve $scope.querySet from the paginate directive.
+    // Remove this event listener once the page and page_size params
+    // are represented in the url.
+    $scope.$on('updateDataset', (event, dataset, queryset) => {
+        paginateQuerySet = queryset;
+        vm.jobs = dataset.results;
+        vm.job_dataset = dataset;
+    });
+
+    vm.onToolbarSort = (sort) => {
+        vm.toolbarSortValue = sort;
+
+        const queryParams = Object.assign(
+            {},
+            $state.params.job_search,
+            paginateQuerySet,
+            { order_by: sort.value }
+        );
+
+        // Update URL with params
+        $state.go('.', {
+            job_search: queryParams
+        }, { notify: false, location: 'replace' });
+    };
 
     $scope.$watch('vm.job_dataset.count', () => {
         $scope.$emit('updateCount', vm.job_dataset.count, 'jobs');
@@ -44,7 +100,11 @@ function ListJobsController (
 
     $scope.$on('ws-jobs', () => {
         if (!launchModalOpen) {
-            refreshJobs();
+            if (!refreshTimerRunning) {
+                refreshJobs();
+            } else {
+                pendingRefresh = true;
+            }
         } else {
             refreshAfterLaunchClose = true;
         }
@@ -86,10 +146,33 @@ function ListJobsController (
         }
 
         if (job.job_slice_number && job.job_slice_count) {
-            return `Slice Job ${job.job_slice_number}/${job.job_slice_count}`;
+            return `${strings.get('list.SLICE_JOB')} ${job.job_slice_number}/${job.job_slice_count}`;
         }
 
         return null;
+    };
+
+    vm.getTranslatedStatusString = (status) => {
+        switch (status) {
+            case 'new':
+                return strings.get('list.NEW');
+            case 'pending':
+                return strings.get('list.PENDING');
+            case 'waiting':
+                return strings.get('list.WAITING');
+            case 'running':
+                return strings.get('list.RUNNING');
+            case 'successful':
+                return strings.get('list.SUCCESSFUL');
+            case 'failed':
+                return strings.get('list.FAILED');
+            case 'error':
+                return strings.get('list.ERROR');
+            case 'canceled':
+                return strings.get('list.CANCELED');
+            default:
+                return status;
+        }
     };
 
     vm.getSref = ({ type, id }) => {
@@ -132,11 +215,11 @@ function ListJobsController (
                     let reloadListStateParams = null;
 
                     if (vm.jobs.length === 1 && $state.params.job_search &&
-                    _.has($state, 'params.job_search.page') &&
-                    $state.params.job_search.page !== '1') {
+                        _.has($state, 'params.job_search.page') &&
+                        $state.params.job_search.page !== '1') {
                         reloadListStateParams = _.cloneDeep($state.params);
                         reloadListStateParams.job_search.page =
-                        (parseInt(reloadListStateParams.job_search.page, 10) - 1).toString();
+                            (parseInt(reloadListStateParams.job_search.page, 10) - 1).toString();
                     }
 
                     $state.go('.', reloadListStateParams, { reload: true });
@@ -173,8 +256,8 @@ function ListJobsController (
                     let reloadListStateParams = null;
 
                     if (vm.jobs.length === 1 && $state.params.job_search &&
-                    !_.isEmpty($state.params.job_search.page) &&
-                    $state.params.job_search.page !== '1') {
+                        !_.isEmpty($state.params.job_search.page) &&
+                        $state.params.job_search.page !== '1') {
                         const page = `${(parseInt(reloadListStateParams
                             .job_search.page, 10) - 1)}`;
                         reloadListStateParams = _.cloneDeep($state.params);
@@ -212,7 +295,26 @@ function ListJobsController (
                 vm.jobs = data.results;
                 vm.job_dataset = data;
             });
+        pendingRefresh = false;
+        refreshTimerRunning = true;
+        $timeout(() => {
+            if (pendingRefresh) {
+                refreshJobs();
+            } else {
+                refreshTimerRunning = false;
+            }
+        }, 5000);
     }
+
+    vm.isCollapsed = true;
+
+    vm.onCollapse = () => {
+        vm.isCollapsed = true;
+    };
+
+    vm.onExpand = () => {
+        vm.isCollapsed = false;
+    };
 }
 
 ListJobsController.$inject = [
@@ -227,7 +329,8 @@ ListJobsController.$inject = [
     'ProcessErrors',
     'Wait',
     'Rest',
-    'SearchBasePath'
+    'SearchBasePath',
+    '$timeout'
 ];
 
 export default ListJobsController;

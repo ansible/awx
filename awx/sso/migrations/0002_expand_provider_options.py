@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='userenterpriseauth',
             name='provider',
-            field=models.CharField(max_length=32, choices=[(b'radius', 'RADIUS'), (b'tacacs+', 'TACACS+'), (b'saml', 'SAML')]),
+            field=models.CharField(max_length=32, choices=[('radius', 'RADIUS'), ('tacacs+', 'TACACS+'), ('saml', 'SAML')]),
         ),
     ]

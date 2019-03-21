@@ -278,10 +278,9 @@ export default ['i18n', function(i18n) {
                 "become_method": {
                     label: i18n._("Privilege Escalation"),
                     // hintText: "If your playbooks use privilege escalation (\"sudo: true\", \"su: true\", etc), you can specify the username to become, and the password to use here.",
-                    type: 'select',
+                    type: 'text',
                     ngShow: "kind.value == 'ssh'",
                     dataTitle: i18n._('Privilege Escalation'),
-                    ngOptions: 'become.label for become in become_options track by become.value',
                     awPopOver: "<p>" + i18n.sprintf(i18n._("Specify a method for %s operations. " +
                     "This is equivalent to specifying the %s parameter, where %s could be "+
                     "%s"), "'become'", "<code>--become-method=BECOME_METHOD</code>", "<code>BECOME_METHOD</code>", "<code>sudo | su | pbrun | pfexec | runas</code>") + " <br>" + i18n.sprintf(i18n._("(defaults to %s)"), "<code>sudo</code>") + "</p>",
@@ -414,7 +413,7 @@ export default ['i18n', function(i18n) {
                     ngShow: '!(credential_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 save: {
-                    label: 'Save',
+                    label: i18n._('Save'),
                     ngClick: 'formSave()', //$scope.function to call on click, optional
                     ngDisabled: true,
                     ngShow: '(credential_obj.summary_fields.user_capabilities.edit || canAdd)' //Disable when $pristine or $invalid, optional
@@ -444,7 +443,7 @@ export default ['i18n', function(i18n) {
                         add: {
                             mode: 'all',
                             ngClick: "$state.go('.add')",
-                            label: 'Add',
+                            label: i18n._('Add'),
                             awToolTip: i18n._('Add a permission'),
                             actionClass: 'at-Button--add',
                             actionId: 'button-add',
@@ -456,19 +455,19 @@ export default ['i18n', function(i18n) {
                             key: true,
                             label: i18n._('User'),
                             linkBase: 'users',
-                            class: 'col-lg-3 col-md-3 col-sm-3 col-xs-4'
+                            columnClass: 'col-sm-3 col-xs-4'
                         },
                         role: {
                             label: i18n._('Role'),
                             type: 'role',
                             nosort: true,
-                            class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4'
+                            columnClass: 'col-sm-4 col-xs-4'
                         },
                         team_roles: {
                             label: i18n._('Team Roles'),
                             type: 'team_roles',
                             nosort: true,
-                            class: 'col-lg-5 col-md-5 col-sm-5 col-xs-4'
+                            columnClass: 'col-sm-5 col-xs-4'
                         }
                     }
                 }

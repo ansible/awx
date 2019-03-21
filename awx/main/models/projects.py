@@ -4,7 +4,7 @@
 # Python
 import datetime
 import os
-import urlparse
+import urllib.parse as urlparse
 
 # Django
 from django.conf import settings
@@ -15,11 +15,10 @@ from django.utils.text import slugify
 from django.core.exceptions import ValidationError
 from django.utils.timezone import now, make_aware, get_default_timezone
 
-import six
 
 # AWX
 from awx.api.versioning import reverse
-from awx.main.models.base import * # noqa
+from awx.main.models.base import PROJECT_UPDATE_JOB_TYPE_CHOICES, PERM_INVENTORY_DEPLOY
 from awx.main.models.events import ProjectUpdateEvent
 from awx.main.models.notifications import (
     NotificationTemplate,
@@ -29,6 +28,7 @@ from awx.main.models.unified_jobs import (
     UnifiedJob,
     UnifiedJobTemplate,
 )
+from awx.main.models.jobs import Job
 from awx.main.models.mixins import (
     ResourceMixin,
     TaskManagerProjectUpdateMixin,
@@ -68,7 +68,7 @@ class ProjectOptions(models.Model):
     @classmethod
     def get_local_path_choices(cls):
         if os.path.exists(settings.PROJECTS_ROOT):
-            paths = [x.decode('utf-8') for x in os.listdir(settings.PROJECTS_ROOT)
+            paths = [x for x in os.listdir(settings.PROJECTS_ROOT)
                      if (os.path.isdir(os.path.join(settings.PROJECTS_ROOT, x)) and
                          not x.startswith('.') and not x.startswith('_'))]
             qs = Project.objects
@@ -134,7 +134,7 @@ class ProjectOptions(models.Model):
     def clean_scm_url(self):
         if self.scm_type == 'insights':
             self.scm_url = settings.INSIGHTS_URL_BASE
-        scm_url = six.text_type(self.scm_url or '')
+        scm_url = str(self.scm_url or '')
         if not self.scm_type:
             return ''
         try:
@@ -145,7 +145,7 @@ class ProjectOptions(models.Model):
         scm_url_parts = urlparse.urlsplit(scm_url)
         if self.scm_type and not any(scm_url_parts):
             raise ValidationError(_('SCM URL is required.'))
-        return six.text_type(self.scm_url or '')
+        return str(self.scm_url or '')
 
     def clean_credential(self):
         if not self.scm_type:
@@ -166,8 +166,8 @@ class ProjectOptions(models.Model):
                                          check_special_cases=False)
                 scm_url_parts = urlparse.urlsplit(scm_url)
                 # Prefer the username/password in the URL, if provided.
-                scm_username = scm_url_parts.username or cred.username or ''
-                if scm_url_parts.password or cred.password:
+                scm_username = scm_url_parts.username or cred.get_input('username', default='')
+                if scm_url_parts.password or cred.has_input('password'):
                     scm_password = '********'
                 else:
                     scm_password = ''
@@ -329,7 +329,7 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
         skip_update = bool(kwargs.pop('skip_update', False))
         # Create auto-generated local path if project uses SCM.
         if self.pk and self.scm_type and not self.local_path.startswith('_'):
-            slug_name = slugify(six.text_type(self.name)).replace(u'-', u'_')
+            slug_name = slugify(str(self.name)).replace(u'-', u'_')
             self.local_path = u'_%d__%s' % (int(self.pk), slug_name)
             if 'local_path' not in update_fields:
                 update_fields.append('local_path')
@@ -544,8 +544,7 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
         res = super(ProjectUpdate, self).cancel(job_explanation=job_explanation, is_chain=is_chain)
         if res and self.launch_type != 'sync':
             for inv_src in self.scm_inventory_updates.filter(status='running'):
-                inv_src.cancel(job_explanation=six.text_type(
-                    'Source project update `{}` was canceled.').format(self.name))
+                inv_src.cancel(job_explanation='Source project update `{}` was canceled.'.format(self.name))
         return res
 
     '''

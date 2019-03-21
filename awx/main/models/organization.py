@@ -10,12 +10,16 @@ from django.db.models import Q
 from django.contrib.auth.models import User
 from django.contrib.sessions.models import Session
 from django.utils.timezone import now as tz_now
+from django.utils.translation import ugettext_lazy as _
 
 
 # AWX
 from awx.api.versioning import reverse
 from awx.main.fields import AutoOneToOneField, ImplicitRoleField
-from awx.main.models.base import * # noqa
+from awx.main.models.base import (
+    BaseModel, CommonModel, CommonModelNameNotUnique, CreatedModifiedModel,
+    NotificationFieldsModel
+)
 from awx.main.models.rbac import (
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
     ROLE_SINGLETON_SYSTEM_AUDITOR,
@@ -39,6 +43,12 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin, CustomVi
         'InstanceGroup',
         blank=True,
     )
+    max_hosts = models.PositiveIntegerField(
+        blank=True,
+        default=0,
+        help_text=_('Maximum number of hosts allowed to be managed by this organization.'),
+    )
+
     admin_role = ImplicitRoleField(
         parent_role='singleton:' + ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
     )

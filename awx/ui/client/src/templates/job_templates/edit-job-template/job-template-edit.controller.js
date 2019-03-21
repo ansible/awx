@@ -11,22 +11,22 @@
 */
 
 export default
-    [   '$filter', '$scope', '$rootScope',
-        '$location', '$stateParams', 'JobTemplateForm', 'GenerateForm',
+    [   '$filter', '$scope',
+        '$stateParams', 'JobTemplateForm', 'GenerateForm',
         'Rest', 'Alert',  'ProcessErrors', 'GetBasePath', 'hashSetup',
         'ParseTypeChange', 'Wait', 'selectedLabels', 'i18n',
-        'Empty', 'Prompt', 'ToJSON', 'GetChoices', 'CallbackHelpInit',
-        'initSurvey', '$state', 'CreateSelect2',
+        'Empty', 'ToJSON', 'GetChoices', 'CallbackHelpInit',
+        'initSurvey', '$state', 'CreateSelect2', 'isNotificationAdmin',
         'ToggleNotification','$q', 'InstanceGroupsService', 'InstanceGroupsData',
         'MultiCredentialService', 'availableLabels', 'projectGetPermissionDenied',
         'inventoryGetPermissionDenied', 'jobTemplateData', 'ParseVariableString', 'ConfigData',
         function(
-            $filter, $scope, $rootScope,
-            $location, $stateParams, JobTemplateForm, GenerateForm, Rest, Alert,
+            $filter, $scope,
+            $stateParams, JobTemplateForm, GenerateForm, Rest, Alert,
             ProcessErrors, GetBasePath, hashSetup,
             ParseTypeChange, Wait, selectedLabels, i18n,
-            Empty, Prompt, ToJSON, GetChoices, CallbackHelpInit,
-            SurveyControllerInit, $state, CreateSelect2,
+            Empty, ToJSON, GetChoices, CallbackHelpInit,
+            SurveyControllerInit, $state, CreateSelect2, isNotificationAdmin,
             ToggleNotification, $q, InstanceGroupsService, InstanceGroupsData,
             MultiCredentialService, availableLabels, projectGetPermissionDenied,
             inventoryGetPermissionDenied, jobTemplateData, ParseVariableString, ConfigData
@@ -45,7 +45,9 @@ export default
                 id = $stateParams.job_template_id,
                 callback,
                 choicesCount = 0,
-                instance_group_url = defaultUrl + id + '/instance_groups';
+                instance_group_url = defaultUrl + id + '/instance_groups',
+                select2LoadDefer = [],
+                launchHasBeenEnabled = false;
 
             init();
             function init() {
@@ -64,6 +66,7 @@ export default
                 $scope.skip_tag_options = [];
                 const virtualEnvs = ConfigData.custom_virtualenvs || [];
                 $scope.custom_virtualenvs_options = virtualEnvs;
+                $scope.isNotificationAdmin = isNotificationAdmin || false;
 
                 SurveyControllerInit({
                     scope: $scope,
@@ -167,47 +170,74 @@ export default
             };
 
             function sync_playbook_select2() {
-                CreateSelect2({
+                select2LoadDefer.push(CreateSelect2({
                     element:'#playbook-select',
                     multiple: false
-                });
+                }));
             }
 
             function sync_verbosity_select2() {
-                CreateSelect2({
+                select2LoadDefer.push(CreateSelect2({
                     element:'#job_template_verbosity',
                     multiple: false
-                });
+                }));
             }
 
             function jobTemplateLoadFinished(){
-                CreateSelect2({
+                select2LoadDefer.push(CreateSelect2({
                     element:'#job_template_job_type',
                     multiple: false
-                });
+                }));
 
-                CreateSelect2({
+                select2LoadDefer.push(CreateSelect2({
                     element:'#playbook-select',
                     multiple: false
-                });
+                }));
 
-                CreateSelect2({
+                select2LoadDefer.push(CreateSelect2({
                     element:'#job_template_job_tags',
                     multiple: true,
                     addNew: true
-                });
+                }));
 
-                CreateSelect2({
+                select2LoadDefer.push(CreateSelect2({
                     element:'#job_template_skip_tags',
                     multiple: true,
                     addNew: true
-                });
+                }));
 
-                CreateSelect2({
+                select2LoadDefer.push(CreateSelect2({
                     element: '#job_template_custom_virtualenv',
                     multiple: false,
                     opts: $scope.custom_virtualenvs_options
-                });
+                }));
+
+                if (!launchHasBeenEnabled) {
+                    $q.all(select2LoadDefer).then(() => {
+                        // updates based on lookups will initially set the form as dirty.
+                        // we need to set it as pristine when it contains the values given by the api
+                        // so that we can enable launching when the two are the same
+                        $scope.job_template_form.$setPristine();
+                        // this is used to set the overall form as dirty for the values
+                        // that don't actually set this internally (lookups, toggles and code mirrors).
+                        $scope.$watchCollection('multiCredential.selectedCredentials', (val, prevVal) => {
+                            if (!_.isEqual(val, prevVal)) {
+                                $scope.job_template_form.$setDirty();
+                            }
+                        });
+                        $scope.$watchGroup([
+                            'inventory',
+                            'project',
+                            'extra_vars',
+                            'diff_mode',
+                            'instance_groups'
+                        ], (val, prevVal) => {
+                            if (!_.isEqual(val, prevVal)) {
+                                $scope.job_template_form.$setDirty();
+                            }
+                        });
+                    });
+                }
             }
 
             $scope.toggleForm = function(key) {
@@ -258,8 +288,8 @@ export default
                     variable: 'extra_vars',
                     onChange: callback
                 });
-
                 jobTemplateLoadFinished();
+                launchHasBeenEnabled = true;
             });
 
             Wait('start');
@@ -282,7 +312,7 @@ export default
                 $scope.breadcrumb.job_template_name = jobTemplateData.name;
                 var fld, i;
                 for (fld in form.fields) {
-                    if (fld !== 'extra_vars' && fld !== 'survey' && fld !== 'forks' && jobTemplateData[fld] !== null && jobTemplateData[fld] !== undefined) {
+                    if (fld !== 'extra_vars' && fld !== 'survey' && jobTemplateData[fld] !== null && jobTemplateData[fld] !== undefined) {
                         if (form.fields[fld].type === 'select') {
                             if ($scope[fld + '_options'] && $scope[fld + '_options'].length > 0) {
                                 for (i = 0; i < $scope[fld + '_options'].length; i++) {
@@ -300,12 +330,6 @@ export default
                             }
                         }
                         master[fld] = $scope[fld];
-                    }
-                    if (fld === 'forks') {
-                        if (jobTemplateData[fld] !== 0) {
-                            $scope[fld] = jobTemplateData[fld];
-                            master[fld] = $scope[fld];
-                        }
                     }
                     if (fld === 'extra_vars') {
                         // Parse extra_vars, converting to YAML.
@@ -463,12 +487,12 @@ export default
                 .map(i => ({id: i.id + "",
                     test: i.name}));
 
-            CreateSelect2({
+            select2LoadDefer.push(CreateSelect2({
                 element:'#job_template_labels',
                 multiple: true,
                 addNew: true,
                 opts: opts
-            });
+            }));
 
             $scope.$emit("choicesReady");
 
@@ -692,7 +716,7 @@ export default
                         })
                         .catch(({data, status}) => {
                             ProcessErrors($scope, data, status, form, { hdr: 'Error!',
-                                msg: 'Failed to update job template. PUT returned status: ' + status });
+                                msg: 'Failed to update job template. PATCH returned status: ' + status });
                         });
                 } catch (err) {
                     Wait('stop');

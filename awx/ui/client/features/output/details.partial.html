@@ -81,6 +81,26 @@
     </div>
 </div>
 
+<!-- HOST LIMIT ERROR DETAIL -->
+<div class="JobResults-resultRow" ng-show="vm.hostLimitError">
+    <label class="JobResults-resultRowLabel">
+        {{ vm.hostLimitError.label }}
+        <a id="awp-hostLimitError"
+            href=""
+            aw-pop-over="{{ vm.hostLimitError.tooltip }}"
+            data-placement="top"
+            data-container="body"
+            class="help-link"
+            title="{{ vm.hostLimitError.label }}"
+            tabindex="-1">
+                <i class="fa fa-question-circle"></i>
+        </a>
+    </label>
+    <div class="JobResults-resultRowText">
+        {{ vm.hostLimitError.value }}
+    </div>
+</div>
+
 <!-- START TIME DETAIL -->
 <div class="JobResults-resultRow" ng-if="vm.started">
     <label class="JobResults-resultRowLabel">{{ vm.started.label }}</label>
@@ -198,6 +218,27 @@
     </div>
 </div>
 
+<!-- INVENTORY SCM DETAIL -->
+<div class="JobResults-resultRow" ng-if="!vm.project && vm.inventoryScm">
+    <label class="JobResults-resultRowLabel">{{ vm.inventoryScm.label }}</label>
+    <div class="JobResults-resultRowText">
+        <span>
+            <a href="{{ vm.inventoryScm.jobLink }}"
+                aw-tool-tip="{{ vm.inventoryScm.jobTooltip }}"
+                data-placement="top">
+                <i class="JobResults-statusResultIcon {{ vm.inventoryScm.icon }}"></i>
+            </a>
+        </span>
+        <span>
+            <a href="{{ vm.inventoryScm.link }}"
+                aw-tool-tip="{{ vm.inventoryScm.tooltip }}"
+                data-placement="top">
+                {{ vm.inventoryScm.value }}
+            </a>
+        </span>
+    </div>
+</div>
+
 <!-- REVISION DETAIL -->
 <div class="JobResults-resultRow" ng-if="vm.scmRevision">
     <label class="JobResults-resultRowLabel">{{ vm.scmRevision.label }}</label>
@@ -268,6 +309,18 @@
     <div class="JobResults-resultRowText">{{ vm.verbosity.value }}</div>
 </div>
 
+<!-- ENVIRONMENT DETAIL -->
+<div class="JobResults-resultRow" ng-if="vm.environment">
+    <label class="JobResults-resultRowLabel">{{ vm.environment.label }}</label>
+    <div class="JobResults-resultRowText">{{ vm.environment.value }}</div>
+</div>
+
+<!-- EXECUTION Node DETAIL -->
+<div class="JobResults-resultRow" ng-if="vm.executionNode">
+  <label class="JobResults-resultRowLabel">{{ vm.executionNode.label }}</label>
+  <div class="JobResults-resultRowText">{{ vm.executionNode.value }}</div>
+</div>
+
 <!-- IG DETAIL -->
 <div class="JobResults-resultRow" ng-if="vm.instanceGroup">
     <label class="JobResults-resultRowLabel">{{ vm.instanceGroup.label }}</label>
@@ -293,15 +346,26 @@
     </div>
 </div>
 
-
 <!-- EXTRA VARIABLES DETAIL -->
 <at-code-mirror
     class="JobResults-resultRow"
     ng-if="vm.extraVars"
     variables="{{ vm.extraVars.value }}"
     tooltip="{{ vm.extraVars.tooltip }}"
-    label="{{ vm.extraVars.label}}"
+    label="{{ vm.extraVars.label }}"
+    name="{{ vm.extraVars.name }}"
     disabled="{{ vm.extraVars.disabled }}">
+</at-code-mirror>
+
+<!-- ARTIFACTS DETAIL -->
+<at-code-mirror
+    class="JobResults-resultRow"
+    ng-if="vm.artifacts"
+    variables="{{ vm.artifacts.value }}"
+    tooltip="{{ vm.artifacts.tooltip }}"
+    label="{{ vm.artifacts.label }}"
+    name="{{ vm.artifacts.name }}"
+    disabled="{{ vm.artifacts.disabled }}">
 </at-code-mirror>
 
 <!-- LABELS DETAIL -->

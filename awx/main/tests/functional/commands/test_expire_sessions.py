@@ -49,7 +49,7 @@ class TestExpireSessionsCommand:
             fake_username = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(6))
         with pytest.raises(CommandError) as excinfo:
             self.run_command(fake_username)
-        assert excinfo.value.message.strip() == 'The user does not exist.'
+        assert str(excinfo.value).strip() == 'The user does not exist.'
 
     def test_expire_one_user(self):
         # alice should be logged out, but bob should not.

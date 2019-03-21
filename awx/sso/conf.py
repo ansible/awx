@@ -1,6 +1,6 @@
 # Python
 import collections
-import urlparse
+import urllib.parse as urlparse
 
 # Django
 from django.conf import settings
@@ -11,10 +11,21 @@ from django.utils.translation import ugettext_lazy as _
 from rest_framework import serializers
 
 # Tower
-from awx.conf import register, register_validate
-from awx.sso import fields
+from awx.conf import register, register_validate, fields
+from awx.sso.fields import (
+    AuthenticationBackendsField, LDAPConnectionOptionsField, LDAPDNField,
+    LDAPDNWithUserField, LDAPGroupTypeField, LDAPGroupTypeParamsField,
+    LDAPOrganizationMapField, LDAPSearchField, LDAPSearchUnionField,
+    LDAPServerURIField, LDAPTeamMapField, LDAPUserAttrMapField,
+    LDAPUserFlagsField, SAMLContactField, SAMLEnabledIdPsField,
+    SAMLOrgAttrField, SAMLOrgInfoField, SAMLSecurityField, SAMLTeamAttrField,
+    SocialOrganizationMapField, SocialTeamMapField,
+)
 from awx.main.validators import validate_private_key, validate_certificate
-from awx.sso.validators import *  # noqa
+from awx.sso.validators import (  # noqa
+    validate_ldap_bind_dn,
+    validate_tacacsplus_disallow_nonascii,
+)
 
 
 class SocialAuthCallbackURL(object):
@@ -76,19 +87,19 @@ SOCIAL_AUTH_TEAM_MAP_PLACEHOLDER = collections.OrderedDict([
 
 register(
     'AUTHENTICATION_BACKENDS',
-    field_class=fields.AuthenticationBackendsField,
+    field_class=AuthenticationBackendsField,
     label=_('Authentication Backends'),
     help_text=_('List of authentication backends that are enabled based on '
                 'license features and other authentication settings.'),
     read_only=True,
-    depends_on=fields.AuthenticationBackendsField.get_all_required_settings(),
+    depends_on=AuthenticationBackendsField.get_all_required_settings(),
     category=_('Authentication'),
     category_slug='authentication',
 )
 
 register(
     'SOCIAL_AUTH_ORGANIZATION_MAP',
-    field_class=fields.SocialOrganizationMapField,
+    field_class=SocialOrganizationMapField,
     allow_null=True,
     default=None,
     label=_('Social Auth Organization Map'),
@@ -100,7 +111,7 @@ register(
 
 register(
     'SOCIAL_AUTH_TEAM_MAP',
-    field_class=fields.SocialTeamMapField,
+    field_class=SocialTeamMapField,
     allow_null=True,
     default=None,
     label=_('Social Auth Team Map'),
@@ -135,7 +146,7 @@ def _register_ldap(append=None):
 
     register(
         'AUTH_LDAP{}_SERVER_URI'.format(append_str),
-        field_class=fields.LDAPServerURIField,
+        field_class=LDAPServerURIField,
         allow_blank=True,
         default='',
         label=_('LDAP Server URI'),
@@ -190,7 +201,7 @@ def _register_ldap(append=None):
 
     register(
         'AUTH_LDAP{}_CONNECTION_OPTIONS'.format(append_str),
-        field_class=fields.LDAPConnectionOptionsField,
+        field_class=LDAPConnectionOptionsField,
         default={'OPT_REFERRALS': 0, 'OPT_NETWORK_TIMEOUT': 30},
         label=_('LDAP Connection Options'),
         help_text=_('Additional options to set for the LDAP connection.  LDAP '
@@ -210,7 +221,7 @@ def _register_ldap(append=None):
 
     register(
         'AUTH_LDAP{}_USER_SEARCH'.format(append_str),
-        field_class=fields.LDAPSearchUnionField,
+        field_class=LDAPSearchUnionField,
         default=[],
         label=_('LDAP User Search'),
         help_text=_('LDAP search query to find users.  Any user that matches the given '
@@ -231,7 +242,7 @@ def _register_ldap(append=None):
 
     register(
         'AUTH_LDAP{}_USER_DN_TEMPLATE'.format(append_str),
-        field_class=fields.LDAPDNWithUserField,
+        field_class=LDAPDNWithUserField,
         allow_blank=True,
         allow_null=True,
         default=None,
@@ -249,7 +260,7 @@ def _register_ldap(append=None):
 
     register(
         'AUTH_LDAP{}_USER_ATTR_MAP'.format(append_str),
-        field_class=fields.LDAPUserAttrMapField,
+        field_class=LDAPUserAttrMapField,
         default={},
         label=_('LDAP User Attribute Map'),
         help_text=_('Mapping of LDAP user schema to Tower API user attributes. The default'
@@ -268,7 +279,7 @@ def _register_ldap(append=None):
 
     register(
         'AUTH_LDAP{}_GROUP_SEARCH'.format(append_str),
-        field_class=fields.LDAPSearchField,
+        field_class=LDAPSearchField,
         default=[],
         label=_('LDAP Group Search'),
         help_text=_('Users are mapped to organizations based on their membership in LDAP'
@@ -286,7 +297,7 @@ def _register_ldap(append=None):
 
     register(
         'AUTH_LDAP{}_GROUP_TYPE'.format(append_str),
-        field_class=fields.LDAPGroupTypeField,
+        field_class=LDAPGroupTypeField,
         label=_('LDAP Group Type'),
         help_text=_('The group type may need to be changed based on the type of the '
                     'LDAP server.  Values are listed at: '
@@ -300,7 +311,7 @@ def _register_ldap(append=None):
 
     register(
         'AUTH_LDAP{}_GROUP_TYPE_PARAMS'.format(append_str),
-        field_class=fields.LDAPGroupTypeParamsField,
+        field_class=LDAPGroupTypeParamsField,
         label=_('LDAP Group Type Parameters'),
         help_text=_('Key value parameters to send the chosen group type init method.'),
         category=_('LDAP'),
@@ -320,7 +331,7 @@ def _register_ldap(append=None):
 
     register(
         'AUTH_LDAP{}_REQUIRE_GROUP'.format(append_str),
-        field_class=fields.LDAPDNField,
+        field_class=LDAPDNField,
         allow_blank=True,
         allow_null=True,
         default=None,
@@ -337,7 +348,7 @@ def _register_ldap(append=None):
 
     register(
         'AUTH_LDAP{}_DENY_GROUP'.format(append_str),
-        field_class=fields.LDAPDNField,
+        field_class=LDAPDNField,
         allow_blank=True,
         allow_null=True,
         default=None,
@@ -353,7 +364,7 @@ def _register_ldap(append=None):
 
     register(
         'AUTH_LDAP{}_USER_FLAGS_BY_GROUP'.format(append_str),
-        field_class=fields.LDAPUserFlagsField,
+        field_class=LDAPUserFlagsField,
         default={},
         label=_('LDAP User Flags By Group'),
         help_text=_('Retrieve users from a given group. At this time, superuser and system'
@@ -370,7 +381,7 @@ def _register_ldap(append=None):
 
     register(
         'AUTH_LDAP{}_ORGANIZATION_MAP'.format(append_str),
-        field_class=fields.LDAPOrganizationMapField,
+        field_class=LDAPOrganizationMapField,
         default={},
         label=_('LDAP Organization Map'),
         help_text=_('Mapping between organization admins/users and LDAP groups. This '
@@ -398,7 +409,7 @@ def _register_ldap(append=None):
 
     register(
         'AUTH_LDAP{}_TEAM_MAP'.format(append_str),
-        field_class=fields.LDAPTeamMapField,
+        field_class=LDAPTeamMapField,
         default={},
         label=_('LDAP Team Map'),
         help_text=_('Mapping between team members (users) and LDAP groups. Configuration'
@@ -461,7 +472,7 @@ register(
 
 register(
     'RADIUS_SECRET',
-    field_class=fields.RADIUSSecretField,
+    field_class=fields.CharField,
     allow_blank=True,
     default='',
     label=_('RADIUS Secret'),
@@ -610,7 +621,7 @@ register(
 
 register(
     'SOCIAL_AUTH_GOOGLE_OAUTH2_ORGANIZATION_MAP',
-    field_class=fields.SocialOrganizationMapField,
+    field_class=SocialOrganizationMapField,
     allow_null=True,
     default=None,
     label=_('Google OAuth2 Organization Map'),
@@ -622,7 +633,7 @@ register(
 
 register(
     'SOCIAL_AUTH_GOOGLE_OAUTH2_TEAM_MAP',
-    field_class=fields.SocialTeamMapField,
+    field_class=SocialTeamMapField,
     allow_null=True,
     default=None,
     label=_('Google OAuth2 Team Map'),
@@ -675,7 +686,7 @@ register(
 
 register(
     'SOCIAL_AUTH_GITHUB_ORGANIZATION_MAP',
-    field_class=fields.SocialOrganizationMapField,
+    field_class=SocialOrganizationMapField,
     allow_null=True,
     default=None,
     label=_('GitHub OAuth2 Organization Map'),
@@ -687,7 +698,7 @@ register(
 
 register(
     'SOCIAL_AUTH_GITHUB_TEAM_MAP',
-    field_class=fields.SocialTeamMapField,
+    field_class=SocialTeamMapField,
     allow_null=True,
     default=None,
     label=_('GitHub OAuth2 Team Map'),
@@ -752,7 +763,7 @@ register(
 
 register(
     'SOCIAL_AUTH_GITHUB_ORG_ORGANIZATION_MAP',
-    field_class=fields.SocialOrganizationMapField,
+    field_class=SocialOrganizationMapField,
     allow_null=True,
     default=None,
     label=_('GitHub Organization OAuth2 Organization Map'),
@@ -764,7 +775,7 @@ register(
 
 register(
     'SOCIAL_AUTH_GITHUB_ORG_TEAM_MAP',
-    field_class=fields.SocialTeamMapField,
+    field_class=SocialTeamMapField,
     allow_null=True,
     default=None,
     label=_('GitHub Organization OAuth2 Team Map'),
@@ -830,7 +841,7 @@ register(
 
 register(
     'SOCIAL_AUTH_GITHUB_TEAM_ORGANIZATION_MAP',
-    field_class=fields.SocialOrganizationMapField,
+    field_class=SocialOrganizationMapField,
     allow_null=True,
     default=None,
     label=_('GitHub Team OAuth2 Organization Map'),
@@ -842,7 +853,7 @@ register(
 
 register(
     'SOCIAL_AUTH_GITHUB_TEAM_TEAM_MAP',
-    field_class=fields.SocialTeamMapField,
+    field_class=SocialTeamMapField,
     allow_null=True,
     default=None,
     label=_('GitHub Team OAuth2 Team Map'),
@@ -895,7 +906,7 @@ register(
 
 register(
     'SOCIAL_AUTH_AZUREAD_OAUTH2_ORGANIZATION_MAP',
-    field_class=fields.SocialOrganizationMapField,
+    field_class=SocialOrganizationMapField,
     allow_null=True,
     default=None,
     label=_('Azure AD OAuth2 Organization Map'),
@@ -907,7 +918,7 @@ register(
 
 register(
     'SOCIAL_AUTH_AZUREAD_OAUTH2_TEAM_MAP',
-    field_class=fields.SocialTeamMapField,
+    field_class=SocialTeamMapField,
     allow_null=True,
     default=None,
     label=_('Azure AD OAuth2 Team Map'),
@@ -1004,7 +1015,7 @@ register(
 
 register(
     'SOCIAL_AUTH_SAML_ORG_INFO',
-    field_class=fields.SAMLOrgInfoField,
+    field_class=SAMLOrgInfoField,
     required=True,
     label=_('SAML Service Provider Organization Info'),
     help_text=_('Provide the URL, display name, and the name of your app. Refer to'
@@ -1023,7 +1034,7 @@ register(
 
 register(
     'SOCIAL_AUTH_SAML_TECHNICAL_CONTACT',
-    field_class=fields.SAMLContactField,
+    field_class=SAMLContactField,
     allow_blank=True,
     required=True,
     label=_('SAML Service Provider Technical Contact'),
@@ -1041,7 +1052,7 @@ register(
 
 register(
     'SOCIAL_AUTH_SAML_SUPPORT_CONTACT',
-    field_class=fields.SAMLContactField,
+    field_class=SAMLContactField,
     allow_blank=True,
     required=True,
     label=_('SAML Service Provider Support Contact'),
@@ -1059,7 +1070,7 @@ register(
 
 register(
     'SOCIAL_AUTH_SAML_ENABLED_IDPS',
-    field_class=fields.SAMLEnabledIdPsField,
+    field_class=SAMLEnabledIdPsField,
     default={},
     label=_('SAML Enabled Identity Providers'),
     help_text=_('Configure the Entity ID, SSO URL and certificate for each identity'
@@ -1096,7 +1107,7 @@ register(
 
 register(
     'SOCIAL_AUTH_SAML_SECURITY_CONFIG',
-    field_class=fields.SAMLSecurityField,
+    field_class=SAMLSecurityField,
     allow_null=True,
     default={'requestedAuthnContext': False},
     label=_('SAML Security Config'),
@@ -1161,7 +1172,7 @@ register(
 
 register(
     'SOCIAL_AUTH_SAML_ORGANIZATION_MAP',
-    field_class=fields.SocialOrganizationMapField,
+    field_class=SocialOrganizationMapField,
     allow_null=True,
     default=None,
     label=_('SAML Organization Map'),
@@ -1174,7 +1185,7 @@ register(
 
 register(
     'SOCIAL_AUTH_SAML_TEAM_MAP',
-    field_class=fields.SocialTeamMapField,
+    field_class=SocialTeamMapField,
     allow_null=True,
     default=None,
     label=_('SAML Team Map'),
@@ -1187,7 +1198,7 @@ register(
 
 register(
     'SOCIAL_AUTH_SAML_ORGANIZATION_ATTR',
-    field_class=fields.SAMLOrgAttrField,
+    field_class=SAMLOrgAttrField,
     allow_null=True,
     default=None,
     label=_('SAML Organization Attribute Mapping'),
@@ -1205,7 +1216,7 @@ register(
 
 register(
     'SOCIAL_AUTH_SAML_TEAM_ATTR',
-    field_class=fields.SAMLTeamAttrField,
+    field_class=SAMLTeamAttrField,
     allow_null=True,
     default=None,
     label=_('SAML Team Attribute Mapping'),

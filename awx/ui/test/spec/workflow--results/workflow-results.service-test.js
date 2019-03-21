@@ -6,7 +6,7 @@ describe('workflowResultsService', () => {
     let $interval;
 
     beforeEach(angular.mock.module('workflowResults', ($provide) => {
-        ['PromptDialog', 'Prompt', 'Wait', 'Rest', 'ProcessErrors', '$state', 'WorkflowJobModel', 'ComponentsStrings']
+        ['i18n', 'PromptDialog', 'Prompt', 'Wait', 'Rest', 'ProcessErrors', '$state', 'WorkflowJobModel', 'ComponentsStrings']
             .forEach(function(item) {
                 $provide.value(item, {});
             });

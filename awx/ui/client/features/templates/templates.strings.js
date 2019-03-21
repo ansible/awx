@@ -45,11 +45,17 @@ function TemplatesStrings (BaseString) {
             VAULT_PASSWORD: t.s('Vault Password')
         },
         SHOW_CHANGES: t.s('Show Changes'),
+        SHOW_CHANGES_HELP: t.s('If enabled, show the changes made by Ansible tasks, where supported. This is equivalent to Ansible&#x2019s --diff mode.'),
         SKIP_TAGS: t.s('Skip Tags'),
+        SKIP_TAGS_HELP: t.s('Skip tags are useful when you have a large playbook, and you want to skip specific parts of a play or task. Use commas to separate multiple tags. Refer to Ansible Tower documentation for details on the usage of tags.'),
         JOB_TAGS: t.s('Job Tags'),
+        JOB_TAGS_HELP: t.s('Tags are useful when you have a large playbook, and you want to run a specific part of a play or task. Use commas to separate multiple tags. Refer to Ansible Tower documentation for details on the usage of tags.'),
         LIMIT: t.s('Limit'),
+        LIMIT_HELP: t.s('Provide a host pattern to further constrain the list of hosts that will be managed or affected by the playbook. Multiple patterns are allowed. Refer to Ansible documentation for more information and examples on patterns.'),
         JOB_TYPE: t.s('Job Type'),
+        JOB_TYPE_HELP: t.s('For job templates, select run to execute the playbook. Select check to only check playbook syntax, test environment setup, and report problems without executing the playbook.'),
         VERBOSITY: t.s('Verbosity'),
+        VERBOSITY_HELP: t.s('Control the level of output ansible will produce as the playbook executes.'),
         CHOOSE_JOB_TYPE: t.s('Choose a job type'),
         CHOOSE_VERBOSITY: t.s('Choose a verbosity'),
         EXTRA_VARIABLES: t.s('Extra Variables'),
@@ -106,7 +112,7 @@ function TemplatesStrings (BaseString) {
         WORKFLOW: t.s('Workflow'),
         WARNING: t.s('Warning'),
         TOTAL_NODES: t.s('TOTAL NODES'),
-        ADD_A_TEMPLATE: t.s('ADD A TEMPLATE'),
+        ADD_A_NODE: t.s('ADD A NODE'),
         EDIT_TEMPLATE: t.s('EDIT TEMPLATE'),
         JOBS: t.s('JOBS'),
         PLEASE_CLICK_THE_START_BUTTON: t.s('Please click the start button to build your workflow.'),
@@ -130,7 +136,12 @@ function TemplatesStrings (BaseString) {
         NEW_LINK: t.s('Please click on an available node to form a new link.'),
         UNLINK: t.s('UNLINK'),
         READ_ONLY_PROMPT_VALUES: t.s('The following promptable values were provided when this node was created:'),
-        READ_ONLY_NO_PROMPT_VALUES: t.s('No promptable values were provided when this node was created.')
+        READ_ONLY_NO_PROMPT_VALUES: t.s('No promptable values were provided when this node was created.'),
+        UNSAVED_CHANGES_HEADER: t.s('WARNING: UNSAVED CHANGES'),
+        UNSAVED_CHANGES_PROMPT_TEXT: t.s('Are you sure you want to exit the Workflow Creator without saving your changes?'),
+        EXIT: t.s('EXIT'),
+        CANCEL: t.s('CANCEL'),
+        SAVE_AND_EXIT: t.s('SAVE & EXIT')
     };
 }
 

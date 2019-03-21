@@ -1,4 +1,4 @@
-import mock
+from unittest import mock
 
 
 def test_empty_host_fails_auth(tacacsplus_backend):

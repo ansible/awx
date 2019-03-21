@@ -43,7 +43,7 @@ register(
     help_text=_('Dictionary for customizing OAuth 2 timeouts, available items are '
                 '`ACCESS_TOKEN_EXPIRE_SECONDS`, the duration of access tokens in the number '
                 'of seconds, and `AUTHORIZATION_CODE_EXPIRE_SECONDS`, the duration of '
-                'authorization grants in the number of seconds.'),
+                'authorization codes in the number of seconds.'),
     category=_('Authentication'),
     category_slug='authentication',
 )

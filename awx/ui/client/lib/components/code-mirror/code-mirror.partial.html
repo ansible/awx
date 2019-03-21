@@ -23,7 +23,7 @@
                             type="radio"
                             value="yaml"
                             ng-model="parseType"
-                            ng-change="parseTypeChange('parseType', 'variables')"
+                            ng-change="parseTypeChange('parseType', vm.variables)"
                             class="ng-pristine ng-untouched ng-valid ng-not-empty">
                                 {{ vm.strings.get('label.YAML')}}
                     </label>
@@ -32,7 +32,7 @@
                             type="radio"
                             value="json"
                             ng-model="parseType"
-                            ng-change="parseTypeChange('parseType', 'variables')"
+                            ng-change="parseTypeChange('parseType', vm.variables)"
                             class="ng-pristine ng-untouched ng-valid ng-not-empty">
                                 {{ vm.strings.get('label.JSON')}}
                     </label>
@@ -47,9 +47,10 @@
         ng-model="variables"
         name="variables"
         class="form-control Form-textArea"
-        id="codemirror-extra-vars">
+        id="{{ vm.name }}">
     </textarea>
     <at-code-mirror-modal
+        name="{{ vm.modalName }}"
         ng-if="vm.expanded"
         variables="{{ variables }}"
         tooltip="{{ tooltip || vm.strings.get('code_mirror.tooltip.TOOLTIP') }}"

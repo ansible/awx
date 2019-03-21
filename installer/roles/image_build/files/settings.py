@@ -5,7 +5,7 @@ import os
 
 def get_secret():
     if os.path.exists("/etc/tower/SECRET_KEY"):
-        return file('/etc/tower/SECRET_KEY', 'rb').read().strip()
+        return open('/etc/tower/SECRET_KEY', 'rb').read().strip()
     return os.getenv("SECRET_KEY", "privateawx")
 
 
@@ -75,7 +75,7 @@ LOGGING['handlers']['management_playbooks'] = {'class': 'logging.NullHandler'}
 DATABASES = {
     'default': {
         'ATOMIC_REQUESTS': True,
-        'ENGINE': 'django.db.backends.postgresql',
+        'ENGINE': 'awx.main.db.profiled_pg',
         'NAME': os.getenv("DATABASE_NAME", None),
         'USER': os.getenv("DATABASE_USER", None),
         'PASSWORD': os.getenv("DATABASE_PASSWORD", None),
@@ -83,6 +83,9 @@ DATABASES = {
         'PORT': os.getenv("DATABASE_PORT", None),
     }
 }
+
+if os.getenv("DATABASE_SSLMODE", False):
+    DATABASES['default']['OPTIONS'] = {'sslmode': os.getenv("DATABASE_SSLMODE")}
 
 BROKER_URL = 'amqp://{}:{}@{}:{}/{}'.format(
     os.getenv("RABBITMQ_USER", None),

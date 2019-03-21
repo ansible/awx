@@ -9,6 +9,8 @@ import pagination from './sections/pagination';
 import permissions from './sections/permissions';
 import search from './sections/search';
 
+const row = '#users_table .List-tableRow';
+
 const details = createFormSection({
     selector: 'form',
     props: {
@@ -19,6 +21,18 @@ const details = createFormSection({
     }
 });
 
+const addEditElements = {
+    title: 'div[class^="Form-title"]',
+    confirmPassword: '#user_password_confirm_input',
+    email: '#user_email',
+    firstName: '#user_first_name',
+    lastName: '#user_last_name',
+    organization: 'input[name="organization_name"]',
+    password: '#user_password_input',
+    save: '#user_save_btn',
+    username: '#user_username',
+};
+
 module.exports = {
     url () {
         return `${this.api.globals.launch_url}/#/users`;
@@ -27,6 +41,15 @@ module.exports = {
         load () {
             this.api.url('data:,'); // https://github.com/nightwatchjs/nightwatch/issues/1724
             return this.navigate();
+        },
+        search (username) {
+            this.section.list.section.search
+                .setValue('@input', username)
+                .click('@searchButton');
+            this.waitForSpinny();
+            this.waitForElementNotPresent(`${row}:nth-of-type(2)`);
+            this.expect.element('.List-titleBadge').text.to.contain('1');
+            this.expect.element(row).text.contain(username);
         },
     }],
     sections: {
@@ -39,9 +62,7 @@ module.exports = {
             sections: {
                 details
             },
-            elements: {
-                title: 'div[class^="Form-title"]'
-            }
+            elements: addEditElements,
         },
         edit: {
             selector: 'div[ui-view="form"]',
@@ -49,9 +70,7 @@ module.exports = {
                 details,
                 permissions
             },
-            elements: {
-                title: 'div[class^="Form-title"]'
-            }
+            elements: addEditElements,
         },
         list: {
             selector: 'div[ui-view="list"]',

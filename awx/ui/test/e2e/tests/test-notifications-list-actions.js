@@ -30,7 +30,7 @@ module.exports = {
         notifications.waitForElementVisible('div.spinny');
         notifications.waitForElementNotVisible('div.spinny');
 
-        notifications.expect.element(`#notification_templates_table tr[id="${data.notification.id}"]`).visible;
+        notifications.expect.element(`#notification_templates_table .List-tableRow[id="${data.notification.id}"]`).visible;
         notifications.expect.element('i[class*="copy"]').visible;
         notifications.expect.element('i[class*="copy"]').enabled;
 
@@ -39,7 +39,7 @@ module.exports = {
         notifications.waitForElementNotVisible('div.spinny');
 
         const activityStream = 'bread-crumb > div i[class$="icon-activity-stream"]';
-        const activityRow = '#activities_table tr td[class*="description-column"] a';
+        const activityRow = '#activities_table .List-tableCell[class*="description-column"] a';
         const toast = 'div[class="Toast-icon"]';
 
         notifications.waitForElementNotPresent(toast);

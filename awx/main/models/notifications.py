@@ -11,7 +11,7 @@ from django.utils.encoding import smart_str, force_text
 
 # AWX
 from awx.api.versioning import reverse
-from awx.main.models.base import * # noqa
+from awx.main.models.base import CommonModelNameNotUnique, CreatedModifiedModel
 from awx.main.utils import encrypt_field, decrypt_field, set_environ
 from awx.main.notifications.email_backend import CustomEmailBackend
 from awx.main.notifications.slack_backend import SlackBackend
@@ -20,6 +20,7 @@ from awx.main.notifications.pagerduty_backend import PagerDutyBackend
 from awx.main.notifications.hipchat_backend import HipChatBackend
 from awx.main.notifications.webhook_backend import WebhookBackend
 from awx.main.notifications.mattermost_backend import MattermostBackend
+from awx.main.notifications.grafana_backend import GrafanaBackend
 from awx.main.notifications.rocketchat_backend import RocketChatBackend
 from awx.main.notifications.irc_backend import IrcBackend
 from awx.main.fields import JSONField
@@ -36,6 +37,7 @@ class NotificationTemplate(CommonModelNameNotUnique):
                           ('slack', _('Slack'), SlackBackend),
                           ('twilio', _('Twilio'), TwilioBackend),
                           ('pagerduty', _('Pagerduty'), PagerDutyBackend),
+                          ('grafana', _('Grafana'), GrafanaBackend),
                           ('hipchat', _('HipChat'), HipChatBackend),
                           ('webhook', _('Webhook'), WebhookBackend),
                           ('mattermost', _('Mattermost'), MattermostBackend),
@@ -82,7 +84,7 @@ class NotificationTemplate(CommonModelNameNotUnique):
                 setattr(self, '_saved_{}_{}'.format("config", field), value)
                 self.notification_configuration[field] = ''
             else:
-                encrypted = encrypt_field(self, 'notification_configuration', subfield=field, skip_utf8=True)
+                encrypted = encrypt_field(self, 'notification_configuration', subfield=field)
                 self.notification_configuration[field] = encrypted
                 if 'notification_configuration' not in update_fields:
                     update_fields.append('notification_configuration')

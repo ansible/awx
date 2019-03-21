@@ -62,6 +62,7 @@ __pycache__
 # UI build flag files
 awx/ui/.deps_built
 awx/ui/.release_built
+awx/ui/.release_deps_built
 
 # Testing
 .cache

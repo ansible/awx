@@ -1,5 +1,5 @@
 import pytest
-import mock
+from unittest import mock
 
 # Django REST Framework
 from rest_framework import exceptions

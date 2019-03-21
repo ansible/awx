@@ -99,6 +99,10 @@
     text-transform: uppercase;
     transition: background-color 0.2s;
     width: 100%;
+
+    > span {
+        width: 100%;
+    }
 }
 
 .DashboardGraphs-filterDropdownText:hover {
@@ -110,6 +114,8 @@
     font-size: 12px;
     width: 20px;
     padding: 0 10px;
+    float: right;
+    margin-top: 1px;
 }
 
 .DashboardGraphs-filterDropdownItems {
@@ -121,6 +127,10 @@
     cursor: pointer;
     border-color: @d7grey;
     min-width: 115px;
+
+    a:not([href]):not([tabindex]) {
+        color: @default-interface-txt;
+    }
 
     a > span {
         float: none;
@@ -145,7 +155,6 @@
 
 .DashboardGraphs-statusFilters{
     padding-top: 5px;
-
 }
 
 .DashboardGraphs-statusFilter{

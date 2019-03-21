@@ -75,10 +75,18 @@ function AtInputGroupController ($scope, $compile) {
     };
 
     vm.getComponentType = input => {
-        const config = {};
+        const config = {
+            _formId: formId
+        };
 
         if (input.type === 'string') {
-            if (!input.multiline) {
+            if (input._isDynamic) {
+                config._component = 'at-dynamic-select';
+                config._format = 'array';
+                config._data = input._choices;
+                config._exp = 'choice for (index, choice) in state._data';
+                config._isDynamic = true;
+            } else if (!input.multiline) {
                 if (input.secret) {
                     config._component = 'at-input-secret';
                 } else {
@@ -118,6 +126,7 @@ function AtInputGroupController ($scope, $compile) {
 
     vm.insert = group => {
         const container = document.createElement('div');
+        container.className = 'row';
         let col = 1;
         const colPerRow = 12 / scope.col;
         let isDivided = true;

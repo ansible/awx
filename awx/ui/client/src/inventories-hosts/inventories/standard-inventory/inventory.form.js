@@ -126,19 +126,19 @@ function(i18n) {
                         key: true,
                         label: i18n._('User'),
                         linkBase: 'users',
-                        class: 'col-lg-3 col-md-3 col-sm-3 col-xs-4'
+                        columnClass: 'col-sm-3 col-xs-4'
                     },
                     role: {
                         label: i18n._('Role'),
                         type: 'role',
                         nosort: true,
-                        class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4',
+                        columnClass: 'col-sm-4 col-xs-4'
                     },
                     team_roles: {
                         label: i18n._('Team Roles'),
                         type: 'team_roles',
                         nosort: true,
-                        class: 'col-lg-5 col-md-5 col-sm-5 col-xs-4',
+                        columnClass: 'col-sm-5 col-xs-4'
                     }
                 }
             },
@@ -149,6 +149,7 @@ function(i18n) {
                 include: "GroupList",
                 title: i18n._('Groups'),
                 iterator: 'group',
+                tabSelected: `$state.includes('inventories.edit.groups') || $state.includes('inventories.edit.rootGroups')`,
                 skipGenerator: true
             },
             hosts: {

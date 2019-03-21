@@ -3,8 +3,6 @@ import logging
 from django.utils.timezone import now
 from django.utils.text import slugify
 
-import six
-
 from awx.main.models.base import PERM_INVENTORY_SCAN, PERM_INVENTORY_DEPLOY
 from awx.main import utils
 
@@ -26,7 +24,7 @@ def _create_fact_scan_project(ContentType, Project, org):
                    polymorphic_ctype=ct)
     proj.save()
 
-    slug_name = slugify(six.text_type(name)).replace(u'-', u'_')
+    slug_name = slugify(str(name)).replace(u'-', u'_')
     proj.local_path = u'_%d__%s' % (int(proj.pk), slug_name)
 
     proj.save()

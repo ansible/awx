@@ -19,6 +19,7 @@ from __future__ import (absolute_import, division, print_function)
 
 # Python
 import codecs
+import collections
 import contextlib
 import json
 import os
@@ -66,6 +67,10 @@ class BaseCallbackModule(CallbackBase):
     def __init__(self):
         super(BaseCallbackModule, self).__init__()
         self.task_uuids = set()
+        self.duplicate_task_counts = collections.defaultdict(lambda: 1)
+
+        self.play_uuids = set()
+        self.duplicate_play_counts = collections.defaultdict(lambda: 1)
 
     @contextlib.contextmanager
     def capture_event_data(self, event, **event_data):
@@ -193,6 +198,24 @@ class BaseCallbackModule(CallbackBase):
             super(BaseCallbackModule, self).v2_playbook_on_include(included_file)
 
     def v2_playbook_on_play_start(self, play):
+        play_uuid = str(play._uuid)
+        if play_uuid in self.play_uuids:
+            # When this play UUID repeats, it means the play is using the
+            # free strategy (or serial:1) so different hosts may be running
+            # different tasks within a play (where duplicate UUIDS are common).
+            #
+            # When this is the case, modify the UUID slightly to append
+            # a counter so we can still _track_ duplicate events, but also
+            # avoid breaking the display in these scenarios.
+            self.duplicate_play_counts[play_uuid] += 1
+
+            play_uuid = '_'.join([
+                play_uuid,
+                str(self.duplicate_play_counts[play_uuid])
+            ])
+        self.play_uuids.add(play_uuid)
+        play._uuid = play_uuid
+
         self.set_play(play)
         if hasattr(play, 'hosts'):
             if isinstance(play.hosts, list):
@@ -229,10 +252,19 @@ class BaseCallbackModule(CallbackBase):
         # FIXME: Flag task path output as vv.
         task_uuid = str(task._uuid)
         if task_uuid in self.task_uuids:
-            # FIXME: When this task UUID repeats, it means the play is using the
-            # free strategy, so different hosts may be running different tasks
-            # within a play.
-            return
+            # When this task UUID repeats, it means the play is using the
+            # free strategy (or serial:1) so different hosts may be running
+            # different tasks within a play (where duplicate UUIDS are common).
+            #
+            # When this is the case, modify the UUID slightly to append
+            # a counter so we can still _track_ duplicate events, but also
+            # avoid breaking the display in these scenarios.
+            self.duplicate_task_counts[task_uuid] += 1
+
+            task_uuid = '_'.join([
+                task_uuid,
+                str(self.duplicate_task_counts[task_uuid])
+            ])
         self.task_uuids.add(task_uuid)
         self.set_task(task)
         event_data = dict(
@@ -297,8 +329,10 @@ class BaseCallbackModule(CallbackBase):
             changed=stats.changed,
             dark=stats.dark,
             failures=stats.failures,
+            ignored=getattr(stats, 'ignored', 0),
             ok=stats.ok,
             processed=stats.processed,
+            rescued=getattr(stats, 'rescued', 0),
             skipped=stats.skipped
         )
 

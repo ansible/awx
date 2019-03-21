@@ -35,7 +35,7 @@ class MattermostBackend(AWXBaseEmailBackend):
         for m in messages:
             payload = {}
             for opt, optval in {'mattermost_icon_url':'icon_url',
-                                'mattermost_channel': 'channel', 'mattermost_username': 'username'}.iteritems():
+                                'mattermost_channel': 'channel', 'mattermost_username': 'username'}.items():
                 optvalue = getattr(self, opt)
                 if optvalue is not None:
                     payload[optval] = optvalue.strip()

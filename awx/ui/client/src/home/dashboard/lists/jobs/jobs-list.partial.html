@@ -8,29 +8,36 @@
         </a>
     </div>
     <div class="DashboardList-container">
-        <table class="List-table">
-           <tr>
-              <th class="List-tableHeader DashboardList-tableHeader--name" translate>Name</th>
-              <th class="List-tableHeader DashboardList-tableHeader--time" translate>Time</th>
-           </tr>
-           <tr class="List-tableRow"
-                ng-repeat = "job in jobs">
-                <td class="DashboardList-nameCell">
-                    <a href="{{ job.detailsUrl }}" ng-if="isSuccessful(job.status)" aw-tool-tip="{{strings.get('list.STATUS_TOOLTIP', job.status)}}" aw-tip-placement="right" data-tip-watch="strings.get('list.STATUS_TOOLTIP', job.status)">
-                        <i class="fa DashboardList-status DashboardList-status--success icon-job-successful"></i>
-                    </a>
-                    <a href="{{ job.detailsUrl }}" ng-if="!isSuccessful(job.status)" aw-tool-tip="{{strings.get('list.STATUS_TOOLTIP', job.status)}}" aw-tip-placement="right" data-tip-watch="strings.get('list.STATUS_TOOLTIP', job.status)">
-                        <i class="fa DashboardList-status DashboardList-status--failed icon-job-failed"></i>
-                    </a>
-                    <a href="{{ job.detailsUrl }}" class="DashboardList-nameContainer">
-                        {{ job.name }}
-                    </a>
-              </td>
-              <td class="DashboardList-timeCell">
-                  {{job.time}}
-              </td>
-           </tr>
-        </table>
+        <div class="List-table">
+            <div class="List-tableHeaderRow">
+                <div class="d-flex">
+                    <div class="List-tableHeader col-6">
+                        <translate>Name</translate>
+                    </div>
+                    <div class="List-tableHeader col-6 DashboardList-tableHeader--time">
+                        <translate>Time</translate>
+                    </div>
+                </div>
+            </div>
+           <div class="List-tableRow" ng-repeat="job in jobs">
+               <div class="d-flex">
+                    <div class="List-tableCell col-6">
+                        <a href="{{ job.detailsUrl }}" ng-if="isSuccessful(job.status)" aw-tool-tip="{{strings.get('list.STATUS_TOOLTIP', job.status)}}" aw-tip-placement="right" data-tip-watch="strings.get('list.STATUS_TOOLTIP', job.status)">
+                            <i class="fa DashboardList-status DashboardList-status--success icon-job-successful"></i>
+                        </a>
+                        <a href="{{ job.detailsUrl }}" ng-if="!isSuccessful(job.status)" aw-tool-tip="{{strings.get('list.STATUS_TOOLTIP', job.status)}}" aw-tip-placement="right" data-tip-watch="strings.get('list.STATUS_TOOLTIP', job.status)">
+                            <i class="fa DashboardList-status DashboardList-status--failed icon-job-failed"></i>
+                        </a>
+                        <a href="{{ job.detailsUrl }}" class="DashboardList-nameContainer">
+                            {{ job.name }}
+                        </a>
+                  </div>
+                  <div class="List-tableCell col-6 DashboardList-timeCell">
+                      {{job.time}}
+                  </div>
+              </div>
+          </div>
+       </div>
     </div>
 </div>
 

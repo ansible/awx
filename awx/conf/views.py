@@ -17,10 +17,15 @@ from rest_framework import serializers
 from rest_framework import status
 
 # Tower
-from awx.api.generics import *  # noqa
+from awx.api.generics import (
+    APIView,
+    GenericAPIView,
+    ListAPIView,
+    RetrieveUpdateDestroyAPIView,
+)
 from awx.api.permissions import IsSuperUser
 from awx.api.versioning import reverse, get_request_version
-from awx.main.utils import *  # noqa
+from awx.main.utils import camelcase_to_underscore
 from awx.main.utils.handlers import AWXProxyHandler, LoggingConnectivityException
 from awx.main.tasks import handle_setting_changes
 from awx.conf.license import get_licensed_features
@@ -72,7 +77,7 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         self.category_slug = self.kwargs.get('category_slug', 'all')
-        all_category_slugs = settings_registry.get_registered_categories(features_enabled=get_licensed_features()).keys()
+        all_category_slugs = list(settings_registry.get_registered_categories(features_enabled=get_licensed_features()).keys())
         for slug_to_delete in VERSION_SPECIFIC_CATEGORIES_TO_EXCLUDE[get_request_version(self.request)]:
             all_category_slugs.remove(slug_to_delete)
         if self.request.user.is_superuser or getattr(self.request.user, 'is_system_auditor', False):
@@ -123,7 +128,7 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
             if key == 'LICENSE' or settings_registry.is_setting_read_only(key):
                 continue
             if settings_registry.is_setting_encrypted(key) and \
-                    isinstance(value, basestring) and \
+                    isinstance(value, str) and \
                     value.startswith('$encrypted$'):
                 continue
             setattr(serializer.instance, key, value)
@@ -135,7 +140,7 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
                 setting.value = value
                 setting.save(update_fields=['value'])
                 settings_change_list.append(key)
-        if settings_change_list and 'migrate_to_database_settings' not in sys.argv:
+        if settings_change_list:
             handle_setting_changes.delay(settings_change_list)
 
     def destroy(self, request, *args, **kwargs):
@@ -150,7 +155,7 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
                 continue
             setting.delete()
             settings_change_list.append(setting.key)
-        if settings_change_list and 'migrate_to_database_settings' not in sys.argv:
+        if settings_change_list:
             handle_setting_changes.delay(settings_change_list)
 
         # When TOWER_URL_BASE is deleted from the API, reset it to the hostname
@@ -210,7 +215,7 @@ class SettingLoggingTest(GenericAPIView):
 # in URL patterns and reverse URL lookups, converting CamelCase names to
 # lowercase_with_underscore (e.g. MyView.as_view() becomes my_view).
 this_module = sys.modules[__name__]
-for attr, value in locals().items():
+for attr, value in list(locals().items()):
     if isinstance(value, type) and issubclass(value, APIView):
         name = camelcase_to_underscore(attr)
         view = value.as_view()

@@ -1,5 +1,5 @@
 import pytest
-import mock
+from unittest import mock
 
 from awx.main.models import Project
 from awx.main.models.organization import Organization

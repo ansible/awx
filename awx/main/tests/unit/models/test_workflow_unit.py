@@ -6,7 +6,7 @@ from awx.main.models.workflow import (
     WorkflowJobTemplate, WorkflowJobTemplateNode, WorkflowJobOptions,
     WorkflowJob, WorkflowJobNode
 )
-import mock
+from unittest import mock
 
 
 @pytest.fixture
@@ -236,4 +236,4 @@ class TestWorkflowJobNodeJobKWARGS:
 
 
 def test_get_ask_mapping_integrity():
-    assert WorkflowJobTemplate.get_ask_mapping().keys() == ['extra_vars', 'inventory']
+    assert list(WorkflowJobTemplate.get_ask_mapping().keys()) == ['extra_vars', 'inventory']

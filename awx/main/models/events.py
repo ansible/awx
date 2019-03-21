@@ -9,7 +9,6 @@ from django.utils.text import Truncator
 from django.utils.timezone import utc
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import force_text
-import six
 
 from awx.api.versioning import reverse
 from awx.main.fields import JSONField
@@ -27,7 +26,7 @@ __all__ = ['JobEvent', 'ProjectUpdateEvent', 'AdHocCommandEvent',
 
 def sanitize_event_keys(kwargs, valid_keys):
     # Sanity check: Don't honor keys that we don't recognize.
-    for key in kwargs.keys():
+    for key in list(kwargs.keys()):
         if key not in valid_keys:
             kwargs.pop(key)
 
@@ -35,7 +34,7 @@ def sanitize_event_keys(kwargs, valid_keys):
     for key in [
         'play', 'role', 'task', 'playbook'
     ]:
-        if isinstance(kwargs.get('event_data', {}).get(key), six.string_types):
+        if isinstance(kwargs.get('event_data', {}).get(key), str):
             if len(kwargs['event_data'][key]) > 1024:
                 kwargs['event_data'][key] = Truncator(kwargs['event_data'][key]).chars(1024)
 
@@ -353,9 +352,16 @@ class BasePlaybookEvent(CreatedModifiedModel):
         if hasattr(self, 'job') and not from_parent_update:
             if getattr(settings, 'CAPTURE_JOB_EVENT_HOSTS', False):
                 self._update_hosts()
-            if self.event == 'playbook_on_stats':
-                self._update_parents_failed_and_changed()
+            if self.parent_uuid:
+                kwargs = {}
+                if self.changed is True:
+                    kwargs['changed'] = True
+                if self.failed is True:
+                    kwargs['failed'] = True
+                if kwargs:
+                    JobEvent.objects.filter(job_id=self.job_id, uuid=self.parent_uuid).update(**kwargs)
 
+            if self.event == 'playbook_on_stats':
                 hostnames = self._hostnames()
                 self._update_host_summary_from_stats(hostnames)
                 try:
@@ -424,7 +430,7 @@ class JobEvent(BasePlaybookEvent):
     def get_absolute_url(self, request=None):
         return reverse('api:job_event_detail', kwargs={'pk': self.pk}, request=request)
 
-    def __unicode__(self):
+    def __str__(self):
         return u'%s @ %s' % (self.get_event_display2(), self.created.isoformat())
 
     def _update_from_event_data(self):
@@ -435,15 +441,6 @@ class JobEvent(BasePlaybookEvent):
             setattr(self, 'host_name', value)
             updated_fields.add('host_name')
         return updated_fields
-
-    def _update_parents_failed_and_changed(self):
-        # Update parent events to reflect failed, changed
-        runner_events = JobEvent.objects.filter(job=self.job,
-                                                event__startswith='runner_on')
-        changed_events = runner_events.filter(changed=True)
-        failed_events = runner_events.filter(failed=True)
-        JobEvent.objects.filter(uuid__in=changed_events.values_list('parent_uuid', flat=True)).update(changed=True)
-        JobEvent.objects.filter(uuid__in=failed_events.values_list('parent_uuid', flat=True)).update(failed=True)
 
     def _update_hosts(self, extra_host_pks=None):
         # Update job event hosts m2m from host_name, propagate to parent events.
@@ -486,7 +483,7 @@ class JobEvent(BasePlaybookEvent):
             job = self.job
             for host in hostnames:
                 host_stats = {}
-                for stat in ('changed', 'dark', 'failures', 'ok', 'processed', 'skipped'):
+                for stat in ('changed', 'dark', 'failures', 'ignored', 'ok', 'processed', 'rescued', 'skipped'):
                     try:
                         host_stats[stat] = self.event_data.get(stat, {}).get(host, 0)
                     except AttributeError:  # in case event_data[stat] isn't a dict.
@@ -580,7 +577,7 @@ class BaseCommandEvent(CreatedModifiedModel):
         editable=False,
     )
 
-    def __unicode__(self):
+    def __str__(self):
         return u'%s @ %s' % (self.get_event_display(), self.created.isoformat())
 
     @classmethod

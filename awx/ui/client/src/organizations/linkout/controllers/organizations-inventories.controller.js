@@ -46,28 +46,28 @@ export default ['$scope', '$rootScope', '$location',
             if (item.has_inventory_sources) {
                 if (item.inventory_sources_with_failures > 0) {
                     item.syncStatus = 'error';
-                    item.syncTip = item.inventory_sources_with_failures + ' groups with sync failures. Click for details';
+                    item.syncTip = item.inventory_sources_with_failures + i18n._(' groups with sync failures. Click for details');
                 } else {
                     item.syncStatus = 'successful';
-                    item.syncTip = 'No inventory sync failures. Click for details.';
+                    item.syncTip = i18n._('No inventory sync failures. Click for details.');
                 }
             } else {
                 item.syncStatus = 'na';
-                item.syncTip = 'Not configured for inventory sync.';
+                item.syncTip = i18n._('Not configured for inventory sync.');
                 item.launch_class = "btn-disabled";
             }
             if (item.has_active_failures) {
                 item.hostsStatus = 'eritemror';
-                item.hostsTip = item.hosts_with_active_failures + ' hosts with failures. Click for details.';
+                item.hostsTip = item.hosts_with_active_failures + i18n._(' hosts with failures. Click for details.');
             } else if (item.total_hosts) {
                 item.hostsStatus = 'successful';
-                item.hostsTip = 'No hosts with failures. Click for details.';
+                item.hostsTip = i18n._('No hosts with failures. Click for details.');
             } else {
                 item.hostsStatus = 'none';
-                item.hostsTip = 'Inventory contains 0 hosts.';
+                item.hostsTip = i18n._('Inventory contains 0 hosts.');
             }
 
-            item.kind_label = item.kind === '' ? 'Inventory' : (item.kind === 'smart' ? i18n._('Smart Inventory'): i18n._('Inventory'));
+            item.kind_label = item.kind === '' ? i18n._('Inventory') : (item.kind === 'smart' ? i18n._('Smart Inventory'): i18n._('Inventory'));
 
             return item;
         }
@@ -182,7 +182,7 @@ export default ['$scope', '$rootScope', '$location',
             });
             html += "</tbody>\n";
             html += "</table>\n";
-            title = "Sync Status";
+            title = i18n._("Sync Status");
             attachElem(event, html, title);
         });
 

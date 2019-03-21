@@ -123,7 +123,7 @@ module.exports = {
     },
     'credential is searchable after saving': client => {
         const credentials = client.page.credentials();
-        const row = '#credentials_table tbody tr';
+        const row = '#credentials_table .List-tableRow';
 
         credentials.section.list.section.search
             .waitForElementVisible('@input', AWX_E2E_TIMEOUT_LONG)

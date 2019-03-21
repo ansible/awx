@@ -52,6 +52,7 @@ export default ['$scope', '$rootScope', '$stateParams', 'UserForm', 'Rest',
             $scope.not_ldap_user = !$scope.ldap_user;
             master.ldap_user = $scope.ldap_user;
             $scope.socialAuthUser = (user_obj.auth.length > 0) ? true : false;
+            $scope.last_login = user_obj.last_login;
             $scope.external_account = user_obj.external_account;
 
             $scope.user_type = $scope.user_type_options[0];

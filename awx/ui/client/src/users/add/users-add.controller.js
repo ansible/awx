@@ -35,6 +35,7 @@ export default ['$scope', '$rootScope', 'UserForm', 'GenerateForm', 'Rest',
             $scope.ldap_dn = null;
             $scope.socialAuthUser = false;
             $scope.external_account = null;
+            $scope.last_login = null;
 
             Rest.setUrl(GetBasePath('users'));
             Rest.options()

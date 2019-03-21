@@ -141,18 +141,15 @@ function(NotificationsList, i18n) {
                 },
                 forks: {
                     label: i18n._('Forks'),
-                    id: 'forks-number',
                     type: 'number',
                     integer: true,
-                    min: 1,
+                    min: 0,
+                    default: 0,
                     spinner: true,
-                    'class': "input-small",
-                    column: 1,
-                    awPopOver: i18n._('The number of parallel or simultaneous processes to use while executing the playbook. Value defaults to 0. Refer to the Ansible documentation for details about the configuration file.'),
-                    placeholder: 'DEFAULT',
                     dataTitle: i18n._('Forks'),
                     dataPlacement: 'right',
-                    dataContainer: "body",
+                    dataContainer: 'body',
+                    awPopOver: "<p>" + i18n._("The number of parallel or simultaneous processes to use while executing the playbook. Value defaults to 0. Refer to the Ansible documentation for details about the configuration file.") + "</p>",
                     ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                 },
                 limit: {
@@ -270,6 +267,19 @@ function(NotificationsList, i18n) {
                     awPopOver: "<p>" + i18n._("Divide the work done by this job template into the specified number of job slices, each running the same tasks against a portion of the inventory.") + "</p>",
                     ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                 },
+                timeout: {
+                    label: i18n._('Timeout'),
+                    type: 'number',
+                    integer: true,
+                    min: 0,
+                    default: 0,
+                    spinner: true,
+                    dataTitle: i18n._('Timeout'),
+                    dataPlacement: 'right',
+                    dataContainer: 'body',
+                    awPopOver: "<p>" + i18n._("The amount of time (in seconds) to run before the task is canceled. Defaults to 0 for no job timeout.") + "</p>",
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
+                },
                 diff_mode: {
                     label: i18n._('Show Changes'),
                     type: 'toggleSwitch',
@@ -296,7 +306,6 @@ function(NotificationsList, i18n) {
                         dataPlacement: 'right',
                         dataTitle: i18n._('Enable Privilege Escalation'),
                         dataContainer: "body",
-                        labelClass: 'stack-inline',
                         ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                     }, {
                         name: 'allow_callbacks',
@@ -309,7 +318,6 @@ function(NotificationsList, i18n) {
                         dataPlacement: 'right',
                         dataTitle: i18n._('Allow Provisioning Callbacks'),
                         dataContainer: "body",
-                        labelClass: 'stack-inline',
                         ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                     }, {
                         name: 'allow_simultaneous',
@@ -320,7 +328,6 @@ function(NotificationsList, i18n) {
                         dataPlacement: 'right',
                         dataTitle: i18n._('Enable Concurrent Jobs'),
                         dataContainer: "body",
-                        labelClass: 'stack-inline',
                         ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                     }, {
                         name: 'use_fact_cache',
@@ -331,7 +338,6 @@ function(NotificationsList, i18n) {
                         dataPlacement: 'right',
                         dataTitle: i18n._('Use Fact Cache'),
                         dataContainer: "body",
-                        labelClass: 'stack-inline',
                         ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                     }]
                 },
@@ -399,6 +405,13 @@ function(NotificationsList, i18n) {
                     ngClick: 'formSave()',    //$scope.function to call on click, optional
                     ngDisabled: "job_template_form.$invalid",//true          //Disable when $pristine or $invalid, optional and when can_edit = false, for permission reasons
                     ngShow: '(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
+                },
+                launch: {
+                    component: 'at-launch-template',
+                    templateObj: 'job_template_obj',
+                    ngShow: '(job_template_obj.summary_fields.user_capabilities.start || canAddJobTemplate)',
+                    ngDisabled: 'disableLaunch || job_template_form.$dirty',
+                    showTextButton: 'true'
                 }
             },
 
@@ -433,19 +446,19 @@ function(NotificationsList, i18n) {
                             key: true,
                             label: 'User',
                             linkBase: 'users',
-                            class: 'col-lg-3 col-md-3 col-sm-3 col-xs-4'
+                            columnClass: 'col-sm-3 col-xs-4'
                         },
                         role: {
                             label: 'Role',
                             type: 'role',
                             nosort: true,
-                            class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4',
+                            columnClass: 'col-sm-4 col-xs-4',
                         },
                         team_roles: {
                             label: 'Team Roles',
                             type: 'team_roles',
                             nosort: true,
-                            class: 'col-lg-5 col-md-5 col-sm-5 col-xs-4',
+                            columnClass: 'col-sm-5 col-xs-4',
                         }
                     }
                 },

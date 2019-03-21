@@ -8,9 +8,8 @@ from pyparsing import (
     CharsNotIn,
     ParseException,
 )
-from logging import Filter, _levelNames
-
-import six
+import logging
+from logging import Filter, _nameToLevel
 
 from django.apps import apps
 from django.db import models
@@ -19,6 +18,8 @@ from django.conf import settings
 from awx.main.utils.common import get_search_fields
 
 __all__ = ['SmartFilter', 'ExternalLoggerEnabled']
+
+logger = logging.getLogger('awx.main.utils')
 
 
 class FieldFromSettings(object):
@@ -91,8 +92,7 @@ class ExternalLoggerEnabled(Filter):
             return False
 
         # Level enablement
-        if record.levelno < _levelNames[self.lvl]:
-            # logging._levelNames -> logging._nameToLevel in python 3
+        if record.levelno < _nameToLevel[self.lvl]:
             return False
 
         # Logger type enablement
@@ -155,12 +155,12 @@ class SmartFilter(object):
                 self.result = Host.objects.filter(**kwargs)
 
         def strip_quotes_traditional_logic(self, v):
-            if type(v) is six.text_type and v.startswith('"') and v.endswith('"'):
+            if type(v) is str and v.startswith('"') and v.endswith('"'):
                 return v[1:-1]
             return v
 
         def strip_quotes_json_logic(self, v):
-            if type(v) is six.text_type and v.startswith('"') and v.endswith('"') and v != u'"null"':
+            if type(v) is str and v.startswith('"') and v.endswith('"') and v != u'"null"':
                 return v[1:-1]
             return v
 
@@ -173,9 +173,25 @@ class SmartFilter(object):
               relationship refered to to see if it's a jsonb type.
         '''
         def _json_path_to_contains(self, k, v):
+            from awx.main.fields import JSONBField  # avoid a circular import
             if not k.startswith(SmartFilter.SEARCHABLE_RELATIONSHIP):
                 v = self.strip_quotes_traditional_logic(v)
                 return (k, v)
+
+            for match in JSONBField.get_lookups().keys():
+                match = '__{}'.format(match)
+                if k.endswith(match):
+                    if match == '__exact':
+                        # appending __exact is basically a no-op, because that's
+                        # what the query means if you leave it off
+                        k = k[:-len(match)]
+                    else:
+                        logger.error(
+                            'host_filter:{} does not support searching with {}'.format(
+                                SmartFilter.SEARCHABLE_RELATIONSHIP,
+                                match
+                            )
+                        )
 
             # Strip off leading relationship key
             if k.startswith(SmartFilter.SEARCHABLE_RELATIONSHIP + '__'):
@@ -206,7 +222,7 @@ class SmartFilter(object):
                 elif type(last_v) is list:
                     last_v.append(new_kv)
                 elif type(last_v) is dict:
-                    last_kv[last_kv.keys()[0]] = new_kv
+                    last_kv[list(last_kv.keys())[0]] = new_kv
 
                 last_v = new_v
                 last_kv = new_kv
@@ -216,7 +232,7 @@ class SmartFilter(object):
             if type(last_v) is list:
                 last_v.append(v)
             elif type(last_v) is dict:
-                last_kv[last_kv.keys()[0]] = v
+                last_kv[list(last_kv.keys())[0]] = v
 
             return (assembled_k, assembled_v)
 
@@ -239,7 +255,7 @@ class SmartFilter(object):
             # value
             # ="something"
             if t_len > (v_offset + 2) and t[v_offset] == "\"" and t[v_offset + 2] == "\"":
-                v = u'"' + six.text_type(t[v_offset + 1]) + u'"'
+                v = u'"' + str(t[v_offset + 1]) + u'"'
                 #v = t[v_offset + 1]
             # empty ""
             elif t_len > (v_offset + 1):
@@ -281,7 +297,11 @@ class SmartFilter(object):
             self.result = None
             i = 2
             while i < len(t[0]):
-                if not self.result:
+                '''
+                Do NOT observe self.result. It will cause the sql query to be executed.
+                We do not want that. We only want to build the query.
+                '''
+                if isinstance(self.result, type(None)):
                     self.result = t[0][0].result
                 right = t[0][i].result
                 self.result = self.execute_logic(self.result, right)
@@ -308,9 +328,9 @@ class SmartFilter(object):
         * handle key with __ in it
         '''
         filter_string_raw = filter_string
-        filter_string = six.text_type(filter_string)
+        filter_string = str(filter_string)
 
-        unicode_spaces = list(set(six.text_type(c) for c in filter_string if c.isspace()))
+        unicode_spaces = list(set(str(c) for c in filter_string if c.isspace()))
         unicode_spaces_other = unicode_spaces + [u'(', u')', u'=', u'"']
         atom = CharsNotIn(unicode_spaces_other)
         atom_inside_quotes = CharsNotIn(u'"')

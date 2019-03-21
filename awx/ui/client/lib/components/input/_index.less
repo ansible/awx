@@ -27,12 +27,17 @@
 .at-InputCheckbox {
     margin: 0;
     padding: 0;
+    display: block;
+    min-height: 20px;
 
     & > label {
+        font-weight: normal;
+
         & > input[type=checkbox] {
             height: @at-height-input;
             margin: 0;
             padding: 0;
+            float: left;
         }
 
         & > p {
@@ -315,5 +320,11 @@
             border: solid 1px @at-color-disabled;
             cursor: not-allowed;
         }
+    }
+}
+
+.at-InputGroup-container {
+    .row {
+        margin: 0;
     }
 }

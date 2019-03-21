@@ -26,6 +26,7 @@ export default [
          $scope.canEditInventory = true;
          $scope.parseType = 'yaml';
          $scope.can_edit = true;
+         $scope.disableLaunch = true;
          // apply form definition's default field values
          GenerateForm.applyDefaults(form, $scope);
 
@@ -69,7 +70,9 @@ export default [
                          data[fld] = $scope[fld];
                      }
                  }
+                 
                  data.ask_inventory_on_launch = Boolean($scope.ask_inventory_on_launch);
+                 data.ask_variables_on_launch = Boolean($scope.ask_variables_on_launch);
 
                  data.extra_vars = ToJSON($scope.parseType,
                      $scope.variables, true);

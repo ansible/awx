@@ -85,7 +85,9 @@ def job(mocker):
         'pk': 1, 'job_template.pk': 1, 'job_template.name': '',
         'created_by.pk': 1, 'created_by.username': 'admin',
         'launch_type': 'manual',
+        'verbosity': 1,
         'awx_meta_vars.return_value': {},
+        'ansible_virtualenv_path': '',
         'inventory.get_script_data.return_value': {}})
     ret.project = mocker.MagicMock(scm_revision='asdf1234')
     return ret

@@ -1,11 +1,9 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
-import six
 import random
 from decimal import Decimal
 
-from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models, connection
 from django.db.models.signals import post_save, post_delete
@@ -29,15 +27,6 @@ from awx.main.utils import get_cpu_capacity, get_mem_capacity, get_system_task_c
 from awx.main.models.mixins import RelatedJobsMixin
 
 __all__ = ('Instance', 'InstanceGroup', 'JobOrigin', 'TowerScheduleState',)
-
-
-def validate_queuename(v):
-    # kombu doesn't play nice with unicode in queue names
-    if v:
-        try:
-            '{}'.format(v.decode('utf-8'))
-        except UnicodeEncodeError:
-            raise ValidationError(_(six.text_type('{} contains unsupported characters')).format(v))
 
 
 class HasPolicyEditsMixin(HasEditsMixin):
@@ -163,11 +152,6 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         self.save(update_fields=['capacity', 'version', 'modified', 'cpu',
                                  'memory', 'cpu_capacity', 'mem_capacity'])
 
-    def clean_hostname(self):
-        validate_queuename(self.hostname)
-        return self.hostname
-
-    
 
 class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
     """A model representing a Queue/Group of AWX Instances."""
@@ -234,9 +218,6 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
     class Meta:
         app_label = 'main'
 
-    def clean_name(self):
-        validate_queuename(self.name)
-        return self.name
 
     def fit_task_to_most_remaining_capacity_instance(self, task):
         instance_most_capacity = None

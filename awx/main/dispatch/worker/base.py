@@ -4,8 +4,9 @@
 import os
 import logging
 import signal
+import sys
 from uuid import UUID
-from Queue import Empty as QueueEmpty
+from queue import Empty as QueueEmpty
 
 from django import db
 from kombu import Producer
@@ -13,7 +14,10 @@ from kombu.mixins import ConsumerMixin
 
 from awx.main.dispatch.pool import WorkerPool
 
-logger = logging.getLogger('awx.main.dispatch')
+if 'run_callback_receiver' in sys.argv:
+    logger = logging.getLogger('awx.main.commands.run_callback_receiver')
+else:
+    logger = logging.getLogger('awx.main.dispatch')
 
 
 def signame(sig):
@@ -81,7 +85,11 @@ class AWXConsumer(ConsumerMixin):
 
     def process_task(self, body, message):
         if 'control' in body:
-            return self.control(body, message)
+            try:
+                return self.control(body, message)
+            except Exception:
+                logger.exception("Exception handling control message:")
+                return
         if len(self.pool):
             if "uuid" in body and body['uuid']:
                 try:
@@ -104,7 +112,7 @@ class AWXConsumer(ConsumerMixin):
 
     def stop(self, signum, frame):
         self.should_stop = True  # this makes the kombu mixin stop consuming
-        logger.debug('received {}, stopping'.format(signame(signum)))
+        logger.warn('received {}, stopping'.format(signame(signum)))
         self.worker.on_stop()
         raise SystemExit()
 

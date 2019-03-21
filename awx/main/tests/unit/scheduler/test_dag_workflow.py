@@ -36,7 +36,8 @@ def wf_node_generator(mocker):
 def workflow_dag_1(wf_node_generator):
     g = WorkflowDAG()
     nodes = [wf_node_generator() for i in range(4)]
-    map(lambda n: g.add_node(n), nodes)
+    for n in nodes:
+        g.add_node(n)
 
     r'''
             0
@@ -67,7 +68,8 @@ class TestWorkflowDAG():
         wf_root_nodes = [wf_node_generator() for i in range(0, 10)]
         wf_leaf_nodes = [wf_node_generator() for i in range(0, 10)]
 
-        map(lambda n: g.add_node(n), wf_root_nodes + wf_leaf_nodes)
+        for n in wf_root_nodes + wf_leaf_nodes:
+            g.add_node(n)
 
         '''
         Pair up a root node with a single child via an edge
@@ -77,7 +79,8 @@ class TestWorkflowDAG():
         |   |      |
         C1  C2     Cx
         '''
-        map(lambda (i, n): g.add_edge(wf_root_nodes[i], n, 'label'), enumerate(wf_leaf_nodes))
+        for i, n in enumerate(wf_leaf_nodes):
+            g.add_edge(wf_root_nodes[i], n, 'label')
         return (g, wf_root_nodes, wf_leaf_nodes)
 
 
@@ -185,7 +188,8 @@ class TestIsWorkflowDone():
     def workflow_dag_canceled(self, wf_node_generator):
         g = WorkflowDAG()
         nodes = [wf_node_generator() for i in range(1)]
-        map(lambda n: g.add_node(n), nodes)
+        for n in nodes:
+            g.add_node(n)
         r'''
                F0
         '''
@@ -252,7 +256,8 @@ class TestBFSNodesToRun():
     def workflow_dag_canceled(self, wf_node_generator):
         g = WorkflowDAG()
         nodes = [wf_node_generator() for i in range(4)]
-        map(lambda n: g.add_node(n), nodes)
+        for n in nodes:
+            g.add_node(n)
         r'''
                C0
               / | \
@@ -279,7 +284,8 @@ class TestDocsExample():
     def complex_dag(self, wf_node_generator):
         g = WorkflowDAG()
         nodes = [wf_node_generator() for i in range(10)]
-        map(lambda n: g.add_node(n), nodes)
+        for n in nodes:
+            g.add_node(n)
 
         g.add_edge(nodes[0], nodes[1], "failure_nodes")
         g.add_edge(nodes[0], nodes[2], "success_nodes")

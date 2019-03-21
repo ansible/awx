@@ -117,7 +117,7 @@ function multiCredentialModalController(GetBasePath, qs, MultiCredentialService)
         }));
 
         const watchType = scope.$watch('credentialType', (newValue, oldValue) => {
-            if (newValue !== oldValue) {
+            if (newValue && newValue !== oldValue) {
                 fetchCredentials(parseInt(newValue));
             }
         });

@@ -98,7 +98,6 @@ function(i18n){
                 title: i18n._('Hosts'),
                 iterator: 'nested_hosts'
             },
-
         }
     };
 }];

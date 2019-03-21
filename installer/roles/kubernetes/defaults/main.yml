@@ -13,10 +13,10 @@ rabbitmq_erlang_cookie: ''
 kubernetes_base_path: "{{ local_base_config_path|default('/tmp') }}/{{ kubernetes_deployment_name }}-config"
 
 kubernetes_task_version: "{{ tower_package_version | default(dockerhub_version) }}"
-kubernetes_task_image: "{{ tower_package_name | default(dockerhub_base+'/awx_task') }}"
+kubernetes_task_image: "{{ tower_package_name | default('ansible/awx_task') }}"
 
 kubernetes_web_version: "{{ tower_package_version | default(dockerhub_version) }}"
-kubernetes_web_image: "{{ tower_package_name | default(dockerhub_base+'/awx_web') }}"
+kubernetes_web_image: "{{ tower_package_name | default('ansible/awx_web') }}"
 
 web_mem_request: 1
 web_cpu_request: 500
@@ -42,3 +42,7 @@ openshift_pg_pvc_name: postgresql
 kubernetes_deployment_name: awx
 
 kubernetes_deployment_replica_size: 1
+
+postgress_activate_wait: 60
+
+insights_url_base: "https://example.org"

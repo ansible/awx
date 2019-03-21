@@ -6,18 +6,17 @@ import re
 import sys
 import threading
 import time
-import StringIO
 import traceback
-import urllib
-
-import six
+import urllib.parse
+from io import StringIO
 
 # Django
 from django.conf import LazySettings
 from django.conf import settings, UserSettingsHolder
 from django.core.cache import cache as django_cache
 from django.core.exceptions import ImproperlyConfigured
-from django.db import ProgrammingError, OperationalError, transaction, connection
+from django.db import transaction, connection
+from django.db.utils import Error as DBError
 from django.utils.functional import cached_property
 
 # Django REST Framework
@@ -67,7 +66,7 @@ def normalize_broker_url(value):
     match = re.search('(amqp://[^:]+:)(.*)', parts[0])
     if match:
         prefix, password = match.group(1), match.group(2)
-        parts[0] = prefix + urllib.quote(password)
+        parts[0] = prefix + urllib.parse.quote(password)
     return '@'.join(parts)
 
 
@@ -90,21 +89,21 @@ def _ctit_db_wrapper(trans_safe=False):
                     logger.debug('Obtaining database settings in spite of broken transaction.')
                     transaction.set_rollback(False)
         yield
-    except (ProgrammingError, OperationalError):
+    except DBError:
         if 'migrate' in sys.argv and get_tower_migration_version() < '310':
             logger.info('Using default settings until version 3.1 migration.')
         else:
             # We want the _full_ traceback with the context
             # First we get the current call stack, which constitutes the "top",
             # it has the context up to the point where the context manager is used
-            top_stack = StringIO.StringIO()
+            top_stack = StringIO()
             traceback.print_stack(file=top_stack)
             top_lines = top_stack.getvalue().strip('\n').split('\n')
             top_stack.close()
             # Get "bottom" stack from the local error that happened
             # inside of the "with" block this wraps
             exc_type, exc_value, exc_traceback = sys.exc_info()
-            bottom_stack = StringIO.StringIO()
+            bottom_stack = StringIO()
             traceback.print_tb(exc_traceback, file=bottom_stack)
             bottom_lines = bottom_stack.getvalue().strip('\n').split('\n')
             # Glue together top and bottom where overlap is found
@@ -168,15 +167,6 @@ class EncryptedCacheProxy(object):
     def get(self, key, **kwargs):
         value = self.cache.get(key, **kwargs)
         value = self._handle_encryption(self.decrypter, key, value)
-
-        # python-memcached auto-encodes unicode on cache set in python2
-        # https://github.com/linsomniac/python-memcached/issues/79
-        # https://github.com/linsomniac/python-memcached/blob/288c159720eebcdf667727a859ef341f1e908308/memcache.py#L961
-        if six.PY2 and isinstance(value, six.binary_type):
-            try:
-                six.text_type(value)
-            except UnicodeDecodeError:
-                value = value.decode('utf-8')
         logger.debug('cache get(%r, %r) -> %r', key, empty, filter_sensitive(self.registry, key, value))
         return value
 
@@ -309,7 +299,7 @@ class SettingsWrapper(UserSettingsHolder):
             self.__dict__['_awx_conf_preload_expires'] = time.time() + SETTING_CACHE_TIMEOUT
             # Check for any settings that have been defined in Python files and
             # make those read-only to avoid overriding in the database.
-            if not self._awx_conf_init_readonly and 'migrate_to_database_settings' not in sys.argv:
+            if not self._awx_conf_init_readonly:
                 defaults_snapshot = self._get_default('DEFAULTS_SNAPSHOT')
                 for key in get_writeable_settings(self.registry):
                     init_default = defaults_snapshot.get(key, None)

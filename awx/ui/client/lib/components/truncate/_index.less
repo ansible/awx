@@ -1,15 +1,19 @@
 .at-Truncate {
-    display: flex;
-    align-items: center;
+    display: inline-block;
 
     .at-Truncate-text {
         font-family: monospace, Courier, "Courier New", "Open Sans", sans-serif;
     }
 
+    .at-Truncate-tag {
+        display: inherit;
+    }
+
     .at-Truncate-copy {
         color: @at-gray-b7;
         cursor: pointer;
-        margin-left: 10px;
+        margin: 0 20px 0 0;
+        display: inherit;
 
         i:hover {
             color: @at-blue;

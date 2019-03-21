@@ -4,7 +4,6 @@
 import os
 import re  # noqa
 import sys
-import six
 from datetime import timedelta
 
 # global settings
@@ -40,7 +39,7 @@ def IS_TESTING(argv=None):
 
 
 if "pytest" in sys.modules:
-    import mock
+    from unittest import mock
     with mock.patch('__main__.__builtins__.dir', return_value=[]):
         import ldap
 else:
@@ -252,6 +251,7 @@ TEMPLATES = [
 MIDDLEWARE_CLASSES = (  # NOQA
     'awx.main.middleware.TimingMiddleware',
     'awx.main.middleware.MigrationRanCheckMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -284,6 +284,7 @@ INSTALLED_APPS = (
     'polymorphic',
     'taggit',
     'social_django',
+    'corsheaders',
     'awx.conf',
     'awx.main',
     'awx.api',
@@ -497,11 +498,11 @@ CELERYBEAT_SCHEDULE = {
 AWX_INCONSISTENT_TASK_INTERVAL = 60 * 3
 
 AWX_CELERY_QUEUES_STATIC = [
-    six.text_type(CELERY_DEFAULT_QUEUE),
+    CELERY_DEFAULT_QUEUE,
 ]
 
 AWX_CELERY_BCAST_QUEUES_STATIC = [
-    six.text_type('tower_broadcast_all'),
+    'tower_broadcast_all',
 ]
 
 ASGI_AMQP = {

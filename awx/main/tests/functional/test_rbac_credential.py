@@ -1,6 +1,6 @@
 import pytest
 
-import mock
+from unittest import mock
 
 from awx.main.access import CredentialAccess
 from awx.main.models.credential import Credential

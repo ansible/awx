@@ -2,6 +2,7 @@ import atLibServices from '~services';
 
 import actionGroup from '~components/action/action-group.directive';
 import divider from '~components/utility/divider.directive';
+import dynamicSelect from '~components/input/dynamic-select.directive';
 import form from '~components/form/form.directive';
 import formAction from '~components/form/action.directive';
 import inputCheckbox from '~components/input/checkbox.directive';
@@ -34,6 +35,7 @@ import tab from '~components/tabs/tab.directive';
 import tabGroup from '~components/tabs/group.directive';
 import tag from '~components/tag/tag.directive';
 import toggleTag from '~components/toggle-tag/toggle-tag.directive';
+import toolbar from '~components/list/list-toolbar.directive';
 import topNavItem from '~components/layout/top-nav-item.directive';
 import truncate from '~components/truncate/truncate.directive';
 import atCodeMirror from '~components/code-mirror';
@@ -52,6 +54,7 @@ angular
     ])
     .directive('atActionGroup', actionGroup)
     .directive('atDivider', divider)
+    .directive('atDynamicSelect', dynamicSelect)
     .directive('atForm', form)
     .directive('atFormAction', formAction)
     .directive('atInputCheckbox', inputCheckbox)
@@ -69,6 +72,7 @@ angular
     .component('atLaunchTemplate', launchTemplate)
     .directive('atLayout', layout)
     .directive('atList', list)
+    .directive('atListToolbar', toolbar)
     .component('atRelaunch', relaunch)
     .directive('atRow', row)
     .directive('atRowItem', rowItem)

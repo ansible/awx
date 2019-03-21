@@ -1,13 +1,11 @@
 # Copyright (c) 2017 Ansible by Red Hat
 # All Rights Reserved.
 
-import itertools
-
 import pytest
 from django.core.exceptions import ValidationError
 
 from awx.main.utils import decrypt_field
-from awx.main.models import Credential, CredentialType, V1Credential
+from awx.main.models import Credential, CredentialType
 
 from rest_framework import serializers
 
@@ -206,10 +204,11 @@ def test_vault_validation(organization, inputs, valid):
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize('become_method, valid', zip(
-    dict(V1Credential.FIELDS['become_method'].choices).keys(),
-    itertools.repeat(True)
-) + [('invalid-choice', False)])
+@pytest.mark.parametrize('become_method, valid', [
+    ('', True),
+    ('sudo', True),
+    ('custom-plugin', True),
+])
 def test_choices_validity(become_method, valid, organization):
     inputs = {'become_method': become_method}
     cred_type = CredentialType.defaults['ssh']()
@@ -327,3 +326,61 @@ def test_credential_update_with_prior(organization_factory, credentialtype_ssh):
     assert cred.inputs['username'] == 'joe'
     assert cred.inputs['password'].startswith('$encrypted$')
     assert decrypt_field(cred, 'password') == 'testing123'
+
+
+@pytest.mark.django_db
+def test_credential_get_input(organization_factory):
+    organization = organization_factory('test').organization
+    type_ = CredentialType(
+        kind='vault',
+        name='somevault',
+        managed_by_tower=True,
+        inputs={
+            'fields': [{
+                'id': 'vault_password',
+                'type': 'string',
+                'secret': True,
+            }, {
+                'id': 'vault_id',
+                'type': 'string',
+                'secret': False
+            }, {
+                'id': 'secret',
+                'type': 'string',
+                'secret': True,
+            }]
+        }
+    )
+    type_.save()
+
+    cred = Credential(
+        organization=organization,
+        credential_type=type_,
+        name="Bob's Credential",
+        inputs={'vault_password': 'testing321'}
+    )
+    cred.save()
+    cred.full_clean()
+
+    assert isinstance(cred, Credential)
+    # verify expected exception is raised when attempting to access an unset
+    # input without providing a default
+    with pytest.raises(AttributeError):
+        cred.get_input('vault_id')
+    # verify that the provided default is used for unset inputs
+    assert cred.get_input('vault_id', default='foo') == 'foo'
+    # verify expected exception is raised when attempting to access an undefined
+    # input without providing a default
+    with pytest.raises(AttributeError):
+        cred.get_input('field_not_on_credential_type')
+    # verify that the provided default is used for undefined inputs
+    assert cred.get_input('field_not_on_credential_type', default='bar') == 'bar'
+    # verify expected exception is raised when attempting to access an unset secret
+    # input without providing a default
+    with pytest.raises(AttributeError):
+        cred.get_input('secret')
+    # verify that the provided default is used for undefined inputs
+    assert cred.get_input('secret', default='fiz') == 'fiz'
+    # verify return values for encrypted secret fields are decrypted
+    assert cred.inputs['vault_password'].startswith('$encrypted$')
+    assert cred.get_input('vault_password') == 'testing321'

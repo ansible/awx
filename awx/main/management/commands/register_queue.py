@@ -1,7 +1,6 @@
 # Copyright (c) 2017 Ansible Tower by Red Hat
 # All Rights Reserved.
 import sys
-import six
 
 from awx.main.utils.pglock import advisory_lock
 from awx.main.models import Instance, InstanceGroup
@@ -19,11 +18,11 @@ class InstanceNotFound(Exception):
 class Command(BaseCommand):
 
     def add_arguments(self, parser):
-        parser.add_argument('--queuename', dest='queuename', type=lambda s: six.text_type(s, 'utf8'),
+        parser.add_argument('--queuename', dest='queuename', type=str,
                             help='Queue to create/update')
-        parser.add_argument('--hostnames', dest='hostnames', type=lambda s: six.text_type(s, 'utf8'),
+        parser.add_argument('--hostnames', dest='hostnames', type=str,
                             help='Comma-Delimited Hosts to add to the Queue (will not remove already assigned instances)')
-        parser.add_argument('--controller', dest='controller', type=lambda s: six.text_type(s, 'utf8'),
+        parser.add_argument('--controller', dest='controller', type=str,
                             default='', help='The controlling group (makes this an isolated group)')
         parser.add_argument('--instance_percent', dest='instance_percent', type=int, default=0,
                             help='The percentage of active instances that will be assigned to this group'),
@@ -73,7 +72,7 @@ class Command(BaseCommand):
             if instance.exists():
                 instances.append(instance[0])
             else:
-                raise InstanceNotFound(six.text_type("Instance does not exist: {}").format(inst_name), changed)
+                raise InstanceNotFound("Instance does not exist: {}".format(inst_name), changed)
 
         ig.instances.add(*instances)
 
@@ -99,24 +98,24 @@ class Command(BaseCommand):
         if options.get('hostnames'):
             hostname_list = options.get('hostnames').split(",")
 
-        with advisory_lock(six.text_type('instance_group_registration_{}').format(queuename)):
+        with advisory_lock('instance_group_registration_{}'.format(queuename)):
             changed2 = False
             changed3 = False
             (ig, created, changed1) = self.get_create_update_instance_group(queuename, inst_per, inst_min)
             if created:
-                print(six.text_type("Creating instance group {}".format(ig.name)))
+                print("Creating instance group {}".format(ig.name))
             elif not created:
-                print(six.text_type("Instance Group already registered {}").format(ig.name))
+                print("Instance Group already registered {}".format(ig.name))
 
             if ctrl:
                 (ig_ctrl, changed2) = self.update_instance_group_controller(ig, ctrl)
                 if changed2:
-                    print(six.text_type("Set controller group {} on {}.").format(ctrl, queuename))
+                    print("Set controller group {} on {}.".format(ctrl, queuename))
 
             try:
                 (instances, changed3) = self.add_instances_to_group(ig, hostname_list)
                 for i in instances:
-                    print(six.text_type("Added instance {} to {}").format(i.hostname, ig.name))
+                    print("Added instance {} to {}".format(i.hostname, ig.name))
             except InstanceNotFound as e:
                 instance_not_found_err = e
 
@@ -126,4 +125,3 @@ class Command(BaseCommand):
         if instance_not_found_err:
             print(instance_not_found_err.message)
             sys.exit(1)
-

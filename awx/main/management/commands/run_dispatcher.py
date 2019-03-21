@@ -19,7 +19,7 @@ logger = logging.getLogger('awx.main.dispatch')
 
 
 def construct_bcast_queue_name(common_name):
-    return common_name.encode('utf8') + '_' + settings.CLUSTER_HOST_ID
+    return common_name + '_' + settings.CLUSTER_HOST_ID
 
 
 class Command(BaseCommand):
@@ -69,21 +69,42 @@ class Command(BaseCommand):
 
                 return TaskResult()
 
+        sched_file = '/var/lib/awx/beat.db'
         app = Celery()
         app.conf.BROKER_URL = settings.BROKER_URL
         app.conf.CELERY_TASK_RESULT_EXPIRES = False
+
+        # celery in py3 seems to have a bug where the celerybeat schedule
+        # shelve can become corrupted; we've _only_ seen this in Ubuntu and py36
+        # it can be avoided by detecting and removing the corrupted file
+        # at some point, we'll just stop using celerybeat, because it's clearly
+        # buggy, too -_-
+        #
+        # https://github.com/celery/celery/issues/4777
+        sched = AWXScheduler(schedule_filename=sched_file, app=app)
+        try:
+            sched.setup_schedule()
+        except Exception:
+            logger.exception('{} is corrupted, removing.'.format(sched_file))
+            sched._remove_db()
+        finally:
+            try:
+                sched.close()
+            except Exception:
+                logger.exception('{} failed to sync/close'.format(sched_file))
+
         beat.Beat(
             30,
             app,
-            schedule='/var/lib/awx/beat.db', scheduler_cls=AWXScheduler
+            schedule=sched_file, scheduler_cls=AWXScheduler
         ).run()
 
     def handle(self, *arg, **options):
         if options.get('status'):
-            print Control('dispatcher').status()
+            print(Control('dispatcher').status())
             return
         if options.get('running'):
-            print Control('dispatcher').running()
+            print(Control('dispatcher').running())
             return
         if options.get('reload'):
             return Control('dispatcher').control({'control': 'reload'})

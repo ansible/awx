@@ -4,6 +4,7 @@
 # All Rights Reserved.
 
 from contextlib import contextmanager
+import codecs
 from uuid import uuid4
 import time
 
@@ -12,7 +13,6 @@ from django.core.cache.backends.locmem import LocMemCache
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.translation import ugettext_lazy as _
 import pytest
-import six
 
 from awx.conf import models, fields
 from awx.conf.settings import SettingsWrapper, EncryptedCacheProxy, SETTING_CACHE_NOTSET
@@ -67,9 +67,9 @@ def test_cached_settings_unicode_is_auto_decoded(settings):
     # https://github.com/linsomniac/python-memcached/issues/79
     # https://github.com/linsomniac/python-memcached/blob/288c159720eebcdf667727a859ef341f1e908308/memcache.py#L961
 
-    value = six.u('Iñtërnâtiônàlizætiøn').encode('utf-8')  # this simulates what python-memcached does on cache.set()
+    value = 'Iñtërnâtiônàlizætiøn'  # this simulates what python-memcached does on cache.set()
     settings.cache.set('DEBUG', value)
-    assert settings.cache.get('DEBUG') == six.u('Iñtërnâtiônàlizætiøn')
+    assert settings.cache.get('DEBUG') == 'Iñtërnâtiônàlizætiøn'
 
 
 def test_read_only_setting(settings):
@@ -262,7 +262,7 @@ def test_setting_from_db_with_unicode(settings, mocker, encrypted):
         encrypted=encrypted
     )
     # this simulates a bug in python-memcached; see https://github.com/linsomniac/python-memcached/issues/79
-    value = six.u('Iñtërnâtiônàlizætiøn').encode('utf-8')
+    value = 'Iñtërnâtiônàlizætiøn'
 
     setting_from_db = mocker.Mock(id=1, key='AWX_SOME_SETTING', value=value)
     mocks = mocker.Mock(**{
@@ -272,8 +272,8 @@ def test_setting_from_db_with_unicode(settings, mocker, encrypted):
         }),
     })
     with mocker.patch('awx.conf.models.Setting.objects.filter', return_value=mocks):
-        assert settings.AWX_SOME_SETTING == six.u('Iñtërnâtiônàlizætiøn')
-        assert settings.cache.get('AWX_SOME_SETTING') == six.u('Iñtërnâtiônàlizætiøn')
+        assert settings.AWX_SOME_SETTING == 'Iñtërnâtiônàlizætiøn'
+        assert settings.cache.get('AWX_SOME_SETTING') == 'Iñtërnâtiônàlizætiøn'
 
 
 @pytest.mark.defined_in_file(AWX_SOME_SETTING='DEFAULT')
@@ -434,7 +434,7 @@ def test_sensitive_cache_data_is_encrypted(settings, mocker):
 
     def rot13(obj, attribute):
         assert obj.pk == 123
-        return getattr(obj, attribute).encode('rot13')
+        return codecs.encode(getattr(obj, attribute), 'rot_13')
 
     native_cache = LocMemCache(str(uuid4()), {})
     cache = EncryptedCacheProxy(
@@ -471,7 +471,7 @@ def test_readonly_sensitive_cache_data_is_encrypted(settings):
 
     def rot13(obj, attribute):
         assert obj.pk is None
-        return getattr(obj, attribute).encode('rot13')
+        return codecs.encode(getattr(obj, attribute), 'rot_13')
 
     native_cache = LocMemCache(str(uuid4()), {})
     cache = EncryptedCacheProxy(

@@ -1,5 +1,5 @@
 import pytest
-import mock
+from unittest import mock
 from datetime import timedelta
 from awx.main.scheduler import TaskManager
 from awx.main.models import InstanceGroup, WorkflowJob
@@ -82,14 +82,14 @@ def test_multi_group_with_shared_dependency(instance_factory, default_instance_g
 
 @pytest.mark.django_db
 def test_workflow_job_no_instancegroup(workflow_job_template_factory, default_instance_group, mocker):
-        wfjt = workflow_job_template_factory('anicedayforawalk').workflow_job_template
-        wfj = WorkflowJob.objects.create(workflow_job_template=wfjt)
-        wfj.status = "pending"
-        wfj.save()
-        with mocker.patch("awx.main.scheduler.TaskManager.start_task"):
-            TaskManager().schedule()
-            TaskManager.start_task.assert_called_once_with(wfj, None, [], None)
-            assert wfj.instance_group is None
+    wfjt = workflow_job_template_factory('anicedayforawalk').workflow_job_template
+    wfj = WorkflowJob.objects.create(workflow_job_template=wfjt)
+    wfj.status = "pending"
+    wfj.save()
+    with mocker.patch("awx.main.scheduler.TaskManager.start_task"):
+        TaskManager().schedule()
+        TaskManager.start_task.assert_called_once_with(wfj, None, [], None)
+        assert wfj.instance_group is None
 
 
 @pytest.mark.django_db

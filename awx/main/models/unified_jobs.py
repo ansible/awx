@@ -2,7 +2,8 @@
 # All Rights Reserved.
 
 # Python
-from StringIO import StringIO
+from io import StringIO
+import codecs
 import json
 import logging
 import os
@@ -11,7 +12,6 @@ import socket
 import subprocess
 import tempfile
 from collections import OrderedDict
-import six
 
 # Django
 from django.conf import settings
@@ -350,10 +350,11 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         validated_kwargs = kwargs.copy()
         if unallowed_fields:
             if parent_field_name is None:
-                logger.warn(six.text_type('Fields {} are not allowed as overrides to spawn from {}.').format(
-                    six.text_type(', ').join(unallowed_fields), self
+                logger.warn('Fields {} are not allowed as overrides to spawn from {}.'.format(
+                    ', '.join(unallowed_fields), self
                 ))
-            map(validated_kwargs.pop, unallowed_fields)
+            for f in unallowed_fields:
+                validated_kwargs.pop(f)
 
         unified_job = copy_model_by_class(self, unified_job_class, fields, validated_kwargs)
 
@@ -735,7 +736,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
     def _resources_sufficient_for_launch(self):
         return True
 
-    def __unicode__(self):
+    def __str__(self):
         return u'%s-%s-%s' % (self.created, self.id, self.status)
 
     @property
@@ -900,7 +901,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
             parent = getattr(self, self._get_parent_field_name())
         if parent is None:
             return
-        valid_fields = parent.get_ask_mapping().keys()
+        valid_fields = list(parent.get_ask_mapping().keys())
         # Special cases allowed for workflows
         if hasattr(self, 'extra_vars'):
             valid_fields.extend(['survey_passwords', 'extra_vars'])
@@ -991,9 +992,11 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
             if not os.path.exists(settings.JOBOUTPUT_ROOT):
                 os.makedirs(settings.JOBOUTPUT_ROOT)
             fd = tempfile.NamedTemporaryFile(
+                mode='w',
                 prefix='{}-{}-'.format(self.model_to_str(), self.pk),
                 suffix='.out',
-                dir=settings.JOBOUTPUT_ROOT
+                dir=settings.JOBOUTPUT_ROOT,
+                encoding='utf-8'
             )
 
         # Before the addition of event-based stdout, older versions of
@@ -1008,7 +1011,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
             fd.write(legacy_stdout_text)
             if hasattr(fd, 'name'):
                 fd.flush()
-                return open(fd.name, 'r')
+                return codecs.open(fd.name, 'r', encoding='utf-8')
             else:
                 # we just wrote to this StringIO, so rewind it
                 fd.seek(0)
@@ -1030,9 +1033,15 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
                     # don't bother actually fetching the data
                     total = self.get_event_queryset().aggregate(
                         total=models.Sum(models.Func(models.F('stdout'), function='LENGTH'))
-                    )['total']
+                    )['total'] or 0
                     if total > max_supported:
                         raise StdoutMaxBytesExceeded(total, max_supported)
+
+                # psycopg2's copy_expert writes bytes, but callers of this
+                # function assume a str-based fd will be returned; decode
+                # .write() calls on the fly to maintain this interface
+                _write = fd.write
+                fd.write = lambda s: _write(smart_text(s))
 
                 cursor.copy_expert(
                     "copy (select stdout from {} where {}={} order by start_line) to stdout".format(
@@ -1048,7 +1057,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
                     # up escaped line sequences
                     fd.flush()
                     subprocess.Popen("sed -i 's/\\\\r\\\\n/\\n/g' {}".format(fd.name), shell=True).wait()
-                    return open(fd.name, 'r')
+                    return codecs.open(fd.name, 'r', encoding='utf-8')
                 else:
                     # If we're dealing with an in-memory string buffer, use
                     # string.replace()
@@ -1063,7 +1072,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         return content
 
     def _result_stdout_raw(self, redact_sensitive=False, escape_ascii=False):
-        content = self.result_stdout_raw_handle().read().decode('utf-8')
+        content = self.result_stdout_raw_handle().read()
         if redact_sensitive:
             content = UriCleaner.remove_sensitive(content)
         if escape_ascii:
@@ -1096,7 +1105,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
             else:
                 end_actual = len(stdout_lines)
 
-        return_buffer = return_buffer.getvalue().decode('utf-8')
+        return_buffer = return_buffer.getvalue()
         if redact_sensitive:
             return_buffer = UriCleaner.remove_sensitive(return_buffer)
         if escape_ascii:
@@ -1295,9 +1304,9 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
                     'dispatcher', self.execution_node
                 ).running(timeout=timeout)
             except socket.timeout:
-                logger.error(six.text_type(
-                    'could not reach dispatcher on {} within {}s'
-                ).format(self.execution_node, timeout))
+                logger.error('could not reach dispatcher on {} within {}s'.format(
+                    self.execution_node, timeout
+                ))
                 running = False
         return running
 
@@ -1314,7 +1323,8 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
     def cancel(self, job_explanation=None, is_chain=False):
         if self.can_cancel:
             if not is_chain:
-                map(lambda x: x.cancel(job_explanation=self._build_job_explanation(), is_chain=True), self.get_jobs_fail_chain())
+                for x in self.get_jobs_fail_chain():
+                    x.cancel(job_explanation=self._build_job_explanation(), is_chain=True)
 
             if not self.cancel_flag:
                 self.cancel_flag = True
@@ -1363,14 +1373,13 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
 
         created_by = getattr_dne(self, 'created_by')
 
-        if not created_by:
-            wj = self.get_workflow_job()
-            if wj:
-                for name in ('awx', 'tower'):
-                    r['{}_workflow_job_id'.format(name)] = wj.pk
-                    r['{}_workflow_job_name'.format(name)] = wj.name
-                created_by = getattr_dne(wj, 'created_by')
+        wj = self.get_workflow_job()
+        if wj:
+            for name in ('awx', 'tower'):
+                r['{}_workflow_job_id'.format(name)] = wj.pk
+                r['{}_workflow_job_name'.format(name)] = wj.name
 
+        if not created_by:
             schedule = getattr_dne(self, 'schedule')
             if schedule:
                 for name in ('awx', 'tower'):

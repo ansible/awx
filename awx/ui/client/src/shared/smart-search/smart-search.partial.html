@@ -7,7 +7,7 @@
                 <input class="SmartSearch-input" ng-model="searchTerm" placeholder="{{searchPlaceholder}}"
                 ng-disabled="disableSearch">
             </form>
-            <div type="submit" class="SmartSearch-searchButton" ng-class="{'SmartSearch-searchButton--disabled': !searchTerm || searchTerm === ''}" ng-click="addTerms(searchTerm)">
+            <div class="SmartSearch-searchButton" ng-class="{'SmartSearch-searchButton--disabled': !searchTerm || searchTerm === ''}" ng-click="addTerms(searchTerm)">
                 <i class="fa fa-search"></i>
             </div>
         </div>

@@ -3,12 +3,13 @@
 
 # Python
 import datetime
+import time
+import itertools
 import logging
 import re
 import copy
-from urlparse import urljoin
 import os.path
-import six
+from urllib.parse import urljoin
 
 # Django
 from django.conf import settings
@@ -32,13 +33,20 @@ from awx.main.fields import (
     SmartFilterField,
 )
 from awx.main.managers import HostManager
-from awx.main.models.base import * # noqa
+from awx.main.models.base import (
+    BaseModel,
+    CommonModelNameNotUnique,
+    VarsDictProperty,
+    CLOUD_INVENTORY_SOURCES,
+    prevent_search
+)
 from awx.main.models.events import InventoryUpdateEvent
-from awx.main.models.unified_jobs import * # noqa
+from awx.main.models.unified_jobs import UnifiedJob, UnifiedJobTemplate
 from awx.main.models.mixins import (
     ResourceMixin,
     TaskManagerInventoryUpdateMixin,
     RelatedJobsMixin,
+    CustomVirtualEnvMixin,
 )
 from awx.main.models.notifications import (
     NotificationTemplate,
@@ -237,7 +245,7 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
         hosts_kw = dict()
         if not show_all:
             hosts_kw['enabled'] = True
-        fetch_fields = ['name', 'id', 'variables']
+        fetch_fields = ['name', 'id', 'variables', 'inventory_id']
         if towervars:
             fetch_fields.append('enabled')
         hosts = self.hosts.filter(**hosts_kw).order_by('name').only(*fetch_fields)
@@ -342,9 +350,13 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
             host_updates = hosts_to_update.setdefault(host_pk, {})
             host_updates['has_inventory_sources'] = False
         # Now apply updates to hosts where needed (in batches).
-        all_update_pks = hosts_to_update.keys()
-        for offset in xrange(0, len(all_update_pks), 500):
-            update_pks = all_update_pks[offset:(offset + 500)]
+        all_update_pks = list(hosts_to_update.keys())
+
+        def _chunk(items, chunk_size):
+            for i, group in itertools.groupby(enumerate(items), lambda x: x[0] // chunk_size):
+                yield (g[1] for g in group)
+
+        for update_pks in _chunk(all_update_pks, 500):
             for host in hosts_qs.filter(pk__in=update_pks):
                 host_updates = hosts_to_update[host.pk]
                 for field, value in host_updates.items():
@@ -411,12 +423,12 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
                 failed_group_pks.add(group_pk)
 
         # Now apply updates to each group as needed (in batches).
-        all_update_pks = groups_to_update.keys()
-        for offset in xrange(0, len(all_update_pks), 500):
+        all_update_pks = list(groups_to_update.keys())
+        for offset in range(0, len(all_update_pks), 500):
             update_pks = all_update_pks[offset:(offset + 500)]
             for group in self.groups.filter(pk__in=update_pks):
                 group_updates = groups_to_update[group.pk]
-                for field, value in group_updates.items():
+                for field, value in list(group_updates.items()):
                     if getattr(group, field) != value:
                         setattr(group, field, value)
                     else:
@@ -428,7 +440,8 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
         '''
         Update model fields that are computed from database relationships.
         '''
-        logger.debug("Going to update inventory computed fields")
+        logger.debug("Going to update inventory computed fields, pk={0}".format(self.pk))
+        start_time = time.time()
         if update_hosts:
             self.update_host_computed_fields()
         if update_groups:
@@ -456,7 +469,7 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
         }
         # CentOS python seems to have issues clobbering the inventory on poor timing during certain operations
         iobj = Inventory.objects.get(id=self.id)
-        for field, value in computed_fields.items():
+        for field, value in list(computed_fields.items()):
             if getattr(iobj, field) != value:
                 setattr(iobj, field, value)
                 # update in-memory object
@@ -465,7 +478,8 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
                 computed_fields.pop(field)
         if computed_fields:
             iobj.save(update_fields=computed_fields.keys())
-        logger.debug("Finished updating inventory computed fields")
+        logger.debug("Finished updating inventory computed fields, pk={0}, in "
+                     "{1:.3f} seconds".format(self.pk, time.time() - start_time))
 
     def websocket_emit_status(self, status):
         connection.on_commit(lambda: emit_channel_notification(
@@ -1347,7 +1361,7 @@ class InventorySourceOptions(BaseModel):
     source_vars_dict = VarsDictProperty('source_vars')
 
     def clean_instance_filters(self):
-        instance_filters = six.text_type(self.instance_filters or '')
+        instance_filters = str(self.instance_filters or '')
         if self.source == 'ec2':
             invalid_filters = []
             instance_filter_re = re.compile(r'^((tag:.+)|([a-z][a-z\.-]*[a-z]))=.*$')
@@ -1373,7 +1387,7 @@ class InventorySourceOptions(BaseModel):
             return ''
 
     def clean_group_by(self):
-        group_by = six.text_type(self.group_by or '')
+        group_by = str(self.group_by or '')
         if self.source == 'ec2':
             get_choices = getattr(self, 'get_%s_group_by_choices' % self.source)
             valid_choices = [x[0] for x in get_choices()]
@@ -1530,7 +1544,7 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, RelatedJobsMix
             if '_eager_fields' not in kwargs:
                 kwargs['_eager_fields'] = {}
             if 'name' not in kwargs['_eager_fields']:
-                name = six.text_type('{} - {}').format(self.inventory.name, self.name)
+                name = '{} - {}'.format(self.inventory.name, self.name)
                 name_field = self._meta.get_field('name')
                 if len(name) > name_field.max_length:
                     name = name[:name_field.max_length]
@@ -1614,7 +1628,7 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, RelatedJobsMix
         return InventoryUpdate.objects.filter(inventory_source=self)
 
 
-class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, TaskManagerInventoryUpdateMixin):
+class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, TaskManagerInventoryUpdateMixin, CustomVirtualEnvMixin):
     '''
     Internal job for tracking inventory updates from external sources.
     '''
@@ -1636,6 +1650,10 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
         on_delete=models.CASCADE,
     )
     license_error = models.BooleanField(
+        default=False,
+        editable=False,
+    )
+    org_host_limit_error = models.BooleanField(
         default=False,
         editable=False,
     )
@@ -1732,6 +1750,18 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
         if not selected_groups:
             return self.global_instance_groups
         return selected_groups
+
+    @property
+    def ansible_virtualenv_path(self):
+        if self.inventory_source and self.inventory_source.source_project:
+            project = self.inventory_source.source_project
+            if project and project.custom_virtualenv:
+                return project.custom_virtualenv
+        if self.inventory_source and self.inventory_source.inventory:
+            organization = self.inventory_source.inventory.organization
+            if organization and organization.custom_virtualenv:
+                return organization.custom_virtualenv
+        return settings.ANSIBLE_VENV_PATH
 
     def cancel(self, job_explanation=None, is_chain=False):
         res = super(InventoryUpdate, self).cancel(job_explanation=job_explanation, is_chain=is_chain)

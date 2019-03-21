@@ -38,7 +38,6 @@ function InventoriesList($scope,
 
     function processInventoryRow(inventory) {
         inventory.launch_class = "";
-        inventory.host_status_class = "Inventories-hostStatus";
 
         if (inventory.has_inventory_sources) {
             inventory.copyTip = i18n._('Inventories with sources cannot be copied');
@@ -158,7 +157,7 @@ function InventoriesList($scope,
                     resourceName: $filter('sanitize')(name),
                     body: deleteModalBody,
                     action: action,
-                    actionText: 'DELETE'
+                    actionText: i18n._('DELETE')
                 });
             });
     };

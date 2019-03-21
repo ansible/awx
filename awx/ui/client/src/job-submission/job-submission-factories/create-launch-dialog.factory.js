@@ -1,5 +1,5 @@
 export default
-    function CreateLaunchDialog($compile, CreateDialog, Wait, ParseTypeChange) {
+    function CreateLaunchDialog($compile, CreateDialog, Wait, ParseTypeChange, i18n) {
         return function(params) {
             var buttons,
             scope = params.scope,
@@ -21,7 +21,7 @@ export default
             }
 
             buttons = [{
-                label: "Cancel",
+                label: i18n._("Cancel"),
                 onClick: function() {
                     $('#password-modal').dialog('close');
                     // scope.$emit('CancelJob');
@@ -30,7 +30,7 @@ export default
                 "class": "btn btn-default",
                 "id": "password-cancel-button"
             },{
-                label: "Launch",
+                label: i18n._("Launch"),
                 onClick: function() {
                     scope.$emit(callback);
                     $('#password-modal').dialog('close');
@@ -46,7 +46,7 @@ export default
                 width: 620,
                 height: "auto",
                 minWidth: 500,
-                title: 'Launch Configuration',
+                title: i18n._('Launch Configuration'),
                 callback: 'DialogReady',
                 onOpen: function(){
                     Wait('stop');
@@ -69,5 +69,6 @@ CreateLaunchDialog.$inject =
     [   '$compile',
         'CreateDialog',
         'Wait',
-        'ParseTypeChange'
+        'ParseTypeChange',
+        'i18n'
     ];

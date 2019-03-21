@@ -10,12 +10,12 @@ export default [
     'Wait', 'Empty', 'ToJSON', 'initSurvey', '$state', 'CreateSelect2',
     'ParseVariableString', 'TemplatesService', 'Rest', 'ToggleNotification',
     'OrgAdminLookup', 'availableLabels', 'selectedLabels', 'workflowJobTemplateData', 'i18n',
-    'workflowLaunch', '$transitions', 'WorkflowJobTemplateModel', 'Inventory',
+    'workflowLaunch', '$transitions', 'WorkflowJobTemplateModel', 'Inventory', 'isNotificationAdmin',
     function($scope, $stateParams, WorkflowForm, GenerateForm, Alert,
         ProcessErrors, GetBasePath, $q, ParseTypeChange, Wait, Empty,
         ToJSON, SurveyControllerInit, $state, CreateSelect2, ParseVariableString,
         TemplatesService, Rest, ToggleNotification, OrgAdminLookup, availableLabels, selectedLabels, workflowJobTemplateData, i18n,
-        workflowLaunch, $transitions, WorkflowJobTemplate, Inventory
+        workflowLaunch, $transitions, WorkflowJobTemplate, Inventory, isNotificationAdmin
     ) {
 
         $scope.missingTemplates = _.has(workflowLaunch, 'node_templates_missing') && workflowLaunch.node_templates_missing.length > 0 ? true : false;
@@ -25,6 +25,8 @@ export default [
                 $scope.canAddWorkflowJobTemplate = false;
             }
         });
+
+        $scope.isNotificationAdmin = isNotificationAdmin || false;
 
         const criteriaObj = {
             from: (state) => state.name === 'templates.editWorkflowJobTemplate.workflowMaker',
@@ -54,6 +56,7 @@ export default [
         $scope.parseType = 'yaml';
         $scope.includeWorkflowMaker = false;
         $scope.ask_inventory_on_launch = workflowJobTemplateData.ask_inventory_on_launch;
+        $scope.ask_variables_on_launch = (workflowJobTemplateData.ask_variables_on_launch) ? true : false;
 
         if (Inventory){
             $scope.inventory = Inventory.id;
@@ -90,6 +93,7 @@ export default [
                 }
 
                 data.ask_inventory_on_launch = Boolean($scope.ask_inventory_on_launch);
+                data.ask_variables_on_launch = Boolean($scope.ask_variables_on_launch);
 
                 data.extra_vars = ToJSON($scope.parseType,
                     $scope.variables, true);
@@ -238,13 +242,6 @@ export default [
             });
         };
 
-        // Select2-ify the lables input
-        CreateSelect2({
-            element:'#workflow_job_template_labels',
-            multiple: true,
-            addNew: true
-        });
-
         SurveyControllerInit({
             scope: $scope,
             parent_scope: $scope,
@@ -259,11 +256,28 @@ export default [
             .map(i => ({id: i.id + "",
                 test: i.name}));
 
+        // Select2-ify the lables input
         CreateSelect2({
             element:'#workflow_job_template_labels',
             multiple: true,
             addNew: true,
-            opts: opts
+            opts
+        }).then(() => {
+            // updates based on lookups will initially set the form as dirty.
+            // we need to set it as pristine when it contains the values given by the api
+            // so that we can enable launching when the two are the same
+            $scope.workflow_job_template_form.$setPristine();
+            // this is used to set the overall form as dirty for the values
+            // that don't actually set this internally (lookups, toggles and code mirrors).
+            $scope.$watchGroup([
+                'organization',
+                'inventory',
+                'variables'
+            ], (val, prevVal) => {
+                if (!_.isEqual(val, prevVal)) {
+                    $scope.workflow_job_template_form.$setDirty();
+                }
+            });
         });
 
         $scope.workflowVisualizerTooltip = i18n._("Click here to open the workflow visualizer.");

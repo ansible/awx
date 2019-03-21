@@ -3,6 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
+import { N_ } from '../../i18n';
 
 import adhoc from './adhoc/main';
 import group from './related/groups/main';
@@ -294,6 +295,78 @@ angular.module('inventory', [
                 let relatedHostCompletedJobs = _.cloneDeep(hostCompletedJobsRoute);
                 relatedHostCompletedJobs.name = 'inventories.edit.hosts.edit.completed_jobs';
 
+                let inventoryRootGroupsList = _.cloneDeep(inventoryGroupsList);
+                inventoryRootGroupsList.name = "inventories.edit.rootGroups";
+                inventoryRootGroupsList.url = "/root_groups?{group_search:queryset}",
+                inventoryRootGroupsList.ncyBreadcrumb.label = N_("ROOT GROUPS");// jshint ignore:line
+                inventoryRootGroupsList.resolve.listDefinition = ['GroupList', (list) => {
+                    const rootGroupList = _.cloneDeep(list);
+                    rootGroupList.basePath = 'api/v2/inventories/{{$stateParams.inventory_id}}/root_groups/';
+                    rootGroupList.fields.name.uiSref = "inventories.edit.rootGroups.edit({group_id:group.id})";
+                    return rootGroupList;
+                }];
+
+                let inventoryRootGroupsAdd = _.cloneDeep(inventoryGroupsAdd);
+                inventoryRootGroupsAdd.name = "inventories.edit.rootGroups.add";
+                inventoryRootGroupsAdd.ncyBreadcrumb.parent = "inventories.edit.rootGroups";
+
+                let inventoryRootGroupsEdit = _.cloneDeep(inventoryGroupsEdit);
+                inventoryRootGroupsEdit.name = "inventories.edit.rootGroups.edit";
+                inventoryRootGroupsEdit.ncyBreadcrumb.parent = "inventories.edit.rootGroups";
+                inventoryRootGroupsEdit.views = {
+                    'groupForm@inventories': {
+                        templateProvider: function(GenerateForm, GroupForm) {
+                            let form = _.cloneDeep(GroupForm);
+                            form.activeEditState = 'inventories.edit.rootGroups.edit';
+                            form.detailsClick = "$state.go('inventories.edit.rootGroups.edit')";
+                            form.parent = 'inventories.edit.rootGroups';
+                            form.related.nested_groups.ngClick = "$state.go('inventories.edit.rootGroups.edit.nested_groups')";
+                            form.related.nested_hosts.ngClick = "$state.go('inventories.edit.rootGroups.edit.nested_hosts')";
+
+                            return GenerateForm.buildHTML(form, {
+                                mode: 'edit',
+                                related: false
+                            });
+                        },
+                        controller: 'GroupEditController'
+                    }
+                };
+                inventoryGroupsEdit.views = {
+                    'groupForm@inventories': {
+                        templateProvider: function(GenerateForm, GroupForm) {
+                            let form = GroupForm;
+
+                            return GenerateForm.buildHTML(form, {
+                                mode: 'edit',
+                                related: false
+                            });
+                        },
+                        controller: 'GroupEditController'
+                    }
+                };
+
+                let rootGroupNestedGroupsRoute = _.cloneDeep(groupNestedGroupsRoute);
+                rootGroupNestedGroupsRoute.name = 'inventories.edit.rootGroups.edit.nested_groups';
+                rootGroupNestedGroupsRoute.ncyBreadcrumb.parent = "inventories.edit.rootGroups.edit";
+
+                let rootNestedGroupsAdd = _.cloneDeep(nestedGroupsAdd);
+                rootNestedGroupsAdd.name = "inventories.edit.rootGroups.edit.nested_groups.add";
+                rootNestedGroupsAdd.ncyBreadcrumb.parent = "inventories.edit.groups.edit.nested_groups";
+
+                let rootGroupNestedGroupsAssociateRoute = _.cloneDeep(groupNestedGroupsAssociateRoute);
+                rootGroupNestedGroupsAssociateRoute.name = 'inventories.edit.rootGroups.edit.nested_groups.associate';
+
+                let rootGroupNestedHostsRoute = _.cloneDeep(nestedHostsRoute);
+                rootGroupNestedHostsRoute.name = 'inventories.edit.rootGroups.edit.nested_hosts';
+                rootGroupNestedHostsRoute.ncyBreadcrumb.parent = "inventories.edit.rootGroups.edit";
+
+                let rootNestedHostsAdd = _.cloneDeep(nestedHostsAddRoute);
+                rootNestedHostsAdd.name = "inventories.edit.rootGroups.edit.nested_hosts.add";
+                rootNestedHostsAdd.ncyBreadcrumb.parent = "inventories.edit.rootGroups.edit.nested_hosts";
+
+                let rootGroupNestedHostsAssociateRoute = _.cloneDeep(nestedHostsAssociateRoute);
+                rootGroupNestedHostsAssociateRoute.name = 'inventories.edit.rootGroups.edit.nested_hosts.associate';
+
                 return Promise.all([
                     standardInventoryAdd,
                     standardInventoryEdit,
@@ -315,10 +388,16 @@ angular.module('inventory', [
                             stateExtender.buildDefinition(relatedHostsAnsibleFacts),
                             stateExtender.buildDefinition(relatedHostsInsights),
                             stateExtender.buildDefinition(inventoryGroupsList),
+                            stateExtender.buildDefinition(inventoryRootGroupsList),
                             stateExtender.buildDefinition(inventoryGroupsAdd),
+                            stateExtender.buildDefinition(rootNestedGroupsAdd),
+                            stateExtender.buildDefinition(inventoryRootGroupsAdd),
                             stateExtender.buildDefinition(inventoryGroupsEdit),
+                            stateExtender.buildDefinition(inventoryRootGroupsEdit),
                             stateExtender.buildDefinition(groupNestedGroupsRoute),
+                            stateExtender.buildDefinition(rootGroupNestedGroupsRoute),
                             stateExtender.buildDefinition(nestedHostsRoute),
+                            stateExtender.buildDefinition(rootGroupNestedHostsRoute),
                             stateExtender.buildDefinition(inventoryHosts),
                             stateExtender.buildDefinition(smartInventoryHosts),
                             stateExtender.buildDefinition(inventoryHostsAdd),
@@ -338,10 +417,13 @@ angular.module('inventory', [
                             stateExtender.buildDefinition(addSourceProject),
                             stateExtender.buildDefinition(editSourceProject),
                             stateExtender.buildDefinition(groupNestedGroupsAssociateRoute),
+                            stateExtender.buildDefinition(rootGroupNestedGroupsAssociateRoute),
                             stateExtender.buildDefinition(hostNestedGroupsAssociateRoute),
                             stateExtender.buildDefinition(nestedHostsAssociateRoute),
+                            stateExtender.buildDefinition(rootGroupNestedHostsAssociateRoute),
                             stateExtender.buildDefinition(nestedGroupsAdd),
                             stateExtender.buildDefinition(nestedHostsAddRoute),
+                            stateExtender.buildDefinition(rootNestedHostsAdd),
                             stateExtender.buildDefinition(relatedHostCompletedJobs)
                         ])
                     };

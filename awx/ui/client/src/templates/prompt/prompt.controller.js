@@ -1,8 +1,5 @@
-export default [ 'Rest', 'GetBasePath', 'ProcessErrors', 'CredentialTypeModel', 'TemplatesStrings',
-    function (Rest, GetBasePath, ProcessErrors, CredentialType, strings) {
-
-        // strings.get('deleteResource.HEADER')
-        // ${strings.get('deleteResource.CONFIRM', 'template')}
+export default [ 'ProcessErrors', 'CredentialTypeModel', 'TemplatesStrings', '$filter',
+    function (ProcessErrors, CredentialType, strings, $filter) {
 
         const vm = this || {};
 
@@ -51,16 +48,14 @@ export default [ 'Rest', 'GetBasePath', 'ProcessErrors', 'CredentialTypeModel', 
 
                     let credentialType = new CredentialType();
 
-                    credentialType.http.get()
+                    credentialType.http.get({ params: { page_size: 200 }})
                     .then( (response) => {
                         vm.promptDataClone.prompts.credentials.credentialTypes = {};
                         vm.promptDataClone.prompts.credentials.credentialTypeOptions = [];
-                        let machineCredTypeId = null;
                         response.data.results.forEach((credentialTypeRow => {
                             vm.promptDataClone.prompts.credentials.credentialTypes[credentialTypeRow.id] = credentialTypeRow.kind;
                             if(credentialTypeRow.kind.match(/^(cloud|net|ssh|vault)$/)) {
                                 if(credentialTypeRow.kind === 'ssh') {
-                                    machineCredTypeId = credentialTypeRow.id;
                                     vm.promptDataClone.prompts.credentials.credentialKind = credentialTypeRow.id.toString();
                                 }
                                 vm.promptDataClone.prompts.credentials.credentialTypeOptions.push({
@@ -186,7 +181,7 @@ export default [ 'Rest', 'GetBasePath', 'ProcessErrors', 'CredentialTypeModel', 
                         }
                         vm.steps.preview.tab.order = order;
                         vm.steps.preview.tab._disabled = vm.readOnlyPrompts ? false : true;
-                        modal.show('PROMPT');
+                        modal.show($filter('sanitize')(vm.promptDataClone.templateName));
                         vm.promptData.triggerModalOpen = false;
 
                         modal.onClose = () => {

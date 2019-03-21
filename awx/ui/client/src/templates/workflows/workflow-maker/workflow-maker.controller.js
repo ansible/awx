@@ -5,12 +5,12 @@
  *************************************************/
 
 export default ['$scope', 'TemplatesService',
-    'ProcessErrors', 'CreateSelect2', '$q', 'JobTemplateModel',
-    'Empty', 'PromptService', 'Rest', 'TemplatesStrings', 'WorkflowChartService',
+    'ProcessErrors', '$q',
+    'PromptService', 'TemplatesStrings', 'WorkflowChartService',
     'Wait', '$state',
     function ($scope, TemplatesService,
-        ProcessErrors, CreateSelect2, $q, JobTemplate,
-        Empty, PromptService, Rest, TemplatesStrings, WorkflowChartService,
+        ProcessErrors, $q,
+        PromptService, TemplatesStrings, WorkflowChartService,
         Wait, $state
     ) {
 
@@ -30,6 +30,13 @@ export default ['$scope', 'TemplatesService',
         $scope.formState = {
             'showNodeForm': false,
             'showLinkForm': false
+        };
+
+        $scope.workflowChangesUnsaved = false;
+        $scope.workflowChangesStarted = false;
+
+        $scope.cancelUnsavedChanges = () => {
+            $scope.unsavedChangesVisible = false;
         };
 
         let getNodes = () => {
@@ -71,6 +78,8 @@ export default ['$scope', 'TemplatesService',
         $scope.saveWorkflowMaker = () => {
 
             Wait('start');
+
+            $scope.unsavedChangesVisible = false;
 
             let buildSendableNodeData = (node) => {
                 // Create the node
@@ -159,6 +168,11 @@ export default ['$scope', 'TemplatesService',
                                     });
                                 });
                             }
+                        }).catch(({ data, status }) => {
+                            Wait('stop');
+                            ProcessErrors($scope, data, status, null, {
+                                hdr: $scope.strings.get('error.HEADER')
+                            });
                         }));
                     } else if (nodeRef[workflowMakerNodeId].isEdited) {
                         editPromises.push(TemplatesService.editWorkflowNode({
@@ -359,15 +373,29 @@ export default ['$scope', 'TemplatesService',
                                 return $q.all(associatePromises.concat(credentialPromises))
                                     .then(() => {
                                         Wait('stop');
+                                        $scope.workflowChangesUnsaved = false;
+                                        $scope.workflowChangesStarted = false;
                                         $scope.closeDialog();
+                                    }).catch(({ data, status }) => {
+                                        Wait('stop');
+                                        ProcessErrors($scope, data, status, null, {
+                                            hdr: $scope.strings.get('error.HEADER')
+                                        });
                                     });
                             }).catch(({
                                 data,
                                 status
                             }) => {
                                 Wait('stop');
-                                ProcessErrors($scope, data, status, null, {});
+                                ProcessErrors($scope, data, status, null, {
+                                    hdr: $scope.strings.get('error.HEADER')
+                                });
                             });
+                    }).catch(({ data, status }) => {
+                        Wait('stop');
+                        ProcessErrors($scope, data, status, null, {
+                            hdr: $scope.strings.get('error.HEADER')
+                        });
                     });
 
             } else {
@@ -379,8 +407,15 @@ export default ['$scope', 'TemplatesService',
                 $q.all(deletePromises)
                     .then(() => {
                         Wait('stop');
+                        $scope.workflowChangesUnsaved = false;
+                        $scope.workflowChangesStarted = false;
                         $scope.closeDialog();
                         $state.transitionTo('templates');
+                    }).catch(({ data, status }) => {
+                        Wait('stop');
+                        ProcessErrors($scope, data, status, null, {
+                            hdr: $scope.strings.get('error.HEADER')
+                        });
                     });
             }
         };
@@ -388,6 +423,7 @@ export default ['$scope', 'TemplatesService',
         /* ADD NODE FUNCTIONS */
 
         $scope.startAddNodeWithoutChild = (parent) => {
+            $scope.workflowChangesStarted = true;
             if ($scope.nodeConfig) {
                 $scope.cancelNodeForm();
             }
@@ -404,7 +440,10 @@ export default ['$scope', 'TemplatesService',
             $scope.graphState.nodeBeingAdded = workflowMakerNodeIdCounter;
 
             $scope.graphState.arrayOfLinksForChart.push({
-                source: {id: parent.id},
+                source: {
+                    id: parent.id,
+                    unifiedJobTemplate: parent.unifiedJobTemplate
+                },
                 target: {id: workflowMakerNodeIdCounter},
                 edgeType: "placeholder"
             });
@@ -423,6 +462,7 @@ export default ['$scope', 'TemplatesService',
         };
 
         $scope.startAddNodeWithChild = (link) => {
+            $scope.workflowChangesStarted = true;
             if ($scope.nodeConfig) {
                 $scope.cancelNodeForm();
             }
@@ -439,7 +479,10 @@ export default ['$scope', 'TemplatesService',
             $scope.graphState.nodeBeingAdded = workflowMakerNodeIdCounter;
 
             $scope.graphState.arrayOfLinksForChart.push({
-                source: {id: link.source.id},
+                source: {
+                    id: link.source.id,
+                    unifiedJobTemplate: link.source.unifiedJobTemplate
+                },
                 target: {id: workflowMakerNodeIdCounter},
                 edgeType: "placeholder"
             });
@@ -466,6 +509,7 @@ export default ['$scope', 'TemplatesService',
         };
 
         $scope.confirmNodeForm = (selectedTemplate, promptData, edgeType) => {
+            $scope.workflowChangesUnsaved = true;
             const nodeId = $scope.nodeConfig.nodeId;
             if ($scope.nodeConfig.mode === "add") {
                 if (selectedTemplate && edgeType && edgeType.value) {
@@ -480,6 +524,7 @@ export default ['$scope', 'TemplatesService',
                     $scope.graphState.arrayOfLinksForChart.map( (link) => {
                         if (link.target.id === nodeId) {
                             link.edgeType = edgeType.value;
+                            link.target.unifiedJobTemplate = selectedTemplate;
                         }
                     });
                 }
@@ -489,6 +534,15 @@ export default ['$scope', 'TemplatesService',
                     nodeRef[$scope.nodeConfig.nodeId].promptData = _.cloneDeep(promptData);
                     nodeRef[$scope.nodeConfig.nodeId].isEdited = true;
                     $scope.graphState.nodeBeingEdited = null;
+
+                    $scope.graphState.arrayOfLinksForChart.map( (link) => {
+                        if (link.target.id === nodeId) {
+                            link.target.unifiedJobTemplate = selectedTemplate;
+                        }
+                        if (link.source.id === nodeId) {
+                            link.source.unifiedJobTemplate = selectedTemplate;
+                        }
+                    });
                 }
             }
 
@@ -505,6 +559,7 @@ export default ['$scope', 'TemplatesService',
         };
 
         $scope.cancelNodeForm = () => {
+            $scope.workflowChangesStarted = false;
             const nodeId = $scope.nodeConfig.nodeId;
             if ($scope.nodeConfig.mode === "add") {
                 // Remove the placeholder node from the array
@@ -561,6 +616,7 @@ export default ['$scope', 'TemplatesService',
         /* EDIT NODE FUNCTIONS */
 
         $scope.startEditNode = (nodeToEdit) => {
+            $scope.workflowChangesStarted = true;
             if ($scope.linkConfig) {
                 $scope.cancelLinkForm();
             }
@@ -587,6 +643,7 @@ export default ['$scope', 'TemplatesService',
         /* LINK FUNCTIONS */
 
         $scope.startEditLink = (linkToEdit) => {
+            $scope.workflowChangesStarted = true;
             const setupLinkEdit = () => {
 
                 // Determine whether or not this link can be removed
@@ -639,6 +696,7 @@ export default ['$scope', 'TemplatesService',
         };
 
         $scope.selectNodeForLinking = (node) => {
+            $scope.workflowChangesStarted = true;
             if ($scope.nodeConfig) {
                 $scope.cancelNodeForm();
             }
@@ -734,6 +792,7 @@ export default ['$scope', 'TemplatesService',
         };
 
         $scope.confirmLinkForm = (newEdgeType) => {
+            $scope.workflowChangesUnsaved = true;
             $scope.graphState.arrayOfLinksForChart.forEach((link) => {
                 if (link.source.id === $scope.linkConfig.source.id && link.target.id === $scope.linkConfig.target.id) {
                     link.edgeType = newEdgeType;
@@ -754,6 +813,7 @@ export default ['$scope', 'TemplatesService',
         };
 
         $scope.unlink = () => {
+            $scope.workflowChangesUnsaved = true;
             // Remove the link
             for( let i = $scope.graphState.arrayOfLinksForChart.length; i--; ){
                 const link = $scope.graphState.arrayOfLinksForChart[i];
@@ -769,6 +829,7 @@ export default ['$scope', 'TemplatesService',
         };
 
         $scope.cancelLinkForm = () => {
+            $scope.workflowChangesStarted = false;
             if ($scope.linkConfig.mode === "add" && $scope.linkConfig.target) {
                 $scope.graphState.arrayOfLinksForChart.splice($scope.graphState.arrayOfLinksForChart.length-1, 1);
                 let targetIsOrphaned = true;
@@ -800,21 +861,28 @@ export default ['$scope', 'TemplatesService',
         /* DELETE NODE FUNCTIONS */
 
         $scope.startDeleteNode = (nodeToDelete) => {
+            $scope.workflowChangesStarted = true;
             $scope.nodeToBeDeleted = nodeToDelete;
             $scope.deleteOverlayVisible = true;
         };
 
         $scope.cancelDeleteNode = () => {
+            $scope.workflowChangesStarted = false;
             $scope.nodeToBeDeleted = null;
             $scope.deleteOverlayVisible = false;
         };
 
         $scope.confirmDeleteNode = () => {
+            $scope.workflowChangesUnsaved = true;
             if ($scope.nodeToBeDeleted) {
                 const nodeId = $scope.nodeToBeDeleted.id;
 
                 if ($scope.linkConfig) {
                     $scope.cancelLinkForm();
+                }
+
+                if ($scope.nodeConfig && $scope.nodeConfig.nodeId === nodeId) {
+                    $scope.cancelNodeForm();
                 }
 
                 // Remove the node from the array

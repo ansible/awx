@@ -1,4 +1,4 @@
-PYTHON ?= python
+PYTHON ?= python3
 PYTHON_VERSION = $(shell $(PYTHON) -c "from distutils.sysconfig import get_python_version; print(get_python_version())")
 SITELIB=$(shell $(PYTHON) -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")
 OFFICIAL ?= no
@@ -53,6 +53,7 @@ WHEEL_FILE ?= $(WHEEL_NAME)-py2-none-any.whl
 
 # UI flag files
 UI_DEPS_FLAG_FILE = awx/ui/.deps_built
+UI_RELEASE_DEPS_FLAG_FILE = awx/ui/.release_deps_built
 UI_RELEASE_FLAG_FILE = awx/ui/.release_built
 
 I18N_FLAG_FILE = .i18n_built
@@ -73,6 +74,7 @@ clean-ui:
 	rm -rf awx/ui/test/e2e/reports/
 	rm -rf awx/ui/client/languages/
 	rm -f $(UI_DEPS_FLAG_FILE)
+	rm -f $(UI_RELEASE_DEPS_FLAG_FILE)
 	rm -f $(UI_RELEASE_FLAG_FILE)
 
 clean-tmp:
@@ -120,10 +122,20 @@ virtualenv_ansible:
 			mkdir $(VENV_BASE); \
 		fi; \
 		if [ ! -d "$(VENV_BASE)/ansible" ]; then \
-			virtualenv --system-site-packages $(VENV_BASE)/ansible && \
+			virtualenv -p python --system-site-packages $(VENV_BASE)/ansible && \
 			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --ignore-installed six packaging appdirs && \
 			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --ignore-installed setuptools==36.0.1 && \
 			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --ignore-installed pip==9.0.1; \
+		fi; \
+	fi
+
+virtualenv_ansible_py3:
+	if [ "$(VENV_BASE)" ]; then \
+		if [ ! -d "$(VENV_BASE)" ]; then \
+			mkdir $(VENV_BASE); \
+		fi; \
+		if [ ! -d "$(VENV_BASE)/ansible" ]; then \
+			$(PYTHON) -m venv --system-site-packages $(VENV_BASE)/ansible; \
 		fi; \
 	fi
 
@@ -133,10 +145,7 @@ virtualenv_awx:
 			mkdir $(VENV_BASE); \
 		fi; \
 		if [ ! -d "$(VENV_BASE)/awx" ]; then \
-			virtualenv --system-site-packages $(VENV_BASE)/awx && \
-			$(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) --ignore-installed six packaging appdirs && \
-			$(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) --ignore-installed setuptools==36.0.1 && \
-			$(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) --ignore-installed pip==9.0.1; \
+			$(PYTHON) -m venv --system-site-packages $(VENV_BASE)/awx; \
 		fi; \
 	fi
 
@@ -148,6 +157,11 @@ requirements_ansible: virtualenv_ansible
 	fi
 	$(VENV_BASE)/ansible/bin/pip uninstall --yes -r requirements/requirements_ansible_uninstall.txt
 
+requirements_ansible_py3: virtualenv_ansible_py3
+	cat requirements/requirements_ansible.txt requirements/requirements_ansible_git.txt | $(VENV_BASE)/ansible/bin/pip3 install $(PIP_OPTIONS) --no-binary $(SRC_ONLY_PKGS) --ignore-installed -r /dev/stdin
+	$(VENV_BASE)/ansible/bin/pip3 install ansible  # can't inherit from system ansible, it's py2
+	$(VENV_BASE)/ansible/bin/pip3 uninstall --yes -r requirements/requirements_ansible_uninstall.txt
+
 requirements_ansible_dev:
 	if [ "$(VENV_BASE)" ]; then \
 		$(VENV_BASE)/ansible/bin/pip install pytest mock; \
@@ -155,11 +169,9 @@ requirements_ansible_dev:
 
 requirements_isolated:
 	if [ ! -d "$(VENV_BASE)/awx" ]; then \
-		virtualenv --system-site-packages $(VENV_BASE)/awx && \
-		$(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) --ignore-installed six packaging appdirs && \
-		$(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) --ignore-installed setuptools==35.0.2 && \
-		$(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) --ignore-installed pip==9.0.1; \
+		$(PYTHON) -m venv $(VENV_BASE)/awx; \
 	fi;
+	echo "include-system-site-packages = true" >> $(VENV_BASE)/awx/lib/python$(PYTHON_VERSION)/pyvenv.cfg
 	$(VENV_BASE)/awx/bin/pip install -r requirements/requirements_isolated.txt
 
 # Install third-party requirements needed for AWX's environment.
@@ -169,6 +181,7 @@ requirements_awx: virtualenv_awx
 	else \
 	    cat requirements/requirements.txt requirements/requirements_git.txt | $(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) --no-binary $(SRC_ONLY_PKGS) --ignore-installed -r /dev/stdin ; \
 	fi
+	echo "include-system-site-packages = true" >> $(VENV_BASE)/awx/lib/python$(PYTHON_VERSION)/pyvenv.cfg
 	#$(VENV_BASE)/awx/bin/pip uninstall --yes -r requirements/requirements_tower_uninstall.txt
 
 requirements_awx_dev:
@@ -195,7 +208,7 @@ version_file:
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	python -c "import awx as awx; print awx.__version__" > /var/lib/awx/.awx_version; \
+	python -c "import awx; print(awx.__version__)" > /var/lib/awx/.awx_version; \
 
 # Do any one-time init tasks.
 comma := ,
@@ -259,7 +272,7 @@ supervisor:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	supervisord --configuration /supervisor.conf --pidfile=/tmp/supervisor_pid
+	supervisord --pidfile=/tmp/supervisor_pid
 
 # Alternate approach to tmux to run all development tasks specified in
 # Procfile.
@@ -356,7 +369,7 @@ check: flake8 pep8 # pyflakes pylint
 awx-link:
 	cp -R /tmp/awx.egg-info /awx_devel/ || true
 	sed -i "s/placeholder/$(shell git describe --long | sed 's/\./\\./g')/" /awx_devel/awx.egg-info/PKG-INFO
-	cp -f /tmp/awx.egg-link /venv/awx/lib/python2.7/site-packages/awx.egg-link
+	cp -f /tmp/awx.egg-link /venv/awx/lib/python$(PYTHON_VERSION)/site-packages/awx.egg-link
 
 TEST_DIRS ?= awx/main/tests/unit awx/main/tests/functional awx/conf/tests awx/sso/tests
 
@@ -453,7 +466,7 @@ messages:
 # generate l10n .json .mo
 languages: $(I18N_FLAG_FILE)
 
-$(I18N_FLAG_FILE): $(UI_DEPS_FLAG_FILE)
+$(I18N_FLAG_FILE): $(UI_RELEASE_DEPS_FLAG_FILE)
 	$(NPM_BIN) --prefix awx/ui run languages
 	$(PYTHON) tools/scripts/compilemessages.py
 	touch $(I18N_FLAG_FILE)
@@ -461,13 +474,31 @@ $(I18N_FLAG_FILE): $(UI_DEPS_FLAG_FILE)
 # End l10n TASKS
 # --------------------------------------
 
-# UI TASKS
+# UI RELEASE TASKS
+# --------------------------------------
+ui-release: $(UI_RELEASE_FLAG_FILE)
+
+$(UI_RELEASE_FLAG_FILE): $(I18N_FLAG_FILE) $(UI_RELEASE_DEPS_FLAG_FILE)
+	$(NPM_BIN) --prefix awx/ui run build-release
+	touch $(UI_RELEASE_FLAG_FILE)
+
+$(UI_RELEASE_DEPS_FLAG_FILE):
+	PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=1 $(NPM_BIN) --unsafe-perm --prefix awx/ui ci --no-save awx/ui
+	touch $(UI_RELEASE_DEPS_FLAG_FILE)
+
+# END UI RELEASE TASKS
 # --------------------------------------
 
+# UI TASKS
+# --------------------------------------
 ui-deps: $(UI_DEPS_FLAG_FILE)
 
 $(UI_DEPS_FLAG_FILE):
-	$(NPM_BIN) --unsafe-perm --prefix awx/ui install --no-save awx/ui
+	@if [ -f ${UI_RELEASE_DEPS_FLAG_FILE} ]; then \
+		rm -rf awx/ui/node_modules; \
+		rm -f ${UI_RELEASE_DEPS_FLAG_FILE}; \
+	fi; \
+	$(NPM_BIN) --unsafe-perm --prefix awx/ui ci --no-save awx/ui
 	touch $(UI_DEPS_FLAG_FILE)
 
 ui-docker-machine: $(UI_DEPS_FLAG_FILE)
@@ -481,12 +512,6 @@ ui-docker: $(UI_DEPS_FLAG_FILE)
 ui-devel: $(UI_DEPS_FLAG_FILE)
 	$(NPM_BIN) --prefix awx/ui run build-devel -- $(MAKEFLAGS)
 
-ui-release: $(UI_RELEASE_FLAG_FILE)
-
-$(UI_RELEASE_FLAG_FILE): $(I18N_FLAG_FILE) $(UI_DEPS_FLAG_FILE)
-	$(NPM_BIN) --prefix awx/ui run build-release
-	touch $(UI_RELEASE_FLAG_FILE)
-
 ui-test: $(UI_DEPS_FLAG_FILE)
 	$(NPM_BIN) --prefix awx/ui run test
 
@@ -496,9 +521,6 @@ ui: clean-ui ui-devel
 ui-test-ci: $(UI_DEPS_FLAG_FILE)
 	$(NPM_BIN) --prefix awx/ui run test:ci
 	$(NPM_BIN) --prefix awx/ui run unit
-
-testjs_ci:
-	echo "Update UI unittests later" #ui-test-ci
 
 jshint: $(UI_DEPS_FLAG_FILE)
 	$(NPM_BIN) run --prefix awx/ui jshint
@@ -547,7 +569,7 @@ docker-isolated:
 	TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose.yml -f tools/docker-isolated-override.yml create
 	docker start tools_awx_1
 	docker start tools_isolated_1
-	echo "__version__ = '`git describe --long | cut -d - -f 1-1`'" | docker exec -i tools_isolated_1 /bin/bash -c "cat > /venv/awx/lib/python2.7/site-packages/awx.py"
+	echo "__version__ = '`git describe --long | cut -d - -f 1-1`'" | docker exec -i tools_isolated_1 /bin/bash -c "cat > /venv/awx/lib/python$(PYTHON_VERSION)/site-packages/awx.py"
 	CURRENT_UID=$(shell id -u) TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose.yml -f tools/docker-isolated-override.yml up
 
 # Docker Compose Development environment
@@ -574,7 +596,7 @@ docker-compose-detect-schema-change:
 	$(MAKE) docker-compose-genschema
 	curl https://s3.amazonaws.com/awx-public-ci-files/schema.json -o reference-schema.json
 	# Ignore differences in whitespace with -b
-	diff -u -b schema.json reference-schema.json
+	diff -u -b reference-schema.json schema.json
 
 docker-compose-clean:
 	cd tools && CURRENT_UID=$(shell id -u) TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose run --rm -w /awx_devel --service-ports awx make clean

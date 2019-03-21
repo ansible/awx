@@ -46,6 +46,11 @@ function ProjectsStrings (BaseString) {
         HEADER: this.error.HEADER,
         CALL: this.error.CALL,
     };
+
+    ns.sort = {
+        NAME_ASCENDING: t.s('Name (Ascending)'),
+        NAME_DESCENDING: t.s('Name (Descending)')
+    };
 }
 
 ProjectsStrings.$inject = ['BaseStringService'];

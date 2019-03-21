@@ -36,7 +36,7 @@ function InstanceModalController ($scope, $state, Dataset, models, strings, Proc
 
         $scope.$watch('vm.instances', function() {
             angular.forEach(vm.instances, function(instance) {
-                instance.isSelected = _.filter(vm.selectedRows, 'id', instance.id).length > 0;
+                instance.isSelected = _.filter(vm.selectedRows, { 'id': instance.id }).length > 0;
             });
         });
     }

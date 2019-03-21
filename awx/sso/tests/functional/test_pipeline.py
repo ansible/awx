@@ -1,7 +1,7 @@
 
 import pytest
-import mock
 import re
+from unittest import mock
 
 from awx.sso.pipeline import (
     update_user_orgs,

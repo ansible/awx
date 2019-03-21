@@ -5,7 +5,6 @@
 import datetime
 import logging
 
-import six
 
 # Django
 from django.core.management.base import BaseCommand
@@ -43,7 +42,7 @@ class Command(BaseCommand):
         n_deleted_items = 0
         pks_to_delete = set()
         for asobj in ActivityStream.objects.iterator():
-            asobj_disp = '"%s" id: %s' % (six.text_type(asobj), asobj.id)
+            asobj_disp = '"%s" id: %s' % (str(asobj), asobj.id)
             if asobj.timestamp >= self.cutoff:
                 if self.dry_run:
                     self.logger.info("would skip %s" % asobj_disp)

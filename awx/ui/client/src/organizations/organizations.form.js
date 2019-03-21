@@ -54,6 +54,21 @@ export default ['NotificationsList', 'i18n',
                     dataPlacement: 'right',
                     ngDisabled: '!(organization_obj.summary_fields.user_capabilities.edit || canAdd)',
                     ngShow: 'custom_virtualenvs_visible'
+                },
+                max_hosts: {
+                    label: i18n._('Max Hosts'),
+                    type: 'number',
+                    integer: true,
+                    min: 0,
+                    max: 2147483647,
+                    default: 0,
+                    spinner: true,
+                    dataTitle: i18n._('Max Hosts'),
+                    dataPlacement: 'right',
+                    dataContainer: 'body',
+                    awPopOver: "<p>" + i18n._("The maximum number of hosts allowed to be managed by this organization. Value defaults to 0 which means no limit. Refer to the Ansible documentation for more details.") + "</p>",
+                    ngDisabled: '!current_user.is_superuser',
+                    ngShow: 'BRAND_NAME === "Tower"'
                 }
             },
 
@@ -103,13 +118,13 @@ export default ['NotificationsList', 'i18n',
                             key: true,
                             label: i18n._('User'),
                             linkBase: 'users',
-                            class: 'col-lg-3 col-md-3 col-sm-3 col-xs-4'
+                            columnClass: 'col-sm-6'
                         },
                         role: {
                             label: i18n._('Role'),
                             type: 'role',
                             nosort: true,
-                            class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4'
+                            columnClass: 'col-sm-6'
                         }
                     }
                 },
@@ -130,7 +145,7 @@ export default ['NotificationsList', 'i18n',
                     actions: {
                         add: {
                             ngClick: "$state.go('.add')",
-                            label: 'Add',
+                            label: i18n._('Add'),
                             awToolTip: i18n._('Add a permission'),
                             actionClass: 'at-Button--add',
                             actionId: 'button-add',
@@ -142,19 +157,19 @@ export default ['NotificationsList', 'i18n',
                             key: true,
                             label: i18n._('User'),
                             linkBase: 'users',
-                            class: 'col-lg-3 col-md-3 col-sm-3 col-xs-4'
+                            columnClass: 'col-lg-3 col-md-3 col-sm-3 col-xs-4'
                         },
                         role: {
                             label: i18n._('Role'),
                             type: 'role',
                             nosort: true,
-                            class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4',
+                            columnClass: 'col-lg-4 col-md-4 col-sm-4 col-xs-4',
                         },
                         team_roles: {
                             label: i18n._('Team Roles'),
                             type: 'team_roles',
                             nosort: true,
-                            class: 'col-lg-5 col-md-5 col-sm-5 col-xs-4',
+                            columnClass: 'col-lg-5 col-md-5 col-sm-5 col-xs-4',
                         }
                     }
                 },

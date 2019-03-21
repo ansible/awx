@@ -5,7 +5,6 @@
 import os
 import sys
 import logging
-import six
 from functools import reduce
 
 # Django
@@ -29,7 +28,17 @@ from awx.main.utils import (
     to_python_boolean,
     get_licenser,
 )
-from awx.main.models import * # noqa
+from awx.main.models import (
+    ActivityStream, AdHocCommand, AdHocCommandEvent, Credential, CredentialType,
+    CustomInventoryScript, Group, Host, Instance, InstanceGroup, Inventory,
+    InventorySource, InventoryUpdate, InventoryUpdateEvent, Job, JobEvent,
+    JobHostSummary, JobLaunchConfig, JobTemplate, Label, Notification,
+    NotificationTemplate, Organization, Project, ProjectUpdate,
+    ProjectUpdateEvent, Role, Schedule, SystemJob, SystemJobEvent,
+    SystemJobTemplate, Team, UnifiedJob, UnifiedJobTemplate, WorkflowJob,
+    WorkflowJobNode, WorkflowJobTemplate, WorkflowJobTemplateNode,
+    ROLE_SINGLETON_SYSTEM_ADMINISTRATOR, ROLE_SINGLETON_SYSTEM_AUDITOR
+)
 from awx.main.models.mixins import ResourceMixin
 
 from awx.conf.license import LicenseForbids, feature_enabled
@@ -321,6 +330,36 @@ class BaseAccess(object):
             elif "features" not in validation_info:
                 raise LicenseForbids(_("Features not found in active license."))
 
+    def check_org_host_limit(self, data, add_host_name=None):
+        validation_info = get_licenser().validate()
+        if validation_info.get('license_type', 'UNLICENSED') == 'open':
+            return
+
+        inventory = get_object_from_data('inventory', Inventory, data)
+        if inventory is None:  # In this case a missing inventory error is launched
+            return             # further down the line, so just ignore it.
+
+        org = inventory.organization
+        if org is None or org.max_hosts == 0:
+            return
+
+        active_count = Host.objects.org_active_count(org.id)
+        if active_count > org.max_hosts:
+            raise PermissionDenied(
+                _("You have already reached the maximum number of %s hosts"
+                  " allowed for your organization. Contact your System Administrator"
+                  " for assistance." % org.max_hosts)
+            )
+
+        if add_host_name:
+            host_exists = Host.objects.filter(inventory__organization=org.id, name=add_host_name).exists()
+            if not host_exists and active_count == org.max_hosts:
+                raise PermissionDenied(
+                    _("You have already reached the maximum number of %s hosts"
+                      " allowed for your organization. Contact your System Administrator"
+                      " for assistance." % org.max_hosts)
+                )
+
     def get_user_capabilities(self, obj, method_list=[], parent_obj=None, capabilities_cache={}):
         if obj is None:
             return {}
@@ -351,7 +390,7 @@ class BaseAccess(object):
                 user_capabilities[display_method] = self.user.is_superuser
                 continue
             elif display_method == 'copy' and isinstance(obj, Project) and obj.scm_type == '':
-                # Connot copy manual project without errors
+                # Cannot copy manual project without errors
                 user_capabilities[display_method] = False
                 continue
             elif display_method in ['start', 'schedule'] and isinstance(obj, Group):  # TODO: remove in 3.3
@@ -435,12 +474,16 @@ class InstanceAccess(BaseAccess):
                    skip_sub_obj_read_check=False):
         if relationship == 'rampart_groups' and isinstance(sub_obj, InstanceGroup):
             return self.user.is_superuser
-        return super(InstanceAccess, self).can_attach(obj, sub_obj, relationship, *args, **kwargs)
+        return super(InstanceAccess, self).can_attach(
+            obj, sub_obj, relationship, data, skip_sub_obj_read_check=skip_sub_obj_read_check
+        )
 
     def can_unattach(self, obj, sub_obj, relationship, data=None):
         if relationship == 'rampart_groups' and isinstance(sub_obj, InstanceGroup):
             return self.user.is_superuser
-        return super(InstanceAccess, self).can_unattach(obj, sub_obj, relationship, *args, **kwargs)
+        return super(InstanceAccess, self).can_unattach(
+            obj, sub_obj, relationship, relationship, data=data
+        )
 
     def can_add(self, data):
         return False
@@ -615,7 +658,7 @@ class OAuth2ApplicationAccess(BaseAccess):
         return self.model.objects.filter(organization__in=org_access_qs)
 
     def can_change(self, obj, data):
-        return self.user.is_superuser or self.check_related('organization', Organization, data, obj=obj, 
+        return self.user.is_superuser or self.check_related('organization', Organization, data, obj=obj,
                                                             role_field='admin_role', mandatory=True)
 
     def can_delete(self, obj):
@@ -623,7 +666,7 @@ class OAuth2ApplicationAccess(BaseAccess):
 
     def can_add(self, data):
         if self.user.is_superuser:
-            return True    
+            return True
         if not data:
             return Organization.accessible_objects(self.user, 'admin_role').exists()
         return self.check_related('organization', Organization, data, role_field='admin_role', mandatory=True)
@@ -637,29 +680,29 @@ class OAuth2TokenAccess(BaseAccess):
      - I am the user of the token.
     I can create an OAuth2 app token when:
      - I have the read permission of the related application.
-    I can read, change or delete a personal token when: 
+    I can read, change or delete a personal token when:
      - I am the user of the token
      - I am the superuser
     I can create an OAuth2 Personal Access Token when:
-     - I am a user.  But I can only create a PAT for myself.  
+     - I am a user.  But I can only create a PAT for myself.
     '''
 
     model = OAuth2AccessToken
-    
+
     select_related = ('user', 'application')
-    
-    def filtered_queryset(self):        
+
+    def filtered_queryset(self):
         org_access_qs = Organization.objects.filter(
             Q(admin_role__members=self.user) | Q(auditor_role__members=self.user))
         return self.model.objects.filter(application__organization__in=org_access_qs)  | self.model.objects.filter(user__id=self.user.pk)
-        
+
     def can_delete(self, obj):
         if (self.user.is_superuser) | (obj.user == self.user):
             return True
         elif not obj.application:
             return False
         return self.user in obj.application.organization.admin_role
-        
+
     def can_change(self, obj, data):
         return self.can_delete(obj)
 
@@ -827,6 +870,10 @@ class HostAccess(BaseAccess):
 
         # Check to see if we have enough licenses
         self.check_license(add_host_name=data.get('name', None))
+
+        # Check the per-org limit
+        self.check_org_host_limit(data, add_host_name=data.get('name', None))
+
         return True
 
     def can_change(self, obj, data):
@@ -838,6 +885,10 @@ class HostAccess(BaseAccess):
         # Prevent renaming a host that might exceed license count
         if data and 'name' in data:
             self.check_license(add_host_name=data['name'])
+
+            # Check the per-org limit
+            self.check_org_host_limit({'inventory': obj.inventory},
+                                      add_host_name=data['name'])
 
         # Checks for admin or change permission on inventory, controls whether
         # the user can edit variable data.
@@ -1333,7 +1384,7 @@ class JobTemplateAccess(BaseAccess):
             return self.user in project.use_role
         else:
             return False
-    
+
     @check_superuser
     def can_copy_related(self, obj):
         '''
@@ -1342,13 +1393,17 @@ class JobTemplateAccess(BaseAccess):
         '''
 
         # obj.credentials.all() is accessible ONLY when object is saved (has valid id)
-        credential_manager = getattr(obj, 'credentials', None) if getattr(obj, 'id', False) else Credentials.objects.none()
+        credential_manager = getattr(obj, 'credentials', None) if getattr(obj, 'id', False) else Credential.objects.none()
         return reduce(lambda prev, cred: prev and self.user in cred.use_role, credential_manager.all(), True)
 
     def can_start(self, obj, validate_license=True):
         # Check license.
         if validate_license:
             self.check_license()
+
+            # Check the per-org limit
+            self.check_org_host_limit({'inventory': obj.inventory})
+
             if obj.survey_enabled:
                 self.check_license(feature='surveys')
             if Instance.objects.active_count() > 1:
@@ -1397,6 +1452,8 @@ class JobTemplateAccess(BaseAccess):
         ]
 
         for k, v in data.items():
+            if k not in [x.name for x in obj._meta.concrete_fields]:
+                continue
             if hasattr(obj, k) and getattr(obj, k) != v:
                 if k not in field_whitelist and v != getattr(obj, '%s_id' % k, None) \
                         and not (hasattr(obj, '%s_id' % k) and getattr(obj, '%s_id' % k) is None and v == ''): # Equate '' to None in the case of foreign keys
@@ -1504,6 +1561,9 @@ class JobAccess(BaseAccess):
     def can_start(self, obj, validate_license=True):
         if validate_license:
             self.check_license()
+
+            # Check the per-org limit
+            self.check_org_host_limit({'inventory': obj.inventory})
 
         # A super user can relaunch a job
         if self.user.is_superuser:
@@ -1849,7 +1909,6 @@ class WorkflowJobTemplateAccess(BaseAccess):
             qs = obj.workflow_job_template_nodes
             qs = qs.prefetch_related('unified_job_template', 'inventory__use_role', 'credentials__use_role')
             for node in qs.all():
-                node_errors = {}
                 if node.inventory and self.user not in node.inventory.use_role:
                     missing_inventories.append(node.inventory.name)
                 for cred in node.credentials.all():
@@ -1858,8 +1917,6 @@ class WorkflowJobTemplateAccess(BaseAccess):
                 ujt = node.unified_job_template
                 if ujt and not self.user.can_access(UnifiedJobTemplate, 'start', ujt, validate_license=False):
                     missing_ujt.append(ujt.name)
-                if node_errors:
-                    wfjt_errors[node.id] = node_errors
             if missing_ujt:
                 self.messages['templates_unable_to_copy'] = missing_ujt
             if missing_credentials:
@@ -1874,6 +1931,10 @@ class WorkflowJobTemplateAccess(BaseAccess):
         if validate_license:
             # check basic license, node count
             self.check_license()
+
+            # Check the per-org limit
+            self.check_org_host_limit({'inventory': obj.inventory})
+
             # if surveys are added to WFJTs, check license here
             if obj.survey_enabled:
                 self.check_license(feature='surveys')
@@ -1944,6 +2005,9 @@ class WorkflowJobAccess(BaseAccess):
     def can_start(self, obj, validate_license=True):
         if validate_license:
             self.check_license()
+
+            # Check the per-org limit
+            self.check_org_host_limit({'inventory': obj.inventory})
 
         if self.user.is_superuser:
             return True
@@ -2020,6 +2084,9 @@ class AdHocCommandAccess(BaseAccess):
 
         if validate_license:
             self.check_license()
+
+            # Check the per-org limit
+            self.check_org_host_limit(data)
 
         # If a credential is provided, the user should have use access to it.
         if not self.check_related('credential', Credential, data, role_field='use_role'):
@@ -2430,7 +2497,7 @@ class ActivityStreamAccess(BaseAccess):
     model = ActivityStream
     prefetch_related = ('organization', 'user', 'inventory', 'host', 'group',
                         'inventory_update', 'credential', 'credential_type', 'team',
-                        'ad_hoc_command', 'o_auth2_application', 'o_auth2_access_token', 
+                        'ad_hoc_command', 'o_auth2_application', 'o_auth2_access_token',
                         'notification_template', 'notification', 'label', 'role', 'actor',
                         'schedule', 'custom_inventory_script', 'unified_job_template',
                         'workflow_job_template_node',)
@@ -2588,7 +2655,7 @@ class RoleAccess(BaseAccess):
         if (isinstance(obj.content_object, Organization) and
                 obj.role_field in (Organization.member_role.field.parent_role + ['member_role'])):
             if not isinstance(sub_obj, User):
-                logger.error(six.text_type('Unexpected attempt to associate {} with organization role.').format(sub_obj))
+                logger.error('Unexpected attempt to associate {} with organization role.'.format(sub_obj))
                 return False
             if not UserAccess(self.user).can_admin(sub_obj, None, allow_orphans=True):
                 return False

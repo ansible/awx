@@ -11,7 +11,6 @@ export default
             vm.strings = strings;
 
             let scope;
-            let launch;
 
             let consolidateTags = (tagModel, tagId) => {
                 let tags = angular.copy(tagModel);
@@ -26,16 +25,13 @@ export default
                 return [...tags.reduce((map, tag) => map.has(tag.value) ? map : map.set(tag.value, tag), new Map()).values()];
             };
 
-            vm.init = (_scope_, _launch_) => {
+            vm.init = (_scope_) => {
                 scope = _scope_;
-                launch = _launch_;
 
                 vm.showJobTags = true;
                 vm.showSkipTags = true;
 
                 scope.parseType = 'yaml';
-
-                scope.promptData.extraVars = ToJSON(scope.parseType, scope.promptData.prompts.variables.value, false);
 
                 const surveyPasswords = {};
 
@@ -48,6 +44,7 @@ export default
                 }
 
                 if (scope.promptData.launchConf.survey_enabled){
+                    scope.promptData.extraVars = ToJSON(scope.parseType, scope.promptData.prompts.variables.value, false);
                     scope.promptData.surveyQuestions.forEach(surveyQuestion => {
                         if (!scope.promptData.extraVars) {
                             scope.promptData.extraVars = {};
@@ -76,15 +73,17 @@ export default
                             surveyPasswords[surveyQuestion.variable] = '$encrypted$';
                         }
                     });
+                    // We don't want to modify the extra vars when we merge them with the survey
+                    // password $encrypted$ strings so we clone it
+                    const extraVarsClone = _.cloneDeep(scope.promptData.extraVars);
+                    // Replace the survey passwords with $encrypted$ to display to the user
+                    const cleansedExtraVars = extraVarsClone ? Object.assign(extraVarsClone, surveyPasswords) : {};
+
+                    scope.promptExtraVars = $.isEmptyObject(scope.promptData.extraVars) ? '---' : '---\n' + jsyaml.safeDump(cleansedExtraVars);
+                } else {
+                    scope.promptData.extraVars = scope.promptData.prompts.variables.value;
+                    scope.promptExtraVars = scope.promptData.prompts.variables.value && scope.promptData.prompts.variables.value !== '' ? scope.promptData.prompts.variables.value : '---\n';
                 }
-
-                // We don't want to modify the extra vars when we merge them with the survey
-                // password $encrypted$ strings so we clone it
-                const extraVarsClone = _.cloneDeep(scope.promptData.extraVars);
-                // Replace the survey passwords with $encrypted$ to display to the user
-                const cleansedExtraVars = extraVarsClone ? Object.assign(extraVarsClone, surveyPasswords) : {};
-
-                scope.promptExtraVars = $.isEmptyObject(scope.promptData.extraVars) ? '---' : '---\n' + jsyaml.safeDump(cleansedExtraVars);
 
                 ParseTypeChange({
                     scope: scope,

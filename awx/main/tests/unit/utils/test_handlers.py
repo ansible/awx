@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 import base64
-import cStringIO
 import logging
 import socket
 import datetime
 from dateutil.tz import tzutc
+from io import StringIO
 from uuid import uuid4
 
-import mock
+from unittest import mock
 
 from django.conf import LazySettings
+from django.utils.encoding import smart_str
 import pytest
 import requests
 from requests_futures.sessions import FuturesSession
@@ -52,7 +53,7 @@ def connection_error_adapter():
 
 @pytest.fixture
 def fake_socket(tmpdir_factory, request):
-    sok = socket._socketobject
+    sok = socket.socket
     sok.send = mock.MagicMock()
     sok.connect = mock.MagicMock()
     sok.setblocking = mock.MagicMock()
@@ -255,7 +256,7 @@ def test_https_logging_handler_connection_error(connection_error_adapter,
     handler.setFormatter(LogstashFormatter())
     handler.session.mount('http://', connection_error_adapter)
 
-    buff = cStringIO.StringIO()
+    buff = StringIO()
     logging.getLogger('awx.main.utils.handlers').addHandler(
         logging.StreamHandler(buff)
     )
@@ -308,7 +309,7 @@ def test_https_logging_handler_emit_logstash_with_creds(https_adapter,
 
     assert len(https_adapter.requests) == 1
     request = https_adapter.requests[0]
-    assert request.headers['Authorization'] == 'Basic %s' % base64.b64encode("user:pass")
+    assert request.headers['Authorization'] == 'Basic %s' % smart_str(base64.b64encode(b"user:pass"))
 
 
 def test_https_logging_handler_emit_splunk_with_creds(https_adapter,
@@ -331,7 +332,7 @@ def test_https_logging_handler_emit_splunk_with_creds(https_adapter,
     ({u'测试键': u'测试值'}, '{"测试键": "测试值"}'),
 ])
 def test_encode_payload_for_socket(payload, encoded_payload):
-    assert _encode_payload_for_socket(payload) == encoded_payload
+    assert _encode_payload_for_socket(payload).decode('utf-8') == encoded_payload
 
 
 def test_udp_handler_create_socket_at_init():

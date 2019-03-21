@@ -1,0 +1,24 @@
+<div class="at-List-toolbar--attached">
+    <div ng-class="isCollapsed ? 'active' : ''" ng-if="!sortOnly" class="at-List-toolbar-item" ng-click="onCollapse()">{{ vm.strings.get('toolbar.COMPACT') }}</div>
+    <div ng-class="!isCollapsed ? 'active' : ''" ng-if="!sortOnly" class="at-List-toolbar-item" ng-click="onExpand()">{{ vm.strings.get('toolbar.EXPANDED') }}</div>
+    <div ng-if="sortOptions" class="at-List-toolbar-item at-List-toolbarDropdown dropdown">
+        <button
+            class="at-List-toolbarDropdown-toggle dropdown-toggle"
+            data-display="static"
+            data-toggle="dropdown">
+            <span class="at-List-toolbarDropdown-toggleText">{{ sortValue.label }}</span>
+            <i class="fa fa-angle-down" aria-hidden="true"></i>
+        </button>
+        <ul class="at-List-toolbarDropdown-menu dropdown-menu">
+            <li class="at-List-toolbarDropdown-menuHeader dropdown-item">
+                {{ vm.strings.get('toolbar.SORT_BY') }}
+            </li>
+            <li
+                class="dropdown-item"
+                ng-repeat="option in sortOptions"
+                ng-click="onSort(option)">
+                {{ option.label }}
+            </li>
+        </ul>
+    </div>
+</div>

@@ -1,7 +1,8 @@
 from datetime import datetime
 
 from django.utils.timezone import now
-import mock
+from django.db.utils import IntegrityError
+from unittest import mock
 import pytest
 import pytz
 
@@ -292,3 +293,46 @@ def test_empty_until_property(job_template):
     )
     s.save()
     assert s.until == ''
+
+
+@pytest.mark.django_db
+def test_duplicate_name_across_templates(job_template):
+    # Assert that duplicate name is allowed for different unified job templates.
+    rrule = 'DTSTART;TZID=America/New_York:20380601T120000 RRULE:FREQ=HOURLY;INTERVAL=1'
+    job_template_2 = JobTemplate.objects.create(name='test-job_template_2')
+    s1 = Schedule(
+        name='Some Schedule',
+        rrule=rrule,
+        unified_job_template=job_template
+    )
+    s2 = Schedule(
+        name='Some Schedule',
+        rrule=rrule,
+        unified_job_template=job_template_2
+    )
+    s1.save()
+    s2.save()
+
+    assert s1.name == s2.name
+
+
+@pytest.mark.django_db
+def test_duplicate_name_within_template(job_template):
+    # Assert that duplicate name is not allowed for the same unified job templates.
+    rrule = 'DTSTART;TZID=America/New_York:20380601T120000 RRULE:FREQ=HOURLY;INTERVAL=1'
+    s1 = Schedule(
+        name='Some Schedule',
+        rrule=rrule,
+        unified_job_template=job_template
+    )
+    s2 = Schedule(
+        name='Some Schedule',
+        rrule=rrule,
+        unified_job_template=job_template
+    )
+
+    s1.save()
+    with pytest.raises(IntegrityError) as ierror:
+        s2.save()
+
+    assert str(ierror.value) == "columns unified_job_template_id, name are not unique"

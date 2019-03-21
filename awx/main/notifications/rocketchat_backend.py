@@ -33,7 +33,7 @@ class RocketChatBackend(AWXBaseEmailBackend):
         for m in messages:
             payload = {"text": m.subject}
             for opt, optval in {'rocketchat_icon_url': 'icon_url',
-                                'rocketchat_username': 'username'}.iteritems():
+                                'rocketchat_username': 'username'}.items():
                 optvalue = getattr(self, opt)
                 if optvalue is not None:
                     payload[optval] = optvalue.strip()

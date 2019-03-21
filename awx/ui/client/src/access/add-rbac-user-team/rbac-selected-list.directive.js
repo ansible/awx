@@ -33,6 +33,7 @@ export default ['$compile', 'i18n', 'generateList',
                 list = _.cloneDeep(listMap[scope.resourceType]);
 
                 delete list.actions;
+                delete list.layoutClass;
 
                 list.listTitleBadge = false;
 
@@ -42,20 +43,22 @@ export default ['$compile', 'i18n', 'generateList',
                             name: list.fields.name,
                             scm_type: list.fields.scm_type
                         };
+                        delete list.staticColumns;
                         delete list.fields.name.ngClick;
                         list.fields.name.ngHref = "#/projects/{{project.id}}";
-                        list.fields.name.columnClass = 'col-md-5 col-sm-5 col-xs-10';
-                        list.fields.scm_type.columnClass = 'col-md-5 col-sm-5 hidden-xs';
+                        list.fields.name.columnClass = 'col-sm-5';
+                        list.fields.scm_type.columnClass = 'col-sm-5';
                         break;
                     case 'inventories':
                         list.fields = {
                             name: list.fields.name,
                             organization: list.fields.organization
                         };
+                        delete list.staticColumns;
                         delete list.fields.name.ngClick;
                         list.fields.name.ngHref = '{{inventory.linkToDetails}}';
-                        list.fields.name.columnClass = 'col-md-5 col-sm-5 col-xs-10';
-                        list.fields.organization.columnClass = 'col-md-5 col-sm-5 hidden-xs';
+                        list.fields.name.columnClass = 'col-sm-5';
+                        list.fields.organization.columnClass = 'col-sm-5';
                         break;
                     case 'job_templates':
                         list.name = 'job_templates';
@@ -63,7 +66,7 @@ export default ['$compile', 'i18n', 'generateList',
                         list.fields = {
                             name: list.fields.name
                         };
-                        list.fields.name.columnClass = 'col-md-5 col-sm-5 col-xs-10';
+                        list.fields.name.columnClass = 'col-sm-10';
                         delete list.fields.name.ngClick;
                         list.fields.name.ngHref = "#/templates/job_template/{{job_template.id}}";
                         break;
@@ -73,7 +76,7 @@ export default ['$compile', 'i18n', 'generateList',
                         list.fields = {
                             name: list.fields.name
                         };
-                        list.fields.name.columnClass = 'col-md-5 col-sm-5 col-xs-10';
+                        list.fields.name.columnClass = 'col-sm-10';
                         delete list.fields.name.ngClick;
                         list.fields.name.ngHref = "#/templates/workflow_job_template/{{workflow_template.id}}";
                         break;
@@ -83,7 +86,7 @@ export default ['$compile', 'i18n', 'generateList',
                         };
                         delete list.fields.name.ngClick;
                         list.fields.name.ngHref = "#/credentials/{{credential.id}}";
-                        list.fields.name.columnClass = 'col-md-5 col-sm-5 col-xs-10';
+                        list.fields.name.columnClass = 'col-sm-10';
                         break;
                     case 'organizations':
                         list.fields = {
@@ -91,11 +94,12 @@ export default ['$compile', 'i18n', 'generateList',
                         };
                         delete list.fields.name.ngClick;
                         list.fields.name.ngHref = "#/organizations/{{organization.id}}";
-                        list.fields.name.columnClass = 'col-md-5 col-sm-5 col-xs-10';
+                        list.fields.name.columnClass = 'col-sm-10';
                         break;
                 }
 
                 list.fieldActions = {
+                    columnClass: 'col-sm-2',
                     remove: {
                         ngClick: `removeSelection(${list.iterator}, resourceType)`,
                         iconClass: 'fa fa-times-circle',

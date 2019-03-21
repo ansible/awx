@@ -1,5 +1,7 @@
 import pytest
 
+from django.utils.encoding import smart_str
+
 from awx.api.versioning import reverse
 from awx.main.models import UnifiedJob, ProjectUpdate, InventoryUpdate
 from awx.main.tests.URI import URI
@@ -70,6 +72,7 @@ def test_project_update_redaction_enabled(get, format, content_type, test_cases,
         assert content_type in response['CONTENT-TYPE']
         assert response.data is not None
         content = response.data['content'] if format == 'json' else response.data
+        content = smart_str(content)
         assert test_data['uri'].username not in content
         assert test_data['uri'].password not in content
         assert content.count(test_data['uri'].host) == test_data['occurrences']
@@ -82,6 +85,7 @@ def test_job_redaction_disabled(get, format, content_type, negative_test_cases, 
         job = test_data['job']
         response = get(reverse("api:job_stdout", kwargs={'pk': job.pk}) + "?format=" + format, user=admin, expect=200, format=format)
         content = response.data['content'] if format == 'json' else response.data
+        content = smart_str(content)
         assert response.data is not None
         assert test_data['uri'].username in content
         assert test_data['uri'].password in content

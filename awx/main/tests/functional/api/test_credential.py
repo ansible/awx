@@ -1,8 +1,10 @@
 import itertools
 import re
 
-import mock # noqa
+from unittest import mock # noqa
 import pytest
+
+from django.utils.encoding import smart_str
 
 from awx.main.models import (AdHocCommand, Credential, CredentialType, Job, JobTemplate,
                              Inventory, InventorySource, Project,
@@ -255,7 +257,7 @@ def test_credential_validation_error_with_bad_user(post, admin, version, credent
         admin
     )
     assert response.status_code == 400
-    assert response.data['user'][0] == 'Incorrect type. Expected pk value, received unicode.'
+    assert response.data['user'][0] == 'Incorrect type. Expected pk value, received str.'
 
 
 @pytest.mark.django_db
@@ -799,7 +801,7 @@ def test_field_dependencies(get, post, organization, admin, kind, extraneous):
         admin
     )
     assert response.status_code == 400
-    assert re.search('cannot be set unless .+ is set.', response.content)
+    assert re.search('cannot be set unless .+ is set.', smart_str(response.content))
 
     assert Credential.objects.count() == 0
 
@@ -1349,6 +1351,40 @@ def test_openstack_create_ok(post, organization, admin, version, params):
         admin
     )
     assert response.status_code == 201
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('verify_ssl, expected', [
+    [None, True],
+    [True, True],
+    [False, False],
+])
+def test_openstack_verify_ssl(get, post, organization, admin, verify_ssl, expected):
+    openstack = CredentialType.defaults['openstack']()
+    openstack.save()
+    inputs = {
+        'username': 'some_user',
+        'password': 'some_password',
+        'project': 'some_project',
+        'host': 'some_host',
+    }
+    if verify_ssl is not None:
+        inputs['verify_ssl'] = verify_ssl
+    params = {
+        'credential_type': openstack.id,
+        'inputs': inputs,
+        'name': 'Best credential ever',
+        'organization': organization.id
+    }
+    response = post(
+        reverse('api:credential_list', kwargs={'version': 'v2'}),
+        params,
+        admin
+    )
+    assert response.status_code == 201
+
+    cred = Credential.objects.get(pk=response.data['id'])
+    assert cred.get_input('verify_ssl') == expected
 
 
 @pytest.mark.django_db

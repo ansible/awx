@@ -7,6 +7,7 @@ from awx.main.fields import JSONField
 
 # Django
 from django.db import models
+from django.utils.encoding import smart_str
 from django.utils.translation import ugettext_lazy as _
 
 __all__ = ['ActivityStream']
@@ -84,9 +85,9 @@ class ActivityStream(models.Model):
         if self.actor:
             self.deleted_actor = {
                 'id': self.actor_id,
-                'username': self.actor.username,
-                'first_name': self.actor.first_name,
-                'last_name': self.actor.last_name,
+                'username': smart_str(self.actor.username),
+                'first_name': smart_str(self.actor.first_name),
+                'last_name': smart_str(self.actor.last_name),
             }
             if 'update_fields' in kwargs and 'deleted_actor' not in kwargs['update_fields']:
                 kwargs['update_fields'].append('deleted_actor')

@@ -16,6 +16,42 @@ right side.  If you don't see it, make sure `DEBUG=True`.
 > Note that enabling DDT is detrimental to the performance of AWX and adds overhead to every API request.  It is 
 recommended to keep this turned off when you are not using it.  
 
+SQL Debugging
+-------------
+AWX includes a powerful tool for tracking slow queries across all of its Python processes.
+As the awx user, run:
+
+```
+$ awx-manage profile_sql --threshold 2 --minutes 5
+```
+
+...where threshold is the max query time in seconds, and minutes it the number of minutes to record.
+For the next five minutes (in this example), any awx Python process that generates a SQL query
+that runs for >2s will be recorded in a .sqlite database in /var/log/tower/profile
+
+This is a useful tool for logging all queries at a per-process level, or filtering and searching for
+queries within a certain code branch.  For example, if you observed that certain HTTP requests were
+particularly slow, you could enable profiling, perform the slow request, and then search the log:
+
+```
+$ sqlite3 -column -header /var/log/tower/profile/uwsgi.sqlite
+sqlite> .schema queries
+CREATE TABLE queries (
+    id INTEGER PRIMARY KEY,
+    version TEXT,             # the awx version
+    pid INTEGER,              # the pid of the process
+    stamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    argv REAL,                # argv of the process
+    time REAL,                # time to run the query (in seconds)
+    sql TEXT,                 # the actual query
+    explain TEXT,             # EXPLAIN VERBOSE ... of the query
+    bt TEXT                   # python stack trace that led to the query running
+);
+sqlite> SELECT time, sql FROM queries ORDER BY time DESC LIMIT 1;
+time        sql
+----------  ---------------------------------------------------------------------------------------------
+0.046       UPDATE "django_session" SET "session_data" = 'XYZ', "expire_date" = '2019-02-15T21:56:45.693290+00:00'::timestamptz WHERE "django_session"."session_key" = 'we9dumywgju4fulaxz3oki58zpxgmd6t'
+```
 
 Remote Debugging
 ----------------

@@ -54,6 +54,7 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
                     EDIT_WORKFLOW: i18n._('Edit the workflow job template'),
                     EDIT_SLICE_TEMPLATE: i18n._('Edit the slice job template'),
                     EDIT_SCHEDULE: i18n._('Edit the schedule'),
+                    EDIT_INVENTORY: i18n._('Edit the inventory'),
                     SOURCE_WORKFLOW_JOB: i18n._('View the source Workflow Job'),
                     TOGGLE_STDOUT_FULLSCREEN: i18n._('Expand Output'),
                     STATUS: '' // re-assigned elsewhere
@@ -120,6 +121,7 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
             $scope.labels = jobLabels;
             $scope.showManualControls = false;
             $scope.readOnly = true;
+            $scope.count = count.val;
 
             // Start elapsed time updater for job known to be running
             if ($scope.workflow.started !== null && $scope.workflow.status === 'running') {
@@ -168,6 +170,7 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
             $scope.parseType = 'yaml';
             $scope.varsTooltip= i18n._('Read only view of extra variables added to the workflow.');
             $scope.varsLabel = i18n._('Extra Variables');
+            $scope.varsName = 'extra_vars';
 
             // Click binding for the expand/collapse button on the standard out log
             $scope.stdoutFullScreen = false;
@@ -287,6 +290,9 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
                             $scope.$broadcast("refreshWorkflowChart");
                         }
                     });
+
+                    $scope.count = workflowResultsService
+                        .getCounts($scope.graphState.arrayOfNodesForChart);
             }
             getLabelsAndTooltips();
         });

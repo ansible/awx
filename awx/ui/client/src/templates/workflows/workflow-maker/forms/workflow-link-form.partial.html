@@ -1,4 +1,6 @@
-<div class="WorkflowMaker-formTitle">{{readOnly ? strings.get('workflow_maker.VIEW_LINK') : (linkConfig.mode === 'add' ? strings.get('workflow_maker.ADD_LINK') : strings.get('workflow_maker.EDIT_LINK')) }} | {{linkConfig.source.name}} {{linkConfig.target ? 'to ' + linkConfig.target.name : ''}}</div>
+<div class="WorkflowMaker-formTitle">
+    {{readOnly ? strings.get('workflow_maker.VIEW_LINK') : (linkConfig.mode === 'add' ? strings.get('workflow_maker.ADD_LINK') : strings.get('workflow_maker.EDIT_LINK')) }} | {{linkConfig.source.name}} {{linkConfig.target ? '&rarr; ' + linkConfig.target.name : ''}}
+</div>
 <div class="WorkflowMaker-form">
     <div class="form-group Form-formGroup Form-formGroup--singleColumn">
         <div ng-show="linkConfig.mode === 'add' && !linkConfig.target">{{:: strings.get('workflow_maker.NEW_LINK')}}</div>

@@ -1,13 +1,13 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
-from collections import OrderedDict
 import functools
+import inspect
 import logging
 import os
 import re
 import stat
 import tempfile
-import six
+from types import SimpleNamespace
 
 # Jinja2
 from jinja2 import Template
@@ -23,17 +23,16 @@ from awx.api.versioning import reverse
 from awx.main.fields import (ImplicitRoleField, CredentialInputField,
                              CredentialTypeInputField,
                              CredentialTypeInjectorField)
-from awx.main.utils import decrypt_field
+from awx.main.utils import decrypt_field, classproperty
 from awx.main.utils.safe_yaml import safe_dump
 from awx.main.validators import validate_ssh_private_key
-from awx.main.models.base import * # noqa
+from awx.main.models.base import CommonModelNameNotUnique, PasswordFieldsModel
 from awx.main.models.mixins import ResourceMixin
 from awx.main.models.rbac import (
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
     ROLE_SINGLETON_SYSTEM_AUDITOR,
 )
 from awx.main.utils import encrypt_field
-from awx.main.constants import CHOICES_PRIVILEGE_ESCALATION_METHODS
 from . import injectors as builtin_injectors
 
 __all__ = ['Credential', 'CredentialType', 'V1Credential', 'build_safe_env']
@@ -164,7 +163,6 @@ class V1Credential(object):
             max_length=32,
             blank=True,
             default='',
-            choices=CHOICES_PRIVILEGE_ESCALATION_METHODS,
             help_text=_('Privilege escalation method.')
         ),
         'become_username': models.CharField(
@@ -325,10 +323,11 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
 
     @property
     def has_encrypted_ssh_key_data(self):
-        if self.pk:
+        try:
             ssh_key_data = decrypt_field(self, 'ssh_key_data')
-        else:
-            ssh_key_data = self.ssh_key_data
+        except AttributeError:
+            return False
+
         try:
             pem_objects = validate_ssh_private_key(ssh_key_data)
             for pem_object in pem_objects:
@@ -383,7 +382,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         super(Credential, self).save(*args, **kwargs)
 
     def encrypt_field(self, field, ask):
-        if not hasattr(self, field):
+        if field not in self.inputs:
             return None
         encrypted = encrypt_field(self, field, ask=ask)
         if encrypted:
@@ -415,13 +414,13 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
             type_alias = self.credential_type.name
         else:
             type_alias = self.credential_type_id
-        if self.kind == 'vault' and self.inputs.get('vault_id', None):
+        if self.kind == 'vault' and self.has_input('vault_id'):
             if display:
-                fmt_str = six.text_type('{} (id={})')
+                fmt_str = '{} (id={})'
             else:
-                fmt_str = six.text_type('{}_{}')
-            return fmt_str.format(type_alias, self.inputs.get('vault_id'))
-        return six.text_type(type_alias)
+                fmt_str = '{}_{}'
+            return fmt_str.format(type_alias, self.get_input('vault_id'))
+        return str(type_alias)
 
     @staticmethod
     def unique_dict(cred_qs):
@@ -429,6 +428,40 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         for cred in cred_qs:
             ret[cred.unique_hash()] = cred
         return ret
+
+    def get_input(self, field_name, **kwargs):
+        """
+        Get an injectable and decrypted value for an input field.
+
+        Retrieves the value for a given credential input field name. Return
+        values for secret input fields are decrypted. If the credential doesn't
+        have an input value defined for the given field name, an AttributeError
+        is raised unless a default value is provided.
+
+        :param field_name(str):        The name of the input field.
+        :param default(optional[str]): A default return value to use.
+        """
+        if field_name in self.credential_type.secret_fields:
+            try:
+                return decrypt_field(self, field_name)
+            except AttributeError:
+                for field in self.credential_type.inputs.get('fields', []):
+                    if field['id'] == field_name and 'default' in field:
+                        return field['default']
+                if 'default' in kwargs:
+                    return kwargs['default']
+                raise AttributeError
+        if field_name in self.inputs:
+            return self.inputs[field_name]
+        if 'default' in kwargs:
+            return kwargs['default']
+        for field in self.credential_type.inputs.get('fields', []):
+            if field['id'] == field_name and 'default' in field:
+                return field['default']
+        raise AttributeError(field_name)
+
+    def has_input(self, field_name):
+        return field_name in self.inputs and self.inputs[field_name] not in ('', None)
 
 
 class CredentialType(CommonModelNameNotUnique):
@@ -438,8 +471,6 @@ class CredentialType(CommonModelNameNotUnique):
     Used to define a named credential type with fields (e.g., an API key) and
     output injectors (i.e., an environment variable that uses the API key).
     '''
-
-    defaults = OrderedDict()
 
     class Meta:
         app_label = 'main'
@@ -463,6 +494,12 @@ class CredentialType(CommonModelNameNotUnique):
         default=False,
         editable=False
     )
+    namespace = models.CharField(
+        max_length=1024,
+        null=True,
+        default=None,
+        editable=False
+    )
     inputs = CredentialTypeInputField(
         blank=True,
         default={},
@@ -477,6 +514,15 @@ class CredentialType(CommonModelNameNotUnique):
                     'radio button to toggle between the two. Refer to the '
                     'Ansible Tower documentation for example syntax.')
     )
+
+    @classmethod
+    def from_db(cls, db, field_names, values):
+        instance = super(CredentialType, cls).from_db(db, field_names, values)
+        if instance.managed_by_tower and instance.namespace:
+            native = ManagedCredentialType.registry[instance.namespace]
+            instance.inputs = native.inputs
+            instance.injectors = native.injectors
+        return instance
 
     def get_absolute_url(self, request=None):
         # Page does not exist in API v1
@@ -511,25 +557,31 @@ class CredentialType(CommonModelNameNotUnique):
             if field['id'] == field_id:
                 if 'choices' in field:
                     return field['choices'][0]
-                return {'string': '', 'boolean': False, 'become_method': ''}[field['type']]
+                return {'string': '', 'boolean': False}[field['type']]
+
+    @classproperty
+    def defaults(cls):
+        return dict(
+            (k, functools.partial(v.create))
+            for k, v in ManagedCredentialType.registry.items()
+        )
 
     @classmethod
-    def default(cls, f):
-        func = functools.partial(f, cls)
-        cls.defaults[f.__name__] = func
-        return func
-
-    @classmethod
-    def setup_tower_managed_defaults(cls, persisted=True):
-        for default in cls.defaults.values():
-            default_ = default()
-            if persisted:
-                if CredentialType.objects.filter(name=default_.name, kind=default_.kind).count():
-                    continue
-                logger.debug(_(
-                    "adding %s credential type" % default_.name
-                ))
-                default_.save()
+    def setup_tower_managed_defaults(cls):
+        for default in ManagedCredentialType.registry.values():
+            existing = CredentialType.objects.filter(name=default.name, kind=default.kind).first()
+            if existing is not None:
+                existing.namespace = default.namespace
+                existing.inputs = {}
+                existing.injectors = {}
+                existing.save()
+                continue
+            logger.debug(_(
+                "adding %s credential type" % default.name
+            ))
+            created = default.create()
+            created.inputs = created.injectors = {}
+            created.save()
 
     @classmethod
     def from_v1_kind(cls, kind, data={}):
@@ -611,8 +663,9 @@ class CredentialType(CommonModelNameNotUnique):
                 safe_namespace[field_name] = namespace[field_name] = value
                 continue
 
+            value = credential.get_input(field_name)
+
             if field_name in self.secret_fields:
-                value = decrypt_field(credential, field_name)
                 safe_namespace[field_name] = '**********'
             elif len(value):
                 safe_namespace[field_name] = value
@@ -632,7 +685,7 @@ class CredentialType(CommonModelNameNotUnique):
             data = Template(file_tmpl).render(**namespace)
             _, path = tempfile.mkstemp(dir=private_data_dir)
             with open(path, 'w') as f:
-                f.write(data.encode('utf-8'))
+                f.write(data)
             os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
 
             # determine if filename indicates single file or many
@@ -649,9 +702,7 @@ class CredentialType(CommonModelNameNotUnique):
             try:
                 injector_field.validate_env_var_allowed(env_var)
             except ValidationError as e:
-                logger.error(six.text_type(
-                    'Ignoring prohibited env var {}, reason: {}'
-                ).format(env_var, e))
+                logger.error('Ignoring prohibited env var {}, reason: {}'.format(env_var, e))
                 continue
             env[env_var] = Template(tmpl).render(**namespace)
             safe_env[env_var] = Template(tmpl).render(**safe_namespace)
@@ -676,527 +727,533 @@ class CredentialType(CommonModelNameNotUnique):
                 safe_args.extend(['-e', '@%s' % path])
 
 
-@CredentialType.default
-def ssh(cls):
-    return cls(
-        kind='ssh',
-        name=ugettext_noop('Machine'),
-        managed_by_tower=True,
-        inputs={
-            'fields': [{
-                'id': 'username',
-                'label': ugettext_noop('Username'),
-                'type': 'string'
-            }, {
-                'id': 'password',
-                'label': ugettext_noop('Password'),
-                'type': 'string',
-                'secret': True,
-                'ask_at_runtime': True
-            }, {
-                'id': 'ssh_key_data',
-                'label': ugettext_noop('SSH Private Key'),
-                'type': 'string',
-                'format': 'ssh_private_key',
-                'secret': True,
-                'multiline': True
-            }, {
-                'id': 'ssh_key_unlock',
-                'label': ugettext_noop('Private Key Passphrase'),
-                'type': 'string',
-                'secret': True,
-                'ask_at_runtime': True
-            }, {
-                'id': 'become_method',
-                'label': ugettext_noop('Privilege Escalation Method'),
-                'type': 'become_method',
-                'help_text': ugettext_noop('Specify a method for "become" operations. This is '
-                                           'equivalent to specifying the --become-method '
-                                           'Ansible parameter.')
-            }, {
-                'id': 'become_username',
-                'label': ugettext_noop('Privilege Escalation Username'),
-                'type': 'string',
-            }, {
-                'id': 'become_password',
-                'label': ugettext_noop('Privilege Escalation Password'),
-                'type': 'string',
-                'secret': True,
-                'ask_at_runtime': True
-            }],
-            'dependencies': {
-                'ssh_key_unlock': ['ssh_key_data'],
-            }
+class ManagedCredentialType(SimpleNamespace):
+
+    registry = {}
+
+    def __init__(self, namespace, **kwargs):
+        for k in ('inputs', 'injectors'):
+            if k not in kwargs:
+                kwargs[k] = {}
+        super(ManagedCredentialType, self).__init__(namespace=namespace, **kwargs)
+        if namespace in ManagedCredentialType.registry:
+            raise ValueError(
+                'a ManagedCredentialType with namespace={} is already defined in {}'.format(
+                    namespace,
+                    inspect.getsourcefile(ManagedCredentialType.registry[namespace].__class__)
+                )
+            )
+        ManagedCredentialType.registry[namespace] = self
+
+    def create(self):
+        return CredentialType(
+            namespace=self.namespace,
+            kind=self.kind,
+            name=self.name,
+            managed_by_tower=True,
+            inputs=self.inputs,
+            injectors=self.injectors,
+        )
+
+
+ManagedCredentialType(
+    namespace='ssh',
+    kind='ssh',
+    name=ugettext_noop('Machine'),
+    inputs={
+        'fields': [{
+            'id': 'username',
+            'label': ugettext_noop('Username'),
+            'type': 'string'
+        }, {
+            'id': 'password',
+            'label': ugettext_noop('Password'),
+            'type': 'string',
+            'secret': True,
+            'ask_at_runtime': True
+        }, {
+            'id': 'ssh_key_data',
+            'label': ugettext_noop('SSH Private Key'),
+            'type': 'string',
+            'format': 'ssh_private_key',
+            'secret': True,
+            'multiline': True
+        }, {
+            'id': 'ssh_key_unlock',
+            'label': ugettext_noop('Private Key Passphrase'),
+            'type': 'string',
+            'secret': True,
+            'ask_at_runtime': True
+        }, {
+            'id': 'become_method',
+            'label': ugettext_noop('Privilege Escalation Method'),
+            'type': 'string',
+            'help_text': ugettext_noop('Specify a method for "become" operations. This is '
+                                       'equivalent to specifying the --become-method '
+                                       'Ansible parameter.')
+        }, {
+            'id': 'become_username',
+            'label': ugettext_noop('Privilege Escalation Username'),
+            'type': 'string',
+        }, {
+            'id': 'become_password',
+            'label': ugettext_noop('Privilege Escalation Password'),
+            'type': 'string',
+            'secret': True,
+            'ask_at_runtime': True
+        }],
+        'dependencies': {
+            'ssh_key_unlock': ['ssh_key_data'],
         }
-    )
+    }
+)
 
-
-@CredentialType.default
-def scm(cls):
-    return cls(
-        kind='scm',
-        name=ugettext_noop('Source Control'),
-        managed_by_tower=True,
-        inputs={
-            'fields': [{
-                'id': 'username',
-                'label': ugettext_noop('Username'),
-                'type': 'string'
-            }, {
-                'id': 'password',
-                'label': ugettext_noop('Password'),
-                'type': 'string',
-                'secret': True
-            }, {
-                'id': 'ssh_key_data',
-                'label': ugettext_noop('SCM Private Key'),
-                'type': 'string',
-                'format': 'ssh_private_key',
-                'secret': True,
-                'multiline': True
-            }, {
-                'id': 'ssh_key_unlock',
-                'label': ugettext_noop('Private Key Passphrase'),
-                'type': 'string',
-                'secret': True
-            }],
-            'dependencies': {
-                'ssh_key_unlock': ['ssh_key_data'],
-            }
+ManagedCredentialType(
+    namespace='scm',
+    kind='scm',
+    name=ugettext_noop('Source Control'),
+    managed_by_tower=True,
+    inputs={
+        'fields': [{
+            'id': 'username',
+            'label': ugettext_noop('Username'),
+            'type': 'string'
+        }, {
+            'id': 'password',
+            'label': ugettext_noop('Password'),
+            'type': 'string',
+            'secret': True
+        }, {
+            'id': 'ssh_key_data',
+            'label': ugettext_noop('SCM Private Key'),
+            'type': 'string',
+            'format': 'ssh_private_key',
+            'secret': True,
+            'multiline': True
+        }, {
+            'id': 'ssh_key_unlock',
+            'label': ugettext_noop('Private Key Passphrase'),
+            'type': 'string',
+            'secret': True
+        }],
+        'dependencies': {
+            'ssh_key_unlock': ['ssh_key_data'],
         }
-    )
+    }
+)
 
+ManagedCredentialType(
+    namespace='vault',
+    kind='vault',
+    name=ugettext_noop('Vault'),
+    managed_by_tower=True,
+    inputs={
+        'fields': [{
+            'id': 'vault_password',
+            'label': ugettext_noop('Vault Password'),
+            'type': 'string',
+            'secret': True,
+            'ask_at_runtime': True
+        }, {
+            'id': 'vault_id',
+            'label': ugettext_noop('Vault Identifier'),
+            'type': 'string',
+            'format': 'vault_id',
+            'help_text': ugettext_noop('Specify an (optional) Vault ID. This is '
+                                       'equivalent to specifying the --vault-id '
+                                       'Ansible parameter for providing multiple Vault '
+                                       'passwords.  Note: this feature only works in '
+                                       'Ansible 2.4+.')
+        }],
+        'required': ['vault_password'],
+    }
+)
 
-@CredentialType.default
-def vault(cls):
-    return cls(
-        kind='vault',
-        name=ugettext_noop('Vault'),
-        managed_by_tower=True,
-        inputs={
-            'fields': [{
-                'id': 'vault_password',
-                'label': ugettext_noop('Vault Password'),
-                'type': 'string',
-                'secret': True,
-                'ask_at_runtime': True
-            }, {
-                'id': 'vault_id',
-                'label': ugettext_noop('Vault Identifier'),
-                'type': 'string',
-                'format': 'vault_id',
-                'help_text': ugettext_noop('Specify an (optional) Vault ID. This is '
-                                           'equivalent to specifying the --vault-id '
-                                           'Ansible parameter for providing multiple Vault '
-                                           'passwords.  Note: this feature only works in '
-                                           'Ansible 2.4+.')
-            }],
-            'required': ['vault_password'],
-        }
-    )
-
-
-@CredentialType.default
-def net(cls):
-    return cls(
-        kind='net',
-        name=ugettext_noop('Network'),
-        managed_by_tower=True,
-        inputs={
-            'fields': [{
-                'id': 'username',
-                'label': ugettext_noop('Username'),
-                'type': 'string'
-            }, {
-                'id': 'password',
-                'label': ugettext_noop('Password'),
-                'type': 'string',
-                'secret': True,
-            }, {
-                'id': 'ssh_key_data',
-                'label': ugettext_noop('SSH Private Key'),
-                'type': 'string',
-                'format': 'ssh_private_key',
-                'secret': True,
-                'multiline': True
-            }, {
-                'id': 'ssh_key_unlock',
-                'label': ugettext_noop('Private Key Passphrase'),
-                'type': 'string',
-                'secret': True,
-            }, {
-                'id': 'authorize',
-                'label': ugettext_noop('Authorize'),
-                'type': 'boolean',
-            }, {
-                'id': 'authorize_password',
-                'label': ugettext_noop('Authorize Password'),
-                'type': 'string',
-                'secret': True,
-            }],
-            'dependencies': {
-                'ssh_key_unlock': ['ssh_key_data'],
-                'authorize_password': ['authorize'],
-            },
-            'required': ['username'],
-        }
-    )
-
-
-@CredentialType.default
-def aws(cls):
-    return cls(
-        kind='cloud',
-        name=ugettext_noop('Amazon Web Services'),
-        managed_by_tower=True,
-        inputs={
-            'fields': [{
-                'id': 'username',
-                'label': ugettext_noop('Access Key'),
-                'type': 'string'
-            }, {
-                'id': 'password',
-                'label': ugettext_noop('Secret Key'),
-                'type': 'string',
-                'secret': True,
-            }, {
-                'id': 'security_token',
-                'label': ugettext_noop('STS Token'),
-                'type': 'string',
-                'secret': True,
-                'help_text': ugettext_noop('Security Token Service (STS) is a web service '
-                                           'that enables you to request temporary, '
-                                           'limited-privilege credentials for AWS Identity '
-                                           'and Access Management (IAM) users.'),
-            }],
-            'required': ['username', 'password']
-        }
-    )
-
-
-@CredentialType.default
-def openstack(cls):
-    return cls(
-        kind='cloud',
-        name=ugettext_noop('OpenStack'),
-        managed_by_tower=True,
-        inputs={
-            'fields': [{
-                'id': 'username',
-                'label': ugettext_noop('Username'),
-                'type': 'string'
-            }, {
-                'id': 'password',
-                'label': ugettext_noop('Password (API Key)'),
-                'type': 'string',
-                'secret': True,
-            }, {
-                'id': 'host',
-                'label': ugettext_noop('Host (Authentication URL)'),
-                'type': 'string',
-                'help_text': ugettext_noop('The host to authenticate with.  For example, '
-                                           'https://openstack.business.com/v2.0/')
-            }, {
-                'id': 'project',
-                'label': ugettext_noop('Project (Tenant Name)'),
-                'type': 'string',
-            }, {
-                'id': 'domain',
-                'label': ugettext_noop('Domain Name'),
-                'type': 'string',
-                'help_text': ugettext_noop('OpenStack domains define administrative boundaries. '
-                                           'It is only needed for Keystone v3 authentication '
-                                           'URLs. Refer to Ansible Tower documentation for '
-                                           'common scenarios.')
-            }],
-            'required': ['username', 'password', 'host', 'project']
-        }
-    )
-
-
-@CredentialType.default
-def vmware(cls):
-    return cls(
-        kind='cloud',
-        name=ugettext_noop('VMware vCenter'),
-        managed_by_tower=True,
-        inputs={
-            'fields': [{
-                'id': 'host',
-                'label': ugettext_noop('VCenter Host'),
-                'type': 'string',
-                'help_text': ugettext_noop('Enter the hostname or IP address that corresponds '
-                                           'to your VMware vCenter.')
-            }, {
-                'id': 'username',
-                'label': ugettext_noop('Username'),
-                'type': 'string'
-            }, {
-                'id': 'password',
-                'label': ugettext_noop('Password'),
-                'type': 'string',
-                'secret': True,
-            }],
-            'required': ['host', 'username', 'password']
-        }
-    )
-
-
-@CredentialType.default
-def satellite6(cls):
-    return cls(
-        kind='cloud',
-        name=ugettext_noop('Red Hat Satellite 6'),
-        managed_by_tower=True,
-        inputs={
-            'fields': [{
-                'id': 'host',
-                'label': ugettext_noop('Satellite 6 URL'),
-                'type': 'string',
-                'help_text': ugettext_noop('Enter the URL that corresponds to your Red Hat '
-                                           'Satellite 6 server. For example, https://satellite.example.org')
-            }, {
-                'id': 'username',
-                'label': ugettext_noop('Username'),
-                'type': 'string'
-            }, {
-                'id': 'password',
-                'label': ugettext_noop('Password'),
-                'type': 'string',
-                'secret': True,
-            }],
-            'required': ['host', 'username', 'password'],
-        }
-    )
-
-
-@CredentialType.default
-def cloudforms(cls):
-    return cls(
-        kind='cloud',
-        name=ugettext_noop('Red Hat CloudForms'),
-        managed_by_tower=True,
-        inputs={
-            'fields': [{
-                'id': 'host',
-                'label': ugettext_noop('CloudForms URL'),
-                'type': 'string',
-                'help_text': ugettext_noop('Enter the URL for the virtual machine that '
-                                           'corresponds to your CloudForms instance. '
-                                           'For example, https://cloudforms.example.org')
-            }, {
-                'id': 'username',
-                'label': ugettext_noop('Username'),
-                'type': 'string'
-            }, {
-                'id': 'password',
-                'label': ugettext_noop('Password'),
-                'type': 'string',
-                'secret': True,
-            }],
-            'required': ['host', 'username', 'password'],
-        }
-    )
-
-
-@CredentialType.default
-def gce(cls):
-    return cls(
-        kind='cloud',
-        name=ugettext_noop('Google Compute Engine'),
-        managed_by_tower=True,
-        inputs={
-            'fields': [{
-                'id': 'username',
-                'label': ugettext_noop('Service Account Email Address'),
-                'type': 'string',
-                'help_text': ugettext_noop('The email address assigned to the Google Compute '
-                                           'Engine service account.')
-            }, {
-                'id': 'project',
-                'label': 'Project',
-                'type': 'string',
-                'help_text': ugettext_noop('The Project ID is the GCE assigned identification. '
-                                           'It is often constructed as three words or two words '
-                                           'followed by a three-digit number. Examples: project-id-000 '
-                                           'and another-project-id')
-            }, {
-                'id': 'ssh_key_data',
-                'label': ugettext_noop('RSA Private Key'),
-                'type': 'string',
-                'format': 'ssh_private_key',
-                'secret': True,
-                'multiline': True,
-                'help_text': ugettext_noop('Paste the contents of the PEM file associated '
-                                           'with the service account email.')
-            }],
-            'required': ['username', 'ssh_key_data'],
-        }
-    )
-
-
-@CredentialType.default
-def azure_rm(cls):
-    return cls(
-        kind='cloud',
-        name=ugettext_noop('Microsoft Azure Resource Manager'),
-        managed_by_tower=True,
-        inputs={
-            'fields': [{
-                'id': 'subscription',
-                'label': ugettext_noop('Subscription ID'),
-                'type': 'string',
-                'help_text': ugettext_noop('Subscription ID is an Azure construct, which is '
-                                           'mapped to a username.')
-            }, {
-                'id': 'username',
-                'label': ugettext_noop('Username'),
-                'type': 'string'
-            }, {
-                'id': 'password',
-                'label': ugettext_noop('Password'),
-                'type': 'string',
-                'secret': True,
-            }, {
-                'id': 'client',
-                'label': ugettext_noop('Client ID'),
-                'type': 'string'
-            }, {
-                'id': 'secret',
-                'label': ugettext_noop('Client Secret'),
-                'type': 'string',
-                'secret': True,
-            }, {
-                'id': 'tenant',
-                'label': ugettext_noop('Tenant ID'),
-                'type': 'string'
-            }, {
-                'id': 'cloud_environment',
-                'label': ugettext_noop('Azure Cloud Environment'),
-                'type': 'string',
-                'help_text': ugettext_noop('Environment variable AZURE_CLOUD_ENVIRONMENT when'
-                                           ' using Azure GovCloud or Azure stack.')
-            }],
-            'required': ['subscription'],
-        }
-    )
-
-
-@CredentialType.default
-def insights(cls):
-    return cls(
-        kind='insights',
-        name=ugettext_noop('Insights'),
-        managed_by_tower=True,
-        inputs={
-            'fields': [{
-                'id': 'username',
-                'label': ugettext_noop('Username'),
-                'type': 'string'
-            }, {
-                'id': 'password',
-                'label': ugettext_noop('Password'),
-                'type': 'string',
-                'secret': True
-            }],
-            'required': ['username', 'password'],
+ManagedCredentialType(
+    namespace='net',
+    kind='net',
+    name=ugettext_noop('Network'),
+    managed_by_tower=True,
+    inputs={
+        'fields': [{
+            'id': 'username',
+            'label': ugettext_noop('Username'),
+            'type': 'string'
+        }, {
+            'id': 'password',
+            'label': ugettext_noop('Password'),
+            'type': 'string',
+            'secret': True,
+        }, {
+            'id': 'ssh_key_data',
+            'label': ugettext_noop('SSH Private Key'),
+            'type': 'string',
+            'format': 'ssh_private_key',
+            'secret': True,
+            'multiline': True
+        }, {
+            'id': 'ssh_key_unlock',
+            'label': ugettext_noop('Private Key Passphrase'),
+            'type': 'string',
+            'secret': True,
+        }, {
+            'id': 'authorize',
+            'label': ugettext_noop('Authorize'),
+            'type': 'boolean',
+        }, {
+            'id': 'authorize_password',
+            'label': ugettext_noop('Authorize Password'),
+            'type': 'string',
+            'secret': True,
+        }],
+        'dependencies': {
+            'ssh_key_unlock': ['ssh_key_data'],
+            'authorize_password': ['authorize'],
         },
-        injectors={
-            'extra_vars': {
-                "scm_username": "{{username}}",
-                "scm_password": "{{password}}",
-            },
-        },
-    )
+        'required': ['username'],
+    }
+)
 
+ManagedCredentialType(
+    namespace='aws',
+    kind='cloud',
+    name=ugettext_noop('Amazon Web Services'),
+    managed_by_tower=True,
+    inputs={
+        'fields': [{
+            'id': 'username',
+            'label': ugettext_noop('Access Key'),
+            'type': 'string'
+        }, {
+            'id': 'password',
+            'label': ugettext_noop('Secret Key'),
+            'type': 'string',
+            'secret': True,
+        }, {
+            'id': 'security_token',
+            'label': ugettext_noop('STS Token'),
+            'type': 'string',
+            'secret': True,
+            'help_text': ugettext_noop('Security Token Service (STS) is a web service '
+                                       'that enables you to request temporary, '
+                                       'limited-privilege credentials for AWS Identity '
+                                       'and Access Management (IAM) users.'),
+        }],
+        'required': ['username', 'password']
+    }
+)
 
-@CredentialType.default
-def rhv(cls):
-    return cls(
-        kind='cloud',
-        name=ugettext_noop('Red Hat Virtualization'),
-        managed_by_tower=True,
-        inputs={
-            'fields': [{
-                'id': 'host',
-                'label': ugettext_noop('Host (Authentication URL)'),
-                'type': 'string',
-                'help_text': ugettext_noop('The host to authenticate with.')
-            }, {
-                'id': 'username',
-                'label': ugettext_noop('Username'),
-                'type': 'string'
-            }, {
-                'id': 'password',
-                'label': ugettext_noop('Password'),
-                'type': 'string',
-                'secret': True,
-            }, {
-                'id': 'ca_file',
-                'label': ugettext_noop('CA File'),
-                'type': 'string',
-                'help_text': ugettext_noop('Absolute file path to the CA file to use (optional)')
-            }],
-            'required': ['host', 'username', 'password'],
-        },
-        injectors={
-            # The duplication here is intentional; the ovirt4 inventory plugin
-            # writes a .ini file for authentication, while the ansible modules for
-            # ovirt4 use a separate authentication process that support
-            # environment variables; by injecting both, we support both
-            'file': {
-                'template': '\n'.join([
-                    '[ovirt]',
-                    'ovirt_url={{host}}',
-                    'ovirt_username={{username}}',
-                    'ovirt_password={{password}}',
-                    '{% if ca_file %}ovirt_ca_file={{ca_file}}{% endif %}'])
-            },
-            'env': {
-                'OVIRT_INI_PATH': '{{tower.filename}}',
-                'OVIRT_URL': '{{host}}',
-                'OVIRT_USERNAME': '{{username}}',
-                'OVIRT_PASSWORD': '{{password}}'
-            }
-        },
-    )
+ManagedCredentialType(
+    namespace='openstack',
+    kind='cloud',
+    name=ugettext_noop('OpenStack'),
+    managed_by_tower=True,
+    inputs={
+        'fields': [{
+            'id': 'username',
+            'label': ugettext_noop('Username'),
+            'type': 'string'
+        }, {
+            'id': 'password',
+            'label': ugettext_noop('Password (API Key)'),
+            'type': 'string',
+            'secret': True,
+        }, {
+            'id': 'host',
+            'label': ugettext_noop('Host (Authentication URL)'),
+            'type': 'string',
+            'help_text': ugettext_noop('The host to authenticate with.  For example, '
+                                       'https://openstack.business.com/v2.0/')
+        }, {
+            'id': 'project',
+            'label': ugettext_noop('Project (Tenant Name)'),
+            'type': 'string',
+        }, {
+            'id': 'domain',
+            'label': ugettext_noop('Domain Name'),
+            'type': 'string',
+            'help_text': ugettext_noop('OpenStack domains define administrative boundaries. '
+                                       'It is only needed for Keystone v3 authentication '
+                                       'URLs. Refer to Ansible Tower documentation for '
+                                       'common scenarios.')
+        }, {
+            'id': 'verify_ssl',
+            'label': ugettext_noop('Verify SSL'),
+            'type': 'boolean',
+            'default': True,
+        }],
+        'required': ['username', 'password', 'host', 'project']
+    }
+)
 
+ManagedCredentialType(
+    namespace='vmware',
+    kind='cloud',
+    name=ugettext_noop('VMware vCenter'),
+    managed_by_tower=True,
+    inputs={
+        'fields': [{
+            'id': 'host',
+            'label': ugettext_noop('VCenter Host'),
+            'type': 'string',
+            'help_text': ugettext_noop('Enter the hostname or IP address that corresponds '
+                                       'to your VMware vCenter.')
+        }, {
+            'id': 'username',
+            'label': ugettext_noop('Username'),
+            'type': 'string'
+        }, {
+            'id': 'password',
+            'label': ugettext_noop('Password'),
+            'type': 'string',
+            'secret': True,
+        }],
+        'required': ['host', 'username', 'password']
+    }
+)
 
-@CredentialType.default
-def tower(cls):
-    return cls(
-        kind='cloud',
-        name=ugettext_noop('Ansible Tower'),
-        managed_by_tower=True,
-        inputs={
-            'fields': [{
-                'id': 'host',
-                'label': ugettext_noop('Ansible Tower Hostname'),
-                'type': 'string',
-                'help_text': ugettext_noop('The Ansible Tower base URL to authenticate with.')
-            }, {
-                'id': 'username',
-                'label': ugettext_noop('Username'),
-                'type': 'string'
-            }, {
-                'id': 'password',
-                'label': ugettext_noop('Password'),
-                'type': 'string',
-                'secret': True,
-            }, {
-                'id': 'verify_ssl',
-                'label': ugettext_noop('Verify SSL'),
-                'type': 'boolean',
-                'secret': False
-            }],
-            'required': ['host', 'username', 'password'],
+ManagedCredentialType(
+    namespace='satellite6',
+    kind='cloud',
+    name=ugettext_noop('Red Hat Satellite 6'),
+    managed_by_tower=True,
+    inputs={
+        'fields': [{
+            'id': 'host',
+            'label': ugettext_noop('Satellite 6 URL'),
+            'type': 'string',
+            'help_text': ugettext_noop('Enter the URL that corresponds to your Red Hat '
+                                       'Satellite 6 server. For example, https://satellite.example.org')
+        }, {
+            'id': 'username',
+            'label': ugettext_noop('Username'),
+            'type': 'string'
+        }, {
+            'id': 'password',
+            'label': ugettext_noop('Password'),
+            'type': 'string',
+            'secret': True,
+        }],
+        'required': ['host', 'username', 'password'],
+    }
+)
+
+ManagedCredentialType(
+    namespace='cloudforms',
+    kind='cloud',
+    name=ugettext_noop('Red Hat CloudForms'),
+    managed_by_tower=True,
+    inputs={
+        'fields': [{
+            'id': 'host',
+            'label': ugettext_noop('CloudForms URL'),
+            'type': 'string',
+            'help_text': ugettext_noop('Enter the URL for the virtual machine that '
+                                       'corresponds to your CloudForms instance. '
+                                       'For example, https://cloudforms.example.org')
+        }, {
+            'id': 'username',
+            'label': ugettext_noop('Username'),
+            'type': 'string'
+        }, {
+            'id': 'password',
+            'label': ugettext_noop('Password'),
+            'type': 'string',
+            'secret': True,
+        }],
+        'required': ['host', 'username', 'password'],
+    }
+)
+
+ManagedCredentialType(
+    namespace='gce',
+    kind='cloud',
+    name=ugettext_noop('Google Compute Engine'),
+    managed_by_tower=True,
+    inputs={
+        'fields': [{
+            'id': 'username',
+            'label': ugettext_noop('Service Account Email Address'),
+            'type': 'string',
+            'help_text': ugettext_noop('The email address assigned to the Google Compute '
+                                       'Engine service account.')
+        }, {
+            'id': 'project',
+            'label': 'Project',
+            'type': 'string',
+            'help_text': ugettext_noop('The Project ID is the GCE assigned identification. '
+                                       'It is often constructed as three words or two words '
+                                       'followed by a three-digit number. Examples: project-id-000 '
+                                       'and another-project-id')
+        }, {
+            'id': 'ssh_key_data',
+            'label': ugettext_noop('RSA Private Key'),
+            'type': 'string',
+            'format': 'ssh_private_key',
+            'secret': True,
+            'multiline': True,
+            'help_text': ugettext_noop('Paste the contents of the PEM file associated '
+                                       'with the service account email.')
+        }],
+        'required': ['username', 'ssh_key_data'],
+    }
+)
+
+ManagedCredentialType(
+    namespace='azure_rm',
+    kind='cloud',
+    name=ugettext_noop('Microsoft Azure Resource Manager'),
+    managed_by_tower=True,
+    inputs={
+        'fields': [{
+            'id': 'subscription',
+            'label': ugettext_noop('Subscription ID'),
+            'type': 'string',
+            'help_text': ugettext_noop('Subscription ID is an Azure construct, which is '
+                                       'mapped to a username.')
+        }, {
+            'id': 'username',
+            'label': ugettext_noop('Username'),
+            'type': 'string'
+        }, {
+            'id': 'password',
+            'label': ugettext_noop('Password'),
+            'type': 'string',
+            'secret': True,
+        }, {
+            'id': 'client',
+            'label': ugettext_noop('Client ID'),
+            'type': 'string'
+        }, {
+            'id': 'secret',
+            'label': ugettext_noop('Client Secret'),
+            'type': 'string',
+            'secret': True,
+        }, {
+            'id': 'tenant',
+            'label': ugettext_noop('Tenant ID'),
+            'type': 'string'
+        }, {
+            'id': 'cloud_environment',
+            'label': ugettext_noop('Azure Cloud Environment'),
+            'type': 'string',
+            'help_text': ugettext_noop('Environment variable AZURE_CLOUD_ENVIRONMENT when'
+                                       ' using Azure GovCloud or Azure stack.')
+        }],
+        'required': ['subscription'],
+    }
+)
+
+ManagedCredentialType(
+    namespace='insights',
+    kind='insights',
+    name=ugettext_noop('Insights'),
+    managed_by_tower=True,
+    inputs={
+        'fields': [{
+            'id': 'username',
+            'label': ugettext_noop('Username'),
+            'type': 'string'
+        }, {
+            'id': 'password',
+            'label': ugettext_noop('Password'),
+            'type': 'string',
+            'secret': True
+        }],
+        'required': ['username', 'password'],
+    },
+    injectors={
+        'extra_vars': {
+            "scm_username": "{{username}}",
+            "scm_password": "{{password}}",
         },
-        injectors={
-            'env': {
-                'TOWER_HOST': '{{host}}',
-                'TOWER_USERNAME': '{{username}}',
-                'TOWER_PASSWORD': '{{password}}',
-                'TOWER_VERIFY_SSL': '{{verify_ssl}}'
-            }
+    },
+)
+
+ManagedCredentialType(
+    namespace='rhv',
+    kind='cloud',
+    name=ugettext_noop('Red Hat Virtualization'),
+    managed_by_tower=True,
+    inputs={
+        'fields': [{
+            'id': 'host',
+            'label': ugettext_noop('Host (Authentication URL)'),
+            'type': 'string',
+            'help_text': ugettext_noop('The host to authenticate with.')
+        }, {
+            'id': 'username',
+            'label': ugettext_noop('Username'),
+            'type': 'string'
+        }, {
+            'id': 'password',
+            'label': ugettext_noop('Password'),
+            'type': 'string',
+            'secret': True,
+        }, {
+            'id': 'ca_file',
+            'label': ugettext_noop('CA File'),
+            'type': 'string',
+            'help_text': ugettext_noop('Absolute file path to the CA file to use (optional)')
+        }],
+        'required': ['host', 'username', 'password'],
+    },
+    injectors={
+        # The duplication here is intentional; the ovirt4 inventory plugin
+        # writes a .ini file for authentication, while the ansible modules for
+        # ovirt4 use a separate authentication process that support
+        # environment variables; by injecting both, we support both
+        'file': {
+            'template': '\n'.join([
+                '[ovirt]',
+                'ovirt_url={{host}}',
+                'ovirt_username={{username}}',
+                'ovirt_password={{password}}',
+                '{% if ca_file %}ovirt_ca_file={{ca_file}}{% endif %}'])
         },
-    )
+        'env': {
+            'OVIRT_INI_PATH': '{{tower.filename}}',
+            'OVIRT_URL': '{{host}}',
+            'OVIRT_USERNAME': '{{username}}',
+            'OVIRT_PASSWORD': '{{password}}'
+        }
+    },
+)
+
+ManagedCredentialType(
+    namespace='tower',
+    kind='cloud',
+    name=ugettext_noop('Ansible Tower'),
+    managed_by_tower=True,
+    inputs={
+        'fields': [{
+            'id': 'host',
+            'label': ugettext_noop('Ansible Tower Hostname'),
+            'type': 'string',
+            'help_text': ugettext_noop('The Ansible Tower base URL to authenticate with.')
+        }, {
+            'id': 'username',
+            'label': ugettext_noop('Username'),
+            'type': 'string'
+        }, {
+            'id': 'password',
+            'label': ugettext_noop('Password'),
+            'type': 'string',
+            'secret': True,
+        }, {
+            'id': 'verify_ssl',
+            'label': ugettext_noop('Verify SSL'),
+            'type': 'boolean',
+            'secret': False
+        }],
+        'required': ['host', 'username', 'password'],
+    },
+    injectors={
+        'env': {
+            'TOWER_HOST': '{{host}}',
+            'TOWER_USERNAME': '{{username}}',
+            'TOWER_PASSWORD': '{{password}}',
+            'TOWER_VERIFY_SSL': '{{verify_ssl}}'
+        }
+    },
+)

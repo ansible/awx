@@ -4,13 +4,14 @@
  * All Rights Reserved
  *************************************************/
 
-export default [ 'templateUrl',
-    function(templateUrl) {
+export default [ 'templateUrl', 'OutputStrings',
+    function(templateUrl, OutputStrings) {
     return {
         scope: true,
         templateUrl: templateUrl('workflow-results/workflow-status-bar/workflow-status-bar'),
         restrict: 'E',
         link: function(scope) {
+            scope.strings = OutputStrings;
             // as count is changed by jobs coming in,
             // update the workflow status bar
             scope.$watch('count', function(val) {
@@ -22,10 +23,21 @@ export default [ 'templateUrl',
                         $(`.WorkflowStatusBar-${key}`)
                             .css('flex', `${val[key]} 0 auto`);
 
+                        let tooltipLabel = key;
+
+                        switch(key) {
+                            case 'successful':
+                                tooltipLabel = scope.strings.get('workflow_status.SUCCESSFUL');
+                                break;
+                            case 'failed':
+                                tooltipLabel = scope.strings.get('workflow_status.FAILED');
+                                break;
+                            }
+
                         // set the tooltip to give how many jobs of
                         // each type
                         if (val[key] > 0) {
-                            scope[`${key}CountTip`] = `<span class='WorkflowStatusBar-tooltipLabel'>${key}</span><span class='badge WorkflowStatusBar-tooltipBadge WorkflowStatusBar-tooltipBadge--${key}'>${val[key]}</span>`;
+                            scope[`${key}CountTip`] = `<span class='WorkflowStatusBar-tooltipLabel'>${tooltipLabel}</span><span class='badge WorkflowStatusBar-tooltipBadge WorkflowStatusBar-tooltipBadge--${key}'>${val[key]}</span>`;
                         }
                     });
 

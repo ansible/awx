@@ -7,10 +7,10 @@ import os
 from backports.tempfile import TemporaryDirectory
 from django.conf import settings
 import pytest
-import mock
+from unittest import mock
 
 # AWX
-from awx.main.models import * # noqa
+from awx.main.models import ProjectUpdate
 from awx.api.versioning import reverse
 
 
@@ -38,14 +38,14 @@ def create_project_update_factory(organization, project):
 
 @pytest.fixture
 def organization_jobs_successful(create_job_factory, create_project_update_factory):
-    return [create_job_factory(status='successful') for i in xrange(0, 2)] + \
-        [create_project_update_factory(status='successful') for i in xrange(0, 2)]
+    return [create_job_factory(status='successful') for i in range(0, 2)] + \
+        [create_project_update_factory(status='successful') for i in range(0, 2)]
 
 
 @pytest.fixture
 def organization_jobs_running(create_job_factory, create_project_update_factory):
-    return [create_job_factory(status='running') for i in xrange(0, 2)] + \
-        [create_project_update_factory(status='running') for i in xrange(0, 2)]
+    return [create_job_factory(status='running') for i in range(0, 2)] + \
+        [create_project_update_factory(status='running') for i in range(0, 2)]
 
 
 @pytest.mark.django_db
@@ -197,6 +197,30 @@ def test_update_organization(get, put, organization, alice, bob):
     assert organization.description == 'hi'
     data['description'] = 'bye'
     put(reverse('api:organization_detail', kwargs={'pk': organization.id}), data, user=bob, expect=403)
+
+
+@pytest.mark.django_db
+def test_update_organization_max_hosts(get, put, organization, admin, alice, bob):
+    # Admin users can get and update max_hosts
+    data = get(reverse('api:organization_detail', kwargs={'pk': organization.id}), user=admin, expect=200).data
+    assert organization.max_hosts == 0
+    data['max_hosts'] = 3
+    put(reverse('api:organization_detail', kwargs={'pk': organization.id}), data, user=admin, expect=200)
+    organization.refresh_from_db()
+    assert organization.max_hosts == 3
+
+    # Organization admins can get the data and can update other fields, but not max_hosts
+    organization.admin_role.members.add(alice)
+    data = get(reverse('api:organization_detail', kwargs={'pk': organization.id}), user=alice, expect=200).data
+    data['max_hosts'] = 5
+    put(reverse('api:organization_detail', kwargs={'pk': organization.id}), data, user=alice, expect=400)
+    organization.refresh_from_db()
+    assert organization.max_hosts == 3
+
+    # Ordinary users shouldn't be able to update either.
+    put(reverse('api:organization_detail', kwargs={'pk': organization.id}), data, user=bob, expect=403)
+    organization.refresh_from_db()
+    assert organization.max_hosts == 3
 
 
 @pytest.mark.django_db

@@ -20,6 +20,11 @@ runs.  To choose a custom virtualenv, first create one in `/var/lib/awx/venv`:
 
     $ sudo virtualenv /var/lib/awx/venv/my-custom-venv
 
+Multiple versions of Python are supported, though it's important to note that
+the semantics for creating virtualenvs in Python 3 has changed slightly:
+
+    $ sudo python3 -m venv /var/lib/awx/venv/my-custom-venv
+
 Your newly created virtualenv needs a few base dependencies to properly run
 playbooks (awx uses memcached as a holding space for playbook artifacts and
 fact gathering):

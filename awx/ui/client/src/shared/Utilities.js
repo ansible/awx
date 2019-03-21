@@ -78,7 +78,7 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
             $('#alert2-modal-msg').html(msg);
 
             alertClass = (cls) ? cls : 'alert-danger'; //default alert class is alert-danger
-            local_backdrop = (backdrop === undefined) ? "static" : backdrop;
+            local_backdrop = (backdrop === undefined || backdrop === null) ? "static" : backdrop;
 
             $('#alert2-modal-msg').attr({ "class": "alert " + alertClass });
             $('#alert-modal2').modal({
@@ -107,7 +107,7 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
             $('#alertHeader').html(hdr);
             $('#alert-modal-msg').html(msg);
             alertClass = (cls) ? cls : 'alert-danger'; //default alert class is alert-danger
-            local_backdrop = (backdrop === undefined) ? "static" : backdrop;
+            local_backdrop = (backdrop === undefined || backdrop === null) ? "static" : backdrop;
 
             $('#alert-modal-msg').attr({ "class": "alert " + alertClass });
             $('#alert-modal').modal({
@@ -579,8 +579,8 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
  * ]
  * ```
  */
-.factory('CreateSelect2', ['$filter',
-        function($filter) {
+.factory('CreateSelect2', ['$filter', '$q',
+        function($filter, $q) {
             return function(params) {
 
                 var element = params.element,
@@ -593,10 +593,11 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                     selectOptions = params.options,
                     model = params.model,
                     original_options,
-                    minimumResultsForSearch = params.minimumResultsForSearch ? params.minimumResultsForSearch : Infinity;
+                    minimumResultsForSearch = params.minimumResultsForSearch ? params.minimumResultsForSearch : Infinity,
+                    defer = $q.defer();
 
                     if (scope && selectOptions) {
-                        original_options = _.cloneDeep(scope[selectOptions]);
+                        original_options = _.get(scope, selectOptions);
                     }
 
                 $.fn.select2.amd.require([
@@ -675,13 +676,16 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
 
                     if (addNew && !multiple) {
                         $(element).on('select2:select', (e) => {
-                            scope[model] = e.params.data.text;
-                            scope[selectOptions] = _.cloneDeep(original_options);
+                            _.set(scope, model, e.params.data.text);
+                            const optionsClone = _.clone(original_options);
+                            _.set(scope, selectOptions, optionsClone);
                             if (e.params.data.id === "") {
                                 return;
                             }
-                            if (scope[selectOptions].indexOf(e.params.data.text) === -1) {
-                                scope[selectOptions].push(e.params.data.text);
+                            const optionMatches = original_options.findIndex((option) => option === e.params.data.text);
+                            if (optionMatches === -1) {
+                                optionsClone.push(e.params.data.text);
+                                _.set(scope, selectOptions, optionsClone);
                             }
                             $(element).select2(config);
                         });
@@ -700,8 +704,10 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
 
                         $(element).trigger('change');
                     }
-
+                    defer.resolve("select2 loaded");
                 });
+
+                return defer.promise;
             };
         }
     ])

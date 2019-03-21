@@ -8,7 +8,7 @@
         <!-- LEFT PANE -->
         <div class="WorkflowResults-leftSide"
             ng-class="{'WorkflowResults-stdoutActionButton--active': stdoutFullScreen}">
-            <div class="Panel"
+            <div class="card at-Panel"
                 ng-show="!stdoutFullScreen">
 
                 <!-- LEFT PANE HEADER -->
@@ -133,7 +133,7 @@
                         </label>
                         <div class="WorkflowResults-resultRowText">
                             <a href="{{ inventory_link }}"
-                                aw-tool-tip="{{ strings.tooltips.EDIT_WORKFLOW }}"
+                                aw-tool-tip="{{ strings.tooltips.EDIT_INVENTORY }}"
                                 data-placement="top">
                                 {{ workflow.summary_fields.inventory.name }}
                             </a>
@@ -224,6 +224,7 @@
                         tooltip="{{ varsTooltip }}"
                         label="{{ varsLabel }}"
                         label-class="WorkflowResults-extraVarsLabel"
+                        name="{{ varsName }}"
                         disabled="disabled">
                     </at-code-mirror>
 
@@ -272,7 +273,7 @@
 
         <!-- RIGHT PANE -->
         <div class="WorkflowResults-rightSide">
-            <div class="Panel">
+            <div class="card at-Panel">
 
                 <!-- RIGHT PANE HEADER -->
                 <div class="StandardOut-panelHeader WorkflowResults-panelRightTitle">

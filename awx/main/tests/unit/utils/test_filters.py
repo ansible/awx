@@ -1,15 +1,15 @@
 
 # Python
 import pytest
-import mock
+from unittest import mock
 
 # AWX
 from awx.main.utils.filters import SmartFilter, ExternalLoggerEnabled
+from awx.main.models import Host
 
 # Django
 from django.db.models import Q
 
-import six
 
 
 @pytest.mark.parametrize('params, logger_name, expected', [
@@ -106,12 +106,13 @@ class TestSmartFilterQueryFromString():
         ('a__b__c=false', Q(**{u"a__b__c": False})),
         ('a__b__c=null', Q(**{u"a__b__c": None})),
         ('ansible_facts__a="true"', Q(**{u"ansible_facts__contains": {u"a": u"true"}})),
+        ('ansible_facts__a__exact="true"', Q(**{u"ansible_facts__contains": {u"a": u"true"}})),
         #('"a__b\"__c"="true"', Q(**{u"a__b\"__c": "true"})),
         #('a__b\"__c="true"', Q(**{u"a__b\"__c": "true"})),
     ])
     def test_query_generated(self, mock_get_host_model, filter_string, q_expected):
         q = SmartFilter.query_from_string(filter_string)
-        assert six.text_type(q) == six.text_type(q_expected)
+        assert str(q) == str(q_expected)
 
     @pytest.mark.parametrize("filter_string", [
         'ansible_facts__facts__facts__blank='
@@ -120,7 +121,7 @@ class TestSmartFilterQueryFromString():
     def test_invalid_filter_strings(self, mock_get_host_model, filter_string):
         with pytest.raises(RuntimeError) as e:
             SmartFilter.query_from_string(filter_string)
-        assert e.value.message == u"Invalid query " + filter_string
+        assert str(e.value) == u"Invalid query " + filter_string
 
     @pytest.mark.parametrize("filter_string", [
         'created_by__password__icontains=pbkdf2'
@@ -138,7 +139,7 @@ class TestSmartFilterQueryFromString():
     ])
     def test_unicode(self, mock_get_host_model, filter_string, q_expected):
         q = SmartFilter.query_from_string(filter_string)
-        assert six.text_type(q) == six.text_type(q_expected)
+        assert str(q) == str(q_expected)
 
     @pytest.mark.parametrize("filter_string,q_expected", [
         ('(a=b)', Q(**{u"a": u"b"})),
@@ -154,7 +155,7 @@ class TestSmartFilterQueryFromString():
     ])
     def test_boolean_parenthesis(self, mock_get_host_model, filter_string, q_expected):
         q = SmartFilter.query_from_string(filter_string)
-        assert six.text_type(q) == six.text_type(q_expected)
+        assert str(q) == str(q_expected)
 
     @pytest.mark.parametrize("filter_string,q_expected", [
         ('ansible_facts__a__b__c[]=3', Q(**{u"ansible_facts__contains": {u"a": {u"b": {u"c": [3]}}}})),
@@ -177,7 +178,7 @@ class TestSmartFilterQueryFromString():
     ])
     def test_contains_query_generated(self, mock_get_host_model, filter_string, q_expected):
         q = SmartFilter.query_from_string(filter_string)
-        assert six.text_type(q) == six.text_type(q_expected)
+        assert str(q) == str(q_expected)
 
     @pytest.mark.parametrize("filter_string,q_expected", [
         #('a__b__c[]="true"', Q(**{u"a__b__c__contains": u"\"true\""})),
@@ -187,7 +188,7 @@ class TestSmartFilterQueryFromString():
     ])
     def test_contains_query_generated_unicode(self, mock_get_host_model, filter_string, q_expected):
         q = SmartFilter.query_from_string(filter_string)
-        assert six.text_type(q) == six.text_type(q_expected)
+        assert str(q) == str(q_expected)
 
     @pytest.mark.parametrize("filter_string,q_expected", [
         ('ansible_facts__a=null', Q(**{u"ansible_facts__contains": {u"a": None}})),
@@ -195,11 +196,10 @@ class TestSmartFilterQueryFromString():
     ])
     def test_contains_query_generated_null(self, mock_get_host_model, filter_string, q_expected):
         q = SmartFilter.query_from_string(filter_string)
-        assert six.text_type(q) == six.text_type(q_expected)
+        assert str(q) == str(q_expected)
 
 
     @pytest.mark.parametrize("filter_string,q_expected", [
-        ('search=foo', Q(Q(**{u"name__icontains": u"foo"}) | Q(**{ u"description__icontains": u"foo"}))),
         ('group__search=foo', Q(Q(**{u"group__name__icontains": u"foo"}) | Q(**{u"group__description__icontains": u"foo"}))),
         ('search=foo and group__search=foo', Q(
             Q(**{u"name__icontains": u"foo"}) | Q(**{ u"description__icontains": u"foo"}),
@@ -207,13 +207,33 @@ class TestSmartFilterQueryFromString():
         ('search=foo or ansible_facts__a=null',
             Q(Q(**{u"name__icontains": u"foo"}) | Q(**{u"description__icontains": u"foo"})) |
             Q(**{u"ansible_facts__contains": {u"a": None}})),
-        ('search=foo or ansible_facts__a="null"',
-            Q(Q(**{u"name__icontains": u"foo"}) | Q(**{u"description__icontains": u"foo"})) |
-            Q(**{u"ansible_facts__contains": {u"a": u"\"null\""}})),
     ])
     def test_search_related_fields(self, mock_get_host_model, filter_string, q_expected):
         q = SmartFilter.query_from_string(filter_string)
-        assert six.text_type(q) == six.text_type(q_expected)
+        assert str(q) == str(q_expected)
+
+
+class TestSmartFilterQueryFromStringNoDB():
+    @pytest.mark.parametrize("filter_string,q_expected", [
+        ('ansible_facts__a="true" and ansible_facts__b="true" and ansible_facts__c="true"',
+            (Q(**{u"ansible_facts__contains": {u"a": u"true"}}) &
+             Q(**{u"ansible_facts__contains": {u"b": u"true"}}) &
+             Q(**{u"ansible_facts__contains": {u"c": u"true"}}))),
+        ('ansible_facts__a="true" or ansible_facts__b="true" or ansible_facts__c="true"',
+            (Q(**{u"ansible_facts__contains": {u"a": u"true"}}) |
+             Q(**{u"ansible_facts__contains": {u"b": u"true"}}) |
+             Q(**{u"ansible_facts__contains": {u"c": u"true"}}))),
+        ('search=foo',
+            Q(Q(**{ u"description__icontains": u"foo"}) | Q(**{u"name__icontains": u"foo"}))),
+        ('search=foo and ansible_facts__a="null"',
+            Q(Q(**{u"description__icontains": u"foo"}) | Q(**{u"name__icontains": u"foo"})) &
+            Q(**{u"ansible_facts__contains": {u"a": u"\"null\""}})),
+        ('name=foo or name=bar and name=foobar',
+            Q(name="foo") | Q(name="bar") & Q(name="foobar"))
+    ])
+    def test_does_not_invoke_db(self, filter_string, q_expected):
+        q = SmartFilter.query_from_string(filter_string)
+        assert str(q.query) == str(Host.objects.filter(q_expected).query)
 
 
 '''

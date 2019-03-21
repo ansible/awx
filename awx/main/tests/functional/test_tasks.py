@@ -1,5 +1,5 @@
 import pytest
-import mock
+from unittest import mock
 import os
 
 from django.utils.timezone import now, timedelta

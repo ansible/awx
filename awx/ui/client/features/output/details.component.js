@@ -113,6 +113,19 @@ function getVerbosityDetails () {
     return { label, value };
 }
 
+function getEnvironmentDetails (virtualenv) {
+    const customVirtualenv = virtualenv || resource.model.get('custom_virtualenv');
+
+    if (!customVirtualenv || customVirtualenv === '') {
+        return null;
+    }
+
+    const label = strings.get('labels.ENVIRONMENT');
+    const value = $filter('sanitize')(customVirtualenv);
+
+    return { label, value };
+}
+
 function getSourceWorkflowJobDetails () {
     const sourceWorkflowJob = resource.model.get('summary_fields.source_workflow_job');
 
@@ -175,6 +188,12 @@ function getInventorySourceDetails () {
         return null;
     }
 
+    if (resource.model.get('summary_fields.inventory_source.source') === 'scm') {
+        // we already show a SOURCE PROJECT item for scm inventory updates, so we
+        // skip the display of the standard source details item.
+        return null;
+    }
+
     const { source } = resource.model.get('summary_fields.inventory_source');
     const choices = mapChoices(resource.model.options('actions.GET.source.choices'));
 
@@ -215,6 +234,18 @@ function getLicenseErrorDetails () {
     const value = resource.model.get('license_error');
 
     return { label, value };
+}
+
+function getHostLimitErrorDetails () {
+    if (!resource.model.has('org_host_limit_error')) {
+        return null;
+    }
+
+    const label = strings.get('labels.HOST_LIMIT_ERROR');
+    const tooltip = strings.get('tooltips.HOST_LIMIT');
+    const value = resource.model.get('org_host_limit_error');
+
+    return { tooltip, label, value };
 }
 
 function getLaunchedByDetails () {
@@ -310,6 +341,34 @@ function getProjectUpdateDetails (updateId) {
     const tooltip = strings.get('tooltips.PROJECT_UPDATE');
 
     return { link, tooltip };
+}
+
+function getInventoryScmDetails (updateId, updateStatus) {
+    const projectId = resource.model.get('summary_fields.source_project.id');
+    const projectName = resource.model.get('summary_fields.source_project.name');
+    const jobId = updateId || resource.model.get('source_project_update');
+    const status = updateStatus || resource.model.get('summary_fields.inventory_source.status');
+
+    if (!projectId || !projectName) {
+        return null;
+    }
+
+    const label = strings.get('labels.INVENTORY_SCM');
+    const jobLink = `/#/jobs/project/${jobId}`;
+    const link = `/#/projects/${projectId}`;
+    const jobTooltip = strings.get('tooltips.INVENTORY_SCM_JOB');
+    const tooltip = strings.get('tooltips.INVENTORY_SCM');
+    const value = $filter('sanitize')(projectName);
+
+    let icon;
+
+    if (status === 'unknown') {
+        icon = 'fa icon-job-pending';
+    } else {
+        icon = `fa icon-job-${status}`;
+    }
+
+    return { label, link, icon, jobLink, jobTooltip, tooltip, value };
 }
 
 function getSCMRevisionDetails () {
@@ -436,6 +495,19 @@ function getLimitDetails () {
     return { label, value };
 }
 
+function getExecutionNodeDetails (node) {
+    const executionNode = node || resource.model.get('execution_node');
+
+    if (!executionNode) {
+        return null;
+    }
+
+    const label = strings.get('labels.EXECUTION_NODE');
+    const value = $filter('sanitize')(executionNode);
+
+    return { label, value };
+}
+
 function getInstanceGroupDetails () {
     const instanceGroup = resource.model.get('summary_fields.instance_group');
 
@@ -512,8 +584,25 @@ function getExtraVarsDetails () {
     const tooltip = strings.get('tooltips.EXTRA_VARS');
     const value = parse(extraVars);
     const disabled = true;
+    const name = 'extra_vars';
 
-    return { label, tooltip, value, disabled };
+    return { label, tooltip, value, disabled, name };
+}
+
+function getArtifactsDetails (val) {
+    const artifacts = val || resource.model.get('artifacts');
+    if (!artifacts || (Object.entries(artifacts).length === 0 &&
+        artifacts.constructor === Object)) {
+        return null;
+    }
+
+    const label = strings.get('labels.ARTIFACTS');
+    const tooltip = strings.get('tooltips.ARTIFACTS');
+    const value = parse(artifacts);
+    const disabled = true;
+    const name = 'artifacts';
+
+    return { label, tooltip, value, disabled, name };
 }
 
 function getLabelDetails () {
@@ -706,23 +795,28 @@ function JobDetailsController (
         vm.projectUpdate = getProjectUpdateDetails();
         vm.projectStatus = getProjectStatusDetails();
         vm.scmRevision = getSCMRevisionDetails();
+        vm.inventoryScm = getInventoryScmDetails();
         vm.playbook = getPlaybookDetails();
         vm.resultTraceback = getResultTracebackDetails();
         vm.launchedBy = getLaunchedByDetails();
         vm.jobExplanation = getJobExplanationDetails();
         vm.verbosity = getVerbosityDetails();
+        vm.environment = getEnvironmentDetails();
         vm.credentials = getCredentialDetails();
         vm.forks = getForkDetails();
         vm.limit = getLimitDetails();
+        vm.executionNode = getExecutionNodeDetails();
         vm.instanceGroup = getInstanceGroupDetails();
         vm.jobTags = getJobTagDetails();
         vm.skipTags = getSkipTagDetails();
         vm.extraVars = getExtraVarsDetails();
+        vm.artifacts = getArtifactsDetails();
         vm.labels = getLabelDetails();
         vm.inventorySource = getInventorySourceDetails();
         vm.overwrite = getOverwriteDetails();
         vm.overwriteVars = getOverwriteVarsDetails();
         vm.licenseError = getLicenseErrorDetails();
+        vm.hostLimitError = getHostLimitErrorDetails();
 
         // Relaunch and Delete Components
         vm.job = angular.copy(_.get(resource.model, 'model.GET', {}));
@@ -735,11 +829,24 @@ function JobDetailsController (
         vm.toggleLabels = toggleLabels;
         vm.showLabels = showLabels;
 
-        unsubscribe = subscribe(({ status, started, finished, scm }) => {
+        unsubscribe = subscribe(({
+            status,
+            started,
+            finished,
+            scm,
+            inventoryScm,
+            environment,
+            artifacts,
+            executionNode
+        }) => {
             vm.started = getStartDetails(started);
             vm.finished = getFinishDetails(finished);
             vm.projectUpdate = getProjectUpdateDetails(scm.id);
             vm.projectStatus = getProjectStatusDetails(scm.status);
+            vm.environment = getEnvironmentDetails(environment);
+            vm.artifacts = getArtifactsDetails(artifacts);
+            vm.executionNode = getExecutionNodeDetails(executionNode);
+            vm.inventoryScm = getInventoryScmDetails(inventoryScm.id, inventoryScm.status);
             vm.status = getStatusDetails(status);
             vm.job.status = status;
         });

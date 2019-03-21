@@ -115,6 +115,10 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n) {
                     dataTitle: i18n._('Extra Variables'),
                     dataPlacement: 'right',
                     dataContainer: "body",
+                    subCheckbox: {
+                        variable: 'ask_variables_on_launch',
+                        text: i18n._('Prompt on launch')
+                    },
                     ngDisabled: '!(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)' // TODO: get working
                 },
                 checkbox_group: {
@@ -129,7 +133,6 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n) {
                         dataPlacement: 'right',
                         dataTitle: i18n._('Enable Concurrent Jobs'),
                         dataContainer: "body",
-                        labelClass: 'stack-inline',
                         ngDisabled: '!(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)'
                     }]
                 }
@@ -148,6 +151,13 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n) {
                     ngClick: 'formSave()',    //$scope.function to call on click, optional
                     ngDisabled: "workflow_job_template_form.$invalid || can_edit!==true", //Disable when $pristine or $invalid, optional and when can_edit = false, for permission reasons
                     ngShow: '(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)'
+                },
+                launch: {
+                    component: 'at-launch-template',
+                    templateObj: 'workflow_job_template_obj',
+                    ngShow: '(workflow_job_template_obj.summary_fields.user_capabilities.start || canAddWorkflowJobTemplate)',
+                    ngDisabled: 'disableLaunch || workflow_job_template_form.$dirty',
+                    showTextButton: 'true'
                 }
             },
 
@@ -182,19 +192,19 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n) {
                             key: true,
                             label: i18n._('User'),
                             linkBase: 'users',
-                            class: 'col-lg-3 col-md-3 col-sm-3 col-xs-4'
+                            columnClass: 'col-sm-3 col-xs-4'
                         },
                         role: {
                             label: i18n._('Role'),
                             type: 'role',
                             nosort: true,
-                            class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4',
+                            columnClass: 'col-sm-4 col-xs-4'
                         },
                         team_roles: {
                             label: i18n._('Team Roles'),
                             type: 'team_roles',
                             nosort: true,
-                            class: 'col-lg-5 col-md-5 col-sm-5 col-xs-4',
+                            columnClass: 'col-sm-5 col-xs-4'
                         }
                     }
                 },

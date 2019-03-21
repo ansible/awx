@@ -272,6 +272,74 @@ def test_create_with_required_inputs(get, post, admin):
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize('default, status_code', [
+    ['some default string', 201],
+    [None, 400],
+    [True, 400],
+    [False, 400],
+])
+@pytest.mark.parametrize('secret', [True, False])
+def test_create_with_default_string(get, post, admin, default, status_code, secret):
+    response = post(reverse('api:credential_type_list'), {
+        'kind': 'cloud',
+        'name': 'MyCloud',
+        'inputs': {
+            'fields': [{
+                'id': 'api_token',
+                'label': 'API Token',
+                'type': 'string',
+                'secret': secret,
+                'default': default,
+            }],
+            'required': ['api_token'],
+        },
+        'injectors': {}
+    }, admin)
+    assert response.status_code == status_code
+    if status_code == 201:
+        cred = Credential(
+            credential_type=CredentialType.objects.get(pk=response.data['id']),
+            name='My Custom Cred'
+        )
+        assert cred.get_input('api_token') == default
+    elif status_code == 400:
+        assert "{} is not a string".format(default) in json.dumps(response.data)
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('default, status_code', [
+    ['some default string', 400],
+    [None, 400],
+    [True, 201],
+    [False, 201],
+])
+def test_create_with_default_bool(get, post, admin, default, status_code):
+    response = post(reverse('api:credential_type_list'), {
+        'kind': 'cloud',
+        'name': 'MyCloud',
+        'inputs': {
+            'fields': [{
+                'id': 'api_token',
+                'label': 'API Token',
+                'type': 'boolean',
+                'default': default,
+            }],
+            'required': ['api_token'],
+        },
+        'injectors': {}
+    }, admin)
+    assert response.status_code == status_code
+    if status_code == 201:
+        cred = Credential(
+            credential_type=CredentialType.objects.get(pk=response.data['id']),
+            name='My Custom Cred'
+        )
+        assert cred.get_input('api_token') == default
+    elif status_code == 400:
+        assert "{} is not a boolean".format(default) in json.dumps(response.data)
+
+
+@pytest.mark.django_db
 @pytest.mark.parametrize('inputs', [
     True,
     100,

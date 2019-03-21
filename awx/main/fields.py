@@ -4,10 +4,8 @@
 # Python
 import copy
 import json
-import operator
 import re
-import six
-import urllib
+import urllib.parse
 
 from jinja2 import Environment, StrictUndefined
 from jinja2.exceptions import UndefinedError, TemplateSyntaxError
@@ -46,7 +44,7 @@ from awx.main.utils.filters import SmartFilter
 from awx.main.utils.encryption import encrypt_value, decrypt_value, get_encryption_key
 from awx.main.validators import validate_ssh_private_key
 from awx.main.models.rbac import batch_role_ancestor_rebuilding, Role
-from awx.main.constants import CHOICES_PRIVILEGE_ESCALATION_METHODS, ENV_BLACKLIST
+from awx.main.constants import ENV_BLACKLIST
 from awx.main import utils
 
 
@@ -80,7 +78,7 @@ class JSONField(upstream_JSONField):
 
 class JSONBField(upstream_JSONBField):
     def get_prep_lookup(self, lookup_type, value):
-        if isinstance(value, six.string_types) and value == "null":
+        if isinstance(value, str) and value == "null":
             return 'null'
         return super(JSONBField, self).get_prep_lookup(lookup_type, value)
 
@@ -95,7 +93,7 @@ class JSONBField(upstream_JSONBField):
     def from_db_value(self, value, expression, connection, context):
         # Work around a bug in django-jsonfield
         # https://bitbucket.org/schinckel/django-jsonfield/issues/57/cannot-use-in-the-same-project-as-djangos
-        if isinstance(value, six.string_types):
+        if isinstance(value, str):
             return json.loads(value)
         return value
 
@@ -251,6 +249,9 @@ class ImplicitRoleField(models.ForeignKey):
             if type(field_name) == tuple:
                 continue
 
+            if type(field_name) == bytes:
+                field_name = field_name.decode('utf-8')
+
             if field_name.startswith('singleton:'):
                 continue
 
@@ -373,7 +374,7 @@ class SmartFilterField(models.TextField):
         # https://docs.python.org/2/library/stdtypes.html#truth-value-testing
         if not value:
             return None
-        value = urllib.unquote(value)
+        value = urllib.parse.unquote(value)
         try:
             SmartFilter().query_from_string(value)
         except RuntimeError as e:
@@ -407,11 +408,8 @@ class JSONSchemaField(JSONBField):
             self.schema(model_instance),
             format_checker=self.format_checker
         ).iter_errors(value):
-            # strip Python unicode markers from jsonschema validation errors
-            error.message = re.sub(r'\bu(\'|")', r'\1', error.message)
-
             if error.validator == 'pattern' and 'error' in error.schema:
-                error.message = six.text_type(error.schema['error']).format(instance=error.instance)
+                error.message = error.schema['error'].format(instance=error.instance)
             elif error.validator == 'type':
                 expected_type = error.validator_value
                 if expected_type == 'object':
@@ -450,7 +448,7 @@ class JSONSchemaField(JSONBField):
     def from_db_value(self, value, expression, connection, context):
         # Work around a bug in django-jsonfield
         # https://bitbucket.org/schinckel/django-jsonfield/issues/57/cannot-use-in-the-same-project-as-djangos
-        if isinstance(value, six.string_types):
+        if isinstance(value, str):
             return json.loads(value)
         return value
 
@@ -512,12 +510,9 @@ class CredentialInputField(JSONSchemaField):
         properties = {}
         for field in model_instance.credential_type.inputs.get('fields', []):
             field = field.copy()
-            if field['type'] == 'become_method':
-                field.pop('type')
-                field['choices'] = map(operator.itemgetter(0), CHOICES_PRIVILEGE_ESCALATION_METHODS)
             properties[field['id']] = field
             if field.get('choices', []):
-                field['enum'] = field['choices'][:]
+                field['enum'] = list(field['choices'])[:]
         return {
             'type': 'object',
             'properties': properties,
@@ -547,7 +542,7 @@ class CredentialInputField(JSONSchemaField):
                 v != '$encrypted$',
                 model_instance.pk
             ]):
-                if not isinstance(getattr(model_instance, k), six.string_types):
+                if not isinstance(getattr(model_instance, k), str):
                     raise django_exceptions.ValidationError(
                         _('secret values must be of type string, not {}').format(type(v).__name__),
                         code='invalid',
@@ -564,7 +559,7 @@ class CredentialInputField(JSONSchemaField):
             format_checker=self.format_checker
         ).iter_errors(decrypted_values):
             if error.validator == 'pattern' and 'error' in error.schema:
-                error.message = six.text_type(error.schema['error']).format(instance=error.instance)
+                error.message = error.schema['error'].format(instance=error.instance)
             if error.validator == 'dependencies':
                 # replace the default error messaging w/ a better i18n string
                 # I wish there was a better way to determine the parameters of
@@ -658,7 +653,7 @@ class CredentialTypeInputField(JSONSchemaField):
                     'items': {
                         'type': 'object',
                         'properties': {
-                            'type': {'enum': ['string', 'boolean', 'become_method']},
+                            'type': {'enum': ['string', 'boolean']},
                             'format': {'enum': ['ssh_private_key']},
                             'choices': {
                                 'type': 'array',
@@ -676,6 +671,7 @@ class CredentialTypeInputField(JSONSchemaField):
                             'multiline': {'type': 'boolean'},
                             'secret': {'type': 'boolean'},
                             'ask_at_runtime': {'type': 'boolean'},
+                            'default': {},
                         },
                         'additionalProperties': False,
                         'required': ['id', 'label'],
@@ -719,16 +715,13 @@ class CredentialTypeInputField(JSONSchemaField):
                 # If no type is specified, default to string
                 field['type'] = 'string'
 
-            if field['type'] == 'become_method':
-                if not model_instance.managed_by_tower:
+            if 'default' in field:
+                default = field['default']
+                _type = {'string': str, 'boolean': bool}[field['type']]
+                if type(default) != _type:
                     raise django_exceptions.ValidationError(
-                        _('become_method is a reserved type name'),
-                        code='invalid',
-                        params={'value': value},
+                        _('{} is not a {}').format(default, field['type'])
                     )
-                else:
-                    field.pop('type')
-                    field['choices'] = CHOICES_PRIVILEGE_ESCALATION_METHODS
 
             for key in ('choices', 'multiline', 'format', 'secret',):
                 if key in field and field['type'] != 'string':
@@ -824,14 +817,14 @@ class CredentialTypeInjectorField(JSONSchemaField):
         )
 
         class ExplodingNamespace:
-            def __unicode__(self):
+            def __str__(self):
                 raise UndefinedError(_('Must define unnamed file injector in order to reference `tower.filename`.'))
 
         class TowerNamespace:
             def __init__(self):
                 self.filename = ExplodingNamespace()
 
-            def __unicode__(self):
+            def __str__(self):
                 raise UndefinedError(_('Cannot directly reference reserved `tower` namespace container.'))
 
         valid_namespace['tower'] = TowerNamespace()

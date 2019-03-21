@@ -3,9 +3,9 @@
 
 # Python
 from collections import OrderedDict, namedtuple
-import ConfigParser
-import cStringIO
+import configparser
 import errno
+import fnmatch
 import functools
 import importlib
 import json
@@ -13,12 +13,10 @@ import logging
 import os
 import re
 import shutil
-import six
 import stat
 import tempfile
 import time
 import traceback
-import urlparse
 from distutils.version import LooseVersion as Version
 import yaml
 import fcntl
@@ -26,6 +24,8 @@ try:
     import psutil
 except Exception:
     psutil = None
+from io import StringIO
+import urllib.parse as urlparse
 
 # Django
 from django.conf import settings
@@ -46,14 +46,22 @@ from crum import impersonate
 from awx import __version__ as awx_application_version
 from awx.main.constants import CLOUD_PROVIDERS, PRIVILEGE_ESCALATION_METHODS, STANDARD_INVENTORY_UPDATE_ENV
 from awx.main.access import access_registry
-from awx.main.models import * # noqa
+from awx.main.models import (
+    Schedule, TowerScheduleState, Instance, InstanceGroup,
+    UnifiedJob, Notification,
+    Inventory, SmartInventoryMembership,
+    Job, AdHocCommand, ProjectUpdate, InventoryUpdate, SystemJob,
+    Project,
+    JobEvent, ProjectUpdateEvent, InventoryUpdateEvent, AdHocCommandEvent, SystemJobEvent,
+    build_safe_env
+)
 from awx.main.constants import ACTIVE_STATES
 from awx.main.exceptions import AwxTaskError
 from awx.main.queue import CallbackQueueDispatcher
 from awx.main.expect import run, isolated_manager
 from awx.main.dispatch.publish import task
 from awx.main.dispatch import get_local_queuename, reaper
-from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field, update_scm_url,
+from awx.main.utils import (get_ansible_version, get_ssh_version, update_scm_url,
                             check_proot_installed, build_proot_temp_dir, get_licenser,
                             wrap_args_with_proot, OutputEventFilter, OutputVerboseFilter, ignore_inventory_computed_fields,
                             ignore_inventory_group_removal, extract_ansible_vars, schedule_task_manager)
@@ -92,7 +100,7 @@ def dispatch_startup():
             with disable_activity_stream():
                 sch.save()
         except Exception:
-            logger.exception(six.text_type("Failed to rebuild schedule {}.").format(sch))
+            logger.exception("Failed to rebuild schedule {}.".format(sch))
 
     #
     # When the dispatcher starts, if the instance cannot be found in the database,
@@ -124,8 +132,8 @@ def inform_cluster_of_shutdown():
             reaper.reap(this_inst)
         except Exception:
             logger.exception('failed to reap jobs for {}'.format(this_inst.hostname))
-        logger.warning(six.text_type('Normal shutdown signal for instance {}, '
-                       'removed self from capacity pool.').format(this_inst.hostname))
+        logger.warning('Normal shutdown signal for instance {}, '
+                       'removed self from capacity pool.'.format(this_inst.hostname))
     except Exception:
         logger.exception('Encountered problem with normal shutdown signal.')
 
@@ -163,14 +171,14 @@ def apply_cluster_membership_policies():
             ])
             for hostname in ig.policy_instance_list:
                 if hostname not in instance_hostnames_map:
-                    logger.info(six.text_type("Unknown instance {} in {} policy list").format(hostname, ig.name))
+                    logger.info("Unknown instance {} in {} policy list".format(hostname, ig.name))
                     continue
                 inst = instance_hostnames_map[hostname]
                 group_actual.instances.append(inst.id)
                 # NOTE: arguable behavior: policy-list-group is not added to
                 # instance's group count for consideration in minimum-policy rules
             if group_actual.instances:
-                logger.info(six.text_type("Policy List, adding Instances {} to Group {}").format(group_actual.instances, ig.name))
+                logger.info("Policy List, adding Instances {} to Group {}".format(group_actual.instances, ig.name))
 
             if ig.controller_id is None:
                 actual_groups.append(group_actual)
@@ -185,9 +193,9 @@ def apply_cluster_membership_policies():
         actual_instances = [Node(obj=i, groups=[]) for i in considered_instances if i.managed_by_policy]
         logger.info("Total non-isolated instances:{} available for policy: {}".format(
             total_instances, len(actual_instances)))
-        for g in sorted(actual_groups, cmp=lambda x,y: len(x.instances) - len(y.instances)):
+        for g in sorted(actual_groups, key=lambda x: len(x.instances)):
             policy_min_added = []
-            for i in sorted(actual_instances, cmp=lambda x,y: len(x.groups) - len(y.groups)):
+            for i in sorted(actual_instances, key=lambda x: len(x.groups)):
                 if len(g.instances) >= g.obj.policy_instance_minimum:
                     break
                 if i.obj.id in g.instances:
@@ -198,12 +206,12 @@ def apply_cluster_membership_policies():
                 i.groups.append(g.obj.id)
                 policy_min_added.append(i.obj.id)
             if policy_min_added:
-                logger.info(six.text_type("Policy minimum, adding Instances {} to Group {}").format(policy_min_added, g.obj.name))
+                logger.info("Policy minimum, adding Instances {} to Group {}".format(policy_min_added, g.obj.name))
 
         # Finally, process instance policy percentages
-        for g in sorted(actual_groups, cmp=lambda x,y: len(x.instances) - len(y.instances)):
+        for g in sorted(actual_groups, key=lambda x: len(x.instances)):
             policy_per_added = []
-            for i in sorted(actual_instances, cmp=lambda x,y: len(x.groups) - len(y.groups)):
+            for i in sorted(actual_instances, key=lambda x: len(x.groups)):
                 if i.obj.id in g.instances:
                     # If the instance is already _in_ the group, it was
                     # applied earlier via a minimum policy or policy list
@@ -214,7 +222,7 @@ def apply_cluster_membership_policies():
                 i.groups.append(g.obj.id)
                 policy_per_added.append(i.obj.id)
             if policy_per_added:
-                logger.info(six.text_type("Policy percentage, adding Instances {} to Group {}").format(policy_per_added, g.obj.name))
+                logger.info("Policy percentage, adding Instances {} to Group {}".format(policy_per_added, g.obj.name))
 
         # Determine if any changes need to be made
         needs_change = False
@@ -258,15 +266,29 @@ def delete_project_files(project_path):
     if os.path.exists(project_path):
         try:
             shutil.rmtree(project_path)
-            logger.info(six.text_type('Success removing project files {}').format(project_path))
+            logger.info('Success removing project files {}'.format(project_path))
         except Exception:
-            logger.exception(six.text_type('Could not remove project directory {}').format(project_path))
+            logger.exception('Could not remove project directory {}'.format(project_path))
     if os.path.exists(lock_file):
         try:
             os.remove(lock_file)
-            logger.debug(six.text_type('Success removing {}').format(lock_file))
+            logger.debug('Success removing {}'.format(lock_file))
         except Exception:
-            logger.exception(six.text_type('Could not remove lock file {}').format(lock_file))
+            logger.exception('Could not remove lock file {}'.format(lock_file))
+
+
+@task(queue='tower_broadcast_all', exchange_type='fanout')
+def profile_sql(threshold=1, minutes=1):
+    if threshold == 0:
+        cache.delete('awx-profile-sql-threshold')
+        logger.error('SQL PROFILING DISABLED')
+    else:
+        cache.set(
+            'awx-profile-sql-threshold',
+            threshold,
+            timeout=minutes * 60
+        )
+        logger.error('SQL QUERIES >={}s ENABLED FOR {} MINUTE(S)'.format(threshold, minutes))
 
 
 @task()
@@ -287,15 +309,15 @@ def send_notifications(notification_list, job_id=None):
             notification.status = "successful"
             notification.notifications_sent = sent
         except Exception as e:
-            logger.error(six.text_type("Send Notification Failed {}").format(e))
+            logger.error("Send Notification Failed {}".format(e))
             notification.status = "failed"
             notification.error = smart_str(e)
             update_fields.append('error')
         finally:
             try:
                 notification.save(update_fields=update_fields)
-            except Exception as e:
-                logger.exception(six.text_type('Error saving notification {} result.').format(notification.id))
+            except Exception:
+                logger.exception('Error saving notification {} result.'.format(notification.id))
 
 
 @task()
@@ -326,7 +348,7 @@ def purge_old_stdout_files():
     for f in os.listdir(settings.JOBOUTPUT_ROOT):
         if os.path.getctime(os.path.join(settings.JOBOUTPUT_ROOT,f)) < nowtime - settings.LOCAL_STDOUT_EXPIRE_TIME:
             os.unlink(os.path.join(settings.JOBOUTPUT_ROOT,f))
-            logger.info(six.text_type("Removing {}").format(os.path.join(settings.JOBOUTPUT_ROOT,f)))
+            logger.info("Removing {}".format(os.path.join(settings.JOBOUTPUT_ROOT,f)))
 
 
 @task(queue=get_local_queuename)
@@ -339,7 +361,7 @@ def cluster_node_heartbeat():
 
     (changed, instance) = Instance.objects.get_or_register()
     if changed:
-        logger.info(six.text_type("Registered tower node '{}'").format(instance.hostname))
+        logger.info("Registered tower node '{}'".format(instance.hostname))
 
     for inst in list(instance_list):
         if inst.hostname == settings.CLUSTER_HOST_ID:
@@ -351,7 +373,7 @@ def cluster_node_heartbeat():
     if this_inst:
         startup_event = this_inst.is_lost(ref_time=nowtime)
         if this_inst.capacity == 0 and this_inst.enabled:
-            logger.warning(six.text_type('Rejoining the cluster as instance {}.').format(this_inst.hostname))
+            logger.warning('Rejoining the cluster as instance {}.'.format(this_inst.hostname))
         if this_inst.enabled:
             this_inst.refresh_capacity()
         elif this_inst.capacity != 0 and not this_inst.enabled:
@@ -366,11 +388,12 @@ def cluster_node_heartbeat():
         if other_inst.version == "":
             continue
         if Version(other_inst.version.split('-', 1)[0]) > Version(awx_application_version.split('-', 1)[0]) and not settings.DEBUG:
-            logger.error(six.text_type("Host {} reports version {}, but this node {} is at {}, shutting down")
-                            .format(other_inst.hostname,
-                                    other_inst.version,
-                                    this_inst.hostname,
-                                    this_inst.version))
+            logger.error("Host {} reports version {}, but this node {} is at {}, shutting down".format(
+                other_inst.hostname,
+                other_inst.version,
+                this_inst.hostname,
+                this_inst.version
+            ))
             # Shutdown signal will set the capacity to zero to ensure no Jobs get added to this instance.
             # The heartbeat task will reset the capacity to the system capacity after upgrade.
             stop_local_services(communicate=False)
@@ -391,17 +414,17 @@ def cluster_node_heartbeat():
             if other_inst.capacity != 0 and not settings.AWX_AUTO_DEPROVISION_INSTANCES:
                 other_inst.capacity = 0
                 other_inst.save(update_fields=['capacity'])
-                logger.error(six.text_type("Host {} last checked in at {}, marked as lost.").format(
+                logger.error("Host {} last checked in at {}, marked as lost.".format(
                     other_inst.hostname, other_inst.modified))
             elif settings.AWX_AUTO_DEPROVISION_INSTANCES:
                 deprovision_hostname = other_inst.hostname
                 other_inst.delete()
-                logger.info(six.text_type("Host {} Automatically Deprovisioned.").format(deprovision_hostname))
+                logger.info("Host {} Automatically Deprovisioned.".format(deprovision_hostname))
         except DatabaseError as e:
             if 'did not affect any rows' in str(e):
-                logger.debug(six.text_type('Another instance has marked {} as lost').format(other_inst.hostname))
+                logger.debug('Another instance has marked {} as lost'.format(other_inst.hostname))
             else:
-                logger.exception(six.text_type('Error marking {} as lost').format(other_inst.hostname))
+                logger.exception('Error marking {} as lost'.format(other_inst.hostname))
 
 
 @task(queue=get_local_queuename)
@@ -428,59 +451,65 @@ def awx_isolated_heartbeat():
             isolated_instance.save(update_fields=['last_isolated_check'])
     # Slow pass looping over isolated IGs and their isolated instances
     if len(isolated_instance_qs) > 0:
-        logger.debug(six.text_type("Managing isolated instances {}.").format(','.join([inst.hostname for inst in isolated_instance_qs])))
+        logger.debug("Managing isolated instances {}.".format(','.join([inst.hostname for inst in isolated_instance_qs])))
         isolated_manager.IsolatedManager.health_check(isolated_instance_qs, awx_application_version)
 
 
 @task()
 def awx_periodic_scheduler():
-    run_now = now()
-    state = TowerScheduleState.get_solo()
-    last_run = state.schedule_last_run
-    logger.debug("Last scheduler run was: %s", last_run)
-    state.schedule_last_run = run_now
-    state.save()
+    with advisory_lock('awx_periodic_scheduler_lock', wait=False) as acquired:
+        if acquired is False:
+            logger.debug("Not running periodic scheduler, another task holds lock")
+            return
+        logger.debug("Starting periodic scheduler")
 
-    old_schedules = Schedule.objects.enabled().before(last_run)
-    for schedule in old_schedules:
-        schedule.save()
-    schedules = Schedule.objects.enabled().between(last_run, run_now)
+        run_now = now()
+        state = TowerScheduleState.get_solo()
+        last_run = state.schedule_last_run
+        logger.debug("Last scheduler run was: %s", last_run)
+        state.schedule_last_run = run_now
+        state.save()
 
-    invalid_license = False
-    try:
-        access_registry[Job](None).check_license()
-    except PermissionDenied as e:
-        invalid_license = e
+        old_schedules = Schedule.objects.enabled().before(last_run)
+        for schedule in old_schedules:
+            schedule.save()
+        schedules = Schedule.objects.enabled().between(last_run, run_now)
 
-    for schedule in schedules:
-        template = schedule.unified_job_template
-        schedule.save() # To update next_run timestamp.
-        if template.cache_timeout_blocked:
-            logger.warn("Cache timeout is in the future, bypassing schedule for template %s" % str(template.id))
-            continue
+        invalid_license = False
         try:
-            job_kwargs = schedule.get_job_kwargs()
-            new_unified_job = schedule.unified_job_template.create_unified_job(**job_kwargs)
-            logger.info(six.text_type('Spawned {} from schedule {}-{}.').format(
-                new_unified_job.log_format, schedule.name, schedule.pk))
+            access_registry[Job](None).check_license()
+        except PermissionDenied as e:
+            invalid_license = e
 
-            if invalid_license:
+        for schedule in schedules:
+            template = schedule.unified_job_template
+            schedule.save() # To update next_run timestamp.
+            if template.cache_timeout_blocked:
+                logger.warn("Cache timeout is in the future, bypassing schedule for template %s" % str(template.id))
+                continue
+            try:
+                job_kwargs = schedule.get_job_kwargs()
+                new_unified_job = schedule.unified_job_template.create_unified_job(**job_kwargs)
+                logger.info('Spawned {} from schedule {}-{}.'.format(
+                    new_unified_job.log_format, schedule.name, schedule.pk))
+
+                if invalid_license:
+                    new_unified_job.status = 'failed'
+                    new_unified_job.job_explanation = str(invalid_license)
+                    new_unified_job.save(update_fields=['status', 'job_explanation'])
+                    new_unified_job.websocket_emit_status("failed")
+                    raise invalid_license
+                can_start = new_unified_job.signal_start()
+            except Exception:
+                logger.exception('Error spawning scheduled job.')
+                continue
+            if not can_start:
                 new_unified_job.status = 'failed'
-                new_unified_job.job_explanation = str(invalid_license)
+                new_unified_job.job_explanation = "Scheduled job could not start because it was not in the right state or required manual credentials"
                 new_unified_job.save(update_fields=['status', 'job_explanation'])
                 new_unified_job.websocket_emit_status("failed")
-                raise invalid_license
-            can_start = new_unified_job.signal_start()
-        except Exception:
-            logger.exception('Error spawning scheduled job.')
-            continue
-        if not can_start:
-            new_unified_job.status = 'failed'
-            new_unified_job.job_explanation = "Scheduled job could not start because it was not in the right state or required manual credentials"
-            new_unified_job.save(update_fields=['status', 'job_explanation'])
-            new_unified_job.websocket_emit_status("failed")
-        emit_channel_notification('schedules-changed', dict(id=schedule.id, group_name="schedules"))
-    state.save()
+            emit_channel_notification('schedules-changed', dict(id=schedule.id, group_name="schedules"))
+        state.save()
 
 
 @task()
@@ -574,7 +603,7 @@ def update_host_smart_inventory_memberships():
                     changed_inventories.add(smart_inventory)
             SmartInventoryMembership.objects.bulk_create(memberships)
     except IntegrityError as e:
-        logger.error(six.text_type("Update Host Smart Inventory Memberships failed due to an exception: {}").format(e))
+        logger.error("Update Host Smart Inventory Memberships failed due to an exception: {}".format(e))
         return
     # Update computed fields for changed inventories outside atomic action
     for smart_inventory in changed_inventories:
@@ -601,7 +630,7 @@ def delete_inventory(inventory_id, user_id, retries=5):
                 'inventories-status_changed',
                 {'group_name': 'inventories', 'inventory_id': inventory_id, 'status': 'deleted'}
             )
-            logger.debug(six.text_type('Deleted inventory {} as user {}.').format(inventory_id, user_id))
+            logger.debug('Deleted inventory {} as user {}.'.format(inventory_id, user_id))
         except Inventory.DoesNotExist:
             logger.exception("Delete Inventory failed due to missing inventory: " + str(inventory_id))
             return
@@ -625,7 +654,7 @@ def with_path_cleanup(f):
                     elif os.path.exists(p):
                         os.remove(p)
                 except OSError:
-                    logger.exception(six.text_type("Failed to remove tmp file: {}").format(p))
+                    logger.exception("Failed to remove tmp file: {}".format(p))
             self.cleanup_paths = []
     return _wrapped
 
@@ -688,6 +717,13 @@ class BaseTask(object):
         '''
         return os.path.abspath(os.path.join(os.path.dirname(__file__), *args))
 
+    def get_path_to_ansible(self, instance, executable='ansible-playbook', **kwargs):
+        venv_path = getattr(instance, 'ansible_virtualenv_path', settings.ANSIBLE_VENV_PATH)
+        venv_exe = os.path.join(venv_path, 'bin', executable)
+        if os.path.exists(venv_exe):
+            return venv_exe
+        return shutil.which(executable)
+
     def build_private_data(self, job, **kwargs):
         '''
         Return SSH private key data (only if stored in DB as ssh_key_data).
@@ -722,12 +758,12 @@ class BaseTask(object):
             ssh_ver = get_ssh_version()
             ssh_too_old = True if ssh_ver == "unknown" else Version(ssh_ver) < Version("6.0")
             openssh_keys_supported = ssh_ver != "unknown" and Version(ssh_ver) >= Version("6.5")
-            for credential, data in private_data.get('credentials', {}).iteritems():
+            for credential, data in private_data.get('credentials', {}).items():
                 # Bail out now if a private key was provided in OpenSSH format
                 # and we're running an earlier version (<6.5).
                 if 'OPENSSH PRIVATE KEY' in data and not openssh_keys_supported:
                     raise RuntimeError(OPENSSH_KEY_ERROR)
-            for credential, data in private_data.get('credentials', {}).iteritems():
+            for credential, data in private_data.get('credentials', {}).items():
                 # OpenSSH formatted keys must have a trailing newline to be
                 # accepted by ssh-add.
                 if 'OPENSSH PRIVATE KEY' in data and not data.endswith('\n'):
@@ -782,8 +818,11 @@ class BaseTask(object):
                 'a valid Python virtualenv does not exist at {}'.format(venv_path)
             )
         env.pop('PYTHONPATH', None)  # default to none if no python_ver matches
-        if os.path.isdir(os.path.join(venv_libdir, "python2.7")):
-            env['PYTHONPATH'] = os.path.join(venv_libdir, "python2.7", "site-packages") + ":"
+        for version in os.listdir(venv_libdir):
+            if fnmatch.fnmatch(version, 'python[23].*'):
+                if os.path.isdir(os.path.join(venv_libdir, version)):
+                    env['PYTHONPATH'] = os.path.join(venv_libdir, version, "site-packages") + ":"
+                    break
         # Add awx/lib to PYTHONPATH.
         if add_awx_lib:
             env['PYTHONPATH'] = env.get('PYTHONPATH', '') + self.get_path_to('..', 'lib') + ':'
@@ -831,7 +870,7 @@ class BaseTask(object):
         json_data = json.dumps(script_data)
         handle, path = tempfile.mkstemp(dir=kwargs.get('private_data_dir', None))
         f = os.fdopen(handle, 'w')
-        f.write('#! /usr/bin/env python\n# -*- coding: utf-8 -*-\nprint %r\n' % json_data)
+        f.write('#! /usr/bin/env python\n# -*- coding: utf-8 -*-\nprint(%r)\n' % json_data)
         f.close()
         os.chmod(path, stat.S_IRUSR | stat.S_IXUSR | stat.S_IWUSR)
         return path
@@ -882,7 +921,7 @@ class BaseTask(object):
                 if 'uuid' in event_data:
                     cache_event = cache.get('ev-{}'.format(event_data['uuid']), None)
                     if cache_event is not None:
-                        event_data.update(cache_event)
+                        event_data.update(json.loads(cache_event))
                 dispatcher.dispatch(event_data)
 
             return OutputEventFilter(event_callback)
@@ -937,6 +976,11 @@ class BaseTask(object):
 
             if not os.path.exists(settings.AWX_PROOT_BASE_PATH):
                 raise RuntimeError('AWX_PROOT_BASE_PATH=%s does not exist' % settings.AWX_PROOT_BASE_PATH)
+
+            # store a record of the venv used at runtime
+            if hasattr(instance, 'custom_virtualenv'):
+                self.update_model(pk, custom_virtualenv=getattr(instance, 'ansible_virtualenv_path', settings.ANSIBLE_VENV_PATH))
+
             # Fetch ansible version once here to support version-dependent features.
             kwargs['ansible_version'] = get_ansible_version()
             kwargs['private_data_dir'] = self.build_private_data_dir(instance, **kwargs)
@@ -1048,13 +1092,13 @@ class BaseTask(object):
         try:
             self.post_run_hook(instance, status, **kwargs)
         except Exception:
-            logger.exception(six.text_type('{} Post run hook errored.').format(instance.log_format))
+            logger.exception('{} Post run hook errored.'.format(instance.log_format))
         instance = self.update_model(pk)
         if instance.cancel_flag:
             status = 'canceled'
             cancel_wait = (now() - instance.modified).seconds if instance.modified else 0
             if cancel_wait > 5:
-                logger.warn(six.text_type('Request to cancel {} took {} seconds to complete.').format(instance.log_format, cancel_wait))
+                logger.warn('Request to cancel {} took {} seconds to complete.'.format(instance.log_format, cancel_wait))
 
         instance = self.update_model(pk, status=status, result_traceback=tb,
                                      output_replacements=output_replacements,
@@ -1063,7 +1107,7 @@ class BaseTask(object):
         try:
             self.final_run_hook(instance, status, **kwargs)
         except Exception:
-            logger.exception(six.text_type('{} Final run hook errored.').format(instance.log_format))
+            logger.exception('{} Final run hook errored.'.format(instance.log_format))
         instance.websocket_emit_status(status)
         if status != 'successful':
             if status == 'canceled':
@@ -1113,20 +1157,22 @@ class RunJob(BaseTask):
         for credential in job.credentials.all():
             # If we were sent SSH credentials, decrypt them and send them
             # back (they will be written to a temporary file).
-            if credential.ssh_key_data not in (None, ''):
-                private_data['credentials'][credential] = decrypt_field(credential, 'ssh_key_data') or ''
+            if credential.has_input('ssh_key_data'):
+                private_data['credentials'][credential] = credential.get_input('ssh_key_data', default='')
 
             if credential.kind == 'openstack':
-                openstack_auth = dict(auth_url=credential.host,
-                                      username=credential.username,
-                                      password=decrypt_field(credential, "password"),
-                                      project_name=credential.project)
-                if credential.domain not in (None, ''):
-                    openstack_auth['domain_name'] = credential.domain
+                openstack_auth = dict(auth_url=credential.get_input('host', default=''),
+                                      username=credential.get_input('username', default=''),
+                                      password=credential.get_input('password', default=''),
+                                      project_name=credential.get_input('project', default=''))
+                if credential.has_input('domain'):
+                    openstack_auth['domain_name'] = credential.get_input('domain', default='')
+                verify_state = credential.get_input('verify_ssl', default=True)
                 openstack_data = {
                     'clouds': {
                         'devstack': {
                             'auth': openstack_auth,
+                            'verify': verify_state,
                         },
                     },
                 }
@@ -1145,22 +1191,27 @@ class RunJob(BaseTask):
             for field in ('ssh_key_unlock', 'ssh_password', 'become_password'):
                 value = kwargs.get(
                     field,
-                    decrypt_field(cred, 'password' if field == 'ssh_password' else field)
+                    cred.get_input('password' if field == 'ssh_password' else field, default='')
                 )
                 if value not in ('', 'ASK'):
                     passwords[field] = value
 
         for cred in job.vault_credentials:
             field = 'vault_password'
-            if cred.inputs.get('vault_id'):
-                field = 'vault_password.{}'.format(cred.inputs['vault_id'])
+            vault_id = cred.get_input('vault_id', default=None)
+            if vault_id:
+                field = 'vault_password.{}'.format(vault_id)
                 if field in passwords:
                     raise RuntimeError(
                         'multiple vault credentials were specified with --vault-id {}@prompt'.format(
-                            cred.inputs['vault_id']
+                            vault_id
                         )
                     )
-            value = kwargs.get(field, decrypt_field(cred, 'vault_password'))
+
+            value = kwargs.get(field, None)
+            if value is None:
+                value = cred.get_input('vault_password', default='')
+
             if value not in ('', 'ASK'):
                 passwords[field] = value
 
@@ -1170,10 +1221,10 @@ class RunJob(BaseTask):
         '''
         if 'ssh_key_unlock' not in passwords:
             for cred in job.network_credentials:
-                if cred.inputs.get('ssh_key_unlock'):
+                if cred.has_input('ssh_key_unlock'):
                     passwords['ssh_key_unlock'] = kwargs.get(
                         'ssh_key_unlock',
-                        decrypt_field(cred, 'ssh_key_unlock')
+                        cred.get_input('ssh_key_unlock', default='')
                     )
                     break
 
@@ -1229,17 +1280,17 @@ class RunJob(BaseTask):
                 env['OS_CLIENT_CONFIG_FILE'] = cred_files.get(cloud_cred, '')
 
         for network_cred in job.network_credentials:
-            env['ANSIBLE_NET_USERNAME'] = network_cred.username
-            env['ANSIBLE_NET_PASSWORD'] = decrypt_field(network_cred, 'password')
+            env['ANSIBLE_NET_USERNAME'] = network_cred.get_input('username', default='')
+            env['ANSIBLE_NET_PASSWORD'] = network_cred.get_input('password', default='')
 
             ssh_keyfile = cred_files.get(network_cred, '')
             if ssh_keyfile:
                 env['ANSIBLE_NET_SSH_KEYFILE'] = ssh_keyfile
 
-            authorize = network_cred.authorize
-            env['ANSIBLE_NET_AUTHORIZE'] = six.text_type(int(authorize))
+            authorize = network_cred.get_input('authorize', default=False)
+            env['ANSIBLE_NET_AUTHORIZE'] = str(int(authorize))
             if authorize:
-                env['ANSIBLE_NET_AUTH_PASS'] = decrypt_field(network_cred, 'authorize_password')
+                env['ANSIBLE_NET_AUTH_PASS'] = network_cred.get_input('authorize_password', default='')
 
         return env
 
@@ -1252,9 +1303,9 @@ class RunJob(BaseTask):
 
         ssh_username, become_username, become_method = '', '', ''
         if creds:
-            ssh_username = kwargs.get('username', creds.username)
-            become_method = kwargs.get('become_method', creds.become_method)
-            become_username = kwargs.get('become_username', creds.become_username)
+            ssh_username = kwargs.get('username', creds.get_input('username', default=''))
+            become_method = kwargs.get('become_method', creds.get_input('become_method', default=''))
+            become_username = kwargs.get('become_username', creds.get_input('become_username', default=''))
         else:
             become_method = None
             become_username = ""
@@ -1263,7 +1314,11 @@ class RunJob(BaseTask):
         # it doesn't make sense to rely on ansible-playbook's default of using
         # the current user.
         ssh_username = ssh_username or 'root'
-        args = ['ansible-playbook', '-i', self.build_inventory(job, **kwargs)]
+        args = [
+            self.get_path_to_ansible(job, 'ansible-playbook', **kwargs),
+            '-i',
+            self.build_inventory(job, **kwargs)
+        ]
         if job.job_type == 'check':
             args.append('--check')
         args.extend(['-u', sanitize_jinja(ssh_username)])
@@ -1475,8 +1530,8 @@ class RunProjectUpdate(BaseTask):
         private_data = {'credentials': {}}
         if project_update.credential:
             credential = project_update.credential
-            if credential.ssh_key_data not in (None, ''):
-                private_data['credentials'][credential] = decrypt_field(credential, 'ssh_key_data')
+            if credential.has_input('ssh_key_data'):
+                private_data['credentials'][credential] = credential.get_input('ssh_key_data', default='')
         return private_data
 
     def build_passwords(self, project_update, **kwargs):
@@ -1487,9 +1542,9 @@ class RunProjectUpdate(BaseTask):
         passwords = super(RunProjectUpdate, self).build_passwords(project_update,
                                                                   **kwargs)
         if project_update.credential:
-            passwords['scm_key_unlock'] = decrypt_field(project_update.credential, 'ssh_key_unlock')
-            passwords['scm_username'] = project_update.credential.username
-            passwords['scm_password'] = decrypt_field(project_update.credential, 'password')
+            passwords['scm_key_unlock'] = project_update.credential.get_input('ssh_key_unlock', default='')
+            passwords['scm_username'] = project_update.credential.get_input('username', default='')
+            passwords['scm_password'] = project_update.credential.get_input('password', default='')
         return passwords
 
     def build_env(self, project_update, **kwargs):
@@ -1557,7 +1612,11 @@ class RunProjectUpdate(BaseTask):
         Build command line argument list for running ansible-playbook,
         optionally using ssh-agent for public/private key authentication.
         '''
-        args = ['ansible-playbook', '-i', self.build_inventory(project_update, **kwargs)]
+        args = [
+            self.get_path_to_ansible(project_update, 'ansible-playbook', **kwargs),
+            '-i',
+            self.build_inventory(project_update, **kwargs)
+        ]
         if getattr(settings, 'PROJECT_UPDATE_VVV', False):
             args.append('-vvv')
         else:
@@ -1588,7 +1647,7 @@ class RunProjectUpdate(BaseTask):
 
     def build_safe_args(self, project_update, **kwargs):
         pwdict = dict(kwargs.get('passwords', {}).items())
-        for pw_name, pw_val in pwdict.items():
+        for pw_name, pw_val in list(pwdict.items()):
             if pw_name in ('', 'yes', 'no', 'scm_username'):
                 continue
             pwdict[pw_name] = HIDDEN_PASSWORD
@@ -1609,7 +1668,7 @@ class RunProjectUpdate(BaseTask):
         scm_username = kwargs.get('passwords', {}).get('scm_username', '')
         scm_password = kwargs.get('passwords', {}).get('scm_password', '')
         pwdict = dict(kwargs.get('passwords', {}).items())
-        for pw_name, pw_val in pwdict.items():
+        for pw_name, pw_val in list(pwdict.items()):
             if pw_name in ('', 'yes', 'no', 'scm_username'):
                 continue
             pwdict[pw_name] = HIDDEN_PASSWORD
@@ -1655,15 +1714,15 @@ class RunProjectUpdate(BaseTask):
             if not inv_src.update_on_project_update:
                 continue
             if inv_src.scm_last_revision == scm_revision:
-                logger.debug(six.text_type('Skipping SCM inventory update for `{}` because '
-                                           'project has not changed.').format(inv_src.name))
+                logger.debug('Skipping SCM inventory update for `{}` because '
+                             'project has not changed.'.format(inv_src.name))
                 continue
-            logger.debug(six.text_type('Local dependent inventory update for `{}`.').format(inv_src.name))
+            logger.debug('Local dependent inventory update for `{}`.'.format(inv_src.name))
             with transaction.atomic():
                 if InventoryUpdate.objects.filter(inventory_source=inv_src,
                                                   status__in=ACTIVE_STATES).exists():
-                    logger.info(six.text_type('Skipping SCM inventory update for `{}` because '
-                                              'another update is already active.').format(inv_src.name))
+                    logger.info('Skipping SCM inventory update for `{}` because '
+                                'another update is already active.'.format(inv_src.name))
                     continue
                 local_inv_update = inv_src.create_inventory_update(
                     _eager_fields=dict(
@@ -1676,8 +1735,9 @@ class RunProjectUpdate(BaseTask):
             try:
                 inv_update_class().run(local_inv_update.id)
             except Exception:
-                logger.exception(six.text_type('{} Unhandled exception updating dependent SCM inventory sources.')
-                                 .format(project_update.log_format))
+                logger.exception('{} Unhandled exception updating dependent SCM inventory sources.'.format(
+                    project_update.log_format
+                ))
 
             try:
                 project_update.refresh_from_db()
@@ -1690,10 +1750,10 @@ class RunProjectUpdate(BaseTask):
                 logger.warning('%s Dependent inventory update deleted during execution.', project_update.log_format)
                 continue
             if project_update.cancel_flag:
-                logger.info(six.text_type('Project update {} was canceled while updating dependent inventories.').format(project_update.log_format))
+                logger.info('Project update {} was canceled while updating dependent inventories.'.format(project_update.log_format))
                 break
             if local_inv_update.cancel_flag:
-                logger.info(six.text_type('Continuing to process project dependencies after {} was canceled').format(local_inv_update.log_format))
+                logger.info('Continuing to process project dependencies after {} was canceled'.format(local_inv_update.log_format))
             if local_inv_update.status == 'successful':
                 inv_src.scm_last_revision = scm_revision
                 inv_src.save(update_fields=['scm_last_revision'])
@@ -1702,7 +1762,7 @@ class RunProjectUpdate(BaseTask):
         try:
             fcntl.flock(self.lock_fd, fcntl.LOCK_UN)
         except IOError as e:
-            logger.error(six.text_type("I/O error({0}) while trying to open lock file [{1}]: {2}").format(e.errno, instance.get_lock_file(), e.strerror))
+            logger.error("I/O error({0}) while trying to open lock file [{1}]: {2}".format(e.errno, instance.get_lock_file(), e.strerror))
             os.close(self.lock_fd)
             raise
 
@@ -1720,7 +1780,7 @@ class RunProjectUpdate(BaseTask):
         try:
             self.lock_fd = os.open(lock_path, os.O_RDONLY | os.O_CREAT)
         except OSError as e:
-            logger.error(six.text_type("I/O error({0}) while trying to open lock file [{1}]: {2}").format(e.errno, lock_path, e.strerror))
+            logger.error("I/O error({0}) while trying to open lock file [{1}]: {2}".format(e.errno, lock_path, e.strerror))
             raise
 
         start_time = time.time()
@@ -1728,23 +1788,23 @@ class RunProjectUpdate(BaseTask):
             try:
                 instance.refresh_from_db(fields=['cancel_flag'])
                 if instance.cancel_flag:
-                    logger.info(six.text_type("ProjectUpdate({0}) was cancelled".format(instance.pk)))
+                    logger.info("ProjectUpdate({0}) was cancelled".format(instance.pk))
                     return
                 fcntl.flock(self.lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
                 break
             except IOError as e:
                 if e.errno not in (errno.EAGAIN, errno.EACCES):
                     os.close(self.lock_fd)
-                    logger.error(six.text_type("I/O error({0}) while trying to aquire lock on file [{1}]: {2}").format(e.errno, lock_path, e.strerror))
+                    logger.error("I/O error({0}) while trying to aquire lock on file [{1}]: {2}".format(e.errno, lock_path, e.strerror))
                     raise
                 else:
                     time.sleep(1.0)
         waiting_time = time.time() - start_time
 
         if waiting_time > 1.0:
-            logger.info(six.text_type(
+            logger.info(
                 '{} spent {} waiting to acquire lock for local source tree '
-                'for path {}.').format(instance.log_format, waiting_time, lock_path))
+                'for path {}.'.format(instance.log_format, waiting_time, lock_path))
 
     def pre_run_hook(self, instance, **kwargs):
         # re-create root project folder if a natural disaster has destroyed it
@@ -1761,7 +1821,7 @@ class RunProjectUpdate(BaseTask):
             if lines:
                 p.scm_revision = lines[0].strip()
             else:
-                logger.info(six.text_type("{} Could not find scm revision in check").format(instance.log_format))
+                logger.info("{} Could not find scm revision in check".format(instance.log_format))
             p.playbook_files = p.playbooks
             p.inventory_files = p.inventories
             p.save()
@@ -1809,13 +1869,15 @@ class RunInventoryUpdate(BaseTask):
         credential = inventory_update.get_cloud_credential()
 
         if inventory_update.source == 'openstack':
-            openstack_auth = dict(auth_url=credential.host,
-                                  username=credential.username,
-                                  password=decrypt_field(credential, "password"),
-                                  project_name=credential.project)
-            if credential.domain not in (None, ''):
-                openstack_auth['domain_name'] = credential.domain
+            openstack_auth = dict(auth_url=credential.get_input('host', default=''),
+                                  username=credential.get_input('username', default=''),
+                                  password=credential.get_input('password', default=''),
+                                  project_name=credential.get_input('project', default=''))
+            if credential.has_input('domain'):
+                openstack_auth['domain_name'] = credential.get_input('domain', default='')
+
             private_state = inventory_update.source_vars_dict.get('private', True)
+            verify_state = credential.get_input('verify_ssl', default=True)
             # Retrieve cache path from inventory update vars if available,
             # otherwise create a temporary cache path only for this update.
             cache = inventory_update.source_vars_dict.get('cache', {})
@@ -1828,6 +1890,7 @@ class RunInventoryUpdate(BaseTask):
                 'clouds': {
                     'devstack': {
                         'private': private_state,
+                        'verify': verify_state,
                         'auth': openstack_auth,
                     },
                 },
@@ -1850,7 +1913,7 @@ class RunInventoryUpdate(BaseTask):
             )
             return private_data
 
-        cp = ConfigParser.ConfigParser()
+        cp = configparser.RawConfigParser()
         # Build custom ec2.ini for ec2 inventory script to use.
         if inventory_update.source == 'ec2':
             section = 'ec2'
@@ -1881,18 +1944,18 @@ class RunInventoryUpdate(BaseTask):
                 cache_path = tempfile.mkdtemp(prefix='ec2_cache', dir=kwargs.get('private_data_dir', None))
                 ec2_opts['cache_path'] = cache_path
             ec2_opts.setdefault('cache_max_age', '300')
-            for k,v in ec2_opts.items():
-                cp.set(section, k, six.text_type(v))
+            for k, v in ec2_opts.items():
+                cp.set(section, k, str(v))
         # Allow custom options to vmware inventory script.
         elif inventory_update.source == 'vmware':
 
             section = 'vmware'
             cp.add_section(section)
-            cp.set('vmware', 'cache_max_age', 0)
+            cp.set('vmware', 'cache_max_age', '0')
             cp.set('vmware', 'validate_certs', str(settings.VMWARE_VALIDATE_CERTS))
-            cp.set('vmware', 'username', credential.username)
-            cp.set('vmware', 'password', decrypt_field(credential, 'password'))
-            cp.set('vmware', 'server', credential.host)
+            cp.set('vmware', 'username', credential.get_input('username', default=''))
+            cp.set('vmware', 'password', credential.get_input('password', default=''))
+            cp.set('vmware', 'server', credential.get_input('host', default=''))
 
             vmware_opts = dict(inventory_update.source_vars_dict.items())
             if inventory_update.instance_filters:
@@ -1900,8 +1963,8 @@ class RunInventoryUpdate(BaseTask):
             if inventory_update.group_by:
                 vmware_opts.setdefault('groupby_patterns', inventory_update.group_by)
 
-            for k,v in vmware_opts.items():
-                cp.set(section, k, six.text_type(v))
+            for k, v in vmware_opts.items():
+                cp.set(section, k, str(v))
 
         elif inventory_update.source == 'satellite6':
             section = 'foreman'
@@ -1913,25 +1976,25 @@ class RunInventoryUpdate(BaseTask):
             foreman_opts = dict(inventory_update.source_vars_dict.items())
             foreman_opts.setdefault('ssl_verify', 'False')
             for k, v in foreman_opts.items():
-                if k == 'satellite6_group_patterns' and isinstance(v, basestring):
+                if k == 'satellite6_group_patterns' and isinstance(v, str):
                     group_patterns = v
-                elif k == 'satellite6_group_prefix' and isinstance(v, basestring):
+                elif k == 'satellite6_group_prefix' and isinstance(v, str):
                     group_prefix = v
                 elif k == 'satellite6_want_hostcollections' and isinstance(v, bool):
                     want_hostcollections = v
                 else:
-                    cp.set(section, k, six.text_type(v))
+                    cp.set(section, k, str(v))
 
             if credential:
-                cp.set(section, 'url', credential.host)
-                cp.set(section, 'user', credential.username)
-                cp.set(section, 'password', decrypt_field(credential, 'password'))
+                cp.set(section, 'url', credential.get_input('host', default=''))
+                cp.set(section, 'user', credential.get_input('username', default=''))
+                cp.set(section, 'password', credential.get_input('password', default=''))
 
             section = 'ansible'
             cp.add_section(section)
             cp.set(section, 'group_patterns', group_patterns)
-            cp.set(section, 'want_facts', True)
-            cp.set(section, 'want_hostcollections', want_hostcollections)
+            cp.set(section, 'want_facts', 'True')
+            cp.set(section, 'want_hostcollections', str(want_hostcollections))
             cp.set(section, 'group_prefix', group_prefix)
 
             section = 'cache'
@@ -1944,15 +2007,15 @@ class RunInventoryUpdate(BaseTask):
             cp.add_section(section)
 
             if credential:
-                cp.set(section, 'url', credential.host)
-                cp.set(section, 'username', credential.username)
-                cp.set(section, 'password', decrypt_field(credential, 'password'))
+                cp.set(section, 'url', credential.get_input('host', default=''))
+                cp.set(section, 'username', credential.get_input('username', default=''))
+                cp.set(section, 'password', credential.get_input('password', default=''))
                 cp.set(section, 'ssl_verify', "false")
 
             cloudforms_opts = dict(inventory_update.source_vars_dict.items())
             for opt in ['version', 'purge_actions', 'clean_group_keys', 'nest_tags', 'suffix', 'prefer_ipv4']:
                 if opt in cloudforms_opts:
-                    cp.set(section, opt, cloudforms_opts[opt])
+                    cp.set(section, opt, str(cloudforms_opts[opt]))
 
             section = 'cache'
             cp.add_section(section)
@@ -1978,12 +2041,12 @@ class RunInventoryUpdate(BaseTask):
                 )
 
             azure_rm_opts = dict(inventory_update.source_vars_dict.items())
-            for k,v in azure_rm_opts.items():
-                cp.set(section, k, six.text_type(v))
+            for k, v in azure_rm_opts.items():
+                cp.set(section, k, str(v))
 
         # Return INI content.
         if cp.sections():
-            f = cStringIO.StringIO()
+            f = StringIO()
             cp.write(f)
             private_data['credentials'][credential] = f.getvalue()
             return private_data
@@ -2002,10 +2065,10 @@ class RunInventoryUpdate(BaseTask):
         credential = inventory_update.get_cloud_credential()
         if credential:
             for subkey in ('username', 'host', 'project', 'client', 'tenant', 'subscription'):
-                passwords['source_%s' % subkey] = getattr(credential, subkey)
+                passwords['source_%s' % subkey] = credential.get_input(subkey, default='')
             for passkey in ('password', 'ssh_key_data', 'security_token', 'secret'):
                 k = 'source_%s' % passkey
-                passwords[k] = decrypt_field(credential, passkey)
+                passwords[k] = credential.get_input(passkey, default='')
         return passwords
 
     def build_env(self, inventory_update, **kwargs):
@@ -2054,7 +2117,7 @@ class RunInventoryUpdate(BaseTask):
 
             # by default, the GCE inventory source caches results on disk for
             # 5 minutes; disable this behavior
-            cp = ConfigParser.ConfigParser()
+            cp = configparser.ConfigParser()
             cp.add_section('cache')
             cp.set('cache', 'cache_max_age', '0')
             handle, path = tempfile.mkstemp(dir=kwargs.get('private_data_dir', None))
@@ -2064,7 +2127,7 @@ class RunInventoryUpdate(BaseTask):
         elif inventory_update.source in ['scm', 'custom']:
             for env_k in inventory_update.source_vars_dict:
                 if str(env_k) not in env and str(env_k) not in settings.INV_ENV_VARIABLE_BLACKLIST:
-                    env[str(env_k)] = six.text_type(inventory_update.source_vars_dict[env_k])
+                    env[str(env_k)] = str(inventory_update.source_vars_dict[env_k])
         elif inventory_update.source == 'tower':
             env['TOWER_INVENTORY'] = inventory_update.instance_filters
             env['TOWER_LICENSE_TYPE'] = get_licenser().validate()['license_type']
@@ -2095,8 +2158,12 @@ class RunInventoryUpdate(BaseTask):
             args.append('--overwrite')
         if inventory_update.overwrite_vars:
             args.append('--overwrite-vars')
-        src = inventory_update.source
 
+        # Declare the virtualenv the management command should activate
+        # as it calls ansible-inventory
+        args.extend(['--venv', inventory_update.ansible_virtualenv_path])
+
+        src = inventory_update.source
         # Add several options to the shell arguments based on the
         # inventory-source-specific setting in the AWX configuration.
         # These settings are "per-source"; it's entirely possible that
@@ -2134,7 +2201,7 @@ class RunInventoryUpdate(BaseTask):
             f = os.fdopen(handle, 'w')
             if inventory_update.source_script is None:
                 raise RuntimeError('Inventory Script does not exist')
-            f.write(inventory_update.source_script.script.encode('utf-8'))
+            f.write(inventory_update.source_script.script)
             f.close()
             os.chmod(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
             args.append(path)
@@ -2210,8 +2277,8 @@ class RunAdHocCommand(BaseTask):
         # back (they will be written to a temporary file).
         creds = ad_hoc_command.credential
         private_data = {'credentials': {}}
-        if creds and creds.ssh_key_data not in (None, ''):
-            private_data['credentials'][creds] = decrypt_field(creds, 'ssh_key_data') or ''
+        if creds and creds.has_input('ssh_key_data'):
+            private_data['credentials'][creds] = creds.get_input('ssh_key_data', default='')
         return private_data
 
     def build_passwords(self, ad_hoc_command, **kwargs):
@@ -2224,9 +2291,9 @@ class RunAdHocCommand(BaseTask):
         if creds:
             for field in ('ssh_key_unlock', 'ssh_password', 'become_password'):
                 if field == 'ssh_password':
-                    value = kwargs.get(field, decrypt_field(creds, 'password'))
+                    value = kwargs.get(field, creds.get_input('password', default=''))
                 else:
-                    value = kwargs.get(field, decrypt_field(creds, field))
+                    value = kwargs.get(field, creds.get_input(field, default=''))
                 if value not in ('', 'ASK'):
                     passwords[field] = value
         return passwords
@@ -2263,9 +2330,9 @@ class RunAdHocCommand(BaseTask):
         creds = ad_hoc_command.credential
         ssh_username, become_username, become_method = '', '', ''
         if creds:
-            ssh_username = kwargs.get('username', creds.username)
-            become_method = kwargs.get('become_method', creds.become_method)
-            become_username = kwargs.get('become_username', creds.become_username)
+            ssh_username = kwargs.get('username', creds.get_input('username', default=''))
+            become_method = kwargs.get('become_method', creds.get_input('become_method', default=''))
+            become_username = kwargs.get('become_username', creds.get_input('become_username', default=''))
         else:
             become_method = None
             become_username = ""
@@ -2274,7 +2341,11 @@ class RunAdHocCommand(BaseTask):
         # it doesn't make sense to rely on ansible's default of using the
         # current user.
         ssh_username = ssh_username or 'root'
-        args = ['ansible', '-i', self.build_inventory(ad_hoc_command, **kwargs)]
+        args = [
+            self.get_path_to_ansible(ad_hoc_command, 'ansible', **kwargs),
+            '-i',
+            self.build_inventory(ad_hoc_command, **kwargs)
+        ]
         if ad_hoc_command.job_type == 'check':
             args.append('--check')
         args.extend(['-u', sanitize_jinja(ssh_username)])
@@ -2372,7 +2443,7 @@ class RunSystemJob(BaseTask):
                              '--management-jobs', '--ad-hoc-commands', '--workflow-jobs',
                              '--notifications'])
         except Exception:
-            logger.exception(six.text_type("{} Failed to parse system job").format(system_job.log_format))
+            logger.exception("{} Failed to parse system job".format(system_job.log_format))
         return args
 
     def build_env(self, instance, **kwargs):
@@ -2398,7 +2469,7 @@ def _reconstruct_relationships(copy_mapping):
                 setattr(new_obj, field_name, related_obj)
             elif field.many_to_many:
                 for related_obj in getattr(old_obj, field_name).all():
-                    logger.debug(six.text_type('Deep copy: Adding {} to {}({}).{} relationship').format(
+                    logger.debug('Deep copy: Adding {} to {}({}).{} relationship'.format(
                         related_obj, new_obj, model, field_name
                     ))
                     getattr(new_obj, field_name).add(copy_mapping.get(related_obj, related_obj))
@@ -2410,7 +2481,7 @@ def deep_copy_model_obj(
     model_module, model_name, obj_pk, new_obj_pk,
     user_pk, sub_obj_list, permission_check_func=None
 ):
-    logger.info(six.text_type('Deep copy {} from {} to {}.').format(model_name, obj_pk, new_obj_pk))
+    logger.info('Deep copy {} from {} to {}.'.format(model_name, obj_pk, new_obj_pk))
     from awx.api.generics import CopyAPIView
     from awx.main.signals import disable_activity_stream
     model = getattr(importlib.import_module(model_module), model_name, None)

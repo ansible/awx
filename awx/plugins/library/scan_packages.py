@@ -90,7 +90,7 @@ def deb_package_list():
 
 
 def main():
-    module = AnsibleModule(
+    module = AnsibleModule(  # noqa
         argument_spec = dict(os_family=dict(required=True))
     )
     ans_os = module.params['os_family']

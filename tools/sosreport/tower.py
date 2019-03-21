@@ -46,7 +46,8 @@ SOSREPORT_FORBIDDEN_PATHS = [
     "/etc/tower/tower.key",
     "/etc/tower/awx.key",
     "/etc/tower/tower.cert",
-    "/etc/tower/awx.cert"
+    "/etc/tower/awx.cert",
+    "/var/log/tower/profile"
 ]
 
 if LooseVersion(sos.__version__) >= LooseVersion('3.0'):

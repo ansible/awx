@@ -2,6 +2,7 @@ export default ['$scope', '$filter', '$state', 'Alert', 'resolvedModels', 'Datas
     function($scope, $filter, $state, Alert, resolvedModels, Dataset, strings, ProcessErrors, Prompt, Wait) {
         const vm = this;
         const { instanceGroup } = resolvedModels;
+        let paginateQuerySet = {};
 
         vm.strings = strings;
         vm.isSuperuser = $scope.$root.user_is_superuser;
@@ -23,15 +24,58 @@ export default ['$scope', '$filter', '$state', 'Alert', 'resolvedModels', 'Datas
             $scope[$scope.list.name] = $scope[`${$scope.list.iterator}_dataset`].results;
             $scope.instanceGroupCount = Dataset.data.count;
 
-            $scope.$on('updateDataset', function(e, dataset) {
+            $scope.$on('updateDataset', function(e, dataset, queryset) {
                 $scope[`${$scope.list.iterator}_dataset`] = dataset;
                 $scope[$scope.list.name] = dataset.results;
+                paginateQuerySet = queryset;
             });
         }
 
-        $scope.$watch('$state.params.instance_group_id', () => {
+        $scope.$watchCollection('$state.params', () => {
             vm.activeId = parseInt($state.params.instance_group_id);
+            setToolbarSort();
         });
+
+        const toolbarSortDefault = {
+            label: `${strings.get('sort.NAME_ASCENDING')}`,
+            value: 'name'
+        };
+
+        vm.toolbarSortOptions = [
+            toolbarSortDefault,
+            {
+                label: `${strings.get('sort.NAME_DESCENDING')}`,
+                value: '-name'
+            }
+        ];
+
+        vm.toolbarSortValue = toolbarSortDefault;
+
+        function setToolbarSort () {
+            const orderByValue = _.get($state.params, 'instance_group_search.order_by');
+            const sortValue = _.find(vm.toolbarSortOptions, (option) => option.value === orderByValue);
+            if (sortValue) {
+                vm.toolbarSortValue = sortValue;
+            } else {
+                vm.toolbarSortValue = toolbarSortDefault;
+            }
+        }
+
+        vm.onToolbarSort = (sort) => {
+            vm.toolbarSortValue = sort;
+
+            const queryParams = Object.assign(
+                {},
+                $state.params.instance_group_search,
+                paginateQuerySet,
+                { order_by: sort.value }
+            );
+
+            // Update URL with params
+            $state.go('.', {
+                instance_group_search: queryParams
+            }, { notify: false, location: 'replace' });
+        };
 
         vm.tooltips = {
             add: strings.get('tooltips.ADD_INSTANCE_GROUP')

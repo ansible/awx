@@ -3,7 +3,6 @@ import os
 import json
 from copy import copy, deepcopy
 
-import six
 
 # Django
 from django.apps import apps
@@ -167,7 +166,7 @@ class SurveyJobTemplateMixin(models.Model):
                     decrypted_default = default
                     if (
                         survey_element['type'] == "password" and
-                        isinstance(decrypted_default, six.string_types) and
+                        isinstance(decrypted_default, str) and
                         decrypted_default.startswith('$encrypted$')
                     ):
                         decrypted_default = decrypt_value(get_encryption_key('value', pk=None), decrypted_default)
@@ -190,7 +189,7 @@ class SurveyJobTemplateMixin(models.Model):
         if (survey_element['type'] == "password"):
             password_value = data.get(survey_element['variable'])
             if (
-                isinstance(password_value, six.string_types) and
+                isinstance(password_value, str) and
                 password_value == '$encrypted$'
             ):
                 if survey_element.get('default') is None and survey_element['required']:
@@ -203,7 +202,7 @@ class SurveyJobTemplateMixin(models.Model):
                 errors.append("'%s' value missing" % survey_element['variable'])
         elif survey_element['type'] in ["textarea", "text", "password"]:
             if survey_element['variable'] in data:
-                if not isinstance(data[survey_element['variable']], six.string_types):
+                if not isinstance(data[survey_element['variable']], str):
                     errors.append("Value %s for '%s' expected to be a string." % (data[survey_element['variable']],
                                                                                   survey_element['variable']))
                     return errors
@@ -247,7 +246,7 @@ class SurveyJobTemplateMixin(models.Model):
                     errors.append("'%s' value is expected to be a list." % survey_element['variable'])
                 else:
                     choice_list = copy(survey_element['choices'])
-                    if isinstance(choice_list, six.string_types):
+                    if isinstance(choice_list, str):
                         choice_list = choice_list.split('\n')
                     for val in data[survey_element['variable']]:
                         if val not in choice_list:
@@ -255,7 +254,7 @@ class SurveyJobTemplateMixin(models.Model):
                                                                                            choice_list))
         elif survey_element['type'] == 'multiplechoice':
             choice_list = copy(survey_element['choices'])
-            if isinstance(choice_list, six.string_types):
+            if isinstance(choice_list, str):
                 choice_list = choice_list.split('\n')
             if survey_element['variable'] in data:
                 if data[survey_element['variable']] not in choice_list:
@@ -315,7 +314,7 @@ class SurveyJobTemplateMixin(models.Model):
             if 'prompts' not in _exclude_errors:
                 errors['extra_vars'] = [_('Variables {list_of_keys} are not allowed on launch. Check the Prompt on Launch setting '+
                                         'on the {model_name} to include Extra Variables.').format(
-                    list_of_keys=six.text_type(', ').join([six.text_type(key) for key in extra_vars.keys()]),
+                    list_of_keys=', '.join([str(key) for key in extra_vars.keys()]),
                     model_name=self._meta.verbose_name.title())]
 
         return (accepted, rejected, errors)
@@ -386,7 +385,7 @@ class SurveyJobMixin(models.Model):
             extra_vars = json.loads(self.extra_vars)
             for key in self.survey_passwords:
                 value = extra_vars.get(key)
-                if value and isinstance(value, six.string_types) and value.startswith('$encrypted$'):
+                if value and isinstance(value, str) and value.startswith('$encrypted$'):
                     extra_vars[key] = decrypt_value(get_encryption_key('value', pk=None), value)
             return json.dumps(extra_vars)
         else:

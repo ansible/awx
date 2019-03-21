@@ -68,7 +68,7 @@ export default ['templateUrl', '$compile', 'Wait', '$filter', 'i18n',
                         }
                         else {
                             html += "<tr>";
-                            html += "<td><a href=\"\" aw-tool-tip=\"No sync data\" aw-tip-placement=\"top\" data-tooltip-outer-class=\"Tooltip-secondary\"><i class=\"fa icon-job-none\"></i></a></td>";
+                            html += `<td><a href=\"\" aw-tool-tip="` + i18n._('No sync data') + `" aw-tip-placement=\"top\" data-tooltip-outer-class=\"Tooltip-secondary\"><i class=\"fa icon-job-none\"></i></a></td>`;
                             html += "<td>NA</td>";
                             html += "<td><span>" + $filter('sanitize')(ellipsis(row.name)) + "</span></td>";
                             html += "</tr>\n";
@@ -76,7 +76,7 @@ export default ['templateUrl', '$compile', 'Wait', '$filter', 'i18n',
                     });
                     html += "</tbody>\n";
                     html += "</table>\n";
-                    title = "Sync Status";
+                    title = i18n._("Sync Status");
                     attachElem(event, html, title);
                 };
 

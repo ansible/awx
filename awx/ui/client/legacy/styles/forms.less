@@ -75,6 +75,18 @@
     text-transform: uppercase;
 }
 
+.Form-title--last_login {
+    border-radius: 5px;
+    color: @default-interface-txt;
+    font-size: 10px;
+    font-weight: 100;
+    height:15px;
+    margin-left: 10px;
+    margin-top: 2.25px;
+    padding: 0 10px;
+    text-transform: uppercase;
+}
+
 .Form-exitHolder {
     justify-content: flex-end;
     display:flex;
@@ -157,11 +169,14 @@
     border-color: @default-icon;
 }
 
-.Form-tab--disabled {
+.Form-tab--disabled,
+.Form-button--disabled {
     opacity: 0.65;
+    color: @btn-txt;
 }
 
-.Form-tab--disabled:hover {
+.Form-tab--disabled:hover,
+.Form-button--disabled:hover {
     color: @btn-txt;
     background-color: @btn-bg;
     cursor:not-allowed!important;
@@ -213,12 +228,6 @@
     input.form-control[disabled], input.form-control[readonly], fieldset[disabled] input.form-control {
         border-color: @b7grey;
         background-color: @ebgrey;
-    }
-}
-
-.Form-checkbox--stacked {
-    label {
-        display: block;
     }
 }
 
@@ -383,6 +392,7 @@
 
 .select2-results__option {
     color: @field-label !important;
+    min-height: 33px;
 }
 
 .select2-container--default .select2-results__option--highlighted[aria-selected] {
@@ -424,13 +434,12 @@
     width: 100%;
 }
 
-.Form-passwordButton {
+.Form-browseButton, .Form-passwordButton {
     height: 30px;
     color: @default-interface-txt;
     text-transform: uppercase;
-    line-height: 1;
-    padding-left: 7px;
-    padding-right: 7px;
+    line-height: 1.2;
+    padding: 6px 12px;
     background-color: @default-bg;
     border:1px solid @b7grey;
 }
@@ -533,6 +542,7 @@ input[type='radio']:checked:before {
     width: 100%;
 
     .form-control {
+        flex-flow: row wrap;
         padding: 0 12px !important;
     }
 
@@ -542,7 +552,6 @@ input[type='radio']:checked:before {
     }
 }
 
-.FormToggle {}
 .FormToggle-container {
     margin: 0 0 0 10px;
     display: initial;
@@ -582,7 +591,6 @@ input[type='radio']:checked:before {
     color: @default-interface-txt;
     font-weight: normal;
     font-size: small;
-    padding-right:5px;
     width: 100%;
     .noselect;
 }
@@ -602,7 +610,7 @@ input[type='radio']:checked:before {
     display: flex;
     justify-content: flex-end;
 
-    button:last-of-type {
+    button {
         margin-left: 20px;
     }
 }
@@ -653,7 +661,6 @@ input[type='radio']:checked:before {
     transition: background-color 0.2s;
     padding-left:15px;
     padding-right: 15px;
-    margin-left: 20px;
 }
 
 .Form-cancelButton:hover {
@@ -672,12 +679,17 @@ input[type='radio']:checked:before {
     margin-bottom: 20px;
 }
 
+.Form-buttons .Form-primaryButton {
+    margin-right: 0;
+}
+
 .Form-primaryButton:hover {
     background-color: @default-link-hov;
     color: @default-bg;
 }
 
-.Form-primaryButton.Form-tab--disabled:hover {
+.Form-primaryButton.Form-tab--disabled:hover,
+.Form-primaryButton.Form-button--disabled:hover {
     background-color: @default-link;
 }
 
@@ -789,7 +801,8 @@ input[type='radio']:checked:before {
     background-color: @ebgrey;
 }
 
-.Form-checkboxRow {
-    display: flex;
-    clear: left;
+.Form-checkbox {
+    label {
+        font-weight: 400;
+    }
 }

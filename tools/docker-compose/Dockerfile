@@ -7,23 +7,25 @@ ADD Makefile /tmp/Makefile
 RUN mkdir /tmp/requirements
 
 RUN yum -y update && yum -y install curl epel-release && yum -y install https://centos7.iuscommunity.org/ius-release.rpm
-RUN yum -y localinstall http://download.postgresql.org/pub/repos/yum/9.4/redhat/rhel-6-x86_64/pgdg-centos94-9.4-3.noarch.rpm
+RUN yum -y localinstall https://download.postgresql.org/pub/repos/yum/9.4/redhat/rhel-6-x86_64/pgdg-centos94-9.4-3.noarch.rpm
 RUN curl --silent --location https://rpm.nodesource.com/setup_8.x | bash -
 
 RUN yum -y update && yum -y install openssh-server ansible mg vim tmux \
-  git2u-core mercurial subversion python-devel python-psycopg2 make postgresql \
+  git2u-core mercurial subversion python-devel python36 python36-devel python-psycopg2 make postgresql \
   postgresql-devel nginx nodejs python-psutil libxml2-devel libxslt-devel \
   libstdc++.so.6 gcc cyrus-sasl-devel cyrus-sasl openldap-devel libffi-devel \
-  zeromq-devel python-pip xmlsec1-devel swig krb5-devel xmlsec1-openssl xmlsec1 \
+  xmlsec1-devel swig krb5-devel xmlsec1-openssl xmlsec1 \
   xmlsec1-openssl-devel libtool-ltdl-devel rabbitmq-server bubblewrap \
-  zanata-python-client gettext gcc-c++ libcurl-devel python-pycurl bzip2 \
-  python-crypto rsync
+  zanata-python-client gettext gcc-c++ libcurl-devel bzip2 \
+  rsync
 
-RUN pip install virtualenv
+RUN ln -s /usr/bin/python36 /usr/bin/python3
+
+RUN python36 -m ensurepip
+RUN pip3 install virtualenv
 RUN /usr/bin/ssh-keygen -q -t rsa -N "" -f /root/.ssh/id_rsa
 RUN mkdir -p /data/db
-RUN pip2 install honcho
-RUN pip2 install supervisor
+RUN pip3 install honcho
 
 ADD requirements/requirements.txt \
   requirements/requirements_git.txt \
@@ -60,9 +62,9 @@ ENTRYPOINT ["/tini", "--"]
 CMD /start_development.sh
 
 # Pre-create things that we need to write to
-RUN for dir in /var/lib/awx/ /projects /.ansible /var/log/nginx /var/lib/nginx /.local; \
+RUN for dir in /var/lib/awx/ /var/log/tower/ /projects /.ansible /var/log/nginx /var/lib/nginx /.local; \
   do mkdir -p $dir; chmod -R g+rwx $dir; chgrp -R root $dir; done
 
-RUN for file in /etc/passwd /supervisor.conf \
-  /venv/awx/lib/python2.7/site-packages/awx.egg-link /var/run/nginx.pid; \
+RUN for file in /etc/passwd /etc/supervisord.conf \
+  /venv/awx/lib/python3.6/site-packages/awx.egg-link /var/run/nginx.pid; \
   do touch $file; chmod -R g+rwx $file; chgrp -R root $file; done

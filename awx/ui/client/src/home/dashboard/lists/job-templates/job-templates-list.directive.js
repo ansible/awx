@@ -1,8 +1,7 @@
 /* jshint unused: vars */
 export default
-    [   'templateUrl',
-        '$state',
-        function JobTemplatesList(templateUrl, $state) {
+    ['templateUrl', '$state', 'Rest', 'GetBasePath',
+    function JobTemplatesList(templateUrl, $state, Rest, GetBasePath)  {
             return {
                 restrict: 'E',
                 link: link,
@@ -24,6 +23,18 @@ export default
                         }
                     }
                 });
+
+                scope.canAddJobTemplate = false;
+                let url = GetBasePath('job_templates');
+                Rest.setUrl(url);
+                Rest.options()
+                    .then(({ data }) => {
+                        if (!data.actions.POST) {
+                            scope.canAddJobTemplate = false;
+                        } else {
+                            scope.canAddJobTemplate = true;
+                        }
+                    });
 
                 function createList(list) {
                     // smartStatus?, launchUrl, editUrl, name

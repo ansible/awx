@@ -1,7 +1,7 @@
 
 # Python
 import pytest
-import mock
+from unittest import mock
 from contextlib import contextmanager
 
 from awx.main.tests.factories import (
@@ -13,6 +13,8 @@ from awx.main.tests.factories import (
     create_survey_spec,
     create_workflow_job_template,
 )
+
+from django.core.cache import cache
 
 
 def pytest_addoption(parser):
@@ -129,4 +131,11 @@ def mock_cache():
             del self.cache[key]
 
     return MockCache()
+
+
+def pytest_runtest_teardown(item, nextitem):
+    # clear Django cache at the end of every test ran
+    # NOTE: this should not be memcache, see test_cache in test_env.py
+    # this is a local test cache, so we want every test to start with empty cache
+    cache.clear()
 

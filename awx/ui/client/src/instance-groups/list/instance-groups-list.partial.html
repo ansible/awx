@@ -31,7 +31,13 @@
                 </button>
             </div>
         </div>
-
+        <at-list-toolbar
+            ng-if="instance_groups.length > 0"
+            sort-only="true"
+            sort-value="vm.toolbarSortValue"
+            sort-options="vm.toolbarSortOptions"
+            on-sort="vm.onToolbarSort">
+        </at-list-toolbar>
         <at-list results="instance_groups">
             <at-row ng-repeat="instance_group in instance_groups"
                 ng-class="{'at-Row--active': (instance_group.id === vm.activeId)}">

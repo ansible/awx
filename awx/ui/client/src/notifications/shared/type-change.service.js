@@ -12,6 +12,7 @@ function (i18n) {
 
             obj.email_required = false;
             obj.slack_required = false;
+            obj.grafana_required = false;
             obj.hipchat_required = false;
             obj.pagerduty_required = false;
             obj.irc_required = false;
@@ -37,6 +38,9 @@ function (i18n) {
                     obj.slack_required = true;
                     obj.token_required = true;
                     obj.channel_required = true;
+                    break;
+                case 'grafana':
+                    obj.grafana_required = true;
                     break;
                 case 'hipchat':
                     obj.tokenLabel = ' ' + i18n._('Token');

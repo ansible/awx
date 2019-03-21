@@ -3,7 +3,7 @@ import pytest
 # AWX
 from awx.main.models.jobs import JobTemplate
 
-import mock
+from unittest import mock
 
 
 def test_missing_project_error(job_template_factory):

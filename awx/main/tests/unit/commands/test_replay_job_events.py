@@ -3,7 +3,7 @@
 
 # Python
 import pytest
-import mock
+from unittest import mock
 from datetime import timedelta
 
 # Django

@@ -1,9 +1,7 @@
 const templateUrl = require('~components/code-mirror/modal/code-mirror-modal.partial.html');
 
 const CodeMirrorModalID = '#CodeMirror-modal';
-const CodeMirrorID = 'codemirror-extra-vars-modal';
 const ParseVariable = 'parseType';
-const CodeMirrorVar = 'extra_variables';
 const ParseType = 'yaml';
 const ModalHeight = '#CodeMirror-modal .modal-dialog';
 const ModalHeader = '.atCodeMirror-label';
@@ -16,6 +14,7 @@ function atCodeMirrorModalController (
     ParseVariableString
 ) {
     const vm = this;
+    const variables = `${$scope.name}_variables`;
     function resize () {
         if ($scope.disabled === 'true') {
             $scope.disabled = true;
@@ -29,24 +28,24 @@ function atCodeMirrorModalController (
     }
 
     function toggle () {
-        $scope.parseTypeChange('parseType', 'extra_variables');
+        $scope.parseTypeChange('parseType', variables);
         setTimeout(resize, 0);
     }
 
-    function init () {
+    function init (vars, name) {
         if ($scope.disabled === 'true') {
             $scope.disabled = true;
         } else if ($scope.disabled === 'false') {
             $scope.disabled = false;
         }
         $(CodeMirrorModalID).modal('show');
-        $scope.extra_variables = ParseVariableString(_.cloneDeep($scope.variables));
+        $scope[variables] = ParseVariableString(_.cloneDeep(vars));
         $scope.parseType = ParseType;
         const options = {
             scope: $scope,
-            variable: CodeMirrorVar,
+            variable: variables,
             parse_variable: ParseVariable,
-            field_id: CodeMirrorID,
+            field_id: name,
             readOnly: $scope.disabled
         };
         ParseTypeChange(options);
@@ -59,9 +58,16 @@ function atCodeMirrorModalController (
         $(`${CodeMirrorModalID} .modal-dialog`).on('resize', resize);
     }
 
+    vm.variables = variables;
+    vm.name = $scope.name;
     vm.strings = strings;
     vm.toggle = toggle;
-    init();
+    if ($scope.init) {
+        $scope.init = init;
+    }
+    angular.element(document).ready(() => {
+        init($scope.variables, $scope.name);
+    });
 }
 
 atCodeMirrorModalController.$inject = [
@@ -85,6 +91,7 @@ function atCodeMirrorModal () {
             labelClass: '@',
             tooltip: '@',
             variables: '@',
+            name: '@',
             closeFn: '&'
         }
     };

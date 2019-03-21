@@ -3,25 +3,28 @@ import os
 import stat
 import tempfile
 
-from awx.main.utils import decrypt_field
 from django.conf import settings
 
 
 def aws(cred, env, private_data_dir):
-    env['AWS_ACCESS_KEY_ID'] = cred.username
-    env['AWS_SECRET_ACCESS_KEY'] = decrypt_field(cred, 'password')
-    if len(cred.security_token) > 0:
-        env['AWS_SECURITY_TOKEN'] = decrypt_field(cred, 'security_token')
+    env['AWS_ACCESS_KEY_ID'] = cred.get_input('username', default='')
+    env['AWS_SECRET_ACCESS_KEY'] = cred.get_input('password', default='')
+
+    if cred.has_input('security_token'):
+        env['AWS_SECURITY_TOKEN'] = cred.get_input('security_token', default='')
 
 
 def gce(cred, env, private_data_dir):
-    env['GCE_EMAIL'] = cred.username
-    env['GCE_PROJECT'] = cred.project
+    project = cred.get_input('project', default='')
+    username = cred.get_input('username', default='')
+
+    env['GCE_EMAIL'] = username
+    env['GCE_PROJECT'] = project
     json_cred = {
         'type': 'service_account',
-        'private_key': decrypt_field(cred, 'ssh_key_data'),
-        'client_email': cred.username,
-        'project_id': cred.project
+        'private_key': cred.get_input('ssh_key_data', default=''),
+        'client_email': username,
+        'project_id': project
     }
     handle, path = tempfile.mkstemp(dir=private_data_dir)
     f = os.fdopen(handle, 'w')
@@ -32,21 +35,25 @@ def gce(cred, env, private_data_dir):
 
 
 def azure_rm(cred, env, private_data_dir):
-    if len(cred.client) and len(cred.tenant):
-        env['AZURE_CLIENT_ID'] = cred.client
-        env['AZURE_SECRET'] = decrypt_field(cred, 'secret')
-        env['AZURE_TENANT'] = cred.tenant
-        env['AZURE_SUBSCRIPTION_ID'] = cred.subscription
+    client = cred.get_input('client', default='')
+    tenant = cred.get_input('tenant', default='')
+
+    if len(client) and len(tenant):
+        env['AZURE_CLIENT_ID'] = client
+        env['AZURE_TENANT'] = tenant
+        env['AZURE_SECRET'] = cred.get_input('secret', default='')
+        env['AZURE_SUBSCRIPTION_ID'] = cred.get_input('subscription', default='')
     else:
-        env['AZURE_SUBSCRIPTION_ID'] = cred.subscription
-        env['AZURE_AD_USER'] = cred.username
-        env['AZURE_PASSWORD'] = decrypt_field(cred, 'password')
-    if cred.inputs.get('cloud_environment', None):
-        env['AZURE_CLOUD_ENVIRONMENT'] = cred.inputs['cloud_environment']
+        env['AZURE_SUBSCRIPTION_ID'] = cred.get_input('subscription', default='')
+        env['AZURE_AD_USER'] = cred.get_input('username', default='')
+        env['AZURE_PASSWORD'] = cred.get_input('password', default='')
+
+    if cred.has_input('cloud_environment'):
+        env['AZURE_CLOUD_ENVIRONMENT'] = cred.get_input('cloud_environment')
 
 
 def vmware(cred, env, private_data_dir):
-    env['VMWARE_USER'] = cred.username
-    env['VMWARE_PASSWORD'] = decrypt_field(cred, 'password')
-    env['VMWARE_HOST'] = cred.host
+    env['VMWARE_USER'] = cred.get_input('username', default='')
+    env['VMWARE_PASSWORD'] = cred.get_input('password', default='')
+    env['VMWARE_HOST'] = cred.get_input('host', default='')
     env['VMWARE_VALIDATE_CERTS'] = str(settings.VMWARE_VALIDATE_CERTS)

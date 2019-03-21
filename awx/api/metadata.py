@@ -157,7 +157,7 @@ class Metadata(metadata.SimpleMetadata):
             finally:
                 view.request = request
 
-            for field, meta in actions[method].items():
+            for field, meta in list(actions[method].items()):
                 if not isinstance(meta, dict):
                     continue
 
@@ -234,17 +234,15 @@ class RoleMetadata(Metadata):
 
 # TODO: Tower 3.3 remove class and all uses in views.py when API v1 is removed
 class JobTypeMetadata(Metadata):
-        def get_field_info(self, field):
-            res = super(JobTypeMetadata, self).get_field_info(field)
+    def get_field_info(self, field):
+        res = super(JobTypeMetadata, self).get_field_info(field)
 
-            if field.field_name == 'job_type':
-                index = 0
-                for choice in res['choices']:
-                    if choice[0] == 'scan':
-                        res['choices'].pop(index)
-                        break
-                    index += 1
-            return res
+        if field.field_name == 'job_type':
+            res['choices'] = [
+                choice for choice in res['choices']
+                if choice[0] != 'scan'
+            ]
+        return res
 
 
 class SublistAttachDetatchMetadata(Metadata):
@@ -253,7 +251,7 @@ class SublistAttachDetatchMetadata(Metadata):
         actions = super(SublistAttachDetatchMetadata, self).determine_actions(request, view)
         method = 'POST'
         if method in actions:
-            for field in actions[method]:
+            for field in list(actions[method].keys()):
                 if field == 'id':
                     continue
                 actions[method].pop(field)

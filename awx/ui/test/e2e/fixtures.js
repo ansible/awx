@@ -10,6 +10,16 @@ import {
 const session = `e2e-${uuid().substr(0, 8)}`;
 const store = {};
 
+/* Utility function for accessing awx resources. This includes resources like
+ * users, organizations, and job templates. Retrieves the end point, and creates
+ * it if it does not exist.
+ *
+ * @param endpoint - The REST API url suffix.
+ * @param data - Attributes used to create a new endpoint.
+ * @param [unique] - An array of keys used to uniquely identify previously
+ *     created resources from the endpoint.
+ *
+ */
 const getOrCreate = (endpoint, data, unique = ['name']) => {
     const identifiers = Object.keys(data).filter(key => unique.indexOf(key) > -1);
 
@@ -40,11 +50,22 @@ const getOrCreate = (endpoint, data, unique = ['name']) => {
     return store[lookup].then(created => created.data);
 };
 
+/* Retrieves an organization, and creates it if it does not exist.
+ *
+ * @param [namespace] - A unique name prefix for the organization.
+ *
+ */
 const getOrganization = (namespace = session) => getOrCreate('/organizations/', {
     name: `${namespace}-organization`,
     description: namespace
 });
 
+/* Retrieves an inventory, and creates it if it does not exist.
+ * Also creates an organization with the same name prefix if needed.
+ *
+ * @param [namespace] - A unique name prefix for the inventory.
+ *
+ */
 const getInventory = (namespace = session) => getOrganization(namespace)
     .then(organization => getOrCreate('/inventories/', {
         name: `${namespace}-inventory`,
@@ -57,6 +78,11 @@ const getInventory = (namespace = session) => getOrganization(namespace)
         variables: JSON.stringify({ ansible_connection: 'local' }),
     }, ['name', 'inventory']).then(() => inventory)));
 
+/* Identical to getInventory except it provides a unique suffix,
+ * "*-inventory-nosource".
+ *
+ * @param[namespace] - A unique name prefix for the inventory.
+*/
 const getInventoryNoSource = (namespace = session) => getOrganization(namespace)
     .then(organization => getOrCreate('/inventories/', {
         name: `${namespace}-inventory-nosource`,
@@ -69,6 +95,11 @@ const getInventoryNoSource = (namespace = session) => getOrganization(namespace)
         variables: JSON.stringify({ ansible_connection: 'local' }),
     }, ['name', 'inventory']).then(() => inventory)));
 
+/* Retrieves a host with the given name prefix, and creates it if it does not exist.
+ * If an inventory does not exist with the same prefix, it is created as well.
+ *
+ * @param[namespace] - A unique name prefix for the host.
+ */
 const getHost = (namespace = session) => getInventory(namespace)
     .then(inventory => getOrCreate('/hosts/', {
         name: `${namespace}-host`,
@@ -77,6 +108,12 @@ const getHost = (namespace = session) => getInventory(namespace)
         variables: JSON.stringify({ ansible_connection: 'local' }),
     }, ['name', 'inventory']));
 
+/* Retrieves an inventory script with the given name prefix, and creates it if it
+ * does not exist. If an organization does not exist with the same prefix, it is
+ * created as well.
+ *
+ * @param[namespace] - A unique name prefix for the host.
+ */
 const getInventoryScript = (namespace = session) => getOrganization(namespace)
     .then(organization => getOrCreate('/inventory_scripts/', {
         name: `${namespace}-inventory-script`,
@@ -85,6 +122,12 @@ const getInventoryScript = (namespace = session) => getOrganization(namespace)
         script: '#!/usr/bin/env python'
     }));
 
+/* Retrieves an inventory source, and creates it if it does not exist. If the
+ * required dependent inventory and inventory script do not exist, they are also
+ * created.
+ *
+ * @param[namespace] - A unique name prefix for the inventory source.
+ */
 const getInventorySource = (namespace = session) => {
     const promises = [
         getInventory(namespace),
@@ -101,6 +144,10 @@ const getInventorySource = (namespace = session) => {
         }));
 };
 
+/* Retrieves an AWS credential, and creates it if it does not exist.
+ *
+ * @param[namespace] - A unique name prefix for the AWS credential.
+ */
 const getAdminAWSCredential = (namespace = session) => {
     const promises = [
         get('/me/'),
@@ -127,6 +174,10 @@ const getAdminAWSCredential = (namespace = session) => {
         });
 };
 
+/* Retrieves a machine credential, and creates it if it does not exist.
+ *
+ * @param[namespace] - A unique name prefix for the machine credential.
+ */
 const getAdminMachineCredential = (namespace = session) => {
     const promises = [
         get('/me/'),
@@ -145,6 +196,12 @@ const getAdminMachineCredential = (namespace = session) => {
         });
 };
 
+/* Retrieves a team, and creates it if it does not exist.
+ * If an organization does not exist with the same prefix, it is
+ * created as well.
+ *
+ * @param[namespace] - A unique name prefix for the team.
+ */
 const getTeam = (namespace = session) => getOrganization(namespace)
     .then(organization => getOrCreate(`/organizations/${organization.id}/teams/`, {
         name: `${namespace}-team`,
@@ -152,6 +209,12 @@ const getTeam = (namespace = session) => getOrganization(namespace)
         organization: organization.id,
     }));
 
+/* Retrieves a smart inventory, and creates it if it does not exist.
+ * name prefix. If an organization does not exist with the same prefix, it is
+ * created as well.
+ *
+ * @param[namespace] - A unique name prefix for the smart inventory.
+ */
 const getSmartInventory = (namespace = session) => getOrganization(namespace)
     .then(organization => getOrCreate('/inventories/', {
         name: `${namespace}-smart-inventory`,
@@ -161,6 +224,12 @@ const getSmartInventory = (namespace = session) => getOrganization(namespace)
         kind: 'smart'
     }));
 
+/* Retrieves a notification template, and creates it if it does not exist.
+ * name prefix. If an organization does not exist with the same prefix, it is
+ * created as well.
+ *
+ * @param[namespace] - A unique name prefix for the notification template.
+ */
 const getNotificationTemplate = (namespace = session) => getOrganization(namespace)
     .then(organization => getOrCreate(`/organizations/${organization.id}/notification_templates/`, {
         name: `${namespace}-notification-template`,
@@ -173,13 +242,25 @@ const getNotificationTemplate = (namespace = session) => getOrganization(namespa
         }
     }));
 
-const getProject = (namespace = session) => getOrganization(namespace)
+/* Retrieves a project, and creates it if it does not exist.
+ * name prefix. If an organization does not exist with the same prefix, it is
+ * created as well.
+ *
+ * @param[namespace] - A unique name prefix for the host.
+ * @param[scmUrl] - The url of the repository.
+ * @param[scmType] - The type of scm (git, etc.)
+ */
+const getProject = (
+    namespace = session,
+    scmUrl = 'https://github.com/ansible/ansible-tower-samples',
+    scmType = 'git'
+) => getOrganization(namespace)
     .then(organization => getOrCreate(`/organizations/${organization.id}/projects/`, {
         name: `${namespace}-project`,
         description: namespace,
         organization: organization.id,
-        scm_url: 'https://github.com/ansible/ansible-tower-samples',
-        scm_type: 'git'
+        scm_url: `${scmUrl}`,
+        scm_type: `${scmType}`
     }));
 
 const waitForJob = endpoint => {
@@ -207,18 +288,32 @@ const waitForJob = endpoint => {
     });
 };
 
-const getUpdatedProject = (namespace = session) => getProject(namespace)
-    .then(project => {
-        const updateURL = project.related.current_update;
+const getUpdatedProject = (namespace = session) => {
+    const promises = [
+        getProject(namespace),
+    ];
+    return Promise.all(promises)
+        .then(([project]) => {
+            post(`/api/v2/projects/${project.id}/update/`, {})
+                .then(update => waitForJob(update.data.url))
+                .then(() => { project = getProject(namespace); });
+            return project;
+        });
+};
 
-        if (updateURL) {
-            return waitForJob(updateURL).then(() => project);
-        }
-
-        return project;
-    });
-
-const getJobTemplate = (namespace = session) => {
+/* Retrieves a job template, and creates it if it does not exist.
+ * name prefix. This function also runs getOrCreate for an inventory,
+ * credential, and project with the same prefix.
+ *
+ * @param [namespace] - Name prefix for associated dependencies.
+ * @param [playbook] - Playbook for the job template.
+ * @param [name] - Unique name prefix for the job template.
+ * */
+const getJobTemplate = (
+    namespace = session,
+    playbook = 'hello_world.yml',
+    name = `${namespace}-job-template`
+) => {
     const promises = [
         getInventory(namespace),
         getAdminMachineCredential(namespace),
@@ -227,16 +322,26 @@ const getJobTemplate = (namespace = session) => {
 
     return Promise.all(promises)
         .then(([inventory, credential, project]) => getOrCreate('/job_templates/', {
-            name: `${namespace}-job-template`,
+            name: `${name}`,
             description: namespace,
             inventory: inventory.id,
             credential: credential.id,
             project: project.id,
-            playbook: 'hello_world.yml',
+            playbook: `${playbook}`,
         }));
 };
 
-const getJob = (namespace = session) => getJobTemplate(namespace)
+/* Similar to getJobTemplate, except that it also launches the job.
+ *
+ * @param[namespace] - A unique name prefix for the job and its dependencies.
+ * @param[playbook] - The playbook file to be run by the job template.
+ * @param[name] - A unique name for the job template.
+ */
+const getJob = (
+    namespace = session,
+    playbook = 'hello_world.yml',
+    name = `${namespace}-job-template`
+) => getJobTemplate(namespace, playbook, name)
     .then(template => {
         const launchURL = template.related.launch;
         return post(launchURL, {}).then(response => {
@@ -245,6 +350,12 @@ const getJob = (namespace = session) => getJobTemplate(namespace)
         });
     });
 
+/* Retrieves a workflow template, and creates it if it does not exist.
+ * name prefix. If an organization does not exist with the same prefix, it is
+ * created as well. A basic workflow node setup is also created.
+ *
+ * @param[namespace] - A unique name prefix for the workflow template.
+ */
 const getWorkflowTemplate = (namespace = session) => {
     const workflowTemplatePromise = getOrganization(namespace)
         .then(organization => getOrCreate(`/organizations/${organization.id}/workflow_job_templates/`, {
@@ -285,6 +396,12 @@ const getWorkflowTemplate = (namespace = session) => {
         .then(([workflowTemplate, nodes]) => workflowTemplate);
 };
 
+/* Retrieves a auditor user, and creates it if it does not exist.
+ * name prefix. If an organization does not exist with the same prefix,
+ * it is also created.
+ *
+ * @param[namespace] - A unique name prefix for the auditor.
+ */
 const getAuditor = (namespace = session) => getOrganization(namespace)
     .then(organization => getOrCreate(`/organizations/${organization.id}/users/`, {
         username: `auditor-${uuid().substr(0, 8)}`,
@@ -297,9 +414,19 @@ const getAuditor = (namespace = session) => getOrganization(namespace)
         password: AWX_E2E_PASSWORD
     }, ['username']));
 
-const getUser = (namespace = session) => getOrganization(namespace)
+/* Retrieves a user, and creates it if it does not exist.
+ * name prefix. If an organization does not exist with the same prefix,
+ * it is also created.
+ *
+ * @param[namespace] - A unique name prefix for the user's organization.
+ * @param[username] - A unique name for the user.
+ */
+const getUser = (
+    namespace = session,
+    username = `user-${uuid().substr(0, 8)}`
+) => getOrganization(namespace)
     .then(organization => getOrCreate(`/organizations/${organization.id}/users/`, {
-        username: `user-${uuid().substr(0, 8)}`,
+        username: `${username}`,
         organization: organization.id,
         first_name: 'firstname',
         last_name: 'lastname',
@@ -309,18 +436,12 @@ const getUser = (namespace = session) => getOrganization(namespace)
         password: AWX_E2E_PASSWORD
     }, ['username']));
 
-const getUserExact = (namespace = session, name) => getOrganization(namespace)
-    .then(organization => getOrCreate(`/organizations/${organization.id}/users/`, {
-        username: `${name}`,
-        organization: organization.id,
-        first_name: 'firstname',
-        last_name: 'lastname',
-        email: 'null@ansible.com',
-        is_superuser: false,
-        is_system_auditor: false,
-        password: AWX_E2E_PASSWORD
-    }, ['username']));
-
+/* Retrieves a job template admin, and creates it if it does not exist.
+ * If a job template or organization does not exist with the same
+ * prefix, they are also created.
+ *
+ * @param[namespace] - A unique name prefix for the template admin.
+ */
 const getJobTemplateAdmin = (namespace = session) => {
     const rolePromise = getJobTemplate(namespace)
         .then(obj => obj.summary_fields.object_roles.admin_role);
@@ -344,6 +465,12 @@ const getJobTemplateAdmin = (namespace = session) => {
         .then(([user, assignment]) => user);
 };
 
+/* Retrieves a project admin, and creates it if it does not exist.
+ * If a job template or organization does not exist with the same
+ * prefix, they are also created.
+ *
+ * @param[namespace] - A unique name prefix for the project admin.
+ */
 const getProjectAdmin = (namespace = session) => {
     const rolePromise = getUpdatedProject(namespace)
         .then(obj => obj.summary_fields.object_roles.admin_role);
@@ -367,6 +494,11 @@ const getProjectAdmin = (namespace = session) => {
         .then(([user, assignment]) => user);
 };
 
+/* Retrieves a inventory source schedule, and creates it if it does not exist.
+ * If an inventory source does not exist with the same prefix, it is also created.
+ *
+ * @param[namespace] - A unique name prefix for the schedule.
+ */
 const getInventorySourceSchedule = (namespace = session) => getInventorySource(namespace)
     .then(source => getOrCreate(source.related.schedules, {
         name: `${source.name}-schedule`,
@@ -374,6 +506,11 @@ const getInventorySourceSchedule = (namespace = session) => getInventorySource(n
         rrule: 'DTSTART:20171104T040000Z RRULE:FREQ=DAILY;INTERVAL=1;COUNT=1'
     }));
 
+/* Retrieves a job template schedule, and creates it if it does not exist.
+ * If an job template  does not exist with the same prefix, it is also created.
+ *
+ * @param[namespace] - A unique name prefix for the schedule.
+ */
 const getJobTemplateSchedule = (namespace = session) => getJobTemplate(namespace)
     .then(template => getOrCreate(template.related.schedules, {
         name: `${template.name}-schedule`,
@@ -404,6 +541,5 @@ module.exports = {
     getTeam,
     getUpdatedProject,
     getUser,
-    getUserExact,
     getWorkflowTemplate,
 };
