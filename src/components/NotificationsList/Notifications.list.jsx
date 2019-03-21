@@ -49,27 +49,21 @@ class Notifications extends Component {
       errorTemplateIds: []
     };
 
-    this.onSearch = this.onSearch.bind(this);
+    this.handleSearch = this.handleSearch.bind(this);
     this.getQueryParams = this.getQueryParams.bind(this);
-    this.onSort = this.onSort.bind(this);
-    this.onSetPage = this.onSetPage.bind(this);
-    this.onSelectAll = this.onSelectAll.bind(this);
+    this.handleSort = this.handleSort.bind(this);
+    this.handleSetPage = this.handleSetPage.bind(this);
+    this.handleSelectAll = this.handleSelectAll.bind(this);
     this.toggleNotification = this.toggleNotification.bind(this);
     this.updateUrl = this.updateUrl.bind(this);
-    this.postToError = this.postToError.bind(this);
-    this.postToSuccess = this.postToSuccess.bind(this);
-    this.fetchNotifications = this.fetchNotifications.bind(this);
+    this.createError = this.createError.bind(this);
+    this.createSuccess = this.createSuccess.bind(this);
+    this.readNotifications = this.readNotifications.bind(this);
   }
 
   componentDidMount () {
     const queryParams = this.getQueryParams();
-    this.fetchNotifications(queryParams);
-  }
-
-  onSearch () {
-    const { sortedColumnKey, sortOrder } = this.state;
-
-    this.onSort(sortedColumnKey, sortOrder);
+    this.readNotifications(queryParams);
   }
 
   getQueryParams (overrides = {}) {
@@ -81,7 +75,7 @@ class Notifications extends Component {
     return Object.assign({}, this.defaultParams, searchParams, overrides);
   }
 
-  onSort = (sortedColumnKey, sortOrder) => {
+  handleSort = (sortedColumnKey, sortOrder) => {
     const { page_size } = this.state;
 
     let order_by = sortedColumnKey;
@@ -92,19 +86,19 @@ class Notifications extends Component {
 
     const queryParams = this.getQueryParams({ order_by, page_size });
 
-    this.fetchNotifications(queryParams);
+    this.readNotifications(queryParams);
   };
 
-  onSetPage = (pageNumber, pageSize) => {
+  handleSetPage = (pageNumber, pageSize) => {
     const page = parseInt(pageNumber, 10);
     const page_size = parseInt(pageSize, 10);
 
     const queryParams = this.getQueryParams({ page, page_size });
 
-    this.fetchNotifications(queryParams);
+    this.readNotifications(queryParams);
   };
 
-  onSelectAll = isSelected => {
+  handleSelectAll = isSelected => {
     const { results } = this.state;
 
     const selected = isSelected ? results.map(o => o.id) : [];
@@ -114,11 +108,17 @@ class Notifications extends Component {
 
   toggleNotification = (id, isCurrentlyOn, status) => {
     if (status === 'success') {
-      this.postToSuccess(id, isCurrentlyOn);
+      this.createSuccess(id, isCurrentlyOn);
     } else if (status === 'error') {
-      this.postToError(id, isCurrentlyOn);
+      this.createError(id, isCurrentlyOn);
     }
   };
+
+  handleSearch () {
+    const { sortedColumnKey, sortOrder } = this.state;
+
+    this.handleSort(sortedColumnKey, sortOrder);
+  }
 
   updateUrl (queryParams) {
     const { history, location, match } = this.props;
@@ -130,14 +130,14 @@ class Notifications extends Component {
     }
   }
 
-  async postToError (id, isCurrentlyOn) {
-    const { postError, match } = this.props;
+  async createError (id, isCurrentlyOn) {
+    const { onCreateError, match } = this.props;
     const postParams = { id };
     if (isCurrentlyOn) {
       postParams.disassociate = true;
     }
     try {
-      await postError(match.params.id, postParams);
+      await onCreateError(match.params.id, postParams);
     } catch (err) {
       this.setState({ error: true });
     } finally {
@@ -155,14 +155,14 @@ class Notifications extends Component {
     }
   }
 
-  async postToSuccess (id, isCurrentlyOn) {
-    const { postSuccess, match } = this.props;
+  async createSuccess (id, isCurrentlyOn) {
+    const { onCreateSuccess, match } = this.props;
     const postParams = { id };
     if (isCurrentlyOn) {
       postParams.disassociate = true;
     }
     try {
-      await postSuccess(match.params.id, postParams);
+      await onCreateSuccess(match.params.id, postParams);
     } catch (err) {
       this.setState({ error: true });
     } finally {
@@ -180,9 +180,9 @@ class Notifications extends Component {
     }
   }
 
-  async fetchNotifications (queryParams) {
+  async readNotifications (queryParams) {
     const { noInitialResults } = this.state;
-    const { getNotifications, getSuccess, getError, match } = this.props;
+    const { onReadNotifications, onReadSuccess, onReadError, match } = this.props;
     const { page, page_size, order_by } = queryParams;
 
     let sortOrder = 'ascending';
@@ -196,7 +196,7 @@ class Notifications extends Component {
     this.setState({ error: false, loading: true });
 
     try {
-      const { data } = await getNotifications(match.params.id, queryParams);
+      const { data } = await onReadNotifications(match.params.id, queryParams);
       const { count, results } = data;
 
       const pageCount = Math.ceil(count / page_size);
@@ -231,10 +231,10 @@ class Notifications extends Component {
       let errorTemplateIds = [];
 
       if (results.length > 0) {
-        const successTemplatesPromise = getSuccess(match.params.id, {
+        const successTemplatesPromise = onReadSuccess(match.params.id, {
           id__in: notificationTemplateIds
         });
-        const errorTemplatesPromise = getError(match.params.id, {
+        const errorTemplatesPromise = onReadError(match.params.id, {
           id__in: notificationTemplateIds
         });
         const successTemplatesResult = await successTemplatesPromise;
@@ -297,9 +297,9 @@ class Notifications extends Component {
               sortedColumnKey={sortedColumnKey}
               sortOrder={sortOrder}
               columns={this.columns}
-              onSearch={this.onSearch}
-              onSort={this.onSort}
-              onSelectAll={this.onSelectAll}
+              onSearch={this.handleSearch}
+              onSort={this.handleSort}
+              onSelectAll={this.handleSelectAll}
             />
             <I18n>
               {({ i18n }) => (
@@ -324,7 +324,7 @@ class Notifications extends Component {
               page={page}
               pageCount={pageCount}
               page_size={page_size}
-              onSetPage={this.onSetPage}
+              onSetPage={this.handleSetPage}
             />
           </Fragment>
         )}
@@ -336,11 +336,11 @@ class Notifications extends Component {
 }
 
 Notifications.propTypes = {
-  getError: PropTypes.func.isRequired,
-  getNotifications: PropTypes.func.isRequired,
-  getSuccess: PropTypes.func.isRequired,
-  postError: PropTypes.func.isRequired,
-  postSuccess: PropTypes.func.isRequired,
+  onReadError: PropTypes.func.isRequired,
+  onReadNotifications: PropTypes.func.isRequired,
+  onReadSuccess: PropTypes.func.isRequired,
+  onCreateError: PropTypes.func.isRequired,
+  onCreateSuccess: PropTypes.func.isRequired,
 };
 
 export default Notifications;

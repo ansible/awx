@@ -6,24 +6,24 @@ class OrganizationNotifications extends Component {
   constructor (props) {
     super(props);
 
-    this.getOrgNotifications = this.getOrgNotifications.bind(this);
-    this.getOrgNotificationSuccess = this.getOrgNotificationSuccess.bind(this);
-    this.getOrgNotificationError = this.getOrgNotificationError.bind(this);
+    this.readOrgNotifications = this.readOrgNotifications.bind(this);
+    this.readOrgNotificationSuccess = this.readOrgNotificationSuccess.bind(this);
+    this.readOrgNotificationError = this.readOrgNotificationError.bind(this);
     this.createOrgNotificationSuccess = this.createOrgNotificationSuccess.bind(this);
     this.createOrgNotificationError = this.createOrgNotificationError.bind(this);
   }
 
-  getOrgNotifications (id, reqParams) {
+  readOrgNotifications (id, reqParams) {
     const { api } = this.props;
     return api.getOrganizationNotifications(id, reqParams);
   }
 
-  getOrgNotificationSuccess (id, reqParams) {
+  readOrgNotificationSuccess (id, reqParams) {
     const { api } = this.props;
     return api.getOrganizationNotificationSuccess(id, reqParams);
   }
 
-  getOrgNotificationError (id, reqParams) {
+  readOrgNotificationError (id, reqParams) {
     const { api } = this.props;
     return api.getOrganizationNotificationError(id, reqParams);
   }
@@ -47,11 +47,11 @@ class OrganizationNotifications extends Component {
 
     return (
       <NotificationsList
-        getNotifications={this.getOrgNotifications}
-        getSuccess={this.getOrgNotificationSuccess}
-        getError={this.getOrgNotificationError}
-        postSuccess={this.createOrgNotificationSuccess}
-        postError={this.createOrgNotificationError}
+        onReadNotifications={this.readOrgNotifications}
+        onReadSuccess={this.readOrgNotificationSuccess}
+        onReadError={this.readOrgNotificationError}
+        onCreateSuccess={this.createOrgNotificationSuccess}
+        onCreateError={this.createOrgNotificationError}
         match={match}
         location={location}
         history={history}

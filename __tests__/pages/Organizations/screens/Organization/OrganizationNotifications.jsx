@@ -44,11 +44,11 @@ describe('<OrganizationNotifications />', () => {
         />
       </MemoryRouter>
     ).find('OrganizationNotifications');
-    wrapper.instance().getOrgNotifications(1, { foo: 'bar' });
+    wrapper.instance().readOrgNotifications(1, { foo: 'bar' });
     expect(getOrganizationNotifications).toHaveBeenCalledWith(1, { foo: 'bar' });
-    wrapper.instance().getOrgNotificationSuccess(1, { foo: 'bar' });
+    wrapper.instance().readOrgNotificationSuccess(1, { foo: 'bar' });
     expect(getOrganizationNotificationSuccess).toHaveBeenCalledWith(1, { foo: 'bar' });
-    wrapper.instance().getOrgNotificationError(1, { foo: 'bar' });
+    wrapper.instance().readOrgNotificationError(1, { foo: 'bar' });
     expect(getOrganizationNotificationError).toHaveBeenCalledWith(1, { foo: 'bar' });
     wrapper.instance().createOrgNotificationSuccess(1, { id: 2 });
     expect(createOrganizationNotificationSuccess).toHaveBeenCalledWith(1, { id: 2 });
