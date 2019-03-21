@@ -75,6 +75,7 @@ GLqbpJyX2r3p/Rmo6mLY71SqpA==
 @pytest.mark.django_db
 def test_default_cred_types():
     assert sorted(CredentialType.defaults.keys()) == [
+        'aim',
         'aws',
         'azure_kv',
         'azure_rm',
