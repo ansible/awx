@@ -5,6 +5,7 @@
 #    pip-compile requirements/requirements.in
 #
 amqp==2.3.2               # via kombu
+ansible-runner==1.3.0
 appdirs==1.4.2
 argparse==1.4.0           # via uwsgitop
 asgi-amqp==1.1.3
@@ -78,6 +79,7 @@ pyopenssl==19.0.0         # via service-identity
 pyparsing==2.2.0
 pyrad==2.1                # via django-radius
 pysocks==1.6.8            # via twilio
+python-daemon==2.2.0      # via ansible-runner
 python-dateutil==2.7.2
 python-ldap==3.1.0        # via django-auth-ldap
 python-logstash==0.4.6

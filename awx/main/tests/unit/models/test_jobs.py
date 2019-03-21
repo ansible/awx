@@ -35,12 +35,12 @@ def job(mocker, hosts, inventory):
 
 
 def test_start_job_fact_cache(hosts, job, inventory, tmpdir):
-    fact_cache = str(tmpdir)
+    fact_cache = os.path.join(tmpdir, 'facts')
     modified_times = {}
     job.start_job_fact_cache(fact_cache, modified_times, 0)
 
     for host in hosts:
-        filepath = os.path.join(fact_cache, 'facts', host.name)
+        filepath = os.path.join(fact_cache, host.name)
         assert os.path.exists(filepath)
         with open(filepath, 'r') as f:
             assert f.read() == json.dumps(host.ansible_facts)
@@ -52,14 +52,14 @@ def test_fact_cache_with_invalid_path_traversal(job, inventory, tmpdir, mocker):
         Host(name='../foo', ansible_facts={"a": 1, "b": 2},),
     ])
 
-    fact_cache = str(tmpdir)
+    fact_cache = os.path.join(tmpdir, 'facts')
     job.start_job_fact_cache(fact_cache, {}, 0)
     # a file called "foo" should _not_ be written outside the facts dir
-    assert os.listdir(os.path.join(fact_cache, 'facts', '..')) == ['facts']
+    assert os.listdir(os.path.join(fact_cache, '..')) == ['facts']
 
 
 def test_finish_job_fact_cache_with_existing_data(job, hosts, inventory, mocker, tmpdir):
-    fact_cache = str(tmpdir)
+    fact_cache = os.path.join(tmpdir, 'facts')
     modified_times = {}
     job.start_job_fact_cache(fact_cache, modified_times, 0)
 
@@ -67,7 +67,7 @@ def test_finish_job_fact_cache_with_existing_data(job, hosts, inventory, mocker,
         h.save = mocker.Mock()
 
     ansible_facts_new = {"foo": "bar", "insights": {"system_id": "updated_by_scan"}}
-    filepath = os.path.join(fact_cache, 'facts', hosts[1].name)
+    filepath = os.path.join(fact_cache, hosts[1].name)
     with open(filepath, 'w') as f:
         f.write(json.dumps(ansible_facts_new))
         f.flush()
@@ -90,7 +90,7 @@ def test_finish_job_fact_cache_with_existing_data(job, hosts, inventory, mocker,
 
 
 def test_finish_job_fact_cache_with_bad_data(job, hosts, inventory, mocker, tmpdir):
-    fact_cache = str(tmpdir)
+    fact_cache = os.path.join(tmpdir, 'facts')
     modified_times = {}
     job.start_job_fact_cache(fact_cache, modified_times, 0)
 
@@ -98,7 +98,7 @@ def test_finish_job_fact_cache_with_bad_data(job, hosts, inventory, mocker, tmpd
         h.save = mocker.Mock()
 
     for h in hosts:
-        filepath = os.path.join(fact_cache, 'facts', h.name)
+        filepath = os.path.join(fact_cache, h.name)
         with open(filepath, 'w') as f:
             f.write('not valid json!')
             f.flush()
@@ -112,14 +112,14 @@ def test_finish_job_fact_cache_with_bad_data(job, hosts, inventory, mocker, tmpd
 
 
 def test_finish_job_fact_cache_clear(job, hosts, inventory, mocker, tmpdir):
-    fact_cache = str(tmpdir)
+    fact_cache = os.path.join(tmpdir, 'facts')
     modified_times = {}
     job.start_job_fact_cache(fact_cache, modified_times, 0)
 
     for h in hosts:
         h.save = mocker.Mock()
 
-    os.remove(os.path.join(fact_cache, 'facts', hosts[1].name))
+    os.remove(os.path.join(fact_cache, hosts[1].name))
     job.finish_job_fact_cache(fact_cache, modified_times)
 
     for host in (hosts[0], hosts[2], hosts[3]):

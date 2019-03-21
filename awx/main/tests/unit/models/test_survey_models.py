@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
-import tempfile
 import json
-import yaml
 import pytest
 from itertools import count
 
 from awx.main.utils.encryption import encrypt_value
-from awx.main.tasks import RunJob
 from awx.main.models import (
     Job,
     JobTemplate,
@@ -15,7 +12,6 @@ from awx.main.models import (
     Project,
     Inventory
 )
-from awx.main.utils.safe_yaml import SafeLoader
 
 ENCRYPTED_SECRET = encrypt_value('secret')
 
@@ -130,29 +126,6 @@ def test_survey_passwords_not_in_extra_vars():
     assert json.loads(job.display_extra_vars()) == {
         'submitter_email': 'foobar@redhat.com',
     }
-
-
-def test_job_safe_args_redacted_passwords(job):
-    """Verify that safe_args hides passwords in the job extra_vars"""
-    kwargs = {'ansible_version': '2.1', 'private_data_dir': tempfile.mkdtemp()}
-    run_job = RunJob()
-    safe_args = run_job.build_safe_args(job, **kwargs)
-    ev_index = safe_args.index('-e') + 1
-    extra_var_file = open(safe_args[ev_index][1:], 'r')
-    extra_vars = yaml.load(extra_var_file, SafeLoader)
-    extra_var_file.close()
-    assert extra_vars['secret_key'] == '$encrypted$'
-
-
-def test_job_args_unredacted_passwords(job, tmpdir_factory):
-    kwargs = {'ansible_version': '2.1', 'private_data_dir': tempfile.mkdtemp()}
-    run_job = RunJob()
-    args = run_job.build_args(job, **kwargs)
-    ev_index = args.index('-e') + 1
-    extra_var_file = open(args[ev_index][1:], 'r')
-    extra_vars = yaml.load(extra_var_file, SafeLoader)
-    extra_var_file.close()
-    assert extra_vars['secret_key'] == 'my_password'
 
 
 def test_launch_config_has_unprompted_vars(survey_spec_factory):

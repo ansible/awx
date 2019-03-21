@@ -1,5 +1,4 @@
 ---
-
 # The following variables will be set by the runner of this playbook:
 # src: /tmp/some/path/private_data_dir/
 
@@ -10,7 +9,7 @@
   tasks:
 
     - name: Determine if daemon process is alive.
-      shell: "awx-expect is-alive {{src}}"
+      shell: "ansible-runner is-alive {{src}}"
       register: is_alive
       ignore_errors: true
 

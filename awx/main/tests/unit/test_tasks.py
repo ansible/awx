@@ -1,12 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from contextlib import contextmanager
-from datetime import datetime
-from functools import partial
 import configparser
 import json
 import os
-import re
 import shutil
 import tempfile
 
@@ -15,9 +11,9 @@ import fcntl
 from unittest import mock
 import pytest
 import yaml
+import jinja2
 
 from django.conf import settings
-
 
 from awx.main.models import (
     AdHocCommand,
@@ -33,21 +29,68 @@ from awx.main.models import (
     ProjectUpdate,
     UnifiedJob,
     User,
-    Organization,
+    CustomInventoryScript,
     build_safe_env
 )
 
 from awx.main import tasks
-from awx.main.queue import CallbackQueueDispatcher
-from awx.main.utils import encrypt_field, encrypt_value, OutputEventFilter
+from awx.main.utils import encrypt_field, encrypt_value
 from awx.main.utils.safe_yaml import SafeLoader
 
 
-@contextmanager
-def apply_patches(_patches):
-    [p.start() for p in _patches]
-    yield
-    [p.stop() for p in _patches]
+class TestJobExecution(object):
+    EXAMPLE_PRIVATE_KEY = '-----BEGIN PRIVATE KEY-----\nxyz==\n-----END PRIVATE KEY-----'
+
+
+@pytest.fixture
+def private_data_dir():
+    private_data = tempfile.mkdtemp(prefix='awx_')
+    yield private_data
+    shutil.rmtree(private_data, True)
+
+
+@pytest.fixture
+def patch_Job():
+    with mock.patch.object(Job, 'cloud_credentials') as mock_cred:
+        mock_cred.__get__ = lambda *args, **kwargs: []
+        with mock.patch.object(Job, 'network_credentials') as mock_net:
+            mock_net.__get__ = lambda *args, **kwargs: []
+            yield
+
+
+@pytest.fixture
+def job():
+    return Job(pk=1, id=1, project=Project(), inventory=Inventory(), job_template=JobTemplate(id=1, name='foo'))
+
+
+@pytest.fixture
+def adhoc_job():
+    return AdHocCommand(pk=1, id=1, inventory=Inventory())
+
+
+@pytest.fixture
+def update_model_wrapper(job):
+    def fn(pk, **kwargs):
+        for k, v in kwargs.items():
+            setattr(job, k, v)
+        return job
+    return fn
+
+
+@pytest.fixture
+def adhoc_update_model_wrapper(adhoc_job):
+    def fn(pk, **kwargs):
+        for k, v in kwargs.items():
+            setattr(adhoc_job, k, v)
+        return adhoc_job
+    return fn
+
+
+@pytest.fixture
+def patch_CallbackQueueDispatcher():
+    with mock.patch('awx.main.tasks.CallbackQueueDispatcher') as m:
+        m.return_value = m
+        yield m
 
 
 def test_send_notifications_not_list():
@@ -69,23 +112,21 @@ def test_work_success_callback_missing_job():
         assert tasks.handle_work_success(task_data) is None
 
 
-def test_send_notifications_list(mocker):
-    patches = list()
-
+@mock.patch('awx.main.models.UnifiedJob.objects.get')
+@mock.patch('awx.main.models.Notification.objects.filter')
+def test_send_notifications_list(mock_notifications_filter, mock_job_get, mocker):
     mock_job = mocker.MagicMock(spec=UnifiedJob)
-    patches.append(mocker.patch('awx.main.models.UnifiedJob.objects.get', return_value=mock_job))
-
+    mock_job_get.return_value = mock_job
     mock_notifications = [mocker.MagicMock(spec=Notification, subject="test", body={'hello': 'world'})]
-    patches.append(mocker.patch('awx.main.models.Notification.objects.filter', return_value=mock_notifications))
+    mock_notifications_filter.return_value = mock_notifications
 
-    with apply_patches(patches):
-        tasks.send_notifications([1,2], job_id=1)
-        assert Notification.objects.filter.call_count == 1
-        assert mock_notifications[0].status == "successful"
-        assert mock_notifications[0].save.called
+    tasks.send_notifications([1,2], job_id=1)
+    assert Notification.objects.filter.call_count == 1
+    assert mock_notifications[0].status == "successful"
+    assert mock_notifications[0].save.called
 
-        assert mock_job.notifications.add.called
-        assert mock_job.notifications.add.called_with(*mock_notifications)
+    assert mock_job.notifications.add.called
+    assert mock_job.notifications.add.called_with(*mock_notifications)
 
 
 @pytest.mark.parametrize("key,value", [
@@ -108,7 +149,7 @@ def test_safe_env_returns_new_copy():
 @pytest.mark.parametrize("source,expected", [
     (None, True), (False, False), (True, True)
 ])
-def test_openstack_client_config_generation(mocker, source, expected):
+def test_openstack_client_config_generation(mocker, source, expected, private_data_dir):
     update = tasks.RunInventoryUpdate()
     credential_type = CredentialType.defaults['openstack']()
     inputs = {
@@ -128,7 +169,7 @@ def test_openstack_client_config_generation(mocker, source, expected):
         'source_vars_dict': {},
         'get_cloud_credential': cred_method
     })
-    cloud_config = update.build_private_data(inventory_update)
+    cloud_config = update.build_private_data(inventory_update, private_data_dir)
     cloud_credential = yaml.load(
         cloud_config.get('credentials')[credential]
     )
@@ -150,7 +191,7 @@ def test_openstack_client_config_generation(mocker, source, expected):
 @pytest.mark.parametrize("source,expected", [
     (False, False), (True, True)
 ])
-def test_openstack_client_config_generation_with_private_source_vars(mocker, source, expected):
+def test_openstack_client_config_generation_with_private_source_vars(mocker, source, expected, private_data_dir):
     update = tasks.RunInventoryUpdate()
     credential_type = CredentialType.defaults['openstack']()
     inputs = {
@@ -169,7 +210,7 @@ def test_openstack_client_config_generation_with_private_source_vars(mocker, sou
         'source_vars_dict': {'private': source},
         'get_cloud_credential': cred_method
     })
-    cloud_config = update.build_private_data(inventory_update)
+    cloud_config = update.build_private_data(inventory_update, private_data_dir)
     cloud_credential = yaml.load(
         cloud_config.get('credentials')[credential]
     )
@@ -209,109 +250,6 @@ def parse_extra_vars(args):
     return extra_vars
 
 
-class TestJobExecution(object):
-    """
-    For job runs, test that `ansible-playbook` is invoked with the proper
-    arguments, environment variables, and pexpect passwords for a variety of
-    credential types.
-    """
-
-    TASK_CLS = tasks.RunJob
-    EXAMPLE_PRIVATE_KEY = '-----BEGIN PRIVATE KEY-----\nxyz==\n-----END PRIVATE KEY-----'
-    INVENTORY_DATA = {
-        "all": {"hosts": ["localhost"]},
-        "_meta": {"localhost": {"ansible_connection": "local"}}
-    }
-
-    def setup_method(self, method):
-        if not os.path.exists(settings.PROJECTS_ROOT):
-            os.mkdir(settings.PROJECTS_ROOT)
-        self.project_path = tempfile.mkdtemp(prefix='awx_project_')
-        with open(os.path.join(self.project_path, 'helloworld.yml'), 'w') as f:
-            f.write('---')
-
-        # The primary goal of these tests is to mock our `run_pexpect` call
-        # and make assertions about the arguments and environment passed to it.
-        self.run_pexpect = mock.Mock()
-        self.run_pexpect.return_value = ['successful', 0]
-
-        self.patches = [
-            mock.patch.object(CallbackQueueDispatcher, 'dispatch', lambda self, obj: None),
-            mock.patch.object(Project, 'get_project_path', lambda *a, **kw: self.project_path),
-            # don't emit websocket statuses; they use the DB and complicate testing
-            mock.patch.object(UnifiedJob, 'websocket_emit_status', mock.Mock()),
-            mock.patch('awx.main.expect.run.run_pexpect', self.run_pexpect),
-        ]
-        for cls in (Job, AdHocCommand):
-            self.patches.append(
-                mock.patch.object(cls, 'inventory', mock.Mock(
-                    pk=1,
-                    get_script_data=lambda *args, **kw: self.INVENTORY_DATA,
-                    spec_set=['pk', 'get_script_data']
-                ))
-            )
-        for p in self.patches:
-            p.start()
-
-        self.instance = self.get_instance()
-
-        def status_side_effect(pk, **kwargs):
-            # If `Job.update_model` is called, we're not actually persisting
-            # to the database; just update the status, which is usually
-            # the update we care about for testing purposes
-            if 'status' in kwargs:
-                self.instance.status = kwargs['status']
-            if 'job_env' in kwargs:
-                self.instance.job_env = kwargs['job_env']
-            return self.instance
-
-        self.task = self.TASK_CLS()
-        self.task.update_model = mock.Mock(side_effect=status_side_effect)
-
-        # ignore pre-run and post-run hooks, they complicate testing in a variety of ways
-        self.task.pre_run_hook = self.task.post_run_hook = self.task.final_run_hook = mock.Mock()
-
-    def teardown_method(self, method):
-        for p in self.patches:
-            p.stop()
-        shutil.rmtree(self.project_path, True)
-
-    def get_instance(self):
-        job = Job(
-            pk=1,
-            created=datetime.utcnow(),
-            status='new',
-            job_type='run',
-            cancel_flag=False,
-            project=Project(),
-            playbook='helloworld.yml',
-            verbosity=3,
-            job_template=JobTemplate(extra_vars='')
-        )
-
-        # mock the job.credentials M2M relation so we can avoid DB access
-        job._credentials = []
-        patch = mock.patch.object(UnifiedJob, 'credentials', mock.Mock(**{
-            'all': lambda: job._credentials,
-            'add': job._credentials.append,
-            'filter.return_value': mock.Mock(
-                __iter__ = lambda *args: iter(job._credentials),
-                first = lambda: job._credentials[0]
-            ),
-            'spec_set': ['all', 'add', 'filter']
-        }))
-        self.patches.append(patch)
-        patch.start()
-
-        job.project = Project(organization=Organization())
-
-        return job
-
-    @property
-    def pk(self):
-        return self.instance.pk
-
-
 class TestExtraVarSanitation(TestJobExecution):
     # By default, extra vars are marked as `!unsafe` in the generated yaml
     # _unless_ they've been specified on the JobTemplate's extra_vars (which
@@ -320,328 +258,351 @@ class TestExtraVarSanitation(TestJobExecution):
 
     UNSAFE = '{{ lookup(''pipe'',''ls -la'') }}'
 
-    def test_vars_unsafe_by_default(self):
-        self.instance.created_by = User(pk=123, username='angry-spud')
+    def test_vars_unsafe_by_default(self, job, private_data_dir):
+        job.created_by = User(pk=123, username='angry-spud')
 
-        def run_pexpect_side_effect(*args, **kwargs):
-            args, cwd, env, stdout = args
-            extra_vars = parse_extra_vars(args)
+        task = tasks.RunJob()
+        task.build_extra_vars_file(job, private_data_dir, {})
 
-            # ensure that strings are marked as unsafe
-            for unsafe in ['awx_job_template_name', 'tower_job_template_name',
-                           'awx_user_name', 'tower_job_launch_type',
-                           'awx_project_revision',
-                           'tower_project_revision', 'tower_user_name',
-                           'awx_job_launch_type']:
-                assert hasattr(extra_vars[unsafe], '__UNSAFE__')
+        fd = open(os.path.join(private_data_dir, 'env', 'extravars'))
+        extra_vars = yaml.load(fd, SafeLoader)
 
-            # ensure that non-strings are marked as safe
-            for safe in ['awx_job_template_id', 'awx_job_id', 'awx_user_id',
-                         'tower_user_id', 'tower_job_template_id',
-                         'tower_job_id']:
-                assert not hasattr(extra_vars[safe], '__UNSAFE__')
-            return ['successful', 0]
+        # ensure that strings are marked as unsafe
+        for unsafe in ['awx_job_template_name', 'tower_job_template_name',
+                       'awx_user_name', 'tower_job_launch_type',
+                       'awx_project_revision',
+                       'tower_project_revision', 'tower_user_name',
+                       'awx_job_launch_type']:
+            assert hasattr(extra_vars[unsafe], '__UNSAFE__')
 
-        self.run_pexpect.side_effect = run_pexpect_side_effect
-        self.task.run(self.pk)
+        # ensure that non-strings are marked as safe
+        for safe in ['awx_job_template_id', 'awx_job_id', 'awx_user_id',
+                     'tower_user_id', 'tower_job_template_id',
+                     'tower_job_id']:
+            assert not hasattr(extra_vars[safe], '__UNSAFE__')
 
-    def test_launchtime_vars_unsafe(self):
-        self.instance.extra_vars = json.dumps({'msg': self.UNSAFE})
 
-        def run_pexpect_side_effect(*args, **kwargs):
-            args, cwd, env, stdout = args
-            extra_vars = parse_extra_vars(args)
-            assert extra_vars['msg'] == self.UNSAFE
-            assert hasattr(extra_vars['msg'], '__UNSAFE__')
-            return ['successful', 0]
+    def test_launchtime_vars_unsafe(self, job, private_data_dir):
+        job.extra_vars = json.dumps({'msg': self.UNSAFE})
+        task = tasks.RunJob()
 
-        self.run_pexpect.side_effect = run_pexpect_side_effect
-        self.task.run(self.pk)
+        task.build_extra_vars_file(job, private_data_dir, {})
 
-    def test_nested_launchtime_vars_unsafe(self):
-        self.instance.extra_vars = json.dumps({'msg': {'a': [self.UNSAFE]}})
+        fd = open(os.path.join(private_data_dir, 'env', 'extravars'))
+        extra_vars = yaml.load(fd, SafeLoader)
+        assert extra_vars['msg'] == self.UNSAFE
+        assert hasattr(extra_vars['msg'], '__UNSAFE__')
 
-        def run_pexpect_side_effect(*args, **kwargs):
-            args, cwd, env, stdout = args
-            extra_vars = parse_extra_vars(args)
-            assert extra_vars['msg'] == {'a': [self.UNSAFE]}
-            assert hasattr(extra_vars['msg']['a'][0], '__UNSAFE__')
-            return ['successful', 0]
+    def test_nested_launchtime_vars_unsafe(self, job, private_data_dir):
+        job.extra_vars = json.dumps({'msg': {'a': [self.UNSAFE]}})
+        task = tasks.RunJob()
 
-        self.run_pexpect.side_effect = run_pexpect_side_effect
-        self.task.run(self.pk)
+        task.build_extra_vars_file(job, private_data_dir, {})
 
-    def test_whitelisted_jt_extra_vars(self):
-        self.instance.job_template.extra_vars = self.instance.extra_vars = json.dumps({'msg': self.UNSAFE})
+        fd = open(os.path.join(private_data_dir, 'env', 'extravars'))
+        extra_vars = yaml.load(fd, SafeLoader)
+        assert extra_vars['msg'] == {'a': [self.UNSAFE]}
+        assert hasattr(extra_vars['msg']['a'][0], '__UNSAFE__')
 
-        def run_pexpect_side_effect(*args, **kwargs):
-            args, cwd, env, stdout = args
-            extra_vars = parse_extra_vars(args)
-            assert extra_vars['msg'] == self.UNSAFE
-            assert not hasattr(extra_vars['msg'], '__UNSAFE__')
-            return ['successful', 0]
+    def test_whitelisted_jt_extra_vars(self, job, private_data_dir):
+        job.job_template.extra_vars = job.extra_vars = json.dumps({'msg': self.UNSAFE})
+        task = tasks.RunJob()
 
-        self.run_pexpect.side_effect = run_pexpect_side_effect
-        self.task.run(self.pk)
+        task.build_extra_vars_file(job, private_data_dir, {})
 
-    def test_nested_whitelisted_vars(self):
-        self.instance.extra_vars = json.dumps({'msg': {'a': {'b': [self.UNSAFE]}}})
-        self.instance.job_template.extra_vars = self.instance.extra_vars
+        fd = open(os.path.join(private_data_dir, 'env', 'extravars'))
+        extra_vars = yaml.load(fd, SafeLoader)
+        assert extra_vars['msg'] == self.UNSAFE
+        assert not hasattr(extra_vars['msg'], '__UNSAFE__')
 
-        def run_pexpect_side_effect(*args, **kwargs):
-            args, cwd, env, stdout = args
-            extra_vars = parse_extra_vars(args)
-            assert extra_vars['msg'] == {'a': {'b': [self.UNSAFE]}}
-            assert not hasattr(extra_vars['msg']['a']['b'][0], '__UNSAFE__')
-            return ['successful', 0]
+    def test_nested_whitelisted_vars(self, job, private_data_dir):
+        job.extra_vars = json.dumps({'msg': {'a': {'b': [self.UNSAFE]}}})
+        job.job_template.extra_vars = job.extra_vars
+        task = tasks.RunJob()
 
-        self.run_pexpect.side_effect = run_pexpect_side_effect
-        self.task.run(self.pk)
+        task.build_extra_vars_file(job, private_data_dir, {})
 
-    def test_sensitive_values_dont_leak(self):
+        fd = open(os.path.join(private_data_dir, 'env', 'extravars'))
+        extra_vars = yaml.load(fd, SafeLoader)
+        assert extra_vars['msg'] == {'a': {'b': [self.UNSAFE]}}
+        assert not hasattr(extra_vars['msg']['a']['b'][0], '__UNSAFE__')
+
+    def test_sensitive_values_dont_leak(self, job, private_data_dir):
         # JT defines `msg=SENSITIVE`, the job *should not* be able to do
         # `other_var=SENSITIVE`
-        self.instance.job_template.extra_vars = json.dumps({'msg': self.UNSAFE})
-        self.instance.extra_vars = json.dumps({
+        job.job_template.extra_vars = json.dumps({'msg': self.UNSAFE})
+        job.extra_vars = json.dumps({
             'msg': 'other-value',
             'other_var': self.UNSAFE
         })
+        task = tasks.RunJob()
 
-        def run_pexpect_side_effect(*args, **kwargs):
-            args, cwd, env, stdout = args
-            extra_vars = parse_extra_vars(args)
+        task.build_extra_vars_file(job, private_data_dir, {})
 
-            assert extra_vars['msg'] == 'other-value'
-            assert hasattr(extra_vars['msg'], '__UNSAFE__')
+        fd = open(os.path.join(private_data_dir, 'env', 'extravars'))
+        extra_vars = yaml.load(fd, SafeLoader)
+        assert extra_vars['msg'] == 'other-value'
+        assert hasattr(extra_vars['msg'], '__UNSAFE__')
 
-            assert extra_vars['other_var'] == self.UNSAFE
-            assert hasattr(extra_vars['other_var'], '__UNSAFE__')
+        assert extra_vars['other_var'] == self.UNSAFE
+        assert hasattr(extra_vars['other_var'], '__UNSAFE__')
 
-            return ['successful', 0]
+    def test_overwritten_jt_extra_vars(self, job, private_data_dir):
+        job.job_template.extra_vars = json.dumps({'msg': 'SAFE'})
+        job.extra_vars = json.dumps({'msg': self.UNSAFE})
+        task = tasks.RunJob()
 
-        self.run_pexpect.side_effect = run_pexpect_side_effect
-        self.task.run(self.pk)
+        task.build_extra_vars_file(job, private_data_dir, {})
 
-    def test_overwritten_jt_extra_vars(self):
-        self.instance.job_template.extra_vars = json.dumps({'msg': 'SAFE'})
-        self.instance.extra_vars = json.dumps({'msg': self.UNSAFE})
-
-        def run_pexpect_side_effect(*args, **kwargs):
-            args, cwd, env, stdout = args
-            extra_vars = parse_extra_vars(args)
-            assert extra_vars['msg'] == self.UNSAFE
-            assert hasattr(extra_vars['msg'], '__UNSAFE__')
-            return ['successful', 0]
-
-        self.run_pexpect.side_effect = run_pexpect_side_effect
-        self.task.run(self.pk)
+        fd = open(os.path.join(private_data_dir, 'env', 'extravars'))
+        extra_vars = yaml.load(fd, SafeLoader)
+        assert extra_vars['msg'] == self.UNSAFE
+        assert hasattr(extra_vars['msg'], '__UNSAFE__')
 
 
-class TestGenericRun(TestJobExecution):
+class TestGenericRun():
 
-    def test_generic_failure(self):
-        self.task.build_private_data_files = mock.Mock(side_effect=OSError())
+    def test_generic_failure(self, patch_Job):
+        job = Job(status='running', inventory=Inventory())
+        job.websocket_emit_status = mock.Mock()
+
+        task = tasks.RunJob()
+        task.update_model = mock.Mock(return_value=job)
+        task.build_private_data_files = mock.Mock(side_effect=OSError())
+
         with pytest.raises(Exception):
-            self.task.run(self.pk)
-        update_model_call = self.task.update_model.call_args[1]
+            task.run(1)
+
+        update_model_call = task.update_model.call_args[1]
         assert 'OSError' in update_model_call['result_traceback']
         assert update_model_call['status'] == 'error'
         assert update_model_call['emitted_events'] == 0
 
-    def test_cancel_flag(self):
-        self.instance.cancel_flag = True
+    def test_cancel_flag(self, job, update_model_wrapper):
+        job.status = 'running'
+        job.cancel_flag = True
+        job.websocket_emit_status = mock.Mock()
+
+        task = tasks.RunJob()
+        task.update_model = mock.Mock(wraps=update_model_wrapper)
+        task.build_private_data_files = mock.Mock()
+
         with pytest.raises(Exception):
-            self.task.run(self.pk)
+            task.run(1)
+
         for c in [
-            mock.call(self.pk, status='running', start_args=''),
-            mock.call(self.pk, status='canceled')
+            mock.call(1, status='running', start_args=''),
+            mock.call(1, status='canceled')
         ]:
-            assert c in self.task.update_model.call_args_list
+            assert c in task.update_model.call_args_list
 
-    def test_event_count(self):
-        with mock.patch.object(self.task, 'get_stdout_handle') as mock_stdout:
-            handle = OutputEventFilter(lambda event_data: None)
-            handle._counter = 334
-            mock_stdout.return_value = handle
-            self.task.run(self.pk)
+    def test_event_count(self, patch_CallbackQueueDispatcher):
+        task = tasks.RunJob()
+        task.instance = Job()
+        task.event_ct = 0
+        event_data = {}
 
-        assert self.task.update_model.call_args[-1]['emitted_events'] == 334
+        [task.event_handler(event_data) for i in range(20)]
+        assert 20 == task.event_ct
 
-    def test_artifact_cleanup(self):
-        path = tempfile.NamedTemporaryFile(delete=False).name
-        try:
-            self.task.cleanup_paths.append(path)
-            assert os.path.exists(path)
-            self.task.run(self.pk)
-            assert not os.path.exists(path)
-        finally:
-            if os.path.exists(path):
-                os.remove(path)
+    def test_finished_callback_eof(self, patch_CallbackQueueDispatcher):
+        task = tasks.RunJob()
+        task.instance = Job(pk=1, id=1)
+        task.event_ct = 17
+        task.finished_callback(None)
+        patch_CallbackQueueDispatcher.dispatch.assert_called_with({'event': 'EOF', 'final_counter': 17, 'job_id': 1})
 
-    def test_uses_bubblewrap(self):
-        self.task.run(self.pk)
+    def test_save_job_metadata(self, job, update_model_wrapper):
+        class MockMe():
+            pass
+        task = tasks.RunJob()
+        task.instance = job
+        task.safe_env = {'secret_key': 'redacted_value'}
+        task.update_model = mock.Mock(wraps=update_model_wrapper)
+        runner_config = MockMe()
+        runner_config.command = {'foo': 'bar'}
+        runner_config.cwd = '/foobar'
+        runner_config.env = {'switch': 'blade', 'foot': 'ball', 'secret_key': 'secret_value'}
+        task.status_handler({'status': 'starting'}, runner_config)
 
-        assert self.run_pexpect.call_count == 1
-        call_args, _ = self.run_pexpect.call_args_list[0]
-        args, cwd, env, stdout = call_args
-        assert args[0] == 'bwrap'
+        task.update_model.assert_called_with(1, job_args=json.dumps({'foo': 'bar'}),
+                                             job_cwd='/foobar', job_env={'switch': 'blade', 'foot': 'ball', 'secret_key': 'redacted_value'})
 
-    def test_bwrap_virtualenvs_are_readonly(self):
-        self.task.run(self.pk)
 
-        assert self.run_pexpect.call_count == 1
-        call_args, _ = self.run_pexpect.call_args_list[0]
-        args, cwd, env, stdout = call_args
-        assert '--ro-bind %s %s' % (settings.ANSIBLE_VENV_PATH, settings.ANSIBLE_VENV_PATH) in ' '.join(args)  # noqa
-        assert '--ro-bind %s %s' % (settings.AWX_VENV_PATH, settings.AWX_VENV_PATH) in ' '.join(args)  # noqa
+    def test_uses_process_isolation(self, settings):
+        job = Job(project=Project(), inventory=Inventory())
+        task = tasks.RunJob()
+        task.should_use_proot = lambda instance: True
+
+        private_data_dir = '/foo'
+        cwd = '/bar'
+
+        settings.AWX_PROOT_HIDE_PATHS = ['/AWX_PROOT_HIDE_PATHS1', '/AWX_PROOT_HIDE_PATHS2']
+        settings.ANSIBLE_VENV_PATH = '/ANSIBLE_VENV_PATH'
+        settings.AWX_VENV_PATH = '/AWX_VENV_PATH'
+
+        process_isolation_params = task.build_params_process_isolation(job, private_data_dir, cwd)
+        assert True is process_isolation_params['process_isolation']
+        assert settings.AWX_PROOT_BASE_PATH == process_isolation_params['process_isolation_path'], \
+            "Directory where a temp directory will be created for the remapping to take place"
+        assert private_data_dir in process_isolation_params['process_isolation_show_paths'], \
+            "The per-job private data dir should be in the list of directories the user can see."
+        assert cwd in process_isolation_params['process_isolation_show_paths'], \
+            "The current working directory should be in the list of directories the user can see."
+
+        for p in [settings.AWX_PROOT_BASE_PATH,
+                  '/etc/tower',
+                  '/var/lib/awx',
+                  '/var/log',
+                  settings.PROJECTS_ROOT,
+                  settings.JOBOUTPUT_ROOT,
+                  '/AWX_PROOT_HIDE_PATHS1',
+                  '/AWX_PROOT_HIDE_PATHS2']:
+            assert p in process_isolation_params['process_isolation_hide_paths']
+        assert 8 == len(process_isolation_params['process_isolation_hide_paths'])
+        assert '/ANSIBLE_VENV_PATH' in process_isolation_params['process_isolation_ro_paths']
+        assert '/AWX_VENV_PATH' in process_isolation_params['process_isolation_ro_paths']
+        assert 2 == len(process_isolation_params['process_isolation_ro_paths'])
 
     def test_created_by_extra_vars(self):
-        self.instance.created_by = User(pk=123, username='angry-spud')
+        job = Job(created_by=User(pk=123, username='angry-spud'))
 
-        def run_pexpect_side_effect(*args, **kwargs):
-            args, cwd, env, stdout = args
-            extra_vars = parse_extra_vars(args)
-            assert extra_vars['tower_user_id'] == 123
-            assert extra_vars['tower_user_name'] == "angry-spud"
-            assert extra_vars['awx_user_id'] == 123
-            assert extra_vars['awx_user_name'] == "angry-spud"
-            return ['successful', 0]
+        task = tasks.RunJob()
+        task._write_extra_vars_file = mock.Mock()
+        task.build_extra_vars_file(job, None, dict())
 
-        self.run_pexpect.side_effect = run_pexpect_side_effect
-        self.task.run(self.pk)
+        call_args, _ = task._write_extra_vars_file.call_args_list[0]
+
+        private_data_dir, extra_vars, safe_dict = call_args
+        assert extra_vars['tower_user_id'] == 123
+        assert extra_vars['tower_user_name'] == "angry-spud"
+        assert extra_vars['awx_user_id'] == 123
+        assert extra_vars['awx_user_name'] == "angry-spud"
 
     def test_survey_extra_vars(self):
-        self.instance.extra_vars = json.dumps({
+        job = Job()
+        job.extra_vars = json.dumps({
             'super_secret': encrypt_value('CLASSIFIED', pk=None)
         })
-        self.instance.survey_passwords = {
+        job.survey_passwords = {
             'super_secret': '$encrypted$'
         }
 
-        def run_pexpect_side_effect(*args, **kwargs):
-            args, cwd, env, stdout = args
-            extra_vars = parse_extra_vars(args)
-            assert extra_vars['super_secret'] == "CLASSIFIED"
-            return ['successful', 0]
+        task = tasks.RunJob()
+        task._write_extra_vars_file = mock.Mock()
+        task.build_extra_vars_file(job, None, dict())
 
-        self.run_pexpect.side_effect = run_pexpect_side_effect
-        self.task.run(self.pk)
+        call_args, _ = task._write_extra_vars_file.call_args_list[0]
 
-    def test_awx_task_env(self):
+        private_data_dir, extra_vars, safe_dict = call_args
+        assert extra_vars['super_secret'] == "CLASSIFIED"
+
+    def test_awx_task_env(self, patch_Job, private_data_dir):
+        job = Job(project=Project(), inventory=Inventory())
+
+        task = tasks.RunJob()
+        task._write_extra_vars_file = mock.Mock()
+
         with mock.patch('awx.main.tasks.settings.AWX_TASK_ENV', {'FOO': 'BAR'}):
-            self.task.run(self.pk)
-
-        assert self.run_pexpect.call_count == 1
-        call_args, _ = self.run_pexpect.call_args_list[0]
-        args, cwd, env, stdout = call_args
+            env = task.build_env(job, private_data_dir)
         assert env['FOO'] == 'BAR'
 
-    def test_valid_custom_virtualenv(self):
+    def test_valid_custom_virtualenv(self, patch_Job, private_data_dir):
+        job = Job(project=Project(), inventory=Inventory())
+
         with TemporaryDirectory(dir=settings.BASE_VENV_PATH) as tempdir:
-            self.instance.project.custom_virtualenv = tempdir
+            job.project.custom_virtualenv = tempdir
             os.makedirs(os.path.join(tempdir, 'lib'))
             os.makedirs(os.path.join(tempdir, 'bin', 'activate'))
 
-            self.task.run(self.pk)
-
-            assert self.run_pexpect.call_count == 1
-            call_args, _ = self.run_pexpect.call_args_list[0]
-            args, cwd, env, stdout = call_args
+            task = tasks.RunJob()
+            env = task.build_env(job, private_data_dir)
 
             assert env['PATH'].startswith(os.path.join(tempdir, 'bin'))
             assert env['VIRTUAL_ENV'] == tempdir
-            for path in (settings.ANSIBLE_VENV_PATH, tempdir):
-                assert '--ro-bind {} {}'.format(path, path) in ' '.join(args)
 
-    def test_invalid_custom_virtualenv(self):
-        with pytest.raises(Exception):
-            self.instance.project.custom_virtualenv = '/venv/missing'
-            self.task.run(self.pk)
-        tb = self.task.update_model.call_args[-1]['result_traceback']
-        assert 'a valid Python virtualenv does not exist at /venv/missing' in tb
+    def test_invalid_custom_virtualenv(self, patch_Job, private_data_dir):
+        job = Job(project=Project(), inventory=Inventory())
+        job.project.custom_virtualenv = '/venv/missing'
+        task = tasks.RunJob()
 
-    def test_fact_cache_usage(self):
-        self.instance.use_fact_cache = True
+        with pytest.raises(RuntimeError) as e:
+            task.build_env(job, private_data_dir)
 
-        start_mock = mock.Mock()
-        patch = mock.patch.object(Job, 'start_job_fact_cache', start_mock)
-        self.patches.append(patch)
-        patch.start()
-
-        self.task.run(self.pk)
-        call_args, _ = self.run_pexpect.call_args_list[0]
-        args, cwd, env, stdout = call_args
-        start_mock.assert_called_once()
-        tmpdir, _ = start_mock.call_args[0]
-
-        assert env['ANSIBLE_CACHE_PLUGIN'] == 'jsonfile'
-        assert env['ANSIBLE_CACHE_PLUGIN_CONNECTION'] == os.path.join(tmpdir, 'facts')
-
-    @pytest.mark.parametrize('task_env, ansible_library_env', [
-        [{}, '/awx_devel/awx/plugins/library'],
-        [{'ANSIBLE_LIBRARY': '/foo/bar'}, '/foo/bar:/awx_devel/awx/plugins/library'],
-    ])
-    def test_fact_cache_usage_with_ansible_library(self, task_env, ansible_library_env):
-        self.instance.use_fact_cache = True
-        with mock.patch('awx.main.tasks.settings.AWX_TASK_ENV', task_env):
-            start_mock = mock.Mock()
-            with mock.patch.object(Job, 'start_job_fact_cache', start_mock):
-                self.task.run(self.pk)
-        call_args, _ = self.run_pexpect.call_args_list[0]
-        args, cwd, env, stdout = call_args
-        assert env['ANSIBLE_LIBRARY'] == ansible_library_env
+        assert 'a valid Python virtualenv does not exist at /venv/missing' == str(e.value)
 
 
 class TestAdhocRun(TestJobExecution):
 
-    TASK_CLS = tasks.RunAdHocCommand
+    def test_options_jinja_usage(self, adhoc_job, adhoc_update_model_wrapper):
+        adhoc_job.module_args = '{{ ansible_ssh_pass }}'
+        adhoc_job.websocket_emit_status = mock.Mock()
 
-    def get_instance(self):
-        return AdHocCommand(
-            pk=1,
-            created=datetime.utcnow(),
-            status='new',
-            cancel_flag=False,
-            verbosity=3,
-            extra_vars={'awx_foo': 'awx-bar'}
-        )
+        task = tasks.RunAdHocCommand()
+        task.update_model = mock.Mock(wraps=adhoc_update_model_wrapper)
+        task.build_inventory = mock.Mock()
 
-    def test_options_jinja_usage(self):
-        self.instance.module_args = '{{ ansible_ssh_pass }}'
         with pytest.raises(Exception):
-            self.task.run(self.pk)
-        update_model_call = self.task.update_model.call_args[1]
+            task.run(adhoc_job.pk)
+
+        call_args, _ = task.update_model.call_args_list[0]
+        update_model_call = task.update_model.call_args[1]
         assert 'Jinja variables are not allowed' in update_model_call['result_traceback']
 
+    '''
+    TODO: The jinja action is in _write_extra_vars_file. The extra vars should
+    be wrapped in unsafe
+    '''
+    '''
+    def test_extra_vars_jinja_usage(self, adhoc_job, adhoc_update_model_wrapper):
+        adhoc_job.module_args = 'ls'
+        adhoc_job.extra_vars = json.dumps({
+            'foo': '{{ bar }}'
+        })
+        #adhoc_job.websocket_emit_status = mock.Mock()
+
+        task = tasks.RunAdHocCommand()
+        #task.update_model = mock.Mock(wraps=adhoc_update_model_wrapper)
+        #task.build_inventory = mock.Mock(return_value='/tmp/something.inventory')
+        task._write_extra_vars_file = mock.Mock()
+
+        task.build_extra_vars_file(adhoc_job, 'ignore')
+
+        call_args, _ = task._write_extra_vars_file.call_args_list[0]
+        private_data_dir, extra_vars = call_args
+        assert extra_vars['foo'] == '{{ bar }}'
+    '''
+
     def test_created_by_extra_vars(self):
-        self.instance.created_by = User(pk=123, username='angry-spud')
+        adhoc_job = AdHocCommand(created_by=User(pk=123, username='angry-spud'))
 
-        def run_pexpect_side_effect(*args, **kwargs):
-            args, cwd, env, stdout = args
-            extra_vars = parse_extra_vars(args)
-            assert extra_vars['tower_user_id'] == 123
-            assert extra_vars['tower_user_name'] == "angry-spud"
-            assert extra_vars['awx_user_id'] == 123
-            assert extra_vars['awx_user_name'] == "angry-spud"
-            assert extra_vars['awx_foo'] == "awx-bar"
-            return ['successful', 0]
+        task = tasks.RunAdHocCommand()
+        task._write_extra_vars_file = mock.Mock()
+        task.build_extra_vars_file(adhoc_job, None, dict())
 
-        self.run_pexpect.side_effect = run_pexpect_side_effect
-        self.task.run(self.pk)
+        call_args, _ = task._write_extra_vars_file.call_args_list[0]
+
+        private_data_dir, extra_vars = call_args
+        assert extra_vars['tower_user_id'] == 123
+        assert extra_vars['tower_user_name'] == "angry-spud"
+        assert extra_vars['awx_user_id'] == 123
+        assert extra_vars['awx_user_name'] == "angry-spud"
 
 
+@pytest.mark.skip(reason="Isolated code path needs updating after runner integration")
 class TestIsolatedExecution(TestJobExecution):
 
     ISOLATED_HOST = 'some-isolated-host'
     ISOLATED_CONTROLLER_HOST = 'some-isolated-controller-host'
 
-    def get_instance(self):
-        instance = super(TestIsolatedExecution, self).get_instance()
-        instance.controller_node = self.ISOLATED_CONTROLLER_HOST
-        instance.execution_node = self.ISOLATED_HOST
-        return instance
+    @pytest.fixture
+    def job(self):
+        job = Job(pk=1, id=1, project=Project(), inventory=Inventory(), job_template=JobTemplate(id=1, name='foo'))
+        job.controller_node = self.ISOLATED_CONTROLLER_HOST
+        job.execution_node = self.ISOLATED_HOST
+        return job
 
-    def test_with_ssh_credentials(self):
+    def test_with_ssh_credentials(self, job):
         ssh = CredentialType.defaults['ssh']()
         credential = Credential(
             pk=1,
@@ -653,7 +614,7 @@ class TestIsolatedExecution(TestJobExecution):
             }
         )
         credential.inputs['password'] = encrypt_field(credential, 'password')
-        self.instance.credentials.add(credential)
+        job.credentials.add(credential)
 
         private_data = tempfile.mkdtemp(prefix='awx_')
         self.task.build_private_data_dir = mock.Mock(return_value=private_data)
@@ -722,6 +683,32 @@ class TestIsolatedExecution(TestJobExecution):
 
 
 class TestJobCredentials(TestJobExecution):
+    @pytest.fixture
+    def job(self):
+        job = Job(pk=1, inventory=Inventory(pk=1), project=Project(pk=1))
+        job.websocket_emit_status = mock.Mock()
+        job._credentials = []
+
+        credentials_mock = mock.Mock(**{
+            'all': lambda: job._credentials,
+            'add': job._credentials.append,
+            'filter.return_value': mock.Mock(
+                __iter__ = lambda *args: iter(job._credentials),
+                first = lambda: job._credentials[0]
+            ),
+            'spec_set': ['all', 'add', 'filter']
+        })
+
+        with mock.patch.object(UnifiedJob, 'credentials', credentials_mock):
+            yield job
+
+    @pytest.fixture
+    def update_model_wrapper(self, job):
+        def fn(pk, **kwargs):
+            for k, v in kwargs.items():
+                setattr(job, k, v)
+            return job
+        return fn
 
     parametrize = {
         'test_ssh_passwords': [
@@ -731,34 +718,38 @@ class TestJobCredentials(TestJobExecution):
         ]
     }
 
-    def test_username_jinja_usage(self):
+    def test_username_jinja_usage(self, job, private_data_dir):
+        task = tasks.RunJob()
         ssh = CredentialType.defaults['ssh']()
         credential = Credential(
             pk=1,
             credential_type=ssh,
             inputs = {'username': '{{ ansible_ssh_pass }}'}
         )
-        self.instance.credentials.add(credential)
-        with pytest.raises(Exception):
-            self.task.run(self.pk)
-        update_model_call = self.task.update_model.call_args[1]
-        assert 'Jinja variables are not allowed' in update_model_call['result_traceback']
+        job.credentials.add(credential)
+        with pytest.raises(ValueError) as e:
+            task.build_args(job, private_data_dir, {})
+
+        assert 'Jinja variables are not allowed' in str(e.value)
 
     @pytest.mark.parametrize("flag", ['become_username', 'become_method'])
-    def test_become_jinja_usage(self, flag):
+    def test_become_jinja_usage(self, job, private_data_dir, flag):
+        task = tasks.RunJob()
         ssh = CredentialType.defaults['ssh']()
         credential = Credential(
             pk=1,
             credential_type=ssh,
             inputs = {'username': 'joe', flag: '{{ ansible_ssh_pass }}'}
         )
-        self.instance.credentials.add(credential)
-        with pytest.raises(Exception):
-            self.task.run(self.pk)
-        update_model_call = self.task.update_model.call_args[1]
-        assert 'Jinja variables are not allowed' in update_model_call['result_traceback']
+        job.credentials.add(credential)
 
-    def test_ssh_passwords(self, field, password_name, expected_flag):
+        with pytest.raises(ValueError) as e:
+            task.build_args(job, private_data_dir, {})
+
+        assert 'Jinja variables are not allowed' in str(e.value)
+
+    def test_ssh_passwords(self, job, private_data_dir, field, password_name, expected_flag):
+        task = tasks.RunJob()
         ssh = CredentialType.defaults['ssh']()
         credential = Credential(
             pk=1,
@@ -766,19 +757,20 @@ class TestJobCredentials(TestJobExecution):
             inputs = {'username': 'bob', field: 'secret'}
         )
         credential.inputs[field] = encrypt_field(credential, field)
-        self.instance.credentials.add(credential)
-        self.task.run(self.pk)
+        job.credentials.add(credential)
 
-        assert self.run_pexpect.call_count == 1
-        call_args, call_kwargs = self.run_pexpect.call_args_list[0]
-        args, cwd, env, stdout = call_args
+        passwords = task.build_passwords(job, {})
+        password_prompts = task.get_password_prompts(passwords)
+        expect_passwords = task.create_expect_passwords_data_struct(password_prompts, passwords)
+        args = task.build_args(job, private_data_dir, passwords)
 
-        assert 'secret' in call_kwargs.get('expect_passwords').values()
+        assert 'secret' in expect_passwords.values()
         assert '-u bob' in ' '.join(args)
         if expected_flag:
             assert expected_flag in ' '.join(args)
 
-    def test_net_ssh_key_unlock(self):
+    def test_net_ssh_key_unlock(self, job):
+        task = tasks.RunJob()
         net = CredentialType.defaults['net']()
         credential = Credential(
             pk=1,
@@ -786,15 +778,16 @@ class TestJobCredentials(TestJobExecution):
             inputs = {'ssh_key_unlock': 'secret'}
         )
         credential.inputs['ssh_key_unlock'] = encrypt_field(credential, 'ssh_key_unlock')
-        self.instance.credentials.add(credential)
-        self.task.run(self.pk)
+        job.credentials.add(credential)
 
-        assert self.run_pexpect.call_count == 1
-        call_args, call_kwargs = self.run_pexpect.call_args_list[0]
+        passwords = task.build_passwords(job, {})
+        password_prompts = task.get_password_prompts(passwords)
+        expect_passwords = task.create_expect_passwords_data_struct(password_prompts, passwords)
 
-        assert 'secret' in call_kwargs.get('expect_passwords').values()
+        assert 'secret' in expect_passwords.values()
 
-    def test_net_first_ssh_key_unlock_wins(self):
+    def test_net_first_ssh_key_unlock_wins(self, job):
+        task = tasks.RunJob()
         for i in range(3):
             net = CredentialType.defaults['net']()
             credential = Credential(
@@ -803,15 +796,16 @@ class TestJobCredentials(TestJobExecution):
                 inputs = {'ssh_key_unlock': 'secret{}'.format(i)}
             )
             credential.inputs['ssh_key_unlock'] = encrypt_field(credential, 'ssh_key_unlock')
-            self.instance.credentials.add(credential)
-        self.task.run(self.pk)
+            job.credentials.add(credential)
 
-        assert self.run_pexpect.call_count == 1
-        call_args, call_kwargs = self.run_pexpect.call_args_list[0]
+        passwords = task.build_passwords(job, {})
+        password_prompts = task.get_password_prompts(passwords)
+        expect_passwords = task.create_expect_passwords_data_struct(password_prompts, passwords)
 
-        assert 'secret0' in call_kwargs.get('expect_passwords').values()
+        assert 'secret0' in expect_passwords.values()
 
-    def test_prefer_ssh_over_net_ssh_key_unlock(self):
+    def test_prefer_ssh_over_net_ssh_key_unlock(self, job):
+        task = tasks.RunJob()
         net = CredentialType.defaults['net']()
         net_credential = Credential(
             pk=1,
@@ -828,16 +822,17 @@ class TestJobCredentials(TestJobExecution):
         )
         ssh_credential.inputs['ssh_key_unlock'] = encrypt_field(ssh_credential, 'ssh_key_unlock')
 
-        self.instance.credentials.add(net_credential)
-        self.instance.credentials.add(ssh_credential)
-        self.task.run(self.pk)
+        job.credentials.add(net_credential)
+        job.credentials.add(ssh_credential)
 
-        assert self.run_pexpect.call_count == 1
-        call_args, call_kwargs = self.run_pexpect.call_args_list[0]
+        passwords = task.build_passwords(job, {})
+        password_prompts = task.get_password_prompts(passwords)
+        expect_passwords = task.create_expect_passwords_data_struct(password_prompts, passwords)
 
-        assert 'ssh_secret' in call_kwargs.get('expect_passwords').values()
+        assert 'ssh_secret' in expect_passwords.values()
 
-    def test_vault_password(self):
+    def test_vault_password(self, private_data_dir, job):
+        task = tasks.RunJob()
         vault = CredentialType.defaults['vault']()
         credential = Credential(
             pk=1,
@@ -845,19 +840,18 @@ class TestJobCredentials(TestJobExecution):
             inputs={'vault_password': 'vault-me'}
         )
         credential.inputs['vault_password'] = encrypt_field(credential, 'vault_password')
-        self.instance.credentials.add(credential)
-        self.task.run(self.pk)
+        job.credentials.add(credential)
 
-        assert self.run_pexpect.call_count == 1
-        call_args, call_kwargs = self.run_pexpect.call_args_list[0]
-        args, cwd, env, stdout = call_args
+        passwords = task.build_passwords(job, {})
+        args = task.build_args(job, private_data_dir, passwords)
+        password_prompts = task.get_password_prompts(passwords)
+        expect_passwords = task.create_expect_passwords_data_struct(password_prompts, passwords)
 
-        assert call_kwargs.get('expect_passwords')[
-            re.compile(r'Vault password:\s*?$', re.M)
-        ] == 'vault-me'
+        assert expect_passwords['Vault password:\s*?$'] == 'vault-me' # noqa
         assert '--ask-vault-pass' in ' '.join(args)
 
-    def test_vault_password_ask(self):
+    def test_vault_password_ask(self, private_data_dir, job):
+        task = tasks.RunJob()
         vault = CredentialType.defaults['vault']()
         credential = Credential(
             pk=1,
@@ -865,19 +859,18 @@ class TestJobCredentials(TestJobExecution):
             inputs={'vault_password': 'ASK'}
         )
         credential.inputs['vault_password'] = encrypt_field(credential, 'vault_password')
-        self.instance.credentials.add(credential)
-        self.task.run(self.pk, vault_password='provided-at-launch')
+        job.credentials.add(credential)
 
-        assert self.run_pexpect.call_count == 1
-        call_args, call_kwargs = self.run_pexpect.call_args_list[0]
-        args, cwd, env, stdout = call_args
+        passwords = task.build_passwords(job, {'vault_password': 'provided-at-launch'})
+        args = task.build_args(job, private_data_dir, passwords)
+        password_prompts = task.get_password_prompts(passwords)
+        expect_passwords = task.create_expect_passwords_data_struct(password_prompts, passwords)
 
-        assert call_kwargs.get('expect_passwords')[
-            re.compile(r'Vault password:\s*?$', re.M)
-        ] == 'provided-at-launch'
+        assert expect_passwords['Vault password:\s*?$'] == 'provided-at-launch' # noqa
         assert '--ask-vault-pass' in ' '.join(args)
 
-    def test_multi_vault_password(self):
+    def test_multi_vault_password(self, private_data_dir, job):
+        task = tasks.RunJob()
         vault = CredentialType.defaults['vault']()
         for i, label in enumerate(['dev', 'prod']):
             credential = Credential(
@@ -886,16 +879,16 @@ class TestJobCredentials(TestJobExecution):
                 inputs={'vault_password': 'pass@{}'.format(label), 'vault_id': label}
             )
             credential.inputs['vault_password'] = encrypt_field(credential, 'vault_password')
-            self.instance.credentials.add(credential)
-        self.task.run(self.pk)
+            job.credentials.add(credential)
 
-        assert self.run_pexpect.call_count == 1
-        call_args, call_kwargs = self.run_pexpect.call_args_list[0]
-        args, cwd, env, stdout = call_args
+        passwords = task.build_passwords(job, {})
+        args = task.build_args(job, private_data_dir, passwords)
+        password_prompts = task.get_password_prompts(passwords)
+        expect_passwords = task.create_expect_passwords_data_struct(password_prompts, passwords)
 
         vault_passwords = dict(
-            (k.pattern, v) for k, v in call_kwargs['expect_passwords'].items()
-            if 'Vault' in k.pattern
+            (k, v) for k, v in expect_passwords.items()
+            if 'Vault' in k
         )
         assert vault_passwords['Vault password \(prod\):\\s*?$'] == 'pass@prod'  # noqa
         assert vault_passwords['Vault password \(dev\):\\s*?$'] == 'pass@dev'  # noqa
@@ -904,7 +897,8 @@ class TestJobCredentials(TestJobExecution):
         assert '--vault-id dev@prompt' in ' '.join(args)
         assert '--vault-id prod@prompt' in ' '.join(args)
 
-    def test_multi_vault_id_conflict(self):
+    def test_multi_vault_id_conflict(self, job):
+        task = tasks.RunJob()
         vault = CredentialType.defaults['vault']()
         for i in range(2):
             credential = Credential(
@@ -913,12 +907,15 @@ class TestJobCredentials(TestJobExecution):
                 inputs={'vault_password': 'some-pass', 'vault_id': 'conflict'}
             )
             credential.inputs['vault_password'] = encrypt_field(credential, 'vault_password')
-            self.instance.credentials.add(credential)
+            job.credentials.add(credential)
 
-        with pytest.raises(Exception):
-            self.task.run(self.pk)
+        with pytest.raises(RuntimeError) as e:
+            task.build_passwords(job, {})
 
-    def test_multi_vault_password_ask(self):
+        assert 'multiple vault credentials were specified with --vault-id' in str(e.value)
+
+    def test_multi_vault_password_ask(self, private_data_dir, job):
+        task = tasks.RunJob()
         vault = CredentialType.defaults['vault']()
         for i, label in enumerate(['dev', 'prod']):
             credential = Credential(
@@ -927,19 +924,18 @@ class TestJobCredentials(TestJobExecution):
                 inputs={'vault_password': 'ASK', 'vault_id': label}
             )
             credential.inputs['vault_password'] = encrypt_field(credential, 'vault_password')
-            self.instance.credentials.add(credential)
-        self.task.run(self.pk, **{
+            job.credentials.add(credential)
+        passwords = task.build_passwords(job, {
             'vault_password.dev': 'provided-at-launch@dev',
             'vault_password.prod': 'provided-at-launch@prod'
         })
-
-        assert self.run_pexpect.call_count == 1
-        call_args, call_kwargs = self.run_pexpect.call_args_list[0]
-        args, cwd, env, stdout = call_args
+        args = task.build_args(job, private_data_dir, passwords)
+        password_prompts = task.get_password_prompts(passwords)
+        expect_passwords = task.create_expect_passwords_data_struct(password_prompts, passwords)
 
         vault_passwords = dict(
-            (k.pattern, v) for k, v in call_kwargs['expect_passwords'].items()
-            if 'Vault' in k.pattern
+            (k, v) for k, v in expect_passwords.items()
+            if 'Vault' in k
         )
         assert vault_passwords['Vault password \(prod\):\\s*?$'] == 'provided-at-launch@prod'  # noqa
         assert vault_passwords['Vault password \(dev\):\\s*?$'] == 'provided-at-launch@dev'  # noqa
@@ -948,38 +944,7 @@ class TestJobCredentials(TestJobExecution):
         assert '--vault-id dev@prompt' in ' '.join(args)
         assert '--vault-id prod@prompt' in ' '.join(args)
 
-    def test_ssh_key_with_agent(self):
-        ssh = CredentialType.defaults['ssh']()
-        credential = Credential(
-            pk=1,
-            credential_type=ssh,
-            inputs = {
-                'username': 'bob',
-                'ssh_key_data': self.EXAMPLE_PRIVATE_KEY
-            }
-        )
-        credential.inputs['ssh_key_data'] = encrypt_field(credential, 'ssh_key_data')
-        self.instance.credentials.add(credential)
-
-        def run_pexpect_side_effect(private_data, *args, **kwargs):
-            args, cwd, env, stdout = args
-            ssh_key_data_fifo = '/'.join([private_data, 'credential_1'])
-            assert open(ssh_key_data_fifo, 'r').read() == self.EXAMPLE_PRIVATE_KEY
-            assert ' '.join(args).startswith(
-                'ssh-agent -a %s sh -c ssh-add %s && rm -f %s' % (
-                    '/'.join([private_data, 'ssh_auth.sock']),
-                    ssh_key_data_fifo,
-                    ssh_key_data_fifo
-                )
-            )
-            return ['successful', 0]
-
-        private_data = tempfile.mkdtemp(prefix='awx_')
-        self.task.build_private_data_dir = mock.Mock(return_value=private_data)
-        self.run_pexpect.side_effect = partial(run_pexpect_side_effect, private_data)
-        self.task.run(self.pk, private_data_dir=private_data)
-
-    def test_aws_cloud_credential(self):
+    def test_aws_cloud_credential(self, job, private_data_dir):
         aws = CredentialType.defaults['aws']()
         credential = Credential(
             pk=1,
@@ -987,19 +952,20 @@ class TestJobCredentials(TestJobExecution):
             inputs = {'username': 'bob', 'password': 'secret'}
         )
         credential.inputs['password'] = encrypt_field(credential, 'password')
-        self.instance.credentials.add(credential)
-        self.task.run(self.pk)
+        job.credentials.add(credential)
 
-        assert self.run_pexpect.call_count == 1
-        call_args, _ = self.run_pexpect.call_args_list[0]
-        args, cwd, env, stdout = call_args
+        env = {}
+        safe_env = {}
+        credential.credential_type.inject_credential(
+            credential, env, safe_env, [], private_data_dir
+        )
 
         assert env['AWS_ACCESS_KEY_ID'] == 'bob'
         assert env['AWS_SECRET_ACCESS_KEY'] == 'secret'
         assert 'AWS_SECURITY_TOKEN' not in env
-        assert self.instance.job_env['AWS_SECRET_ACCESS_KEY'] == tasks.HIDDEN_PASSWORD
+        assert safe_env['AWS_SECRET_ACCESS_KEY'] == tasks.HIDDEN_PASSWORD
 
-    def test_aws_cloud_credential_with_sts_token(self):
+    def test_aws_cloud_credential_with_sts_token(self, private_data_dir, job):
         aws = CredentialType.defaults['aws']()
         credential = Credential(
             pk=1,
@@ -1008,19 +974,20 @@ class TestJobCredentials(TestJobExecution):
         )
         for key in ('password', 'security_token'):
             credential.inputs[key] = encrypt_field(credential, key)
-        self.instance.credentials.add(credential)
-        self.task.run(self.pk)
+        job.credentials.add(credential)
 
-        assert self.run_pexpect.call_count == 1
-        call_args, _ = self.run_pexpect.call_args_list[0]
-        args, cwd, env, stdout = call_args
+        env = {}
+        safe_env = {}
+        credential.credential_type.inject_credential(
+            credential, env, safe_env, [], private_data_dir
+        )
 
         assert env['AWS_ACCESS_KEY_ID'] == 'bob'
         assert env['AWS_SECRET_ACCESS_KEY'] == 'secret'
         assert env['AWS_SECURITY_TOKEN'] == 'token'
-        assert self.instance.job_env['AWS_SECRET_ACCESS_KEY'] == tasks.HIDDEN_PASSWORD
+        assert safe_env['AWS_SECRET_ACCESS_KEY'] == tasks.HIDDEN_PASSWORD
 
-    def test_gce_credentials(self):
+    def test_gce_credentials(self, private_data_dir, job):
         gce = CredentialType.defaults['gce']()
         credential = Credential(
             pk=1,
@@ -1032,21 +999,20 @@ class TestJobCredentials(TestJobExecution):
             }
         )
         credential.inputs['ssh_key_data'] = encrypt_field(credential, 'ssh_key_data')
-        self.instance.credentials.add(credential)
+        job.credentials.add(credential)
 
-        def run_pexpect_side_effect(*args, **kwargs):
-            args, cwd, env, stdout = args
-            json_data = json.load(open(env['GCE_CREDENTIALS_FILE_PATH'], 'rb'))
-            assert json_data['type'] == 'service_account'
-            assert json_data['private_key'] == self.EXAMPLE_PRIVATE_KEY
-            assert json_data['client_email'] == 'bob'
-            assert json_data['project_id'] == 'some-project'
-            return ['successful', 0]
+        env = {}
+        safe_env = {}
+        credential.credential_type.inject_credential(
+            credential, env, safe_env, [], private_data_dir
+        )
+        json_data = json.load(open(env['GCE_CREDENTIALS_FILE_PATH'], 'rb'))
+        assert json_data['type'] == 'service_account'
+        assert json_data['private_key'] == self.EXAMPLE_PRIVATE_KEY
+        assert json_data['client_email'] == 'bob'
+        assert json_data['project_id'] == 'some-project'
 
-        self.run_pexpect.side_effect = run_pexpect_side_effect
-        self.task.run(self.pk)
-
-    def test_azure_rm_with_tenant(self):
+    def test_azure_rm_with_tenant(self, private_data_dir, job):
         azure = CredentialType.defaults['azure_rm']()
         credential = Credential(
             pk=1,
@@ -1059,21 +1025,21 @@ class TestJobCredentials(TestJobExecution):
             }
         )
         credential.inputs['secret'] = encrypt_field(credential, 'secret')
-        self.instance.credentials.add(credential)
+        job.credentials.add(credential)
 
-        self.task.run(self.pk)
-
-        assert self.run_pexpect.call_count == 1
-        call_args, _ = self.run_pexpect.call_args_list[0]
-        args, cwd, env, stdout = call_args
+        env = {}
+        safe_env = {}
+        credential.credential_type.inject_credential(
+            credential, env, safe_env, [], private_data_dir
+        )
 
         assert env['AZURE_CLIENT_ID'] == 'some-client'
         assert env['AZURE_SECRET'] == 'some-secret'
         assert env['AZURE_TENANT'] == 'some-tenant'
         assert env['AZURE_SUBSCRIPTION_ID'] == 'some-subscription'
-        assert self.instance.job_env['AZURE_SECRET'] == tasks.HIDDEN_PASSWORD
+        assert safe_env['AZURE_SECRET'] == tasks.HIDDEN_PASSWORD
 
-    def test_azure_rm_with_password(self):
+    def test_azure_rm_with_password(self, private_data_dir, job):
         azure = CredentialType.defaults['azure_rm']()
         credential = Credential(
             pk=1,
@@ -1086,21 +1052,21 @@ class TestJobCredentials(TestJobExecution):
             }
         )
         credential.inputs['password'] = encrypt_field(credential, 'password')
-        self.instance.credentials.add(credential)
+        job.credentials.add(credential)
 
-        self.task.run(self.pk)
-
-        assert self.run_pexpect.call_count == 1
-        call_args, _ = self.run_pexpect.call_args_list[0]
-        args, cwd, env, stdout = call_args
+        env = {}
+        safe_env = {}
+        credential.credential_type.inject_credential(
+            credential, env, safe_env, [], private_data_dir
+        )
 
         assert env['AZURE_SUBSCRIPTION_ID'] == 'some-subscription'
         assert env['AZURE_AD_USER'] == 'bob'
         assert env['AZURE_PASSWORD'] == 'secret'
         assert env['AZURE_CLOUD_ENVIRONMENT'] == 'foobar'
-        assert self.instance.job_env['AZURE_PASSWORD'] == tasks.HIDDEN_PASSWORD
+        assert safe_env['AZURE_PASSWORD'] == tasks.HIDDEN_PASSWORD
 
-    def test_vmware_credentials(self):
+    def test_vmware_credentials(self, private_data_dir, job):
         vmware = CredentialType.defaults['vmware']()
         credential = Credential(
             pk=1,
@@ -1108,19 +1074,21 @@ class TestJobCredentials(TestJobExecution):
             inputs = {'username': 'bob', 'password': 'secret', 'host': 'https://example.org'}
         )
         credential.inputs['password'] = encrypt_field(credential, 'password')
-        self.instance.credentials.add(credential)
-        self.task.run(self.pk)
+        job.credentials.add(credential)
 
-        assert self.run_pexpect.call_count == 1
-        call_args, _ = self.run_pexpect.call_args_list[0]
-        args, cwd, env, stdout = call_args
+        env = {}
+        safe_env = {}
+        credential.credential_type.inject_credential(
+            credential, env, safe_env, [], private_data_dir
+        )
 
         assert env['VMWARE_USER'] == 'bob'
         assert env['VMWARE_PASSWORD'] == 'secret'
         assert env['VMWARE_HOST'] == 'https://example.org'
-        assert self.instance.job_env['VMWARE_PASSWORD'] == tasks.HIDDEN_PASSWORD
+        assert safe_env['VMWARE_PASSWORD'] == tasks.HIDDEN_PASSWORD
 
-    def test_openstack_credentials(self):
+    def test_openstack_credentials(self, private_data_dir, job):
+        task = tasks.RunJob()
         openstack = CredentialType.defaults['openstack']()
         credential = Credential(
             pk=1,
@@ -1133,29 +1101,29 @@ class TestJobCredentials(TestJobExecution):
             }
         )
         credential.inputs['password'] = encrypt_field(credential, 'password')
-        self.instance.credentials.add(credential)
+        job.credentials.add(credential)
 
-        def run_pexpect_side_effect(*args, **kwargs):
-            args, cwd, env, stdout = args
-            shade_config = open(env['OS_CLIENT_CONFIG_FILE'], 'r').read()
-            assert shade_config == '\n'.join([
-                'clouds:',
-                '  devstack:',
-                '    auth:',
-                '      auth_url: https://keystone.example.org',
-                '      password: secret',
-                '      project_name: tenant-name',
-                '      username: bob',
-                '    verify: true',
-                ''
-            ])
-            return ['successful', 0]
+        private_data_files = task.build_private_data_files(job, private_data_dir)
+        env = task.build_env(job, private_data_dir, private_data_files=private_data_files)
+        credential.credential_type.inject_credential(
+            credential, env, {}, [], private_data_dir
+        )
 
-        self.run_pexpect.side_effect = run_pexpect_side_effect
-        self.task.run(self.pk)
+        shade_config = open(env['OS_CLIENT_CONFIG_FILE'], 'r').read()
+        assert shade_config == '\n'.join([
+            'clouds:',
+            '  devstack:',
+            '    auth:',
+            '      auth_url: https://keystone.example.org',
+            '      password: secret',
+            '      project_name: tenant-name',
+            '      username: bob',
+            '    verify: true',
+            ''
+        ])
 
     @pytest.mark.parametrize("ca_file", [None, '/path/to/some/file'])
-    def test_rhv_credentials(self, ca_file):
+    def test_rhv_credentials(self, private_data_dir, job, ca_file):
         rhv = CredentialType.defaults['rhv']()
         inputs = {
             'host': 'some-ovirt-host.example.org',
@@ -1170,31 +1138,32 @@ class TestJobCredentials(TestJobExecution):
             inputs=inputs
         )
         credential.inputs['password'] = encrypt_field(credential, 'password')
-        self.instance.credentials.add(credential)
+        job.credentials.add(credential)
 
-        def run_pexpect_side_effect(*args, **kwargs):
-            args, cwd, env, stdout = args
-            config = configparser.ConfigParser()
-            config.read(env['OVIRT_INI_PATH'])
-            assert config.get('ovirt', 'ovirt_url') == 'some-ovirt-host.example.org'
-            assert config.get('ovirt', 'ovirt_username') == 'bob'
-            assert config.get('ovirt', 'ovirt_password') == 'some-pass'
-            if ca_file:
-                assert config.get('ovirt', 'ovirt_ca_file') == ca_file
-            else:
-                with pytest.raises(configparser.NoOptionError):
-                    config.get('ovirt', 'ovirt_ca_file')
-            return ['successful', 0]
+        env = {}
+        safe_env = {}
+        credential.credential_type.inject_credential(
+            credential, env, safe_env, [], private_data_dir
+        )
 
-        self.run_pexpect.side_effect = run_pexpect_side_effect
-        self.task.run(self.pk)
+        config = configparser.ConfigParser()
+        config.read(env['OVIRT_INI_PATH'])
+        assert config.get('ovirt', 'ovirt_url') == 'some-ovirt-host.example.org'
+        assert config.get('ovirt', 'ovirt_username') == 'bob'
+        assert config.get('ovirt', 'ovirt_password') == 'some-pass'
+        if ca_file:
+            assert config.get('ovirt', 'ovirt_ca_file') == ca_file
+        else:
+            with pytest.raises(configparser.NoOptionError):
+                config.get('ovirt', 'ovirt_ca_file')
 
     @pytest.mark.parametrize('authorize, expected_authorize', [
         [True, '1'],
         [False, '0'],
         [None, '0'],
     ])
-    def test_net_credentials(self, authorize, expected_authorize):
+    def test_net_credentials(self, authorize, expected_authorize, job, private_data_dir):
+        task = tasks.RunJob()
         net = CredentialType.defaults['net']()
         inputs = {
             'username': 'bob',
@@ -1204,26 +1173,27 @@ class TestJobCredentials(TestJobExecution):
         }
         if authorize is not None:
             inputs['authorize'] = authorize
-        credential = Credential(pk=1,credential_type=net, inputs = inputs)
+        credential = Credential(pk=1, credential_type=net, inputs=inputs)
         for field in ('password', 'ssh_key_data', 'authorize_password'):
             credential.inputs[field] = encrypt_field(credential, field)
-        self.instance.credentials.add(credential)
+        job.credentials.add(credential)
 
-        def run_pexpect_side_effect(*args, **kwargs):
-            args, cwd, env, stdout = args
-            assert env['ANSIBLE_NET_USERNAME'] == 'bob'
-            assert env['ANSIBLE_NET_PASSWORD'] == 'secret'
-            assert env['ANSIBLE_NET_AUTHORIZE'] == expected_authorize
-            if authorize:
-                assert env['ANSIBLE_NET_AUTH_PASS'] == 'authorizeme'
-            assert open(env['ANSIBLE_NET_SSH_KEYFILE'], 'r').read() == self.EXAMPLE_PRIVATE_KEY
-            return ['successful', 0]
+        private_data_files = task.build_private_data_files(job, private_data_dir)
+        env = task.build_env(job, private_data_dir, private_data_files=private_data_files)
+        safe_env = build_safe_env(env)
+        credential.credential_type.inject_credential(
+            credential, env, safe_env, [], private_data_dir
+        )
 
-        self.run_pexpect.side_effect = run_pexpect_side_effect
-        self.task.run(self.pk)
-        assert self.instance.job_env['ANSIBLE_NET_PASSWORD'] == tasks.HIDDEN_PASSWORD
+        assert env['ANSIBLE_NET_USERNAME'] == 'bob'
+        assert env['ANSIBLE_NET_PASSWORD'] == 'secret'
+        assert env['ANSIBLE_NET_AUTHORIZE'] == expected_authorize
+        if authorize:
+            assert env['ANSIBLE_NET_AUTH_PASS'] == 'authorizeme'
+        assert open(env['ANSIBLE_NET_SSH_KEYFILE'], 'r').read() == self.EXAMPLE_PRIVATE_KEY
+        assert safe_env['ANSIBLE_NET_PASSWORD'] == tasks.HIDDEN_PASSWORD
 
-    def test_custom_environment_injectors_with_jinja_syntax_error(self):
+    def test_custom_environment_injectors_with_jinja_syntax_error(self, private_data_dir):
         some_cloud = CredentialType(
             kind='cloud',
             name='SomeCloud',
@@ -1246,11 +1216,13 @@ class TestJobCredentials(TestJobExecution):
             credential_type=some_cloud,
             inputs = {'api_token': 'ABC123'}
         )
-        self.instance.credentials.add(credential)
-        with pytest.raises(Exception):
-            self.task.run(self.pk)
 
-    def test_custom_environment_injectors(self):
+        with pytest.raises(jinja2.exceptions.UndefinedError):
+            credential.credential_type.inject_credential(
+                credential, {}, {}, [], private_data_dir
+            )
+
+    def test_custom_environment_injectors(self, private_data_dir):
         some_cloud = CredentialType(
             kind='cloud',
             name='SomeCloud',
@@ -1273,16 +1245,15 @@ class TestJobCredentials(TestJobExecution):
             credential_type=some_cloud,
             inputs = {'api_token': 'ABC123'}
         )
-        self.instance.credentials.add(credential)
-        self.task.run(self.pk)
 
-        assert self.run_pexpect.call_count == 1
-        call_args, _ = self.run_pexpect.call_args_list[0]
-        args, cwd, env, stdout = call_args
+        env = {}
+        credential.credential_type.inject_credential(
+            credential, env, {}, [], private_data_dir
+        )
 
         assert env['MY_CLOUD_API_TOKEN'] == 'ABC123'
 
-    def test_custom_environment_injectors_with_boolean_env_var(self):
+    def test_custom_environment_injectors_with_boolean_env_var(self, private_data_dir):
         some_cloud = CredentialType(
             kind='cloud',
             name='SomeCloud',
@@ -1305,15 +1276,16 @@ class TestJobCredentials(TestJobExecution):
             credential_type=some_cloud,
             inputs={'turbo_button': True}
         )
-        self.instance.credentials.add(credential)
-        self.task.run(self.pk)
 
-        assert self.run_pexpect.call_count == 1
-        call_args, _ = self.run_pexpect.call_args_list[0]
-        args, cwd, env, stdout = call_args
+        env = {}
+        credential.credential_type.inject_credential(
+            credential, env, {}, [], private_data_dir
+        )
+
         assert env['TURBO_BUTTON'] == str(True)
 
-    def test_custom_environment_injectors_with_reserved_env_var(self):
+    def test_custom_environment_injectors_with_reserved_env_var(self, private_data_dir, job):
+        task = tasks.RunJob()
         some_cloud = CredentialType(
             kind='cloud',
             name='SomeCloud',
@@ -1336,16 +1308,13 @@ class TestJobCredentials(TestJobExecution):
             credential_type=some_cloud,
             inputs = {'api_token': 'ABC123'}
         )
-        self.instance.credentials.add(credential)
-        self.task.run(self.pk)
+        job.credentials.add(credential)
 
-        assert self.run_pexpect.call_count == 1
-        call_args, _ = self.run_pexpect.call_args_list[0]
-        args, cwd, env, stdout = call_args
+        env = task.build_env(job, private_data_dir)
 
-        assert env['JOB_ID'] == str(self.instance.pk)
+        assert env['JOB_ID'] == str(job.pk)
 
-    def test_custom_environment_injectors_with_secret_field(self):
+    def test_custom_environment_injectors_with_secret_field(self, private_data_dir):
         some_cloud = CredentialType(
             kind='cloud',
             name='SomeCloud',
@@ -1370,18 +1339,19 @@ class TestJobCredentials(TestJobExecution):
             inputs = {'password': 'SUPER-SECRET-123'}
         )
         credential.inputs['password'] = encrypt_field(credential, 'password')
-        self.instance.credentials.add(credential)
-        self.task.run(self.pk)
 
-        assert self.run_pexpect.call_count == 1
-        call_args, _ = self.run_pexpect.call_args_list[0]
-        args, cwd, env, stdout = call_args
+        env = {}
+        safe_env = {}
+        credential.credential_type.inject_credential(
+            credential, env, safe_env, [], private_data_dir
+        )
 
         assert env['MY_CLOUD_PRIVATE_VAR'] == 'SUPER-SECRET-123'
-        assert 'SUPER-SECRET-123' not in json.dumps(self.task.update_model.call_args_list)
-        assert self.instance.job_env['MY_CLOUD_PRIVATE_VAR'] == tasks.HIDDEN_PASSWORD
+        assert 'SUPER-SECRET-123' not in safe_env.values()
+        assert safe_env['MY_CLOUD_PRIVATE_VAR'] == tasks.HIDDEN_PASSWORD
 
-    def test_custom_environment_injectors_with_extra_vars(self):
+    def test_custom_environment_injectors_with_extra_vars(self, private_data_dir, job):
+        task = tasks.RunJob()
         some_cloud = CredentialType(
             kind='cloud',
             name='SomeCloud',
@@ -1404,19 +1374,19 @@ class TestJobCredentials(TestJobExecution):
             credential_type=some_cloud,
             inputs = {'api_token': 'ABC123'}
         )
-        self.instance.credentials.add(credential)
+        job.credentials.add(credential)
 
-        def run_pexpect_side_effect(*args, **kwargs):
-            args, cwd, env, stdout = args
-            extra_vars = parse_extra_vars(args)
-            assert extra_vars["api_token"] == "ABC123"
-            assert hasattr(extra_vars["api_token"], '__UNSAFE__')
-            return ['successful', 0]
+        args = task.build_args(job, private_data_dir, {})
+        credential.credential_type.inject_credential(
+            credential, {}, {}, args, private_data_dir
+        )
+        extra_vars = parse_extra_vars(args)
 
-        self.run_pexpect.side_effect = run_pexpect_side_effect
-        self.task.run(self.pk)
+        assert extra_vars["api_token"] == "ABC123"
+        assert hasattr(extra_vars["api_token"], '__UNSAFE__')
 
-    def test_custom_environment_injectors_with_boolean_extra_vars(self):
+    def test_custom_environment_injectors_with_boolean_extra_vars(self, job, private_data_dir):
+        task = tasks.RunJob()
         some_cloud = CredentialType(
             kind='cloud',
             name='SomeCloud',
@@ -1439,18 +1409,19 @@ class TestJobCredentials(TestJobExecution):
             credential_type=some_cloud,
             inputs={'turbo_button': True}
         )
-        self.instance.credentials.add(credential)
+        job.credentials.add(credential)
 
-        def run_pexpect_side_effect(*args, **kwargs):
-            args, cwd, env, stdout = args
-            extra_vars = parse_extra_vars(args)
-            assert extra_vars["turbo_button"] == "True"
-            return ['successful', 0]
+        args = task.build_args(job, private_data_dir, {})
+        credential.credential_type.inject_credential(
+            credential, {}, {}, args, private_data_dir
+        )
+        extra_vars = parse_extra_vars(args)
 
-        self.run_pexpect.side_effect = run_pexpect_side_effect
-        self.task.run(self.pk)
+        assert extra_vars["turbo_button"] == "True"
+        return ['successful', 0]
 
-    def test_custom_environment_injectors_with_complicated_boolean_template(self):
+    def test_custom_environment_injectors_with_complicated_boolean_template(self, job, private_data_dir):
+        task = tasks.RunJob()
         some_cloud = CredentialType(
             kind='cloud',
             name='SomeCloud',
@@ -1473,21 +1444,21 @@ class TestJobCredentials(TestJobExecution):
             credential_type=some_cloud,
             inputs={'turbo_button': True}
         )
-        self.instance.credentials.add(credential)
+        job.credentials.add(credential)
 
-        def run_pexpect_side_effect(*args, **kwargs):
-            args, cwd, env, stdout = args
-            extra_vars = parse_extra_vars(args)
-            assert extra_vars["turbo_button"] == "FAST!"
-            return ['successful', 0]
+        args = task.build_args(job, private_data_dir, {})
+        credential.credential_type.inject_credential(
+            credential, {}, {}, args, private_data_dir
+        )
+        extra_vars = parse_extra_vars(args)
 
-        self.run_pexpect.side_effect = run_pexpect_side_effect
-        self.task.run(self.pk)
+        assert extra_vars["turbo_button"] == "FAST!"
 
-    def test_custom_environment_injectors_with_secret_extra_vars(self):
+    def test_custom_environment_injectors_with_secret_extra_vars(self, job, private_data_dir):
         """
         extra_vars that contain secret field values should be censored in the DB
         """
+        task = tasks.RunJob()
         some_cloud = CredentialType(
             kind='cloud',
             name='SomeCloud',
@@ -1512,20 +1483,17 @@ class TestJobCredentials(TestJobExecution):
             inputs = {'password': 'SUPER-SECRET-123'}
         )
         credential.inputs['password'] = encrypt_field(credential, 'password')
-        self.instance.credentials.add(credential)
+        job.credentials.add(credential)
 
-        def run_pexpect_side_effect(*args, **kwargs):
-            args, cwd, env, stdout = args
-            extra_vars = parse_extra_vars(args)
-            assert extra_vars["password"] == "SUPER-SECRET-123"
-            return ['successful', 0]
+        args = task.build_args(job, private_data_dir, {})
+        credential.credential_type.inject_credential(
+            credential, {}, {}, args, private_data_dir
+        )
 
-        self.run_pexpect.side_effect = run_pexpect_side_effect
-        self.task.run(self.pk)
+        extra_vars = parse_extra_vars(args)
+        assert extra_vars["password"] == "SUPER-SECRET-123"
 
-        assert 'SUPER-SECRET-123' not in json.dumps(self.task.update_model.call_args_list)
-
-    def test_custom_environment_injectors_with_file(self):
+    def test_custom_environment_injectors_with_file(self, private_data_dir):
         some_cloud = CredentialType(
             kind='cloud',
             name='SomeCloud',
@@ -1551,18 +1519,15 @@ class TestJobCredentials(TestJobExecution):
             credential_type=some_cloud,
             inputs = {'api_token': 'ABC123'}
         )
-        self.instance.credentials.add(credential)
-        self.task.run(self.pk)
 
-        def run_pexpect_side_effect(*args, **kwargs):
-            args, cwd, env, stdout = args
-            assert open(env['MY_CLOUD_INI_FILE'], 'r').read() == '[mycloud]\nABC123'
-            return ['successful', 0]
+        env = {}
+        credential.credential_type.inject_credential(
+            credential, env, {}, [], private_data_dir
+        )
 
-        self.run_pexpect.side_effect = run_pexpect_side_effect
-        self.task.run(self.pk)
+        assert open(env['MY_CLOUD_INI_FILE'], 'r').read() == '[mycloud]\nABC123'
 
-    def test_custom_environment_injectors_with_unicode_content(self):
+    def test_custom_environment_injectors_with_unicode_content(self, private_data_dir):
         value = 'Iñtërnâtiônàlizætiøn'
         some_cloud = CredentialType(
             kind='cloud',
@@ -1578,18 +1543,15 @@ class TestJobCredentials(TestJobExecution):
             pk=1,
             credential_type=some_cloud,
         )
-        self.instance.credentials.add(credential)
-        self.task.run(self.pk)
 
-        def run_pexpect_side_effect(*args, **kwargs):
-            args, cwd, env, stdout = args
-            assert open(env['MY_CLOUD_INI_FILE'], 'r').read() == value
-            return ['successful', 0]
+        env = {}
+        credential.credential_type.inject_credential(
+            credential, env, {}, [], private_data_dir
+        )
 
-        self.run_pexpect.side_effect = run_pexpect_side_effect
-        self.task.run(self.pk)
+        assert open(env['MY_CLOUD_INI_FILE'], 'r').read() == value
 
-    def test_custom_environment_injectors_with_files(self):
+    def test_custom_environment_injectors_with_files(self, private_data_dir):
         some_cloud = CredentialType(
             kind='cloud',
             name='SomeCloud',
@@ -1621,19 +1583,16 @@ class TestJobCredentials(TestJobExecution):
             credential_type=some_cloud,
             inputs = {'cert': 'CERT123', 'key': 'KEY123'}
         )
-        self.instance.credentials.add(credential)
-        self.task.run(self.pk)
 
-        def run_pexpect_side_effect(*args, **kwargs):
-            args, cwd, env, stdout = args
-            assert open(env['MY_CERT_INI_FILE'], 'r').read() == '[mycert]\nCERT123'
-            assert open(env['MY_KEY_INI_FILE'], 'r').read() == '[mykey]\nKEY123'
-            return ['successful', 0]
+        env = {}
+        credential.credential_type.inject_credential(
+            credential, env, {}, [], private_data_dir
+        )
 
-        self.run_pexpect.side_effect = run_pexpect_side_effect
-        self.task.run(self.pk)
+        assert open(env['MY_CERT_INI_FILE'], 'r').read() == '[mycert]\nCERT123'
+        assert open(env['MY_KEY_INI_FILE'], 'r').read() == '[mykey]\nKEY123'
 
-    def test_multi_cloud(self):
+    def test_multi_cloud(self, private_data_dir):
         gce = CredentialType.defaults['gce']()
         gce_credential = Credential(
             pk=1,
@@ -1641,11 +1600,10 @@ class TestJobCredentials(TestJobExecution):
             inputs = {
                 'username': 'bob',
                 'project': 'some-project',
-                'ssh_key_data': 'GCE: %s' % self.EXAMPLE_PRIVATE_KEY
+                'ssh_key_data': self.EXAMPLE_PRIVATE_KEY
             }
         )
         gce_credential.inputs['ssh_key_data'] = encrypt_field(gce_credential, 'ssh_key_data')
-        self.instance.credentials.add(gce_credential)
 
         azure_rm = CredentialType.defaults['azure_rm']()
         azure_rm_credential = Credential(
@@ -1659,40 +1617,40 @@ class TestJobCredentials(TestJobExecution):
         )
         azure_rm_credential.inputs['secret'] = ''
         azure_rm_credential.inputs['secret'] = encrypt_field(azure_rm_credential, 'secret')
-        self.instance.credentials.add(azure_rm_credential)
 
-        def run_pexpect_side_effect(*args, **kwargs):
-            args, cwd, env, stdout = args
+        env = {}
+        safe_env = {}
+        for credential in [gce_credential, azure_rm_credential]:
+            credential.credential_type.inject_credential(
+                credential, env, safe_env, [], private_data_dir
+            )
 
-            assert env['AZURE_SUBSCRIPTION_ID'] == 'some-subscription'
-            assert env['AZURE_AD_USER'] == 'bob'
-            assert env['AZURE_PASSWORD'] == 'secret'
+        assert env['AZURE_SUBSCRIPTION_ID'] == 'some-subscription'
+        assert env['AZURE_AD_USER'] == 'bob'
+        assert env['AZURE_PASSWORD'] == 'secret'
 
-            return ['successful', 0]
+        json_data = json.load(open(env['GCE_CREDENTIALS_FILE_PATH'], 'rb'))
+        assert json_data['type'] == 'service_account'
+        assert json_data['private_key'] == self.EXAMPLE_PRIVATE_KEY
+        assert json_data['client_email'] == 'bob'
+        assert json_data['project_id'] == 'some-project'
 
-        self.run_pexpect.side_effect = run_pexpect_side_effect
-        self.task.run(self.pk)
-        assert self.instance.job_env['AZURE_PASSWORD'] == tasks.HIDDEN_PASSWORD
+        assert safe_env['AZURE_PASSWORD'] == tasks.HIDDEN_PASSWORD
 
-    def test_awx_task_env(self):
-        with mock.patch('awx.main.tasks.settings.AWX_TASK_ENV', {'FOO': 'BAR'}):
-            self.task.run(self.pk)
+    def test_awx_task_env(self, settings, private_data_dir, job):
+        settings.AWX_TASK_ENV = {'FOO': 'BAR'}
+        task = tasks.RunJob()
+        env = task.build_env(job, private_data_dir)
 
-        assert self.run_pexpect.call_count == 1
-        call_args, _ = self.run_pexpect.call_args_list[0]
-        args, cwd, env, stdout = call_args
         assert env['FOO'] == 'BAR'
 
 
 class TestProjectUpdateCredentials(TestJobExecution):
-
-    TASK_CLS = tasks.RunProjectUpdate
-
-    def get_instance(self):
-        return ProjectUpdate(
-            pk=1,
-            project=Project()
-        )
+    @pytest.fixture
+    def project_update(self):
+        project_update = ProjectUpdate(pk=1, project=Project(pk=1))
+        project_update.websocket_emit_status = mock.Mock()
+        return project_update
 
     parametrize = {
         'test_username_and_password_auth': [
@@ -1712,53 +1670,53 @@ class TestProjectUpdateCredentials(TestJobExecution):
         ]
     }
 
-    def test_bwrap_exposes_projects_root(self):
+    def test_process_isolation_exposes_projects_root(self, private_data_dir, project_update):
+        task = tasks.RunProjectUpdate()
+        task.revision_path = 'foobar'
         ssh = CredentialType.defaults['ssh']()
-        self.instance.scm_type = 'git'
-        self.instance.credential = Credential(
+        project_update.scm_type = 'git'
+        project_update.credential = Credential(
             pk=1,
             credential_type=ssh,
         )
+        process_isolation = task.build_params_process_isolation(job, private_data_dir, 'cwd')
 
-        def run_pexpect_side_effect(*args, **kwargs):
-            args, cwd, env, stdout = args
-            extra_vars = parse_extra_vars(args)
-            assert ' '.join(args).startswith('bwrap')
-            assert ' '.join([
-                '--bind',
-                os.path.realpath(settings.PROJECTS_ROOT),
-                os.path.realpath(settings.PROJECTS_ROOT)
-            ]) in ' '.join(args)
-            assert extra_vars["scm_revision_output"].startswith(settings.PROJECTS_ROOT)
-            return ['successful', 0]
+        assert process_isolation['process_isolation'] is True
+        assert settings.PROJECTS_ROOT in process_isolation['process_isolation_show_paths']
 
-        self.run_pexpect.side_effect = run_pexpect_side_effect
-        self.task.run(self.pk)
+        task._write_extra_vars_file = mock.Mock()
+        task.build_extra_vars_file(project_update, private_data_dir, {})
 
-    def test_username_and_password_auth(self, scm_type):
+        call_args, _ = task._write_extra_vars_file.call_args_list[0]
+        _, extra_vars = call_args
+
+        assert extra_vars["scm_revision_output"] == 'foobar'
+
+    def test_username_and_password_auth(self, project_update, scm_type):
+        task = tasks.RunProjectUpdate()
         ssh = CredentialType.defaults['ssh']()
-        self.instance.scm_type = scm_type
-        self.instance.credential = Credential(
+        project_update.scm_type = scm_type
+        project_update.credential = Credential(
             pk=1,
             credential_type=ssh,
             inputs = {'username': 'bob', 'password': 'secret'}
         )
-        self.instance.credential.inputs['password'] = encrypt_field(
-            self.instance.credential, 'password'
+        project_update.credential.inputs['password'] = encrypt_field(
+            project_update.credential, 'password'
         )
-        self.task.run(self.pk)
 
-        assert self.run_pexpect.call_count == 1
-        call_args, call_kwargs = self.run_pexpect.call_args_list[0]
-        args, cwd, env, stdout = call_args
+        passwords = task.build_passwords(project_update, {})
+        password_prompts = task.get_password_prompts(passwords)
+        expect_passwords = task.create_expect_passwords_data_struct(password_prompts, passwords)
 
-        assert 'bob' in call_kwargs.get('expect_passwords').values()
-        assert 'secret' in call_kwargs.get('expect_passwords').values()
+        assert 'bob' in expect_passwords.values()
+        assert 'secret' in expect_passwords.values()
 
-    def test_ssh_key_auth(self, scm_type):
+    def test_ssh_key_auth(self, project_update, scm_type):
+        task = tasks.RunProjectUpdate()
         ssh = CredentialType.defaults['ssh']()
-        self.instance.scm_type = scm_type
-        self.instance.credential = Credential(
+        project_update.scm_type = scm_type
+        project_update.credential = Credential(
             pk=1,
             credential_type=ssh,
             inputs = {
@@ -1766,45 +1724,28 @@ class TestProjectUpdateCredentials(TestJobExecution):
                 'ssh_key_data': self.EXAMPLE_PRIVATE_KEY
             }
         )
-        self.instance.credential.inputs['ssh_key_data'] = encrypt_field(
-            self.instance.credential, 'ssh_key_data'
+        project_update.credential.inputs['ssh_key_data'] = encrypt_field(
+            project_update.credential, 'ssh_key_data'
         )
 
-        def run_pexpect_side_effect(private_data, *args, **kwargs):
-            args, cwd, env, stdout = args
-            ssh_key_data_fifo = '/'.join([private_data, 'credential_1'])
-            assert open(ssh_key_data_fifo, 'r').read() == self.EXAMPLE_PRIVATE_KEY
-            assert ' '.join(args).startswith(
-                'ssh-agent -a %s sh -c ssh-add %s && rm -f %s' % (
-                    '/'.join([private_data, 'ssh_auth.sock']),
-                    ssh_key_data_fifo,
-                    ssh_key_data_fifo
-                )
-            )
-            assert 'bob' in kwargs.get('expect_passwords').values()
-            return ['successful', 0]
+        passwords = task.build_passwords(project_update, {})
+        password_prompts = task.get_password_prompts(passwords)
+        expect_passwords = task.create_expect_passwords_data_struct(password_prompts, passwords)
+        assert 'bob' in expect_passwords.values()
 
-        private_data = tempfile.mkdtemp(prefix='awx_')
-        self.task.build_private_data_dir = mock.Mock(return_value=private_data)
-        self.run_pexpect.side_effect = partial(run_pexpect_side_effect, private_data)
-        self.task.run(self.pk)
+    def test_awx_task_env(self, project_update, settings, private_data_dir, scm_type):
+        settings.AWX_TASK_ENV = {'FOO': 'BAR'}
+        task = tasks.RunProjectUpdate()
+        project_update.scm_type = scm_type
 
-    def test_awx_task_env(self, scm_type):
-        self.instance.scm_type = scm_type
-        with mock.patch('awx.main.tasks.settings.AWX_TASK_ENV', {'FOO': 'BAR'}):
-            self.task.run(self.pk)
+        env = task.build_env(project_update, private_data_dir)
 
-        assert self.run_pexpect.call_count == 1
-        call_args, _ = self.run_pexpect.call_args_list[0]
-        args, cwd, env, stdout = call_args
         assert env['FOO'] == 'BAR'
 
 
 class TestInventoryUpdateCredentials(TestJobExecution):
-
-    TASK_CLS = tasks.RunInventoryUpdate
-
-    def get_instance(self):
+    @pytest.fixture
+    def inventory_update(self):
         return InventoryUpdate(
             pk=1,
             inventory_source=InventorySource(
@@ -1813,34 +1754,28 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             )
         )
 
-    def test_source_without_credential(self, mocker):
-        self.instance.source = 'ec2'
-        self.instance.get_cloud_credential = mocker.Mock(return_value=None)
+    def test_source_without_credential(self, mocker, inventory_update, private_data_dir):
+        task = tasks.RunInventoryUpdate()
+        inventory_update.source = 'ec2'
+        inventory_update.get_cloud_credential = mocker.Mock(return_value=None)
 
-        def run_pexpect_side_effect(*args, **kwargs):
-            args, cwd, env, stdout = args
+        private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
+        env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
 
-            assert 'AWS_ACCESS_KEY_ID' not in env
-            assert 'AWS_SECRET_ACCESS_KEY' not in env
-            assert 'EC2_INI_PATH' in env
+        assert 'AWS_ACCESS_KEY_ID' not in env
+        assert 'AWS_SECRET_ACCESS_KEY' not in env
+        assert 'EC2_INI_PATH' in env
 
-            config = configparser.ConfigParser()
-            config.read(env['EC2_INI_PATH'])
-            assert 'ec2' in config.sections()
-            return ['successful', 0]
-
-        self.run_pexpect.side_effect = run_pexpect_side_effect
-        self.task.run(self.pk)
+        config = configparser.ConfigParser()
+        config.read(env['EC2_INI_PATH'])
+        assert 'ec2' in config.sections()
 
     @pytest.mark.parametrize('with_credential', [True, False])
-    def test_custom_source(self, with_credential, mocker):
-        self.instance.source = 'custom'
-        self.instance.source_vars = '{"FOO": "BAR"}'
-        patch = mock.patch.object(InventoryUpdate, 'source_script', mock.Mock(
-            script='#!/bin/sh\necho "Hello, World!"')
-        )
-        self.patches.append(patch)
-        patch.start()
+    def test_custom_source(self, with_credential, mocker, inventory_update, private_data_dir):
+        task = tasks.RunInventoryUpdate()
+        inventory_update.source = 'custom'
+        inventory_update.source_vars = '{"FOO": "BAR"}'
+        inventory_update.source_script= CustomInventoryScript(script='#!/bin/sh\necho "Hello, World!"')
 
         if with_credential:
             azure_rm = CredentialType.defaults['azure_rm']()
@@ -1857,30 +1792,35 @@ class TestInventoryUpdateCredentials(TestJobExecution):
                     }
                 )
                 return cred
-            self.instance.get_cloud_credential = get_cred
+            inventory_update.get_cloud_credential = get_cred
         else:
-            self.instance.get_cloud_credential = mocker.Mock(return_value=None)
+            inventory_update.get_cloud_credential = mocker.Mock(return_value=None)
 
-        def run_pexpect_side_effect(*args, **kwargs):
-            args, cwd, env, stdout = args
-            assert '--custom' in ' '.join(args)
-            script = args[args.index('--source') + 1]
-            with open(script, 'r') as f:
-                assert f.read() == self.instance.source_script.script
-            assert env['FOO'] == 'BAR'
-            if with_credential:
-                assert env['AZURE_CLIENT_ID'] == 'some-client'
-                assert env['AZURE_SECRET'] == 'some-secret'
-                assert env['AZURE_TENANT'] == 'some-tenant'
-                assert env['AZURE_SUBSCRIPTION_ID'] == 'some-subscription'
-            return ['successful', 0]
+        env = task.build_env(inventory_update, private_data_dir, False)
+        args = task.build_args(inventory_update, private_data_dir, {})
 
-        self.run_pexpect.side_effect = run_pexpect_side_effect
-        self.task.run(self.pk)
+        credentials = task.build_credentials_list(inventory_update)
+        for credential in credentials:
+            if credential:
+                credential.credential_type.inject_credential(
+                    credential, env, {}, [], private_data_dir
+                )
 
-    def test_ec2_source(self):
+        assert '--custom' in ' '.join(args)
+        script = args[args.index('--source') + 1]
+        with open(script, 'r') as f:
+            assert f.read() == inventory_update.source_script.script
+        assert env['FOO'] == 'BAR'
+        if with_credential:
+            assert env['AZURE_CLIENT_ID'] == 'some-client'
+            assert env['AZURE_SECRET'] == 'some-secret'
+            assert env['AZURE_TENANT'] == 'some-tenant'
+            assert env['AZURE_SUBSCRIPTION_ID'] == 'some-subscription'
+
+    def test_ec2_source(self, private_data_dir, inventory_update):
+        task = tasks.RunInventoryUpdate()
         aws = CredentialType.defaults['aws']()
-        self.instance.source = 'ec2'
+        inventory_update.source = 'ec2'
 
         def get_cred():
             cred = Credential(
@@ -1890,27 +1830,33 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             )
             cred.inputs['password'] = encrypt_field(cred, 'password')
             return cred
-        self.instance.get_cloud_credential = get_cred
+        inventory_update.get_cloud_credential = get_cred
 
-        def run_pexpect_side_effect(*args, **kwargs):
-            args, cwd, env, stdout = args
+        private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
+        env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
 
-            assert env['AWS_ACCESS_KEY_ID'] == 'bob'
-            assert env['AWS_SECRET_ACCESS_KEY'] == 'secret'
-            assert 'EC2_INI_PATH' in env
+        safe_env = {}
+        credentials = task.build_credentials_list(inventory_update)
+        for credential in credentials:
+            if credential:
+                credential.credential_type.inject_credential(
+                    credential, env, safe_env, [], private_data_dir
+                )
 
-            config = configparser.ConfigParser()
-            config.read(env['EC2_INI_PATH'])
-            assert 'ec2' in config.sections()
-            return ['successful', 0]
+        assert env['AWS_ACCESS_KEY_ID'] == 'bob'
+        assert env['AWS_SECRET_ACCESS_KEY'] == 'secret'
+        assert 'EC2_INI_PATH' in env
 
-        self.run_pexpect.side_effect = run_pexpect_side_effect
-        self.task.run(self.pk)
-        assert self.instance.job_env['AWS_SECRET_ACCESS_KEY'] == tasks.HIDDEN_PASSWORD
+        config = configparser.ConfigParser()
+        config.read(env['EC2_INI_PATH'])
+        assert 'ec2' in config.sections()
 
-    def test_vmware_source(self):
+        assert safe_env['AWS_SECRET_ACCESS_KEY'] == tasks.HIDDEN_PASSWORD
+
+    def test_vmware_source(self, inventory_update, private_data_dir):
+        task = tasks.RunInventoryUpdate()
         vmware = CredentialType.defaults['vmware']()
-        self.instance.source = 'vmware'
+        inventory_update.source = 'vmware'
 
         def get_cred():
             cred = Credential(
@@ -1920,25 +1866,30 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             )
             cred.inputs['password'] = encrypt_field(cred, 'password')
             return cred
-        self.instance.get_cloud_credential = get_cred
+        inventory_update.get_cloud_credential = get_cred
 
-        def run_pexpect_side_effect(*args, **kwargs):
-            args, cwd, env, stdout = args
+        private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
+        env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
 
-            config = configparser.ConfigParser()
-            config.read(env['VMWARE_INI_PATH'])
-            assert config.get('vmware', 'username') == 'bob'
-            assert config.get('vmware', 'password') == 'secret'
-            assert config.get('vmware', 'server') == 'https://example.org'
-            return ['successful', 0]
+        safe_env = {}
+        credentials = task.build_credentials_list(inventory_update)
+        for credential in credentials:
+            if credential:
+                credential.credential_type.inject_credential(
+                    credential, env, safe_env, [], private_data_dir
+                )
 
-        self.run_pexpect.side_effect = run_pexpect_side_effect
-        self.task.run(self.pk)
+        config = configparser.ConfigParser()
+        config.read(env['VMWARE_INI_PATH'])
+        assert config.get('vmware', 'username') == 'bob'
+        assert config.get('vmware', 'password') == 'secret'
+        assert config.get('vmware', 'server') == 'https://example.org'
 
-    def test_azure_rm_source_with_tenant(self):
+    def test_azure_rm_source_with_tenant(self, private_data_dir, inventory_update):
+        task = tasks.RunInventoryUpdate()
         azure_rm = CredentialType.defaults['azure_rm']()
-        self.instance.source = 'azure_rm'
-        self.instance.source_regions = 'north, south, east, west'
+        inventory_update.source = 'azure_rm'
+        inventory_update.source_regions = 'north, south, east, west'
 
         def get_cred():
             cred = Credential(
@@ -1953,38 +1904,45 @@ class TestInventoryUpdateCredentials(TestJobExecution):
                 }
             )
             return cred
-        self.instance.get_cloud_credential = get_cred
-        self.instance.source_vars = {
+        inventory_update.get_cloud_credential = get_cred
+        inventory_update.source_vars = {
             'include_powerstate': 'yes',
             'group_by_resource_group': 'no'
         }
 
-        def run_pexpect_side_effect(*args, **kwargs):
-            args, cwd, env, stdout = args
-            assert env['AZURE_CLIENT_ID'] == 'some-client'
-            assert env['AZURE_SECRET'] == 'some-secret'
-            assert env['AZURE_TENANT'] == 'some-tenant'
-            assert env['AZURE_SUBSCRIPTION_ID'] == 'some-subscription'
-            assert env['AZURE_CLOUD_ENVIRONMENT'] == 'foobar'
+        private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
+        env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
 
-            config = configparser.ConfigParser()
-            config.read(env['AZURE_INI_PATH'])
-            assert config.get('azure', 'include_powerstate') == 'yes'
-            assert config.get('azure', 'group_by_resource_group') == 'no'
-            assert config.get('azure', 'group_by_location') == 'yes'
-            assert 'group_by_security_group' not in config.items('azure')
-            assert config.get('azure', 'group_by_tag') == 'yes'
-            assert config.get('azure', 'locations') == 'north,south,east,west'
-            return ['successful', 0]
+        safe_env = {}
+        credentials = task.build_credentials_list(inventory_update)
+        for credential in credentials:
+            if credential:
+                credential.credential_type.inject_credential(
+                    credential, env, safe_env, [], private_data_dir
+                )
 
-        self.run_pexpect.side_effect = run_pexpect_side_effect
-        self.task.run(self.pk)
-        assert self.instance.job_env['AZURE_SECRET'] == tasks.HIDDEN_PASSWORD
+        assert env['AZURE_CLIENT_ID'] == 'some-client'
+        assert env['AZURE_SECRET'] == 'some-secret'
+        assert env['AZURE_TENANT'] == 'some-tenant'
+        assert env['AZURE_SUBSCRIPTION_ID'] == 'some-subscription'
+        assert env['AZURE_CLOUD_ENVIRONMENT'] == 'foobar'
 
-    def test_azure_rm_source_with_password(self):
+        config = configparser.ConfigParser()
+        config.read(env['AZURE_INI_PATH'])
+        assert config.get('azure', 'include_powerstate') == 'yes'
+        assert config.get('azure', 'group_by_resource_group') == 'no'
+        assert config.get('azure', 'group_by_location') == 'yes'
+        assert 'group_by_security_group' not in config.items('azure')
+        assert config.get('azure', 'group_by_tag') == 'yes'
+        assert config.get('azure', 'locations') == 'north,south,east,west'
+
+        assert safe_env['AZURE_SECRET'] == tasks.HIDDEN_PASSWORD
+
+    def test_azure_rm_source_with_password(self, private_data_dir, inventory_update):
+        task = tasks.RunInventoryUpdate()
         azure_rm = CredentialType.defaults['azure_rm']()
-        self.instance.source = 'azure_rm'
-        self.instance.source_regions = 'all'
+        inventory_update.source = 'azure_rm'
+        inventory_update.source_regions = 'all'
 
         def get_cred():
             cred = Credential(
@@ -1998,38 +1956,44 @@ class TestInventoryUpdateCredentials(TestJobExecution):
                 }
             )
             return cred
-        self.instance.get_cloud_credential = get_cred
-        self.instance.source_vars = {
+        inventory_update.get_cloud_credential = get_cred
+        inventory_update.source_vars = {
             'include_powerstate': 'yes',
             'group_by_resource_group': 'no',
             'group_by_security_group': 'no'
         }
 
-        def run_pexpect_side_effect(*args, **kwargs):
-            args, cwd, env, stdout = args
-            assert env['AZURE_SUBSCRIPTION_ID'] == 'some-subscription'
-            assert env['AZURE_AD_USER'] == 'bob'
-            assert env['AZURE_PASSWORD'] == 'secret'
-            assert env['AZURE_CLOUD_ENVIRONMENT'] == 'foobar'
+        private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
+        env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
 
-            config = configparser.ConfigParser()
-            config.read(env['AZURE_INI_PATH'])
-            assert config.get('azure', 'include_powerstate') == 'yes'
-            assert config.get('azure', 'group_by_resource_group') == 'no'
-            assert config.get('azure', 'group_by_location') == 'yes'
-            assert config.get('azure', 'group_by_security_group') == 'no'
-            assert config.get('azure', 'group_by_tag') == 'yes'
-            assert 'locations' not in config.items('azure')
-            return ['successful', 0]
+        safe_env = {}
+        credentials = task.build_credentials_list(inventory_update)
+        for credential in credentials:
+            if credential:
+                credential.credential_type.inject_credential(
+                    credential, env, safe_env, [], private_data_dir
+                )
 
-        self.run_pexpect.side_effect = run_pexpect_side_effect
-        self.task.run(self.pk)
-        assert self.instance.job_env['AZURE_PASSWORD'] == tasks.HIDDEN_PASSWORD
+        assert env['AZURE_SUBSCRIPTION_ID'] == 'some-subscription'
+        assert env['AZURE_AD_USER'] == 'bob'
+        assert env['AZURE_PASSWORD'] == 'secret'
+        assert env['AZURE_CLOUD_ENVIRONMENT'] == 'foobar'
 
-    def test_gce_source(self):
+        config = configparser.ConfigParser()
+        config.read(env['AZURE_INI_PATH'])
+        assert config.get('azure', 'include_powerstate') == 'yes'
+        assert config.get('azure', 'group_by_resource_group') == 'no'
+        assert config.get('azure', 'group_by_location') == 'yes'
+        assert config.get('azure', 'group_by_security_group') == 'no'
+        assert config.get('azure', 'group_by_tag') == 'yes'
+        assert 'locations' not in config.items('azure')
+        assert safe_env['AZURE_PASSWORD'] == tasks.HIDDEN_PASSWORD
+
+    def test_gce_source(self, inventory_update, private_data_dir):
+        task = tasks.RunInventoryUpdate()
         gce = CredentialType.defaults['gce']()
-        self.instance.source = 'gce'
-        self.instance.source_regions = 'all'
+        inventory_update.source = 'gce'
+        inventory_update.source_regions = 'all'
 
         def get_cred():
             cred = Credential(
@@ -2045,12 +2009,19 @@ class TestInventoryUpdateCredentials(TestJobExecution):
                 cred, 'ssh_key_data'
             )
             return cred
-        self.instance.get_cloud_credential = get_cred
+        inventory_update.get_cloud_credential = get_cred
 
-        expected_gce_zone = ''
+        def run(expected_gce_zone):
+            private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
+            env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
+            safe_env = {}
+            credentials = task.build_credentials_list(inventory_update)
+            for credential in credentials:
+                if credential:
+                    credential.credential_type.inject_credential(
+                        credential, env, safe_env, [], private_data_dir
+                    )
 
-        def run_pexpect_side_effect(*args, **kwargs):
-            args, cwd, env, stdout = args
             assert env['GCE_ZONE'] == expected_gce_zone
             json_data = json.load(open(env['GCE_CREDENTIALS_FILE_PATH'], 'rb'))
             assert json_data['type'] == 'service_account'
@@ -2063,18 +2034,16 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             assert 'cache' in config.sections()
             assert config.getint('cache', 'cache_max_age') == 0
 
-            return ['successful', 0]
 
-        self.run_pexpect.side_effect = run_pexpect_side_effect
-        self.task.run(self.pk)
+        run('')
 
-        self.instance.source_regions = 'us-east-4'
-        expected_gce_zone = 'us-east-4'
-        self.task.run(self.pk)
+        inventory_update.source_regions = 'us-east-4'
+        run('us-east-4')
 
-    def test_openstack_source(self):
+    def test_openstack_source(self, inventory_update, private_data_dir):
+        task = tasks.RunInventoryUpdate()
         openstack = CredentialType.defaults['openstack']()
-        self.instance.source = 'openstack'
+        inventory_update.source = 'openstack'
 
         def get_cred():
             cred = Credential(
@@ -2092,29 +2061,27 @@ class TestInventoryUpdateCredentials(TestJobExecution):
                 cred, 'ssh_key_data'
             )
             return cred
-        self.instance.get_cloud_credential = get_cred
+        inventory_update.get_cloud_credential = get_cred
 
-        def run_pexpect_side_effect(*args, **kwargs):
-            args, cwd, env, stdout = args
-            shade_config = open(env['OS_CLIENT_CONFIG_FILE'], 'r').read()
-            assert '\n'.join([
-                'clouds:',
-                '  devstack:',
-                '    auth:',
-                '      auth_url: https://keystone.example.org',
-                '      password: secret',
-                '      project_name: tenant-name',
-                '      username: bob',
-                ''
-            ]) in shade_config
-            return ['successful', 0]
+        private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
+        env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
 
-        self.run_pexpect.side_effect = run_pexpect_side_effect
-        self.task.run(self.pk)
+        shade_config = open(env['OS_CLIENT_CONFIG_FILE'], 'r').read()
+        assert '\n'.join([
+            'clouds:',
+            '  devstack:',
+            '    auth:',
+            '      auth_url: https://keystone.example.org',
+            '      password: secret',
+            '      project_name: tenant-name',
+            '      username: bob',
+            ''
+        ]) in shade_config
 
-    def test_satellite6_source(self):
+    def test_satellite6_source(self, inventory_update, private_data_dir):
+        task = tasks.RunInventoryUpdate()
         satellite6 = CredentialType.defaults['satellite6']()
-        self.instance.source = 'satellite6'
+        inventory_update.source = 'satellite6'
 
         def get_cred():
             cred = Credential(
@@ -2130,28 +2097,26 @@ class TestInventoryUpdateCredentials(TestJobExecution):
                 cred, 'password'
             )
             return cred
-        self.instance.get_cloud_credential = get_cred
+        inventory_update.get_cloud_credential = get_cred
 
-        self.instance.source_vars = '{"satellite6_group_patterns": "[a,b,c]", "satellite6_group_prefix": "hey_", "satellite6_want_hostcollections": True}'
+        inventory_update.source_vars = '{"satellite6_group_patterns": "[a,b,c]", "satellite6_group_prefix": "hey_", "satellite6_want_hostcollections": True}'
 
-        def run_pexpect_side_effect(*args, **kwargs):
-            args, cwd, env, stdout = args
-            config = configparser.ConfigParser()
-            config.read(env['FOREMAN_INI_PATH'])
-            assert config.get('foreman', 'url') == 'https://example.org'
-            assert config.get('foreman', 'user') == 'bob'
-            assert config.get('foreman', 'password') == 'secret'
-            assert config.get('ansible', 'group_patterns') == '[a,b,c]'
-            assert config.get('ansible', 'group_prefix') == 'hey_'
-            assert config.get('ansible', 'want_hostcollections') == 'True'
-            return ['successful', 0]
+        private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
+        env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
 
-        self.run_pexpect.side_effect = run_pexpect_side_effect
-        self.task.run(self.pk)
+        config = configparser.ConfigParser()
+        config.read(env['FOREMAN_INI_PATH'])
+        assert config.get('foreman', 'url') == 'https://example.org'
+        assert config.get('foreman', 'user') == 'bob'
+        assert config.get('foreman', 'password') == 'secret'
+        assert config.get('ansible', 'group_patterns') == '[a,b,c]'
+        assert config.get('ansible', 'group_prefix') == 'hey_'
+        assert config.get('ansible', 'want_hostcollections') == 'True'
 
-    def test_cloudforms_source(self):
+    def test_cloudforms_source(self, inventory_update, private_data_dir):
+        task = tasks.RunInventoryUpdate()
         cloudforms = CredentialType.defaults['cloudforms']()
-        self.instance.source = 'cloudforms'
+        inventory_update.source = 'cloudforms'
 
         def get_cred():
             cred = Credential(
@@ -2167,33 +2132,31 @@ class TestInventoryUpdateCredentials(TestJobExecution):
                 cred, 'password'
             )
             return cred
-        self.instance.get_cloud_credential = get_cred
+        inventory_update.get_cloud_credential = get_cred
 
-        self.instance.source_vars = '{"prefer_ipv4": True}'
+        inventory_update.source_vars = '{"prefer_ipv4": True}'
 
-        def run_pexpect_side_effect(*args, **kwargs):
-            args, cwd, env, stdout = args
-            config = configparser.ConfigParser()
-            config.read(env['CLOUDFORMS_INI_PATH'])
-            assert config.get('cloudforms', 'url') == 'https://example.org'
-            assert config.get('cloudforms', 'username') == 'bob'
-            assert config.get('cloudforms', 'password') == 'secret'
-            assert config.get('cloudforms', 'ssl_verify') == 'false'
-            assert config.get('cloudforms', 'prefer_ipv4') == 'True'
+        private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
+        env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
 
-            cache_path = config.get('cache', 'path')
-            assert cache_path.startswith(env['AWX_PRIVATE_DATA_DIR'])
-            assert os.path.isdir(cache_path)
-            return ['successful', 0]
+        config = configparser.ConfigParser()
+        config.read(env['CLOUDFORMS_INI_PATH'])
+        assert config.get('cloudforms', 'url') == 'https://example.org'
+        assert config.get('cloudforms', 'username') == 'bob'
+        assert config.get('cloudforms', 'password') == 'secret'
+        assert config.get('cloudforms', 'ssl_verify') == 'false'
+        assert config.get('cloudforms', 'prefer_ipv4') == 'True'
 
-        self.run_pexpect.side_effect = run_pexpect_side_effect
-        self.task.run(self.pk)
+        cache_path = config.get('cache', 'path')
+        assert cache_path.startswith(env['AWX_PRIVATE_DATA_DIR'])
+        assert os.path.isdir(cache_path)
 
     @pytest.mark.parametrize('verify', [True, False])
-    def test_tower_source(self, verify):
+    def test_tower_source(self, verify, inventory_update, private_data_dir):
+        task = tasks.RunInventoryUpdate()
         tower = CredentialType.defaults['tower']()
-        self.instance.source = 'tower'
-        self.instance.instance_filters = '12345'
+        inventory_update.source = 'tower'
+        inventory_update.instance_filters = '12345'
         inputs = {
             'host': 'https://tower.example.org',
             'username': 'bob',
@@ -2205,28 +2168,33 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             cred = Credential(pk=1, credential_type=tower, inputs = inputs)
             cred.inputs['password'] = encrypt_field(cred, 'password')
             return cred
-        self.instance.get_cloud_credential = get_cred
+        inventory_update.get_cloud_credential = get_cred
 
-        def run_pexpect_side_effect(*args, **kwargs):
-            args, cwd, env, stdout = args
-            assert env['TOWER_HOST'] == 'https://tower.example.org'
-            assert env['TOWER_USERNAME'] == 'bob'
-            assert env['TOWER_PASSWORD'] == 'secret'
-            assert env['TOWER_INVENTORY'] == '12345'
-            if verify:
-                assert env['TOWER_VERIFY_SSL'] == 'True'
-            else:
-                assert env['TOWER_VERIFY_SSL'] == 'False'
-            return ['successful', 0]
+        env = task.build_env(inventory_update, private_data_dir, False)
 
-        self.run_pexpect.side_effect = run_pexpect_side_effect
-        self.task.run(self.pk)
-        assert self.instance.job_env['TOWER_PASSWORD'] == tasks.HIDDEN_PASSWORD
+        safe_env = {}
+        credentials = task.build_credentials_list(inventory_update)
+        for credential in credentials:
+            if credential:
+                credential.credential_type.inject_credential(
+                    credential, env, safe_env, [], private_data_dir
+                )
 
-    def test_tower_source_ssl_verify_empty(self):
+        assert env['TOWER_HOST'] == 'https://tower.example.org'
+        assert env['TOWER_USERNAME'] == 'bob'
+        assert env['TOWER_PASSWORD'] == 'secret'
+        assert env['TOWER_INVENTORY'] == '12345'
+        if verify:
+            assert env['TOWER_VERIFY_SSL'] == 'True'
+        else:
+            assert env['TOWER_VERIFY_SSL'] == 'False'
+        assert safe_env['TOWER_PASSWORD'] == tasks.HIDDEN_PASSWORD
+
+    def test_tower_source_ssl_verify_empty(self, inventory_update, private_data_dir):
+        task = tasks.RunInventoryUpdate()
         tower = CredentialType.defaults['tower']()
-        self.instance.source = 'tower'
-        self.instance.instance_filters = '12345'
+        inventory_update.source = 'tower'
+        inventory_update.instance_filters = '12345'
         inputs = {
             'host': 'https://tower.example.org',
             'username': 'bob',
@@ -2237,19 +2205,23 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             cred = Credential(pk=1, credential_type=tower, inputs = inputs)
             cred.inputs['password'] = encrypt_field(cred, 'password')
             return cred
-        self.instance.get_cloud_credential = get_cred
+        inventory_update.get_cloud_credential = get_cred
 
-        def run_pexpect_side_effect(*args, **kwargs):
-            args, cwd, env, stdout = args
-            assert env['TOWER_VERIFY_SSL'] == 'False'
-            return ['successful', 0]
+        env = task.build_env(inventory_update, private_data_dir, False)
+        safe_env = {}
+        credentials = task.build_credentials_list(inventory_update)
+        for credential in credentials:
+            if credential:
+                credential.credential_type.inject_credential(
+                    credential, env, safe_env, [], private_data_dir
+                )
 
-        self.run_pexpect.side_effect = run_pexpect_side_effect
-        self.task.run(self.pk)
+        assert env['TOWER_VERIFY_SSL'] == 'False'
 
-    def test_awx_task_env(self):
+    def test_awx_task_env(self, inventory_update, private_data_dir, settings):
+        task = tasks.RunInventoryUpdate()
         gce = CredentialType.defaults['gce']()
-        self.instance.source = 'gce'
+        inventory_update.source = 'gce'
 
         def get_cred():
             cred = Credential(
@@ -2261,16 +2233,12 @@ class TestInventoryUpdateCredentials(TestJobExecution):
                 }
             )
             return cred
-        self.instance.get_cloud_credential = get_cred
+        inventory_update.get_cloud_credential = get_cred
+        settings.AWX_TASK_ENV = {'FOO': 'BAR'}
 
-        with mock.patch('awx.main.tasks.settings.AWX_TASK_ENV', {'FOO': 'BAR'}):
-            self.task.run(self.pk)
+        env = task.build_env(inventory_update, private_data_dir, False)
 
-        assert self.run_pexpect.call_count == 1
-        call_args, _ = self.run_pexpect.call_args_list[0]
-        args, cwd, env, stdout = call_args
         assert env['FOO'] == 'BAR'
-
 
 
 def test_os_open_oserror():

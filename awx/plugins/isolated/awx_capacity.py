@@ -50,7 +50,7 @@ def main():
     )
     try:
         version = subprocess.check_output(
-            ['awx-expect', '--version'],
+            ['ansible-runner', '--version'],
             stderr=subprocess.STDOUT
         ).strip()
     except subprocess.CalledProcessError as e:

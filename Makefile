@@ -146,6 +146,7 @@ virtualenv_awx:
 		fi; \
 		if [ ! -d "$(VENV_BASE)/awx" ]; then \
 			$(PYTHON) -m venv --system-site-packages $(VENV_BASE)/awx; \
+			$(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) --ignore-installed docutils==0.14; \
 		fi; \
 	fi
 
@@ -166,13 +167,6 @@ requirements_ansible_dev:
 	if [ "$(VENV_BASE)" ]; then \
 		$(VENV_BASE)/ansible/bin/pip install pytest mock; \
 	fi
-
-requirements_isolated:
-	if [ ! -d "$(VENV_BASE)/awx" ]; then \
-		$(PYTHON) -m venv $(VENV_BASE)/awx; \
-	fi;
-	echo "include-system-site-packages = true" >> $(VENV_BASE)/awx/lib/python$(PYTHON_VERSION)/pyvenv.cfg
-	$(VENV_BASE)/awx/bin/pip install -r requirements/requirements_isolated.txt
 
 # Install third-party requirements needed for AWX's environment.
 requirements_awx: virtualenv_awx
@@ -569,7 +563,6 @@ docker-isolated:
 	TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose.yml -f tools/docker-isolated-override.yml create
 	docker start tools_awx_1
 	docker start tools_isolated_1
-	echo "__version__ = '`git describe --long | cut -d - -f 1-1`'" | docker exec -i tools_isolated_1 /bin/bash -c "cat > /venv/awx/lib/python$(PYTHON_VERSION)/site-packages/awx.py"
 	CURRENT_UID=$(shell id -u) TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose.yml -f tools/docker-isolated-override.yml up
 
 # Docker Compose Development environment

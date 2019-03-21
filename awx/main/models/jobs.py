@@ -821,7 +821,6 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         return self.inventory.hosts.only(*only)
 
     def start_job_fact_cache(self, destination, modification_times, timeout=None):
-        destination = os.path.join(destination, 'facts')
         os.makedirs(destination, mode=0o700)
         hosts = self._get_inventory_hosts()
         if timeout is None:
@@ -846,7 +845,6 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
             modification_times[filepath] = os.path.getmtime(filepath)
 
     def finish_job_fact_cache(self, destination, modification_times):
-        destination = os.path.join(destination, 'facts')
         for host in self._get_inventory_hosts():
             filepath = os.sep.join(map(str, [destination, host.name]))
             if not os.path.realpath(filepath).startswith(destination):

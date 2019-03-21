@@ -606,7 +606,7 @@ class CredentialType(CommonModelNameNotUnique):
             match = cls.objects.filter(**requirements)[:1].get()
         return match
 
-    def inject_credential(self, credential, env, safe_env, args, safe_args, private_data_dir):
+    def inject_credential(self, credential, env, safe_env, args, private_data_dir):
         """
         Inject credential data into the environment variables and arguments
         passed to `ansible-playbook`
@@ -627,9 +627,6 @@ class CredentialType(CommonModelNameNotUnique):
                                  additional arguments based on custom
                                  `extra_vars` injectors defined on this
                                  CredentialType.
-        :param safe_args:        a list of arguments stored in the database for
-                                 the job run (`UnifiedJob.job_args`); secret
-                                 values should be stripped
         :param private_data_dir: a temporary directory to store files generated
                                  by `file` injectors (like config files or key
                                  files)
@@ -650,7 +647,7 @@ class CredentialType(CommonModelNameNotUnique):
         # maintain a normal namespace for building the ansible-playbook arguments (env and args)
         namespace = {'tower': tower_namespace}
 
-        # maintain a sanitized namespace for building the DB-stored arguments (safe_env and safe_args)
+        # maintain a sanitized namespace for building the DB-stored arguments (safe_env)
         safe_namespace = {'tower': tower_namespace}
 
         # build a normal namespace with secret values decrypted (for
@@ -724,7 +721,6 @@ class CredentialType(CommonModelNameNotUnique):
             path = build_extra_vars_file(extra_vars, private_data_dir)
             if extra_vars:
                 args.extend(['-e', '@%s' % path])
-                safe_args.extend(['-e', '@%s' % path])
 
 
 class ManagedCredentialType(SimpleNamespace):
