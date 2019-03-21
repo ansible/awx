@@ -21,20 +21,20 @@
                          </a>
                          <div class="atCodeMirror-toggleContainer FormToggle-container">
                              <div class="btn-group">
-                                <label ng-class="{'btn-primary': parseType === 'yaml','Button-primary--hollow' : parseType === 'json'}" class="btn btn-xs btn-primary">
+                                <label ng-class="{'btn-primary': modalParseType === 'yaml','Button-primary--hollow' : modalParseType === 'json'}" class="btn btn-xs">
                                     <input
                                         type="radio"
                                         value="yaml"
-                                        ng-model="parseType"
+                                        ng-model="modalParseType"
                                         ng-change="vm.toggle()"
                                         class="ng-pristine ng-untouched ng-valid ng-not-empty">
                                             {{ vm.strings.get('label.YAML')}}
                                 </label>
-                                <label ng-class="{'btn-primary': parseType === 'json','Button-primary--hollow' : parseType === 'yaml'}" class="btn btn-xs Button-primary--hollow">
+                                <label ng-class="{'btn-primary': modalParseType === 'json','Button-primary--hollow' : modalParseType === 'yaml'}" class="btn btn-xs">
                                     <input
                                         type="radio"
                                         value="json"
-                                        ng-model="parseType"
+                                        ng-model="modalParseType"
                                         ng-change="vm.toggle()"
                                         class="ng-pristine ng-untouched ng-valid ng-not-empty">
                                             {{ vm.strings.get('label.JSON')}}
@@ -46,7 +46,7 @@
                         <div class="at-RowItem-tag at-RowItem-tag--header atCodeMirror-badge" ng-show="disabled === 'true' || disabled === true">
                             {{ vm.strings.get('label.READONLY')}}
                         </div>
-                        <button type="button" class="close" ng-click="closeFn()">
+                        <button type="button" class="close" ng-click="close()">
                             <i class="fa fa-times-circle"></i>
                         </button>
                     </div>
@@ -55,15 +55,15 @@
             <div class="modal-body">
                 <textarea
                     ng-disabled="disabled"
-                    ng-model="extra_variables"
+                    ng-model="modalVars"
                     name="extra_variables"
                     class="form-control Form-textArea"
-                    id="{{ vm.name }}">
+                    id="variables_modal">
                 </textarea>
             </div>
             <div class="modal-footer">
                 <div class="CodeMirror-modalControls">
-                    <button ng-click="closeFn()" class="btn btn-sm btn-default">Close</button>
+                    <button ng-click="close()" class="btn btn-sm btn-default">Close</button>
                 </div>
             </div>
         </div>

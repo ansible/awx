@@ -42,43 +42,8 @@
  			$rootScope.breadcrumb.host_name = host.data.name;
             $scope.name = host.data.name;
  			$scope.description = host.data.description;
-			$scope.variables = getVars(host.data.variables);
-        	ParseTypeChange({
-        		scope: $scope,
-        		field_id: 'host_variables',
-        		variable: 'variables',
-        	});
+			$scope.variables = host.data.variables;
  		};
-
-		// Adding this function b/c sometimes extra vars are returned to the
-		// UI as a string (ex: "foo: bar"), and other times as a
-		// json-object-string (ex: "{"foo": "bar"}"). CodeMirror wouldn't know
-		// how to prettify the latter. The latter occurs when host vars were
-		// system generated and not user-input (such as adding a cloud host);
-		function getVars(str){
-
-			// Quick function to test if the host vars are a json-object-string,
-			// by testing if they can be converted to a JSON object w/o error.
-			function IsJsonString(str) {
-				try {
-					JSON.parse(str);
-				} catch (e) {
-					return false;
-				}
-				return true;
-			}
-
-			if(str === ''){
-				return '---';
-			}
-			else if(IsJsonString(str)){
-				str = JSON.parse(str);
-				return jsyaml.safeDump(str);
-			}
-			else if(!IsJsonString(str)){
-				return str;
-			}
-		}
 
  		init();
  	}];

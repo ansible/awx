@@ -66,20 +66,26 @@ function(i18n) {
                 },
                 host_variables: {
                     label: i18n._('Variables'),
-                    type: 'textarea',
-                    rows: 6,
+                    type: 'code_mirror',
                     class: 'Form-formGroup--fullWidth',
                     "default": "---",
-                    awPopOver: "<p>" + i18n._("Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two.") + "</p>" +
-                        "JSON:<br />\n" +
-                        "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
-                        "YAML:<br />\n" +
-                        "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n" +
-                        '<p>' + i18n.sprintf(i18n._('View JSON examples at %s'), '<a href="http://www.json.org" target="_blank">www.json.org</a>') + '</p>' +
-                        '<p>' + i18n.sprintf(i18n._('View YAML examples at %s'), '<a href="http://docs.ansible.com/YAMLSyntax.html" target="_blank">docs.ansible.com</a>') + '</p>',
-                    dataTitle: i18n._('Host Variables'),
-                    dataPlacement: 'right',
-                    dataContainer: 'body',
+                    variables: 'host_variables',
+                    awPopOver: `<p>${i18n._("Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two.")}</p>
+                    JSON:<br />
+                    <blockquote>
+                      {<br />&emsp;&quot;somevar&quot;: &quot;somevalue&quot;,<br />&emsp;&quot;password&quot;: &quot;magic&quot;<br /> }
+                    </blockquote>
+                    YAML:<br />
+                    <blockquote>
+                      ---<br />
+                      somevar: somevalue<br />
+                      password: magic<br />
+                      </blockquote>
+                    <p>${i18n.sprintf(i18n._(
+                      'View JSON examples at %s'),
+                      '<a href=&quot;http://www.json.org&quot; target=&quot;_blank&quot;>www.json.org</a>'
+                    )}</p>
+                    <p>${i18n.sprintf(i18n._('View YAML examples at %s'), '<a href=&quot;http://docs.ansible.com/YAMLSyntax.html&quot; target=&quot;_blank&quot;>docs.ansible.com</a>')}</p>`,
                     ngDisabled: '!(host.summary_fields.user_capabilities.edit || canAdd) || isSmartInvHost'
                 }
             },

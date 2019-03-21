@@ -1364,6 +1364,18 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += "</div>\n";
                     }
 
+                    if (field.type === 'code_mirror') {
+                        html += '<at-code-mirror ';
+                        html += `id="${form.name}_${fld}" `;
+                        html += `class="${field.class}" `;
+                        html += `label="${field.label}" `;
+                        html += `tooltip="${field.awPopOver}" `;
+                        html += `name="${fld}" `;
+                        html += `variables="${field.variables}" `;
+                        html += `ng-disabled="${field.ngDisabled}" `;
+                        html += '></at-code-mirror>';
+                    }
+
                     if (field.type === 'custom') {
                         let labelOptions = {};
 
@@ -1475,7 +1487,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             } else {
                                 relatedTabSelected = this.form.activeEditState ? `$state.includes('${this.form.activeEditState}.${itm}') || $state.includes('${this.form.stateTree}.edit.${itm}')` : `$state.includes('${this.form.stateTree}.edit.${itm}')`;
                             }
-                             
+
                             html += `ng-class="{'is-selected' : ${relatedTabSelected}` ;
                             if(this.form.related[itm].disabled){
                                 html += `, 'Form-tab--disabled' : ${this.form.related[itm].disabled }`;

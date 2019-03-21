@@ -94,8 +94,12 @@ export default
                     // convert json to yaml
                     try {
                         removeField(fld);
-                        
-                        json_obj = JSON.parse(scope[fld]);
+                        let jsonString = scope[fld];
+                        if (jsonString.trim() === '') {
+                          jsonString = '{}';
+                        }
+
+                        json_obj = JSON.parse(jsonString);
                         if ($.isEmptyObject(json_obj)) {
                             scope[fld] = '---';
                         }

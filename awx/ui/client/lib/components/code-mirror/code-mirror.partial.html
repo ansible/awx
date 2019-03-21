@@ -13,26 +13,27 @@
                 class="help-link"
                 data-original-title="{{ label || vm.strings.get('code_mirror.label.VARIABLES') }}"
                 title="{{ label || vm.strings.get('code_mirror.label.VARIABLES') }}"
-                tabindex="-1">
+                tabindex="-1"
+                ng-if="tooltip">
                  <i class="fa fa-question-circle"></i>
              </a>
              <div class="atCodeMirror-toggleContainer FormToggle-container">
                  <div class="btn-group">
-                    <label ng-class="{'btn-primary': parseType === 'yaml','Button-primary--hollow' : parseType === 'json'}" class="btn btn-xs btn-primary">
+                    <label ng-class="{'btn-primary': parseType === 'yaml','Button-primary--hollow' : parseType === 'json'}" class="btn btn-xs">
                         <input
                             type="radio"
                             value="yaml"
                             ng-model="parseType"
-                            ng-change="parseTypeChange('parseType', vm.variables)"
+                            ng-change="parseTypeChange('parseType', vm.variablesName)"
                             class="ng-pristine ng-untouched ng-valid ng-not-empty">
                                 {{ vm.strings.get('label.YAML')}}
                     </label>
-                    <label ng-class="{'btn-primary': parseType === 'json','Button-primary--hollow' : parseType === 'yaml'}" class="btn btn-xs Button-primary--hollow">
+                    <label ng-class="{'btn-primary': parseType === 'json','Button-primary--hollow' : parseType === 'yaml'}" class="btn btn-xs">
                         <input
                             type="radio"
                             value="json"
                             ng-model="parseType"
-                            ng-change="parseTypeChange('parseType', vm.variables)"
+                            ng-change="parseTypeChange('parseType', vm.variablesName)"
                             class="ng-pristine ng-untouched ng-valid ng-not-empty">
                                 {{ vm.strings.get('label.JSON')}}
                     </label>
@@ -45,17 +46,18 @@
         ng-disabled="disabled"
         rows="6"
         ng-model="variables"
-        name="variables"
+        name="{{ vm.name }}_variables"
         class="form-control Form-textArea"
-        id="{{ vm.name }}">
+        id="{{ vm.name }}_variables">
     </textarea>
     <at-code-mirror-modal
-        name="{{ vm.modalName }}"
+        name="{{ vm.name }}"
         ng-if="vm.expanded"
-        variables="{{ variables }}"
+        modal-vars="variables"
+        modal-parse-type="parseType"
         tooltip="{{ tooltip || vm.strings.get('code_mirror.tooltip.TOOLTIP') }}"
         label="{{ label || vm.strings.get('code_mirror.label.VARIABLES') }}"
         disabled="{{ disabled || false }}"
-        close-fn="vm.close()">
+        close-fn="vm.close(values, parseType)">
     </at-code-mirror-modal>
 </div>
