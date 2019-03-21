@@ -18,17 +18,10 @@ class CustomEmailBackend(EmailBackend):
                        "use_ssl": {"label": "Use SSL", "type": "bool"},
                        "sender": {"label": "Sender Email", "type": "string"},
                        "recipients": {"label": "Recipient List", "type": "list"},
-                       "timeout": {"label": "Timeout", "type": "int"}}
+                       "timeout": {"label": "Timeout", "type": "int", "default": 30}}
     recipient_parameter = "recipients"
     sender_parameter = "sender"
 
-    def __init__(self, timeout=None, **kwargs):
-        self.timeout = timeout
-        if timeout is None:
-            self.timeout == 30
-        if not (1 <= timeout <= 120):
-            raise ValueError("Email timeout range needs to be between 1 and 120 seconds")
-        return super(CustomEmailBackend, self).__init__(timeout, **kwargs)
 
     def format_body(self, body):
         if "body" in body:
