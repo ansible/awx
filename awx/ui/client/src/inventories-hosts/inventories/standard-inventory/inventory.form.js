@@ -66,12 +66,17 @@ function(i18n) {
                 dataContainer: 'body',
                 control: '<instance-groups-multiselect instance-groups="instance_groups" field-is-disabled="!(inventory_obj.summary_fields.user_capabilities.edit || canAdd)"></instance-groups-multiselect>',
             },
-            variables: {
+            inventory_variables: {
+                realName: 'variables',
                 label: i18n._('Variables'),
-                type: 'code_mirror',
+                type: 'textarea',
                 class: 'Form-formGroup--fullWidth',
-                variables: 'variables',
+                rows: 6,
+                "default": "---",
                 awPopOver: i18n._('Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax.'),
+                dataTitle: i18n._('Variables'),
+                dataPlacement: 'right',
+                dataContainer: 'body',
                 ngDisabled: '!(inventory_obj.summary_fields.user_capabilities.edit || canAdd)' // TODO: get working
             }
         },
