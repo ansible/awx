@@ -4624,7 +4624,7 @@ class NotificationTemplateSerializer(BaseSerializer):
                     attrs['notification_configuration'][field] = params['default']
                 else:
                     missing_fields.append(field)
-                continue
+                    continue
             field_val = attrs['notification_configuration'][field]
             field_type = params['type']
             expected_types = self.type_map[field_type]
