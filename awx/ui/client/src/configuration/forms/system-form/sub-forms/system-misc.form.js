@@ -58,6 +58,8 @@ export default ['i18n', function(i18n) {
             CUSTOM_VENV_PATHS: {
                 type: 'textarea',
                 reset: 'CUSTOM_VENV_PATHS'
+            INSIGHTS_DATA_ENABLED: {
+                type: 'toggleSwitch'
             }
         },
 
