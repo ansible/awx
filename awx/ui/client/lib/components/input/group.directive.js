@@ -114,12 +114,16 @@ function AtInputGroupController ($scope, $compile) {
             config._component = 'at-input-checkbox';
         } else if (input.type === 'file') {
             config._component = 'at-input-file';
-        } else if (input.choices) {
+        }
+
+        if (input.choices) {
             config._component = 'at-input-select';
             config._format = 'array';
             config._data = input.choices;
             config._exp = 'choice for (index, choice) in state._data';
-        } else {
+        }
+
+        if (!config._component) {
             const preface = vm.strings.get('group.UNSUPPORTED_ERROR_PREFACE');
             throw new Error(`${preface}: ${input.type}`);
         }
