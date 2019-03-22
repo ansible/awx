@@ -15,22 +15,22 @@
     - name: synchronize job environment with isolated host
       synchronize:
         copy_links: true
-        src: "{{src}}"
+        src: "{{src}}/"
         dest: "{{dest}}"
 
     - stat: path="{{src}}/env/ssh_key"
       register: key
 
     - name: create a named pipe for secret environment data
-      command: "mkfifo {{src}}/env/ssh_key"
+      command: "mkfifo {{dest}}/env/ssh_key"
       when: key.stat.exists
 
     - name: spawn the playbook
-      command: "ansible-runner start {{src}} -p {{playbook}} -i {{ident}}"
+      shell: "ansible-runner start {{dest}} -p {{playbook}} -i {{ident}}"
 
     - name: write the secret environment data
       mkfifo:
         content: "{{secret}}"
-        path: "{{src}}/env/ssh_key"
+        path: "{{dest}}/env/ssh_key"
       when: key.stat.exists
       no_log: True

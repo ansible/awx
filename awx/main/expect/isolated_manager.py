@@ -104,7 +104,7 @@ class IsolatedManager(object):
         self.build_isolated_job_data()
         extra_vars = {
             'src': self.private_data_dir,
-            'dest': settings.AWX_PROOT_BASE_PATH,
+            'dest': os.path.join(settings.AWX_PROOT_BASE_PATH, os.path.basename(os.path.normpath(self.private_data_dir))),
             'playbook': playbook,
             'ident': self.ident
         }
