@@ -26,18 +26,19 @@ aim_inputs = {
         'type': 'string',
         'secret': True,
         'multiline': True,
+        'format': 'ssh_private_key',
     }, {
         'id': 'client_cert',
-        'label': _('Client Cert'),
+        'label': _('Client Certificate'),
         'type': 'string',
         'secret': True,
         'multiline': True,
+        'format': 'ssh_private_key',
     }, {
         'id': 'verify',
         'type': 'boolean',
         'default': True,
-        'label': _('Verify'),
-        'help_text': _('Verify SSL certificates for HTTPS requests'),
+        'label': _('Verify SSL Certificates'),
     }],
     'metadata': [{
         'id': 'safe',

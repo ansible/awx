@@ -99,6 +99,7 @@ function AtInputGroupController ($scope, $compile) {
 
                 if (input.secret) {
                     config._component = 'at-input-textarea-secret';
+                    input.format = 'ssh_private_key';
                 } else {
                     config._component = 'at-input-textarea';
                 }
