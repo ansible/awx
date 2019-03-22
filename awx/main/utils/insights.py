@@ -2,42 +2,46 @@
 # All Rights Reserved.
 
 
-def filter_insights_api_response(json):
-    new_json = {}
-    '''
-    'last_check_in',
-    'reports.[].rule.severity',
-    'reports.[].rule.description',
-    'reports.[].rule.category',
-    'reports.[].rule.summary',
-    'reports.[].rule.ansible_fix',
-    'reports.[].rule.ansible',
-    'reports.[].maintenance_actions.[].maintenance_plan.name',
-    'reports.[].maintenance_actions.[].maintenance_plan.maintenance_id',
-    '''
+# Old Insights API -> New API
+#
+# last_check_in -> checked_on
+# reports[] -> active_reports[]
+# reports[].rule.{description,summary} -> active_reports[].rule.{description,summary}
+# reports[].rule.category -> active_reports[].rule.category.name
+# reports[].rule.severity (str) -> active_reports[].rule.total_risk (int)
 
-    if 'last_check_in' in json:
-        new_json['last_check_in'] = json['last_check_in']
-    if 'reports' in json:
+# reports[].rule.{ansible,ansible_fix} appears to be unused
+# reports[].maintenance_actions[] missing entirely, will be provided
+#   by a different Insights endpoint
+
+
+def filter_insights_api_response(json):
+    severity_mapping = {
+        1: 'INFO',
+        2: 'WARN',
+        3: 'ERROR',
+        4: 'CRITICAL'
+    }
+
+    new_json = {}
+    if 'checked_on' in json:
+        new_json['last_check_in'] = json['checked_on']
+    if 'active_reports' in json:
         new_json['reports'] = []
-        for rep in json['reports']:
+        for rep in json['active_reports']:
             new_report = {
                 'rule': {},
-                'maintenance_actions': []
+                'maintenance_actions': []  # This will be populated by a different API call
             }
-            if 'rule' in rep:
-                for k in ['severity', 'description', 'category', 'summary', 'ansible_fix', 'ansible',]:
-                    if k in rep['rule']:
-                        new_report['rule'][k] = rep['rule'][k]
+            rule = rep.get('rule') or {}
+            for k in ['description', 'summary']:
+                if k in rule:
+                    new_report['rule'][k] = rule[k]
+            if 'category' in rule:
+                new_report['category'] = rule['category']['name']
+            if rule.get('total_risk') in severity_mapping:
+                new_report['severity'] = severity_mapping[rule['total_risk']]
 
-            for action in rep.get('maintenance_actions', []):
-                new_action = {'maintenance_plan': {}}
-                if 'maintenance_plan' in action:
-                    for k in ['name', 'maintenance_id']:
-                        if k in action['maintenance_plan']:
-                            new_action['maintenance_plan'][k] = action['maintenance_plan'][k]
-                new_report['maintenance_actions'].append(new_action)
-            
             new_json['reports'].append(new_report)
+
     return new_json
-        
