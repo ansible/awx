@@ -159,8 +159,8 @@ module.exports = {
         client.click('div[class="CodeMirror-scroll"]');
         client.sendKeys('.CodeMirror textarea', client.Keys.ENTER);
         client.sendKeys('.CodeMirror textarea', 'ansible_connection: local');
-        client.click('#host_host_variables_parse_type label[class$="hollow"]');
-        client.click('#host_host_variables_parse_type label[class$="hollow"]');
+        client.click('#host_variables_parse_type label[class$="hollow"]');
+        client.click('#host_variables_parse_type label[class$="hollow"]');
 
         client.expect.element('#host_save_btn').enabled;
         client.click('#host_save_btn');
