@@ -1,724 +1,436 @@
 {
-	"toString": "$REDACTED$",
-	"isCheckingIn": false,
-    "system_id": "11111111-1111-1111-1111-111111111111",
-	"display_name": null,
-	"remote_branch": null,
-	"remote_leaf": null,
-	"account_number": "1111111",
-	"hostname": "$REDACTED$",
-	"parent_id": null,
-	"system_type_id": 105,
-	"last_check_in": "2017-07-21T07:07:29.000Z",
-	"stale_ack": false,
-	"type": "machine",
-	"product": "rhel",
-	"created_at": "2017-07-20T17:26:53.000Z",
-	"updated_at": "2017-07-21T07:07:29.000Z",
-	"unregistered_at": null,
-	"reports": [{
-		"details": {
-			"vulnerable_setting": "hosts:      files dns myhostname",
-			"affected_package": "glibc-2.17-105.el7",
-			"error_key": "GLIBC_CVE_2015_7547"
-		},
-		"id": 955802695,
-		"rule_id": "CVE_2015_7547_glibc|GLIBC_CVE_2015_7547",
-        "system_id": "11111111-1111-1111-1111-111111111111",
-        "account_number": "1111111",
-        "uuid": "11111111111111111111111111111111",
-		"date": "2017-07-21T07:07:29.000Z",
-		"rule": {
-			"summary_html": "<p>A critical security flaw in the <code>glibc</code> library was found. It allows an attacker to crash an application built against that library or, potentially, execute arbitrary code with privileges of the user running the application.</p>\n",
-			"generic_html": "<p>The <code>glibc</code> library is vulnerable to a stack-based buffer overflow security flaw. A remote attacker could create specially crafted DNS responses that could cause the <code>libresolv</code> part of the library, which performs dual A/AAAA DNS queries, to crash or potentially execute code with the permissions of the user running the library. The issue is only exposed when <code>libresolv</code> is called from the nss_dns NSS service module. This flaw is known as <a href=\"https://access.redhat.com/security/cve/CVE-2015-7547\">CVE-2015-7547</a>.</p>\n",
-			"more_info_html": "<ul>\n<li>For more information about the flaw see <a href=\"https://access.redhat.com/security/cve/CVE-2015-7547\">CVE-2015-7547</a>.</li>\n<li>To learn how to upgrade packages, see &quot;<a href=\"https://access.redhat.com/solutions/9934\">What is yum and how do I use it?</a>&quot;</li>\n<li>The Customer Portal page for the <a href=\"https://access.redhat.com/security/\">Red Hat Security Team</a> contains more information about policies, procedures, and alerts for Red Hat Products.</li>\n<li>The Security Team also maintains a frequently updated blog at <a href=\"https://securityblog.redhat.com\">securityblog.redhat.com</a>.</li>\n</ul>\n",
-			"severity": "ERROR",
-			"ansible": true,
-			"ansible_fix": false,
-			"ansible_mitigation": false,
-			"rule_id": "CVE_2015_7547_glibc|GLIBC_CVE_2015_7547",
-			"error_key": "GLIBC_CVE_2015_7547",
-			"plugin": "CVE_2015_7547_glibc",
-			"description": "Remote code execution vulnerability in libresolv via crafted DNS response (CVE-2015-7547)",
-			"summary": "A critical security flaw in the `glibc` library was found. It allows an attacker to crash an application built against that library or, potentially, execute arbitrary code with privileges of the user running the application.",
-			"generic": "The `glibc` library is vulnerable to a stack-based buffer overflow security flaw. A remote attacker could create specially crafted DNS responses that could cause the `libresolv` part of the library, which performs dual A/AAAA DNS queries, to crash or potentially execute code with the permissions of the user running the library. The issue is only exposed when `libresolv` is called from the nss_dns NSS service module. This flaw is known as [CVE-2015-7547](https://access.redhat.com/security/cve/CVE-2015-7547).",
-			"reason": "<p>This host is vulnerable because it has vulnerable package <strong>glibc-2.17-105.el7</strong> installed and DNS is enabled in <code>/etc/nsswitch.conf</code>:</p>\n<pre><code>hosts:      files dns myhostname\n</code></pre><p>The <code>glibc</code> library is vulnerable to a stack-based buffer overflow security flaw. A remote attacker could create specially crafted DNS responses that could cause the <code>libresolv</code> part of the library, which performs dual A/AAAA DNS queries, to crash or potentially execute code with the permissions of the user running the library. The issue is only exposed when <code>libresolv</code> is called from the nss_dns NSS service module. This flaw is known as <a href=\"https://access.redhat.com/security/cve/CVE-2015-7547\">CVE-2015-7547</a>.</p>\n",
-			"type": null,
-			"more_info": "* For more information about the flaw see [CVE-2015-7547](https://access.redhat.com/security/cve/CVE-2015-7547).\n* To learn how to upgrade packages, see \"[What is yum and how do I use it?](https://access.redhat.com/solutions/9934)\"\n* The Customer Portal page for the [Red Hat Security Team](https://access.redhat.com/security/) contains more information about policies, procedures, and alerts for Red Hat Products.\n* The Security Team also maintains a frequently updated blog at [securityblog.redhat.com](https://securityblog.redhat.com).",
-			"active": true,
-			"node_id": "2168451",
-			"category": "Security",
-			"retired": false,
-			"reboot_required": false,
-			"publish_date": "2016-10-31T04:08:35.000Z",
-			"rec_impact": 4,
-			"rec_likelihood": 2,
-			"resolution": "<p>Red Hat recommends updating <code>glibc</code> and restarting the affected system:</p>\n<pre><code># yum update glibc\n# reboot\n</code></pre><p>Alternatively, you can restart all affected services, but because this vulnerability affects a large amount of applications on the system, the best solution is to restart the system.</p>\n"
-		},
-		"maintenance_actions": [{
-			"done": false,
-			"id": 305205,
-			"maintenance_plan": {
-				"maintenance_id": 29315,
-				"name": "RHEL Demo Infrastructure",
-				"description": null,
-				"start": null,
-				"end": null,
-				"created_by": "$READACTED$",
-				"silenced": false,
-				"hidden": false,
-				"suggestion": null,
-				"remote_branch": null,
-				"allow_reboot": true
-			}
-		}, {
-			"done": false,
-			"id": 305955,
-			"maintenance_plan": {
-				"maintenance_id": 29335,
-				"name": "RHEL Demo All Systems",
-				"description": null,
-				"start": null,
-				"end": null,
-				"created_by": "$READACTED$",
-				"silenced": false,
-				"hidden": false,
-				"suggestion": null,
-				"remote_branch": null,
-				"allow_reboot": true
-			}
-		}]
-	}, {
-		"details": {
-			"affected_kernel": "3.10.0-327.el7",
-			"error_key": "KERNEL_CVE-2016-0728"
-		},
-		"id": 955802705,
-		"rule_id": "CVE_2016_0728_kernel|KERNEL_CVE-2016-0728",
-		"system_id": "11111111-1111-1111-1111-111111111111",
-		"account_number": "1111111",
-		"uuid": "11111111111111111111111111111111",
-		"date": "2017-07-21T07:07:29.000Z",
-		"rule": {
-			"summary_html": "<p>A vulnerability in the Linux kernel allowing local privilege escalation was discovered. The issue was reported as <a href=\"https://access.redhat.com/security/cve/cve-2016-0728\">CVE-2016-0728</a>.</p>\n",
-			"generic_html": "<p>A vulnerability in the Linux kernel rated <strong>Important</strong> was discovered. The use-after-free flaw relates to the way the Linux kernel&#39;s key management subsystem handles keyring object reference counting in certain error paths of the join_session_keyring() function. A local, unprivileged user could use this flaw to escalate their privileges on the system. The issue was reported as <a href=\"https://access.redhat.com/security/cve/cve-2016-0728\">CVE-2016-0728</a>.</p>\n<p>Red Hat recommends that you update the kernel and reboot the system. If you cannot reboot now, consider applying the <a href=\"https://bugzilla.redhat.com/attachment.cgi?id=1116284&amp;action=edit\">systemtap patch</a> to update your running kernel.</p>\n",
-			"more_info_html": "<ul>\n<li>For more information about the flaws and versions of the package that are vulnerable see <a href=\"https://access.redhat.com/security/cve/cve-2016-0728\">CVE-2016-0728</a>.</li>\n<li>To learn how to upgrade packages, see &quot;<a href=\"https://access.redhat.com/solutions/9934\">What is yum and how do I use it?</a>&quot;</li>\n<li>The Customer Portal page for the <a href=\"https://access.redhat.com/security/\">Red Hat Security Team</a> contains more information about policies, procedures, and alerts for Red Hat Products.</li>\n<li>The Security Team also maintains a frequently updated blog at <a href=\"https://securityblog.redhat.com\">securityblog.redhat.com</a>.</li>\n</ul>\n",
-			"severity": "WARN",
-			"ansible": true,
-			"ansible_fix": false,
-			"ansible_mitigation": false,
-			"rule_id": "CVE_2016_0728_kernel|KERNEL_CVE-2016-0728",
-			"error_key": "KERNEL_CVE-2016-0728",
-			"plugin": "CVE_2016_0728_kernel",
-			"description": "Kernel key management subsystem vulnerable to local privilege escalation (CVE-2016-0728)",
-			"summary": "A vulnerability in the Linux kernel allowing local privilege escalation was discovered. The issue was reported as [CVE-2016-0728](https://access.redhat.com/security/cve/cve-2016-0728).",
-			"generic": "A vulnerability in the Linux kernel rated **Important** was discovered. The use-after-free flaw relates to the way the Linux kernel's key management subsystem handles keyring object reference counting in certain error paths of the join_session_keyring() function. A local, unprivileged user could use this flaw to escalate their privileges on the system. The issue was reported as [CVE-2016-0728](https://access.redhat.com/security/cve/cve-2016-0728).\n\nRed Hat recommends that you update the kernel and reboot the system. If you cannot reboot now, consider applying the [systemtap patch](https://bugzilla.redhat.com/attachment.cgi?id=1116284&action=edit) to update your running kernel.",
-			"reason": "<p>A vulnerability in the Linux kernel rated <strong>Important</strong> was discovered. The use-after-free flaw relates to the way the Linux kernel&#39;s key management subsystem handles keyring object reference counting in certain error paths of the join_session_keyring() function. A local, unprivileged user could use this flaw to escalate their privileges on the system. The issue was reported as <a href=\"https://access.redhat.com/security/cve/cve-2016-0728\">CVE-2016-0728</a>.</p>\n<p>The host is vulnerable as it is running <strong>kernel-3.10.0-327.el7</strong>.</p>\n",
-			"type": null,
-			"more_info": "* For more information about the flaws and versions of the package that are vulnerable see [CVE-2016-0728](https://access.redhat.com/security/cve/cve-2016-0728).\n* To learn how to upgrade packages, see \"[What is yum and how do I use it?](https://access.redhat.com/solutions/9934)\"\n* The Customer Portal page for the [Red Hat Security Team](https://access.redhat.com/security/) contains more information about policies, procedures, and alerts for Red Hat Products.\n* The Security Team also maintains a frequently updated blog at [securityblog.redhat.com](https://securityblog.redhat.com).",
-			"active": true,
-			"node_id": "2130791",
-			"category": "Security",
-			"retired": false,
-			"reboot_required": false,
-			"publish_date": "2016-10-31T04:08:37.000Z",
-			"rec_impact": 2,
-			"rec_likelihood": 2,
-			"resolution": "<p>Red Hat recommends that you update <code>kernel</code> and reboot. If you cannot reboot now, consider applying the <a href=\"https://bugzilla.redhat.com/attachment.cgi?id=1116284&amp;action=edit\">systemtap patch</a> to update your running kernel.</p>\n<pre><code># yum update kernel\n# reboot\n-or-\n# debuginfo-install kernel     (or equivalent)\n# stap -vgt -Gfix_p=1 -Gtrace_p=0 cve20160728e.stp\n</code></pre>"
-		},
-		"maintenance_actions": [{
-			"done": false,
-			"id": 305215,
-			"maintenance_plan": {
-				"maintenance_id": 29315,
-				"name": "RHEL Demo Infrastructure",
-				"description": null,
-				"start": null,
-				"end": null,
-				"created_by": "$READACTED$",
-				"silenced": false,
-				"hidden": false,
-				"suggestion": null,
-				"remote_branch": null,
-				"allow_reboot": true
-			}
-		}, {
-			"done": false,
-			"id": 306205,
-			"maintenance_plan": {
-				"maintenance_id": 29335,
-				"name": "RHEL Demo All Systems",
-				"description": null,
-				"start": null,
-				"end": null,
-				"created_by": "$READACTED$",
-				"silenced": false,
-				"hidden": false,
-				"suggestion": null,
-				"remote_branch": null,
-				"allow_reboot": true
-			}
-		}]
-	}, {
-		"details": {
-			"processes_listening_int": [
-				["neutron-o", "127.0.0.1", "6633"],
-				["ovsdb-ser", "127.0.0.1", "6640"]
-			],
-			"processes_listening_ext": [
-				["CPU", "0.0.0.0", "5900"],
-				["libvirtd", "", "::16509"],
-				["master", "", ":1:25"],
-				["qemu-kvm", "0.0.0.0", "5900"],
-				["vnc_worke", "0.0.0.0", "5900"],
-				["worker", "0.0.0.0", "5900"]
-			],
-			"error_key": "OPENSSL_CVE_2016_0800_DROWN_LISTENING",
-			"processes_listening": [
-				["CPU", "0.0.0.0", "5900"],
-				["libvirtd", "", "::16509"],
-				["master", "", ":1:25"],
-				["neutron-o", "127.0.0.1", "6633"],
-				["ovsdb-ser", "127.0.0.1", "6640"],
-				["qemu-kvm", "0.0.0.0", "5900"],
-				["vnc_worke", "0.0.0.0", "5900"],
-				["worker", "0.0.0.0", "5900"]
-			],
-			"processes_names": ["/usr/bin/", "CPU", "ceilomete", "gmain", "handler6", "libvirtd", "master", "neutron-o", "neutron-r", "nova-comp", "ovs-vswit", "ovsdb-cli", "ovsdb-ser", "pickup", "privsep-h", "qemu-kvm", "qmgr", "redhat-ac", "revalidat", "tuned", "urcu3", "virtlogd", "vnc_worke", "worker"],
-			"vulnerable_package": "openssl-libs-1.0.1e-42.el7_1.9"
-		},
-		"id": 955802715,
-		"rule_id": "CVE_2016_0800_openssl_drown|OPENSSL_CVE_2016_0800_DROWN_LISTENING",
-		"system_id": "11111111-1111-1111-1111-111111111111",
-		"account_number": "1111111",
-		"uuid": "11111111111111111111111111111111",
-		"date": "2017-07-21T07:07:29.000Z",
-		"rule": {
-			"summary_html": "<p>A new cross-protocol attack against SSLv2 protocol has been found. It has been assigned <a href=\"https://access.redhat.com/security/cve/CVE-2016-0800\">CVE-2016-0800</a> and is referred to as DROWN - Decrypting RSA using Obsolete and Weakened eNcryption. An attacker can decrypt passively collected TLS sessions between up-to-date client and server which supports SSLv2.</p>\n",
-			"generic_html": "<p>A new cross-protocol attack against a vulnerability in the SSLv2 protocol has been found. It can be used to passively decrypt collected TLS/SSL sessions from any connection that used an RSA key exchange cypher suite on a server that supports SSLv2. Even if a given service does not support SSLv2 the connection is still vulnerable if another service does and shares the same RSA private key.</p>\n<p>A more efficient variant of the attack exists against unpatched OpenSSL servers using versions that predate security advisories released on March 19, 2015 (see <a href=\"https://access.redhat.com/security/cve/CVE-2015-0293\">CVE-2015-0293</a>).</p>\n",
-			"more_info_html": "<ul>\n<li>For more information about the flaw see <a href=\"https://access.redhat.com/security/cve/CVE-2016-0800\">CVE-2016-0800</a></li>\n<li>To learn how to upgrade packages, see &quot;<a href=\"https://access.redhat.com/solutions/9934\">What is yum and how do I use it?</a>&quot;</li>\n<li>The Customer Portal page for the <a href=\"https://access.redhat.com/security/\">Red Hat Security Team</a> contains more information about policies, procedures, and alerts for Red Hat Products.</li>\n<li>The Security Team also maintains a frequently updated blog at <a href=\"https://securityblog.redhat.com\">securityblog.redhat.com</a>.</li>\n</ul>\n",
-			"severity": "ERROR",
-			"ansible": true,
-			"ansible_fix": false,
-			"ansible_mitigation": false,
-			"rule_id": "CVE_2016_0800_openssl_drown|OPENSSL_CVE_2016_0800_DROWN_LISTENING",
-			"error_key": "OPENSSL_CVE_2016_0800_DROWN_LISTENING",
-			"plugin": "CVE_2016_0800_openssl_drown",
-			"description": "OpenSSL with externally listening processes vulnerable to session decryption (CVE-2016-0800/DROWN)",
-			"summary": "A new cross-protocol attack against SSLv2 protocol has been found. It has been assigned [CVE-2016-0800](https://access.redhat.com/security/cve/CVE-2016-0800) and is referred to as DROWN - Decrypting RSA using Obsolete and Weakened eNcryption. An attacker can decrypt passively collected TLS sessions between up-to-date client and server which supports SSLv2.",
-			"generic": "A new cross-protocol attack against a vulnerability in the SSLv2 protocol has been found. It can be used to passively decrypt collected TLS/SSL sessions from any connection that used an RSA key exchange cypher suite on a server that supports SSLv2. Even if a given service does not support SSLv2 the connection is still vulnerable if another service does and shares the same RSA private key.\n\nA more efficient variant of the attack exists against unpatched OpenSSL servers using versions that predate security advisories released on March 19, 2015 (see [CVE-2015-0293](https://access.redhat.com/security/cve/CVE-2015-0293)).",
-			"reason": "<p>This host is vulnerable because it has vulnerable package <strong>openssl-libs-1.0.1e-42.el7_1.9</strong> installed.</p>\n<p>It also runs the following processes that use OpenSSL libraries:</p>\n<ul class=\"pre-code\"><li>/usr/bin/</li><li>CPU</li><li>ceilomete</li><li>gmain</li><li>handler6</li><li>libvirtd</li><li>master</li><li>neutron-o</li><li>neutron-r</li><li>nova-comp</li><li>ovs-vswit</li><li>ovsdb-cli</li><li>ovsdb-ser</li><li>pickup</li><li>privsep-h</li><li>qemu-kvm</li><li>qmgr</li><li>redhat-ac</li><li>revalidat</li><li>tuned</li><li>urcu3</li><li>virtlogd</li><li>vnc_worke</li><li>worker</li></ul>\n\n\n\n\n<p>The following processes that use OpenSSL libraries are listening on the sockets bound to public IP addresses:</p>\n<ul class=\"pre-code\"><li>CPU (0.0.0.0)</li><li>libvirtd ()</li><li>master ()</li><li>qemu-kvm (0.0.0.0)</li><li>vnc_worke (0.0.0.0)</li><li>worker (0.0.0.0)</li></ul>\n\n\n\n\n\n\n\n\n<p>A new cross-protocol attack against a vulnerability in the SSLv2 protocol has been found. It can be used to passively decrypt collected TLS/SSL sessions from any connection that used an RSA key exchange cypher suite on a server that supports SSLv2. Even if a given service does not support SSLv2 the connection is still vulnerable if another service does and shares the same RSA private key.</p>\n<p>A more efficient variant of the attack exists against unpatched OpenSSL servers using versions that predate security advisories released on March 19, 2015 (see <a href=\"https://access.redhat.com/security/cve/CVE-2015-0293\">CVE-2015-0293</a>).</p>\n",
-			"type": null,
-			"more_info": "* For more information about the flaw see [CVE-2016-0800](https://access.redhat.com/security/cve/CVE-2016-0800)\n* To learn how to upgrade packages, see \"[What is yum and how do I use it?](https://access.redhat.com/solutions/9934)\"\n* The Customer Portal page for the [Red Hat Security Team](https://access.redhat.com/security/) contains more information about policies, procedures, and alerts for Red Hat Products.\n* The Security Team also maintains a frequently updated blog at [securityblog.redhat.com](https://securityblog.redhat.com).",
-			"active": true,
-			"node_id": "2174451",
-			"category": "Security",
-			"retired": false,
-			"reboot_required": false,
-			"publish_date": "2016-10-31T04:08:33.000Z",
-			"rec_impact": 3,
-			"rec_likelihood": 4,
-			"resolution": "<p>Red Hat recommends that you update <code>openssl</code> and restart the affected system:</p>\n<pre><code># yum update openssl\n# reboot\n</code></pre><p>Alternatively, you can restart all affected services (that is, the ones linked to the openssl library), especially those listening on public IP addresses.</p>\n"
-		},
-		"maintenance_actions": [{
-			"done": false,
-			"id": 305225,
-			"maintenance_plan": {
-				"maintenance_id": 29315,
-				"name": "RHEL Demo Infrastructure",
-				"description": null,
-				"start": null,
-				"end": null,
-				"created_by": "$READACTED$",
-				"silenced": false,
-				"hidden": false,
-				"suggestion": null,
-				"remote_branch": null,
-				"allow_reboot": true
-			}
-		}, {
-			"done": false,
-			"id": 306435,
-			"maintenance_plan": {
-				"maintenance_id": 29335,
-				"name": "RHEL Demo All Systems",
-				"description": null,
-				"start": null,
-				"end": null,
-				"created_by": "$READACTED$",
-				"silenced": false,
-				"hidden": false,
-				"suggestion": null,
-				"remote_branch": null,
-				"allow_reboot": true
-			}
-		}]
-	}, {
-		"details": {
-			"vulnerable_kernel": "3.10.0-327.el7",
-			"package_name": "kernel",
-			"error_key": "KERNEL_CVE_2016_5195_2"
-		},
-		"id": 955802725,
-		"rule_id": "CVE_2016_5195_kernel|KERNEL_CVE_2016_5195_2",
-		"system_id": "11111111-1111-1111-1111-111111111111",
-		"account_number": "1111111",
-		"uuid": "11111111111111111111111111111111",
-		"date": "2017-07-21T07:07:29.000Z",
-		"rule": {
-			"summary_html": "<p>A flaw was found in the Linux kernel&#39;s memory subsystem. An unprivileged local user could use this flaw to write to files they would normally only have read-only access to and thus increase their privileges on the system.</p>\n",
-			"generic_html": "<p>A race condition was found in the way Linux kernel&#39;s memory subsystem handled breakage of the read only shared mappings COW situation on write access. An unprivileged local user could use this flaw to write to files they should normally have read-only access to, and thus increase their privileges on the system.</p>\n<p>A process that is able to mmap a file is able to race Copy on Write (COW) page creation (within get_user_pages) with madvise(MADV_DONTNEED) kernel system calls. This would allow modified pages to bypass the page protection mechanism and modify the mapped file.  The vulnerability could be abused by allowing an attacker to modify existing setuid files with instructions to elevate permissions.  This attack has been found in the wild. </p>\n<p>Red Hat recommends that you update the kernel package.</p>\n",
-			"more_info_html": "<ul>\n<li>For more information about the flaw see <a href=\"https://access.redhat.com/security/cve/CVE-2016-5195\">CVE-2016-5195</a></li>\n<li>To learn how to upgrade packages, see &quot;<a href=\"https://access.redhat.com/solutions/9934\">What is yum and how do I use it?</a>&quot;</li>\n<li>The Customer Portal page for the <a href=\"https://access.redhat.com/security/\">Red Hat Security Team</a> contains more information about policies, procedures, and alerts for Red Hat Products.</li>\n<li>The Security Team also maintains a frequently updated blog at <a href=\"https://securityblog.redhat.com\">securityblog.redhat.com</a>.</li>\n</ul>\n",
-			"severity": "WARN",
-			"ansible": true,
-			"ansible_fix": false,
-			"ansible_mitigation": false,
-			"rule_id": "CVE_2016_5195_kernel|KERNEL_CVE_2016_5195_2",
-			"error_key": "KERNEL_CVE_2016_5195_2",
-			"plugin": "CVE_2016_5195_kernel",
-			"description": "Kernel vulnerable to privilege escalation via permission bypass (CVE-2016-5195)",
-			"summary": "A flaw was found in the Linux kernel's memory subsystem. An unprivileged local user could use this flaw to write to files they would normally only have read-only access to and thus increase their privileges on the system.",
-			"generic": "A race condition was found in the way Linux kernel's memory subsystem handled breakage of the read only shared mappings COW situation on write access. An unprivileged local user could use this flaw to write to files they should normally have read-only access to, and thus increase their privileges on the system.\n\nA process that is able to mmap a file is able to race Copy on Write (COW) page creation (within get_user_pages) with madvise(MADV_DONTNEED) kernel system calls. This would allow modified pages to bypass the page protection mechanism and modify the mapped file.  The vulnerability could be abused by allowing an attacker to modify existing setuid files with instructions to elevate permissions.  This attack has been found in the wild. \n\nRed Hat recommends that you update the kernel package.\n",
-			"reason": "<p>A flaw was found in the Linux kernel&#39;s memory subsystem. An unprivileged local user could use this flaw to write to files they would normally have read-only access to and thus increase their privileges on the system.</p>\n<p>This host is affected because it is running kernel <strong>3.10.0-327.el7</strong>. </p>\n",
-			"type": null,
-			"more_info": "* For more information about the flaw see [CVE-2016-5195](https://access.redhat.com/security/cve/CVE-2016-5195)\n* To learn how to upgrade packages, see \"[What is yum and how do I use it?](https://access.redhat.com/solutions/9934)\"\n* The Customer Portal page for the [Red Hat Security Team](https://access.redhat.com/security/) contains more information about policies, procedures, and alerts for Red Hat Products.\n* The Security Team also maintains a frequently updated blog at [securityblog.redhat.com](https://securityblog.redhat.com).",
-			"active": true,
-			"node_id": "2706661",
-			"category": "Security",
-			"retired": false,
-			"reboot_required": true,
-			"publish_date": "2016-10-31T04:08:33.000Z",
-			"rec_impact": 2,
-			"rec_likelihood": 2,
-			"resolution": "<p>Red Hat recommends that you update the <code>kernel</code> package and restart the system:</p>\n<pre><code># yum update kernel\n# reboot\n</code></pre>"
-		},
-		"maintenance_actions": [{
-			"done": false,
-			"id": 305235,
-			"maintenance_plan": {
-				"maintenance_id": 29315,
-				"name": "RHEL Demo Infrastructure",
-				"description": null,
-				"start": null,
-				"end": null,
-				"created_by": "$READACTED$",
-				"silenced": false,
-				"hidden": false,
-				"suggestion": null,
-				"remote_branch": null,
-				"allow_reboot": true
-			}
-		}, {
-			"done": false,
-			"id": 306705,
-			"maintenance_plan": {
-				"maintenance_id": 29335,
-				"name": "RHEL Demo All Systems",
-				"description": null,
-				"start": null,
-				"end": null,
-				"created_by": "$READACTED$",
-				"silenced": false,
-				"hidden": false,
-				"suggestion": null,
-				"remote_branch": null,
-				"allow_reboot": true
-			}
-		}]
-	}, {
-		"details": {
-			"mitigation_conf": "no",
-			"sysctl_live_ack_limit": "100",
-			"package_name": "kernel",
-			"sysctl_live_ack_limit_line": "net.ipv4.tcp_challenge_ack_limit = 100",
-			"error_key": "KERNEL_CVE_2016_5696_URGENT",
-			"vulnerable_kernel": "3.10.0-327.el7",
-			"sysctl_conf_ack_limit": "100",
-			"sysctl_conf_ack_limit_line": "net.ipv4.tcp_challenge_ack_limit = 100  # Implicit default",
-			"mitigation_live": "no"
-		},
-		"id": 955802735,
-		"rule_id": "CVE_2016_5696_kernel|KERNEL_CVE_2016_5696_URGENT",
-		"system_id": "11111111-1111-1111-1111-111111111111",
-		"account_number": "1111111",
-		"uuid": "11111111111111111111111111111111",
-		"date": "2017-07-21T07:07:29.000Z",
-		"rule": {
-			"summary_html": "<p>A flaw in the Linux kernel&#39;s TCP/IP networking subsystem implementation of the <a href=\"https://tools.ietf.org/html/rfc5961\">RFC 5961</a> challenge ACK rate limiting was found that could allow an attacker located on different subnet to inject or take over a TCP connection between a server and client without needing to use a traditional man-in-the-middle (MITM) attack.</p>\n",
-			"generic_html": "<p>A flaw was found in the implementation of the Linux kernel&#39;s handling of networking challenge ack &#40;<a href=\"https://tools.ietf.org/html/rfc5961\">RFC 5961</a>&#41; where an attacker is able to determine the\nshared counter. This flaw allows an attacker located on different subnet to inject or take over a TCP connection between a server and client without needing to use a traditional man-in-the-middle (MITM) attack. </p>\n<p>Red Hat recommends that you update the kernel package or apply mitigations.</p>\n",
-			"more_info_html": "<ul>\n<li>For more information about the flaw see <a href=\"https://access.redhat.com/security/cve/CVE-2016-5696\">CVE-2016-5696</a></li>\n<li>To learn how to upgrade packages, see &quot;<a href=\"https://access.redhat.com/solutions/9934\">What is yum and how do I use it?</a>&quot;</li>\n<li>The Customer Portal page for the <a href=\"https://access.redhat.com/security/\">Red Hat Security Team</a> contains more information about policies, procedures, and alerts for Red Hat Products.</li>\n<li>The Security Team also maintains a frequently updated blog at <a href=\"https://securityblog.redhat.com\">securityblog.redhat.com</a>.</li>\n</ul>\n",
-			"severity": "ERROR",
-			"ansible": true,
-			"ansible_fix": false,
-			"ansible_mitigation": false,
-			"rule_id": "CVE_2016_5696_kernel|KERNEL_CVE_2016_5696_URGENT",
-			"error_key": "KERNEL_CVE_2016_5696_URGENT",
-			"plugin": "CVE_2016_5696_kernel",
-			"description": "Kernel vulnerable to man-in-the-middle via payload injection",
-			"summary": "A flaw in the Linux kernel's TCP/IP networking subsystem implementation of the [RFC 5961](https://tools.ietf.org/html/rfc5961) challenge ACK rate limiting was found that could allow an attacker located on different subnet to inject or take over a TCP connection between a server and client without needing to use a traditional man-in-the-middle (MITM) attack.",
-			"generic": "A flaw was found in the implementation of the Linux kernel's handling of networking challenge ack &#40;[RFC 5961](https://tools.ietf.org/html/rfc5961)&#41; where an attacker is able to determine the\nshared counter. This flaw allows an attacker located on different subnet to inject or take over a TCP connection between a server and client without needing to use a traditional man-in-the-middle (MITM) attack. \n\nRed Hat recommends that you update the kernel package or apply mitigations.",
-			"reason": "<p>A flaw was found in the implementation of the Linux kernel&#39;s handling of networking challenge ack &#40;<a href=\"https://tools.ietf.org/html/rfc5961\">RFC 5961</a>&#41; where an attacker is able to determine the\nshared counter. This flaw allows an attacker located on different subnet to inject or take over a TCP connection between a server and client without needing to use a traditional man-in-the-middle (MITM) attack.</p>\n<p>This host is affected because it is running kernel <strong>3.10.0-327.el7</strong>. </p>\n<p>Your currently loaded kernel configuration contains this setting: </p>\n<pre><code>net.ipv4.tcp_challenge_ack_limit = 100\n</code></pre><p>Your currently stored kernel configuration is: </p>\n<pre><code>net.ipv4.tcp_challenge_ack_limit = 100  # Implicit default\n</code></pre><p>There is currently no mitigation applied and your system is vulnerable.</p>\n",
-			"type": null,
-			"more_info": "* For more information about the flaw see [CVE-2016-5696](https://access.redhat.com/security/cve/CVE-2016-5696)\n* To learn how to upgrade packages, see \"[What is yum and how do I use it?](https://access.redhat.com/solutions/9934)\"\n* The Customer Portal page for the [Red Hat Security Team](https://access.redhat.com/security/) contains more information about policies, procedures, and alerts for Red Hat Products.\n* The Security Team also maintains a frequently updated blog at [securityblog.redhat.com](https://securityblog.redhat.com).",
-			"active": true,
-			"node_id": "2438571",
-			"category": "Security",
-			"retired": false,
-			"reboot_required": false,
-			"publish_date": "2016-10-31T04:08:32.000Z",
-			"rec_impact": 4,
-			"rec_likelihood": 2,
-			"resolution": "<p>Red Hat recommends that you update the <code>kernel</code> package and restart the system:</p>\n<pre><code># yum update kernel\n# reboot\n</code></pre><p><strong>or</strong></p>\n<p>Alternatively, this issue can be addressed by applying the following mitigations until the machine is restarted with the updated kernel package.</p>\n<p>Edit <code>/etc/sysctl.conf</code> file as root, add the mitigation configuration, and reload the kernel configuration:</p>\n<pre><code># echo &quot;net.ipv4.tcp_challenge_ack_limit = 2147483647&quot; &gt;&gt; /etc/sysctl.conf \n# sysctl -p\n</code></pre>"
-		},
-		"maintenance_actions": [{
-			"done": false,
-			"id": 305245,
-			"maintenance_plan": {
-				"maintenance_id": 29315,
-				"name": "RHEL Demo Infrastructure",
-				"description": null,
-				"start": null,
-				"end": null,
-				"created_by": "$READACTED$",
-				"silenced": false,
-				"hidden": false,
-				"suggestion": null,
-				"remote_branch": null,
-				"allow_reboot": true
-			}
-		}, {
-			"done": false,
-			"id": 306975,
-			"maintenance_plan": {
-				"maintenance_id": 29335,
-				"name": "RHEL Demo All Systems",
-				"description": null,
-				"start": null,
-				"end": null,
-				"created_by": "$READACTED$",
-				"silenced": false,
-				"hidden": false,
-				"suggestion": null,
-				"remote_branch": null,
-				"allow_reboot": true
-			}
-		}, {
-			"done": false,
-			"id": 316055,
-			"maintenance_plan": {
-				"maintenance_id": 30575,
-				"name": "Fix the problem",
-				"description": null,
-				"start": null,
-				"end": null,
-				"created_by": "asdavis@redhat.com",
-				"silenced": false,
-				"hidden": false,
-				"suggestion": null,
-				"remote_branch": null,
-				"allow_reboot": true
-			}
-		}]
-	}, {
-		"details": {
-			"kernel_left_fully_exploitable": true,
-			"vulnerable_kernel_version_release": "3.10.0-327.el7",
-			"kernel_kpatch_applied": false,
-			"kernel_vulnerable": true,
-			"glibc_left_fully_exploitable": true,
-			"vulnerable_glibc": {
-				"PACKAGE_NAMES": ["glibc"],
-				"PACKAGES": ["glibc-2.17-105.el7"]
-			},
-			"kernel_stap_applied": false,
-			"error_key": "CVE_2017_1000364_KERNEL_CVE_2017_1000366_GLIBC_EXPLOITABLE",
-			"vulnerable_kernel_name": "kernel",
-			"nothing_left_fully_exploitable": false,
-			"glibc_vulnerable": true
-		},
-		"id": 955802745,
-		"rule_id": "CVE_2017_1000366_glibc|CVE_2017_1000364_KERNEL_CVE_2017_1000366_GLIBC_EXPLOITABLE",
-		"system_id": "11111111-1111-1111-1111-111111111111",
-		"account_number": "1111111",
-		"uuid": "11111111111111111111111111111111",
-		"date": "2017-07-21T07:07:29.000Z",
-		"rule": {
-			"summary_html": "<p>A flaw was found in the way memory is being allocated on the stack for user space binaries. It has been assigned <a href=\"https://access.redhat.com/security/cve/CVE-2017-1000364\">CVE-2017-1000364</a> and <a href=\"https://access.redhat.com/security/cve/CVE-2017-1000366\">CVE-2017-1000366</a>. An unprivileged local user can use this flaw to execute arbitrary code as root and increase their privileges on the system.</p>\n",
-			"generic_html": "<p>A flaw was found in the way memory is being allocated on the stack for user space binaries. It has been assigned CVE-2017-1000364 and CVE-2017-1000366. An unprivileged local user can use this flaw to execute arbitrary code as root and increase their privileges on the system.</p>\n<p>If heap and stack memory regions are adjacent to each other, an attacker can use this flaw to jump over the heap/stack gap, cause controlled memory corruption on process stack or heap, and thus increase their privileges on the system. </p>\n<p>An attacker must have access to a local account on the system.</p>\n<p>Red Hat recommends that you update the kernel and glibc.</p>\n",
-			"more_info_html": "<ul>\n<li>For more information about the flaw, see <a href=\"https://access.redhat.com/security/vulnerabilities/stackguard\">the vulnerability article</a> and <a href=\"https://access.redhat.com/security/cve/CVE-2017-1000364\">CVE-2017-1000364</a> and <a href=\"https://access.redhat.com/security/cve/CVE-2017-1000366\">CVE-2017-1000366</a>.</li>\n<li>To learn how to upgrade packages, see <a href=\"https://access.redhat.com/solutions/9934\">What is yum and how do I use it?</a>.</li>\n<li>The Customer Portal page for the <a href=\"https://access.redhat.com/security/\">Red Hat Security Team</a> contains more information about policies, procedures, and alerts for Red Hat products.</li>\n<li>The Security Team also maintains a frequently updated blog at <a href=\"https://securityblog.redhat.com\">securityblog.redhat.com</a>.</li>\n</ul>\n",
-			"severity": "WARN",
-			"ansible": true,
-			"ansible_fix": false,
-			"ansible_mitigation": false,
-			"rule_id": "CVE_2017_1000366_glibc|CVE_2017_1000364_KERNEL_CVE_2017_1000366_GLIBC_EXPLOITABLE",
-			"error_key": "CVE_2017_1000364_KERNEL_CVE_2017_1000366_GLIBC_EXPLOITABLE",
-			"plugin": "CVE_2017_1000366_glibc",
-			"description": "Kernel and glibc vulnerable to local privilege escalation via stack and heap memory clash (CVE-2017-1000364 and CVE-2017-1000366)",
-			"summary": "A flaw was found in the way memory is being allocated on the stack for user space binaries. It has been assigned [CVE-2017-1000364](https://access.redhat.com/security/cve/CVE-2017-1000364) and [CVE-2017-1000366](https://access.redhat.com/security/cve/CVE-2017-1000366). An unprivileged local user can use this flaw to execute arbitrary code as root and increase their privileges on the system.\n",
-			"generic": "A flaw was found in the way memory is being allocated on the stack for user space binaries. It has been assigned CVE-2017-1000364 and CVE-2017-1000366. An unprivileged local user can use this flaw to execute arbitrary code as root and increase their privileges on the system.\n\nIf heap and stack memory regions are adjacent to each other, an attacker can use this flaw to jump over the heap/stack gap, cause controlled memory corruption on process stack or heap, and thus increase their privileges on the system. \n\nAn attacker must have access to a local account on the system.\n\nRed Hat recommends that you update the kernel and glibc.\n",
-			"reason": "<p>A flaw was found in kernel and glibc in the way memory is being allocated on the stack for user space binaries.</p>\n<p>The host is affected because it is running <strong>kernel-3.10.0-327.el7</strong> and using <strong>glibc-2.17-105.el7</strong>.</p>\n",
-			"type": null,
-			"more_info": "* For more information about the flaw, see [the vulnerability article](https://access.redhat.com/security/vulnerabilities/stackguard) and [CVE-2017-1000364](https://access.redhat.com/security/cve/CVE-2017-1000364) and [CVE-2017-1000366](https://access.redhat.com/security/cve/CVE-2017-1000366).\n* To learn how to upgrade packages, see [What is yum and how do I use it?](https://access.redhat.com/solutions/9934).\n* The Customer Portal page for the [Red Hat Security Team](https://access.redhat.com/security/) contains more information about policies, procedures, and alerts for Red Hat products.\n* The Security Team also maintains a frequently updated blog at [securityblog.redhat.com](https://securityblog.redhat.com).\n",
-			"active": true,
-			"node_id": null,
-			"category": "Security",
-			"retired": false,
-			"reboot_required": true,
-			"publish_date": "2017-06-19T15:00:00.000Z",
-			"rec_impact": 2,
-			"rec_likelihood": 2,
-			"resolution": "<p>Red Hat recommends updating the <code>kernel</code> and <code>glibc</code> packages and rebooting the system.</p>\n<pre><code># yum update kernel glibc\n# reboot\n</code></pre>"
-		},
-		"maintenance_actions": [{
-			"done": false,
-			"id": 305255,
-			"maintenance_plan": {
-				"maintenance_id": 29315,
-				"name": "RHEL Demo Infrastructure",
-				"description": null,
-				"start": null,
-				"end": null,
-				"created_by": "$READACTED$",
-				"silenced": false,
-				"hidden": false,
-				"suggestion": null,
-				"remote_branch": null,
-				"allow_reboot": true
-			}
-		}, {
-			"done": false,
-			"id": 307415,
-			"maintenance_plan": {
-				"maintenance_id": 29335,
-				"name": "RHEL Demo All Systems",
-				"description": null,
-				"start": null,
-				"end": null,
-				"created_by": "$READACTED$",
-				"silenced": false,
-				"hidden": false,
-				"suggestion": null,
-				"remote_branch": null,
-				"allow_reboot": true
-			}
-		}]
-	}, {
-		"details": {
-			"PACKAGE_NAMES": ["sudo"],
-			"PACKAGES": ["sudo-1.8.6p7-16.el7"],
-			"error_key": "CVE_2017_1000367_SUDO"
-		},
-		"id": 955802755,
-		"rule_id": "CVE_2017_1000367_sudo|CVE_2017_1000367_SUDO",
-		"system_id": "11111111-1111-1111-1111-111111111111",
-		"account_number": "1111111",
-		"uuid": "11111111111111111111111111111111",
-		"date": "2017-07-21T07:07:29.000Z",
-		"rule": {
-			"summary_html": "<p>A local privilege escalation flaw was found in <code>sudo</code>. A local user having sudo access on the system,\ncould use this flaw to execute arbitrary commands as root. This issue was reported as\n<a href=\"https://access.redhat.com/security/cve/CVE-2017-1000367\">CVE-2017-1000367</a></p>\n",
-			"generic_html": "<p>A local privilege escalation flaw was found in <code>sudo</code>. All versions of sudo package shipped with RHEL 5, 6 and 7 are vulnerable\nto a local privilege escalation vulnerability. A flaw was found in the way <code>get_process_ttyname()</code> function obtained\ninformation about the controlling terminal of the sudo process from the status file in the proc filesystem.\nThis allows a local user who has any level of sudo access on the system to execute arbitrary commands as root or\nin certain conditions escalate his privileges to root.</p>\n<p>Red Hat recommends that you update update the <code>sudo</code> package.</p>\n",
-			"more_info_html": "<ul>\n<li>For more information about the remote code execution flaw <a href=\"https://access.redhat.com/security/cve/CVE-2017-1000367\">CVE-2017-1000367</a> see <a href=\"https://access.redhat.com/security/vulnerabilities/3059071\">knowledge base article</a>.</li>\n<li>To learn how to upgrade packages, see &quot;<a href=\"https://access.redhat.com/solutions/9934\">What is yum and how do I use it?</a>&quot;</li>\n<li>To better understand <a href=\"https://www.sudo.ws/\">sudo</a>, see <a href=\"https://www.sudo.ws/intro.html\">Sudo in a Nutshell</a></li>\n<li>The Customer Portal page for the <a href=\"https://access.redhat.com/security/\">Red Hat Security Team</a> contains more information about policies, procedures, and alerts for Red Hat Products.</li>\n<li>The Security Team also maintains a frequently updated blog at <a href=\"https://securityblog.redhat.com\">securityblog.redhat.com</a>.</li>\n</ul>\n",
-			"severity": "WARN",
-			"ansible": true,
-			"ansible_fix": true,
-			"ansible_mitigation": false,
-			"rule_id": "CVE_2017_1000367_sudo|CVE_2017_1000367_SUDO",
-			"error_key": "CVE_2017_1000367_SUDO",
-			"plugin": "CVE_2017_1000367_sudo",
-			"description": "sudo vulnerable to local privilege escalation via process TTY name parsing (CVE-2017-1000367)",
-			"summary": "A local privilege escalation flaw was found in `sudo`. A local user having sudo access on the system,\ncould use this flaw to execute arbitrary commands as root. This issue was reported as\n[CVE-2017-1000367](https://access.redhat.com/security/cve/CVE-2017-1000367)",
-			"generic": "A local privilege escalation flaw was found in `sudo`. All versions of sudo package shipped with RHEL 5, 6 and 7 are vulnerable\nto a local privilege escalation vulnerability. A flaw was found in the way `get_process_ttyname()` function obtained\ninformation about the controlling terminal of the sudo process from the status file in the proc filesystem.\nThis allows a local user who has any level of sudo access on the system to execute arbitrary commands as root or\nin certain conditions escalate his privileges to root.\n\nRed Hat recommends that you update update the `sudo` package.\n",
-			"reason": "<p>This machine is vulnerable because it has vulnerable <code>sudo</code> package <strong>sudo-1.8.6p7-16.el7</strong> installed.</p>\n",
-			"type": null,
-			"more_info": "* For more information about the remote code execution flaw [CVE-2017-1000367](https://access.redhat.com/security/cve/CVE-2017-1000367) see [knowledge base article](https://access.redhat.com/security/vulnerabilities/3059071).\n* To learn how to upgrade packages, see \"[What is yum and how do I use it?](https://access.redhat.com/solutions/9934)\"\n* To better understand [sudo](https://www.sudo.ws/), see [Sudo in a Nutshell](https://www.sudo.ws/intro.html)\n* The Customer Portal page for the [Red Hat Security Team](https://access.redhat.com/security/) contains more information about policies, procedures, and alerts for Red Hat Products.\n* The Security Team also maintains a frequently updated blog at [securityblog.redhat.com](https://securityblog.redhat.com).\n",
-			"active": true,
-			"node_id": "3059071",
-			"category": "Security",
-			"retired": false,
-			"reboot_required": false,
-			"publish_date": "2017-05-30T13:30:00.000Z",
-			"rec_impact": 2,
-			"rec_likelihood": 2,
-			"resolution": "<p>Red Hat recommends that you update the <code>sudo</code> package.</p>\n<pre><code># yum update sudo\n</code></pre>"
-		},
-		"maintenance_actions": [{
-			"done": false,
-			"id": 305265,
-			"maintenance_plan": {
-				"maintenance_id": 29315,
-				"name": "RHEL Demo Infrastructure",
-				"description": null,
-				"start": null,
-				"end": null,
-				"created_by": "$READACTED$",
-				"silenced": false,
-				"hidden": false,
-				"suggestion": null,
-				"remote_branch": null,
-				"allow_reboot": true
-			}
-		}, {
-			"done": false,
-			"id": 308075,
-			"maintenance_plan": {
-				"maintenance_id": 29335,
-				"name": "RHEL Demo All Systems",
-				"description": null,
-				"start": null,
-				"end": null,
-				"created_by": "$READACTED$",
-				"silenced": false,
-				"hidden": false,
-				"suggestion": null,
-				"remote_branch": null,
-				"allow_reboot": true
-			}
-		}]
-	}, {
-		"details": {
-			"mod_loading_disabled": false,
-			"package_name": "kernel",
-			"error_key": "KERNEL_CVE_2017_2636",
-			"vulnerable_kernel": "3.10.0-327.el7",
-			"mod_loaded": false,
-			"mitigation_info": true
-		},
-		"id": 955802765,
-		"rule_id": "CVE_2017_2636_kernel|KERNEL_CVE_2017_2636",
-		"system_id": "11111111-1111-1111-1111-111111111111",
-		"account_number": "1111111",
-		"uuid": "11111111111111111111111111111111",
-		"date": "2017-07-21T07:07:29.000Z",
-		"rule": {
-			"summary_html": "<p>A vulnerability in the Linux kernel allowing local privilege escalation was discovered.\nThe issue was reported as <a href=\"https://access.redhat.com/security/cve/CVE-2017-2636\">CVE-2017-2636</a>.</p>\n",
-			"generic_html": "<p>A use-after-free flaw was found in the Linux kernel implementation of the HDLC (High-Level Data Link Control) TTY line discipline implementation. It has been assigned CVE-2017-2636.</p>\n<p>An unprivileged local user could use this flaw to execute arbitrary code in kernel memory and increase their privileges on the system. The kernel uses a TTY subsystem to take and show terminal output to connected systems. An attacker crafting specific-sized memory allocations could abuse this mechanism to place a kernel function pointer with malicious instructions to be executed on behalf of the attacker.</p>\n<p>An attacker must have access to a local account on the system; this is not a remote attack. Exploiting this flaw does not require Microgate or SyncLink hardware to be in use.</p>\n<p>Red Hat recommends that you use the proposed mitigation to disable the N_HDLC module.</p>\n",
-			"more_info_html": "<ul>\n<li>For more information about the flaw, see <a href=\"https://access.redhat.com/security/cve/CVE-2017-2636\">CVE-2017-2636</a> and <a href=\"https://access.redhat.com/security/vulnerabilities/CVE-2017-2636\">CVE-2017-2636 article</a>.</li>\n<li>The Customer Portal page for the <a href=\"https://access.redhat.com/security/\">Red Hat Security Team</a> contains more information about policies, procedures, and alerts for Red Hat products.</li>\n<li>The Security Team also maintains a frequently updated blog at <a href=\"https://securityblog.redhat.com\">securityblog.redhat.com</a>.</li>\n</ul>\n",
-			"severity": "WARN",
-			"ansible": true,
-			"ansible_fix": false,
-			"ansible_mitigation": false,
-			"rule_id": "CVE_2017_2636_kernel|KERNEL_CVE_2017_2636",
-			"error_key": "KERNEL_CVE_2017_2636",
-			"plugin": "CVE_2017_2636_kernel",
-			"description": "Kernel vulnerable to local privilege escalation via n_hdlc module (CVE-2017-2636)",
-			"summary": "A vulnerability in the Linux kernel allowing local privilege escalation was discovered.\nThe issue was reported as [CVE-2017-2636](https://access.redhat.com/security/cve/CVE-2017-2636).\n",
-			"generic": "A use-after-free flaw was found in the Linux kernel implementation of the HDLC (High-Level Data Link Control) TTY line discipline implementation. It has been assigned CVE-2017-2636.\n\nAn unprivileged local user could use this flaw to execute arbitrary code in kernel memory and increase their privileges on the system. The kernel uses a TTY subsystem to take and show terminal output to connected systems. An attacker crafting specific-sized memory allocations could abuse this mechanism to place a kernel function pointer with malicious instructions to be executed on behalf of the attacker.\n\nAn attacker must have access to a local account on the system; this is not a remote attack. Exploiting this flaw does not require Microgate or SyncLink hardware to be in use.\n\nRed Hat recommends that you use the proposed mitigation to disable the N_HDLC module.\n",
-			"reason": "<p>A use-after-free flaw was found in the Linux kernel implementation of the HDLC (High-Level Data Link Control) TTY line discipline implementation.</p>\n<p>This host is affected because it is running kernel <strong>3.10.0-327.el7</strong>.</p>\n",
-			"type": null,
-			"more_info": "* For more information about the flaw, see [CVE-2017-2636](https://access.redhat.com/security/cve/CVE-2017-2636) and [CVE-2017-2636 article](https://access.redhat.com/security/vulnerabilities/CVE-2017-2636).\n* The Customer Portal page for the [Red Hat Security Team](https://access.redhat.com/security/) contains more information about policies, procedures, and alerts for Red Hat products.\n* The Security Team also maintains a frequently updated blog at [securityblog.redhat.com](https://securityblog.redhat.com).\n",
-			"active": true,
-			"node_id": null,
-			"category": "Security",
-			"retired": false,
-			"reboot_required": false,
-			"publish_date": "2017-05-16T12:00:00.000Z",
-			"rec_impact": 2,
-			"rec_likelihood": 2,
-			"resolution": "<p>Red Hat recommends updating the <code>kernel</code> package and rebooting the system.</p>\n<pre><code># yum update kernel\n# reboot\n</code></pre><p><strong>Alternatively</strong>, apply one of the following mitigations:</p>\n<p>Disable loading of N_HDLC kernel module:</p>\n<pre><code># echo &quot;install n_hdlc /bin/true&quot; &gt;&gt; /etc/modprobe.d/disable-n_hdlc.conf\n</code></pre>"
-		},
-		"maintenance_actions": [{
-			"done": false,
-			"id": 305275,
-			"maintenance_plan": {
-				"maintenance_id": 29315,
-				"name": "RHEL Demo Infrastructure",
-				"description": null,
-				"start": null,
-				"end": null,
-				"created_by": "$READACTED$",
-				"silenced": false,
-				"hidden": false,
-				"suggestion": null,
-				"remote_branch": null,
-				"allow_reboot": true
-			}
-		}, {
-			"done": false,
-			"id": 308675,
-			"maintenance_plan": {
-				"maintenance_id": 29335,
-				"name": "RHEL Demo All Systems",
-				"description": null,
-				"start": null,
-				"end": null,
-				"created_by": "$READACTED$",
-				"silenced": false,
-				"hidden": false,
-				"suggestion": null,
-				"remote_branch": null,
-				"allow_reboot": true
-			}
-		}]
-	}, {
-		"details": {
-			"kvr": "3.10.0-327.el7",
-			"error_key": "IPMI_LIST_CORRUPTION_CRASH"
-		},
-		"id": 955826995,
-		"rule_id": "ipmi_list_corruption_crash|IPMI_LIST_CORRUPTION_CRASH",
-		"system_id": "11111111-1111-1111-1111-111111111111",
-		"account_number": "1111111",
-		"uuid": "11111111111111111111111111111111",
-		"date": "2017-07-21T07:07:29.000Z",
-		"rule": {
-			"summary_html": "<p>Kernel occasionally panics when running <code>ipmitool</code> command due to a bug in the ipmi message handler.</p>\n",
-			"generic_html": "<p>Kernel occasionally panics when running <code>ipmitool</code> due to a bug in the ipmi message handler.</p>\n",
-			"more_info_html": "<p>For how to upgrade the kernel to a specific version, refer to <a href=\"https://access.redhat.com/solutions/161803\">How do I upgrade the kernel to a particular version manually?</a>.</p>\n",
-			"severity": "WARN",
-			"ansible": false,
-			"ansible_fix": false,
-			"ansible_mitigation": false,
-			"rule_id": "ipmi_list_corruption_crash|IPMI_LIST_CORRUPTION_CRASH",
-			"error_key": "IPMI_LIST_CORRUPTION_CRASH",
-			"plugin": "ipmi_list_corruption_crash",
-			"description": "Kernel panic occurs when running ipmitool command with specific kernels",
-			"summary": "Kernel occasionally panics when running `ipmitool` command due to a bug in the ipmi message handler.\n",
-			"generic": "Kernel occasionally panics when running `ipmitool` due to a bug in the ipmi message handler.\n",
-			"reason": "<p>This host is running kernel <strong>3.10.0-327.el7</strong> with the IPMI management tool installed.\nKernel panics can occur when running <code>ipmitool</code>.</p>\n",
-			"type": null,
-			"more_info": "For how to upgrade the kernel to a specific version, refer to [How do I upgrade the kernel to a particular version manually?](https://access.redhat.com/solutions/161803).\n",
-			"active": true,
-			"node_id": "2690791",
-			"category": "Stability",
-			"retired": false,
-			"reboot_required": true,
-			"publish_date": null,
-			"rec_impact": 3,
-			"rec_likelihood": 1,
-			"resolution": "<p>Red Hat recommends that you complete the following steps to fix this issue:</p>\n<ol>\n\n<li>Upgrade kernel to the version <strong>3.10.0-327.36.1.el7</strong> or later:</li>\n\n<code>\n# yum update kernel\n</code>\n<li>Restart the host with the new kernel.</li>\n<code>\n# reboot\n</code>\n</ol>\n"
-		},
-		"maintenance_actions": [{
-			"done": false,
-			"id": 305285,
-			"maintenance_plan": {
-				"maintenance_id": 29315,
-				"name": "RHEL Demo Infrastructure",
-				"description": null,
-				"start": null,
-				"end": null,
-				"created_by": "$READACTED$",
-				"silenced": false,
-				"hidden": false,
-				"suggestion": null,
-				"remote_branch": null,
-				"allow_reboot": true
-			}
-		}, {
-			"done": false,
-			"id": 310145,
-			"maintenance_plan": {
-				"maintenance_id": 29335,
-				"name": "RHEL Demo All Systems",
-				"description": null,
-				"start": null,
-				"end": null,
-				"created_by": "$READACTED$",
-				"silenced": false,
-				"hidden": false,
-				"suggestion": null,
-				"remote_branch": null,
-				"allow_reboot": true
-			}
-		}]
-	}]
+    "id": 1679900,
+    "system_uuid": "$REDACTED$",
+    "account": "$REDACTED$",
+    "system_type": 105,
+    "checked_on": "2019-03-19T21:59:09.213151-04:00",
+    "active_reports": [
+        {
+            "id": 16923675,
+            "rule": {
+                "id": 46,
+                "created_at": "2019-02-07T14:02:34.379375-05:00",
+                "updated_at": "2019-03-12T11:45:28.804999-04:00",
+                "ruleset": {
+                    "created_at": "2018-12-20T20:33:00-05:00",
+                    "updated_at": "2018-12-20T20:33:00-05:00",
+                    "rule_source": "https://$REDACTED$/insights-open-source/insights-security",
+                    "description": "Security"
+                },
+                "rule_id": "CVE_2017_5715_cpu_virt|VIRT_CVE_2017_5715_CPU_3_ONLYKERNEL",
+                "description": "Kernel vulnerable to side-channel attacks in modern microprocessors (CVE-2017-5715/Spectre)",
+                "active": true,
+                "category": {
+                    "id": 2,
+                    "name": "Security"
+                },
+                "impact": {
+                    "name": "Information Disclosure",
+                    "impact": 3
+                },
+                "likelihood": 2,
+                "node_id": "3244101",
+                "tags": "security kernel CVE",
+                "reboot_required": true,
+                "publish_date": "2018-01-17T12:00:00-05:00",
+                "summary": "A vulnerability was discovered in modern microprocessors supported by the kernel, whereby an unprivileged attacker can use this flaw to bypass restrictions to gain read access to privileged memory.\nThe issue was reported as [CVE-2017-5715 / Spectre](https://access.redhat.com/security/cve/CVE-2017-5715).\n",
+                "generic": "An industry-wide issue was found in the manner many modern microprocessors have implemented speculative execution of instructions. There are three primary variants of the issue which differ in the way the speculative execution can be exploited.\n\nAll three rely upon the fact that modern high performance microprocessors implement both speculative execution, and utilize VIPT (Virtually Indexed, Physically Tagged) level 1 data caches that may become allocated with data in the kernel virtual address space during such speculation.\n\nAn unprivileged attacker could use these to read privileged memory by conducting targeted cache side-channel attacks, including memory locations that cross the syscall boundary or the guest/host boundary, or potentially arbitrary host memory addresses.\n",
+                "reason": "{{? pydata.error_key == \"VIRT_CVE_2017_5715_CPU_3_VIRTKERNEL\" ||  pydata.error_key == \"VIRT_CVE_2017_5715_CPU_3_DRACUTKERNEL\" }}This machine is vulnerable, because it runs a vulnerable kernel and has the following vulnerable packages installed:\n\n{{~ pydata.PACKAGES :value:index}}\n* `{{= value }}`{{~}}\n{{?}}{{? pydata.error_key == \"VIRT_CVE_2017_5715_CPU_3_ONLYKERNEL\" }}This machine is vulnerable, because it runs a vulnerable kernel.\n{{?}}{{? pydata.error_key == \"VIRT_CVE_2017_5715_CPU_3_ONLYVIRT\" ||  pydata.error_key == \"VIRT_CVE_2017_5715_CPU_3_ONLYDRACUT\" }}This machine is vulnerable, because it has the following vulnerable packages installed:\n\n{{~ pydata.PACKAGES :value:index}}\n* `{{= value }}`{{~}}\n{{?}}\n\n<!--\n\nThe information about dracut is displayed only when the list of vulnerable packages is limited to solely dracut-related packages. Even though the message is applicable also to all other cases where a dracut-related package is vulnerable, it is not displayed in those cases, because it is clear that this Insights rule informs about the vulnerability that is specifically relevant to virtualization. After the prescribed actions would be taken, the potentially detected Dracut version would be updated with it, and the paragraph about Dracut might be more of a noise than relevant information, given the presumed presence of virtualization-related packages with more complex changes and impact in that particual report. However, in a case where no virtualization-related packages are detected as vulnerable, it ceases to be so clear that the Dracut update might help resolve the Variant 2 of the issue, which also affects any virtualization that might be used on the system, even though Dracut itself has little to do with virtualization. \n\nAlso note that the dracut-related packages are detected as vulnerable for the particular machine only if the machine has CPU of the particular applicable AMD family, as the relevant dracut update fixes behavior only for a limited set of AMD families.\n\n-->\n{{? pydata.error_key == \"VIRT_CVE_2017_5715_CPU_3_DRACUTKERNEL\" ||  pydata.error_key == \"VIRT_CVE_2017_5715_CPU_3_ONLYDRACUT\" }}This machine has a particular family of an AMD processor for which there exists an updated version of Dracut. Dracut is a low-level software for generating an initramfs/initrd image that, among other tasks, selects the appropriate processor microcode to use. It is possible, but not guaranteed, that after updating the affected Dracut packages, the appropriate microcode will be selected to enable the protections for Variant 2 of this issue.\n\n{{?}}\nAn unprivileged attacker could use the vulnerability to read privileged memory by conducting targeted cache side-channel attacks, including memory locations that cross the syscall boundary or the guest/host boundary, or potentially arbitrary host memory addresses.\n",
+                "more_info": "* For more information about the flaw, see [Kernel Side-Channel Attacks](https://access.redhat.com/security/vulnerabilities/speculativeexecution) and [CVE-2017-5715](https://access.redhat.com/security/cve/CVE-2017-5715).\n* For possible performance impact of kernel updates, see [Speculative Execution Exploit Performance Impacts](https://access.redhat.com/articles/3307751)\n* Extensive details can be found at the [Project Zero blog](https://googleprojectzero.blogspot.ca/2018/01/reading-privileged-memory-with-side.html) and [Meltdown and Spectre Attack webpage](https://meltdownattack.com/).\n* The Customer Portal page for the [Red Hat Security Team](https://access.redhat.com/security/) contains more information about policies, procedures, and alerts for Red Hat products.\n* The Security Team also maintains a frequently updated blog at [securityblog.redhat.com](https://securityblog.redhat.com).\n",
+                "resolution_set": [
+                    {
+                        "system_type": 105,
+                        "resolution": "{{? pydata.error_key == \"VIRT_CVE_2017_5715_CPU_3_VIRTKERNEL\" ||  pydata.error_key == \"VIRT_CVE_2017_5715_CPU_3_DRACUTKERNEL\" }}Red Hat recommends that you update the kernel and the packages and restart the system:\n\n~~~~\n# yum update{{~ pydata.PACKAGE_NAMES :value:index}} {{= value }}{{~}}\n# yum update {{=pydata.kernel_pkg_name}}\n# reboot\n~~~~\n\nIf additional steps to update the kernel are necessary, they are detailed in the separate insights rule *Kernel vulnerable to side-channel attacks in modern microprocessors (CVE-2017-5753/Spectre, CVE-2017-5715/Spectre, CVE-2017-5754/Meltdown)*.\n{{?}}{{? pydata.error_key == \"VIRT_CVE_2017_5715_CPU_3_ONLYKERNEL\" }}Red Hat recommends that you update the kernel:\n\n~~~~\n# yum update {{=pydata.kernel_pkg_name}}\n# reboot\n~~~~\n\nIf additional steps to update the kernel are necessary, they are detailed in the separate insights rule *Kernel vulnerable to side-channel attacks in modern microprocessors (CVE-2017-5753/Spectre, CVE-2017-5715/Spectre, CVE-2017-5754/Meltdown)*.\n{{?}}{{? pydata.error_key == \"VIRT_CVE_2017_5715_CPU_3_ONLYVIRT\" ||  pydata.error_key == \"VIRT_CVE_2017_5715_CPU_3_ONLYDRACUT\" }}Red Hat recommends that you update the packages and restart the system:\n\n~~~~\n# yum update{{~ pydata.PACKAGE_NAMES :value:index}} {{= value }}{{~}}\n# reboot\n~~~~\n{{?}}\n\nFixes require CPU microcode/firmware to activate.\n\n**In addition:**\n\nSubscribers are advised to contact their hardware OEM to receive the appropriate microcode/firmware for their processor. Red Hat may be providing `microcode_ctl` and `linux_firmware` packages that will cover the limited subset of chipsets we were able to test, but this will **not** address many CPUs that you may have in use in your server fleet. Again, contacting your hardware vendor will ensure you have the appropriate software to enable the protections for Variant 2 of this issue.\n",
+                        "resolution_risk": {
+                            "name": "Upgrade Kernel",
+                            "risk": 3
+                        },
+                        "has_playbook": true
+                    }
+                ],
+                "total_risk": 2
+            },
+            "details": {
+                "type": "rule",
+                "cves_fail": [
+                    "CVE-2017-5715"
+                ],
+                "cves_pass": [],
+                "error_key": "VIRT_CVE_2017_5715_CPU_3_ONLYKERNEL",
+                "kernel_pkg_name": "kernel",
+                "affected_amd_family": false
+            },
+            "resolution": {
+                "system_type": 105,
+                "resolution": "{{? pydata.error_key == \"VIRT_CVE_2017_5715_CPU_3_VIRTKERNEL\" ||  pydata.error_key == \"VIRT_CVE_2017_5715_CPU_3_DRACUTKERNEL\" }}Red Hat recommends that you update the kernel and the packages and restart the system:\n\n~~~~\n# yum update{{~ pydata.PACKAGE_NAMES :value:index}} {{= value }}{{~}}\n# yum update {{=pydata.kernel_pkg_name}}\n# reboot\n~~~~\n\nIf additional steps to update the kernel are necessary, they are detailed in the separate insights rule *Kernel vulnerable to side-channel attacks in modern microprocessors (CVE-2017-5753/Spectre, CVE-2017-5715/Spectre, CVE-2017-5754/Meltdown)*.\n{{?}}{{? pydata.error_key == \"VIRT_CVE_2017_5715_CPU_3_ONLYKERNEL\" }}Red Hat recommends that you update the kernel:\n\n~~~~\n# yum update {{=pydata.kernel_pkg_name}}\n# reboot\n~~~~\n\nIf additional steps to update the kernel are necessary, they are detailed in the separate insights rule *Kernel vulnerable to side-channel attacks in modern microprocessors (CVE-2017-5753/Spectre, CVE-2017-5715/Spectre, CVE-2017-5754/Meltdown)*.\n{{?}}{{? pydata.error_key == \"VIRT_CVE_2017_5715_CPU_3_ONLYVIRT\" ||  pydata.error_key == \"VIRT_CVE_2017_5715_CPU_3_ONLYDRACUT\" }}Red Hat recommends that you update the packages and restart the system:\n\n~~~~\n# yum update{{~ pydata.PACKAGE_NAMES :value:index}} {{= value }}{{~}}\n# reboot\n~~~~\n{{?}}\n\nFixes require CPU microcode/firmware to activate.\n\n**In addition:**\n\nSubscribers are advised to contact their hardware OEM to receive the appropriate microcode/firmware for their processor. Red Hat may be providing `microcode_ctl` and `linux_firmware` packages that will cover the limited subset of chipsets we were able to test, but this will **not** address many CPUs that you may have in use in your server fleet. Again, contacting your hardware vendor will ensure you have the appropriate software to enable the protections for Variant 2 of this issue.\n",
+                "resolution_risk": {
+                    "name": "Upgrade Kernel",
+                    "risk": 3
+                },
+                "has_playbook": true
+            }
+        },
+        {
+            "id": 16923676,
+            "rule": {
+                "id": 49,
+                "created_at": "2019-02-07T14:02:34.410515-05:00",
+                "updated_at": "2019-03-12T11:45:28.875932-04:00",
+                "ruleset": {
+                    "created_at": "2018-12-20T20:33:00-05:00",
+                    "updated_at": "2018-12-20T20:33:00-05:00",
+                    "rule_source": "https://$REDACTED$/insights-open-source/insights-security",
+                    "description": "Security"
+                },
+                "rule_id": "CVE_2017_5753_4_cpu_kernel|KERNEL_CVE_2017_5753_4_CPU_ERROR_3",
+                "description": "Kernel vulnerable to side-channel attacks in modern microprocessors (CVE-2017-5753/Spectre, CVE-2017-5715/Spectre, CVE-2017-5754/Meltdown)",
+                "active": true,
+                "category": {
+                    "id": 2,
+                    "name": "Security"
+                },
+                "impact": {
+                    "name": "Information Disclosure",
+                    "impact": 3
+                },
+                "likelihood": 2,
+                "node_id": "3244101",
+                "tags": "security kernel CVE",
+                "reboot_required": true,
+                "publish_date": "2018-01-22T12:00:00-05:00",
+                "summary": "A vulnerability was discovered in modern microprocessors supported by the kernel, whereby an unprivileged attacker can use this flaw to bypass restrictions to gain read access to privileged memory.\nThe issue was reported as [CVE-2017-5753 / CVE-2017-5715 / Spectre](https://access.redhat.com/security/cve/CVE-2017-5753) and [CVE-2017-5754 / Meltdown](https://access.redhat.com/security/cve/CVE-2017-5754).\n",
+                "generic": "An industry-wide issue was found in the manner many modern microprocessors have implemented speculative execution of instructions. There are three primary variants of the issue which differ in the way the speculative execution can be exploited.\n\nAll three rely upon the fact that modern high performance microprocessors implement both speculative execution, and utilize VIPT (Virtually Indexed, Physically Tagged) level 1 data caches that may become allocated with data in the kernel virtual address space during such speculation.\n\nAn unprivileged attacker could use these to read privileged memory by conducting targeted cache side-channel attacks, including memory locations that cross the syscall boundary or the guest/host boundary, or potentially arbitrary host memory addresses.\n\nMitigations for these vulnerabilities additionally require firmware/microcode updates from hardware vendors.\n",
+                "reason": "This system is vulnerable to the following variant(s):\n\n{{? pydata.problems.v1_vulnerable}}* Variant 1 (Spectre/CVE-2017-5753)\n{{?}}{{? pydata.problems.v2_vulnerable}}* Variant 2 (Spectre/CVE-2017-5715)\n{{?}}{{? pydata.problems.v3_vulnerable}}* Variant 3 (Meltdown/CVE-2017-5754)\n{{?}}\n\n{{ var factors_contributing_displayed = (!pydata.problems.kernel_supports_features || !pydata.problems.firmware_supports_features || pydata.problems.pti_cmdline_disabled || pydata.problems.ibpb_cmdline_disabled || pydata.problems.ibpb_cmdline_spectre_v2_disabled || pydata.problems.ibrs_cmdline_disabled || pydata.problems.ibrs_cmdline_spectre_v2_disabled || pydata.problems.rfi_flush_cmdline_disabled) ; }}{{? factors_contributing_displayed }}Factors contributing to these vulnerabilities are:\n\n{{? !pydata.problems.kernel_supports_features}}* This system's kernel needs updating.\n{{?}}{{? !pydata.problems.firmware_supports_features}}* This system needs a firmware update.\n{{?}}{{? pydata.problems.pti_cmdline_disabled}}* PTI has been disabled by the `nopti` kernel argument.\n{{?}}{{? pydata.problems.ibpb_cmdline_disabled}}* IBPB has been disabled by the `noibpb` kernel argument.\n{{?}}{{? pydata.problems.ibpb_cmdline_spectre_v2_disabled}}* IBPB has been disabled by the `{{=pydata.problems.spectre_v2_disabling_cmdline}}` kernel argument.\n{{?}}{{? pydata.problems.ibrs_cmdline_disabled}}* IBRS has been disabled by the `noibrs` kernel argument.\n{{?}}{{? pydata.problems.ibrs_cmdline_spectre_v2_disabled}}* IBRS has been disabled by the `{{=pydata.problems.spectre_v2_disabling_cmdline}}` kernel argument.\n{{?}}{{? pydata.problems.rfi_flush_cmdline_disabled}}* RFI flush has been disabled by the `no_rfi_flush` kernel argument.\n{{?}}{{?}}\n\n{{? ( pydata.sysfs_vuln_md && (pydata.sysfs_vuln_md.indexOf(\"Vulnerable\") != -1)) || ( pydata.sysfs_vuln_s2 && (/Vulnerable: Minimal.*ASM retpoline/.test(pydata.sysfs_vuln_s2) || pydata.sysfs_vuln_s2.indexOf(\"Vulnerable: Retpoline without IBPB\") != -1 || pydata.sysfs_vuln_s2.indexOf(\"Vulnerable: Retpoline on Skylake\") != -1 || pydata.sysfs_vuln_s2.indexOf(\"Vulnerable: Retpoline with unsafe module\") != -1)) }}{{? factors_contributing_displayed }}Additional details:{{??}}Factors contributing to these vulnerabilities are:{{?}}\n\n{{? pydata.sysfs_vuln_md }}{{? pydata.sysfs_vuln_md.indexOf(\"Vulnerable\") != -1 }}* The CPU is vulnerable to Variant 3 (Meltdown/CVE-2017-5754) and PTI is disabled.\n{{?}}{{?}}{{? pydata.sysfs_vuln_s2 }}{{? /Vulnerable: Minimal.*ASM retpoline/.test(pydata.sysfs_vuln_s2) }}* The kernel has been compiled with an old version of the `gcc` compiler that doesn't support retpolines, so the kernel is vulnerable to Variant 2 (Spectre/CVE-2017-5715).\n{{?}}{{? pydata.sysfs_vuln_s2.indexOf(\"Vulnerable: Retpoline without IBPB\") != -1 }}* The CPU has vulnerable microcode, so the kernel can't use IBPB to mitigate Variant 2 (Spectre/CVE-2017-5715).\n{{?}}{{? pydata.sysfs_vuln_s2.indexOf(\"Vulnerable: Retpoline on Skylake\") != -1 }}* The CPU is Intel Skylake with updated microcode or newer, but retpolines are enabled. This type of CPU requires that IBRS is enabled and retpolines are disabled. The system is vulnerable to Variant 2 (Spectre/CVE-2017-5715) as a result.\n{{?}}{{? pydata.sysfs_vuln_s2.indexOf(\"Vulnerable: Retpoline with unsafe module\") != -1 }}* A kernel module is loaded that has been compiled with a compiler without retpoline support. As a result, the kernel is vulnerable to Variant 2 (Spectre/CVE-2017-5715).\n{{?}}{{?}}{{?}}\n\n{{? !pydata.debugfs_available || pydata.retpo_kernel_but_no_sys_cpu_vuln }}Some diagnostic information was unavailable to Insights.{{?}}\n{{? !pydata.debugfs_available }}* `debugfs` information was not available. {{? pydata.dmesg_available }}Feature settings were inferred from `dmesg` and known vendor defaults.{{??}}`dmesg` information is also unavailable, so it isn't possible to determine which mitigations are available.{{?}}\n{{?}}{{? pydata.retpo_kernel_but_no_sys_cpu_vuln }}* `/sys/devices/system/cpu/vulnerabilities` was not available to Insights, even though the kernel provides it.\n{{?}}\n\n",
+                "more_info": "* For more information about the flaws, see [Kernel Side-Channel Attacks](https://access.redhat.com/security/vulnerabilities/speculativeexecution), [CVE-2017-5754](https://access.redhat.com/security/cve/CVE-2017-5754), [CVE-2017-5753](https://access.redhat.com/security/cve/CVE-2017-5753), and [CVE-2017-5715](https://access.redhat.com/security/cve/CVE-2017-5715).\n* For possible performance impact of kernel updates, see [Speculative Execution Exploit Performance Impacts](https://access.redhat.com/articles/3307751).\n* For information related to VMs, see [How do I enable Markdown/Spectre mitigations in my virtualised machines?](https://access.redhat.com/articles/3331571)\n* Extensive details can be found at the [Project Zero blog](https://googleprojectzero.blogspot.ca/2018/01/reading-privileged-memory-with-side.html) and [Meltdown and Spectre Attack webpage](https://meltdownattack.com/).\n* More information about performance impact of the mitigations can be found in the [Speculative Execution Exploit Performance Impacts](https://access.redhat.com/articles/3307751) knowledgebase article.\n* The Customer Portal page for the [Red Hat Security Team](https://access.redhat.com/security/) contains more information about policies, procedures, and alerts for Red Hat products.\n* The Security Team also maintains a frequently updated blog at [securityblog.redhat.com](https://securityblog.redhat.com).\n",
+                "resolution_set": [
+                    {
+                        "system_type": 105,
+                        "resolution": "{{? pydata.dmesg_wrapped || !pydata.debugfs_available || pydata.retpo_kernel_but_no_sys_cpu_vuln }}**To improve detection reliability:**{{?}}\n{{? pydata.dmesg_wrapped}}* The kernel ring buffer has wrapped, making some information from `dmesg` unreliable. See [How do I increase the kernel log ring buffer size?](https://access.redhat.com/solutions/47276) for further information. Rebooting the system may also overcome this issue.\n{{?}}{{? !pydata.debugfs_available}}* Kernel debug information was not available. Mount `debugfs` as follows:  \n{{? pydata.release >= 7 }}\n ~~~\n # systemctl restart sys-kernel-debug.mount\n ~~~\n{{??}}\n ~~~\n # mount -t debugfs nodev /sys/kernel/debug\n ~~~\n{{?}}{{?}}{{? pydata.retpo_kernel_but_no_sys_cpu_vuln}}* Allow Insights to collect `/sys/devices/system/cpu/vulnerabilities`.\n{{?}}\n\n**To mitigate the vulnerability:**\n{{? ( pydata.dmesg_wrapped || !pydata.dmesg_available ) && !pydata.debugfs_available && (!pydata.sysfs_vuln_s1 && !pydata.sysfs_vuln_s2 && !pydata.sysfs_vuln_md) }}* It might be necessary to improve detection reliability before we can offer more concrete mitigation steps.{{? !pydata.problems.kernel_supports_features}} If it is not possible, update the kernel package and reboot:\n ~~~\n # yum update {{=pydata.package_name}}\n # reboot\n ~~~\n{{?}}\n{{?}}{{? pydata.dmesg_available && !pydata.problems.kernel_supports_features }}* This system is running a vulnerable kernel. Update the kernel package and reboot:\n ~~~\n # yum update {{=pydata.package_name}}\n # reboot\n ~~~\n{{?}}{{? ((pydata.debugfs_available || pydata.dmesg_available) && !pydata.problems.firmware_supports_features) || (pydata.sysfs_vuln_s2 && (pydata.sysfs_vuln_s2.indexOf(\"Vulnerable: Retpoline without IBPB\") != -1)) }}* This system needs a firmware update. Contact your system hardware vendor for more information.\n{{?}}{{? pydata.problems.pti_cmdline_disabled }}* Remove the `nopti` kernel argument:\n ~~~\n # grubby --update-kernel=ALL --remove-args=nopti\n ~~~\n{{?}}{{? pydata.problems.ibpb_cmdline_disabled }}* Remove the `noibpb` kernel argument:\n ~~~\n # grubby --update-kernel=ALL --remove-args=noibpb\n ~~~\n{{?}}{{? pydata.problems.ibrs_cmdline_disabled }}* Remove the `noibrs` kernel argument:\n ~~~\n # grubby --update-kernel=ALL --remove-args=noibrs\n ~~~\n{{?}}{{? ( pydata.problems.ibpb_cmdline_spectre_v2_disabled || pydata.problems.ibrs_cmdline_spectre_v2_disabled ) && ( pydata.problems.spectre_v2_disabling_cmdline.indexOf(\"v2=\") != -1 ) }}* Remove the `spectre_v2` kernel argument:\n ~~~\n # grubby --update-kernel=ALL --remove-args=spectre_v2\n ~~~\n{{?}}{{? ( pydata.problems.ibpb_cmdline_spectre_v2_disabled || pydata.problems.ibrs_cmdline_spectre_v2_disabled ) && ( pydata.problems.spectre_v2_disabling_cmdline.indexOf(\"nospectre\") != -1 ) }}* Remove the `nospectre_v2` kernel argument:\n ~~~\n # grubby --update-kernel=ALL --remove-args=nospectre_v2\n ~~~\n{{?}}{{? pydata.problems.rfi_flush_cmdline_disabled }}* Remove the `no_rfi_flush` kernel argument:\n ~~~\n # grubby --update-kernel=ALL --remove-args=no_rfi_flush\n ~~~\n{{?}}{{? pydata.sysfs_vuln_s2 }}{{? /Vulnerable: Minimal.*ASM retpoline/.test(pydata.sysfs_vuln_s2) }}* This system is running a custom kernel that has been compiled with outdated `gcc`. Either recompile the kernel with retpoline-enabled `gcc` or update the kernel package and reboot:\n ~~~\n # yum update {{=pydata.package_name}}\n # reboot\n ~~~\n{{?}}{{? pydata.sysfs_vuln_s2.indexOf(\"Vulnerable: Retpoline on Skylake\") != -1 }}* Enable IBRS and disable retpolines. Retpolines are disabled automatically when IBRS is enabled:\n ~~~\n # echo 1 > /sys/kernel/debug/x86/ibrs_enabled\n ~~~\n{{?}}{{? pydata.sysfs_vuln_s2.indexOf(\"Vulnerable: Retpoline with unsafe module\") != -1 }}* Unload the kernel modules that have been compiled without a retpoline-enabled compiler. To find the affected kernel modules:\n ~~~\n # dmesg | grep \"WARNING: module.*built without retpoline-enabled compiler\"\n ~~~\nTo unload the module:\n ~~~\n # modprobe -r module_name\n ~~~\n{{?}}{{?}}{{? pydata.problems.pti_cmdline_disabled || pydata.problems.ibpb_cmdline_disabled || pydata.problems.ibrs_cmdline_disabled || pydata.problems.ibpb_cmdline_spectre_v2_disabled || pydata.problems.ibrs_cmdline_spectre_v2_disabled || pydata.problems.rfi_flush_cmdline_disabled }}\n ~~~\n # reboot\n ~~~\n {{?}}\n\n{{? !pydata.virtual == false || pydata.virtual === null }}**Note about virtualization**\n\nIn virtualized environment, there are more steps to mitigate the issue, including:\n* Host needs to have updated kernel and CPU microcode\n* Host needs to have updated virtualization software\n* Guest needs to have updated kernel\n* Hypervisor needs to propagate new CPU features correctly\n\nFor more details about mitigations in virtualized environment see: [https://access.redhat.com/articles/3331571](https://access.redhat.com/articles/3331571){{?}}\n\n{{? pydata.virtual == \"vmware\" }}For help with setting VMWare to propagate CPU features correctly, refer to the following knowledge-base article: [https://kb.vmware.com/s/article/52085](https://kb.vmware.com/s/article/52085){{?}}\n",
+                        "resolution_risk": {
+                            "name": "Upgrade Kernel",
+                            "risk": 3
+                        },
+                        "has_playbook": true
+                    }
+                ],
+                "total_risk": 2
+            },
+            "details": {
+                "mfr": "Intel",
+                "type": "rule",
+                "virtual": "kvm",
+                "problems": {
+                    "v1_vulnerable": false,
+                    "v2_vulnerable": true,
+                    "v3_vulnerable": false,
+                    "pti_cmdline_disabled": false,
+                    "ibpb_cmdline_disabled": false,
+                    "ibrs_cmdline_disabled": false,
+                    "kernel_supports_features": true,
+                    "firmware_supports_features": false,
+                    "rfi_flush_cmdline_disabled": false,
+                    "spectre_v2_disabling_cmdline": null,
+                    "ibpb_cmdline_spectre_v2_disabled": false,
+                    "ibrs_cmdline_spectre_v2_disabled": false
+                },
+                "cves_fail": [
+                    "CVE-2017-5715"
+                ],
+                "cves_pass": [
+                    "CVE-2017-5753",
+                    "CVE-2017-5754"
+                ],
+                "error_key": "KERNEL_CVE_2017_5753_4_CPU_ERROR_3",
+                "package_name": "kernel",
+                "dmesg_wrapped": false,
+                "release_major": "7",
+                "sysfs_vuln_md": "Mitigation: PTI",
+                "sysfs_vuln_s1": "Mitigation: Load fences, __user pointer sanitization",
+                "sysfs_vuln_s2": "Vulnerable: Retpoline without IBPB",
+                "running_kernel": "3.10.0-862.14.4.el7.x86_64",
+                "dmesg_available": true,
+                "debugfs_available": true,
+                "old_specs_on_client": false,
+                "retpo_kernel_but_no_sys_cpu_vuln": false
+            },
+            "resolution": {
+                "system_type": 105,
+                "resolution": "{{? pydata.dmesg_wrapped || !pydata.debugfs_available || pydata.retpo_kernel_but_no_sys_cpu_vuln }}**To improve detection reliability:**{{?}}\n{{? pydata.dmesg_wrapped}}* The kernel ring buffer has wrapped, making some information from `dmesg` unreliable. See [How do I increase the kernel log ring buffer size?](https://access.redhat.com/solutions/47276) for further information. Rebooting the system may also overcome this issue.\n{{?}}{{? !pydata.debugfs_available}}* Kernel debug information was not available. Mount `debugfs` as follows:  \n{{? pydata.release >= 7 }}\n ~~~\n # systemctl restart sys-kernel-debug.mount\n ~~~\n{{??}}\n ~~~\n # mount -t debugfs nodev /sys/kernel/debug\n ~~~\n{{?}}{{?}}{{? pydata.retpo_kernel_but_no_sys_cpu_vuln}}* Allow Insights to collect `/sys/devices/system/cpu/vulnerabilities`.\n{{?}}\n\n**To mitigate the vulnerability:**\n{{? ( pydata.dmesg_wrapped || !pydata.dmesg_available ) && !pydata.debugfs_available && (!pydata.sysfs_vuln_s1 && !pydata.sysfs_vuln_s2 && !pydata.sysfs_vuln_md) }}* It might be necessary to improve detection reliability before we can offer more concrete mitigation steps.{{? !pydata.problems.kernel_supports_features}} If it is not possible, update the kernel package and reboot:\n ~~~\n # yum update {{=pydata.package_name}}\n # reboot\n ~~~\n{{?}}\n{{?}}{{? pydata.dmesg_available && !pydata.problems.kernel_supports_features }}* This system is running a vulnerable kernel. Update the kernel package and reboot:\n ~~~\n # yum update {{=pydata.package_name}}\n # reboot\n ~~~\n{{?}}{{? ((pydata.debugfs_available || pydata.dmesg_available) && !pydata.problems.firmware_supports_features) || (pydata.sysfs_vuln_s2 && (pydata.sysfs_vuln_s2.indexOf(\"Vulnerable: Retpoline without IBPB\") != -1)) }}* This system needs a firmware update. Contact your system hardware vendor for more information.\n{{?}}{{? pydata.problems.pti_cmdline_disabled }}* Remove the `nopti` kernel argument:\n ~~~\n # grubby --update-kernel=ALL --remove-args=nopti\n ~~~\n{{?}}{{? pydata.problems.ibpb_cmdline_disabled }}* Remove the `noibpb` kernel argument:\n ~~~\n # grubby --update-kernel=ALL --remove-args=noibpb\n ~~~\n{{?}}{{? pydata.problems.ibrs_cmdline_disabled }}* Remove the `noibrs` kernel argument:\n ~~~\n # grubby --update-kernel=ALL --remove-args=noibrs\n ~~~\n{{?}}{{? ( pydata.problems.ibpb_cmdline_spectre_v2_disabled || pydata.problems.ibrs_cmdline_spectre_v2_disabled ) && ( pydata.problems.spectre_v2_disabling_cmdline.indexOf(\"v2=\") != -1 ) }}* Remove the `spectre_v2` kernel argument:\n ~~~\n # grubby --update-kernel=ALL --remove-args=spectre_v2\n ~~~\n{{?}}{{? ( pydata.problems.ibpb_cmdline_spectre_v2_disabled || pydata.problems.ibrs_cmdline_spectre_v2_disabled ) && ( pydata.problems.spectre_v2_disabling_cmdline.indexOf(\"nospectre\") != -1 ) }}* Remove the `nospectre_v2` kernel argument:\n ~~~\n # grubby --update-kernel=ALL --remove-args=nospectre_v2\n ~~~\n{{?}}{{? pydata.problems.rfi_flush_cmdline_disabled }}* Remove the `no_rfi_flush` kernel argument:\n ~~~\n # grubby --update-kernel=ALL --remove-args=no_rfi_flush\n ~~~\n{{?}}{{? pydata.sysfs_vuln_s2 }}{{? /Vulnerable: Minimal.*ASM retpoline/.test(pydata.sysfs_vuln_s2) }}* This system is running a custom kernel that has been compiled with outdated `gcc`. Either recompile the kernel with retpoline-enabled `gcc` or update the kernel package and reboot:\n ~~~\n # yum update {{=pydata.package_name}}\n # reboot\n ~~~\n{{?}}{{? pydata.sysfs_vuln_s2.indexOf(\"Vulnerable: Retpoline on Skylake\") != -1 }}* Enable IBRS and disable retpolines. Retpolines are disabled automatically when IBRS is enabled:\n ~~~\n # echo 1 > /sys/kernel/debug/x86/ibrs_enabled\n ~~~\n{{?}}{{? pydata.sysfs_vuln_s2.indexOf(\"Vulnerable: Retpoline with unsafe module\") != -1 }}* Unload the kernel modules that have been compiled without a retpoline-enabled compiler. To find the affected kernel modules:\n ~~~\n # dmesg | grep \"WARNING: module.*built without retpoline-enabled compiler\"\n ~~~\nTo unload the module:\n ~~~\n # modprobe -r module_name\n ~~~\n{{?}}{{?}}{{? pydata.problems.pti_cmdline_disabled || pydata.problems.ibpb_cmdline_disabled || pydata.problems.ibrs_cmdline_disabled || pydata.problems.ibpb_cmdline_spectre_v2_disabled || pydata.problems.ibrs_cmdline_spectre_v2_disabled || pydata.problems.rfi_flush_cmdline_disabled }}\n ~~~\n # reboot\n ~~~\n {{?}}\n\n{{? !pydata.virtual == false || pydata.virtual === null }}**Note about virtualization**\n\nIn virtualized environment, there are more steps to mitigate the issue, including:\n* Host needs to have updated kernel and CPU microcode\n* Host needs to have updated virtualization software\n* Guest needs to have updated kernel\n* Hypervisor needs to propagate new CPU features correctly\n\nFor more details about mitigations in virtualized environment see: [https://access.redhat.com/articles/3331571](https://access.redhat.com/articles/3331571){{?}}\n\n{{? pydata.virtual == \"vmware\" }}For help with setting VMWare to propagate CPU features correctly, refer to the following knowledge-base article: [https://kb.vmware.com/s/article/52085](https://kb.vmware.com/s/article/52085){{?}}\n",
+                "resolution_risk": {
+                    "name": "Upgrade Kernel",
+                    "risk": 3
+                },
+                "has_playbook": true
+            }
+        },
+        {
+            "id": 16923673,
+            "rule": {
+                "id": 72,
+                "created_at": "2019-02-07T14:02:34.653624-05:00",
+                "updated_at": "2019-03-12T11:45:29.372525-04:00",
+                "ruleset": {
+                    "created_at": "2018-12-20T20:33:00-05:00",
+                    "updated_at": "2018-12-20T20:33:00-05:00",
+                    "rule_source": "https://$REDACTED$/insights-open-source/insights-security",
+                    "description": "Security"
+                },
+                "rule_id": "CVE_2018_3639_cpu_kernel|CVE_2018_3639_CPU_BAD_MICROCODE",
+                "description": "Kernel vulnerable to side-channel attacks in modern microprocessors using Speculative Store Bypass when CPU microcode is outdated (CVE-2018-3639)",
+                "active": true,
+                "category": {
+                    "id": 2,
+                    "name": "Security"
+                },
+                "impact": {
+                    "name": "Local Privilege Escalation",
+                    "impact": 2
+                },
+                "likelihood": 2,
+                "node_id": "3448801",
+                "tags": "security",
+                "reboot_required": true,
+                "publish_date": "2018-05-21T21:00:00-04:00",
+                "summary": "An industry-wide issue was found in the manner in which many modern microprocessors have implemented speculative execution of instructions. It has been assigned [CVE-2018-3639](https://access.redhat.com/security/cve/CVE-2018-3639). Mitigations for this vulnerability require firmware/microcode updates from hardware vendors.\n\nAn unprivileged attacker can use this flaw to bypass restrictions in order to gain read access to privileged memory that would otherwise be inaccessible.\n",
+                "generic": "An industry-wide issue was found in the manner in which many modern microprocessors have implemented speculative execution of instructions. The flaw is similar to CVE-2017-5753 (aka \"Spectre v1\"), except it leverages Speculative Store Bypass memory optimization in place of the Branch Misprediction used by Spectre v1.\n\nAn unprivileged attacker can use this flaw to bypass restrictions in order to gain read access to privileged memory that would otherwise be inaccessible, e.g. to memory outside of a sandboxed environments like web browsers or JIT execution runtimes.\n\nMitigations for this vulnerability require firmware/microcode updates from hardware vendors.\n\nRed Hat recommends that you update the kernel and update firmware.\n",
+                "reason": "The system is vulnerable because:\n\n* CPU microcode requires an update\n",
+                "more_info": "* For more information about the flaw, see [the vulnerability article](https://access.redhat.com/security/vulnerabilities/ssbd).\n* To learn how to upgrade packages, see [What is yum and how do I use it?](https://access.redhat.com/solutions/9934).\n* The Customer Portal page for the [Red Hat Security Team](https://access.redhat.com/security/) contains more information about policies, procedures, and alerts for Red Hat products.\n* The Security Team also maintains a frequently updated blog at [securityblog.redhat.com](https://securityblog.redhat.com).\n",
+                "resolution_set": [
+                    {
+                        "system_type": 105,
+                        "resolution": "This system needs a firmware update. Contact your system hardware vendor for more information.\n\n{{? !pydata.virtual == false || pydata.virtual === null}}**Note about virtualization**\n\nIn virtualized environment, there are more steps to mitigate the issue, including:\n* Host needs to have updated kernel and CPU microcode\n* Host needs to have updated virtualization software\n* Guest needs to have updated kernel\n* Hypervisor needs to propagate new CPU features correctly\n\nFor more details about mitigations in virtualized environment see: [https://access.redhat.com/articles/3331571](https://access.redhat.com/articles/3331571){{?}}\n\n{{? pydata.virtual == \"vmware\" }}For help with setting VMWare to propagate CPU features correctly, refer to the following knowledge-base article: [https://kb.vmware.com/s/article/52085](https://kb.vmware.com/s/article/52085){{?}}\n",
+                        "resolution_risk": {
+                            "name": "Hardware Vendor Firmware Update",
+                            "risk": 3
+                        },
+                        "has_playbook": false
+                    }
+                ],
+                "total_risk": 2
+            },
+            "details": {
+                "rt": false,
+                "type": "rule",
+                "virtual": "kvm",
+                "cmd_avail": true,
+                "cves_fail": [
+                    "CVE-2018-3639"
+                ],
+                "cves_pass": [],
+                "error_key": "CVE_2018_3639_CPU_BAD_MICROCODE",
+                "running_kernel": "3.10.0-862.14.4.el7.x86_64",
+                "vuln_file_present": true
+            },
+            "resolution": {
+                "system_type": 105,
+                "resolution": "This system needs a firmware update. Contact your system hardware vendor for more information.\n\n{{? !pydata.virtual == false || pydata.virtual === null}}**Note about virtualization**\n\nIn virtualized environment, there are more steps to mitigate the issue, including:\n* Host needs to have updated kernel and CPU microcode\n* Host needs to have updated virtualization software\n* Guest needs to have updated kernel\n* Hypervisor needs to propagate new CPU features correctly\n\nFor more details about mitigations in virtualized environment see: [https://access.redhat.com/articles/3331571](https://access.redhat.com/articles/3331571){{?}}\n\n{{? pydata.virtual == \"vmware\" }}For help with setting VMWare to propagate CPU features correctly, refer to the following knowledge-base article: [https://kb.vmware.com/s/article/52085](https://kb.vmware.com/s/article/52085){{?}}\n",
+                "resolution_risk": {
+                    "name": "Hardware Vendor Firmware Update",
+                    "risk": 3
+                },
+                "has_playbook": false
+            }
+        },
+        {
+            "id": 16923678,
+            "rule": {
+                "id": 193,
+                "created_at": "2019-02-07T14:02:35.803497-05:00",
+                "updated_at": "2019-02-07T14:02:35.803513-05:00",
+                "ruleset": {
+                    "created_at": "2018-12-20T20:33:00-05:00",
+                    "updated_at": "2018-12-20T20:33:00-05:00",
+                    "rule_source": "https://$REDACTED$/insights-open-source/insights-security",
+                    "description": "Security"
+                },
+                "rule_id": "hardening_httpd_pci_dss|HARDENING_HTTPD_PCI_DSS",
+                "description": "Decreased security in httpd when using deprecated TLS protocol version (PCI DSS)",
+                "active": true,
+                "category": {
+                    "id": 2,
+                    "name": "Security"
+                },
+                "impact": {
+                    "name": "Hardening",
+                    "impact": 1
+                },
+                "likelihood": 1,
+                "node_id": "",
+                "tags": "httpd hardening security",
+                "reboot_required": false,
+                "publish_date": "2018-10-20T00:00:00-04:00",
+                "summary": "PCI Data Security Standard [mandates disabling](https://blog.pcisecuritystandards.org/are-you-ready-for-30-june-2018-sayin-goodbye-to-ssl-early-tls) TLS versions older than 1.1 for safeguarding payment data.\n",
+                "generic": "These hosts are running httpd with legacy SSL or TLS versions enabled and might be non-compliant with the PCI Data Security Standard.\n\nRed Hat recommends that you change your httpd/Apache configuration files. Select a host to see the host-specific details that need to be updated within the httpd/Apache configuration.\n",
+                "reason": "This host is running httpd with legacy SSL or TLS versions enabled and might be non-compliant with the PCI Data Security Standard.\n",
+                "more_info": "* For more information about the new PCI DSS rules, see [the article](https://blog.pcisecuritystandards.org/are-you-ready-for-30-june-2018-sayin-goodbye-to-ssl-early-tls)\n* [How do I globally disable TLSv1.0 on my RHEL server?](https://access.redhat.com/solutions/2157131)\n* The Customer Portal page for the [Red Hat Security Team](https://access.redhat.com/security/) contains more information about policies, procedures, and alerts for Red Hat Products.\n* The Security Team also maintains a frequently updated blog at [securityblog.redhat.com](https://securityblog.redhat.com).\n",
+                "resolution_set": [
+                    {
+                        "system_type": 19,
+                        "resolution": "Red Hat recommends that you disable SSLv3 and TLSv1.0.\n\n{{?pydata.ssl_protocols}}**The following SSLProtocol directive(s) in the respective Apache configuration files will need to be modified:**\n<ul>{{~pydata.ssl_protocols: ssl}}\n<li>`{{=ssl[0]}}` - `{{=ssl[1]}}`</li>\n{{~}}</ul>\n\nRed Hat recommends that either of these `SSLProtocol` configurations is used:\n* `SSLProtocol -all +TLSv1.1 +TLSv1.2`\n* `SSLProtocol all -SSLv2 -SSLv3 -TLSv1`\n\nFor additional hardening, to use TLS 1.2 only, use either of these `SSLProtocol` configurations:\n* `SSLProtocol -all +TLSv1.2`\n* `SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1`\n{{?}}\n\n{{?pydata.nss_protocols}}**The following NSSProtocol directive(s) in the respective Apache configuration files will need to be modified:**\n<ul>{{~pydata.nss_protocols: nss}}\n<li>`{{=nss[0]}}` - `{{=nss[1]}}`</li>\n{{~}}</ul>\n\nRed Hat recommends that this `NSSProtocol` configuration is used:\n* `NSSProtocol TLSv1.1,TLSv1.2`\n\nFor additional hardening, to use TLS 1.2 only, use the following `NSSProtocol` configuration:\n* `NSSProtocol TLSv1.2`\n{{?}}\n\nThen restart httpd:\n\n    # service httpd restart\n\nMake the changes permanent in the container image by using the **docker commit** command at the next container shutdown.\n\n{{?pydata.scl_installed}}You have installed httpd from Software Collections, which uses a different configuration files path from the default httpd. Some of the detected configuration files might be applicable only if the respective httpd package is used. Red Hat recommends resolving all listed issues to prevent inadvertent exposure to the vulnerability in case the httpd you use changes in the future.\n{{?}}\n",
+                        "resolution_risk": {
+                            "name": "Update Service Configuration",
+                            "risk": 3
+                        },
+                        "has_playbook": false
+                    },
+                    {
+                        "system_type": 105,
+                        "resolution": "Red Hat recommends that you disable SSLv3 and TLSv1.0.\n\n{{?pydata.ssl_protocols}}**The following SSLProtocol directive(s) in the respective Apache configuration files will need to be modified:**\n{{~pydata.ssl_protocols: ssl}}* `{{=ssl[0]}}` - {{=ssl[1]}}\n{{~}}\n\nRed Hat recommends that either of these `SSLProtocol` configurations is used:\n* `SSLProtocol -all +TLSv1.1 +TLSv1.2`\n* `SSLProtocol all -SSLv2 -SSLv3 -TLSv1`\n\nFor additional hardening, to use TLS 1.2 only, use either of these `SSLProtocol` configurations:\n* `SSLProtocol -all +TLSv1.2`\n* `SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1`\n{{?}}\n\n{{?pydata.nss_protocols}}**The following NSSProtocol directive(s) in the respective Apache configuration files will need to be modified:**\n{{~pydata.nss_protocols: nss}}* `{{=nss[0]}}` - {{=nss[1]}}\n{{~}}\n\nRed Hat recommends that this `NSSProtocol` configuration is used:\n* `NSSProtocol TLSv1.1,TLSv1.2`\n\nFor additional hardening, to use TLS 1.2 only, use the following `NSSProtocol` configuration:\n* `NSSProtocol TLSv1.2`\n{{?}}\n\nThen restart httpd:\n\n    # service httpd restart\n\n{{?pydata.scl_installed}}You have installed httpd from Software Collections, which uses a different configuration files path from the default httpd. Some of the detected configuration files might be applicable only if the respective httpd package is used. Red Hat recommends resolving all listed issues to prevent inadvertent exposure to the vulnerability in case the httpd you use changes in the future.\n{{?}}\n",
+                        "resolution_risk": {
+                            "name": "Update Service Configuration",
+                            "risk": 3
+                        },
+                        "has_playbook": false
+                    },
+                    {
+                        "system_type": 29,
+                        "resolution": "Red Hat recommends that you disable SSLv3 and TLSv1.0.\n\n{{?pydata.ssl_protocols}}**The following SSLProtocol directive(s) in the respective Apache configuration files will need to be modified:**\n<ul>{{~pydata.ssl_protocols: ssl}}\n<li>`{{=ssl[0]}}` - `{{=ssl[1]}}`</li>\n{{~}}</ul>\n\nRed Hat recommends that either of these `SSLProtocol` configurations is used:\n* `SSLProtocol -all +TLSv1.1 +TLSv1.2`\n* `SSLProtocol all -SSLv2 -SSLv3 -TLSv1`\n\nFor additional hardening, to use TLS 1.2 only, use either of these `SSLProtocol` configurations:\n* `SSLProtocol -all +TLSv1.2`\n* `SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1`\n{{?}}\n\n{{?pydata.nss_protocols}}**The following NSSProtocol directive(s) in the respective Apache configuration files will need to be modified:**\n<ul>{{~pydata.nss_protocols: nss}}\n<li>`{{=nss[0]}}` - `{{=nss[1]}}`</li>\n{{~}}</ul>\n\nRed Hat recommends that this `NSSProtocol` configuration is used:\n* `NSSProtocol TLSv1.1,TLSv1.2`\n\nFor additional hardening, to use TLS 1.2 only, use the following `NSSProtocol` configuration:\n* `NSSProtocol TLSv1.2`\n{{?}}\n\nMake the changes permanent in the image by using the **docker commit** command.\n\n{{?pydata.scl_installed}}You have installed httpd from Software Collections, which uses a different configuration files path from the default httpd. Some of the detected configuration files might be applicable only if the respective httpd package is used. Red Hat recommends resolving all listed issues to prevent inadvertent exposure to the vulnerability in case the httpd you use changes in the future.\n{{?}}\n",
+                        "resolution_risk": {
+                            "name": "Update Service Configuration",
+                            "risk": 3
+                        },
+                        "has_playbook": false
+                    }
+                ],
+                "total_risk": 1
+            },
+            "details": {
+                "type": "rule",
+                "error_key": "HARDENING_HTTPD_PCI_DSS",
+                "nss_protocols": [
+                    [
+                        "NSSProtocol TLSv1.0,TLSv1.1,TLSv1.2",
+                        "/etc/httpd/conf.d/nss.conf"
+                    ]
+                ],
+                "scl_installed": false,
+                "ssl_protocols": null
+            },
+            "resolution": {
+                "system_type": 105,
+                "resolution": "Red Hat recommends that you disable SSLv3 and TLSv1.0.\n\n{{?pydata.ssl_protocols}}**The following SSLProtocol directive(s) in the respective Apache configuration files will need to be modified:**\n{{~pydata.ssl_protocols: ssl}}* `{{=ssl[0]}}` - {{=ssl[1]}}\n{{~}}\n\nRed Hat recommends that either of these `SSLProtocol` configurations is used:\n* `SSLProtocol -all +TLSv1.1 +TLSv1.2`\n* `SSLProtocol all -SSLv2 -SSLv3 -TLSv1`\n\nFor additional hardening, to use TLS 1.2 only, use either of these `SSLProtocol` configurations:\n* `SSLProtocol -all +TLSv1.2`\n* `SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1`\n{{?}}\n\n{{?pydata.nss_protocols}}**The following NSSProtocol directive(s) in the respective Apache configuration files will need to be modified:**\n{{~pydata.nss_protocols: nss}}* `{{=nss[0]}}` - {{=nss[1]}}\n{{~}}\n\nRed Hat recommends that this `NSSProtocol` configuration is used:\n* `NSSProtocol TLSv1.1,TLSv1.2`\n\nFor additional hardening, to use TLS 1.2 only, use the following `NSSProtocol` configuration:\n* `NSSProtocol TLSv1.2`\n{{?}}\n\nThen restart httpd:\n\n    # service httpd restart\n\n{{?pydata.scl_installed}}You have installed httpd from Software Collections, which uses a different configuration files path from the default httpd. Some of the detected configuration files might be applicable only if the respective httpd package is used. Red Hat recommends resolving all listed issues to prevent inadvertent exposure to the vulnerability in case the httpd you use changes in the future.\n{{?}}\n",
+                "resolution_risk": {
+                    "name": "Update Service Configuration",
+                    "risk": 3
+                },
+                "has_playbook": false
+            }
+        },
+        {
+            "id": 16923677,
+            "rule": {
+                "id": 235,
+                "created_at": "2019-02-07T14:02:36.236195-05:00",
+                "updated_at": "2019-02-11T15:21:37.409742-05:00",
+                "ruleset": {
+                    "created_at": "2018-05-21T22:00:51-04:00",
+                    "updated_at": "2018-05-21T22:00:51-04:00",
+                    "rule_source": "https://$REDACTED$/insights-open-source/insights-plugins",
+                    "description": "Advisor"
+                },
+                "rule_id": "httpd24_deprecated_order|DEPRECATED_ORDER_USED_INFO_V1",
+                "description": "Unexpected behavior when using deprecated access control directives in httpd 2.4",
+                "active": true,
+                "category": {
+                    "id": 1,
+                    "name": "Availability"
+                },
+                "impact": {
+                    "name": "Invalid Configuration",
+                    "impact": 1
+                },
+                "likelihood": 3,
+                "node_id": "",
+                "tags": "sbr_webservers webservers httpd",
+                "reboot_required": false,
+                "publish_date": "2018-05-30T20:39:00-04:00",
+                "summary": "The httpd service does not work as expected when using old directives in httpd-2.4.\n",
+                "generic": "Access control is using deprecated directives (\"Order\", \"Allow\" and \"Deny\") provided by `mod_authz_compat` which has been replaced by `mod_authz_host` in **httpd 2.4**.\n",
+                "reason": "This host is running **{{=pydata.ver}}** and using the following old directives (`Order`, `Allow` or `Deny`) which have been deprecated:\n\n{{ for (var _sec in pydata.dep_conf) { }}\n* Section `<{{=_sec}}>`\n  {{ for (var file in pydata.dep_conf[_sec]) { }} * Configuration file `{{=file}}`\n    ```text {{ for (var dir in pydata.dep_conf[_sec][file]) { }}\n    {{=pydata.dep_conf[_sec][file][dir]}}  {{ } }}\n    ```\n  {{ } }}\n{{ } }}\n",
+                "more_info": "",
+                "resolution_set": [
+                    {
+                        "system_type": 105,
+                        "resolution": "Red Hat recommends that you replace the old directives (\"Order\", \"Allow\" and \"Deny\") with the new directive (\"Require\") in **httpd-2.4**.  Please check the [Upgrading to 2.4 from 2.2](http://httpd.apache.org/docs/2.4/upgrading.html) guide for more information.\n",
+                        "resolution_risk": {
+                            "name": "Update Service Configuration",
+                            "risk": 3
+                        },
+                        "has_playbook": false
+                    }
+                ],
+                "total_risk": 2
+            },
+            "details": {
+                "ver": "httpd-2.4.6-80.el7",
+                "type": "rule",
+                "dep_conf": {
+                    "Location /KdcProxy": {
+                        "/etc/httpd/conf.d/ipa-kdc-proxy.conf": [
+                            "Order Deny,Allow",
+                            "Allow from all"
+                        ]
+                    },
+                    "Directory /usr/share/fonts": {
+                        "/etc/httpd/conf.d/ipa.conf": [
+                            "Allow from all"
+                        ]
+                    },
+                    "Directory /usr/share/ipa/ui": {
+                        "/etc/httpd/conf.d/ipa.conf": [
+                            "Allow from all"
+                        ]
+                    },
+                    "Directory /usr/share/ipa/html": {
+                        "/etc/httpd/conf.d/ipa.conf": [
+                            "Allow from all"
+                        ]
+                    },
+                    "Directory /usr/share/ipa/wsgi": {
+                        "/etc/httpd/conf.d/ipa.conf": [
+                            "Allow from all"
+                        ]
+                    },
+                    "Location /ipa/session/sync_token": {
+                        "/etc/httpd/conf.d/ipa.conf": [
+                            "Order Deny,Allow",
+                            "Allow from all"
+                        ]
+                    },
+                    "Directory /usr/share/ipa/migration": {
+                        "/etc/httpd/conf.d/ipa.conf": [
+                            "Allow from all"
+                        ]
+                    },
+                    "Location /ipa/session/login_password": {
+                        "/etc/httpd/conf.d/ipa.conf": [
+                            "Order Deny,Allow",
+                            "Allow from all"
+                        ]
+                    },
+                    "Directory /var/lib/ipa/pki-ca/publish": {
+                        "/etc/httpd/conf.d/ipa.conf": [
+                            "Allow from all"
+                        ]
+                    },
+                    "Location /ipa/session/change_password": {
+                        "/etc/httpd/conf.d/ipa.conf": [
+                            "Order Deny,Allow",
+                            "Allow from all"
+                        ]
+                    }
+                },
+                "error_key": "DEPRECATED_ORDER_USED_INFO_V1"
+            },
+            "resolution": {
+                "system_type": 105,
+                "resolution": "Red Hat recommends that you replace the old directives (\"Order\", \"Allow\" and \"Deny\") with the new directive (\"Require\") in **httpd-2.4**.  Please check the [Upgrading to 2.4 from 2.2](http://httpd.apache.org/docs/2.4/upgrading.html) guide for more information.\n",
+                "resolution_risk": {
+                    "name": "Update Service Configuration",
+                    "risk": 3
+                },
+                "has_playbook": false
+            }
+        }
+    ]
 }
