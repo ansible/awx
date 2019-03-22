@@ -40,7 +40,7 @@ function ComponentsStrings (BaseString) {
     };
 
     ns.textarea = {
-        SSH_KEY_HINT: t.s('HINT: Drag and drop an SSH private key file on the field below.')
+        SSH_KEY_HINT: t.s('HINT: Drag and drop private file on the field below.')
     };
 
     ns.lookup = {
