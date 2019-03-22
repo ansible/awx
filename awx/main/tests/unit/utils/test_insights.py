@@ -9,16 +9,17 @@ from awx.main.tests.data.insights import TEST_INSIGHTS_PLANS
 def test_filter_insights_api_response():
     actual = filter_insights_api_response(TEST_INSIGHTS_PLANS)
 
-    assert actual['last_check_in'] == '2017-07-21T07:07:29.000Z'
-    assert len(actual['reports']) == 9
-    assert actual['reports'][0]['maintenance_actions'][0]['maintenance_plan']['name'] == "RHEL Demo Infrastructure"
-    assert actual['reports'][0]['maintenance_actions'][0]['maintenance_plan']['maintenance_id'] == 29315
-    assert actual['reports'][0]['rule']['severity'] == 'ERROR'
-    assert actual['reports'][0]['rule']['description'] == 'Remote code execution vulnerability in libresolv via crafted DNS response (CVE-2015-7547)'
-    assert actual['reports'][0]['rule']['category'] == 'Security'
-    assert actual['reports'][0]['rule']['summary'] == ("A critical security flaw in the `glibc` library was found. "
-                                                       "It allows an attacker to crash an application built against "
-                                                       "that library or, potentially, execute arbitrary code with "
-                                                       "privileges of the user running the application.")
-    assert actual['reports'][0]['rule']['ansible_fix'] is False
+    assert actual['last_check_in'] == '2019-03-19T21:59:09.213151-04:00'
+    assert len(actual['reports']) == 5
+    assert len(actual['reports'][0]['maintenance_actions']) == 0
+    rule = actual['reports'][0]['rule']
 
+    assert rule['severity'] == 'WARN'
+    assert rule['description'] == (
+        "Kernel vulnerable to side-channel attacks in modern microprocessors (CVE-2017-5715/Spectre)")
+    assert rule['category'] == 'Security'
+    assert rule['summary'] == (
+        "A vulnerability was discovered in modern microprocessors supported by the kernel,"
+        " whereby an unprivileged attacker can use this flaw to bypass restrictions to gain read"
+        " access to privileged memory.\nThe issue was reported as [CVE-2017-5715 / Spectre]"
+        "(https://access.redhat.com/security/cve/CVE-2017-5715).\n")

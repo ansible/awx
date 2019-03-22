@@ -38,9 +38,9 @@ def filter_insights_api_response(json):
                 if k in rule:
                     new_report['rule'][k] = rule[k]
             if 'category' in rule:
-                new_report['category'] = rule['category']['name']
+                new_report['rule']['category'] = rule['category']['name']
             if rule.get('total_risk') in severity_mapping:
-                new_report['severity'] = severity_mapping[rule['total_risk']]
+                new_report['rule']['severity'] = severity_mapping[rule['total_risk']]
 
             new_json['reports'].append(new_report)
 
