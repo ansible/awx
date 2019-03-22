@@ -191,18 +191,7 @@ def run_isolated_job(private_data_dir, secrets, logfile=sys.stdout):
     job_timeout = secrets.get('job_timeout', 10)
     pexpect_timeout = secrets.get('pexpect_timeout', 5)
 
-    # Use local callback directory
-    callback_dir = os.getenv('AWX_LIB_DIRECTORY')
-    if callback_dir is None:
-        raise RuntimeError('Location for callbacks must be specified '
-                           'by environment variable AWX_LIB_DIRECTORY.')
-    env['ANSIBLE_CALLBACK_PLUGINS'] = os.path.join(callback_dir, 'isolated_callbacks')
-    if 'AD_HOC_COMMAND_ID' in env:
-        env['ANSIBLE_STDOUT_CALLBACK'] = 'minimal'
-    else:
-        env['ANSIBLE_STDOUT_CALLBACK'] = 'awx_display'
     env['AWX_ISOLATED_DATA_DIR'] = private_data_dir
-    env['PYTHONPATH'] = env.get('PYTHONPATH', '') + callback_dir + ':'
 
     venv_path = env.get('VIRTUAL_ENV')
     if venv_path and not os.path.exists(venv_path):

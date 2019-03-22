@@ -1354,7 +1354,6 @@ class RunJob(BaseTask):
         env['MAX_EVENT_RES'] = str(settings.MAX_EVENT_RES_DATA)
         if not isolated:
             env['ANSIBLE_CALLBACK_PLUGINS'] = plugin_path
-            env['ANSIBLE_STDOUT_CALLBACK'] = 'awx_display'
             env['AWX_HOST'] = settings.TOWER_URL_BASE
 
         # Create a directory for ControlPath sockets that is unique to each
@@ -1632,7 +1631,6 @@ class RunProjectUpdate(BaseTask):
         env['TMP'] = settings.AWX_PROOT_BASE_PATH
         env['PROJECT_UPDATE_ID'] = str(project_update.pk)
         env['ANSIBLE_CALLBACK_PLUGINS'] = self.get_path_to('..', 'plugins', 'callback')
-        env['ANSIBLE_STDOUT_CALLBACK'] = 'awx_display'
         return env
 
     def _build_scm_url_extra_vars(self, project_update, scm_username='', scm_password=''):
@@ -2383,7 +2381,6 @@ class RunAdHocCommand(BaseTask):
         env['INVENTORY_HOSTVARS'] = str(True)
         env['ANSIBLE_CALLBACK_PLUGINS'] = plugin_dir
         env['ANSIBLE_LOAD_CALLBACK_PLUGINS'] = '1'
-        env['ANSIBLE_STDOUT_CALLBACK'] = 'minimal'  # Hardcoded by Ansible for ad-hoc commands (either minimal or oneline).
         env['ANSIBLE_SFTP_BATCH_MODE'] = 'False'
 
         # Specify empty SSH args (should disable ControlPersist entirely for
