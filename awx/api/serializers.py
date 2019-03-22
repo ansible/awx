@@ -4618,12 +4618,15 @@ class NotificationTemplateSerializer(BaseSerializer):
             object_actual = self.context['view'].get_object()
         else:
             object_actual = None
-        for field in notification_class.init_parameters:
+        for field, params in notification_class.init_parameters.items():
             if field not in attrs['notification_configuration']:
-                missing_fields.append(field)
-                continue
+                if 'default' in params:
+                    attrs['notification_configuration'][field] = params['default']
+                else:
+                    missing_fields.append(field)
+                    continue
             field_val = attrs['notification_configuration'][field]
-            field_type = notification_class.init_parameters[field]['type']
+            field_type = params['type']
             expected_types = self.type_map[field_type]
             if not type(field_val) in expected_types:
                 incorrect_type_fields.append((field, field_type))

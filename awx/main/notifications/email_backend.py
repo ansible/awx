@@ -18,9 +18,10 @@ class CustomEmailBackend(EmailBackend):
                        "use_ssl": {"label": "Use SSL", "type": "bool"},
                        "sender": {"label": "Sender Email", "type": "string"},
                        "recipients": {"label": "Recipient List", "type": "list"},
-                       "timeout": {"label": "Timeout", "type": "int"}}
+                       "timeout": {"label": "Timeout", "type": "int", "default": 30}}
     recipient_parameter = "recipients"
     sender_parameter = "sender"
+
 
     def format_body(self, body):
         if "body" in body:
