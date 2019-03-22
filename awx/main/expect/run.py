@@ -14,10 +14,7 @@ import signal
 import sys
 import threading
 import time
-try:
-    from io import StringIO
-except ImportError:
-    from StringIO import StringIO
+from io import StringIO
 
 import pexpect
 import psutil
@@ -231,10 +228,7 @@ def handle_termination(pid, args, proot_cmd, is_cancel=True):
                       instance's cancel_flag.
     '''
     try:
-        if sys.version_info > (3, 0):
-            used_proot = proot_cmd.encode('utf-8') in args
-        else:
-            used_proot = proot_cmd in ' '.join(args)
+        used_proot = proot_cmd.encode('utf-8') in args
         if used_proot:
             if not psutil:
                 os.kill(pid, signal.SIGKILL)
