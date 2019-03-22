@@ -4,7 +4,6 @@ import shutil
 import stat
 import tempfile
 import time
-import uuid
 import logging
 from io import StringIO
 
@@ -373,7 +372,7 @@ class IsolatedManager(object):
             if os.path.exists(facts_path):
                 shutil.rmtree(facts_path)
 
-    def run(self, instance, private_data_dir, playbook, event_data_key):
+    def run(self, instance, private_data_dir, playbook, event_data_key, ident=None):
         """
         Run a job on an isolated host.
 
@@ -388,7 +387,7 @@ class IsolatedManager(object):
         representing the status and return code of the isolated
         `ansible-playbook` run.
         """
-        self.ident = str(uuid.uuid4())
+        self.ident = ident
         self.event_data_key = event_data_key
         self.instance = instance
         self.host = instance.execution_node

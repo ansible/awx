@@ -1183,7 +1183,8 @@ class BaseTask(object):
                 status, rc = manager_instance.run(self.instance,
                                                   private_data_dir,
                                                   playbook,
-                                                  event_data_key=self.event_data_key)
+                                                  event_data_key=self.event_data_key,
+                                                  ident=str(self.instance.pk))
             else:
                 res = ansible_runner.interface.run(**params)
                 status = res.status
