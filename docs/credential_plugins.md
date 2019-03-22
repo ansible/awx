@@ -134,7 +134,6 @@ storing the password in plaintext on your disk), doing so is fairly easy:
 ```python
 from awx.main.credential_plugins import hashivault
 hashivault.hashivault_kv_plugin.backend(
-    '',
     url='https://hcv.example.org',
     token='some-valid-token',
     api_version='v2',
