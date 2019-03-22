@@ -26,10 +26,10 @@ the semantics for creating virtualenvs in Python 3 has changed slightly:
     $ sudo python3 -m venv /var/lib/awx/venv/my-custom-venv
 
 Your newly created virtualenv needs a few base dependencies to properly run
-playbooks (awx uses memcached as a holding space for playbook artifacts and
+playbooks:
 fact gathering):
 
-    $ sudo /var/lib/awx/venv/my-custom-venv/bin/pip install python-memcached psutil
+    $ sudo /var/lib/awx/venv/my-custom-venv/bin/pip install psutil
 
 From here, you can install _additional_ Python dependencies that you care
 about, such as a per-virtualenv version of ansible itself:
@@ -61,7 +61,7 @@ index aa8b304..eb05f91 100644
  
 +requirements_custom:
 +	virtualenv $(VENV_BASE)/my-custom-env
-+	$(VENV_BASE)/my-custom-env/bin/pip install python-memcached psutil
++	$(VENV_BASE)/my-custom-env/bin/pip install psutil
 +
 diff --git a/installer/image_build/templates/Dockerfile.j2 b/installer/image_build/templates/Dockerfile.j2
 index d69e2c9..a08bae5 100644
@@ -97,7 +97,7 @@ Now create an initContainer stanza.  You can subsititute your own custom images 
               pip install virtualenv &&
               virtualenv /var/lib/awx/venv/my-custom-venv &&
               source /var/lib/awx/venv/my-custom-venv/bin/activate &&
-              /var/lib/awx/venv/my-custom-venv/bin/pip install python-memcached psutil &&
+              /var/lib/awx/venv/my-custom-venv/bin/pip install psutil &&
               /var/lib/awx/venv/my-custom-venv/bin/pip install -U "ansible == X.Y.Z" &&
               /var/lib/awx/venv/my-custom-venv/bin/pip install -U custom-python-module
           volumeMounts:

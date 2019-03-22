@@ -38,7 +38,6 @@ netaddr
 ovirt-engine-sdk-python==4.2.4    # minimum set inside Ansible facts module requirements
 # AWX usage
 pexpect==4.6.0    # same as AWX requirement
-python-memcached==1.59    # same as AWX requirement
 psutil==5.4.3    # same as AWX requirement
 setuptools==36.0.1
 pip==9.0.1
