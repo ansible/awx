@@ -4,26 +4,18 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$state', '$stateParams', '$scope', 'RelatedHostsFormDefinition', 'ParseTypeChange',
+export default ['$state', '$stateParams', '$scope', 'RelatedHostsFormDefinition',
                 'GenerateForm', 'HostsService', 'GetBasePath', 'ToJSON', 'canAdd',
-                function($state, $stateParams, $scope, RelatedHostsFormDefinition, ParseTypeChange,
+                function($state, $stateParams, $scope, RelatedHostsFormDefinition,
                          GenerateForm, HostsService, GetBasePath, ToJSON, canAdd) {
 
         init();
 
         function init() {
             $scope.canAdd = canAdd;
-            $scope.parseType = 'yaml';
             $scope.host = { enabled: true };
             // apply form definition's default field values
             GenerateForm.applyDefaults(RelatedHostsFormDefinition, $scope);
-
-            ParseTypeChange({
-                scope: $scope,
-                field_id: 'host_host_variables',
-                variable: 'host_variables',
-                parse_variable: 'parseType'
-            });
         }
         $scope.formCancel = function() {
             $state.go('^');

@@ -73,6 +73,9 @@ function atCodeMirrorController (
             return true;
         }
 
+        if (typeof str === 'undefined') {
+            return '---';
+        }
         if (typeof str !== 'string') {
             const yamlStr = jsyaml.safeDump(str);
             // jsyaml.safeDump doesn't process an empty object correctly

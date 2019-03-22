@@ -1,8 +1,8 @@
 export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
-    'jobLabels', 'workflowNodes', '$scope', 'ParseTypeChange',
+    'jobLabels', 'workflowNodes', '$scope',
     'ParseVariableString', 'count', '$state', 'i18n', 'WorkflowChartService', '$filter',
     'moment', function(workflowData, workflowResultsService,
-    workflowDataOptions, jobLabels, workflowNodes, $scope, ParseTypeChange,
+    workflowDataOptions, jobLabels, workflowNodes, $scope,
     ParseVariableString, count, $state, i18n, WorkflowChartService, $filter,
     moment) {
         let nodeRef;
@@ -167,7 +167,6 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
 
             // set up a read only code mirror for extra vars
             $scope.variables = ParseVariableString($scope.workflow.extra_vars);
-            $scope.parseType = 'yaml';
             $scope.varsTooltip= i18n._('Read only view of extra variables added to the workflow.');
             $scope.varsLabel = i18n._('Extra Variables');
             $scope.varsName = 'extra_vars';

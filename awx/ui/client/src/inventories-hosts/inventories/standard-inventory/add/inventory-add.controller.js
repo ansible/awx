@@ -30,14 +30,6 @@ function InventoriesAdd($scope, $location,
 
         // apply form definition's default field values
         GenerateForm.applyDefaults(form, $scope);
-
-        $scope.parseType = 'yaml';
-        ParseTypeChange({
-            scope: $scope,
-            variable: 'inventory_variables',
-            parse_variable: 'parseType',
-            field_id: 'inventory_inventory_variables'
-        });
     }
 
     // Save

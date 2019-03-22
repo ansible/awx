@@ -5,8 +5,8 @@
  *************************************************/
 
  export default
- 	['$scope', '$state', '$stateParams', 'GenerateForm', 'ParseTypeChange', 'HostsService', 'host', '$rootScope',
- 	function($scope, $state, $stateParams, GenerateForm, ParseTypeChange, HostsService, host, $rootScope){
+ 	['$scope', '$state', '$stateParams', 'GenerateForm', 'HostsService', 'host', '$rootScope',
+ 	function($scope, $state, $stateParams, GenerateForm, HostsService, host, $rootScope){
  		$scope.parseType = 'yaml';
  		$scope.formCancel = function(){
  			$state.go('^', null, {reload: true});
