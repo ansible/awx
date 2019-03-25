@@ -7,6 +7,7 @@ localhost ansible_connection=local ansible_python_interpreter="/usr/bin/env pyth
 # be selected based on: latest, 1, 1.0, 1.0.0, 1.0.0.123
 # by default the base will be used to search for ansible/awx_web and ansible/awx_task
 dockerhub_base=ansible
+dockerhub_version=3.0.1
 
 # Openshift Install
 # Will need to set -e openshift_password=developer -e docker_registry_password=$(oc whoami -t)
@@ -18,8 +19,8 @@ dockerhub_base=ansible
 # openshift_pg_emptydir=True
 
 # Kubernetes Install
-# kubernetes_context=test-cluster
-# kubernetes_namespace=awx
+kubernetes_context=true
+kubernetes_namespace=ansible-tower
 # tiller_namespace=kube-system
 # Optional Kubernetes Variables
 # pg_persistence_storageClass=StorageClassName
@@ -78,11 +79,11 @@ docker_compose_dir=/var/lib/awx
 
 # Set pg_hostname if you have an external postgres server, otherwise
 # a new postgres service will be created
-# pg_hostname=postgresql
-pg_username=awx
+# pg_hostname=ansible-awx-{{ kubernetes_r53_env }}.crexelpqqzy2.us-east-1.rds.amazonaws.com
+# pg_username=awxadmin
 # pg_password should be random 10 character alphanumeric string, when postgresql is running on kubernetes
 # NB: it's a limitation of the "official" postgres helm chart
-pg_password=awxpass
+# pg_password=
 pg_database=awx
 pg_port=5432
 #pg_sslmode=require

@@ -141,7 +141,7 @@
     - "{{ configmap }}"
     - "{{ deployment }}"
     - "{{ secret }}"
-  no_log: yes
+  # no_log: yes
 
 - name: Delete any existing management pod
   shell: |

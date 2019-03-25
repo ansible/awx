@@ -1,7 +1,42 @@
 ---
 - name: Build and deploy AWX
   hosts: all
+  vars:
+    kuberenetes_r53_env: stg
+    pg_hostname: 'ansible-awx-{{ kuberenetes_r53_env }}.crexelpqqzy2.us-east-1.rds.amazonaws.com'
+    pg_database: tower
+    pg_username: awx
+    pg_password: null
   gather_facts: false
+  vars_prompt:
+    - name: "kubernetes_r53_env"
+      prompt: "Enter the environment (stg prd)"
+      default: "{{ kuberenetes_r53_env }}"
+      when: R53_ENV is not defined
+      private: no
+    - name: "pg_hostname"
+      prompt: "Enter the Postgres server hostname"
+      default: "{{ pg_hostname }}"
+      when: PG_HOSTNAME is not defined
+      private: no
+    - name: "pg_database"
+      prompt: "Enter the Postgres server database name"
+      default: "{{ pg_database }}"
+      when: PG_DATABASE is not defined
+      private: no
+    - name: "pg_username"
+      prompt: "Enter the awx username on the {{ pg_hostname }} server"
+      default: "{{ pg_username }}"
+      when: PG_USERNAME is not defined
+      private: no
+    - name: "pg_password"
+      prompt: "Enter the awx password on the {{ pg_hostname }} server"
+      when: PG_PASSWORD is not defined
+      private: yes
+    - name: "secret_key"
+      prompt: "Enter the secret key used to encrypt secrets"
+      when: SECRET_KEY is not defined
+      private: yes
   roles:
     - { role: check_vars }
     - { role: image_build, when: "dockerhub_base is not defined" }
