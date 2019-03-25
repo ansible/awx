@@ -10,7 +10,7 @@ RUN yum -y update && yum -y install openssh-server ansible mg vim tmux git pytho
 RUN ln -s /usr/bin/python36 /usr/bin/python3
 RUN python36 -m ensurepip
 RUN pip3 install virtualenv
-RUN pip3 install git+https://github.com/ansible/ansible-runner@master#egg=ansible_runner
+RUN pip3 install ansible-runner
 WORKDIR /tmp
 RUN make requirements_ansible
 RUN localedef -c -i en_US -f UTF-8 en_US.UTF-8
