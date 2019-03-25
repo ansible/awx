@@ -28,8 +28,8 @@ describe('<OrganizationAdd />', () => {
     );
   });
 
-  test('calls "onFieldChange" when input values change', () => {
-    const spy = jest.spyOn(OrganizationAdd.WrappedComponent.prototype, 'onFieldChange');
+  test('calls "handleFieldChange" when input values change', () => {
+    const spy = jest.spyOn(OrganizationAdd.WrappedComponent.prototype, 'handleFieldChange');
     const wrapper = mount(
       <MemoryRouter>
         <I18nProvider>
@@ -47,8 +47,8 @@ describe('<OrganizationAdd />', () => {
     expect(spy).toHaveBeenCalledTimes(2);
   });
 
-  test('calls "onSubmit" when Save button is clicked', () => {
-    const spy = jest.spyOn(OrganizationAdd.WrappedComponent.prototype, 'onSubmit');
+  test('calls "handleSubmit" when Save button is clicked', () => {
+    const spy = jest.spyOn(OrganizationAdd.WrappedComponent.prototype, 'handleSubmit');
     const wrapper = mount(
       <MemoryRouter>
         <I18nProvider>
@@ -65,8 +65,8 @@ describe('<OrganizationAdd />', () => {
     expect(spy).toBeCalled();
   });
 
-  test('calls "onCancel" when Cancel button is clicked', () => {
-    const spy = jest.spyOn(OrganizationAdd.WrappedComponent.prototype, 'onCancel');
+  test('calls "handleCancel" when Cancel button is clicked', () => {
+    const spy = jest.spyOn(OrganizationAdd.WrappedComponent.prototype, 'handleCancel');
     const wrapper = mount(
       <MemoryRouter>
         <I18nProvider>
@@ -83,7 +83,7 @@ describe('<OrganizationAdd />', () => {
     expect(spy).toBeCalled();
   });
 
-  test('calls "onCancel" when close button (x) is clicked', () => {
+  test('calls "handleCancel" when close button (x) is clicked', () => {
     const wrapper = mount(
       <MemoryRouter initialEntries={['/organizations/add']} initialIndex={0}>
         <I18nProvider>
@@ -104,7 +104,7 @@ describe('<OrganizationAdd />', () => {
   });
 
   test('Successful form submission triggers redirect', (done) => {
-    const onSuccess = jest.spyOn(OrganizationAdd.WrappedComponent.prototype, 'onSuccess');
+    const handleSuccess = jest.spyOn(OrganizationAdd.WrappedComponent.prototype, 'handleSuccess');
     const mockedResp = { data: { id: 1, related: { instance_groups: '/bar' } } };
     api.createOrganization = jest.fn().mockResolvedValue(mockedResp); api.associateInstanceGroup = jest.fn().mockResolvedValue('done');
     const wrapper = mount(
@@ -117,12 +117,12 @@ describe('<OrganizationAdd />', () => {
     wrapper.find('input#add-org-form-name').simulate('change', { target: { value: 'foo' } });
     wrapper.find('button[aria-label="Save"]').prop('onClick')();
     setImmediate(() => {
-      expect(onSuccess).toHaveBeenCalled();
+      expect(handleSuccess).toHaveBeenCalled();
       done();
     });
   });
 
-  test('onLookupSave successfully sets instanceGroups state', () => {
+  test('changing instance groups successfully sets instanceGroups state', () => {
     const wrapper = mount(
       <MemoryRouter>
         <I18nProvider>
@@ -130,7 +130,8 @@ describe('<OrganizationAdd />', () => {
         </I18nProvider>
       </MemoryRouter>
     ).find('OrganizationAdd');
-    wrapper.instance().onLookupSave([
+
+    wrapper.find('InstanceGroupsLookup').prop('onChange')([
       {
         id: 1,
         name: 'foo'
@@ -144,7 +145,7 @@ describe('<OrganizationAdd />', () => {
     ]);
   });
 
-  test('onFieldChange successfully sets custom_virtualenv state', () => {
+  test('handleFieldChange successfully sets custom_virtualenv state', () => {
     const wrapper = mount(
       <MemoryRouter>
         <I18nProvider>
@@ -152,11 +153,11 @@ describe('<OrganizationAdd />', () => {
         </I18nProvider>
       </MemoryRouter>
     ).find('OrganizationAdd');
-    wrapper.instance().onFieldChange('fooBar', { target: { name: 'custom_virtualenv' } });
+    wrapper.instance().handleFieldChange('fooBar', { target: { name: 'custom_virtualenv' } });
     expect(wrapper.state('custom_virtualenv')).toBe('fooBar');
   });
 
-  test('onSubmit posts instance groups from selectedInstanceGroups', async () => {
+  test('handleSubmit posts instance groups from selectedInstanceGroups', async () => {
     api.createOrganization = jest.fn().mockResolvedValue({
       data: {
         id: 1,
@@ -181,7 +182,7 @@ describe('<OrganizationAdd />', () => {
         name: 'foo'
       }]
     });
-    await wrapper.instance().onSubmit();
+    await wrapper.instance().handleSubmit();
     expect(api.createOrganization).toHaveBeenCalledWith({
       custom_virtualenv: '',
       description: '',

@@ -21,12 +21,12 @@ class OrganizationEdit extends Component {
 
     this.getRelatedInstanceGroups = this.getRelatedInstanceGroups.bind(this);
     this.checkValidity = this.checkValidity.bind(this);
-    this.onFieldChange = this.onFieldChange.bind(this);
-    this.onLookupSave = this.onLookupSave.bind(this);
-    this.onSubmit = this.onSubmit.bind(this);
+    this.handleFieldChange = this.handleFieldChange.bind(this);
+    this.handleInstanceGroupsChange = this.handleInstanceGroupsChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
     this.postInstanceGroups = this.postInstanceGroups.bind(this);
-    this.onCancel = this.onCancel.bind(this);
-    this.onSuccess = this.onSuccess.bind(this);
+    this.handleCancel = this.handleCancel.bind(this);
+    this.handleSuccess = this.handleSuccess.bind(this);
 
     this.state = {
       form: {
@@ -73,7 +73,24 @@ class OrganizationEdit extends Component {
     this.setState({ form: formData });
   }
 
-  onFieldChange (val, evt) {
+  async getRelatedInstanceGroups () {
+    const {
+      api,
+      organization: { id }
+    } = this.props;
+    const { data } = await api.getOrganizationInstanceGroups(id);
+    const { results } = data;
+    return results;
+  }
+
+  checkValidity = (value, validation) => {
+    const isValid = (validation.required)
+      ? (value.trim() !== '') : true;
+
+    return isValid;
+  }
+
+  handleFieldChange (val, evt) {
     const targetName = evt.target.name;
     const value = val;
 
@@ -91,14 +108,14 @@ class OrganizationEdit extends Component {
     this.setState({ form: updatedForm, formIsValid });
   }
 
-  onLookupSave (val, targetName) {
+  handleInstanceGroupsChange (val, targetName) {
     const { form: updatedForm } = this.state;
     updatedForm[targetName].value = val;
 
     this.setState({ form: updatedForm });
   }
 
-  async onSubmit () {
+  async handleSubmit () {
     const { api, organization } = this.props;
     const { form: { name, description, custom_virtualenv } } = this.state;
     const formData = { name, description, custom_virtualenv };
@@ -115,35 +132,18 @@ class OrganizationEdit extends Component {
     } catch (err) {
       this.setState({ error: err });
     } finally {
-      this.onSuccess();
+      this.handleSuccess();
     }
   }
 
-  onCancel () {
+  handleCancel () {
     const { organization: { id }, history } = this.props;
     history.push(`/organizations/${id}`);
   }
 
-  onSuccess () {
+  handleSuccess () {
     const { organization: { id }, history } = this.props;
     history.push(`/organizations/${id}`);
-  }
-
-  async getRelatedInstanceGroups () {
-    const {
-      api,
-      organization: { id }
-    } = this.props;
-    const { data } = await api.getOrganizationInstanceGroups(id);
-    const { results } = data;
-    return results;
-  }
-
-  checkValidity = (value, validation) => {
-    const isValid = (validation.required)
-      ? (value.trim() !== '') : true;
-
-    return isValid;
   }
 
   async postInstanceGroups () {
@@ -202,7 +202,7 @@ class OrganizationEdit extends Component {
                     isRequired
                     isValid={name.isValid}
                     name="name"
-                    onChange={this.onFieldChange}
+                    onChange={this.handleFieldChange}
                     value={name.value || ''}
                   />
                 </FormGroup>
@@ -213,7 +213,7 @@ class OrganizationEdit extends Component {
                   <TextInput
                     id="edit-org-form-description"
                     name="description"
-                    onChange={this.onFieldChange}
+                    onChange={this.handleFieldChange}
                     value={description.value || ''}
                   />
                 </FormGroup>
@@ -229,7 +229,7 @@ class OrganizationEdit extends Component {
                           defaultSelected={custom_virtualenv.defaultEnv}
                           label={i18n._(t`Ansible Environment`)}
                           name="custom_virtualenv"
-                          onChange={this.onFieldChange}
+                          onChange={this.handleFieldChange}
                           value={custom_virtualenv.value || ''}
                         />
                       </FormGroup>
@@ -240,11 +240,11 @@ class OrganizationEdit extends Component {
               <InstanceGroupsLookup
                 api={api}
                 value={instanceGroups.value}
-                onChange={this.onLookupSave}
+                onChange={this.handleInstanceGroupsChange}
               />
               <FormActionGroup
-                onCancel={this.onCancel}
-                onSubmit={this.onSubmit}
+                onCancel={this.handleCancel}
+                onSubmit={this.handleSubmit}
                 submitDisabled={!formIsValid}
               />
               { error ? <div>error</div> : '' }

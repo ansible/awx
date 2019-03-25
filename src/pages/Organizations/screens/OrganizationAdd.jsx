@@ -26,11 +26,11 @@ class OrganizationAdd extends React.Component {
   constructor (props) {
     super(props);
 
-    this.onFieldChange = this.onFieldChange.bind(this);
-    this.onLookupSave = this.onLookupSave.bind(this);
-    this.onSubmit = this.onSubmit.bind(this);
-    this.onCancel = this.onCancel.bind(this);
-    this.onSuccess = this.onSuccess.bind(this);
+    this.handleFieldChange = this.handleFieldChange.bind(this);
+    this.handleInstanceGroupsChange = this.handleInstanceGroupsChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleCancel = this.handleCancel.bind(this);
+    this.handleSuccess = this.handleSuccess.bind(this);
 
     this.state = {
       name: '',
@@ -42,15 +42,15 @@ class OrganizationAdd extends React.Component {
     };
   }
 
-  onFieldChange (val, evt) {
+  handleFieldChange (val, evt) {
     this.setState({ [evt.target.name]: val || evt.target.value });
   }
 
-  onLookupSave (val, targetName) {
+  handleInstanceGroupsChange (val, targetName) {
     this.setState({ [targetName]: val });
   }
 
-  async onSubmit () {
+  async handleSubmit () {
     const { api } = this.props;
     const { name, description, custom_virtualenv, instanceGroups } = this.state;
     const data = {
@@ -70,19 +70,19 @@ class OrganizationAdd extends React.Component {
       } catch (err) {
         this.setState({ error: err });
       } finally {
-        this.onSuccess(response.id);
+        this.handleSuccess(response.id);
       }
     } catch (err) {
       this.setState({ error: err });
     }
   }
 
-  onCancel () {
+  handleCancel () {
     const { history } = this.props;
     history.push('/organizations');
   }
 
-  onSuccess (id) {
+  handleSuccess (id) {
     const { history } = this.props;
     history.push(`/organizations/${id}`);
   }
@@ -112,7 +112,7 @@ class OrganizationAdd extends React.Component {
                   <Button
                     variant="plain"
                     aria-label={i18n._(t`Close`)}
-                    onClick={this.onCancel}
+                    onClick={this.handleCancel}
                   >
                     <TimesIcon />
                   </Button>
@@ -131,7 +131,7 @@ class OrganizationAdd extends React.Component {
                         id="add-org-form-name"
                         name="name"
                         value={name}
-                        onChange={this.onFieldChange}
+                        onChange={this.handleFieldChange}
                       />
                     </FormGroup>
                     <FormGroup label={i18n._(t`Description`)} fieldId="add-org-form-description">
@@ -139,13 +139,13 @@ class OrganizationAdd extends React.Component {
                         id="add-org-form-description"
                         name="description"
                         value={description}
-                        onChange={this.onFieldChange}
+                        onChange={this.handleFieldChange}
                       />
                     </FormGroup>
                     <InstanceGroupsLookup
                       api={api}
                       value={instanceGroups}
-                      onChange={this.onLookupSave}
+                      onChange={this.handleInstanceGroupsChange}
                     />
                     <ConfigContext.Consumer>
                       {({ custom_virtualenvs }) => (
@@ -169,7 +169,7 @@ class OrganizationAdd extends React.Component {
                               label={i18n._(t`Ansible Environment`)}
                               name="custom_virtualenv"
                               value={custom_virtualenv}
-                              onChange={this.onFieldChange}
+                              onChange={this.handleFieldChange}
                               data={custom_virtualenvs}
                               defaultSelected={defaultEnv}
                             />
@@ -179,9 +179,9 @@ class OrganizationAdd extends React.Component {
                     </ConfigContext.Consumer>
                   </Gallery>
                   <FormActionGroup
-                    onSubmit={this.onSubmit}
+                    onSubmit={this.handleSubmit}
                     submitDisabled={!enabled}
-                    onCancel={this.onCancel}
+                    onCancel={this.handleCancel}
                   />
                   {error ? <div>error</div> : ''}
                 </Form>

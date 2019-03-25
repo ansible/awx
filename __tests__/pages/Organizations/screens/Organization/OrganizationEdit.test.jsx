@@ -75,7 +75,7 @@ describe('<OrganizationEdit />', () => {
     expect(wrapper.state().form.instanceGroups.value).toEqual(mockInstanceGroups);
   });
 
-  test('onLookupSave successfully sets instanceGroups state', () => {
+  test('changing instance group successfully sets instanceGroups state', () => {
     const wrapper = mount(
       <MemoryRouter>
         <I18nProvider>
@@ -88,7 +88,10 @@ describe('<OrganizationEdit />', () => {
       </MemoryRouter>
     ).find('OrganizationEdit');
 
-    wrapper.instance().onLookupSave([
+    const lookup = wrapper.find('InstanceGroupsLookup');
+    expect(lookup.length).toBe(1);
+
+    lookup.prop('onChange')([
       {
         id: 1,
         name: 'foo'
@@ -102,9 +105,8 @@ describe('<OrganizationEdit />', () => {
     ]);
   });
 
-  test('calls "onFieldChange" when input values change', () => {
-    // const api = new APIClient();
-    const spy = jest.spyOn(OrganizationEdit.WrappedComponent.prototype, 'onFieldChange');
+  test('calls "handleFieldChange" when input values change', () => {
+    const spy = jest.spyOn(OrganizationEdit.WrappedComponent.prototype, 'handleFieldChange');
     const wrapper = mount(
       <MemoryRouter>
         <I18nProvider>
@@ -118,8 +120,8 @@ describe('<OrganizationEdit />', () => {
     ).find('OrganizationEdit');
 
     expect(spy).not.toHaveBeenCalled();
-    wrapper.instance().onFieldChange('foo', { target: { name: 'name' } });
-    wrapper.instance().onFieldChange('bar', { target: { name: 'description' } });
+    wrapper.instance().handleFieldChange('foo', { target: { name: 'name' } });
+    wrapper.instance().handleFieldChange('bar', { target: { name: 'description' } });
     expect(spy).toHaveBeenCalledTimes(2);
   });
 
@@ -148,8 +150,8 @@ describe('<OrganizationEdit />', () => {
     expect(wrapper.find('FormSelectOption')).toHaveLength(2);
   });
 
-  test('calls onSubmit when Save button is clicked', () => {
-    const spy = jest.spyOn(OrganizationEdit.WrappedComponent.prototype, 'onSubmit');
+  test('calls handleSubmit when Save button is clicked', () => {
+    const spy = jest.spyOn(OrganizationEdit.WrappedComponent.prototype, 'handleSubmit');
     const wrapper = mount(
       <MemoryRouter>
         <I18nProvider>
@@ -170,7 +172,7 @@ describe('<OrganizationEdit />', () => {
     expect(spy).toBeCalled();
   });
 
-  test('onSubmit associates and disassociates instance groups', async () => {
+  test('handleSubmit associates and disassociates instance groups', async () => {
     const mockInstanceGroups = [
       { name: 'One', id: 1 },
       { name: 'Two', id: 2 }
@@ -204,12 +206,12 @@ describe('<OrganizationEdit />', () => {
 
     await wrapper.instance().componentDidMount();
 
-    wrapper.instance().onLookupSave([
+    wrapper.find('InstanceGroupsLookup').prop('onChange')([
       { name: 'One', id: 1 },
       { name: 'Three', id: 3 }
     ], 'instanceGroups');
 
-    await wrapper.instance().onSubmit();
+    await wrapper.instance().handleSubmit();
     expect(api.updateOrganizationDetails).toHaveBeenCalledWith(1, mockDataForm);
     expect(api.associateInstanceGroup).toHaveBeenCalledWith('/api/v2/organizations/1/instance_groups', 3);
     expect(api.associateInstanceGroup).not.toHaveBeenCalledWith('/api/v2/organizations/1/instance_groups', 1);
@@ -220,8 +222,8 @@ describe('<OrganizationEdit />', () => {
     expect(api.disassociate).not.toHaveBeenCalledWith('/api/v2/organizations/1/instance_groups', 3);
   });
 
-  test('calls "onCancel" when Cancel button is clicked', () => {
-    const spy = jest.spyOn(OrganizationEdit.WrappedComponent.prototype, 'onCancel');
+  test('calls "handleCancel" when Cancel button is clicked', () => {
+    const spy = jest.spyOn(OrganizationEdit.WrappedComponent.prototype, 'handleCancel');
     const wrapper = mount(
       <MemoryRouter>
         <I18nProvider>
