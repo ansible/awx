@@ -2584,7 +2584,7 @@ class V2CredentialFields(BaseSerializer, metaclass=BaseSerializerMetaclass):
 
 
 class CredentialSerializer(BaseSerializer):
-    show_capabilities = ['edit', 'delete', 'copy']
+    show_capabilities = ['edit', 'delete', 'copy', 'use']
     capabilities_prefetch = ['admin', 'use']
 
     class Meta:

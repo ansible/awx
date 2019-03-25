@@ -1162,6 +1162,11 @@ class CredentialAccess(BaseAccess):
         #    return True
         return self.can_change(obj, None)
 
+    def get_user_capabilities(self, obj, **kwargs):
+        user_capabilities = super(CredentialAccess, self).get_user_capabilities(obj, **kwargs)
+        user_capabilities['use'] = self.can_use(obj)
+        return user_capabilities
+
 
 class CredentialInputSourceAccess(BaseAccess):
     '''
