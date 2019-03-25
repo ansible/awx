@@ -39,8 +39,8 @@ export default {
     params: {
         token_search: {
             value: {
-                page_size: 5,
-                order_by: 'application'
+                page_size: 10,
+                order_by: 'application__name'
             }
         }
     },

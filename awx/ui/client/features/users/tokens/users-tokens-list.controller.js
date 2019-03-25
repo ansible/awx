@@ -16,7 +16,6 @@ function ListTokensController (
     models
 ) {
     const vm = this || {};
-
     const { token } = models;
 
     vm.strings = strings;
@@ -27,18 +26,60 @@ function ListTokensController (
     // smart-search
     const name = 'tokens';
     const iterator = 'token';
-    const key = 'token_dataset';
+    let paginateQuerySet = {};
 
-    $scope.list = { iterator, name, basePath: 'tokens' };
-    $scope.collection = { iterator };
-    $scope[key] = Dataset.data;
-    vm.tokensCount = Dataset.data.count;
-    $scope[name] = Dataset.data.results;
-    $scope.$on('updateDataset', (e, dataset) => {
-        $scope[key] = dataset;
-        $scope[name] = dataset.results;
-        vm.tokensCount = dataset.count;
+    vm.token_dataset = Dataset.data;
+    vm.tokens = Dataset.data.results;
+    vm.list = { iterator, name, basePath: 'tokens' };
+    vm.basePath = `${GetBasePath('users')}${$state.params.user_id}/tokens`;
+
+    $scope.$on('updateDataset', (e, dataset, queryset) => {
+        vm.token_dataset = dataset;
+        vm.tokens = dataset.results;
+        paginateQuerySet = queryset;
     });
+
+    $scope.$watchCollection('$state.params', () => {
+        setToolbarSort();
+    });
+
+    const toolbarSortDefault = {
+        label: `${strings.get('sort.NAME_ASCENDING')}`,
+        value: 'application__name'
+    };
+
+    vm.toolbarSortOptions = [
+        toolbarSortDefault,
+        {
+            label: `${strings.get('sort.NAME_DESCENDING')}`,
+            value: '-application__name'
+        }
+    ];
+
+    function setToolbarSort () {
+        const orderByValue = _.get($state.params, 'token_search.order_by');
+        const sortValue = _.find(vm.toolbarSortOptions, (option) => option.value === orderByValue);
+        if (sortValue) {
+            vm.toolbarSortValue = sortValue;
+        } else {
+            vm.toolbarSortValue = toolbarSortDefault;
+        }
+    }
+
+    vm.onToolbarSort = (sort) => {
+        vm.toolbarSortValue = sort;
+        const queryParams = Object.assign(
+            {},
+            $state.params.token_search,
+            paginateQuerySet,
+            { order_by: sort.value }
+        );
+
+        // Update URL with params
+        $state.go('.', {
+            token_search: queryParams
+        }, { notify: false, location: 'replace' });
+    };
 
     vm.getScopeString = str => {
         if (str === 'Read') {

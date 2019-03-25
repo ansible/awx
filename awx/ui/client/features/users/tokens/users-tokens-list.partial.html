@@ -2,11 +2,11 @@
     <smart-search
         class="at-List-search"
         django-model="tokens"
-        base-path="tokens"
+        base-path="{{ vm.basePath }}"
         iterator="token"
-        list="list"
-        dataset="token_dataset"
-        collection="collection"
+        list="vm.list"
+        dataset="vm.token_dataset"
+        collection="vm.tokens"
         search-tags="searchTags">
     </smart-search>
     <div class="at-List-toolbarAction">
@@ -20,9 +20,15 @@
         </button>
     </div>
 </div>
-
-<at-list results="tokens">
-    <at-row ng-repeat="token in tokens">
+<at-list-toolbar
+    ng-if="vm.tokens.length > 0"
+    sort-only="true"
+    sort-value="vm.toolbarSortValue"
+    sort-options="vm.toolbarSortOptions"
+    on-sort="vm.onToolbarSort">
+</at-list-toolbar>
+<at-list results="vm.tokens">
+    <at-row ng-repeat="token in vm.tokens">
         <div class="at-Row-items">
             <at-row-item
                 header-value="{{ token.summary_fields.application.name ?
@@ -59,8 +65,8 @@
     </at-row>
 </at-list>
 <paginate
-    collection="tokens"
-    dataset="token_dataset"
+    collection="vm.tokens"
+    dataset="vm.token_dataset"
     iterator="token"
-    base-path="tokens">
+    base-path="{{ vm.basePath }}">
 </paginate>
