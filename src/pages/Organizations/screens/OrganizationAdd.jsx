@@ -1,7 +1,7 @@
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
-import { I18n, i18nMark } from '@lingui/react';
+import { I18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
   PageSection,
@@ -18,15 +18,14 @@ import {
 import { QuestionCircleIcon, TimesIcon } from '@patternfly/react-icons';
 
 import { ConfigContext } from '../../../context';
-import Lookup from '../../../components/Lookup';
 import AnsibleSelect from '../../../components/AnsibleSelect';
 import FormActionGroup from '../../../components/FormActionGroup';
+import InstanceGroupsLookup from '../components/InstanceGroupsLookup';
 
 class OrganizationAdd extends React.Component {
   constructor (props) {
     super(props);
 
-    this.getInstanceGroups = this.getInstanceGroups.bind(this);
     this.onFieldChange = this.onFieldChange.bind(this);
     this.onLookupSave = this.onLookupSave.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
@@ -88,13 +87,8 @@ class OrganizationAdd extends React.Component {
     history.push(`/organizations/${id}`);
   }
 
-  async getInstanceGroups (params) {
-    const { api } = this.props;
-    const data = await api.getInstanceGroups(params);
-    return data;
-  }
-
   render () {
+    const { api } = this.props;
     const {
       name,
       description,
@@ -104,11 +98,6 @@ class OrganizationAdd extends React.Component {
       error
     } = this.state;
     const enabled = name.length > 0; // TODO: add better form validation
-    const instanceGroupsLookupColumns = [
-      { name: i18nMark('Name'), key: 'name', isSortable: true },
-      { name: i18nMark('Modified'), key: 'modified', isSortable: false, isNumeric: true },
-      { name: i18nMark('Created'), key: 'created', isSortable: false, isNumeric: true }
-    ];
 
     return (
       <PageSection>
@@ -153,31 +142,11 @@ class OrganizationAdd extends React.Component {
                         onChange={this.onFieldChange}
                       />
                     </FormGroup>
-                    <FormGroup
-                      label={(
-                        <Fragment>
-                          {i18n._(t`Instance Groups`)}
-                          {' '}
-                          <Tooltip
-                            position="right"
-                            content={i18n._(t`Select the Instance Groups for this Organization to run on.`)}
-                          >
-                            <QuestionCircleIcon />
-                          </Tooltip>
-                        </Fragment>
-                      )}
-                      fieldId="add-org-form-instance-groups"
-                    >
-                      <Lookup
-                        lookupHeader={i18n._(t`Instance Groups`)}
-                        name="instanceGroups"
-                        value={instanceGroups}
-                        onLookupSave={this.onLookupSave}
-                        getItems={this.getInstanceGroups}
-                        columns={instanceGroupsLookupColumns}
-                        sortedColumnKey="name"
-                      />
-                    </FormGroup>
+                    <InstanceGroupsLookup
+                      api={api}
+                      value={instanceGroups}
+                      onChange={this.onLookupSave}
+                    />
                     <ConfigContext.Consumer>
                       {({ custom_virtualenvs }) => (
                         custom_virtualenvs && custom_virtualenvs.length > 1 && (

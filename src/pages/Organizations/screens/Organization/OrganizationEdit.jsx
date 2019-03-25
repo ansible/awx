@@ -11,15 +11,14 @@ import {
 } from '@patternfly/react-core';
 
 import { ConfigContext } from '../../../../context';
-import Lookup from '../../../../components/Lookup';
 import FormActionGroup from '../../../../components/FormActionGroup';
 import AnsibleSelect from '../../../../components/AnsibleSelect';
+import InstanceGroupsLookup from '../../components/InstanceGroupsLookup';
 
 class OrganizationEdit extends Component {
   constructor (props) {
     super(props);
 
-    this.getInstanceGroups = this.getInstanceGroups.bind(this);
     this.getRelatedInstanceGroups = this.getRelatedInstanceGroups.bind(this);
     this.checkValidity = this.checkValidity.bind(this);
     this.onFieldChange = this.onFieldChange.bind(this);
@@ -130,12 +129,6 @@ class OrganizationEdit extends Component {
     history.push(`/organizations/${id}`);
   }
 
-  async getInstanceGroups (params) {
-    const { api } = this.props;
-    const data = await api.getInstanceGroups(params);
-    return data;
-  }
-
   async getRelatedInstanceGroups () {
     const {
       api,
@@ -179,6 +172,7 @@ class OrganizationEdit extends Component {
   }
 
   render () {
+    const { api } = this.props;
     const {
       form: {
         name,
@@ -189,12 +183,6 @@ class OrganizationEdit extends Component {
       formIsValid,
       error
     } = this.state;
-
-    const instanceGroupsLookupColumns = [
-      { name: i18nMark('Name'), key: 'name', isSortable: true },
-      { name: i18nMark('Modified'), key: 'modified', isSortable: false, isNumeric: true },
-      { name: i18nMark('Created'), key: 'created', isSortable: false, isNumeric: true }
-    ];
 
     return (
       <CardBody>
@@ -249,20 +237,11 @@ class OrganizationEdit extends Component {
                   )}
                 </ConfigContext.Consumer>
               </div>
-              <FormGroup
-                fieldId="edit-org-form-instance-groups"
-                label={i18n._(t`Instance Groups`)}
-              >
-                <Lookup
-                  columns={instanceGroupsLookupColumns}
-                  getItems={this.getInstanceGroups}
-                  lookupHeader={i18n._(t`Instance Groups`)}
-                  name="instanceGroups"
-                  onLookupSave={this.onLookupSave}
-                  sortedColumnKey="name"
-                  value={instanceGroups.value}
-                />
-              </FormGroup>
+              <InstanceGroupsLookup
+                api={api}
+                value={instanceGroups.value}
+                onChange={this.onLookupSave}
+              />
               <FormActionGroup
                 onCancel={this.onCancel}
                 onSubmit={this.onSubmit}

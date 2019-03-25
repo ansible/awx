@@ -3,7 +3,6 @@ import { mount } from 'enzyme';
 import { MemoryRouter } from 'react-router-dom';
 import { I18nProvider } from '@lingui/react';
 import { ConfigContext } from '../../../../../src/context';
-import APIClient from '../../../../../src/api';
 import OrganizationEdit from '../../../../../src/pages/Organizations/screens/Organization/OrganizationEdit';
 
 describe('<OrganizationEdit />', () => {
