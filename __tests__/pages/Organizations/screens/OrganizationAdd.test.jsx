@@ -6,11 +6,20 @@ import { ConfigContext } from '../../../../src/context';
 import OrganizationAdd from '../../../../src/pages/Organizations/screens/OrganizationAdd';
 
 describe('<OrganizationAdd />', () => {
+  let api;
+
+  beforeEach(() => {
+    api = {
+      getInstanceGroups: jest.fn(),
+    };
+  });
+
   test('initially renders succesfully', () => {
     mount(
       <MemoryRouter>
         <I18nProvider>
           <OrganizationAdd
+            api={api}
             match={{ path: '/organizations/add', url: '/organizations/add' }}
             location={{ search: '', pathname: '/organizations/add' }}
           />
@@ -25,6 +34,7 @@ describe('<OrganizationAdd />', () => {
       <MemoryRouter>
         <I18nProvider>
           <OrganizationAdd
+            api={api}
             match={{ path: '/organizations/add', url: '/organizations/add' }}
             location={{ search: '', pathname: '/organizations/add' }}
           />
@@ -43,6 +53,7 @@ describe('<OrganizationAdd />', () => {
       <MemoryRouter>
         <I18nProvider>
           <OrganizationAdd
+            api={api}
             match={{ path: '/organizations/add', url: '/organizations/add' }}
             location={{ search: '', pathname: '/organizations/add' }}
           />
@@ -60,6 +71,7 @@ describe('<OrganizationAdd />', () => {
       <MemoryRouter>
         <I18nProvider>
           <OrganizationAdd
+            api={api}
             match={{ path: '/organizations/add', url: '/organizations/add' }}
             location={{ search: '', pathname: '/organizations/add' }}
           />
@@ -76,6 +88,7 @@ describe('<OrganizationAdd />', () => {
       <MemoryRouter initialEntries={['/organizations/add']} initialIndex={0}>
         <I18nProvider>
           <OrganizationAdd
+            api={api}
             match={{ path: '/organizations/add', url: '/organizations/add' }}
             location={{ search: '', pathname: '/organizations/add' }}
           />
@@ -93,7 +106,7 @@ describe('<OrganizationAdd />', () => {
   test('Successful form submission triggers redirect', (done) => {
     const onSuccess = jest.spyOn(OrganizationAdd.WrappedComponent.prototype, 'onSuccess');
     const mockedResp = { data: { id: 1, related: { instance_groups: '/bar' } } };
-    const api = { createOrganization: jest.fn().mockResolvedValue(mockedResp), associateInstanceGroup: jest.fn().mockResolvedValue('done') };
+    api.createOrganization = jest.fn().mockResolvedValue(mockedResp); api.associateInstanceGroup = jest.fn().mockResolvedValue('done');
     const wrapper = mount(
       <MemoryRouter>
         <I18nProvider>
@@ -113,7 +126,7 @@ describe('<OrganizationAdd />', () => {
     const wrapper = mount(
       <MemoryRouter>
         <I18nProvider>
-          <OrganizationAdd api={{}} />
+          <OrganizationAdd api={api} />
         </I18nProvider>
       </MemoryRouter>
     ).find('OrganizationAdd');
@@ -135,7 +148,7 @@ describe('<OrganizationAdd />', () => {
     const wrapper = mount(
       <MemoryRouter>
         <I18nProvider>
-          <OrganizationAdd api={{}} />
+          <OrganizationAdd api={api} />
         </I18nProvider>
       </MemoryRouter>
     ).find('OrganizationAdd');
@@ -144,7 +157,7 @@ describe('<OrganizationAdd />', () => {
   });
 
   test('onSubmit posts instance groups from selectedInstanceGroups', async () => {
-    const createOrganizationFn = jest.fn().mockResolvedValue({
+    api.createOrganization = jest.fn().mockResolvedValue({
       data: {
         id: 1,
         name: 'mock org',
@@ -153,11 +166,7 @@ describe('<OrganizationAdd />', () => {
         }
       }
     });
-    const associateInstanceGroupFn = jest.fn().mockResolvedValue('done');
-    const api = {
-      createOrganization: createOrganizationFn,
-      associateInstanceGroup: associateInstanceGroupFn
-    };
+    api.associateInstanceGroup = jest.fn().mockResolvedValue('done');
     const wrapper = mount(
       <MemoryRouter>
         <I18nProvider>
@@ -173,12 +182,12 @@ describe('<OrganizationAdd />', () => {
       }]
     });
     await wrapper.instance().onSubmit();
-    expect(createOrganizationFn).toHaveBeenCalledWith({
+    expect(api.createOrganization).toHaveBeenCalledWith({
       custom_virtualenv: '',
       description: '',
       name: 'mock org'
     });
-    expect(associateInstanceGroupFn).toHaveBeenCalledWith('/api/v2/organizations/1/instance_groups', 1);
+    expect(api.associateInstanceGroup).toHaveBeenCalledWith('/api/v2/organizations/1/instance_groups', 1);
   });
 
   test('AnsibleSelect component renders if there are virtual environments', () => {
@@ -189,7 +198,7 @@ describe('<OrganizationAdd />', () => {
       <MemoryRouter>
         <I18nProvider>
           <ConfigContext.Provider value={config}>
-            <OrganizationAdd api={{}} />
+            <OrganizationAdd api={api} />
           </ConfigContext.Provider>
         </I18nProvider>
       </MemoryRouter>
@@ -206,7 +215,7 @@ describe('<OrganizationAdd />', () => {
       <MemoryRouter>
         <I18nProvider>
           <ConfigContext.Provider value={config}>
-            <OrganizationAdd api={{}} />
+            <OrganizationAdd api={api} />
           </ConfigContext.Provider>
         </I18nProvider>
       </MemoryRouter>

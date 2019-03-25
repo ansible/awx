@@ -7,6 +7,8 @@ import APIClient from '../../../../../src/api';
 import OrganizationEdit from '../../../../../src/pages/Organizations/screens/Organization/OrganizationEdit';
 
 describe('<OrganizationEdit />', () => {
+  let api;
+
   const mockData = {
     name: 'Foo',
     description: 'Bar',
@@ -17,12 +19,18 @@ describe('<OrganizationEdit />', () => {
     }
   };
 
+  beforeEach(() => {
+    api = {
+      getInstanceGroups: jest.fn(),
+    };
+  });
+
   test('should request related instance groups from api', () => {
     const mockInstanceGroups = [
       { name: 'One', id: 1 },
       { name: 'Two', id: 2 }
     ];
-    const getOrganizationInstanceGroups = jest.fn(() => (
+    api.getOrganizationInstanceGroups = jest.fn(() => (
       Promise.resolve({ data: { results: mockInstanceGroups } })
     ));
     mount(
@@ -30,16 +38,14 @@ describe('<OrganizationEdit />', () => {
         <MemoryRouter initialEntries={['/organizations/1']} initialIndex={0}>
           <OrganizationEdit
             match={{ params: { id: '1' } }}
-            api={{
-              getOrganizationInstanceGroups
-            }}
+            api={api}
             organization={mockData}
           />
         </MemoryRouter>
       </I18nProvider>
     ).find('OrganizationEdit');
 
-    expect(getOrganizationInstanceGroups).toHaveBeenCalledTimes(1);
+    expect(api.getOrganizationInstanceGroups).toHaveBeenCalledTimes(1);
   });
 
   test('componentDidMount should set instanceGroups to state', async () => {
@@ -47,7 +53,7 @@ describe('<OrganizationEdit />', () => {
       { name: 'One', id: 1 },
       { name: 'Two', id: 2 }
     ];
-    const getOrganizationInstanceGroups = jest.fn(() => (
+    api.getOrganizationInstanceGroups = jest.fn(() => (
       Promise.resolve({ data: { results: mockInstanceGroups } })
     ));
     const wrapper = mount(
@@ -60,7 +66,7 @@ describe('<OrganizationEdit />', () => {
               params: { id: '1' }
             }}
             organization={mockData}
-            api={{ getOrganizationInstanceGroups }}
+            api={api}
           />
         </MemoryRouter>
       </I18nProvider>
@@ -69,8 +75,8 @@ describe('<OrganizationEdit />', () => {
     await wrapper.instance().componentDidMount();
     expect(wrapper.state().form.instanceGroups.value).toEqual(mockInstanceGroups);
   });
+
   test('onLookupSave successfully sets instanceGroups state', () => {
-    const api = jest.fn();
     const wrapper = mount(
       <MemoryRouter>
         <I18nProvider>
@@ -96,8 +102,9 @@ describe('<OrganizationEdit />', () => {
       }
     ]);
   });
+
   test('calls "onFieldChange" when input values change', () => {
-    const api = new APIClient();
+    // const api = new APIClient();
     const spy = jest.spyOn(OrganizationEdit.WrappedComponent.prototype, 'onFieldChange');
     const wrapper = mount(
       <MemoryRouter>
@@ -116,8 +123,8 @@ describe('<OrganizationEdit />', () => {
     wrapper.instance().onFieldChange('bar', { target: { name: 'description' } });
     expect(spy).toHaveBeenCalledTimes(2);
   });
+
   test('AnsibleSelect component renders if there are virtual environments', () => {
-    const api = jest.fn();
     const config = {
       custom_virtualenvs: ['foo', 'bar'],
     };
@@ -141,8 +148,8 @@ describe('<OrganizationEdit />', () => {
     expect(wrapper.find('FormSelect')).toHaveLength(1);
     expect(wrapper.find('FormSelectOption')).toHaveLength(2);
   });
+
   test('calls onSubmit when Save button is clicked', () => {
-    const api = jest.fn();
     const spy = jest.spyOn(OrganizationEdit.WrappedComponent.prototype, 'onSubmit');
     const wrapper = mount(
       <MemoryRouter>
@@ -163,12 +170,13 @@ describe('<OrganizationEdit />', () => {
     wrapper.find('button[aria-label="Save"]').prop('onClick')();
     expect(spy).toBeCalled();
   });
+
   test('onSubmit associates and disassociates instance groups', async () => {
     const mockInstanceGroups = [
       { name: 'One', id: 1 },
       { name: 'Two', id: 2 }
     ];
-    const getOrganizationInstanceGroupsFn = jest.fn(() => (
+    api.getOrganizationInstanceGroups = jest.fn(() => (
       Promise.resolve({ data: { results: mockInstanceGroups } })
     ));
     const mockDataForm = {
@@ -176,15 +184,9 @@ describe('<OrganizationEdit />', () => {
       description: 'Bar',
       custom_virtualenv: 'Fizz',
     };
-    const updateOrganizationDetailsFn = jest.fn().mockResolvedValue(1, mockDataForm);
-    const associateInstanceGroupFn = jest.fn().mockResolvedValue('done');
-    const disassociateInstanceGroupFn = jest.fn().mockResolvedValue('done');
-    const api = {
-      getOrganizationInstanceGroups: getOrganizationInstanceGroupsFn,
-      updateOrganizationDetails: updateOrganizationDetailsFn,
-      associateInstanceGroup: associateInstanceGroupFn,
-      disassociate: disassociateInstanceGroupFn
-    };
+    api.updateOrganizationDetails = jest.fn().mockResolvedValue(1, mockDataForm);
+    api.associateInstanceGroup = jest.fn().mockResolvedValue('done');
+    api.disassociate = jest.fn().mockResolvedValue('done');
     const wrapper = mount(
       <I18nProvider>
         <MemoryRouter initialEntries={['/organizations/1']} initialIndex={0}>
@@ -209,18 +211,17 @@ describe('<OrganizationEdit />', () => {
     ], 'instanceGroups');
 
     await wrapper.instance().onSubmit();
-    expect(updateOrganizationDetailsFn).toHaveBeenCalledWith(1, mockDataForm);
-    expect(associateInstanceGroupFn).toHaveBeenCalledWith('/api/v2/organizations/1/instance_groups', 3);
-    expect(associateInstanceGroupFn).not.toHaveBeenCalledWith('/api/v2/organizations/1/instance_groups', 1);
-    expect(associateInstanceGroupFn).not.toHaveBeenCalledWith('/api/v2/organizations/1/instance_groups', 2);
+    expect(api.updateOrganizationDetails).toHaveBeenCalledWith(1, mockDataForm);
+    expect(api.associateInstanceGroup).toHaveBeenCalledWith('/api/v2/organizations/1/instance_groups', 3);
+    expect(api.associateInstanceGroup).not.toHaveBeenCalledWith('/api/v2/organizations/1/instance_groups', 1);
+    expect(api.associateInstanceGroup).not.toHaveBeenCalledWith('/api/v2/organizations/1/instance_groups', 2);
 
-    expect(disassociateInstanceGroupFn).toHaveBeenCalledWith('/api/v2/organizations/1/instance_groups', 2);
-    expect(disassociateInstanceGroupFn).not.toHaveBeenCalledWith('/api/v2/organizations/1/instance_groups', 1);
-    expect(disassociateInstanceGroupFn).not.toHaveBeenCalledWith('/api/v2/organizations/1/instance_groups', 3);
+    expect(api.disassociate).toHaveBeenCalledWith('/api/v2/organizations/1/instance_groups', 2);
+    expect(api.disassociate).not.toHaveBeenCalledWith('/api/v2/organizations/1/instance_groups', 1);
+    expect(api.disassociate).not.toHaveBeenCalledWith('/api/v2/organizations/1/instance_groups', 3);
   });
 
   test('calls "onCancel" when Cancel button is clicked', () => {
-    const api = jest.fn();
     const spy = jest.spyOn(OrganizationEdit.WrappedComponent.prototype, 'onCancel');
     const wrapper = mount(
       <MemoryRouter>
