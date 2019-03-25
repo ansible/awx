@@ -10,6 +10,7 @@ export default function BuildAnchor($log, $filter) {
              // catch-all case to avoid generating urls if a resource has been deleted
              // if a resource still exists, it'll be serialized in the activity's summary_fields
              if (!activity.summary_fields[resource]){
+                  console.log(activity);
                  throw {name : 'ResourceDeleted', message: 'The referenced resource no longer exists'};
              }
              let name;
