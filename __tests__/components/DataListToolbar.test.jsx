@@ -236,7 +236,7 @@ describe('<DataListToolbar />', () => {
       <I18nProvider>
         <DataListToolbar
           isAllSelected={false}
-          selected={() => ([1, 2, 3, 4])}
+          selected={() => [1, 2, 3, 4]}
           sortedColumnKey="name"
           sortOrder="ascending"
           columns={columns}

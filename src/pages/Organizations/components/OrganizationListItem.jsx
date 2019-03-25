@@ -4,11 +4,7 @@ import { Trans, t } from '@lingui/macro';
 import {
   Badge,
   Checkbox,
-  Button,
 } from '@patternfly/react-core';
-import {
-  TrashAltIcon,
-} from '@patternfly/react-icons';
 import {
   Link
 } from 'react-router-dom';
