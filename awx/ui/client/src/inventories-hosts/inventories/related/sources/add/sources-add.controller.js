@@ -198,7 +198,6 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
             $scope.group_by = null;
             $scope.group_by_choices = [];
             $scope.overwrite_vars = false;
-            $scope.compatibility_mode = true;
             initRegionSelect();
         };
         // region / source options callback
@@ -277,7 +276,6 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
                 credential: $scope.credential,
                 overwrite: $scope.overwrite,
                 overwrite_vars: $scope.overwrite_vars,
-                compatibility_mode: $scope.compatibility_mode,
                 update_on_launch: $scope.update_on_launch,
                 verbosity: $scope.verbosity.value,
                 update_cache_timeout: $scope.update_cache_timeout || 0,

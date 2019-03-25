@@ -12,6 +12,8 @@ from awx.main.models import (
     Inventory,
     InventorySource,
     InventoryUpdate,
+    CredentialType,
+    Credential,
     Job
 )
 from awx.main.constants import CLOUD_PROVIDERS
@@ -223,7 +225,7 @@ class TestInventorySourceInjectors:
             name='foo', source='custom', source_project=project
         )
         inventory_source.credentials.add(credential)
-        assert inventory_source.get_cloud_credential() is None
+        assert inventory_source.get_cloud_credential() == credential  # for serializer
         assert inventory_source.get_extra_credentials() == [credential]
 
         inventory_source.source = 'ec2'
@@ -266,7 +268,6 @@ class TestInventorySourceInjectors:
         injector = InventorySource.injectors['azure_rm']('2.9')
         inv_src = InventorySource(
             name='azure source', source='azure_rm',
-            compatibility_mode=True,
             source_vars={'group_by_os_family': True}
         )
         group_by_on = injector.inventory_as_dict(inv_src, '/tmp/foo')
@@ -278,23 +279,6 @@ class TestInventorySourceInjectors:
         # much better, everyone should turn off the flag and live in the future
         assert len(group_by_off['keyed_groups']) == expected_groups - 1
 
-    @pytest.mark.parametrize('source', ['ec2', 'azure_rm'])
-    def test_default_groupings_same(self, source):
-        """Just a sanity check, the number of groupings should be the same
-        with or without compatibility mode turned on.
-        This was a change made during feature development.
-        """
-        injector = InventorySource.injectors[source]('2.9')
-        inv_src = InventorySource(
-            name='test source', source=source, compatibility_mode=True)
-        compat_on = injector.inventory_as_dict(inv_src, '/tmp/foo')
-        inv_src = InventorySource(
-            name='test source', source=source, compatibility_mode=False)
-        compat_off = injector.inventory_as_dict(inv_src, '/tmp/foo')
-        # Both default uses should give the same number of groups
-        assert len(compat_on['keyed_groups']) > 0
-        assert len(compat_on['keyed_groups']) == len(compat_off['keyed_groups'])
-
     def test_tower_plugin_named_url(self):
         injector = InventorySource.injectors['tower']('2.9')
         inv_src = InventorySource(
@@ -304,6 +288,29 @@ class TestInventorySourceInjectors:
         )
         result = injector.inventory_as_dict(inv_src, '/tmp/foo')
         assert result['inventory_id'] == 'Designer%20hair%20%EC%9D%B0++Cosmetic_products%E4%B5%86'
+
+
+@pytest.mark.django_db
+def test_custom_source_custom_credential(organization):
+    credential_type = CredentialType.objects.create(
+        kind='cloud',
+        name='MyCloud',
+        inputs = {
+            'fields': [{
+                'id': 'api_token',
+                'label': 'API Token',
+                'type': 'string',
+                'secret': True
+            }]
+        }
+    )
+    credential = Credential.objects.create(
+        name='my cred', credential_type=credential_type, organization=organization,
+        inputs={'api_token': 'secret'}
+    )
+    inv_source = InventorySource.objects.create(source='scm')
+    inv_source.credentials.add(credential)
+    assert inv_source.get_cloud_credential() == credential
 
 
 @pytest.fixture

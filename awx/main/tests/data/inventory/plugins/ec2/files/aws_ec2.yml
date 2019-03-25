@@ -1,7 +1,7 @@
 boto_profile: /tmp/my_boto_stuff
 compose:
   ansible_host: public_ip_address
-  ec2_account_id: network_interfaces | json_query("[0].owner_id")
+  ec2_account_id: owner_id
   ec2_ami_launch_index: ami_launch_index | string
   ec2_architecture: architecture
   ec2_block_devices: dict(block_device_mappings | map(attribute='device_name') | list | zip(block_device_mappings | map(attribute='ebs.volume_id') | list))

@@ -25,7 +25,6 @@ export default ['$state', '$scope', 'ParseVariableString', 'ParseTypeChange',
             {credential: inventorySourceData.credential},
             {overwrite: inventorySourceData.overwrite},
             {overwrite_vars: inventorySourceData.overwrite_vars},
-            {compatibility_mode: inventorySourceData.compatibility_mode},
             {update_on_launch: inventorySourceData.update_on_launch},
             {update_cache_timeout: inventorySourceData.update_cache_timeout},
             {instance_filters: inventorySourceData.instance_filters},
@@ -327,7 +326,6 @@ export default ['$state', '$scope', 'ParseVariableString', 'ParseTypeChange',
                 credential: $scope.credential,
                 overwrite: $scope.overwrite,
                 overwrite_vars: $scope.overwrite_vars,
-                compatibility_mode: $scope.compatibility_mode,
                 update_on_launch: $scope.update_on_launch,
                 update_cache_timeout: $scope.update_cache_timeout || 0,
                 verbosity: $scope.verbosity.value,
@@ -404,7 +402,6 @@ export default ['$state', '$scope', 'ParseVariableString', 'ParseTypeChange',
             $scope.group_by = null;
             $scope.group_by_choices = [];
             $scope.overwrite_vars = false;
-            $scope.compatibility_mode = true;
 
             initRegionSelect();
 

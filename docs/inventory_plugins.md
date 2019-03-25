@@ -71,30 +71,17 @@ For example, after AWX no longer supports Ansible 2.7, the script
 
 An effort was made to keep imports working in the exact same way after
 the switchover. However, the inventory plugins are a fundamental rewrite
-and many elements of default behavior has changed. Because of that,
-a `compatibility_mode` toggle was added. This defaults to True.
+and many elements of default behavior has changed. These changes also
+include many backward incompatible changes. Because of this, what you
+get via an inventory import will be a superset of what you get from the script
+but will not match the default behavior you would get from the inventory
+plugin on the CLI.
 
-Turning off compatibility mode will be more future-proof.
-Keeping it on, will be more stable and consistent.
-
-### Changes with Compatibility Mode Off
-
-The set of `hostvars` will be almost completely different, using new names
-for data which is mostly the same content. You can see the jinja2 keyed_groups
-construction used in compatibility mode to help get a sense of what
-new names replace old names.
-
-If you turn compatibility mode off or downgrade Ansible, you should
+Because inventory plugins add additional variables, if you downgrade Ansible, you should
 turn on `overwrite` and `overwrite_vars` to get rid of stale
 variables (and potentially groups) no longer returned by the import.
 
-Group names will be sanitized with compatibility mode turned off.
-That means that characters such as "-" will
-be replaced by underscores "\_". In some cases, this means that a large
-fraction of groups get renamed as you move from scripts to plugins.
-This will become the default Ansible behavior on the CLI eventually.
-
-### Changes with Compatibility Mode On
+### Changes for Compatibility
 
 Programatically-generated examples of inventory file syntax used in
 updates (with dummy data) can be found in `awx/main/tests/data/inventory/scripts`,
@@ -103,8 +90,8 @@ from the inventory scripts.
 
 #### hostvar keys and values
 
-More hostvars will appear if the inventory plugins are used with compatibility
-mode on. To maintain backward compatibility,
+More hostvars will appear if the inventory plugins are used.
+To maintain backward compatibility,
 the old names are added back where they have the same meaning as a
 variable returned by the plugin. New names are not removed.
 

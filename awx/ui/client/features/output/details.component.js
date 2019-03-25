@@ -225,17 +225,6 @@ function getOverwriteVarsDetails () {
     return { label, value };
 }
 
-function getCompatibilityModeDetails () {
-    if (!resource.model.has('compatibility_mode')) {
-        return null;
-    }
-
-    const label = strings.get('labels.COMPATIBILITY_MODE');
-    const value = resource.model.get('compatibility_mode');
-
-    return { label, value };
-}
-
 function getLicenseErrorDetails () {
     if (!resource.model.has('license_error')) {
         return null;
@@ -826,7 +815,6 @@ function JobDetailsController (
         vm.inventorySource = getInventorySourceDetails();
         vm.overwrite = getOverwriteDetails();
         vm.overwriteVars = getOverwriteVarsDetails();
-        vm.compatibilityMode = getCompatibilityModeDetails();
         vm.licenseError = getLicenseErrorDetails();
         vm.hostLimitError = getHostLimitErrorDetails();
 
