@@ -2819,6 +2819,7 @@ class CredentialSerializerCreate(CredentialSerializer):
 
 
 class CredentialInputSourceSerializer(BaseSerializer):
+    show_capabilities = ['delete']
 
     class Meta:
         model = CredentialInputSource
