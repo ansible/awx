@@ -24,29 +24,31 @@ import ExpandCollapse from '../ExpandCollapse';
 import Search from '../Search';
 import Sort from '../Sort';
 import VerticalSeparator from '../VerticalSeparator';
+// import SelectedList from '../SelectedList';
 
 class DataListToolbar extends React.Component {
   render () {
     const {
+      addUrl,
       columns,
-      isAllSelected,
+      disableTrashCanIcon,
       onSelectAll,
       sortedColumnKey,
       sortOrder,
-      addUrl,
       showDelete,
       showSelectAll,
+      isAllSelected,
       isLookup,
       isCompact,
       onSort,
       onSearch,
       onCompact,
       onExpand,
-      add
+      add,
+      onOpenDeleteModal
     } = this.props;
 
     const showExpandCollapse = (onCompact && onExpand);
-
     return (
       <I18n>
         {({ i18n }) => (
@@ -115,10 +117,13 @@ class DataListToolbar extends React.Component {
                     position="top"
                   >
                     <Button
+                      className="awx-ToolBarBtn"
                       variant="plain"
                       aria-label={i18n._(t`Delete`)}
+                      onClick={onOpenDeleteModal}
+                      isDisabled={disableTrashCanIcon}
                     >
-                      <TrashAltIcon />
+                      <TrashAltIcon className="awx-ToolBarTrashCanIcon" />
                     </Button>
                   </Tooltip>
                 )}

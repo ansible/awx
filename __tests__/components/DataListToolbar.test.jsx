@@ -221,4 +221,32 @@ describe('<DataListToolbar />', () => {
     const upAlphaIcon = toolbar.find(upAlphaIconSelector);
     expect(upAlphaIcon.length).toBe(1);
   });
+
+  test('trash can button triggers correct function', () => {
+    const columns = [{ name: 'Name', key: 'name', isSortable: true }];
+    const onOpenDeleteModal = jest.fn();
+    const deleteModal = 'button.pf-c-button.pf-m-plain.awx-ToolBarBtn';
+    const onSearch = jest.fn();
+    const onSort = jest.fn();
+    const onSelectAll = jest.fn();
+
+    toolbar = mount(
+      <I18nProvider>
+        <DataListToolbar
+          isAllSelected={false}
+          selected={() => ([1, 2, 3, 4])}
+          sortedColumnKey="name"
+          sortOrder="ascending"
+          columns={columns}
+          onSearch={onSearch}
+          onSort={onSort}
+          onSelectAll={onSelectAll}
+          onOpenDeleteModal={() => {}}
+        />
+      </I18nProvider>
+    );
+
+    toolbar.find(deleteModal).simulate('click');
+    expect(onOpenDeleteModal).toBeCalled();
+  });
 });

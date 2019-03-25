@@ -12,9 +12,11 @@ import {
   EmptyState,
   EmptyStateIcon,
   EmptyStateBody,
+  Modal,
   PageSection,
   PageSectionVariants,
-  Title
+  Title,
+  Button
 } from '@patternfly/react-core';
 import { CubesIcon } from '@patternfly/react-icons';
 import DataListToolbar from '../../../components/DataListToolbar';
@@ -54,6 +56,8 @@ class OrganizationsList extends Component {
       loading: true,
       results: [],
       selected: [],
+      isModalOpen: false,
+      orgsToDelete: []
     };
 
     this.onSearch = this.onSearch.bind(this);
@@ -64,6 +68,9 @@ class OrganizationsList extends Component {
     this.onSelect = this.onSelect.bind(this);
     this.updateUrl = this.updateUrl.bind(this);
     this.fetchOrganizations = this.fetchOrganizations.bind(this);
+    this.handleOrgDelete = this.handleOrgDelete.bind(this);
+    this.handleOpenOrgDeleteModal = this.handleOpenOrgDeleteModal.bind(this);
+    this.handleClearOrgsToDelete = this.handleClearOrgsToDelete.bind(this);
   }
 
   componentDidMount () {
@@ -127,6 +134,50 @@ class OrganizationsList extends Component {
     const searchParams = parseQueryString(search.substring(1));
 
     return Object.assign({}, this.defaultParams, searchParams, overrides);
+  }
+
+  handleClearOrgsToDelete () {
+    this.setState(({ isModalOpen }) => ({ isModalOpen: !isModalOpen, orgsToDelete: [] }));
+    this.onSelectAll();
+  }
+
+  handleOpenOrgDeleteModal () {
+    const { results, selected } = this.state;
+    const warningTitle = i18nMark('Delete Organization');
+    const warningMsg = i18nMark('Are you sure you want to delete:');
+
+    const orgsToDelete = [];
+    results.forEach((result) => {
+      selected.forEach((selectedOrg) => {
+        if (result.id === selectedOrg) {
+          orgsToDelete.push({ name: result.name, id: selectedOrg });
+        }
+      });
+    });
+    this.setState({
+      orgsToDelete,
+      isModalOpen: true,
+      warningTitle,
+      warningMsg,
+      loading: false });
+  }
+
+  async handleOrgDelete (event) {
+    const { orgsToDelete } = this.state;
+    const { api } = this.props;
+    try {
+      const deleteOrgsApiCalls = [];
+
+      orgsToDelete.forEach((org) => {
+        deleteOrgsApiCalls.push(api.destroyOrganization(org.id));
+      });
+      await Promise.all(deleteOrgsApiCalls);
+    } finally {
+      this.handleClearOrgsToDelete();
+      const queryParams = this.getQueryParams();
+      this.fetchOrganizations(queryParams);
+    }
+    event.preventDefault();
   }
 
   updateUrl (queryParams) {
@@ -196,18 +247,47 @@ class OrganizationsList extends Component {
       error,
       loading,
       noInitialResults,
+      orgsToDelete,
       page,
       pageCount,
       page_size,
+      selected,
       sortedColumnKey,
       sortOrder,
       results,
-      selected,
+      isModalOpen,
+      warningTitle,
+      warningMsg,
     } = this.state;
     const { match } = this.props;
     return (
       <PageSection variant={medium}>
         <Card>
+          { isModalOpen && (
+            <Modal
+              className="orgListAlert"
+              width="50%"
+              title={warningTitle}
+              isOpen={isModalOpen}
+              style={{ width: '1000px' }}
+              variant="danger"
+              onClose={this.handleClearOrgsToDelete}
+            >
+              {warningMsg}
+              <br />
+              {orgsToDelete.map((org) => (
+                <strong key={org.id}>
+                  {org.name}
+                  <br />
+                </strong>
+              ))}
+              <br />
+              <span className="awx-c-form-action-group">
+                <Button className="orgListAlert-actionBtn" keys="cancel" variant="secondary" aria-label="cancel-delete" onClick={this.handleClearOrgsToDelete}>Cancel</Button>
+                <Button className="orgListAlert-actionBtn" keys="cancel" variant="danger" aria-label="confirm-delete" onClick={this.handleOrgDelete}>Delete</Button>
+              </span>
+            </Modal>
+          )}
           {noInitialResults && (
             <EmptyState>
               <EmptyStateIcon icon={CubesIcon} />
@@ -229,6 +309,8 @@ class OrganizationsList extends Component {
                 onSearch={this.onSearch}
                 onSort={this.onSort}
                 onSelectAll={this.onSelectAll}
+                onOpenDeleteModal={this.handleOpenOrgDeleteModal}
+                disableTrashCanIcon={selected.length === 0}
                 showDelete
                 showSelectAll
               />
@@ -244,7 +326,8 @@ class OrganizationsList extends Component {
                         userCount={o.summary_fields.related_field_counts.users}
                         teamCount={o.summary_fields.related_field_counts.teams}
                         isSelected={selected.includes(o.id)}
-                        onSelect={() => this.onSelect(o.id)}
+                        onSelect={() => this.onSelect(o.id, o.name)}
+                        onOpenOrgDeleteModal={this.handleOpenOrgDeleteModal}
                       />
                     ))}
                   </ul>

@@ -56,6 +56,11 @@ class APIClient {
     return this.http.get(API_CONFIG);
   }
 
+  destroyOrganization (id) {
+    const endpoint = `${API_ORGANIZATIONS}${id}/`;
+    return (this.http.delete(endpoint));
+  }
+
   getOrganizations (params = {}) {
     return this.http.get(API_ORGANIZATIONS, { params });
   }
