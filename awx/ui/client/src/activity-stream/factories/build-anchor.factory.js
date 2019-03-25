@@ -10,8 +10,10 @@ export default function BuildAnchor($log, $filter) {
              // catch-all case to avoid generating urls if a resource has been deleted
              // if a resource still exists, it'll be serialized in the activity's summary_fields
              if (!activity.summary_fields[resource]){
+                  console.log(activity);
                  throw {name : 'ResourceDeleted', message: 'The referenced resource no longer exists'};
              }
+             let name;
              switch (resource) {
                  case 'custom_inventory_script':
                      url += 'inventory_scripts/' + obj.id + '/';
@@ -75,6 +77,10 @@ export default function BuildAnchor($log, $filter) {
                  case 'workflow_job_template':
                      url += `templates/workflow_job_template/${obj.id}`;
                      break;
+                 case 'workflow_job_template_node':
+                     url += `templates/workflow_job_template/${activity.summary_fields.workflow_job_template[0].id}`;
+                     name = activity.summary_fields.workflow_job_template[0].name;
+                     break;
                  case 'workflow_job':
                      url += `workflows/${obj.id}`;
                      break;
@@ -92,7 +98,7 @@ export default function BuildAnchor($log, $filter) {
                      url += resource + 's/' + obj.id + '/';
              }
 
-             const name = $filter('sanitize')(obj.name || obj.username);
+             name = $filter('sanitize')(name || obj.name || obj.username);
 
              if (url) {
                 return ` <a href=\"${url}\">&nbsp;${name}&nbsp;</a> `;

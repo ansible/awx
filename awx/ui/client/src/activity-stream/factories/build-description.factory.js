@@ -85,8 +85,12 @@ export default function BuildDescription(BuildAnchor, $log, i18n) {
                                      'from ' + activity.object1 + BuildAnchor(activity.summary_fields.group[0], activity.object1, activity);
                              }
                              else {
-                                 activity.description += activity.object2 + BuildAnchor(activity.summary_fields[activity.object2][0], activity.object2, activity) +
-                                     'from ' + activity.object1 + BuildAnchor(activity.summary_fields[activity.object1][0], activity.object1, activity);
+                               if (activity.object1 === 'workflow_job_template_node' && activity.object2 === 'workflow_job_template_node') {
+                                  activity.description += 'two nodes on workflow' + BuildAnchor(activity.summary_fields[activity.object1[0]], activity.object1, activity);
+                                } else {
+                                  activity.description += activity.object2 + BuildAnchor(activity.summary_fields[activity.object2][0], activity.object2, activity) +
+                                       'from ' + activity.object1 + BuildAnchor(activity.summary_fields[activity.object1][0], activity.object1, activity);
+                                }
                              }
                              break;
                          // expected outcome "associated <object2> to <object1>"
@@ -97,8 +101,12 @@ export default function BuildDescription(BuildAnchor, $log, i18n) {
                                      'to ' + activity.object2 + BuildAnchor(activity.summary_fields.group[1], activity.object2, activity);
                              }
                              else {
-                                 activity.description += activity.object1 + BuildAnchor(activity.summary_fields[activity.object1][0], activity.object1, activity) +
-                                     'to ' + activity.object2 + BuildAnchor(activity.summary_fields[activity.object2][0], activity.object2, activity);
+                                 if (activity.object1 === 'workflow_job_template_node' && activity.object2 === 'workflow_job_template_node') {
+                                   activity.description += 'two nodes on workflow' + BuildAnchor(activity.summary_fields[activity.object1[0]], activity.object1, activity);
+                                 } else {
+                                   activity.description += activity.object1 + BuildAnchor(activity.summary_fields[activity.object1][0], activity.object1, activity) +
+                                       'to ' + activity.object2 + BuildAnchor(activity.summary_fields[activity.object2][0], activity.object2, activity);
+                                 }
                              }
                              break;
                          case 'delete':

@@ -4021,7 +4021,7 @@ class WorkflowJobTemplateNodeDetailSerializer(WorkflowJobTemplateNodeSerializer)
     Influence the api browser sample data to not include workflow_job_template
     when editing a WorkflowNode.
 
-    Note: I was not able to accomplish this trough the use of extra_kwargs.
+    Note: I was not able to accomplish this through the use of extra_kwargs.
     Maybe something to do with workflow_job_template being a relational field?
     '''
     def build_relational_field(self, field_name, relation_info):
@@ -5073,6 +5073,17 @@ class ActivityStreamSerializer(BaseSerializer):
                                     if fval is not None:
                                         job_template_item[field] = fval
                                 summary_fields['job_template'].append(job_template_item)
+                        if fk == 'workflow_job_template_node':
+                            summary_fields['workflow_job_template'] = []
+                            workflow_job_template_item = {}
+                            workflow_job_template_fields = SUMMARIZABLE_FK_FIELDS['workflow_job_template']
+                            workflow_job_template = getattr(thisItem, 'workflow_job_template', None)
+                            if workflow_job_template is not None:
+                                for field in workflow_job_template_fields:
+                                    fval = getattr(workflow_job_template, field, None)
+                                    if fval is not None:
+                                        workflow_job_template_item[field] = fval
+                                summary_fields['workflow_job_template'].append(workflow_job_template_item)
                         if fk == 'schedule':
                             unified_job_template = getattr(thisItem, 'unified_job_template', None)
                             if unified_job_template is not None:
