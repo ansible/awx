@@ -260,6 +260,11 @@ class IsolatedManager(object):
                         dispatcher.dispatch(event_data)
                         self.handled_events.add(event)
 
+                        # handle artifacts
+                        if event_data.get('event_data', {}).get('artifact_data', {}):
+                            self.instance.artifacts = event_data['event_data']['artifact_data']
+                            self.instance.save(update_fields=['artifacts'])
+
             last_check = time.time()
 
         if status == 'successful':
