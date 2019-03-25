@@ -189,16 +189,11 @@ def test_run_isolated_job(private_data_dir, rsa_key):
     mgr.build_isolated_job_data()
     stdout = StringIO()
     # Mock environment variables for callback module
-    with mock.patch('os.getenv') as env_mock:
-        env_mock.return_value = '/path/to/awx/lib'
-        status, rc = run.run_isolated_job(private_data_dir, secrets, stdout)
+    status, rc = run.run_isolated_job(private_data_dir, secrets, stdout)
     assert status == 'successful'
     assert rc == 0
     assert FILENAME in stdout.getvalue()
 
-    assert '/path/to/awx/lib' in env['PYTHONPATH']
-    assert env['ANSIBLE_STDOUT_CALLBACK'] == 'awx_display'
-    assert env['ANSIBLE_CALLBACK_PLUGINS'] == '/path/to/awx/lib/isolated_callbacks'
     assert env['AWX_ISOLATED_DATA_DIR'] == private_data_dir
 
 
@@ -230,9 +225,6 @@ def test_run_isolated_adhoc_command(private_data_dir, rsa_key):
     # an ad-hoc command that runs `pwd` should print `private_data_dir` to stdout
     assert private_data_dir in stdout.getvalue()
 
-    assert '/path/to/awx/lib' in env['PYTHONPATH']
-    assert env['ANSIBLE_STDOUT_CALLBACK'] == 'minimal'
-    assert env['ANSIBLE_CALLBACK_PLUGINS'] == '/path/to/awx/lib/isolated_callbacks'
     assert env['AWX_ISOLATED_DATA_DIR'] == private_data_dir
 
 
