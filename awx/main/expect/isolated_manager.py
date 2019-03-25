@@ -95,19 +95,24 @@ class IsolatedManager(object):
     def path_to(self, *args):
         return os.path.join(self.private_data_dir, *args)
 
-    def dispatch(self, playbook):
+    def dispatch(self, playbook=None, module=None, module_args=None):
         '''
         Ship the runner payload to a remote host for isolated execution.
         '''
+        self.handled_events = set()
         self.started_at = time.time()
 
         self.build_isolated_job_data()
         extra_vars = {
             'src': self.private_data_dir,
             'dest': settings.AWX_PROOT_BASE_PATH,
-            'playbook': playbook,
             'ident': self.ident
         }
+        if playbook:
+            extra_vars['playbook'] = playbook
+        if module and module_args:
+            extra_vars['module'] = module
+            extra_vars['module_args'] = module_args
 
         # Run ansible-playbook to launch a job on the isolated host.  This:
         #
@@ -129,12 +134,12 @@ class IsolatedManager(object):
         output = buff.getvalue()
         playbook_logger.info('Isolated job {} dispatch:\n{}'.format(self.instance.id, output))
         if status != 'successful':
-            event_data = {
-                'event': 'verbose',
-                'stdout': output
-            }
-            event_data.setdefault(self.event_data_key, self.instance.id)
-            CallbackQueueDispatcher().dispatch(event_data)
+            for event_data in [
+                {'event': 'verbose', 'stdout': output},
+                {'event': 'EOF', 'final_counter': 1},
+            ]:
+                event_data.setdefault(self.event_data_key, self.instance.id)
+                CallbackQueueDispatcher().dispatch(event_data)
         return status, rc
 
     @classmethod
@@ -207,7 +212,6 @@ class IsolatedManager(object):
         buff = StringIO()
         last_check = time.time()
         job_timeout = remaining = self.job_timeout
-        handled_events = set()
         dispatcher = CallbackQueueDispatcher()
         while status == 'failed':
             if job_timeout != 0:
@@ -241,15 +245,20 @@ class IsolatedManager(object):
 
             # discover new events and ingest them
             events_path = self.path_to('artifacts', self.ident, 'job_events')
-            for event in set(os.listdir(events_path)) - handled_events:
-                path = os.path.join(events_path, event)
-                if os.path.exists(path):
-                    event_data = json.load(
-                        open(os.path.join(events_path, event), 'r')
-                    )
-                    event_data.setdefault(self.event_data_key, self.instance.id)
-                    dispatcher.dispatch(event_data)
-                    handled_events.add(event)
+
+            # it's possible that `events_path` doesn't exist *yet*, because runner
+            # hasn't actually written any events yet (if you ran e.g., a sleep 30)
+            # only attempt to consume events if any were rsynced back
+            if os.path.exists(events_path):
+                for event in set(os.listdir(events_path)) - self.handled_events:
+                    path = os.path.join(events_path, event)
+                    if os.path.exists(path):
+                        event_data = json.load(
+                            open(os.path.join(events_path, event), 'r')
+                        )
+                        event_data.setdefault(self.event_data_key, self.instance.id)
+                        dispatcher.dispatch(event_data)
+                        self.handled_events.add(event)
 
             last_check = time.time()
 
@@ -264,7 +273,7 @@ class IsolatedManager(object):
         # emit an EOF event
         event_data = {
             'event': 'EOF',
-            'final_counter': len(handled_events)
+            'final_counter': len(self.handled_events)
         }
         event_data.setdefault(self.event_data_key, self.instance.id)
         dispatcher.dispatch(event_data)
@@ -372,7 +381,8 @@ class IsolatedManager(object):
             if os.path.exists(facts_path):
                 shutil.rmtree(facts_path)
 
-    def run(self, instance, private_data_dir, playbook, event_data_key, ident=None):
+    def run(self, instance, private_data_dir, playbook, module, module_args,
+            event_data_key, ident=None):
         """
         Run a job on an isolated host.
 
@@ -381,6 +391,8 @@ class IsolatedManager(object):
                                  where job-specific data should be written
                                  (i.e., `/tmp/ansible_awx_xyz/`)
         :param playbook:         the playbook to run
+        :param module:           the module to run
+        :param module_args:      the module args to use
         :param event_data_key:   e.g., job_id, inventory_id, ...
 
         For a completed job run, this function returns (status, rc),
@@ -392,7 +404,7 @@ class IsolatedManager(object):
         self.instance = instance
         self.host = instance.execution_node
         self.private_data_dir = private_data_dir
-        status, rc = self.dispatch(playbook)
+        status, rc = self.dispatch(playbook, module, module_args)
         if status == 'successful':
             status, rc = self.check()
         self.cleanup()

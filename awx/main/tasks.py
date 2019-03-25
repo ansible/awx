@@ -1172,7 +1172,11 @@ class BaseTask(object):
                     del params[v]
 
             if self.instance.is_isolated() is True:
-                playbook = params['playbook']
+                module_args = None
+                if 'module_args' in params:
+                    module_args = ansible_runner.utils.args2cmdline(
+                        params.get('module_args'),
+                    )
                 shutil.move(
                     params.pop('inventory'),
                     os.path.join(private_data_dir, 'inventory')
@@ -1182,9 +1186,12 @@ class BaseTask(object):
                 manager_instance = isolated_manager.IsolatedManager(env, **_kw)
                 status, rc = manager_instance.run(self.instance,
                                                   private_data_dir,
-                                                  playbook,
+                                                  params.get('playbook'),
+                                                  params.get('module'),
+                                                  module_args,
                                                   event_data_key=self.event_data_key,
                                                   ident=str(self.instance.pk))
+                self.event_ct = len(manager_instance.handled_events)
             else:
                 res = ansible_runner.interface.run(**params)
                 status = res.status

@@ -27,6 +27,11 @@
 
     - name: spawn the playbook
       command: "ansible-runner start {{src}} -p {{playbook}} -i {{ident}}"
+      when: playbook is defined
+
+    - name: spawn the adhoc command
+      command: "ansible-runner start {{src}} -m {{module}} -a {{module_args}} -i {{ident}}"
+      when: module is defined
 
     - name: write the secret environment data
       mkfifo:
