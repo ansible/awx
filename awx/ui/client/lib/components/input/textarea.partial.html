@@ -18,6 +18,13 @@
             >
               <div class="at-InputTagContainer">
                 <at-tag
+                  ng-show="(!state._disabled) && state._tagValue"
+                  icon="external"
+                  tag="state._tagValue"
+                  remove-tag="state._onRemoveTag(state)"
+                />
+                <at-tag
+                  ng-show="state._disabled && state._tagValue"
                   icon="external"
                   tag="state._tagValue"
                   remove-tag="state._onRemoveTag(state)"

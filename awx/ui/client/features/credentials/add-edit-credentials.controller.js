@@ -21,6 +21,7 @@ function AddEditCredentialsController (
         credentialType,
         organization,
         isOrgEditableByUser,
+        sourceCredentials,
     } = models;
 
     const omit = ['user', 'team', 'inputs'];
@@ -131,7 +132,11 @@ function AddEditCredentialsController (
             const apiConfig = ConfigService.get();
 
             credentialType.mergeInputProperties();
-            const fields = credential.assignInputGroupValues(apiConfig, credentialType);
+            const fields = credential.assignInputGroupValues(
+                apiConfig,
+                credentialType,
+                sourceCredentials
+            );
 
             if (credentialType.get('name') === 'Google Compute Engine') {
                 fields.splice(2, 0, gceFileInputSchema);
@@ -417,6 +422,11 @@ function AddEditCredentialsController (
         if (isExternal) {
             data.results = data.results.filter(({ id }) => id !== credential.get('id'));
         }
+
+        // only show credentials we can use
+        data.results = data.results
+            .filter(({ summary_fields }) => summary_fields.user_capabilities.use);
+
         return data;
     };
 

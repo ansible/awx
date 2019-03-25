@@ -30,7 +30,7 @@ function createFormSchema (method, config) {
     return schema;
 }
 
-function assignInputGroupValues (apiConfig, credentialType) {
+function assignInputGroupValues (apiConfig, credentialType, sourceCredentials) {
     let inputs = credentialType.get('inputs.fields');
 
     if (!inputs) {
@@ -79,7 +79,16 @@ function assignInputGroupValues (apiConfig, credentialType) {
             const { summary_fields } = this.get('related.input_sources.results')
                 .find(({ input_field_name }) => input_field_name === field.id);
             field._tagValue = summary_fields.source_credential.name;
+
+            const { source_credential: { id } } = summary_fields;
+            const src = sourceCredentials.data.results.find(obj => obj.id === id);
+            const canRemove = _.get(src, ['summary_fields', 'user_capabilities', 'delete'], false);
+
+            if (!canRemove) {
+                field._disabled = true;
+            }
         }
+
         return field;
     });
 

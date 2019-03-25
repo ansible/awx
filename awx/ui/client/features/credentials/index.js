@@ -16,7 +16,9 @@ function CredentialsResolve (
     CredentialType,
     Organization,
     ProcessErrors,
-    strings
+    strings,
+    Rest,
+    GetBasePath,
 ) {
     const id = $stateParams.credential_id;
 
@@ -28,6 +30,7 @@ function CredentialsResolve (
         promises.credential = new Credential('options');
         promises.credentialType = new CredentialType();
         promises.organization = new Organization();
+        promises.sourceCredentials = $q.resolve({ data: { count: 0, results: [] } });
 
         return $q.all(promises);
     }
@@ -39,10 +42,15 @@ function CredentialsResolve (
             const typeId = models.credential.get('credential_type');
             const orgId = models.credential.get('organization');
 
+            Rest.setUrl(GetBasePath('credentials'));
+            const params = { target_input_sources__target_credential: id };
+            const sourceCredentialsPromise = Rest.get({ params });
+
             const dependents = {
                 credentialType: new CredentialType('get', typeId),
                 organization: new Organization('get', orgId),
-                credentialInputSources: models.credential.extend('GET', 'input_sources')
+                credentialInputSources: models.credential.extend('GET', 'input_sources'),
+                sourceCredentials: sourceCredentialsPromise
             };
 
             dependents.isOrgCredAdmin = dependents.organization.then((org) => org.search({ role_level: 'credential_admin_role' }));
@@ -51,6 +59,7 @@ function CredentialsResolve (
                 .then(related => {
                     models.credentialType = related.credentialType;
                     models.organization = related.organization;
+                    models.sourceCredentials = related.sourceCredentials;
 
                     const isOrgAdmin = _.some(models.me.get('related.admin_of_organizations.results'), (org) => org.id === models.organization.get('id'));
                     const isSuperuser = models.me.get('is_superuser');
@@ -79,7 +88,9 @@ CredentialsResolve.$inject = [
     'CredentialTypeModel',
     'OrganizationModel',
     'ProcessErrors',
-    'CredentialsStrings'
+    'CredentialsStrings',
+    'Rest',
+    'GetBasePath',
 ];
 
 function CredentialsRun ($stateExtender, legacy, strings) {
