@@ -70,7 +70,7 @@ class APIClient {
     return this.http.get(endpoint, { params });
   }
 
-  getOrganizationTeamsList (id, params = {}) {
+  readOrganizationTeamsList (id, params = {}) {
     const endpoint = `${API_ORGANIZATIONS}${id}/teams/`;
 
     return this.http.get(endpoint, { params });

@@ -8,7 +8,7 @@ const mockAPITeamsList = {
   foo: 'bar',
 };
 
-const mockGetOrganizationTeamsList = () => Promise.resolve(mockAPITeamsList);
+const readOrganizationTeamsList = () => Promise.resolve(mockAPITeamsList);
 
 describe('<OrganizationTeams />', () => {
   test('initially renders succesfully', () => {
@@ -19,7 +19,7 @@ describe('<OrganizationTeams />', () => {
           location={{ search: '', pathname: '/organizations/1/teams' }}
           params={{}}
           api={{
-            getOrganizationTeamsList: jest.fn(),
+            readOrganizationTeamsList: jest.fn(),
           }}
         />
       </MemoryRouter>
@@ -34,12 +34,12 @@ describe('<OrganizationTeams />', () => {
           location={{ search: '', pathname: '/organizations/1/teams' }}
           params={{}}
           api={{
-            getOrganizationTeamsList: mockGetOrganizationTeamsList
+            readOrganizationTeamsList
           }}
         />
       </MemoryRouter>
     ).find('OrganizationTeams');
-    const teamsList = await wrapper.instance().getOrgTeamsList();
+    const teamsList = await wrapper.instance().readOrganizationTeamsList();
     expect(teamsList).toEqual(mockAPITeamsList);
   });
 });

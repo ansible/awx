@@ -45,7 +45,7 @@ class OrganizationTeamsList extends React.Component {
   constructor (props) {
     super(props);
 
-    const { page, page_size } = this.getQueryParams();
+    const { page, page_size } = this.readQueryParams();
 
     this.state = {
       page,
@@ -56,22 +56,22 @@ class OrganizationTeamsList extends React.Component {
       results: [],
     };
 
-    this.fetchOrgTeamsList = this.fetchOrgTeamsList.bind(this);
-    this.onSetPage = this.onSetPage.bind(this);
-    this.onSort = this.onSort.bind(this);
-    this.getQueryParams = this.getQueryParams.bind(this);
+    this.readOrganizationTeamsList = this.readOrganizationTeamsList.bind(this);
+    this.handleSetPage = this.handleSetPage.bind(this);
+    this.handleSort = this.handleSort.bind(this);
+    this.reatQueryParams = this.readQueryParams.bind(this);
   }
 
   componentDidMount () {
-    const queryParams = this.getQueryParams();
+    const queryParams = this.readQueryParams();
     try {
-      this.fetchOrgTeamsList(queryParams);
+      this.readOrganizationTeamsList(queryParams);
     } catch (error) {
       this.setState({ error });
     }
   }
 
-  onSetPage (pageNumber, pageSize) {
+  handleSetPage (pageNumber, pageSize) {
     const { sortOrder, sortedColumnKey } = this.state;
     const page = parseInt(pageNumber, 10);
     const page_size = parseInt(pageSize, 10);
@@ -82,12 +82,12 @@ class OrganizationTeamsList extends React.Component {
       order_by = `-${order_by}`;
     }
 
-    const queryParams = this.getQueryParams({ page, page_size, order_by });
+    const queryParams = this.readQueryParams({ page, page_size, order_by });
 
-    this.fetchOrgTeamsList(queryParams);
+    this.readOrganizationTeamsList(queryParams);
   }
 
-  onSort (sortedColumnKey, sortOrder) {
+  handleSort (sortedColumnKey, sortOrder) {
     const { page_size } = this.state;
 
     let order_by = sortedColumnKey;
@@ -96,12 +96,12 @@ class OrganizationTeamsList extends React.Component {
       order_by = `-${order_by}`;
     }
 
-    const queryParams = this.getQueryParams({ order_by, page_size });
+    const queryParams = this.readQueryParams({ order_by, page_size });
 
-    this.fetchOrgTeamsList(queryParams);
+    this.readOrganizationTeamsList(queryParams);
   }
 
-  getQueryParams (overrides = {}) {
+  readQueryParams (overrides = {}) {
     const { location } = this.props;
     const { search } = location;
 
@@ -110,8 +110,8 @@ class OrganizationTeamsList extends React.Component {
     return Object.assign({}, this.defaultParams, searchParams, overrides);
   }
 
-  async fetchOrgTeamsList (queryParams) {
-    const { match, getTeamsList } = this.props;
+  async readOrganizationTeamsList (queryParams) {
+    const { match, onReadTeamsList } = this.props;
 
     const { page, page_size, order_by } = queryParams;
 
@@ -126,7 +126,7 @@ class OrganizationTeamsList extends React.Component {
     try {
       const { data:
         { count = 0, results = [] }
-      } = await getTeamsList(match.params.id, queryParams);
+      } = await onReadTeamsList(match.params.id, queryParams);
       const pageCount = Math.ceil(count / page_size);
 
       const stateToUpdate = {
@@ -178,7 +178,7 @@ class OrganizationTeamsList extends React.Component {
                   sortOrder={sortOrder}
                   columns={this.columns}
                   onSearch={() => { }}
-                  onSort={this.onSort}
+                  onSort={this.handleSort}
                 />
                 <DataList aria-label={i18n._(t`Teams List`)}>
                   {results.map(({ url, id, name }) => (
@@ -198,7 +198,7 @@ class OrganizationTeamsList extends React.Component {
                   page={page}
                   pageCount={pageCount}
                   page_size={page_size}
-                  onSetPage={this.onSetPage}
+                  onSetPage={this.handleSetPage}
                 />
               </Fragment>
             )}
@@ -210,7 +210,7 @@ class OrganizationTeamsList extends React.Component {
 }
 
 OrganizationTeamsList.propTypes = {
-  getTeamsList: PropTypes.func.isRequired,
+  onReadTeamsList: PropTypes.func.isRequired,
 };
 
 export default OrganizationTeamsList;

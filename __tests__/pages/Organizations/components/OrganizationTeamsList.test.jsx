@@ -25,7 +25,7 @@ describe('<OrganizationTeamsList />', () => {
           <OrganizationTeamsList
             match={{ path: '/organizations/:id', url: '/organizations/1', params: { id: '1' } }}
             location={{ search: '', pathname: '/organizations/1/teams' }}
-            getTeamsList={() => {}}
+            onReadTeamsList={() => {}}
             removeRole={() => {}}
           />
         </MemoryRouter>
@@ -40,7 +40,7 @@ describe('<OrganizationTeamsList />', () => {
           <OrganizationTeamsList
             match={{ path: '/organizations/:id', url: '/organizations/1', params: { id: '0' } }}
             location={{ search: '', pathname: '/organizations/1/teams' }}
-            getTeamsList={() => ({ data: { count: 1, results: mockData } })}
+            onReadTeamsList={() => ({ data: { count: 1, results: mockData } })}
           />
         </MemoryRouter>
       </I18nProvider>
@@ -52,52 +52,52 @@ describe('<OrganizationTeamsList />', () => {
     });
   });
 
-  test('onSort being passed properly to DataListToolbar component', async (done) => {
-    const onSort = jest.spyOn(OrganizationTeamsList.prototype, 'onSort');
+  test('handleSort being passed properly to DataListToolbar component', async (done) => {
+    const handleSort = jest.spyOn(OrganizationTeamsList.prototype, 'handleSort');
     const wrapper = mount(
       <I18nProvider>
         <MemoryRouter>
           <OrganizationTeamsList
             match={{ path: '/organizations/:id', url: '/organizations/1', params: { id: '0' } }}
             location={{ search: '', pathname: '/organizations/1/teams' }}
-            getTeamsList={() => ({ data: { count: 1, results: mockData } })}
+            onReadTeamsList={() => ({ data: { count: 1, results: mockData } })}
           />
         </MemoryRouter>
       </I18nProvider>
     ).find('OrganizationTeamsList');
-    expect(onSort).not.toHaveBeenCalled();
+    expect(handleSort).not.toHaveBeenCalled();
 
     setImmediate(() => {
       const rendered = wrapper.update();
       rendered.find('button[aria-label="Sort"]').simulate('click');
-      expect(onSort).toHaveBeenCalled();
+      expect(handleSort).toHaveBeenCalled();
       done();
     });
   });
 
-  test('onSetPage calls getQueryParams fetchOrgTeamsList ', () => {
-    const spyQueryParams = jest.spyOn(OrganizationTeamsList.prototype, 'getQueryParams');
-    const spyFetch = jest.spyOn(OrganizationTeamsList.prototype, 'fetchOrgTeamsList');
+  test('handleSetPage calls readQueryParams and readOrganizationTeamsList ', () => {
+    const spyQueryParams = jest.spyOn(OrganizationTeamsList.prototype, 'readQueryParams');
+    const spyFetch = jest.spyOn(OrganizationTeamsList.prototype, 'readOrganizationTeamsList');
     const wrapper = mount(
       <I18nProvider>
         <MemoryRouter>
           <OrganizationTeamsList
             match={{ path: '/organizations/:id', url: '/organizations/1', params: { id: '0' } }}
             location={{ search: '', pathname: '/organizations/1/teams' }}
-            getTeamsList={() => ({ data: { count: 1, results: mockData } })}
+            onReadTeamsList={() => ({ data: { count: 1, results: mockData } })}
           />
         </MemoryRouter>
       </I18nProvider>
     ).find('OrganizationTeamsList');
-    wrapper.instance().onSetPage(2, 10);
+    wrapper.instance().handleSetPage(2, 10);
     expect(spyQueryParams).toHaveBeenCalled();
     expect(spyFetch).toHaveBeenCalled();
     wrapper.setState({ sortOrder: 'descending' });
-    wrapper.instance().onSetPage(3, 5);
+    wrapper.instance().handleSetPage(3, 5);
     expect(spyQueryParams).toHaveBeenCalled();
     expect(spyFetch).toHaveBeenCalled();
     const queryParamCalls = spyQueryParams.mock.calls;
-    // make sure last two getQueryParams calls
+    // make sure last two readQueryParams calls
     // were called with the correct arguments
     expect(queryParamCalls[queryParamCalls.length - 2][0])
       .toEqual({ order_by: 'name', page: 2, page_size: 10 });

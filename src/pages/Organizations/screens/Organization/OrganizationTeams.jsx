@@ -5,12 +5,12 @@ class OrganizationTeams extends React.Component {
   constructor (props) {
     super(props);
 
-    this.getOrgTeamsList = this.getOrgTeamsList.bind(this);
+    this.readOrganizationTeamsList = this.readOrganizationTeamsList.bind(this);
   }
 
-  getOrgTeamsList (id, params) {
+  readOrganizationTeamsList (id, params) {
     const { api } = this.props;
-    return api.getOrganizationTeamsList(id, params);
+    return api.readOrganizationTeamsList(id, params);
   }
 
   render () {
@@ -22,7 +22,7 @@ class OrganizationTeams extends React.Component {
 
     return (
       <OrganizationTeamsList
-        getTeamsList={this.getOrgTeamsList}
+        onReadTeamsList={this.readOrganizationTeamsList}
         match={match}
         location={location}
         history={history}
