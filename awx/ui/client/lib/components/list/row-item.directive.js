@@ -18,7 +18,6 @@ function atRowItem () {
             statusTip: '@',
             statusClick: '&?',
             labelValue: '@',
-            labelLink: '@',
             labelState: '@',
             value: '@',
             valueLink: '@',
