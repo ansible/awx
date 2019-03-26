@@ -1,7 +1,2 @@
 - import_tasks: set_image.yml
-
-- import_tasks: standalone.yml
-  when: not (use_docker_compose | default(False) | bool)
-
 - import_tasks: compose.yml
-  when: use_docker_compose | default(False) | bool

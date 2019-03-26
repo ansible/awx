@@ -11,3 +11,5 @@ rabbitmq_default_password: "guest"
 
 postgresql_version: "9.6"
 postgresql_image: "postgres:{{postgresql_version}}"
+
+docker_compose_dir: "/var/lib/awx"

@@ -15,9 +15,10 @@ services:
     hostname: {{ awx_web_hostname }}
     user: root
     restart: unless-stopped
-    {% if (project_data_dir is defined) or (ca_trust_dir is defined) %}
     volumes:
-    {% endif %}
+      - "{{ docker_compose_dir }}/SECRET_KEY:/etc/tower/SECRET_KEY"
+      - "{{ docker_compose_dir }}/environment.sh:/etc/tower/conf.d/environment.sh"
+      - "{{ docker_compose_dir }}/credentials.py:/etc/tower/conf.d/credentials.py"
     {% if project_data_dir is defined %}
       - "{{ project_data_dir +':/var/lib/awx/projects:rw' }}"
     {% endif %}
@@ -46,21 +47,6 @@ services:
       http_proxy: {{ http_proxy | default('') }}
       https_proxy: {{ https_proxy | default('') }}
       no_proxy: {{ no_proxy | default('') }}
-      SECRET_KEY: {{ secret_key }}
-      DATABASE_NAME: {{ pg_database }}
-      DATABASE_USER: {{ pg_username }}
-      DATABASE_PASSWORD: {{ pg_password }}
-      DATABASE_PORT: {{ pg_port }}
-      DATABASE_HOST: {{ pg_hostname|default("postgres") }}
-      RABBITMQ_USER: guest
-      RABBITMQ_PASSWORD: guest
-      RABBITMQ_HOST: rabbitmq
-      RABBITMQ_PORT: 5672
-      RABBITMQ_VHOST: awx
-      MEMCACHED_HOST: memcached
-      MEMCACHED_PORT: 11211
-      AWX_ADMIN_USER: {{ admin_user|default('admin') }}
-      AWX_ADMIN_PASSWORD: {{ admin_password|default('password') }}
 
   task:
     image: {{ awx_task_docker_actual_image }}
@@ -74,9 +60,10 @@ services:
     hostname: {{ awx_task_hostname }}
     user: root
     restart: unless-stopped
-    {% if (project_data_dir is defined) or (ca_trust_dir is defined) %}
     volumes:
-    {% endif %}
+      - "{{ docker_compose_dir }}/SECRET_KEY:/etc/tower/SECRET_KEY"
+      - "{{ docker_compose_dir }}/environment.sh:/etc/tower/conf.d/environment.sh"
+      - "{{ docker_compose_dir }}/credentials.py:/etc/tower/conf.d/credentials.py"
     {% if project_data_dir is defined %}
       - "{{ project_data_dir +':/var/lib/awx/projects:rw' }}"
     {% endif %}
@@ -105,21 +92,6 @@ services:
       http_proxy: {{ http_proxy | default('') }}
       https_proxy: {{ https_proxy | default('') }}
       no_proxy: {{ no_proxy | default('') }}
-      SECRET_KEY: {{ secret_key }}
-      DATABASE_NAME: {{ pg_database }}
-      DATABASE_USER: {{ pg_username }}
-      DATABASE_PASSWORD: {{ pg_password }}
-      DATABASE_HOST: {{ pg_hostname|default("postgres") }}
-      DATABASE_PORT: {{ pg_port }}
-      RABBITMQ_USER: guest
-      RABBITMQ_PASSWORD: guest
-      RABBITMQ_HOST: rabbitmq
-      RABBITMQ_PORT: 5672
-      RABBITMQ_VHOST: awx
-      MEMCACHED_HOST: memcached
-      MEMCACHED_PORT: 11211
-      AWX_ADMIN_USER: {{ admin_user|default('admin') }}
-      AWX_ADMIN_PASSWORD: {{ admin_password|default('password') }}
 
   rabbitmq:
     image: {{ rabbitmq_image }}

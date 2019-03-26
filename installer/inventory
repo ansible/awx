@@ -55,12 +55,6 @@ postgres_data_dir=/tmp/pgdocker
 host_port=80
 #ssl_certificate=
 
-# Docker Compose Install
-# use_docker_compose=false
-# The docker_compose.yml file will be created in this directory
-# The name of the directory (here "awx") will be the prefix of the docker containers
-docker_compose_dir=/var/lib/awx
-
 # Required for Openshift when building the image on your own
 # Optional for Openshift if using Dockerhub or another prebuilt registry
 # Required for Standalone Docker Install if building the image on your own
