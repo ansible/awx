@@ -1,6 +1,7 @@
 # Copyright (c) 2016 Ansible, Inc.
 # All Rights Reserved.
 
+from copy import deepcopy
 import logging
 
 from django.db import models
@@ -122,7 +123,12 @@ class NotificationTemplate(CommonModelNameNotUnique):
         if not isinstance(recipients, list):
             recipients = [recipients]
         sender = self.notification_configuration.pop(self.notification_class.sender_parameter, None)
-        backend_obj = self.notification_class(**self.notification_configuration)
+        notification_configuration = deepcopy(self.notification_configuration)
+        for field, params in self.notification_class.init_parameters.items():
+            if field not in notification_configuration:
+                if 'default' in params:
+                    notification_configuration[field] = params['default']
+        backend_obj = self.notification_class(**notification_configuration) 
         notification_obj = EmailMessage(subject, backend_obj.format_body(body), sender, recipients)
         with set_environ(**settings.AWX_TASK_ENV):
             return backend_obj.send_messages([notification_obj])

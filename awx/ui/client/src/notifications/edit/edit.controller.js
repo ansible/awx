@@ -86,6 +86,10 @@ export default ['Rest', 'Wait',
                             }
                         }
                         else {
+                            if (data.notification_configuration.timeout === null ||
+                              !data.notification_configuration.timeout){
+                                $scope.timeout = 30;
+                            }
                             if (data.notification_configuration[fld]) {
                                 $scope[fld] = data.notification_configuration[fld];
                                 master[fld] = data.notification_configuration[fld];
@@ -193,7 +197,11 @@ export default ['Rest', 'Wait',
                             $scope[subFldName] = null;
                             $scope.notification_template_form[subFldName].$setPristine();
                         }
-                    } else {
+                    }
+                    if ($scope.timeout === null || !$scope.timeout) {
+                        $scope.timeout = 30;
+                    }
+                    else {
                         $scope[fld] = null;
                         $scope.notification_template_form[fld].$setPristine();
                     }
