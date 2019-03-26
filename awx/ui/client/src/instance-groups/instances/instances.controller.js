@@ -1,4 +1,4 @@
-function InstancesController ($scope, $state, $http, models, strings, Dataset, ProcessErrors) {
+function InstancesController ($scope, $state, $http, $transitions, models, strings, Dataset, ProcessErrors) {
     const { instanceGroup } = models;
     const vm = this || {};
     let paginateQuerySet = {};
@@ -21,6 +21,7 @@ function InstancesController ($scope, $state, $http, models, strings, Dataset, P
         value: 'hostname'
     };
 
+    vm.toolbarSortValue = toolbarSortDefault;
     vm.toolbarSortOptions = [
         toolbarSortDefault,
         {
@@ -29,9 +30,7 @@ function InstancesController ($scope, $state, $http, models, strings, Dataset, P
         }
     ];
 
-    vm.toolbarSortValue = toolbarSortDefault;
-
-    $scope.$watchCollection('$state.params', () => {
+    const removeStateParamsListener = $scope.$watchCollection('$state.params', () => {
         setToolbarSort();
     });
 
@@ -124,10 +123,24 @@ function InstancesController ($scope, $state, $http, models, strings, Dataset, P
         return id === selected;
     };
 
-    $scope.$on('updateDataset', (e, dataset, queryset) => {
+    const removeUpdateDatasetListener = $scope.$on('updateDataset', (e, dataset, queryset) => {
         vm.instances = dataset.results;
         vm.instance_dataset = dataset;
         paginateQuerySet = queryset;
+    });
+
+    const removeStateChangeListener = $transitions.onSuccess({}, function(trans) {
+        if (trans.to().name === 'instanceGroups.instances.modal.add') {
+            removeUpdateDatasetListener();
+            removeStateChangeListener();
+            removeStateParamsListener();
+        }
+    });
+
+    $scope.$on('$destroy', function() {
+        removeUpdateDatasetListener();
+        removeStateChangeListener();
+        removeStateParamsListener();
     });
 }
 
@@ -135,6 +148,7 @@ InstancesController.$inject = [
     '$scope',
     '$state',
     '$http',
+    '$transitions',
     'resolvedModels',
     'InstanceGroupsStrings',
     'Dataset',

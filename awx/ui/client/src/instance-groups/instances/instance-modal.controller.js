@@ -2,6 +2,7 @@ function InstanceModalController ($scope, $state, Dataset, models, strings, Proc
     const { instanceGroup } = models;
     const vm = this || {};
     let relatedInstanceIds = [];
+    let paginateQuerySet = {};
 
     function setRelatedInstances () {
         vm.relatedInstances = instanceGroup.get('related.instances.results');
@@ -21,11 +22,9 @@ function InstanceModalController ($scope, $state, Dataset, models, strings, Proc
         vm.instanceGroupId = instanceGroup.get('id');
         vm.instanceGroupName = instanceGroup.get('name');
 
-        vm.querySet = $state.params.instance_search;
-
         vm.list = {
             name: 'instances',
-            iterator: 'instance',
+            iterator: 'add_instance',
             basePath: `/api/v2/instances/`
         };
 
@@ -33,13 +32,50 @@ function InstanceModalController ($scope, $state, Dataset, models, strings, Proc
         vm.instance_dataset = Dataset.data;
 
         setRelatedInstances();
-
-        $scope.$watch('vm.instances', function() {
-            angular.forEach(vm.instances, function(instance) {
-                instance.isSelected = _.filter(vm.selectedRows, { 'id': instance.id }).length > 0;
-            });
-        });
     }
+
+    const toolbarSortDefault = {
+      label: `${strings.get('sort.NAME_ASCENDING')}`,
+      value: 'hostname'
+    };
+
+    vm.toolbarSortValue = toolbarSortDefault;
+    vm.toolbarSortOptions = [
+        toolbarSortDefault,
+        {
+            label: `${strings.get('sort.NAME_DESCENDING')}`,
+            value: '-hostname'
+        }
+    ];
+
+    const removeStateParamsListener = $scope.$watchCollection('$state.params', () => {
+        setToolbarSort();
+    });
+
+    function setToolbarSort () {
+        const orderByValue = _.get($state.params, 'add_instance_search.order_by');
+        const sortValue = _.find(vm.toolbarSortOptions, (option) => option.value === orderByValue);
+        if (sortValue) {
+            vm.toolbarSortValue = sortValue;
+        } else {
+            vm.toolbarSortValue = toolbarSortDefault;
+        }
+    }
+
+    vm.onToolbarSort = (sort) => {
+        vm.toolbarSortValue = sort;
+
+        const queryParams = Object.assign(
+            {},
+            $state.params.add_instance_search,
+            paginateQuerySet,
+            { order_by: sort.value }
+        );
+
+        $state.go('.', {
+            add_instance_search: queryParams
+        }, { notify: false, location: 'replace' });
+    };
 
     vm.submit = () => {
         Wait('start');
@@ -97,8 +133,22 @@ function InstanceModalController ($scope, $state, Dataset, models, strings, Proc
             row.isSelected = true;
             vm.selectedRows.push(row);
         }
-
     };
+
+    const removeUpdateDatasetListener = $scope.$on('updateDataset', (e, dataset, queryset) => {
+        vm.instances = dataset.results;
+        vm.instance_dataset = dataset;
+        paginateQuerySet = queryset;
+
+        angular.forEach(vm.instances, function(instance) {
+            instance.isSelected = _.filter(vm.selectedRows, { 'id': instance.id }).length > 0;
+        });
+    });
+
+    $scope.$on('$destroy', function() {
+        removeUpdateDatasetListener();
+        removeStateParamsListener();
+    });
 }
 
 InstanceModalController.$inject = [
