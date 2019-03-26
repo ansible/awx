@@ -183,12 +183,6 @@ class UserSessionMembership(BaseModel):
         non_expire_memberships = [x for x in query_set if x.session.expire_date > now]
         return non_expire_memberships[settings.SESSIONS_PER_USER:]
 
-    @staticmethod
-    def clear_session_for_user(user):
-        query_set = UserSessionMembership.objects.select_related('session').filter(user=user)
-        sessions_to_delete = [obj.session.pk for obj in query_set]
-        Session.objects.filter(pk__in=sessions_to_delete).delete()
-
 
 # Add get_absolute_url method to User model if not present.
 if not hasattr(User, 'get_absolute_url'):

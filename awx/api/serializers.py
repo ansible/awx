@@ -16,6 +16,7 @@ from oauthlib.common import generate_token
 
 # Django
 from django.conf import settings
+from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist, ValidationError as DjangoValidationError
@@ -933,8 +934,12 @@ class UserSerializer(BaseSerializer):
         if new_password:
             obj.set_password(new_password)
             obj.save(update_fields=['password'])
-            if self.context['request'].user != obj:
-                UserSessionMembership.clear_session_for_user(obj)
+
+            # Cycle the session key, but if the requesting user is the same
+            # as the modified user then inject a session key derived from
+            # the updated user to prevent logout. This is the logic used by
+            # the Django admin's own user_change_password view.
+            update_session_auth_hash(self.context['request'], obj)
         elif not obj.password:
             obj.set_unusable_password()
             obj.save(update_fields=['password'])
