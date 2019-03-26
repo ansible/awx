@@ -128,7 +128,7 @@ function AddEditCredentialsController (
     let gceFileInputPreEditValues;
 
     vm.form.inputs = {
-        _get ({ getSubmitData }) {
+        _get ({ getSubmitData, check }) {
             const apiConfig = ConfigService.get();
 
             credentialType.mergeInputProperties();
@@ -152,6 +152,7 @@ function AddEditCredentialsController (
             }
             vm.isTestable = (isEditable && credentialType.get('kind') === 'external');
             vm.getSubmitData = getSubmitData;
+            vm.checkForm = check;
 
             return fields;
         },
@@ -345,7 +346,9 @@ function AddEditCredentialsController (
         // We've linked this field to a credential, so display value as a credential tag
         vm.form[field]._value = '';
         vm.form[field]._tagValue = credentialName;
+        vm.form[field]._isValid = true;
         vm.form[field].asTag = true;
+        vm.checkForm();
     };
 
     vm.onInputSourceTabSelect = (name) => {
