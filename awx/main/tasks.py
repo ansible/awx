@@ -818,6 +818,7 @@ class BaseTask(object):
                 'process_isolation_hide_paths': [
                     settings.AWX_PROOT_BASE_PATH,
                     '/etc/tower',
+                    '/etc/ssh',
                     '/var/lib/awx',
                     '/var/log',
                     settings.PROJECTS_ROOT,

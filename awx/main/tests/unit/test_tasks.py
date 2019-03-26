@@ -452,6 +452,7 @@ class TestGenericRun():
 
         for p in [settings.AWX_PROOT_BASE_PATH,
                   '/etc/tower',
+                  '/etc/ssh',
                   '/var/lib/awx',
                   '/var/log',
                   settings.PROJECTS_ROOT,
@@ -459,7 +460,7 @@ class TestGenericRun():
                   '/AWX_PROOT_HIDE_PATHS1',
                   '/AWX_PROOT_HIDE_PATHS2']:
             assert p in process_isolation_params['process_isolation_hide_paths']
-        assert 8 == len(process_isolation_params['process_isolation_hide_paths'])
+        assert 9 == len(process_isolation_params['process_isolation_hide_paths'])
         assert '/ANSIBLE_VENV_PATH' in process_isolation_params['process_isolation_ro_paths']
         assert '/AWX_VENV_PATH' in process_isolation_params['process_isolation_ro_paths']
         assert 2 == len(process_isolation_params['process_isolation_ro_paths'])
