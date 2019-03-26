@@ -2,7 +2,7 @@ import importlib
 import json
 import os
 import tarfile
-
+from unittest import mock
 import pytest
 
 from django.conf import settings
@@ -22,11 +22,23 @@ def bad_json(since):
 @register('throws_error')
 def throws_error(since):
     raise ValueError()
+    
+
+def _valid_license():
+    pass
+
+
+@pytest.fixture
+def mock_valid_license():
+    with mock.patch('awx.main.analytics.core._valid_license') as license:
+        license.return_value = True
+        yield license
 
 
 @pytest.mark.django_db
-def test_gather():
+def test_gather(mock_valid_license):
     settings.INSIGHTS_DATA_ENABLED = True
+    
     tgz = gather(module=importlib.import_module(__name__))
     files = {}
     with tarfile.open(tgz, "r:gz") as archive:

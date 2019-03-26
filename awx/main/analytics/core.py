@@ -12,6 +12,7 @@ from django.utils.encoding import smart_str
 from django.utils.timezone import now, timedelta
 from rest_framework.exceptions import PermissionDenied
 
+from awx.conf.license import get_license
 from awx.main.models import Job
 from awx.main.access import access_registry
 from awx.main.models.ha import TowerAnalyticsState
@@ -25,6 +26,8 @@ logger = logging.getLogger('awx.main.analytics')
 
 def _valid_license():
     try:
+        if get_license(show_key=False)['license_type'] == 'open':
+            return False
         access_registry[Job](None).check_license()
     except PermissionDenied:
         logger.exception("A valid license was not found:")
@@ -73,8 +76,8 @@ def gather(dest=None, module=None):
 
     if _valid_license() is False:
         logger.exception("Invalid License provided, or No License Provided")
-        return
-        
+        return "Error: Invalid License provided, or No License Provided"
+    
     if not settings.INSIGHTS_DATA_ENABLED:
         logger.error("Insights analytics not enabled")
         return "Error: Insights analytics not enabled"
