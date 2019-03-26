@@ -166,6 +166,8 @@ REMOTE_HOST_HEADERS = ['REMOTE_ADDR', 'REMOTE_HOST']
 # REMOTE_HOST_HEADERS will be trusted unconditionally')
 PROXY_IP_WHITELIST = []
 
+CUSTOM_VENV_PATHS = []
+
 # Note: This setting may be overridden by database settings.
 STDOUT_MAX_BYTES_DISPLAY = 1048576
 

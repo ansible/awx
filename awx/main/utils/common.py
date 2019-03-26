@@ -943,19 +943,22 @@ def get_current_apps():
     return current_apps
 
 
-def get_custom_venv_choices():
+def get_custom_venv_choices(custom_paths=None):
     from django.conf import settings
-    custom_venv_path = settings.BASE_VENV_PATH
-    if os.path.exists(custom_venv_path):
-        return [
-            os.path.join(custom_venv_path, x, '')
-            for x in os.listdir(custom_venv_path)
-            if x != 'awx' and
-            os.path.isdir(os.path.join(custom_venv_path, x)) and
-            os.path.exists(os.path.join(custom_venv_path, x, 'bin', 'activate'))
-        ]
-    else:
-        return []
+    custom_paths = custom_paths or settings.CUSTOM_VENV_PATHS
+    all_venv_paths = [settings.BASE_VENV_PATH] + custom_paths
+    custom_venv_choices = []
+
+    for custom_venv_path in all_venv_paths:
+        if os.path.exists(custom_venv_path):
+            custom_venv_choices.extend([
+                os.path.join(custom_venv_path, x, '')
+                for x in os.listdir(custom_venv_path)
+                if x != 'awx' and
+                os.path.isdir(os.path.join(custom_venv_path, x)) and
+                os.path.exists(os.path.join(custom_venv_path, x, 'bin', 'activate'))
+            ])
+    return custom_venv_choices
 
 
 class OutputEventFilter(object):
