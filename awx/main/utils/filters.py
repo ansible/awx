@@ -17,7 +17,7 @@ from django.conf import settings
 
 from awx.main.utils.common import get_search_fields
 
-__all__ = ['SmartFilter', 'ExternalLoggerEnabled']
+__all__ = ['SmartFilter', 'ExternalLoggerEnabled', 'GlobalLogLevelFilter']
 
 logger = logging.getLogger('awx.main.utils')
 
@@ -108,6 +108,17 @@ class ExternalLoggerEnabled(Filter):
             else:
                 base_name = record.name
             return bool(base_name in loggers)
+
+
+class GlobalLogLevelFilter(Filter):
+    """Configure-tower-in-tower setting LOG_AGGREGATOR_LEVEL
+    shall be used to control the log levels of all logs in the system
+    including those writing to file
+    """
+
+    def filter(self, record):
+        allowed_level = settings.LOG_AGGREGATOR_LEVEL
+        return bool(record.levelno >= _nameToLevel[allowed_level])
 
 
 def string_to_type(t):

@@ -989,6 +989,9 @@ LOGGING = {
         'external_log_enabled': {
             '()': 'awx.main.utils.filters.ExternalLoggerEnabled'
         },
+        'global_log_level': {
+            '()': 'awx.main.utils.filters.GlobalLogLevelFilter'
+        },
     },
     'formatters': {
         'simple': {
@@ -1008,8 +1011,7 @@ LOGGING = {
     'handlers': {
         'console': {
             '()': 'logging.StreamHandler',
-            'level': 'DEBUG',
-            'filters': ['require_debug_true_or_test'],
+            'filters': ['require_debug_true_or_test', 'global_log_level'],
             'formatter': 'simple',
         },
         'null': {
@@ -1036,27 +1038,24 @@ LOGGING = {
             'class': 'django.utils.log.AdminEmailHandler',
         },
         'tower_warnings': {
-            'level': 'WARNING',
             'class':'logging.handlers.RotatingFileHandler',
-            'filters': ['require_debug_false'],
+            'filters': ['require_debug_false', 'global_log_level'],
             'filename': os.path.join(LOG_ROOT, 'tower.log'),
             'maxBytes': 1024 * 1024 * 5, # 5 MB
             'backupCount': 5,
             'formatter':'simple',
         },
         'callback_receiver': {
-            'level': 'WARNING',
             'class':'logging.handlers.RotatingFileHandler',
-            'filters': ['require_debug_false'],
+            'filters': ['require_debug_false', 'global_log_level'],
             'filename': os.path.join(LOG_ROOT, 'callback_receiver.log'),
             'maxBytes': 1024 * 1024 * 5, # 5 MB
             'backupCount': 5,
             'formatter':'simple',
         },
         'dispatcher': {
-            'level': 'WARNING',
             'class':'logging.handlers.RotatingFileHandler',
-            'filters': ['require_debug_false'],
+            'filters': ['require_debug_false', 'global_log_level'],
             'filename': os.path.join(LOG_ROOT, 'dispatcher.log'),
             'maxBytes': 1024 * 1024 * 5, # 5 MB
             'backupCount': 5,
@@ -1072,27 +1071,24 @@ LOGGING = {
             'formatter': 'timed_import',
         },
         'task_system': {
-            'level': 'INFO',
             'class':'logging.handlers.RotatingFileHandler',
-            'filters': ['require_debug_false'],
+            'filters': ['require_debug_false', 'global_log_level'],
             'filename': os.path.join(LOG_ROOT, 'task_system.log'),
             'maxBytes': 1024 * 1024 * 5, # 5 MB
             'backupCount': 5,
             'formatter':'simple',
         },
         'management_playbooks': {
-            'level': 'DEBUG',
             'class':'logging.handlers.RotatingFileHandler',
-            'filters': ['require_debug_false'],
+            'filters': ['require_debug_false', 'global_log_level'],
             'filename': os.path.join(LOG_ROOT, 'management_playbooks.log'),
             'maxBytes': 1024 * 1024 * 5, # 5 MB
             'backupCount': 5,
             'formatter':'simple',
         },
         'fact_receiver': {
-            'level': 'WARNING',
             'class':'logging.handlers.RotatingFileHandler',
-            'filters': ['require_debug_false'],
+            'filters': ['require_debug_false', 'global_log_level'],
             'filename': os.path.join(LOG_ROOT, 'fact_receiver.log'),
             'maxBytes': 1024 * 1024 * 5, # 5 MB
             'backupCount': 5,
