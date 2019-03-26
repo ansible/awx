@@ -296,23 +296,27 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
                 group_children = group_children_map.setdefault(to_group_id, [])
                 group_children.append(from_group_name)
 
-            # Now use in-memory maps to build up group info.
-            for group in self.groups.only('name', 'id', 'variables'):
-                group_info = dict()
-                group_info['hosts'] = group_hosts_map.get(group.id, [])
-                group_info['children'] = group_children_map.get(group.id, [])
-                group_info['vars'] = group.variables_dict
-                data[group.name] = group_info
-
             # Add ungrouped hosts to all group
             all_group['hosts'] = [host.name for host in hosts if host.name not in grouped_hosts]
 
-        # Remove any empty groups
-        for group_name in list(data.keys()):
-            if group_name == 'all':
-                continue
-            if not (data.get(group_name, {}).get('hosts', []) or data.get(group_name, {}).get('children', [])):
-                data.pop(group_name)
+            # Now use in-memory maps to build up group info.
+            all_group_names = []
+            for group in self.groups.only('name', 'id', 'variables'):
+                group_info = dict()
+                if group.id in group_hosts_map:
+                    group_info['hosts'] = group_hosts_map[group.id]
+                if group.id in group_children_map:
+                    group_info['children'] = group_children_map[group.id]
+                group_vars = group.variables_dict
+                if group_vars:
+                    group_info['vars'] = group_vars
+                if group_info:
+                    data[group.name] = group_info
+                all_group_names.append(group.name)
+
+            # add all groups as children of all group, includes empty groups
+            if all_group_names:
+                all_group['children'] = all_group_names
 
         if hostvars:
             data.setdefault('_meta', dict())
