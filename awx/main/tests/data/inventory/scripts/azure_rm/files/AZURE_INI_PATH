@@ -1,0 +1,10 @@
+[azure]
+include_powerstate = yes
+group_by_resource_group = yes
+group_by_location = yes
+group_by_tag = yes
+locations = southcentralus,westus
+base_source_var = value_of_var
+use_private_ip = True
+resource_groups = foo_resources,bar_resources
+

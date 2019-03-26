@@ -1,0 +1,35 @@
+conditional_groups:
+  azure: true
+default_host_filters: []
+exclude_host_filters:
+- resource_group not in ['foo_resources', 'bar_resources']
+- location not in ['southcentralus', 'westus']
+hostvar_expressions:
+  ansible_host: private_ipv4_addresses[0]
+  computer_name: name
+  private_ip: private_ipv4_addresses[0]
+  provisioning_state: provisioning_state | title
+  public_ip: public_ipv4_addresses[0]
+  tags: tags if tags else None
+  type: resource_type
+keyed_groups:
+- key: location
+  prefix: ''
+  separator: ''
+- key: tags.keys() | list if tags else []
+  prefix: ''
+  separator: ''
+- key: security_group
+  prefix: ''
+  separator: ''
+- key: resource_group
+  prefix: ''
+  separator: ''
+- key: os_disk.operating_system_type
+  prefix: ''
+  separator: ''
+- key: dict(tags.keys() | map("regex_replace", "^(.*)$", "\1_") | list | zip(tags.values() | list)) if tags else []
+  prefix: ''
+  separator: ''
+plugin: azure_rm
+use_contrib_script_compatible_sanitization: true

@@ -464,8 +464,9 @@ def group(inventory):
 
 @pytest.fixture
 def inventory_source(inventory):
+    # by making it ec2, the credential is not required
     return InventorySource.objects.create(name='single-inv-src',
-                                          inventory=inventory, source='gce')
+                                          inventory=inventory, source='ec2')
 
 
 @pytest.fixture

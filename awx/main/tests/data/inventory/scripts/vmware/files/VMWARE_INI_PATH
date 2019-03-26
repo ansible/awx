@@ -1,0 +1,10 @@
+[vmware]
+cache_max_age = 0
+validate_certs = False
+username = fooo
+password = fooo
+server = https://foo.invalid
+base_source_var = value_of_var
+host_filters = foobaa
+groupby_patterns = fouo
+

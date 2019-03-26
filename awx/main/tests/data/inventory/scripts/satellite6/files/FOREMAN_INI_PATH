@@ -1,0 +1,17 @@
+[foreman]
+base_source_var = value_of_var
+ssl_verify = False
+url = https://foo.invalid
+user = fooo
+password = fooo
+
+[ansible]
+group_patterns = foo_group_patterns
+want_facts = True
+want_hostcollections = True
+group_prefix = foo_group_prefix
+
+[cache]
+path = /tmp
+max_age = 0
+
