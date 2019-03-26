@@ -59,7 +59,7 @@ class OrganizationTeamsList extends React.Component {
     this.readOrganizationTeamsList = this.readOrganizationTeamsList.bind(this);
     this.handleSetPage = this.handleSetPage.bind(this);
     this.handleSort = this.handleSort.bind(this);
-    this.reatQueryParams = this.readQueryParams.bind(this);
+    this.readQueryParams = this.readQueryParams.bind(this);
   }
 
   componentDidMount () {
