@@ -145,27 +145,9 @@ spec:
               mountPath: "/etc/tower"
               readOnly: true
 
-            - name: "{{ kubernetes_deployment_name }}-confd"
+            - name: "{{ kubernetes_deployment_name }}-application-credentials"
               mountPath: "/etc/tower/conf.d/"
               readOnly: true
-          env:
-            - name: DATABASE_USER
-              value: {{ pg_username }}
-            - name: DATABASE_NAME
-              value: {{ pg_database }}
-            - name: DATABASE_HOST
-              value: {{ pg_hostname|default('postgresql') }}
-            - name: DATABASE_PORT
-              value: "{{ pg_port|default('5432') }}"
-            - name: DATABASE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: "{{ kubernetes_deployment_name }}-secrets"
-                  key: pg_password
-            - name: MEMCACHED_HOST
-              value: {{ memcached_hostname|default('localhost') }}
-            - name: RABBITMQ_HOST
-              value: {{ rabbitmq_hostname|default('localhost') }}
           resources:
             requests:
               memory: "{{ web_mem_request }}Gi"
@@ -191,36 +173,9 @@ spec:
               mountPath: "/etc/tower"
               readOnly: true
 
-            - name: "{{ kubernetes_deployment_name }}-confd"
+            - name: "{{ kubernetes_deployment_name }}-application-credentials"
               mountPath: "/etc/tower/conf.d/"
               readOnly: true
-          env:
-            - name: AWX_SKIP_MIGRATIONS
-              value: "1"
-            - name: DATABASE_USER
-              value: {{ pg_username }}
-            - name: DATABASE_NAME
-              value: {{ pg_database }}
-            - name: DATABASE_HOST
-              value: {{ pg_hostname|default('postgresql') }}
-            - name: DATABASE_PORT
-              value: "{{ pg_port|default('5432') }}"
-            - name: DATABASE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: "{{ kubernetes_deployment_name }}-secrets"
-                  key: pg_password
-            - name: MEMCACHED_HOST
-              value: {{ memcached_hostname|default('localhost') }}
-            - name: RABBITMQ_HOST
-              value: {{ rabbitmq_hostname|default('localhost') }}
-            - name: AWX_ADMIN_USER
-              value: {{ admin_user }}
-            - name: AWX_ADMIN_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: "{{ kubernetes_deployment_name }}-secrets"
-                  key: admin_password
           resources:
             requests:
               memory: "{{ task_mem_request }}Gi"
@@ -312,12 +267,14 @@ spec:
               - key: secret_key
                 path: SECRET_KEY
 
-        - name: "{{ kubernetes_deployment_name }}-confd"
+        - name: "{{ kubernetes_deployment_name }}-application-credentials"
           secret:
             secretName: "{{ kubernetes_deployment_name }}-secrets"
             items:
-              - key: confd_contents
-                path: 'secrets.py'
+              - key: credentials_py
+                path: 'credentials.py'
+              - key: environment_sh
+                path: 'environment.sh'
 
         - name: rabbitmq-config
           configMap:

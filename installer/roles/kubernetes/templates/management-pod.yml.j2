@@ -14,7 +14,7 @@ spec:
           mountPath: "/etc/tower"
           readOnly: true
 
-        - name: "{{ kubernetes_deployment_name }}-confd"
+        - name: "{{ kubernetes_deployment_name }}-application-credentials"
           mountPath: "/etc/tower/conf.d/"
           readOnly: true
       resources:
@@ -37,11 +37,11 @@ spec:
           - key: secret_key
             path: SECRET_KEY
 
-    - name: "{{ kubernetes_deployment_name }}-confd"
+    - name: "{{ kubernetes_deployment_name }}-application-credentials"
       secret:
         secretName: "{{ kubernetes_deployment_name }}-secrets"
         items:
-          - key: confd_contents
-            path: 'secrets.py'
+          - key: credentials_py
+            path: 'credentials.py'
 
   restartPolicy: Never
