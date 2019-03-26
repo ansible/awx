@@ -56,6 +56,7 @@ For example:
 
 ```bash
 curl -X POST \
+  -H "Content-Type: application/x-www-form-urlencoded" \
   -d "grant_type=password&username=<username>&password=<password>&scope=read" \
   -u "gwSPoasWSdNkMDtBN3Hu2WYQpPWCO9SwUEsKK22l:fI6ZpfocHYBGfm1tP92r0yIgCyfRdDQt0Tos9L8a4fNsJjQQMwp9569e
 IaUBsaVDgt2eiwOGe0bg5m5vCSstClZmtdy359RVx2rQK5YlIWyPlrolpt2LEpVeKXWaiybo" \
@@ -85,6 +86,7 @@ format:
 The `/api/o/token/` endpoint is used for refreshing access token:
 ```bash
 curl -X POST \
+  -H "Content-Type: application/x-www-form-urlencoded" \
   -d "grant_type=refresh_token&refresh_token=AL0NK9TTpv0qp54dGbC4VUZtsZ9r8z" \
   -u "gwSPoasWSdNkMDtBN3Hu2WYQpPWCO9SwUEsKK22l:fI6ZpfocHYBGfm1tP92r0yIgCyfRdDQt0Tos9L8a4fNsJjQQMwp9569eIaUBsaVDgt2eiwOGe0bg5m5vCSstClZmtdy359RVx2rQK5YlIWyPlrolpt2LEpVeKXWaiybo" \
   http://localhost:8013/api/o/token/ -i
@@ -114,6 +116,7 @@ Revoking is done by POSTing to `/api/o/revoke_token/` with the token to revoke a
 
 ```bash
 curl -X POST -d "token=rQONsve372fQwuc2pn76k3IHDCYpi7" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
   -u "gwSPoasWSdNkMDtBN3Hu2WYQpPWCO9SwUEsKK22l:fI6ZpfocHYBGfm1tP92r0yIgCyfRdDQt0Tos9L8a4fNsJjQQMwp9569eIaUBsaVDgt2eiwOGe0bg5m5vCSstClZmtdy359RVx2rQK5YlIWyPlrolpt2LEpVeKXWaiybo" \
   http://localhost:8013/api/o/revoke_token/ -i
 ```
