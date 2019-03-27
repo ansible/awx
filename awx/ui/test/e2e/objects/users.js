@@ -31,6 +31,7 @@ const addEditElements = {
     password: '#user_password_input',
     save: '#user_save_btn',
     username: '#user_username',
+    type: '#select2-user_user_type-container',
 };
 
 module.exports = {
@@ -41,6 +42,46 @@ module.exports = {
         load () {
             this.api.url('data:,'); // https://github.com/nightwatchjs/nightwatch/issues/1724
             return this.navigate();
+        },
+        create (user, organization) {
+            this.section.list
+                .waitForElementVisible('@add')
+                .click('@add');
+            this.section.add
+                .waitForElementVisible('@title')
+                .setValue('@organization', organization.name)
+                .setValue('@email', user.email)
+                .setValue('@username', user.username)
+                .setValue('@password', user.password)
+                .setValue('@confirmPassword', user.password);
+            if (user.firstName) {
+                this.section.add.setValue('@firstName', user.firstName);
+            }
+            if (user.lastName) {
+                this.section.add.setValue('@lastName', user.lastName);
+            }
+            if (user.type) {
+                this.section.add
+                    .click('@type')
+                    .click(`li[id$=${user.type}]`);
+            }
+            this.section.add.click('@save');
+            this.waitForSpinny();
+        },
+        delete (username) {
+            this.search(username);
+            const deleteButton = `${row} i[class*="fa-trash-o"]`;
+            const modalAction = '.modal-dialog #prompt_action_btn';
+            this
+                .waitForElementVisible(deleteButton)
+                .click(deleteButton)
+                .waitForElementVisible(modalAction)
+                .click(modalAction)
+                .waitForSpinny();
+            const searchResults = '.List-searchNoResults';
+            this
+                .waitForElementVisible(searchResults)
+                .expect.element(searchResults).text.contain('No records matched your search.');
         },
         search (username) {
             this.section.list.section.search
