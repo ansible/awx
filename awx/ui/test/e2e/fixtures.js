@@ -242,27 +242,6 @@ const getNotificationTemplate = (namespace = session) => getOrganization(namespa
         }
     }));
 
-/* Retrieves a project, and creates it if it does not exist.
- * name prefix. If an organization does not exist with the same prefix, it is
- * created as well.
- *
- * @param[namespace] - A unique name prefix for the host.
- * @param[scmUrl] - The url of the repository.
- * @param[scmType] - The type of scm (git, etc.)
- */
-const getProject = (
-    namespace = session,
-    scmUrl = 'https://github.com/ansible/ansible-tower-samples',
-    scmType = 'git'
-) => getOrganization(namespace)
-    .then(organization => getOrCreate(`/organizations/${organization.id}/projects/`, {
-        name: `${namespace}-project`,
-        description: namespace,
-        organization: organization.id,
-        scm_url: `${scmUrl}`,
-        scm_type: `${scmType}`
-    }));
-
 const waitForJob = endpoint => {
     const interval = 2000;
     const statuses = ['successful', 'failed', 'error', 'canceled'];
@@ -288,17 +267,36 @@ const waitForJob = endpoint => {
     });
 };
 
+/* Retrieves a project, and creates it if it does not exist.
+ * name prefix. If an organization does not exist with the same prefix, it is
+ * created as well.
+ *
+ * @param[namespace] - A unique name prefix for the host.
+ * @param[scmUrl] - The url of the repository.
+ * @param[scmType] - The type of scm (git, etc.)
+ */
+const getProject = (
+    namespace = session,
+    scmUrl = 'https://github.com/ansible/ansible-tower-samples',
+    scmType = 'git'
+) => getOrganization(namespace)
+    .then(organization => getOrCreate(`/organizations/${organization.id}/projects/`, {
+        name: `${namespace}-project`,
+        description: namespace,
+        organization: organization.id,
+        scm_url: `${scmUrl}`,
+        scm_type: `${scmType}`
+    }));
+
 const getUpdatedProject = (namespace = session) => {
     const promises = [
         getProject(namespace),
     ];
     return Promise.all(promises)
-        .then(([project]) => {
+        .then(([project]) =>
             post(`/api/v2/projects/${project.id}/update/`, {})
                 .then(update => waitForJob(update.data.url))
-                .then(() => { project = getProject(namespace); });
-            return project;
-        });
+                .then(() => getProject(namespace)));
 };
 
 /* Retrieves a job template, and creates it if it does not exist.
@@ -336,17 +334,22 @@ const getJobTemplate = (
  * @param[namespace] - A unique name prefix for the job and its dependencies.
  * @param[playbook] - The playbook file to be run by the job template.
  * @param[name] - A unique name for the job template.
+ * @param[wait] - Choose whether to return the result of the completed job.
  */
 const getJob = (
     namespace = session,
     playbook = 'hello_world.yml',
-    name = `${namespace}-job-template`
+    name = `${namespace}-job-template`,
+    wait = true
 ) => getJobTemplate(namespace, playbook, name)
     .then(template => {
         const launchURL = template.related.launch;
         return post(launchURL, {}).then(response => {
             const jobURL = response.data.url;
-            return waitForJob(jobURL).then(() => response.data);
+            if (wait) {
+                return waitForJob(jobURL).then(() => response.data);
+            }
+            return response.data;
         });
     });
 
@@ -423,10 +426,13 @@ const getAuditor = (namespace = session) => getOrganization(namespace)
  */
 const getUser = (
     namespace = session,
+    // unique substrings are needed to avoid the edge case
+    // where a user and org both exist, but the user is not in the organization.
+    // this ensures a new user is always created.
     username = `user-${uuid().substr(0, 8)}`
 ) => getOrganization(namespace)
     .then(organization => getOrCreate(`/organizations/${organization.id}/users/`, {
-        username: `${username}`,
+        username: `${username}-${uuid().substr(0, 8)}`,
         organization: organization.id,
         first_name: 'firstname',
         last_name: 'lastname',

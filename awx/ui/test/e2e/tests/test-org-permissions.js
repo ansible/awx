@@ -39,7 +39,6 @@ const teamsText = `name.iexact:"${namespace}-team"`;
 const teamsSearchBadgeCount = '//span[contains(@class, "List-titleBadge") and contains(text(), "1")]';
 const teamCheckbox = '//*[@item="team"]//input[@type="checkbox"]';
 const addUserToTeam = '//*[@aw-tool-tip="Add User"]';
-const userText = `username.iexact:"${namespace}-user"`;
 
 const trashButton = '//i[contains(@class, "fa-trash")]';
 const deleteButton = '//*[text()="DELETE"]';
@@ -99,8 +98,9 @@ module.exports = {
             .useXpath()
             .findThenClick(usersTab)
             .findThenClick(addUserToTeam)
+            .waitForElementVisible(modalSearchBar)
             .clearValue(modalSearchBar)
-            .setValue(modalSearchBar, [userText, client.Keys.ENTER])
+            .setValue(modalSearchBar, [`username.iexact:${data.user.username}`, client.Keys.ENTER])
             .waitForElementNotVisible(spinny)
             .findThenClick(checkbox)
             .findThenClick(userRoleSearchBar)
@@ -126,13 +126,13 @@ module.exports = {
             .waitForElementNotVisible(spinny)
             .findThenClick(saveButton)
             .clearValue(searchBar)
-            .setValue(searchBar, [userText, client.Keys.ENTER])
+            .setValue(searchBar, [`username.iexact:${data.user.username}`, client.Keys.ENTER])
             .waitForElementVisible(verifyTeamPermissions);
     },
     after: client => {
         client
             .findThenClick(usersNavTab)
-            .setValue(searchBar, [userText, client.Keys.ENTER])
+            .setValue(searchBar, [`username.iexact:${data.user.username}`, client.Keys.ENTER])
             .waitForElementNotVisible(spinny)
             .findThenClick(trashButton)
             .findThenClick(deleteButton)
