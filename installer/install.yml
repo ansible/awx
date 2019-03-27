@@ -1,7 +1,6 @@
 ---
 - name: Build and deploy AWX
   hosts: all
-  gather_facts: false
   roles:
     - { role: check_vars }
     - { role: image_build, when: "dockerhub_base is not defined" }

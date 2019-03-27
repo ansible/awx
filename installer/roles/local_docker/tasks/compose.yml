@@ -1,4 +1,13 @@
 ---
+- include_vars: '{{ item }}'
+  with_first_found:
+    - files:
+        - '{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml'     # CentOS-7
+        - '{{ ansible_os_family }}-{{ ansible_distribution_major_version }}.yml'        # RedHat-7
+        - '{{ ansible_distribution }}.yml'                                              # CentOS
+        - '{{ ansible_os_family }}.yml'                                                 # RedHat
+        - 'default.yml'
+
 - name: Create {{ docker_compose_dir }} directory
   file:
     path: "{{ docker_compose_dir }}"
@@ -33,7 +42,7 @@
   docker_service:
     project_src: "{{ docker_compose_dir }}"
   register: awx_compose_start
-    
+
 - name: Update CA trust in awx_web container
   command: docker exec awx_web_1 '/usr/bin/update-ca-trust'
   when: awx_compose_config.changed or awx_compose_start.changed
