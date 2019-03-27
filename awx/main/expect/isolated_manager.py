@@ -21,8 +21,7 @@ playbook_logger = logging.getLogger('awx.isolated.manager.playbooks')
 class IsolatedManager(object):
 
     def __init__(self, env, cancelled_callback=None, job_timeout=0,
-                 idle_timeout=None, extra_update_fields=None,
-                 pexpect_timeout=5, proot_cmd='bwrap'):
+                 idle_timeout=None):
         """
         :param env:                 a dict containing environment variables for the
                                     subprocess, ala `os.environ`
@@ -34,20 +33,11 @@ class IsolatedManager(object):
         :param idle_timeout         a timeout (in seconds); if new output is not
                                     sent to stdout in this interval, the process
                                     will be terminated
-        :param extra_update_fields: a dict used to specify DB fields which should
-                                    be updated on the underlying model
-                                    object after execution completes
-        :param pexpect_timeout      a timeout (in seconds) to wait on
-                                    `pexpect.spawn().expect()` calls
-        :param proot_cmd            the command used to isolate processes, `bwrap`
         """
         self.management_env = self._base_management_env()
         self.cancelled_callback = cancelled_callback
         self.job_timeout = job_timeout
         self.idle_timeout = idle_timeout
-        self.extra_update_fields = extra_update_fields
-        self.pexpect_timeout = pexpect_timeout
-        self.proot_cmd = proot_cmd
         self.started_at = None
 
     @staticmethod
@@ -216,19 +206,15 @@ class IsolatedManager(object):
         while status == 'failed':
             if job_timeout != 0:
                 remaining = max(0, job_timeout - (time.time() - self.started_at))
-                if remaining == 0:
-                    # if it takes longer than $REMAINING_JOB_TIMEOUT to retrieve
-                    # job artifacts from the host, consider the job failed
-                    if isinstance(self.extra_update_fields, dict):
-                        self.extra_update_fields['job_explanation'] = "Job terminated due to timeout"
-                    status = 'failed'
-                    break
 
             canceled = self.cancelled_callback() if self.cancelled_callback else False
             if not canceled and time.time() - last_check < interval:
                 # If the job isn't cancelled, but we haven't waited `interval` seconds, wait longer
                 time.sleep(1)
                 continue
+
+            if canceled:
+                logger.warning('Isolated job {} was manually cancelled.'.format(self.instance.id))
 
             buff = StringIO()
             logger.debug('Checking on isolated job {} with `check_isolated.yml`.'.format(self.instance.id))
@@ -238,7 +224,7 @@ class IsolatedManager(object):
                 idle_timeout=remaining,
                 job_timeout=remaining,
                 pexpect_timeout=5,
-                proot_cmd=self.proot_cmd
+                proot_cmd='bwrap'
             )
             output = buff.getvalue().encode('utf-8')
             playbook_logger.info('Isolated job {} check:\n{}'.format(self.instance.id, output))
