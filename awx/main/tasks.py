@@ -1139,11 +1139,6 @@ class BaseTask(object):
             password_prompts = self.get_password_prompts(passwords)
             expect_passwords = self.create_expect_passwords_data_struct(password_prompts, passwords)
 
-            # TODO: Probably remove this when cleaning up isolated path
-            _kw = dict(
-                extra_update_fields=extra_update_fields,
-                proot_cmd=getattr(settings, 'AWX_PROOT_CMD', 'bwrap'),
-            )
             self.instance = self.update_model(self.instance.pk, output_replacements=output_replacements)
 
             params = {
@@ -1196,7 +1191,12 @@ class BaseTask(object):
                 )
                 copy_tree(cwd, os.path.join(private_data_dir, 'project'))
                 ansible_runner.utils.dump_artifacts(params)
-                manager_instance = isolated_manager.IsolatedManager(env, **_kw)
+                manager_instance = isolated_manager.IsolatedManager(
+                    env,
+                    cancelled_callback=lambda: self.update_model(self.instance.pk).cancel_flag,
+                    job_timeout=self.get_instance_timeout(self.instance),
+                    idle_timeout=self.get_idle_timeout(),
+                )
                 status, rc = manager_instance.run(self.instance,
                                                   private_data_dir,
                                                   params.get('playbook'),
