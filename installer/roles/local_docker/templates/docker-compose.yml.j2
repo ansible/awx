@@ -4,6 +4,7 @@ services:
 
   web:
     image: {{ awx_web_docker_actual_image }}
+    container_name: awx_web
     depends_on:
       - rabbitmq
       - memcached
@@ -50,6 +51,7 @@ services:
 
   task:
     image: {{ awx_task_docker_actual_image }}
+    container_name: awx_task
     depends_on:
       - rabbitmq
       - memcached
@@ -95,18 +97,23 @@ services:
 
   rabbitmq:
     image: {{ rabbitmq_image }}
+    container_name: awx_rabbitmq
     restart: unless-stopped
     environment:
-      RABBITMQ_DEFAULT_VHOST: awx
-      RABBITMQ_ERLANG_COOKIE: cookiemonster
+      RABBITMQ_DEFAULT_VHOST: "{{ rabbitmq_default_vhost }}"
+      RABBITMQ_DEFAULT_USER: "{{ rabbitmq_user }}"
+      RABBITMQ_DEFAULT_PASS: "{{ rabbitmq_password }}"
+      RABBITMQ_ERLANG_COOKIE: {{ rabbitmq_erlang_cookie }}
 
   memcached:
     image: memcached:alpine
+    container_name: awx_memcached
     restart: unless-stopped
 
   {% if pg_hostname is not defined %}
   postgres:
     image: postgres:9.6
+    container_name: awx_postgres
     restart: unless-stopped
     volumes:
       - {{ postgres_data_dir }}:/var/lib/postgresql/data:Z
