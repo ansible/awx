@@ -1202,7 +1202,10 @@ class CredentialInputSourceAccess(BaseAccess):
         if self.can_add(data) is False:
             return False
 
-        return self.user in obj.target_credential.admin_role
+        return (
+            self.user in obj.target_credential.admin_role and
+            self.user in obj.source_credential.use_role
+        )
 
     @check_superuser
     def can_delete(self, obj):

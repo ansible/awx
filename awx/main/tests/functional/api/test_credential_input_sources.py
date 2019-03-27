@@ -186,12 +186,18 @@ def test_input_source_detail_rbac(get, post, patch, delete, admin, alice,
     assert response.status_code == 200
     assert response.data['count'] == 1
 
-    # alice can't change or delete the input source because she can't change the target cred
+    # alice can't change or delete the input source because she can't change
+    # the target cred and she can't use the source cred
     assert patch(url, {'input_field_name': 'vault_id'}, alice).status_code == 403
     assert delete(url, alice).status_code == 403
 
-    # alice can admin the target cred, so she can change the input field name
+    # alice still can't change the input source because she she can't use the
+    # source cred
     vault_credential.admin_role.members.add(alice)
+    assert patch(url, {'input_field_name': 'vault_id'}, alice).status_code == 403
+
+    # alice can now admin the target cred and use the source cred, so she can
+    # change the input field name
     external_credential.use_role.members.add(alice)
     assert patch(url, {'input_field_name': 'vault_id'}, alice).status_code == 200
     assert CredentialInputSource.objects.first().input_field_name == 'vault_id'
@@ -257,6 +263,10 @@ def test_input_source_rbac_swap_target_credential(get, post, put, patch, admin, 
     assert response.status_code == 201
     url = response.data['url']
 
+    # alice starts with use permission on the source credential
+    # alice starts with no permissions on the target credential
+    external_credential.admin_role.members.add(alice)
+
     # alice can't change target cred because she can't admin either one
     assert patch(url, {
         'target_credential': machine_credential.pk,
@@ -274,6 +284,45 @@ def test_input_source_rbac_swap_target_credential(get, post, put, patch, admin, 
     assert patch(url, {
         'target_credential': machine_credential.pk,
         'input_field_name': 'password'
+    }, alice).status_code == 200
+
+
+@pytest.mark.django_db
+def test_input_source_rbac_change_metadata(get, post, put, patch, admin, alice,
+                                           machine_credential, external_credential):
+    # To change an input source, a user must have admin permissions on the
+    # target credential and use permissions on the source credential.
+    list_url = reverse(
+        'api:credential_input_source_list',
+        kwargs={'version': 'v2'}
+    )
+    params = {
+        'target_credential': machine_credential.pk,
+        'source_credential': external_credential.pk,
+        'input_field_name': 'password',
+        'metadata': {'key': 'some_key'},
+    }
+
+    response = post(list_url, params, admin)
+    assert response.status_code == 201
+    url = response.data['url']
+
+    # alice can't change input source metadata because she isn't an admin of the
+    # target credential and doesn't have use permission on the source credential
+    assert patch(url, {
+        'metadata': {'key': 'some_other_key'}
+    }, alice).status_code == 403
+
+    # alice still can't change input source metadata because she doesn't have
+    # use permission on the source credential.
+    machine_credential.admin_role.members.add(alice)
+    assert patch(url, {
+        'metadata': {'key': 'some_other_key'}
+    }, alice).status_code == 403
+
+    external_credential.use_role.members.add(alice)
+    assert patch(url, {
+        'metadata': {'key': 'some_other_key'}
     }, alice).status_code == 200
 
 
