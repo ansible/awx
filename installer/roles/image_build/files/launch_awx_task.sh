@@ -19,9 +19,6 @@ fi
 if [ ! -z "$AWX_ADMIN_USER" ]&&[ ! -z "$AWX_ADMIN_PASSWORD" ]; then
     echo "from django.contrib.auth.models import User; User.objects.create_superuser('$AWX_ADMIN_USER', 'root@localhost', '$AWX_ADMIN_PASSWORD')" | awx-manage shell
     awx-manage create_preload_data
-else
-    echo "from django.contrib.auth.models import User; User.objects.create_superuser('admin', 'root@localhost', 'password')" | awx-manage shell
-    awx-manage create_preload_data
 fi
 echo 'from django.conf import settings; x = settings.AWX_TASK_ENV; x["HOME"] = "/var/lib/awx"; settings.AWX_TASK_ENV = x' | awx-manage shell
 awx-manage provision_instance --hostname=$(hostname)
