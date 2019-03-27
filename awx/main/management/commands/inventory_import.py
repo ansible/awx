@@ -1120,7 +1120,7 @@ class Command(BaseCommand):
                 tb = traceback.format_exc()
                 exc = e
 
-        if self.invoked_from_dispatcher is False:
+        if not self.invoked_from_dispatcher:
             with ignore_inventory_computed_fields():
                 self.inventory_update = InventoryUpdate.objects.get(pk=self.inventory_update.pk)
                 self.inventory_update.result_traceback = tb
@@ -1129,8 +1129,10 @@ class Command(BaseCommand):
                 self.inventory_source.status = status
                 self.inventory_source.save(update_fields=['status'])
 
+            if exc:
+                logger.error(str(exc))
+
         if exc:
-            logger.error(str(exc))
             if isinstance(exc, CommandError):
                 sys.exit(1)
             raise exc
