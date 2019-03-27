@@ -1,27 +1,35 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
+import { Formik, Field } from 'formik';
 import { I18n, i18nMark } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
   CardBody,
   Form,
   FormGroup,
-  TextInput,
 } from '@patternfly/react-core';
 
 import { ConfigContext } from '../../../../context';
+import FormField from '../../../../components/FormField';
 import FormActionGroup from '../../../../components/FormActionGroup';
 import AnsibleSelect from '../../../../components/AnsibleSelect';
 import InstanceGroupsLookup from '../../components/InstanceGroupsLookup';
+
+function required (message) {
+  return value => {
+    if (!value.trim()) {
+      return message || i18nMark('This field must not be blank');
+    }
+    return undefined;
+  };
+}
 
 class OrganizationEdit extends Component {
   constructor (props) {
     super(props);
 
     this.getRelatedInstanceGroups = this.getRelatedInstanceGroups.bind(this);
-    this.checkValidity = this.checkValidity.bind(this);
-    this.handleFieldChange = this.handleFieldChange.bind(this);
     this.handleInstanceGroupsChange = this.handleInstanceGroupsChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.postInstanceGroups = this.postInstanceGroups.bind(this);
@@ -29,48 +37,25 @@ class OrganizationEdit extends Component {
     this.handleSuccess = this.handleSuccess.bind(this);
 
     this.state = {
-      form: {
-        name: {
-          value: '',
-          isValid: true,
-          validation: {
-            required: true
-          },
-          helperTextInvalid: i18nMark('This field must not be blank')
-        },
-        description: {
-          value: ''
-        },
-        instanceGroups: {
-          value: [],
-          initialValue: []
-        },
-        custom_virtualenv: {
-          value: '',
-          defaultValue: '/venv/ansible/'
-        }
-      },
+      initialInstanceGroups: [],
+      instanceGroups: [],
       error: '',
-      formIsValid: true
+      formIsValid: true,
     };
   }
 
   async componentDidMount () {
-    const { organization } = this.props;
-    const { form: formData } = this.state;
-
-    formData.name.value = organization.name;
-    formData.description.value = organization.description;
-    formData.custom_virtualenv.value = organization.custom_virtualenv;
-
+    let instanceGroups;
     try {
-      formData.instanceGroups.value = await this.getRelatedInstanceGroups();
-      formData.instanceGroups.initialValue = [...formData.instanceGroups.value];
+      instanceGroups = await this.getRelatedInstanceGroups();
     } catch (err) {
       this.setState({ error: err });
     }
 
-    this.setState({ form: formData });
+    this.setState({
+      instanceGroups,
+      initialInstanceGroups: instanceGroups,
+    });
   }
 
   async getRelatedInstanceGroups () {
@@ -79,56 +64,19 @@ class OrganizationEdit extends Component {
       organization: { id }
     } = this.props;
     const { data } = await api.getOrganizationInstanceGroups(id);
-    const { results } = data;
-    return results;
+    return data.results;
   }
 
-  checkValidity = (value, validation) => {
-    const isValid = (validation.required)
-      ? (value.trim() !== '') : true;
-
-    return isValid;
+  handleInstanceGroupsChange (instanceGroups) {
+    this.setState({ instanceGroups });
   }
 
-  handleFieldChange (val, evt) {
-    const targetName = evt.target.name;
-    const value = val;
-
-    const { form: updatedForm } = this.state;
-    const updatedFormEl = { ...updatedForm[targetName] };
-
-    updatedFormEl.value = value;
-    updatedForm[targetName] = updatedFormEl;
-
-    updatedFormEl.isValid = (updatedFormEl.validation)
-      ? this.checkValidity(updatedFormEl.value, updatedFormEl.validation) : true;
-
-    const formIsValid = (updatedFormEl.validation) ? updatedFormEl.isValid : true;
-
-    this.setState({ form: updatedForm, formIsValid });
-  }
-
-  handleInstanceGroupsChange (val, targetName) {
-    const { form: updatedForm } = this.state;
-    updatedForm[targetName].value = val;
-
-    this.setState({ form: updatedForm });
-  }
-
-  async handleSubmit () {
+  async handleSubmit (values) {
     const { api, organization } = this.props;
-    const { form: { name, description, custom_virtualenv } } = this.state;
-    const formData = { name, description, custom_virtualenv };
-
-    const updatedData = {};
-    Object.keys(formData)
-      .forEach(formId => {
-        updatedData[formId] = formData[formId].value;
-      });
-
+    const { instanceGroups } = this.state;
     try {
-      await api.updateOrganizationDetails(organization.id, updatedData);
-      await this.postInstanceGroups();
+      await api.updateOrganizationDetails(organization.id, values);
+      await this.postInstanceGroups(instanceGroups);
     } catch (err) {
       this.setState({ error: err });
     } finally {
@@ -146,18 +94,18 @@ class OrganizationEdit extends Component {
     history.push(`/organizations/${id}`);
   }
 
-  async postInstanceGroups () {
+  async postInstanceGroups (instanceGroups) {
     const { api, organization } = this.props;
-    const { form: { instanceGroups } } = this.state;
+    const { initialInstanceGroups } = this.state;
     const url = organization.related.instance_groups;
 
-    const initialInstanceGroups = instanceGroups.initialValue.map(ig => ig.id);
-    const updatedInstanceGroups = instanceGroups.value.map(ig => ig.id);
+    const initialIds = initialInstanceGroups.map(ig => ig.id);
+    const updatedIds = instanceGroups.map(ig => ig.id);
 
-    const groupsToAssociate = [...updatedInstanceGroups]
-      .filter(x => !initialInstanceGroups.includes(x));
-    const groupsToDisassociate = [...initialInstanceGroups]
-      .filter(x => !updatedInstanceGroups.includes(x));
+    const groupsToAssociate = [...updatedIds]
+      .filter(x => !initialIds.includes(x));
+    const groupsToDisassociate = [...initialIds]
+      .filter(x => !updatedIds.includes(x));
 
     try {
       await Promise.all(groupsToAssociate.map(async id => {
@@ -172,83 +120,85 @@ class OrganizationEdit extends Component {
   }
 
   render () {
-    const { api } = this.props;
+    const { api, organization } = this.props;
     const {
-      form: {
-        name,
-        description,
-        instanceGroups,
-        custom_virtualenv
-      },
+      instanceGroups,
       formIsValid,
-      error
+      error,
     } = this.state;
+    const defaultVenv = '/venv/ansible/';
 
     return (
       <CardBody>
         <I18n>
           {({ i18n }) => (
-            <Form autoComplete="off">
-              <div style={{ display: 'grid', gridGap: '20px', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>
-                <FormGroup
-                  fieldId="edit-org-form-name"
-                  helperTextInvalid={name.helperTextInvalid}
-                  isRequired
-                  isValid={name.isValid}
-                  label={i18n._(t`Name`)}
-                >
-                  <TextInput
-                    id="edit-org-form-name"
-                    isRequired
-                    isValid={name.isValid}
-                    name="name"
-                    onChange={this.handleFieldChange}
-                    value={name.value || ''}
+            <Formik
+              initialValues={{
+                name: organization.name,
+                description: organization.description,
+                custom_virtualenv: organization.custom_virtualenv || '',
+              }}
+              onSubmit={this.handleSubmit}
+              render={formik => (
+                <Form autoComplete="off" onSubmit={formik.handleSubmit}>
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridGap: '20px',
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))'
+                    }}
+                  >
+                    <FormField
+                      id="edit-org-form-name"
+                      name="name"
+                      type="text"
+                      label={i18n._(t`Name`)}
+                      validate={required()}
+                      isRequired
+                    />
+                    <FormField
+                      id="edit-org-form-description"
+                      name="description"
+                      type="text"
+                      label={i18n._(t`Description`)}
+                    />
+                    <ConfigContext.Consumer>
+                      {({ custom_virtualenvs }) => (
+                        custom_virtualenvs && custom_virtualenvs.length > 1 && (
+                          <Field
+                            name="custom_virtualenv"
+                            render={({ field }) => (
+                              <FormGroup
+                                fieldId="edit-org-custom-virtualenv"
+                                label={i18n._(t`Ansible Environment`)}
+                              >
+                                <AnsibleSelect
+                                  data={custom_virtualenvs}
+                                  defaultSelected={defaultVenv}
+                                  label={i18n._(t`Ansible Environment`)}
+                                  {...field}
+                                />
+                              </FormGroup>
+                            )}
+                          />
+                        )
+                      )}
+                    </ConfigContext.Consumer>
+                  </div>
+                  <InstanceGroupsLookup
+                    api={api}
+                    value={instanceGroups}
+                    onChange={this.handleInstanceGroupsChange}
                   />
-                </FormGroup>
-                <FormGroup
-                  fieldId="edit-org-form-description"
-                  label={i18n._(t`Description`)}
-                >
-                  <TextInput
-                    id="edit-org-form-description"
-                    name="description"
-                    onChange={this.handleFieldChange}
-                    value={description.value || ''}
+                  <FormActionGroup
+                    onCancel={this.handleCancel}
+                    onSubmit={formik.handleSubmit}
+                    submitDisabled={!formIsValid}
                   />
-                </FormGroup>
-                <ConfigContext.Consumer>
-                  {({ custom_virtualenvs }) => (
-                    custom_virtualenvs && custom_virtualenvs.length > 1 && (
-                      <FormGroup
-                        fieldId="edit-org-custom-virtualenv"
-                        label={i18n._(t`Ansible Environment`)}
-                      >
-                        <AnsibleSelect
-                          data={custom_virtualenvs}
-                          defaultSelected={custom_virtualenv.defaultEnv}
-                          label={i18n._(t`Ansible Environment`)}
-                          name="custom_virtualenv"
-                          onChange={this.handleFieldChange}
-                          value={custom_virtualenv.value || ''}
-                        />
-                      </FormGroup>
-                    )
-                  )}
-                </ConfigContext.Consumer>
-              </div>
-              <InstanceGroupsLookup
-                api={api}
-                value={instanceGroups.value}
-                onChange={this.handleInstanceGroupsChange}
-              />
-              <FormActionGroup
-                onCancel={this.handleCancel}
-                onSubmit={this.handleSubmit}
-                submitDisabled={!formIsValid}
-              />
-              { error ? <div>error</div> : '' }
-            </Form>
+                  { error ? <div>error</div> : '' }
+                </Form>
+              )}
+            />
           )}
         </I18n>
       </CardBody>
