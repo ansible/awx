@@ -491,11 +491,7 @@ CELERYBEAT_SCHEDULE = {
         'schedule': timedelta(seconds=20),
         'options': {'expires': 20}
     },
-    'isolated_heartbeat': {
-        'task': 'awx.main.tasks.awx_isolated_heartbeat',
-        'schedule': timedelta(seconds=AWX_ISOLATED_PERIODIC_CHECK),
-        'options': {'expires': AWX_ISOLATED_PERIODIC_CHECK * 2},
-    }
+    # 'isolated_heartbeat': set up at the end of production.py and development.py
 }
 AWX_INCONSISTENT_TASK_INTERVAL = 60 * 3
 
