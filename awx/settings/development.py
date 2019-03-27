@@ -142,6 +142,15 @@ except ImportError:
     traceback.print_exc()
     sys.exit(1)
 
+
+CELERYBEAT_SCHEDULE.update({  # noqa
+    'isolated_heartbeat': {
+        'task': 'awx.main.tasks.awx_isolated_heartbeat',
+        'schedule': timedelta(seconds=AWX_ISOLATED_PERIODIC_CHECK),  # noqa
+        'options': {'expires': AWX_ISOLATED_PERIODIC_CHECK * 2},  # noqa
+    }
+})
+
 CLUSTER_HOST_ID = socket.gethostname()
 
 try:
