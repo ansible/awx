@@ -1162,8 +1162,8 @@ class BaseTask(object):
                     'idle_timeout': self.get_idle_timeout() or "",
                     'job_timeout': self.get_instance_timeout(self.instance),
                     'pexpect_timeout': getattr(settings, 'PEXPECT_TIMEOUT', 5),
+                    **process_isolation_params,
                 },
-                **process_isolation_params,
             }
 
             if isinstance(self.instance, AdHocCommand):
