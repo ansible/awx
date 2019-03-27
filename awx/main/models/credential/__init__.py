@@ -698,14 +698,14 @@ class CredentialType(CommonModelNameNotUnique):
         # build a normal namespace with secret values decrypted (for
         # ansible-playbook) and a safe namespace with secret values hidden (for
         # DB storage)
-        for field_name, value in credential.inputs.items():
+        injectable_fields = list(credential.inputs.keys()) + credential.dynamic_input_fields
+        for field_name in list(set(injectable_fields)):
+            value = credential.get_input(field_name)
 
             if type(value) is bool:
-                # boolean values can't be secret/encrypted
+                # boolean values can't be secret/encrypted/external
                 safe_namespace[field_name] = namespace[field_name] = value
                 continue
-
-            value = credential.get_input(field_name)
 
             if field_name in self.secret_fields:
                 safe_namespace[field_name] = '**********'
