@@ -453,7 +453,7 @@ def awx_isolated_heartbeat():
     # Slow pass looping over isolated IGs and their isolated instances
     if len(isolated_instance_qs) > 0:
         logger.debug("Managing isolated instances {}.".format(','.join([inst.hostname for inst in isolated_instance_qs])))
-        isolated_manager.IsolatedManager.health_check(isolated_instance_qs, awx_application_version)
+        isolated_manager.IsolatedManager().health_check(isolated_instance_qs)
 
 
 @task()
@@ -1192,9 +1192,7 @@ class BaseTask(object):
                 copy_tree(cwd, os.path.join(private_data_dir, 'project'))
                 ansible_runner.utils.dump_artifacts(params)
                 manager_instance = isolated_manager.IsolatedManager(
-                    env,
                     cancelled_callback=lambda: self.update_model(self.instance.pk).cancel_flag,
-                    job_timeout=self.get_instance_timeout(self.instance),
                     idle_timeout=self.get_idle_timeout(),
                 )
                 status, rc = manager_instance.run(self.instance,
@@ -1216,7 +1214,6 @@ class BaseTask(object):
                 extra_update_fields['job_explanation'] = self.instance.job_explanation
 
         except Exception:
-            # run_pexpect does not throw exceptions for cancel or timeout
             # this could catch programming or file system errors
             tb = traceback.format_exc()
             logger.exception('%s Exception occurred while running task', self.instance.log_format)
