@@ -11,7 +11,7 @@ class OrganizationAccess extends React.Component {
 
   getOrgAccessList (id, params) {
     const { api } = this.props;
-    return api.getOrganzationAccessList(id, params);
+    return api.getOrganizationAccessList(id, params);
   }
 
   removeRole (url, id) {

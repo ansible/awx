@@ -8,7 +8,7 @@ const mockAPIAccessList = {
   foo: 'bar',
 };
 
-const mockGetOrganzationAccessList = () => Promise.resolve(mockAPIAccessList);
+const mockGetOrganizationAccessList = () => Promise.resolve(mockAPIAccessList);
 
 const mockResponse = {
   status: 'success',
@@ -25,7 +25,7 @@ describe('<OrganizationAccess />', () => {
           location={{ search: '', pathname: '/organizations/1/access' }}
           params={{}}
           api={{
-            getOrganzationAccessList: jest.fn(),
+            getOrganizationAccessList: jest.fn(),
           }}
         />
       </MemoryRouter>
@@ -40,7 +40,7 @@ describe('<OrganizationAccess />', () => {
           location={{ search: '', pathname: '/organizations/1/access' }}
           params={{}}
           api={{
-            getOrganzationAccessList: mockGetOrganzationAccessList,
+            getOrganizationAccessList: mockGetOrganizationAccessList,
             disassociate: mockRemoveRole
           }}
         />

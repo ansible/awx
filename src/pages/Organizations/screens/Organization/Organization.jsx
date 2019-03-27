@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { I18n, i18nMark } from '@lingui/react';
-import { Trans, t } from '@lingui/macro';
+import { t } from '@lingui/macro';
 import {
   Switch,
   Route,
@@ -9,7 +9,6 @@ import {
 } from 'react-router-dom';
 import {
   Card,
-  CardBody,
   CardHeader,
   PageSection
 } from '@patternfly/react-core';
@@ -18,6 +17,7 @@ import OrganizationAccess from './OrganizationAccess';
 import OrganizationDetail from './OrganizationDetail';
 import OrganizationEdit from './OrganizationEdit';
 import OrganizationNotifications from './OrganizationNotifications';
+import OrganizationTeams from './OrganizationTeams';
 import Tabs from '../../../../components/Tabs/Tabs';
 import Tab from '../../../../components/Tabs/Tab';
 
@@ -157,7 +157,14 @@ class Organization extends Component {
             />
             <Route
               path="/organizations/:id/teams"
-              render={() => <CardBody><h1><Trans>Teams</Trans></h1></CardBody>}
+              render={() => (
+                <OrganizationTeams
+                  api={api}
+                  match={match}
+                  location={location}
+                  history={history}
+                />
+              )}
             />
             <Route
               path="/organizations/:id/notifications"

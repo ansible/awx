@@ -64,8 +64,14 @@ class APIClient {
     return this.http.post(API_ORGANIZATIONS, data);
   }
 
-  getOrganzationAccessList (id, params = {}) {
+  getOrganizationAccessList (id, params = {}) {
     const endpoint = `${API_ORGANIZATIONS}${id}/access_list/`;
+
+    return this.http.get(endpoint, { params });
+  }
+
+  readOrganizationTeamsList (id, params = {}) {
+    const endpoint = `${API_ORGANIZATIONS}${id}/teams/`;
 
     return this.http.get(endpoint, { params });
   }
