@@ -31,5 +31,6 @@ keyed_groups:
 - key: dict(tags.keys() | map("regex_replace", "^(.*)$", "\1_") | list | zip(tags.values() | list)) if tags else []
   prefix: ''
   separator: ''
+plain_host_names: true
 plugin: azure_rm
 use_contrib_script_compatible_sanitization: true
