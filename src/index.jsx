@@ -15,6 +15,7 @@ import './app.scss';
 import './components/Pagination/styles.scss';
 import './components/DataListToolbar/styles.scss';
 import './components/SelectedList/styles.scss';
+import './components/AddRole/styles.scss';
 
 import { Config } from './contexts/Config';
 

@@ -5,6 +5,8 @@ const API_V2 = `${API_ROOT}v2/`;
 const API_CONFIG = `${API_V2}config/`;
 const API_ORGANIZATIONS = `${API_V2}organizations/`;
 const API_INSTANCE_GROUPS = `${API_V2}instance_groups/`;
+const API_USERS = `${API_V2}users/`;
+const API_TEAMS = `${API_V2}teams/`;
 
 const LOGIN_CONTENT_TYPE = 'application/x-www-form-urlencoded';
 
@@ -139,6 +141,22 @@ class APIClient {
 
   disassociate (url, id) {
     return this.http.post(url, { id, disassociate: true });
+  }
+
+  readUsers (params) {
+    return this.http.get(API_USERS, { params });
+  }
+
+  readTeams (params) {
+    return this.http.get(API_TEAMS, { params });
+  }
+
+  createUserRole (userId, roleId) {
+    return this.http.post(`${API_USERS}${userId}/roles/`, { id: roleId });
+  }
+
+  createTeamRole (teamId, roleId) {
+    return this.http.post(`${API_TEAMS}${teamId}/roles/`, { id: roleId });
   }
 }
 

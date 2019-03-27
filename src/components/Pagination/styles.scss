@@ -5,6 +5,7 @@
   --awx-pagination--disabled-Color: #C2C2CA;
 
   border-top: 1px solid var(--awx-pagination--BorderColor);
+  border-bottom: 1px solid var(--awx-pagination--BorderColor);
   background-color: var(--awx-pagination--BackgroundColor);
   height: 55px;
   display: flex;

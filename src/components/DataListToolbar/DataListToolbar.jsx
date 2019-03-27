@@ -39,6 +39,7 @@ class DataListToolbar extends React.Component {
       isAllSelected,
       isLookup,
       isCompact,
+      noLeftMargin,
       onSort,
       onSearch,
       onCompact,
@@ -54,7 +55,7 @@ class DataListToolbar extends React.Component {
           <div className="awx-toolbar">
             <Level>
               <LevelItem style={{ display: 'flex', flexBasis: '700px' }}>
-                <Toolbar style={{ marginLeft: isLookup ? '0px' : '20px', flexGrow: '1' }}>
+                <Toolbar style={{ marginLeft: noLeftMargin ? '0px' : '20px', flexGrow: '1' }}>
                   { showSelectAll && (
                     <ToolbarGroup>
                       <ToolbarItem>
@@ -152,6 +153,7 @@ DataListToolbar.propTypes = {
   addUrl: PropTypes.string,
   columns: PropTypes.arrayOf(PropTypes.object).isRequired,
   isAllSelected: PropTypes.bool,
+  noLeftMargin: PropTypes.bool,
   onSearch: PropTypes.func,
   onSelectAll: PropTypes.func,
   onSort: PropTypes.func,
@@ -178,7 +180,8 @@ DataListToolbar.defaultProps = {
   onCompact: null,
   onExpand: null,
   isCompact: false,
-  add: null
+  add: null,
+  noLeftMargin: false
 };
 
 export default DataListToolbar;

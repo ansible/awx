@@ -1,9 +1,10 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import {
   Chip
 } from '@patternfly/react-core';
 
+import BasicChip from '../BasicChip/BasicChip';
 import VerticalSeparator from '../VerticalSeparator';
 
 const selectedRowStyling = {
@@ -35,7 +36,14 @@ class SelectedList extends Component {
   };
 
   render () {
-    const { label, selected, showOverflowAfter, onRemove } = this.props;
+    const {
+      label,
+      selected,
+      showOverflowAfter,
+      onRemove,
+      displayKey,
+      isReadOnly
+    } = this.props;
     const { showOverflow } = this.state;
     return (
       <div className="awx-selectedList">
@@ -46,16 +54,33 @@ class SelectedList extends Component {
           <VerticalSeparator />
           <div className="pf-l-split__item">
             <div className="pf-c-chip-group">
-              {selected
-                .slice(0, showOverflow ? selected.length : showOverflowAfter)
-                .map(selectedItem => (
-                  <Chip
-                    key={selectedItem.id}
-                    onClick={() => onRemove(selectedItem)}
-                  >
-                    {selectedItem.name}
-                  </Chip>
-                ))}
+              {isReadOnly ? (
+                <Fragment>
+                  {selected
+                    .slice(0, showOverflow ? selected.length : showOverflowAfter)
+                    .map(selectedItem => (
+                      <BasicChip
+                        key={selectedItem.id}
+                        text={selectedItem[displayKey]}
+                      />
+                    ))
+                  }
+                </Fragment>
+              ) : (
+                <Fragment>
+                  {selected
+                    .slice(0, showOverflow ? selected.length : showOverflowAfter)
+                    .map(selectedItem => (
+                      <Chip
+                        key={selectedItem.id}
+                        onClick={() => onRemove(selectedItem)}
+                      >
+                        {selectedItem[displayKey]}
+                      </Chip>
+                    ))
+                  }
+                </Fragment>
+              )}
               {(
                 !showOverflow
                 && selected.length > showOverflowAfter
@@ -76,15 +101,20 @@ class SelectedList extends Component {
 }
 
 SelectedList.propTypes = {
+  displayKey: PropTypes.string,
   label: PropTypes.string,
-  onRemove: PropTypes.func.isRequired,
+  onRemove: PropTypes.func,
   selected: PropTypes.arrayOf(PropTypes.object).isRequired,
   showOverflowAfter: PropTypes.number,
+  isReadOnly: PropTypes.bool
 };
 
 SelectedList.defaultProps = {
+  displayKey: 'name',
   label: 'Selected',
+  onRemove: () => null,
   showOverflowAfter: 5,
+  isReadOnly: false
 };
 
 export default SelectedList;

@@ -6,6 +6,10 @@ import {
   TextContent, TextVariants, Chip, Button
 } from '@patternfly/react-core';
 
+import {
+  PlusIcon,
+} from '@patternfly/react-icons';
+
 import { I18n, i18nMark } from '@lingui/react';
 import { t, Trans } from '@lingui/macro';
 
@@ -19,6 +23,7 @@ import { withNetwork } from '../../../contexts/Network';
 import AlertModal from '../../../components/AlertModal';
 import Pagination from '../../../components/Pagination';
 import DataListToolbar from '../../../components/DataListToolbar';
+import AddResourceRole from '../../../components/AddRole/AddResourceRole';
 
 import {
   parseQueryString,
@@ -109,6 +114,7 @@ class OrganizationAccessList extends React.Component {
       deleteRoleId: null,
       deleteResourceId: null,
       results: [],
+      isModalOpen: false
     };
 
     this.fetchOrgAccessList = this.fetchOrgAccessList.bind(this);
@@ -119,6 +125,8 @@ class OrganizationAccessList extends React.Component {
     this.handleWarning = this.handleWarning.bind(this);
     this.hideWarning = this.hideWarning.bind(this);
     this.confirmDelete = this.confirmDelete.bind(this);
+    this.handleModalToggle = this.handleModalToggle.bind(this);
+    this.handleSuccessfulRoleAdd = this.handleSuccessfulRoleAdd.bind(this);
   }
 
   componentDidMount () {
@@ -282,6 +290,22 @@ class OrganizationAccessList extends React.Component {
     });
   }
 
+  handleSuccessfulRoleAdd () {
+    this.handleModalToggle();
+    const queryParams = this.getQueryParams();
+    try {
+      this.fetchOrgAccessList(queryParams);
+    } catch (error) {
+      this.setState({ error });
+    }
+  }
+
+  handleModalToggle () {
+    this.setState((prevState) => ({
+      isModalOpen: !prevState.isModalOpen,
+    }));
+  }
+
   hideWarning () {
     this.setState({ showWarning: false });
   }
@@ -303,8 +327,13 @@ class OrganizationAccessList extends React.Component {
       sortOrder,
       warningMsg,
       warningTitle,
-      showWarning
+      showWarning,
+      isModalOpen
     } = this.state;
+    const {
+      api,
+      organization
+    } = this.props;
     return (
       <I18n>
         {({ i18n }) => (
@@ -328,6 +357,25 @@ class OrganizationAccessList extends React.Component {
                   columns={this.columns}
                   onSearch={() => { }}
                   onSort={this.onSort}
+                  add={(
+                    <Fragment>
+                      <Button
+                        variant="primary"
+                        aria-label={i18n._(t`Add Access Role`)}
+                        onClick={this.handleModalToggle}
+                      >
+                        <PlusIcon />
+                      </Button>
+                      {isModalOpen && (
+                        <AddResourceRole
+                          onClose={this.handleModalToggle}
+                          onSave={this.handleSuccessfulRoleAdd}
+                          api={api}
+                          roles={organization.summary_fields.object_roles}
+                        />
+                      )}
+                    </Fragment>
+                  )}
                 />
                 {showWarning && (
                   <AlertModal
@@ -419,7 +467,7 @@ class OrganizationAccessList extends React.Component {
 
 OrganizationAccessList.propTypes = {
   getAccessList: PropTypes.func.isRequired,
-  removeRole: PropTypes.func.isRequired,
+  removeRole: PropTypes.func.isRequired
 };
 
 export { OrganizationAccessList as _OrganizationAccessList };
