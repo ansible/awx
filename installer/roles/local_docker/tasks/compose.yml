@@ -8,22 +8,26 @@
   template:
     src: docker-compose.yml.j2
     dest: "{{ docker_compose_dir }}/docker-compose.yml"
+    mode: 0600
   register: awx_compose_config
 
 - name: Render secrets file
   template:
     src: environment.sh.j2
     dest: "{{ docker_compose_dir }}/environment.sh"
+    mode: 0600
 
 - name: Render application credentials
   template:
     src: credentials.py.j2
     dest: "{{ docker_compose_dir }}/credentials.py"
+    mode: 0600
 
 - name: Render SECRET_KEY file
   copy:
     content: "{{ secret_key }}"
     dest: "{{ docker_compose_dir }}/SECRET_KEY"
+    mode: 0600
 
 - name: Start the containers
   docker_service:
