@@ -94,13 +94,14 @@ def kv_backend(**kwargs):
         # https://www.vaultproject.io/api/secret/kv/kv-v2.html#read-secret-version
         response = sess.get(
             '/'.join([url, mount_point, 'data'] + path).rstrip('/'),
-            params=params
+            params=params,
+            timeout=30
         )
         response.raise_for_status()
         json = response.json()['data']
     else:
         # https://www.vaultproject.io/api/secret/kv/kv-v1.html#read-secret
-        response = sess.get('/'.join([url, secret_path]).rstrip('/'))
+        response = sess.get('/'.join([url, secret_path]).rstrip('/'), timeout=30)
         response.raise_for_status()
         json = response.json()
 
@@ -130,7 +131,8 @@ def ssh_backend(**kwargs):
     # https://www.vaultproject.io/api/secret/ssh/index.html#sign-ssh-key
     resp = sess.post(
         '/'.join([url, secret_path, 'sign', role]).rstrip('/'),
-        json=json
+        json=json,
+        timeout=30
     )
     resp.raise_for_status()
     return resp.json()['data']['signed_key']

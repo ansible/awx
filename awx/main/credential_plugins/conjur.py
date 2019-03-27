@@ -108,7 +108,7 @@ def conjur_backend(**kwargs):
     if version:
         path = '?'.join([path, version])
 
-    resp = requests.get(path, **lookup_kwargs)
+    resp = requests.get(path, timeout=30, **lookup_kwargs)
     resp.raise_for_status()
     return resp.text
 

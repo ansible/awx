@@ -107,7 +107,12 @@ def aim_backend(**kwargs):
     elif client_cert:
         cert = create_temporary_fifo(client_cert.encode())
 
-    res = requests.get(request_url + request_qs, cert=cert, verify=verify)
+    res = requests.get(
+        request_url + request_qs,
+        timeout=30,
+        cert=cert,
+        verify=verify,
+    )
     res.raise_for_status()
     return res.json()['Content']
 
