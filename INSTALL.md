@@ -27,7 +27,7 @@ This document provides a guide for installing AWX.
   - [Start the build](#start-the-build-1)
   - [Accessing AWX](#accessing-awx-1)
   - [SSL Termination](#ssl-termination)
-- [Docker or Docker Compose](#docker-or-docker-compose)
+- [Docker Compose](#docker-compose)
   - [Prerequisites](#prerequisites-3)
   - [Pre-build steps](#pre-build-steps-2)
     - [Deploying to a remote host](#deploying-to-a-remote-host)
@@ -88,7 +88,7 @@ The [installer](./installer) directory contains an [inventory](./installer/inven
 In the sections below, you'll find deployment details and instructions for each platform:
 - [OpenShift](#openshift)
 - [Kubernetes](#kubernetes)
-- [Docker or Docker Compose](#docker-or-docker-compose).
+- [Docker Compose](#docker-compose).
 
 ### Official vs Building Images
 
@@ -391,14 +391,14 @@ If your provider is able to allocate an IP Address from the Ingress controller t
 Unlike Openshift's `Route` the Kubernetes `Ingress` doesn't yet handle SSL termination. As such the default configuration will only expose AWX through HTTP on port 80. You are responsible for configuring SSL support until support is added (either to Kubernetes or AWX itself).
 
 
-## Docker or Docker-Compose
+## Docker-Compose
 
 ### Prerequisites
 
 - [Docker](https://docs.docker.com/engine/installation/) on the host where AWX will be deployed. After installing Docker, the Docker service must be started (depending on your OS, you may have to add the local user that uses Docker to the ``docker`` group, refer to the documentation for details)
 - [docker-py](https://github.com/docker/docker-py) Python module.
 
-If you're installing using Docker Compose, you'll need [Docker Compose](https://docs.docker.com/compose/install/).
+- [Docker Compose](https://docs.docker.com/compose/install/).
 
 ### Pre-build steps
 
