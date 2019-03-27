@@ -73,7 +73,7 @@ The system that runs the AWX service will need to satisfy the following requirem
 - At least 2 cpu cores
 - At least 20GB of space
 - Running Docker, Openshift, or Kubernetes
-- If you choose to use an external PostgreSQL database, please note that the minimum version is 9.4.
+- If you choose to use an external PostgreSQL database, please note that the minimum version is 9.6+.
 
 ### AWX Tunables
 
@@ -81,7 +81,7 @@ The system that runs the AWX service will need to satisfy the following requirem
 
 ### Choose a deployment platform
 
-We currently support running AWX as a containerized application using Docker images deployed to either an OpenShift cluster, docker-compose or a standalone Docker daemon. The remainder of this document will walk you through the process of building the images, and deploying them to either platform.
+We currently support running AWX as a containerized application using Docker images deployed to either an OpenShift cluster or docker-compose. The remainder of this document will walk you through the process of building the images, and deploying them to either platform.
 
 The [installer](./installer) directory contains an [inventory](./installer/inventory) file, and a playbook, [install.yml](./installer/install.yml). You'll begin by setting variables in the inventory file according to the platform you wish to use, and then you'll start the image build and deployment process by running the playbook.
 
