@@ -6,9 +6,10 @@ rabbitmq_image: "ansible/awx_rabbitmq:{{rabbitmq_version}}"
 rabbitmq_default_vhost: "awx"
 rabbitmq_erlang_cookie: "cookiemonster"
 rabbitmq_port: "5672"
-rabbitmq_default_username: "guest"
-rabbitmq_default_password: "guest"
+rabbitmq_user: "guest"
+rabbitmq_password: "guest"
 
 postgresql_version: "9.6"
 postgresql_image: "postgres:{{postgresql_version}}"
 
+docker_compose_dir: "/tmp/awxcompose"

@@ -1,36 +1,19 @@
 ---
-- include_vars: '{{ item }}'
-  with_first_found:
-    - files:
-        - '{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml'     # CentOS-7
-        - '{{ ansible_os_family }}-{{ ansible_distribution_major_version }}.yml'        # RedHat-7
-        - '{{ ansible_distribution }}.yml'                                              # CentOS
-        - '{{ ansible_os_family }}.yml'                                                 # RedHat
-        - 'default.yml'
-
 - name: Create {{ docker_compose_dir }} directory
   file:
     path: "{{ docker_compose_dir }}"
     state: directory
 
-- name: Create docker-compose.yml file
+- name: Create Docker Compose Configuration
   template:
-    src: docker-compose.yml.j2
-    dest: "{{ docker_compose_dir }}/docker-compose.yml"
+    src: "{{ item }}.j2"
+    dest: "{{ docker_compose_dir }}/{{ item }}"
     mode: 0600
+  with_items:
+    - environment.sh
+    - credentials.py
+    - docker-compose.yml
   register: awx_compose_config
-
-- name: Render secrets file
-  template:
-    src: environment.sh.j2
-    dest: "{{ docker_compose_dir }}/environment.sh"
-    mode: 0600
-
-- name: Render application credentials
-  template:
-    src: credentials.py.j2
-    dest: "{{ docker_compose_dir }}/credentials.py"
-    mode: 0600
 
 - name: Render SECRET_KEY file
   copy:
@@ -44,9 +27,9 @@
   register: awx_compose_start
 
 - name: Update CA trust in awx_web container
-  command: docker exec awx_web_1 '/usr/bin/update-ca-trust'
+  command: docker exec awx_web '/usr/bin/update-ca-trust'
   when: awx_compose_config.changed or awx_compose_start.changed
 
 - name: Update CA trust in awx_task container
-  command: docker exec awx_task_1 '/usr/bin/update-ca-trust'
+  command: docker exec awx_task '/usr/bin/update-ca-trust'
   when: awx_compose_config.changed or awx_compose_start.changed
