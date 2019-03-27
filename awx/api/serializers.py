@@ -51,11 +51,11 @@ from awx.main.models import (
     CredentialType, CustomInventoryScript, Fact, Group, Host, Instance,
     InstanceGroup, Inventory, InventorySource, InventoryUpdate,
     InventoryUpdateEvent, Job, JobEvent, JobHostSummary, JobLaunchConfig,
-    JobTemplate, Label, Notification, NotificationTemplate, OAuth2AccessToken,
-    OAuth2Application, Organization, Project, ProjectUpdate,
-    ProjectUpdateEvent, RefreshToken, Role, Schedule, SystemJob,
-    SystemJobEvent, SystemJobTemplate, Team, UnifiedJob, UnifiedJobTemplate,
-    UserSessionMembership, V1Credential, WorkflowJob, WorkflowJobNode,
+    JobTemplate, Label, Notification, NotificationTemplate,
+    OAuth2AccessToken, OAuth2Application, Organization, Project,
+    ProjectUpdate, ProjectUpdateEvent, RefreshToken, Role, Schedule,
+    SystemJob, SystemJobEvent, SystemJobTemplate, Team, UnifiedJob,
+    UnifiedJobTemplate, V1Credential, WorkflowJob, WorkflowJobNode,
     WorkflowJobTemplate, WorkflowJobTemplateNode, StdoutMaxBytesExceeded
 )
 from awx.main.models.base import VERBOSITY_CHOICES, NEW_JOB_TYPE_CHOICES

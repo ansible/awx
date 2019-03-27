@@ -1,7 +1,6 @@
 import pytest
 
 from django.contrib.sessions.middleware import SessionMiddleware
-from django.test import Client
 
 from awx.api.versioning import reverse
 
