@@ -41,6 +41,7 @@ from awx.main.utils import (
 from awx.main.utils.common import _get_ansible_version
 from awx.main.signals import disable_activity_stream
 from awx.main.constants import STANDARD_INVENTORY_UPDATE_ENV
+from awx.main.utils.pglock import advisory_lock
 
 logger = logging.getLogger('awx.main.commands.inventory_import')
 
@@ -870,20 +871,21 @@ class Command(BaseCommand):
         Load inventory from in-memory groups to the database, overwriting or
         merging as appropriate.
         '''
-        # FIXME: Attribute changes to superuser?
-        # Perform __in queries in batches (mainly for unit tests using SQLite).
-        self._batch_size = 500
-        self._build_db_instance_id_map()
-        self._build_mem_instance_id_map()
-        if self.overwrite:
-            self._delete_hosts()
-            self._delete_groups()
-            self._delete_group_children_and_hosts()
-        self._update_inventory()
-        self._create_update_groups()
-        self._create_update_hosts()
-        self._create_update_group_children()
-        self._create_update_group_hosts()
+        with advisory_lock('inventory_{}_update'.format(self.inventory.id)):
+            # FIXME: Attribute changes to superuser?
+            # Perform __in queries in batches (mainly for unit tests using SQLite).
+            self._batch_size = 500
+            self._build_db_instance_id_map()
+            self._build_mem_instance_id_map()
+            if self.overwrite:
+                self._delete_hosts()
+                self._delete_groups()
+                self._delete_group_children_and_hosts()
+            self._update_inventory()
+            self._create_update_groups()
+            self._create_update_hosts()
+            self._create_update_group_children()
+            self._create_update_group_hosts()
 
     def remote_tower_license_compare(self, local_license_type):
         # this requires https://github.com/ansible/ansible/pull/52747
