@@ -230,6 +230,8 @@ function AddEditCredentialsController (
         vm.form[field].asTag = false;
         vm.form[field]._value = '';
         vm.form[field]._tagValue = '';
+        vm.form[field]._isValid = true;
+        vm.form[field]._rejected = false;
         vm.inputSources.items = vm.inputSources.items
             .filter(({ input_field_name }) => input_field_name !== field);
         vm.inputSources.changedInputFields.push(field);

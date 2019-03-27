@@ -188,6 +188,10 @@ function AtFormController (eventService, strings) {
                 continue;
             }
 
+            if (vm.components[i].state.asTag) {
+                continue;
+            }
+
             if (!vm.components[i].state._isValid) {
                 isValid = false;
                 break;
