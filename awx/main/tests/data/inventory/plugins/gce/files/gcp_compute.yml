@@ -3,6 +3,7 @@ compose:
   ansible_ssh_host: networkInterfaces[0].accessConfigs[0].natIP
   gce_description: description if description else None
   gce_id: id
+  gce_image: image
   gce_machine_type: machineType
   gce_metadata: metadata.get("items", []) | items2dict(key_name="key", value_name="value")
   gce_name: name
@@ -36,9 +37,13 @@ keyed_groups:
   prefix: tag
 - key: status | lower
   prefix: status
+- key: image
+  prefix: ''
+  separator: ''
 plugin: gcp_compute
 projects:
 - fooo
+retrieve_image_info: true
 service_account_file: {{ file_reference }}
 use_contrib_script_compatible_sanitization: true
 zones:

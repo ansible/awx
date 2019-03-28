@@ -2339,6 +2339,8 @@ class gce(PluginFileInjector):
             'gce_tags': 'tags.get("items", [])',
             'gce_zone': 'zone',
             'gce_metadata': 'metadata.get("items", []) | items2dict(key_name="key", value_name="value")',
+            # NOTE: image hostvar is enabled via retrieve_image_info option
+            'gce_image': 'image',
             # We need this as long as hostnames is non-default, otherwise hosts
             # will not be addressed correctly, was returned in script
             'ansible_ssh_host': 'networkInterfaces[0].accessConfigs[0].natIP'
@@ -2367,7 +2369,9 @@ class gce(PluginFileInjector):
             {'prefix': '', 'separator': '', 'key': 'machineType'},
             {'prefix': '', 'separator': '', 'key': 'zone'},
             {'prefix': 'tag', 'key': 'gce_tags'},  # composed var
-            {'prefix': 'status', 'key': 'status | lower'}
+            {'prefix': 'status', 'key': 'status | lower'},
+            # NOTE: image hostvar is enabled via retrieve_image_info option
+            {'prefix': '', 'separator': '', 'key': 'image'},
         ]
         # This will be used as the gce instance_id, must be universal, non-compat
         compose_dict = {'gce_id': 'id'}
@@ -2376,6 +2380,8 @@ class gce(PluginFileInjector):
         # TODO: proper group_by and instance_filters support, irrelevant of compat mode
         # The gce.py script never sanitized any names in any way
         ret['use_contrib_script_compatible_sanitization'] = True
+        # Perform extra API query to get the image hostvar
+        ret['retrieve_image_info'] = True
         # Add in old hostvars aliases
         compose_dict.update(self._compat_compose_vars())
         # Non-default names to match script
