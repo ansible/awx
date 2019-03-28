@@ -75,6 +75,7 @@ function assignInputGroupValues (apiConfig, credentialType, sourceCredentials) {
     inputs = inputs.map((field) => {
         field.tagMode = this.isEditable() && credentialType.get('kind') !== 'external';
         if (linkedFieldNames.includes(field.id)) {
+            field.tagMode = true;
             field.asTag = true;
             const { summary_fields } = this.get('related.input_sources.results')
                 .find(({ input_field_name }) => input_field_name === field.id);
