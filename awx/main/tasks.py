@@ -65,7 +65,7 @@ from awx.main.utils import (get_ssh_version, update_scm_url,
                             ignore_inventory_computed_fields,
                             ignore_inventory_group_removal, extract_ansible_vars, schedule_task_manager,
                             get_awx_version)
-from awx.main.utils.common import _get_ansible_version
+from awx.main.utils.common import _get_ansible_version, get_custom_venv_choices
 from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja
 from awx.main.utils.reload import stop_local_services
 from awx.main.utils.pglock import advisory_lock
@@ -91,6 +91,12 @@ Try upgrading OpenSSH or providing your private key in an different format. \
 '''
 
 logger = logging.getLogger('awx.main.tasks')
+
+
+class InvalidVirtualenvError(Exception):
+
+    def __init__(self, message):
+        self.message = message
 
 
 def dispatch_startup():
@@ -892,10 +898,13 @@ class BaseTask(object):
         env['PATH'] = os.path.join(venv_path, "bin") + ":" + env['PATH']
         venv_libdir = os.path.join(venv_path, "lib")
 
-        if not isolated and not os.path.exists(venv_libdir):
-            raise RuntimeError(
-                'a valid Python virtualenv does not exist at {}'.format(venv_path)
-            )
+        if not isolated and (
+            not os.path.exists(venv_libdir) or
+            os.path.join(venv_path, '') not in get_custom_venv_choices()
+        ):
+            raise InvalidVirtualenvError(_(
+                'Invalid virtual environment selected: {}'.format(venv_path)
+            ))
 
         isolated_manager.set_pythonpath(venv_libdir, env)
 
@@ -1252,6 +1261,9 @@ class BaseTask(object):
                 status = 'failed'
                 extra_update_fields['job_explanation'] = self.instance.job_explanation
 
+        except InvalidVirtualenvError as e:
+            extra_update_fields['job_explanation'] = e.message
+            logger.error('{} {}'.format(self.instance.log_format, e.message))
         except Exception:
             # this could catch programming or file system errors
             extra_update_fields['result_traceback'] = traceback.format_exc()
