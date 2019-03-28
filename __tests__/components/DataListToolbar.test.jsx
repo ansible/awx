@@ -225,10 +225,12 @@ describe('<DataListToolbar />', () => {
   test('trash can button triggers correct function', () => {
     const columns = [{ name: 'Name', key: 'name', isSortable: true }];
     const onOpenDeleteModal = jest.fn();
-    const deleteModal = 'button.pf-c-button.pf-m-plain.awx-ToolBarBtn';
+    const openDeleteModalButton = 'button[aria-label="Delete"]';
     const onSearch = jest.fn();
     const onSort = jest.fn();
     const onSelectAll = jest.fn();
+    const showDelete = true;
+    const disableTrashCanIcon = false;
 
     toolbar = mount(
       <I18nProvider>
@@ -241,12 +243,14 @@ describe('<DataListToolbar />', () => {
           onSearch={onSearch}
           onSort={onSort}
           onSelectAll={onSelectAll}
-          onOpenDeleteModal={() => {}}
+          onOpenDeleteModal={onOpenDeleteModal}
+          showDelete={showDelete}
+          disableTrashCanIcon={disableTrashCanIcon}
         />
       </I18nProvider>
     );
 
-    toolbar.find(deleteModal).simulate('click');
+    toolbar.find(openDeleteModalButton).simulate('click');
     expect(onOpenDeleteModal).toBeCalled();
   });
 });
