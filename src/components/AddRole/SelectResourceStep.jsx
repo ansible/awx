@@ -70,7 +70,7 @@ class SelectResourceStep extends React.Component {
   }
 
   async readResourceList (queryParams) {
-    const { onSearch, defaultSearchParams } = this.props;
+    const { onSearch } = this.props;
     const { page, order_by } = queryParams;
 
     let sortOrder = 'ascending';
@@ -84,7 +84,7 @@ class SelectResourceStep extends React.Component {
     this.setState({ error: false });
 
     try {
-      const { data } = await onSearch(Object.assign(queryParams, defaultSearchParams));
+      const { data } = await onSearch(queryParams);
       const { count, results } = data;
 
       const stateToUpdate = {
@@ -189,7 +189,6 @@ class SelectResourceStep extends React.Component {
 
 SelectResourceStep.propTypes = {
   columns: PropTypes.arrayOf(PropTypes.object).isRequired,
-  defaultSearchParams: PropTypes.shape(),
   displayKey: PropTypes.string,
   emptyListBody: PropTypes.string,
   emptyListTitle: PropTypes.string,
@@ -202,7 +201,6 @@ SelectResourceStep.propTypes = {
 };
 
 SelectResourceStep.defaultProps = {
-  defaultSearchParams: {},
   displayKey: 'name',
   emptyListBody: i18nMark('Please add items to populate this list'),
   emptyListTitle: i18nMark('No Items Found'),

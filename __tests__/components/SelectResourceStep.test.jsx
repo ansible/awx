@@ -15,9 +15,6 @@ describe('<SelectResourceStep />', () => {
       <I18nProvider>
         <SelectResourceStep
           columns={columns}
-          defaultSearchParams={{
-            is_superuser: false
-          }}
           displayKey="username"
           onRowClick={jest.fn()}
           onSearch={jest.fn()}
@@ -40,9 +37,6 @@ describe('<SelectResourceStep />', () => {
       <I18nProvider>
         <SelectResourceStep
           columns={columns}
-          defaultSearchParams={{
-            is_superuser: false
-          }}
           displayKey="username"
           onRowClick={jest.fn()}
           onSearch={handleSearch}
@@ -51,7 +45,6 @@ describe('<SelectResourceStep />', () => {
       </I18nProvider>
     );
     expect(handleSearch).toHaveBeenCalledWith({
-      is_superuser: false,
       order_by: 'username',
       page: 1,
       page_size: 5
@@ -77,9 +70,6 @@ describe('<SelectResourceStep />', () => {
       <I18nProvider>
         <SelectResourceStep
           columns={columns}
-          defaultSearchParams={{
-            is_superuser: false
-          }}
           displayKey="username"
           onRowClick={jest.fn()}
           onSearch={handleSearch}
@@ -93,7 +83,6 @@ describe('<SelectResourceStep />', () => {
       order_by: '-username'
     });
     expect(handleSearch).toHaveBeenCalledWith({
-      is_superuser: false,
       order_by: '-username',
       page: 1
     });

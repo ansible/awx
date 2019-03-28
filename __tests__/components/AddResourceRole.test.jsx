@@ -147,7 +147,8 @@ describe('<SelectResourceStep />', () => {
       foo: 'bar'
     });
     expect(readUsers).toHaveBeenCalledWith({
-      foo: 'bar'
+      foo: 'bar',
+      is_superuser: false
     });
     wrapper.instance().readTeams({
       foo: 'bar'

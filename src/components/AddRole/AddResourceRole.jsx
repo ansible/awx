@@ -106,7 +106,7 @@ class AddResourceRole extends React.Component {
 
   async readUsers (queryParams) {
     const { api } = this.props;
-    return api.readUsers(queryParams);
+    return api.readUsers(Object.assign(queryParams, { is_superuser: false }));
   }
 
   async readTeams (queryParams) {
@@ -174,9 +174,6 @@ class AddResourceRole extends React.Component {
                 {selectedResource === 'users' && (
                   <SelectResourceStep
                     columns={userColumns}
-                    defaultSearchParams={{
-                      is_superuser: false
-                    }}
                     displayKey="username"
                     emptyListBody={i18n._(t`Please add users to populate this list`)}
                     emptyListTitle={i18n._(t`No Users Found`)}
