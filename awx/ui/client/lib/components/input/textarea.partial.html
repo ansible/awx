@@ -11,6 +11,7 @@
           </div>
           <div
             ng-show="state.asTag"
+            ng-disabled="state._disabled || form.disabled"
             class="form-control at-Input at-InputTaggedTextarea"
             >
               <div class="at-InputTagContainer">
