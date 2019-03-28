@@ -302,6 +302,16 @@ register(
 )
 
 register(
+    'INSIGHTS_DATA_ENABLED',
+    field_class=fields.BooleanField,
+    default=False,
+    label=_('Gather data for Automation Insights'),
+    help_text=_('Enables Tower to gather data on automation and send it to Red Hat Insights.'),
+    category=_('System'),
+    category_slug='system',
+)
+
+register(
     'AWX_ROLES_ENABLED',
     field_class=fields.BooleanField,
     default=True,

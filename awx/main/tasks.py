@@ -70,6 +70,7 @@ from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja
 from awx.main.utils.reload import stop_local_services
 from awx.main.utils.pglock import advisory_lock
 from awx.main.consumers import emit_channel_notification
+from awx.main import analytics
 from awx.conf import settings_registry
 
 from rest_framework.exceptions import PermissionDenied
@@ -319,6 +320,19 @@ def send_notifications(notification_list, job_id=None):
                 notification.save(update_fields=update_fields)
             except Exception:
                 logger.exception('Error saving notification {} result.'.format(notification.id))
+
+
+@task()
+def gather_analytics():
+    if settings.PENDO_TRACKING_STATE == 'off':
+        return
+    try:
+        tgz = analytics.gather()
+        logger.debug('gathered analytics: {}'.format(tgz))
+        analytics.ship(tgz)
+    finally:
+        if os.path.exists(tgz):
+            os.remove(tgz)
 
 
 @task()
