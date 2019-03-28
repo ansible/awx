@@ -1996,8 +1996,6 @@ class RunInventoryUpdate(BaseTask):
             else:
                 env['ANSIBLE_INVENTORY_ENABLED'] = 'script'
 
-        # TODO: option for Automatic transformation of group names, ANSIBLE_TRANSFORM_INVALID_GROUP_CHARS
-
         if inventory_update.source in ['scm', 'custom']:
             for env_k in inventory_update.source_vars_dict:
                 if str(env_k) not in env and str(env_k) not in settings.INV_ENV_VARIABLE_BLACKLIST:
