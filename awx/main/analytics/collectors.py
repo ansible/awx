@@ -67,16 +67,17 @@ def counts(since):
 
     inv_counts = dict(models.Inventory.objects.order_by().values_list('kind').annotate(Count('kind')))
     inv_counts['normal'] = inv_counts.get('', 0)
+    inv_counts.pop('', None)
     inv_counts['smart'] = inv_counts.get('smart', 0)
     counts['inventories'] = inv_counts
     
     counts['active_host_count'] = models.Host.objects.active_count()   
     active_sessions = Session.objects.filter(expire_date__gte=now()).count()
     api_sessions = models.UserSessionMembership.objects.select_related('session').filter(session__expire_date__gte=now()).count()
-    channels_sessions = active_sessions - api_sessions
+    anonymous_sessions = active_sessions - api_sessions
     counts['active_sessions'] = active_sessions
     counts['active_api_sessions'] = api_sessions
-    counts['active_channels_sessions'] = channels_sessions
+    counts['active_anonymous_sessions'] = anonymous_sessions
     counts['running_jobs'] = models.UnifiedJob.objects.filter(status__in=('running', 'waiting',)).count()
     return counts
 
@@ -184,12 +185,12 @@ def job_instance_counts(since):
 # Copies Job Events from db to a .csv to be shipped
 def copy_tables(since, full_path):
     def _copy_table(table, query, path):
-        events_file = os.path.join(path, table + '_table.csv')
-        write_data = open(events_file, 'w', encoding='utf-8')
+        file_path = os.path.join(path, table + '_table.csv')
+        file = open(file_path, 'w', encoding='utf-8')
         with connection.cursor() as cursor:
-            cursor.copy_expert(query, write_data)
-            write_data.close()
-        return events_file
+            cursor.copy_expert(query, file)
+            file.close()
+        return file_path
 
     events_query = '''COPY (SELECT main_jobevent.id, 
                               main_jobevent.created,
@@ -233,5 +234,25 @@ def copy_tables(since, full_path):
                                  WHERE main_unifiedjob.created > {} and main_unifiedjob.polymorphic_ctype_id = django_content_type.id
                                  ORDER BY main_unifiedjob.id ASC) to stdout'''.format(since.strftime("'%Y-%m-%d %H:%M:%S'"))    
     _copy_table(table='unified_jobs', query=unified_job_query, path=full_path)
+    
+    unified_job_template_query = '''COPY (SELECT main_unifiedjobtemplate.id, 
+                                 main_unifiedjobtemplate.polymorphic_ctype_id,
+                                 django_content_type.model,
+                                 main_unifiedjobtemplate.created, 
+                                 main_unifiedjobtemplate.modified, 
+                                 main_unifiedjobtemplate.created_by_id, 
+                                 main_unifiedjobtemplate.modified_by_id, 
+                                 main_unifiedjobtemplate.name, 
+                                 main_unifiedjobtemplate.current_job_id, 
+                                 main_unifiedjobtemplate.last_job_id, 
+                                 main_unifiedjobtemplate.last_job_failed, 
+                                 main_unifiedjobtemplate.last_job_run, 
+                                 main_unifiedjobtemplate.next_job_run, 
+                                 main_unifiedjobtemplate.next_schedule_id, 
+                                 main_unifiedjobtemplate.status 
+                                 FROM main_unifiedjobtemplate, django_content_type
+                                 WHERE main_unifiedjobtemplate.polymorphic_ctype_id = django_content_type.id
+                                 ORDER BY main_unifiedjobtemplate.id ASC) to stdout'''.format(since.strftime("'%Y-%m-%d %H:%M:%S'"))    
+    _copy_table(table='unified_job_template', query=unified_job_template_query, path=full_path)
     return
 
