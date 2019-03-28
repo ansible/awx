@@ -2508,26 +2508,25 @@ class openstack(PluginFileInjector):
             openstack_data['ansible'] = ansible_variables
         return openstack_data
 
-    def build_script_private_data(self, inventory_update, private_data_dir):
+    def build_script_private_data(self, inventory_update, private_data_dir, mk_cache=True):
         credential = inventory_update.get_cloud_credential()
         private_data = {'credentials': {}}
 
-        openstack_data = self._get_clouds_dict(inventory_update, credential, private_data_dir)
+        openstack_data = self._get_clouds_dict(inventory_update, credential, private_data_dir, mk_cache=mk_cache)
         private_data['credentials'][credential] = yaml.safe_dump(
             openstack_data, default_flow_style=False, allow_unicode=True
         )
         return private_data
 
+    def build_plugin_private_data(self, inventory_update, private_data_dir):
+        # Credentials can be passed in the same way as the script did
+        # but do not create the tmp cache file
+        return self.build_script_private_data(inventory_update, private_data_dir, mk_cache=False)
+
+    def get_plugin_env(self, inventory_update, private_data_dir, private_data_files):
+        return self.get_script_env(inventory_update, private_data_dir, private_data_files)
+
     def inventory_as_dict(self, inventory_update, private_data_dir):
-        credential = inventory_update.get_cloud_credential()
-
-        openstack_data = self._get_clouds_dict(inventory_update, credential, private_data_dir, mk_cache=False)
-        handle, path = tempfile.mkstemp(dir=private_data_dir)
-        f = os.fdopen(handle, 'w')
-        yaml.dump(openstack_data, f, default_flow_style=False)
-        f.close()
-        os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
-
         def use_host_name_for_name(a_bool_maybe):
             if not isinstance(a_bool_maybe, bool):
                 # Could be specified by user via "host" or "uuid"
@@ -2542,7 +2541,6 @@ class openstack(PluginFileInjector):
             fail_on_errors=True,
             expand_hostvars=True,
             inventory_hostname=use_host_name_for_name(False),
-            clouds_yaml_path=[path]  # why a list? it just is
         )
         # Note: mucking with defaults will break import integrity
         # For the plugin, we need to use the same defaults as the old script
