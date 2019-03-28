@@ -1886,6 +1886,8 @@ class PluginFileInjector(object):
         else:
             injector_env = self.get_script_env(inventory_update, private_data_dir, private_data_files)
         env.update(injector_env)
+        # Preserves current behavior for Ansible change in default planned for 2.10
+        env['ANSIBLE_TRANSFORM_INVALID_GROUP_CHARS'] = 'never'
         return env
 
     def _get_shared_env(self, inventory_update, private_data_dir, private_data_files):
