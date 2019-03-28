@@ -55,7 +55,7 @@ aim_inputs = {
         'type': 'string',
         'help_text': _('Object request reason. This is only needed if it is required by the object\'s policy.')
     }],
-    'required': ['url', 'app_id', 'query'],
+    'required': ['url', 'app_id', 'object_query'],
 }
 
 
