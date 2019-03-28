@@ -14,6 +14,8 @@
 # scm_revision: current revision in tower
 # scm_revision_output: where to store gathered revision (temporary file)
 # roles_enabled: Allow us to pull roles from a requirements.yml file
+# awx_version: Current running version of the awx or tower as a string
+# awx_license_type: "open" for AWX; else presume Tower
 
 - hosts: all
   connection: local
@@ -110,6 +112,8 @@
           username: "{{scm_username}}"
           password: "{{scm_password}}"
           project_path: "{{project_path}}"
+          awx_license_type: "{{awx_license_type}}"
+          awx_version: "{{awx_version}}"
         register: results
 
       - name: Save Insights Version

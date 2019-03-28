@@ -40,10 +40,20 @@ class ActionModule(ActionBase):
         username = self._task.args.get('username', None)
         password = self._task.args.get('password', None)
         proj_path = self._task.args.get('project_path', None)
+        license = self._task.args.get('awx_license_type', None)
+        awx_version = self._task.args.get('awx_version', None)
 
         session = requests.Session()
         session.auth = requests.auth.HTTPBasicAuth(username, password)
-        headers = {'Content-Type': 'application/json'}
+        headers = {
+            'Content-Type': 'application/json',
+            'User-Agent': '{} {} ({})'.format(
+                'AWX' if license == 'open' else 'Red Hat Ansible Tower',
+                awx_version,
+                license
+            )
+        }
+
         
         url = '{}/r/insights/v3/maintenance?ansible=true'.format(insights_url)
 
