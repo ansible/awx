@@ -332,5 +332,10 @@ class IsolatedManager(object):
         status, rc = self.dispatch(playbook, module, module_args)
         if status == 'successful':
             status, rc = self.check()
+        else:
+            # emit an EOF event
+            event_data = {'event': 'EOF', 'final_counter': 0}
+            event_data.setdefault(self.event_data_key, self.instance.id)
+            CallbackQueueDispatcher().dispatch(event_data)
         self.cleanup()
         return status, rc
