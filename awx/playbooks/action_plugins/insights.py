@@ -54,9 +54,7 @@ class ActionModule(ActionBase):
                 license
             )
         }
-
-        
-        url = '{}/r/insights/platform/remediations/v1/remediations?sort=-updated_at'.format(insights_url)
+        url = '{}/api/remediations/v1/remediations?sort=-updated_at'.format(insights_url)
 
         res = session.get(url, headers=headers, timeout=120)
 
@@ -81,7 +79,7 @@ class ActionModule(ActionBase):
             return result
 
         for item in res.json()['remediations']:
-            url = '{}/r/insights/platform/remediations/v1/remediations/{}/playbook'.format(
+            url = '{}/api/remediations/v1/remediations/{}/playbook'.format(
                 insights_url, item['id'])
             res = session.get(url, timeout=120)
             if res.status_code != 200:
