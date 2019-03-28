@@ -1429,7 +1429,7 @@ class InventorySourceOptions(BaseModel):
             return ''
 
 
-class InventorySource(UnifiedJobTemplate, InventorySourceOptions, RelatedJobsMixin):
+class InventorySource(UnifiedJobTemplate, InventorySourceOptions, CustomVirtualEnvMixin, RelatedJobsMixin):
 
     SOFT_UNIQUE_TOGETHER = [('polymorphic_ctype', 'name', 'inventory')]
 
@@ -1776,14 +1776,12 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
 
     @property
     def ansible_virtualenv_path(self):
+        if self.inventory_source and self.inventory_source.custom_virtualenv:
+            return self.inventory_source.custom_virtualenv
         if self.inventory_source and self.inventory_source.source_project:
             project = self.inventory_source.source_project
             if project and project.custom_virtualenv:
                 return project.custom_virtualenv
-        if self.inventory_source and self.inventory_source.inventory:
-            organization = self.inventory_source.inventory.organization
-            if organization and organization.custom_virtualenv:
-                return organization.custom_virtualenv
         return settings.ANSIBLE_VENV_PATH
 
     def cancel(self, job_explanation=None, is_chain=False):
