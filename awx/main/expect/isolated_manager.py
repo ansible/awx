@@ -1,3 +1,4 @@
+import fnmatch
 import json
 import os
 import shutil
@@ -15,6 +16,15 @@ from awx.main.queue import CallbackQueueDispatcher
 
 logger = logging.getLogger('awx.isolated.manager')
 playbook_logger = logging.getLogger('awx.isolated.manager.playbooks')
+
+
+def set_pythonpath(venv_libdir, env):
+    env.pop('PYTHONPATH', None)  # default to none if no python_ver matches
+    for version in os.listdir(venv_libdir):
+        if fnmatch.fnmatch(version, 'python[23].*'):
+            if os.path.isdir(os.path.join(venv_libdir, version)):
+                env['PYTHONPATH'] = os.path.join(venv_libdir, version, "site-packages") + ":"
+                break
 
 
 class IsolatedManager(object):
@@ -37,6 +47,7 @@ class IsolatedManager(object):
         env['ANSIBLE_RETRY_FILES_ENABLED'] = 'False'
         env['ANSIBLE_HOST_KEY_CHECKING'] = 'False'
         env['ANSIBLE_LIBRARY'] = os.path.join(os.path.dirname(awx.__file__), 'plugins', 'isolated')
+        set_pythonpath(os.path.join(settings.ANSIBLE_VENV_PATH, 'lib'), env)
 
         def finished_callback(runner_obj):
             if runner_obj.status == 'failed':

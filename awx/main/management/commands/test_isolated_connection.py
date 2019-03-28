@@ -1,3 +1,4 @@
+import os
 import shutil
 import sys
 import tempfile
@@ -6,6 +7,8 @@ from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 
 import ansible_runner
+
+from awx.main.expect.isolated_manager import set_pythonpath
 
 
 class Command(BaseCommand):
@@ -29,12 +32,15 @@ class Command(BaseCommand):
                 getattr(settings, 'AWX_ISOLATED_PRIVATE_KEY', None)
             ]):
                 ssh_key = settings.AWX_ISOLATED_PRIVATE_KEY
+            env = dict(os.environ.items())
+            set_pythonpath(os.path.join(settings.ANSIBLE_VENV_PATH, 'lib'), env)
             res = ansible_runner.interface.run(
                 private_data_dir=path,
                 host_pattern='all',
                 inventory='{} ansible_ssh_user={}'.format(hostname, settings.AWX_ISOLATED_USERNAME),
                 module='shell',
                 module_args='ansible-runner --version',
+                envvars=env,
                 verbosity=3,
                 ssh_key=ssh_key,
             )

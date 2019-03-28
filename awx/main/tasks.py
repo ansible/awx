@@ -4,7 +4,6 @@
 # Python
 from collections import OrderedDict, namedtuple
 import errno
-import fnmatch
 import functools
 import importlib
 import json
@@ -870,12 +869,8 @@ class BaseTask(object):
             raise RuntimeError(
                 'a valid Python virtualenv does not exist at {}'.format(venv_path)
             )
-        env.pop('PYTHONPATH', None)  # default to none if no python_ver matches
-        for version in os.listdir(venv_libdir):
-            if fnmatch.fnmatch(version, 'python[23].*'):
-                if os.path.isdir(os.path.join(venv_libdir, version)):
-                    env['PYTHONPATH'] = os.path.join(venv_libdir, version, "site-packages") + ":"
-                    break
+
+        isolated_manager.set_pythonpath(venv_libdir, env)
 
     def add_awx_venv(self, env):
         env['VIRTUAL_ENV'] = settings.AWX_VENV_PATH
