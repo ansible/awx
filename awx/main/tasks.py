@@ -946,9 +946,6 @@ class BaseTask(object):
     def build_credentials_list(self, instance):
         return []
 
-    def get_idle_timeout(self):
-        return None
-
     def get_instance_timeout(self, instance):
         global_timeout_setting_name = instance._global_timeout_setting()
         if global_timeout_setting_name:
@@ -1149,7 +1146,6 @@ class BaseTask(object):
                 'finished_callback': self.finished_callback,
                 'status_handler': self.status_handler,
                 'settings': {
-                    'idle_timeout': self.get_idle_timeout() or "",
                     'job_timeout': self.get_instance_timeout(self.instance),
                     'pexpect_timeout': getattr(settings, 'PEXPECT_TIMEOUT', 5),
                     **process_isolation_params,
@@ -1187,8 +1183,7 @@ class BaseTask(object):
                 copy_tree(cwd, os.path.join(private_data_dir, 'project'))
                 ansible_runner.utils.dump_artifacts(params)
                 manager_instance = isolated_manager.IsolatedManager(
-                    cancelled_callback=lambda: self.update_model(self.instance.pk).cancel_flag,
-                    idle_timeout=self.get_idle_timeout(),
+                    cancelled_callback=lambda: self.update_model(self.instance.pk).cancel_flag
                 )
                 status, rc = manager_instance.run(self.instance,
                                                   private_data_dir,
@@ -1492,9 +1487,6 @@ class RunJob(BaseTask):
     def build_credentials_list(self, job):
         return job.credentials.all()
 
-    def get_idle_timeout(self):
-        return getattr(settings, 'JOB_RUN_IDLE_TIMEOUT', None)
-
     def get_password_prompts(self, passwords={}):
         d = super(RunJob, self).get_password_prompts(passwords)
         d[r'Enter passphrase for .*:\s*?$'] = 'ssh_key_unlock'
@@ -1767,9 +1759,6 @@ class RunProjectUpdate(BaseTask):
         # FIXME: Configure whether we should auto accept host keys?
         d[r'^Are you sure you want to continue connecting \(yes/no\)\?\s*?$'] = 'yes'
         return d
-
-    def get_idle_timeout(self):
-        return getattr(settings, 'PROJECT_UPDATE_IDLE_TIMEOUT', None)
 
     def _update_dependent_inventories(self, project_update, dependent_inventory_sources):
         scm_revision = project_update.project.scm_revision
@@ -2131,9 +2120,6 @@ class RunInventoryUpdate(BaseTask):
         # All credentials not used by inventory source injector
         return inventory_update.get_extra_credentials()
 
-    def get_idle_timeout(self):
-        return getattr(settings, 'INVENTORY_UPDATE_IDLE_TIMEOUT', None)
-
     def pre_run_hook(self, inventory_update):
         source_project = None
         if inventory_update.inventory_source:
@@ -2320,9 +2306,6 @@ class RunAdHocCommand(BaseTask):
 
     def build_playbook_path_relative_to_cwd(self, job, private_data_dir):
         return None
-
-    def get_idle_timeout(self):
-        return getattr(settings, 'JOB_RUN_IDLE_TIMEOUT', None)
 
     def get_password_prompts(self, passwords={}):
         d = super(RunAdHocCommand, self).get_password_prompts()

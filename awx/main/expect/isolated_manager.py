@@ -29,17 +29,14 @@ def set_pythonpath(venv_libdir, env):
 
 class IsolatedManager(object):
 
-    def __init__(self, cancelled_callback=None, idle_timeout=None):
+    def __init__(self, cancelled_callback=None):
         """
         :param cancelled_callback:  a callable - which returns `True` or `False`
                                     - signifying if the job has been prematurely
                                       cancelled
-        :param idle_timeout         a timeout (in seconds); if new output is not
-                                    sent to stdout in this interval, the process
-                                    will be terminated
         """
         self.cancelled_callback = cancelled_callback
-        self.idle_timeout = idle_timeout or max(60, 2 * settings.AWX_ISOLATED_CONNECTION_TIMEOUT)
+        self.idle_timeout = max(60, 2 * settings.AWX_ISOLATED_CONNECTION_TIMEOUT)
         self.started_at = None
 
     def build_runner_params(self, hosts, verbosity=1):
@@ -50,7 +47,21 @@ class IsolatedManager(object):
         set_pythonpath(os.path.join(settings.ANSIBLE_VENV_PATH, 'lib'), env)
 
         def finished_callback(runner_obj):
-            if runner_obj.status == 'failed':
+            if runner_obj.status == 'failed' and runner_obj.config.playbook != 'check_isolated.yml':
+                # failed for clean_isolated.yml just means the playbook hasn't
+                # exited on the isolated host
+                stdout = runner_obj.stdout.read()
+                playbook_logger.error(stdout)
+            elif runner_obj.status == 'timeout':
+                # this means that the default idle timeout of
+                # (2 * AWX_ISOLATED_CONNECTION_TIMEOUT) was exceeded
+                # (meaning, we tried to sync with an isolated node, and we got
+                # no new output for 2 * AWX_ISOLATED_CONNECTION_TIMEOUT seconds)
+                # this _usually_ means SSH key auth from the controller ->
+                # isolated didn't work, and ssh is hung waiting on interactive
+                # input e.g.,
+                #
+                # awx@isolated's password:
                 stdout = runner_obj.stdout.read()
                 playbook_logger.error(stdout)
             else:
