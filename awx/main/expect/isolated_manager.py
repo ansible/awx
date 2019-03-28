@@ -53,8 +53,6 @@ class IsolatedManager(object):
             if runner_obj.status == 'failed':
                 stdout = runner_obj.stdout.read()
                 playbook_logger.error(stdout)
-                event_data = {'event': 'verbose', 'stdout': stdout, self.event_data_key: self.instance.id}
-                CallbackQueueDispatcher().dispatch(event_data)
             else:
                 playbook_logger.info(runner_obj.stdout.read())
 
