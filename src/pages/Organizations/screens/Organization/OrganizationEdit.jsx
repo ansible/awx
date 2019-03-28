@@ -85,4 +85,5 @@ OrganizationEdit.contextTypes = {
   custom_virtualenvs: PropTypes.arrayOf(PropTypes.string)
 };
 
+export { OrganizationEdit as OrganizationEditNoRouter };
 export default withRouter(OrganizationEdit);

@@ -19,8 +19,6 @@ class OrganizationAdd extends React.Component {
   constructor (props) {
     super(props);
 
-    this.handleFieldChange = this.handleFieldChange.bind(this);
-    this.handleInstanceGroupsChange = this.handleInstanceGroupsChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleCancel = this.handleCancel.bind(this);
     this.handleSuccess = this.handleSuccess.bind(this);
@@ -28,14 +26,6 @@ class OrganizationAdd extends React.Component {
     this.state = {
       error: '',
     };
-  }
-
-  handleFieldChange (val, evt) {
-    this.setState({ [evt.target.name]: val || evt.target.value });
-  }
-
-  handleInstanceGroupsChange (val, targetName) {
-    this.setState({ [targetName]: val });
   }
 
   async handleSubmit (values, groupsToAssociate) {
@@ -114,4 +104,5 @@ OrganizationAdd.contextTypes = {
   custom_virtualenvs: PropTypes.arrayOf(PropTypes.string)
 };
 
+export { OrganizationAdd as OrganizationAddNoRouter };
 export default withRouter(OrganizationAdd);

@@ -65,7 +65,7 @@ class OrganizationForm extends Component {
     this.setState({ instanceGroups });
   }
 
-  async handleSubmit (values) {
+  handleSubmit (values) {
     const { handleSubmit } = this.props;
     const { instanceGroups, initialInstanceGroups } = this.state;
 

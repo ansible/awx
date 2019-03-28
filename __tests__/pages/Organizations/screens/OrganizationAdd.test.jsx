@@ -1,9 +1,11 @@
 import React from 'react';
 import { mount } from 'enzyme';
-import { MemoryRouter, Router } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 import { I18nProvider } from '@lingui/react';
 import { ConfigContext } from '../../../../src/context';
-import OrganizationAdd from '../../../../src/pages/Organizations/screens/OrganizationAdd';
+import OrganizationAdd, { OrganizationAddNoRouter } from '../../../../src/pages/Organizations/screens/OrganizationAdd';
+
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 describe('<OrganizationAdd />', () => {
   let api;
@@ -11,184 +13,140 @@ describe('<OrganizationAdd />', () => {
   beforeEach(() => {
     api = {
       getInstanceGroups: jest.fn(),
+      createOrganization: jest.fn(),
+      associateInstanceGroup: jest.fn(),
+      disassociate: jest.fn(),
     };
   });
 
-  test('initially renders succesfully', () => {
-    mount(
-      <MemoryRouter>
-        <I18nProvider>
-          <OrganizationAdd
-            api={api}
-            match={{ path: '/organizations/add', url: '/organizations/add' }}
-            location={{ search: '', pathname: '/organizations/add' }}
-          />
-        </I18nProvider>
-      </MemoryRouter>
-    );
-  });
-
-  test('calls "handleFieldChange" when input values change', () => {
-    const spy = jest.spyOn(OrganizationAdd.WrappedComponent.prototype, 'handleFieldChange');
+  test('handleSubmit should post to api', () => {
     const wrapper = mount(
       <MemoryRouter>
         <I18nProvider>
           <OrganizationAdd
             api={api}
-            match={{ path: '/organizations/add', url: '/organizations/add' }}
-            location={{ search: '', pathname: '/organizations/add' }}
           />
         </I18nProvider>
       </MemoryRouter>
     );
-    expect(spy).not.toHaveBeenCalled();
-    wrapper.find('input#add-org-form-name').simulate('change', { target: { value: 'foo' } });
-    wrapper.find('input#add-org-form-description').simulate('change', { target: { value: 'bar' } });
-    expect(spy).toHaveBeenCalledTimes(2);
+
+    const updatedOrgData = {
+      name: 'new name',
+      description: 'new description',
+      custom_virtualenv: 'Buzz',
+    };
+    wrapper.find('OrganizationForm').prop('handleSubmit')(updatedOrgData, [], []);
+
+    expect(api.createOrganization).toHaveBeenCalledWith(updatedOrgData);
   });
 
-  test('calls "handleSubmit" when Save button is clicked', () => {
-    const spy = jest.spyOn(OrganizationAdd.WrappedComponent.prototype, 'handleSubmit');
+  test('should navigate to organizations list when cancel is clicked', () => {
+    const history = {
+      push: jest.fn(),
+    };
     const wrapper = mount(
       <MemoryRouter>
         <I18nProvider>
-          <OrganizationAdd
+          <OrganizationAddNoRouter
+            history={history}
             api={api}
-            match={{ path: '/organizations/add', url: '/organizations/add' }}
-            location={{ search: '', pathname: '/organizations/add' }}
           />
         </I18nProvider>
       </MemoryRouter>
     );
-    expect(spy).not.toHaveBeenCalled();
-    wrapper.find('button[aria-label="Save"]').prop('onClick')();
-    expect(spy).toBeCalled();
-  });
 
-  test('calls "handleCancel" when Cancel button is clicked', () => {
-    const spy = jest.spyOn(OrganizationAdd.WrappedComponent.prototype, 'handleCancel');
-    const wrapper = mount(
-      <MemoryRouter>
-        <I18nProvider>
-          <OrganizationAdd
-            api={api}
-            match={{ path: '/organizations/add', url: '/organizations/add' }}
-            location={{ search: '', pathname: '/organizations/add' }}
-          />
-        </I18nProvider>
-      </MemoryRouter>
-    );
-    expect(spy).not.toHaveBeenCalled();
+    expect(history.push).not.toHaveBeenCalled();
     wrapper.find('button[aria-label="Cancel"]').prop('onClick')();
-    expect(spy).toBeCalled();
+
+    expect(history.push).toHaveBeenCalledWith('/organizations');
   });
 
-  test('calls "handleCancel" when close button (x) is clicked', () => {
+  test('should navigate to organizations list when close (x) is clicked', () => {
+    const history = {
+      push: jest.fn(),
+    };
     const wrapper = mount(
-      <MemoryRouter initialEntries={['/organizations/add']} initialIndex={0}>
+      <MemoryRouter>
         <I18nProvider>
-          <OrganizationAdd
+          <OrganizationAddNoRouter
+            history={history}
             api={api}
-            match={{ path: '/organizations/add', url: '/organizations/add' }}
-            location={{ search: '', pathname: '/organizations/add' }}
           />
         </I18nProvider>
       </MemoryRouter>
     );
-    const history = wrapper.find(Router).prop('history');
-    expect(history.length).toBe(1);
-    expect(history.location.pathname).toEqual('/organizations/add');
+
+    expect(history.push).not.toHaveBeenCalled();
     wrapper.find('button[aria-label="Close"]').prop('onClick')();
-    expect(history.length).toBe(2);
-    expect(history.location.pathname).toEqual('/organizations');
+
+    expect(history.push).toHaveBeenCalledWith('/organizations');
   });
 
-  test('Successful form submission triggers redirect', (done) => {
-    const handleSuccess = jest.spyOn(OrganizationAdd.WrappedComponent.prototype, 'handleSuccess');
-    const mockedResp = { data: { id: 1, related: { instance_groups: '/bar' } } };
-    api.createOrganization = jest.fn().mockResolvedValue(mockedResp); api.associateInstanceGroup = jest.fn().mockResolvedValue('done');
+  test('successful form submission should trigger redirect', async () => {
+    const history = {
+      push: jest.fn(),
+    };
+    const orgData = {
+      name: 'new name',
+      description: 'new description',
+      custom_virtualenv: 'Buzz',
+    };
+    api.createOrganization.mockReturnValueOnce({
+      data: {
+        id: 5,
+        related: {
+          instance_groups: '/bar',
+        },
+        ...orgData,
+      }
+    });
     const wrapper = mount(
       <MemoryRouter>
         <I18nProvider>
-          <OrganizationAdd api={api} />
+          <OrganizationAddNoRouter
+            history={history}
+            api={api}
+          />
         </I18nProvider>
       </MemoryRouter>
     );
-    wrapper.find('input#add-org-form-name').simulate('change', { target: { value: 'foo' } });
-    wrapper.find('button[aria-label="Save"]').prop('onClick')();
-    setImmediate(() => {
-      expect(handleSuccess).toHaveBeenCalled();
-      done();
-    });
+
+    wrapper.find('OrganizationForm').prop('handleSubmit')(orgData, [], []);
+    await sleep(0);
+
+    expect(history.push).toHaveBeenCalledWith('/organizations/5');
   });
 
-  test('changing instance groups successfully sets instanceGroups state', () => {
+  test('handleSubmit should post instance groups', async () => {
     const wrapper = mount(
       <MemoryRouter>
         <I18nProvider>
-          <OrganizationAdd api={api} />
+          <OrganizationAdd
+            api={api}
+          />
         </I18nProvider>
       </MemoryRouter>
-    ).find('OrganizationAdd');
+    );
 
-    wrapper.find('InstanceGroupsLookup').prop('onChange')([
-      {
-        id: 1,
-        name: 'foo'
-      }
-    ], 'instanceGroups');
-    expect(wrapper.state('instanceGroups')).toEqual([
-      {
-        id: 1,
-        name: 'foo'
-      }
-    ]);
-  });
-
-  test('handleFieldChange successfully sets custom_virtualenv state', () => {
-    const wrapper = mount(
-      <MemoryRouter>
-        <I18nProvider>
-          <OrganizationAdd api={api} />
-        </I18nProvider>
-      </MemoryRouter>
-    ).find('OrganizationAdd');
-    wrapper.instance().handleFieldChange('fooBar', { target: { name: 'custom_virtualenv' } });
-    expect(wrapper.state('custom_virtualenv')).toBe('fooBar');
-  });
-
-  test('handleSubmit posts instance groups from selectedInstanceGroups', async () => {
-    api.createOrganization = jest.fn().mockResolvedValue({
+    const orgData = {
+      name: 'new name',
+      description: 'new description',
+      custom_virtualenv: 'Buzz',
+    };
+    api.createOrganization.mockReturnValueOnce({
       data: {
-        id: 1,
-        name: 'mock org',
+        id: 5,
         related: {
-          instance_groups: '/api/v2/organizations/1/instance_groups'
-        }
+          instance_groups: '/api/v2/organizations/5/instance_groups',
+        },
+        ...orgData,
       }
     });
-    api.associateInstanceGroup = jest.fn().mockResolvedValue('done');
-    const wrapper = mount(
-      <MemoryRouter>
-        <I18nProvider>
-          <OrganizationAdd api={api} />
-        </I18nProvider>
-      </MemoryRouter>
-    ).find('OrganizationAdd');
-    wrapper.setState({
-      name: 'mock org',
-      instanceGroups: [{
-        id: 1,
-        name: 'foo'
-      }]
-    });
-    await wrapper.instance().handleSubmit();
-    expect(api.createOrganization).toHaveBeenCalledWith({
-      custom_virtualenv: '',
-      description: '',
-      name: 'mock org'
-    });
-    expect(api.associateInstanceGroup).toHaveBeenCalledWith('/api/v2/organizations/1/instance_groups', 1);
+    wrapper.find('OrganizationForm').prop('handleSubmit')(orgData, [3], []);
+    await sleep(0);
+
+    expect(api.associateInstanceGroup)
+      .toHaveBeenCalledWith('/api/v2/organizations/5/instance_groups', 3);
   });
 
   test('AnsibleSelect component renders if there are virtual environments', () => {

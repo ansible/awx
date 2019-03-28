@@ -11,7 +11,8 @@ export function required (message) {
 
 export function maxLength (max) {
   return value => {
-    if (value.trim() > max) {
+    if (value.trim().length
+     > max) {
       return i18nMark(`This field must not exceed ${max} characters`);
     }
     return undefined;
