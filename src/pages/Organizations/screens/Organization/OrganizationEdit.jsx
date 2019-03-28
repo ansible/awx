@@ -9,9 +9,8 @@ class OrganizationEdit extends Component {
   constructor (props) {
     super(props);
 
-    // this.getRelatedInstanceGroups = this.getRelatedInstanceGroups.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.postInstanceGroups = this.postInstanceGroups.bind(this);
+    this.submitInstanceGroups = this.submitInstanceGroups.bind(this);
     this.handleCancel = this.handleCancel.bind(this);
     this.handleSuccess = this.handleSuccess.bind(this);
 
@@ -24,7 +23,7 @@ class OrganizationEdit extends Component {
     const { api, organization } = this.props;
     try {
       await api.updateOrganizationDetails(organization.id, values);
-      await this.postInstanceGroups(groupsToAssociate, groupsToDisassociate);
+      await this.submitInstanceGroups(groupsToAssociate, groupsToDisassociate);
     } catch (err) {
       this.setState({ error: err });
     } finally {
@@ -42,7 +41,7 @@ class OrganizationEdit extends Component {
     history.push(`/organizations/${id}`);
   }
 
-  async postInstanceGroups (groupsToAssociate, groupsToDisassociate) {
+  async submitInstanceGroups (groupsToAssociate, groupsToDisassociate) {
     const { api, organization } = this.props;
     const url = organization.related.instance_groups;
 
