@@ -6,12 +6,11 @@ from awx.main.analytics import collectors
 
 @pytest.mark.django_db
 def test_empty():
-    print(collectors.counts(None))
     assert collectors.counts(None) == {
-        "active_api_sessions": 0,
+        "active_user_sessions": 0,
         "active_anonymous_sessions": 0,
-        "active_host_count": 0,
         "active_sessions": 0,
+        "active_host_count": 0,
         "credential": 0,
         "custom_inventory_script": 0,
         "custom_virtualenvs": 0,   # dev env ansible3

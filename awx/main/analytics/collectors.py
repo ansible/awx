@@ -54,8 +54,7 @@ def counts(since):
     for cls in (models.Organization, models.Team, models.User,
                 models.Inventory, models.Credential, models.Project,
                 models.JobTemplate, models.WorkflowJobTemplate, 
-                models.UnifiedJob, models.Host,
-                models.Schedule, models.CustomInventoryScript,
+                models.Host, models.Schedule, models.CustomInventoryScript, 
                 models.NotificationTemplate):
         counts[camelcase_to_underscore(cls.__name__)] = cls.objects.count()
 
@@ -71,14 +70,15 @@ def counts(since):
     inv_counts['smart'] = inv_counts.get('smart', 0)
     counts['inventories'] = inv_counts
     
+    counts['unified_job'] = models.UnifiedJob.objects.exclude(launch_type='sync').count() # excludes implicit project_updates
     counts['active_host_count'] = models.Host.objects.active_count()   
     active_sessions = Session.objects.filter(expire_date__gte=now()).count()
-    api_sessions = models.UserSessionMembership.objects.select_related('session').filter(session__expire_date__gte=now()).count()
-    anonymous_sessions = active_sessions - api_sessions
+    active_user_sessions = models.UserSessionMembership.objects.select_related('session').filter(session__expire_date__gte=now()).count()
+    active_anonymous_sessions = active_sessions - active_user_sessions
     counts['active_sessions'] = active_sessions
-    counts['active_api_sessions'] = api_sessions
-    counts['active_anonymous_sessions'] = anonymous_sessions
-    counts['running_jobs'] = models.UnifiedJob.objects.filter(status__in=('running', 'waiting',)).count()
+    counts['active_user_sessions'] = active_user_sessions
+    counts['active_anonymous_sessions'] = active_anonymous_sessions
+    counts['running_jobs'] = models.UnifiedJob.objects.exclude(launch_type='sync').filter(status__in=('running', 'waiting',)).count()
     return counts
 
     
@@ -160,9 +160,9 @@ def instance_info(since):
 @register('job_counts')
 def job_counts(since):
     counts = {}
-    counts['total_jobs'] = models.UnifiedJob.objects.count()
-    counts['status'] = dict(models.UnifiedJob.objects.values_list('status').annotate(Count('status')))
-    counts['launch_type'] = dict(models.UnifiedJob.objects.values_list('launch_type').annotate(Count('launch_type')))
+    counts['total_jobs'] = models.UnifiedJob.objects.exclude(launch_type='sync').count()
+    counts['status'] = dict(models.UnifiedJob.objects.exclude(launch_type='sync').values_list('status').annotate(Count('status')))
+    counts['launch_type'] = dict(models.UnifiedJob.objects.exclude(launch_type='sync').values_list('launch_type').annotate(Count('launch_type')))
     
     return counts
     
@@ -170,12 +170,12 @@ def job_counts(since):
 @register('job_instance_counts')
 def job_instance_counts(since):
     counts = {}
-    job_types = models.UnifiedJob.objects.values_list(
+    job_types = models.UnifiedJob.objects.exclude(launch_type='sync').values_list(
         'execution_node', 'launch_type').annotate(job_launch_type=Count('launch_type'))
     for job in job_types:
         counts.setdefault(job[0], {}).setdefault('status', {})[job[1]] = job[2]
         
-    job_statuses = models.UnifiedJob.objects.values_list(
+    job_statuses = models.UnifiedJob.objects.exclude(launch_type='sync').values_list(
         'execution_node', 'status').annotate(job_status=Count('status'))
     for job in job_statuses:
         counts.setdefault(job[0], {}).setdefault('launch_type', {})[job[1]] = job[2]
@@ -231,7 +231,9 @@ def copy_tables(since, full_path):
                                  main_unifiedjob.job_explanation, 
                                  main_unifiedjob.instance_group_id
                                  FROM main_unifiedjob, django_content_type
-                                 WHERE main_unifiedjob.created > {} and main_unifiedjob.polymorphic_ctype_id = django_content_type.id
+                                 WHERE main_unifiedjob.created > {} AND 
+                                 main_unifiedjob.polymorphic_ctype_id = django_content_type.id AND 
+                                 main_unifiedjob.launch_type != 'sync'
                                  ORDER BY main_unifiedjob.id ASC) to stdout'''.format(since.strftime("'%Y-%m-%d %H:%M:%S'"))    
     _copy_table(table='unified_jobs', query=unified_job_query, path=full_path)
     
