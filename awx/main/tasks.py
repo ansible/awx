@@ -1187,14 +1187,17 @@ class BaseTask(object):
             if self.instance.is_isolated() is True:
                 module_args = None
                 if 'module_args' in params:
+                    # if it's adhoc, copy the module args
                     module_args = ansible_runner.utils.args2cmdline(
                         params.get('module_args'),
                     )
+                else:
+                    # otherwise, it's a playbook, so copy the project dir
+                    copy_tree(cwd, os.path.join(private_data_dir, 'project'))
                 shutil.move(
                     params.pop('inventory'),
                     os.path.join(private_data_dir, 'inventory')
                 )
-                copy_tree(cwd, os.path.join(private_data_dir, 'project'))
                 ansible_runner.utils.dump_artifacts(params)
                 manager_instance = isolated_manager.IsolatedManager(
                     cancelled_callback=lambda: self.update_model(self.instance.pk).cancel_flag
