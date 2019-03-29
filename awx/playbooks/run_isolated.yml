@@ -18,7 +18,7 @@
         src: "{{src}}"
         dest: "{{dest}}"
 
-    - stat: path="{{src}}/env/ssh_key"
+    - local_action: stat path="{{src}}/env/ssh_key"
       register: key
 
     - name: create a named pipe for secret environment data
