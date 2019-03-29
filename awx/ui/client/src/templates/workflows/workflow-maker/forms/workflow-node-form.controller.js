@@ -656,6 +656,28 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
                 });
         };
 
+        const formatPopOverDetails = (model) => {
+            model.popOverDetails = {};
+            model.popOverDetails.playbook = model.playbook || i18n._('NONE SELECTED');
+            Object.keys(model.summary_fields).forEach(field => {
+                if (field === 'project') {
+                    model.popOverDetails.project = model.summary_fields[field].name || i18n._('NONE SELECTED');
+                }
+                if (field === 'inventory') {
+                    model.popOverDetails.inventory = model.summary_fields[field].name || i18n._('NONE SELECTED');
+                }
+                if (field === 'credentials') {
+                    if (model.summary_fields[field].length <= 0) {
+                        model.popOverDetails.credentials = i18n._('NONE SELECTED');
+                    }
+                    else {
+                        const credentialNames = model.summary_fields[field].map(({name}) => name);
+                        model.popOverDetails.credentials = credentialNames.join('<br />');
+                    }
+                }
+            });
+        };
+
         $scope.openPromptModal = () => {
             $scope.promptData.triggerModalOpen = true;
         };
@@ -677,6 +699,9 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
             switch($scope.activeTab) {
                 case 'jobs':
                     $scope.wf_maker_templates.forEach((row, i) => {
+                        if (row.type === 'job_template') {
+                            formatPopOverDetails(row);
+                        }
                         if(row.id === unifiedJobTemplateId) {
                             $scope.wf_maker_templates[i].checked = 1;
                         }
