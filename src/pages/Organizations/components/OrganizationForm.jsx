@@ -10,6 +10,7 @@ import {
 } from '@patternfly/react-core';
 
 import { ConfigContext } from '../../../context';
+import FormRow from '../../../components/FormRow';
 import FormField from '../../../components/FormField';
 import FormActionGroup from '../../../components/FormActionGroup';
 import AnsibleSelect from '../../../components/AnsibleSelect';
@@ -96,13 +97,7 @@ class OrganizationForm extends Component {
             onSubmit={this.handleSubmit}
             render={formik => (
               <Form autoComplete="off" onSubmit={formik.handleSubmit}>
-                <div
-                  style={{
-                    display: 'grid',
-                    gridGap: '20px',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))'
-                  }}
-                >
+                <FormRow>
                   <FormField
                     id="edit-org-form-name"
                     name="name"
@@ -139,7 +134,7 @@ class OrganizationForm extends Component {
                       )
                     )}
                   </ConfigContext.Consumer>
-                </div>
+                </FormRow>
                 <InstanceGroupsLookup
                   api={api}
                   value={instanceGroups}

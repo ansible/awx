@@ -3,7 +3,7 @@ import { mount } from 'enzyme';
 import { MemoryRouter } from 'react-router-dom';
 import { I18nProvider } from '@lingui/react';
 import { ConfigContext } from '../../../../src/context';
-import OrganizationAdd, { OrganizationAddNoRouter } from '../../../../src/pages/Organizations/screens/OrganizationAdd';
+import OrganizationAdd, { _OrganizationAdd } from '../../../../src/pages/Organizations/screens/OrganizationAdd';
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -47,7 +47,7 @@ describe('<OrganizationAdd />', () => {
     const wrapper = mount(
       <MemoryRouter>
         <I18nProvider>
-          <OrganizationAddNoRouter
+          <_OrganizationAdd
             history={history}
             api={api}
           />
@@ -68,7 +68,7 @@ describe('<OrganizationAdd />', () => {
     const wrapper = mount(
       <MemoryRouter>
         <I18nProvider>
-          <OrganizationAddNoRouter
+          <_OrganizationAdd
             history={history}
             api={api}
           />
@@ -103,7 +103,7 @@ describe('<OrganizationAdd />', () => {
     const wrapper = mount(
       <MemoryRouter>
         <I18nProvider>
-          <OrganizationAddNoRouter
+          <_OrganizationAdd
             history={history}
             api={api}
           />

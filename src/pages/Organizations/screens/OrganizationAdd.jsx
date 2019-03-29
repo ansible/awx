@@ -104,5 +104,5 @@ OrganizationAdd.contextTypes = {
   custom_virtualenvs: PropTypes.arrayOf(PropTypes.string)
 };
 
-export { OrganizationAdd as OrganizationAddNoRouter };
+export { OrganizationAdd as _OrganizationAdd };
 export default withRouter(OrganizationAdd);
