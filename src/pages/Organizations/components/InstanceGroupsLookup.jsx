@@ -27,7 +27,7 @@ class InstanceGroupsLookup extends React.Component {
   }
 
   render () {
-    const { value, onChange } = this.props;
+    const { value, tooltip, onChange } = this.props;
 
     return (
       <I18n>
@@ -37,12 +37,16 @@ class InstanceGroupsLookup extends React.Component {
               <Fragment>
                 {i18n._(t`Instance Groups`)}
                 {' '}
-                <Tooltip
-                  position="right"
-                  content={i18n._(t`Select the Instance Groups for this Organization to run on.`)}
-                >
-                  <QuestionCircleIcon />
-                </Tooltip>
+                {
+                  tooltip && (
+                    <Tooltip
+                      position="right"
+                      content={tooltip}
+                    >
+                      <QuestionCircleIcon />
+                    </Tooltip>
+                  )
+                }
               </Fragment>
             )}
             fieldId="add-org-form-instance-groups"
@@ -68,7 +72,12 @@ InstanceGroupsLookup.propTypes = {
     getInstanceGroups: PropTypes.func,
   }).isRequired,
   value: PropTypes.arrayOf(PropTypes.object).isRequired,
+  tooltip: PropTypes.string,
   onChange: PropTypes.func.isRequired,
+};
+
+InstanceGroupsLookup.defaultProps = {
+  tooltip: '',
 };
 
 export default InstanceGroupsLookup;

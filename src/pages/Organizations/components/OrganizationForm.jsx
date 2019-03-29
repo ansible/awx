@@ -139,6 +139,7 @@ class OrganizationForm extends Component {
                   api={api}
                   value={instanceGroups}
                   onChange={this.handleInstanceGroupsChange}
+                  tooltip={i18n._(t`Select the Instance Groups for this Organization to run on.`)}
                 />
                 <FormActionGroup
                   onCancel={handleCancel}
