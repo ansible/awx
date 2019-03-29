@@ -72,6 +72,10 @@ function AddEditCredentialsController (
         vm.form.credential_type._displayValue = credentialType.get('name');
         vm.isTestable = (isEditable && credentialType.get('kind') === 'external');
 
+        if (credential.get('related.input_sources.results.length' > 0)) {
+            vm.form.credential_type._disabled = true;
+        }
+
         $scope.$watch('$state.current.name', (value) => {
             if (/credentials.edit($|\.organization$|\.credentialType$)/.test(value)) {
                 vm.tab.details._active = true;
@@ -548,8 +552,8 @@ function AddEditCredentialsController (
         filteredInputs = _.omit(filteredInputs, updatedLinkedFieldNames);
         data.inputs = filteredInputs;
 
-        return Promise.all(sourcesToDisassociate.map(deleteInputSource))
-            .then(() => credential.request('put', { data }))
+        return credential.request('put', { data })
+            .then(() => Promise.all(sourcesToDisassociate.map(deleteInputSource)))
             .then(() => Promise.all(sourcesToAssociate.map(createInputSource)));
     }
 
