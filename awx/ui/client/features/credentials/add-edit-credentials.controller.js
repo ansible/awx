@@ -141,7 +141,9 @@ function AddEditCredentialsController (
             if (credentialType.get('name') === 'Google Compute Engine') {
                 fields.splice(2, 0, gceFileInputSchema);
                 $scope.$watch(`vm.form.${gceFileInputSchema.id}._value`, gceOnFileInputChanged);
-                $scope.$watch('vm.form.ssh_key_data._isBeingReplaced', gceOnReplaceKeyChanged);
+                if (mode === 'edit') {
+                    $scope.$watch('vm.form.ssh_key_data._isBeingReplaced', gceOnReplaceKeyChanged);
+                }
             }
 
             vm.inputSources.initialItems = credential.get('related.input_sources.results');
@@ -587,9 +589,24 @@ function AddEditCredentialsController (
                 ssh_key_data: vm.form.ssh_key_data._value,
                 username: vm.form.username._value
             });
+
+            vm.form.project.asTag = false;
             vm.form.project._value = _.get(obj, 'project_id', '');
+            vm.inputSources.changedInputFields.push('project');
+            vm.inputSources.items = vm.inputSources.items
+                .filter(({ input_field_name }) => input_field_name !== 'project');
+
+            vm.form.ssh_key_data.asTag = false;
             vm.form.ssh_key_data._value = _.get(obj, 'private_key', '');
+            vm.inputSources.changedInputFields.push('ssh_key_data');
+            vm.inputSources.items = vm.inputSources.items
+                .filter(({ input_field_name }) => input_field_name !== 'ssh_key_data');
+
+            vm.form.username.asTag = false;
             vm.form.username._value = _.get(obj, 'client_email', '');
+            vm.inputSources.changedInputFields.push('username');
+            vm.inputSources.items = vm.inputSources.items
+                .filter(({ input_field_name }) => input_field_name !== 'username');
         } else {
             vm.form.project._value = gceFileInputPreEditValues.project;
             vm.form.ssh_key_data._value = gceFileInputPreEditValues.ssh_key_data;

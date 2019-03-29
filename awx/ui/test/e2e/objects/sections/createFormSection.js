@@ -21,11 +21,11 @@ const inputContainerElements = {
     },
     show: {
         locateStrategy: 'xpath',
-        selector: `.//button[${normalized}='show']`
+        selector: './/i[contains(@class, "fa fa-eye")]'
     },
     hide: {
         locateStrategy: 'xpath',
-        selector: `.//button[${normalized}='hide']`
+        selector: './/i[contains(@class, "fa fa-eye-slash")]'
     },
     on: {
         locateStrategy: 'xpath',
@@ -37,11 +37,11 @@ const inputContainerElements = {
     },
     replace: {
         locateStrategy: 'xpath',
-        selector: `.//button[${normalized}='replace']`
+        selector: './/i[contains(@class, "fa fa-undo")]'
     },
     revert: {
         locateStrategy: 'xpath',
-        selector: `.//button[${normalized}='revert']`
+        selector: './/i[contains(@class, "fa fa-undo fa-flip-horizontal")]'
     }
 };
 
