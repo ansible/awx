@@ -57,7 +57,7 @@ from awx.main.models import (
 from awx.main.constants import ACTIVE_STATES
 from awx.main.exceptions import AwxTaskError
 from awx.main.queue import CallbackQueueDispatcher
-from awx.main.expect import isolated_manager
+from awx.main.isolated import manager as isolated_manager
 from awx.main.dispatch.publish import task
 from awx.main.dispatch import get_local_queuename, reaper
 from awx.main.utils import (get_ssh_version, update_scm_url,

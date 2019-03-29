@@ -8,7 +8,7 @@ from django.core.management.base import BaseCommand, CommandError
 
 import ansible_runner
 
-from awx.main.expect.isolated_manager import set_pythonpath
+from awx.main.isolated.manager import set_pythonpath
 
 
 class Command(BaseCommand):
