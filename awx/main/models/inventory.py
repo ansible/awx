@@ -1959,8 +1959,7 @@ class PluginFileInjector(object):
 
 class azure_rm(PluginFileInjector):
     plugin_name = 'azure_rm'
-    # FIXME: https://github.com/ansible/ansible/issues/54065 need resolving to enable
-    # initial_version = '2.8'  # Driven by unsafe group names issue, hostvars
+    initial_version = '2.8'  # Driven by unsafe group names issue, hostvars, host names
     ini_env_reference = 'AZURE_INI_PATH'
     base_injector = 'managed'
 
@@ -2003,6 +2002,8 @@ class azure_rm(PluginFileInjector):
         # TODO: add proper support for group_by non-specific to compatibility
         # Dashes were not configurable in azure_rm.py script, we do not want unicode, so always use this
         ret['use_contrib_script_compatible_sanitization'] = True
+        # use same host names as script
+        ret['plain_host_names'] = True
         # By default the script did not filter hosts 
         ret['default_host_filters'] = []
         # User-given host filters
