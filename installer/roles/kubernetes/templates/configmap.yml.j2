@@ -4,7 +4,6 @@ metadata:
   name: {{ kubernetes_deployment_name }}-config
   namespace: {{ kubernetes_namespace }}
 data:
-  secret_key: {{ secret_key }}
   {{ kubernetes_deployment_name }}_settings: |
     import os
     import socket
