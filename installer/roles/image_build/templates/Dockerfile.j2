@@ -14,7 +14,8 @@ RUN chmod +x /tini
 
 ADD Makefile /tmp/Makefile
 RUN mkdir /tmp/requirements
-ADD requirements/requirements_ansible.txt \
+ADD requirements/requirements_ansible_2.txt \
+    requirements/requirements_ansible_3.txt \
     requirements/requirements_ansible_uninstall.txt \
     requirements/requirements_ansible_git.txt \
     requirements/requirements.txt \

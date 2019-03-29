@@ -152,17 +152,17 @@ virtualenv_awx:
 
 requirements_ansible: virtualenv_ansible
 	if [[ "$(PIP_OPTIONS)" == *"--no-index"* ]]; then \
-	    cat requirements/requirements_ansible.txt requirements/requirements_ansible_local.txt | $(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --ignore-installed -r /dev/stdin ; \
+	    cat requirements/requirements_ansible_2.txt requirements/requirements_ansible_local.txt | $(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --ignore-installed -r /dev/stdin ; \
 	else \
-	    cat requirements/requirements_ansible.txt requirements/requirements_ansible_git.txt | $(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --no-binary $(SRC_ONLY_PKGS) --ignore-installed -r /dev/stdin ; \
+	    cat requirements/requirements_ansible_2.txt requirements/requirements_ansible_git.txt | $(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --no-binary $(SRC_ONLY_PKGS) --ignore-installed -r /dev/stdin ; \
 	fi
 	$(VENV_BASE)/ansible/bin/pip uninstall --yes -r requirements/requirements_ansible_uninstall.txt
 
 requirements_ansible_py3: virtualenv_ansible_py3
 	if [[ "$(PIP_OPTIONS)" == *"--no-index"* ]]; then \
-	    cat requirements/requirements_ansible.txt requirements/requirements_ansible_local.txt | $(VENV_BASE)/ansible/bin/pip3 install $(PIP_OPTIONS) --ignore-installed -r /dev/stdin ; \
+	    cat requirements/requirements_ansible_3.txt requirements/requirements_ansible_local.txt | $(VENV_BASE)/ansible/bin/pip3 install $(PIP_OPTIONS) --ignore-installed -r /dev/stdin ; \
 	else \
-	    cat requirements/requirements_ansible.txt requirements/requirements_ansible_git.txt | $(VENV_BASE)/ansible/bin/pip3 install $(PIP_OPTIONS) --no-binary $(SRC_ONLY_PKGS) --ignore-installed -r /dev/stdin ; \
+	    cat requirements/requirements_ansible_3.txt requirements/requirements_ansible_git.txt | $(VENV_BASE)/ansible/bin/pip3 install $(PIP_OPTIONS) --no-binary $(SRC_ONLY_PKGS) --ignore-installed -r /dev/stdin ; \
 	fi
 	$(VENV_BASE)/ansible/bin/pip3 uninstall --yes -r requirements/requirements_ansible_uninstall.txt
 

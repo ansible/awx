@@ -11,7 +11,7 @@ echo "---------- end requirements.txt --------------"
 
 
 echo "---------- requirements_ansible.txt --------------"
-for each in `cat requirements/requirements_ansible.txt| awk -F= '{print $1}' | tr -d "[]"`
+for each in `cat requirements/requirements_ansible_{2,3}.txt| awk -F= '{print $1}' | tr -d "[]"`
 do
     if [ ! -f docs/licenses/$each.txt ]; then
         echo No license for $each

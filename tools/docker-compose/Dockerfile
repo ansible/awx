@@ -29,7 +29,8 @@ RUN pip3 install honcho && pip install supervisor
 
 ADD requirements/requirements.txt \
   requirements/requirements_git.txt \
-  requirements/requirements_ansible.txt \
+  requirements/requirements_ansible_2.txt \
+  requirements/requirements_ansible_3.txt \
   requirements/requirements_ansible_git.txt \
   requirements/requirements_dev.txt \
   requirements/requirements_ansible_uninstall.txt \

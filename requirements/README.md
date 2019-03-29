@@ -11,7 +11,13 @@ pip install pip-tools
 pip install pip --upgrade
 
 pip-compile requirements/requirements.in > requirements/requirements.txt
-pip-compile requirements/requirements_ansible.in > requirements/requirements_ansible.txt
+pip-compile requirements/requirements_ansible.in > requirements/requirements_ansible_3.txt
+
+python2 virtualenv /buildit2
+source /buildit2/bin/activate
+pip2 install pip-tools
+pip2 install pip --upgrade
+pip-compile requirements/requirements_ansible.in > requirements/requirements_ansible_2.txt
 ```
 
 ## Known Issues
