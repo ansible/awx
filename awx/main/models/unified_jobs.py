@@ -618,6 +618,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         choices=STATUS_CHOICES,
         default='new',
         editable=False,
+        db_index=True,
     )
     failed = models.BooleanField(
         default=False,
