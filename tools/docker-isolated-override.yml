@@ -12,7 +12,7 @@ services:
     container_name: tools_isolated_1
     hostname: isolated
     volumes:
-      - "../awx/main/expect:/awx_devel"
+      - "../awx/main/isolated:/awx_devel"
       - "../awx/lib:/awx_lib"
       - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
     privileged: true
