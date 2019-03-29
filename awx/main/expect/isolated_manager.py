@@ -198,9 +198,20 @@ class IsolatedManager(object):
                 for event in set(os.listdir(events_path)) - self.handled_events:
                     path = os.path.join(events_path, event)
                     if os.path.exists(path):
-                        event_data = json.load(
-                            open(os.path.join(events_path, event), 'r')
-                        )
+                        try:
+                            event_data = json.load(
+                                open(os.path.join(events_path, event), 'r')
+                            )
+                        except json.decoder.JSONDecodeError:
+                            # This means the event we got back isn't valid JSON
+                            # that can happen if runner is still partially
+                            # writing an event file while it's rsyncing
+                            # these event writes are _supposed_ to be atomic
+                            # but it doesn't look like they actually are in
+                            # practice
+                            # in this scenario, just ignore this event and try it
+                            # again on the next sync
+                            pass
                         event_data.setdefault(self.event_data_key, self.instance.id)
                         dispatcher.dispatch(event_data)
                         self.handled_events.add(event)
