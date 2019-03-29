@@ -1,13 +1,14 @@
 import os
 import shutil
-import subprocess
 import sys
 import tempfile
 
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 
-from awx.main.expect import run
+import ansible_runner
+
+from awx.main.expect.isolated_manager import set_pythonpath
 
 
 class Command(BaseCommand):
@@ -25,23 +26,24 @@ class Command(BaseCommand):
 
         try:
             path = tempfile.mkdtemp(prefix='awx_isolated_ssh', dir=settings.AWX_PROOT_BASE_PATH)
-            args = [
-                'ansible', 'all', '-i', '{},'.format(hostname), '-u',
-                settings.AWX_ISOLATED_USERNAME, '-T5', '-m', 'shell',
-                '-a', 'ansible-runner --version', '-vvv'
-            ]
+            ssh_key = None
             if all([
                 getattr(settings, 'AWX_ISOLATED_KEY_GENERATION', False) is True,
                 getattr(settings, 'AWX_ISOLATED_PRIVATE_KEY', None)
             ]):
-                ssh_key_path = os.path.join(path, '.isolated')
-                ssh_auth_sock = os.path.join(path, 'ssh_auth.sock')
-                run.open_fifo_write(ssh_key_path, settings.AWX_ISOLATED_PRIVATE_KEY)
-                args = run.wrap_args_with_ssh_agent(args, ssh_key_path, ssh_auth_sock)
-            try:
-                print(' '.join(args))
-                subprocess.check_call(args)
-            except subprocess.CalledProcessError as e:
-                sys.exit(e.returncode)
+                ssh_key = settings.AWX_ISOLATED_PRIVATE_KEY
+            env = dict(os.environ.items())
+            set_pythonpath(os.path.join(settings.ANSIBLE_VENV_PATH, 'lib'), env)
+            res = ansible_runner.interface.run(
+                private_data_dir=path,
+                host_pattern='all',
+                inventory='{} ansible_ssh_user={}'.format(hostname, settings.AWX_ISOLATED_USERNAME),
+                module='shell',
+                module_args='ansible-runner --version',
+                envvars=env,
+                verbosity=3,
+                ssh_key=ssh_key,
+            )
+            sys.exit(res.rc)
         finally:
             shutil.rmtree(path)
