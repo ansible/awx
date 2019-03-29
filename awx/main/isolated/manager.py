@@ -366,5 +366,4 @@ class IsolatedManager(object):
             event_data = {'event': 'EOF', 'final_counter': 0}
             event_data.setdefault(self.event_data_key, self.instance.id)
             CallbackQueueDispatcher().dispatch(event_data)
-        self.cleanup()
         return status, rc

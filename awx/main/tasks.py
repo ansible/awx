@@ -995,7 +995,7 @@ class BaseTask(object):
         Hook for any steps to run before job/task is marked as complete.
         '''
 
-    def final_run_hook(self, instance, status, private_data_dir, fact_modification_times):
+    def final_run_hook(self, instance, status, private_data_dir, fact_modification_times, isolated_manager_instance=None):
         '''
         Hook for any steps to run after job/task is marked as complete.
         '''
@@ -1088,6 +1088,7 @@ class BaseTask(object):
         '''
         self.safe_env = {}
         private_data_dir = None
+        isolated_manager_instance = None
 
         try:
             isolated = self.instance.is_isolated()
@@ -1199,17 +1200,17 @@ class BaseTask(object):
                     os.path.join(private_data_dir, 'inventory')
                 )
                 ansible_runner.utils.dump_artifacts(params)
-                manager_instance = isolated_manager.IsolatedManager(
+                isolated_manager_instance = isolated_manager.IsolatedManager(
                     cancelled_callback=lambda: self.update_model(self.instance.pk).cancel_flag
                 )
-                status, rc = manager_instance.run(self.instance,
-                                                  private_data_dir,
-                                                  params.get('playbook'),
-                                                  params.get('module'),
-                                                  module_args,
-                                                  event_data_key=self.event_data_key,
-                                                  ident=str(self.instance.pk))
-                self.event_ct = len(manager_instance.handled_events)
+                status, rc = isolated_manager_instance.run(self.instance,
+                                                           private_data_dir,
+                                                           params.get('playbook'),
+                                                           params.get('module'),
+                                                           module_args,
+                                                           event_data_key=self.event_data_key,
+                                                           ident=str(self.instance.pk))
+                self.event_ct = len(isolated_manager_instance.handled_events)
             else:
                 res = ansible_runner.interface.run(**params)
                 status = res.status
@@ -1239,7 +1240,7 @@ class BaseTask(object):
                                           **extra_update_fields)
 
         try:
-            self.final_run_hook(self.instance, status, private_data_dir, fact_modification_times)
+            self.final_run_hook(self.instance, status, private_data_dir, fact_modification_times, isolated_manager_instance=isolated_manager_instance)
         except Exception:
             logger.exception('{} Final run hook errored.'.format(self.instance.log_format))
 
@@ -1568,7 +1569,7 @@ class RunJob(BaseTask):
                                                              ('project_update', local_project_sync.name, local_project_sync.id)))
                     raise
 
-    def final_run_hook(self, job, status, private_data_dir, fact_modification_times):
+    def final_run_hook(self, job, status, private_data_dir, fact_modification_times, isolated_manager_instance=None):
         super(RunJob, self).final_run_hook(job, status, private_data_dir, fact_modification_times)
         if not private_data_dir:
             # If there's no private data dir, that means we didn't get into the
@@ -1580,7 +1581,8 @@ class RunJob(BaseTask):
                 os.path.join(private_data_dir, 'artifacts', str(job.id), 'fact_cache'),
                 fact_modification_times,
             )
-
+        if isolated_manager_instance:
+            isolated_manager_instance.cleanup()
         try:
             inventory = job.inventory
         except Inventory.DoesNotExist:
@@ -2339,6 +2341,11 @@ class RunAdHocCommand(BaseTask):
         Return whether this task should use proot.
         '''
         return getattr(settings, 'AWX_PROOT_ENABLED', False)
+
+    def final_run_hook(self, adhoc_job, status, private_data_dir, fact_modification_times, isolated_manager_instance=None):
+        super(RunAdHocCommand, self).final_run_hook(adhoc_job, status, private_data_dir, fact_modification_times)
+        if isolated_manager_instance:
+            isolated_manager_instance.cleanup()
 
 
 @task()
