@@ -142,12 +142,19 @@ spec:
             - containerPort: 8052
           volumeMounts:
             - name: {{ kubernetes_deployment_name }}-application-config
-              mountPath: "/etc/tower"
+              mountPath: "/etc/tower/settings.py"
+              subPath: settings.py
               readOnly: true
 
             - name: "{{ kubernetes_deployment_name }}-application-credentials"
               mountPath: "/etc/tower/conf.d/"
               readOnly: true
+
+            - name: {{ kubernetes_deployment_name }}-secret-key
+              mountPath: "/etc/tower/SECRET_KEY"
+              subPath: SECRET_KEY
+              readOnly: true
+
           resources:
             requests:
               memory: "{{ web_mem_request }}Gi"
@@ -170,12 +177,21 @@ spec:
           imagePullPolicy: Always
           volumeMounts:
             - name: {{ kubernetes_deployment_name }}-application-config
-              mountPath: "/etc/tower"
+              mountPath: "/etc/tower/settings.py"
+              subPath: settings.py
               readOnly: true
 
             - name: "{{ kubernetes_deployment_name }}-application-credentials"
               mountPath: "/etc/tower/conf.d/"
               readOnly: true
+
+            - name: {{ kubernetes_deployment_name }}-secret-key
+              mountPath: "/etc/tower/SECRET_KEY"
+              subPath: SECRET_KEY
+              readOnly: true
+          env:
+            - name: AWX_SKIP_MIGRATIONS
+              value: "1"
           resources:
             requests:
               memory: "{{ task_mem_request }}Gi"
@@ -264,8 +280,6 @@ spec:
             items:
               - key: {{ kubernetes_deployment_name }}_settings
                 path: settings.py
-              - key: secret_key
-                path: SECRET_KEY
 
         - name: "{{ kubernetes_deployment_name }}-application-credentials"
           secret:
@@ -275,6 +289,13 @@ spec:
                 path: 'credentials.py'
               - key: environment_sh
                 path: 'environment.sh'
+
+        - name: {{ kubernetes_deployment_name }}-secret-key
+          secret:
+            secretName: "{{ kubernetes_deployment_name }}-secrets"
+            items:
+              - key: secret_key
+                path: SECRET_KEY
 
         - name: rabbitmq-config
           configMap:

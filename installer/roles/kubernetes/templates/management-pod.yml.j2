@@ -11,11 +11,17 @@ spec:
       command: ["sleep", "infinity"]
       volumeMounts:
         - name: {{ kubernetes_deployment_name }}-application-config
-          mountPath: "/etc/tower"
+          mountPath: "/etc/tower/settings.py"
+          subPath: settings.py
           readOnly: true
 
         - name: "{{ kubernetes_deployment_name }}-application-credentials"
           mountPath: "/etc/tower/conf.d/"
+          readOnly: true
+
+        - name: {{ kubernetes_deployment_name }}-secret-key
+          mountPath: "/etc/tower/SECRET_KEY"
+          subPath: SECRET_KEY
           readOnly: true
       resources:
 {% if management_mem_limit is defined or management_cpu_limit is defined %}
@@ -34,6 +40,11 @@ spec:
         items:
           - key: {{ kubernetes_deployment_name }}_settings
             path: settings.py
+
+    - name: {{ kubernetes_deployment_name }}-secret-key
+      secret:
+        secretName: "{{ kubernetes_deployment_name }}-secrets"
+        items:
           - key: secret_key
             path: SECRET_KEY
 
