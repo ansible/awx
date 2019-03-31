@@ -1,11 +1,13 @@
 # Copyright (c) 2017 Ansible Tower by Red Hat
 # All Rights Reserved.
 
-from logstash.formatter import LogstashFormatterVersion1
 from copy import copy
 import json
 import time
 import logging
+import traceback
+import socket
+from datetime import datetime
 
 
 from django.conf import settings
@@ -20,7 +22,90 @@ class TimeFormatter(logging.Formatter):
         return logging.Formatter.format(self, record)
 
 
-class LogstashFormatter(LogstashFormatterVersion1):
+class LogstashFormatterBase(logging.Formatter):
+    """Base class taken from python-logstash=0.4.6
+    modified here since that version
+
+    For compliance purposes, this was the license at the point of divergence:
+
+    The MIT License (MIT)
+
+    Copyright (c) 2013, Volodymyr Klochan
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in
+    all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+    THE SOFTWARE.
+    """
+
+    def __init__(self, message_type='Logstash', fqdn=False):
+        self.message_type = message_type
+
+        if fqdn:
+            self.host = socket.getfqdn()
+        else:
+            self.host = socket.gethostname()
+
+    def get_extra_fields(self, record):
+        # The list contains all the attributes listed in
+        # http://docs.python.org/library/logging.html#logrecord-attributes
+        skip_list = (
+            'args', 'asctime', 'created', 'exc_info', 'exc_text', 'filename',
+            'funcName', 'id', 'levelname', 'levelno', 'lineno', 'module',
+            'msecs', 'msecs', 'message', 'msg', 'name', 'pathname', 'process',
+            'processName', 'relativeCreated', 'thread', 'threadName', 'extra')
+
+        easy_types = (str, bool, dict, float, int, list, type(None))
+
+        fields = {}
+
+        for key, value in record.__dict__.items():
+            if key not in skip_list:
+                if isinstance(value, easy_types):
+                    fields[key] = value
+                else:
+                    fields[key] = repr(value)
+
+        return fields
+
+    def get_debug_fields(self, record):
+        return {
+            'stack_trace': self.format_exception(record.exc_info),
+            'lineno': record.lineno,
+            'process': record.process,
+            'thread_name': record.threadName,
+            'funcName': record.funcName,
+            'processName': record.processName,
+        }
+
+    @classmethod
+    def format_timestamp(cls, time):
+        tstamp = datetime.utcfromtimestamp(time)
+        return tstamp.strftime("%Y-%m-%dT%H:%M:%S") + ".%03d" % (tstamp.microsecond / 1000) + "Z"
+
+    @classmethod
+    def format_exception(cls, exc_info):
+        return ''.join(traceback.format_exception(*exc_info)) if exc_info else ''
+
+    @classmethod
+    def serialize(cls, message):
+        return bytes(json.dumps(message), 'utf-8')
+
+
+class LogstashFormatter(LogstashFormatterBase):
 
     def reformat_data_for_log(self, raw_data, kind=None):
         '''
@@ -156,10 +241,8 @@ class LogstashFormatter(LogstashFormatterVersion1):
 
     def format(self, record):
         message = {
-            # Fields not included, but exist in related logs
+            # Field not included, but exist in related logs
             # 'path': record.pathname
-            # '@version': '1', # from python-logstash
-            # 'tags': self.tags,
             '@timestamp': self.format_timestamp(record.created),
             'message': record.getMessage(),
             'host': self.host,
