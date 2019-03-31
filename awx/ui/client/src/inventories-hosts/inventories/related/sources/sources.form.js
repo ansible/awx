@@ -56,6 +56,19 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n){
                 ngModel: 'source',
                 hasSubForm: true
             },
+            custom_virtualenv: {
+                label: i18n._('Ansible Environment'),
+                type: 'select',
+                defaultText: i18n._('Use Default Environment'),
+                ngOptions: 'venv for venv in custom_virtualenvs_options track by venv',
+
+                awPopOver: "<p>" + i18n._("Select the custom Python virtual environment for this inventory source sync to run on.") + "</p>",
+                dataTitle: i18n._('Ansible Environment'),
+                dataContainer: 'body',
+                dataPlacement: 'right',
+                ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)',
+                ngShow: 'custom_virtualenvs_options.length > 1'
+            },
             credential: {
                 label: i18n._('Credential'),
                 type: 'lookup',
