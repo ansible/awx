@@ -13,8 +13,7 @@ export default {
     templateUrl: templateUrl('management-jobs/card/card'),
     controller: 'managementJobsCardController',
     data: {
-        activityStream: true,
-        activityStreamTarget: 'job'
+        activityStream: false,
     },
     ncyBreadcrumb: {
         label: N_('MANAGEMENT JOBS')
