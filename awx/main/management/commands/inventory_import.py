@@ -1088,7 +1088,7 @@ class Command(BaseCommand):
                                 logger.warning('update computed fields took %d queries',
                                                len(connection.queries) - queries_before2)
                         # Check if the license is valid. 
-                        # If the license is not valid, a CommandError will be thrown, 
+                        # If the license is not valid, a CommandError will be thrown,
                         # and inventory update will be marked as invalid.
                         # with transaction.atomic() will roll back the changes.
                         license_fail = True

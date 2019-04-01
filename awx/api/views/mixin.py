@@ -31,46 +31,9 @@ from awx.main.models.organization import Team
 from awx.main.models.projects import Project
 from awx.main.models.inventory import Inventory
 from awx.main.models.jobs import JobTemplate
-from awx.conf.license import (
-    feature_enabled,
-    LicenseForbids,
-)
 from awx.api.exceptions import ActiveJobConflict
 
 logger = logging.getLogger('awx.api.views.mixin')
-
-
-class ActivityStreamEnforcementMixin(object):
-    '''
-    Mixin to check that license supports activity streams.
-    '''
-    def check_permissions(self, request):
-        ret = super(ActivityStreamEnforcementMixin, self).check_permissions(request)
-        if not feature_enabled('activity_streams'):
-            raise LicenseForbids(_('Your license does not allow use of the activity stream.'))
-        return ret
-
-
-class SystemTrackingEnforcementMixin(object):
-    '''
-    Mixin to check that license supports system tracking.
-    '''
-    def check_permissions(self, request):
-        ret = super(SystemTrackingEnforcementMixin, self).check_permissions(request)
-        if not feature_enabled('system_tracking'):
-            raise LicenseForbids(_('Your license does not permit use of system tracking.'))
-        return ret
-
-
-class WorkflowsEnforcementMixin(object):
-    '''
-    Mixin to check that license supports workflows.
-    '''
-    def check_permissions(self, request):
-        ret = super(WorkflowsEnforcementMixin, self).check_permissions(request)
-        if not feature_enabled('workflows') and request.method not in ('GET', 'OPTIONS', 'DELETE'):
-            raise LicenseForbids(_('Your license does not allow use of workflows.'))
-        return ret
 
 
 class UnifiedJobDeletionMixin(object):

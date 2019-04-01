@@ -48,7 +48,6 @@ from awx.api.serializers import (
     JobTemplateSerializer,
 )
 from awx.api.views.mixin import (
-    ActivityStreamEnforcementMixin,
     RelatedJobsPreventDeleteMixin,
     ControlledByScmMixin,
 )
@@ -149,7 +148,7 @@ class InventoryDetail(RelatedJobsPreventDeleteMixin, ControlledByScmMixin, Retri
             return Response(dict(error=_("{0}".format(e))), status=status.HTTP_400_BAD_REQUEST)
 
 
-class InventoryActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
+class InventoryActivityStreamList(SubListAPIView):
 
     model = ActivityStream
     serializer_class = ActivityStreamSerializer

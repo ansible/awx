@@ -7,13 +7,8 @@ import logging
 # Django
 from django.db.models import Count
 from django.contrib.contenttypes.models import ContentType
-from django.utils.translation import ugettext_lazy as _
 
 # AWX
-from awx.conf.license import (
-    feature_enabled,
-    LicenseForbids,
-)
 from awx.main.models import (
     ActivityStream,
     Inventory,
@@ -50,7 +45,6 @@ from awx.api.serializers import (
     InstanceGroupSerializer,
 )
 from awx.api.views.mixin import (
-    ActivityStreamEnforcementMixin,
     RelatedJobsPreventDeleteMixin,
     OrganizationCountsMixin,
 )
@@ -68,24 +62,6 @@ class OrganizationList(OrganizationCountsMixin, ListCreateAPIView):
         qs = qs.select_related('admin_role', 'auditor_role', 'member_role', 'read_role')
         qs = qs.prefetch_related('created_by', 'modified_by')
         return qs
-
-    def create(self, request, *args, **kwargs):
-        """Create a new organzation.
-
-        If there is already an organization and the license of this
-        instance does not permit multiple organizations, then raise
-        LicenseForbids.
-        """
-        # Sanity check: If the multiple organizations feature is disallowed
-        # by the license, then we are only willing to create this organization
-        # if no organizations exist in the system.
-        if (not feature_enabled('multiple_organizations') and
-                self.model.objects.exists()):
-            raise LicenseForbids(_('Your license only permits a single '
-                                   'organization to exist.'))
-
-        # Okay, create the organization as usual.
-        return super(OrganizationList, self).create(request, *args, **kwargs)
 
 
 class OrganizationDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
@@ -177,7 +153,7 @@ class OrganizationTeamsList(SubListCreateAttachDetachAPIView):
     parent_key = 'organization'
 
 
-class OrganizationActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
+class OrganizationActivityStreamList(SubListAPIView):
 
     model = ActivityStream
     serializer_class = ActivityStreamSerializer
@@ -244,4 +220,3 @@ class OrganizationObjectRolesList(SubListAPIView):
         po = self.get_parent_object()
         content_type = ContentType.objects.get_for_model(self.parent_model)
         return Role.objects.filter(content_type=content_type, object_id=po.pk)
-

@@ -9,9 +9,9 @@ import {N_} from "../i18n";
 export default
     ['Wait', '$state', '$scope', '$rootScope',
     'ProcessErrors', 'CheckLicense', 'moment','$window',
-    'ConfigService', 'FeaturesService', 'pendoService', 'insightsEnablementService', 'i18n', 'config',
+    'ConfigService', 'pendoService', 'insightsEnablementService', 'i18n', 'config',
     function(Wait, $state, $scope, $rootScope, ProcessErrors, CheckLicense, moment,
-    $window, ConfigService, FeaturesService, pendoService, insightsEnablementService, i18n, config) {
+    $window, ConfigService, pendoService, insightsEnablementService, i18n, config) {
 
         const calcDaysRemaining = function(seconds) {
       	 		// calculate the number of days remaining on the license
@@ -105,8 +105,6 @@ export default
                             ConfigService.delete();
                             ConfigService.getConfig(licenseInfo)
                                 .then(function(config) {
-                                    delete($rootScope.features);
-                                    FeaturesService.get();
 
                                     if ($rootScope.licenseMissing === true) {
                                         if ($scope.newLicense.pendo) {

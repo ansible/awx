@@ -28,7 +28,6 @@ import moment from './moment/main';
 import config from './config/main';
 import PromptDialog from './prompt-dialog';
 import directives from './directives';
-import features from './features/main';
 import orgAdminLookup from './org-admin-lookup/main';
 import limitPanels from './limit-panels/main';
 import multiSelectPreview from './multi-select-preview/main';
@@ -60,7 +59,6 @@ angular.module('shared', [
         PromptDialog.name,
         directives.name,
         filters.name,
-        features.name,
         orgAdminLookup.name,
         limitPanels.name,
         multiSelectPreview.name,

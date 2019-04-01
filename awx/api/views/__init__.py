@@ -73,7 +73,7 @@ from awx.api.generics import (
     SubListDestroyAPIView, get_view_name
 )
 from awx.api.versioning import reverse, get_request_version
-from awx.conf.license import feature_enabled, feature_exists, LicenseForbids, get_license
+from awx.conf.license import get_license
 from awx.main import models
 from awx.main.utils import (
     camelcase_to_underscore,
@@ -100,10 +100,9 @@ from awx.api.metadata import RoleMetadata, JobTypeMetadata
 from awx.main.constants import ACTIVE_STATES
 from awx.main.scheduler.dag_workflow import WorkflowDAG
 from awx.api.views.mixin import (
-    ActivityStreamEnforcementMixin, ControlledByScmMixin,
-    InstanceGroupMembershipMixin, OrganizationCountsMixin,
-    RelatedJobsPreventDeleteMixin, SystemTrackingEnforcementMixin,
-    UnifiedJobDeletionMixin, WorkflowsEnforcementMixin,
+    ControlledByScmMixin, InstanceGroupMembershipMixin,
+    OrganizationCountsMixin, RelatedJobsPreventDeleteMixin,
+    UnifiedJobDeletionMixin,
 )
 from awx.api.views.organization import ( # noqa
     OrganizationList,
@@ -530,12 +529,6 @@ class AuthView(APIView):
         # Return auth backends in consistent order: Google, GitHub, SAML.
         auth_backends.sort(key=lambda x: 'g' if x[0] == 'google-oauth2' else x[0])
         for name, backend in auth_backends:
-            if (not feature_exists('enterprise_auth') and
-                not feature_enabled('ldap')) or \
-                (not feature_enabled('enterprise_auth') and
-                 name in ['saml', 'radius']):
-                continue
-
             login_url = reverse('social:begin', args=(name,))
             complete_url = request.build_absolute_uri(reverse('social:complete', args=(name,)))
             backend_data = {
@@ -649,7 +642,7 @@ class TeamProjectsList(SubListAPIView):
         return self.model.accessible_objects(self.request.user, 'read_role').filter(pk__in=[t.content_object.pk for t in proj_roles])
 
 
-class TeamActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
+class TeamActivityStreamList(SubListAPIView):
 
     model = models.ActivityStream
     serializer_class = serializers.ActivityStreamSerializer
@@ -745,7 +738,7 @@ class ProjectScmInventorySources(SubListAPIView):
     parent_key = 'source_project'
 
 
-class ProjectActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
+class ProjectActivityStreamList(SubListAPIView):
 
     model = models.ActivityStream
     serializer_class = serializers.ActivityStreamSerializer
@@ -989,7 +982,7 @@ class ApplicationOAuth2TokenList(SubListCreateAPIView):
     swagger_topic = 'Authentication'
 
 
-class OAuth2ApplicationActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
+class OAuth2ApplicationActivityStreamList(SubListAPIView):
 
     model = models.ActivityStream
     serializer_class = serializers.ActivityStreamSerializer
@@ -1071,7 +1064,7 @@ class OAuth2TokenDetail(RetrieveUpdateDestroyAPIView):
     swagger_topic = 'Authentication'
 
 
-class OAuth2TokenActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
+class OAuth2TokenActivityStreamList(SubListAPIView):
 
     model = models.ActivityStream
     serializer_class = serializers.ActivityStreamSerializer
@@ -1185,7 +1178,7 @@ class UserAdminOfOrganizationsList(OrganizationCountsMixin, SubListAPIView):
         return my_qs & user_qs
 
 
-class UserActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
+class UserActivityStreamList(SubListAPIView):
 
     model = models.ActivityStream
     serializer_class = serializers.ActivityStreamSerializer
@@ -1272,7 +1265,7 @@ class CredentialTypeCredentialList(SubListCreateAPIView):
     serializer_class = serializers.CredentialSerializer
 
 
-class CredentialTypeActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
+class CredentialTypeActivityStreamList(SubListAPIView):
 
     model = models.ActivityStream
     serializer_class = serializers.ActivityStreamSerializer
@@ -1386,7 +1379,7 @@ class CredentialDetail(RetrieveUpdateDestroyAPIView):
     filter_backends = RetrieveUpdateDestroyAPIView.filter_backends + [V1CredentialFilterBackend]
 
 
-class CredentialActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
+class CredentialActivityStreamList(SubListAPIView):
 
     model = models.ActivityStream
     serializer_class = serializers.ActivityStreamSerializer
@@ -1618,7 +1611,7 @@ class HostSmartInventoriesList(SubListAPIView):
     relationship = 'smart_inventories'
 
 
-class HostActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
+class HostActivityStreamList(SubListAPIView):
 
     model = models.ActivityStream
     serializer_class = serializers.ActivityStreamSerializer
@@ -1633,7 +1626,7 @@ class HostActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
         return qs.filter(Q(host=parent) | Q(inventory=parent.inventory))
 
 
-class HostFactVersionsList(SystemTrackingEnforcementMixin, ParentMixin, ListAPIView):
+class HostFactVersionsList(ParentMixin, ListAPIView):
 
     model = models.Fact
     serializer_class = serializers.FactVersionSerializer
@@ -1660,7 +1653,7 @@ class HostFactVersionsList(SystemTrackingEnforcementMixin, ParentMixin, ListAPIV
         return Response(dict(results=self.serializer_class(queryset, many=True).data))
 
 
-class HostFactCompareView(SystemTrackingEnforcementMixin, SubDetailAPIView):
+class HostFactCompareView(SubDetailAPIView):
 
     model = models.Fact
     parent_model = models.Host
@@ -1876,7 +1869,7 @@ class GroupInventorySourcesList(SubListAPIView):
     relationship = 'inventory_sources'
 
 
-class GroupActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
+class GroupActivityStreamList(SubListAPIView):
 
     model = models.ActivityStream
     serializer_class = serializers.ActivityStreamSerializer
@@ -2119,7 +2112,7 @@ class InventorySourceSchedulesList(SubListCreateAPIView):
     parent_key = 'unified_job_template'
 
 
-class InventorySourceActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
+class InventorySourceActivityStreamList(SubListAPIView):
 
     model = models.ActivityStream
     serializer_class = serializers.ActivityStreamSerializer
@@ -2530,20 +2523,10 @@ class JobTemplateSurveySpec(GenericAPIView):
 
     def get(self, request, *args, **kwargs):
         obj = self.get_object()
-        if not feature_enabled('surveys'):
-            raise LicenseForbids(_('Your license does not allow '
-                                   'adding surveys.'))
-
         return Response(obj.display_survey_spec())
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
-
-        # Sanity check: Are surveys available on this license?
-        # If not, do not allow them to be used.
-        if not feature_enabled('surveys'):
-            raise LicenseForbids(_('Your license does not allow '
-                                   'adding surveys.'))
 
         if not request.user.can_access(self.model, 'change', obj, None):
             raise PermissionDenied()
@@ -2672,12 +2655,12 @@ class JobTemplateSurveySpec(GenericAPIView):
         return Response()
 
 
-class WorkflowJobTemplateSurveySpec(WorkflowsEnforcementMixin, JobTemplateSurveySpec):
+class WorkflowJobTemplateSurveySpec(JobTemplateSurveySpec):
 
     model = models.WorkflowJobTemplate
 
 
-class JobTemplateActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
+class JobTemplateActivityStreamList(SubListAPIView):
 
     model = models.ActivityStream
     serializer_class = serializers.ActivityStreamSerializer
@@ -2995,14 +2978,14 @@ class JobTemplateCopy(CopyAPIView):
     copy_return_serializer_class = serializers.JobTemplateSerializer
 
 
-class WorkflowJobNodeList(WorkflowsEnforcementMixin, ListAPIView):
+class WorkflowJobNodeList(ListAPIView):
 
     model = models.WorkflowJobNode
     serializer_class = serializers.WorkflowJobNodeListSerializer
     search_fields = ('unified_job_template__name', 'unified_job_template__description',)
 
 
-class WorkflowJobNodeDetail(WorkflowsEnforcementMixin, RetrieveAPIView):
+class WorkflowJobNodeDetail(RetrieveAPIView):
 
     model = models.WorkflowJobNode
     serializer_class = serializers.WorkflowJobNodeDetailSerializer
@@ -3016,14 +2999,14 @@ class WorkflowJobNodeCredentialsList(SubListAPIView):
     relationship = 'credentials'
 
 
-class WorkflowJobTemplateNodeList(WorkflowsEnforcementMixin, ListCreateAPIView):
+class WorkflowJobTemplateNodeList(ListCreateAPIView):
 
     model = models.WorkflowJobTemplateNode
     serializer_class = serializers.WorkflowJobTemplateNodeSerializer
     search_fields = ('unified_job_template__name', 'unified_job_template__description',)
 
 
-class WorkflowJobTemplateNodeDetail(WorkflowsEnforcementMixin, RetrieveUpdateDestroyAPIView):
+class WorkflowJobTemplateNodeDetail(RetrieveUpdateDestroyAPIView):
 
     model = models.WorkflowJobTemplateNode
     serializer_class = serializers.WorkflowJobTemplateNodeDetailSerializer
@@ -3034,7 +3017,7 @@ class WorkflowJobTemplateNodeCredentialsList(LaunchConfigCredentialsBase):
     parent_model = models.WorkflowJobTemplateNode
 
 
-class WorkflowJobTemplateNodeChildrenBaseList(WorkflowsEnforcementMixin, EnforceParentRelationshipMixin, SubListCreateAttachDetachAPIView):
+class WorkflowJobTemplateNodeChildrenBaseList(EnforceParentRelationshipMixin, SubListCreateAttachDetachAPIView):
 
     model = models.WorkflowJobTemplateNode
     serializer_class = serializers.WorkflowJobTemplateNodeSerializer
@@ -3096,7 +3079,7 @@ class WorkflowJobTemplateNodeAlwaysNodesList(WorkflowJobTemplateNodeChildrenBase
     relationship = 'always_nodes'
 
 
-class WorkflowJobNodeChildrenBaseList(WorkflowsEnforcementMixin, SubListAPIView):
+class WorkflowJobNodeChildrenBaseList(SubListAPIView):
 
     model = models.WorkflowJobNode
     serializer_class = serializers.WorkflowJobNodeListSerializer
@@ -3126,21 +3109,21 @@ class WorkflowJobNodeAlwaysNodesList(WorkflowJobNodeChildrenBaseList):
     relationship = 'always_nodes'
 
 
-class WorkflowJobTemplateList(WorkflowsEnforcementMixin, ListCreateAPIView):
+class WorkflowJobTemplateList(ListCreateAPIView):
 
     model = models.WorkflowJobTemplate
     serializer_class = serializers.WorkflowJobTemplateSerializer
     always_allow_superuser = False
 
 
-class WorkflowJobTemplateDetail(RelatedJobsPreventDeleteMixin, WorkflowsEnforcementMixin, RetrieveUpdateDestroyAPIView):
+class WorkflowJobTemplateDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
 
     model = models.WorkflowJobTemplate
     serializer_class = serializers.WorkflowJobTemplateSerializer
     always_allow_superuser = False
 
 
-class WorkflowJobTemplateCopy(WorkflowsEnforcementMixin, CopyAPIView):
+class WorkflowJobTemplateCopy(CopyAPIView):
 
     model = models.WorkflowJobTemplate
     copy_return_serializer_class = serializers.WorkflowJobTemplateSerializer
@@ -3185,11 +3168,11 @@ class WorkflowJobTemplateCopy(WorkflowsEnforcementMixin, CopyAPIView):
             obj.save()
 
 
-class WorkflowJobTemplateLabelList(WorkflowsEnforcementMixin, JobTemplateLabelList):
+class WorkflowJobTemplateLabelList(JobTemplateLabelList):
     parent_model = models.WorkflowJobTemplate
 
 
-class WorkflowJobTemplateLaunch(WorkflowsEnforcementMixin, RetrieveAPIView):
+class WorkflowJobTemplateLaunch(RetrieveAPIView):
 
 
     model = models.WorkflowJobTemplate
@@ -3238,7 +3221,7 @@ class WorkflowJobTemplateLaunch(WorkflowsEnforcementMixin, RetrieveAPIView):
         return Response(data, status=status.HTTP_201_CREATED, headers=headers)
 
 
-class WorkflowJobRelaunch(WorkflowsEnforcementMixin, GenericAPIView):
+class WorkflowJobRelaunch(GenericAPIView):
 
     model = models.WorkflowJob
     obj_permission_type = 'start'
@@ -3270,7 +3253,7 @@ class WorkflowJobRelaunch(WorkflowsEnforcementMixin, GenericAPIView):
         return Response(data, status=status.HTTP_201_CREATED, headers=headers)
 
 
-class WorkflowJobTemplateWorkflowNodesList(WorkflowsEnforcementMixin, SubListCreateAPIView):
+class WorkflowJobTemplateWorkflowNodesList(SubListCreateAPIView):
 
     model = models.WorkflowJobTemplateNode
     serializer_class = serializers.WorkflowJobTemplateNodeSerializer
@@ -3283,7 +3266,7 @@ class WorkflowJobTemplateWorkflowNodesList(WorkflowsEnforcementMixin, SubListCre
         return super(WorkflowJobTemplateWorkflowNodesList, self).get_queryset().order_by('id')
 
 
-class WorkflowJobTemplateJobsList(WorkflowsEnforcementMixin, SubListAPIView):
+class WorkflowJobTemplateJobsList(SubListAPIView):
 
     model = models.WorkflowJob
     serializer_class = serializers.WorkflowJobListSerializer
@@ -3292,7 +3275,7 @@ class WorkflowJobTemplateJobsList(WorkflowsEnforcementMixin, SubListAPIView):
     parent_key = 'workflow_job_template'
 
 
-class WorkflowJobTemplateSchedulesList(WorkflowsEnforcementMixin, SubListCreateAPIView):
+class WorkflowJobTemplateSchedulesList(SubListCreateAPIView):
 
     view_name = _("Workflow Job Template Schedules")
 
@@ -3303,7 +3286,7 @@ class WorkflowJobTemplateSchedulesList(WorkflowsEnforcementMixin, SubListCreateA
     parent_key = 'unified_job_template'
 
 
-class WorkflowJobTemplateNotificationTemplatesAnyList(WorkflowsEnforcementMixin, SubListCreateAttachDetachAPIView):
+class WorkflowJobTemplateNotificationTemplatesAnyList(SubListCreateAttachDetachAPIView):
 
     model = models.NotificationTemplate
     serializer_class = serializers.NotificationTemplateSerializer
@@ -3311,7 +3294,7 @@ class WorkflowJobTemplateNotificationTemplatesAnyList(WorkflowsEnforcementMixin,
     relationship = 'notification_templates_any'
 
 
-class WorkflowJobTemplateNotificationTemplatesErrorList(WorkflowsEnforcementMixin, SubListCreateAttachDetachAPIView):
+class WorkflowJobTemplateNotificationTemplatesErrorList(SubListCreateAttachDetachAPIView):
 
     model = models.NotificationTemplate
     serializer_class = serializers.NotificationTemplateSerializer
@@ -3319,7 +3302,7 @@ class WorkflowJobTemplateNotificationTemplatesErrorList(WorkflowsEnforcementMixi
     relationship = 'notification_templates_error'
 
 
-class WorkflowJobTemplateNotificationTemplatesSuccessList(WorkflowsEnforcementMixin, SubListCreateAttachDetachAPIView):
+class WorkflowJobTemplateNotificationTemplatesSuccessList(SubListCreateAttachDetachAPIView):
 
     model = models.NotificationTemplate
     serializer_class = serializers.NotificationTemplateSerializer
@@ -3327,13 +3310,13 @@ class WorkflowJobTemplateNotificationTemplatesSuccessList(WorkflowsEnforcementMi
     relationship = 'notification_templates_success'
 
 
-class WorkflowJobTemplateAccessList(WorkflowsEnforcementMixin, ResourceAccessList):
+class WorkflowJobTemplateAccessList(ResourceAccessList):
 
     model = models.User # needs to be User for AccessLists's
     parent_model = models.WorkflowJobTemplate
 
 
-class WorkflowJobTemplateObjectRolesList(WorkflowsEnforcementMixin, SubListAPIView):
+class WorkflowJobTemplateObjectRolesList(SubListAPIView):
 
     model = models.Role
     serializer_class = serializers.RoleSerializer
@@ -3346,7 +3329,7 @@ class WorkflowJobTemplateObjectRolesList(WorkflowsEnforcementMixin, SubListAPIVi
         return models.Role.objects.filter(content_type=content_type, object_id=po.pk)
 
 
-class WorkflowJobTemplateActivityStreamList(WorkflowsEnforcementMixin, ActivityStreamEnforcementMixin, SubListAPIView):
+class WorkflowJobTemplateActivityStreamList(SubListAPIView):
 
     model = models.ActivityStream
     serializer_class = serializers.ActivityStreamSerializer
@@ -3362,19 +3345,19 @@ class WorkflowJobTemplateActivityStreamList(WorkflowsEnforcementMixin, ActivityS
                          Q(workflow_job_template_node__workflow_job_template=parent)).distinct()
 
 
-class WorkflowJobList(WorkflowsEnforcementMixin, ListCreateAPIView):
+class WorkflowJobList(ListCreateAPIView):
 
     model = models.WorkflowJob
     serializer_class = serializers.WorkflowJobListSerializer
 
 
-class WorkflowJobDetail(WorkflowsEnforcementMixin, UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
+class WorkflowJobDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
 
     model = models.WorkflowJob
     serializer_class = serializers.WorkflowJobSerializer
 
 
-class WorkflowJobWorkflowNodesList(WorkflowsEnforcementMixin, SubListAPIView):
+class WorkflowJobWorkflowNodesList(SubListAPIView):
 
     model = models.WorkflowJobNode
     serializer_class = serializers.WorkflowJobNodeListSerializer
@@ -3388,7 +3371,7 @@ class WorkflowJobWorkflowNodesList(WorkflowsEnforcementMixin, SubListAPIView):
         return super(WorkflowJobWorkflowNodesList, self).get_queryset().order_by('id')
 
 
-class WorkflowJobCancel(WorkflowsEnforcementMixin, RetrieveAPIView):
+class WorkflowJobCancel(RetrieveAPIView):
 
     model = models.WorkflowJob
     obj_permission_type = 'cancel'
@@ -3404,7 +3387,7 @@ class WorkflowJobCancel(WorkflowsEnforcementMixin, RetrieveAPIView):
             return self.http_method_not_allowed(request, *args, **kwargs)
 
 
-class WorkflowJobNotificationsList(WorkflowsEnforcementMixin, SubListAPIView):
+class WorkflowJobNotificationsList(SubListAPIView):
 
     model = models.Notification
     serializer_class = serializers.NotificationSerializer
@@ -3413,7 +3396,7 @@ class WorkflowJobNotificationsList(WorkflowsEnforcementMixin, SubListAPIView):
     search_fields = ('subject', 'notification_type', 'body',)
 
 
-class WorkflowJobActivityStreamList(WorkflowsEnforcementMixin, ActivityStreamEnforcementMixin, SubListAPIView):
+class WorkflowJobActivityStreamList(SubListAPIView):
 
     model = models.ActivityStream
     serializer_class = serializers.ActivityStreamSerializer
@@ -3589,11 +3572,11 @@ class JobLabelList(SubListAPIView):
     parent_key = 'job'
 
 
-class WorkflowJobLabelList(WorkflowsEnforcementMixin, JobLabelList):
+class WorkflowJobLabelList(JobLabelList):
     parent_model = models.WorkflowJob
 
 
-class JobActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
+class JobActivityStreamList(SubListAPIView):
 
     model = models.ActivityStream
     serializer_class = serializers.ActivityStreamSerializer
@@ -4106,7 +4089,7 @@ class AdHocCommandAdHocCommandEventsList(BaseAdHocCommandEventsList):
     parent_model = models.AdHocCommand
 
 
-class AdHocCommandActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
+class AdHocCommandActivityStreamList(SubListAPIView):
 
     model = models.ActivityStream
     serializer_class = serializers.ActivityStreamSerializer
@@ -4402,14 +4385,14 @@ class LabelDetail(RetrieveUpdateAPIView):
     serializer_class = serializers.LabelSerializer
 
 
-class ActivityStreamList(ActivityStreamEnforcementMixin, SimpleListAPIView):
+class ActivityStreamList(SimpleListAPIView):
 
     model = models.ActivityStream
     serializer_class = serializers.ActivityStreamSerializer
     search_fields = ('changes',)
 
 
-class ActivityStreamDetail(ActivityStreamEnforcementMixin, RetrieveAPIView):
+class ActivityStreamDetail(RetrieveAPIView):
 
     model = models.ActivityStream
     serializer_class = serializers.ActivityStreamSerializer

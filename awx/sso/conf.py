@@ -157,7 +157,6 @@ def _register_ldap(append=None):
         category=_('LDAP'),
         category_slug='ldap',
         placeholder='ldaps://ldap.example.com:636',
-        feature_required='ldap',
     )
 
     register(
@@ -172,7 +171,6 @@ def _register_ldap(append=None):
                     ' user information. Refer to the Ansible Tower documentation for example syntax.'),
         category=_('LDAP'),
         category_slug='ldap',
-        feature_required='ldap',
     )
 
     register(
@@ -184,7 +182,6 @@ def _register_ldap(append=None):
         help_text=_('Password used to bind LDAP user account.'),
         category=_('LDAP'),
         category_slug='ldap',
-        feature_required='ldap',
         encrypted=True,
     )
 
@@ -196,7 +193,6 @@ def _register_ldap(append=None):
         help_text=_('Whether to enable TLS when the LDAP connection is not using SSL.'),
         category=_('LDAP'),
         category_slug='ldap',
-        feature_required='ldap',
     )
 
     register(
@@ -216,7 +212,6 @@ def _register_ldap(append=None):
             ('OPT_REFERRALS', 0),
             ('OPT_NETWORK_TIMEOUT', 30)
         ]),
-        feature_required='ldap',
     )
 
     register(
@@ -237,7 +232,6 @@ def _register_ldap(append=None):
             'SCOPE_SUBTREE',
             '(sAMAccountName=%(user)s)',
         ),
-        feature_required='ldap',
     )
 
     register(
@@ -255,7 +249,6 @@ def _register_ldap(append=None):
         category=_('LDAP'),
         category_slug='ldap',
         placeholder='uid=%(user)s,OU=Users,DC=example,DC=com',
-        feature_required='ldap',
     )
 
     register(
@@ -274,7 +267,6 @@ def _register_ldap(append=None):
             ('last_name', 'sn'),
             ('email', 'mail'),
         ]),
-        feature_required='ldap',
     )
 
     register(
@@ -292,7 +284,6 @@ def _register_ldap(append=None):
             'SCOPE_SUBTREE',
             '(objectClass=group)',
         ),
-        feature_required='ldap',
     )
 
     register(
@@ -304,7 +295,6 @@ def _register_ldap(append=None):
                     'https://django-auth-ldap.readthedocs.io/en/stable/groups.html#types-of-groups'),
         category=_('LDAP'),
         category_slug='ldap',
-        feature_required='ldap',
         default='MemberDNGroupType',
         depends_on=['AUTH_LDAP{}_GROUP_TYPE_PARAMS'.format(append_str)],
     )
@@ -325,7 +315,6 @@ def _register_ldap(append=None):
             ('member_attr', 'member'),
             ('name_attr', 'cn'),
         ]),
-        feature_required='ldap',
         depends_on=['AUTH_LDAP{}_GROUP_TYPE'.format(append_str)],
     )
 
@@ -343,7 +332,6 @@ def _register_ldap(append=None):
         category=_('LDAP'),
         category_slug='ldap',
         placeholder='CN=Tower Users,OU=Users,DC=example,DC=com',
-        feature_required='ldap',
     )
 
     register(
@@ -359,7 +347,6 @@ def _register_ldap(append=None):
         category=_('LDAP'),
         category_slug='ldap',
         placeholder='CN=Disabled Users,OU=Users,DC=example,DC=com',
-        feature_required='ldap',
     )
 
     register(
@@ -376,7 +363,6 @@ def _register_ldap(append=None):
             ('is_superuser', 'CN=Domain Admins,CN=Users,DC=example,DC=com'),
             ('is_system_auditor', 'CN=Domain Auditors,CN=Users,DC=example,DC=com'),
         ]),
-        feature_required='ldap',
     )
 
     register(
@@ -404,7 +390,6 @@ def _register_ldap(append=None):
                 ('remove_admins', True),
             ])),
         ]),
-        feature_required='ldap',
     )
 
     register(
@@ -428,7 +413,6 @@ def _register_ldap(append=None):
                 ('remove', False),
             ])),
         ]),
-        feature_required='ldap',
     )
 
 
@@ -454,7 +438,6 @@ register(
     category=_('RADIUS'),
     category_slug='radius',
     placeholder='radius.example.com',
-    feature_required='enterprise_auth',
 )
 
 register(
@@ -467,7 +450,6 @@ register(
     help_text=_('Port of RADIUS server.'),
     category=_('RADIUS'),
     category_slug='radius',
-    feature_required='enterprise_auth',
 )
 
 register(
@@ -479,7 +461,6 @@ register(
     help_text=_('Shared secret for authenticating to RADIUS server.'),
     category=_('RADIUS'),
     category_slug='radius',
-    feature_required='enterprise_auth',
     encrypted=True,
 )
 
@@ -496,7 +477,6 @@ register(
     help_text=_('Hostname of TACACS+ server.'),
     category=_('TACACS+'),
     category_slug='tacacsplus',
-    feature_required='enterprise_auth',
 )
 
 register(
@@ -509,7 +489,6 @@ register(
     help_text=_('Port number of TACACS+ server.'),
     category=_('TACACS+'),
     category_slug='tacacsplus',
-    feature_required='enterprise_auth',
 )
 
 register(
@@ -522,7 +501,6 @@ register(
     help_text=_('Shared secret for authenticating to TACACS+ server.'),
     category=_('TACACS+'),
     category_slug='tacacsplus',
-    feature_required='enterprise_auth',
     encrypted=True,
 )
 
@@ -535,7 +513,6 @@ register(
     help_text=_('TACACS+ session timeout value in seconds, 0 disables timeout.'),
     category=_('TACACS+'),
     category_slug='tacacsplus',
-    feature_required='enterprise_auth',
 )
 
 register(
@@ -547,7 +524,6 @@ register(
     help_text=_('Choose the authentication protocol used by TACACS+ client.'),
     category=_('TACACS+'),
     category_slug='tacacsplus',
-    feature_required='enterprise_auth',
 )
 
 ###############################################################################
@@ -953,7 +929,6 @@ register(
     category=_('SAML'),
     category_slug='saml',
     depends_on=['TOWER_URL_BASE'],
-    feature_required='enterprise_auth',
 )
 
 register(
@@ -966,7 +941,6 @@ register(
                 'metadata file, you can download one from this URL.'),
     category=_('SAML'),
     category_slug='saml',
-    feature_required='enterprise_auth',
 )
 
 register(
@@ -980,7 +954,6 @@ register(
                 'This is usually the URL for Tower.'),
     category=_('SAML'),
     category_slug='saml',
-    feature_required='enterprise_auth',
     depends_on=['TOWER_URL_BASE'],
 )
 
@@ -995,7 +968,6 @@ register(
                 'and include the certificate content here.'),
     category=_('SAML'),
     category_slug='saml',
-    feature_required='enterprise_auth',
 )
 
 register(
@@ -1009,7 +981,6 @@ register(
                 'and include the private key content here.'),
     category=_('SAML'),
     category_slug='saml',
-    feature_required='enterprise_auth',
     encrypted=True,
 )
 
@@ -1029,7 +1000,6 @@ register(
             ('url', 'http://www.example.com'),
         ])),
     ]),
-    feature_required='enterprise_auth',
 )
 
 register(
@@ -1047,7 +1017,6 @@ register(
         ('givenName', 'Technical Contact'),
         ('emailAddress', 'techsup@example.com'),
     ]),
-    feature_required='enterprise_auth',
 )
 
 register(
@@ -1065,7 +1034,6 @@ register(
         ('givenName', 'Support Contact'),
         ('emailAddress', 'support@example.com'),
     ]),
-    feature_required='enterprise_auth',
 )
 
 register(
@@ -1102,7 +1070,6 @@ register(
             ('attr_email', 'User.email'),
         ])),
     ]),
-    feature_required='enterprise_auth',
 )
 
 register(
@@ -1135,7 +1102,6 @@ register(
         ("signatureAlgorithm", "http://www.w3.org/2000/09/xmldsig#rsa-sha1"),
         ("digestAlgorithm", "http://www.w3.org/2000/09/xmldsig#sha1"),
     ]),
-    feature_required='enterprise_auth',
 )
 
 register(
@@ -1149,7 +1115,6 @@ register(
     category=_('SAML'),
     category_slug='saml',
     placeholder=collections.OrderedDict(),
-    feature_required='enterprise_auth',
 )
 
 register(
@@ -1167,7 +1132,6 @@ register(
         ('department', 'department'),
         ('manager_full_name', 'manager_full_name')
     ],
-    feature_required='enterprise_auth',
 )
 
 register(
@@ -1180,7 +1144,6 @@ register(
     category=_('SAML'),
     category_slug='saml',
     placeholder=SOCIAL_AUTH_ORGANIZATION_MAP_PLACEHOLDER,
-    feature_required='enterprise_auth',
 )
 
 register(
@@ -1193,7 +1156,6 @@ register(
     category=_('SAML'),
     category_slug='saml',
     placeholder=SOCIAL_AUTH_TEAM_MAP_PLACEHOLDER,
-    feature_required='enterprise_auth',
 )
 
 register(
@@ -1211,7 +1173,6 @@ register(
         ('remove', True),
         ('remove_admins', True),
     ]),
-    feature_required='enterprise_auth',
 )
 
 register(
@@ -1253,7 +1214,6 @@ register(
             ]),
         ]),
     ]),
-    feature_required='enterprise_auth',
 )
 
 

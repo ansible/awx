@@ -107,7 +107,7 @@ export default ['i18n', function(i18n) {
             },
             save: {
                 ngClick: 'vm.formSave()',
-                ngDisabled: "!ldap_auth || configuration_ldap2_template_form.$invalid || configuration_ldap2_template_form.$pending"
+                ngDisabled: "configuration_ldap2_template_form.$invalid || configuration_ldap2_template_form.$pending"
             }
         }
     };

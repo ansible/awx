@@ -480,7 +480,6 @@ function(NotificationsList, i18n) {
             relatedButtons: {
                 view_survey: {
                     ngClick: 'editSurvey()',
-                    awFeature: 'surveys',
                     ngShow: '($state.is(\'templates.addJobTemplate\') || $state.is(\'templates.editJobTemplate\')) &&  survey_exists && !(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)',
                     label: i18n._('View Survey'),
                     class: 'Form-primaryButton'
@@ -488,7 +487,6 @@ function(NotificationsList, i18n) {
                 add_survey: {
                     ngClick: 'addSurvey()',
                     ngShow: '($state.is(\'templates.addJobTemplate\') || $state.is(\'templates.editJobTemplate\')) && !survey_exists && (job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)',
-                    awFeature: 'surveys',
                     awToolTip: '{{surveyTooltip}}',
                     dataPlacement: 'top',
                     label: i18n._('Add Survey'),
@@ -496,7 +494,6 @@ function(NotificationsList, i18n) {
                 },
                 edit_survey: {
                     ngClick: 'editSurvey()',
-                    awFeature: 'surveys',
                     ngShow: '($state.is(\'templates.addJobTemplate\') || $state.is(\'templates.editJobTemplate\')) && survey_exists && (job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)',
                     label: i18n._('Edit Survey'),
                     class: 'Form-primaryButton',

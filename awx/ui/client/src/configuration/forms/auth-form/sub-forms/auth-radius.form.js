@@ -39,7 +39,7 @@ export default ['i18n', function(i18n) {
             },
             save: {
                 ngClick: 'vm.formSave()',
-                ngDisabled: "!enterprise_auth || configuration_radius_template_form.$invalid || configuration_radius_template_form.$pending"
+                ngDisabled: "configuration_radius_template_form.$invalid || configuration_radius_template_form.$pending"
             }
         }
     };

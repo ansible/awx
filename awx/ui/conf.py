@@ -35,7 +35,6 @@ register(
                 'custom HTML or other markup languages are not supported.'),
     category=_('UI'),
     category_slug='ui',
-    feature_required='rebranding',
 )
 
 register(
@@ -50,7 +49,6 @@ register(
     placeholder='data:image/gif;base64,R0lGODlhAQABAIABAP///wAAACwAAAAAAQABAAACAkQBADs=',
     category=_('UI'),
     category_slug='ui',
-    feature_required='rebranding',
 )
 
 register(

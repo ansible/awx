@@ -78,9 +78,6 @@ register(
     # the other settings change, the cached value for this setting will be
     # cleared to require it to be recomputed.
     depends_on=['ANSIBLE_COW_SELECTION'],
-    # Optional; licensed feature required to be able to view or modify this
-    # setting.
-    feature_required='rebranding',
     # Optional; field is stored encrypted in the database and only $encrypted$
     # is returned via the API.
     encrypted=True,

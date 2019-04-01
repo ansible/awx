@@ -61,27 +61,6 @@ export default {
                 return qs.search(path, stateParams);
             }
         ],
-        features: ['FeaturesService', '$state', '$rootScope',
-            function(FeaturesService, $state, $rootScope) {
-                var features = FeaturesService.get();
-                if (features) {
-                    if (FeaturesService.featureEnabled('activity_streams')) {
-                        return features;
-                    } else {
-                        $state.go('dashboard');
-                    }
-                }
-                $rootScope.featuresConfigured.promise.then(function(features) {
-                    if (features) {
-                        if (FeaturesService.featureEnabled('activity_streams')) {
-                            return features;
-                        } else {
-                            $state.go('dashboard');
-                        }
-                    }
-                });
-            }
-        ],
         subTitle: ['$stateParams', 'Rest', 'ModelToBasePathKey', 'GetBasePath',
             'ProcessErrors',
             function($stateParams, rest, ModelToBasePathKey, getBasePath,

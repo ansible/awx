@@ -1,6 +1,6 @@
 export default
-    ['templateUrl', '$state', 'FeaturesService','$rootScope', 'Store', 'Empty', '$window', 'BreadCrumbService', 'i18n', '$transitions',
-    function(templateUrl, $state, FeaturesService, $rootScope, Store, Empty, $window, BreadCrumbService, i18n, $transitions) {
+    ['templateUrl', '$state', '$rootScope', 'Store', 'Empty', '$window', 'BreadCrumbService', 'i18n', '$transitions',
+    function(templateUrl, $state, $rootScope, Store, Empty, $window, BreadCrumbService, i18n, $transitions) {
         return {
             restrict: 'E',
             templateUrl: templateUrl('bread-crumb/bread-crumb'),
@@ -28,40 +28,23 @@ export default
                         streamConfig = (trans.to() && trans.to().data) ? trans.to().data : {};
 
                         if(streamConfig && streamConfig.activityStream) {
-
-                            // Check to see if activity_streams is an enabled feature.  $transition.onSuccess fires
-                            // after the resolve on the state declaration so features should be available at this
-                            // point.  We use the get() function call here just in case the features aren't available.
-                            // The get() function will only fire off the server call if the features aren't already
-                            // attached to the $rootScope.
-                            var features = FeaturesService.get();
-                            if(features){
-                                scope.loadingLicense = false;
-                                scope.activityStreamActive = (trans.to().name === 'activityStream') ? true : false;
-                                scope.activityStreamTooltip = (trans.to().name === 'activityStream') ? i18n._('Hide Activity Stream') : i18n._('View Activity Stream');
-                                scope.showActivityStreamButton = (FeaturesService.featureEnabled('activity_streams') || trans.to().name ==='activityStream') ? true : false;
-                            }
+                            scope.loadingLicense = false;
+                            scope.activityStreamActive = (trans.to().name === 'activityStream') ? true : false;
+                            scope.activityStreamTooltip = (trans.to().name === 'activityStream') ? i18n._('Hide Activity Stream') : i18n._('View Activity Stream');
+                            scope.showActivityStreamButton = true;
                         }
                         else {
-
                             scope.showActivityStreamButton = false;
-
                         }
 
                         scope.showRefreshButton = (streamConfig && streamConfig.refreshButton) ? true : false;
                         scope.alwaysShowRefreshButton = (streamConfig && streamConfig.alwaysShowRefreshButton) ? true: false;
                     });
 
-                    // scope.$on('featuresLoaded', function(){
-                    $rootScope.featuresConfigured.promise.then(function(features){
-                        // var features = FeaturesService.get();
-                        if(features){
-                            scope.loadingLicense = false;
-                            scope.activityStreamActive = ($state.current.name === 'activityStream') ? true : false;
-                            scope.activityStreamTooltip = ($state.current.name === 'activityStream') ? 'Hide Activity Stream' : 'View Activity Stream';
-                            scope.showActivityStreamButton = ((FeaturesService.featureEnabled('activity_streams') && streamConfig && streamConfig.activityStream) || $state.current.name ==='activityStream') ? true : false;
-                        }
-                    });
+                    scope.loadingLicense = false;
+                    scope.activityStreamActive = ($state.current.name === 'activityStream') ? true : false;
+                    scope.activityStreamTooltip = ($state.current.name === 'activityStream') ? 'Hide Activity Stream' : 'View Activity Stream';
+                    scope.showActivityStreamButton = ((streamConfig && streamConfig.activityStream) || $state.current.name ==='activityStream') ? true : false;
 
                     function onResize(){
                         BreadCrumbService.truncateCrumbs();

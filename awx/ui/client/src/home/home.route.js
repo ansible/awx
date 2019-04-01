@@ -21,12 +21,10 @@ export default {
         label: N_("DASHBOARD")
     },
     resolve: {
-        graphData: ['$q', 'jobStatusGraphData', '$rootScope',
-            function($q, jobStatusGraphData, $rootScope) {
-                return $rootScope.featuresConfigured.promise.then(function() {
-                    return $q.all({
-                        jobStatus: jobStatusGraphData.get("month", "all"),
-                    });
+        graphData: ['$q', 'jobStatusGraphData',
+            function($q, jobStatusGraphData) {
+                return $q.all({
+                    jobStatus: jobStatusGraphData.get("month", "all"),
                 });
             }
         ]

@@ -126,7 +126,7 @@ export default ['i18n', function(i18n) {
             },
             save: {
                 ngClick: 'vm.formSave()',
-                ngDisabled: "!enterprise_auth || configuration_saml_template_form.$invalid || configuration_saml_template_form.$pending"
+                ngDisabled: "configuration_saml_template_form.$invalid || configuration_saml_template_form.$pending"
             }
         }
     };
