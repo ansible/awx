@@ -12,7 +12,7 @@ class ActionModule(ActionBase):
     def save_playbook(self, proj_path, plan, content):
         fname = '{}-{}.yml'.format(plan.get('name', None) or 'insights-plan', plan['maintenance_id'])
         file_path = os.path.join(proj_path, fname)
-        with open(file_path, 'w') as f:
+        with open(file_path, 'wb') as f:
             f.write(content)
 
     def is_stale(self, proj_path, etag):
