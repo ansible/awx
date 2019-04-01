@@ -30,6 +30,7 @@ class Command(BaseCommand):
                 p = Project(name='Demo Project',
                             scm_type='git',
                             scm_url='https://github.com/ansible/ansible-tower-samples',
+                            scm_branch='master',
                             scm_update_on_launch=True,
                             scm_update_cache_timeout=0,
                             organization=o)
