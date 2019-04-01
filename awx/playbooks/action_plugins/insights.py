@@ -1,6 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
+import codecs
 import os
 import requests
 
@@ -12,7 +13,7 @@ class ActionModule(ActionBase):
     def save_playbook(self, proj_path, plan, content):
         fname = '{}-{}.yml'.format(plan.get('name', None) or 'insights-plan', plan['maintenance_id'])
         file_path = os.path.join(proj_path, fname)
-        with open(file_path, 'w') as f:
+        with codecs.open(file_path, 'w', encoding='utf-8') as f:
             f.write(content)
 
     def is_stale(self, proj_path, etag):
@@ -27,7 +28,7 @@ class ActionModule(ActionBase):
 
     def write_version(self, proj_path, etag):
         file_path = os.path.join(proj_path, '.version')
-        with open(file_path, 'w') as f:
+        with codecs.open(file_path, 'w', encoding='utf-8') as f:
             f.write(etag)
 
     def run(self, tmp=None, task_vars=None):
