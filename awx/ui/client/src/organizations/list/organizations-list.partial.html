@@ -83,7 +83,8 @@
                                 {{ link.count }}
                             </span>
                             <a class="OrgCards-linkName"
-                                ng-href="{{ link.href }}">
+                                ui-sref="{{ link.sref }}"
+                                ui-sref-opts="{{ link.srefOpts }}">
                                 {{ link.name }}
                             </a>
                         </div>

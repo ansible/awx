@@ -36,6 +36,7 @@ function ListTemplatesController(
     let refreshAfterLaunchClose = false;
     let pendingRefresh = false;
     let refreshTimerRunning = false;
+    let paginateQuerySet = {};
 
     vm.strings = strings;
     vm.templateTypes = mapChoices(choices);
@@ -61,6 +62,39 @@ function ListTemplatesController(
     };
     vm.dataset = Dataset.data;
     vm.templates = Dataset.data.results;
+    vm.defaultParams = $state.params.template_search;
+
+    const toolbarSortDefault = {
+        label: `${strings.get('sort.NAME_ASCENDING')}`,
+        value: 'name'
+    };
+
+    vm.toolbarSortOptions = [
+        toolbarSortDefault,
+        { label: `${strings.get('sort.NAME_DESCENDING')}`, value: '-name' }
+    ];
+
+    vm.toolbarSortValue = toolbarSortDefault;
+
+    $scope.$on('updateDataset', (event, dataset, queryset) => {
+        paginateQuerySet = queryset;
+    });
+
+    vm.onToolbarSort = (sort) => {
+        vm.toolbarSortValue = sort;
+
+        const queryParams = Object.assign(
+            {},
+            $state.params.template_search,
+            paginateQuerySet,
+            { order_by: sort.value }
+        );
+
+        // Update params
+        $state.go('.', {
+            template_search: queryParams
+        }, { notify: false, location: 'replace' });
+    };
 
     $scope.$watch('vm.dataset.count', () => {
         $scope.$emit('updateCount', vm.dataset.count, 'templates');
@@ -75,6 +109,7 @@ function ListTemplatesController(
         } else {
             vm.activeId = "";
         }
+        setToolbarSort();
     }, true);
 
     $scope.$on(`ws-jobs`, () => {
@@ -203,15 +238,25 @@ function ListTemplatesController(
         }
     };
 
+    function setToolbarSort () {
+        const orderByValue = _.get($state.params, 'template_search.order_by');
+        const sortValue = _.find(vm.toolbarSortOptions, (option) => option.value === orderByValue);
+        if (sortValue) {
+            vm.toolbarSortValue = sortValue;
+        } else {
+            vm.toolbarSortValue = toolbarSortDefault;
+        }
+    }
+
     function refreshTemplates() {
         Wait('start');
         let path = GetBasePath('unified_job_templates');
         qs.search(path, $state.params.template_search, { 'X-WS-Session-Quiet': true })
-            .then(function(searchResponse) {
-                vm.dataset = searchResponse.data;
-                vm.templates = vm.dataset.results;
-            })
-            .finally(() => Wait('stop'));
+        .then(function(searchResponse) {
+            vm.dataset = searchResponse.data;
+            vm.templates = vm.dataset.results;
+        })
+        .finally(() => Wait('stop'));
         pendingRefresh = false;
         refreshTimerRunning = true;
         $timeout(() => {
