@@ -12,7 +12,7 @@ export default
 
             let scope;
 
-            vm.init = (_scope_) => {
+            vm.init = (_scope_, controller, el) => {
                 scope = _scope_;
 
                 scope.parseType = 'yaml';
@@ -102,6 +102,13 @@ export default
                     return ToJSON(scope.parseType, scope.extraVariables, true);
                 }
                 scope.validate = validate;
+
+                angular.element(el).ready(() => {
+                  const inputs = el.find('input, select');
+                  if (inputs.length) {
+                    inputs.get(0).focus();
+                  }
+                });
             };
 
 

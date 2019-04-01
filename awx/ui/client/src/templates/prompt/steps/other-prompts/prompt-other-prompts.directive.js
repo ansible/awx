@@ -28,7 +28,7 @@ export default [ 'templateUrl',
             const launchController = controllers[0];
             const promptOtherPromptsController = controllers[1];
 
-            promptOtherPromptsController.init(scope, launchController);
+            promptOtherPromptsController.init(scope, launchController, el);
         }
     };
 }];
