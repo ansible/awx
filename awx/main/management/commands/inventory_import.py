@@ -75,12 +75,13 @@ class AnsibleInventoryLoader(object):
         /usr/bin/ansible/ansible-inventory -i hosts --list
     '''
 
-    def __init__(self, source, is_custom=False, venv_path=None):
+    def __init__(self, source, is_custom=False, venv_path=None, verbosity=0):
         self.source = source
         self.source_dir = functioning_dir(self.source)
         self.is_custom = is_custom
         self.tmp_private_dir = None
         self.method = 'ansible-inventory'
+        self.verbosity = verbosity
         if venv_path:
             self.venv_path = venv_path
         else:
@@ -134,8 +135,14 @@ class AnsibleInventoryLoader(object):
         # https://github.com/ansible/ansible/issues/50714
         bargs = ['python', ansible_inventory_path, '-i', self.source]
         ansible_version = _get_ansible_version(ansible_inventory_path[:-len('-inventory')])
-        if ansible_version != 'unknown' and Version(ansible_version) >= Version('2.5'):
-            bargs.extend(['--playbook-dir', self.source_dir])
+        if ansible_version != 'unknown':
+            this_version = Version(ansible_version)
+            if this_version >= Version('2.5'):
+                bargs.extend(['--playbook-dir', self.source_dir])
+            if this_version >= Version('2.8'):
+                if self.verbosity:
+                    # INFO: -vvv, DEBUG: -vvvvv, for inventory, any more than 3 makes little difference
+                    bargs.append('-{}'.format('v' * min(5, self.verbosity * 2 + 1)))
         logger.debug('Using base command: {}'.format(' '.join(bargs)))
         return bargs
 
@@ -1025,7 +1032,8 @@ class Command(BaseCommand):
 
             source = self.get_source_absolute_path(self.source)
 
-            data = AnsibleInventoryLoader(source=source, is_custom=self.is_custom, venv_path=venv_path).load()
+            data = AnsibleInventoryLoader(source=source, is_custom=self.is_custom,
+                                          venv_path=venv_path, verbosity=self.verbosity).load()
 
             logger.debug('Finished loading from source: %s', source)
             logger.info('Processing JSON output...')
