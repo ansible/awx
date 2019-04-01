@@ -17,10 +17,12 @@ function atCodeMirrorModalController (
         } else if ($scope.disabled === 'false') {
             $scope.disabled = false;
         }
-        const editor = $(`${CodeMirrorModalID} .CodeMirror`)[0].CodeMirror;
-        const height = $(ModalHeight).height() - $(ModalHeader).height() -
-            $(ModalFooter).height() - 100;
-        editor.setSize('100%', height);
+        const editor = $(`${CodeMirrorModalID} .CodeMirror`)[0];
+        if (editor) {
+            const height = $(ModalHeight).height() - $(ModalHeader).height() -
+                $(ModalFooter).height() - 100;
+            editor.CodeMirror.setSize('100%', height);
+        }
     }
 
     function toggle () {
