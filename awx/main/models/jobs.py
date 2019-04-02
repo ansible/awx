@@ -861,8 +861,21 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
                             continue
                         host.ansible_facts = ansible_facts
                         host.ansible_facts_modified = now()
-                        if 'insights' in ansible_facts and 'system_id' in ansible_facts['insights']:
-                            host.insights_system_id = ansible_facts['insights']['system_id']
+                        ansible_local_system_id = ansible_facts.get('ansible_local', {}).get('insights', {}).get('system_id', None)
+                        ansible_facts_system_id = ansible_facts.get('insights', {}).get('system_id', None)
+                        if ansible_local_system_id:
+                            print("Setting local {}".format(ansible_local_system_id))
+                            logger.debug("Insights system_id {} found for host <{}, {}> in"
+                                         " ansible local facts".format(ansible_local_system_id,
+                                                                       host.inventory.id,
+                                                                       host.name))
+                            host.insights_system_id = ansible_local_system_id
+                        elif ansible_facts_system_id:
+                            logger.debug("Insights system_id {} found for host <{}, {}> in"
+                                         " insights facts".format(ansible_local_system_id,
+                                                                  host.inventory.id,
+                                                                  host.name))
+                            host.insights_system_id = ansible_facts_system_id
                         host.save()
                         system_tracking_logger.info(
                             'New fact for inventory {} host {}'.format(
