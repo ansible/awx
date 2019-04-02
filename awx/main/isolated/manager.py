@@ -29,13 +29,14 @@ def set_pythonpath(venv_libdir, env):
 
 class IsolatedManager(object):
 
-    def __init__(self, cancelled_callback=None):
+    def __init__(self, cancelled_callback=None, check_callback=None):
         """
         :param cancelled_callback:  a callable - which returns `True` or `False`
                                     - signifying if the job has been prematurely
                                       cancelled
         """
         self.cancelled_callback = cancelled_callback
+        self.check_callback = check_callback
         self.idle_timeout = max(60, 2 * settings.AWX_ISOLATED_CONNECTION_TIMEOUT)
         self.started_at = None
 
@@ -187,6 +188,13 @@ class IsolatedManager(object):
                                                       self.private_data_dir,
                                                       extravars=extravars)
             status, rc = runner_obj.status, runner_obj.rc
+            if self.check_callback is not None:
+                command_path = self.path_to('artifacts', self.ident, 'command')
+                # If the command artifact has been synced back, update the model
+                if os.path.exists(command_path):
+                    with open(command_path, 'r') as f:
+                        data = json.load(f)
+                    self.check_callback(data['command'], data['cwd'], self.runner_params['envvars'].copy())
             self.consume_events(dispatcher)
 
             last_check = time.time()

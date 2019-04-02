@@ -1077,6 +1077,15 @@ class BaseTask(object):
             self.instance = self.update_model(self.instance.pk, job_args=json.dumps(runner_config.command),
                                               job_cwd=runner_config.cwd, job_env=job_env)
 
+    def check_handler(self, command, cwd, env):
+        '''
+        IsolatedManager callback triggered by the repeated checks of the isolated node
+        '''
+        self.instance = self.update_model(self.instance.pk,
+                                          job_args=command,
+                                          job_cwd=cwd,
+                                          job_env=build_safe_env(env))
+
 
     @with_path_cleanup
     def run(self, pk, **kwargs):
@@ -1212,7 +1221,8 @@ class BaseTask(object):
                 )
                 ansible_runner.utils.dump_artifacts(params)
                 isolated_manager_instance = isolated_manager.IsolatedManager(
-                    cancelled_callback=lambda: self.update_model(self.instance.pk).cancel_flag
+                    cancelled_callback=lambda: self.update_model(self.instance.pk).cancel_flag,
+                    check_callback=self.check_callback,
                 )
                 status, rc = isolated_manager_instance.run(self.instance,
                                                            private_data_dir,
