@@ -460,6 +460,42 @@ class BaseAccess(object):
         return False
 
 
+class NotificationAttachMixin(BaseAccess):
+    '''For models that can have notifications attached
+
+    I can attach a notification template when
+    - I have notification_admin_role to organization of the NT
+    - I can read the object I am attaching it to
+
+    I can unattach when those same critiera are met
+    '''
+    notification_attach_roles = None
+
+    def _can_attach(self, notification_template, resource_obj):
+        if not NotificationTemplateAccess(self.user).can_change(notification_template, {}):
+            return False
+        if self.notification_attach_roles is None:
+            return self.can_read(resource_obj)
+        return any(self.user in getattr(resource_obj, role) for role in self.notification_attach_roles)
+
+    @check_superuser
+    def can_attach(self, obj, sub_obj, relationship, data, skip_sub_obj_read_check=False):
+        if isinstance(sub_obj, NotificationTemplate):
+            # reverse obj and sub_obj
+            return self._can_attach(notification_template=sub_obj, resource_obj=obj)
+        return super(NotificationAttachMixin, self).can_attach(
+            obj, sub_obj, relationship, data, skip_sub_obj_read_check=skip_sub_obj_read_check)
+
+    @check_superuser
+    def can_unattach(self, obj, sub_obj, relationship, data=None):
+        if isinstance(sub_obj, NotificationTemplate):
+            # due to this special case, we use symmetrical logic with attach permission
+            return self._can_attach(notification_template=sub_obj, resource_obj=obj)
+        return super(NotificationAttachMixin, self).can_unattach(
+            obj, sub_obj, relationship, relationship, data=data
+        )
+
+
 class InstanceAccess(BaseAccess):
 
     model = Instance
@@ -715,7 +751,7 @@ class OAuth2TokenAccess(BaseAccess):
         return True
 
 
-class OrganizationAccess(BaseAccess):
+class OrganizationAccess(NotificationAttachMixin, BaseAccess):
     '''
     I can see organizations when:
      - I am a superuser.
@@ -729,6 +765,8 @@ class OrganizationAccess(BaseAccess):
 
     model = Organization
     prefetch_related = ('created_by', 'modified_by',)
+    # organization admin_role is not a parent of organization auditor_role
+    notification_attach_roles = ['admin_role', 'auditor_role']
 
     def filtered_queryset(self):
         return self.model.accessible_objects(self.user, 'read_role')
@@ -966,7 +1004,7 @@ class GroupAccess(BaseAccess):
         return False
 
 
-class InventorySourceAccess(BaseAccess):
+class InventorySourceAccess(NotificationAttachMixin, BaseAccess):
     '''
     I can see inventory sources whenever I can see their inventory.
     I can change inventory sources whenever I can change their inventory.
@@ -1282,7 +1320,7 @@ class TeamAccess(BaseAccess):
                                                     *args, **kwargs)
 
 
-class ProjectAccess(BaseAccess):
+class ProjectAccess(NotificationAttachMixin, BaseAccess):
     '''
     I can see projects when:
      - I am a superuser.
@@ -1301,6 +1339,7 @@ class ProjectAccess(BaseAccess):
 
     model = Project
     select_related = ('modified_by', 'credential', 'current_job', 'last_job',)
+    notification_attach_roles = ['admin_role']
 
     def filtered_queryset(self):
         return self.model.accessible_objects(self.user, 'read_role')
@@ -1363,7 +1402,7 @@ class ProjectUpdateAccess(BaseAccess):
         return obj and self.user in obj.project.admin_role
 
 
-class JobTemplateAccess(BaseAccess):
+class JobTemplateAccess(NotificationAttachMixin, BaseAccess):
     '''
     I can see job templates when:
      - I have read role for the job template.
@@ -1514,8 +1553,6 @@ class JobTemplateAccess(BaseAccess):
 
     @check_superuser
     def can_attach(self, obj, sub_obj, relationship, data, skip_sub_obj_read_check=False):
-        if isinstance(sub_obj, NotificationTemplate):
-            return self.check_related('organization', Organization, {}, obj=sub_obj, mandatory=True)
         if relationship == "instance_groups":
             if not obj.project.organization:
                 return False
@@ -1913,7 +1950,7 @@ class WorkflowJobNodeAccess(BaseAccess):
 
 
 # TODO: notification attachments?
-class WorkflowJobTemplateAccess(BaseAccess):
+class WorkflowJobTemplateAccess(NotificationAttachMixin, BaseAccess):
     '''
     I can only see/manage Workflow Job Templates if I'm a super user
     '''
