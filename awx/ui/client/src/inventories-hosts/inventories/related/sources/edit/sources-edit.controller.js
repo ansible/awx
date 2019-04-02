@@ -8,18 +8,20 @@ export default ['$state', '$scope', 'ParseVariableString', 'ParseTypeChange',
     'GetChoices', 'GetBasePath', 'CreateSelect2', 'GetSourceTypeOptions',
     'SourcesService', 'inventoryData', 'inventorySourcesOptions', 'Empty',
     'Wait', 'Rest', 'Alert', '$rootScope', 'i18n', 'InventoryHostsStrings',
-    'ProcessErrors', 'inventorySource', 'isNotificationAdmin',
+    'ProcessErrors', 'inventorySource', 'isNotificationAdmin', 'ConfigData',
     function($state, $scope, ParseVariableString, ParseTypeChange,
         GetChoices, GetBasePath, CreateSelect2, GetSourceTypeOptions,
         SourcesService, inventoryData, inventorySourcesOptions, Empty,
         Wait, Rest, Alert, $rootScope, i18n, InventoryHostsStrings,
-        ProcessErrors, inventorySource, isNotificationAdmin) {
+        ProcessErrors, inventorySource, isNotificationAdmin, ConfigData) {
 
         const inventorySourceData = inventorySource.get();
 
         $scope.projectBasePath = GetBasePath('projects') + '?not__status=never updated';
         $scope.canAdd = inventorySourcesOptions.actions.POST;
         $scope.isNotificationAdmin = isNotificationAdmin || false;
+        const virtualEnvs = ConfigData.custom_virtualenvs || [];
+        $scope.custom_virtualenvs_options = virtualEnvs;
         // instantiate expected $scope values from inventorySourceData
         _.assign($scope,
             {credential: inventorySourceData.credential},
@@ -156,6 +158,12 @@ export default ['$state', '$scope', 'ParseVariableString', 'ParseTypeChange',
                 $scope.verbosity = $scope.verbosity_options[i];
             }
         }
+
+        CreateSelect2({
+            element: '#inventory_source_custom_virtualenv',
+            multiple: false,
+            opts: $scope.custom_virtualenvs_options
+        });
 
         initVerbositySelect();
 
@@ -329,6 +337,7 @@ export default ['$state', '$scope', 'ParseVariableString', 'ParseTypeChange',
                 update_on_launch: $scope.update_on_launch,
                 update_cache_timeout: $scope.update_cache_timeout || 0,
                 verbosity: $scope.verbosity.value,
+                custom_virtualenv: $scope.custom_virtualenv || null,
                 // comma-delimited strings
                 group_by: SourcesService.encodeGroupBy($scope.source, $scope.group_by),
                 source_regions: _.map($scope.source_regions, 'value').join(',')

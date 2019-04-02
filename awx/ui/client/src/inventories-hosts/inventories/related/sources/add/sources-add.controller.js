@@ -4,16 +4,15 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
-    'ParseTypeChange', 'GenerateForm', 'inventoryData', 'GroupsService',
-    'GetChoices', 'GetBasePath', 'CreateSelect2', 'GetSourceTypeOptions',
-    'rbacUiControlService', 'ToJSON', 'SourcesService', 'Empty',
-    'Wait', 'Rest', 'Alert', 'ProcessErrors', 'inventorySourcesOptions',
-    '$rootScope', 'i18n', 'InventorySourceModel', 'InventoryHostsStrings',
-    function($state, $stateParams, $scope, SourcesFormDefinition,  ParseTypeChange,
-        GenerateForm, inventoryData, GroupsService, GetChoices,
-        GetBasePath, CreateSelect2, GetSourceTypeOptions, rbacUiControlService,
-        ToJSON, SourcesService, Empty, Wait, Rest, Alert, ProcessErrors,
+export default ['$state', 'ConfigData', '$scope', 'SourcesFormDefinition', 'ParseTypeChange', 
+    'GenerateForm', 'inventoryData', 'GetChoices', 
+    'GetBasePath', 'CreateSelect2', 'GetSourceTypeOptions',
+    'SourcesService', 'Empty', 'Wait', 'Rest', 'Alert', 'ProcessErrors', 
+    'inventorySourcesOptions', '$rootScope', 'i18n', 'InventorySourceModel', 'InventoryHostsStrings',
+    function($state, ConfigData, $scope, SourcesFormDefinition,  ParseTypeChange,
+        GenerateForm, inventoryData, GetChoices,
+        GetBasePath, CreateSelect2, GetSourceTypeOptions,
+        SourcesService, Empty, Wait, Rest, Alert, ProcessErrors,
         inventorySourcesOptions,$rootScope, i18n, InventorySource, InventoryHostsStrings) {
 
         let form = SourcesFormDefinition;
@@ -22,6 +21,8 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
         GenerateForm.applyDefaults(form, $scope, true);
         $scope.canAdd = inventorySourcesOptions.actions.POST;
         $scope.envParseType = 'yaml';
+        const virtualEnvs = ConfigData.custom_virtualenvs || [];
+        $scope.custom_virtualenvs_options = virtualEnvs;
 
         GetChoices({
             scope: $scope,
@@ -79,6 +80,12 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
         });
 
         $scope.verbosity = $scope.verbosity_options[1];
+
+        CreateSelect2({
+            element: '#inventory_source_custom_virtualenv',
+            multiple: false,
+            opts: $scope.custom_virtualenvs_options
+        });
 
         GetSourceTypeOptions({
             scope: $scope,
@@ -279,9 +286,10 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
                 update_on_launch: $scope.update_on_launch,
                 verbosity: $scope.verbosity.value,
                 update_cache_timeout: $scope.update_cache_timeout || 0,
+                custom_virtualenv: $scope.custom_virtualenv || null,
                 // comma-delimited strings
                 group_by: SourcesService.encodeGroupBy($scope.source, $scope.group_by),
-                source_regions: _.map($scope.source_regions, 'value').join(',')
+                source_regions: _.map($scope.source_regions, 'value').join(','),
             };
 
             if ($scope.source) {

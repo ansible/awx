@@ -38,6 +38,16 @@ export default {
                             msg: i18n._('Failed to get organizations for which this user is a notification administrator. GET returned ') + status
                         });
                 });
+        }],
+        ConfigData: ['ConfigService', 'ProcessErrors', 'i18n', (ConfigService, ProcessErrors, i18n) => {
+            return ConfigService.getConfig()
+                .then(response => response)
+                .catch(({data, status}) => {
+                    ProcessErrors(null, data, status, null, {
+                        hdr: i18n._('Error!'),
+                        msg: i18n._('Failed to get config. GET returned status: ') + status
+                    });
+                });
         }]
     }
 };
