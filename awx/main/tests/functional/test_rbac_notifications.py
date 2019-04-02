@@ -1,9 +1,14 @@
 import pytest
 
+from awx.main.models import Organization
 from awx.main.access import (
     NotificationTemplateAccess,
     NotificationAccess,
-    JobTemplateAccess
+    JobTemplateAccess,
+    ProjectAccess,
+    WorkflowJobTemplateAccess,
+    OrganizationAccess,
+    InventorySourceAccess
 )
 
 
@@ -135,6 +140,36 @@ def test_system_auditor_JT_attach(system_auditor, job_template, notification_tem
     assert not access.can_attach(
         job_template, notification_template, 'notification_templates_success',
         {'id': notification_template.id})
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("org_role,expect", [
+    ('admin_role', True),
+    ('notification_admin_role', True),
+    ('workflow_admin_role', False),
+    ('auditor_role', False),
+    ('member_role', False)
+])
+def test_org_role_JT_attach(rando, job_template, project, workflow_job_template, inventory_source,
+                            notification_template, org_role, expect):
+    getattr(notification_template.organization, org_role).members.add(rando)
+    kwargs = dict(
+        sub_obj=notification_template,
+        relationship='notification_templates_success',
+        data={'id': notification_template.id}
+    )
+    job_template.admin_role.members.add(rando)
+    assert JobTemplateAccess(rando).can_attach(job_template, **kwargs) is expect
+    project.admin_role.members.add(rando)
+    assert ProjectAccess(rando).can_attach(project, **kwargs) is expect
+    workflow_job_template.admin_role.members.add(rando)
+    assert workflow_job_template.organization == notification_template.organization
+    assert WorkflowJobTemplateAccess(rando).can_attach(workflow_job_template, **kwargs) is expect
+    second_organization = Organization.objects.create(name='fooooorg')
+    second_organization.admin_role.members.add(rando)
+    assert OrganizationAccess(rando).can_attach(second_organization, **kwargs) is expect
+    inventory_source.inventory.admin_role.members.add(rando)
+    assert InventorySourceAccess(rando).can_attach(inventory_source, **kwargs) is expect
 
 
 @pytest.mark.django_db

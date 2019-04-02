@@ -460,6 +460,19 @@ class BaseAccess(object):
         return False
 
 
+class NotificationAttachMixin(BaseAccess):
+
+    @check_superuser
+    def can_attach(self, obj, sub_obj, relationship, data, skip_sub_obj_read_check=False):
+        if isinstance(sub_obj, NotificationTemplate):
+            if not self.check_related(
+                    'organization', Organization, {}, obj=sub_obj,
+                    role_field='notification_admin_role', mandatory=True):
+                return False
+        return super(NotificationAttachMixin, self).can_attach(
+            obj, sub_obj, relationship, data, skip_sub_obj_read_check=skip_sub_obj_read_check)
+
+
 class InstanceAccess(BaseAccess):
 
     model = Instance
@@ -715,7 +728,7 @@ class OAuth2TokenAccess(BaseAccess):
         return True
 
 
-class OrganizationAccess(BaseAccess):
+class OrganizationAccess(NotificationAttachMixin, BaseAccess):
     '''
     I can see organizations when:
      - I am a superuser.
@@ -966,7 +979,7 @@ class GroupAccess(BaseAccess):
         return False
 
 
-class InventorySourceAccess(BaseAccess):
+class InventorySourceAccess(NotificationAttachMixin, BaseAccess):
     '''
     I can see inventory sources whenever I can see their inventory.
     I can change inventory sources whenever I can change their inventory.
@@ -1233,7 +1246,7 @@ class TeamAccess(BaseAccess):
                                                     *args, **kwargs)
 
 
-class ProjectAccess(BaseAccess):
+class ProjectAccess(NotificationAttachMixin, BaseAccess):
     '''
     I can see projects when:
      - I am a superuser.
@@ -1314,7 +1327,7 @@ class ProjectUpdateAccess(BaseAccess):
         return obj and self.user in obj.project.admin_role
 
 
-class JobTemplateAccess(BaseAccess):
+class JobTemplateAccess(NotificationAttachMixin, BaseAccess):
     '''
     I can see job templates when:
      - I have read role for the job template.
@@ -1465,8 +1478,6 @@ class JobTemplateAccess(BaseAccess):
 
     @check_superuser
     def can_attach(self, obj, sub_obj, relationship, data, skip_sub_obj_read_check=False):
-        if isinstance(sub_obj, NotificationTemplate):
-            return self.check_related('organization', Organization, {}, obj=sub_obj, mandatory=True)
         if relationship == "instance_groups":
             if not obj.project.organization:
                 return False
@@ -1864,7 +1875,7 @@ class WorkflowJobNodeAccess(BaseAccess):
 
 
 # TODO: notification attachments?
-class WorkflowJobTemplateAccess(BaseAccess):
+class WorkflowJobTemplateAccess(NotificationAttachMixin, BaseAccess):
     '''
     I can only see/manage Workflow Job Templates if I'm a super user
     '''
