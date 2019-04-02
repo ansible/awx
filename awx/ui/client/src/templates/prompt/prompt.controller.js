@@ -9,7 +9,7 @@ export default [ 'ProcessErrors', 'CredentialTypeModel', 'TemplatesStrings', '$f
         let modal;
         let activeTab;
 
-        vm.init = (_scope_, el) => {
+        vm.init = (_scope_) => {
             scope = _scope_;
             ({ modal } = scope[scope.ns]);
 
