@@ -189,12 +189,12 @@ class IsolatedManager(object):
                                                       extravars=extravars)
             status, rc = runner_obj.status, runner_obj.rc
             if self.check_callback is not None:
-                command_path = self.path_to('artifacts', self.ident, 'command')
-                # If the command artifact has been synced back, update the model
-                if os.path.exists(command_path):
-                    with open(command_path, 'r') as f:
+                config_path = self.path_to('artifacts', self.ident, 'config')
+                # If the configuration artifact has been synced back, update the model
+                if os.path.exists(config_path):
+                    with open(config_path, 'r') as f:
                         data = json.load(f)
-                    self.check_callback(data['command'], data['cwd'], self.runner_params['envvars'].copy())
+                    self.check_callback(data)
             self.consume_events(dispatcher)
 
             last_check = time.time()

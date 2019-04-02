@@ -1077,14 +1077,14 @@ class BaseTask(object):
             self.instance = self.update_model(self.instance.pk, job_args=json.dumps(runner_config.command),
                                               job_cwd=runner_config.cwd, job_env=job_env)
 
-    def check_handler(self, command, cwd, env):
+    def check_handler(self, config):
         '''
         IsolatedManager callback triggered by the repeated checks of the isolated node
         '''
         self.instance = self.update_model(self.instance.pk,
-                                          job_args=command,
-                                          job_cwd=cwd,
-                                          job_env=build_safe_env(env))
+                                          job_args=json.dumps(config['command']),
+                                          job_cwd=config['cwd'],
+                                          job_env=config['env'])
 
 
     @with_path_cleanup
