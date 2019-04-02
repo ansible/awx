@@ -20,7 +20,7 @@ export default [ 'templateUrl',
             scope.ns = 'launch';
             scope[scope.ns] = { modal: {} };
 
-            promptController.init(scope);
+            promptController.init(scope, el);
         }
     };
 }];

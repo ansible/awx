@@ -7,7 +7,7 @@
             <at-tab id="prompt_survey_tab" ng-if="vm.steps.survey.tab" state="vm.steps.survey.tab">{{:: vm.strings.get('prompt.SURVEY') }}</at-tab>
             <at-tab id="prompt_preview_tab" state="vm.steps.preview.tab">{{:: vm.strings.get('prompt.PREVIEW') }}</at-tab>
         </at-tab-group>
-        <div class="Prompt-step">
+        <div class="Prompt-step" ng-keypress="vm.keypress($event)">
             <div ng-if="vm.steps.inventory.includeStep" ng-show="vm.steps.inventory.tab._active" id="prompt_inventory_step">
                 <prompt-inventory
                     prompt-data="vm.promptDataClone"
