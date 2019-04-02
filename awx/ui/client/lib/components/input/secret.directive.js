@@ -21,17 +21,15 @@ function AtInputSecretController (baseInputController) {
 
         scope = _scope_;
         scope.type = 'password';
+        scope.state._show = false;
+        scope.state._showHideText = vm.strings.get('SHOW');
 
         if (!scope.state._value || scope.state._promptOnLaunch) {
             scope.mode = 'input';
-            scope.state._buttonText = vm.strings.get('SHOW');
-
-            vm.toggle = vm.toggleShowHide;
         } else {
             scope.mode = 'encrypted';
-            scope.state._buttonText = vm.strings.get('REPLACE');
             scope.state._placeholder = vm.strings.get('ENCRYPTED');
-            vm.toggle = vm.toggleRevertReplace;
+            scope.state._buttonText = vm.strings.get('REPLACE');
         }
 
         vm.check();
@@ -41,15 +39,30 @@ function AtInputSecretController (baseInputController) {
         scope.state._isBeingReplaced = !scope.state._isBeingReplaced;
 
         vm.onRevertReplaceToggle();
+
+        if (scope.state._isBeingReplaced) {
+            if (scope.type !== 'password') {
+                vm.toggleShowHide();
+            }
+        }
     };
 
     vm.toggleShowHide = () => {
         if (scope.type === 'password') {
             scope.type = 'text';
-            scope.state._buttonText = vm.strings.get('HIDE');
+            scope.state._show = true;
+            scope.state._showHideText = vm.strings.get('HIDE');
         } else {
             scope.type = 'password';
-            scope.state._buttonText = vm.strings.get('SHOW');
+            scope.state._show = false;
+            scope.state._showHideText = vm.strings.get('SHOW');
+        }
+    };
+
+    vm.onLookupClick = () => {
+        if (scope.state._onInputLookup) {
+            const { id, label, required, type } = scope.state;
+            scope.state._onInputLookup({ id, label, required, type });
         }
     };
 }

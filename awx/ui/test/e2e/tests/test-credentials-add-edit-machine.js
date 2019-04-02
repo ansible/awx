@@ -173,13 +173,13 @@ module.exports = {
 
         machine.section.password.expect.element('@replace').visible;
         machine.section.password.expect.element('@replace').enabled;
-        machine.section.password.expect.element('@revert').not.present;
+        machine.section.password.expect.element('@revert').not.visible;
 
         machine.expect.element('@password').not.enabled;
 
         machine.section.password.click('@replace');
 
-        machine.section.password.expect.element('@replace').not.present;
+        machine.section.password.expect.element('@replace').not.visible;
         machine.section.password.expect.element('@revert').visible;
 
         machine.expect.element('@password').enabled;

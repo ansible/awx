@@ -30,7 +30,6 @@ function AtFormController (eventService, strings) {
         ({ modal } = scope[scope.ns]);
 
         vm.state.disabled = scope.state.disabled;
-
         vm.setListeners();
     };
 
@@ -62,6 +61,35 @@ function AtFormController (eventService, strings) {
         scope.$apply(vm.submit);
     };
 
+    vm.getSubmitData = () => vm.components
+        .filter(component => component.category === 'input')
+        .reduce((values, component) => {
+            if (component.state._value === undefined) {
+                return values;
+            }
+
+            if (component.state._format === 'selectFromOptions') {
+                values[component.state.id] = component.state._value[0];
+            } else if (component.state._key && typeof component.state._value === 'object') {
+                values[component.state.id] = component.state._value[component.state._key];
+            } else if (component.state._group) {
+                values[component.state._key] = values[component.state._key] || {};
+                values[component.state._key][component.state.id] = component.state._value;
+            } else {
+                values[component.state.id] = component.state._value;
+            }
+
+            return values;
+        }, {});
+
+    vm.submitSecondary = () => {
+        if (!vm.state.isValid) {
+            return;
+        }
+        const data = vm.getSubmitData();
+        scope.state.secondary(data);
+    };
+
     vm.submit = () => {
         if (!vm.state.isValid) {
             return;
@@ -69,26 +97,7 @@ function AtFormController (eventService, strings) {
 
         vm.state.disabled = true;
 
-        const data = vm.components
-            .filter(component => component.category === 'input')
-            .reduce((values, component) => {
-                if (component.state._value === undefined) {
-                    return values;
-                }
-
-                if (component.state._format === 'selectFromOptions') {
-                    values[component.state.id] = component.state._value[0];
-                } else if (component.state._key && typeof component.state._value === 'object') {
-                    values[component.state.id] = component.state._value[component.state._key];
-                } else if (component.state._group) {
-                    values[component.state._key] = values[component.state._key] || {};
-                    values[component.state._key][component.state.id] = component.state._value;
-                } else {
-                    values[component.state.id] = component.state._value;
-                }
-
-                return values;
-            }, {});
+        const data = vm.getSubmitData();
 
         scope.state.save(data)
             .then(scope.state.onSaveSuccess)
@@ -179,6 +188,10 @@ function AtFormController (eventService, strings) {
                 continue;
             }
 
+            if (vm.components[i].state.asTag) {
+                continue;
+            }
+
             if (!vm.components[i].state._isValid) {
                 isValid = false;
                 break;
@@ -193,6 +206,10 @@ function AtFormController (eventService, strings) {
 
         if (isValid !== vm.state.isValid) {
             vm.state.isValid = isValid;
+        }
+
+        if (isValid !== scope.state.isValid) {
+            scope.state.isValid = isValid;
         }
     };
 

@@ -30,8 +30,8 @@ from awx.main.utils import (
 )
 from awx.main.models import (
     ActivityStream, AdHocCommand, AdHocCommandEvent, Credential, CredentialType,
-    CustomInventoryScript, Group, Host, Instance, InstanceGroup, Inventory,
-    InventorySource, InventoryUpdate, InventoryUpdateEvent, Job, JobEvent,
+    CredentialInputSource, CustomInventoryScript, Group, Host, Instance, InstanceGroup,
+    Inventory, InventorySource, InventoryUpdate, InventoryUpdateEvent, Job, JobEvent,
     JobHostSummary, JobLaunchConfig, JobTemplate, Label, Notification,
     NotificationTemplate, Organization, Project, ProjectUpdate,
     ProjectUpdateEvent, Role, Schedule, SystemJob, SystemJobEvent,
@@ -426,7 +426,7 @@ class BaseAccess(object):
             if display_method == 'schedule':
                 user_capabilities['schedule'] = user_capabilities['start']
                 continue
-            elif display_method == 'delete' and not isinstance(obj, (User, UnifiedJob, CustomInventoryScript)):
+            elif display_method == 'delete' and not isinstance(obj, (User, UnifiedJob, CustomInventoryScript, CredentialInputSource)):
                 user_capabilities['delete'] = user_capabilities['edit']
                 continue
             elif display_method == 'copy' and isinstance(obj, (Group, Host)):
@@ -1161,6 +1161,55 @@ class CredentialAccess(BaseAccess):
         #if obj.user is None and obj.team is None:
         #    return True
         return self.can_change(obj, None)
+
+    def get_user_capabilities(self, obj, **kwargs):
+        user_capabilities = super(CredentialAccess, self).get_user_capabilities(obj, **kwargs)
+        user_capabilities['use'] = self.can_use(obj)
+        return user_capabilities
+
+
+class CredentialInputSourceAccess(BaseAccess):
+    '''
+    I can see a CredentialInputSource when:
+     - I can see the associated target_credential
+    I can create/change a CredentialInputSource when:
+     - I'm an admin of the associated target_credential
+     - I have use access to the associated source credential
+    I can delete a CredentialInputSource when:
+     - I'm an admin of the associated target_credential
+    '''
+
+    model = CredentialInputSource
+    select_related = ('target_credential', 'source_credential')
+
+    def filtered_queryset(self):
+        return CredentialInputSource.objects.filter(
+            target_credential__in=Credential.accessible_pk_qs(self.user, 'read_role'))
+
+    @check_superuser
+    def can_read(self, obj):
+        return self.user in obj.target_credential.read_role
+
+    @check_superuser
+    def can_add(self, data):
+        return (
+            self.check_related('target_credential', Credential, data, role_field='admin_role') and
+            self.check_related('source_credential', Credential, data, role_field='use_role')
+        )
+
+    @check_superuser
+    def can_change(self, obj, data):
+        if self.can_add(data) is False:
+            return False
+
+        return (
+            self.user in obj.target_credential.admin_role and
+            self.user in obj.source_credential.use_role
+        )
+
+    @check_superuser
+    def can_delete(self, obj):
+        return self.user in obj.target_credential.admin_role
 
 
 class TeamAccess(BaseAccess):

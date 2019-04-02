@@ -51,6 +51,10 @@ function BaseInputController (strings) {
             let isValid = true;
             let message = '';
 
+            if (scope.state.asTag) {
+                return (isValid, message);
+            }
+
             if (scope.state._value || scope.state._displayValue) {
                 scope.state._touched = true;
             }

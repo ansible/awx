@@ -75,10 +75,15 @@ GLqbpJyX2r3p/Rmo6mLY71SqpA==
 @pytest.mark.django_db
 def test_default_cred_types():
     assert sorted(CredentialType.defaults.keys()) == [
+        'aim',
         'aws',
+        'azure_kv',
         'azure_rm',
         'cloudforms',
+        'conjur',
         'gce',
+        'hashivault_kv',
+        'hashivault_ssh',
         'insights',
         'net',
         'openstack',
@@ -181,7 +186,7 @@ def test_ssh_key_data_validation(organization, kind, ssh_key_data, ssh_key_unloc
 @pytest.mark.django_db
 @pytest.mark.parametrize('inputs, valid', [
     ({'vault_password': 'some-pass'}, True),
-    ({}, False),
+    ({}, True),
     ({'vault_password': 'dev-pass', 'vault_id': 'dev'}, True),
     ({'vault_password': 'dev-pass', 'vault_id': 'dev@prompt'}, False),  # @ not allowed
 ])

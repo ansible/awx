@@ -1,0 +1,43 @@
+.at-Dialog {
+    display: block;
+    border: none;
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.3);
+    animation-name: at-DialogFadeIn;
+    animation-iteration-count: 1;
+    animation-timing-function: ease-in;
+    animation-duration: 0.3s;
+}
+
+@keyframes at-DialogFadeIn {
+    0%   { opacity: 0; background: rgba(0, 0, 0, 0); }
+    100% { opacity: 1; background: rgba(0, 0, 0, 0.3); }
+}
+
+.at-Dialog-body {
+    font-size: @at-font-size;
+    padding: @at-padding-panel 0;
+}
+
+.at-Dialog-dismiss {
+    .at-mixin-ButtonIcon();
+    font-size: @at-font-size-modal-dismiss;
+    color: @at-color-icon-dismiss;
+    text-align: right;
+}
+
+.at-Dialog-heading {
+    margin: 0;
+    overflow: visible;
+
+    & > .at-Dialog-dismiss {
+        margin: 0;
+    }
+}
+
+.at-Dialog-title {
+    margin: 0;
+    padding: 0;
+
+    .at-mixin-Heading(@at-font-size-modal-heading);
+}

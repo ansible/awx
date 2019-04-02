@@ -5,6 +5,7 @@ import {
 } from '../fixtures';
 
 import {
+    AWX_E2E_TIMEOUT_MEDIUM,
     AWX_E2E_TIMEOUT_SHORT
 } from '../settings';
 
@@ -23,16 +24,19 @@ module.exports = {
         Promise.all(resources)
             .then(([jt, jt2]) => {
                 data = { jt, jt2 };
+                // We login and load the test page *after* data setup is finished.
+                // This helps avoid flakiness due to unpredictable spinners, etc.
+                // caused by first-time project syncs when creating the job templates.
+                client
+                    .login()
+                    .waitForAngular()
+                    .resizeWindow(1200, 1000)
+                    .useXpath()
+                    .findThenClick(templatesNavTab)
+                    .findThenClick('//*[@id="button-add"]')
+                    .findThenClick('//a[@ui-sref="templates.addJobTemplate"]');
                 done();
             });
-        client
-            .login()
-            .waitForAngular()
-            .resizeWindow(1200, 1000)
-            .useXpath()
-            .findThenClick(templatesNavTab)
-            .findThenClick('//*[@id="button-add"]')
-            .findThenClick('//a[@ui-sref="templates.addJobTemplate"]');
     },
     'Test max character limit when creating a job template': client => {
         client
@@ -49,18 +53,21 @@ module.exports = {
                 '//input[@name="project_name"]',
                 ['test-form-error-handling-project', client.Keys.ENTER]
             )
-
-            // clicked twice to make the element an active field
-            .findThenClick('//*[@id="select2-playbook-select-container"]')
+            // After the test sets a value for the project, a few seconds are
+            // needed while the UI fetches the playbooks names with a network
+            // call. There's no obvious dom element here to poll, so we wait a
+            // reasonably safe amount of time for the form to settle down
+            // before proceeding.
+            .pause(AWX_E2E_TIMEOUT_MEDIUM)
+            .waitForElementNotVisible('//*[contains(@class, "spinny")]')
             .findThenClick('//*[@id="select2-playbook-select-container"]')
             .findThenClick('//li[text()="hello_world.yml"]')
             .findThenClick('//*[@id="job_template_save_btn"]')
             .findThenClick('//*[@id="alert_ok_btn"]');
 
         client.expect.element('//div[@id="job_template_name_group"]' +
-            '//div[@id="job_template-name-api-error"]').to.be.visible.before(AWX_E2E_TIMEOUT_SHORT);
+            '//div[@id="job_template-name-api-error"]').to.be.visible;
     },
-
     'Test duplicate template name handling when creating a job template': client => {
         client
             .waitForElementNotVisible('//*[@id="alert_ok_btn"]')

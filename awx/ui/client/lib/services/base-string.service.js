@@ -61,7 +61,9 @@ function BaseStringService (namespace) {
     this.CANCEL = t.s('CANCEL');
     this.CLOSE = t.s('CLOSE');
     this.SAVE = t.s('SAVE');
+    this.SELECT = t.s('SELECT');
     this.OK = t.s('OK');
+    this.RUN = t.s('RUN');
     this.NEXT = t.s('NEXT');
     this.SHOW = t.s('SHOW');
     this.HIDE = t.s('HIDE');
@@ -73,6 +75,7 @@ function BaseStringService (namespace) {
     this.COPY = t.s('COPY');
     this.YES = t.s('YES');
     this.CLOSE = t.s('CLOSE');
+    this.TEST = t.s('TEST');
     this.SUCCESSFUL_CREATION = resource => t.s('{{ resource }} successfully created', { resource: $filter('sanitize')(resource) });
 
     this.deleteResource = {

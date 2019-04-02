@@ -465,7 +465,13 @@ function getCredentialDetails () {
 }
 
 function buildCredentialDetails (credential) {
-    const icon = `${credential.kind}`;
+    let icon;
+    if (credential.cloud) {
+        icon = 'cloud';
+    } else {
+        icon = `${credential.kind}`;
+    }
+
     const link = `/#/credentials/${credential.id}`;
     const tooltip = strings.get('tooltips.CREDENTIAL');
     const value = $filter('sanitize')(credential.name);

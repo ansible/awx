@@ -45,6 +45,7 @@ function AtInputTextareaSecretController (baseInputController, eventService) {
     };
 
     vm.onIsBeingReplacedChanged = () => {
+        if (!scope.state) return;
         if (!scope.state._touched) return;
 
         vm.onRevertReplaceToggle();
@@ -91,6 +92,13 @@ function AtInputTextareaSecretController (baseInputController, eventService) {
             scope.drag = false;
             input.value = '';
         });
+    };
+
+    vm.onLookupClick = () => {
+        if (scope.state._onInputLookup) {
+            const { id, label, required, type } = scope.state;
+            scope.state._onInputLookup({ id, label, required, type });
+        }
     };
 }
 

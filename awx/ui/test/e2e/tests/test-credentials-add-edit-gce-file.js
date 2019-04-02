@@ -216,14 +216,22 @@ module.exports = {
         edit.section.gce.expect.element('@sshKeyData').not.enabled;
     },
     'select and deselect credential file when replacing private key': client => {
+        const taggedTextArea = '.at-InputTaggedTextarea';
+        const textArea = '.at-InputTextarea';
+        const replace = 'button i[class="fa fa-undo"]';
+        const revert = 'button i[class="fa fa-undo fa-flip-horizontal"]';
         const { gce } = credentials.section.edit.section.details.section;
 
-        gce.section.sshKeyData.waitForElementVisible('@replace');
-        gce.section.sshKeyData.click('@replace');
+        gce.waitForElementVisible(replace);
+        // eslint-disable-next-line prefer-arrow-callback
+        client.execute(function clickReplace (selector) {
+            document.querySelector(selector).click();
+        }, [replace]);
 
         gce.expect.element('@email').enabled;
         gce.expect.element('@project').enabled;
-        gce.expect.element('@sshKeyData').enabled;
+        gce.expect.element(textArea).enabled;
+        gce.expect.element(taggedTextArea).not.present;
         gce.expect.element('@serviceAccountFile').enabled;
 
         gce.section.sshKeyData.expect.element('@error').visible;
@@ -247,10 +255,9 @@ module.exports = {
         gce.section.sshKeyData.expect.element('@error').not.present;
         gce.section.serviceAccountFile.expect.element('@error').not.present;
 
-        gce.section.sshKeyData.expect.element('@replace').not.present;
-        gce.section.sshKeyData.expect.element('@revert').present;
-        gce.section.sshKeyData.expect.element('@revert').not.enabled;
-
+        gce.expect.element(replace).not.present;
+        gce.expect.element(revert).present;
+        gce.expect.element('.input-group-append button').not.enabled;
         gce.section.serviceAccountFile.click('form i[class*="trash"]');
 
         gce.expect.element('@email').enabled;
@@ -264,9 +271,11 @@ module.exports = {
         gce.section.project.expect.element('@error').not.present;
         gce.section.serviceAccountFile.expect.element('@error').not.present;
 
-        gce.section.sshKeyData.expect.element('@revert').enabled;
-
-        gce.section.sshKeyData.click('@revert');
+        gce.expect.element('.input-group-append button').enabled;
+        // eslint-disable-next-line prefer-arrow-callback
+        client.execute(function clickRevert (selector) {
+            document.querySelector(selector).click();
+        }, [revert]);
 
         gce.expect.element('@email').enabled;
         gce.expect.element('@project').enabled;

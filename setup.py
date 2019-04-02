@@ -114,6 +114,13 @@ setup(
         'console_scripts': [
             'awx-manage = awx:manage',
         ],
+        'awx.credential_plugins': [
+            'conjur = awx.main.credential_plugins.conjur:conjur_plugin',
+            'hashivault_kv = awx.main.credential_plugins.hashivault:hashivault_kv_plugin',
+            'hashivault_ssh = awx.main.credential_plugins.hashivault:hashivault_ssh_plugin',
+            'azure_kv = awx.main.credential_plugins.azure_kv:azure_keyvault_plugin',
+            'aim = awx.main.credential_plugins.aim:aim_plugin'
+        ]
     },
     data_files = proc_data_files([
         ("%s" % homedir,        ["config/wsgi.py",

@@ -46,7 +46,7 @@ from awx.main.constants import (
     CENSOR_VALUE,
 )
 from awx.main.models import (
-    ActivityStream, AdHocCommand, AdHocCommandEvent, Credential,
+    ActivityStream, AdHocCommand, AdHocCommandEvent, Credential, CredentialInputSource,
     CredentialType, CustomInventoryScript, Fact, Group, Host, Instance,
     InstanceGroup, Inventory, InventorySource, InventoryUpdate,
     InventoryUpdateEvent, Job, JobEvent, JobHostSummary, JobLaunchConfig,
@@ -133,6 +133,8 @@ SUMMARIZABLE_FK_FIELDS = {
     'notification_template': DEFAULT_SUMMARY_FIELDS,
     'instance_group': {'id', 'name', 'controller_id'},
     'insights_credential': DEFAULT_SUMMARY_FIELDS,
+    'source_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'credential_type_id'),
+    'target_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'credential_type_id'),
 }
 
 
@@ -2582,7 +2584,7 @@ class V2CredentialFields(BaseSerializer, metaclass=BaseSerializerMetaclass):
 
 
 class CredentialSerializer(BaseSerializer):
-    show_capabilities = ['edit', 'delete', 'copy']
+    show_capabilities = ['edit', 'delete', 'copy', 'use']
     capabilities_prefetch = ['admin', 'use']
 
     class Meta:
@@ -2629,6 +2631,7 @@ class CredentialSerializer(BaseSerializer):
         ))
         if self.version > 1:
             res['copy'] = self.reverse('api:credential_copy', kwargs={'pk': obj.pk})
+            res['input_sources'] = self.reverse('api:credential_input_source_sublist', kwargs={'pk': obj.pk})
 
         # TODO: remove when API v1 is removed
         if self.version > 1:
@@ -2813,6 +2816,32 @@ class CredentialSerializerCreate(CredentialSerializer):
             credential.admin_role.parents.add(team.admin_role)
             credential.use_role.parents.add(team.member_role)
         return credential
+
+
+class CredentialInputSourceSerializer(BaseSerializer):
+    show_capabilities = ['delete']
+
+    class Meta:
+        model = CredentialInputSource
+        fields = (
+            '*',
+            'input_field_name',
+            'metadata',
+            'target_credential',
+            'source_credential',
+            '-name',
+        )
+        extra_kwargs = {
+            'input_field_name': {'required': True},
+            'target_credential': {'required': True},
+            'source_credential': {'required': True},
+        }
+
+    def get_related(self, obj):
+        res = super(CredentialInputSourceSerializer, self).get_related(obj)
+        res['source_credential'] = obj.source_credential.get_absolute_url(request=self.context.get('request'))
+        res['target_credential'] = obj.target_credential.get_absolute_url(request=self.context.get('request'))
+        return res
 
 
 class UserCredentialSerializerCreate(CredentialSerializerCreate):

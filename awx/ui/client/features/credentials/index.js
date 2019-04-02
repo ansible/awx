@@ -1,7 +1,8 @@
 import LegacyCredentials from './legacy.credentials';
-import AddController from './add-credentials.controller';
-import EditController from './edit-credentials.controller';
+import AddEditController from './add-edit-credentials.controller';
 import CredentialsStrings from './credentials.strings';
+import InputSourceLookupComponent from './input-source-lookup.component';
+import ExternalTestModalComponent from './external-test-modal.component';
 
 const MODULE_NAME = 'at.features.credentials';
 
@@ -15,7 +16,9 @@ function CredentialsResolve (
     CredentialType,
     Organization,
     ProcessErrors,
-    strings
+    strings,
+    Rest,
+    GetBasePath,
 ) {
     const id = $stateParams.credential_id;
 
@@ -27,6 +30,7 @@ function CredentialsResolve (
         promises.credential = new Credential('options');
         promises.credentialType = new CredentialType();
         promises.organization = new Organization();
+        promises.sourceCredentials = $q.resolve({ data: { count: 0, results: [] } });
 
         return $q.all(promises);
     }
@@ -38,17 +42,32 @@ function CredentialsResolve (
             const typeId = models.credential.get('credential_type');
             const orgId = models.credential.get('organization');
 
+            Rest.setUrl(GetBasePath('credentials'));
+            const params = { target_input_sources__target_credential: id };
+            const sourceCredentialsPromise = Rest.get({ params });
+
             const dependents = {
                 credentialType: new CredentialType('get', typeId),
-                organization: new Organization('get', orgId)
+                organization: new Organization('get', orgId),
+                credentialInputSources: models.credential.extend('GET', 'input_sources'),
+                sourceCredentials: sourceCredentialsPromise
             };
+
             dependents.isOrgCredAdmin = dependents.organization.then((org) => org.search({ role_level: 'credential_admin_role' }));
 
             return $q.all(dependents)
                 .then(related => {
                     models.credentialType = related.credentialType;
                     models.organization = related.organization;
-                    models.isOrgCredAdmin = related.isOrgCredAdmin;
+                    models.sourceCredentials = related.sourceCredentials;
+
+                    const isOrgAdmin = _.some(models.me.get('related.admin_of_organizations.results'), (org) => org.id === models.organization.get('id'));
+                    const isSuperuser = models.me.get('is_superuser');
+                    const isCurrentAuthor = Boolean(models.credential.get('summary_fields.created_by.id') === models.me.get('id'));
+
+                    models.isOrgEditableByUser = (isSuperuser || isOrgAdmin
+                        || related.isOrgCredAdmin
+                        || (models.credential.get('organization') === null && isCurrentAuthor));
 
                     return models;
                 });
@@ -69,7 +88,9 @@ CredentialsResolve.$inject = [
     'CredentialTypeModel',
     'OrganizationModel',
     'ProcessErrors',
-    'CredentialsStrings'
+    'CredentialsStrings',
+    'Rest',
+    'GetBasePath',
 ];
 
 function CredentialsRun ($stateExtender, legacy, strings) {
@@ -86,7 +107,7 @@ function CredentialsRun ($stateExtender, legacy, strings) {
         views: {
             'add@credentials': {
                 templateUrl: addEditTemplate,
-                controller: AddController,
+                controller: AddEditController,
                 controllerAs: 'vm'
             }
         },
@@ -109,7 +130,7 @@ function CredentialsRun ($stateExtender, legacy, strings) {
         views: {
             'edit@credentials': {
                 templateUrl: addEditTemplate,
-                controller: EditController,
+                controller: AddEditController,
                 controllerAs: 'vm'
             }
         },
@@ -135,10 +156,11 @@ CredentialsRun.$inject = [
 
 angular
     .module(MODULE_NAME, [])
-    .controller('AddController', AddController)
-    .controller('EditController', EditController)
+    .controller('AddEditController', AddEditController)
     .service('LegacyCredentialsService', LegacyCredentials)
     .service('CredentialsStrings', CredentialsStrings)
+    .component('atInputSourceLookup', InputSourceLookupComponent)
+    .component('atExternalCredentialTest', ExternalTestModalComponent)
     .run(CredentialsRun);
 
 export default MODULE_NAME;

@@ -1419,6 +1419,88 @@ class CredentialCopy(CopyAPIView):
     copy_return_serializer_class = serializers.CredentialSerializer
 
 
+class CredentialExternalTest(SubDetailAPIView):
+    """
+    Test updates to the input values and metadata of an external credential
+    before saving them.
+    """
+
+    view_name = _('External Credential Test')
+
+    model = models.Credential
+    serializer_class = serializers.EmptySerializer
+
+    def post(self, request, *args, **kwargs):
+        obj = self.get_object()
+        backend_kwargs = {}
+        for field_name, value in obj.inputs.items():
+            backend_kwargs[field_name] = obj.get_input(field_name)
+        for field_name, value in request.data.get('inputs', {}).items():
+            if value != '$encrypted$':
+                backend_kwargs[field_name] = value
+        backend_kwargs.update(request.data.get('metadata', {}))
+        try:
+            obj.credential_type.plugin.backend(**backend_kwargs)
+            return Response({}, status=status.HTTP_202_ACCEPTED)
+        except requests.exceptions.HTTPError as exc:
+            message = 'HTTP {}\n{}'.format(exc.response.status_code, exc.response.text)
+            return Response({'inputs': message}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as exc:
+            return Response({'inputs': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CredentialInputSourceDetail(RetrieveUpdateDestroyAPIView):
+
+    view_name = _("Credential Input Source Detail")
+
+    model = models.CredentialInputSource
+    serializer_class = serializers.CredentialInputSourceSerializer
+
+
+class CredentialInputSourceList(ListCreateAPIView):
+
+    view_name = _("Credential Input Sources")
+
+    model = models.CredentialInputSource
+    serializer_class = serializers.CredentialInputSourceSerializer
+
+
+class CredentialInputSourceSubList(SubListCreateAPIView):
+
+    view_name = _("Credential Input Sources")
+
+    model = models.CredentialInputSource
+    serializer_class = serializers.CredentialInputSourceSerializer
+    parent_model = models.Credential
+    relationship = 'input_sources'
+    parent_key = 'target_credential'
+
+
+class CredentialTypeExternalTest(SubDetailAPIView):
+    """
+    Test a complete set of input values for an external credential before
+    saving it.
+    """
+
+    view_name = _('External Credential Type Test')
+
+    model = models.CredentialType
+    serializer_class = serializers.EmptySerializer
+
+    def post(self, request, *args, **kwargs):
+        obj = self.get_object()
+        backend_kwargs = request.data.get('inputs', {})
+        backend_kwargs.update(request.data.get('metadata', {}))
+        try:
+            obj.plugin.backend(**backend_kwargs)
+            return Response({}, status=status.HTTP_202_ACCEPTED)
+        except requests.exceptions.HTTPError as exc:
+            message = 'HTTP {}\n{}'.format(exc.response.status_code, exc.response.text)
+            return Response({'inputs': message}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as exc:
+            return Response({'inputs': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+
+
 class HostRelatedSearchMixin(object):
 
     @property

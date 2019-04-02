@@ -1,0 +1,90 @@
+<div>
+    <div ng-hide="vm.collection.length === 0 && (searchTags | isEmpty)">
+        <div style="min-height: 20px"></div>
+        <smart-search
+            django-model="{{ vm.resourceName + 's' }}"
+            base-path="{{ vm.resourceName + 's' }}"
+            iterator="{{ vm.list.iterator }}"
+            dataset="vm.dataset"
+            list="vm.list"
+            collection="vm.collection"
+            default-params="vm.defaultParams"
+            query-set="vm.queryset"
+            search-tags="searchTags">
+        </smart-search>
+    </div>
+    <div
+        class="row"
+        ng-show="vm.collection.length === 0 && !(searchTags | isEmpty)"
+    >
+        <div class="col-lg-12 List-searchNoResults">
+            {{::vm.strings.get('NO_MATCH')}}
+        </div>
+    </div>
+    <div
+        class="List-noItems"
+        ng-show="vm.collection.length === 0 && (searchTags | isEmpty)"
+    >
+        {{::vm.strings.get('NO_ITEMS')}}
+    </div>
+    <div
+        class="list-table-container"
+        ng-show="vm.collection.length > 0"
+    >
+        <div
+            id="credential_input_source_table"
+            class="List-table"
+            is-extended="false"
+        >
+            <div class="List-lookupLayout List-tableHeaderRow">
+                <div></div>
+                <div class="d-flex h-100">
+                    <div
+                        base-path="{{ vm.resourceName + 's' }}"
+                        collection="vm.collection"
+                        dataset="vm.dataset"
+                        column-sort=""
+                        column-field="name"
+                        column-iterator="{{ vm.list.iterator }}"
+                        column-label="Name"
+                        column-custom-class="List-tableCell col-md-4 col-sm-9 col-xs-9"
+                        query-set="vm.queryset"
+                    >
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div
+                    id="{{ obj.id }}"
+                    class="List-lookupLayout List-tableRow"
+                    ng-repeat="obj in vm.collection"
+                >
+                    <div class="List-centerEnd select-column">
+                        <input type="radio"
+                            name="check_{{ vm.resourceName }}_{{ obj.id }}"
+                            ng-checked="obj.id === vm.selectedId"
+                            ng-click="vm.onItemSelect(obj)"
+                        >
+                    </div>
+                    <div class="d-flex h-100">
+                        <div
+                            class="List-tableCell name-column col-sm-12"
+                             ng-click="vm.onItemSelect(obj)"
+                        >
+                            {{ obj.name }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <paginate
+        base-path="{{ vm.resourceName + 's' }}"
+        iterator="{{ vm.list.iterator }}"
+        collection="vm.collection"
+        dataset="vm.dataset"
+        query-set="vm.queryset"
+        hide-view-per-page="true"
+    >
+    </paginate>
+</div>

@@ -700,7 +700,8 @@ class TestJobCredentials(TestJobExecution):
                 __iter__ = lambda *args: iter(job._credentials),
                 first = lambda: job._credentials[0]
             ),
-            'spec_set': ['all', 'add', 'filter']
+            'prefetch_related': lambda _: credentials_mock,
+            'spec_set': ['all', 'add', 'filter', 'prefetch_related'],
         })
 
         with mock.patch.object(UnifiedJob, 'credentials', credentials_mock):

@@ -48,7 +48,7 @@ function AtInputGroupController ($scope, $compile) {
 
         state._value = source._value;
 
-        const inputs = state._get(source._value);
+        const inputs = state._get(form);
         const group = vm.createComponentConfigs(inputs);
 
         vm.insert(group);
@@ -66,7 +66,9 @@ function AtInputGroupController ($scope, $compile) {
                     _element: vm.createComponent(input, i),
                     _key: 'inputs',
                     _group: true,
-                    _groupIndex: i
+                    _groupIndex: i,
+                    _onInputLookup: state._onInputLookup,
+                    _onRemoveTag: state._onRemoveTag,
                 }, input));
             });
         }
@@ -97,6 +99,7 @@ function AtInputGroupController ($scope, $compile) {
 
                 if (input.secret) {
                     config._component = 'at-input-textarea-secret';
+                    input.format = 'ssh_private_key';
                 } else {
                     config._component = 'at-input-textarea';
                 }
@@ -111,12 +114,16 @@ function AtInputGroupController ($scope, $compile) {
             config._component = 'at-input-checkbox';
         } else if (input.type === 'file') {
             config._component = 'at-input-file';
-        } else if (input.choices) {
+        }
+
+        if (input.choices) {
             config._component = 'at-input-select';
             config._format = 'array';
             config._data = input.choices;
             config._exp = 'choice for (index, choice) in state._data';
-        } else {
+        }
+
+        if (!config._component) {
             const preface = vm.strings.get('group.UNSUPPORTED_ERROR_PREFACE');
             throw new Error(`${preface}: ${input.type}`);
         }
@@ -160,7 +167,6 @@ function AtInputGroupController ($scope, $compile) {
             </${input._component}>`);
 
         $compile(component)(scope.$parent);
-
         return component;
     };
 

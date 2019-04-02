@@ -1,7 +1,7 @@
 <div ng-show="state._group" class="col-sm-12 at-InputGroup">
-    <div class="at-InputGroup-border"></div>
+    <div ng-if="state.border" class="at-InputGroup-border"></div>
     <div class="at-InputGroup-inset">
-        <div class="row">
+        <div ng-if="state.title" class="row">
             <div class="col-sm-12">
                 <h4 class="at-InputGroup-title">
                     <ng-transclude></ng-transclude>

@@ -146,19 +146,19 @@ module.exports = {
             const input = `@${f.id}`;
 
             group.expect.element('@show').visible;
-            group.expect.element('@hide').not.present;
+            group.expect.element('@hide').not.visible;
 
             type.setValue(input, 'SECRET');
             type.expect.element(input).text.equal('');
 
             group.click('@show');
-            group.expect.element('@show').not.present;
+            group.expect.element('@show').not.visible;
             group.expect.element('@hide').visible;
             type.expect.element(input).value.contain('SECRET');
 
             group.click('@hide');
             group.expect.element('@show').visible;
-            group.expect.element('@hide').not.present;
+            group.expect.element('@hide').not.visible;
             type.expect.element(input).text.equal('');
         });
     },

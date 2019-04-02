@@ -4,12 +4,12 @@ function ComponentsStrings (BaseString) {
     const { t } = this;
     const ns = this.components;
 
-    ns.REPLACE = t.s('REPLACE');
-    ns.REVERT = t.s('REVERT');
+    ns.REPLACE = t.s('Replace');
+    ns.REVERT = t.s('Revert');
     ns.ENCRYPTED = t.s('ENCRYPTED');
     ns.OPTIONS = t.s('OPTIONS');
-    ns.SHOW = t.s('SHOW');
-    ns.HIDE = t.s('HIDE');
+    ns.SHOW = t.s('Show');
+    ns.HIDE = t.s('Hide');
 
     ns.message = {
         REQUIRED_INPUT_MISSING: t.s('Please enter a value.'),
@@ -40,7 +40,7 @@ function ComponentsStrings (BaseString) {
     };
 
     ns.textarea = {
-        SSH_KEY_HINT: t.s('HINT: Drag and drop an SSH private key file on the field below.')
+        SSH_KEY_HINT: t.s('HINT: Drag and drop private file on the field below.')
     };
 
     ns.lookup = {

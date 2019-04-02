@@ -75,6 +75,12 @@
     height: @at-height-textarea;
 }
 
+.at-Input-button--long-sm {
+    .at-mixin-InputButton();
+    max-width: @at-width-input-button-md;
+    min-height: @at-height-textarea;
+}
+
 .at-Input-button--active {
     .at-mixin-ButtonColor(at-color-info, at-color-default);
 }
@@ -326,5 +332,28 @@
 .at-InputGroup-container {
     .row {
         margin: 0;
+    }
+}
+
+.at-InputTaggedTextarea {
+    .at-mixin-FontFixedWidth();
+    min-height: @at-height-textarea;
+    padding: 6px @at-padding-input 0 @at-padding-input;
+    border-radius: @at-border-radius;
+}
+
+.at-InputTagContainer {
+    display: flex;
+    width: 100%;
+    flex-wrap: wrap;
+
+    .TagComponent {
+        max-height: @at-space-4x;
+    }
+
+    .TagComponent-name {
+        align-self: auto;
+        word-break: break-all;
+        font-family: 'Open Sans', sans-serif;
     }
 }
