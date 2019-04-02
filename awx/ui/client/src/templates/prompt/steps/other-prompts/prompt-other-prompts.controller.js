@@ -103,15 +103,25 @@ export default
                 }
                 scope.validate = validate;
 
-                angular.element(el).ready(() => {
-                  const inputs = el.find('input, select');
+                function focusFirstInput () {
+                  const inputs = el.find('input[type=text], select, textarea:visible, .CodeMirror textarea');
                   if (inputs.length) {
                     inputs.get(0).focus();
                   }
+                }
+
+                angular.element(el).ready(() => {
+                    focusFirstInput();
+                });
+
+                scope.$on('promptTabChange', (event, args) => {
+                    if (args.step === 'other_prompts') {
+                        angular.element(el).ready(() => {
+                          focusFirstInput();
+                        });
+                    }
                 });
             };
-
-
 
             vm.toggleDiff = () => {
                 scope.promptData.prompts.diffMode.value = !scope.promptData.prompts.diffMode.value;

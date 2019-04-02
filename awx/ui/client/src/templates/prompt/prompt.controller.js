@@ -216,6 +216,7 @@ export default [ 'ProcessErrors', 'CredentialTypeModel', 'TemplatesStrings', '$f
                     } else if(vm.steps[step].tab.order === currentTab.order + 1) {
                         vm.steps[step].tab._active = true;
                         vm.steps[step].tab._disabled = false;
+                        scope.$broadcast('promptTabChange', { step });
                     }
                 }
             });

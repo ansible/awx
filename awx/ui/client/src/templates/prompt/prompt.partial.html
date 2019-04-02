@@ -10,9 +10,9 @@
         <div class="Prompt-step">
             <div ng-if="vm.steps.inventory.includeStep" ng-show="vm.steps.inventory.tab._active" id="prompt_inventory_step">
                 <prompt-inventory
-                prompt-data="vm.promptDataClone"
-                read-only-prompts="vm.readOnlyPrompts">
-            </prompt-inventory>
+                    prompt-data="vm.promptDataClone"
+                    read-only-prompts="vm.readOnlyPrompts">
+                </prompt-inventory>
             </div>
             <div ng-if="vm.steps.credential.includeStep" ng-show="vm.steps.credential.tab._active" id="prompt_credential_step">
                 <prompt-credential
