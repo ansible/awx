@@ -18,6 +18,7 @@ export default [
         workflowLaunch, $transitions, WorkflowJobTemplate, Inventory, isNotificationAdmin
     ) {
 
+        $scope.isAdminOfResource = workflowJobTemplateData.summary_fields.object_roles.hasOwnProperty('admin_role') || false;
         $scope.missingTemplates = _.has(workflowLaunch, 'node_templates_missing') && workflowLaunch.node_templates_missing.length > 0 ? true : false;
 
         $scope.$watch('workflow_job_template_obj.summary_fields.user_capabilities.edit', function(val) {

@@ -17,6 +17,7 @@ export default ['$state', '$scope', 'ParseVariableString', 'ParseTypeChange',
 
         const inventorySourceData = inventorySource.get();
 
+        $scope.isAdminOfResource = inventoryData.summary_fields.object_roles.hasOwnProperty('admin_role') || false;
         $scope.projectBasePath = GetBasePath('projects') + '?not__status=never updated';
         $scope.canAdd = inventorySourcesOptions.actions.POST;
         $scope.isNotificationAdmin = isNotificationAdmin || false;

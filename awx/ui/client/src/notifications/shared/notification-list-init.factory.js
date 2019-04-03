@@ -22,12 +22,6 @@ export default ['Wait', 'GetBasePath', 'ProcessErrors', 'Rest', 'GetChoices',
             url = params.url,
             id = params.id;
 
-        Rest.setUrl($rootScope.current_user.related.admin_of_organizations);
-        Rest.get()
-            .then(({data}) => {
-                scope.isOrgAdmin = data.results && data.results.length > 0;
-            });
-
         scope.addNotificationTemplate = function() {
             var org_id;
             if($stateParams.hasOwnProperty('project_id')){

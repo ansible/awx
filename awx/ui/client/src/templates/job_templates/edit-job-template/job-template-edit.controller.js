@@ -54,6 +54,7 @@ export default
 
                 CallbackHelpInit({ scope: $scope });
 
+                $scope.isAdminOfResource = jobTemplateData.summary_fields.object_roles.hasOwnProperty('admin_role') || false;
                 $scope.playbook_options = null;
                 $scope.playbook = null;
                 $scope.mode = 'edit';

@@ -20,15 +20,11 @@ export default ['$scope', '$rootScope', '$stateParams', 'ProjectsForm', 'Rest',
             master = {},
             id = $stateParams.project_id;
 
-        init();
-
-        function init() {
-            $scope.project_local_paths = [];
-            $scope.base_dir = '';
-            const virtualEnvs = ConfigData.custom_virtualenvs || [];
-            $scope.custom_virtualenvs_options = virtualEnvs;
-            $scope.isNotificationAdmin = isNotificationAdmin || false;
-        }
+        $scope.project_local_paths = [];
+        $scope.base_dir = '';
+        const virtualEnvs = ConfigData.custom_virtualenvs || [];
+        $scope.custom_virtualenvs_options = virtualEnvs;
+        $scope.isNotificationAdmin = isNotificationAdmin || false;
 
         $scope.$watch('project_obj.summary_fields.user_capabilities.edit', function(val) {
             if (val === false) {
@@ -157,6 +153,7 @@ export default ['$scope', '$rootScope', '$stateParams', 'ProjectsForm', 'Rest',
                     });
 
                     $scope.project_obj = data;
+                    $scope.isAdminOfResource = data.summary_fields.object_roles.hasOwnProperty('admin_role') || false;
                     $scope.name = data.name;
                     $scope.breadcrumb.project_name = data.name;
                     $scope.$emit('projectLoaded');
