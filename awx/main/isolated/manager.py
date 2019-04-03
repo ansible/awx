@@ -188,16 +188,17 @@ class IsolatedManager(object):
                                                       self.private_data_dir,
                                                       extravars=extravars)
             status, rc = runner_obj.status, runner_obj.rc
-            if self.check_callback is not None:
-                config_path = self.path_to('artifacts', self.ident, 'config')
-                # If the configuration artifact has been synced back, update the model
-                if os.path.exists(config_path):
-                    with open(config_path, 'r') as f:
-                        data = json.load(f)
-                    self.check_callback(data)
             self.consume_events(dispatcher)
 
             last_check = time.time()
+
+        if self.check_callback is not None:
+            config_path = self.path_to('artifacts', self.ident, 'config')
+            # If the configuration artifact has been synced back, update the model
+            if os.path.exists(config_path):
+                with open(config_path, 'r') as f:
+                    data = json.load(f)
+                self.check_callback(data)
 
         if status == 'successful':
             status_path = self.path_to('artifacts', self.ident, 'status')
