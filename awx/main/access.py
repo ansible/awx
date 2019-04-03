@@ -465,12 +465,23 @@ class NotificationAttachMixin(BaseAccess):
     @check_superuser
     def can_attach(self, obj, sub_obj, relationship, data, skip_sub_obj_read_check=False):
         if isinstance(sub_obj, NotificationTemplate):
-            if not self.check_related(
-                    'organization', Organization, {}, obj=sub_obj,
-                    role_field='notification_admin_role', mandatory=True):
-                return False
+            # reverse obj and sub_obj
+            return NotificationTemplateAccess(self.user).can_attach(
+                sub_obj, obj, relationship, data
+            )
         return super(NotificationAttachMixin, self).can_attach(
             obj, sub_obj, relationship, data, skip_sub_obj_read_check=skip_sub_obj_read_check)
+
+    @check_superuser
+    def can_unattach(self, obj, sub_obj, relationship, data=None):
+        if isinstance(sub_obj, NotificationTemplate):
+            # due to this special case, needs to be symmetrical with attach permission
+            return NotificationTemplateAccess(self.user).can_attach(
+                sub_obj, obj, relationship, data
+            )
+        return super(NotificationAttachMixin, self).can_unattach(
+            obj, sub_obj, relationship, relationship, data=data
+        )
 
 
 class InstanceAccess(BaseAccess):

@@ -176,10 +176,10 @@ def test_org_role_JT_attach(rando, job_template, project, workflow_job_template,
 @pytest.mark.django_db
 @pytest.mark.parametrize("res_role,expect", [
     ('admin_role', True),
-    ('execute_role', False),
-    ('use_role', False),
-    ('update_role', False),
-    ('read_role', False),
+    ('execute_role', True),
+    ('use_role', True),
+    ('update_role', True),
+    ('read_role', True),
     (None, False)
 ])
 def test_object_role_JT_attach(rando, job_template, project, workflow_job_template, inventory_source,
