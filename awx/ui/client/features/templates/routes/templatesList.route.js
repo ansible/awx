@@ -25,6 +25,8 @@ export default {
             dynamic: true,
             value: {
                 type: 'workflow_job_template,job_template',
+                order_by: 'name',
+                page_size: '20'
             },
         }
     },

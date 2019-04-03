@@ -43,45 +43,50 @@ export default ['$stateParams', '$scope', '$rootScope',
 
         function parseCardData(cards) {
             return cards.map(function(card) {
-                var val = {},
-                    url = '/#/organizations/' + card.id + '/';
+                var val = {};
                 val.user_capabilities = card.summary_fields.user_capabilities;
                 val.name = card.name;
                 val.id = card.id;
                 val.description = card.description || undefined;
                 val.links = [];
                 val.links.push({
-                    href: url + 'users',
+                    sref: `organizations.users({organization_id: ${card.id}})`,
+                    srefOpts: { inherit: false },
                     name: i18n._("USERS"),
                     count: card.summary_fields.related_field_counts.users,
                     activeMode: 'users'
                 });
                 val.links.push({
-                    href: url + 'teams',
+                    sref: `organizations.teams({organization_id: ${card.id}})`,
+                    srefOpts: { inherit: false },
                     name: i18n._("TEAMS"),
                     count: card.summary_fields.related_field_counts.teams,
                     activeMode: 'teams'
                 });
                 val.links.push({
-                    href: url + 'inventories',
+                    sref: `organizations.inventories({organization_id: ${card.id}})`,
+                    srefOpts: { inherit: false },
                     name: i18n._("INVENTORIES"),
                     count: card.summary_fields.related_field_counts.inventories,
                     activeMode: 'inventories'
                 });
                 val.links.push({
-                    href: url + 'projects',
+                    sref: `organizations.projects({organization_id: ${card.id}})`,
+                    srefOpts: { inherit: false },
                     name: i18n._("PROJECTS"),
                     count: card.summary_fields.related_field_counts.projects,
                     activeMode: 'projects'
                 });
                 val.links.push({
-                    href: url + 'job_templates',
+                    sref: `organizations.job_templates({organization_id: ${card.id}, or__jobtemplate__project__organization: ${card.id}, or__jobtemplate__inventory__organization: ${card.id}})`,
+                    srefOpts: { inherit: false },
                     name: i18n._("JOB TEMPLATES"),
                     count: card.summary_fields.related_field_counts.job_templates,
                     activeMode: 'job_templates'
                 });
                 val.links.push({
-                    href: url + 'admins',
+                    sref: `organizations.admins({organization_id: ${card.id}})`,
+                    srefOpts: { inherit: false },
                     name: i18n._("ADMINS"),
                     count: card.summary_fields.related_field_counts.admins,
                     activeMode: 'admins'
