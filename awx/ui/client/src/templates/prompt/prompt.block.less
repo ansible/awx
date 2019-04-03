@@ -1,5 +1,6 @@
 .Prompt .modal-dialog {
-    width: 700px;
+    max-width: calc(100vw - 10px);
+    width: 700px
 }
 .Prompt-step {
     margin-top: 20px;
@@ -7,6 +8,7 @@
 .Prompt-footer {
     display: flex;
     flex: 0 0 auto;
+    flex-wrap: wrap;
     margin-top: 15px;
     justify-content: flex-end;
     align-items: flex-end;
@@ -20,6 +22,7 @@
     height: 30px;
     padding-left:15px;
     padding-right: 15px;
+    margin: 10px 0;
     min-width: 85px;
     margin-left: 20px;
 }
@@ -41,6 +44,7 @@
     border: 1px solid @btn-bord;
     padding-left:15px;
     padding-right: 15px;
+    margin: 10px 0;
     height: 30px;
     min-width: 85px;
 }
