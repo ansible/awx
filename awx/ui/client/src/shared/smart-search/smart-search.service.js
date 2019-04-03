@@ -14,6 +14,10 @@ export default [function() {
             let groups = [];
             let quoted;
 
+            // This split _may_ split search terms down the middle
+            // ex) searchString=ansible_facts.some_other_thing:"foo foobar" ansible_facts.some_thing:"foobar"
+            // would result in 3 different substring's but only two search terms
+            // This logic handles that scenario with the `quoted` variable
             searchString.split(' ').forEach(substring => {
                 if (/:"/g.test(substring)) {
                     if (/"$/.test(substring)) {
