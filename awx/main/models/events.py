@@ -204,6 +204,12 @@ class BasePlaybookEvent(CreatedModifiedModel):
         default=0,
         editable=False,
     )
+    created = models.DateTimeField(
+        null=True,
+        default=None,
+        editable=False,
+        db_index=True,
+    )
 
     @property
     def event_level(self):
