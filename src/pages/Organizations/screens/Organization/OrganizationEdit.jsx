@@ -1,170 +1,49 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
-import { I18n, i18nMark } from '@lingui/react';
-import { t } from '@lingui/macro';
-import {
-  CardBody,
-  Form,
-  FormGroup,
-  TextInput,
-} from '@patternfly/react-core';
+import { CardBody } from '@patternfly/react-core';
 
-import { ConfigContext } from '../../../../context';
-import Lookup from '../../../../components/Lookup';
-import FormActionGroup from '../../../../components/FormActionGroup';
-import AnsibleSelect from '../../../../components/AnsibleSelect';
+import OrganizationForm from '../../components/OrganizationForm';
 
 class OrganizationEdit extends Component {
   constructor (props) {
     super(props);
 
-    this.getInstanceGroups = this.getInstanceGroups.bind(this);
-    this.getRelatedInstanceGroups = this.getRelatedInstanceGroups.bind(this);
-    this.checkValidity = this.checkValidity.bind(this);
-    this.onFieldChange = this.onFieldChange.bind(this);
-    this.onLookupSave = this.onLookupSave.bind(this);
-    this.onSubmit = this.onSubmit.bind(this);
-    this.postInstanceGroups = this.postInstanceGroups.bind(this);
-    this.onCancel = this.onCancel.bind(this);
-    this.onSuccess = this.onSuccess.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.submitInstanceGroups = this.submitInstanceGroups.bind(this);
+    this.handleCancel = this.handleCancel.bind(this);
+    this.handleSuccess = this.handleSuccess.bind(this);
 
     this.state = {
-      form: {
-        name: {
-          value: '',
-          isValid: true,
-          validation: {
-            required: true
-          },
-          helperTextInvalid: i18nMark('This field must not be blank')
-        },
-        description: {
-          value: ''
-        },
-        instanceGroups: {
-          value: [],
-          initialValue: []
-        },
-        custom_virtualenv: {
-          value: '',
-          defaultValue: '/venv/ansible/'
-        }
-      },
       error: '',
-      formIsValid: true
     };
   }
 
-  async componentDidMount () {
-    const { organization } = this.props;
-    const { form: formData } = this.state;
-
-    formData.name.value = organization.name;
-    formData.description.value = organization.description;
-    formData.custom_virtualenv.value = organization.custom_virtualenv;
-
-    try {
-      formData.instanceGroups.value = await this.getRelatedInstanceGroups();
-      formData.instanceGroups.initialValue = [...formData.instanceGroups.value];
-    } catch (err) {
-      this.setState({ error: err });
-    }
-
-    this.setState({ form: formData });
-  }
-
-  onFieldChange (val, evt) {
-    const targetName = evt.target.name;
-    const value = val;
-
-    const { form: updatedForm } = this.state;
-    const updatedFormEl = { ...updatedForm[targetName] };
-
-    updatedFormEl.value = value;
-    updatedForm[targetName] = updatedFormEl;
-
-    updatedFormEl.isValid = (updatedFormEl.validation)
-      ? this.checkValidity(updatedFormEl.value, updatedFormEl.validation) : true;
-
-    const formIsValid = (updatedFormEl.validation) ? updatedFormEl.isValid : true;
-
-    this.setState({ form: updatedForm, formIsValid });
-  }
-
-  onLookupSave (val, targetName) {
-    const { form: updatedForm } = this.state;
-    updatedForm[targetName].value = val;
-
-    this.setState({ form: updatedForm });
-  }
-
-  async onSubmit () {
+  async handleSubmit (values, groupsToAssociate, groupsToDisassociate) {
     const { api, organization } = this.props;
-    const { form: { name, description, custom_virtualenv } } = this.state;
-    const formData = { name, description, custom_virtualenv };
-
-    const updatedData = {};
-    Object.keys(formData)
-      .forEach(formId => {
-        updatedData[formId] = formData[formId].value;
-      });
-
     try {
-      await api.updateOrganizationDetails(organization.id, updatedData);
-      await this.postInstanceGroups();
+      await api.updateOrganizationDetails(organization.id, values);
+      await this.submitInstanceGroups(groupsToAssociate, groupsToDisassociate);
     } catch (err) {
       this.setState({ error: err });
     } finally {
-      this.onSuccess();
+      this.handleSuccess();
     }
   }
 
-  onCancel () {
+  handleCancel () {
     const { organization: { id }, history } = this.props;
     history.push(`/organizations/${id}`);
   }
 
-  onSuccess () {
+  handleSuccess () {
     const { organization: { id }, history } = this.props;
     history.push(`/organizations/${id}`);
   }
 
-  async getInstanceGroups (params) {
-    const { api } = this.props;
-    const data = await api.getInstanceGroups(params);
-    return data;
-  }
-
-  async getRelatedInstanceGroups () {
-    const {
-      api,
-      organization: { id }
-    } = this.props;
-    const { data } = await api.getOrganizationInstanceGroups(id);
-    const { results } = data;
-    return results;
-  }
-
-  checkValidity = (value, validation) => {
-    const isValid = (validation.required)
-      ? (value.trim() !== '') : true;
-
-    return isValid;
-  }
-
-  async postInstanceGroups () {
+  async submitInstanceGroups (groupsToAssociate, groupsToDisassociate) {
     const { api, organization } = this.props;
-    const { form: { instanceGroups } } = this.state;
     const url = organization.related.instance_groups;
-
-    const initialInstanceGroups = instanceGroups.initialValue.map(ig => ig.id);
-    const updatedInstanceGroups = instanceGroups.value.map(ig => ig.id);
-
-    const groupsToAssociate = [...updatedInstanceGroups]
-      .filter(x => !initialInstanceGroups.includes(x));
-    const groupsToDisassociate = [...initialInstanceGroups]
-      .filter(x => !updatedInstanceGroups.includes(x));
 
     try {
       await Promise.all(groupsToAssociate.map(async id => {
@@ -179,106 +58,31 @@ class OrganizationEdit extends Component {
   }
 
   render () {
-    const {
-      form: {
-        name,
-        description,
-        instanceGroups,
-        custom_virtualenv
-      },
-      formIsValid,
-      error
-    } = this.state;
-
-    const instanceGroupsLookupColumns = [
-      { name: i18nMark('Name'), key: 'name', isSortable: true },
-      { name: i18nMark('Modified'), key: 'modified', isSortable: false, isNumeric: true },
-      { name: i18nMark('Created'), key: 'created', isSortable: false, isNumeric: true }
-    ];
+    const { api, organization } = this.props;
+    const { error } = this.state;
 
     return (
       <CardBody>
-        <I18n>
-          {({ i18n }) => (
-            <Form autoComplete="off">
-              <div style={{ display: 'grid', gridGap: '20px', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>
-                <FormGroup
-                  fieldId="edit-org-form-name"
-                  helperTextInvalid={name.helperTextInvalid}
-                  isRequired
-                  isValid={name.isValid}
-                  label={i18n._(t`Name`)}
-                >
-                  <TextInput
-                    id="edit-org-form-name"
-                    isRequired
-                    isValid={name.isValid}
-                    name="name"
-                    onChange={this.onFieldChange}
-                    value={name.value || ''}
-                  />
-                </FormGroup>
-                <FormGroup
-                  fieldId="edit-org-form-description"
-                  label={i18n._(t`Description`)}
-                >
-                  <TextInput
-                    id="edit-org-form-description"
-                    name="description"
-                    onChange={this.onFieldChange}
-                    value={description.value || ''}
-                  />
-                </FormGroup>
-                <ConfigContext.Consumer>
-                  {({ custom_virtualenvs }) => (
-                    custom_virtualenvs && custom_virtualenvs.length > 1 && (
-                      <FormGroup
-                        fieldId="edit-org-custom-virtualenv"
-                        label={i18n._(t`Ansible Environment`)}
-                      >
-                        <AnsibleSelect
-                          data={custom_virtualenvs}
-                          defaultSelected={custom_virtualenv.defaultEnv}
-                          label={i18n._(t`Ansible Environment`)}
-                          name="custom_virtualenv"
-                          onChange={this.onFieldChange}
-                          value={custom_virtualenv.value || ''}
-                        />
-                      </FormGroup>
-                    )
-                  )}
-                </ConfigContext.Consumer>
-              </div>
-              <FormGroup
-                fieldId="edit-org-form-instance-groups"
-                label={i18n._(t`Instance Groups`)}
-              >
-                <Lookup
-                  columns={instanceGroupsLookupColumns}
-                  getItems={this.getInstanceGroups}
-                  lookupHeader={i18n._(t`Instance Groups`)}
-                  name="instanceGroups"
-                  onLookupSave={this.onLookupSave}
-                  sortedColumnKey="name"
-                  value={instanceGroups.value}
-                />
-              </FormGroup>
-              <FormActionGroup
-                onCancel={this.onCancel}
-                onSubmit={this.onSubmit}
-                submitDisabled={!formIsValid}
-              />
-              { error ? <div>error</div> : '' }
-            </Form>
-          )}
-        </I18n>
+        <OrganizationForm
+          api={api}
+          organization={organization}
+          handleSubmit={this.handleSubmit}
+          handleCancel={this.handleCancel}
+        />
+        {error ? <div>error</div> : null}
       </CardBody>
     );
   }
 }
 
+OrganizationEdit.propTypes = {
+  api: PropTypes.shape().isRequired,
+  organization: PropTypes.shape().isRequired,
+};
+
 OrganizationEdit.contextTypes = {
   custom_virtualenvs: PropTypes.arrayOf(PropTypes.string)
 };
 
+export { OrganizationEdit as _OrganizationEdit };
 export default withRouter(OrganizationEdit);

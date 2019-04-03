@@ -52,6 +52,7 @@
     "@patternfly/react-icons": "^3.6.1",
     "@patternfly/react-tokens": "^2.2.1",
     "axios": "^0.18.0",
+    "formik": "^1.5.1",
     "prop-types": "^15.6.2",
     "react": "^16.4.1",
     "react-dom": "^16.4.1",

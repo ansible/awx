@@ -16,7 +16,7 @@ class AnsibleSelect extends React.Component {
   onSelectChange (val, event) {
     const { onChange, name } = this.props;
     event.target.name = name;
-    onChange(val, event);
+    onChange(event, val);
   }
 
   render () {
@@ -24,10 +24,22 @@ class AnsibleSelect extends React.Component {
     return (
       <I18n>
         {({ i18n }) => (
-          <FormSelect value={value} onChange={this.onSelectChange} aria-label={i18n._(t`Select Input`)}>
-            {data.map((datum) => (datum === defaultSelected
-              ? (<FormSelectOption key="" value="" label={i18n._(t`Use Default ${label}`)} />) : (<FormSelectOption key={datum} value={datum} label={datum} />)))
-            }
+          <FormSelect
+            value={value}
+            onChange={this.onSelectChange}
+            aria-label={i18n._(t`Select Input`)}
+          >
+            {data.map((datum) => (
+              datum === defaultSelected ? (
+                <FormSelectOption
+                  key=""
+                  value=""
+                  label={i18n._(t`Use Default ${label}`)}
+                />
+              ) : (
+                <FormSelectOption key={datum} value={datum} label={datum} />
+              )
+            ))}
           </FormSelect>
         )}
       </I18n>
