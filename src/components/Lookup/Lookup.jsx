@@ -157,7 +157,7 @@ class Lookup extends React.Component {
       sortedColumnKey,
       sortOrder
     } = this.state;
-    const { lookupHeader = 'items', value, columns } = this.props;
+    const { id, lookupHeader = 'items', value, columns } = this.props;
 
     const chips = value ? (
       <div className="pf-c-chip-group">
@@ -173,7 +173,12 @@ class Lookup extends React.Component {
       <I18n>
         {({ i18n }) => (
           <div className="pf-c-input-group awx-lookup">
-            <Button className="pf-c-input-group__text" aria-label="search" id="search" onClick={this.handleModalToggle}>
+            <Button
+              className="pf-c-input-group__text"
+              aria-label="search"
+              id={id}
+              onClick={this.handleModalToggle}
+            >
               <SearchIcon />
             </Button>
             <div className="pf-c-form-control">{chips}</div>
@@ -248,6 +253,7 @@ class Lookup extends React.Component {
 }
 
 Lookup.propTypes = {
+  id: PropTypes.string,
   getItems: PropTypes.func.isRequired,
   lookupHeader: PropTypes.string,
   name: PropTypes.string,
@@ -256,6 +262,7 @@ Lookup.propTypes = {
 };
 
 Lookup.defaultProps = {
+  id: 'lookup-search',
   lookupHeader: 'items',
   name: null,
 };

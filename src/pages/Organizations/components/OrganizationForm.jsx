@@ -99,7 +99,7 @@ class OrganizationForm extends Component {
               <Form autoComplete="off" onSubmit={formik.handleSubmit}>
                 <FormRow>
                   <FormField
-                    id="edit-org-form-name"
+                    id="org-name"
                     name="name"
                     type="text"
                     label={i18n._(t`Name`)}
@@ -107,7 +107,7 @@ class OrganizationForm extends Component {
                     isRequired
                   />
                   <FormField
-                    id="edit-org-form-description"
+                    id="org-description"
                     name="description"
                     type="text"
                     label={i18n._(t`Description`)}
@@ -119,7 +119,7 @@ class OrganizationForm extends Component {
                           name="custom_virtualenv"
                           render={({ field }) => (
                             <FormGroup
-                              fieldId="edit-org-custom-virtualenv"
+                              fieldId="org-custom-virtualenv"
                               label={i18n._(t`Ansible Environment`)}
                             >
                               <AnsibleSelect

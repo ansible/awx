@@ -49,9 +49,10 @@ class InstanceGroupsLookup extends React.Component {
                 }
               </Fragment>
             )}
-            fieldId="add-org-form-instance-groups"
+            fieldId="org-instance-groups"
           >
             <Lookup
+              id="org-instance-groups"
               lookupHeader={i18n._(t`Instance Groups`)}
               name="instanceGroups"
               value={value}
