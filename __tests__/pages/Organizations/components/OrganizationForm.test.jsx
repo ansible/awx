@@ -121,11 +121,11 @@ describe('<OrganizationForm />', () => {
     ).find('OrganizationForm');
 
     const form = wrapper.find('Formik');
-    wrapper.find('input#edit-org-form-name').simulate('change', {
+    wrapper.find('input#org-name').simulate('change', {
       target: { value: 'new foo', name: 'name' }
     });
     expect(form.state('values').name).toEqual('new foo');
-    wrapper.find('input#edit-org-form-description').simulate('change', {
+    wrapper.find('input#org-description').simulate('change', {
       target: { value: 'new bar', name: 'description' }
     });
     expect(form.state('values').description).toEqual('new bar');

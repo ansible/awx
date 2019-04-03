@@ -49,6 +49,7 @@ describe('<Lookup />', () => {
     const wrapper = mount(
       <I18nProvider>
         <Lookup
+          id="search"
           lookup_header="Foo Bar"
           name="fooBar"
           value={mockSelected}
@@ -76,6 +77,7 @@ describe('<Lookup />', () => {
     const wrapper = mount(
       <I18nProvider>
         <Lookup
+          id="search"
           lookup_header="Foo Bar"
           name="fooBar"
           value={mockSelected}
@@ -100,6 +102,7 @@ describe('<Lookup />', () => {
     const wrapper = mount(
       <I18nProvider>
         <Lookup
+          id="search"
           lookup_header="Foo Bar"
           name="fooBar"
           value={mockData}
