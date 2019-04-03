@@ -443,6 +443,10 @@ Before starting the build process, review the [inventory](./installer/inventory)
 
 > Provide a port number that can be mapped from the Docker daemon host to the web server running inside the AWX container. Defaults to *80*.
 
+*host_port_ssl*
+
+> Provide a port number that can be mapped from the Docker daemon host to the web server running inside the AWX container for SSL support. Defaults to *443*, only works if you also set `ssl_certificate` (see below).
+
 *ssl_certificate*
 
 > Optionally, provide the path to a file that contains a certificate and its private key.

@@ -12,6 +12,9 @@ services:
       - postgres
       {% endif %}
     ports:
+      {% if ssl_certificate is defined %}
+      - "{{ host_port_ssl }}:8053"
+      {% endif %}
       - "{{ host_port }}:8052"
     hostname: {{ awx_web_hostname }}
     user: root
