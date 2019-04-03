@@ -219,7 +219,7 @@ export default [ 'ProcessErrors', 'CredentialTypeModel', 'TemplatesStrings', '$f
                     if(vm.steps[step].tab.order === currentTab.order) {
                         vm.steps[step].tab._active = false;
                     } else if(vm.steps[step].tab.order === currentTab.order + 1) {
-                        activeTab = currentTab
+                        activeTab = currentTab;
                         vm.steps[step].tab._active = true;
                         vm.steps[step].tab._disabled = false;
                         scope.$broadcast('promptTabChange', { step });
