@@ -39,6 +39,7 @@ class IsolatedManager(object):
         self.check_callback = check_callback
         self.idle_timeout = max(60, 2 * settings.AWX_ISOLATED_CONNECTION_TIMEOUT)
         self.started_at = None
+        self.captured_config_artifact = False
 
     def build_runner_params(self, hosts, verbosity=1):
         env = dict(os.environ.items())
@@ -188,17 +189,22 @@ class IsolatedManager(object):
                                                       self.private_data_dir,
                                                       extravars=extravars)
             status, rc = runner_obj.status, runner_obj.rc
+
+            if self.check_callback is not None and not self.captured_config_artifact:
+                config_path = self.path_to('artifacts', self.ident, 'config')
+                # If the configuration artifact has been synced back, update the model
+                if os.path.exists(config_path):
+                    try:
+                        with open(config_path, 'r') as f:
+                            data = json.load(f)
+                        self.check_callback(data)
+                        self.captured_config_artifact = True
+                    except json.decoder.JSONDecodeError:  # Just in case it's not fully here yet.
+                        pass
+
             self.consume_events(dispatcher)
 
             last_check = time.time()
-
-        if self.check_callback is not None:
-            config_path = self.path_to('artifacts', self.ident, 'config')
-            # If the configuration artifact has been synced back, update the model
-            if os.path.exists(config_path):
-                with open(config_path, 'r') as f:
-                    data = json.load(f)
-                self.check_callback(data)
 
         if status == 'successful':
             status_path = self.path_to('artifacts', self.ident, 'status')
