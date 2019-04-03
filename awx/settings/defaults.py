@@ -671,6 +671,8 @@ PENDO_TRACKING_STATE = "off"
 # Note: This setting may be overridden by database settings.
 INSIGHTS_TRACKING_STATE = False
 
+# Collect resource profiling data on playbook runs
+AWX_PERF_STATS_ENABLED = False
 
 # Default list of modules allowed for ad hoc commands.
 # Note: This setting may be overridden by database settings.

@@ -4112,7 +4112,7 @@ class JobEventSerializer(BaseSerializer):
     class Meta:
         model = JobEvent
         fields = ('*', '-name', '-description', 'job', 'event', 'counter',
-                  'event_display', 'event_data', 'event_level', 'failed',
+                  'event_display', 'event_data', 'profiling_data', 'event_level', 'failed',
                   'changed', 'uuid', 'parent_uuid', 'host', 'host_name', 'parent',
                   'playbook', 'play', 'task', 'role', 'stdout', 'start_line', 'end_line',
                   'verbosity')
@@ -4143,12 +4143,18 @@ class JobEventSerializer(BaseSerializer):
 
     def to_representation(self, obj):
         ret = super(JobEventSerializer, self).to_representation(obj)
-        # Show full stdout for event detail view, truncate only for list view.
+        # Only show profiling data for relevant events, omit field if empty
+        events_with_data = ('runner_on_ok', 'runner_on_failed', 'runner_on_item_ok', 'runner_on_item_failed')
+        if obj.event not in events_with_data or not ret.get('profiling_data', {}):
+            ret.pop('profiling_data', None)
+
+        # Show full stdout and profiling data for event detail view, truncate only for list view.
         if hasattr(self.context.get('view', None), 'retrieve'):
             return ret
         # Show full stdout for playbook_on_* events.
         if obj and obj.event.startswith('playbook_on'):
             return ret
+
         max_bytes = settings.EVENT_STDOUT_MAX_BYTES_DISPLAY
         if max_bytes > 0 and 'stdout' in ret and len(ret['stdout']) >= max_bytes:
             ret['stdout'] = ret['stdout'][:(max_bytes - 1)] + u'\u2026'
@@ -4160,6 +4166,8 @@ class JobEventSerializer(BaseSerializer):
                 else:
                     set_count += 1
             ret['stdout'] += u'\u001b[0m' * (set_count - reset_count)
+        if 'profiling_data' in ret:
+            ret.pop('profiling_data', None)
         return ret
 
 

@@ -61,7 +61,7 @@ class BasePlaybookEvent(CreatedModifiedModel):
     '''
 
     VALID_KEYS = [
-        'event', 'event_data', 'playbook', 'play', 'role', 'task', 'created',
+        'event', 'event_data', 'profiling_data', 'playbook', 'play', 'role', 'task', 'created',
         'counter', 'uuid', 'stdout', 'parent_uuid', 'start_line', 'end_line',
         'verbosity'
     ]
@@ -148,6 +148,10 @@ class BasePlaybookEvent(CreatedModifiedModel):
         choices=EVENT_CHOICES,
     )
     event_data = JSONField(
+        blank=True,
+        default={},
+    )
+    profiling_data = JSONField(
         blank=True,
         default={},
     )

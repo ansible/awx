@@ -876,6 +876,18 @@ class BaseTask(object):
                 process_isolation_params['process_isolation_ro_paths'].append(instance.ansible_virtualenv_path)
         return process_isolation_params
 
+    def build_params_resource_profiling(self):
+        '''
+        Build ansible runner .run() parameters for resource profiling.
+        '''
+        resource_profiling_params = dict()
+        if isinstance(self.instance, Job) and getattr(settings, 'AWX_PERF_STATS_ENABLED', False):
+            logger.info('Resource profiling enabled')
+            resource_profiling_params['resource_profiling'] = True
+            # TODO: Params for enabling/disabling perf stats summary
+        return resource_profiling_params
+
+
     def _write_extra_vars_file(self, private_data_dir, vars, safe_dict={}):
         env_path = os.path.join(private_data_dir, 'env')
         try:
@@ -1174,6 +1186,8 @@ class BaseTask(object):
             process_isolation_params = self.build_params_process_isolation(self.instance,
                                                                            private_data_dir,
                                                                            cwd)
+            resource_profiling_params = self.build_params_resource_profiling()
+
             env = self.build_env(self.instance, private_data_dir, isolated,
                                  private_data_files=private_data_files)
             self.safe_env = build_safe_env(env)
@@ -1212,6 +1226,7 @@ class BaseTask(object):
                     'pexpect_timeout': getattr(settings, 'PEXPECT_TIMEOUT', 5),
                     'suppress_ansible_output': True,
                     **process_isolation_params,
+                    **resource_profiling_params,
                 },
             }
 

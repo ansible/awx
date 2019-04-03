@@ -319,6 +319,16 @@ register(
 )
 
 register(
+    'AWX_PERF_STATS_ENABLED',
+    field_class=fields.BooleanField,
+    default=False,
+    label=_('Enable Performance Stats'),
+    help_text=_('Collect resource profiling data for playbook runs.  Requires Ansible 2.8 or greater.'),
+    category=_('Jobs'),
+    category_slug='jobs',
+)
+
+register(
     'AWX_ROLES_ENABLED',
     field_class=fields.BooleanField,
     default=True,
