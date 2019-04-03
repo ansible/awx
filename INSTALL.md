@@ -446,7 +446,7 @@ Before starting the build process, review the [inventory](./installer/inventory)
 
 *docker_compose_dir*
 
-When using docker-compose, the `docker-compose.yml` file will be created there (default `/tmp/awxcompose`).
+> When using docker-compose, the `docker-compose.yml` file will be created there (default `/tmp/awxcompose`).
 
 *ca_trust_dir*
 

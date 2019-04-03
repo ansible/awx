@@ -54,11 +54,10 @@ awx_web_hostname=awxweb
 postgres_data_dir=/tmp/pgdocker
 host_port=80
 #ssl_certificate=
+docker_compose_dir=/tmp/awxcompose
 
 # Required for Openshift when building the image on your own
 # Optional for Openshift if using Dockerhub or another prebuilt registry
-# Required for Standalone Docker Install if building the image on your own
-# Optional for Standalone Docker Install if using Dockerhub or another prebuilt registry
 # Required for Docker Compose Install if building the image on your own
 # Optional for Docker Compose Install if using Dockerhub or another prebuilt registry
 # Define if you want the image pushed to a registry. The container definition will also use these images
