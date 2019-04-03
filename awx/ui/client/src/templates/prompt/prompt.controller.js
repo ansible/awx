@@ -7,6 +7,7 @@ export default [ 'ProcessErrors', 'CredentialTypeModel', 'TemplatesStrings', '$f
 
         let scope;
         let modal;
+        let activeTab;
 
         vm.init = (_scope_) => {
             scope = _scope_;
@@ -137,6 +138,7 @@ export default [ 'ProcessErrors', 'CredentialTypeModel', 'TemplatesStrings', '$f
                                 _active: true,
                                 order: order
                             };
+                            activeTab = activeTab || vm.steps.inventory.tab;
                             order++;
                         }
                         if (vm.promptDataClone.launchConf.ask_credential_on_launch ||
@@ -152,6 +154,7 @@ export default [ 'ProcessErrors', 'CredentialTypeModel', 'TemplatesStrings', '$f
                                 _disabled: (order === 1 || vm.readOnlyPrompts) ? false : true,
                                 order: order
                             };
+                            activeTab = activeTab || vm.steps.credentials.tab;
                             order++;
                         }
                         if(vm.promptDataClone.launchConf.ask_verbosity_on_launch || vm.promptDataClone.launchConf.ask_job_type_on_launch || vm.promptDataClone.launchConf.ask_limit_on_launch || vm.promptDataClone.launchConf.ask_tags_on_launch || vm.promptDataClone.launchConf.ask_skip_tags_on_launch || (vm.promptDataClone.launchConf.ask_variables_on_launch && !vm.promptDataClone.launchConf.ignore_ask_variables) || vm.promptDataClone.launchConf.ask_diff_mode_on_launch) {
@@ -161,6 +164,7 @@ export default [ 'ProcessErrors', 'CredentialTypeModel', 'TemplatesStrings', '$f
                                 _disabled: (order === 1 || vm.readOnlyPrompts) ? false : true,
                                 order: order
                             };
+                            activeTab = activeTab || vm.steps.other_prompts.tab;
                             order++;
 
                             let codemirror = () =>  {
@@ -177,6 +181,7 @@ export default [ 'ProcessErrors', 'CredentialTypeModel', 'TemplatesStrings', '$f
                                 _disabled: (order === 1 || vm.readOnlyPrompts) ? false : true,
                                 order: order
                             };
+                            activeTab = activeTab || vm.steps.survey.tab;
                             order++;
                         }
                         vm.steps.preview.tab.order = order;
@@ -214,11 +219,19 @@ export default [ 'ProcessErrors', 'CredentialTypeModel', 'TemplatesStrings', '$f
                     if(vm.steps[step].tab.order === currentTab.order) {
                         vm.steps[step].tab._active = false;
                     } else if(vm.steps[step].tab.order === currentTab.order + 1) {
+                        activeTab = currentTab;
                         vm.steps[step].tab._active = true;
                         vm.steps[step].tab._disabled = false;
+                        scope.$broadcast('promptTabChange', { step });
                     }
                 }
             });
+        };
+
+        vm.keypress = (event) => {
+          if (event.key === 'Enter') {
+            vm.next(activeTab);
+          }
         };
 
         vm.finish = () => {
