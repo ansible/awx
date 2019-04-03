@@ -59,7 +59,9 @@ Before you can run a deployment, you'll need the following installed in your loc
 
 - [Ansible](http://docs.ansible.com/ansible/latest/intro_installation.html) Requires Version 2.4+
 - [Docker](https://docs.docker.com/engine/installation/)
-- [docker-py](https://github.com/docker/docker-py) Python module
+- [docker](https://pypi.org/project/docker/) Python module
+    + This is incompatible with `docker-py`. If you have previously installed `docker-py`, please uninstall it.
+    + We use this module instead of `docker-py` because it is what the `docker-compose` Python module requires.
 - [GNU Make](https://www.gnu.org/software/make/)
 - [Git](https://git-scm.com/) Requires Version 1.8.4+
 - [Node 8.x LTS version](https://nodejs.org/en/download/)
@@ -396,7 +398,8 @@ Unlike Openshift's `Route` the Kubernetes `Ingress` doesn't yet handle SSL termi
 ### Prerequisites
 
 - [Docker](https://docs.docker.com/engine/installation/) on the host where AWX will be deployed. After installing Docker, the Docker service must be started (depending on your OS, you may have to add the local user that uses Docker to the ``docker`` group, refer to the documentation for details)
-- [docker-py](https://github.com/docker/docker-py) Python module.
+- [docker-compose](https://pypi.org/project/docker-compose/) Python module.
+    + This also installs the `docker` Python module, which is incompatible with `docker-py`. If you have previously installed `docker-py`, please uninstall it.
 - [Docker Compose](https://docs.docker.com/compose/install/).
 
 ### Pre-build steps
