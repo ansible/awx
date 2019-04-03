@@ -1222,7 +1222,7 @@ class BaseTask(object):
                 ansible_runner.utils.dump_artifacts(params)
                 isolated_manager_instance = isolated_manager.IsolatedManager(
                     cancelled_callback=lambda: self.update_model(self.instance.pk).cancel_flag,
-                    check_callback=self.check_callback,
+                    check_callback=self.check_handler,
                 )
                 status, rc = isolated_manager_instance.run(self.instance,
                                                            private_data_dir,
