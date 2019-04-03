@@ -475,10 +475,9 @@ class NotificationAttachMixin(BaseAccess):
     @check_superuser
     def can_unattach(self, obj, sub_obj, relationship, data=None):
         if isinstance(sub_obj, NotificationTemplate):
-            # due to this special case, needs to be symmetrical with attach permission
-            return NotificationTemplateAccess(self.user).can_attach(
-                sub_obj, obj, relationship, data
-            )
+            # due to this special case, we must whitelist case symmetrical with attach permission
+            if NotificationTemplateAccess(self.user).can_attach(sub_obj, obj, relationship, data):
+                return True
         return super(NotificationAttachMixin, self).can_unattach(
             obj, sub_obj, relationship, relationship, data=data
         )
