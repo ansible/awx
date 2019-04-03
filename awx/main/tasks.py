@@ -1084,7 +1084,7 @@ class BaseTask(object):
         self.instance = self.update_model(self.instance.pk,
                                           job_args=json.dumps(config['command']),
                                           job_cwd=config['cwd'],
-                                          job_env=config['env'])
+                                          job_env=build_safe_env(config['env']))
 
 
     @with_path_cleanup
