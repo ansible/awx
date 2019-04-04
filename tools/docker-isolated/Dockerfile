@@ -7,8 +7,7 @@ ADD requirements/requirements_ansible.txt requirements/requirements_ansible_git.
 RUN yum -y update && yum -y install curl epel-release
 RUN yum -y update && yum -y install openssh-server ansible mg vim tmux git python-devel python36 python36-devel python-psycopg2 make python-psutil libxml2-devel libxslt-devel libstdc++.so.6 gcc cyrus-sasl-devel cyrus-sasl openldap-devel libffi-devel zeromq-devel python-pip xmlsec1-devel swig krb5-devel xmlsec1-openssl xmlsec1 xmlsec1-openssl-devel libtool-ltdl-devel bubblewrap zanata-python-client gettext gcc-c++ libcurl-devel python-pycurl bzip2
 
-RUN ln -s /usr/bin/python36 /usr/bin/python3
-RUN python36 -m ensurepip
+RUN python3 -m ensurepip
 RUN pip3 install virtualenv
 RUN pip3 install ansible-runner
 WORKDIR /tmp
