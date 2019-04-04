@@ -39,6 +39,9 @@ export default ['i18n', function(i18n) {
                 reset: 'AWX_PROOT_HIDE_PATHS',
                 rows: 6
             },
+            AWX_PERF_STATS_ENABLED: {
+                type: 'toggleSwitch',
+            },
             AWX_PROOT_ENABLED: {
                 type: 'toggleSwitch',
             },
