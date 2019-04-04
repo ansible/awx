@@ -275,7 +275,8 @@ let lists = [{
                 add: {
                     awToolTip: i18n._('Add existing user to organization as administrator'),
                     actionClass: 'at-Button--add',
-                    ngClick: 'addUsers()'
+                    ngClick: 'addUsers()',
+                    ngShow:'canAddAdmins'
                 }
             };
             list.listTitle = i18n._('Admins') + ` | {{ name }}`;

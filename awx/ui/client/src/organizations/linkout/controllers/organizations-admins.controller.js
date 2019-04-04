@@ -8,7 +8,7 @@ export default ['$stateParams', '$scope', 'Rest', '$state',
     '$compile', 'Wait', 'OrgAdminList', 'OrgAdminsDataset', 'i18n',
     'Prompt', 'ProcessErrors', 'GetBasePath', '$filter',
     function($stateParams, $scope, Rest, $state,
-        $compile, Wait, OrgAdminList, OrgAdminsDataset, i18n, 
+        $compile, Wait, OrgAdminList, OrgAdminsDataset, i18n,
         Prompt, ProcessErrors, GetBasePath, $filter) {
 
         var orgBase = GetBasePath('organizations');
@@ -27,6 +27,7 @@ export default ['$stateParams', '$scope', 'Rest', '$state',
                     $scope.organization_name = data.name;
                     $scope.name = data.name;
                     $scope.org_id = data.id;
+                    $scope.canAddAdmins = data.summary_fields.user_capabilities.edit;
 
                     $scope.orgRelatedUrls = data.related;
 
