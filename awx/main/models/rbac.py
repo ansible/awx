@@ -52,8 +52,8 @@ role_names = {
 
 role_descriptions = {
     'system_administrator': _('Can manage all aspects of the system'),
-    'system_auditor': _('Can view all settings on the system'),
-    'adhoc_role': _('May run ad hoc commands on an inventory'),
+    'system_auditor': _('Can view all aspects of the system'),
+    'adhoc_role': _('May run ad hoc commands on the %s'),
     'admin_role': _('Can manage all aspects of the %s'),
     'project_admin_role': _('Can manage all projects of the %s'),
     'inventory_admin_role': _('Can manage all inventories of the %s'),
@@ -61,14 +61,14 @@ role_descriptions = {
     'job_template_admin_role': _('Can manage all job templates of the %s'),
     'workflow_admin_role': _('Can manage all workflows of the %s'),
     'notification_admin_role': _('Can manage all notifications of the %s'),
-    'auditor_role': _('Can view all settings for the %s'),
+    'auditor_role': _('Can view all aspects of the %s'),
     'execute_role': {
         'organization': _('May run any executable resources in the organization'),
         'default': _('May run the %s'),
     },
     'member_role': _('User is a member of the %s'),
     'read_role': _('May view settings for the %s'),
-    'update_role': _('May update project or inventory or group using the configured source update system'),
+    'update_role': _('May update the %s'),
     'use_role': _('Can use the %s in a job template'),
 }
 
