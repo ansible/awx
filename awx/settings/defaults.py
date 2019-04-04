@@ -702,7 +702,7 @@ EC2_ENABLED_VAR = 'ec2_state'
 EC2_ENABLED_VALUE = 'running'
 
 # Inventory variable name containing unique instance ID.
-EC2_INSTANCE_ID_VAR = 'ec2_id'
+EC2_INSTANCE_ID_VAR = 'ec2_id,instance_id'
 
 # Filter for allowed group/host names when importing inventory from EC2.
 EC2_GROUP_FILTER = r'^.+$'
