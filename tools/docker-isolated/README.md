@@ -56,12 +56,12 @@ by disabling some parts of the cleanup_isolated.yml playbook.
 
 Example location of a private data directory:
 
-`/tmp/ansible_awx_29_OM6Mnx/`
+`/tmp/awx_29_OM6Mnx/`
 
 The following command would run the playbook corresponding to that job.
 
 ```bash
-ansible-runner start /tmp/ansible_awx_29_OM6Mnx/ -p some_playbook.yml
+ansible-runner start /tmp/awx_29_OM6Mnx/ -p some_playbook.yml
 ```
 
 Other ansible-runner commands include `start`, `is-alive`, and `stop`.
