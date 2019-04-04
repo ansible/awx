@@ -50,6 +50,20 @@ module.exports = {
                 path: AWX_E2E_SCREENSHOTS_PATH,
             }
         },
+        headless: {
+            desiredCapabilities: {
+                browserName: 'chrome',
+                chromeOptions: {
+                    args: [
+                        'headless',
+                        'disable-web-security',
+                        'ignore-certificate-errors',
+                        'no-sandbox',
+                        'disable-gpu'
+                    ]
+                }
+            },
+        },
         // Note: These are environment-specific overrides to the default
         // test settings defined above.
         cluster: {
