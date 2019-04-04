@@ -63,7 +63,8 @@ from awx.main.dispatch import get_local_queuename, reaper
 from awx.main.utils import (get_ssh_version, update_scm_url,
                             get_licenser,
                             ignore_inventory_computed_fields,
-                            ignore_inventory_group_removal, extract_ansible_vars, schedule_task_manager)
+                            ignore_inventory_group_removal, extract_ansible_vars, schedule_task_manager,
+                            get_awx_version)
 from awx.main.utils.common import _get_ansible_version
 from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja
 from awx.main.utils.reload import stop_local_services
@@ -71,6 +72,7 @@ from awx.main.utils.pglock import advisory_lock
 from awx.main.consumers import emit_channel_notification
 from awx.main import analytics
 from awx.conf import settings_registry
+from awx.conf.license import get_license
 
 from rest_framework.exceptions import PermissionDenied
 
@@ -1739,6 +1741,8 @@ class RunProjectUpdate(BaseTask):
         extra_vars.update({
             'project_path': project_update.get_project_path(check_if_exists=False),
             'insights_url': settings.INSIGHTS_URL_BASE,
+            'awx_license_type': get_license(show_key=False).get('license_type', 'UNLICENSED'),
+            'awx_version': get_awx_version(),
             'scm_type': project_update.scm_type,
             'scm_url': scm_url,
             'scm_branch': scm_branch,
