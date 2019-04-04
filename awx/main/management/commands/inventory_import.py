@@ -271,7 +271,7 @@ class Command(BaseCommand):
                                      logging.DEBUG, 0]))
         logger.setLevel(log_levels.get(self.verbosity, 0))
 
-    def _get_instance_id(self, from_dict, default=''):
+    def _get_instance_id(self, variables, default=''):
         '''
         Retrieve the instance ID from the given dict of host variables.
 
@@ -279,15 +279,23 @@ class Command(BaseCommand):
         the lookup will traverse into nested dicts, equivalent to:
 
         from_dict.get('foo', {}).get('bar', default)
+
+        Multiple ID variables may be specified as 'foo.bar,foobar', so that
+        it will first try to find 'bar' inside of 'foo', and if unable,
+        will try to find 'foobar' as a fallback
         '''
         instance_id = default
         if getattr(self, 'instance_id_var', None):
-            for key in self.instance_id_var.split('.'):
-                if not hasattr(from_dict, 'get'):
-                    instance_id = default
+            for single_instance_id in self.instance_id_var.split(','):
+                from_dict = variables
+                for key in single_instance_id.split('.'):
+                    if not hasattr(from_dict, 'get'):
+                        instance_id = default
+                        break
+                    instance_id = from_dict.get(key, default)
+                    from_dict = instance_id
+                if instance_id:
                     break
-                instance_id = from_dict.get(key, default)
-                from_dict = instance_id
         return smart_text(instance_id)
 
     def _get_enabled(self, from_dict, default=None):
@@ -422,7 +430,7 @@ class Command(BaseCommand):
             for mem_host in self.all_group.all_hosts.values():
                 instance_id = self._get_instance_id(mem_host.variables)
                 if not instance_id:
-                    logger.warning('Host "%s" has no "%s" variable',
+                    logger.warning('Host "%s" has no "%s" variable(s)',
                                    mem_host.name, self.instance_id_var)
                     continue
                 mem_host.instance_id = instance_id
