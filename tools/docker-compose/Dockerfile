@@ -19,9 +19,7 @@ RUN yum -y update && yum -y install openssh-server ansible mg vim tmux \
   zanata-python-client gettext gcc-c++ libcurl-devel bzip2 \
   rsync
 
-RUN ln -s /usr/bin/python36 /usr/bin/python3
-
-RUN python36 -m ensurepip
+RUN python3 -m ensurepip
 RUN pip3 install virtualenv
 RUN /usr/bin/ssh-keygen -q -t rsa -N "" -f /root/.ssh/id_rsa
 RUN mkdir -p /data/db

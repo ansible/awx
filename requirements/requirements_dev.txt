@@ -13,7 +13,7 @@ pytest-django
 pytest-pythonpath
 pytest-mock
 pytest-timeout
-pytest-xdist
+pytest-xdist<1.28.0
 logutils
 jupyter
 matplotlib
