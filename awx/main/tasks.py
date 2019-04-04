@@ -1081,10 +1081,14 @@ class BaseTask(object):
         '''
         IsolatedManager callback triggered by the repeated checks of the isolated node
         '''
+        job_env = build_safe_env(config['env'])
+        for k, v in self.safe_cred_env.items():
+            if k in job_env:
+                job_env[k] = v
         self.instance = self.update_model(self.instance.pk,
                                           job_args=json.dumps(config['command']),
                                           job_cwd=config['cwd'],
-                                          job_env=build_safe_env(config['env']))
+                                          job_env=job_env)
 
 
     @with_path_cleanup
@@ -1107,6 +1111,7 @@ class BaseTask(object):
         Needs to be an object property because status_handler uses it in a callback context
         '''
         self.safe_env = {}
+        self.safe_cred_env = {}
         private_data_dir = None
         isolated_manager_instance = None
 
@@ -1159,8 +1164,11 @@ class BaseTask(object):
             for credential in credentials:
                 if credential:
                     credential.credential_type.inject_credential(
-                        credential, env, self.safe_env, args, private_data_dir
+                        credential, env, self.safe_cred_env, args, private_data_dir
                     )
+
+            self.safe_env.update(self.safe_cred_env)
+
             self.write_args_file(private_data_dir, args)
 
             password_prompts = self.get_password_prompts(passwords)
