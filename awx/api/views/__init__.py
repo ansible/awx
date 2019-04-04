@@ -277,7 +277,7 @@ class DashboardJobsGraphView(APIView):
         period = request.query_params.get('period', 'month')
         job_type = request.query_params.get('job_type', 'all')
 
-        user_unified_jobs = get_user_queryset(request.user, models.UnifiedJob)
+        user_unified_jobs = get_user_queryset(request.user, models.UnifiedJob).exclude(launch_type='sync')
 
         success_query = user_unified_jobs.filter(status='successful')
         failed_query = user_unified_jobs.filter(status='failed')
