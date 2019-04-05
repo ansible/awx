@@ -50,7 +50,7 @@ export default ['$stateParams', '$scope', '$rootScope',
                 val.description = card.description || undefined;
                 val.links = [];
                 val.links.push({
-                    sref: `organizations.users({organization_id: ${card.id}})`,
+                    sref: `organizations.edit.users({organization_id: ${card.id}})`,
                     srefOpts: { inherit: false },
                     name: i18n._("USERS"),
                     count: card.summary_fields.related_field_counts.users,
