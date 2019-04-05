@@ -340,7 +340,7 @@ class IsolatedManager(object):
         :param instance:         a `model.Job` instance
         :param private_data_dir: an absolute path on the local file system
                                  where job-specific data should be written
-                                 (i.e., `/tmp/ansible_awx_xyz/`)
+                                 (i.e., `/tmp/awx_N_xyz/`)
         :param playbook:         the playbook to run
         :param module:           the module to run
         :param module_args:      the module args to use
