@@ -352,6 +352,10 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
             kwargs['_parent_field_name'] = "job_template"
             kwargs.setdefault('_eager_fields', {})
             kwargs['_eager_fields']['is_sliced_job'] = True
+        elif self.job_slice_count > 1 and (not prevent_slicing):
+            # Unique case where JT was set to slice but hosts not available
+            kwargs.setdefault('_eager_fields', {})
+            kwargs['_eager_fields']['job_slice_count'] = 1
         elif prevent_slicing:
             kwargs.setdefault('_eager_fields', {})
             kwargs['_eager_fields'].setdefault('job_slice_count', 1)
