@@ -62,7 +62,7 @@ describe('<Lookup />', () => {
     ).find('Lookup');
     expect(spy).not.toHaveBeenCalled();
     expect(wrapper.state('lookupSelectedItems')).toEqual(mockSelected);
-    const searchItem = wrapper.find('.pf-c-input-group__text#search');
+    const searchItem = wrapper.find('button[aria-label="Search"]');
     searchItem.first().simulate('click');
     expect(spy).toHaveBeenCalled();
     expect(wrapper.state('lookupSelectedItems')).toEqual([{
@@ -89,7 +89,7 @@ describe('<Lookup />', () => {
       </I18nProvider>
     );
     setImmediate(() => {
-      const searchItem = wrapper.find('.pf-c-input-group__text#search');
+      const searchItem = wrapper.find('button[aria-label="Search"]');
       searchItem.first().simulate('click');
       wrapper.find('input[type="checkbox"]').simulate('change');
       expect(spy).toHaveBeenCalled();

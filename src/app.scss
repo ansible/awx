@@ -132,12 +132,6 @@
   }
 }
 
-.pf-c-input-group__text {
-  &:hover {
-    cursor: pointer;
-  }
-}
-
 //
 // pf modal overrides
 //
@@ -220,12 +214,10 @@
 // note that these should be given a consistent prefix
 // and bem style, as well as moved into component-based scss files
 //
-.awx-lookup {
-  min-height: 36px;
 
-  .pf-c-form-control {
-    --pf-c-form-control--Height: auto;
-  }
+.awx-lookup .pf-c-form-control {
+  --pf-c-form-control--Height: 90px;
+  overflow-y: auto;
 }
 
 .awx-c-list {
