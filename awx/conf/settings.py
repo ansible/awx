@@ -381,8 +381,9 @@ class SettingsWrapper(UserSettingsHolder):
             setting = None
             setting_id = None
             if not field.read_only or name in (
-                # these two values are read-only - however - we *do* want
+                # these values are read-only - however - we *do* want
                 # to fetch their value from the database
+                'INSTALL_UUID',
                 'AWX_ISOLATED_PRIVATE_KEY',
                 'AWX_ISOLATED_PUBLIC_KEY',
             ):
