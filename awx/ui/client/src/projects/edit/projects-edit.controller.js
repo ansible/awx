@@ -51,20 +51,7 @@ export default ['$scope', '$rootScope', '$stateParams', 'ProjectsForm', 'Rest',
             $scope.projectLoadedRemove();
         }
         $scope.projectLoadedRemove = $scope.$on('projectLoaded', function() {
-            var opts = [];
-
-            if (Authorization.getUserInfo('is_superuser') === true) {
-                GetProjectPath({ scope: $scope, master: master });
-            } else {
-                opts.push({
-                    label: $scope.local_path,
-                    value: $scope.local_path
-                });
-                $scope.project_local_paths = opts;
-                $scope.local_path = $scope.project_local_paths[0];
-                $scope.base_dir = i18n._('You do not have access to view this property');
-                $scope.$emit('pathsReady');
-            }
+            GetProjectPath({ scope: $scope, master: master });
 
             $scope.pathRequired = ($scope.scm_type.value === 'manual') ? true : false;
             $scope.scmRequired = ($scope.scm_type.value !== 'manual') ? true : false;

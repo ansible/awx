@@ -221,7 +221,8 @@ class ApiV1ConfigView(APIView):
         if request.user.is_superuser \
                 or request.user.is_system_auditor \
                 or Organization.accessible_objects(request.user, 'admin_role').exists() \
-                or Organization.accessible_objects(request.user, 'auditor_role').exists():
+                or Organization.accessible_objects(request.user, 'auditor_role').exists() \
+                or Organization.accessible_objects(request.user, 'project_admin_role').exists():
             data.update(dict(
                 project_base_dir = settings.PROJECTS_ROOT,
                 project_local_paths = Project.get_local_path_choices(),
