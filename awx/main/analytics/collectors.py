@@ -158,7 +158,7 @@ def instance_info(since):
     instances = models.Instance.objects.values_list('hostname').annotate().values(
         'uuid', 'version', 'capacity', 'cpu', 'memory', 'managed_by_policy', 'hostname', 'last_isolated_check', 'enabled')
     for instance in instances:
-        info = {'uuid': instance['uuid'],
+        instance_info = {'uuid': instance['uuid'],
                 'version': instance['version'],
                 'capacity': instance['capacity'],
                 'cpu': instance['cpu'],
@@ -167,6 +167,7 @@ def instance_info(since):
                 'last_isolated_check': instance['last_isolated_check'],
                 'enabled': instance['enabled']
                 }
+        info[instance['uuid']] = instance_info
     return info
 
 
@@ -186,12 +187,12 @@ def job_instance_counts(since):
     job_types = models.UnifiedJob.objects.exclude(launch_type='sync').values_list(
         'execution_node', 'launch_type').annotate(job_launch_type=Count('launch_type'))
     for job in job_types:
-        counts.setdefault(job[0], {}).setdefault('status', {})[job[1]] = job[2]
+        counts.setdefault(job[0], {}).setdefault('launch_type', {})[job[1]] = job[2]
         
     job_statuses = models.UnifiedJob.objects.exclude(launch_type='sync').values_list(
         'execution_node', 'status').annotate(job_status=Count('status'))
     for job in job_statuses:
-        counts.setdefault(job[0], {}).setdefault('launch_type', {})[job[1]] = job[2]
+        counts.setdefault(job[0], {}).setdefault('status', {})[job[1]] = job[2]
     return counts
 
 

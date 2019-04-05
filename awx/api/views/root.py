@@ -104,6 +104,7 @@ class ApiVersionRootView(APIView):
             data['credential_input_sources'] = reverse('api:credential_input_source_list', request=request)
             data['applications'] = reverse('api:o_auth2_application_list', request=request)
             data['tokens'] = reverse('api:o_auth2_token_list', request=request)
+            data['metrics'] = reverse('api:metrics_view', request=request)
         data['inventory'] = reverse('api:inventory_list', request=request)
         data['inventory_scripts'] = reverse('api:inventory_script_list', request=request)
         data['inventory_sources'] = reverse('api:inventory_source_list', request=request)
@@ -278,6 +279,3 @@ class ApiV1ConfigView(APIView):
         except Exception:
             # FIX: Log
             return Response({"error": _("Failed to remove license.")}, status=status.HTTP_400_BAD_REQUEST)
-
-
-

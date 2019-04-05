@@ -74,6 +74,7 @@ oauthlib==2.0.6           # via django-oauth-toolkit, requests-oauthlib, social-
 ordereddict==1.1
 pexpect==4.6.0
 pkgconfig==1.4.0          # via xmlsec
+prometheus_client==0.6.0
 psutil==5.4.3
 psycopg2==2.7.3.2
 ptyprocess==0.6.0         # via pexpect
