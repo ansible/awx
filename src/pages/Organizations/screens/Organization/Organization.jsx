@@ -159,10 +159,9 @@ class Organization extends Component {
               path="/organizations/:id/teams"
               render={() => (
                 <OrganizationTeams
+                  id={Number(match.params.id)}
+                  searchString={location.search}
                   api={api}
-                  match={match}
-                  location={location}
-                  history={history}
                 />
               )}
             />
