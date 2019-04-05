@@ -256,7 +256,7 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
         if towervars:
             fetch_fields.append('enabled')
         hosts = self.hosts.filter(**hosts_kw).order_by('name').only(*fetch_fields)
-        if slice_count > 1:
+        if slice_count > 1 and slice_number > 0:
             offset = slice_number - 1
             hosts = hosts[offset::slice_count]
 
