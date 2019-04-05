@@ -518,11 +518,11 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     html += "\"><div class='ScheduleToggle' ng-class='{\"is-on\": " + form.iterator + ".";
                     html += (field.flag) ? field.flag : "enabled";
                     html += (field.ngDisabled) ? ', "ScheduleToggle--disabled": ' + field.ngDisabled : '';
-                    html += "\}' aw-tool-tip='" + field.awToolTip + "' data-placement='" + field.dataPlacement + "' data-tip-watch='" + field.dataTipWatch + "'><button ng-show='" + form.iterator + "." ;
+                    html += "\}' aw-tool-tip='" + field.awToolTip + "' data-placement='" + field.dataPlacement + "' data-tip-watch='" + field.dataTipWatch + "'><button type='button' ng-show='" + form.iterator + "." ;
                     html += (field.flag) ? field.flag : 'enabled';
                     html += "' ";
                     html += (field.ngDisabled) ? `ng-disabled="${field.ngDisabled}" ` : "";
-                    html += " class='ScheduleToggle-switch is-on' ng-click='" + field.ngClick + "' translate>" + i18n._("ON") + "</button><button ng-show='!" + form.iterator + "." ;
+                    html += " class='ScheduleToggle-switch is-on' ng-click='" + field.ngClick + "' translate>" + i18n._("ON") + "</button><button type='button' ng-show='!" + form.iterator + "." ;
                     html += (field.flag) ? field.flag : "enabled";
                     html += "' ";
                     html += (field.ngDisabled) ? `ng-disabled="${field.ngDisabled}" ` : "";
@@ -745,9 +745,9 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += `<div class="ScheduleToggle" ng-class="{'is-on': ${field.toggleSource}, 'ScheduleToggle--disabled': ${field.ngDisabled}}" aw-tool-tip="" `;
                         html += (field.ngShow) ? "ng-show=\"" + field.ngShow + "\" " : "";
                         html += `data-placement="top">`;
-                        html += `<button ng-show="${field.toggleSource}" class="ScheduleToggle-switch is-on" ng-click="toggleForm('${field.toggleSource}')"
+                        html += `<button type="button" ng-show="${field.toggleSource}" class="ScheduleToggle-switch is-on" ng-click="toggleForm('${field.toggleSource}')"
                                 ng-disabled="${field.ngDisabled}" translate>${i18n._("ON")}</button>
-                            <button ng-show="!${field.toggleSource}" class="ScheduleToggle-switch" ng-click="toggleForm('${field.toggleSource}')"
+                            <button type="button" ng-show="!${field.toggleSource}" class="ScheduleToggle-switch" ng-click="toggleForm('${field.toggleSource}')"
                                 ng-disabled="${field.ngDisabled}" translate>${i18n._("OFF")}</button>
                         </div>`;
                     }

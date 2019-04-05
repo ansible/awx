@@ -112,8 +112,8 @@
         </label>
         <div>
             <div class="ScheduleToggle" ng-class="{'is-on': promptData.prompts.diffMode.value}" aw-tool-tip="" data-placement="top" data-original-title="" title="" ng-click="vm.toggleDiff()">
-                <button ng-show="promptData.prompts.diffMode.value" class="ScheduleToggle-switch is-on" ng-disabled="readOnlyPrompts">{{:: vm.strings.get('ON') }}</button>
-                <button ng-show="!promptData.prompts.diffMode.value" class="ScheduleToggle-switch ng-hide" ng-disabled="readOnlyPrompts">{{:: vm.strings.get('OFF') }}</button>
+                <button type="button" ng-show="promptData.prompts.diffMode.value" class="ScheduleToggle-switch is-on" ng-disabled="readOnlyPrompts">{{:: vm.strings.get('ON') }}</button>
+                <button type="button" ng-show="!promptData.prompts.diffMode.value" class="ScheduleToggle-switch ng-hide" ng-disabled="readOnlyPrompts">{{:: vm.strings.get('OFF') }}</button>
             </div>
         </div>
     </div>
