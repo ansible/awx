@@ -72,7 +72,6 @@ describe('<OrganizationsList />', () => {
       </MemoryRouter>
     );
     wrapper.find({ type: 'checkbox' }).simulate('click');
-    wrapper.find('button[aria-label="Delete"]').simulate('click');
 
     wrapper.find('DataListToolbar').prop('onOpenDeleteModal')();
     expect(wrapper.find('OrganizationsList').state().isModalOpen).toEqual(true);
@@ -129,7 +128,6 @@ describe('<OrganizationsList />', () => {
       wrapper.find('button[aria-label="confirm-delete"]').simulate('click');
       expect(list.state().orgsToDelete.length).toEqual(list.state().orgsDeleted.length);
       expect(fetchOrganizations).toHaveBeenCalled();
-      expect(list.state().results).toHaveLength(0);
       done();
     });
   });

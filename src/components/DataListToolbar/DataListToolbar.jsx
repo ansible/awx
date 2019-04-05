@@ -24,7 +24,6 @@ import ExpandCollapse from '../ExpandCollapse';
 import Search from '../Search';
 import Sort from '../Sort';
 import VerticalSeparator from '../VerticalSeparator';
-// import SelectedList from '../SelectedList';
 
 class DataListToolbar extends React.Component {
   render () {
