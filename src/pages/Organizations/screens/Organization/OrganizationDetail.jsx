@@ -51,7 +51,6 @@ class OrganizationDetail extends Component {
       error: false
     };
 
-    this.showOverflowChipAfter = 5;
     this.handleChipToggle = this.handleChipToggle.bind(this);
     this.loadInstanceGroups = this.loadInstanceGroups.bind(this);
   }
@@ -100,9 +99,10 @@ class OrganizationDetail extends Component {
       },
       match
     } = this.props;
+    const showOverflowChipAfter = 5;
 
     const instanceGroupChips = instanceGroups.slice(0, isToggleOpen
-      ? instanceGroups.length : this.showOverflowChipAfter)
+      ? instanceGroups.length : showOverflowChipAfter)
       .map(instanceGroup => (
         <BasicChip
           key={instanceGroup.id}
@@ -111,12 +111,12 @@ class OrganizationDetail extends Component {
         </BasicChip>
       ));
 
-    const overflowChip = (instanceGroups.length > this.showOverflowChipAfter) ? (
+    const overflowChip = (instanceGroups.length > showOverflowChipAfter) ? (
       <BasicChip
         isOverflowChip
         onToggle={this.handleChipToggle}
       >
-        {isToggleOpen ? 'Show less' : `${(instanceGroups.length - this.showOverflowChipAfter).toString()} more`}
+        {isToggleOpen ? 'Show less' : `${(instanceGroups.length - showOverflowChipAfter).toString()} more`}
       </BasicChip>
     ) : null;
 
