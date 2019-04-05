@@ -100,6 +100,7 @@ export default [
                         .OAUTH2_PROVIDER.AUTHORIZATION_CODE_EXPIRE_SECONDS;
                     var currentKeys = _.keys(data);
                     $scope.requiredLogValues = {};
+                    $scope.originalSettings = data;
                     _.each(currentKeys, function(key) {
                         if(key === "LOG_AGGREGATOR_HOST") {
                             $scope.requiredLogValues.LOG_AGGREGATOR_HOST = data[key];
@@ -385,6 +386,7 @@ export default [
             var saveDeferred = $q.defer();
             clearApiErrors();
             Wait('start');
+            const payload = getFormPayload();
             SettingsService.patchConfiguration(getFormPayload())
                 .then(function(data) {
                     loginUpdate();
@@ -402,6 +404,12 @@ export default [
                             Toast-successIcon"></i>` +
                                 i18n._('Save Complete')
                     });
+                    if(payload.PENDO_TRACKING_STATE && payload.PENDO_TRACKING_STATE !== $scope.originalSettings.PENDO_TRACKING_STATE) {
+                        // Refreshing the page will pull in the new config and
+                        // properly set pendo up/shut it off depending on the
+                        // action
+                        location.reload();
+                    }
                 })
                 .catch(function(data) {
                     ProcessErrors($scope, data.data, data.status, formDefs[formTracker.getCurrent()],
