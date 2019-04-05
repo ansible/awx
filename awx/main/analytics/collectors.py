@@ -1,4 +1,6 @@
+import os
 import os.path
+import platform
 
 from django.db import connection
 from django.db.models import Count
@@ -32,7 +34,18 @@ data _since_ the last report date - i.e., new data in the last 24 hours)
 @register('config')
 def config(since):
     license_info = get_license(show_key=False)
+    install_type = 'traditional'
+    if os.environ.get('container') == 'oci':
+        install_type = 'openshift'
+    elif 'KUBERNETES_SERVICE_PORT' in os.environ:
+        install_type = 'k8s'
     return {
+        'platform': {
+            'system': platform.system(),
+            'dist': platform.dist(),
+            'release': platform.release(),
+            'type': install_type,
+        },
         'system_uuid': settings.SYSTEM_UUID,
         'tower_url_base': settings.TOWER_URL_BASE,
         'tower_version': get_awx_version(),
