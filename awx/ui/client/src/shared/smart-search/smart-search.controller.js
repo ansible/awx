@@ -202,7 +202,7 @@ function SmartSearchController (
                     });
             }
 
-            qs.search(path, queryset)
+            qs.search(path, queryset, singleSearchParam)
                 .then(({ data }) => {
                     if ($scope.querySet) {
                         $scope.querySet = queryset;
