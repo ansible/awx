@@ -1,5 +1,7 @@
 import pytest
 
+from django.contrib.sessions.middleware import SessionMiddleware
+
 from awx.api.versioning import reverse
 
 
@@ -19,7 +21,7 @@ EXAMPLE_USER_DATA = {
 
 @pytest.mark.django_db
 def test_user_create(post, admin):
-    response = post(reverse('api:user_list'), EXAMPLE_USER_DATA, admin)
+    response = post(reverse('api:user_list'), EXAMPLE_USER_DATA, admin, middleware=SessionMiddleware())
     assert response.status_code == 201
     assert not response.data['is_superuser']
     assert not response.data['is_system_auditor']
@@ -27,21 +29,22 @@ def test_user_create(post, admin):
 
 @pytest.mark.django_db
 def test_fail_double_create_user(post, admin):
-    response = post(reverse('api:user_list'), EXAMPLE_USER_DATA, admin)
+    response = post(reverse('api:user_list'), EXAMPLE_USER_DATA, admin, middleware=SessionMiddleware())
     assert response.status_code == 201
 
-    response = post(reverse('api:user_list'), EXAMPLE_USER_DATA, admin)
+    response = post(reverse('api:user_list'), EXAMPLE_USER_DATA, admin, middleware=SessionMiddleware())
     assert response.status_code == 400
 
 
 @pytest.mark.django_db
 def test_create_delete_create_user(post, delete, admin):
-    response = post(reverse('api:user_list'), EXAMPLE_USER_DATA, admin)
+    response = post(reverse('api:user_list'), EXAMPLE_USER_DATA, admin, middleware=SessionMiddleware())
     assert response.status_code == 201
 
-    response = delete(reverse('api:user_detail', kwargs={'pk': response.data['id']}), admin)
+    response = delete(reverse('api:user_detail', kwargs={'pk': response.data['id']}), admin,
+                      middleware=SessionMiddleware())
     assert response.status_code == 204
 
-    response = post(reverse('api:user_list'), EXAMPLE_USER_DATA, admin)
+    response = post(reverse('api:user_list'), EXAMPLE_USER_DATA, admin, middleware=SessionMiddleware())
     print(response.data)
     assert response.status_code == 201
