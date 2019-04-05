@@ -147,7 +147,8 @@ class OrganizationsList extends Component {
       isModalOpen: false,
       orgsDeleted: [],
       deleteSuccess: false,
-      orgsToDelete: []
+      orgsToDelete: [],
+      deleteStarted: false
     });
     this.onSelectAll();
   }
