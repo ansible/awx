@@ -179,7 +179,8 @@ class DashboardView(APIView):
         user_inventory = get_user_queryset(request.user, models.Inventory)
         inventory_with_failed_hosts = user_inventory.filter(hosts_with_active_failures__gt=0)
         user_inventory_external = user_inventory.filter(has_inventory_sources=True)
-        failed_inventory = user_inventory.aggregate(Sum('inventory_sources_with_failures'))['inventory_sources_with_failures__sum']
+        # it there are *zero* inventories, this aggregrate query will be None, fall back to 0
+        failed_inventory = user_inventory.aggregate(Sum('inventory_sources_with_failures'))['inventory_sources_with_failures__sum'] or 0
         data['inventories'] = {'url': reverse('api:inventory_list', request=request),
                                'total': user_inventory.count(),
                                'total_with_inventory_source': user_inventory_external.count(),
