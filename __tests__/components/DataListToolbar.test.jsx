@@ -221,4 +221,36 @@ describe('<DataListToolbar />', () => {
     const upAlphaIcon = toolbar.find(upAlphaIconSelector);
     expect(upAlphaIcon.length).toBe(1);
   });
+
+  test('trash can button triggers correct function', () => {
+    const columns = [{ name: 'Name', key: 'name', isSortable: true }];
+    const onOpenDeleteModal = jest.fn();
+    const openDeleteModalButton = 'button[aria-label="Delete"]';
+    const onSearch = jest.fn();
+    const onSort = jest.fn();
+    const onSelectAll = jest.fn();
+    const showDelete = true;
+    const disableTrashCanIcon = false;
+
+    toolbar = mount(
+      <I18nProvider>
+        <DataListToolbar
+          isAllSelected={false}
+          selected={() => [1, 2, 3, 4]}
+          sortedColumnKey="name"
+          sortOrder="ascending"
+          columns={columns}
+          onSearch={onSearch}
+          onSort={onSort}
+          onSelectAll={onSelectAll}
+          onOpenDeleteModal={onOpenDeleteModal}
+          showDelete={showDelete}
+          disableTrashCanIcon={disableTrashCanIcon}
+        />
+      </I18nProvider>
+    );
+
+    toolbar.find(openDeleteModalButton).simulate('click');
+    expect(onOpenDeleteModal).toBeCalled();
+  });
 });

@@ -80,3 +80,16 @@
 .awx-toolbar .pf-l-toolbar__item .pf-c-button.pf-m-plain {
   font-size: 18px;
 }
+.pf-c-button--disabled--BackgroundColor{
+  background-color: #b7b7b7;
+}
+.awx-ToolBarBtn{
+  width: 30px;
+}
+.awx-ToolBarBtn:hover{
+  .awx-ToolBarTrashCanIcon {
+    color:white;
+  }
+  background-color:#d9534f;
+}
+

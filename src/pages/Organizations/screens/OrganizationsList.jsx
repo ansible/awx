@@ -12,10 +12,15 @@ import {
   EmptyState,
   EmptyStateIcon,
   EmptyStateBody,
+  Modal,
   PageSection,
   PageSectionVariants,
-  Title
+  Title,
+  Button,
+  Progress,
+  ProgressVariant
 } from '@patternfly/react-core';
+
 import { CubesIcon } from '@patternfly/react-icons';
 import DataListToolbar from '../../../components/DataListToolbar';
 import OrganizationListItem from '../components/OrganizationListItem';
@@ -54,6 +59,11 @@ class OrganizationsList extends Component {
       loading: true,
       results: [],
       selected: [],
+      isModalOpen: false,
+      orgsToDelete: [],
+      orgsDeleted: [],
+      deleteSuccess: false,
+
     };
 
     this.onSearch = this.onSearch.bind(this);
@@ -64,6 +74,9 @@ class OrganizationsList extends Component {
     this.onSelect = this.onSelect.bind(this);
     this.updateUrl = this.updateUrl.bind(this);
     this.fetchOrganizations = this.fetchOrganizations.bind(this);
+    this.handleOrgDelete = this.handleOrgDelete.bind(this);
+    this.handleOpenOrgDeleteModal = this.handleOpenOrgDeleteModal.bind(this);
+    this.handleClearOrgsToDelete = this.handleClearOrgsToDelete.bind(this);
   }
 
   componentDidMount () {
@@ -127,6 +140,60 @@ class OrganizationsList extends Component {
     const searchParams = parseQueryString(search.substring(1));
 
     return Object.assign({}, this.defaultParams, searchParams, overrides);
+  }
+
+  handleClearOrgsToDelete () {
+    this.setState({
+      isModalOpen: false,
+      orgsDeleted: [],
+      deleteSuccess: false,
+      orgsToDelete: [],
+      deleteStarted: false
+    });
+    this.onSelectAll();
+  }
+
+  handleOpenOrgDeleteModal () {
+    const { results, selected } = this.state;
+    const warningTitle = i18nMark('Delete Organization');
+    const warningMsg = i18nMark('Are you sure you want to delete:');
+
+    const orgsToDelete = [];
+    results.forEach((result) => {
+      selected.forEach((selectedOrg) => {
+        if (result.id === selectedOrg) {
+          orgsToDelete.push({ name: result.name, id: selectedOrg });
+        }
+      });
+    });
+    this.setState({
+      orgsToDelete,
+      isModalOpen: true,
+      warningTitle,
+      warningMsg,
+      loading: false });
+  }
+
+  async handleOrgDelete (event) {
+    const { orgsToDelete, orgsDeleted } = this.state;
+    const { api } = this.props;
+    this.setState({ deleteStarted: true });
+
+    orgsToDelete.forEach(async (org) => {
+      try {
+        const res = await api.destroyOrganization(org.id);
+        this.setState({
+          orgsDeleted: orgsDeleted.concat(res)
+        });
+      } catch {
+        this.setState({ deleteSuccess: false });
+      } finally {
+        this.setState({ deleteSuccess: true });
+        const queryParams = this.getQueryParams();
+        this.fetchOrganizations(queryParams);
+      }
+    });
+    event.preventDefault();
   }
 
   updateUrl (queryParams) {
@@ -194,20 +261,65 @@ class OrganizationsList extends Component {
     const {
       count,
       error,
+      deleteSuccess,
+      deleteStarted,
       loading,
       noInitialResults,
+      orgsToDelete,
+      orgsDeleted,
       page,
       pageCount,
       page_size,
+      selected,
       sortedColumnKey,
       sortOrder,
       results,
-      selected,
+      isModalOpen,
+      warningTitle,
+      warningMsg,
     } = this.state;
     const { match } = this.props;
     return (
       <PageSection variant={medium}>
         <Card>
+          { isModalOpen && (
+            <Modal
+              className="orgListAlert"
+              title={warningTitle}
+              isOpen={isModalOpen}
+              style={{ width: '1000px' }}
+              variant="danger"
+              onClose={this.handleClearOrgsToDelete}
+            >
+              {warningMsg}
+              <br />
+              {orgsToDelete.map((org) => (
+                <span key={org.id}>
+                  <strong>
+                    {org.name}
+                  </strong>
+                  <br />
+                </span>
+              ))}
+              <div className={deleteStarted ? 'orgListDetete-progressBar' : 'orgListDelete-progressBar-noShow'}>
+                <Progress
+                  value={deleteSuccess ? 100 : 67}
+                  variant={deleteStarted ? ProgressVariant.success : ProgressVariant.danger}
+                />
+              </div>
+              <br />
+              <div className="awx-c-form-action-group">
+                {orgsDeleted.length
+                  ? <Button className="orgListAlert-actionBtn" keys="cancel" variant="primary" aria-label="close-delete" onClick={this.handleClearOrgsToDelete}>Close</Button>
+                  : (
+                    <span>
+                      <Button className="orgListAlert-actionBtn" keys="cancel" variant="secondary" aria-label="cancel-delete" onClick={this.handleClearOrgsToDelete}>Cancel</Button>
+                      <Button className="orgListAlert-actionBtn" keys="cancel" variant="danger" aria-label="confirm-delete" onClick={this.handleOrgDelete}>Delete</Button>
+                    </span>
+                  )}
+              </div>
+            </Modal>
+          )}
           {noInitialResults && (
             <EmptyState>
               <EmptyStateIcon icon={CubesIcon} />
@@ -229,6 +341,8 @@ class OrganizationsList extends Component {
                 onSearch={this.onSearch}
                 onSort={this.onSort}
                 onSelectAll={this.onSelectAll}
+                onOpenDeleteModal={this.handleOpenOrgDeleteModal}
+                disableTrashCanIcon={selected.length === 0}
                 showDelete
                 showSelectAll
               />
@@ -244,7 +358,8 @@ class OrganizationsList extends Component {
                         userCount={o.summary_fields.related_field_counts.users}
                         teamCount={o.summary_fields.related_field_counts.teams}
                         isSelected={selected.includes(o.id)}
-                        onSelect={() => this.onSelect(o.id)}
+                        onSelect={() => this.onSelect(o.id, o.name)}
+                        onOpenOrgDeleteModal={this.handleOpenOrgDeleteModal}
                       />
                     ))}
                   </ul>
