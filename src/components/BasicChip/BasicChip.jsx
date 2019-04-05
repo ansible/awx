@@ -4,16 +4,18 @@ import PropTypes from 'prop-types';
 import { Chip } from '@patternfly/react-core';
 import './basicChip.scss';
 
-const BasicChip = ({ text }) => (
+const BasicChip = ({ children, onToggle, isOverflowChip }) => (
   <Chip
     className="awx-c-chip--basic"
+    onClick={onToggle}
+    isOverflowChip={isOverflowChip}
   >
-    {text}
+    {children}
   </Chip>
 );
 
 BasicChip.propTypes = {
-  text: PropTypes.string.isRequired,
+  children: PropTypes.node.isRequired,
 };
 
 export default BasicChip;

@@ -47,14 +47,22 @@ class OrganizationDetail extends Component {
 
     this.state = {
       instanceGroups: [],
+      isToggleOpen: false,
       error: false
     };
 
+    this.handleChipToggle = this.handleChipToggle.bind(this);
     this.loadInstanceGroups = this.loadInstanceGroups.bind(this);
   }
 
   componentDidMount () {
     this.loadInstanceGroups();
+  }
+
+  handleChipToggle = () => {
+    this.setState((prevState) => ({
+      isToggleOpen: !prevState.isToggleOpen
+    }));
   }
 
   async loadInstanceGroups () {
@@ -78,6 +86,7 @@ class OrganizationDetail extends Component {
     const {
       error,
       instanceGroups,
+      isToggleOpen,
     } = this.state;
 
     const {
@@ -90,6 +99,26 @@ class OrganizationDetail extends Component {
       },
       match
     } = this.props;
+    const showOverflowChipAfter = 5;
+
+    const instanceGroupChips = instanceGroups.slice(0, isToggleOpen
+      ? instanceGroups.length : showOverflowChipAfter)
+      .map(instanceGroup => (
+        <BasicChip
+          key={instanceGroup.id}
+        >
+          {instanceGroup.name}
+        </BasicChip>
+      ));
+
+    const overflowChip = (instanceGroups.length > showOverflowChipAfter) ? (
+      <BasicChip
+        isOverflowChip
+        onToggle={this.handleChipToggle}
+      >
+        {isToggleOpen ? 'Show less' : `${(instanceGroups.length - showOverflowChipAfter).toString()} more`}
+      </BasicChip>
+    ) : null;
 
     return (
       <I18n>
@@ -104,24 +133,6 @@ class OrganizationDetail extends Component {
                 label={i18n._(t`Description`)}
                 value={description}
               />
-              {(instanceGroups && instanceGroups.length > 0) && (
-                <TextContent style={detailWrapperStyle}>
-                  <Text
-                    component={TextVariants.h6}
-                    style={detailLabelStyle}
-                  >
-                    <Trans>Instance Groups</Trans>
-                  </Text>
-                  <div style={detailValueStyle}>
-                    {instanceGroups.map(instanceGroup => (
-                      <BasicChip
-                        key={instanceGroup.id}
-                        text={instanceGroup.name}
-                      />
-                    ))}
-                  </div>
-                </TextContent>
-              )}
               <Detail
                 label={i18n._(t`Ansible Environment`)}
                 value={custom_virtualenv}
@@ -134,6 +145,20 @@ class OrganizationDetail extends Component {
                 label={i18n._(t`Last Modified`)}
                 value={modified}
               />
+              {(instanceGroups && instanceGroups.length > 0) && (
+                <TextContent style={{ display: 'flex', gridColumn: '1 / -1' }}>
+                  <Text
+                    component={TextVariants.h6}
+                    style={detailLabelStyle}
+                  >
+                    <Trans>Instance Groups</Trans>
+                  </Text>
+                  <div style={detailValueStyle}>
+                    {instanceGroupChips}
+                    {overflowChip}
+                  </div>
+                </TextContent>
+              )}
             </div>
             <div style={{ display: 'flex', flexDirection: 'row-reverse', marginTop: '20px' }}>
               <Link to={`/organizations/${match.params.id}/edit`}>
