@@ -117,7 +117,7 @@ def metrics():
         for launch_type, value in types.items():
             INSTANCE_LAUNCH_TYPE.labels(node=node, launch_type=launch_type).set(value)
         statuses = instance_data[node].get('status', {})
-        for status, value in types.items():
+        for status, value in statuses.items():
             INSTANCE_STATUS.labels(node=node, status=status).set(value)
 
 
