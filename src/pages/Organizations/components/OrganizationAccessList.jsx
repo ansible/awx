@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 import {
   DataList, DataListItem, DataListCell, Text,
-  TextContent, TextVariants, Chip, Alert, AlertActionCloseButton, Button
+  TextContent, TextVariants, Chip, Button
 } from '@patternfly/react-core';
 
 import { I18n, i18nMark } from '@lingui/react';
@@ -13,6 +13,7 @@ import {
   Link
 } from 'react-router-dom';
 
+import AlertModal from '../../../components/AlertModal';
 import Pagination from '../../../components/Pagination';
 import DataListToolbar from '../../../components/DataListToolbar';
 
@@ -333,17 +334,18 @@ class OrganizationAccessList extends React.Component {
                   showExpandCollapse
                 />
                 {showWarning && (
-                  <Alert
+                  <AlertModal
                     variant="danger"
                     title={warningTitle}
-                    action={<AlertActionCloseButton onClose={this.hideWarning} />}
+                    isOpen={showWarning}
+                    onClose={this.hideWarning}
+                    actions={[
+                      <Button variant="danger" aria-label="confirm-delete" onClick={this.confirmDelete}>Delete</Button>,
+                      <Button variant="secondary" onClick={this.hideWarning}>Cancel</Button>
+                    ]}
                   >
                     {warningMsg}
-                    <span className="awx-c-form-action-group">
-                      <Button variant="danger" aria-label="confirm-delete" onClick={this.confirmDelete}>Delete</Button>
-                      <Button variant="secondary" onClick={this.hideWarning}>Cancel</Button>
-                    </span>
-                  </Alert>
+                  </AlertModal>
                 )}
                 <DataList aria-label={i18n._(t`Access List`)}>
                   {results.map(result => (

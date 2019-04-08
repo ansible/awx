@@ -5,26 +5,26 @@ import React, {
 import {
   withRouter
 } from 'react-router-dom';
+
 import { I18n, i18nMark } from '@lingui/react';
 import { Trans, t } from '@lingui/macro';
+
 import {
   Card,
   EmptyState,
   EmptyStateIcon,
   EmptyStateBody,
-  Modal,
   PageSection,
   PageSectionVariants,
   Title,
-  Button,
-  Progress,
-  ProgressVariant
+  Button
 } from '@patternfly/react-core';
 
 import { CubesIcon } from '@patternfly/react-icons';
 import DataListToolbar from '../../../components/DataListToolbar';
 import OrganizationListItem from '../components/OrganizationListItem';
 import Pagination from '../../../components/Pagination';
+import AlertModal from '../../../components/AlertModal';
 
 import {
   encodeQueryString,
@@ -61,8 +61,6 @@ class OrganizationsList extends Component {
       selected: [],
       isModalOpen: false,
       orgsToDelete: [],
-      orgsDeleted: [],
-      deleteSuccess: false,
 
     };
 
@@ -145,10 +143,7 @@ class OrganizationsList extends Component {
   handleClearOrgsToDelete () {
     this.setState({
       isModalOpen: false,
-      orgsDeleted: [],
-      deleteSuccess: false,
-      orgsToDelete: [],
-      deleteStarted: false
+      orgsToDelete: []
     });
     this.onSelectAll();
   }
@@ -175,23 +170,13 @@ class OrganizationsList extends Component {
   }
 
   async handleOrgDelete (event) {
-    const { orgsToDelete, orgsDeleted } = this.state;
+    const { orgsToDelete } = this.state;
     const { api } = this.props;
-    this.setState({ deleteStarted: true });
 
     orgsToDelete.forEach(async (org) => {
-      try {
-        const res = await api.destroyOrganization(org.id);
-        this.setState({
-          orgsDeleted: orgsDeleted.concat(res)
-        });
-      } catch {
-        this.setState({ deleteSuccess: false });
-      } finally {
-        this.setState({ deleteSuccess: true });
+      await api.destroyOrganization(org.id);
         const queryParams = this.getQueryParams();
         this.fetchOrganizations(queryParams);
-      }
     });
     event.preventDefault();
   }
@@ -261,12 +246,9 @@ class OrganizationsList extends Component {
     const {
       count,
       error,
-      deleteSuccess,
-      deleteStarted,
       loading,
       noInitialResults,
       orgsToDelete,
-      orgsDeleted,
       page,
       pageCount,
       page_size,
@@ -283,13 +265,15 @@ class OrganizationsList extends Component {
       <PageSection variant={medium}>
         <Card>
           { isModalOpen && (
-            <Modal
-              className="orgListAlert"
+            <AlertModal
+              variant="danger"
               title={warningTitle}
               isOpen={isModalOpen}
-              style={{ width: '1000px' }}
-              variant="danger"
               onClose={this.handleClearOrgsToDelete}
+              actions={[
+                <Button variant="danger" aria-label="confirm-delete" onClick={this.handleOrgDelete}>Delete</Button>,
+                <Button variant="secondary" aria-label="cancel-delete" onClick={this.handleClearOrgsToDelete}>Cancel</Button>
+              ]}
             >
               {warningMsg}
               <br />
@@ -301,24 +285,8 @@ class OrganizationsList extends Component {
                   <br />
                 </span>
               ))}
-              <div className={deleteStarted ? 'orgListDetete-progressBar' : 'orgListDelete-progressBar-noShow'}>
-                <Progress
-                  value={deleteSuccess ? 100 : 67}
-                  variant={deleteStarted ? ProgressVariant.success : ProgressVariant.danger}
-                />
-              </div>
               <br />
-              <div className="awx-c-form-action-group">
-                {orgsDeleted.length
-                  ? <Button className="orgListAlert-actionBtn" keys="cancel" variant="primary" aria-label="close-delete" onClick={this.handleClearOrgsToDelete}>Close</Button>
-                  : (
-                    <span>
-                      <Button className="orgListAlert-actionBtn" keys="cancel" variant="secondary" aria-label="cancel-delete" onClick={this.handleClearOrgsToDelete}>Cancel</Button>
-                      <Button className="orgListAlert-actionBtn" keys="cancel" variant="danger" aria-label="confirm-delete" onClick={this.handleOrgDelete}>Delete</Button>
-                    </span>
-                  )}
-              </div>
-            </Modal>
+            </AlertModal>
           )}
           {noInitialResults && (
             <EmptyState>
