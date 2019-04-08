@@ -1,0 +1,84 @@
+
+import axios from 'axios';
+import React, { Component } from 'react';
+
+import { withRouter } from 'react-router-dom';
+
+import { withRootDialog } from './RootDialog';
+
+import APIClient from '../api';
+
+const NetworkContext = React.createContext({});
+
+class prov extends Component {
+  constructor (props) {
+    super(props);
+
+    this.state = {
+      value: {
+        api: new APIClient(axios.create({ xsrfCookieName: 'csrftoken', xsrfHeaderName: 'X-CSRFToken' })),
+        handleHttpError: err => {
+          if (err.response.status === 401) {
+            this.handle401();
+          } else if (err.response.status === 404) {
+            this.handle404();
+          }
+          return (err.response.status === 401 || err.response.status === 404);
+        }
+      }
+    };
+  }
+
+  handle401 () {
+    const { handle401, history, setRootDialogMessage } = this.props;
+    if (handle401) {
+      handle401();
+      return;
+    }
+    history.replace('/login');
+    setRootDialogMessage({
+      bodyText: 'You have been logged out.',
+    });
+  }
+
+  handle404 () {
+    const { handle404, history, setRootDialogMessage } = this.props;
+    if (handle404) {
+      handle404();
+      return;
+    }
+    history.replace('/home');
+    setRootDialogMessage({
+      title: '404',
+      bodyText: 'Cannot find resource.',
+      variant: 'warning'
+    });
+  }
+
+  render () {
+    const {
+      children
+    } = this.props;
+
+    const {
+      value
+    } = this.state;
+
+    return (
+      <NetworkContext.Provider value={value}>
+        {children}
+      </NetworkContext.Provider>
+    );
+  }
+}
+
+export const NetworkProvider = withRootDialog(withRouter(prov));
+
+export function withNetwork (Child) {
+  return (props) => (
+    <NetworkContext.Consumer>
+      {context => <Child {...props} {...context} />}
+    </NetworkContext.Consumer>
+  );
+}
+

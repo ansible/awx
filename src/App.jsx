@@ -6,13 +6,20 @@ import {
   Page,
   PageHeader,
   PageSidebar,
+  Button
 } from '@patternfly/react-core';
 
+import { I18n } from '@lingui/react';
+import { t } from '@lingui/macro';
+
+import { RootDialog } from './contexts/RootDialog';
+import { withNetwork } from './contexts/Network';
+
+import AlertModal from './components/AlertModal';
 import About from './components/About';
 import NavExpandableGroup from './components/NavExpandableGroup';
 import TowerLogo from './components/TowerLogo';
 import PageHeaderToolbar from './components/PageHeaderToolbar';
-import { ConfigContext } from './context';
 
 class App extends Component {
   constructor (props) {
@@ -23,29 +30,24 @@ class App extends Component {
       && window.innerWidth >= parseInt(global_breakpoint_md.value, 10);
 
     this.state = {
-      ansible_version: null,
-      custom_virtualenvs: null,
       isAboutModalOpen: false,
-      isNavOpen,
-      version: null,
+      isNavOpen
     };
 
-    this.fetchConfig = this.fetchConfig.bind(this);
     this.onLogout = this.onLogout.bind(this);
     this.onAboutModalClose = this.onAboutModalClose.bind(this);
     this.onAboutModalOpen = this.onAboutModalOpen.bind(this);
     this.onNavToggle = this.onNavToggle.bind(this);
   }
 
-  componentDidMount () {
-    this.fetchConfig();
-  }
-
   async onLogout () {
-    const { api } = this.props;
-
-    await api.logout();
-    window.location.replace('/#/login');
+    const { api, handleHttpError } = this.props;
+    try {
+      await api.logout();
+      window.location.replace('/#/login');
+    } catch (err) {
+      handleHttpError(err);
+    }
   }
 
   onAboutModalOpen () {
@@ -60,24 +62,12 @@ class App extends Component {
     this.setState(({ isNavOpen }) => ({ isNavOpen: !isNavOpen }));
   }
 
-  async fetchConfig () {
-    const { api } = this.props;
-
-    try {
-      const { data: { ansible_version, custom_virtualenvs, version } } = await api.getConfig();
-      this.setState({ ansible_version, custom_virtualenvs, version });
-    } catch (err) {
-      this.setState({ ansible_version: null, custom_virtualenvs: null, version: null });
-    }
-  }
-
   render () {
     const {
       ansible_version,
-      custom_virtualenvs,
       isAboutModalOpen,
       isNavOpen,
-      version,
+      version
     } = this.state;
 
     const {
@@ -86,63 +76,76 @@ class App extends Component {
       navLabel = '',
     } = this.props;
 
-    const config = {
-      ansible_version,
-      custom_virtualenvs,
-      version,
-    };
-
     return (
-      <Fragment>
-        <Page
-          usecondensed="True"
-          header={(
-            <PageHeader
-              showNavToggle
-              onNavToggle={this.onNavToggle}
-              logo={<TowerLogo linkTo="/" />}
-              toolbar={(
-                <PageHeaderToolbar
-                  isAboutDisabled={!version}
-                  onAboutClick={this.onAboutModalOpen}
-                  onLogoutClick={this.onLogout}
+      <I18n>
+        {({ i18n }) => (
+          <RootDialog>
+            {({ title, bodyText, variant = 'info', clearRootDialogMessage }) => (
+              <Fragment>
+                {(title || bodyText) && (
+                  <AlertModal
+                    variant={variant}
+                    isOpen={!!(title || bodyText)}
+                    onClose={clearRootDialogMessage}
+                    title={title}
+                    actions={[
+                      <Button key="close" variant="secondary" onClick={clearRootDialogMessage}>{i18n._(t`Close`)}</Button>
+                    ]}
+                  >
+                    {bodyText}
+                  </AlertModal>
+                )}
+                <Page
+                  usecondensed="True"
+                  header={(
+                    <PageHeader
+                      showNavToggle
+                      onNavToggle={this.onNavToggle}
+                      logo={<TowerLogo linkTo="/" />}
+                      toolbar={(
+                        <PageHeaderToolbar
+                          isAboutDisabled={!version}
+                          onAboutClick={this.onAboutModalOpen}
+                          onLogoutClick={this.onLogout}
+                        />
+                      )}
+                    />
+                  )}
+                  sidebar={(
+                    <PageSidebar
+                      isNavOpen={isNavOpen}
+                      nav={(
+                        <Nav aria-label={navLabel}>
+                          <NavList>
+                            {routeGroups.map(({ groupId, groupTitle, routes }) => (
+                              <NavExpandableGroup
+                                key={groupId}
+                                groupId={groupId}
+                                groupTitle={groupTitle}
+                                routes={routes}
+                              />
+                            ))}
+                          </NavList>
+                        </Nav>
+                      )}
+                    />
+                  )}
+                >
+                  {render && render({ routeGroups })}
+                </Page>
+                <About
+                  ansible_version={ansible_version}
+                  version={version}
+                  isOpen={isAboutModalOpen}
+                  onClose={this.onAboutModalClose}
                 />
-              )}
-            />
-          )}
-          sidebar={(
-            <PageSidebar
-              isNavOpen={isNavOpen}
-              nav={(
-                <Nav aria-label={navLabel}>
-                  <NavList>
-                    {routeGroups.map(({ groupId, groupTitle, routes }) => (
-                      <NavExpandableGroup
-                        key={groupId}
-                        groupId={groupId}
-                        groupTitle={groupTitle}
-                        routes={routes}
-                      />
-                    ))}
-                  </NavList>
-                </Nav>
-              )}
-            />
-          )}
-        >
-          <ConfigContext.Provider value={config}>
-            {render && render({ routeGroups })}
-          </ConfigContext.Provider>
-        </Page>
-        <About
-          ansible_version={ansible_version}
-          version={version}
-          isOpen={isAboutModalOpen}
-          onClose={this.onAboutModalClose}
-        />
-      </Fragment>
+              </Fragment>
+            )}
+          </RootDialog>
+        )}
+      </I18n>
     );
   }
 }
 
-export default App;
+export default withNetwork(App);
