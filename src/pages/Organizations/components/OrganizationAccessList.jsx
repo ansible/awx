@@ -7,7 +7,7 @@ import {
 } from '@patternfly/react-core';
 
 import { I18n, i18nMark } from '@lingui/react';
-import { t } from '@lingui/macro';
+import { t, Trans } from '@lingui/macro';
 
 import {
   Link
@@ -257,16 +257,33 @@ class OrganizationAccessList extends React.Component {
     let warningMsg;
 
     if (type === 'users') {
-      warningTitle = i18nMark('User Access Removal');
-      warningMsg = i18nMark(`Please confirm that you would like to remove ${roleName}
-      access from ${resourceName}.`);
+      warningTitle = i18nMark('Remove User Access');
+      warningMsg = (
+        <Trans>
+          Are you sure you want to remove
+          <b>{` ${roleName} `}</b>
+          access from
+          <strong>{` ${resourceName}`}</strong>
+          ?
+        </Trans>
+      );
     }
     if (type === 'teams') {
-      warningTitle = i18nMark('Team Access Removal');
-      warningMsg = i18nMark(`Please confirm that you would like to remove ${roleName}
-      access from the team ${resourceName}. This will affect all
-      members of the team. If you would like to only remove access
-      for this particular user, please remove them from the team.`);
+      warningTitle = i18nMark('Remove Team Access');
+      warningMsg = (
+        <Trans>
+          Are you sure you want to remove
+          <b>{` ${roleName} `}</b>
+          access from
+          <b>{` ${resourceName}`}</b>
+          ?  Doing so affects all members of the team.
+          <br />
+          <br />
+          If you
+          <b><i> only </i></b>
+          want to remove access for this particular user, please remove them from the team.
+        </Trans>
+      );
     }
 
     this.setState({

@@ -4,6 +4,8 @@ import React, { Component } from 'react';
 
 import { withRouter } from 'react-router-dom';
 
+import { i18nMark } from '@lingui/react';
+
 import { withRootDialog } from './RootDialog';
 
 import APIClient from '../api';
@@ -37,7 +39,7 @@ class prov extends Component {
     }
     history.replace('/login');
     setRootDialogMessage({
-      bodyText: 'You have been logged out.',
+      bodyText: i18nMark('You have been logged out.')
     });
   }
 
@@ -49,8 +51,8 @@ class prov extends Component {
     }
     history.replace('/home');
     setRootDialogMessage({
-      title: '404',
-      bodyText: 'Cannot find resource.',
+      title: i18nMark('404'),
+      bodyText: i18nMark('Cannot find resource.'),
       variant: 'warning'
     });
   }

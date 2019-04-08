@@ -153,7 +153,7 @@ class OrganizationsList extends Component {
 
   handleOpenOrgDeleteModal () {
     const { results, selected } = this.state;
-    const warningTitle = i18nMark('Delete Organization');
+    const warningTitle = i18nMark(`Delete Organization${selected.length > 1 ? 's' : ''}`);
     const warningMsg = i18nMark('Are you sure you want to delete:');
 
     const orgsToDelete = [];

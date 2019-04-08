@@ -1,6 +1,7 @@
 import React, { Component, Fragment } from 'react';
 import { Route, withRouter, Switch } from 'react-router-dom';
 import { i18nMark } from '@lingui/react';
+import { Trans } from '@lingui/macro';
 
 import { NetworkProvider } from '../../contexts/Network';
 import { withRootDialog } from '../../contexts/RootDialog';
@@ -62,7 +63,13 @@ class Organizations extends Component {
                   history.replace('/organizations');
                   setRootDialogMessage({
                     title: '404',
-                    bodyText: `Cannot find organization with ID ${newRouteMatch.params.id}.`,
+                    bodyText: (
+                      <Trans>
+                        Cannot find organization with ID
+                        <strong>{` ${newRouteMatch.params.id}`}</strong>
+                        .
+                      </Trans>
+                    ),
                     variant: 'warning'
                   });
                 }}
