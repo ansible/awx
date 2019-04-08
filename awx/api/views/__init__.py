@@ -31,7 +31,7 @@ from django.utils.translation import ugettext_lazy as _
 
 
 # Django REST Framework
-from rest_framework.exceptions import PermissionDenied, ParseError
+from rest_framework.exceptions import APIException, PermissionDenied, ParseError
 from rest_framework.parsers import FormParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.renderers import JSONRenderer, StaticHTMLRenderer
@@ -1613,17 +1613,57 @@ class HostActivityStreamList(SubListAPIView):
         return qs.filter(Q(host=parent) | Q(inventory=parent.inventory))
 
 
+class BadGateway(APIException):
+    status_code = status.HTTP_502_BAD_GATEWAY
+    default_detail = ''
+    default_code = 'bad_gateway'
+
+
+class GatewayTimeout(APIException):
+    status_code = status.HTTP_504_GATEWAY_TIMEOUT
+    default_detail = ''
+    default_code = 'gateway_timeout'
+
+
 class HostInsights(GenericAPIView):
 
     model = models.Host
     serializer_class = serializers.EmptySerializer
 
-    def _extract_insights_creds(self, credential):
-        return (credential.get_input('username', default=''), credential.get_input('password', default=''))
+    def _call_insights_api(self, url, session, headers):
+        try:
+            res = session.get(url, headers=headers, timeout=120)
+        except requests.exceptions.SSLError:
+            raise BadGateway(_('SSLError while trying to connect to {}').format(url))
+        except requests.exceptions.Timeout:
+            raise GatewayTimeout(_('Request to {} timed out.').format(url))
+        except requests.exceptions.RequestException as e:
+            raise BadGateway(_('Unknown exception {} while trying to GET {}').format(e, url))
 
-    def _get_insights(self, url, username, password):
+        if res.status_code == 401:
+            raise BadGateway(
+                _('Unauthorized access. Please check your Insights Credential username and password.'))
+        elif res.status_code != 200:
+            raise BadGateway(
+                _(
+                    'Failed to access the Insights API at URL {}.'
+                    ' Server responded with {} status code and message {}'
+                ).format(url, res.status_code, res.content)
+            )
+
+        try:
+            return res.json()
+        except ValueError:
+            raise BadGateway(
+                _('Expected JSON response from Insights but instead got {}').format(res.content))
+
+    def _get_session(self, username, password):
         session = requests.Session()
         session.auth = requests.auth.HTTPBasicAuth(username, password)
+
+        return session
+
+    def _get_headers(self):
         license = get_license(show_key=False).get('license_type', 'UNLICENSED')
         headers = {
             'Content-Type': 'application/json',
@@ -1633,46 +1673,43 @@ class HostInsights(GenericAPIView):
                 license
             )
         }
-        return session.get(url, headers=headers, timeout=120)
 
-    def _call_insights_api(self, url, username, password):
-        try:
-            res = self._get_insights(url, username, password)
-        except requests.exceptions.SSLError:
-            return (dict(error=_('SSLError while trying to connect to {}').format(url)),
-                    status.HTTP_502_BAD_GATEWAY)
-        except requests.exceptions.Timeout:
-            return (dict(error=_('Request to {} timed out.').format(url)),
-                    status.HTTP_504_GATEWAY_TIMEOUT)
-        except requests.exceptions.RequestException as e:
-            return (dict(error=_('Unknown exception {} while trying to GET {}').format(e, url)),
-                    status.HTTP_502_BAD_GATEWAY)
+        return headers
 
-        if res.status_code == 401:
-            msg = _('Unauthorized access. Please check your Insights Credential username and password.')
-            return (dict(error=msg), status.HTTP_502_BAD_GATEWAY)
-        elif res.status_code != 200:
-            msg = _(
-                'Failed to access the Insights API at URL {}.'
-                ' Server responded with {} status code and message {}'
-            ).format(url, res.status_code, res.content)
-            return (dict(error=msg), status.HTTP_502_BAD_GATEWAY)
+    def _get_platform_id(self, host, session, headers):
+        url = '{}/api/inventory/v1/hosts?insights_id={}'.format(
+            settings.INSIGHTS_URL_BASE, host.insights_system_id)
+        res = self._call_insights_api(url, session, headers)
+        platform_id = res['results'][0]['id']
 
-        try:
-            res.json()
-        except ValueError:
-            return (dict(error=_('Expected JSON response from Insights but instead got {}').format(res.content)),
-                    status.HTTP_502_BAD_GATEWAY)
+        return platform_id
 
-        return res
+    def _get_reports(self, platform_id, session, headers):
+        url = '{}/api/insights/v1/system/{}/reports/'.format(
+            settings.INSIGHTS_URL_BASE, platform_id)
 
-    def get_insights(self, url, username, password):
-        res = self._call_insights_api(url, username, password)
-        if isinstance(res, tuple):  # This value was constructed based on a bad response from the API.
-            return res
+        return self._call_insights_api(url, session, headers)
 
-        filtered_insights_content = filter_insights_api_response(res.json())
-        return (dict(insights_content=filtered_insights_content), status.HTTP_200_OK)
+    def _get_remediations(self, platform_id, session, headers):
+        url = '{}/api/remediations/v1/?system={}'.format(
+            settings.INSIGHTS_URL_BASE, platform_id)
+
+        remediations = []
+
+        # Iterate over all of the pages of content.
+        while url:
+            data = self._call_insights_api(url, session, headers)
+            remediations.extend(data['data'])
+
+            url = data['links']['next']  # Will be `None` if this is the last page.
+
+        return remediations
+
+    def _get_insights(self, platform_id, session, headers):
+        reports = self._get_reports(platform_id, session, headers)
+        remediations = self._get_remediations(platform_id, session, headers)
+
+        return {'insights_content': filter_insights_api_response(reports, remediations)}
 
     def get(self, request, *args, **kwargs):
         host = self.get_object()
@@ -1692,19 +1729,14 @@ class HostInsights(GenericAPIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        (username, password) = self._extract_insights_creds(cred)
+        username = cred.get_input('username', default='')
+        password = cred.get_input('password', default='')
+        session = self._get_session(username, password)
+        headers = self._get_headers()
+        platform_id = self._get_platform_id(host, session, headers)
 
-        host_url = '{}/api/inventory/v1/hosts?insights_id={}'.format(
-            settings.INSIGHTS_URL_BASE, host.insights_system_id)
-        res = self._call_insights_api(host_url, username, password)
-        if isinstance(res, tuple):  # This value was constructed based on a bad response from the API.
-            return Response(res[0], status=res[1])
-        platform_id = res.json()['results'][0]['id']
-
-        reports_url = '{}/api/insights/v1/system/{}/reports/'.format(
-            settings.INSIGHTS_URL_BASE, platform_id)
-        (msg, err_code) = self.get_insights(reports_url, username, password)
-        return Response(msg, status=err_code)
+        data = self._get_insights(platform_id, session, headers)
+        return Response(data, status=status.HTTP_200_OK)
 
 
 class GroupList(ListCreateAPIView):
