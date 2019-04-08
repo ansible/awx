@@ -356,3 +356,11 @@
     color: var(--pf-global--success-color--200);
   }
 }
+
+//
+// LoginModal overrides
+//
+
+.pf-m-error p.pf-c-form__helper-text {
+  color: var(--pf-global--danger-color--100);
+}
