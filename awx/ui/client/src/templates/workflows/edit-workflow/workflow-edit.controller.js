@@ -18,6 +18,12 @@ export default [
         workflowLaunch, $transitions, WorkflowJobTemplate, Inventory, isNotificationAdmin
     ) {
 
+        // To toggle notifications a user needs to have a read role on the WFJT
+        // _and_ have at least a notification template admin role on an org.
+        // If the user has gotten this far it's safe to say they have
+        // at least read access to the WFJT
+        $scope.sufficientRoleForNotifToggle = isNotificationAdmin;
+        $scope.sufficientRoleForNotif =  isNotificationAdmin || $scope.user_is_system_auditor;
         $scope.missingTemplates = _.has(workflowLaunch, 'node_templates_missing') && workflowLaunch.node_templates_missing.length > 0 ? true : false;
 
         $scope.$watch('workflow_job_template_obj.summary_fields.user_capabilities.edit', function(val) {
@@ -25,8 +31,6 @@ export default [
                 $scope.canAddWorkflowJobTemplate = false;
             }
         });
-
-        $scope.isNotificationAdmin = isNotificationAdmin || false;
 
         const criteriaObj = {
             from: (state) => state.name === 'templates.editWorkflowJobTemplate.workflowMaker',

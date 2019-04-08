@@ -20,15 +20,10 @@ export default ['$scope', '$rootScope', '$stateParams', 'ProjectsForm', 'Rest',
             master = {},
             id = $stateParams.project_id;
 
-        init();
-
-        function init() {
-            $scope.project_local_paths = [];
-            $scope.base_dir = '';
-            const virtualEnvs = ConfigData.custom_virtualenvs || [];
-            $scope.custom_virtualenvs_options = virtualEnvs;
-            $scope.isNotificationAdmin = isNotificationAdmin || false;
-        }
+        $scope.project_local_paths = [];
+        $scope.base_dir = '';
+        const virtualEnvs = ConfigData.custom_virtualenvs || [];
+        $scope.custom_virtualenvs_options = virtualEnvs;
 
         $scope.$watch('project_obj.summary_fields.user_capabilities.edit', function(val) {
             if (val === false) {
@@ -157,6 +152,12 @@ export default ['$scope', '$rootScope', '$stateParams', 'ProjectsForm', 'Rest',
                     });
 
                     $scope.project_obj = data;
+                    // To toggle notifications a user needs to have an admin role on the project
+                    // _and_ have at least a notification template admin role on an org.
+                    // Only users with admin role on the project can edit it which is why we
+                    // look at that user_capability
+                    $scope.sufficientRoleForNotifToggle = isNotificationAdmin && data.summary_fields.user_capabilities.edit;
+                    $scope.sufficientRoleForNotif =  isNotificationAdmin || $scope.user_is_system_auditor;
                     $scope.name = data.name;
                     $scope.breadcrumb.project_name = data.name;
                     $scope.$emit('projectLoaded');

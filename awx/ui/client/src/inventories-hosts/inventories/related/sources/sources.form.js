@@ -9,7 +9,7 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n){
     var notifications_object = {
         generateList: true,
         include: "NotificationsList",
-        ngIf: "(current_user.is_superuser || isOrgAdmin || isNotificationAdmin) && !(inventory_source_obj.source === undefined || inventory_source_obj.source === '')",
+        ngIf: "(sufficientRoleForNotif) && !(inventory_source_obj.source === undefined || inventory_source_obj.source === '')",
         ngClick: "$state.go('inventories.edit.inventory_sources.edit.notifications')"
     };
     let clone = _.clone(NotificationsList);
