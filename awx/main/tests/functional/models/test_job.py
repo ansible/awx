@@ -1,6 +1,6 @@
 import pytest
 
-from awx.main.models import JobTemplate, Job, JobHostSummary, WorkflowJob
+from awx.main.models import JobTemplate, Job, JobHostSummary, WorkflowJob, Inventory
 
 
 @pytest.mark.django_db
@@ -96,3 +96,13 @@ class TestSlicingModels:
             assert node.limit is None  # data not saved in node prompts
             job = node.job
             assert job.limit == 'foobar'
+
+    def test_effective_slice_count(self, job_template, inventory, organization):
+        job_template.inventory = inventory
+        assert job_template.inventory.hosts.count() == 0
+        job_template.job_slice_count = 2
+        job_template.inventory.hosts.create(name='foo1')
+        assert job_template.get_effective_slice_ct({})
+        inventory2 = Inventory.objects.create(organization=organization, name='fooinv')
+        [inventory2.hosts.create(name='foo{}'.format(i)) for i in range(3)]
+        assert job_template.get_effective_slice_ct({'inventory': inventory2})
