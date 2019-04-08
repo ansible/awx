@@ -81,7 +81,7 @@ class ActionModule(ActionBase):
 
             url = res.json()['links']['next']  # will be None if we're on the last page
 
-            for item in res.json()['remediations']:
+            for item in res.json()['data']:
                 playbook_url = '{}/api/remediations/v1/remediations/{}/playbook'.format(
                     insights_url, item['id'])
                 res = session.get(playbook_url, timeout=120)
