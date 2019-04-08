@@ -1,4 +1,7 @@
 import React from 'react';
+
+import { withNetwork } from '../../../../contexts/Network';
+
 import OrganizationAccessList from '../../components/OrganizationAccessList';
 
 class OrganizationAccess extends React.Component {
@@ -38,4 +41,4 @@ class OrganizationAccess extends React.Component {
   }
 }
 
-export default OrganizationAccess;
+export default withNetwork(OrganizationAccess);

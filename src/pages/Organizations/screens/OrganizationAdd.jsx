@@ -13,6 +13,8 @@ import {
 } from '@patternfly/react-core';
 import { TimesIcon } from '@patternfly/react-icons';
 
+import { withNetwork } from '../../../contexts/Network';
+
 import OrganizationForm from '../components/OrganizationForm';
 
 class OrganizationAdd extends React.Component {
@@ -29,7 +31,7 @@ class OrganizationAdd extends React.Component {
   }
 
   async handleSubmit (values, groupsToAssociate) {
-    const { api } = this.props;
+    const { api, handleHttpError } = this.props;
     try {
       const { data: response } = await api.createOrganization(values);
       const instanceGroupsUrl = response.related.instance_groups;
@@ -37,10 +39,9 @@ class OrganizationAdd extends React.Component {
         await Promise.all(groupsToAssociate.map(async id => {
           await api.associateInstanceGroup(instanceGroupsUrl, id);
         }));
-      } catch (err) {
-        this.setState({ error: err });
-      } finally {
         this.handleSuccess(response.id);
+      } catch (err) {
+        handleHttpError(err) || this.setState({ error: err });
       }
     } catch (err) {
       this.setState({ error: err });
@@ -58,7 +59,6 @@ class OrganizationAdd extends React.Component {
   }
 
   render () {
-    const { api } = this.props;
     const { error } = this.state;
 
     return (
@@ -82,7 +82,6 @@ class OrganizationAdd extends React.Component {
               </CardHeader>
               <CardBody>
                 <OrganizationForm
-                  api={api}
                   handleSubmit={this.handleSubmit}
                   handleCancel={this.handleCancel}
                 />
@@ -105,4 +104,4 @@ OrganizationAdd.contextTypes = {
 };
 
 export { OrganizationAdd as _OrganizationAdd };
-export default withRouter(OrganizationAdd);
+export default withNetwork(withRouter(OrganizationAdd));

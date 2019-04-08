@@ -21,6 +21,9 @@ import {
 } from '@patternfly/react-core';
 
 import { CubesIcon } from '@patternfly/react-icons';
+
+import { withNetwork } from '../../../contexts/Network';
+
 import DataListToolbar from '../../../components/DataListToolbar';
 import OrganizationListItem from '../components/OrganizationListItem';
 import Pagination from '../../../components/Pagination';
@@ -170,14 +173,21 @@ class OrganizationsList extends Component {
   }
 
   async handleOrgDelete (event) {
-    const { orgsToDelete } = this.state;
+    const { orgsToDelete, handleHttpError } = this.state;
     const { api } = this.props;
+    let errorHandled;
 
-    orgsToDelete.forEach(async (org) => {
-      await api.destroyOrganization(org.id);
+    try {
+      await Promise.all(orgsToDelete.map(async (org) => api.destroyOrganization(org.id)));
+      this.handleClearOrgsToDelete();
+    } catch (err) {
+      errorHandled = handleHttpError(err);
+    } finally {
+      if (!errorHandled) {
         const queryParams = this.getQueryParams();
         this.fetchOrganizations(queryParams);
-    });
+      }
+    }
     event.preventDefault();
   }
 
@@ -192,7 +202,7 @@ class OrganizationsList extends Component {
   }
 
   async fetchOrganizations (queryParams) {
-    const { api } = this.props;
+    const { api, handleHttpError } = this.props;
     const { page, page_size, order_by } = queryParams;
 
     let sortOrder = 'ascending';
@@ -220,6 +230,7 @@ class OrganizationsList extends Component {
         sortedColumnKey,
         results,
         selected: [],
+        loading: false
       };
 
       // This is in place to track whether or not the initial request
@@ -233,9 +244,7 @@ class OrganizationsList extends Component {
       this.setState(stateToUpdate);
       this.updateUrl(queryParams);
     } catch (err) {
-      this.setState({ error: true });
-    } finally {
-      this.setState({ loading: false });
+      handleHttpError(err) || this.setState({ error: true, loading: false });
     }
   }
 
@@ -271,8 +280,8 @@ class OrganizationsList extends Component {
               isOpen={isModalOpen}
               onClose={this.handleClearOrgsToDelete}
               actions={[
-                <Button variant="danger" aria-label="confirm-delete" onClick={this.handleOrgDelete}>Delete</Button>,
-                <Button variant="secondary" aria-label="cancel-delete" onClick={this.handleClearOrgsToDelete}>Cancel</Button>
+                <Button variant="danger" key="delete" aria-label="confirm-delete" onClick={this.handleOrgDelete}>Delete</Button>,
+                <Button variant="secondary" key="cancel" aria-label="cancel-delete" onClick={this.handleClearOrgsToDelete}>Cancel</Button>
               ]}
             >
               {warningMsg}
@@ -350,4 +359,4 @@ class OrganizationsList extends Component {
   }
 }
 
-export default withRouter(OrganizationsList);
+export default withNetwork(withRouter(OrganizationsList));

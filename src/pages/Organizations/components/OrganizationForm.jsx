@@ -9,7 +9,8 @@ import {
   FormGroup,
 } from '@patternfly/react-core';
 
-import { ConfigContext } from '../../../context';
+import { Config } from '../../../contexts/Config';
+import { withNetwork } from '../../../contexts/Network';
 import FormRow from '../../../components/FormRow';
 import FormField from '../../../components/FormField';
 import FormActionGroup from '../../../components/FormActionGroup';
@@ -81,7 +82,7 @@ class OrganizationForm extends Component {
   }
 
   render () {
-    const { api, organization, handleCancel } = this.props;
+    const { organization, handleCancel } = this.props;
     const { instanceGroups, formIsValid, error } = this.state;
     const defaultVenv = '/venv/ansible/';
 
@@ -112,7 +113,7 @@ class OrganizationForm extends Component {
                     type="text"
                     label={i18n._(t`Description`)}
                   />
-                  <ConfigContext.Consumer>
+                  <Config>
                     {({ custom_virtualenvs }) => (
                       custom_virtualenvs && custom_virtualenvs.length > 1 && (
                         <Field
@@ -133,10 +134,9 @@ class OrganizationForm extends Component {
                         />
                       )
                     )}
-                  </ConfigContext.Consumer>
+                  </Config>
                 </FormRow>
                 <InstanceGroupsLookup
-                  api={api}
                   value={instanceGroups}
                   onChange={this.handleInstanceGroupsChange}
                   tooltip={i18n._(t`Select the Instance Groups for this Organization to run on.`)}
@@ -157,7 +157,6 @@ class OrganizationForm extends Component {
 }
 
 OrganizationForm.propTypes = {
-  api: PropTypes.shape().isRequired,
   organization: PropTypes.shape(),
   handleSubmit: PropTypes.func.isRequired,
   handleCancel: PropTypes.func.isRequired,
@@ -175,4 +174,4 @@ OrganizationForm.contextTypes = {
   custom_virtualenvs: PropTypes.arrayOf(PropTypes.string)
 };
 
-export default withRouter(OrganizationForm);
+export default withNetwork(withRouter(OrganizationForm));

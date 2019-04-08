@@ -1,11 +1,15 @@
 import React, { Component, Fragment } from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Route, withRouter, Switch } from 'react-router-dom';
 import { i18nMark } from '@lingui/react';
+
+import { NetworkProvider } from '../../contexts/Network';
+import { withRootDialog } from '../../contexts/RootDialog';
+
+import Breadcrumbs from '../../components/Breadcrumbs/Breadcrumbs';
 
 import OrganizationsList from './screens/OrganizationsList';
 import OrganizationAdd from './screens/OrganizationAdd';
 import Organization from './screens/Organization/Organization';
-import Breadcrumbs from '../../components/Breadcrumbs/Breadcrumbs';
 
 class Organizations extends Component {
   state = {
@@ -13,7 +17,7 @@ class Organizations extends Component {
       '/organizations': i18nMark('Organizations'),
       '/organizations/add': i18nMark('Create New Organization')
     }
-  }
+  };
 
   setBreadcrumbConfig = (organization) => {
     if (!organization) {
@@ -35,7 +39,7 @@ class Organizations extends Component {
   }
 
   render () {
-    const { match, api, history, location } = this.props;
+    const { match, history, location, setRootDialogMessage } = this.props;
     const { breadcrumbConfig } = this.state;
 
     return (
@@ -47,28 +51,34 @@ class Organizations extends Component {
           <Route
             path={`${match.path}/add`}
             render={() => (
-              <OrganizationAdd
-                api={api}
-              />
+              <OrganizationAdd />
             )}
           />
           <Route
             path={`${match.path}/:id`}
-            render={() => (
-              <Organization
-                api={api}
-                history={history}
-                location={location}
-                setBreadcrumb={this.setBreadcrumbConfig}
-              />
+            render={({ match: newRouteMatch }) => (
+              <NetworkProvider
+                handle404={() => {
+                  history.replace('/organizations');
+                  setRootDialogMessage({
+                    title: '404',
+                    bodyText: `Cannot find organization with ID ${newRouteMatch.params.id}.`,
+                    variant: 'warning'
+                  });
+                }}
+              >
+                <Organization
+                  history={history}
+                  location={location}
+                  setBreadcrumb={this.setBreadcrumbConfig}
+                />
+              </NetworkProvider>
             )}
           />
           <Route
             path={`${match.path}`}
             render={() => (
-              <OrganizationsList
-                api={api}
-              />
+              <OrganizationsList />
             )}
           />
         </Switch>
@@ -77,4 +87,4 @@ class Organizations extends Component {
   }
 }
 
-export default Organizations;
+export default withRootDialog(withRouter(Organizations));

@@ -13,13 +13,16 @@ import {
   PageSection
 } from '@patternfly/react-core';
 
+import { withNetwork } from '../../../../contexts/Network';
+
+import Tabs from '../../../../components/Tabs/Tabs';
+import Tab from '../../../../components/Tabs/Tab';
+
 import OrganizationAccess from './OrganizationAccess';
 import OrganizationDetail from './OrganizationDetail';
 import OrganizationEdit from './OrganizationEdit';
 import OrganizationNotifications from './OrganizationNotifications';
 import OrganizationTeams from './OrganizationTeams';
-import Tabs from '../../../../components/Tabs/Tabs';
-import Tab from '../../../../components/Tabs/Tab';
 
 class Organization extends Component {
   constructor (props) {
@@ -47,18 +50,18 @@ class Organization extends Component {
 
   async fetchOrganization () {
     const {
-      api,
       match,
-      setBreadcrumb
+      setBreadcrumb,
+      api,
+      handleHttpError
     } = this.props;
+
     try {
-      const { data } = await api.getOrganizationDetails(+match.params.id);
-      this.setState({ organization: data });
+      const { data } = await api.getOrganizationDetails(parseInt(match.params.id, 10));
       setBreadcrumb(data);
+      this.setState({ organization: data, loading: false });
     } catch (error) {
-      this.setState({ error: true });
-    } finally {
-      this.setState({ loading: false });
+      handleHttpError(error) || this.setState({ error: true, loading: false });
     }
   }
 
@@ -66,7 +69,6 @@ class Organization extends Component {
     const {
       location,
       match,
-      api,
       history
     } = this.props;
 
@@ -125,7 +127,6 @@ class Organization extends Component {
                 path="/organizations/:id/edit"
                 render={() => (
                   <OrganizationEdit
-                    api={api}
                     match={match}
                     organization={organization}
                   />
@@ -137,7 +138,6 @@ class Organization extends Component {
                 path="/organizations/:id/details"
                 render={() => (
                   <OrganizationDetail
-                    api={api}
                     match={match}
                     organization={organization}
                   />
@@ -148,7 +148,6 @@ class Organization extends Component {
               path="/organizations/:id/access"
               render={() => (
                 <OrganizationAccess
-                  api={api}
                   match={match}
                   location={location}
                   history={history}
@@ -160,7 +159,9 @@ class Organization extends Component {
               render={() => (
                 <OrganizationTeams
                   id={Number(match.params.id)}
-                  api={api}
+                  match={match}
+                  location={location}
+                  history={history}
                 />
               )}
             />
@@ -168,7 +169,6 @@ class Organization extends Component {
               path="/organizations/:id/notifications"
               render={() => (
                 <OrganizationNotifications
-                  api={api}
                   match={match}
                   location={location}
                   history={history}
@@ -184,4 +184,4 @@ class Organization extends Component {
   }
 }
 
-export default withRouter(Organization);
+export default withNetwork(withRouter(Organization));

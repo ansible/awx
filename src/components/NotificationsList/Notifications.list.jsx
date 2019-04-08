@@ -8,6 +8,8 @@ import { CubesIcon } from '@patternfly/react-icons';
 import { I18n, i18nMark } from '@lingui/react';
 import { Trans, t } from '@lingui/macro';
 
+import { withNetwork } from '../../contexts/Network';
+
 import DataListToolbar from '../DataListToolbar';
 import NotificationListItem from './NotificationListItem';
 import Pagination from '../Pagination';
@@ -117,58 +119,71 @@ class Notifications extends Component {
   }
 
   async createError (id, isCurrentlyOn) {
-    const { onCreateError, match } = this.props;
+    const { onCreateError, match, handleHttpError } = this.props;
     const postParams = { id };
+    let errorHandled;
     if (isCurrentlyOn) {
       postParams.disassociate = true;
     }
     try {
       await onCreateError(match.params.id, postParams);
     } catch (err) {
-      this.setState({ error: true });
+      errorHandled = handleHttpError(err);
+      if (!errorHandled) {
+        this.setState({ error: true });
+      }
     } finally {
-      if (isCurrentlyOn) {
-        // Remove it from state
-        this.setState((prevState) => ({
-          errorTemplateIds: prevState.errorTemplateIds.filter((templateId) => templateId !== id)
-        }));
-      } else {
-        // Add it to state
-        this.setState(prevState => ({
-          errorTemplateIds: [...prevState.errorTemplateIds, id]
-        }));
+      if (!errorHandled) {
+        if (isCurrentlyOn) {
+          // Remove it from state
+          this.setState((prevState) => ({
+            errorTemplateIds: prevState.errorTemplateIds.filter((templateId) => templateId !== id)
+          }));
+        } else {
+          // Add it to state
+          this.setState(prevState => ({
+            errorTemplateIds: [...prevState.errorTemplateIds, id]
+          }));
+        }
       }
     }
   }
 
   async createSuccess (id, isCurrentlyOn) {
-    const { onCreateSuccess, match } = this.props;
+    const { onCreateSuccess, match, handleHttpError } = this.props;
     const postParams = { id };
+    let errorHandled;
     if (isCurrentlyOn) {
       postParams.disassociate = true;
     }
     try {
       await onCreateSuccess(match.params.id, postParams);
     } catch (err) {
-      this.setState({ error: true });
+      errorHandled = handleHttpError(err);
+      if (!errorHandled) {
+        this.setState({ error: true });
+      }
     } finally {
-      if (isCurrentlyOn) {
-        // Remove it from state
-        this.setState((prevState) => ({
-          successTemplateIds: prevState.successTemplateIds.filter((templateId) => templateId !== id)
-        }));
-      } else {
-        // Add it to state
-        this.setState(prevState => ({
-          successTemplateIds: [...prevState.successTemplateIds, id]
-        }));
+      if (!errorHandled) {
+        if (isCurrentlyOn) {
+          // Remove it from state
+          this.setState((prevState) => ({
+            successTemplateIds: prevState.successTemplateIds
+              .filter((templateId) => templateId !== id)
+          }));
+        } else {
+          // Add it to state
+          this.setState(prevState => ({
+            successTemplateIds: [...prevState.successTemplateIds, id]
+          }));
+        }
       }
     }
   }
 
   async readNotifications (queryParams) {
     const { noInitialResults } = this.state;
-    const { onReadNotifications, onReadSuccess, onReadError, match } = this.props;
+    const { onReadNotifications, onReadSuccess, onReadError, match, handleHttpError } = this.props;
     const { page, page_size, order_by } = queryParams;
 
     let sortOrder = 'ascending';
@@ -233,12 +248,11 @@ class Notifications extends Component {
       }
       this.setState({
         successTemplateIds,
-        errorTemplateIds
+        errorTemplateIds,
+        loading: false
       });
     } catch (err) {
-      this.setState({ error: true });
-    } finally {
-      this.setState({ loading: false });
+      handleHttpError(err) || this.setState({ error: true, loading: false });
     }
   }
 
@@ -329,4 +343,4 @@ Notifications.propTypes = {
   onCreateSuccess: PropTypes.func.isRequired,
 };
 
-export default Notifications;
+export default withNetwork(Notifications);

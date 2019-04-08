@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 
+import { withNetwork } from '../../../../contexts/Network';
+
 import NotificationsList from '../../../../components/NotificationsList/Notifications.list';
 
 class OrganizationNotifications extends Component {
@@ -60,4 +62,4 @@ class OrganizationNotifications extends Component {
   }
 }
 
-export default OrganizationNotifications;
+export default withNetwork(OrganizationNotifications);

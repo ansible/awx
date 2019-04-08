@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import { I18n } from '@lingui/react';
 import { Trans, t } from '@lingui/macro';
+
 import {
   CardBody,
   Button,
@@ -9,6 +10,9 @@ import {
   TextContent,
   TextVariants,
 } from '@patternfly/react-core';
+
+import { withNetwork } from '../../../../contexts/Network';
+
 import BasicChip from '../../../../components/BasicChip/BasicChip';
 
 const detailWrapperStyle = {
@@ -68,6 +72,7 @@ class OrganizationDetail extends Component {
   async loadInstanceGroups () {
     const {
       api,
+      handleHttpError,
       match
     } = this.props;
     try {
@@ -78,7 +83,7 @@ class OrganizationDetail extends Component {
         instanceGroups: [...data.results]
       });
     } catch (err) {
-      this.setState({ error: true });
+      handleHttpError(err) || this.setState({ error: true });
     }
   }
 
@@ -173,4 +178,4 @@ class OrganizationDetail extends Component {
   }
 }
 
-export default OrganizationDetail;
+export default withNetwork(OrganizationDetail);

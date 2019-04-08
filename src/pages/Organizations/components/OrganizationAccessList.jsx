@@ -13,6 +13,8 @@ import {
   Link
 } from 'react-router-dom';
 
+import { withNetwork } from '../../../contexts/Network';
+
 import AlertModal from '../../../components/AlertModal';
 import Pagination from '../../../components/Pagination';
 import DataListToolbar from '../../../components/DataListToolbar';
@@ -238,20 +240,16 @@ class OrganizationAccessList extends React.Component {
   }
 
   async removeAccessRole (roleId, resourceId, type) {
-    const { removeRole } = this.props;
+    const { removeRole, handleHttpError } = this.props;
     const url = `/api/v2/${type}/${resourceId}/roles/`;
     try {
       await removeRole(url, roleId);
+      const queryParams = this.getQueryParams();
+      await this.fetchOrgAccessList(queryParams);
+      this.setState({ showWarning: false });
     } catch (error) {
-      this.setState({ error });
+      handleHttpError(error) || this.setState({ error });
     }
-    const queryParams = this.getQueryParams();
-    try {
-      this.fetchOrgAccessList(queryParams);
-    } catch (error) {
-      this.setState({ error });
-    }
-    this.setState({ showWarning: false });
   }
 
   handleWarning (roleName, roleId, resourceName, resourceId, type) {
@@ -432,4 +430,4 @@ OrganizationAccessList.propTypes = {
   removeRole: PropTypes.func.isRequired,
 };
 
-export default OrganizationAccessList;
+export default withNetwork(OrganizationAccessList);
