@@ -48,17 +48,19 @@ INSTANCE_STATUS = Gauge('awx_instance_status_total', 'Status of Job launched', [
 
 def metrics():
     license_info = get_license(show_key=False)
-    SYSTEM_INFO.info({'system_uuid': settings.SYSTEM_UUID,
-                      'insights_analytics': str(settings.INSIGHTS_DATA_ENABLED),
-                      'tower_url_base': settings.TOWER_URL_BASE,
-                      'tower_version': get_awx_version(),
-                      'ansible_version': get_ansible_version(),
-                      'license_type': license_info.get('license_type', 'UNLICENSED'),
-                      'free_instances': str(license_info.get('free instances', 0)),
-                      'license_expiry': str(license_info.get('time_remaining', 0)),
-                      'pendo_tracking': settings.PENDO_TRACKING_STATE,
-                      'external_logger_enabled': str(settings.LOG_AGGREGATOR_ENABLED),
-                      'external_logger_type': getattr(settings, 'LOG_AGGREGATOR_TYPE', 'None')})
+    SYSTEM_INFO.info({
+        'system_uuid': settings.SYSTEM_UUID,
+        'insights_analytics': str(settings.INSIGHTS_DATA_ENABLED),
+        'tower_url_base': settings.TOWER_URL_BASE,
+        'tower_version': get_awx_version(),
+        'ansible_version': get_ansible_version(),
+        'license_type': license_info.get('license_type', 'UNLICENSED'),
+        'free_instances': str(license_info.get('free instances', 0)),
+        'license_expiry': str(license_info.get('time_remaining', 0)),
+        'pendo_tracking': settings.PENDO_TRACKING_STATE,
+        'external_logger_enabled': str(settings.LOG_AGGREGATOR_ENABLED),
+        'external_logger_type': getattr(settings, 'LOG_AGGREGATOR_TYPE', 'None')
+    })
 
     current_counts = counts(datetime.now())
 
