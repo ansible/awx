@@ -160,7 +160,6 @@ class Organization extends Component {
               render={() => (
                 <OrganizationTeams
                   id={Number(match.params.id)}
-                  searchString={location.search}
                   api={api}
                 />
               )}

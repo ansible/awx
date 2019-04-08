@@ -1,11 +1,20 @@
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import {
-  DataList, DataListItem, DataListCell, Text,
-  TextContent, TextVariants
+  DataList,
+  DataListItem,
+  DataListCell,
+  Text,
+  TextContent,
+  TextVariants,
+  Title,
+  EmptyState,
+  EmptyStateIcon,
+  EmptyStateBody,
 } from '@patternfly/react-core';
+import { CubesIcon } from '@patternfly/react-icons';
 import { I18n, i18nMark } from '@lingui/react';
-import { t } from '@lingui/macro';
+import { Trans, t } from '@lingui/macro';
 import { withRouter, Link } from 'react-router-dom';
 
 import Pagination from '../../../components/Pagination';
@@ -94,7 +103,17 @@ class OrganizationTeamsList extends React.Component {
                 )}
               </Fragment> // TODO: replace with proper error handling
             )}
-            {teams.length > 0 && (
+            {teams.length === 0 ? (
+              <EmptyState>
+                <EmptyStateIcon icon={CubesIcon} />
+                <Title size="lg">
+                  <Trans>No Teams Found</Trans>
+                </Title>
+                <EmptyStateBody>
+                  <Trans>Please add a team to populate this list</Trans>
+                </EmptyStateBody>
+              </EmptyState>
+            ) : (
               <Fragment>
                 <DataListToolbar
                   sortedColumnKey={queryParams.sort_by}
@@ -132,14 +151,22 @@ class OrganizationTeamsList extends React.Component {
   }
 }
 
+const Item = PropTypes.shape({
+  id: PropTypes.number.isRequired,
+  url: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+});
+
+const QueryParams = PropTypes.shape({
+  page: PropTypes.number,
+  page_size: PropTypes.number,
+  order_by: PropTypes.string,
+});
+
 OrganizationTeamsList.propTypes = {
-  teams: PropTypes.arrayOf({}).isRequired,
+  teams: PropTypes.arrayOf(Item).isRequired,
   itemCount: PropTypes.number.isRequired,
-  queryParams: PropTypes.shape({
-    page: PropTypes.number,
-    page_size: PropTypes.number,
-    order_by: PropTypes.string,
-  }).isRequired
+  queryParams: QueryParams.isRequired
 };
 
 export { OrganizationTeamsList as _OrganizationTeamsList };

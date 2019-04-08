@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import OrganizationTeamsList from '../../components/OrganizationTeamsList';
@@ -17,6 +17,7 @@ class OrganizationTeams extends React.Component {
     this.readOrganizationTeamsList = this.readOrganizationTeamsList.bind(this);
 
     this.state = {
+      isInitialized: false,
       isLoading: false,
       error: null,
       itemCount: 0,
@@ -36,8 +37,8 @@ class OrganizationTeams extends React.Component {
   }
 
   getQueryParams () {
-    const { searchString } = this.props;
-    const searchParams = parseQueryString(searchString.substring(1));
+    const { location } = this.props;
+    const searchParams = parseQueryString(location.search.substring(1));
 
     return {
       ...DEFAULT_QUERY_PARAMS,
@@ -57,36 +58,44 @@ class OrganizationTeams extends React.Component {
         itemCount: count,
         teams: results,
         isLoading: false,
+        isInitialized: true,
       });
     } catch (error) {
       this.setState({
         error,
-        isLoading: false
+        isLoading: false,
+        isInitialized: true,
       });
     }
   }
 
   render () {
-    const { teams, itemCount, isLoading } = this.state;
+    const { teams, itemCount, isLoading, isInitialized, error } = this.state;
 
-    if (isLoading) {
-      return <div>Loading...</div>;
+    if (error) {
+      // TODO: better error state
+      return <div>{error.message}</div>;
     }
 
+    // TODO: better loading state
     return (
-      <OrganizationTeamsList
-        teams={teams}
-        itemCount={itemCount}
-        queryParams={this.getQueryParams()}
-      />
+      <Fragment>
+        {isLoading && (<div>Loading...</div>)}
+        {isInitialized && (
+          <OrganizationTeamsList
+            teams={teams}
+            itemCount={itemCount}
+            queryParams={this.getQueryParams()}
+          />
+        )}
+      </Fragment>
     );
   }
 }
 
 OrganizationTeams.propTypes = {
   id: PropTypes.number.isRequired,
-  searchString: PropTypes.string.isRequired,
-  api: PropTypes.shape().isRequired, // TODO: remove?
+  api: PropTypes.shape().isRequired,
 };
 
 export { OrganizationTeams as _OrganizationTeams };

@@ -4,8 +4,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { I18nProvider } from '@lingui/react';
 import { ConfigContext } from '../../../../src/context';
 import OrganizationForm from '../../../../src/pages/Organizations/components/OrganizationForm';
-
-const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+import { sleep } from '../../../testUtils';
 
 describe('<OrganizationForm />', () => {
   let api;
