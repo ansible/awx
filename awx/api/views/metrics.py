@@ -5,14 +5,11 @@
 import logging
 
 # Django
-from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
-from django.utils.timezone import now
 
 # Django REST Framework
-from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
-from rest_framework.renderers import JSONRenderer, StaticHTMLRenderer
+from rest_framework.renderers import JSONRenderer
 
 # AWX
 # from awx.main.analytics import collectors
@@ -23,13 +20,8 @@ from awx.api.generics import (
     APIView,
 )
 
-from awx.api.serializers import (
-    InventorySerializer,
-    ActivityStreamSerializer,
-)
 
 logger = logging.getLogger('awx.main.analytics')
-
 
 
 class MetricsView(APIView):

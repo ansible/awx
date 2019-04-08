@@ -27,15 +27,16 @@ EXPECTED_VALUES = {
     'awx_instance_memory':0.0,
     'awx_instance_info':1.0,
 }
+
+
 @pytest.mark.django_db
-def test_metrics_counts(organization_factory, job_template_factory,
-                         workflow_job_template_factory):
-
-
+def test_metrics_counts(organization_factory, job_template_factory, workflow_job_template_factory):
     objs = organization_factory('org', superusers=['admin'])
-    jt = job_template_factory('test', organization=objs.organization,
-                              inventory='test_inv', project='test_project',
-                              credential='test_cred')
+    jt = job_template_factory(
+        'test', organization=objs.organization,
+        inventory='test_inv', project='test_project',
+        credential='test_cred'
+    )
     workflow_job_template_factory('test')
     models.Team(organization=objs.organization).save()
     models.Host(inventory=jt.inventory).save()
