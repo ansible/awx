@@ -127,6 +127,15 @@ register(
 )
 
 register(
+    'INSTALL_UUID',
+    field_class=fields.CharField,
+    label=_('Unique identifier for an AWX/Tower installation'),
+    category=_('System'),
+    category_slug='system',
+    read_only=True,
+)
+
+register(
     'CUSTOM_VENV_PATHS',
     field_class=fields.StringListPathField,
     label=_('Custom virtual environment paths'),

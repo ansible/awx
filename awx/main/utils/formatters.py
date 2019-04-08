@@ -237,6 +237,13 @@ class LogstashFormatter(LogstashFormatterBase):
                 fields[log_name] = getattr(settings, setting_name, None)
             elif log_name == 'type':
                 fields[log_name] = 'other'
+
+        uuid = (
+            getattr(settings, 'LOG_AGGREGATOR_TOWER_UUID', None) or
+            getattr(settings, 'INSTALL_UUID', None)
+        )
+        if uuid:
+            fields['tower_uuid'] = uuid
         return fields
 
     def format(self, record):
