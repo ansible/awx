@@ -153,7 +153,11 @@ export default ['$scope', '$rootScope', '$stateParams', 'ProjectsForm', 'Rest',
                     });
 
                     $scope.project_obj = data;
-                    $scope.isAdminOfResource = data.summary_fields.object_roles.hasOwnProperty('admin_role') || false;
+                    // To toggle notifications a user needs to have an admin role on the project
+                    // _and_ have at least a notification template admin role on an org.
+                    // Only users with admin role on the project can edit it which is why we
+                    // look at that user_capability
+                    $scope.sufficientRoleForNotifToggle = data.summary_fields.user_capabilities.edit;
                     $scope.name = data.name;
                     $scope.breadcrumb.project_name = data.name;
                     $scope.$emit('projectLoaded');

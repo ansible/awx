@@ -54,7 +54,11 @@ export default
 
                 CallbackHelpInit({ scope: $scope });
 
-                $scope.isAdminOfResource = jobTemplateData.summary_fields.object_roles.hasOwnProperty('admin_role') || false;
+                // To toggle notifications a user needs to have a read role on the JT
+                // _and_ have at least a notification template admin role on an org.
+                // If the user has gotten this far it's safe to say they have
+                // at least read access to the JT
+                $scope.sufficientRoleForNotifToggle = true;
                 $scope.playbook_options = null;
                 $scope.playbook = null;
                 $scope.mode = 'edit';

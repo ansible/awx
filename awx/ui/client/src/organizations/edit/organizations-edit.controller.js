@@ -49,7 +49,7 @@ export default ['$scope', '$location', '$stateParams', 'OrgAdminLookup',
         .then(({data}) => {
             let fld;
 
-            $scope.isAdminOfResource = data.summary_fields.object_roles.hasOwnProperty('admin_role') || false;
+            $scope.sufficientRoleForNotifToggle = true;
             $scope.organization_name = data.name;
             for (fld in form.fields) {
                 if (typeof data[fld] !== 'undefined') {

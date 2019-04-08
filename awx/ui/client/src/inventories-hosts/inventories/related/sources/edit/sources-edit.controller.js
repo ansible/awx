@@ -17,7 +17,11 @@ export default ['$state', '$scope', 'ParseVariableString', 'ParseTypeChange',
 
         const inventorySourceData = inventorySource.get();
 
-        $scope.isAdminOfResource = inventoryData.summary_fields.object_roles.hasOwnProperty('admin_role') || false;
+        // To toggle notifications a user needs to have a read role on the inventory
+        // _and_ have at least a notification template admin role on an org.
+        // If the user has gotten this far it's safe to say they have
+        // at least read access to the inventory
+        $scope.sufficientRoleForNotifToggle = true;
         $scope.projectBasePath = GetBasePath('projects') + '?not__status=never updated';
         $scope.canAdd = inventorySourcesOptions.actions.POST;
         $scope.isNotificationAdmin = isNotificationAdmin || false;
