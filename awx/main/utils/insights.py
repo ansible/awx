@@ -11,11 +11,11 @@
 # reports[].rule.severity (str) -> active_reports[].rule.total_risk (int)
 
 # reports[].rule.{ansible,ansible_fix} appears to be unused
-# reports[].maintenance_actions[] missing entirely, will be provided
+# reports[].maintenance_actions[] missing entirely, is now provided
 #   by a different Insights endpoint
 
 
-def filter_insights_api_response(json):
+def filter_insights_api_response(reports, remediations):
     severity_mapping = {
         1: 'INFO',
         2: 'WARN',
@@ -24,14 +24,14 @@ def filter_insights_api_response(json):
     }
 
     new_json = {}
-    if 'checked_on' in json:
-        new_json['last_check_in'] = json['checked_on']
-    if 'active_reports' in json:
+    if 'checked_on' in reports:
+        new_json['last_check_in'] = reports['checked_on']
+    if 'active_reports' in reports:
         new_json['reports'] = []
-        for rep in json['active_reports']:
+        for rep in reports['active_reports']:
             new_report = {
                 'rule': {},
-                'maintenance_actions': []  # This will be populated by a different API call
+                'maintenance_actions': remediations
             }
             rule = rep.get('rule') or {}
             for k in ['description', 'summary']:
