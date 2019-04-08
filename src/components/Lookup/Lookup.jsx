@@ -2,12 +2,14 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { SearchIcon, CubesIcon } from '@patternfly/react-icons';
 import {
-  Chip,
-  Modal,
   Button,
+  ButtonVariant,
+  Chip,
   EmptyState,
-  EmptyStateIcon,
   EmptyStateBody,
+  EmptyStateIcon,
+  InputGroup,
+  Modal,
   Title
 } from '@patternfly/react-core';
 import { I18n } from '@lingui/react';
@@ -172,16 +174,20 @@ class Lookup extends React.Component {
     return (
       <I18n>
         {({ i18n }) => (
-          <div className="pf-c-input-group awx-lookup">
-            <Button
-              className="pf-c-input-group__text"
-              aria-label="search"
-              id={id}
-              onClick={this.handleModalToggle}
-            >
-              <SearchIcon />
-            </Button>
-            <div className="pf-c-form-control">{chips}</div>
+          <Fragment>
+            <InputGroup className="awx-lookup">
+              <Button
+                aria-label="Search"
+                id={id}
+                onClick={this.handleModalToggle}
+                variant={ButtonVariant.tertiary}
+              >
+                <SearchIcon />
+              </Button>
+              <div className="pf-c-form-control">
+                {chips}
+              </div>
+            </InputGroup>
             <Modal
               className="awx-c-modal"
               title={`Select ${lookupHeader}`}
@@ -245,7 +251,7 @@ class Lookup extends React.Component {
               )}
               { error ? <div>error</div> : '' }
             </Modal>
-          </div>
+          </Fragment>
         )}
       </I18n>
     );
