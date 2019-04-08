@@ -1,6 +1,5 @@
-import os
 from datetime import datetime
-
+from django.conf import settings
 from prometheus_client import (
     REGISTRY,
     PROCESS_COLLECTOR,
@@ -11,30 +10,18 @@ from prometheus_client import (
     generate_latest
 )
 
-from django.contrib.sessions.models import Session
-
-# Temporary Imports
-from django.db import connection
-from django.db.models import Count
-from django.conf import settings
-
 from awx.conf.license import get_license
-from awx.main.utils import (get_awx_version, get_ansible_version,
-                            get_custom_venv_choices)
-from awx.main import models
+from awx.main.utils import (get_awx_version, get_ansible_version)
 from awx.main.analytics.collectors import (
     counts, 
     instance_info,
-    job_instance_counts
-    )
-from django.contrib.sessions.models import Session
-from awx.main.analytics import register
+    job_instance_counts,
+)
 
 
 REGISTRY.unregister(PROCESS_COLLECTOR)
 REGISTRY.unregister(PLATFORM_COLLECTOR)
 REGISTRY.unregister(GC_COLLECTOR)
-
 
 SYSTEM_INFO = Info('awx_system', 'AWX System Information')
 ORG_COUNT = Gauge('awx_organizations_total', 'Number of organizations')
@@ -61,16 +48,18 @@ INSTANCE_STATUS = Gauge('awx_instance_status_total', 'Status of Job launched', [
 
 def metrics():
     license_info = get_license(show_key=False)
-    SYSTEM_INFO.info({'system_uuid': settings.SYSTEM_UUID,
-                      'tower_url_base': settings.TOWER_URL_BASE,
-                      'tower_version': get_awx_version(),
-                      'ansible_version': get_ansible_version(),
-                      'license_type': license_info.get('license_type', 'UNLICENSED'),
-                      'free_instances': str(license_info.get('free instances', 0)),
-                      'license_expiry': str(license_info.get('time_remaining', 0)),
-                      'pendo_tracking': settings.PENDO_TRACKING_STATE,
-                      'external_logger_enabled': str(settings.LOG_AGGREGATOR_ENABLED),
-                      'external_logger_type': getattr(settings, 'LOG_AGGREGATOR_TYPE', 'None')})
+    SYSTEM_INFO.info({
+        'system_uuid': settings.SYSTEM_UUID,
+        'tower_url_base': settings.TOWER_URL_BASE,
+        'tower_version': get_awx_version(),
+        'ansible_version': get_ansible_version(),
+        'license_type': license_info.get('license_type', 'UNLICENSED'),
+        'free_instances': str(license_info.get('free instances', 0)),
+        'license_expiry': str(license_info.get('time_remaining', 0)),
+        'pendo_tracking': settings.PENDO_TRACKING_STATE,
+        'external_logger_enabled': str(settings.LOG_AGGREGATOR_ENABLED),
+        'external_logger_type': getattr(settings, 'LOG_AGGREGATOR_TYPE', 'None')
+    })
 
     current_counts = counts(datetime.now())
 
@@ -101,11 +90,12 @@ def metrics():
         INSTANCE_CAPACITY.labels(type=uuid).set(instance_data[uuid]['capacity'])
         INSTANCE_CPU.labels(type=uuid).set(instance_data[uuid]['cpu'])
         INSTANCE_MEMORY.labels(type=uuid).set(instance_data[uuid]['memory'])
-        INSTANCE_INFO.labels(type=uuid).info({'enabled': str(instance_data[uuid]['enabled']), 
-                                             'last_isolated_check': getattr(instance_data[uuid], 'last_isolated_check', 'None'),
-                                             'managed_by_policy': str(instance_data[uuid]['managed_by_policy']),
-                                             'version': instance_data[uuid]['version']
-                                            })
+        INSTANCE_INFO.labels(type=uuid).info({
+            'enabled': str(instance_data[uuid]['enabled']),
+            'last_isolated_check': getattr(instance_data[uuid], 'last_isolated_check', 'None'),
+            'managed_by_policy': str(instance_data[uuid]['managed_by_policy']),
+            'version': instance_data[uuid]['version']
+        })
 
     instance_data = job_instance_counts(datetime.now())
     for node in instance_data:
