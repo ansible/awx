@@ -347,7 +347,7 @@ function JobRenderService ($q, $compile, $sce, $window, strings) {
         let tdToggle = '';
         let tdEvent = '';
         let classList = '';
-        let directives = '';
+        let directives = `aw-tool-tip="${this.createToolTip(event, record)}" aw-tip-placement="top"`;
 
         if (record.isMissing) {
             return `<div id="${record.uuid}" class="at-Stdout-row">
@@ -403,20 +403,17 @@ function JobRenderService ($q, $compile, $sce, $window, strings) {
 
         if (record && record.isClickable) {
             classList += ' at-Stdout-row--clickable';
-            directives = `ng-click="vm.showHostDetails('${record.id}', '${record.uuid}')"`;
+            directives += ` ng-click="vm.showHostDetails('${record.id}', '${record.uuid}')"
+            `;
         }
-
         return `
-            <div id="${id}" class="at-Stdout-row ${classList}" ${directives} aw-tool-tip= '${this.createToolTip(event, record)}' aw-tip-placement="top">
+            <div id="${id}" class="at-Stdout-row ${classList}" ${directives}>
                 ${tdToggle}
                 <div class="at-Stdout-line">${ln}</div>
-                <div class="at-Stdout-event">
-                    <div>Host Status </div>
-                    <div>Next line </div>
-                    <div ng-non-bindable>${content}</div>
-                </div>
+                <div class="at-Stdout-event"><span ng-non-bindable>${content}</span></div>
                 <div class="at-Stdout-time">${timestamp}</div>
-            </div>`;
+            </div>
+        `;
     };
 
     this.createToolTip = (event, record) => {
