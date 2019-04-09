@@ -100,8 +100,16 @@
   --pf-c-data-list__cell--PaddingBottom: 16px;
   --pf-c-data-list__cell-cell--PaddingTop: 16px;
 
-  a {
-    margin-right: 8px;
+  .awx-c-list-group {
+    display: inline-flex;
+    margin-right: 20px;
+
+    &--badge {
+      align-items: center;
+      display: flex;
+      justify-content: center;
+      margin-left: 10px;
+    }
   }
 }
 
@@ -224,17 +232,11 @@
   border-bottom: 1px solid #d7d7d7;
 }
 
-.at-c-listCardBody {
-  --pf-c-card__footer--PaddingX: 0;
-  --pf-c-card__footer--PaddingY: 0;
-  --pf-c-card__body--PaddingX: 0;
-  --pf-c-card__body--PaddingY: 0;
-}
-
-
 .awx-c-card {
   position: relative;
 }
+
+
 
 // PF Alert notification component overrides
 .pf-c-alert__title {

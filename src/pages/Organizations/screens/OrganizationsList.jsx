@@ -355,7 +355,7 @@ class OrganizationsList extends Component {
                         itemId={o.id}
                         name={o.name}
                         detailUrl={`${match.url}/${o.id}`}
-                        userCount={o.summary_fields.related_field_counts.users}
+                        memberCount={o.summary_fields.related_field_counts.users}
                         teamCount={o.summary_fields.related_field_counts.teams}
                         isSelected={selected.includes(o.id)}
                         onSelect={() => this.onSelect(o.id, o.name)}

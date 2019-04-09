@@ -16,7 +16,7 @@ class OrganizationListItem extends React.Component {
     const {
       itemId,
       name,
-      userCount,
+      memberCount,
       teamCount,
       isSelected,
       onSelect,
@@ -45,22 +45,18 @@ class OrganizationListItem extends React.Component {
           </span>
         </div>
         <div className="pf-c-data-list__cell">
-          <Link to={`${detailUrl}/access`}>
-            <Trans>Users</Trans>
-          </Link>
-          <Badge isRead>
-            {' '}
-            {userCount}
-            {' '}
-          </Badge>
-          <Link to={`${detailUrl}/teams`}>
+          <span className="awx-c-list-group">
+            <Trans>Members</Trans>
+            <Badge className="awx-c-list-group--badge" isRead>
+              {memberCount}
+            </Badge>
+          </span>
+          <span className="awx-c-list-group">
             <Trans>Teams</Trans>
-          </Link>
-          <Badge isRead>
-            {' '}
-            {teamCount}
-            {' '}
-          </Badge>
+            <Badge className="awx-c-list-group--badge" isRead>
+              {teamCount}
+            </Badge>
+          </span>
         </div>
         <div className="pf-c-data-list__cell" />
       </li>
@@ -68,4 +64,3 @@ class OrganizationListItem extends React.Component {
   }
 }
 export default OrganizationListItem;
-
