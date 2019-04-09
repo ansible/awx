@@ -3,6 +3,8 @@ import pytest
 from prometheus_client.parser import text_string_to_metric_families
 from awx.main import models
 from awx.main.analytics.metrics import metrics
+from awx.api.versioning import reverse
+from awx.main.models.rbac import Role
 
 EXPECTED_VALUES = {
     'awx_system_info':1.0,
@@ -54,3 +56,30 @@ def test_metrics_counts(organization_factory, job_template_factory, workflow_job
             # name, label, value, timestamp, exemplar
             name, _, value, _, _ = sample
             assert EXPECTED_VALUES[name] == value
+
+
+@pytest.mark.django_db 
+def test_metrics_permissions(get, admin, org_admin, alice, bob, organization):
+
+    assert get(reverse('api:metrics_view'), user=admin).status_code == 200
+    assert get(reverse('api:metrics_view'), user=org_admin).status_code == 403
+    assert get(reverse('api:metrics_view'), user=alice).status_code == 403
+    assert get(reverse('api:metrics_view'), user=bob).status_code == 403
+    organization.auditor_role.members.add(bob)
+    assert get(reverse('api:metrics_view'), user=bob).status_code == 403
+    
+    Role.singleton('system_auditor').members.add(bob)
+    bob.is_system_auditor = True
+    assert get(reverse('api:metrics_view'), user=bob).status_code == 200
+
+
+@pytest.mark.django_db 
+def test_metrics_http_methods(get, post, patch, put, options, admin):
+
+    assert get(reverse('api:metrics_view'), user=admin).status_code == 200
+    assert put(reverse('api:metrics_view'), user=admin).status_code == 405
+    assert patch(reverse('api:metrics_view'), user=admin).status_code == 405
+    assert post(reverse('api:metrics_view'), user=admin).status_code == 405
+    assert options(reverse('api:metrics_view'), user=admin).status_code == 200
+
+
