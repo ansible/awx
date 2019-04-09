@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-import re
 import pytest
-import requests
 from copy import deepcopy
 from unittest import mock
 
@@ -11,13 +9,9 @@ from awx.api.views import (
     ApiVersionRootView,
     JobTemplateLabelList,
     InventoryInventorySourcesUpdate,
-    HostInsights,
     JobTemplateSurveySpec
 )
 
-from awx.main.models import (
-    Host,
-)
 from awx.main.views import handle_error
 
 from rest_framework.test import APIRequestFactory
