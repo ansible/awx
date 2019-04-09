@@ -1738,6 +1738,12 @@ class HostInsights(GenericAPIView):
         data = self._get_insights(platform_id, session, headers)
         return Response(data, status=status.HTTP_200_OK)
 
+    def handle_exception(self, exc):
+        # Continue supporting the slightly different way we have handled error responses on this view.
+        response = super().handle_exception(exc)
+        response.data['error'] = response.data.pop('detail')
+        return response
+
 
 class GroupList(ListCreateAPIView):
 
