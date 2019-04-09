@@ -862,10 +862,12 @@ class BaseTask(object):
                     settings.PROJECTS_ROOT,
                     settings.JOBOUTPUT_ROOT,
                 ] + getattr(settings, 'AWX_PROOT_HIDE_PATHS', None) or [],
-                'process_isolation_ro_paths': [settings.ANSIBLE_VENV_PATH, settings.AWX_VENV_PATH],
             }
             if getattr(instance, 'ansible_virtualenv_path', settings.ANSIBLE_VENV_PATH) != settings.ANSIBLE_VENV_PATH:
-                process_isolation_params['process_isolation_ro_paths'].append(instance.ansible_virtualenv_path)
+                process_isolation_params['process_isolation_ro_paths'] = [instance.ansible_virtualenv_path]
+            else:
+                process_isolation_params['process_isolation_ro_paths'] = [settings.ANSIBLE_VENV_PATH,
+                                                                          settings.AWX_VENV_PATH]
         return process_isolation_params
 
     def _write_extra_vars_file(self, private_data_dir, vars, safe_dict={}):
