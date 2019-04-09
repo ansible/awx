@@ -29,6 +29,7 @@ jsonschema==2.6.0
 Markdown==2.6.11    # used for formatting API help
 ordereddict==1.1
 pexpect==4.6.0
+prometheus_client==0.6.0
 psutil==5.4.3
 psycopg2==2.7.3.2   # problems with Segmentation faults / wheels on upgrade
 pygerduty==0.37.0

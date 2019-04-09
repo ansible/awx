@@ -34,6 +34,8 @@ from awx.api.views import (
     OAuth2ApplicationDetail,
 )
 
+from awx.api.views.metrics import MetricsView
+
 from .organization import urls as organization_urls
 from .user import urls as user_urls
 from .project import urls as project_urls
@@ -133,6 +135,7 @@ v2_urls = [
     url(r'^applications/(?P<pk>[0-9]+)/tokens/$', ApplicationOAuth2TokenList.as_view(), name='application_o_auth2_token_list'),
     url(r'^tokens/$', OAuth2TokenList.as_view(), name='o_auth2_token_list'),
     url(r'^', include(oauth2_urls)),
+    url(r'^metrics/$', MetricsView.as_view(), name='metrics_view'),
 ]
 
 app_name = 'api'
