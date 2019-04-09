@@ -7,12 +7,6 @@ about: Create a report to help us improve
 ##### ISSUE TYPE
  - Bug Report
 
-##### COMPONENT NAME
-<!-- Pick the area of AWX for this issue, you can have multiple, delete the rest: -->
- - API
- - UI
- - Installer
-
 ##### SUMMARY
 <!-- Briefly describe the problem. -->
 
