@@ -21,6 +21,7 @@ for setting in dir(global_settings):
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
+RUNNER_RECEIVER_PORT=8888
 
 def is_testing(argv=None):
     import sys
