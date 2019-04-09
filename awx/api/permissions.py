@@ -103,8 +103,7 @@ class ModelAccessPermission(permissions.BasePermission):
             return False
 
         # Always allow superusers
-        if getattr(view, 'always_allow_superuser', True) and request.user.is_superuser \
-                and not hasattr(request.user, 'oauth_scopes'):
+        if getattr(view, 'always_allow_superuser', True) and request.user.is_superuser:
             return True
 
         # Check if view supports the request method before checking permission
