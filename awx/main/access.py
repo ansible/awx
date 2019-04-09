@@ -489,7 +489,7 @@ class InstanceAccess(BaseAccess):
         return False
 
     def can_change(self, obj, data):
-        return False
+        return self.user.is_superuser
 
     def can_delete(self, obj):
         return False
