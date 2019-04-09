@@ -2494,7 +2494,7 @@ class CredentialTypeSerializer(BaseSerializer):
 
     class Meta:
         model = CredentialType
-        fields = ('*', 'kind', 'name', 'managed_by_tower', 'inputs',
+        fields = ('*', 'kind', 'namespace', 'name', 'managed_by_tower', 'inputs',
                   'injectors')
 
     def validate(self, attrs):
