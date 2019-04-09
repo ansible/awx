@@ -20,6 +20,7 @@ import './components/SelectedList/styles.scss';
 import { Config } from './contexts/Config';
 
 import Background from './components/Background';
+import NotifyAndRedirect from './components/NotifyAndRedirect';
 
 import RootProvider from './RootProvider';
 import App from './App';
@@ -220,17 +221,22 @@ export async function main (render) {
                         },
                       ]}
                       render={({ routeGroups }) => (
-                        routeGroups
-                          .reduce((allRoutes, { routes }) => allRoutes.concat(routes), [])
-                          .map(({ component: PageComponent, path }) => (
-                            <Route
-                              key={path}
-                              path={path}
-                              render={({ match }) => (
-                                <PageComponent match={match} />
-                              )}
-                            />
-                          ))
+                        <Switch>
+                          {routeGroups
+                            .reduce((allRoutes, { routes }) => allRoutes.concat(routes), [])
+                            .map(({ component: PageComponent, path }) => (
+                              <Route
+                                key={path}
+                                path={path}
+                                render={({ match }) => (
+                                  <PageComponent match={match} />
+                                )}
+                              />
+                            ))
+                            .concat([
+                              <NotifyAndRedirect key="redirect" to="/" />
+                            ])}
+                        </Switch>
                       )}
                     />
                   )}

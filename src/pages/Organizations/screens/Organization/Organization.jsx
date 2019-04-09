@@ -17,6 +17,7 @@ import { withNetwork } from '../../../../contexts/Network';
 
 import Tabs from '../../../../components/Tabs/Tabs';
 import Tab from '../../../../components/Tabs/Tab';
+import NotifyAndRedirect from '../../../../components/NotifyAndRedirect';
 
 import OrganizationAccess from './OrganizationAccess';
 import OrganizationDetail from './OrganizationDetail';
@@ -175,6 +176,7 @@ class Organization extends Component {
                 />
               )}
             />
+            {organization && <NotifyAndRedirect to={`/organizations/${match.params.id}/details`} />}
           </Switch>
           {error ? 'error!' : ''}
           {loading ? 'loading...' : ''}
