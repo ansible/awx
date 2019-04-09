@@ -10,6 +10,8 @@ from django.utils.translation import ugettext_lazy as _
 # Django REST Framework
 from rest_framework.response import Response
 from rest_framework.renderers import JSONRenderer
+from rest_framework.exceptions import PermissionDenied
+
 
 # AWX
 # from awx.main.analytics import collectors
@@ -35,4 +37,6 @@ class MetricsView(APIView):
 
     def get(self, request, format='txt'):
         ''' Show Metrics Details '''
-        return Response(metrics().decode('UTF-8'))
+        if (request.user.is_superuser or request.user.is_system_auditor):
+            return Response(metrics().decode('UTF-8'))
+        raise PermissionDenied()
