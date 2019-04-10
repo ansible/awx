@@ -21,6 +21,8 @@
     color: @at-white;
     margin: 2px @at-space-2x;
     align-self: center;
+    /* fallback for FF < 68 which doesn't support `break-word` */
+    word-break: break-all;
     word-break: break-word;
 
     &:hover,
