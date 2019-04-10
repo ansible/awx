@@ -10,7 +10,7 @@ module.exports = {
   },
   setupTestFrameworkScriptFile: '<rootDir>/jest.setup.js',
   testMatch: [
-    '<rootDir>/__tests__/**/*.{js,jsx}'
+    '<rootDir>/__tests__/**/*.test.{js,jsx}'
   ],
   testEnvironment: 'jsdom',
   testURL: 'http://127.0.0.1:3001',

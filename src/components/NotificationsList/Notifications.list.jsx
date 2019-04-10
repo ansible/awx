@@ -12,10 +12,7 @@ import DataListToolbar from '../DataListToolbar';
 import NotificationListItem from './NotificationListItem';
 import Pagination from '../Pagination';
 
-import {
-  encodeQueryString,
-  parseQueryString,
-} from '../../qs';
+import { parseQueryString } from '../../qs';
 
 class Notifications extends Component {
   columns = [
@@ -55,7 +52,6 @@ class Notifications extends Component {
     this.handleSetPage = this.handleSetPage.bind(this);
     this.handleSelectAll = this.handleSelectAll.bind(this);
     this.toggleNotification = this.toggleNotification.bind(this);
-    this.updateUrl = this.updateUrl.bind(this);
     this.createError = this.createError.bind(this);
     this.createSuccess = this.createSuccess.bind(this);
     this.readNotifications = this.readNotifications.bind(this);
@@ -118,16 +114,6 @@ class Notifications extends Component {
     const { sortedColumnKey, sortOrder } = this.state;
 
     this.handleSort(sortedColumnKey, sortOrder);
-  }
-
-  updateUrl (queryParams) {
-    const { history, location, match } = this.props;
-    const pathname = match.url;
-    const search = `?${encodeQueryString(queryParams)}`;
-
-    if (search !== location.search) {
-      history.replace({ pathname, search });
-    }
   }
 
   async createError (id, isCurrentlyOn) {

@@ -1,34 +1,102 @@
-import React from 'react';
+import React, { Fragment } from 'react';
+import PropTypes from 'prop-types';
+import { withRouter } from 'react-router-dom';
 import OrganizationTeamsList from '../../components/OrganizationTeamsList';
+import { parseQueryString } from '../../../../qs';
+
+const DEFAULT_QUERY_PARAMS = {
+  page: 1,
+  page_size: 5,
+  order_by: 'name',
+};
 
 class OrganizationTeams extends React.Component {
   constructor (props) {
     super(props);
 
     this.readOrganizationTeamsList = this.readOrganizationTeamsList.bind(this);
+
+    this.state = {
+      isInitialized: false,
+      isLoading: false,
+      error: null,
+      itemCount: 0,
+      teams: [],
+    };
   }
 
-  readOrganizationTeamsList (id, params) {
-    const { api } = this.props;
-    return api.readOrganizationTeamsList(id, params);
+  componentDidMount () {
+    this.readOrganizationTeamsList();
+  }
+
+  componentDidUpdate (prevProps) {
+    const { location } = this.props;
+    if (location !== prevProps.location) {
+      this.readOrganizationTeamsList();
+    }
+  }
+
+  getQueryParams () {
+    const { location } = this.props;
+    const searchParams = parseQueryString(location.search.substring(1));
+
+    return {
+      ...DEFAULT_QUERY_PARAMS,
+      ...searchParams,
+    };
+  }
+
+  async readOrganizationTeamsList () {
+    const { api, id } = this.props;
+    const params = this.getQueryParams();
+    this.setState({ isLoading: true });
+    try {
+      const {
+        data: { count = 0, results = [] },
+      } = await api.readOrganizationTeamsList(id, params);
+      this.setState({
+        itemCount: count,
+        teams: results,
+        isLoading: false,
+        isInitialized: true,
+      });
+    } catch (error) {
+      this.setState({
+        error,
+        isLoading: false,
+        isInitialized: true,
+      });
+    }
   }
 
   render () {
-    const {
-      location,
-      match,
-      history,
-    } = this.props;
+    const { teams, itemCount, isLoading, isInitialized, error } = this.state;
 
+    if (error) {
+      // TODO: better error state
+      return <div>{error.message}</div>;
+    }
+
+    // TODO: better loading state
     return (
-      <OrganizationTeamsList
-        onReadTeamsList={this.readOrganizationTeamsList}
-        match={match}
-        location={location}
-        history={history}
-      />
+      <Fragment>
+        {isLoading && (<div>Loading...</div>)}
+        {isInitialized && (
+          <OrganizationTeamsList
+            teams={teams}
+            itemCount={itemCount}
+            queryParams={this.getQueryParams()}
+          />
+        )}
+      </Fragment>
     );
   }
 }
 
-export default OrganizationTeams;
+OrganizationTeams.propTypes = {
+  id: PropTypes.number.isRequired,
+  api: PropTypes.shape().isRequired,
+};
+
+export { OrganizationTeams as _OrganizationTeams };
+export default withRouter(OrganizationTeams);

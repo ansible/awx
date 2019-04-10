@@ -1,16 +1,17 @@
 import React from 'react';
 import { mount } from 'enzyme';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, Router } from 'react-router-dom';
+import { createMemoryHistory } from 'history';
 import { I18nProvider } from '@lingui/react';
-
+import { sleep } from '../../../testUtils';
 import OrganizationTeamsList from '../../../../src/pages/Organizations/components/OrganizationTeamsList';
 
 const mockData = [
-  {
-    id: 1,
-    name: 'boo',
-    url: '/foo/bar/'
-  }
+  { id: 1, name: 'one', url: '/org/team/1' },
+  { id: 2, name: 'two', url: '/org/team/2' },
+  { id: 3, name: 'three', url: '/org/team/3' },
+  { id: 4, name: 'four', url: '/org/team/4' },
+  { id: 5, name: 'five', url: '/org/team/5' },
 ];
 
 describe('<OrganizationTeamsList />', () => {
@@ -23,85 +24,81 @@ describe('<OrganizationTeamsList />', () => {
       <I18nProvider>
         <MemoryRouter>
           <OrganizationTeamsList
-            match={{ path: '/organizations/:id', url: '/organizations/1', params: { id: '1' } }}
-            location={{ search: '', pathname: '/organizations/1/teams' }}
-            onReadTeamsList={() => {}}
-            removeRole={() => {}}
+            teams={mockData}
+            itemCount={7}
+            queryParams={{
+              page: 1,
+              page_size: 5,
+              order_by: 'name',
+            }}
           />
         </MemoryRouter>
       </I18nProvider>
     );
   });
 
-  test('api response data passed to component gets set to state properly', (done) => {
-    const wrapper = mount(
-      <I18nProvider>
-        <MemoryRouter>
-          <OrganizationTeamsList
-            match={{ path: '/organizations/:id', url: '/organizations/1', params: { id: '0' } }}
-            location={{ search: '', pathname: '/organizations/1/teams' }}
-            onReadTeamsList={() => ({ data: { count: 1, results: mockData } })}
-          />
-        </MemoryRouter>
-      </I18nProvider>
-    ).find('OrganizationTeamsList');
-
-    setImmediate(() => {
-      expect(wrapper.state().results).toEqual(mockData);
-      done();
+  // should navigate when datalisttoolbar changes sorting
+  test('should navigate when DataListToolbar calls onSort prop', async () => {
+    const history = createMemoryHistory({
+      initialEntries: ['/organizations/1/teams'],
     });
+    const wrapper = mount(
+      <Router history={history}>
+        <I18nProvider>
+          <OrganizationTeamsList
+            teams={mockData}
+            itemCount={7}
+            queryParams={{
+              page: 1,
+              page_size: 5,
+              order_by: 'name',
+            }}
+          />
+        </I18nProvider>
+      </Router>
+    );
+
+    const toolbar = wrapper.find('DataListToolbar');
+    expect(toolbar.prop('sortedColumnKey')).toEqual('name');
+    expect(toolbar.prop('sortOrder')).toEqual('ascending');
+    toolbar.prop('onSort')('name', 'descending');
+    expect(history.location.search).toEqual('?order_by=-name');
+    await sleep(0);
+    wrapper.update();
+
+    expect(toolbar.prop('sortedColumnKey')).toEqual('name');
+    // TODO: this assertion required updating queryParams prop. Consider
+    // fixing after #147 is done:
+    // expect(toolbar.prop('sortOrder')).toEqual('descending');
+    toolbar.prop('onSort')('name', 'ascending');
+    expect(history.location.search).toEqual('?order_by=name');
   });
 
-  test('handleSort being passed properly to DataListToolbar component', async (done) => {
-    const handleSort = jest.spyOn(OrganizationTeamsList.prototype, 'handleSort');
-    const wrapper = mount(
-      <I18nProvider>
-        <MemoryRouter>
-          <OrganizationTeamsList
-            match={{ path: '/organizations/:id', url: '/organizations/1', params: { id: '0' } }}
-            location={{ search: '', pathname: '/organizations/1/teams' }}
-            onReadTeamsList={() => ({ data: { count: 1, results: mockData } })}
-          />
-        </MemoryRouter>
-      </I18nProvider>
-    ).find('OrganizationTeamsList');
-    expect(handleSort).not.toHaveBeenCalled();
-
-    setImmediate(() => {
-      const rendered = wrapper.update();
-      rendered.find('button[aria-label="Sort"]').simulate('click');
-      expect(handleSort).toHaveBeenCalled();
-      done();
+  test('should navigate to page when Pagination calls onSetPage prop', () => {
+    const history = createMemoryHistory({
+      initialEntries: ['/organizations/1/teams'],
     });
-  });
-
-  test('handleSetPage calls readQueryParams and readOrganizationTeamsList ', () => {
-    const spyQueryParams = jest.spyOn(OrganizationTeamsList.prototype, 'readQueryParams');
-    const spyFetch = jest.spyOn(OrganizationTeamsList.prototype, 'readOrganizationTeamsList');
     const wrapper = mount(
-      <I18nProvider>
-        <MemoryRouter>
+      <Router history={history}>
+        <I18nProvider>
           <OrganizationTeamsList
-            match={{ path: '/organizations/:id', url: '/organizations/1', params: { id: '0' } }}
-            location={{ search: '', pathname: '/organizations/1/teams' }}
-            onReadTeamsList={() => ({ data: { count: 1, results: mockData } })}
+            teams={mockData}
+            itemCount={7}
+            queryParams={{
+              page: 1,
+              page_size: 5,
+              order_by: 'name',
+            }}
           />
-        </MemoryRouter>
-      </I18nProvider>
-    ).find('OrganizationTeamsList');
-    wrapper.instance().handleSetPage(2, 10);
-    expect(spyQueryParams).toHaveBeenCalled();
-    expect(spyFetch).toHaveBeenCalled();
-    wrapper.setState({ sortOrder: 'descending' });
-    wrapper.instance().handleSetPage(3, 5);
-    expect(spyQueryParams).toHaveBeenCalled();
-    expect(spyFetch).toHaveBeenCalled();
-    const queryParamCalls = spyQueryParams.mock.calls;
-    // make sure last two readQueryParams calls
-    // were called with the correct arguments
-    expect(queryParamCalls[queryParamCalls.length - 2][0])
-      .toEqual({ order_by: 'name', page: 2, page_size: 10 });
-    expect(queryParamCalls[queryParamCalls.length - 1][0])
-      .toEqual({ order_by: '-name', page: 3, page_size: 5 });
+        </I18nProvider>
+      </Router>
+    );
+
+    const pagination = wrapper.find('Pagination');
+    pagination.prop('onSetPage')(2, 5);
+    expect(history.location.search).toEqual('?page=2&page_size=5');
+    wrapper.update();
+    pagination.prop('onSetPage')(1, 25);
+    expect(history.location.search).toEqual('?page=1&page_size=25');
   });
 });
