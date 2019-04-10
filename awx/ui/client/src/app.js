@@ -411,6 +411,10 @@ angular
                 // create a promise that will resolve state $AnsibleConfig is loaded
                 $rootScope.loginConfig = $q.defer();
             }
+            if (!$rootScope.basePathsLoaded) {
+                // create a promise that will resolve when base paths are loaded
+                $rootScope.basePathsLoaded = $q.defer();
+            }
             $rootScope.licenseMissing = true;
             //the authorization controller redirects to the home page automatcially if there is no last path defined. in order to override
             // this, set the last path to /portal for instances where portal is visited for the first time.
