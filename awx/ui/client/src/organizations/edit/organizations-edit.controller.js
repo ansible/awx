@@ -4,11 +4,11 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$scope', '$location', '$stateParams', 'OrgAdminLookup',
-    'OrganizationForm', 'Rest', 'ProcessErrors', 'Prompt', '$rootScope', 'i18n',
+export default ['$scope', '$location', '$stateParams', 'isOrgAdmin', 'isNotificationAdmin',
+    'OrganizationForm', 'Rest', 'ProcessErrors', 'Prompt', 'i18n', 'isOrgAuditor',
     'GetBasePath', 'Wait', '$state', 'ToggleNotification', 'CreateSelect2', 'InstanceGroupsService', 'InstanceGroupsData', 'ConfigData',
-    function($scope, $location, $stateParams, OrgAdminLookup,
-        OrganizationForm, Rest, ProcessErrors, Prompt, $rootScope, i18n,
+    function($scope, $location, $stateParams, isOrgAdmin, isNotificationAdmin,
+        OrganizationForm, Rest, ProcessErrors, Prompt, i18n, isOrgAuditor,
         GetBasePath, Wait, $state, ToggleNotification, CreateSelect2, InstanceGroupsService, InstanceGroupsData, ConfigData) {
 
         let form = OrganizationForm(),
@@ -18,34 +18,22 @@ export default ['$scope', '$location', '$stateParams', 'OrgAdminLookup',
             id = $stateParams.organization_id,
             instance_group_url = defaultUrl + id + '/instance_groups/';
 
-        init();
+        $scope.isOrgAuditor = isOrgAuditor;
+        $scope.isOrgAdmin = isOrgAdmin;
+        $scope.isNotificationAdmin = isNotificationAdmin;
 
-        function init() {
-            OrgAdminLookup.checkForAdminAccess({organization: id})
-                .then(function(isOrgAdmin){
-                    $scope.isOrgAdmin = isOrgAdmin;
-                });
+        $scope.$watch('organization_obj.summary_fields.user_capabilities.edit', function(val) {
+            if (val === false) {
+                $scope.canAdd = false;
+            }
+        });
 
-            Rest.setUrl(GetBasePath('users') + $rootScope.current_user.id + '/roles/?role_field=notification_admin_role');
-            Rest.get()
-                .then(({data}) => {
-                    $scope.isNotificationAdmin = (data.count && data.count > 0);
-                });
-
-            $scope.$watch('organization_obj.summary_fields.user_capabilities.edit', function(val) {
-                if (val === false) {
-                    $scope.canAdd = false;
-                }
-            });
-
-            $scope.instance_groups = InstanceGroupsData;
-            const virtualEnvs = ConfigData.custom_virtualenvs || [];
-            $scope.custom_virtualenvs_visible = virtualEnvs.length > 1;
-            $scope.custom_virtualenvs_options = virtualEnvs.filter(
-                v => !/\/ansible\/$/.test(v)
-            );
-        }
-
+        $scope.instance_groups = InstanceGroupsData;
+        const virtualEnvs = ConfigData.custom_virtualenvs || [];
+        $scope.custom_virtualenvs_visible = virtualEnvs.length > 1;
+        $scope.custom_virtualenvs_options = virtualEnvs.filter(
+            v => !/\/ansible\/$/.test(v)
+        );
 
         // Retrieve detail record and prepopulate the form
         Wait('start');
@@ -54,6 +42,15 @@ export default ['$scope', '$location', '$stateParams', 'OrgAdminLookup',
         .then(({data}) => {
             let fld;
 
+            $scope.sufficientRoleForNotifToggle = 
+                isNotificationAdmin && (
+                    $scope.is_system_auditor || 
+                    isOrgAuditor ||
+                    isOrgAdmin
+                );
+
+            $scope.sufficientRoleForNotif =  isNotificationAdmin || isOrgAuditor || $scope.user_is_system_auditor;
+            
             $scope.organization_name = data.name;
             for (fld in form.fields) {
                 if (typeof data[fld] !== 'undefined') {

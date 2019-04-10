@@ -1,5 +1,6 @@
 import pytest
 
+from awx.main.models import Organization, Project
 from awx.main.access import (
     NotificationTemplateAccess,
     NotificationAccess,
@@ -135,6 +136,106 @@ def test_system_auditor_JT_attach(system_auditor, job_template, notification_tem
     assert not access.can_attach(
         job_template, notification_template, 'notification_templates_success',
         {'id': notification_template.id})
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("org_role,expect", [
+    ('admin_role', True),
+    ('notification_admin_role', True),
+    ('workflow_admin_role', False),
+    ('auditor_role', False),
+    ('member_role', False)
+])
+def test_org_role_JT_attach(rando, job_template, project, workflow_job_template, inventory_source,
+                            notification_template, org_role, expect):
+    nt_organization = Organization.objects.create(name='organization just for the notification template')
+    notification_template.organization = nt_organization
+    notification_template.save()
+    getattr(notification_template.organization, org_role).members.add(rando)
+    kwargs = dict(
+        sub_obj=notification_template,
+        relationship='notification_templates_success',
+        data={'id': notification_template.id}
+    )
+    permissions = {}
+    expected_permissions = {}
+    organization = Organization.objects.create(name='objective organization')
+
+    for resource in (organization, job_template, project, workflow_job_template, inventory_source):
+        permission_resource = resource
+        if resource == inventory_source:
+            permission_resource = inventory_source.inventory
+        getattr(permission_resource, 'admin_role').members.add(rando)
+        model_name = resource.__class__.__name__
+        permissions[model_name] = rando.can_access(resource.__class__, 'attach', resource, **kwargs)
+        expected_permissions[model_name] = expect
+
+    assert permissions == expected_permissions
+
+
+@pytest.mark.django_db
+def test_organization_NT_attach_permission(rando, notification_template):
+    notification_template.organization.notification_admin_role.members.add(rando)
+    target_organization = Organization.objects.create(name='objective organization')
+    target_organization.workflow_admin_role.members.add(rando)
+    assert not rando.can_access(Organization, 'attach', obj=target_organization, sub_obj=notification_template,
+                                relationship='notification_templates_success', data={})
+    target_organization.auditor_role.members.add(rando)
+    assert rando.can_access(Organization, 'attach', obj=target_organization, sub_obj=notification_template,
+                            relationship='notification_templates_success', data={})
+
+
+@pytest.mark.django_db
+def test_project_NT_attach_permission(rando, notification_template):
+    notification_template.organization.notification_admin_role.members.add(rando)
+    project = Project.objects.create(
+        name='objective project',
+        organization=Organization.objects.create(name='foo')
+    )
+    project.update_role.members.add(rando)
+    assert not rando.can_access(Project, 'attach', obj=project, sub_obj=notification_template,
+                                relationship='notification_templates_success', data={})
+    project.admin_role.members.add(rando)
+    assert rando.can_access(Project, 'attach', obj=project, sub_obj=notification_template,
+                            relationship='notification_templates_success', data={})
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("res_role,expect", [
+    ('read_role', True),
+    (None, False)
+])
+def test_object_role_JT_attach(rando, job_template, workflow_job_template, inventory_source,
+                               notification_template, res_role, expect):
+    nt_organization = Organization.objects.create(name='organization just for the notification template')
+    nt_organization.notification_admin_role.members.add(rando)
+    notification_template.organization = nt_organization
+    notification_template.save()
+    kwargs = dict(
+        sub_obj=notification_template,
+        relationship='notification_templates_success',
+        data={'id': notification_template.id}
+    )
+    permissions = {}
+    expected_permissions = {}
+
+    for resource in (job_template, workflow_job_template, inventory_source):
+        permission_resource = resource
+        if resource == inventory_source:
+            permission_resource = inventory_source.inventory
+        model_name = resource.__class__.__name__
+        if res_role is None or hasattr(permission_resource, res_role):
+            if res_role is not None:
+                getattr(permission_resource, res_role).members.add(rando)
+            permissions[model_name] = rando.can_access(
+                resource.__class__, 'attach', resource, **kwargs
+            )
+            expected_permissions[model_name] = expect
+        else:
+            permissions[model_name] = None
+            expected_permissions[model_name] = None
+
+    assert permissions == expected_permissions
 
 
 @pytest.mark.django_db

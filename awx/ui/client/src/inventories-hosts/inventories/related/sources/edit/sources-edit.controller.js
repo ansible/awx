@@ -17,9 +17,14 @@ export default ['$state', '$scope', 'ParseVariableString', 'ParseTypeChange',
 
         const inventorySourceData = inventorySource.get();
 
+        // To toggle notifications a user needs to have a read role on the inventory
+        // _and_ have at least a notification template admin role on an org.
+        // If the user has gotten this far it's safe to say they have
+        // at least read access to the inventory
+        $scope.sufficientRoleForNotifToggle = isNotificationAdmin;
+        $scope.sufficientRoleForNotif =  isNotificationAdmin || $scope.user_is_system_auditor;
         $scope.projectBasePath = GetBasePath('projects') + '?not__status=never updated';
         $scope.canAdd = inventorySourcesOptions.actions.POST;
-        $scope.isNotificationAdmin = isNotificationAdmin || false;
         const virtualEnvs = ConfigData.custom_virtualenvs || [];
         $scope.custom_virtualenvs_options = virtualEnvs;
         // instantiate expected $scope values from inventorySourceData

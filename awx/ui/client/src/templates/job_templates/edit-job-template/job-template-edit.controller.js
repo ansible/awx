@@ -54,6 +54,12 @@ export default
 
                 CallbackHelpInit({ scope: $scope });
 
+                // To toggle notifications a user needs to have a read role on the JT
+                // _and_ have at least a notification template admin role on an org.
+                // If the user has gotten this far it's safe to say they have
+                // at least read access to the JT
+                $scope.sufficientRoleForNotifToggle = isNotificationAdmin;
+                $scope.sufficientRoleForNotif =  isNotificationAdmin || $scope.user_is_system_auditor;
                 $scope.playbook_options = null;
                 $scope.playbook = null;
                 $scope.mode = 'edit';
@@ -66,7 +72,6 @@ export default
                 $scope.skip_tag_options = [];
                 const virtualEnvs = ConfigData.custom_virtualenvs || [];
                 $scope.custom_virtualenvs_options = virtualEnvs;
-                $scope.isNotificationAdmin = isNotificationAdmin || false;
 
                 SurveyControllerInit({
                     scope: $scope,
