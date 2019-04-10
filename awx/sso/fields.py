@@ -134,17 +134,6 @@ class AuthenticationBackendsField(fields.StringListField):
         ('django.contrib.auth.backends.ModelBackend', []),
     ])
 
-    REQUIRED_BACKEND_FEATURE = {
-        'awx.sso.backends.LDAPBackend': 'ldap',
-        'awx.sso.backends.LDAPBackend1': 'ldap',
-        'awx.sso.backends.LDAPBackend2': 'ldap',
-        'awx.sso.backends.LDAPBackend3': 'ldap',
-        'awx.sso.backends.LDAPBackend4': 'ldap',
-        'awx.sso.backends.LDAPBackend5': 'ldap',
-        'awx.sso.backends.RADIUSBackend': 'enterprise_auth',
-        'awx.sso.backends.SAMLAuth': 'enterprise_auth',
-    }
-
     @classmethod
     def get_all_required_settings(cls):
         all_required_settings = set(['LICENSE'])
@@ -167,10 +156,8 @@ class AuthenticationBackendsField(fields.StringListField):
         for backend, required_settings in self.REQUIRED_BACKEND_SETTINGS.items():
             if backend not in backends:
                 continue
-            required_feature = self.REQUIRED_BACKEND_FEATURE.get(backend, '')
-            if not required_feature:
-                if all([getattr(settings, rs, None) for rs in required_settings]):
-                    continue
+            if all([getattr(settings, rs, None) for rs in required_settings]):
+                continue
             backends = [x for x in backends if x != backend]
         return backends
 
