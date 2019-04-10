@@ -1,4 +1,3 @@
-from datetime import datetime
 from django.conf import settings
 from prometheus_client import (
     REGISTRY,
@@ -62,7 +61,7 @@ def metrics():
         'external_logger_type': getattr(settings, 'LOG_AGGREGATOR_TYPE', 'None')
     })
 
-    current_counts = counts(datetime.now())
+    current_counts = counts(None)
 
     ORG_COUNT.set(current_counts['organization'])
     USER_COUNT.set(current_counts['user'])
@@ -86,7 +85,7 @@ def metrics():
     RUNNING_JOBS.set(current_counts['running_jobs'])
 
 
-    instance_data = instance_info(datetime.now())
+    instance_data = instance_info(None)
     for uuid in instance_data:
         INSTANCE_CAPACITY.labels(type=uuid).set(instance_data[uuid]['capacity'])
         INSTANCE_CPU.labels(type=uuid).set(instance_data[uuid]['cpu'])
@@ -98,7 +97,7 @@ def metrics():
             'version': instance_data[uuid]['version']
         })
 
-    instance_data = job_instance_counts(datetime.now())
+    instance_data = job_instance_counts(None)
     for node in instance_data:
         # skipping internal execution node (for system jobs) 
         # TODO: determine if we should exclude execution_node from instance count
