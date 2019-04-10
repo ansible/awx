@@ -58,10 +58,6 @@ class PageHeaderToolbar extends Component {
     const { isHelpOpen, isUserOpen } = this.state;
     const { isAboutDisabled, onAboutClick, onLogoutClick } = this.props;
 
-    // const dropdownIconColor = {
-    //   color: 'white'
-    // };
-
     return (
       <I18n>
         {({ i18n }) => (
@@ -69,8 +65,6 @@ class PageHeaderToolbar extends Component {
             <ToolbarGroup>
               <Tooltip
                 position="left"
-                entryDelay={0}
-                exitDelay={0}
                 content={
                   <div>Help</div>
                 }
@@ -84,7 +78,6 @@ class PageHeaderToolbar extends Component {
                     toggle={(
                       <DropdownToggle
                         onToggle={this.onHelpToggle}
-                        // style={dropdownIconColor}
                       >
                         <QuestionCircleIcon />
                       </DropdownToggle>
@@ -111,8 +104,6 @@ class PageHeaderToolbar extends Component {
               </Tooltip>
               <Tooltip
                 position="left"
-                entryDelay={0}
-                exitDelay={0}
                 content={
                   <div>User</div>
                 }
@@ -126,7 +117,6 @@ class PageHeaderToolbar extends Component {
                     toggle={(
                       <DropdownToggle
                         onToggle={this.onUserToggle}
-                        // style={dropdownIconColor}
                       >
                         <UserIcon />
                         &nbsp; User Name
