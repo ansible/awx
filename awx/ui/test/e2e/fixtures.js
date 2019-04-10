@@ -312,7 +312,8 @@ const getJobTemplate = (
     namespace = session,
     playbook = 'hello_world.yml',
     name = `${namespace}-job-template`,
-    updateProject = true
+    updateProject = true,
+    jobSliceCount = 1
 ) => {
     const promises = [
         getInventory(namespace),
@@ -332,6 +333,7 @@ const getJobTemplate = (
             credential: credential.id,
             project: project.id,
             playbook: `${playbook}`,
+            job_slice_count: `${jobSliceCount}`,
         }));
 };
 
