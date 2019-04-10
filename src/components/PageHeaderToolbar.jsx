@@ -11,6 +11,7 @@ import {
   Toolbar,
   ToolbarGroup,
   ToolbarItem,
+  Tooltip
 } from '@patternfly/react-core';
 import {
   QuestionCircleIcon,
@@ -22,7 +23,10 @@ const DOCLINK = 'https://docs.ansible.com/ansible-tower/latest/html/userguide/in
 class PageHeaderToolbar extends Component {
   constructor (props) {
     super(props);
-    this.state = { isHelpOpen: false, isUserOpen: false };
+    this.state = {
+      isHelpOpen: false,
+      isUserOpen: false,
+    };
 
     this.onHelpSelect = this.onHelpSelect.bind(this);
     this.onHelpToggle = this.onHelpToggle.bind(this);
@@ -54,77 +58,98 @@ class PageHeaderToolbar extends Component {
     const { isHelpOpen, isUserOpen } = this.state;
     const { isAboutDisabled, onAboutClick, onLogoutClick } = this.props;
 
-    const dropdownIconColor = {
-      color: 'white'
-    };
+    // const dropdownIconColor = {
+    //   color: 'white'
+    // };
 
     return (
       <I18n>
         {({ i18n }) => (
           <Toolbar>
             <ToolbarGroup>
-              <ToolbarItem>
-                <Dropdown
-                  isOpen={isHelpOpen}
-                  position={DropdownPosition.right}
-                  onSelect={this.onHelpSelect}
-                  toggle={(
-                    <DropdownToggle
-                      onToggle={this.onHelpToggle}
-                      style={dropdownIconColor}
-                    >
-                      <QuestionCircleIcon />
-                    </DropdownToggle>
-                  )}
-                  dropdownItems={[
-                    <DropdownItem
-                      key="help"
-                      target="_blank"
-                      href={DOCLINK}
-                    >
-                      {i18n._(t`Help`)}
-                    </DropdownItem>,
-                    <DropdownItem
-                      key="about"
-                      component="button"
-                      isDisabled={isAboutDisabled}
-                      onClick={onAboutClick}
-                    >
-                      {i18n._(t`About`)}
-                    </DropdownItem>
-                  ]}
-                />
-              </ToolbarItem>
-              <ToolbarItem>
-                <Dropdown
-                  isOpen={isUserOpen}
-                  position={DropdownPosition.right}
-                  onSelect={this.onUserSelect}
-                  toggle={(
-                    <DropdownToggle
-                      onToggle={this.onUserToggle}
-                      style={dropdownIconColor}
-                    >
-                      <UserIcon />
-                    </DropdownToggle>
-                  )}
-                  dropdownItems={[
-                    <DropdownItem
-                      key="user"
-                      href="#/home"
-                    >
-                      {i18n._(t`User Details`)}
-                    </DropdownItem>,
-                    <DropdownItem
-                      key="logout"
-                      component="button"
-                      onClick={onLogoutClick}
-                    >
-                      {i18n._(t`Logout`)}
-                    </DropdownItem>
-                  ]}
-                />
-              </ToolbarItem>
+              <Tooltip
+                position="left"
+                entryDelay={0}
+                exitDelay={0}
+                content={
+                  <div>Help</div>
+                }
+              >
+                <ToolbarItem>
+                  <Dropdown
+                    isPlain
+                    isOpen={isHelpOpen}
+                    position={DropdownPosition.right}
+                    onSelect={this.onHelpSelect}
+                    toggle={(
+                      <DropdownToggle
+                        onToggle={this.onHelpToggle}
+                        // style={dropdownIconColor}
+                      >
+                        <QuestionCircleIcon />
+                      </DropdownToggle>
+                    )}
+                    dropdownItems={[
+                      <DropdownItem
+                        key="help"
+                        target="_blank"
+                        href={DOCLINK}
+                      >
+                        {i18n._(t`Help`)}
+                      </DropdownItem>,
+                      <DropdownItem
+                        key="about"
+                        component="button"
+                        isDisabled={isAboutDisabled}
+                        onClick={onAboutClick}
+                      >
+                        {i18n._(t`About`)}
+                      </DropdownItem>
+                    ]}
+                  />
+                </ToolbarItem>
+              </Tooltip>
+              <Tooltip
+                position="left"
+                entryDelay={0}
+                exitDelay={0}
+                content={
+                  <div>User</div>
+                }
+              >
+                <ToolbarItem>
+                  <Dropdown
+                    isPlain
+                    isOpen={isUserOpen}
+                    position={DropdownPosition.right}
+                    onSelect={this.onUserSelect}
+                    toggle={(
+                      <DropdownToggle
+                        onToggle={this.onUserToggle}
+                        // style={dropdownIconColor}
+                      >
+                        <UserIcon />
+                        &nbsp; User Name
+                      </DropdownToggle>
+                    )}
+                    dropdownItems={[
+                      <DropdownItem
+                        key="user"
+                        href="#/home"
+                      >
+                        {i18n._(t`User Details`)}
+                      </DropdownItem>,
+                      <DropdownItem
+                        key="logout"
+                        component="button"
+                        onClick={onLogoutClick}
+                      >
+                        {i18n._(t`Logout`)}
+                      </DropdownItem>
+                    ]}
+                  />
+                </ToolbarItem>
+              </Tooltip>
             </ToolbarGroup>
           </Toolbar>
         )}
