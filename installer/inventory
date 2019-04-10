@@ -110,7 +110,7 @@ create_preload_data=True
 secret_key=awxsecret
 
 # Build AWX with official logos
-# Requires cloning awx-logos repo into the project root.
+# Requires cloning awx-logos repo as a sibling of this project.
 # Review the trademark guidelines at https://github.com/ansible/awx-logos/blob/master/TRADEMARKS.md
 # awx_official=false
 
