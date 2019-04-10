@@ -67,13 +67,13 @@ class provider extends Component {
 
   render () {
     const {
-      value
+      value: stateValue
     } = this.state;
 
-    const { children } = this.props;
+    const { value: propsValue, children } = this.props;
 
     return (
-      <ConfigContext.Provider value={value}>
+      <ConfigContext.Provider value={propsValue || stateValue}>
         {children}
       </ConfigContext.Provider>
     );

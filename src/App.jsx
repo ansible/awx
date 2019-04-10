@@ -14,6 +14,7 @@ import { t } from '@lingui/macro';
 
 import { RootDialog } from './contexts/RootDialog';
 import { withNetwork } from './contexts/Network';
+import { Config } from './contexts/Config';
 
 import AlertModal from './components/AlertModal';
 import About from './components/About';
@@ -64,10 +65,8 @@ class App extends Component {
 
   render () {
     const {
-      ansible_version,
       isAboutModalOpen,
-      isNavOpen,
-      version
+      isNavOpen
     } = this.state;
 
     const {
@@ -77,75 +76,80 @@ class App extends Component {
     } = this.props;
 
     return (
-      <I18n>
-        {({ i18n }) => (
-          <RootDialog>
-            {({ title, bodyText, variant = 'info', clearRootDialogMessage }) => (
-              <Fragment>
-                {(title || bodyText) && (
-                  <AlertModal
-                    variant={variant}
-                    isOpen={!!(title || bodyText)}
-                    onClose={clearRootDialogMessage}
-                    title={title}
-                    actions={[
-                      <Button key="close" variant="secondary" onClick={clearRootDialogMessage}>{i18n._(t`Close`)}</Button>
-                    ]}
-                  >
-                    {bodyText}
-                  </AlertModal>
-                )}
-                <Page
-                  usecondensed="True"
-                  header={(
-                    <PageHeader
-                      showNavToggle
-                      onNavToggle={this.onNavToggle}
-                      logo={<TowerLogo linkTo="/" />}
-                      toolbar={(
-                        <PageHeaderToolbar
-                          isAboutDisabled={!version}
-                          onAboutClick={this.onAboutModalOpen}
-                          onLogoutClick={this.onLogout}
+      <Config>
+        {({ ansible_version, version }) => (
+          <I18n>
+            {({ i18n }) => (
+              <RootDialog>
+                {({ title, bodyText, variant = 'info', clearRootDialogMessage }) => (
+                  <Fragment>
+                    {(title || bodyText) && (
+                      <AlertModal
+                        variant={variant}
+                        isOpen={!!(title || bodyText)}
+                        onClose={clearRootDialogMessage}
+                        title={title}
+                        actions={[
+                          <Button key="close" variant="secondary" onClick={clearRootDialogMessage}>{i18n._(t`Close`)}</Button>
+                        ]}
+                      >
+                        {bodyText}
+                      </AlertModal>
+                    )}
+                    <Page
+                      usecondensed="True"
+                      header={(
+                        <PageHeader
+                          showNavToggle
+                          onNavToggle={this.onNavToggle}
+                          logo={<TowerLogo linkTo="/" />}
+                          toolbar={(
+                            <PageHeaderToolbar
+                              isAboutDisabled={!version}
+                              onAboutClick={this.onAboutModalOpen}
+                              onLogoutClick={this.onLogout}
+                            />
+                          )}
                         />
                       )}
-                    />
-                  )}
-                  sidebar={(
-                    <PageSidebar
-                      isNavOpen={isNavOpen}
-                      nav={(
-                        <Nav aria-label={navLabel}>
-                          <NavList>
-                            {routeGroups.map(({ groupId, groupTitle, routes }) => (
-                              <NavExpandableGroup
-                                key={groupId}
-                                groupId={groupId}
-                                groupTitle={groupTitle}
-                                routes={routes}
-                              />
-                            ))}
-                          </NavList>
-                        </Nav>
+                      sidebar={(
+                        <PageSidebar
+                          isNavOpen={isNavOpen}
+                          nav={(
+                            <Nav aria-label={navLabel}>
+                              <NavList>
+                                {routeGroups.map(({ groupId, groupTitle, routes }) => (
+                                  <NavExpandableGroup
+                                    key={groupId}
+                                    groupId={groupId}
+                                    groupTitle={groupTitle}
+                                    routes={routes}
+                                  />
+                                ))}
+                              </NavList>
+                            </Nav>
+                          )}
+                        />
                       )}
+                    >
+                      {render && render({ routeGroups })}
+                    </Page>
+                    <About
+                      ansible_version={ansible_version}
+                      version={version}
+                      isOpen={isAboutModalOpen}
+                      onClose={this.onAboutModalClose}
                     />
-                  )}
-                >
-                  {render && render({ routeGroups })}
-                </Page>
-                <About
-                  ansible_version={ansible_version}
-                  version={version}
-                  isOpen={isAboutModalOpen}
-                  onClose={this.onAboutModalClose}
-                />
-              </Fragment>
+                  </Fragment>
+                )}
+              </RootDialog>
             )}
-          </RootDialog>
+          </I18n>
         )}
-      </I18n>
+      </Config>
     );
   }
 }
 
+export { App as _App };
 export default withNetwork(App);

@@ -28,6 +28,7 @@ class OrganizationForm extends Component {
 
     this.state = {
       instanceGroups: [],
+      initialInstanceGroups: [],
       formIsValid: true,
     };
   }
@@ -174,4 +175,5 @@ OrganizationForm.contextTypes = {
   custom_virtualenvs: PropTypes.arrayOf(PropTypes.string)
 };
 
+export { OrganizationForm as _OrganizationForm };
 export default withNetwork(withRouter(OrganizationForm));

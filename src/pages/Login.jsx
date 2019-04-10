@@ -97,4 +97,5 @@ class AWXLogin extends Component {
   }
 }
 
+export { AWXLogin as _AWXLogin };
 export default withNetwork(withRootDialog(withRouter(AWXLogin)));

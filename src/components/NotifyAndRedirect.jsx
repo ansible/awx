@@ -26,6 +26,7 @@ class NotifyAndRedirect extends Component {
 
   render () {
     const { to, push, from, exact, strict, sensitive } = this.props;
+
     return (
       <Redirect
         to={to}
@@ -39,4 +40,5 @@ class NotifyAndRedirect extends Component {
   }
 }
 
+export { NotifyAndRedirect as _NotifyAndRedirect };
 export default withRootDialog(withRouter(NotifyAndRedirect));

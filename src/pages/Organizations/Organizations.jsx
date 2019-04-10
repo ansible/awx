@@ -94,4 +94,5 @@ class Organizations extends Component {
   }
 }
 
+export { Organizations as _Organizations };
 export default withRootDialog(withRouter(Organizations));

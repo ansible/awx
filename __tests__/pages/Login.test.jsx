@@ -1,9 +1,9 @@
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { mount, shallow } from 'enzyme';
+import { mount } from 'enzyme';
 import { I18nProvider } from '@lingui/react';
 import { asyncFlush } from '../../jest.setup';
-import AWXLogin from '../../src/pages/Login';
+import { _AWXLogin } from '../../src/pages/Login';
 import APIClient from '../../src/api';
 
 describe('<Login />', () => {
@@ -32,7 +32,7 @@ describe('<Login />', () => {
     loginWrapper = mount(
       <MemoryRouter>
         <I18nProvider>
-          <AWXLogin api={api} />
+          <_AWXLogin api={api} clearRootDialogMessage={() => {}} handleHttpError={() => {}} />
         </I18nProvider>
       </MemoryRouter>
     );
@@ -61,7 +61,7 @@ describe('<Login />', () => {
     loginWrapper = mount(
       <MemoryRouter>
         <I18nProvider>
-          <AWXLogin api={api} logo="images/foo.jpg" alt="Foo Application" />
+          <_AWXLogin api={api} logo="images/foo.jpg" alt="Foo Application" />
         </I18nProvider>
       </MemoryRouter>
     );
@@ -75,7 +75,7 @@ describe('<Login />', () => {
     loginWrapper = mount(
       <MemoryRouter>
         <I18nProvider>
-          <AWXLogin api={api} />
+          <_AWXLogin api={api} />
         </I18nProvider>
       </MemoryRouter>
     );
@@ -166,9 +166,7 @@ describe('<Login />', () => {
   });
 
   test('render Redirect to / when already authenticated', () => {
-    api.isAuthenticated = jest.fn();
-    api.isAuthenticated.mockReturnValue(true);
-    loginWrapper = shallow(<AWXLogin api={api} />);
+    awxLogin.setState({ isAuthenticated: true });
     const redirectElem = loginWrapper.find('Redirect');
     expect(redirectElem.length).toBe(1);
     expect(redirectElem.props().to).toBe('/');

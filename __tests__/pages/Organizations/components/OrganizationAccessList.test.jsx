@@ -3,7 +3,7 @@ import { mount } from 'enzyme';
 import { MemoryRouter } from 'react-router-dom';
 import { I18nProvider } from '@lingui/react';
 
-import OrganizationAccessList from '../../../../src/pages/Organizations/components/OrganizationAccessList';
+import OrganizationAccessList, { _OrganizationAccessList } from '../../../../src/pages/Organizations/components/OrganizationAccessList';
 
 const mockData = [
   {
@@ -66,16 +66,17 @@ describe('<OrganizationAccessList />', () => {
   });
 
   test('onExpand and onCompact methods called when user clicks on Expand and Compact icons respectively', async (done) => {
-    const onExpand = jest.spyOn(OrganizationAccessList.prototype, 'onExpand');
-    const onCompact = jest.spyOn(OrganizationAccessList.prototype, 'onCompact');
+    const onExpand = jest.spyOn(_OrganizationAccessList.prototype, 'onExpand');
+    const onCompact = jest.spyOn(_OrganizationAccessList.prototype, 'onCompact');
     const wrapper = mount(
       <I18nProvider>
         <MemoryRouter>
-          <OrganizationAccessList
+          <_OrganizationAccessList
             match={{ path: '/organizations/:id', url: '/organizations/1', params: { id: '0' } }}
             location={{ search: '', pathname: '/organizations/1/access' }}
             getAccessList={() => ({ data: { count: 1, results: mockData } })}
             removeRole={() => {}}
+            handleHttpError={() => {}}
           />
         </MemoryRouter>
       </I18nProvider>
@@ -94,15 +95,16 @@ describe('<OrganizationAccessList />', () => {
   });
 
   test('onSort being passed properly to DataListToolbar component', async (done) => {
-    const onSort = jest.spyOn(OrganizationAccessList.prototype, 'onSort');
+    const onSort = jest.spyOn(_OrganizationAccessList.prototype, 'onSort');
     const wrapper = mount(
       <I18nProvider>
         <MemoryRouter>
-          <OrganizationAccessList
+          <_OrganizationAccessList
             match={{ path: '/organizations/:id', url: '/organizations/1', params: { id: '0' } }}
             location={{ search: '', pathname: '/organizations/1/access' }}
             getAccessList={() => ({ data: { count: 1, results: mockData } })}
             removeRole={() => {}}
+            handleHttpError={() => {}}
           />
         </MemoryRouter>
       </I18nProvider>
@@ -141,17 +143,18 @@ describe('<OrganizationAccessList />', () => {
   });
 
   test('test handleWarning, confirmDelete, and removeRole methods for Alert component', (done) => {
-    const handleWarning = jest.spyOn(OrganizationAccessList.prototype, 'handleWarning');
-    const confirmDelete = jest.spyOn(OrganizationAccessList.prototype, 'confirmDelete');
-    const removeRole = jest.spyOn(OrganizationAccessList.prototype, 'removeAccessRole');
+    const handleWarning = jest.spyOn(_OrganizationAccessList.prototype, 'handleWarning');
+    const confirmDelete = jest.spyOn(_OrganizationAccessList.prototype, 'confirmDelete');
+    const removeRole = jest.spyOn(_OrganizationAccessList.prototype, 'removeAccessRole');
     const wrapper = mount(
       <I18nProvider>
         <MemoryRouter>
-          <OrganizationAccessList
+          <_OrganizationAccessList
             match={{ path: '/organizations/:id', url: '/organizations/1', params: { id: '0' } }}
             location={{ search: '', pathname: '/organizations/1/access' }}
             getAccessList={() => ({ data: { count: 1, results: mockData } })}
             removeRole={() => {}}
+            handleHttpError={() => {}}
           />
         </MemoryRouter>
       </I18nProvider>
@@ -164,19 +167,19 @@ describe('<OrganizationAccessList />', () => {
       const rendered = wrapper.update().find('ChipButton');
       rendered.find('button[aria-label="close"]').simulate('click');
       expect(handleWarning).toHaveBeenCalled();
-      const alert = wrapper.update().find('Alert');
-      alert.find('button[aria-label="confirm-delete"]').simulate('click');
+      const alertModal = wrapper.update().find('Modal');
+      alertModal.find('button[aria-label="Confirm delete"]').simulate('click');
       expect(confirmDelete).toHaveBeenCalled();
       expect(removeRole).toHaveBeenCalled();
       done();
     });
   });
 
-  test('state is set appropriately when a user tries deleting a role', (done) => {
+  test.only('state is set appropriately when a user tries deleting a role', (done) => {
     const wrapper = mount(
       <I18nProvider>
         <MemoryRouter>
-          <OrganizationAccessList
+          <_OrganizationAccessList
             match={{ path: '/organizations/:id', url: '/organizations/1', params: { id: '0' } }}
             location={{ search: '', pathname: '/organizations/1/access' }}
             getAccessList={() => ({ data: { count: 1, results: mockData } })}
@@ -200,8 +203,8 @@ describe('<OrganizationAccessList />', () => {
       ];
       const rendered = wrapper.update().find('ChipButton');
       rendered.find('button[aria-label="close"]').simulate('click');
-      const alert = wrapper.update().find('Alert');
-      alert.find('button[aria-label="confirm-delete"]').simulate('click');
+      const alertModal = wrapper.update().find('Modal');
+      alertModal.find('button[aria-label="Confirm delete"]').simulate('click');
       expect(wrapper.state().warningTitle).not.toBe(null);
       expect(wrapper.state().warningMsg).not.toBe(null);
       expected.forEach(criteria => {

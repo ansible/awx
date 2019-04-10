@@ -343,4 +343,5 @@ Notifications.propTypes = {
   onCreateSuccess: PropTypes.func.isRequired,
 };
 
+export { Notifications as _Notifications };
 export default withNetwork(Notifications);

@@ -1,13 +1,13 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { MemoryRouter } from 'react-router-dom';
-import OrganizationNotifications from '../../../../../src/pages/Organizations/screens/Organization/OrganizationNotifications';
+import { _OrganizationNotifications } from '../../../../../src/pages/Organizations/screens/Organization/OrganizationNotifications';
 
 describe('<OrganizationNotifications />', () => {
   test('initially renders succesfully', () => {
     mount(
       <MemoryRouter initialEntries={['/organizations/1']} initialIndex={0}>
-        <OrganizationNotifications
+        <_OrganizationNotifications
           match={{ path: '/organizations/:id/notifications', url: '/organizations/1/notifications' }}
           location={{ search: '', pathname: '/organizations/1/notifications' }}
           params={{}}
@@ -18,6 +18,7 @@ describe('<OrganizationNotifications />', () => {
             createOrganizationNotificationSuccess: jest.fn(),
             createOrganizationNotificationError: jest.fn()
           }}
+          handleHttpError={() => {}}
         />
       </MemoryRouter>
     );
@@ -30,7 +31,7 @@ describe('<OrganizationNotifications />', () => {
     const createOrganizationNotificationError = jest.fn();
     const wrapper = mount(
       <MemoryRouter initialEntries={['/organizations/1']} initialIndex={0}>
-        <OrganizationNotifications
+        <_OrganizationNotifications
           match={{ path: '/organizations/:id/notifications', url: '/organizations/1/notifications' }}
           location={{ search: '', pathname: '/organizations/1/notifications' }}
           params={{}}
@@ -41,6 +42,7 @@ describe('<OrganizationNotifications />', () => {
             createOrganizationNotificationSuccess,
             createOrganizationNotificationError
           }}
+          handleHttpError={() => {}}
         />
       </MemoryRouter>
     ).find('OrganizationNotifications');

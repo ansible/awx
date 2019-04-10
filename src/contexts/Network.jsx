@@ -59,21 +59,20 @@ class prov extends Component {
 
   render () {
     const {
-      children
-    } = this.props;
-
-    const {
-      value
+      value: stateValue
     } = this.state;
 
+    const { value: propsValue, children } = this.props;
+
     return (
-      <NetworkContext.Provider value={value}>
+      <NetworkContext.Provider value={propsValue || stateValue}>
         {children}
       </NetworkContext.Provider>
     );
   }
 }
 
+export { NetworkProvider as _NetworkProvider };
 export const NetworkProvider = withRootDialog(withRouter(prov));
 
 export function withNetwork (Child) {

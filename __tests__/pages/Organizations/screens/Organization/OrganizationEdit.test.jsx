@@ -2,12 +2,16 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { MemoryRouter } from 'react-router-dom';
 import { I18nProvider } from '@lingui/react';
-import OrganizationEdit, { _OrganizationEdit } from '../../../../../src/pages/Organizations/screens/Organization/OrganizationEdit';
+
+import { NetworkProvider } from '../../../../../src/contexts/Network';
+
+import { _OrganizationEdit } from '../../../../../src/pages/Organizations/screens/Organization/OrganizationEdit';
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 describe('<OrganizationEdit />', () => {
   let api;
+  let networkProviderValue;
 
   const mockData = {
     name: 'Foo',
@@ -26,16 +30,24 @@ describe('<OrganizationEdit />', () => {
       associateInstanceGroup: jest.fn(),
       disassociate: jest.fn(),
     };
+
+    networkProviderValue = {
+      api,
+      handleHttpError: () => {}
+    };
   });
 
   test('handleSubmit should call api update', () => {
     const wrapper = mount(
       <MemoryRouter>
         <I18nProvider>
-          <OrganizationEdit
-            organization={mockData}
-            api={api}
-          />
+          <NetworkProvider value={networkProviderValue}>
+            <_OrganizationEdit
+              organization={mockData}
+              api={api}
+              handleHttpError={() => {}}
+            />
+          </NetworkProvider>
         </I18nProvider>
       </MemoryRouter>
     );
@@ -57,10 +69,13 @@ describe('<OrganizationEdit />', () => {
     const wrapper = mount(
       <MemoryRouter>
         <I18nProvider>
-          <OrganizationEdit
-            organization={mockData}
-            api={api}
-          />
+          <NetworkProvider value={networkProviderValue}>
+            <_OrganizationEdit
+              organization={mockData}
+              api={api}
+              handleHttpError={() => {}}
+            />
+          </NetworkProvider>
         </I18nProvider>
       </MemoryRouter>
     );
@@ -94,11 +109,14 @@ describe('<OrganizationEdit />', () => {
     const wrapper = mount(
       <MemoryRouter>
         <I18nProvider>
-          <_OrganizationEdit
-            history={history}
-            organization={mockData}
-            api={api}
-          />
+          <NetworkProvider value={networkProviderValue}>
+            <_OrganizationEdit
+              organization={mockData}
+              api={api}
+              handleHttpError={() => {}}
+              history={history}
+            />
+          </NetworkProvider>
         </I18nProvider>
       </MemoryRouter>
     );

@@ -62,4 +62,5 @@ class OrganizationNotifications extends Component {
   }
 }
 
+export { OrganizationNotifications as _OrganizationNotifications };
 export default withNetwork(OrganizationNotifications);

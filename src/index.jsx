@@ -50,7 +50,7 @@ import Templates from './pages/Templates';
 import Users from './pages/Users';
 
 // eslint-disable-next-line import/prefer-default-export
-export async function main (render) {
+export function main (render) {
   const el = document.getElementById('app');
 
   return render(
@@ -246,7 +246,7 @@ export async function main (render) {
           )}
         </I18n>
       </RootProvider>
-    </HashRouter>, el
+    </HashRouter>, el || document.createElement('div')
   );
 }
 

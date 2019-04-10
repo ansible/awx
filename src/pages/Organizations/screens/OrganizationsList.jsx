@@ -359,4 +359,5 @@ class OrganizationsList extends Component {
   }
 }
 
+export { OrganizationsList as _OrganizationsList };
 export default withNetwork(withRouter(OrganizationsList));

@@ -355,8 +355,8 @@ class OrganizationAccessList extends React.Component {
                     isOpen={showWarning}
                     onClose={this.hideWarning}
                     actions={[
-                      <Button variant="danger" aria-label="confirm-delete" onClick={this.confirmDelete}>Delete</Button>,
-                      <Button variant="secondary" onClick={this.hideWarning}>Cancel</Button>
+                      <Button key="delete" variant="danger" aria-label="Confirm delete" onClick={this.confirmDelete}>Delete</Button>,
+                      <Button key="cancel" variant="secondary" onClick={this.hideWarning}>Cancel</Button>
                     ]}
                   >
                     {warningMsg}
@@ -447,4 +447,5 @@ OrganizationAccessList.propTypes = {
   removeRole: PropTypes.func.isRequired,
 };
 
+export { OrganizationAccessList as _OrganizationAccessList };
 export default withNetwork(OrganizationAccessList);

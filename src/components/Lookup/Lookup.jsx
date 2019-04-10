@@ -275,4 +275,5 @@ Lookup.defaultProps = {
   name: null,
 };
 
+export { Lookup as _Lookup };
 export default withNetwork(Lookup);
