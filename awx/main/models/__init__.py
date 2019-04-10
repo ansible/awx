@@ -49,7 +49,6 @@ from awx.main.models.mixins import (  # noqa
     TaskManagerUnifiedJobMixin,
 )
 from awx.main.models.notifications import Notification, NotificationTemplate # noqa
-from awx.main.models.fact import Fact # noqa
 from awx.main.models.label import Label # noqa
 from awx.main.models.workflow import (  # noqa
     WorkflowJob, WorkflowJobNode, WorkflowJobOptions, WorkflowJobTemplate,

@@ -65,7 +65,7 @@ from awx.main.access import get_user_queryset
 from awx.api.filters import V1CredentialFilterBackend
 from awx.api.generics import (
     APIView, BaseUsersList, CopyAPIView, DeleteLastUnattachLabelMixin,
-    GenericAPIView, ListAPIView, ListCreateAPIView, ParentMixin,
+    GenericAPIView, ListAPIView, ListCreateAPIView,
     ResourceAccessList, RetrieveAPIView, RetrieveDestroyAPIView,
     RetrieveUpdateAPIView, RetrieveUpdateDestroyAPIView, SimpleListAPIView,
     SubDetailAPIView, SubListAPIView, SubListAttachDetachAPIView,
@@ -1624,53 +1624,6 @@ class HostActivityStreamList(SubListAPIView):
         self.check_parent_access(parent)
         qs = self.request.user.get_queryset(self.model)
         return qs.filter(Q(host=parent) | Q(inventory=parent.inventory))
-
-
-class HostFactVersionsList(ParentMixin, ListAPIView):
-
-    model = models.Fact
-    serializer_class = serializers.FactVersionSerializer
-    parent_model = models.Host
-    search_fields = ('facts',)
-    deprecated = True
-
-    def get_queryset(self):
-        from_spec = self.request.query_params.get('from', None)
-        to_spec = self.request.query_params.get('to', None)
-        module_spec = self.request.query_params.get('module', None)
-
-        if from_spec:
-            from_spec = dateutil.parser.parse(from_spec)
-        if to_spec:
-            to_spec = dateutil.parser.parse(to_spec)
-
-        host_obj = self.get_parent_object()
-
-        return models.Fact.get_timeline(host_obj.id, module=module_spec, ts_from=from_spec, ts_to=to_spec)
-
-    def list(self, *args, **kwargs):
-        queryset = self.get_queryset() or []
-        return Response(dict(results=self.serializer_class(queryset, many=True).data))
-
-
-class HostFactCompareView(SubDetailAPIView):
-
-    model = models.Fact
-    parent_model = models.Host
-    serializer_class = serializers.FactSerializer
-    deprecated = True
-
-    def retrieve(self, request, *args, **kwargs):
-        datetime_spec = request.query_params.get('datetime', None)
-        module_spec = request.query_params.get('module', "ansible")
-        datetime_actual = dateutil.parser.parse(datetime_spec) if datetime_spec is not None else now()
-
-        host_obj = self.get_parent_object()
-
-        fact_entry = models.Fact.get_host_fact(host_obj.id, module_spec, datetime_actual)
-        if not fact_entry:
-            return Response({'detail': _('Fact not found.')}, status=status.HTTP_404_NOT_FOUND)
-        return Response(self.serializer_class(instance=fact_entry).data)
 
 
 class HostInsights(GenericAPIView):
