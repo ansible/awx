@@ -27,7 +27,7 @@ function PromptService (Empty, $filter)  {
         if(hasCurrentExtraVars && hasDefaultExtraVars) {
             extraVars = jsyaml.safeDump(_.merge(jsyaml.safeLoad(params.launchConf.defaults.extra_vars), params.currentValues.extra_data));
         } else if(hasCurrentExtraVars) {
-            extraVars = params.currentValues.extra_data;
+            extraVars = jsyaml.safeDump(params.currentValues.extra_data);
         } else if(hasDefaultExtraVars) {
             extraVars = params.launchConf.defaults.extra_vars;
         }
