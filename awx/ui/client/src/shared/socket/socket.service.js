@@ -96,8 +96,7 @@ export default
                 $log.debug('Received From Server: ' + e.data);
 
                 var data = JSON.parse(e.data), str = "";
-
-                if(!window.liveUpdates && data.group_name !== "control" && $state.current.name !== "jobResult"){
+                if(!window.liveUpdates && data.group_name !== "control" && $state.current.name !== "output"){
                     $log.debug('Message from server dropped: ' + e.data);
                     needsRefreshAfterBlur = true;
                     return;
