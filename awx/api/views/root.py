@@ -159,11 +159,12 @@ class ApiV1PingView(APIView):
             'ha': is_ha_environment(),
             'version': get_awx_version(),
             'active_node': settings.CLUSTER_HOST_ID,
+            'install_uuid': settings.INSTALL_UUID,
         }
 
         response['instances'] = []
         for instance in Instance.objects.all():
-            response['instances'].append(dict(node=instance.hostname, heartbeat=instance.modified,
+            response['instances'].append(dict(node=instance.hostname, uuid=instance.uuid, heartbeat=instance.modified,
                                               capacity=instance.capacity, version=instance.version))
             sorted(response['instances'], key=operator.itemgetter('node'))
         response['instance_groups'] = []

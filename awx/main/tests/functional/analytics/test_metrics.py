@@ -60,7 +60,6 @@ def test_metrics_counts(organization_factory, job_template_factory, workflow_job
 
 @pytest.mark.django_db 
 def test_metrics_permissions(get, admin, org_admin, alice, bob, organization):
-
     assert get(reverse('api:metrics_view'), user=admin).status_code == 200
     assert get(reverse('api:metrics_view'), user=org_admin).status_code == 403
     assert get(reverse('api:metrics_view'), user=alice).status_code == 403
@@ -75,7 +74,6 @@ def test_metrics_permissions(get, admin, org_admin, alice, bob, organization):
 
 @pytest.mark.django_db 
 def test_metrics_http_methods(get, post, patch, put, options, admin):
-
     assert get(reverse('api:metrics_view'), user=admin).status_code == 200
     assert put(reverse('api:metrics_view'), user=admin).status_code == 405
     assert patch(reverse('api:metrics_view'), user=admin).status_code == 405
