@@ -17,6 +17,7 @@
         trackBy: 'group.id',
         basePath:  'api/v2/inventories/{{$stateParams.inventory_id}}/groups/',
         layoutClass: 'List-staticColumnLayout--groups',
+        actionHolderClass: 'List-actionHolder List-actionHolder--rootGroups',
         staticColumns: [
             {
                 field: 'failed_hosts',
