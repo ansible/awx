@@ -9,7 +9,6 @@ from django.utils.translation import ugettext_lazy as _
 
 # Django REST Framework
 from rest_framework.response import Response
-from rest_framework.renderers import JSONRenderer
 from rest_framework.exceptions import PermissionDenied
 
 
@@ -32,8 +31,7 @@ class MetricsView(APIView):
     swagger_topic = 'Metrics'
 
     renderer_classes = [renderers.PlainTextRenderer,
-                        renderers.BrowsableAPIRenderer,
-                        JSONRenderer,]
+                        renderers.BrowsableAPIRenderer,]
 
     def get(self, request, format='txt'):
         ''' Show Metrics Details '''
