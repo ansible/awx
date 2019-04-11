@@ -886,7 +886,7 @@ function(SettingsUtils, i18n, $rootScope) {
                 delay: 0,
                 title: title,
                 content: function() {
-                    return scope[attrs.awPopOverWatch];
+                    return _.get(scope, attrs.awPopOverWatch);
                 },
                 trigger: trigger,
                 html: true,
