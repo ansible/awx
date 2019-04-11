@@ -6,6 +6,7 @@ import { createMemoryHistory } from 'history';
 import { sleep } from '../../../../testUtils';
 import OrganizationTeams, { _OrganizationTeams } from '../../../../../src/pages/Organizations/screens/Organization/OrganizationTeams';
 import OrganizationTeamsList from '../../../../../src/pages/Organizations/components/OrganizationTeamsList';
+import { NetworkProvider } from '../../../../../src/contexts/Network';
 
 const listData = {
   data: {
@@ -30,6 +31,7 @@ describe('<OrganizationTeams />', () => {
         api={{
           readOrganizationTeamsList: jest.fn(),
         }}
+        handleHttpError={() => {}}
       />
     );
   });
@@ -39,11 +41,14 @@ describe('<OrganizationTeams />', () => {
     mount(
       <I18nProvider>
         <MemoryRouter initialEntries={['/organizations/1']} initialIndex={0}>
-          <OrganizationTeams
-            id={1}
-            searchString=""
-            api={{ readOrganizationTeamsList }}
-          />
+          <NetworkProvider
+            value={{ api: { readOrganizationTeamsList }, handleHttpError: () => {} }}
+          >
+            <OrganizationTeams
+              id={1}
+              searchString=""
+            />
+          </NetworkProvider>
         </MemoryRouter>
       </I18nProvider>
     ).find('OrganizationTeams');
@@ -59,11 +64,14 @@ describe('<OrganizationTeams />', () => {
     const wrapper = mount(
       <I18nProvider>
         <MemoryRouter>
-          <OrganizationTeams
-            id={1}
-            searchString=""
-            api={{ readOrganizationTeamsList }}
-          />
+          <NetworkProvider
+            value={{ api: { readOrganizationTeamsList }, handleHttpError: () => {} }}
+          >
+            <OrganizationTeams
+              id={1}
+              searchString=""
+            />
+          </NetworkProvider>
         </MemoryRouter>
       </I18nProvider>
     );
@@ -100,11 +108,14 @@ describe('<OrganizationTeams />', () => {
     const wrapper = mount(
       <Router history={history}>
         <I18nProvider>
-          <OrganizationTeams
-            id={1}
-            searchString=""
-            api={{ readOrganizationTeamsList }}
-          />
+          <NetworkProvider
+            value={{ api: { readOrganizationTeamsList }, handleHttpError: () => {} }}
+          >
+            <OrganizationTeams
+              id={1}
+              searchString=""
+            />
+          </NetworkProvider>
         </I18nProvider>
       </Router>
     );

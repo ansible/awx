@@ -2,17 +2,10 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { MemoryRouter } from 'react-router-dom';
 import { I18nProvider } from '@lingui/react';
-<<<<<<< HEAD
-import { ConfigContext } from '../../../../src/context';
-import OrganizationForm from '../../../../src/pages/Organizations/components/OrganizationForm';
 import { sleep } from '../../../testUtils';
-=======
 import { ConfigProvider } from '../../../../src/contexts/Config';
 import { NetworkProvider } from '../../../../src/contexts/Network';
 import OrganizationForm, { _OrganizationForm } from '../../../../src/pages/Organizations/components/OrganizationForm';
-
-const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
->>>>>>> fix unit tests for network handling
 
 describe('<OrganizationForm />', () => {
   let api;
