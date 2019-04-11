@@ -2,7 +2,7 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import OrganizationTeamsList from '../../components/OrganizationTeamsList';
-import { parseQueryString } from '../../../../qs';
+import { parseQueryString } from '../../../../util/qs';
 import { withNetwork } from '../../../../contexts/Network';
 
 const DEFAULT_QUERY_PARAMS = {

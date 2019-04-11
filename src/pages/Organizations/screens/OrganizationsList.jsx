@@ -32,7 +32,7 @@ import AlertModal from '../../../components/AlertModal';
 import {
   encodeQueryString,
   parseQueryString,
-} from '../../../qs';
+} from '../../../util/qs';
 
 class OrganizationsList extends Component {
   columns = [

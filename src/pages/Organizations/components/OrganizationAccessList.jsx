@@ -21,7 +21,7 @@ import DataListToolbar from '../../../components/DataListToolbar';
 
 import {
   parseQueryString,
-} from '../../../qs';
+} from '../../../util/qs';
 
 const userRolesWrapperStyle = {
   display: 'flex',
