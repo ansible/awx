@@ -12,7 +12,7 @@ import APIClient from '../api';
 
 const NetworkContext = React.createContext({});
 
-class prov extends Component {
+class Provider extends Component {
   constructor (props) {
     super(props);
 
@@ -72,8 +72,8 @@ class prov extends Component {
   }
 }
 
-export { NetworkProvider as _NetworkProvider };
-export const NetworkProvider = withRootDialog(withRouter(prov));
+export { Provider as _NetworkProvider };
+export const NetworkProvider = withRootDialog(withRouter(Provider));
 
 export function withNetwork (Child) {
   return (props) => (

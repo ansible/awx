@@ -5,7 +5,7 @@ import { withNetwork } from './Network';
 
 const ConfigContext = React.createContext({});
 
-class provider extends Component {
+class Provider extends Component {
   constructor (props) {
     super(props);
 
@@ -80,7 +80,7 @@ class provider extends Component {
   }
 }
 
-export const ConfigProvider = withNetwork(provider);
+export const ConfigProvider = withNetwork(Provider);
 
 export const Config = ({ children }) => (
   <ConfigContext.Consumer>
