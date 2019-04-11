@@ -302,9 +302,6 @@ class IsolatedManager(object):
          - clean up orphaned private files
         Performs save on each instance to update its capacity.
         '''
-        # TODO: runner doesn't have a --forks arg
-        #args.extend(['--forks', str(len(instance_qs))])
-
         try:
             private_data_dir = tempfile.mkdtemp(
                 prefix='awx_iso_heartbeat_',
@@ -314,6 +311,7 @@ class IsolatedManager(object):
                 instance.hostname for instance in instance_qs
             ])
             self.runner_params['private_data_dir'] = private_data_dir
+            self.runner_params['forks'] = str(len(instance_qs))
             runner_obj = self.run_management_playbook(
                 'heartbeat_isolated.yml',
                 private_data_dir
