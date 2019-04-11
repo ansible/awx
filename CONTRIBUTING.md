@@ -96,7 +96,7 @@ Ideally, files should be named the same as the component they export, and tests 
 
 **Component naming and conventions** - In order to provide a consistent interface with react-router and lingui, as well as make their usage easier and less verbose, context components follow these conventions:
 - Providers are wrapped in a component in the `FooProvider` format.
-  - The value prop of the provider should be pulled from state.  This is recommended by the react docs, [here](here).
+  - The value prop of the provider should be pulled from state.  This is recommended by the react docs, [here](https://reactjs.org/docs/context.html#caveats).
   - The provider should also be able to accept its value by prop for testing.
   - Any sort of code related to grabbing data to put on the context should be done in this component.
 - Consumers are wrapped in a component in the `Foo` format.
