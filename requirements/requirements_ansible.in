@@ -46,6 +46,7 @@ ncclient==0.6.3
 netaddr
 # oVirt/RHV
 ovirt-engine-sdk-python==4.2.4    # minimum set inside Ansible facts module requirements
+pycurl==7.43.0.1    # higher versions will not install without SSL backend specified
 # AWX usage
 pexpect==4.6.0    # same as AWX requirement
 psutil==5.4.3    # same as AWX requirement
