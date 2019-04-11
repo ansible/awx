@@ -31,7 +31,7 @@ from django.utils.translation import ugettext_lazy as _
 
 
 # Django REST Framework
-from rest_framework.exceptions import APIException, PermissionDenied, ParseError
+from rest_framework.exceptions import APIException, PermissionDenied, ParseError, NotFound
 from rest_framework.parsers import FormParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.renderers import JSONRenderer, StaticHTMLRenderer
@@ -1680,7 +1680,10 @@ class HostInsights(GenericAPIView):
         url = '{}/api/inventory/v1/hosts?insights_id={}'.format(
             settings.INSIGHTS_URL_BASE, host.insights_system_id)
         res = self._call_insights_api(url, session, headers)
-        platform_id = res['results'][0]['id']
+        try:
+            platform_id = res['results'][0]['id']
+        except (IndexError, KeyError):
+            raise NotFound(_('This host is not recognized as an Insights host.'))
 
         return platform_id
 
