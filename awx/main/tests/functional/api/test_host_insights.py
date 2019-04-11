@@ -38,7 +38,9 @@ class TestHostInsights:
         url = reverse('api:host_insights', kwargs={'pk': host.pk})
         response = get(url, user('admin', True))
 
-        assert response.data['error'] == 'This host is not recognized as an Insights host.'
+        assert response.data['error'] == (
+            'Could not translate Insights system ID 123e4567-e89b-12d3-a456-426655440000'
+            ' into an Insights platform ID.')
         assert response.status_code == 404
 
     def test_insights_no_credential(self, get, hosts, user, mocker):

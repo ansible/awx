@@ -1683,7 +1683,9 @@ class HostInsights(GenericAPIView):
         try:
             platform_id = res['results'][0]['id']
         except (IndexError, KeyError):
-            raise NotFound(_('This host is not recognized as an Insights host.'))
+            raise NotFound(
+                _('Could not translate Insights system ID {}'
+                  ' into an Insights platform ID.').format(host.insights_system_id))
 
         return platform_id
 
