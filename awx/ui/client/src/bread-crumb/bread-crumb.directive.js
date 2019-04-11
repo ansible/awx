@@ -59,7 +59,7 @@ export default
                             scope.loadingLicense = false;
                             scope.activityStreamActive = ($state.current.name === 'activityStream') ? true : false;
                             scope.activityStreamTooltip = ($state.current.name === 'activityStream') ? 'Hide Activity Stream' : 'View Activity Stream';
-                            scope.showActivityStreamButton = (FeaturesService.featureEnabled('activity_streams') || $state.current.name ==='activityStream') ? true : false;
+                            scope.showActivityStreamButton = ((FeaturesService.featureEnabled('activity_streams') && streamConfig && streamConfig.activityStream) || $state.current.name ==='activityStream') ? true : false;
                         }
                     });
 
