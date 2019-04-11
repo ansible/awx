@@ -53,10 +53,7 @@ module.exports = {
             );
         client.useXpath().expect.element('//a[text()="test-pagination-job-template-0"]')
             .to.be.visible.after(AWX_E2E_TIMEOUT_MEDIUM);
-        client
-            .useCss()
-            .waitForSpinny()
-            .findThenClick('.Paginate-controls--next', 'css');
+        client.useCss().findThenClick('.Paginate-controls--next', 'css');
 
         // Default search sort uses alphanumeric sorting, so template #9 is last
         client.useXpath().expect.element('//a[text()="test-pagination-job-template-9"]')

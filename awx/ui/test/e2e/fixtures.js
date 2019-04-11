@@ -246,7 +246,7 @@ const waitForJob = endpoint => {
     const interval = 2000;
     const statuses = ['successful', 'failed', 'error', 'canceled'];
 
-    let attempts = 20;
+    let attempts = 30;
 
     return new Promise((resolve, reject) => {
         (function pollStatus () {
@@ -437,7 +437,8 @@ const getUser = (
     // unique substrings are needed to avoid the edge case
     // where a user and org both exist, but the user is not in the organization.
     // this ensures a new user is always created.
-    username = `user-${uuid().substr(0, 8)}`
+    username = `user-${uuid().substr(0, 8)}`,
+    isSuperuser = false
 ) => getOrganization(namespace)
     .then(organization => getOrCreate(`/organizations/${organization.id}/users/`, {
         username: `${username}-${uuid().substr(0, 8)}`,
@@ -445,7 +446,7 @@ const getUser = (
         first_name: 'firstname',
         last_name: 'lastname',
         email: 'null@ansible.com',
-        is_superuser: false,
+        is_superuser: `${isSuperuser}`,
         is_system_auditor: false,
         password: AWX_E2E_PASSWORD
     }, ['username']));

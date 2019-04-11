@@ -1,12 +1,14 @@
 /* Tests for applications. */
 import uuid from 'uuid';
+import { getOrganization } from '../fixtures';
 
 const row = '.at-List-container .at-Row';
 const testID = uuid().substr(0, 8);
+const namespace = 'test-applications';
 
 const store = {
     organization: {
-        name: `org-${testID}`
+        name: `${namespace}-organization`
     },
     application: {
         name: `name-${testID}`,
@@ -17,19 +19,19 @@ const store = {
     },
 };
 
+let data;
+
 module.exports = {
     before: (client, done) => {
+        const resources = [getOrganization(namespace)];
+        Promise.all(resources)
+            .then(([org]) => {
+                data = { org };
+                done();
+            });
+
         client.login();
         client.waitForAngular();
-
-        client.inject(
-            [store, 'OrganizationModel'],
-            (_store_, Model) => new Model().http.post({ data: _store_.organization }),
-            ({ data }) => {
-                store.organization = data;
-                done();
-            }
-        );
     },
     'create an application': client => {
         const applications = client.page.applications();

@@ -56,8 +56,9 @@ module.exports = {
             if (application.redirectUris) {
                 this.section.add.setValue('@redirectUris', application.redirectUris);
             }
+            this.section.add.click('@save'); // flake avoidance. triple click ensures it works.
             this.section.add.click('@save');
-            this.waitForSpinny();
+            this.section.add.click('@save');
             this
                 .waitForElementVisible('#alert-modal-msg')
                 .expect.element('#alert-modal-msg').text.contain(application.name);
