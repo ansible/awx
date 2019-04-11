@@ -129,5 +129,7 @@ class TestHostInsights:
         url = reverse('api:host_insights', kwargs={'pk': host.pk})
         response = get(url, user('admin', True))
 
-        assert response.data['error'] == "Expected JSON response from Insights but instead got booo!"
+        assert response.data['error'].startswith("Expected JSON response from Insights at URL")
+        assert 'insights_id=123e4567-e89b-12d3-a456-426655440000' in response.data['error']
+        assert response.data['error'].endswith("but instead got booo!")
         assert response.status_code == 502

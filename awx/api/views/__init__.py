@@ -1655,7 +1655,8 @@ class HostInsights(GenericAPIView):
             return res.json()
         except ValueError:
             raise BadGateway(
-                _('Expected JSON response from Insights but instead got {}').format(res.content))
+                _('Expected JSON response from Insights at URL {}'
+                  ' but instead got {}').format(url, res.content))
 
     def _get_session(self, username, password):
         session = requests.Session()
