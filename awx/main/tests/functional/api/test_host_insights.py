@@ -19,6 +19,28 @@ class TestHostInsights:
         assert response.data['error'] == 'This host is not recognized as an Insights host.'
         assert response.status_code == 404
 
+    def test_insights_host_missing_from_insights(self, get, hosts, insights_credential, user, mocker):
+        class Response:
+            status_code = 200
+            content = "{'results': []}"
+
+            def json(self):
+                return {'results': []}
+
+        mocker.patch.object(requests.Session, 'get', return_value=Response())
+
+        host = hosts(host_count=1)[0]
+        host.insights_system_id = '123e4567-e89b-12d3-a456-426655440000'
+        host.inventory.insights_credential = insights_credential
+        host.inventory.save()
+        host.save()
+
+        url = reverse('api:host_insights', kwargs={'pk': host.pk})
+        response = get(url, user('admin', True))
+
+        assert response.data['error'] == 'This host is not recognized as an Insights host.'
+        assert response.status_code == 404
+
     def test_insights_no_credential(self, get, hosts, user, mocker):
         mocker.patch.object(requests.Session, 'get')
 
