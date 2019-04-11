@@ -84,7 +84,7 @@ In the root of `/src`, there are a few files which are used to initialize the re
   - Sets standard page layout, about modal, and root dialog modal.
 - **RootProvider.jsx**
   - Sets up all context providers.
-  - Initializes i18n.
+  - Initializes i18n and router
 
 ### Naming files
 

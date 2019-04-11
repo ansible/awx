@@ -3,6 +3,10 @@ import {
   I18nProvider,
 } from '@lingui/react';
 
+import {
+  HashRouter
+} from 'react-router-dom';
+
 import { NetworkProvider } from './contexts/Network';
 import { RootDialogProvider } from './contexts/RootDialog';
 import { ConfigProvider } from './contexts/Config';
@@ -25,18 +29,20 @@ class RootProvider extends Component {
     const language = getLanguage(navigator);
 
     return (
-      <I18nProvider
-        language={language}
-        catalogs={catalogs}
-      >
-        <RootDialogProvider>
-          <NetworkProvider>
-            <ConfigProvider>
-              {children}
-            </ConfigProvider>
-          </NetworkProvider>
-        </RootDialogProvider>
-      </I18nProvider>
+      <HashRouter>
+        <I18nProvider
+          language={language}
+          catalogs={catalogs}
+        >
+          <RootDialogProvider>
+            <NetworkProvider>
+              <ConfigProvider>
+                {children}
+              </ConfigProvider>
+            </NetworkProvider>
+          </RootDialogProvider>
+        </I18nProvider>
+      </HashRouter>
     );
   }
 }

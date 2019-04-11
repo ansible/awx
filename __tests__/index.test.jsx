@@ -1,7 +1,13 @@
+import React from 'react';
 import { mount } from 'enzyme';
+import { MemoryRouter } from 'react-router-dom';
 import { main } from '../src/index';
 
-const render = template => mount(template);
+const render = template => mount(
+  <MemoryRouter>
+    {template}
+  </MemoryRouter>
+);
 
 describe('index.jsx', () => {
   test('index.jsx loads without issue', () => {
