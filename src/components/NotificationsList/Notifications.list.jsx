@@ -14,7 +14,7 @@ import DataListToolbar from '../DataListToolbar';
 import NotificationListItem from './NotificationListItem';
 import Pagination from '../Pagination';
 
-import { parseQueryString } from '../../qs';
+import { parseQueryString } from '../../util/qs';
 
 class Notifications extends Component {
   columns = [
