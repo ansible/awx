@@ -208,6 +208,14 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
     def jobs_total(self):
         return UnifiedJob.objects.filter(instance_group=self).count()
 
+    @property
+    def is_controller(self):
+        return self.controlled_groups.exists()
+
+    @property
+    def is_isolated(self):
+        return bool(self.controller)
+
     '''
     RelatedJobsMixin
     '''
