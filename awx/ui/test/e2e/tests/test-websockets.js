@@ -15,7 +15,7 @@ import {
     AWX_E2E_URL,
     AWX_E2E_TIMEOUT_ASYNC,
     AWX_E2E_TIMEOUT_LONG,
-    AWX_E2E_TIMEOUT_MEDIUM,
+    AWX_E2E_TIMEOUT_SHORT,
 } from '../settings';
 
 let data;
@@ -60,29 +60,25 @@ module.exports = {
     'Test job template status updates for a successful job on dashboard': client => {
         client
             .useCss()
-            .navigateTo(`${AWX_E2E_URL}/#/home`);
+            .navigateTo(`${AWX_E2E_URL}/#/home`, false);
         getJob('test-websockets', 'debug.yml', 'test-websockets-successful', false);
 
-        client.expect.element('.spinny')
-            .to.not.be.visible.before(AWX_E2E_TIMEOUT_MEDIUM);
         client.useXpath().expect.element(`${sparklineIcon}[1]${running}`)
-            .to.be.visible.before(AWX_E2E_TIMEOUT_LONG);
+            .to.be.visible.before(AWX_E2E_TIMEOUT_ASYNC);
         client.useXpath().expect.element(`${successfulJt}${sparklineIcon}[1]${success}`)
-            .to.be.present.before(AWX_E2E_TIMEOUT_LONG);
+            .to.be.present.before(AWX_E2E_TIMEOUT_ASYNC);
     },
 
     'Test job template status updates for a failed job on dashboard': client => {
         client
             .useCss()
-            .navigateTo(`${AWX_E2E_URL}/#/home`);
+            .navigateTo(`${AWX_E2E_URL}/#/home`, false);
         getJob('test-websockets', 'fail_unless.yml', 'test-websockets-failed', false);
 
-        client.expect.element('.spinny')
-            .to.not.be.visible.before(AWX_E2E_TIMEOUT_MEDIUM);
         client.useXpath().expect.element(`${sparklineIcon}[1]${running}`)
-            .to.be.visible.before(AWX_E2E_TIMEOUT_LONG);
+            .to.be.visible.before(AWX_E2E_TIMEOUT_ASYNC);
         client.useXpath().expect.element(`${failedJt}${sparklineIcon}[1]${fail}`)
-            .to.be.present.before(AWX_E2E_TIMEOUT_LONG);
+            .to.be.present.before(AWX_E2E_TIMEOUT_ASYNC);
     },
 
     'Test projects list blinking icon': client => {
@@ -98,15 +94,15 @@ module.exports = {
         getUpdatedProject('test-websockets');
 
         client.expect.element('i.icon-job-running')
-            .to.be.visible.before(AWX_E2E_TIMEOUT_LONG);
+            .to.be.visible.before(AWX_E2E_TIMEOUT_ASYNC);
         client.expect.element('i.icon-job-success')
-            .to.be.visible.before(AWX_E2E_TIMEOUT_LONG);
+            .to.be.visible.before(AWX_E2E_TIMEOUT_ASYNC);
     },
 
     'Test successful job within an organization view': client => {
         client
             .useCss()
-            .navigateTo(`${AWX_E2E_URL}/#/organizations/${data.org.id}/job_templates`)
+            .navigateTo(`${AWX_E2E_URL}/#/organizations/${data.org.id}/job_templates`, false)
             .waitForElementVisible('[ui-view=templatesList] .SmartSearch-input')
             .clearValue('[ui-view=templatesList] .SmartSearch-input')
             .setValue(
@@ -115,17 +111,15 @@ module.exports = {
             );
         getJob('test-websockets', 'debug.yml', 'test-websockets-successful', false);
 
-        client.expect.element('.spinny')
-            .to.not.be.visible.before(AWX_E2E_TIMEOUT_MEDIUM);
         client.useXpath().expect.element(`${sparklineIcon}[1]${running}`)
-            .to.be.visible.before(AWX_E2E_TIMEOUT_LONG);
+            .to.be.visible.before(AWX_E2E_TIMEOUT_ASYNC);
         client.useXpath().expect.element(`${sparklineIcon}[1]${success}`)
-            .to.be.present.before(AWX_E2E_TIMEOUT_LONG);
+            .to.be.present.before(AWX_E2E_TIMEOUT_ASYNC);
     },
     'Test failed job within an organization view': client => {
         client
             .useCss()
-            .navigateTo(`${AWX_E2E_URL}/#/organizations/${data.org.id}/job_templates`)
+            .navigateTo(`${AWX_E2E_URL}/#/organizations/${data.org.id}/job_templates`, false)
             .waitForElementVisible('[ui-view=templatesList] .SmartSearch-input')
             .clearValue('[ui-view=templatesList] .SmartSearch-input')
             .setValue(
@@ -134,17 +128,15 @@ module.exports = {
             );
         getJob('test-websockets', 'debug.yml', 'test-websockets-failed', false);
 
-        client.expect.element('.spinny')
-            .to.not.be.visible.before(AWX_E2E_TIMEOUT_MEDIUM);
         client.useXpath().expect.element(`${sparklineIcon}[1]${running}`)
-            .to.be.visible.before(AWX_E2E_TIMEOUT_LONG);
+            .to.be.visible.before(AWX_E2E_TIMEOUT_ASYNC);
         client.useXpath().expect.element(`${sparklineIcon}[1]${fail}`)
-            .to.be.present.before(AWX_E2E_TIMEOUT_LONG);
+            .to.be.present.before(AWX_E2E_TIMEOUT_ASYNC);
     },
     'Test project blinking icon within an organization view': client => {
         client
             .useCss()
-            .navigateTo(`${AWX_E2E_URL}/#/organizations/${data.org.id}/projects`)
+            .navigateTo(`${AWX_E2E_URL}/#/organizations/${data.org.id}/projects`, false)
             .waitForElementVisible('.projectsList .SmartSearch-input')
             .clearValue('.projectsList .SmartSearch-input')
             .setValue(
@@ -154,7 +146,7 @@ module.exports = {
         getUpdatedProject('test-websockets');
 
         client.expect.element('i.icon-job-running')
-            .to.be.visible.before(AWX_E2E_TIMEOUT_LONG);
+            .to.be.visible.before(AWX_E2E_TIMEOUT_ASYNC);
         client.expect.element('i.icon-job-success')
             .to.be.visible.before(AWX_E2E_TIMEOUT_ASYNC);
     },
@@ -162,27 +154,26 @@ module.exports = {
         client.findThenClick('[ui-sref=dashboard]', 'css');
         getJob('test-ws-split-job-template', 'debug.yml', 'test-websockets-failed', false);
 
-        client.expect.element('.spinny')
-            .to.not.be.visible.before(AWX_E2E_TIMEOUT_MEDIUM);
         client.useXpath().expect.element(`${sparklineIcon}[1]${running}`)
-            .to.be.visible.before(AWX_E2E_TIMEOUT_LONG);
+            .to.be.visible.before(AWX_E2E_TIMEOUT_ASYNC);
         client.useXpath().expect.element(`${splitJt}${sparklineIcon}[1]${success}`)
-            .to.be.present.before(AWX_E2E_TIMEOUT_LONG);
+            .to.be.present.before(AWX_E2E_TIMEOUT_ASYNC);
     },
     'Test pending deletion of inventories': client => {
         getInventorySource('test-pending-delete');
         client
             .useCss()
-            .navigateTo(`${AWX_E2E_URL}/#/inventories`)
+            .navigateTo(`${AWX_E2E_URL}/#/inventories`, false)
             .waitForElementVisible('.SmartSearch-input')
             .clearValue('.SmartSearch-input')
             .setValue('.SmartSearch-input', ['test-pending-delete', client.Keys.ENTER])
-            .waitForSpinny()
+            .pause(AWX_E2E_TIMEOUT_SHORT) // helps prevent flake
             .findThenClick('.fa-trash-o', 'css')
             .waitForElementVisible('#prompt_action_btn')
+            .pause(AWX_E2E_TIMEOUT_SHORT) // animation catches us sometimes
             .click('#prompt_action_btn');
         client.useCss().expect.element('[ng-if="inventory.pending_deletion"]')
-            .to.be.visible.before(AWX_E2E_TIMEOUT_MEDIUM);
+            .to.be.visible.before(AWX_E2E_TIMEOUT_LONG);
     },
     after: client => {
         client.end();
