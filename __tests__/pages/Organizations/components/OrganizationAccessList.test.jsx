@@ -175,7 +175,7 @@ describe('<OrganizationAccessList />', () => {
     });
   });
 
-  test.only('state is set appropriately when a user tries deleting a role', (done) => {
+  test('state is set appropriately when a user tries deleting a role', (done) => {
     const wrapper = mount(
       <I18nProvider>
         <MemoryRouter>
