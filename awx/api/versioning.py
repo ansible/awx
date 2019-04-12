@@ -2,7 +2,7 @@
 # All Rights Reserved.
 
 from django.conf import settings
-from django.core.urlresolvers import NoReverseMatch
+from django.urls import NoReverseMatch
 
 from rest_framework.reverse import _reverse
 from rest_framework.versioning import URLPathVersioning as BaseVersioning

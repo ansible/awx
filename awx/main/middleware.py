@@ -19,8 +19,7 @@ from django.utils.functional import curry
 from django.shortcuts import get_object_or_404, redirect
 from django.apps import apps
 from django.utils.translation import ugettext_lazy as _
-from django.core.urlresolvers import reverse
-from django.urls import resolve
+from django.urls import reverse, resolve
 
 from awx.main.models import ActivityStream
 from awx.main.utils.named_url_graph import generate_graph, GraphNode

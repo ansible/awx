@@ -4,4 +4,7 @@
 from __future__ import absolute_import, unicode_literals
 from .urls import urlpatterns
 
-__all__ = ['urlpatterns']
+__all__ = ['urlpatterns', 'app_name']
+
+
+app_name = 'api'

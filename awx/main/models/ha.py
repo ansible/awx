@@ -172,7 +172,8 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
         help_text=_('Instance Group to remotely control this group.'),
         editable=False,
         default=None,
-        null=True
+        null=True,
+        on_delete=models.CASCADE
     )
     policy_instance_percentage = models.IntegerField(
         default=0,
@@ -264,8 +265,8 @@ class JobOrigin(models.Model):
     This is fine, and code should be able to handle it. A job with no origin
     is always assumed to *not* have the current instance as its origin.
     """
-    unified_job = models.OneToOneField(UnifiedJob, related_name='job_origin')
-    instance = models.ForeignKey(Instance)
+    unified_job = models.OneToOneField(UnifiedJob, related_name='job_origin', on_delete=models.CASCADE)
+    instance = models.ForeignKey(Instance, on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
 

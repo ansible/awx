@@ -7,7 +7,7 @@ import urllib.parse
 from unittest.mock import PropertyMock
 
 # Django
-from django.core.urlresolvers import resolve
+from django.urls import resolve
 from django.contrib.auth.models import User
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.backends.sqlite3.base import SQLiteCursorWrapper

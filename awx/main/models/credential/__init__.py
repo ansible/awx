@@ -249,6 +249,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         'CredentialType',
         related_name='credentials',
         null=False,
+        on_delete=models.CASCADE,
         help_text=_('Specify the type of credential you want to create. Refer '
                     'to the Ansible Tower documentation for details on each type.')
     )

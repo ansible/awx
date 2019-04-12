@@ -2,7 +2,7 @@ import urllib.parse
 
 import pytest
 
-from django.core.urlresolvers import resolve
+from django.urls import resolve
 from django.contrib.auth.models import User
 
 from rest_framework.test import (
