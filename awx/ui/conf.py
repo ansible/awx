@@ -17,8 +17,8 @@ register(
         ('anonymous', _('Anonymous')),
         ('detailed', _('Detailed')),
     ],
-    label=_('Pendo Analytics Tracking State'),
-    help_text=_('Enable or Disable Pendo Analytics Tracking.'),
+    label=_('User Analytics Tracking State'),
+    help_text=_('Enable or Disable User Analytics Tracking.'),
     category=_('UI'),
     category_slug='ui',
 )
