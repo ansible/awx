@@ -10,7 +10,7 @@ from awx.main.dispatch.worker import AWXConsumer, CallbackBrokerWorker
 
 class Command(BaseCommand):
     '''
-    Save Job Callback receiver (see awx.plugins.callbacks.job_event_callback)
+    Save Job Callback receiver
     Runs as a management command and receives job save events.  It then hands
     them off to worker processors (see Worker) which writes them to the database
     '''

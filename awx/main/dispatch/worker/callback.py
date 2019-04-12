@@ -20,8 +20,8 @@ class CallbackBrokerWorker(BaseWorker):
     A worker implementation that deserializes callback event data and persists
     it into the database.
 
-    The code that *builds* these types of messages is found in the AWX display
-    callback (`awx.lib.awx_display_callback`).
+    The code that *generates* these types of messages is found in the
+    ansible-runner display callback plugin.
     '''
 
     MAX_RETRIES = 2
