@@ -841,6 +841,8 @@ function JobDetailsController (
             finished,
             scm,
             inventoryScm,
+            scmRevision,
+            instanceGroup,
             environment,
             artifacts,
             executionNode
@@ -853,6 +855,8 @@ function JobDetailsController (
             vm.artifacts = getArtifactsDetails(artifacts);
             vm.executionNode = getExecutionNodeDetails(executionNode);
             vm.inventoryScm = getInventoryScmDetails(inventoryScm.id, inventoryScm.status);
+            vm.scmRevision = getSCMRevisionDetails(scmRevision);
+            vm.instanceGroup = getInstanceGroupDetails(instanceGroup);
             vm.status = getStatusDetails(status);
             vm.job.status = status;
         });
