@@ -1,4 +1,4 @@
-import { encodeQueryString, parseQueryString } from '../src/qs';
+import { encodeQueryString, parseQueryString } from '../../src/util/qs';
 
 describe('qs (qs.js)', () => {
   test('encodeQueryString returns the expected queryString', () => {

@@ -7,6 +7,8 @@ import { t } from '@lingui/macro';
 
 import Lookup from '../../../components/Lookup';
 
+import { withNetwork } from '../../../contexts/Network';
+
 const INSTANCE_GROUPS_LOOKUP_COLUMNS = [
   { name: i18nMark('Name'), key: 'name', isSortable: true },
   { name: i18nMark('Modified'), key: 'modified', isSortable: false, isNumeric: true },
@@ -69,9 +71,6 @@ class InstanceGroupsLookup extends React.Component {
 }
 
 InstanceGroupsLookup.propTypes = {
-  api: PropTypes.shape({
-    getInstanceGroups: PropTypes.func,
-  }).isRequired,
   value: PropTypes.arrayOf(PropTypes.object).isRequired,
   tooltip: PropTypes.string,
   onChange: PropTypes.func.isRequired,
@@ -81,4 +80,4 @@ InstanceGroupsLookup.defaultProps = {
   tooltip: '',
 };
 
-export default InstanceGroupsLookup;
+export default withNetwork(InstanceGroupsLookup);

@@ -6,6 +6,7 @@
 //
 // masthead overrides
 //
+
 .pf-c-page__header-brand {
   max-width: 255px;
 }
@@ -114,8 +115,9 @@
 
 //
 // switch overrides
-//
 // https://github.com/patternfly/patternfly-next/issues/915
+//
+
 .pf-c-switch {
   .pf-c-switch__label::before {
     display: none;
@@ -145,6 +147,7 @@
 
 .awx-c-modal.pf-c-modal-box {
   margin: 0;
+  padding: 24px;
   width: 600px;
 
   .pf-c-modal-box__body {
@@ -231,13 +234,21 @@
   border-bottom: 1px solid #d7d7d7;
 }
 
+.at-c-listCardBody {
+  --pf-c-card__footer--PaddingX: 0;
+  --pf-c-card__footer--PaddingY: 0;
+  --pf-c-card__body--PaddingX: 0;
+  --pf-c-card__body--PaddingY: 0;
+}
+
 .awx-c-card {
   position: relative;
 }
 
-
-
+//
 // PF Alert notification component overrides
+//
+
 .pf-c-alert__title {
   --pf-c-alert__title--PaddingTop: 20px;
   --pf-c-alert__title--PaddingRight: 20px;
@@ -272,17 +283,6 @@
   margin-bottom: 10px;
 }
 
-.orgListAlert-actionBtn{
-  margin:0 10px;
-}
-.orgListDetete-progressBar{
-  padding-right: 32px;
-}
-.orgListDelete-progressBar-noShow{
-  display: none;
-  padding-right: 32px;
-}
-
 .awx-c-form-action-group {
   float: right;
   display: block;
@@ -293,3 +293,74 @@
   }
 }
 
+//
+// AlertModal styles
+//
+
+.at-c-alertModal.pf-c-modal-box {
+  border: 0;
+  border-left: 56px solid black;
+
+  .at-c-alertModal__icon {
+    position: absolute;
+    font-size: 23px;
+    top: 28px;
+    left: -39px;
+  }
+}
+
+.at-c-alertModal--warning.pf-c-modal-box {
+  border-color: var(--pf-global--warning-color--100);
+
+  .pf-c-title {
+    color: var(--pf-global--warning-color--200);
+  }
+
+  .at-c-alertModal__icon {
+    color: var(--pf-global--warning-color--200);
+  }
+}
+
+.at-c-alertModal--danger.pf-c-modal-box {
+  border-color: var(--pf-global--danger-color--100);
+
+  .pf-c-title {
+    color: var(--pf-global--danger-color--200);
+  }
+
+  .at-c-alertModal__icon {
+    color: white;
+  }
+}
+
+.at-c-alertModal--info.pf-c-modal-box {
+  border-color: var(--pf-global--info-color--100);
+
+  .pf-c-title {
+    color: var(--pf-global--info-color--200);
+  }
+
+  .at-c-alertModal__icon {
+    color: var(--pf-global--info-color--200);
+  }
+}
+
+.at-c-alertModal--success.pf-c-modal-box {
+  border-color: var(--pf-global--success-color--100);
+
+  .pf-c-title {
+    color: var(--pf-global--success-color--200);
+  }
+
+  .at-c-alertModal__icon {
+    color: var(--pf-global--success-color--200);
+  }
+}
+
+//
+// LoginModal overrides
+//
+
+.pf-m-error p.pf-c-form__helper-text {
+  color: var(--pf-global--danger-color--100);
+}

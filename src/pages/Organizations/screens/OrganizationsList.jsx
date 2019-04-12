@@ -5,31 +5,34 @@ import React, {
 import {
   withRouter
 } from 'react-router-dom';
+
 import { I18n, i18nMark } from '@lingui/react';
 import { Trans, t } from '@lingui/macro';
+
 import {
   Card,
   EmptyState,
   EmptyStateIcon,
   EmptyStateBody,
-  Modal,
   PageSection,
   PageSectionVariants,
   Title,
-  Button,
-  Progress,
-  ProgressVariant
+  Button
 } from '@patternfly/react-core';
 
 import { CubesIcon } from '@patternfly/react-icons';
+
+import { withNetwork } from '../../../contexts/Network';
+
 import DataListToolbar from '../../../components/DataListToolbar';
 import OrganizationListItem from '../components/OrganizationListItem';
 import Pagination from '../../../components/Pagination';
+import AlertModal from '../../../components/AlertModal';
 
 import {
   encodeQueryString,
   parseQueryString,
-} from '../../../qs';
+} from '../../../util/qs';
 
 class OrganizationsList extends Component {
   columns = [
@@ -61,8 +64,6 @@ class OrganizationsList extends Component {
       selected: [],
       isModalOpen: false,
       orgsToDelete: [],
-      orgsDeleted: [],
-      deleteSuccess: false,
 
     };
 
@@ -145,17 +146,14 @@ class OrganizationsList extends Component {
   handleClearOrgsToDelete () {
     this.setState({
       isModalOpen: false,
-      orgsDeleted: [],
-      deleteSuccess: false,
-      orgsToDelete: [],
-      deleteStarted: false
+      orgsToDelete: []
     });
     this.onSelectAll();
   }
 
   handleOpenOrgDeleteModal () {
     const { results, selected } = this.state;
-    const warningTitle = i18nMark('Delete Organization');
+    const warningTitle = selected.length > 1 ? i18nMark('Delete Organization') : i18nMark('Delete Organizations');
     const warningMsg = i18nMark('Are you sure you want to delete:');
 
     const orgsToDelete = [];
@@ -175,24 +173,21 @@ class OrganizationsList extends Component {
   }
 
   async handleOrgDelete (event) {
-    const { orgsToDelete, orgsDeleted } = this.state;
-    const { api } = this.props;
-    this.setState({ deleteStarted: true });
+    const { orgsToDelete } = this.state;
+    const { api, handleHttpError } = this.props;
+    let errorHandled;
 
-    orgsToDelete.forEach(async (org) => {
-      try {
-        const res = await api.destroyOrganization(org.id);
-        this.setState({
-          orgsDeleted: orgsDeleted.concat(res)
-        });
-      } catch {
-        this.setState({ deleteSuccess: false });
-      } finally {
-        this.setState({ deleteSuccess: true });
+    try {
+      await Promise.all(orgsToDelete.map((org) => api.destroyOrganization(org.id)));
+      this.handleClearOrgsToDelete();
+    } catch (err) {
+      errorHandled = handleHttpError(err);
+    } finally {
+      if (!errorHandled) {
         const queryParams = this.getQueryParams();
         this.fetchOrganizations(queryParams);
       }
-    });
+    }
     event.preventDefault();
   }
 
@@ -207,7 +202,7 @@ class OrganizationsList extends Component {
   }
 
   async fetchOrganizations (queryParams) {
-    const { api } = this.props;
+    const { api, handleHttpError } = this.props;
     const { page, page_size, order_by } = queryParams;
 
     let sortOrder = 'ascending';
@@ -235,6 +230,7 @@ class OrganizationsList extends Component {
         sortedColumnKey,
         results,
         selected: [],
+        loading: false
       };
 
       // This is in place to track whether or not the initial request
@@ -248,9 +244,7 @@ class OrganizationsList extends Component {
       this.setState(stateToUpdate);
       this.updateUrl(queryParams);
     } catch (err) {
-      this.setState({ error: true });
-    } finally {
-      this.setState({ loading: false });
+      handleHttpError(err) || this.setState({ error: true, loading: false });
     }
   }
 
@@ -261,12 +255,9 @@ class OrganizationsList extends Component {
     const {
       count,
       error,
-      deleteSuccess,
-      deleteStarted,
       loading,
       noInitialResults,
       orgsToDelete,
-      orgsDeleted,
       page,
       pageCount,
       page_size,
@@ -280,74 +271,60 @@ class OrganizationsList extends Component {
     } = this.state;
     const { match } = this.props;
     return (
-      <PageSection variant={medium}>
-        <Card>
-          { isModalOpen && (
-            <Modal
-              className="orgListAlert"
-              title={warningTitle}
-              isOpen={isModalOpen}
-              style={{ width: '1000px' }}
-              variant="danger"
-              onClose={this.handleClearOrgsToDelete}
-            >
-              {warningMsg}
-              <br />
-              {orgsToDelete.map((org) => (
-                <span key={org.id}>
-                  <strong>
-                    {org.name}
-                  </strong>
+      <I18n>
+        {({ i18n }) => (
+          <PageSection variant={medium}>
+            <Card>
+              { isModalOpen && (
+                <AlertModal
+                  variant="danger"
+                  title={warningTitle}
+                  isOpen={isModalOpen}
+                  onClose={this.handleClearOrgsToDelete}
+                  actions={[
+                    <Button variant="danger" key="delete" aria-label="confirm-delete" onClick={this.handleOrgDelete}>{i18n._(t`Delete`)}</Button>,
+                    <Button variant="secondary" key="cancel" aria-label="cancel-delete" onClick={this.handleClearOrgsToDelete}>{i18n._(t`Cancel`)}</Button>
+                  ]}
+                >
+                  {warningMsg}
                   <br />
-                </span>
-              ))}
-              <div className={deleteStarted ? 'orgListDetete-progressBar' : 'orgListDelete-progressBar-noShow'}>
-                <Progress
-                  value={deleteSuccess ? 100 : 67}
-                  variant={deleteStarted ? ProgressVariant.success : ProgressVariant.danger}
-                />
-              </div>
-              <br />
-              <div className="awx-c-form-action-group">
-                {orgsDeleted.length
-                  ? <Button className="orgListAlert-actionBtn" keys="cancel" variant="primary" aria-label="close-delete" onClick={this.handleClearOrgsToDelete}>Close</Button>
-                  : (
-                    <span>
-                      <Button className="orgListAlert-actionBtn" keys="cancel" variant="secondary" aria-label="cancel-delete" onClick={this.handleClearOrgsToDelete}>Cancel</Button>
-                      <Button className="orgListAlert-actionBtn" keys="cancel" variant="danger" aria-label="confirm-delete" onClick={this.handleOrgDelete}>Delete</Button>
+                  {orgsToDelete.map((org) => (
+                    <span key={org.id}>
+                      <strong>
+                        {org.name}
+                      </strong>
+                      <br />
                     </span>
-                  )}
-              </div>
-            </Modal>
-          )}
-          {noInitialResults && (
-            <EmptyState>
-              <EmptyStateIcon icon={CubesIcon} />
-              <Title size="lg">
-                <Trans>No Organizations Found</Trans>
-              </Title>
-              <EmptyStateBody>
-                <Trans>Please add an organization to populate this list</Trans>
-              </EmptyStateBody>
-            </EmptyState>
-          ) || (
-            <Fragment>
-              <DataListToolbar
-                addUrl={`${match.url}/add`}
-                isAllSelected={selected.length === results.length}
-                sortedColumnKey={sortedColumnKey}
-                sortOrder={sortOrder}
-                columns={this.columns}
-                onSearch={this.onSearch}
-                onSort={this.onSort}
-                onSelectAll={this.onSelectAll}
-                onOpenDeleteModal={this.handleOpenOrgDeleteModal}
-                disableTrashCanIcon={selected.length === 0}
-                showDelete
-                showSelectAll
-              />
-              <I18n>
-                {({ i18n }) => (
+                  ))}
+                  <br />
+                </AlertModal>
+              )}
+              {noInitialResults && (
+                <EmptyState>
+                  <EmptyStateIcon icon={CubesIcon} />
+                  <Title size="lg">
+                    <Trans>No Organizations Found</Trans>
+                  </Title>
+                  <EmptyStateBody>
+                    <Trans>Please add an organization to populate this list</Trans>
+                  </EmptyStateBody>
+                </EmptyState>
+              ) || (
+                <Fragment>
+                  <DataListToolbar
+                    addUrl={`${match.url}/add`}
+                    isAllSelected={selected.length === results.length}
+                    sortedColumnKey={sortedColumnKey}
+                    sortOrder={sortOrder}
+                    columns={this.columns}
+                    onSearch={this.onSearch}
+                    onSort={this.onSort}
+                    onSelectAll={this.onSelectAll}
+                    onOpenDeleteModal={this.handleOpenOrgDeleteModal}
+                    disableTrashCanIcon={selected.length === 0}
+                    showDelete
+                    showSelectAll
+                  />
                   <ul className="pf-c-data-list" aria-label={i18n._(t`Organizations List`)}>
                     { results.map(o => (
                       <OrganizationListItem
@@ -363,23 +340,24 @@ class OrganizationsList extends Component {
                       />
                     ))}
                   </ul>
-                )}
-              </I18n>
-              <Pagination
-                count={count}
-                page={page}
-                pageCount={pageCount}
-                page_size={page_size}
-                onSetPage={this.onSetPage}
-              />
-              { loading ? <div>loading...</div> : '' }
-              { error ? <div>error</div> : '' }
-            </Fragment>
-          )}
-        </Card>
-      </PageSection>
+                  <Pagination
+                    count={count}
+                    page={page}
+                    pageCount={pageCount}
+                    page_size={page_size}
+                    onSetPage={this.onSetPage}
+                  />
+                  { loading ? <div>loading...</div> : '' }
+                  { error ? <div>error</div> : '' }
+                </Fragment>
+              )}
+            </Card>
+          </PageSection>
+        )}
+      </I18n>
     );
   }
 }
 
-export default withRouter(OrganizationsList);
+export { OrganizationsList as _OrganizationsList };
+export default withNetwork(withRouter(OrganizationsList));

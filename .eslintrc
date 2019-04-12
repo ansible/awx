@@ -48,6 +48,7 @@
     "object-curly-newline": "off",
     "space-before-function-paren": ["error", "always"],
     "no-trailing-spaces": ["error"],
+    "no-unused-expressions": ["error", { "allowShortCircuit": true }],
     "react/prefer-stateless-function": "off",
     "react/prop-types": "off",
     "jsx-a11y/label-has-for": "off",

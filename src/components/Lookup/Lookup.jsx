@@ -15,6 +15,8 @@ import {
 import { I18n } from '@lingui/react';
 import { Trans, t } from '@lingui/macro';
 
+import { withNetwork } from '../../contexts/Network';
+
 import CheckboxListItem from '../ListItem';
 import DataListToolbar from '../DataListToolbar';
 import SelectedList from '../SelectedList';
@@ -67,7 +69,7 @@ class Lookup extends React.Component {
   }
 
   async getData () {
-    const { getItems } = this.props;
+    const { getItems, handleHttpError } = this.props;
     const { page, page_size, sortedColumnKey, sortOrder } = this.state;
 
     this.setState({ error: false });
@@ -92,7 +94,7 @@ class Lookup extends React.Component {
 
       this.setState(stateToUpdate);
     } catch (err) {
-      this.setState({ error: true });
+      handleHttpError(err) || this.setState({ error: true });
     }
   }
 
@@ -273,4 +275,5 @@ Lookup.defaultProps = {
   name: null,
 };
 
-export default Lookup;
+export { Lookup as _Lookup };
+export default withNetwork(Lookup);

@@ -2,13 +2,17 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { MemoryRouter } from 'react-router-dom';
 import { I18nProvider } from '@lingui/react';
-import { ConfigContext } from '../../../../src/context';
-import OrganizationAdd, { _OrganizationAdd } from '../../../../src/pages/Organizations/screens/OrganizationAdd';
+
+import { ConfigProvider } from '../../../../src/contexts/Config';
+import { NetworkProvider } from '../../../../src/contexts/Network';
+
+import { _OrganizationAdd } from '../../../../src/pages/Organizations/screens/OrganizationAdd';
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 describe('<OrganizationAdd />', () => {
   let api;
+  let networkProviderValue;
 
   beforeEach(() => {
     api = {
@@ -17,15 +21,22 @@ describe('<OrganizationAdd />', () => {
       associateInstanceGroup: jest.fn(),
       disassociate: jest.fn(),
     };
+
+    networkProviderValue = {
+      api,
+      handleHttpError: () => {}
+    };
   });
 
   test('handleSubmit should post to api', () => {
     const wrapper = mount(
       <MemoryRouter>
         <I18nProvider>
-          <OrganizationAdd
-            api={api}
-          />
+          <NetworkProvider value={networkProviderValue}>
+            <ConfigProvider>
+              <_OrganizationAdd api={api} />
+            </ConfigProvider>
+          </NetworkProvider>
         </I18nProvider>
       </MemoryRouter>
     );
@@ -47,10 +58,11 @@ describe('<OrganizationAdd />', () => {
     const wrapper = mount(
       <MemoryRouter>
         <I18nProvider>
-          <_OrganizationAdd
-            history={history}
-            api={api}
-          />
+          <NetworkProvider value={networkProviderValue}>
+            <ConfigProvider>
+              <_OrganizationAdd api={api} history={history} />
+            </ConfigProvider>
+          </NetworkProvider>
         </I18nProvider>
       </MemoryRouter>
     );
@@ -68,10 +80,11 @@ describe('<OrganizationAdd />', () => {
     const wrapper = mount(
       <MemoryRouter>
         <I18nProvider>
-          <_OrganizationAdd
-            history={history}
-            api={api}
-          />
+          <NetworkProvider value={networkProviderValue}>
+            <ConfigProvider>
+              <_OrganizationAdd api={api} history={history} />
+            </ConfigProvider>
+          </NetworkProvider>
         </I18nProvider>
       </MemoryRouter>
     );
@@ -103,10 +116,11 @@ describe('<OrganizationAdd />', () => {
     const wrapper = mount(
       <MemoryRouter>
         <I18nProvider>
-          <_OrganizationAdd
-            history={history}
-            api={api}
-          />
+          <NetworkProvider value={networkProviderValue}>
+            <ConfigProvider>
+              <_OrganizationAdd api={api} history={history} />
+            </ConfigProvider>
+          </NetworkProvider>
         </I18nProvider>
       </MemoryRouter>
     );
@@ -121,9 +135,11 @@ describe('<OrganizationAdd />', () => {
     const wrapper = mount(
       <MemoryRouter>
         <I18nProvider>
-          <OrganizationAdd
-            api={api}
-          />
+          <NetworkProvider value={networkProviderValue}>
+            <ConfigProvider>
+              <_OrganizationAdd api={api} />
+            </ConfigProvider>
+          </NetworkProvider>
         </I18nProvider>
       </MemoryRouter>
     );
@@ -156,9 +172,11 @@ describe('<OrganizationAdd />', () => {
     const wrapper = mount(
       <MemoryRouter>
         <I18nProvider>
-          <ConfigContext.Provider value={config}>
-            <OrganizationAdd api={api} />
-          </ConfigContext.Provider>
+          <NetworkProvider value={networkProviderValue}>
+            <ConfigProvider value={config}>
+              <_OrganizationAdd api={api} />
+            </ConfigProvider>
+          </NetworkProvider>
         </I18nProvider>
       </MemoryRouter>
     ).find('OrganizationAdd').find('AnsibleSelect');
@@ -173,9 +191,11 @@ describe('<OrganizationAdd />', () => {
     const wrapper = mount(
       <MemoryRouter>
         <I18nProvider>
-          <ConfigContext.Provider value={config}>
-            <OrganizationAdd api={api} />
-          </ConfigContext.Provider>
+          <NetworkProvider value={networkProviderValue}>
+            <ConfigProvider value={config}>
+              <_OrganizationAdd api={api} />
+            </ConfigProvider>
+          </NetworkProvider>
         </I18nProvider>
       </MemoryRouter>
     ).find('OrganizationAdd').find('AnsibleSelect');

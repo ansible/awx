@@ -20,7 +20,7 @@ import { withRouter, Link } from 'react-router-dom';
 import Pagination from '../../../components/Pagination';
 import DataListToolbar from '../../../components/DataListToolbar';
 
-import { encodeQueryString } from '../../../qs';
+import { encodeQueryString } from '../../../util/qs';
 
 const detailWrapperStyle = {
   display: 'grid',

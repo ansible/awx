@@ -13,6 +13,8 @@ Have questions about this document or anything not covered here? Feel free to re
 * [Build the user interface](#build-the-user-interface)
 * [Accessing the AWX web interface](#accessing-the-awx-web-interface)
 * [Working with React](#working-with-react)
+  * [App structure](#app-structure)
+  * [Naming files](#naming-files)
   * [Class constructors vs Class properties](#class-constructors-vs-class-properties)
   * [Binding](#binding)
   * [Typechecking with PropTypes](#typechecking-with-proptypes)
@@ -56,6 +58,50 @@ Run the following to build the AWX UI:
 You can now log into the AWX web interface at [https://127.0.0.1:3001](https://127.0.0.1:3001).
 
 ## Working with React
+
+### App structure
+
+All source code lives in the `/src` directory and all tests live in the `/__tests__` directory (mimicing the internal structure of `/src`).
+
+Inside these folders, the internal structure is:
+- **/components** - All generic components that are meant to be used in multiple contexts throughout awx.  Things like buttons, tabs go here.
+- **/contexts** - Components which utilize react's context api.
+- **/pages** - Based on the various routes of awx.
+  - **/components** - Components that are meant to be used specifically by a particular route, but might be sharable across pages of that route. For example, a form component which is used on both add and edit screens.
+  - **/screens** - Individual pages of the route, such as add, edit, list, related lists, etc.
+- **/util** - Stateless helper functions that aren't tied to react.
+
+#### Bootstrapping the application (root src/ files)
+
+In the root of `/src`, there are a few files which are used to initialize the react app.  These are
+
+- **index.jsx**
+  - Connects react app to root dom node.
+  - Sets up root route structure, navigation grouping and login modal
+  - Calls base context providers
+  - Imports .scss styles.
+- **app.jsx**
+  - Sets standard page layout, about modal, and root dialog modal.
+- **RootProvider.jsx**
+  - Sets up all context providers.
+  - Initializes i18n and router
+
+### Naming files
+
+Ideally, files should be named the same as the component they export, and tests with `.test` appended.  In other words, `<FooBar>` would be defined in `FooBar.jsx`, and its tests would be defined in `FooBar.test.jsx`.
+
+#### Naming components that use the context api
+
+**File naming** - Since contexts export both consumer and provider (and potentially in withContext function form), the file can be simplified to be named after the consumer export.  In other words, the file containing the `Network` context components would be named `Network.jsx`.
+
+**Component naming and conventions** - In order to provide a consistent interface with react-router and lingui, as well as make their usage easier and less verbose, context components follow these conventions:
+- Providers are wrapped in a component in the `FooProvider` format.
+  - The value prop of the provider should be pulled from state.  This is recommended by the react docs, [here](https://reactjs.org/docs/context.html#caveats).
+  - The provider should also be able to accept its value by prop for testing.
+  - Any sort of code related to grabbing data to put on the context should be done in this component.
+- Consumers are wrapped in a component in the `Foo` format.
+- If it makes sense, consumers can be exported as a function in the `withFoo()` format.  If a component is wrapped in this function, its context values are available on the component as props.
+
 ### Class constructors vs Class properties
 It is good practice to use constructor-bound instance methods rather than methods as class properties. Methods as arrow functions provide lexical scope and are bound to the Component class instance instead of the class itself. This makes it so we cannot easily test a Component's methods without invoking an instance of the Component and calling the method directly within our tests.
 

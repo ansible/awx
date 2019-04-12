@@ -1,11 +1,14 @@
 import React, { Component } from 'react';
-import { Redirect } from 'react-router-dom';
+import { Redirect, withRouter } from 'react-router-dom';
 import { I18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
   LoginForm,
   LoginPage,
 } from '@patternfly/react-core';
+
+import { withRootDialog } from '../contexts/RootDialog';
+import { withNetwork } from '../contexts/Network';
 
 import towerLogo from '../../images/tower-logo-header.svg';
 
@@ -17,7 +20,8 @@ class AWXLogin extends Component {
       username: '',
       password: '',
       isInputValid: true,
-      isLoading: false
+      isLoading: false,
+      isAuthenticated: false
     };
 
     this.onChangeUsername = this.onChangeUsername.bind(this);
@@ -35,7 +39,7 @@ class AWXLogin extends Component {
 
   async onLoginButtonClick (event) {
     const { username, password, isLoading } = this.state;
-    const { api } = this.props;
+    const { api, handleHttpError, clearRootDialogMessage } = this.props;
 
     event.preventDefault();
 
@@ -43,25 +47,23 @@ class AWXLogin extends Component {
       return;
     }
 
+    clearRootDialogMessage();
     this.setState({ isLoading: true });
 
     try {
       await api.login(username, password);
+      this.setState({ isAuthenticated: true, isLoading: false });
     } catch (error) {
-      if (error.response && error.response.status === 401) {
-        this.setState({ isInputValid: false });
-      }
-    } finally {
-      this.setState({ isLoading: false });
+      handleHttpError(error) || this.setState({ isInputValid: false, isLoading: false });
     }
   }
 
   render () {
-    const { username, password, isInputValid } = this.state;
-    const { api, alt, loginInfo, logo } = this.props;
+    const { username, password, isInputValid, isAuthenticated } = this.state;
+    const { alt, loginInfo, logo, bodyText: errorMessage } = this.props;
     const logoSrc = logo ? `data:image/jpeg;${logo}` : towerLogo;
 
-    if (api.isAuthenticated()) {
+    if (isAuthenticated) {
       return (<Redirect to="/" />);
     }
 
@@ -75,10 +77,11 @@ class AWXLogin extends Component {
             textContent={loginInfo}
           >
             <LoginForm
+              className={errorMessage && 'pf-m-error'}
               usernameLabel={i18n._(t`Username`)}
               passwordLabel={i18n._(t`Password`)}
-              showHelperText={!isInputValid}
-              helperText={i18n._(t`Invalid username or password. Please try again.`)}
+              showHelperText={!isInputValid || !!errorMessage}
+              helperText={errorMessage || i18n._(t`Invalid username or password. Please try again.`)}
               usernameValue={username}
               passwordValue={password}
               isValidUsername={isInputValid}
@@ -94,4 +97,5 @@ class AWXLogin extends Component {
   }
 }
 
-export default AWXLogin;
+export { AWXLogin as _AWXLogin };
+export default withNetwork(withRootDialog(withRouter(AWXLogin)));

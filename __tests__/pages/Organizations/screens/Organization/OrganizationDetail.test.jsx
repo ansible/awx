@@ -36,6 +36,7 @@ describe('<OrganizationDetail />', () => {
             api={{
               getOrganizationInstanceGroups
             }}
+            handleHttpError={() => {}}
             organization={mockDetails}
           />
         </MemoryRouter>
@@ -63,6 +64,7 @@ describe('<OrganizationDetail />', () => {
               params: { id: '1' }
             }}
             organization={mockDetails}
+            handleHttpError={() => {}}
             api={{
               getOrganizationInstanceGroups
             }}

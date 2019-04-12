@@ -2,7 +2,8 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import OrganizationTeamsList from '../../components/OrganizationTeamsList';
-import { parseQueryString } from '../../../../qs';
+import { parseQueryString } from '../../../../util/qs';
+import { withNetwork } from '../../../../contexts/Network';
 
 const DEFAULT_QUERY_PARAMS = {
   page: 1,
@@ -47,7 +48,7 @@ class OrganizationTeams extends React.Component {
   }
 
   async readOrganizationTeamsList () {
-    const { api, id } = this.props;
+    const { api, handleHttpError, id } = this.props;
     const params = this.getQueryParams();
     this.setState({ isLoading: true });
     try {
@@ -61,7 +62,7 @@ class OrganizationTeams extends React.Component {
         isInitialized: true,
       });
     } catch (error) {
-      this.setState({
+      handleHttpError(error) && this.setState({
         error,
         isLoading: false,
         isInitialized: true,
@@ -94,9 +95,8 @@ class OrganizationTeams extends React.Component {
 }
 
 OrganizationTeams.propTypes = {
-  id: PropTypes.number.isRequired,
-  api: PropTypes.shape().isRequired,
+  id: PropTypes.number.isRequired
 };
 
 export { OrganizationTeams as _OrganizationTeams };
-export default withRouter(OrganizationTeams);
+export default withNetwork(withRouter(OrganizationTeams));

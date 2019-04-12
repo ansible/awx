@@ -2,7 +2,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { MemoryRouter } from 'react-router-dom';
 import { I18nProvider } from '@lingui/react';
-import Notifications from '../../src/components/NotificationsList/Notifications.list';
+import Notifications, { _Notifications } from '../../src/components/NotificationsList/Notifications.list';
 
 describe('<Notifications />', () => {
   test('initially renders succesfully', () => {
@@ -17,50 +17,52 @@ describe('<Notifications />', () => {
             onReadSuccess={jest.fn()}
             onCreateError={jest.fn()}
             onCreateSuccess={jest.fn()}
+            handleHttpError={() => {}}
           />
         </I18nProvider>
       </MemoryRouter>
     );
   });
+
   test('fetches notifications on mount', () => {
-    const spy = jest.spyOn(Notifications.prototype, 'readNotifications');
+    const spy = jest.spyOn(_Notifications.prototype, 'readNotifications');
     mount(
-      <MemoryRouter>
-        <I18nProvider>
-          <Notifications
-            match={{ path: '/organizations/:id/?tab=notifications', url: '/organizations/:id/?tab=notifications' }}
-            location={{ search: '', pathname: '/organizations/:id/?tab=notifications' }}
-            onReadError={jest.fn()}
-            onReadNotifications={jest.fn()}
-            onReadSuccess={jest.fn()}
-            onCreateError={jest.fn()}
-            onCreateSuccess={jest.fn()}
-          />
-        </I18nProvider>
-      </MemoryRouter>
+      <I18nProvider>
+        <_Notifications
+          match={{ path: '/organizations/:id/?tab=notifications', url: '/organizations/:id/?tab=notifications' }}
+          location={{ search: '', pathname: '/organizations/:id/?tab=notifications' }}
+          onReadError={jest.fn()}
+          onReadNotifications={jest.fn()}
+          onReadSuccess={jest.fn()}
+          onCreateError={jest.fn()}
+          onCreateSuccess={jest.fn()}
+          handleHttpError={() => {}}
+        />
+      </I18nProvider>
     );
     expect(spy).toHaveBeenCalled();
   });
+
   test('toggle success calls post', () => {
-    const spy = jest.spyOn(Notifications.prototype, 'createSuccess');
+    const spy = jest.spyOn(_Notifications.prototype, 'createSuccess');
     const wrapper = mount(
-      <MemoryRouter>
-        <I18nProvider>
-          <Notifications
-            match={{ path: '/organizations/:id/?tab=notifications', url: '/organizations/:id/?tab=notifications' }}
-            location={{ search: '', pathname: '/organizations/:id/?tab=notifications' }}
-            onReadError={jest.fn()}
-            onReadNotifications={jest.fn()}
-            onReadSuccess={jest.fn()}
-            onCreateError={jest.fn()}
-            onCreateSuccess={jest.fn()}
-          />
-        </I18nProvider>
-      </MemoryRouter>
+      <I18nProvider>
+        <_Notifications
+          match={{ path: '/organizations/:id/?tab=notifications', url: '/organizations/:id/?tab=notifications' }}
+          location={{ search: '', pathname: '/organizations/:id/?tab=notifications' }}
+          onReadError={jest.fn()}
+          onReadNotifications={jest.fn()}
+          onReadSuccess={jest.fn()}
+          onCreateError={jest.fn()}
+          onCreateSuccess={jest.fn()}
+          handleHttpError={() => {}}
+        />
+      </I18nProvider>
     ).find('Notifications');
     wrapper.instance().toggleNotification(1, true, 'success');
     expect(spy).toHaveBeenCalledWith(1, true);
   });
+
   test('post success makes request and updates state properly', async () => {
     const createSuccess = jest.fn();
     const wrapper = mount(
@@ -74,6 +76,7 @@ describe('<Notifications />', () => {
             onReadSuccess={jest.fn()}
             onCreateError={jest.fn()}
             onCreateSuccess={createSuccess}
+            handleHttpError={() => {}}
           />
         </I18nProvider>
       </MemoryRouter>
@@ -86,26 +89,27 @@ describe('<Notifications />', () => {
     expect(createSuccess).toHaveBeenCalledWith(1, { id: 44 });
     expect(wrapper.state('successTemplateIds')).toContain(44);
   });
+
   test('toggle error calls post', () => {
-    const spy = jest.spyOn(Notifications.prototype, 'createError');
+    const spy = jest.spyOn(_Notifications.prototype, 'createError');
     const wrapper = mount(
-      <MemoryRouter>
-        <I18nProvider>
-          <Notifications
-            match={{ path: '/organizations/:id/?tab=notifications', url: '/organizations/:id/?tab=notifications' }}
-            location={{ search: '', pathname: '/organizations/:id/?tab=notifications' }}
-            onReadError={jest.fn()}
-            onReadNotifications={jest.fn()}
-            onReadSuccess={jest.fn()}
-            onCreateError={jest.fn()}
-            onCreateSuccess={jest.fn()}
-          />
-        </I18nProvider>
-      </MemoryRouter>
+      <I18nProvider>
+        <_Notifications
+          match={{ path: '/organizations/:id/?tab=notifications', url: '/organizations/:id/?tab=notifications' }}
+          location={{ search: '', pathname: '/organizations/:id/?tab=notifications' }}
+          onReadError={jest.fn()}
+          onReadNotifications={jest.fn()}
+          onReadSuccess={jest.fn()}
+          onCreateError={jest.fn()}
+          onCreateSuccess={jest.fn()}
+          handleHttpError={() => {}}
+        />
+      </I18nProvider>
     ).find('Notifications');
     wrapper.instance().toggleNotification(1, true, 'error');
     expect(spy).toHaveBeenCalledWith(1, true);
   });
+
   test('post error makes request and updates state properly', async () => {
     const createError = jest.fn();
     const wrapper = mount(
@@ -119,6 +123,7 @@ describe('<Notifications />', () => {
             onReadSuccess={jest.fn()}
             onCreateError={createError}
             onCreateSuccess={jest.fn()}
+            handleHttpError={() => {}}
           />
         </I18nProvider>
       </MemoryRouter>
@@ -131,6 +136,7 @@ describe('<Notifications />', () => {
     expect(createError).toHaveBeenCalledWith(1, { id: 44 });
     expect(wrapper.state('errorTemplateIds')).toContain(44);
   });
+
   test('fetchNotifications', async () => {
     const mockQueryParams = {
       page: 44,
@@ -171,6 +177,7 @@ describe('<Notifications />', () => {
             onReadError={readError}
             onCreateError={jest.fn()}
             onCreateSuccess={jest.fn()}
+            handleHttpError={() => {}}
           />
         </I18nProvider>
       </MemoryRouter>

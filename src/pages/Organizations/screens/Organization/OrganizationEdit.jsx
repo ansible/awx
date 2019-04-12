@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import { CardBody } from '@patternfly/react-core';
-
 import OrganizationForm from '../../components/OrganizationForm';
+import { withNetwork } from '../../../../contexts/Network';
 
 class OrganizationEdit extends Component {
   constructor (props) {
@@ -20,14 +20,13 @@ class OrganizationEdit extends Component {
   }
 
   async handleSubmit (values, groupsToAssociate, groupsToDisassociate) {
-    const { api, organization } = this.props;
+    const { api, organization, handleHttpError } = this.props;
     try {
       await api.updateOrganizationDetails(organization.id, values);
       await this.submitInstanceGroups(groupsToAssociate, groupsToDisassociate);
-    } catch (err) {
-      this.setState({ error: err });
-    } finally {
       this.handleSuccess();
+    } catch (err) {
+      handleHttpError(err) || this.setState({ error: err });
     }
   }
 
@@ -42,29 +41,24 @@ class OrganizationEdit extends Component {
   }
 
   async submitInstanceGroups (groupsToAssociate, groupsToDisassociate) {
-    const { api, organization } = this.props;
+    const { api, organization, handleHttpError } = this.props;
     const url = organization.related.instance_groups;
 
     try {
-      await Promise.all(groupsToAssociate.map(async id => {
-        await api.associateInstanceGroup(url, id);
-      }));
-      await Promise.all(groupsToDisassociate.map(async id => {
-        await api.disassociate(url, id);
-      }));
+      await Promise.all(groupsToAssociate.map(id => api.associateInstanceGroup(url, id)));
+      await Promise.all(groupsToDisassociate.map(id => api.disassociate(url, id)));
     } catch (err) {
-      this.setState({ error: err });
+      handleHttpError(err) || this.setState({ error: err });
     }
   }
 
   render () {
-    const { api, organization } = this.props;
+    const { organization } = this.props;
     const { error } = this.state;
 
     return (
       <CardBody>
         <OrganizationForm
-          api={api}
           organization={organization}
           handleSubmit={this.handleSubmit}
           handleCancel={this.handleCancel}
@@ -76,7 +70,6 @@ class OrganizationEdit extends Component {
 }
 
 OrganizationEdit.propTypes = {
-  api: PropTypes.shape().isRequired,
   organization: PropTypes.shape().isRequired,
 };
 
@@ -85,4 +78,4 @@ OrganizationEdit.contextTypes = {
 };
 
 export { OrganizationEdit as _OrganizationEdit };
-export default withRouter(OrganizationEdit);
+export default withNetwork(withRouter(OrganizationEdit));

@@ -3,22 +3,25 @@ import PropTypes from 'prop-types';
 
 import {
   DataList, DataListItem, DataListCell, Text,
-  TextContent, TextVariants, Chip, Alert, AlertActionCloseButton, Button
+  TextContent, TextVariants, Chip, Button
 } from '@patternfly/react-core';
 
 import { I18n, i18nMark } from '@lingui/react';
-import { t } from '@lingui/macro';
+import { t, Trans } from '@lingui/macro';
 
 import {
   Link
 } from 'react-router-dom';
 
+import { withNetwork } from '../../../contexts/Network';
+
+import AlertModal from '../../../components/AlertModal';
 import Pagination from '../../../components/Pagination';
 import DataListToolbar from '../../../components/DataListToolbar';
 
 import {
   parseQueryString,
-} from '../../../qs';
+} from '../../../util/qs';
 
 const userRolesWrapperStyle = {
   display: 'flex',
@@ -237,20 +240,16 @@ class OrganizationAccessList extends React.Component {
   }
 
   async removeAccessRole (roleId, resourceId, type) {
-    const { removeRole } = this.props;
+    const { removeRole, handleHttpError } = this.props;
     const url = `/api/v2/${type}/${resourceId}/roles/`;
     try {
       await removeRole(url, roleId);
+      const queryParams = this.getQueryParams();
+      await this.fetchOrgAccessList(queryParams);
+      this.setState({ showWarning: false });
     } catch (error) {
-      this.setState({ error });
+      handleHttpError(error) || this.setState({ error });
     }
-    const queryParams = this.getQueryParams();
-    try {
-      this.fetchOrgAccessList(queryParams);
-    } catch (error) {
-      this.setState({ error });
-    }
-    this.setState({ showWarning: false });
   }
 
   handleWarning (roleName, roleId, resourceName, resourceId, type) {
@@ -258,16 +257,33 @@ class OrganizationAccessList extends React.Component {
     let warningMsg;
 
     if (type === 'users') {
-      warningTitle = i18nMark('User Access Removal');
-      warningMsg = i18nMark(`Please confirm that you would like to remove ${roleName}
-      access from ${resourceName}.`);
+      warningTitle = i18nMark('Remove User Access');
+      warningMsg = (
+        <Trans>
+          Are you sure you want to remove
+          <b>{` ${roleName} `}</b>
+          access from
+          <strong>{` ${resourceName}`}</strong>
+          ?
+        </Trans>
+      );
     }
     if (type === 'teams') {
-      warningTitle = i18nMark('Team Access Removal');
-      warningMsg = i18nMark(`Please confirm that you would like to remove ${roleName}
-      access from the team ${resourceName}. This will affect all
-      members of the team. If you would like to only remove access
-      for this particular user, please remove them from the team.`);
+      warningTitle = i18nMark('Remove Team Access');
+      warningMsg = (
+        <Trans>
+          Are you sure you want to remove
+          <b>{` ${roleName} `}</b>
+          access from
+          <b>{` ${resourceName}`}</b>
+          ?  Doing so affects all members of the team.
+          <br />
+          <br />
+          If you
+          <b><i> only </i></b>
+          want to remove access for this particular user, please remove them from the team.
+        </Trans>
+      );
     }
 
     this.setState({
@@ -333,17 +349,18 @@ class OrganizationAccessList extends React.Component {
                   showExpandCollapse
                 />
                 {showWarning && (
-                  <Alert
+                  <AlertModal
                     variant="danger"
                     title={warningTitle}
-                    action={<AlertActionCloseButton onClose={this.hideWarning} />}
+                    isOpen={showWarning}
+                    onClose={this.hideWarning}
+                    actions={[
+                      <Button key="delete" variant="danger" aria-label="Confirm delete" onClick={this.confirmDelete}>{i18n._(t`Delete`)}</Button>,
+                      <Button key="cancel" variant="secondary" onClick={this.hideWarning}>{i18n._(t`Cancel`)}</Button>
+                    ]}
                   >
                     {warningMsg}
-                    <span className="awx-c-form-action-group">
-                      <Button variant="danger" aria-label="confirm-delete" onClick={this.confirmDelete}>Delete</Button>
-                      <Button variant="secondary" onClick={this.hideWarning}>Cancel</Button>
-                    </span>
-                  </Alert>
+                  </AlertModal>
                 )}
                 <DataList aria-label={i18n._(t`Access List`)}>
                   {results.map(result => (
@@ -430,4 +447,5 @@ OrganizationAccessList.propTypes = {
   removeRole: PropTypes.func.isRequired,
 };
 
-export default OrganizationAccessList;
+export { OrganizationAccessList as _OrganizationAccessList };
+export default withNetwork(OrganizationAccessList);
