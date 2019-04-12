@@ -173,8 +173,8 @@ class OrganizationsList extends Component {
   }
 
   async handleOrgDelete (event) {
-    const { orgsToDelete, handleHttpError } = this.state;
-    const { api } = this.props;
+    const { orgsToDelete } = this.state;
+    const { api, handleHttpError } = this.props;
     let errorHandled;
 
     try {
