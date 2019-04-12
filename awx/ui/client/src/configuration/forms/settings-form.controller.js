@@ -81,13 +81,13 @@ export default [
         $scope.configDataResolve = configDataResolve;
         $scope.formDefs = formDefs;
 
-        // check if it's auditor, show messageBar 
+        // check if it's auditor, show messageBar
         $scope.show_auditor_bar = false;
         if($rootScope.user_is_system_auditor && Store('show_auditor_bar') !== false) {
             $scope.show_auditor_bar = true;
         } else {
             $scope.show_auditor_bar = false;
-        }  
+        }
 
         var populateFromApi = function() {
             SettingsService.getCurrentValues()
@@ -145,19 +145,6 @@ export default [
                     });
                     $scope.$broadcast('populated', data);
                 });
-                ConfigService.getConfig()
-                    .then(function(data) {
-                        $scope.ldap_auth = data.license_info.features.ldap;
-                        $scope.enterprise_auth = data.license_info.features.enterprise_auth;
-                    })
-                    .catch(function(data, status) {
-                        ProcessErrors($scope, data, status, null,
-                            {
-                                hdr: i18n._('Error'),
-                                msg: i18n._('There was an error getting config values: ') + status
-                            }
-                        );
-                    });
         };
 
         populateFromApi();

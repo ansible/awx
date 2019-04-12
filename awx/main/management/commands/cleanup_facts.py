@@ -13,7 +13,6 @@ from django.utils.timezone import now
 
 # AWX
 from awx.main.models.fact import Fact
-from awx.conf.license import feature_enabled
 
 OLDER_THAN = 'older_than'
 GRANULARITY = 'granularity'
@@ -30,7 +29,7 @@ class CleanupFacts(object):
     #       Delete all except LAST entry (or Delete all except the FIRST entry, it's an arbitrary decision)
     #
     #   pivot -= granularity
-    # group by host 
+    # group by host
     def cleanup(self, older_than_abs, granularity, module=None):
         fact_oldest = Fact.objects.all().order_by('timestamp').first()
         if not fact_oldest:
@@ -114,7 +113,7 @@ class Command(BaseCommand):
     def string_time_to_timestamp(self, time_string):
         units = {
             'y': 'years',
-            'd': 'days', 
+            'd': 'days',
             'w': 'weeks',
             'm': 'months'
         }
@@ -131,8 +130,6 @@ class Command(BaseCommand):
     @transaction.atomic
     def handle(self, *args, **options):
         sys.stderr.write("This command has been deprecated and will be removed in a future release.\n")
-        if not feature_enabled('system_tracking'):
-            raise CommandError("The System Tracking feature is not enabled for your instance")
         cleanup_facts = CleanupFacts()
         if not all([options[GRANULARITY], options[OLDER_THAN]]):
             raise CommandError('Both --granularity and --older_than are required.')

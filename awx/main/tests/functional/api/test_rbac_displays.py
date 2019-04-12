@@ -332,13 +332,3 @@ def test_manual_projects_no_update(manual_project, get, admin_user):
     response = get(reverse('api:project_detail', kwargs={'pk': manual_project.pk}), admin_user, expect=200)
     assert not response.data['summary_fields']['user_capabilities']['start']
     assert not response.data['summary_fields']['user_capabilities']['schedule']
-
-
-@pytest.mark.django_db
-def test_license_check_not_called(mocker, job_template, project, org_admin, get):
-    job_template.project = project
-    job_template.save() # need this to make the JT visible
-    mock_license_check = mocker.MagicMock()
-    with mocker.patch('awx.main.access.BaseAccess.check_license', mock_license_check):
-        get(reverse('api:job_template_detail', kwargs={'pk': job_template.pk}), org_admin, expect=200)
-        assert not mock_license_check.called

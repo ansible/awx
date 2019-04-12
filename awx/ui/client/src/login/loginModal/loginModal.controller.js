@@ -42,10 +42,10 @@
 export default ['$log', '$cookies', '$compile', '$rootScope',
     '$location', 'Authorization', 'Alert', 'Wait', 'Timer',
     'Empty', '$scope', 'pendoService', 'ConfigService',
-    'CheckLicense', 'FeaturesService', 'SocketService',
+    'CheckLicense', 'SocketService',
     function ($log, $cookies, $compile, $rootScope, $location,
         Authorization, Alert, Wait, Timer, Empty,
-        scope, pendoService, ConfigService, CheckLicense, FeaturesService,
+        scope, pendoService, ConfigService, CheckLicense,
         SocketService) {
     var lastPath, lastUser, sessionExpired, loginAgain, preAuthUrl;
 
@@ -97,7 +97,6 @@ export default ['$log', '$cookies', '$compile', '$rootScope',
         ConfigService.getConfig().then(function(){
                 CheckLicense.test();
                 pendoService.issuePendoIdentity();
-                FeaturesService.get();
                 Wait("stop");
                 if(!Empty(preAuthUrl)){
                     $location.path(preAuthUrl);

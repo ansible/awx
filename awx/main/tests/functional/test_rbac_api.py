@@ -6,12 +6,6 @@ from awx.api.versioning import reverse
 from awx.main.models.rbac import Role, ROLE_SINGLETON_SYSTEM_ADMINISTRATOR
 
 
-def mock_feature_enabled(feature):
-    return True
-
-
-#@mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
-
 
 @pytest.fixture
 def role():

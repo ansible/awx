@@ -990,9 +990,8 @@ def has_model_field_prefetched(model_obj, field_name):
 
 def get_external_account(user):
     from django.conf import settings
-    from awx.conf.license import feature_enabled
     account_type = None
-    if getattr(settings, 'AUTH_LDAP_SERVER_URI', None) and feature_enabled('ldap'):
+    if getattr(settings, 'AUTH_LDAP_SERVER_URI', None):
         try:
             if user.pk and user.profile.ldap_dn and not user.has_usable_password():
                 account_type = "ldap"

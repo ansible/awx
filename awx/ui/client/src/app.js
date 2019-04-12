@@ -91,7 +91,6 @@ angular
         'templates',
         'PromptDialog',
         'AWDirectives',
-        'features',
 
         instanceGroups,
         atFeatures,
@@ -166,11 +165,11 @@ angular
         'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'Timer',
         'LoadConfig', 'Store', 'pendoService', 'Prompt', 'Rest',
         'Wait', 'ProcessErrors', '$state', 'GetBasePath', 'ConfigService',
-        'FeaturesService', '$filter', 'SocketService', 'AppStrings', '$transitions',
+        '$filter', 'SocketService', 'AppStrings', '$transitions',
         function($stateExtender, $q, $compile, $cookies, $rootScope, $log, $stateParams,
             CheckLicense, $location, Authorization, LoadBasePaths, Timer,
             LoadConfig, Store, pendoService, Prompt, Rest, Wait,
-            ProcessErrors, $state, GetBasePath, ConfigService, FeaturesService,
+            ProcessErrors, $state, GetBasePath, ConfigService,
             $filter, SocketService, AppStrings, $transitions) {
 
             $rootScope.$state = $state;
@@ -381,7 +380,6 @@ angular
                                 SocketService.init();
                                 pendoService.issuePendoIdentity();
                                 CheckLicense.test();
-                                FeaturesService.get();
                                 if ($location.$$path === "/home" && $state.current && $state.current.name === "") {
                                     $state.go('dashboard');
                                 } else if ($location.$$path === "/portal" && $state.current && $state.current.name === "") {
@@ -413,9 +411,9 @@ angular
                 // create a promise that will resolve state $AnsibleConfig is loaded
                 $rootScope.loginConfig = $q.defer();
             }
-            if (!$rootScope.featuresConfigured) {
-                // create a promise that will resolve when features are loaded
-                $rootScope.featuresConfigured = $q.defer();
+            if (!$rootScope.basePathsLoaded) {
+                // create a promise that will resolve when base paths are loaded
+                $rootScope.basePathsLoaded = $q.defer();
             }
             $rootScope.licenseMissing = true;
             //the authorization controller redirects to the home page automatcially if there is no last path defined. in order to override

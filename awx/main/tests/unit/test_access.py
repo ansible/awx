@@ -13,7 +13,6 @@ from awx.main.access import (
     SystemJobTemplateAccess,
 )
 
-from awx.conf.license import LicenseForbids
 from awx.main.models import (
     Credential,
     CredentialType,
@@ -21,7 +20,6 @@ from awx.main.models import (
     Project,
     Role,
     Organization,
-    Instance,
 )
 
 
@@ -204,29 +202,18 @@ def test_jt_add_scan_job_check(job_template_with_ids, user_unit):
         else:
             raise Exception('Item requested has not been mocked')
 
-    with mock.patch.object(JobTemplateAccess, 'check_license', return_value=None):
-        with mock.patch('awx.main.models.rbac.Role.__contains__', return_value=True):
-            with mock.patch('awx.main.access.get_object_or_400', mock_get_object):
-                assert access.can_add({
-                    'project': project.pk,
-                    'inventory': inventory.pk,
-                    'job_type': 'scan'
-                })
 
-
-def mock_raise_license_forbids(self, add_host=False, feature=None, check_expiration=True):
-    raise LicenseForbids("Feature not enabled")
+    with mock.patch('awx.main.models.rbac.Role.__contains__', return_value=True):
+        with mock.patch('awx.main.access.get_object_or_400', mock_get_object):
+            assert access.can_add({
+                'project': project.pk,
+                'inventory': inventory.pk,
+                'job_type': 'scan'
+            })
 
 
 def mock_raise_none(self, add_host=False, feature=None, check_expiration=True):
     return None
-
-
-def test_jt_can_start_ha(job_template_with_ids):
-    with mock.patch.object(Instance.objects, 'active_count', return_value=2):
-        with mock.patch('awx.main.access.BaseAccess.check_license', new=mock_raise_license_forbids):
-            with pytest.raises(LicenseForbids):
-                JobTemplateAccess(user_unit).can_start(job_template_with_ids)
 
 
 def test_jt_can_add_bad_data(user_unit):

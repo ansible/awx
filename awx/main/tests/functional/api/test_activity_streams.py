@@ -1,4 +1,3 @@
-from unittest import mock
 import pytest
 
 from awx.api.versioning import reverse
@@ -8,16 +7,12 @@ from awx.main.access import ActivityStreamAccess
 from awx.conf.models import Setting
 
 
-def mock_feature_enabled(feature):
-    return True
-
 
 @pytest.fixture
 def activity_stream_entry(organization, org_admin):
     return ActivityStream.objects.filter(organization__pk=organization.pk, user=org_admin, operation='associate').first()
 
 
-@mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
 @pytest.mark.django_db
 def test_get_activity_stream_list(monkeypatch, organization, get, user, settings):
     settings.ACTIVITY_STREAM_ENABLED = True
@@ -27,7 +22,6 @@ def test_get_activity_stream_list(monkeypatch, organization, get, user, settings
     assert response.status_code == 200
 
 
-@mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
 @pytest.mark.django_db
 def test_basic_fields(monkeypatch, organization, get, user, settings):
     settings.ACTIVITY_STREAM_ENABLED = True
@@ -48,7 +42,6 @@ def test_basic_fields(monkeypatch, organization, get, user, settings):
     assert response.data['summary_fields']['organization'][0]['name'] == 'test-org'
 
 
-@mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
 @pytest.mark.django_db
 def test_ctint_activity_stream(monkeypatch, get, user, settings):
     Setting.objects.create(key="FOO", value="bar")
@@ -68,7 +61,6 @@ def test_ctint_activity_stream(monkeypatch, get, user, settings):
     assert response.data['summary_fields']['setting'][0]['name'] == 'FOO'
 
 
-@mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
 @pytest.mark.django_db
 def test_middleware_actor_added(monkeypatch, post, get, user, settings):
     settings.ACTIVITY_STREAM_ENABLED = True
@@ -91,7 +83,6 @@ def test_middleware_actor_added(monkeypatch, post, get, user, settings):
     assert response.data['summary_fields']['actor']['username'] == 'admin-poster'
 
 
-@mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
 @pytest.mark.django_db
 def test_rbac_stream_resource_roles(activity_stream_entry, organization, org_admin, settings):
     settings.ACTIVITY_STREAM_ENABLED = True
@@ -101,7 +92,6 @@ def test_rbac_stream_resource_roles(activity_stream_entry, organization, org_adm
     assert activity_stream_entry.object_relationship_type == 'awx.main.models.organization.Organization.admin_role'
 
 
-@mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
 @pytest.mark.django_db
 def test_rbac_stream_user_roles(activity_stream_entry, organization, org_admin, settings):
     settings.ACTIVITY_STREAM_ENABLED = True
@@ -113,7 +103,6 @@ def test_rbac_stream_user_roles(activity_stream_entry, organization, org_admin, 
 
 @pytest.mark.django_db
 @pytest.mark.activity_stream_access
-@mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
 def test_stream_access_cant_change(activity_stream_entry, organization, org_admin, settings):
     settings.ACTIVITY_STREAM_ENABLED = True
     access = ActivityStreamAccess(org_admin)
@@ -125,7 +114,6 @@ def test_stream_access_cant_change(activity_stream_entry, organization, org_admi
 
 @pytest.mark.django_db
 @pytest.mark.activity_stream_access
-@mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
 def test_stream_queryset_hides_shows_items(
         activity_stream_entry, organization, user, org_admin,
         project, org_credential, inventory, label, deploy_jobtemplate,
@@ -160,7 +148,6 @@ def test_stream_queryset_hides_shows_items(
 
 
 @pytest.mark.django_db
-@mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
 def test_stream_user_direct_role_updates(get, post, organization_factory):
     objects = organization_factory('test_org',
                                    superusers=['admin'],

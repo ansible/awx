@@ -48,9 +48,6 @@ let lists = [{
         activityStreamTarget: 'organization'
     },
     resolve: {
-        features: ['FeaturesService', function(FeaturesService) {
-            return FeaturesService.get();
-        }],
         OrgUsersDataset: ['OrgUserList', 'QuerySet', '$stateParams', 'GetBasePath',
             function(list, qs, $stateParams, GetBasePath) {
                 let path = GetBasePath(list.basePath) || list.basePath;
@@ -98,9 +95,6 @@ let lists = [{
         label: N_("TEAMS")
     },
     resolve: {
-        features: ['FeaturesService', function(FeaturesService) {
-            return FeaturesService.get();
-        }],
         OrgTeamList: ['TeamList', 'GetBasePath', '$stateParams', 'i18n', function(TeamList, GetBasePath, $stateParams, i18n) {
             let list = _.cloneDeep(TeamList);
             delete list.actions.add;
@@ -144,9 +138,6 @@ let lists = [{
         label: N_("INVENTORIES")
     },
     resolve: {
-        features: ['FeaturesService', function(FeaturesService) {
-            return FeaturesService.get();
-        }],
         OrgInventoryList: ['InventoryList', 'GetBasePath', '$stateParams', 'i18n', function(InventoryList, GetBasePath, $stateParams, i18n) {
             let list = _.cloneDeep(InventoryList);
             delete list.actions.add;
@@ -196,9 +187,6 @@ let lists = [{
         label: N_("PROJECTS")
     },
     resolve: {
-        features: ['FeaturesService', function(FeaturesService) {
-            return FeaturesService.get();
-        }],
         OrgProjectList: ['ProjectList', 'GetBasePath', '$stateParams', 'i18n', function(ProjectList, GetBasePath, $stateParams, i18n) {
             let list = _.cloneDeep(ProjectList);
             delete list.actions;
@@ -258,9 +246,6 @@ let lists = [{
         label: N_("ADMINS")
     },
     resolve: {
-        features: ['FeaturesService', function(FeaturesService) {
-            return FeaturesService.get();
-        }],
         OrgAdminsDataset: ['OrgAdminList', 'QuerySet', '$stateParams', 'GetBasePath',
             function(list, qs, $stateParams, GetBasePath) {
                 let path = GetBasePath(list.basePath) || list.basePath;

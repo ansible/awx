@@ -3,7 +3,6 @@
 
 # Python
 import pytest
-from unittest import mock
 from dateutil.relativedelta import relativedelta
 from datetime import timedelta
 
@@ -16,13 +15,6 @@ from awx.main.management.commands.cleanup_facts import CleanupFacts, Command
 from awx.main.models.fact import Fact
 from awx.main.models.inventory import Host
 
-
-def mock_feature_enabled(feature):
-    return True
-
-
-def mock_feature_disabled(feature):
-    return False
 
 
 @pytest.mark.django_db
@@ -101,17 +93,7 @@ def test_cleanup_logic(fact_scans, hosts, monkeypatch_jsonbfield_get_db_prep_sav
             assert fact.timestamp == timestamp_pivot
 
 
-@mock.patch('awx.main.management.commands.cleanup_facts.feature_enabled', new=mock_feature_disabled)
-@pytest.mark.django_db
-@pytest.mark.license_feature
-def test_system_tracking_feature_disabled(mocker):
-    cmd = Command()
-    with pytest.raises(CommandError) as err:
-        cmd.handle(None)
-    assert 'The System Tracking feature is not enabled for your instance' in str(err.value)
 
-
-@mock.patch('awx.main.management.commands.cleanup_facts.feature_enabled', new=mock_feature_enabled)
 @pytest.mark.django_db
 def test_parameters_ok(mocker):
     run = mocker.patch('awx.main.management.commands.cleanup_facts.CleanupFacts.run')
@@ -185,7 +167,6 @@ def test_string_time_to_timestamp_invalid():
         assert res is None
 
 
-@mock.patch('awx.main.management.commands.cleanup_facts.feature_enabled', new=mock_feature_enabled)
 @pytest.mark.django_db
 def test_parameters_fail(mocker):
     # Mock run() just in case, but it should never get called because an error should be thrown

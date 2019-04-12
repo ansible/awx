@@ -21,7 +21,6 @@ register(
     help_text=_('Enable capturing activity for the activity stream.'),
     category=_('System'),
     category_slug='system',
-    feature_required='activity_streams',
 )
 
 register(
@@ -31,7 +30,6 @@ register(
     help_text=_('Enable capturing activity for the activity stream when running inventory sync.'),
     category=_('System'),
     category_slug='system',
-    feature_required='activity_streams',
 )
 
 register(

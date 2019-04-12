@@ -36,11 +36,17 @@ angular.module('ApiLoader', ['Utilities'])
                             data.base = base;
                             $rootScope.defaultUrls = data;
                             Store('api', data);
+                            if($rootScope.basePathsLoaded){
+                                $rootScope.basePathsLoaded.resolve();
+                            }
                         })
                         .catch(({data, status}) => {
                             $rootScope.defaultUrls = {
                                 status: 'error'
                             };
+                            if($rootScope.basePathsLoaded){
+                                $rootScope.basePathsLoaded.reject();
+                            }
                             ProcessErrors(null, data, status, null, {
                                 hdr: 'Error',
                                 msg: 'Failed to read ' + base + '. GET status: ' + status

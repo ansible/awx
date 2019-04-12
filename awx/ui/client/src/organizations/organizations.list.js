@@ -32,7 +32,6 @@ export default [function() {
                 mode: 'all', // One of: edit, select, all
                 ngClick: 'addOrganization()',
                 awToolTip: 'Create a new organization',
-                awFeature: 'multiple_organizations',
                 actionClass: 'at-Button--add',
                 actionId: 'button-add'
             }

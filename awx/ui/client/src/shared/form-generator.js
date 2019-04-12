@@ -718,7 +718,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     html += "'";
                     html += (field.ngShow) ? this.attr(field, 'ngShow') : "";
                     html += (field.ngHide) ? this.attr(field, 'ngHide') : "";
-                    html += (field.awFeature) ? "aw-feature=\"" + field.awFeature + "\" " : "";
                     html += ">\n";
 
                     var definedInFileMessage = i18n._('This setting has been set manually in a settings file and is now disabled.');
@@ -1511,9 +1510,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             if (button.ngClick) {
                                 html += this.attr(button, 'ngClick');
                             }
-                            if (button.awFeature) {
-                                html += this.attr(button, 'awFeature');
-                            }
                             if (button.ngDisabled) {
                                 ngDisabled = (button.ngDisabled===true) ? this.form.name+"_form.$invalid" : button.ngDisabled;
                                 if (itm !== 'reset') {
@@ -1560,9 +1556,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                             if(button.ngShow){
                                 html += this.attr(button, 'ngShow');
-                            }
-                            if (button.awFeature) {
-                                html += this.attr(button, 'awFeature');
                             }
                             if(button.awToolTip) {
                                 html += " aw-tool-tip='" + button.awToolTip + "' data-placement='" + button.dataPlacement + "' data-tip-watch='" + button.dataTipWatch + "'";
@@ -1727,9 +1720,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                     }
                                     if (button.ngClick) {
                                         html += this.attr(button, 'ngClick');
-                                    }
-                                    if (button.awFeature) {
-                                        html += this.attr(button, 'awFeature');
                                     }
                                     if (button.ngDisabled) {
                                         ngDisabled = (button.ngDisabled===true) ? `${this.form.name}_form.$invalid ||  ${this.form.name}_form.$pending`: button.ngDisabled;

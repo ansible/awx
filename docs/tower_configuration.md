@@ -62,7 +62,6 @@ register(
     category=None,
     depends_on=None,
     placeholder=rest_framework.fields.empty,
-    feature_required=rest_framework.fields.empty,
     encrypted=False,
     defined_in_file=False,
 )
@@ -78,7 +77,6 @@ Here is the details of each argument:
 | `category`               | transformable string, like `_('foobar')`                          | The human-readable form of `category_slug`, mainly for display.                                                                                                               |
 | `depends_on`             | `list` of `str`s                                                  | A list of setting names this setting depends on. A setting this setting depends on is another tower configuration setting whose changes may affect the value of this setting. |
 | `placeholder`            | transformable string, like `_('foobar')`                          | A human-readable string displaying a typical value for the setting, mainly used by UI                                                                                         |
-| `feature_required`       | `str`                                                             | Indicator of which feature this setting belongs, a user whose license does not allow a feature cannot access its related settings.                                            |
 | `encrypted`              | `boolean`                                                         | Flag determining whether the setting value should be encrypted                                                                                                                |
 | `defined_in_file`        | `boolean`                                                         | Flag determining whether a value has been manually set in settings file.                                                                                                      |
 

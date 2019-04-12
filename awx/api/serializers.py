@@ -73,7 +73,6 @@ from awx.main.redact import UriCleaner, REPLACE_STR
 
 from awx.main.validators import vars_validate_or_raise
 
-from awx.conf.license import feature_enabled, LicenseForbids
 from awx.api.versioning import reverse, get_request_version
 from awx.api.fields import (BooleanNullField, CharNullField, ChoiceNullField,
                             VerbatimField, DeprecatedCredentialField)
@@ -918,7 +917,7 @@ class UserSerializer(BaseSerializer):
     def _update_password(self, obj, new_password):
         # For now we're not raising an error, just not saving password for
         # users managed by LDAP who already have an unusable password set.
-        if getattr(settings, 'AUTH_LDAP_SERVER_URI', None) and feature_enabled('ldap'):
+        if getattr(settings, 'AUTH_LDAP_SERVER_URI', None):
             try:
                 if obj.pk and obj.profile.ldap_dn and not obj.has_usable_password():
                     new_password = None
@@ -979,7 +978,7 @@ class UserSerializer(BaseSerializer):
         return res
 
     def _validate_ldap_managed_field(self, value, field_name):
-        if not getattr(settings, 'AUTH_LDAP_SERVER_URI', None) or not feature_enabled('ldap'):
+        if not getattr(settings, 'AUTH_LDAP_SERVER_URI', None):
             return value
         try:
             is_ldap_user = bool(self.instance and self.instance.profile.ldap_dn)
@@ -1073,7 +1072,7 @@ class BaseOAuth2TokenSerializer(BaseSerializer):
             if word not in self.ALLOWED_SCOPES:
                 return False
         return True
-            
+
     def validate_scope(self, value):
         if not self._is_valid_scope(value):
             raise serializers.ValidationError(_(
@@ -3170,12 +3169,6 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
     def validate_extra_vars(self, value):
         return vars_validate_or_raise(value)
 
-    def validate_job_slice_count(self, value):
-        if value > 1 and not feature_enabled('workflows'):
-            raise LicenseForbids({'job_slice_count': [_(
-                "Job slicing is a workflows-based feature and your license does not allow use of workflows."
-            )]})
-        return value
 
     def get_summary_fields(self, obj):
         summary_fields = super(JobTemplateSerializer, self).get_summary_fields(obj)

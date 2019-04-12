@@ -7,7 +7,6 @@ import os
 from backports.tempfile import TemporaryDirectory
 from django.conf import settings
 import pytest
-from unittest import mock
 
 # AWX
 from awx.main.models import ProjectUpdate
@@ -131,10 +130,9 @@ def test_organization_inventory_list(organization, inventory_factory, get, alice
     assert get(reverse('api:organization_inventories_list', kwargs={'pk': organization.id}), user=alice).data['count'] == 2
     assert get(reverse('api:organization_inventories_list', kwargs={'pk': organization.id}), user=bob).data['count'] == 1
     get(reverse('api:organization_inventories_list', kwargs={'pk': organization.id}), user=rando, expect=403)
-    
+
 
 @pytest.mark.django_db
-@mock.patch('awx.api.views.feature_enabled', lambda feature: True)
 def test_create_organization(post, admin, alice):
     new_org = {
         'name': 'new org',
@@ -146,7 +144,6 @@ def test_create_organization(post, admin, alice):
 
 
 @pytest.mark.django_db
-@mock.patch('awx.api.views.feature_enabled', lambda feature: True)
 def test_create_organization_xfail(post, alice):
     new_org = {
         'name': 'new org',
@@ -224,27 +221,23 @@ def test_update_organization_max_hosts(get, put, organization, admin, alice, bob
 
 
 @pytest.mark.django_db
-@mock.patch('awx.main.access.BaseAccess.check_license', lambda *a, **kw: True)
 def test_delete_organization(delete, organization, admin):
     delete(reverse('api:organization_detail', kwargs={'pk': organization.id}), user=admin, expect=204)
 
 
 @pytest.mark.django_db
-@mock.patch('awx.main.access.BaseAccess.check_license', lambda *a, **kw: True)
 def test_delete_organization2(delete, organization, alice):
     organization.admin_role.members.add(alice)
     delete(reverse('api:organization_detail', kwargs={'pk': organization.id}), user=alice, expect=204)
 
 
 @pytest.mark.django_db
-@mock.patch('awx.main.access.BaseAccess.check_license', lambda *a, **kw: True)
 def test_delete_organization_xfail1(delete, organization, alice):
     organization.member_role.members.add(alice)
     delete(reverse('api:organization_detail', kwargs={'pk': organization.id}), user=alice, expect=403)
 
 
 @pytest.mark.django_db
-@mock.patch('awx.main.access.BaseAccess.check_license', lambda *a, **kw: True)
 def test_delete_organization_xfail2(delete, organization):
     delete(reverse('api:organization_detail', kwargs={'pk': organization.id}), user=None, expect=401)
 
@@ -295,5 +288,3 @@ def test_organization_delete_with_active_jobs(delete, admin, organization, organ
 
     assert resp.data['error'] == u"Resource is being used by running jobs."
     assert resp_sorted == expect_sorted
-
-

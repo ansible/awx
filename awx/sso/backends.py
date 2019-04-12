@@ -31,7 +31,6 @@ from social_core.backends.saml import SAMLAuth as BaseSAMLAuth
 from social_core.backends.saml import SAMLIdentityProvider as BaseSAMLIdentityProvider
 
 # Ansible Tower
-from awx.conf.license import feature_enabled
 from awx.sso.models import UserEnterpriseAuth
 
 logger = logging.getLogger('awx.sso.backends')
@@ -94,9 +93,6 @@ class LDAPBackend(BaseLDAPBackend):
 
         if not self.settings.SERVER_URI:
             return None
-        if not feature_enabled('ldap'):
-            logger.error("Unable to authenticate, license does not support LDAP authentication")
-            return None
         try:
             user = User.objects.get(username=username)
             if user and (not user.profile or not user.profile.ldap_dn):
@@ -120,9 +116,6 @@ class LDAPBackend(BaseLDAPBackend):
 
     def get_user(self, user_id):
         if not self.settings.SERVER_URI:
-            return None
-        if not feature_enabled('ldap'):
-            logger.error("Unable to get_user, license does not support LDAP authentication")
             return None
         return super(LDAPBackend, self).get_user(user_id)
 
@@ -188,19 +181,13 @@ class RADIUSBackend(BaseRADIUSBackend):
     Custom Radius backend to verify license status
     '''
 
-    def authenticate(self, username, password):    
+    def authenticate(self, username, password):
         if not django_settings.RADIUS_SERVER:
-            return None
-        if not feature_enabled('enterprise_auth'):
-            logger.error("Unable to authenticate, license does not support RADIUS authentication")
             return None
         return super(RADIUSBackend, self).authenticate(None, username, password)
 
     def get_user(self, user_id):
         if not django_settings.RADIUS_SERVER:
-            return None
-        if not feature_enabled('enterprise_auth'):
-            logger.error("Unable to get_user, license does not support RADIUS authentication")
             return None
         user = super(RADIUSBackend, self).get_user(user_id)
         if not user.has_usable_password():
@@ -217,9 +204,6 @@ class TACACSPlusBackend(object):
 
     def authenticate(self, username, password):
         if not django_settings.TACACSPLUS_HOST:
-            return None
-        if not feature_enabled('enterprise_auth'):
-            logger.error("Unable to authenticate, license does not support TACACS+ authentication")
             return None
         try:
             # Upstream TACACS+ client does not accept non-string, so convert if needed.
@@ -240,9 +224,6 @@ class TACACSPlusBackend(object):
 
     def get_user(self, user_id):
         if not django_settings.TACACSPLUS_HOST:
-            return None
-        if not feature_enabled('enterprise_auth'):
-            logger.error("Unable to get user, license does not support TACACS+ authentication")
             return None
         try:
             return User.objects.get(pk=user_id)
@@ -294,9 +275,6 @@ class SAMLAuth(BaseSAMLAuth):
                     django_settings.SOCIAL_AUTH_SAML_TECHNICAL_CONTACT, django_settings.SOCIAL_AUTH_SAML_SUPPORT_CONTACT,
                     django_settings.SOCIAL_AUTH_SAML_ENABLED_IDPS]):
             return None
-        if not feature_enabled('enterprise_auth'):
-            logger.error("Unable to authenticate, license does not support SAML authentication")
-            return None
         user = super(SAMLAuth, self).authenticate(*args, **kwargs)
         # Comes from https://github.com/omab/python-social-auth/blob/v0.2.21/social/backends/base.py#L91
         if getattr(user, 'is_new', False):
@@ -310,9 +288,6 @@ class SAMLAuth(BaseSAMLAuth):
                     django_settings.SOCIAL_AUTH_SAML_SP_PRIVATE_KEY, django_settings.SOCIAL_AUTH_SAML_ORG_INFO,
                     django_settings.SOCIAL_AUTH_SAML_TECHNICAL_CONTACT, django_settings.SOCIAL_AUTH_SAML_SUPPORT_CONTACT,
                     django_settings.SOCIAL_AUTH_SAML_ENABLED_IDPS]):
-            return None
-        if not feature_enabled('enterprise_auth'):
-            logger.error("Unable to get_user, license does not support SAML authentication")
             return None
         return super(SAMLAuth, self).get_user(user_id)
 

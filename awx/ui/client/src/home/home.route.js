@@ -23,7 +23,7 @@ export default {
     resolve: {
         graphData: ['$q', 'jobStatusGraphData', '$rootScope',
             function($q, jobStatusGraphData, $rootScope) {
-                return $rootScope.featuresConfigured.promise.then(function() {
+                return $rootScope.basePathsLoaded.promise.then(function() {
                     return $q.all({
                         jobStatus: jobStatusGraphData.get("month", "all"),
                     });

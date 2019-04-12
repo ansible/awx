@@ -119,20 +119,6 @@ def test_get_registered_read_only_settings(reg):
     ]
 
 
-def test_get_registered_settings_with_required_features(reg):
-    reg.register(
-        'AWX_SOME_SETTING_ENABLED',
-        field_class=fields.BooleanField,
-        category=_('System'),
-        category_slug='system',
-        feature_required='superpowers',
-    )
-    assert reg.get_registered_settings(features_enabled=[]) == []
-    assert reg.get_registered_settings(features_enabled=['superpowers']) == [
-        'AWX_SOME_SETTING_ENABLED'
-    ]
-
-
 def test_get_dependent_settings(reg):
     reg.register(
         'AWX_SOME_SETTING_ENABLED',
@@ -173,45 +159,6 @@ def test_get_registered_categories(reg):
     }
 
 
-def test_get_registered_categories_with_required_features(reg):
-    reg.register(
-        'AWX_SOME_SETTING_ENABLED',
-        field_class=fields.BooleanField,
-        category=_('System'),
-        category_slug='system',
-        feature_required='superpowers'
-    )
-    reg.register(
-        'AWX_SOME_OTHER_SETTING_ENABLED',
-        field_class=fields.BooleanField,
-        category=_('OtherSystem'),
-        category_slug='other-system',
-        feature_required='sortapowers'
-    )
-    assert reg.get_registered_categories(features_enabled=[]) == {
-        'all': _('All'),
-        'changed': _('Changed'),
-    }
-    assert reg.get_registered_categories(features_enabled=['superpowers']) == {
-        'all': _('All'),
-        'changed': _('Changed'),
-        'system': _('System'),
-    }
-    assert reg.get_registered_categories(features_enabled=['sortapowers']) == {
-        'all': _('All'),
-        'changed': _('Changed'),
-        'other-system': _('OtherSystem'),
-    }
-    assert reg.get_registered_categories(
-        features_enabled=['superpowers', 'sortapowers']
-    ) == {
-        'all': _('All'),
-        'changed': _('Changed'),
-        'system': _('System'),
-        'other-system': _('OtherSystem'),
-    }
-
-
 def test_is_setting_encrypted(reg):
     reg.register(
         'AWX_SOME_SETTING_ENABLED',
@@ -237,7 +184,6 @@ def test_simple_field(reg):
         category=_('System'),
         category_slug='system',
         placeholder='Example Value',
-        feature_required='superpowers'
     )
 
     field = reg.get_setting_field('AWX_SOME_SETTING')
@@ -246,7 +192,6 @@ def test_simple_field(reg):
     assert field.category_slug == 'system'
     assert field.default is empty
     assert field.placeholder == 'Example Value'
-    assert field.feature_required == 'superpowers'
 
 
 def test_field_with_custom_attribute(reg):

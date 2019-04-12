@@ -718,7 +718,6 @@ angular.module('GeneratorHelpers', [systemStatus.name])
         html += (options.ngClick) ? "ng-click=\"$eval(" + options.ngClick + ")\" " : "";
         html += (options.ngShow) ? "ng-show=\"" + options.ngShow + "\" " : "";
         html += (options.ngHide) ? "ng-hide=\"" + options.ngHide + "\" " : "";
-        html += (options.awFeature) ? "aw-feature=\"" + options.awFeature + "\" " : "";
         html += '>';
         html += '<span translate>';
         html += (options.buttonContent) ? options.buttonContent : "";

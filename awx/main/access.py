@@ -41,8 +41,6 @@ from awx.main.models import (
 )
 from awx.main.models.mixins import ResourceMixin
 
-from awx.conf.license import LicenseForbids, feature_enabled
-
 __all__ = ['get_user_queryset', 'check_user_access', 'check_user_access_with_errors',
            'user_accessible_objects', 'consumer_access',]
 
@@ -324,12 +322,6 @@ class BaseAccess(object):
         elif not add_host_name and free_instances < 0:
             raise PermissionDenied(_("Host count exceeds available instances."))
 
-        if feature is not None:
-            if "features" in validation_info and not validation_info["features"].get(feature, False):
-                raise LicenseForbids(_("Feature %s is not enabled in the active license.") % feature)
-            elif "features" not in validation_info:
-                raise LicenseForbids(_("Features not found in active license."))
-
     def check_org_host_limit(self, data, add_host_name=None):
         validation_info = get_licenser().validate()
         if validation_info.get('license_type', 'UNLICENSED') == 'open':
@@ -383,9 +375,6 @@ class BaseAccess(object):
                 if obj.validation_errors:
                     user_capabilities[display_method] = False
                     continue
-            elif isinstance(obj, (WorkflowJobTemplate, WorkflowJob)) and (not feature_enabled('workflows')):
-                user_capabilities[display_method] = (display_method == 'delete')
-                continue
             elif display_method == 'copy' and isinstance(obj, WorkflowJobTemplate) and obj.organization_id is None:
                 user_capabilities[display_method] = self.user.is_superuser
                 continue
@@ -776,7 +765,7 @@ class OrganizationAccess(NotificationAttachMixin, BaseAccess):
         return self.user in obj.admin_role
 
     def can_delete(self, obj):
-        self.check_license(feature='multiple_organizations', check_expiration=False)
+        self.check_license(check_expiration=False)
         is_change_possible = self.can_change(obj, None)
         if not is_change_possible:
             return False
@@ -1492,11 +1481,6 @@ class JobTemplateAccess(NotificationAttachMixin, BaseAccess):
             # Check the per-org limit
             self.check_org_host_limit({'inventory': obj.inventory})
 
-            if obj.survey_enabled:
-                self.check_license(feature='surveys')
-            if Instance.objects.active_count() > 1:
-                self.check_license(feature='ha')
-
         # Super users can start any job
         if self.user.is_superuser:
             return True
@@ -2021,10 +2005,6 @@ class WorkflowJobTemplateAccess(NotificationAttachMixin, BaseAccess):
             # Check the per-org limit
             self.check_org_host_limit({'inventory': obj.inventory})
 
-            # if surveys are added to WFJTs, check license here
-            if obj.survey_enabled:
-                self.check_license(feature='surveys')
-
         # Super users can start any job
         if self.user.is_superuser:
             return True
@@ -2032,11 +2012,6 @@ class WorkflowJobTemplateAccess(NotificationAttachMixin, BaseAccess):
         return self.user in obj.execute_role
 
     def can_change(self, obj, data):
-        # Check survey license if surveys are added to WFJTs
-        if (data and 'survey_enabled' in data and
-                obj.survey_enabled != data['survey_enabled'] and data['survey_enabled']):
-            self.check_license(feature='surveys')
-
         if self.user.is_superuser:
             return True
 

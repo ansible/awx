@@ -25,7 +25,6 @@ from awx.sso.ldap_group_types import PosixUIDGroupType  # noqa
 
 # Tower
 from awx.conf import fields
-from awx.conf.license import feature_enabled
 from awx.main.validators import validate_certificate
 from awx.sso.validators import (  # noqa
     validate_ldap_dn,
@@ -135,17 +134,6 @@ class AuthenticationBackendsField(fields.StringListField):
         ('django.contrib.auth.backends.ModelBackend', []),
     ])
 
-    REQUIRED_BACKEND_FEATURE = {
-        'awx.sso.backends.LDAPBackend': 'ldap',
-        'awx.sso.backends.LDAPBackend1': 'ldap',
-        'awx.sso.backends.LDAPBackend2': 'ldap',
-        'awx.sso.backends.LDAPBackend3': 'ldap',
-        'awx.sso.backends.LDAPBackend4': 'ldap',
-        'awx.sso.backends.LDAPBackend5': 'ldap',
-        'awx.sso.backends.RADIUSBackend': 'enterprise_auth',
-        'awx.sso.backends.SAMLAuth': 'enterprise_auth',
-    }
-
     @classmethod
     def get_all_required_settings(cls):
         all_required_settings = set(['LICENSE'])
@@ -164,15 +152,12 @@ class AuthenticationBackendsField(fields.StringListField):
         except AttributeError:
             backends = self.REQUIRED_BACKEND_SETTINGS.keys()
         # Filter which authentication backends are enabled based on their
-        # required settings being defined and non-empty. Also filter available
-        # backends based on license features.
+        # required settings being defined and non-empty.
         for backend, required_settings in self.REQUIRED_BACKEND_SETTINGS.items():
             if backend not in backends:
                 continue
-            required_feature = self.REQUIRED_BACKEND_FEATURE.get(backend, '')
-            if not required_feature or feature_enabled(required_feature):
-                if all([getattr(settings, rs, None) for rs in required_settings]):
-                    continue
+            if all([getattr(settings, rs, None) for rs in required_settings]):
+                continue
             backends = [x for x in backends if x != backend]
         return backends
 
@@ -782,4 +767,3 @@ class SAMLTeamAttrField(BaseDictWithChildField):
         'remove': fields.BooleanField(required=False),
         'saml_attr': fields.CharField(required=False, allow_null=True),
     }
-
