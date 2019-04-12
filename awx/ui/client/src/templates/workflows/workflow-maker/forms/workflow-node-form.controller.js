@@ -5,11 +5,11 @@
  *************************************************/
 
 export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService', 'Rest', '$q',
-        'TemplatesStrings', 'CreateSelect2', 'Empty', 'generateList', 'QuerySet',
+        'TemplatesStrings', 'CreateSelect2', 'Empty', 'QuerySet', '$filter',
         'GetBasePath', 'TemplateList', 'ProjectList', 'InventorySourcesList', 'ProcessErrors',
         'i18n', 'ParseTypeChange', 'WorkflowJobTemplateModel',
     function($scope, TemplatesService, JobTemplate, PromptService, Rest, $q,
-        TemplatesStrings, CreateSelect2, Empty, generateList, qs,
+        TemplatesStrings, CreateSelect2, Empty, qs, $filter,
         GetBasePath, TemplateList, ProjectList, InventorySourcesList, ProcessErrors,
         i18n, ParseTypeChange, WorkflowJobTemplate
     ) {
@@ -657,25 +657,43 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
         };
 
         const formatPopOverDetails = (model) => {
-            model.popOverDetails = {};
-            model.popOverDetails.playbook = model.playbook || i18n._('NONE SELECTED');
+            const popOverDetails = {};
+            popOverDetails.playbook = model.playbook || i18n._('NONE SELECTED');
             Object.keys(model.summary_fields).forEach(field => {
                 if (field === 'project') {
-                    model.popOverDetails.project = model.summary_fields[field].name || i18n._('NONE SELECTED');
+                    popOverDetails.project = model.summary_fields[field].name || i18n._('NONE SELECTED');
                 }
                 if (field === 'inventory') {
-                    model.popOverDetails.inventory = model.summary_fields[field].name || i18n._('NONE SELECTED');
+                    popOverDetails.inventory = model.summary_fields[field].name || i18n._('NONE SELECTED');
                 }
                 if (field === 'credentials') {
                     if (model.summary_fields[field].length <= 0) {
-                        model.popOverDetails.credentials = i18n._('NONE SELECTED');
+                        popOverDetails.credentials = i18n._('NONE SELECTED');
                     }
                     else {
                         const credentialNames = model.summary_fields[field].map(({name}) => name);
-                        model.popOverDetails.credentials = credentialNames.join('<br />');
+                        popOverDetails.credentials = credentialNames.join('<br />');
                     }
                 }
             });
+            model.popOver = `
+                <dl>
+                    <dt>${i18n._('INVENTORY')}</dt>
+                    <dd>${$filter('sanitize')(popOverDetails.inventory)}</dd>
+                </dl>
+                <dl>
+                    <dt>${i18n._('PROJECT')}</dt>
+                    <dd>${$filter('sanitize')(popOverDetails.project)}</dd>
+                </dl>
+                <dl>
+                    <dt>${i18n._('PLAYBOOK')}</dt>
+                    <dd>${$filter('sanitize')(popOverDetails.playbook)}</dd>
+                </dl>
+                <dl>
+                    <dt>${i18n._('CREDENTIAL')}</dt>
+                    <dd>${$filter('sanitize')(popOverDetails.credentials)}</dd>
+                </dl>
+            `;
         };
 
         $scope.openPromptModal = () => {
