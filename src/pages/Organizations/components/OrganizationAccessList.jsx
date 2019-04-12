@@ -105,7 +105,6 @@ class OrganizationAccessList extends React.Component {
       count: 0,
       sortOrder: 'ascending',
       sortedColumnKey: 'username',
-      isCompact: false,
       showWarning: false,
       warningTitle: '',
       warningMsg: '',
@@ -117,8 +116,6 @@ class OrganizationAccessList extends React.Component {
 
     this.fetchOrgAccessList = this.fetchOrgAccessList.bind(this);
     this.onSetPage = this.onSetPage.bind(this);
-    this.onExpand = this.onExpand.bind(this);
-    this.onCompact = this.onCompact.bind(this);
     this.onSort = this.onSort.bind(this);
     this.getQueryParams = this.getQueryParams.bind(this);
     this.removeAccessRole = this.removeAccessRole.bind(this);
@@ -134,14 +131,6 @@ class OrganizationAccessList extends React.Component {
     } catch (error) {
       this.setState({ error });
     }
-  }
-
-  onExpand () {
-    this.setState({ isCompact: false });
-  }
-
-  onCompact () {
-    this.setState({ isCompact: true });
   }
 
   onSetPage (pageNumber, pageSize) {
@@ -343,10 +332,6 @@ class OrganizationAccessList extends React.Component {
                   columns={this.columns}
                   onSearch={() => { }}
                   onSort={this.onSort}
-                  onCompact={this.onCompact}
-                  onExpand={this.onExpand}
-                  isCompact={isCompact}
-                  showExpandCollapse
                 />
                 {showWarning && (
                   <AlertModal

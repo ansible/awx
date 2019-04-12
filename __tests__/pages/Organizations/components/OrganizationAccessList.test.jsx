@@ -65,35 +65,6 @@ describe('<OrganizationAccessList />', () => {
     });
   });
 
-  test('onExpand and onCompact methods called when user clicks on Expand and Compact icons respectively', async (done) => {
-    const onExpand = jest.spyOn(_OrganizationAccessList.prototype, 'onExpand');
-    const onCompact = jest.spyOn(_OrganizationAccessList.prototype, 'onCompact');
-    const wrapper = mount(
-      <I18nProvider>
-        <MemoryRouter>
-          <_OrganizationAccessList
-            match={{ path: '/organizations/:id', url: '/organizations/1', params: { id: '0' } }}
-            location={{ search: '', pathname: '/organizations/1/access' }}
-            getAccessList={() => ({ data: { count: 1, results: mockData } })}
-            removeRole={() => {}}
-            handleHttpError={() => {}}
-          />
-        </MemoryRouter>
-      </I18nProvider>
-    ).find('OrganizationAccessList');
-    expect(onExpand).not.toHaveBeenCalled();
-    expect(onCompact).not.toHaveBeenCalled();
-
-    setImmediate(() => {
-      const rendered = wrapper.update();
-      rendered.find('button[aria-label="Expand"]').simulate('click');
-      rendered.find('button[aria-label="Collapse"]').simulate('click');
-      expect(onExpand).toHaveBeenCalled();
-      expect(onCompact).toHaveBeenCalled();
-      done();
-    });
-  });
-
   test('onSort being passed properly to DataListToolbar component', async (done) => {
     const onSort = jest.spyOn(_OrganizationAccessList.prototype, 'onSort');
     const wrapper = mount(
