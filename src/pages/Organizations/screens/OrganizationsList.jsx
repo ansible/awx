@@ -153,7 +153,7 @@ class OrganizationsList extends Component {
 
   handleOpenOrgDeleteModal () {
     const { results, selected } = this.state;
-    const warningTitle = i18nMark(`Delete Organization${selected.length > 1 ? 's' : ''}`);
+    const warningTitle = selected.length > 1 ? i18nMark('Delete Organization') : i18nMark('Delete Organizations');
     const warningMsg = i18nMark('Are you sure you want to delete:');
 
     const orgsToDelete = [];
@@ -271,60 +271,60 @@ class OrganizationsList extends Component {
     } = this.state;
     const { match } = this.props;
     return (
-      <PageSection variant={medium}>
-        <Card>
-          { isModalOpen && (
-            <AlertModal
-              variant="danger"
-              title={warningTitle}
-              isOpen={isModalOpen}
-              onClose={this.handleClearOrgsToDelete}
-              actions={[
-                <Button variant="danger" key="delete" aria-label="confirm-delete" onClick={this.handleOrgDelete}>Delete</Button>,
-                <Button variant="secondary" key="cancel" aria-label="cancel-delete" onClick={this.handleClearOrgsToDelete}>Cancel</Button>
-              ]}
-            >
-              {warningMsg}
-              <br />
-              {orgsToDelete.map((org) => (
-                <span key={org.id}>
-                  <strong>
-                    {org.name}
-                  </strong>
+      <I18n>
+        {({ i18n }) => (
+          <PageSection variant={medium}>
+            <Card>
+              { isModalOpen && (
+                <AlertModal
+                  variant="danger"
+                  title={warningTitle}
+                  isOpen={isModalOpen}
+                  onClose={this.handleClearOrgsToDelete}
+                  actions={[
+                    <Button variant="danger" key="delete" aria-label="confirm-delete" onClick={this.handleOrgDelete}>{i18n._(t`Delete`)}</Button>,
+                    <Button variant="secondary" key="cancel" aria-label="cancel-delete" onClick={this.handleClearOrgsToDelete}>{i18n._(t`Cancel`)}</Button>
+                  ]}
+                >
+                  {warningMsg}
                   <br />
-                </span>
-              ))}
-              <br />
-            </AlertModal>
-          )}
-          {noInitialResults && (
-            <EmptyState>
-              <EmptyStateIcon icon={CubesIcon} />
-              <Title size="lg">
-                <Trans>No Organizations Found</Trans>
-              </Title>
-              <EmptyStateBody>
-                <Trans>Please add an organization to populate this list</Trans>
-              </EmptyStateBody>
-            </EmptyState>
-          ) || (
-            <Fragment>
-              <DataListToolbar
-                addUrl={`${match.url}/add`}
-                isAllSelected={selected.length === results.length}
-                sortedColumnKey={sortedColumnKey}
-                sortOrder={sortOrder}
-                columns={this.columns}
-                onSearch={this.onSearch}
-                onSort={this.onSort}
-                onSelectAll={this.onSelectAll}
-                onOpenDeleteModal={this.handleOpenOrgDeleteModal}
-                disableTrashCanIcon={selected.length === 0}
-                showDelete
-                showSelectAll
-              />
-              <I18n>
-                {({ i18n }) => (
+                  {orgsToDelete.map((org) => (
+                    <span key={org.id}>
+                      <strong>
+                        {org.name}
+                      </strong>
+                      <br />
+                    </span>
+                  ))}
+                  <br />
+                </AlertModal>
+              )}
+              {noInitialResults && (
+                <EmptyState>
+                  <EmptyStateIcon icon={CubesIcon} />
+                  <Title size="lg">
+                    <Trans>No Organizations Found</Trans>
+                  </Title>
+                  <EmptyStateBody>
+                    <Trans>Please add an organization to populate this list</Trans>
+                  </EmptyStateBody>
+                </EmptyState>
+              ) || (
+                <Fragment>
+                  <DataListToolbar
+                    addUrl={`${match.url}/add`}
+                    isAllSelected={selected.length === results.length}
+                    sortedColumnKey={sortedColumnKey}
+                    sortOrder={sortOrder}
+                    columns={this.columns}
+                    onSearch={this.onSearch}
+                    onSort={this.onSort}
+                    onSelectAll={this.onSelectAll}
+                    onOpenDeleteModal={this.handleOpenOrgDeleteModal}
+                    disableTrashCanIcon={selected.length === 0}
+                    showDelete
+                    showSelectAll
+                  />
                   <ul className="pf-c-data-list" aria-label={i18n._(t`Organizations List`)}>
                     { results.map(o => (
                       <OrganizationListItem
@@ -340,21 +340,21 @@ class OrganizationsList extends Component {
                       />
                     ))}
                   </ul>
-                )}
-              </I18n>
-              <Pagination
-                count={count}
-                page={page}
-                pageCount={pageCount}
-                page_size={page_size}
-                onSetPage={this.onSetPage}
-              />
-              { loading ? <div>loading...</div> : '' }
-              { error ? <div>error</div> : '' }
-            </Fragment>
-          )}
-        </Card>
-      </PageSection>
+                  <Pagination
+                    count={count}
+                    page={page}
+                    pageCount={pageCount}
+                    page_size={page_size}
+                    onSetPage={this.onSetPage}
+                  />
+                  { loading ? <div>loading...</div> : '' }
+                  { error ? <div>error</div> : '' }
+                </Fragment>
+              )}
+            </Card>
+          </PageSection>
+        )}
+      </I18n>
     );
   }
 }

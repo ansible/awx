@@ -355,8 +355,8 @@ class OrganizationAccessList extends React.Component {
                     isOpen={showWarning}
                     onClose={this.hideWarning}
                     actions={[
-                      <Button key="delete" variant="danger" aria-label="Confirm delete" onClick={this.confirmDelete}>Delete</Button>,
-                      <Button key="cancel" variant="secondary" onClick={this.hideWarning}>Cancel</Button>
+                      <Button key="delete" variant="danger" aria-label="Confirm delete" onClick={this.confirmDelete}>{i18n._(t`Delete`)}</Button>,
+                      <Button key="cancel" variant="secondary" onClick={this.hideWarning}>{i18n._(t`Cancel`)}</Button>
                     ]}
                   >
                     {warningMsg}
