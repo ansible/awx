@@ -5,20 +5,21 @@ import {
   Switch,
   Route,
   withRouter,
-  Redirect
+  Redirect,
+  Link
 } from 'react-router-dom';
 import {
   Card,
   CardHeader,
-  PageSection
+  PageSection,
+  Tab,
+  Tabs
 } from '@patternfly/react-core';
-
+import {
+  TimesIcon
+} from '@patternfly/react-icons';
 import { withNetwork } from '../../../../contexts/Network';
-
-import Tabs from '../../../../components/Tabs/Tabs';
-import Tab from '../../../../components/Tabs/Tab';
 import NotifyAndRedirect from '../../../../components/NotifyAndRedirect';
-
 import OrganizationAccess from './OrganizationAccess';
 import OrganizationDetail from './OrganizationDetail';
 import OrganizationEdit from './OrganizationEdit';
@@ -33,9 +34,17 @@ class Organization extends Component {
       organization: null,
       error: false,
       loading: true,
+      tabElements: [
+        { name: i18nMark('Details'), link: `${props.match.url}/details`, id: 0 },
+        { name: i18nMark('Access'), link: `${props.match.url}/access`, id: 1 },
+        { name: i18nMark('Teams'), link: `${props.match.url}/teams`, id: 2 },
+        { name: i18nMark('Notifications'), link: `${props.match.url}/notifications`, id: 3 },
+      ],
     };
 
     this.fetchOrganization = this.fetchOrganization.bind(this);
+    this.handleTabSelect = this.handleTabSelect.bind(this);
+    this.checkLocation = this.checkLocation.bind(this);
   }
 
   componentDidMount () {
@@ -62,8 +71,33 @@ class Organization extends Component {
       setBreadcrumb(data);
       this.setState({ organization: data, loading: false });
     } catch (error) {
+<<<<<<< HEAD
       handleHttpError(error) || this.setState({ error: true, loading: false });
+=======
+      this.setState({ error: true });
+    } finally {
+      this.setState({ loading: false });
+      this.checkLocation();
+>>>>>>> addresses PR issues
     }
+  }
+
+  checkLocation () {
+    const { location } = this.props;
+    const { tabElements } = this.state;
+    const activeTab = tabElements.filter(tabElement => tabElement.link === location.pathname);
+    this.setState({ activeTabKey: activeTab[0].id });
+  }
+
+  handleTabSelect (event, eventKey) {
+    const { history } = this.props;
+    const { tabElements } = this.state;
+
+    const tab = tabElements.find(tabElement => tabElement.id === eventKey);
+    history.push(tab.link);
+    const activeTab = tabElements.filter(selectedTab => selectedTab.link === tab.link)
+      .map(selectedTab => selectedTab.id);
+    this.setState({ activeTabKey: activeTab[0] });
   }
 
   render () {
@@ -72,38 +106,45 @@ class Organization extends Component {
       match,
       history
     } = this.props;
-
     const {
+      activeTabKey,
       organization,
       error,
-      loading
+      loading,
+      tabElements
     } = this.state;
-
-    const tabElements = [
-      { name: i18nMark('Details'), link: `${match.url}/details` },
-      { name: i18nMark('Access'), link: `${match.url}/access` },
-      { name: i18nMark('Teams'), link: `${match.url}/teams` },
-      { name: i18nMark('Notifications'), link: `${match.url}/notifications` },
-    ];
 
     let cardHeader = (
       <CardHeader>
         <I18n>
           {({ i18n }) => (
-            <Tabs
-              labelText={i18n._(t`Organization detail tabs`)}
-              closeButton={{ link: '/organizations', text: i18nMark('Close') }}
-            >
-              {tabElements.map(tabElement => (
-                <Tab
-                  key={tabElement.name}
-                  link={tabElement.link}
-                  replace
-                >
-                  {tabElement.name}
-                </Tab>
-              ))}
-            </Tabs>
+            <>
+              <Tabs
+                labeltext={i18n._(t`Organization detail tabs`)}
+                activeKey={activeTabKey}
+                onSelect={(event, eventKey) => {
+                  this.handleTabSelect(event, eventKey);
+                }}
+              >
+                {tabElements.map(tabElement => (
+                  <Tab
+                    className={`${tabElement.name}`}
+                    aria-label={`${tabElement.name}`}
+                    eventKey={tabElement.id}
+                    key={tabElement.id}
+                    link={tabElement.link}
+                    title={tabElement.name}
+                  />
+                ))}
+              </Tabs>
+              <Link
+                aria-label="Close"
+                title="Close"
+                to="/organizations"
+              >
+                <TimesIcon className="OrgsTab-closeButton" />
+              </Link>
+            </>
           )}
         </I18n>
       </CardHeader>
@@ -185,5 +226,10 @@ class Organization extends Component {
     );
   }
 }
+<<<<<<< HEAD
 
 export default withNetwork(withRouter(Organization));
+=======
+export { Organization as _Organization };
+export default withRouter(Organization);
+>>>>>>> addresses PR issues

@@ -283,6 +283,25 @@
   margin-bottom: 10px;
 }
 
+.orgListAlert-actionBtn{
+  margin:0 10px;
+}
+
+.orgListDetete-progressBar{
+  padding-right: 32px;
+}
+
+.orgListDelete-progressBar-noShow{
+  display: none;
+  padding-right: 32px;
+}
+
+.OrgsTab-closeButton {
+  color: black;
+  float:right;
+  position: relative;
+  top: -60px;
+}
 .awx-c-form-action-group {
   float: right;
   display: block;
