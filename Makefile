@@ -60,7 +60,7 @@ I18N_FLAG_FILE = .i18n_built
 
 .PHONY: awx-link clean clean-tmp clean-venv requirements requirements_dev \
 	develop refresh adduser migrate dbchange dbshell runserver \
-	receiver test test_unit test_ansible test_coverage coverage_html \
+	receiver test test_unit test_coverage coverage_html \
 	dev_build release_build release_clean sdist \
 	ui-docker-machine ui-docker ui-release ui-devel \
 	ui-test ui-deps ui-test-ci VERSION
@@ -378,19 +378,11 @@ test:
 	PYTHONDONTWRITEBYTECODE=1 py.test -p no:cacheprovider -n auto $(TEST_DIRS)
 	awx-manage check_migrations --dry-run --check  -n 'vNNN_missing_migration_file'
 
-test_combined: test_ansible test
-
 test_unit:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	py.test awx/main/tests/unit awx/conf/tests/unit awx/sso/tests/unit
-
-test_ansible:
-	@if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/ansible/bin/activate; \
-	fi; \
-	py.test awx/lib/tests -c awx/lib/tests/pytest.ini
 
 # Run all API unit tests with coverage enabled.
 test_coverage:

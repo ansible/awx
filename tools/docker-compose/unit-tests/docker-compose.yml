@@ -13,6 +13,6 @@ services:
       RABBITMQ_USER: guest
       RABBITMQ_PASS: guest
       RABBITMQ_VHOST: /
-    command: ["make test_combined"]
+    command: ["make test"]
     volumes:
       - ../../../:/awx_devel
