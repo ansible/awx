@@ -178,7 +178,7 @@ class OrganizationsList extends Component {
     let errorHandled;
 
     try {
-      await Promise.all(orgsToDelete.map(async (org) => api.destroyOrganization(org.id)));
+      await Promise.all(orgsToDelete.map((org) => api.destroyOrganization(org.id)));
       this.handleClearOrgsToDelete();
     } catch (err) {
       errorHandled = handleHttpError(err);

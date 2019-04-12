@@ -45,12 +45,8 @@ class OrganizationEdit extends Component {
     const url = organization.related.instance_groups;
 
     try {
-      await Promise.all(groupsToAssociate.map(async id => {
-        await api.associateInstanceGroup(url, id);
-      }));
-      await Promise.all(groupsToDisassociate.map(async id => {
-        await api.disassociate(url, id);
-      }));
+      await Promise.all(groupsToAssociate.map(id => api.associateInstanceGroup(url, id)));
+      await Promise.all(groupsToDisassociate.map(id => api.disassociate(url, id)));
     } catch (err) {
       handleHttpError(err) || this.setState({ error: err });
     }

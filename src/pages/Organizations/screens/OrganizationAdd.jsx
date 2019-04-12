@@ -36,9 +36,8 @@ class OrganizationAdd extends React.Component {
       const { data: response } = await api.createOrganization(values);
       const instanceGroupsUrl = response.related.instance_groups;
       try {
-        await Promise.all(groupsToAssociate.map(async id => {
-          await api.associateInstanceGroup(instanceGroupsUrl, id);
-        }));
+        await Promise.all(groupsToAssociate.map(id => api
+          .associateInstanceGroup(instanceGroupsUrl, id)));
         this.handleSuccess(response.id);
       } catch (err) {
         handleHttpError(err) || this.setState({ error: err });
