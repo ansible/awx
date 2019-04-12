@@ -291,7 +291,7 @@ def test_job_launch_JT_with_validation(machine_credential, credential, deploy_jo
     kv['credentials'] = [machine_credential]  # conversion to internal value
     job_obj = deploy_jobtemplate.create_unified_job(**kv)
 
-    final_job_extra_vars = yaml.load(job_obj.extra_vars)
+    final_job_extra_vars = yaml.safe_load(job_obj.extra_vars)
     assert 'job_launch_var' in final_job_extra_vars
     assert 'job_template_var' in final_job_extra_vars
     assert set([cred.pk for cred in job_obj.credentials.all()]) == set([machine_credential.id, credential.id])
