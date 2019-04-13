@@ -37,10 +37,10 @@ USER_SESSIONS = Gauge('awx_sessions_total', 'Number of sessions', ['type',])
 CUSTOM_VENVS = Gauge('awx_custom_virtualenvs_total', 'Number of virtualenvs')
 RUNNING_JOBS = Gauge('awx_running_jobs_total', 'Number of running jobs on the Tower system')
 
-INSTANCE_CAPACITY = Gauge('awx_instance_capacity', 'Capacity of each node in a Tower system', ['type',])
-INSTANCE_CPU = Gauge('awx_instance_cpu', 'CPU cores on each node in a Tower system', ['type',])
-INSTANCE_MEMORY = Gauge('awx_instance_memory', 'RAM (Kb) on each node in a Tower system', ['type',])
-INSTANCE_INFO = Info('awx_instance', 'Info about each node in a Tower system', ['type',])
+INSTANCE_CAPACITY = Gauge('awx_instance_capacity', 'Capacity of each node in a Tower system', ['instance_uuid',])
+INSTANCE_CPU = Gauge('awx_instance_cpu', 'CPU cores on each node in a Tower system', ['instance_uuid',])
+INSTANCE_MEMORY = Gauge('awx_instance_memory', 'RAM (Kb) on each node in a Tower system', ['instance_uuid',])
+INSTANCE_INFO = Info('awx_instance', 'Info about each node in a Tower system', ['instance_uuid',])
 INSTANCE_LAUNCH_TYPE = Gauge('awx_instance_launch_type_total', 'Type of Job launched', ['node', 'launch_type',])
 INSTANCE_STATUS = Gauge('awx_instance_status_total', 'Status of Job launched', ['node', 'status',])
 
@@ -48,7 +48,7 @@ INSTANCE_STATUS = Gauge('awx_instance_status_total', 'Status of Job launched', [
 def metrics():
     license_info = get_license(show_key=False)
     SYSTEM_INFO.info({
-        'system_uuid': settings.SYSTEM_UUID,
+        'install_uuid': settings.INSTALL_UUID,
         'insights_analytics': str(settings.INSIGHTS_DATA_ENABLED),
         'tower_url_base': settings.TOWER_URL_BASE,
         'tower_version': get_awx_version(),
@@ -87,10 +87,10 @@ def metrics():
 
     instance_data = instance_info(None)
     for uuid in instance_data:
-        INSTANCE_CAPACITY.labels(type=uuid).set(instance_data[uuid]['capacity'])
-        INSTANCE_CPU.labels(type=uuid).set(instance_data[uuid]['cpu'])
-        INSTANCE_MEMORY.labels(type=uuid).set(instance_data[uuid]['memory'])
-        INSTANCE_INFO.labels(type=uuid).info({
+        INSTANCE_CAPACITY.labels(instance_uuid=uuid).set(instance_data[uuid]['capacity'])
+        INSTANCE_CPU.labels(instance_uuid=uuid).set(instance_data[uuid]['cpu'])
+        INSTANCE_MEMORY.labels(instance_uuid=uuid).set(instance_data[uuid]['memory'])
+        INSTANCE_INFO.labels(instance_uuid=uuid).info({
             'enabled': str(instance_data[uuid]['enabled']),
             'last_isolated_check': getattr(instance_data[uuid], 'last_isolated_check', 'None'),
             'managed_by_policy': str(instance_data[uuid]['managed_by_policy']),
@@ -100,7 +100,6 @@ def metrics():
     instance_data = job_instance_counts(None)
     for node in instance_data:
         # skipping internal execution node (for system jobs) 
-        # TODO: determine if we should exclude execution_node from instance count
         if node == '':
             continue
         types = instance_data[node].get('launch_type', {})

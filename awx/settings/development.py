@@ -116,6 +116,7 @@ INSTALLED_APPS += ('rest_framework_swagger',)
 
 # Configure a default UUID for development only.
 SYSTEM_UUID = '00000000-0000-0000-0000-000000000000'
+INSTALL_UUID = '00000000-0000-0000-0000-000000000000'
 
 # Store a snapshot of default settings at this point before loading any
 # customizable config files.
