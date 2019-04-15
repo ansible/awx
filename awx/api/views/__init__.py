@@ -1677,7 +1677,7 @@ class HostInsights(GenericAPIView):
 
         return headers
 
-    def _get_platform_id(self, host, session, headers):
+    def _get_platform_info(self, host, session, headers):
         url = '{}/api/inventory/v1/hosts?insights_id={}'.format(
             settings.INSIGHTS_URL_BASE, host.insights_system_id)
         res = self._call_insights_api(url, session, headers)
@@ -1688,7 +1688,7 @@ class HostInsights(GenericAPIView):
                 _('Could not translate Insights system ID {}'
                   ' into an Insights platform ID.').format(host.insights_system_id))
 
-        return platform_id
+        return res['results'][0]
 
     def _get_reports(self, platform_id, session, headers):
         url = '{}/api/insights/v1/system/{}/reports/'.format(
@@ -1711,11 +1711,15 @@ class HostInsights(GenericAPIView):
 
         return remediations
 
-    def _get_insights(self, platform_id, session, headers):
+    def _get_insights(self, session, headers):
+        platform_info = self._get_platform_info(host, session, headers)
+        platform_id = platform_info['id']
         reports = self._get_reports(platform_id, session, headers)
         remediations = self._get_remediations(platform_id, session, headers)
 
-        return {'insights_content': filter_insights_api_response(reports, remediations)}
+        return {
+            'insights_content': filter_insights_api_response(platform_info, reports, remediations)
+        }
 
     def get(self, request, *args, **kwargs):
         host = self.get_object()
@@ -1739,7 +1743,6 @@ class HostInsights(GenericAPIView):
         password = cred.get_input('password', default='')
         session = self._get_session(username, password)
         headers = self._get_headers()
-        platform_id = self._get_platform_id(host, session, headers)
 
         data = self._get_insights(platform_id, session, headers)
         return Response(data, status=status.HTTP_200_OK)
