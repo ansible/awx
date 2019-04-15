@@ -41,10 +41,10 @@ if social_django.__version__ != '2.1.0':
             still works".format(social_django.__version__))
 
 
-if django.__version__ != '1.11.20':
-    raise RuntimeError("Django version other than 1.11.20 detected {}. \
+if django.__version__ != '1.11.16':
+    raise RuntimeError("Django version other than 1.11.16 detected {}. \
             Inherit from WSGIHandler to support short-circuit Django Middleware. \
-            This is known to work for Django 1.11.20 and may not work with other, \
+            This is known to work for Django 1.11.16 and may not work with other, \
             even minor, versions.".format(django.__version__))
 
 

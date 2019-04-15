@@ -59,7 +59,7 @@ class TestParserExceptions:
     @staticmethod
     def yaml_error(data):
         try:
-            yaml.safe_load(data)
+            yaml.load(data)
             return None
         except Exception as e:
             return str(e)

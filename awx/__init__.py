@@ -37,9 +37,9 @@ if HAS_DJANGO is True:
     # This line exists to make sure we don't regress on FIPS support if we
     # upgrade Django; if you're upgrading Django and see this error,
     # update the version check below, and confirm that FIPS still works.
-    if django.__version__ != '1.11.20':
-        raise RuntimeError("Django version other than 1.11.20 detected {}. \
-                Subclassing BaseDatabaseSchemaEditor is known to work for Django 1.11.20 \
+    if django.__version__ != '1.11.16':
+        raise RuntimeError("Django version other than 1.11.16 detected {}. \
+                Subclassing BaseDatabaseSchemaEditor is known to work for Django 1.11.16 \
                 and may not work in newer Django versions.".format(django.__version__))
 
 
