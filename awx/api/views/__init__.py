@@ -1697,7 +1697,7 @@ class HostInsights(GenericAPIView):
         return self._call_insights_api(url, session, headers)
 
     def _get_remediations(self, platform_id, session, headers):
-        url = '{}/api/remediations/v1/?system={}'.format(
+        url = '{}/api/remediations/v1/remediations?system={}'.format(
             settings.INSIGHTS_URL_BASE, platform_id)
 
         remediations = []
