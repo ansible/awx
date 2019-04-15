@@ -4,11 +4,11 @@
 
 # Old Insights API -> New API
 #
-# last_check_in -> checked_on
-# reports[] -> active_reports[]
-# reports[].rule.{description,summary} -> active_reports[].rule.{description,summary}
-# reports[].rule.category -> active_reports[].rule.category.name
-# reports[].rule.severity (str) -> active_reports[].rule.total_risk (int)
+# last_check_in is missing entirely, is now provided by a different endpoint
+# reports[] -> []
+# reports[].rule.{description,summary} -> [].rule.{description,summary}
+# reports[].rule.category -> [].rule.category.name
+# reports[].rule.severity (str) -> [].rule.total_risk (int)
 
 # reports[].rule.{ansible,ansible_fix} appears to be unused
 # reports[].maintenance_actions[] missing entirely, is now provided

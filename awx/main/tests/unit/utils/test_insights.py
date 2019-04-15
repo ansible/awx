@@ -3,11 +3,12 @@
 
 
 from awx.main.utils.insights import filter_insights_api_response
-from awx.main.tests.data.insights import TEST_INSIGHTS_PLANS, TEST_INSIGHTS_REMEDIATIONS
+from awx.main.tests.data.insights import TEST_INSIGHTS_HOSTS, TEST_INSIGHTS_PLANS, TEST_INSIGHTS_REMEDIATIONS
 
 
 def test_filter_insights_api_response():
-    actual = filter_insights_api_response(TEST_INSIGHTS_PLANS, TEST_INSIGHTS_REMEDIATIONS)
+    actual = filter_insights_api_response(
+        TEST_INSIGHTS_HOSTS['results'][0], TEST_INSIGHTS_PLANS, TEST_INSIGHTS_REMEDIATIONS)
 
     assert actual['last_check_in'] == '2019-03-19T21:59:09.213151-04:00'
     assert len(actual['reports']) == 5
