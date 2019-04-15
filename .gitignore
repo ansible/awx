@@ -29,6 +29,7 @@ awx/ui/templates/ui/index.html
 awx/ui/templates/ui/installing.html
 /tower-license
 /tower-license/**
+tools/prometheus/data
 
 # Tower setup playbook testing
 setup/test/roles/postgresql
