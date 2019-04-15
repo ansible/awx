@@ -1682,7 +1682,7 @@ class HostInsights(GenericAPIView):
             settings.INSIGHTS_URL_BASE, host.insights_system_id)
         res = self._call_insights_api(url, session, headers)
         try:
-            platform_id = res['results'][0]['id']
+            res['results'][0]['id']
         except (IndexError, KeyError):
             raise NotFound(
                 _('Could not translate Insights system ID {}'
