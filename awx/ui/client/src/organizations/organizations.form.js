@@ -93,7 +93,7 @@ export default ['NotificationsList', 'i18n',
                     name: 'users',
                     dataPlacement: 'top',
                     awToolTip: i18n._('Please save before adding users.'),
-                    basePath: 'api/v2/organizations/{{$stateParams.organization_id}}/access_list/',
+                    basePath: 'api/v2/organizations/{{$stateParams.organization_id}}/users/',
                     search: {
                         order_by: 'username'
                     },
@@ -118,13 +118,15 @@ export default ['NotificationsList', 'i18n',
                             key: true,
                             label: i18n._('User'),
                             linkBase: 'users',
-                            columnClass: 'col-sm-6'
+                            columnClass: 'col-sm-4'
                         },
-                        role: {
-                            label: i18n._('Role'),
-                            type: 'role',
-                            nosort: true,
-                            columnClass: 'col-sm-6'
+                        first_name: {
+                            label: i18n._('First name'),
+                            columnClass: 'col-sm-4'
+                        },
+                        last_name: {
+                            label: i18n._('Last name'),
+                            columnClass: 'col-sm-4'
                         }
                     }
                 },
