@@ -1744,7 +1744,7 @@ class HostInsights(GenericAPIView):
         session = self._get_session(username, password)
         headers = self._get_headers()
 
-        data = self._get_insights(platform_id, session, headers)
+        data = self._get_insights(session, headers)
         return Response(data, status=status.HTTP_200_OK)
 
     def handle_exception(self, exc):
