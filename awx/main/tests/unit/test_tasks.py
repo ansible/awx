@@ -172,7 +172,7 @@ def test_openstack_client_config_generation(mocker, source, expected, private_da
         'ansible_virtualenv_path': '/venv/foo'
     })
     cloud_config = update.build_private_data(inventory_update, private_data_dir)
-    cloud_credential = yaml.safe_load(
+    cloud_credential = yaml.load(
         cloud_config.get('credentials')[credential]
     )
     assert cloud_credential['clouds'] == {
@@ -215,7 +215,7 @@ def test_openstack_client_config_generation_with_private_source_vars(mocker, sou
     })
     cloud_config = update.build_private_data(inventory_update, private_data_dir)
     cloud_credential = yaml.load(
-        cloud_config.get('credentials')[credential], Loader=SafeLoader
+        cloud_config.get('credentials')[credential]
     )
     assert cloud_credential['clouds'] == {
         'devstack': {
@@ -249,7 +249,7 @@ def parse_extra_vars(args):
     for chunk in args:
         if chunk.startswith('@/tmp/'):
             with open(chunk.strip('@'), 'r') as f:
-                extra_vars.update(yaml.load(f, Loader=SafeLoader))
+                extra_vars.update(yaml.load(f, SafeLoader))
     return extra_vars
 
 
@@ -268,7 +268,7 @@ class TestExtraVarSanitation(TestJobExecution):
         task.build_extra_vars_file(job, private_data_dir, {})
 
         fd = open(os.path.join(private_data_dir, 'env', 'extravars'))
-        extra_vars = yaml.load(fd, Loader=SafeLoader)
+        extra_vars = yaml.load(fd, SafeLoader)
 
         # ensure that strings are marked as unsafe
         for unsafe in ['awx_job_template_name', 'tower_job_template_name',
@@ -292,7 +292,7 @@ class TestExtraVarSanitation(TestJobExecution):
         task.build_extra_vars_file(job, private_data_dir, {})
 
         fd = open(os.path.join(private_data_dir, 'env', 'extravars'))
-        extra_vars = yaml.load(fd, Loader=SafeLoader)
+        extra_vars = yaml.load(fd, SafeLoader)
         assert extra_vars['msg'] == self.UNSAFE
         assert hasattr(extra_vars['msg'], '__UNSAFE__')
 
@@ -303,7 +303,7 @@ class TestExtraVarSanitation(TestJobExecution):
         task.build_extra_vars_file(job, private_data_dir, {})
 
         fd = open(os.path.join(private_data_dir, 'env', 'extravars'))
-        extra_vars = yaml.load(fd, Loader=SafeLoader)
+        extra_vars = yaml.load(fd, SafeLoader)
         assert extra_vars['msg'] == {'a': [self.UNSAFE]}
         assert hasattr(extra_vars['msg']['a'][0], '__UNSAFE__')
 
@@ -314,7 +314,7 @@ class TestExtraVarSanitation(TestJobExecution):
         task.build_extra_vars_file(job, private_data_dir, {})
 
         fd = open(os.path.join(private_data_dir, 'env', 'extravars'))
-        extra_vars = yaml.load(fd, Loader=SafeLoader)
+        extra_vars = yaml.load(fd, SafeLoader)
         assert extra_vars['msg'] == self.UNSAFE
         assert not hasattr(extra_vars['msg'], '__UNSAFE__')
 
@@ -326,7 +326,7 @@ class TestExtraVarSanitation(TestJobExecution):
         task.build_extra_vars_file(job, private_data_dir, {})
 
         fd = open(os.path.join(private_data_dir, 'env', 'extravars'))
-        extra_vars = yaml.load(fd, Loader=SafeLoader)
+        extra_vars = yaml.load(fd, SafeLoader)
         assert extra_vars['msg'] == {'a': {'b': [self.UNSAFE]}}
         assert not hasattr(extra_vars['msg']['a']['b'][0], '__UNSAFE__')
 
@@ -343,7 +343,7 @@ class TestExtraVarSanitation(TestJobExecution):
         task.build_extra_vars_file(job, private_data_dir, {})
 
         fd = open(os.path.join(private_data_dir, 'env', 'extravars'))
-        extra_vars = yaml.load(fd, Loader=SafeLoader)
+        extra_vars = yaml.load(fd, SafeLoader)
         assert extra_vars['msg'] == 'other-value'
         assert hasattr(extra_vars['msg'], '__UNSAFE__')
 
@@ -358,7 +358,7 @@ class TestExtraVarSanitation(TestJobExecution):
         task.build_extra_vars_file(job, private_data_dir, {})
 
         fd = open(os.path.join(private_data_dir, 'env', 'extravars'))
-        extra_vars = yaml.load(fd, Loader=SafeLoader)
+        extra_vars = yaml.load(fd, SafeLoader)
         assert extra_vars['msg'] == self.UNSAFE
         assert hasattr(extra_vars['msg'], '__UNSAFE__')
 
