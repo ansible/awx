@@ -1,5 +1,5 @@
 # Azure
-# azure deps from https://github.com/ansible/ansible/blob/stable-2.7/packaging/requirements/requirements-azure.txt
+# azure deps from https://github.com/ansible/ansible/blob/stable-2.8/packaging/requirements/requirements-azure.txt
 packaging
 azure-cli-core==2.0.35
 azure-cli-nspkg==3.0.2
