@@ -44,10 +44,6 @@ const detailValueStyle = {
   overflow: 'visible',
 };
 
-const hiddenStyle = {
-  display: 'none',
-};
-
 const Detail = ({ label, value, url, customStyles }) => {
   let detail = null;
   if (value) {
@@ -105,7 +101,6 @@ class OrganizationAccessList extends React.Component {
       count: 0,
       sortOrder: 'ascending',
       sortedColumnKey: 'username',
-      isCompact: false,
       showWarning: false,
       warningTitle: '',
       warningMsg: '',
@@ -117,8 +112,6 @@ class OrganizationAccessList extends React.Component {
 
     this.fetchOrgAccessList = this.fetchOrgAccessList.bind(this);
     this.onSetPage = this.onSetPage.bind(this);
-    this.onExpand = this.onExpand.bind(this);
-    this.onCompact = this.onCompact.bind(this);
     this.onSort = this.onSort.bind(this);
     this.getQueryParams = this.getQueryParams.bind(this);
     this.removeAccessRole = this.removeAccessRole.bind(this);
@@ -134,14 +127,6 @@ class OrganizationAccessList extends React.Component {
     } catch (error) {
       this.setState({ error });
     }
-  }
-
-  onExpand () {
-    this.setState({ isCompact: false });
-  }
-
-  onCompact () {
-    this.setState({ isCompact: true });
   }
 
   onSetPage (pageNumber, pageSize) {
@@ -315,7 +300,6 @@ class OrganizationAccessList extends React.Component {
       page,
       sortedColumnKey,
       sortOrder,
-      isCompact,
       warningMsg,
       warningTitle,
       showWarning
@@ -343,10 +327,6 @@ class OrganizationAccessList extends React.Component {
                   columns={this.columns}
                   onSearch={() => { }}
                   onSort={this.onSort}
-                  onCompact={this.onCompact}
-                  onExpand={this.onExpand}
-                  isCompact={isCompact}
-                  showExpandCollapse
                 />
                 {showWarning && (
                   <AlertModal
@@ -375,7 +355,7 @@ class OrganizationAccessList extends React.Component {
                             label={i18n._(t`Name`)}
                             value={`${result.first_name} ${result.last_name}`}
                             url={null}
-                            customStyles={isCompact ? hiddenStyle : null}
+                            customStyles={null}
                           />
                         ) : (
                           null
@@ -386,13 +366,10 @@ class OrganizationAccessList extends React.Component {
                           label=" "
                           value=" "
                           url={null}
-                          customStyles={isCompact ? hiddenStyle : null}
+                          customStyles={null}
                         />
                         {result.userRoles.length > 0 && (
-                          <ul style={isCompact
-                            ? { ...userRolesWrapperStyle, ...hiddenStyle }
-                            : userRolesWrapperStyle}
-                          >
+                          <ul style={userRolesWrapperStyle}>
                             <Text component={TextVariants.h6} style={detailLabelStyle}>{i18n._(t`User Roles`)}</Text>
                             {result.userRoles.map(role => (
                               <Chip
@@ -406,10 +383,7 @@ class OrganizationAccessList extends React.Component {
                           </ul>
                         )}
                         {result.teamRoles.length > 0 && (
-                          <ul style={isCompact
-                            ? { ...userRolesWrapperStyle, ...hiddenStyle }
-                            : userRolesWrapperStyle}
-                          >
+                          <ul style={userRolesWrapperStyle}>
                             <Text component={TextVariants.h6} style={detailLabelStyle}>{i18n._(t`Team Roles`)}</Text>
                             {result.teamRoles.map(role => (
                               <Chip
