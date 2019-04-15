@@ -18,7 +18,6 @@
 # awx_license_type: "open" for AWX; else presume Tower
 
 - hosts: all
-  connection: local
   gather_facts: false
   tasks:
 
@@ -27,6 +26,7 @@
         path: "{{project_path|quote}}"
         state: absent
       when: scm_delete_on_update|default('')
+      delegate_to: localhost
 
     - block:
       - name: check repo using git
@@ -59,6 +59,7 @@
           scm_version: "{{ git_result['after'] }}"
         when: "'after' in git_result"
       when: scm_type == 'git'
+      delegate_to: localhost
 
     - block:
       - name: update project using hg
@@ -78,6 +79,7 @@
         set_fact:
           scm_version: "{{scm_version|regex_replace('^([A-Za-z0-9]+).*$', '\\1')}}"
       when: scm_type == 'hg'
+      delegate_to: localhost
 
     - block:
       - name: update project using svn
@@ -99,6 +101,7 @@
         set_fact:
           scm_version: "{{scm_version|regex_replace('^.*Revision: ([0-9]+).*$', '\\1')}}"
       when: scm_type == 'svn'
+      delegate_to: localhost
 
     - block:
       - name: Ensure the project directory is present
@@ -121,6 +124,7 @@
           scm_version: "{{results.version}}"
         when: results is defined
       when: scm_type == 'insights'
+      delegate_to: localhost
 
 
     - name: Repository Version
@@ -132,9 +136,9 @@
         dest: "{{ scm_revision_output }}"
         content: "{{ scm_version }}"
       when: scm_version is defined and scm_revision_output is defined
+      delegate_to: localhost
 
 - hosts: all
-  connection: local
   gather_facts: false
   tasks:
 
@@ -158,3 +162,4 @@
         when: doesRequirementsExist.stat.exists and galaxy_result is skipped
 
       when: roles_enabled|bool
+      delegate_to: localhost
