@@ -26,7 +26,7 @@ cffi==1.12.1              # via cryptography
 channels==1.1.8
 chardet==3.0.4            # via requests
 constantly==15.1.0        # via twisted
-cryptography==2.5         # via adal, azure-keyvault, pyopenssl
+cryptography==2.6.1       # via adal, azure-keyvault, pyopenssl
 daphne==1.3.0
 defusedxml==0.5.0
 django-auth-ldap==1.7.0
@@ -41,7 +41,7 @@ django-radius==1.3.3
 django-solo==1.1.3
 django-split-settings==0.3.0
 django-taggit==0.22.2
-django==1.11.16
+django==1.11.20
 djangorestframework-yaml==1.0.3
 djangorestframework==3.7.7
 future==0.16.0            # via django-radius
@@ -96,7 +96,7 @@ python-radius==1.0
 python3-openid==3.1.0     # via social-auth-core
 python3-saml==1.4.0
 pytz==2018.9              # via celery, django, irc, tempora, twilio
-pyyaml==3.13              # via djangorestframework-yaml
+pyyaml==5.1               # via djangorestframework-yaml
 requests-futures==0.9.7
 requests-oauthlib==1.2.0  # via msrest, social-auth-core
 requests[security]==2.21.0
@@ -121,5 +121,5 @@ xmlsec==1.3.3             # via python3-saml
 zope.interface==4.6.0     # via twisted
 
 # The following packages are considered to be unsafe in a requirements file:
-# pip
-# setuptools
+pip==19.0.3
+setuptools==41.0.0
