@@ -303,6 +303,7 @@ class IsolatedManager(object):
         Performs save on each instance to update its capacity.
         '''
         try:
+            instance_qs = instance_qs.filter(enabled=True)
             private_data_dir = tempfile.mkdtemp(
                 prefix='awx_iso_heartbeat_',
                 dir=settings.AWX_PROOT_BASE_PATH
