@@ -2,6 +2,8 @@ from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
 import os
+import re
+
 import requests
 
 from ansible.plugins.action import ActionBase
@@ -10,8 +12,10 @@ from ansible.plugins.action import ActionBase
 class ActionModule(ActionBase):
 
     def save_playbook(self, proj_path, remediation, content):
-        fname = '{}-{}.yml'.format(
-            remediation.get('name', None) or 'insights-remediation', remediation['id'])
+        name = remediation.get('name', None) or 'insights-remediation'
+        name = re.sub(r'[^\w\s-]', '', name).strip().lower()
+        name = re.sub(r'[-\s]+', '-', name)
+        fname = '{}-{}.yml'.format(name, remediation['id'])
         file_path = os.path.join(proj_path, fname)
         with open(file_path, 'wb') as f:
             f.write(content)
