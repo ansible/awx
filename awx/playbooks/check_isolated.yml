@@ -21,6 +21,12 @@
         delete: yes
         recursive: yes
 
+    - name: Copy daemon log from the isolated host
+      synchronize:
+        src: "{{src}}/daemon.log"
+        dest: "{{src}}/daemon.log"
+        mode: pull
+
     - name: Fail if previous check determined that process is not alive.
       fail:
         msg: "isolated task is still running"
