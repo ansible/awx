@@ -210,10 +210,24 @@ class IsolatedManager(object):
         if status == 'successful':
             status_path = self.path_to('artifacts', self.ident, 'status')
             rc_path = self.path_to('artifacts', self.ident, 'rc')
-            with open(status_path, 'r') as f:
-                status = f.readline()
-            with open(rc_path, 'r') as f:
-                rc = int(f.readline())
+            if os.path.exists(status_path):
+                with open(status_path, 'r') as f:
+                    status = f.readline()
+                with open(rc_path, 'r') as f:
+                    rc = int(f.readline())
+            else:
+                # if there's no status file, it means that runner _probably_
+                # exited with a traceback (which should be logged to
+                # daemon.log)  Record it so we can see how runner failed.
+                daemon_path = self.path_to('daemon.log')
+                if os.path.exists(daemon_path):
+                    with open(daemon_path, 'r') as f:
+                        self.instance.result_traceback = f.read()
+                        self.instance.save(update_fields=['result_traceback'])
+                else:
+                    logger.error('Failed to rsync daemon.log (is ansible-runner installed on the isolated host?)')
+                status = 'failed'
+                rc = 1
 
         # consume events one last time just to be sure we didn't miss anything
         # in the final sync

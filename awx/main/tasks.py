@@ -1103,7 +1103,7 @@ class BaseTask(object):
                                           start_args='')  # blank field to remove encrypted passwords
 
         self.instance.websocket_emit_status("running")
-        status, rc, tb = 'error', None, ''
+        status, rc = 'error', None
         output_replacements = []
         extra_update_fields = {}
         fact_modification_times = {}
@@ -1255,7 +1255,7 @@ class BaseTask(object):
 
         except Exception:
             # this could catch programming or file system errors
-            tb = traceback.format_exc()
+            extra_update_fields['result_traceback'] = traceback.format_exc()
             logger.exception('%s Exception occurred while running task', self.instance.log_format)
         finally:
             logger.info('%s finished running, producing %s events.', self.instance.log_format, self.event_ct)
@@ -1266,7 +1266,7 @@ class BaseTask(object):
             logger.exception('{} Post run hook errored.'.format(self.instance.log_format))
 
         self.instance = self.update_model(pk)
-        self.instance = self.update_model(pk, status=status, result_traceback=tb,
+        self.instance = self.update_model(pk, status=status,
                                           output_replacements=output_replacements,
                                           emitted_events=self.event_ct,
                                           **extra_update_fields)
