@@ -71,14 +71,11 @@ class Organization extends Component {
       setBreadcrumb(data);
       this.setState({ organization: data, loading: false });
     } catch (error) {
-<<<<<<< HEAD
       handleHttpError(error) || this.setState({ error: true, loading: false });
-=======
       this.setState({ error: true });
     } finally {
       this.setState({ loading: false });
       this.checkLocation();
->>>>>>> addresses PR issues
     }
   }
 
@@ -226,10 +223,5 @@ class Organization extends Component {
     );
   }
 }
-<<<<<<< HEAD
-
 export default withNetwork(withRouter(Organization));
-=======
 export { Organization as _Organization };
-export default withRouter(Organization);
->>>>>>> addresses PR issues

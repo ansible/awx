@@ -1,15 +1,9 @@
 import React from 'react';
 import { mount } from 'enzyme';
-<<<<<<< HEAD
-import { MemoryRouter } from 'react-router-dom';	import { MemoryRouter } from 'react-router-dom';
-import { I18nProvider } from '@lingui/react';	import { I18nProvider } from '@lingui/react';
-import Organization from '../../../../../src/pages/Organizations/screens/Organization/Organization';	import Organization, { _Organization } from '../../../../../src/pages/Organizations/screens/Organization/Organization';
 
-=======
 import { MemoryRouter } from 'react-router-dom';
 import { I18nProvider } from '@lingui/react';
 import Organization, { _Organization } from '../../../../../src/pages/Organizations/screens/Organization/Organization';
->>>>>>> addresses PR issues
 
 describe('<OrganizationView />', () => {
   test('initially renders succesfully', () => {
