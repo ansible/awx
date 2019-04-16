@@ -43,7 +43,7 @@ __all__ = ['get_object_or_400', 'camelcase_to_underscore', 'memoize', 'memoize_d
            'get_current_apps', 'set_current_apps',
            'extract_ansible_vars', 'get_search_fields', 'get_system_task_capacity', 'get_cpu_capacity', 'get_mem_capacity',
            'wrap_args_with_proot', 'build_proot_temp_dir', 'check_proot_installed', 'model_to_dict',
-           'model_instance_diff', 'timestamp_apiformat', 'parse_yaml_or_json', 'RequireDebugTrueOrTest',
+           'model_instance_diff', 'parse_yaml_or_json', 'RequireDebugTrueOrTest',
            'has_model_field_prefetched', 'set_environ', 'IllegalArgumentError', 'get_custom_venv_choices', 'get_external_account',
            'task_manager_bulk_reschedule', 'schedule_task_manager', 'classproperty']
 
@@ -893,13 +893,6 @@ def get_pk_from_dict(_dict, key):
         return int(val)
     except (TypeError, KeyError, ValueError):
         return None
-
-
-def timestamp_apiformat(timestamp):
-    timestamp = timestamp.isoformat()
-    if timestamp.endswith('+00:00'):
-        timestamp = timestamp[:-6] + 'Z'
-    return timestamp
 
 
 class NoDefaultProvided(object):

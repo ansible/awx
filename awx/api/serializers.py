@@ -6,7 +6,6 @@ import copy
 import json
 import logging
 import re
-import urllib.parse
 from collections import OrderedDict
 from datetime import timedelta
 
@@ -48,7 +47,7 @@ from awx.main.constants import (
 )
 from awx.main.models import (
     ActivityStream, AdHocCommand, AdHocCommandEvent, Credential, CredentialInputSource,
-    CredentialType, CustomInventoryScript, Fact, Group, Host, Instance,
+    CredentialType, CustomInventoryScript, Group, Host, Instance,
     InstanceGroup, Inventory, InventorySource, InventoryUpdate,
     InventoryUpdateEvent, Job, JobEvent, JobHostSummary, JobLaunchConfig,
     JobTemplate, Label, Notification, NotificationTemplate,
@@ -64,7 +63,7 @@ from awx.main.models.rbac import (
 )
 from awx.main.fields import ImplicitRoleField, JSONBField
 from awx.main.utils import (
-    get_type_for_model, get_model_for_type, timestamp_apiformat,
+    get_type_for_model, get_model_for_type,
     camelcase_to_underscore, getattrd, parse_yaml_or_json,
     has_model_field_prefetched, extract_ansible_vars, encrypt_dict,
     prefetch_page_capabilities, get_external_account)
@@ -641,18 +640,6 @@ class BaseSerializer(serializers.ModelSerializer, metaclass=BaseSerializerMetacl
 
 class EmptySerializer(serializers.Serializer):
     pass
-
-
-class BaseFactSerializer(BaseSerializer, metaclass=BaseSerializerMetaclass):
-
-    def get_fields(self):
-        ret = super(BaseFactSerializer, self).get_fields()
-        if 'module' in ret:
-            # TODO: the values_list may pull in a LOT of entries before the distinct is called
-            modules = Fact.objects.all().values_list('module', flat=True).distinct()
-            choices = [(o, o.title()) for o in modules]
-            ret['module'] = serializers.ChoiceField(choices=choices, read_only=True, required=False)
-        return ret
 
 
 class UnifiedJobTemplateSerializer(BaseSerializer):
@@ -1665,7 +1652,6 @@ class HostSerializer(BaseSerializerWithVariables):
             smart_inventories = self.reverse('api:host_smart_inventories_list', kwargs={'pk': obj.pk}),
             ad_hoc_commands = self.reverse('api:host_ad_hoc_commands_list', kwargs={'pk': obj.pk}),
             ad_hoc_command_events = self.reverse('api:host_ad_hoc_command_events_list', kwargs={'pk': obj.pk}),
-            fact_versions = self.reverse('api:host_fact_versions_list', kwargs={'pk': obj.pk}),
         ))
         if self.version > 1:
             res['insights'] = self.reverse('api:host_insights', kwargs={'pk': obj.pk})
@@ -5136,44 +5122,3 @@ class ActivityStreamSerializer(BaseSerializer):
             summary_fields['setting'] = [obj.setting]
         return summary_fields
 
-
-class FactVersionSerializer(BaseFactSerializer):
-
-    class Meta:
-        model = Fact
-        fields = ('related', 'module', 'timestamp')
-        read_only_fields = ('*',)
-
-    def get_related(self, obj):
-        res = super(FactVersionSerializer, self).get_related(obj)
-        params = {
-            'datetime': timestamp_apiformat(obj.timestamp),
-            'module': obj.module,
-        }
-        res['fact_view'] = '%s?%s' % (
-            reverse('api:host_fact_compare_view', kwargs={'pk': obj.host.pk}, request=self.context.get('request')),
-            urllib.parse.urlencode(params)
-        )
-        return res
-
-
-class FactSerializer(BaseFactSerializer):
-
-    class Meta:
-        model = Fact
-        # TODO: Consider adding in host to the fields list ?
-        fields = ('related', 'timestamp', 'module', 'facts', 'id', 'summary_fields', 'host')
-        read_only_fields = ('*',)
-
-    def get_related(self, obj):
-        res = super(FactSerializer, self).get_related(obj)
-        res['host'] = obj.host.get_absolute_url(self.context.get('request'))
-        return res
-
-    def to_representation(self, obj):
-        ret = super(FactSerializer, self).to_representation(obj)
-        if obj is None:
-            return ret
-        if 'facts' in ret and isinstance(ret['facts'], str):
-            ret['facts'] = json.loads(ret['facts'])
-        return ret

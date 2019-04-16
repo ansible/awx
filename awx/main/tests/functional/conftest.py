@@ -1,17 +1,13 @@
 # Python
 import pytest
 from unittest import mock
-import json
-import os
 import tempfile
 import shutil
 import urllib.parse
-from datetime import timedelta
 from unittest.mock import PropertyMock
 
 # Django
 from django.core.urlresolvers import resolve
-from django.utils import timezone
 from django.contrib.auth.models import User
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.backends.sqlite3.base import SQLiteCursorWrapper
@@ -20,7 +16,6 @@ from jsonbfield.fields import JSONField
 # AWX
 from awx.main.models.projects import Project
 from awx.main.models.ha import Instance
-from awx.main.models.fact import Fact
 
 from rest_framework.test import (
     APIRequestFactory,
@@ -644,50 +639,6 @@ def head():
 @pytest.fixture
 def options():
     return _request('options')
-
-
-@pytest.fixture
-def fact_scans(group_factory, fact_ansible_json, fact_packages_json, fact_services_json):
-    group1 = group_factory('group-1')
-
-    def rf(fact_scans=1, timestamp_epoch=timezone.now()):
-        facts_json = {}
-        facts = []
-        module_names = ['ansible', 'services', 'packages']
-        timestamp_current = timestamp_epoch
-
-        facts_json['ansible'] = fact_ansible_json
-        facts_json['packages'] = fact_packages_json
-        facts_json['services'] = fact_services_json
-
-        for i in range(0, fact_scans):
-            for host in group1.hosts.all():
-                for module_name in module_names:
-                    facts.append(Fact.objects.create(host=host, timestamp=timestamp_current, module=module_name, facts=facts_json[module_name]))
-            timestamp_current += timedelta(days=1)
-        return facts
-    return rf
-
-
-def _fact_json(module_name):
-    current_dir = os.path.dirname(os.path.realpath(__file__))
-    with open('%s/%s.json' % (current_dir, module_name)) as f:
-        return json.load(f)
-
-
-@pytest.fixture
-def fact_ansible_json():
-    return _fact_json('ansible')
-
-
-@pytest.fixture
-def fact_packages_json():
-    return _fact_json('packages')
-
-
-@pytest.fixture
-def fact_services_json():
-    return _fact_json('services')
 
 
 @pytest.fixture
