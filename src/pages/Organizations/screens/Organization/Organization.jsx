@@ -12,8 +12,6 @@ import {
   Card,
   CardHeader,
   PageSection,
-  Tab,
-  Tabs
 } from '@patternfly/react-core';
 import {
   TimesIcon
@@ -25,6 +23,7 @@ import OrganizationDetail from './OrganizationDetail';
 import OrganizationEdit from './OrganizationEdit';
 import OrganizationNotifications from './OrganizationNotifications';
 import OrganizationTeams from './OrganizationTeams';
+import RoutedTabs from '../../../../components/Tabs/RoutedTabs';
 
 class Organization extends Component {
   constructor (props) {
@@ -34,17 +33,9 @@ class Organization extends Component {
       organization: null,
       error: false,
       loading: true,
-      tabElements: [
-        { name: i18nMark('Details'), link: `${props.match.url}/details`, id: 0 },
-        { name: i18nMark('Access'), link: `${props.match.url}/access`, id: 1 },
-        { name: i18nMark('Teams'), link: `${props.match.url}/teams`, id: 2 },
-        { name: i18nMark('Notifications'), link: `${props.match.url}/notifications`, id: 3 },
-      ],
     };
 
     this.fetchOrganization = this.fetchOrganization.bind(this);
-    this.handleTabSelect = this.handleTabSelect.bind(this);
-    this.checkLocation = this.checkLocation.bind(this);
   }
 
   componentDidMount () {
@@ -75,26 +66,7 @@ class Organization extends Component {
       this.setState({ error: true });
     } finally {
       this.setState({ loading: false });
-      this.checkLocation();
     }
-  }
-
-  checkLocation () {
-    const { location } = this.props;
-    const { tabElements } = this.state;
-    const activeTab = tabElements.filter(tabElement => tabElement.link === location.pathname);
-    this.setState({ activeTabKey: activeTab[0].id });
-  }
-
-  handleTabSelect (event, eventKey) {
-    const { history } = this.props;
-    const { tabElements } = this.state;
-
-    const tab = tabElements.find(tabElement => tabElement.id === eventKey);
-    history.push(tab.link);
-    const activeTab = tabElements.filter(selectedTab => selectedTab.link === tab.link)
-      .map(selectedTab => selectedTab.id);
-    this.setState({ activeTabKey: activeTab[0] });
   }
 
   render () {
@@ -104,36 +76,25 @@ class Organization extends Component {
       history
     } = this.props;
     const {
-      activeTabKey,
       organization,
       error,
       loading,
-      tabElements
     } = this.state;
 
     let cardHeader = (
       <CardHeader>
         <I18n>
           {({ i18n }) => (
-            <>
-              <Tabs
+            <React.Fragment>
+              <RoutedTabs
                 labeltext={i18n._(t`Organization detail tabs`)}
-                activeKey={activeTabKey}
-                onSelect={(event, eventKey) => {
-                  this.handleTabSelect(event, eventKey);
-                }}
-              >
-                {tabElements.map(tabElement => (
-                  <Tab
-                    className={`${tabElement.name}`}
-                    aria-label={`${tabElement.name}`}
-                    eventKey={tabElement.id}
-                    key={tabElement.id}
-                    link={tabElement.link}
-                    title={tabElement.name}
-                  />
-                ))}
-              </Tabs>
+                tabsArray={[
+                  { name: i18nMark('Details'), link: `${match.url}/details`, id: 0 },
+                  { name: i18nMark('Access'), link: `${match.url}/access`, id: 1 },
+                  { name: i18nMark('Teams'), link: `${match.url}/teams`, id: 2 },
+                  { name: i18nMark('Notifications'), link: `${match.url}/notifications`, id: 3 },
+                ]}
+              />
               <Link
                 aria-label="Close"
                 title="Close"
@@ -141,7 +102,7 @@ class Organization extends Component {
               >
                 <TimesIcon className="OrgsTab-closeButton" />
               </Link>
-            </>
+            </React.Fragment>
           )}
         </I18n>
       </CardHeader>
