@@ -41,7 +41,7 @@ function (data, $scope, moment, $state, InventoryData, InsightsService,
     };
 
     $scope.viewDataInInsights = function(){
-        window.open(`https://cloud.redhat.com/insights/inventory/${$scope.platform_id}/insights`, '_blank');
+        window.open(`https://cloud.redhat.com/insights/inventory/${$scope.platformId}/insights`, '_blank');
     };
 
     $scope.remediateInventory = function(inv_id, insights_credential){
