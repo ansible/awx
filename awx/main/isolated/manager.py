@@ -326,7 +326,10 @@ class IsolatedManager(object):
                 instance.hostname for instance in instance_qs
             ])
             self.runner_params['private_data_dir'] = private_data_dir
-            self.runner_params['forks'] = str(len(instance_qs))
+            forks = len(instance_qs)
+            if not forks:
+                return
+            self.runner_params['forks'] = forks
             runner_obj = self.run_management_playbook(
                 'heartbeat_isolated.yml',
                 private_data_dir
