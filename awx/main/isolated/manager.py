@@ -316,8 +316,10 @@ class IsolatedManager(object):
          - clean up orphaned private files
         Performs save on each instance to update its capacity.
         '''
+        instance_qs = [i for i in instance_qs if i.enabled]
+        if not len(instance_qs):
+            return
         try:
-            instance_qs = instance_qs.filter(enabled=True)
             private_data_dir = tempfile.mkdtemp(
                 prefix='awx_iso_heartbeat_',
                 dir=settings.AWX_PROOT_BASE_PATH
@@ -326,7 +328,7 @@ class IsolatedManager(object):
                 instance.hostname for instance in instance_qs
             ])
             self.runner_params['private_data_dir'] = private_data_dir
-            self.runner_params['forks'] = str(len(instance_qs))
+            self.runner_params['forks'] = len(instance_qs)
             runner_obj = self.run_management_playbook(
                 'heartbeat_isolated.yml',
                 private_data_dir
