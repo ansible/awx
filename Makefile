@@ -124,8 +124,8 @@ virtualenv_ansible:
 		if [ ! -d "$(VENV_BASE)/ansible" ]; then \
 			virtualenv -p python --system-site-packages $(VENV_BASE)/ansible && \
 			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --ignore-installed six packaging appdirs && \
-			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --ignore-installed setuptools==36.0.1 && \
-			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --ignore-installed pip==9.0.1; \
+			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --force --ignore-installed setuptools==41.0.0 && \
+			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --force --ignore-installed pip==19.0.3; \
 		fi; \
 	fi
 
@@ -179,6 +179,8 @@ requirements_awx: virtualenv_awx
 	    cat requirements/requirements.txt requirements/requirements_git.txt | $(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) --no-binary $(SRC_ONLY_PKGS) --ignore-installed -r /dev/stdin ; \
 	fi
 	echo "include-system-site-packages = true" >> $(VENV_BASE)/awx/lib/python$(PYTHON_VERSION)/pyvenv.cfg
+	$(VENV_BASE)/awx/bin/python3 -m pip install --force $(PIP_OPTIONS) --ignore-installed setuptools==41.0.0
+	$(VENV_BASE)/awx/bin/python3 -m pip install --force $(PIP_OPTIONS) --ignore-installed pip==19.0.3
 	#$(VENV_BASE)/awx/bin/pip uninstall --yes -r requirements/requirements_tower_uninstall.txt
 
 requirements_awx_dev:
