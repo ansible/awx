@@ -24,6 +24,7 @@ def filter_insights_api_response(platform_info, reports, remediations):
     }
 
     new_json = {
+        'platform_id': platform_info['id'],
         'last_check_in': platform_info.get('updated'),
         'reports': [],
     }
