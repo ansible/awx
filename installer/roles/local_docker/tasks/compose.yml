@@ -20,10 +20,12 @@
     content: "{{ secret_key }}"
     dest: "{{ docker_compose_dir }}/SECRET_KEY"
     mode: 0600
+  register: awx_secret_key
 
 - name: Start the containers
   docker_service:
     project_src: "{{ docker_compose_dir }}"
+    restarted: "{{ awx_compose_config is changed or awx_secret_key is changed }}"
   register: awx_compose_start
 
 - name: Update CA trust in awx_web container
