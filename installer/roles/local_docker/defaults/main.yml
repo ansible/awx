@@ -5,9 +5,14 @@ rabbitmq_version: "3.7.4"
 rabbitmq_image: "ansible/awx_rabbitmq:{{rabbitmq_version}}"
 rabbitmq_default_vhost: "awx"
 rabbitmq_erlang_cookie: "cookiemonster"
+rabbitmq_host: "rabbitmq"
 rabbitmq_port: "5672"
 rabbitmq_user: "guest"
 rabbitmq_password: "guest"
 
 postgresql_version: "9.6"
 postgresql_image: "postgres:{{postgresql_version}}"
+
+memcached_host: "memcached"
+memcached_port: "11211"
+
