@@ -1245,6 +1245,7 @@ class TeamAccess(BaseAccess):
      - I'm a superuser.
      - I'm an admin of the team
      - I'm a member of that team.
+     - I'm a member of the team's organization
     I can create/change a team when:
      - I'm a superuser.
      - I'm an admin for the team
@@ -1257,7 +1258,10 @@ class TeamAccess(BaseAccess):
         if settings.ORG_ADMINS_CAN_SEE_ALL_USERS and \
                 (self.user.admin_of_organizations.exists() or self.user.auditor_of_organizations.exists()):
             return self.model.objects.all()
-        return self.model.accessible_objects(self.user, 'read_role')
+        return self.model.objects.filter(
+            Q(organization=Organization.accessible_pk_qs(self.user, 'member_role')) |
+            Q(pk__in=self.model.accessible_pk_qs(self.user, 'read_role'))
+        )
 
     @check_superuser
     def can_add(self, data):

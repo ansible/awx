@@ -175,13 +175,6 @@ def test_team_project_list(get, team_project_list):
     assert get(reverse('api:user_projects_list', kwargs={'pk':admin.pk,}), alice).data['count'] == 2
 
 
-@pytest.mark.django_db
-def test_team_project_list_fail1(get, team_project_list):
-    objects = team_project_list
-    res = get(reverse('api:team_projects_list', kwargs={'pk':objects.teams.team2.pk,}), objects.users.alice)
-    assert res.status_code == 403
-
-
 @pytest.mark.parametrize("u,expected_status_code", [
     ('rando', 403),
     ('org_member', 403),
