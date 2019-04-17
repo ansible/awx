@@ -76,6 +76,11 @@ class ActivityStream(models.Model):
 
     setting = JSONField(blank=True)
 
+    def __str__(self):
+        operation = self.operation if 'operation' in self.__dict__ else '_delayed_'
+        timestamp = self.timestamp.isoformat() if 'timestamp' in self.__dict__ else '_delayed_'
+        return u'%s-%s-pk=%s' % (operation, timestamp, self.pk)
+
     def get_absolute_url(self, request=None):
         return reverse('api:activity_stream_detail', kwargs={'pk': self.pk}, request=request)
 

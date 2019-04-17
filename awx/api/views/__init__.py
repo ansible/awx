@@ -922,21 +922,6 @@ class UserList(ListCreateAPIView):
     serializer_class = serializers.UserSerializer
     permission_classes = (UserPermission,)
 
-    def post(self, request, *args, **kwargs):
-        ret = super(UserList, self).post( request, *args, **kwargs)
-        try:
-            if request.data.get('is_system_auditor', False):
-                # This is a faux-field that just maps to checking the system
-                # auditor role member list.. unfortunately this means we can't
-                # set it on creation, and thus needs to be set here.
-                user = models.User.objects.get(id=ret.data['id'])
-                user.is_system_auditor = request.data['is_system_auditor']
-                ret.data['is_system_auditor'] = request.data['is_system_auditor']
-        except AttributeError as exc:
-            print(exc)
-            pass
-        return ret
-
 
 class UserMeList(ListAPIView):
 

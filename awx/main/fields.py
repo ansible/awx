@@ -43,7 +43,10 @@ from rest_framework import serializers
 from awx.main.utils.filters import SmartFilter
 from awx.main.utils.encryption import encrypt_value, decrypt_value, get_encryption_key
 from awx.main.validators import validate_ssh_private_key
-from awx.main.models.rbac import batch_role_ancestor_rebuilding, Role
+from awx.main.models.rbac import (
+    batch_role_ancestor_rebuilding, Role,
+    ROLE_SINGLETON_SYSTEM_ADMINISTRATOR, ROLE_SINGLETON_SYSTEM_AUDITOR
+)
 from awx.main.constants import ENV_BLACKLIST
 from awx.main import utils
 
@@ -159,6 +162,13 @@ def is_implicit_parent(parent_role, child_role):
     the model definition. This does not include any role parents that
     might have been set by the user.
     '''
+    if child_role.content_object is None:
+        # The only singleton implicit parent is the system admin being
+        # a parent of the system auditor role
+        return bool(
+            child_role.singleton_name == ROLE_SINGLETON_SYSTEM_AUDITOR and 
+            parent_role.singleton_name == ROLE_SINGLETON_SYSTEM_ADMINISTRATOR
+        )
     # Get the list of implicit parents that were defined at the class level.
     implicit_parents = getattr(
         child_role.content_object.__class__, child_role.role_field

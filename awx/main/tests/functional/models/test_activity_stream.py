@@ -11,7 +11,8 @@ from awx.main.models import (
     Credential,
     CredentialType,
     Inventory,
-    InventorySource
+    InventorySource,
+    User
 )
 
 # other AWX
@@ -75,31 +76,57 @@ class TestImplicitRolesOmitted:
         assert qs[0].operation == 'create'
 
 
+@pytest.mark.django_db
 class TestRolesAssociationEntries:
     '''
     Test that non-implicit role associations have a corresponding
     activity stream entry.
     These tests will fail if `rbac_activity_stream` skipping logic
-    finds a false-negative.
+    in signals is wrong.
     '''
 
-    @pytest.mark.django_db
     def test_non_implicit_associations_are_recorded(self, project):
         org2 = Organization.objects.create(name='test-organization2')
-        project.admin_role.parents.add(org2.admin_role)
-        assert ActivityStream.objects.filter(
-            role=org2.admin_role,
-            organization=org2,
-            project=project
-        ).count() == 1
+        # check that duplicate adds do not get recorded in 2nd loop
+        for i in range(2):
+            # Not supported, should not be possible via API
+            # org2.admin_role.children.add(project.admin_role)
+            project.admin_role.parents.add(org2.admin_role)
+            assert ActivityStream.objects.filter(
+                role=org2.admin_role,
+                organization=org2,
+                project=project
+            ).count() == 1, 'In loop %s' % i
 
-    @pytest.mark.django_db
     def test_model_associations_are_recorded(self, organization):
         proj1 = organization.projects.create(name='proj1')
         proj2 = organization.projects.create(name='proj2')
         proj2.use_role.parents.add(proj1.admin_role)
         assert ActivityStream.objects.filter(role=proj1.admin_role, project=proj2).count() == 1
 
+    @pytest.mark.parametrize('value', [True, False])
+    def test_auditor_is_recorded(self, post, value):
+        u = User.objects.create(username='foouser')
+        assert not u.is_system_auditor
+        u.is_system_auditor = value
+        u = User.objects.get(pk=u.pk)  # refresh from db
+        assert u.is_system_auditor == value
+        entry_qs = ActivityStream.objects.filter(user=u)
+        if value:
+            assert len(entry_qs) == 2
+        else:
+            assert len(entry_qs) == 1
+        # unfortunate, the original creation does _not_ set a real is_auditor field
+        assert 'is_system_auditor' not in json.loads(entry_qs[0].changes)
+        if value:
+            auditor_changes = json.loads(entry_qs[1].changes)
+            assert auditor_changes['object2'] == 'user'
+            assert auditor_changes['object2_pk'] == u.pk
+
+    def test_user_no_op_api(self, system_auditor):
+        as_ct = ActivityStream.objects.count()
+        system_auditor.is_system_auditor = True  # already auditor
+        assert ActivityStream.objects.count() == as_ct
 
 
 @pytest.fixture

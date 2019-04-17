@@ -893,7 +893,7 @@ class UserSerializer(BaseSerializer):
 
     def get_validation_exclusions(self, obj=None):
         ret = super(UserSerializer, self).get_validation_exclusions(obj)
-        ret.append('password')
+        ret.extend(['password', 'is_system_auditor'])
         return ret
 
     def validate_password(self, value):
@@ -937,14 +937,20 @@ class UserSerializer(BaseSerializer):
 
     def create(self, validated_data):
         new_password = validated_data.pop('password', None)
+        is_system_auditor = validated_data.pop('is_system_auditor', None)
         obj = super(UserSerializer, self).create(validated_data)
         self._update_password(obj, new_password)
+        if is_system_auditor is not None:
+            obj.is_system_auditor = is_system_auditor
         return obj
 
     def update(self, obj, validated_data):
         new_password = validated_data.pop('password', None)
+        is_system_auditor = validated_data.pop('is_system_auditor', None)
         obj = super(UserSerializer, self).update(obj, validated_data)
         self._update_password(obj, new_password)
+        if is_system_auditor is not None:
+            obj.is_system_auditor = is_system_auditor
         return obj
 
     def get_related(self, obj):
@@ -994,6 +1000,16 @@ class UserSerializer(BaseSerializer):
 
     def validate_is_superuser(self, value):
         return self._validate_ldap_managed_field(value, 'is_superuser')
+
+
+class UserActivityStreamSerializer(UserSerializer):
+    """Changes to system auditor status are shown as separate entries,
+    so by excluding it from fields here we avoid duplication, which
+    would carry some unintended consequences.
+    """
+    class Meta:
+        model = User
+        fields = ('*', '-is_system_auditor')
 
 
 class BaseOAuth2TokenSerializer(BaseSerializer):
