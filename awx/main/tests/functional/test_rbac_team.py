@@ -152,3 +152,18 @@ def test_org_admin_view_all_teams(org_admin, enabled):
     with mock.patch('awx.main.access.settings') as settings_mock:
         settings_mock.ORG_ADMINS_CAN_SEE_ALL_USERS = enabled
         assert access.can_read(other_team) is enabled
+
+
+@pytest.mark.django_db
+def test_team_member_read(rando, organization, team):
+    assert team.organization == organization
+    organization.member_role.members.add(rando)
+    assert TeamAccess(rando).can_read(team)
+    assert team in TeamAccess(rando).get_queryset()
+
+
+@pytest.mark.django_db
+def test_team_list_no_duplicate_entries(rando, organization, team):
+    organization.member_role.members.add(rando)
+    team.read_role.members.add(rando)
+    assert list(TeamAccess(rando).get_queryset()) == [team]
