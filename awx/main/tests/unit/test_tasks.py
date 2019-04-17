@@ -87,13 +87,6 @@ def adhoc_update_model_wrapper(adhoc_job):
     return fn
 
 
-@pytest.fixture
-def patch_CallbackQueueDispatcher():
-    with mock.patch('awx.main.tasks.CallbackQueueDispatcher') as m:
-        m.return_value = m
-        yield m
-
-
 def test_send_notifications_not_list():
     with pytest.raises(TypeError):
         tasks.send_notifications(None)
@@ -399,8 +392,9 @@ class TestGenericRun():
         ]:
             assert c in task.update_model.call_args_list
 
-    def test_event_count(self, patch_CallbackQueueDispatcher):
+    def test_event_count(self):
         task = tasks.RunJob()
+        task.dispatcher = mock.MagicMock()
         task.instance = Job()
         task.event_ct = 0
         event_data = {}
@@ -408,12 +402,13 @@ class TestGenericRun():
         [task.event_handler(event_data) for i in range(20)]
         assert 20 == task.event_ct
 
-    def test_finished_callback_eof(self, patch_CallbackQueueDispatcher):
+    def test_finished_callback_eof(self):
         task = tasks.RunJob()
+        task.dispatcher = mock.MagicMock()
         task.instance = Job(pk=1, id=1)
         task.event_ct = 17
         task.finished_callback(None)
-        patch_CallbackQueueDispatcher.dispatch.assert_called_with({'event': 'EOF', 'final_counter': 17, 'job_id': 1})
+        task.dispatcher.dispatch.assert_called_with({'event': 'EOF', 'final_counter': 17, 'job_id': 1})
 
     def test_save_job_metadata(self, job, update_model_wrapper):
         class MockMe():

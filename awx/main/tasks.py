@@ -1026,9 +1026,8 @@ class BaseTask(object):
             if event_data[self.event_data_key] != 'job_id':
                 event_data.pop('parent_uuid', None)
         should_write_event = False
-        dispatcher = CallbackQueueDispatcher()
         event_data.setdefault(self.event_data_key, self.instance.id)
-        dispatcher.dispatch(event_data)
+        self.dispatcher.dispatch(event_data)
         self.event_ct += 1
 
         '''
@@ -1056,13 +1055,12 @@ class BaseTask(object):
         '''
         Ansible runner callback triggered on finished run
         '''
-        dispatcher = CallbackQueueDispatcher()
         event_data = {
             'event': 'EOF',
             'final_counter': self.event_ct,
         }
         event_data.setdefault(self.event_data_key, self.instance.id)
-        dispatcher.dispatch(event_data)
+        self.dispatcher.dispatch(event_data)
 
     def status_handler(self, status_data, runner_config):
         '''
@@ -1244,6 +1242,7 @@ class BaseTask(object):
                                                            ident=str(self.instance.pk))
                 self.event_ct = len(isolated_manager_instance.handled_events)
             else:
+                self.dispatcher = CallbackQueueDispatcher()
                 res = ansible_runner.interface.run(**params)
                 status = res.status
                 rc = res.rc
