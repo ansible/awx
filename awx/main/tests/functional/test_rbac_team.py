@@ -21,7 +21,21 @@ def test_team_attach_unattach(team, user):
     u2 = user('non-member', False)
     access = TeamAccess(u2)
     assert not access.can_attach(team, team.member_role, 'member_role.children', None)
-    assert not access.can_unattach(team, team.member_role, 'member_role.chidlren')
+    assert not access.can_unattach(team, team.member_role, 'member_role.children')
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('ext_auth', [True, False])
+def test_team_org_resource_role(ext_auth, team, user, rando):
+    with mock.patch('awx.main.access.settings') as settings_mock:
+        settings_mock.MANAGE_ORGANIZATION_AUTH = ext_auth
+        u = user('member', False)
+        team.organization.admin_role.members.add(u)
+        access = TeamAccess(u)
+
+        assert access.can_attach(team, rando, 'member_role.members') == ext_auth
+        team.member_role.members.add(rando)
+        assert access.can_unattach(team, rando, 'member_role.members') == ext_auth
 
 
 @pytest.mark.django_db

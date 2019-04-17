@@ -645,25 +645,22 @@ class UserAccess(BaseAccess):
         return False
 
     def can_attach(self, obj, sub_obj, relationship, *args, **kwargs):
-        # Reverse obj and sub_obj, defer to RoleAccess if this is a role assignment.
+        # The only thing that a User should ever have attached is a Role
         if relationship == 'roles':
             role_access = RoleAccess(self.user)
             return role_access.can_attach(sub_obj, obj, 'members', *args, **kwargs)
 
-        if not settings.MANAGE_ORGANIZATION_AUTH and not self.user.is_superuser:
-            return False
-
-        return super(UserAccess, self).can_attach(obj, sub_obj, relationship, *args, **kwargs)
+        logger.error('Unexpected attempt to associate {} with a user.'.format(sub_obj))
+        return False
 
     def can_unattach(self, obj, sub_obj, relationship, *args, **kwargs):
+        # The only thing that a User should ever have to be unattached is a Role
         if relationship == 'roles':
             role_access = RoleAccess(self.user)
             return role_access.can_unattach(sub_obj, obj, 'members', *args, **kwargs)
 
-        if not settings.MANAGE_ORGANIZATION_AUTH and not self.user.is_superuser:
-            return False
-
-        return super(UserAccess, self).can_unattach(obj, sub_obj, relationship, *args, **kwargs)
+        logger.error('Unexpected attempt to de-associate {} from a user.'.format(sub_obj))
+        return False
 
 
 class OAuth2ApplicationAccess(BaseAccess):
@@ -774,6 +771,11 @@ class OrganizationAccess(NotificationAttachMixin, BaseAccess):
         return True
 
     def can_attach(self, obj, sub_obj, relationship, *args, **kwargs):
+        # If the request is updating the membership, check the membership role permissions instead
+        if relationship in ('member_role.members', 'admin_role.members'):
+            rel_role = getattr(obj, relationship.split('.')[0])
+            return RoleAccess(self.user).can_attach(rel_role, sub_obj, 'members', *args, **kwargs)
+
         if relationship == "instance_groups":
             if self.user.is_superuser:
                 return True
@@ -781,6 +783,11 @@ class OrganizationAccess(NotificationAttachMixin, BaseAccess):
         return super(OrganizationAccess, self).can_attach(obj, sub_obj, relationship, *args, **kwargs)
 
     def can_unattach(self, obj, sub_obj, relationship, *args, **kwargs):
+        # If the request is updating the membership, check the membership role permissions instead
+        if relationship in ('member_role.members', 'admin_role.members'):
+            rel_role = getattr(obj, relationship.split('.')[0])
+            return RoleAccess(self.user).can_unattach(rel_role, sub_obj, 'members', *args, **kwargs)
+
         if relationship == "instance_groups":
             return self.can_attach(obj, sub_obj, relationship, *args, **kwargs)
         return super(OrganizationAccess, self).can_attach(obj, sub_obj, relationship, *args, **kwargs)
@@ -1301,6 +1308,12 @@ class TeamAccess(BaseAccess):
                                               *args, **kwargs)
         if self.user.is_superuser:
             return True
+
+        # If the request is updating the membership, check the membership role permissions instead
+        if relationship in ('member_role.members', 'admin_role.members'):
+            rel_role = getattr(obj, relationship.split('.')[0])
+            return RoleAccess(self.user).can_attach(rel_role, sub_obj, 'members', *args, **kwargs)
+
         return super(TeamAccess, self).can_attach(obj, sub_obj, relationship,
                                                   *args, **kwargs)
 
@@ -1311,6 +1324,12 @@ class TeamAccess(BaseAccess):
                 role_access = RoleAccess(self.user)
                 return role_access.can_unattach(sub_obj, obj, 'member_role.parents',
                                                 *args, **kwargs)
+
+        # If the request is updating the membership, check the membership role permissions instead
+        if relationship in ('member_role.members', 'admin_role.members'):
+            rel_role = getattr(obj, relationship.split('.')[0])
+            return RoleAccess(self.user).can_unattach(rel_role, sub_obj, 'members', *args, **kwargs)
+
         return super(TeamAccess, self).can_unattach(obj, sub_obj, relationship,
                                                     *args, **kwargs)
 
