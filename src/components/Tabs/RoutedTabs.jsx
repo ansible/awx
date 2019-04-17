@@ -1,25 +1,23 @@
 import React from 'react';
+import { shape, string, number, arrayOf } from 'prop-types';
+import { Tab, Tabs } from '@patternfly/react-core';
+import { withRouter } from 'react-router-dom';
 
-import {
-  Tab,
-  Tabs
-} from '@patternfly/react-core';
-
-export default function RoutedTabs (props) {
+function RoutedTabs (props) {
   const { history, tabsArray } = props;
+
   const getActiveTabId = () => {
-    if (history && history.location.pathname) {
-      const matchTab = tabsArray.find(selectedTab => selectedTab.link
-        === history.location.pathname);
-      return matchTab.id;
+    const match = tabsArray.find(tab => tab.link === history.location.pathname);
+    if (match) {
+      return match.id;
     }
     return 0;
   };
 
   function handleTabSelect (event, eventKey) {
-    if (history && history.location.pathname) {
-      const tab = tabsArray.find(tabElement => tabElement.id === eventKey);
-      history.push(tab.link);
+    const match = tabsArray.find(tab => tab.id === eventKey);
+    if (match) {
+      history.push(match.link);
     }
   }
 
@@ -28,17 +26,31 @@ export default function RoutedTabs (props) {
       activeKey={getActiveTabId()}
       onSelect={handleTabSelect}
     >
-      {tabsArray.map(tabElement => (
+      {tabsArray.map(tab => (
         <Tab
-          className={`${tabElement.name}`}
-          aria-label={`${tabElement.name}`}
-          eventKey={tabElement.id}
-          key={tabElement.id}
-          link={tabElement.link}
-          title={tabElement.name}
+          className={`${tab.name}`}
+          aria-label={`${tab.name}`}
+          eventKey={tab.id}
+          key={tab.id}
+          link={tab.link}
+          title={tab.name}
         />
       ))}
     </Tabs>
   );
 }
+RoutedTabs.propTypes = {
+  history: shape({
+    location: shape({
+      pathname: string.isRequired
+    }).isRequired,
+  }).isRequired,
+  tabsArray: arrayOf(shape({
+    id: number.isRequired,
+    link: string.isRequired,
+    name: string.isRequired,
+  })).isRequired,
+};
 
+export { RoutedTabs as _RoutedTabs };
+export default withRouter(RoutedTabs);
