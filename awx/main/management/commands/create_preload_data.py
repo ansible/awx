@@ -47,7 +47,7 @@ class Command(BaseCommand):
                                              created_by=superuser)
                 Host.objects.create(name='localhost',
                                     inventory=i,
-                                    variables="ansible_connection: local",
+                                    variables="ansible_connection: local\nansible_python_interpreter: '{{ ansible_playbook_python }}'",
                                     created_by=superuser)
                 jt = JobTemplate.objects.create(name='Demo Job Template',
                                                 playbook='hello_world.yml',
