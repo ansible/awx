@@ -5,26 +5,23 @@ import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { I18nProvider } from '@lingui/react';
 import RoutedTabs from '../../src/components/Tabs/RoutedTabs';
-import { DonateIcon } from '@patternfly/react-icons';
 
 let wrapper;
 
-afterEach(() => {
-  jest.clearAllMocks();
+let history;
+
+beforeEach(() => {
+  history = createMemoryHistory({
+    initialEntries: ['/organizations/19/details'],
+  });
 });
+
 const tabs = [
   { name: 'Details', link: 'organizations/19/details', id: 0 },
   { name: 'Access', link: 'organizations/19/access', id: 1 },
-  { name: 'Teams', link: 'organizations/19/teams', id: 2 }
+  { name: 'Teams', link: 'organizations/19/teams', id: 2 },
+  { name: 'Notification', link: 'organizations/19/notification', id: 3 }
 ];
-
-const history = createMemoryHistory({
-  history: {
-    location: {
-      pathname: '/organizations/19/details'
-    }
-  }
-});
 
 describe('<RoutedTabs />', () => {
   test('RoutedTabs renders successfully', () => {
@@ -39,41 +36,34 @@ describe('<RoutedTabs />', () => {
     ).find('RoutedTabs');
   });
 
-  test('the correct tab is rendered', async () => {
-    const currentTab = 'organizations/1/details';
+  test('Given a URL the correct tab is displayed', async (done) => {
     wrapper = mount(
       <I18nProvider>
         <Router history={history}>
           <RoutedTabs
             tabsArray={tabs}
-            location={currentTab}
           />
         </Router>
       </I18nProvider>
     ).find('RoutedTabs');
-    wrapper.find('button').at(2).simulate('click');
-    wrapper.update();
+    wrapper.find('Tabs').prop('onSelect')({}, 1);
     expect(history.location.pathname).toEqual('/organizations/19/access');
+    done();
   });
 
-  test('Given a URL the correct tab is displayed', async (done) => {
-    const currentTab = createMemoryHistory({
-      initialEntries: ['/organizations/19/teams'],
-    });
+  test('the correct tab is rendered', async () => {
     wrapper = mount(
       <I18nProvider>
-        <Router history={currentTab}>
+        <Router history={history}>
           <RoutedTabs
             tabsArray={tabs}
           />
         </Router>
       </I18nProvider>
     ).find('RoutedTabs');
-    setImmediate(() => {
-      wrapper.find('Tabs').prop('onSelect')({}, 2);
-      const selectedTab = wrapper.find('li').get(2).props.className;
-      expect(selectedTab).toBe('pf-c-tabs__item pf-m-current');
-      done();
-    });
+    const selectedTab = wrapper.find('section').get(2).props.hidden;
+    wrapper.find('button').at(2).simulate('click');
+    expect(selectedTab).toBe(false);
   });
 });
+

@@ -63,9 +63,6 @@ class Organization extends Component {
       this.setState({ organization: data, loading: false });
     } catch (error) {
       handleHttpError(error) || this.setState({ error: true, loading: false });
-      this.setState({ error: true });
-    } finally {
-      this.setState({ loading: false });
     }
   }
 
@@ -78,35 +75,41 @@ class Organization extends Component {
     const {
       organization,
       error,
-      loading,
+      loading
     } = this.state;
-
     let cardHeader = (
-      <CardHeader>
-        <I18n>
-          {({ i18n }) => (
-            <React.Fragment>
-              <RoutedTabs
-                labeltext={i18n._(t`Organization detail tabs`)}
-                tabsArray={[
-                  { name: i18nMark('Details'), link: `${match.url}/details`, id: 0 },
-                  { name: i18nMark('Access'), link: `${match.url}/access`, id: 1 },
-                  { name: i18nMark('Teams'), link: `${match.url}/teams`, id: 2 },
-                  { name: i18nMark('Notifications'), link: `${match.url}/notifications`, id: 3 },
-                ]}
-              />
-              <Link
-                aria-label="Close"
-                title="Close"
-                to="/organizations"
-              >
-                <TimesIcon className="OrgsTab-closeButton" />
-              </Link>
-            </React.Fragment>
-          )}
-        </I18n>
-      </CardHeader>
-    );
+      loading ? ''
+        : (
+          <CardHeader>
+            <I18n>
+              {({ i18n }) => (
+                <React.Fragment>
+                  <RoutedTabs
+                    match={match}
+                    history={history}
+                    labeltext={i18n._(t`Organization detail tabs`)}
+                    tabsArray={[
+                      { name: i18nMark('Details'), link: `${match.url}/details`, id: 0 },
+                      { name: i18nMark('Access'), link: `${match.url}/access`, id: 1 },
+                      { name: i18nMark('Teams'), link: `${match.url}/teams`, id: 2 },
+                      { name: i18nMark('Notifications'), link: `${match.url}/notifications`, id: 3 },
+                    ]}
+                  />
+                  <Link
+                    aria-label="Close"
+                    title="Close"
+                    to="/organizations"
+                  >
+                    <TimesIcon className="OrgsTab-closeButton" />
+                  </Link>
+                </React.Fragment>
+              )}
+            </I18n>
+          </CardHeader>
+        ));
+    if (!match) {
+      cardHeader = null;
+    }
 
     if (location.pathname.endsWith('edit')) {
       cardHeader = null;
