@@ -49,7 +49,7 @@ def metrics():
     license_info = get_license(show_key=False)
     SYSTEM_INFO.info({
         'install_uuid': settings.INSTALL_UUID,
-        'insights_analytics': str(settings.INSIGHTS_DATA_ENABLED),
+        'insights_analytics': str(settings.INSIGHTS_TRACKING_STATE),
         'tower_url_base': settings.TOWER_URL_BASE,
         'tower_version': get_awx_version(),
         'ansible_version': get_ansible_version(),

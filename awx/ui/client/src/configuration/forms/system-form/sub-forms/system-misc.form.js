@@ -59,7 +59,7 @@ export default ['i18n', function(i18n) {
                 type: 'textarea',
                 reset: 'CUSTOM_VENV_PATHS'
             },
-            INSIGHTS_DATA_ENABLED: {
+            INSIGHTS_TRACKING_STATE: {
                 type: 'toggleSwitch'
             }
         },

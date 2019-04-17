@@ -88,7 +88,7 @@ AWX_ISOLATED_LAUNCH_TIMEOUT = 30
 # Disable Pendo on the UI for development/test.
 # Note: This setting may be overridden by database settings.
 PENDO_TRACKING_STATE = "off"
-INSIGHTS_DATA_ENABLED = False
+INSIGHTS_TRACKING_STATE = False
 
 # Use Django-Jenkins if installed. Only run tests for awx.main app.
 try:

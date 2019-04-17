@@ -37,7 +37,7 @@ def mock_valid_license():
 
 @pytest.mark.django_db
 def test_gather(mock_valid_license):
-    settings.INSIGHTS_DATA_ENABLED = True
+    settings.INSIGHTS_TRACKING_STATE = True
     
     tgz = gather(module=importlib.import_module(__name__))
     files = {}
