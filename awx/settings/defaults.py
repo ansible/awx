@@ -670,7 +670,7 @@ PENDO_TRACKING_STATE = "off"
 
 # Enables Insights data collection for Ansible Tower.
 # Note: This setting may be overridden by database settings.
-INSIGHTS_DATA_ENABLED = False
+INSIGHTS_TRACKING_STATE = False
 
 
 # Default list of modules allowed for ad hoc commands.

@@ -11,11 +11,11 @@ export default ['$rootScope', 'Rest', 'GetBasePath', 'ProcessErrors',
             updateInsightsTrackingState: function(tracking_type) {
                 if (tracking_type === true || tracking_type === false) {
                         Rest.setUrl(`${GetBasePath('settings')}system`);
-                        Rest.patch({ INSIGHTS_DATA_ENABLED: tracking_type })
+                        Rest.patch({ INSIGHTS_TRACKING_STATE: tracking_type })
                             .catch(function ({data, status}) {
                                 ProcessErrors($rootScope, data, status, null, {
                                     hdr: 'Error!',
-                                    msg: 'Failed to patch INSIGHTS_DATA_ENABLED in settings: ' +
+                                    msg: 'Failed to patch INSIGHTS_TRACKING_STATE in settings: ' +
                                         status });
                             });
                 } else {

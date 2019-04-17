@@ -309,7 +309,7 @@ register(
 )
 
 register(
-    'INSIGHTS_DATA_ENABLED',
+    'INSIGHTS_TRACKING_STATE',
     field_class=fields.BooleanField,
     default=False,
     label=_('Gather data for Automation Insights'),
