@@ -645,22 +645,24 @@ class UserAccess(BaseAccess):
         return False
 
     def can_attach(self, obj, sub_obj, relationship, *args, **kwargs):
-        if not settings.MANAGE_ORGANIZATION_AUTH and not self.user.is_superuser:
-            return False
-
         # Reverse obj and sub_obj, defer to RoleAccess if this is a role assignment.
         if relationship == 'roles':
             role_access = RoleAccess(self.user)
             return role_access.can_attach(sub_obj, obj, 'members', *args, **kwargs)
-        return super(UserAccess, self).can_attach(obj, sub_obj, relationship, *args, **kwargs)
 
-    def can_unattach(self, obj, sub_obj, relationship, *args, **kwargs):
         if not settings.MANAGE_ORGANIZATION_AUTH and not self.user.is_superuser:
             return False
 
+        return super(UserAccess, self).can_attach(obj, sub_obj, relationship, *args, **kwargs)
+
+    def can_unattach(self, obj, sub_obj, relationship, *args, **kwargs):
         if relationship == 'roles':
             role_access = RoleAccess(self.user)
             return role_access.can_unattach(sub_obj, obj, 'members', *args, **kwargs)
+
+        if not settings.MANAGE_ORGANIZATION_AUTH and not self.user.is_superuser:
+            return False
+
         return super(UserAccess, self).can_unattach(obj, sub_obj, relationship, *args, **kwargs)
 
 
@@ -2700,10 +2702,6 @@ class RoleAccess(BaseAccess):
 
     @check_superuser
     def can_unattach(self, obj, sub_obj, relationship, data=None, skip_sub_obj_read_check=False):
-        if isinstance(obj.content_object, Team):
-            if not settings.MANAGE_ORGANIZATION_AUTH and not self.user.is_superuser:
-                return False
-
         if not skip_sub_obj_read_check and relationship in ['members', 'member_role.parents', 'parents']:
             # If we are unattaching a team Role, check the Team read access
             if relationship == 'parents':
@@ -2715,18 +2713,22 @@ class RoleAccess(BaseAccess):
 
         # Being a user in the member_role or admin_role of an organization grants
         # administrators of that Organization the ability to edit that user. To prevent
-        # unwanted escalations lets ensure that the Organization administartor has the abilty
+        # unwanted escalations let's ensure that the Organization administrator has the ability
         # to admin the user being added to the role.
-        if (isinstance(obj.content_object, Organization) and
-                obj.role_field in (Organization.member_role.field.parent_role + ['member_role'])):
+        if isinstance(obj.content_object, Organization) and obj.role_field in ['admin_role', 'member_role']:
             if not isinstance(sub_obj, User):
                 logger.error('Unexpected attempt to associate {} with organization role.'.format(sub_obj))
+                return False
+            if not settings.MANAGE_ORGANIZATION_AUTH and not self.user.is_superuser:
                 return False
             if not UserAccess(self.user).can_admin(sub_obj, None, allow_orphans=True):
                 return False
 
-        if isinstance(obj.content_object, ResourceMixin) and \
-           self.user in obj.content_object.admin_role:
+        if isinstance(obj.content_object, Team) and obj.role_field in ['admin_role', 'member_role']:
+            if not settings.MANAGE_ORGANIZATION_AUTH and not self.user.is_superuser:
+                return False
+
+        if isinstance(obj.content_object, ResourceMixin) and self.user in obj.content_object.admin_role:
             return True
         return False
 

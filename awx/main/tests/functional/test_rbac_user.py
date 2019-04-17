@@ -77,19 +77,27 @@ def test_manage_org_auth_setting(ext_auth, superuser, expect, organization, rand
         assert [
             # use via /api/v2/users/N/roles/
             UserAccess(u).can_attach(rando, organization.admin_role, 'roles'),
+            UserAccess(u).can_attach(rando, organization.member_role, 'roles'),
             UserAccess(u).can_attach(rando, team.admin_role, 'roles'),
+            UserAccess(u).can_attach(rando, team.member_role, 'roles'),
             # use via /api/v2/roles/N/users/
             RoleAccess(u).can_attach(organization.admin_role, rando, 'members'),
-            RoleAccess(u).can_attach(team.admin_role, rando, 'members')
-        ] == [expect for i in range(4)]
+            RoleAccess(u).can_attach(organization.member_role, rando, 'members'),
+            RoleAccess(u).can_attach(team.admin_role, rando, 'members'),
+            RoleAccess(u).can_attach(team.member_role, rando, 'members'),
+        ] == [expect for i in range(8)]
         assert [
             # use via /api/v2/users/N/roles/
             UserAccess(u).can_unattach(rando, organization.admin_role, 'roles'),
+            UserAccess(u).can_unattach(rando, organization.member_role, 'roles'),
             UserAccess(u).can_unattach(rando, team.admin_role, 'roles'),
+            UserAccess(u).can_unattach(rando, team.member_role, 'roles'),
             # use via /api/v2/roles/N/users/
             RoleAccess(u).can_unattach(organization.admin_role, rando, 'members'),
-            RoleAccess(u).can_unattach(team.admin_role, rando, 'members')
-        ] == [expect for i in range(4)]
+            RoleAccess(u).can_unattach(organization.member_role, rando, 'members'),
+            RoleAccess(u).can_unattach(team.admin_role, rando, 'members'),
+            RoleAccess(u).can_unattach(team.member_role, rando, 'members'),
+        ] == [expect for i in range(8)]
 
 
 @pytest.mark.django_db
