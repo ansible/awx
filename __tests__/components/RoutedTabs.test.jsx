@@ -2,7 +2,6 @@ import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
-import { I18nProvider } from '@lingui/react';
 import RoutedTabs, { _RoutedTabs } from '../../src/components/Tabs/RoutedTabs';
 
 let wrapper;
