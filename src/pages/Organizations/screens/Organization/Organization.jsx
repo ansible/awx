@@ -72,15 +72,23 @@ class Organization extends Component {
       match,
       history
     } = this.props;
+
     const {
       organization,
       error,
       loading
     } = this.state;
+
+    const tabsPaddingOverride = {
+      padding: '0'
+    };
+
     let cardHeader = (
       loading ? ''
         : (
-          <CardHeader>
+          <CardHeader
+            style={tabsPaddingOverride}
+          >
             <I18n>
               {({ i18n }) => (
                 <React.Fragment>
