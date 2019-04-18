@@ -18,9 +18,14 @@ import {
   withRouter
 } from 'react-router-dom';
 
+import {
+  PlusIcon,
+} from '@patternfly/react-icons';
+
 import { withNetwork } from '../../../contexts/Network';
 
 import AlertModal from '../../../components/AlertModal';
+import BasicChip from '../../../components/BasicChip/BasicChip';
 import Pagination from '../../../components/Pagination';
 import DataListToolbar from '../../../components/DataListToolbar';
 import AddResourceRole from '../../../components/AddRole/AddResourceRole';
@@ -357,6 +362,7 @@ class OrganizationAccessList extends React.Component {
                   columns={this.columns}
                   onSearch={() => { }}
                   onSort={this.onSort}
+                  showAdd={organization.summary_fields.user_capabilities.edit}
                   add={(
                     <Fragment>
                       <Button
@@ -421,13 +427,21 @@ class OrganizationAccessList extends React.Component {
                           <ul style={userRolesWrapperStyle}>
                             <Text component={TextVariants.h6} style={detailLabelStyle}>{i18n._(t`User Roles`)}</Text>
                             {result.userRoles.map(role => (
-                              <Chip
-                                key={role.id}
-                                className="awx-c-chip"
-                                onClick={() => this.handleWarning(role.name, role.id, result.username, result.id, 'users')}
-                              >
-                                {role.name}
-                              </Chip>
+                              role.user_capabilities.unattach ? (
+                                <Chip
+                                  key={role.id}
+                                  className="awx-c-chip"
+                                  onClick={() => this.handleWarning(role.name, role.id, result.username, result.id, 'users')}
+                                >
+                                  {role.name}
+                                </Chip>
+                              ) : (
+                                <BasicChip
+                                  key={role.id}
+                                >
+                                  {role.name}
+                                </BasicChip>
+                              )
                             ))}
                           </ul>
                         )}

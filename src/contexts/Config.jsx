@@ -16,17 +16,61 @@ class Provider extends Component {
         version: null,
         custom_logo: null,
         custom_login_info: null,
+        me: {},
         ...props.value
       }
     };
 
     this.fetchConfig = this.fetchConfig.bind(this);
+    this.fetchMe = this.fetchMe.bind(this);
+    this.updateConfig = this.updateConfig.bind(this);
   }
 
   componentDidMount () {
     const { value } = this.props;
     if (!value) {
       this.fetchConfig();
+    }
+  }
+
+  updateConfig = (config) => {
+    const {
+      ansible_version,
+      custom_virtualenvs,
+      version
+    } = config;
+
+    this.setState(prevState => ({
+      value: {
+        ...prevState.value,
+        ansible_version,
+        custom_virtualenvs,
+        version
+      },
+    }));
+  }
+
+  async fetchMe () {
+    const { api, handleHttpError } = this.props;
+    try {
+      const { data: { results: [me] } } = await api.getMe();
+      this.setState(prevState => ({
+        value: {
+          ...prevState.value,
+          me
+        },
+      }));
+    } catch (err) {
+      handleHttpError(err) || this.setState({
+        value: {
+          ansible_version: null,
+          custom_virtualenvs: null,
+          version: null,
+          custom_logo: null,
+          custom_login_info: null,
+          me: {}
+        }
+      });
     }
   }
 
@@ -47,13 +91,15 @@ class Provider extends Component {
           custom_login_info
         }
       } = await api.getRoot();
+      const { data: { results: [me] } } = await api.getMe();
       this.setState({
         value: {
           ansible_version,
           custom_virtualenvs,
           version,
           custom_logo,
-          custom_login_info
+          custom_login_info,
+          me
         }
       });
     } catch (err) {
@@ -63,7 +109,8 @@ class Provider extends Component {
           custom_virtualenvs: null,
           version: null,
           custom_logo: null,
-          custom_login_info: null
+          custom_login_info: null,
+          me: {}
         }
       });
     }
@@ -75,7 +122,13 @@ class Provider extends Component {
     const { children } = this.props;
 
     return (
-      <ConfigContext.Provider value={value}>
+      <ConfigContext.Provider
+        value={{
+          ...(propsValue || stateValue),
+          fetchMe: this.fetchMe,
+          updateConfig: this.updateConfig
+        }}
+      >
         {children}
       </ConfigContext.Provider>
     );

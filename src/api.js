@@ -3,6 +3,7 @@ const API_LOGIN = `${API_ROOT}login/`;
 const API_LOGOUT = `${API_ROOT}logout/`;
 const API_V2 = `${API_ROOT}v2/`;
 const API_CONFIG = `${API_V2}config/`;
+const API_ME = `${API_V2}me/`;
 const API_ORGANIZATIONS = `${API_V2}organizations/`;
 const API_INSTANCE_GROUPS = `${API_V2}instance_groups/`;
 const API_USERS = `${API_V2}users/`;
@@ -58,6 +59,10 @@ class APIClient {
     return this.http.get(API_CONFIG);
   }
 
+  getMe () {
+    return this.http.get(API_ME);
+  }
+
   destroyOrganization (id) {
     const endpoint = `${API_ORGANIZATIONS}${id}/`;
     return (this.http.delete(endpoint));
@@ -69,6 +74,10 @@ class APIClient {
 
   createOrganization (data) {
     return this.http.post(API_ORGANIZATIONS, data);
+  }
+
+  callOrganizations () {
+    return this.http.options(API_ORGANIZATIONS);
   }
 
   getOrganizationAccessList (id, params = {}) {

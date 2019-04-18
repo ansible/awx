@@ -100,7 +100,8 @@ class OrganizationDetail extends Component {
         description,
         custom_virtualenv,
         created,
-        modified
+        modified,
+        summary_fields
       },
       match
     } = this.props;
@@ -165,11 +166,13 @@ class OrganizationDetail extends Component {
                 </TextContent>
               )}
             </div>
-            <div style={{ display: 'flex', flexDirection: 'row-reverse', marginTop: '20px' }}>
-              <Link to={`/organizations/${match.params.id}/edit`}>
-                <Button><Trans>Edit</Trans></Button>
-              </Link>
-            </div>
+            {summary_fields.user_capabilities.edit && (
+              <div style={{ display: 'flex', flexDirection: 'row-reverse', marginTop: '20px' }}>
+                <Link to={`/organizations/${match.params.id}/edit`}>
+                  <Button><Trans>Edit</Trans></Button>
+                </Link>
+              </div>
+            )}
             {error ? 'error!' : ''}
           </CardBody>
         )}
