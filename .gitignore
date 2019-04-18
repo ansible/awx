@@ -11,6 +11,7 @@ reference-schema.json
 awx/settings/local_*.py*
 awx/*.sqlite3
 awx/*.sqlite3_*
+awx-dev
 awx/job_status
 awx/projects
 awx/job_output
