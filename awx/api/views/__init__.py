@@ -168,6 +168,8 @@ def api_exception_handler(exc, context):
 
 class DashboardView(APIView):
 
+    deprecated = True
+
     view_name = _("Dashboard")
     swagger_topic = 'Dashboard'
 
