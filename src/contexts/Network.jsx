@@ -26,7 +26,8 @@ class Provider extends Component {
             this.handle404();
           }
           return (err.response.status === 401 || err.response.status === 404);
-        }
+        },
+        ...props.value
       }
     };
   }
@@ -58,14 +59,12 @@ class Provider extends Component {
   }
 
   render () {
-    const {
-      value: stateValue
-    } = this.state;
+    const { value } = this.state;
 
-    const { value: propsValue, children } = this.props;
+    const { children } = this.props;
 
     return (
-      <NetworkContext.Provider value={propsValue || stateValue}>
+      <NetworkContext.Provider value={value}>
         {children}
       </NetworkContext.Provider>
     );
