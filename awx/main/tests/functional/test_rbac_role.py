@@ -17,24 +17,21 @@ def test_team_access_attach(rando, team, inventory):
     # team has read_role for the inventory
     team.member_role.children.add(inventory.read_role)
 
-    access = TeamAccess(rando)
+    team_access = TeamAccess(rando)
+    role_access = RoleAccess(rando)
     data = {'id': inventory.admin_role.pk}
-    assert not access.can_attach(team, inventory.admin_role, 'member_role.children', data, False)
+    assert not team_access.can_attach(team, inventory.admin_role, 'member_role.children', data, False)
+    assert not role_access.can_attach(inventory.admin_role, team, 'member_role.parents', data, False)
 
 
 @pytest.mark.django_db
 def test_user_access_attach(rando, inventory):
     inventory.read_role.members.add(rando)
-    access = UserAccess(rando)
+    user_access = UserAccess(rando)
+    role_access = RoleAccess(rando)
     data = {'id': inventory.admin_role.pk}
-    assert not access.can_attach(rando, inventory.admin_role, 'roles', data, False)
-
-
-@pytest.mark.django_db
-def test_role_access_attach(rando, inventory):
-    inventory.read_role.members.add(rando)
-    access = RoleAccess(rando)
-    assert not access.can_attach(inventory.admin_role, rando, 'members', None)
+    assert not user_access.can_attach(rando, inventory.admin_role, 'roles', data, False)
+    assert not role_access.can_attach(inventory.admin_role, rando, 'members', data, False)
 
 
 @pytest.mark.django_db
@@ -68,8 +65,11 @@ def test_org_user_role_attach(user, organization, inventory):
     organization.admin_role.members.add(admin)
 
     role_access = RoleAccess(admin)
+    org_access = OrganizationAccess(admin)
     assert not role_access.can_attach(organization.member_role, nonmember, 'members', None)
     assert not role_access.can_attach(organization.admin_role, nonmember, 'members', None)
+    assert not org_access.can_attach(organization, nonmember, 'member_role.members', None)
+    assert not org_access.can_attach(organization, nonmember, 'admin_role.members', None)
 
 
 # Permissions when adding users/teams to org special-purpose roles
@@ -83,8 +83,14 @@ def test_user_org_object_roles(organization, org_admin, org_member):
     assert RoleAccess(org_admin).can_attach(
         organization.notification_admin_role, org_member, 'members', None
     )
+    assert OrganizationAccess(org_admin).can_attach(
+        organization, org_member, 'notification_admin_role.members', None
+    )
     assert not RoleAccess(org_member).can_attach(
         organization.notification_admin_role, org_member, 'members', None
+    )
+    assert not OrganizationAccess(org_member).can_attach(
+        organization, org_member, 'notification_admin_role.members', None
     )
 
 
@@ -120,8 +126,11 @@ def test_org_superuser_role_attach(admin_user, org_admin, organization):
     organization.member_role.members.add(admin_user)
 
     role_access = RoleAccess(org_admin)
+    org_access = OrganizationAccess(org_admin)
     assert not role_access.can_attach(organization.member_role, admin_user, 'members', None)
     assert not role_access.can_attach(organization.admin_role, admin_user, 'members', None)
+    assert not org_access.can_attach(organization, admin_user, 'member_role.members', None)
+    assert not org_access.can_attach(organization, admin_user, 'admin_role.members', None)
     user_access = UserAccess(org_admin)
     assert not user_access.can_change(admin_user, {'last_name': 'Witzel'})
 
@@ -185,7 +194,9 @@ def test_orphaned_user_allowed(org_admin, rando, organization):
     *orphaned means user is not a member of any organization
     '''
     role_access = RoleAccess(org_admin)
+    org_access = OrganizationAccess(org_admin)
     assert role_access.can_attach(organization.member_role, rando, 'members', None)
+    assert org_access.can_attach(organization, rando, 'member_role.members', None)
     # Cannot edit the user directly without adding to org first
     user_access = UserAccess(org_admin)
     assert not user_access.can_change(rando, {'last_name': 'Witzel'})
