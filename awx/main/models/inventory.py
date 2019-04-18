@@ -100,32 +100,38 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
     has_active_failures = models.BooleanField(
         default=False,
         editable=False,
-        help_text=_('Flag indicating whether any hosts in this inventory have failed.'),
+        help_text=_('This field is deprecated and will be removed in a future release. '
+                    'Flag indicating whether any hosts in this inventory have failed.'),
     )
     total_hosts = models.PositiveIntegerField(
         default=0,
         editable=False,
-        help_text=_('Total number of hosts in this inventory.'),
+        help_text=_('This field is deprecated and will be removed in a future release. '
+                    'Total number of hosts in this inventory.'),
     )
     hosts_with_active_failures = models.PositiveIntegerField(
         default=0,
         editable=False,
-        help_text=_('Number of hosts in this inventory with active failures.'),
+        help_text=_('This field is deprecated and will be removed in a future release. '
+                    'Number of hosts in this inventory with active failures.'),
     )
     total_groups = models.PositiveIntegerField(
         default=0,
         editable=False,
-        help_text=_('Total number of groups in this inventory.'),
+        help_text=_('This field is deprecated and will be removed in a future release. '
+                    'Total number of groups in this inventory.'),
     )
     groups_with_active_failures = models.PositiveIntegerField(
         default=0,
         editable=False,
-        help_text=_('Number of groups in this inventory with active failures.'),
+        help_text=_('This field is deprecated and will be removed in a future release. '
+                    'Number of groups in this inventory with active failures.'),
     )
     has_inventory_sources = models.BooleanField(
         default=False,
         editable=False,
-        help_text=_('Flag indicating whether this inventory has any external inventory sources.'),
+        help_text=_('This field is deprecated and will be removed in a future release. '
+                    'Flag indicating whether this inventory has any external inventory sources.'),
     )
     total_inventory_sources = models.PositiveIntegerField(
         default=0,
@@ -625,12 +631,14 @@ class Host(CommonModelNameNotUnique, RelatedJobsMixin):
     has_active_failures  = models.BooleanField(
         default=False,
         editable=False,
-        help_text=_('Flag indicating whether the last job failed for this host.'),
+        help_text=_('This field is deprecated and will be removed in a future release. '
+                    'Flag indicating whether the last job failed for this host.'),
     )
     has_inventory_sources = models.BooleanField(
         default=False,
         editable=False,
-        help_text=_('Flag indicating whether this host was created/updated from any external inventory sources.'),
+        help_text=_('This field is deprecated and will be removed in a future release. '
+                    'Flag indicating whether this host was created/updated from any external inventory sources.'),
     )
     inventory_sources = models.ManyToManyField(
         'InventorySource',
@@ -800,32 +808,38 @@ class Group(CommonModelNameNotUnique, RelatedJobsMixin):
     total_hosts = models.PositiveIntegerField(
         default=0,
         editable=False,
-        help_text=_('Total number of hosts directly or indirectly in this group.'),
+        help_text=_('This field is deprecated and will be removed in a future release. '
+                    'Total number of hosts directly or indirectly in this group.'),
     )
     has_active_failures = models.BooleanField(
         default=False,
         editable=False,
-        help_text=_('Flag indicating whether this group has any hosts with active failures.'),
+        help_text=_('This field is deprecated and will be removed in a future release. '
+                    'Flag indicating whether this group has any hosts with active failures.'),
     )
     hosts_with_active_failures = models.PositiveIntegerField(
         default=0,
         editable=False,
-        help_text=_('Number of hosts in this group with active failures.'),
+        help_text=_('This field is deprecated and will be removed in a future release. '
+                    'Number of hosts in this group with active failures.'),
     )
     total_groups = models.PositiveIntegerField(
         default=0,
         editable=False,
-        help_text=_('Total number of child groups contained within this group.'),
+        help_text=_('This field is deprecated and will be removed in a future release. '
+                    'Total number of child groups contained within this group.'),
     )
     groups_with_active_failures = models.PositiveIntegerField(
         default=0,
         editable=False,
-        help_text=_('Number of child groups within this group that have active failures.'),
+        help_text=_('This field is deprecated and will be removed in a future release. '
+                    'Number of child groups within this group that have active failures.'),
     )
     has_inventory_sources = models.BooleanField(
         default=False,
         editable=False,
-        help_text=_('Flag indicating whether this group was created/updated from any external inventory sources.'),
+        help_text=_('This field is deprecated and will be removed in a future release. '
+                    'Flag indicating whether this group was created/updated from any external inventory sources.'),
     )
     inventory_sources = models.ManyToManyField(
         'InventorySource',
