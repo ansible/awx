@@ -7,6 +7,10 @@ let data;
 
 module.exports = {
     before: (client, done) => {
+        client.resizeWindow(1200, 800);
+        client.login();
+        client.waitForAngular();
+
         const resources = [
             getJobTemplateAdmin('test-actions'),
             getJob('test-actions'),
@@ -15,11 +19,6 @@ module.exports = {
         Promise.all(resources)
             .then(([admin, job]) => {
                 data = { admin, job };
-
-                client.login(data.admin.username);
-                client.resizeWindow(1200, 800);
-                client.waitForAngular();
-
                 done();
             });
     },
@@ -29,33 +28,29 @@ module.exports = {
         const allJobsButton = '#all-jobs-btn';
         const relaunch = `#job-${data.job.id} i[class*="launch"]`;
         const search = '#portal-container-jobs smart-search input';
-        const spinny = 'div.spinny';
 
         portal.load();
 
-        portal.expect.element(allJobsButton).visible;
+        portal.waitForElementVisible(allJobsButton);
         portal.expect.element(allJobsButton).enabled;
         portal.click(allJobsButton);
-
-        portal.waitForElementVisible(spinny);
-        portal.waitForElementNotVisible(spinny);
+        portal.waitForSpinny();
+        portal.assert.cssClassPresent(allJobsButton, 'btn-primary');
 
         const query = `id:>${data.job.id - 1} id:<${data.job.id + 1}`;
 
-        portal.expect.element(search).visible;
+        portal.waitForElementVisible(search);
         portal.expect.element(search).enabled;
         portal.sendKeys(search, query);
         portal.sendKeys(search, client.Keys.ENTER);
 
-        portal.waitForElementVisible(spinny);
-        portal.waitForElementNotVisible(spinny);
+        portal.waitForSpinny();
 
-        portal.expect.element(relaunch).visible;
+        portal.waitForElementVisible(relaunch);
         portal.expect.element(relaunch).enabled;
         portal.click(relaunch);
 
-        portal.waitForElementVisible(spinny);
-        portal.waitForElementNotVisible(spinny);
+        portal.waitForSpinny();
 
         const jobDetails = 'at-job-details';
         const output = './/span[normalize-space(text())=\'"msg": "Hello World!"\']';
