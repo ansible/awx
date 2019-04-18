@@ -9,6 +9,9 @@ module.exports = {
     '\\.(css|scss|less)$': '<rootDir>/__mocks__/styleMock.js'
   },
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  snapshotSerializers: [
+    "enzyme-to-json/serializer"
+  ],
   testMatch: [
     '<rootDir>/__tests__/**/*.test.{js,jsx}'
   ],

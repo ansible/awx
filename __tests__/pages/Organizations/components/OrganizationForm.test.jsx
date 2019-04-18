@@ -1,15 +1,10 @@
 import React from 'react';
-import { mount } from 'enzyme';
-import { MemoryRouter } from 'react-router-dom';
-import { I18nProvider } from '@lingui/react';
+import { mountWithContexts } from '../../../enzymeHelpers';
 import { sleep } from '../../../testUtils';
-import { ConfigProvider } from '../../../../src/contexts/Config';
-import { NetworkProvider } from '../../../../src/contexts/Network';
-import OrganizationForm, { _OrganizationForm } from '../../../../src/pages/Organizations/components/OrganizationForm';
+import OrganizationForm from '../../../../src/pages/Organizations/components/OrganizationForm';
 
 describe('<OrganizationForm />', () => {
-  let api;
-  let networkProviderValue;
+  let network;
 
   const mockData = {
     id: 1,
@@ -22,14 +17,11 @@ describe('<OrganizationForm />', () => {
   };
 
   beforeEach(() => {
-    api = {
-      getInstanceGroups: jest.fn(),
-    };
+    network = {};
+  });
 
-    networkProviderValue = {
-      api,
-      handleHttpError: () => {}
-    };
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   test('should request related instance groups from api', () => {
@@ -37,25 +29,24 @@ describe('<OrganizationForm />', () => {
       { name: 'One', id: 1 },
       { name: 'Two', id: 2 }
     ];
-    api.getOrganizationInstanceGroups = jest.fn(() => (
-      Promise.resolve({ data: { results: mockInstanceGroups } })
-    ));
-    mount(
-      <MemoryRouter initialEntries={['/organizations/1']} initialIndex={0}>
-        <I18nProvider>
-          <NetworkProvider value={networkProviderValue}>
-            <_OrganizationForm
-              api={api}
-              organization={mockData}
-              handleSubmit={jest.fn()}
-              handleCancel={jest.fn()}
-            />
-          </NetworkProvider>
-        </I18nProvider>
-      </MemoryRouter>
-    ).find('OrganizationForm');
+    network.api = {
+      getOrganizationInstanceGroups: jest.fn(() => (
+        Promise.resolve({ data: { results: mockInstanceGroups } })
+      ))
+    };
+    mountWithContexts(
+      (
+        <OrganizationForm
+          organization={mockData}
+          handleSubmit={jest.fn()}
+          handleCancel={jest.fn()}
+        />
+      ), {
+        context: { network },
+      }
+    );
 
-    expect(api.getOrganizationInstanceGroups).toHaveBeenCalledTimes(1);
+    expect(network.api.getOrganizationInstanceGroups).toHaveBeenCalledTimes(1);
   });
 
   test('componentDidMount should set instanceGroups to state', async () => {
@@ -63,42 +54,36 @@ describe('<OrganizationForm />', () => {
       { name: 'One', id: 1 },
       { name: 'Two', id: 2 }
     ];
-    api.getOrganizationInstanceGroups = jest.fn(() => (
-      Promise.resolve({ data: { results: mockInstanceGroups } })
-    ));
-    const wrapper = mount(
-      <MemoryRouter initialEntries={['/organizations/1']} initialIndex={0}>
-        <I18nProvider>
-          <NetworkProvider value={networkProviderValue}>
-            <_OrganizationForm
-              organization={mockData}
-              api={api}
-              handleSubmit={jest.fn()}
-              handleCancel={jest.fn()}
-            />
-          </NetworkProvider>
-        </I18nProvider>
-      </MemoryRouter>
-    ).find('OrganizationForm');
+    network.api = {
+      getOrganizationInstanceGroups: jest.fn(() => (
+        Promise.resolve({ data: { results: mockInstanceGroups } })
+      ))
+    };
+    const wrapper = mountWithContexts(
+      (
+        <OrganizationForm
+          organization={mockData}
+          handleSubmit={jest.fn()}
+          handleCancel={jest.fn()}
+        />
+      ), {
+        context: { network },
+      }
+    );
 
-    await wrapper.instance().componentDidMount();
-    expect(wrapper.state().instanceGroups).toEqual(mockInstanceGroups);
+    await sleep(0);
+    expect(network.api.getOrganizationInstanceGroups).toHaveBeenCalled();
+    expect(wrapper.find('OrganizationForm').state().instanceGroups).toEqual(mockInstanceGroups);
   });
 
   test('changing instance group successfully sets instanceGroups state', () => {
-    const wrapper = mount(
-      <MemoryRouter>
-        <I18nProvider>
-          <NetworkProvider value={networkProviderValue}>
-            <OrganizationForm
-              organization={mockData}
-              handleSubmit={jest.fn()}
-              handleCancel={jest.fn()}
-            />
-          </NetworkProvider>
-        </I18nProvider>
-      </MemoryRouter>
-    ).find('OrganizationForm');
+    const wrapper = mountWithContexts(
+      <OrganizationForm
+        organization={mockData}
+        handleSubmit={jest.fn()}
+        handleCancel={jest.fn()}
+      />
+    );
 
     const lookup = wrapper.find('InstanceGroupsLookup');
     expect(lookup.length).toBe(1);
@@ -109,7 +94,7 @@ describe('<OrganizationForm />', () => {
         name: 'foo'
       }
     ], 'instanceGroups');
-    expect(wrapper.state().instanceGroups).toEqual([
+    expect(wrapper.find('OrganizationForm').state().instanceGroups).toEqual([
       {
         id: 1,
         name: 'foo'
@@ -118,19 +103,13 @@ describe('<OrganizationForm />', () => {
   });
 
   test('changing inputs should update form values', () => {
-    const wrapper = mount(
-      <MemoryRouter>
-        <I18nProvider>
-          <NetworkProvider value={networkProviderValue}>
-            <OrganizationForm
-              organization={mockData}
-              handleSubmit={jest.fn()}
-              handleCancel={jest.fn()}
-            />
-          </NetworkProvider>
-        </I18nProvider>
-      </MemoryRouter>
-    ).find('OrganizationForm');
+    const wrapper = mountWithContexts(
+      <OrganizationForm
+        organization={mockData}
+        handleSubmit={jest.fn()}
+        handleCancel={jest.fn()}
+      />
+    );
 
     const form = wrapper.find('Formik');
     wrapper.find('input#org-name').simulate('change', {
@@ -147,20 +126,16 @@ describe('<OrganizationForm />', () => {
     const config = {
       custom_virtualenvs: ['foo', 'bar'],
     };
-    const wrapper = mount(
-      <MemoryRouter>
-        <I18nProvider>
-          <NetworkProvider value={networkProviderValue}>
-            <ConfigProvider value={config}>
-              <OrganizationForm
-                organization={mockData}
-                handleSubmit={jest.fn()}
-                handleCancel={jest.fn()}
-              />
-            </ConfigProvider>
-          </NetworkProvider>
-        </I18nProvider>
-      </MemoryRouter>
+    const wrapper = mountWithContexts(
+      (
+        <OrganizationForm
+          organization={mockData}
+          handleSubmit={jest.fn()}
+          handleCancel={jest.fn()}
+        />
+      ), {
+        context: { config },
+      }
     );
     expect(wrapper.find('FormSelect')).toHaveLength(1);
     expect(wrapper.find('FormSelectOption')).toHaveLength(2);
@@ -168,20 +143,13 @@ describe('<OrganizationForm />', () => {
 
   test('calls handleSubmit when form submitted', async () => {
     const handleSubmit = jest.fn();
-    const wrapper = mount(
-      <MemoryRouter>
-        <I18nProvider>
-          <NetworkProvider value={networkProviderValue}>
-            <OrganizationForm
-              organization={mockData}
-              api={api}
-              handleSubmit={handleSubmit}
-              handleCancel={jest.fn()}
-            />
-          </NetworkProvider>
-        </I18nProvider>
-      </MemoryRouter>
-    ).find('OrganizationForm');
+    const wrapper = mountWithContexts(
+      <OrganizationForm
+        organization={mockData}
+        handleSubmit={handleSubmit}
+        handleCancel={jest.fn()}
+      />
+    );
     expect(handleSubmit).not.toHaveBeenCalled();
     wrapper.find('button[aria-label="Save"]').simulate('click');
     await sleep(1);
@@ -197,34 +165,33 @@ describe('<OrganizationForm />', () => {
       { name: 'One', id: 1 },
       { name: 'Two', id: 2 }
     ];
-    api.getOrganizationInstanceGroups = jest.fn(() => (
-      Promise.resolve({ data: { results: mockInstanceGroups } })
-    ));
+    network.api = {
+      getOrganizationInstanceGroups: jest.fn(() => (
+        Promise.resolve({ data: { results: mockInstanceGroups } })
+      ))
+    };
     const mockDataForm = {
       name: 'Foo',
       description: 'Bar',
       custom_virtualenv: 'Fizz',
     };
     const handleSubmit = jest.fn();
-    api.updateOrganizationDetails = jest.fn().mockResolvedValue(1, mockDataForm);
-    api.associateInstanceGroup = jest.fn().mockResolvedValue('done');
-    api.disassociate = jest.fn().mockResolvedValue('done');
-    const wrapper = mount(
-      <I18nProvider>
-        <MemoryRouter initialEntries={['/organizations/1']} initialIndex={0}>
-          <NetworkProvider value={networkProviderValue}>
-            <_OrganizationForm
-              organization={mockData}
-              api={api}
-              handleSubmit={handleSubmit}
-              handleCancel={jest.fn()}
-            />
-          </NetworkProvider>
-        </MemoryRouter>
-      </I18nProvider>
-    ).find('OrganizationForm');
+    network.api.updateOrganizationDetails = jest.fn().mockResolvedValue(1, mockDataForm);
+    network.api.associateInstanceGroup = jest.fn().mockResolvedValue('done');
+    network.api.disassociate = jest.fn().mockResolvedValue('done');
+    const wrapper = mountWithContexts(
+      (
+        <OrganizationForm
+          organization={mockData}
+          handleSubmit={handleSubmit}
+          handleCancel={jest.fn()}
+        />
+      ), {
+        context: { network },
+      }
+    );
 
-    await wrapper.instance().componentDidMount();
+    await sleep(0);
 
     wrapper.find('InstanceGroupsLookup').prop('onChange')([
       { name: 'One', id: 1 },
@@ -238,18 +205,12 @@ describe('<OrganizationForm />', () => {
 
   test('calls "handleCancel" when Cancel button is clicked', () => {
     const handleCancel = jest.fn();
-    const wrapper = mount(
-      <MemoryRouter>
-        <I18nProvider>
-          <NetworkProvider value={networkProviderValue}>
-            <OrganizationForm
-              organization={mockData}
-              handleSubmit={jest.fn()}
-              handleCancel={handleCancel}
-            />
-          </NetworkProvider>
-        </I18nProvider>
-      </MemoryRouter>
+    const wrapper = mountWithContexts(
+      <OrganizationForm
+        organization={mockData}
+        handleSubmit={jest.fn()}
+        handleCancel={handleCancel}
+      />
     );
     expect(handleCancel).not.toHaveBeenCalled();
     wrapper.find('button[aria-label="Cancel"]').prop('onClick')();

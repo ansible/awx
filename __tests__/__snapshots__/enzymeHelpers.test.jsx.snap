@@ -1,0 +1,78 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`mountWithContexts injected ConfigProvider should mount and render with custom Config value 1`] = `
+<Foo>
+  <Config>
+    <div>
+      Fizz
+      1.1
+    </div>
+  </Config>
+</Foo>
+`;
+
+exports[`mountWithContexts injected ConfigProvider should mount and render with default values 1`] = `
+<Foo>
+  <Config>
+    <div />
+  </Config>
+</Foo>
+`;
+
+exports[`mountWithContexts injected I18nProvider should mount and render 1`] = `
+<div>
+  <I18n
+    update={true}
+    withHash={true}
+  >
+    <span>
+      Text content
+    </span>
+  </I18n>
+</div>
+`;
+
+exports[`mountWithContexts injected I18nProvider should mount and render deeply nested consumer 1`] = `
+<Parent>
+  <Child>
+    <I18n
+      update={true}
+      withHash={true}
+    >
+      <div>
+        Text content
+      </div>
+    </I18n>
+  </Child>
+</Parent>
+`;
+
+exports[`mountWithContexts injected Network should mount and render 1`] = `
+<Foo
+  api={
+    Object {
+      "getConfig": [Function],
+    }
+  }
+  handleHttpError={[Function]}
+>
+  <div>
+    test
+  </div>
+</Foo>
+`;
+
+exports[`mountWithContexts injected Router should mount and render 1`] = `
+<div>
+  <Link
+    replace={false}
+    to="/"
+  >
+    <a
+      onClick={[Function]}
+    >
+      home
+    </a>
+  </Link>
+</div>
+`;

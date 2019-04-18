@@ -82,4 +82,3 @@ export function withNetwork (Child) {
     </NetworkContext.Consumer>
   );
 }
-
