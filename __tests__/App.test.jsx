@@ -1,50 +1,36 @@
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
-import { I18nProvider } from '@lingui/react';
 
-import { mount } from 'enzyme';
+import { mountWithContexts } from './enzymeHelpers';
+
 import { asyncFlush } from '../jest.setup';
 
-import { ConfigProvider } from '../src/contexts/Config';
-import { NetworkProvider } from '../src/contexts/Network';
-
-import App, { _App } from '../src/App';
-
-const networkProviderValue = { api: {}, handleHttpError: () => {} };
+import App from '../src/App';
 
 describe('<App />', () => {
   test('expected content is rendered', () => {
-    const appWrapper = mount(
-      <MemoryRouter>
-        <I18nProvider>
-          <NetworkProvider value={networkProviderValue}>
-            <ConfigProvider>
-              <App
-                routeGroups={[
-                  {
-                    groupTitle: 'Group One',
-                    groupId: 'group_one',
-                    routes: [
-                      { title: 'Foo', path: '/foo' },
-                      { title: 'Bar', path: '/bar' },
-                    ],
-                  },
-                  {
-                    groupTitle: 'Group Two',
-                    groupId: 'group_two',
-                    routes: [
-                      { title: 'Fiz', path: '/fiz' },
-                    ]
-                  }
-                ]}
-                render={({ routeGroups }) => (
-                  routeGroups.map(({ groupId }) => (<div key={groupId} id={groupId} />))
-                )}
-              />
-            </ConfigProvider>
-          </NetworkProvider>
-        </I18nProvider>
-      </MemoryRouter>
+    const appWrapper = mountWithContexts(
+      <App
+        routeGroups={[
+          {
+            groupTitle: 'Group One',
+            groupId: 'group_one',
+            routes: [
+              { title: 'Foo', path: '/foo' },
+              { title: 'Bar', path: '/bar' },
+            ],
+          },
+          {
+            groupTitle: 'Group Two',
+            groupId: 'group_two',
+            routes: [
+              { title: 'Fiz', path: '/fiz' },
+            ]
+          }
+        ]}
+        render={({ routeGroups }) => (
+          routeGroups.map(({ groupId }) => (<div key={groupId} id={groupId} />))
+        )}
+      />
     );
 
     // page components
@@ -69,17 +55,7 @@ describe('<App />', () => {
 
     const config = { ansible_version, version };
 
-    const wrapper = mount(
-      <MemoryRouter>
-        <I18nProvider>
-          <NetworkProvider value={networkProviderValue}>
-            <ConfigProvider value={config}>
-              <App />
-            </ConfigProvider>
-          </NetworkProvider>
-        </I18nProvider>
-      </MemoryRouter>
-    );
+    const wrapper = mountWithContexts(<App />, { context: { config } });
 
     // open about modal
     const aboutDropdown = 'Dropdown QuestionCircleIcon';
@@ -106,19 +82,8 @@ describe('<App />', () => {
   });
 
   test('onNavToggle sets state.isNavOpen to opposite', () => {
-    const appWrapper = mount(
-      <MemoryRouter>
-        <I18nProvider>
-          <NetworkProvider value={networkProviderValue}>
-            <ConfigProvider>
-              <App />
-            </ConfigProvider>
-          </NetworkProvider>
-        </I18nProvider>
-      </MemoryRouter>
-    ).find('App');
+    const appWrapper = mountWithContexts(<App />).find('App');
     const { onNavToggle } = appWrapper.instance();
-
     [true, false, true, false, true].forEach(expected => {
       expect(appWrapper.state().isNavOpen).toBe(expected);
       onNavToggle();
@@ -128,17 +93,9 @@ describe('<App />', () => {
   test('onLogout makes expected call to api client', async (done) => {
     const logout = jest.fn(() => Promise.resolve());
 
-    const appWrapper = mount(
-      <MemoryRouter>
-        <I18nProvider>
-          <NetworkProvider value={networkProviderValue}>
-            <ConfigProvider>
-              <_App api={{ logout }} handleHttpError={() => {}} />
-            </ConfigProvider>
-          </NetworkProvider>
-        </I18nProvider>
-      </MemoryRouter>
-    ).find('App');
+    const appWrapper = mountWithContexts(<App />, {
+      context: { network: { api: { logout }, handleHttpError: () => {} } }
+    }).find('App');
 
     appWrapper.instance().onLogout();
     await asyncFlush();
