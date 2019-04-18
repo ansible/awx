@@ -1,9 +1,15 @@
 /* Tests for the user CRUD operations. */
 import uuid from 'uuid';
+import {
+    getAuditor,
+    getOrganization,
+    getUser
+} from '../fixtures';
 
 const row = '#users_table .List-tableRow';
 const testID = uuid().substr(0, 8);
 
+let data;
 const store = {
     organization: {
         name: `org-${testID}`
@@ -36,17 +42,21 @@ const store = {
 
 module.exports = {
     before: (client, done) => {
+        const resources = [
+            getOrganization(store.organization.name),
+            getAuditor(store.auditor.username),
+            getUser(store.user.username),
+            getUser(store.admin.username, true)
+        ];
+
+        Promise.all(resources)
+            .then(([organization, auditor, user, admin]) => {
+                store.organization.name = `${store.organization.name}-organization`;
+                data = { organization, auditor, user, admin };
+                done();
+            });
         client.login();
         client.waitForAngular();
-
-        client.inject(
-            [store, 'OrganizationModel'],
-            (_store_, Model) => new Model().http.post({ data: _store_.organization }),
-            ({ data }) => {
-                store.organization = data;
-                done();
-            }
-        );
     },
     'create a system administrator': (client) => {
         client.login();

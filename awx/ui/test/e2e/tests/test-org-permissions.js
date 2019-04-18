@@ -4,6 +4,10 @@ import {
     getTeam,
 } from '../fixtures';
 
+import {
+    AWX_E2E_URL
+} from '../settings';
+
 const namespace = 'test-org-permissions';
 
 let data;
@@ -18,7 +22,6 @@ const modalOrgsSearchBar = '//smart-search[@django-model="organizations"]//input
 
 const orgsNavTab = "//at-side-nav-item[contains(@name, 'ORGANIZATIONS')]";
 const teamsNavTab = "//at-side-nav-item[contains(@name, 'TEAMS')]";
-const usersNavTab = "//at-side-nav-item[contains(@name, 'USERS')]";
 
 const orgTab = '//div[not(@ng-show="showSection2Container()")]/div[@class="Form-tabHolder"]/div[@ng-click="selectTab(\'organizations\')"]';
 const teamsTab = '//*[@id="teams_tab"]';
@@ -40,8 +43,6 @@ const teamsSearchBadgeCount = '//span[contains(@class, "List-titleBadge") and co
 const teamCheckbox = '//*[@item="team"]//input[@type="checkbox"]';
 const addUserToTeam = '//*[@aw-tool-tip="Add User"]';
 
-const trashButton = '//i[contains(@class, "fa-trash")]';
-const deleteButton = '//*[text()="DELETE"]';
 const saveButton = '//*[text()="Save"]';
 
 const addPermission = '//*[@aw-tool-tip="Grant Permission"]';
@@ -109,6 +110,8 @@ module.exports = {
             .findThenClick(saveButton)
             // add team-wide permissions to an organization
             .findThenClick(orgsNavTab)
+            .navigateTo(`${AWX_E2E_URL}/#/organizations`, false)
+            .waitForElementVisible(searchBar)
             .clearValue(searchBar)
             .setValue(searchBar, [orgsText, client.Keys.ENTER])
             .waitForElementNotVisible(spinny)
@@ -130,12 +133,6 @@ module.exports = {
             .waitForElementVisible(verifyTeamPermissions);
     },
     after: client => {
-        client
-            .findThenClick(usersNavTab)
-            .setValue(searchBar, [`username.iexact:${data.user.username}`, client.Keys.ENTER])
-            .waitForElementNotVisible(spinny)
-            .findThenClick(trashButton)
-            .findThenClick(deleteButton)
-            .end();
+        client.end();
     }
 };

@@ -1,8 +1,10 @@
 /* Utility function to wait for the working spinner to disappear. */
-exports.command = function waitForSpinny () {
-    const selector = 'div.spinny';
-    this
-        .waitForElementVisible(selector)
-        .waitForElementNotVisible(selector);
+exports.command = function waitForSpinny (useXpath = false) {
+    let selector = 'div.spinny';
+    if (useXpath) {
+        selector = '//*[contains(@class, "spinny")]';
+    }
+    this.waitForElementVisible(selector);
+    this.waitForElementNotVisible(selector);
     return this;
 };

@@ -150,6 +150,9 @@ module.exports = {
         client.expect.element('[class=xss]').not.present;
 
         client.click('#prompt_cancel_btn');
+        if (client.isVisible('#prompt_cancel_btn')) {
+            client.click('#prompt_cancel_btn');
+        }
 
         client.expect.element('#prompt-header').not.visible;
     },
@@ -168,10 +171,8 @@ module.exports = {
         client.expect.element('#permissions_tab').visible;
         client.expect.element('#permissions_tab').enabled;
 
-        client.click('#permissions_tab');
-
-        client.expect.element('div.spinny').visible;
-        client.expect.element('div.spinny').not.visible;
+        client.pause(2000);
+        client.findThenClick('#permissions_tab', 'css');
 
         client.expect.element('#xss').not.present;
         client.expect.element('[class=xss]').not.present;
@@ -237,6 +238,7 @@ module.exports = {
         client.sendKeys('div.at-Panel smart-search input', `id:>${data.notification.id - 1} id:<${data.notification.id + 1}`);
         client.waitForElementNotPresent('div.at-Panel smart-search .SmartSearch-searchButton--disabled');
         client.waitForElementNotVisible('.overlay');
+        client.pause(2000);
         client.click('div.at-Panel smart-search .SmartSearch-searchButton');
 
         client.expect.element('div.spinny').visible;
@@ -270,6 +272,9 @@ module.exports = {
         client.expect.element('[class=xss]').not.present;
 
         client.click('#prompt_cancel_btn');
+        if (client.isVisible('#prompt_cancel_btn')) {
+            client.click('#prompt_cancel_btn');
+        }
 
         client.expect.element('#prompt-header').not.visible;
     },
@@ -322,6 +327,9 @@ module.exports = {
         client.expect.element('[class=xss]').not.present;
 
         client.click('#prompt_cancel_btn');
+        if (client.isVisible('#prompt_cancel_btn')) {
+            client.click('#prompt_cancel_btn');
+        }
 
         client.expect.element('#prompt-header').not.visible;
     },
@@ -376,6 +384,9 @@ module.exports = {
         client.expect.element('[class=xss]').not.present;
 
         client.click('#prompt_cancel_btn');
+        if (client.isVisible('#prompt_cancel_btn')) {
+            client.click('#prompt_cancel_btn');
+        }
 
         client.expect.element('#prompt-header').not.visible;
     },
@@ -438,6 +449,9 @@ module.exports = {
         client.expect.element('[class=xss]').not.present;
 
         client.click('#prompt_cancel_btn');
+        if (client.isVisible('#prompt_cancel_btn')) {
+            client.click('#prompt_cancel_btn');
+        }
 
         client.expect.element('#prompt-header').not.visible;
     },
@@ -455,6 +469,8 @@ module.exports = {
         client.expect.element('#permissions_tab').visible;
         client.expect.element('#permissions_tab').enabled;
 
+        client.pause(1000);
+        client.click('#permissions_tab');
         client.click('#permissions_tab');
 
         client.expect.element('div.spinny').visible;
@@ -563,6 +579,9 @@ module.exports = {
         client.expect.element('[class=xss]').not.present;
 
         client.click('#prompt_cancel_btn');
+        if (client.isVisible('#prompt_cancel_btn')) {
+            client.click('#prompt_cancel_btn');
+        }
 
         client.expect.element('#prompt-header').not.visible;
     },
@@ -617,6 +636,9 @@ module.exports = {
         client.expect.element('[class=xss]').not.present;
 
         client.click('#prompt_cancel_btn');
+        if (client.isVisible('#prompt_cancel_btn')) {
+            client.click('#prompt_cancel_btn');
+        }
 
         client.expect.element('#prompt-header').not.visible;
     },
@@ -671,6 +693,9 @@ module.exports = {
         client.expect.element('[class=xss]').not.present;
 
         client.click('#prompt_cancel_btn');
+        if (client.isVisible('#prompt_cancel_btn')) {
+            client.click('#prompt_cancel_btn');
+        }
 
         client.expect.element('#prompt-header').not.visible;
     },

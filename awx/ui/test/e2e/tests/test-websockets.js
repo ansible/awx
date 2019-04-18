@@ -39,10 +39,10 @@ module.exports = {
             getProject('test-websockets', 'https://github.com/ansible/test-playbooks'),
             getOrganization('test-websockets'),
             // launch job templates once before running tests so that they appear on the dashboard.
-            getJob('test-websockets', 'debug.yml', 'test-websockets-successful', done),
-            getJob('test-websockets', 'fail_unless.yml', 'test-websockets-failed', done),
+            getJob('test-websockets', 'debug.yml', 'test-websockets-successful', true, done),
+            getJob('test-websockets', 'fail_unless.yml', 'test-websockets-failed', true, done),
             getJobTemplate('test-websockets', 'debug.yml', 'test-ws-split-job-template', true, '2'),
-            getJob('test-websockets', 'debug.yml', 'test-ws-split-job-template', done)
+            getJob('test-websockets', 'debug.yml', 'test-ws-split-job-template', false, done)
         ];
 
         Promise.all(resources)
@@ -152,7 +152,7 @@ module.exports = {
     },
     'Test job slicing sparkline behavior': client => {
         client.findThenClick('[ui-sref=dashboard]', 'css');
-        getJob('test-ws-split-job-template', 'debug.yml', 'test-websockets-failed', false);
+        getJob('test-websockets', 'debug.yml', 'test-ws-split-job-template', false);
 
         client.useXpath().expect.element(`${sparklineIcon}[1]${running}`)
             .to.be.visible.before(AWX_E2E_TIMEOUT_ASYNC);
