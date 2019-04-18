@@ -10,7 +10,8 @@ import { I18n, i18nMark } from '@lingui/react';
 import { t, Trans } from '@lingui/macro';
 
 import {
-  Link
+  Link,
+  withRouter
 } from 'react-router-dom';
 
 import { withNetwork } from '../../../contexts/Network';
@@ -160,8 +161,8 @@ class OrganizationAccessList extends React.Component {
   }
 
   getQueryParams (overrides = {}) {
-    const { location } = this.props;
-    const { search } = location;
+    const { history } = this.props;
+    const { search } = history.location;
 
     const searchParams = parseQueryString(search.substring(1));
 
@@ -422,4 +423,4 @@ OrganizationAccessList.propTypes = {
 };
 
 export { OrganizationAccessList as _OrganizationAccessList };
-export default withNetwork(OrganizationAccessList);
+export default withRouter(withNetwork(OrganizationAccessList));

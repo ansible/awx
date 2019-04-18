@@ -1,8 +1,6 @@
 import React from 'react';
-import { mount } from 'enzyme';
-import { MemoryRouter } from 'react-router-dom';
-import { I18nProvider } from '@lingui/react';
 
+import { mountWithContexts } from '../../../enzymeHelpers';
 import OrganizationAccessList, { _OrganizationAccessList } from '../../../../src/pages/Organizations/components/OrganizationAccessList';
 
 const mockData = [
@@ -31,32 +29,20 @@ describe('<OrganizationAccessList />', () => {
   });
 
   test('initially renders succesfully', () => {
-    mount(
-      <I18nProvider>
-        <MemoryRouter>
-          <OrganizationAccessList
-            match={{ path: '/organizations/:id', url: '/organizations/1', params: { id: '1' } }}
-            location={{ search: '', pathname: '/organizations/1/access' }}
-            getAccessList={() => {}}
-            removeRole={() => {}}
-          />
-        </MemoryRouter>
-      </I18nProvider>
+    mountWithContexts(
+      <OrganizationAccessList
+        getAccessList={() => {}}
+        removeRole={() => {}}
+      />
     );
   });
 
   test('api response data passed to component gets set to state properly', (done) => {
-    const wrapper = mount(
-      <I18nProvider>
-        <MemoryRouter>
-          <OrganizationAccessList
-            match={{ path: '/organizations/:id', url: '/organizations/1', params: { id: '0' } }}
-            location={{ search: '', pathname: '/organizations/1/access' }}
-            getAccessList={() => ({ data: { count: 1, results: mockData } })}
-            removeRole={() => {}}
-          />
-        </MemoryRouter>
-      </I18nProvider>
+    const wrapper = mountWithContexts(
+      <OrganizationAccessList
+        getAccessList={() => ({ data: { count: 1, results: mockData } })}
+        removeRole={() => {}}
+      />
     ).find('OrganizationAccessList');
 
     setImmediate(() => {
@@ -67,18 +53,11 @@ describe('<OrganizationAccessList />', () => {
 
   test('onSort being passed properly to DataListToolbar component', async (done) => {
     const onSort = jest.spyOn(_OrganizationAccessList.prototype, 'onSort');
-    const wrapper = mount(
-      <I18nProvider>
-        <MemoryRouter>
-          <_OrganizationAccessList
-            match={{ path: '/organizations/:id', url: '/organizations/1', params: { id: '0' } }}
-            location={{ search: '', pathname: '/organizations/1/access' }}
-            getAccessList={() => ({ data: { count: 1, results: mockData } })}
-            removeRole={() => {}}
-            handleHttpError={() => {}}
-          />
-        </MemoryRouter>
-      </I18nProvider>
+    const wrapper = mountWithContexts(
+      <OrganizationAccessList
+        getAccessList={() => ({ data: { count: 1, results: mockData } })}
+        removeRole={() => {}}
+      />
     ).find('OrganizationAccessList');
     expect(onSort).not.toHaveBeenCalled();
 
@@ -91,17 +70,11 @@ describe('<OrganizationAccessList />', () => {
   });
 
   test('getTeamRoles returns empty array if dataset is missing team_id attribute', (done) => {
-    const wrapper = mount(
-      <I18nProvider>
-        <MemoryRouter>
-          <OrganizationAccessList
-            match={{ path: '/organizations/:id', url: '/organizations/1', params: { id: '0' } }}
-            location={{ search: '', pathname: '/organizations/1/access' }}
-            getAccessList={() => ({ data: { count: 1, results: mockData } })}
-            removeRole={() => {}}
-          />
-        </MemoryRouter>
-      </I18nProvider>
+    const wrapper = mountWithContexts(
+      <OrganizationAccessList
+        getAccessList={() => ({ data: { count: 1, results: mockData } })}
+        removeRole={() => {}}
+      />
     ).find('OrganizationAccessList');
 
     setImmediate(() => {
@@ -117,18 +90,11 @@ describe('<OrganizationAccessList />', () => {
     const handleWarning = jest.spyOn(_OrganizationAccessList.prototype, 'handleWarning');
     const confirmDelete = jest.spyOn(_OrganizationAccessList.prototype, 'confirmDelete');
     const removeRole = jest.spyOn(_OrganizationAccessList.prototype, 'removeAccessRole');
-    const wrapper = mount(
-      <I18nProvider>
-        <MemoryRouter>
-          <_OrganizationAccessList
-            match={{ path: '/organizations/:id', url: '/organizations/1', params: { id: '0' } }}
-            location={{ search: '', pathname: '/organizations/1/access' }}
-            getAccessList={() => ({ data: { count: 1, results: mockData } })}
-            removeRole={() => {}}
-            handleHttpError={() => {}}
-          />
-        </MemoryRouter>
-      </I18nProvider>
+    const wrapper = mountWithContexts(
+      <OrganizationAccessList
+        getAccessList={() => ({ data: { count: 1, results: mockData } })}
+        removeRole={() => {}}
+      />
     ).find('OrganizationAccessList');
     expect(handleWarning).not.toHaveBeenCalled();
     expect(confirmDelete).not.toHaveBeenCalled();
@@ -147,17 +113,11 @@ describe('<OrganizationAccessList />', () => {
   });
 
   test('state is set appropriately when a user tries deleting a role', (done) => {
-    const wrapper = mount(
-      <I18nProvider>
-        <MemoryRouter>
-          <_OrganizationAccessList
-            match={{ path: '/organizations/:id', url: '/organizations/1', params: { id: '0' } }}
-            location={{ search: '', pathname: '/organizations/1/access' }}
-            getAccessList={() => ({ data: { count: 1, results: mockData } })}
-            removeRole={() => {}}
-          />
-        </MemoryRouter>
-      </I18nProvider>
+    const wrapper = mountWithContexts(
+      <OrganizationAccessList
+        getAccessList={() => ({ data: { count: 1, results: mockData } })}
+        removeRole={() => {}}
+      />
     ).find('OrganizationAccessList');
 
     setImmediate(() => {

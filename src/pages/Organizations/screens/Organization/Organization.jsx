@@ -148,11 +148,7 @@ class Organization extends Component {
             <Route
               path="/organizations/:id/access"
               render={() => (
-                <OrganizationAccess
-                  match={match}
-                  location={location}
-                  history={history}
-                />
+                <OrganizationAccess />
               )}
             />
             <Route
