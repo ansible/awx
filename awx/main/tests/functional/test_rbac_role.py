@@ -3,7 +3,9 @@ import pytest
 from awx.main.access import (
     RoleAccess,
     UserAccess,
-    TeamAccess)
+    OrganizationAccess,
+    TeamAccess,
+)
 from awx.main.models import Role, Organization
 
 
@@ -160,12 +162,17 @@ def test_need_all_orgs_to_admin_user(user):
     assert not user_access.can_change(org12_member, {'last_name': 'Witzel'})
 
     role_access = RoleAccess(org1_admin)
+    org_access = OrganizationAccess(org1_admin)
     assert not role_access.can_attach(org1.admin_role, org12_member, 'members', None)
     assert not role_access.can_attach(org1.member_role, org12_member, 'members', None)
+    assert not org_access.can_attach(org1, org12_member, 'admin_role.members')
+    assert not org_access.can_attach(org1, org12_member, 'member_role.members')
 
     org2.admin_role.members.add(org1_admin)
     assert role_access.can_attach(org1.admin_role, org12_member, 'members', None)
     assert role_access.can_attach(org1.member_role, org12_member, 'members', None)
+    assert org_access.can_attach(org1, org12_member, 'admin_role.members')
+    assert org_access.can_attach(org1, org12_member, 'member_role.members')
 
 
 # Orphaned user can be added to member role, only in special cases
