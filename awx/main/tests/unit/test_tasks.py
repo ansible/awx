@@ -525,10 +525,10 @@ class TestGenericRun():
         job.project.custom_virtualenv = '/venv/missing'
         task = tasks.RunJob()
 
-        with pytest.raises(RuntimeError) as e:
+        with pytest.raises(tasks.InvalidVirtualenvError) as e:
             task.build_env(job, private_data_dir)
 
-        assert 'a valid Python virtualenv does not exist at /venv/missing' == str(e.value)
+        assert 'Invalid virtual environment selected: /venv/missing' == str(e.value)
 
 
 class TestAdhocRun(TestJobExecution):
