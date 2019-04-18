@@ -13,8 +13,14 @@ def settings(request):
     }
 
 def version(request):
+    context = getattr(request, 'parser_context', {})
     return {
         'version': get_awx_version(),
         'tower_version': get_awx_version(),
         'short_tower_version': get_awx_version().split('-')[0],
+        'deprecated': getattr(
+            context.get('view'),
+            'deprecated',
+            False
+        ) or request.path.startswith('/api/v1/')
     }
