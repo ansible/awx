@@ -28,6 +28,7 @@ ADD RPM-GPG-KEY-ansible-release /etc/pki/rpm-gpg/RPM-GPG-KEY-ansible-release
 WORKDIR /tmp
 RUN mkdir -p /var/lib/awx/public/static
 RUN chgrp -Rf root /var/lib/awx && chmod -Rf g+w /var/lib/awx
+# sync with tools/docker-compose/Dockerfile
 RUN yum -y install epel-release && \
     yum -y localinstall https://download.postgresql.org/pub/repos/yum/9.6/redhat/rhel-7-x86_64/pgdg-centos96-9.6-3.noarch.rpm && \
     yum -y update && \
