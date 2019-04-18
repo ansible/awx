@@ -24,7 +24,10 @@ class Provider extends Component {
   }
 
   componentDidMount () {
-    this.fetchConfig();
+    const { value } = this.props;
+    if (!value) {
+      this.fetchConfig();
+    }
   }
 
   async fetchConfig () {
