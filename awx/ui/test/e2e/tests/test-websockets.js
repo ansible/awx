@@ -1,6 +1,7 @@
 /* Websocket tests. These tests verify that items like the sparkline (colored box rows which
  * display job status) and other status icons update correctly as the jobs progress.
  */
+import uuid from 'uuid';
 
 import {
     getInventorySource,
@@ -160,13 +161,14 @@ module.exports = {
             .to.be.present.before(AWX_E2E_TIMEOUT_ASYNC);
     },
     'Test pending deletion of inventories': client => {
-        getInventorySource('test-pending-delete');
+        const uniqueID = uuid().substr(0, 8);
+        getInventorySource(`test-pending-delete-${uniqueID}`);
         client
             .useCss()
             .navigateTo(`${AWX_E2E_URL}/#/inventories`, false)
             .waitForElementVisible('.SmartSearch-input')
             .clearValue('.SmartSearch-input')
-            .setValue('.SmartSearch-input', ['test-pending-delete', client.Keys.ENTER])
+            .setValue('.SmartSearch-input', [`test-pending-delete-${uniqueID}`, client.Keys.ENTER])
             .pause(AWX_E2E_TIMEOUT_SHORT) // helps prevent flake
             .findThenClick('.fa-trash-o', 'css')
             .waitForElementVisible('#prompt_action_btn')
