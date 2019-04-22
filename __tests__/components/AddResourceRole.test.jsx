@@ -1,6 +1,6 @@
 import React from 'react';
-import { mount } from 'enzyme';
-import { I18nProvider } from '@lingui/react';
+import { shallow } from 'enzyme';
+import { mountWithContexts } from '../enzymeHelpers';
 import AddResourceRole from '../../src/components/AddRole/AddResourceRole';
 
 describe('<SelectResourceStep />', () => {
@@ -30,28 +30,24 @@ describe('<SelectResourceStep />', () => {
     }
   };
   test('initially renders without crashing', () => {
-    mount(
-      <I18nProvider>
-        <AddResourceRole
-          api={api}
-          onClose={jest.fn()}
-          onSave={jest.fn()}
-          roles={roles}
-        />
-      </I18nProvider>
+    shallow(
+      <AddResourceRole
+        api={api}
+        onClose={() => {}}
+        onSave={() => {}}
+        roles={roles}
+      />
     );
   });
   test('handleRoleCheckboxClick properly updates state', () => {
-    const wrapper = mount(
-      <I18nProvider>
-        <AddResourceRole
-          api={api}
-          onClose={jest.fn()}
-          onSave={jest.fn()}
-          roles={roles}
-        />
-      </I18nProvider>
-    ).find('AddResourceRole');
+    const wrapper = shallow(
+      <AddResourceRole
+        api={api}
+        onClose={() => {}}
+        onSave={() => {}}
+        roles={roles}
+      />
+    );
     wrapper.setState({
       selectedRoleRows: [
         {
@@ -79,16 +75,14 @@ describe('<SelectResourceStep />', () => {
     }]);
   });
   test('handleResourceCheckboxClick properly updates state', () => {
-    const wrapper = mount(
-      <I18nProvider>
-        <AddResourceRole
-          api={api}
-          onClose={jest.fn()}
-          onSave={jest.fn()}
-          roles={roles}
-        />
-      </I18nProvider>
-    ).find('AddResourceRole');
+    const wrapper = shallow(
+      <AddResourceRole
+        api={api}
+        onClose={() => {}}
+        onSave={() => {}}
+        roles={roles}
+      />
+    );
     wrapper.setState({
       selectedResourceRows: [
         {
@@ -113,15 +107,13 @@ describe('<SelectResourceStep />', () => {
   });
   test('clicking user/team cards updates state', () => {
     const spy = jest.spyOn(AddResourceRole.prototype, 'handleResourceSelect');
-    const wrapper = mount(
-      <I18nProvider>
-        <AddResourceRole
-          onClose={jest.fn()}
-          onSave={jest.fn()}
-          api={api}
-          roles={roles}
-        />
-      </I18nProvider>
+    const wrapper = mountWithContexts(
+      <AddResourceRole
+        onClose={() => {}}
+        onSave={() => {}}
+        api={api}
+        roles={roles}
+      />
     ).find('AddResourceRole');
     const selectableCardWrapper = wrapper.find('SelectableCard');
     expect(selectableCardWrapper.length).toBe(2);
@@ -133,16 +125,14 @@ describe('<SelectResourceStep />', () => {
     expect(wrapper.state('selectedResource')).toBe('teams');
   });
   test('readUsers and readTeams call out to corresponding api functions', () => {
-    const wrapper = mount(
-      <I18nProvider>
-        <AddResourceRole
-          api={api}
-          onClose={jest.fn()}
-          onSave={jest.fn()}
-          roles={roles}
-        />
-      </I18nProvider>
-    ).find('AddResourceRole');
+    const wrapper = shallow(
+      <AddResourceRole
+        api={api}
+        onClose={() => {}}
+        onSave={() => {}}
+        roles={roles}
+      />
+    );
     wrapper.instance().readUsers({
       foo: 'bar'
     });
@@ -158,16 +148,14 @@ describe('<SelectResourceStep />', () => {
     });
   });
   test('handleResourceSelect clears out selected lists and sets selectedResource', () => {
-    const wrapper = mount(
-      <I18nProvider>
-        <AddResourceRole
-          api={api}
-          onClose={jest.fn()}
-          onSave={jest.fn()}
-          roles={roles}
-        />
-      </I18nProvider>
-    ).find('AddResourceRole');
+    const wrapper = shallow(
+      <AddResourceRole
+        api={api}
+        onClose={() => {}}
+        onSave={() => {}}
+        roles={roles}
+      />
+    );
     wrapper.setState({
       selectedResource: 'teams',
       selectedResourceRows: [
@@ -199,15 +187,13 @@ describe('<SelectResourceStep />', () => {
   });
   test('handleWizardSave makes correct api calls, calls onSave when done', async () => {
     const handleSave = jest.fn();
-    const wrapper = mount(
-      <I18nProvider>
-        <AddResourceRole
-          api={api}
-          onClose={jest.fn()}
-          onSave={handleSave}
-          roles={roles}
-        />
-      </I18nProvider>
+    const wrapper = mountWithContexts(
+      <AddResourceRole
+        api={api}
+        onClose={() => {}}
+        onSave={handleSave}
+        roles={roles}
+      />
     ).find('AddResourceRole');
     wrapper.setState({
       selectedResource: 'users',

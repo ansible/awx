@@ -45,6 +45,7 @@ class SelectedList extends Component {
       isReadOnly
     } = this.props;
     const { showOverflow } = this.state;
+    const visibleItems = selected.slice(0, showOverflow ? selected.length : showOverflowAfter);
     return (
       <div className="awx-selectedList">
         <div className="pf-l-split" style={selectedRowStyling}>
@@ -56,20 +57,19 @@ class SelectedList extends Component {
             <div className="pf-c-chip-group">
               {isReadOnly ? (
                 <Fragment>
-                  {selected
-                    .slice(0, showOverflow ? selected.length : showOverflowAfter)
+                  {visibleItems
                     .map(selectedItem => (
                       <BasicChip
                         key={selectedItem.id}
-                        text={selectedItem[displayKey]}
-                      />
+                      >
+                        {selectedItem[displayKey]}
+                      </BasicChip>
                     ))
                   }
                 </Fragment>
               ) : (
                 <Fragment>
-                  {selected
-                    .slice(0, showOverflow ? selected.length : showOverflowAfter)
+                  {visibleItems
                     .map(selectedItem => (
                       <Chip
                         key={selectedItem.id}

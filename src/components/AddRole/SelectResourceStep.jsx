@@ -17,6 +17,14 @@ import DataListToolbar from '../DataListToolbar';
 import Pagination from '../Pagination';
 import SelectedList from '../SelectedList';
 
+const paginationStyling = {
+  paddingLeft: '0',
+  justifyContent: 'flex-end',
+  borderRight: '1px solid #ebebeb',
+  borderBottom: '1px solid #ebebeb',
+  borderTop: '0'
+};
+
 class SelectResourceStep extends React.Component {
   constructor (props) {
     super(props);
@@ -119,8 +127,7 @@ class SelectResourceStep extends React.Component {
       emptyListTitle,
       onRowClick,
       selectedLabel,
-      selectedResourceRows,
-      title
+      selectedResourceRows
     } = this.props;
 
     return (
@@ -138,9 +145,15 @@ class SelectResourceStep extends React.Component {
             </EmptyState>
           ) : (
             <Fragment>
-              <Title size="lg">
-                {title}
-              </Title>
+              {selectedResourceRows.length > 0 && (
+                <SelectedList
+                  displayKey={displayKey}
+                  label={selectedLabel}
+                  onRemove={onRowClick}
+                  selected={selectedResourceRows}
+                  showOverflowAfter={5}
+                />
+              )}
               <DataListToolbar
                 columns={columns}
                 noLeftMargin
@@ -168,19 +181,11 @@ class SelectResourceStep extends React.Component {
                 pageSizeOptions={null}
                 page_size={page_size}
                 showPageSizeOptions={false}
+                style={paginationStyling}
               />
             </Fragment>
           )}
         </Fragment>
-        {selectedResourceRows.length > 0 && (
-          <SelectedList
-            displayKey={displayKey}
-            label={selectedLabel}
-            onRemove={onRowClick}
-            selected={selectedResourceRows}
-            showOverflowAfter={5}
-          />
-        )}
         { error ? <div>error</div> : '' }
       </Fragment>
     );
@@ -196,8 +201,7 @@ SelectResourceStep.propTypes = {
   onSearch: PropTypes.func.isRequired,
   selectedLabel: PropTypes.string,
   selectedResourceRows: PropTypes.arrayOf(PropTypes.object),
-  sortedColumnKey: PropTypes.string,
-  title: PropTypes.string
+  sortedColumnKey: PropTypes.string
 };
 
 SelectResourceStep.defaultProps = {
@@ -207,8 +211,7 @@ SelectResourceStep.defaultProps = {
   onRowClick: () => {},
   selectedLabel: i18nMark('Selected Items'),
   selectedResourceRows: [],
-  sortedColumnKey: 'name',
-  title: ''
+  sortedColumnKey: 'name'
 };
 
 export default SelectResourceStep;

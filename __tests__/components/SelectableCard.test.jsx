@@ -1,12 +1,12 @@
 import React from 'react';
-import { mount } from 'enzyme';
+import { shallow } from 'enzyme';
 import SelectableCard from '../../src/components/AddRole/SelectableCard';
 
 describe('<SelectableCard />', () => {
   let wrapper;
   const onClick = jest.fn();
   test('initially renders without crashing when not selected', () => {
-    wrapper = mount(
+    wrapper = shallow(
       <SelectableCard
         onClick={onClick}
       />
@@ -15,7 +15,7 @@ describe('<SelectableCard />', () => {
     wrapper.unmount();
   });
   test('initially renders without crashing when selected', () => {
-    wrapper = mount(
+    wrapper = shallow(
       <SelectableCard
         isSelected
         onClick={onClick}

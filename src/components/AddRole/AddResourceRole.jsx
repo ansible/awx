@@ -142,6 +142,19 @@ class AddResourceRole extends React.Component {
       { name: i18nMark('Name'), key: 'name', isSortable: true }
     ];
 
+    let wizardTitle = '';
+
+    switch (selectedResource) {
+      case 'users':
+        wizardTitle = i18nMark('Add User Roles');
+        break;
+      case 'teams':
+        wizardTitle = i18nMark('Add Team Roles');
+        break;
+      default:
+        wizardTitle = i18nMark('Add Roles');
+    }
+
     const steps = [
       {
         name: i18nMark('Select Users Or Teams'),
@@ -179,10 +192,9 @@ class AddResourceRole extends React.Component {
                     emptyListTitle={i18n._(t`No Users Found`)}
                     onRowClick={this.handleResourceCheckboxClick}
                     onSearch={this.readUsers}
-                    selectedLabel={i18n._(t`Selected Users`)}
+                    selectedLabel={i18n._(t`Selected`)}
                     selectedResourceRows={selectedResourceRows}
                     sortedColumnKey="username"
-                    title={i18n._(t`Users`)}
                   />
                 )}
                 {selectedResource === 'teams' && (
@@ -192,9 +204,8 @@ class AddResourceRole extends React.Component {
                     emptyListTitle={i18n._(t`No Teams Found`)}
                     onRowClick={this.handleResourceCheckboxClick}
                     onSearch={this.readTeams}
-                    selectedLabel={i18n._(t`Selected Teams`)}
+                    selectedLabel={i18n._(t`Selected`)}
                     selectedResourceRows={selectedResourceRows}
-                    title={i18n._(t`Teams`)}
                   />
                 )}
               </Fragment>
@@ -212,7 +223,7 @@ class AddResourceRole extends React.Component {
                 onRolesClick={this.handleRoleCheckboxClick}
                 roles={roles}
                 selectedListKey={selectedResource === 'users' ? 'username' : 'name'}
-                selectedListLabel={selectedResource === 'users' ? i18n._(t`Selected Users`) : i18n._(t`Selected Teams`)}
+                selectedListLabel={i18n._(t`Selected`)}
                 selectedResourceRows={selectedResourceRows}
                 selectedRoleRows={selectedRoleRows}
               />
@@ -234,7 +245,7 @@ class AddResourceRole extends React.Component {
             onClose={onClose}
             onSave={this.handleWizardSave}
             steps={steps}
-            title={i18n._(t`Add Roles`)}
+            title={wizardTitle}
           />
         )}
       </I18n>

@@ -1,6 +1,6 @@
 import React from 'react';
-import { mount } from 'enzyme';
-import { I18nProvider } from '@lingui/react';
+import { shallow } from 'enzyme';
+import { mountWithContexts } from '../enzymeHelpers';
 import SelectResourceStep from '../../src/components/AddRole/SelectResourceStep';
 
 describe('<SelectResourceStep />', () => {
@@ -11,16 +11,14 @@ describe('<SelectResourceStep />', () => {
     jest.restoreAllMocks();
   });
   test('initially renders without crashing', () => {
-    mount(
-      <I18nProvider>
-        <SelectResourceStep
-          columns={columns}
-          displayKey="username"
-          onRowClick={jest.fn()}
-          onSearch={jest.fn()}
-          sortedColumnKey="username"
-        />
-      </I18nProvider>
+    shallow(
+      <SelectResourceStep
+        columns={columns}
+        displayKey="username"
+        onRowClick={() => {}}
+        onSearch={() => {}}
+        sortedColumnKey="username"
+      />
     );
   });
   test('fetches resources on mount', async () => {
@@ -33,16 +31,14 @@ describe('<SelectResourceStep />', () => {
         ]
       }
     });
-    mount(
-      <I18nProvider>
-        <SelectResourceStep
-          columns={columns}
-          displayKey="username"
-          onRowClick={jest.fn()}
-          onSearch={handleSearch}
-          sortedColumnKey="username"
-        />
-      </I18nProvider>
+    mountWithContexts(
+      <SelectResourceStep
+        columns={columns}
+        displayKey="username"
+        onRowClick={() => {}}
+        onSearch={handleSearch}
+        sortedColumnKey="username"
+      />
     );
     expect(handleSearch).toHaveBeenCalledWith({
       order_by: 'username',
@@ -66,17 +62,15 @@ describe('<SelectResourceStep />', () => {
         ]
       }
     });
-    const wrapper = await mount(
-      <I18nProvider>
-        <SelectResourceStep
-          columns={columns}
-          displayKey="username"
-          onRowClick={jest.fn()}
-          onSearch={handleSearch}
-          selectedResourceRows={selectedResourceRows}
-          sortedColumnKey="username"
-        />
-      </I18nProvider>
+    const wrapper = await mountWithContexts(
+      <SelectResourceStep
+        columns={columns}
+        displayKey="username"
+        onRowClick={() => {}}
+        onSearch={handleSearch}
+        selectedResourceRows={selectedResourceRows}
+        sortedColumnKey="username"
+      />
     ).find('SelectResourceStep');
     await wrapper.instance().readResourceList({
       page: 1,
@@ -93,17 +87,15 @@ describe('<SelectResourceStep />', () => {
   });
   test('handleSetPage calls readResourceList with correct params', () => {
     const spy = jest.spyOn(SelectResourceStep.prototype, 'readResourceList');
-    const wrapper = mount(
-      <I18nProvider>
-        <SelectResourceStep
-          columns={columns}
-          displayKey="username"
-          onRowClick={jest.fn()}
-          onSearch={jest.fn()}
-          selectedResourceRows={[]}
-          sortedColumnKey="username"
-        />
-      </I18nProvider>
+    const wrapper = mountWithContexts(
+      <SelectResourceStep
+        columns={columns}
+        displayKey="username"
+        onRowClick={() => {}}
+        onSearch={() => {}}
+        selectedResourceRows={[]}
+        sortedColumnKey="username"
+      />
     ).find('SelectResourceStep');
     wrapper.setState({ sortOrder: 'descending' });
     wrapper.instance().handleSetPage(2);
@@ -114,17 +106,15 @@ describe('<SelectResourceStep />', () => {
   });
   test('handleSort calls readResourceList with correct params', () => {
     const spy = jest.spyOn(SelectResourceStep.prototype, 'readResourceList');
-    const wrapper = mount(
-      <I18nProvider>
-        <SelectResourceStep
-          columns={columns}
-          displayKey="username"
-          onRowClick={jest.fn()}
-          onSearch={jest.fn()}
-          selectedResourceRows={[]}
-          sortedColumnKey="username"
-        />
-      </I18nProvider>
+    const wrapper = mountWithContexts(
+      <SelectResourceStep
+        columns={columns}
+        displayKey="username"
+        onRowClick={() => {}}
+        onSearch={() => {}}
+        selectedResourceRows={[]}
+        sortedColumnKey="username"
+      />
     ).find('SelectResourceStep');
     wrapper.instance().handleSort('username', 'descending');
     expect(spy).toHaveBeenCalledWith({ page: 1, page_size: 5, order_by: '-username' });
@@ -133,17 +123,15 @@ describe('<SelectResourceStep />', () => {
   });
   test('clicking on row fires callback with correct params', () => {
     const handleRowClick = jest.fn();
-    const wrapper = mount(
-      <I18nProvider>
-        <SelectResourceStep
-          columns={columns}
-          displayKey="username"
-          onRowClick={handleRowClick}
-          onSearch={jest.fn()}
-          selectedResourceRows={[]}
-          sortedColumnKey="username"
-        />
-      </I18nProvider>
+    const wrapper = mountWithContexts(
+      <SelectResourceStep
+        columns={columns}
+        displayKey="username"
+        onRowClick={handleRowClick}
+        onSearch={() => {}}
+        selectedResourceRows={[]}
+        sortedColumnKey="username"
+      />
     );
     const selectResourceStepWrapper = wrapper.find('SelectResourceStep');
     selectResourceStepWrapper.setState({

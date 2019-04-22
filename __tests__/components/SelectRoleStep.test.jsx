@@ -1,5 +1,5 @@
 import React from 'react';
-import { mount } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 import SelectRoleStep from '../../src/components/AddRole/SelectRoleStep';
 
 describe('<SelectRoleStep />', () => {
@@ -30,7 +30,7 @@ describe('<SelectRoleStep />', () => {
     }
   ];
   test('initially renders without crashing', () => {
-    wrapper = mount(
+    wrapper = shallow(
       <SelectRoleStep
         roles={roles}
         selectedResourceRows={selectedResourceRows}
