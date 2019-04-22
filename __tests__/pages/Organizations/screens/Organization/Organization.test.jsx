@@ -1,5 +1,6 @@
 import React from 'react';
 import { mount } from 'enzyme';
+
 import { MemoryRouter } from 'react-router-dom';
 import { I18nProvider } from '@lingui/react';
 import Organization from '../../../../../src/pages/Organizations/screens/Organization/Organization';

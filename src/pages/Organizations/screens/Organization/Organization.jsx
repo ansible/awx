@@ -5,25 +5,25 @@ import {
   Switch,
   Route,
   withRouter,
-  Redirect
+  Redirect,
+  Link
 } from 'react-router-dom';
 import {
   Card,
   CardHeader,
-  PageSection
+  PageSection,
 } from '@patternfly/react-core';
-
+import {
+  TimesIcon
+} from '@patternfly/react-icons';
 import { withNetwork } from '../../../../contexts/Network';
-
-import Tabs from '../../../../components/Tabs/Tabs';
-import Tab from '../../../../components/Tabs/Tab';
 import NotifyAndRedirect from '../../../../components/NotifyAndRedirect';
-
 import OrganizationAccess from './OrganizationAccess';
 import OrganizationDetail from './OrganizationDetail';
 import OrganizationEdit from './OrganizationEdit';
 import OrganizationNotifications from './OrganizationNotifications';
 import OrganizationTeams from './OrganizationTeams';
+import RoutedTabs from '../../../../components/Tabs/RoutedTabs';
 
 class Organization extends Component {
   constructor (props) {
@@ -79,35 +79,45 @@ class Organization extends Component {
       loading
     } = this.state;
 
-    const tabElements = [
-      { name: i18nMark('Details'), link: `${match.url}/details` },
-      { name: i18nMark('Access'), link: `${match.url}/access` },
-      { name: i18nMark('Teams'), link: `${match.url}/teams` },
-      { name: i18nMark('Notifications'), link: `${match.url}/notifications` },
-    ];
+    const tabsPaddingOverride = {
+      padding: '0'
+    };
 
     let cardHeader = (
-      <CardHeader>
-        <I18n>
-          {({ i18n }) => (
-            <Tabs
-              labelText={i18n._(t`Organization detail tabs`)}
-              closeButton={{ link: '/organizations', text: i18nMark('Close') }}
-            >
-              {tabElements.map(tabElement => (
-                <Tab
-                  key={tabElement.name}
-                  link={tabElement.link}
-                  replace
-                >
-                  {tabElement.name}
-                </Tab>
-              ))}
-            </Tabs>
-          )}
-        </I18n>
-      </CardHeader>
-    );
+      loading ? ''
+        : (
+          <CardHeader
+            style={tabsPaddingOverride}
+          >
+            <I18n>
+              {({ i18n }) => (
+                <React.Fragment>
+                  <RoutedTabs
+                    match={match}
+                    history={history}
+                    labeltext={i18n._(t`Organization detail tabs`)}
+                    tabsArray={[
+                      { name: i18nMark('Details'), link: `${match.url}/details`, id: 0 },
+                      { name: i18nMark('Access'), link: `${match.url}/access`, id: 1 },
+                      { name: i18nMark('Teams'), link: `${match.url}/teams`, id: 2 },
+                      { name: i18nMark('Notifications'), link: `${match.url}/notifications`, id: 3 },
+                    ]}
+                  />
+                  <Link
+                    aria-label="Close"
+                    title="Close"
+                    to="/organizations"
+                  >
+                    <TimesIcon className="OrgsTab-closeButton" />
+                  </Link>
+                </React.Fragment>
+              )}
+            </I18n>
+          </CardHeader>
+        ));
+    if (!match) {
+      cardHeader = null;
+    }
 
     if (location.pathname.endsWith('edit')) {
       cardHeader = null;
@@ -185,5 +195,5 @@ class Organization extends Component {
     );
   }
 }
-
 export default withNetwork(withRouter(Organization));
+export { Organization as _Organization };
