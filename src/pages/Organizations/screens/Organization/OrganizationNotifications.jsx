@@ -41,12 +41,6 @@ class OrganizationNotifications extends Component {
   }
 
   render () {
-    const {
-      location,
-      match,
-      history
-    } = this.props;
-
     return (
       <NotificationsList
         onReadNotifications={this.readOrgNotifications}
@@ -54,9 +48,6 @@ class OrganizationNotifications extends Component {
         onReadError={this.readOrgNotificationError}
         onCreateSuccess={this.createOrgNotificationSuccess}
         onCreateError={this.createOrgNotificationError}
-        match={match}
-        location={location}
-        history={history}
       />
     );
   }

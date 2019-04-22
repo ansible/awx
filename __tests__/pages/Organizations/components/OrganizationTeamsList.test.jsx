@@ -1,8 +1,6 @@
 import React from 'react';
-import { mount } from 'enzyme';
-import { MemoryRouter, Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
-import { I18nProvider } from '@lingui/react';
+import { mountWithContexts } from '../../../enzymeHelpers';
 import { sleep } from '../../../testUtils';
 import OrganizationTeamsList from '../../../../src/pages/Organizations/components/OrganizationTeamsList';
 
@@ -20,20 +18,16 @@ describe('<OrganizationTeamsList />', () => {
   });
 
   test('initially renders succesfully', () => {
-    mount(
-      <I18nProvider>
-        <MemoryRouter>
-          <OrganizationTeamsList
-            teams={mockData}
-            itemCount={7}
-            queryParams={{
-              page: 1,
-              page_size: 5,
-              order_by: 'name',
-            }}
-          />
-        </MemoryRouter>
-      </I18nProvider>
+    mountWithContexts(
+      <OrganizationTeamsList
+        teams={mockData}
+        itemCount={7}
+        queryParams={{
+          page: 1,
+          page_size: 5,
+          order_by: 'name',
+        }}
+      />
     );
   });
 
@@ -42,20 +36,16 @@ describe('<OrganizationTeamsList />', () => {
     const history = createMemoryHistory({
       initialEntries: ['/organizations/1/teams'],
     });
-    const wrapper = mount(
-      <Router history={history}>
-        <I18nProvider>
-          <OrganizationTeamsList
-            teams={mockData}
-            itemCount={7}
-            queryParams={{
-              page: 1,
-              page_size: 5,
-              order_by: 'name',
-            }}
-          />
-        </I18nProvider>
-      </Router>
+    const wrapper = mountWithContexts(
+      <OrganizationTeamsList
+        teams={mockData}
+        itemCount={7}
+        queryParams={{
+          page: 1,
+          page_size: 5,
+          order_by: 'name',
+        }}
+      />, { context: { router: { history } } }
     );
 
     const toolbar = wrapper.find('DataListToolbar');
@@ -78,20 +68,16 @@ describe('<OrganizationTeamsList />', () => {
     const history = createMemoryHistory({
       initialEntries: ['/organizations/1/teams'],
     });
-    const wrapper = mount(
-      <Router history={history}>
-        <I18nProvider>
-          <OrganizationTeamsList
-            teams={mockData}
-            itemCount={7}
-            queryParams={{
-              page: 1,
-              page_size: 5,
-              order_by: 'name',
-            }}
-          />
-        </I18nProvider>
-      </Router>
+    const wrapper = mountWithContexts(
+      <OrganizationTeamsList
+        teams={mockData}
+        itemCount={7}
+        queryParams={{
+          page: 1,
+          page_size: 5,
+          order_by: 'name',
+        }}
+      />, { context: { router: { history } } }
     );
 
     const pagination = wrapper.find('Pagination');

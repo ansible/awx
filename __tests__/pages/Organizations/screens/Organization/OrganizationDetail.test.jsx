@@ -1,7 +1,5 @@
 import React from 'react';
-import { mount } from 'enzyme';
-import { MemoryRouter } from 'react-router-dom';
-import { I18nProvider } from '@lingui/react';
+import { mountWithContexts } from '../../../../enzymeHelpers';
 import OrganizationDetail from '../../../../../src/pages/Organizations/screens/Organization/OrganizationDetail';
 
 describe('<OrganizationDetail />', () => {
@@ -14,33 +12,21 @@ describe('<OrganizationDetail />', () => {
   };
 
   test('initially renders succesfully', () => {
-    mount(
-      <I18nProvider>
-        <MemoryRouter initialEntries={['/organizations/1']} initialIndex={0}>
-          <OrganizationDetail
-            match={{ params: { id: '1' } }}
-            organization={mockDetails}
-          />
-        </MemoryRouter>
-      </I18nProvider>
+    mountWithContexts(
+      <OrganizationDetail
+        organization={mockDetails}
+      />
     );
   });
 
   test('should request instance groups from api', () => {
     const getOrganizationInstanceGroups = jest.fn();
-    mount(
-      <I18nProvider>
-        <MemoryRouter initialEntries={['/organizations/1']} initialIndex={0}>
-          <OrganizationDetail
-            match={{ params: { id: '1' } }}
-            api={{
-              getOrganizationInstanceGroups
-            }}
-            handleHttpError={() => {}}
-            organization={mockDetails}
-          />
-        </MemoryRouter>
-      </I18nProvider>
+    mountWithContexts(
+      <OrganizationDetail
+        organization={mockDetails}
+      />, { context: {
+        network: { api: { getOrganizationInstanceGroups }, handleHttpError: () => {} }
+      } }
     ).find('OrganizationDetail');
 
     expect(getOrganizationInstanceGroups).toHaveBeenCalledTimes(1);
@@ -54,23 +40,12 @@ describe('<OrganizationDetail />', () => {
     const getOrganizationInstanceGroups = jest.fn(() => (
       Promise.resolve({ data: { results: mockInstanceGroups } })
     ));
-    const wrapper = mount(
-      <I18nProvider>
-        <MemoryRouter initialEntries={['/organizations/1']} initialIndex={0}>
-          <OrganizationDetail
-            match={{
-              path: '/organizations/:id',
-              url: '/organizations/1',
-              params: { id: '1' }
-            }}
-            organization={mockDetails}
-            handleHttpError={() => {}}
-            api={{
-              getOrganizationInstanceGroups
-            }}
-          />
-        </MemoryRouter>
-      </I18nProvider>
+    const wrapper = mountWithContexts(
+      <OrganizationDetail
+        organization={mockDetails}
+      />, { context: {
+        network: { api: { getOrganizationInstanceGroups }, handleHttpError: () => {} }
+      } }
     ).find('OrganizationDetail');
 
     await getOrganizationInstanceGroups();
@@ -78,19 +53,10 @@ describe('<OrganizationDetail />', () => {
   });
 
   test('should render Details', async () => {
-    const wrapper = mount(
-      <I18nProvider>
-        <MemoryRouter initialEntries={['/organizations/1']} initialIndex={0}>
-          <OrganizationDetail
-            match={{
-              path: '/organizations/:id',
-              url: '/organizations/1',
-              params: { id: '1' }
-            }}
-            organization={mockDetails}
-          />
-        </MemoryRouter>
-      </I18nProvider>
+    const wrapper = mountWithContexts(
+      <OrganizationDetail
+        organization={mockDetails}
+      />
     );
 
     const detailWrapper = wrapper.find('Detail');

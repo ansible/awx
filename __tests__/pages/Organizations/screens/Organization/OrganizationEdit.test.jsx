@@ -1,17 +1,12 @@
 import React from 'react';
-import { mount } from 'enzyme';
-import { MemoryRouter } from 'react-router-dom';
-import { I18nProvider } from '@lingui/react';
+import { mountWithContexts } from '../../../../enzymeHelpers';
 
-import { NetworkProvider } from '../../../../../src/contexts/Network';
-
-import { _OrganizationEdit } from '../../../../../src/pages/Organizations/screens/Organization/OrganizationEdit';
+import OrganizationEdit from '../../../../../src/pages/Organizations/screens/Organization/OrganizationEdit';
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 describe('<OrganizationEdit />', () => {
   let api;
-  let networkProviderValue;
 
   const mockData = {
     name: 'Foo',
@@ -30,26 +25,16 @@ describe('<OrganizationEdit />', () => {
       associateInstanceGroup: jest.fn(),
       disassociate: jest.fn(),
     };
-
-    networkProviderValue = {
-      api,
-      handleHttpError: () => {}
-    };
   });
 
   test('handleSubmit should call api update', () => {
-    const wrapper = mount(
-      <MemoryRouter>
-        <I18nProvider>
-          <NetworkProvider value={networkProviderValue}>
-            <_OrganizationEdit
-              organization={mockData}
-              api={api}
-              handleHttpError={() => {}}
-            />
-          </NetworkProvider>
-        </I18nProvider>
-      </MemoryRouter>
+    const wrapper = mountWithContexts(
+      <OrganizationEdit
+        organization={mockData}
+      />, { context: { network: {
+        api,
+        handleHttpError: () => {}
+      } } }
     );
 
     const updatedOrgData = {
@@ -66,18 +51,13 @@ describe('<OrganizationEdit />', () => {
   });
 
   test('handleSubmit associates and disassociates instance groups', async () => {
-    const wrapper = mount(
-      <MemoryRouter>
-        <I18nProvider>
-          <NetworkProvider value={networkProviderValue}>
-            <_OrganizationEdit
-              organization={mockData}
-              api={api}
-              handleHttpError={() => {}}
-            />
-          </NetworkProvider>
-        </I18nProvider>
-      </MemoryRouter>
+    const wrapper = mountWithContexts(
+      <OrganizationEdit
+        organization={mockData}
+      />, { context: { network: {
+        api,
+        handleHttpError: () => {}
+      } } }
     );
 
     const updatedOrgData = {
@@ -106,19 +86,16 @@ describe('<OrganizationEdit />', () => {
     const history = {
       push: jest.fn(),
     };
-    const wrapper = mount(
-      <MemoryRouter>
-        <I18nProvider>
-          <NetworkProvider value={networkProviderValue}>
-            <_OrganizationEdit
-              organization={mockData}
-              api={api}
-              handleHttpError={() => {}}
-              history={history}
-            />
-          </NetworkProvider>
-        </I18nProvider>
-      </MemoryRouter>
+    const wrapper = mountWithContexts(
+      <OrganizationEdit
+        organization={mockData}
+      />, { context: {
+        network: {
+          api: { api },
+          handleHttpError: () => {}
+        },
+        router: { history }
+      } }
     );
 
     expect(history.push).not.toHaveBeenCalled();

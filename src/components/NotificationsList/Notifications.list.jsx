@@ -3,6 +3,7 @@ import React, {
   Fragment
 } from 'react';
 import PropTypes from 'prop-types';
+import { withRouter } from 'react-router-dom';
 import { Title, EmptyState, EmptyStateIcon, EmptyStateBody } from '@patternfly/react-core';
 import { CubesIcon } from '@patternfly/react-icons';
 import { I18n, i18nMark } from '@lingui/react';
@@ -344,4 +345,4 @@ Notifications.propTypes = {
 };
 
 export { Notifications as _Notifications };
-export default withNetwork(Notifications);
+export default withRouter(withNetwork(Notifications));

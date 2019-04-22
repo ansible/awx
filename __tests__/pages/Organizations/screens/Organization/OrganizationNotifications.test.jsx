@@ -1,60 +1,45 @@
 import React from 'react';
-import { mount } from 'enzyme';
-import { MemoryRouter } from 'react-router-dom';
-import { _OrganizationNotifications } from '../../../../../src/pages/Organizations/screens/Organization/OrganizationNotifications';
+import { mountWithContexts } from '../../../../enzymeHelpers';
+
+import OrganizationNotifications from '../../../../../src/pages/Organizations/screens/Organization/OrganizationNotifications';
 
 describe('<OrganizationNotifications />', () => {
+  let api;
+
+  beforeEach(() => {
+    api = {
+      getOrganizationNotifications: jest.fn(),
+      getOrganizationNotificationSuccess: jest.fn(),
+      getOrganizationNotificationError: jest.fn(),
+      createOrganizationNotificationSuccess: jest.fn(),
+      createOrganizationNotificationError: jest.fn()
+    };
+  });
+
   test('initially renders succesfully', () => {
-    mount(
-      <MemoryRouter initialEntries={['/organizations/1']} initialIndex={0}>
-        <_OrganizationNotifications
-          match={{ path: '/organizations/:id/notifications', url: '/organizations/1/notifications' }}
-          location={{ search: '', pathname: '/organizations/1/notifications' }}
-          params={{}}
-          api={{
-            getOrganizationNotifications: jest.fn(),
-            getOrganizationNotificationSuccess: jest.fn(),
-            getOrganizationNotificationError: jest.fn(),
-            createOrganizationNotificationSuccess: jest.fn(),
-            createOrganizationNotificationError: jest.fn()
-          }}
-          handleHttpError={() => {}}
-        />
-      </MemoryRouter>
+    mountWithContexts(
+      <OrganizationNotifications />, { context: { network: {
+        api,
+        handleHttpError: () => {}
+      } } }
     );
   });
   test('handles api requests', () => {
-    const getOrganizationNotifications = jest.fn();
-    const getOrganizationNotificationSuccess = jest.fn();
-    const getOrganizationNotificationError = jest.fn();
-    const createOrganizationNotificationSuccess = jest.fn();
-    const createOrganizationNotificationError = jest.fn();
-    const wrapper = mount(
-      <MemoryRouter initialEntries={['/organizations/1']} initialIndex={0}>
-        <_OrganizationNotifications
-          match={{ path: '/organizations/:id/notifications', url: '/organizations/1/notifications' }}
-          location={{ search: '', pathname: '/organizations/1/notifications' }}
-          params={{}}
-          api={{
-            getOrganizationNotifications,
-            getOrganizationNotificationSuccess,
-            getOrganizationNotificationError,
-            createOrganizationNotificationSuccess,
-            createOrganizationNotificationError
-          }}
-          handleHttpError={() => {}}
-        />
-      </MemoryRouter>
+    const wrapper = mountWithContexts(
+      <OrganizationNotifications />, { context: { network: {
+        api,
+        handleHttpError: () => {}
+      } } }
     ).find('OrganizationNotifications');
     wrapper.instance().readOrgNotifications(1, { foo: 'bar' });
-    expect(getOrganizationNotifications).toHaveBeenCalledWith(1, { foo: 'bar' });
+    expect(api.getOrganizationNotifications).toHaveBeenCalledWith(1, { foo: 'bar' });
     wrapper.instance().readOrgNotificationSuccess(1, { foo: 'bar' });
-    expect(getOrganizationNotificationSuccess).toHaveBeenCalledWith(1, { foo: 'bar' });
+    expect(api.getOrganizationNotificationSuccess).toHaveBeenCalledWith(1, { foo: 'bar' });
     wrapper.instance().readOrgNotificationError(1, { foo: 'bar' });
-    expect(getOrganizationNotificationError).toHaveBeenCalledWith(1, { foo: 'bar' });
+    expect(api.getOrganizationNotificationError).toHaveBeenCalledWith(1, { foo: 'bar' });
     wrapper.instance().createOrgNotificationSuccess(1, { id: 2 });
-    expect(createOrganizationNotificationSuccess).toHaveBeenCalledWith(1, { id: 2 });
+    expect(api.createOrganizationNotificationSuccess).toHaveBeenCalledWith(1, { id: 2 });
     wrapper.instance().createOrgNotificationError(1, { id: 2 });
-    expect(createOrganizationNotificationError).toHaveBeenCalledWith(1, { id: 2 });
+    expect(api.createOrganizationNotificationError).toHaveBeenCalledWith(1, { id: 2 });
   });
 });

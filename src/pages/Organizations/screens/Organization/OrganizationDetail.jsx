@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, withRouter } from 'react-router-dom';
 import { I18n } from '@lingui/react';
 import { Trans, t } from '@lingui/macro';
 
@@ -178,4 +178,4 @@ class OrganizationDetail extends Component {
   }
 }
 
-export default withNetwork(OrganizationDetail);
+export default withRouter(withNetwork(OrganizationDetail));
