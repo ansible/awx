@@ -1,5 +1,6 @@
 import React from 'react';
 import { shallow } from 'enzyme';
+import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { mountWithContexts } from '../../../../enzymeHelpers';
 import { sleep } from '../../../../testUtils';
@@ -92,12 +93,18 @@ describe('<OrganizationTeams />', () => {
       initialEntries: ['/organizations/1/teams'],
     });
     const wrapper = mountWithContexts(
-      <OrganizationTeams
-        id={1}
-        searchString=""
-      />, { context: {
-        network: { api: { readOrganizationTeamsList }, handleHttpError: () => {} },
-        router: { history }
+      <Router history={history}>
+        <OrganizationTeams
+          id={1}
+          searchString=""
+        />
+      </Router>,
+      { context: {
+        network: {
+          api: { readOrganizationTeamsList },
+          handleHttpError: () => {}
+        },
+        router: false,
       } }
     );
 
