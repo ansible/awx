@@ -39,7 +39,7 @@ describe('NavExpandableGroup', () => {
     ];
 
     params.forEach(([location, path, expected]) => {
-      test(`when location is ${location}', isActivePath('${path}') returns ${expected} `, () => {
+      test(`when location is ${location}, isActivePath('${path}') returns ${expected} `, () => {
         const component = mount(
           <MemoryRouter initialEntries={[location]}>
             <Nav aria-label="Test Navigation">

@@ -1,6 +1,5 @@
 import React from 'react';
-import { mount } from 'enzyme';
-import { I18nProvider } from '@lingui/react';
+import { mountWithContexts } from '../enzymeHelpers';
 import Sort from '../../src/components/Sort';
 
 describe('<Sort />', () => {
@@ -8,7 +7,6 @@ describe('<Sort />', () => {
 
   afterEach(() => {
     if (sort) {
-      sort.unmount();
       sort = null;
     }
   });
@@ -20,15 +18,13 @@ describe('<Sort />', () => {
 
     const onSort = jest.fn();
 
-    const wrapper = mount(
-      <I18nProvider>
-        <Sort
-          sortedColumnKey="name"
-          sortOrder="ascending"
-          columns={columns}
-          onSort={onSort}
-        />
-      </I18nProvider>
+    const wrapper = mountWithContexts(
+      <Sort
+        sortedColumnKey="name"
+        sortOrder="ascending"
+        columns={columns}
+        onSort={onSort}
+      />
     ).find('Sort');
 
     wrapper.find(sortBtn).simulate('click');
@@ -47,15 +43,13 @@ describe('<Sort />', () => {
 
     const onSort = jest.fn();
 
-    const wrapper = mount(
-      <I18nProvider>
-        <Sort
-          sortedColumnKey="foo"
-          sortOrder="ascending"
-          columns={multipleColumns}
-          onSort={onSort}
-        />
-      </I18nProvider>
+    const wrapper = mountWithContexts(
+      <Sort
+        sortedColumnKey="foo"
+        sortOrder="ascending"
+        columns={multipleColumns}
+        onSort={onSort}
+      />
     ).find('Sort');
     const sortDropdownToggle = wrapper.find('Button');
     expect(sortDropdownToggle.length).toBe(1);
@@ -73,15 +67,13 @@ describe('<Sort />', () => {
 
     const onSort = jest.fn();
 
-    const wrapper = mount(
-      <I18nProvider>
-        <Sort
-          sortedColumnKey="foo"
-          sortOrder="descending"
-          columns={multipleColumns}
-          onSort={onSort}
-        />
-      </I18nProvider>
+    const wrapper = mountWithContexts(
+      <Sort
+        sortedColumnKey="foo"
+        sortOrder="descending"
+        columns={multipleColumns}
+        onSort={onSort}
+      />
     ).find('Sort');
     const sortDropdownToggle = wrapper.find('Button');
     expect(sortDropdownToggle.length).toBe(1);
@@ -99,15 +91,13 @@ describe('<Sort />', () => {
 
     const onSort = jest.fn();
 
-    const wrapper = mount(
-      <I18nProvider>
-        <Sort
-          sortedColumnKey="foo"
-          sortOrder="ascending"
-          columns={multipleColumns}
-          onSort={onSort}
-        />
-      </I18nProvider>
+    const wrapper = mountWithContexts(
+      <Sort
+        sortedColumnKey="foo"
+        sortOrder="ascending"
+        columns={multipleColumns}
+        onSort={onSort}
+      />
     ).find('Sort');
 
     wrapper.instance().handleDropdownSelect({ target: { innerText: 'Bar' } });
@@ -124,15 +114,13 @@ describe('<Sort />', () => {
 
     const onSort = jest.fn();
 
-    const wrapper = mount(
-      <I18nProvider>
-        <Sort
-          sortedColumnKey="foo"
-          sortOrder="ascending"
-          columns={multipleColumns}
-          onSort={onSort}
-        />
-      </I18nProvider>
+    const wrapper = mountWithContexts(
+      <Sort
+        sortedColumnKey="foo"
+        sortOrder="ascending"
+        columns={multipleColumns}
+        onSort={onSort}
+      />
     ).find('Sort');
     expect(wrapper.state('isSortDropdownOpen')).toEqual(false);
     wrapper.instance().handleDropdownToggle(true);
@@ -149,57 +137,49 @@ describe('<Sort />', () => {
     const alphaColumns = [{ name: 'Name', key: 'name', isSortable: true, isNumeric: false }];
     const onSort = jest.fn();
 
-    sort = mount(
-      <I18nProvider>
-        <Sort
-          sortedColumnKey="id"
-          sortOrder="descending"
-          columns={numericColumns}
-          onSort={onSort}
-        />
-      </I18nProvider>
+    sort = mountWithContexts(
+      <Sort
+        sortedColumnKey="id"
+        sortOrder="descending"
+        columns={numericColumns}
+        onSort={onSort}
+      />
     );
 
     const downNumericIcon = sort.find(downNumericIconSelector);
     expect(downNumericIcon.length).toBe(1);
 
-    sort = mount(
-      <I18nProvider>
-        <Sort
-          sortedColumnKey="id"
-          sortOrder="ascending"
-          columns={numericColumns}
-          onSort={onSort}
-        />
-      </I18nProvider>
+    sort = mountWithContexts(
+      <Sort
+        sortedColumnKey="id"
+        sortOrder="ascending"
+        columns={numericColumns}
+        onSort={onSort}
+      />
     );
 
     const upNumericIcon = sort.find(upNumericIconSelector);
     expect(upNumericIcon.length).toBe(1);
 
-    sort = mount(
-      <I18nProvider>
-        <Sort
-          sortedColumnKey="name"
-          sortOrder="descending"
-          columns={alphaColumns}
-          onSort={onSort}
-        />
-      </I18nProvider>
+    sort = mountWithContexts(
+      <Sort
+        sortedColumnKey="name"
+        sortOrder="descending"
+        columns={alphaColumns}
+        onSort={onSort}
+      />
     );
 
     const downAlphaIcon = sort.find(downAlphaIconSelector);
     expect(downAlphaIcon.length).toBe(1);
 
-    sort = mount(
-      <I18nProvider>
-        <Sort
-          sortedColumnKey="name"
-          sortOrder="ascending"
-          columns={alphaColumns}
-          onSort={onSort}
-        />
-      </I18nProvider>
+    sort = mountWithContexts(
+      <Sort
+        sortedColumnKey="name"
+        sortOrder="ascending"
+        columns={alphaColumns}
+        onSort={onSort}
+      />
     );
 
     const upAlphaIcon = sort.find(upAlphaIconSelector);

@@ -1,6 +1,5 @@
 import React from 'react';
-import { mount } from 'enzyme';
-import { I18nProvider } from '@lingui/react';
+import { mountWithContexts } from '../enzymeHelpers';
 import DataListToolbar from '../../src/components/DataListToolbar';
 
 describe('<DataListToolbar />', () => {
@@ -25,20 +24,18 @@ describe('<DataListToolbar />', () => {
     const onSort = jest.fn();
     const onSelectAll = jest.fn();
 
-    toolbar = mount(
-      <I18nProvider>
-        <DataListToolbar
-          isAllSelected={false}
-          showExpandCollapse
-          sortedColumnKey="name"
-          sortOrder="ascending"
-          columns={columns}
-          onSearch={onSearch}
-          onSort={onSort}
-          onSelectAll={onSelectAll}
-          showSelectAll
-        />
-      </I18nProvider>
+    toolbar = mountWithContexts(
+      <DataListToolbar
+        isAllSelected={false}
+        showExpandCollapse
+        sortedColumnKey="name"
+        sortOrder="ascending"
+        columns={columns}
+        onSearch={onSearch}
+        onSort={onSort}
+        onSelectAll={onSelectAll}
+        showSelectAll
+      />
     );
 
     toolbar.find(sort).simulate('click');
@@ -76,18 +73,16 @@ describe('<DataListToolbar />', () => {
     const onSort = jest.fn();
     const onSelectAll = jest.fn();
 
-    toolbar = mount(
-      <I18nProvider>
-        <DataListToolbar
-          isAllSelected={false}
-          sortedColumnKey="foo"
-          sortOrder="ascending"
-          columns={multipleColumns}
-          onSearch={onSearch}
-          onSort={onSort}
-          onSelectAll={onSelectAll}
-        />
-      </I18nProvider>
+    toolbar = mountWithContexts(
+      <DataListToolbar
+        isAllSelected={false}
+        sortedColumnKey="foo"
+        sortOrder="ascending"
+        columns={multipleColumns}
+        onSearch={onSearch}
+        onSort={onSort}
+        onSelectAll={onSelectAll}
+      />
     );
     const sortDropdownToggle = toolbar.find(sortDropdownToggleSelector);
     expect(sortDropdownToggle.length).toBe(2);
@@ -100,18 +95,16 @@ describe('<DataListToolbar />', () => {
 
     const mockedSortEvent = { target: { innerText: 'Bar' } };
     sortDropdownItems.at(0).simulate('click', mockedSortEvent);
-    toolbar = mount(
-      <I18nProvider>
-        <DataListToolbar
-          isAllSelected={false}
-          sortedColumnKey="foo"
-          sortOrder="descending"
-          columns={multipleColumns}
-          onSearch={onSearch}
-          onSort={onSort}
-          onSelectAll={onSelectAll}
-        />
-      </I18nProvider>
+    toolbar = mountWithContexts(
+      <DataListToolbar
+        isAllSelected={false}
+        sortedColumnKey="foo"
+        sortOrder="descending"
+        columns={multipleColumns}
+        onSearch={onSearch}
+        onSort={onSort}
+        onSelectAll={onSelectAll}
+      />
     );
     toolbar.update();
 
@@ -152,70 +145,62 @@ describe('<DataListToolbar />', () => {
     const onSort = jest.fn();
     const onSelectAll = jest.fn();
 
-    toolbar = mount(
-      <I18nProvider>
-        <DataListToolbar
-          isAllSelected={false}
-          sortedColumnKey="id"
-          sortOrder="descending"
-          columns={numericColumns}
-          onSearch={onSearch}
-          onSort={onSort}
-          onSelectAll={onSelectAll}
-          showDelete
-        />
-      </I18nProvider>
+    toolbar = mountWithContexts(
+      <DataListToolbar
+        isAllSelected={false}
+        sortedColumnKey="id"
+        sortOrder="descending"
+        columns={numericColumns}
+        onSearch={onSearch}
+        onSort={onSort}
+        onSelectAll={onSelectAll}
+        showDelete
+      />
     );
 
     const downNumericIcon = toolbar.find(downNumericIconSelector);
     expect(downNumericIcon.length).toBe(1);
 
-    toolbar = mount(
-      <I18nProvider>
-        <DataListToolbar
-          isAllSelected={false}
-          sortedColumnKey="id"
-          sortOrder="ascending"
-          columns={numericColumns}
-          onSearch={onSearch}
-          onSort={onSort}
-          onSelectAll={onSelectAll}
-        />
-      </I18nProvider>
+    toolbar = mountWithContexts(
+      <DataListToolbar
+        isAllSelected={false}
+        sortedColumnKey="id"
+        sortOrder="ascending"
+        columns={numericColumns}
+        onSearch={onSearch}
+        onSort={onSort}
+        onSelectAll={onSelectAll}
+      />
     );
 
     const upNumericIcon = toolbar.find(upNumericIconSelector);
     expect(upNumericIcon.length).toBe(1);
 
-    toolbar = mount(
-      <I18nProvider>
-        <DataListToolbar
-          isAllSelected={false}
-          sortedColumnKey="name"
-          sortOrder="descending"
-          columns={alphaColumns}
-          onSearch={onSearch}
-          onSort={onSort}
-          onSelectAll={onSelectAll}
-        />
-      </I18nProvider>
+    toolbar = mountWithContexts(
+      <DataListToolbar
+        isAllSelected={false}
+        sortedColumnKey="name"
+        sortOrder="descending"
+        columns={alphaColumns}
+        onSearch={onSearch}
+        onSort={onSort}
+        onSelectAll={onSelectAll}
+      />
     );
 
     const downAlphaIcon = toolbar.find(downAlphaIconSelector);
     expect(downAlphaIcon.length).toBe(1);
 
-    toolbar = mount(
-      <I18nProvider>
-        <DataListToolbar
-          isAllSelected={false}
-          sortedColumnKey="name"
-          sortOrder="ascending"
-          columns={alphaColumns}
-          onSearch={onSearch}
-          onSort={onSort}
-          onSelectAll={onSelectAll}
-        />
-      </I18nProvider>
+    toolbar = mountWithContexts(
+      <DataListToolbar
+        isAllSelected={false}
+        sortedColumnKey="name"
+        sortOrder="ascending"
+        columns={alphaColumns}
+        onSearch={onSearch}
+        onSort={onSort}
+        onSelectAll={onSelectAll}
+      />
     );
 
     const upAlphaIcon = toolbar.find(upAlphaIconSelector);
@@ -232,22 +217,20 @@ describe('<DataListToolbar />', () => {
     const showDelete = true;
     const disableTrashCanIcon = false;
 
-    toolbar = mount(
-      <I18nProvider>
-        <DataListToolbar
-          isAllSelected={false}
-          selected={() => [1, 2, 3, 4]}
-          sortedColumnKey="name"
-          sortOrder="ascending"
-          columns={columns}
-          onSearch={onSearch}
-          onSort={onSort}
-          onSelectAll={onSelectAll}
-          onOpenDeleteModal={onOpenDeleteModal}
-          showDelete={showDelete}
-          disableTrashCanIcon={disableTrashCanIcon}
-        />
-      </I18nProvider>
+    toolbar = mountWithContexts(
+      <DataListToolbar
+        isAllSelected={false}
+        selected={() => [1, 2, 3, 4]}
+        sortedColumnKey="name"
+        sortOrder="ascending"
+        columns={columns}
+        onSearch={onSearch}
+        onSort={onSort}
+        onSelectAll={onSelectAll}
+        onOpenDeleteModal={onOpenDeleteModal}
+        showDelete={showDelete}
+        disableTrashCanIcon={disableTrashCanIcon}
+      />
     );
 
     toolbar.find(openDeleteModalButton).simulate('click');
