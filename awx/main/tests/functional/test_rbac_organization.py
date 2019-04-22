@@ -36,3 +36,15 @@ def test_organization_access_user(cl, organization, user):
     org = access.get_queryset()[0]
     assert len(org.admin_role.members.all()) == 0
     assert len(org.member_role.members.all()) == 1
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('ext_auth', [True, False])
+def test_org_resource_role(ext_auth, organization, rando, org_admin):
+    with mock.patch('awx.main.access.settings') as settings_mock:
+        settings_mock.MANAGE_ORGANIZATION_AUTH = ext_auth
+        access = OrganizationAccess(org_admin)
+
+        assert access.can_attach(organization, rando, 'member_role.members') == ext_auth
+        organization.member_role.members.add(rando)
+        assert access.can_unattach(organization, rando, 'member_role.members') == ext_auth
