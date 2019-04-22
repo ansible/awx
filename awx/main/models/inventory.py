@@ -59,6 +59,7 @@ from awx.main.models.notifications import (
     NotificationTemplate,
     JobNotificationMixin,
 )
+from awx.main.models.credential.injectors import _openstack_data
 from awx.main.utils import _inventory_updates, region_sorting, get_licenser
 
 
@@ -2463,25 +2464,10 @@ class openstack(PluginFileInjector):
     def script_name(self):
         return 'openstack_inventory.py'  # exception
 
-    def _get_clouds_dict(self, inventory_update, credential, private_data_dir, mk_cache=True):
-        openstack_auth = dict(auth_url=credential.get_input('host', default=''),
-                              username=credential.get_input('username', default=''),
-                              password=credential.get_input('password', default=''),
-                              project_name=credential.get_input('project', default=''))
-        if credential.has_input('domain'):
-            openstack_auth['domain_name'] = credential.get_input('domain', default='')
+    def _get_clouds_dict(self, inventory_update, cred, private_data_dir, mk_cache=True):
+        openstack_data = _openstack_data(cred)
 
-        private_state = inventory_update.source_vars_dict.get('private', True)
-        verify_state = credential.get_input('verify_ssl', default=True)
-        openstack_data = {
-            'clouds': {
-                'devstack': {
-                    'private': private_state,
-                    'verify': verify_state,
-                    'auth': openstack_auth,
-                },
-            },
-        }
+        openstack_data['clouds']['devstack']['private'] = inventory_update.source_vars_dict.get('private', True)
         if mk_cache:
             # Retrieve cache path from inventory update vars if available,
             # otherwise create a temporary cache path only for this update.

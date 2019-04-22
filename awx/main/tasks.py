@@ -1340,24 +1340,6 @@ class RunJob(BaseTask):
             if credential.has_input('ssh_public_key_data'):
                 private_data.setdefault('certificates', {})[credential] = credential.get_input('ssh_public_key_data', default='')
 
-            if credential.kind == 'openstack':
-                openstack_auth = dict(auth_url=credential.get_input('host', default=''),
-                                      username=credential.get_input('username', default=''),
-                                      password=credential.get_input('password', default=''),
-                                      project_name=credential.get_input('project', default=''))
-                if credential.has_input('domain'):
-                    openstack_auth['domain_name'] = credential.get_input('domain', default='')
-                verify_state = credential.get_input('verify_ssl', default=True)
-                openstack_data = {
-                    'clouds': {
-                        'devstack': {
-                            'auth': openstack_auth,
-                            'verify': verify_state,
-                        },
-                    },
-                }
-                private_data['credentials'][credential] = yaml.safe_dump(openstack_data, default_flow_style=False, allow_unicode=True)
-
         return private_data
 
     def build_passwords(self, job, runtime_passwords):
@@ -1450,9 +1432,6 @@ class RunJob(BaseTask):
 
         # Set environment variables for cloud credentials.
         cred_files = private_data_files.get('credentials', {})
-        for cloud_cred in job.cloud_credentials:
-            if cloud_cred and cloud_cred.kind == 'openstack':
-                env['OS_CLIENT_CONFIG_FILE'] = cred_files.get(cloud_cred, '')
 
         for network_cred in job.network_credentials:
             env['ANSIBLE_NET_USERNAME'] = network_cred.get_input('username', default='')

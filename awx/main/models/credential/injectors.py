@@ -1,4 +1,5 @@
 import json
+import yaml
 import os
 import stat
 import tempfile
@@ -62,3 +63,32 @@ def vmware(cred, env, private_data_dir):
     env['VMWARE_PASSWORD'] = cred.get_input('password', default='')
     env['VMWARE_HOST'] = cred.get_input('host', default='')
     env['VMWARE_VALIDATE_CERTS'] = str(settings.VMWARE_VALIDATE_CERTS)
+
+
+def _openstack_data(cred):
+    openstack_auth = dict(auth_url=cred.get_input('host', default=''),
+                          username=cred.get_input('username', default=''),
+                          password=cred.get_input('password', default=''),
+                          project_name=cred.get_input('project', default=''))
+    if cred.has_input('domain'):
+        openstack_auth['domain_name'] = cred.get_input('domain', default='')
+    verify_state = cred.get_input('verify_ssl', default=True)
+    openstack_data = {
+        'clouds': {
+            'devstack': {
+                'auth': openstack_auth,
+                'verify': verify_state,
+            },
+        },
+    }
+    return openstack_data
+
+
+def openstack(cred, env, private_data_dir):
+    handle, path = tempfile.mkstemp(dir=private_data_dir)
+    f = os.fdopen(handle, 'w')
+    openstack_data = _openstack_data(cred)
+    yaml.safe_dump(openstack_data, f, default_flow_style=False, allow_unicode=True)
+    f.close()
+    os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
+    env['OS_CLIENT_CONFIG_FILE'] = path
