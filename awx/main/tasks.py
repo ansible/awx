@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
@@ -1023,10 +1025,18 @@ class BaseTask(object):
         '''
 
     def event_handler(self, event_data):
-        '''
-        Ansible runner callback for events
-        '''
-
+        #
+        # ⚠️  D-D-D-DANGER ZONE ⚠️
+        # This method is called once for *every event* emitted by Ansible
+        # Runner as a playbook runs.  That means that changes to the code in
+        # this method are _very_ likely to introduce performance regressions.
+        #
+        # Even if this function is made on average .05s slower, it can have
+        # devastating performance implications for playbooks that emit
+        # tens or hundreds of thousands of events.
+        #
+        # Proceed with caution!
+        #
         '''
         Ansible runner puts a parent_uuid on each event, no matter what the type.
         AWX only saves the parent_uuid if the event is for a Job.
