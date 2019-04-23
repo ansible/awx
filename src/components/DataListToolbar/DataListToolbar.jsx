@@ -37,13 +37,11 @@ class DataListToolbar extends React.Component {
       isCompact,
       noLeftMargin,
       onSort,
-      onSearch
+      onSearch,
       onCompact,
       onExpand,
       onOpenDeleteModal,
-      onSearch,
       onSelectAll,
-      onSort,
       showAdd,
       showDelete,
       showSelectAll,
@@ -160,7 +158,10 @@ DataListToolbar.propTypes = {
   columns: PropTypes.arrayOf(PropTypes.object).isRequired,
   deleteTooltip: PropTypes.node,
   isAllSelected: PropTypes.bool,
+  isCompact: PropTypes.bool,
   noLeftMargin: PropTypes.bool,
+  onCompact: PropTypes.func,
+  onExpand: PropTypes.func,
   onSearch: PropTypes.func,
   onSelectAll: PropTypes.func,
   onSort: PropTypes.func,
@@ -168,11 +169,7 @@ DataListToolbar.propTypes = {
   showDelete: PropTypes.bool,
   showSelectAll: PropTypes.bool,
   sortOrder: PropTypes.string,
-  sortedColumnKey: PropTypes.string,
-  onCompact: PropTypes.func,
-  onExpand: PropTypes.func,
-  isCompact: PropTypes.bool,
-  add: PropTypes.node
+  sortedColumnKey: PropTypes.string
 };
 
 DataListToolbar.defaultProps = {
@@ -181,6 +178,7 @@ DataListToolbar.defaultProps = {
   deleteTooltip: i18nMark('Delete'),
   isAllSelected: false,
   isCompact: false,
+  noLeftMargin: false,
   onCompact: null,
   onExpand: null,
   onSearch: null,
@@ -190,13 +188,7 @@ DataListToolbar.defaultProps = {
   showDelete: false,
   showSelectAll: false,
   sortOrder: 'ascending',
-  sortedColumnKey: 'name',
-  isAllSelected: false,
-  onCompact: null,
-  onExpand: null,
-  isCompact: false,
-  add: null,
-  noLeftMargin: false
+  sortedColumnKey: 'name'
 };
 
 export default DataListToolbar;

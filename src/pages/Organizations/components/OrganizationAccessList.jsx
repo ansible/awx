@@ -18,10 +18,6 @@ import {
   withRouter
 } from 'react-router-dom';
 
-import {
-  PlusIcon,
-} from '@patternfly/react-icons';
-
 import { withNetwork } from '../../../contexts/Network';
 
 import AlertModal from '../../../components/AlertModal';

@@ -124,7 +124,7 @@ class Provider extends Component {
     return (
       <ConfigContext.Provider
         value={{
-          ...(propsValue || stateValue),
+          ...value,
           fetchMe: this.fetchMe,
           updateConfig: this.updateConfig
         }}
