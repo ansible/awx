@@ -1,51 +1,26 @@
 import React from 'react';
-import { mount } from 'enzyme';
-import { MemoryRouter } from 'react-router-dom';
-
+import { mountWithContexts } from '../../../../enzymeHelpers';
 import OrganizationAccess from '../../../../../src/pages/Organizations/screens/Organization/OrganizationAccess';
-
-const mockAPIAccessList = {
-  foo: 'bar',
-};
-
-const mockGetOrganizationAccessList = () => Promise.resolve(mockAPIAccessList);
-
-const mockResponse = {
-  status: 'success',
-};
-
-const mockRemoveRole = () => Promise.resolve(mockResponse);
 
 describe('<OrganizationAccess />', () => {
   test('initially renders succesfully', () => {
-    mount(
-      <MemoryRouter initialEntries={['/organizations/1']} initialIndex={0}>
-        <OrganizationAccess
-          match={{ path: '/organizations/:id/access', url: '/organizations/1/access', params: { id: 1 } }}
-          location={{ search: '', pathname: '/organizations/1/access' }}
-          params={{}}
-          api={{
-            getOrganizationAccessList: jest.fn(),
-          }}
-        />
-      </MemoryRouter>
-    );
+    mountWithContexts(<OrganizationAccess />);
   });
 
   test('passed methods as props are called appropriately', async () => {
-    const wrapper = mount(
-      <MemoryRouter initialEntries={['/organizations/1']} initialIndex={0}>
-        <OrganizationAccess
-          match={{ path: '/organizations/:id/access', url: '/organizations/1/access', params: { id: 1 } }}
-          location={{ search: '', pathname: '/organizations/1/access' }}
-          params={{}}
-          api={{
-            getOrganizationAccessList: mockGetOrganizationAccessList,
-            disassociate: mockRemoveRole
-          }}
-        />
-      </MemoryRouter>
-    ).find('OrganizationAccess');
+    const mockAPIAccessList = {
+      foo: 'bar',
+    };
+    const mockResponse = {
+      status: 'success',
+    };
+    const wrapper = mountWithContexts(<OrganizationAccess />, { context: { network: {
+      api: {
+        getOrganizationAccessList: () => Promise.resolve(mockAPIAccessList),
+        disassociate: () => Promise.resolve(mockResponse)
+      },
+      handleHttpError: () => {}
+    } } }).find('OrganizationAccess');
     const accessList = await wrapper.instance().getOrgAccessList();
     expect(accessList).toEqual(mockAPIAccessList);
     const resp = await wrapper.instance().removeRole(2, 3, 'users');

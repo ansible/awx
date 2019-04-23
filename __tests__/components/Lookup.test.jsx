@@ -1,6 +1,5 @@
 import React from 'react';
-import { mount } from 'enzyme';
-import { I18nProvider } from '@lingui/react';
+import { mountWithContexts } from '../enzymeHelpers';
 import Lookup from '../../src/components/Lookup';
 import { _Lookup } from '../../src/components/Lookup/Lookup';
 
@@ -10,36 +9,32 @@ const mockColumns = [
 ];
 describe('<Lookup />', () => {
   test('initially renders succesfully', () => {
-    mount(
-      <I18nProvider>
-        <_Lookup
-          lookup_header="Foo Bar"
-          name="fooBar"
-          value={mockData}
-          onLookupSave={() => { }}
-          getItems={() => { }}
-          columns={mockColumns}
-          sortedColumnKey="name"
-          handleHttpError={() => {}}
-        />
-      </I18nProvider>
+    mountWithContexts(
+      <_Lookup
+        lookup_header="Foo Bar"
+        name="fooBar"
+        value={mockData}
+        onLookupSave={() => { }}
+        getItems={() => { }}
+        columns={mockColumns}
+        sortedColumnKey="name"
+        handleHttpError={() => {}}
+      />
     );
   });
 
   test('API response is formatted properly', (done) => {
-    const wrapper = mount(
-      <I18nProvider>
-        <_Lookup
-          lookup_header="Foo Bar"
-          name="fooBar"
-          value={mockData}
-          onLookupSave={() => { }}
-          getItems={() => ({ data: { results: [{ name: 'test instance', id: 1 }] } })}
-          columns={mockColumns}
-          sortedColumnKey="name"
-          handleHttpError={() => {}}
-        />
-      </I18nProvider>
+    const wrapper = mountWithContexts(
+      <_Lookup
+        lookup_header="Foo Bar"
+        name="fooBar"
+        value={mockData}
+        onLookupSave={() => { }}
+        getItems={() => ({ data: { results: [{ name: 'test instance', id: 1 }] } })}
+        columns={mockColumns}
+        sortedColumnKey="name"
+        handleHttpError={() => {}}
+      />
     ).find('Lookup');
 
     setImmediate(() => {
@@ -51,20 +46,18 @@ describe('<Lookup />', () => {
   test('Opens modal when search icon is clicked', () => {
     const spy = jest.spyOn(_Lookup.prototype, 'handleModalToggle');
     const mockSelected = [{ name: 'foo', id: 1 }];
-    const wrapper = mount(
-      <I18nProvider>
-        <_Lookup
-          id="search"
-          lookup_header="Foo Bar"
-          name="fooBar"
-          value={mockSelected}
-          onLookupSave={() => { }}
-          getItems={() => { }}
-          columns={mockColumns}
-          sortedColumnKey="name"
-          handleHttpError={() => {}}
-        />
-      </I18nProvider>
+    const wrapper = mountWithContexts(
+      <_Lookup
+        id="search"
+        lookup_header="Foo Bar"
+        name="fooBar"
+        value={mockSelected}
+        onLookupSave={() => { }}
+        getItems={() => { }}
+        columns={mockColumns}
+        sortedColumnKey="name"
+        handleHttpError={() => {}}
+      />
     ).find('Lookup');
     expect(spy).not.toHaveBeenCalled();
     expect(wrapper.state('lookupSelectedItems')).toEqual(mockSelected);
@@ -81,20 +74,18 @@ describe('<Lookup />', () => {
   test('calls "toggleSelected" when a user changes a checkbox', (done) => {
     const spy = jest.spyOn(_Lookup.prototype, 'toggleSelected');
     const mockSelected = [{ name: 'foo', id: 1 }];
-    const wrapper = mount(
-      <I18nProvider>
-        <_Lookup
-          id="search"
-          lookup_header="Foo Bar"
-          name="fooBar"
-          value={mockSelected}
-          onLookupSave={() => { }}
-          getItems={() => ({ data: { results: [{ name: 'test instance', id: 1 }] } })}
-          columns={mockColumns}
-          sortedColumnKey="name"
-          handleHttpError={() => {}}
-        />
-      </I18nProvider>
+    const wrapper = mountWithContexts(
+      <_Lookup
+        id="search"
+        lookup_header="Foo Bar"
+        name="fooBar"
+        value={mockSelected}
+        onLookupSave={() => { }}
+        getItems={() => ({ data: { results: [{ name: 'test instance', id: 1 }] } })}
+        columns={mockColumns}
+        sortedColumnKey="name"
+        handleHttpError={() => {}}
+      />
     );
     setImmediate(() => {
       const searchItem = wrapper.find('button[aria-label="Search"]');
@@ -108,20 +99,18 @@ describe('<Lookup />', () => {
   test('calls "toggleSelected" when remove icon is clicked', () => {
     const spy = jest.spyOn(_Lookup.prototype, 'toggleSelected');
     mockData = [{ name: 'foo', id: 1 }, { name: 'bar', id: 2 }];
-    const wrapper = mount(
-      <I18nProvider>
-        <_Lookup
-          id="search"
-          lookup_header="Foo Bar"
-          name="fooBar"
-          value={mockData}
-          onLookupSave={() => { }}
-          getItems={() => { }}
-          columns={mockColumns}
-          sortedColumnKey="name"
-          handleHttpError={() => {}}
-        />
-      </I18nProvider>
+    const wrapper = mountWithContexts(
+      <_Lookup
+        id="search"
+        lookup_header="Foo Bar"
+        name="fooBar"
+        value={mockData}
+        onLookupSave={() => { }}
+        getItems={() => { }}
+        columns={mockColumns}
+        sortedColumnKey="name"
+        handleHttpError={() => {}}
+      />
     );
     const removeIcon = wrapper.find('button[aria-label="close"]').first();
     removeIcon.simulate('click');
@@ -130,19 +119,16 @@ describe('<Lookup />', () => {
 
   test('renders chips from prop value', () => {
     mockData = [{ name: 'foo', id: 0 }, { name: 'bar', id: 1 }];
-    const wrapper = mount(
-      <I18nProvider>
-        <Lookup
-          lookup_header="Foo Bar"
-          onLookupSave={() => { }}
-          value={mockData}
-          selected={[]}
-          getItems={() => { }}
-          columns={mockColumns}
-          sortedColumnKey="name"
-          handleHttpError={() => {}}
-        />
-      </I18nProvider>
+    const wrapper = mountWithContexts(
+      <Lookup
+        lookup_header="Foo Bar"
+        onLookupSave={() => { }}
+        value={mockData}
+        selected={[]}
+        getItems={() => { }}
+        columns={mockColumns}
+        sortedColumnKey="name"
+      />
     ).find('Lookup');
     const chip = wrapper.find('li.pf-c-chip');
     expect(chip).toHaveLength(2);
@@ -150,18 +136,15 @@ describe('<Lookup />', () => {
 
   test('toggleSelected successfully adds/removes row from lookupSelectedItems state', () => {
     mockData = [];
-    const wrapper = mount(
-      <I18nProvider>
-        <Lookup
-          lookup_header="Foo Bar"
-          onLookupSave={() => { }}
-          value={mockData}
-          getItems={() => { }}
-          columns={mockColumns}
-          sortedColumnKey="name"
-          handleHttpError={() => {}}
-        />
-      </I18nProvider>
+    const wrapper = mountWithContexts(
+      <Lookup
+        lookup_header="Foo Bar"
+        onLookupSave={() => { }}
+        value={mockData}
+        getItems={() => { }}
+        columns={mockColumns}
+        sortedColumnKey="name"
+      />
     ).find('Lookup');
     wrapper.instance().toggleSelected({
       id: 1,
@@ -181,17 +164,14 @@ describe('<Lookup />', () => {
   test('saveModal calls callback with selected items', () => {
     mockData = [];
     const onLookupSaveFn = jest.fn();
-    const wrapper = mount(
-      <I18nProvider>
-        <Lookup
-          lookup_header="Foo Bar"
-          name="fooBar"
-          value={mockData}
-          onLookupSave={onLookupSaveFn}
-          getItems={() => { }}
-          handleHttpError={() => {}}
-        />
-      </I18nProvider>
+    const wrapper = mountWithContexts(
+      <Lookup
+        lookup_header="Foo Bar"
+        name="fooBar"
+        value={mockData}
+        onLookupSave={onLookupSaveFn}
+        getItems={() => { }}
+      />
     ).find('Lookup');
     wrapper.instance().toggleSelected({
       id: 1,
@@ -210,19 +190,17 @@ describe('<Lookup />', () => {
 
   test('onSort sets state and calls getData ', () => {
     const spy = jest.spyOn(_Lookup.prototype, 'getData');
-    const wrapper = mount(
-      <I18nProvider>
-        <_Lookup
-          lookup_header="Foo Bar"
-          onLookupSave={() => { }}
-          value={mockData}
-          selected={[]}
-          columns={mockColumns}
-          sortedColumnKey="name"
-          getItems={() => { }}
-          handleHttpError={() => {}}
-        />
-      </I18nProvider>
+    const wrapper = mountWithContexts(
+      <_Lookup
+        lookup_header="Foo Bar"
+        onLookupSave={() => { }}
+        value={mockData}
+        selected={[]}
+        columns={mockColumns}
+        sortedColumnKey="name"
+        getItems={() => { }}
+        handleHttpError={() => {}}
+      />
     ).find('Lookup');
     wrapper.instance().onSort('id', 'descending');
     expect(wrapper.state('sortedColumnKey')).toEqual('id');
@@ -232,19 +210,17 @@ describe('<Lookup />', () => {
 
   test('onSearch calls getData (through calling onSort)', () => {
     const spy = jest.spyOn(_Lookup.prototype, 'getData');
-    const wrapper = mount(
-      <I18nProvider>
-        <_Lookup
-          lookup_header="Foo Bar"
-          onLookupSave={() => { }}
-          value={mockData}
-          selected={[]}
-          columns={mockColumns}
-          sortedColumnKey="name"
-          getItems={() => { }}
-          handleHttpError={() => {}}
-        />
-      </I18nProvider>
+    const wrapper = mountWithContexts(
+      <_Lookup
+        lookup_header="Foo Bar"
+        onLookupSave={() => { }}
+        value={mockData}
+        selected={[]}
+        columns={mockColumns}
+        sortedColumnKey="name"
+        getItems={() => { }}
+        handleHttpError={() => {}}
+      />
     ).find('Lookup');
     wrapper.instance().onSearch();
     expect(spy).toHaveBeenCalled();
@@ -252,19 +228,17 @@ describe('<Lookup />', () => {
 
   test('onSetPage sets state and calls getData ', () => {
     const spy = jest.spyOn(_Lookup.prototype, 'getData');
-    const wrapper = mount(
-      <I18nProvider>
-        <_Lookup
-          lookup_header="Foo Bar"
-          onLookupSave={() => { }}
-          value={mockData}
-          selected={[]}
-          columns={mockColumns}
-          sortedColumnKey="name"
-          getItems={() => { }}
-          handleHttpError={() => {}}
-        />
-      </I18nProvider>
+    const wrapper = mountWithContexts(
+      <_Lookup
+        lookup_header="Foo Bar"
+        onLookupSave={() => { }}
+        value={mockData}
+        selected={[]}
+        columns={mockColumns}
+        sortedColumnKey="name"
+        getItems={() => { }}
+        handleHttpError={() => {}}
+      />
     ).find('Lookup');
     wrapper.instance().onSetPage(2, 10);
     expect(wrapper.state('page')).toEqual(2);

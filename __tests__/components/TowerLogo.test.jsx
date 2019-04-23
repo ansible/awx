@@ -1,7 +1,6 @@
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
-import { mount } from 'enzyme';
-import { I18nProvider } from '@lingui/react';
+import { createMemoryHistory } from 'history';
+import { mountWithContexts } from '../enzymeHelpers';
 import TowerLogo from '../../src/components/TowerLogo';
 
 let logoWrapper;
@@ -15,12 +14,8 @@ const findChildren = () => {
 
 describe('<TowerLogo />', () => {
   test('initially renders without crashing', () => {
-    logoWrapper = mount(
-      <MemoryRouter>
-        <I18nProvider>
-          <TowerLogo />
-        </I18nProvider>
-      </MemoryRouter>
+    logoWrapper = mountWithContexts(
+      <TowerLogo />
     );
     findChildren();
     expect(logoWrapper.length).toBe(1);
@@ -29,12 +24,12 @@ describe('<TowerLogo />', () => {
   });
 
   test('adds navigation to route history on click', () => {
-    logoWrapper = mount(
-      <MemoryRouter>
-        <I18nProvider>
-          <TowerLogo linkTo="/" />
-        </I18nProvider>
-      </MemoryRouter>
+    const history = createMemoryHistory({
+      initialEntries: ['/organizations/1/teams'],
+    });
+
+    logoWrapper = mountWithContexts(
+      <TowerLogo linkTo="/" />, { context: { router: { history } } }
     );
     findChildren();
     expect(towerLogoElem.props().history.length).toBe(1);
@@ -42,27 +37,9 @@ describe('<TowerLogo />', () => {
     expect(towerLogoElem.props().history.length).toBe(2);
   });
 
-  test('linkTo prop is optional', () => {
-    logoWrapper = mount(
-      <MemoryRouter>
-        <I18nProvider>
-          <TowerLogo />
-        </I18nProvider>
-      </MemoryRouter>
-    );
-    findChildren();
-    expect(towerLogoElem.props().history.length).toBe(1);
-    logoWrapper.simulate('click');
-    expect(towerLogoElem.props().history.length).toBe(1);
-  });
-
   test('handles mouse over and out state.hover changes', () => {
-    logoWrapper = mount(
-      <MemoryRouter>
-        <I18nProvider>
-          <TowerLogo />
-        </I18nProvider>
-      </MemoryRouter>
+    logoWrapper = mountWithContexts(
+      <TowerLogo />
     );
     findChildren();
     findChildren();

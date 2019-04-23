@@ -45,6 +45,12 @@ const defaultContexts = {
       push: () => {},
       replace: () => {},
       createHref: () => {},
+      location: {
+        hash: '',
+        pathname: '',
+        search: '',
+        state: '',
+      }
     },
     route: {
       location: {
@@ -58,7 +64,7 @@ const defaultContexts = {
         isExact: false,
         path: '',
         url: '',
-      },
+      }
     },
     toJSON: () => '/router/',
   },

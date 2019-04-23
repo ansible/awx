@@ -23,19 +23,10 @@ class OrganizationAccess extends React.Component {
   }
 
   render () {
-    const {
-      location,
-      match,
-      history,
-    } = this.props;
-
     return (
       <OrganizationAccessList
         getAccessList={this.getOrgAccessList}
         removeRole={this.removeRole}
-        match={match}
-        location={location}
-        history={history}
       />
     );
   }

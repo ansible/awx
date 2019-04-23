@@ -1,12 +1,11 @@
 import React from 'react';
-import { mount, shallow } from 'enzyme';
-import { MemoryRouter, Router } from 'react-router-dom';
-import { I18nProvider } from '@lingui/react';
+import { shallow } from 'enzyme';
+import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
+import { mountWithContexts } from '../../../../enzymeHelpers';
 import { sleep } from '../../../../testUtils';
 import OrganizationTeams, { _OrganizationTeams } from '../../../../../src/pages/Organizations/screens/Organization/OrganizationTeams';
 import OrganizationTeamsList from '../../../../../src/pages/Organizations/components/OrganizationTeamsList';
-import { NetworkProvider } from '../../../../../src/contexts/Network';
 
 const listData = {
   data: {
@@ -38,19 +37,13 @@ describe('<OrganizationTeams />', () => {
 
   test('should load teams on mount', () => {
     const readOrganizationTeamsList = jest.fn(() => Promise.resolve(listData));
-    mount(
-      <I18nProvider>
-        <MemoryRouter initialEntries={['/organizations/1']} initialIndex={0}>
-          <NetworkProvider
-            value={{ api: { readOrganizationTeamsList }, handleHttpError: () => {} }}
-          >
-            <OrganizationTeams
-              id={1}
-              searchString=""
-            />
-          </NetworkProvider>
-        </MemoryRouter>
-      </I18nProvider>
+    mountWithContexts(
+      <OrganizationTeams
+        id={1}
+        searchString=""
+      />, { context: {
+        network: { api: { readOrganizationTeamsList }, handleHttpError: () => {} } }
+      }
     ).find('OrganizationTeams');
     expect(readOrganizationTeamsList).toHaveBeenCalledWith(1, {
       page: 1,
@@ -61,19 +54,13 @@ describe('<OrganizationTeams />', () => {
 
   test('should pass fetched teams to list component', async () => {
     const readOrganizationTeamsList = jest.fn(() => Promise.resolve(listData));
-    const wrapper = mount(
-      <I18nProvider>
-        <MemoryRouter>
-          <NetworkProvider
-            value={{ api: { readOrganizationTeamsList }, handleHttpError: () => {} }}
-          >
-            <OrganizationTeams
-              id={1}
-              searchString=""
-            />
-          </NetworkProvider>
-        </MemoryRouter>
-      </I18nProvider>
+    const wrapper = mountWithContexts(
+      <OrganizationTeams
+        id={1}
+        searchString=""
+      />, { context: {
+        network: { api: { readOrganizationTeamsList }, handleHttpError: () => {} } }
+      }
     );
 
     await sleep(0);
@@ -105,19 +92,20 @@ describe('<OrganizationTeams />', () => {
     const history = createMemoryHistory({
       initialEntries: ['/organizations/1/teams'],
     });
-    const wrapper = mount(
+    const wrapper = mountWithContexts(
       <Router history={history}>
-        <I18nProvider>
-          <NetworkProvider
-            value={{ api: { readOrganizationTeamsList }, handleHttpError: () => {} }}
-          >
-            <OrganizationTeams
-              id={1}
-              searchString=""
-            />
-          </NetworkProvider>
-        </I18nProvider>
-      </Router>
+        <OrganizationTeams
+          id={1}
+          searchString=""
+        />
+      </Router>,
+      { context: {
+        network: {
+          api: { readOrganizationTeamsList },
+          handleHttpError: () => {}
+        },
+        router: false,
+      } }
     );
 
     await sleep(0);
@@ -132,7 +120,6 @@ describe('<OrganizationTeams />', () => {
 
     readOrganizationTeamsList.mockReturnValueOnce(page2Data);
     history.push('/organizations/1/teams?page=2');
-    wrapper.setProps({ history });
 
     await sleep(0);
     wrapper.update();

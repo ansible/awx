@@ -15,7 +15,8 @@ class Provider extends Component {
         custom_virtualenvs: null,
         version: null,
         custom_logo: null,
-        custom_login_info: null
+        custom_login_info: null,
+        ...props.value
       }
     };
 
@@ -23,7 +24,10 @@ class Provider extends Component {
   }
 
   componentDidMount () {
-    this.fetchConfig();
+    const { value } = this.props;
+    if (!value) {
+      this.fetchConfig();
+    }
   }
 
   async fetchConfig () {
@@ -66,14 +70,12 @@ class Provider extends Component {
   }
 
   render () {
-    const {
-      value: stateValue
-    } = this.state;
+    const { value } = this.state;
 
-    const { value: propsValue, children } = this.props;
+    const { children } = this.props;
 
     return (
-      <ConfigContext.Provider value={propsValue || stateValue}>
+      <ConfigContext.Provider value={value}>
         {children}
       </ConfigContext.Provider>
     );

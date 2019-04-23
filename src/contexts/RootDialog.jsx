@@ -17,7 +17,7 @@ export class RootDialogProvider extends Component {
           const { value } = this.state;
           this.setState({ value: { ...value, title: null, bodyText: null, variant: null } });
         },
-        ...props.value,
+        ...props.value
       }
     };
   }

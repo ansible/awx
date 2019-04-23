@@ -1,6 +1,5 @@
 import React from 'react';
-import { mount } from 'enzyme';
-import { I18nProvider } from '@lingui/react';
+import { mountWithContexts } from '../enzymeHelpers';
 import Search from '../../src/components/Search';
 
 describe('<Search />', () => {
@@ -8,7 +7,6 @@ describe('<Search />', () => {
 
   afterEach(() => {
     if (search) {
-      search.unmount();
       search = null;
     }
   });
@@ -21,14 +19,12 @@ describe('<Search />', () => {
 
     const onSearch = jest.fn();
 
-    search = mount(
-      <I18nProvider>
-        <Search
-          sortedColumnKey="name"
-          columns={columns}
-          onSearch={onSearch}
-        />
-      </I18nProvider>
+    search = mountWithContexts(
+      <Search
+        sortedColumnKey="name"
+        columns={columns}
+        onSearch={onSearch}
+      />
     );
 
     search.find(searchTextInput).instance().value = 'test-321';
@@ -42,14 +38,12 @@ describe('<Search />', () => {
   test('handleDropdownToggle properly updates state', async () => {
     const columns = [{ name: 'Name', key: 'name', isSortable: true }];
     const onSearch = jest.fn();
-    const wrapper = mount(
-      <I18nProvider>
-        <Search
-          sortedColumnKey="name"
-          columns={columns}
-          onSearch={onSearch}
-        />
-      </I18nProvider>
+    const wrapper = mountWithContexts(
+      <Search
+        sortedColumnKey="name"
+        columns={columns}
+        onSearch={onSearch}
+      />
     ).find('Search');
     expect(wrapper.state('isSearchDropdownOpen')).toEqual(false);
     wrapper.instance().handleDropdownToggle(true);
@@ -62,14 +56,12 @@ describe('<Search />', () => {
       { name: 'Description', key: 'description', isSortable: true }
     ];
     const onSearch = jest.fn();
-    const wrapper = mount(
-      <I18nProvider>
-        <Search
-          sortedColumnKey="name"
-          columns={columns}
-          onSearch={onSearch}
-        />
-      </I18nProvider>
+    const wrapper = mountWithContexts(
+      <Search
+        sortedColumnKey="name"
+        columns={columns}
+        onSearch={onSearch}
+      />
     ).find('Search');
     expect(wrapper.state('searchKey')).toEqual('name');
     wrapper.instance().handleDropdownSelect({ target: { innerText: 'Description' } });
