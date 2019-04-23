@@ -147,6 +147,7 @@ class Profile(CreatedModifiedModel):
         'auth.User',
         related_name='profile',
         editable=False,
+        on_delete=models.CASCADE
     )
     ldap_dn = models.CharField(
         max_length=1024,

@@ -6,7 +6,7 @@ from unittest.mock import PropertyMock
 from awx.api.urls import urlpatterns as api_patterns
 
 # Django
-from django.core.urlresolvers import RegexURLResolver, RegexURLPattern
+from django.urls import RegexURLResolver, RegexURLPattern
 
 
 @pytest.fixture(autouse=True)

@@ -18,7 +18,7 @@ from django.db.models.signals import (
 )
 from django.db.models.signals import m2m_changed
 from django.db import models
-from django.db.models.fields.related import add_lazy_relation
+from django.db.models.fields.related import lazy_related_operation
 from django.db.models.fields.related_descriptors import (
     ReverseOneToOneDescriptor,
     ForwardManyToOneDescriptor,
@@ -227,6 +227,7 @@ class ImplicitRoleField(models.ForeignKey):
         kwargs.setdefault('related_name', '+')
         kwargs.setdefault('null', 'True')
         kwargs.setdefault('editable', False)
+        kwargs.setdefault('on_delete', models.CASCADE)
         super(ImplicitRoleField, self).__init__(*args, **kwargs)
 
     def deconstruct(self):
@@ -244,7 +245,9 @@ class ImplicitRoleField(models.ForeignKey):
 
         post_save.connect(self._post_save, cls, True, dispatch_uid='implicit-role-post-save')
         post_delete.connect(self._post_delete, cls, True, dispatch_uid='implicit-role-post-delete')
-        add_lazy_relation(cls, self, "self", self.bind_m2m_changed)
+
+        function = lambda local, related, field: self.bind_m2m_changed(field, related, local)
+        lazy_related_operation(function, cls, "self", field=self)
 
     def bind_m2m_changed(self, _self, _role_class, cls):
         if not self.parent_role:
