@@ -213,7 +213,7 @@ def copy_tables(since, full_path):
                               main_jobevent.uuid,
                               main_jobevent.parent_uuid,
                               main_jobevent.event, 
-                              main_jobevent.event_data::json->'task_action',
+                              main_jobevent.event_data::json->'task_action' AS task_action,
                               main_jobevent.failed, 
                               main_jobevent.changed, 
                               main_jobevent.playbook, 
@@ -225,7 +225,7 @@ def copy_tables(since, full_path):
                               main_jobevent.host_name
                               FROM main_jobevent 
                               WHERE main_jobevent.created > {}
-                              ORDER BY main_jobevent.id ASC) to stdout'''.format(since.strftime("'%Y-%m-%d %H:%M:%S'"))
+                              ORDER BY main_jobevent.id ASC) TO STDOUT WITH CSV HEADER'''.format(since.strftime("'%Y-%m-%d %H:%M:%S'"))
     _copy_table(table='events', query=events_query, path=full_path)
     
     unified_job_query = '''COPY (SELECT main_unifiedjob.id, 
@@ -250,7 +250,7 @@ def copy_tables(since, full_path):
                                  WHERE main_unifiedjob.created > {} AND 
                                  main_unifiedjob.polymorphic_ctype_id = django_content_type.id AND 
                                  main_unifiedjob.launch_type != 'sync'
-                                 ORDER BY main_unifiedjob.id ASC) to stdout'''.format(since.strftime("'%Y-%m-%d %H:%M:%S'"))    
+                                 ORDER BY main_unifiedjob.id ASC) TO STDOUT WITH CSV HEADER'''.format(since.strftime("'%Y-%m-%d %H:%M:%S'"))    
     _copy_table(table='unified_jobs', query=unified_job_query, path=full_path)
     
     unified_job_template_query = '''COPY (SELECT main_unifiedjobtemplate.id, 
@@ -270,7 +270,7 @@ def copy_tables(since, full_path):
                                  main_unifiedjobtemplate.status 
                                  FROM main_unifiedjobtemplate, django_content_type
                                  WHERE main_unifiedjobtemplate.polymorphic_ctype_id = django_content_type.id
-                                 ORDER BY main_unifiedjobtemplate.id ASC) to stdout'''.format(since.strftime("'%Y-%m-%d %H:%M:%S'"))    
+                                 ORDER BY main_unifiedjobtemplate.id ASC) TO STDOUT WITH CSV HEADER'''.format(since.strftime("'%Y-%m-%d %H:%M:%S'"))    
     _copy_table(table='unified_job_template', query=unified_job_template_query, path=full_path)
     return
 
