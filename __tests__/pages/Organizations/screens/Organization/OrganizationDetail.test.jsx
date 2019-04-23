@@ -8,7 +8,12 @@ describe('<OrganizationDetail />', () => {
     description: 'Bar',
     custom_virtualenv: 'Fizz',
     created: 'Bat',
-    modified: 'Boo'
+    modified: 'Boo',
+    summary_fields: {
+      user_capabilities: {
+        edit: true
+      }
+    }
   };
 
   test('initially renders succesfully', () => {

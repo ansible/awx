@@ -11,6 +11,7 @@ describe('<Notifications />', () => {
         onReadSuccess={() => {}}
         onCreateError={() => {}}
         onCreateSuccess={() => {}}
+        canToggleNotifications
       />
     );
   });
@@ -24,6 +25,7 @@ describe('<Notifications />', () => {
         onReadSuccess={() => {}}
         onCreateError={() => {}}
         onCreateSuccess={() => {}}
+        canToggleNotifications
       />
     );
     expect(spy).toHaveBeenCalled();
@@ -38,6 +40,7 @@ describe('<Notifications />', () => {
         onReadSuccess={() => {}}
         onCreateError={() => {}}
         onCreateSuccess={() => {}}
+        canToggleNotifications
       />
     ).find('Notifications');
     wrapper.instance().toggleNotification(1, true, 'success');
@@ -56,6 +59,7 @@ describe('<Notifications />', () => {
         onReadSuccess={() => {}}
         onCreateError={() => {}}
         onCreateSuccess={onCreateSuccess}
+        canToggleNotifications
       />
     ).find('Notifications');
     wrapper.setState({ successTemplateIds: [44] });
@@ -76,6 +80,7 @@ describe('<Notifications />', () => {
         onReadSuccess={() => {}}
         onCreateError={() => {}}
         onCreateSuccess={() => {}}
+        canToggleNotifications
       />
     ).find('Notifications');
     wrapper.instance().toggleNotification(1, true, 'error');
@@ -94,6 +99,7 @@ describe('<Notifications />', () => {
         onReadSuccess={() => {}}
         onCreateError={onCreateError}
         onCreateSuccess={() => {}}
+        canToggleNotifications
       />
     ).find('Notifications');
     wrapper.setState({ errorTemplateIds: [44] });
@@ -144,6 +150,7 @@ describe('<Notifications />', () => {
         onReadSuccess={onReadSuccess}
         onCreateError={() => {}}
         onCreateSuccess={() => {}}
+        canToggleNotifications
       />
     ).find('Notifications');
     wrapper.instance().updateUrl = jest.fn();

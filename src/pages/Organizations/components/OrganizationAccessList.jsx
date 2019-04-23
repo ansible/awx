@@ -476,7 +476,9 @@ class OrganizationAccessList extends React.Component {
 }
 
 OrganizationAccessList.propTypes = {
+  api: PropTypes.shape().isRequired,
   getAccessList: PropTypes.func.isRequired,
+  organization: PropTypes.shape().isRequired,
   removeRole: PropTypes.func.isRequired
 };
 

@@ -16,12 +16,30 @@ const mockData = [
           role: {
             name: 'foo',
             id: 2,
+            user_capabilities: {
+              unattach: true
+            }
           }
         }
-      ],
+      ]
     }
   }
 ];
+
+const organization = {
+  id: 1,
+  name: 'Default',
+  summary_fields: {
+    object_roles: {},
+    user_capabilities: {
+      edit: true
+    }
+  }
+};
+
+const api = {
+  foo: () => {}
+};
 
 describe('<OrganizationAccessList />', () => {
   afterEach(() => {
@@ -33,6 +51,8 @@ describe('<OrganizationAccessList />', () => {
       <OrganizationAccessList
         getAccessList={() => {}}
         removeRole={() => {}}
+        api={api}
+        organization={organization}
       />
     );
   });
@@ -42,8 +62,12 @@ describe('<OrganizationAccessList />', () => {
       <OrganizationAccessList
         getAccessList={() => ({ data: { count: 1, results: mockData } })}
         removeRole={() => {}}
+        api={api}
+        organization={organization}
       />
     ).find('OrganizationAccessList');
+
+    // expect(wrapper.debug()).toBe(false);
 
     setImmediate(() => {
       expect(wrapper.state().results).toEqual(mockData);
@@ -57,6 +81,8 @@ describe('<OrganizationAccessList />', () => {
       <OrganizationAccessList
         getAccessList={() => ({ data: { count: 1, results: mockData } })}
         removeRole={() => {}}
+        api={api}
+        organization={organization}
       />
     ).find('OrganizationAccessList');
     expect(onSort).not.toHaveBeenCalled();
@@ -74,6 +100,8 @@ describe('<OrganizationAccessList />', () => {
       <OrganizationAccessList
         getAccessList={() => ({ data: { count: 1, results: mockData } })}
         removeRole={() => {}}
+        api={api}
+        organization={organization}
       />
     ).find('OrganizationAccessList');
 
@@ -94,6 +122,8 @@ describe('<OrganizationAccessList />', () => {
       <OrganizationAccessList
         getAccessList={() => ({ data: { count: 1, results: mockData } })}
         removeRole={() => {}}
+        api={api}
+        organization={organization}
       />
     ).find('OrganizationAccessList');
     expect(handleWarning).not.toHaveBeenCalled();
@@ -117,6 +147,8 @@ describe('<OrganizationAccessList />', () => {
       <OrganizationAccessList
         getAccessList={() => ({ data: { count: 1, results: mockData } })}
         removeRole={() => {}}
+        api={api}
+        organization={organization}
       />
     ).find('OrganizationAccessList');
 
