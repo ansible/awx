@@ -1,0 +1,28 @@
+.awx-selectableCard {
+  min-width: 200px;
+  border: 1px solid var(--pf-global--BorderColor);
+  border-radius: var(--pf-global--BorderRadius--sm);
+  margin-right: 20px;
+  font-weight: bold;
+  display: flex;
+
+  .awx-selectableCard__indicator {
+    display: flex;
+    flex: 0 0 5px;
+  }
+
+  .awx-selectableCard__label {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    padding: 20px;
+  }
+}
+
+.awx-selectableCard.awx-selectableCard__selected {
+  border-color: var(--pf-global--active-color--100);
+
+  .awx-selectableCard__indicator {
+    background-color: var(--pf-global--active-color--100);
+  }
+}
