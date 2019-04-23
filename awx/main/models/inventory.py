@@ -59,6 +59,7 @@ from awx.main.models.notifications import (
     NotificationTemplate,
     JobNotificationMixin,
 )
+from awx.main.models.credential.injectors import _openstack_data
 from awx.main.utils import _inventory_updates, region_sorting, get_licenser
 
 
@@ -2463,25 +2464,10 @@ class openstack(PluginFileInjector):
     def script_name(self):
         return 'openstack_inventory.py'  # exception
 
-    def _get_clouds_dict(self, inventory_update, credential, private_data_dir, mk_cache=True):
-        openstack_auth = dict(auth_url=credential.get_input('host', default=''),
-                              username=credential.get_input('username', default=''),
-                              password=credential.get_input('password', default=''),
-                              project_name=credential.get_input('project', default=''))
-        if credential.has_input('domain'):
-            openstack_auth['domain_name'] = credential.get_input('domain', default='')
+    def _get_clouds_dict(self, inventory_update, cred, private_data_dir, mk_cache=True):
+        openstack_data = _openstack_data(cred)
 
-        private_state = inventory_update.source_vars_dict.get('private', True)
-        verify_state = credential.get_input('verify_ssl', default=True)
-        openstack_data = {
-            'clouds': {
-                'devstack': {
-                    'private': private_state,
-                    'verify': verify_state,
-                    'auth': openstack_auth,
-                },
-            },
-        }
+        openstack_data['clouds']['devstack']['private'] = inventory_update.source_vars_dict.get('private', True)
         if mk_cache:
             # Retrieve cache path from inventory update vars if available,
             # otherwise create a temporary cache path only for this update.
@@ -2508,26 +2494,25 @@ class openstack(PluginFileInjector):
             openstack_data['ansible'] = ansible_variables
         return openstack_data
 
-    def build_script_private_data(self, inventory_update, private_data_dir):
+    def build_script_private_data(self, inventory_update, private_data_dir, mk_cache=True):
         credential = inventory_update.get_cloud_credential()
         private_data = {'credentials': {}}
 
-        openstack_data = self._get_clouds_dict(inventory_update, credential, private_data_dir)
+        openstack_data = self._get_clouds_dict(inventory_update, credential, private_data_dir, mk_cache=mk_cache)
         private_data['credentials'][credential] = yaml.safe_dump(
             openstack_data, default_flow_style=False, allow_unicode=True
         )
         return private_data
 
+    def build_plugin_private_data(self, inventory_update, private_data_dir):
+        # Credentials can be passed in the same way as the script did
+        # but do not create the tmp cache file
+        return self.build_script_private_data(inventory_update, private_data_dir, mk_cache=False)
+
+    def get_plugin_env(self, inventory_update, private_data_dir, private_data_files):
+        return self.get_script_env(inventory_update, private_data_dir, private_data_files)
+
     def inventory_as_dict(self, inventory_update, private_data_dir):
-        credential = inventory_update.get_cloud_credential()
-
-        openstack_data = self._get_clouds_dict(inventory_update, credential, private_data_dir, mk_cache=False)
-        handle, path = tempfile.mkstemp(dir=private_data_dir)
-        f = os.fdopen(handle, 'w')
-        yaml.dump(openstack_data, f, default_flow_style=False)
-        f.close()
-        os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
-
         def use_host_name_for_name(a_bool_maybe):
             if not isinstance(a_bool_maybe, bool):
                 # Could be specified by user via "host" or "uuid"
@@ -2542,7 +2527,6 @@ class openstack(PluginFileInjector):
             fail_on_errors=True,
             expand_hostvars=True,
             inventory_hostname=use_host_name_for_name(False),
-            clouds_yaml_path=[path]  # why a list? it just is
         )
         # Note: mucking with defaults will break import integrity
         # For the plugin, we need to use the same defaults as the old script
