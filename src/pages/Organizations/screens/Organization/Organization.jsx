@@ -158,7 +158,9 @@ class Organization extends Component {
             <Route
               path="/organizations/:id/access"
               render={() => (
-                <OrganizationAccess />
+                <OrganizationAccess
+                  organization={organization}
+                />
               )}
             />
             <Route
