@@ -1,6 +1,0 @@
-[mini_dinstall]
-fqdn = localhost
-method = local
-incoming = FIXME/deb-repo/mini-dinstall/incoming
-run_dinstall = 0
-post_upload_command = mini-dinstall -b -v
