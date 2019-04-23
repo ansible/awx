@@ -1,3 +1,5 @@
+import uuid from 'uuid';
+
 import {
     getInventorySource,
     getJobTemplate,
@@ -7,15 +9,12 @@ import {
 
 import {
     AWX_E2E_URL,
-    AWX_E2E_TIMEOUT_LONG
 } from '../settings';
 
 let data;
 const spinny = "//*[contains(@class, 'spinny')]";
-const workflowSelector = "//a[text()='test-actions-workflow-template']";
 const workflowVisualizerBtn = "//button[contains(@id, 'workflow_job_template_workflow_visualizer_btn')]";
 const workflowSearchBar = "//input[contains(@class, 'SmartSearch-input')]";
-const workflowText = 'name.iexact:"test-actions-workflow-template"';
 
 const startNodeId = '1';
 let initialJobNodeId;
@@ -25,10 +24,6 @@ let newChildNodeId;
 let leafNodeId;
 const nodeAdd = "//*[contains(@class, 'WorkflowChart-nodeAddIcon')]";
 const nodeRemove = "//*[contains(@class, 'WorkflowChart-nodeRemoveIcon')]";
-
-// one of the jobs or projects or inventories
-const testActionsJob = "//div[contains(@class, 'List-tableCell') and contains(text(), 'test-actions-job')]";
-const testActionsJobText = 'name.iexact:"test-actions-job-template"';
 
 // search bar for visualizer templates
 const jobSearchBar = "//*[contains(@id, 'workflow-jobs-list')]//input[contains(@class, 'SmartSearch-input')]";
@@ -49,51 +44,50 @@ const deleteConfirmation = "//button[@ng-click='confirmDeleteNode()']";
 
 const xPathNodeById = (id) => `//*[@id='node-${id}']`;
 const xPathLinkById = (sourceId, targetId) => `//*[@id='link-${sourceId}-${targetId}']//*[contains(@class, 'WorkflowChart-linkPath')]`;
+const xPathNodeByName = (name) => `//*[contains(@class, "WorkflowChart-nameText") and contains(text(), "${name}")]/..`;
 
 module.exports = {
     before: (client, done) => {
+        // Ensure deterministic state on retries
+        const testID = uuid().substr(0, 8);
+        const namespace = `test-actions-${testID}`;
         const resources = [
-            getInventorySource('test-actions'),
-            getJobTemplate('test-actions'),
-            getProject('test-actions'),
-            getWorkflowTemplate('test-actions'),
+            getInventorySource(namespace),
+            getJobTemplate(namespace),
+            getProject(namespace),
+            getWorkflowTemplate(namespace),
         ];
 
         Promise.all(resources)
-            .then(([source, template, project, workflow]) => {
-                data = { source, template, project, workflow };
+            .then(([inventory, template, project, workflow]) => {
+                data = { inventory, template, project, workflow };
+                client
+                    .login()
+                    .waitForAngular()
+                    .resizeWindow(1200, 1000)
+                    .navigateTo(`${AWX_E2E_URL}/#/templates`, false)
+                    .useXpath()
+                    .waitForElementVisible(workflowSearchBar)
+                    .setValue(workflowSearchBar, [`name.iexact:"${data.workflow.name}"`])
+                    .click('//*[contains(@class, "SmartSearch-searchButton")]')
+                    .waitForSpinny(true)
+                    .click(`//a[text()="${namespace}-workflow-template"]`)
+                    .waitForElementVisible(workflowVisualizerBtn)
+                    .click(workflowVisualizerBtn)
+                    .waitForSpinny(true);
+                client.waitForElementVisible(xPathNodeByName(`${namespace}-job`));
+                // Grab the ids of the nodes
+                client.getAttribute(xPathNodeByName(`${namespace}-job`), 'id', (res) => {
+                    initialJobNodeId = res.value.split('-')[1];
+                });
+                client.getAttribute(xPathNodeByName(`${namespace}-pro`), 'id', (res) => {
+                    initialProjectNodeId = res.value.split('-')[1];
+                });
+                client.getAttribute(xPathNodeByName(`${namespace}-inv`), 'id', (res) => {
+                    initialInventoryNodeId = res.value.split('-')[1];
+                });
                 done();
             });
-        client
-            .login()
-            .waitForAngular()
-            .resizeWindow(1200, 1000)
-            .navigateTo(`${AWX_E2E_URL}/#/templates`, false)
-            .useXpath()
-            .waitForElementVisible(workflowSearchBar)
-            .setValue(workflowSearchBar, [workflowText])
-            .click('//*[contains(@class, "SmartSearch-searchButton")]')
-            .waitForSpinny(true)
-            .click('//*[contains(@class, "SmartSearch-clearAll")]')
-            .waitForSpinny(true)
-            .setValue(workflowSearchBar, [workflowText])
-            .click('//*[contains(@class, "SmartSearch-searchButton")]')
-            .waitForSpinny(true)
-            .click(workflowSelector)
-            .waitForSpinny(true)
-            .click(workflowVisualizerBtn);
-        client.waitForElementVisible('//*[contains(@class, "WorkflowChart-nameText") and contains(text(), "test-actions-job")]/..');
-
-        // Grab the ids of the nodes
-        client.getAttribute('//*[contains(@class, "WorkflowChart-nameText") and contains(text(), "test-actions-job")]/..', 'id', (res) => {
-            initialJobNodeId = res.value.split('-')[1];
-        });
-        client.getAttribute('//*[contains(@class, "WorkflowChart-nameText") and contains(text(), "test-actions-project")]/..', 'id', (res) => {
-            initialProjectNodeId = res.value.split('-')[1];
-        });
-        client.getAttribute('//*[contains(@class, "WorkflowChart-nameText") and contains(text(), "test-actions-inventory")]/..', 'id', (res) => {
-            initialInventoryNodeId = res.value.split('-')[1];
-        });
     },
     'verify that workflow visualizer new root node can only be set to always': client => {
         client
@@ -143,9 +137,9 @@ module.exports = {
         client
             .waitForElementVisible(jobSearchBar)
             .clearValue(jobSearchBar)
-            .setValue(jobSearchBar, [testActionsJobText, client.Keys.ENTER])
+            .setValue(jobSearchBar, [`name.iexact:"${data.template.name}"`, client.Keys.ENTER])
             .pause(1000)
-            .findThenClick(testActionsJob)
+            .findThenClick(`//div[contains(@class, "List-tableCell") and contains(text(), "${data.template.name}")]`)
             .pause(1000)
             .waitForElementNotVisible(spinny)
             .findThenClick(edgeTypeDropdownBar)
@@ -174,9 +168,9 @@ module.exports = {
             client
                 .waitForElementVisible(jobSearchBar)
                 .clearValue(jobSearchBar)
-                .setValue(jobSearchBar, [testActionsJobText, client.Keys.ENTER])
+                .setValue(jobSearchBar, [`name.iexact:"${data.template.name}"`, client.Keys.ENTER])
                 .pause(1000)
-                .findThenClick(testActionsJob)
+                .findThenClick(`//div[contains(@class, "List-tableCell") and contains(text(), "${data.template.name}")]`)
                 .pause(1000)
                 .waitForElementNotVisible(spinny)
                 .findThenClick(edgeTypeDropdownBar)

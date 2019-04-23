@@ -62,7 +62,7 @@ module.exports = {
             this
                 .waitForElementVisible('#alert-modal-msg')
                 .expect.element('#alert-modal-msg').text.contain(application.name);
-            this.click('#alert_ok_btn');
+            this.findThenClick('#alert_ok_btn', 'css');
             this.waitForElementNotVisible('#alert-modal-msg');
         },
         delete (name) {
