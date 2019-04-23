@@ -67,8 +67,6 @@ describe('<OrganizationAccessList />', () => {
       />
     ).find('OrganizationAccessList');
 
-    // expect(wrapper.debug()).toBe(false);
-
     setImmediate(() => {
       expect(wrapper.state().results).toEqual(mockData);
       done();
