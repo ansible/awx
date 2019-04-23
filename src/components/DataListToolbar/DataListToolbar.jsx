@@ -37,7 +37,6 @@ class DataListToolbar extends React.Component {
       showDelete,
       showSelectAll,
       isAllSelected,
-      isLookup,
       isCompact,
       noLeftMargin,
       onSort,
