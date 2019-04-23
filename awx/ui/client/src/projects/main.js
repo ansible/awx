@@ -36,7 +36,23 @@ function ResolveScmCredentialType (GetBasePath, Rest, ProcessErrors) {
         });
 }
 
+function ResolveInsightsCredentialType (GetBasePath, Rest, ProcessErrors) {
+    Rest.setUrl(GetBasePath('credential_types') + '?name=Insights');
+
+    return Rest.get()
+        .then(({ data }) => {
+            return data.results[0].id;
+        })
+        .catch(({ data, status }) => {
+            ProcessErrors(null, data, status, null, {
+                hdr: 'Error!',
+                msg: 'Failed to get credential type data: ' + status
+            });
+        });
+}
+
 ResolveScmCredentialType.$inject = ['GetBasePath', 'Rest', 'ProcessErrors'];
+ResolveInsightsCredentialType.$inject = ['GetBasePath', 'Rest', 'ProcessErrors'];
 
 
 export default
@@ -70,6 +86,7 @@ angular.module('Projects', [])
                     const stateIndex = res.states.findIndex(s => s.name === projectsAddName);
 
                     res.states[stateIndex].resolve.scmCredentialType = ResolveScmCredentialType;
+                    res.states[stateIndex].resolve.insightsCredentialType = ResolveInsightsCredentialType;
 
                     return res;
                 });
@@ -113,6 +130,7 @@ angular.module('Projects', [])
                     const stateIndex = res.states.findIndex(s => s.name === projectsEditName);
 
                     res.states[stateIndex].resolve.scmCredentialType = ResolveScmCredentialType;
+                    res.states[stateIndex].resolve.insightsCredentialType = ResolveInsightsCredentialType;
 
                     return res;
                 });
