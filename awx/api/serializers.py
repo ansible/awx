@@ -4883,6 +4883,15 @@ class InstanceGroupSerializer(BaseSerializer):
         read_only=True
     )
     instances = serializers.SerializerMethodField()
+    is_controller = serializers.BooleanField(
+        help_text=_('Indicates whether instance group controls any other group'),
+        read_only=True
+    )
+    is_isolated = serializers.BooleanField(
+        help_text=_('Indicates whether instances in this group are isolated.'
+                    'Isolated groups have a designated controller group.'),
+        read_only=True
+    )
     # NOTE: help_text is duplicated from field definitions, no obvious way of
     # both defining field details here and also getting the field's help_text
     policy_instance_percentage = serializers.IntegerField(
@@ -4908,7 +4917,7 @@ class InstanceGroupSerializer(BaseSerializer):
         fields = ("id", "type", "url", "related", "name", "created", "modified",
                   "capacity", "committed_capacity", "consumed_capacity",
                   "percent_capacity_remaining", "jobs_running", "jobs_total",
-                  "instances", "controller",
+                  "instances", "controller", "is_controller", "is_isolated",
                   "policy_instance_percentage", "policy_instance_minimum", "policy_instance_list")
 
     def get_related(self, obj):

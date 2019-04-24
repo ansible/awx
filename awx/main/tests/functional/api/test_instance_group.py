@@ -79,6 +79,26 @@ def instance_group_jobs_successful(instance_group, create_job_factory, create_pr
 
 
 @pytest.mark.django_db
+def test_instance_group_is_controller(instance_group, isolated_instance_group, non_iso_instance):
+    assert not isolated_instance_group.is_controller
+    assert instance_group.is_controller
+
+    instance_group.instances.set([non_iso_instance])
+
+    assert instance_group.is_controller
+
+
+@pytest.mark.django_db
+def test_instance_group_is_isolated(instance_group, isolated_instance_group):
+    assert not instance_group.is_isolated
+    assert isolated_instance_group.is_isolated
+
+    isolated_instance_group.instances = []
+
+    assert isolated_instance_group.is_isolated
+
+
+@pytest.mark.django_db
 def test_delete_instance_group_jobs(delete, instance_group_jobs_successful, instance_group, admin):
     url = reverse("api:instance_group_detail", kwargs={'pk': instance_group.pk})
     delete(url, None, admin, expect=204)

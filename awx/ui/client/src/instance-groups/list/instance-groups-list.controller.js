@@ -83,7 +83,7 @@ export default ['$scope', '$filter', '$state', 'Alert', 'resolvedModels', 'Datas
 
         vm.rowAction = {
             trash: instance_group => {
-                return vm.isSuperuser && instance_group.name !== 'tower';
+                return vm.isSuperuser && instance_group.name !== 'tower' && !instance_group.is_controller && !instance_group.is_isolated;
             }
         };
 
