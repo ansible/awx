@@ -4,8 +4,8 @@
 #
 #    pip-compile --output-file requirements/requirements_ansible.txt requirements/requirements_ansible.in
 #
-adal==0.5.0               # via msrestazure
-appdirs==1.4.3            # via openstacksdk, os-client-config
+adal==1.2.1               # via msrestazure
+appdirs==1.4.3            # via openstacksdk
 applicationinsights==0.11.1  # via azure-cli-core
 argcomplete==1.9.4        # via azure-cli-core, knack
 asn1crypto==0.24.0        # via cryptography
@@ -14,23 +14,31 @@ azure-cli-nspkg==3.0.2
 azure-common==1.1.11
 azure-graphrbac==0.40.0
 azure-keyvault==1.0.0a1
-azure-mgmt-batch==4.1.0
-azure-mgmt-compute==2.1.0
-azure-mgmt-containerinstance==0.4.0
+azure-mgmt-authorization==0.51.1
+azure-mgmt-batch==5.0.1
+azure-mgmt-cdn==3.0.0
+azure-mgmt-compute==4.4.0
+azure-mgmt-containerinstance==1.4.0
 azure-mgmt-containerregistry==2.0.0
-azure-mgmt-containerservice==3.0.1
-azure-mgmt-dns==1.2.0
-azure-mgmt-keyvault==0.40.0
+azure-mgmt-containerservice==4.4.0
+azure-mgmt-cosmosdb==0.5.2
+azure-mgmt-devtestlabs==3.0.0
+azure-mgmt-dns==2.1.0
+azure-mgmt-hdinsight==0.1.0
+azure-mgmt-keyvault==1.1.0
+azure-mgmt-loganalytics==0.2.0
 azure-mgmt-marketplaceordering==0.1.0
 azure-mgmt-monitor==0.5.2
-azure-mgmt-network==1.7.1
+azure-mgmt-network==2.3.0
 azure-mgmt-nspkg==2.0.0
-azure-mgmt-rdbms==1.2.0
-azure-mgmt-resource==1.2.2
-azure-mgmt-sql==0.7.1
-azure-mgmt-storage==1.5.0
+azure-mgmt-rdbms==1.4.1
+azure-mgmt-redis==5.0.0
+azure-mgmt-resource==2.1.0
+azure-mgmt-servicebus==0.5.3
+azure-mgmt-sql==0.10.0
+azure-mgmt-storage==3.1.0
 azure-mgmt-trafficmanager==0.50.0
-azure-mgmt-web==0.32.0
+azure-mgmt-web==0.41.0
 azure-nspkg==2.0.0
 azure-storage==0.35.1
 backports.ssl-match-hostname==3.5.0.1
@@ -43,13 +51,11 @@ certifi==2018.1.18        # via msrest, requests
 cffi==1.11.5              # via bcrypt, cryptography, pynacl
 chardet==3.0.4            # via requests
 colorama==0.3.9           # via azure-cli-core, knack
-configparser==3.5.0       # via entrypoints
 cryptography==2.6.1       # via adal, azure-keyvault, azure-storage, paramiko, pyopenssl, requests-kerberos, requests-ntlm, secretstorage
 decorator==4.2.1          # via openstacksdk
 deprecation==2.0          # via openstacksdk
 docutils==0.14            # via botocore
 dogpile.cache==0.6.5      # via openstacksdk
-entrypoints==0.2.3        # via keyring
 enum34==1.1.6; python_version < '3' # via cryptography, knack, msrest, ovirt-engine-sdk-python
 futures==3.2.0; python_version < '3' # via openstacksdk, s3transfer
 google-auth==1.6.2
@@ -62,13 +68,12 @@ jinja2==2.10.1
 jmespath==0.9.3           # via azure-cli-core, boto3, botocore, knack, openstacksdk
 jsonpatch==1.21           # via openstacksdk
 jsonpointer==2.0          # via jsonpatch
-keyring==15.1.0           # via msrestazure
 keystoneauth1==3.11.2     # via openstacksdk, os-client-config
 knack==0.3.3              # via azure-cli-core
 lxml==4.1.1               # via ncclient, pyvmomi
 monotonic==1.4            # via humanfriendly
-msrest==0.4.29
-msrestazure==0.4.31
+msrest==0.6.1
+msrestazure==0.5.0
 munch==2.2.0              # via openstacksdk
 ncclient==0.6.3
 netaddr==0.7.19
@@ -106,9 +111,7 @@ requests==2.20.0
 requestsexceptions==1.4.0  # via openstacksdk, os-client-config
 rsa==4.0                  # via google-auth
 s3transfer==0.1.13        # via boto3
-secretstorage==2.3.1      # via keyring
 selectors2==2.0.1         # via ncclient
-
 six==1.11.0               # via azure-cli-core, bcrypt, cryptography, google-auth, isodate, keystoneauth1, knack, munch, ncclient, ntlm-auth, openstacksdk, ovirt-engine-sdk-python, packaging, pynacl, pyopenssl, python-dateutil, pyvmomi, pywinrm, stevedore
 stevedore==1.28.0         # via keystoneauth1
 tabulate==0.7.7           # via azure-cli-core, knack
