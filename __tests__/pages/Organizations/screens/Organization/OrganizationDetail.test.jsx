@@ -88,4 +88,28 @@ describe('<OrganizationDetail />', () => {
     expect(modifiedDetail.find('h6').text()).toBe('Last Modified');
     expect(modifiedDetail.find('p').text()).toBe('Boo');
   });
+
+  test('should show edit button for users with edit permission', () => {
+    const wrapper = mountWithContexts(
+      <OrganizationDetail
+        organization={mockDetails}
+      />
+    ).find('OrganizationDetail');
+
+    const editLink = wrapper.findWhere(node => node.props().to === '/organizations/undefined/edit');
+    expect(editLink.length).toBe(1);
+  });
+
+  test('should hide edit button for users without edit permission', () => {
+    const readOnlyOrg = { ...mockDetails };
+    readOnlyOrg.summary_fields.user_capabilities.edit = false;
+    const wrapper = mountWithContexts(
+      <OrganizationDetail
+        organization={readOnlyOrg}
+      />
+    ).find('OrganizationDetail');
+
+    const editLink = wrapper.findWhere(node => node.props().to === '/organizations/undefined/edit');
+    expect(editLink.length).toBe(0);
+  });
 });

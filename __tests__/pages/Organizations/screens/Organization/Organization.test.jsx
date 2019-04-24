@@ -10,4 +10,14 @@ describe('<OrganizationView />', () => {
   test('initially renders succesfully', () => {
     mountWithContexts(<Organization me={me} />);
   });
+  test('notifications tab shown/hidden based on permissions', () => {
+    const wrapper = mountWithContexts(<Organization me={me} />);
+    expect(wrapper.find('.pf-c-tabs__item').length).toBe(3);
+    expect(wrapper.find('.pf-c-tabs__button[children="Notifications"]').length).toBe(0);
+    wrapper.find('Organization').setState({
+      isNotifAdmin: true
+    });
+    expect(wrapper.find('.pf-c-tabs__item').length).toBe(4);
+    expect(wrapper.find('.pf-c-tabs__button[children="Notifications"]').length).toBe(1);
+  });
 });

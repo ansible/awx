@@ -135,14 +135,18 @@ class Organization extends Component {
       || isAdminOfThisOrg
     );
 
-    const tabElements = [
-      { name: i18nMark('Details'), link: `${match.url}/details` },
-      { name: i18nMark('Access'), link: `${match.url}/access` },
-      { name: i18nMark('Teams'), link: `${match.url}/teams` }
+    const tabsArray = [
+      { name: i18nMark('Details'), link: `${match.url}/details`, id: 0 },
+      { name: i18nMark('Access'), link: `${match.url}/access`, id: 1 },
+      { name: i18nMark('Teams'), link: `${match.url}/teams`, id: 2 }
     ];
 
     if (canSeeNotificationsTab) {
-      tabElements.push({ name: i18nMark('Notifications'), link: `${match.url}/notifications` });
+      tabsArray.push({
+        name: i18nMark('Notifications'),
+        link: `${match.url}/notifications`,
+        id: 3
+      });
     }
 
     let cardHeader = (
@@ -158,12 +162,7 @@ class Organization extends Component {
                     match={match}
                     history={history}
                     labeltext={i18n._(t`Organization detail tabs`)}
-                    tabsArray={[
-                      { name: i18nMark('Details'), link: `${match.url}/details`, id: 0 },
-                      { name: i18nMark('Access'), link: `${match.url}/access`, id: 1 },
-                      { name: i18nMark('Teams'), link: `${match.url}/teams`, id: 2 },
-                      { name: i18nMark('Notifications'), link: `${match.url}/notifications`, id: 3 },
-                    ]}
+                    tabsArray={tabsArray}
                   />
                   <Link
                     aria-label="Close"

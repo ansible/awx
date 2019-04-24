@@ -176,4 +176,38 @@ describe('<OrganizationAccessList />', () => {
       done();
     });
   });
+
+  test('add role button visible for user that can edit org', () => {
+    const wrapper = mountWithContexts(
+      <OrganizationAccessList
+        getAccessList={() => ({ data: { count: 1, results: mockData } })}
+        removeRole={() => {}}
+        api={api}
+        organization={organization}
+      />
+    ).find('OrganizationAccessList');
+
+    setImmediate(() => {
+      const addRole = wrapper.update().find('DataListToolbar').find('PlusIcon');
+      expect(addRole.length).toBe(1);
+    });
+  });
+
+  test('add role button hidden for user that cannot edit org', () => {
+    const readOnlyOrg = { ...organization };
+    readOnlyOrg.summary_fields.user_capabilities.edit = false;
+    const wrapper = mountWithContexts(
+      <OrganizationAccessList
+        getAccessList={() => ({ data: { count: 1, results: mockData } })}
+        removeRole={() => {}}
+        api={api}
+        organization={readOnlyOrg}
+      />
+    ).find('OrganizationAccessList');
+
+    setImmediate(() => {
+      const addRole = wrapper.update().find('DataListToolbar').find('PlusIcon');
+      expect(addRole.length).toBe(0);
+    });
+  });
 });
