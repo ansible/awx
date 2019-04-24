@@ -1,1 +1,1 @@
-e2e-pipeline()
+e2ePipeline()
