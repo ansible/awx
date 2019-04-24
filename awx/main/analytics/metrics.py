@@ -44,6 +44,9 @@ INSTANCE_INFO = Info('awx_instance', 'Info about each node in a Tower system', [
 INSTANCE_LAUNCH_TYPE = Gauge('awx_instance_launch_type_total', 'Type of Job launched', ['node', 'launch_type',])
 INSTANCE_STATUS = Gauge('awx_instance_status_total', 'Status of Job launched', ['node', 'status',])
 
+LICENSE_INSTANCE_TOTAL = Gauge('awx_license_instance_total', 'Total number of managed hosts provided by your license')
+LICENSE_INSTANCE_FREE = Gauge('awx_license_instance_free', 'Number of remaining managed hosts provided by your license')
+
 
 def metrics():
     license_info = get_license(show_key=False)
@@ -54,12 +57,14 @@ def metrics():
         'tower_version': get_awx_version(),
         'ansible_version': get_ansible_version(),
         'license_type': license_info.get('license_type', 'UNLICENSED'),
-        'free_instances': str(license_info.get('free instances', 0)),
         'license_expiry': str(license_info.get('time_remaining', 0)),
         'pendo_tracking': settings.PENDO_TRACKING_STATE,
         'external_logger_enabled': str(settings.LOG_AGGREGATOR_ENABLED),
         'external_logger_type': getattr(settings, 'LOG_AGGREGATOR_TYPE', 'None')
     })
+
+    LICENSE_INSTANCE_TOTAL.set(str(license_info.get('available_instances', 0)))
+    LICENSE_INSTANCE_FREE.set(str(license_info.get('free_instances', 0)))
 
     current_counts = counts(None)
 

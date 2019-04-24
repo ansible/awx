@@ -28,6 +28,8 @@ EXPECTED_VALUES = {
     'awx_instance_cpu':0.0,
     'awx_instance_memory':0.0,
     'awx_instance_info':1.0,
+    'awx_license_instance_total':0,
+    'awx_license_instance_free':0,
 }
 
 
