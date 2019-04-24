@@ -44,7 +44,6 @@ plugin: gcp_compute
 projects:
 - fooo
 retrieve_image_info: true
-service_account_file: {{ file_reference }}
 use_contrib_script_compatible_sanitization: true
 zones:
 - us-east4-a

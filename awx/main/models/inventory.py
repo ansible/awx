@@ -1912,13 +1912,14 @@ class PluginFileInjector(object):
         # some sources may have no credential, specifically ec2
         if credential is None:
             return injected_env
+        if self.base_injector in ('managed', 'template'):
+            injected_env['INVENTORY_UPDATE_ID'] = str(inventory_update.pk)  # so injector knows this is inventory
         if self.base_injector == 'managed':
             from awx.main.models.credential import injectors as builtin_injectors
             cred_kind = inventory_update.source.replace('ec2', 'aws')
             if cred_kind in dir(builtin_injectors):
                 getattr(builtin_injectors, cred_kind)(credential, injected_env, private_data_dir)
         elif self.base_injector == 'template':
-            injected_env['INVENTORY_UPDATE_ID'] = str(inventory_update.pk)  # so injector knows this is inventory
             safe_env = injected_env.copy()
             args = []
             credential.credential_type.inject_credential(
@@ -2327,6 +2328,12 @@ class gce(PluginFileInjector):
 
     def get_script_env(self, inventory_update, private_data_dir, private_data_files):
         env = super(gce, self).get_script_env(inventory_update, private_data_dir, private_data_files)
+        cred = inventory_update.get_cloud_credential()
+        # these environment keys are unique to the script operation, and are not
+        # concepts in the modern inventory plugin or gce Ansible module
+        # email and project are redundant with the creds file
+        env['GCE_EMAIL'] = cred.get_input('username', default='')
+        env['GCE_PROJECT'] = cred.get_input('project', default='')
         env['GCE_ZONE'] = inventory_update.source_regions if inventory_update.source_regions != 'all' else ''  # noqa
 
         # by default, the GCE inventory source caches results on disk for
@@ -2367,8 +2374,6 @@ class gce(PluginFileInjector):
         credential = inventory_update.get_cloud_credential()
 
         # auth related items
-        from awx.main.models.credential.injectors import gce as builtin_injector
-        ret['service_account_file'] = builtin_injector(credential, {}, private_data_dir)
         ret['projects'] = [credential.get_input('project', default='')]
         ret['auth_kind'] = "serviceaccount"
 
@@ -2413,11 +2418,6 @@ class gce(PluginFileInjector):
         if inventory_update.source_regions and 'all' not in inventory_update.source_regions:
             ret['zones'] = inventory_update.source_regions.split(',')
         return ret
-
-    def get_plugin_env(self, inventory_update, private_data_dir, private_data_files):
-        # gce wants everything defined in inventory & cred files
-        # this explicitly turns off injection of environment variables
-        return {}
 
 
 class vmware(PluginFileInjector):

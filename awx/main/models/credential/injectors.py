@@ -19,8 +19,9 @@ def gce(cred, env, private_data_dir):
     project = cred.get_input('project', default='')
     username = cred.get_input('username', default='')
 
-    env['GCE_EMAIL'] = username
-    env['GCE_PROJECT'] = project
+    if 'INVENTORY_UPDATE_ID' not in env:
+        env['GCE_EMAIL'] = username
+        env['GCE_PROJECT'] = project
     json_cred = {
         'type': 'service_account',
         'private_key': cred.get_input('ssh_key_data', default=''),
