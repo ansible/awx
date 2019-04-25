@@ -279,8 +279,6 @@ This task was added as a new feature in Tower 3.5. It allows the user to turn on
 
 #### Gather Analytics
 
-[This is a Tower-only feature and requires a subscription to RH Insights.]
-
 The analytics collection `gather()` and `ship()` functions are called by an `awx-manage gather_analytics --ship` command, which runs on whichever Tower instance it is invoked on. When these functions are called by Celery beat (currently at midnight local time), it is run on one `execution_node`, or Tower instance, by the Python in the AWX virtualenv.
 
 For more details about analytics, please visit the [Usability Analytics and Data Collection](https://docs.ansible.com/ansible-tower/latest/html/administration/usability_data_collection.html) page.
