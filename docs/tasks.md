@@ -1,15 +1,14 @@
 Background Tasks in AWX
 =======================
 
-AWX runs a lot of Python code asynchronously _in the background_ - meaning
-_outside_ of the context of an HTTP request, such as:
+In this document, we will go into a bit of detail about how AWX runs a lot of Python code asynchronously _in the background_ (_i.e._, _outside_ of the context of an HTTP request, such as:
 
-* Any time a Job is launched in AWX (a Job Template, an Adhoc Command, a Project
+* Any time a Job is launched in AWX (a Job Template, an Ad Hoc Command, a Project
   Update, an Inventory Update, a System Job), a background process retrieves
-  metadata _about_ that job from the database and forks some process (e.g.,
-  `ansible-playbook`, `awx-manage inventory_import`) 
-* Certain expensive or time consuming tasks run in the background
-  asynchronously (like deleting an inventory).
+  metadata _about_ that job from the database and forks some process (_e.g._,
+  `ansible-playbook`, `awx-manage inventory_import`)
+* Certain expensive or time-consuming tasks run in the background
+  asynchronously (_e.g._, when deleting an inventory).
 * AWX runs a variety of periodic background tasks on a schedule.  Some examples
   are:
     - AWX's "Task Manager/Scheduler" wakes up periodically and looks for
@@ -17,7 +16,7 @@ _outside_ of the context of an HTTP request, such as:
     - AWX periodically runs code that looks for scheduled jobs and launches
       them.
     - AWX runs a variety of periodic tasks that clean up temporary files, and
-      perform various administrative checks
+      performs various administrative checks
     - Every node in an AWX cluster runs a periodic task that serves as
       a heartbeat and capacity check
 
@@ -108,19 +107,6 @@ child processes that it distributes inbound messages to.  These worker
 processes perform the actual work of deserializing published tasks and running
 the associated Python code.
 
-Heartbeats, Capacity, and Job Reaping
-------------------------------------
-One of the most important tasks in a clustered AWX installation is the periodic
-heartbeat task.  This task runs periodically on _every_ node, and is used to
-record a heartbeat and system capacity for that node (which is used by the
-scheduler when determining where to placed launched jobs).
-
-If a node in an AWX cluster discovers that one of its peers has not updated its
-heartbeat within a certain grace period, it is assumed to be offline, and its
-capacity is set to zero to avoid scheduling new tasks on that node.
-Additionally, jobs allegedly running or scheduled to run on that node are
-assumed to be lost, and "reaped", or marked as failed.
-
 Debugging
 ---------
 `awx-manage run_dispatcher` includes a few flags that allow interaction and
@@ -153,3 +139,179 @@ work has completed, spinning up replacement workers.
 ```
 awx-manage run_dispatcher --reload
 ```
+
+* * *
+
+In the following sections, we will go further into the details regarding AWX/Tower tasks.  They are all decorated by `@task()` in [awx/awx/main/tasks.py](https://github.com/ansible/awx/blob/devel/awx/main/tasks.py)
+
+## Housekeeping Tasks
+
+The two main types of "housekeeping tasks" are _Tower Schedulers_ and _Task Managers_.  
+
+Tower Schedulers act like the system's clocks and timers. The `schedule()` function gets run periodically by a background task as well as upon job creation or completion. `schedule()` is triggered via the mechanisms mentioned in the previous line in order to reduce the time from launch to running, resulting in a better user experience. It also provides a fail-safe in case there are any missed code-paths.
+
+Task Managers typically run every 20 seconds; its most important job is to build dependency graphs of all jobs that are in a particular state in the system (_e.g._ ensuring that things like user-selected inventory syncs occur prior to a playbook run).
+
+For further information regarding Tower Schedulers or Task Managers, refer to the [Task Manager Overview page](https://github.com/ansible/awx/blob/devel/docs/task_manager_system.md) of the AWX documentation.
+
+
+### Heartbeats, Capacity, and Job Reaping
+
+One of the most important tasks in a clustered AWX installation is the periodic heartbeat task.  This task runs periodically on _every_ node, and is used to record a heartbeat and system capacity for that node (which is used by the scheduler when determining where to place launched jobs).
+
+If a node in an AWX cluster discovers that one of its peers has not updated its heartbeat within a certain grace period, it is assumed to be offline, and its capacity is set to zero to avoid scheduling new tasks on that node. Additionally, jobs allegedly running or scheduled to run on that node are assumed to be lost, and "reaped", or marked as failed.
+
+
+#### AWX Isolated Heartbeat
+
+AWX reports as much status as it can via the browsable API at `/api/v2/ping` in order to provide validation of the health of an instance, including the timestamps of the last heartbeat.
+
+When a job is scheduled to run on an isolated instance, the controller instance puts together the metadata required to run the job and then transfers it to the isolated instance. Once the metadata has been synchronized to the isolated host, the controller instance starts a process on the isolated instance, which consumes the metadata and starts running `ansible/ansible-playbook`. As the playbook runs, job artifacts (such as stdout and job events) are written to disk on the isolated instance.
+
+While the job runs on the isolated instance, the controller instance periodically copies job artifacts (_e.g._, stdout and job events) from the isolated instance. It processes these until the job finishes running on the isolated instance.
+
+To read more about isolated instances, refer to the [Isolated Instance Groups](https://docs.ansible.com/ansible-tower/latest/html/administration/clustering.html#isolated-instance-groups) section of the Clustering page in the Ansible Tower Administration guide.
+
+
+#### AWX Periodic Scheduler
+
+When a job is launched, a periodic scheduler task is kicked off in the background, which looks at all of the jobs currently in `pending` status (based on dependencies being completed or not). For example, if you launch a Job Template and it needs the associated Project to be updated first, this task (which runs every 30 seconds) ensures that AWX knows that it needs to wait until the updated is complete.
+
+
+
+## AWX/Tower Jobs
+
+### Unified Jobs
+
+This is the categorical name for _all_ types of jobs (_i.e._, it's the parent class of all job class models). On the simplest level, a process is being forked and captured in the output.  Instance capacity determines which jobs get assigned to any specific instance; thus jobs and ad hoc commands use more capacity if they have a higher forks value.
+
+For more information, visit the [Jobs page](https://docs.ansible.com/ansible-tower/latest/html/userguide/jobs.html) of the Ansible Tower User Guide.
+
+Below are specific details regarding each type of unified job that can be run in AWX/Tower.
+
+
+#### Run Ad Hoc Command
+
+This task spawns an `ansible` proces, which then runs a command using Ansible. The different functions contained within this task do the following:
+
+- Return SSH private key data needed for the ad hoc command (only if stored in the database as `ssh_key_data`).
+- Build a dictionary of passwords for the SSH private key, SSH user and sudo/su.
+- Build an environment dictionary for Ansible.
+- Build a command line argument list for running Ansible, optionally using `ssh-agent` for public/private key authentication.
+- Return whether the task should use `proot`.
+
+For more information on ad hoc commands, read the [Running Ad Hoc Commands section](https://docs.ansible.com/ansible-tower/latest/html/userguide/inventories.html#running-ad-hoc-commands) of the Inventories page of the Ansible Tower User Guide.
+
+
+#### Run Job
+
+This task is a definition and set of parameters for running `ansible-playbook` via a Job Template. It defines metadata about a given playbook run, such as a named identifier, an associated inventory to run against, the project and `.yml` playbook file to run, etc.
+
+
+#### Run Project Update
+
+When a Project Update is run in AWX, an `ansible-playbook` command is composed and spawned in a pseudoterminal on one of the servers/containers that make up the AWX installation. This process runs until completion (or until a configurable timeout), and the return code, `stdout`, and `stderr` of the process are recorded in the AWX database.
+
+This task also includes a helper method to build SCM url and extra vars with parameters needed for authentication, as well as a method for returning search/replace strings to prevent output URLs from showing sensitive passwords.
+
+To read more about this topic, visit the [Projects page](https://docs.ansible.com/ansible-tower/latest/html/userguide/projects.html) of the Ansible Tower User Guide.
+
+
+#### Run Inventory Update
+
+Inventory data can be entered into AWX manually, but many users perform Inventory Syncs to import inventory data from a variety of external sources. This task returns the private data needed for the inventory update.
+
+One of the methods in this task class builds the environment dictionary for inventory import. This _used_ to be the mechanism by which any data that needed to be passed to the inventory update script was set up (since it made the inventory update job aware of its proper credentials).  However, most environment injection is currently accomplished by the credential injectors. The primary purpose of this is to point to the inventory update `INI` or `config` file.
+
+Another method adds several options to the shell arguments based on the inventory-source-specific setting in the AWX configuration. These settings are "per-source"; it's entirely possible that they will be different between cloud providers if an AWX user actively uses multiple ones.
+
+Additionally, inventory imports run through a management command. Inventory in `args` get passed to that command, which results in this not being considered to be "Ansible" inventory by Runner even though it is.
+
+To read more, visit the [Inventories page](https://docs.ansible.com/ansible-tower/latest/html/userguide/inventories.h) of the Ansible Tower User Guide.
+
+
+#### System Jobs
+
+The main distinctive feature of a System Job (as compared to all other Unified Jobs) is that a system job runs management commands, which are placed in the highest priority for execution hierarchy purposes. They also implement a database lock while running, _i.e._, no other jobs can be run during that time on the same node. Additionally, they have a fixed fork impact of 5 vs 1.
+
+For more details about AWX/Tower jobs, please refer to the [Jobs](https://docs.ansible.com/ansible-tower/latest/html/userguide/jobs.html) page of the Ansible Tower user guide.
+
+
+### Periodic Background Tasks
+
+Generally speaking, these are the tasks which take up a lot of resources which are best for _not_ running via HTTP request.
+
+
+#### Update/Delete Inventory Computed Fields
+
+When making changes to inventories or hosts, there are related attributes that are calculated "under the hood".  For example, when a user runs an inventory update (refer to the "Run Inventory Update" section above for more details) and one of the hosts is offline, this can be a very resource-intensive thing to calculate.  This particular background task can do the work instead!  
+
+In addition to freeing up resources, a handler and wrapper around `inventory.update_computed_fields` get signaled within this task in order to prevent unnecessary recursive calls.
+
+
+#### Update Host Smart Inventory Memberships
+
+The `smart_inventories` field in AWX/Tower uses a membership lookup table that identifies a set of every Smart Inventory a host is associated with. This particular task generates memberships and is launched whenever certain conditions are met (_e.g._, a new host is added or an existing host is modified).
+
+An important thing to note is that this task is only run if the `AWX_REBUILD_SMART_MEMBERSHIP` is set to `True` (default is `False`).
+
+For more information, visit the [Smart Inventories section](https://docs.ansible.com/ansible-tower/latest/html/userguide/inventories.html#smart-inventories) of the Tower User Guide's "Inventory" page or the AWX documentation page [Inventory Refresh Overview page](https://github.com/ansible/awx/blob/devel/docs/inventory_refresh.md#inventory-changes) in this repo.
+
+
+#### Deep Copy Model Object
+
+As previously discussed, there are a number of places where tasks run in the background due to slow processing time or high amounts of memory consumption (_e.g._, in cases where nested code is involved). Since it would be suboptimal to have resource-intensive code running only to have the HTTP connection hanging, this task instead acquires all of the attributes of the original job or object, checks that the user has permissions to it, and then constructs a new compound job/object, recursively adding these copies into the original. This enables a response of a `202 Accepted`, where instead of waiting for a `200 OK` status, it simply indicates that the job is in progress, freeing up resources for other tasks.
+
+
+#### Handle Setting Changes
+
+Any time you change a setting in Tower (_e.g._, in `api/v2/settings`), data will be added to or altered in a database. Since querying databases directly can be extremely time-consuming, each node in a cluster runs a local `memcached` server, none of which are aware of each other. They all potentially have different values contained within, but ultimately need to be consistent. So how can this be accomplished?
+
+"Handle Settings Changes" provides the solution!  This "fanout" task (_i.e._, all nodes execute it) makes it so that there is a single source of truth even within a clustered system.  When anything gets altered or updated in the database, all of the `memcached` servers on each node needs to "forget" the value that they previously retained; with this task, whenever `perform_update()` or `perform_destroy` gets invoked in `awx/conf/views.py`, this task will clear any associated values within each node's `memcached` process and ensure that all of the nodes in the cluster have the most up-to-date information in their caches at all times.
+
+
+### Analytics and Administrative Tasks
+
+#### Profile SQL
+
+This task was added as a new feature in Tower 3.5. It allows the user to turn on a global profiler in their system, so that Tower can profile all of the SQL queries that they make.  This is a "fanout" style task (meaning all nodes execute it), and one of the main benefits is that it assists with identifying slow queries.
+
+
+#### Gather Analytics
+
+[This is a Tower-only feature and requires a subscription to RH Insights.]
+
+The analytics collection `gather()` and `ship()` functions are called by an `awx-manage gather_analytics --ship` command, which runs on whichever Tower instance it is invoked on. When these functions are called by Celery beat (currently at midnight local time), it is run on one `execution_node`, or Tower instance, by the Python in the AWX virtualenv.
+
+For more details about analytics, please visit the [Usability Analytics and Data Collection](https://docs.ansible.com/ansible-tower/latest/html/administration/usability_data_collection.html) page.
+
+
+#### Run Administrative Checks
+
+Not applicable to AWX, this task checks that the Tower license currently in use is valid and alerts the admin user(s) via email when they are in danger of going over capacity and/or when the license is about to expire. Specifically (in cases of going over capacity), it triggers when the node count is at or over 90% of what the license allows.
+
+
+#### Purge Old Stdout Files
+
+Previously, AWX/Tower wrote `stdout` to a disk.  With the implementation of this task, old files are now cleaned on a regular basis when the `LOCAL_STDOUT_EXPIRE_TIME` is triggered.
+
+
+#### Delete Project Files
+
+A "fanout" task (meaning all nodes execute it), this looks at the local file system and deletes project-related files.
+
+
+#### Handle Work Success/Error
+
+This task is part of the process of running a unified job.  For example, let's say that a Project Update gets started, and it takes 10 seconds; it's done and ready to go with no more dependencies.  Instead of waiting for the scheduler to wake up again (typically every 30 seconds), this task will alert the scheduler to go ahead and run the next phase of the dependency graph.
+
+In case of an error, the same thing happens as above but with a "fail" vs a "success".  So for example if a workflow node is set to run "on fail", the Handel Work task will wake up the scheduler and ensure that the next step runs.  It is also useful in recording cascading errors (_e.g._, if a job has an error, it will look at what it depended on and report status details for all of those dependencies as well).
+
+
+#### Send Notifications
+
+When a user creates a notification at `/api/v2/notifications/`, they can assign it to any of the various objects that support it (_i.e._, all variants of Job Templates as well as Organizations and Projects).  They can also set the appropriate trigger level for when they want the notification task to run (_e.g._, error, success, or any).
+
+Notifications assigned at certain levels will inherit traits defined on parent objects in different ways.  For example, ad hoc commands will use notifications defined on the Organization that the inventory is associated with.
+
+For more details on notifications, visit the [Notifications page](https://docs.ansible.com/ansible-tower/3.4.3/html/userguide/notifications.html) of the Tower user guide, or the AWX documentation on [Notification System Overview](https://github.com/ansible/awx/blob/devel/docs/notification_system.md) in this repository.
