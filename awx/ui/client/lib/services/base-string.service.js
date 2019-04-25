@@ -103,6 +103,27 @@ function BaseStringService (namespace) {
         CANCEL: resourceType => t.s('Cancel the {{resourceType}}', { resourceType })
     };
 
+    this.sort = {
+        NAME_ASCENDING: t.s('Name (Ascending)'),
+        NAME_DESCENDING: t.s('Name (Descending)'),
+        CREATED_ASCENDING: t.s('Created (Ascending)'),
+        CREATED_DESCENDING: t.s('Created (Descending)'),
+        MODIFIED_ASCENDING: t.s('Modified (Ascending)'),
+        MODIFIED_DESCENDING: t.s('Modified (Descending)'),
+        EXPIRES_ASCENDING: t.s('Expires (Ascending)'),
+        EXPIRES_DESCENDING: t.s('Expires (Descending)'),
+        LAST_JOB_RUN_ASCENDING: t.s('Last Run (Ascending)'),
+        LAST_JOB_RUN_DESCENDING: t.s('Last Run (Descending)'),
+        USERNAME_ASCENDING: t.s('Username (Ascending)'),
+        USERNAME_DESCENDING: t.s('Username (Descending)'),
+        START_TIME_ASCENDING: t.s('Start Time (Ascending)'),
+        START_TIME_DESCENDING: t.s('Start Time (Descending)'),
+        FINISH_TIME_ASCENDING: t.s('Finish Time (Ascending)'),
+        FINISH_TIME_DESCENDING: t.s('Finish Time (Descending)'),
+        UUID_ASCENDING: t.s('UUID (Ascending)'),
+        UUID_DESCENDING: t.s('UUID (Descending)')
+    };
+
     this.ALERT = ({ header, body }) => t.s('{{ header }} {{ body }}', { header, body });
 
     /**

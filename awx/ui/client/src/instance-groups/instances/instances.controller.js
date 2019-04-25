@@ -24,10 +24,13 @@ function InstancesController ($scope, $state, $http, $transitions, models, strin
     vm.toolbarSortValue = toolbarSortDefault;
     vm.toolbarSortOptions = [
         toolbarSortDefault,
-        {
-            label: `${strings.get('sort.NAME_DESCENDING')}`,
-            value: '-hostname'
-        }
+        { label: `${strings.get('sort.NAME_DESCENDING')}`, value: '-hostname' },
+        { label: `${strings.get('sort.UUID_ASCENDING')}`, value: 'uuid' },
+        { label: `${strings.get('sort.UUID_DESCENDING')}`, value: '-uuid' },
+        { label: `${strings.get('sort.CREATED_ASCENDING')}`, value: 'created' },
+        { label: `${strings.get('sort.CREATED_DESCENDING')}`, value: '-created' },
+        { label: `${strings.get('sort.MODIFIED_ASCENDING')}`, value: 'modified' },
+        { label: `${strings.get('sort.MODIFIED_DESCENDING')}`, value: '-modified' }
     ];
 
     const removeStateParamsListener = $scope.$watchCollection('$state.params', () => {
