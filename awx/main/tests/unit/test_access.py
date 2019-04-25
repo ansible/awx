@@ -3,14 +3,19 @@ from unittest import mock
 
 from django.contrib.auth.models import User
 from django.forms.models import model_to_dict
+from django.core.exceptions import FieldDoesNotExist
+
 from rest_framework.exceptions import ParseError
 
 from awx.main.access import (
     BaseAccess,
+    BaseAttachAccess,
     check_superuser,
     JobTemplateAccess,
     WorkflowJobTemplateAccess,
     SystemJobTemplateAccess,
+    ProjectAccess,
+    ActivityStreamAccess,
     vars_are_encrypted
 )
 
@@ -21,6 +26,10 @@ from awx.main.models import (
     Project,
     Role,
     Organization,
+    ActivityStream,
+    Job,
+    JobTemplate,
+    SystemJobTemplate
 )
 
 
@@ -294,3 +303,70 @@ def test_system_job_template_can_start(mocker):
     user.is_superuser = True
     access = SystemJobTemplateAccess(user)
     assert access.can_start(None)
+
+
+class TestAttachUtilities:
+    def test_relationship_not_editable(self):
+        with pytest.raises(RuntimeError) as exe:
+            # valid relationship but not editable by user, should error
+            ActivityStreamAccess(User()).can_attach(ActivityStream(id=42), Job(), 'job')
+        assert 'has not be written' in exe.value.args[0]
+
+    def test_relationship_does_not_exist(self):
+        with pytest.raises(FieldDoesNotExist):
+            # relationship not valid, should error
+            ActivityStreamAccess(User()).can_attach(ActivityStream(id=42), Job(), 'newspapers')
+
+    def test_valid_field_but_not_editable(self):
+        # This case gets weird, a relationship exists technically within the models
+        # but for the given model and field, this is not an editable field by the user
+        with pytest.raises(RuntimeError) as exe:
+            SystemJobTemplateAccess(User()).can_attach(SystemJobTemplate(pk=42), Credential(pk=43), 'credentials')
+        assert 'Access logic for either SystemJobTemplate or Credential' in exe.value.args[0]
+        assert 'not implemented' in exe.value.args[0]
+
+    def test_bad_sub_object_type(self):
+        with pytest.raises(RuntimeError) as exe:
+            # valid and editable relationship but wrong type given for object being attached
+            JobTemplateAccess(User()).can_attach(JobTemplate(pk=42), Job(pk=43), 'credentials')
+        assert 'Incorrect type given' in exe.value.args[0]
+
+    # valid usage
+    def test_valid_association_access_call(self, mocker):
+        mock_method = mocker.MagicMock(return_value='fooooo')
+        with mocker.patch('awx.main.access.RelatedCredentialsAttachAccess.can_add', mock_method):
+            assert JobTemplateAccess(User()).can_attach(JobTemplate(pk=42), Credential(pk=43), 'credentials') == 'fooooo'
+        mock_method.assert_called_once_with(obj_A=JobTemplate(pk=42), obj_B=Credential(pk=43))
+
+    # valid usage
+    def test_valid_association_access_call_in_reverse(self, mocker):
+        mock_method = mocker.MagicMock(return_value='fooooo')
+        with mocker.patch('awx.main.access.RelatedCredentialsAttachAccess.can_add', mock_method):
+            assert JobTemplateAccess(User()).can_attach(Credential(pk=43), JobTemplate(pk=42), 'unifiedjobtemplates') == 'fooooo'
+        mock_method.assert_called_once_with(obj_A=JobTemplate(pk=42), obj_B=Credential(pk=43))
+
+    def test_unsupported_relationship_type(self):
+        with pytest.raises(RuntimeError):
+            # this call makes no sense, and organization has LOTS of project, so what does
+            # it mean to attach to this project?
+            ProjectAccess(User()).can_attach(Project(pk=42), Organization(pk=43), 'organization')
+
+    # valid usage, but not ideal
+    def test_one_to_many_call(self, mocker):
+        mock_method = mocker.MagicMock(return_value='baaaar')
+        with mocker.patch('awx.main.access.ProjectAccess.can_change', mock_method):
+            assert ProjectAccess(User()).can_attach(Organization(pk=43), Project(pk=42), 'projects')
+        mock_method.assert_called_once_with(Project(pk=42), {'organization': Organization(pk=43)})
+
+    def test_attach_classes_non_overlapping(self):
+        '''Assure that two attach classes will not make claim to the same relationship
+        If that happens, that would leave the intention ambiguous and subject to
+        unpredictable ordering
+        '''
+        attach_registry = {}
+        for cls in BaseAttachAccess.__subclasses__():
+            for through_model in cls.through_models():
+                assert through_model not in attach_registry, 'Relationship {} is claimed by both classes {} and {}'.format(
+                    through_model.__name__, attach_registry[through_model].__name__, cls.__name__
+                )
+                attach_registry[through_model] = cls

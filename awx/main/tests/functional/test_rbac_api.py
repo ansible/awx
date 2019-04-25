@@ -311,7 +311,12 @@ def test_org_admin_add_user_to_job_template(post, organization, check_jobtemplat
     assert org_admin in check_jobtemplate.admin_role
     assert joe not in check_jobtemplate.execute_role
 
-    post(reverse('api:role_users_list', kwargs={'pk': check_jobtemplate.execute_role.id}), {'id': joe.id}, org_admin)
+    post(
+        url=reverse('api:role_users_list', kwargs={'pk': check_jobtemplate.execute_role.id}),
+        data={'id': joe.id},
+        user=org_admin,
+        expect=204
+    )
     assert joe in check_jobtemplate.execute_role
 
 
@@ -326,7 +331,12 @@ def test_org_admin_remove_user_from_job_template(post, organization, check_jobte
     assert org_admin in check_jobtemplate.admin_role
     assert joe in check_jobtemplate.execute_role
 
-    post(reverse('api:role_users_list', kwargs={'pk': check_jobtemplate.execute_role.id}), {'disassociate': True, 'id': joe.id}, org_admin)
+    post(
+        url=reverse('api:role_users_list', kwargs={'pk': check_jobtemplate.execute_role.id}),
+        data={'disassociate': True, 'id': joe.id},
+        user=org_admin,
+        expect=204
+    )
     assert joe not in check_jobtemplate.execute_role
 
 

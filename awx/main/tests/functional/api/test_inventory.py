@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 
 from awx.api.versioning import reverse
 
-from awx.main.models import InventorySource, Inventory, ActivityStream
+from awx.main.models import InventorySource, Inventory, ActivityStream, Group, Host
 
 import json
 
@@ -173,6 +173,27 @@ def test_edit_inventory_group(put, group, alice, role_field, expected_status_cod
     if role_field:
         getattr(group.inventory, role_field).members.add(alice)
     put(reverse('api:group_detail', kwargs={'pk': group.id}), data, alice, expect=expected_status_code)
+
+
+@pytest.mark.django_db
+def test_cannot_associate_between_different_inventories(post, rando, group, organization, admin_user):
+    inv2 = Inventory.objects.create(name='foo2', organization=organization)
+    group2 = Group.objects.create(name='group2', inventory=inv2)
+    r = post(
+        url=reverse('api:group_children_list', kwargs={'pk': group.id}),
+        data={'id': group2.pk},
+        user=admin_user,
+        expect=400
+    )
+    assert 'Cannot associate two items from different inventories' in r.data['detail']
+    host2 = Host.objects.create(name='host2', inventory=inv2)
+    r2 = post(
+        url=reverse('api:group_hosts_list', kwargs={'pk': group.id}),
+        data={'id': host2.pk},
+        user=admin_user,
+        expect=400
+    )
+    assert 'Cannot associate two items from different inventories' in r2.data['detail']
 
 
 @pytest.mark.parametrize("role_field,expected_status_code", [

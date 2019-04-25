@@ -107,15 +107,15 @@ def test_team_org_resource_role(ext_auth, organization, rando, org_admin, team):
         settings_mock.MANAGE_ORGANIZATION_AUTH = ext_auth
         assert [
             # use via /api/v2/teams/N/roles/
-            TeamAccess(org_admin).can_attach(team, organization.workflow_admin_role, 'roles'),
+            TeamAccess(org_admin).can_attach(team, organization.workflow_admin_role, 'member_role.children'),
             # use via /api/v2/roles/teams/
-            RoleAccess(org_admin).can_attach(organization.workflow_admin_role, team, 'member_role.parents')
+            RoleAccess(org_admin).can_attach(organization.workflow_admin_role, team.member_role, 'parents')
         ] == [True for i in range(2)]
         assert [
             # use via /api/v2/teams/N/roles/
-            TeamAccess(org_admin).can_unattach(team, organization.workflow_admin_role, 'roles'),
+            TeamAccess(org_admin).can_unattach(team, organization.workflow_admin_role, 'member_role.children'),
             # use via /api/v2/roles/teams/
-            RoleAccess(org_admin).can_unattach(organization.workflow_admin_role, team, 'member_role.parents')
+            RoleAccess(org_admin).can_unattach(organization.workflow_admin_role, team.member_role, 'parents')
         ] == [True for i in range(2)]
 
 

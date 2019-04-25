@@ -4500,9 +4500,8 @@ class RoleTeamsList(SubListAttachDetachAPIView):
             data = dict(msg=_("You cannot grant system-level permissions to a team."))
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
-        if not request.user.can_access(self.parent_model, action, role, team,
-                                       self.relationship, request.data,
-                                       skip_sub_obj_read_check=False):
+        if not request.user.can_access(self.parent_model, action, role, team.member_role,
+                                       'parents', request.data):
             raise PermissionDenied()
         if request.data.get('disassociate', None):
             team.member_role.children.remove(role)

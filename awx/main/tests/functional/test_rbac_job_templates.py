@@ -220,9 +220,12 @@ def test_job_template_creator_access(project, rando, post):
 
 @pytest.mark.django_db
 def test_associate_label(label, user, job_template):
-    access = JobTemplateAccess(user('joe', False))
-    job_template.admin_role.members.add(user('joe', False))
-    label.organization.read_role.members.add(user('joe', False))
+    joe = user('joe', False)
+    access = JobTemplateAccess(joe)
+    assert not access.can_attach(job_template, label, 'labels', None)
+    job_template.admin_role.members.add(joe)
+    assert not access.can_attach(job_template, label, 'labels', None)
+    label.organization.read_role.members.add(joe)
     assert access.can_attach(job_template, label, 'labels', None)
 
 

@@ -8,6 +8,8 @@ from awx.main.access import (
 )
 from awx.main.models import Role, Organization
 
+from rest_framework.exceptions import PermissionDenied
+
 
 @pytest.mark.django_db
 def test_team_access_attach(rando, team, inventory):
@@ -19,9 +21,10 @@ def test_team_access_attach(rando, team, inventory):
 
     team_access = TeamAccess(rando)
     role_access = RoleAccess(rando)
-    data = {'id': inventory.admin_role.pk}
-    assert not team_access.can_attach(team, inventory.admin_role, 'member_role.children', data, False)
-    assert not role_access.can_attach(inventory.admin_role, team, 'member_role.parents', data, False)
+    assert not team_access.can_attach(team, inventory.admin_role, 'member_role.children')
+    assert not team_access.can_attach(team.member_role, inventory.admin_role, 'children')
+    assert not role_access.can_attach(inventory, team.member_role, 'admin_role.parents')
+    assert not role_access.can_attach(inventory.admin_role, team.member_role, 'parents')
 
 
 @pytest.mark.django_db
@@ -29,9 +32,9 @@ def test_user_access_attach(rando, inventory):
     inventory.read_role.members.add(rando)
     user_access = UserAccess(rando)
     role_access = RoleAccess(rando)
-    data = {'id': inventory.admin_role.pk}
-    assert not user_access.can_attach(rando, inventory.admin_role, 'roles', data, False)
-    assert not role_access.can_attach(inventory.admin_role, rando, 'members', data, False)
+    assert not user_access.can_attach(rando, inventory.admin_role, 'roles')
+    assert not role_access.can_attach(inventory.admin_role, rando, 'members')
+    assert not role_access.can_attach(inventory, rando, 'admin_role.members')
 
 
 @pytest.mark.django_db
@@ -102,17 +105,21 @@ def test_team_org_object_roles(organization, team, org_admin, org_member):
     following normal admin rules
     '''
     assert RoleAccess(org_admin).can_attach(
-        organization.notification_admin_role, team, 'member_role.parents', {'id': 68}
+        organization, team.member_role, 'notification_admin_role.parents'
+    )
+    assert RoleAccess(org_admin).can_attach(
+        organization.notification_admin_role, team.member_role, 'parents'
     )
     # Obviously team admin isn't enough to assign organization roles to the team
     team.admin_role.members.add(org_member)
     assert not RoleAccess(org_member).can_attach(
-        organization.notification_admin_role, team, 'member_role.parents', {'id': 68}
+        organization.notification_admin_role, team.member_role, 'parents'
     )
     # Cannot make a team member of an org
-    assert not RoleAccess(org_admin).can_attach(
-        organization.member_role, team, 'member_role.parents', {'id': 68}
-    )
+    with pytest.raises(PermissionDenied):
+        assert not RoleAccess(org_admin).can_attach(
+            organization.member_role, team.member_role, 'parents'
+        )
 
 
 # Singleton user editing restrictions

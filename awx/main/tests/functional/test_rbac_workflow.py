@@ -106,6 +106,14 @@ class TestWorkflowJobTemplateNodeAccess:
         access = WorkflowJobTemplateNodeAccess(rando)
         assert access.can_delete(wfjt_node)
 
+    def test_credential_attach_permission(self, wfjt_node, credential, rando):
+        wfjt_node.workflow_job_template.admin_role.members.add(rando)
+        wfjt_node.unified_job_template.execute_role.members.add(rando)
+        access = WorkflowJobTemplateNodeAccess(rando)
+        assert not access.can_attach(wfjt_node, credential, 'credentials', data=None)
+        credential.use_role.members.add(rando)
+        assert access.can_attach(wfjt_node, credential, 'credentials', data=None)
+
 
 @pytest.mark.django_db
 class TestWorkflowJobAccess:
