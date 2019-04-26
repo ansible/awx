@@ -3,6 +3,7 @@ import { Route, withRouter, Switch } from 'react-router-dom';
 import { i18nMark } from '@lingui/react';
 import { Trans } from '@lingui/macro';
 
+import { Config } from '../../contexts/Config';
 import { NetworkProvider } from '../../contexts/Network';
 import { withRootDialog } from '../../contexts/RootDialog';
 
@@ -74,11 +75,16 @@ class Organizations extends Component {
                   });
                 }}
               >
-                <Organization
-                  history={history}
-                  location={location}
-                  setBreadcrumb={this.setBreadcrumbConfig}
-                />
+                <Config>
+                  {({ me }) => (
+                    <Organization
+                      history={history}
+                      location={location}
+                      setBreadcrumb={this.setBreadcrumbConfig}
+                      me={me || {}}
+                    />
+                  )}
+                </Config>
               </NetworkProvider>
             )}
           />

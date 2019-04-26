@@ -273,6 +273,7 @@ class Notifications extends Component {
       successTemplateIds,
       errorTemplateIds
     } = this.state;
+    const { canToggleNotifications } = this.props;
     return (
       <Fragment>
         {noInitialResults && (
@@ -315,6 +316,7 @@ class Notifications extends Component {
                       toggleNotification={this.toggleNotification}
                       errorTurnedOn={errorTemplateIds.includes(o.id)}
                       successTurnedOn={successTemplateIds.includes(o.id)}
+                      canToggleNotifications={canToggleNotifications}
                     />
                   ))}
                 </ul>
@@ -337,6 +339,7 @@ class Notifications extends Component {
 }
 
 Notifications.propTypes = {
+  canToggleNotifications: PropTypes.bool.isRequired,
   onReadError: PropTypes.func.isRequired,
   onReadNotifications: PropTypes.func.isRequired,
   onReadSuccess: PropTypes.func.isRequired,

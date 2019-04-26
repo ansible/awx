@@ -63,10 +63,12 @@ export function main (render) {
                 path="/login"
                 render={() => (
                   <Config>
-                    {({ custom_logo, custom_login_info }) => (
+                    {({ custom_logo, custom_login_info, fetchMe, updateConfig }) => (
                       <Login
                         logo={custom_logo}
                         loginInfo={custom_login_info}
+                        fetchMe={fetchMe}
+                        updateConfig={updateConfig}
                       />
                     )}
                   </Config>

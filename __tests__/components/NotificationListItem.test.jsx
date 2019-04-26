@@ -20,6 +20,7 @@ describe('<NotificationListItem />', () => {
         toggleNotification={toggleNotification}
         detailUrl="/foo"
         notificationType="slack"
+        canToggleNotifications
       />
     );
     expect(wrapper.length).toBe(1);
@@ -33,6 +34,7 @@ describe('<NotificationListItem />', () => {
         toggleNotification={toggleNotification}
         detailUrl="/foo"
         notificationType="slack"
+        canToggleNotifications
       />
     );
     wrapper.find('Switch').first().find('input').simulate('change');
@@ -47,6 +49,7 @@ describe('<NotificationListItem />', () => {
         toggleNotification={toggleNotification}
         detailUrl="/foo"
         notificationType="slack"
+        canToggleNotifications
       />
     );
     wrapper.find('Switch').first().find('input').simulate('change');
@@ -61,6 +64,7 @@ describe('<NotificationListItem />', () => {
         toggleNotification={toggleNotification}
         detailUrl="/foo"
         notificationType="slack"
+        canToggleNotifications
       />
     );
     wrapper.find('Switch').at(1).find('input').simulate('change');
@@ -75,6 +79,7 @@ describe('<NotificationListItem />', () => {
         toggleNotification={toggleNotification}
         detailUrl="/foo"
         notificationType="slack"
+        canToggleNotifications
       />
     );
     wrapper.find('Switch').at(1).find('input').simulate('change');

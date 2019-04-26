@@ -171,6 +171,7 @@ Here are the guidelines for how to name functions.
 |`replace<x>`| Use for methods that make API `PUT` requests |
 |`disassociate<x>`| Use for methods that pass `{ disassociate: true }` as a data param to an endpoint |
 |`associate<x>`| Use for methods that pass a resource id as a data param to an endpoint |
+|`can<x>`| Use for props dealing with RBAC to denote whether a user has access to something |
 
 ### Default State Initialization
 When declaring empty initial states, prefer the following instead of leaving them undefined:

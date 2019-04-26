@@ -39,7 +39,7 @@ class AWXLogin extends Component {
 
   async onLoginButtonClick (event) {
     const { username, password, isLoading } = this.state;
-    const { api, handleHttpError, clearRootDialogMessage } = this.props;
+    const { api, handleHttpError, clearRootDialogMessage, fetchMe, updateConfig } = this.props;
 
     event.preventDefault();
 
@@ -51,7 +51,9 @@ class AWXLogin extends Component {
     this.setState({ isLoading: true });
 
     try {
-      await api.login(username, password);
+      const { data } = await api.login(username, password);
+      updateConfig(data);
+      await fetchMe();
       this.setState({ isAuthenticated: true, isLoading: false });
     } catch (error) {
       handleHttpError(error) || this.setState({ isInputValid: false, isLoading: false });

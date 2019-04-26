@@ -13,6 +13,7 @@ import {
 class NotificationListItem extends React.Component {
   render () {
     const {
+      canToggleNotifications,
       itemId,
       name,
       notificationType,
@@ -49,12 +50,14 @@ class NotificationListItem extends React.Component {
               <Switch
                 label={i18n._(t`Successful`)}
                 isChecked={successTurnedOn}
+                isDisabled={!canToggleNotifications}
                 onChange={() => toggleNotification(itemId, successTurnedOn, 'success')}
                 aria-label={i18n._(t`Notification success toggle`)}
               />
               <Switch
                 label={i18n._(t`Failure`)}
                 isChecked={errorTurnedOn}
+                isDisabled={!canToggleNotifications}
                 onChange={() => toggleNotification(itemId, errorTurnedOn, 'error')}
                 aria-label={i18n._(t`Notification failure toggle`)}
               />
@@ -67,6 +70,7 @@ class NotificationListItem extends React.Component {
 }
 
 NotificationListItem.propTypes = {
+  canToggleNotifications: PropTypes.bool.isRequired,
   detailUrl: PropTypes.string.isRequired,
   errorTurnedOn: PropTypes.bool,
   itemId: PropTypes.number.isRequired,

@@ -16,12 +16,30 @@ const mockData = [
           role: {
             name: 'foo',
             id: 2,
+            user_capabilities: {
+              unattach: true
+            }
           }
         }
-      ],
+      ]
     }
   }
 ];
+
+const organization = {
+  id: 1,
+  name: 'Default',
+  summary_fields: {
+    object_roles: {},
+    user_capabilities: {
+      edit: true
+    }
+  }
+};
+
+const api = {
+  foo: () => {}
+};
 
 describe('<OrganizationAccessList />', () => {
   afterEach(() => {
@@ -33,7 +51,8 @@ describe('<OrganizationAccessList />', () => {
       <OrganizationAccessList
         getAccessList={() => {}}
         removeRole={() => {}}
-      />
+        organization={organization}
+      />, { context: { network: { api } } }
     );
   });
 
@@ -42,7 +61,8 @@ describe('<OrganizationAccessList />', () => {
       <OrganizationAccessList
         getAccessList={() => ({ data: { count: 1, results: mockData } })}
         removeRole={() => {}}
-      />
+        organization={organization}
+      />, { context: { network: { api } } }
     ).find('OrganizationAccessList');
 
     setImmediate(() => {
@@ -57,7 +77,8 @@ describe('<OrganizationAccessList />', () => {
       <OrganizationAccessList
         getAccessList={() => ({ data: { count: 1, results: mockData } })}
         removeRole={() => {}}
-      />
+        organization={organization}
+      />, { context: { network: { api } } }
     ).find('OrganizationAccessList');
     expect(onSort).not.toHaveBeenCalled();
 
@@ -74,7 +95,8 @@ describe('<OrganizationAccessList />', () => {
       <OrganizationAccessList
         getAccessList={() => ({ data: { count: 1, results: mockData } })}
         removeRole={() => {}}
-      />
+        organization={organization}
+      />, { context: { network: { api } } }
     ).find('OrganizationAccessList');
 
     setImmediate(() => {
@@ -94,7 +116,8 @@ describe('<OrganizationAccessList />', () => {
       <OrganizationAccessList
         getAccessList={() => ({ data: { count: 1, results: mockData } })}
         removeRole={() => {}}
-      />
+        organization={organization}
+      />, { context: { network: { api } } }
     ).find('OrganizationAccessList');
     expect(handleWarning).not.toHaveBeenCalled();
     expect(confirmDelete).not.toHaveBeenCalled();
@@ -117,7 +140,8 @@ describe('<OrganizationAccessList />', () => {
       <OrganizationAccessList
         getAccessList={() => ({ data: { count: 1, results: mockData } })}
         removeRole={() => {}}
-      />
+        organization={organization}
+      />, { context: { network: { api } } }
     ).find('OrganizationAccessList');
 
     setImmediate(() => {
@@ -144,6 +168,38 @@ describe('<OrganizationAccessList />', () => {
         });
       });
       done();
+    });
+  });
+
+  test('add role button visible for user that can edit org', () => {
+    const wrapper = mountWithContexts(
+      <OrganizationAccessList
+        getAccessList={() => ({ data: { count: 1, results: mockData } })}
+        removeRole={() => {}}
+        organization={organization}
+      />, { context: { network: { api } } }
+    ).find('OrganizationAccessList');
+
+    setImmediate(() => {
+      const addRole = wrapper.update().find('DataListToolbar').find('PlusIcon');
+      expect(addRole.length).toBe(1);
+    });
+  });
+
+  test('add role button hidden for user that cannot edit org', () => {
+    const readOnlyOrg = { ...organization };
+    readOnlyOrg.summary_fields.user_capabilities.edit = false;
+    const wrapper = mountWithContexts(
+      <OrganizationAccessList
+        getAccessList={() => ({ data: { count: 1, results: mockData } })}
+        removeRole={() => {}}
+        organization={readOnlyOrg}
+      />, { context: { network: { api } } }
+    ).find('OrganizationAccessList');
+
+    setImmediate(() => {
+      const addRole = wrapper.update().find('DataListToolbar').find('PlusIcon');
+      expect(addRole.length).toBe(0);
     });
   });
 });

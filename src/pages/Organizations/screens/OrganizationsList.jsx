@@ -62,8 +62,7 @@ class OrganizationsList extends Component {
       loading: true,
       results: [],
       selected: [],
-      isModalOpen: false,
-      orgsToDelete: [],
+      isModalOpen: false
 
     };
 
@@ -74,14 +73,16 @@ class OrganizationsList extends Component {
     this.onSelectAll = this.onSelectAll.bind(this);
     this.onSelect = this.onSelect.bind(this);
     this.updateUrl = this.updateUrl.bind(this);
+    this.fetchOptionsOrganizations = this.fetchOptionsOrganizations.bind(this);
     this.fetchOrganizations = this.fetchOrganizations.bind(this);
     this.handleOrgDelete = this.handleOrgDelete.bind(this);
     this.handleOpenOrgDeleteModal = this.handleOpenOrgDeleteModal.bind(this);
-    this.handleClearOrgsToDelete = this.handleClearOrgsToDelete.bind(this);
+    this.handleCloseOrgDeleteModal = this.handleCloseOrgDeleteModal.bind(this);
   }
 
   componentDidMount () {
     const queryParams = this.getQueryParams();
+    this.fetchOptionsOrganizations();
     this.fetchOrganizations(queryParams);
   }
 
@@ -117,20 +118,20 @@ class OrganizationsList extends Component {
   onSelectAll (isSelected) {
     const { results } = this.state;
 
-    const selected = isSelected ? results.map(o => o.id) : [];
+    const selected = isSelected ? results : [];
 
     this.setState({ selected });
   }
 
-  onSelect (id) {
+  onSelect (row) {
     const { selected } = this.state;
 
-    const isSelected = selected.includes(id);
+    const isSelected = selected.some(s => s.id === row.id);
 
     if (isSelected) {
-      this.setState({ selected: selected.filter(s => s !== id) });
+      this.setState({ selected: selected.filter(s => s.id !== row.id) });
     } else {
-      this.setState({ selected: selected.concat(id) });
+      this.setState({ selected: selected.concat(row) });
     }
   }
 
@@ -143,43 +144,35 @@ class OrganizationsList extends Component {
     return Object.assign({}, this.defaultParams, searchParams, overrides);
   }
 
-  handleClearOrgsToDelete () {
+  handleCloseOrgDeleteModal () {
     this.setState({
-      isModalOpen: false,
-      orgsToDelete: []
+      isModalOpen: false
     });
-    this.onSelectAll();
   }
 
   handleOpenOrgDeleteModal () {
-    const { results, selected } = this.state;
+    const { selected } = this.state;
     const warningTitle = selected.length > 1 ? i18nMark('Delete Organization') : i18nMark('Delete Organizations');
     const warningMsg = i18nMark('Are you sure you want to delete:');
-
-    const orgsToDelete = [];
-    results.forEach((result) => {
-      selected.forEach((selectedOrg) => {
-        if (result.id === selectedOrg) {
-          orgsToDelete.push({ name: result.name, id: selectedOrg });
-        }
-      });
-    });
     this.setState({
-      orgsToDelete,
       isModalOpen: true,
       warningTitle,
       warningMsg,
-      loading: false });
+      loading: false
+    });
   }
 
-  async handleOrgDelete (event) {
-    const { orgsToDelete } = this.state;
+  async handleOrgDelete () {
+    const { selected } = this.state;
     const { api, handleHttpError } = this.props;
     let errorHandled;
 
     try {
-      await Promise.all(orgsToDelete.map((org) => api.destroyOrganization(org.id)));
-      this.handleClearOrgsToDelete();
+      await Promise.all(selected.map((org) => api.destroyOrganization(org.id)));
+      this.setState({
+        isModalOpen: false,
+        selected: []
+      });
     } catch (err) {
       errorHandled = handleHttpError(err);
     } finally {
@@ -188,7 +181,6 @@ class OrganizationsList extends Component {
         this.fetchOrganizations(queryParams);
       }
     }
-    event.preventDefault();
   }
 
   updateUrl (queryParams) {
@@ -248,16 +240,35 @@ class OrganizationsList extends Component {
     }
   }
 
+  async fetchOptionsOrganizations () {
+    const { api } = this.props;
+
+    try {
+      const { data } = await api.optionsOrganizations();
+      const { actions } = data;
+
+      const stateToUpdate = {
+        canAdd: Object.prototype.hasOwnProperty.call(actions, 'POST')
+      };
+
+      this.setState(stateToUpdate);
+    } catch (err) {
+      this.setState({ error: true });
+    } finally {
+      this.setState({ loading: false });
+    }
+  }
+
   render () {
     const {
       medium,
     } = PageSectionVariants;
     const {
+      canAdd,
       count,
       error,
       loading,
       noInitialResults,
-      orgsToDelete,
       page,
       pageCount,
       page_size,
@@ -270,6 +281,12 @@ class OrganizationsList extends Component {
       warningMsg,
     } = this.state;
     const { match } = this.props;
+
+    const disableDelete = (
+      selected.length === 0
+      || selected.some(row => !row.summary_fields.user_capabilities.delete)
+    );
+
     return (
       <I18n>
         {({ i18n }) => (
@@ -280,15 +297,15 @@ class OrganizationsList extends Component {
                   variant="danger"
                   title={warningTitle}
                   isOpen={isModalOpen}
-                  onClose={this.handleClearOrgsToDelete}
+                  onClose={this.handleCloseOrgDeleteModal}
                   actions={[
                     <Button variant="danger" key="delete" aria-label="confirm-delete" onClick={this.handleOrgDelete}>{i18n._(t`Delete`)}</Button>,
-                    <Button variant="secondary" key="cancel" aria-label="cancel-delete" onClick={this.handleClearOrgsToDelete}>{i18n._(t`Cancel`)}</Button>
+                    <Button variant="secondary" key="cancel" aria-label="cancel-delete" onClick={this.handleCloseOrgDeleteModal}>{i18n._(t`Cancel`)}</Button>
                   ]}
                 >
                   {warningMsg}
                   <br />
-                  {orgsToDelete.map((org) => (
+                  {selected.map((org) => (
                     <span key={org.id}>
                       <strong>
                         {org.name}
@@ -321,9 +338,27 @@ class OrganizationsList extends Component {
                     onSort={this.onSort}
                     onSelectAll={this.onSelectAll}
                     onOpenDeleteModal={this.handleOpenOrgDeleteModal}
-                    disableTrashCanIcon={selected.length === 0}
+                    disableTrashCanIcon={disableDelete}
+                    deleteTooltip={
+                      selected.some(row => !row.summary_fields.user_capabilities.delete) ? (
+                        <div>
+                          <Trans>
+                            You dont have permission to delete the following Organizations:
+                          </Trans>
+                          {selected
+                            .filter(row => !row.summary_fields.user_capabilities.delete)
+                            .map(row => (
+                              <div key={row.id}>
+                                {row.name}
+                              </div>
+                            ))
+                          }
+                        </div>
+                      ) : undefined
+                    }
                     showDelete
                     showSelectAll
+                    showAdd={canAdd}
                   />
                   <ul className="pf-c-data-list" aria-label={i18n._(t`Organizations List`)}>
                     { results.map(o => (
@@ -334,8 +369,8 @@ class OrganizationsList extends Component {
                         detailUrl={`${match.url}/${o.id}`}
                         memberCount={o.summary_fields.related_field_counts.users}
                         teamCount={o.summary_fields.related_field_counts.teams}
-                        isSelected={selected.includes(o.id)}
-                        onSelect={() => this.onSelect(o.id, o.name)}
+                        isSelected={selected.some(row => row.id === o.id)}
+                        onSelect={() => this.onSelect(o)}
                         onOpenOrgDeleteModal={this.handleOpenOrgDeleteModal}
                       />
                     ))}

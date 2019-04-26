@@ -18,7 +18,7 @@ describe('<OrganizationNotifications />', () => {
 
   test('initially renders succesfully', () => {
     mountWithContexts(
-      <OrganizationNotifications />, { context: { network: {
+      <OrganizationNotifications canToggleNotifications />, { context: { network: {
         api,
         handleHttpError: () => {}
       } } }
@@ -26,7 +26,7 @@ describe('<OrganizationNotifications />', () => {
   });
   test('handles api requests', () => {
     const wrapper = mountWithContexts(
-      <OrganizationNotifications />, { context: { network: {
+      <OrganizationNotifications canToggleNotifications />, { context: { network: {
         api,
         handleHttpError: () => {}
       } } }

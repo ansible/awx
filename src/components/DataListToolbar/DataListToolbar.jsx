@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { I18n } from '@lingui/react';
+import { I18n, i18nMark } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
   Button,
@@ -28,14 +28,11 @@ import VerticalSeparator from '../VerticalSeparator';
 class DataListToolbar extends React.Component {
   render () {
     const {
+      add,
       addUrl,
       columns,
+      deleteTooltip,
       disableTrashCanIcon,
-      onSelectAll,
-      sortedColumnKey,
-      sortOrder,
-      showDelete,
-      showSelectAll,
       isAllSelected,
       isCompact,
       noLeftMargin,
@@ -43,8 +40,13 @@ class DataListToolbar extends React.Component {
       onSearch,
       onCompact,
       onExpand,
-      add,
-      onOpenDeleteModal
+      onOpenDeleteModal,
+      onSelectAll,
+      showAdd,
+      showDelete,
+      showSelectAll,
+      sortOrder,
+      sortedColumnKey
     } = this.props;
 
     const showExpandCollapse = (onCompact && onExpand);
@@ -112,21 +114,23 @@ class DataListToolbar extends React.Component {
               <LevelItem>
                 { showDelete && (
                   <Tooltip
-                    content={i18n._(t`Delete`)}
-                    position="top"
+                    content={deleteTooltip}
+                    position="left"
                   >
-                    <Button
-                      className="awx-ToolBarBtn"
-                      variant="plain"
-                      aria-label={i18n._(t`Delete`)}
-                      onClick={onOpenDeleteModal}
-                      isDisabled={disableTrashCanIcon}
-                    >
-                      <TrashAltIcon className="awx-ToolBarTrashCanIcon" />
-                    </Button>
+                    <span>
+                      <Button
+                        className="awx-ToolBarBtn"
+                        variant="plain"
+                        aria-label={i18n._(t`Delete`)}
+                        onClick={onOpenDeleteModal}
+                        isDisabled={disableTrashCanIcon}
+                      >
+                        <TrashAltIcon className="awx-ToolBarTrashCanIcon" />
+                      </Button>
+                    </span>
                   </Tooltip>
                 )}
-                {addUrl && (
+                {showAdd && addUrl && (
                   <Link to={addUrl}>
                     <Button
                       variant="primary"
@@ -136,7 +140,7 @@ class DataListToolbar extends React.Component {
                     </Button>
                   </Link>
                 )}
-                {add && (
+                {showAdd && add && (
                   <Fragment>{add}</Fragment>
                 )}
               </LevelItem>
@@ -149,38 +153,42 @@ class DataListToolbar extends React.Component {
 }
 
 DataListToolbar.propTypes = {
+  add: PropTypes.node,
   addUrl: PropTypes.string,
   columns: PropTypes.arrayOf(PropTypes.object).isRequired,
+  deleteTooltip: PropTypes.node,
   isAllSelected: PropTypes.bool,
+  isCompact: PropTypes.bool,
   noLeftMargin: PropTypes.bool,
+  onCompact: PropTypes.func,
+  onExpand: PropTypes.func,
   onSearch: PropTypes.func,
   onSelectAll: PropTypes.func,
   onSort: PropTypes.func,
+  showAdd: PropTypes.bool,
   showDelete: PropTypes.bool,
   showSelectAll: PropTypes.bool,
   sortOrder: PropTypes.string,
-  sortedColumnKey: PropTypes.string,
-  onCompact: PropTypes.func,
-  onExpand: PropTypes.func,
-  isCompact: PropTypes.bool,
-  add: PropTypes.node
+  sortedColumnKey: PropTypes.string
 };
 
 DataListToolbar.defaultProps = {
+  add: null,
   addUrl: null,
+  deleteTooltip: i18nMark('Delete'),
+  isAllSelected: false,
+  isCompact: false,
+  noLeftMargin: false,
+  onCompact: null,
+  onExpand: null,
   onSearch: null,
   onSelectAll: null,
   onSort: null,
+  showAdd: false,
   showDelete: false,
   showSelectAll: false,
   sortOrder: 'ascending',
-  sortedColumnKey: 'name',
-  isAllSelected: false,
-  onCompact: null,
-  onExpand: null,
-  isCompact: false,
-  add: null,
-  noLeftMargin: false
+  sortedColumnKey: 'name'
 };
 
 export default DataListToolbar;

@@ -41,13 +41,18 @@ class OrganizationNotifications extends Component {
   }
 
   render () {
+    const {
+      canToggleNotifications
+    } = this.props;
+
     return (
       <NotificationsList
+        canToggleNotifications={canToggleNotifications}
+        onCreateError={this.createOrgNotificationError}
+        onCreateSuccess={this.createOrgNotificationSuccess}
+        onReadError={this.readOrgNotificationError}
         onReadNotifications={this.readOrgNotifications}
         onReadSuccess={this.readOrgNotificationSuccess}
-        onReadError={this.readOrgNotificationError}
-        onCreateSuccess={this.createOrgNotificationSuccess}
-        onCreateError={this.createOrgNotificationError}
       />
     );
   }
