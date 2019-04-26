@@ -121,7 +121,18 @@ function BaseStringService (namespace) {
         FINISH_TIME_ASCENDING: t.s('Finish Time (Ascending)'),
         FINISH_TIME_DESCENDING: t.s('Finish Time (Descending)'),
         UUID_ASCENDING: t.s('UUID (Ascending)'),
-        UUID_DESCENDING: t.s('UUID (Descending)')
+        UUID_DESCENDING: t.s('UUID (Descending)'),
+        LAUNCHED_BY_ASCENDING: t.s('Launched By (Ascending)'),
+        LAUNCHED_BY_DESCENDING: t.s('Launched By (Descending)'),
+        INVENTORY_ASCENDING: t.s('Inventory (Ascending)'),
+        INVENTORY_DESCENDING: t.s('Inventory (Descending)'),
+        PROJECT_ASCENDING: t.s('Project (Ascending)'),
+        PROJECT_DESCENDING: t.s('Project (Descending)'),
+        ORGANIZATION_ASCENDING: t.s('Organization (Ascending)'),
+        ORGANIZATION_DESCENDING: t.s('Organization (Descending)'),
+        CAPACITY_ASCENDING: t.s('Capacity (Ascending)'),
+        CAPACITY_DESCENDING: t.s('Capacity (Descending)')
+        
     };
 
     this.ALERT = ({ header, body }) => t.s('{{ header }} {{ body }}', { header, body });

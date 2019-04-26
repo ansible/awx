@@ -48,7 +48,9 @@ function InstanceModalController ($scope, $state, Dataset, models, strings, Proc
         { label: `${strings.get('sort.CREATED_ASCENDING')}`, value: 'created' },
         { label: `${strings.get('sort.CREATED_DESCENDING')}`, value: '-created' },
         { label: `${strings.get('sort.MODIFIED_ASCENDING')}`, value: 'modified' },
-        { label: `${strings.get('sort.MODIFIED_DESCENDING')}`, value: '-modified' }
+        { label: `${strings.get('sort.MODIFIED_DESCENDING')}`, value: '-modified' },
+        { label: `${strings.get('sort.CAPACITY_ASCENDING')}`, value: 'capacity' },
+        { label: `${strings.get('sort.CAPACITY_DESCENDING')}`, value: '-capacity' }
     ];
 
     const removeStateParamsListener = $scope.$watchCollection('$state.params', () => {
