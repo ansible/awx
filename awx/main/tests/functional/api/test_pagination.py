@@ -1,7 +1,11 @@
 import pytest
+import json
+from unittest.mock import patch
+from urllib.parse import urlencode
 
 from awx.main.models.inventory import Group, Host
 from awx.api.pagination import Pagination
+from awx.api.versioning import reverse
 
 
 @pytest.fixture
@@ -38,3 +42,20 @@ def test_pagination_backend_output_correct_total_count(group, host):
     p = Pagination().django_paginator_class(queryset, 10)
     p.page(1)
     assert p.count == 1
+
+
+@pytest.mark.django_db
+def test_pagination_cap_page_size(get, admin, inventory):
+    for i in range(20):
+        Host(name='host-{}'.format(i), inventory=inventory).save()
+
+    def host_list_url(params):
+        request_qs = '?' + urlencode(params)
+        return reverse('api:host_list', kwargs={'version': 'v2'}) + request_qs
+
+    with patch('awx.api.pagination.Pagination.max_page_size', 5):
+        resp = get(host_list_url({'page': '2', 'page_size': '10'}), user=admin)
+        jdata = json.loads(resp.content)
+
+        assert jdata['previous'] == host_list_url({'page': '1', 'page_size': '5'})
+        assert jdata['next'] == host_list_url({'page': '3', 'page_size': '5'})
