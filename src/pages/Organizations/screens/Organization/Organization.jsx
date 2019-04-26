@@ -240,9 +240,6 @@ class Organization extends Component {
                 path="/organizations/:id/notifications"
                 render={() => (
                   <OrganizationNotifications
-                    match={match}
-                    location={location}
-                    history={history}
                     canToggleNotifications={canToggleNotifications}
                   />
                 )}

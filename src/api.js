@@ -76,7 +76,7 @@ class APIClient {
     return this.http.post(API_ORGANIZATIONS, data);
   }
 
-  callOrganizations () {
+  optionsOrganizations () {
     return this.http.options(API_ORGANIZATIONS);
   }
 

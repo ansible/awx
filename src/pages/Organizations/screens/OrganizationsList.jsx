@@ -73,7 +73,7 @@ class OrganizationsList extends Component {
     this.onSelectAll = this.onSelectAll.bind(this);
     this.onSelect = this.onSelect.bind(this);
     this.updateUrl = this.updateUrl.bind(this);
-    this.callOrganizations = this.callOrganizations.bind(this);
+    this.fetchOptionsOrganizations = this.fetchOptionsOrganizations.bind(this);
     this.fetchOrganizations = this.fetchOrganizations.bind(this);
     this.handleOrgDelete = this.handleOrgDelete.bind(this);
     this.handleOpenOrgDeleteModal = this.handleOpenOrgDeleteModal.bind(this);
@@ -82,7 +82,7 @@ class OrganizationsList extends Component {
 
   componentDidMount () {
     const queryParams = this.getQueryParams();
-    this.callOrganizations();
+    this.fetchOptionsOrganizations();
     this.fetchOrganizations(queryParams);
   }
 
@@ -240,11 +240,11 @@ class OrganizationsList extends Component {
     }
   }
 
-  async callOrganizations () {
+  async fetchOptionsOrganizations () {
     const { api } = this.props;
 
     try {
-      const { data } = await api.callOrganizations();
+      const { data } = await api.optionsOrganizations();
       const { actions } = data;
 
       const stateToUpdate = {
@@ -345,11 +345,14 @@ class OrganizationsList extends Component {
                           <Trans>
                             You dont have permission to delete the following Organizations:
                           </Trans>
-                          {selected.map(row => (
-                            <div key={row.id}>
-                              {row.name}
-                            </div>
-                          ))}
+                          {selected
+                            .filter(row => !row.summary_fields.user_capabilities.delete)
+                            .map(row => (
+                              <div key={row.id}>
+                                {row.name}
+                              </div>
+                            ))
+                          }
                         </div>
                       ) : undefined
                     }

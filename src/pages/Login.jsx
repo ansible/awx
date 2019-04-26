@@ -53,7 +53,7 @@ class AWXLogin extends Component {
     try {
       const { data } = await api.login(username, password);
       updateConfig(data);
-      fetchMe();
+      await fetchMe();
       this.setState({ isAuthenticated: true, isLoading: false });
     } catch (error) {
       handleHttpError(error) || this.setState({ isInputValid: false, isLoading: false });

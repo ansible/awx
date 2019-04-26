@@ -51,9 +51,8 @@ describe('<OrganizationAccessList />', () => {
       <OrganizationAccessList
         getAccessList={() => {}}
         removeRole={() => {}}
-        api={api}
         organization={organization}
-      />
+      />, { context: { network: { api } } }
     );
   });
 
@@ -62,9 +61,8 @@ describe('<OrganizationAccessList />', () => {
       <OrganizationAccessList
         getAccessList={() => ({ data: { count: 1, results: mockData } })}
         removeRole={() => {}}
-        api={api}
         organization={organization}
-      />
+      />, { context: { network: { api } } }
     ).find('OrganizationAccessList');
 
     setImmediate(() => {
@@ -79,9 +77,8 @@ describe('<OrganizationAccessList />', () => {
       <OrganizationAccessList
         getAccessList={() => ({ data: { count: 1, results: mockData } })}
         removeRole={() => {}}
-        api={api}
         organization={organization}
-      />
+      />, { context: { network: { api } } }
     ).find('OrganizationAccessList');
     expect(onSort).not.toHaveBeenCalled();
 
@@ -98,9 +95,8 @@ describe('<OrganizationAccessList />', () => {
       <OrganizationAccessList
         getAccessList={() => ({ data: { count: 1, results: mockData } })}
         removeRole={() => {}}
-        api={api}
         organization={organization}
-      />
+      />, { context: { network: { api } } }
     ).find('OrganizationAccessList');
 
     setImmediate(() => {
@@ -120,9 +116,8 @@ describe('<OrganizationAccessList />', () => {
       <OrganizationAccessList
         getAccessList={() => ({ data: { count: 1, results: mockData } })}
         removeRole={() => {}}
-        api={api}
         organization={organization}
-      />
+      />, { context: { network: { api } } }
     ).find('OrganizationAccessList');
     expect(handleWarning).not.toHaveBeenCalled();
     expect(confirmDelete).not.toHaveBeenCalled();
@@ -145,9 +140,8 @@ describe('<OrganizationAccessList />', () => {
       <OrganizationAccessList
         getAccessList={() => ({ data: { count: 1, results: mockData } })}
         removeRole={() => {}}
-        api={api}
         organization={organization}
-      />
+      />, { context: { network: { api } } }
     ).find('OrganizationAccessList');
 
     setImmediate(() => {
@@ -182,9 +176,8 @@ describe('<OrganizationAccessList />', () => {
       <OrganizationAccessList
         getAccessList={() => ({ data: { count: 1, results: mockData } })}
         removeRole={() => {}}
-        api={api}
         organization={organization}
-      />
+      />, { context: { network: { api } } }
     ).find('OrganizationAccessList');
 
     setImmediate(() => {
@@ -200,9 +193,8 @@ describe('<OrganizationAccessList />', () => {
       <OrganizationAccessList
         getAccessList={() => ({ data: { count: 1, results: mockData } })}
         removeRole={() => {}}
-        api={api}
         organization={readOnlyOrg}
-      />
+      />, { context: { network: { api } } }
     ).find('OrganizationAccessList');
 
     setImmediate(() => {

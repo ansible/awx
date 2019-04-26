@@ -78,28 +78,19 @@ class Provider extends Component {
     const { api, handleHttpError } = this.props;
 
     try {
-      const {
-        data: {
-          ansible_version,
-          custom_virtualenvs,
-          version
-        }
-      } = await api.getConfig();
-      const {
-        data: {
-          custom_logo,
-          custom_login_info
-        }
-      } = await api.getRoot();
-      const { data: { results: [me] } } = await api.getMe();
+      const [configRes, rootRes, meRes] = await Promise.all([
+        api.getConfig(),
+        api.getRoot(),
+        api.getMe()
+      ]);
       this.setState({
         value: {
-          ansible_version,
-          custom_virtualenvs,
-          version,
-          custom_logo,
-          custom_login_info,
-          me
+          ansible_version: configRes.data.ansible_version,
+          custom_virtualenvs: configRes.data.custom_virtualenvs,
+          version: configRes.data.version,
+          custom_logo: rootRes.data.custom_logo,
+          custom_login_info: rootRes.data.custom_login_info,
+          me: meRes.data.results
         }
       });
     } catch (err) {
