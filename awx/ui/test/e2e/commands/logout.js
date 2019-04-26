@@ -5,7 +5,6 @@
 exports.command = function logout () {
     const logoutButton = '.at-Layout-topNav i.fa-power-off';
     this
-        .waitForElementVisible(logoutButton)
-        .click(logoutButton)
+        .findThenClick(logoutButton, 'css')
         .waitForElementPresent('#login-button');
 };
