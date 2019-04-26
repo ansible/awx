@@ -20,6 +20,7 @@ const store = {
         lastName: `last-admin-${testID}`,
         password: `admin-${testID}`,
         username: `admin-${testID}`,
+        usernameDefault: `admin-${testID}`,
         type: 'administrator',
     },
     auditor: {
@@ -28,6 +29,7 @@ const store = {
         lastName: `last-auditor-${testID}`,
         password: `auditor-${testID}`,
         username: `auditor-${testID}`,
+        usernameDefault: `auditor-${testID}`,
         type: 'auditor',
     },
     user: {
@@ -36,12 +38,20 @@ const store = {
         lastName: `last-${testID}`,
         password: `${testID}`,
         username: `user-${testID}`,
+        usernameDefault: `user-${testID}`,
         type: 'normal',
     },
 };
 
 module.exports = {
     before: (client, done) => {
+        // generate a unique username on each attempt.
+        const uniqueUser = uuid().substr(0, 8);
+        Object.keys(store).forEach(key => {
+            if ('username' in store[key]) {
+                store[key].username = `${store[key].usernameDefault}-${uniqueUser}`;
+            }
+        });
         const resources = [
             getOrganization(store.organization.name),
             getAuditor(store.auditor.username),

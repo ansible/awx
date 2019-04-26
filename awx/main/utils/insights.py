@@ -2,42 +2,46 @@
 # All Rights Reserved.
 
 
-def filter_insights_api_response(json):
-    new_json = {}
-    '''
-    'last_check_in',
-    'reports.[].rule.severity',
-    'reports.[].rule.description',
-    'reports.[].rule.category',
-    'reports.[].rule.summary',
-    'reports.[].rule.ansible_fix',
-    'reports.[].rule.ansible',
-    'reports.[].maintenance_actions.[].maintenance_plan.name',
-    'reports.[].maintenance_actions.[].maintenance_plan.maintenance_id',
-    '''
+# Old Insights API -> New API
+#
+# last_check_in is missing entirely, is now provided by a different endpoint
+# reports[] -> []
+# reports[].rule.{description,summary} -> [].rule.{description,summary}
+# reports[].rule.category -> [].rule.category.name
+# reports[].rule.severity (str) -> [].rule.total_risk (int)
 
-    if 'last_check_in' in json:
-        new_json['last_check_in'] = json['last_check_in']
-    if 'reports' in json:
-        new_json['reports'] = []
-        for rep in json['reports']:
-            new_report = {
-                'rule': {},
-                'maintenance_actions': []
-            }
-            if 'rule' in rep:
-                for k in ['severity', 'description', 'category', 'summary', 'ansible_fix', 'ansible',]:
-                    if k in rep['rule']:
-                        new_report['rule'][k] = rep['rule'][k]
+# reports[].rule.{ansible,ansible_fix} appears to be unused
+# reports[].maintenance_actions[] missing entirely, is now provided
+#   by a different Insights endpoint
 
-            for action in rep.get('maintenance_actions', []):
-                new_action = {'maintenance_plan': {}}
-                if 'maintenance_plan' in action:
-                    for k in ['name', 'maintenance_id']:
-                        if k in action['maintenance_plan']:
-                            new_action['maintenance_plan'][k] = action['maintenance_plan'][k]
-                new_report['maintenance_actions'].append(new_action)
-            
-            new_json['reports'].append(new_report)
+
+def filter_insights_api_response(platform_info, reports, remediations):
+    severity_mapping = {
+        1: 'INFO',
+        2: 'WARN',
+        3: 'ERROR',
+        4: 'CRITICAL'
+    }
+
+    new_json = {
+        'platform_id': platform_info['id'],
+        'last_check_in': platform_info.get('updated'),
+        'reports': [],
+    }
+    for rep in reports:
+        new_report = {
+            'rule': {},
+            'maintenance_actions': remediations
+        }
+        rule = rep.get('rule') or {}
+        for k in ['description', 'summary']:
+            if k in rule:
+                new_report['rule'][k] = rule[k]
+        if 'category' in rule:
+            new_report['rule']['category'] = rule['category']['name']
+        if rule.get('total_risk') in severity_mapping:
+            new_report['rule']['severity'] = severity_mapping[rule['total_risk']]
+
+        new_json['reports'].append(new_report)
+
     return new_json
-        
