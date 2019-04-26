@@ -132,7 +132,6 @@ function BaseStringService (namespace) {
         ORGANIZATION_DESCENDING: t.s('Organization (Descending)'),
         CAPACITY_ASCENDING: t.s('Capacity (Ascending)'),
         CAPACITY_DESCENDING: t.s('Capacity (Descending)')
-        
     };
 
     this.ALERT = ({ header, body }) => t.s('{{ header }} {{ body }}', { header, body });
