@@ -297,10 +297,10 @@ class OrganizationsList extends Component {
                   variant="danger"
                   title={warningTitle}
                   isOpen={isModalOpen}
-                  onClose={this.handleCloseOrgDeleteModal}
+                  onClose={this.handleClearOrgDeleteModal}
                   actions={[
                     <Button variant="danger" key="delete" aria-label="confirm-delete" onClick={this.handleOrgDelete}>{i18n._(t`Delete`)}</Button>,
-                    <Button variant="secondary" key="cancel" aria-label="cancel-delete" onClick={this.handleCloseOrgDeleteModal}>{i18n._(t`Cancel`)}</Button>
+                    <Button variant="secondary" key="cancel" aria-label="cancel-delete" onClick={this.handleClearOrgDeleteModal}>{i18n._(t`Cancel`)}</Button>
                   ]}
                 >
                   {warningMsg}
