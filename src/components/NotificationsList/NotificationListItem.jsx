@@ -1,88 +1,93 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+import { shape, number, string, bool, func } from 'prop-types';
 import { I18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import {
-  Link
-} from 'react-router-dom';
-import {
-  Badge,
-  Switch
-} from '@patternfly/react-core';
+import { Link } from 'react-router-dom';
+import { Badge, Switch, DataListItem, DataListCell } from '@patternfly/react-core';
 
-class NotificationListItem extends React.Component {
-  render () {
-    const {
-      canToggleNotifications,
-      itemId,
-      name,
-      notificationType,
-      detailUrl,
-      successTurnedOn,
-      errorTurnedOn,
-      toggleNotification
-    } = this.props;
-    const capText = {
-      textTransform: 'capitalize'
-    };
+function NotificationListItem (props) {
+  const {
+    canToggleNotifications,
+    notification,
+    detailUrl,
+    successTurnedOn,
+    errorTurnedOn,
+    toggleNotification
+  } = props;
+  const capText = {
+    textTransform: 'capitalize'
+  };
 
-    return (
-      <I18n>
-        {({ i18n }) => (
-          <li key={itemId} className="pf-c-data-list__item">
-            <div className="pf-c-data-list__cell" style={{ display: 'flex' }}>
-              <Link
-                to={{
-                  pathname: detailUrl
-                }}
-                style={{ marginRight: '1.5em' }}
-              >
-                <b>{name}</b>
-              </Link>
-              <Badge
-                style={capText}
-                isRead
-              >
-                {notificationType}
-              </Badge>
-            </div>
-            <div className="pf-c-data-list__cell" style={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <Switch
-                label={i18n._(t`Successful`)}
-                isChecked={successTurnedOn}
-                isDisabled={!canToggleNotifications}
-                onChange={() => toggleNotification(itemId, successTurnedOn, 'success')}
-                aria-label={i18n._(t`Notification success toggle`)}
-              />
-              <Switch
-                label={i18n._(t`Failure`)}
-                isChecked={errorTurnedOn}
-                isDisabled={!canToggleNotifications}
-                onChange={() => toggleNotification(itemId, errorTurnedOn, 'error')}
-                aria-label={i18n._(t`Notification failure toggle`)}
-              />
-            </div>
-          </li>
-        )}
-      </I18n>
-    );
-  }
+  return (
+    <I18n>
+      {({ i18n }) => (
+        <DataListItem
+          aria-labelledby={`items-list-item-${notification.id}`}
+          key={notification.id}
+        >
+          <DataListCell>
+            <Link
+              to={{
+                pathname: detailUrl
+              }}
+              style={{ marginRight: '1.5em' }}
+            >
+              <b id={`items-list-item-${notification.id}`}>{notification.name}</b>
+            </Link>
+            <Badge
+              style={capText}
+              isRead
+            >
+              {notification.notification_type}
+            </Badge>
+          </DataListCell>
+          <DataListCell alignRight>
+            <Switch
+              id={`notification-${notification.id}-success-toggle`}
+              label={i18n._(t`Successful`)}
+              isChecked={successTurnedOn}
+              isDisabled={!canToggleNotifications}
+              onChange={() => toggleNotification(
+                notification.id,
+                successTurnedOn,
+                'success'
+              )}
+              aria-label={i18n._(t`Toggle notification success`)}
+            />
+            <Switch
+              id={`notification-${notification.id}-error-toggle`}
+              label={i18n._(t`Failure`)}
+              isChecked={errorTurnedOn}
+              isDisabled={!canToggleNotifications}
+              onChange={() => toggleNotification(
+                notification.id,
+                errorTurnedOn,
+                'error'
+              )}
+              aria-label={i18n._(t`Toggle notification failure`)}
+            />
+          </DataListCell>
+        </DataListItem>
+      )}
+    </I18n>
+  );
 }
 
 NotificationListItem.propTypes = {
-  canToggleNotifications: PropTypes.bool.isRequired,
-  detailUrl: PropTypes.string.isRequired,
-  errorTurnedOn: PropTypes.bool,
-  itemId: PropTypes.number.isRequired,
-  name: PropTypes.string,
-  notificationType: PropTypes.string.isRequired,
-  successTurnedOn: PropTypes.bool,
-  toggleNotification: PropTypes.func.isRequired,
+  notification: shape({
+    id: number.isRequired,
+    canToggleNotifications: bool.isRequired,
+    name: string.isRequired,
+    notification_type: string.isRequired,
+  }).isRequired,
+  detailUrl: string.isRequired,
+  errorTurnedOn: bool,
+  successTurnedOn: bool,
+  toggleNotification: func.isRequired,
 };
 
 NotificationListItem.defaultProps = {
   errorTurnedOn: false,
-  name: null,
   successTurnedOn: false,
 };
 

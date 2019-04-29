@@ -11,6 +11,7 @@ export const encodeQueryString = (params) => {
 
   return Object.keys(params)
     .sort()
+    .filter(key => params[key] !== null)
     .map(key => ([key, params[key]]))
     .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
     .join('&');
@@ -27,7 +28,7 @@ export const encodeQueryString = (params) => {
 export const parseQueryString = (queryString, integerFields = ['page', 'page_size']) => {
   if (!queryString) return {};
 
-  const keyValuePairs = queryString.split('&')
+  const keyValuePairs = queryString.replace(/^\?/, '').split('&')
     .map(s => s.split('='))
     .map(([key, value]) => {
       if (integerFields.includes(key)) {

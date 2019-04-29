@@ -1,0 +1,1309 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
+<RootDialogProvider
+  i18n={null}
+  value={Object {}}
+>
+  <Provider
+    i18n={null}
+    value={
+      Object {
+        "api": "/api/",
+        "handleHttpError": [Function],
+      }
+    }
+  >
+    <Component
+      i18n={"/i18n/"}
+      value={"/config/"}
+    >
+      <Provider
+        api={"/api/"}
+        handleHttpError={[Function]}
+        i18n={"/i18n/"}
+        value={"/config/"}
+      >
+        <Component
+          canToggleNotifications={true}
+          id={1}
+        >
+          <withRouter(OrganizationNotifications)
+            api={"/api/"}
+            canToggleNotifications={true}
+            handleHttpError={[Function]}
+            id={1}
+          >
+            <Route>
+              <OrganizationNotifications
+                api={"/api/"}
+                canToggleNotifications={true}
+                handleHttpError={[Function]}
+                history={"/history/"}
+                id={1}
+                location={
+                  Object {
+                    "hash": "",
+                    "pathname": "",
+                    "search": "",
+                    "state": "",
+                  }
+                }
+                match={
+                  Object {
+                    "isExact": false,
+                    "params": Object {},
+                    "path": "",
+                    "url": "",
+                  }
+                }
+              >
+                <withRouter(PaginatedDataList)
+                  itemCount={2}
+                  itemName="notification"
+                  items={
+                    Array [
+                      Object {
+                        "id": 1,
+                        "name": "Notification one",
+                        "notification_type": "email",
+                        "url": "/api/v2/notification_templates/1/",
+                      },
+                      Object {
+                        "id": 2,
+                        "name": "Notification two",
+                        "notification_type": "email",
+                        "url": "/api/v2/notification_templates/2/",
+                      },
+                    ]
+                  }
+                  queryParams={
+                    Object {
+                      "order_by": "name",
+                      "page": 1,
+                      "page_size": 5,
+                    }
+                  }
+                  renderItem={[Function]}
+                >
+                  <Route>
+                    <PaginatedDataList
+                      additionalControls={null}
+                      history={"/history/"}
+                      itemCount={2}
+                      itemName="notification"
+                      itemNamePlural=""
+                      items={
+                        Array [
+                          Object {
+                            "id": 1,
+                            "name": "Notification one",
+                            "notification_type": "email",
+                            "url": "/api/v2/notification_templates/1/",
+                          },
+                          Object {
+                            "id": 2,
+                            "name": "Notification two",
+                            "notification_type": "email",
+                            "url": "/api/v2/notification_templates/2/",
+                          },
+                        ]
+                      }
+                      location={
+                        Object {
+                          "hash": "",
+                          "pathname": "",
+                          "search": "",
+                          "state": "",
+                        }
+                      }
+                      match={
+                        Object {
+                          "isExact": false,
+                          "params": Object {},
+                          "path": "",
+                          "url": "",
+                        }
+                      }
+                      queryParams={
+                        Object {
+                          "order_by": "name",
+                          "page": 1,
+                          "page_size": 5,
+                        }
+                      }
+                      renderItem={[Function]}
+                      toolbarColumns={
+                        Array [
+                          Object {
+                            "isSortable": true,
+                            "key": "name",
+                            "name": "Name",
+                          },
+                        ]
+                      }
+                    >
+                      <I18n
+                        update={true}
+                        withHash={true}
+                      >
+                        <DataListToolbar
+                          add={null}
+                          addUrl={null}
+                          columns={
+                            Array [
+                              Object {
+                                "isSortable": true,
+                                "key": "name",
+                                "name": "Name",
+                              },
+                            ]
+                          }
+                          deleteTooltip="Delete"
+                          isAllSelected={false}
+                          isCompact={false}
+                          noLeftMargin={false}
+                          onCompact={null}
+                          onExpand={null}
+                          onSearch={[Function]}
+                          onSelectAll={null}
+                          onSort={[Function]}
+                          showAdd={false}
+                          showDelete={false}
+                          showSelectAll={false}
+                          sortOrder="ascending"
+                          sortedColumnKey="name"
+                        >
+                          <I18n
+                            update={true}
+                            withHash={true}
+                          >
+                            <div
+                              className="awx-toolbar"
+                            >
+                              <Level
+                                className=""
+                                gutter={null}
+                              >
+                                <div
+                                  className="pf-l-level"
+                                >
+                                  <LevelItem
+                                    style={
+                                      Object {
+                                        "display": "flex",
+                                        "flexBasis": "700px",
+                                      }
+                                    }
+                                  >
+                                    <div
+                                      style={
+                                        Object {
+                                          "display": "flex",
+                                          "flexBasis": "700px",
+                                        }
+                                      }
+                                    >
+                                      <Toolbar
+                                        className={null}
+                                        style={
+                                          Object {
+                                            "flexGrow": "1",
+                                            "marginLeft": "20px",
+                                          }
+                                        }
+                                      >
+                                        <div
+                                          className="pf-l-toolbar"
+                                          style={
+                                            Object {
+                                              "flexGrow": "1",
+                                              "marginLeft": "20px",
+                                            }
+                                          }
+                                        >
+                                          <ToolbarGroup
+                                            className={null}
+                                            style={
+                                              Object {
+                                                "flexGrow": "1",
+                                              }
+                                            }
+                                          >
+                                            <div
+                                              className="pf-l-toolbar__group"
+                                              style={
+                                                Object {
+                                                  "flexGrow": "1",
+                                                }
+                                              }
+                                            >
+                                              <ToolbarItem
+                                                className={null}
+                                                style={
+                                                  Object {
+                                                    "flexGrow": "1",
+                                                  }
+                                                }
+                                              >
+                                                <div
+                                                  className="pf-l-toolbar__item"
+                                                  style={
+                                                    Object {
+                                                      "flexGrow": "1",
+                                                    }
+                                                  }
+                                                >
+                                                  <Search
+                                                    columns={
+                                                      Array [
+                                                        Object {
+                                                          "isSortable": true,
+                                                          "key": "name",
+                                                          "name": "Name",
+                                                        },
+                                                      ]
+                                                    }
+                                                    onSearch={[Function]}
+                                                    sortedColumnKey="name"
+                                                  >
+                                                    <I18n
+                                                      update={true}
+                                                      withHash={true}
+                                                    >
+                                                      <div
+                                                        className="pf-c-input-group"
+                                                      >
+                                                        <Dropdown
+                                                          className="searchKeyDropdown"
+                                                          direction="down"
+                                                          dropdownItems={Array []}
+                                                          isOpen={false}
+                                                          isPlain={false}
+                                                          onSelect={[Function]}
+                                                          onToggle={[Function]}
+                                                          position="left"
+                                                          toggle={
+                                                            <DropdownToggle
+                                                              className=""
+                                                              iconComponent={[Function]}
+                                                              id=""
+                                                              isActive={false}
+                                                              isFocused={false}
+                                                              isHovered={false}
+                                                              isOpen={false}
+                                                              isPlain={false}
+                                                              onToggle={[Function]}
+                                                              parentRef={null}
+                                                            >
+                                                              Name
+                                                            </DropdownToggle>
+                                                          }
+                                                        >
+                                                          <div
+                                                            className="pf-c-dropdown searchKeyDropdown"
+                                                            onToggle={[Function]}
+                                                          >
+                                                            <DropdownToggle
+                                                              ariaHasPopup={null}
+                                                              className=""
+                                                              iconComponent={[Function]}
+                                                              id="pf-toggle-id-2"
+                                                              isActive={false}
+                                                              isFocused={false}
+                                                              isHovered={false}
+                                                              isOpen={false}
+                                                              isPlain={false}
+                                                              key=".0"
+                                                              onEnter={[Function]}
+                                                              onToggle={[Function]}
+                                                              parentRef={
+                                                                <div
+                                                                  class="pf-c-dropdown searchKeyDropdown"
+                                                                >
+                                                                  <button
+                                                                    aria-expanded="false"
+                                                                    class="pf-c-dropdown__toggle"
+                                                                    id="pf-toggle-id-2"
+                                                                    type="button"
+                                                                  >
+                                                                    <span
+                                                                      class="pf-c-dropdown__toggle-text"
+                                                                    >
+                                                                      Name
+                                                                    </span>
+                                                                    <svg
+                                                                      aria-hidden="true"
+                                                                      class="pf-c-dropdown__toggle-icon"
+                                                                      fill="currentColor"
+                                                                      height="1em"
+                                                                      role="img"
+                                                                      style="vertical-align: -0.125em;"
+                                                                      viewBox="0 0 320 512"
+                                                                      width="1em"
+                                                                    >
+                                                                      <path
+                                                                        d="M31.3 192h257.3c17.8 0 26.7 21.5 14.1 34.1L174.1 354.8c-7.8 7.8-20.5 7.8-28.3 0L17.2 226.1C4.6 213.5 13.5 192 31.3 192z"
+                                                                        transform=""
+                                                                      />
+                                                                    </svg>
+                                                                  </button>
+                                                                </div>
+                                                              }
+                                                            >
+                                                              <DropdownToggle
+                                                                ariaHasPopup={null}
+                                                                className=""
+                                                                id="pf-toggle-id-2"
+                                                                isActive={false}
+                                                                isDisabled={false}
+                                                                isFocused={false}
+                                                                isHovered={false}
+                                                                isOpen={false}
+                                                                isPlain={false}
+                                                                onEnter={[Function]}
+                                                                onToggle={[Function]}
+                                                                parentRef={
+                                                                  <div
+                                                                    class="pf-c-dropdown searchKeyDropdown"
+                                                                  >
+                                                                    <button
+                                                                      aria-expanded="false"
+                                                                      class="pf-c-dropdown__toggle"
+                                                                      id="pf-toggle-id-2"
+                                                                      type="button"
+                                                                    >
+                                                                      <span
+                                                                        class="pf-c-dropdown__toggle-text"
+                                                                      >
+                                                                        Name
+                                                                      </span>
+                                                                      <svg
+                                                                        aria-hidden="true"
+                                                                        class="pf-c-dropdown__toggle-icon"
+                                                                        fill="currentColor"
+                                                                        height="1em"
+                                                                        role="img"
+                                                                        style="vertical-align: -0.125em;"
+                                                                        viewBox="0 0 320 512"
+                                                                        width="1em"
+                                                                      >
+                                                                        <path
+                                                                          d="M31.3 192h257.3c17.8 0 26.7 21.5 14.1 34.1L174.1 354.8c-7.8 7.8-20.5 7.8-28.3 0L17.2 226.1C4.6 213.5 13.5 192 31.3 192z"
+                                                                          transform=""
+                                                                        />
+                                                                      </svg>
+                                                                    </button>
+                                                                  </div>
+                                                                }
+                                                              >
+                                                                <button
+                                                                  aria-expanded={false}
+                                                                  aria-haspopup={null}
+                                                                  className="pf-c-dropdown__toggle"
+                                                                  disabled={false}
+                                                                  id="pf-toggle-id-2"
+                                                                  onClick={[Function]}
+                                                                  onKeyDown={[Function]}
+                                                                  type="button"
+                                                                >
+                                                                  <span
+                                                                    className="pf-c-dropdown__toggle-text"
+                                                                  >
+                                                                    Name
+                                                                  </span>
+                                                                  <CaretDownIcon
+                                                                    className="pf-c-dropdown__toggle-icon"
+                                                                    color="currentColor"
+                                                                    size="sm"
+                                                                    title={null}
+                                                                  >
+                                                                    <svg
+                                                                      aria-hidden={true}
+                                                                      aria-labelledby={null}
+                                                                      className="pf-c-dropdown__toggle-icon"
+                                                                      fill="currentColor"
+                                                                      height="1em"
+                                                                      role="img"
+                                                                      style={
+                                                                        Object {
+                                                                          "verticalAlign": "-0.125em",
+                                                                        }
+                                                                      }
+                                                                      viewBox="0 0 320 512"
+                                                                      width="1em"
+                                                                    >
+                                                                      <path
+                                                                        d="M31.3 192h257.3c17.8 0 26.7 21.5 14.1 34.1L174.1 354.8c-7.8 7.8-20.5 7.8-28.3 0L17.2 226.1C4.6 213.5 13.5 192 31.3 192z"
+                                                                        transform=""
+                                                                      />
+                                                                    </svg>
+                                                                  </CaretDownIcon>
+                                                                </button>
+                                                              </DropdownToggle>
+                                                            </DropdownToggle>
+                                                          </div>
+                                                        </Dropdown>
+                                                        <TextInput
+                                                          aria-label="Search text input"
+                                                          className=""
+                                                          isDisabled={false}
+                                                          isReadOnly={false}
+                                                          isRequired={false}
+                                                          isValid={true}
+                                                          onChange={[Function]}
+                                                          style={
+                                                            Object {
+                                                              "height": "30px",
+                                                            }
+                                                          }
+                                                          type="search"
+                                                          value=""
+                                                        >
+                                                          <input
+                                                            aria-invalid={false}
+                                                            aria-label="Search text input"
+                                                            className="pf-c-form-control"
+                                                            disabled={false}
+                                                            onChange={[Function]}
+                                                            readOnly={false}
+                                                            required={false}
+                                                            style={
+                                                              Object {
+                                                                "height": "30px",
+                                                              }
+                                                            }
+                                                            type="search"
+                                                            value=""
+                                                          />
+                                                        </TextInput>
+                                                        <Button
+                                                          aria-label="Search"
+                                                          className=""
+                                                          component="button"
+                                                          isActive={false}
+                                                          isBlock={false}
+                                                          isDisabled={false}
+                                                          isFocus={false}
+                                                          isHover={false}
+                                                          onClick={[Function]}
+                                                          type="button"
+                                                          variant="tertiary"
+                                                        >
+                                                          <button
+                                                            aria-disabled={null}
+                                                            aria-label="Search"
+                                                            className="pf-c-button pf-m-tertiary"
+                                                            disabled={false}
+                                                            onClick={[Function]}
+                                                            tabIndex={null}
+                                                            type="button"
+                                                          >
+                                                            <i
+                                                              aria-hidden="true"
+                                                              className="fas fa-search"
+                                                            />
+                                                          </button>
+                                                        </Button>
+                                                      </div>
+                                                    </I18n>
+                                                  </Search>
+                                                </div>
+                                              </ToolbarItem>
+                                              <VerticalSeparator>
+                                                <div>
+                                                  <span
+                                                    style={
+                                                      Object {
+                                                        "backgroundColor": "#d7d7d7",
+                                                        "content": "",
+                                                        "display": "inline-block",
+                                                        "height": "30px",
+                                                        "marginLeft": "20px",
+                                                        "marginRight": "20px",
+                                                        "verticalAlign": "middle",
+                                                        "width": "1px",
+                                                      }
+                                                    }
+                                                  />
+                                                </div>
+                                              </VerticalSeparator>
+                                            </div>
+                                          </ToolbarGroup>
+                                          <ToolbarGroup
+                                            className="sortDropdownGroup"
+                                          >
+                                            <div
+                                              className="pf-l-toolbar__group sortDropdownGroup"
+                                            >
+                                              <ToolbarItem
+                                                className={null}
+                                              >
+                                                <div
+                                                  className="pf-l-toolbar__item"
+                                                >
+                                                  <Sort
+                                                    columns={
+                                                      Array [
+                                                        Object {
+                                                          "isSortable": true,
+                                                          "key": "name",
+                                                          "name": "Name",
+                                                        },
+                                                      ]
+                                                    }
+                                                    onSort={[Function]}
+                                                    sortOrder="ascending"
+                                                    sortedColumnKey="name"
+                                                  >
+                                                    <I18n
+                                                      update={true}
+                                                      withHash={true}
+                                                    >
+                                                      <Button
+                                                        aria-label="Sort"
+                                                        className=""
+                                                        component="button"
+                                                        isActive={false}
+                                                        isBlock={false}
+                                                        isDisabled={false}
+                                                        isFocus={false}
+                                                        isHover={false}
+                                                        onClick={[Function]}
+                                                        type="button"
+                                                        variant="plain"
+                                                      >
+                                                        <button
+                                                          aria-disabled={null}
+                                                          aria-label="Sort"
+                                                          className="pf-c-button pf-m-plain"
+                                                          disabled={false}
+                                                          onClick={[Function]}
+                                                          tabIndex={null}
+                                                          type="button"
+                                                        >
+                                                          <SortAlphaUpIcon
+                                                            color="currentColor"
+                                                            size="sm"
+                                                            title={null}
+                                                          >
+                                                            <svg
+                                                              aria-hidden={true}
+                                                              aria-labelledby={null}
+                                                              fill="currentColor"
+                                                              height="1em"
+                                                              role="img"
+                                                              style={
+                                                                Object {
+                                                                  "verticalAlign": "-0.125em",
+                                                                }
+                                                              }
+                                                              viewBox="0 0 448 512"
+                                                              width="1em"
+                                                            >
+                                                              <path
+                                                                d="M107.3 36.7c-6.2-6.2-16.4-6.2-22.6 0l-80 80c-10 10-2.9 27.3 11.3 27.3h48v320c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V144h48c14.2 0 21.4-17.2 11.3-27.3zm293.4 390.4h-61.1c.7-1 1.5-2 2.3-3.1l67.5-95.7c1.4-2 2.2-4.4 2.2-6.9V300c0-6.6-5.4-12-12-12H274.5c-6.6 0-12 5.4-12 12v28.9c0 6.6 5.4 12 12 12H331c-.7 1-1.5 2-2.3 3.1l-67.2 95.2c-1.4 2-2.2 4.4-2.2 6.9V468c0 6.6 5.4 12 12 12h129.4c6.6 0 12-5.4 12-12v-28.9c0-6.7-5.4-12-12-12zm23.5-219l-57.1-168c-1.7-4.9-6.2-8.1-11.4-8.1h-39.6c-5.1 0-9.7 3.3-11.4 8.1l-57.1 168c-2.6 7.8 3.1 15.9 11.4 15.9h35.7c5.4 0 10.1-3.5 11.5-8.7l8.1-28.2h42.9l8.3 28.3A12 12 0 0 0 377 224h35.7c8.4 0 14.2-8.1 11.5-15.9zm-95-71.5l6.8-22.9 6.6 22.9z"
+                                                                transform=""
+                                                              />
+                                                            </svg>
+                                                          </SortAlphaUpIcon>
+                                                        </button>
+                                                      </Button>
+                                                    </I18n>
+                                                  </Sort>
+                                                </div>
+                                              </ToolbarItem>
+                                            </div>
+                                          </ToolbarGroup>
+                                        </div>
+                                      </Toolbar>
+                                    </div>
+                                  </LevelItem>
+                                  <LevelItem>
+                                    <div />
+                                  </LevelItem>
+                                </div>
+                              </Level>
+                            </div>
+                          </I18n>
+                        </DataListToolbar>
+                        <DataList
+                          aria-label="{0} List"
+                          className=""
+                        >
+                          <ul
+                            aria-label="{0} List"
+                            className="pf-c-data-list"
+                            role="list"
+                          >
+                            <NotificationListItem
+                              canToggleNotifications={true}
+                              detailUrl="/notifications/1"
+                              errorTurnedOn={false}
+                              key="1"
+                              notification={
+                                Object {
+                                  "id": 1,
+                                  "name": "Notification one",
+                                  "notification_type": "email",
+                                  "url": "/api/v2/notification_templates/1/",
+                                }
+                              }
+                              successTurnedOn={true}
+                              toggleNotification={[Function]}
+                            >
+                              <I18n
+                                update={true}
+                                withHash={true}
+                              >
+                                <DataListItem
+                                  aria-labelledby="items-list-item-1"
+                                  className=""
+                                  isExpanded={false}
+                                  key="1"
+                                >
+                                  <li
+                                    aria-labelledby="items-list-item-1"
+                                    className="pf-c-data-list__item"
+                                  >
+                                    <DataListCell
+                                      className=""
+                                      key=".0"
+                                      rowid="items-list-item-1"
+                                      width={1}
+                                    >
+                                      <div
+                                        className="pf-c-data-list__cell"
+                                      >
+                                        <Link
+                                          replace={false}
+                                          style={
+                                            Object {
+                                              "marginRight": "1.5em",
+                                            }
+                                          }
+                                          to={
+                                            Object {
+                                              "pathname": "/notifications/1",
+                                            }
+                                          }
+                                        >
+                                          <a
+                                            onClick={[Function]}
+                                            style={
+                                              Object {
+                                                "marginRight": "1.5em",
+                                              }
+                                            }
+                                          >
+                                            <b
+                                              id="items-list-item-1"
+                                            >
+                                              Notification one
+                                            </b>
+                                          </a>
+                                        </Link>
+                                        <Badge
+                                          className=""
+                                          isRead={true}
+                                          style={
+                                            Object {
+                                              "textTransform": "capitalize",
+                                            }
+                                          }
+                                        >
+                                          <span
+                                            className="pf-c-badge pf-m-read"
+                                            style={
+                                              Object {
+                                                "textTransform": "capitalize",
+                                              }
+                                            }
+                                          >
+                                            email
+                                          </span>
+                                        </Badge>
+                                      </div>
+                                    </DataListCell>
+                                    <DataListCell
+                                      alignRight={true}
+                                      className=""
+                                      key=".1"
+                                      rowid="items-list-item-1"
+                                      width={1}
+                                    >
+                                      <div
+                                        alignRight={true}
+                                        className="pf-c-data-list__cell"
+                                      >
+                                        <Switch
+                                          aria-label="Toggle notification success"
+                                          className=""
+                                          id="notification-1-success-toggle"
+                                          isChecked={true}
+                                          isDisabled={false}
+                                          label="Successful"
+                                          onChange={[Function]}
+                                        >
+                                          <label
+                                            className="pf-c-switch"
+                                            htmlFor="notification-1-success-toggle"
+                                          >
+                                            <input
+                                              aria-label="Toggle notification success"
+                                              checked={true}
+                                              className="pf-c-switch__input"
+                                              disabled={false}
+                                              id="notification-1-success-toggle"
+                                              onChange={[Function]}
+                                              type="checkbox"
+                                            />
+                                            <span
+                                              className="pf-c-switch__toggle"
+                                            />
+                                            <span
+                                              aria-hidden="true"
+                                              className="pf-c-switch__label pf-m-on"
+                                            >
+                                              Successful
+                                            </span>
+                                            <span
+                                              aria-hidden="true"
+                                              className="pf-c-switch__label pf-m-off"
+                                            >
+                                              Successful
+                                            </span>
+                                          </label>
+                                        </Switch>
+                                        <Switch
+                                          aria-label="Toggle notification failure"
+                                          className=""
+                                          id="notification-1-error-toggle"
+                                          isChecked={false}
+                                          isDisabled={false}
+                                          label="Failure"
+                                          onChange={[Function]}
+                                        >
+                                          <label
+                                            className="pf-c-switch"
+                                            htmlFor="notification-1-error-toggle"
+                                          >
+                                            <input
+                                              aria-label="Toggle notification failure"
+                                              checked={false}
+                                              className="pf-c-switch__input"
+                                              disabled={false}
+                                              id="notification-1-error-toggle"
+                                              onChange={[Function]}
+                                              type="checkbox"
+                                            />
+                                            <span
+                                              className="pf-c-switch__toggle"
+                                            />
+                                            <span
+                                              aria-hidden="true"
+                                              className="pf-c-switch__label pf-m-on"
+                                            >
+                                              Failure
+                                            </span>
+                                            <span
+                                              aria-hidden="true"
+                                              className="pf-c-switch__label pf-m-off"
+                                            >
+                                              Failure
+                                            </span>
+                                          </label>
+                                        </Switch>
+                                      </div>
+                                    </DataListCell>
+                                  </li>
+                                </DataListItem>
+                              </I18n>
+                            </NotificationListItem>
+                            <NotificationListItem
+                              canToggleNotifications={true}
+                              detailUrl="/notifications/2"
+                              errorTurnedOn={true}
+                              key="2"
+                              notification={
+                                Object {
+                                  "id": 2,
+                                  "name": "Notification two",
+                                  "notification_type": "email",
+                                  "url": "/api/v2/notification_templates/2/",
+                                }
+                              }
+                              successTurnedOn={false}
+                              toggleNotification={[Function]}
+                            >
+                              <I18n
+                                update={true}
+                                withHash={true}
+                              >
+                                <DataListItem
+                                  aria-labelledby="items-list-item-2"
+                                  className=""
+                                  isExpanded={false}
+                                  key="2"
+                                >
+                                  <li
+                                    aria-labelledby="items-list-item-2"
+                                    className="pf-c-data-list__item"
+                                  >
+                                    <DataListCell
+                                      className=""
+                                      key=".0"
+                                      rowid="items-list-item-2"
+                                      width={1}
+                                    >
+                                      <div
+                                        className="pf-c-data-list__cell"
+                                      >
+                                        <Link
+                                          replace={false}
+                                          style={
+                                            Object {
+                                              "marginRight": "1.5em",
+                                            }
+                                          }
+                                          to={
+                                            Object {
+                                              "pathname": "/notifications/2",
+                                            }
+                                          }
+                                        >
+                                          <a
+                                            onClick={[Function]}
+                                            style={
+                                              Object {
+                                                "marginRight": "1.5em",
+                                              }
+                                            }
+                                          >
+                                            <b
+                                              id="items-list-item-2"
+                                            >
+                                              Notification two
+                                            </b>
+                                          </a>
+                                        </Link>
+                                        <Badge
+                                          className=""
+                                          isRead={true}
+                                          style={
+                                            Object {
+                                              "textTransform": "capitalize",
+                                            }
+                                          }
+                                        >
+                                          <span
+                                            className="pf-c-badge pf-m-read"
+                                            style={
+                                              Object {
+                                                "textTransform": "capitalize",
+                                              }
+                                            }
+                                          >
+                                            email
+                                          </span>
+                                        </Badge>
+                                      </div>
+                                    </DataListCell>
+                                    <DataListCell
+                                      alignRight={true}
+                                      className=""
+                                      key=".1"
+                                      rowid="items-list-item-2"
+                                      width={1}
+                                    >
+                                      <div
+                                        alignRight={true}
+                                        className="pf-c-data-list__cell"
+                                      >
+                                        <Switch
+                                          aria-label="Toggle notification success"
+                                          className=""
+                                          id="notification-2-success-toggle"
+                                          isChecked={false}
+                                          isDisabled={false}
+                                          label="Successful"
+                                          onChange={[Function]}
+                                        >
+                                          <label
+                                            className="pf-c-switch"
+                                            htmlFor="notification-2-success-toggle"
+                                          >
+                                            <input
+                                              aria-label="Toggle notification success"
+                                              checked={false}
+                                              className="pf-c-switch__input"
+                                              disabled={false}
+                                              id="notification-2-success-toggle"
+                                              onChange={[Function]}
+                                              type="checkbox"
+                                            />
+                                            <span
+                                              className="pf-c-switch__toggle"
+                                            />
+                                            <span
+                                              aria-hidden="true"
+                                              className="pf-c-switch__label pf-m-on"
+                                            >
+                                              Successful
+                                            </span>
+                                            <span
+                                              aria-hidden="true"
+                                              className="pf-c-switch__label pf-m-off"
+                                            >
+                                              Successful
+                                            </span>
+                                          </label>
+                                        </Switch>
+                                        <Switch
+                                          aria-label="Toggle notification failure"
+                                          className=""
+                                          id="notification-2-error-toggle"
+                                          isChecked={true}
+                                          isDisabled={false}
+                                          label="Failure"
+                                          onChange={[Function]}
+                                        >
+                                          <label
+                                            className="pf-c-switch"
+                                            htmlFor="notification-2-error-toggle"
+                                          >
+                                            <input
+                                              aria-label="Toggle notification failure"
+                                              checked={true}
+                                              className="pf-c-switch__input"
+                                              disabled={false}
+                                              id="notification-2-error-toggle"
+                                              onChange={[Function]}
+                                              type="checkbox"
+                                            />
+                                            <span
+                                              className="pf-c-switch__toggle"
+                                            />
+                                            <span
+                                              aria-hidden="true"
+                                              className="pf-c-switch__label pf-m-on"
+                                            >
+                                              Failure
+                                            </span>
+                                            <span
+                                              aria-hidden="true"
+                                              className="pf-c-switch__label pf-m-off"
+                                            >
+                                              Failure
+                                            </span>
+                                          </label>
+                                        </Switch>
+                                      </div>
+                                    </DataListCell>
+                                  </li>
+                                </DataListItem>
+                              </I18n>
+                            </NotificationListItem>
+                          </ul>
+                        </DataList>
+                        <Pagination
+                          count={2}
+                          onSetPage={[Function]}
+                          page={1}
+                          pageCount={1}
+                          pageSizeOptions={
+                            Array [
+                              5,
+                              10,
+                              25,
+                              50,
+                            ]
+                          }
+                          page_size={5}
+                          showPageSizeOptions={true}
+                        >
+                          <I18n
+                            update={true}
+                            withHash={true}
+                          >
+                            <div
+                              className="awx-pagination"
+                            >
+                              <div
+                                className="awx-pagination__page-size-selection"
+                              >
+                                <WithI18n
+                                  id="Items Per Page"
+                                >
+                                  <I18n
+                                    update={true}
+                                    withHash={true}
+                                  >
+                                    <Trans
+                                      i18n={"/i18n/"}
+                                      id="Items Per Page"
+                                    >
+                                      <Render
+                                        value={null}
+                                      />
+                                    </Trans>
+                                  </I18n>
+                                </WithI18n>
+                                <Dropdown
+                                  className=""
+                                  direction="up"
+                                  dropdownItems={
+                                    Array [
+                                      <Item
+                                        className=""
+                                        component="button"
+                                        href="#"
+                                        isDisabled={false}
+                                        isHovered={false}
+                                      >
+                                        50
+                                      </Item>,
+                                      <Item
+                                        className=""
+                                        component="button"
+                                        href="#"
+                                        isDisabled={false}
+                                        isHovered={false}
+                                      >
+                                        25
+                                      </Item>,
+                                      <Item
+                                        className=""
+                                        component="button"
+                                        href="#"
+                                        isDisabled={false}
+                                        isHovered={false}
+                                      >
+                                        10
+                                      </Item>,
+                                    ]
+                                  }
+                                  isOpen={false}
+                                  isPlain={false}
+                                  onSelect={[Function]}
+                                  onToggle={[Function]}
+                                  position="left"
+                                  toggle={
+                                    <DropdownToggle
+                                      className="togglePageSize"
+                                      iconComponent={[Function]}
+                                      id=""
+                                      isActive={false}
+                                      isFocused={false}
+                                      isHovered={false}
+                                      isOpen={false}
+                                      isPlain={false}
+                                      onToggle={[Function]}
+                                      parentRef={null}
+                                    >
+                                      5
+                                    </DropdownToggle>
+                                  }
+                                >
+                                  <div
+                                    className="pf-c-dropdown pf-m-top"
+                                    onToggle={[Function]}
+                                  >
+                                    <DropdownToggle
+                                      ariaHasPopup={true}
+                                      className="togglePageSize"
+                                      iconComponent={[Function]}
+                                      id="pf-toggle-id-3"
+                                      isActive={false}
+                                      isFocused={false}
+                                      isHovered={false}
+                                      isOpen={false}
+                                      isPlain={false}
+                                      key=".0"
+                                      onEnter={[Function]}
+                                      onToggle={[Function]}
+                                      parentRef={
+                                        <div
+                                          class="pf-c-dropdown pf-m-top"
+                                        >
+                                          <button
+                                            aria-expanded="false"
+                                            aria-haspopup="true"
+                                            class="pf-c-dropdown__toggle togglePageSize"
+                                            id="pf-toggle-id-3"
+                                            type="button"
+                                          >
+                                            <span
+                                              class="pf-c-dropdown__toggle-text"
+                                            >
+                                              5
+                                            </span>
+                                            <svg
+                                              aria-hidden="true"
+                                              class="pf-c-dropdown__toggle-icon"
+                                              fill="currentColor"
+                                              height="1em"
+                                              role="img"
+                                              style="vertical-align: -0.125em;"
+                                              viewBox="0 0 320 512"
+                                              width="1em"
+                                            >
+                                              <path
+                                                d="M31.3 192h257.3c17.8 0 26.7 21.5 14.1 34.1L174.1 354.8c-7.8 7.8-20.5 7.8-28.3 0L17.2 226.1C4.6 213.5 13.5 192 31.3 192z"
+                                                transform=""
+                                              />
+                                            </svg>
+                                          </button>
+                                        </div>
+                                      }
+                                    >
+                                      <DropdownToggle
+                                        ariaHasPopup={true}
+                                        className="togglePageSize"
+                                        id="pf-toggle-id-3"
+                                        isActive={false}
+                                        isDisabled={false}
+                                        isFocused={false}
+                                        isHovered={false}
+                                        isOpen={false}
+                                        isPlain={false}
+                                        onEnter={[Function]}
+                                        onToggle={[Function]}
+                                        parentRef={
+                                          <div
+                                            class="pf-c-dropdown pf-m-top"
+                                          >
+                                            <button
+                                              aria-expanded="false"
+                                              aria-haspopup="true"
+                                              class="pf-c-dropdown__toggle togglePageSize"
+                                              id="pf-toggle-id-3"
+                                              type="button"
+                                            >
+                                              <span
+                                                class="pf-c-dropdown__toggle-text"
+                                              >
+                                                5
+                                              </span>
+                                              <svg
+                                                aria-hidden="true"
+                                                class="pf-c-dropdown__toggle-icon"
+                                                fill="currentColor"
+                                                height="1em"
+                                                role="img"
+                                                style="vertical-align: -0.125em;"
+                                                viewBox="0 0 320 512"
+                                                width="1em"
+                                              >
+                                                <path
+                                                  d="M31.3 192h257.3c17.8 0 26.7 21.5 14.1 34.1L174.1 354.8c-7.8 7.8-20.5 7.8-28.3 0L17.2 226.1C4.6 213.5 13.5 192 31.3 192z"
+                                                  transform=""
+                                                />
+                                              </svg>
+                                            </button>
+                                          </div>
+                                        }
+                                      >
+                                        <button
+                                          aria-expanded={false}
+                                          aria-haspopup={true}
+                                          className="pf-c-dropdown__toggle togglePageSize"
+                                          disabled={false}
+                                          id="pf-toggle-id-3"
+                                          onClick={[Function]}
+                                          onKeyDown={[Function]}
+                                          type="button"
+                                        >
+                                          <span
+                                            className="pf-c-dropdown__toggle-text"
+                                          >
+                                            5
+                                          </span>
+                                          <CaretDownIcon
+                                            className="pf-c-dropdown__toggle-icon"
+                                            color="currentColor"
+                                            size="sm"
+                                            title={null}
+                                          >
+                                            <svg
+                                              aria-hidden={true}
+                                              aria-labelledby={null}
+                                              className="pf-c-dropdown__toggle-icon"
+                                              fill="currentColor"
+                                              height="1em"
+                                              role="img"
+                                              style={
+                                                Object {
+                                                  "verticalAlign": "-0.125em",
+                                                }
+                                              }
+                                              viewBox="0 0 320 512"
+                                              width="1em"
+                                            >
+                                              <path
+                                                d="M31.3 192h257.3c17.8 0 26.7 21.5 14.1 34.1L174.1 354.8c-7.8 7.8-20.5 7.8-28.3 0L17.2 226.1C4.6 213.5 13.5 192 31.3 192z"
+                                                transform=""
+                                              />
+                                            </svg>
+                                          </CaretDownIcon>
+                                        </button>
+                                      </DropdownToggle>
+                                    </DropdownToggle>
+                                  </div>
+                                </Dropdown>
+                              </div>
+                              <div
+                                className="awx-pagination__counts"
+                              >
+                                <div
+                                  className="awx-pagination__item-count"
+                                >
+                                  <WithI18n
+                                    id="Items {itemMin} – {itemMax} of {count}"
+                                    values={
+                                      Object {
+                                        "count": 2,
+                                        "itemMax": 2,
+                                        "itemMin": 1,
+                                      }
+                                    }
+                                  >
+                                    <I18n
+                                      update={true}
+                                      withHash={true}
+                                    >
+                                      <Trans
+                                        i18n={"/i18n/"}
+                                        id="Items {itemMin} – {itemMax} of {count}"
+                                        values={
+                                          Object {
+                                            "count": 2,
+                                            "itemMax": 2,
+                                            "itemMin": 1,
+                                          }
+                                        }
+                                      >
+                                        <Render
+                                          value={null}
+                                        />
+                                      </Trans>
+                                    </I18n>
+                                  </WithI18n>
+                                </div>
+                              </div>
+                            </div>
+                          </I18n>
+                        </Pagination>
+                      </I18n>
+                    </PaginatedDataList>
+                  </Route>
+                </withRouter(PaginatedDataList)>
+              </OrganizationNotifications>
+            </Route>
+          </withRouter(OrganizationNotifications)>
+        </Component>
+      </Provider>
+    </Component>
+  </Provider>
+</RootDialogProvider>
+`;

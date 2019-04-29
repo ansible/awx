@@ -1,7 +1,7 @@
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
-import OrganizationTeamsList from '../../components/OrganizationTeamsList';
+import PaginatedDataList from '../../../../components/PaginatedDataList';
 import { parseQueryString } from '../../../../util/qs';
 import { withNetwork } from '../../../../contexts/Network';
 
@@ -62,10 +62,9 @@ class OrganizationTeams extends React.Component {
         isInitialized: true,
       });
     } catch (error) {
-      handleHttpError(error) && this.setState({
+      handleHttpError(error) || this.setState({
         error,
         isLoading: false,
-        isInitialized: true,
       });
     }
   }
@@ -83,9 +82,10 @@ class OrganizationTeams extends React.Component {
       <Fragment>
         {isLoading && (<div>Loading...</div>)}
         {isInitialized && (
-          <OrganizationTeamsList
-            teams={teams}
+          <PaginatedDataList
+            items={teams}
             itemCount={itemCount}
+            itemName="team"
             queryParams={this.getQueryParams()}
           />
         )}

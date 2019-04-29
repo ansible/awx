@@ -49,11 +49,7 @@ exports[`mountWithContexts injected I18nProvider should mount and render deeply 
 
 exports[`mountWithContexts injected Network should mount and render 1`] = `
 <Foo
-  api={
-    Object {
-      "getConfig": [Function],
-    }
-  }
+  api={"/api/"}
   handleHttpError={[Function]}
 >
   <div>

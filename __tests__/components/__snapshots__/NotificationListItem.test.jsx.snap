@@ -1,0 +1,369 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<NotificationListItem /> initially renders succesfully 1`] = `
+<NotificationListItem
+  canToggleNotifications={true}
+  detailUrl="/foo"
+  errorTurnedOn={false}
+  notification={
+    Object {
+      "id": 9000,
+      "name": "Foo",
+      "notification_type": "slack",
+    }
+  }
+  successTurnedOn={false}
+  toggleNotification={[MockFunction]}
+>
+  <I18n
+    update={true}
+    withHash={true}
+  >
+    <DataListItem
+      aria-labelledby="items-list-item-9000"
+      className=""
+      isExpanded={false}
+      key="9000"
+    >
+      <li
+        aria-labelledby="items-list-item-9000"
+        className="pf-c-data-list__item"
+      >
+        <DataListCell
+          className=""
+          key=".0"
+          rowid="items-list-item-9000"
+          width={1}
+        >
+          <div
+            className="pf-c-data-list__cell"
+          >
+            <Link
+              replace={false}
+              style={
+                Object {
+                  "marginRight": "1.5em",
+                }
+              }
+              to={
+                Object {
+                  "pathname": "/foo",
+                }
+              }
+            >
+              <a
+                onClick={[Function]}
+                style={
+                  Object {
+                    "marginRight": "1.5em",
+                  }
+                }
+              >
+                <b
+                  id="items-list-item-9000"
+                >
+                  Foo
+                </b>
+              </a>
+            </Link>
+            <Badge
+              className=""
+              isRead={true}
+              style={
+                Object {
+                  "textTransform": "capitalize",
+                }
+              }
+            >
+              <span
+                className="pf-c-badge pf-m-read"
+                style={
+                  Object {
+                    "textTransform": "capitalize",
+                  }
+                }
+              >
+                slack
+              </span>
+            </Badge>
+          </div>
+        </DataListCell>
+        <DataListCell
+          alignRight={true}
+          className=""
+          key=".1"
+          rowid="items-list-item-9000"
+          width={1}
+        >
+          <div
+            alignRight={true}
+            className="pf-c-data-list__cell"
+          >
+            <Switch
+              aria-label="Toggle notification success"
+              className=""
+              id="notification-9000-success-toggle"
+              isChecked={false}
+              isDisabled={false}
+              label="Successful"
+              onChange={[Function]}
+            >
+              <label
+                className="pf-c-switch"
+                htmlFor="notification-9000-success-toggle"
+              >
+                <input
+                  aria-label="Toggle notification success"
+                  checked={false}
+                  className="pf-c-switch__input"
+                  disabled={false}
+                  id="notification-9000-success-toggle"
+                  onChange={[Function]}
+                  type="checkbox"
+                />
+                <span
+                  className="pf-c-switch__toggle"
+                />
+                <span
+                  aria-hidden="true"
+                  className="pf-c-switch__label pf-m-on"
+                >
+                  Successful
+                </span>
+                <span
+                  aria-hidden="true"
+                  className="pf-c-switch__label pf-m-off"
+                >
+                  Successful
+                </span>
+              </label>
+            </Switch>
+            <Switch
+              aria-label="Toggle notification failure"
+              className=""
+              id="notification-9000-error-toggle"
+              isChecked={false}
+              isDisabled={false}
+              label="Failure"
+              onChange={[Function]}
+            >
+              <label
+                className="pf-c-switch"
+                htmlFor="notification-9000-error-toggle"
+              >
+                <input
+                  aria-label="Toggle notification failure"
+                  checked={false}
+                  className="pf-c-switch__input"
+                  disabled={false}
+                  id="notification-9000-error-toggle"
+                  onChange={[Function]}
+                  type="checkbox"
+                />
+                <span
+                  className="pf-c-switch__toggle"
+                />
+                <span
+                  aria-hidden="true"
+                  className="pf-c-switch__label pf-m-on"
+                >
+                  Failure
+                </span>
+                <span
+                  aria-hidden="true"
+                  className="pf-c-switch__label pf-m-off"
+                >
+                  Failure
+                </span>
+              </label>
+            </Switch>
+          </div>
+        </DataListCell>
+      </li>
+    </DataListItem>
+  </I18n>
+</NotificationListItem>
+`;
+
+exports[`<NotificationListItem canToggleNotifications /> initially renders succesfully 1`] = `
+<NotificationListItem
+  canToggleNotifications={true}
+  detailUrl="/foo"
+  errorTurnedOn={false}
+  notification={
+    Object {
+      "id": 9000,
+      "name": "Foo",
+      "notification_type": "slack",
+    }
+  }
+  successTurnedOn={false}
+  toggleNotification={[MockFunction]}
+>
+  <I18n
+    update={true}
+    withHash={true}
+  >
+    <DataListItem
+      aria-labelledby="items-list-item-9000"
+      className=""
+      isExpanded={false}
+      key="9000"
+    >
+      <li
+        aria-labelledby="items-list-item-9000"
+        className="pf-c-data-list__item"
+      >
+        <DataListCell
+          className=""
+          key=".0"
+          rowid="items-list-item-9000"
+          width={1}
+        >
+          <div
+            className="pf-c-data-list__cell"
+          >
+            <Link
+              replace={false}
+              style={
+                Object {
+                  "marginRight": "1.5em",
+                }
+              }
+              to={
+                Object {
+                  "pathname": "/foo",
+                }
+              }
+            >
+              <a
+                onClick={[Function]}
+                style={
+                  Object {
+                    "marginRight": "1.5em",
+                  }
+                }
+              >
+                <b>
+                  Foo
+                </b>
+              </a>
+            </Link>
+            <Badge
+              className=""
+              isRead={true}
+              style={
+                Object {
+                  "textTransform": "capitalize",
+                }
+              }
+            >
+              <span
+                className="pf-c-badge pf-m-read"
+                style={
+                  Object {
+                    "textTransform": "capitalize",
+                  }
+                }
+              >
+                slack
+              </span>
+            </Badge>
+          </div>
+        </DataListCell>
+        <DataListCell
+          alignRight={true}
+          className=""
+          key=".1"
+          rowid="items-list-item-9000"
+          width={1}
+        >
+          <div
+            alignRight={true}
+            className="pf-c-data-list__cell"
+          >
+            <Switch
+              aria-label="Toggle notification success"
+              className=""
+              id="notification-9000-success-toggle"
+              isChecked={false}
+              isDisabled={false}
+              label="Successful"
+              onChange={[Function]}
+            >
+              <label
+                className="pf-c-switch"
+                htmlFor="notification-9000-success-toggle"
+              >
+                <input
+                  aria-label="Toggle notification success"
+                  checked={false}
+                  className="pf-c-switch__input"
+                  disabled={false}
+                  id="notification-9000-success-toggle"
+                  onChange={[Function]}
+                  type="checkbox"
+                />
+                <span
+                  className="pf-c-switch__toggle"
+                />
+                <span
+                  aria-hidden="true"
+                  className="pf-c-switch__label pf-m-on"
+                >
+                  Successful
+                </span>
+                <span
+                  aria-hidden="true"
+                  className="pf-c-switch__label pf-m-off"
+                >
+                  Successful
+                </span>
+              </label>
+            </Switch>
+            <Switch
+              aria-label="Toggle notification failure"
+              className=""
+              id="notification-9000-error-toggle"
+              isChecked={false}
+              isDisabled={false}
+              label="Failure"
+              onChange={[Function]}
+            >
+              <label
+                className="pf-c-switch"
+                htmlFor="notification-9000-error-toggle"
+              >
+                <input
+                  aria-label="Toggle notification failure"
+                  checked={false}
+                  className="pf-c-switch__input"
+                  disabled={false}
+                  id="notification-9000-error-toggle"
+                  onChange={[Function]}
+                  type="checkbox"
+                />
+                <span
+                  className="pf-c-switch__toggle"
+                />
+                <span
+                  aria-hidden="true"
+                  className="pf-c-switch__label pf-m-on"
+                >
+                  Failure
+                </span>
+                <span
+                  aria-hidden="true"
+                  className="pf-c-switch__label pf-m-off"
+                >
+                  Failure
+                </span>
+              </label>
+            </Switch>
+          </div>
+        </DataListCell>
+      </li>
+    </DataListItem>
+  </I18n>
+</NotificationListItem>
+`;

@@ -216,23 +216,20 @@ class Organization extends Component {
                 )}
               />
             )}
-            <Route
-              path="/organizations/:id/access"
-              render={() => (
-                <OrganizationAccess
-                  organization={organization}
-                />
-              )}
-            />
+            {organization && (
+              <Route
+                path="/organizations/:id/access"
+                render={() => (
+                  <OrganizationAccess
+                    organization={organization}
+                  />
+                )}
+              />
+            )}
             <Route
               path="/organizations/:id/teams"
               render={() => (
-                <OrganizationTeams
-                  id={Number(match.params.id)}
-                  match={match}
-                  location={location}
-                  history={history}
-                />
+                <OrganizationTeams id={Number(match.params.id)} />
               )}
             />
             {canSeeNotificationsTab && (
@@ -240,12 +237,17 @@ class Organization extends Component {
                 path="/organizations/:id/notifications"
                 render={() => (
                   <OrganizationNotifications
+                    id={Number(match.params.id)}
                     canToggleNotifications={canToggleNotifications}
                   />
                 )}
               />
             )}
-            {organization && <NotifyAndRedirect to={`/organizations/${match.params.id}/details`} />}
+            {organization && (
+              <NotifyAndRedirect
+                to={`/organizations/${match.params.id}/details`}
+              />
+            )}
           </Switch>
           {error ? 'error!' : ''}
           {loading ? 'loading...' : ''}

@@ -2,38 +2,49 @@ import React from 'react';
 import { mountWithContexts } from '../enzymeHelpers';
 import NotificationListItem from '../../src/components/NotificationsList/NotificationListItem';
 
-describe('<NotificationListItem />', () => {
+describe('<NotificationListItem canToggleNotifications />', () => {
   let wrapper;
-  const toggleNotification = jest.fn();
+  let toggleNotification;
+
+  beforeEach(() => {
+    toggleNotification = jest.fn();
+  });
 
   afterEach(() => {
     if (wrapper) {
       wrapper.unmount();
       wrapper = null;
     }
+    jest.clearAllMocks();
   });
 
   test('initially renders succesfully', () => {
     wrapper = mountWithContexts(
       <NotificationListItem
-        itemId={9000}
+        notification={{
+          id: 9000,
+          name: 'Foo',
+          notification_type: 'slack',
+        }}
         toggleNotification={toggleNotification}
         detailUrl="/foo"
-        notificationType="slack"
         canToggleNotifications
       />
     );
-    expect(wrapper.length).toBe(1);
+    expect(wrapper.find('NotificationListItem')).toMatchSnapshot();
   });
 
   test('handles success click when toggle is on', () => {
     wrapper = mountWithContexts(
       <NotificationListItem
-        itemId={9000}
+        notification={{
+          id: 9000,
+          name: 'Foo',
+          notification_type: 'slack',
+        }}
         successTurnedOn
         toggleNotification={toggleNotification}
         detailUrl="/foo"
-        notificationType="slack"
         canToggleNotifications
       />
     );
@@ -44,11 +55,14 @@ describe('<NotificationListItem />', () => {
   test('handles success click when toggle is off', () => {
     wrapper = mountWithContexts(
       <NotificationListItem
-        itemId={9000}
+        notification={{
+          id: 9000,
+          name: 'Foo',
+          notification_type: 'slack',
+        }}
         successTurnedOn={false}
         toggleNotification={toggleNotification}
         detailUrl="/foo"
-        notificationType="slack"
         canToggleNotifications
       />
     );
@@ -59,11 +73,14 @@ describe('<NotificationListItem />', () => {
   test('handles error click when toggle is on', () => {
     wrapper = mountWithContexts(
       <NotificationListItem
-        itemId={9000}
+        notification={{
+          id: 9000,
+          name: 'Foo',
+          notification_type: 'slack',
+        }}
         errorTurnedOn
         toggleNotification={toggleNotification}
         detailUrl="/foo"
-        notificationType="slack"
         canToggleNotifications
       />
     );
@@ -74,11 +91,14 @@ describe('<NotificationListItem />', () => {
   test('handles error click when toggle is off', () => {
     wrapper = mountWithContexts(
       <NotificationListItem
-        itemId={9000}
+        notification={{
+          id: 9000,
+          name: 'Foo',
+          notification_type: 'slack',
+        }}
         errorTurnedOn={false}
         toggleNotification={toggleNotification}
         detailUrl="/foo"
-        notificationType="slack"
         canToggleNotifications
       />
     );

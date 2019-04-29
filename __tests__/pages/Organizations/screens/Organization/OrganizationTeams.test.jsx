@@ -5,7 +5,6 @@ import { createMemoryHistory } from 'history';
 import { mountWithContexts } from '../../../../enzymeHelpers';
 import { sleep } from '../../../../testUtils';
 import OrganizationTeams, { _OrganizationTeams } from '../../../../../src/pages/Organizations/screens/Organization/OrganizationTeams';
-import OrganizationTeamsList from '../../../../../src/pages/Organizations/components/OrganizationTeamsList';
 
 const listData = {
   data: {
@@ -52,7 +51,7 @@ describe('<OrganizationTeams />', () => {
     });
   });
 
-  test('should pass fetched teams to list component', async () => {
+  test('should pass fetched teams to PaginatedDatalist', async () => {
     const readOrganizationTeamsList = jest.fn(() => Promise.resolve(listData));
     const wrapper = mountWithContexts(
       <OrganizationTeams
@@ -66,8 +65,8 @@ describe('<OrganizationTeams />', () => {
     await sleep(0);
     wrapper.update();
 
-    const list = wrapper.find('OrganizationTeamsList');
-    expect(list.prop('teams')).toEqual(listData.data.results);
+    const list = wrapper.find('PaginatedDataList');
+    expect(list.prop('items')).toEqual(listData.data.results);
     expect(list.prop('itemCount')).toEqual(listData.data.count);
     expect(list.prop('queryParams')).toEqual({
       page: 1,
@@ -76,7 +75,7 @@ describe('<OrganizationTeams />', () => {
     });
   });
 
-  test('should pass queryParams to OrganizationTeamsList', async () => {
+  test('should pass queryParams to PaginatedDataList', async () => {
     const page1Data = listData;
     const page2Data = {
       data: {
@@ -111,7 +110,7 @@ describe('<OrganizationTeams />', () => {
     await sleep(0);
     wrapper.update();
 
-    const list = wrapper.find(OrganizationTeamsList);
+    const list = wrapper.find('PaginatedDataList');
     expect(list.prop('queryParams')).toEqual({
       page: 1,
       page_size: 5,
@@ -123,7 +122,7 @@ describe('<OrganizationTeams />', () => {
 
     await sleep(0);
     wrapper.update();
-    const list2 = wrapper.find(OrganizationTeamsList);
+    const list2 = wrapper.find('PaginatedDataList');
     expect(list2.prop('queryParams')).toEqual({
       page: 2,
       page_size: 5,

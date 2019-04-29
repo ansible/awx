@@ -34,19 +34,19 @@ import {
   parseQueryString,
 } from '../../../util/qs';
 
+const COLUMNS = [
+  { name: i18nMark('Name'), key: 'name', isSortable: true },
+  { name: i18nMark('Modified'), key: 'modified', isSortable: true, isNumeric: true },
+  { name: i18nMark('Created'), key: 'created', isSortable: true, isNumeric: true },
+];
+
+const DEFAULT_PARAMS = {
+  page: 1,
+  page_size: 5,
+  order_by: 'name',
+};
+
 class OrganizationsList extends Component {
-  columns = [
-    { name: i18nMark('Name'), key: 'name', isSortable: true },
-    { name: i18nMark('Modified'), key: 'modified', isSortable: true, isNumeric: true },
-    { name: i18nMark('Created'), key: 'created', isSortable: true, isNumeric: true },
-  ];
-
-  defaultParams = {
-    page: 1,
-    page_size: 5,
-    order_by: 'name',
-  };
-
   constructor (props) {
     super(props);
 
@@ -141,7 +141,7 @@ class OrganizationsList extends Component {
 
     const searchParams = parseQueryString(search.substring(1));
 
-    return Object.assign({}, this.defaultParams, searchParams, overrides);
+    return Object.assign({}, DEFAULT_PARAMS, searchParams, overrides);
   }
 
   handleCloseOrgDeleteModal () {
@@ -333,7 +333,7 @@ class OrganizationsList extends Component {
                     isAllSelected={selected.length === results.length}
                     sortedColumnKey={sortedColumnKey}
                     sortOrder={sortOrder}
-                    columns={this.columns}
+                    columns={COLUMNS}
                     onSearch={this.onSearch}
                     onSort={this.onSort}
                     onSelectAll={this.onSelectAll}

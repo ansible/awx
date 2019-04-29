@@ -1,0 +1,36 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<OrganizationAccess /> initially renders succesfully 1`] = `
+<OrganizationAccess
+  api={"/api/"}
+  handleHttpError={[Function]}
+  history={"/history/"}
+  id={1}
+  location={
+    Object {
+      "hash": "",
+      "pathname": "",
+      "search": "",
+      "state": "",
+    }
+  }
+  match={
+    Object {
+      "isExact": false,
+      "params": Object {},
+      "path": "",
+      "url": "",
+    }
+  }
+  organization={
+    Object {
+      "id": 1,
+      "name": "Default",
+    }
+  }
+>
+  <div>
+    Loading...
+  </div>
+</OrganizationAccess>
+`;

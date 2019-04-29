@@ -148,6 +148,16 @@ class APIClient {
     return this.http.post(url, { id });
   }
 
+  disassociateTeamRole (teamId, roleId) {
+    const url = `/api/v2/teams/${teamId}/roles/`;
+    return this.disassociate(url, roleId);
+  }
+
+  disassociateUserRole (accessRecordId, roleId) {
+    const url = `/api/v2/users/${accessRecordId}/roles/`;
+    return this.disassociate(url, roleId);
+  }
+
   disassociate (url, id) {
     return this.http.post(url, { id, disassociate: true });
   }

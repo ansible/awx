@@ -50,7 +50,8 @@ const defaultContexts = {
         pathname: '',
         search: '',
         state: '',
-      }
+      },
+      toJSON: () => '/history/',
     },
     route: {
       location: {
@@ -71,6 +72,7 @@ const defaultContexts = {
   network: {
     api: {
       getConfig: () => {},
+      toJSON: () => '/api/',
     },
     handleHttpError: () => {},
   },

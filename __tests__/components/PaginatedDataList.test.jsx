@@ -1,8 +1,8 @@
 import React from 'react';
 import { createMemoryHistory } from 'history';
-import { mountWithContexts } from '../../../enzymeHelpers';
-import { sleep } from '../../../testUtils';
-import OrganizationTeamsList from '../../../../src/pages/Organizations/components/OrganizationTeamsList';
+import { mountWithContexts } from '../enzymeHelpers';
+import { sleep } from '../testUtils';
+import PaginatedDataList from '../../src/components/PaginatedDataList';
 
 const mockData = [
   { id: 1, name: 'one', url: '/org/team/1' },
@@ -12,15 +12,15 @@ const mockData = [
   { id: 5, name: 'five', url: '/org/team/5' },
 ];
 
-describe('<OrganizationTeamsList />', () => {
+describe('<PaginatedDataList />', () => {
   afterEach(() => {
     jest.restoreAllMocks();
   });
 
   test('initially renders succesfully', () => {
     mountWithContexts(
-      <OrganizationTeamsList
-        teams={mockData}
+      <PaginatedDataList
+        items={mockData}
         itemCount={7}
         queryParams={{
           page: 1,
@@ -37,8 +37,8 @@ describe('<OrganizationTeamsList />', () => {
       initialEntries: ['/organizations/1/teams'],
     });
     const wrapper = mountWithContexts(
-      <OrganizationTeamsList
-        teams={mockData}
+      <PaginatedDataList
+        items={mockData}
         itemCount={7}
         queryParams={{
           page: 1,
@@ -69,8 +69,8 @@ describe('<OrganizationTeamsList />', () => {
       initialEntries: ['/organizations/1/teams'],
     });
     const wrapper = mountWithContexts(
-      <OrganizationTeamsList
-        teams={mockData}
+      <PaginatedDataList
+        items={mockData}
         itemCount={7}
         queryParams={{
           page: 1,

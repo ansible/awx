@@ -36,7 +36,7 @@ class Search extends React.Component {
     const { columns } = this.props;
     const { innerText } = target;
 
-    const [{ key: searchKey }] = columns.filter(({ name }) => name === innerText);
+    const { key: searchKey } = columns.find(({ name }) => name === innerText);
     this.setState({ isSearchDropdownOpen: false, searchKey });
   }
 
@@ -62,7 +62,7 @@ class Search extends React.Component {
       searchValue,
     } = this.state;
 
-    const [{ name: searchColumnName }] = columns.filter(({ key }) => key === searchKey);
+    const { name: searchColumnName } = columns.find(({ key }) => key === searchKey);
 
     const searchDropdownItems = columns
       .filter(({ key }) => key !== searchKey)
