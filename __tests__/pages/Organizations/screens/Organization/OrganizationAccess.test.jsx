@@ -7,7 +7,13 @@ describe('<OrganizationAccess />', () => {
   let network;
   const organization = {
     id: 1,
-    name: 'Default'
+    name: 'Default',
+    summary_fields: {
+      object_roles: {},
+      user_capabilities: {
+        edit: true
+      }
+    }
   };
 
   const data = {
