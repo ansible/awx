@@ -28,29 +28,29 @@ class PageHeaderToolbar extends Component {
       isUserOpen: false,
     };
 
-    this.onHelpSelect = this.onHelpSelect.bind(this);
-    this.onHelpToggle = this.onHelpToggle.bind(this);
-    this.onUserSelect = this.onUserSelect.bind(this);
-    this.onUserToggle = this.onUserToggle.bind(this);
+    this.handleHelpSelect = this.handleHelpSelect.bind(this);
+    this.handleHelpToggle = this.handleHelpToggle.bind(this);
+    this.handleUserSelect = this.handleUserSelect.bind(this);
+    this.handleUserToggle = this.handleUserToggle.bind(this);
   }
 
-  onHelpSelect () {
+  handleHelpSelect () {
     const { isHelpOpen } = this.state;
 
     this.setState({ isHelpOpen: !isHelpOpen });
   }
 
-  onUserSelect () {
+  handleUserSelect () {
     const { isUserOpen } = this.state;
 
     this.setState({ isUserOpen: !isUserOpen });
   }
 
-  onHelpToggle (isOpen) {
+  handleHelpToggle (isOpen) {
     this.setState({ isHelpOpen: isOpen });
   }
 
-  onUserToggle (isOpen) {
+  handleUserToggle (isOpen) {
     this.setState({ isUserOpen: isOpen });
   }
 
@@ -74,10 +74,10 @@ class PageHeaderToolbar extends Component {
                     isPlain
                     isOpen={isHelpOpen}
                     position={DropdownPosition.right}
-                    onSelect={this.onHelpSelect}
+                    onSelect={this.handleHelpSelect}
                     toggle={(
                       <DropdownToggle
-                        onToggle={this.onHelpToggle}
+                        onToggle={this.handleHelpToggle}
                       >
                         <QuestionCircleIcon />
                       </DropdownToggle>
@@ -113,10 +113,10 @@ class PageHeaderToolbar extends Component {
                     isPlain
                     isOpen={isUserOpen}
                     position={DropdownPosition.right}
-                    onSelect={this.onUserSelect}
+                    onSelect={this.handleUserSelect}
                     toggle={(
                       <DropdownToggle
-                        onToggle={this.onUserToggle}
+                        onToggle={this.handleUserToggle}
                       >
                         <UserIcon />
                         &nbsp; User Name
