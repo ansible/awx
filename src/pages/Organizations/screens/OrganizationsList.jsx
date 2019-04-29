@@ -62,8 +62,7 @@ class OrganizationsList extends Component {
       loading: true,
       results: [],
       selected: [],
-      isModalOpen: false
-
+      isModalOpen: false,
     };
 
     this.onSearch = this.onSearch.bind(this);
@@ -77,7 +76,7 @@ class OrganizationsList extends Component {
     this.fetchOrganizations = this.fetchOrganizations.bind(this);
     this.handleOrgDelete = this.handleOrgDelete.bind(this);
     this.handleOpenOrgDeleteModal = this.handleOpenOrgDeleteModal.bind(this);
-    this.handleCloseOrgDeleteModal = this.handleCloseOrgDeleteModal.bind(this);
+    this.handleClearOrgDeleteModal = this.handleClearOrgDeleteModal.bind(this);
   }
 
   componentDidMount () {
@@ -144,9 +143,10 @@ class OrganizationsList extends Component {
     return Object.assign({}, DEFAULT_PARAMS, searchParams, overrides);
   }
 
-  handleCloseOrgDeleteModal () {
+  handleClearOrgDeleteModal () {
     this.setState({
-      isModalOpen: false
+      isModalOpen: false,
+      selected: []
     });
   }
 
