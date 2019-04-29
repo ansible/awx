@@ -142,13 +142,13 @@ awx-manage run_dispatcher --reload
 
 * * *
 
-In the following sections, we will go further into the details regarding AWX/Tower tasks.  They are all decorated by `@task()` in [awx/awx/main/tasks.py](https://github.com/ansible/awx/blob/devel/awx/main/tasks.py)
+In the following sections, we will go further into the details regarding AWX tasks.  They are all decorated by `@task()` in [awx/awx/main/tasks.py](https://github.com/ansible/awx/blob/devel/awx/main/tasks.py)
 
 ## Housekeeping Tasks
 
-Tower's task execution is based on a sophisticated system for scheduling jobs that are launched on demand or at scheduled times, primarily via the `run_task_manager` task.
+Task execution in AWX is based on a sophisticated system for scheduling jobs that are launched on demand or at scheduled times, primarily via the `run_task_manager` task.
 
-For further information regarding Tower Schedulers or Task Managers, refer to the [Task Manager Overview page](https://github.com/ansible/awx/blob/devel/docs/task_manager_system.md) of the AWX documentation.
+For further information regarding AWX Schedulers or Task Managers, refer to the [Task Manager Overview page](https://github.com/ansible/awx/blob/devel/docs/task_manager_system.md) of the AWX documentation.
 
 
 ### Heartbeats, Capacity, and Job Reaping
@@ -166,10 +166,10 @@ When a job is scheduled to run on an isolated instance, the controller instance 
 
 While the job runs on the isolated instance, the controller instance periodically copies job artifacts (_e.g._, `stdout` and job events) from the isolated instance. It processes these until the job finishes running on the isolated instance.
 
-To read more about isolated instances, refer to the [Isolated Instance Groups](https://docs.ansible.com/ansible-tower/latest/html/administration/clustering.html#isolated-instance-groups) section of the Clustering page in the Ansible Tower Administration guide.
+To read more about Isolated Instances, refer to the [Isolated Instance Groups](https://docs.ansible.com/ansible-tower/latest/html/administration/clustering.html#isolated-instance-groups) section of the Clustering page in the Ansible Tower Administration guide.
 
 
-## AWX/Tower Jobs
+## AWX Jobs
 
 ### Unified Jobs
 
@@ -177,7 +177,7 @@ This is the categorical name for _all_ types of jobs (_i.e._, it's the parent cl
 
 For more information, visit the [Jobs page](https://docs.ansible.com/ansible-tower/latest/html/userguide/jobs.html) of the Ansible Tower User Guide.
 
-Below are specific details regarding each type of unified job that can be run in AWX/Tower.
+Below are specific details regarding each type of unified job that can be run in AWX.
 
 
 #### Run Ad Hoc Command
@@ -246,7 +246,7 @@ In addition to freeing up resources, a handler and wrapper around `inventory.upd
 
 #### Update Host Smart Inventory Memberships
 
-The `smart_inventories` field in AWX/Tower uses a membership lookup table that identifies the set of every Smart Inventory a host is associated with. This particular task generates memberships and is launched whenever certain conditions are met (_e.g._, a new host is added or an existing host is modified).
+The `smart_inventories` field in AWX uses a membership lookup table that identifies the set of every Smart Inventory a host is associated with. This particular task generates memberships and is launched whenever certain conditions are met (_e.g._, a new host is added or an existing host is modified).
 
 An important thing to note is that this task is only run if the `AWX_REBUILD_SMART_MEMBERSHIP` is set to `True` (default is `False`).
 
@@ -260,28 +260,28 @@ As previously discussed, there are a number of places where tasks run in the bac
 
 #### Handle Setting Changes
 
-Any time you change a setting in Tower (_e.g._, in `api/v2/settings`), data will be added to or altered in a database. Since querying databases directly can be extremely time-consuming, each node in a cluster runs a local `memcached` server, none of which are aware of each other. They all potentially have different values contained within, but ultimately need to be consistent. So how can this be accomplished?
+Any time you change a setting in AWX (_e.g._, in `api/v2/settings`), data will be added to or altered in a database. Since querying databases directly can be extremely time-consuming, each node in a cluster runs a local `memcached` server, none of which are aware of each other. They all potentially have different values contained within, but ultimately need to be consistent. So how can this be accomplished?
 
-"Handle Settings Changes" provides the solution!  This "fanout" task (_i.e._, all nodes execute it) makes it so that there is a single source of truth even within a clustered system.  When anything gets altered or updated in the database, all of the `memcached` servers on each node needs to "forget" the value that they previously retained; with this task, whenever `perform_update()` or `perform_destroy` gets invoked in `awx/conf/views.py`, this task will clear any associated values within each node's `memcached` process and ensure that all of the nodes in the cluster have the most up-to-date information in their caches at all times.
+"Handle Setting Changes" provides the solution!  This "fanout" task (_i.e._, all nodes execute it) makes it so that there is a single source of truth even within a clustered system.  When anything gets altered or updated in the database, all of the `memcached` servers on each node needs to "forget" the value that they previously retained; with this task, whenever `perform_update()` or `perform_destroy` gets invoked in `awx/conf/views.py`, this task will clear any associated values within each node's `memcached` process and ensure that all of the nodes in the cluster have the most up-to-date information in their caches at all times.
 
 
 ### Analytics and Administrative Tasks
 
 #### Profile SQL
 
-This task was added as a new feature in Tower 3.5. It allows the user to turn on a global profiler in their system, so that Tower can profile all of the SQL queries that they make.  This is a "fanout" style task (meaning all nodes execute it), and one of the main benefits is that it assists with identifying slow queries.
+This task allows the user to turn on a global profiler in their system, so that AWX can profile all of the SQL queries that they make.  This is a "fanout" style task (meaning all nodes execute it), and one of the main benefits is that it assists with identifying slow queries.
 
 
 #### Gather Analytics
 
-The analytics collection `gather()` and `ship()` functions are called by an `awx-manage gather_analytics --ship` command, which runs on whichever Tower instance it is invoked on. When these functions are called by Celery beat (currently at midnight local time), it is run on one `execution_node`, or Tower instance, by the Python in the AWX virtualenv.
+The analytics collection `gather()` and `ship()` functions are called by an `awx-manage gather_analytics --ship` command, which runs on whichever instance it is invoked on. When these functions are called by Celery beat (currently at midnight local time), it is run on one `execution_node` by the Python in the AWX virtualenv.
 
 For more details about analytics, please visit the [Usability Analytics and Data Collection](https://docs.ansible.com/ansible-tower/latest/html/administration/usability_data_collection.html) page.
 
 
 #### Run Administrative Checks
 
-Not applicable to AWX, this task checks that the Tower license currently in use is valid and alerts the admin user(s) via email when they are in danger of going over capacity and/or when the license is about to expire. Specifically (in cases of going over capacity), it triggers when the node count is at or over 90% of what the license allows.
+This task checks that the license currently in use is valid and alerts the admin user(s) via email when they are in danger of going over capacity and/or when the license is about to expire. Specifically (in cases of going over capacity), it triggers when the node count is at or over 90% of what the license allows.
 
 
 #### Purge Old Stdout Files
