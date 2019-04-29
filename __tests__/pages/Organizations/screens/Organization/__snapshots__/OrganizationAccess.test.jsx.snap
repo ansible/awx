@@ -26,6 +26,12 @@ exports[`<OrganizationAccess /> initially renders succesfully 1`] = `
     Object {
       "id": 1,
       "name": "Default",
+      "summary_fields": Object {
+        "object_roles": Object {},
+        "user_capabilities": Object {
+          "edit": true,
+        },
+      },
     }
   }
 >

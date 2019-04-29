@@ -76,10 +76,10 @@ function NotificationListItem (props) {
 NotificationListItem.propTypes = {
   notification: shape({
     id: number.isRequired,
-    canToggleNotifications: bool.isRequired,
     name: string.isRequired,
     notification_type: string.isRequired,
   }).isRequired,
+  canToggleNotifications: bool.isRequired,
   detailUrl: string.isRequired,
   errorTurnedOn: bool,
   successTurnedOn: bool,
