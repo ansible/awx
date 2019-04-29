@@ -33,7 +33,7 @@ class DeleteRoleConfirmationModal extends React.Component {
             variant="danger"
             title={i18nMark(title)}
             isOpen
-            onClose={this.hideWarning}
+            onClose={onCancel}
             actions={[
               <Button
                 key="delete"

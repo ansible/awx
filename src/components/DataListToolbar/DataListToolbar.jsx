@@ -114,12 +114,14 @@ class DataListToolbar extends React.Component {
               <LevelItem>
                 { showDelete && (
                   <Tooltip
-                    content={deleteTooltip}
-                    position="left"
+                    content={disableTrashCanIcon ? i18n._(t`Select a row to delete`) : i18n._(t`Delete`)}
+                    position="top"
                   >
-                    <span>
+                    <div
+                      className={disableTrashCanIcon ? 'awx-ToolBarTrashCanIcon-disabled'
+                        : 'awx-ToolBarBtn'}
+                    >
                       <Button
-                        className="awx-ToolBarBtn"
                         variant="plain"
                         aria-label={i18n._(t`Delete`)}
                         onClick={onOpenDeleteModal}
@@ -127,17 +129,21 @@ class DataListToolbar extends React.Component {
                       >
                         <TrashAltIcon className="awx-ToolBarTrashCanIcon" />
                       </Button>
-                    </span>
+                    </div>
                   </Tooltip>
                 )}
                 {showAdd && addUrl && (
                   <Link to={addUrl}>
-                    <Button
-                      variant="primary"
-                      aria-label={i18n._(t`Add`)}
+                    <Tooltip
+                      content={i18n._(t`Add Organization`)}
                     >
-                      <PlusIcon />
-                    </Button>
+                      <Button
+                        variant="primary"
+                        aria-label={i18n._(t`Add`)}
+                      >
+                        <PlusIcon />
+                      </Button>
+                    </Tooltip>
                   </Link>
                 )}
                 {showAdd && add && (
