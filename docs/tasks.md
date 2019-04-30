@@ -20,22 +20,17 @@ In this document, we will go into a bit of detail about how AWX runs a lot of Py
     - Every node in an AWX cluster runs a periodic task that serves as
       a heartbeat and capacity check
 
+
 Tasks, Queues and Workers
 ----------------
 
-To accomplish this, AWX makes use of a "Task Queue" abstraction.  Task Queues
-are used as a mechanism to distribute work across machines in an AWX
-installation.  A Task Queue's input is a unit of work called a Task. Dedicated
-worker processes running on every AWX node constantly monitor these queues for
-new work to perform.
+To accomplish this, AWX makes use of a "Task Queue" abstraction.  Task Queues are used as a mechanism to distribute work across machines in an AWX installation.  A Task Queue's input is a unit of work called a Task. Dedicated worker processes running on every AWX node constantly monitor these queues for new work to perform.
 
-AWX communicates with these worker processes via AMQP - using RabbitMQ,
-specifically - to mediate between clients and workers. To initiate a task, the
-client (generally, Python code in the AWX API) publishes a message to a queue,
-and RabbitMQ then delivers that message to one or more workers.
+AWX communicates with these worker processes to mediate between clients and workers. This is done via distributed RabbitMQ queues and the already-acknowledged local queue that the Dispatcher is working through. Simply put: to initiate a task, the client (generally, Python code in the AWX API) publishes a message to a queue, and RabbitMQ then delivers that message to one or more workers.
 
 Clustered AWX installations consist of multiple workers spread across every
 node, giving way to high availability and horizontal scaling.
+
 
 Direct vs Fanout Messages
 -------------------------
@@ -58,8 +53,10 @@ message is consumed and handled by *one* worker process.
 a setting value in the AWX API, a fanout message is broadcast to _every_ AWX
 node in your cluster, and code runs on _every_ node.
 
+
 Defining and Running Tasks
 --------------------------
+
 Tasks are defined in AWX's source code, and generally live in the
 `awx.main.tasks` module.  Tasks can be defined as simple functions:
 
@@ -97,6 +94,7 @@ associated Python code:
 
     awx.main.tasks.add(123)
 
+
 Dispatcher Implementation
 -------------------------
 Every node in an AWX install runs `awx-manage run_dispatcher`, a Python process
@@ -106,6 +104,7 @@ hostname, and the broadcast queue).  The Dispatcher process manages a pool of
 child processes that it distributes inbound messages to.  These worker
 processes perform the actual work of deserializing published tasks and running
 the associated Python code.
+
 
 Debugging
 ---------
@@ -175,8 +174,6 @@ To read more about Isolated Instances, refer to the [Isolated Instance Groups](h
 
 This is the categorical name for _all_ types of jobs (_i.e._, it's the parent class of all job class models). On the simplest level, a process is being forked and AWX is recording its output.  Instance capacity determines which jobs get assigned to any specific instance; thus jobs and ad hoc commands use more capacity if they have a higher forks value.
 
-For more information, visit the [Jobs page](https://docs.ansible.com/ansible-tower/latest/html/userguide/jobs.html) of the Ansible Tower User Guide.
-
 Below are specific details regarding each type of unified job that can be run in AWX.
 
 
@@ -197,6 +194,8 @@ For more information on ad hoc commands, read the [Running Ad Hoc Commands secti
 
 This task is a definition and set of parameters for running `ansible-playbook` via a Job Template. It defines metadata about a given playbook run, such as a named identifier, an associated inventory to run against, the project and `.yml` playbook file to run, etc.
 
+For more information, visit the [Jobs page](https://docs.ansible.com/ansible-tower/latest/html/userguide/jobs.html) of the Ansible Tower User Guide.
+
 
 #### Run Project Update
 
@@ -208,14 +207,12 @@ To read more about this topic, visit the [Projects page](https://docs.ansible.co
 
 
 #### Run Inventory Update
+**
+Inventory data can be entered into AWX manually, but many users perform syncs to import inventory data from a variety of supported external sources (_e.g._, GCE, EC2, etc.) via inventory scripts. The goal of the Run Inventory Update task is to translate the JSON inventory data returned from `ansible-inventory` into `Host`, `Group`, and `Inventory` records in the AWX database.
 
-Inventory data can be entered into AWX manually, but many users perform Inventory Syncs to import inventory data from a variety of external sources. The goal of this task is to translate the JSON inventory data returned from `ansible-inventory` into `Host`, `Group`, and `Inventory` records in the AWX database.
+In older versions of AWX, the `INI` files were not exclusive for either specification via environment variables nor for using the credential injectors. The respective credential for each of these types would lay down authentication information, usually in environment variables. Then, inventory-specific logic laid down an `INI` file that was referenced from an environment variable. Currently, if the inventory plugin is available in the installed Ansible version, a `.yml` file will be used instead of the `INI` inventory config. The way that respective credentials have been injected has mostly remained the same.
 
-One of the methods in this task class builds the environment dictionary for inventory import. This _used_ to be the mechanism by which any data that needed to be passed to the inventory update script was set up (since it made the inventory update job aware of its proper credentials).  However, most environment injection is currently accomplished by the credential injectors. The primary purpose of this is to point to the inventory update `INI` or `config` file.
-
-Another method adds several options to the shell arguments based on the inventory-source-specific setting in the AWX configuration. These settings are "per-source"; it's entirely possible that they will be different between cloud providers if an AWX user actively uses multiple ones.
-
-Additionally, inventory imports run through a management command. Inventory in `args` get passed to that command, which results in this not being considered to be an Ansible inventory by Runner even though it is.
+Additionally, inventory imports are ran through a management command. Inventory in `args` get passed to that command, which results in it not being considered to be an Ansible inventory by Runner even though it is.
 
 To read more, visit the [Inventories page](https://docs.ansible.com/ansible-tower/latest/html/userguide/inventories.html) of the Ansible Tower User Guide.
 
@@ -237,11 +234,11 @@ Generally speaking, these are the tasks which take up a lot of resources which a
 While jobs can be launched manually in the AWX interface, it's also possible to configure jobs to run automatically on a schedule (such as daily, or every Monday at 9AM). A special background task, `awx_periodic_scheduler`, runs periodically and determines which jobs are ready to be launched.
 
 
-#### Update/Delete Inventory Computed Fields
+#### Update Inventory Computed Fields / Delete Inventory
 
-When making changes to inventories or hosts, there are related attributes that are calculated "under the hood".  For example, when a user runs an inventory update (refer to the "Run Inventory Update" section above for more details) and one of the hosts is offline, this can be a very resource-intensive thing to calculate.  This particular background task can do the work instead!  
+When making changes to inventories or hosts, there are related attributes that are calculated "under the hood" which require the task to be run for the full scale of the inventory. Because computed fields will aggregate overall stats for all of the hosts in the inventory, this can be quite a resource-consuming task, especially when considering a large number of hosts.
 
-In addition to freeing up resources, a handler and wrapper around `inventory.update_computed_fields` get signaled within this task in order to prevent unnecessary recursive calls.
+Running the Update Inventory Computed Fields task in the background, in response to changes made by the user via the API, updates the aggregated stats for the inventory; it does this by calculating aggregates for the inventory as a whole. Because of this task, the inventory/group/host details can be made consistent within the AWX environment in a manner that is not resource-intensive.
 
 
 #### Update Host Smart Inventory Memberships
@@ -255,14 +252,18 @@ For more information, visit the [Smart Inventories section](https://docs.ansible
 
 #### Deep Copy Model Object
 
-As previously discussed, there are a number of places where tasks run in the background due to slow processing time or high amounts of memory consumption (_e.g._, in cases where nested code is involved). Since it would be suboptimal to have resource-intensive code running only to have the HTTP connection hanging, this task instead acquires all of the attributes of the original job or object, checks that the user has permissions to it, and then constructs a new compound job/object, recursively adding these copies into the original. This enables a response of a `202 Accepted`, where instead of waiting for a `200 OK` status, it simply indicates that the job is in progress, freeing up resources for other tasks.
+As previously discussed, there are a number of places where tasks run in the background due to slow processing time or high amounts of memory consumption (_e.g._, in cases where nested code is involved). Since it would be difficult to scale resource-intensive code (which would leave the HTTP connection hanging), this task instead acquires all of the attributes of the original object within the HTTP request, constructs a mapping of related objects, then sends this mapping as a parameter to the task call, which is sent via the messaging system.
+
+When the task starts, it receives those attributes and creates the needed related objects (or creates connections to existing objects). At this point the task will check user permissions; some items may remain unlinked if the user who started the copy does not have permissions to it.
+
+This entire process enables a response of a `202 Accepted`, where instead of waiting for a `200 OK` status, it simply indicates that the job is in progress, freeing up resources for other tasks.
 
 
 #### Handle Setting Changes
 
-Any time you change a setting in AWX (_e.g._, in `api/v2/settings`), data will be added to or altered in a database. Since querying databases directly can be extremely time-consuming, each node in a cluster runs a local `memcached` server, none of which are aware of each other. They all potentially have different values contained within, but ultimately need to be consistent. So how can this be accomplished?
+Any time the user changes a setting in AWX (_e.g._, in `api/v2/settings`), data will be added to or altered in a database. Since querying databases directly can be extremely time-consuming, each node in a cluster runs a local `memcached` server, none of which are aware of each other. They all potentially have different values contained within, but ultimately need to be consistent. So how can this be accomplished?
 
-"Handle Setting Changes" provides the solution!  This "fanout" task (_i.e._, all nodes execute it) makes it so that there is a single source of truth even within a clustered system.  When anything gets altered or updated in the database, all of the `memcached` servers on each node needs to "forget" the value that they previously retained; with this task, whenever `perform_update()` or `perform_destroy` gets invoked in `awx/conf/views.py`, this task will clear any associated values within each node's `memcached` process and ensure that all of the nodes in the cluster have the most up-to-date information in their caches at all times.
+"Handle Setting Changes" provides the solution!  This "fanout" task (_i.e._, all nodes execute it) makes it so that there is a single source of truth even within a clustered system. Whenever a database setting is accessed, and that setting's name is not present in `memcached`, it grabs the setting from the database and then populates it in the applicable node's cache.  When any database setting gets altered, all of the `memcached` servers on each node needs to "forget" the value that they previously retained. By deleting the setting in `memcached` on all nodes with the use of this task, we assure that the next time it is accessed, the database will be consulted for the most up-to-date value.
 
 
 ### Analytics and Administrative Tasks
@@ -303,7 +304,7 @@ In case of an error, the same thing happens as above but with a "fail" vs a "suc
 
 #### Send Notifications
 
-When a user creates a notification at `/api/v2/notifications/`, they can assign it to any of the various objects that support it (_i.e._, all variants of Job Templates as well as Organizations and Projects).  They can also set the appropriate trigger level for when they want the notification task to run (_e.g._, error, success, or any).
+When a user creates a notification template in `/api/v2/notification_templates`, they can assign it to any of the various objects that support it (_i.e._, Job Templates).  They can also set the appropriate trigger level for when they want the notification task to run (_e.g._, error, success, or any). When the object that the notification was attached to runs and triggers the notification template, it sends a notification, and the action of sending it is recorded in `/api/v2/notifications/`.
 
 Notifications assigned at certain levels will inherit traits defined on parent objects in different ways.  For example, ad hoc commands will use notifications defined on the Organization that the inventory is associated with.
 
