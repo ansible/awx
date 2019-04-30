@@ -694,8 +694,6 @@ class BaseTask(object):
         """Reload the model instance from the database and update the
         given fields.
         """
-        output_replacements = updates.pop('output_replacements', None) or []
-
         try:
             with transaction.atomic():
                 # Retrieve the model instance.
@@ -706,9 +704,6 @@ class BaseTask(object):
                 if updates:
                     update_fields = ['modified']
                     for field, value in updates.items():
-                        if field in ('result_traceback'):
-                            for srch, repl in output_replacements:
-                                value = value.replace(srch, repl)
                         setattr(instance, field, value)
                         update_fields.append(field)
                         if field == 'status':
@@ -728,7 +723,6 @@ class BaseTask(object):
                 return self.update_model(
                     pk,
                     _attempt=_attempt + 1,
-                    output_replacements=output_replacements,
                     **updates
                 )
             else:
@@ -978,9 +972,6 @@ class BaseTask(object):
     def build_cwd(self, instance, private_data_dir):
         raise NotImplementedError
 
-    def build_output_replacements(self, instance, passwords={}):
-        return []
-
     def build_credentials_list(self, instance):
         return []
 
@@ -1121,7 +1112,6 @@ class BaseTask(object):
 
         self.instance.websocket_emit_status("running")
         status, rc = 'error', None
-        output_replacements = []
         extra_update_fields = {}
         fact_modification_times = {}
         self.event_ct = 0
@@ -1167,9 +1157,6 @@ class BaseTask(object):
             passwords = self.build_passwords(self.instance, kwargs)
             self.build_extra_vars_file(self.instance, private_data_dir, passwords)
             args = self.build_args(self.instance, private_data_dir, passwords)
-            # TODO: output_replacements hurts my head right now
-            #output_replacements = self.build_output_replacements(self.instance, **kwargs)
-            output_replacements = []
             cwd = self.build_cwd(self.instance, private_data_dir)
             process_isolation_params = self.build_params_process_isolation(self.instance,
                                                                            private_data_dir,
@@ -1193,7 +1180,7 @@ class BaseTask(object):
             password_prompts = self.get_password_prompts(passwords)
             expect_passwords = self.create_expect_passwords_data_struct(password_prompts, passwords)
 
-            self.instance = self.update_model(self.instance.pk, output_replacements=output_replacements)
+            self.instance = self.update_model(self.instance.pk)
 
             params = {
                 'ident': self.instance.id,
@@ -1288,7 +1275,6 @@ class BaseTask(object):
 
         self.instance = self.update_model(pk)
         self.instance = self.update_model(pk, status=status,
-                                          output_replacements=output_replacements,
                                           emitted_events=self.event_ct,
                                           **extra_update_fields)
 
@@ -1780,33 +1766,6 @@ class RunProjectUpdate(BaseTask):
     def build_playbook_path_relative_to_cwd(self, project_update, private_data_dir):
         self.build_cwd(project_update, private_data_dir)
         return os.path.join('project_update.yml')
-
-    def build_output_replacements(self, project_update, passwords={}):
-        '''
-        Return search/replace strings to prevent output URLs from showing
-        sensitive passwords.
-        '''
-        output_replacements = []
-        before_url, before_passwords = self._build_scm_url_extra_vars(project_update, passwords)
-        scm_username = before_passwords.get('scm_username', '')
-        scm_password = before_passwords.get('scm_password', '')
-        after_url = self._build_scm_url_extra_vars(project_update, passwords)[0]
-        if after_url != before_url:
-            output_replacements.append((before_url, after_url))
-        if project_update.scm_type == 'svn' and scm_username and scm_password:
-            d_before = {
-                'username': scm_username,
-                'password': scm_password,
-            }
-            d_after = {
-                'username': scm_username,
-                'password': HIDDEN_PASSWORD,
-            }
-            pattern1 = "username=\"%(username)s\" password=\"%(password)s\""
-            pattern2 = "--username '%(username)s' --password '%(password)s'"
-            output_replacements.append((pattern1 % d_before, pattern1 % d_after))
-            output_replacements.append((pattern2 % d_before, pattern2 % d_after))
-        return output_replacements
 
     def get_password_prompts(self, passwords={}):
         d = super(RunProjectUpdate, self).get_password_prompts(passwords)
