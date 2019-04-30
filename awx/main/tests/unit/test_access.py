@@ -11,6 +11,7 @@ from awx.main.access import (
     JobTemplateAccess,
     WorkflowJobTemplateAccess,
     SystemJobTemplateAccess,
+    vars_are_encrypted
 )
 
 from awx.main.models import (
@@ -112,6 +113,20 @@ class TestRelatedFieldAccess:
         # important for PUT requests
         assert access.check_related(
             'related', mocker.MagicMock, data, obj=resource, mandatory=True)
+
+
+def test_encrypted_vars_detection():
+    assert vars_are_encrypted({
+        'aaa': {'b': 'c'},
+        'alist': [],
+        'test_var_eight': '$encrypted$UTF8$AESCBC$Z0FBQUF...==',
+        'test_var_five': 'four',
+    })
+    assert not vars_are_encrypted({
+        'aaa': {'b': 'c'},
+        'alist': [],
+        'test_var_five': 'four',
+    })
 
 
 @pytest.fixture

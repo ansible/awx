@@ -58,7 +58,7 @@ def test_job_relaunch_permission_denied_response(
 
 
 @pytest.mark.django_db
-def test_job_relaunch_permission_denied_response_other_user(get, post, inventory, project, alice, bob):
+def test_job_relaunch_permission_denied_response_other_user(get, post, inventory, project, alice, bob, survey_spec_factory):
     '''
     Asserts custom permission denied message corresponding to
     awx/main/tests/functional/test_rbac_job.py::TestJobRelaunchAccess::test_other_user_prompts
@@ -66,18 +66,26 @@ def test_job_relaunch_permission_denied_response_other_user(get, post, inventory
     jt = JobTemplate.objects.create(
         name='testjt', inventory=inventory, project=project,
         ask_credential_on_launch=True,
-        ask_variables_on_launch=True)
+        ask_variables_on_launch=True,
+        survey_spec=survey_spec_factory([{'variable': 'secret_key', 'default': '6kQngg3h8lgiSTvIEb21', 'type': 'password'}]),
+        survey_enabled=True
+    )
     jt.execute_role.members.add(alice, bob)
     with impersonate(bob):
-        job = jt.create_unified_job(extra_vars={'job_var': 'foo2'})
+        job = jt.create_unified_job(extra_vars={'job_var': 'foo2', 'secret_key': 'sk4t3Rb01'})
 
     # User capability is shown for this
     r = get(job.get_absolute_url(), alice, expect=200)
     assert r.data['summary_fields']['user_capabilities']['start']
 
     # Job has prompted data, launch denied w/ message
-    r = post(reverse('api:job_relaunch', kwargs={'pk':job.pk}), {}, alice, expect=403)
-    assert 'Job was launched with prompts provided by another user' in r.data['detail']
+    r = post(
+        url=reverse('api:job_relaunch', kwargs={'pk':job.pk}),
+        data={},
+        user=alice,
+        expect=403
+    )
+    assert 'Job was launched with secret prompts provided by another user' in r.data['detail']
 
 
 @pytest.mark.django_db
