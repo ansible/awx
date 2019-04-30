@@ -45,58 +45,82 @@ exports[`<OrganizationAccessItem /> initially renders succesfully 1`] = `
         aria-labelledby="access-list-item"
         className="pf-c-data-list__item"
       >
-        <DataListCell
+        <DataListItemRow
           className=""
           key=".0"
           rowid="access-list-item"
-          width={1}
         >
           <div
-            className="pf-c-data-list__cell"
+            className="pf-c-data-list__item-row"
           >
-            <TextContent
+            <DataListItemCells
               className=""
-              style={
-                Object {
-                  "display": "grid",
-                  "gridTemplateColumns": "minmax(70px, max-content) minmax(60px, max-content)",
-                }
-              }
-            >
-              <div
-                className="pf-c-content"
-                style={
-                  Object {
-                    "display": "grid",
-                    "gridTemplateColumns": "minmax(70px, max-content) minmax(60px, max-content)",
-                  }
-                }
-              >
-                <Link
-                  replace={false}
-                  to={
-                    Object {
-                      "pathname": "/bar",
-                    }
-                  }
-                >
-                  <a
-                    onClick={[Function]}
+              dataListCells={
+                Array [
+                  <DataListCell
+                    alignRight={false}
+                    className=""
+                    isFilled={true}
+                    isIcon={false}
+                    width={1}
                   >
-                    <Text
+                    <TextContent
                       className=""
-                      component="h6"
                       style={
                         Object {
-                          "fontWeight": "700",
-                          "lineHeight": "24px",
-                          "marginRight": "20px",
+                          "display": "grid",
+                          "gridTemplateColumns": "minmax(70px, max-content) minmax(60px, max-content)",
                         }
                       }
                     >
-                      <h6
+                      <Link
+                        replace={false}
+                        to={
+                          Object {
+                            "pathname": "/bar",
+                          }
+                        }
+                      >
+                        <Text
+                          className=""
+                          component="h6"
+                          style={
+                            Object {
+                              "fontWeight": "700",
+                              "lineHeight": "24px",
+                              "marginRight": "20px",
+                            }
+                          }
+                        >
+                          jane
+                        </Text>
+                      </Link>
+                    </TextContent>
+                    <Detail
+                      customStyles={null}
+                      label="Name"
+                      url={null}
+                      value="jane brown"
+                    />
+                  </DataListCell>,
+                  <DataListCell
+                    alignRight={false}
+                    className=""
+                    isFilled={true}
+                    isIcon={false}
+                    width={1}
+                  >
+                    <ul
+                      style={
+                        Object {
+                          "display": "flex",
+                          "flexWrap": "wrap",
+                        }
+                      }
+                    >
+                      <Text
                         className=""
-                        data-pf-content={true}
+                        component="h6"
                         style={
                           Object {
                             "fontWeight": "700",
@@ -105,220 +129,309 @@ exports[`<OrganizationAccessItem /> initially renders succesfully 1`] = `
                           }
                         }
                       >
-                        jane
-                      </h6>
-                    </Text>
-                  </a>
-                </Link>
-              </div>
-            </TextContent>
-            <Detail
-              customStyles={null}
-              label="Name"
-              url={null}
-              value="jane brown"
-            >
-              <TextContent
-                className=""
-                style={
-                  Object {
-                    "display": "grid",
-                    "gridTemplateColumns": "minmax(70px, max-content) minmax(60px, max-content)",
-                  }
-                }
-              >
-                <div
-                  className="pf-c-content"
-                  style={
-                    Object {
-                      "display": "grid",
-                      "gridTemplateColumns": "minmax(70px, max-content) minmax(60px, max-content)",
-                    }
-                  }
-                >
-                  <Text
-                    className=""
-                    component="h6"
-                    style={
-                      Object {
-                        "fontWeight": "700",
-                        "lineHeight": "24px",
-                        "marginRight": "20px",
-                      }
-                    }
-                  >
-                    <h6
-                      className=""
-                      data-pf-content={true}
-                      style={
-                        Object {
-                          "fontWeight": "700",
-                          "lineHeight": "24px",
-                          "marginRight": "20px",
-                        }
-                      }
-                    >
-                      Name
-                    </h6>
-                  </Text>
-                  <Text
-                    className=""
-                    component="p"
-                    style={
-                      Object {
-                        "lineHeight": "28px",
-                        "overflow": "visible",
-                      }
-                    }
-                  >
-                    <p
-                      className=""
-                      data-pf-content={true}
-                      style={
-                        Object {
-                          "lineHeight": "28px",
-                          "overflow": "visible",
-                        }
-                      }
-                    >
-                      jane brown
-                    </p>
-                  </Text>
-                </div>
-              </TextContent>
-            </Detail>
-          </div>
-        </DataListCell>
-        <DataListCell
-          className=""
-          key=".1"
-          rowid="access-list-item"
-          width={1}
-        >
-          <div
-            className="pf-c-data-list__cell"
-          >
-            <ul
-              style={
-                Object {
-                  "display": "flex",
-                  "flexWrap": "wrap",
-                }
-              }
-            >
-              <Text
-                className=""
-                component="h6"
-                style={
-                  Object {
-                    "fontWeight": "700",
-                    "lineHeight": "24px",
-                    "marginRight": "20px",
-                  }
-                }
-              >
-                <h6
-                  className=""
-                  data-pf-content={true}
-                  style={
-                    Object {
-                      "fontWeight": "700",
-                      "lineHeight": "24px",
-                      "marginRight": "20px",
-                    }
-                  }
-                >
-                  Team Roles
-                </h6>
-              </Text>
-              <Chip
-                className="awx-c-chip"
-                closeBtnAriaLabel="close"
-                isOverflowChip={false}
-                key="3"
-                onClick={[Function]}
-                tooltipPosition="top"
-              >
-                <GenerateId
-                  prefix="pf-random-id-"
-                >
-                  <li
-                    className="pf-c-chip awx-c-chip"
-                  >
-                    <span
-                      className="pf-c-chip__text"
-                      id="pf-random-id-0"
-                    >
-                      Member
-                    </span>
-                    <ChipButton
-                      aria-labelledby="remove_pf-random-id-0 pf-random-id-0"
-                      ariaLabel="close"
-                      className=""
-                      id="remove_pf-random-id-0"
-                      onClick={[Function]}
-                    >
-                      <Button
-                        aria-label="close"
-                        aria-labelledby="remove_pf-random-id-0 pf-random-id-0"
-                        className=""
-                        component="button"
-                        id="remove_pf-random-id-0"
-                        isActive={false}
-                        isBlock={false}
-                        isDisabled={false}
-                        isFocus={false}
-                        isHover={false}
+                        Team Roles
+                      </Text>
+                      <Chip
+                        className="awx-c-chip"
+                        closeBtnAriaLabel="close"
+                        isOverflowChip={false}
                         onClick={[Function]}
-                        type="button"
-                        variant="plain"
+                        tooltipPosition="top"
                       >
-                        <button
-                          aria-disabled={null}
-                          aria-label="close"
-                          aria-labelledby="remove_pf-random-id-0 pf-random-id-0"
-                          className="pf-c-button pf-m-plain"
-                          disabled={false}
-                          id="remove_pf-random-id-0"
-                          onClick={[Function]}
-                          tabIndex={null}
-                          type="button"
+                        Member
+                      </Chip>
+                    </ul>
+                  </DataListCell>,
+                ]
+              }
+              key=".0"
+              rowid="access-list-item"
+            >
+              <div
+                className="pf-c-data-list__item-content"
+              >
+                <DataListCell
+                  alignRight={false}
+                  className=""
+                  isFilled={true}
+                  isIcon={false}
+                  key="name"
+                  width={1}
+                >
+                  <div
+                    className="pf-c-data-list__cell"
+                  >
+                    <TextContent
+                      className=""
+                      style={
+                        Object {
+                          "display": "grid",
+                          "gridTemplateColumns": "minmax(70px, max-content) minmax(60px, max-content)",
+                        }
+                      }
+                    >
+                      <div
+                        className="pf-c-content"
+                        style={
+                          Object {
+                            "display": "grid",
+                            "gridTemplateColumns": "minmax(70px, max-content) minmax(60px, max-content)",
+                          }
+                        }
+                      >
+                        <Link
+                          replace={false}
+                          to={
+                            Object {
+                              "pathname": "/bar",
+                            }
+                          }
                         >
-                          <TimesCircleIcon
-                            aria-hidden="true"
-                            color="currentColor"
-                            size="sm"
-                            title={null}
+                          <a
+                            onClick={[Function]}
                           >
-                            <svg
-                              aria-hidden="true"
-                              aria-labelledby={null}
-                              fill="currentColor"
-                              height="1em"
-                              role="img"
+                            <Text
+                              className=""
+                              component="h6"
                               style={
                                 Object {
-                                  "verticalAlign": "-0.125em",
+                                  "fontWeight": "700",
+                                  "lineHeight": "24px",
+                                  "marginRight": "20px",
                                 }
                               }
-                              viewBox="0 0 512 512"
-                              width="1em"
                             >
-                              <path
-                                d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm121.6 313.1c4.7 4.7 4.7 12.3 0 17L338 377.6c-4.7 4.7-12.3 4.7-17 0L256 312l-65.1 65.6c-4.7 4.7-12.3 4.7-17 0L134.4 338c-4.7-4.7-4.7-12.3 0-17l65.6-65-65.6-65.1c-4.7-4.7-4.7-12.3 0-17l39.6-39.6c4.7-4.7 12.3-4.7 17 0l65 65.7 65.1-65.6c4.7-4.7 12.3-4.7 17 0l39.6 39.6c4.7 4.7 4.7 12.3 0 17L312 256l65.6 65.1z"
-                                transform=""
-                              />
-                            </svg>
-                          </TimesCircleIcon>
-                        </button>
-                      </Button>
-                    </ChipButton>
-                  </li>
-                </GenerateId>
-              </Chip>
-            </ul>
+                              <h6
+                                className=""
+                                data-pf-content={true}
+                                style={
+                                  Object {
+                                    "fontWeight": "700",
+                                    "lineHeight": "24px",
+                                    "marginRight": "20px",
+                                  }
+                                }
+                              >
+                                jane
+                              </h6>
+                            </Text>
+                          </a>
+                        </Link>
+                      </div>
+                    </TextContent>
+                    <Detail
+                      customStyles={null}
+                      label="Name"
+                      url={null}
+                      value="jane brown"
+                    >
+                      <TextContent
+                        className=""
+                        style={
+                          Object {
+                            "display": "grid",
+                            "gridTemplateColumns": "minmax(70px, max-content) minmax(60px, max-content)",
+                          }
+                        }
+                      >
+                        <div
+                          className="pf-c-content"
+                          style={
+                            Object {
+                              "display": "grid",
+                              "gridTemplateColumns": "minmax(70px, max-content) minmax(60px, max-content)",
+                            }
+                          }
+                        >
+                          <Text
+                            className=""
+                            component="h6"
+                            style={
+                              Object {
+                                "fontWeight": "700",
+                                "lineHeight": "24px",
+                                "marginRight": "20px",
+                              }
+                            }
+                          >
+                            <h6
+                              className=""
+                              data-pf-content={true}
+                              style={
+                                Object {
+                                  "fontWeight": "700",
+                                  "lineHeight": "24px",
+                                  "marginRight": "20px",
+                                }
+                              }
+                            >
+                              Name
+                            </h6>
+                          </Text>
+                          <Text
+                            className=""
+                            component="p"
+                            style={
+                              Object {
+                                "lineHeight": "28px",
+                                "overflow": "visible",
+                              }
+                            }
+                          >
+                            <p
+                              className=""
+                              data-pf-content={true}
+                              style={
+                                Object {
+                                  "lineHeight": "28px",
+                                  "overflow": "visible",
+                                }
+                              }
+                            >
+                              jane brown
+                            </p>
+                          </Text>
+                        </div>
+                      </TextContent>
+                    </Detail>
+                  </div>
+                </DataListCell>
+                <DataListCell
+                  alignRight={false}
+                  className=""
+                  isFilled={true}
+                  isIcon={false}
+                  key="roles"
+                  width={1}
+                >
+                  <div
+                    className="pf-c-data-list__cell"
+                  >
+                    <ul
+                      style={
+                        Object {
+                          "display": "flex",
+                          "flexWrap": "wrap",
+                        }
+                      }
+                    >
+                      <Text
+                        className=""
+                        component="h6"
+                        style={
+                          Object {
+                            "fontWeight": "700",
+                            "lineHeight": "24px",
+                            "marginRight": "20px",
+                          }
+                        }
+                      >
+                        <h6
+                          className=""
+                          data-pf-content={true}
+                          style={
+                            Object {
+                              "fontWeight": "700",
+                              "lineHeight": "24px",
+                              "marginRight": "20px",
+                            }
+                          }
+                        >
+                          Team Roles
+                        </h6>
+                      </Text>
+                      <Chip
+                        className="awx-c-chip"
+                        closeBtnAriaLabel="close"
+                        isOverflowChip={false}
+                        key="3"
+                        onClick={[Function]}
+                        tooltipPosition="top"
+                      >
+                        <GenerateId
+                          prefix="pf-random-id-"
+                        >
+                          <li
+                            className="pf-c-chip awx-c-chip"
+                          >
+                            <span
+                              className="pf-c-chip__text"
+                              id="pf-random-id-0"
+                            >
+                              Member
+                            </span>
+                            <ChipButton
+                              aria-labelledby="remove_pf-random-id-0 pf-random-id-0"
+                              ariaLabel="close"
+                              className=""
+                              id="remove_pf-random-id-0"
+                              onClick={[Function]}
+                            >
+                              <Button
+                                aria-label="close"
+                                aria-labelledby="remove_pf-random-id-0 pf-random-id-0"
+                                className=""
+                                component="button"
+                                id="remove_pf-random-id-0"
+                                isActive={false}
+                                isBlock={false}
+                                isDisabled={false}
+                                isFocus={false}
+                                isHover={false}
+                                onClick={[Function]}
+                                type="button"
+                                variant="plain"
+                              >
+                                <button
+                                  aria-disabled={null}
+                                  aria-label="close"
+                                  aria-labelledby="remove_pf-random-id-0 pf-random-id-0"
+                                  className="pf-c-button pf-m-plain"
+                                  disabled={false}
+                                  id="remove_pf-random-id-0"
+                                  onClick={[Function]}
+                                  tabIndex={null}
+                                  type="button"
+                                >
+                                  <TimesCircleIcon
+                                    aria-hidden="true"
+                                    color="currentColor"
+                                    size="sm"
+                                    title={null}
+                                  >
+                                    <svg
+                                      aria-hidden="true"
+                                      aria-labelledby={null}
+                                      fill="currentColor"
+                                      height="1em"
+                                      role="img"
+                                      style={
+                                        Object {
+                                          "verticalAlign": "-0.125em",
+                                        }
+                                      }
+                                      viewBox="0 0 512 512"
+                                      width="1em"
+                                    >
+                                      <path
+                                        d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm121.6 313.1c4.7 4.7 4.7 12.3 0 17L338 377.6c-4.7 4.7-12.3 4.7-17 0L256 312l-65.1 65.6c-4.7 4.7-12.3 4.7-17 0L134.4 338c-4.7-4.7-4.7-12.3 0-17l65.6-65-65.6-65.1c-4.7-4.7-4.7-12.3 0-17l39.6-39.6c4.7-4.7 12.3-4.7 17 0l65 65.7 65.1-65.6c4.7-4.7 12.3-4.7 17 0l39.6 39.6c4.7 4.7 4.7 12.3 0 17L312 256l65.6 65.1z"
+                                        transform=""
+                                      />
+                                    </svg>
+                                  </TimesCircleIcon>
+                                </button>
+                              </Button>
+                            </ChipButton>
+                          </li>
+                        </GenerateId>
+                      </Chip>
+                    </ul>
+                  </div>
+                </DataListCell>
+              </div>
+            </DataListItemCells>
           </div>
-        </DataListCell>
+        </DataListItemRow>
       </li>
     </DataListItem>
   </I18n>

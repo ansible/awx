@@ -3,7 +3,14 @@ import { shape, number, string, bool, func } from 'prop-types';
 import { I18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
-import { Badge, Switch, DataListItem, DataListCell } from '@patternfly/react-core';
+import {
+  Badge,
+  Switch,
+  DataListItem,
+  DataListItemRow,
+  DataListItemCells,
+  DataListCell,
+} from '@patternfly/react-core';
 
 function NotificationListItem (props) {
   const {
@@ -25,48 +32,53 @@ function NotificationListItem (props) {
           aria-labelledby={`items-list-item-${notification.id}`}
           key={notification.id}
         >
-          <DataListCell>
-            <Link
-              to={{
-                pathname: detailUrl
-              }}
-              style={{ marginRight: '1.5em' }}
-            >
-              <b id={`items-list-item-${notification.id}`}>{notification.name}</b>
-            </Link>
-            <Badge
-              style={capText}
-              isRead
-            >
-              {notification.notification_type}
-            </Badge>
-          </DataListCell>
-          <DataListCell alignRight>
-            <Switch
-              id={`notification-${notification.id}-success-toggle`}
-              label={i18n._(t`Successful`)}
-              isChecked={successTurnedOn}
-              isDisabled={!canToggleNotifications}
-              onChange={() => toggleNotification(
-                notification.id,
-                successTurnedOn,
-                'success'
-              )}
-              aria-label={i18n._(t`Toggle notification success`)}
+          <DataListItemRow>
+            <DataListItemCells dataListCells={[
+              <DataListCell key="name">
+                <Link
+                  to={{
+                    pathname: detailUrl
+                  }}
+                  style={{ marginRight: '1.5em' }}
+                >
+                  <b id={`items-list-item-${notification.id}`}>{notification.name}</b>
+                </Link>
+                <Badge
+                  style={capText}
+                  isRead
+                >
+                  {notification.notification_type}
+                </Badge>
+              </DataListCell>,
+              <DataListCell key="toggles" alignRight>
+                <Switch
+                  id={`notification-${notification.id}-success-toggle`}
+                  label={i18n._(t`Successful`)}
+                  isChecked={successTurnedOn}
+                  isDisabled={!canToggleNotifications}
+                  onChange={() => toggleNotification(
+                    notification.id,
+                    successTurnedOn,
+                    'success'
+                  )}
+                  aria-label={i18n._(t`Toggle notification success`)}
+                />
+                <Switch
+                  id={`notification-${notification.id}-error-toggle`}
+                  label={i18n._(t`Failure`)}
+                  isChecked={errorTurnedOn}
+                  isDisabled={!canToggleNotifications}
+                  onChange={() => toggleNotification(
+                    notification.id,
+                    errorTurnedOn,
+                    'error'
+                  )}
+                  aria-label={i18n._(t`Toggle notification failure`)}
+                />
+              </DataListCell>
+            ]}
             />
-            <Switch
-              id={`notification-${notification.id}-error-toggle`}
-              label={i18n._(t`Failure`)}
-              isChecked={errorTurnedOn}
-              isDisabled={!canToggleNotifications}
-              onChange={() => toggleNotification(
-                notification.id,
-                errorTurnedOn,
-                'error'
-              )}
-              aria-label={i18n._(t`Toggle notification failure`)}
-            />
-          </DataListCell>
+          </DataListItemRow>
         </DataListItem>
       )}
     </I18n>

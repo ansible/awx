@@ -71,9 +71,9 @@ describe('<OrganizationAccess />', () => {
     };
   });
 
-  test.only('initially renders succesfully', () => {
+  test('initially renders succesfully', () => {
     const wrapper = mountWithContexts(
-      <OrganizationAccess id={1} organization={organization} />,
+      <OrganizationAccess organization={organization} />,
       { context: { network } }
     );
     expect(wrapper.find('OrganizationAccess')).toMatchSnapshot();
@@ -81,7 +81,7 @@ describe('<OrganizationAccess />', () => {
 
   test('should fetch and display access records on mount', async () => {
     const wrapper = mountWithContexts(
-      <OrganizationAccess id={1} />,
+      <OrganizationAccess organization={organization} />,
       { context: { network } }
     );
     await sleep(0);
@@ -94,7 +94,7 @@ describe('<OrganizationAccess />', () => {
 
   test('should open confirmation dialog when deleting role', async () => {
     const wrapper = mountWithContexts(
-      <OrganizationAccess id={1} />,
+      <OrganizationAccess organization={organization} />,
       { context: { network } }
     );
     await sleep(0);
@@ -114,7 +114,7 @@ describe('<OrganizationAccess />', () => {
 
   it('should close dialog when cancel button clicked', async () => {
     const wrapper = mountWithContexts(
-      <OrganizationAccess id={1} />,
+      <OrganizationAccess organization={organization} />,
       { context: { network } }
     );
     await sleep(0);
@@ -133,7 +133,7 @@ describe('<OrganizationAccess />', () => {
 
   it('should delete user role', async () => {
     const wrapper = mountWithContexts(
-      <OrganizationAccess id={1} />,
+      <OrganizationAccess organization={organization} />,
       { context: { network } }
     );
     await sleep(0);
@@ -156,7 +156,7 @@ describe('<OrganizationAccess />', () => {
 
   it('should delete team role', async () => {
     const wrapper = mountWithContexts(
-      <OrganizationAccess id={1} />,
+      <OrganizationAccess organization={organization} />,
       { context: { network } }
     );
     await sleep(0);

@@ -3,6 +3,8 @@ import PropTypes, { arrayOf, shape, string, bool } from 'prop-types';
 import {
   DataList,
   DataListItem,
+  DataListItemRow,
+  DataListItemCells,
   DataListCell,
   Text,
   TextContent,
@@ -154,21 +156,26 @@ class PaginatedDataList extends React.Component {
                       aria-labelledby={`items-list-item-${item.id}`}
                       key={item.id}
                     >
-                      <DataListCell>
-                        <TextContent style={detailWrapperStyle}>
-                          <Link to={{ pathname: item.url }}>
-                            <Text
-                              id="items-list-item"
-                              component={TextVariants.h6}
-                              style={detailLabelStyle}
-                            >
-                              <span id={`items-list-item-${item.id}`}>
-                                {item.name}
-                              </span>
-                            </Text>
-                          </Link>
-                        </TextContent>
-                      </DataListCell>
+                      <DataListItemRow>
+                        <DataListItemCells dataListCells={[
+                          <DataListCell key="team-name">
+                            <TextContent style={detailWrapperStyle}>
+                              <Link to={{ pathname: item.url }}>
+                                <Text
+                                  id="items-list-item"
+                                  component={TextVariants.h6}
+                                  style={detailLabelStyle}
+                                >
+                                  <span id={`items-list-item-${item.id}`}>
+                                    {item.name}
+                                  </span>
+                                </Text>
+                              </Link>
+                            </TextContent>
+                          </DataListCell>
+                        ]}
+                        />
+                      </DataListItemRow>
                     </DataListItem>
                   )))}
                 </DataList>

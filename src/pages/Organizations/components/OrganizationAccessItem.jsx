@@ -4,6 +4,8 @@ import { I18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
   DataListItem,
+  DataListItemRow,
+  DataListItemCells,
   DataListCell,
   Text,
   TextContent,
@@ -86,79 +88,84 @@ class OrganizationAccessItem extends React.Component {
       <I18n>
         {({ i18n }) => (
           <DataListItem aria-labelledby="access-list-item" key={accessRecord.id}>
-            <DataListCell>
-              {accessRecord.username && (
-                <TextContent style={detailWrapperStyle}>
-                  {accessRecord.url ? (
-                    <Link to={{ pathname: accessRecord.url }}>
-                      <Text component={TextVariants.h6} style={detailLabelStyle}>
-                        {accessRecord.username}
-                      </Text>
-                    </Link>
-                  ) : (
-                    <Text component={TextVariants.h6} style={detailLabelStyle}>
-                      {accessRecord.username}
-                    </Text>
+            <DataListItemRow>
+              <DataListItemCells dataListCells={[
+                <DataListCell key="name">
+                  {accessRecord.username && (
+                    <TextContent style={detailWrapperStyle}>
+                      {accessRecord.url ? (
+                        <Link to={{ pathname: accessRecord.url }}>
+                          <Text component={TextVariants.h6} style={detailLabelStyle}>
+                            {accessRecord.username}
+                          </Text>
+                        </Link>
+                      ) : (
+                        <Text component={TextVariants.h6} style={detailLabelStyle}>
+                          {accessRecord.username}
+                        </Text>
+                      )}
+                    </TextContent>
                   )}
-                </TextContent>
-              )}
-              {accessRecord.first_name || accessRecord.last_name ? (
-                <Detail
-                  label={i18n._(t`Name`)}
-                  value={`${accessRecord.first_name} ${accessRecord.last_name}`}
-                  url={null}
-                  customStyles={null}
-                />
-              ) : (
-                null
-              )}
-            </DataListCell>
-            <DataListCell>
-              {userRoles.length > 0 && (
-                <ul style={userRolesWrapperStyle}>
-                  <Text component={TextVariants.h6} style={detailLabelStyle}>
-                    {i18n._(t`User Roles`)}
-                  </Text>
-                  {userRoles.map(role => (
-                    role.user_capabilities.unattach ? (
-                      <Chip
-                        key={role.id}
-                        className="awx-c-chip"
-                        onClick={() => { onRoleDelete(role, accessRecord); }}
-                      >
-                        {role.name}
-                      </Chip>
-                    ) : (
-                      <BasicChip key={role.id}>
-                        {role.name}
-                      </BasicChip>
-                    )
-                  ))}
-                </ul>
-              )}
-              {teamRoles.length > 0 && (
-                <ul style={userRolesWrapperStyle}>
-                  <Text component={TextVariants.h6} style={detailLabelStyle}>
-                    {i18n._(t`Team Roles`)}
-                  </Text>
-                  {teamRoles.map(role => (
-                    role.user_capabilities.unattach ? (
-                      <Chip
-                        key={role.id}
-                        className="awx-c-chip"
-                        onClick={() => { onRoleDelete(role, accessRecord); }}
-                      >
-                        {role.name}
-                      </Chip>
-                    ) : (
-                      <BasicChip key={role.id}>
-                        {role.name}
-                      </BasicChip>
-                    )
-                  ))}
-                </ul>
-              )}
-            </DataListCell>
+                  {accessRecord.first_name || accessRecord.last_name ? (
+                    <Detail
+                      label={i18n._(t`Name`)}
+                      value={`${accessRecord.first_name} ${accessRecord.last_name}`}
+                      url={null}
+                      customStyles={null}
+                    />
+                  ) : (
+                    null
+                  )}
+                </DataListCell>,
+                <DataListCell key="roles">
+                  {userRoles.length > 0 && (
+                    <ul style={userRolesWrapperStyle}>
+                      <Text component={TextVariants.h6} style={detailLabelStyle}>
+                        {i18n._(t`User Roles`)}
+                      </Text>
+                      {userRoles.map(role => (
+                        role.user_capabilities.unattach ? (
+                          <Chip
+                            key={role.id}
+                            className="awx-c-chip"
+                            onClick={() => { onRoleDelete(role, accessRecord); }}
+                          >
+                            {role.name}
+                          </Chip>
+                        ) : (
+                          <BasicChip key={role.id}>
+                            {role.name}
+                          </BasicChip>
+                        )
+                      ))}
+                    </ul>
+                  )}
+                  {teamRoles.length > 0 && (
+                    <ul style={userRolesWrapperStyle}>
+                      <Text component={TextVariants.h6} style={detailLabelStyle}>
+                        {i18n._(t`Team Roles`)}
+                      </Text>
+                      {teamRoles.map(role => (
+                        role.user_capabilities.unattach ? (
+                          <Chip
+                            key={role.id}
+                            className="awx-c-chip"
+                            onClick={() => { onRoleDelete(role, accessRecord); }}
+                          >
+                            {role.name}
+                          </Chip>
+                        ) : (
+                          <BasicChip key={role.id}>
+                            {role.name}
+                          </BasicChip>
+                        )
+                      ))}
+                    </ul>
+                  )}
+                </DataListCell>
+              ]}
+              />
+            </DataListItemRow>
           </DataListItem>
         )}
       </I18n>

@@ -5,7 +5,6 @@ exports[`<OrganizationAccess /> initially renders succesfully 1`] = `
   api={"/api/"}
   handleHttpError={[Function]}
   history={"/history/"}
-  id={1}
   location={
     Object {
       "hash": "",
