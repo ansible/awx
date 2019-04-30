@@ -1180,8 +1180,6 @@ class BaseTask(object):
             password_prompts = self.get_password_prompts(passwords)
             expect_passwords = self.create_expect_passwords_data_struct(password_prompts, passwords)
 
-            self.instance = self.update_model(self.instance.pk)
-
             params = {
                 'ident': self.instance.id,
                 'private_data_dir': private_data_dir,
