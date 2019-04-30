@@ -1,8 +1,7 @@
 import React from 'react';
-import { mount } from 'enzyme';
-import { MemoryRouter } from 'react-router-dom';
-import { I18nProvider } from '@lingui/react';
-import { _OrganizationsList } from '../../../../src/pages/Organizations/screens/OrganizationsList';
+import { createMemoryHistory } from 'history';
+import { mountWithContexts } from '../../../enzymeHelpers';
+import OrganizationsList, { _OrganizationsList } from '../../../../src/pages/Organizations/screens/OrganizationsList';
 
 const mockAPIOrgsList = {
   data: {
@@ -13,26 +12,35 @@ const mockAPIOrgsList = {
         related_field_counts: {
           teams: 3,
           users: 4
+        },
+        user_capabilities: {
+          delete: true
         }
       },
     },
     {
       name: 'Organization 1',
-      id: 1,
+      id: 2,
       summary_fields: {
         related_field_counts: {
           teams: 2,
           users: 5
+        },
+        user_capabilities: {
+          delete: true
         }
       },
     },
     {
       name: 'Organization 2',
-      id: 2,
+      id: 3,
       summary_fields: {
         related_field_counts: {
           teams: 5,
           users: 6
+        },
+        user_capabilities: {
+          delete: true
         }
       },
     }]
@@ -40,99 +48,194 @@ const mockAPIOrgsList = {
   isModalOpen: false,
   warningTitle: 'title',
   warningMsg: 'message'
-
 };
 
-describe('<OrganizationsList />', () => {
+describe('<_OrganizationsList />', () => {
+  let wrapper;
+  let api;
+
+  beforeEach(() => {
+    api = {
+      getOrganizations: () => {},
+      destroyOrganization: jest.fn(),
+    };
+  });
+
   test('initially renders succesfully', () => {
-    mount(
-      <MemoryRouter initialEntries={['/organizations']} initialIndex={0}>
-        <I18nProvider>
-          <_OrganizationsList
-            match={{ path: '/organizations', url: '/organizations' }}
-            location={{ search: '', pathname: '/organizations' }}
-            handleHttpError={() => {}}
-          />
-        </I18nProvider>
-      </MemoryRouter>
+    mountWithContexts(
+      <OrganizationsList />
     );
   });
 
-  // TODO: these tests were not correct.  will work to clean these tests up after PR
-  test.skip('Modal closes when close button is clicked.', async (done) => {
-    const handleClearOrgsToDelete = jest.fn();
-    const wrapper = mount(
-      <MemoryRouter initialEntries={['/organizations']} initialIndex={0}>
-        <I18nProvider>
-          <_OrganizationsList
-            match={{ path: '/organizations', url: '/organizations' }}
-            location={{ search: '', pathname: '/organizations' }}
-            getItems={({ data: { orgsToDelete: [{ name: 'Organization 1', id: 1 }] } })}
-            handleClearOrgsToDelete={handleClearOrgsToDelete()}
-            handleHttpError={() => {}}
-          />
-        </I18nProvider>
-      </MemoryRouter>
+  test('Puts 1 selected Org in state when onSelect is called.', () => {
+    wrapper = mountWithContexts(
+      <OrganizationsList />
+    ).find('OrganizationsList');
+
+    wrapper.setState({
+      results: mockAPIOrgsList.data.results
+    });
+    wrapper.update();
+    expect(wrapper.state('selected').length).toBe(0);
+    wrapper.instance().onSelect(mockAPIOrgsList.data.results.slice(0, 1));
+    expect(wrapper.state('selected').length).toBe(1);
+  });
+
+  test('Puts all Orgs in state when onSelectAll is called.', () => {
+    wrapper = mountWithContexts(
+      <OrganizationsList />
+    ).find('OrganizationsList');
+    wrapper.setState(
+      mockAPIOrgsList.data
     );
-    wrapper.find({ type: 'checkbox' }).simulate('click');
+    expect(wrapper.state('selected').length).toBe(0);
+    wrapper.instance().onSelectAll(true);
+    expect(wrapper.find('OrganizationsList').state().selected.length).toEqual(wrapper.state().results.length);
+  });
 
+  test('selected is > 0 when close modal button is clicked.', () => {
+    wrapper = mountWithContexts(
+      <OrganizationsList />
+    );
+    wrapper.find('OrganizationsList').setState({
+      results: mockAPIOrgsList.data.results,
+      isModalOpen: mockAPIOrgsList.isModalOpen,
+      selected: mockAPIOrgsList.data.results
+    });
+    const component = wrapper.find('OrganizationsList');
     wrapper.find('DataListToolbar').prop('onOpenDeleteModal')();
-    expect(wrapper.find('OrganizationsList').state().isModalOpen).toEqual(true);
-    setImmediate(() => {
-      wrapper.update();
-      wrapper.setState({
-        selected: mockAPIOrgsList.data.results.map((result) => result.id),
-        orgsToDelete: mockAPIOrgsList.data.results.map((result) => result),
-        isModalOpen: true,
-      });
+    wrapper.update();
+    const button = wrapper.find('ModalBoxCloseButton');
+    button.prop('onClose')();
+    wrapper.update();
+    expect(component.state('isModalOpen')).toBe(false);
+    expect(component.state('selected').length).toBeGreaterThan(0);
+    wrapper.unmount();
+  });
 
-      wrapper.find('button[aria-label="Close"]').simulate('click');
-      expect(handleClearOrgsToDelete).toBeCalled();
-      const list = wrapper.find('OrganizationsList');
-      expect(list.state().isModalOpen).toBe(false);
-      done();
+  test('selected is > 0 when cancel modal button is clicked.', () => {
+    wrapper = mountWithContexts(
+      <OrganizationsList />
+    );
+    wrapper.find('OrganizationsList').setState({
+      results: mockAPIOrgsList.data.results,
+      isModalOpen: mockAPIOrgsList.isModalOpen,
+      selected: mockAPIOrgsList.data.results
+    });
+    const component = wrapper.find('OrganizationsList');
+    wrapper.find('DataListToolbar').prop('onOpenDeleteModal')();
+    wrapper.update();
+    const button = wrapper.find('ModalBoxFooter').find('button').at(1);
+    button.prop('onClick')();
+    wrapper.update();
+    expect(component.state('isModalOpen')).toBe(false);
+    expect(component.state('selected').length).toBeGreaterThan(0);
+    wrapper.unmount();
+  });
+
+  test('api is called to delete Orgs for each org in selected.', () => {
+    const fetchOrganizations = jest.fn(() => wrapper.find('OrganizationsList').setState({
+      results: []
+    }));
+    wrapper = mountWithContexts(
+      <OrganizationsList
+        fetchOrganizations={fetchOrganizations}
+      />, {
+        context: { network: { api } }
+      }
+    );
+    const component = wrapper.find('OrganizationsList');
+    wrapper.find('OrganizationsList').setState({
+      results: mockAPIOrgsList.data.results,
+      isModalOpen: mockAPIOrgsList.isModalOpen,
+      selected: mockAPIOrgsList.data.results
+    });
+    wrapper.find('DataListToolbar').prop('onOpenDeleteModal')();
+    wrapper.update();
+    const button = wrapper.find('ModalBoxFooter').find('button').at(0);
+    button.simulate('click');
+    wrapper.update();
+    expect(api.destroyOrganization).toHaveBeenCalledTimes(component.state('selected').length);
+  });
+
+  test('call fetchOrganizations after org(s) have been deleted', () => {
+    const fetchOrgs = jest.spyOn(_OrganizationsList.prototype, 'fetchOrganizations');
+    const event = { preventDefault: () => { } };
+    wrapper = mountWithContexts(
+      <OrganizationsList />, {
+        context: { network: { api } }
+      }
+    );
+    wrapper.find('OrganizationsList').setState({
+      results: mockAPIOrgsList.data.results,
+      selected: mockAPIOrgsList.data.results.slice(0, 1)
+    });
+    const component = wrapper.find('OrganizationsList');
+    component.instance().handleOrgDelete(event);
+    expect(fetchOrgs).toBeCalled();
+  });
+
+  test('url updates properly', () => {
+    const history = createMemoryHistory({
+      initialEntries: ['organizations?order_by=name&page=1&page_size=5'],
+    });
+    wrapper = mountWithContexts(
+      <OrganizationsList />, {
+        context: { router: { history } }
+      }
+    );
+    const component = wrapper.find('OrganizationsList');
+    component.instance().updateUrl({
+      page: 1,
+      page_size: 5,
+      order_by: 'modified'
+    });
+    expect(history.location.search).toBe('?order_by=modified&page=1&page_size=5');
+  });
+
+  test('onSort sends the correct information to fetchOrganizations', () => {
+    const history = createMemoryHistory({
+      initialEntries: ['organizations?order_by=name&page=1&page_size=5'],
+    });
+    const fetchOrganizations = jest.spyOn(_OrganizationsList.prototype, 'fetchOrganizations');
+    wrapper = mountWithContexts(
+      <OrganizationsList />, {
+        context: {
+          router: { history }
+        }
+      }
+    );
+    const component = wrapper.find('OrganizationsList');
+    component.instance().onSort('modified', 'ascending');
+    expect(fetchOrganizations).toBeCalledWith({
+      page: 1,
+      page_size: 5,
+      order_by: 'modified'
     });
   });
 
-  // TODO: these tests were not correct.  will work to clean these tests up after PR
-  test.skip('Orgs to delete length is 0 when all orgs are selected and Delete button is called.', async (done) => {
-    const handleClearOrgsToDelete = jest.fn();
-    const handleOrgDelete = jest.fn();
-    const fetchOrganizations = jest.fn();
-    const wrapper = mount(
-      <MemoryRouter initialEntries={['/organizations']} initialIndex={0}>
-        <I18nProvider>
-          <_OrganizationsList
-            match={{ path: '/organizations', url: '/organizations' }}
-            location={{ search: '', pathname: '/organizations' }}
-            getItems={({ data: { orgsToDelete: [{ name: 'Organization 1', id: 1 }] } })}
-            handleClearOrgsToDelete={handleClearOrgsToDelete()}
-            handleOrgDelete={handleOrgDelete()}
-            fetchOrganizations={fetchOrganizations()}
-            handleHttpError={() => {}}
-          />
-        </I18nProvider>
-      </MemoryRouter>
-    );
-    wrapper.find({ type: 'checkbox' }).simulate('click');
-    wrapper.find('button[aria-label="Delete"]').simulate('click');
-
-    wrapper.find('DataListToolbar').prop('onOpenDeleteModal')();
-    expect(wrapper.find('OrganizationsList').state().isModalOpen).toEqual(true);
-    setImmediate(() => {
-      wrapper.update();
-      wrapper.setState({
-        selected: mockAPIOrgsList.data.results.map((result) => result.id),
-        orgsToDelete: mockAPIOrgsList.data.results.map((result) => result),
-        isModalOpen: true,
-      });
-      wrapper.update();
-
-      const list = wrapper.find('OrganizationsList');
-      wrapper.find('button[aria-label="confirm-delete"]').simulate('click');
-      expect(list.state().orgsToDelete.length).toEqual(list.state().orgsDeleted.length);
-      expect(fetchOrganizations).toHaveBeenCalled();
-      done();
+  test('error is thrown when org not successfully deleted from api', async () => {
+    const history = createMemoryHistory({
+      initialEntries: ['organizations?order_by=name&page=1&page_size=5'],
     });
+    const handleError = jest.fn();
+    wrapper = mountWithContexts(
+      <OrganizationsList />, {
+        context: {
+          router: { history }, network: { api, handleHttpError: handleError }
+        }
+      }
+    );
+    await wrapper.setState({
+      results: mockAPIOrgsList.data.results,
+      selected: [...mockAPIOrgsList.data.results].push({
+        name: 'Organization 6',
+        id: 'a',
+      })
+    });
+    wrapper.update();
+    const component = wrapper.find('OrganizationsList');
+    component.instance().handleOrgDelete();
+    expect(handleError).toHaveBeenCalled();
   });
 });

@@ -62,8 +62,7 @@ class OrganizationsList extends Component {
       loading: true,
       results: [],
       selected: [],
-      isModalOpen: false
-
+      isModalOpen: false,
     };
 
     this.onSearch = this.onSearch.bind(this);
@@ -77,7 +76,7 @@ class OrganizationsList extends Component {
     this.fetchOrganizations = this.fetchOrganizations.bind(this);
     this.handleOrgDelete = this.handleOrgDelete.bind(this);
     this.handleOpenOrgDeleteModal = this.handleOpenOrgDeleteModal.bind(this);
-    this.handleCloseOrgDeleteModal = this.handleCloseOrgDeleteModal.bind(this);
+    this.handleClearOrgDeleteModal = this.handleClearOrgDeleteModal.bind(this);
   }
 
   componentDidMount () {
@@ -144,9 +143,9 @@ class OrganizationsList extends Component {
     return Object.assign({}, DEFAULT_PARAMS, searchParams, overrides);
   }
 
-  handleCloseOrgDeleteModal () {
+  handleClearOrgDeleteModal () {
     this.setState({
-      isModalOpen: false
+      isModalOpen: false,
     });
   }
 
@@ -297,10 +296,10 @@ class OrganizationsList extends Component {
                   variant="danger"
                   title={warningTitle}
                   isOpen={isModalOpen}
-                  onClose={this.handleCloseOrgDeleteModal}
+                  onClose={this.handleClearOrgDeleteModal}
                   actions={[
                     <Button variant="danger" key="delete" aria-label="confirm-delete" onClick={this.handleOrgDelete}>{i18n._(t`Delete`)}</Button>,
-                    <Button variant="secondary" key="cancel" aria-label="cancel-delete" onClick={this.handleCloseOrgDeleteModal}>{i18n._(t`Cancel`)}</Button>
+                    <Button variant="secondary" key="cancel" aria-label="cancel-delete" onClick={this.handleClearOrgDeleteModal}>{i18n._(t`Cancel`)}</Button>
                   ]}
                 >
                   {warningMsg}
