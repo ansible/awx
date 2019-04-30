@@ -1,4 +1,3 @@
-
 import React, { Component } from 'react';
 
 import { withNetwork } from './Network';
@@ -33,12 +32,8 @@ class Provider extends Component {
     }
   }
 
-  updateConfig = (config) => {
-    const {
-      ansible_version,
-      custom_virtualenvs,
-      version
-    } = config;
+  updateConfig = config => {
+    const { ansible_version, custom_virtualenvs, version } = config;
 
     this.setState(prevState => ({
       value: {
@@ -46,31 +41,36 @@ class Provider extends Component {
         ansible_version,
         custom_virtualenvs,
         version
-      },
+      }
     }));
-  }
+  };
 
   async fetchMe () {
     const { api, handleHttpError } = this.props;
     try {
-      const { data: { results: [me] } } = await api.getMe();
+      const {
+        data: {
+          results: [me]
+        }
+      } = await api.getMe();
       this.setState(prevState => ({
         value: {
           ...prevState.value,
           me
-        },
+        }
       }));
     } catch (err) {
-      handleHttpError(err) || this.setState({
-        value: {
-          ansible_version: null,
-          custom_virtualenvs: null,
-          version: null,
-          custom_logo: null,
-          custom_login_info: null,
-          me: {}
-        }
-      });
+      handleHttpError(err)
+        || this.setState({
+          value: {
+            ansible_version: null,
+            custom_virtualenvs: null,
+            version: null,
+            custom_logo: null,
+            custom_login_info: null,
+            me: {}
+          }
+        });
     }
   }
 
@@ -90,20 +90,21 @@ class Provider extends Component {
           version: configRes.data.version,
           custom_logo: rootRes.data.custom_logo,
           custom_login_info: rootRes.data.custom_login_info,
-          me: meRes.data.results
+          me: meRes.data.results[0]
         }
       });
     } catch (err) {
-      handleHttpError(err) || this.setState({
-        value: {
-          ansible_version: null,
-          custom_virtualenvs: null,
-          version: null,
-          custom_logo: null,
-          custom_login_info: null,
-          me: {}
-        }
-      });
+      handleHttpError(err)
+        || this.setState({
+          value: {
+            ansible_version: null,
+            custom_virtualenvs: null,
+            version: null,
+            custom_logo: null,
+            custom_login_info: null,
+            me: {}
+          }
+        });
     }
   }
 
@@ -129,7 +130,5 @@ class Provider extends Component {
 export const ConfigProvider = withNetwork(Provider);
 
 export const Config = ({ children }) => (
-  <ConfigContext.Consumer>
-    {value => children(value)}
-  </ConfigContext.Consumer>
+  <ConfigContext.Consumer>{value => children(value)}</ConfigContext.Consumer>
 );
