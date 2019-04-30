@@ -613,60 +613,6 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         new_prompts['_eager_fields']['job_slice_count'] = self.job_slice_count
         return super(Job, self).copy_unified_job(**new_prompts)
 
-    @property
-    def ask_diff_mode_on_launch(self):
-        if self.job_template is not None:
-            return self.job_template.ask_diff_mode_on_launch
-        return False
-
-    @property
-    def ask_variables_on_launch(self):
-        if self.job_template is not None:
-            return self.job_template.ask_variables_on_launch
-        return False
-
-    @property
-    def ask_limit_on_launch(self):
-        if self.job_template is not None:
-            return self.job_template.ask_limit_on_launch
-        return False
-
-    @property
-    def ask_tags_on_launch(self):
-        if self.job_template is not None:
-            return self.job_template.ask_tags_on_launch
-        return False
-
-    @property
-    def ask_skip_tags_on_launch(self):
-        if self.job_template is not None:
-            return self.job_template.ask_skip_tags_on_launch
-        return False
-
-    @property
-    def ask_job_type_on_launch(self):
-        if self.job_template is not None:
-            return self.job_template.ask_job_type_on_launch
-        return False
-
-    @property
-    def ask_verbosity_on_launch(self):
-        if self.job_template is not None:
-            return self.job_template.ask_verbosity_on_launch
-        return False
-
-    @property
-    def ask_inventory_on_launch(self):
-        if self.job_template is not None:
-            return self.job_template.ask_inventory_on_launch
-        return False
-
-    @property
-    def ask_credential_on_launch(self):
-        if self.job_template is not None:
-            return self.job_template.ask_credential_on_launch
-        return False
-
     def get_passwords_needed_to_start(self):
         return self.passwords_needed_to_start
 
