@@ -1835,11 +1835,11 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         inventory_update.get_cloud_credential = get_cred
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
 
-        private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
-        env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
+        # force test to use the ec2 script injection logic, as opposed to plugin
+        with mocker.patch('awx.main.tasks._get_ansible_version', mocker.MagicMock(return_value='2.7')):
+            private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
+            env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
 
-        injector = InventorySource.injectors['ec2']('2.7')
-        env = injector.get_script_env(inventory_update, private_data_dir, private_data_files)
         safe_env = build_safe_env(env)
 
         assert env['AWS_ACCESS_KEY_ID'] == 'bob'
@@ -1911,12 +1911,11 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             'group_by_resource_group': 'no'
         }
 
-        private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
-        env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
+        # force azure_rm inventory to use script injection logic, as opposed to plugin
+        with mocker.patch('awx.main.tasks._get_ansible_version', mocker.MagicMock(return_value='2.7')):
+            private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
+            env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
 
-
-        injector = InventorySource.injectors['azure_rm']('2.7')
-        env = injector.get_script_env(inventory_update, private_data_dir, private_data_files)
         safe_env = build_safe_env(env)
 
         assert env['AZURE_CLIENT_ID'] == 'some-client'
@@ -1962,12 +1961,11 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             'group_by_security_group': 'no'
         }
 
-        private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
-        env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
+        # force azure_rm inventory to use script injection logic, as opposed to plugin
+        with mocker.patch('awx.main.tasks._get_ansible_version', mocker.MagicMock(return_value='2.7')):
+            private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
+            env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
 
-
-        injector = InventorySource.injectors['azure_rm']('2.7')
-        env = injector.get_script_env(inventory_update, private_data_dir, private_data_files)
         safe_env = build_safe_env(env)
 
         assert env['AZURE_SUBSCRIPTION_ID'] == 'some-subscription'
@@ -2172,10 +2170,10 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         inventory_update.get_cloud_credential = get_cred
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
 
-        env = task.build_env(inventory_update, private_data_dir, False)
+        # force tower inventory source to use script injection logic, as opposed to plugin
+        with mocker.patch('awx.main.tasks._get_ansible_version', mocker.MagicMock(return_value='2.7')):
+            env = task.build_env(inventory_update, private_data_dir, False)
 
-        injector = InventorySource.injectors['tower']('2.7')
-        env = injector.get_script_env(inventory_update, private_data_dir, {})
         safe_env = build_safe_env(env)
 
         assert env['TOWER_HOST'] == 'https://tower.example.org'
