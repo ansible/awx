@@ -490,6 +490,15 @@ def format_ssh_private_key(value):
     return True
 
 
+@JSONSchemaField.format_checker.checks('url')
+def format_url(value):
+    if urllib.parse.urlparse(value).scheme == '':
+        raise jsonschema.exceptions.FormatError(
+            'Invalid URL: Missing url scheme (http, https, etc.)'
+        )
+    return True
+
+
 class DynamicCredentialInputField(JSONSchemaField):
     """
     Used to validate JSON for
@@ -722,7 +731,7 @@ class CredentialTypeInputField(JSONSchemaField):
                         'type': 'object',
                         'properties': {
                             'type': {'enum': ['string', 'boolean']},
-                            'format': {'enum': ['ssh_private_key']},
+                            'format': {'enum': ['ssh_private_key', 'url']},
                             'choices': {
                                 'type': 'array',
                                 'minItems': 1,

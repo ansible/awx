@@ -14,6 +14,7 @@ base_inputs = {
         'id': 'url',
         'label': _('Server URL'),
         'type': 'string',
+        'format': 'url',
         'help_text': _('The URL to the HashiCorp Vault'),
     }, {
         'id': 'token',

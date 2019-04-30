@@ -10,6 +10,7 @@ azure_keyvault_inputs = {
         'id': 'url',
         'label': _('Vault URL (DNS Name)'),
         'type': 'string',
+        'format': 'url',
     }, {
         'id': 'client',
         'label': _('Client ID'),
