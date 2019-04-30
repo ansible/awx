@@ -56,7 +56,7 @@ describe('<_OrganizationsList />', () => {
 
   beforeEach(() => {
     api = {
-      getOrganizations: jest.fn(),
+      getOrganizations: () => {},
       destroyOrganization: jest.fn(),
     };
   });
@@ -76,6 +76,7 @@ describe('<_OrganizationsList />', () => {
       results: mockAPIOrgsList.data.results
     });
     wrapper.update();
+    expect(wrapper.state('selected').length).toBe(0);
     wrapper.instance().onSelect(mockAPIOrgsList.data.results.slice(0, 1));
     expect(wrapper.state('selected').length).toBe(1);
   });
@@ -87,12 +88,12 @@ describe('<_OrganizationsList />', () => {
     wrapper.setState(
       mockAPIOrgsList.data
     );
-    wrapper.find({ type: 'checkbox' }).simulate('click');
+    expect(wrapper.state('selected').length).toBe(0);
     wrapper.instance().onSelectAll(true);
     expect(wrapper.find('OrganizationsList').state().selected.length).toEqual(wrapper.state().results.length);
   });
 
-  test('orgsToDelete is 0 when close modal button is clicked.', () => {
+  test('selected is > 0 when close modal button is clicked.', () => {
     wrapper = mountWithContexts(
       <OrganizationsList />
     );
@@ -108,11 +109,11 @@ describe('<_OrganizationsList />', () => {
     button.prop('onClose')();
     wrapper.update();
     expect(component.state('isModalOpen')).toBe(false);
-    expect(component.state('selected').length).toBe(0);
+    expect(component.state('selected').length).toBeGreaterThan(0);
     wrapper.unmount();
   });
 
-  test('orgsToDelete is 0 when cancel modal button is clicked.', () => {
+  test('selected is > 0 when cancel modal button is clicked.', () => {
     wrapper = mountWithContexts(
       <OrganizationsList />
     );
@@ -128,11 +129,11 @@ describe('<_OrganizationsList />', () => {
     button.prop('onClick')();
     wrapper.update();
     expect(component.state('isModalOpen')).toBe(false);
-    expect(component.state('selected').length).toBe(0);
+    expect(component.state('selected').length).toBeGreaterThan(0);
     wrapper.unmount();
   });
 
-  test('api is called to delete Orgs for each org in orgsToDelete.', () => {
+  test('api is called to delete Orgs for each org in selected.', () => {
     const fetchOrganizations = jest.fn(() => wrapper.find('OrganizationsList').setState({
       results: []
     }));
@@ -154,7 +155,7 @@ describe('<_OrganizationsList />', () => {
     const button = wrapper.find('ModalBoxFooter').find('button').at(0);
     button.simulate('click');
     wrapper.update();
-    expect(api.destroyOrganization).toHaveBeenCalledTimes(component.state('results').length);
+    expect(api.destroyOrganization).toHaveBeenCalledTimes(component.state('selected').length);
   });
 
   test('call fetchOrganizations after org(s) have been deleted', () => {

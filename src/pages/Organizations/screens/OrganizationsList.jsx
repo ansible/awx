@@ -146,7 +146,6 @@ class OrganizationsList extends Component {
   handleClearOrgDeleteModal () {
     this.setState({
       isModalOpen: false,
-      selected: []
     });
   }
 
