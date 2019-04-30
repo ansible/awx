@@ -67,21 +67,20 @@ describe('<_OrganizationsList />', () => {
     );
   });
 
-  test('Puts 1 selected Org in state when onSelect is called.', async () => {
+  test('Puts 1 selected Org in state when onSelect is called.', () => {
     wrapper = mountWithContexts(
       <OrganizationsList />
     ).find('OrganizationsList');
-    await setImmediate(async () => {
-      wrapper.setState({
-        results: mockAPIOrgsList.data.results
-      });
-      wrapper.update();
+
+    wrapper.setState({
+      results: mockAPIOrgsList.data.results
     });
+    wrapper.update();
     wrapper.instance().onSelect(mockAPIOrgsList.data.results.slice(0, 1));
     expect(wrapper.state('selected').length).toBe(1);
   });
 
-  test('Puts all Orgs in state when onSelectAll is called.', async () => {
+  test('Puts all Orgs in state when onSelectAll is called.', () => {
     wrapper = mountWithContexts(
       <OrganizationsList />
     ).find('OrganizationsList');
@@ -93,7 +92,7 @@ describe('<_OrganizationsList />', () => {
     expect(wrapper.find('OrganizationsList').state().selected.length).toEqual(wrapper.state().results.length);
   });
 
-  test('orgsToDelete is 0 when close modal button is clicked.', async () => {
+  test('orgsToDelete is 0 when close modal button is clicked.', () => {
     wrapper = mountWithContexts(
       <OrganizationsList />
     );
@@ -113,7 +112,7 @@ describe('<_OrganizationsList />', () => {
     wrapper.unmount();
   });
 
-  test('orgsToDelete is 0 when cancel modal button is clicked.', async () => {
+  test('orgsToDelete is 0 when cancel modal button is clicked.', () => {
     wrapper = mountWithContexts(
       <OrganizationsList />
     );
@@ -133,7 +132,7 @@ describe('<_OrganizationsList />', () => {
     wrapper.unmount();
   });
 
-  test('api is called to delete Orgs for each org in orgsToDelete.', async () => {
+  test('api is called to delete Orgs for each org in orgsToDelete.', () => {
     const fetchOrganizations = jest.fn(() => wrapper.find('OrganizationsList').setState({
       results: []
     }));
@@ -158,7 +157,7 @@ describe('<_OrganizationsList />', () => {
     expect(api.destroyOrganization).toHaveBeenCalledTimes(component.state('results').length);
   });
 
-  test('call fetchOrganizations after org(s) have been deleted', async () => {
+  test('call fetchOrganizations after org(s) have been deleted', () => {
     const fetchOrgs = jest.spyOn(_OrganizationsList.prototype, 'fetchOrganizations');
     const event = { preventDefault: () => { } };
     wrapper = mountWithContexts(
@@ -171,11 +170,11 @@ describe('<_OrganizationsList />', () => {
       selected: mockAPIOrgsList.data.results.slice(0, 1)
     });
     const component = wrapper.find('OrganizationsList');
-    await component.instance().handleOrgDelete(event);
+    component.instance().handleOrgDelete(event);
     expect(fetchOrgs).toBeCalled();
   });
 
-  test('url updates properly', async () => {
+  test('url updates properly', () => {
     const history = createMemoryHistory({
       initialEntries: ['organizations?order_by=name&page=1&page_size=5'],
     });
@@ -193,7 +192,7 @@ describe('<_OrganizationsList />', () => {
     expect(history.location.search).toBe('?order_by=modified&page=1&page_size=5');
   });
 
-  test('onSort sends the correct information to fetchOrganizations', async () => {
+  test('onSort sends the correct information to fetchOrganizations', () => {
     const history = createMemoryHistory({
       initialEntries: ['organizations?order_by=name&page=1&page_size=5'],
     });
@@ -226,15 +225,16 @@ describe('<_OrganizationsList />', () => {
         }
       }
     );
-    await setImmediate(async () => {
-      wrapper.setState({
-        results: mockAPIOrgsList.data.results,
-        selected: [...mockAPIOrgsList.data.results].push({ id: 'a' })
-      });
-      wrapper.update();
+    await wrapper.setState({
+      results: mockAPIOrgsList.data.results,
+      selected: [...mockAPIOrgsList.data.results].push({
+        name: 'Organization 6',
+        id: 'a',
+      })
     });
+    wrapper.update();
     const component = wrapper.find('OrganizationsList');
     component.instance().handleOrgDelete();
-    expect(handleError).toBeCalled();
+    expect(handleError).toHaveBeenCalled();
   });
 });
