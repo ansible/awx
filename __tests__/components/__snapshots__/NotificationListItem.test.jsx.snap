@@ -80,10 +80,16 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                     </Badge>
                   </DataListCell>,
                   <DataListCell
-                    alignRight={true}
+                    alignRight={false}
                     className=""
                     isFilled={true}
                     isIcon={false}
+                    style={
+                      Object {
+                        "display": "flex",
+                        "justifyContent": "flex-end",
+                      }
+                    }
                     width={1}
                   >
                     <Switch
@@ -175,15 +181,27 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                   </div>
                 </DataListCell>
                 <DataListCell
-                  alignRight={true}
+                  alignRight={false}
                   className=""
                   isFilled={true}
                   isIcon={false}
                   key="toggles"
+                  style={
+                    Object {
+                      "display": "flex",
+                      "justifyContent": "flex-end",
+                    }
+                  }
                   width={1}
                 >
                   <div
-                    className="pf-c-data-list__cell pf-m-align-right"
+                    className="pf-c-data-list__cell"
+                    style={
+                      Object {
+                        "display": "flex",
+                        "justifyContent": "flex-end",
+                      }
+                    }
                   >
                     <Switch
                       aria-label="Toggle notification success"

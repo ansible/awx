@@ -8,7 +8,6 @@ import {
   DataListCell,
   Text,
   TextContent,
-  TextVariants,
   Title,
   EmptyState,
   EmptyStateIcon,
@@ -162,13 +161,10 @@ class PaginatedDataList extends React.Component {
                             <TextContent style={detailWrapperStyle}>
                               <Link to={{ pathname: item.url }}>
                                 <Text
-                                  id="items-list-item"
-                                  component={TextVariants.h6}
+                                  id={`items-list-item-${item.id}`}
                                   style={detailLabelStyle}
                                 >
-                                  <span id={`items-list-item-${item.id}`}>
-                                    {item.name}
-                                  </span>
+                                  {item.name}
                                 </Text>
                               </Link>
                             </TextContent>

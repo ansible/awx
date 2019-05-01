@@ -85,6 +85,27 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                     }
                   }
                   renderItem={[Function]}
+                  toolbarColumns={
+                    Array [
+                      Object {
+                        "isSortable": true,
+                        "key": "name",
+                        "name": "Name",
+                      },
+                      Object {
+                        "isNumeric": true,
+                        "isSortable": true,
+                        "key": "modified",
+                        "name": "Modified",
+                      },
+                      Object {
+                        "isNumeric": true,
+                        "isSortable": true,
+                        "key": "created",
+                        "name": "Created",
+                      },
+                    ]
+                  }
                 >
                   <Route>
                     <PaginatedDataList
@@ -140,6 +161,18 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                             "key": "name",
                             "name": "Name",
                           },
+                          Object {
+                            "isNumeric": true,
+                            "isSortable": true,
+                            "key": "modified",
+                            "name": "Modified",
+                          },
+                          Object {
+                            "isNumeric": true,
+                            "isSortable": true,
+                            "key": "created",
+                            "name": "Created",
+                          },
                         ]
                       }
                     >
@@ -156,6 +189,18 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                 "isSortable": true,
                                 "key": "name",
                                 "name": "Name",
+                              },
+                              Object {
+                                "isNumeric": true,
+                                "isSortable": true,
+                                "key": "modified",
+                                "name": "Modified",
+                              },
+                              Object {
+                                "isNumeric": true,
+                                "isSortable": true,
+                                "key": "created",
+                                "name": "Created",
                               },
                             ]
                           }
@@ -262,6 +307,18 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                           "key": "name",
                                                           "name": "Name",
                                                         },
+                                                        Object {
+                                                          "isNumeric": true,
+                                                          "isSortable": true,
+                                                          "key": "modified",
+                                                          "name": "Modified",
+                                                        },
+                                                        Object {
+                                                          "isNumeric": true,
+                                                          "isSortable": true,
+                                                          "key": "created",
+                                                          "name": "Created",
+                                                        },
                                                       ]
                                                     }
                                                     onSearch={[Function]}
@@ -277,7 +334,28 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                         <Dropdown
                                                           className="searchKeyDropdown"
                                                           direction="down"
-                                                          dropdownItems={Array []}
+                                                          dropdownItems={
+                                                            Array [
+                                                              <Item
+                                                                className=""
+                                                                component="button"
+                                                                href="#"
+                                                                isDisabled={false}
+                                                                isHovered={false}
+                                                              >
+                                                                Modified
+                                                              </Item>,
+                                                              <Item
+                                                                className=""
+                                                                component="button"
+                                                                href="#"
+                                                                isDisabled={false}
+                                                                isHovered={false}
+                                                              >
+                                                                Created
+                                                              </Item>,
+                                                            ]
+                                                          }
                                                           isOpen={false}
                                                           isPlain={false}
                                                           onSelect={[Function]}
@@ -305,10 +383,10 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                             onToggle={[Function]}
                                                           >
                                                             <DropdownToggle
-                                                              ariaHasPopup={null}
+                                                              ariaHasPopup={true}
                                                               className=""
                                                               iconComponent={[Function]}
-                                                              id="pf-toggle-id-2"
+                                                              id="pf-toggle-id-3"
                                                               isActive={false}
                                                               isFocused={false}
                                                               isHovered={false}
@@ -323,8 +401,9 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                                 >
                                                                   <button
                                                                     aria-expanded="false"
+                                                                    aria-haspopup="true"
                                                                     class="pf-c-dropdown__toggle"
-                                                                    id="pf-toggle-id-2"
+                                                                    id="pf-toggle-id-3"
                                                                     type="button"
                                                                   >
                                                                     <span
@@ -352,9 +431,9 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                               }
                                                             >
                                                               <DropdownToggle
-                                                                ariaHasPopup={null}
+                                                                ariaHasPopup={true}
                                                                 className=""
-                                                                id="pf-toggle-id-2"
+                                                                id="pf-toggle-id-3"
                                                                 isActive={false}
                                                                 isDisabled={false}
                                                                 isFocused={false}
@@ -369,8 +448,9 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                                   >
                                                                     <button
                                                                       aria-expanded="false"
+                                                                      aria-haspopup="true"
                                                                       class="pf-c-dropdown__toggle"
-                                                                      id="pf-toggle-id-2"
+                                                                      id="pf-toggle-id-3"
                                                                       type="button"
                                                                     >
                                                                       <span
@@ -399,10 +479,10 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                               >
                                                                 <button
                                                                   aria-expanded={false}
-                                                                  aria-haspopup={null}
+                                                                  aria-haspopup={true}
                                                                   className="pf-c-dropdown__toggle"
                                                                   disabled={false}
-                                                                  id="pf-toggle-id-2"
+                                                                  id="pf-toggle-id-3"
                                                                   onClick={[Function]}
                                                                   onKeyDown={[Function]}
                                                                   type="button"
@@ -550,6 +630,18 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                           "key": "name",
                                                           "name": "Name",
                                                         },
+                                                        Object {
+                                                          "isNumeric": true,
+                                                          "isSortable": true,
+                                                          "key": "modified",
+                                                          "name": "Modified",
+                                                        },
+                                                        Object {
+                                                          "isNumeric": true,
+                                                          "isSortable": true,
+                                                          "key": "created",
+                                                          "name": "Created",
+                                                        },
                                                       ]
                                                     }
                                                     onSort={[Function]}
@@ -560,6 +652,211 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                       update={true}
                                                       withHash={true}
                                                     >
+                                                      <Dropdown
+                                                        className=""
+                                                        direction="down"
+                                                        dropdownItems={
+                                                          Array [
+                                                            <Item
+                                                              className=""
+                                                              component="button"
+                                                              href="#"
+                                                              isDisabled={false}
+                                                              isHovered={false}
+                                                            >
+                                                              Modified
+                                                            </Item>,
+                                                            <Item
+                                                              className=""
+                                                              component="button"
+                                                              href="#"
+                                                              isDisabled={false}
+                                                              isHovered={false}
+                                                            >
+                                                              Created
+                                                            </Item>,
+                                                          ]
+                                                        }
+                                                        isOpen={false}
+                                                        isPlain={false}
+                                                        onSelect={[Function]}
+                                                        onToggle={[Function]}
+                                                        position="left"
+                                                        style={
+                                                          Object {
+                                                            "marginRight": "20px",
+                                                          }
+                                                        }
+                                                        toggle={
+                                                          <DropdownToggle
+                                                            className=""
+                                                            iconComponent={[Function]}
+                                                            id=""
+                                                            isActive={false}
+                                                            isFocused={false}
+                                                            isHovered={false}
+                                                            isOpen={false}
+                                                            isPlain={false}
+                                                            onToggle={[Function]}
+                                                            parentRef={null}
+                                                          >
+                                                            Name
+                                                          </DropdownToggle>
+                                                        }
+                                                      >
+                                                        <div
+                                                          className="pf-c-dropdown"
+                                                          onToggle={[Function]}
+                                                          style={
+                                                            Object {
+                                                              "marginRight": "20px",
+                                                            }
+                                                          }
+                                                        >
+                                                          <DropdownToggle
+                                                            ariaHasPopup={true}
+                                                            className=""
+                                                            iconComponent={[Function]}
+                                                            id="pf-toggle-id-4"
+                                                            isActive={false}
+                                                            isFocused={false}
+                                                            isHovered={false}
+                                                            isOpen={false}
+                                                            isPlain={false}
+                                                            key=".0"
+                                                            onEnter={[Function]}
+                                                            onToggle={[Function]}
+                                                            parentRef={
+                                                              <div
+                                                                class="pf-c-dropdown"
+                                                                style="margin-right: 20px;"
+                                                              >
+                                                                <button
+                                                                  aria-expanded="false"
+                                                                  aria-haspopup="true"
+                                                                  class="pf-c-dropdown__toggle"
+                                                                  id="pf-toggle-id-4"
+                                                                  type="button"
+                                                                >
+                                                                  <span
+                                                                    class="pf-c-dropdown__toggle-text"
+                                                                  >
+                                                                    Name
+                                                                  </span>
+                                                                  <svg
+                                                                    aria-hidden="true"
+                                                                    class="pf-c-dropdown__toggle-icon"
+                                                                    fill="currentColor"
+                                                                    height="1em"
+                                                                    role="img"
+                                                                    style="vertical-align: -0.125em;"
+                                                                    viewBox="0 0 320 512"
+                                                                    width="1em"
+                                                                  >
+                                                                    <path
+                                                                      d="M31.3 192h257.3c17.8 0 26.7 21.5 14.1 34.1L174.1 354.8c-7.8 7.8-20.5 7.8-28.3 0L17.2 226.1C4.6 213.5 13.5 192 31.3 192z"
+                                                                      transform=""
+                                                                    />
+                                                                  </svg>
+                                                                </button>
+                                                              </div>
+                                                            }
+                                                          >
+                                                            <DropdownToggle
+                                                              ariaHasPopup={true}
+                                                              className=""
+                                                              id="pf-toggle-id-4"
+                                                              isActive={false}
+                                                              isDisabled={false}
+                                                              isFocused={false}
+                                                              isHovered={false}
+                                                              isOpen={false}
+                                                              isPlain={false}
+                                                              onEnter={[Function]}
+                                                              onToggle={[Function]}
+                                                              parentRef={
+                                                                <div
+                                                                  class="pf-c-dropdown"
+                                                                  style="margin-right: 20px;"
+                                                                >
+                                                                  <button
+                                                                    aria-expanded="false"
+                                                                    aria-haspopup="true"
+                                                                    class="pf-c-dropdown__toggle"
+                                                                    id="pf-toggle-id-4"
+                                                                    type="button"
+                                                                  >
+                                                                    <span
+                                                                      class="pf-c-dropdown__toggle-text"
+                                                                    >
+                                                                      Name
+                                                                    </span>
+                                                                    <svg
+                                                                      aria-hidden="true"
+                                                                      class="pf-c-dropdown__toggle-icon"
+                                                                      fill="currentColor"
+                                                                      height="1em"
+                                                                      role="img"
+                                                                      style="vertical-align: -0.125em;"
+                                                                      viewBox="0 0 320 512"
+                                                                      width="1em"
+                                                                    >
+                                                                      <path
+                                                                        d="M31.3 192h257.3c17.8 0 26.7 21.5 14.1 34.1L174.1 354.8c-7.8 7.8-20.5 7.8-28.3 0L17.2 226.1C4.6 213.5 13.5 192 31.3 192z"
+                                                                        transform=""
+                                                                      />
+                                                                    </svg>
+                                                                  </button>
+                                                                </div>
+                                                              }
+                                                            >
+                                                              <button
+                                                                aria-expanded={false}
+                                                                aria-haspopup={true}
+                                                                className="pf-c-dropdown__toggle"
+                                                                disabled={false}
+                                                                id="pf-toggle-id-4"
+                                                                onClick={[Function]}
+                                                                onKeyDown={[Function]}
+                                                                type="button"
+                                                              >
+                                                                <span
+                                                                  className="pf-c-dropdown__toggle-text"
+                                                                >
+                                                                  Name
+                                                                </span>
+                                                                <CaretDownIcon
+                                                                  className="pf-c-dropdown__toggle-icon"
+                                                                  color="currentColor"
+                                                                  size="sm"
+                                                                  title={null}
+                                                                >
+                                                                  <svg
+                                                                    aria-hidden={true}
+                                                                    aria-labelledby={null}
+                                                                    className="pf-c-dropdown__toggle-icon"
+                                                                    fill="currentColor"
+                                                                    height="1em"
+                                                                    role="img"
+                                                                    style={
+                                                                      Object {
+                                                                        "verticalAlign": "-0.125em",
+                                                                      }
+                                                                    }
+                                                                    viewBox="0 0 320 512"
+                                                                    width="1em"
+                                                                  >
+                                                                    <path
+                                                                      d="M31.3 192h257.3c17.8 0 26.7 21.5 14.1 34.1L174.1 354.8c-7.8 7.8-20.5 7.8-28.3 0L17.2 226.1C4.6 213.5 13.5 192 31.3 192z"
+                                                                      transform=""
+                                                                    />
+                                                                  </svg>
+                                                                </CaretDownIcon>
+                                                              </button>
+                                                            </DropdownToggle>
+                                                          </DropdownToggle>
+                                                        </div>
+                                                      </Dropdown>
                                                       <Button
                                                         aria-label="Sort"
                                                         className=""
@@ -717,10 +1014,16 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                 </Badge>
                                               </DataListCell>,
                                               <DataListCell
-                                                alignRight={true}
+                                                alignRight={false}
                                                 className=""
                                                 isFilled={true}
                                                 isIcon={false}
+                                                style={
+                                                  Object {
+                                                    "display": "flex",
+                                                    "justifyContent": "flex-end",
+                                                  }
+                                                }
                                                 width={1}
                                               >
                                                 <Switch
@@ -812,15 +1115,27 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                               </div>
                                             </DataListCell>
                                             <DataListCell
-                                              alignRight={true}
+                                              alignRight={false}
                                               className=""
                                               isFilled={true}
                                               isIcon={false}
                                               key="toggles"
+                                              style={
+                                                Object {
+                                                  "display": "flex",
+                                                  "justifyContent": "flex-end",
+                                                }
+                                              }
                                               width={1}
                                             >
                                               <div
-                                                className="pf-c-data-list__cell pf-m-align-right"
+                                                className="pf-c-data-list__cell"
+                                                style={
+                                                  Object {
+                                                    "display": "flex",
+                                                    "justifyContent": "flex-end",
+                                                  }
+                                                }
                                               >
                                                 <Switch
                                                   aria-label="Toggle notification success"
@@ -991,10 +1306,16 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                 </Badge>
                                               </DataListCell>,
                                               <DataListCell
-                                                alignRight={true}
+                                                alignRight={false}
                                                 className=""
                                                 isFilled={true}
                                                 isIcon={false}
+                                                style={
+                                                  Object {
+                                                    "display": "flex",
+                                                    "justifyContent": "flex-end",
+                                                  }
+                                                }
                                                 width={1}
                                               >
                                                 <Switch
@@ -1086,15 +1407,27 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                               </div>
                                             </DataListCell>
                                             <DataListCell
-                                              alignRight={true}
+                                              alignRight={false}
                                               className=""
                                               isFilled={true}
                                               isIcon={false}
                                               key="toggles"
+                                              style={
+                                                Object {
+                                                  "display": "flex",
+                                                  "justifyContent": "flex-end",
+                                                }
+                                              }
                                               width={1}
                                             >
                                               <div
-                                                className="pf-c-data-list__cell pf-m-align-right"
+                                                className="pf-c-data-list__cell"
+                                                style={
+                                                  Object {
+                                                    "display": "flex",
+                                                    "justifyContent": "flex-end",
+                                                  }
+                                                }
                                               >
                                                 <Switch
                                                   aria-label="Toggle notification success"
@@ -1293,7 +1626,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                       ariaHasPopup={true}
                                       className="togglePageSize"
                                       iconComponent={[Function]}
-                                      id="pf-toggle-id-3"
+                                      id="pf-toggle-id-5"
                                       isActive={false}
                                       isFocused={false}
                                       isHovered={false}
@@ -1310,7 +1643,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                             aria-expanded="false"
                                             aria-haspopup="true"
                                             class="pf-c-dropdown__toggle togglePageSize"
-                                            id="pf-toggle-id-3"
+                                            id="pf-toggle-id-5"
                                             type="button"
                                           >
                                             <span
@@ -1340,7 +1673,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                       <DropdownToggle
                                         ariaHasPopup={true}
                                         className="togglePageSize"
-                                        id="pf-toggle-id-3"
+                                        id="pf-toggle-id-5"
                                         isActive={false}
                                         isDisabled={false}
                                         isFocused={false}
@@ -1357,7 +1690,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                               aria-expanded="false"
                                               aria-haspopup="true"
                                               class="pf-c-dropdown__toggle togglePageSize"
-                                              id="pf-toggle-id-3"
+                                              id="pf-toggle-id-5"
                                               type="button"
                                             >
                                               <span
@@ -1389,7 +1722,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                           aria-haspopup={true}
                                           className="pf-c-dropdown__toggle togglePageSize"
                                           disabled={false}
-                                          id="pf-toggle-id-3"
+                                          id="pf-toggle-id-5"
                                           onClick={[Function]}
                                           onKeyDown={[Function]}
                                           type="button"

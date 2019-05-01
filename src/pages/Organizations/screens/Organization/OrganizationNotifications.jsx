@@ -12,6 +12,12 @@ const DEFAULT_QUERY_PARAMS = {
   order_by: 'name',
 };
 
+const COLUMNS = [
+  { key: 'name', name: 'Name', isSortable: true },
+  { key: 'modified', name: 'Modified', isSortable: true, isNumeric: true },
+  { key: 'created', name: 'Created', isSortable: true, isNumeric: true },
+];
+
 class OrganizationNotifications extends Component {
   constructor (props) {
     super(props);
@@ -186,6 +192,7 @@ class OrganizationNotifications extends Component {
             itemCount={itemCount}
             itemName="notification"
             queryParams={this.getQueryParams()}
+            toolbarColumns={COLUMNS}
             renderItem={(notification) => (
               <NotificationListItem
                 key={notification.id}

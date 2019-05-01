@@ -1,9 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { I18n } from '@lingui/react';
-import { t } from '@lingui/macro';
 import {
-  Checkbox,
+  DataListItem,
+  DataListItemRow,
+  DataListItemCells,
+  DataListCheck,
+  DataListCell,
 } from '@patternfly/react-core';
 
 import VerticalSeparator from '../VerticalSeparator';
@@ -14,25 +16,32 @@ const CheckboxListItem = ({
   isSelected,
   onSelect,
 }) => (
-  <li key={itemId} className="pf-c-data-list__item" aria-labelledby="check-action-item1">
-    <I18n>
-      {({ i18n }) => (
-        <Checkbox
-          checked={isSelected}
-          onChange={onSelect}
-          aria-label={i18n._(t`selected ${itemId}`)}
-          id={`selectd-${itemId}`}
-          value={itemId}
-        />
-      )}
-    </I18n>
-    <VerticalSeparator />
-    <div className="pf-c-data-list__cell">
-      <label htmlFor={`selectd-${itemId}`} className="check-action-item">
-        <b>{name}</b>
-      </label>
-    </div>
-  </li>
+  <DataListItem key={itemId} aria-labelledby={`check-action-item-${itemId}`}>
+    <DataListItemRow>
+      <DataListCheck
+        id={`selected-${itemId}`}
+        checked={isSelected}
+        onChange={onSelect}
+        aria-labelledby={`check-action-item-${itemId}`}
+        value={itemId}
+      />
+      <DataListItemCells dataListCells={[
+        <DataListCell key="divider" className="pf-c-data-list__cell--divider">
+          <VerticalSeparator />
+        </DataListCell>,
+        <DataListCell key="name">
+          <label
+            id={`check-action-item-${itemId}`}
+            htmlFor={`selected-${itemId}`}
+            className="check-action-item"
+          >
+            <b>{name}</b>
+          </label>
+        </DataListCell>
+      ]}
+      />
+    </DataListItemRow>
+  </DataListItem>
 );
 
 CheckboxListItem.propTypes = {

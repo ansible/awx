@@ -24,6 +24,10 @@ function NotificationListItem (props) {
   const capText = {
     textTransform: 'capitalize'
   };
+  const toggleCellStyles = {
+    display: 'flex',
+    justifyContent: 'flex-end',
+  };
 
   return (
     <I18n>
@@ -50,7 +54,7 @@ function NotificationListItem (props) {
                   {notification.notification_type}
                 </Badge>
               </DataListCell>,
-              <DataListCell key="toggles" alignRight>
+              <DataListCell key="toggles" style={toggleCellStyles}>
                 <Switch
                   id={`notification-${notification.id}-success-toggle`}
                   label={i18n._(t`Successful`)}

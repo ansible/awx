@@ -3,7 +3,7 @@ import { shallow } from 'enzyme';
 import { mountWithContexts } from '../enzymeHelpers';
 import AddResourceRole from '../../src/components/AddRole/AddResourceRole';
 
-describe('<SelectResourceStep />', () => {
+describe('<AddResourceRole />', () => {
   const readUsers = jest.fn().mockResolvedValue({
     data: {
       count: 2,
@@ -147,6 +147,7 @@ describe('<SelectResourceStep />', () => {
       foo: 'bar'
     });
   });
+
   test('handleResourceSelect clears out selected lists and sets selectedResource', () => {
     const wrapper = shallow(
       <AddResourceRole
@@ -176,15 +177,18 @@ describe('<SelectResourceStep />', () => {
     expect(wrapper.state()).toEqual({
       selectedResource: 'users',
       selectedResourceRows: [],
-      selectedRoleRows: []
+      selectedRoleRows: [],
+      currentStepId: 1,
     });
     wrapper.instance().handleResourceSelect('teams');
     expect(wrapper.state()).toEqual({
       selectedResource: 'teams',
       selectedResourceRows: [],
-      selectedRoleRows: []
+      selectedRoleRows: [],
+      currentStepId: 1
     });
   });
+
   test('handleWizardSave makes correct api calls, calls onSave when done', async () => {
     const handleSave = jest.fn();
     const wrapper = mountWithContexts(

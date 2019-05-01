@@ -2,6 +2,7 @@ import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
+import { Tab } from '@patternfly/react-core';
 import RoutedTabs, { _RoutedTabs } from '../../src/components/Tabs/RoutedTabs';
 
 let wrapper;
@@ -28,7 +29,7 @@ describe('<RoutedTabs />', () => {
         history={history}
       />
     );
-    expect(wrapper.find('Tab')).toHaveLength(4);
+    expect(wrapper.find(Tab)).toHaveLength(4);
   });
 
   test('Given a URL the correct tab is active', async () => {

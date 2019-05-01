@@ -10,7 +10,7 @@ class CheckboxCard extends Component {
     return (
       <div style={{
         display: 'flex',
-        border: '1px solid var(--pf-global--BorderColor)',
+        border: '1px solid var(--pf-global--BorderColor--200)',
         borderRadius: 'var(--pf-global--BorderRadius--sm)',
         padding: '10px'
       }}

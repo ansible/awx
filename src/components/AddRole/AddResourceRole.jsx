@@ -2,11 +2,7 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { I18n, i18nMark } from '@lingui/react';
 import { t } from '@lingui/macro';
-import {
-  BackgroundImageSrc,
-  Wizard
-} from '@patternfly/react-core';
-
+import { Wizard } from '@patternfly/react-core';
 import SelectResourceStep from './SelectResourceStep';
 import SelectRoleStep from './SelectRoleStep';
 import SelectableCard from './SelectableCard';
@@ -18,12 +14,14 @@ class AddResourceRole extends React.Component {
     this.state = {
       selectedResource: null,
       selectedResourceRows: [],
-      selectedRoleRows: []
+      selectedRoleRows: [],
+      currentStepId: 1,
     };
 
     this.handleResourceCheckboxClick = this.handleResourceCheckboxClick.bind(this);
     this.handleResourceSelect = this.handleResourceSelect.bind(this);
     this.handleRoleCheckboxClick = this.handleRoleCheckboxClick.bind(this);
+    this.handleWizardNext = this.handleWizardNext.bind(this);
     this.handleWizardSave = this.handleWizardSave.bind(this);
     this.readTeams = this.readTeams.bind(this);
     this.readUsers = this.readUsers.bind(this);
@@ -66,6 +64,12 @@ class AddResourceRole extends React.Component {
       selectedResource: resourceType,
       selectedResourceRows: [],
       selectedRoleRows: []
+    });
+  }
+
+  handleWizardNext (step) {
+    this.setState({
+      currentStepId: step.id,
     });
   }
 
@@ -118,21 +122,13 @@ class AddResourceRole extends React.Component {
     const {
       selectedResource,
       selectedResourceRows,
-      selectedRoleRows
+      selectedRoleRows,
+      currentStepId,
     } = this.state;
     const {
       onClose,
       roles
     } = this.props;
-
-    const images = {
-      [BackgroundImageSrc.xs]: '/assets/images/pfbg_576.jpg',
-      [BackgroundImageSrc.xs2x]: '/assets/images/pfbg_576@2x.jpg',
-      [BackgroundImageSrc.sm]: '/assets/images/pfbg_768.jpg',
-      [BackgroundImageSrc.sm2x]: '/assets/images/pfbg_768@2x.jpg',
-      [BackgroundImageSrc.lg]: '/assets/images/pfbg_2000.jpg',
-      [BackgroundImageSrc.filter]: '/assets/images/background-filter.svg#image_overlay'
-    };
 
     const userColumns = [
       { name: i18nMark('Username'), key: 'username', isSortable: true }
@@ -157,6 +153,7 @@ class AddResourceRole extends React.Component {
 
     const steps = [
       {
+        id: 1,
         name: i18nMark('Select Users Or Teams'),
         component: (
           <I18n>
@@ -179,6 +176,7 @@ class AddResourceRole extends React.Component {
         enableNext: selectedResource !== null
       },
       {
+        id: 2,
         name: i18nMark('Select items from list'),
         component: (
           <I18n>
@@ -215,6 +213,7 @@ class AddResourceRole extends React.Component {
         enableNext: selectedResourceRows.length > 0
       },
       {
+        id: 3,
         name: i18nMark('Apply roles'),
         component: (
           <I18n>
@@ -230,25 +229,23 @@ class AddResourceRole extends React.Component {
             )}
           </I18n>
         ),
+        nextButtonText: i18nMark('Save'),
         enableNext: selectedRoleRows.length > 0
       }
     ];
 
+    const currentStep = steps.find(step => step.id === currentStepId);
+
     return (
-      <I18n>
-        {({ i18n }) => (
-          <Wizard
-            backgroundImgSrc={images}
-            footerRightAlign
-            isOpen
-            lastStepButtonText={i18n._(t`Save`)}
-            onClose={onClose}
-            onSave={this.handleWizardSave}
-            steps={steps}
-            title={wizardTitle}
-          />
-        )}
-      </I18n>
+      <Wizard
+        isOpen
+        onNext={this.handleWizardNext}
+        onClose={onClose}
+        onSave={this.handleWizardSave}
+        steps={steps}
+        title={wizardTitle}
+        nextButtonText={currentStep.nextButtonText || undefined}
+      />
     );
   }
 }

@@ -95,11 +95,15 @@
 
 .pf-c-data-list__item-content {
   --pf-c-data-list__item-content--PaddingBottom: 16px;
+
+  min-height: 59px;
+  align-items: center;
 }
 
 .pf-c-data-list__item-control {
   --pf-c-data-list__item-control--PaddingTop: 16px;
   --pf-c-data-list__item-control--MarginRight: 8px;
+  --pf-c-data-list__item-control--PaddingBottom: 16px;
 }
 
 .pf-c-data-list__item {
@@ -124,8 +128,9 @@
   }
 
   &.pf-c-data-list__cell--divider {
+    --pf-c-data-list__cell-cell--MarginRight: 0;
+    --pf-c-data-list__cell--PaddingTop: 12px;
     flex-grow: 0;
-    margin-right: 0;
   }
 }
 
@@ -244,10 +249,6 @@
 .awx-lookup .pf-c-form-control {
   --pf-c-form-control--Height: 90px;
   overflow-y: auto;
-}
-
-.awx-c-list {
-  border-bottom: 1px solid #d7d7d7;
 }
 
 .at-c-listCardBody {

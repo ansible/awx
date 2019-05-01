@@ -48,7 +48,7 @@ class OrganizationListItem extends React.Component {
                 </Link>
               </span>
             </DataListCell>,
-            <DataListCell key="org-members">
+            <DataListCell key="org-members" width={2}>
               <span className="awx-c-list-group">
                 <Trans>Members</Trans>
                 <Badge className="awx-c-list-group--badge" isRead>

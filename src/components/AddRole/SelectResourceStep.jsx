@@ -1,15 +1,13 @@
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
-
 import { i18nMark } from '@lingui/react';
-
 import {
   EmptyState,
   EmptyStateBody,
   EmptyStateIcon,
   Title,
+  DataList,
 } from '@patternfly/react-core';
-
 import { CubesIcon } from '@patternfly/react-icons';
 
 import CheckboxListItem from '../ListItem';
@@ -162,7 +160,7 @@ class SelectResourceStep extends React.Component {
                 sortOrder={sortOrder}
                 sortedColumnKey={sortedColumnKey}
               />
-              <ul className="pf-c-data-list awx-c-list">
+              <DataList aria-label={i18nMark('Roles List')}>
                 {resources.map(i => (
                   <CheckboxListItem
                     isSelected={selectedResourceRows.some(item => item.id === i.id)}
@@ -172,7 +170,7 @@ class SelectResourceStep extends React.Component {
                     onSelect={() => onRowClick(i)}
                   />
                 ))}
-              </ul>
+              </DataList>
               <Pagination
                 count={count}
                 onSetPage={this.handleSetPage}
