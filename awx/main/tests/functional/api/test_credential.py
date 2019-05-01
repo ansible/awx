@@ -1942,3 +1942,40 @@ def test_create_credential_missing_user_team_org_xfail(post, admin, credentialty
         admin
     )
     assert response.status_code == 400
+
+
+@pytest.mark.django_db
+def test_create_credential_with_invalid_url_xfail(post, organization, admin):
+    credential_type = CredentialType(
+        kind='test',
+        name='MyTestCredentialType',
+        inputs = {
+            'fields': [{
+                'id': 'server_url',
+                'label': 'Server Url',
+                'type': 'string',
+                'format': 'url'
+            }]
+        }
+    )
+    credential_type.save()
+
+    params = {
+        'name': 'Second Best Credential Ever',
+        'organization': organization.pk,
+        'credential_type': credential_type.pk,
+        'inputs': {'server_url': 'foo.com'}
+    }
+    endpoint = reverse('api:credential_list', kwargs={'version': 'v2'})
+    response = post(endpoint, params, admin)
+    assert response.status_code == 400
+    assert response.data['inputs']['server_url'] == ['Invalid URL: Missing url scheme (http, https, etc.)']
+
+    params['inputs']['server_url'] = 'https://[dead:beef'
+    response = post(endpoint, params, admin)
+    assert response.status_code == 400
+    assert response.data['inputs']['server_url'] == ['Invalid IPv6 URL']
+
+    params['inputs']['server_url'] = 'http://foo.com'
+    response = post(endpoint, params, admin)
+    assert response.status_code == 201
