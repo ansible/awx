@@ -205,6 +205,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                             ]
                           }
                           deleteTooltip="Delete"
+                          disableDelete={true}
                           isAllSelected={false}
                           isCompact={false}
                           noLeftMargin={false}
@@ -916,8 +917,20 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                       </Toolbar>
                                     </div>
                                   </LevelItem>
-                                  <LevelItem>
-                                    <div />
+                                  <LevelItem
+                                    style={
+                                      Object {
+                                        "display": "flex",
+                                      }
+                                    }
+                                  >
+                                    <div
+                                      style={
+                                        Object {
+                                          "display": "flex",
+                                        }
+                                      }
+                                    />
                                   </LevelItem>
                                 </div>
                               </Level>

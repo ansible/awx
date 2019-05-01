@@ -29,11 +29,11 @@ class DataListToolbar extends React.Component {
   render () {
     const {
       add,
+      addBtnToolTipContent,
       addUrl,
       columns,
       deleteTooltip,
-      disableDeleteIcon,
-      deleteIconStyling,
+      disableDelete,
       isAllSelected,
       isCompact,
       noLeftMargin,
@@ -48,8 +48,10 @@ class DataListToolbar extends React.Component {
       showSelectAll,
       sortOrder,
       sortedColumnKey,
-      // deleteToolTipContent
     } = this.props;
+
+    const deleteIconStyling = disableDelete ? 'awx-ToolBarBtn awx-ToolBarBtn--disabled'
+      : 'awx-ToolBarBtn';
 
     const showExpandCollapse = (onCompact && onExpand);
     return (
@@ -126,7 +128,7 @@ class DataListToolbar extends React.Component {
                         variant="plain"
                         aria-label={i18n._(t`Delete`)}
                         onClick={onOpenDeleteModal}
-                        isDisabled={disableDeleteIcon}
+                        isDisabled={disableDelete}
                       >
                         <TrashAltIcon className="awx-ToolBarTrashCanIcon" />
                       </Button>
@@ -136,7 +138,7 @@ class DataListToolbar extends React.Component {
                 {showAdd && addUrl && (
                   <Link to={addUrl}>
                     <Tooltip
-                      content={i18n._(t`Add Organization`)}
+                      content={addBtnToolTipContent}
                     >
                       <Button
                         variant="primary"
@@ -164,7 +166,7 @@ DataListToolbar.propTypes = {
   addUrl: PropTypes.string,
   columns: PropTypes.arrayOf(PropTypes.object).isRequired,
   deleteTooltip: PropTypes.node,
-  disableDeleteIcon: PropTypes.bool,
+  disableDelete: PropTypes.bool,
   isAllSelected: PropTypes.bool,
   isCompact: PropTypes.bool,
   noLeftMargin: PropTypes.bool,
@@ -184,7 +186,7 @@ DataListToolbar.defaultProps = {
   add: null,
   addUrl: null,
   deleteTooltip: i18nMark('Delete'),
-  disableDeleteIcon: true,
+  disableDelete: true,
   isAllSelected: false,
   isCompact: false,
   noLeftMargin: false,

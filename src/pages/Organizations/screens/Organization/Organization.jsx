@@ -126,7 +126,6 @@ class Organization extends Component {
 
     const tabsPaddingOverride = {
       padding: '0',
-      borderBottom: '1px solid black'
     };
 
     const canSeeNotificationsTab = me.is_system_auditor || isNotifAdmin || isAuditorOfThisOrg;
