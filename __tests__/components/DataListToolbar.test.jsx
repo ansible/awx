@@ -217,11 +217,11 @@ describe('<DataListToolbar />', () => {
         columns={columns}
         onOpenDeleteModal={onOpenDeleteModal}
         showDelete
+        disableDeleteIcon={false}
       />
     );
-
     toolbar.find(openDeleteModalButton).simulate('click');
-    expect(onOpenDeleteModal).toBeCalled();
+    expect(onOpenDeleteModal).toHaveBeenCalled();
   });
 
   test('Tooltip says "Select a row to delete" when trash can icon is disabled', () => {
@@ -229,7 +229,7 @@ describe('<DataListToolbar />', () => {
       <DataListToolbar
         columns={[{ name: 'Name', key: 'name', isSortable: true }]}
         showDelete
-        disableTrashCanIcon
+        deleteTooltip="Select a row to delete"
       />
     );
 
@@ -243,7 +243,7 @@ describe('<DataListToolbar />', () => {
       <DataListToolbar
         columns={[{ name: 'Name', key: 'name', isSortable: true }]}
         showDelete
-        disableTrashCanIcon={false}
+        deleteTooltip="Delete"
       />
     );
     const toolTip = toolbar.find('.pf-c-tooltip__content');

@@ -5,6 +5,7 @@
   margin-right: 20px;
   font-weight: bold;
   display: flex;
+  cursor: pointer;
 
   .awx-selectableCard__indicator {
     display: flex;
@@ -16,7 +17,6 @@
     flex: 1;
     align-items: center;
     padding: 20px;
-    cursor: pointer;
   }
 }
 

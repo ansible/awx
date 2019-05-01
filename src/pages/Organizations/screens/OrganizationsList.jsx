@@ -285,6 +285,7 @@ class OrganizationsList extends Component {
       selected.length === 0
       || selected.some(row => !row.summary_fields.user_capabilities.delete)
     );
+    const deleteToolTipContent = disableDelete ? i18nMark('Select a row to delete') : i18nMark('Delete');
 
     return (
       <I18n>
@@ -337,7 +338,10 @@ class OrganizationsList extends Component {
                     onSort={this.onSort}
                     onSelectAll={this.onSelectAll}
                     onOpenDeleteModal={this.handleOpenOrgDeleteModal}
-                    disableTrashCanIcon={disableDelete}
+                    disableDeleteIcon={disableDelete}
+                    deleteIconStyling={disableDelete ? 'awx-ToolBarBtn awx-ToolBarBtn--disabled'
+                      : 'awx-ToolBarBtn'}
+
                     deleteTooltip={
                       selected.some(row => !row.summary_fields.user_capabilities.delete) ? (
                         <div>
@@ -353,7 +357,7 @@ class OrganizationsList extends Component {
                             ))
                           }
                         </div>
-                      ) : undefined
+                      ) : deleteToolTipContent
                     }
                     showDelete
                     showSelectAll

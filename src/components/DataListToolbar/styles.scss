@@ -30,6 +30,7 @@
 
 .awx-toolbar button.pf-c-button {
   height: 30px;
+  width: 30px;
   padding: 0px;
 }
 
@@ -82,27 +83,27 @@
 
 .awx-ToolBarBtn{
   width: 30px;
-  position: absolute;
-  right: 80px;
   display: flex;
   justify-content: center;
   margin-right: 20px;
   border-radius: 3px;
 }
+
 .awx-ToolBarBtn:hover{
   .awx-ToolBarTrashCanIcon {
     color:white;
   }
   background-color:#d9534f;
 }
-.awx-ToolBarTrashCanIcon-disabled{
-  width: 30px;
-  position: absolute;
-  right: 80px;
-  display: flex;
-  justify-content: center;
-  margin-right: 20px;
+
+.awx-ToolBarBtn--disabled:hover{
+  .awx-ToolBarTrashCanIcon {
+    color: #d2d2d2;
+  }
+  background-color:white;
+  cursor: not-allowed;
 }
+
 .pf-l-toolbar >div{
   &:last-child{
     display:none;

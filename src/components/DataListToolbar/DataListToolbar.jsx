@@ -32,7 +32,8 @@ class DataListToolbar extends React.Component {
       addUrl,
       columns,
       deleteTooltip,
-      disableTrashCanIcon,
+      disableDeleteIcon,
+      deleteIconStyling,
       isAllSelected,
       isCompact,
       noLeftMargin,
@@ -46,7 +47,8 @@ class DataListToolbar extends React.Component {
       showDelete,
       showSelectAll,
       sortOrder,
-      sortedColumnKey
+      sortedColumnKey,
+      // deleteToolTipContent
     } = this.props;
 
     const showExpandCollapse = (onCompact && onExpand);
@@ -111,21 +113,20 @@ class DataListToolbar extends React.Component {
                   )}
                 </Toolbar>
               </LevelItem>
-              <LevelItem>
-                { showDelete && (
+              <LevelItem style={{ display: 'flex' }}>
+                {showDelete && (
                   <Tooltip
-                    content={disableTrashCanIcon ? i18n._(t`Select a row to delete`) : i18n._(t`Delete`)}
+                    content={deleteTooltip}
                     position="top"
                   >
                     <div
-                      className={disableTrashCanIcon ? 'awx-ToolBarTrashCanIcon-disabled'
-                        : 'awx-ToolBarBtn'}
+                      className={deleteIconStyling}
                     >
                       <Button
                         variant="plain"
                         aria-label={i18n._(t`Delete`)}
                         onClick={onOpenDeleteModal}
-                        isDisabled={disableTrashCanIcon}
+                        isDisabled={disableDeleteIcon}
                       >
                         <TrashAltIcon className="awx-ToolBarTrashCanIcon" />
                       </Button>
@@ -163,6 +164,7 @@ DataListToolbar.propTypes = {
   addUrl: PropTypes.string,
   columns: PropTypes.arrayOf(PropTypes.object).isRequired,
   deleteTooltip: PropTypes.node,
+  disableDeleteIcon: PropTypes.bool,
   isAllSelected: PropTypes.bool,
   isCompact: PropTypes.bool,
   noLeftMargin: PropTypes.bool,
@@ -175,13 +177,14 @@ DataListToolbar.propTypes = {
   showDelete: PropTypes.bool,
   showSelectAll: PropTypes.bool,
   sortOrder: PropTypes.string,
-  sortedColumnKey: PropTypes.string
+  sortedColumnKey: PropTypes.string,
 };
 
 DataListToolbar.defaultProps = {
   add: null,
   addUrl: null,
   deleteTooltip: i18nMark('Delete'),
+  disableDeleteIcon: true,
   isAllSelected: false,
   isCompact: false,
   noLeftMargin: false,
@@ -194,7 +197,7 @@ DataListToolbar.defaultProps = {
   showDelete: false,
   showSelectAll: false,
   sortOrder: 'ascending',
-  sortedColumnKey: 'name'
+  sortedColumnKey: 'name',
 };
 
 export default DataListToolbar;

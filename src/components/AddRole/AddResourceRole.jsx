@@ -238,6 +238,7 @@ class AddResourceRole extends React.Component {
 
     return (
       <Wizard
+        style={{ overflow: 'scroll' }}
         isOpen
         onNext={this.handleWizardNext}
         onClose={onClose}
