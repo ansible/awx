@@ -4124,8 +4124,7 @@ class JobEventSerializer(BaseSerializer):
         ))
         if obj.parent_id:
             res['parent'] = self.reverse('api:job_event_detail', kwargs={'pk': obj.parent_id})
-        if obj.children.exists():
-            res['children'] = self.reverse('api:job_event_children_list', kwargs={'pk': obj.pk})
+        res['children'] = self.reverse('api:job_event_children_list', kwargs={'pk': obj.pk})
         if obj.host_id:
             res['host'] = self.reverse('api:host_detail', kwargs={'pk': obj.host_id})
         if obj.hosts.exists():
