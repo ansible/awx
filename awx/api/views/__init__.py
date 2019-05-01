@@ -61,7 +61,7 @@ from wsgiref.util import FileWrapper
 
 # AWX
 from awx.main.tasks import send_notifications, update_inventory_computed_fields
-from awx.main.access import get_user_queryset
+from awx.main.access import get_user_queryset, HostAccess
 from awx.api.filters import V1CredentialFilterBackend
 from awx.api.generics import (
     APIView, BaseUsersList, CopyAPIView, DeleteLastUnattachLabelMixin,
@@ -669,18 +669,6 @@ class ProjectList(ListCreateAPIView):
 
     model = models.Project
     serializer_class = serializers.ProjectSerializer
-
-    def get_queryset(self):
-        projects_qs = models.Project.accessible_objects(self.request.user, 'read_role')
-        projects_qs = projects_qs.select_related(
-            'organization',
-            'admin_role',
-            'use_role',
-            'update_role',
-            'read_role',
-        )
-        projects_qs = projects_qs.prefetch_related('last_job', 'created_by')
-        return projects_qs
 
 
 class ProjectDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
@@ -1539,7 +1527,10 @@ class InventoryHostsList(HostRelatedSearchMixin, SubListCreateAttachDetachAPIVie
 
     def get_queryset(self):
         inventory = self.get_parent_object()
-        return getattrd(inventory, self.relationship).all()
+        qs = getattrd(inventory, self.relationship).all()
+        # Apply queryset optimizations
+        qs = qs.select_related(*HostAccess.select_related).prefetch_related(*HostAccess.prefetch_related)
+        return qs
 
 
 class HostGroupsList(ControlledByScmMixin, SubListCreateAttachDetachAPIView):
@@ -4426,18 +4417,6 @@ class RoleList(ListAPIView):
     serializer_class = serializers.RoleSerializer
     permission_classes = (IsAuthenticated,)
     search_fields = ('role_field', 'content_type__model',)
-
-    def get_queryset(self):
-        result = models.Role.visible_roles(self.request.user)
-        # Sanity check: is the requesting user an orphaned non-admin/auditor?
-        # if yes, make system admin/auditor mandatorily visible.
-        if not self.request.user.organizations.exists() and\
-           not self.request.user.is_superuser and\
-           not self.request.user.is_system_auditor:
-            mandatories = ('system_administrator', 'system_auditor')
-            super_qs = models.Role.objects.filter(singleton_name__in=mandatories)
-            result = result | super_qs
-        return result
 
 
 class RoleDetail(RetrieveAPIView):

@@ -115,12 +115,6 @@ class InventoryList(ListCreateAPIView):
     model = Inventory
     serializer_class = InventorySerializer
 
-    def get_queryset(self):
-        qs = Inventory.accessible_objects(self.request.user, 'read_role')
-        qs = qs.select_related('admin_role', 'read_role', 'update_role', 'use_role', 'adhoc_role')
-        qs = qs.prefetch_related('created_by', 'modified_by', 'organization')
-        return qs
-
 
 class InventoryDetail(RelatedJobsPreventDeleteMixin, ControlledByScmMixin, RetrieveUpdateDestroyAPIView):
 
