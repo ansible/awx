@@ -223,7 +223,7 @@ class FieldLookupBackend(BaseFilterBackend):
                 raise ValueError('%s is not searchable' % new_lookup[:-8])
             new_lookups = []
             for rm_field in related_model._meta.fields:
-                if rm_field.name in ('username', 'first_name', 'last_name', 'email', 'name', 'description'):
+                if rm_field.name in ('username', 'first_name', 'last_name', 'email', 'name', 'description', 'playbook'):
                     new_lookups.append('{}__{}__icontains'.format(new_lookup[:-8], rm_field.name))
             return value, new_lookups
         else:
