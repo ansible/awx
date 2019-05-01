@@ -59,7 +59,7 @@ class Command(BaseCommand):
         if len(pks_to_delete):
             ActivityStream.objects.filter(pk__in=pks_to_delete).delete()
             n_deleted_items += len(pks_to_delete)
-        self.logger.log(99, "Removed %d items", n_deleted_items)
+        self.logger.info("Removed {} items".format(n_deleted_items))
 
     def handle(self, *args, **options):
         self.verbosity = int(options.get('verbosity', 1))

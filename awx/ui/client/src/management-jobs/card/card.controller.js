@@ -45,69 +45,91 @@ export default
                     });
                 };
 
+                var launchManagementJob = function (defaultUrl){
+                  var data = {};
+                  Rest.setUrl(defaultUrl);
+                  Rest.post(data)
+                      .then(({data}) => {
+                          Wait('stop');
+                          $state.go('output', { id: data.system_job, type: 'system' }, { reload: true });
+                      })
+                      .catch(({data, status}) => {
+                          let template_id = $scope.job_template_id;
+                          template_id = (template_id === undefined) ? "undefined" : i18n.sprintf("%d", template_id);
+                          ProcessErrors($scope, data, status, null, { hdr: i18n._('Error!'),
+                              msg: i18n.sprintf(i18n._('Failed updating job %s with variables. POST returned: %d'), template_id, status) });
+                      });
+                };
+
                 $scope.submitJob = function (id, name) {
                     Wait('start');
                         defaultUrl = GetBasePath('system_job_templates')+id+'/launch/';
-                        CreateDialog({
-                            id: 'prompt-for-days'    ,
-                            title: name,
-                            scope: $scope,
-                            width: 500,
-                            height: 300,
-                            minWidth: 200,
-                            callback: 'PromptForDays',
-                            resizable: false,
-                            onOpen: function(){
-                                $scope.$watch('prompt_for_days_form.$invalid', function(invalid) {
-                                    if (invalid === true) {
-                                        $('#prompt-for-days-launch').prop("disabled", true);
-                                    } else {
-                                        $('#prompt-for-days-launch').prop("disabled", false);
-                                    }
-                                });
+                        var noModalJobs = ['Cleanup Expired Sessions', 'Cleanup Expired OAuth 2 Tokens'];
+                        if (noModalJobs.includes(name)) {
+                            launchManagementJob(defaultUrl, name);
+                        } else {
+                            
+                            CreateDialog({
+                                id: 'prompt-for-days',
+                                title: name,
+                                scope: $scope,
+                                width: 500,
+                                height: 300,
+                                minWidth: 200,
+                                callback: 'PromptForDays',
+                                resizable: false,
+                                onOpen: function(){
+                                    $scope.$watch('prompt_for_days_form.$invalid', function(invalid) {
+                                        if (invalid === true) {
+                                            $('#prompt-for-days-launch').prop("disabled", true);
+                                        } else {
+                                            $('#prompt-for-days-launch').prop("disabled", false);
+                                        }
+                                    });
 
-                                let fieldScope = $scope.$parent;
-                                fieldScope.days_to_keep = 30;
-                                $scope.prompt_for_days_form.$setPristine();
-                                $scope.prompt_for_days_form.$invalid = false;
-                            },
-                            buttons: [
-                                {
-                                    "label": "Cancel",
-                                    "onClick": function() {
-                                        $(this).dialog('close');
+                                    let fieldScope = $scope.$parent;
+                                    fieldScope.days_to_keep = 30;
+                                    $scope.prompt_for_days_form.$setPristine();
+                                    $scope.prompt_for_days_form.$invalid = false;
+                                },
+                                buttons: [
+                                    {
+                                        "label": "Cancel",
+                                        "onClick": function() {
+                                            $(this).dialog('close');
 
+                                        },
+                                        "class": "btn btn-default",
+                                        "id": "prompt-for-days-cancel"
                                     },
-                                    "class": "btn btn-default",
-                                    "id": "prompt-for-days-cancel"
-                                },
-                            {
-                                "label": "Launch",
-                                "onClick": function() {
-                                    const extra_vars = {"days": $scope.days_to_keep },
-                                    data = {};
-                                    data.extra_vars = JSON.stringify(extra_vars);
+                                {
+                                    "label": "Launch",
+                                    "onClick": function() {
+                                        const extra_vars = {"days": $scope.days_to_keep },
+                                        data = {};
+                                        data.extra_vars = JSON.stringify(extra_vars);
 
-                                    Rest.setUrl(defaultUrl);
-                                    Rest.post(data)
-                                        .then(({data}) => {
-                                            Wait('stop');
-                                            $("#prompt-for-days").dialog("close");
-                                            // $("#configure-dialog").dialog('close');
-                                            $state.go('output', { id: data.system_job, type: 'system' }, { reload: true });
-                                        })
-                                        .catch(({data, status}) => {
-                                            let template_id = $scope.job_template_id;
-                                            template_id = (template_id === undefined) ? "undefined" : i18n.sprintf("%d", template_id);
-                                            ProcessErrors($scope, data, status, null, { hdr: i18n._('Error!'),
-                                                msg: i18n.sprintf(i18n._('Failed updating job %s with variables. POST returned: %d'), template_id, status) });
-                                        });
-                                },
-                                "class": "btn btn-primary",
-                                "id": "prompt-for-days-launch"
-                            }
-                            ]
-                        });
+                                        Rest.setUrl(defaultUrl);
+                                        Rest.post(data)
+                                            .then(({data}) => {
+                                                Wait('stop');
+                                                $("#prompt-for-days").dialog("close");
+                                                // $("#configure-dialog").dialog('close');
+                                                $state.go('output', { id: data.system_job, type: 'system' }, { reload: true });
+                                            })
+                                            .catch(({data, status}) => {
+                                                let template_id = $scope.job_template_id;
+                                                template_id = (template_id === undefined) ? "undefined" : i18n.sprintf("%d", template_id);
+                                                ProcessErrors($scope, data, status, null, { hdr: i18n._('Error!'),
+                                                    msg: i18n.sprintf(i18n._('Failed updating job %s with variables. POST returned: %d'), template_id, status) });
+                                            });
+                                    },
+                                    "class": "btn btn-primary",
+                                    "id": "prompt-for-days-launch"
+                                }
+                                ]
+                            });
+                        }
 
                         if ($scope.removePromptForDays) {
                             $scope.removePromptForDays();

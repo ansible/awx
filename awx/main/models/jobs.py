@@ -1139,7 +1139,8 @@ class SystemJobOptions(BaseModel):
     SYSTEM_JOB_TYPE = [
         ('cleanup_jobs', _('Remove jobs older than a certain number of days')),
         ('cleanup_activitystream', _('Remove activity stream entries older than a certain number of days')),
-        ('cleanup_facts', _('Purge and/or reduce the granularity of system tracking data')),
+        ('clearsessions', _('Removes expired browser sessions from the database')),
+        ('cleartokens', _('Removes expired OAuth 2 access tokens and refresh tokens'))
     ]
 
     class Meta:

@@ -3,7 +3,7 @@ Launch a Job Template:
 Make a POST request to this resource to launch the system job template.
 
 Variables specified inside of the parameter `extra_vars` are passed to the
-system job task as command line parameters. These tasks can be ran manually
+system job task as command line parameters. These tasks can be run manually
 on the host system via the `awx-manage` command.
 
 For example on `cleanup_jobs` and `cleanup_activitystream`:
