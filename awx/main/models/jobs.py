@@ -1140,6 +1140,7 @@ class SystemJobOptions(BaseModel):
         ('cleanup_jobs', _('Remove jobs older than a certain number of days')),
         ('cleanup_activitystream', _('Remove activity stream entries older than a certain number of days')),
         ('cleanup_facts', _('Purge and/or reduce the granularity of system tracking data')),
+        ('gather_analytics', _('Collects and sends Automation Insights data'))
     ]
 
     class Meta:

@@ -486,10 +486,6 @@ CELERYBEAT_SCHEDULE = {
         'task': 'awx.main.tasks.purge_old_stdout_files',
         'schedule': timedelta(days=7)
     },
-    'gather_analytics': {
-        'task': 'awx.main.tasks.gather_analytics',
-        'schedule': crontab(hour=0)
-    },
     'task_manager': {
         'task': 'awx.main.scheduler.tasks.run_task_manager',
         'schedule': timedelta(seconds=20),
