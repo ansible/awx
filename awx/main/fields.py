@@ -492,7 +492,11 @@ def format_ssh_private_key(value):
 
 @JSONSchemaField.format_checker.checks('url')
 def format_url(value):
-    if urllib.parse.urlparse(value).scheme == '':
+    try:
+        scheme = urllib.parse.urlparse(value).scheme
+    except Exception as e:
+        raise jsonschema.exceptions.FormatError(str(e))
+    if scheme == '':
         raise jsonschema.exceptions.FormatError(
             'Invalid URL: Missing url scheme (http, https, etc.)'
         )
