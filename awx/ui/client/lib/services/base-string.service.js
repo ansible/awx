@@ -114,6 +114,8 @@ function BaseStringService (namespace) {
         EXPIRES_DESCENDING: t.s('Expires (Descending)'),
         LAST_JOB_RUN_ASCENDING: t.s('Last Run (Ascending)'),
         LAST_JOB_RUN_DESCENDING: t.s('Last Run (Descending)'),
+        LAST_USED_ASCENDING: t.s('Last Used (Ascending)'),
+        LAST_USED_DESCENDING: t.s('Last Used (Descending)'),
         USERNAME_ASCENDING: t.s('Username (Ascending)'),
         USERNAME_DESCENDING: t.s('Username (Descending)'),
         START_TIME_ASCENDING: t.s('Start Time (Ascending)'),
