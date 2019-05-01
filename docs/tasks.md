@@ -172,7 +172,9 @@ To read more about Isolated Instances, refer to the [Isolated Instance Groups](h
 
 ### Unified Jobs
 
-This is the categorical name for _all_ types of jobs (_i.e._, it's the parent class of all job class models). On the simplest level, a process is being forked and AWX is recording its output.  Instance capacity determines which jobs get assigned to any specific instance; thus jobs and ad hoc commands use more capacity if they have a higher forks value.
+Much of the code in AWX around `ansible` and `ansible-playbook` invocation and interaction has been removed and put into the project `ansible-runner`. AWX now calls out to `ansible-runner` to invoke `ansible` and `ansible-playbook`.
+
+"Unified Jobs" is the categorical name for _all_ types of jobs (_i.e._, it's the parent class of all job class models). On the simplest level, a process is being forked and AWX is recording its output.  Instance capacity determines which jobs get assigned to any specific instance; thus jobs and ad hoc commands use more capacity if they have a higher forks value.
 
 Below are specific details regarding each type of unified job that can be run in AWX.
 
@@ -207,14 +209,14 @@ To read more about this topic, visit the [Projects page](https://docs.ansible.co
 
 
 #### Run Inventory Update
-**
+
 Inventory data can be entered into AWX manually, but many users perform syncs to import inventory data from a variety of supported external sources (_e.g._, GCE, EC2, etc.) via inventory scripts. The goal of the Run Inventory Update task is to translate the JSON inventory data returned from `ansible-inventory` into `Host`, `Group`, and `Inventory` records in the AWX database.
 
 In older versions of AWX, the `INI` files were not exclusive for either specification via environment variables nor for using the credential injectors. The respective credential for each of these types would lay down authentication information, usually in environment variables. Then, inventory-specific logic laid down an `INI` file that was referenced from an environment variable. Currently, if the inventory plugin is available in the installed Ansible version, a `.yml` file will be used instead of the `INI` inventory config. The way that respective credentials have been injected has mostly remained the same.
 
 Additionally, inventory imports are run through a management command. Inventory in `args` get passed to that command, which results in it not being considered to be an Ansible inventory by Runner even though it is.
 
-To read more, visit the [Inventories page](https://docs.ansible.com/ansible-tower/latest/html/userguide/inventories.html) of the Ansible Tower User Guide.
+To read more about inventories, visit the [Inventories page](https://docs.ansible.com/ansible-tower/latest/html/userguide/inventories.html) of the Ansible Tower User Guide. For more detail about Runner, visit the [Ansible Runner Integration Overview](https://github.com/ansible/awx/blob/devel/docs/ansible_runner_integration.md) AWX documentation page.
 
 
 #### System Jobs
