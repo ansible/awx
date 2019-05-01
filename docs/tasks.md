@@ -1,7 +1,7 @@
 Background Tasks in AWX
 =======================
 
-In this document, we will go into a bit of detail about how AWX runs a lot of Python code asynchronously _in the background_ (_i.e._, _outside_ of the context of an HTTP request), such as:
+In this document, we will go into a bit of detail about how and when AWX runs Python code _in the background_ (_i.e._, _outside_ of the context of an HTTP request), such as:
 
 * Any time a Job is launched in AWX (a Job Template, an Ad Hoc Command, a Project
   Update, an Inventory Update, a System Job), a background process retrieves
@@ -163,7 +163,7 @@ AWX reports as much status as it can via the browsable API at `/api/v2/ping` in 
 
 When a job is scheduled to run on an isolated instance, the controller instance puts together the metadata required to run the job and then transfers it to the isolated instance. Once the metadata has been synchronized to the isolated host, the controller instance starts a process on the isolated instance, which consumes the metadata and starts running `ansible/ansible-playbook`. As the playbook runs, job artifacts (such as `stdout` and job events) are written to disk on the isolated instance.
 
-While the job runs on the isolated instance, the controller instance periodically copies job artifacts (_e.g._, `stdout` and job events) from the isolated instance. It processes these until the job finishes running on the isolated instance.
+Alternatively: "While the job runs on the isolated instance, the controller instance periodically checks for and copies the job artifacts (_e.g._, `stdout` and job events) that it produces. It processes these until the job finishes running."
 
 To read more about Isolated Instances, refer to the [Isolated Instance Groups](https://docs.ansible.com/ansible-tower/latest/html/administration/clustering.html#isolated-instance-groups) section of the Clustering page in the Ansible Tower Administration guide.
 
@@ -212,7 +212,7 @@ Inventory data can be entered into AWX manually, but many users perform syncs to
 
 In older versions of AWX, the `INI` files were not exclusive for either specification via environment variables nor for using the credential injectors. The respective credential for each of these types would lay down authentication information, usually in environment variables. Then, inventory-specific logic laid down an `INI` file that was referenced from an environment variable. Currently, if the inventory plugin is available in the installed Ansible version, a `.yml` file will be used instead of the `INI` inventory config. The way that respective credentials have been injected has mostly remained the same.
 
-Additionally, inventory imports are ran through a management command. Inventory in `args` get passed to that command, which results in it not being considered to be an Ansible inventory by Runner even though it is.
+Additionally, inventory imports are run through a management command. Inventory in `args` get passed to that command, which results in it not being considered to be an Ansible inventory by Runner even though it is.
 
 To read more, visit the [Inventories page](https://docs.ansible.com/ansible-tower/latest/html/userguide/inventories.html) of the Ansible Tower User Guide.
 
