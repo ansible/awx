@@ -1,0 +1,10 @@
+# This is a cross-platform list tracking distribution packages needed by tests;
+# see https://docs.openstack.org/infra/bindep/ for additional information.
+
+docker [test platform:fedora]
+gcc-c++ [test platform:rpm]
+npm [test platform:rpm]
+openldap-devel [test plaform:rpm]
+python3-devel [test !platform:centos-7 platform:rpm]
+python3 [test !platform:centos-7 platform:rpm]
+python36 [test !platform:centos-7 !platform:fedora-28]
