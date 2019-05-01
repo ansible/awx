@@ -96,6 +96,11 @@ function JobStatusGraph($window, adjustGraphSize, templateUrl, i18n, moment, gra
                     job_status_chart.interactiveLayer.tooltip.fixedTop(-10); //distance from the top of the chart to tooltip
                     job_status_chart.interactiveLayer.tooltip.distance(-1); //distance from interactive line to tooltip
 
+                    scope.$on('$destroy', function() {
+                        job_status_chart.tooltip.hidden(true);
+                        job_status_chart.interactiveLayer.tooltip.hidden(true);
+                    });
+
                     job_status_chart.xAxis
                     .axisLabel(i18n._("TIME"))//.showMaxMin(true)
                     .tickFormat(function(d) {
