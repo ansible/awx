@@ -98,6 +98,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
 
     class Meta:
         app_label = 'main'
+        ordering = ("hostname",)
 
     POLICY_FIELDS = frozenset(('managed_by_policy', 'hostname', 'capacity_adjustment'))
 

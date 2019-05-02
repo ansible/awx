@@ -4455,6 +4455,7 @@ class RoleUsersList(SubListAttachDetachAPIView):
     serializer_class = serializers.UserSerializer
     parent_model = models.Role
     relationship = 'members'
+    ordering = ('username',)
 
     def get_queryset(self):
         role = self.get_parent_object()

@@ -138,6 +138,7 @@ class Role(models.Model):
         index_together = [
             ("content_type", "object_id")
         ]
+        ordering = ("content_type", "object_id")
 
     role_field = models.TextField(null=False)
     singleton_name = models.TextField(null=True, default=None, db_index=True, unique=True)

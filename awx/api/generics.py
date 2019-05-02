@@ -815,6 +815,7 @@ class RetrieveUpdateDestroyAPIView(RetrieveUpdateAPIView, DestroyAPIView):
 class ResourceAccessList(ParentMixin, ListAPIView):
 
     serializer_class = ResourceAccessListElementSerializer
+    ordering = ('username',)
 
     def get_queryset(self):
         obj = self.get_parent_object()

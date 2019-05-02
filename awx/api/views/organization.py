@@ -116,6 +116,7 @@ class OrganizationUsersList(BaseUsersList):
     serializer_class = UserSerializer
     parent_model = Organization
     relationship = 'member_role.members'
+    ordering = ('username',)
 
 
 class OrganizationAdminsList(BaseUsersList):
@@ -124,6 +125,7 @@ class OrganizationAdminsList(BaseUsersList):
     serializer_class = UserSerializer
     parent_model = Organization
     relationship = 'admin_role.members'
+    ordering = ('username',)
 
 
 class OrganizationProjectsList(SubListCreateAttachDetachAPIView):

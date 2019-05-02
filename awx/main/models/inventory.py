@@ -1451,6 +1451,7 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, CustomVirtualE
 
     class Meta:
         app_label = 'main'
+        ordering = ('inventory', 'name')
 
     inventory = models.ForeignKey(
         'Inventory',
@@ -1680,6 +1681,7 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
 
     class Meta:
         app_label = 'main'
+        ordering = ('inventory', 'name')
 
     inventory = models.ForeignKey(
         'Inventory',
