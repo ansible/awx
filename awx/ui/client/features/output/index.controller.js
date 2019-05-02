@@ -439,7 +439,7 @@ function togglePanelExpand () {
 const iconCollapsed = 'fa-angle-right';
 const iconExpanded = 'fa-angle-down';
 const iconSelector = '.at-Stdout-toggle > i';
-const lineCollapsed = 'hidden';
+const lineCollapsed = 'at-Stdout-row--hidden';
 
 function toggleCollapseAll () {
     if (scroll.isPaused()) return;
@@ -524,11 +524,15 @@ function togglePlayCollapse (uuid) {
         taskIcons.addClass(iconCollapsed);
 
         lines.addClass(lineCollapsed);
+
+        descendants
+            .map(item => $(`.child-of-${item}`))
+            .forEach(line => line.addClass(lineCollapsed));
     }
 
     descendants
         .map(item => render.records[item])
-        .filter(({ name }) => name === EVENT_START_TASK)
+        .filter((descRecord) => descRecord && descRecord.name === EVENT_START_TASK)
         .forEach(rec => { render.records[rec.uuid].isCollapsed = true; });
 
     render.records[uuid].isCollapsed = !isCollapsed;

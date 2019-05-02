@@ -204,7 +204,7 @@ function JobRenderService ($q, $compile, $sce, $window, strings) {
             return { html: '', count: 0 };
         }
 
-        if (event.uuid && this.records[event.uuid]) {
+        if (event.uuid && this.records[event.uuid] && !this.records[event.uuid]._isIncomplete) {
             return { html: '', count: 0 };
         }
 
@@ -272,6 +272,9 @@ function JobRenderService ($q, $compile, $sce, $window, strings) {
             isClickable = true;
         }
 
+        const children = (this.records[event.uuid] && this.records[event.uuid].children)
+            ? this.records[event.uuid].children : [];
+
         const record = {
             isClickable,
             id: event.id,
@@ -285,6 +288,7 @@ function JobRenderService ($q, $compile, $sce, $window, strings) {
             lineCount: lines.length,
             isCollapsed: this.state.collapseAll,
             counters: [event.counter],
+            children
         };
 
         if (event.parent_uuid) {
@@ -307,12 +311,18 @@ function JobRenderService ($q, $compile, $sce, $window, strings) {
 
             if (event.parent_uuid) {
                 if (this.records[event.parent_uuid]) {
-                    if (this.records[event.parent_uuid].children &&
-                        !this.records[event.parent_uuid].children.includes(event.uuid)) {
-                        this.records[event.parent_uuid].children.push(event.uuid);
+                    if (this.records[event.parent_uuid].children) {
+                        if (!this.records[event.parent_uuid].children.includes(event.uuid)) {
+                            this.records[event.parent_uuid].children.push(event.uuid);
+                        }
                     } else {
                         this.records[event.parent_uuid].children = [event.uuid];
                     }
+                } else {
+                    this.records[event.parent_uuid] = {
+                        _isIncomplete: true,
+                        children: [event.uuid]
+                    };
                 }
             }
         }
@@ -397,7 +407,7 @@ function JobRenderService ($q, $compile, $sce, $window, strings) {
 
         if (record && record.isCollapsed) {
             if (record.level === 3 || record.level === 0) {
-                classList += ' hidden';
+                classList += ' at-Stdout-row--hidden';
             }
         }
 
