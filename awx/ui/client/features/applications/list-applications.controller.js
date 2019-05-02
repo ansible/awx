@@ -54,7 +54,9 @@ function ListApplicationsController (
 
     vm.toolbarSortOptions = [
         toolbarSortDefault,
-        { label: `${strings.get('sort.NAME_DESCENDING')}`, value: '-name' }
+        { label: `${strings.get('sort.NAME_DESCENDING')}`, value: '-name' },
+        { label: `${strings.get('sort.CREATED_ASCENDING')}`, value: 'created' },
+        { label: `${strings.get('sort.CREATED_DESCENDING')}`, value: '-created' }
     ];
 
     vm.toolbarSortValue = toolbarSortDefault;
