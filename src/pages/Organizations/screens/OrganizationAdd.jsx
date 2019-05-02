@@ -8,13 +8,11 @@ import {
   Card,
   CardHeader,
   CardBody,
-  Button,
   Tooltip,
 } from '@patternfly/react-core';
-import { TimesIcon } from '@patternfly/react-icons';
 
 import { withNetwork } from '../../../contexts/Network';
-
+import CardCloseButton from '../../../components/CardCloseButton';
 import OrganizationForm from '../components/OrganizationForm';
 
 class OrganizationAdd extends React.Component {
@@ -70,13 +68,7 @@ class OrganizationAdd extends React.Component {
                   content={i18n._(t`Close`)}
                   position="top"
                 >
-                  <Button
-                    variant="plain"
-                    aria-label={i18n._(t`Close`)}
-                    onClick={this.handleCancel}
-                  >
-                    <TimesIcon />
-                  </Button>
+                  <CardCloseButton onClick={this.handleCancel} />
                 </Tooltip>
               </CardHeader>
               <CardBody>
