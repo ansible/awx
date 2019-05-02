@@ -1,8 +1,7 @@
 # Copyright (c) 2016 Ansible, Inc.
 # All Rights Reserved.
 
-import sos
-from distutils.version import LooseVersion
+from sos.plugins import Plugin, RedHatPlugin, UbuntuPlugin
 
 SOSREPORT_TOWER_COMMANDS = [
     "awx-manage --version", # tower version
@@ -42,36 +41,17 @@ SOSREPORT_FORBIDDEN_PATHS = [
     "/var/log/tower/profile"
 ]
 
-if LooseVersion(sos.__version__) >= LooseVersion('3.0'):
-    from sos.plugins import Plugin, RedHatPlugin, UbuntuPlugin
 
-    class Tower(Plugin, RedHatPlugin, UbuntuPlugin):
-        '''Collect Ansible Tower related information'''
-        plugin_name = "tower"
+class Tower(Plugin, RedHatPlugin, UbuntuPlugin):
+    '''Collect Ansible Tower related information'''
+    plugin_name = "tower"
 
-        def setup(self):
+    def setup(self):
 
-            for path in SOSREPORT_TOWER_DIRS:
-                self.add_copy_spec(path)
+        for path in SOSREPORT_TOWER_DIRS:
+            self.add_copy_spec(path)
 
-            self.add_forbidden_path(SOSREPORT_FORBIDDEN_PATHS)
+        self.add_forbidden_path(SOSREPORT_FORBIDDEN_PATHS)
 
-            self.add_cmd_output(SOSREPORT_TOWER_COMMANDS)
-
-else:
-    import sos.plugintools
-
-    class Tower(sos.plugintools.PluginBase):
-        '''Collect Ansible Tower related information'''
-
-        def setup(self):
-
-            for path in SOSREPORT_TOWER_DIRS:
-                self.addCopySpec(path)
-
-            for path in SOSREPORT_FORBIDDEN_PATHS:
-                self.addForbiddenPath(path)
-
-            for command in SOSREPORT_TOWER_COMMANDS:
-                self.collectExtOutput(command)
+        self.add_cmd_output(SOSREPORT_TOWER_COMMANDS)
 
