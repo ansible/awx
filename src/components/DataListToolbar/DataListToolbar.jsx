@@ -163,6 +163,7 @@ class DataListToolbar extends React.Component {
 
 DataListToolbar.propTypes = {
   add: PropTypes.node,
+  addBtnToolTipContent: PropTypes.string,
   addUrl: PropTypes.string,
   columns: PropTypes.arrayOf(PropTypes.object).isRequired,
   deleteTooltip: PropTypes.node,
@@ -172,6 +173,7 @@ DataListToolbar.propTypes = {
   noLeftMargin: PropTypes.bool,
   onCompact: PropTypes.func,
   onExpand: PropTypes.func,
+  onOpenDeleteModal: PropTypes.func,
   onSearch: PropTypes.func,
   onSelectAll: PropTypes.func,
   onSort: PropTypes.func,
@@ -184,6 +186,7 @@ DataListToolbar.propTypes = {
 
 DataListToolbar.defaultProps = {
   add: null,
+  addBtnToolTipContent: null,
   addUrl: null,
   deleteTooltip: i18nMark('Delete'),
   disableDelete: true,
@@ -192,6 +195,7 @@ DataListToolbar.defaultProps = {
   noLeftMargin: false,
   onCompact: null,
   onExpand: null,
+  onOpenDeleteModal: null,
   onSearch: null,
   onSelectAll: null,
   onSort: null,
