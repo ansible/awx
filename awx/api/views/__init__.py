@@ -4176,12 +4176,14 @@ class UnifiedJobTemplateList(ListAPIView):
 
     model = models.UnifiedJobTemplate
     serializer_class = serializers.UnifiedJobTemplateSerializer
+    search_fields = ('description', 'name', 'jobtemplate__playbook',)
 
 
 class UnifiedJobList(ListAPIView):
 
     model = models.UnifiedJob
     serializer_class = serializers.UnifiedJobListSerializer
+    search_fields = ('description', 'name', 'job__playbook',)
 
 
 def redact_ansi(line):
