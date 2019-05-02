@@ -1944,8 +1944,15 @@ def test_create_credential_missing_user_team_org_xfail(post, admin, credentialty
     assert response.status_code == 400
 
 
+@pytest.mark.parametrize('url, status, msg', [
+    ('foo.com', 400, 'Invalid URL: Missing url scheme (http, https, etc.)'),
+    ('https://[dead:beef', 400, 'Invalid IPv6 URL'),
+    ('http:domain:8080', 400, 'Invalid URL: http:domain:8080'),
+    ('http:/domain:8080', 400, 'Invalid URL: http:/domain:8080'),
+    ('http://foo.com', 201, None)
+])
 @pytest.mark.django_db
-def test_create_credential_with_invalid_url_xfail(post, organization, admin):
+def test_create_credential_with_invalid_url_xfail(post, organization, admin, url, status, msg):
     credential_type = CredentialType(
         kind='test',
         name='MyTestCredentialType',
@@ -1964,18 +1971,10 @@ def test_create_credential_with_invalid_url_xfail(post, organization, admin):
         'name': 'Second Best Credential Ever',
         'organization': organization.pk,
         'credential_type': credential_type.pk,
-        'inputs': {'server_url': 'foo.com'}
+        'inputs': {'server_url': url}
     }
     endpoint = reverse('api:credential_list', kwargs={'version': 'v2'})
     response = post(endpoint, params, admin)
-    assert response.status_code == 400
-    assert response.data['inputs']['server_url'] == ['Invalid URL: Missing url scheme (http, https, etc.)']
-
-    params['inputs']['server_url'] = 'https://[dead:beef'
-    response = post(endpoint, params, admin)
-    assert response.status_code == 400
-    assert response.data['inputs']['server_url'] == ['Invalid IPv6 URL']
-
-    params['inputs']['server_url'] = 'http://foo.com'
-    response = post(endpoint, params, admin)
-    assert response.status_code == 201
+    assert response.status_code == status
+    if status != 201:
+        assert response.data['inputs']['server_url'] == [msg]
