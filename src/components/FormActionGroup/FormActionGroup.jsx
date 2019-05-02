@@ -1,21 +1,19 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-
 import { I18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-
 import {
   ActionGroup,
   Toolbar,
   ToolbarGroup,
   Button
 } from '@patternfly/react-core';
+import './styles.scss';
 
 const formActionGroupStyle = {
   display: 'flex',
   flexDirection: 'row',
   justifyContent: 'flex-end',
-  marginTop: '10px'
 };
 
 const buttonGroupStyle = {
