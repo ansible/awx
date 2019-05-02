@@ -28,25 +28,44 @@ def test_job_template_copy(post, get, project, inventory, machine_credential, va
         reverse('api:job_template_copy', kwargs={'pk': job_template_with_survey_passwords.pk}),
         admin, expect=200
     ).data['can_copy'] is True
-    post(
+    assert post(
         reverse('api:job_template_copy', kwargs={'pk': job_template_with_survey_passwords.pk}),
         {'name': 'new jt name'}, alice, expect=403
-    )
+    ).data['detail'] == 'Insufficient access to Job Template credentials.'
     jt_copy_pk = post(
         reverse('api:job_template_copy', kwargs={'pk': job_template_with_survey_passwords.pk}),
         {'name': 'new jt name'}, admin, expect=201
     ).data['id']
-    jt_copy = type(job_template_with_survey_passwords).objects.get(pk=jt_copy_pk)
-    assert jt_copy.created_by == admin
-    assert jt_copy.name == 'new jt name'
-    assert jt_copy.project == project
-    assert jt_copy.inventory == inventory
-    assert jt_copy.playbook == job_template_with_survey_passwords.playbook
-    assert jt_copy.credentials.count() == 3
-    assert credential in jt_copy.credentials.all()
-    assert vault_credential in jt_copy.credentials.all()
-    assert machine_credential in jt_copy.credentials.all()
-    assert job_template_with_survey_passwords.survey_spec == jt_copy.survey_spec
+
+    # give credential access to user 'alice'
+    for c in (credential, machine_credential, vault_credential):
+        c.use_role.members.add(alice)
+        c.save()
+    assert get(
+        reverse('api:job_template_copy', kwargs={'pk': job_template_with_survey_passwords.pk}),
+        alice, expect=200
+    ).data['can_copy'] is True
+    jt_copy_pk_alice = post(
+        reverse('api:job_template_copy', kwargs={'pk': job_template_with_survey_passwords.pk}),
+        {'name': 'new jt name'}, alice, expect=201
+    ).data['id']
+
+    jt_copy_admin = type(job_template_with_survey_passwords).objects.get(pk=jt_copy_pk)
+    jt_copy_alice = type(job_template_with_survey_passwords).objects.get(pk=jt_copy_pk_alice)
+
+    assert jt_copy_admin.created_by == admin
+    assert jt_copy_alice.created_by == alice
+
+    for jt_copy in (jt_copy_admin, jt_copy_alice):
+        assert jt_copy.name == 'new jt name'
+        assert jt_copy.project == project
+        assert jt_copy.inventory == inventory
+        assert jt_copy.playbook == job_template_with_survey_passwords.playbook
+        assert jt_copy.credentials.count() == 3
+        assert credential in jt_copy.credentials.all()
+        assert vault_credential in jt_copy.credentials.all()
+        assert machine_credential in jt_copy.credentials.all()
+        assert job_template_with_survey_passwords.survey_spec == jt_copy.survey_spec
 
 
 @pytest.mark.django_db

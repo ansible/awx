@@ -959,8 +959,11 @@ class CopyAPIView(GenericAPIView):
         create_kwargs = self._build_create_dict(obj)
         for key in create_kwargs:
             create_kwargs[key] = getattr(create_kwargs[key], 'pk', None) or create_kwargs[key]
-        can_copy = request.user.can_access(self.model, 'add', create_kwargs) and \
-            request.user.can_access(self.model, 'copy_related', obj)
+        try:
+            can_copy = request.user.can_access(self.model, 'add', create_kwargs) and \
+                request.user.can_access(self.model, 'copy_related', obj)
+        except PermissionDenied:
+            return Response({'can_copy': False})
         return Response({'can_copy': can_copy})
 
     def post(self, request, *args, **kwargs):

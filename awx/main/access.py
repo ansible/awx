@@ -1507,7 +1507,10 @@ class JobTemplateAccess(NotificationAttachMixin, BaseAccess):
 
         # obj.credentials.all() is accessible ONLY when object is saved (has valid id)
         credential_manager = getattr(obj, 'credentials', None) if getattr(obj, 'id', False) else Credential.objects.none()
-        return reduce(lambda prev, cred: prev and self.user in cred.use_role, credential_manager.all(), True)
+        user_can_copy = reduce(lambda prev, cred: prev and self.user in cred.use_role, credential_manager.all(), True)
+        if not user_can_copy:
+            raise PermissionDenied(_('Insufficient access to Job Template credentials.'))
+        return user_can_copy
 
     def can_start(self, obj, validate_license=True):
         # Check license.
