@@ -29,10 +29,11 @@ class DataListToolbar extends React.Component {
   render () {
     const {
       add,
+      addBtnToolTipContent,
       addUrl,
       columns,
       deleteTooltip,
-      disableTrashCanIcon,
+      disableDelete,
       isAllSelected,
       isCompact,
       noLeftMargin,
@@ -46,8 +47,11 @@ class DataListToolbar extends React.Component {
       showDelete,
       showSelectAll,
       sortOrder,
-      sortedColumnKey
+      sortedColumnKey,
     } = this.props;
+
+    const deleteIconStyling = disableDelete ? 'awx-ToolBarBtn awx-ToolBarBtn--disabled'
+      : 'awx-ToolBarBtn';
 
     const showExpandCollapse = (onCompact && onExpand);
     return (
@@ -111,33 +115,38 @@ class DataListToolbar extends React.Component {
                   )}
                 </Toolbar>
               </LevelItem>
-              <LevelItem>
-                { showDelete && (
+              <LevelItem style={{ display: 'flex' }}>
+                {showDelete && (
                   <Tooltip
                     content={deleteTooltip}
-                    position="left"
+                    position="top"
                   >
-                    <span>
+                    <div
+                      className={deleteIconStyling}
+                    >
                       <Button
-                        className="awx-ToolBarBtn"
                         variant="plain"
                         aria-label={i18n._(t`Delete`)}
                         onClick={onOpenDeleteModal}
-                        isDisabled={disableTrashCanIcon}
+                        isDisabled={disableDelete}
                       >
                         <TrashAltIcon className="awx-ToolBarTrashCanIcon" />
                       </Button>
-                    </span>
+                    </div>
                   </Tooltip>
                 )}
                 {showAdd && addUrl && (
                   <Link to={addUrl}>
-                    <Button
-                      variant="primary"
-                      aria-label={i18n._(t`Add`)}
+                    <Tooltip
+                      content={addBtnToolTipContent}
                     >
-                      <PlusIcon />
-                    </Button>
+                      <Button
+                        variant="primary"
+                        aria-label={i18n._(t`Add`)}
+                      >
+                        <PlusIcon />
+                      </Button>
+                    </Tooltip>
                   </Link>
                 )}
                 {showAdd && add && (
@@ -154,14 +163,17 @@ class DataListToolbar extends React.Component {
 
 DataListToolbar.propTypes = {
   add: PropTypes.node,
+  addBtnToolTipContent: PropTypes.string,
   addUrl: PropTypes.string,
   columns: PropTypes.arrayOf(PropTypes.object).isRequired,
   deleteTooltip: PropTypes.node,
+  disableDelete: PropTypes.bool,
   isAllSelected: PropTypes.bool,
   isCompact: PropTypes.bool,
   noLeftMargin: PropTypes.bool,
   onCompact: PropTypes.func,
   onExpand: PropTypes.func,
+  onOpenDeleteModal: PropTypes.func,
   onSearch: PropTypes.func,
   onSelectAll: PropTypes.func,
   onSort: PropTypes.func,
@@ -169,18 +181,21 @@ DataListToolbar.propTypes = {
   showDelete: PropTypes.bool,
   showSelectAll: PropTypes.bool,
   sortOrder: PropTypes.string,
-  sortedColumnKey: PropTypes.string
+  sortedColumnKey: PropTypes.string,
 };
 
 DataListToolbar.defaultProps = {
   add: null,
+  addBtnToolTipContent: i18nMark('Add'),
   addUrl: null,
   deleteTooltip: i18nMark('Delete'),
+  disableDelete: true,
   isAllSelected: false,
   isCompact: false,
   noLeftMargin: false,
   onCompact: null,
   onExpand: null,
+  onOpenDeleteModal: null,
   onSearch: null,
   onSelectAll: null,
   onSort: null,
@@ -188,7 +203,7 @@ DataListToolbar.defaultProps = {
   showDelete: false,
   showSelectAll: false,
   sortOrder: 'ascending',
-  sortedColumnKey: 'name'
+  sortedColumnKey: 'name',
 };
 
 export default DataListToolbar;

@@ -281,6 +281,30 @@ class OrganizationsList extends Component {
     } = this.state;
     const { match } = this.props;
 
+    let deleteToolTipContent;
+
+    if (selected.some(row => !row.summary_fields.user_capabilities.delete)) {
+      deleteToolTipContent = (
+        <div>
+          <Trans>
+            You dont have permission to delete the following Organizations:
+          </Trans>
+          {selected
+            .filter(row => !row.summary_fields.user_capabilities.delete)
+            .map(row => (
+              <div key={row.id}>
+                {row.name}
+              </div>
+            ))
+          }
+        </div>
+      );
+    } else if (selected.length === 0) {
+      deleteToolTipContent = i18nMark('Select a row to delete');
+    } else {
+      deleteToolTipContent = i18nMark('Delete');
+    }
+
     const disableDelete = (
       selected.length === 0
       || selected.some(row => !row.summary_fields.user_capabilities.delete)
@@ -329,6 +353,7 @@ class OrganizationsList extends Component {
                 <Fragment>
                   <DataListToolbar
                     addUrl={`${match.url}/add`}
+                    addBtnToolTipContent={i18nMark('Add Organization')}
                     isAllSelected={selected.length === results.length}
                     sortedColumnKey={sortedColumnKey}
                     sortOrder={sortOrder}
@@ -337,24 +362,8 @@ class OrganizationsList extends Component {
                     onSort={this.onSort}
                     onSelectAll={this.onSelectAll}
                     onOpenDeleteModal={this.handleOpenOrgDeleteModal}
-                    disableTrashCanIcon={disableDelete}
-                    deleteTooltip={
-                      selected.some(row => !row.summary_fields.user_capabilities.delete) ? (
-                        <div>
-                          <Trans>
-                            You dont have permission to delete the following Organizations:
-                          </Trans>
-                          {selected
-                            .filter(row => !row.summary_fields.user_capabilities.delete)
-                            .map(row => (
-                              <div key={row.id}>
-                                {row.name}
-                              </div>
-                            ))
-                          }
-                        </div>
-                      ) : undefined
-                    }
+                    disableDelete={disableDelete}
+                    deleteTooltip={deleteToolTipContent}
                     showDelete
                     showSelectAll
                     showAdd={canAdd}
@@ -370,7 +379,6 @@ class OrganizationsList extends Component {
                         teamCount={o.summary_fields.related_field_counts.teams}
                         isSelected={selected.some(row => row.id === o.id)}
                         onSelect={() => this.onSelect(o)}
-                        onOpenOrgDeleteModal={this.handleOpenOrgDeleteModal}
                       />
                     ))}
                   </ul>

@@ -113,9 +113,7 @@ class Organization extends Component {
     } = this.state;
 
     const tabsPaddingOverride = {
-      paddingTop: '0',
-      paddingRight: '0',
-      paddingLeft: '0',
+      padding: '0',
     };
 
     const canSeeNotificationsTab = me.is_system_auditor || isNotifAdmin || isAuditorOfThisOrg;

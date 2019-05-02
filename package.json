@@ -40,7 +40,7 @@
     "file-loader": "^2.0.0",
     "history": "^4.9.0",
     "jest": "^24.7.1",
-    "node-sass": "^4.11.0",
+    "node-sass": "^4.12.0",
     "react-hot-loader": "^4.3.3",
     "sass-loader": "^7.1.0",
     "style-loader": "^0.23.0",

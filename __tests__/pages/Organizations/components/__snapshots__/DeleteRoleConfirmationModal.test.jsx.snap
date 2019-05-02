@@ -56,6 +56,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
         ]
       }
       isOpen={true}
+      onClose={[Function]}
       title="Remove Team Access"
       variant="danger"
     >
