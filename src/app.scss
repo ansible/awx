@@ -317,6 +317,24 @@
   margin-bottom: 10px;
 }
 
+.orgTabsContainer{
+  display: flex
+}
+
+.orgTabsSection{
+  flex-grow: 1;
+  border-bottom: 1px solid #d2d2d2
+}
+
+.OrgsTab-closeButton {
+  color: black;
+  float: right;
+  position: relative;
+  top: 10px;
+  margin: 0 10px;
+  right: 10px;
+}
+
 .awx-c-form-action-group {
   float: right;
   display: block;
@@ -398,3 +416,5 @@
 .pf-m-error p.pf-c-form__helper-text {
   color: var(--pf-global--danger-color--100);
 }
+
+
