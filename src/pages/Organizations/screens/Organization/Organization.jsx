@@ -1,23 +1,11 @@
 import React, { Component } from 'react';
 import { I18n, i18nMark } from '@lingui/react';
 import { t } from '@lingui/macro';
-import {
-  Switch,
-  Route,
-  withRouter,
-  Redirect,
-  Link
-} from 'react-router-dom';
-import {
-  Card,
-  CardHeader,
-  PageSection,
-} from '@patternfly/react-core';
-import {
-  TimesIcon
-} from '@patternfly/react-icons';
+import { Switch, Route, withRouter, Redirect } from 'react-router-dom';
+import { Card, CardHeader, PageSection } from '@patternfly/react-core';
 import { withNetwork } from '../../../../contexts/Network';
 import NotifyAndRedirect from '../../../../components/NotifyAndRedirect';
+import CardCloseButton from '../../../../components/CardCloseButton';
 import OrganizationAccess from './OrganizationAccess';
 import OrganizationDetail from './OrganizationDetail';
 import OrganizationEdit from './OrganizationEdit';
@@ -125,7 +113,9 @@ class Organization extends Component {
     } = this.state;
 
     const tabsPaddingOverride = {
-      padding: '0'
+      paddingTop: '0',
+      paddingRight: '0',
+      paddingLeft: '0',
     };
 
     const canSeeNotificationsTab = me.is_system_auditor || isNotifAdmin || isAuditorOfThisOrg;
@@ -164,13 +154,7 @@ class Organization extends Component {
                     labeltext={i18n._(t`Organization detail tabs`)}
                     tabsArray={tabsArray}
                   />
-                  <Link
-                    aria-label="Close"
-                    title="Close"
-                    to="/organizations"
-                  >
-                    <TimesIcon className="OrgsTab-closeButton" />
-                  </Link>
+                  <CardCloseButton linkTo="/organizations" />
                 </React.Fragment>
               )}
             </I18n>
