@@ -15,7 +15,7 @@ export default ['i18n', function(i18n) {
         hover: true,
         trackBy: 'group.id',
         basePath:  'api/v2/hosts/{{$stateParams.host_id}}/groups/',
-        layoutClass: 'List-staticColumnLayout--groups',
+        layoutClass: 'List-staticColumnLayout--statusOrCheckbox',
         staticColumns: [
             {
                 field: 'failed_hosts',
