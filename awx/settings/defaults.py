@@ -5,7 +5,6 @@ import os
 import re  # noqa
 import sys
 from datetime import timedelta
-from celery.schedules import crontab
 
 # global settings
 from django.conf import global_settings

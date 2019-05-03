@@ -11,6 +11,7 @@ from django.dispatch import receiver
 # Tower
 from awx.conf import settings_registry
 from awx.conf.models import Setting
+from awx.main.models import Schedule, SystemJobTemplate
 
 logger = logging.getLogger('awx.conf.signals')
 
@@ -36,6 +37,13 @@ def handle_setting_change(key, for_delete=False):
             value=getattr(settings, setting_key, None),
             enter=not bool(for_delete),
         )
+
+    # enabled/disable analytics sys job schedule with setting value
+    if key == 'INSIGHTS_TRACKING_STATE':
+        enabled_value = getattr(settings, key, None)
+        system_jt = SystemJobTemplate.objects.filter(name='Automation Insights Collection').first()
+        if system_jt:
+            Schedule.objects.filter(unified_job_template=system_jt.id).update(enabled=enabled_value)
 
 
 @receiver(post_save, sender=Setting)
