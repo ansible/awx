@@ -64,24 +64,22 @@ class App extends Component {
   }
 
   render () {
-    const {
-      isAboutModalOpen,
-      isNavOpen
-    } = this.state;
+    const { isAboutModalOpen, isNavOpen } = this.state;
 
-    const {
-      render,
-      routeGroups = [],
-      navLabel = '',
-    } = this.props;
+    const { render, routeGroups = [], navLabel = '' } = this.props;
 
     return (
       <Config>
-        {({ ansible_version, version }) => (
+        {({ ansible_version, version, me }) => (
           <I18n>
             {({ i18n }) => (
               <RootDialog>
-                {({ title, bodyText, variant = 'info', clearRootDialogMessage }) => (
+                {({
+                  title,
+                  bodyText,
+                  variant = 'info',
+                  clearRootDialogMessage
+                }) => (
                   <Fragment>
                     {(title || bodyText) && (
                       <AlertModal
@@ -90,7 +88,13 @@ class App extends Component {
                         onClose={clearRootDialogMessage}
                         title={title}
                         actions={[
-                          <Button key="close" variant="secondary" onClick={clearRootDialogMessage}>{i18n._(t`Close`)}</Button>
+                          <Button
+                            key="close"
+                            variant="secondary"
+                            onClick={clearRootDialogMessage}
+                          >
+                            {i18n._(t`Close`)}
+                          </Button>
                         ]}
                       >
                         {bodyText}
@@ -105,6 +109,7 @@ class App extends Component {
                           logo={<TowerLogo linkTo="/" />}
                           toolbar={(
                             <PageHeaderToolbar
+                              loggedInUser={me}
                               isAboutDisabled={!version}
                               onAboutClick={this.onAboutModalOpen}
                               onLogoutClick={this.onLogout}
@@ -118,14 +123,16 @@ class App extends Component {
                           nav={(
                             <Nav aria-label={navLabel}>
                               <NavList>
-                                {routeGroups.map(({ groupId, groupTitle, routes }) => (
-                                  <NavExpandableGroup
-                                    key={groupId}
-                                    groupId={groupId}
-                                    groupTitle={groupTitle}
-                                    routes={routes}
-                                  />
-                                ))}
+                                {routeGroups.map(
+                                  ({ groupId, groupTitle, routes }) => (
+                                    <NavExpandableGroup
+                                      key={groupId}
+                                      groupId={groupId}
+                                      groupTitle={groupTitle}
+                                      routes={routes}
+                                    />
+                                  )
+                                )}
                               </NavList>
                             </Nav>
                           )}

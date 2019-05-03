@@ -13,10 +13,7 @@ import {
   ToolbarItem,
   Tooltip
 } from '@patternfly/react-core';
-import {
-  QuestionCircleIcon,
-  UserIcon,
-} from '@patternfly/react-icons';
+import { QuestionCircleIcon, UserIcon } from '@patternfly/react-icons';
 
 const DOCLINK = 'https://docs.ansible.com/ansible-tower/latest/html/userguide/index.html';
 
@@ -25,7 +22,7 @@ class PageHeaderToolbar extends Component {
     super(props);
     this.state = {
       isHelpOpen: false,
-      isUserOpen: false,
+      isUserOpen: false
     };
 
     this.handleHelpSelect = this.handleHelpSelect.bind(this);
@@ -56,19 +53,19 @@ class PageHeaderToolbar extends Component {
 
   render () {
     const { isHelpOpen, isUserOpen } = this.state;
-    const { isAboutDisabled, onAboutClick, onLogoutClick } = this.props;
+    const {
+      isAboutDisabled,
+      onAboutClick,
+      onLogoutClick,
+      loggedInUser
+    } = this.props;
 
     return (
       <I18n>
         {({ i18n }) => (
           <Toolbar>
             <ToolbarGroup>
-              <Tooltip
-                position="left"
-                content={
-                  <div>Help</div>
-                }
-              >
+              <Tooltip position="left" content={<div>{i18n._(t`Info`)}</div>}>
                 <ToolbarItem>
                   <Dropdown
                     isPlain
@@ -76,18 +73,12 @@ class PageHeaderToolbar extends Component {
                     position={DropdownPosition.right}
                     onSelect={this.handleHelpSelect}
                     toggle={(
-                      <DropdownToggle
-                        onToggle={this.handleHelpToggle}
-                      >
+                      <DropdownToggle onToggle={this.handleHelpToggle}>
                         <QuestionCircleIcon />
                       </DropdownToggle>
                     )}
                     dropdownItems={[
-                      <DropdownItem
-                        key="help"
-                        target="_blank"
-                        href={DOCLINK}
-                      >
+                      <DropdownItem key="help" target="_blank" href={DOCLINK}>
                         {i18n._(t`Help`)}
                       </DropdownItem>,
                       <DropdownItem
@@ -102,12 +93,7 @@ class PageHeaderToolbar extends Component {
                   />
                 </ToolbarItem>
               </Tooltip>
-              <Tooltip
-                position="left"
-                content={
-                  <div>User</div>
-                }
-              >
+              <Tooltip position="left" content={<div>User</div>}>
                 <ToolbarItem>
                   <Dropdown
                     isPlain
@@ -115,18 +101,17 @@ class PageHeaderToolbar extends Component {
                     position={DropdownPosition.right}
                     onSelect={this.handleUserSelect}
                     toggle={(
-                      <DropdownToggle
-                        onToggle={this.handleUserToggle}
-                      >
+                      <DropdownToggle onToggle={this.handleUserToggle}>
                         <UserIcon />
-                        &nbsp; User Name
+                        {loggedInUser && (
+                          <span style={{ marginLeft: '10px' }}>
+                            {loggedInUser.username}
+                          </span>
+                        )}
                       </DropdownToggle>
                     )}
                     dropdownItems={[
-                      <DropdownItem
-                        key="user"
-                        href="#/home"
-                      >
+                      <DropdownItem key="user" href="#/home">
                         {i18n._(t`User Details`)}
                       </DropdownItem>,
                       <DropdownItem
@@ -151,11 +136,11 @@ class PageHeaderToolbar extends Component {
 PageHeaderToolbar.propTypes = {
   isAboutDisabled: PropTypes.bool,
   onAboutClick: PropTypes.func.isRequired,
-  onLogoutClick: PropTypes.func.isRequired,
+  onLogoutClick: PropTypes.func.isRequired
 };
 
 PageHeaderToolbar.defaultProps = {
-  isAboutDisabled: false,
+  isAboutDisabled: false
 };
 
 export default PageHeaderToolbar;
