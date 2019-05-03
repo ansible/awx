@@ -64,13 +64,13 @@ function ListJobsController (
         { label: `${strings.get('sort.NAME_ASCENDING')}`, value: 'name' },
         { label: `${strings.get('sort.NAME_DESCENDING')}`, value: '-name' },
         { label: `${strings.get('sort.FINISH_TIME_ASCENDING')}`, value: 'finished' },
+        toolbarSortDefault,
         { label: `${strings.get('sort.START_TIME_ASCENDING')}`, value: 'started' },
         { label: `${strings.get('sort.START_TIME_DESCENDING')}`, value: '-started' },
         { label: `${strings.get('sort.LAUNCHED_BY_ASCENDING')}`, value: 'created_by__id' },
         { label: `${strings.get('sort.LAUNCHED_BY_DESCENDING')}`, value: '-created_by__id' },
         { label: `${strings.get('sort.PROJECT_ASCENDING')}`, value: 'unified_job_template__project__id' },
-        { label: `${strings.get('sort.PROJECT_DESCENDING')}`, value: '-unified_job_template__project__id' },
-        toolbarSortDefault
+        { label: `${strings.get('sort.PROJECT_DESCENDING')}`, value: '-unified_job_template__project__id' }
     ];
 
     vm.toolbarSortValue = toolbarSortDefault;
