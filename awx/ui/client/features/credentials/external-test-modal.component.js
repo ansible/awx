@@ -5,6 +5,10 @@ function ExternalTestModalController (strings) {
 
     vm.strings = strings;
     vm.title = strings.get('externalTest.TITLE');
+
+    vm.$onInit = () => {
+        vm.form.save = () => vm.onSubmit();
+    };
 }
 
 ExternalTestModalController.$inject = [

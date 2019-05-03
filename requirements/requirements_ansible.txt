@@ -115,7 +115,7 @@ selectors2==2.0.1         # via ncclient
 six==1.11.0               # via azure-cli-core, bcrypt, cryptography, google-auth, isodate, keystoneauth1, knack, munch, ncclient, ntlm-auth, openstacksdk, ovirt-engine-sdk-python, packaging, pynacl, pyopenssl, python-dateutil, pyvmomi, pywinrm, stevedore
 stevedore==1.28.0         # via keystoneauth1
 tabulate==0.7.7           # via azure-cli-core, knack
-urllib3==1.24             # via requests
+urllib3==1.24.3           # via requests
 wheel==0.30.0             # via azure-cli-core
 xmltodict==0.11.0         # via pywinrm
 

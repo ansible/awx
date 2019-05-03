@@ -6,7 +6,10 @@ function InputSourceLookupController (strings, wait) {
     vm.strings = strings;
     vm.title = strings.get('inputSources.TITLE');
 
-    vm.$onInit = () => wait('start');
+    vm.$onInit = () => {
+        wait('start');
+        vm.form.save = () => vm.onTest();
+    };
 
     vm.onReady = () => {
         vm.isReady = true;

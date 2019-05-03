@@ -71,7 +71,15 @@ function ListTemplatesController(
 
     vm.toolbarSortOptions = [
         toolbarSortDefault,
-        { label: `${strings.get('sort.NAME_DESCENDING')}`, value: '-name' }
+        { label: `${strings.get('sort.NAME_DESCENDING')}`, value: '-name' },
+        { label: `${strings.get('sort.MODIFIED_ASCENDING')}`, value: 'modified' },
+        { label: `${strings.get('sort.MODIFIED_DESCENDING')}`, value: '-modified' },
+        { label: `${strings.get('sort.LAST_JOB_RUN_ASCENDING')}`, value: 'last_job_run' },
+        { label: `${strings.get('sort.LAST_JOB_RUN_DESCENDING')}`, value: '-last_job_run' },
+        { label: `${strings.get('sort.INVENTORY_ASCENDING')}`, value: 'job_template__inventory__id' },
+        { label: `${strings.get('sort.INVENTORY_DESCENDING')}`, value: '-job_template__inventory__id' },
+        { label: `${strings.get('sort.PROJECT_ASCENDING')}`, value: 'jobtemplate__project__id' },
+        { label: `${strings.get('sort.PROJECT_DESCENDING')}`, value: '-jobtemplate__project__id' },
     ];
 
     vm.toolbarSortValue = toolbarSortDefault;

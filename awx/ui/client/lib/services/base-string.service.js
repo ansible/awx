@@ -103,6 +103,39 @@ function BaseStringService (namespace) {
         CANCEL: resourceType => t.s('Cancel the {{resourceType}}', { resourceType })
     };
 
+    this.sort = {
+        NAME_ASCENDING: t.s('Name (Ascending)'),
+        NAME_DESCENDING: t.s('Name (Descending)'),
+        CREATED_ASCENDING: t.s('Created (Ascending)'),
+        CREATED_DESCENDING: t.s('Created (Descending)'),
+        MODIFIED_ASCENDING: t.s('Modified (Ascending)'),
+        MODIFIED_DESCENDING: t.s('Modified (Descending)'),
+        EXPIRES_ASCENDING: t.s('Expires (Ascending)'),
+        EXPIRES_DESCENDING: t.s('Expires (Descending)'),
+        LAST_JOB_RUN_ASCENDING: t.s('Last Run (Ascending)'),
+        LAST_JOB_RUN_DESCENDING: t.s('Last Run (Descending)'),
+        LAST_USED_ASCENDING: t.s('Last Used (Ascending)'),
+        LAST_USED_DESCENDING: t.s('Last Used (Descending)'),
+        USERNAME_ASCENDING: t.s('Username (Ascending)'),
+        USERNAME_DESCENDING: t.s('Username (Descending)'),
+        START_TIME_ASCENDING: t.s('Start Time (Ascending)'),
+        START_TIME_DESCENDING: t.s('Start Time (Descending)'),
+        FINISH_TIME_ASCENDING: t.s('Finish Time (Ascending)'),
+        FINISH_TIME_DESCENDING: t.s('Finish Time (Descending)'),
+        UUID_ASCENDING: t.s('UUID (Ascending)'),
+        UUID_DESCENDING: t.s('UUID (Descending)'),
+        LAUNCHED_BY_ASCENDING: t.s('Launched By (Ascending)'),
+        LAUNCHED_BY_DESCENDING: t.s('Launched By (Descending)'),
+        INVENTORY_ASCENDING: t.s('Inventory (Ascending)'),
+        INVENTORY_DESCENDING: t.s('Inventory (Descending)'),
+        PROJECT_ASCENDING: t.s('Project (Ascending)'),
+        PROJECT_DESCENDING: t.s('Project (Descending)'),
+        ORGANIZATION_ASCENDING: t.s('Organization (Ascending)'),
+        ORGANIZATION_DESCENDING: t.s('Organization (Descending)'),
+        CAPACITY_ASCENDING: t.s('Capacity (Ascending)'),
+        CAPACITY_DESCENDING: t.s('Capacity (Descending)')
+    };
+
     this.ALERT = ({ header, body }) => t.s('{{ header }} {{ body }}', { header, body });
 
     /**
