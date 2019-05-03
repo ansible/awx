@@ -112,7 +112,7 @@ twilio==6.10.4
 twisted==18.9.0           # via daphne
 txaio==18.8.1             # via autobahn
 typing==3.6.6             # via django-extensions
-urllib3==1.24.1           # via requests
+urllib3==1.24.3           # via requests
 uwsgi==2.0.17
 uwsgitop==0.10.0
 vine==1.2.0               # via amqp

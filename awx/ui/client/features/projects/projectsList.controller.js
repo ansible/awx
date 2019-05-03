@@ -68,10 +68,13 @@ function projectsListController (
 
     vm.toolbarSortOptions = [
         toolbarSortDefault,
-        {
-            label: `${strings.get('sort.NAME_DESCENDING')}`,
-            value: '-name'
-        }
+        { label: `${strings.get('sort.NAME_DESCENDING')}`, value: '-name' },
+        { label: `${strings.get('sort.MODIFIED_ASCENDING')}`, value: 'modified' },
+        { label: `${strings.get('sort.MODIFIED_DESCENDING')}`, value: '-modified' },
+        { label: `${strings.get('sort.LAST_USED_ASCENDING')}`, value: 'last_job_run' },
+        { label: `${strings.get('sort.LAST_USED_DESCENDING')}`, value: '-last_job_run' },
+        { label: `${strings.get('sort.ORGANIZATION_ASCENDING')}`, value: 'organization' },
+        { label: `${strings.get('sort.ORGANIZATION_DESCENDING')}`, value: '-organization' }
     ];
 
     vm.toolbarSortValue = toolbarSortDefault;

@@ -154,7 +154,7 @@ export default [ 'ProcessErrors', 'CredentialTypeModel', 'TemplatesStrings', '$f
                                 _disabled: (order === 1 || vm.readOnlyPrompts) ? false : true,
                                 order: order
                             };
-                            activeTab = activeTab || vm.steps.credentials.tab;
+                            activeTab = activeTab || vm.steps.credential.tab;
                             order++;
                         }
                         if(vm.promptDataClone.launchConf.ask_verbosity_on_launch || vm.promptDataClone.launchConf.ask_job_type_on_launch || vm.promptDataClone.launchConf.ask_limit_on_launch || vm.promptDataClone.launchConf.ask_tags_on_launch || vm.promptDataClone.launchConf.ask_skip_tags_on_launch || (vm.promptDataClone.launchConf.ask_variables_on_launch && !vm.promptDataClone.launchConf.ignore_ask_variables) || vm.promptDataClone.launchConf.ask_diff_mode_on_launch) {

@@ -16,6 +16,7 @@ conjur_inputs = {
         'id': 'url',
         'label': _('Conjur URL'),
         'type': 'string',
+        'format': 'url',
     }, {
         'id': 'api_key',
         'label': _('API Key'),

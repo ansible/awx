@@ -15,6 +15,7 @@ aim_inputs = {
         'id': 'url',
         'label': _('CyberArk AIM URL'),
         'type': 'string',
+        'format': 'url',
     }, {
         'id': 'app_id',
         'label': _('Application ID'),

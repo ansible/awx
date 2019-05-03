@@ -1042,7 +1042,7 @@ class BaseTask(object):
         AWX only saves the parent_uuid if the event is for a Job.
         '''
         if event_data.get(self.event_data_key, None):
-            if event_data[self.event_data_key] != 'job_id':
+            if self.event_data_key != 'job_id':
                 event_data.pop('parent_uuid', None)
         should_write_event = False
         event_data.setdefault(self.event_data_key, self.instance.id)

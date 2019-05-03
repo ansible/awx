@@ -41,11 +41,6 @@ function TokensStrings (BaseString) {
         PERSONAL_ACCESS_TOKEN: t.s('Personal Access Token'),
         HEADER: appName => t.s('{{ appName }} Token', { appName }),
     };
-
-    ns.sort = {
-        NAME_ASCENDING: t.s('Name (Ascending)'),
-        NAME_DESCENDING: t.s('Name (Descending)')
-    };
 }
 
 TokensStrings.$inject = ['BaseStringService'];

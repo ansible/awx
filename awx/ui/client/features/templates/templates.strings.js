@@ -143,11 +143,6 @@ function TemplatesStrings (BaseString) {
         CANCEL: t.s('CANCEL'),
         SAVE_AND_EXIT: t.s('SAVE & EXIT')
     };
-
-    ns.sort = {
-        NAME_ASCENDING: t.s('Name (Ascending)'),
-        NAME_DESCENDING: t.s('Name (Descending)')
-    };
 }
 
 TemplatesStrings.$inject = ['BaseStringService'];

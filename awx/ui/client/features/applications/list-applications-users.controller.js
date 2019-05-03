@@ -41,10 +41,13 @@ function ListApplicationsUsersController (
 
     vm.toolbarSortOptions = [
         toolbarSortDefault,
-        {
-            label: `${strings.get('sort.USERNAME_DESCENDING')}`,
-            value: '-user__username'
-        }
+        { label: `${strings.get('sort.USERNAME_DESCENDING')}`, value: '-user__username' },
+        { label: `${strings.get('sort.CREATED_ASCENDING')}`, value: 'created' },
+        { label: `${strings.get('sort.CREATED_DESCENDING')}`, value: '-created' },
+        { label: `${strings.get('sort.MODIFIED_ASCENDING')}`, value: 'modified' },
+        { label: `${strings.get('sort.MODIFIED_DESCENDING')}`, value: '-modified' },
+        { label: `${strings.get('sort.EXPIRES_ASCENDING')}`, value: 'expires' },
+        { label: `${strings.get('sort.EXPIRES_DESCENDING')}`, value: '-expires' }
     ];
 
     function setToolbarSort () {
