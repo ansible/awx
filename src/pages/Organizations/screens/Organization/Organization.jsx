@@ -157,7 +157,7 @@ class Organization extends Component {
                     />
                     <CardCloseButton linkTo="/organizations" />
                     <div
-                      className="awx-orgTabs_bottom-border"
+                      className="awx-orgTabs__bottom-border"
                     />
                   </div>
                 </React.Fragment>
