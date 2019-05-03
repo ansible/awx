@@ -82,6 +82,17 @@ def get_object_from_data(field, Model, data, obj=None):
         raise ParseError(_("Bad data found in related field %s." % field))
 
 
+def vars_are_encrypted(vars):
+    '''Returns True if any of the values in the dictionary vars contains
+    content which is encrypted by the AWX encryption algorithm
+    '''
+    for value in vars.values():
+        if isinstance(value, str):
+            if value.startswith('$encrypted$'):
+                return True
+    return False
+
+
 def register_access(model_class, access_class):
     access_registry[model_class] = access_class
 
@@ -1677,10 +1688,10 @@ class JobAccess(BaseAccess):
                 prompts_access = False
             elif not config.has_user_prompts(obj.job_template):
                 prompts_access = True
-            elif obj.created_by_id != self.user.pk:
+            elif obj.created_by_id != self.user.pk and vars_are_encrypted(config.extra_data):
                 prompts_access = False
                 if self.save_messages:
-                    self.messages['detail'] = _('Job was launched with prompts provided by another user.')
+                    self.messages['detail'] = _('Job was launched with secret prompts provided by another user.')
             else:
                 prompts_access = (
                     JobLaunchConfigAccess(self.user).can_add({'reference_obj': config}) and
@@ -2116,9 +2127,9 @@ class WorkflowJobAccess(BaseAccess):
 
         # Check if access to prompts to prevent relaunch
         if config.prompts_dict():
-            if obj.created_by_id != self.user.pk:
+            if obj.created_by_id != self.user.pk and vars_are_encrypted(config.extra_data):
                 if self.save_messages:
-                    self.messages['detail'] = _('Job was launched with prompts provided by another user.')
+                    self.messages['detail'] = _('Job was launched with secret prompts provided by another user.')
                 return False
             if not JobLaunchConfigAccess(self.user).can_add({'reference_obj': config}):
                 if self.save_messages:

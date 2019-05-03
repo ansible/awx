@@ -248,7 +248,7 @@ class TestJobRelaunchAccess:
         jt.execute_role.members.add(alice, bob)
 
         with impersonate(bob):
-            job = jt.create_unified_job(extra_vars={'job_var': 'foo2'})
+            job = jt.create_unified_job(extra_vars={'job_var': 'foo2', 'my_secret': '$encrypted$foo'})
 
         assert 'job_var' in job.launch_config.extra_data
         assert bob.can_access(Job, 'start', job, validate_license=False)
