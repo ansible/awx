@@ -57,13 +57,15 @@ def main():
         module.fail_json(msg=str(e))
         return
     # NOTE: Duplicated with awx.main.utils.common capacity utilities
-    _, capacity_cpu = get_cpu_capacity()
-    _, capacity_mem = get_mem_capacity()
+    cpu, capacity_cpu = get_cpu_capacity()
+    mem, capacity_mem = get_mem_capacity()
 
     # Module never results in a change
     module.exit_json(changed=False, capacity_cpu=capacity_cpu,
                      capacity_mem=capacity_mem, version=version,
                      ansible_facts=dict(
+                         awx_cpu=cpu,
+                         awx_mem=mem,
                          awx_capacity_cpu=capacity_cpu,
                          awx_capacity_mem=capacity_mem,
                          awx_capacity_version=version
