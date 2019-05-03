@@ -3229,41 +3229,12 @@ class JobTemplateWithSpecSerializer(JobTemplateSerializer):
 class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
 
     passwords_needed_to_start = serializers.ReadOnlyField()
-    ask_diff_mode_on_launch = serializers.BooleanField(
-        read_only=True,
-        help_text=_('This field has been deprecated and will be removed in a future release'))
-    ask_variables_on_launch = serializers.BooleanField(
-        read_only=True,
-        help_text=_('This field has been deprecated and will be removed in a future release'))
-    ask_limit_on_launch = serializers.BooleanField(
-        read_only=True,
-        help_text=_('This field has been deprecated and will be removed in a future release'))
-    ask_skip_tags_on_launch = serializers.BooleanField(
-        read_only=True,
-        help_text=_('This field has been deprecated and will be removed in a future release'))
-    ask_tags_on_launch = serializers.BooleanField(
-        read_only=True,
-        help_text=_('This field has been deprecated and will be removed in a future release'))
-    ask_job_type_on_launch = serializers.BooleanField(
-        read_only=True,
-        help_text=_('This field has been deprecated and will be removed in a future release'))
-    ask_verbosity_on_launch = serializers.BooleanField(
-        read_only=True,
-        help_text=_('This field has been deprecated and will be removed in a future release'))
-    ask_inventory_on_launch = serializers.BooleanField(
-        read_only=True,
-        help_text=_('This field has been deprecated and will be removed in a future release'))
-    ask_credential_on_launch = serializers.BooleanField(
-        read_only=True,
-        help_text=_('This field has been deprecated and will be removed in a future release'))
     artifacts = serializers.SerializerMethodField()
 
     class Meta:
         model = Job
-        fields = ('*', 'job_template', 'passwords_needed_to_start', 'ask_diff_mode_on_launch',
-                  'ask_variables_on_launch', 'ask_limit_on_launch', 'ask_tags_on_launch', 'ask_skip_tags_on_launch',
-                  'ask_job_type_on_launch', 'ask_verbosity_on_launch', 'ask_inventory_on_launch',
-                  'ask_credential_on_launch', 'allow_simultaneous', 'artifacts', 'scm_revision',
+        fields = ('*', 'job_template', 'passwords_needed_to_start',
+                  'allow_simultaneous', 'artifacts', 'scm_revision',
                   'instance_group', 'diff_mode', 'job_slice_number', 'job_slice_count')
 
     def get_related(self, obj):
