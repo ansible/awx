@@ -217,7 +217,7 @@
 
 .pf-c-card__close {
   position: absolute;
-  top: 10px;
+  top: 5px;
   right: 4px;
   color: var(--pf-c-button--m-plain--Color);
 
@@ -317,32 +317,13 @@
   margin-bottom: 10px;
 }
 
-.orgTabsContainer{
+.awx-orgTabs-container{
   display: flex
 }
 
-.orgTabsSection{
+.awx-orgTabs_bottom-border{
   flex-grow: 1;
   border-bottom: 1px solid #d2d2d2
-}
-
-.OrgsTab-closeButton {
-  color: black;
-  float: right;
-  position: relative;
-  top: 10px;
-  margin: 0 10px;
-  right: 10px;
-}
-
-.awx-c-form-action-group {
-  float: right;
-  display: block;
-
-  .pf-m-danger {
-    margin-top: 20px;
-    margin-right: 20px;
-  }
 }
 
 //

@@ -148,19 +148,17 @@ class Organization extends Component {
             <I18n>
               {({ i18n }) => (
                 <React.Fragment>
-                  <div className="orgTabsContainer">
+                  <div className="awx-orgTabs-container">
                     <RoutedTabs
-                      className="orgTabsSection"
                       match={match}
                       history={history}
                       labeltext={i18n._(t`Organization detail tabs`)}
                       tabsArray={tabsArray}
                     />
+                    <CardCloseButton linkTo="/organizations" />
                     <div
-                      className="orgTabsSection"
-                    >
-                      <CardCloseButton linkTo="/organizations" />
-                    </div>
+                      className="awx-orgTabs_bottom-border"
+                    />
                   </div>
                 </React.Fragment>
               )}
