@@ -15,13 +15,13 @@ logger = logging.getLogger('awx.main.notifications.webhook_backend')
 class WebhookBackend(AWXBaseEmailBackend):
 
     init_parameters = {"url": {"label": "Target URL", "type": "string"},
-                       "webhook_no_verify_ssl": {"label": "Verify SSL", "type": "bool"},
+                       "disable_ssl_verification": {"label": "Verify SSL", "type": "bool"},
                        "headers": {"label": "HTTP Headers", "type": "object"}}
     recipient_parameter = "url"
     sender_parameter = None
 
-    def __init__(self, headers, webhook_no_verify_ssl=False, fail_silently=False, **kwargs):
-        self.webhook_no_verify_ssl = webhook_no_verify_ssl
+    def __init__(self, headers, disable_ssl_verification=False, fail_silently=False, **kwargs):
+        self.disable_ssl_verification = disable_ssl_verification
         self.headers = headers
         super(WebhookBackend, self).__init__(fail_silently=fail_silently)
 
@@ -36,7 +36,7 @@ class WebhookBackend(AWXBaseEmailBackend):
             r = requests.post("{}".format(m.recipients()[0]),
                               json=m.body,
                               headers=self.headers,
-                              verify=(not self.webhook_no_verify_ssl))
+                              verify=(not self.disable_ssl_verification))
             if r.status_code >= 400:
                 logger.error(smart_text(_("Error sending notification webhook: {}").format(r.text)))
                 if not self.fail_silently:

@@ -399,7 +399,7 @@ export default ['i18n', function(i18n) {
                 subForm: 'typeSubForm',
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
-            webhook_no_verify_ssl: {
+            disable_ssl_verification: {
                 label: i18n._('Disable SSL Verification'),
                 type: 'checkbox',
                 ngShow: "notification_type.value == 'webhook' ",
