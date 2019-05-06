@@ -1091,7 +1091,7 @@ class BaseOAuth2TokenSerializer(BaseSerializer):
             raise PermissionDenied(str(e))
 
 
-class UserAuthorizedTokenSerializer(BaseOAuth2TokenSerializer):  
+class UserAuthorizedTokenSerializer(BaseOAuth2TokenSerializer):
 
     class Meta:
         extra_kwargs = {
@@ -1143,7 +1143,7 @@ class OAuth2TokenSerializer(BaseOAuth2TokenSerializer):
 class OAuth2TokenDetailSerializer(OAuth2TokenSerializer):
 
     class Meta:
-        read_only_fields = ('*', 'user', 'application')       
+        read_only_fields = ('*', 'user', 'application')
 
 
 class UserPersonalTokenSerializer(BaseOAuth2TokenSerializer):
@@ -1163,9 +1163,9 @@ class UserPersonalTokenSerializer(BaseOAuth2TokenSerializer):
 
 
 class OAuth2ApplicationSerializer(BaseSerializer):
-    
+
     show_capabilities = ['edit', 'delete']
-    
+
     class Meta:
         model = OAuth2Application
         fields = (
@@ -1190,8 +1190,8 @@ class OAuth2ApplicationSerializer(BaseSerializer):
             'skip_authorization': {
                 'label': _('Skip Authorization')
             },
-        }        
-        
+        }
+
     def to_representation(self, obj):
         ret = super(OAuth2ApplicationSerializer, self).to_representation(obj)
         request = self.context.get('request', None)
@@ -1200,7 +1200,7 @@ class OAuth2ApplicationSerializer(BaseSerializer):
         if obj.client_type == 'public':
             ret.pop('client_secret', None)
         return ret
-        
+
     def get_related(self, obj):
         res = super(OAuth2ApplicationSerializer, self).get_related(obj)
         res.update(dict(
@@ -2007,17 +2007,22 @@ class InventorySourceOptionsSerializer(BaseSerializer):
     # TODO: remove when old 'credential' fields are removed
     def get_summary_fields(self, obj):
         summary_fields = super(InventorySourceOptionsSerializer, self).get_summary_fields(obj)
+        all_creds = []
         if 'credential' in summary_fields:
             cred = obj.get_cloud_credential()
             if cred:
-                summary_fields['credential'] = {
+                summarized_cred = {
                     'id': cred.id, 'name': cred.name, 'description': cred.description,
                     'kind': cred.kind, 'cloud': True
                 }
+                summary_fields['credential'] = summarized_cred
+                all_creds.append(summarized_cred)
                 if self.version > 1:
                     summary_fields['credential']['credential_type_id'] = cred.credential_type_id
             else:
                 summary_fields.pop('credential')
+        if self.version > 1:
+            summary_fields['credentials'] = all_creds
         return summary_fields
 
 
@@ -5116,4 +5121,3 @@ class ActivityStreamSerializer(BaseSerializer):
         if obj.setting:
             summary_fields['setting'] = [obj.setting]
         return summary_fields
-
