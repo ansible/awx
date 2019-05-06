@@ -11,7 +11,12 @@
 * npm start
 * visit `https://127.0.0.1:3001/`
 
-**note:** These instructions assume you have the [awx](https://github.com/ansible/awx/blob/devel/CONTRIBUTING.md#running-the-environment) development api server up and running at `localhost:8043`.
+**note:** These instructions assume you have the [awx](https://github.com/ansible/awx/blob/devel/CONTRIBUTING.md#running-the-environment) development api server up and running at `localhost:8043`. You can use a different backend server with the `TAGET_HOST` and `TARGET_PORT` environment variables when starting the development server:
+
+```shell
+# use a non-default host and port when starting the development server
+TARGET_HOST='ec2-awx.amazonaws.com' TARGET_PORT='443' npm run start
+```
 
 ## Unit Tests
 
