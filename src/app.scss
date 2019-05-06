@@ -230,7 +230,7 @@
 
 .pf-c-card__close {
   position: absolute;
-  top: 10px;
+  top: 5px;
   right: 4px;
   color: var(--pf-c-button--m-plain--Color);
 
@@ -330,14 +330,13 @@
   margin-bottom: 10px;
 }
 
-.awx-c-form-action-group {
-  float: right;
-  display: block;
+.awx-orgTabs-container{
+  display: flex
+}
 
-  .pf-m-danger {
-    margin-top: 20px;
-    margin-right: 20px;
-  }
+.awx-orgTabs__bottom-border{
+  flex-grow: 1;
+  border-bottom: 1px solid #d2d2d2
 }
 
 //
@@ -411,3 +410,5 @@
 .pf-m-error p.pf-c-form__helper-text {
   color: var(--pf-global--danger-color--100);
 }
+
+

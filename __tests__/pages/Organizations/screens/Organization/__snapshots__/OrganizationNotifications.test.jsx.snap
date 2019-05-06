@@ -182,6 +182,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                       >
                         <DataListToolbar
                           add={null}
+                          addBtnToolTipContent="Add"
                           addUrl={null}
                           columns={
                             Array [
@@ -211,6 +212,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                           noLeftMargin={false}
                           onCompact={null}
                           onExpand={null}
+                          onOpenDeleteModal={null}
                           onSearch={[Function]}
                           onSelectAll={null}
                           onSort={[Function]}

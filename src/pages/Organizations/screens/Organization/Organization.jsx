@@ -112,8 +112,10 @@ class Organization extends Component {
       isAdminOfThisOrg
     } = this.state;
 
-    const tabsPaddingOverride = {
-      padding: '0',
+    const tabsStyle = {
+      paddingTop: '0px',
+      paddingLeft: '0px',
+      paddingRight: '0px',
     };
 
     const canSeeNotificationsTab = me.is_system_auditor || isNotifAdmin || isAuditorOfThisOrg;
@@ -141,18 +143,23 @@ class Organization extends Component {
       loading ? ''
         : (
           <CardHeader
-            style={tabsPaddingOverride}
+            style={tabsStyle}
           >
             <I18n>
               {({ i18n }) => (
                 <React.Fragment>
-                  <RoutedTabs
-                    match={match}
-                    history={history}
-                    labeltext={i18n._(t`Organization detail tabs`)}
-                    tabsArray={tabsArray}
-                  />
-                  <CardCloseButton linkTo="/organizations" />
+                  <div className="awx-orgTabs-container">
+                    <RoutedTabs
+                      match={match}
+                      history={history}
+                      labeltext={i18n._(t`Organization detail tabs`)}
+                      tabsArray={tabsArray}
+                    />
+                    <CardCloseButton linkTo="/organizations" />
+                    <div
+                      className="awx-orgTabs__bottom-border"
+                    />
+                  </div>
                 </React.Fragment>
               )}
             </I18n>
