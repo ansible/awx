@@ -15,7 +15,9 @@ from django.utils.translation import ugettext_lazy as _
 
 # AWX
 from awx.api.versioning import reverse
-from awx.main.fields import AutoOneToOneField, ImplicitRoleField
+from awx.main.fields import (
+    AutoOneToOneField, ImplicitRoleField, OrderedManyToManyField
+)
 from awx.main.models.base import (
     BaseModel, CommonModel, CommonModelNameNotUnique, CreatedModifiedModel,
     NotificationFieldsModel
@@ -39,9 +41,10 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin, CustomVi
         app_label = 'main'
         ordering = ('name',)
 
-    instance_groups = models.ManyToManyField(
+    instance_groups = OrderedManyToManyField(
         'InstanceGroup',
         blank=True,
+        through='OrganizationInstanceGroupMembership'
     )
     max_hosts = models.PositiveIntegerField(
         blank=True,
