@@ -299,12 +299,14 @@ class IsolatedManager(object):
 
         if instance.capacity == 0 and task_result['capacity_cpu']:
             logger.warning('Isolated instance {} has re-joined.'.format(instance.hostname))
+        instance.cpu = int(task_result['cpu'])
+        instance.memory = int(task_result['mem'])
         instance.cpu_capacity = int(task_result['capacity_cpu'])
         instance.mem_capacity = int(task_result['capacity_mem'])
         instance.capacity = get_system_task_capacity(scale=instance.capacity_adjustment,
                                                      cpu_capacity=int(task_result['capacity_cpu']),
                                                      mem_capacity=int(task_result['capacity_mem']))
-        instance.save(update_fields=['cpu_capacity', 'mem_capacity', 'capacity', 'version', 'modified'])
+        instance.save(update_fields=['cpu', 'memory', 'cpu_capacity', 'mem_capacity', 'capacity', 'version', 'modified'])
 
     def health_check(self, instance_qs):
         '''
@@ -343,6 +345,8 @@ class IsolatedManager(object):
                         logger.exception('Failed to read status from isolated instances')
                     if 'awx_capacity_cpu' in task_result and 'awx_capacity_mem' in task_result:
                         task_result = {
+                            'cpu': task_result['awx_cpu'],
+                            'mem': task_result['awx_mem'],
                             'capacity_cpu': task_result['awx_capacity_cpu'],
                             'capacity_mem': task_result['awx_capacity_mem'],
                             'version': task_result['awx_capacity_version']
