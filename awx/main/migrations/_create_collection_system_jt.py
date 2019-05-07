@@ -18,8 +18,8 @@ def create_system_job_templates(apps, schema_editor):
     Schedule = apps.get_model('main', 'Schedule')
     ContentType = apps.get_model('contenttypes', 'ContentType')
     sjt_ct = ContentType.objects.get_for_model(SystemJobTemplate)
-    now_dt = now()
-    random_time = now() + timedelta(minutes=random.randint(-30,30))
+    midnight_tonight = now().replace(hour=23, minute=59, second=59)
+    random_time = midnight_tonight + timedelta(minutes=random.randint(-30,30))
     random_schedule_time = random_time.strftime('%Y%m%dT%H%M%SZ')
 
     sjt, created = SystemJobTemplate.objects.get_or_create(
