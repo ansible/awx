@@ -401,6 +401,7 @@ Unlike Openshift's `Route` the Kubernetes `Ingress` doesn't yet handle SSL termi
 - [docker-compose](https://pypi.org/project/docker-compose/) Python module.
     + This also installs the `docker` Python module, which is incompatible with `docker-py`. If you have previously installed `docker-py`, please uninstall it.
 - [Docker Compose](https://docs.docker.com/compose/install/).
+- selinux must be in permissive mode on the target system
 
 ### Pre-build steps
 
