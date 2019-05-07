@@ -1,7 +1,5 @@
 function searchWithoutKey (term, singleSearchParam = null) {
-    if (singleSearchParam === 'host_filter') {
-        return { [singleSearchParam]: `${encodeURIComponent(term)}` };
-    } else if (singleSearchParam) {
+    if (singleSearchParam) {
         return { [singleSearchParam]: `search=${encodeURIComponent(term)}` };
     }
     return { search: encodeURIComponent(term) };
@@ -418,7 +416,11 @@ function QuerysetService ($q, Rest, ProcessErrors, $rootScope, Wait, DjangoSearc
                 let termParams;
 
                 if (termParts.length === 1) {
-                    termParams = searchWithoutKey(term, singleSearchParam);
+                    if (singleSearchParam && termParts[0].toLowerCase() === "or") {
+                        termParams = { [singleSearchParam]: "or" } 
+                    } else {
+                        termParams = searchWithoutKey(term, singleSearchParam);
+                    }
                 } else if ((isAnsibleFactField && isAnsibleFactField(termParts)) || (isFilterableBaseField && isFilterableBaseField(termParts))) {
                     termParams = this.encodeParam({ term, singleSearchParam, searchTerm: true });
                 } else if (isRelatedField && isRelatedField(termParts)) {
