@@ -532,7 +532,7 @@ export default
                 var credDefer = MultiCredentialService
                     .saveRelated(jobTemplateData, $scope.multiCredential.selectedCredentials);
 
-                InstanceGroupsService.editInstanceGroups(instance_group_url, $scope.instance_groups)
+                const instanceGroupDefer = InstanceGroupsService.editInstanceGroups(instance_group_url, $scope.instance_groups)
                     .catch(({data, status}) => {
                         ProcessErrors($scope, data, status, form, {
                             hdr: 'Error!',
@@ -609,7 +609,7 @@ export default
 
                         Rest.setUrl(data.related.labels);
 
-                        var defers = [credDefer];
+                        var defers = [credDefer, instanceGroupDefer];
                         for (var i = 0; i < toPost.length; i++) {
                             defers.push(Rest.post(toPost[i]));
                         }
