@@ -1,38 +1,19 @@
-import React, {
-  Component,
-  Fragment
-} from 'react';
-import {
-  withRouter
-} from 'react-router-dom';
-
-import { I18n, i18nMark } from '@lingui/react';
-import { Trans, t } from '@lingui/macro';
-
+import React, { Component } from 'react';
+import { withRouter } from 'react-router-dom';
+import { i18nMark } from '@lingui/react';
 import {
   Card,
-  EmptyState,
-  EmptyStateIcon,
-  EmptyStateBody,
   PageSection,
   PageSectionVariants,
-  Title,
-  Button
 } from '@patternfly/react-core';
 
-import { CubesIcon } from '@patternfly/react-icons';
-
 import { withNetwork } from '../../../contexts/Network';
-
-import DataListToolbar from '../../../components/DataListToolbar';
+import PaginatedDataList, {
+  ToolbarDeleteButton,
+  ToolbarAddButton
+} from '../../../components/PaginatedDataList';
 import OrganizationListItem from '../components/OrganizationListItem';
-import Pagination from '../../../components/Pagination';
-import AlertModal from '../../../components/AlertModal';
-
-import {
-  encodeQueryString,
-  parseQueryString,
-} from '../../../util/qs';
+import { encodeQueryString, parseQueryString } from '../../../util/qs';
 
 const COLUMNS = [
   { name: i18nMark('Name'), key: 'name', isSortable: true },
@@ -40,7 +21,7 @@ const COLUMNS = [
   { name: i18nMark('Created'), key: 'created', isSortable: true, isNumeric: true },
 ];
 
-const DEFAULT_PARAMS = {
+const DEFAULT_QUERY_PARAMS = {
   page: 1,
   page_size: 5,
   order_by: 'name',
@@ -50,115 +31,60 @@ class OrganizationsList extends Component {
   constructor (props) {
     super(props);
 
-    const { page, page_size } = this.getQueryParams();
-
     this.state = {
-      page,
-      page_size,
-      sortedColumnKey: 'name',
-      sortOrder: 'ascending',
-      count: null,
       error: null,
-      loading: true,
-      results: [],
+      isLoading: true,
+      isInitialized: false,
+      organizations: [],
       selected: [],
-      isModalOpen: false,
     };
 
-    this.onSearch = this.onSearch.bind(this);
     this.getQueryParams = this.getQueryParams.bind(this);
-    this.onSort = this.onSort.bind(this);
-    this.onSetPage = this.onSetPage.bind(this);
-    this.onSelectAll = this.onSelectAll.bind(this);
-    this.onSelect = this.onSelect.bind(this);
+    this.handleSelectAll = this.handleSelectAll.bind(this);
+    this.handleSelect = this.handleSelect.bind(this);
     this.updateUrl = this.updateUrl.bind(this);
     this.fetchOptionsOrganizations = this.fetchOptionsOrganizations.bind(this);
     this.fetchOrganizations = this.fetchOrganizations.bind(this);
     this.handleOrgDelete = this.handleOrgDelete.bind(this);
-    this.handleOpenOrgDeleteModal = this.handleOpenOrgDeleteModal.bind(this);
-    this.handleClearOrgDeleteModal = this.handleClearOrgDeleteModal.bind(this);
   }
 
   componentDidMount () {
-    const queryParams = this.getQueryParams();
     this.fetchOptionsOrganizations();
-    this.fetchOrganizations(queryParams);
+    this.fetchOrganizations();
   }
 
-  onSearch () {
-    const { sortedColumnKey, sortOrder } = this.state;
-
-    this.onSort(sortedColumnKey, sortOrder);
-  }
-
-  onSort (sortedColumnKey, sortOrder) {
-    const { page_size } = this.state;
-
-    let order_by = sortedColumnKey;
-
-    if (sortOrder === 'descending') {
-      order_by = `-${order_by}`;
+  componentDidUpdate (prevProps) {
+    const { location } = this.props;
+    if (location !== prevProps.location) {
+      this.fetchOrganizations();
     }
-
-    const queryParams = this.getQueryParams({ order_by, page_size });
-
-    this.fetchOrganizations(queryParams);
   }
 
-  onSetPage (pageNumber, pageSize) {
-    const page = parseInt(pageNumber, 10);
-    const page_size = parseInt(pageSize, 10);
+  handleSelectAll (isSelected) {
+    const { organizations } = this.state;
 
-    const queryParams = this.getQueryParams({ page, page_size });
-
-    this.fetchOrganizations(queryParams);
-  }
-
-  onSelectAll (isSelected) {
-    const { results } = this.state;
-
-    const selected = isSelected ? results : [];
-
+    const selected = isSelected ? [...organizations] : [];
     this.setState({ selected });
   }
 
-  onSelect (row) {
+  handleSelect (row) {
     const { selected } = this.state;
 
-    const isSelected = selected.some(s => s.id === row.id);
-
-    if (isSelected) {
+    if (selected.some(s => s.id === row.id)) {
       this.setState({ selected: selected.filter(s => s.id !== row.id) });
     } else {
       this.setState({ selected: selected.concat(row) });
     }
   }
 
-  getQueryParams (overrides = {}) {
+  getQueryParams () {
     const { location } = this.props;
-    const { search } = location;
+    const searchParams = parseQueryString(location.search.substring(1));
 
-    const searchParams = parseQueryString(search.substring(1));
-
-    return Object.assign({}, DEFAULT_PARAMS, searchParams, overrides);
-  }
-
-  handleClearOrgDeleteModal () {
-    this.setState({
-      isModalOpen: false,
-    });
-  }
-
-  handleOpenOrgDeleteModal () {
-    const { selected } = this.state;
-    const warningTitle = selected.length > 1 ? i18nMark('Delete Organization') : i18nMark('Delete Organizations');
-    const warningMsg = i18nMark('Are you sure you want to delete:');
-    this.setState({
-      isModalOpen: true,
-      warningTitle,
-      warningMsg,
-      loading: false
-    });
+    return {
+      ...DEFAULT_QUERY_PARAMS,
+      ...searchParams,
+    };
   }
 
   async handleOrgDelete () {
@@ -169,7 +95,6 @@ class OrganizationsList extends Component {
     try {
       await Promise.all(selected.map((org) => api.destroyOrganization(org.id)));
       this.setState({
-        isModalOpen: false,
         selected: []
       });
     } catch (err) {
@@ -192,50 +117,27 @@ class OrganizationsList extends Component {
     }
   }
 
-  async fetchOrganizations (queryParams) {
+  async fetchOrganizations () {
     const { api, handleHttpError } = this.props;
-    const { page, page_size, order_by } = queryParams;
+    const params = this.getQueryParams();
 
-    let sortOrder = 'ascending';
-    let sortedColumnKey = order_by;
-
-    if (order_by.startsWith('-')) {
-      sortOrder = 'descending';
-      sortedColumnKey = order_by.substring(1);
-    }
-
-    this.setState({ error: false, loading: true });
+    this.setState({ error: false, isLoading: true });
 
     try {
-      const { data } = await api.getOrganizations(queryParams);
+      const { data } = await api.getOrganizations(params);
       const { count, results } = data;
 
-      const pageCount = Math.ceil(count / page_size);
-
       const stateToUpdate = {
-        count,
-        page,
-        pageCount,
-        page_size,
-        sortOrder,
-        sortedColumnKey,
-        results,
+        itemCount: count,
+        organizations: results,
         selected: [],
-        loading: false
+        isLoading: false,
+        isInitialized: true,
       };
 
-      // This is in place to track whether or not the initial request
-      // return any results.  If it did not, we show the empty state.
-      // This will become problematic once search is in play because
-      // the first load may have query params (think bookmarked search)
-      if (typeof noInitialResults === 'undefined') {
-        stateToUpdate.noInitialResults = results.length === 0;
-      }
-
       this.setState(stateToUpdate);
-      this.updateUrl(queryParams);
     } catch (err) {
-      handleHttpError(err) || this.setState({ error: true, loading: false });
+      handleHttpError(err) || this.setState({ error: true, isLoading: false });
     }
   }
 
@@ -254,7 +156,7 @@ class OrganizationsList extends Component {
     } catch (err) {
       this.setState({ error: true });
     } finally {
-      this.setState({ loading: false });
+      this.setState({ isLoading: false });
     }
   }
 
@@ -264,139 +166,56 @@ class OrganizationsList extends Component {
     } = PageSectionVariants;
     const {
       canAdd,
-      count,
+      itemCount,
       error,
-      loading,
-      noInitialResults,
-      page,
-      pageCount,
-      page_size,
+      isLoading,
+      isInitialized,
       selected,
-      sortedColumnKey,
-      sortOrder,
-      results,
-      isModalOpen,
-      warningTitle,
-      warningMsg,
+      organizations,
     } = this.state;
     const { match } = this.props;
 
-    let deleteToolTipContent;
-
-    if (selected.some(row => !row.summary_fields.user_capabilities.delete)) {
-      deleteToolTipContent = (
-        <div>
-          <Trans>
-            You dont have permission to delete the following Organizations:
-          </Trans>
-          {selected
-            .filter(row => !row.summary_fields.user_capabilities.delete)
-            .map(row => (
-              <div key={row.id}>
-                {row.name}
-              </div>
-            ))
-          }
-        </div>
-      );
-    } else if (selected.length === 0) {
-      deleteToolTipContent = i18nMark('Select a row to delete');
-    } else {
-      deleteToolTipContent = i18nMark('Delete');
-    }
-
-    const disableDelete = (
-      selected.length === 0
-      || selected.some(row => !row.summary_fields.user_capabilities.delete)
-    );
+    const isAllSelected = selected.length === organizations.length;
 
     return (
-      <I18n>
-        {({ i18n }) => (
-          <PageSection variant={medium}>
-            <Card>
-              { isModalOpen && (
-                <AlertModal
-                  variant="danger"
-                  title={warningTitle}
-                  isOpen={isModalOpen}
-                  onClose={this.handleClearOrgDeleteModal}
-                  actions={[
-                    <Button variant="danger" key="delete" aria-label="confirm-delete" onClick={this.handleOrgDelete}>{i18n._(t`Delete`)}</Button>,
-                    <Button variant="secondary" key="cancel" aria-label="cancel-delete" onClick={this.handleClearOrgDeleteModal}>{i18n._(t`Cancel`)}</Button>
-                  ]}
-                >
-                  {warningMsg}
-                  <br />
-                  {selected.map((org) => (
-                    <span key={org.id}>
-                      <strong>
-                        {org.name}
-                      </strong>
-                      <br />
-                    </span>
-                  ))}
-                  <br />
-                </AlertModal>
+      <PageSection variant={medium}>
+        <Card>
+          {isInitialized && (
+            <PaginatedDataList
+              items={organizations}
+              itemCount={itemCount}
+              itemName="organization"
+              queryParams={this.getQueryParams()}
+              toolbarColumns={COLUMNS}
+              showSelectAll
+              isAllSelected={isAllSelected}
+              onSelectAll={this.handleSelectAll}
+              additionalControls={[
+                <ToolbarDeleteButton
+                  key="delete"
+                  onDelete={this.handleOrgDelete}
+                  itemsToDelete={selected}
+                  itemName="Organization"
+                />,
+                canAdd
+                  ? <ToolbarAddButton key="add" linkTo={`${match.url}/add`} />
+                  : null,
+              ]}
+              renderItem={(o) => (
+                <OrganizationListItem
+                  key={o.id}
+                  organization={o}
+                  detailUrl={`${match.url}/${o.id}`}
+                  isSelected={selected.some(row => row.id === o.id)}
+                  onSelect={() => this.handleSelect(o)}
+                />
               )}
-              {noInitialResults && (
-                <EmptyState>
-                  <EmptyStateIcon icon={CubesIcon} />
-                  <Title size="lg">
-                    <Trans>No Organizations Found</Trans>
-                  </Title>
-                  <EmptyStateBody>
-                    <Trans>Please add an organization to populate this list</Trans>
-                  </EmptyStateBody>
-                </EmptyState>
-              ) || (
-                <Fragment>
-                  <DataListToolbar
-                    addUrl={`${match.url}/add`}
-                    addBtnToolTipContent={i18nMark('Add Organization')}
-                    isAllSelected={selected.length === results.length}
-                    sortedColumnKey={sortedColumnKey}
-                    sortOrder={sortOrder}
-                    columns={COLUMNS}
-                    onSearch={this.onSearch}
-                    onSort={this.onSort}
-                    onSelectAll={this.onSelectAll}
-                    onOpenDeleteModal={this.handleOpenOrgDeleteModal}
-                    disableDelete={disableDelete}
-                    deleteTooltip={deleteToolTipContent}
-                    showDelete
-                    showSelectAll
-                    showAdd={canAdd}
-                  />
-                  <ul className="pf-c-data-list" aria-label={i18n._(t`Organizations List`)}>
-                    { results.map(o => (
-                      <OrganizationListItem
-                        key={o.id}
-                        itemId={o.id}
-                        name={o.name}
-                        detailUrl={`${match.url}/${o.id}`}
-                        memberCount={o.summary_fields.related_field_counts.users}
-                        teamCount={o.summary_fields.related_field_counts.teams}
-                        isSelected={selected.some(row => row.id === o.id)}
-                        onSelect={() => this.onSelect(o)}
-                      />
-                    ))}
-                  </ul>
-                  <Pagination
-                    count={count}
-                    page={page}
-                    pageCount={pageCount}
-                    page_size={page_size}
-                    onSetPage={this.onSetPage}
-                  />
-                  { loading ? <div>loading...</div> : '' }
-                  { error ? <div>error</div> : '' }
-                </Fragment>
-              )}
-            </Card>
-          </PageSection>
-        )}
-      </I18n>
+            />
+          )}
+          { isLoading ? <div>loading...</div> : '' }
+          { error ? <div>error</div> : '' }
+        </Card>
+      </PageSection>
     );
   }
 }

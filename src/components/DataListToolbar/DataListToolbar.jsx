@@ -1,24 +1,15 @@
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { I18n, i18nMark } from '@lingui/react';
+import { I18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
-  Button,
   Checkbox,
   Level,
   LevelItem,
   Toolbar,
   ToolbarGroup,
   ToolbarItem,
-  Tooltip,
 } from '@patternfly/react-core';
-import {
-  TrashAltIcon,
-  PlusIcon,
-} from '@patternfly/react-icons';
-import {
-  Link
-} from 'react-router-dom';
 
 import ExpandCollapse from '../ExpandCollapse';
 import Search from '../Search';
@@ -28,12 +19,8 @@ import VerticalSeparator from '../VerticalSeparator';
 class DataListToolbar extends React.Component {
   render () {
     const {
-      add,
-      addBtnToolTipContent,
-      addUrl,
       columns,
-      deleteTooltip,
-      disableDelete,
+      showSelectAll,
       isAllSelected,
       isCompact,
       noLeftMargin,
@@ -41,17 +28,11 @@ class DataListToolbar extends React.Component {
       onSearch,
       onCompact,
       onExpand,
-      onOpenDeleteModal,
       onSelectAll,
-      showAdd,
-      showDelete,
-      showSelectAll,
       sortOrder,
       sortedColumnKey,
+      additionalControls,
     } = this.props;
-
-    const deleteIconStyling = disableDelete ? 'awx-ToolBarBtn awx-ToolBarBtn--disabled'
-      : 'awx-ToolBarBtn';
 
     const showExpandCollapse = (onCompact && onExpand);
     return (
@@ -96,9 +77,9 @@ class DataListToolbar extends React.Component {
                       />
                     </ToolbarItem>
                   </ToolbarGroup>
-                  { (showExpandCollapse || showDelete || addUrl || add) && (
+                  { (showExpandCollapse || additionalControls.length) ? (
                     <VerticalSeparator />
-                  )}
+                  ) : null}
                   {showExpandCollapse && (
                     <Fragment>
                       <ToolbarGroup>
@@ -108,50 +89,15 @@ class DataListToolbar extends React.Component {
                           onExpand={onExpand}
                         />
                       </ToolbarGroup>
-                      { (showDelete || addUrl || add) && (
+                      { additionalControls && (
                         <VerticalSeparator />
                       )}
                     </Fragment>
                   )}
                 </Toolbar>
               </LevelItem>
-              <LevelItem style={{ display: 'flex' }}>
-                {showDelete && (
-                  <Tooltip
-                    content={deleteTooltip}
-                    position="top"
-                  >
-                    <div
-                      className={deleteIconStyling}
-                    >
-                      <Button
-                        variant="plain"
-                        aria-label={i18n._(t`Delete`)}
-                        onClick={onOpenDeleteModal}
-                        isDisabled={disableDelete}
-                      >
-                        <TrashAltIcon className="awx-ToolBarTrashCanIcon" />
-                      </Button>
-                    </div>
-                  </Tooltip>
-                )}
-                {showAdd && addUrl && (
-                  <Link to={addUrl}>
-                    <Tooltip
-                      content={addBtnToolTipContent}
-                    >
-                      <Button
-                        variant="primary"
-                        aria-label={i18n._(t`Add`)}
-                      >
-                        <PlusIcon />
-                      </Button>
-                    </Tooltip>
-                  </Link>
-                )}
-                {showAdd && add && (
-                  <Fragment>{add}</Fragment>
-                )}
+              <LevelItem>
+                {additionalControls}
               </LevelItem>
             </Level>
           </div>
@@ -162,48 +108,34 @@ class DataListToolbar extends React.Component {
 }
 
 DataListToolbar.propTypes = {
-  add: PropTypes.node,
-  addBtnToolTipContent: PropTypes.string,
-  addUrl: PropTypes.string,
   columns: PropTypes.arrayOf(PropTypes.object).isRequired,
-  deleteTooltip: PropTypes.node,
-  disableDelete: PropTypes.bool,
+  showSelectAll: PropTypes.bool,
   isAllSelected: PropTypes.bool,
   isCompact: PropTypes.bool,
   noLeftMargin: PropTypes.bool,
   onCompact: PropTypes.func,
   onExpand: PropTypes.func,
-  onOpenDeleteModal: PropTypes.func,
   onSearch: PropTypes.func,
   onSelectAll: PropTypes.func,
   onSort: PropTypes.func,
-  showAdd: PropTypes.bool,
-  showDelete: PropTypes.bool,
-  showSelectAll: PropTypes.bool,
   sortOrder: PropTypes.string,
   sortedColumnKey: PropTypes.string,
+  additionalControls: PropTypes.arrayOf(PropTypes.node),
 };
 
 DataListToolbar.defaultProps = {
-  add: null,
-  addBtnToolTipContent: i18nMark('Add'),
-  addUrl: null,
-  deleteTooltip: i18nMark('Delete'),
-  disableDelete: true,
+  showSelectAll: false,
   isAllSelected: false,
   isCompact: false,
   noLeftMargin: false,
   onCompact: null,
   onExpand: null,
-  onOpenDeleteModal: null,
   onSearch: null,
   onSelectAll: null,
   onSort: null,
-  showAdd: false,
-  showDelete: false,
-  showSelectAll: false,
   sortOrder: 'ascending',
   sortedColumnKey: 'name',
+  additionalControls: [],
 };
 
 export default DataListToolbar;

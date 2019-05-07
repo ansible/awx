@@ -1,10 +1,7 @@
 import React, { Fragment } from 'react';
 import { withRouter } from 'react-router-dom';
-import { I18n, i18nMark } from '@lingui/react';
-import { t } from '@lingui/macro';
-import { Button } from '@patternfly/react-core';
-import { PlusIcon } from '@patternfly/react-icons';
-import PaginatedDataList from '../../../../components/PaginatedDataList';
+import { i18nMark } from '@lingui/react';
+import PaginatedDataList, { ToolbarAddButton } from '../../../../components/PaginatedDataList';
 import OrganizationAccessItem from '../../components/OrganizationAccessItem';
 import DeleteRoleConfirmationModal from '../../components/DeleteRoleConfirmationModal';
 import AddResourceRole from '../../../../components/AddRole/AddResourceRole';
@@ -184,19 +181,9 @@ class OrganizationAccess extends React.Component {
               { name: i18nMark('Username'), key: 'username', isSortable: true },
               { name: i18nMark('Last Name'), key: 'last_name', isSortable: true },
             ]}
-            additionalControls={canEdit ? (
-              <I18n>
-                {({ i18n }) => (
-                  <Button
-                    variant="primary"
-                    aria-label={i18n._(t`Add Access Role`)}
-                    onClick={this.toggleAddModal}
-                  >
-                    <PlusIcon />
-                  </Button>
-                )}
-              </I18n>
-            ) : null}
+            additionalControls={canEdit ? [
+              <ToolbarAddButton key="add" onClick={this.toggleAddModal} />
+            ] : null}
             renderItem={accessRecord => (
               <OrganizationAccessItem
                 key={accessRecord.id}

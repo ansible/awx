@@ -5,9 +5,11 @@ import OrganizationsList, { _OrganizationsList } from '../../../../src/pages/Org
 
 const mockAPIOrgsList = {
   data: {
+    count: 3,
     results: [{
       name: 'Organization 0',
       id: 1,
+      url: '/organizations/1',
       summary_fields: {
         related_field_counts: {
           teams: 3,
@@ -21,6 +23,7 @@ const mockAPIOrgsList = {
     {
       name: 'Organization 1',
       id: 2,
+      url: '/organizations/2',
       summary_fields: {
         related_field_counts: {
           teams: 2,
@@ -34,6 +37,7 @@ const mockAPIOrgsList = {
     {
       name: 'Organization 2',
       id: 3,
+      url: '/organizations/3',
       summary_fields: {
         related_field_counts: {
           teams: 5,
@@ -50,7 +54,7 @@ const mockAPIOrgsList = {
   warningMsg: 'message'
 };
 
-describe('<_OrganizationsList />', () => {
+describe('<OrganizationsList />', () => {
   let wrapper;
   let api;
 
@@ -67,75 +71,42 @@ describe('<_OrganizationsList />', () => {
     );
   });
 
-  test('Puts 1 selected Org in state when onSelect is called.', () => {
+  test('Puts 1 selected Org in state when handleSelect is called.', () => {
     wrapper = mountWithContexts(
       <OrganizationsList />
     ).find('OrganizationsList');
 
     wrapper.setState({
-      results: mockAPIOrgsList.data.results
+      organizations: mockAPIOrgsList.data.results,
+      itemCount: 3,
+      isInitialized: true
     });
     wrapper.update();
     expect(wrapper.state('selected').length).toBe(0);
-    wrapper.instance().onSelect(mockAPIOrgsList.data.results.slice(0, 1));
+    wrapper.instance().handleSelect(mockAPIOrgsList.data.results.slice(0, 1));
     expect(wrapper.state('selected').length).toBe(1);
   });
 
-  test('Puts all Orgs in state when onSelectAll is called.', () => {
-    wrapper = mountWithContexts(
-      <OrganizationsList />
-    ).find('OrganizationsList');
-    wrapper.setState(
-      mockAPIOrgsList.data
-    );
-    expect(wrapper.state('selected').length).toBe(0);
-    wrapper.instance().onSelectAll(true);
-    expect(wrapper.find('OrganizationsList').state().selected.length).toEqual(wrapper.state().results.length);
-  });
-
-  test('selected is > 0 when close modal button is clicked.', () => {
+  test('Puts all Orgs in state when handleSelectAll is called.', () => {
     wrapper = mountWithContexts(
       <OrganizationsList />
     );
-    wrapper.find('OrganizationsList').setState({
-      results: mockAPIOrgsList.data.results,
-      isModalOpen: mockAPIOrgsList.isModalOpen,
-      selected: mockAPIOrgsList.data.results
+    const list = wrapper.find('OrganizationsList');
+    list.setState({
+      organizations: mockAPIOrgsList.data.results,
+      itemCount: 3,
+      isInitialized: true
     });
-    const component = wrapper.find('OrganizationsList');
-    wrapper.find('DataListToolbar').prop('onOpenDeleteModal')();
+    expect(list.state('selected').length).toBe(0);
+    list.instance().handleSelectAll(true);
     wrapper.update();
-    const button = wrapper.find('ModalBoxCloseButton');
-    button.prop('onClose')();
-    wrapper.update();
-    expect(component.state('isModalOpen')).toBe(false);
-    expect(component.state('selected').length).toBeGreaterThan(0);
-    wrapper.unmount();
-  });
-
-  test('selected is > 0 when cancel modal button is clicked.', () => {
-    wrapper = mountWithContexts(
-      <OrganizationsList />
-    );
-    wrapper.find('OrganizationsList').setState({
-      results: mockAPIOrgsList.data.results,
-      isModalOpen: mockAPIOrgsList.isModalOpen,
-      selected: mockAPIOrgsList.data.results
-    });
-    const component = wrapper.find('OrganizationsList');
-    wrapper.find('DataListToolbar').prop('onOpenDeleteModal')();
-    wrapper.update();
-    const button = wrapper.find('ModalBoxFooter').find('button').at(1);
-    button.prop('onClick')();
-    wrapper.update();
-    expect(component.state('isModalOpen')).toBe(false);
-    expect(component.state('selected').length).toBeGreaterThan(0);
-    wrapper.unmount();
+    expect(list.state('selected').length)
+      .toEqual(list.state('organizations').length);
   });
 
   test('api is called to delete Orgs for each org in selected.', () => {
     const fetchOrganizations = jest.fn(() => wrapper.find('OrganizationsList').setState({
-      results: []
+      organizations: []
     }));
     wrapper = mountWithContexts(
       <OrganizationsList
@@ -146,15 +117,13 @@ describe('<_OrganizationsList />', () => {
     );
     const component = wrapper.find('OrganizationsList');
     wrapper.find('OrganizationsList').setState({
-      results: mockAPIOrgsList.data.results,
+      organizations: mockAPIOrgsList.data.results,
+      itemCount: 3,
+      isInitialized: true,
       isModalOpen: mockAPIOrgsList.isModalOpen,
       selected: mockAPIOrgsList.data.results
     });
-    wrapper.find('DataListToolbar').prop('onOpenDeleteModal')();
-    wrapper.update();
-    const button = wrapper.find('ModalBoxFooter').find('button').at(0);
-    button.simulate('click');
-    wrapper.update();
+    wrapper.find('ToolbarDeleteButton').prop('onDelete')();
     expect(api.destroyOrganization).toHaveBeenCalledTimes(component.state('selected').length);
   });
 
@@ -167,7 +136,9 @@ describe('<_OrganizationsList />', () => {
       }
     );
     wrapper.find('OrganizationsList').setState({
-      results: mockAPIOrgsList.data.results,
+      organizations: mockAPIOrgsList.data.results,
+      itemCount: 3,
+      isInitialized: true,
       selected: mockAPIOrgsList.data.results.slice(0, 1)
     });
     const component = wrapper.find('OrganizationsList');
@@ -193,27 +164,6 @@ describe('<_OrganizationsList />', () => {
     expect(history.location.search).toBe('?order_by=modified&page=1&page_size=5');
   });
 
-  test('onSort sends the correct information to fetchOrganizations', () => {
-    const history = createMemoryHistory({
-      initialEntries: ['organizations?order_by=name&page=1&page_size=5'],
-    });
-    const fetchOrganizations = jest.spyOn(_OrganizationsList.prototype, 'fetchOrganizations');
-    wrapper = mountWithContexts(
-      <OrganizationsList />, {
-        context: {
-          router: { history }
-        }
-      }
-    );
-    const component = wrapper.find('OrganizationsList');
-    component.instance().onSort('modified', 'ascending');
-    expect(fetchOrganizations).toBeCalledWith({
-      page: 1,
-      page_size: 5,
-      order_by: 'modified'
-    });
-  });
-
   test('error is thrown when org not successfully deleted from api', async () => {
     const history = createMemoryHistory({
       initialEntries: ['organizations?order_by=name&page=1&page_size=5'],
@@ -227,7 +177,9 @@ describe('<_OrganizationsList />', () => {
       }
     );
     await wrapper.setState({
-      results: mockAPIOrgsList.data.results,
+      organizations: mockAPIOrgsList.data.results,
+      itemCount: 3,
+      isInitialized: true,
       selected: [...mockAPIOrgsList.data.results].push({
         name: 'Organization 6',
         id: 'a',

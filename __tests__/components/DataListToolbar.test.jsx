@@ -179,47 +179,24 @@ describe('<DataListToolbar />', () => {
     expect(upAlphaIcon.length).toBe(1);
   });
 
-  test('trash can button triggers correct function', () => {
+  test('should render additionalControls', () => {
     const columns = [{ name: 'Name', key: 'name', isSortable: true }];
-    const onOpenDeleteModal = jest.fn();
-    const openDeleteModalButton = 'button[aria-label="Delete"]';
+    const onSearch = jest.fn();
+    const onSort = jest.fn();
+    const onSelectAll = jest.fn();
 
     toolbar = mountWithContexts(
       <DataListToolbar
         columns={columns}
-        onOpenDeleteModal={onOpenDeleteModal}
-        showDelete
-        disableDelete={false}
-      />
-    );
-    toolbar.find(openDeleteModalButton).simulate('click');
-    expect(onOpenDeleteModal).toHaveBeenCalled();
-  });
-
-  test('Tooltip says "Select a row to delete" when trash can icon is disabled', () => {
-    toolbar = mountWithContexts(
-      <DataListToolbar
-        columns={[{ name: 'Name', key: 'name', isSortable: true }]}
-        showDelete
-        deleteTooltip="Select a row to delete"
+        onSearch={onSearch}
+        onSort={onSort}
+        onSelectAll={onSelectAll}
+        additionalControls={[<button key="1" id="test" type="button">click</button>]}
       />
     );
 
-    const toolTip = toolbar.find('.pf-c-tooltip__content');
-    toolTip.simulate('mouseover');
-    expect(toolTip.text()).toBe('Select a row to delete');
-  });
-
-  test('Delete Org tooltip says "Delete" when trash can icon is enabled', () => {
-    toolbar = mountWithContexts(
-      <DataListToolbar
-        columns={[{ name: 'Name', key: 'name', isSortable: true }]}
-        showDelete
-        deleteTooltip="Delete"
-      />
-    );
-    const toolTip = toolbar.find('.pf-c-tooltip__content');
-    toolTip.simulate('mouseover');
-    expect(toolTip.text()).toBe('Delete');
+    const button = toolbar.find('#test');
+    expect(button).toHaveLength(1);
+    expect(button.text()).toEqual('click');
   });
 });

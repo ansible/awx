@@ -81,32 +81,34 @@
   font-size: 18px;
 }
 
-.awx-ToolBarBtn{
+.awx-ToolBarBtn {
   width: 30px;
   display: flex;
   justify-content: center;
   margin-right: 20px;
   border-radius: 3px;
+
+  &[disabled] {
+    cursor: not-allowed;
+  }
 }
 
-.awx-ToolBarBtn:hover{
+.awx-ToolBarBtn:hover {
   .awx-ToolBarTrashCanIcon {
-    color:white;
+    color: white;
   }
   background-color:#d9534f;
 }
 
-.awx-ToolBarBtn--disabled:hover{
+.awx-ToolBarBtn[disabled]:hover {
   .awx-ToolBarTrashCanIcon {
     color: #d2d2d2;
   }
-  background-color:white;
-  cursor: not-allowed;
+  background-color: white;
 }
 
-.pf-l-toolbar >div{
+.pf-l-toolbar > div {
   &:last-child{
     display:none;
   }
 }
-

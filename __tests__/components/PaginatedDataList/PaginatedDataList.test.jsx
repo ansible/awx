@@ -1,8 +1,8 @@
 import React from 'react';
 import { createMemoryHistory } from 'history';
-import { mountWithContexts } from '../enzymeHelpers';
-import { sleep } from '../testUtils';
-import PaginatedDataList from '../../src/components/PaginatedDataList';
+import { mountWithContexts } from '../../enzymeHelpers';
+import { sleep } from '../../testUtils';
+import PaginatedDataList from '../../../src/components/PaginatedDataList';
 
 const mockData = [
   { id: 1, name: 'one', url: '/org/team/1' },

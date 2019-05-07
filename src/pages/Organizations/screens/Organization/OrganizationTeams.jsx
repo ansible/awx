@@ -50,7 +50,7 @@ class OrganizationTeams extends React.Component {
   async readOrganizationTeamsList () {
     const { api, handleHttpError, id } = this.props;
     const params = this.getQueryParams();
-    this.setState({ isLoading: true });
+    this.setState({ isLoading: true, error: null });
     try {
       const {
         data: { count = 0, results = [] },

@@ -1,5 +1,5 @@
 import React, { Fragment } from 'react';
-import PropTypes, { arrayOf, shape, string, bool } from 'prop-types';
+import PropTypes, { arrayOf, shape, string, bool, node } from 'prop-types';
 import {
   DataList,
   DataListItem,
@@ -99,6 +99,9 @@ class PaginatedDataList extends React.Component {
       additionalControls,
       itemName,
       itemNamePlural,
+      showSelectAll,
+      isAllSelected,
+      onSelectAll,
     } = this.props;
     const { error } = this.state;
     const [orderBy, sortOrder] = this.getSortOrder();
@@ -146,8 +149,10 @@ class PaginatedDataList extends React.Component {
                   columns={toolbarColumns}
                   onSearch={() => { }}
                   onSort={this.handleSort}
-                  showAdd={!!additionalControls}
-                  add={additionalControls}
+                  showSelectAll={showSelectAll}
+                  isAllSelected={isAllSelected}
+                  onSelectAll={onSelectAll}
+                  additionalControls={additionalControls}
                 />
                 <DataList aria-label={i18n._(t`${ucFirst(pluralize(itemName))} List`)}>
                   {items.map(item => (renderItem ? renderItem(item) : (
@@ -216,7 +221,10 @@ PaginatedDataList.propTypes = {
     key: string.isRequired,
     isSortable: bool,
   })),
-  additionalControls: PropTypes.node,
+  additionalControls: arrayOf(node),
+  showSelectAll: PropTypes.bool,
+  isAllSelected: PropTypes.bool,
+  onSelectAll: PropTypes.func,
 };
 
 PaginatedDataList.defaultProps = {
@@ -224,9 +232,12 @@ PaginatedDataList.defaultProps = {
   toolbarColumns: [
     { name: i18nMark('Name'), key: 'name', isSortable: true },
   ],
-  additionalControls: null,
+  additionalControls: [],
   itemName: 'item',
   itemNamePlural: '',
+  showSelectAll: false,
+  isAllSelected: false,
+  onSelectAll: null,
 };
 
 export { PaginatedDataList as _PaginatedDataList };

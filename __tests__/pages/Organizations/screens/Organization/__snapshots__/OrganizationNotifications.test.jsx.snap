@@ -109,8 +109,9 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                 >
                   <Route>
                     <PaginatedDataList
-                      additionalControls={null}
+                      additionalControls={Array []}
                       history={"/history/"}
+                      isAllSelected={false}
                       itemCount={2}
                       itemName="notification"
                       itemNamePlural=""
@@ -146,6 +147,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                           "url": "",
                         }
                       }
+                      onSelectAll={null}
                       queryParams={
                         Object {
                           "order_by": "name",
@@ -154,6 +156,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                         }
                       }
                       renderItem={[Function]}
+                      showSelectAll={false}
                       toolbarColumns={
                         Array [
                           Object {
@@ -181,9 +184,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                         withHash={true}
                       >
                         <DataListToolbar
-                          add={null}
-                          addBtnToolTipContent="Add"
-                          addUrl={null}
+                          additionalControls={Array []}
                           columns={
                             Array [
                               Object {
@@ -205,19 +206,14 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                               },
                             ]
                           }
-                          deleteTooltip="Delete"
-                          disableDelete={true}
                           isAllSelected={false}
                           isCompact={false}
                           noLeftMargin={false}
                           onCompact={null}
                           onExpand={null}
-                          onOpenDeleteModal={null}
                           onSearch={[Function]}
                           onSelectAll={null}
                           onSort={[Function]}
-                          showAdd={false}
-                          showDelete={false}
                           showSelectAll={false}
                           sortOrder="ascending"
                           sortedColumnKey="name"
@@ -919,20 +915,8 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                       </Toolbar>
                                     </div>
                                   </LevelItem>
-                                  <LevelItem
-                                    style={
-                                      Object {
-                                        "display": "flex",
-                                      }
-                                    }
-                                  >
-                                    <div
-                                      style={
-                                        Object {
-                                          "display": "flex",
-                                        }
-                                      }
-                                    />
+                                  <LevelItem>
+                                    <div />
                                   </LevelItem>
                                 </div>
                               </Level>

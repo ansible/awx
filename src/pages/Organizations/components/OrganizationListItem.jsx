@@ -1,4 +1,5 @@
 import React from 'react';
+import { string, bool, func } from 'prop-types';
 import { Trans } from '@lingui/macro';
 import {
   Badge,
@@ -13,24 +14,29 @@ import {
 } from 'react-router-dom';
 
 import VerticalSeparator from '../../../components/VerticalSeparator';
+import { Organization } from '../../../types';
 
 class OrganizationListItem extends React.Component {
+  static propTypes = {
+    organization: Organization.isRequired,
+    detailUrl: string.isRequired,
+    isSelected: bool.isRequired,
+    onSelect: func.isRequired
+  }
+
   render () {
     const {
-      itemId,
-      name,
-      memberCount,
-      teamCount,
+      organization,
       isSelected,
       onSelect,
       detailUrl,
     } = this.props;
-    const labelId = `check-action-${itemId}`;
+    const labelId = `check-action-${organization.id}`;
     return (
-      <DataListItem key={itemId} aria-labelledby={labelId}>
+      <DataListItem key={organization.id} aria-labelledby={labelId}>
         <DataListItemRow>
           <DataListCheck
-            id={`select-organization-${itemId}`}
+            id={`select-organization-${organization.id}`}
             checked={isSelected}
             onChange={onSelect}
             aria-labelledby={labelId}
@@ -44,7 +50,7 @@ class OrganizationListItem extends React.Component {
                 <Link
                   to={`${detailUrl}`}
                 >
-                  <b>{name}</b>
+                  <b>{organization.name}</b>
                 </Link>
               </span>
             </DataListCell>,
@@ -52,13 +58,13 @@ class OrganizationListItem extends React.Component {
               <span className="awx-c-list-group">
                 <Trans>Members</Trans>
                 <Badge className="awx-c-list-group--badge" isRead>
-                  {memberCount}
+                  {organization.summary_fields.related_field_counts.users}
                 </Badge>
               </span>
               <span className="awx-c-list-group">
                 <Trans>Teams</Trans>
                 <Badge className="awx-c-list-group--badge" isRead>
-                  {teamCount}
+                  {organization.summary_fields.related_field_counts.teams}
                 </Badge>
               </span>
             </DataListCell>
