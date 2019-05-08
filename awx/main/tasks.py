@@ -840,7 +840,7 @@ class BaseTask(object):
             '': '',
         }
 
-    def build_extra_vars_file(self, instance, private_data_dir, passwords):
+    def build_extra_vars_file(self, instance, private_data_dir):
         '''
         Build ansible yaml file filled with extra vars to be passed via -e@file.yml
         '''
@@ -1155,7 +1155,7 @@ class BaseTask(object):
             # May have to serialize the value
             private_data_files = self.build_private_data_files(self.instance, private_data_dir)
             passwords = self.build_passwords(self.instance, kwargs)
-            self.build_extra_vars_file(self.instance, private_data_dir, passwords)
+            self.build_extra_vars_file(self.instance, private_data_dir)
             args = self.build_args(self.instance, private_data_dir, passwords)
             cwd = self.build_cwd(self.instance, private_data_dir)
             process_isolation_params = self.build_params_process_isolation(self.instance,
@@ -1507,7 +1507,7 @@ class RunJob(BaseTask):
     def build_playbook_path_relative_to_cwd(self, job, private_data_dir):
         return os.path.join(job.playbook)
 
-    def build_extra_vars_file(self, job, private_data_dir, passwords):
+    def build_extra_vars_file(self, job, private_data_dir):
         # Define special extra_vars for AWX, combine with job.extra_vars.
         extra_vars = job.awx_meta_vars()
 
@@ -1679,12 +1679,14 @@ class RunProjectUpdate(BaseTask):
         env['ANSIBLE_CALLBACK_PLUGINS'] = self.get_path_to('..', 'plugins', 'callback')
         return env
 
-    def _build_scm_url_extra_vars(self, project_update, scm_username='', scm_password=''):
+    def _build_scm_url_extra_vars(self, project_update):
         '''
         Helper method to build SCM url and extra vars with parameters needed
         for authentication.
         '''
         extra_vars = {}
+        scm_username = project_update.credential.get_input('username', default='')
+        scm_password = project_update.credential.get_input('password', default='')
         scm_type = project_update.scm_type
         scm_url = update_scm_url(scm_type, project_update.scm_url,
                                  check_special_cases=False)
@@ -1730,11 +1732,9 @@ class RunProjectUpdate(BaseTask):
             args.append('-v')
         return args
 
-    def build_extra_vars_file(self, project_update, private_data_dir, passwords):
+    def build_extra_vars_file(self, project_update, private_data_dir):
         extra_vars = {}
-        scm_url, extra_vars_new = self._build_scm_url_extra_vars(project_update,
-                                                                 passwords.get('scm_username', ''),
-                                                                 passwords.get('scm_password', ''))
+        scm_url, extra_vars_new = self._build_scm_url_extra_vars(project_update)
         extra_vars.update(extra_vars_new)
 
         if project_update.project.scm_revision and project_update.job_type == 'run':
@@ -1938,26 +1938,6 @@ class RunInventoryUpdate(BaseTask):
         if inventory_update.source in InventorySource.injectors:
             injector = InventorySource.injectors[inventory_update.source](self.get_ansible_version(inventory_update))
             return injector.build_private_data(inventory_update, private_data_dir)
-
-    def build_passwords(self, inventory_update, runtime_passwords):
-        """Build a dictionary of authentication/credential information for
-        an inventory source.
-
-        This dictionary is used by `build_env`, below.
-        """
-        # Run the superclass implementation.
-        passwords = super(RunInventoryUpdate, self).build_passwords(inventory_update, runtime_passwords)
-
-        # Take key fields from the credential in use and add them to the
-        # passwords dictionary.
-        credential = inventory_update.get_cloud_credential()
-        if credential:
-            for subkey in ('username', 'host', 'project', 'client', 'tenant', 'subscription'):
-                passwords['source_%s' % subkey] = credential.get_input(subkey, default='')
-            for passkey in ('password', 'ssh_key_data', 'security_token', 'secret'):
-                k = 'source_%s' % passkey
-                passwords[k] = credential.get_input(passkey, default='')
-        return passwords
 
     def build_env(self, inventory_update, private_data_dir, isolated, private_data_files=None):
         """Build environment dictionary for inventory import.
@@ -2302,7 +2282,7 @@ class RunAdHocCommand(BaseTask):
 
         return args
 
-    def build_extra_vars_file(self, ad_hoc_command, private_data_dir, passwords={}):
+    def build_extra_vars_file(self, ad_hoc_command, private_data_dir):
         extra_vars = ad_hoc_command.awx_meta_vars()
 
         if ad_hoc_command.extra_vars_dict:
