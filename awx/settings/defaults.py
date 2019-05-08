@@ -251,7 +251,7 @@ TEMPLATES = [
     },
 ]
 
-MIDDLEWARE_CLASSES = (  # NOQA
+MIDDLEWARE = (  # NOQA
     'awx.main.middleware.TimingMiddleware',
     'awx.main.middleware.MigrationRanCheckMiddleware',
     'corsheaders.middleware.CorsMiddleware',
@@ -628,7 +628,7 @@ AWX_REBUILD_SMART_MEMBERSHIP = False
 ALLOW_JINJA_IN_EXTRA_VARS = 'template'
 
 # Enable dynamically pulling roles from a requirement.yml file
-# when updating SCM projects 
+# when updating SCM projects
 # Note: This setting may be overridden by database settings.
 AWX_ROLES_ENABLED = True
 
