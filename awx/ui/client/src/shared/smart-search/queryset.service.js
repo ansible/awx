@@ -417,7 +417,7 @@ function QuerysetService ($q, Rest, ProcessErrors, $rootScope, Wait, DjangoSearc
 
                 if (termParts.length === 1) {
                     if (singleSearchParam && termParts[0].toLowerCase() === "or") {
-                        termParams = { [singleSearchParam]: "or" } 
+                        termParams = { [singleSearchParam]: "or" };
                     } else {
                         termParams = searchWithoutKey(term, singleSearchParam);
                     }
