@@ -399,6 +399,13 @@ export default ['i18n', function(i18n) {
                 subForm: 'typeSubForm',
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
+            disable_ssl_verification: {
+                label: i18n._('Disable SSL Verification'),
+                type: 'checkbox',
+                ngShow: "notification_type.value == 'webhook' ",
+                subForm: 'typeSubForm',
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
+            },
             headers: {
                 label: i18n._('HTTP Headers'),
                 dataTitle: i18n._('HTTP Headers'),
