@@ -426,6 +426,22 @@ def test_inventory_source_vars_prohibition(post, inventory, admin_user):
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize('role,expect', [
+    ('admin_role', 200),
+    ('use_role', 403),
+    ('adhoc_role', 403),
+    ('read_role', 403)
+])
+def test_action_view_permissions(patch, put, get, inventory, rando, role, expect):
+    getattr(inventory, role).members.add(rando)
+    url = reverse('api:inventory_variable_data', kwargs={'pk': inventory.pk})
+    # read_role and all other roles should be able to view
+    get(url=url, user=rando, expect=200)
+    patch(url=url, data={"host_filter": "bar"}, user=rando, expect=expect)
+    put(url=url, data={"fooooo": "bar"}, user=rando, expect=expect)
+
+
+@pytest.mark.django_db
 class TestInventorySourceCredential:
     def test_need_cloud_credential(self, inventory, admin_user, post):
         """Test that a cloud-based source requires credential"""
