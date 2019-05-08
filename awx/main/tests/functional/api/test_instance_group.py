@@ -1,3 +1,5 @@
+import random
+
 import pytest
 
 from awx.api.versioning import reverse
@@ -6,6 +8,7 @@ from awx.main.models import (
     InstanceGroup,
     ProjectUpdate,
 )
+from awx.main.utils import camelcase_to_underscore
 
 
 @pytest.fixture
@@ -76,6 +79,11 @@ def instance_group_jobs_successful(instance_group, create_job_factory, create_pr
     jobs_successful = [create_job_factory(status='successful') for i in range(0, 2)]
     project_updates_successful = [create_project_update_factory(status='successful') for i in range(0, 2)]
     return jobs_successful + project_updates_successful
+
+
+@pytest.fixture(scope='function')
+def source_model(request):
+    return request.getfixturevalue(request.param)
 
 
 @pytest.mark.django_db
@@ -196,3 +204,39 @@ def test_prevent_non_isolated_instance_added_to_isolated_instance_group_via_poli
     resp = patch(url, {'policy_instance_list': [non_iso_instance.hostname]}, user=admin, expect=400)
     assert [u"Isolated instance group membership may not be managed via the API."] == resp.data['policy_instance_list']
     assert isolated_instance_group.policy_instance_list == []
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    'source_model', ['job_template', 'inventory', 'organization'], indirect=True
+)
+def test_instance_group_order_persistence(get, post, admin, source_model):
+    # create several instance groups in random order
+    total = 5
+    pks = list(range(total))
+    random.shuffle(pks)
+    instances = [InstanceGroup.objects.create(name='iso-%d' % i) for i in pks]
+    view_name = camelcase_to_underscore(source_model.__class__.__name__)
+    url = reverse(
+        'api:{}_instance_groups_list'.format(view_name),
+        kwargs={'pk': source_model.pk}
+    )
+
+    # associate them all
+    for instance in instances:
+        post(url, {'associate': True, 'id': instance.id}, admin, expect=204)
+
+    for _ in range(10):
+        # remove them all
+        for instance in instances:
+            post(url, {'disassociate': True, 'id': instance.id}, admin, expect=204)
+        resp = get(url, admin)
+        assert resp.data['count'] == 0
+
+        # add them all in random order
+        before = sorted(instances, key=lambda x: random.random())
+        for instance in before:
+            post(url, {'associate': True, 'id': instance.id}, admin, expect=204)
+        resp = get(url, admin)
+        assert resp.data['count'] == total
+        assert [ig['name'] for ig in resp.data['results']] == [ig.name for ig in before]
