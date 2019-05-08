@@ -12,7 +12,6 @@ import os.path
 from urllib.parse import urljoin
 import yaml
 import configparser
-import stat
 import tempfile
 from io import StringIO
 from distutils.version import LooseVersion as Version
@@ -1964,7 +1963,7 @@ class PluginFileInjector(object):
         if cp.sections():
             f = StringIO()
             cp.write(f)
-            private_data = private_data = {'credentials': {}}
+            private_data = {'credentials': {}}
             private_data['credentials'][credential] = f.getvalue()
             return private_data
         else:
@@ -2018,7 +2017,7 @@ class azure_rm(PluginFileInjector):
         ret['use_contrib_script_compatible_sanitization'] = True
         # use same host names as script
         ret['plain_host_names'] = True
-        # By default the script did not filter hosts 
+        # By default the script did not filter hosts
         ret['default_host_filters'] = []
         # User-given host filters
         user_filters = []
@@ -2324,6 +2323,7 @@ class ec2(PluginFileInjector):
 class gce(PluginFileInjector):
     plugin_name = 'gcp_compute'
     initial_version = '2.8'  # Driven by unsafe group names issue, hostvars
+    ini_env_reference = 'GCE_INI_PATH'
     base_injector = 'managed'
 
     def get_script_env(self, inventory_update, private_data_dir, private_data_files):
@@ -2335,16 +2335,6 @@ class gce(PluginFileInjector):
         env['GCE_EMAIL'] = cred.get_input('username', default='')
         env['GCE_PROJECT'] = cred.get_input('project', default='')
         env['GCE_ZONE'] = inventory_update.source_regions if inventory_update.source_regions != 'all' else ''  # noqa
-
-        # by default, the GCE inventory source caches results on disk for
-        # 5 minutes; disable this behavior
-        cp = configparser.ConfigParser()
-        cp.add_section('cache')
-        cp.set('cache', 'cache_max_age', '0')
-        handle, path = tempfile.mkstemp(dir=private_data_dir)
-        cp.write(os.fdopen(handle, 'w'))
-        os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
-        env['GCE_INI_PATH'] = path
         return env
 
     def _compat_compose_vars(self):
@@ -2418,6 +2408,14 @@ class gce(PluginFileInjector):
         if inventory_update.source_regions and 'all' not in inventory_update.source_regions:
             ret['zones'] = inventory_update.source_regions.split(',')
         return ret
+
+    def build_script_private_data(self, inventory_update, private_data_dir):
+        cp = configparser.RawConfigParser()
+        # by default, the GCE inventory source caches results on disk for
+        # 5 minutes; disable this behavior
+        cp.add_section('cache')
+        cp.set('cache', 'cache_max_age', '0')
+        return self.dump_cp(cp, inventory_update.get_cloud_credential())
 
 
 class vmware(PluginFileInjector):
