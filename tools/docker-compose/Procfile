@@ -1,7 +1,0 @@
-nginx:          make nginx
-runworker:      make runworker
-daphne:         make daphne
-dispatcher:     make dispatcher
-receiver:       make receiver
-uwsgi:          make uwsgi
-jupyter:        make jupyter

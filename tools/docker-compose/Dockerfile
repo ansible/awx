@@ -19,7 +19,7 @@ RUN python3 -m ensurepip
 RUN pip3 install virtualenv
 RUN /usr/bin/ssh-keygen -q -t rsa -N "" -f /root/.ssh/id_rsa
 RUN mkdir -p /data/db
-RUN pip3 install honcho && pip install supervisor
+RUN pip install supervisor
 
 ADD requirements/requirements.txt \
   requirements/requirements_git.txt \

@@ -64,4 +64,3 @@ by the *daphne* server and our *asgi_amqp* implementation to broadcast messages 
 
 ### Development
  - nginx listens on 8013/8043 instead of 80/443
- - uwsgi, daphne, and runworker are started with honcho instead of supervisord
