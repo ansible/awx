@@ -63,11 +63,22 @@ describe('Service: QuerySet', () => {
             spyOn(QuerySet, 'encodeParam').and.callThrough();
 
             const term = 'name:foo';
-            const isFilterableBaseField = () => true;
+            const isFilterableBaseField = (termParts) => termParts[0] === 'name';
             const isRelatedField = () => false;
 
             expect(QuerySet.getSearchInputQueryset(term, isFilterableBaseField, isRelatedField)).toEqual({ name__icontains_DEFAULT: 'foo' });
             expect(QuerySet.encodeParam).toHaveBeenCalledWith({ term: "name:foo",  searchTerm: true, singleSearchParam: null });
+            expect(QuerySet.getSearchInputQueryset('foo', isFilterableBaseField, null, null, 'host_filter')).toEqual({ host_filter: 'search=foo' });
+            expect(QuerySet.getSearchInputQueryset('foo bar', isFilterableBaseField, null, null, 'host_filter')).toEqual({ host_filter: 'search=foo%20and%20search=bar' });
+            expect(QuerySet.getSearchInputQueryset('foo or bar', isFilterableBaseField, null, null, 'host_filter')).toEqual({ host_filter: 'search=foo%20or%20search=bar' });
+            expect(QuerySet.getSearchInputQueryset('name:foo or bar', isFilterableBaseField, null, null, 'host_filter')).toEqual({ host_filter: 'name__icontains=foo%20or%20search=bar' });
+            expect(QuerySet.getSearchInputQueryset('name:foo bar', isFilterableBaseField, null, null, 'host_filter')).toEqual({ host_filter: 'name__icontains=foo%20and%20search=bar' });
+            expect(QuerySet.getSearchInputQueryset('foo or name:bar', isFilterableBaseField, null, null, 'host_filter')).toEqual({ host_filter: 'search=foo%20or%20name__icontains=bar' });
+            expect(QuerySet.getSearchInputQueryset('foo name:bar', isFilterableBaseField, null, null, 'host_filter')).toEqual({ host_filter: 'search=foo%20and%20name__icontains=bar' });
+            expect(QuerySet.getSearchInputQueryset('name:foo or name:bar', isFilterableBaseField, null, null, 'host_filter')).toEqual({ host_filter: 'name__icontains=foo%20or%20name__icontains=bar' });
+            expect(QuerySet.getSearchInputQueryset('name:foo name:bar', isFilterableBaseField, null, null, 'host_filter')).toEqual({ host_filter: 'name__icontains=foo%20and%20name__icontains=bar' });
+            expect(QuerySet.getSearchInputQueryset('name:foo name:bar or baz', isFilterableBaseField, null, null, 'host_filter')).toEqual({ host_filter: 'name__icontains=foo%20and%20name__icontains=bar%20or%20search=baz' });
+            expect(QuerySet.getSearchInputQueryset('baz or name:foo name:bar', isFilterableBaseField, null, null, 'host_filter')).toEqual({ host_filter: 'search=baz%20or%20name__icontains=foo%20and%20name__icontains=bar' });
         });
     });
 
