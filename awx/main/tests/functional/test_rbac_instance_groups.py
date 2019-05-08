@@ -6,6 +6,7 @@ from awx.main.access import (
     InventoryAccess,
     JobTemplateAccess,
 )
+from awx.main.models import Organization
 
 
 @pytest.mark.django_db
@@ -37,6 +38,16 @@ def test_ig_normal_user_associability(organization, default_instance_group, user
 
 
 @pytest.mark.django_db
+def test_access_via_two_organizations(rando, default_instance_group):
+    for org_name in ['org1', 'org2']:
+        org = Organization.objects.create(name=org_name)
+        org.instance_groups.add(default_instance_group)
+        org.admin_role.members.add(rando)
+    access = InstanceGroupAccess(rando)
+    assert list(access.get_queryset()) == [default_instance_group]
+
+
+@pytest.mark.django_db
 def test_ig_associability(organization, default_instance_group, admin, system_auditor, org_admin, org_member, job_template_factory):
     admin_access = OrganizationAccess(admin)
     auditor_access = OrganizationAccess(system_auditor)
@@ -53,7 +64,7 @@ def test_ig_associability(organization, default_instance_group, admin, system_au
     assert not oadmin_access.can_unattach(organization, default_instance_group, 'instance_groups', None)
     assert not auditor_access.can_unattach(organization, default_instance_group, 'instance_groups', None)
     assert not omember_access.can_unattach(organization, default_instance_group, 'instance_groups', None)
-    
+
     objects = job_template_factory('jt', organization=organization, project='p',
                                    inventory='i', credential='c')
     admin_access = InventoryAccess(admin)
@@ -75,5 +86,3 @@ def test_ig_associability(organization, default_instance_group, admin, system_au
     assert oadmin_access.can_attach(objects.job_template, default_instance_group, 'instance_groups', None)
     assert not auditor_access.can_attach(objects.job_template, default_instance_group, 'instance_groups', None)
     assert not omember_access.can_attach(objects.job_template, default_instance_group, 'instance_groups', None)
-
-    
