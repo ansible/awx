@@ -265,8 +265,12 @@ class BaseAccess(object):
         field = obj._meta.get_field(relationship)
         if isinstance(field, ManyToOneRel):
             # this call is in the wrong place, not an attachment but a modification
+            if disassociate:
+                kwargs = {'obj': sub_obj, 'data': {field.remote_field.name: None}}
+            else:
+                kwargs = {'obj': sub_obj, 'data': {field.remote_field.name: obj}}
             access = access_registry[sub_obj.__class__](self.user)
-            return access.can_change(sub_obj, {field.remote_field.name: obj})
+            return (access, 'can_change', kwargs)
         if not isinstance(field, (ManyToManyField, ManyToManyRel)):
             raise RuntimeError('Cannot call this with a {} relationship obj:{} rel:{}.'.format(
                 field.__class__.__name__, obj.__class__.__name__, relationship))
@@ -292,17 +296,20 @@ class BaseAccess(object):
         if not isinstance(obj_B, modelB):
             raise RuntimeError('Incorrect type given in {} for object B. Given {}, expected {}.'.format(
                 access, obj_B.__class__.__name__, modelB))
+        kwargs = {'obj_A': obj_A, 'obj_B': obj_B}
         if disassociate:
-            return access.can_delete(obj_A=obj_A, obj_B=obj_B)
+            return (access, 'can_delete', kwargs)
         else:
-            return access.can_add(obj_A=obj_A, obj_B=obj_B)
+            return (access, 'can_add', kwargs)
 
     # NOTE: the data parameter is no longer necessary
     def can_attach(self, obj, sub_obj, relationship, data=None, skip_sub_obj_read_check=False):
-        return self.get_attach_access(obj, sub_obj, relationship, skip_sub_obj_read_check)
+        access, method, kwargs = self.get_attach_access(obj, sub_obj, relationship, skip_sub_obj_read_check)
+        return getattr(access, method)(**kwargs)
 
     def can_unattach(self, obj, sub_obj, relationship, data=None, skip_sub_obj_read_check=False):
-        return self.get_attach_access(obj, sub_obj, relationship, skip_sub_obj_read_check, disassociate=True)
+        access, method, kwargs = self.get_attach_access(obj, sub_obj, relationship, skip_sub_obj_read_check, disassociate=True)
+        return getattr(access, method)(**kwargs)
 
     def check_related(self, field, Model, data, role_field='admin_role',
                       obj=None, mandatory=False):

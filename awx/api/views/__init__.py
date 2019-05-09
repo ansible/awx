@@ -4465,7 +4465,7 @@ class RoleTeamsList(SubListAttachDetachAPIView):
     model = models.Team
     serializer_class = serializers.TeamSerializer
     parent_model = models.Role
-    relationship = 'member_role.parents'
+    relationship = None  # forward relationship cannot be deterministically written
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):

@@ -7,6 +7,7 @@ from django.core.exceptions import FieldDoesNotExist
 
 from rest_framework.exceptions import ParseError
 
+from awx.main.fields import ImplicitRoleField
 from awx.main.access import (
     BaseAccess,
     BaseAttachAccess,
@@ -16,7 +17,8 @@ from awx.main.access import (
     SystemJobTemplateAccess,
     ProjectAccess,
     ActivityStreamAccess,
-    vars_are_encrypted
+    vars_are_encrypted,
+    access_registry
 )
 
 from awx.main.models import (
@@ -31,6 +33,7 @@ from awx.main.models import (
     JobTemplate,
     SystemJobTemplate
 )
+from awx.api.generics import SubListCreateAttachDetachAPIView
 
 
 @pytest.fixture
@@ -356,7 +359,7 @@ class TestAttachUtilities:
         mock_method = mocker.MagicMock(return_value='baaaar')
         with mocker.patch('awx.main.access.ProjectAccess.can_change', mock_method):
             assert ProjectAccess(User()).can_attach(Organization(pk=43), Project(pk=42), 'projects')
-        mock_method.assert_called_once_with(Project(pk=42), {'organization': Organization(pk=43)})
+        mock_method.assert_called_once_with(obj=Project(pk=42), data={'organization': Organization(pk=43)})
 
     def test_attach_classes_non_overlapping(self):
         '''Assure that two attach classes will not make claim to the same relationship
@@ -370,3 +373,28 @@ class TestAttachUtilities:
                     through_model.__name__, attach_registry[through_model].__name__, cls.__name__
                 )
                 attach_registry[through_model] = cls
+
+    def test_all_views_use_valid_relation(self, all_views, mocker):
+        for View in all_views:
+            if not issubclass(View, SubListCreateAttachDetachAPIView):
+                continue
+            assert View.model
+            assert View.parent_model
+            if not View.relationship:
+                continue # special case only for role teams list
+
+            AccessClass = access_registry[View.model]
+
+            parent_obj = View.parent_model(pk=43)
+            obj = View.model(pk=42)
+
+            # Since we're not using the real database,
+            # we have to manually create the related roles
+            for field in parent_obj._meta.concrete_fields:
+                if isinstance(field, ImplicitRoleField):
+                    setattr(parent_obj, field.name, Role(pk=232, role_field=field.name))
+
+            access = AccessClass(User())
+            # Check that these do not fall into a RuntimeError case
+            access.get_attach_access(parent_obj, obj, View.relationship, False)
+            access.get_attach_access(parent_obj, obj, View.relationship, False, disassociate=True)
