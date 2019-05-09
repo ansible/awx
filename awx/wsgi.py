@@ -8,11 +8,10 @@ from awx import __version__ as tower_version
 from awx import prepare_env, MODE
 prepare_env()
 
-
-from django.core.wsgi import WSGIHandler  # NOQA
 import django  # NOQA
 from django.conf import settings  # NOQA
 from django.urls import resolve  # NOQA
+from django.core.wsgi import get_wsgi_application # NOQA
 import social_django  # NOQA
 
 
@@ -48,25 +47,5 @@ if not django.__version__.startswith('1.'):
             even minor, versions.".format(django.__version__))
 
 
-class AWXWSGIHandler(WSGIHandler):
-    def _legacy_get_response(self, request):
-        try:
-            # resolve can raise a 404, in that case, pass through to the
-            # "normal" middleware
-            if getattr(resolve(request.path), 'url_name', '') == 'migrations_notran':
-                # short-circuit middleware
-                request._cors_enabled = False
-                return self._get_response(request)
-        except django.urls.Resolver404:
-            pass
-        # fall through to middle-ware
-        return super(AWXWSGIHandler, self)._legacy_get_response(request)
-
-
 # Return the default Django WSGI application.
-def get_wsgi_application():
-    django.setup(set_prefix=False)
-    return AWXWSGIHandler()
-
-
 application = get_wsgi_application()
