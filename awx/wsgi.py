@@ -41,20 +41,11 @@ if social_django.__version__ != '2.1.0':
             still works".format(social_django.__version__))
 
 
-if django.__version__ != '1.11.20':
-    raise RuntimeError("Django version other than 1.11.20 detected {}. \
+if not django.__version__.startswith('1.'):
+    raise RuntimeError("Django version other than 1.XX detected {}. \
             Inherit from WSGIHandler to support short-circuit Django Middleware. \
-            This is known to work for Django 1.11.20 and may not work with other, \
+            This is known to work for Django 1.XX and may not work with other, \
             even minor, versions.".format(django.__version__))
-
-
-if settings.MIDDLEWARE:
-    raise RuntimeError("MIDDLEWARE setting detected. \
-            The 'migration in progress' view feature short-circuits OLD Django \
-            MIDDLEWARE_CLASSES behavior. With the new Django MIDDLEWARE beahvior \
-            it's possible to short-ciruit the middleware onion through supported \
-            middleware mechanisms. Further, from django.core.wsgi.get_wsgi_application() \
-            should be called to get an instance of WSGIHandler().")
 
 
 class AWXWSGIHandler(WSGIHandler):
