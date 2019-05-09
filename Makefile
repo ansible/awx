@@ -590,9 +590,7 @@ docker-compose-build: awx-devel-build
 
 # Base development image build
 awx-devel-build:
-	# To enable the 'experimental' features in Docker:
-	# https://docs.docker.com/engine/reference/commandline/dockerd/#daemon-configuration-file
-	docker build --squash -t ansible/awx_devel -f tools/docker-compose/Dockerfile .
+	docker build -t ansible/awx_devel -f tools/docker-compose/Dockerfile .
 	docker tag ansible/awx_devel $(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG)
 	#docker push $(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG)
 
