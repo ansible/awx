@@ -44,8 +44,10 @@ class Command(BaseCommand):
             print((fmt + ']').format(instance_group))
             for x in instance_group.instances.all():
                 color = '\033[92m'
-                if x.capacity == 0 or x.enabled is False:
+                if x.capacity == 0:
                     color = '\033[91m'
+                if x.enabled is False:
+                    color = '\033[90m[DISABLED] '
                 fmt = '\t' + color + '{0.hostname} capacity={0.capacity} version={1}'
                 if x.last_isolated_check:
                     fmt += ' last_isolated_check="{0.last_isolated_check:%Y-%m-%d %H:%M:%S}"'
