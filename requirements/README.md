@@ -12,6 +12,8 @@ pip-compile -U -r --allow-unsafe --output-file requirements/requirements.txt req
 pip-compile -U -r --allow-unsafe --output-file requirements/requirements_ansible_py3.txt requirements/requirements_ansible.in
 ```
 
+Remove the `docutils` line from `requirements/requirements.txt`.
+
 The Ansible venv requirements file needs to start with the python 2 version
 as a base. Then we can run the tool again to get the python 3 version.
 Consult the output of the `diff` command and add a conditional switch in those cases.

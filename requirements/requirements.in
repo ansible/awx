@@ -35,7 +35,6 @@ psutil==5.4.3
 psycopg2==2.7.3.2   # problems with Segmentation faults / wheels on upgrade
 pygerduty==0.37.0
 pyparsing==2.2.0
-python-daemon==2.2.0
 python-dateutil==2.7.2  # contains support for TZINFO= parsing
 python-memcached==1.59
 python-radius==1.0
