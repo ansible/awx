@@ -37,7 +37,6 @@ describe('<OrganizationEdit />', () => {
         organization={mockData}
       />, { context: { network: {
         api,
-        handleHttpError: () => {}
       } } }
     );
 
@@ -57,7 +56,6 @@ describe('<OrganizationEdit />', () => {
         organization={mockData}
       />, { context: { network: {
         api,
-        handleHttpError: () => {}
       } } }
     );
 
@@ -84,7 +82,6 @@ describe('<OrganizationEdit />', () => {
       />, { context: {
         network: {
           api: { api },
-          handleHttpError: () => {}
         },
         router: { history }
       } }

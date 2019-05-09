@@ -1,169 +1,215 @@
 import React from 'react';
-import { mountWithContexts } from '../enzymeHelpers';
-import { asyncFlush } from '../../jest.setup';
+import { mountWithContexts, waitForElement } from '../enzymeHelpers';
 import AWXLogin from '../../src/pages/Login';
 import { RootAPI } from '../../src/api';
 
 jest.mock('../../src/api');
 
 describe('<Login />', () => {
-  let loginWrapper;
-  let awxLogin;
-  let loginPage;
-  let loginForm;
-  let usernameInput;
-  let passwordInput;
-  let submitButton;
-  let loginHeaderLogo;
+  async function findChildren (wrapper) {
+    const [
+      awxLogin,
+      loginPage,
+      loginForm,
+      usernameInput,
+      passwordInput,
+      submitButton,
+      loginHeaderLogo,
+    ] = await Promise.all([
+      waitForElement(wrapper, 'AWXLogin', (el) => el.length === 1),
+      waitForElement(wrapper, 'LoginPage', (el) => el.length === 1),
+      waitForElement(wrapper, 'LoginForm', (el) => el.length === 1),
+      waitForElement(wrapper, 'input#pf-login-username-id', (el) => el.length === 1),
+      waitForElement(wrapper, 'input#pf-login-password-id', (el) => el.length === 1),
+      waitForElement(wrapper, 'Button[type="submit"]', (el) => el.length === 1),
+      waitForElement(wrapper, 'img', (el) => el.length === 1),
+    ]);
+    return {
+      awxLogin,
+      loginPage,
+      loginForm,
+      usernameInput,
+      passwordInput,
+      submitButton,
+      loginHeaderLogo,
+    };
+  }
 
-  const mountLogin = () => {
-    loginWrapper = mountWithContexts(<AWXLogin />, { context: { network: {} } });
-  };
-
-  const findChildren = () => {
-    awxLogin = loginWrapper.find('AWXLogin');
-    loginPage = loginWrapper.find('LoginPage');
-    loginForm = loginWrapper.find('LoginForm');
-    usernameInput = loginWrapper.find('input#pf-login-username-id');
-    passwordInput = loginWrapper.find('input#pf-login-password-id');
-    submitButton = loginWrapper.find('Button[type="submit"]');
-    loginHeaderLogo = loginPage.find('img');
-  };
+  beforeEach(() => {
+    RootAPI.read.mockResolvedValue({
+      data: {
+        custom_login_info: '',
+        custom_logo: 'images/foo.jpg'
+      }
+    });
+  });
 
   afterEach(() => {
     jest.clearAllMocks();
-    loginWrapper.unmount();
   });
 
-  test('initially renders without crashing', () => {
-    mountLogin();
-    findChildren();
-    expect(loginWrapper.length).toBe(1);
-    expect(loginPage.length).toBe(1);
-    expect(loginForm.length).toBe(1);
-    expect(usernameInput.length).toBe(1);
+  test('initially renders without crashing', async (done) => {
+    const loginWrapper = mountWithContexts(
+      <AWXLogin isAuthenticated={() => false} />
+    );
+    const {
+      awxLogin,
+      usernameInput,
+      passwordInput,
+      submitButton,
+    } = await findChildren(loginWrapper);
     expect(usernameInput.props().value).toBe('');
-    expect(passwordInput.length).toBe(1);
     expect(passwordInput.props().value).toBe('');
-    expect(awxLogin.state().isInputValid).toBe(true);
-    expect(submitButton.length).toBe(1);
+    expect(awxLogin.state('validationError')).toBe(false);
     expect(submitButton.props().isDisabled).toBe(false);
-    expect(loginHeaderLogo.length).toBe(1);
+    done();
   });
 
-  test('custom logo renders Brand component with correct src and alt', () => {
-    loginWrapper = mountWithContexts(<AWXLogin logo="images/foo.jpg" alt="Foo Application" />);
-    findChildren();
-    expect(loginHeaderLogo.length).toBe(1);
-    expect(loginHeaderLogo.props().src).toBe('data:image/jpeg;images/foo.jpg');
-    expect(loginHeaderLogo.props().alt).toBe('Foo Application');
+  test('custom logo renders Brand component with correct src and alt', async (done) => {
+    const loginWrapper = mountWithContexts(
+      <AWXLogin alt="Foo Application" isAuthenticated={() => false} />
+    );
+    const { loginHeaderLogo } = await findChildren(loginWrapper);
+    const { alt, src } = loginHeaderLogo.props();
+    expect([alt, src]).toEqual(['Foo Application', 'data:image/jpeg;images/foo.jpg']);
+    done();
   });
 
-  test('default logo renders Brand component with correct src and alt', () => {
-    mountLogin();
-    findChildren();
-    expect(loginHeaderLogo.length).toBe(1);
-    expect(loginHeaderLogo.props().src).toBe('brand-logo.svg');
-    expect(loginHeaderLogo.props().alt).toBe('AWX');
+  test('default logo renders Brand component with correct src and alt', async (done) => {
+    RootAPI.read.mockResolvedValue({ data: {} });
+    const loginWrapper = mountWithContexts(
+      <AWXLogin isAuthenticated={() => false} />
+    );
+    const { loginHeaderLogo } = await findChildren(loginWrapper);
+    const { alt, src } = loginHeaderLogo.props();
+    expect([alt, src]).toEqual(['AWX', 'brand-logo.svg']);
+    done();
   });
 
-  test('state maps to un/pw input value props', () => {
-    mountLogin();
-    findChildren();
-    awxLogin.setState({ username: 'un', password: 'pw' });
-    expect(awxLogin.state().username).toBe('un');
-    expect(awxLogin.state().password).toBe('pw');
-    findChildren();
-    expect(usernameInput.props().value).toBe('un');
-    expect(passwordInput.props().value).toBe('pw');
+  test('default logo renders on data initialization error', async (done) => {
+    RootAPI.read.mockRejectedValueOnce({ response: { status: 500 } });
+    const loginWrapper = mountWithContexts(
+      <AWXLogin isAuthenticated={() => false} />
+    );
+    const { loginHeaderLogo } = await findChildren(loginWrapper);
+    const { alt, src } = loginHeaderLogo.props();
+    expect([alt, src]).toEqual(['AWX', 'brand-logo.svg']);
+    done();
   });
 
-  test('updating un/pw clears out error', () => {
-    mountLogin();
-    findChildren();
-    awxLogin.setState({ isInputValid: false });
-    expect(loginWrapper.find('.pf-c-form__helper-text.pf-m-error').length).toBe(1);
-    usernameInput.instance().value = 'uname';
-    usernameInput.simulate('change');
-    expect(awxLogin.state().username).toBe('uname');
-    expect(awxLogin.state().isInputValid).toBe(true);
-    expect(loginWrapper.find('.pf-c-form__helper-text.pf-m-error').length).toBe(0);
-    awxLogin.setState({ isInputValid: false });
-    expect(loginWrapper.find('.pf-c-form__helper-text.pf-m-error').length).toBe(1);
-    passwordInput.instance().value = 'pword';
-    passwordInput.simulate('change');
-    expect(awxLogin.state().password).toBe('pword');
-    expect(awxLogin.state().isInputValid).toBe(true);
-    expect(loginWrapper.find('.pf-c-form__helper-text.pf-m-error').length).toBe(0);
+  test('state maps to un/pw input value props', async (done) => {
+    const loginWrapper = mountWithContexts(
+      <AWXLogin isAuthenticated={() => false} />
+    );
+    const { usernameInput, passwordInput } = await findChildren(loginWrapper);
+    usernameInput.props().onChange({ currentTarget: { value: 'un' } });
+    passwordInput.props().onChange({ currentTarget: { value: 'pw' } });
+    await waitForElement(loginWrapper, 'AWXLogin', (el) => el.state('username') === 'un');
+    await waitForElement(loginWrapper, 'AWXLogin', (el) => el.state('password') === 'pw');
+    done();
   });
 
-  test('login API not called when loading', () => {
-    mountLogin();
-    findChildren();
-    expect(awxLogin.state().isLoading).toBe(false);
-    awxLogin.setState({ isLoading: true });
+  test('handles input validation errors and clears on input value change', async (done) => {
+    const formError = '.pf-c-form__helper-text.pf-m-error';
+    const loginWrapper = mountWithContexts(
+      <AWXLogin isAuthenticated={() => false} />
+    );
+    const {
+      usernameInput,
+      passwordInput,
+      submitButton
+    } = await findChildren(loginWrapper);
+
+    RootAPI.login.mockRejectedValueOnce({ response: { status: 401 } });
+    usernameInput.props().onChange({ currentTarget: { value: 'invalid' } });
+    passwordInput.props().onChange({ currentTarget: { value: 'invalid' } });
+    submitButton.simulate('click');
+    await waitForElement(loginWrapper, 'AWXLogin', (el) => el.state('username') === 'invalid');
+    await waitForElement(loginWrapper, 'AWXLogin', (el) => el.state('password') === 'invalid');
+    await waitForElement(loginWrapper, 'AWXLogin', (el) => el.state('validationError') === true);
+    await waitForElement(loginWrapper, formError, (el) => el.length === 1);
+
+    usernameInput.props().onChange({ currentTarget: { value: 'dsarif' } });
+    passwordInput.props().onChange({ currentTarget: { value: 'freneticpny' } });
+    await waitForElement(loginWrapper, 'AWXLogin', (el) => el.state('username') === 'dsarif');
+    await waitForElement(loginWrapper, 'AWXLogin', (el) => el.state('password') === 'freneticpny');
+    await waitForElement(loginWrapper, 'AWXLogin', (el) => el.state('validationError') === false);
+    await waitForElement(loginWrapper, formError, (el) => el.length === 0);
+
+    done();
+  });
+
+  test('handles other errors and clears on resubmit', async (done) => {
+    const loginWrapper = mountWithContexts(
+      <AWXLogin isAuthenticated={() => false} />
+    );
+    const {
+      usernameInput,
+      passwordInput,
+      submitButton
+    } = await findChildren(loginWrapper);
+
+    RootAPI.login.mockRejectedValueOnce({ response: { status: 500 } });
+    submitButton.simulate('click');
+    await waitForElement(loginWrapper, 'AWXLogin', (el) => el.state('authenticationError') === true);
+
+    usernameInput.props().onChange({ currentTarget: { value: 'sgrimes' } });
+    passwordInput.props().onChange({ currentTarget: { value: 'ovid' } });
+    await waitForElement(loginWrapper, 'AWXLogin', (el) => el.state('username') === 'sgrimes');
+    await waitForElement(loginWrapper, 'AWXLogin', (el) => el.state('password') === 'ovid');
+    await waitForElement(loginWrapper, 'AWXLogin', (el) => el.state('authenticationError') === true);
+
+    submitButton.simulate('click');
+    await waitForElement(loginWrapper, 'AWXLogin', (el) => el.state('authenticationError') === false);
+    done();
+  });
+
+  test('no login requests are made when already authenticating', async (done) => {
+    const loginWrapper = mountWithContexts(
+      <AWXLogin isAuthenticated={() => false} />
+    );
+    const { awxLogin, submitButton } = await findChildren(loginWrapper);
+
+    awxLogin.setState({ isAuthenticating: true });
+    submitButton.simulate('click');
     submitButton.simulate('click');
     expect(RootAPI.login).toHaveBeenCalledTimes(0);
-  });
 
-  test('submit calls login API successfully', async () => {
-    RootAPI.login = jest.fn().mockImplementation(() => Promise.resolve({}));
-    mountLogin();
-    findChildren();
-    expect(awxLogin.state().isLoading).toBe(false);
-    awxLogin.setState({ username: 'unamee', password: 'pwordd' });
+    awxLogin.setState({ isAuthenticating: false });
+    submitButton.simulate('click');
     submitButton.simulate('click');
     expect(RootAPI.login).toHaveBeenCalledTimes(1);
-    expect(RootAPI.login).toHaveBeenCalledWith('unamee', 'pwordd');
-    expect(awxLogin.state().isLoading).toBe(true);
-    await asyncFlush();
-    expect(awxLogin.state().isLoading).toBe(false);
+
+    done();
   });
 
-  test('submit calls login API and handles 401 error', async () => {
-    RootAPI.login = jest.fn().mockImplementation(() => {
-      const err = new Error('401 error');
-      err.response = { status: 401, message: 'problem' };
-      return Promise.reject(err);
-    });
-    mountLogin();
-    findChildren();
-    expect(awxLogin.state().isLoading).toBe(false);
-    expect(awxLogin.state().isInputValid).toBe(true);
-    awxLogin.setState({ username: 'unamee', password: 'pwordd' });
+  test('submit calls api.login successfully', async (done) => {
+    const loginWrapper = mountWithContexts(
+      <AWXLogin isAuthenticated={() => false} />
+    );
+    const {
+      usernameInput,
+      passwordInput,
+      submitButton,
+    } = await findChildren(loginWrapper);
+
+    usernameInput.props().onChange({ currentTarget: { value: 'gthorpe' } });
+    passwordInput.props().onChange({ currentTarget: { value: 'hydro' } });
     submitButton.simulate('click');
+    await waitForElement(loginWrapper, 'AWXLogin', (el) => el.state('isAuthenticating') === true);
+    await waitForElement(loginWrapper, 'AWXLogin', (el) => el.state('isAuthenticating') === false);
     expect(RootAPI.login).toHaveBeenCalledTimes(1);
-    expect(RootAPI.login).toHaveBeenCalledWith('unamee', 'pwordd');
-    expect(awxLogin.state().isLoading).toBe(true);
-    await asyncFlush();
-    expect(awxLogin.state().isInputValid).toBe(false);
-    expect(awxLogin.state().isLoading).toBe(false);
+    expect(RootAPI.login).toHaveBeenCalledWith('gthorpe', 'hydro');
+
+    done();
   });
 
-  test('submit calls login API and handles non-401 error', async () => {
-    RootAPI.login = jest.fn().mockImplementation(() => {
-      const err = new Error('500 error');
-      err.response = { status: 500, message: 'problem' };
-      return Promise.reject(err);
-    });
-    mountLogin();
-    findChildren();
-    expect(awxLogin.state().isLoading).toBe(false);
-    awxLogin.setState({ username: 'unamee', password: 'pwordd' });
-    submitButton.simulate('click');
-    expect(RootAPI.login).toHaveBeenCalledTimes(1);
-    expect(RootAPI.login).toHaveBeenCalledWith('unamee', 'pwordd');
-    expect(awxLogin.state().isLoading).toBe(true);
-    await asyncFlush();
-    expect(awxLogin.state().isLoading).toBe(false);
-  });
-
-  test('render Redirect to / when already authenticated', () => {
-    mountLogin();
-    findChildren();
-    awxLogin.setState({ isAuthenticated: true });
-    const redirectElem = loginWrapper.find('Redirect');
-    expect(redirectElem.length).toBe(1);
-    expect(redirectElem.props().to).toBe('/');
+  test('render Redirect to / when already authenticated', async (done) => {
+    const loginWrapper = mountWithContexts(
+      <AWXLogin isAuthenticated={() => true} />
+    );
+    await waitForElement(loginWrapper, 'Redirect', (el) => el.length === 1);
+    await waitForElement(loginWrapper, 'Redirect', (el) => el.props().to === '/');
+    done();
   });
 });

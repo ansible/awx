@@ -12,7 +12,6 @@ import {
 } from '@patternfly/react-core';
 
 import { Config } from '../../../contexts/Config';
-import { withNetwork } from '../../../contexts/Network';
 import CardCloseButton from '../../../components/CardCloseButton';
 import OrganizationForm from '../components/OrganizationForm';
 import { OrganizationsAPI } from '../../../api';
@@ -20,40 +19,26 @@ import { OrganizationsAPI } from '../../../api';
 class OrganizationAdd extends React.Component {
   constructor (props) {
     super(props);
-
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleCancel = this.handleCancel.bind(this);
-    this.handleSuccess = this.handleSuccess.bind(this);
-
-    this.state = {
-      error: '',
-    };
+    this.state = { error: '' };
   }
 
   async handleSubmit (values, groupsToAssociate) {
-    const { handleHttpError } = this.props;
+    const { history } = this.props;
     try {
       const { data: response } = await OrganizationsAPI.create(values);
-      try {
-        await Promise.all(groupsToAssociate.map(id => OrganizationsAPI
-          .associateInstanceGroup(response.id, id)));
-        this.handleSuccess(response.id);
-      } catch (err) {
-        handleHttpError(err) || this.setState({ error: err });
-      }
-    } catch (err) {
-      this.setState({ error: err });
+      await Promise.all(groupsToAssociate.map(id => OrganizationsAPI
+        .associateInstanceGroup(response.id, id)));
+      history.push(`/organizations/${response.id}`);
+    } catch (error) {
+      this.setState({ error });
     }
   }
 
   handleCancel () {
     const { history } = this.props;
     history.push('/organizations');
-  }
-
-  handleSuccess (id) {
-    const { history } = this.props;
-    history.push(`/organizations/${id}`);
   }
 
   render () {
@@ -94,4 +79,4 @@ OrganizationAdd.contextTypes = {
 };
 
 export { OrganizationAdd as _OrganizationAdd };
-export default withI18n()(withNetwork(withRouter(OrganizationAdd)));
+export default withI18n()(withRouter(OrganizationAdd));

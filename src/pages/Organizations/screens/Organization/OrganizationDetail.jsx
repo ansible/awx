@@ -4,9 +4,11 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { CardBody as PFCardBody, Button } from '@patternfly/react-core';
 import styled from 'styled-components';
+
 import { DetailList, Detail } from '../../../../components/DetailList';
-import { withNetwork } from '../../../../contexts/Network';
 import { ChipGroup, Chip } from '../../../../components/Chip';
+import ContentError from '../../../../components/ContentError';
+import ContentLoading from '../../../../components/ContentLoading';
 import { OrganizationsAPI } from '../../../../api';
 
 const CardBody = styled(PFCardBody)`
@@ -18,8 +20,9 @@ class OrganizationDetail extends Component {
     super(props);
 
     this.state = {
+      contentError: false,
+      contentLoading: true,
       instanceGroups: [],
-      error: false
     };
     this.loadInstanceGroups = this.loadInstanceGroups.bind(this);
   }
@@ -29,25 +32,23 @@ class OrganizationDetail extends Component {
   }
 
   async loadInstanceGroups () {
-    const {
-      handleHttpError,
-      match
-    } = this.props;
+    const { match: { params: { id } } } = this.props;
+
+    this.setState({ contentLoading: true });
     try {
-      const {
-        data
-      } = await OrganizationsAPI.readInstanceGroups(match.params.id);
-      this.setState({
-        instanceGroups: [...data.results]
-      });
+      const { data: { results = [] } } = await OrganizationsAPI.readInstanceGroups(id);
+      this.setState({ instanceGroups: [...results] });
     } catch (err) {
-      handleHttpError(err) || this.setState({ error: true });
+      this.setState({ contentError: true });
+    } finally {
+      this.setState({ contentLoading: false });
     }
   }
 
   render () {
     const {
-      error,
+      contentLoading,
+      contentError,
       instanceGroups,
     } = this.state;
 
@@ -64,6 +65,14 @@ class OrganizationDetail extends Component {
       match,
       i18n
     } = this.props;
+
+    if (contentLoading) {
+      return (<ContentLoading />);
+    }
+
+    if (contentError) {
+      return (<ContentError />);
+    }
 
     return (
       <CardBody>
@@ -116,10 +125,9 @@ class OrganizationDetail extends Component {
             </Button>
           </div>
         )}
-        {error ? 'error!' : ''}
       </CardBody>
     );
   }
 }
 
-export default withI18n()(withRouter(withNetwork(OrganizationDetail)));
+export default withI18n()(withRouter(OrganizationDetail));

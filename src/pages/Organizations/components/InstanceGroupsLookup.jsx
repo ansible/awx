@@ -7,8 +7,6 @@ import { QuestionCircleIcon } from '@patternfly/react-icons';
 
 import Lookup from '../../../components/Lookup';
 
-import { withNetwork } from '../../../contexts/Network';
-
 import { InstanceGroupsAPI } from '../../../api';
 
 const getInstanceGroups = async (params) => InstanceGroupsAPI.read(params);
@@ -66,4 +64,4 @@ InstanceGroupsLookup.defaultProps = {
   tooltip: '',
 };
 
-export default withI18n()(withNetwork(InstanceGroupsLookup));
+export default withI18n()(InstanceGroupsLookup);

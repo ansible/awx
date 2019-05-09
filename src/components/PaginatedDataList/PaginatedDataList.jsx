@@ -1,18 +1,14 @@
 import React, { Fragment } from 'react';
 import PropTypes, { arrayOf, shape, string, bool } from 'prop-types';
-import {
-  DataList,
-  Title,
-  EmptyState,
-  EmptyStateIcon,
-  EmptyStateBody
-} from '@patternfly/react-core';
-import { CubesIcon } from '@patternfly/react-icons';
+import { DataList } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { withRouter } from 'react-router-dom';
 import styled from 'styled-components';
 
+import ContentEmpty from '../ContentEmpty';
+import ContentError from '../ContentError';
+import ContentLoading from '../ContentLoading';
 import Pagination from '../Pagination';
 import DataListToolbar from '../DataListToolbar';
 import PaginatedDataListItem from './PaginatedDataListItem';
@@ -37,11 +33,6 @@ const EmptyStateControlsWrapper = styled.div`
 class PaginatedDataList extends React.Component {
   constructor (props) {
     super(props);
-
-    this.state = {
-      error: null,
-    };
-
     this.handleSetPage = this.handleSetPage.bind(this);
     this.handleSetPageSize = this.handleSetPageSize.bind(this);
     this.handleSort = this.handleSort.bind(this);
@@ -79,7 +70,10 @@ class PaginatedDataList extends React.Component {
   }
 
   render () {
+    const [orderBy, sortOrder] = this.getSortOrder();
     const {
+      contentError,
+      contentLoading,
       emptyStateControls,
       items,
       itemCount,
@@ -93,66 +87,67 @@ class PaginatedDataList extends React.Component {
       i18n,
       renderToolbar,
     } = this.props;
-    const { error } = this.state;
-    const [orderBy, sortOrder] = this.getSortOrder();
-    const queryParams = parseNamespacedQueryString(qsConfig, location.search);
     const columns = toolbarColumns.length ? toolbarColumns : [{ name: i18n._(t`Name`), key: 'name', isSortable: true }];
-    return (
-      <Fragment>
-        {error && (
-          <Fragment>
-            <div>{error.message}</div>
-            {error.response && (
-              <div>{error.response.data.detail}</div>
-            )}
-          </Fragment> // TODO: replace with proper error handling
-        )}
-        {items.length === 0 ? (
-          <Fragment>
+    const queryParams = parseNamespacedQueryString(qsConfig, location.search);
+
+    const itemDisplayName = ucFirst(pluralize(itemName));
+    const itemDisplayNamePlural = ucFirst(itemNamePlural || pluralize(itemName));
+
+    const dataListLabel = i18n._(t`${itemDisplayName} List`);
+    const emptyContentMessage = i18n._(t`Please add ${itemDisplayNamePlural} to populate this list `);
+    const emptyContentTitle = i18n._(t`No ${itemDisplayNamePlural} Found `);
+
+    let Content;
+    if (contentLoading && items.length <= 0) {
+      Content = (<ContentLoading />);
+    } else if (contentError) {
+      Content = (<ContentError />);
+    } else if (items.length <= 0) {
+      Content = (<ContentEmpty title={emptyContentTitle} message={emptyContentMessage} />);
+    } else {
+      Content = (<DataList aria-label={dataListLabel}>{items.map(renderItem)}</DataList>);
+    }
+
+    if (items.length <= 0) {
+      return (
+        <Fragment>
+          {emptyStateControls && (
             <EmptyStateControlsWrapper>
               {emptyStateControls}
             </EmptyStateControlsWrapper>
+          )}
+          {emptyStateControls && (
             <div css="border-bottom: 1px solid #d2d2d2" />
-            <EmptyState>
-              <EmptyStateIcon icon={CubesIcon} />
-              <Title size="lg">
-                {i18n._(t`No ${ucFirst(itemNamePlural || pluralize(itemName))} Found `)}
-              </Title>
-              <EmptyStateBody>
-                {i18n._(t`Please add ${ucFirst(itemNamePlural || pluralize(itemName))} to populate this list `)}
-              </EmptyStateBody>
-            </EmptyState>
-          </Fragment>
-        ) : (
-          <Fragment>
-            {renderToolbar({
-              sortedColumnKey: orderBy,
-              sortOrder,
-              columns,
-              onSearch: () => { },
-              onSort: this.handleSort,
-            })}
-            <DataList aria-label={i18n._(t`${ucFirst(pluralize(itemName))} List`)}>
-              {items.map(item => (renderItem ? renderItem(item) : (
-                <PaginatedDataListItem key={item.id} item={item} />
-              )))}
-            </DataList>
-            <Pagination
-              variant="bottom"
-              itemCount={itemCount}
-              page={queryParams.page || 1}
-              perPage={queryParams.page_size}
-              perPageOptions={showPageSizeOptions ? [
-                { title: '5', value: 5 },
-                { title: '10', value: 10 },
-                { title: '20', value: 20 },
-                { title: '50', value: 50 }
-              ] : []}
-              onSetPage={this.handleSetPage}
-              onPerPageSelect={this.handleSetPageSize}
-            />
-          </Fragment>
-        )}
+          )}
+          {Content}
+        </Fragment>
+      );
+    }
+
+    return (
+      <Fragment>
+        {renderToolbar({
+          sortedColumnKey: orderBy,
+          sortOrder,
+          columns,
+          onSearch: () => { },
+          onSort: this.handleSort,
+        })}
+        {Content}
+        <Pagination
+          variant="bottom"
+          itemCount={itemCount}
+          page={queryParams.page || 1}
+          perPage={queryParams.page_size}
+          perPageOptions={showPageSizeOptions ? [
+            { title: '5', value: 5 },
+            { title: '10', value: 10 },
+            { title: '20', value: 20 },
+            { title: '50', value: 50 }
+          ] : []}
+          onSetPage={this.handleSetPage}
+          onPerPageSelect={this.handleSetPageSize}
+        />
       </Fragment>
     );
   }
@@ -178,14 +173,18 @@ PaginatedDataList.propTypes = {
   })),
   showPageSizeOptions: PropTypes.bool,
   renderToolbar: PropTypes.func,
+  contentLoading: PropTypes.bool,
+  contentError: PropTypes.bool,
 };
 
 PaginatedDataList.defaultProps = {
-  renderItem: null,
+  contentLoading: false,
+  contentError: false,
   toolbarColumns: [],
   itemName: 'item',
   itemNamePlural: '',
   showPageSizeOptions: true,
+  renderItem: (item) => (<PaginatedDataListItem key={item.id} item={item} />),
   renderToolbar: (props) => (<DataListToolbar {...props} />),
 };
 

@@ -7,10 +7,6 @@ import {
   HashRouter
 } from 'react-router-dom';
 
-import { NetworkProvider } from './contexts/Network';
-import { RootDialogProvider } from './contexts/RootDialog';
-import { ConfigProvider } from './contexts/Config';
-
 import ja from '../build/locales/ja/messages';
 import en from '../build/locales/en/messages';
 
@@ -34,13 +30,7 @@ class RootProvider extends Component {
           language={language}
           catalogs={catalogs}
         >
-          <RootDialogProvider>
-            <NetworkProvider>
-              <ConfigProvider>
-                {children}
-              </ConfigProvider>
-            </NetworkProvider>
-          </RootDialogProvider>
+          {children}
         </I18nProvider>
       </HashRouter>
     );

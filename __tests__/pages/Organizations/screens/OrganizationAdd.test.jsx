@@ -1,27 +1,15 @@
 import React from 'react';
 
-import { mountWithContexts } from '../../../enzymeHelpers';
+import { mountWithContexts, waitForElement } from '../../../enzymeHelpers';
 
 import OrganizationAdd from '../../../../src/pages/Organizations/screens/OrganizationAdd';
 import { OrganizationsAPI } from '../../../../src/api';
 
 jest.mock('../../../../src/api');
 
-const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
 describe('<OrganizationAdd />', () => {
-  let networkProviderValue;
-
-  beforeEach(() => {
-    networkProviderValue = {
-      handleHttpError: () => {}
-    };
-  });
-
   test('handleSubmit should post to api', () => {
-    const wrapper = mountWithContexts(<OrganizationAdd />, {
-      context: { network: networkProviderValue }
-    });
+    const wrapper = mountWithContexts(<OrganizationAdd />);
     const updatedOrgData = {
       name: 'new name',
       description: 'new description',
@@ -35,9 +23,10 @@ describe('<OrganizationAdd />', () => {
     const history = {
       push: jest.fn(),
     };
-    const wrapper = mountWithContexts(<OrganizationAdd />, {
-      context: { router: { history } }
-    });
+    const wrapper = mountWithContexts(
+      <OrganizationAdd />,
+      { context: { router: { history } } }
+    );
     expect(history.push).not.toHaveBeenCalled();
     wrapper.find('button[aria-label="Cancel"]').prop('onClick')();
     expect(history.push).toHaveBeenCalledWith('/organizations');
@@ -47,15 +36,16 @@ describe('<OrganizationAdd />', () => {
     const history = {
       push: jest.fn(),
     };
-    const wrapper = mountWithContexts(<OrganizationAdd />, {
-      context: { router: { history } }
-    });
+    const wrapper = mountWithContexts(
+      <OrganizationAdd />,
+      { context: { router: { history } } }
+    );
     expect(history.push).not.toHaveBeenCalled();
     wrapper.find('button[aria-label="Close"]').prop('onClick')();
     expect(history.push).toHaveBeenCalledWith('/organizations');
   });
 
-  test('successful form submission should trigger redirect', async () => {
+  test('successful form submission should trigger redirect', async (done) => {
     const history = {
       push: jest.fn(),
     };
@@ -64,7 +54,7 @@ describe('<OrganizationAdd />', () => {
       description: 'new description',
       custom_virtualenv: 'Buzz',
     };
-    OrganizationsAPI.create.mockReturnValueOnce({
+    OrganizationsAPI.create.mockResolvedValueOnce({
       data: {
         id: 5,
         related: {
@@ -73,24 +63,23 @@ describe('<OrganizationAdd />', () => {
         ...orgData,
       }
     });
-    const wrapper = mountWithContexts(<OrganizationAdd />, {
-      context: { router: { history }, network: networkProviderValue }
-    });
-    wrapper.find('OrganizationForm').prop('handleSubmit')(orgData, [], []);
-    await sleep(0);
+    const wrapper = mountWithContexts(
+      <OrganizationAdd />,
+      { context: { router: { history } } }
+    );
+    await waitForElement(wrapper, 'button[aria-label="Save"]');
+    await wrapper.find('OrganizationForm').prop('handleSubmit')(orgData, [3], []);
     expect(history.push).toHaveBeenCalledWith('/organizations/5');
+    done();
   });
 
-  test('handleSubmit should post instance groups', async () => {
-    const wrapper = mountWithContexts(<OrganizationAdd />, {
-      context: { network: networkProviderValue }
-    });
+  test('handleSubmit should post instance groups', async (done) => {
     const orgData = {
       name: 'new name',
       description: 'new description',
       custom_virtualenv: 'Buzz',
     };
-    OrganizationsAPI.create.mockReturnValueOnce({
+    OrganizationsAPI.create.mockResolvedValueOnce({
       data: {
         id: 5,
         related: {
@@ -99,19 +88,22 @@ describe('<OrganizationAdd />', () => {
         ...orgData,
       }
     });
-    wrapper.find('OrganizationForm').prop('handleSubmit')(orgData, [3], []);
-    await sleep(0);
+    const wrapper = mountWithContexts(<OrganizationAdd />);
+    await waitForElement(wrapper, 'button[aria-label="Save"]');
+    await wrapper.find('OrganizationForm').prop('handleSubmit')(orgData, [3], []);
     expect(OrganizationsAPI.associateInstanceGroup)
       .toHaveBeenCalledWith(5, 3);
+    done();
   });
 
   test('AnsibleSelect component renders if there are virtual environments', () => {
     const config = {
       custom_virtualenvs: ['foo', 'bar'],
     };
-    const wrapper = mountWithContexts(<OrganizationAdd />, {
-      context: { network: networkProviderValue, config }
-    }).find('AnsibleSelect');
+    const wrapper = mountWithContexts(
+      <OrganizationAdd />,
+      { context: { config } }
+    ).find('AnsibleSelect');
     expect(wrapper.find('FormSelect')).toHaveLength(1);
     expect(wrapper.find('FormSelectOption')).toHaveLength(2);
   });
@@ -120,9 +112,10 @@ describe('<OrganizationAdd />', () => {
     const config = {
       custom_virtualenvs: [],
     };
-    const wrapper = mountWithContexts(<OrganizationAdd />, {
-      context: { network: networkProviderValue, config }
-    }).find('AnsibleSelect');
+    const wrapper = mountWithContexts(
+      <OrganizationAdd />,
+      { context: { config } }
+    ).find('AnsibleSelect');
     expect(wrapper.find('FormSelect')).toHaveLength(0);
   });
 });

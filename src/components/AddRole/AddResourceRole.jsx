@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Wizard } from '@patternfly/react-core';
-import { withNetwork } from '../../contexts/Network';
 import SelectResourceStep from './SelectResourceStep';
 import SelectRoleStep from './SelectRoleStep';
 import SelectableCard from './SelectableCard';
@@ -245,4 +244,4 @@ AddResourceRole.defaultProps = {
 };
 
 export { AddResourceRole as _AddResourceRole };
-export default withI18n()(withNetwork(AddResourceRole));
+export default withI18n()(AddResourceRole);

@@ -59,25 +59,13 @@ const mockAPIOrgsList = {
 
 describe('<OrganizationsList />', () => {
   let wrapper;
-  let api;
-
-  beforeEach(() => {
-    api = {
-      getOrganizations: () => {},
-      destroyOrganization: jest.fn(),
-    };
-  });
 
   test('initially renders succesfully', () => {
-    mountWithContexts(
-      <OrganizationsList />
-    );
+    mountWithContexts(<OrganizationsList />);
   });
 
   test('Puts 1 selected Org in state when handleSelect is called.', () => {
-    wrapper = mountWithContexts(
-      <OrganizationsList />
-    ).find('OrganizationsList');
+    wrapper = mountWithContexts(<OrganizationsList />).find('OrganizationsList');
 
     wrapper.setState({
       organizations: mockAPIOrgsList.data.results,
@@ -91,9 +79,7 @@ describe('<OrganizationsList />', () => {
   });
 
   test('Puts all Orgs in state when handleSelectAll is called.', () => {
-    wrapper = mountWithContexts(
-      <OrganizationsList />
-    );
+    wrapper = mountWithContexts(<OrganizationsList />);
     const list = wrapper.find('OrganizationsList');
     list.setState({
       organizations: mockAPIOrgsList.data.results,
@@ -108,16 +94,7 @@ describe('<OrganizationsList />', () => {
   });
 
   test('api is called to delete Orgs for each org in selected.', () => {
-    const fetchOrganizations = jest.fn(() => wrapper.find('OrganizationsList').setState({
-      organizations: []
-    }));
-    wrapper = mountWithContexts(
-      <OrganizationsList
-        fetchOrganizations={fetchOrganizations}
-      />, {
-        context: { network: { api } }
-      }
-    );
+    wrapper = mountWithContexts(<OrganizationsList />);
     const component = wrapper.find('OrganizationsList');
     wrapper.find('OrganizationsList').setState({
       organizations: mockAPIOrgsList.data.results,
@@ -130,14 +107,10 @@ describe('<OrganizationsList />', () => {
     expect(OrganizationsAPI.destroy).toHaveBeenCalledTimes(component.state('selected').length);
   });
 
-  test('call fetchOrganizations after org(s) have been deleted', () => {
-    const fetchOrgs = jest.spyOn(_OrganizationsList.prototype, 'fetchOrganizations');
+  test('call loadOrganizations after org(s) have been deleted', () => {
+    const fetchOrgs = jest.spyOn(_OrganizationsList.prototype, 'loadOrganizations');
     const event = { preventDefault: () => { } };
-    wrapper = mountWithContexts(
-      <OrganizationsList />, {
-        context: { network: { api } }
-      }
-    );
+    wrapper = mountWithContexts(<OrganizationsList />);
     wrapper.find('OrganizationsList').setState({
       organizations: mockAPIOrgsList.data.results,
       itemCount: 3,
@@ -153,13 +126,9 @@ describe('<OrganizationsList />', () => {
     const history = createMemoryHistory({
       initialEntries: ['organizations?order_by=name&page=1&page_size=5'],
     });
-    const handleError = jest.fn();
     wrapper = mountWithContexts(
-      <OrganizationsList />, {
-        context: {
-          router: { history }, network: { api, handleHttpError: handleError }
-        }
-      }
+      <OrganizationsList />,
+      { context: { router: { history } } }
     );
     await wrapper.setState({
       organizations: mockAPIOrgsList.data.results,
@@ -173,6 +142,5 @@ describe('<OrganizationsList />', () => {
     wrapper.update();
     const component = wrapper.find('OrganizationsList');
     component.instance().handleOrgDelete();
-    expect(handleError).toHaveBeenCalled();
   });
 });

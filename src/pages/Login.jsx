@@ -7,13 +7,10 @@ import {
   LoginForm,
   LoginPage as PFLoginPage,
 } from '@patternfly/react-core';
-
-import { withRootDialog } from '../contexts/RootDialog';
-import { withNetwork } from '../contexts/Network';
 import { RootAPI } from '../api';
 import { BrandName } from '../variables';
 
-import logoImg from '../../images/brand-logo.svg';
+import brandLogo from '../../images/brand-logo.svg';
 
 const LoginPage = styled(PFLoginPage)`
   & .pf-c-brand {
@@ -28,80 +25,122 @@ class AWXLogin extends Component {
     this.state = {
       username: '',
       password: '',
-      isInputValid: true,
-      isLoading: false,
-      isAuthenticated: false
+      authenticationError: false,
+      validationError: false,
+      isAuthenticating: false,
+      isLoading: true,
+      logo: null,
+      loginInfo: null,
     };
 
-    this.onChangeUsername = this.onChangeUsername.bind(this);
-    this.onChangePassword = this.onChangePassword.bind(this);
-    this.onLoginButtonClick = this.onLoginButtonClick.bind(this);
+    this.handleChangeUsername = this.handleChangeUsername.bind(this);
+    this.handleChangePassword = this.handleChangePassword.bind(this);
+    this.handleLoginButtonClick = this.handleLoginButtonClick.bind(this);
+    this.loadCustomLoginInfo = this.loadCustomLoginInfo.bind(this);
   }
 
-  onChangeUsername (value) {
-    this.setState({ username: value, isInputValid: true });
+  async componentDidMount () {
+    await this.loadCustomLoginInfo();
   }
 
-  onChangePassword (value) {
-    this.setState({ password: value, isInputValid: true });
+  async loadCustomLoginInfo () {
+    this.setState({ isLoading: true });
+    try {
+      const { data: { custom_logo, custom_login_info } } = await RootAPI.read();
+      const logo = custom_logo ? `data:image/jpeg;${custom_logo}` : brandLogo;
+
+      this.setState({ logo, loginInfo: custom_login_info });
+    } catch (err) {
+      this.setState({ logo: brandLogo });
+    } finally {
+      this.setState({ isLoading: false });
+    }
   }
 
-  async onLoginButtonClick (event) {
-    const { username, password, isLoading } = this.state;
-    const { handleHttpError, clearRootDialogMessage, fetchMe, updateConfig } = this.props;
+  async handleLoginButtonClick (event) {
+    const { username, password, isAuthenticating } = this.state;
 
     event.preventDefault();
 
-    if (isLoading) {
+    if (isAuthenticating) {
       return;
     }
 
-    clearRootDialogMessage();
-    this.setState({ isLoading: true });
-
+    this.setState({ authenticationError: false, isAuthenticating: true });
     try {
-      const { data } = await RootAPI.login(username, password);
-      updateConfig(data);
-      await fetchMe();
-      this.setState({ isAuthenticated: true, isLoading: false });
-    } catch (error) {
-      handleHttpError(error) || this.setState({ isInputValid: false, isLoading: false });
+      // note: if authentication is successful, the appropriate cookie will be set automatically
+      // and isAuthenticated() (the source of truth) will start returning true.
+      await RootAPI.login(username, password);
+    } catch (err) {
+      if (err && err.response && err.response.status === 401) {
+        this.setState({ validationError: true });
+      } else {
+        this.setState({ authenticationError: true });
+      }
+    } finally {
+      this.setState({ isAuthenticating: false });
     }
   }
 
+  handleChangeUsername (value) {
+    this.setState({ username: value, validationError: false });
+  }
+
+  handleChangePassword (value) {
+    this.setState({ password: value, validationError: false });
+  }
+
   render () {
-    const { username, password, isInputValid, isAuthenticated } = this.state;
-    const { alt, loginInfo, logo, bodyText: errorMessage, i18n } = this.props;
-    const logoSrc = logo ? `data:image/jpeg;${logo}` : logoImg;
+    const {
+      authenticationError,
+      validationError,
+      username,
+      password,
+      isLoading,
+      logo,
+      loginInfo,
+    } = this.state;
+    const { alt, i18n, isAuthenticated } = this.props;
     // Setting BrandName to a variable here is necessary to get the jest tests
     // passing.  Attempting to use BrandName in the template literal results
     // in failing tests.
     const brandName = BrandName;
 
-    if (isAuthenticated) {
+    if (isLoading) {
+      return null;
+    }
+
+    if (isAuthenticated()) {
       return (<Redirect to="/" />);
+    }
+
+    let helperText;
+    if (validationError) {
+      helperText = i18n._(t`Invalid username or password. Please try again.`);
+    } else {
+      helperText = i18n._(t`There was a problem signing in. Please try again.`);
     }
 
     return (
       <LoginPage
-        brandImgSrc={logoSrc}
+        brandImgSrc={logo}
         brandImgAlt={alt || brandName}
         loginTitle={i18n._(t`Welcome to Ansible ${brandName}! Please Sign In.`)}
         textContent={loginInfo}
       >
         <LoginForm
-          className={errorMessage && 'pf-m-error'}
+          className={(authenticationError || validationError) ? 'pf-m-error' : ''}
           usernameLabel={i18n._(t`Username`)}
           passwordLabel={i18n._(t`Password`)}
-          showHelperText={!isInputValid || !!errorMessage}
-          helperText={errorMessage || i18n._(t`Invalid username or password. Please try again.`)}
+          showHelperText={(authenticationError || validationError)}
+          helperText={helperText}
           usernameValue={username}
           passwordValue={password}
-          isValidUsername={isInputValid}
-          isValidPassword={isInputValid}
-          onChangeUsername={this.onChangeUsername}
-          onChangePassword={this.onChangePassword}
-          onLoginButtonClick={this.onLoginButtonClick}
+          isValidUsername={!validationError}
+          isValidPassword={!validationError}
+          onChangeUsername={this.handleChangeUsername}
+          onChangePassword={this.handleChangePassword}
+          onLoginButtonClick={this.handleLoginButtonClick}
         />
       </LoginPage>
     );
@@ -109,4 +148,4 @@ class AWXLogin extends Component {
 }
 
 export { AWXLogin as _AWXLogin };
-export default withI18n()(withNetwork(withRootDialog(withRouter(AWXLogin))));
+export default withI18n()(withRouter(AWXLogin));

@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -8,13 +8,13 @@ import {
   PageSectionVariants,
 } from '@patternfly/react-core';
 
-import { withNetwork } from '../../../contexts/Network';
 import PaginatedDataList, {
   ToolbarDeleteButton,
   ToolbarAddButton
 } from '../../../components/PaginatedDataList';
 import DataListToolbar from '../../../components/DataListToolbar';
 import OrganizationListItem from '../components/OrganizationListItem';
+import AlertModal from '../../../components/AlertModal';
 import { getQSConfig, parseNamespacedQueryString } from '../../../util/qs';
 import { OrganizationsAPI } from '../../../api';
 
@@ -29,29 +29,30 @@ class OrganizationsList extends Component {
     super(props);
 
     this.state = {
-      error: null,
-      isLoading: true,
-      isInitialized: false,
+      contentLoading: true,
+      contentError: false,
+      deletionError: false,
       organizations: [],
-      selected: []
+      selected: [],
+      itemCount: 0,
+      actions: null,
     };
 
     this.handleSelectAll = this.handleSelectAll.bind(this);
     this.handleSelect = this.handleSelect.bind(this);
-    this.fetchOptionsOrganizations = this.fetchOptionsOrganizations.bind(this);
-    this.fetchOrganizations = this.fetchOrganizations.bind(this);
     this.handleOrgDelete = this.handleOrgDelete.bind(this);
+    this.handleDeleteErrorClose = this.handleDeleteErrorClose.bind(this);
+    this.loadOrganizations = this.loadOrganizations.bind(this);
   }
 
   componentDidMount () {
-    this.fetchOptionsOrganizations();
-    this.fetchOrganizations();
+    this.loadOrganizations();
   }
 
   componentDidUpdate (prevProps) {
     const { location } = this.props;
     if (location !== prevProps.location) {
-      this.fetchOrganizations();
+      this.loadOrganizations();
     }
   }
 
@@ -72,63 +73,54 @@ class OrganizationsList extends Component {
     }
   }
 
+  handleDeleteErrorClose () {
+    this.setState({ deletionError: false });
+  }
+
   async handleOrgDelete () {
     const { selected } = this.state;
-    const { handleHttpError } = this.props;
-    let errorHandled;
 
+    this.setState({ contentLoading: true, deletionError: false });
     try {
       await Promise.all(selected.map((org) => OrganizationsAPI.destroy(org.id)));
-      this.setState({
-        selected: []
-      });
+      this.setState({ selected: [] });
     } catch (err) {
-      errorHandled = handleHttpError(err);
+      this.setState({ deletionError: true });
     } finally {
-      if (!errorHandled) {
-        this.fetchOrganizations();
-      }
+      await this.loadOrganizations();
     }
   }
 
-  async fetchOrganizations () {
-    const { handleHttpError, location } = this.props;
+  async loadOrganizations () {
+    const { location } = this.props;
+    const { actions: cachedActions } = this.state;
     const params = parseNamespacedQueryString(QS_CONFIG, location.search);
 
-    this.setState({ error: false, isLoading: true });
+    let optionsPromise;
+    if (cachedActions) {
+      optionsPromise = Promise.resolve({ data: { actions: cachedActions } });
+    } else {
+      optionsPromise = OrganizationsAPI.readOptions();
+    }
 
+    const promises = Promise.all([
+      OrganizationsAPI.read(params),
+      optionsPromise,
+    ]);
+
+    this.setState({ contentError: false, contentLoading: true });
     try {
-      const { data } = await OrganizationsAPI.read(params);
-      const { count, results } = data;
-
-      const stateToUpdate = {
+      const [{ data: { count, results } }, { data: { actions } }] = await promises;
+      this.setState({
+        actions,
         itemCount: count,
         organizations: results,
         selected: [],
-        isLoading: false,
-        isInitialized: true,
-      };
-
-      this.setState(stateToUpdate);
+      });
     } catch (err) {
-      handleHttpError(err) || this.setState({ error: true, isLoading: false });
-    }
-  }
-
-  async fetchOptionsOrganizations () {
-    try {
-      const { data } = await OrganizationsAPI.readOptions();
-      const { actions } = data;
-
-      const stateToUpdate = {
-        canAdd: Object.prototype.hasOwnProperty.call(actions, 'POST')
-      };
-
-      this.setState(stateToUpdate);
-    } catch (err) {
-      this.setState({ error: true });
+      this.setState(({ contentError: true }));
     } finally {
-      this.setState({ isLoading: false });
+      this.setState({ contentLoading: false });
     }
   }
 
@@ -137,23 +129,26 @@ class OrganizationsList extends Component {
       medium,
     } = PageSectionVariants;
     const {
-      canAdd,
+      actions,
       itemCount,
-      error,
-      isLoading,
-      isInitialized,
+      contentError,
+      contentLoading,
+      deletionError,
       selected,
-      organizations
+      organizations,
     } = this.state;
     const { match, i18n } = this.props;
 
+    const canAdd = actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
     const isAllSelected = selected.length === organizations.length;
 
     return (
-      <PageSection variant={medium}>
-        <Card>
-          {isInitialized && (
+      <Fragment>
+        <PageSection variant={medium}>
+          <Card>
             <PaginatedDataList
+              contentError={contentError}
+              contentLoading={contentLoading}
               items={organizations}
               itemCount={itemCount}
               itemName="organization"
@@ -196,14 +191,20 @@ class OrganizationsList extends Component {
                   : null
               }
             />
-          )}
-          { isLoading ? <div>loading...</div> : '' }
-          { error ? <div>error</div> : '' }
-        </Card>
-      </PageSection>
+          </Card>
+        </PageSection>
+        <AlertModal
+          isOpen={deletionError}
+          variant="danger"
+          title={i18n._(t`Error!`)}
+          onClose={this.handleDeleteErrorClose}
+        >
+          {i18n._(t`Failed to delete one or more organizations.`)}
+        </AlertModal>
+      </Fragment>
     );
   }
 }
 
 export { OrganizationsList as _OrganizationsList };
-export default withI18n()(withNetwork(withRouter(OrganizationsList)));
+export default withI18n()(withRouter(OrganizationsList));

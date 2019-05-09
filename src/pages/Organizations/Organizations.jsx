@@ -4,9 +4,6 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
 import { Config } from '../../contexts/Config';
-import { NetworkProvider } from '../../contexts/Network';
-import { withRootDialog } from '../../contexts/RootDialog';
-
 import Breadcrumbs from '../../components/Breadcrumbs/Breadcrumbs';
 
 import OrganizationsList from './screens/OrganizationsList';
@@ -49,7 +46,7 @@ class Organizations extends Component {
   }
 
   render () {
-    const { match, history, location, setRootDialogMessage, i18n } = this.props;
+    const { match, history, location } = this.props;
     const { breadcrumbConfig } = this.state;
 
     return (
@@ -66,34 +63,17 @@ class Organizations extends Component {
           />
           <Route
             path={`${match.path}/:id`}
-            render={({ match: newRouteMatch }) => (
-              <NetworkProvider
-                handle404={() => {
-                  history.replace('/organizations');
-                  setRootDialogMessage({
-                    title: '404',
-                    bodyText: (
-                      <Fragment>
-                        {i18n._(t`Cannot find organization with ID`)}
-                        <strong>{` ${newRouteMatch.params.id}`}</strong>
-                        .
-                      </Fragment>
-                    ),
-                    variant: 'warning'
-                  });
-                }}
-              >
-                <Config>
-                  {({ me }) => (
-                    <Organization
-                      history={history}
-                      location={location}
-                      setBreadcrumb={this.setBreadcrumbConfig}
-                      me={me || {}}
-                    />
-                  )}
-                </Config>
-              </NetworkProvider>
+            render={() => (
+              <Config>
+                {({ me }) => (
+                  <Organization
+                    history={history}
+                    location={location}
+                    setBreadcrumb={this.setBreadcrumbConfig}
+                    me={me || {}}
+                  />
+                )}
+              </Config>
             )}
           />
           <Route
@@ -109,4 +89,4 @@ class Organizations extends Component {
 }
 
 export { Organizations as _Organizations };
-export default withI18n()(withRootDialog(withRouter(Organizations)));
+export default withI18n()(withRouter(Organizations));

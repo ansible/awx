@@ -13,15 +13,12 @@ import { t } from '@lingui/macro';
 import '@patternfly/react-core/dist/styles/base.css';
 import './app.scss';
 
-import { Config } from './contexts/Config';
-
-import { BrandName } from './variables';
-
 import Background from './components/Background';
-import NotifyAndRedirect from './components/NotifyAndRedirect';
 
 import RootProvider from './RootProvider';
 import App from './App';
+import { BrandName } from './variables';
+import { isAuthenticated } from './util/auth';
 
 import Applications from './pages/Applications';
 import Credentials from './pages/Credentials';
@@ -52,185 +49,188 @@ export function main (render) {
   const el = document.getElementById('app');
   document.title = `Ansible ${BrandName}`;
 
+  const defaultRedirect = () => (<Redirect to="/home" />);
+  const removeTrailingSlash = (
+    <Route
+      exact
+      strict
+      path="/*/"
+      render={({ history: { location: { pathname, search, hash } } }) => (
+        <Redirect to={`${pathname.slice(0, -1)}${search}${hash}`} />
+      )}
+    />
+  );
+  const loginRoutes = (
+    <Switch>
+      {removeTrailingSlash}
+      <Route
+        path="/login"
+        render={() => (
+          <Login isAuthenticated={isAuthenticated} />
+        )}
+      />
+      <Redirect to="/login" />
+    </Switch>
+  );
+
   return render(
     <RootProvider>
       <I18n>
         {({ i18n }) => (
           <Background>
-            <Switch>
-              <Route
-                exact
-                strict
-                path="/*/"
-                render={({ history: { location: { pathname, search, hash } } }) => (
-                  <Redirect to={`${pathname.slice(0, -1)}${search}${hash}`} />
-                )}
-              />
-              <Route
-                path="/login"
-                render={() => (
-                  <Config>
-                    {({ custom_logo, custom_login_info, fetchMe, updateConfig }) => (
-                      <Login
-                        logo={custom_logo}
-                        loginInfo={custom_login_info}
-                        fetchMe={fetchMe}
-                        updateConfig={updateConfig}
-                      />
-                    )}
-                  </Config>
-                )}
-              />
-              <Route exact path="/" render={() => <Redirect to="/home" />} />
-              <Route
-                render={() => (
-                  <App
-                    navLabel={i18n._(t`Primary Navigation`)}
-                    routeGroups={[
-                      {
-                        groupTitle: i18n._(t`Views`),
-                        groupId: 'views_group',
-                        routes: [
-                          {
-                            title: i18n._(t`Dashboard`),
-                            path: '/home',
-                            component: Dashboard
-                          },
-                          {
-                            title: i18n._(t`Jobs`),
-                            path: '/jobs',
-                            component: Jobs
-                          },
-                          {
-                            title: i18n._(t`Schedules`),
-                            path: '/schedules',
-                            component: Schedules
-                          },
-                          {
-                            title: i18n._(t`My View`),
-                            path: '/portal',
-                            component: Portal
-                          },
-                        ],
-                      },
-                      {
-                        groupTitle: i18n._(t`Resources`),
-                        groupId: 'resources_group',
-                        routes: [
-                          {
-                            title: i18n._(t`Templates`),
-                            path: '/templates',
-                            component: Templates
-                          },
-                          {
-                            title: i18n._(t`Credentials`),
-                            path: '/credentials',
-                            component: Credentials
-                          },
-                          {
-                            title: i18n._(t`Projects`),
-                            path: '/projects',
-                            component: Projects
-                          },
-                          {
-                            title: i18n._(t`Inventories`),
-                            path: '/inventories',
-                            component: Inventories
-                          },
-                          {
-                            title: i18n._(t`Inventory Scripts`),
-                            path: '/inventory_scripts',
-                            component: InventoryScripts
-                          },
-                        ],
-                      },
-                      {
-                        groupTitle: i18n._(t`Access`),
-                        groupId: 'access_group',
-                        routes: [
-                          {
-                            title: i18n._(t`Organizations`),
-                            path: '/organizations',
-                            component: Organizations
-                          },
-                          {
-                            title: i18n._(t`Users`),
-                            path: '/users',
-                            component: Users
-                          },
-                          {
-                            title: i18n._(t`Teams`),
-                            path: '/teams',
-                            component: Teams
-                          },
-                        ],
-                      },
-                      {
-                        groupTitle: i18n._(t`Administration`),
-                        groupId: 'administration_group',
-                        routes: [
-                          {
-                            title: i18n._(t`Credential Types`),
-                            path: '/credential_types',
-                            component: CredentialTypes
-                          },
-                          {
-                            title: i18n._(t`Notifications`),
-                            path: '/notification_templates',
-                            component: NotificationTemplates
-                          },
-                          {
-                            title: i18n._(t`Management Jobs`),
-                            path: '/management_jobs',
-                            component: ManagementJobs
-                          },
-                          {
-                            title: i18n._(t`Instance Groups`),
-                            path: '/instance_groups',
-                            component: InstanceGroups
-                          },
-                          {
-                            title: i18n._(t`Integrations`),
-                            path: '/applications',
-                            component: Applications
-                          },
-                        ],
-                      },
-                      {
-                        groupTitle: i18n._(t`Settings`),
-                        groupId: 'settings_group',
-                        routes: [
-                          {
-                            title: i18n._(t`Authentication`),
-                            path: '/auth_settings',
-                            component: AuthSettings
-                          },
-                          {
-                            title: i18n._(t`Jobs`),
-                            path: '/jobs_settings',
-                            component: JobsSettings
-                          },
-                          {
-                            title: i18n._(t`System`),
-                            path: '/system_settings',
-                            component: SystemSettings
-                          },
-                          {
-                            title: i18n._(t`User Interface`),
-                            path: '/ui_settings',
-                            component: UISettings
-                          },
-                          {
-                            title: i18n._(t`License`),
-                            path: '/license',
-                            component: License
-                          },
-                        ],
-                      },
-                    ]}
-                    render={({ routeGroups }) => (
-                      <Switch>
-                        {routeGroups
+            {!isAuthenticated() ? loginRoutes : (
+              <Switch>
+                {removeTrailingSlash}
+                <Route path="/login" render={defaultRedirect} />
+                <Route exact path="/" render={defaultRedirect} />
+                <Route
+                  render={() => (
+                    <App
+                      navLabel={i18n._(t`Primary Navigation`)}
+                      routeGroups={[
+                        {
+                          groupTitle: i18n._(t`Views`),
+                          groupId: 'views_group',
+                          routes: [
+                            {
+                              title: i18n._(t`Dashboard`),
+                              path: '/home',
+                              component: Dashboard
+                            },
+                            {
+                              title: i18n._(t`Jobs`),
+                              path: '/jobs',
+                              component: Jobs
+                            },
+                            {
+                              title: i18n._(t`Schedules`),
+                              path: '/schedules',
+                              component: Schedules
+                            },
+                            {
+                              title: i18n._(t`My View`),
+                              path: '/portal',
+                              component: Portal
+                            },
+                          ],
+                        },
+                        {
+                          groupTitle: i18n._(t`Resources`),
+                          groupId: 'resources_group',
+                          routes: [
+                            {
+                              title: i18n._(t`Templates`),
+                              path: '/templates',
+                              component: Templates
+                            },
+                            {
+                              title: i18n._(t`Credentials`),
+                              path: '/credentials',
+                              component: Credentials
+                            },
+                            {
+                              title: i18n._(t`Projects`),
+                              path: '/projects',
+                              component: Projects
+                            },
+                            {
+                              title: i18n._(t`Inventories`),
+                              path: '/inventories',
+                              component: Inventories
+                            },
+                            {
+                              title: i18n._(t`Inventory Scripts`),
+                              path: '/inventory_scripts',
+                              component: InventoryScripts
+                            },
+                          ],
+                        },
+                        {
+                          groupTitle: i18n._(t`Access`),
+                          groupId: 'access_group',
+                          routes: [
+                            {
+                              title: i18n._(t`Organizations`),
+                              path: '/organizations',
+                              component: Organizations
+                            },
+                            {
+                              title: i18n._(t`Users`),
+                              path: '/users',
+                              component: Users
+                            },
+                            {
+                              title: i18n._(t`Teams`),
+                              path: '/teams',
+                              component: Teams
+                            },
+                          ],
+                        },
+                        {
+                          groupTitle: i18n._(t`Administration`),
+                          groupId: 'administration_group',
+                          routes: [
+                            {
+                              title: i18n._(t`Credential Types`),
+                              path: '/credential_types',
+                              component: CredentialTypes
+                            },
+                            {
+                              title: i18n._(t`Notifications`),
+                              path: '/notification_templates',
+                              component: NotificationTemplates
+                            },
+                            {
+                              title: i18n._(t`Management Jobs`),
+                              path: '/management_jobs',
+                              component: ManagementJobs
+                            },
+                            {
+                              title: i18n._(t`Instance Groups`),
+                              path: '/instance_groups',
+                              component: InstanceGroups
+                            },
+                            {
+                              title: i18n._(t`Integrations`),
+                              path: '/applications',
+                              component: Applications
+                            },
+                          ],
+                        },
+                        {
+                          groupTitle: i18n._(t`Settings`),
+                          groupId: 'settings_group',
+                          routes: [
+                            {
+                              title: i18n._(t`Authentication`),
+                              path: '/auth_settings',
+                              component: AuthSettings
+                            },
+                            {
+                              title: i18n._(t`Jobs`),
+                              path: '/jobs_settings',
+                              component: JobsSettings
+                            },
+                            {
+                              title: i18n._(t`System`),
+                              path: '/system_settings',
+                              component: SystemSettings
+                            },
+                            {
+                              title: i18n._(t`User Interface`),
+                              path: '/ui_settings',
+                              component: UISettings
+                            },
+                            {
+                              title: i18n._(t`License`),
+                              path: '/license',
+                              component: License
+                            },
+                          ],
+                        },
+                      ]}
+                      render={({ routeGroups }) => (
+                        routeGroups
                           .reduce((allRoutes, { routes }) => allRoutes.concat(routes), [])
                           .map(({ component: PageComponent, path }) => (
                             <Route
@@ -241,15 +241,12 @@ export function main (render) {
                               )}
                             />
                           ))
-                          .concat([
-                            <NotifyAndRedirect key="redirect" to="/" />
-                          ])}
-                      </Switch>
-                    )}
-                  />
-                )}
-              />
-            </Switch>
+                      )}
+                    />
+                  )}
+                />
+              </Switch>
+            )}
           </Background>
         )}
       </I18n>

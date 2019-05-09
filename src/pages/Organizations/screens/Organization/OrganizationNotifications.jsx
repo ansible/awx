@@ -1,7 +1,10 @@
 import React, { Component, Fragment } from 'react';
-import { number, shape, func, string, bool } from 'prop-types';
+import { number, shape, string, bool } from 'prop-types';
 import { withRouter } from 'react-router-dom';
-import { withNetwork } from '../../../../contexts/Network';
+import { withI18n } from '@lingui/react';
+import { t } from '@lingui/macro';
+
+import AlertModal from '../../../../components/AlertModal';
 import PaginatedDataList from '../../../../components/PaginatedDataList';
 import NotificationListItem from '../../../../components/NotificationsList/NotificationListItem';
 import { getQSConfig, parseNamespacedQueryString } from '../../../../util/qs';
@@ -22,194 +25,159 @@ const COLUMNS = [
 class OrganizationNotifications extends Component {
   constructor (props) {
     super(props);
-
-    this.readNotifications = this.readNotifications.bind(this);
-    this.readSuccessesAndErrors = this.readSuccessesAndErrors.bind(this);
-    this.toggleNotification = this.toggleNotification.bind(this);
-
     this.state = {
-      isInitialized: false,
-      isLoading: false,
-      error: null,
+      contentError: false,
+      contentLoading: true,
+      toggleError: false,
+      toggleLoading: false,
       itemCount: 0,
       notifications: [],
       successTemplateIds: [],
       errorTemplateIds: [],
     };
+    this.handleNotificationToggle = this.handleNotificationToggle.bind(this);
+    this.handleNotificationErrorClose = this.handleNotificationErrorClose.bind(this);
+    this.loadNotifications = this.loadNotifications.bind(this);
   }
 
   componentDidMount () {
-    this.readNotifications();
+    this.loadNotifications();
   }
 
   componentDidUpdate (prevProps) {
     const { location } = this.props;
     if (location !== prevProps.location) {
-      this.readNotifications();
+      this.loadNotifications();
     }
   }
 
-  async readNotifications () {
-    const { id, handleHttpError, location } = this.props;
+  async loadNotifications () {
+    const { id, location } = this.props;
     const params = parseNamespacedQueryString(QS_CONFIG, location.search);
-    this.setState({ isLoading: true });
-    try {
-      const { data } = await OrganizationsAPI.readNotificationTemplates(id, params);
-      this.setState(
-        {
-          itemCount: data.count || 0,
-          notifications: data.results || [],
-          isLoading: false,
-          isInitialized: true,
-        },
-        this.readSuccessesAndErrors
-      );
-    } catch (error) {
-      handleHttpError(error) || this.setState({
-        error,
-        isLoading: false,
-      });
-    }
-  }
 
-  async readSuccessesAndErrors () {
-    const { handleHttpError, id } = this.props;
-    const { notifications } = this.state;
-    if (!notifications.length) {
-      return;
-    }
-    const ids = notifications.map(n => n.id).join(',');
+    this.setState({ contentError: false, contentLoading: true });
     try {
-      const successTemplatesPromise = OrganizationsAPI.readNotificationTemplatesSuccess(
-        id,
-        { id__in: ids }
-      );
-      const errorTemplatesPromise = OrganizationsAPI.readNotificationTemplatesError(
-        id,
-        { id__in: ids }
-      );
+      const {
+        data: {
+          count: itemCount = 0,
+          results: notifications = [],
+        }
+      } = await OrganizationsAPI.readNotificationTemplates(id, params);
 
-      const { data: successTemplates } = await successTemplatesPromise;
-      const { data: errorTemplates } = await errorTemplatesPromise;
+      let idMatchParams;
+      if (notifications.length > 0) {
+        idMatchParams = { id__in: notifications.map(n => n.id).join(',') };
+      } else {
+        idMatchParams = {};
+      }
+
+      const [
+        { data: successTemplates },
+        { data: errorTemplates },
+      ] = await Promise.all([
+        OrganizationsAPI.readNotificationTemplatesSuccess(id, idMatchParams),
+        OrganizationsAPI.readNotificationTemplatesError(id, idMatchParams),
+      ]);
 
       this.setState({
+        itemCount,
+        notifications,
         successTemplateIds: successTemplates.results.map(s => s.id),
         errorTemplateIds: errorTemplates.results.map(e => e.id),
       });
-    } catch (error) {
-      handleHttpError(error) || this.setState({
-        error,
-        isLoading: false,
+    } catch {
+      this.setState({ contentError: true });
+    } finally {
+      this.setState({ contentLoading: false });
+    }
+  }
+
+  async handleNotificationToggle (notificationId, isCurrentlyOn, status) {
+    const { id } = this.props;
+
+    let stateArrayName;
+    if (status === 'success') {
+      stateArrayName = 'successTemplateIds';
+    } else {
+      stateArrayName = 'errorTemplateIds';
+    }
+
+    let stateUpdateFunction;
+    if (isCurrentlyOn) {
+      // when switching off, remove the toggled notification id from the array
+      stateUpdateFunction = (prevState) => ({
+        [stateArrayName]: prevState[stateArrayName].filter(i => i !== notificationId)
+      });
+    } else {
+      // when switching on, add the toggled notification id to the array
+      stateUpdateFunction = (prevState) => ({
+        [stateArrayName]: prevState[stateArrayName].concat(notificationId)
       });
     }
-  }
 
-  toggleNotification = (notificationId, isCurrentlyOn, status) => {
-    if (status === 'success') {
-      if (isCurrentlyOn) {
-        this.disassociateSuccess(notificationId);
-      } else {
-        this.associateSuccess(notificationId);
-      }
-    } else if (status === 'error') {
-      if (isCurrentlyOn) {
-        this.disassociateError(notificationId);
-      } else {
-        this.associateError(notificationId);
-      }
-    }
-  };
-
-  async associateSuccess (notificationId) {
-    const { id, handleHttpError } = this.props;
+    this.setState({ toggleLoading: true });
     try {
-      await OrganizationsAPI.associateNotificationTemplatesSuccess(id, notificationId);
-      this.setState(prevState => ({
-        successTemplateIds: [...prevState.successTemplateIds, notificationId]
-      }));
+      await OrganizationsAPI.updateNotificationTemplateAssociation(
+        id,
+        notificationId,
+        status,
+        !isCurrentlyOn
+      );
+      this.setState(stateUpdateFunction);
     } catch (err) {
-      handleHttpError(err) || this.setState({ error: true });
+      this.setState({ toggleError: true });
+    } finally {
+      this.setState({ toggleLoading: false });
     }
   }
 
-  async disassociateSuccess (notificationId) {
-    const { id, handleHttpError } = this.props;
-    try {
-      await OrganizationsAPI.disassociateNotificationTemplatesSuccess(id, notificationId);
-      this.setState((prevState) => ({
-        successTemplateIds: prevState.successTemplateIds
-          .filter((templateId) => templateId !== notificationId)
-      }));
-    } catch (err) {
-      handleHttpError(err) || this.setState({ error: true });
-    }
-  }
-
-  async associateError (notificationId) {
-    const { id, handleHttpError } = this.props;
-    try {
-      await OrganizationsAPI.associateNotificationTemplatesError(id, notificationId);
-      this.setState(prevState => ({
-        errorTemplateIds: [...prevState.errorTemplateIds, notificationId]
-      }));
-    } catch (err) {
-      handleHttpError(err) || this.setState({ error: true });
-    }
-  }
-
-  async disassociateError (notificationId) {
-    const { id, handleHttpError } = this.props;
-    try {
-      await OrganizationsAPI.disassociateNotificationTemplatesError(id, notificationId);
-      this.setState((prevState) => ({
-        errorTemplateIds: prevState.errorTemplateIds
-          .filter((templateId) => templateId !== notificationId)
-      }));
-    } catch (err) {
-      handleHttpError(err) || this.setState({ error: true });
-    }
+  handleNotificationErrorClose () {
+    this.setState({ toggleError: false });
   }
 
   render () {
-    const { canToggleNotifications } = this.props;
+    const { canToggleNotifications, i18n } = this.props;
     const {
-      notifications,
+      contentError,
+      contentLoading,
+      toggleError,
+      toggleLoading,
       itemCount,
-      isLoading,
-      isInitialized,
-      error,
+      notifications,
       successTemplateIds,
       errorTemplateIds,
     } = this.state;
 
-    if (error) {
-      // TODO: better error state
-      return <div>{error.message}</div>;
-    }
-    // TODO: better loading state
     return (
       <Fragment>
-        {isLoading && (<div>Loading...</div>)}
-        {isInitialized && (
-          <PaginatedDataList
-            items={notifications}
-            itemCount={itemCount}
-            itemName="notification"
-            qsConfig={QS_CONFIG}
-            toolbarColumns={COLUMNS}
-            renderItem={(notification) => (
-              <NotificationListItem
-                key={notification.id}
-                notification={notification}
-                detailUrl={`/notifications/${notification.id}`}
-                canToggleNotifications={canToggleNotifications}
-                toggleNotification={this.toggleNotification}
-                errorTurnedOn={errorTemplateIds.includes(notification.id)}
-                successTurnedOn={successTemplateIds.includes(notification.id)}
-              />
-            )}
-          />
-        )}
+        <PaginatedDataList
+          contentError={contentError}
+          contentLoading={contentLoading}
+          items={notifications}
+          itemCount={itemCount}
+          itemName="notification"
+          qsConfig={QS_CONFIG}
+          toolbarColumns={COLUMNS}
+          renderItem={(notification) => (
+            <NotificationListItem
+              key={notification.id}
+              notification={notification}
+              detailUrl={`/notifications/${notification.id}`}
+              canToggleNotifications={canToggleNotifications && !toggleLoading}
+              toggleNotification={this.handleNotificationToggle}
+              errorTurnedOn={errorTemplateIds.includes(notification.id)}
+              successTurnedOn={successTemplateIds.includes(notification.id)}
+            />
+          )}
+        />
+        <AlertModal
+          variant="danger"
+          title={i18n._(t`Error!`)}
+          isOpen={toggleError && !toggleLoading}
+          onClose={this.handleNotificationErrorClose}
+        >
+          {i18n._(t`Failed to toggle notification.`)}
+        </AlertModal>
       </Fragment>
     );
   }
@@ -218,11 +186,10 @@ class OrganizationNotifications extends Component {
 OrganizationNotifications.propTypes = {
   id: number.isRequired,
   canToggleNotifications: bool.isRequired,
-  handleHttpError: func.isRequired,
   location: shape({
     search: string.isRequired,
   }).isRequired,
 };
 
 export { OrganizationNotifications as _OrganizationNotifications };
-export default withNetwork(withRouter(OrganizationNotifications));
+export default withI18n()(withRouter(OrganizationNotifications));

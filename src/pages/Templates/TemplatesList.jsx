@@ -7,7 +7,6 @@ import {
   PageSection,
   PageSectionVariants,
 } from '@patternfly/react-core';
-import { withNetwork } from '../../contexts/Network';
 import { UnifiedJobTemplatesAPI } from '../../api';
 
 import { getQSConfig, parseNamespacedQueryString } from '../../util/qs';
@@ -29,25 +28,25 @@ class TemplatesList extends Component {
     super(props);
 
     this.state = {
-      error: null,
-      isLoading: true,
-      isInitialized: false,
+      contentError: false,
+      contentLoading: true,
       selected: [],
       templates: [],
+      itemCount: 0,
     };
-    this.readUnifiedJobTemplates = this.readUnifiedJobTemplates.bind(this);
+    this.loadUnifiedJobTemplates = this.loadUnifiedJobTemplates.bind(this);
     this.handleSelectAll = this.handleSelectAll.bind(this);
     this.handleSelect = this.handleSelect.bind(this);
   }
 
   componentDidMount () {
-    this.readUnifiedJobTemplates();
+    this.loadUnifiedJobTemplates();
   }
 
   componentDidUpdate (prevProps) {
     const { location } = this.props;
     if (location !== prevProps.location) {
-      this.readUnifiedJobTemplates();
+      this.loadUnifiedJobTemplates();
     }
   }
 
@@ -66,33 +65,29 @@ class TemplatesList extends Component {
     }
   }
 
-  async readUnifiedJobTemplates () {
-    const { handleHttpError, location } = this.props;
-    this.setState({ error: false, isLoading: true });
+  async loadUnifiedJobTemplates () {
+    const { location } = this.props;
     const params = parseNamespacedQueryString(QS_CONFIG, location.search);
 
+    this.setState({ contentError: false, contentLoading: true });
     try {
-      const { data } = await UnifiedJobTemplatesAPI.read(params);
-      const { count, results } = data;
-
-      const stateToUpdate = {
+      const { data: { count, results } } = await UnifiedJobTemplatesAPI.read(params);
+      this.setState({
         itemCount: count,
         templates: results,
         selected: [],
-        isInitialized: true,
-        isLoading: false,
-      };
-      this.setState(stateToUpdate);
+      });
     } catch (err) {
-      handleHttpError(err) || this.setState({ error: true, isLoading: false });
+      this.setState({ contentError: true });
+    } finally {
+      this.setState({ contentLoading: false });
     }
   }
 
   render () {
     const {
-      error,
-      isInitialized,
-      isLoading,
+      contentError,
+      contentLoading,
       templates,
       itemCount,
       selected,
@@ -106,44 +101,43 @@ class TemplatesList extends Component {
     return (
       <PageSection variant={medium}>
         <Card>
-          {isInitialized && (
-            <PaginatedDataList
-              items={templates}
-              itemCount={itemCount}
-              itemName={i18n._(t`Template`)}
-              qsConfig={QS_CONFIG}
-              toolbarColumns={[
-                { name: i18n._(t`Name`), key: 'name', isSortable: true },
-                { name: i18n._(t`Modified`), key: 'modified', isSortable: true, isNumeric: true },
-                { name: i18n._(t`Created`), key: 'created', isSortable: true, isNumeric: true },
-              ]}
-              renderToolbar={(props) => (
-                <DatalistToolbar
-                  {...props}
-                  showSelectAll
-                  showExpandCollapse
-                  isAllSelected={isAllSelected}
-                  onSelectAll={this.handleSelectAll}
-                />
-              )}
-              renderItem={(template) => (
-                <TemplateListItem
-                  key={template.id}
-                  value={template.name}
-                  template={template}
-                  detailUrl={`${match.url}/${template.type}/${template.id}`}
-                  onSelect={() => this.handleSelect(template)}
-                  isSelected={selected.some(row => row.id === template.id)}
-                />
-              )}
-            />
-          )}
-          {isLoading ? <div>loading....</div> : ''}
-          {error ? <div>error</div> : '' }
+          <PaginatedDataList
+            contentError={contentError}
+            contentLoading={contentLoading}
+            items={templates}
+            itemCount={itemCount}
+            itemName={i18n._(t`Template`)}
+            qsConfig={QS_CONFIG}
+            toolbarColumns={[
+              { name: i18n._(t`Name`), key: 'name', isSortable: true },
+              { name: i18n._(t`Modified`), key: 'modified', isSortable: true, isNumeric: true },
+              { name: i18n._(t`Created`), key: 'created', isSortable: true, isNumeric: true },
+            ]}
+            renderToolbar={(props) => (
+              <DatalistToolbar
+                {...props}
+                showSelectAll
+                showExpandCollapse
+                isAllSelected={isAllSelected}
+                onSelectAll={this.handleSelectAll}
+              />
+            )}
+            renderItem={(template) => (
+              <TemplateListItem
+                key={template.id}
+                value={template.name}
+                template={template}
+                detailUrl={`${match.url}/${template.type}/${template.id}`}
+                onSelect={() => this.handleSelect(template)}
+                isSelected={selected.some(row => row.id === template.id)}
+              />
+            )}
+          />
         </Card>
       </PageSection>
     );
   }
 }
+
 export { TemplatesList as _TemplatesList };
-export default withI18n()(withNetwork(withRouter(TemplatesList)));
+export default withI18n()(withRouter(TemplatesList));

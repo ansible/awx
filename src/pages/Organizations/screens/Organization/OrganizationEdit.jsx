@@ -4,7 +4,7 @@ import { withRouter } from 'react-router-dom';
 import { CardBody } from '@patternfly/react-core';
 import OrganizationForm from '../../components/OrganizationForm';
 import { Config } from '../../../../contexts/Config';
-import { withNetwork } from '../../../../contexts/Network';
+
 import { OrganizationsAPI } from '../../../../api';
 
 class OrganizationEdit extends Component {
@@ -22,13 +22,13 @@ class OrganizationEdit extends Component {
   }
 
   async handleSubmit (values, groupsToAssociate, groupsToDisassociate) {
-    const { organization, handleHttpError } = this.props;
+    const { organization } = this.props;
     try {
       await OrganizationsAPI.update(organization.id, values);
       await this.submitInstanceGroups(groupsToAssociate, groupsToDisassociate);
       this.handleSuccess();
     } catch (err) {
-      handleHttpError(err) || this.setState({ error: err });
+      this.setState({ error: err });
     }
   }
 
@@ -43,8 +43,7 @@ class OrganizationEdit extends Component {
   }
 
   async submitInstanceGroups (groupsToAssociate, groupsToDisassociate) {
-    const { organization, handleHttpError } = this.props;
-
+    const { organization } = this.props;
     try {
       await Promise.all(
         groupsToAssociate.map(id => OrganizationsAPI.associateInstanceGroup(organization.id, id))
@@ -55,7 +54,7 @@ class OrganizationEdit extends Component {
         )
       );
     } catch (err) {
-      handleHttpError(err) || this.setState({ error: err });
+      this.setState({ error: err });
     }
   }
 
@@ -90,4 +89,4 @@ OrganizationEdit.contextTypes = {
 };
 
 export { OrganizationEdit as _OrganizationEdit };
-export default withNetwork(withRouter(OrganizationEdit));
+export default withRouter(OrganizationEdit);
