@@ -258,7 +258,7 @@ class TestExtraVarSanitation(TestJobExecution):
         job.created_by = User(pk=123, username='angry-spud')
 
         task = tasks.RunJob()
-        task.build_extra_vars_file(job, private_data_dir, {})
+        task.build_extra_vars_file(job, private_data_dir)
 
         fd = open(os.path.join(private_data_dir, 'env', 'extravars'))
         extra_vars = yaml.load(fd, Loader=SafeLoader)
@@ -282,7 +282,7 @@ class TestExtraVarSanitation(TestJobExecution):
         job.extra_vars = json.dumps({'msg': self.UNSAFE})
         task = tasks.RunJob()
 
-        task.build_extra_vars_file(job, private_data_dir, {})
+        task.build_extra_vars_file(job, private_data_dir)
 
         fd = open(os.path.join(private_data_dir, 'env', 'extravars'))
         extra_vars = yaml.load(fd, Loader=SafeLoader)
@@ -293,7 +293,7 @@ class TestExtraVarSanitation(TestJobExecution):
         job.extra_vars = json.dumps({'msg': {'a': [self.UNSAFE]}})
         task = tasks.RunJob()
 
-        task.build_extra_vars_file(job, private_data_dir, {})
+        task.build_extra_vars_file(job, private_data_dir)
 
         fd = open(os.path.join(private_data_dir, 'env', 'extravars'))
         extra_vars = yaml.load(fd, Loader=SafeLoader)
@@ -304,7 +304,7 @@ class TestExtraVarSanitation(TestJobExecution):
         job.job_template.extra_vars = job.extra_vars = json.dumps({'msg': self.UNSAFE})
         task = tasks.RunJob()
 
-        task.build_extra_vars_file(job, private_data_dir, {})
+        task.build_extra_vars_file(job, private_data_dir)
 
         fd = open(os.path.join(private_data_dir, 'env', 'extravars'))
         extra_vars = yaml.load(fd, Loader=SafeLoader)
@@ -316,7 +316,7 @@ class TestExtraVarSanitation(TestJobExecution):
         job.job_template.extra_vars = job.extra_vars
         task = tasks.RunJob()
 
-        task.build_extra_vars_file(job, private_data_dir, {})
+        task.build_extra_vars_file(job, private_data_dir)
 
         fd = open(os.path.join(private_data_dir, 'env', 'extravars'))
         extra_vars = yaml.load(fd, Loader=SafeLoader)
@@ -333,7 +333,7 @@ class TestExtraVarSanitation(TestJobExecution):
         })
         task = tasks.RunJob()
 
-        task.build_extra_vars_file(job, private_data_dir, {})
+        task.build_extra_vars_file(job, private_data_dir)
 
         fd = open(os.path.join(private_data_dir, 'env', 'extravars'))
         extra_vars = yaml.load(fd, Loader=SafeLoader)
@@ -348,7 +348,7 @@ class TestExtraVarSanitation(TestJobExecution):
         job.extra_vars = json.dumps({'msg': self.UNSAFE})
         task = tasks.RunJob()
 
-        task.build_extra_vars_file(job, private_data_dir, {})
+        task.build_extra_vars_file(job, private_data_dir)
 
         fd = open(os.path.join(private_data_dir, 'env', 'extravars'))
         extra_vars = yaml.load(fd, Loader=SafeLoader)
@@ -468,7 +468,7 @@ class TestGenericRun():
 
         task = tasks.RunJob()
         task._write_extra_vars_file = mock.Mock()
-        task.build_extra_vars_file(job, None, dict())
+        task.build_extra_vars_file(job, None)
 
         call_args, _ = task._write_extra_vars_file.call_args_list[0]
 
@@ -489,7 +489,7 @@ class TestGenericRun():
 
         task = tasks.RunJob()
         task._write_extra_vars_file = mock.Mock()
-        task.build_extra_vars_file(job, None, dict())
+        task.build_extra_vars_file(job, None)
 
         call_args, _ = task._write_extra_vars_file.call_args_list[0]
 
@@ -577,7 +577,7 @@ class TestAdhocRun(TestJobExecution):
 
         task = tasks.RunAdHocCommand()
         task._write_extra_vars_file = mock.Mock()
-        task.build_extra_vars_file(adhoc_job, None, dict())
+        task.build_extra_vars_file(adhoc_job, None)
 
         call_args, _ = task._write_extra_vars_file.call_args_list[0]
 
@@ -1685,7 +1685,7 @@ class TestProjectUpdateCredentials(TestJobExecution):
         assert settings.PROJECTS_ROOT in process_isolation['process_isolation_show_paths']
 
         task._write_extra_vars_file = mock.Mock()
-        task.build_extra_vars_file(project_update, private_data_dir, {})
+        task.build_extra_vars_file(project_update, private_data_dir)
 
         call_args, _ = task._write_extra_vars_file.call_args_list[0]
         _, extra_vars = call_args
