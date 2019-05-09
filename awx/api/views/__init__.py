@@ -92,7 +92,7 @@ from awx.main.redact import UriCleaner
 from awx.api.permissions import (
     JobTemplateCallbackPermission, TaskPermission, ProjectUpdatePermission,
     InventoryInventorySourcesUpdatePermission, UserPermission,
-    InstanceGroupTowerPermission,
+    InstanceGroupTowerPermission, VariableDataPermission
 )
 from awx.api import renderers
 from awx.api import serializers
@@ -1948,7 +1948,7 @@ class BaseVariableData(RetrieveUpdateAPIView):
 
     parser_classes = api_settings.DEFAULT_PARSER_CLASSES + [YAMLParser]
     renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES + [YAMLRenderer]
-    is_variable_data = True # Special flag for permissions check.
+    permission_classes = (VariableDataPermission,)
 
 
 class InventoryVariableData(BaseVariableData):

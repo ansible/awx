@@ -15,7 +15,7 @@ from awx.main.utils import get_object_or_400
 
 logger = logging.getLogger('awx.api.permissions')
 
-__all__ = ['ModelAccessPermission', 'JobTemplateCallbackPermission',
+__all__ = ['ModelAccessPermission', 'JobTemplateCallbackPermission', 'VariableDataPermission',
            'TaskPermission', 'ProjectUpdatePermission', 'InventoryInventorySourcesUpdatePermission',
            'UserPermission', 'IsSuperUser', 'InstanceGroupTowerPermission',]
 
@@ -74,12 +74,8 @@ class ModelAccessPermission(permissions.BasePermission):
             # FIXME: For some reason this needs to return True
             # because it is first called with obj=None?
             return True
-        if getattr(view, 'is_variable_data', False):
-            return check_user_access(request.user, view.model, 'change', obj,
-                                     dict(variables=request.data))
-        else:
-            return check_user_access(request.user, view.model, 'change', obj,
-                                     request.data)
+        return check_user_access(request.user, view.model, 'change', obj,
+                                 request.data)
 
     def check_patch_permissions(self, request, view, obj=None):
         return self.check_put_permissions(request, view, obj)
@@ -161,6 +157,15 @@ class JobTemplateCallbackPermission(ModelAccessPermission):
             raise PermissionDenied()
         else:
             return True
+
+
+class VariableDataPermission(ModelAccessPermission):
+
+    def check_put_permissions(self, request, view, obj=None):
+        if not obj:
+            return True
+        return check_user_access(request.user, view.model, 'change', obj,
+                                 dict(variables=request.data))
 
 
 class TaskPermission(ModelAccessPermission):
