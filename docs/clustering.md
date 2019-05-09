@@ -52,23 +52,23 @@ The current standalone instance configuration doesn't change for a 3.1+ deploy. 
   hostA
   hostB
   hostC
-  
+
   [instance_group_east]
   hostB
   hostC
-  
+
   [instance_group_west]
   hostC
   hostD
   ```
-  
+
   The `database` group remains for specifying an external postgres. If the database host is provisioned seperately this group should be empty
   ```
   [tower]
   hostA
   hostB
   hostC
-  
+
   [database]
   hostDB
   ```
@@ -86,7 +86,7 @@ The current standalone instance configuration doesn't change for a 3.1+ deploy. 
 * There are various new fields for RabbitMQ:
   - `rabbitmq_port=5672` - RabbitMQ is installed on each instance and is not optional, it's also not possible to externalize. It is
     possible to configure what port it listens on and this setting controls that.
-  - `rabbitmq_vhost=tower` - Tower configures a rabbitmq virtualhost to isolate itself. This controls that settings.
+  - `rabbitmq_vhost=tower` - Tower configures a rabbitmq virtualhost to isolate itself. This controls that setting.
   - `rabbitmq_username=tower` and `rabbitmq_password=tower` - Each instance will be configured with these values and each instance's Tower
     instance will be configured with it also. This is similar to our other uses of usernames/passwords.
   - `rabbitmq_cookie=<somevalue>` - This value is unused in a standalone deployment but is critical for clustered deployments.
@@ -162,7 +162,7 @@ When a job is scheduled to run on an "isolated" instance:
    - a static inventory file
    - pexpect passwords
    - environment variables
-   - the `ansible`/`ansible-playbook` command invocation, i.e., 
+   - the `ansible`/`ansible-playbook` command invocation, i.e.,
      `bwrap ... ansible-playbook -i /path/to/inventory /path/to/playbook.yml -e ...`
 
 * Once the metadata has been rsynced to the isolated host, the "controller
@@ -320,7 +320,7 @@ Ideally a regular user of Tower should not notice any semantic difference to the
 pointing out the differences in how the system behaves.
 
 When a job is submitted from the API interface it gets pushed into the Celery queue on RabbitMQ. A single RabbitMQ instance is the responsible master for
-individual queues but each Tower instance will connect to and receive jobs from that queue using a Fair scheduling algorithm. Any instance on the cluster is 
+individual queues but each Tower instance will connect to and receive jobs from that queue using a Fair scheduling algorithm. Any instance on the cluster is
 just as likely to receive the work and execute the task. If a instance fails while executing jobs then the work is marked as permanently failed.
 
 If a cluster is divided into separate Instance Groups then the behavior is similar to the cluster as a whole. If two instances are assigned to a group then
@@ -430,7 +430,7 @@ When verifying acceptance we should ensure the following statements are true
   a) instances are shared between groups
   b) instances are isolated to particular groups
   Organizations, Inventories, and Job Templates should be variously assigned to one or many groups and jobs should execute
-  in those groups in preferential order as resources are available. 
+  in those groups in preferential order as resources are available.
 
 ## Performance Testing
 
