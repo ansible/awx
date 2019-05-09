@@ -353,6 +353,10 @@ swagger: reports
 	fi; \
 	(set -o pipefail && py.test $(PYTEST_ARGS) awx/conf/tests/functional awx/main/tests/functional/api awx/main/tests/docs --release=$(VERSION_TARGET) | tee reports/$@.report)
 
+swagger-diff:
+	docker run -it --rm --name swagger-diff -v `pwd`/tools:/tools -w /tools/scripts ruby:2.5 './swagger-diff.sh'
+
+
 check: flake8 pep8 # pyflakes pylint
 
 awx-link:
