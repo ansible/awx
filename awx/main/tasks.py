@@ -1079,7 +1079,7 @@ class BaseTask(object):
         if status_data['status'] == 'starting':
             job_env = dict(runner_config.env)
             '''
-            Take the safe environment variables and overwrite 
+            Take the safe environment variables and overwrite
             '''
             for k, v in self.safe_env.items():
                 if k in job_env:
@@ -1685,8 +1685,12 @@ class RunProjectUpdate(BaseTask):
         for authentication.
         '''
         extra_vars = {}
-        scm_username = project_update.credential.get_input('username', default='')
-        scm_password = project_update.credential.get_input('password', default='')
+        if project_update.credential:
+            scm_username = project_update.credential.get_input('username', default='')
+            scm_password = project_update.credential.get_input('password', default='')
+        else:
+            scm_username = ''
+            scm_password = ''
         scm_type = project_update.scm_type
         scm_url = update_scm_url(scm_type, project_update.scm_url,
                                  check_special_cases=False)
