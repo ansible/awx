@@ -332,3 +332,54 @@ def on_job_create(sender, instance, created=False, raw=False, **kwargs):
         instance=Instance.objects.me(),
         unified_job=instance,
     )
+
+
+class UnifiedJobTemplateInstanceGroupMembership(models.Model):
+
+    unifiedjobtemplate = models.ForeignKey(
+        'UnifiedJobTemplate',
+        on_delete=models.CASCADE
+    )
+    instancegroup = models.ForeignKey(
+        'InstanceGroup',
+        on_delete=models.CASCADE
+    )
+    position = models.PositiveIntegerField(
+        null=True,
+        default=None,
+        db_index=True,
+    )
+
+
+class OrganizationInstanceGroupMembership(models.Model):
+
+    organization = models.ForeignKey(
+        'Organization',
+        on_delete=models.CASCADE
+    )
+    instancegroup = models.ForeignKey(
+        'InstanceGroup',
+        on_delete=models.CASCADE
+    )
+    position = models.PositiveIntegerField(
+        null=True,
+        default=None,
+        db_index=True,
+    )
+
+
+class InventoryInstanceGroupMembership(models.Model):
+
+    inventory = models.ForeignKey(
+        'Inventory',
+        on_delete=models.CASCADE
+    )
+    instancegroup = models.ForeignKey(
+        'InstanceGroup',
+        on_delete=models.CASCADE
+    )
+    position = models.PositiveIntegerField(
+        null=True,
+        default=None,
+        db_index=True,
+    )

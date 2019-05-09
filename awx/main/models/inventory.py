@@ -37,6 +37,7 @@ from awx.main.fields import (
     ImplicitRoleField,
     JSONBField,
     SmartFilterField,
+    OrderedManyToManyField,
 )
 from awx.main.managers import HostManager
 from awx.main.models.base import (
@@ -156,9 +157,10 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
         default=None,
         help_text=_('Filter that will be applied to the hosts of this inventory.'),
     )
-    instance_groups = models.ManyToManyField(
+    instance_groups = OrderedManyToManyField(
         'InstanceGroup',
         blank=True,
+        through='InventoryInstanceGroupMembership',
     )
     admin_role = ImplicitRoleField(
         parent_role='organization.inventory_admin_role',
