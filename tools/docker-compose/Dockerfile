@@ -64,12 +64,6 @@ ADD tools/docker-compose/awx.egg-link /tmp/awx.egg-link
 ADD tools/docker-compose/awx-manage /usr/local/bin/awx-manage
 ADD tools/docker-compose/awx.egg-info /tmp/awx.egg-info
 
-RUN ln -Ffs /awx_devel/tools/docker-compose/nginx.conf /etc/nginx/nginx.conf
-RUN ln -Ffs /awx_devel/tools/docker-compose/nginx.vh.default.conf /etc/nginx/conf.d/nginx.vh.default.conf
-RUN ln -s /awx_devel/tools/docker-compose/start_development.sh /start_development.sh
-RUN ln -s /awx_devel/tools/docker-compose/start_tests.sh /start_tests.sh
-RUN ln -s /awx_devel/tools/docker-compose/bootstrap_development.sh /bootstrap_development.sh
-
 RUN openssl req -nodes -newkey rsa:2048 -keyout /etc/nginx/nginx.key -out /etc/nginx/nginx.csr -subj "/C=US/ST=North Carolina/L=Durham/O=Ansible/OU=AWX Development/CN=awx.localhost"
 RUN openssl x509 -req -days 365 -in /etc/nginx/nginx.csr -signkey /etc/nginx/nginx.key -out /etc/nginx/nginx.crt
 
@@ -118,12 +112,17 @@ ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
-WORKDIR /
+ADD tools/docker-compose/nginx.conf /etc/nginx/nginx.conf
+ADD tools/docker-compose/nginx.vh.default.conf /etc/nginx/conf.d/nginx.vh.default.conf
+ADD tools/docker-compose/start_development.sh /start_development.sh
+ADD tools/docker-compose/start_tests.sh /start_tests.sh
+ADD tools/docker-compose/bootstrap_development.sh /bootstrap_development.sh
 
 EXPOSE 8043 8013 8080 22
 
-ENTRYPOINT ["/tini", "--"]
-CMD /start_development.sh
+ADD tools/docker-compose/entrypoint.sh /
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["/bin/bash"]
 
 # Pre-create things that we need to write to
 RUN for dir in /var/lib/awx/ /var/log/tower/ /projects /.ansible /var/log/nginx /var/lib/nginx /.local; \

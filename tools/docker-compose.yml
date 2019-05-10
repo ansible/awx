@@ -6,6 +6,7 @@ services:
     image: ${DEV_DOCKER_TAG_BASE}/awx_devel:${TAG}
     container_name: tools_awx_1
     hostname: awx
+    command: /start_development.sh
     environment:
       CURRENT_UID:
       RABBITMQ_HOST: rabbitmq
