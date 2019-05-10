@@ -528,8 +528,11 @@ class TestInventorySourceCredential:
             user=admin_user, expect=200
         )
         assert r.data['count'] == 2
+        r = get(url=inv_src.get_absolute_url(), user=admin_user, expect=200)
+        # the credential field could be either of the credentials
+        assert r.data['credential'] in [gce_cred.pk, aws_cred.pk]
 
-    def test_associate_multiple_credentials(self, project, inventory, post, admin_user):
+    def test_associate_multiple_credentials(self, project, inventory, post, patch, admin_user):
         inv_src = InventorySource.objects.create(
             inventory=inventory, name='foobar', source='scm',
             source_project=project, source_path=''
@@ -548,6 +551,8 @@ class TestInventorySourceCredential:
                 expect=204
             )
         assert set(inv_src.credentials.all()) == set([aws_cred, gce_cred])
+        patch(url=inv_src.get_absolute_url(), data={'credential': gce_cred.pk}, user=admin_user, expect=200)
+        assert set(inv_src.credentials.all()) == set([gce_cred])
 
     def test_credentials_relationship_mapping(self, project, inventory, organization, admin_user, post, patch):
         """The credentials relationship is used to manage the cloud credential

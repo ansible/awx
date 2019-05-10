@@ -2194,6 +2194,7 @@ class InventorySourceCredentialsList(SubListAttachDetachAPIView):
             return {'msg': error}
         return None
 
+
 class InventorySourceUpdateView(RetrieveAPIView):
 
     model = models.InventorySource
