@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 
 from awx.api.versioning import reverse
 
-from awx.main.models import InventorySource, Inventory, ActivityStream
+from awx.main.models import InventorySource, Inventory, ActivityStream, CredentialType, Credential
 
 import json
 
@@ -460,7 +460,6 @@ class TestInventorySourceCredential:
 
     def test_validating_credential_type(self, organization, inventory, admin_user, post):
         """Test that cloud sources must use their respective credential type"""
-        from awx.main.models.credential import Credential, CredentialType
         openstack = CredentialType.defaults['openstack']()
         openstack.save()
         os_cred = Credential.objects.create(
@@ -511,6 +510,44 @@ class TestInventorySourceCredential:
         )
         assert 'Credentials of type insights and vault' in r.data['msg']
         assert 'disallowed for scm inventory sources' in r.data['msg']
+
+    def test_view_multiple_credentials(self, project, inventory, get, admin_user):
+        inv_src = InventorySource.objects.create(
+            inventory=inventory, name='foobar', source='scm',
+            source_project=project, source_path=''
+        )
+        aws_ct = CredentialType.defaults['aws']()
+        aws_ct.save()
+        aws_cred = Credential.objects.create(name='is_aws', credential_type=aws_ct)
+        gce_ct = CredentialType.defaults['gce']()
+        gce_ct.save()
+        gce_cred = Credential.objects.create(name='is_gce', credential_type=gce_ct)
+        inv_src.credentials.add(aws_cred, gce_cred)
+        r = get(
+            url=reverse('api:inventory_source_credentials_list', kwargs={'pk': inv_src.pk}),
+            user=admin_user, expect=200
+        )
+        assert r.data['count'] == 2
+
+    def test_associate_multiple_credentials(self, project, inventory, post, admin_user):
+        inv_src = InventorySource.objects.create(
+            inventory=inventory, name='foobar', source='scm',
+            source_project=project, source_path=''
+        )
+        aws_ct = CredentialType.defaults['aws']()
+        aws_ct.save()
+        aws_cred = Credential.objects.create(name='is_aws', credential_type=aws_ct)
+        gce_ct = CredentialType.defaults['gce']()
+        gce_ct.save()
+        gce_cred = Credential.objects.create(name='is_gce', credential_type=gce_ct)
+        for cred in [aws_cred, gce_cred]:
+            post(
+                url=reverse('api:inventory_source_credentials_list', kwargs={'pk': inv_src.pk}),
+                data={'id': cred.pk},
+                user=admin_user,
+                expect=204
+            )
+        assert set(inv_src.credentials.all()) == set([aws_cred, gce_cred])
 
     def test_credentials_relationship_mapping(self, project, inventory, organization, admin_user, post, patch):
         """The credentials relationship is used to manage the cloud credential

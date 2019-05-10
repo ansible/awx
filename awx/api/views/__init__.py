@@ -2183,16 +2183,16 @@ class InventorySourceCredentialsList(SubListAttachDetachAPIView):
     relationship = 'credentials'
 
     def is_valid_relation(self, parent, sub, created=False):
-        # Inventory source credentials are exclusive with all other credentials
-        # subject to change for https://github.com/ansible/awx/issues/277
-        # or https://github.com/ansible/awx/issues/223
-        if parent.credentials.exists():
-            return {'msg': _("Source already has credential assigned.")}
+        # validate that this is not a duplicate of a credential already in the list
+        # same as job template credentials validation
+        if sub.unique_hash() in [cred.unique_hash() for cred in parent.credentials.all()]:
+            return {"error": _("Cannot assign multiple {credential_type} credentials.").format(
+                credential_type=sub.unique_hash(display=True))}
+        # apply additional checks specific to the inventory source type
         error = models.InventorySource.cloud_credential_validation(parent.source, sub)
         if error:
             return {'msg': error}
         return None
-
 
 class InventorySourceUpdateView(RetrieveAPIView):
 
