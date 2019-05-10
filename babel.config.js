@@ -2,6 +2,7 @@ module.exports = api => {
   api.cache(false);
   return {
     plugins: [
+      'babel-plugin-styled-components',
       '@babel/plugin-proposal-class-properties',
       'macros'
     ],
