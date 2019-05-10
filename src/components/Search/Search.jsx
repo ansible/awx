@@ -10,6 +10,9 @@ import {
   DropdownItem,
   TextInput
 } from '@patternfly/react-core';
+import {
+  SearchIcon
+} from '@patternfly/react-icons';
 
 class Search extends React.Component {
   constructor (props) {
@@ -103,7 +106,7 @@ class Search extends React.Component {
               aria-label={i18n._(t`Search`)}
               onClick={this.handleSearch}
             >
-              <i className="fas fa-search" aria-hidden="true" />
+              <SearchIcon />
             </Button>
           </div>
         )}

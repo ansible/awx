@@ -77,11 +77,9 @@ class DataListToolbar extends React.Component {
                       />
                     </ToolbarItem>
                   </ToolbarGroup>
-                  { (showExpandCollapse || additionalControls.length) ? (
-                    <VerticalSeparator />
-                  ) : null}
                   {showExpandCollapse && (
                     <Fragment>
+                      <VerticalSeparator />
                       <ToolbarGroup>
                         <ExpandCollapse
                           isCompact={isCompact}
