@@ -75,7 +75,7 @@ class TimingMiddleware(threading.local):
 
 class ActivityStreamMiddleware(threading.local):
 
-    def __init__(self, get_response):
+    def __init__(self, get_response=None):
         self.disp_uid = None
         self.instance_ids = []
         self.get_response = get_response
@@ -177,7 +177,7 @@ def _customize_graph():
 
 class URLModificationMiddleware(object):
 
-    def __init__(self, get_response):
+    def __init__(self, get_response=None):
         self.get_response = get_response
         models = [m for m in apps.get_app_config('main').get_models() if hasattr(m, 'get_absolute_url')]
         generate_graph(models)
