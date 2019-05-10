@@ -1,69 +1,71 @@
 .awx-toolbar {
-  --awx-toolbar--BackgroundColor: var(--pf-global--BackgroundColor--light-100);
-  --awx-toolbar--BorderColor: #ebebeb;
-  --awx-toolbar--BorderWidth: var(--pf-global--BorderWidth--sm);
+  // --awx-toolbar--BackgroundColor: var(--pf-global--BackgroundColor--light-100);
+  // --awx-toolbar--BorderColor: #ebebeb;
+  // --awx-toolbar--BorderWidth: var(--pf-global--BorderWidth--sm);
 
-  border-bottom: var(--awx-toolbar--BorderWidth) solid var(--awx-toolbar--BorderColor);
-  background-color: var(--awx-toolbar--BackgroundColor);
-  display: flex;
-  height: 70px;
-  padding-top: 5px;
+  // border-bottom: var(--awx-toolbar--BorderWidth) solid var(--awx-toolbar--BorderColor);
+  // background-color: var(--awx-toolbar--BackgroundColor);
+  // display: flex;
+  // height: 70px;
+  // padding-top: 5px;
 
-  --pf-global--target-size--MinHeight: 0px;
-  --pf-global--target-size--MinWidth: 0px;
-  --pf-global--FontSize--md: 14px;
+  // --pf-global--target-size--MinHeight: 0px;
+  // --pf-global--target-size--MinWidth: 0px;
+  // --pf-global--FontSize--md: 14px;
 }
 
 .awx-toolbar .pf-l-level {
-  flex: 1;
+  // flex: 1;
 }
 
 .awx-toolbar .pf-c-button.pf-m-plain {
-  --pf-c-button--m-plain--PaddingLeft: 0px;
-  --pf-c-button--m-plain--PaddingRight: 0px;
+  // --pf-c-button--m-plain--PaddingLeft: 0px;
+  // --pf-c-button--m-plain--PaddingRight: 0px;
 }
 
 .awx-toolbar .pf-l-toolbar__group {
-    --pf-l-toolbar__group--MarginRight: 0px;
-    --pf-l-toolbar__group--MarginLeft: 0px;
+    // --pf-l-toolbar__group--MarginRight: 0px;
+    // --pf-l-toolbar__group--MarginLeft: 0px;
 }
 
 .awx-toolbar button.pf-c-button {
-  height: 30px;
-  width: 30px;
-  padding: 0px;
+  // height: 30px;
+  // width: 30px;
+  // padding: 0px;
 }
 
-.awx-toolbar .pf-c-input-group {
-  min-height: 0px;
-  height: 30px;
+// SEARCH
+// .awx-toolbar .pf-c-input-group {
+//   // min-height: 0px;
+//   // height: 30px;
 
-  .pf-m-tertiary {
-    width: 34px;
-    padding: 0px;
-  }
-}
+//   .pf-m-tertiary {
+//     // width: 34px;
+//     // padding: 0px;
+//   }
+// }
 
+// SEARCH
 .awx-toolbar .pf-c-dropdown__toggle {
-  min-height: 30px;
-  min-width: 70px;
-  height: 30px;
-  padding: 0 10px;
-  margin: 0px;
+  // min-height: 30px;
+  // min-width: 70px;
+  // height: 30px;
+  // padding: 0 10px;
+  // margin: 0px;
 
   .pf-c-dropdown__toggle-text {
-    width: auto;
+    // width: auto;
   }
 
   .pf-c-dropdown__toggle-icon {
-    margin: 0px;
-    padding-top: 3px;
-    padding-left: 3px;
+    // margin: 0px;
+    // padding-top: 3px;
+    // padding-left: 3px;
   }
 }
 
 .awx-toolbar .pf-l-toolbar__item + .pf-l-toolbar__item button {
-  margin-left: 20px;
+  // margin-left: 20px;
 }
 
 // .awx-toolbar .pf-c-button.pf-m-primary {
@@ -78,7 +80,7 @@
 // }
 
 .awx-toolbar .pf-l-toolbar__item .pf-c-button.pf-m-plain {
-  font-size: 18px;
+  // font-size: 18px;
 }
 
 // .awx-ToolBarBtn {

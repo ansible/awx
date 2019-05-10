@@ -3,14 +3,49 @@ import PropTypes from 'prop-types';
 import { I18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
-  Button,
-  Dropdown,
+  Button as PFButton,
+  Dropdown as PFDropdown,
   DropdownPosition,
   DropdownToggle,
   DropdownItem,
-  TextInput
+  TextInput as PFTextInput
 } from '@patternfly/react-core';
 
+import { SearchIcon } from '@patternfly/react-icons';
+
+import styled from 'styled-components';
+
+const TextInput = styled(PFTextInput)`
+  min-height: 0px;
+  height: 30px;
+`;
+
+const Button = styled(PFButton)`
+  width: 34px;
+  padding: 0px;
+`;
+
+const Dropdown = styled(PFDropdown)`
+  &&& { /* Higher specificity required because we are selecting unclassed elements */
+    > button {
+      min-height: 30px;
+      min-width: 70px;
+      height: 30px;
+      padding: 0 10px;
+      margin: 0px;
+
+      > span { /* text element */
+        width: auto;
+      }
+
+      > svg { /* caret icon */
+        margin: 0px;
+        padding-top: 3px;
+        padding-left: 3px;
+      }
+    }
+  }  
+`;
 class Search extends React.Component {
   constructor (props) {
     super(props);
@@ -103,7 +138,7 @@ class Search extends React.Component {
               aria-label={i18n._(t`Search`)}
               onClick={this.handleSearch}
             >
-              <i className="fas fa-search" aria-hidden="true" />
+              <SearchIcon />
             </Button>
           </div>
         )}

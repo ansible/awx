@@ -15,6 +15,7 @@ const Button = styled(PFButton)`
   justify-content: center;
   margin-right: 20px;
   border-radius: 3px;
+  padding: 0;
 
 
   &:disabled {

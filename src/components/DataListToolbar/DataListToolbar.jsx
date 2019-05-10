@@ -6,16 +6,43 @@ import {
   Checkbox,
   Level,
   LevelItem,
-  Toolbar,
-  ToolbarGroup,
+  Toolbar as PFToolbar,
+  ToolbarGroup as PFToolbarGroup,
   ToolbarItem,
 } from '@patternfly/react-core';
 
+import styled from 'styled-components';
 import ExpandCollapse from '../ExpandCollapse';
 import Search from '../Search';
 import Sort from '../Sort';
 import VerticalSeparator from '../VerticalSeparator';
 
+const AWXToolbar = styled.div`
+  --awx-toolbar--BackgroundColor: var(--pf-global--BackgroundColor--light-100);
+  --awx-toolbar--BorderColor: #ebebeb;
+  --awx-toolbar--BorderWidth: var(--pf-global--BorderWidth--sm);
+
+  border-bottom: var(--awx-toolbar--BorderWidth) solid var(--awx-toolbar--BorderColor);
+  background-color: var(--awx-toolbar--BackgroundColor);
+  display: flex;
+  min-height: 70px;
+  padding-top: 5px;
+
+  --pf-global--target-size--MinHeight: 0px;
+  --pf-global--target-size--MinWidth: 0px;
+  --pf-global--FontSize--md: 14px;
+`;
+
+const Toolbar = styled(PFToolbar)`
+  flex-grow: 1;
+  margin-left: ${props => (props.noleftmargin ? '0' : '20px')};
+`;
+
+const ToolbarGroup = styled(PFToolbarGroup)`
+  &&& {
+    margin: 0;
+  }
+`;
 class DataListToolbar extends React.Component {
   render () {
     const {
@@ -38,12 +65,12 @@ class DataListToolbar extends React.Component {
     return (
       <I18n>
         {({ i18n }) => (
-          <div className="awx-toolbar">
-            <Level>
-              <LevelItem style={{ display: 'flex', flexBasis: '700px' }}>
-                <Toolbar style={{ marginLeft: noLeftMargin ? '0px' : '20px', flexGrow: '1' }}>
+          <AWXToolbar className="awx-toolbar">
+            <Level css="flex-grow: 1;">
+              <LevelItem css="display: flex; flex-basis: 700px">
+                <Toolbar noleftmargin={noLeftMargin}>
                   { showSelectAll && (
-                    <ToolbarGroup>
+                    <ToolbarGroup css="margin: 0;">
                       <ToolbarItem>
                         <Checkbox
                           checked={isAllSelected}
@@ -55,8 +82,8 @@ class DataListToolbar extends React.Component {
                       <VerticalSeparator />
                     </ToolbarGroup>
                   )}
-                  <ToolbarGroup style={{ flexGrow: '1' }}>
-                    <ToolbarItem style={{ flexGrow: '1' }}>
+                  <ToolbarGroup css="margin: 0; flex-grow: 1;">
+                    <ToolbarItem css="flex-grow: 1;">
                       <Search
                         columns={columns}
                         onSearch={onSearch}
@@ -65,9 +92,7 @@ class DataListToolbar extends React.Component {
                     </ToolbarItem>
                     <VerticalSeparator />
                   </ToolbarGroup>
-                  <ToolbarGroup
-                    className="sortDropdownGroup"
-                  >
+                  <ToolbarGroup>
                     <ToolbarItem>
                       <Sort
                         columns={columns}
@@ -100,7 +125,7 @@ class DataListToolbar extends React.Component {
                 {additionalControls}
               </LevelItem>
             </Level>
-          </div>
+          </AWXToolbar>
         )}
       </I18n>
     );
