@@ -1,5 +1,5 @@
 export default
-    ['$q', 'Rest', function($q, Rest) {
+    ['Rest', function(Rest) {
         return {
             addInstanceGroups: function(url, instance_groups) {
                 let groups = (instance_groups || []);
@@ -67,7 +67,7 @@ export default
                         // make the disassociate request sequence - we need to do these requests
                         // sequentially to make sure they get processed in the right order so we
                         // build a promise chain here instead of using .all()
-                        let disassociationPromise = $q.resolve();
+                        let disassociationPromise = Promise.resolve();
                         groupsToDisassociate.forEach(data => {
                             disassociationPromise = disassociationPromise.then(() => {
                                 Rest.setUrl(url);
@@ -81,7 +81,7 @@ export default
                                 // we need to do these requests sequentially to make sure they get
                                 // processed in the right order so we build a promise chain here
                                 // instead of using .all()
-                                let associationPromise = $q.resolve();
+                                let associationPromise = Promise.resolve();
                                 groupsToAssociate.forEach(data => {
                                     associationPromise = associationPromise.then(() => {
                                         Rest.setUrl(url);
