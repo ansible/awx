@@ -9,6 +9,7 @@ services:
     command: /start_development.sh
     environment:
       CURRENT_UID:
+      OS:
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_USER: guest
       RABBITMQ_PASS: guest
