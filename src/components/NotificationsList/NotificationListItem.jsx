@@ -5,12 +5,30 @@ import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 import {
   Badge,
-  Switch,
+  Switch as PFSwitch,
   DataListItem,
   DataListItemRow,
   DataListItemCells,
-  DataListCell,
+  DataListCell as PFDataListCell,
 } from '@patternfly/react-core';
+
+import styled from 'styled-components';
+
+const DataListCell = styled(PFDataListCell)`
+  display: flex;
+  justify-content: ${props => (props.righthalf ? 'flex-start' : 'inherit')};
+  padding-bottom: ${props => (props.righthalf ? '16px' : '8px')};
+  
+  @media screen and (min-width: 768px) {
+    justify-content: ${props => (props.righthalf ? 'flex-end' : 'inherit')};
+    padding-bottom: 0;
+  }
+`;
+
+const Switch = styled(PFSwitch)`
+  display: flex;
+  flex-wrap: no-wrap;
+`;
 
 function NotificationListItem (props) {
   const {
@@ -21,13 +39,6 @@ function NotificationListItem (props) {
     errorTurnedOn,
     toggleNotification
   } = props;
-  const capText = {
-    textTransform: 'capitalize'
-  };
-  const toggleCellStyles = {
-    display: 'flex',
-    justifyContent: 'flex-end',
-  };
 
   return (
     <I18n>
@@ -43,18 +54,18 @@ function NotificationListItem (props) {
                   to={{
                     pathname: detailUrl
                   }}
-                  style={{ marginRight: '1.5em' }}
+                  css="margin-right: 1.5em;"
                 >
                   <b id={`items-list-item-${notification.id}`}>{notification.name}</b>
                 </Link>
                 <Badge
-                  style={capText}
+                  css="text-transform: capitalize;"
                   isRead
                 >
                   {notification.notification_type}
                 </Badge>
               </DataListCell>,
-              <DataListCell key="toggles" style={toggleCellStyles}>
+              <DataListCell righthalf="true" key="toggles">
                 <Switch
                   id={`notification-${notification.id}-success-toggle`}
                   label={i18n._(t`Successful`)}
