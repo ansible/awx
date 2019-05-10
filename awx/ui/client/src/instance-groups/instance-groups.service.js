@@ -1,5 +1,5 @@
 export default
-    ['$q', 'Rest', function($q, Rest) {
+    ['Rest', function(Rest) {
         return {
             addInstanceGroups: function(url, instance_groups) {
                 let groups = (instance_groups || []);
@@ -7,6 +7,24 @@ export default
                 let defers = groups.map((group) => Rest.post(group));
                 return Promise.all(defers);
             },
+            /**
+             * This function compares the currently saved ids and the selected ids - as soon as
+             * we encounter a difference between the two arrays, we mark all remaining currently
+             * saved ids in the array for disassociation.
+             *
+             * Example Scenario
+             * -----------------
+             * page is loaded with [1,2,3,4,5,6] as the currently selected tags
+             * user removes tag 3 from the middle
+             * user adds a new tag 7 to the end
+             * user appends tag 3 to the end
+             *
+             *                 _______ all ids here and to the right are disassociated
+             *                |
+             * current:  [1,2,3,4,5,6]
+             * selected: [1,2,4,5,6,7,3]
+             *                |_______ all ids here and to the right are (re)associated
+             */
             editInstanceGroups: function(url, instance_groups) {
                 Rest.setUrl(url);
                 return Rest.get()
@@ -49,7 +67,7 @@ export default
                         // make the disassociate request sequence - we need to do these requests
                         // sequentially to make sure they get processed in the right order so we
                         // build a promise chain here instead of using .all()
-                        let disassociationPromise = $q.resolve();
+                        let disassociationPromise = Promise.resolve();
                         groupsToDisassociate.forEach(data => {
                             disassociationPromise = disassociationPromise.then(() => {
                                 Rest.setUrl(url);
@@ -63,7 +81,7 @@ export default
                                 // we need to do these requests sequentially to make sure they get
                                 // processed in the right order so we build a promise chain here
                                 // instead of using .all()
-                                let associationPromise = $q.resolve();
+                                let associationPromise = Promise.resolve();
                                 groupsToAssociate.forEach(data => {
                                     associationPromise = associationPromise.then(() => {
                                         Rest.setUrl(url);
