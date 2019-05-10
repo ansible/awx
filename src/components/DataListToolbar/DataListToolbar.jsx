@@ -96,7 +96,7 @@ class DataListToolbar extends React.Component {
                   )}
                 </Toolbar>
               </LevelItem>
-              <LevelItem>
+              <LevelItem css="display: flex;">
                 {additionalControls}
               </LevelItem>
             </Level>

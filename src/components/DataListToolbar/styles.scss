@@ -66,49 +66,49 @@
   margin-left: 20px;
 }
 
-.awx-toolbar .pf-c-button.pf-m-primary {
-  background-color: #5cb85c;
-  min-width: 0px;
-  width: 30px;
-  height: 30px;
-  text-align: center;
-  padding: 0px;
-  margin: 0px;
-  margin-right: 20px;
-}
+// .awx-toolbar .pf-c-button.pf-m-primary {
+//   background-color: #5cb85c;
+//   min-width: 0px;
+//   width: 30px;
+//   height: 30px;
+//   text-align: center;
+//   padding: 0px;
+//   margin: 0px;
+//   margin-right: 20px;
+// }
 
 .awx-toolbar .pf-l-toolbar__item .pf-c-button.pf-m-plain {
   font-size: 18px;
 }
 
-.awx-ToolBarBtn {
-  width: 30px;
-  display: flex;
-  justify-content: center;
-  margin-right: 20px;
-  border-radius: 3px;
+// .awx-ToolBarBtn {
+//   width: 30px;
+//   display: flex;
+//   justify-content: center;
+//   margin-right: 20px;
+//   border-radius: 3px;
 
-  &[disabled] {
-    cursor: not-allowed;
-  }
-}
+//   &[disabled] {
+//     cursor: not-allowed;
+//   }
+// }
 
-.awx-ToolBarBtn:hover {
-  .awx-ToolBarTrashCanIcon {
-    color: white;
-  }
-  background-color:#d9534f;
-}
+// .awx-ToolBarBtn:hover {
+//   .awx-ToolBarTrashCanIcon {
+//     color: white;
+//   }
+//   background-color:#d9534f;
+// }
 
-.awx-ToolBarBtn[disabled]:hover {
-  .awx-ToolBarTrashCanIcon {
-    color: #d2d2d2;
-  }
-  background-color: white;
-}
+// .awx-ToolBarBtn[disabled]:hover {
+//   .awx-ToolBarTrashCanIcon {
+//     color: #d2d2d2;
+//   }
+//   background-color: white;
+// }
 
-.pf-l-toolbar > div {
-  &:last-child{
-    display:none;
-  }
-}
+// .pf-l-toolbar > div {
+//   &:last-child{
+//     display:none;
+//   }
+// }
