@@ -18,6 +18,7 @@ from django.db import IntegrityError, connection
 from django.utils.functional import curry
 from django.shortcuts import get_object_or_404, redirect
 from django.apps import apps
+from django.utils.deprecation import MiddlewareMixin
 from django.utils.translation import ugettext_lazy as _
 from django.urls import reverse, resolve
 
@@ -73,17 +74,12 @@ class TimingMiddleware(threading.local):
         return filepath
 
 
-class ActivityStreamMiddleware(threading.local):
+class ActivityStreamMiddleware(MiddlewareMixin, threading.local):
 
     def __init__(self, get_response=None):
         self.disp_uid = None
         self.instance_ids = []
         self.get_response = get_response
-
-    def __call__(self, request):
-        response = self.process_request(request)
-        response = self.process_response(request, response)
-        return response
 
     def process_request(self, request):
         if hasattr(request, 'user') and hasattr(request.user, 'is_authenticated') and request.user.is_authenticated():
@@ -95,7 +91,6 @@ class ActivityStreamMiddleware(threading.local):
         self.disp_uid = str(uuid.uuid1())
         self.instance_ids = []
         post_save.connect(set_actor, sender=ActivityStream, dispatch_uid=self.disp_uid, weak=False)
-        return self.get_response(request)
 
     def process_response(self, request, response):
         drf_request = getattr(request, 'drf_request', None)
