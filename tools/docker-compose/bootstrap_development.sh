@@ -2,6 +2,7 @@
 set +x
 
 if [ `id -u` -ge 500 ] || [ -z "${CURRENT_UID}" ]; then
+    echo "root:x:0:0:root:/root:/bin/bash" > /tmp/password
     echo "awx:x:`id -u`:`id -g`:,,,:/tmp:/bin/bash" >> /tmp/passwd
     cat /tmp/passwd > /etc/passwd
     rm /tmp/passwd
