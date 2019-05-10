@@ -22,7 +22,7 @@ export default function BuildDescription(BuildAnchor, $log, i18n) {
 
                      // if object1 winds up being the role's resource, we need to swap the objects
                      // in order to make the sentence make sense.
-                     if (activity.summary_fields.role[0].content_type === object1) {
+                     if (activity.object_type === object1) {
                          object1 = activity.object2;
                          object2 = activity.object1;
                      }
