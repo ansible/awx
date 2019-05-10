@@ -128,7 +128,7 @@ SUMMARIZABLE_FK_FIELDS = {
     'inventory_source': ('source', 'last_updated', 'status'),
     'custom_inventory_script': DEFAULT_SUMMARY_FIELDS,
     'source_script': ('name', 'description'),
-    'role': ('id', 'role_field'),
+    'role': ('id', 'role_field', 'content_type'),
     'notification_template': DEFAULT_SUMMARY_FIELDS,
     'instance_group': {'id', 'name', 'controller_id'},
     'insights_credential': DEFAULT_SUMMARY_FIELDS,
@@ -5106,6 +5106,8 @@ class ActivityStreamSerializer(BaseSerializer):
                         for field in related_fields:
                             fval = getattr(thisItem, field, None)
                             if fval is not None:
+                                if field == 'content_type':
+                                    fval = str(fval)
                                 thisItemDict[field] = fval
                         summary_fields[fk].append(thisItemDict)
             except ObjectDoesNotExist:
