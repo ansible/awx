@@ -112,7 +112,7 @@ services:
 
   {% if pg_hostname is not defined %}
   postgres:
-    image: postgres:11.2
+    image: postgres:9.6
     container_name: awx_postgres
     restart: unless-stopped
     volumes:
