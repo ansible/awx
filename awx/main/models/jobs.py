@@ -170,15 +170,15 @@ class JobOptions(BaseModel):
 
     @property
     def network_credentials(self):
-        return list(self.credentials.filter(credential_type__kind='net'))
+        return [cred for cred in self.credentials.all() if cred.credential_type.kind == 'net']
 
     @property
     def cloud_credentials(self):
-        return list(self.credentials.filter(credential_type__kind='cloud'))
+        return [cred for cred in self.credentials.all() if cred.credential_type.kind == 'cloud']
 
     @property
     def vault_credentials(self):
-        return list(self.credentials.filter(credential_type__kind='vault'))
+        return [cred for cred in self.credentials.all() if cred.credential_type.kind == 'vault']
 
     @property
     def credential(self):

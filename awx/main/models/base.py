@@ -189,6 +189,8 @@ class PasswordFieldsModel(BaseModel):
         for field in self.PASSWORD_FIELDS:
             if new_instance:
                 value = getattr(self, field, '')
+                if not value:
+                    continue
                 setattr(self, '_saved_%s' % field, value)
                 setattr(self, field, '')
             else:
@@ -202,6 +204,8 @@ class PasswordFieldsModel(BaseModel):
             update_fields = []
             for field in self.PASSWORD_FIELDS:
                 saved_value = getattr(self, '_saved_%s' % field, '')
+                if not saved_value:
+                    continue
                 setattr(self, field, saved_value)
                 self.mark_field_for_save(update_fields, field)
 

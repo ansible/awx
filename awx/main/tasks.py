@@ -690,15 +690,20 @@ class BaseTask(object):
     cleanup_paths = []
     proot_show_paths = []
 
-    def update_model(self, pk, _attempt=0, **updates):
+    def update_model(self, pk=None, _attempt=0, **updates):
         """Reload the model instance from the database and update the
         given fields.
         """
         try:
             with transaction.atomic():
                 # Retrieve the model instance.
-                instance = self.model.objects.get(pk=pk)
-
+                if pk is None:
+                    instance = self.instance
+                else:
+                    instance = self.model.objects.prefetch_related(
+                        'credentials__credential_type',
+                        'credentials__input_sources__source_credential'
+                    ).get(pk=pk)
                 # Update the appropriate fields and save the model
                 # instance, then return the new instance.
                 if updates:
@@ -1053,7 +1058,7 @@ class BaseTask(object):
         '''
         Ansible runner callback to tell the job when/if it is canceled
         '''
-        self.instance = self.update_model(self.instance.pk)
+        self.instance.refresh_from_db(fields=['cancel_flag'])
         if self.instance.cancel_flag or self.instance.status == 'canceled':
             cancel_wait = (now() - self.instance.modified).seconds if self.instance.modified else 0
             if cancel_wait > 5:
@@ -1084,7 +1089,7 @@ class BaseTask(object):
             for k, v in self.safe_env.items():
                 if k in job_env:
                     job_env[k] = v
-            self.instance = self.update_model(self.instance.pk, job_args=json.dumps(runner_config.command),
+            self.instance = self.update_model(job_args=json.dumps(runner_config.command),
                                               job_cwd=runner_config.cwd, job_env=job_env)
 
     def check_handler(self, config):
@@ -1095,8 +1100,7 @@ class BaseTask(object):
         for k, v in self.safe_cred_env.items():
             if k in job_env:
                 job_env[k] = v
-        self.instance = self.update_model(self.instance.pk,
-                                          job_args=json.dumps(config['command']),
+        self.instance = self.update_model(job_args=json.dumps(config['command']),
                                           job_cwd=config['cwd'],
                                           job_env=job_env)
 
@@ -1128,11 +1132,10 @@ class BaseTask(object):
             isolated = self.instance.is_isolated()
             self.pre_run_hook(self.instance)
             if self.instance.cancel_flag:
-                self.instance = self.update_model(self.instance.pk, status='canceled')
+                self.instance = self.update_model(status='canceled')
             if self.instance.status != 'running':
                 # Stop the task chain and prevent starting the job if it has
                 # already been canceled.
-                self.instance = self.update_model(pk)
                 status = self.instance.status
                 raise RuntimeError('not starting %s task' % self.instance.status)
 
@@ -1141,7 +1144,7 @@ class BaseTask(object):
 
             # store a record of the venv used at runtime
             if hasattr(self.instance, 'custom_virtualenv'):
-                self.update_model(pk, custom_virtualenv=getattr(self.instance, 'ansible_virtualenv_path', settings.ANSIBLE_VENV_PATH))
+                self.update_model(custom_virtualenv=getattr(self.instance, 'ansible_virtualenv_path', settings.ANSIBLE_VENV_PATH))
             private_data_dir = self.build_private_data_dir(self.instance)
 
             # Fetch "cached" fact data from prior runs and put on the disk
@@ -1234,7 +1237,7 @@ class BaseTask(object):
                 )
                 ansible_runner.utils.dump_artifacts(params)
                 isolated_manager_instance = isolated_manager.IsolatedManager(
-                    cancelled_callback=lambda: self.update_model(self.instance.pk).cancel_flag,
+                    cancelled_callback=lambda: self.instance.refresh_from_db(fields=['cancel_flag']).cancel_flag,
                     check_callback=self.check_handler,
                 )
                 status, rc = isolated_manager_instance.run(self.instance,
@@ -1271,8 +1274,7 @@ class BaseTask(object):
         except Exception:
             logger.exception('{} Post run hook errored.'.format(self.instance.log_format))
 
-        self.instance = self.update_model(pk)
-        self.instance = self.update_model(pk, status=status,
+        self.instance = self.update_model(status=status,
                                           emitted_events=self.event_ct,
                                           **extra_update_fields)
 
@@ -1526,7 +1528,7 @@ class RunJob(BaseTask):
         return self._write_extra_vars_file(private_data_dir, extra_vars, safe_dict)
 
     def build_credentials_list(self, job):
-        return job.credentials.prefetch_related('input_sources__source_credential').all()
+        return job.credentials.all()
 
     def get_password_prompts(self, passwords={}):
         d = super(RunJob, self).get_password_prompts(passwords)
@@ -1554,7 +1556,7 @@ class RunJob(BaseTask):
     def pre_run_hook(self, job):
         if job.inventory is None:
             error = _('Job could not start because it does not have a valid inventory.')
-            self.update_model(job.pk, status='failed', job_explanation=error)
+            self.update_model(status='failed', job_explanation=error)
             raise RuntimeError(error)
         if job.project and job.project.scm_type:
             pu_ig = job.instance_group
@@ -1566,7 +1568,7 @@ class RunJob(BaseTask):
                 msg = _(
                     'The project revision for this job template is unknown due to a failed update.'
                 )
-                job = self.update_model(job.pk, status='failed', job_explanation=msg)
+                job = self.update_model(status='failed', job_explanation=msg)
                 raise RuntimeError(msg)
             local_project_sync = job.project.create_project_update(
                 _eager_fields=dict(
@@ -1578,16 +1580,16 @@ class RunJob(BaseTask):
                     celery_task_id=job.celery_task_id))
             # save the associated job before calling run() so that a
             # cancel() call on the job can cancel the project update
-            job = self.update_model(job.pk, project_update=local_project_sync)
+            job = self.update_model(project_update=local_project_sync)
 
             project_update_task = local_project_sync._get_task_class()
             try:
                 project_update_task().run(local_project_sync.id)
-                job = self.update_model(job.pk, scm_revision=job.project.scm_revision)
+                job = self.update_model(scm_revision=job.project.scm_revision)
             except Exception:
                 local_project_sync.refresh_from_db()
                 if local_project_sync.status != 'canceled':
-                    job = self.update_model(job.pk, status='failed',
+                    job = self.update_model(status='failed',
                                             job_explanation=('Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' %
                                                              ('project_update', local_project_sync.name, local_project_sync.id)))
                     raise
@@ -1901,9 +1903,9 @@ class RunProjectUpdate(BaseTask):
             p.save()
 
         # Update any inventories that depend on this project
-        dependent_inventory_sources = p.scm_inventory_sources.filter(update_on_project_update=True)
-        if len(dependent_inventory_sources) > 0:
-            if status == 'successful' and instance.launch_type != 'sync':
+        if status == 'successful' and instance.launch_type != 'sync':
+            dependent_inventory_sources = p.scm_inventory_sources.filter(update_on_project_update=True)
+            if len(dependent_inventory_sources) > 0:
                 self._update_dependent_inventories(instance, dependent_inventory_sources)
 
     def should_use_proot(self, project_update):
@@ -2143,7 +2145,7 @@ class RunInventoryUpdate(BaseTask):
                 inventory_update.inventory_source.save(update_fields=['scm_last_revision'])
             except Exception:
                 inventory_update = self.update_model(
-                    inventory_update.pk, status='failed',
+                    status='failed',
                     job_explanation=('Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' %
                                      ('project_update', local_project_sync.name, local_project_sync.id)))
                 raise

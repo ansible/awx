@@ -792,9 +792,12 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         # If this job already exists in the database, retrieve a copy of
         # the job in its prior state.
         if self.pk:
-            self_before = self.__class__.objects.get(pk=self.pk)
-            if self_before.status != self.status:
-                status_before = self_before.status
+            if 'update_fields' in kwargs and 'status' not in kwargs['update_fields']:
+                status_before = None  # status not being updated, information not needed
+            else:
+                self_before = self.__class__.objects.get(pk=self.pk)
+                if self_before.status != self.status:
+                    status_before = self_before.status
 
         # Sanity check: Is this a failure? Ensure that the failure value
         # matches the status.
@@ -841,7 +844,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         result = super(UnifiedJob, self).save(*args, **kwargs)
 
         # If status changed, update the parent instance.
-        if self.status != status_before:
+        if status_before is not None and self.status != status_before:
             self._update_parent_instance()
 
         # Done.

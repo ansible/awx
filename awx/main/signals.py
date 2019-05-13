@@ -40,6 +40,7 @@ from awx.main.models import (
 from awx.main.constants import CENSOR_VALUE
 from awx.main.utils import model_instance_diff, model_to_dict, camelcase_to_underscore, get_current_apps
 from awx.main.utils import ignore_inventory_computed_fields, ignore_inventory_group_removal, _inventory_updates
+from awx.main.utils.common import get_allowed_fields
 from awx.main.tasks import update_inventory_computed_fields
 from awx.main.fields import (
     is_implicit_parent,
@@ -478,6 +479,12 @@ def activity_stream_update(sender, instance, **kwargs):
         return
     if not activity_stream_enabled:
         return
+    if 'update_fields' in kwargs:
+        # optimization: if only non-serialized fields are changed, then
+        # no activity stream is needed, so exit
+        allowed_fields = get_allowed_fields(instance, model_serializer_mapping())
+        if not (set(kwargs['update_fields']) & set(allowed_fields)):
+            return
     try:
         old = sender.objects.get(id=instance.id)
     except sender.DoesNotExist:
