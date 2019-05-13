@@ -40,3 +40,14 @@ ENV_BLACKLIST = frozenset((
     'JOB_CALLBACK_DEBUG', 'INVENTORY_HOSTVARS',
     'AWX_HOST', 'PROJECT_REVISION'
 ))
+
+# loggers that may be called in process of emitting a log
+LOGGER_BLACKLIST = (
+    'awx.main.utils.handlers',
+    'awx.main.utils.formatters',
+    'awx.main.utils.filters',
+    'awx.main.utils.encryption',
+    'awx.main.utils.log',
+    # loggers that may be called getting logging settings
+    'awx.conf'
+)

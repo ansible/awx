@@ -29,20 +29,6 @@ def test_base_logging_handler_skip_log(params, logger_name, expected, dummy_log_
     assert filter.filter(dummy_log_record) is expected, (params, logger_name)
 
 
-@pytest.mark.parametrize('level, expect', [
-    (30, True),  # warning
-    (20, False)  # info
-])
-def test_log_configurable_severity(level, expect, dummy_log_record):
-    dummy_log_record.levelno = level
-    filter = ExternalLoggerEnabled(
-        enabled_flag=True,
-        enabled_loggers=['awx', 'activity_stream', 'job_events', 'system_tracking'],
-        lvl='WARNING'
-    )
-    assert filter.filter(dummy_log_record) is expect
-
-
 class Field(object):
 
     def __init__(self, name, related_model=None, __prevent_search__=None):
