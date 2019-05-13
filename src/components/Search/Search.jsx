@@ -112,7 +112,6 @@ class Search extends React.Component {
         {({ i18n }) => (
           <div className="pf-c-input-group">
             <Dropdown
-              className="searchKeyDropdown"
               onToggle={this.handleDropdownToggle}
               onSelect={this.handleDropdownSelect}
               direction={up}

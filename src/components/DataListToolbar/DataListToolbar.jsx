@@ -4,8 +4,6 @@ import { I18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
   Checkbox,
-  Level,
-  LevelItem,
   Toolbar as PFToolbar,
   ToolbarGroup as PFToolbarGroup,
   ToolbarItem,
@@ -22,15 +20,15 @@ const AWXToolbar = styled.div`
   --awx-toolbar--BorderColor: #ebebeb;
   --awx-toolbar--BorderWidth: var(--pf-global--BorderWidth--sm);
 
+  --pf-global--target-size--MinHeight: 0;
+  --pf-global--target-size--MinWidth: 0;
+  --pf-global--FontSize--md: 14px;
+
   border-bottom: var(--awx-toolbar--BorderWidth) solid var(--awx-toolbar--BorderColor);
   background-color: var(--awx-toolbar--BackgroundColor);
   display: flex;
   min-height: 70px;
-  padding-top: 5px;
-
-  --pf-global--target-size--MinHeight: 0px;
-  --pf-global--target-size--MinWidth: 0px;
-  --pf-global--FontSize--md: 14px;
+  flex-grow: 1;
 `;
 
 const Toolbar = styled(PFToolbar)`
@@ -43,6 +41,35 @@ const ToolbarGroup = styled(PFToolbarGroup)`
     margin: 0;
   }
 `;
+
+const ColumnLeft = styled.div`
+  display: flex;
+  flex-basis: 100%;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 10px 0 8px 0;
+
+  @media screen and (min-width: 980px) {
+    flex-basis: 50%;
+  }
+`;
+
+const ColumnRight = styled(ColumnLeft)`
+  margin-left: 60px;
+  padding: 8px 0 10px 0;
+
+  @media screen and (min-width: 980px) {
+    margin-left: 0;
+    padding: 10px 0 8px 0;
+  }
+`;
+
+const AdditionalControlsWrapper = styled.div`
+  display: flex;
+  flex-grow: 1;
+  justify-content: flex-end;
+`;
+
 class DataListToolbar extends React.Component {
   render () {
     const {
@@ -65,24 +92,20 @@ class DataListToolbar extends React.Component {
     return (
       <I18n>
         {({ i18n }) => (
-          <AWXToolbar className="awx-toolbar">
-            <Level css="flex-grow: 1;">
-              <LevelItem css="display: flex; flex-basis: 700px">
-                <Toolbar noleftmargin={noLeftMargin}>
-                  { showSelectAll && (
-                    <ToolbarGroup css="margin: 0;">
-                      <ToolbarItem>
-                        <Checkbox
-                          checked={isAllSelected}
-                          onChange={onSelectAll}
-                          aria-label={i18n._(t`Select all`)}
-                          id="select-all"
-                        />
-                      </ToolbarItem>
-                      <VerticalSeparator />
-                    </ToolbarGroup>
-                  )}
-                  <ToolbarGroup css="margin: 0; flex-grow: 1;">
+          <AWXToolbar>
+            <Toolbar noleftmargin={noLeftMargin}>
+              { showSelectAll && (
+                <Fragment>
+                  <ColumnLeft>
+                    <ToolbarItem>
+                      <Checkbox
+                        checked={isAllSelected}
+                        onChange={onSelectAll}
+                        aria-label={i18n._(t`Select all`)}
+                        id="select-all"
+                      />
+                    </ToolbarItem>
+                    <VerticalSeparator />
                     <ToolbarItem css="flex-grow: 1;">
                       <Search
                         columns={columns}
@@ -91,8 +114,8 @@ class DataListToolbar extends React.Component {
                       />
                     </ToolbarItem>
                     <VerticalSeparator />
-                  </ToolbarGroup>
-                  <ToolbarGroup>
+                  </ColumnLeft>
+                  <ColumnRight>
                     <ToolbarItem>
                       <Sort
                         columns={columns}
@@ -101,31 +124,32 @@ class DataListToolbar extends React.Component {
                         sortedColumnKey={sortedColumnKey}
                       />
                     </ToolbarItem>
-                  </ToolbarGroup>
-                  { (showExpandCollapse || additionalControls.length) ? (
-                    <VerticalSeparator />
-                  ) : null}
-                  {showExpandCollapse && (
-                    <Fragment>
-                      <ToolbarGroup>
-                        <ExpandCollapse
-                          isCompact={isCompact}
-                          onCompact={onCompact}
-                          onExpand={onExpand}
-                        />
-                      </ToolbarGroup>
-                      { additionalControls && (
-                        <VerticalSeparator />
-                      )}
-                    </Fragment>
-                  )}
-                </Toolbar>
-              </LevelItem>
-              <LevelItem css="display: flex;">
-                {additionalControls}
-              </LevelItem>
-            </Level>
+                    { (showExpandCollapse || additionalControls.length) ? (
+                      <VerticalSeparator />
+                    ) : null}
+                    {showExpandCollapse && (
+                      <Fragment>
+                        <ToolbarGroup>
+                          <ExpandCollapse
+                            isCompact={isCompact}
+                            onCompact={onCompact}
+                            onExpand={onExpand}
+                          />
+                        </ToolbarGroup>
+                        { additionalControls && (
+                          <VerticalSeparator />
+                        )}
+                      </Fragment>
+                    )}
+                    <AdditionalControlsWrapper>
+                      {additionalControls}
+                    </AdditionalControlsWrapper>
+                  </ColumnRight>
+                </Fragment>
+              )}
+            </Toolbar>
           </AWXToolbar>
+
         )}
       </I18n>
     );
