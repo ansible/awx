@@ -79,7 +79,7 @@ class ActivityStreamMiddleware(MiddlewareMixin, threading.local):
     def __init__(self, get_response=None):
         self.disp_uid = None
         self.instance_ids = []
-        self.get_response = get_response
+        super().__init__(get_response)
 
     def process_request(self, request):
         if hasattr(request, 'user') and hasattr(request.user, 'is_authenticated') and request.user.is_authenticated():
