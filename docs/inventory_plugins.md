@@ -47,7 +47,7 @@ More hostvars will appear if the inventory plugins are used. To maintain backwar
 
 A small number of hostvars will be lost because of general deprecation needs.
 
-#### Host nNames
+#### Host Names
 
 In many cases, the host names will change. In all cases, accurate host tracking will still be maintained via the host `instance_id`. (after: https://github.com/ansible/awx/pull/3362)
 
@@ -68,7 +68,7 @@ The `inputs` for this credential constitute one source of data for running inven
  - `instance_filters`
  - `group_by`
 
-The way these data are applied to the environment (including files and environment vars) is highly dependent on the specific source.
+The way this data is applied to the environment (including files and environment vars) is highly dependent on the specific source.
 
 With plugins, the inventory file may reference files that contain secrets from the credential. With scripts, typically an environment variable will reference a filename that contains a ConfigParser format file with parameters for the update, and possibly including fields from the credential.
 

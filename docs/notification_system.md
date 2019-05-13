@@ -17,7 +17,7 @@ Notification templates assigned at certain levels will inherit notifications def
 
 * Job Templates will use notifications defined on it as well as inheriting notifications from the Project used by the Job Template and from the Organization that it is listed under (via the Project).
 * Project Updates will use notifications defined on the project and will inherit notifications from the Organization associated with it.
-* Inventory Updates will use notifications defined on the Organization under which it is listed.
+* Inventory Updates will use notifications defined on the Organization it is in.
 * Ad-hoc commands will use notifications defined on the Organization with which that inventory is associated.
 
 ## Workflow
