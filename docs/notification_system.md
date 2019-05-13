@@ -81,10 +81,6 @@ The following should be performed for good acceptance:
 
 * Test single and multiple channels and good formatting of the message. Note that slack notifications only contain the minimal information.
 
-### Test Service
-
-Any user of the Ansible Slack service can create a bot integration (which is how this notification is implemented). Remember to invite the bot to the channel first.
-
 
 ## Mattermost
 
