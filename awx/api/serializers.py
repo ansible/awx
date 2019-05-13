@@ -4955,8 +4955,10 @@ class InstanceGroupSerializer(BaseSerializer):
 class ActivityStreamSerializer(BaseSerializer):
 
     changes = serializers.SerializerMethodField()
-    object_association = serializers.SerializerMethodField()
-    object_type = serializers.SerializerMethodField()
+    object_association = serializers.SerializerMethodField(
+        help_text="When present, shows the field name of the role or relationship that changed.")
+    object_type = serializers.SerializerMethodField(
+        help_text="When present, shows the model on which the role or relationship was defined.")
 
     @cached_property
     def _local_summarizable_fk_fields(self):
