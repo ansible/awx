@@ -216,7 +216,7 @@ class URLModificationMiddleware(object):
         return '/'.join(url_units)
 
     def __call__(self, request):
-        response = self.process_request(request)
+        response = self.get_response(request)
         return response
 
     def process_request(self, request):

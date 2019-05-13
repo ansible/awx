@@ -1184,7 +1184,7 @@ AWX_REQUEST_PROFILE = False
 # Delete temporary directories created to store playbook run-time
 AWX_CLEANUP_PATHS = True
 
-MIDDLEWARE = [  # NOQA
+MIDDLEWARE = [
     'awx.main.middleware.TimingMiddleware',
     'awx.main.middleware.MigrationRanCheckMiddleware',
     'corsheaders.middleware.CorsMiddleware',
