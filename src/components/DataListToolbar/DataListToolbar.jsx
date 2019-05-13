@@ -33,7 +33,7 @@ const AWXToolbar = styled.div`
 
 const Toolbar = styled(PFToolbar)`
   flex-grow: 1;
-  margin-left: ${props => (props.noleftmargin ? '0' : '20px')};
+  margin-left: ${props => (props.marginleft ? '0' : '20px')};
 `;
 
 const ToolbarGroup = styled(PFToolbarGroup)`
@@ -55,7 +55,6 @@ const ColumnLeft = styled.div`
 `;
 
 const ColumnRight = styled(ColumnLeft)`
-  margin-left: 60px;
   padding: 8px 0 10px 0;
 
   @media screen and (min-width: 980px) {
@@ -93,10 +92,10 @@ class DataListToolbar extends React.Component {
       <I18n>
         {({ i18n }) => (
           <AWXToolbar>
-            <Toolbar noleftmargin={noLeftMargin}>
-              { showSelectAll && (
-                <Fragment>
-                  <ColumnLeft>
+            <Toolbar marginleft={noLeftMargin ? 1 : 0}>
+              <ColumnLeft>
+                { showSelectAll && (
+                  <Fragment>
                     <ToolbarItem>
                       <Checkbox
                         checked={isAllSelected}
@@ -106,47 +105,47 @@ class DataListToolbar extends React.Component {
                       />
                     </ToolbarItem>
                     <VerticalSeparator />
-                    <ToolbarItem css="flex-grow: 1;">
-                      <Search
-                        columns={columns}
-                        onSearch={onSearch}
-                        sortedColumnKey={sortedColumnKey}
+                  </Fragment>
+                )}
+                <ToolbarItem css="flex-grow: 1;">
+                  <Search
+                    columns={columns}
+                    onSearch={onSearch}
+                    sortedColumnKey={sortedColumnKey}
+                  />
+                </ToolbarItem>
+                <VerticalSeparator />
+              </ColumnLeft>
+              <ColumnRight>
+                <ToolbarItem>
+                  <Sort
+                    columns={columns}
+                    onSort={onSort}
+                    sortOrder={sortOrder}
+                    sortedColumnKey={sortedColumnKey}
+                  />
+                </ToolbarItem>
+                { (showExpandCollapse || additionalControls.length) ? (
+                  <VerticalSeparator />
+                ) : null}
+                {showExpandCollapse && (
+                  <Fragment>
+                    <ToolbarGroup>
+                      <ExpandCollapse
+                        isCompact={isCompact}
+                        onCompact={onCompact}
+                        onExpand={onExpand}
                       />
-                    </ToolbarItem>
-                    <VerticalSeparator />
-                  </ColumnLeft>
-                  <ColumnRight>
-                    <ToolbarItem>
-                      <Sort
-                        columns={columns}
-                        onSort={onSort}
-                        sortOrder={sortOrder}
-                        sortedColumnKey={sortedColumnKey}
-                      />
-                    </ToolbarItem>
-                    { (showExpandCollapse || additionalControls.length) ? (
+                    </ToolbarGroup>
+                    { additionalControls && (
                       <VerticalSeparator />
-                    ) : null}
-                    {showExpandCollapse && (
-                      <Fragment>
-                        <ToolbarGroup>
-                          <ExpandCollapse
-                            isCompact={isCompact}
-                            onCompact={onCompact}
-                            onExpand={onExpand}
-                          />
-                        </ToolbarGroup>
-                        { additionalControls && (
-                          <VerticalSeparator />
-                        )}
-                      </Fragment>
                     )}
-                    <AdditionalControlsWrapper>
-                      {additionalControls}
-                    </AdditionalControlsWrapper>
-                  </ColumnRight>
-                </Fragment>
-              )}
+                  </Fragment>
+                )}
+                <AdditionalControlsWrapper>
+                  {additionalControls}
+                </AdditionalControlsWrapper>
+              </ColumnRight>
             </Toolbar>
           </AWXToolbar>
 

@@ -118,6 +118,7 @@ class Search extends React.Component {
               isOpen={isSearchDropdownOpen}
               toggle={(
                 <DropdownToggle
+                  id="awx-search"
                   onToggle={this.handleDropdownToggle}
                 >
                   {searchColumnName}

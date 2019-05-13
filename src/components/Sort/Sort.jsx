@@ -31,7 +31,7 @@ const Dropdown = styled(PFDropdown)`
         width: auto;
       }
 
-      > svg { /* carret icon */
+      > svg { /* caret icon */
         margin: 0px;
         padding-top: 3px;
         padding-left: 3px;
@@ -121,6 +121,7 @@ class Sort extends React.Component {
                 isOpen={isSortDropdownOpen}
                 toggle={(
                   <DropdownToggle
+                    id="awx-sort"
                     onToggle={this.handleDropdownToggle}
                   >
                     {sortedColumnName}

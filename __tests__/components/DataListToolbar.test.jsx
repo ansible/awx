@@ -57,10 +57,9 @@ describe('<DataListToolbar />', () => {
   });
 
   test('dropdown items sortable columns work', () => {
-    const sortDropdownToggleSelector = '.pf-l-toolbar__group.sortDropdownGroup .pf-l-toolbar__item button';
-    const sortDropdownItemsSelector = '.pf-l-toolbar__group.sortDropdownGroup button.pf-c-dropdown__menu-item';
-    const searchDropdownToggleSelector = '.pf-c-dropdown.searchKeyDropdown .pf-c-dropdown__toggle';
-    const searchDropdownItemsSelector = '.pf-c-dropdown.searchKeyDropdown button.pf-c-dropdown__menu-item';
+    const sortDropdownToggleSelector = 'button[id="awx-sort"]';
+    const searchDropdownToggleSelector = 'button[id="awx-search"]';
+    const dropdownMenuItems = 'DropdownMenu > ul';
 
     const multipleColumns = [
       { name: 'Foo', key: 'foo', isSortable: true },
@@ -80,12 +79,10 @@ describe('<DataListToolbar />', () => {
       />
     );
     const sortDropdownToggle = toolbar.find(sortDropdownToggleSelector);
-    expect(sortDropdownToggle.length).toBe(2);
-    sortDropdownToggle.at(1).simulate('click');
-    sortDropdownToggle.at(0).simulate('click');
+    expect(sortDropdownToggle.length).toBe(1);
+    sortDropdownToggle.simulate('click');
     toolbar.update();
-
-    const sortDropdownItems = toolbar.find(sortDropdownItemsSelector);
+    const sortDropdownItems = toolbar.find(dropdownMenuItems).children();
     expect(sortDropdownItems.length).toBe(2);
 
     const mockedSortEvent = { target: { innerText: 'Bar' } };
@@ -101,13 +98,13 @@ describe('<DataListToolbar />', () => {
     toolbar.update();
 
     const sortDropdownToggleDescending = toolbar.find(sortDropdownToggleSelector);
-    expect(sortDropdownToggleDescending.length).toBe(2);
-    sortDropdownToggleDescending.at(1).simulate('click');
-    sortDropdownToggleDescending.at(0).simulate('click');
+    expect(sortDropdownToggleDescending.length).toBe(1);
+    sortDropdownToggleDescending.simulate('click');
     toolbar.update();
 
-    const sortDropdownItemsDescending = toolbar.find(sortDropdownItemsSelector);
+    const sortDropdownItemsDescending = toolbar.find(dropdownMenuItems).children();
     expect(sortDropdownItemsDescending.length).toBe(2);
+    sortDropdownToggleDescending.simulate('click'); // toggle close the sort dropdown
 
     const mockedSortEventDescending = { target: { innerText: 'Bar' } };
     sortDropdownItems.at(0).simulate('click', mockedSortEventDescending);
@@ -115,10 +112,10 @@ describe('<DataListToolbar />', () => {
 
     const searchDropdownToggle = toolbar.find(searchDropdownToggleSelector);
     expect(searchDropdownToggle.length).toBe(1);
-    searchDropdownToggle.at(0).simulate('click');
+    searchDropdownToggle.simulate('click');
     toolbar.update();
 
-    const searchDropdownItems = toolbar.find(searchDropdownItemsSelector);
+    const searchDropdownItems = toolbar.find(dropdownMenuItems).children();
     expect(searchDropdownItems.length).toBe(3);
 
     const mockedSearchEvent = { target: { innerText: 'Bar' } };
