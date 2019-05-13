@@ -1,36 +1,34 @@
 # Notification System Overview
 
-A Notifier is an instance of a notification type (Email, Slack, Webhook, etc.) with a name, description, and a defined configuration A few examples include:
+A Notification Template is an instance of a notification type (Email, Slack, Webhook, etc.) with a name, description, and a defined configuration. A few examples include:
 
 * Username, password, server, recipients for the Email type.
 * Token and list of channels for Slack.
 * URL and Headers for webhooks.
 
-A Notification is a manifestation of the Notifier... for example, when a job fails, a notification is sent using the configuration defined by the Notifier.
-
 At a high level, the typical notification task flow is:
 
-* User creates a Notification at `/api/v2/notification_templates/`.
-* User assigns the notification to any of the various objects that support it (all variants of Job Templates as well as organizations and projects) and at the appropriate trigger level for which they want the notification (error, success, or any).   For example, a user may wish to assign a particular Notification to trigger when `Job Template 1` fails.   In which case they will associate the notification with the job template at `/api/v2/job_templates/n/notifiers_error`.
+* User creates a `NotificationTemplate` at `/api/v2/notification_templates/`.
+* User assigns the notification to any of the various objects that support it (all variants of Job Templates as well as organizations and projects) and at the appropriate trigger level for which they want the notification (error, success, or any). For example, a user may wish to assign a particular Notification Template to trigger when `Job Template 1` fails.
 
-## Notifier Hierarchy
+## Notification Hierarchy
 
-Notifiers assigned at certain levels will inherit notifiers defined on parent objects as such:
+Notification templates assigned at certain levels will inherit notifications defined on parent objects as such:
 
-* Job Templates will use notifiers defined on it as well as inheriting notifiers from the Project used by the Job Template and from the Organization that it is listed under (via the Project).
-* Project Updates will use notifiers defined on the project and will inherit notifiers from the Organization associated with it.
-* Inventory Updates will use notifiers defined on the Organization under which it is listed.
-* Ad-hoc commands will use notifiers defined on the Organization with which that inventory is associated.
+* Job Templates will use notifications defined on it as well as inheriting notifications from the Project used by the Job Template and from the Organization that it is listed under (via the Project).
+* Project Updates will use notifications defined on the project and will inherit notifications from the Organization associated with it.
+* Inventory Updates will use notifications defined on the Organization under which it is listed.
+* Ad-hoc commands will use notifications defined on the Organization with which that inventory is associated.
 
 ## Workflow
 
-When a job succeeds or fails, the error or success handler will pull a list of relevant notifiers using the procedure defined above. It will then create a Notification object for each one containing relevant details about the job and then **sends** it to the destination (email addresses, slack channel(s), SMS numbers, etc.). These Notification objects are available as related resources on job types (Jobs, Inventory Updates, Project Updates), and also at `/api/v2/notifications`. You may also see what notifications have been sent from a notifier by examining its related resources.
+When a job succeeds or fails, the error or success handler will pull a list of relevant notifications using the procedure defined above. It will then create a Notification object for each one containing relevant details about the job and then **sends** it to the destination (email addresses, slack channel(s), SMS numbers, etc.). These Notification objects are available as related resources on job types (Jobs, Inventory Updates, Project Updates), and also at `/api/v2/notifications`. You may also see what notifications have been sent from a notifications by examining its related resources.
 
 Notifications can succeed or fail but that will not cause its associated job to succeed or fail. The status of the notification can be viewed at its detail endpoint: `/api/v2/notifications/<n>`
 
-## Testing Notifiers Before Using Them
+## Testing Notifications Before Using Them
 
-Once a Notifier is created its configuration can be tested by utilizing the endpoint at `/api/v2/notification_templates/<n>/test`   This will emit a test notification given the configuration defined by the Notifier.  These test notifications will also appear in the notifications list at `/api/v2/notifications`
+Once a Notification Template is created, its configuration can be tested by utilizing the endpoint at `/api/v2/notification_templates/<n>/test`   This will emit a test notification given the configuration defined by the notification.  These test notifications will also appear in the notifications list at `/api/v2/notifications`
 
 
 # Notification Types
@@ -70,6 +68,7 @@ Set up a local SMTP mail service.  Some options are listed below:
 
 * Postfix service on galaxy: https://galaxy.ansible.com/debops/postfix/
 * Mailtrap has a good free plan that should provide all of the features necessary: https://mailtrap.io/
+* Another option is to use a Docker container: `docker run --network="tools_default" -p 25:25 -e maildomain=mail.example.com -e smtp_user=user:pwd --name postfix -d catatnight/postfix`
 
 
 ## Slack
@@ -85,30 +84,6 @@ The following should be performed for good acceptance:
 ### Test Service
 
 Any user of the Ansible Slack service can create a bot integration (which is how this notification is implemented). Remember to invite the bot to the channel first.
-
-
-## HipChat
-
-There are several ways to integrate with HipChat. The Tower implementation uses HipChat "Integrations". Currently you can find this at the bottom right of the main HipChat webview.  From there, you will select "Build your own Integration". After creating that, it will list the `auth_token` that needs to be supplied to Tower. Some other relevant details on the fields accepted by Tower for the HipChat notification type are:
-
-* `color`: This will highlight the message as the given color. If set to something HipChat doesn't expect, then the notification will generate an error.
-* `notify`: Selecting this will cause the bot to "notify" channel members. Normally it will just be stuck as a message in the chat channel without triggering anyone's notifications. This option will notify users of the channel respecting their existing notification settings (browser notification, email fallback, etc.)
-* `message_from`: Along with the integration name itself, this will put another label on the notification. This is particularly helpful when multiple services are using the same integration to distinguish them from each other.
-* `api_url`: The url of the HipChat API service. If you create a team hosted by them, it'll be something like `https://team.hipchat.com`. For a self-hosted service, it will be the HTTP URL that is accessible by Tower.
-
-### Testing Considerations
-
-* Make sure all of the options behave as expected.
-* Test single and multiple channels.
-* Test that notification preferences are obeyed.
-* Test formatting and appearance.  Note that, like Slack, HipChat will use the minimal version of the notification.
-* Test standalone HipChat service for parity with hosted solution.
-
-### Test Service
-
-HipChat allows you to create a team with limited users and message history for free, which is easy to set up and get started with. HipChat also contains a self-hosted server and offers a 30 day trial:
-
-https://www.hipchat.com/server
 
 
 ## Mattermost
