@@ -4984,7 +4984,7 @@ class ActivityStreamSerializer(BaseSerializer):
     class Meta:
         model = ActivityStream
         fields = ('*', '-name', '-description', '-created', '-modified', 'timestamp', 'operation',
-                  'changes', 'object1', 'object2', 'object_association', 'object_type')
+                  'changes', 'object1', 'object2', 'object_association', 'action_node', 'object_type')
 
     def get_fields(self):
         ret = super(ActivityStreamSerializer, self).get_fields()

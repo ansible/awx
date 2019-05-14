@@ -277,3 +277,22 @@ def test_saved_passwords_hidden_activity(workflow_job_template, job_template_wit
     changes = json.loads(entry.changes)
     assert 'survey_passwords' not in changes
     assert json.loads(changes['extra_data'])['bbbb'] == '$encrypted$'
+
+
+@pytest.mark.django_db
+def test_cluster_node_recorded(inventory, project):
+    jt = JobTemplate.objects.create(name='testjt', inventory=inventory, project=project)
+    with mock.patch('awx.main.models.activity_stream.settings.CLUSTER_HOST_ID', 'foo_host'):
+        job = jt.create_unified_job()
+    entry = ActivityStream.objects.filter(job=job).first()
+    assert entry.action_node == 'foo_host'
+
+
+@pytest.mark.django_db
+def test_cluster_node_long_node_name(inventory, project):
+    jt = JobTemplate.objects.create(name='testjt', inventory=inventory, project=project)
+    with mock.patch('awx.main.models.activity_stream.settings.CLUSTER_HOST_ID', 'f' * 700):
+        job = jt.create_unified_job()
+    # node name is very long, we just want to make sure it does not error
+    entry = ActivityStream.objects.filter(job=job).first()
+    assert entry.action_node.startswith('ffffff')

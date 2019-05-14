@@ -19,14 +19,11 @@ from awx.api.versioning import reverse
 from awx.main.managers import InstanceManager, InstanceGroupManager
 from awx.main.fields import JSONField
 from awx.main.models.base import BaseModel, HasEditsMixin
-from awx.main.models.inventory import InventoryUpdate
-from awx.main.models.jobs import Job
-from awx.main.models.projects import ProjectUpdate
 from awx.main.models.unified_jobs import UnifiedJob
 from awx.main.utils import get_cpu_capacity, get_mem_capacity, get_system_task_capacity
 from awx.main.models.mixins import RelatedJobsMixin
 
-__all__ = ('Instance', 'InstanceGroup', 'JobOrigin', 'TowerScheduleState', 'TowerAnalyticsState')
+__all__ = ('Instance', 'InstanceGroup', 'TowerScheduleState', 'TowerAnalyticsState')
 
 
 class HasPolicyEditsMixin(HasEditsMixin):
@@ -266,24 +263,6 @@ class TowerAnalyticsState(SingletonModel):
     last_run = models.DateTimeField(auto_now_add=True)
 
 
-class JobOrigin(models.Model):
-    """A model representing the relationship between a unified job and
-    the instance that was responsible for starting that job.
-
-    It may be possible that a job has no origin (the common reason for this
-    being that the job was started on Tower < 2.1 before origins were a thing).
-    This is fine, and code should be able to handle it. A job with no origin
-    is always assumed to *not* have the current instance as its origin.
-    """
-    unified_job = models.OneToOneField(UnifiedJob, related_name='job_origin', on_delete=models.CASCADE)
-    instance = models.ForeignKey(Instance, on_delete=models.CASCADE)
-    created = models.DateTimeField(auto_now_add=True)
-    modified = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        app_label = 'main'
-
-
 def schedule_policy_task():
     from awx.main.tasks import apply_cluster_membership_policies
     connection.on_commit(lambda: apply_cluster_membership_policies.apply_async())
@@ -309,31 +288,6 @@ def on_instance_group_deleted(sender, instance, using, **kwargs):
 @receiver(post_delete, sender=Instance)
 def on_instance_deleted(sender, instance, using, **kwargs):
     schedule_policy_task()
-
-
-# Unfortunately, the signal can't just be connected against UnifiedJob; it
-# turns out that creating a model's subclass doesn't fire the signal for the
-# superclass model.
-@receiver(post_save, sender=InventoryUpdate)
-@receiver(post_save, sender=Job)
-@receiver(post_save, sender=ProjectUpdate)
-def on_job_create(sender, instance, created=False, raw=False, **kwargs):
-    """When a new job is created, save a record of its origin (the machine
-    that started the job).
-    """
-    # Sanity check: We only want to create a JobOrigin record in cases where
-    # we are making a new record, and in normal situations.
-    #
-    # In other situations, we simply do nothing.
-    if raw or not created:
-        return
-
-    # Create the JobOrigin record, which attaches to the current instance
-    # (which started the job).
-    job_origin, new = JobOrigin.objects.get_or_create(
-        instance=Instance.objects.me(),
-        unified_job=instance,
-    )
 
 
 class UnifiedJobTemplateInstanceGroupMembership(models.Model):
