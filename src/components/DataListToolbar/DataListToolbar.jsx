@@ -125,11 +125,9 @@ class DataListToolbar extends React.Component {
                     sortedColumnKey={sortedColumnKey}
                   />
                 </ToolbarItem>
-                { (showExpandCollapse || additionalControls.length) ? (
-                  <VerticalSeparator />
-                ) : null}
                 {showExpandCollapse && (
                   <Fragment>
+                    <VerticalSeparator />
                     <ToolbarGroup>
                       <ExpandCollapse
                         isCompact={isCompact}

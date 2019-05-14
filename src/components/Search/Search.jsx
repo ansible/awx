@@ -10,8 +10,9 @@ import {
   DropdownItem,
   TextInput as PFTextInput
 } from '@patternfly/react-core';
-
-import { SearchIcon } from '@patternfly/react-icons';
+import {
+  SearchIcon
+} from '@patternfly/react-icons';
 
 import styled from 'styled-components';
 
