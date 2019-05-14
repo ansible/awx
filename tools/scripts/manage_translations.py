@@ -75,8 +75,8 @@ def _handle_response(output, errors):
     """
     Prints response received from Zanata client
     """
-    if not errors and '\n' in output:
-        for response in output.split('\n'):
+    if not errors and '\n' in output.decode('utf-8'):
+        for response in output.decode('utf-8').split('\n'):
             print(response)
         return True
     else:
