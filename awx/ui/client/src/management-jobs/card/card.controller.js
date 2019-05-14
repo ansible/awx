@@ -64,7 +64,7 @@ export default
                 $scope.submitJob = function (id, name) {
                     Wait('start');
                         defaultUrl = GetBasePath('system_job_templates')+id+'/launch/';
-                        var noModalJobs = ['Cleanup Expired Sessions', 'Cleanup Expired OAuth 2 Tokens'];
+                        var noModalJobs = ['Automation Insights Collection', 'Cleanup Expired Sessions', 'Cleanup Expired OAuth 2 Tokens'];
                         if (noModalJobs.includes(name)) {
                             launchManagementJob(defaultUrl, name);
                         } else {
