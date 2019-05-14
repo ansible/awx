@@ -61,13 +61,11 @@ def gather(dest=None, module=None):
     :pararm module: the module to search for registered analytic collector
                     functions; defaults to awx.main.analytics.collectors
     """
-    
+
     run_now = now()
     state = TowerAnalyticsState.get_solo()
     last_run = state.last_run
     logger.debug("Last analytics run was: {}".format(last_run))
-    state.last_run = run_now
-    state.save()
     
     max_interval = now() - timedelta(days=7)
     if last_run < max_interval or not last_run:
@@ -132,6 +130,12 @@ def ship(path):
         ]
         output = smart_str(subprocess.check_output(cmd, timeout=60 * 5))
         logger.debug(output)
+        # reset the `last_run` when data is shipped
+        run_now = now()
+        state = TowerAnalyticsState.get_solo()
+        state.last_run = run_now
+        state.save()
+
     except subprocess.CalledProcessError:
         logger.exception('{} failure:'.format(cmd))
     except subprocess.TimeoutExpired:
