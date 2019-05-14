@@ -2,19 +2,51 @@ import React from 'react';
 import { string, bool, func } from 'prop-types';
 import { Trans } from '@lingui/macro';
 import {
-  Badge,
+  Badge as PFBadge,
   DataListItem,
   DataListItemRow,
   DataListItemCells,
   DataListCheck,
-  DataListCell,
+  DataListCell as PFDataListCell,
 } from '@patternfly/react-core';
 import {
   Link
 } from 'react-router-dom';
 
+import styled from 'styled-components';
+
 import VerticalSeparator from '../../../components/VerticalSeparator';
 import { Organization } from '../../../types';
+
+const Badge = styled(PFBadge)`
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  margin-left: 10px;
+`;
+
+const ListGroup = styled.span`
+  display: flex;
+  margin-left: 40px;
+
+  @media screen and (min-width: 768px) {
+    margin-left: 20px;
+
+    &:first-of-type {
+      margin-left: 0;
+    }
+  }
+`;
+
+const DataListCell = styled(PFDataListCell)`
+  display: flex;
+  align-items: center;
+  padding-bottom: ${props => (props.righthalf ? '16px' : '8px')};
+
+  @media screen and (min-width: 768px) {
+    padding-bottom: 0;
+  }
+`;
 
 class OrganizationListItem extends React.Component {
   static propTypes = {
@@ -42,10 +74,8 @@ class OrganizationListItem extends React.Component {
             aria-labelledby={labelId}
           />
           <DataListItemCells dataListCells={[
-            <DataListCell key="divider" className="pf-c-data-list__cell--divider">
+            <DataListCell key="divider">
               <VerticalSeparator />
-            </DataListCell>,
-            <DataListCell key="org-name">
               <span id={labelId}>
                 <Link
                   to={`${detailUrl}`}
@@ -54,19 +84,19 @@ class OrganizationListItem extends React.Component {
                 </Link>
               </span>
             </DataListCell>,
-            <DataListCell key="org-members" width={2}>
-              <span className="awx-c-list-group">
+            <DataListCell key="org-members" righthalf="true" width={2}>
+              <ListGroup>
                 <Trans>Members</Trans>
-                <Badge className="awx-c-list-group--badge" isRead>
+                <Badge isRead>
                   {organization.summary_fields.related_field_counts.users}
                 </Badge>
-              </span>
-              <span className="awx-c-list-group">
+              </ListGroup>
+              <ListGroup>
                 <Trans>Teams</Trans>
-                <Badge className="awx-c-list-group--badge" isRead>
+                <Badge isRead>
                   {organization.summary_fields.related_field_counts.teams}
                 </Badge>
-              </span>
+              </ListGroup>
             </DataListCell>
           ]}
           />

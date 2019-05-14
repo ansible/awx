@@ -1,11 +1,41 @@
 import React, { Fragment } from 'react';
 import { func, bool, number, string, arrayOf, shape } from 'prop-types';
-import { Button, Tooltip } from '@patternfly/react-core';
+import { Button as PFButton, Tooltip } from '@patternfly/react-core';
 import { TrashAltIcon } from '@patternfly/react-icons';
 import { I18n, i18nMark } from '@lingui/react';
 import { Trans, t } from '@lingui/macro';
+import styled from 'styled-components';
 import AlertModal from '../AlertModal';
 import { pluralize } from '../../util/strings';
+
+const Button = styled(PFButton)`
+  width: 30px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  margin-right: 20px;
+  border-radius: 3px;
+  padding: 0;
+
+
+  &:disabled {
+    cursor: not-allowed;
+    &:hover {
+      background-color: white;
+
+      > svg {
+        color: #d2d2d2;
+      }
+    }
+  }
+
+  &:hover {
+    background-color:#d9534f;
+    > svg {
+      color: white;
+    }
+  }
+`;
 
 const ItemToDelete = shape({
   id: number.isRequired,
@@ -102,13 +132,12 @@ class ToolbarDeleteButton extends React.Component {
               position="left"
             >
               <Button
-                className="awx-ToolBarBtn"
                 variant="plain"
                 aria-label={i18n._(t`Delete`)}
                 onClick={this.handleConfirmDelete}
                 isDisabled={isDisabled}
               >
-                <TrashAltIcon className="awx-ToolBarTrashCanIcon" />
+                <TrashAltIcon />
               </Button>
             </Tooltip>
             { isModalOpen && (

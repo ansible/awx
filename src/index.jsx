@@ -13,7 +13,6 @@ import { t } from '@lingui/macro';
 import '@patternfly/react-core/dist/styles/base.css';
 import './app.scss';
 import './components/Pagination/styles.scss';
-import './components/DataListToolbar/styles.scss';
 import './components/SelectedList/styles.scss';
 import './components/AddRole/styles.scss';
 

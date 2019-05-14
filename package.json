@@ -28,6 +28,7 @@
     "babel-jest": "^24.7.1",
     "babel-loader": "^8.0.4",
     "babel-plugin-macros": "^2.4.2",
+    "babel-plugin-styled-components": "^1.10.0",
     "css-loader": "^1.0.0",
     "enzyme": "^3.9.0",
     "enzyme-adapter-react-16": "^1.12.1",
@@ -59,6 +60,7 @@
     "prop-types": "^15.6.2",
     "react": "^16.4.1",
     "react-dom": "^16.4.1",
-    "react-router-dom": "^4.3.1"
+    "react-router-dom": "^4.3.1",
+    "styled-components": "^4.2.0"
   }
 }

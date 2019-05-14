@@ -1,10 +1,24 @@
 import React from 'react';
 import { string, func } from 'prop-types';
 import { Link } from 'react-router-dom';
-import { Button } from '@patternfly/react-core';
+import { Button as PFButton } from '@patternfly/react-core';
 import { PlusIcon } from '@patternfly/react-icons';
 import { I18n } from '@lingui/react';
 import { t } from '@lingui/macro';
+import styled from 'styled-components';
+
+const Button = styled(PFButton)`
+  &&& { /* higher specificity order */
+    background-color: #5cb85c;
+    min-width: 0;
+    width: 30px;
+    height: 30px;
+    text-align: center;
+    padding: 0;
+    margin: 0;
+    margin-right: 20px;
+  }
+`;
 
 function ToolbarAddButton ({ linkTo, onClick }) {
   if (!linkTo && !onClick) {
@@ -15,7 +29,7 @@ function ToolbarAddButton ({ linkTo, onClick }) {
     return (
       <I18n>
         {({ i18n }) => (
-          <Link to={linkTo} className="pf-c-button pf-m-primary">
+          <Link to={linkTo}>
             <Button
               variant="primary"
               aria-label={i18n._(t`Add`)}

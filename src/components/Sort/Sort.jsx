@@ -4,7 +4,7 @@ import { I18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
   Button,
-  Dropdown,
+  Dropdown as PFDropdown,
   DropdownPosition,
   DropdownToggle,
   DropdownItem
@@ -15,6 +15,36 @@ import {
   SortNumericDownIcon,
   SortNumericUpIcon
 } from '@patternfly/react-icons';
+
+import styled from 'styled-components';
+
+const Dropdown = styled(PFDropdown)`
+  &&& {
+    > button {
+      min-height: 30px;
+      min-width: 70px;
+      height: 30px;
+      padding: 0 10px;
+      margin: 0px;
+
+      > span { /* text element within dropdown */
+        width: auto;
+      }
+
+      > svg { /* caret icon */
+        margin: 0px;
+        padding-top: 3px;
+        padding-left: 3px;
+      }
+    }
+  }  
+`;
+
+const IconWrapper = styled.span`
+  > svg {
+    font-size: 18px;
+  }
+`;
 
 class Sort extends React.Component {
   constructor (props) {
@@ -60,7 +90,6 @@ class Sort extends React.Component {
     const {
       isSortDropdownOpen
     } = this.state;
-
     const [{ name: sortedColumnName, isNumeric }] = columns
       .filter(({ key }) => key === sortedColumnKey);
 
@@ -92,6 +121,7 @@ class Sort extends React.Component {
                 isOpen={isSortDropdownOpen}
                 toggle={(
                   <DropdownToggle
+                    id="awx-sort"
                     onToggle={this.handleDropdownToggle}
                   >
                     {sortedColumnName}
@@ -104,8 +134,11 @@ class Sort extends React.Component {
               onClick={this.handleSort}
               variant="plain"
               aria-label={i18n._(t`Sort`)}
+              css="padding: 0;"
             >
-              <SortIcon />
+              <IconWrapper>
+                <SortIcon />
+              </IconWrapper>
             </Button>
           </React.Fragment>
         )}

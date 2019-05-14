@@ -128,17 +128,6 @@
   --pf-c-data-list__cell--PaddingTop: 16px;
   --pf-c-data-list__cell-cell--PaddingTop: 16px;
 
-  .awx-c-list-group {
-    display: inline-flex;
-    margin-right: 20px;
-
-    &--badge {
-      align-items: center;
-      display: flex;
-      justify-content: center;
-      margin-left: 10px;
-    }
-  }
 
   &.pf-c-data-list__cell--divider {
     --pf-c-data-list__cell-cell--MarginRight: 0;
