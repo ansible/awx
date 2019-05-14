@@ -2092,15 +2092,20 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
     # TODO: remove when old 'credential' fields are removed
     def _update_deprecated_fields(self, fields, obj):
         if 'credential' in fields:
-            new_cred = fields['credential']
+            if fields['credential'] is None:
+                new_cred = None
+                new_cred_hash = None
+            else:
+                new_cred = Credential.objects.get(pk=fields['credential'])
+                new_cred_hash = new_cred.unique_hash()
             existing = obj.credentials.all()
-            if new_cred not in existing:
-                for cred in existing:
-                    # Remove all other cloud credentials
+            for cred in existing:
+                # Remove all other cloud credentials of same type
+                if not cred or (cred != new_cred and cred.unique_hash() == new_cred_hash):
                     obj.credentials.remove(cred)
-                if new_cred:
-                    # Add new credential
-                    obj.credentials.add(new_cred)
+            if new_cred and new_cred not in existing:
+                # Add new credential
+                obj.credentials.add(new_cred)
 
     def validate(self, attrs):
         deprecated_fields = {}

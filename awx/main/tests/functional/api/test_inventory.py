@@ -552,11 +552,40 @@ class TestInventorySourceCredential:
             )
         assert set(inv_src.credentials.all()) == set([aws_cred, gce_cred])
         patch(url=inv_src.get_absolute_url(), data={'credential': gce_cred.pk}, user=admin_user, expect=200)
-        assert set(inv_src.credentials.all()) == set([gce_cred])
+        assert set(inv_src.credentials.all()) == set([aws_cred, gce_cred])
 
-    def test_credentials_relationship_mapping(self, project, inventory, organization, admin_user, post, patch):
+    def test_credential_deprecated_field_replacement(self, project, inventory, organization, admin_user, post, patch):
         """The credentials relationship is used to manage the cloud credential
         this test checks that replacement works"""
+        from awx.main.models.credential import Credential, CredentialType
+        openstack = CredentialType.defaults['openstack']()
+        openstack.save()
+        os_cred = Credential.objects.create(credential_type=openstack, name='bar', organization=organization)
+        r = post(
+            url=reverse('api:inventory_source_list'),
+            data={
+                'inventory': inventory.pk, 'name': 'fobar', 'source': 'scm',
+                'source_project': project.pk, 'source_path': '',
+                'credential': os_cred.pk
+            },
+            expect=201,
+            user=admin_user
+        )
+        os_cred2 = Credential.objects.create(credential_type=openstack, name='bar2', organization=organization)
+        inv_src = InventorySource.objects.get(pk=r.data['id'])
+        assert list(inv_src.credentials.values_list('id', flat=True)) == [os_cred.pk]
+        patch(
+            url=inv_src.get_absolute_url(),
+            data={'credential': os_cred2.pk},
+            expect=200,
+            user=admin_user
+        )
+        assert list(inv_src.credentials.values_list('id', flat=True)) == [os_cred2.pk]
+
+    def test_credential_deprecated_field_addition(self, project, inventory, organization, admin_user, post, patch):
+        """Test that with deprecated credential field, a new type credential
+        can be added. In this implementation, it does not replace any existing
+        credentials of different type."""
         from awx.main.models.credential import Credential, CredentialType
         openstack = CredentialType.defaults['openstack']()
         openstack.save()
@@ -580,13 +609,11 @@ class TestInventorySourceCredential:
         assert list(inv_src.credentials.values_list('id', flat=True)) == [os_cred.pk]
         patch(
             url=inv_src.get_absolute_url(),
-            data={
-                'credential': aws_cred.pk
-            },
+            data={'credential': aws_cred.pk},
             expect=200,
             user=admin_user
         )
-        assert list(inv_src.credentials.values_list('id', flat=True)) == [aws_cred.pk]
+        assert set(inv_src.credentials.values_list('id', flat=True)) == set([aws_cred.pk, os_cred.pk])
 
 
 @pytest.mark.django_db
