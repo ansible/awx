@@ -21,6 +21,12 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
+# Enable the following lines and install the browser extension to use Django debug toolbar
+# if your deployment method is not VMWare of Docker-for-Mac you may
+# need a different IP address from request.META['REMOTE_ADDR']
+# INTERNAL_IPS = ('172.19.0.1', '172.18.0.1', '192.168.100.1')
+# ALLOWED_HOSTS = ['*']
+
 # Database settings to use PostgreSQL for development.
 DATABASES = {
     'default': {
