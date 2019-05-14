@@ -32,24 +32,15 @@ analytics_logger = logging.getLogger('awx.analytics.activity_stream')
 perf_logger = logging.getLogger('awx.analytics.performance')
 
 
-class TimingMiddleware(threading.local):
+class TimingMiddleware(threading.local, MiddlewareMixin):
 
     dest = '/var/log/tower/profile'
-
-    def __init__(self, get_response):
-        self.get_response = get_response
-
-    def __call__(self, request):
-        response = self.process_request(request)
-        response = self.process_response(request, response)
-        return response
 
     def process_request(self, request):
         self.start_time = time.time()
         if settings.AWX_REQUEST_PROFILE:
             self.prof = cProfile.Profile()
             self.prof.enable()
-        return self.get_response(request)
 
     def process_response(self, request, response):
         if not hasattr(self, 'start_time'):  # some tools may not invoke process_request
@@ -74,7 +65,7 @@ class TimingMiddleware(threading.local):
         return filepath
 
 
-class ActivityStreamMiddleware(MiddlewareMixin, threading.local):
+class ActivityStreamMiddleware(threading.local, MiddlewareMixin):
 
     def __init__(self, get_response=None):
         self.disp_uid = None
@@ -129,19 +120,11 @@ class ActivityStreamMiddleware(MiddlewareMixin, threading.local):
                     self.instance_ids.append(instance.id)
 
 
-class SessionTimeoutMiddleware(object):
+class SessionTimeoutMiddleware(MiddlewareMixin):
     """
     Resets the session timeout for both the UI and the actual session for the API
     to the value of SESSION_COOKIE_AGE on every request if there is a valid session.
     """
-
-    def __init__(self, get_response):
-        self.get_response = get_response
-
-    def __call__(self, request):
-        response = self.get_response(request)
-        response = self.process_response(request, response)
-        return response
 
     def process_response(self, request, response):
         should_skip = 'HTTP_X_WS_SESSION_QUIET' in request.META
@@ -170,10 +153,9 @@ def _customize_graph():
         settings.NAMED_URL_GRAPH[Instance].add_bindings()
 
 
-class URLModificationMiddleware(object):
+class URLModificationMiddleware(MiddlewareMixin):
 
     def __init__(self, get_response=None):
-        self.get_response = get_response
         models = [m for m in apps.get_app_config('main').get_models() if hasattr(m, 'get_absolute_url')]
         generate_graph(models)
         _customize_graph()
@@ -197,6 +179,7 @@ class URLModificationMiddleware(object):
             category=_('Named URL'),
             category_slug='named-url',
         )
+        super().__init__(get_response)
 
     def _named_url_to_pk(self, node, named_url):
         kwargs = {}
@@ -215,10 +198,6 @@ class URLModificationMiddleware(object):
                                                  url_units[4])
         return '/'.join(url_units)
 
-    def __call__(self, request):
-        response = self.get_response(request)
-        return response
-
     def process_request(self, request):
         if hasattr(request, 'environ') and 'REQUEST_URI' in request.environ:
             old_path = urllib.parse.urlsplit(request.environ['REQUEST_URI']).path
@@ -229,17 +208,9 @@ class URLModificationMiddleware(object):
         if request.path_info != new_path:
             request.path = request.path.replace(request.path_info, new_path)
             request.path_info = new_path
-        return self.get_response(request)
 
 
-class MigrationRanCheckMiddleware(object):
-
-    def __init__(self, get_response):
-        self.get_response = get_response
-
-    def __call__(self, request):
-        response = self.process_request(request)
-        return response
+class MigrationRanCheckMiddleware(MiddlewareMixin):
 
     def process_request(self, request):
         executor = MigrationExecutor(connection)
@@ -247,4 +218,3 @@ class MigrationRanCheckMiddleware(object):
         if bool(plan) and \
                 getattr(resolve(request.path), 'url_name', '') != 'migrations_notran':
             return redirect(reverse("ui:migrations_notran"))
-        return self.get_response(request)
