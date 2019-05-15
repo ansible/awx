@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { I18n } from '@lingui/react';
+import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
   Button as PFButton,
@@ -90,7 +90,8 @@ class Search extends React.Component {
   render () {
     const { up } = DropdownPosition;
     const {
-      columns
+      columns,
+      i18n
     } = this.props;
     const {
       isSearchDropdownOpen,
@@ -109,41 +110,37 @@ class Search extends React.Component {
       ));
 
     return (
-      <I18n>
-        {({ i18n }) => (
-          <div className="pf-c-input-group">
-            <Dropdown
+      <div className="pf-c-input-group">
+        <Dropdown
+          onToggle={this.handleDropdownToggle}
+          onSelect={this.handleDropdownSelect}
+          direction={up}
+          isOpen={isSearchDropdownOpen}
+          toggle={(
+            <DropdownToggle
+              id="awx-search"
               onToggle={this.handleDropdownToggle}
-              onSelect={this.handleDropdownSelect}
-              direction={up}
-              isOpen={isSearchDropdownOpen}
-              toggle={(
-                <DropdownToggle
-                  id="awx-search"
-                  onToggle={this.handleDropdownToggle}
-                >
-                  {searchColumnName}
-                </DropdownToggle>
-              )}
-              dropdownItems={searchDropdownItems}
-            />
-            <TextInput
-              type="search"
-              aria-label="Search text input"
-              value={searchValue}
-              onChange={this.handleSearchInputChange}
-              style={{ height: '30px' }}
-            />
-            <Button
-              variant="tertiary"
-              aria-label={i18n._(t`Search`)}
-              onClick={this.handleSearch}
             >
-              <SearchIcon />
-            </Button>
-          </div>
-        )}
-      </I18n>
+              {searchColumnName}
+            </DropdownToggle>
+          )}
+          dropdownItems={searchDropdownItems}
+        />
+        <TextInput
+          type="search"
+          aria-label={i18n._(t`Search text input`)}
+          value={searchValue}
+          onChange={this.handleSearchInputChange}
+          style={{ height: '30px' }}
+        />
+        <Button
+          variant="tertiary"
+          aria-label={i18n._(t`Search`)}
+          onClick={this.handleSearch}
+        >
+          <SearchIcon />
+        </Button>
+      </div>
     );
   }
 }
@@ -159,4 +156,4 @@ Search.defaultProps = {
   sortedColumnKey: 'name'
 };
 
-export default Search;
+export default withI18n()(Search);

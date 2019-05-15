@@ -1,6 +1,7 @@
 import React from 'react';
 import { string, bool, func } from 'prop-types';
-import { Trans } from '@lingui/macro';
+import { withI18n } from '@lingui/react';
+import { t } from '@lingui/macro';
 import {
   Badge as PFBadge,
   DataListItem,
@@ -62,6 +63,7 @@ class OrganizationListItem extends React.Component {
       isSelected,
       onSelect,
       detailUrl,
+      i18n
     } = this.props;
     const labelId = `check-action-${organization.id}`;
     return (
@@ -86,13 +88,15 @@ class OrganizationListItem extends React.Component {
             </DataListCell>,
             <DataListCell key="org-members" righthalf="true" width={2}>
               <ListGroup>
-                <Trans>Members</Trans>
+                {i18n._(t`Members`)}
                 <Badge isRead>
                   {organization.summary_fields.related_field_counts.users}
                 </Badge>
               </ListGroup>
+            </DataListCell>,
+            <DataListCell>
               <ListGroup>
-                <Trans>Teams</Trans>
+                {i18n._(t`Teams`)}
                 <Badge isRead>
                   {organization.summary_fields.related_field_counts.teams}
                 </Badge>
@@ -105,4 +109,4 @@ class OrganizationListItem extends React.Component {
     );
   }
 }
-export default OrganizationListItem;
+export default withI18n()(OrganizationListItem);

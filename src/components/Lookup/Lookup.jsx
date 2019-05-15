@@ -9,7 +9,7 @@ import {
   InputGroup,
   Modal,
 } from '@patternfly/react-core';
-import { I18n } from '@lingui/react';
+import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
 import { withNetwork } from '../../contexts/Network';
@@ -130,7 +130,9 @@ class Lookup extends React.Component {
       results,
       count,
     } = this.state;
-    const { id, lookupHeader = 'items', value, columns } = this.props;
+    const { id, lookupHeader, value, columns, i18n } = this.props;
+
+    const header = lookupHeader || i18n._(t`items`);
 
     const chips = value ? (
       <div className="pf-c-chip-group">
@@ -143,64 +145,60 @@ class Lookup extends React.Component {
     ) : null;
 
     return (
-      <I18n>
-        {({ i18n }) => (
-          <Fragment>
-            <InputGroup className="awx-lookup">
-              <Button
-                aria-label="Search"
-                id={id}
-                onClick={this.handleModalToggle}
-                variant={ButtonVariant.tertiary}
-              >
-                <SearchIcon />
-              </Button>
-              <div className="pf-c-form-control">
-                {chips}
-              </div>
-            </InputGroup>
-            <Modal
-              className="awx-c-modal"
-              title={`Select ${lookupHeader}`}
-              isOpen={isModalOpen}
-              onClose={this.handleModalToggle}
-              actions={[
-                <Button key="save" variant="primary" onClick={this.saveModal} style={(results.length === 0) ? { display: 'none' } : {}}>{i18n._(t`Save`)}</Button>,
-                <Button key="cancel" variant="secondary" onClick={this.handleModalToggle}>{(results.length === 0) ? i18n._(t`Close`) : i18n._(t`Cancel`)}</Button>
-              ]}
-            >
-              <PaginatedDataList
-                items={results}
-                itemCount={count}
-                itemName={lookupHeader}
-                qsConfig={this.qsConfig}
-                toolbarColumns={columns}
-                renderItem={item => (
-                  <CheckboxListItem
-                    key={item.id}
-                    itemId={item.id}
-                    name={item.name}
-                    isSelected={lookupSelectedItems.some(i => i.id === item.id)}
-                    onSelect={() => this.toggleSelected(item)}
-                  />
-                )}
-                alignToolbarLeft
-                showPageSizeOptions={false}
-                paginationStyling={paginationStyling}
+      <Fragment>
+        <InputGroup className="awx-lookup">
+          <Button
+            aria-label="Search"
+            id={id}
+            onClick={this.handleModalToggle}
+            variant={ButtonVariant.tertiary}
+          >
+            <SearchIcon />
+          </Button>
+          <div className="pf-c-form-control">
+            {chips}
+          </div>
+        </InputGroup>
+        <Modal
+          className="awx-c-modal"
+          title={i18n._(t`Select ${header}`)}
+          isOpen={isModalOpen}
+          onClose={this.handleModalToggle}
+          actions={[
+            <Button key="save" variant="primary" onClick={this.saveModal} style={(results.length === 0) ? { display: 'none' } : {}}>{i18n._(t`Save`)}</Button>,
+            <Button key="cancel" variant="secondary" onClick={this.handleModalToggle}>{(results.length === 0) ? i18n._(t`Close`) : i18n._(t`Cancel`)}</Button>
+          ]}
+        >
+          <PaginatedDataList
+            items={results}
+            itemCount={count}
+            itemName={lookupHeader}
+            qsConfig={this.qsConfig}
+            toolbarColumns={columns}
+            renderItem={item => (
+              <CheckboxListItem
+                key={item.id}
+                itemId={item.id}
+                name={item.name}
+                isSelected={lookupSelectedItems.some(i => i.id === item.id)}
+                onSelect={() => this.toggleSelected(item)}
               />
-              {lookupSelectedItems.length > 0 && (
-                <SelectedList
-                  label={i18n._(t`Selected`)}
-                  selected={lookupSelectedItems}
-                  showOverflowAfter={5}
-                  onRemove={this.toggleSelected}
-                />
-              )}
-              { error ? <div>error</div> : '' }
-            </Modal>
-          </Fragment>
-        )}
-      </I18n>
+            )}
+            alignToolbarLeft
+            showPageSizeOptions={false}
+            paginationStyling={paginationStyling}
+          />
+          {lookupSelectedItems.length > 0 && (
+            <SelectedList
+              label={i18n._(t`Selected`)}
+              selected={lookupSelectedItems}
+              showOverflowAfter={5}
+              onRemove={this.toggleSelected}
+            />
+          )}
+          { error ? <div>error</div> : '' }
+        </Modal>
+      </Fragment>
     );
   }
 }
@@ -217,9 +215,9 @@ Lookup.propTypes = {
 
 Lookup.defaultProps = {
   id: 'lookup-search',
-  lookupHeader: 'items',
+  lookupHeader: null,
   name: null,
 };
 
 export { Lookup as _Lookup };
-export default withNetwork(withRouter(Lookup));
+export default withI18n()(withNetwork(withRouter(Lookup)));

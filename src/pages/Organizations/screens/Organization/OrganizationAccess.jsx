@@ -1,6 +1,7 @@
 import React, { Fragment } from 'react';
 import { withRouter } from 'react-router-dom';
-import { i18nMark } from '@lingui/react';
+import { withI18n } from '@lingui/react';
+import { t } from '@lingui/macro';
 import PaginatedDataList, { ToolbarAddButton } from '../../../../components/PaginatedDataList';
 import OrganizationAccessItem from '../../components/OrganizationAccessItem';
 import DeleteRoleConfirmationModal from '../../components/DeleteRoleConfirmationModal';
@@ -130,7 +131,7 @@ class OrganizationAccess extends React.Component {
   }
 
   render () {
-    const { api, organization } = this.props;
+    const { api, organization, i18n } = this.props;
     const {
       isLoading,
       isInitialized,
@@ -167,9 +168,9 @@ class OrganizationAccess extends React.Component {
             itemName="role"
             qsConfig={QS_CONFIG}
             toolbarColumns={[
-              { name: i18nMark('Name'), key: 'first_name', isSortable: true },
-              { name: i18nMark('Username'), key: 'username', isSortable: true },
-              { name: i18nMark('Last Name'), key: 'last_name', isSortable: true },
+              { name: i18n._(t`Name`), key: 'first_name', isSortable: true },
+              { name: i18n._(t`Username`), key: 'username', isSortable: true },
+              { name: i18n._(t`Last Name`), key: 'last_name', isSortable: true },
             ]}
             additionalControls={canEdit ? [
               <ToolbarAddButton key="add" onClick={this.toggleAddModal} />
@@ -197,4 +198,4 @@ class OrganizationAccess extends React.Component {
 }
 
 export { OrganizationAccess as _OrganizationAccess };
-export default withNetwork(withRouter(OrganizationAccess));
+export default withI18n()(withNetwork(withRouter(OrganizationAccess)));

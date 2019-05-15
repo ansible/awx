@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { I18n, i18nMark } from '@lingui/react';
+import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Switch, Route, withRouter, Redirect } from 'react-router-dom';
 import { Card, CardHeader, PageSection } from '@patternfly/react-core';
@@ -100,7 +100,8 @@ class Organization extends Component {
       location,
       match,
       me,
-      history
+      history,
+      i18n
     } = this.props;
 
     const {
@@ -126,14 +127,14 @@ class Organization extends Component {
     );
 
     const tabsArray = [
-      { name: i18nMark('Details'), link: `${match.url}/details`, id: 0 },
-      { name: i18nMark('Access'), link: `${match.url}/access`, id: 1 },
-      { name: i18nMark('Teams'), link: `${match.url}/teams`, id: 2 }
+      { name: i18n._(t`Details`), link: `${match.url}/details`, id: 0 },
+      { name: i18n._(t`Access`), link: `${match.url}/access`, id: 1 },
+      { name: i18n._(t`Teams`), link: `${match.url}/teams`, id: 2 }
     ];
 
     if (canSeeNotificationsTab) {
       tabsArray.push({
-        name: i18nMark('Notifications'),
+        name: i18n._(t`Notifications`),
         link: `${match.url}/notifications`,
         id: 3
       });
@@ -145,24 +146,18 @@ class Organization extends Component {
           <CardHeader
             style={tabsStyle}
           >
-            <I18n>
-              {({ i18n }) => (
-                <React.Fragment>
-                  <div className="awx-orgTabs-container">
-                    <RoutedTabs
-                      match={match}
-                      history={history}
-                      labeltext={i18n._(t`Organization detail tabs`)}
-                      tabsArray={tabsArray}
-                    />
-                    <CardCloseButton linkTo="/organizations" />
-                    <div
-                      className="awx-orgTabs__bottom-border"
-                    />
-                  </div>
-                </React.Fragment>
-              )}
-            </I18n>
+            <div className="awx-orgTabs-container">
+              <RoutedTabs
+                match={match}
+                history={history}
+                labeltext={i18n._(t`Organization detail tabs`)}
+                tabsArray={tabsArray}
+              />
+              <CardCloseButton linkTo="/organizations" />
+              <div
+                className="awx-orgTabs__bottom-border"
+              />
+            </div>
           </CardHeader>
         ));
     if (!match) {
@@ -245,5 +240,5 @@ class Organization extends Component {
     );
   }
 }
-export default withNetwork(withRouter(Organization));
+export default withI18n()(withNetwork(withRouter(Organization)));
 export { Organization as _Organization };

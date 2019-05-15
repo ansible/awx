@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { I18n } from '@lingui/react';
+import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
   Checkbox,
@@ -85,70 +85,66 @@ class DataListToolbar extends React.Component {
       sortOrder,
       sortedColumnKey,
       additionalControls,
+      i18n
     } = this.props;
 
     const showExpandCollapse = (onCompact && onExpand);
     return (
-      <I18n>
-        {({ i18n }) => (
-          <AWXToolbar>
-            <Toolbar marginleft={noLeftMargin ? 1 : 0}>
-              <ColumnLeft>
-                { showSelectAll && (
-                  <Fragment>
-                    <ToolbarItem>
-                      <Checkbox
-                        checked={isAllSelected}
-                        onChange={onSelectAll}
-                        aria-label={i18n._(t`Select all`)}
-                        id="select-all"
-                      />
-                    </ToolbarItem>
-                    <VerticalSeparator />
-                  </Fragment>
-                )}
-                <ToolbarItem css="flex-grow: 1;">
-                  <Search
-                    columns={columns}
-                    onSearch={onSearch}
-                    sortedColumnKey={sortedColumnKey}
+      <AWXToolbar>
+        <Toolbar marginleft={noLeftMargin ? 1 : 0}>
+          <ColumnLeft>
+            { showSelectAll && (
+              <Fragment>
+                <ToolbarItem>
+                  <Checkbox
+                    checked={isAllSelected}
+                    onChange={onSelectAll}
+                    aria-label={i18n._(t`Select all`)}
+                    id="select-all"
                   />
                 </ToolbarItem>
                 <VerticalSeparator />
-              </ColumnLeft>
-              <ColumnRight>
-                <ToolbarItem>
-                  <Sort
-                    columns={columns}
-                    onSort={onSort}
-                    sortOrder={sortOrder}
-                    sortedColumnKey={sortedColumnKey}
+              </Fragment>
+            )}
+            <ToolbarItem css="flex-grow: 1;">
+              <Search
+                columns={columns}
+                onSearch={onSearch}
+                sortedColumnKey={sortedColumnKey}
+              />
+            </ToolbarItem>
+            <VerticalSeparator />
+          </ColumnLeft>
+          <ColumnRight>
+            <ToolbarItem>
+              <Sort
+                columns={columns}
+                onSort={onSort}
+                sortOrder={sortOrder}
+                sortedColumnKey={sortedColumnKey}
+              />
+            </ToolbarItem>
+            {showExpandCollapse && (
+              <Fragment>
+                <VerticalSeparator />
+                <ToolbarGroup>
+                  <ExpandCollapse
+                    isCompact={isCompact}
+                    onCompact={onCompact}
+                    onExpand={onExpand}
                   />
-                </ToolbarItem>
-                {showExpandCollapse && (
-                  <Fragment>
-                    <VerticalSeparator />
-                    <ToolbarGroup>
-                      <ExpandCollapse
-                        isCompact={isCompact}
-                        onCompact={onCompact}
-                        onExpand={onExpand}
-                      />
-                    </ToolbarGroup>
-                    { additionalControls && (
-                      <VerticalSeparator />
-                    )}
-                  </Fragment>
+                </ToolbarGroup>
+                { additionalControls && (
+                  <VerticalSeparator />
                 )}
-                <AdditionalControlsWrapper>
-                  {additionalControls}
-                </AdditionalControlsWrapper>
-              </ColumnRight>
-            </Toolbar>
-          </AWXToolbar>
-
-        )}
-      </I18n>
+              </Fragment>
+            )}
+            <AdditionalControlsWrapper>
+              {additionalControls}
+            </AdditionalControlsWrapper>
+          </ColumnRight>
+        </Toolbar>
+      </AWXToolbar>
     );
   }
 }
@@ -184,4 +180,4 @@ DataListToolbar.defaultProps = {
   additionalControls: [],
 };
 
-export default DataListToolbar;
+export default withI18n()(DataListToolbar);

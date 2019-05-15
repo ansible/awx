@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
-import { I18n } from '@lingui/react';
+import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Brand } from '@patternfly/react-core';
 
@@ -34,6 +34,7 @@ class TowerLogo extends Component {
 
   render () {
     const { hover } = this.state;
+    const { i18n } = this.props;
 
     let src = TowerLogoHeader;
 
@@ -42,19 +43,15 @@ class TowerLogo extends Component {
     }
 
     return (
-      <I18n>
-        {({ i18n }) => (
-          <Brand
-            src={src}
-            alt={i18n._(t`Tower Brand Image`)}
-            onMouseOut={this.onHover}
-            onMouseOver={this.onHover}
-            onBlur={this.onHover}
-            onFocus={this.onHover}
-            onClick={this.onClick}
-          />
-        )}
-      </I18n>
+      <Brand
+        src={src}
+        alt={i18n._(t`Tower Brand Image`)}
+        onMouseOut={this.onHover}
+        onMouseOver={this.onHover}
+        onBlur={this.onHover}
+        onFocus={this.onHover}
+        onClick={this.onClick}
+      />
     );
   }
 }
@@ -67,4 +64,4 @@ TowerLogo.defaultProps = {
   linkTo: null,
 };
 
-export default withRouter(TowerLogo);
+export default withI18n()(withRouter(TowerLogo));

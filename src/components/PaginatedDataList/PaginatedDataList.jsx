@@ -14,8 +14,8 @@ import {
   EmptyStateBody,
 } from '@patternfly/react-core';
 import { CubesIcon } from '@patternfly/react-icons';
-import { I18n, i18nMark } from '@lingui/react';
-import { Trans, t } from '@lingui/macro';
+import { withI18n } from '@lingui/react';
+import { t } from '@lingui/macro';
 import { withRouter, Link } from 'react-router-dom';
 
 import Pagination from '../Pagination';
@@ -108,13 +108,15 @@ class PaginatedDataList extends React.Component {
       showPageSizeOptions,
       paginationStyling,
       location,
+      i18n
     } = this.props;
     const { error } = this.state;
     const [orderBy, sortOrder] = this.getSortOrder();
     const queryParams = parseNamespacedQueryString(qsConfig, location.search);
+    const columns = toolbarColumns || [{ name: i18n._(t`Name`), key: 'name', isSortable: true }];
     return (
-      <I18n>
-        {({ i18n }) => (
+      <Fragment>
+        {error && (
           <Fragment>
             {error && (
               <Fragment>
@@ -128,24 +130,10 @@ class PaginatedDataList extends React.Component {
               <EmptyState>
                 <EmptyStateIcon icon={CubesIcon} />
                 <Title size="lg">
-                  <Trans>
-                    No
-                    {' '}
-                    {ucFirst(itemNamePlural || pluralize(itemName))}
-                    {' '}
-                    Found
-                  </Trans>
+                  {i18n._(t`No ${ucFirst(itemNamePlural || pluralize(itemName))} Found`)}
                 </Title>
                 <EmptyStateBody>
-                  <Trans>
-                    Please add
-                    {' '}
-                    {getArticle(itemName)}
-                    {' '}
-                    {itemName}
-                    {' '}
-                    to populate this list
-                  </Trans>
+                  {i18n._(t`Please add ${getArticle(itemName)} ${itemName} to populate this list`)}
                 </EmptyStateBody>
               </EmptyState>
             ) : (
@@ -199,9 +187,67 @@ class PaginatedDataList extends React.Component {
                 />
               </Fragment>
             )}
+          </Fragment> // TODO: replace with proper error handling
+        )}
+        {items.length === 0 ? (
+          <EmptyState>
+            <EmptyStateIcon icon={CubesIcon} />
+            <Title size="lg">
+              {i18n._(t`No ${ucFirst(itemNamePlural || pluralize(itemName))} Found`)}
+            </Title>
+            <EmptyStateBody>
+              {i18n._(t`Please add ${getArticle(itemName)} ${itemName} to populate this list`)}
+            </EmptyStateBody>
+          </EmptyState>
+        ) : (
+          <Fragment>
+            <DataListToolbar
+              sortedColumnKey={orderBy}
+              sortOrder={sortOrder}
+              columns={columns}
+              onSearch={() => { }}
+              onSort={this.handleSort}
+              showSelectAll={showSelectAll}
+              isAllSelected={isAllSelected}
+              onSelectAll={onSelectAll}
+              additionalControls={additionalControls}
+            />
+            <DataList aria-label={i18n._(t`${ucFirst(pluralize(itemName))} List`)}>
+              {items.map(item => (renderItem ? renderItem(item) : (
+                <DataListItem
+                  aria-labelledby={`items-list-item-${item.id}`}
+                  key={item.id}
+                >
+                  <DataListItemRow>
+                    <DataListItemCells dataListCells={[
+                      <DataListCell key="team-name">
+                        <TextContent style={detailWrapperStyle}>
+                          <Link to={{ pathname: item.url }}>
+                            <Text
+                              id={`items-list-item-${item.id}`}
+                              style={detailLabelStyle}
+                            >
+                              {item.name}
+                            </Text>
+                          </Link>
+                        </TextContent>
+                      </DataListCell>
+                    ]}
+                    />
+                  </DataListItemRow>
+                </DataListItem>
+              )))}
+            </DataList>
+            <Pagination
+              count={itemCount}
+              page={queryParams.page}
+              pageCount={this.getPageCount()}
+              page_size={queryParams.page_size}
+              onSetPage={this.handleSetPage}
+            />
           </Fragment>
         )}
-      </I18n>
+      </Fragment>
     );
   }
 }
@@ -235,9 +281,7 @@ PaginatedDataList.propTypes = {
 
 PaginatedDataList.defaultProps = {
   renderItem: null,
-  toolbarColumns: [
-    { name: i18nMark('Name'), key: 'name', isSortable: true },
-  ],
+  toolbarColumns: [],
   additionalControls: [],
   itemName: 'item',
   itemNamePlural: '',
@@ -250,4 +294,4 @@ PaginatedDataList.defaultProps = {
 };
 
 export { PaginatedDataList as _PaginatedDataList };
-export default withRouter(PaginatedDataList);
+export default withI18n()(withRouter(PaginatedDataList));

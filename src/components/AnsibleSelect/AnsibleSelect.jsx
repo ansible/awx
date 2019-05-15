@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { I18n } from '@lingui/react';
+import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
   FormSelect,
@@ -20,29 +20,25 @@ class AnsibleSelect extends React.Component {
   }
 
   render () {
-    const { label, value, data, defaultSelected } = this.props;
+    const { label, value, data, defaultSelected, i18n } = this.props;
     return (
-      <I18n>
-        {({ i18n }) => (
-          <FormSelect
-            value={value}
-            onChange={this.onSelectChange}
-            aria-label={i18n._(t`Select Input`)}
-          >
-            {data.map((datum) => (
-              datum === defaultSelected ? (
-                <FormSelectOption
-                  key=""
-                  value=""
-                  label={i18n._(t`Use Default ${label}`)}
-                />
-              ) : (
-                <FormSelectOption key={datum} value={datum} label={datum} />
-              )
-            ))}
-          </FormSelect>
-        )}
-      </I18n>
+      <FormSelect
+        value={value}
+        onChange={this.onSelectChange}
+        aria-label={i18n._(t`Select Input`)}
+      >
+        {data.map((datum) => (
+          datum === defaultSelected ? (
+            <FormSelectOption
+              key=""
+              value=""
+              label={i18n._(t`Use Default ${label}`)}
+            />
+          ) : (
+            <FormSelectOption key={datum} value={datum} label={datum} />
+          )
+        ))}
+      </FormSelect>
     );
   }
 }
@@ -62,4 +58,4 @@ AnsibleSelect.propTypes = {
   value: PropTypes.string.isRequired,
 };
 
-export default AnsibleSelect;
+export default withI18n()(AnsibleSelect);

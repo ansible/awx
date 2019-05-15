@@ -3,7 +3,7 @@ import { string, func } from 'prop-types';
 import { Link } from 'react-router-dom';
 import { Button as PFButton } from '@patternfly/react-core';
 import { PlusIcon } from '@patternfly/react-icons';
-import { I18n } from '@lingui/react';
+import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
 
@@ -20,39 +20,32 @@ const Button = styled(PFButton)`
   }
 `;
 
-function ToolbarAddButton ({ linkTo, onClick }) {
+function ToolbarAddButton ({ linkTo, onClick, i18n }) {
   if (!linkTo && !onClick) {
     throw new Error('ToolbarAddButton requires either `linkTo` or `onClick` prop');
   }
   if (linkTo) {
     // TODO: This should only be a <Link> (no <Button>) but CSS is off
     return (
-      <I18n>
-        {({ i18n }) => (
-          <Link to={linkTo}>
-            <Button
-              variant="primary"
-              aria-label={i18n._(t`Add`)}
-            >
-              <PlusIcon />
-            </Button>
-          </Link>
-        )}
-      </I18n>
-    );
-  }
-  return (
-    <I18n>
-      {({ i18n }) => (
+      <Link to={linkTo}>
         <Button
           variant="primary"
           aria-label={i18n._(t`Add`)}
-          onClick={onClick}
         >
           <PlusIcon />
         </Button>
-      )}
-    </I18n>
+      </Link>
+    );
+  }
+
+  return (
+    <Button
+      variant="primary"
+      aria-label={i18n._(t`Add`)}
+      onClick={onClick}
+    >
+      <PlusIcon />
+    </Button>
   );
 }
 ToolbarAddButton.propTypes = {
@@ -64,4 +57,4 @@ ToolbarAddButton.defaultProps = {
   onClick: null
 };
 
-export default ToolbarAddButton;
+export default withI18n()(ToolbarAddButton);

@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import { Formik, Field } from 'formik';
-import { I18n } from '@lingui/react';
+import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
   Form,
@@ -83,76 +83,72 @@ class OrganizationForm extends Component {
   }
 
   render () {
-    const { organization, handleCancel } = this.props;
+    const { organization, handleCancel, i18n } = this.props;
     const { instanceGroups, formIsValid, error } = this.state;
     const defaultVenv = '/venv/ansible/';
 
     return (
-      <I18n>
-        {({ i18n }) => (
-          <Formik
-            initialValues={{
-              name: organization.name,
-              description: organization.description,
-              custom_virtualenv: organization.custom_virtualenv || '',
-            }}
-            onSubmit={this.handleSubmit}
-            render={formik => (
-              <Form autoComplete="off" onSubmit={formik.handleSubmit}>
-                <FormRow>
-                  <FormField
-                    id="org-name"
-                    name="name"
-                    type="text"
-                    label={i18n._(t`Name`)}
-                    validate={required()}
-                    isRequired
-                  />
-                  <FormField
-                    id="org-description"
-                    name="description"
-                    type="text"
-                    label={i18n._(t`Description`)}
-                  />
-                  <Config>
-                    {({ custom_virtualenvs }) => (
-                      custom_virtualenvs && custom_virtualenvs.length > 1 && (
-                        <Field
-                          name="custom_virtualenv"
-                          render={({ field }) => (
-                            <FormGroup
-                              fieldId="org-custom-virtualenv"
-                              label={i18n._(t`Ansible Environment`)}
-                            >
-                              <AnsibleSelect
-                                data={custom_virtualenvs}
-                                defaultSelected={defaultVenv}
-                                label={i18n._(t`Ansible Environment`)}
-                                {...field}
-                              />
-                            </FormGroup>
-                          )}
-                        />
-                      )
-                    )}
-                  </Config>
-                </FormRow>
-                <InstanceGroupsLookup
-                  value={instanceGroups}
-                  onChange={this.handleInstanceGroupsChange}
-                  tooltip={i18n._(t`Select the Instance Groups for this Organization to run on.`)}
-                />
-                <FormActionGroup
-                  onCancel={handleCancel}
-                  onSubmit={formik.handleSubmit}
-                  submitDisabled={!formIsValid}
-                />
-                {error ? <div>error</div> : null}
-              </Form>
-            )}
-          />
+      <Formik
+        initialValues={{
+          name: organization.name,
+          description: organization.description,
+          custom_virtualenv: organization.custom_virtualenv || '',
+        }}
+        onSubmit={this.handleSubmit}
+        render={formik => (
+          <Form autoComplete="off" onSubmit={formik.handleSubmit}>
+            <FormRow>
+              <FormField
+                id="org-name"
+                name="name"
+                type="text"
+                label={i18n._(t`Name`)}
+                validate={required(null, i18n)}
+                isRequired
+              />
+              <FormField
+                id="org-description"
+                name="description"
+                type="text"
+                label={i18n._(t`Description`)}
+              />
+              <Config>
+                {({ custom_virtualenvs }) => (
+                  custom_virtualenvs && custom_virtualenvs.length > 1 && (
+                    <Field
+                      name="custom_virtualenv"
+                      render={({ field }) => (
+                        <FormGroup
+                          fieldId="org-custom-virtualenv"
+                          label={i18n._(t`Ansible Environment`)}
+                        >
+                          <AnsibleSelect
+                            data={custom_virtualenvs}
+                            defaultSelected={defaultVenv}
+                            label={i18n._(t`Ansible Environment`)}
+                            {...field}
+                          />
+                        </FormGroup>
+                      )}
+                    />
+                  )
+                )}
+              </Config>
+            </FormRow>
+            <InstanceGroupsLookup
+              value={instanceGroups}
+              onChange={this.handleInstanceGroupsChange}
+              tooltip={i18n._(t`Select the Instance Groups for this Organization to run on.`)}
+            />
+            <FormActionGroup
+              onCancel={handleCancel}
+              onSubmit={formik.handleSubmit}
+              submitDisabled={!formIsValid}
+            />
+            {error ? <div>error</div> : null}
+          </Form>
         )}
-      </I18n>
+      />
     );
   }
 }
@@ -176,4 +172,4 @@ OrganizationForm.contextTypes = {
 };
 
 export { OrganizationForm as _OrganizationForm };
-export default withNetwork(withRouter(OrganizationForm));
+export default withI18n()(withNetwork(withRouter(OrganizationForm)));

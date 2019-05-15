@@ -1,19 +1,13 @@
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { I18n, i18nMark } from '@lingui/react';
+import { withI18n } from '@lingui/react';
+import { t } from '@lingui/macro';
 import { FormGroup, Tooltip } from '@patternfly/react-core';
 import { QuestionCircleIcon } from '@patternfly/react-icons';
-import { t } from '@lingui/macro';
 
 import Lookup from '../../../components/Lookup';
 
 import { withNetwork } from '../../../contexts/Network';
-
-const INSTANCE_GROUPS_LOOKUP_COLUMNS = [
-  { name: i18nMark('Name'), key: 'name', isSortable: true },
-  { name: i18nMark('Modified'), key: 'modified', isSortable: false, isNumeric: true },
-  { name: i18nMark('Created'), key: 'created', isSortable: false, isNumeric: true }
-];
 
 class InstanceGroupsLookup extends React.Component {
   constructor (props) {
@@ -29,43 +23,43 @@ class InstanceGroupsLookup extends React.Component {
   }
 
   render () {
-    const { value, tooltip, onChange } = this.props;
+    const { value, tooltip, onChange, i18n } = this.props;
 
     return (
-      <I18n>
-        {({ i18n }) => (
-          <FormGroup
-            label={(
-              <Fragment>
-                {i18n._(t`Instance Groups`)}
-                {' '}
-                {
-                  tooltip && (
-                    <Tooltip
-                      position="right"
-                      content={tooltip}
-                    >
-                      <QuestionCircleIcon />
-                    </Tooltip>
-                  )
-                }
-              </Fragment>
-            )}
-            fieldId="org-instance-groups"
-          >
-            <Lookup
-              id="org-instance-groups"
-              lookupHeader={i18n._(t`Instance Groups`)}
-              name="instanceGroups"
-              value={value}
-              onLookupSave={onChange}
-              getItems={this.getInstanceGroups}
-              columns={INSTANCE_GROUPS_LOOKUP_COLUMNS}
-              sortedColumnKey="name"
-            />
-          </FormGroup>
+      <FormGroup
+        label={(
+          <Fragment>
+            {i18n._(t`Instance Groups`)}
+            {' '}
+            {
+              tooltip && (
+                <Tooltip
+                  position="right"
+                  content={tooltip}
+                >
+                  <QuestionCircleIcon />
+                </Tooltip>
+              )
+            }
+          </Fragment>
         )}
-      </I18n>
+        fieldId="org-instance-groups"
+      >
+        <Lookup
+          id="org-instance-groups"
+          lookupHeader={i18n._(t`Instance Groups`)}
+          name="instanceGroups"
+          value={value}
+          onLookupSave={onChange}
+          getItems={this.getInstanceGroups}
+          columns={[
+            { name: i18n._(t`Name`), key: 'name', isSortable: true },
+            { name: i18n._(t`Modified`), key: 'modified', isSortable: false, isNumeric: true },
+            { name: i18n._(t`Created`), key: 'created', isSortable: false, isNumeric: true }
+          ]}
+          sortedColumnKey="name"
+        />
+      </FormGroup>
     );
   }
 }
@@ -80,4 +74,4 @@ InstanceGroupsLookup.defaultProps = {
   tooltip: '',
 };
 
-export default withNetwork(InstanceGroupsLookup);
+export default withI18n()(withNetwork(InstanceGroupsLookup));

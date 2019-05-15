@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { I18n } from '@lingui/react';
-import { Trans, t } from '@lingui/macro';
+import { withI18n } from '@lingui/react';
+import { t } from '@lingui/macro';
 import {
   AboutModal,
   TextContent,
@@ -41,46 +41,43 @@ class About extends React.Component {
       ansible_version,
       version,
       isOpen,
-      onClose
+      onClose,
+      i18n
     } = this.props;
 
     const speechBubble = this.createSpeechBubble(version);
 
     return (
-      <I18n>
-        {({ i18n }) => (
-          <AboutModal
-            isOpen={isOpen}
-            onClose={onClose}
-            productName="Ansible Tower"
-            trademark={i18n._(t`Copyright 2018 Red Hat, Inc.`)}
-            brandImageSrc={brandImg}
-            brandImageAlt={i18n._(t`Brand Image`)}
-            logoImageSrc={logoImg}
-            logoImageAlt={i18n._(t`AboutModal Logo`)}
-          >
-            <pre>
-              { speechBubble }
-              {`
-              \\
-              \\   ^__^
-                  (oo)\\_______
-                  (__)      A )\\
-                      ||----w |
-                      ||     ||
-                        `}
-            </pre>
-            <TextContent>
-              <TextList component="dl">
-                <TextListItem component="dt">
-                  <Trans>Ansible Version</Trans>
-                </TextListItem>
-                <TextListItem component="dd">{ ansible_version }</TextListItem>
-              </TextList>
-            </TextContent>
-          </AboutModal>
-        )}
-      </I18n>
+      <AboutModal
+        isOpen={isOpen}
+        onClose={onClose}
+        productName="Ansible Tower"
+        trademark={i18n._(t`Copyright 2018 Red Hat, Inc.`)}
+        brandImageSrc={brandImg}
+        brandImageAlt={i18n._(t`Brand Image`)}
+        logoImageSrc={logoImg}
+        logoImageAlt={i18n._(t`AboutModal Logo`)}
+      >
+        <pre>
+          { speechBubble }
+          {`
+          \\
+          \\   ^__^
+              (oo)\\_______
+              (__)      A )\\
+                  ||----w |
+                  ||     ||
+                    `}
+        </pre>
+        <TextContent>
+          <TextList component="dl">
+            <TextListItem component="dt">
+              {i18n._(t`Ansible Version`)}
+            </TextListItem>
+            <TextListItem component="dd">{ ansible_version }</TextListItem>
+          </TextList>
+        </TextContent>
+      </AboutModal>
     );
   }
 }
@@ -98,4 +95,4 @@ About.defaultProps = {
   version: null,
 };
 
-export default About;
+export default withI18n()(About);
