@@ -27,13 +27,3 @@ To run a single test (in this case the login page test):
 * `npm test -- __tests__/pages/Login.jsx`
 
 **note:** Once the test watcher is up and running you can hit `a` to run all the tests
-
-## Internationalization
-
-Internationalization leans on the [lingui](https://github.com/lingui/js-lingui) project.  [Official documentation here](https://lingui.js.org/).  We use this libary to mark our strings for translation.  For common React use cases see [this link](https://lingui.js.org/tutorials/react-patterns.html).  If you want to see this in action you'll need to take the following steps:
-
-1) `npm run add-locale` to add the language that you want to translate to (we should only have to do this once and the commit to repo afaik).  Example: `npm run add-locale en es fr`  # Add English, Spanish and French locale
-2) `npm run extract-strings` to create .po files for each language specified.  The .po files will be placed in src/locales but this is configurable.
-3) Open up the .po file for the language you want to test and add some translations.  In production we would pass this .po file off to the translation team.
-4) Once you've edited your .po file (or we've gotten a .po file back from the translation team) run `npm run compile-strings`.  This command takes the .po files and turns them into a minified JSON object and can be seen in the `messages.js` file in each locale directory.  These files get loaded at the App root level (see: App.jsx).
-5) Change the language in your browser and reload the page.  You should see your specified translations in place of English strings.
