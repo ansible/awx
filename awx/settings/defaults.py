@@ -1199,5 +1199,4 @@ MIDDLEWARE = [
     'crum.CurrentRequestUserMiddleware',
     'awx.main.middleware.URLModificationMiddleware',
     'awx.main.middleware.SessionTimeoutMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
