@@ -93,7 +93,7 @@ INSIGHTS_TRACKING_STATE = False
 # Use Django-Jenkins if installed. Only run tests for awx.main app.
 try:
     import django_jenkins
-    INSTALLED_APPS += (django_jenkins.__name__,)  # noqa
+    INSTALLED_APPS += [django_jenkins.__name__,] # noqa
     PROJECT_APPS = ('awx.main.tests', 'awx.api.tests',)
 except ImportError:
     pass
@@ -112,7 +112,18 @@ if 'django_jenkins' in INSTALLED_APPS:
     PEP8_RCFILE = "setup.cfg"
     PYLINT_RCFILE = ".pylintrc"
 
-INSTALLED_APPS += ('rest_framework_swagger',)
+INSTALLED_APPS += [   # NOQA
+    'rest_framework_swagger',
+    'debug_toolbar',
+]
+
+MIDDLEWARE += [  # NOQA
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
+]
+
+DEBUG_TOOLBAR_CONFIG = {
+    'ENABLE_STACKTRACES' : True,
+}
 
 # Configure a default UUID for development only.
 SYSTEM_UUID = '00000000-0000-0000-0000-000000000000'

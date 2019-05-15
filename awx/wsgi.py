@@ -8,11 +8,10 @@ from awx import __version__ as tower_version
 from awx import prepare_env, MODE
 prepare_env()
 
-
-from django.core.wsgi import WSGIHandler  # NOQA
 import django  # NOQA
 from django.conf import settings  # NOQA
 from django.urls import resolve  # NOQA
+from django.core.wsgi import get_wsgi_application # NOQA
 import social_django  # NOQA
 
 
@@ -41,41 +40,12 @@ if social_django.__version__ != '2.1.0':
             still works".format(social_django.__version__))
 
 
-if django.__version__ != '1.11.20':
-    raise RuntimeError("Django version other than 1.11.20 detected {}. \
+if not django.__version__.startswith('1.'):
+    raise RuntimeError("Django version other than 1.XX detected {}. \
             Inherit from WSGIHandler to support short-circuit Django Middleware. \
-            This is known to work for Django 1.11.20 and may not work with other, \
+            This is known to work for Django 1.XX and may not work with other, \
             even minor, versions.".format(django.__version__))
 
 
-if settings.MIDDLEWARE:
-    raise RuntimeError("MIDDLEWARE setting detected. \
-            The 'migration in progress' view feature short-circuits OLD Django \
-            MIDDLEWARE_CLASSES behavior. With the new Django MIDDLEWARE beahvior \
-            it's possible to short-ciruit the middleware onion through supported \
-            middleware mechanisms. Further, from django.core.wsgi.get_wsgi_application() \
-            should be called to get an instance of WSGIHandler().")
-
-
-class AWXWSGIHandler(WSGIHandler):
-    def _legacy_get_response(self, request):
-        try:
-            # resolve can raise a 404, in that case, pass through to the
-            # "normal" middleware
-            if getattr(resolve(request.path), 'url_name', '') == 'migrations_notran':
-                # short-circuit middleware
-                request._cors_enabled = False
-                return self._get_response(request)
-        except django.urls.Resolver404:
-            pass
-        # fall through to middle-ware
-        return super(AWXWSGIHandler, self)._legacy_get_response(request)
-
-
 # Return the default Django WSGI application.
-def get_wsgi_application():
-    django.setup(set_prefix=False)
-    return AWXWSGIHandler()
-
-
 application = get_wsgi_application()
