@@ -47,3 +47,9 @@ export const Organization = shape({
   created: string,
   modified: string,
 });
+
+export const QSConfig = shape({
+  defaultParams: shape().isRequired,
+  namespace: string,
+  integerFields: arrayOf(string).isRequired,
+});

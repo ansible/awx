@@ -191,4 +191,19 @@ describe('mountWithContexts', () => {
       expect(dialog.setRootDialogMessage).toHaveBeenCalledWith('error');
     });
   });
+
+  it('should set props on wrapped component', () => {
+    function Component ({ text }) {
+      return (<div>{text}</div>);
+    }
+
+    const wrapper = mountWithContexts(
+      <Component text="foo" />
+    );
+    expect(wrapper.find('div').text()).toEqual('foo');
+    wrapper.setProps({
+      text: 'bar'
+    });
+    expect(wrapper.find('div').text()).toEqual('bar');
+  });
 });

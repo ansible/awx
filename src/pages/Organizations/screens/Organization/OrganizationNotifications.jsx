@@ -4,13 +4,13 @@ import { withRouter } from 'react-router-dom';
 import { withNetwork } from '../../../../contexts/Network';
 import PaginatedDataList from '../../../../components/PaginatedDataList';
 import NotificationListItem from '../../../../components/NotificationsList/NotificationListItem';
-import { parseQueryString } from '../../../../util/qs';
+import { getQSConfig, parseNamespacedQueryString } from '../../../../util/qs';
 
-const DEFAULT_QUERY_PARAMS = {
+const QS_CONFIG = getQSConfig('notification', {
   page: 1,
   page_size: 5,
   order_by: 'name',
-};
+});
 
 const COLUMNS = [
   { key: 'name', name: 'Name', isSortable: true },
@@ -48,19 +48,9 @@ class OrganizationNotifications extends Component {
     }
   }
 
-  getQueryParams () {
-    const { location } = this.props;
-    const searchParams = parseQueryString(location.search.substring(1));
-
-    return {
-      ...DEFAULT_QUERY_PARAMS,
-      ...searchParams,
-    };
-  }
-
   async readNotifications () {
-    const { api, handleHttpError, id } = this.props;
-    const params = this.getQueryParams();
+    const { id, api, handleHttpError, location } = this.props;
+    const params = parseNamespacedQueryString(QS_CONFIG, location.search);
     this.setState({ isLoading: true });
     try {
       const { data } = await api.getOrganizationNotifications(id, params);
@@ -191,7 +181,7 @@ class OrganizationNotifications extends Component {
             items={notifications}
             itemCount={itemCount}
             itemName="notification"
-            queryParams={this.getQueryParams()}
+            qsConfig={QS_CONFIG}
             toolbarColumns={COLUMNS}
             renderItem={(notification) => (
               <NotificationListItem

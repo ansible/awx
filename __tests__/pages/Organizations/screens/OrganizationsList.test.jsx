@@ -146,24 +146,6 @@ describe('<OrganizationsList />', () => {
     expect(fetchOrgs).toBeCalled();
   });
 
-  test('url updates properly', () => {
-    const history = createMemoryHistory({
-      initialEntries: ['organizations?order_by=name&page=1&page_size=5'],
-    });
-    wrapper = mountWithContexts(
-      <OrganizationsList />, {
-        context: { router: { history } }
-      }
-    );
-    const component = wrapper.find('OrganizationsList');
-    component.instance().updateUrl({
-      page: 1,
-      page_size: 5,
-      order_by: 'modified'
-    });
-    expect(history.location.search).toBe('?order_by=modified&page=1&page_size=5');
-  });
-
   test('error is thrown when org not successfully deleted from api', async () => {
     const history = createMemoryHistory({
       initialEntries: ['organizations?order_by=name&page=1&page_size=5'],

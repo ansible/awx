@@ -1,26 +1,22 @@
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { SearchIcon, CubesIcon } from '@patternfly/react-icons';
+import { withRouter } from 'react-router-dom';
+import { SearchIcon } from '@patternfly/react-icons';
 import {
   Button,
   ButtonVariant,
   Chip,
-  EmptyState,
-  EmptyStateBody,
-  EmptyStateIcon,
   InputGroup,
   Modal,
-  Title
 } from '@patternfly/react-core';
 import { I18n } from '@lingui/react';
-import { Trans, t } from '@lingui/macro';
+import { t } from '@lingui/macro';
 
 import { withNetwork } from '../../contexts/Network';
-
+import PaginatedDataList from '../PaginatedDataList';
 import CheckboxListItem from '../ListItem';
-import DataListToolbar from '../DataListToolbar';
 import SelectedList from '../SelectedList';
-import Pagination from '../Pagination';
+import { getQSConfig, parseNamespacedQueryString } from '../../util/qs';
 
 const paginationStyling = {
   paddingLeft: '0',
@@ -39,70 +35,47 @@ class Lookup extends React.Component {
       lookupSelectedItems: [...props.value] || [],
       results: [],
       count: 0,
+      error: null,
+    };
+    this.qsConfig = getQSConfig('lookup', {
       page: 1,
       page_size: 5,
-      error: null,
-      sortOrder: 'ascending',
-      sortedColumnKey: props.sortedColumnKey
-    };
-    this.onSetPage = this.onSetPage.bind(this);
+      order_by: props.sortedColumnKey,
+    });
     this.handleModalToggle = this.handleModalToggle.bind(this);
     this.toggleSelected = this.toggleSelected.bind(this);
     this.saveModal = this.saveModal.bind(this);
     this.getData = this.getData.bind(this);
-    this.onSearch = this.onSearch.bind(this);
-    this.onSort = this.onSort.bind(this);
   }
 
   componentDidMount () {
-    const { page_size, page } = this.state;
-    this.getData({ page_size, page });
+    this.getData();
   }
 
-  onSearch () {
-    const { sortedColumnKey, sortOrder } = this.state;
-    this.onSort(sortedColumnKey, sortOrder);
-  }
-
-  onSort (sortedColumnKey, sortOrder) {
-    this.setState({ page: 1, sortedColumnKey, sortOrder }, this.getData);
+  componentDidUpdate (prevProps) {
+    const { location } = this.props;
+    if (location !== prevProps.location) {
+      this.getData();
+    }
   }
 
   async getData () {
-    const { getItems, handleHttpError } = this.props;
-    const { page, page_size, sortedColumnKey, sortOrder } = this.state;
+    const { getItems, handleHttpError, location } = this.props;
+    const queryParams = parseNamespacedQueryString(this.qsConfig, location.search);
 
     this.setState({ error: false });
-
-    const queryParams = {
-      page,
-      page_size
-    };
-
-    if (sortedColumnKey) {
-      queryParams.order_by = sortOrder === 'descending' ? `-${sortedColumnKey}` : sortedColumnKey;
-    }
-
     try {
       const { data } = await getItems(queryParams);
       const { results, count } = data;
 
-      const stateToUpdate = {
+      this.setState({
         results,
         count
-      };
-
-      this.setState(stateToUpdate);
+      });
     } catch (err) {
       handleHttpError(err) || this.setState({ error: true });
     }
   }
-
-  onSetPage = async (pageNumber, pageSize) => {
-    const page = parseInt(pageNumber, 10);
-    const page_size = parseInt(pageSize, 10);
-    this.setState({ page, page_size }, this.getData);
-  };
 
   toggleSelected (row) {
     const { name, onLookupSave } = this.props;
@@ -156,10 +129,6 @@ class Lookup extends React.Component {
       error,
       results,
       count,
-      page,
-      page_size,
-      sortedColumnKey,
-      sortOrder
     } = this.state;
     const { id, lookupHeader = 'items', value, columns } = this.props;
 
@@ -200,49 +169,25 @@ class Lookup extends React.Component {
                 <Button key="cancel" variant="secondary" onClick={this.handleModalToggle}>{(results.length === 0) ? i18n._(t`Close`) : i18n._(t`Cancel`)}</Button>
               ]}
             >
-              {(results.length === 0) ? (
-                <EmptyState>
-                  <EmptyStateIcon icon={CubesIcon} />
-                  <Title size="lg">
-                    <Trans>{`No ${lookupHeader} Found`}</Trans>
-                  </Title>
-                  <EmptyStateBody>
-                    <Trans>{`Please add ${lookupHeader.toLowerCase()} to populate this list`}</Trans>
-                  </EmptyStateBody>
-                </EmptyState>
-              ) : (
-                <Fragment>
-                  <DataListToolbar
-                    sortedColumnKey={sortedColumnKey}
-                    sortOrder={sortOrder}
-                    columns={columns}
-                    onSearch={this.onSearch}
-                    onSort={this.onSort}
-                    noLeftMargin
+              <PaginatedDataList
+                items={results}
+                itemCount={count}
+                itemName={lookupHeader}
+                qsConfig={this.qsConfig}
+                toolbarColumns={columns}
+                renderItem={item => (
+                  <CheckboxListItem
+                    key={item.id}
+                    itemId={item.id}
+                    name={item.name}
+                    isSelected={lookupSelectedItems.some(i => i.id === item.id)}
+                    onSelect={() => this.toggleSelected(item)}
                   />
-                  <ul className="pf-c-data-list awx-c-list">
-                    {results.map(i => (
-                      <CheckboxListItem
-                        key={i.id}
-                        itemId={i.id}
-                        name={i.name}
-                        isSelected={lookupSelectedItems.some(item => item.id === i.id)}
-                        onSelect={() => this.toggleSelected(i)}
-                      />
-                    ))}
-                  </ul>
-                  <Pagination
-                    count={count}
-                    page={page}
-                    pageCount={Math.ceil(count / page_size)}
-                    page_size={page_size}
-                    onSetPage={this.onSetPage}
-                    pageSizeOptions={null}
-                    showPageSizeOptions={false}
-                    style={paginationStyling}
-                  />
-                </Fragment>
-              )}
+                )}
+                alignToolbarLeft
+                showPageSizeOptions={false}
+                paginationStyling={paginationStyling}
+              />
               {lookupSelectedItems.length > 0 && (
                 <SelectedList
                   label={i18n._(t`Selected`)}
@@ -264,9 +209,10 @@ Lookup.propTypes = {
   id: PropTypes.string,
   getItems: PropTypes.func.isRequired,
   lookupHeader: PropTypes.string,
-  name: PropTypes.string,
+  name: PropTypes.string, // TODO: delete, unused ?
   onLookupSave: PropTypes.func.isRequired,
   value: PropTypes.arrayOf(PropTypes.object).isRequired,
+  sortedColumnKey: PropTypes.string.isRequired,
 };
 
 Lookup.defaultProps = {
@@ -276,4 +222,4 @@ Lookup.defaultProps = {
 };
 
 export { Lookup as _Lookup };
-export default withNetwork(Lookup);
+export default withNetwork(withRouter(Lookup));

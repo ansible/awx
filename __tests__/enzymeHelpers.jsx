@@ -79,30 +79,31 @@ const defaultContexts = {
   dialog: {}
 };
 
-const providers = {
-  config: ConfigProvider,
-  network: _NetworkProvider,
-  dialog: RootDialogProvider,
-};
-
 function wrapContexts (node, context) {
-  let wrapped = node;
-  let isFirst = true;
-  Object.keys(providers).forEach(key => {
-    if (context[key]) {
-      const Provider = providers[key];
-      wrapped = (
-        <Provider
-          value={context[key]}
-          i18n={isFirst ? defaultContexts.linguiPublisher.i18n : null}
-        >
-          {wrapped}
-        </Provider>
+  const { config, network, dialog } = context;
+  class Wrap extends React.Component {
+    render () {
+      // eslint-disable-next-line react/no-this-in-sfc
+      const { children, ...props } = this.props;
+      const component = React.cloneElement(children, props);
+      return (
+        <RootDialogProvider value={dialog}>
+          <_NetworkProvider value={network}>
+            <ConfigProvider
+              value={config}
+              i18n={defaultContexts.linguiPublisher.i18n}
+            >
+              {component}
+            </ConfigProvider>
+          </_NetworkProvider>
+        </RootDialogProvider>
       );
-      isFirst = false;
     }
-  });
-  return wrapped;
+  }
+
+  return (
+    <Wrap>{node}</Wrap>
+  );
 }
 
 function applyDefaultContexts (context) {

@@ -1,4 +1,5 @@
 import React from 'react';
+import { createMemoryHistory } from 'history';
 import { mountWithContexts } from '../enzymeHelpers';
 import Lookup from '../../src/components/Lookup';
 import { _Lookup } from '../../src/components/Lookup/Lookup';
@@ -10,8 +11,8 @@ const mockColumns = [
 describe('<Lookup />', () => {
   test('initially renders succesfully', () => {
     mountWithContexts(
-      <_Lookup
-        lookup_header="Foo Bar"
+      <Lookup
+        lookupHeader="Foo Bar"
         name="fooBar"
         value={mockData}
         onLookupSave={() => { }}
@@ -25,8 +26,8 @@ describe('<Lookup />', () => {
 
   test('API response is formatted properly', (done) => {
     const wrapper = mountWithContexts(
-      <_Lookup
-        lookup_header="Foo Bar"
+      <Lookup
+        lookupHeader="Foo Bar"
         name="fooBar"
         value={mockData}
         onLookupSave={() => { }}
@@ -47,9 +48,9 @@ describe('<Lookup />', () => {
     const spy = jest.spyOn(_Lookup.prototype, 'handleModalToggle');
     const mockSelected = [{ name: 'foo', id: 1 }];
     const wrapper = mountWithContexts(
-      <_Lookup
+      <Lookup
         id="search"
-        lookup_header="Foo Bar"
+        lookupHeader="Foo Bar"
         name="fooBar"
         value={mockSelected}
         onLookupSave={() => { }}
@@ -74,17 +75,22 @@ describe('<Lookup />', () => {
   test('calls "toggleSelected" when a user changes a checkbox', (done) => {
     const spy = jest.spyOn(_Lookup.prototype, 'toggleSelected');
     const mockSelected = [{ name: 'foo', id: 1 }];
+    const data = {
+      results: [
+        { name: 'test instance', id: 1, url: '/foo' }
+      ],
+      count: 1,
+    };
     const wrapper = mountWithContexts(
-      <_Lookup
+      <Lookup
         id="search"
-        lookup_header="Foo Bar"
+        lookupHeader="Foo Bar"
         name="fooBar"
         value={mockSelected}
         onLookupSave={() => { }}
-        getItems={() => ({ data: { results: [{ name: 'test instance', id: 1 }] } })}
+        getItems={() => ({ data })}
         columns={mockColumns}
         sortedColumnKey="name"
-        handleHttpError={() => {}}
       />
     );
     setImmediate(() => {
@@ -99,17 +105,22 @@ describe('<Lookup />', () => {
   test('calls "toggleSelected" when remove icon is clicked', () => {
     const spy = jest.spyOn(_Lookup.prototype, 'toggleSelected');
     mockData = [{ name: 'foo', id: 1 }, { name: 'bar', id: 2 }];
+    const data = {
+      results: [
+        { name: 'test instance', id: 1, url: '/foo' }
+      ],
+      count: 1,
+    };
     const wrapper = mountWithContexts(
-      <_Lookup
+      <Lookup
         id="search"
-        lookup_header="Foo Bar"
+        lookupHeader="Foo Bar"
         name="fooBar"
         value={mockData}
         onLookupSave={() => { }}
-        getItems={() => { }}
+        getItems={() => ({ data })}
         columns={mockColumns}
         sortedColumnKey="name"
-        handleHttpError={() => {}}
       />
     );
     const removeIcon = wrapper.find('button[aria-label="close"]').first();
@@ -121,7 +132,7 @@ describe('<Lookup />', () => {
     mockData = [{ name: 'foo', id: 0 }, { name: 'bar', id: 1 }];
     const wrapper = mountWithContexts(
       <Lookup
-        lookup_header="Foo Bar"
+        lookupHeader="Foo Bar"
         onLookupSave={() => { }}
         value={mockData}
         selected={[]}
@@ -138,7 +149,7 @@ describe('<Lookup />', () => {
     mockData = [];
     const wrapper = mountWithContexts(
       <Lookup
-        lookup_header="Foo Bar"
+        lookupHeader="Foo Bar"
         onLookupSave={() => { }}
         value={mockData}
         getItems={() => { }}
@@ -166,11 +177,12 @@ describe('<Lookup />', () => {
     const onLookupSaveFn = jest.fn();
     const wrapper = mountWithContexts(
       <Lookup
-        lookup_header="Foo Bar"
+        lookupHeader="Foo Bar"
         name="fooBar"
         value={mockData}
         onLookupSave={onLookupSaveFn}
         getItems={() => { }}
+        sortedColumnKey="name"
       />
     ).find('Lookup');
     wrapper.instance().toggleSelected({
@@ -188,61 +200,31 @@ describe('<Lookup />', () => {
     }], 'fooBar');
   });
 
-  test('onSort sets state and calls getData ', () => {
-    const spy = jest.spyOn(_Lookup.prototype, 'getData');
+  test('should re-fetch data when URL params change', async () => {
+    const history = createMemoryHistory({
+      initialEntries: ['/organizations/add'],
+    });
+    const getItems = jest.fn();
     const wrapper = mountWithContexts(
       <_Lookup
-        lookup_header="Foo Bar"
+        lookupHeader="Foo Bar"
         onLookupSave={() => { }}
         value={mockData}
         selected={[]}
         columns={mockColumns}
         sortedColumnKey="name"
-        getItems={() => { }}
+        getItems={getItems}
         handleHttpError={() => {}}
+        location={{ history }}
       />
-    ).find('Lookup');
-    wrapper.instance().onSort('id', 'descending');
-    expect(wrapper.state('sortedColumnKey')).toEqual('id');
-    expect(wrapper.state('sortOrder')).toEqual('descending');
-    expect(spy).toHaveBeenCalled();
-  });
+    );
 
-  test('onSearch calls getData (through calling onSort)', () => {
-    const spy = jest.spyOn(_Lookup.prototype, 'getData');
-    const wrapper = mountWithContexts(
-      <_Lookup
-        lookup_header="Foo Bar"
-        onLookupSave={() => { }}
-        value={mockData}
-        selected={[]}
-        columns={mockColumns}
-        sortedColumnKey="name"
-        getItems={() => { }}
-        handleHttpError={() => {}}
-      />
-    ).find('Lookup');
-    wrapper.instance().onSearch();
-    expect(spy).toHaveBeenCalled();
-  });
-
-  test('onSetPage sets state and calls getData ', () => {
-    const spy = jest.spyOn(_Lookup.prototype, 'getData');
-    const wrapper = mountWithContexts(
-      <_Lookup
-        lookup_header="Foo Bar"
-        onLookupSave={() => { }}
-        value={mockData}
-        selected={[]}
-        columns={mockColumns}
-        sortedColumnKey="name"
-        getItems={() => { }}
-        handleHttpError={() => {}}
-      />
-    ).find('Lookup');
-    wrapper.instance().onSetPage(2, 10);
-    expect(wrapper.state('page')).toEqual(2);
-    expect(wrapper.state('page_size')).toEqual(10);
-    expect(spy).toHaveBeenCalled();
+    expect(getItems).toHaveBeenCalledTimes(1);
+    history.push('organizations/add?page=2');
+    wrapper.setProps({
+      location: { history },
+    });
+    wrapper.update();
+    expect(getItems).toHaveBeenCalledTimes(2);
   });
 });

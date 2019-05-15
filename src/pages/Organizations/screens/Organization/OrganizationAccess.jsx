@@ -6,14 +6,14 @@ import OrganizationAccessItem from '../../components/OrganizationAccessItem';
 import DeleteRoleConfirmationModal from '../../components/DeleteRoleConfirmationModal';
 import AddResourceRole from '../../../../components/AddRole/AddResourceRole';
 import { withNetwork } from '../../../../contexts/Network';
-import { parseQueryString } from '../../../../util/qs';
+import { getQSConfig, parseNamespacedQueryString } from '../../../../util/qs';
 import { Organization } from '../../../../types';
 
-const DEFAULT_QUERY_PARAMS = {
+const QS_CONFIG = getQSConfig('access', {
   page: 1,
   page_size: 5,
   order_by: 'first_name',
-};
+});
 
 class OrganizationAccess extends React.Component {
   static propTypes = {
@@ -54,12 +54,12 @@ class OrganizationAccess extends React.Component {
   }
 
   async readOrgAccessList () {
-    const { organization, api, handleHttpError } = this.props;
+    const { organization, api, handleHttpError, location } = this.props;
     this.setState({ isLoading: true });
     try {
       const { data } = await api.getOrganizationAccessList(
         organization.id,
-        this.getQueryParams()
+        parseNamespacedQueryString(QS_CONFIG, location.search)
       );
       this.setState({
         itemCount: data.count || 0,
@@ -73,16 +73,6 @@ class OrganizationAccess extends React.Component {
         isLoading: false,
       });
     }
-  }
-
-  getQueryParams () {
-    const { location } = this.props;
-    const searchParams = parseQueryString(location.search.substring(1));
-
-    return {
-      ...DEFAULT_QUERY_PARAMS,
-      ...searchParams,
-    };
   }
 
   confirmRemoveRole (role, accessRecord) {
@@ -175,7 +165,7 @@ class OrganizationAccess extends React.Component {
             items={accessRecords}
             itemCount={itemCount}
             itemName="role"
-            queryParams={this.getQueryParams()}
+            qsConfig={QS_CONFIG}
             toolbarColumns={[
               { name: i18nMark('Name'), key: 'first_name', isSortable: true },
               { name: i18nMark('Username'), key: 'username', isSortable: true },

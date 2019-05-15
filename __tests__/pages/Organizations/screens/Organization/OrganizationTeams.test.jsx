@@ -1,7 +1,5 @@
 import React from 'react';
 import { shallow } from 'enzyme';
-import { Router } from 'react-router-dom';
-import { createMemoryHistory } from 'history';
 import { mountWithContexts } from '../../../../enzymeHelpers';
 import { sleep } from '../../../../testUtils';
 import OrganizationTeams, { _OrganizationTeams } from '../../../../../src/pages/Organizations/screens/Organization/OrganizationTeams';
@@ -68,65 +66,14 @@ describe('<OrganizationTeams />', () => {
     const list = wrapper.find('PaginatedDataList');
     expect(list.prop('items')).toEqual(listData.data.results);
     expect(list.prop('itemCount')).toEqual(listData.data.count);
-    expect(list.prop('queryParams')).toEqual({
-      page: 1,
-      page_size: 5,
-      order_by: 'name',
-    });
-  });
-
-  test('should pass queryParams to PaginatedDataList', async () => {
-    const page1Data = listData;
-    const page2Data = {
-      data: {
-        count: 7,
-        results: [
-          { id: 6, name: 'six', url: '/org/team/6' },
-          { id: 7, name: 'seven', url: '/org/team/7' },
-        ]
-      }
-    };
-    const readOrganizationTeamsList = jest.fn();
-    readOrganizationTeamsList.mockReturnValueOnce(page1Data);
-    const history = createMemoryHistory({
-      initialEntries: ['/organizations/1/teams'],
-    });
-    const wrapper = mountWithContexts(
-      <Router history={history}>
-        <OrganizationTeams
-          id={1}
-          searchString=""
-        />
-      </Router>,
-      { context: {
-        network: {
-          api: { readOrganizationTeamsList },
-          handleHttpError: () => {}
-        },
-        router: false,
-      } }
-    );
-
-    await sleep(0);
-    wrapper.update();
-
-    const list = wrapper.find('PaginatedDataList');
-    expect(list.prop('queryParams')).toEqual({
-      page: 1,
-      page_size: 5,
-      order_by: 'name',
-    });
-
-    readOrganizationTeamsList.mockReturnValueOnce(page2Data);
-    history.push('/organizations/1/teams?page=2');
-
-    await sleep(0);
-    wrapper.update();
-    const list2 = wrapper.find('PaginatedDataList');
-    expect(list2.prop('queryParams')).toEqual({
-      page: 2,
-      page_size: 5,
-      order_by: 'name',
+    expect(list.prop('qsConfig')).toEqual({
+      namespace: 'team',
+      defaultParams: {
+        page: 1,
+        page_size: 5,
+        order_by: 'name',
+      },
+      integerFields: ['page', 'page_size'],
     });
   });
 });

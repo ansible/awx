@@ -40,3 +40,74 @@ export const parseQueryString = (queryString, integerFields = ['page', 'page_siz
 
   return Object.assign(...keyValuePairs.map(([k, v]) => ({ [k]: v })));
 };
+
+export function getQSConfig (
+  namespace,
+  defaultParams = { page: 1, page_size: 5, order_by: 'name' },
+  integerFields = ['page', 'page_size']
+) {
+  if (!namespace) {
+    throw new Error('a QS namespace is required');
+  }
+  return {
+    defaultParams,
+    namespace,
+    integerFields,
+  };
+}
+
+export function encodeNamespacedQueryString (config, params) {
+  return encodeQueryString(namespaceParams(config.namespace, params));
+}
+
+export function parseNamespacedQueryString (config, queryString, includeDefaults = true) {
+  const integerFields = prependNamespaceToArray(config.namespace, config.integerFields);
+  const parsed = parseQueryString(queryString, integerFields);
+
+  const namespace = {};
+  Object.keys(parsed).forEach(field => {
+    if (namespaceMatches(config.namespace, field)) {
+      let fieldname = field;
+      if (config.namespace) {
+        fieldname = field.substr(config.namespace.length + 1);
+      }
+      namespace[fieldname] = parsed[field];
+    }
+  });
+  return {
+    ...includeDefaults ? config.defaultParams : {},
+    ...namespace,
+  };
+}
+
+export function updateNamespacedQueryString (config, queryString, newParams) {
+  const params = parseQueryString(queryString);
+  return encodeQueryString({
+    ...params,
+    ...namespaceParams(config.namespace, newParams),
+  });
+}
+
+function namespaceParams (ns, params) {
+  if (!ns) return params;
+
+  const namespaced = {};
+  Object.keys(params).forEach(key => {
+    namespaced[`${ns}.${key}`] = params[key];
+  });
+  return namespaced;
+}
+
+function namespaceMatches (namespace, fieldname) {
+  if (!namespace) {
+    return !fieldname.includes('.');
+  }
+  return fieldname.startsWith(`${namespace}.`);
+}
+
+function prependNamespaceToArray (namespace, arr) {
+  if (!namespace) {
+    return arr;
+  }
+  return arr.map(f => `${namespace}.${f}`);
+}

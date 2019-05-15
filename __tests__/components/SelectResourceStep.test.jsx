@@ -1,7 +1,9 @@
 import React from 'react';
+import { createMemoryHistory } from 'history';
 import { shallow } from 'enzyme';
 import { mountWithContexts } from '../enzymeHelpers';
-import SelectResourceStep from '../../src/components/AddRole/SelectResourceStep';
+import { sleep } from '../testUtils';
+import SelectResourceStep, { _SelectResourceStep } from '../../src/components/AddRole/SelectResourceStep';
 
 describe('<SelectResourceStep />', () => {
   const columns = [
@@ -21,13 +23,14 @@ describe('<SelectResourceStep />', () => {
       />
     );
   });
+
   test('fetches resources on mount', async () => {
     const handleSearch = jest.fn().mockResolvedValue({
       data: {
         count: 2,
         results: [
-          { id: 1, username: 'foo' },
-          { id: 2, username: 'bar' }
+          { id: 1, username: 'foo', url: 'item/1' },
+          { id: 2, username: 'bar', url: 'item/2' }
         ]
       }
     });
@@ -46,102 +49,71 @@ describe('<SelectResourceStep />', () => {
       page_size: 5
     });
   });
+
   test('readResourceList properly adds rows to state', async () => {
     const selectedResourceRows = [
-      {
-        id: 1,
-        username: 'foo'
-      }
+      { id: 1, username: 'foo', url: 'item/1' }
     ];
     const handleSearch = jest.fn().mockResolvedValue({
       data: {
         count: 2,
         results: [
-          { id: 1, username: 'foo' },
-          { id: 2, username: 'bar' }
+          { id: 1, username: 'foo', url: 'item/1' },
+          { id: 2, username: 'bar', url: 'item/2' }
         ]
       }
     });
+    const history = createMemoryHistory({
+      initialEntries: ['/organizations/1/access?resource.page=1&resource.order_by=-username'],
+    });
     const wrapper = await mountWithContexts(
-      <SelectResourceStep
+      <_SelectResourceStep
         columns={columns}
         displayKey="username"
         onRowClick={() => {}}
         onSearch={handleSearch}
         selectedResourceRows={selectedResourceRows}
         sortedColumnKey="username"
+        location={history.location}
       />
     ).find('SelectResourceStep');
-    await wrapper.instance().readResourceList({
-      page: 1,
-      order_by: '-username'
-    });
+    await wrapper.instance().readResourceList();
     expect(handleSearch).toHaveBeenCalledWith({
       order_by: '-username',
-      page: 1
+      page: 1,
+      page_size: 5,
     });
     expect(wrapper.state('resources')).toEqual([
-      { id: 1, username: 'foo' },
-      { id: 2, username: 'bar' }
+      { id: 1, username: 'foo', url: 'item/1' },
+      { id: 2, username: 'bar', url: 'item/2' }
     ]);
   });
-  test('handleSetPage calls readResourceList with correct params', () => {
-    const spy = jest.spyOn(SelectResourceStep.prototype, 'readResourceList');
-    const wrapper = mountWithContexts(
-      <SelectResourceStep
-        columns={columns}
-        displayKey="username"
-        onRowClick={() => {}}
-        onSearch={() => {}}
-        selectedResourceRows={[]}
-        sortedColumnKey="username"
-      />
-    ).find('SelectResourceStep');
-    wrapper.setState({ sortOrder: 'descending' });
-    wrapper.instance().handleSetPage(2);
-    expect(spy).toHaveBeenCalledWith({ page: 2, page_size: 5, order_by: '-username' });
-    wrapper.setState({ sortOrder: 'ascending' });
-    wrapper.instance().handleSetPage(2);
-    expect(spy).toHaveBeenCalledWith({ page: 2, page_size: 5, order_by: 'username' });
-  });
-  test('handleSort calls readResourceList with correct params', () => {
-    const spy = jest.spyOn(SelectResourceStep.prototype, 'readResourceList');
-    const wrapper = mountWithContexts(
-      <SelectResourceStep
-        columns={columns}
-        displayKey="username"
-        onRowClick={() => {}}
-        onSearch={() => {}}
-        selectedResourceRows={[]}
-        sortedColumnKey="username"
-      />
-    ).find('SelectResourceStep');
-    wrapper.instance().handleSort('username', 'descending');
-    expect(spy).toHaveBeenCalledWith({ page: 1, page_size: 5, order_by: '-username' });
-    wrapper.instance().handleSort('username', 'ascending');
-    expect(spy).toHaveBeenCalledWith({ page: 1, page_size: 5, order_by: 'username' });
-  });
-  test('clicking on row fires callback with correct params', () => {
+
+  test('clicking on row fires callback with correct params', async () => {
     const handleRowClick = jest.fn();
+    const data = {
+      count: 2,
+      results: [
+        { id: 1, username: 'foo', url: 'item/1' },
+        { id: 2, username: 'bar', url: 'item/2' }
+      ]
+    };
     const wrapper = mountWithContexts(
       <SelectResourceStep
         columns={columns}
         displayKey="username"
         onRowClick={handleRowClick}
-        onSearch={() => {}}
+        onSearch={() => ({ data })}
         selectedResourceRows={[]}
         sortedColumnKey="username"
       />
     );
-    const selectResourceStepWrapper = wrapper.find('SelectResourceStep');
-    selectResourceStepWrapper.setState({
-      resources: [
-        { id: 1, username: 'foo' }
-      ]
-    });
+    await sleep(0);
+    wrapper.update();
     const checkboxListItemWrapper = wrapper.find('CheckboxListItem');
-    expect(checkboxListItemWrapper.length).toBe(1);
-    checkboxListItemWrapper.first().find('input[type="checkbox"]').simulate('change', { target: { checked: true } });
-    expect(handleRowClick).toHaveBeenCalledWith({ id: 1, username: 'foo' });
+    expect(checkboxListItemWrapper.length).toBe(2);
+    checkboxListItemWrapper.first().find('input[type="checkbox"]')
+      .simulate('change', { target: { checked: true } });
+    expect(handleRowClick).toHaveBeenCalledWith(data.results[0]);
   });
 });

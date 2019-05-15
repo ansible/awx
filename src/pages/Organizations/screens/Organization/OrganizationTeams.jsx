@@ -2,14 +2,14 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import PaginatedDataList from '../../../../components/PaginatedDataList';
-import { parseQueryString } from '../../../../util/qs';
+import { getQSConfig, parseNamespacedQueryString } from '../../../../util/qs';
 import { withNetwork } from '../../../../contexts/Network';
 
-const DEFAULT_QUERY_PARAMS = {
+const QS_CONFIG = getQSConfig('team', {
   page: 1,
   page_size: 5,
   order_by: 'name',
-};
+});
 
 class OrganizationTeams extends React.Component {
   constructor (props) {
@@ -37,19 +37,9 @@ class OrganizationTeams extends React.Component {
     }
   }
 
-  getQueryParams () {
-    const { location } = this.props;
-    const searchParams = parseQueryString(location.search.substring(1));
-
-    return {
-      ...DEFAULT_QUERY_PARAMS,
-      ...searchParams,
-    };
-  }
-
   async readOrganizationTeamsList () {
-    const { api, handleHttpError, id } = this.props;
-    const params = this.getQueryParams();
+    const { id, api, handleHttpError, location } = this.props;
+    const params = parseNamespacedQueryString(QS_CONFIG, location.search);
     this.setState({ isLoading: true, error: null });
     try {
       const {
@@ -86,7 +76,7 @@ class OrganizationTeams extends React.Component {
             items={teams}
             itemCount={itemCount}
             itemName="team"
-            queryParams={this.getQueryParams()}
+            qsConfig={QS_CONFIG}
           />
         )}
       </Fragment>

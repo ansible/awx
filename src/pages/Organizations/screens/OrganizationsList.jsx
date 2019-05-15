@@ -13,7 +13,7 @@ import PaginatedDataList, {
   ToolbarAddButton
 } from '../../../components/PaginatedDataList';
 import OrganizationListItem from '../components/OrganizationListItem';
-import { encodeQueryString, parseQueryString } from '../../../util/qs';
+import { getQSConfig, parseNamespacedQueryString } from '../../../util/qs';
 
 const COLUMNS = [
   { name: i18nMark('Name'), key: 'name', isSortable: true },
@@ -21,11 +21,11 @@ const COLUMNS = [
   { name: i18nMark('Created'), key: 'created', isSortable: true, isNumeric: true },
 ];
 
-const DEFAULT_QUERY_PARAMS = {
+const QS_CONFIG = getQSConfig('organization', {
   page: 1,
   page_size: 5,
   order_by: 'name',
-};
+});
 
 class OrganizationsList extends Component {
   constructor (props) {
@@ -39,10 +39,8 @@ class OrganizationsList extends Component {
       selected: [],
     };
 
-    this.getQueryParams = this.getQueryParams.bind(this);
     this.handleSelectAll = this.handleSelectAll.bind(this);
     this.handleSelect = this.handleSelect.bind(this);
-    this.updateUrl = this.updateUrl.bind(this);
     this.fetchOptionsOrganizations = this.fetchOptionsOrganizations.bind(this);
     this.fetchOrganizations = this.fetchOrganizations.bind(this);
     this.handleOrgDelete = this.handleOrgDelete.bind(this);
@@ -77,16 +75,6 @@ class OrganizationsList extends Component {
     }
   }
 
-  getQueryParams () {
-    const { location } = this.props;
-    const searchParams = parseQueryString(location.search.substring(1));
-
-    return {
-      ...DEFAULT_QUERY_PARAMS,
-      ...searchParams,
-    };
-  }
-
   async handleOrgDelete () {
     const { selected } = this.state;
     const { api, handleHttpError } = this.props;
@@ -101,25 +89,14 @@ class OrganizationsList extends Component {
       errorHandled = handleHttpError(err);
     } finally {
       if (!errorHandled) {
-        const queryParams = this.getQueryParams();
-        this.fetchOrganizations(queryParams);
+        this.fetchOrganizations();
       }
     }
   }
 
-  updateUrl (queryParams) {
-    const { history, location } = this.props;
-    const pathname = '/organizations';
-    const search = `?${encodeQueryString(queryParams)}`;
-
-    if (search !== location.search) {
-      history.replace({ pathname, search });
-    }
-  }
-
   async fetchOrganizations () {
-    const { api, handleHttpError } = this.props;
-    const params = this.getQueryParams();
+    const { api, handleHttpError, location } = this.props;
+    const params = parseNamespacedQueryString(QS_CONFIG, location.search);
 
     this.setState({ error: false, isLoading: true });
 
@@ -185,7 +162,7 @@ class OrganizationsList extends Component {
               items={organizations}
               itemCount={itemCount}
               itemName="organization"
-              queryParams={this.getQueryParams()}
+              qsConfig={QS_CONFIG}
               toolbarColumns={COLUMNS}
               showSelectAll
               isAllSelected={isAllSelected}

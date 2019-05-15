@@ -12,6 +12,12 @@ const mockData = [
   { id: 5, name: 'five', url: '/org/team/5' },
 ];
 
+const qsConfig = {
+  namespace: 'item',
+  defaultParams: { page: 1, page_size: 5 },
+  integerFields: [],
+};
+
 describe('<PaginatedDataList />', () => {
   afterEach(() => {
     jest.restoreAllMocks();
@@ -27,11 +33,11 @@ describe('<PaginatedDataList />', () => {
           page_size: 5,
           order_by: 'name',
         }}
+        qsConfig={qsConfig}
       />
     );
   });
 
-  // should navigate when datalisttoolbar changes sorting
   test('should navigate when DataListToolbar calls onSort prop', async () => {
     const history = createMemoryHistory({
       initialEntries: ['/organizations/1/teams'],
@@ -45,6 +51,7 @@ describe('<PaginatedDataList />', () => {
           page_size: 5,
           order_by: 'name',
         }}
+        qsConfig={qsConfig}
       />, { context: { router: { history } } }
     );
 
@@ -52,7 +59,7 @@ describe('<PaginatedDataList />', () => {
     expect(toolbar.prop('sortedColumnKey')).toEqual('name');
     expect(toolbar.prop('sortOrder')).toEqual('ascending');
     toolbar.prop('onSort')('name', 'descending');
-    expect(history.location.search).toEqual('?order_by=-name');
+    expect(history.location.search).toEqual('?item.order_by=-name');
     await sleep(0);
     wrapper.update();
 
@@ -61,7 +68,7 @@ describe('<PaginatedDataList />', () => {
     // fixing after #147 is done:
     // expect(toolbar.prop('sortOrder')).toEqual('descending');
     toolbar.prop('onSort')('name', 'ascending');
-    expect(history.location.search).toEqual('?order_by=name');
+    expect(history.location.search).toEqual('?item.order_by=name');
   });
 
   test('should navigate to page when Pagination calls onSetPage prop', () => {
@@ -77,14 +84,15 @@ describe('<PaginatedDataList />', () => {
           page_size: 5,
           order_by: 'name',
         }}
+        qsConfig={qsConfig}
       />, { context: { router: { history } } }
     );
 
     const pagination = wrapper.find('Pagination');
     pagination.prop('onSetPage')(2, 5);
-    expect(history.location.search).toEqual('?page=2&page_size=5');
+    expect(history.location.search).toEqual('?item.page=2&item.page_size=5');
     wrapper.update();
     pagination.prop('onSetPage')(1, 25);
-    expect(history.location.search).toEqual('?page=1&page_size=25');
+    expect(history.location.search).toEqual('?item.page=1&item.page_size=25');
   });
 });

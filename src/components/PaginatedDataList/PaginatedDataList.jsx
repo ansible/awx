@@ -20,8 +20,12 @@ import { withRouter, Link } from 'react-router-dom';
 
 import Pagination from '../Pagination';
 import DataListToolbar from '../DataListToolbar';
-import { encodeQueryString, parseQueryString } from '../../util/qs';
+import {
+  parseNamespacedQueryString,
+  updateNamespacedQueryString,
+} from '../../util/qs';
 import { pluralize, getArticle, ucFirst } from '../../util/strings';
+import { QSConfig } from '../../types';
 
 const detailWrapperStyle = {
   display: 'grid',
@@ -47,12 +51,14 @@ class PaginatedDataList extends React.Component {
   }
 
   getPageCount () {
-    const { itemCount, queryParams: { page_size } } = this.props;
-    return Math.ceil(itemCount / page_size);
+    const { itemCount, qsConfig, location } = this.props;
+    const queryParams = parseNamespacedQueryString(qsConfig, location.search);
+    return Math.ceil(itemCount / queryParams.page_size);
   }
 
   getSortOrder () {
-    const { queryParams } = this.props;
+    const { qsConfig, location } = this.props;
+    const queryParams = parseNamespacedQueryString(qsConfig, location.search);
     if (queryParams.order_by && queryParams.order_by.startsWith('-')) {
       return [queryParams.order_by.substr(1), 'descending'];
     }
@@ -74,13 +80,9 @@ class PaginatedDataList extends React.Component {
   }
 
   pushHistoryState (newParams) {
-    const { history } = this.props;
+    const { history, qsConfig } = this.props;
     const { pathname, search } = history.location;
-    const currentParams = parseQueryString(search);
-    const qs = encodeQueryString({
-      ...currentParams,
-      ...newParams
-    });
+    const qs = updateNamespacedQueryString(qsConfig, search, newParams);
     history.push(`${pathname}?${qs}`);
   }
 
@@ -93,7 +95,7 @@ class PaginatedDataList extends React.Component {
     const {
       items,
       itemCount,
-      queryParams,
+      qsConfig,
       renderItem,
       toolbarColumns,
       additionalControls,
@@ -102,9 +104,14 @@ class PaginatedDataList extends React.Component {
       showSelectAll,
       isAllSelected,
       onSelectAll,
+      alignToolbarLeft,
+      showPageSizeOptions,
+      paginationStyling,
+      location,
     } = this.props;
     const { error } = this.state;
     const [orderBy, sortOrder] = this.getSortOrder();
+    const queryParams = parseNamespacedQueryString(qsConfig, location.search);
     return (
       <I18n>
         {({ i18n }) => (
@@ -153,6 +160,7 @@ class PaginatedDataList extends React.Component {
                   isAllSelected={isAllSelected}
                   onSelectAll={onSelectAll}
                   additionalControls={additionalControls}
+                  noLeftMargin={alignToolbarLeft}
                 />
                 <DataList aria-label={i18n._(t`${ucFirst(pluralize(itemName))} List`)}>
                   {items.map(item => (renderItem ? renderItem(item) : (
@@ -182,10 +190,12 @@ class PaginatedDataList extends React.Component {
                 </DataList>
                 <Pagination
                   count={itemCount}
-                  page={queryParams.page}
+                  page={queryParams.page || 1}
                   pageCount={this.getPageCount()}
                   page_size={queryParams.page_size}
                   onSetPage={this.handleSetPage}
+                  showPageSizeOptions={showPageSizeOptions}
+                  style={paginationStyling}
                 />
               </Fragment>
             )}
@@ -202,19 +212,12 @@ const Item = PropTypes.shape({
   name: PropTypes.string,
 });
 
-const QueryParams = PropTypes.shape({
-  page: PropTypes.number,
-  page_size: PropTypes.number,
-  order_by: PropTypes.string,
-});
-
 PaginatedDataList.propTypes = {
   items: PropTypes.arrayOf(Item).isRequired,
   itemCount: PropTypes.number.isRequired,
   itemName: PropTypes.string,
   itemNamePlural: PropTypes.string,
-  // TODO: determine this internally but pass in defaults?
-  queryParams: QueryParams.isRequired,
+  qsConfig: QSConfig.isRequired,
   renderItem: PropTypes.func,
   toolbarColumns: arrayOf(shape({
     name: string.isRequired,
@@ -225,6 +228,9 @@ PaginatedDataList.propTypes = {
   showSelectAll: PropTypes.bool,
   isAllSelected: PropTypes.bool,
   onSelectAll: PropTypes.func,
+  alignToolbarLeft: PropTypes.bool,
+  showPageSizeOptions: PropTypes.bool,
+  paginationStyling: PropTypes.shape(),
 };
 
 PaginatedDataList.defaultProps = {
@@ -238,6 +244,9 @@ PaginatedDataList.defaultProps = {
   showSelectAll: false,
   isAllSelected: false,
   onSelectAll: null,
+  alignToolbarLeft: false,
+  showPageSizeOptions: true,
+  paginationStyling: null,
 };
 
 export { PaginatedDataList as _PaginatedDataList };

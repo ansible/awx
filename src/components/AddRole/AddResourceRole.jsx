@@ -186,24 +186,22 @@ class AddResourceRole extends React.Component {
                   <SelectResourceStep
                     columns={userColumns}
                     displayKey="username"
-                    emptyListBody={i18n._(t`Please add users to populate this list`)}
-                    emptyListTitle={i18n._(t`No Users Found`)}
                     onRowClick={this.handleResourceCheckboxClick}
                     onSearch={this.readUsers}
                     selectedLabel={i18n._(t`Selected`)}
                     selectedResourceRows={selectedResourceRows}
                     sortedColumnKey="username"
+                    itemName="user"
                   />
                 )}
                 {selectedResource === 'teams' && (
                   <SelectResourceStep
                     columns={teamColumns}
-                    emptyListBody={i18n._(t`Please add teams to populate this list`)}
-                    emptyListTitle={i18n._(t`No Teams Found`)}
                     onRowClick={this.handleResourceCheckboxClick}
                     onSearch={this.readTeams}
                     selectedLabel={i18n._(t`Selected`)}
                     selectedResourceRows={selectedResourceRows}
+                    itemName="team"
                   />
                 )}
               </Fragment>
