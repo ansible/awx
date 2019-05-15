@@ -18,13 +18,6 @@ from social_django.middleware import SocialAuthExceptionMiddleware
 
 class SocialAuthMiddleware(SocialAuthExceptionMiddleware):
 
-    def __init__(self, get_response):
-        self.get_response = get_response
-
-    def __call__(self, request):
-        response = self.process_request(request)
-        return response
-
     def process_request(self, request):
         if request.path.startswith('/sso'):
             # django-social keeps a list of backends in memory that it gathers
