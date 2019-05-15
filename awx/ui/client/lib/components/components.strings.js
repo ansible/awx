@@ -85,7 +85,7 @@ function ComponentsStrings (BaseString) {
         APPLICATIONS: t.s('Applications'),
         SETTINGS: t.s('Settings'),
         ABOUT: t.s('About'),
-        COPYRIGHT: t.s('Copyright © 2018 Red Hat, Inc.'),
+        COPYRIGHT: t.s('Copyright © 2019 Red Hat, Inc.'),
         VIEWS_HEADER: t.s('Views'),
         RESOURCES_HEADER: t.s('Resources'),
         ACCESS_HEADER: t.s('Access'),
