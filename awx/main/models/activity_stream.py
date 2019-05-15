@@ -97,12 +97,4 @@ class ActivityStream(models.Model):
             if 'update_fields' in kwargs and 'deleted_actor' not in kwargs['update_fields']:
                 kwargs['update_fields'].append('deleted_actor')
 
-        # For compatibility with Django 1.4.x, attempt to handle any calls to
-        # save that pass update_fields.
-        try:
-            super(ActivityStream, self).save(*args, **kwargs)
-        except TypeError:
-            if 'update_fields' not in kwargs:
-                raise
-            kwargs.pop('update_fields')
-            super(ActivityStream, self).save(*args, **kwargs)
+        super(ActivityStream, self).save(*args, **kwargs)

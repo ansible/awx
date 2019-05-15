@@ -3,14 +3,10 @@ import pytest
 import copy
 import json
 
-from django.db import DatabaseError
-
 from awx.main.utils.common import (
     model_instance_diff,
-    model_to_dict,
-    get_model_for_type
+    model_to_dict
 )
-from awx.main import models
 
 
 @pytest.mark.django_db
@@ -62,20 +58,3 @@ def test_model_instance_diff(alice, bob):
     assert hasattr(alice, 'is_superuser')
     assert hasattr(bob, 'is_superuser')
     assert 'is_superuser' not in output_dict
-
-
-@pytest.mark.django_db
-def test_get_model_for_invalid_type():
-    with pytest.raises(DatabaseError) as exc:
-        get_model_for_type('foobar')
-    assert 'not a valid AWX model' in str(exc)
-
-
-@pytest.mark.django_db
-@pytest.mark.parametrize("model_type,model_class", [
-    ('inventory', models.Inventory),
-    ('job_template', models.JobTemplate),
-    ('unified_job_template', models.UnifiedJobTemplate)
-])
-def test_get_model_for_valid_type(model_type, model_class):
-    assert get_model_for_type(model_type) == model_class
