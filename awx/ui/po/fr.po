@@ -852,7 +852,7 @@ msgstr "Annuler la mise à jour SCM"
 
 #: client/lib/services/base-string.service.js:99
 msgid "Cancel the {{resourceType}}"
-msgstr "Anuuler {{resourceType}}"
+msgstr "Annuler {{resourceType}}"
 
 #: client/src/organizations/linkout/controllers/organizations-projects.controller.js:42
 #: client/src/projects/list/projects-list.controller.js:80
