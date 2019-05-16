@@ -83,7 +83,7 @@ The system that runs the AWX service will need to satisfy the following requirem
 
 ### Choose a deployment platform
 
-We currently support running AWX as a containerized application using Docker images deployed to either an OpenShift cluster or docker-compose. The remainder of this document will walk you through the process of building the images, and deploying them to either platform.
+We currently support running AWX as a containerized application using Docker images deployed to either an OpenShift cluster, a Kubernetes cluster, or docker-compose. The remainder of this document will walk you through the process of building the images, and deploying them to either platform.
 
 The [installer](./installer) directory contains an [inventory](./installer/inventory) file, and a playbook, [install.yml](./installer/install.yml). You'll begin by setting variables in the inventory file according to the platform you wish to use, and then you'll start the image build and deployment process by running the playbook.
 
