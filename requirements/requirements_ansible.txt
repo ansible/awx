@@ -103,7 +103,7 @@ python-dateutil==2.6.1    # via adal, azure-storage, botocore
 pyvmomi==6.5
 pywinrm[kerberos]==0.3.0
 pyyaml==5.1               # via azure-cli-core, knack, openstacksdk, os-client-config
-requests-credssp==0.1.0
+requests-credssp==1.0.2
 requests-kerberos==0.12.0  # via pywinrm
 requests-ntlm==1.1.0      # via pywinrm
 requests-oauthlib==0.8.0  # via msrest

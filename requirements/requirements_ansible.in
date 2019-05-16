@@ -57,6 +57,6 @@ pyvmomi==6.5
 backports.ssl-match-hostname==3.5.0.1
 pywinrm[kerberos]==0.3.0
 requests
-requests-credssp==0.1.0   # For windows authentication awx/issues/1144
+requests-credssp==1.0.2   # For windows authentication awx/issues/1144
 # OpenStack
 openstacksdk==0.23.0
