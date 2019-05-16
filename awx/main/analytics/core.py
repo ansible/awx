@@ -80,7 +80,7 @@ def gather(dest=None, module=None):
     
     if not settings.INSIGHTS_TRACKING_STATE:
         logger.error("Insights analytics not enabled")
-        return "Error: Insights analytics not enabled"
+        return
 
     if module is None:
         from awx.main.analytics import collectors
