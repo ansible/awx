@@ -58,4 +58,5 @@ AnsibleSelect.propTypes = {
   value: PropTypes.string.isRequired,
 };
 
+export { AnsibleSelect as _AnsibleSelect };
 export default withI18n()(AnsibleSelect);

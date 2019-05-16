@@ -1,5 +1,5 @@
 import React from 'react';
-import { mount } from 'enzyme';
+import { mountWithContexts } from '../enzymeHelpers';
 import CredentialTypes from '../../src/pages/CredentialTypes';
 
 describe('<CredentialTypes />', () => {
@@ -8,7 +8,7 @@ describe('<CredentialTypes />', () => {
   let title;
 
   beforeEach(() => {
-    pageWrapper = mount(<CredentialTypes />);
+    pageWrapper = mountWithContexts(<CredentialTypes />);
     pageSections = pageWrapper.find('PageSection');
     title = pageWrapper.find('Title');
   });

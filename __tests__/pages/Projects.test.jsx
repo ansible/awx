@@ -1,5 +1,5 @@
 import React from 'react';
-import { mount } from 'enzyme';
+import { mountWithContexts } from '../enzymeHelpers';
 import Projects from '../../src/pages/Projects';
 
 describe('<Projects />', () => {
@@ -8,7 +8,7 @@ describe('<Projects />', () => {
   let title;
 
   beforeEach(() => {
-    pageWrapper = mount(<Projects />);
+    pageWrapper = mountWithContexts(<Projects />);
     pageSections = pageWrapper.find('PageSection');
     title = pageWrapper.find('Title');
   });

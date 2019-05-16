@@ -1,5 +1,5 @@
 import React from 'react';
-import { mount } from 'enzyme';
+import { mountWithContexts } from '../enzymeHelpers';
 import NotificationTemplates from '../../src/pages/NotificationTemplates';
 
 describe('<NotificationTemplates />', () => {
@@ -8,7 +8,7 @@ describe('<NotificationTemplates />', () => {
   let title;
 
   beforeEach(() => {
-    pageWrapper = mount(<NotificationTemplates />);
+    pageWrapper = mountWithContexts(<NotificationTemplates />);
     pageSections = pageWrapper.find('PageSection');
     title = pageWrapper.find('Title');
   });

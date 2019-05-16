@@ -21,29 +21,28 @@ exports[`mountWithContexts injected ConfigProvider should mount and render with 
 
 exports[`mountWithContexts injected I18nProvider should mount and render 1`] = `
 <div>
-  <I18n
-    update={true}
-    withHash={true}
-  >
-    <span>
-      Text content
-    </span>
-  </I18n>
+  <span>
+    Text content
+  </span>
 </div>
 `;
 
 exports[`mountWithContexts injected I18nProvider should mount and render deeply nested consumer 1`] = `
 <Parent>
-  <Child>
+  <WithI18n>
     <I18n
       update={true}
       withHash={true}
     >
-      <div>
-        Text content
-      </div>
+      <Component
+        i18n={"/i18n/"}
+      >
+        <div>
+          Text content
+        </div>
+      </Component>
     </I18n>
-  </Child>
+  </WithI18n>
 </Parent>
 `;
 

@@ -94,7 +94,7 @@ class OrganizationListItem extends React.Component {
                 </Badge>
               </ListGroup>
             </DataListCell>,
-            <DataListCell>
+            <DataListCell key="teams">
               <ListGroup>
                 {i18n._(t`Teams`)}
                 <Badge isRead>

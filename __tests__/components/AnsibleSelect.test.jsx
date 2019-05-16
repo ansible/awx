@@ -1,6 +1,7 @@
 import React from 'react';
 import { mountWithContexts } from '../enzymeHelpers';
 import AnsibleSelect from '../../src/components/AnsibleSelect';
+import { _AnsibleSelect } from '../../src/components/AnsibleSelect/AnsibleSelect';
 
 const label = 'test select';
 const mockData = ['/venv/baz/', '/venv/ansible/'];
@@ -18,7 +19,7 @@ describe('<AnsibleSelect />', () => {
   });
 
   test('calls "onSelectChange" on dropdown select change', () => {
-    const spy = jest.spyOn(AnsibleSelect.prototype, 'onSelectChange');
+    const spy = jest.spyOn(_AnsibleSelect.prototype, 'onSelectChange');
     const wrapper = mountWithContexts(
       <AnsibleSelect
         value="foo"

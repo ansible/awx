@@ -113,7 +113,7 @@ class PaginatedDataList extends React.Component {
     const { error } = this.state;
     const [orderBy, sortOrder] = this.getSortOrder();
     const queryParams = parseNamespacedQueryString(qsConfig, location.search);
-    const columns = toolbarColumns || [{ name: i18n._(t`Name`), key: 'name', isSortable: true }];
+    const columns = toolbarColumns.length ? toolbarColumns : [{ name: i18n._(t`Name`), key: 'name', isSortable: true }];
     return (
       <Fragment>
         {error && (
@@ -141,7 +141,7 @@ class PaginatedDataList extends React.Component {
                 <DataListToolbar
                   sortedColumnKey={orderBy}
                   sortOrder={sortOrder}
-                  columns={toolbarColumns}
+                  columns={columns}
                   onSearch={() => { }}
                   onSort={this.handleSort}
                   showSelectAll={showSelectAll}

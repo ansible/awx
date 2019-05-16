@@ -187,13 +187,15 @@ class Pagination extends Component {
                 className="awx-pagination__page-input-form"
                 onSubmit={this.onSubmit}
               >
-                {i18n._(t`Page ${(<TextInput
+                {i18n._(t`Page `)}
+                <TextInput
                   className="awx-pagination__page-input"
                   aria-label={i18n._(t`Page Number`)}
                   value={value}
                   type="text"
                   onChange={this.onPageChange}
-                />)} of ${pageCount}`)}
+                />
+                {i18n._(t` of ${pageCount}`)}
               </form>
               <div className="pf-c-input-group">
                 <Button

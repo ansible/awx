@@ -11,6 +11,7 @@ describe('<NotifyAndRedirect />', () => {
         to="foo"
         setRootDialogMessage={setRootDialogMessage}
         location={{ pathname: 'foo' }}
+        i18n={{ _: val => val.toString() }}
       />
     );
     expect(setRootDialogMessage).toHaveBeenCalled();

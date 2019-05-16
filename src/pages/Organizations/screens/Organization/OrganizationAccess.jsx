@@ -188,7 +188,6 @@ class OrganizationAccess extends React.Component {
           <AddResourceRole
             onClose={this.toggleAddModal}
             onSave={this.handleSuccessfulRoleAdd}
-            api={api}
             roles={organization.summary_fields.object_roles}
           />
         )}
