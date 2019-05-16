@@ -92,18 +92,6 @@ function NotificationListItem (props) {
           </DataListCell>
         ]}
         />
-        <Switch
-          id={`notification-${notification.id}-error-toggle`}
-          label={i18n._(t`Failure`)}
-          isChecked={errorTurnedOn}
-          isDisabled={!canToggleNotifications}
-          onChange={() => toggleNotification(
-            notification.id,
-            errorTurnedOn,
-            'error'
-          )}
-          aria-label={i18n._(t`Toggle notification failure`)}
-        />
       </DataListItemRow>
     </DataListItem>
   );
