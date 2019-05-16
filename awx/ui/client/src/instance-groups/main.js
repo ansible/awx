@@ -148,7 +148,7 @@ function InstanceGroupsRun ($stateExtender, strings) {
         name: 'instanceGroups.edit',
         route: '/:instance_group_id',
         ncyBreadcrumb: {
-            label: strings.get('state.EDIT_BREADCRUMB_LABEL')
+            label: '{{breadcrumb.instance_group_name}}'
         },
         params: {
             instance_search: {
