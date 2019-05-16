@@ -8,14 +8,6 @@ import CheckboxListItem from '../ListItem';
 import SelectedList from '../SelectedList';
 import { getQSConfig, parseNamespacedQueryString } from '../../util/qs';
 
-const paginationStyling = {
-  paddingLeft: '0',
-  justifyContent: 'flex-end',
-  borderRight: '1px solid #ebebeb',
-  borderBottom: '1px solid #ebebeb',
-  borderTop: '0'
-};
-
 class SelectResourceStep extends React.Component {
   constructor (props) {
     super(props);
@@ -124,7 +116,6 @@ class SelectResourceStep extends React.Component {
               )}
               alignToolbarLeft
               showPageSizeOptions={false}
-              paginationStyling={paginationStyling}
             />
           </Fragment>
         )}

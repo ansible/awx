@@ -47,6 +47,7 @@ class PaginatedDataList extends React.Component {
     };
 
     this.handleSetPage = this.handleSetPage.bind(this);
+    this.handleSetPageSize = this.handleSetPageSize.bind(this);
     this.handleSort = this.handleSort.bind(this);
   }
 
@@ -65,11 +66,12 @@ class PaginatedDataList extends React.Component {
     return [queryParams.order_by, 'ascending'];
   }
 
-  handleSetPage (pageNumber, pageSize) {
-    this.pushHistoryState({
-      page: pageNumber,
-      page_size: pageSize,
-    });
+  handleSetPage (event, pageNumber) {
+    this.pushHistoryState({ page: pageNumber });
+  }
+
+  handleSetPageSize (event, pageSize) {
+    this.pushHistoryState({ page_size: pageSize });
   }
 
   handleSort (sortedColumnKey, sortOrder) {
@@ -106,7 +108,6 @@ class PaginatedDataList extends React.Component {
       onSelectAll,
       alignToolbarLeft,
       showPageSizeOptions,
-      paginationStyling,
       location,
       i18n
     } = this.props;
@@ -118,74 +119,9 @@ class PaginatedDataList extends React.Component {
       <Fragment>
         {error && (
           <Fragment>
-            {error && (
-              <Fragment>
-                <div>{error.message}</div>
-                {error.response && (
-                  <div>{error.response.data.detail}</div>
-                )}
-              </Fragment> // TODO: replace with proper error handling
-            )}
-            {items.length === 0 ? (
-              <EmptyState>
-                <EmptyStateIcon icon={CubesIcon} />
-                <Title size="lg">
-                  {i18n._(t`No ${ucFirst(itemNamePlural || pluralize(itemName))} Found`)}
-                </Title>
-                <EmptyStateBody>
-                  {i18n._(t`Please add ${getArticle(itemName)} ${itemName} to populate this list`)}
-                </EmptyStateBody>
-              </EmptyState>
-            ) : (
-              <Fragment>
-                <DataListToolbar
-                  sortedColumnKey={orderBy}
-                  sortOrder={sortOrder}
-                  columns={columns}
-                  onSearch={() => { }}
-                  onSort={this.handleSort}
-                  showSelectAll={showSelectAll}
-                  isAllSelected={isAllSelected}
-                  onSelectAll={onSelectAll}
-                  additionalControls={additionalControls}
-                  noLeftMargin={alignToolbarLeft}
-                />
-                <DataList aria-label={i18n._(t`${ucFirst(pluralize(itemName))} List`)}>
-                  {items.map(item => (renderItem ? renderItem(item) : (
-                    <DataListItem
-                      aria-labelledby={`items-list-item-${item.id}`}
-                      key={item.id}
-                    >
-                      <DataListItemRow>
-                        <DataListItemCells dataListCells={[
-                          <DataListCell key="team-name">
-                            <TextContent style={detailWrapperStyle}>
-                              <Link to={{ pathname: item.url }}>
-                                <Text
-                                  id={`items-list-item-${item.id}`}
-                                  style={detailLabelStyle}
-                                >
-                                  {item.name}
-                                </Text>
-                              </Link>
-                            </TextContent>
-                          </DataListCell>
-                        ]}
-                        />
-                      </DataListItemRow>
-                    </DataListItem>
-                  )))}
-                </DataList>
-                <Pagination
-                  count={itemCount}
-                  page={queryParams.page || 1}
-                  pageCount={this.getPageCount()}
-                  page_size={queryParams.page_size}
-                  onSetPage={this.handleSetPage}
-                  showPageSizeOptions={showPageSizeOptions}
-                  style={paginationStyling}
-                />
-              </Fragment>
+            <div>{error.message}</div>
+            {error.response && (
+              <div>{error.response.data.detail}</div>
             )}
           </Fragment> // TODO: replace with proper error handling
         )}
@@ -211,6 +147,7 @@ class PaginatedDataList extends React.Component {
               isAllSelected={isAllSelected}
               onSelectAll={onSelectAll}
               additionalControls={additionalControls}
+              noLeftMargin={alignToolbarLeft}
             />
             <DataList aria-label={i18n._(t`${ucFirst(pluralize(itemName))} List`)}>
               {items.map(item => (renderItem ? renderItem(item) : (
@@ -239,11 +176,18 @@ class PaginatedDataList extends React.Component {
               )))}
             </DataList>
             <Pagination
-              count={itemCount}
-              page={queryParams.page}
-              pageCount={this.getPageCount()}
-              page_size={queryParams.page_size}
+              variant="bottom"
+              itemCount={itemCount}
+              page={queryParams.page || 1}
+              perPage={queryParams.page_size}
+              perPageOptions={showPageSizeOptions ? [
+                { title: '5', value: 5 },
+                { title: '10', value: 10 },
+                { title: '20', value: 20 },
+                { title: '50', value: 50 }
+              ] : []}
               onSetPage={this.handleSetPage}
+              onPerPageSelect={this.handleSetPageSize}
             />
           </Fragment>
         )}
@@ -276,7 +220,6 @@ PaginatedDataList.propTypes = {
   onSelectAll: PropTypes.func,
   alignToolbarLeft: PropTypes.bool,
   showPageSizeOptions: PropTypes.bool,
-  paginationStyling: PropTypes.shape(),
 };
 
 PaginatedDataList.defaultProps = {
@@ -290,7 +233,6 @@ PaginatedDataList.defaultProps = {
   onSelectAll: null,
   alignToolbarLeft: false,
   showPageSizeOptions: true,
-  paginationStyling: null,
 };
 
 export { PaginatedDataList as _PaginatedDataList };
