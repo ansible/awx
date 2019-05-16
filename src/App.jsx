@@ -9,7 +9,7 @@ import {
   Button
 } from '@patternfly/react-core';
 
-import { I18n } from '@lingui/react';
+import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
 import { RootDialog } from './contexts/RootDialog';
@@ -66,92 +66,88 @@ class App extends Component {
   render () {
     const { isAboutModalOpen, isNavOpen } = this.state;
 
-    const { render, routeGroups = [], navLabel = '' } = this.props;
+    const { render, routeGroups = [], navLabel = '', i18n } = this.props;
 
     return (
       <Config>
         {({ ansible_version, version, me }) => (
-          <I18n>
-            {({ i18n }) => (
-              <RootDialog>
-                {({
-                  title,
-                  bodyText,
-                  variant = 'info',
-                  clearRootDialogMessage
-                }) => (
-                  <Fragment>
-                    {(title || bodyText) && (
-                      <AlertModal
-                        variant={variant}
-                        isOpen={!!(title || bodyText)}
-                        onClose={clearRootDialogMessage}
-                        title={title}
-                        actions={[
-                          <Button
-                            key="close"
-                            variant="secondary"
-                            onClick={clearRootDialogMessage}
-                          >
-                            {i18n._(t`Close`)}
-                          </Button>
-                        ]}
+          <RootDialog>
+            {({
+              title,
+              bodyText,
+              variant = 'info',
+              clearRootDialogMessage
+            }) => (
+              <Fragment>
+                {(title || bodyText) && (
+                  <AlertModal
+                    variant={variant}
+                    isOpen={!!(title || bodyText)}
+                    onClose={clearRootDialogMessage}
+                    title={title}
+                    actions={[
+                      <Button
+                        key="close"
+                        variant="secondary"
+                        onClick={clearRootDialogMessage}
                       >
-                        {bodyText}
-                      </AlertModal>
-                    )}
-                    <Page
-                      usecondensed="True"
-                      header={(
-                        <PageHeader
-                          showNavToggle
-                          onNavToggle={this.onNavToggle}
-                          logo={<TowerLogo linkTo="/" />}
-                          toolbar={(
-                            <PageHeaderToolbar
-                              loggedInUser={me}
-                              isAboutDisabled={!version}
-                              onAboutClick={this.onAboutModalOpen}
-                              onLogoutClick={this.onLogout}
-                            />
-                          )}
-                        />
-                      )}
-                      sidebar={(
-                        <PageSidebar
-                          isNavOpen={isNavOpen}
-                          nav={(
-                            <Nav aria-label={navLabel}>
-                              <NavList>
-                                {routeGroups.map(
-                                  ({ groupId, groupTitle, routes }) => (
-                                    <NavExpandableGroup
-                                      key={groupId}
-                                      groupId={groupId}
-                                      groupTitle={groupTitle}
-                                      routes={routes}
-                                    />
-                                  )
-                                )}
-                              </NavList>
-                            </Nav>
-                          )}
-                        />
-                      )}
-                    >
-                      {render && render({ routeGroups })}
-                    </Page>
-                    <About
-                      ansible_version={ansible_version}
-                      version={version}
-                      isOpen={isAboutModalOpen}
-                      onClose={this.onAboutModalClose}
-                    />
-                  </Fragment>
+                        {i18n._(t`Close`)}
+                      </Button>
+                    ]}
+                  >
+                    {bodyText}
+                  </AlertModal>
                 )}
-              </RootDialog>
+                <Page
+                  usecondensed="True"
+                  header={(
+                    <PageHeader
+                      showNavToggle
+                      onNavToggle={this.onNavToggle}
+                      logo={<TowerLogo linkTo="/" />}
+                      toolbar={(
+                        <PageHeaderToolbar
+                          loggedInUser={me}
+                          isAboutDisabled={!version}
+                          onAboutClick={this.onAboutModalOpen}
+                          onLogoutClick={this.onLogout}
+                        />
+                      )}
+                    />
+                  )}
+                  sidebar={(
+                    <PageSidebar
+                      isNavOpen={isNavOpen}
+                      nav={(
+                        <Nav aria-label={navLabel}>
+                          <NavList>
+                            {routeGroups.map(
+                              ({ groupId, groupTitle, routes }) => (
+                                <NavExpandableGroup
+                                  key={groupId}
+                                  groupId={groupId}
+                                  groupTitle={groupTitle}
+                                  routes={routes}
+                                />
+                              )
+                            )}
+                          </NavList>
+                        </Nav>
+                      )}
+                    />
+                  )}
+                >
+                  {render && render({ routeGroups })}
+                </Page>
+                <About
+                  ansible_version={ansible_version}
+                  version={version}
+                  isOpen={isAboutModalOpen}
+                  onClose={this.onAboutModalClose}
+                />
+              </Fragment>
             )}
-          </I18n>
+          </RootDialog>
         )}
       </Config>
     );
@@ -159,4 +155,4 @@ class App extends Component {
 }
 
 export { App as _App };
-export default withNetwork(App);
+export default withI18n()(withNetwork(App));

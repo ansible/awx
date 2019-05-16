@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { I18n } from '@lingui/react';
+import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
   Button,
@@ -85,7 +85,8 @@ class Sort extends React.Component {
     const {
       columns,
       sortedColumnKey,
-      sortOrder
+      sortOrder,
+      i18n
     } = this.props;
     const {
       isSortDropdownOpen
@@ -109,40 +110,36 @@ class Sort extends React.Component {
     }
 
     return (
-      <I18n>
-        {({ i18n }) => (
-          <React.Fragment>
-            { sortDropdownItems.length > 1 && (
-              <Dropdown
-                style={{ marginRight: '20px' }}
+      <React.Fragment>
+        { sortDropdownItems.length > 1 && (
+          <Dropdown
+            style={{ marginRight: '20px' }}
+            onToggle={this.handleDropdownToggle}
+            onSelect={this.handleDropdownSelect}
+            direction={up}
+            isOpen={isSortDropdownOpen}
+            toggle={(
+              <DropdownToggle
+                id="awx-sort"
                 onToggle={this.handleDropdownToggle}
-                onSelect={this.handleDropdownSelect}
-                direction={up}
-                isOpen={isSortDropdownOpen}
-                toggle={(
-                  <DropdownToggle
-                    id="awx-sort"
-                    onToggle={this.handleDropdownToggle}
-                  >
-                    {sortedColumnName}
-                  </DropdownToggle>
-                )}
-                dropdownItems={sortDropdownItems}
-              />
+              >
+                {sortedColumnName}
+              </DropdownToggle>
             )}
-            <Button
-              onClick={this.handleSort}
-              variant="plain"
-              aria-label={i18n._(t`Sort`)}
-              css="padding: 0;"
-            >
-              <IconWrapper>
-                <SortIcon />
-              </IconWrapper>
-            </Button>
-          </React.Fragment>
+            dropdownItems={sortDropdownItems}
+          />
         )}
-      </I18n>
+        <Button
+          onClick={this.handleSort}
+          variant="plain"
+          aria-label={i18n._(t`Sort`)}
+          css="padding: 0;"
+        >
+          <IconWrapper>
+            <SortIcon />
+          </IconWrapper>
+        </Button>
+      </React.Fragment>
     );
   }
 }
@@ -160,4 +157,4 @@ Sort.defaultProps = {
   sortedColumnKey: 'name'
 };
 
-export default Sort;
+export default withI18n()(Sort);

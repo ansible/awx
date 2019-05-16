@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-// import { mount } from 'enzyme';
-import { I18n } from '@lingui/react';
+import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { mountWithContexts } from './enzymeHelpers';
 import { Config } from '../src/contexts/Config';
@@ -11,26 +10,19 @@ import { withRootDialog } from '../src/contexts/RootDialog';
 describe('mountWithContexts', () => {
   describe('injected I18nProvider', () => {
     test('should mount and render', () => {
-      const wrapper = mountWithContexts(
+      const Child = withI18n()(({ i18n }) => (
         <div>
-          <I18n>
-            {({ i18n }) => (
-              <span>{i18n._(t`Text content`)}</span>
-            )}
-          </I18n>
+          <span>{i18n._(t`Text content`)}</span>
         </div>
-      );
+      ));
+      const wrapper = mountWithContexts(<Child />);
       expect(wrapper.find('div')).toMatchSnapshot();
     });
 
     test('should mount and render deeply nested consumer', () => {
-      const Child = () => (
-        <I18n>
-          {({ i18n }) => (
-            <div>{i18n._(t`Text content`)}</div>
-          )}
-        </I18n>
-      );
+      const Child = withI18n()(({ i18n }) => (
+        <div>{i18n._(t`Text content`)}</div>
+      ));
       const Parent = () => (<Child />);
       const wrapper = mountWithContexts(<Parent />);
       expect(wrapper.find('Parent')).toMatchSnapshot();

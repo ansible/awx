@@ -1,9 +1,9 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { mountWithContexts } from '../enzymeHelpers';
-import AddResourceRole from '../../src/components/AddRole/AddResourceRole';
+import AddResourceRole, { _AddResourceRole } from '../../src/components/AddRole/AddResourceRole';
 
-describe('<AddResourceRole />', () => {
+describe('<_AddResourceRole />', () => {
   const readUsers = jest.fn().mockResolvedValue({
     data: {
       count: 2,
@@ -31,21 +31,23 @@ describe('<AddResourceRole />', () => {
   };
   test('initially renders without crashing', () => {
     shallow(
-      <AddResourceRole
+      <_AddResourceRole
         api={api}
         onClose={() => {}}
         onSave={() => {}}
         roles={roles}
+        i18n={{ _: val => val.toString() }}
       />
     );
   });
   test('handleRoleCheckboxClick properly updates state', () => {
     const wrapper = shallow(
-      <AddResourceRole
+      <_AddResourceRole
         api={api}
         onClose={() => {}}
         onSave={() => {}}
         roles={roles}
+        i18n={{ _: val => val.toString() }}
       />
     );
     wrapper.setState({
@@ -76,11 +78,12 @@ describe('<AddResourceRole />', () => {
   });
   test('handleResourceCheckboxClick properly updates state', () => {
     const wrapper = shallow(
-      <AddResourceRole
+      <_AddResourceRole
         api={api}
         onClose={() => {}}
         onSave={() => {}}
         roles={roles}
+        i18n={{ _: val => val.toString() }}
       />
     );
     wrapper.setState({
@@ -106,14 +109,13 @@ describe('<AddResourceRole />', () => {
     }]);
   });
   test('clicking user/team cards updates state', () => {
-    const spy = jest.spyOn(AddResourceRole.prototype, 'handleResourceSelect');
+    const spy = jest.spyOn(_AddResourceRole.prototype, 'handleResourceSelect');
     const wrapper = mountWithContexts(
       <AddResourceRole
         onClose={() => {}}
         onSave={() => {}}
-        api={api}
         roles={roles}
-      />
+      />, { context: { network: { api, handleHttpError: () => {} } } }
     ).find('AddResourceRole');
     const selectableCardWrapper = wrapper.find('SelectableCard');
     expect(selectableCardWrapper.length).toBe(2);
@@ -126,11 +128,12 @@ describe('<AddResourceRole />', () => {
   });
   test('readUsers and readTeams call out to corresponding api functions', () => {
     const wrapper = shallow(
-      <AddResourceRole
+      <_AddResourceRole
         api={api}
         onClose={() => {}}
         onSave={() => {}}
         roles={roles}
+        i18n={{ _: val => val.toString() }}
       />
     );
     wrapper.instance().readUsers({
@@ -150,11 +153,12 @@ describe('<AddResourceRole />', () => {
 
   test('handleResourceSelect clears out selected lists and sets selectedResource', () => {
     const wrapper = shallow(
-      <AddResourceRole
+      <_AddResourceRole
         api={api}
         onClose={() => {}}
         onSave={() => {}}
         roles={roles}
+        i18n={{ _: val => val.toString() }}
       />
     );
     wrapper.setState({
@@ -193,11 +197,10 @@ describe('<AddResourceRole />', () => {
     const handleSave = jest.fn();
     const wrapper = mountWithContexts(
       <AddResourceRole
-        api={api}
         onClose={() => {}}
         onSave={handleSave}
         roles={roles}
-      />
+      />, { context: { network: { api, handleHttpError: () => {} } } }
     ).find('AddResourceRole');
     wrapper.setState({
       selectedResource: 'users',

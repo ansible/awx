@@ -13,6 +13,10 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
+#: src/contexts/Network.jsx:56
+msgid "404"
+msgstr ""
+
 #: src/pages/Organizations/components/OrganizationBreadcrumb.jsx:60
 #~ msgid "> add"
 #~ msgstr ""
@@ -25,20 +29,34 @@ msgstr ""
 msgid "About"
 msgstr ""
 
-#: src/components/About.jsx:60
+#: src/components/About.jsx:59
 msgid "AboutModal Logo"
 msgstr ""
 
-#: src/index.jsx:175
+#: src/index.jsx:140
+#: src/pages/Organizations/Organizations.jsx:43
+#: src/pages/Organizations/screens/Organization/Organization.jsx:131
 msgid "Access"
 msgstr ""
 
-#: src/components/DataListToolbar/DataListToolbar.jsx:266
-#: src/pages/Organizations/components/OrganizationBreadcrumb.jsx:68
+#: src/components/PaginatedDataList/ToolbarAddButton.jsx:33
+#: src/components/PaginatedDataList/ToolbarAddButton.jsx:44
 msgid "Add"
 msgstr ""
 
-#: src/index.jsx:196
+#: src/components/AddRole/AddResourceRole.jsx:153
+msgid "Add Roles"
+msgstr ""
+
+#: src/components/AddRole/AddResourceRole.jsx:150
+msgid "Add Team Roles"
+msgstr ""
+
+#: src/components/AddRole/AddResourceRole.jsx:147
+msgid "Add User Roles"
+msgstr ""
+
+#: src/index.jsx:161
 msgid "Administration"
 msgstr ""
 
@@ -46,67 +64,154 @@ msgstr ""
 #~ msgid "Admins"
 #~ msgstr ""
 
-#: src/components/About.jsx:77
+#: src/pages/Organizations/components/OrganizationForm.jsx:123
+#: src/pages/Organizations/components/OrganizationForm.jsx:128
+#: src/pages/Organizations/screens/Organization/OrganizationDetail.jsx:142
+msgid "Ansible Environment"
+msgstr ""
+
+#: src/components/About.jsx:75
 msgid "Ansible Version"
 msgstr ""
 
-#: src/pages/Applications.jsx:17
+#: src/pages/Applications.jsx:19
 msgid "Applications"
 msgstr ""
 
-#: src/index.jsx:231
+#: src/components/AddRole/AddResourceRole.jsx:209
+msgid "Apply roles"
+msgstr ""
+
+#: src/components/PaginatedDataList/ToolbarDeleteButton.jsx:165
+msgid "Are you sure you want to delete:"
+msgstr ""
+
+#: src/pages/Organizations/components/DeleteRoleConfirmationModal.jsx:51
+msgid "Are you sure you want to remove {0} access from {1}?  Doing so affects all members of the team."
+msgstr ""
+
+#: src/pages/Organizations/components/DeleteRoleConfirmationModal.jsx:58
+msgid "Are you sure you want to remove {0} access from {username}?"
+msgstr ""
+
+#: src/index.jsx:196
 msgid "Authentication"
 msgstr ""
 
-#: src/pages/AuthSettings.jsx:17
+#: src/pages/AuthSettings.jsx:19
 msgid "Authentication Settings"
 msgstr ""
 
-#: src/components/About.jsx:58
+#: src/components/About.jsx:57
 msgid "Brand Image"
 msgstr ""
 
-#: src/components/DataListToolbar/DataListToolbar.jsx:241
+#: src/components/FormActionGroup/FormActionGroup.jsx:30
+#: src/components/FormActionGroup/FormActionGroup.jsx:30
+#: src/components/Lookup/Lookup.jsx:169
+#: src/components/PaginatedDataList/ToolbarDeleteButton.jsx:161
+#: src/pages/Organizations/components/DeleteRoleConfirmationModal.jsx:45
+msgid "Cancel"
+msgstr ""
+
+#: src/pages/Organizations/Organizations.jsx:77
+msgid "Cannot find organization with ID"
+msgstr ""
+
+#: src/contexts/Network.jsx:57
+msgid "Cannot find resource."
+msgstr ""
+
+#: src/components/NotifyAndRedirect.jsx:23
+msgid "Cannot find route {0}."
+msgstr ""
+
+#: src/App.jsx:94
+#: src/components/CardCloseButton.jsx:14
+#: src/components/CardCloseButton.jsx:15
+#: src/components/CardCloseButton.jsx:27
+#: src/components/Lookup/Lookup.jsx:169
+#: src/pages/Organizations/screens/OrganizationAdd.jsx:67
+msgid "Close"
+msgstr ""
+
+#: src/components/ExpandCollapse/ExpandCollapse.jsx:34
 msgid "Collapse"
 msgstr ""
 
-#: src/components/About.jsx:56
+#: src/components/About.jsx:55
 msgid "Copyright 2018 Red Hat, Inc."
 msgstr ""
 
-#: src/pages/Organizations/views/Organizations.list.jsx:29
+#: src/pages/Organizations/Organizations.jsx:39
+#: src/pages/Organizations/Organizations.jsx:25
+msgid "Create New Organization"
+msgstr ""
+
+#: src/pages/Organizations/components/InstanceGroupsLookup.jsx:58
+#: src/pages/Organizations/screens/Organization/OrganizationDetail.jsx:146
+#: src/pages/Organizations/screens/OrganizationsList.jsx:164
 msgid "Created"
 msgstr ""
 
-#: src/index.jsx:200
-#: src/pages/CredentialTypes.jsx:17
+#: src/index.jsx:165
+#: src/pages/CredentialTypes.jsx:19
 msgid "Credential Types"
 msgstr ""
 
-#: src/index.jsx:153
-#: src/pages/Credentials.jsx:17
+#: src/index.jsx:118
+#: src/pages/Credentials.jsx:19
 msgid "Credentials"
 msgstr ""
 
-#: src/index.jsx:122
-#: src/pages/Dashboard.jsx:17
+#: src/index.jsx:87
+#: src/pages/Dashboard.jsx:19
 msgid "Dashboard"
 msgstr ""
 
-#: src/components/DataListToolbar/DataListToolbar.jsx:252
-#: src/components/DataListToolbar/DataListToolbar.jsx:257
+#: src/components/PaginatedDataList/ToolbarDeleteButton.jsx:109
+#: src/components/PaginatedDataList/ToolbarDeleteButton.jsx:130
+#: src/components/PaginatedDataList/ToolbarDeleteButton.jsx:153
+#: src/pages/Organizations/components/DeleteRoleConfirmationModal.jsx:42
 msgid "Delete"
 msgstr ""
 
-#: src/pages/Organizations/components/OrganizationBreadcrumb.jsx:59
+#: src/components/PaginatedDataList/ToolbarDeleteButton.jsx:142
+msgid "Delete {0}"
+msgstr ""
+
+#: src/components/PaginatedDataList/ToolbarDeleteButton.jsx:141
+msgid "Delete {itemName}"
+msgstr ""
+
+#: src/pages/Organizations/components/OrganizationForm.jsx:113
+#: src/pages/Organizations/screens/Organization/OrganizationDetail.jsx:138
+msgid "Description"
+msgstr ""
+
+#: src/pages/Organizations/Organizations.jsx:42
+#: src/pages/Organizations/screens/Organization/Organization.jsx:130
+msgid "Details"
+msgstr ""
+
+#: src/pages/Organizations/screens/Organization/OrganizationDetail.jsx:171
 msgid "Edit"
 msgstr ""
 
-#: src/components/DataListToolbar/DataListToolbar.jsx:233
+#: src/pages/Organizations/Organizations.jsx:41
+msgid "Edit Details"
+msgstr ""
+
+#: src/components/ExpandCollapse/ExpandCollapse.jsx:44
 msgid "Expand"
 msgstr ""
 
-#: src/components/Pagination/Pagination.jsx:169
+#: src/components/NotificationsList/NotificationListItem.jsx:82
+#: src/components/NotificationsList/NotificationListItem.jsx:97
+msgid "Failure"
+msgstr ""
+
+#: src/components/Pagination/Pagination.jsx:170
 msgid "First"
 msgstr ""
 
@@ -114,260 +219,436 @@ msgstr ""
 msgid "Help"
 msgstr ""
 
-#: src/index.jsx:215
-#: src/pages/InstanceGroups.jsx:17
+#: src/pages/Organizations/components/DeleteRoleConfirmationModal.jsx:54
+msgid "If you {0} want to remove access for this particular user, please remove them from the team."
+msgstr ""
+
+#: src/components/PageHeaderToolbar.jsx:66
+msgid "Info"
+msgstr ""
+
+#: src/index.jsx:180
+#: src/pages/InstanceGroups.jsx:19
+#: src/pages/Organizations/components/InstanceGroupsLookup.jsx:32
+#: src/pages/Organizations/components/InstanceGroupsLookup.jsx:50
+#: src/pages/Organizations/screens/Organization/OrganizationDetail.jsx:159
 msgid "Instance Groups"
 msgstr ""
 
-#: src/index.jsx:220
+#: src/index.jsx:185
 msgid "Integrations"
 msgstr ""
 
-#: src/pages/Login.jsx:80
+#: src/pages/Login.jsx:84
 msgid "Invalid username or password. Please try again."
 msgstr ""
 
-#: src/index.jsx:163
-#: src/pages/Inventories.jsx:17
+#: src/index.jsx:128
+#: src/pages/Inventories.jsx:19
 msgid "Inventories"
 msgstr ""
 
-#: src/index.jsx:168
-#: src/pages/InventoryScripts.jsx:17
+#: src/index.jsx:133
+#: src/pages/InventoryScripts.jsx:19
 msgid "Inventory Scripts"
 msgstr ""
 
-#: src/index.jsx:127
-#: src/index.jsx:236
-#: src/pages/Jobs.jsx:17
+#: src/components/Pagination/Pagination.jsx:142
+msgid "Items Per Page"
+msgstr ""
+
+#: src/components/Pagination/Pagination.jsx:162
+msgid "Items {itemMin} – {itemMax} of {count}"
+msgstr ""
+
+#: src/index.jsx:92
+#: src/index.jsx:201
+#: src/pages/Jobs.jsx:19
 msgid "Jobs"
 msgstr ""
 
-#: src/pages/JobsSettings.jsx:17
+#: src/pages/JobsSettings.jsx:19
 msgid "Jobs Settings"
 msgstr ""
 
-#: src/components/Pagination/Pagination.jsx:221
+#: src/components/Pagination/Pagination.jsx:213
 msgid "Last"
 msgstr ""
 
-#: src/index.jsx:251
-#: src/pages/License.jsx:17
+#: src/pages/Organizations/screens/Organization/OrganizationDetail.jsx:150
+msgid "Last Modified"
+msgstr ""
+
+#: src/pages/Organizations/screens/Organization/OrganizationAccess.jsx:173
+msgid "Last Name"
+msgstr ""
+
+#: src/index.jsx:216
+#: src/pages/License.jsx:19
 msgid "License"
 msgstr ""
 
-#: src/components/PageHeaderToolbar.jsx:116
+#: src/components/AddRole/SelectResourceStep.jsx:96
+msgid "Loading..."
+msgstr ""
+
+#: src/components/PageHeaderToolbar.jsx:120
 msgid "Logout"
 msgstr ""
 
-#: src/index.jsx:210
-#: src/pages/ManagementJobs.jsx:17
+#: src/index.jsx:175
+#: src/pages/ManagementJobs.jsx:19
 msgid "Management Jobs"
 msgstr ""
 
-#: src/pages/Organizations/views/Organizations.list.jsx:28
+#: src/pages/Organizations/components/OrganizationListItem.jsx:91
+msgid "Members"
+msgstr ""
+
+#: src/pages/Organizations/components/InstanceGroupsLookup.jsx:57
+#: src/pages/Organizations/screens/OrganizationsList.jsx:163
 msgid "Modified"
 msgstr ""
 
-#: src/index.jsx:137
-#: src/pages/Portal.jsx:17
+#: src/index.jsx:102
+#: src/pages/Portal.jsx:19
 msgid "My View"
 msgstr ""
 
-#: src/pages/Organizations/views/Organizations.list.jsx:27
+#: src/components/AddRole/AddResourceRole.jsx:140
+#: src/components/PaginatedDataList/PaginatedDataList.jsx:116
+#: src/pages/Organizations/components/InstanceGroupsLookup.jsx:56
+#: src/pages/Organizations/components/OrganizationAccessItem.jsx:109
+#: src/pages/Organizations/components/OrganizationForm.jsx:105
+#: src/pages/Organizations/screens/Organization/OrganizationAccess.jsx:171
+#: src/pages/Organizations/screens/Organization/OrganizationDetail.jsx:134
+#: src/pages/Organizations/screens/OrganizationsList.jsx:162
 msgid "Name"
 msgstr ""
 
-#: src/components/Pagination/Pagination.jsx:212
+#: src/components/Pagination/Pagination.jsx:204
 msgid "Next"
 msgstr ""
 
-#: src/pages/NotificationTemplates.jsx:17
+#: src/components/PaginatedDataList/PaginatedDataList.jsx:133
+#: src/components/PaginatedDataList/PaginatedDataList.jsx:196
+msgid "No {0} Found"
+msgstr ""
+
+#: src/pages/NotificationTemplates.jsx:19
 msgid "Notification Templates"
 msgstr ""
 
-#: src/index.jsx:205
+#: src/index.jsx:170
+#: src/pages/Organizations/Organizations.jsx:45
+#: src/pages/Organizations/screens/Organization/Organization.jsx:137
 msgid "Notifications"
 msgstr ""
 
 #: src/pages/Organizations/views/Organization.add.jsx:79
-msgid "Organization Add"
-msgstr ""
+#~ msgid "Organization Add"
+#~ msgstr ""
 
-#: src/pages/Organizations/components/OrganizationDetail.jsx:72
+#: src/pages/Organizations/screens/Organization/Organization.jsx:153
 msgid "Organization detail tabs"
 msgstr ""
 
-#: src/index.jsx:179
-#: src/pages/Organizations/views/Organization.view.jsx:63
-#: src/pages/Organizations/views/Organizations.list.jsx:196
-#: src/pages/Organizations/views/Organizations.list.jsx:202
+#: src/index.jsx:144
+#: src/pages/Organizations/Organizations.jsx:38
+#: src/pages/Organizations/Organizations.jsx:24
 msgid "Organizations"
 msgstr ""
 
 #: src/pages/Organizations/views/Organizations.list.jsx:218
-msgid "Organizations List"
+#~ msgid "Organizations List"
+#~ msgstr ""
+
+#: src/components/Pagination/Pagination.jsx:190
+msgid "Page"
 msgstr ""
 
 #: src/components/Pagination/Pagination.jsx:189
-msgid "Page <0/> of {pageCount}"
-msgstr ""
+#~ msgid "Page <0/> of {pageCount}"
+#~ msgstr ""
 
-#: src/components/Pagination/Pagination.jsx:192
+#: src/components/Pagination/Pagination.jsx:193
 msgid "Page Number"
 msgstr ""
 
-#: src/pages/Login.jsx:79
+#: src/pages/Login.jsx:82
 msgid "Password"
 msgstr ""
 
 #: src/components/Pagination/Pagination.jsx:158
-msgid "Per Page"
+#~ msgid "Per Page"
+#~ msgstr ""
+
+#: src/components/PaginatedDataList/PaginatedDataList.jsx:136
+#: src/components/PaginatedDataList/PaginatedDataList.jsx:199
+msgid "Please add {0} {itemName} to populate this list"
 msgstr ""
 
 #: src/App.jsx:203
 #~ msgid "Portal Mode"
 #~ msgstr ""
 
-#: src/components/Pagination/Pagination.jsx:178
+#: src/components/Pagination/Pagination.jsx:179
 msgid "Previous"
 msgstr ""
 
-#: src/index.jsx:115
+#: src/index.jsx:80
 msgid "Primary Navigation"
 msgstr ""
 
-#: src/index.jsx:158
-#: src/pages/Projects.jsx:17
+#: src/index.jsx:123
+#: src/pages/Projects.jsx:19
 msgid "Projects"
 msgstr ""
 
-#: src/index.jsx:144
+#: src/pages/Organizations/components/DeleteRoleConfirmationModal.jsx:28
+msgid "Remove {0} Access"
+msgstr ""
+
+#: src/index.jsx:109
 msgid "Resources"
 msgstr ""
 
-#: src/index.jsx:132
-#: src/pages/Schedules.jsx:17
+#: src/components/AddRole/AddResourceRole.jsx:220
+#: src/components/FormActionGroup/FormActionGroup.jsx:27
+#: src/components/FormActionGroup/FormActionGroup.jsx:27
+#: src/components/Lookup/Lookup.jsx:168
+msgid "Save"
+msgstr ""
+
+#: src/index.jsx:97
+#: src/pages/Schedules.jsx:19
 msgid "Schedules"
 msgstr ""
 
-#: src/components/DataListToolbar/DataListToolbar.jsx:191
+#: src/components/Search/Search.jsx:138
 msgid "Search"
 msgstr ""
 
-#: src/components/DataListToolbar/DataListToolbar.jsx:185
+#: src/components/Search/Search.jsx:131
 msgid "Search text input"
 msgstr ""
 
-#: src/components/DataListToolbar/DataListToolbar.jsx:160
+#: src/components/AnsibleSelect/AnsibleSelect.jsx:28
+msgid "Select Input"
+msgstr ""
+
+#: src/components/AddRole/AddResourceRole.jsx:159
+msgid "Select Users Or Teams"
+msgstr ""
+
+#: src/components/PaginatedDataList/ToolbarDeleteButton.jsx:111
+msgid "Select a row to delete"
+msgstr ""
+
+#: src/components/DataListToolbar/DataListToolbar.jsx:102
 msgid "Select all"
 msgstr ""
 
-#: src/index.jsx:227
+#: src/components/AddRole/AddResourceRole.jsx:178
+msgid "Select items from list"
+msgstr ""
+
+#: src/pages/Organizations/components/OrganizationForm.jsx:141
+msgid "Select the Instance Groups for this Organization to run on."
+msgstr ""
+
+#: src/components/Lookup/Lookup.jsx:164
+msgid "Select {header}"
+msgstr ""
+
+#: src/components/AddRole/AddResourceRole.jsx:187
+#: src/components/AddRole/AddResourceRole.jsx:198
+#: src/components/AddRole/AddResourceRole.jsx:215
+#: src/components/AddRole/SelectRoleStep.jsx:29
+#: src/components/Lookup/Lookup.jsx:193
+msgid "Selected"
+msgstr ""
+
+#: src/index.jsx:192
 msgid "Settings"
 msgstr ""
 
-#: src/components/DataListToolbar/DataListToolbar.jsx:222
+#: src/components/Sort/Sort.jsx:135
 msgid "Sort"
 msgstr ""
 
-#: src/index.jsx:241
+#: src/components/NotificationsList/NotificationListItem.jsx:70
+msgid "Successful"
+msgstr ""
+
+#: src/index.jsx:206
 msgid "System"
 msgstr ""
 
-#: src/pages/SystemSettings.jsx:17
+#: src/pages/SystemSettings.jsx:19
 msgid "System Settings"
 msgstr ""
 
-#: src/index.jsx:189
-#: src/pages/Organizations/components/OrganizationListItem.jsx:57
-#: src/pages/Teams.jsx:17
+#: src/pages/Organizations/components/DeleteRoleConfirmationModal.jsx:28
+msgid "Team"
+msgstr ""
+
+#: src/pages/Organizations/components/OrganizationAccessItem.jsx:144
+msgid "Team Roles"
+msgstr ""
+
+#: src/components/AddRole/AddResourceRole.jsx:169
+#: src/index.jsx:154
+#: src/pages/Organizations/Organizations.jsx:44
+#: src/pages/Organizations/components/OrganizationListItem.jsx:99
+#: src/pages/Organizations/screens/Organization/Organization.jsx:132
+#: src/pages/Teams.jsx:19
 msgid "Teams"
 msgstr ""
 
-#: src/index.jsx:148
-#: src/pages/Templates.jsx:17
+#: src/index.jsx:113
+#: src/pages/Templates.jsx:19
 msgid "Templates"
+msgstr ""
+
+#: src/util/validators.jsx:6
+msgid "This field must not be blank"
+msgstr ""
+
+#: src/util/validators.jsx:16
+msgid "This field must not exceed {max} characters"
+msgstr ""
+
+#: src/components/NotificationsList/NotificationListItem.jsx:90
+#: src/components/NotificationsList/NotificationListItem.jsx:105
+msgid "Toggle notification failure"
+msgstr ""
+
+#: src/components/NotificationsList/NotificationListItem.jsx:78
+msgid "Toggle notification success"
 msgstr ""
 
 #: src/components/TowerLogo/TowerLogo.jsx:48
 msgid "Tower Brand Image"
 msgstr ""
 
-#: src/components/PageHeaderToolbar.jsx:108
+#: src/components/AnsibleSelect/AnsibleSelect.jsx:35
+msgid "Use Default {label}"
+msgstr ""
+
+#: src/pages/Organizations/components/DeleteRoleConfirmationModal.jsx:28
+msgid "User"
+msgstr ""
+
+#: src/components/PageHeaderToolbar.jsx:113
 msgid "User Details"
 msgstr ""
 
-#: src/index.jsx:246
+#: src/index.jsx:211
 msgid "User Interface"
 msgstr ""
 
-#: src/pages/UISettings.jsx:17
+#: src/pages/UISettings.jsx:19
 msgid "User Interface Settings"
 msgstr ""
 
-#: src/pages/Login.jsx:78
+#: src/pages/Organizations/components/OrganizationAccessItem.jsx:122
+msgid "User Roles"
+msgstr ""
+
+#: src/components/AddRole/AddResourceRole.jsx:136
+#: src/pages/Login.jsx:81
+#: src/pages/Organizations/screens/Organization/OrganizationAccess.jsx:172
 msgid "Username"
 msgstr ""
 
-#: src/index.jsx:184
-#: src/pages/Organizations/components/OrganizationListItem.jsx:49
-#: src/pages/Users.jsx:17
+#: src/components/AddRole/AddResourceRole.jsx:164
+#: src/index.jsx:149
+#: src/pages/Users.jsx:19
 msgid "Users"
 msgstr ""
 
-#: src/index.jsx:118
+#: src/index.jsx:83
 msgid "Views"
 msgstr ""
 
-#: src/pages/Login.jsx:74
+#: src/pages/Login.jsx:76
 msgid "Welcome to Ansible Tower! Please Sign In."
 msgstr ""
 
-#: src/pages/Organizations/components/OrganizationDetail.jsx:56
-msgid "add {currentTab}"
+#: src/components/PaginatedDataList/ToolbarDeleteButton.jsx:104
+msgid "You do not have permission to delete the following {0}: {itemsUnableToDelete}"
 msgstr ""
 
+#: src/contexts/Network.jsx:44
+msgid "You have been logged out."
+msgstr ""
+
+#: src/pages/Organizations/components/OrganizationDetail.jsx:56
+#~ msgid "add {currentTab}"
+#~ msgstr ""
+
 #: src/pages/Organizations/components/OrganizationDetail.jsx:45
-msgid "adding {currentTab}"
+#~ msgid "adding {currentTab}"
+#~ msgstr ""
+
+#: src/components/PaginatedDataList/ToolbarDeleteButton.jsx:158
+msgid "cancel delete"
+msgstr ""
+
+#: src/components/PaginatedDataList/ToolbarDeleteButton.jsx:150
+msgid "confirm delete"
 msgstr ""
 
 #: src/pages/Organizations/components/OrganizationDetail.jsx:38
-msgid "confirm removal of {currentTab}/cancel and go back to {currentTab} view."
-msgstr ""
+#~ msgid "confirm removal of {currentTab}/cancel and go back to {currentTab} view."
+#~ msgstr ""
 
 #: src/pages/Organizations/components/OrganizationDetail.jsx:60
-msgid "delete {currentTab}"
-msgstr ""
+#~ msgid "delete {currentTab}"
+#~ msgstr ""
 
 #: src/pages/Organizations/components/OrganizationDetail.jsx:36
-msgid "deleting {currentTab} association with orgs"
-msgstr ""
+#~ msgid "deleting {currentTab} association with orgs"
+#~ msgstr ""
 
 #: src/pages/Organizations/components/OrganizationEdit.jsx:20
-msgid "edit view"
+#~ msgid "edit view"
+#~ msgstr ""
+
+#: src/components/Lookup/Lookup.jsx:135
+msgid "items"
+msgstr ""
+
+#: src/components/Pagination/Pagination.jsx:198
+msgid "of {pageCount}"
 msgstr ""
 
 #: src/pages/Organizations/components/OrganizationEdit.jsx:22
-msgid "save/cancel and go back to view"
-msgstr ""
+#~ msgid "save/cancel and go back to view"
+#~ msgstr ""
 
 #: src/pages/Organizations/components/OrganizationDetail.jsx:47
-msgid "save/cancel and go back to {currentTab} view"
-msgstr ""
+#~ msgid "save/cancel and go back to {currentTab} view"
+#~ msgstr ""
 
 #: src/pages/Organizations/components/OrganizationListItem.jsx:29
-msgid "select organization {itemId}"
-msgstr ""
+#~ msgid "select organization {itemId}"
+#~ msgstr ""
 
 #: src/pages/Organizations/components/OrganizationDetail.jsx:82
-msgid "{0}"
+#~ msgid "{0}"
+#~ msgstr ""
+
+#: src/components/PaginatedDataList/PaginatedDataList.jsx:153
+#: src/components/PaginatedDataList/PaginatedDataList.jsx:215
+msgid "{0} List"
 msgstr ""
 
 #: src/pages/Organizations/components/OrganizationDetail.jsx:54
-msgid "{currentTab} detail view"
-msgstr ""
+#~ msgid "{currentTab} detail view"
+#~ msgstr ""
 
 #: src/components/Pagination/Pagination.jsx:163
-msgid "{itemMin} - {itemMax} of {count}"
-msgstr ""
+#~ msgid "{itemMin} - {itemMax} of {count}"
+#~ msgstr ""

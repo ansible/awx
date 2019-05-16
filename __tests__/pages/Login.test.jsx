@@ -1,9 +1,7 @@
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
-import { mount } from 'enzyme';
-import { I18nProvider } from '@lingui/react';
+import { mountWithContexts } from '../enzymeHelpers';
 import { asyncFlush } from '../../jest.setup';
-import { _AWXLogin } from '../../src/pages/Login';
+import AWXLogin from '../../src/pages/Login';
 import APIClient from '../../src/api';
 
 describe('<Login />', () => {
@@ -18,6 +16,12 @@ describe('<Login />', () => {
 
   const api = new APIClient({});
 
+  const mountLogin = () => {
+    loginWrapper = mountWithContexts(<AWXLogin />, { context: { network: {
+      api, handleHttpError: () => {}
+    } } });
+  };
+
   const findChildren = () => {
     awxLogin = loginWrapper.find('AWXLogin');
     loginPage = loginWrapper.find('LoginPage');
@@ -28,22 +32,13 @@ describe('<Login />', () => {
     loginHeaderLogo = loginPage.find('img');
   };
 
-  beforeEach(() => {
-    loginWrapper = mount(
-      <MemoryRouter>
-        <I18nProvider>
-          <_AWXLogin api={api} clearRootDialogMessage={() => {}} handleHttpError={() => {}} />
-        </I18nProvider>
-      </MemoryRouter>
-    );
-    findChildren();
-  });
-
   afterEach(() => {
     loginWrapper.unmount();
   });
 
   test('initially renders without crashing', () => {
+    mountLogin();
+    findChildren();
     expect(loginWrapper.length).toBe(1);
     expect(loginPage.length).toBe(1);
     expect(loginForm.length).toBe(1);
@@ -58,13 +53,7 @@ describe('<Login />', () => {
   });
 
   test('custom logo renders Brand component with correct src and alt', () => {
-    loginWrapper = mount(
-      <MemoryRouter>
-        <I18nProvider>
-          <_AWXLogin api={api} logo="images/foo.jpg" alt="Foo Application" />
-        </I18nProvider>
-      </MemoryRouter>
-    );
+    loginWrapper = mountWithContexts(<AWXLogin logo="images/foo.jpg" alt="Foo Application" />);
     findChildren();
     expect(loginHeaderLogo.length).toBe(1);
     expect(loginHeaderLogo.props().src).toBe('data:image/jpeg;images/foo.jpg');
@@ -72,13 +61,7 @@ describe('<Login />', () => {
   });
 
   test('default logo renders Brand component with correct src and alt', () => {
-    loginWrapper = mount(
-      <MemoryRouter>
-        <I18nProvider>
-          <_AWXLogin api={api} />
-        </I18nProvider>
-      </MemoryRouter>
-    );
+    mountLogin();
     findChildren();
     expect(loginHeaderLogo.length).toBe(1);
     expect(loginHeaderLogo.props().src).toBe('tower-logo-header.svg');
@@ -86,6 +69,8 @@ describe('<Login />', () => {
   });
 
   test('state maps to un/pw input value props', () => {
+    mountLogin();
+    findChildren();
     awxLogin.setState({ username: 'un', password: 'pw' });
     expect(awxLogin.state().username).toBe('un');
     expect(awxLogin.state().password).toBe('pw');
@@ -95,6 +80,8 @@ describe('<Login />', () => {
   });
 
   test('updating un/pw clears out error', () => {
+    mountLogin();
+    findChildren();
     awxLogin.setState({ isInputValid: false });
     expect(loginWrapper.find('.pf-c-form__helper-text.pf-m-error').length).toBe(1);
     usernameInput.instance().value = 'uname';
@@ -113,6 +100,8 @@ describe('<Login />', () => {
 
   test('api.login not called when loading', () => {
     api.login = jest.fn().mockImplementation(() => Promise.resolve({}));
+    mountLogin();
+    findChildren();
     expect(awxLogin.state().isLoading).toBe(false);
     awxLogin.setState({ isLoading: true });
     submitButton.simulate('click');
@@ -121,6 +110,8 @@ describe('<Login />', () => {
 
   test('submit calls api.login successfully', async () => {
     api.login = jest.fn().mockImplementation(() => Promise.resolve({}));
+    mountLogin();
+    findChildren();
     expect(awxLogin.state().isLoading).toBe(false);
     awxLogin.setState({ username: 'unamee', password: 'pwordd' });
     submitButton.simulate('click');
@@ -137,6 +128,8 @@ describe('<Login />', () => {
       err.response = { status: 401, message: 'problem' };
       return Promise.reject(err);
     });
+    mountLogin();
+    findChildren();
     expect(awxLogin.state().isLoading).toBe(false);
     expect(awxLogin.state().isInputValid).toBe(true);
     awxLogin.setState({ username: 'unamee', password: 'pwordd' });
@@ -155,6 +148,8 @@ describe('<Login />', () => {
       err.response = { status: 500, message: 'problem' };
       return Promise.reject(err);
     });
+    mountLogin();
+    findChildren();
     expect(awxLogin.state().isLoading).toBe(false);
     awxLogin.setState({ username: 'unamee', password: 'pwordd' });
     submitButton.simulate('click');
@@ -166,6 +161,8 @@ describe('<Login />', () => {
   });
 
   test('render Redirect to / when already authenticated', () => {
+    mountLogin();
+    findChildren();
     awxLogin.setState({ isAuthenticated: true });
     const redirectElem = loginWrapper.find('Redirect');
     expect(redirectElem.length).toBe(1);

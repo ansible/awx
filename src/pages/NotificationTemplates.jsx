@@ -1,5 +1,6 @@
 import React, { Component, Fragment } from 'react';
-import { Trans } from '@lingui/macro';
+import { withI18n } from '@lingui/react';
+import { t } from '@lingui/macro';
 import {
   PageSection,
   PageSectionVariants,
@@ -8,13 +9,14 @@ import {
 
 class NotificationTemplates extends Component {
   render () {
+    const { i18n } = this.props;
     const { light, medium } = PageSectionVariants;
 
     return (
       <Fragment>
         <PageSection variant={light} className="pf-m-condensed">
           <Title size="2xl">
-            <Trans>Notification Templates</Trans>
+            {i18n._(t`Notification Templates`)}
           </Title>
         </PageSection>
         <PageSection variant={medium} />
@@ -23,4 +25,4 @@ class NotificationTemplates extends Component {
   }
 }
 
-export default NotificationTemplates;
+export default withI18n()(NotificationTemplates);

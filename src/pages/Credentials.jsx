@@ -1,5 +1,6 @@
 import React, { Component, Fragment } from 'react';
-import { Trans } from '@lingui/macro';
+import { withI18n } from '@lingui/react';
+import { t } from '@lingui/macro';
 import {
   PageSection,
   PageSectionVariants,
@@ -8,13 +9,14 @@ import {
 
 class Credentials extends Component {
   render () {
+    const { i18n } = this.props;
     const { light, medium } = PageSectionVariants;
 
     return (
       <Fragment>
         <PageSection variant={light} className="pf-m-condensed">
           <Title size="2xl">
-            <Trans>Credentials</Trans>
+            {i18n._(t`Credentials`)}
           </Title>
         </PageSection>
         <PageSection variant={medium} />
@@ -23,4 +25,4 @@ class Credentials extends Component {
   }
 }
 
-export default Credentials;
+export default withI18n()(Credentials);

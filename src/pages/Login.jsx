@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Redirect, withRouter } from 'react-router-dom';
-import { I18n } from '@lingui/react';
+import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
   LoginForm,
@@ -62,7 +62,7 @@ class AWXLogin extends Component {
 
   render () {
     const { username, password, isInputValid, isAuthenticated } = this.state;
-    const { alt, loginInfo, logo, bodyText: errorMessage } = this.props;
+    const { alt, loginInfo, logo, bodyText: errorMessage, i18n } = this.props;
     const logoSrc = logo ? `data:image/jpeg;${logo}` : towerLogo;
 
     if (isAuthenticated) {
@@ -70,34 +70,30 @@ class AWXLogin extends Component {
     }
 
     return (
-      <I18n>
-        {({ i18n }) => (
-          <LoginPage
-            brandImgSrc={logoSrc}
-            brandImgAlt={alt || 'Ansible Tower'}
-            loginTitle={i18n._(t`Welcome to Ansible Tower! Please Sign In.`)}
-            textContent={loginInfo}
-          >
-            <LoginForm
-              className={errorMessage && 'pf-m-error'}
-              usernameLabel={i18n._(t`Username`)}
-              passwordLabel={i18n._(t`Password`)}
-              showHelperText={!isInputValid || !!errorMessage}
-              helperText={errorMessage || i18n._(t`Invalid username or password. Please try again.`)}
-              usernameValue={username}
-              passwordValue={password}
-              isValidUsername={isInputValid}
-              isValidPassword={isInputValid}
-              onChangeUsername={this.onChangeUsername}
-              onChangePassword={this.onChangePassword}
-              onLoginButtonClick={this.onLoginButtonClick}
-            />
-          </LoginPage>
-        )}
-      </I18n>
+      <LoginPage
+        brandImgSrc={logoSrc}
+        brandImgAlt={alt || 'Ansible Tower'}
+        loginTitle={i18n._(t`Welcome to Ansible Tower! Please Sign In.`)}
+        textContent={loginInfo}
+      >
+        <LoginForm
+          className={errorMessage && 'pf-m-error'}
+          usernameLabel={i18n._(t`Username`)}
+          passwordLabel={i18n._(t`Password`)}
+          showHelperText={!isInputValid || !!errorMessage}
+          helperText={errorMessage || i18n._(t`Invalid username or password. Please try again.`)}
+          usernameValue={username}
+          passwordValue={password}
+          isValidUsername={isInputValid}
+          isValidPassword={isInputValid}
+          onChangeUsername={this.onChangeUsername}
+          onChangePassword={this.onChangePassword}
+          onLoginButtonClick={this.onLoginButtonClick}
+        />
+      </LoginPage>
     );
   }
 }
 
 export { AWXLogin as _AWXLogin };
-export default withNetwork(withRootDialog(withRouter(AWXLogin)));
+export default withI18n()(withNetwork(withRootDialog(withRouter(AWXLogin))));

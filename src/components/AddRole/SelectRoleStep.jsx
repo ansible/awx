@@ -1,7 +1,8 @@
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 
-import { i18nMark } from '@lingui/react';
+import { withI18n } from '@lingui/react';
+import { t } from '@lingui/macro';
 
 import CheckboxCard from './CheckboxCard';
 import SelectedList from '../SelectedList';
@@ -14,7 +15,8 @@ class RolesStep extends React.Component {
       selectedListKey,
       selectedListLabel,
       selectedResourceRows,
-      selectedRoleRows
+      selectedRoleRows,
+      i18n
     } = this.props;
 
     return (
@@ -24,7 +26,7 @@ class RolesStep extends React.Component {
             <SelectedList
               displayKey={selectedListKey}
               isReadOnly
-              label={selectedListLabel}
+              label={selectedListLabel || i18n._(t`Selected`)}
               selected={selectedResourceRows}
               showOverflowAfter={5}
             />
@@ -61,9 +63,9 @@ RolesStep.propTypes = {
 RolesStep.defaultProps = {
   onRolesClick: () => {},
   selectedListKey: 'name',
-  selectedListLabel: i18nMark('Selected'),
+  selectedListLabel: null,
   selectedResourceRows: [],
   selectedRoleRows: []
 };
 
-export default RolesStep;
+export default withI18n()(RolesStep);

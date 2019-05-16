@@ -3,7 +3,7 @@ import { createMemoryHistory } from 'history';
 import { shallow } from 'enzyme';
 import { mountWithContexts } from '../enzymeHelpers';
 import { sleep } from '../testUtils';
-import SelectResourceStep, { _SelectResourceStep } from '../../src/components/AddRole/SelectResourceStep';
+import SelectResourceStep from '../../src/components/AddRole/SelectResourceStep';
 
 describe('<SelectResourceStep />', () => {
   const columns = [
@@ -67,15 +67,14 @@ describe('<SelectResourceStep />', () => {
       initialEntries: ['/organizations/1/access?resource.page=1&resource.order_by=-username'],
     });
     const wrapper = await mountWithContexts(
-      <_SelectResourceStep
+      <SelectResourceStep
         columns={columns}
         displayKey="username"
         onRowClick={() => {}}
         onSearch={handleSearch}
         selectedResourceRows={selectedResourceRows}
         sortedColumnKey="username"
-        location={history.location}
-      />
+      />, { context: { router: { history, route: { location: history.location } } } }
     ).find('SelectResourceStep');
     await wrapper.instance().readResourceList();
     expect(handleSearch).toHaveBeenCalledWith({

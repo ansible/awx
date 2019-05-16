@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { I18n } from '@lingui/react';
+import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
   ActionGroup,
@@ -20,21 +20,17 @@ const buttonGroupStyle = {
   marginRight: '20px'
 };
 
-const FormActionGroup = ({ onSubmit, submitDisabled, onCancel }) => (
-  <I18n>
-    {({ i18n }) => (
-      <ActionGroup style={formActionGroupStyle}>
-        <Toolbar>
-          <ToolbarGroup style={buttonGroupStyle}>
-            <Button aria-label={i18n._(t`Save`)} variant="primary" type="submit" onClick={onSubmit} isDisabled={submitDisabled}>{i18n._(t`Save`)}</Button>
-          </ToolbarGroup>
-          <ToolbarGroup>
-            <Button aria-label={i18n._(t`Cancel`)} variant="secondary" type="button" onClick={onCancel}>{i18n._(t`Cancel`)}</Button>
-          </ToolbarGroup>
-        </Toolbar>
-      </ActionGroup>
-    )}
-  </I18n>
+const FormActionGroup = ({ onSubmit, submitDisabled, onCancel, i18n }) => (
+  <ActionGroup style={formActionGroupStyle}>
+    <Toolbar>
+      <ToolbarGroup style={buttonGroupStyle}>
+        <Button aria-label={i18n._(t`Save`)} variant="primary" type="submit" onClick={onSubmit} isDisabled={submitDisabled}>{i18n._(t`Save`)}</Button>
+      </ToolbarGroup>
+      <ToolbarGroup>
+        <Button aria-label={i18n._(t`Cancel`)} variant="secondary" type="button" onClick={onCancel}>{i18n._(t`Cancel`)}</Button>
+      </ToolbarGroup>
+    </Toolbar>
+  </ActionGroup>
 );
 
 FormActionGroup.propTypes = {
@@ -47,4 +43,4 @@ FormActionGroup.defaultProps = {
   submitDisabled: false,
 };
 
-export default FormActionGroup;
+export default withI18n()(FormActionGroup);

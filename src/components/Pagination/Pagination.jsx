@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { I18n } from '@lingui/react';
-import { Trans, t } from '@lingui/macro';
+import { withI18n } from '@lingui/react';
+import { t } from '@lingui/macro';
 import {
   Button,
   Dropdown,
@@ -106,7 +106,8 @@ class Pagination extends Component {
       page_size,
       pageSizeOptions,
       showPageSizeOptions,
-      style
+      style,
+      i18n
     } = this.props;
     const { value, isOpen } = this.state;
     let opts = [];
@@ -135,98 +136,91 @@ class Pagination extends Component {
     ));
 
     return (
-      <I18n>
-        {({ i18n }) => (
-          <div className="awx-pagination" style={style}>
-            {showPageSizeOptions && (
-              <div className="awx-pagination__page-size-selection">
-                <Trans>Items Per Page</Trans>
-                <Dropdown
+      <div className="awx-pagination" style={style}>
+        {showPageSizeOptions && (
+          <div className="awx-pagination__page-size-selection">
+            {i18n._(t`Items Per Page`)}
+            <Dropdown
+              onToggle={this.onTogglePageSize}
+              onSelect={this.onSelectPageSize}
+              direction={up}
+              isOpen={isOpen}
+              toggle={(
+                <DropdownToggle
+                  className="togglePageSize"
                   onToggle={this.onTogglePageSize}
-                  onSelect={this.onSelectPageSize}
-                  direction={up}
-                  isOpen={isOpen}
-                  toggle={(
-                    <DropdownToggle
-                      className="togglePageSize"
-                      onToggle={this.onTogglePageSize}
-                    >
-                      {page_size}
-                    </DropdownToggle>
-                  )}
-                  dropdownItems={dropdownItems}
-                />
-              </div>
-            )}
-            <div className="awx-pagination__counts">
-              <div className="awx-pagination__item-count">
-                <Trans>{`Items ${itemMin} – ${itemMax} of ${count}`}</Trans>
-              </div>
-              {pageCount !== 1 && (
-                <div className="awx-pagination__page-count">
-                  <div className="pf-c-input-group pf-m-previous">
-                    <Button
-                      className="awx-pagination__page-button"
-                      variant="tertiary"
-                      aria-label={i18n._(t`First`)}
-                      isDisabled={isOnFirst}
-                      onClick={this.onFirst}
-                    >
-                      <i className="fas fa-angle-double-left" />
-                    </Button>
-                    <Button
-                      className="awx-pagination__page-button"
-                      variant="tertiary"
-                      aria-label={i18n._(t`Previous`)}
-                      isDisabled={isOnFirst}
-                      onClick={this.onPrevious}
-                    >
-                      <i className="fas fa-angle-left" />
-                    </Button>
-                  </div>
-                  <form
-                    className="awx-pagination__page-input-form"
-                    onSubmit={this.onSubmit}
-                  >
-                    <Trans>
-                      {'Page '}
-                      <TextInput
-                        className="awx-pagination__page-input"
-                        aria-label={i18n._(t`Page Number`)}
-                        value={value}
-                        type="text"
-                        onChange={this.onPageChange}
-                      />
-                      {' of '}
-                      {pageCount}
-                    </Trans>
-                  </form>
-                  <div className="pf-c-input-group">
-                    <Button
-                      className="awx-pagination__page-button"
-                      variant="tertiary"
-                      aria-label={i18n._(t`Next`)}
-                      isDisabled={isOnLast}
-                      onClick={this.onNext}
-                    >
-                      <i className="fas fa-angle-right" />
-                    </Button>
-                    <Button
-                      className="awx-pagination__page-button"
-                      variant="tertiary"
-                      aria-label={i18n._(t`Last`)}
-                      isDisabled={isOnLast}
-                      onClick={this.onLast}
-                    >
-                      <i className="fas fa-angle-double-right" />
-                    </Button>
-                  </div>
-                </div>
+                >
+                  {page_size}
+                </DropdownToggle>
               )}
-            </div>
+              dropdownItems={dropdownItems}
+            />
           </div>
         )}
-      </I18n>
+        <div className="awx-pagination__counts">
+          <div className="awx-pagination__item-count">
+            {i18n._(t`Items ${itemMin} – ${itemMax} of ${count}`)}
+          </div>
+          {pageCount !== 1 && (
+            <div className="awx-pagination__page-count">
+              <div className="pf-c-input-group pf-m-previous">
+                <Button
+                  className="awx-pagination__page-button"
+                  variant="tertiary"
+                  aria-label={i18n._(t`First`)}
+                  isDisabled={isOnFirst}
+                  onClick={this.onFirst}
+                >
+                  <i className="fas fa-angle-double-left" />
+                </Button>
+                <Button
+                  className="awx-pagination__page-button"
+                  variant="tertiary"
+                  aria-label={i18n._(t`Previous`)}
+                  isDisabled={isOnFirst}
+                  onClick={this.onPrevious}
+                >
+                  <i className="fas fa-angle-left" />
+                </Button>
+              </div>
+              <form
+                className="awx-pagination__page-input-form"
+                onSubmit={this.onSubmit}
+              >
+                {i18n._(t`Page `)}
+                <TextInput
+                  className="awx-pagination__page-input"
+                  aria-label={i18n._(t`Page Number`)}
+                  value={value}
+                  type="text"
+                  onChange={this.onPageChange}
+                />
+                {i18n._(t` of ${pageCount}`)}
+              </form>
+              <div className="pf-c-input-group">
+                <Button
+                  className="awx-pagination__page-button"
+                  variant="tertiary"
+                  aria-label={i18n._(t`Next`)}
+                  isDisabled={isOnLast}
+                  onClick={this.onNext}
+                >
+                  <i className="fas fa-angle-right" />
+                </Button>
+                <Button
+                  className="awx-pagination__page-button"
+                  variant="tertiary"
+                  aria-label={i18n._(t`Last`)}
+                  isDisabled={isOnLast}
+                  onClick={this.onLast}
+                >
+                  <i className="fas fa-angle-double-right" />
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
     );
   }
 }
@@ -248,4 +242,4 @@ Pagination.defaultProps = {
   showPageSizeOptions: true
 };
 
-export default Pagination;
+export default withI18n()(Pagination);

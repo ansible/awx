@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
-import { i18nMark } from '@lingui/react';
+import { withI18n } from '@lingui/react';
+import { t } from '@lingui/macro';
 import {
   Card,
   PageSection,
@@ -14,12 +15,6 @@ import PaginatedDataList, {
 } from '../../../components/PaginatedDataList';
 import OrganizationListItem from '../components/OrganizationListItem';
 import { getQSConfig, parseNamespacedQueryString } from '../../../util/qs';
-
-const COLUMNS = [
-  { name: i18nMark('Name'), key: 'name', isSortable: true },
-  { name: i18nMark('Modified'), key: 'modified', isSortable: true, isNumeric: true },
-  { name: i18nMark('Created'), key: 'created', isSortable: true, isNumeric: true },
-];
 
 const QS_CONFIG = getQSConfig('organization', {
   page: 1,
@@ -36,7 +31,7 @@ class OrganizationsList extends Component {
       isLoading: true,
       isInitialized: false,
       organizations: [],
-      selected: [],
+      selected: []
     };
 
     this.handleSelectAll = this.handleSelectAll.bind(this);
@@ -148,9 +143,9 @@ class OrganizationsList extends Component {
       isLoading,
       isInitialized,
       selected,
-      organizations,
+      organizations
     } = this.state;
-    const { match } = this.props;
+    const { match, i18n } = this.props;
 
     const isAllSelected = selected.length === organizations.length;
 
@@ -163,7 +158,11 @@ class OrganizationsList extends Component {
               itemCount={itemCount}
               itemName="organization"
               qsConfig={QS_CONFIG}
-              toolbarColumns={COLUMNS}
+              toolbarColumns={[
+                { name: i18n._(t`Name`), key: 'name', isSortable: true },
+                { name: i18n._(t`Modified`), key: 'modified', isSortable: true, isNumeric: true },
+                { name: i18n._(t`Created`), key: 'created', isSortable: true, isNumeric: true },
+              ]}
               showSelectAll
               isAllSelected={isAllSelected}
               onSelectAll={this.handleSelectAll}
@@ -198,4 +197,4 @@ class OrganizationsList extends Component {
 }
 
 export { OrganizationsList as _OrganizationsList };
-export default withNetwork(withRouter(OrganizationsList));
+export default withI18n()(withNetwork(withRouter(OrganizationsList)));

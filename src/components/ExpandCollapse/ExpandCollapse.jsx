@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { I18n } from '@lingui/react';
+import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
   Button,
@@ -22,36 +22,33 @@ class ExpandCollapse extends React.Component {
     const {
       onCompact,
       onExpand,
-      isCompact
+      isCompact,
+      i18n
     } = this.props;
 
     return (
-      <I18n>
-        {({ i18n }) => (
-          <Fragment>
-            <ToolbarItem>
-              <Button
-                variant="plain"
-                aria-label={i18n._(t`Collapse`)}
-                onClick={onCompact}
-                style={isCompact ? ToolbarActiveStyle : null}
-              >
-                <BarsIcon />
-              </Button>
-            </ToolbarItem>
-            <ToolbarItem>
-              <Button
-                variant="plain"
-                aria-label={i18n._(t`Expand`)}
-                onClick={onExpand}
-                style={!isCompact ? ToolbarActiveStyle : null}
-              >
-                <EqualsIcon />
-              </Button>
-            </ToolbarItem>
-          </Fragment>
-        )}
-      </I18n>
+      <Fragment>
+        <ToolbarItem>
+          <Button
+            variant="plain"
+            aria-label={i18n._(t`Collapse`)}
+            onClick={onCompact}
+            style={isCompact ? ToolbarActiveStyle : null}
+          >
+            <BarsIcon />
+          </Button>
+        </ToolbarItem>
+        <ToolbarItem>
+          <Button
+            variant="plain"
+            aria-label={i18n._(t`Expand`)}
+            onClick={onExpand}
+            style={!isCompact ? ToolbarActiveStyle : null}
+          >
+            <EqualsIcon />
+          </Button>
+        </ToolbarItem>
+      </Fragment>
     );
   }
 }
@@ -64,4 +61,4 @@ ExpandCollapse.propTypes = {
 
 ExpandCollapse.defaultProps = {};
 
-export default ExpandCollapse;
+export default withI18n()(ExpandCollapse);

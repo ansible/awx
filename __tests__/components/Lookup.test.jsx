@@ -216,6 +216,7 @@ describe('<Lookup />', () => {
         getItems={getItems}
         handleHttpError={() => {}}
         location={{ history }}
+        i18n={{ _: val => val.toString() }}
       />
     );
 

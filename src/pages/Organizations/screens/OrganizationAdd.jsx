@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
-import { I18n } from '@lingui/react';
+import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
   PageSection,
@@ -57,30 +57,27 @@ class OrganizationAdd extends React.Component {
 
   render () {
     const { error } = this.state;
+    const { i18n } = this.props;
 
     return (
       <PageSection>
-        <I18n>
-          {({ i18n }) => (
-            <Card>
-              <CardHeader className="at-u-textRight">
-                <Tooltip
-                  content={i18n._(t`Close`)}
-                  position="top"
-                >
-                  <CardCloseButton onClick={this.handleCancel} />
-                </Tooltip>
-              </CardHeader>
-              <CardBody>
-                <OrganizationForm
-                  handleSubmit={this.handleSubmit}
-                  handleCancel={this.handleCancel}
-                />
-                {error ? <div>error</div> : ''}
-              </CardBody>
-            </Card>
-          )}
-        </I18n>
+        <Card>
+          <CardHeader className="at-u-textRight">
+            <Tooltip
+              content={i18n._(t`Close`)}
+              position="top"
+            >
+              <CardCloseButton onClick={this.handleCancel} />
+            </Tooltip>
+          </CardHeader>
+          <CardBody>
+            <OrganizationForm
+              handleSubmit={this.handleSubmit}
+              handleCancel={this.handleCancel}
+            />
+            {error ? <div>error</div> : ''}
+          </CardBody>
+        </Card>
       </PageSection>
     );
   }
@@ -95,4 +92,4 @@ OrganizationAdd.contextTypes = {
 };
 
 export { OrganizationAdd as _OrganizationAdd };
-export default withNetwork(withRouter(OrganizationAdd));
+export default withI18n()(withNetwork(withRouter(OrganizationAdd)));

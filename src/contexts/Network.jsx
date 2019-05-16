@@ -4,7 +4,8 @@ import React, { Component } from 'react';
 
 import { withRouter } from 'react-router-dom';
 
-import { i18nMark } from '@lingui/react';
+import { withI18n } from '@lingui/react';
+import { t } from '@lingui/macro';
 
 import { withRootDialog } from './RootDialog';
 
@@ -33,27 +34,27 @@ class Provider extends Component {
   }
 
   handle401 () {
-    const { handle401, history, setRootDialogMessage } = this.props;
+    const { handle401, history, setRootDialogMessage, i18n } = this.props;
     if (handle401) {
       handle401();
       return;
     }
     history.replace('/login');
     setRootDialogMessage({
-      bodyText: i18nMark('You have been logged out.')
+      bodyText: i18n._(t`You have been logged out.`)
     });
   }
 
   handle404 () {
-    const { handle404, history, setRootDialogMessage } = this.props;
+    const { handle404, history, setRootDialogMessage, i18n } = this.props;
     if (handle404) {
       handle404();
       return;
     }
     history.replace('/home');
     setRootDialogMessage({
-      title: i18nMark('404'),
-      bodyText: i18nMark('Cannot find resource.'),
+      title: i18n._(t`404`),
+      bodyText: i18n._(t`Cannot find resource.`),
       variant: 'warning'
     });
   }
@@ -72,7 +73,7 @@ class Provider extends Component {
 }
 
 export { Provider as _NetworkProvider };
-export const NetworkProvider = withRootDialog(withRouter(Provider));
+export const NetworkProvider = withI18n()(withRootDialog(withRouter(Provider)));
 
 export function withNetwork (Child) {
   return (props) => (

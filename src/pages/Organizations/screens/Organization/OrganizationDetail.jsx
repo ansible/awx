@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Link, withRouter } from 'react-router-dom';
-import { I18n } from '@lingui/react';
-import { Trans, t } from '@lingui/macro';
+import { withI18n } from '@lingui/react';
+import { t } from '@lingui/macro';
 
 import {
   CardBody,
@@ -103,7 +103,8 @@ class OrganizationDetail extends Component {
         modified,
         summary_fields
       },
-      match
+      match,
+      i18n
     } = this.props;
     const showOverflowChipAfter = 5;
 
@@ -127,58 +128,54 @@ class OrganizationDetail extends Component {
     ) : null;
 
     return (
-      <I18n>
-        {({ i18n }) => (
-          <CardBody>
-            <div className="pf-l-grid pf-m-gutter pf-m-all-12-col-on-md pf-m-all-6-col-on-lg pf-m-all-4-col-on-xl">
-              <Detail
-                label={i18n._(t`Name`)}
-                value={name}
-              />
-              <Detail
-                label={i18n._(t`Description`)}
-                value={description}
-              />
-              <Detail
-                label={i18n._(t`Ansible Environment`)}
-                value={custom_virtualenv}
-              />
-              <Detail
-                label={i18n._(t`Created`)}
-                value={created}
-              />
-              <Detail
-                label={i18n._(t`Last Modified`)}
-                value={modified}
-              />
-              {(instanceGroups && instanceGroups.length > 0) && (
-                <TextContent style={{ display: 'flex', gridColumn: '1 / -1' }}>
-                  <Text
-                    component={TextVariants.h6}
-                    style={detailLabelStyle}
-                  >
-                    <Trans>Instance Groups</Trans>
-                  </Text>
-                  <div style={detailValueStyle}>
-                    {instanceGroupChips}
-                    {overflowChip}
-                  </div>
-                </TextContent>
-              )}
-            </div>
-            {summary_fields.user_capabilities.edit && (
-              <div style={{ display: 'flex', flexDirection: 'row-reverse', marginTop: '20px' }}>
-                <Link to={`/organizations/${match.params.id}/edit`}>
-                  <Button><Trans>Edit</Trans></Button>
-                </Link>
+      <CardBody>
+        <div className="pf-l-grid pf-m-gutter pf-m-all-12-col-on-md pf-m-all-6-col-on-lg pf-m-all-4-col-on-xl">
+          <Detail
+            label={i18n._(t`Name`)}
+            value={name}
+          />
+          <Detail
+            label={i18n._(t`Description`)}
+            value={description}
+          />
+          <Detail
+            label={i18n._(t`Ansible Environment`)}
+            value={custom_virtualenv}
+          />
+          <Detail
+            label={i18n._(t`Created`)}
+            value={created}
+          />
+          <Detail
+            label={i18n._(t`Last Modified`)}
+            value={modified}
+          />
+          {(instanceGroups && instanceGroups.length > 0) && (
+            <TextContent style={{ display: 'flex', gridColumn: '1 / -1' }}>
+              <Text
+                component={TextVariants.h6}
+                style={detailLabelStyle}
+              >
+                {i18n._(t`Instance Groups`)}
+              </Text>
+              <div style={detailValueStyle}>
+                {instanceGroupChips}
+                {overflowChip}
               </div>
-            )}
-            {error ? 'error!' : ''}
-          </CardBody>
+            </TextContent>
+          )}
+        </div>
+        {summary_fields.user_capabilities.edit && (
+          <div style={{ display: 'flex', flexDirection: 'row-reverse', marginTop: '20px' }}>
+            <Link to={`/organizations/${match.params.id}/edit`}>
+              <Button>{i18n._(t`Edit`)}</Button>
+            </Link>
+          </div>
         )}
-      </I18n>
+        {error ? 'error!' : ''}
+      </CardBody>
     );
   }
 }
 
-export default withRouter(withNetwork(OrganizationDetail));
+export default withI18n()(withRouter(withNetwork(OrganizationDetail)));

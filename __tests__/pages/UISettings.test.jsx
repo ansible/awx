@@ -1,5 +1,5 @@
 import React from 'react';
-import { mount } from 'enzyme';
+import { mountWithContexts } from '../enzymeHelpers';
 import UISettings from '../../src/pages/UISettings';
 
 describe('<UISettings />', () => {
@@ -8,7 +8,7 @@ describe('<UISettings />', () => {
   let title;
 
   beforeEach(() => {
-    pageWrapper = mount(<UISettings />);
+    pageWrapper = mountWithContexts(<UISettings />);
     pageSections = pageWrapper.find('PageSection');
     title = pageWrapper.find('Title');
   });

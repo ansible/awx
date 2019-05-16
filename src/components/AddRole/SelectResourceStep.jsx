@@ -1,7 +1,8 @@
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
-import { i18nMark } from '@lingui/react';
+import { withI18n } from '@lingui/react';
+import { t } from '@lingui/macro';
 import PaginatedDataList from '../PaginatedDataList';
 import CheckboxListItem from '../ListItem';
 import SelectedList from '../SelectedList';
@@ -87,11 +88,12 @@ class SelectResourceStep extends React.Component {
       selectedLabel,
       selectedResourceRows,
       itemName,
+      i18n
     } = this.props;
 
     return (
       <Fragment>
-        {isLoading && (<div>Loading...</div>)}
+        {isLoading && (<div>{i18n._(t`Loading...`)}</div>)}
         {isInitialized && (
           <Fragment>
             {selectedResourceRows.length > 0 && (
@@ -146,11 +148,11 @@ SelectResourceStep.propTypes = {
 SelectResourceStep.defaultProps = {
   displayKey: 'name',
   onRowClick: () => {},
-  selectedLabel: i18nMark('Selected Items'),
+  selectedLabel: null,
   selectedResourceRows: [],
   sortedColumnKey: 'name',
   itemName: 'item',
 };
 
 export { SelectResourceStep as _SelectResourceStep };
-export default withRouter(SelectResourceStep);
+export default withI18n()(withRouter(SelectResourceStep));

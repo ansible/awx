@@ -2,9 +2,9 @@ import React, { Fragment } from 'react';
 import { func, bool, number, string, arrayOf, shape } from 'prop-types';
 import { Button as PFButton, Tooltip } from '@patternfly/react-core';
 import { TrashAltIcon } from '@patternfly/react-icons';
-import { I18n, i18nMark } from '@lingui/react';
-import { Trans, t } from '@lingui/macro';
 import styled from 'styled-components';
+import { withI18n } from '@lingui/react';
+import { t } from '@lingui/macro';
 import AlertModal from '../AlertModal';
 import { pluralize } from '../../util/strings';
 
@@ -89,103 +89,95 @@ class ToolbarDeleteButton extends React.Component {
   }
 
   renderTooltip () {
-    const { itemsToDelete, itemName } = this.props;
+    const { itemsToDelete, itemName, i18n } = this.props;
+
+    const itemsUnableToDelete = itemsToDelete
+      .filter(cannotDelete)
+      .map(item => (
+        <div key={item.id}>
+          {item.name}
+        </div>
+      ));
     if (itemsToDelete.some(cannotDelete)) {
       return (
         <div>
-          <Trans>
-            You dont have permission to delete the following
-            {' '}
-            {pluralize(itemName)}
-            :
-          </Trans>
-          {itemsToDelete
-            .filter(cannotDelete)
-            .map(item => (
-              <div key={item.id}>
-                {item.name}
-              </div>
-            ))
-          }
+          {i18n._(t`You do not have permission to delete the following ${pluralize(itemName)}: ${itemsUnableToDelete}`)}
         </div>
       );
     }
     if (itemsToDelete.length) {
-      return i18nMark('Delete');
+      return i18n._(t`Delete`);
     }
-    return i18nMark('Select a row to delete');
+    return i18n._(t`Select a row to delete`);
   }
 
   render () {
-    const { itemsToDelete, itemName } = this.props;
+    const { itemsToDelete, itemName, i18n } = this.props;
     const { isModalOpen } = this.state;
 
     const isDisabled = itemsToDelete.length === 0
       || itemsToDelete.some(cannotDelete);
 
     return (
-      <I18n>
-        {({ i18n }) => (
-          <Fragment>
-            <Tooltip
-              content={this.renderTooltip()}
-              position="left"
-            >
+      <Fragment>
+        <Tooltip
+          content={this.renderTooltip()}
+          position="left"
+        >
+          <Button
+            className="awx-ToolBarBtn"
+            variant="plain"
+            aria-label={i18n._(t`Delete`)}
+            onClick={this.handleConfirmDelete}
+            isDisabled={isDisabled}
+          >
+            <TrashAltIcon className="awx-ToolBarTrashCanIcon" />
+          </Button>
+        </Tooltip>
+        { isModalOpen && (
+          <AlertModal
+            variant="danger"
+            title={itemsToDelete === 1
+              ? i18n._(t`Delete ${itemName}`)
+              : i18n._(t`Delete ${pluralize(itemName)}`)
+            }
+            isOpen={isModalOpen}
+            onClose={this.handleCancelDelete}
+            actions={[
               <Button
-                variant="plain"
-                aria-label={i18n._(t`Delete`)}
-                onClick={this.handleConfirmDelete}
-                isDisabled={isDisabled}
-              >
-                <TrashAltIcon />
-              </Button>
-            </Tooltip>
-            { isModalOpen && (
-              <AlertModal
+                key="delete"
                 variant="danger"
-                title={itemsToDelete === 1
-                  ? i18n._(t`Delete ${itemName}`)
-                  : i18n._(t`Delete ${pluralize(itemName)}`)
-                }
-                isOpen={isModalOpen}
-                onClose={this.handleCancelDelete}
-                actions={[
-                  <Button
-                    key="delete"
-                    variant="danger"
-                    aria-label={i18n._(t`confirm delete`)}
-                    onClick={this.handleDelete}
-                  >
-                    {i18n._(t`Delete`)}
-                  </Button>,
-                  <Button
-                    key="cancel"
-                    variant="secondary"
-                    aria-label={i18n._(t`cancel delete`)}
-                    onClick={this.handleCancelDelete}
-                  >
-                    {i18n._(t`Cancel`)}
-                  </Button>
-                ]}
+                aria-label={i18n._(t`confirm delete`)}
+                onClick={this.handleDelete}
               >
-                {i18n._(t`Are you sure you want to delete:`)}
+                {i18n._(t`Delete`)}
+              </Button>,
+              <Button
+                key="cancel"
+                variant="secondary"
+                aria-label={i18n._(t`cancel delete`)}
+                onClick={this.handleCancelDelete}
+              >
+                {i18n._(t`Cancel`)}
+              </Button>
+            ]}
+          >
+            {i18n._(t`Are you sure you want to delete:`)}
+            <br />
+            {itemsToDelete.map((item) => (
+              <span key={item.id}>
+                <strong>
+                  {item.name}
+                </strong>
                 <br />
-                {itemsToDelete.map((item) => (
-                  <span key={item.id}>
-                    <strong>
-                      {item.name}
-                    </strong>
-                    <br />
-                  </span>
-                ))}
-                <br />
-              </AlertModal>
-            )}
-          </Fragment>
+              </span>
+            ))}
+            <br />
+          </AlertModal>
         )}
-      </I18n>
+      </Fragment>
     );
   }
 }
 
-export default ToolbarDeleteButton;
+export default withI18n()(ToolbarDeleteButton);

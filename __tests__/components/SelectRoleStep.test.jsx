@@ -1,5 +1,6 @@
 import React from 'react';
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
+import { mountWithContexts } from '../enzymeHelpers';
 import SelectRoleStep from '../../src/components/AddRole/SelectRoleStep';
 
 describe('<SelectRoleStep />', () => {
@@ -42,7 +43,7 @@ describe('<SelectRoleStep />', () => {
   });
   test('clicking role fires onRolesClick callback', () => {
     const onRolesClick = jest.fn();
-    wrapper = mount(
+    wrapper = mountWithContexts(
       <SelectRoleStep
         onRolesClick={onRolesClick}
         roles={roles}
