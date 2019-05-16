@@ -24,7 +24,6 @@ from rest_framework.fields import empty, SkipField
 
 # Tower
 from awx.main.utils import encrypt_field, decrypt_field
-from awx.main.utils.db import get_tower_migration_version
 from awx.conf import settings_registry
 from awx.conf.models import Setting
 from awx.conf.migrations._reencrypt import decrypt_field as old_decrypt_field
@@ -90,45 +89,42 @@ def _ctit_db_wrapper(trans_safe=False):
                     transaction.set_rollback(False)
         yield
     except DBError:
-        if 'migrate' in sys.argv and get_tower_migration_version() < '310':
-            logger.info('Using default settings until version 3.1 migration.')
-        else:
-            # We want the _full_ traceback with the context
-            # First we get the current call stack, which constitutes the "top",
-            # it has the context up to the point where the context manager is used
-            top_stack = StringIO()
-            traceback.print_stack(file=top_stack)
-            top_lines = top_stack.getvalue().strip('\n').split('\n')
-            top_stack.close()
-            # Get "bottom" stack from the local error that happened
-            # inside of the "with" block this wraps
-            exc_type, exc_value, exc_traceback = sys.exc_info()
-            bottom_stack = StringIO()
-            traceback.print_tb(exc_traceback, file=bottom_stack)
-            bottom_lines = bottom_stack.getvalue().strip('\n').split('\n')
-            # Glue together top and bottom where overlap is found
-            bottom_cutoff = 0
-            for i, line in enumerate(bottom_lines):
-                if line in top_lines:
-                    # start of overlapping section, take overlap from bottom
-                    top_lines = top_lines[:top_lines.index(line)]
-                    bottom_cutoff = i
-                    break
-            bottom_lines = bottom_lines[bottom_cutoff:]
-            tb_lines = top_lines + bottom_lines
+        # We want the _full_ traceback with the context
+        # First we get the current call stack, which constitutes the "top",
+        # it has the context up to the point where the context manager is used
+        top_stack = StringIO()
+        traceback.print_stack(file=top_stack)
+        top_lines = top_stack.getvalue().strip('\n').split('\n')
+        top_stack.close()
+        # Get "bottom" stack from the local error that happened
+        # inside of the "with" block this wraps
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        bottom_stack = StringIO()
+        traceback.print_tb(exc_traceback, file=bottom_stack)
+        bottom_lines = bottom_stack.getvalue().strip('\n').split('\n')
+        # Glue together top and bottom where overlap is found
+        bottom_cutoff = 0
+        for i, line in enumerate(bottom_lines):
+            if line in top_lines:
+                # start of overlapping section, take overlap from bottom
+                top_lines = top_lines[:top_lines.index(line)]
+                bottom_cutoff = i
+                break
+        bottom_lines = bottom_lines[bottom_cutoff:]
+        tb_lines = top_lines + bottom_lines
 
-            tb_string = '\n'.join(
-                ['Traceback (most recent call last):'] +
-                tb_lines +
-                ['{}: {}'.format(exc_type.__name__, str(exc_value))]
-            )
-            bottom_stack.close()
-            # Log the combined stack
-            if trans_safe:
-                if 'check_migrations' not in sys.argv:
-                    logger.warning('Database settings are not available, using defaults, error:\n{}'.format(tb_string))
-            else:
-                logger.error('Error modifying something related to database settings.\n{}'.format(tb_string))
+        tb_string = '\n'.join(
+            ['Traceback (most recent call last):'] +
+            tb_lines +
+            ['{}: {}'.format(exc_type.__name__, str(exc_value))]
+        )
+        bottom_stack.close()
+        # Log the combined stack
+        if trans_safe:
+            if 'check_migrations' not in sys.argv:
+                logger.debug('Database settings are not available, using defaults, error:\n{}'.format(tb_string))
+        else:
+            logger.debug('Error modifying something related to database settings.\n{}'.format(tb_string))
     finally:
         if trans_safe and is_atomic and rollback_set:
             transaction.set_rollback(rollback_set)

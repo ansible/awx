@@ -9,12 +9,13 @@ from pyparsing import (
     ParseException,
 )
 import logging
-from logging import Filter, _nameToLevel
+from logging import Filter
 
 from django.apps import apps
 from django.db import models
 from django.conf import settings
 
+from awx.main.constants import LOGGER_BLACKLIST
 from awx.main.utils.common import get_search_fields
 
 __all__ = ['SmartFilter', 'ExternalLoggerEnabled']
@@ -49,18 +50,6 @@ class FieldFromSettings(object):
 
 class ExternalLoggerEnabled(Filter):
 
-    # Prevents recursive logging loops from swamping the server
-    LOGGER_BLACKLIST = (
-        # loggers that may be called in process of emitting a log
-        'awx.main.utils.handlers',
-        'awx.main.utils.formatters',
-        'awx.main.utils.filters',
-        'awx.main.utils.encryption',
-        'awx.main.utils.log',
-        # loggers that may be called getting logging settings
-        'awx.conf'
-    )
-
     lvl = FieldFromSettings('LOG_AGGREGATOR_LEVEL')
     enabled_loggers = FieldFromSettings('LOG_AGGREGATOR_LOGGERS')
     enabled_flag = FieldFromSettings('LOG_AGGREGATOR_ENABLED')
@@ -84,15 +73,11 @@ class ExternalLoggerEnabled(Filter):
         True - should be logged
         """
         # Logger exceptions
-        for logger_name in self.LOGGER_BLACKLIST:
+        for logger_name in LOGGER_BLACKLIST:
             if record.name.startswith(logger_name):
                 return False
         # General enablement
         if not self.enabled_flag:
-            return False
-
-        # Level enablement
-        if record.levelno < _nameToLevel[self.lvl]:
             return False
 
         # Logger type enablement

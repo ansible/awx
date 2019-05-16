@@ -103,7 +103,7 @@ class InvalidVirtualenvError(Exception):
 
 def dispatch_startup():
     startup_logger = logging.getLogger('awx.main.tasks')
-    startup_logger.info("Syncing Schedules")
+    startup_logger.debug("Syncing Schedules")
     for sch in Schedule.objects.all():
         try:
             sch.update_computed_fields()
@@ -189,20 +189,20 @@ def apply_cluster_membership_policies():
                 # NOTE: arguable behavior: policy-list-group is not added to
                 # instance's group count for consideration in minimum-policy rules
             if group_actual.instances:
-                logger.info("Policy List, adding Instances {} to Group {}".format(group_actual.instances, ig.name))
+                logger.debug("Policy List, adding Instances {} to Group {}".format(group_actual.instances, ig.name))
 
             if ig.controller_id is None:
                 actual_groups.append(group_actual)
             else:
                 # For isolated groups, _only_ apply the policy_instance_list
                 # do not add to in-memory list, so minimum rules not applied
-                logger.info('Committing instances to isolated group {}'.format(ig.name))
+                logger.debug('Committing instances to isolated group {}'.format(ig.name))
                 ig.instances.set(group_actual.instances)
 
         # Process Instance minimum policies next, since it represents a concrete lower bound to the
         # number of instances to make available to instance groups
         actual_instances = [Node(obj=i, groups=[]) for i in considered_instances if i.managed_by_policy]
-        logger.info("Total non-isolated instances:{} available for policy: {}".format(
+        logger.debug("Total non-isolated instances:{} available for policy: {}".format(
             total_instances, len(actual_instances)))
         for g in sorted(actual_groups, key=lambda x: len(x.instances)):
             policy_min_added = []
@@ -217,7 +217,7 @@ def apply_cluster_membership_policies():
                 i.groups.append(g.obj.id)
                 policy_min_added.append(i.obj.id)
             if policy_min_added:
-                logger.info("Policy minimum, adding Instances {} to Group {}".format(policy_min_added, g.obj.name))
+                logger.debug("Policy minimum, adding Instances {} to Group {}".format(policy_min_added, g.obj.name))
 
         # Finally, process instance policy percentages
         for g in sorted(actual_groups, key=lambda x: len(x.instances)):
@@ -233,7 +233,7 @@ def apply_cluster_membership_policies():
                 i.groups.append(g.obj.id)
                 policy_per_added.append(i.obj.id)
             if policy_per_added:
-                logger.info("Policy percentage, adding Instances {} to Group {}".format(policy_per_added, g.obj.name))
+                logger.debug("Policy percentage, adding Instances {} to Group {}".format(policy_per_added, g.obj.name))
 
         # Determine if any changes need to be made
         needs_change = False
@@ -242,7 +242,7 @@ def apply_cluster_membership_policies():
                 needs_change = True
                 break
         if not needs_change:
-            logger.info('Cluster policy no-op finished in {} seconds'.format(time.time() - started_compute))
+            logger.debug('Cluster policy no-op finished in {} seconds'.format(time.time() - started_compute))
             return
 
         # On a differential basis, apply instances to non-isolated groups
@@ -251,12 +251,12 @@ def apply_cluster_membership_policies():
                 instances_to_add = set(g.instances) - set(g.prior_instances)
                 instances_to_remove = set(g.prior_instances) - set(g.instances)
                 if instances_to_add:
-                    logger.info('Adding instances {} to group {}'.format(list(instances_to_add), g.obj.name))
+                    logger.debug('Adding instances {} to group {}'.format(list(instances_to_add), g.obj.name))
                     g.obj.instances.add(*instances_to_add)
                 if instances_to_remove:
-                    logger.info('Removing instances {} from group {}'.format(list(instances_to_remove), g.obj.name))
+                    logger.debug('Removing instances {} from group {}'.format(list(instances_to_remove), g.obj.name))
                     g.obj.instances.remove(*instances_to_remove)
-        logger.info('Cluster policy computation finished in {} seconds'.format(time.time() - started_compute))
+        logger.debug('Cluster policy computation finished in {} seconds'.format(time.time() - started_compute))
 
 
 @task(queue='tower_broadcast_all', exchange_type='fanout')
@@ -277,7 +277,7 @@ def delete_project_files(project_path):
     if os.path.exists(project_path):
         try:
             shutil.rmtree(project_path)
-            logger.info('Success removing project files {}'.format(project_path))
+            logger.debug('Success removing project files {}'.format(project_path))
         except Exception:
             logger.exception('Could not remove project directory {}'.format(project_path))
     if os.path.exists(lock_file):
@@ -372,7 +372,7 @@ def purge_old_stdout_files():
     for f in os.listdir(settings.JOBOUTPUT_ROOT):
         if os.path.getctime(os.path.join(settings.JOBOUTPUT_ROOT,f)) < nowtime - settings.LOCAL_STDOUT_EXPIRE_TIME:
             os.unlink(os.path.join(settings.JOBOUTPUT_ROOT,f))
-            logger.info("Removing {}".format(os.path.join(settings.JOBOUTPUT_ROOT,f)))
+            logger.debug("Removing {}".format(os.path.join(settings.JOBOUTPUT_ROOT,f)))
 
 
 @task(queue=get_local_queuename)
@@ -514,7 +514,7 @@ def awx_periodic_scheduler():
             try:
                 job_kwargs = schedule.get_job_kwargs()
                 new_unified_job = schedule.unified_job_template.create_unified_job(**job_kwargs)
-                logger.info('Spawned {} from schedule {}-{}.'.format(
+                logger.debug('Spawned {} from schedule {}-{}.'.format(
                     new_unified_job.log_format, schedule.name, schedule.pk))
 
                 if invalid_license:
@@ -1264,7 +1264,7 @@ class BaseTask(object):
             extra_update_fields['result_traceback'] = traceback.format_exc()
             logger.exception('%s Exception occurred while running task', self.instance.log_format)
         finally:
-            logger.info('%s finished running, producing %s events.', self.instance.log_format, self.event_ct)
+            logger.debug('%s finished running, producing %s events.', self.instance.log_format, self.event_ct)
 
         try:
             self.post_run_hook(self.instance, status)
@@ -1795,8 +1795,8 @@ class RunProjectUpdate(BaseTask):
             with transaction.atomic():
                 if InventoryUpdate.objects.filter(inventory_source=inv_src,
                                                   status__in=ACTIVE_STATES).exists():
-                    logger.info('Skipping SCM inventory update for `{}` because '
-                                'another update is already active.'.format(inv_src.name))
+                    logger.debug('Skipping SCM inventory update for `{}` because '
+                                 'another update is already active.'.format(inv_src.name))
                     continue
                 local_inv_update = inv_src.create_inventory_update(
                     _eager_fields=dict(
@@ -1862,7 +1862,7 @@ class RunProjectUpdate(BaseTask):
             try:
                 instance.refresh_from_db(fields=['cancel_flag'])
                 if instance.cancel_flag:
-                    logger.info("ProjectUpdate({0}) was cancelled".format(instance.pk))
+                    logger.debug("ProjectUpdate({0}) was cancelled".format(instance.pk))
                     return
                 fcntl.flock(self.lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
                 break
@@ -2415,7 +2415,7 @@ def deep_copy_model_obj(
     model_module, model_name, obj_pk, new_obj_pk,
     user_pk, sub_obj_list, permission_check_func=None
 ):
-    logger.info('Deep copy {} from {} to {}.'.format(model_name, obj_pk, new_obj_pk))
+    logger.debug('Deep copy {} from {} to {}.'.format(model_name, obj_pk, new_obj_pk))
     from awx.api.generics import CopyAPIView
     from awx.main.signals import disable_activity_stream
     model = getattr(importlib.import_module(model_module), model_name, None)
