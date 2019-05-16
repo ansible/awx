@@ -131,7 +131,7 @@ class OrganizationAccess extends React.Component {
   }
 
   render () {
-    const { api, organization, i18n } = this.props;
+    const { organization, i18n } = this.props;
     const {
       isLoading,
       isInitialized,
