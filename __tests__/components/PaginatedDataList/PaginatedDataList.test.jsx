@@ -89,10 +89,35 @@ describe('<PaginatedDataList />', () => {
     );
 
     const pagination = wrapper.find('Pagination');
-    pagination.prop('onSetPage')(2, 5);
-    expect(history.location.search).toEqual('?item.page=2&item.page_size=5');
+    pagination.prop('onSetPage')(null, 2);
+    expect(history.location.search).toEqual('?item.page=2');
     wrapper.update();
-    pagination.prop('onSetPage')(1, 25);
-    expect(history.location.search).toEqual('?item.page=1&item.page_size=25');
+    pagination.prop('onSetPage')(null, 1);
+    expect(history.location.search).toEqual('?item.page=1');
+  });
+
+  test('should navigate to page when Pagination calls onPerPageSelect prop', () => {
+    const history = createMemoryHistory({
+      initialEntries: ['/organizations/1/teams'],
+    });
+    const wrapper = mountWithContexts(
+      <PaginatedDataList
+        items={mockData}
+        itemCount={7}
+        queryParams={{
+          page: 1,
+          page_size: 5,
+          order_by: 'name',
+        }}
+        qsConfig={qsConfig}
+      />, { context: { router: { history } } }
+    );
+
+    const pagination = wrapper.find('Pagination');
+    pagination.prop('onPerPageSelect')(null, 5);
+    expect(history.location.search).toEqual('?item.page_size=5');
+    wrapper.update();
+    pagination.prop('onPerPageSelect')(null, 25);
+    expect(history.location.search).toEqual('?item.page_size=25');
   });
 });
