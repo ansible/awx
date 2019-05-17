@@ -2592,6 +2592,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                 withHash={true}
                               >
                                 <Pagination__AWXPagination
+                                  dropDirection="up"
                                   itemCount={2}
                                   onPerPageSelect={[Function]}
                                   onSetPage={[Function]}
@@ -2635,6 +2636,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                   variant="bottom"
                                 >
                                   <StyledComponent
+                                    dropDirection="up"
                                     forwardedComponent={
                                       Object {
                                         "$$typeof": Symbol(react.forward_ref),
@@ -2702,7 +2704,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                   >
                                     <Pagination
                                       className="Pagination__AWXPagination-c2dclb-0 dXBcqV"
-                                      dropDirection="down"
+                                      dropDirection="up"
                                       itemCount={2}
                                       onFirstClick={[Function]}
                                       onLastClick={[Function]}
@@ -2756,7 +2758,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                         className="pf-c-pagination pf-m-footer Pagination__AWXPagination-c2dclb-0 dXBcqV"
                                       >
                                         <OptionsMenu
-                                          dropDirection="down"
+                                          dropDirection="up"
                                           firstIndex={1}
                                           itemCount={2}
                                           itemsPerPageTitle="Items per page"
@@ -2801,7 +2803,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                             </span>
                                             <Dropdown
                                               className=""
-                                              direction="down"
+                                              direction="up"
                                               dropdownItems={
                                                 Array [
                                                   <Item
@@ -2898,7 +2900,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                               }
                                             >
                                               <div
-                                                className="pf-c-dropdown"
+                                                className="pf-c-dropdown pf-m-top"
                                               >
                                                 <OptionsToggle
                                                   ariaHasPopup={true}
@@ -2915,7 +2917,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                   optionsToggle="Select"
                                                   parentRef={
                                                     <div
-                                                      class="pf-c-dropdown"
+                                                      class="pf-c-dropdown pf-m-top"
                                                     >
                                                       <div
                                                         class="pf-c-options-menu__toggle pf-m-plain pf-m-text"

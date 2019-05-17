@@ -1,6 +1,6 @@
 import React from 'react';
 import styled, { css } from 'styled-components';
-import { Pagination as PFPagination } from '@patternfly/react-core';
+import { Pagination as PFPagination, DropdownDirection } from '@patternfly/react-core';
 import { I18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
@@ -29,6 +29,7 @@ export default (props) => (
           currPage: i18n._(t`Current page`),
           paginationTitle: i18n._(t`Pagination`)
         }}
+        dropDirection={DropdownDirection.up}
         {...props}
       />
     )}
