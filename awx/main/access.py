@@ -1434,8 +1434,7 @@ class JobTemplateAccess(NotificationAttachMixin, BaseAccess):
     '''
 
     model = JobTemplate
-    select_related = ('created_by', 'modified_by', 'inventory', 'project',
-                      'next_schedule',)
+    select_related = ('created_by', 'modified_by', 'inventory', 'project')
     prefetch_related = (
         'instance_groups',
         'credentials__credential_type',
@@ -1979,8 +1978,8 @@ class WorkflowJobTemplateAccess(NotificationAttachMixin, BaseAccess):
     '''
 
     model = WorkflowJobTemplate
-    select_related = ('created_by', 'modified_by', 'next_schedule',
-                      'admin_role', 'execute_role', 'read_role',)
+    select_related = ('created_by', 'modified_by', 'admin_role',
+                      'execute_role', 'read_role',)
 
     def filtered_queryset(self):
         return self.model.accessible_objects(self.user, 'read_role')
@@ -2364,7 +2363,6 @@ class UnifiedJobTemplateAccess(BaseAccess):
     select_related = (
         'created_by',
         'modified_by',
-        'next_schedule',
     )
     # prefetch last/current jobs so we get the real instance
     prefetch_related = (

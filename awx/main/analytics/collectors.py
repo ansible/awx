@@ -265,8 +265,6 @@ def copy_tables(since, full_path):
                                  main_unifiedjobtemplate.last_job_id, 
                                  main_unifiedjobtemplate.last_job_failed, 
                                  main_unifiedjobtemplate.last_job_run, 
-                                 main_unifiedjobtemplate.next_job_run, 
-                                 main_unifiedjobtemplate.next_schedule_id, 
                                  main_unifiedjobtemplate.status 
                                  FROM main_unifiedjobtemplate, django_content_type
                                  WHERE main_unifiedjobtemplate.polymorphic_ctype_id = django_content_type.id

@@ -136,19 +136,6 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
     #    max_length=32,
     #    choices=[],
     #)
-    next_job_run = models.DateTimeField(
-        null=True,
-        default=None,
-        editable=False,
-    )
-    next_schedule = models.ForeignKey( # Schedule entry responsible for next_job_run.
-        'Schedule',
-        null=True,
-        default=None,
-        editable=False,
-        related_name='%(class)s_as_next_schedule+',
-        on_delete=models.SET_NULL,
-    )
     status = models.CharField(
         max_length=32,
         choices=ALL_STATUS_CHOICES,
@@ -251,13 +238,15 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
     def last_updated(self):
         return self.last_job_run
 
-    def update_computed_fields(self):
-        Schedule = self._meta.get_field('schedules').related_model
-        related_schedules = Schedule.objects.filter(enabled=True, unified_job_template=self, next_run__isnull=False).order_by('-next_run')
-        if related_schedules.exists():
-            self.next_schedule = related_schedules[0]
-            self.next_job_run = related_schedules[0].next_run
-            self.save(update_fields=['next_schedule', 'next_job_run'])
+    @property
+    def next_schedule(self):
+        return self.schedules.filter(enabled=True, next_run__isnull=False).order_by('-next_run').first()
+
+    @property
+    def next_job_run(self):
+        first = self.next_schedule
+        if first:
+            return first.next_run
 
     def save(self, *args, **kwargs):
         # If update_fields has been specified, add our field names to it,
