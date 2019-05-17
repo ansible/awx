@@ -14,6 +14,7 @@ import { t } from '@lingui/macro';
 
 import { withNetwork } from '../../contexts/Network';
 import PaginatedDataList from '../PaginatedDataList';
+import DataListToolbar from '../DataListToolbar';
 import CheckboxListItem from '../ListItem';
 import SelectedList from '../SelectedList';
 import { getQSConfig, parseNamespacedQueryString } from '../../util/qs';
@@ -176,7 +177,9 @@ class Lookup extends React.Component {
                 onSelect={() => this.toggleSelected(item)}
               />
             )}
-            alignToolbarLeft
+            renderToolbar={(props) => (
+              <DataListToolbar {...props} alignToolbarLeft />
+            )}
             showPageSizeOptions={false}
           />
           {lookupSelectedItems.length > 0 && (

@@ -3,6 +3,7 @@ import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import PaginatedDataList, { ToolbarAddButton } from '../../../../components/PaginatedDataList';
+import DataListToolbar from '../../../../components/DataListToolbar';
 import OrganizationAccessItem from '../../components/OrganizationAccessItem';
 import DeleteRoleConfirmationModal from '../../components/DeleteRoleConfirmationModal';
 import AddResourceRole from '../../../../components/AddRole/AddResourceRole';
@@ -172,9 +173,14 @@ class OrganizationAccess extends React.Component {
               { name: i18n._(t`Username`), key: 'username', isSortable: true },
               { name: i18n._(t`Last Name`), key: 'last_name', isSortable: true },
             ]}
-            additionalControls={canEdit ? [
-              <ToolbarAddButton key="add" onClick={this.toggleAddModal} />
-            ] : null}
+            renderToolbar={(props) => (
+              <DataListToolbar
+                {...props}
+                additionalControls={canEdit ? [
+                  <ToolbarAddButton key="add" onClick={this.toggleAddModal} />
+                ] : null}
+              />
+            )}
             renderItem={accessRecord => (
               <OrganizationAccessItem
                 key={accessRecord.id}
