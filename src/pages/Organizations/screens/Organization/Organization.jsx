@@ -113,12 +113,6 @@ class Organization extends Component {
       isAdminOfThisOrg
     } = this.state;
 
-    const tabsStyle = {
-      paddingTop: '0px',
-      paddingLeft: '0px',
-      paddingRight: '0px',
-    };
-
     const canSeeNotificationsTab = me.is_system_auditor || isNotifAdmin || isAuditorOfThisOrg;
     const canToggleNotifications = isNotifAdmin && (
       me.is_system_auditor
@@ -141,11 +135,9 @@ class Organization extends Component {
     }
 
     let cardHeader = (
-      loading ? ''
-        : (
-          <CardHeader
-            style={tabsStyle}
-          >
+      loading ? '' : (
+        <CardHeader style={{ padding: 0 }}>
+          <React.Fragment>
             <div className="awx-orgTabs-container">
               <RoutedTabs
                 match={match}
@@ -158,8 +150,10 @@ class Organization extends Component {
                 className="awx-orgTabs__bottom-border"
               />
             </div>
-          </CardHeader>
-        ));
+          </React.Fragment>
+        </CardHeader>
+      )
+    );
     if (!match) {
       cardHeader = null;
     }

@@ -6,17 +6,17 @@ import {
   DataListItemRow,
   DataListItemCells,
   DataListCell,
-  Text,
   TextContent,
   Title,
   EmptyState,
   EmptyStateIcon,
-  EmptyStateBody,
+  EmptyStateBody
 } from '@patternfly/react-core';
 import { CubesIcon } from '@patternfly/react-icons';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { withRouter, Link } from 'react-router-dom';
+import styled from 'styled-components';
 
 import Pagination from '../Pagination';
 import DataListToolbar from '../DataListToolbar';
@@ -24,19 +24,26 @@ import {
   parseNamespacedQueryString,
   updateNamespacedQueryString,
 } from '../../util/qs';
-import { pluralize, getArticle, ucFirst } from '../../util/strings';
+import { pluralize, ucFirst } from '../../util/strings';
 import { QSConfig } from '../../types';
 
-const detailWrapperStyle = {
-  display: 'grid',
-  gridTemplateColumns: 'minmax(70px, max-content) minmax(60px, max-content)',
-};
+const EmptyStateControlsWrapper = styled.div`
+  display: flex;
+  margin-top: 20px;
+  margin-right: 20px;
+  margin-bottom: 20px;
+  justify-content: flex-end;
 
-const detailLabelStyle = {
-  fontWeight: '700',
-  lineHeight: '24px',
-  marginRight: '20px',
-};
+  & > :not(:first-child)  {
+    margin-left: 20px;
+  }
+`;
+
+const ListItemGrid = styled(TextContent)`
+  display: grid;
+  grid-template-columns: minmax(70px,max-content) repeat(auto-fit, minmax(60px,max-content));
+  grid-gap: 10px;
+`;
 
 class PaginatedDataList extends React.Component {
   constructor (props) {
@@ -95,6 +102,7 @@ class PaginatedDataList extends React.Component {
 
   render () {
     const {
+      emptyStateControls,
       items,
       itemCount,
       qsConfig,
@@ -125,72 +133,78 @@ class PaginatedDataList extends React.Component {
             )}
           </Fragment> // TODO: replace with proper error handling
         )}
-        {items.length === 0 ? (
-          <EmptyState>
-            <EmptyStateIcon icon={CubesIcon} />
-            <Title size="lg">
-              {i18n._(t`No ${ucFirst(itemNamePlural || pluralize(itemName))} Found`)}
-            </Title>
-            <EmptyStateBody>
-              {i18n._(t`Please add ${getArticle(itemName)} ${itemName} to populate this list`)}
-            </EmptyStateBody>
-          </EmptyState>
-        ) : (
-          <Fragment>
-            <DataListToolbar
-              sortedColumnKey={orderBy}
-              sortOrder={sortOrder}
-              columns={columns}
-              onSearch={() => { }}
-              onSort={this.handleSort}
-              showSelectAll={showSelectAll}
-              isAllSelected={isAllSelected}
-              onSelectAll={onSelectAll}
-              additionalControls={additionalControls}
-              noLeftMargin={alignToolbarLeft}
-            />
-            <DataList aria-label={i18n._(t`${ucFirst(pluralize(itemName))} List`)}>
-              {items.map(item => (renderItem ? renderItem(item) : (
-                <DataListItem
-                  aria-labelledby={`items-list-item-${item.id}`}
-                  key={item.id}
-                >
-                  <DataListItemRow>
-                    <DataListItemCells dataListCells={[
-                      <DataListCell key="team-name">
-                        <TextContent style={detailWrapperStyle}>
-                          <Link to={{ pathname: item.url }}>
-                            <Text
-                              id={`items-list-item-${item.id}`}
-                              style={detailLabelStyle}
-                            >
-                              {item.name}
-                            </Text>
-                          </Link>
-                        </TextContent>
-                      </DataListCell>
-                    ]}
-                    />
-                  </DataListItemRow>
-                </DataListItem>
-              )))}
-            </DataList>
-            <Pagination
-              variant="bottom"
-              itemCount={itemCount}
-              page={queryParams.page || 1}
-              perPage={queryParams.page_size}
-              perPageOptions={showPageSizeOptions ? [
-                { title: '5', value: 5 },
-                { title: '10', value: 10 },
-                { title: '20', value: 20 },
-                { title: '50', value: 50 }
-              ] : []}
-              onSetPage={this.handleSetPage}
-              onPerPageSelect={this.handleSetPageSize}
-            />
-          </Fragment>
-        )}
+        {items.length === 0
+          ? (
+            <Fragment>
+              <EmptyStateControlsWrapper>
+                {emptyStateControls}
+              </EmptyStateControlsWrapper>
+              <div css="border-bottom: 1px solid #d2d2d2" />
+              <EmptyState>
+                <EmptyStateIcon icon={CubesIcon} />
+                <Title size="lg">
+                  {i18n._(t`No ${ucFirst(itemNamePlural || pluralize(itemName))} Found `)}
+                </Title>
+                <EmptyStateBody>
+                  {i18n._(t`Please add ${ucFirst(itemNamePlural || pluralize(itemName))} to populate this list `)}
+                </EmptyStateBody>
+              </EmptyState>
+            </Fragment>
+          )
+          : (
+            <Fragment>
+              <DataListToolbar
+                sortedColumnKey={orderBy}
+                sortOrder={sortOrder}
+                columns={columns}
+                onSearch={() => { }}
+                onSort={this.handleSort}
+                showSelectAll={showSelectAll}
+                isAllSelected={isAllSelected}
+                onSelectAll={onSelectAll}
+                additionalControls={additionalControls}
+                noLeftMargin={alignToolbarLeft}
+
+              />
+              <DataList aria-label={i18n._(t`${ucFirst(pluralize(itemName))} List`)}>
+                {items.map(item => (renderItem ? renderItem(item) : (
+                  <DataListItem
+                    aria-labelledby={`items-list-item-${item.id}`}
+                    key={item.id}
+                  >
+                    <DataListItemRow>
+                      <DataListItemCells dataListCells={[
+                        <DataListCell key="team-name">
+                          <ListItemGrid>
+                            <Link to={{ pathname: item.url }}>
+                              <b id={`items-list-item-${item.id}`}>
+                                {item.name}
+                              </b>
+                            </Link>
+                          </ListItemGrid>
+                        </DataListCell>
+                      ]}
+                      />
+                    </DataListItemRow>
+                  </DataListItem>
+                )))}
+              </DataList>
+              <Pagination
+                variant="bottom"
+                itemCount={itemCount}
+                page={queryParams.page || 1}
+                perPage={queryParams.page_size}
+                perPageOptions={showPageSizeOptions ? [
+                  { title: '5', value: 5 },
+                  { title: '10', value: 10 },
+                  { title: '20', value: 20 },
+                  { title: '50', value: 50 }
+                ] : []}
+                onSetPage={this.handleSetPage}
+                onPerPageSelect={this.handleSetPageSize}
+              />
+            </Fragment>
+          )}
       </Fragment>
     );
   }
