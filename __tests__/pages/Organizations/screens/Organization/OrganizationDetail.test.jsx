@@ -107,7 +107,8 @@ describe('<OrganizationDetail />', () => {
       />
     ).find('OrganizationDetail');
 
-    const editLink = wrapper.findWhere(node => node.props().to === '/organizations/undefined/edit');
+    const editLink = wrapper
+      .findWhere(node => node.props().to === '/organizations/undefined/edit');
     expect(editLink.length).toBe(0);
   });
 });
