@@ -1186,6 +1186,7 @@ AWX_CLEANUP_PATHS = True
 
 MIDDLEWARE = [
     'awx.main.middleware.TimingMiddleware',
+    'awx.main.middleware.SessionTimeoutMiddleware',
     'awx.main.middleware.MigrationRanCheckMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -1198,5 +1199,4 @@ MIDDLEWARE = [
     'awx.sso.middleware.SocialAuthMiddleware',
     'crum.CurrentRequestUserMiddleware',
     'awx.main.middleware.URLModificationMiddleware',
-    'awx.main.middleware.SessionTimeoutMiddleware',
 ]
