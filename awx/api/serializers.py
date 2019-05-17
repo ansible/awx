@@ -4955,7 +4955,10 @@ class InstanceGroupSerializer(BaseSerializer):
 class ActivityStreamSerializer(BaseSerializer):
 
     changes = serializers.SerializerMethodField()
-    object_association = serializers.SerializerMethodField()
+    object_association = serializers.SerializerMethodField(
+        help_text=_("When present, shows the field name of the role or relationship that changed."))
+    object_type = serializers.SerializerMethodField(
+        help_text=_("When present, shows the model on which the role or relationship was defined."))
 
     @cached_property
     def _local_summarizable_fk_fields(self):
@@ -4980,8 +4983,8 @@ class ActivityStreamSerializer(BaseSerializer):
 
     class Meta:
         model = ActivityStream
-        fields = ('*', '-name', '-description', '-created', '-modified',
-                  'timestamp', 'operation', 'changes', 'object1', 'object2', 'object_association')
+        fields = ('*', '-name', '-description', '-created', '-modified', 'timestamp', 'operation',
+                  'changes', 'object1', 'object2', 'object_association', 'object_type')
 
     def get_fields(self):
         ret = super(ActivityStreamSerializer, self).get_fields()
@@ -5020,6 +5023,21 @@ class ActivityStreamSerializer(BaseSerializer):
         # so instead of splitting on period we have to take after the first underscore
         try:
             return obj.object_relationship_type.split(".")[-1].split("_", 1)[1]
+        except Exception:
+            logger.debug('Failed to parse activity stream relationship type {}'.format(obj.object_relationship_type))
+            return ""
+
+    def get_object_type(self, obj):
+        if not obj.object_relationship_type:
+            return ""
+        elif obj.object_relationship_type.endswith('_role'):
+            return camelcase_to_underscore(obj.object_relationship_type.rsplit('.', 2)[-2])
+        # default case: these values look like
+        # "awx.main.models.organization.Organization_notification_templates_success"
+        # so we have to take after the last period but before the first underscore.
+        try:
+            cls = obj.object_relationship_type.rsplit('.', 1)[0]
+            return camelcase_to_underscore(cls.split('_', 1))
         except Exception:
             logger.debug('Failed to parse activity stream relationship type {}'.format(obj.object_relationship_type))
             return ""
