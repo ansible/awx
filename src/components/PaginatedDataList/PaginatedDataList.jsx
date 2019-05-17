@@ -2,11 +2,6 @@ import React, { Fragment } from 'react';
 import PropTypes, { arrayOf, shape, string, bool } from 'prop-types';
 import {
   DataList,
-  DataListItem,
-  DataListItemRow,
-  DataListItemCells,
-  DataListCell,
-  TextContent,
   Title,
   EmptyState,
   EmptyStateIcon,
@@ -15,11 +10,12 @@ import {
 import { CubesIcon } from '@patternfly/react-icons';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { withRouter, Link } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
 import styled from 'styled-components';
 
 import Pagination from '../Pagination';
 import DataListToolbar from '../DataListToolbar';
+import PaginatedDataListItem from './PaginatedDataListItem';
 import {
   parseNamespacedQueryString,
   updateNamespacedQueryString,
@@ -38,13 +34,6 @@ const EmptyStateControlsWrapper = styled.div`
     margin-left: 20px;
   }
 `;
-
-const ListItemGrid = styled(TextContent)`
-  display: grid;
-  grid-template-columns: minmax(70px,max-content) repeat(auto-fit, minmax(60px,max-content));
-  grid-gap: 10px;
-`;
-
 class PaginatedDataList extends React.Component {
   constructor (props) {
     super(props);
@@ -56,12 +45,6 @@ class PaginatedDataList extends React.Component {
     this.handleSetPage = this.handleSetPage.bind(this);
     this.handleSetPageSize = this.handleSetPageSize.bind(this);
     this.handleSort = this.handleSort.bind(this);
-  }
-
-  getPageCount () {
-    const { itemCount, qsConfig, location } = this.props;
-    const queryParams = parseNamespacedQueryString(qsConfig, location.search);
-    return Math.ceil(itemCount / queryParams.page_size);
   }
 
   getSortOrder () {
@@ -93,11 +76,6 @@ class PaginatedDataList extends React.Component {
     const { pathname, search } = history.location;
     const qs = updateNamespacedQueryString(qsConfig, search, newParams);
     history.push(`${pathname}?${qs}`);
-  }
-
-  getPluralItemName () {
-    const { itemName, itemNamePlural } = this.props;
-    return itemNamePlural || `${itemName}s`;
   }
 
   render () {
@@ -156,25 +134,7 @@ class PaginatedDataList extends React.Component {
             })}
             <DataList aria-label={i18n._(t`${ucFirst(pluralize(itemName))} List`)}>
               {items.map(item => (renderItem ? renderItem(item) : (
-                <DataListItem
-                  aria-labelledby={`items-list-item-${item.id}`}
-                  key={item.id}
-                >
-                  <DataListItemRow>
-                    <DataListItemCells dataListCells={[
-                      <DataListCell key="team-name">
-                        <ListItemGrid>
-                          <Link to={{ pathname: item.url }}>
-                            <b id={`items-list-item-${item.id}`}>
-                              {item.name}
-                            </b>
-                          </Link>
-                        </ListItemGrid>
-                      </DataListCell>
-                    ]}
-                    />
-                  </DataListItemRow>
-                </DataListItem>
+                <PaginatedDataListItem key={item.id} item={item} />
               )))}
             </DataList>
             <Pagination
@@ -226,7 +186,7 @@ PaginatedDataList.defaultProps = {
   itemName: 'item',
   itemNamePlural: '',
   showPageSizeOptions: true,
-  renderToolbar: ({ ...props }) => (<DataListToolbar {...props} />),
+  renderToolbar: (props) => (<DataListToolbar {...props} />),
 };
 
 export { PaginatedDataList as _PaginatedDataList };
