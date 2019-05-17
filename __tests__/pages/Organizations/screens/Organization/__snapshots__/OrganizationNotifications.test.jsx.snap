@@ -368,11 +368,11 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                 "componentStyle": ComponentStyle {
                                                   "componentId": "DataListToolbar__Toolbar-ajzso8-1",
                                                   "isStatic": false,
-                                                  "lastClassName": "dwCtVz",
+                                                  "lastClassName": "exECbH",
                                                   "rules": Array [
                                                     "flex-grow:1;margin-left:",
                                                     [Function],
-                                                    ";",
+                                                    ";margin-right:20px;",
                                                   ],
                                                 },
                                                 "displayName": "DataListToolbar__Toolbar",
@@ -389,11 +389,11 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                             marginleft={0}
                                           >
                                             <Toolbar
-                                              className="DataListToolbar__Toolbar-ajzso8-1 dwCtVz"
+                                              className="DataListToolbar__Toolbar-ajzso8-1 exECbH"
                                               marginleft={0}
                                             >
                                               <div
-                                                className="pf-l-toolbar DataListToolbar__Toolbar-ajzso8-1 dwCtVz"
+                                                className="pf-l-toolbar DataListToolbar__Toolbar-ajzso8-1 exECbH"
                                                 marginleft={0}
                                               >
                                                 <DataListToolbar__ColumnLeft>
@@ -1563,9 +1563,9 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                               "componentStyle": ComponentStyle {
                                                                 "componentId": "DataListToolbar__AdditionalControlsWrapper-ajzso8-5",
                                                                 "isStatic": true,
-                                                                "lastClassName": "cAcBQW",
+                                                                "lastClassName": "bWuACV",
                                                                 "rules": Array [
-                                                                  "display:flex;flex-grow:1;justify-content:flex-end;",
+                                                                  "display:flex;flex-grow:1;justify-content:flex-end;align-items:center;& >:not(:first-child){margin-left:20px;}",
                                                                 ],
                                                               },
                                                               "displayName": "DataListToolbar__AdditionalControlsWrapper",
@@ -1581,7 +1581,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                           forwardedRef={null}
                                                         >
                                                           <div
-                                                            className="DataListToolbar__AdditionalControlsWrapper-ajzso8-5 cAcBQW"
+                                                            className="DataListToolbar__AdditionalControlsWrapper-ajzso8-5 bWuACV"
                                                           />
                                                         </StyledComponent>
                                                       </DataListToolbar__AdditionalControlsWrapper>
@@ -1770,9 +1770,9 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                                   "$$typeof": Symbol(react.forward_ref),
                                                                   "attrs": Array [],
                                                                   "componentStyle": ComponentStyle {
-                                                                    "componentId": "sc-htpNat",
+                                                                    "componentId": "sc-bxivhb",
                                                                     "isStatic": true,
-                                                                    "lastClassName": "dlcYLn",
+                                                                    "lastClassName": "lohjuH",
                                                                     "rules": Array [
                                                                       "margin-right: 1.5em;",
                                                                     ],
@@ -1780,7 +1780,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                                   "displayName": "Styled(Link)",
                                                                   "foldedComponentIds": Array [],
                                                                   "render": [Function],
-                                                                  "styledComponentId": "sc-htpNat",
+                                                                  "styledComponentId": "sc-bxivhb",
                                                                   "target": [Function],
                                                                   "toString": [Function],
                                                                   "warnTooManyClasses": [Function],
@@ -1795,7 +1795,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                               }
                                                             >
                                                               <Link
-                                                                className="sc-htpNat dlcYLn"
+                                                                className="sc-bxivhb lohjuH"
                                                                 replace={false}
                                                                 to={
                                                                   Object {
@@ -1804,7 +1804,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                                 }
                                                               >
                                                                 <a
-                                                                  className="sc-htpNat dlcYLn"
+                                                                  className="sc-bxivhb lohjuH"
                                                                   onClick={[Function]}
                                                                 >
                                                                   <b
@@ -1825,9 +1825,9 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                                   "$$typeof": Symbol(react.forward_ref),
                                                                   "attrs": Array [],
                                                                   "componentStyle": ComponentStyle {
-                                                                    "componentId": "sc-bxivhb",
+                                                                    "componentId": "sc-ifAKCX",
                                                                     "isStatic": true,
-                                                                    "lastClassName": "iZoxgU",
+                                                                    "lastClassName": "jGZNNo",
                                                                     "rules": Array [
                                                                       "text-transform: capitalize;",
                                                                     ],
@@ -1835,7 +1835,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                                   "displayName": "Styled(Badge)",
                                                                   "foldedComponentIds": Array [],
                                                                   "render": [Function],
-                                                                  "styledComponentId": "sc-bxivhb",
+                                                                  "styledComponentId": "sc-ifAKCX",
                                                                   "target": [Function],
                                                                   "toString": [Function],
                                                                   "warnTooManyClasses": [Function],
@@ -1846,11 +1846,11 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                               isRead={true}
                                                             >
                                                               <Badge
-                                                                className="sc-bxivhb iZoxgU"
+                                                                className="sc-ifAKCX jGZNNo"
                                                                 isRead={true}
                                                               >
                                                                 <span
-                                                                  className="pf-c-badge pf-m-read sc-bxivhb iZoxgU"
+                                                                  className="pf-c-badge pf-m-read sc-ifAKCX jGZNNo"
                                                                 >
                                                                   email
                                                                 </span>
@@ -2245,9 +2245,9 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                                   "$$typeof": Symbol(react.forward_ref),
                                                                   "attrs": Array [],
                                                                   "componentStyle": ComponentStyle {
-                                                                    "componentId": "sc-htpNat",
+                                                                    "componentId": "sc-bxivhb",
                                                                     "isStatic": true,
-                                                                    "lastClassName": "dlcYLn",
+                                                                    "lastClassName": "lohjuH",
                                                                     "rules": Array [
                                                                       "margin-right: 1.5em;",
                                                                     ],
@@ -2255,7 +2255,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                                   "displayName": "Styled(Link)",
                                                                   "foldedComponentIds": Array [],
                                                                   "render": [Function],
-                                                                  "styledComponentId": "sc-htpNat",
+                                                                  "styledComponentId": "sc-bxivhb",
                                                                   "target": [Function],
                                                                   "toString": [Function],
                                                                   "warnTooManyClasses": [Function],
@@ -2270,7 +2270,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                               }
                                                             >
                                                               <Link
-                                                                className="sc-htpNat dlcYLn"
+                                                                className="sc-bxivhb lohjuH"
                                                                 replace={false}
                                                                 to={
                                                                   Object {
@@ -2279,7 +2279,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                                 }
                                                               >
                                                                 <a
-                                                                  className="sc-htpNat dlcYLn"
+                                                                  className="sc-bxivhb lohjuH"
                                                                   onClick={[Function]}
                                                                 >
                                                                   <b
@@ -2300,9 +2300,9 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                                   "$$typeof": Symbol(react.forward_ref),
                                                                   "attrs": Array [],
                                                                   "componentStyle": ComponentStyle {
-                                                                    "componentId": "sc-bxivhb",
+                                                                    "componentId": "sc-ifAKCX",
                                                                     "isStatic": true,
-                                                                    "lastClassName": "iZoxgU",
+                                                                    "lastClassName": "jGZNNo",
                                                                     "rules": Array [
                                                                       "text-transform: capitalize;",
                                                                     ],
@@ -2310,7 +2310,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                                   "displayName": "Styled(Badge)",
                                                                   "foldedComponentIds": Array [],
                                                                   "render": [Function],
-                                                                  "styledComponentId": "sc-bxivhb",
+                                                                  "styledComponentId": "sc-ifAKCX",
                                                                   "target": [Function],
                                                                   "toString": [Function],
                                                                   "warnTooManyClasses": [Function],
@@ -2321,11 +2321,11 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                               isRead={true}
                                                             >
                                                               <Badge
-                                                                className="sc-bxivhb iZoxgU"
+                                                                className="sc-ifAKCX jGZNNo"
                                                                 isRead={true}
                                                               >
                                                                 <span
-                                                                  className="pf-c-badge pf-m-read sc-bxivhb iZoxgU"
+                                                                  className="pf-c-badge pf-m-read sc-ifAKCX jGZNNo"
                                                                 >
                                                                   email
                                                                 </span>

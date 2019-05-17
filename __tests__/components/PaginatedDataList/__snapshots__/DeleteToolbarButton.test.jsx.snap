@@ -15,7 +15,7 @@ exports[`<ToolbarDeleteButton /> should render button 1`] = `
     entryDelay={500}
     exitDelay={500}
     maxWidth="18.75rem"
-    position="left"
+    position="top"
     trigger="mouseenter focus"
     zIndex={9999}
   >
@@ -49,7 +49,7 @@ exports[`<ToolbarDeleteButton /> should render button 1`] = `
       maxWidth="18.75rem"
       onCreate={[Function]}
       performance={true}
-      placement="left"
+      placement="top"
       popperOptions={
         Object {
           "modifiers": Object {
@@ -66,96 +66,94 @@ exports[`<ToolbarDeleteButton /> should render button 1`] = `
       trigger="mouseenter focus"
       zIndex={9999}
     >
-      <ToolbarDeleteButton__Button
-        aria-label="Delete"
-        className="awx-ToolBarBtn"
-        isDisabled={true}
-        onClick={[Function]}
-        variant="plain"
-      >
-        <StyledComponent
+      <div>
+        <ToolbarDeleteButton__DeleteButton
           aria-label="Delete"
-          className="awx-ToolBarBtn"
-          forwardedComponent={
-            Object {
-              "$$typeof": Symbol(react.forward_ref),
-              "attrs": Array [],
-              "componentStyle": ComponentStyle {
-                "componentId": "ToolbarDeleteButton__Button-sc-1e3r0eg-0",
-                "isStatic": true,
-                "lastClassName": "iyjqWq",
-                "rules": Array [
-                  "width:30px;height:30px;display:flex;justify-content:center;margin-right:20px;border-radius:3px;padding:0;&:disabled{cursor:not-allowed;&:hover{background-color:white;> svg{color:#d2d2d2;}}}&:hover{background-color:#d9534f;> svg{color:white;}}",
-                ],
-              },
-              "displayName": "ToolbarDeleteButton__Button",
-              "foldedComponentIds": Array [],
-              "render": [Function],
-              "styledComponentId": "ToolbarDeleteButton__Button-sc-1e3r0eg-0",
-              "target": [Function],
-              "toString": [Function],
-              "warnTooManyClasses": [Function],
-              "withComponent": [Function],
-            }
-          }
-          forwardedRef={null}
           isDisabled={true}
           onClick={[Function]}
           variant="plain"
         >
-          <Button
+          <StyledComponent
             aria-label="Delete"
-            className="awx-ToolBarBtn ToolbarDeleteButton__Button-sc-1e3r0eg-0 iyjqWq"
-            component="button"
-            isActive={false}
-            isBlock={false}
+            forwardedComponent={
+              Object {
+                "$$typeof": Symbol(react.forward_ref),
+                "attrs": Array [],
+                "componentStyle": ComponentStyle {
+                  "componentId": "ToolbarDeleteButton__DeleteButton-sc-1e3r0eg-0",
+                  "isStatic": true,
+                  "lastClassName": "bQjfFG",
+                  "rules": Array [
+                    "padding:5px 8px;&:hover{background-color:#d9534f;color:white;}&[disabled]{color:var(--pf-c-button--m-plain--Color);pointer-events:initial;cursor:not-allowed;}",
+                  ],
+                },
+                "displayName": "ToolbarDeleteButton__DeleteButton",
+                "foldedComponentIds": Array [],
+                "render": [Function],
+                "styledComponentId": "ToolbarDeleteButton__DeleteButton-sc-1e3r0eg-0",
+                "target": [Function],
+                "toString": [Function],
+                "warnTooManyClasses": [Function],
+                "withComponent": [Function],
+              }
+            }
+            forwardedRef={null}
             isDisabled={true}
-            isFocus={false}
-            isHover={false}
             onClick={[Function]}
-            type="button"
             variant="plain"
           >
-            <button
-              aria-disabled={null}
+            <Button
               aria-label="Delete"
-              className="pf-c-button pf-m-plain pf-m-disabled awx-ToolBarBtn ToolbarDeleteButton__Button-sc-1e3r0eg-0 iyjqWq"
-              disabled={true}
+              className="ToolbarDeleteButton__DeleteButton-sc-1e3r0eg-0 bQjfFG"
+              component="button"
+              isActive={false}
+              isBlock={false}
+              isDisabled={true}
+              isFocus={false}
+              isHover={false}
               onClick={[Function]}
-              tabIndex={null}
               type="button"
+              variant="plain"
             >
-              <TrashAltIcon
-                className="awx-ToolBarTrashCanIcon"
-                color="currentColor"
-                size="sm"
-                title={null}
+              <button
+                aria-disabled={null}
+                aria-label="Delete"
+                className="pf-c-button pf-m-plain pf-m-disabled ToolbarDeleteButton__DeleteButton-sc-1e3r0eg-0 bQjfFG"
+                disabled={true}
+                onClick={[Function]}
+                tabIndex={null}
+                type="button"
               >
-                <svg
-                  aria-hidden={true}
-                  aria-labelledby={null}
-                  className="awx-ToolBarTrashCanIcon"
-                  fill="currentColor"
-                  height="1em"
-                  role="img"
-                  style={
-                    Object {
-                      "verticalAlign": "-0.125em",
-                    }
-                  }
-                  viewBox="0 0 448 512"
-                  width="1em"
+                <TrashAltIcon
+                  color="currentColor"
+                  size="sm"
+                  title={null}
                 >
-                  <path
-                    d="M32 464a48 48 0 0 0 48 48h288a48 48 0 0 0 48-48V128H32zm272-256a16 16 0 0 1 32 0v224a16 16 0 0 1-32 0zm-96 0a16 16 0 0 1 32 0v224a16 16 0 0 1-32 0zm-96 0a16 16 0 0 1 32 0v224a16 16 0 0 1-32 0zM432 32H312l-9.4-18.7A24 24 0 0 0 281.1 0H166.8a23.72 23.72 0 0 0-21.4 13.3L136 32H16A16 16 0 0 0 0 48v32a16 16 0 0 0 16 16h416a16 16 0 0 0 16-16V48a16 16 0 0 0-16-16z"
-                    transform=""
-                  />
-                </svg>
-              </TrashAltIcon>
-            </button>
-          </Button>
-        </StyledComponent>
-      </ToolbarDeleteButton__Button>
+                  <svg
+                    aria-hidden={true}
+                    aria-labelledby={null}
+                    fill="currentColor"
+                    height="1em"
+                    role="img"
+                    style={
+                      Object {
+                        "verticalAlign": "-0.125em",
+                      }
+                    }
+                    viewBox="0 0 448 512"
+                    width="1em"
+                  >
+                    <path
+                      d="M32 464a48 48 0 0 0 48 48h288a48 48 0 0 0 48-48V128H32zm272-256a16 16 0 0 1 32 0v224a16 16 0 0 1-32 0zm-96 0a16 16 0 0 1 32 0v224a16 16 0 0 1-32 0zm-96 0a16 16 0 0 1 32 0v224a16 16 0 0 1-32 0zM432 32H312l-9.4-18.7A24 24 0 0 0 281.1 0H166.8a23.72 23.72 0 0 0-21.4 13.3L136 32H16A16 16 0 0 0 0 48v32a16 16 0 0 0 16 16h416a16 16 0 0 0 16-16V48a16 16 0 0 0-16-16z"
+                      transform=""
+                    />
+                  </svg>
+                </TrashAltIcon>
+              </button>
+            </Button>
+          </StyledComponent>
+        </ToolbarDeleteButton__DeleteButton>
+      </div>
       <Portal
         containerInfo={
           <div>

@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react';
 import { func, bool, number, string, arrayOf, shape } from 'prop-types';
-import { Button as PFButton, Tooltip } from '@patternfly/react-core';
+import { Button, Tooltip } from '@patternfly/react-core';
 import { TrashAltIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
 import { withI18n } from '@lingui/react';
@@ -8,32 +8,18 @@ import { t } from '@lingui/macro';
 import AlertModal from '../AlertModal';
 import { pluralize } from '../../util/strings';
 
-const Button = styled(PFButton)`
-  width: 30px;
-  height: 30px;
-  display: flex;
-  justify-content: center;
-  margin-right: 20px;
-  border-radius: 3px;
-  padding: 0;
-
-
-  &:disabled {
-    cursor: not-allowed;
-    &:hover {
-      background-color: white;
-
-      > svg {
-        color: #d2d2d2;
-      }
-    }
-  }
+const DeleteButton = styled(Button)`
+  padding: 5px 8px;
 
   &:hover {
     background-color:#d9534f;
-    > svg {
-      color: white;
-    }
+    color: white;
+  }
+
+  &[disabled] {
+    color: var(--pf-c-button--m-plain--Color);
+    pointer-events: initial;
+    cursor: not-allowed;
   }
 `;
 
@@ -118,21 +104,25 @@ class ToolbarDeleteButton extends React.Component {
     const isDisabled = itemsToDelete.length === 0
       || itemsToDelete.some(cannotDelete);
 
+    // NOTE: Once PF supports tooltips on disabled elements,
+    // we can delete the extra <div> around the <DeleteButton> below.
+    // See: https://github.com/patternfly/patternfly-react/issues/1894
     return (
       <Fragment>
         <Tooltip
           content={this.renderTooltip()}
-          position="left"
+          position="top"
         >
-          <Button
-            className="awx-ToolBarBtn"
-            variant="plain"
-            aria-label={i18n._(t`Delete`)}
-            onClick={this.handleConfirmDelete}
-            isDisabled={isDisabled}
-          >
-            <TrashAltIcon className="awx-ToolBarTrashCanIcon" />
-          </Button>
+          <div>
+            <DeleteButton
+              variant="plain"
+              aria-label={i18n._(t`Delete`)}
+              onClick={this.handleConfirmDelete}
+              isDisabled={isDisabled}
+            >
+              <TrashAltIcon />
+            </DeleteButton>
+          </div>
         </Tooltip>
         { isModalOpen && (
           <AlertModal

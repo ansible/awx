@@ -72,21 +72,20 @@ describe('<OrganizationDetail />', () => {
     const custom_virtualenvDetail = detailWrapper.findWhere(node => node.props().label === 'Ansible Environment');
     const createdDetail = detailWrapper.findWhere(node => node.props().label === 'Created');
     const modifiedDetail = detailWrapper.findWhere(node => node.props().label === 'Last Modified');
+    expect(nameDetail.find('dt').text()).toBe('Name');
+    expect(nameDetail.find('dd').text()).toBe('Foo');
 
-    expect(nameDetail.find('h6').text()).toBe('Name');
-    expect(nameDetail.find('p').text()).toBe('Foo');
+    expect(descriptionDetail.find('dt').text()).toBe('Description');
+    expect(descriptionDetail.find('dd').text()).toBe('Bar');
 
-    expect(descriptionDetail.find('h6').text()).toBe('Description');
-    expect(descriptionDetail.find('p').text()).toBe('Bar');
+    expect(custom_virtualenvDetail.find('dt').text()).toBe('Ansible Environment');
+    expect(custom_virtualenvDetail.find('dd').text()).toBe('Fizz');
 
-    expect(custom_virtualenvDetail.find('h6').text()).toBe('Ansible Environment');
-    expect(custom_virtualenvDetail.find('p').text()).toBe('Fizz');
+    expect(createdDetail.find('dt').text()).toBe('Created');
+    expect(createdDetail.find('dd').text()).toBe('Bat');
 
-    expect(createdDetail.find('h6').text()).toBe('Created');
-    expect(createdDetail.find('p').text()).toBe('Bat');
-
-    expect(modifiedDetail.find('h6').text()).toBe('Last Modified');
-    expect(modifiedDetail.find('p').text()).toBe('Boo');
+    expect(modifiedDetail.find('dt').text()).toBe('Last Modified');
+    expect(modifiedDetail.find('dd').text()).toBe('Boo');
   });
 
   test('should show edit button for users with edit permission', () => {
@@ -95,9 +94,8 @@ describe('<OrganizationDetail />', () => {
         organization={mockDetails}
       />
     ).find('OrganizationDetail');
-
-    const editLink = wrapper.findWhere(node => node.props().to === '/organizations/undefined/edit');
-    expect(editLink.length).toBe(1);
+    const editButton = wrapper.find('Button');
+    expect((editButton).prop('to')).toBe('/organizations/undefined/edit');
   });
 
   test('should hide edit button for users without edit permission', () => {
@@ -109,7 +107,8 @@ describe('<OrganizationDetail />', () => {
       />
     ).find('OrganizationDetail');
 
-    const editLink = wrapper.findWhere(node => node.props().to === '/organizations/undefined/edit');
+    const editLink = wrapper
+      .findWhere(node => node.props().to === '/organizations/undefined/edit');
     expect(editLink.length).toBe(0);
   });
 });

@@ -4,45 +4,60 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
 import {
-  CardBody,
+  CardBody as PFCardBody,
   Button,
-  Text,
-  TextContent,
-  TextVariants,
+  TextList,
+  TextListItem,
+  TextListVariants,
+  TextListItemVariants,
 } from '@patternfly/react-core';
-
+import styled from 'styled-components';
 import { withNetwork } from '../../../../contexts/Network';
-
 import BasicChip from '../../../../components/BasicChip/BasicChip';
 
-const detailWrapperStyle = {
-  display: 'flex'
-};
+const CardBody = styled(PFCardBody)`
+  padding-top: 20px;
+`;
 
-const detailLabelStyle = {
-  fontWeight: '700',
-  lineHeight: '24px',
-  marginRight: '20px',
-  minWidth: '150px',
-  textAlign: 'right'
-};
+const DetailList = styled(TextList)`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+  grid-gap: 20px;
 
-const detailValueStyle = {
-  lineHeight: '24px',
-  wordBreak: 'break-all'
-};
+  & > div {
+    display: grid;
+    grid-template-columns: 10em 1fr;
+    grid-gap: 20px;
+  }
+`;
+
+const DetailName = styled(TextListItem)`
+  && {
+    grid-column: 1;
+    font-weight: var(--pf-global--FontWeight--bold);
+    text-align: right;
+  }
+`;
+
+const DetailValue = styled(TextListItem)`
+  && {
+    grid-column: 2;
+    word-break: break-all;
+  }
+`;
+
+const InstanceGroupsDetail = styled.div`
+  grid-column: 1 / -1;
+`;
 
 const Detail = ({ label, value }) => {
-  let detail = null;
-  if (value) {
-    detail = (
-      <TextContent style={detailWrapperStyle}>
-        <Text component={TextVariants.h6} style={detailLabelStyle}>{ label }</Text>
-        <Text component={TextVariants.p} style={detailValueStyle}>{ value }</Text>
-      </TextContent>
-    );
-  }
-  return detail;
+  if (!value) return null;
+  return (
+    <div>
+      <DetailName component={TextListItemVariants.dt}>{label}</DetailName>
+      <DetailValue component={TextListItemVariants.dd}>{value}</DetailValue>
+    </div>
+  );
 };
 
 class OrganizationDetail extends Component {
@@ -129,7 +144,7 @@ class OrganizationDetail extends Component {
 
     return (
       <CardBody>
-        <div className="pf-l-grid pf-m-gutter pf-m-all-12-col-on-md pf-m-all-6-col-on-lg pf-m-all-4-col-on-xl">
+        <DetailList component={TextListVariants.dl}>
           <Detail
             label={i18n._(t`Name`)}
             value={name}
@@ -151,25 +166,25 @@ class OrganizationDetail extends Component {
             value={modified}
           />
           {(instanceGroups && instanceGroups.length > 0) && (
-            <TextContent style={{ display: 'flex', gridColumn: '1 / -1' }}>
-              <Text
-                component={TextVariants.h6}
-                style={detailLabelStyle}
-              >
+            <InstanceGroupsDetail>
+              <DetailName component={TextListItemVariants.dt}>
                 {i18n._(t`Instance Groups`)}
-              </Text>
-              <div style={detailValueStyle}>
+              </DetailName>
+              <DetailValue component={TextListItemVariants.dd}>
                 {instanceGroupChips}
                 {overflowChip}
-              </div>
-            </TextContent>
+              </DetailValue>
+            </InstanceGroupsDetail>
           )}
-        </div>
+        </DetailList>
         {summary_fields.user_capabilities.edit && (
-          <div style={{ display: 'flex', flexDirection: 'row-reverse', marginTop: '20px' }}>
-            <Link to={`/organizations/${match.params.id}/edit`}>
-              <Button>{i18n._(t`Edit`)}</Button>
-            </Link>
+          <div css="margin-top: 10px; text-align: right;">
+            <Button
+              component={Link}
+              to={`/organizations/${match.params.id}/edit`}
+            >
+              {i18n._(t`Edit`)}
+            </Button>
           </div>
         )}
         {error ? 'error!' : ''}

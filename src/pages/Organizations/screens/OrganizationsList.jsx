@@ -186,6 +186,10 @@ class OrganizationsList extends Component {
                   onSelect={() => this.handleSelect(o)}
                 />
               )}
+              emptyStateControls={
+                canAdd ? <ToolbarAddButton key="add" linkTo={`${match.url}/add`} />
+                  : null
+              }
             />
           )}
           { isLoading ? <div>loading...</div> : '' }

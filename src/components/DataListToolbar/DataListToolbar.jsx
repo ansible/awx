@@ -34,6 +34,7 @@ const AWXToolbar = styled.div`
 const Toolbar = styled(PFToolbar)`
   flex-grow: 1;
   margin-left: ${props => (props.marginleft ? '0' : '20px')};
+  margin-right: 20px;
 `;
 
 const ToolbarGroup = styled(PFToolbarGroup)`
@@ -67,6 +68,11 @@ const AdditionalControlsWrapper = styled.div`
   display: flex;
   flex-grow: 1;
   justify-content: flex-end;
+  align-items: center;
+
+  & > :not(:first-child)  {
+  margin-left: 20px;
+  }
 `;
 
 class DataListToolbar extends React.Component {
