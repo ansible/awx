@@ -41,7 +41,7 @@ services:
   #     dockerfile: Dockerfile-logstash
   # Postgres Database Container
   postgres:
-    image: postgres:9.6
+    image: postgres:10.7
     container_name: tools_postgres_1
     ports:
         - "5432:5432"
