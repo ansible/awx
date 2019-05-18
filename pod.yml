@@ -1,0 +1,63 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: awx-tests
+spec:
+  restartPolicy: Never
+  volumes:
+    - name: git-repo
+      emptyDir:
+        medium: Memory
+    - name: git-clone
+      configMap:
+        name: git-clone
+        defaultMode: 0755
+    - name: kaniko-secret
+      secret:
+        secretName: kaniko-secret
+  initContainers:
+    - name: clone-repo
+      image: alpine/git
+      command:
+        - /usr/local/git/git-clone.sh
+      volumeMounts:
+        - name: git-repo
+          mountPath: /awx_devel
+        - name: git-clone
+          mountPath: /usr/local/git
+    - name: build-image
+      image: gcr.io/kaniko-project/executor
+      args:
+        - "--dockerfile=./tools/docker-compose/Dockerfile"
+        - "--context=/awx_devel"
+        - "--destination=gcr.io/ansible-tower-engineering/awx_devel:my_branch"
+        - "--cache=true"
+      volumeMounts:
+        - name: kaniko-secret
+          mountPath: /secret
+        - name: git-repo
+          mountPath: /awx_devel
+      env:
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: /secret/kaniko-secret.json
+  containers:
+    - name: api-tests
+      imagePullPolicy: Always
+      image: gcr.io/ansible-tower-engineering/awx_devel:my_branch
+      workingDir: /awx_devel
+      command:
+        - /start_tests.sh
+      volumeMounts:
+        - name: git-repo
+          mountPath: /awx_devel
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: git-clone
+data:
+  git-clone.sh: |
+    #!/bin/sh -xe
+    git clone --single-branch -- https://github.com/shanemcd/awx.git /awx_devel/

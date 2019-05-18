@@ -496,6 +496,10 @@ ui-devel: $(UI_DEPS_FLAG_FILE)
 ui-test: $(UI_DEPS_FLAG_FILE)
 	$(NPM_BIN) --prefix awx/ui run test
 
+ui-lint: $(UI_DEPS_FLAG_FILE)
+	$(NPM_BIN) run --prefix awx/ui jshint
+	$(NPM_BIN) run --prefix awx/ui lint
+
 # A standard go-to target for API developers to use building the frontend
 ui: clean-ui ui-devel
 

@@ -1,0 +1,42 @@
+---
+- hosts: localhost
+  tasks:
+    - name: Create pod for running tests
+      shell: kubectl apply -f pod.yml
+
+    - name: Wait for first init container to start
+      shell: |
+        kubectl -n default get pod awx-tests \
+          -o jsonpath="{.status.initContainerStatuses[0].state}"
+      register: result
+      until: result.stdout | regex_search('running|terminated')
+      delay: 5
+      retries: 25
+
+    - name: Tail logs for repo clone
+      shell: kubectl logs -f awx-tests -c clone-repo
+
+    - name: Wait for second init container to start
+      shell: |
+        kubectl -n default get pod awx-tests \
+          -o jsonpath="{.status.initContainerStatuses[1].state}"
+      register: result
+      until: result.stdout | regex_search('running|terminated')
+      delay: 5
+      retries: 25
+
+    - name: Tail logs for image build
+      shell: kubectl logs -f awx-tests -c build-image
+
+    - name: Wait for tests to start
+      shell: kubectl -n default get pod awx-tests -o jsonpath="{.status.phase}"
+      register: result
+      until: result.stdout in ['Running', 'Succeeded']
+      delay: 5
+      retries: 25
+
+    - name: Tail logs for tests
+      shell: kubectl logs -f awx-tests
+
+    - name: Delete pod
+      shell: kubectl delete pod awx-tests
