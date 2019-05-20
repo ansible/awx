@@ -176,11 +176,8 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                       >
                         <Route>
                           <PaginatedDataList
-                            additionalControls={Array []}
-                            alignToolbarLeft={false}
                             history={"/history/"}
                             i18n={"/i18n/"}
-                            isAllSelected={false}
                             itemCount={2}
                             itemName="notification"
                             itemNamePlural=""
@@ -216,7 +213,6 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                 "url": "",
                               }
                             }
-                            onSelectAll={null}
                             qsConfig={
                               Object {
                                 "defaultParams": Object {
@@ -232,8 +228,8 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                               }
                             }
                             renderItem={[Function]}
+                            renderToolbar={[Function]}
                             showPageSizeOptions={true}
-                            showSelectAll={false}
                             toolbarColumns={
                               Array [
                                 Object {
@@ -257,7 +253,6 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                             }
                           >
                             <WithI18n
-                              additionalControls={Array []}
                               columns={
                                 Array [
                                   Object {
@@ -279,12 +274,8 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                   },
                                 ]
                               }
-                              isAllSelected={false}
-                              noLeftMargin={false}
                               onSearch={[Function]}
-                              onSelectAll={null}
                               onSort={[Function]}
-                              showSelectAll={false}
                               sortOrder="ascending"
                               sortedColumnKey="name"
                             >

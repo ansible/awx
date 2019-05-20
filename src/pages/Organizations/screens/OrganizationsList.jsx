@@ -13,6 +13,7 @@ import PaginatedDataList, {
   ToolbarDeleteButton,
   ToolbarAddButton
 } from '../../../components/PaginatedDataList';
+import DataListToolbar from '../../../components/DataListToolbar';
 import OrganizationListItem from '../components/OrganizationListItem';
 import { getQSConfig, parseNamespacedQueryString } from '../../../util/qs';
 
@@ -163,20 +164,25 @@ class OrganizationsList extends Component {
                 { name: i18n._(t`Modified`), key: 'modified', isSortable: true, isNumeric: true },
                 { name: i18n._(t`Created`), key: 'created', isSortable: true, isNumeric: true },
               ]}
-              showSelectAll
-              isAllSelected={isAllSelected}
-              onSelectAll={this.handleSelectAll}
-              additionalControls={[
-                <ToolbarDeleteButton
-                  key="delete"
-                  onDelete={this.handleOrgDelete}
-                  itemsToDelete={selected}
-                  itemName="Organization"
-                />,
-                canAdd
-                  ? <ToolbarAddButton key="add" linkTo={`${match.url}/add`} />
-                  : null,
-              ]}
+              renderToolbar={(props) => (
+                <DataListToolbar
+                  {...props}
+                  showSelectAll
+                  isAllSelected={isAllSelected}
+                  onSelectAll={this.handleSelectAll}
+                  additionalControls={[
+                    <ToolbarDeleteButton
+                      key="delete"
+                      onDelete={this.handleOrgDelete}
+                      itemsToDelete={selected}
+                      itemName="Organization"
+                    />,
+                    canAdd
+                      ? <ToolbarAddButton key="add" linkTo={`${match.url}/add`} />
+                      : null,
+                  ]}
+                />
+              )}
               renderItem={(o) => (
                 <OrganizationListItem
                   key={o.id}

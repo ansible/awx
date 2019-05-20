@@ -4,6 +4,7 @@ import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import PaginatedDataList from '../PaginatedDataList';
+import DataListToolbar from '../DataListToolbar';
 import CheckboxListItem from '../ListItem';
 import SelectedList from '../SelectedList';
 import { getQSConfig, parseNamespacedQueryString } from '../../util/qs';
@@ -102,9 +103,7 @@ class SelectResourceStep extends React.Component {
               itemCount={count}
               itemName={itemName}
               qsConfig={this.qsConfig}
-              toolbarColumns={
-                columns
-              }
+              toolbarColumns={columns}
               renderItem={item => (
                 <CheckboxListItem
                   isSelected={selectedResourceRows.some(i => i.id === item.id)}
@@ -114,7 +113,9 @@ class SelectResourceStep extends React.Component {
                   onSelect={() => onRowClick(item)}
                 />
               )}
-              alignToolbarLeft
+              renderToolbar={(props) => (
+                <DataListToolbar {...props} alignToolbarLeft />
+              )}
               showPageSizeOptions={false}
             />
           </Fragment>
