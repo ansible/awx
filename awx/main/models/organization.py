@@ -161,8 +161,8 @@ class Profile(CreatedModifiedModel):
 class UserSessionMembership(BaseModel):
     '''
     A lookup table for API session membership given user. Note, there is a
-    different session created by channels for websockets using the same 
-    underlying model.  
+    different session created by channels for websockets using the same
+    underlying model.
     '''
 
     class Meta:
@@ -177,14 +177,14 @@ class UserSessionMembership(BaseModel):
     created = models.DateTimeField(default=None, editable=False)
 
     @staticmethod
-    def get_memberships_over_limit(user, now=None):
+    def get_memberships_over_limit(user_id, now=None):
         if settings.SESSIONS_PER_USER == -1:
             return []
         if now is None:
             now = tz_now()
         query_set = UserSessionMembership.objects\
             .select_related('session')\
-            .filter(user=user)\
+            .filter(user_id=user_id)\
             .order_by('-created')
         non_expire_memberships = [x for x in query_set if x.session.expire_date > now]
         return non_expire_memberships[settings.SESSIONS_PER_USER:]

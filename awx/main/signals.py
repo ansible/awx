@@ -652,20 +652,19 @@ def save_user_session_membership(sender, **kwargs):
         return
     if not session:
         return
-    user = session.get_decoded().get(SESSION_KEY, None)
-    if not user:
+    user_id = session.get_decoded().get(SESSION_KEY, None)
+    if not user_id:
         return
-    user = User.objects.get(pk=user)
-    if UserSessionMembership.objects.filter(user=user, session=session).exists():
+    if UserSessionMembership.objects.filter(user=user_id, session=session).exists():
         return
-    UserSessionMembership(user=user, session=session, created=timezone.now()).save()
-    expired = UserSessionMembership.get_memberships_over_limit(user)
+    UserSessionMembership(user_id=user_id, session=session, created=timezone.now()).save()
+    expired = UserSessionMembership.get_memberships_over_limit(user_id)
     for membership in expired:
         Session.objects.filter(session_key__in=[membership.session_id]).delete()
         membership.delete()
     if len(expired):
         consumers.emit_channel_notification(
-            'control-limit_reached_{}'.format(user.pk),
+            'control-limit_reached_{}'.format(user_id),
             dict(group_name='control', reason='limit_reached')
         )
 
@@ -680,7 +679,7 @@ def create_access_token_user_if_missing(sender, **kwargs):
         post_save.connect(create_access_token_user_if_missing, sender=OAuth2AccessToken)
 
 
-# Connect the Instance Group to Activity Stream receivers. 
+# Connect the Instance Group to Activity Stream receivers.
 post_save.connect(activity_stream_create, sender=InstanceGroup, dispatch_uid=str(InstanceGroup) + "_create")
 pre_save.connect(activity_stream_update, sender=InstanceGroup, dispatch_uid=str(InstanceGroup) + "_update")
 pre_delete.connect(activity_stream_delete, sender=InstanceGroup, dispatch_uid=str(InstanceGroup) + "_delete")
