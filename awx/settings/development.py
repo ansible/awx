@@ -112,14 +112,17 @@ if 'django_jenkins' in INSTALLED_APPS:
     PEP8_RCFILE = "setup.cfg"
     PYLINT_RCFILE = ".pylintrc"
 
+
+# debug toolbar and swagger assume that requirements/requirements_dev.txt are installed
+
 INSTALLED_APPS += [   # NOQA
     'rest_framework_swagger',
     'debug_toolbar',
 ]
 
-MIDDLEWARE += [  # NOQA
+MIDDLEWARE = [
     'debug_toolbar.middleware.DebugToolbarMiddleware',
-]
+] + MIDDLEWARE  # NOQA
 
 DEBUG_TOOLBAR_CONFIG = {
     'ENABLE_STACKTRACES' : True,
