@@ -1,8 +1,8 @@
 # AWX UI
 
 ## Requirements
-- node.js 8.x LTS
-- npm >=5.10
+- node.js 10.x LTS
+- npm >=6.x
 - bzip2, gcc-c++, git, make
 
 ## Development
