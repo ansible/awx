@@ -30,6 +30,7 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
 
     class Meta(object):
         app_label = 'main'
+        ordering = ('id',)
 
     diff_mode = models.BooleanField(
         default=False,

@@ -402,6 +402,8 @@ class OrderByBackend(BaseFilterBackend):
                         order_by = value.split(',')
                     else:
                         order_by = (value,)
+            if order_by is None:
+                order_by = self.get_default_ordering(view)
             if order_by:
                 order_by = self._validate_ordering_fields(queryset.model, order_by)
 
@@ -427,6 +429,12 @@ class OrderByBackend(BaseFilterBackend):
         except FieldError as e:
             # Return a 400 for invalid field names.
             raise ParseError(*e.args)
+
+    def get_default_ordering(self, view):
+        ordering = getattr(view, 'ordering', None)
+        if isinstance(ordering, str):
+            return (ordering,)
+        return ordering
 
     def _validate_ordering_fields(self, model, order_by):
         for field_name in order_by:

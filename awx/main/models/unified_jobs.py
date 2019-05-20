@@ -98,6 +98,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
 
     class Meta:
         app_label = 'main'
+        ordering = ('name',)
         # unique_together here is intentionally commented out. Please make sure sub-classes of this model
         # contain at least this uniqueness restriction: SOFT_UNIQUE_TOGETHER = [('polymorphic_ctype', 'name')]
         #unique_together = [('polymorphic_ctype', 'name')]
@@ -556,6 +557,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
 
     class Meta:
         app_label = 'main'
+        ordering = ('id',)
 
     old_pk = models.PositiveIntegerField(
         null=True,

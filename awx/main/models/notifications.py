@@ -50,6 +50,7 @@ class NotificationTemplate(CommonModelNameNotUnique):
     class Meta:
         app_label = 'main'
         unique_together = ('organization', 'name')
+        ordering = ("name",)
 
     organization = models.ForeignKey(
         'Organization',

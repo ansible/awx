@@ -1312,6 +1312,7 @@ class CredentialInputSource(PrimordialModel):
     class Meta:
         app_label = 'main'
         unique_together = (('target_credential', 'input_field_name'),)
+        ordering = ('target_credential', 'source_credential', 'input_field_name',)
 
     target_credential = models.ForeignKey(
         'Credential',

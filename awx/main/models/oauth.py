@@ -28,6 +28,7 @@ class OAuth2Application(AbstractApplication):
         app_label = 'main'
         verbose_name = _('application')
         unique_together = (("name", "organization"),)
+        ordering = ('organization', 'name')
     
     CLIENT_CONFIDENTIAL = "confidential"
     CLIENT_PUBLIC = "public"
@@ -89,6 +90,7 @@ class OAuth2AccessToken(AbstractAccessToken):
     class Meta:
         app_label = 'main'
         verbose_name = _('access token')
+        ordering = ('id',)
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, 
