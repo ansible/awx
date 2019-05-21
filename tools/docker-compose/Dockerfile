@@ -6,14 +6,20 @@ RUN yum -y update && yum -y install epel-release
 
 # sync with installer/roles/image_build/templates/Dockerfile.j2
 RUN yum -y install acl \
+  alsa-lib \
   ansible \
+  atk \
   bubblewrap \
+  cups-libs \
   curl \
   cyrus-sasl \
   cyrus-sasl-devel \
   gcc \
   gcc-c++ \
+  GConf2 \
   git \
+  gtk3 \
+  ipa-gothic-fonts \
   krb5-devel \
   krb5-libs \
   krb5-workstation \
@@ -22,8 +28,16 @@ RUN yum -y install acl \
   libselinux-python \
   libstdc++.so.6 \
   libtool-ltdl-devel \
+  libXcomposite \
+  libXcursor \
+  libXdamage \
+  libXext \
+  libXi \
   libxml2-devel \
+  libXrandr \
+  libXScrnSaver \
   libxslt-devel \
+  libXtst \
   make \
   mercurial \
   mg \
@@ -33,7 +47,6 @@ RUN yum -y install acl \
   openssh-server \
   postgresql-devel \
   python-devel \
-  python-pip \
   python-pip \
   python-psutil \
   python-psycopg2 \
@@ -52,6 +65,12 @@ RUN yum -y install acl \
   xmlsec1-devel \
   xmlsec1-openssl \
   xmlsec1-openssl-devel \
+  xorg-x11-fonts-100dpi \
+  xorg-x11-fonts-75dpi \
+  xorg-x11-fonts-cyrillic \
+  xorg-x11-fonts-misc \
+  xorg-x11-fonts-Type1 \
+  xorg-x11-utils \
   yum-utils
 
 ADD https://github.com/krallin/tini/releases/download/v0.14.0/tini /tini
@@ -67,7 +86,7 @@ ADD tools/docker-compose/awx.egg-info /tmp/awx.egg-info
 RUN openssl req -nodes -newkey rsa:2048 -keyout /etc/nginx/nginx.key -out /etc/nginx/nginx.csr -subj "/C=US/ST=North Carolina/L=Durham/O=Ansible/OU=AWX Development/CN=awx.localhost"
 RUN openssl x509 -req -days 365 -in /etc/nginx/nginx.csr -signkey /etc/nginx/nginx.key -out /etc/nginx/nginx.crt
 
-RUN python3 -m ensurepip && pip3 install virtualenv
+RUN python3 -m ensurepip && pip3 install virtualenv flake8
 RUN pip install supervisor
 
 ADD Makefile /tmp/Makefile
@@ -86,7 +105,6 @@ RUN cd /tmp && VENV_BASE="/venv" make requirements_dev
 # Use the distro provided npm to bootstrap our required version of node
 RUN npm install -g n
 RUN n 8.15.0
-ENV PATH /usr/bin:/usr/local/n/versions/node/8.15.0/bin:$PATH
 
 RUN yum -y remove cyrus-sasl-devel \
   gcc \
@@ -131,3 +149,5 @@ RUN for dir in /var/lib/awx/ /var/log/tower/ /projects /.ansible /var/log/nginx 
 RUN for file in /etc/passwd /etc/supervisord.conf \
   /venv/awx/lib/python3.6/site-packages/awx.egg-link /var/run/nginx.pid; \
   do touch $file; chmod -R g+rwx $file; chgrp -R root $file; done
+
+ENV PATH=/usr/local/n/versions/node/8.15.0/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
