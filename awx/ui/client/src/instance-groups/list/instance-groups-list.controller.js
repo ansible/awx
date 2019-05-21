@@ -33,7 +33,7 @@ export default [
         init();
 
         function init(){
-            $rootScope.breadcrumb.instance_group_name = instanceGroup.get('name');
+            $rootScope.breadcrumb.instance_group_name = $filter('sanitize')(instanceGroup.get('name'));
             $scope.list = {
                 iterator: 'instance_group',
                 name: 'instance_groups'
