@@ -1,5 +1,28 @@
-export default ['$scope', '$filter', '$state', 'Alert', 'resolvedModels', 'Dataset', 'InstanceGroupsStrings','ProcessErrors', 'Prompt', 'Wait',
-    function($scope, $filter, $state, Alert, resolvedModels, Dataset, strings, ProcessErrors, Prompt, Wait) {
+export default [
+    '$rootScope',
+    '$scope',
+    '$filter',
+    '$state',
+    'Alert',
+    'resolvedModels',
+    'Dataset',
+    'InstanceGroupsStrings',
+    'ProcessErrors',
+    'Prompt',
+    'Wait',
+    function(
+        $rootScope,
+        $scope,
+        $filter,
+        $state,
+        Alert,
+        resolvedModels,
+        Dataset,
+        strings,
+        ProcessErrors,
+        Prompt,
+        Wait
+    ) {
         const vm = this;
         const { instanceGroup } = resolvedModels;
         let paginateQuerySet = {};
@@ -10,6 +33,7 @@ export default ['$scope', '$filter', '$state', 'Alert', 'resolvedModels', 'Datas
         init();
 
         function init(){
+            $rootScope.breadcrumb.instance_group_name = $filter('sanitize')(instanceGroup.get('name'));
             $scope.list = {
                 iterator: 'instance_group',
                 name: 'instance_groups'
