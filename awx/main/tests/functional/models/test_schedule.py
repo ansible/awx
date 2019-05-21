@@ -1,4 +1,5 @@
 from datetime import datetime
+from contextlib import contextmanager
 
 from django.utils.timezone import now
 from django.db.utils import IntegrityError
@@ -6,7 +7,7 @@ from unittest import mock
 import pytest
 import pytz
 
-from awx.main.models import JobTemplate, Schedule
+from awx.main.models import JobTemplate, Schedule, ActivityStream
 
 from crum import impersonate
 
@@ -22,19 +23,140 @@ def job_template(inventory, project):
 
 
 @pytest.mark.django_db
-def test_computed_fields_modified_by_retained(job_template, admin_user):
-    with impersonate(admin_user):
+class TestComputedFields:
+
+    # expired in 2015, so next_run should not be populated
+    dead_rrule = "DTSTART;TZID=UTC:20140520T190000 RRULE:FREQ=YEARLY;INTERVAL=1;BYMONTH=1;BYMONTHDAY=1;UNTIL=20150530T000000Z"
+    continuing_rrule = "DTSTART;TZID=UTC:20140520T190000 RRULE:FREQ=YEARLY;INTERVAL=1;BYMONTH=1;BYMONTHDAY=1"
+
+    @property
+    def distant_rrule(self):
+        # this rule should produce a next_run, but it should not overlap with test run time
+        this_year = now().year
+        return "DTSTART;TZID=UTC:{}0520T190000 RRULE:FREQ=YEARLY;INTERVAL=1;BYMONTH=1;BYMONTHDAY=1;UNTIL={}0530T000000Z".format(
+            this_year + 1, this_year + 2
+        )
+
+    @contextmanager
+    def assert_no_unwanted_stuff(self, schedule, act_stream=True, sch_assert=True):
+        """These changes are not wanted for any computed fields update
+        of schedules, so we make the assertions for all of the tests here
+        """
+        original_sch_modified = schedule.modified
+        original_sch_modified_by = schedule.modified_by
+        original_ujt_modified = schedule.unified_job_template.modified
+        original_ujt_modified_by = schedule.unified_job_template.modified_by
+        original_AS_entries = ActivityStream.objects.count()
+        yield None
+        if sch_assert:
+            schedule.refresh_from_db()
+            assert schedule.modified == original_sch_modified
+            assert schedule.modified_by == original_sch_modified_by
+        # a related schedule update should not change JT modified time
+        schedule.unified_job_template.refresh_from_db()
+        assert schedule.unified_job_template.modified == original_ujt_modified
+        assert schedule.unified_job_template.modified_by == original_ujt_modified_by
+        if act_stream:
+            assert ActivityStream.objects.count() == original_AS_entries, (
+                ActivityStream.objects.order_by('-timestamp').first().changes
+            )
+
+    def test_computed_fields_modified_by_retained(self, job_template, admin_user):
+        with impersonate(admin_user):
+            s = Schedule.objects.create(
+                name='Some Schedule',
+                rrule='DTSTART:20300112T210000Z RRULE:FREQ=DAILY;INTERVAL=1',
+                unified_job_template=job_template
+            )
+        assert s.created_by == admin_user
+        with self.assert_no_unwanted_stuff(s):
+            s.update_computed_fields()  # modification done by system here
+        s.save()
+        assert s.modified_by == admin_user
+
+    def test_computed_fields_no_op(self, job_template):
         s = Schedule.objects.create(
             name='Some Schedule',
-            rrule='DTSTART:20300112T210000Z RRULE:FREQ=DAILY;INTERVAL=1',
+            rrule=self.dead_rrule,
+            unified_job_template=job_template,
+            enabled=True
+        )
+        with self.assert_no_unwanted_stuff(s):
+            assert s.next_run is None
+            assert s.dtend is not None
+            prior_dtend = s.dtend
+            s.update_computed_fields()
+            assert s.next_run is None
+            assert s.dtend == prior_dtend
+
+    def test_computed_fields_time_change(self, job_template):
+        s = Schedule.objects.create(
+            name='Some Schedule',
+            rrule=self.continuing_rrule,
+            unified_job_template=job_template,
+            enabled=True
+        )
+        with self.assert_no_unwanted_stuff(s):
+            # force update of next_run, as if schedule re-calculation had not happened
+            # since this time
+            old_next_run = datetime(2009, 3, 13, tzinfo=pytz.utc)
+            Schedule.objects.filter(pk=s.pk).update(next_run=old_next_run)
+            s.next_run = old_next_run
+            prior_modified = s.modified
+            s.update_computed_fields()
+            assert s.next_run != old_next_run
+            assert s.modified == prior_modified
+
+    def test_computed_fields_turning_on(self, job_template):
+        s = Schedule.objects.create(
+            name='Some Schedule',
+            rrule=self.distant_rrule,
+            unified_job_template=job_template,
+            enabled=False
+        )
+        # we expect 1 activity stream entry for changing enabled field
+        with self.assert_no_unwanted_stuff(s, act_stream=False):
+            assert s.next_run is None
+            assert job_template.next_schedule is None
+            s.enabled = True
+            s.save(update_fields=['enabled'])
+            assert s.next_run is not None
+            assert job_template.next_schedule == s
+
+    def test_computed_fields_turning_on_via_rrule(self, job_template):
+        s = Schedule.objects.create(
+            name='Some Schedule',
+            rrule=self.dead_rrule,
             unified_job_template=job_template
         )
-    s.refresh_from_db()
-    assert s.created_by == admin_user
-    assert s.modified_by == admin_user
-    s.update_computed_fields()
-    s.save()
-    assert s.modified_by == admin_user
+        with self.assert_no_unwanted_stuff(s, act_stream=False):
+            assert s.next_run is None
+            assert job_template.next_schedule is None
+            s.rrule = self.distant_rrule
+            s.update_computed_fields()
+            assert s.next_run is not None
+            assert job_template.next_schedule == s
+
+    def test_computed_fields_turning_off_by_deleting(self, job_template):
+        s1 = Schedule.objects.create(
+            name='first schedule',
+            rrule=self.distant_rrule,
+            unified_job_template=job_template
+        )
+        s2 = Schedule.objects.create(
+            name='second schedule',
+            rrule=self.distant_rrule,
+            unified_job_template=job_template
+        )
+        assert job_template.next_schedule in [s1, s2]
+        if job_template.next_schedule == s1:
+            expected_schedule = s2
+        else:
+            expected_schedule = s1
+        with self.assert_no_unwanted_stuff(expected_schedule, act_stream=False, sch_assert=False):
+            job_template.next_schedule.delete()
+        job_template.refresh_from_db()
+        assert job_template.next_schedule == expected_schedule
 
 
 @pytest.mark.django_db
