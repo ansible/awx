@@ -107,9 +107,6 @@ def dispatch_startup():
     for sch in Schedule.objects.all():
         try:
             sch.update_computed_fields()
-            from awx.main.signals import disable_activity_stream
-            with disable_activity_stream():
-                sch.save()
         except Exception:
             logger.exception("Failed to rebuild schedule {}.".format(sch))
 
@@ -496,7 +493,7 @@ def awx_periodic_scheduler():
 
         old_schedules = Schedule.objects.enabled().before(last_run)
         for schedule in old_schedules:
-            schedule.save()
+            schedule.update_computed_fields()
         schedules = Schedule.objects.enabled().between(last_run, run_now)
 
         invalid_license = False
@@ -507,7 +504,7 @@ def awx_periodic_scheduler():
 
         for schedule in schedules:
             template = schedule.unified_job_template
-            schedule.save() # To update next_run timestamp.
+            schedule.update_computed_fields() # To update next_run timestamp.
             if template.cache_timeout_blocked:
                 logger.warn("Cache timeout is in the future, bypassing schedule for template %s" % str(template.id))
                 continue

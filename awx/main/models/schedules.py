@@ -227,7 +227,12 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
         job_kwargs['_eager_fields'] = {'launch_type': 'scheduled', 'schedule': self}
         return job_kwargs
 
-    def update_computed_fields(self):
+    def update_computed_fields_no_save(self):
+        affects_fields = ['next_run', 'dtstart', 'dtend']
+        starting_values = {}
+        for field_name in affects_fields:
+            starting_values[field_name] = getattr(self, field_name)
+
         future_rs = Schedule.rrulestr(self.rrule)
         next_run_actual = future_rs.after(now())
 
@@ -248,11 +253,38 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
                 self.dtend = future_rs[-1].astimezone(pytz.utc)
             except IndexError:
                 self.dtend = None
+
+        changed = any(getattr(self, field_name) != starting_values[field_name] for field_name in affects_fields)
+        return changed
+
+    def update_computed_fields(self):
+        changed = self.update_computed_fields_no_save()
+        if not changed:
+            return
         emit_channel_notification('schedules-changed', dict(id=self.id, group_name='schedules'))
+        # Must save self here before calling unified_job_template computed fields
+        # in order for that method to be correct
+        self.rrule = Schedule.coerce_naive_until(self.rrule)
+        # do not update modified time
+        super(Schedule, self).save(update_fields=['next_run', 'dtstart', 'dtend', 'modified'])
         with ignore_inventory_computed_fields():
             self.unified_job_template.update_computed_fields()
 
     def save(self, *args, **kwargs):
-        self.update_computed_fields()
         self.rrule = Schedule.coerce_naive_until(self.rrule)
+        changed = self.update_computed_fields_no_save()
+        if changed and 'update_fields' in kwargs:
+            for field_name in ['next_run', 'dtstart', 'dtend']:
+                if field_name not in kwargs['update_fields']:
+                    kwargs['update_fields'].append(field_name)
         super(Schedule, self).save(*args, **kwargs)
+        with ignore_inventory_computed_fields():
+            self.unified_job_template.update_computed_fields()
+
+    def delete(self, *args, **kwargs):
+        ujt = self.unified_job_template
+        r = super(Schedule, self).delete(*args, **kwargs)
+        if ujt:
+            with ignore_inventory_computed_fields():
+                ujt.update_computed_fields()
+        return r
