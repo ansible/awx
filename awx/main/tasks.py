@@ -103,15 +103,19 @@ class InvalidVirtualenvError(Exception):
 
 def dispatch_startup():
     startup_logger = logging.getLogger('awx.main.tasks')
-    startup_logger.debug("Syncing Schedules")
-    for sch in Schedule.objects.all():
-        try:
-            sch.update_computed_fields()
-            from awx.main.signals import disable_activity_stream
-            with disable_activity_stream():
-                sch.save()
-        except Exception:
-            logger.exception("Failed to rebuild schedule {}.".format(sch))
+    with advisory_lock('awx_periodic_scheduler_lock', wait=False) as acquired:
+        if acquired is True:
+            startup_logger.debug("Syncing Schedules")
+            for sch in Schedule.objects.all():
+                try:
+                    sch.update_computed_fields()
+                    from awx.main.signals import disable_activity_stream
+                    with disable_activity_stream():
+                        sch.save()
+                except Exception:
+                    logger.exception("Failed to rebuild schedule {}.".format(sch))
+        else:
+            startup_logger.debug("Not syncing schedules, another task holds lock")
 
     #
     # When the dispatcher starts, if the instance cannot be found in the database,
