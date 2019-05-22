@@ -966,6 +966,9 @@ LOGGING = {
         'external_log_enabled': {
             '()': 'awx.main.utils.filters.ExternalLoggerEnabled'
         },
+        'dynamic_level_filter': {
+            '()': 'awx.main.utils.filters.DynamicLevelFilter'
+        }
     },
     'formatters': {
         'simple': {
@@ -1005,7 +1008,7 @@ LOGGING = {
         'external_logger': {
             'class': 'awx.main.utils.handlers.AWXProxyHandler',
             'formatter': 'json',
-            'filters': ['external_log_enabled'],
+            'filters': ['external_log_enabled', 'dynamic_level_filter'],
         },
         'mail_admins': {
             'level': 'ERROR',
@@ -1014,8 +1017,8 @@ LOGGING = {
         },
         'tower_warnings': {
             # don't define a level here, it's set by settings.LOG_AGGREGATOR_LEVEL
-            'class':'awx.main.utils.handlers.RotatingProductionLogHandler',
-            'filters': ['require_debug_false'],
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filters': ['require_debug_false', 'dynamic_level_filter'],
             'filename': os.path.join(LOG_ROOT, 'tower.log'),
             'maxBytes': 1024 * 1024 * 5, # 5 MB
             'backupCount': 5,
@@ -1023,8 +1026,8 @@ LOGGING = {
         },
         'callback_receiver': {
             # don't define a level here, it's set by settings.LOG_AGGREGATOR_LEVEL
-            'class':'awx.main.utils.handlers.RotatingProductionLogHandler',
-            'filters': ['require_debug_false'],
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filters': ['require_debug_false', 'dynamic_level_filter'],
             'filename': os.path.join(LOG_ROOT, 'callback_receiver.log'),
             'maxBytes': 1024 * 1024 * 5, # 5 MB
             'backupCount': 5,
@@ -1032,8 +1035,8 @@ LOGGING = {
         },
         'dispatcher': {
             # don't define a level here, it's set by settings.LOG_AGGREGATOR_LEVEL
-            'class':'awx.main.utils.handlers.RotatingProductionLogHandler',
-            'filters': ['require_debug_false'],
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filters': ['require_debug_false', 'dynamic_level_filter'],
             'filename': os.path.join(LOG_ROOT, 'dispatcher.log'),
             'maxBytes': 1024 * 1024 * 5, # 5 MB
             'backupCount': 5,
@@ -1050,8 +1053,8 @@ LOGGING = {
         },
         'task_system': {
             # don't define a level here, it's set by settings.LOG_AGGREGATOR_LEVEL
-            'class':'awx.main.utils.handlers.RotatingProductionLogHandler',
-            'filters': ['require_debug_false'],
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filters': ['require_debug_false', 'dynamic_level_filter'],
             'filename': os.path.join(LOG_ROOT, 'task_system.log'),
             'maxBytes': 1024 * 1024 * 5, # 5 MB
             'backupCount': 5,
