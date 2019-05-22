@@ -18,7 +18,7 @@ from django.conf import settings
 from awx.main.constants import LOGGER_BLACKLIST
 from awx.main.utils.common import get_search_fields
 
-__all__ = ['SmartFilter', 'ExternalLoggerEnabled']
+__all__ = ['SmartFilter', 'ExternalLoggerEnabled', 'DynamicLevelFilter']
 
 logger = logging.getLogger('awx.main.utils')
 
@@ -48,9 +48,18 @@ class FieldFromSettings(object):
             instance.settings_override[self.setting_name] = value
 
 
+def record_is_blacklisted(record):
+    """Given a log record, return True if it is considered to be in
+    the logging blacklist, return False if not
+    """
+    for logger_name in LOGGER_BLACKLIST:
+        if record.name.startswith(logger_name):
+            return True
+    return False
+
+
 class ExternalLoggerEnabled(Filter):
 
-    lvl = FieldFromSettings('LOG_AGGREGATOR_LEVEL')
     enabled_loggers = FieldFromSettings('LOG_AGGREGATOR_LOGGERS')
     enabled_flag = FieldFromSettings('LOG_AGGREGATOR_ENABLED')
 
@@ -64,18 +73,16 @@ class ExternalLoggerEnabled(Filter):
             setattr(self, field_name, field_value)
 
     def filter(self, record):
-        """
-        Uses the database settings to determine if the current
-        external log configuration says that this particular record
-        should be sent to the external log aggregator
+        """Filters out all log records if LOG_AGGREGATOR_ENABLED is False
+        or if the particular logger is not in LOG_AGGREGATOR_LOGGERS
+        should only be used for the external logger
 
         False - should not be logged
         True - should be logged
         """
-        # Logger exceptions
-        for logger_name in LOGGER_BLACKLIST:
-            if record.name.startswith(logger_name):
-                return False
+        # Do not send exceptions to external logger
+        if record_is_blacklisted(record):
+            return False
         # General enablement
         if not self.enabled_flag:
             return False
@@ -93,6 +100,24 @@ class ExternalLoggerEnabled(Filter):
             else:
                 base_name = record.name
             return bool(base_name in loggers)
+
+
+class DynamicLevelFilter(Filter):
+
+    def filter(self, record):
+        """Filters out logs that have a level below the threshold defined
+        by the databse setting LOG_AGGREGATOR_LEVEL
+        """
+        if record_is_blacklisted(record):
+            # Fine to write blacklisted loggers to file, apply default filtering level
+            cutoff_level = logging.WARNING
+        else:
+            try:
+                cutoff_level = logging._nameToLevel[settings.LOG_AGGREGATOR_LEVEL]
+            except Exception:
+                cutoff_level = logging.WARNING
+
+        return bool(record.levelno >= cutoff_level)
 
 
 def string_to_type(t):

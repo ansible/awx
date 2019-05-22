@@ -19,12 +19,11 @@ from django.conf import settings
 from requests_futures.sessions import FuturesSession
 
 # AWX
-from awx.main.constants import LOGGER_BLACKLIST
 from awx.main.utils.formatters import LogstashFormatter
 
 
 __all__ = ['BaseHTTPSHandler', 'TCPHandler', 'UDPHandler',
-           'AWXProxyHandler', 'RotatingProductionLogHandler']
+           'AWXProxyHandler']
 
 
 logger = logging.getLogger('awx.main.utils.handlers')
@@ -90,28 +89,6 @@ class SocketResult:
 
     def result(self):
         return self
-
-
-class DynamicLevelMixin(object):
-
-    @property
-    def level(self):
-        from django.conf import settings
-        for logger_name in LOGGER_BLACKLIST:
-            if self.name.startswith(logger_name):
-                return 30  # WARNING
-        try:
-            return logging._nameToLevel[settings.LOG_AGGREGATOR_LEVEL]
-        except Exception:
-            return 30  # WARNING
-
-    @level.setter
-    def level(self, level):
-        pass  # no-op, this value comes from the database
-
-
-class RotatingProductionLogHandler(logging.handlers.RotatingFileHandler, DynamicLevelMixin):
-    pass
 
 
 class BaseHandler(logging.Handler):
@@ -295,7 +272,7 @@ HANDLER_MAPPING = {
 }
 
 
-class AWXProxyHandler(logging.Handler, DynamicLevelMixin):
+class AWXProxyHandler(logging.Handler):
     '''
     Handler specific to the AWX external logging feature
 
