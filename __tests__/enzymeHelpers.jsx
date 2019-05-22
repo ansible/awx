@@ -158,3 +158,26 @@ export function mountWithContexts (node, options = {}) {
   };
   return mount(wrapContexts(node, context), { context, childContextTypes });
 }
+
+/**
+ * Wait for element to exist.
+ *
+ * @param[wrapper] - A ReactWrapper instance
+ * @param[selector] - The selector of the element to wait for.
+ */
+export function waitForElement (wrapper, selector) {
+  const interval = 100;
+  return new Promise((resolve, reject) => {
+    let attempts = 30;
+    (function pollElement () {
+      wrapper.update();
+      if (wrapper.exists(selector)) {
+        return resolve(wrapper.find(selector));
+      }
+      if (--attempts <= 0) {
+        return reject(new Error(`Element not found using ${selector}`));
+      }
+      return setTimeout(pollElement, interval);
+    }());
+  });
+}

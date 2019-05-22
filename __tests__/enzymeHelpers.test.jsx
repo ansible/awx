@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { mountWithContexts } from './enzymeHelpers';
+import { mountWithContexts, waitForElement } from './enzymeHelpers';
 import { Config } from '../src/contexts/Config';
 import { withNetwork } from '../src/contexts/Network';
 import { withRootDialog } from '../src/contexts/RootDialog';
@@ -185,17 +185,70 @@ describe('mountWithContexts', () => {
   });
 
   it('should set props on wrapped component', () => {
-    function Component ({ text }) {
+    function TestComponent ({ text }) {
       return (<div>{text}</div>);
     }
 
     const wrapper = mountWithContexts(
-      <Component text="foo" />
+      <TestComponent text="foo" />
     );
     expect(wrapper.find('div').text()).toEqual('foo');
     wrapper.setProps({
       text: 'bar'
     });
     expect(wrapper.find('div').text()).toEqual('bar');
+  });
+});
+
+/**
+ * This is a fixture for testing async components. It renders a div
+ * after a short amount of time.
+ */
+class TestAsyncComponent extends Component {
+  constructor (props) {
+    super(props);
+    this.state = { displayElement: false };
+  }
+
+  componentDidMount () {
+    setTimeout(() => {
+      this.setState({ displayElement: true });
+    }, 1000);
+  }
+
+  render () {
+    const { displayElement } = this.state;
+    if (displayElement) {
+      return (<div id="test-async-component" />);
+    }
+    return null;
+  }
+}
+
+describe('waitForElement', () => {
+  it('waits for the element and returns it', async (done) => {
+    const selector = '#test-async-component';
+    const wrapper = mountWithContexts(<TestAsyncComponent />);
+    expect(wrapper.exists(selector)).toEqual(false);
+
+    const elem = await waitForElement(wrapper, selector);
+    expect(elem.props().id).toEqual('test-async-component');
+    expect(wrapper.exists(selector)).toEqual(true);
+    done();
+  });
+
+  it('eventually throws an error for elements that don\'t exist', async (done) => {
+    const selector = '#does-not-exist';
+    const wrapper = mountWithContexts(<div />);
+
+    let error;
+    try {
+      await waitForElement(wrapper, selector);
+    } catch (err) {
+      error = err;
+    } finally {
+      expect(error).toEqual(new Error(`Element not found using ${selector}`));
+      done();
+    }
   });
 });

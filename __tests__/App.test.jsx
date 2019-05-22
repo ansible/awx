@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { mountWithContexts } from './enzymeHelpers';
+import { mountWithContexts, waitForElement } from './enzymeHelpers';
 
 import { asyncFlush } from '../jest.setup';
 
@@ -66,11 +66,9 @@ describe('<App />', () => {
     expect(wrapper.find(aboutModalContent)).toHaveLength(0);
     wrapper.find(aboutDropdown).simulate('click');
     wrapper.find(aboutButton).simulate('click');
-    wrapper.update();
 
     // check about modal content
-    const content = wrapper.find(aboutModalContent);
-    expect(content).toHaveLength(1);
+    const content = await waitForElement(wrapper, aboutModalContent);
     expect(content.find('dd').text()).toContain(ansible_version);
     expect(content.find('pre').text()).toContain(`<  Tower ${version}  >`);
 
