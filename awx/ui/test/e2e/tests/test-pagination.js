@@ -26,8 +26,7 @@ module.exports = {
 
         client
             .login()
-            .waitForAngular()
-            .resizeWindow(1200, 1000);
+            .waitForAngular();
     },
     'Test job template pagination': client => {
         client

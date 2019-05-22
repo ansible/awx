@@ -66,7 +66,6 @@ module.exports = {
         client
             .login()
             .waitForAngular()
-            .resizeWindow(1200, 1000)
             .useXpath()
             .findThenClick(teamsNavTab)
             .clearValue(searchBar)

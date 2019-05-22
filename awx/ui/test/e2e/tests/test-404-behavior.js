@@ -7,8 +7,7 @@ module.exports = {
     before: (client) => {
         client
             .login()
-            .waitForAngular()
-            .resizeWindow(1200, 1000);
+            .waitForAngular();
     },
     'Test that default the 404 behavior redirects to the dashboard': client => {
         client.navigateTo(`${AWX_E2E_URL}#/brokenurl`, false);

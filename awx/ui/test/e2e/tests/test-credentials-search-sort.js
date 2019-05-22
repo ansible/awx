@@ -3,7 +3,6 @@ module.exports = {
         const credentials = client.page.credentials();
 
         client.login();
-        client.resizeWindow(1200, 800);
         client.waitForAngular();
 
         credentials

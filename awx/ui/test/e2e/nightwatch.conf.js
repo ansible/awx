@@ -27,7 +27,14 @@ module.exports = {
             selenium_host: 'localhost',
             selenium_port: 9515,
             default_path_prefix: '',
-            desiredCapabilities: { browserName: 'chrome' },
+            desiredCapabilities: {
+                browserName: 'chrome',
+                chromeOptions: {
+                    args: [
+                        'window-size=1280,800'
+                    ]
+                }
+            },
             test_workers: { enabled: false },
             globals: {
                 launch_url: AWX_E2E_LAUNCH_URL,
