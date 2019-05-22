@@ -58,6 +58,14 @@ export function main (render) {
           <Background>
             <Switch>
               <Route
+                exact
+                strict
+                path="/*/"
+                render={({ history: { location: { pathname, search, hash } } }) => (
+                  <Redirect to={`${pathname.slice(0, -1)}${search}${hash}`} />
+                )}
+              />
+              <Route
                 path="/login"
                 render={() => (
                   <Config>
