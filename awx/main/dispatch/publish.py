@@ -4,7 +4,9 @@ import sys
 from uuid import uuid4
 
 from django.conf import settings
-from kombu import Connection, Exchange, Producer
+from kombu import Exchange, Producer
+
+from awx.main.dispatch.kombu import Connection
 
 logger = logging.getLogger('awx.main.dispatch')
 

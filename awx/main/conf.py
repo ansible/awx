@@ -570,6 +570,16 @@ register(
 )
 
 
+register(
+    'BROKER_DURABILITY',
+    field_class=fields.BooleanField,
+    label=_('Message Durability'),
+    help_text=_('When set (the default), underlying queues will be persisted to disk.  Disable this to enable higher message bus throughput.'),
+    category=_('System'),
+    category_slug='system',
+)
+
+
 def logging_validate(serializer, attrs):
     if not serializer.instance or \
             not hasattr(serializer.instance, 'LOG_AGGREGATOR_HOST') or \

@@ -4,7 +4,8 @@ import socket
 from django.conf import settings
 
 from awx.main.dispatch import get_local_queuename
-from kombu import Connection, Queue, Exchange, Producer, Consumer
+from awx.main.dispatch.kombu import Connection
+from kombu import Queue, Exchange, Producer, Consumer
 
 logger = logging.getLogger('awx.main.dispatch')
 
