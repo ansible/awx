@@ -20,7 +20,6 @@ from decimal import Decimal
 
 # Django
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import DatabaseError
 from django.utils.translation import ugettext_lazy as _
 from django.db.models.fields.related import ForeignObjectRel, ManyToManyField
 from django.db.models.query import QuerySet
@@ -34,7 +33,7 @@ from django.apps import apps
 
 logger = logging.getLogger('awx.main.utils')
 
-__all__ = ['get_object_or_400', 'camelcase_to_underscore', 'memoize', 'memoize_delete',
+__all__ = ['get_object_or_400', 'camelcase_to_underscore', 'underscore_to_camelcase', 'memoize', 'memoize_delete',
            'get_ansible_version', 'get_ssh_version', 'get_licenser', 'get_awx_version', 'update_scm_url',
            'get_type_for_model', 'get_model_for_type', 'copy_model_by_class', 'region_sorting',
            'copy_m2m_relationships', 'prefetch_page_capabilities', 'to_python_boolean',
@@ -90,6 +89,14 @@ def camelcase_to_underscore(s):
     '''
     s = re.sub(r'(((?<=[a-z])[A-Z])|([A-Z](?![A-Z]|$)))', '_\\1', s)
     return s.lower().strip('_')
+
+
+def underscore_to_camelcase(s):
+    '''
+    Convert lowercase_with_underscore names to CamelCase.
+    '''
+    return ''.join(x.capitalize() or '_' for x in s.split('_'))
+
 
 
 class RequireDebugTrueOrTest(logging.Filter):
@@ -497,20 +504,16 @@ def get_type_for_model(model):
     return camelcase_to_underscore(opts.object_name)
 
 
-def get_model_for_type(type):
+def get_model_for_type(type_name):
     '''
     Return model class for a given type name.
     '''
-    from django.contrib.contenttypes.models import ContentType
-    for ct in ContentType.objects.filter(Q(app_label='main') | Q(app_label='auth', model='user')):
-        ct_model = ct.model_class()
-        if not ct_model:
-            continue
-        ct_type = get_type_for_model(ct_model)
-        if type == ct_type:
-            return ct_model
+    model_str = underscore_to_camelcase(type_name)
+    if model_str == 'User':
+        use_app = 'auth'
     else:
-        raise DatabaseError('"{}" is not a valid AWX model.'.format(type))
+        use_app = 'main'
+    return apps.get_model(use_app, model_str)
 
 
 def prefetch_page_capabilities(model, page, prefetch_list, user):
