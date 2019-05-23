@@ -5,8 +5,9 @@ asgiref==1.1.2
 azure-keyvault==1.1.0
 boto==2.47.0
 channels==1.1.8
-celery==4.2.1
+celery==4.3.0
 daphne==1.3.0   # Last before backwards-incompatible channels 2 upgrade
+twisted[tls]>=17.1   # from daphne, see https://github.com/django/daphne/pull/257
 defusedxml==0.5.0  # py36 support https://github.com/tiran/defusedxml/pull/4
 Django==1.11.20
 django-auth-ldap==1.7.0
@@ -34,7 +35,6 @@ psutil==5.4.3
 psycopg2==2.7.3.2   # problems with Segmentation faults / wheels on upgrade
 pygerduty==0.37.0
 pyparsing==2.2.0
-python-daemon==2.2.0
 python-dateutil==2.7.2  # contains support for TZINFO= parsing
 python-memcached==1.59
 python-radius==1.0
@@ -43,7 +43,6 @@ social-auth-core==3.0.0
 social-auth-app-django==2.1.0
 requests==2.21.0
 requests-futures==0.9.7
-service-identity==17.0.0
 slackclient==1.1.2
 tacacs_plus==1.0
 twilio==6.10.4
