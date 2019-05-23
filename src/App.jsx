@@ -4,13 +4,13 @@ import {
   Nav,
   NavList,
   Page,
-  PageHeader,
+  PageHeader as PFPageHeader,
   PageSidebar,
   Button
 } from '@patternfly/react-core';
-
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
+import styled from 'styled-components';
 
 import { RootDialog } from './contexts/RootDialog';
 import { withNetwork } from './contexts/Network';
@@ -21,6 +21,20 @@ import About from './components/About';
 import NavExpandableGroup from './components/NavExpandableGroup';
 import TowerLogo from './components/TowerLogo';
 import PageHeaderToolbar from './components/PageHeaderToolbar';
+
+const PageHeader = styled(PFPageHeader)`
+  & .pf-c-page__header-brand-link {
+    color: inherit;
+
+    &:hover {
+      color: inherit;
+    }
+
+    & svg {
+      width: 125px;
+    }
+  }
+`;
 
 class App extends Component {
   constructor (props) {
@@ -104,7 +118,8 @@ class App extends Component {
                     <PageHeader
                       showNavToggle
                       onNavToggle={this.onNavToggle}
-                      logo={<TowerLogo linkTo="/" />}
+                      logo={<TowerLogo />}
+                      logoProps={{ href: '/' }}
                       toolbar={(
                         <PageHeaderToolbar
                           loggedInUser={me}

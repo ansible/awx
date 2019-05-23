@@ -11,15 +11,6 @@
   max-width: 255px;
 }
 
-.pf-c-page__header-brand-link {
-  max-width: 85px;
-}
-
-.pf-c-page__header-brand-link img {
-  transform: scale(1.1, 1.1);
-  position: relative;
-}
-
 .pf-c-page__header-tools .pf-l-toolbar__item {
   margin-left: 20px;
 }
@@ -399,5 +390,3 @@
 .pf-m-error p.pf-c-form__helper-text {
   color: var(--pf-global--danger-color--100);
 }
-
-
