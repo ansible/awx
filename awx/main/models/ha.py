@@ -144,7 +144,10 @@ class Instance(HasPolicyEditsMixin, BaseModel):
     def refresh_capacity(self):
         cpu = get_cpu_capacity()
         mem = get_mem_capacity()
-        self.capacity = get_system_task_capacity(self.capacity_adjustment)
+        if self.enabled:
+            self.capacity = get_system_task_capacity(self.capacity_adjustment)
+        else:
+            self.capacity = 0
         self.cpu = cpu[0]
         self.memory = mem[0]
         self.cpu_capacity = cpu[1]
@@ -231,9 +234,7 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
 
     def fit_task_to_most_remaining_capacity_instance(self, task):
         instance_most_capacity = None
-        for i in self.instances.filter(capacity__gt=0).order_by('hostname'):
-            if not i.enabled:
-                continue
+        for i in self.instances.filter(capacity__gt=0, enabled=True).order_by('hostname'):
             if i.remaining_capacity >= task.task_impact and \
                     (instance_most_capacity is None or
                      i.remaining_capacity > instance_most_capacity.remaining_capacity):
@@ -242,7 +243,7 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
 
     def find_largest_idle_instance(self):
         largest_instance = None
-        for i in self.instances.filter(capacity__gt=0).order_by('hostname'):
+        for i in self.instances.filter(capacity__gt=0, enabled=True).order_by('hostname'):
             if i.jobs_running == 0:
                 if largest_instance is None:
                     largest_instance = i
@@ -253,7 +254,7 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
     def choose_online_controller_node(self):
         return random.choice(list(self.controller
                                       .instances
-                                      .filter(capacity__gt=0)
+                                      .filter(capacity__gt=0, enabled=True)
                                       .values_list('hostname', flat=True)))
 
 

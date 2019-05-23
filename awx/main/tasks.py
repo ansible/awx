@@ -393,14 +393,9 @@ def cluster_node_heartbeat():
             instance_list.remove(inst)
     if this_inst:
         startup_event = this_inst.is_lost(ref_time=nowtime)
-        if this_inst.capacity == 0 and this_inst.enabled:
-            logger.warning('Rejoining the cluster as instance {}.'.format(this_inst.hostname))
-        if this_inst.enabled:
-            this_inst.refresh_capacity()
-        elif this_inst.capacity != 0 and not this_inst.enabled:
-            this_inst.capacity = 0
-            this_inst.save(update_fields=['capacity'])
+        this_inst.refresh_capacity()
         if startup_event:
+            logger.warning('Rejoining the cluster as instance {}.'.format(this_inst.hostname))
             return
     else:
         raise RuntimeError("Cluster Host Not Found: {}".format(settings.CLUSTER_HOST_ID))
