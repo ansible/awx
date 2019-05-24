@@ -167,7 +167,7 @@ class ApiV1PingView(APIView):
                                               capacity=instance.capacity, version=instance.version))
             sorted(response['instances'], key=operator.itemgetter('node'))
         response['instance_groups'] = []
-        for instance_group in InstanceGroup.objects.all():
+        for instance_group in InstanceGroup.objects.prefetch_related('instances'):
             response['instance_groups'].append(dict(name=instance_group.name,
                                                     capacity=instance_group.capacity,
                                                     instances=[x.hostname for x in instance_group.instances.all()]))

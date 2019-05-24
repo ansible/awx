@@ -687,6 +687,7 @@ class OAuth2ApplicationAccess(BaseAccess):
 
     model = OAuth2Application
     select_related = ('user',)
+    prefetch_related = ('organization', 'oauth2accesstoken_set')
 
     def filtered_queryset(self):
         org_access_qs = Organization.accessible_objects(self.user, 'member_role')
@@ -725,6 +726,7 @@ class OAuth2TokenAccess(BaseAccess):
     model = OAuth2AccessToken
 
     select_related = ('user', 'application')
+    prefetch_related = ('refresh_token',)
 
     def filtered_queryset(self):
         org_access_qs = Organization.objects.filter(
@@ -826,7 +828,7 @@ class InventoryAccess(BaseAccess):
     '''
 
     model = Inventory
-    select_related = ('created_by', 'modified_by', 'organization',)
+    prefetch_related = ('created_by', 'modified_by', 'organization')
 
     def filtered_queryset(self, allowed=None, ad_hoc=None):
         return self.model.accessible_objects(self.user, 'read_role')
@@ -1090,8 +1092,8 @@ class InventoryUpdateAccess(BaseAccess):
     '''
 
     model = InventoryUpdate
-    select_related = ('created_by', 'modified_by', 'inventory_source__inventory',)
-    prefetch_related = ('unified_job_template', 'instance_group', 'credentials',)
+    select_related = ('created_by', 'modified_by', 'inventory_source',)
+    prefetch_related = ('unified_job_template', 'instance_group', 'credentials__credential_type', 'inventory', 'source_script')
 
     def filtered_queryset(self):
         return self.model.objects.filter(inventory_source__inventory__in=Inventory.accessible_pk_qs(self.user, 'read_role'))
@@ -1105,11 +1107,7 @@ class InventoryUpdateAccess(BaseAccess):
         return self.user in obj.inventory_source.inventory.admin_role
 
     def can_start(self, obj, validate_license=True):
-        # For relaunching
-        if obj and obj.inventory_source:
-            access = InventorySourceAccess(self.user)
-            return access.can_start(obj.inventory_source, validate_license=validate_license)
-        return False
+        return InventorySourceAccess(self.user).can_start(obj, validate_license=validate_license)
 
     @check_superuser
     def can_delete(self, obj):
@@ -1127,6 +1125,7 @@ class CredentialTypeAccess(BaseAccess):
     '''
 
     model = CredentialType
+    prefetch_related = ('created_by', 'modified_by',)
 
     def can_read(self, obj):
         return True
@@ -1363,7 +1362,8 @@ class ProjectAccess(NotificationAttachMixin, BaseAccess):
     '''
 
     model = Project
-    select_related = ('modified_by', 'credential', 'current_job', 'last_job',)
+    select_related = ('credential',)
+    prefetch_related = ('modified_by', 'created_by', 'organization', 'last_job', 'current_job')
     notification_attach_roles = ['admin_role']
 
     def filtered_queryset(self):
@@ -1856,7 +1856,7 @@ class WorkflowJobTemplateNodeAccess(BaseAccess):
     '''
     model = WorkflowJobTemplateNode
     prefetch_related = ('success_nodes', 'failure_nodes', 'always_nodes',
-                        'unified_job_template', 'credentials',)
+                        'unified_job_template', 'credentials', 'workflow_job_template')
 
     def filtered_queryset(self):
         return self.model.objects.filter(
@@ -1948,9 +1948,8 @@ class WorkflowJobNodeAccess(BaseAccess):
     Deletion must happen as a cascade delete from the workflow job.
     '''
     model = WorkflowJobNode
-    select_related = ('unified_job_template', 'job',)
-    prefetch_related = ('success_nodes', 'failure_nodes', 'always_nodes',
-                        'credentials',)
+    prefetch_related = ('unified_job_template', 'job', 'workflow_job', 'credentials',
+                        'success_nodes', 'failure_nodes', 'always_nodes',)
 
     def filtered_queryset(self):
         return self.model.objects.filter(
@@ -2497,6 +2496,7 @@ class NotificationTemplateAccess(BaseAccess):
     I can see/use a notification_template if I have permission to
     '''
     model = NotificationTemplate
+    prefetch_related = ('created_by', 'modified_by', 'organization')
 
     def filtered_queryset(self):
         return self.model.objects.filter(
@@ -2683,6 +2683,7 @@ class ActivityStreamAccess(BaseAccess):
 class CustomInventoryScriptAccess(BaseAccess):
 
     model = CustomInventoryScript
+    prefetch_related = ('created_by', 'modified_by', 'organization')
 
     def filtered_queryset(self):
         return self.model.accessible_objects(self.user, 'read_role').all()
@@ -2716,6 +2717,17 @@ class RoleAccess(BaseAccess):
     '''
 
     model = Role
+    prefetch_related = ('content_type',)
+
+    def filtered_queryset(self):
+        result = Role.visible_roles(self.user)
+        # Sanity check: is the requesting user an orphaned non-admin/auditor?
+        # if yes, make system admin/auditor mandatorily visible.
+        if not self.user.is_superuser and not self.user.is_system_auditor and not self.user.organizations.exists():
+            mandatories = ('system_administrator', 'system_auditor')
+            super_qs = Role.objects.filter(singleton_name__in=mandatories)
+            result = result | super_qs
+        return result
 
     def can_read(self, obj):
         if not obj:
