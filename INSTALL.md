@@ -193,7 +193,7 @@ $ eval $(minishift docker-env)
 
 By default, AWX will deploy a PostgreSQL pod inside of your cluster. You will need to create a [Persistent Volume Claim](https://docs.openshift.org/latest/dev_guide/persistent_volumes.html) which is named `postgresql` by default, and can be overridden by setting the `openshift_pg_pvc_name` variable. For testing and demo purposes, you may set `openshift_pg_emptydir=yes`.
 
-If you wish to use an external database, in the inventory file, set the value of `pg_hostname`, and update `pg_username`, `pg_password`, `pg_database`, and `pg_port` with the connection information. When setting `pg_hostname` the installer will assume you have configured the database in that location and will not launch the postgresql pod.
+If you wish to use an external database, in the inventory file, set the value of `pg_hostname`, and update `pg_username`, `pg_password`, `pg_admin_password`, `pg_database`, and `pg_port` with the connection information. When setting `pg_hostname` the installer will assume you have configured the database in that location and will not launch the postgresql pod.
 
 ### Start the build
 
@@ -503,7 +503,7 @@ If you wish to tag and push built images to a Docker registry, set the following
 
 AWX requires access to a PostgreSQL database, and by default, one will be created and deployed in a container, and data will be persisted to a host volume. In this scenario, you must set the value of `postgres_data_dir` to a path that can be mounted to the container. When the container is stopped, the database files will still exist in the specified path.
 
-If you wish to use an external database, in the inventory file, set the value of `pg_hostname`, and update `pg_username`, `pg_password`, `pg_database`, and `pg_port` with the connection information.
+If you wish to use an external database, in the inventory file, set the value of `pg_hostname`, and update `pg_username`, `pg_password`, `pg_admin_password`, `pg_database`, and `pg_port` with the connection information.
 
 ### Start the build
 

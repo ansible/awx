@@ -272,31 +272,31 @@ supervisor:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	supervisord --pidfile=/tmp/supervisor_pid -n
+	/usr/bin/scl enable rh-postgresql10 'supervisord --pidfile=/tmp/supervisor_pid -n'
 
 collectstatic:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	mkdir -p awx/public/static && $(PYTHON) manage.py collectstatic --clear --noinput > /dev/null 2>&1
+	/usr/bin/scl enable rh-postgresql10 'mkdir -p awx/public/static && $(PYTHON) manage.py collectstatic --clear --noinput > /dev/null 2>&1'
 
 uwsgi: collectstatic
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-    uwsgi -b 32768 --socket 127.0.0.1:8050 --module=awx.wsgi:application --home=/venv/awx --chdir=/awx_devel/ --vacuum --processes=5 --harakiri=120 --master --no-orphans --py-autoreload 1 --max-requests=1000 --stats /tmp/stats.socket --lazy-apps --logformat "%(addr) %(method) %(uri) - %(proto) %(status)" --hook-accepting1="exec:supervisorctl restart tower-processes:awx-dispatcher tower-processes:awx-receiver"
+	/usr/bin/scl enable rh-postgresql10 'uwsgi -b 32768 --socket 127.0.0.1:8050 --module=awx.wsgi:application --home=/venv/awx --chdir=/awx_devel/ --vacuum --processes=5 --harakiri=120 --master --no-orphans --py-autoreload 1 --max-requests=1000 --stats /tmp/stats.socket --lazy-apps --logformat "%(addr) %(method) %(uri) - %(proto) %(status)" --hook-accepting1="exec:supervisorctl restart tower-processes:awx-dispatcher tower-processes:awx-receiver"'
 
 daphne:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	daphne -b 127.0.0.1 -p 8051 awx.asgi:channel_layer
+	/usr/bin/scl enable rh-postgresql10 'daphne -b 127.0.0.1 -p 8051 awx.asgi:channel_layer'
 
 runworker:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	$(PYTHON) manage.py runworker --only-channels websocket.*
+	/usr/bin/scl enable rh-postgresql10 '$(PYTHON) manage.py runworker --only-channels websocket.*'
 
 # Run the built-in development webserver (by default on http://localhost:8013).
 runserver:
@@ -310,7 +310,7 @@ dispatcher:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	$(PYTHON) manage.py run_dispatcher
+	/usr/bin/scl enable rh-postgresql10 '$(PYTHON) manage.py run_dispatcher'
 
 
 # Run to start the zeromq callback receiver
@@ -318,7 +318,7 @@ receiver:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	$(PYTHON) manage.py run_callback_receiver
+	/usr/bin/scl enable rh-postgresql10 '$(PYTHON) manage.py run_callback_receiver'
 
 nginx:
 	nginx -g "daemon off;"
@@ -327,7 +327,7 @@ jupyter:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	$(MANAGEMENT_COMMAND) shell_plus --notebook
+	/usr/bin/scl enable rh-postgresql10 '$(MANAGEMENT_COMMAND) shell_plus --notebook'
 
 reports:
 	mkdir -p $@
@@ -648,7 +648,7 @@ clean-elk:
 	docker rm tools_kibana_1
 
 psql-container:
-	docker run -it --net tools_default --rm postgres:9.6 sh -c 'exec psql -h "postgres" -p "5432" -U postgres'
+	docker run -it --net tools_default --rm postgres:10 sh -c 'exec psql -h "postgres" -p "5432" -U postgres'
 
 VERSION:
 	@echo "awx: $(VERSION)"

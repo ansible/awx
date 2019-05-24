@@ -30,7 +30,7 @@ Markdown==2.6.11    # used for formatting API help
 ordereddict==1.1
 prometheus_client==0.6.0
 psutil==5.4.3
-psycopg2==2.7.3.2   # problems with Segmentation faults / wheels on upgrade
+psycopg2==2.8.2
 pygerduty==0.37.0
 pyparsing==2.2.0
 python-dateutil==2.7.2  # contains support for TZINFO= parsing
