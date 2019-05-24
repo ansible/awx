@@ -26,7 +26,6 @@ module.exports = {
         const templates = client.page.templates();
 
         client.useCss();
-        client.resizeWindow(1200, 800);
         client.login();
         client.waitForAngular();
 
@@ -84,7 +83,6 @@ module.exports = {
         const templates = client.page.templates();
 
         client.useCss();
-        client.resizeWindow(1200, 800);
         client.login();
         client.waitForAngular();
 

@@ -67,7 +67,6 @@ module.exports = {
     },
     'login to awx': client => {
         client.login();
-        client.resizeWindow(1200, 800);
         client.waitForAngular();
     },
     'expected jt launch with no prompts to navigate to job details': client => {

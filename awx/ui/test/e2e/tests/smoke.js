@@ -22,7 +22,6 @@ module.exports = {
         initializeData();
 
         client.login();
-        client.resizeWindow(1200, 800);
         client.waitForAngular();
     },
     'create organization': client => {

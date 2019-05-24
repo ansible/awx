@@ -12,7 +12,6 @@ module.exports = {
         const notifications = client.page.notificationTemplates();
 
         client.useCss();
-        client.resizeWindow(1200, 800);
         client.login();
         client.waitForAngular();
 

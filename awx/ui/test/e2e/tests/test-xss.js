@@ -75,7 +75,6 @@ module.exports = {
 
                 client.useCss();
                 client.login();
-                client.resizeWindow(1200, 800);
                 client.waitForAngular();
 
                 done();

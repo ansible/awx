@@ -7,7 +7,6 @@ let data;
 
 module.exports = {
     before: (client, done) => {
-        client.resizeWindow(1200, 800);
         client.login();
         client.waitForAngular();
 

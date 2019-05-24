@@ -54,8 +54,7 @@ module.exports = {
 
         client
             .login()
-            .waitForAngular()
-            .resizeWindow(1200, 1000);
+            .waitForAngular();
     },
 
     'Test job template status updates for a successful job on dashboard': client => {

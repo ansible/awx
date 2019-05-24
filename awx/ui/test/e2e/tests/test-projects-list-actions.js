@@ -12,7 +12,6 @@ module.exports = {
         const projects = client.page.projects();
 
         client.useCss();
-        client.resizeWindow(1200, 800);
         client.login();
         client.waitForAngular();
 

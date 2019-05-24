@@ -12,7 +12,6 @@ module.exports = {
         const inventoryScripts = client.page.inventoryScripts();
 
         client.useCss();
-        client.resizeWindow(1200, 800);
         client.login();
         client.waitForAngular();
 
