@@ -336,7 +336,12 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
         }
     } else if (base === 'system_job_templates') {
         schedule_url = GetBasePath(base) + $stateParams.id + '/schedules/';
-        $scope.cleanupJob = true;
+        var noModalJobs = ['Automation Insights Collection', 'Cleanup Expired Sessions', 'Cleanup Expired OAuth 2 Tokens'];
+        if (noModalJobs.includes($scope.parentObject.name)) {
+            $scope.cleanupJob = false;
+        } else {
+          $scope.cleanupJob = true;
+        }
     }
 
     Wait('start');

@@ -166,6 +166,12 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
         if (_.has(schedule, 'summary_fields.unified_job_template.unified_job_type') &&
             schedule.summary_fields.unified_job_template.unified_job_type === 'system_job'){
             $scope.cleanupJob = true;
+            var noModalJobs = ['Automation Insights Collection', 'Cleanup Expired Sessions', 'Cleanup Expired OAuth 2 Tokens'];
+            if (noModalJobs.includes($scope.parentObject.name)) {
+                $scope.cleanupJob = false;
+            } else {
+              $scope.cleanupJob = true;
+            }
         }
 
         $scope.schedule_obj = scheduleResolve;

@@ -24,7 +24,7 @@ def create_collection_jt(apps, schema_editor):
     now_dt = now()	
     random_time = now_dt + timedelta(minutes=random.randint(-30,30))	
     random_schedule_time = random_time.strftime('%Y%m%dT%H%M%SZ')
-    insights_enabled = getattr(settings, 'INSIGHTS_TRACKING_STATE', None)
+    insights_enabled = getattr(settings, 'INSIGHTS_TRACKING_STATE', False)
 
     sjt, created = SystemJobTemplate.objects.get_or_create(	
         job_type='gather_analytics --ship',
