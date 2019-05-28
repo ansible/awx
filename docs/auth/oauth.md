@@ -235,7 +235,7 @@ This page lists OAuth 2 utility endpoints used for authorization, token refresh 
 Note endpoints other than `/api/o/authorize/` are not meant to be used in browsers and do not
 support HTTP GET. The endpoints here strictly follow
 [RFC specs for OAuth 2](https://tools.ietf.org/html/rfc6749), so please use that for detailed
-reference. The `implicit` grant type can only be used to acquire a access token if the user is already logged in via session authentication, as that confirms that the user is authorized to create an access token. Here we give some examples to demonstrate the typical usage of these endpoints in
+reference. Here we give some examples to demonstrate the typical usage of these endpoints in
 AWX context (Note AWX net location default to `http://localhost:8013` in examples):
 
 
@@ -263,51 +263,6 @@ to the redirect_uri specified in the application. The client application will th
 `api/o/token/` endpoint on AWX with the `code`, `client_id`, `client_secret`, `grant_type`, and `redirect_uri`. 
 AWX will respond with the `access_token`, `token_type`, `refresh_token`, and `expires_in`. For more
 information on testing this flow, refer to [django-oauth-toolkit](http://django-oauth-toolkit.readthedocs.io/en/latest/tutorial/tutorial_01.html#test-your-authorization-server).
-
-
-
-#### Application using `implicit` grant type
-The use case: single page web apps that can't keep a client_secret as secure.  This method with skips the 
-authorization code part of the flow and just returns an access token.  
-Suppose we have an application `admin's app` of grant type `implicit`:
-```text
-{
-    "id": 1,
-    "type": "application",
-    "related": {
-    ...
-    "name": "admin's app",
-    "user": 1,
-    "client_id": "L0uQQWW8pKX51hoqIRQGsuqmIdPi2AcXZ9EJRGmj",
-    "client_secret": "9Wp4dUrUsigI8J15fQYJ3jn0MJHLkAjyw7ikBsABeWTNJbZwy7eB2Xro9ykYuuygerTPQ2gIF2DCTtN3kurkt0Me3AhanEw6peRNvNLs1NNfI4f53mhX8zo5JQX0BKy5",
-    "client_type": "confidential",
-    "redirect_uris": "http://<awx>/api/",
-    "authorization_grant_type": "implicit",
-    "skip_authorization": false
-}
-```
-
-In API browser, first make sure the user is logged in via session auth, then visit authorization
-endpoint with given parameters:
-```text
-http://localhost:8013/api/o/authorize/?response_type=token&client_id=L0uQQWW8pKX51hoqIRQGsuqmIdPi2AcXZ9EJRGmj&scope=read
-```
-Here the value of `client_id` should be the same as that of `client_id` field of underlying application.
-On success, an authorization page should be displayed asking the logged in user to grant/deny the access token.
-Once the user clicks on 'grant', the API browser will try POSTing to the same endpoint with the same parameters in POST body, on success a 302 redirect will be returned:
-```text
-HTTP/1.1 302 Found
-Connection:keep-alive
-Content-Language:en
-Content-Length:0
-Content-Type:text/html; charset=utf-8
-Date:Tue, 05 Dec 2017 20:36:19 GMT
-Location:http://localhost:8013/api/#access_token=0lVJJkolFTwYawHyGkk7NTmSKdzBen&token_type=Bearer&state=&expires_in=315360000000&scope=read
-Server:nginx/1.12.2
-Strict-Transport-Security:max-age=15768000
-Vary:Accept-Language, Cookie
-
-```
 
 
 #### Application using `password` grant type

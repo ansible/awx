@@ -38,11 +38,9 @@ class OAuth2Application(AbstractApplication):
     )
 
     GRANT_AUTHORIZATION_CODE = "authorization-code"
-    GRANT_IMPLICIT = "implicit"
     GRANT_PASSWORD = "password"
     GRANT_TYPES = (
         (GRANT_AUTHORIZATION_CODE, _("Authorization code")),
-        (GRANT_IMPLICIT, _("Implicit")),
         (GRANT_PASSWORD, _("Resource owner password-based")),
     )
 

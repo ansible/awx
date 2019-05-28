@@ -22,7 +22,6 @@ const addEditElements = {
 
 const authorizationGrantTypeOptions = {
     authorizationCode: 'Authorization code',
-    implicit: 'Implicit',
     resourceOwnerPasswordBased: 'Resource owner password-based',
 };
 
