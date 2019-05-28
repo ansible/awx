@@ -714,7 +714,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                                                   </div>
                                                                                 }
                                                                               >
-                                                                                <DropdownToggle
+                                                                                <Toggle
                                                                                   ariaHasPopup={true}
                                                                                   className=""
                                                                                   id="awx-search"
@@ -804,7 +804,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                                                       </svg>
                                                                                     </CaretDownIcon>
                                                                                   </button>
-                                                                                </DropdownToggle>
+                                                                                </Toggle>
                                                                               </DropdownToggle>
                                                                             </div>
                                                                           </Dropdown>
@@ -932,6 +932,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                                             isDisabled={false}
                                                                             isFocus={false}
                                                                             isHover={false}
+                                                                            isInline={false}
                                                                             onClick={[Function]}
                                                                             type="button"
                                                                             variant="tertiary"
@@ -984,20 +985,37 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                       </Styled(ToolbarItem)>
                                                       <VerticalSeparator>
                                                         <div>
-                                                          <span
-                                                            style={
-                                                              Object {
-                                                                "backgroundColor": "#d7d7d7",
-                                                                "content": "",
-                                                                "display": "inline-block",
-                                                                "height": "30px",
-                                                                "marginLeft": "20px",
-                                                                "marginRight": "20px",
-                                                                "verticalAlign": "middle",
-                                                                "width": "1px",
+                                                          <VerticalSeparator__Separator>
+                                                            <StyledComponent
+                                                              forwardedComponent={
+                                                                Object {
+                                                                  "$$typeof": Symbol(react.forward_ref),
+                                                                  "attrs": Array [],
+                                                                  "componentStyle": ComponentStyle {
+                                                                    "componentId": "VerticalSeparator__Separator-sc-1256nz7-0",
+                                                                    "isStatic": true,
+                                                                    "lastClassName": "kgxyCB",
+                                                                    "rules": Array [
+                                                                      "display:inline-block;width:1px;height:30px;margin-right:20px;margin-left:20px;background-color:#d7d7d7;vertical-align:middle;",
+                                                                    ],
+                                                                  },
+                                                                  "displayName": "VerticalSeparator__Separator",
+                                                                  "foldedComponentIds": Array [],
+                                                                  "render": [Function],
+                                                                  "styledComponentId": "VerticalSeparator__Separator-sc-1256nz7-0",
+                                                                  "target": "span",
+                                                                  "toString": [Function],
+                                                                  "warnTooManyClasses": [Function],
+                                                                  "withComponent": [Function],
+                                                                }
                                                               }
-                                                            }
-                                                          />
+                                                              forwardedRef={null}
+                                                            >
+                                                              <span
+                                                                className="VerticalSeparator__Separator-sc-1256nz7-0 kgxyCB"
+                                                              />
+                                                            </StyledComponent>
+                                                          </VerticalSeparator__Separator>
                                                         </div>
                                                       </VerticalSeparator>
                                                     </div>
@@ -1327,7 +1345,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                                             </div>
                                                                           }
                                                                         >
-                                                                          <DropdownToggle
+                                                                          <Toggle
                                                                             ariaHasPopup={true}
                                                                             className=""
                                                                             id="awx-sort"
@@ -1418,7 +1436,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                                                 </svg>
                                                                               </CaretDownIcon>
                                                                             </button>
-                                                                          </DropdownToggle>
+                                                                          </Toggle>
                                                                         </DropdownToggle>
                                                                       </div>
                                                                     </Dropdown>
@@ -1466,6 +1484,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                                       isDisabled={false}
                                                                       isFocus={false}
                                                                       isHover={false}
+                                                                      isInline={false}
                                                                       onClick={[Function]}
                                                                       type="button"
                                                                       variant="plain"
@@ -2748,7 +2767,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                       <div
                                         className="pf-c-pagination pf-m-footer Pagination__AWXPagination-c2dclb-0 dXBcqV"
                                       >
-                                        <OptionsMenu
+                                        <PaginationOptionsMenu
                                           dropDirection="up"
                                           firstIndex={1}
                                           itemCount={2}
@@ -2964,7 +2983,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                     <span
                                                       className="pf-c-options-menu__toggle-text"
                                                     >
-                                                      <ToggleTamplate
+                                                      <ToggleTemplate
                                                         firstIndex={1}
                                                         itemCount={2}
                                                         itemsTitle="items"
@@ -2981,7 +3000,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                         </strong>
                                                          
                                                         items
-                                                      </ToggleTamplate>
+                                                      </ToggleTemplate>
                                                     </span>
                                                     <button
                                                       aria-expanded={false}
@@ -3024,7 +3043,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                               </div>
                                             </Dropdown>
                                           </div>
-                                        </OptionsMenu>
+                                        </PaginationOptionsMenu>
                                         <Navigation
                                           currPage="Current page"
                                           lastPage={1}
@@ -3056,6 +3075,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                               isDisabled={true}
                                               isFocus={false}
                                               isHover={false}
+                                              isInline={false}
                                               onClick={[Function]}
                                               type="button"
                                               variant="plain"
@@ -3107,6 +3127,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                               isDisabled={true}
                                               isFocus={false}
                                               isHover={false}
+                                              isInline={false}
                                               onClick={[Function]}
                                               type="button"
                                               variant="plain"
@@ -3179,6 +3200,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                               isDisabled={true}
                                               isFocus={false}
                                               isHover={false}
+                                              isInline={false}
                                               onClick={[Function]}
                                               type="button"
                                               variant="plain"
@@ -3230,6 +3252,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                               isDisabled={true}
                                               isFocus={false}
                                               isHover={false}
+                                              isInline={false}
                                               onClick={[Function]}
                                               type="button"
                                               variant="plain"

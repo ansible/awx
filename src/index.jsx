@@ -12,7 +12,6 @@ import { t } from '@lingui/macro';
 
 import '@patternfly/react-core/dist/styles/base.css';
 import './app.scss';
-import './components/SelectedList/styles.scss';
 import './components/AddRole/styles.scss';
 
 import { Config } from './contexts/Config';

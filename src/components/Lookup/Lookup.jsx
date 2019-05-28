@@ -5,7 +5,6 @@ import { SearchIcon } from '@patternfly/react-icons';
 import {
   Button,
   ButtonVariant,
-  Chip,
   InputGroup,
   Modal,
 } from '@patternfly/react-core';
@@ -17,6 +16,7 @@ import PaginatedDataList from '../PaginatedDataList';
 import DataListToolbar from '../DataListToolbar';
 import CheckboxListItem from '../ListItem';
 import SelectedList from '../SelectedList';
+import { ChipGroup, Chip } from '../Chip';
 import { getQSConfig, parseNamespacedQueryString } from '../../util/qs';
 
 class Lookup extends React.Component {
@@ -128,13 +128,13 @@ class Lookup extends React.Component {
     const header = lookupHeader || i18n._(t`items`);
 
     const chips = value ? (
-      <div className="pf-c-chip-group">
+      <ChipGroup>
         {value.map(chip => (
           <Chip key={chip.id} onClick={() => this.toggleSelected(chip)}>
             {chip.name}
           </Chip>
         ))}
-      </div>
+      </ChipGroup>
     ) : null;
 
     return (

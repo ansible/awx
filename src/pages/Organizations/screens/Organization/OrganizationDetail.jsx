@@ -2,63 +2,15 @@ import React, { Component } from 'react';
 import { Link, withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-
-import {
-  CardBody as PFCardBody,
-  Button,
-  TextList,
-  TextListItem,
-  TextListVariants,
-  TextListItemVariants,
-} from '@patternfly/react-core';
+import { CardBody as PFCardBody, Button } from '@patternfly/react-core';
 import styled from 'styled-components';
+import { DetailList, Detail } from '../../../../components/DetailList';
 import { withNetwork } from '../../../../contexts/Network';
-import BasicChip from '../../../../components/BasicChip/BasicChip';
+import { ChipGroup, Chip } from '../../../../components/Chip';
 
 const CardBody = styled(PFCardBody)`
   padding-top: 20px;
 `;
-
-const DetailList = styled(TextList)`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
-  grid-gap: 20px;
-
-  & > div {
-    display: grid;
-    grid-template-columns: 10em 1fr;
-    grid-gap: 20px;
-  }
-`;
-
-const DetailName = styled(TextListItem)`
-  && {
-    grid-column: 1;
-    font-weight: var(--pf-global--FontWeight--bold);
-    text-align: right;
-  }
-`;
-
-const DetailValue = styled(TextListItem)`
-  && {
-    grid-column: 2;
-    word-break: break-all;
-  }
-`;
-
-const InstanceGroupsDetail = styled.div`
-  grid-column: 1 / -1;
-`;
-
-const Detail = ({ label, value }) => {
-  if (!value) return null;
-  return (
-    <div>
-      <DetailName component={TextListItemVariants.dt}>{label}</DetailName>
-      <DetailValue component={TextListItemVariants.dd}>{value}</DetailValue>
-    </div>
-  );
-};
 
 class OrganizationDetail extends Component {
   constructor (props) {
@@ -66,22 +18,13 @@ class OrganizationDetail extends Component {
 
     this.state = {
       instanceGroups: [],
-      isToggleOpen: false,
       error: false
     };
-
-    this.handleChipToggle = this.handleChipToggle.bind(this);
     this.loadInstanceGroups = this.loadInstanceGroups.bind(this);
   }
 
   componentDidMount () {
     this.loadInstanceGroups();
-  }
-
-  handleChipToggle = () => {
-    this.setState((prevState) => ({
-      isToggleOpen: !prevState.isToggleOpen
-    }));
   }
 
   async loadInstanceGroups () {
@@ -106,7 +49,6 @@ class OrganizationDetail extends Component {
     const {
       error,
       instanceGroups,
-      isToggleOpen,
     } = this.state;
 
     const {
@@ -121,30 +63,10 @@ class OrganizationDetail extends Component {
       match,
       i18n
     } = this.props;
-    const showOverflowChipAfter = 5;
-
-    const instanceGroupChips = instanceGroups.slice(0, isToggleOpen
-      ? instanceGroups.length : showOverflowChipAfter)
-      .map(instanceGroup => (
-        <BasicChip
-          key={instanceGroup.id}
-        >
-          {instanceGroup.name}
-        </BasicChip>
-      ));
-
-    const overflowChip = (instanceGroups.length > showOverflowChipAfter) ? (
-      <BasicChip
-        isOverflowChip
-        onToggle={this.handleChipToggle}
-      >
-        {isToggleOpen ? 'Show less' : `${(instanceGroups.length - showOverflowChipAfter).toString()} more`}
-      </BasicChip>
-    ) : null;
 
     return (
       <CardBody>
-        <DetailList component={TextListVariants.dl}>
+        <DetailList>
           <Detail
             label={i18n._(t`Name`)}
             value={name}
@@ -166,15 +88,17 @@ class OrganizationDetail extends Component {
             value={modified}
           />
           {(instanceGroups && instanceGroups.length > 0) && (
-            <InstanceGroupsDetail>
-              <DetailName component={TextListItemVariants.dt}>
-                {i18n._(t`Instance Groups`)}
-              </DetailName>
-              <DetailValue component={TextListItemVariants.dd}>
-                {instanceGroupChips}
-                {overflowChip}
-              </DetailValue>
-            </InstanceGroupsDetail>
+            <Detail
+              fullWidth
+              label={i18n._(t`Instance Groups`)}
+              value={(
+                <ChipGroup showOverflowAfter={5}>
+                  {instanceGroups.map(ig => (
+                    <Chip key={ig.id} isReadOnly>{ig.name}</Chip>
+                  ))}
+                </ChipGroup>
+              )}
+            />
           )}
         </DetailList>
         {summary_fields.user_capabilities.edit && (

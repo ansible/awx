@@ -1,40 +1,24 @@
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import {
-  Chip
-} from '@patternfly/react-core';
-
-import BasicChip from '../BasicChip/BasicChip';
+import { Split as PFSplit, SplitItem } from '@patternfly/react-core';
+import styled from 'styled-components';
+import { ChipGroup, Chip } from '../Chip';
 import VerticalSeparator from '../VerticalSeparator';
 
-const selectedRowStyling = {
-  paddingTop: '15px',
-  paddingBottom: '5px',
-  borderLeft: '0',
-  borderRight: '0'
-};
+const Split = styled(PFSplit)`
+  padding-top: 15px;
+  padding-bottom: 5px;
+  border-bottom: #ebebeb var(--pf-global--BorderWidth--sm) solid;
+  align-items: baseline;
+`;
 
-const selectedLabelStyling = {
-  alignSelf: 'center',
-  fontSize: '14px',
-  fontWeight: 'bold'
-};
+const SplitLabelItem = styled(SplitItem)`
+  font-size: 14px;
+  font-weight: bold;
+  word-break: initial;
+`;
 
 class SelectedList extends Component {
-  constructor (props) {
-    super(props);
-
-    this.state = {
-      showOverflow: false
-    };
-
-    this.showOverflow = this.showOverflow.bind(this);
-  }
-
-  showOverflow = () => {
-    this.setState({ showOverflow: true });
-  };
-
   render () {
     const {
       label,
@@ -44,58 +28,26 @@ class SelectedList extends Component {
       displayKey,
       isReadOnly
     } = this.props;
-    const { showOverflow } = this.state;
-    const visibleItems = selected.slice(0, showOverflow ? selected.length : showOverflowAfter);
     return (
-      <div className="awx-selectedList">
-        <div className="pf-l-split" style={selectedRowStyling}>
-          <div className="pf-l-split__item" style={selectedLabelStyling}>
-            {label}
-          </div>
-          <VerticalSeparator />
-          <div className="pf-l-split__item">
-            <div className="pf-c-chip-group">
-              {isReadOnly ? (
-                <Fragment>
-                  {visibleItems
-                    .map(selectedItem => (
-                      <BasicChip
-                        key={selectedItem.id}
-                      >
-                        {selectedItem[displayKey]}
-                      </BasicChip>
-                    ))
-                  }
-                </Fragment>
-              ) : (
-                <Fragment>
-                  {visibleItems
-                    .map(selectedItem => (
-                      <Chip
-                        key={selectedItem.id}
-                        onClick={() => onRemove(selectedItem)}
-                      >
-                        {selectedItem[displayKey]}
-                      </Chip>
-                    ))
-                  }
-                </Fragment>
-              )}
-              {(
-                !showOverflow
-                && selected.length > showOverflowAfter
-              ) && (
-                <Chip
-                  isOverflowChip
-                  onClick={() => this.showOverflow()}
-                >
-                  {`${(selected.length - showOverflowAfter).toString()} more`}
-                </Chip>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
+      <Split>
+        <SplitLabelItem>
+          {label}
+        </SplitLabelItem>
+        <VerticalSeparator />
+        <SplitItem>
+          <ChipGroup showOverflowAfter={showOverflowAfter}>
+            {selected.map(item => (
+              <Chip
+                key={item.id}
+                isReadOnly={isReadOnly}
+                onClick={() => onRemove(item)}
+              >
+                {item[displayKey]}
+              </Chip>
+            ))}
+          </ChipGroup>
+        </SplitItem>
+      </Split>
     );
   }
 }

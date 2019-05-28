@@ -5,61 +5,32 @@ import { t } from '@lingui/macro';
 import {
   DataListItem,
   DataListItemRow,
-  DataListItemCells,
+  DataListItemCells as PFDataListItemCells,
   DataListCell,
   Text,
   TextContent,
   TextVariants,
-  Chip,
 } from '@patternfly/react-core';
 import { Link } from 'react-router-dom';
+import styled from 'styled-components';
 import { AccessRecord } from '../../../types';
-import BasicChip from '../../../components/BasicChip/BasicChip';
+import { DetailList, Detail } from '../../../components/DetailList';
+import { ChipGroup, Chip } from '../../../components/Chip';
 
-const userRolesWrapperStyle = {
-  display: 'flex',
-  flexWrap: 'wrap',
-};
-
-const detailWrapperStyle = {
-  display: 'grid',
-  gridTemplateColumns: 'minmax(70px, max-content) minmax(60px, max-content)',
-};
-
-const detailLabelStyle = {
-  fontWeight: '700',
-  lineHeight: '24px',
-  marginRight: '20px',
-};
-
-const detailValueStyle = {
-  lineHeight: '28px',
-  overflow: 'visible',
-};
-
-/* TODO: does PF offer any sort of <dl> treatment for this? */
-const Detail = ({ label, value, url, customStyles }) => {
-  let detail = null;
-  if (value) {
-    detail = (
-      <TextContent style={{ ...detailWrapperStyle, ...customStyles }}>
-        {url ? (
-          <Link to={{ pathname: url }}>
-            <Text component={TextVariants.h6} style={detailLabelStyle}>{label}</Text>
-          </Link>) : (<Text component={TextVariants.h6} style={detailLabelStyle}>{label}</Text>
-        )}
-        <Text component={TextVariants.p} style={detailValueStyle}>{value}</Text>
-      </TextContent>
-    );
-  }
-  return detail;
-};
+const DataListItemCells = styled(PFDataListItemCells)`
+  align-items: start;
+`;
 
 class OrganizationAccessItem extends React.Component {
   static propTypes = {
     accessRecord: AccessRecord.isRequired,
     onRoleDelete: func.isRequired,
   };
+
+  constructor (props) {
+    super(props);
+    this.renderChip = this.renderChip.bind(this);
+  }
 
   getRoleLists () {
     const { accessRecord } = this.props;
@@ -80,8 +51,21 @@ class OrganizationAccessItem extends React.Component {
     return [teamRoles, userRoles];
   }
 
+  renderChip (role) {
+    const { accessRecord, onRoleDelete } = this.props;
+    return (
+      <Chip
+        key={role.id}
+        isReadOnly={!role.user_capabilities.unattach}
+        onClick={() => { onRoleDelete(role, accessRecord); }}
+      >
+        {role.name}
+      </Chip>
+    );
+  }
+
   render () {
-    const { accessRecord, onRoleDelete, i18n } = this.props;
+    const { accessRecord, i18n } = this.props;
     const [teamRoles, userRoles] = this.getRoleLists();
 
     return (
@@ -90,76 +74,60 @@ class OrganizationAccessItem extends React.Component {
           <DataListItemCells dataListCells={[
             <DataListCell key="name">
               {accessRecord.username && (
-                <TextContent style={detailWrapperStyle}>
+                <TextContent>
                   {accessRecord.url ? (
-                    <Link to={{ pathname: accessRecord.url }}>
-                      <Text component={TextVariants.h6} style={detailLabelStyle}>
+                    <Text component={TextVariants.h6}>
+                      <Link
+                        to={{ pathname: accessRecord.url }}
+                        css="font-weight: bold"
+                      >
                         {accessRecord.username}
-                      </Text>
-                    </Link>
+                      </Link>
+                    </Text>
                   ) : (
-                    <Text component={TextVariants.h6} style={detailLabelStyle}>
+                    <Text
+                      component={TextVariants.h6}
+                      css="font-weight: bold"
+                    >
                       {accessRecord.username}
                     </Text>
                   )}
                 </TextContent>
               )}
               {accessRecord.first_name || accessRecord.last_name ? (
-                <Detail
-                  label={i18n._(t`Name`)}
-                  value={`${accessRecord.first_name} ${accessRecord.last_name}`}
-                  url={null}
-                  customStyles={null}
-                />
+                <DetailList stacked>
+                  <Detail
+                    label={i18n._(t`Name`)}
+                    value={`${accessRecord.first_name} ${accessRecord.last_name}`}
+                  />
+                </DetailList>
               ) : (
                 null
               )}
             </DataListCell>,
             <DataListCell key="roles">
-              {userRoles.length > 0 && (
-                <ul style={userRolesWrapperStyle}>
-                  <Text component={TextVariants.h6} style={detailLabelStyle}>
-                    {i18n._(t`User Roles`)}
-                  </Text>
-                  {userRoles.map(role => (
-                    role.user_capabilities.unattach ? (
-                      <Chip
-                        key={role.id}
-                        className="awx-c-chip"
-                        onClick={() => { onRoleDelete(role, accessRecord); }}
-                      >
-                        {role.name}
-                      </Chip>
-                    ) : (
-                      <BasicChip key={role.id}>
-                        {role.name}
-                      </BasicChip>
-                    )
-                  ))}
-                </ul>
-              )}
-              {teamRoles.length > 0 && (
-                <ul style={userRolesWrapperStyle}>
-                  <Text component={TextVariants.h6} style={detailLabelStyle}>
-                    {i18n._(t`Team Roles`)}
-                  </Text>
-                  {teamRoles.map(role => (
-                    role.user_capabilities.unattach ? (
-                      <Chip
-                        key={role.id}
-                        className="awx-c-chip"
-                        onClick={() => { onRoleDelete(role, accessRecord); }}
-                      >
-                        {role.name}
-                      </Chip>
-                    ) : (
-                      <BasicChip key={role.id}>
-                        {role.name}
-                      </BasicChip>
-                    )
-                  ))}
-                </ul>
-              )}
+              <DetailList stacked>
+                {userRoles.length > 0 && (
+                  <Detail
+                    label={i18n._(t`User Roles`)}
+                    value={(
+                      <ChipGroup>
+                        {userRoles.map(this.renderChip)}
+                      </ChipGroup>
+                    )}
+                  />
+                )}
+                {teamRoles.length > 0 && (
+                  <Detail
+                    label={i18n._(t`Team Roles`)}
+                    value={(
+                      <ChipGroup>
+                        {teamRoles.map(this.renderChip)}
+                      </ChipGroup>
+                    )}
+                  />
+                )}
+              </DetailList>
             </DataListCell>
           ]}
           />

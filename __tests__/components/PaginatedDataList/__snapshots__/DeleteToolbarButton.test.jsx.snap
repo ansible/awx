@@ -111,6 +111,7 @@ exports[`<ToolbarDeleteButton /> should render button 1`] = `
               isDisabled={true}
               isFocus={false}
               isHover={false}
+              isInline={false}
               onClick={[Function]}
               type="button"
               variant="plain"

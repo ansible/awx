@@ -141,7 +141,7 @@ describe('<Lookup />', () => {
         sortedColumnKey="name"
       />
     ).find('Lookup');
-    const chip = wrapper.find('li.pf-c-chip');
+    const chip = wrapper.find('.pf-c-chip');
     expect(chip).toHaveLength(2);
   });
 
