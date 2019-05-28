@@ -82,9 +82,11 @@ module.exports = {
     'copy workflow template': client => {
         const templates = client.page.templates();
 
-        client.useCss();
-        client.login();
-        client.waitForAngular();
+        client
+            .useCss()
+            .resizeWindow(1200, 800)
+            .login()
+            .waitForAngular();
 
         templates.load();
         templates.waitForElementVisible('div.spinny');
