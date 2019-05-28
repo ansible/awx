@@ -2248,7 +2248,7 @@ def test_os_open_oserror():
 
 def test_fcntl_ioerror():
     with pytest.raises(OSError):
-        fcntl.flock(99999, fcntl.LOCK_EX)
+        fcntl.lockf(99999, fcntl.LOCK_EX)
 
 
 @mock.patch('os.open')
@@ -2276,8 +2276,8 @@ def test_aquire_lock_open_fail_logged(logging_getLogger, os_open):
 @mock.patch('os.open')
 @mock.patch('os.close')
 @mock.patch('logging.getLogger')
-@mock.patch('fcntl.flock')
-def test_aquire_lock_acquisition_fail_logged(fcntl_flock, logging_getLogger, os_close, os_open):
+@mock.patch('fcntl.lockf')
+def test_aquire_lock_acquisition_fail_logged(fcntl_lockf, logging_getLogger, os_close, os_open):
     err = IOError()
     err.errno = 3
     err.strerror = 'dummy message'
@@ -2291,7 +2291,7 @@ def test_aquire_lock_acquisition_fail_logged(fcntl_flock, logging_getLogger, os_
     logger = mock.Mock()
     logging_getLogger.return_value = logger
 
-    fcntl_flock.side_effect = err
+    fcntl_lockf.side_effect = err
 
     ProjectUpdate = tasks.RunProjectUpdate()
     with pytest.raises(IOError, message='dummy message'):

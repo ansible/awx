@@ -1826,9 +1826,9 @@ class RunProjectUpdate(BaseTask):
 
     def release_lock(self, instance):
         try:
-            fcntl.flock(self.lock_fd, fcntl.LOCK_UN)
+            fcntl.lockf(self.lock_fd, fcntl.LOCK_UN)
         except IOError as e:
-            logger.error("I/O error({0}) while trying to open lock file [{1}]: {2}".format(e.errno, instance.get_lock_file(), e.strerror))
+            logger.error("I/O error({0}) while trying to release lock file [{1}]: {2}".format(e.errno, instance.get_lock_file(), e.strerror))
             os.close(self.lock_fd)
             raise
 
@@ -1844,7 +1844,7 @@ class RunProjectUpdate(BaseTask):
             raise RuntimeError(u'Invalid lock file path')
 
         try:
-            self.lock_fd = os.open(lock_path, os.O_RDONLY | os.O_CREAT)
+            self.lock_fd = os.open(lock_path, os.O_RDWR | os.O_CREAT)
         except OSError as e:
             logger.error("I/O error({0}) while trying to open lock file [{1}]: {2}".format(e.errno, lock_path, e.strerror))
             raise
@@ -1856,7 +1856,7 @@ class RunProjectUpdate(BaseTask):
                 if instance.cancel_flag:
                     logger.debug("ProjectUpdate({0}) was cancelled".format(instance.pk))
                     return
-                fcntl.flock(self.lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                fcntl.lockf(self.lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
                 break
             except IOError as e:
                 if e.errno not in (errno.EAGAIN, errno.EACCES):
