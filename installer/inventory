@@ -53,6 +53,7 @@ awx_task_hostname=awx
 awx_web_hostname=awxweb
 postgres_data_dir=/tmp/pgdocker
 host_port=80
+host_port_ssl=443
 #ssl_certificate=
 docker_compose_dir=/tmp/awxcompose
 
