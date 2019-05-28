@@ -3,8 +3,9 @@
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
-from kombu import Connection, Exchange, Queue
+from kombu import Exchange, Queue
 
+from awx.main.dispatch.kombu import Connection
 from awx.main.dispatch.worker import AWXConsumer, CallbackBrokerWorker
 
 

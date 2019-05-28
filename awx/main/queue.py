@@ -10,7 +10,8 @@ import os
 from django.conf import settings
 
 # Kombu
-from kombu import Connection, Exchange, Producer
+from awx.main.dispatch.kombu import Connection
+from kombu import Exchange, Producer
 from kombu.serialization import registry
 
 __all__ = ['CallbackQueueDispatcher']

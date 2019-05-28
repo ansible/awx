@@ -28,6 +28,8 @@ To accomplish this, AWX makes use of a "Task Queue" abstraction.  Task Queues ar
 
 AWX communicates with these worker processes to mediate between clients and workers. This is done via distributed RabbitMQ queues and the already-acknowledged local queue that the Dispatcher is working through. Simply put: to initiate a task, the client (generally, Python code in the AWX API) publishes a message to a queue, and RabbitMQ then delivers that message to one or more workers.
 
+By default, when AWX creates queues in RabbitMQ, it creates them as *durable* queues in RabbitMQ (which allows for message persistence at the cost of lower performance).  For increased message throughput (at the risk of message loss on server restarts), set BROKER_DURABILITY=False, and AWX will create _transient_ queues instead.
+
 Clustered AWX installations consist of multiple workers spread across every
 node, giving way to high availability and horizontal scaling.
 
