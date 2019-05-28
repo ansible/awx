@@ -72,7 +72,7 @@
 // page header overrides
 //
 
-.pf-c-page__main-section.pf-m-condensed {
+.pf-c-page__main-section {
   padding-top: 10px;
   padding-bottom: 10px;
 }
@@ -206,17 +206,6 @@
 
   display: flex;
   position: relative;
-}
-
-.pf-c-card__close {
-  position: absolute;
-  top: 5px;
-  right: 4px;
-  color: var(--pf-c-button--m-plain--Color);
-
-  &.pf-c-button {
-    position: absolute;
-  }
 }
 
 .pf-c-card__header {
