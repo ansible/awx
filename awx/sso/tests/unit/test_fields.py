@@ -33,7 +33,7 @@ class TestSAMLOrgAttrField():
 
     @pytest.mark.parametrize("data, expected", [
         ({'remove': 'blah', 'saml_attr': 'foobar'},
-            ValidationError('"blah" is not a valid boolean.')),
+            ValidationError('Must be a valid boolean.')),
         ({'remove': True, 'saml_attr': False},
             ValidationError('Not a valid string.')),
         ({'remove': True, 'saml_attr': False, 'foo': 'bar', 'gig': 'ity'},
@@ -41,7 +41,7 @@ class TestSAMLOrgAttrField():
         ({'remove_admins': True, 'saml_admin_attr': False},
             ValidationError('Not a valid string.')),
         ({'remove_admins': 'blah', 'saml_admin_attr': 'foobar'},
-            ValidationError('"blah" is not a valid boolean.')),
+            ValidationError('Must be a valid boolean.')),
     ])
     def test_internal_value_invalid(self, data, expected):
         field = SAMLOrgAttrField()
