@@ -3,27 +3,24 @@ import PropTypes from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
-  ActionGroup,
+  ActionGroup as PFActionGroup,
   Toolbar,
   ToolbarGroup,
   Button
 } from '@patternfly/react-core';
-import './styles.scss';
+import styled from 'styled-components';
 
-const formActionGroupStyle = {
-  display: 'flex',
-  flexDirection: 'row',
-  justifyContent: 'flex-end',
-};
-
-const buttonGroupStyle = {
-  marginRight: '20px'
-};
+const ActionGroup = styled(PFActionGroup)`
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    --pf-c-form__group--m-action--MarginTop: 0;
+`;
 
 const FormActionGroup = ({ onSubmit, submitDisabled, onCancel, i18n }) => (
-  <ActionGroup style={formActionGroupStyle}>
+  <ActionGroup>
     <Toolbar>
-      <ToolbarGroup style={buttonGroupStyle}>
+      <ToolbarGroup css="margin-right: 20px">
         <Button aria-label={i18n._(t`Save`)} variant="primary" type="submit" onClick={onSubmit} isDisabled={submitDisabled}>{i18n._(t`Save`)}</Button>
       </ToolbarGroup>
       <ToolbarGroup>

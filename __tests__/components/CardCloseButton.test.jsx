@@ -8,7 +8,7 @@ describe('<CardCloseButton>', () => {
     const button = wrapper.find('Button');
     expect(button).toHaveLength(1);
     expect(button.prop('variant')).toBe('plain');
-    expect(button.prop('className')).toBe('pf-c-card__close');
+    expect(button.prop('aria-label')).toBe('Close');
     expect(wrapper.find('Link')).toHaveLength(0);
   });
 
@@ -18,6 +18,6 @@ describe('<CardCloseButton>', () => {
     const link = wrapper.find('Link');
     expect(link).toHaveLength(1);
     expect(link.prop('to')).toEqual('/foo');
-    expect(link.prop('className')).toEqual('pf-c-button pf-c-card__close');
+    expect(link.prop('aria-label')).toEqual('Close');
   });
 });

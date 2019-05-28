@@ -13,7 +13,7 @@ import { Config } from '../../../contexts/Config';
 import { withNetwork } from '../../../contexts/Network';
 import FormRow from '../../../components/FormRow';
 import FormField from '../../../components/FormField';
-import FormActionGroup from '../../../components/FormActionGroup';
+import FormActionGroup from '../../../components/FormActionGroup/FormActionGroup';
 import AnsibleSelect from '../../../components/AnsibleSelect';
 import InstanceGroupsLookup from './InstanceGroupsLookup';
 import { required } from '../../../util/validators';

@@ -1,18 +1,29 @@
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import {
-  PageSection,
+  PageSection as PFPageSection,
   PageSectionVariants,
   Breadcrumb,
   BreadcrumbItem,
-  BreadcrumbHeading
+  BreadcrumbHeading as PFBreadcrumbHeading
 } from '@patternfly/react-core';
 import {
   Link,
   Route,
   withRouter
 } from 'react-router-dom';
-import './breadcrumbs.scss';
+import styled from 'styled-components';
+
+const PageSection = styled(PFPageSection)`
+  padding-top: 10px;
+  padding-bottom: 10px;
+`;
+
+const BreadcrumbHeading = styled(PFBreadcrumbHeading)`
+   --pf-c-breadcrumb__heading--FontSize: 20px;
+  line-height: 24px;
+  flex: 100%;
+`;
 
 const Breadcrumbs = ({ breadcrumbConfig }) => {
   const { light } = PageSectionVariants;
@@ -20,7 +31,6 @@ const Breadcrumbs = ({ breadcrumbConfig }) => {
   return (
     <PageSection
       variant={light}
-      className="pf-m-condensed"
     >
       <Breadcrumb>
         <Route
@@ -47,7 +57,6 @@ const Crumb = ({ breadcrumbConfig, match }) => {
     crumbElement = (
       <BreadcrumbHeading
         key="breadcrumb-heading"
-        className="heading"
       >
         {crumb}
       </BreadcrumbHeading>
