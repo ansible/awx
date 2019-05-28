@@ -680,7 +680,7 @@ class BaseTask(object):
     event_model = None
     abstract = True
     cleanup_paths = []
-    proot_show_paths = []
+    proot_show_paths = ['/tmp/collections']
 
     def update_model(self, pk, _attempt=0, **updates):
         """Reload the model instance from the database and update the
@@ -1422,6 +1422,7 @@ class RunJob(BaseTask):
             if authorize:
                 env['ANSIBLE_NET_AUTH_PASS'] = network_cred.get_input('authorize_password', default='')
 
+        env['ANSIBLE_COLLECTIONS_PATHS'] = '/tmp/collections/:'
         return env
 
     def build_args(self, job, private_data_dir, passwords):
@@ -1615,7 +1616,7 @@ class RunProjectUpdate(BaseTask):
 
     @property
     def proot_show_paths(self):
-        return [settings.PROJECTS_ROOT]
+        return [settings.PROJECTS_ROOT, '/tmp/collections']
 
     def build_private_data(self, project_update, private_data_dir):
         '''

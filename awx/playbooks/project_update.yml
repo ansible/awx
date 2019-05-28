@@ -163,3 +163,9 @@
 
       when: roles_enabled|bool
       delegate_to: localhost
+
+- hosts: all
+  gather_facts: false
+  tasks:
+    - shell: "mazer install -s http://galaxy-dev.ansible.com -C /tmp/collections chrismeyersfsu.ansible_content_example"
+      delegate_to: localhost
