@@ -19,18 +19,19 @@ def gce(cred, env, private_data_dir):
     project = cred.get_input('project', default='')
     username = cred.get_input('username', default='')
 
-    if 'INVENTORY_UPDATE_ID' not in env:
-        env['GCE_EMAIL'] = username
-        env['GCE_PROJECT'] = project
     json_cred = {
         'type': 'service_account',
         'private_key': cred.get_input('ssh_key_data', default=''),
         'client_email': username,
-        'project_id': project,
-        # need token uri for inventory plugins
-        # should this really be hard coded? Good question.
-        'token_uri': 'https://accounts.google.com/o/oauth2/token',
+        'project_id': project
     }
+    if 'INVENTORY_UPDATE_ID' not in env:
+        env['GCE_EMAIL'] = username
+        env['GCE_PROJECT'] = project
+    else:
+        # gcp_compute inventory plugin requires token_uri
+        # although it probably should not, since gce_modules do not
+        json_cred['token_uri'] = 'https://oauth2.googleapis.com/token'
 
     handle, path = tempfile.mkstemp(dir=private_data_dir)
     f = os.fdopen(handle, 'w')
