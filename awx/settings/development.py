@@ -169,10 +169,10 @@ CELERYBEAT_SCHEDULE.update({  # noqa
 
 CLUSTER_HOST_ID = socket.gethostname()
 
-try:
-    socket.gethostbyname('docker.for.mac.host.internal')
+
+if 'Docker for Mac' in os.getenv('OS', ''):
     os.environ['SDB_NOTIFY_HOST'] = 'docker.for.mac.host.internal'
-except Exception:
+else:
     os.environ['SDB_NOTIFY_HOST'] = os.popen('ip route').read().split(' ')[2]
 
 WEBSOCKET_ORIGIN_WHITELIST = ['https://localhost:8043', 'https://localhost:3000']
