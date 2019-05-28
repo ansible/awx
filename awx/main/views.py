@@ -20,10 +20,8 @@ class ApiErrorView(views.APIView):
     permission_classes = (permissions.AllowAny,)
     metadata_class = None
     exception_class = exceptions.APIException
-    view_name = _('API Error')
 
-    def get_view_name(self):
-        return self.view_name
+    name = _('API Error')
 
     def finalize_response(self, request, response, *args, **kwargs):
         response = super(ApiErrorView, self).finalize_response(request, response, *args, **kwargs)
@@ -46,7 +44,7 @@ def handle_error(request, status=404, **kwargs):
         class APIException(exceptions.APIException):
             status_code = status
             default_detail = kwargs['content']
-        api_error_view = ApiErrorView.as_view(view_name=kwargs['name'], exception_class=APIException)
+        api_error_view = ApiErrorView.as_view(exception_class=APIException)
         response = api_error_view(request)
         if hasattr(response, 'render'):
             response.render()

@@ -60,7 +60,7 @@ class InventoryUpdateEventsList(SubListAPIView):
     serializer_class = InventoryUpdateEventSerializer
     parent_model = InventoryUpdate
     relationship = 'inventory_update_events'
-    view_name = _('Inventory Update Events List')
+    name = _('Inventory Update Events List')
     search_fields = ('stdout',)
 
     def finalize_response(self, request, response, *args, **kwargs):
