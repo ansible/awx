@@ -387,16 +387,6 @@ def test_saml_x509cert_validation(patch, get, admin, headers):
 
 
 @pytest.mark.django_db
-def test_default_broker_url():
-    url = parse_url(settings.BROKER_URL)
-    assert url['transport'] == 'amqp'
-    assert url['hostname'] == 'rabbitmq'
-    assert url['userid'] == 'guest'
-    assert url['password'] == 'guest'
-    assert url['virtual_host'] == '/'
-
-
-@pytest.mark.django_db
 def test_broker_url_with_special_characters():
     settings.BROKER_URL = 'amqp://guest:a@ns:ibl3#@rabbitmq:5672//'
     url = parse_url(settings.BROKER_URL)

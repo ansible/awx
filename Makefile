@@ -346,6 +346,7 @@ pylint: reports
 
 genschema: reports
 	$(MAKE) swagger PYTEST_ARGS="--genschema"
+	mv swagger.json schema.json
 
 swagger: reports
 	@if [ "$(VENV_BASE)" ]; then \
@@ -496,6 +497,10 @@ ui-devel: $(UI_DEPS_FLAG_FILE)
 ui-test: $(UI_DEPS_FLAG_FILE)
 	$(NPM_BIN) --prefix awx/ui run test
 
+ui-lint: $(UI_DEPS_FLAG_FILE)
+	$(NPM_BIN) run --prefix awx/ui jshint
+	$(NPM_BIN) run --prefix awx/ui lint
+
 # A standard go-to target for API developers to use building the frontend
 ui: clean-ui ui-devel
 
@@ -572,12 +577,7 @@ docker-compose-runtest:
 docker-compose-build-swagger:
 	cd tools && CURRENT_UID=$(shell id -u) TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose run --rm --service-ports awx /start_tests.sh swagger
 
-docker-compose-genschema:
-	cd tools && CURRENT_UID=$(shell id -u) TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose run --rm --service-ports awx /start_tests.sh genschema
-	mv swagger.json schema.json
-
-docker-compose-detect-schema-change:
-	$(MAKE) docker-compose-genschema
+detect-schema-change: genschema
 	curl https://s3.amazonaws.com/awx-public-ci-files/schema.json -o reference-schema.json
 	# Ignore differences in whitespace with -b
 	diff -u -b reference-schema.json schema.json
