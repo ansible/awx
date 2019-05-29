@@ -64,7 +64,7 @@ Before you can run a deployment, you'll need the following installed in your loc
     + We use this module instead of `docker-py` because it is what the `docker-compose` Python module requires.
 - [GNU Make](https://www.gnu.org/software/make/)
 - [Git](https://git-scm.com/) Requires Version 1.8.4+
-- [Node 8.x LTS version](https://nodejs.org/en/download/)
+- [Node 10.x LTS version](https://nodejs.org/en/download/)
 - [NPM 6.x LTS](https://docs.npmjs.com/)
 
 ### System Requirements
