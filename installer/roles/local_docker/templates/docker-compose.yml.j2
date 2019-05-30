@@ -113,11 +113,18 @@ services:
       RABBITMQ_DEFAULT_USER: "{{ rabbitmq_user }}"
       RABBITMQ_DEFAULT_PASS: "{{ rabbitmq_password }}"
       RABBITMQ_ERLANG_COOKIE: {{ rabbitmq_erlang_cookie }}
+      http_proxy: {{ http_proxy | default('') }}
+      https_proxy: {{ https_proxy | default('') }}
+      no_proxy: {{ no_proxy | default('') }}
 
   memcached:
     image: memcached:alpine
     container_name: awx_memcached
     restart: unless-stopped
+    environment:
+      http_proxy: {{ http_proxy | default('') }}
+      https_proxy: {{ https_proxy | default('') }}
+      no_proxy: {{ no_proxy | default('') }}
 
   {% if pg_hostname is not defined %}
   postgres:
@@ -131,4 +138,7 @@ services:
       POSTGRES_PASSWORD: {{ pg_password }}
       POSTGRES_DB: {{ pg_database }}
       PGDATA: /var/lib/postgresql/data/pgdata
+      http_proxy: {{ http_proxy | default('') }}
+      https_proxy: {{ https_proxy | default('') }}
+      no_proxy: {{ no_proxy | default('') }}
   {% endif %}
