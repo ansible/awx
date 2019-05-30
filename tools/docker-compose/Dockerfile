@@ -104,7 +104,7 @@ RUN cd /tmp && VENV_BASE="/venv" make requirements_dev
 
 # Use the distro provided npm to bootstrap our required version of node
 RUN npm install -g n
-RUN n 8.15.0
+RUN n 10.15.0
 
 RUN yum -y remove cyrus-sasl-devel \
   gcc \
@@ -150,4 +150,4 @@ RUN for file in /etc/passwd /etc/supervisord.conf \
   /venv/awx/lib/python3.6/site-packages/awx.egg-link /var/run/nginx.pid; \
   do touch $file; chmod -R g+rwx $file; chgrp -R root $file; done
 
-ENV PATH=/usr/local/n/versions/node/8.15.0/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ENV PATH=/usr/local/n/versions/node/10.15.0/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
