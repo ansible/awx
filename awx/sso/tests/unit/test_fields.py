@@ -33,21 +33,23 @@ class TestSAMLOrgAttrField():
 
     @pytest.mark.parametrize("data, expected", [
         ({'remove': 'blah', 'saml_attr': 'foobar'},
-            ValidationError('Must be a valid boolean.')),
+            {'remove': ['Must be a valid boolean.']}),
         ({'remove': True, 'saml_attr': False},
-            ValidationError('Not a valid string.')),
+            {'saml_attr': ['Not a valid string.']}),
         ({'remove': True, 'saml_attr': False, 'foo': 'bar', 'gig': 'ity'},
-            ValidationError('Invalid key(s): "foo", "gig".')),
+            {'saml_attr': ['Not a valid string.'],
+             'foo': ['Invalid field.'],
+             'gig': ['Invalid field.']}),
         ({'remove_admins': True, 'saml_admin_attr': False},
-            ValidationError('Not a valid string.')),
+            {'saml_admin_attr': ['Not a valid string.']}),
         ({'remove_admins': 'blah', 'saml_admin_attr': 'foobar'},
-            ValidationError('Must be a valid boolean.')),
+            {'remove_admins': ['Must be a valid boolean.']}),
     ])
     def test_internal_value_invalid(self, data, expected):
         field = SAMLOrgAttrField()
-        with pytest.raises(type(expected)) as e:
+        with pytest.raises(ValidationError) as e:
             field.to_internal_value(data)
-        assert str(e.value) == str(expected)
+        assert e.value.detail == expected
 
 
 class TestSAMLTeamAttrField():
@@ -77,36 +79,38 @@ class TestSAMLTeamAttrField():
     @pytest.mark.parametrize("data, expected", [
         ({'remove': True, 'saml_attr': 'foobar', 'team_org_map': [
             {'team': 'foobar', 'not_a_valid_key': 'blah', 'organization': 'Ansible'},
-        ]}, ValidationError('Invalid key(s): "not_a_valid_key".')),
+        ]}, {'team_org_map': {0: {'not_a_valid_key': ['Invalid field.']}}}),
         ({'remove': False, 'saml_attr': 'foobar', 'team_org_map': [
             {'organization': 'Ansible'},
-        ]}, ValidationError('Missing key(s): "team".')),
+        ]}, {'team_org_map': {0: {'team': ['This field is required.']}}}),
         ({'remove': False, 'saml_attr': 'foobar', 'team_org_map': [
             {},
-        ]}, ValidationError('Missing key(s): "organization", "team".')),
+        ]}, {'team_org_map': {
+            0: {'organization': ['This field is required.'],
+                'team': ['This field is required.']}}}),
     ])
     def test_internal_value_invalid(self, data, expected):
         field = SAMLTeamAttrField()
-        with pytest.raises(type(expected)) as e:
+        with pytest.raises(ValidationError) as e:
             field.to_internal_value(data)
-        assert str(e.value) == str(expected)
+        assert e.value.detail == expected
 
 
 class TestLDAPGroupTypeParamsField():
 
     @pytest.mark.parametrize("group_type, data, expected", [
         ('LDAPGroupType', {'name_attr': 'user', 'bob': ['a', 'b'], 'scooter': 'hello'},
-         ValidationError('Invalid key(s): "bob", "scooter".')),
+         ['Invalid key(s): "bob", "scooter".']),
         ('MemberDNGroupType', {'name_attr': 'user', 'member_attr': 'west', 'bob': ['a', 'b'], 'scooter': 'hello'},
-         ValidationError('Invalid key(s): "bob", "scooter".')),
+         ['Invalid key(s): "bob", "scooter".']),
         ('PosixUIDGroupType', {'name_attr': 'user', 'member_attr': 'west', 'ldap_group_user_attr': 'legacyThing',
          'bob': ['a', 'b'], 'scooter': 'hello'},
-         ValidationError('Invalid key(s): "bob", "member_attr", "scooter".')),
+         ['Invalid key(s): "bob", "member_attr", "scooter".']),
     ])
     def test_internal_value_invalid(self, group_type, data, expected):
         field = LDAPGroupTypeParamsField()
         field.get_depends_on = mock.MagicMock(return_value=group_type)
 
-        with pytest.raises(type(expected)) as e:
+        with pytest.raises(ValidationError) as e:
             field.to_internal_value(data)
-        assert str(e.value) == str(expected)
+        assert e.value.detail == expected
