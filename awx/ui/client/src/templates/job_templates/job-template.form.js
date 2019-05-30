@@ -149,7 +149,7 @@ function(NotificationsList, i18n) {
                     dataTitle: i18n._('Forks'),
                     dataPlacement: 'right',
                     dataContainer: 'body',
-                    awPopOver: "<p>" + i18n._("The number of parallel or simultaneous processes to use while executing the playbook. Value defaults to 0. Refer to the Ansible documentation for details about the configuration file.") + "</p>",
+                    awPopOver: "<p>" + i18n._("The number of parallel or simultaneous processes to use while executing the playbook. An empty value, or a value less than 1 will use the Ansible default which is usually 5. The default number of forks can be overwritten with a change to ") + "<code class='popover-body_code-snippet'>ansible.cfg</code>. " + i18n._("Refer to the Ansible documentation for details about the configuration file.") + "</p>",
                     ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                 },
                 limit: {
