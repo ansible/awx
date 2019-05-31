@@ -7,6 +7,7 @@ from awx.main.fields import JSONField
 
 # Django
 from django.db import models
+from django.conf import settings
 from django.utils.encoding import smart_str
 from django.utils.translation import ugettext_lazy as _
 
@@ -35,6 +36,13 @@ class ActivityStream(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     changes = models.TextField(blank=True)
     deleted_actor = JSONField(null=True)
+    action_node = models.CharField(
+        blank=True,
+        default='',
+        editable=False,
+        max_length=512,
+        help_text=_("The cluster node the activity took place on."),
+    )
 
     object_relationship_type = models.TextField(blank=True)
     object1 = models.TextField()
@@ -78,7 +86,13 @@ class ActivityStream(models.Model):
 
     def __str__(self):
         operation = self.operation if 'operation' in self.__dict__ else '_delayed_'
-        timestamp = self.timestamp.isoformat() if 'timestamp' in self.__dict__ else '_delayed_'
+        if 'timestamp' in self.__dict__:
+            if self.timestamp:
+                timestamp = self.timestamp.isoformat()
+            else:
+                timestamp = self.timestamp
+        else:
+            timestamp = '_delayed_'
         return u'%s-%s-pk=%s' % (operation, timestamp, self.pk)
 
     def get_absolute_url(self, request=None):
@@ -96,5 +110,8 @@ class ActivityStream(models.Model):
             }
             if 'update_fields' in kwargs and 'deleted_actor' not in kwargs['update_fields']:
                 kwargs['update_fields'].append('deleted_actor')
+
+        hostname_char_limit = self._meta.get_field('action_node').max_length
+        self.action_node = settings.CLUSTER_HOST_ID[:hostname_char_limit]
 
         super(ActivityStream, self).save(*args, **kwargs)

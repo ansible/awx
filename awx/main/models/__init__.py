@@ -35,7 +35,7 @@ from awx.main.models.ad_hoc_commands import AdHocCommand # noqa
 from awx.main.models.schedules import Schedule # noqa
 from awx.main.models.activity_stream import ActivityStream # noqa
 from awx.main.models.ha import (  # noqa
-    Instance, InstanceGroup, JobOrigin, TowerScheduleState,
+    Instance, InstanceGroup, TowerScheduleState,
 )
 from awx.main.models.rbac import (  # noqa
     Role, batch_role_ancestor_rebuilding, get_roles_on_resource,
