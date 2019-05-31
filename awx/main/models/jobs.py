@@ -435,6 +435,8 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         base_notification_templates = NotificationTemplate.objects
         error_notification_templates = list(base_notification_templates.filter(
             unifiedjobtemplate_notification_templates_for_errors__in=[self, self.project]))
+        started_notification_templates = list(base_notification_templates.filter(
+            unifiedjobtemplate_notification_templates_for_started__in=[self, self.project]))
         success_notification_templates = list(base_notification_templates.filter(
             unifiedjobtemplate_notification_templates_for_success__in=[self, self.project]))
         any_notification_templates = list(base_notification_templates.filter(
@@ -443,11 +445,16 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         if self.project is not None and self.project.organization is not None:
             error_notification_templates = set(error_notification_templates + list(base_notification_templates.filter(
                 organization_notification_templates_for_errors=self.project.organization)))
+            started_notification_templates = set(started_notification_templates + list(base_notification_templates.filter(
+                organization_notification_templates_for_started=self.project.organization)))
             success_notification_templates = set(success_notification_templates + list(base_notification_templates.filter(
                 organization_notification_templates_for_success=self.project.organization)))
             any_notification_templates = set(any_notification_templates + list(base_notification_templates.filter(
                 organization_notification_templates_for_any=self.project.organization)))
-        return dict(error=list(error_notification_templates), success=list(success_notification_templates), any=list(any_notification_templates))
+        return dict(error=list(error_notification_templates),
+                    started=list(started_notification_templates),
+                    success=list(success_notification_templates),
+                    any=list(any_notification_templates))
 
     '''
     RelatedJobsMixin
@@ -1133,11 +1140,14 @@ class SystemJobTemplate(UnifiedJobTemplate, SystemJobOptions):
         base_notification_templates = NotificationTemplate.objects.all()
         error_notification_templates = list(base_notification_templates
                                             .filter(unifiedjobtemplate_notification_templates_for_errors__in=[self]))
+        started_notification_templates = list(base_notification_templates
+                                              .filter(unifiedjobtemplate_notification_templates_for_started__in=[self]))
         success_notification_templates = list(base_notification_templates
                                               .filter(unifiedjobtemplate_notification_templates_for_success__in=[self]))
         any_notification_templates = list(base_notification_templates
                                           .filter(unifiedjobtemplate_notification_templates_for_any__in=[self]))
         return dict(error=list(error_notification_templates),
+                    started=list(started_notification_templates),
                     success=list(success_notification_templates),
                     any=list(any_notification_templates))
 

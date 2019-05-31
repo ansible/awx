@@ -411,6 +411,8 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
         base_notification_templates = NotificationTemplate.objects
         error_notification_templates = list(base_notification_templates
                                             .filter(unifiedjobtemplate_notification_templates_for_errors=self))
+        started_notification_templates = list(base_notification_templates
+                                              .filter(unifiedjobtemplate_notification_templates_for_started=self))
         success_notification_templates = list(base_notification_templates
                                               .filter(unifiedjobtemplate_notification_templates_for_success=self))
         any_notification_templates = list(base_notification_templates
@@ -420,6 +422,9 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
             error_notification_templates = set(error_notification_templates +
                                                list(base_notification_templates
                                                     .filter(organization_notification_templates_for_errors=self.organization)))
+            started_notification_templates = set(started_notification_templates +
+                                                 list(base_notification_templates
+                                                      .filter(organization_notification_templates_for_started=self.organization)))
             success_notification_templates = set(success_notification_templates +
                                                  list(base_notification_templates
                                                       .filter(organization_notification_templates_for_success=self.organization)))
@@ -427,6 +432,7 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
                                              list(base_notification_templates
                                                   .filter(organization_notification_templates_for_any=self.organization)))
         return dict(error=list(error_notification_templates),
+                    started=list(started_notification_templates),
                     success=list(success_notification_templates),
                     any=list(any_notification_templates))
 
@@ -567,5 +573,3 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
         if not selected_groups:
             return self.global_instance_groups
         return selected_groups
-
-

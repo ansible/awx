@@ -314,7 +314,7 @@ def send_notifications(notification_list, job_id=None):
         update_fields = ['status', 'notifications_sent']
         try:
             sent = notification.notification_template.send(notification.subject, notification.body)
-            notification.status = "successful"
+            notification.status = "successful" or "running"
             notification.notifications_sent = sent
         except Exception as e:
             logger.error("Send Notification Failed {}".format(e))
@@ -1114,6 +1114,8 @@ class BaseTask(object):
         # self.instance because of the update_model pattern and when it's used in callback handlers
         self.instance = self.update_model(pk, status='running',
                                           start_args='')  # blank field to remove encrypted passwords
+
+        self.instance.send_notification_templates("running")
 
         self.instance.websocket_emit_status("running")
         status, rc = 'error', None
