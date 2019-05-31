@@ -54,3 +54,25 @@ nightwatch.js tests. These functions are automatically made available for use by
 client object. For more information on these functions and how to 
 create your own, refer to the [nightwatch.js documentation on custom commands]
 (http://nightwatchjs.org/guide/#writing-custom-commands).
+
+#### CI Container Debugging
+To reproduce test runs in the ci container locally, you'll want to use the provided `docker-compose.yml` file as well as some override files
+to link the containers to your development environment.
+
+```shell
+# docker-compose.yml - the default configuration for ci
+# docker-compose.devel-override.yml - link ci container to development containers
+# docker-compose.debug-override.hml - make chrome and firefox nodes accessible over vnc
+docker-compose \
+  -f awx/ui/test/e2e/cluster/docker-compose.yml \
+  -f awx/ui/test/e2e/cluster/docker-compose.devel-override.yml \
+  -f awx/ui/test/e2e/cluster/docker-compose.debug-override.yml \
+  run -e AWX_E2E_URL=https://awx:8043 -e AWX_E2E_USERNAME=awx -e AWX_E2E_PASSWORD=password e2e '--filter=*smoke*'
+```
+
+Once running, you can connect to nodes over vnc at `vnc://localhost:5900` and `vnc://localhost:5901`.
+
+**Note:**
+- On macOS, safari has a built-in vnc client and you should be able to use these urls directly.
+- On linux, you'll need to have your favorite vnc client ready (like `tigervnc`). Depending on the vnc client you use, you may need to visit `localhost:5900` and input the password `secret` separately.
+- For the chrome and firefox nodes, the development container instance of awx is mapped to hostname `awx` (https://awx:8043)

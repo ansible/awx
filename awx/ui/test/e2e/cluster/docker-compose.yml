@@ -9,9 +9,6 @@ services:
       DBUS_SESSION_BUS_ADDRESS: /dev/null
   chrome:
     image: selenium/node-chrome
-    # uncomment the two lines below to make tests watchable at vnc://localhost:secret@localhost:5900
-    # image: selenium/node-chrome-debug
-    # ports: ['5900:5900']
     links:
       - hub
     volumes:
