@@ -17,7 +17,7 @@
   shell: |
     {{ openshift_oc_bin }} login {{ openshift_host }} \
       -u {{ openshift_user }} \
-      -p {{ openshift_password }} \
+      -p {{ openshift_password | quote }} \
       --insecure-skip-tls-verify={{ openshift_skip_tls_verify | default(false) | bool }}
   when:
     - openshift_user is defined
