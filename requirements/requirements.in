@@ -1,14 +1,12 @@
 ansible-runner==1.3.4
 appdirs==1.4.2
 asgi-amqp==1.1.3
-asgiref==1.1.2
 azure-keyvault==1.1.0
 boto==2.47.0
 channels==1.1.8
 celery==4.3.0
 daphne==1.3.0   # Last before backwards-incompatible channels 2 upgrade
 twisted[tls]>=17.1   # from daphne, see https://github.com/django/daphne/pull/257
-defusedxml==0.5.0  # py36 support https://github.com/tiran/defusedxml/pull/4
 Django==1.11.20
 django-auth-ldap==1.7.0
 django-cors-headers==2.4.0
@@ -29,7 +27,6 @@ jinja2==2.10.1
 jsonschema==2.6.0
 Markdown==2.6.11    # used for formatting API help
 ordereddict==1.1
-pexpect==4.6.0
 prometheus_client==0.6.0
 psutil==5.4.3
 psycopg2==2.7.3.2   # problems with Segmentation faults / wheels on upgrade
