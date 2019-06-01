@@ -59,6 +59,7 @@ Before you can run a deployment, you'll need the following installed in your loc
 
 - [Ansible](http://docs.ansible.com/ansible/latest/intro_installation.html) Requires Version 2.4+
 - [Docker](https://docs.docker.com/engine/installation/)
+    + A recent version
 - [docker](https://pypi.org/project/docker/) Python module
     + This is incompatible with `docker-py`. If you have previously installed `docker-py`, please uninstall it.
     + We use this module instead of `docker-py` because it is what the `docker-compose` Python module requires.
