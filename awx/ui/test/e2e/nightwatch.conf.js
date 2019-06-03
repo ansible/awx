@@ -31,7 +31,7 @@ module.exports = {
                 browserName: 'chrome',
                 chromeOptions: {
                     args: [
-                        'window-size=1280,800'
+                        'window-size=1024,768'
                     ]
                 }
             },

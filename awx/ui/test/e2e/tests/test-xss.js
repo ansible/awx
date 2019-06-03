@@ -73,9 +73,11 @@ module.exports = {
                 urls.jobsSchedules = `${pages.jobs.url()}/schedules`;
                 urls.inventoryHosts = `${pages.inventories.url()}/inventory/${data.host.summary_fields.inventory.id}/hosts`;
 
-                client.useCss();
-                client.login();
-                client.waitForAngular();
+                client
+                    .useCss()
+                    .login()
+                    .waitForAngular()
+                    .resizeWindow(1200, 800);
 
                 done();
             });

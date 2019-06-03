@@ -64,6 +64,7 @@ module.exports = {
                 client
                     .login()
                     .waitForAngular()
+                    .resizeWindow(1200, 1000)
                     .navigateTo(`${AWX_E2E_URL}/#/templates`, false)
                     .useXpath()
                     .waitForElementVisible(workflowSearchBar)
