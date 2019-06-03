@@ -4,36 +4,6 @@
 }
 
 //
-// masthead overrides
-//
-
-.pf-c-page__header-brand {
-  max-width: 255px;
-}
-
-.pf-c-page__header-tools .pf-l-toolbar__item {
-  margin-left: 20px;
-}
-
-.pf-c-page__header-tools .pf-c-dropdown__toggle:before {
-  --pf-c-dropdown__toggle--BorderBottomColor: var(
-    --pf-global--BackgroundColor--light-100
-  );
-  --pf-c-dropdown__toggle--hover--BorderBottomColor: var(
-    --pf-global--BackgroundColor--light-100
-  );
-  --pf-c-dropdown__toggle--expanded--BorderBottomColor: var(
-    --pf-global--BackgroundColor--light-100
-  );
-}
-
-.pf-c-page__header {
-  .pf-c-dropdown__toggle .pf-c-dropdown__toggle-icon {
-    --pf-c-dropdown__toggle-icon--MarginLeft: 10px;
-  }
-}
-
-//
 // sidebar overrides
 //
 
@@ -119,34 +89,6 @@
 }
 
 //
-// switch overrides
-// https://github.com/patternfly/patternfly-next/issues/915
-//
-
-.pf-c-switch {
-  .pf-c-switch__label::before {
-    display: none;
-  }
-}
-
-//
-// about modal overrides
-//
-
-.pf-c-backdrop .pf-c-about-modal-box {
-  --pf-c-about-modal-box--MaxHeight: 40rem;
-  --pf-c-about-modal-box--MaxWidth: 63rem;
-}
-
-.pf-c-list {
-  li {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-  }
-}
-
-//
 // pf modal overrides
 //
 
@@ -183,28 +125,6 @@
   --pf-c-modal-box__body--PaddingLeft: 20px;
   --pf-c-modal-box__body--PaddingRight: 20px;
   --pf-c-modal-box__body--PaddingBottom: 5px;
-}
-
-//
-// pf card overrides
-//
-
-// specificity hack to override PatternFly
-.pf-c-card.pf-c-card {
-  --pf-c-card--child--PaddingRight: 20px;
-  --pf-c-card--child--PaddingBottom: 24px;
-  --pf-c-card--child--PaddingLeft: 20px;
-
-  display: flex;
-  position: relative;
-}
-
-.pf-c-card__header {
-  padding: 0;
-}
-
-.pf-c-card__body {
-  --pf-c-card__body--PaddingTop: 24px;
 }
 
 //
