@@ -2,9 +2,9 @@
 # All Rights Reserved.
 
 # Python
-import cgi
 import dateutil
 import functools
+import html
 import logging
 import re
 import requests
@@ -4100,7 +4100,7 @@ class UnifiedJobStdout(RetrieveAPIView):
                 # Remove any ANSI escape sequences containing job event data.
                 content = re.sub(r'\x1b\[K(?:[A-Za-z0-9+/=]+\x1b\[\d+D)+\x1b\[K', '', content)
 
-                body = ansiconv.to_html(cgi.escape(content))
+                body = ansiconv.to_html(html.escape(content))
 
                 context = {
                     'title': get_view_name(self.__class__),
