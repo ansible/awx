@@ -48,6 +48,15 @@
   </div>
 {% endblock %}
 
+{% block content %}
+  {% if deprecated %}
+    <div class="breadcrumb" style="background: #FCC;">
+        <b>This resource has been deprecated and will be removed in a future release.</b>
+    </div>
+  {% endif %}
+{{ block.super }}
+{% endblock content %}
+
 {% block script %}
 <div id="footer">
   <div class="container">
