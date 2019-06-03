@@ -590,12 +590,12 @@ docker-compose-build: awx-devel-build
 
 # Base development image build
 awx-devel-build:
-	docker build -t ansible/awx_devel -f tools/docker-compose/Dockerfile .
+	docker build -t ansible/awx_devel -f tools/docker-compose/Dockerfile --cache-from=$(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG) .
 	docker tag ansible/awx_devel $(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG)
 	#docker push $(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG)
 
 # For use when developing on "isolated" AWX deployments
-awx-isolated-build:
+awx-isolated-build: awx-devel-build
 	docker build -t ansible/awx_isolated -f tools/docker-isolated/Dockerfile .
 	docker tag ansible/awx_isolated $(DEV_DOCKER_TAG_BASE)/awx_isolated:$(COMPOSE_TAG)
 	#docker push $(DEV_DOCKER_TAG_BASE)/awx_isolated:$(COMPOSE_TAG)
