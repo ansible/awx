@@ -111,7 +111,7 @@ services:
     environment:
       RABBITMQ_DEFAULT_VHOST: "{{ rabbitmq_default_vhost }}"
       RABBITMQ_DEFAULT_USER: "{{ rabbitmq_user }}"
-      RABBITMQ_DEFAULT_PASS: "{{ rabbitmq_password }}"
+      RABBITMQ_DEFAULT_PASS: "{{ rabbitmq_password | quote }}"
       RABBITMQ_ERLANG_COOKIE: {{ rabbitmq_erlang_cookie }}
       http_proxy: {{ http_proxy | default('') }}
       https_proxy: {{ https_proxy | default('') }}
@@ -135,7 +135,7 @@ services:
       - {{ postgres_data_dir }}:/var/lib/postgresql/data:Z
     environment:
       POSTGRES_USER: {{ pg_username }}
-      POSTGRES_PASSWORD: {{ pg_password }}
+      POSTGRES_PASSWORD: {{ pg_password | quote }}
       POSTGRES_DB: {{ pg_database }}
       PGDATA: /var/lib/postgresql/data/pgdata
       http_proxy: {{ http_proxy | default('') }}

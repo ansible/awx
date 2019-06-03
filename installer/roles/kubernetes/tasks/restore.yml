@@ -75,7 +75,7 @@
 - name: Temporarily grant createdb role
   shell: |
     {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
-      exec -i ansible-tower-management -- bash -c "PGPASSWORD={{ pg_password }} \
+      exec -i ansible-tower-management -- bash -c "PGPASSWORD={{ pg_password | quote }} \
         psql \
         --host={{ pg_hostname | default('postgresql') }} \
         --port={{ pg_port | default('5432') }} \
@@ -87,7 +87,7 @@
 - name: Perform a PostgreSQL restore
   shell: |
     {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
-      exec -i ansible-tower-management -- bash -c "PGPASSWORD={{ pg_password }} \
+      exec -i ansible-tower-management -- bash -c "PGPASSWORD={{ pg_password | quote }} \
         psql \
         --host={{ pg_hostname | default('postgresql') }} \
         --port={{ pg_port | default('5432') }} \
@@ -98,7 +98,7 @@
 - name: Revoke createdb role
   shell: |
     {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
-      exec -i ansible-tower-management -- bash -c "PGPASSWORD={{ pg_password }} \
+      exec -i ansible-tower-management -- bash -c "PGPASSWORD={{ pg_password | quote }} \
         psql \
         --host={{ pg_hostname | default('postgresql') }} \
         --port={{ pg_port | default('5432') }} \

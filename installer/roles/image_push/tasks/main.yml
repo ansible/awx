@@ -3,7 +3,7 @@
   docker_login:
     registry: "{{ docker_registry }}"
     username: "{{ docker_registry_username }}"
-    password: "{{ docker_registry_password }}"
+    password: "{{ docker_registry_password | quote }}"
     reauthorize: yes
   when: docker_registry is defined and docker_registry_password is defined
   delegate_to: localhost
