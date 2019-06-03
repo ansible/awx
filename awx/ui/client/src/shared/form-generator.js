@@ -697,7 +697,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                     html += `<div id='${form.name}_${fld}_group' class='form-group Form-formGroup `;
                     html += (field.disabled) ? `Form-formGroup--disabled ` : ``;
-                    html += (field.type === "checkbox") ? "Form-formGroup--checkbox" : "";
+                    html += (field.type === "checkbox") ? "Form-formGroup--checkbox " : "";
                     html += (field['class']) ? (field['class']) : "";
                     html += "'";
                     html += (field.ngShow) ? this.attr(field, 'ngShow') : "";

@@ -269,6 +269,14 @@ export default ['Rest', 'Wait',
                 "name": $scope.name,
                 "description": $scope.description,
                 "organization": $scope.organization,
+                "messages": $scope.customize_messages ? {
+                  start_message: $scope.start_message,
+                  start_body: $scope.start_body,
+                  success_message: $scope.success_message,
+                  success_body: $scope.success_body,
+                  error_message: $scope.error_message,
+                  error_body: $scope.error_body,
+                } : null,
                 "notification_type": v,
                 "notification_configuration": {}
             };

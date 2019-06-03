@@ -581,7 +581,55 @@ export default ['i18n', function(i18n) {
                 ngShow: "notification_type.value == 'slack' ",
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
                 awPopOver: i18n._('Specify a notification color. Acceptable colors are hex color code (example: #3af or #789abc) .')
-            }
+            },
+            customize_messages: {
+              label: i18n._('Customize messages…'),
+              type: 'checkbox',
+              class: 'Form-formGroup--fullWidth',
+              default: false,
+            },
+            start_message: {
+                label: i18n._('Start Message'),
+                class: 'Form-formGroup--fullWidth',
+                type: 'text',
+                default: '',
+                ngShow: "customize_messages",
+            },
+            start_body: {
+                label: i18n._('Start Body'),
+                class: 'Form-formGroup--fullWidth',
+                type: 'textarea',
+                default: '',
+                ngShow: "customize_messages && notification_type.value == 'email'",
+            },
+            success_message: {
+                label: i18n._('Success Message'),
+                class: 'Form-formGroup--fullWidth',
+                type: 'text',
+                default: '',
+                ngShow: "customize_messages",
+            },
+            success_body: {
+                label: i18n._('Success Body'),
+                class: 'Form-formGroup--fullWidth',
+                type: 'textarea',
+                default: '',
+                ngShow: "customize_messages && notification_type.value == 'email'",
+            },
+            error_message: {
+                label: i18n._('Error Message'),
+                class: 'Form-formGroup--fullWidth',
+                type: 'text',
+                default: '',
+                ngShow: "customize_messages",
+            },
+            error_body: {
+                label: i18n._('Error Body'),
+                class: 'Form-formGroup--fullWidth',
+                type: 'textarea',
+                default: '',
+                ngShow: "customize_messages && notification_type.value == 'email'",
+            },
         },
 
         buttons: { //for now always generates <button> tags
