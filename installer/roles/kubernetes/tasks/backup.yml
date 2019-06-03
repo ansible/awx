@@ -49,7 +49,7 @@
 - name: Dump database
   shell: |
     {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} exec ansible-tower-management -- \
-      bash -c "PGPASSWORD={{ pg_password }} \
+      bash -c "PGPASSWORD={{ pg_password | quote }} \
         pg_dump --clean --create \
           --host='{{ pg_hostname | default('postgresql') }}' \
           --port={{ pg_port | default('5432') }} \
