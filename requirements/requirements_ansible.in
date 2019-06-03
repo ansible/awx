@@ -62,3 +62,4 @@ requests
 requests-credssp==1.0.2   # For windows authentication awx/issues/1144
 # OpenStack
 openstacksdk==0.23.0
+ansible-tower-cli==3.3.4
