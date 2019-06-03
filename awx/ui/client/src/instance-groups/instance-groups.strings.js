@@ -14,6 +14,7 @@ function InstanceGroupsStrings (BaseString) {
         MANUAL: t.s('MANUAL'),
         PANEL_TITLE: t.s('INSTANCE GROUPS'),
         ROW_ITEM_LABEL_INSTANCES: t.s('Instances'),
+        ROW_ITEM_LABEL_ISOLATED: t.s('ISOLATED'),
         ROW_ITEM_LABEL_RUNNING_JOBS: t.s('Running Jobs'),
         ROW_ITEM_LABEL_TOTAL_JOBS: t.s('Total Jobs'),
         ROW_ITEM_LABEL_USED_CAPACITY: t.s('Used Capacity')
@@ -58,7 +59,7 @@ function InstanceGroupsStrings (BaseString) {
         DELETE: t.s('Unable to delete instance group.'),
     };
 
-    ns.alert  = {
+    ns.alert = {
         MISSING_PARAMETER: t.s('Instance Group parameter is missing.'),
     };
 }
