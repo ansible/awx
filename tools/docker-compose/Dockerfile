@@ -73,8 +73,7 @@ RUN yum -y install acl \
   xorg-x11-utils \
   yum-utils
 
-ADD https://github.com/krallin/tini/releases/download/v0.14.0/tini /tini
-RUN chmod +x /tini
+RUN yum install -y https://github.com/krallin/tini/releases/download/v0.18.0/tini_0.18.0.rpm
 
 RUN /usr/bin/ssh-keygen -q -t rsa -N "" -f /root/.ssh/id_rsa
 RUN mkdir -p /data/db

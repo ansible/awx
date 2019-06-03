@@ -5,4 +5,4 @@ set +x
 
 cd /awx_devel
 # Start the services
-exec /tini -- make supervisor
+exec tini -- make supervisor
