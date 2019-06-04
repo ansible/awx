@@ -68,6 +68,10 @@ class TestSwaggerGeneration():
                         node[method]['deprecated'] = True
                     if 'action_node' in node:
                         node['action_node'] = 'foo.host.invalid'
+                    if 'results' in node:
+                        for entry in node['results']:
+                            if 'action_node' in entry:
+                                entry['action_node'] = 'foo.host.invalid'
                     if 'description' in node[method]:
                         # Pop off the first line and use that as the summary
                         lines = node[method]['description'].splitlines()
