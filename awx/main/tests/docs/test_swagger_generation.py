@@ -163,6 +163,8 @@ class TestSwaggerGeneration():
     @classmethod
     def teardown_class(cls):
         with open('swagger.json', 'w') as f:
+            if 'action_node' in cls.JSON:
+                cls.JSON['action_node'] = 'foo.host.invalid'
             data = json.dumps(cls.JSON, cls=i18nEncoder, indent=2, sort_keys=True)
             # replace ISO dates w/ the same value so we don't generate
             # needless diffs
