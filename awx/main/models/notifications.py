@@ -7,6 +7,7 @@ import logging
 from django.db import models
 from django.conf import settings
 from django.core.mail.message import EmailMessage
+from django.db import connection
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import smart_str, force_text
 
@@ -240,12 +241,16 @@ class JobNotificationMixin(object):
                 notification_template_type = 'started'
             else:
                 notification_template_type = 'error'
-            all_notification_templates = set(notification_templates.get(notification_template_type, []) + notification_templates.get('any', []))
-            if len(all_notification_templates):
-                try:
-                    (notification_subject, notification_body) = getattr(self, 'build_notification_%s_message' % status_str)()
-                except AttributeError:
-                    raise NotImplementedError("build_notification_%s_message() does not exist" % status_str)
+            all_notification_templates = set(notification_templates.get(notification_template_type, []))
+            if status_str != 'running':
+                all_notification_templates.update(notification_templates.get('any', []))
+            try:
+                (notification_subject, notification_body) = getattr(self, 'build_notification_%s_message' % status_str)()
+            except AttributeError:
+                raise NotImplementedError("build_notification_%s_message() does not exist" % status_str)
+
+            def send_it():
                 send_notifications.delay([n.generate_notification(notification_subject, notification_body).id
                                           for n in all_notification_templates],
                                          job_id=self.id)
+            connection.on_commit(send_it)

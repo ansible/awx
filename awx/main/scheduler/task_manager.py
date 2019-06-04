@@ -233,6 +233,7 @@ class TaskManager():
         else:
             if type(task) is WorkflowJob:
                 task.status = 'running'
+                task.send_notification_templates('running') # <----
                 logger.debug('Transitioning %s to running status.', task.log_format)
                 schedule_task_manager()
             elif not task.supports_isolation() and rampart_group.controller_id:
@@ -587,4 +588,4 @@ class TaskManager():
 
                 # Operations whose queries rely on modifications made during the atomic scheduling session
                 for wfj in WorkflowJob.objects.filter(id__in=finished_wfjs):
-                    wfj.send_notification_templates('started' if wfj.status == 'running' else ('succeeded' if wfj.status == 'successful' else 'failed'))
+                    wfj.send_notification_templates('succeeded' if wfj.status == 'successful' else 'failed')

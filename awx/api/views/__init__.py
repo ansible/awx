@@ -751,27 +751,18 @@ class ProjectNotificationTemplatesAnyList(SubListCreateAttachDetachAPIView):
     relationship = 'notification_templates_any'
 
 
-class ProjectNotificationTemplatesStartedList(SubListCreateAttachDetachAPIView):
+class ProjectNotificationTemplatesStartedList(ProjectNotificationTemplatesAnyList):
 
-    model = models.NotificationTemplate
-    serializer_class = serializers.NotificationTemplateSerializer
-    parent_model = models.Project
     relationship = 'notification_templates_started'
 
 
-class ProjectNotificationTemplatesErrorList(SubListCreateAttachDetachAPIView):
+class ProjectNotificationTemplatesErrorList(ProjectNotificationTemplatesAnyList):
 
-    model = models.NotificationTemplate
-    serializer_class = serializers.NotificationTemplateSerializer
-    parent_model = models.Project
     relationship = 'notification_templates_error'
 
 
-class ProjectNotificationTemplatesSuccessList(SubListCreateAttachDetachAPIView):
+class ProjectNotificationTemplatesSuccessList(ProjectNotificationTemplatesAnyList):
 
-    model = models.NotificationTemplate
-    serializer_class = serializers.NotificationTemplateSerializer
-    parent_model = models.Project
     relationship = 'notification_templates_success'
 
 
@@ -2643,27 +2634,18 @@ class JobTemplateNotificationTemplatesAnyList(SubListCreateAttachDetachAPIView):
     relationship = 'notification_templates_any'
 
 
-class JobTemplateNotificationTemplatesStartedList(SubListCreateAttachDetachAPIView):
+class JobTemplateNotificationTemplatesStartedList(JobTemplateNotificationTemplatesAnyList):
 
-    model = models.NotificationTemplate
-    serializer_class = serializers.NotificationTemplateSerializer
-    parent_model = models.JobTemplate
     relationship = 'notification_templates_started'
 
 
-class JobTemplateNotificationTemplatesErrorList(SubListCreateAttachDetachAPIView):
+class JobTemplateNotificationTemplatesErrorList(JobTemplateNotificationTemplatesAnyList):
 
-    model = models.NotificationTemplate
-    serializer_class = serializers.NotificationTemplateSerializer
-    parent_model = models.JobTemplate
     relationship = 'notification_templates_error'
 
 
-class JobTemplateNotificationTemplatesSuccessList(SubListCreateAttachDetachAPIView):
+class JobTemplateNotificationTemplatesSuccessList(JobTemplateNotificationTemplatesAnyList):
 
-    model = models.NotificationTemplate
-    serializer_class = serializers.NotificationTemplateSerializer
-    parent_model = models.JobTemplate
     relationship = 'notification_templates_success'
 
 
@@ -3259,27 +3241,18 @@ class WorkflowJobTemplateNotificationTemplatesAnyList(SubListCreateAttachDetachA
     relationship = 'notification_templates_any'
 
 
-class WorkflowJobTemplateNotificationTemplatesStartedList(SubListCreateAttachDetachAPIView):
+class WorkflowJobTemplateNotificationTemplatesStartedList(WorkflowJobTemplateNotificationTemplatesAnyList):
 
-    model = models.NotificationTemplate
-    serializer_class = serializers.NotificationTemplateSerializer
-    parent_model = models.WorkflowJobTemplate
     relationship = 'notification_templates_started'
 
 
-class WorkflowJobTemplateNotificationTemplatesErrorList(SubListCreateAttachDetachAPIView):
+class WorkflowJobTemplateNotificationTemplatesErrorList(WorkflowJobTemplateNotificationTemplatesAnyList):
 
-    model = models.NotificationTemplate
-    serializer_class = serializers.NotificationTemplateSerializer
-    parent_model = models.WorkflowJobTemplate
     relationship = 'notification_templates_error'
 
 
-class WorkflowJobTemplateNotificationTemplatesSuccessList(SubListCreateAttachDetachAPIView):
+class WorkflowJobTemplateNotificationTemplatesSuccessList(WorkflowJobTemplateNotificationTemplatesAnyList):
 
-    model = models.NotificationTemplate
-    serializer_class = serializers.NotificationTemplateSerializer
-    parent_model = models.WorkflowJobTemplate
     relationship = 'notification_templates_success'
 
 
@@ -3444,27 +3417,18 @@ class SystemJobTemplateNotificationTemplatesAnyList(SubListCreateAttachDetachAPI
     relationship = 'notification_templates_any'
 
 
-class SystemJobTemplateNotificationTemplatesStartedList(SubListCreateAttachDetachAPIView):
+class SystemJobTemplateNotificationTemplatesStartedList(SystemJobTemplateNotificationTemplatesAnyList):
 
-    model = models.NotificationTemplate
-    serializer_class = serializers.NotificationTemplateSerializer
-    parent_model = models.SystemJobTemplate
     relationship = 'notification_templates_started'
 
 
-class SystemJobTemplateNotificationTemplatesErrorList(SubListCreateAttachDetachAPIView):
+class SystemJobTemplateNotificationTemplatesErrorList(SystemJobTemplateNotificationTemplatesAnyList):
 
-    model = models.NotificationTemplate
-    serializer_class = serializers.NotificationTemplateSerializer
-    parent_model = models.SystemJobTemplate
     relationship = 'notification_templates_error'
 
 
-class SystemJobTemplateNotificationTemplatesSuccessList(SubListCreateAttachDetachAPIView):
+class SystemJobTemplateNotificationTemplatesSuccessList(SystemJobTemplateNotificationTemplatesAnyList):
 
-    model = models.NotificationTemplate
-    serializer_class = serializers.NotificationTemplateSerializer
-    parent_model = models.SystemJobTemplate
     relationship = 'notification_templates_success'
 
 
