@@ -233,7 +233,7 @@ class TaskManager():
         else:
             if type(task) is WorkflowJob:
                 task.status = 'running'
-                task.send_notification_templates('running') # <----
+                task.send_notification_templates('running')
                 logger.debug('Transitioning %s to running status.', task.log_format)
                 schedule_task_manager()
             elif not task.supports_isolation() and rampart_group.controller_id:
