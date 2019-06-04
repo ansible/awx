@@ -12,3 +12,10 @@
     that:
     - host_port is defined and host_port != ''
     msg: "Set the value of 'host_port' in the inventory file."
+
+- name: host_port should be available
+  wait_for:
+    port: "{{ host_port }}"
+    timeout: 2
+    state: stopped
+    msg: "host_port is currently in use"
