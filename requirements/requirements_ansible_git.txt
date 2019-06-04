@@ -1,1 +1,0 @@
-git+https://github.com/ansible/libcloud@trunk#egg=apache-libcloud
