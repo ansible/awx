@@ -20,6 +20,7 @@ from distutils.dir_util import copy_tree
 from distutils.version import LooseVersion as Version
 import yaml
 import fcntl
+from pathlib import Path
 try:
     import psutil
 except Exception:
@@ -692,8 +693,11 @@ class BaseTask(object):
     model = None
     event_model = None
     abstract = True
-    cleanup_paths = []
     proot_show_paths = []
+
+    def __init__(self, *args, **kwargs):
+        super(BaseTask, self).__init__(*args, **kwargs)
+        self.cleanup_paths = []
 
     def update_model(self, pk, _attempt=0, **updates):
         """Reload the model instance from the database and update the
@@ -855,11 +859,14 @@ class BaseTask(object):
         Build ansible runner .run() parameters for process isolation.
         '''
         process_isolation_params = dict()
+        local_paths = [private_data_dir]
+        if cwd != private_data_dir and Path(private_data_dir) not in Path(cwd).parents:
+            local_paths.append(cwd)
         if self.should_use_proot(instance):
             process_isolation_params = {
                 'process_isolation': True,
                 'process_isolation_path': settings.AWX_PROOT_BASE_PATH,
-                'process_isolation_show_paths': self.proot_show_paths + [private_data_dir, cwd] + settings.AWX_PROOT_SHOW_PATHS,
+                'process_isolation_show_paths': self.proot_show_paths + local_paths + settings.AWX_PROOT_SHOW_PATHS,
                 'process_isolation_hide_paths': [
                     settings.AWX_PROOT_BASE_PATH,
                     '/etc/tower',
@@ -1005,7 +1012,7 @@ class BaseTask(object):
             expect_passwords[k] = passwords.get(v, '') or ''
         return expect_passwords
 
-    def pre_run_hook(self, instance):
+    def pre_run_hook(self, instance, private_data_dir):
         '''
         Hook for any steps to run before the job/task starts
         '''
@@ -1131,7 +1138,8 @@ class BaseTask(object):
 
         try:
             isolated = self.instance.is_isolated()
-            self.pre_run_hook(self.instance)
+            private_data_dir = self.build_private_data_dir(self.instance)
+            self.pre_run_hook(self.instance, private_data_dir)
             if self.instance.cancel_flag:
                 self.instance = self.update_model(self.instance.pk, status='canceled')
             if self.instance.status != 'running':
@@ -1147,7 +1155,6 @@ class BaseTask(object):
             # store a record of the venv used at runtime
             if hasattr(self.instance, 'custom_virtualenv'):
                 self.update_model(pk, custom_virtualenv=getattr(self.instance, 'ansible_virtualenv_path', settings.ANSIBLE_VENV_PATH))
-            private_data_dir = self.build_private_data_dir(self.instance)
 
             # Fetch "cached" fact data from prior runs and put on the disk
             # where ansible expects to find it
@@ -1230,9 +1237,6 @@ class BaseTask(object):
                     module_args = ansible_runner.utils.args2cmdline(
                         params.get('module_args'),
                     )
-                else:
-                    # otherwise, it's a playbook, so copy the project dir
-                    copy_tree(cwd, os.path.join(private_data_dir, 'project'))
                 shutil.move(
                     params.pop('inventory'),
                     os.path.join(private_data_dir, 'inventory')
@@ -1506,15 +1510,10 @@ class RunJob(BaseTask):
         return args
 
     def build_cwd(self, job, private_data_dir):
-        cwd = job.project.get_project_path()
-        if not cwd:
-            root = settings.PROJECTS_ROOT
-            raise RuntimeError('project local_path %s cannot be found in %s' %
-                               (job.project.local_path, root))
-        return cwd
+        return os.path.join(private_data_dir, 'project')
 
     def build_playbook_path_relative_to_cwd(self, job, private_data_dir):
-        return os.path.join(job.playbook)
+        return job.playbook
 
     def build_extra_vars_file(self, job, private_data_dir):
         # Define special extra_vars for AWX, combine with job.extra_vars.
@@ -1561,11 +1560,23 @@ class RunJob(BaseTask):
         '''
         return getattr(settings, 'AWX_PROOT_ENABLED', False)
 
-    def pre_run_hook(self, job):
+    def copy_folders(self, project_path, galaxy_install_path, private_data_dir):
+        if project_path is None:
+            raise RuntimeError('project does not supply a valid path')
+        elif not os.path.exists(project_path):
+            raise RuntimeError('project path %s cannot be found' % project_path)
+        runner_project_folder = os.path.join(private_data_dir, 'project')
+        copy_tree(project_path, runner_project_folder)
+        if galaxy_install_path:
+            galaxy_run_path = os.path.join(private_data_dir, 'project', 'roles')
+            copy_tree(galaxy_install_path, galaxy_run_path)
+
+    def pre_run_hook(self, job, private_data_dir):
         if job.inventory is None:
             error = _('Job could not start because it does not have a valid inventory.')
             self.update_model(job.pk, status='failed', job_explanation=error)
             raise RuntimeError(error)
+        galaxy_install_path = None
         if job.project and job.project.scm_type:
             pu_ig = job.instance_group
             pu_en = job.execution_node
@@ -1590,9 +1601,13 @@ class RunJob(BaseTask):
             # cancel() call on the job can cancel the project update
             job = self.update_model(job.pk, project_update=local_project_sync)
 
+            # Save the roles from galaxy to a temporary directory to be moved later
+            # at this point, the project folder has not yet been coppied into the temporary directory
+            galaxy_install_path = tempfile.mkdtemp(prefix='tmp_roles_', dir=private_data_dir)
+            os.chmod(galaxy_install_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
             project_update_task = local_project_sync._get_task_class()
             try:
-                project_update_task().run(local_project_sync.id)
+                project_update_task(roles_destination=galaxy_install_path).run(local_project_sync.id)
                 job = self.update_model(job.pk, scm_revision=job.project.scm_revision)
             except Exception:
                 local_project_sync.refresh_from_db()
@@ -1601,6 +1616,11 @@ class RunJob(BaseTask):
                                             job_explanation=('Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' %
                                                              ('project_update', local_project_sync.name, local_project_sync.id)))
                     raise
+
+        # copy the project and roles directory
+        project_path = job.project.get_project_path(check_if_exists=False)
+        self.copy_folders(project_path, galaxy_install_path, private_data_dir)
+
         if job.inventory.kind == 'smart':
             # cache smart inventory memberships so that the host_filter query is not
             # ran inside of the event saving code
@@ -1637,7 +1657,14 @@ class RunProjectUpdate(BaseTask):
 
     @property
     def proot_show_paths(self):
-        return [settings.PROJECTS_ROOT]
+        show_paths = [settings.PROJECTS_ROOT]
+        if self.roles_destination:
+            show_paths.append(self.roles_destination)
+        return show_paths
+
+    def __init__(self, *args, roles_destination=None, **kwargs):
+        super(RunProjectUpdate, self).__init__(*args, **kwargs)
+        self.roles_destination = roles_destination
 
     def build_private_data(self, project_update, private_data_dir):
         '''
@@ -1772,8 +1799,10 @@ class RunProjectUpdate(BaseTask):
             'scm_full_checkout': True if project_update.job_type == 'run' else False,
             'scm_revision_output': self.revision_path,
             'scm_revision': project_update.project.scm_revision,
-            'roles_enabled': getattr(settings, 'AWX_ROLES_ENABLED', True)
+            'roles_enabled': getattr(settings, 'AWX_ROLES_ENABLED', True) if project_update.job_type != 'check' else False
         })
+        if self.roles_destination:
+            extra_vars['roles_destination'] = self.roles_destination
         self._write_extra_vars_file(private_data_dir, extra_vars)
 
     def build_cwd(self, project_update, private_data_dir):
@@ -1894,7 +1923,7 @@ class RunProjectUpdate(BaseTask):
                 '{} spent {} waiting to acquire lock for local source tree '
                 'for path {}.'.format(instance.log_format, waiting_time, lock_path))
 
-    def pre_run_hook(self, instance):
+    def pre_run_hook(self, instance, private_data_dir):
         # re-create root project folder if a natural disaster has destroyed it
         if not os.path.exists(settings.PROJECTS_ROOT):
             os.mkdir(settings.PROJECTS_ROOT)
@@ -2133,11 +2162,12 @@ class RunInventoryUpdate(BaseTask):
         # All credentials not used by inventory source injector
         return inventory_update.get_extra_credentials()
 
-    def pre_run_hook(self, inventory_update):
+    def pre_run_hook(self, inventory_update, private_data_dir):
         source_project = None
         if inventory_update.inventory_source:
             source_project = inventory_update.inventory_source.source_project
         if (inventory_update.source=='scm' and inventory_update.launch_type!='scm' and source_project):
+            # In project sync, pulling galaxy roles is not needed
             local_project_sync = source_project.create_project_update(
                 _eager_fields=dict(
                     launch_type="sync",
