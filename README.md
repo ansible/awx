@@ -1,7 +1,7 @@
 # AWX-PF
 
 ## Requirements
-- node 8.x LTS, npm 5.x LTS, make, git
+- node 10.x LTS, npm 6.x LTS, make, git
 
 ## Usage
 
