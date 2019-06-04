@@ -66,6 +66,8 @@ class TestSwaggerGeneration():
                 for method in node:
                     if path in deprecated_paths:
                         node[method]['deprecated'] = True
+                    if 'action_node' in node:
+                        node['action_node'] = 'foo.host.invalid'
                     if 'description' in node[method]:
                         # Pop off the first line and use that as the summary
                         lines = node[method]['description'].splitlines()
