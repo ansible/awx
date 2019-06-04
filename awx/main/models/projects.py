@@ -261,8 +261,13 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
     scm_update_cache_timeout = models.PositiveIntegerField(
         default=0,
         blank=True,
-        help_text=_('The number of seconds after the last project update ran that a new'
+        help_text=_('The number of seconds after the last project update ran that a new '
                     'project update will be launched as a job dependency.'),
+    )
+    allow_override = models.BooleanField(
+        default=False,
+        help_text=_('Allow changing the SCM branch or revision in a job template '
+                    'that uses this project.'),
     )
 
     scm_revision = models.CharField(

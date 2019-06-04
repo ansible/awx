@@ -361,12 +361,13 @@ class TestExtraVarSanitation(TestJobExecution):
 class TestGenericRun():
 
     def test_generic_failure(self, patch_Job):
-        job = Job(status='running', inventory=Inventory())
+        job = Job(status='running', inventory=Inventory(), project=Project())
         job.websocket_emit_status = mock.Mock()
 
         task = tasks.RunJob()
         task.update_model = mock.Mock(return_value=job)
         task.build_private_data_files = mock.Mock(side_effect=OSError())
+        task.copy_folders = mock.Mock()
 
         with pytest.raises(Exception):
             task.run(1)
@@ -385,6 +386,7 @@ class TestGenericRun():
         task = tasks.RunJob()
         task.update_model = mock.Mock(wraps=update_model_wrapper)
         task.build_private_data_files = mock.Mock()
+        task.copy_folders = mock.Mock()
 
         with pytest.raises(Exception):
             task.run(1)

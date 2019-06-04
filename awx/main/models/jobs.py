@@ -96,6 +96,13 @@ class JobOptions(BaseModel):
         default='',
         blank=True,
     )
+    scm_branch = models.CharField(
+        max_length=1024,
+        default='',
+        blank=True,
+        help_text=_('Branch to use in job run. Project default used if blank. '
+                  'Only allowed if project allow_override field is set to true.'),
+    )
     forks = models.PositiveIntegerField(
         blank=True,
         default=0,
@@ -233,6 +240,11 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         blank=True,
         default=False,
         allows_field='credentials'
+    )
+    ask_scm_branch_on_launch = AskForField(
+        blank=True,
+        default=False,
+        allows_field='scm_branch'
     )
     job_slice_count = models.PositiveIntegerField(
         blank=True,
