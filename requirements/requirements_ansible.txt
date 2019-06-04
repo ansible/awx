@@ -5,6 +5,7 @@
 #    pip-compile -U -r --allow-unsafe --output-file requirements/requirements_ansible.txt requirements/requirements_ansible.in
 #
 adal==1.2.1               # via msrestazure
+apache-libcloud==2.5.0
 appdirs==1.4.3            # via openstacksdk
 applicationinsights==0.11.9  # via azure-cli-core
 argcomplete==1.9.5        # via azure-cli-core, knack
