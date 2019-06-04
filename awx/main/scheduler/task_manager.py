@@ -193,6 +193,8 @@ class TaskManager():
                 status_changed = True
             if status_changed:
                 workflow_job.websocket_emit_status(workflow_job.status)
+                # Operations whose queries rely on modifications made during the atomic scheduling session
+                connection.on_commit(lambda: workflow_job.send_notification_templates('succeeded' if workflow_job.status == 'successful' else 'failed'))
                 if workflow_job.spawned_by_workflow:
                     schedule_task_manager()
         return result
@@ -582,10 +584,5 @@ class TaskManager():
                     logger.debug("Not running scheduler, another task holds lock")
                     return
                 logger.debug("Starting Scheduler")
-
                 with task_manager_bulk_reschedule():
-                    finished_wfjs = self._schedule()
-
-                # Operations whose queries rely on modifications made during the atomic scheduling session
-                for wfj in WorkflowJob.objects.filter(id__in=finished_wfjs):
-                    wfj.send_notification_templates('succeeded' if wfj.status == 'successful' else 'failed')
+                    self._schedule()
