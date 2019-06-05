@@ -7,11 +7,15 @@ RUN yum install -y bzip2 \
     gettext \
     git \
     make \
+    nodejs \
     python36-setuptools
 
-RUN curl --silent --location https://rpm.nodesource.com/setup_8.x | bash -
-RUN yum install -y nodejs
-RUN npm set progress=false
+# Use the distro provided npm to bootstrap our required version of node
+RUN npm install -g n
+RUN n 10.15.0
+RUN yum remove -y nodejs
+
+ENV PATH=/usr/local/n/versions/node/10.15.0/bin:$PATH
 
 WORKDIR "/awx"
 
