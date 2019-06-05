@@ -13,9 +13,19 @@
     - host_port is defined and host_port != ''
     msg: "Set the value of 'host_port' in the inventory file."
 
-- name: host_port should be available
-  wait_for:
-    port: "{{ host_port }}"
-    timeout: 2
-    state: stopped
-    msg: "host_port is currently in use"
+- name: gather process name listening on host_port
+  shell: ps hp `fuser -n tcp "{{ host_port }}" 2> /dev/null | cut -d ' ' -f 2` -o comm
+  register: host_port_listening
+  failed_when: "'command not found' in host_port_listening.stderr"
+
+- name: gather container name when docker-proxy is using host_port
+  shell: docker port awx_web
+  register: docker_port_listener
+  when: host_port_listening.stdout == 'docker-proxy'
+
+- name: host_port should not be in use by other services
+  assert:
+    that:
+    - host_port_listening.stdout == 'docker-proxy' and docker_port_listener == 'awx_web'
+    msg: "host_port {{ host_port }} is in use by process {{ host_port_listening.stdout }}"
+  when: host_port_listening.stdout != '' and host_port_listening.stdout != 'docker-proxy'
