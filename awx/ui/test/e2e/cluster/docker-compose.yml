@@ -2,13 +2,13 @@
 version: '2'
 services:
   hub:
-    image: selenium/hub
+    image: selenium/hub:${SELENIUM_DOCKER_TAG}
     ports:
       - 4444:4444
     environment:
       DBUS_SESSION_BUS_ADDRESS: /dev/null
   chrome:
-    image: selenium/node-chrome
+    image: selenium/node-chrome:${SELENIUM_DOCKER_TAG}
     links:
       - hub
     volumes:
@@ -18,7 +18,7 @@ services:
       HUB_PORT_4444_TCP_PORT: 4444
       DBUS_SESSION_BUS_ADDRESS: /dev/null
   firefox:
-    image: selenium/node-firefox
+    image: selenium/node-firefox:${SELENIUM_DOCKER_TAG}
     links:
       - hub
     environment:
