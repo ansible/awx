@@ -45,7 +45,9 @@
                 <div class="at-Row-items">
                     <at-row-item
                         header-value="{{ instance_group.name }}"
-                        header-link="/#/instance_groups/{{ instance_group.id }}">
+                        header-link="/#/instance_groups/{{ instance_group.id }}"
+                        header-tag="{{ instance_group.is_isolated ? vm.strings.get('list.ROW_ITEM_LABEL_ISOLATED') : '' }}"
+                    >
                     </at-row-item>
 
                     <div class="at-Row--inline">
