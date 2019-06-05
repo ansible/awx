@@ -43,15 +43,18 @@
 
 - name: Build sdist builder image
   docker_image:
-    buildargs:
-      http_proxy: "{{ http_proxy | default('') }}"
-      https_proxy: "{{ https_proxy | default('') }}"
-      no_proxy: "{{ no_proxy | default('') }}"
-    path: "{{ role_path }}/files"
-    dockerfile: Dockerfile.sdist
+    build:
+      path: "{{ role_path }}/files"
+      dockerfile: Dockerfile.sdist
+      pull: no
+      args:
+        http_proxy: "{{ http_proxy | default('') }}"
+        https_proxy: "{{ https_proxy | default('') }}"
+        no_proxy: "{{ no_proxy | default('') }}"
     name: awx_sdist_builder
     tag: "{{ awx_version }}"
-    force: true
+    source: 'build'
+    force_source: true
   delegate_to: localhost
   when: use_container_for_build|default(true)|bool
 
@@ -183,29 +186,34 @@
 
 - name: Build base web image
   docker_image:
-    buildargs:
-      http_proxy: "{{ http_proxy | default('') }}"
-      https_proxy: "{{ https_proxy | default('') }}"
-      no_proxy: "{{ no_proxy | default('') }}"
-    path: "{{ docker_base_path }}"
-    dockerfile: Dockerfile
+    build:
+      path: "{{ docker_base_path }}"
+      dockerfile: Dockerfile
+      pull: no
+      args:
+        http_proxy: "{{ http_proxy | default('') }}"
+        https_proxy: "{{ https_proxy | default('') }}"
+        no_proxy: "{{ no_proxy | default('') }}"
     name: "{{ web_image }}"
     tag: "{{ awx_version }}"
-    force: yes
+    source: 'build'
+    force_source: yes
   delegate_to: localhost
 
 - name: Build base task image
   docker_image:
-    buildargs:
-      http_proxy: "{{ http_proxy | default('') }}"
-      https_proxy: "{{ https_proxy | default('') }}"
-      no_proxy: "{{ no_proxy | default('') }}"
-    path: "{{ docker_base_path }}"
-    dockerfile: Dockerfile.task
+    build:
+      path: "{{ docker_base_path }}"
+      dockerfile: Dockerfile.task
+      pull: no
+      args:
+        http_proxy: "{{ http_proxy | default('') }}"
+        https_proxy: "{{ https_proxy | default('') }}"
+        no_proxy: "{{ no_proxy | default('') }}"
     name: "{{ task_image }}"
     tag: "{{ awx_version }}"
-    pull: no
-    force: yes
+    source: 'build'
+    force_source: yes
   delegate_to: localhost
 
 - name: Tag task and web images as latest
