@@ -194,7 +194,7 @@ class TaskManager():
             if status_changed:
                 workflow_job.websocket_emit_status(workflow_job.status)
                 # Operations whose queries rely on modifications made during the atomic scheduling session
-                connection.on_commit(lambda: workflow_job.send_notification_templates('succeeded' if workflow_job.status == 'successful' else 'failed'))
+                workflow_job.send_notification_templates('succeeded' if workflow_job.status == 'successful' else 'failed')
                 if workflow_job.spawned_by_workflow:
                     schedule_task_manager()
         return result
@@ -235,7 +235,7 @@ class TaskManager():
         else:
             if type(task) is WorkflowJob:
                 task.status = 'running'
-                connection.on_commit(lambda: task.send_notification_templates('running'))
+                task.send_notification_templates('running')
                 logger.debug('Transitioning %s to running status.', task.log_format)
                 schedule_task_manager()
             elif not task.supports_isolation() and rampart_group.controller_id:

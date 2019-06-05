@@ -242,15 +242,16 @@ class JobNotificationMixin(object):
             else:
                 notification_template_type = 'error'
             all_notification_templates = set(notification_templates.get(notification_template_type, []))
-            if status_str != 'running':
-                all_notification_templates.update(notification_templates.get('any', []))
-            try:
-                (notification_subject, notification_body) = getattr(self, 'build_notification_%s_message' % status_str)()
-            except AttributeError:
-                raise NotImplementedError("build_notification_%s_message() does not exist" % status_str)
+            if len(all_notification_templates):
+                if status_str != 'running':
+                    all_notification_templates.update(notification_templates.get('any', []))
+                try:
+                    (notification_subject, notification_body) = getattr(self, 'build_notification_%s_message' % status_str)()
+                except AttributeError:
+                    raise NotImplementedError("build_notification_%s_message() does not exist" % status_str)
 
-            def send_it():
-                send_notifications.delay([n.generate_notification(notification_subject, notification_body).id
-                                          for n in all_notification_templates],
-                                         job_id=self.id)
-            connection.on_commit(send_it)
+                def send_it():
+                    send_notifications.delay([n.generate_notification(notification_subject, notification_body).id
+                                              for n in all_notification_templates],
+                                             job_id=self.id)
+                connection.on_commit(send_it)
