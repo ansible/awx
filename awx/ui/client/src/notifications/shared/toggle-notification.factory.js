@@ -21,7 +21,7 @@ export default ['Wait', 'ProcessErrors', 'Rest',
             notifier = params.notifier,
             notifier_id = params.notifier.id,
             callback = params.callback,
-            column = params.column, // notification_template_success/notification_template__error
+            column = params.column, // notification_template_success/notification_template__error/notification_template_started
             url = params.url + "/" + column + '/';
 
         if(!notifier[column]){
@@ -45,7 +45,7 @@ export default ['Wait', 'ProcessErrors', 'Rest',
                     notifier[column] = !notifier[column];
                 }
                 // Hide the working spinner
-                Wait('stop');
+            Wait('stop');
             })
             .catch(({data, status}) => {
                 ProcessErrors(scope, data, status, null, { hdr: 'Error!',

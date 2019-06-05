@@ -35,6 +35,18 @@ export default ['i18n', 'templateUrl', function(i18n, templateUrl){
                 excludeModal: true,
                 columnClass: 'd-none d-sm-flex col-md-4 col-sm-3'
             },
+            notification_templates_started: {
+                label: i18n._("Start"),
+                flag: 'notification_templates_started',
+                type: "toggle",
+                ngClick: "toggleNotification($event, notification.id, \"notification_templates_started\")",
+                ngDisabled: "!sufficientRoleForNotifToggle",
+                awToolTip: "{{ schedule.play_tip }}",
+                dataTipWatch: "schedule.play_tip",
+                dataPlacement: "right",
+                nosort: true,
+                columnClass: 'd-none d-md-flex justify-content-start col-md-1'
+            },
             notification_templates_success: {
                 label: i18n._('Success'),
                 flag: 'notification_templates_success',
@@ -45,11 +57,11 @@ export default ['i18n', 'templateUrl', function(i18n, templateUrl){
                 dataTipWatch: "schedule.play_tip",
                 dataPlacement: "right",
                 nosort: true,
-                columnClass: 'd-none d-md-flex justify-content-start col-md-2'
+                columnClass: 'd-none d-md-flex justify-content-start col-md-1'
             },
             notification_templates_error: {
                 label: i18n._('Failure'),
-                columnClass: 'd-none d-md-flex justify-content-start col-md-2 NotifierList-lastColumn',
+                columnClass: 'd-none d-md-flex justify-content-start col-md-1 NotifierList-lastColumn',
                 flag: 'notification_templates_error',
                 type: "toggle",
                 ngClick: "toggleNotification($event, notification.id, \"notification_templates_error\")",
