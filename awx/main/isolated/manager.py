@@ -69,17 +69,18 @@ class IsolatedManager(object):
             else:
                 playbook_logger.info(runner_obj.stdout.read())
 
-        inventory = '\n'.join([
-            '{} ansible_ssh_user={}'.format(host, settings.AWX_ISOLATED_USERNAME)
-            for host in hosts
-        ])
+        handle, path = tempfile.mkstemp()
+        f = os.fdopen(handle, 'w')
+        f.write('\n'.join(['isolated ansible_connection=oc']))
+        f.close()
+        os.chmod(path, stat.S_IRUSR | stat.S_IXUSR | stat.S_IWUSR)
 
         return {
             'project_dir': os.path.abspath(os.path.join(
                 os.path.dirname(awx.__file__),
                 'playbooks'
             )),
-            'inventory': inventory,
+            'inventory': path,
             'envvars': env,
             'finished_callback': finished_callback,
             'verbosity': verbosity,

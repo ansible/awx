@@ -23,7 +23,7 @@
       retries: 3
       delay: 5
 
-    - name: fail if build artifacts were not cleaned
-      fail:
-        msg: 'Unable to cleanup build artifacts'
-      when: not result is succeeded
+    # - name: fail if build artifacts were not cleaned
+    #   fail:
+    #     msg: 'Unable to cleanup build artifacts'
+    #   when: not result is succeeded

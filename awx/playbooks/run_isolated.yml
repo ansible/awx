@@ -13,10 +13,9 @@
   tasks:
 
     - name: synchronize job environment with isolated host
-      synchronize:
-        copy_links: true
-        src: "{{src}}"
-        dest: "{{dest}}"
+      command: |
+        rsync --delete -az --rsh='oc rsh' {{src}} isolated:{{dest}}
+      delegate_to: localhost
 
     - local_action: stat path="{{src}}/env/ssh_key"
       register: key

@@ -14,18 +14,14 @@
       ignore_errors: true
 
     - name: Copy artifacts from the isolated host.
-      synchronize:
-        src: "{{src}}/artifacts/"
-        dest: "{{src}}/artifacts/"
-        mode: pull
-        delete: yes
-        recursive: yes
+      command: |
+        rsync --delete -az --rsh='oc rsh' isolated:{{src}}/artifacts/ {{src}}/artifacts/
+      delegate_to: localhost
 
     - name: Copy daemon log from the isolated host
-      synchronize:
-        src: "{{src}}/daemon.log"
-        dest: "{{src}}/daemon.log"
-        mode: pull
+      command: |
+        rsync --delete -az --rsh='oc rsh' isolated:{{src}}/daemon.log {{src}}/daemon.log
+      delegate_to: localhost
 
     - name: Fail if previous check determined that process is not alive.
       fail:
