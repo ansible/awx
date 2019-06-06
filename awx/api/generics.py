@@ -119,21 +119,12 @@ class LoggedLogoutView(auth_views.LogoutView):
         return ret
 
 
-def get_view_description(cls, request, html=False):
+def get_view_description(view, html=False):
+    '''Wrapper around REST framework get_view_description() to continue
+    to support our historical div.
+
     '''
-    Wrapper around REST framework get_view_description() to support
-    get_description() method and view_description property on a view class.
-    '''
-    if hasattr(cls, 'get_description') and callable(cls.get_description):
-        desc = cls().get_description(request, html=html)
-        cls = type(cls.__name__, (object,), {'__doc__': desc})
-    elif hasattr(cls, 'view_description'):
-        if callable(cls.view_description):
-            view_desc = cls.view_description()
-        else:
-            view_desc = cls.view_description
-        cls = type(cls.__name__, (object,), {'__doc__': view_desc})
-    desc = views.get_view_description(cls, html=html)
+    desc = views.get_view_description(view, html=html)
     if html:
         desc = '<div class="description">%s</div>' % desc
     return mark_safe(desc)
@@ -246,14 +237,6 @@ class APIView(views.APIView):
         # `curl https://user:pass@tower.example.org/api/v2/job_templates/N/launch/`
         return 'Bearer realm=api authorization_url=/api/o/authorize/'
 
-    def get_view_description(self, html=False):
-        """
-        Return some descriptive text for the view, as used in OPTIONS responses
-        and in the browsable API.
-        """
-        func = self.settings.VIEW_DESCRIPTION_FUNCTION
-        return func(self.__class__, getattr(self, '_request', None), html)
-
     def get_description_context(self):
         return {
             'view': self,
@@ -262,8 +245,8 @@ class APIView(views.APIView):
             'swagger_method': getattr(self.request, 'swagger_method', None),
         }
 
-    def get_description(self, request, html=False):
-        self.request = request
+    @property
+    def description(self):
         template_list = []
         for klass in inspect.getmro(type(self)):
             template_basename = camelcase_to_underscore(klass.__name__)

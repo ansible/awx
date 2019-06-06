@@ -53,7 +53,6 @@ class AutoSchema(DRFAuthSchema):
         return link
 
     def get_description(self, path, method):
-        self.view._request = self.view.request
         setattr(self.view.request, 'swagger_method', method)
         description = super(AutoSchema, self).get_description(path, method)
         return description
