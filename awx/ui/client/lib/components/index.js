@@ -42,6 +42,7 @@ import toolbar from '~components/list/list-toolbar.directive';
 import topNavItem from '~components/layout/top-nav-item.directive';
 import truncate from '~components/truncate/truncate.directive';
 import atCodeMirror from '~components/code-mirror';
+import atSyntaxHighlight from '~components/syntax-highlight';
 import card from '~components/cards/card.directive';
 import cardGroup from '~components/cards/group.directive';
 import atSwitch from '~components/switch/switch.directive';
@@ -54,7 +55,8 @@ const MODULE_NAME = 'at.lib.components';
 angular
     .module(MODULE_NAME, [
         atLibServices,
-        atCodeMirror
+        atCodeMirror,
+        atSyntaxHighlight,
     ])
     .directive('atActionGroup', actionGroup)
     .directive('atActionButton', actionButton)

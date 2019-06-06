@@ -591,9 +591,9 @@ export default ['i18n', function(i18n) {
             start_message: {
                 label: i18n._('Start Message'),
                 class: 'Form-formGroup--fullWidth',
-                type: 'text',
+                type: 'syntax_highlight',
                 default: '',
-                ngShow: "customize_messages",
+                ngShow: "true || customize_messages",
             },
             start_body: {
                 label: i18n._('Start Body'),
