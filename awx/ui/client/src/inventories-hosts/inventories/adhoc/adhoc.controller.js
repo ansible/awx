@@ -28,7 +28,7 @@ function adhocController($q, $scope, $stateParams,
         return {
             adhocUrl: GetBasePath('inventory') + id + '/ad_hoc_commands/',
             inventoryUrl: GetBasePath('inventory') + id + '/',
-            machineCredentialUrl: GetBasePath('credentials') + '?kind=ssh'
+            machineCredentialUrl: GetBasePath('credentials') + '?credential_type__namespace=ssh'
         };
     };
 
