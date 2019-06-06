@@ -24,7 +24,7 @@ urls = [
     url(r'^(?P<pk>[0-9]+)/schedules/$', SystemJobTemplateSchedulesList.as_view(), name='system_job_template_schedules_list'),
     url(r'^(?P<pk>[0-9]+)/notification_templates_any/$', SystemJobTemplateNotificationTemplatesAnyList.as_view(),
         name='system_job_template_notification_templates_any_list'),
-    url(r'^(?P<pk>[0-9]+)/notification_templates_any/$', SystemJobTemplateNotificationTemplatesStartedList.as_view(),
+    url(r'^(?P<pk>[0-9]+)/notification_templates_started/$', SystemJobTemplateNotificationTemplatesStartedList.as_view(),
         name='system_job_template_notification_templates_started_list'),
     url(r'^(?P<pk>[0-9]+)/notification_templates_error/$', SystemJobTemplateNotificationTemplatesErrorList.as_view(),
         name='system_job_template_notification_templates_error_list'),
