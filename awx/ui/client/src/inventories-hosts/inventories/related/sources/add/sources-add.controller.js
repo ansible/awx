@@ -133,25 +133,36 @@ export default ['$state', 'ConfigData', '$scope', 'SourcesFormDefinition', 'Pars
         });
 
         $scope.lookupCredential = function(){
-            if($scope.source.value !== "scm" && $scope.source.value !== "custom") {
-                let kind = ($scope.source.value === "ec2") ? "aws" : $scope.source.value;
-                $state.go('.credential', {
-                    credential_search: {
-                        kind: kind,
-                        page_size: '5',
-                        page: '1'
-                    }
-                });
+            // For most source type selections, we filter for 1-1 matches to credential_type namespace.
+            let searchKey = 'credential_type__namespace';
+            let searchValue = $scope.source.value;
+
+            // SCM and custom source types are more generic in terms of the credentials they
+            // accept - any cloud or user-defined credential type can be used. We filter for
+            // these using the credential_type kind field, which categorizes all cloud and
+            // user-defined credentials as 'cloud'.
+            if ($scope.source.value === 'scm') {
+                searchKey = 'credential_type__kind';
+                searchValue = 'cloud';
             }
-            else {
-                $state.go('.credential', {
-                    credential_search: {
-                        credential_type__kind: "cloud",
-                        page_size: '5',
-                        page: '1'
-                    }
-                });
+
+            if ($scope.source.value === 'custom') {
+                searchKey = 'credential_type__kind';
+                searchValue = 'cloud';
             }
+
+            // When the selection is 'ec2' we actually want to filter for the 'aws' namespace.
+            if ($scope.source.value === 'ec2') {
+                searchValue = 'aws';
+            }
+
+            $state.go('.credential', {
+                credential_search: {
+                    [searchKey]: searchValue,
+                    page_size: '5',
+                    page: '1'
+                }
+            });
         };
 
         $scope.lookupProject = function(){
@@ -169,7 +180,7 @@ export default ['$state', 'ConfigData', '$scope', 'SourcesFormDefinition', 'Pars
                 $scope.credentialBasePath = GetBasePath('credentials') + '?credential_type__kind__in=cloud,network';
             }
             else{
-                $scope.credentialBasePath = (source === 'ec2') ? GetBasePath('credentials') + '?kind=aws' : GetBasePath('credentials') + (source === '' ? '' : '?kind=' + (source));
+                $scope.credentialBasePath = (source === 'ec2') ? GetBasePath('credentials') + '?credential_type__namespace=aws' : GetBasePath('credentials') + (source === '' ? '' : '?credential_type__namespace=' + (source));
             }
             if (source === 'ec2' || source === 'custom' || source === 'vmware' || source === 'openstack' || source === 'scm' || source === 'cloudforms' || source === "satellite6" || source === "azure_rm") {
                 $scope.envParseType = 'yaml';
