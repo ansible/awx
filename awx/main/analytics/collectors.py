@@ -177,9 +177,9 @@ def instance_info(since):
 def job_counts(since):
     counts = {}
     counts['total_jobs'] = models.UnifiedJob.objects.exclude(launch_type='sync').count()
-    counts['status'] = dict(models.UnifiedJob.objects.exclude(launch_type='sync').values_list('status').annotate(Count('status')))
-    counts['launch_type'] = dict(models.UnifiedJob.objects.exclude(launch_type='sync').values_list('launch_type').annotate(Count('launch_type')))
-    
+    counts['status'] = dict(models.UnifiedJob.objects.exclude(launch_type='sync').values_list('status').annotate(Count('status')).order_by())
+    counts['launch_type'] = dict(models.UnifiedJob.objects.exclude(launch_type='sync').values_list(
+        'launch_type').annotate(Count('launch_type')).order_by())
     return counts
     
     
