@@ -23,7 +23,7 @@
     </div>
     <textarea
         ng-disabled="disabled"
-        rows="2"
+        rows="{{ vm.rows }}"
         ng-model="codeMirrorValue"
         name="{{ vm.name }}_codemirror"
         class="form-control Form-textArea"

@@ -1364,11 +1364,12 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += `id="${form.name}_${fld}" `;
                         html += `class="${field.class}" `;
                         html += `label="${field.label}" `;
-                        html += `tooltip="${field.awPopOver}" `;
+                        html += `tooltip="${field.awPopOver || ''}" `;
                         html += `name="${fld}" `;
                         html += `value="${fld}" `;
                         html += `default="${field.default || ''}" `;
                         html += `rows="${field.rows || 6}" `;
+                        html += `mode="${field.mode}" `;
                         html += `ng-disabled="${field.ngDisabled}" `;
                         html += '></at-syntax-highlight>';
                     }

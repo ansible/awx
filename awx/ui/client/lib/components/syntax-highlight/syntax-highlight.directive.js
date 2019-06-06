@@ -2,7 +2,7 @@ const templateUrl = require('~components/syntax-highlight/syntax-highlight.parti
 
 function atSyntaxHighlightController ($scope, AngularCodeMirror) {
     const vm = this;
-    const variablesName = `${$scope.name}_codemirror`;
+    const varName = `${$scope.name}_codemirror`;
 
     function init () {
         if ($scope.disabled === 'true') {
@@ -10,16 +10,14 @@ function atSyntaxHighlightController ($scope, AngularCodeMirror) {
         } else if ($scope.disabled === 'false') {
             $scope.disabled = false;
         }
-        // TODO: get default value
         $scope.value = $scope.value || $scope.default;
-        $scope.parseType = 'jinja2';
 
-        $scope.variablesName = variablesName;
-        $scope[variablesName] = $scope.value || '';
+        $scope.varName = varName;
+        $scope[varName] = $scope.value;
         const codeMirror = AngularCodeMirror($scope.disabled);
         codeMirror.addModes({
             jinja2: {
-                mode: 'jinja2',
+                mode: $scope.mode,
                 matchBrackets: true,
                 autoCloseBrackets: true,
                 styleActiveLine: true,
@@ -31,20 +29,19 @@ function atSyntaxHighlightController ($scope, AngularCodeMirror) {
         });
         codeMirror.showTextArea({
             scope: $scope,
-            model: variablesName,
+            model: varName,
             element: `${$scope.name}_codemirror`,
             lineNumbers: true,
-            mode: 'jinja2',
+            mode: $scope.mode,
         });
 
-        $scope.$watch(variablesName, () => {
-            $scope.value = $scope[variablesName];
+        $scope.$watch(varName, () => {
+            $scope.value = $scope[varName];
         });
     }
 
     vm.name = $scope.name;
-    // vm.variablesName = variablesName;
-    vm.parseType = $scope.parseType;
+    vm.rows = $scope.rows || 6;
     if ($scope.init) {
         $scope.init = init;
     }
@@ -74,7 +71,10 @@ function atCodeMirrorTextarea () {
             tooltipPlacement: '@',
             value: '=',
             name: '@',
-            init: '='
+            init: '=',
+            default: '@',
+            rows: '@',
+            mode: '@',
         }
     };
 }
