@@ -1366,7 +1366,9 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += `label="${field.label}" `;
                         html += `tooltip="${field.awPopOver}" `;
                         html += `name="${fld}" `;
-                        html += `variables="${field.variables}" `;
+                        html += `value="${fld}" `;
+                        html += `default="${field.default || ''}" `;
+                        html += `rows="${field.rows || 6}" `;
                         html += `ng-disabled="${field.ngDisabled}" `;
                         html += '></at-syntax-highlight>';
                     }

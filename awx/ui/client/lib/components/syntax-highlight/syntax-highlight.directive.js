@@ -11,15 +11,15 @@ function atSyntaxHighlightController ($scope, AngularCodeMirror) {
             $scope.disabled = false;
         }
         // TODO: get default value
-        $scope.codeMirrorValue = $scope.codeMirrorValue || '';
+        $scope.value = $scope.value || $scope.default;
         $scope.parseType = 'jinja2';
 
         $scope.variablesName = variablesName;
-        $scope[variablesName] = $scope.codeMirrorValue;
+        $scope[variablesName] = $scope.value || '';
         const codeMirror = AngularCodeMirror($scope.disabled);
         codeMirror.addModes({
             jinja2: {
-                mode: 'text/x-jinja2',
+                mode: 'jinja2',
                 matchBrackets: true,
                 autoCloseBrackets: true,
                 styleActiveLine: true,
@@ -29,7 +29,6 @@ function atSyntaxHighlightController ($scope, AngularCodeMirror) {
                 scrollbarStyle: null,
             }
         });
-        // codeMirror.fromTextArea(document.getElementById(`${$scope.name}_codemirror`));
         codeMirror.showTextArea({
             scope: $scope,
             model: variablesName,
@@ -39,12 +38,12 @@ function atSyntaxHighlightController ($scope, AngularCodeMirror) {
         });
 
         $scope.$watch(variablesName, () => {
-            $scope.codeMirrorValue = $scope[variablesName];
+            $scope.value = $scope[variablesName];
         });
     }
 
     vm.name = $scope.name;
-    vm.variablesName = variablesName;
+    // vm.variablesName = variablesName;
     vm.parseType = $scope.parseType;
     if ($scope.init) {
         $scope.init = init;
@@ -73,7 +72,7 @@ function atCodeMirrorTextarea () {
             labelClass: '@',
             tooltip: '@',
             tooltipPlacement: '@',
-            variables: '=',
+            value: '=',
             name: '@',
             init: '='
         }
