@@ -872,7 +872,7 @@ class TestJobCredentials(TestJobExecution):
     def test_multi_vault_password(self, private_data_dir, job):
         task = tasks.RunJob()
         vault = CredentialType.defaults['vault']()
-        for i, label in enumerate(['dev', 'prod']):
+        for i, label in enumerate(['dev', 'prod', 'dotted.name']):
             credential = Credential(
                 pk=i,
                 credential_type=vault,
@@ -892,10 +892,12 @@ class TestJobCredentials(TestJobExecution):
         )
         assert vault_passwords['Vault password \(prod\):\\s*?$'] == 'pass@prod'  # noqa
         assert vault_passwords['Vault password \(dev\):\\s*?$'] == 'pass@dev'  # noqa
+        assert vault_passwords['Vault password \(dotted.name\):\\s*?$'] == 'pass@dotted.name'  # noqa
         assert vault_passwords['Vault password:\\s*?$'] == ''  # noqa
         assert '--ask-vault-pass' not in ' '.join(args)
         assert '--vault-id dev@prompt' in ' '.join(args)
         assert '--vault-id prod@prompt' in ' '.join(args)
+        assert '--vault-id dotted.name@prompt' in ' '.join(args)
 
     def test_multi_vault_id_conflict(self, job):
         task = tasks.RunJob()

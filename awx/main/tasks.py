@@ -1467,7 +1467,8 @@ class RunJob(BaseTask):
                 if k == 'vault_password':
                     args.append('--ask-vault-pass')
                 else:
-                    vault_id = k.split('.')[1]
+                    # split only on the first dot in case the vault ID itself contains a dot
+                    vault_id = k.split('.', 1)[1]
                     args.append('--vault-id')
                     args.append('{}@prompt'.format(vault_id))
 
@@ -1533,7 +1534,8 @@ class RunJob(BaseTask):
         d[r'Vault password:\s*?$'] = 'vault_password'
         for k, v in passwords.items():
             if k.startswith('vault_password.'):
-                vault_id = k.split('.')[1]
+                # split only on the first dot in case the vault ID itself contains a dot
+                vault_id = k.split('.', 1)[1]
                 d[r'Vault password \({}\):\s*?$'.format(vault_id)] = k
         return d
 
