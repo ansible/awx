@@ -36,11 +36,6 @@ export default ['$scope', 'Rest', 'CredentialList', 'Prompt', 'ProcessErrors', '
 
         $scope.$on(`${list.iterator}_options`, function(event, data){
             $scope.options = data.data.actions.GET;
-            optionsRequestDataProcessing();
-        });
-
-        $scope.$watchCollection(`${$scope.list.name}`, function() {
-            optionsRequestDataProcessing();
         });
 
         function assignCredentialKinds () {
@@ -67,26 +62,6 @@ export default ['$scope', 'Rest', 'CredentialList', 'Prompt', 'ProcessErrors', '
                         credential.kind = credentialType.match('id', credential.credential_type).name;
                     });
                 });
-        }
-
-        // iterate over the list and add fields like type label, after the
-        // OPTIONS request returns, or the list is sorted/paginated/searched
-        function optionsRequestDataProcessing(){
-            if ($scope[list.name] !== undefined) {
-                $scope[list.name].forEach(function(item, item_idx) {
-                    var itm = $scope[list.name][item_idx];
-
-                    // Set the item type label
-                    if (list.fields.kind && $scope.options &&
-                        $scope.options.hasOwnProperty('kind')) {
-                            $scope.options.kind.choices.forEach(function(choice) {
-                                if (choice[0] === item.kind) {
-                                    itm.kind_label = choice[1];
-                                }
-                            });
-                    }
-                });
-            }
         }
 
         $scope.copyCredential = credential => {
