@@ -13,6 +13,4 @@ services:
     hostname: isolated
     volumes:
       - "../awx/main/isolated:/awx_devel"
-      - "../awx/lib:/awx_lib"
-      - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
     privileged: true

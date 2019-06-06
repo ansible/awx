@@ -551,10 +551,7 @@ docker-auth:
 	fi;
 
 # Docker isolated rampart
-docker-isolated:
-	TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose.yml -f tools/docker-isolated-override.yml create
-	docker start tools_awx_1
-	docker start tools_isolated_1
+docker-compose-isolated:
 	CURRENT_UID=$(shell id -u) TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose.yml -f tools/docker-isolated-override.yml up
 
 # Docker Compose Development environment
@@ -595,7 +592,7 @@ awx-devel-build:
 	#docker push $(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG)
 
 # For use when developing on "isolated" AWX deployments
-awx-isolated-build: awx-devel-build
+docker-compose-isolated-build: awx-devel-build
 	docker build -t ansible/awx_isolated -f tools/docker-isolated/Dockerfile .
 	docker tag ansible/awx_isolated $(DEV_DOCKER_TAG_BASE)/awx_isolated:$(COMPOSE_TAG)
 	#docker push $(DEV_DOCKER_TAG_BASE)/awx_isolated:$(COMPOSE_TAG)
