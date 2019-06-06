@@ -345,7 +345,7 @@ pylint: reports
 	@(set -o pipefail && $@ | reports/$@.report)
 
 genschema: reports
-	$(MAKE) swagger PYTEST_ARGS="--genschema"
+	$(MAKE) swagger PYTEST_ARGS="--genschema --create-db "
 	mv swagger.json schema.json
 
 swagger: reports
