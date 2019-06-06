@@ -2175,14 +2175,25 @@ class InventoryUpdateDetailSerializer(InventoryUpdateSerializer):
 
     def get_summary_fields(self, obj):
         summary_fields = super(InventoryUpdateDetailSerializer, self).get_summary_fields(obj)
-        summary_obj = self.get_source_project(obj)
 
-        if summary_obj:
+        source_project = self.get_source_project(obj)
+        if source_project:
             summary_fields['source_project'] = {}
             for field in SUMMARIZABLE_FK_FIELDS['project']:
-                value = getattr(summary_obj, field, None)
+                value = getattr(source_project, field, None)
                 if value is not None:
                     summary_fields['source_project'][field] = value
+
+        cred = obj.credentials.first()
+        if cred:
+            summary_fields['credential'] = {
+                'id': cred.pk,
+                'name': cred.name,
+                'description': cred.description,
+                'kind': cred.kind,
+                'cloud': cred.credential_type.kind == 'cloud'
+            }
+
         return summary_fields
 
 
