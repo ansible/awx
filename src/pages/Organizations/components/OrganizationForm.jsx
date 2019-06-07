@@ -1,10 +1,13 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
+import { QuestionCircleIcon } from '@patternfly/react-icons';
+
 import { withRouter } from 'react-router-dom';
 import { Formik, Field } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
+  Tooltip,
   Form,
   FormGroup,
 } from '@patternfly/react-core';
@@ -16,8 +19,8 @@ import FormField from '../../../components/FormField';
 import FormActionGroup from '../../../components/FormActionGroup/FormActionGroup';
 import AnsibleSelect from '../../../components/AnsibleSelect';
 import InstanceGroupsLookup from './InstanceGroupsLookup';
-import { required } from '../../../util/validators';
-import { OrganizationsAPI } from '../../../api';
+
+import { required, minMaxValue } from '../../../util/validators';
 
 class OrganizationForm extends Component {
   constructor (props) {
@@ -25,7 +28,9 @@ class OrganizationForm extends Component {
 
     this.getRelatedInstanceGroups = this.getRelatedInstanceGroups.bind(this);
     this.handleInstanceGroupsChange = this.handleInstanceGroupsChange.bind(this);
+    this.maxHostsChange = this.maxHostsChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.readUsers = this.readUsers.bind(this);
 
     this.state = {
       instanceGroups: [],
@@ -59,6 +64,14 @@ class OrganizationForm extends Component {
     return data.results;
   }
 
+  async readUsers (queryParams) {
+    const { api } = this.props;
+    console.log(api.readUsers((queryParams, is_superuser)));
+    console.log(api.readUsers((queryParams)));
+    return true;
+   // return api.readUsers((queryParams));
+  }
+
   isEditingNewOrganization () {
     const { organization } = this.props;
     return !organization.id;
@@ -66,6 +79,10 @@ class OrganizationForm extends Component {
 
   handleInstanceGroupsChange (instanceGroups) {
     this.setState({ instanceGroups });
+  }
+
+  maxHostsChange (event) {
+    console.log('boop');
   }
 
   handleSubmit (values) {
@@ -83,9 +100,11 @@ class OrganizationForm extends Component {
   }
 
   render () {
-    const { organization, handleCancel, i18n } = this.props;
+    const { organization, handleCancel, i18n, is_superuser } = this.props;
     const { instanceGroups, formIsValid, error } = this.state;
     const defaultVenv = '/venv/ansible/';
+
+    console.log(organization);
 
     return (
       <Formik
@@ -93,6 +112,7 @@ class OrganizationForm extends Component {
           name: organization.name,
           description: organization.description,
           custom_virtualenv: organization.custom_virtualenv || '',
+          max_hosts: organization.max_hosts || 0
         }}
         onSubmit={this.handleSubmit}
         render={formik => (
@@ -112,6 +132,29 @@ class OrganizationForm extends Component {
                 type="text"
                 label={i18n._(t`Description`)}
               />
+              <FormField
+                id="org-max_hosts"
+                name="max_hosts"
+                type="number"
+                label={<Fragment>
+                    {i18n._(t`Max Hosts`)}
+                      {' '}
+                      {(
+                          <Tooltip
+                            position="right"
+                            content="The maximum number of hosts allowed to be managed by this organization. Value defaults to 0 which means no limit. Refer to the Ansible documentation for more details."
+                          >
+                            <QuestionCircleIcon />
+                          </Tooltip>
+                        )
+                      }
+                    </Fragment>}
+                validate={minMaxValue(0, 2147483647, i18n)}
+                onChange={(evt) => this.maxHostsChange(evt)}
+                // isDisabled={!is_superuser + console.log(is_superuser)}
+                // isDisabled={this.readUsers}
+                isDisabled={this.readUsers? true: false}
+            />
               <Config>
                 {({ custom_virtualenvs }) => (
                   custom_virtualenvs && custom_virtualenvs.length > 1 && (
@@ -153,16 +196,27 @@ class OrganizationForm extends Component {
   }
 }
 
+FormField.propTypes = {
+  //consider changing this in FormField.jsx, as many fields may need tooltips in the label
+  label: PropTypes.oneOfType ([
+    PropTypes.object, 
+    PropTypes.string
+  ])
+}
+
+console.log()
+
 OrganizationForm.propTypes = {
   organization: PropTypes.shape(),
   handleSubmit: PropTypes.func.isRequired,
   handleCancel: PropTypes.func.isRequired,
-};
+  };
 
 OrganizationForm.defaultProps = {
   organization: {
     name: '',
     description: '',
+    max_hosts: '0',
     custom_virtualenv: '',
   }
 };
