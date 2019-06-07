@@ -598,7 +598,7 @@ export default ['i18n', function(i18n) {
                 rows: 2,
             },
             start_body: {
-                label: i18n._('Start Body'),
+                label: i18n._('Start Expanded Message'),
                 class: 'Form-formGroup--fullWidth',
                 type: 'syntax_highlight',
                 mode: 'jinja2',
@@ -615,7 +615,7 @@ export default ['i18n', function(i18n) {
                 rows: 2,
             },
             success_body: {
-                label: i18n._('Success Body'),
+                label: i18n._('Success Expanded Message'),
                 class: 'Form-formGroup--fullWidth',
                 type: 'syntax_highlight',
                 mode: 'jinja2',
@@ -632,7 +632,7 @@ export default ['i18n', function(i18n) {
                 rows: 2,
             },
             error_body: {
-                label: i18n._('Error Body'),
+                label: i18n._('Error Expanded Message'),
                 class: 'Form-formGroup--fullWidth',
                 type: 'syntax_highlight',
                 mode: 'jinja2',

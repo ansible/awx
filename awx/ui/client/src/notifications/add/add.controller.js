@@ -153,6 +153,14 @@ export default ['Rest', 'Wait', 'NotificationsFormObject',
             });
         };
 
+        $scope.$watch('customize_messages', (value) => {
+            if (value) {
+                $scope.$broadcast('reset-code-mirror', {
+                    customize_messages: $scope.customize_messages,
+                });
+            }
+        });
+
         $scope.emailOptionsChange = function () {
             if ($scope.email_options === 'use_ssl') {
                 if ($scope.use_ssl) {

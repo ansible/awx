@@ -12,9 +12,17 @@ function atSyntaxHighlightController ($scope, AngularCodeMirror) {
         }
         $scope.value = $scope.value || $scope.default;
 
+        initCodeMirror();
+
+        $scope.$watch(varName, () => {
+            $scope.value = $scope[varName];
+        });
+    }
+
+    function initCodeMirror () {
         $scope.varName = varName;
         $scope[varName] = $scope.value;
-        const codeMirror = AngularCodeMirror($scope.disabled);
+        const codeMirror = AngularCodeMirror(!!$scope.disabled);
         codeMirror.addModes({
             jinja2: {
                 mode: $scope.mode,
@@ -34,10 +42,6 @@ function atSyntaxHighlightController ($scope, AngularCodeMirror) {
             lineNumbers: true,
             mode: $scope.mode,
         });
-
-        $scope.$watch(varName, () => {
-            $scope.value = $scope[varName];
-        });
     }
 
     vm.name = $scope.name;
@@ -47,6 +51,9 @@ function atSyntaxHighlightController ($scope, AngularCodeMirror) {
     }
     angular.element(document).ready(() => {
         init();
+    });
+    $scope.$on('reset-code-mirror', () => {
+        initCodeMirror();
     });
 }
 
