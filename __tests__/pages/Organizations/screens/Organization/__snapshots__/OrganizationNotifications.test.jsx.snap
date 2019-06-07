@@ -8,7 +8,6 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
     <Provider
       value={
         Object {
-          "api": "/api/",
           "handleHttpError": [Function],
         }
       }
@@ -18,7 +17,6 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
         value={"/config/"}
       >
         <Provider
-          api={"/api/"}
           handleHttpError={[Function]}
           i18n={"/i18n/"}
           value={"/config/"}
@@ -28,14 +26,12 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
             id={1}
           >
             <withRouter(OrganizationNotifications)
-              api={"/api/"}
               canToggleNotifications={true}
               handleHttpError={[Function]}
               id={1}
             >
               <Route>
                 <OrganizationNotifications
-                  api={"/api/"}
                   canToggleNotifications={true}
                   handleHttpError={[Function]}
                   history={"/history/"}

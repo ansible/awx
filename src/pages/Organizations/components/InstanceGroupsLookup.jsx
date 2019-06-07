@@ -9,19 +9,11 @@ import Lookup from '../../../components/Lookup';
 
 import { withNetwork } from '../../../contexts/Network';
 
+import { InstanceGroupsAPI } from '../../../api';
+
+const getInstanceGroups = async (params) => InstanceGroupsAPI.read(params);
+
 class InstanceGroupsLookup extends React.Component {
-  constructor (props) {
-    super(props);
-
-    this.getInstanceGroups = this.getInstanceGroups.bind(this);
-  }
-
-  async getInstanceGroups (params) {
-    const { api } = this.props;
-    const data = await api.getInstanceGroups(params);
-    return data;
-  }
-
   render () {
     const { value, tooltip, onChange, i18n } = this.props;
 
@@ -51,7 +43,7 @@ class InstanceGroupsLookup extends React.Component {
           name="instanceGroups"
           value={value}
           onLookupSave={onChange}
-          getItems={this.getInstanceGroups}
+          getItems={getInstanceGroups}
           columns={[
             { name: i18n._(t`Name`), key: 'name', isSortable: true },
             { name: i18n._(t`Modified`), key: 'modified', isSortable: false, isNumeric: true },

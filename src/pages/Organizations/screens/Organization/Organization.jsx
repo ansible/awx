@@ -12,6 +12,7 @@ import OrganizationEdit from './OrganizationEdit';
 import OrganizationNotifications from './OrganizationNotifications';
 import OrganizationTeams from './OrganizationTeams';
 import RoutedTabs from '../../../../components/Tabs/RoutedTabs';
+import { OrganizationsAPI } from '../../../../api';
 
 class Organization extends Component {
   constructor (props) {
@@ -45,22 +46,21 @@ class Organization extends Component {
     const {
       match,
       setBreadcrumb,
-      api,
       handleHttpError
     } = this.props;
 
     try {
       const [{ data }, notifAdminRest, auditorRes, adminRes] = await Promise.all([
-        api.getOrganizationDetails(parseInt(match.params.id, 10)),
-        api.getOrganizations({
+        OrganizationsAPI.readDetail(parseInt(match.params.id, 10)),
+        OrganizationsAPI.read({
           role_level: 'notification_admin_role',
           page_size: 1
         }),
-        api.getOrganizations({
+        OrganizationsAPI.read({
           role_level: 'auditor_role',
           id: parseInt(match.params.id, 10)
         }),
-        api.getOrganizations({
+        OrganizationsAPI.read({
           role_level: 'admin_role',
           id: parseInt(match.params.id, 10)
         })
@@ -82,12 +82,11 @@ class Organization extends Component {
     const {
       match,
       setBreadcrumb,
-      api,
       handleHttpError
     } = this.props;
 
     try {
-      const { data } = await api.getOrganizationDetails(parseInt(match.params.id, 10));
+      const { data } = await OrganizationsAPI.readDetail(parseInt(match.params.id, 10));
       setBreadcrumb(data);
       this.setState({ organization: data, loading: false });
     } catch (error) {

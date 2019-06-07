@@ -46,17 +46,6 @@ exports[`mountWithContexts injected I18nProvider should mount and render deeply 
 </Parent>
 `;
 
-exports[`mountWithContexts injected Network should mount and render 1`] = `
-<Foo
-  api={"/api/"}
-  handleHttpError={[Function]}
->
-  <div>
-    test
-  </div>
-</Foo>
-`;
-
 exports[`mountWithContexts injected Router should mount and render 1`] = `
 <div>
   <Link

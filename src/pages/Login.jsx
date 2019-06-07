@@ -9,6 +9,7 @@ import {
 
 import { withRootDialog } from '../contexts/RootDialog';
 import { withNetwork } from '../contexts/Network';
+import { RootAPI } from '../api';
 
 import towerLogo from '../../images/tower-logo-header.svg';
 
@@ -39,7 +40,7 @@ class AWXLogin extends Component {
 
   async onLoginButtonClick (event) {
     const { username, password, isLoading } = this.state;
-    const { api, handleHttpError, clearRootDialogMessage, fetchMe, updateConfig } = this.props;
+    const { handleHttpError, clearRootDialogMessage, fetchMe, updateConfig } = this.props;
 
     event.preventDefault();
 
@@ -51,7 +52,7 @@ class AWXLogin extends Component {
     this.setState({ isLoading: true });
 
     try {
-      const { data } = await api.login(username, password);
+      const { data } = await RootAPI.login(username, password);
       updateConfig(data);
       await fetchMe();
       this.setState({ isAuthenticated: true, isLoading: false });

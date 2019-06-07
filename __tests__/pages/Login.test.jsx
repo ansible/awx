@@ -2,7 +2,9 @@ import React from 'react';
 import { mountWithContexts } from '../enzymeHelpers';
 import { asyncFlush } from '../../jest.setup';
 import AWXLogin from '../../src/pages/Login';
-import APIClient from '../../src/api';
+import { RootAPI } from '../../src/api';
+
+jest.mock('../../src/api');
 
 describe('<Login />', () => {
   let loginWrapper;
@@ -14,12 +16,8 @@ describe('<Login />', () => {
   let submitButton;
   let loginHeaderLogo;
 
-  const api = new APIClient({});
-
   const mountLogin = () => {
-    loginWrapper = mountWithContexts(<AWXLogin />, { context: { network: {
-      api, handleHttpError: () => {}
-    } } });
+    loginWrapper = mountWithContexts(<AWXLogin />, { context: { network: {} } });
   };
 
   const findChildren = () => {
@@ -33,6 +31,7 @@ describe('<Login />', () => {
   };
 
   afterEach(() => {
+    jest.clearAllMocks();
     loginWrapper.unmount();
   });
 
@@ -98,32 +97,31 @@ describe('<Login />', () => {
     expect(loginWrapper.find('.pf-c-form__helper-text.pf-m-error').length).toBe(0);
   });
 
-  test('api.login not called when loading', () => {
-    api.login = jest.fn().mockImplementation(() => Promise.resolve({}));
+  test('login API not called when loading', () => {
     mountLogin();
     findChildren();
     expect(awxLogin.state().isLoading).toBe(false);
     awxLogin.setState({ isLoading: true });
     submitButton.simulate('click');
-    expect(api.login).toHaveBeenCalledTimes(0);
+    expect(RootAPI.login).toHaveBeenCalledTimes(0);
   });
 
-  test('submit calls api.login successfully', async () => {
-    api.login = jest.fn().mockImplementation(() => Promise.resolve({}));
+  test('submit calls login API successfully', async () => {
+    RootAPI.login = jest.fn().mockImplementation(() => Promise.resolve({}));
     mountLogin();
     findChildren();
     expect(awxLogin.state().isLoading).toBe(false);
     awxLogin.setState({ username: 'unamee', password: 'pwordd' });
     submitButton.simulate('click');
-    expect(api.login).toHaveBeenCalledTimes(1);
-    expect(api.login).toHaveBeenCalledWith('unamee', 'pwordd');
+    expect(RootAPI.login).toHaveBeenCalledTimes(1);
+    expect(RootAPI.login).toHaveBeenCalledWith('unamee', 'pwordd');
     expect(awxLogin.state().isLoading).toBe(true);
     await asyncFlush();
     expect(awxLogin.state().isLoading).toBe(false);
   });
 
-  test('submit calls api.login handles 401 error', async () => {
-    api.login = jest.fn().mockImplementation(() => {
+  test('submit calls login API and handles 401 error', async () => {
+    RootAPI.login = jest.fn().mockImplementation(() => {
       const err = new Error('401 error');
       err.response = { status: 401, message: 'problem' };
       return Promise.reject(err);
@@ -134,16 +132,16 @@ describe('<Login />', () => {
     expect(awxLogin.state().isInputValid).toBe(true);
     awxLogin.setState({ username: 'unamee', password: 'pwordd' });
     submitButton.simulate('click');
-    expect(api.login).toHaveBeenCalledTimes(1);
-    expect(api.login).toHaveBeenCalledWith('unamee', 'pwordd');
+    expect(RootAPI.login).toHaveBeenCalledTimes(1);
+    expect(RootAPI.login).toHaveBeenCalledWith('unamee', 'pwordd');
     expect(awxLogin.state().isLoading).toBe(true);
     await asyncFlush();
     expect(awxLogin.state().isInputValid).toBe(false);
     expect(awxLogin.state().isLoading).toBe(false);
   });
 
-  test('submit calls api.login handles non-401 error', async () => {
-    api.login = jest.fn().mockImplementation(() => {
+  test('submit calls login API and handles non-401 error', async () => {
+    RootAPI.login = jest.fn().mockImplementation(() => {
       const err = new Error('500 error');
       err.response = { status: 500, message: 'problem' };
       return Promise.reject(err);
@@ -153,8 +151,8 @@ describe('<Login />', () => {
     expect(awxLogin.state().isLoading).toBe(false);
     awxLogin.setState({ username: 'unamee', password: 'pwordd' });
     submitButton.simulate('click');
-    expect(api.login).toHaveBeenCalledTimes(1);
-    expect(api.login).toHaveBeenCalledWith('unamee', 'pwordd');
+    expect(RootAPI.login).toHaveBeenCalledTimes(1);
+    expect(RootAPI.login).toHaveBeenCalledWith('unamee', 'pwordd');
     expect(awxLogin.state().isLoading).toBe(true);
     await asyncFlush();
     expect(awxLogin.state().isLoading).toBe(false);

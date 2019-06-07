@@ -3,23 +3,17 @@ import React from 'react';
 import { mountWithContexts } from '../../../enzymeHelpers';
 
 import OrganizationAdd from '../../../../src/pages/Organizations/screens/OrganizationAdd';
+import { OrganizationsAPI } from '../../../../src/api';
+
+jest.mock('../../../../src/api');
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 describe('<OrganizationAdd />', () => {
-  let api;
   let networkProviderValue;
 
   beforeEach(() => {
-    api = {
-      getInstanceGroups: jest.fn(),
-      createOrganization: jest.fn(),
-      associateInstanceGroup: jest.fn(),
-      disassociate: jest.fn(),
-    };
-
     networkProviderValue = {
-      api,
       handleHttpError: () => {}
     };
   });
@@ -34,7 +28,7 @@ describe('<OrganizationAdd />', () => {
       custom_virtualenv: 'Buzz',
     };
     wrapper.find('OrganizationForm').prop('handleSubmit')(updatedOrgData, [], []);
-    expect(api.createOrganization).toHaveBeenCalledWith(updatedOrgData);
+    expect(OrganizationsAPI.create).toHaveBeenCalledWith(updatedOrgData);
   });
 
   test('should navigate to organizations list when cancel is clicked', () => {
@@ -70,7 +64,7 @@ describe('<OrganizationAdd />', () => {
       description: 'new description',
       custom_virtualenv: 'Buzz',
     };
-    api.createOrganization.mockReturnValueOnce({
+    OrganizationsAPI.create.mockReturnValueOnce({
       data: {
         id: 5,
         related: {
@@ -96,7 +90,7 @@ describe('<OrganizationAdd />', () => {
       description: 'new description',
       custom_virtualenv: 'Buzz',
     };
-    api.createOrganization.mockReturnValueOnce({
+    OrganizationsAPI.create.mockReturnValueOnce({
       data: {
         id: 5,
         related: {
@@ -107,8 +101,8 @@ describe('<OrganizationAdd />', () => {
     });
     wrapper.find('OrganizationForm').prop('handleSubmit')(orgData, [3], []);
     await sleep(0);
-    expect(api.associateInstanceGroup)
-      .toHaveBeenCalledWith('/api/v2/organizations/5/instance_groups', 3);
+    expect(OrganizationsAPI.associateInstanceGroup)
+      .toHaveBeenCalledWith(5, 3);
   });
 
   test('AnsibleSelect component renders if there are virtual environments', () => {

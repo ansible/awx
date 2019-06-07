@@ -4,7 +4,6 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { mountWithContexts, waitForElement } from './enzymeHelpers';
 import { Config } from '../src/contexts/Config';
-import { withNetwork } from '../src/contexts/Network';
 import { withRootDialog } from '../src/contexts/RootDialog';
 
 describe('mountWithContexts', () => {
@@ -108,32 +107,6 @@ describe('mountWithContexts', () => {
         { context: { config } }
       );
       expect(wrapper.find('Foo')).toMatchSnapshot();
-    });
-  });
-
-  describe('injected Network', () => {
-    it('should mount and render', () => {
-      const Foo = () => (
-        <div>test</div>
-      );
-      const Bar = withNetwork(Foo);
-      const wrapper = mountWithContexts(<Bar />);
-      expect(wrapper.find('Foo')).toMatchSnapshot();
-    });
-
-    it('should mount and render with stubbed api', () => {
-      const network = {
-        api: {
-          getFoo: jest.fn().mockReturnValue('foo value'),
-        },
-      };
-      const Foo = ({ api }) => (
-        <div>{api.getFoo()}</div>
-      );
-      const Bar = withNetwork(Foo);
-      const wrapper = mountWithContexts(<Bar />, { context: { network } });
-      expect(network.api.getFoo).toHaveBeenCalledTimes(1);
-      expect(wrapper.find('div').text()).toEqual('foo value');
     });
   });
 

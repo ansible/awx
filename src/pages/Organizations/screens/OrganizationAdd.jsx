@@ -14,6 +14,7 @@ import {
 import { withNetwork } from '../../../contexts/Network';
 import CardCloseButton from '../../../components/CardCloseButton';
 import OrganizationForm from '../components/OrganizationForm';
+import { OrganizationsAPI } from '../../../api';
 
 class OrganizationAdd extends React.Component {
   constructor (props) {
@@ -29,13 +30,12 @@ class OrganizationAdd extends React.Component {
   }
 
   async handleSubmit (values, groupsToAssociate) {
-    const { api, handleHttpError } = this.props;
+    const { handleHttpError } = this.props;
     try {
-      const { data: response } = await api.createOrganization(values);
-      const instanceGroupsUrl = response.related.instance_groups;
+      const { data: response } = await OrganizationsAPI.create(values);
       try {
-        await Promise.all(groupsToAssociate.map(id => api
-          .associateInstanceGroup(instanceGroupsUrl, id)));
+        await Promise.all(groupsToAssociate.map(id => OrganizationsAPI
+          .associateInstanceGroup(response.id, id)));
         this.handleSuccess(response.id);
       } catch (err) {
         handleHttpError(err) || this.setState({ error: err });
@@ -82,10 +82,6 @@ class OrganizationAdd extends React.Component {
     );
   }
 }
-
-OrganizationAdd.propTypes = {
-  api: PropTypes.shape().isRequired,
-};
 
 OrganizationAdd.contextTypes = {
   custom_virtualenvs: PropTypes.arrayOf(PropTypes.string)

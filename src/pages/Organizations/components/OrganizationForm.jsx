@@ -17,6 +17,7 @@ import FormActionGroup from '../../../components/FormActionGroup/FormActionGroup
 import AnsibleSelect from '../../../components/AnsibleSelect';
 import InstanceGroupsLookup from './InstanceGroupsLookup';
 import { required } from '../../../util/validators';
+import { OrganizationsAPI } from '../../../api';
 
 class OrganizationForm extends Component {
   constructor (props) {
@@ -52,10 +53,9 @@ class OrganizationForm extends Component {
 
   async getRelatedInstanceGroups () {
     const {
-      api,
       organization: { id }
     } = this.props;
-    const { data } = await api.getOrganizationInstanceGroups(id);
+    const { data } = await OrganizationsAPI.readInstanceGroups(id);
     return data.results;
   }
 

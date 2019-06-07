@@ -16,6 +16,7 @@ import PaginatedDataList, {
 import DataListToolbar from '../../../components/DataListToolbar';
 import OrganizationListItem from '../components/OrganizationListItem';
 import { getQSConfig, parseNamespacedQueryString } from '../../../util/qs';
+import { OrganizationsAPI } from '../../../api';
 
 const QS_CONFIG = getQSConfig('organization', {
   page: 1,
@@ -73,11 +74,11 @@ class OrganizationsList extends Component {
 
   async handleOrgDelete () {
     const { selected } = this.state;
-    const { api, handleHttpError } = this.props;
+    const { handleHttpError } = this.props;
     let errorHandled;
 
     try {
-      await Promise.all(selected.map((org) => api.destroyOrganization(org.id)));
+      await Promise.all(selected.map((org) => OrganizationsAPI.destroy(org.id)));
       this.setState({
         selected: []
       });
@@ -91,13 +92,13 @@ class OrganizationsList extends Component {
   }
 
   async fetchOrganizations () {
-    const { api, handleHttpError, location } = this.props;
+    const { handleHttpError, location } = this.props;
     const params = parseNamespacedQueryString(QS_CONFIG, location.search);
 
     this.setState({ error: false, isLoading: true });
 
     try {
-      const { data } = await api.getOrganizations(params);
+      const { data } = await OrganizationsAPI.read(params);
       const { count, results } = data;
 
       const stateToUpdate = {
@@ -115,10 +116,8 @@ class OrganizationsList extends Component {
   }
 
   async fetchOptionsOrganizations () {
-    const { api } = this.props;
-
     try {
-      const { data } = await api.optionsOrganizations();
+      const { data } = await OrganizationsAPI.readOptions();
       const { actions } = data;
 
       const stateToUpdate = {

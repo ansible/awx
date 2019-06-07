@@ -70,10 +70,6 @@ const defaultContexts = {
     toJSON: () => '/router/',
   },
   network: {
-    api: {
-      getConfig: () => {},
-      toJSON: () => '/api/',
-    },
     handleHttpError: () => {},
   },
   dialog: {}
@@ -146,7 +142,6 @@ export function mountWithContexts (node, options = {}) {
       history: shape({}).isRequired,
     }),
     network: shape({
-      api: shape({}).isRequired,
       handleHttpError: func.isRequired,
     }),
     dialog: shape({

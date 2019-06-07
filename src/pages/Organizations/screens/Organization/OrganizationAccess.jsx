@@ -10,6 +10,7 @@ import AddResourceRole from '../../../../components/AddRole/AddResourceRole';
 import { withNetwork } from '../../../../contexts/Network';
 import { getQSConfig, parseNamespacedQueryString } from '../../../../util/qs';
 import { Organization } from '../../../../types';
+import { OrganizationsAPI, TeamsAPI, UsersAPI } from '../../../../api';
 
 const QS_CONFIG = getQSConfig('access', {
   page: 1,
@@ -56,10 +57,10 @@ class OrganizationAccess extends React.Component {
   }
 
   async readOrgAccessList () {
-    const { organization, api, handleHttpError, location } = this.props;
+    const { organization, handleHttpError, location } = this.props;
     this.setState({ isLoading: true });
     try {
-      const { data } = await api.getOrganizationAccessList(
+      const { data } = await OrganizationsAPI.readAccessList(
         organization.id,
         parseNamespacedQueryString(QS_CONFIG, location.search)
       );
@@ -92,7 +93,7 @@ class OrganizationAccess extends React.Component {
   }
 
   async removeRole () {
-    const { api, handleHttpError } = this.props;
+    const { handleHttpError } = this.props;
     const { roleToDelete: role, roleToDeleteAccessRecord: accessRecord } = this.state;
     if (!role || !accessRecord) {
       return;
@@ -101,9 +102,9 @@ class OrganizationAccess extends React.Component {
     this.setState({ isLoading: true });
     try {
       if (type === 'teams') {
-        await api.disassociateTeamRole(role.team_id, role.id);
+        await TeamsAPI.disassociateRole(role.team_id, role.id);
       } else {
-        await api.disassociateUserRole(accessRecord.id, role.id);
+        await UsersAPI.disassociateRole(accessRecord.id, role.id);
       }
       this.setState({
         isLoading: false,

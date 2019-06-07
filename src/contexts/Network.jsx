@@ -1,5 +1,4 @@
 
-import axios from 'axios';
 import React, { Component } from 'react';
 
 import { withRouter } from 'react-router-dom';
@@ -9,8 +8,6 @@ import { t } from '@lingui/macro';
 
 import { withRootDialog } from './RootDialog';
 
-import APIClient from '../api';
-
 const NetworkContext = React.createContext({});
 
 class Provider extends Component {
@@ -19,7 +16,6 @@ class Provider extends Component {
 
     this.state = {
       value: {
-        api: new APIClient(axios.create({ xsrfCookieName: 'csrftoken', xsrfHeaderName: 'X-CSRFToken' })),
         handleHttpError: err => {
           if (err.response.status === 401) {
             this.handle401();

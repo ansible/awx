@@ -1,6 +1,9 @@
 import React from 'react';
 import { mountWithContexts } from '../../../../enzymeHelpers';
 import OrganizationDetail from '../../../../../src/pages/Organizations/screens/Organization/OrganizationDetail';
+import { OrganizationsAPI } from '../../../../../src/api';
+
+jest.mock('../../../../../src/api');
 
 describe('<OrganizationDetail />', () => {
   const mockDetails = {
@@ -16,6 +19,10 @@ describe('<OrganizationDetail />', () => {
     }
   };
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   test('initially renders succesfully', () => {
     mountWithContexts(
       <OrganizationDetail
@@ -25,16 +32,15 @@ describe('<OrganizationDetail />', () => {
   });
 
   test('should request instance groups from api', () => {
-    const getOrganizationInstanceGroups = jest.fn();
     mountWithContexts(
       <OrganizationDetail
         organization={mockDetails}
       />, { context: {
-        network: { api: { getOrganizationInstanceGroups }, handleHttpError: () => {} }
+        network: { handleHttpError: () => {} }
       } }
     ).find('OrganizationDetail');
 
-    expect(getOrganizationInstanceGroups).toHaveBeenCalledTimes(1);
+    expect(OrganizationsAPI.readInstanceGroups).toHaveBeenCalledTimes(1);
   });
 
   test('should handle setting instance groups to state', async () => {
@@ -42,18 +48,18 @@ describe('<OrganizationDetail />', () => {
       { name: 'One', id: 1 },
       { name: 'Two', id: 2 }
     ];
-    const getOrganizationInstanceGroups = jest.fn(() => (
-      Promise.resolve({ data: { results: mockInstanceGroups } })
-    ));
+    OrganizationsAPI.readInstanceGroups.mockResolvedValue({
+      data: { results: mockInstanceGroups }
+    });
     const wrapper = mountWithContexts(
       <OrganizationDetail
         organization={mockDetails}
       />, { context: {
-        network: { api: { getOrganizationInstanceGroups }, handleHttpError: () => {} }
+        network: { handleHttpError: () => {} }
       } }
     ).find('OrganizationDetail');
 
-    await getOrganizationInstanceGroups();
+    await OrganizationsAPI.readInstanceGroups();
     expect(wrapper.state().instanceGroups).toEqual(mockInstanceGroups);
   });
 

@@ -5,6 +5,7 @@ import { withNetwork } from '../../../../contexts/Network';
 import PaginatedDataList from '../../../../components/PaginatedDataList';
 import NotificationListItem from '../../../../components/NotificationsList/NotificationListItem';
 import { getQSConfig, parseNamespacedQueryString } from '../../../../util/qs';
+import { OrganizationsAPI } from '../../../../api';
 
 const QS_CONFIG = getQSConfig('notification', {
   page: 1,
@@ -49,11 +50,11 @@ class OrganizationNotifications extends Component {
   }
 
   async readNotifications () {
-    const { id, api, handleHttpError, location } = this.props;
+    const { id, handleHttpError, location } = this.props;
     const params = parseNamespacedQueryString(QS_CONFIG, location.search);
     this.setState({ isLoading: true });
     try {
-      const { data } = await api.getOrganizationNotifications(id, params);
+      const { data } = await OrganizationsAPI.readNotificationTemplates(id, params);
       this.setState(
         {
           itemCount: data.count || 0,
@@ -72,21 +73,22 @@ class OrganizationNotifications extends Component {
   }
 
   async readSuccessesAndErrors () {
-    const { api, handleHttpError, id } = this.props;
+    const { handleHttpError, id } = this.props;
     const { notifications } = this.state;
     if (!notifications.length) {
       return;
     }
     const ids = notifications.map(n => n.id).join(',');
     try {
-      const successTemplatesPromise = api.getOrganizationNotificationSuccess(
+      const successTemplatesPromise = OrganizationsAPI.readNotificationTemplatesSuccess(
         id,
         { id__in: ids }
       );
-      const errorTemplatesPromise = api.getOrganizationNotificationError(
+      const errorTemplatesPromise = OrganizationsAPI.readNotificationTemplatesError(
         id,
         { id__in: ids }
       );
+
       const { data: successTemplates } = await successTemplatesPromise;
       const { data: errorTemplates } = await errorTemplatesPromise;
 
@@ -104,53 +106,65 @@ class OrganizationNotifications extends Component {
 
   toggleNotification = (notificationId, isCurrentlyOn, status) => {
     if (status === 'success') {
-      this.createSuccess(notificationId, isCurrentlyOn);
+      if (isCurrentlyOn) {
+        this.disassociateSuccess(notificationId);
+      } else {
+        this.associateSuccess(notificationId);
+      }
     } else if (status === 'error') {
-      this.createError(notificationId, isCurrentlyOn);
+      if (isCurrentlyOn) {
+        this.disassociateError(notificationId);
+      } else {
+        this.associateError(notificationId);
+      }
     }
   };
 
-  async createSuccess (notificationId, isCurrentlyOn) {
-    const { id, api, handleHttpError } = this.props;
-    const postParams = { id: notificationId };
-    if (isCurrentlyOn) {
-      postParams.disassociate = true;
-    }
+  async associateSuccess (notificationId) {
+    const { id, handleHttpError } = this.props;
     try {
-      await api.createOrganizationNotificationSuccess(id, postParams);
-      if (isCurrentlyOn) {
-        this.setState((prevState) => ({
-          successTemplateIds: prevState.successTemplateIds
-            .filter((templateId) => templateId !== notificationId)
-        }));
-      } else {
-        this.setState(prevState => ({
-          successTemplateIds: [...prevState.successTemplateIds, notificationId]
-        }));
-      }
+      await OrganizationsAPI.associateNotificationTemplatesSuccess(id, notificationId);
+      this.setState(prevState => ({
+        successTemplateIds: [...prevState.successTemplateIds, notificationId]
+      }));
     } catch (err) {
       handleHttpError(err) || this.setState({ error: true });
     }
   }
 
-  async createError (notificationId, isCurrentlyOn) {
-    const { id, api, handleHttpError } = this.props;
-    const postParams = { id: notificationId };
-    if (isCurrentlyOn) {
-      postParams.disassociate = true;
-    }
+  async disassociateSuccess (notificationId) {
+    const { id, handleHttpError } = this.props;
     try {
-      await api.createOrganizationNotificationError(id, postParams);
-      if (isCurrentlyOn) {
-        this.setState((prevState) => ({
-          errorTemplateIds: prevState.errorTemplateIds
-            .filter((templateId) => templateId !== notificationId)
-        }));
-      } else {
-        this.setState(prevState => ({
-          errorTemplateIds: [...prevState.errorTemplateIds, notificationId]
-        }));
-      }
+      await OrganizationsAPI.disassociateNotificationTemplatesSuccess(id, notificationId);
+      this.setState((prevState) => ({
+        successTemplateIds: prevState.successTemplateIds
+          .filter((templateId) => templateId !== notificationId)
+      }));
+    } catch (err) {
+      handleHttpError(err) || this.setState({ error: true });
+    }
+  }
+
+  async associateError (notificationId) {
+    const { id, handleHttpError } = this.props;
+    try {
+      await OrganizationsAPI.associateNotificationTemplatesError(id, notificationId);
+      this.setState(prevState => ({
+        errorTemplateIds: [...prevState.errorTemplateIds, notificationId]
+      }));
+    } catch (err) {
+      handleHttpError(err) || this.setState({ error: true });
+    }
+  }
+
+  async disassociateError (notificationId) {
+    const { id, handleHttpError } = this.props;
+    try {
+      await OrganizationsAPI.disassociateNotificationTemplatesError(id, notificationId);
+      this.setState((prevState) => ({
+        errorTemplateIds: prevState.errorTemplateIds
+          .filter((templateId) => templateId !== notificationId)
+      }));
     } catch (err) {
       handleHttpError(err) || this.setState({ error: true });
     }
@@ -205,13 +219,6 @@ OrganizationNotifications.propTypes = {
   id: number.isRequired,
   canToggleNotifications: bool.isRequired,
   handleHttpError: func.isRequired,
-  api: shape({
-    getOrganizationNotifications: func.isRequired,
-    getOrganizationNotificationSuccess: func.isRequired,
-    getOrganizationNotificationError: func.isRequired,
-    createOrganizationNotificationSuccess: func.isRequired,
-    createOrganizationNotificationError: func.isRequired,
-  }).isRequired,
   location: shape({
     search: string.isRequired,
   }).isRequired,

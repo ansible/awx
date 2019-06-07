@@ -4,6 +4,7 @@ import { withRouter } from 'react-router-dom';
 import { CardBody } from '@patternfly/react-core';
 import OrganizationForm from '../../components/OrganizationForm';
 import { withNetwork } from '../../../../contexts/Network';
+import { OrganizationsAPI } from '../../../../api';
 
 class OrganizationEdit extends Component {
   constructor (props) {
@@ -20,9 +21,9 @@ class OrganizationEdit extends Component {
   }
 
   async handleSubmit (values, groupsToAssociate, groupsToDisassociate) {
-    const { api, organization, handleHttpError } = this.props;
+    const { organization, handleHttpError } = this.props;
     try {
-      await api.updateOrganizationDetails(organization.id, values);
+      await OrganizationsAPI.update(organization.id, values);
       await this.submitInstanceGroups(groupsToAssociate, groupsToDisassociate);
       this.handleSuccess();
     } catch (err) {
@@ -41,12 +42,17 @@ class OrganizationEdit extends Component {
   }
 
   async submitInstanceGroups (groupsToAssociate, groupsToDisassociate) {
-    const { api, organization, handleHttpError } = this.props;
-    const url = organization.related.instance_groups;
+    const { organization, handleHttpError } = this.props;
 
     try {
-      await Promise.all(groupsToAssociate.map(id => api.associateInstanceGroup(url, id)));
-      await Promise.all(groupsToDisassociate.map(id => api.disassociate(url, id)));
+      await Promise.all(
+        groupsToAssociate.map(id => OrganizationsAPI.associateInstanceGroup(organization.id, id))
+      );
+      await Promise.all(
+        groupsToDisassociate.map(
+          id => OrganizationsAPI.disassociateInstanceGroup(organization.id, id)
+        )
+      );
     } catch (err) {
       handleHttpError(err) || this.setState({ error: err });
     }

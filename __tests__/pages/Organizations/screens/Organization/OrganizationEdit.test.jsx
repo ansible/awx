@@ -3,6 +3,10 @@ import { mountWithContexts } from '../../../../enzymeHelpers';
 
 import OrganizationEdit from '../../../../../src/pages/Organizations/screens/Organization/OrganizationEdit';
 
+import { OrganizationsAPI } from '../../../../../src/api';
+
+jest.mock('../../../../../src/api');
+
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 describe('<OrganizationEdit />', () => {
@@ -44,10 +48,7 @@ describe('<OrganizationEdit />', () => {
     };
     wrapper.find('OrganizationForm').prop('handleSubmit')(updatedOrgData, [], []);
 
-    expect(api.updateOrganizationDetails).toHaveBeenCalledWith(
-      1,
-      updatedOrgData
-    );
+    expect(OrganizationsAPI.update).toHaveBeenCalledWith(1, updatedOrgData);
   });
 
   test('handleSubmit associates and disassociates instance groups', async () => {
@@ -68,18 +69,9 @@ describe('<OrganizationEdit />', () => {
     wrapper.find('OrganizationForm').prop('handleSubmit')(updatedOrgData, [3, 4], [2]);
     await sleep(1);
 
-    expect(api.associateInstanceGroup).toHaveBeenCalledWith(
-      '/api/v2/organizations/1/instance_groups',
-      3
-    );
-    expect(api.associateInstanceGroup).toHaveBeenCalledWith(
-      '/api/v2/organizations/1/instance_groups',
-      4
-    );
-    expect(api.disassociate).toHaveBeenCalledWith(
-      '/api/v2/organizations/1/instance_groups',
-      2
-    );
+    expect(OrganizationsAPI.associateInstanceGroup).toHaveBeenCalledWith(1, 3);
+    expect(OrganizationsAPI.associateInstanceGroup).toHaveBeenCalledWith(1, 4);
+    expect(OrganizationsAPI.disassociateInstanceGroup).toHaveBeenCalledWith(1, 2);
   });
 
   test('should navigate to organization detail when cancel is clicked', () => {

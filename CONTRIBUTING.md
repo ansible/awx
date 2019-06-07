@@ -12,6 +12,7 @@ Have questions about this document or anything not covered here? Feel free to re
     * [Node and npm](#node-and-npm)
 * [Build the user interface](#build-the-user-interface)
 * [Accessing the AWX web interface](#accessing-the-awx-web-interface)
+* [AWX REST API Interaction](#awx-rest-api-interaction)
 * [Working with React](#working-with-react)
   * [App structure](#app-structure)
   * [Naming files](#naming-files)
@@ -57,6 +58,57 @@ Run the following to build the AWX UI:
 ## Accessing the AWX web interface
 
 You can now log into the AWX web interface at [https://127.0.0.1:3001](https://127.0.0.1:3001).
+
+## AWX REST API Interaction
+
+This interface is built on top of the AWX REST API. If a component needs to interact with the API then the model that corresponds to that base endpoint will need to be imported from the api module.
+
+Example:
+
+`import { OrganizationsAPI, UsersAPI } from '../../../api';`
+
+All models extend a `Base` class which provides an interface to the standard HTTP methods (GET, POST, PUT etc).  Methods that are specific to that endpoint should be added directly to model's class.
+
+**Mixins** - For related endpoints that apply to several different models a mixin should be used.  Mixins are classes with a number of methods and can be used to avoid adding the same methods to a number of different models.  A good example of this is the Notifications mixin.  This mixin provides generic methods for reading notification templates and toggling them on and off.
+Note that mixins can be chained.  See the example below.
+
+Example of a model using multiple mixins:
+
+```
+import NotificationsMixin from '../mixins/Notifications.mixin';
+import InstanceGroupsMixin from '../mixins/InstanceGroups.mixin';
+
+class Organizations extends InstanceGroupsMixin(NotificationsMixin(Base)) {
+  ...
+}
+
+export default Organizations;
+```
+
+**Testing** - The easiest way to mock the api module in tests is to use jest's [automatic mock](https://jestjs.io/docs/en/es6-class-mocks#automatic-mock).  This syntax will replace the class with a mock constructor and mock out all methods to return undefined by default.  If necessary, you can still override these mocks for specific tests.  See the example below.
+
+Example of mocking a specific method for every test in a suite:
+
+```
+import { OrganizationsAPI } from '../../../../src/api';
+
+// Mocks out all available methods.  Comparable to:
+// OrganizationsAPI.readAccessList = jest.fn();
+// but for every available method
+jest.mock('../../../../src/api');
+
+// Return a specific mock value for the readAccessList method
+beforeEach(() => {
+  OrganizationsAPI.readAccessList.mockReturnValue({ foo: 'bar' });
+});
+
+// Reset mocks
+afterEach(() => {
+  jest.clearAllMocks();
+});
+
+...
+```
 
 ## Working with React
 
@@ -191,20 +243,19 @@ this.state = {
 
 We have several React contexts that wrap much of the app, including those from react-router, lingui, and some of our own. When testing a component that depends on one or more of these, you can use the `mountWithContexts()` helper function found in `__tests__/enzymeHelpers.jsx`. This can be used just like Enzyme's `mount()` function, except it will wrap the component tree with the necessary context providers and basic stub data.
 
-If you want to stub the value of a context, or assert actions taken on it, you can customize a contexts value by passing a second parameter to `mountWithContexts`. For example, this provides a custom value for the `Network` context:
+If you want to stub the value of a context, or assert actions taken on it, you can customize a contexts value by passing a second parameter to `mountWithContexts`. For example, this provides a custom value for the `Config` context:
 
 ```
-const network = {
-  api: {
-    getOrganizationInstanceGroups: jest.fn(),
-  }
+const config = {
+  custom_virtualenvs: ['foo', 'bar'],
 };
 mountWithContexts(<OrganizationForm />, {
-  context: { network },
+  context: { config },
 });
 ```
 
-In this test, when the `OrganizationForm` calls `api.getOrganizationInstanceGroups` from the network context, it will invoke the provided stub. You can assert that this stub is invoked when you expect or to provide stubbed data.
+Now that these custom virtual environments are available in this `OrganizationForm` test we can assert that the component that displays
+them is rendering properly.
 
 The object containing context values looks for five known contexts, identified by the keys `linguiPublisher`, `router`, `config`, `network`, and `dialog` — the latter three each referring to the contexts defined in `src/contexts`. You can pass `false` for any of these values, and the corresponding context will be omitted from your test. For example, this will mount your component without the dialog context:
 

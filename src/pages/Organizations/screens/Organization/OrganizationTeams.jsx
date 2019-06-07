@@ -4,6 +4,7 @@ import { withRouter } from 'react-router-dom';
 import PaginatedDataList from '../../../../components/PaginatedDataList';
 import { getQSConfig, parseNamespacedQueryString } from '../../../../util/qs';
 import { withNetwork } from '../../../../contexts/Network';
+import { OrganizationsAPI } from '../../../../api';
 
 const QS_CONFIG = getQSConfig('team', {
   page: 1,
@@ -38,13 +39,13 @@ class OrganizationTeams extends React.Component {
   }
 
   async readOrganizationTeamsList () {
-    const { id, api, handleHttpError, location } = this.props;
+    const { id, handleHttpError, location } = this.props;
     const params = parseNamespacedQueryString(QS_CONFIG, location.search);
     this.setState({ isLoading: true, error: null });
     try {
       const {
         data: { count = 0, results = [] },
-      } = await api.readOrganizationTeamsList(id, params);
+      } = await OrganizationsAPI.readTeams(id, params);
       this.setState({
         itemCount: count,
         teams: results,

@@ -2,9 +2,12 @@ import React from 'react';
 import { mountWithContexts } from '../../../enzymeHelpers';
 import { sleep } from '../../../testUtils';
 import OrganizationForm from '../../../../src/pages/Organizations/components/OrganizationForm';
+import { OrganizationsAPI } from '../../../../src/api';
+
+jest.mock('../../../../src/api');
 
 describe('<OrganizationForm />', () => {
-  let network;
+  const network = {};
 
   const mockData = {
     id: 1,
@@ -16,24 +19,11 @@ describe('<OrganizationForm />', () => {
     }
   };
 
-  beforeEach(() => {
-    network = {};
-  });
-
   afterEach(() => {
     jest.clearAllMocks();
   });
 
   test('should request related instance groups from api', () => {
-    const mockInstanceGroups = [
-      { name: 'One', id: 1 },
-      { name: 'Two', id: 2 }
-    ];
-    network.api = {
-      getOrganizationInstanceGroups: jest.fn(() => (
-        Promise.resolve({ data: { results: mockInstanceGroups } })
-      ))
-    };
     mountWithContexts(
       (
         <OrganizationForm
@@ -46,7 +36,7 @@ describe('<OrganizationForm />', () => {
       }
     );
 
-    expect(network.api.getOrganizationInstanceGroups).toHaveBeenCalledTimes(1);
+    expect(OrganizationsAPI.readInstanceGroups).toHaveBeenCalledTimes(1);
   });
 
   test('componentDidMount should set instanceGroups to state', async () => {
@@ -54,11 +44,11 @@ describe('<OrganizationForm />', () => {
       { name: 'One', id: 1 },
       { name: 'Two', id: 2 }
     ];
-    network.api = {
-      getOrganizationInstanceGroups: jest.fn(() => (
-        Promise.resolve({ data: { results: mockInstanceGroups } })
-      ))
-    };
+    OrganizationsAPI.readInstanceGroups.mockReturnValue({
+      data: {
+        results: mockInstanceGroups
+      }
+    });
     const wrapper = mountWithContexts(
       (
         <OrganizationForm
@@ -72,7 +62,7 @@ describe('<OrganizationForm />', () => {
     );
 
     await sleep(0);
-    expect(network.api.getOrganizationInstanceGroups).toHaveBeenCalled();
+    expect(OrganizationsAPI.readInstanceGroups).toHaveBeenCalled();
     expect(wrapper.find('OrganizationForm').state().instanceGroups).toEqual(mockInstanceGroups);
   });
 
@@ -165,20 +155,20 @@ describe('<OrganizationForm />', () => {
       { name: 'One', id: 1 },
       { name: 'Two', id: 2 }
     ];
-    network.api = {
-      getOrganizationInstanceGroups: jest.fn(() => (
-        Promise.resolve({ data: { results: mockInstanceGroups } })
-      ))
-    };
+    OrganizationsAPI.readInstanceGroups.mockReturnValue({
+      data: {
+        results: mockInstanceGroups
+      }
+    });
     const mockDataForm = {
       name: 'Foo',
       description: 'Bar',
       custom_virtualenv: 'Fizz',
     };
     const handleSubmit = jest.fn();
-    network.api.updateOrganizationDetails = jest.fn().mockResolvedValue(1, mockDataForm);
-    network.api.associateInstanceGroup = jest.fn().mockResolvedValue('done');
-    network.api.disassociate = jest.fn().mockResolvedValue('done');
+    OrganizationsAPI.update.mockResolvedValue(1, mockDataForm);
+    OrganizationsAPI.associateInstanceGroup.mockResolvedValue('done');
+    OrganizationsAPI.disassociateInstanceGroup.mockResolvedValue('done');
     const wrapper = mountWithContexts(
       (
         <OrganizationForm

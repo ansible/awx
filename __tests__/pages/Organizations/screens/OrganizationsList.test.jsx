@@ -2,6 +2,9 @@ import React from 'react';
 import { createMemoryHistory } from 'history';
 import { mountWithContexts } from '../../../enzymeHelpers';
 import OrganizationsList, { _OrganizationsList } from '../../../../src/pages/Organizations/screens/OrganizationsList';
+import { OrganizationsAPI } from '../../../../src/api';
+
+jest.mock('../../../../src/api');
 
 const mockAPIOrgsList = {
   data: {
@@ -124,7 +127,7 @@ describe('<OrganizationsList />', () => {
       selected: mockAPIOrgsList.data.results
     });
     wrapper.find('ToolbarDeleteButton').prop('onDelete')();
-    expect(api.destroyOrganization).toHaveBeenCalledTimes(component.state('selected').length);
+    expect(OrganizationsAPI.destroy).toHaveBeenCalledTimes(component.state('selected').length);
   });
 
   test('call fetchOrganizations after org(s) have been deleted', () => {

@@ -2,9 +2,12 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { mountWithContexts } from '../enzymeHelpers';
 import AddResourceRole, { _AddResourceRole } from '../../src/components/AddRole/AddResourceRole';
+import { TeamsAPI, UsersAPI } from '../../src/api';
+
+jest.mock('../../src/api');
 
 describe('<_AddResourceRole />', () => {
-  const readUsers = jest.fn().mockResolvedValue({
+  UsersAPI.read.mockResolvedValue({
     data: {
       count: 2,
       results: [
@@ -13,10 +16,6 @@ describe('<_AddResourceRole />', () => {
       ]
     }
   });
-  const readTeams = jest.fn();
-  const createUserRole = jest.fn();
-  const createTeamRole = jest.fn();
-  const api = { readUsers, readTeams, createUserRole, createTeamRole };
   const roles = {
     admin_role: {
       description: 'Can manage all aspects of the organization',
@@ -32,7 +31,6 @@ describe('<_AddResourceRole />', () => {
   test('initially renders without crashing', () => {
     shallow(
       <_AddResourceRole
-        api={api}
         onClose={() => {}}
         onSave={() => {}}
         roles={roles}
@@ -43,7 +41,6 @@ describe('<_AddResourceRole />', () => {
   test('handleRoleCheckboxClick properly updates state', () => {
     const wrapper = shallow(
       <_AddResourceRole
-        api={api}
         onClose={() => {}}
         onSave={() => {}}
         roles={roles}
@@ -79,7 +76,6 @@ describe('<_AddResourceRole />', () => {
   test('handleResourceCheckboxClick properly updates state', () => {
     const wrapper = shallow(
       <_AddResourceRole
-        api={api}
         onClose={() => {}}
         onSave={() => {}}
         roles={roles}
@@ -115,7 +111,7 @@ describe('<_AddResourceRole />', () => {
         onClose={() => {}}
         onSave={() => {}}
         roles={roles}
-      />, { context: { network: { api, handleHttpError: () => {} } } }
+      />, { context: { network: { handleHttpError: () => {} } } }
     ).find('AddResourceRole');
     const selectableCardWrapper = wrapper.find('SelectableCard');
     expect(selectableCardWrapper.length).toBe(2);
@@ -126,35 +122,9 @@ describe('<_AddResourceRole />', () => {
     expect(spy).toHaveBeenCalledWith('teams');
     expect(wrapper.state('selectedResource')).toBe('teams');
   });
-  test('readUsers and readTeams call out to corresponding api functions', () => {
-    const wrapper = shallow(
-      <_AddResourceRole
-        api={api}
-        onClose={() => {}}
-        onSave={() => {}}
-        roles={roles}
-        i18n={{ _: val => val.toString() }}
-      />
-    );
-    wrapper.instance().readUsers({
-      foo: 'bar'
-    });
-    expect(readUsers).toHaveBeenCalledWith({
-      foo: 'bar',
-      is_superuser: false
-    });
-    wrapper.instance().readTeams({
-      foo: 'bar'
-    });
-    expect(readTeams).toHaveBeenCalledWith({
-      foo: 'bar'
-    });
-  });
-
   test('handleResourceSelect clears out selected lists and sets selectedResource', () => {
     const wrapper = shallow(
       <_AddResourceRole
-        api={api}
         onClose={() => {}}
         onSave={() => {}}
         roles={roles}
@@ -192,7 +162,6 @@ describe('<_AddResourceRole />', () => {
       currentStepId: 1
     });
   });
-
   test('handleWizardSave makes correct api calls, calls onSave when done', async () => {
     const handleSave = jest.fn();
     const wrapper = mountWithContexts(
@@ -200,7 +169,7 @@ describe('<_AddResourceRole />', () => {
         onClose={() => {}}
         onSave={handleSave}
         roles={roles}
-      />, { context: { network: { api, handleHttpError: () => {} } } }
+      />, { context: { network: { handleHttpError: () => {} } } }
     ).find('AddResourceRole');
     wrapper.setState({
       selectedResource: 'users',
@@ -224,7 +193,7 @@ describe('<_AddResourceRole />', () => {
       ]
     });
     await wrapper.instance().handleWizardSave();
-    expect(createUserRole).toHaveBeenCalledTimes(2);
+    expect(UsersAPI.associateRole).toHaveBeenCalledTimes(2);
     expect(handleSave).toHaveBeenCalled();
     wrapper.setState({
       selectedResource: 'teams',
@@ -248,7 +217,7 @@ describe('<_AddResourceRole />', () => {
       ]
     });
     await wrapper.instance().handleWizardSave();
-    expect(createTeamRole).toHaveBeenCalledTimes(2);
+    expect(TeamsAPI.associateRole).toHaveBeenCalledTimes(2);
     expect(handleSave).toHaveBeenCalled();
   });
 });

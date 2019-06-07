@@ -3,8 +3,12 @@ import { mountWithContexts } from '../../../../enzymeHelpers';
 import OrganizationAccess from '../../../../../src/pages/Organizations/screens/Organization/OrganizationAccess';
 import { sleep } from '../../../../testUtils';
 
+import { OrganizationsAPI, TeamsAPI, UsersAPI } from '../../../../../src/api';
+
+jest.mock('../../../../../src/api');
+
 describe('<OrganizationAccess />', () => {
-  let network;
+  const network = {};
   const organization = {
     id: 1,
     name: 'Default',
@@ -60,15 +64,11 @@ describe('<OrganizationAccess />', () => {
   };
 
   beforeEach(() => {
-    network = {
-      api: {
-        getOrganizationAccessList: jest.fn()
-          .mockReturnValue(Promise.resolve({ data })),
-        disassociateTeamRole: jest.fn(),
-        disassociateUserRole: jest.fn(),
-        toJSON: () => '/api/',
-      },
-    };
+    OrganizationsAPI.readAccessList.mockReturnValue({ data });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   test('initially renders succesfully', () => {
@@ -86,7 +86,7 @@ describe('<OrganizationAccess />', () => {
     );
     await sleep(0);
     wrapper.update();
-    expect(network.api.getOrganizationAccessList).toHaveBeenCalled();
+    expect(OrganizationsAPI.readAccessList).toHaveBeenCalled();
     expect(wrapper.find('OrganizationAccess').state('isInitialized')).toBe(true);
     expect(wrapper.find('PaginatedDataList').prop('items')).toEqual(data.results);
     expect(wrapper.find('OrganizationAccessItem')).toHaveLength(2);
@@ -127,8 +127,8 @@ describe('<OrganizationAccess />', () => {
     const component = wrapper.find('OrganizationAccess');
     expect(component.state('roleToDelete')).toBeNull();
     expect(component.state('roleToDeleteAccessRecord')).toBeNull();
-    expect(network.api.disassociateTeamRole).not.toHaveBeenCalled();
-    expect(network.api.disassociateUserRole).not.toHaveBeenCalled();
+    expect(TeamsAPI.disassociateRole).not.toHaveBeenCalled();
+    expect(UsersAPI.disassociateRole).not.toHaveBeenCalled();
   });
 
   it('should delete user role', async () => {
@@ -149,9 +149,9 @@ describe('<OrganizationAccess />', () => {
     const component = wrapper.find('OrganizationAccess');
     expect(component.state('roleToDelete')).toBeNull();
     expect(component.state('roleToDeleteAccessRecord')).toBeNull();
-    expect(network.api.disassociateTeamRole).not.toHaveBeenCalled();
-    expect(network.api.disassociateUserRole).toHaveBeenCalledWith(1, 1);
-    expect(network.api.getOrganizationAccessList).toHaveBeenCalledTimes(2);
+    expect(TeamsAPI.disassociateRole).not.toHaveBeenCalled();
+    expect(UsersAPI.disassociateRole).toHaveBeenCalledWith(1, 1);
+    expect(OrganizationsAPI.readAccessList).toHaveBeenCalledTimes(2);
   });
 
   it('should delete team role', async () => {
@@ -172,8 +172,8 @@ describe('<OrganizationAccess />', () => {
     const component = wrapper.find('OrganizationAccess');
     expect(component.state('roleToDelete')).toBeNull();
     expect(component.state('roleToDeleteAccessRecord')).toBeNull();
-    expect(network.api.disassociateTeamRole).toHaveBeenCalledWith(5, 3);
-    expect(network.api.disassociateUserRole).not.toHaveBeenCalled();
-    expect(network.api.getOrganizationAccessList).toHaveBeenCalledTimes(2);
+    expect(TeamsAPI.disassociateRole).toHaveBeenCalledWith(5, 3);
+    expect(UsersAPI.disassociateRole).not.toHaveBeenCalled();
+    expect(OrganizationsAPI.readAccessList).toHaveBeenCalledTimes(2);
   });
 });

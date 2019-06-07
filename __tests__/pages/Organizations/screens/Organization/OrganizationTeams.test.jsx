@@ -3,6 +3,9 @@ import { shallow } from 'enzyme';
 import { mountWithContexts } from '../../../../enzymeHelpers';
 import { sleep } from '../../../../testUtils';
 import OrganizationTeams, { _OrganizationTeams } from '../../../../../src/pages/Organizations/screens/Organization/OrganizationTeams';
+import { OrganizationsAPI } from '../../../../../src/api';
+
+jest.mock('../../../../../src/api');
 
 const listData = {
   data: {
@@ -17,6 +20,14 @@ const listData = {
   }
 };
 
+beforeEach(() => {
+  OrganizationsAPI.readTeams.mockResolvedValue(listData);
+});
+
+afterEach(() => {
+  jest.clearAllMocks();
+});
+
 describe('<OrganizationTeams />', () => {
   test('renders succesfully', () => {
     shallow(
@@ -24,25 +35,21 @@ describe('<OrganizationTeams />', () => {
         id={1}
         searchString=""
         location={{ search: '', pathname: '/organizations/1/teams' }}
-        api={{
-          readOrganizationTeamsList: jest.fn(),
-        }}
         handleHttpError={() => {}}
       />
     );
   });
 
   test('should load teams on mount', () => {
-    const readOrganizationTeamsList = jest.fn(() => Promise.resolve(listData));
     mountWithContexts(
       <OrganizationTeams
         id={1}
         searchString=""
       />, { context: {
-        network: { api: { readOrganizationTeamsList }, handleHttpError: () => {} } }
+        network: {} }
       }
     ).find('OrganizationTeams');
-    expect(readOrganizationTeamsList).toHaveBeenCalledWith(1, {
+    expect(OrganizationsAPI.readTeams).toHaveBeenCalledWith(1, {
       page: 1,
       page_size: 5,
       order_by: 'name',
@@ -50,13 +57,12 @@ describe('<OrganizationTeams />', () => {
   });
 
   test('should pass fetched teams to PaginatedDatalist', async () => {
-    const readOrganizationTeamsList = jest.fn(() => Promise.resolve(listData));
     const wrapper = mountWithContexts(
       <OrganizationTeams
         id={1}
         searchString=""
       />, { context: {
-        network: { api: { readOrganizationTeamsList }, handleHttpError: () => {} } }
+        network: { handleHttpError: () => {} } }
       }
     );
 

@@ -2,10 +2,13 @@ import React from 'react';
 import { mountWithContexts } from '../../../../enzymeHelpers';
 import OrganizationNotifications from '../../../../../src/pages/Organizations/screens/Organization/OrganizationNotifications';
 import { sleep } from '../../../../testUtils';
+import { OrganizationsAPI } from '../../../../../src/api';
+
+jest.mock('../../../../../src/api');
 
 describe('<OrganizationNotifications />', () => {
   let data;
-  let network;
+  const network = {};
 
   beforeEach(() => {
     data = {
@@ -22,23 +25,13 @@ describe('<OrganizationNotifications />', () => {
         notification_type: 'email',
       }]
     };
-    network = {
-      api: {
-        getOrganizationNotifications: jest.fn()
-          .mockReturnValue(Promise.resolve({ data })),
-        getOrganizationNotificationSuccess: jest.fn()
-          .mockReturnValue(Promise.resolve({
-            data: { results: [{ id: 1 }] },
-          })),
-        getOrganizationNotificationError: jest.fn()
-          .mockReturnValue(Promise.resolve({
-            data: { results: [{ id: 2 }] },
-          })),
-        createOrganizationNotificationSuccess: jest.fn(),
-        createOrganizationNotificationError: jest.fn(),
-        toJSON: () => '/api/',
-      }
-    };
+    OrganizationsAPI.readNotificationTemplates.mockReturnValue({ data });
+    OrganizationsAPI.readNotificationTemplatesSuccess.mockReturnValue({
+      data: { results: [{ id: 1 }] },
+    });
+    OrganizationsAPI.readNotificationTemplatesError.mockReturnValue({
+      data: { results: [{ id: 2 }] },
+    });
   });
 
   afterEach(() => {
@@ -65,7 +58,7 @@ describe('<OrganizationNotifications />', () => {
     await sleep(0);
     wrapper.update();
 
-    expect(network.api.getOrganizationNotifications).toHaveBeenCalled();
+    expect(OrganizationsAPI.readNotificationTemplates).toHaveBeenCalled();
     expect(wrapper.find('OrganizationNotifications').state('notifications'))
       .toEqual(data.results);
     const items = wrapper.find('NotificationListItem');
@@ -91,7 +84,7 @@ describe('<OrganizationNotifications />', () => {
     ).toEqual([1]);
     const items = wrapper.find('NotificationListItem');
     items.at(1).find('Switch').at(0).prop('onChange')();
-    expect(network.api.createOrganizationNotificationSuccess).toHaveBeenCalled();
+    expect(OrganizationsAPI.associateNotificationTemplatesSuccess).toHaveBeenCalled();
     await sleep(0);
     wrapper.update();
     expect(
@@ -114,7 +107,7 @@ describe('<OrganizationNotifications />', () => {
     ).toEqual([2]);
     const items = wrapper.find('NotificationListItem');
     items.at(0).find('Switch').at(1).prop('onChange')();
-    expect(network.api.createOrganizationNotificationError).toHaveBeenCalled();
+    expect(OrganizationsAPI.associateNotificationTemplatesError).toHaveBeenCalled();
     await sleep(0);
     wrapper.update();
     expect(
@@ -137,7 +130,7 @@ describe('<OrganizationNotifications />', () => {
     ).toEqual([1]);
     const items = wrapper.find('NotificationListItem');
     items.at(0).find('Switch').at(0).prop('onChange')();
-    expect(network.api.createOrganizationNotificationSuccess).toHaveBeenCalled();
+    expect(OrganizationsAPI.disassociateNotificationTemplatesSuccess).toHaveBeenCalled();
     await sleep(0);
     wrapper.update();
     expect(
@@ -160,7 +153,7 @@ describe('<OrganizationNotifications />', () => {
     ).toEqual([2]);
     const items = wrapper.find('NotificationListItem');
     items.at(1).find('Switch').at(1).prop('onChange')();
-    expect(network.api.createOrganizationNotificationError).toHaveBeenCalled();
+    expect(OrganizationsAPI.disassociateNotificationTemplatesError).toHaveBeenCalled();
     await sleep(0);
     wrapper.update();
     expect(

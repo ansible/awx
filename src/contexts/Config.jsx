@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 
 import { withNetwork } from './Network';
 
+import { ConfigAPI, MeAPI, RootAPI } from '../api';
+
 const ConfigContext = React.createContext({});
 
 class Provider extends Component {
@@ -46,13 +48,13 @@ class Provider extends Component {
   };
 
   async fetchMe () {
-    const { api, handleHttpError } = this.props;
+    const { handleHttpError } = this.props;
     try {
       const {
         data: {
           results: [me]
         }
-      } = await api.getMe();
+      } = await MeAPI.read();
       this.setState(prevState => ({
         value: {
           ...prevState.value,
@@ -75,13 +77,13 @@ class Provider extends Component {
   }
 
   async fetchConfig () {
-    const { api, handleHttpError } = this.props;
+    const { handleHttpError } = this.props;
 
     try {
       const [configRes, rootRes, meRes] = await Promise.all([
-        api.getConfig(),
-        api.getRoot(),
-        api.getMe()
+        ConfigAPI.read(),
+        RootAPI.read(),
+        MeAPI.read()
       ]);
       this.setState({
         value: {

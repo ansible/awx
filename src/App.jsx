@@ -15,6 +15,7 @@ import styled from 'styled-components';
 import { RootDialog } from './contexts/RootDialog';
 import { withNetwork } from './contexts/Network';
 import { Config } from './contexts/Config';
+import { RootAPI } from './api';
 
 import AlertModal from './components/AlertModal';
 import About from './components/About';
@@ -56,9 +57,9 @@ class App extends Component {
   }
 
   async onLogout () {
-    const { api, handleHttpError } = this.props;
+    const { handleHttpError } = this.props;
     try {
-      await api.logout();
+      await RootAPI.logout();
       window.location.replace('/#/login');
     } catch (err) {
       handleHttpError(err);

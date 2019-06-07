@@ -6,6 +6,10 @@ import { asyncFlush } from '../jest.setup';
 
 import App from '../src/App';
 
+import { RootAPI } from '../src/api';
+
+jest.mock('../src/api');
+
 describe('<App />', () => {
   test('expected content is rendered', () => {
     const appWrapper = mountWithContexts(
@@ -89,15 +93,13 @@ describe('<App />', () => {
   });
 
   test('onLogout makes expected call to api client', async (done) => {
-    const logout = jest.fn(() => Promise.resolve());
-
     const appWrapper = mountWithContexts(<App />, {
-      context: { network: { api: { logout }, handleHttpError: () => {} } }
+      context: { network: { handleHttpError: () => {} } }
     }).find('App');
 
     appWrapper.instance().onLogout();
     await asyncFlush();
-    expect(logout).toHaveBeenCalledTimes(1);
+    expect(RootAPI.logout).toHaveBeenCalledTimes(1);
 
     done();
   });

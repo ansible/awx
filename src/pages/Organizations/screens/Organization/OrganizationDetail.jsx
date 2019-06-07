@@ -7,6 +7,7 @@ import styled from 'styled-components';
 import { DetailList, Detail } from '../../../../components/DetailList';
 import { withNetwork } from '../../../../contexts/Network';
 import { ChipGroup, Chip } from '../../../../components/Chip';
+import { OrganizationsAPI } from '../../../../api';
 
 const CardBody = styled(PFCardBody)`
   padding-top: 20px;
@@ -29,14 +30,13 @@ class OrganizationDetail extends Component {
 
   async loadInstanceGroups () {
     const {
-      api,
       handleHttpError,
       match
     } = this.props;
     try {
       const {
         data
-      } = await api.getOrganizationInstanceGroups(match.params.id);
+      } = await OrganizationsAPI.readInstanceGroups(match.params.id);
       this.setState({
         instanceGroups: [...data.results]
       });

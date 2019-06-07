@@ -2,7 +2,6 @@
 
 exports[`<OrganizationAccess /> initially renders succesfully 1`] = `
 <OrganizationAccess
-  api={"/api/"}
   handleHttpError={[Function]}
   history={"/history/"}
   i18n={"/i18n/"}

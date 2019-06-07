@@ -7,6 +7,13 @@ import { withNetwork } from '../../contexts/Network';
 import SelectResourceStep from './SelectResourceStep';
 import SelectRoleStep from './SelectRoleStep';
 import SelectableCard from './SelectableCard';
+import { TeamsAPI, UsersAPI } from '../../api';
+
+const readUsers = async (queryParams) => UsersAPI.read(
+  Object.assign(queryParams, { is_superuser: false })
+);
+
+const readTeams = async (queryParams) => TeamsAPI.read(queryParams);
 
 class AddResourceRole extends React.Component {
   constructor (props) {
@@ -24,8 +31,6 @@ class AddResourceRole extends React.Component {
     this.handleRoleCheckboxClick = this.handleRoleCheckboxClick.bind(this);
     this.handleWizardNext = this.handleWizardNext.bind(this);
     this.handleWizardSave = this.handleWizardSave.bind(this);
-    this.readTeams = this.readTeams.bind(this);
-    this.readUsers = this.readUsers.bind(this);
   }
 
   handleResourceCheckboxClick (user) {
@@ -76,8 +81,7 @@ class AddResourceRole extends React.Component {
 
   async handleWizardSave () {
     const {
-      onSave,
-      api
+      onSave
     } = this.props;
     const {
       selectedResourceRows,
@@ -92,11 +96,11 @@ class AddResourceRole extends React.Component {
         for (let j = 0; j < selectedRoleRows.length; j++) {
           if (selectedResource === 'users') {
             roleRequests.push(
-              api.createUserRole(selectedResourceRows[i].id, selectedRoleRows[j].id)
+              UsersAPI.associateRole(selectedResourceRows[i].id, selectedRoleRows[j].id)
             );
           } else if (selectedResource === 'teams') {
             roleRequests.push(
-              api.createTeamRole(selectedResourceRows[i].id, selectedRoleRows[j].id)
+              TeamsAPI.associateRole(selectedResourceRows[i].id, selectedRoleRows[j].id)
             );
           }
         }
@@ -107,16 +111,6 @@ class AddResourceRole extends React.Component {
     } catch (err) {
       // TODO: handle this error
     }
-  }
-
-  async readUsers (queryParams) {
-    const { api } = this.props;
-    return api.readUsers(Object.assign(queryParams, { is_superuser: false }));
-  }
-
-  async readTeams (queryParams) {
-    const { api } = this.props;
-    return api.readTeams(queryParams);
   }
 
   render () {
@@ -183,7 +177,7 @@ class AddResourceRole extends React.Component {
                 columns={userColumns}
                 displayKey="username"
                 onRowClick={this.handleResourceCheckboxClick}
-                onSearch={this.readUsers}
+                onSearch={readUsers}
                 selectedLabel={i18n._(t`Selected`)}
                 selectedResourceRows={selectedResourceRows}
                 sortedColumnKey="username"
@@ -194,7 +188,7 @@ class AddResourceRole extends React.Component {
               <SelectResourceStep
                 columns={teamColumns}
                 onRowClick={this.handleResourceCheckboxClick}
-                onSearch={this.readTeams}
+                onSearch={readTeams}
                 selectedLabel={i18n._(t`Selected`)}
                 selectedResourceRows={selectedResourceRows}
                 itemName="team"
