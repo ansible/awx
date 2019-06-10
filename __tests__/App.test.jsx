@@ -74,7 +74,7 @@ describe('<App />', () => {
     // check about modal content
     const content = await waitForElement(wrapper, aboutModalContent);
     expect(content.find('dd').text()).toContain(ansible_version);
-    expect(content.find('pre').text()).toContain(`<  Tower ${version}  >`);
+    expect(content.find('pre').text()).toContain(`<  AWX ${version}  >`);
 
     // close about modal
     wrapper.find(aboutModalClose).simulate('click');

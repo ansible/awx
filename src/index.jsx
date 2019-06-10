@@ -15,6 +15,8 @@ import './app.scss';
 
 import { Config } from './contexts/Config';
 
+import { BrandName } from './variables';
+
 import Background from './components/Background';
 import NotifyAndRedirect from './components/NotifyAndRedirect';
 
@@ -48,6 +50,7 @@ import Users from './pages/Users';
 // eslint-disable-next-line import/prefer-default-export
 export function main (render) {
   const el = document.getElementById('app');
+  document.title = `Ansible ${BrandName}`;
 
   return render(
     <RootProvider>

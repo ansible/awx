@@ -9,12 +9,12 @@ import {
   TextListItem
 } from '@patternfly/react-core';
 
-import brandImg from '../../images/tower-logo-white.svg';
-import logoImg from '../../images/tower-logo-login.svg';
+import { BrandName } from '../variables';
+import brandLogoImg from '../../images/brand-logo.svg';
 
 class About extends React.Component {
   static createSpeechBubble (version) {
-    let text = `Tower ${version}`;
+    let text = `${BrandName} ${version}`;
     let top = '';
     let bottom = '';
 
@@ -51,12 +51,10 @@ class About extends React.Component {
       <AboutModal
         isOpen={isOpen}
         onClose={onClose}
-        productName="Ansible Tower"
-        trademark={i18n._(t`Copyright 2018 Red Hat, Inc.`)}
-        brandImageSrc={brandImg}
+        productName={`Ansible ${BrandName}`}
+        trademark={i18n._(t`Copyright 2019 Red Hat, Inc.`)}
+        brandImageSrc={brandLogoImg}
         brandImageAlt={i18n._(t`Brand Image`)}
-        logoImageSrc={logoImg}
-        logoImageAlt={i18n._(t`AboutModal Logo`)}
       >
         <pre>
           { speechBubble }

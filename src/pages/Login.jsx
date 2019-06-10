@@ -2,16 +2,24 @@ import React, { Component } from 'react';
 import { Redirect, withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
+import styled from 'styled-components';
 import {
   LoginForm,
-  LoginPage,
+  LoginPage as PFLoginPage,
 } from '@patternfly/react-core';
 
 import { withRootDialog } from '../contexts/RootDialog';
 import { withNetwork } from '../contexts/Network';
 import { RootAPI } from '../api';
+import { BrandName } from '../variables';
 
-import towerLogo from '../../images/tower-logo-header.svg';
+import logoImg from '../../images/brand-logo.svg';
+
+const LoginPage = styled(PFLoginPage)`
+  & .pf-c-brand {
+    max-height: 285px;
+  }
+`;
 
 class AWXLogin extends Component {
   constructor (props) {
@@ -64,7 +72,11 @@ class AWXLogin extends Component {
   render () {
     const { username, password, isInputValid, isAuthenticated } = this.state;
     const { alt, loginInfo, logo, bodyText: errorMessage, i18n } = this.props;
-    const logoSrc = logo ? `data:image/jpeg;${logo}` : towerLogo;
+    const logoSrc = logo ? `data:image/jpeg;${logo}` : logoImg;
+    // Setting BrandName to a variable here is necessary to get the jest tests
+    // passing.  Attempting to use BrandName in the template literal results
+    // in failing tests.
+    const brandName = BrandName;
 
     if (isAuthenticated) {
       return (<Redirect to="/" />);
@@ -73,8 +85,8 @@ class AWXLogin extends Component {
     return (
       <LoginPage
         brandImgSrc={logoSrc}
-        brandImgAlt={alt || 'Ansible Tower'}
-        loginTitle={i18n._(t`Welcome to Ansible Tower! Please Sign In.`)}
+        brandImgAlt={alt || brandName}
+        loginTitle={i18n._(t`Welcome to Ansible ${brandName}! Please Sign In.`)}
         textContent={loginInfo}
       >
         <LoginForm

@@ -1,24 +1,24 @@
 import React from 'react';
 import { mountWithContexts } from '../enzymeHelpers';
-import TowerLogo from '../../src/components/TowerLogo';
+import BrandLogo from '../../src/components/BrandLogo';
 
 let logoWrapper;
-let towerLogoElem;
+let brandLogoElem;
 let svgElem;
 
 const findChildren = () => {
-  towerLogoElem = logoWrapper.find('TowerLogo');
+  brandLogoElem = logoWrapper.find('BrandLogo');
   svgElem = logoWrapper.find('svg');
 };
 
-describe('<TowerLogo />', () => {
+describe('<BrandLogo />', () => {
   test('initially renders without crashing', () => {
     logoWrapper = mountWithContexts(
-      <TowerLogo />
+      <BrandLogo />
     );
     findChildren();
     expect(logoWrapper.length).toBe(1);
-    expect(towerLogoElem.length).toBe(1);
+    expect(brandLogoElem.length).toBe(1);
     expect(svgElem.length).toBe(1);
   });
 });

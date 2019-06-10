@@ -20,7 +20,7 @@ import { RootAPI } from './api';
 import AlertModal from './components/AlertModal';
 import About from './components/About';
 import NavExpandableGroup from './components/NavExpandableGroup';
-import TowerLogo from './components/TowerLogo';
+import BrandLogo from './components/BrandLogo';
 import PageHeaderToolbar from './components/PageHeaderToolbar';
 
 const PageHeader = styled(PFPageHeader)`
@@ -32,7 +32,7 @@ const PageHeader = styled(PFPageHeader)`
     }
 
     & svg {
-      width: 125px;
+      height: 76px;
     }
   }
 `;
@@ -119,7 +119,7 @@ class App extends Component {
                     <PageHeader
                       showNavToggle
                       onNavToggle={this.onNavToggle}
-                      logo={<TowerLogo />}
+                      logo={<BrandLogo />}
                       logoProps={{ href: '/' }}
                       toolbar={(
                         <PageHeaderToolbar

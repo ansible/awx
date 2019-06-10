@@ -63,8 +63,8 @@ describe('<Login />', () => {
     mountLogin();
     findChildren();
     expect(loginHeaderLogo.length).toBe(1);
-    expect(loginHeaderLogo.props().src).toBe('tower-logo-header.svg');
-    expect(loginHeaderLogo.props().alt).toBe('Ansible Tower');
+    expect(loginHeaderLogo.props().src).toBe('brand-logo.svg');
+    expect(loginHeaderLogo.props().alt).toBe('AWX');
   });
 
   test('state maps to un/pw input value props', () => {
