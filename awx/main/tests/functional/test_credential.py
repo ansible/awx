@@ -100,25 +100,6 @@ def test_default_cred_types():
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize('kind', ['net', 'scm', 'ssh', 'vault'])
-def test_cred_type_kind_uniqueness(kind):
-    """
-    non-cloud credential types are exclusive_on_kind (you can only use *one* of
-    them at a time)
-    """
-    assert CredentialType.defaults[kind]().unique_by_kind is True
-
-
-@pytest.mark.django_db
-def test_cloud_kind_uniqueness():
-    """
-    you can specify more than one cloud credential type (as long as they have
-    different names so you don't e.g., use ec2 twice")
-    """
-    assert CredentialType.defaults['aws']().unique_by_kind is False
-
-
-@pytest.mark.django_db
 def test_credential_creation(organization_factory):
     org = organization_factory('test').organization
     type_ = CredentialType(
@@ -141,7 +122,7 @@ def test_credential_creation(organization_factory):
     cred.full_clean()
     assert isinstance(cred, Credential)
     assert cred.name == "Bob's Credential"
-    assert cred.inputs['username'] == cred.username == 'bob'
+    assert cred.inputs['username'] == 'bob'
 
 
 @pytest.mark.django_db

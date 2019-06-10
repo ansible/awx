@@ -20,7 +20,7 @@
  *
  * ```
  *    /api/v2/inventories/9/
- *    /api/v2/credentials/?name=SSH Key&kind=ssh
+ *    /api/v2/credentials/?name=SSH Key&credential_type__namespace=ssh
  * ```
  *
  * When constructing the URL be sure to use the GetBasePath() method found in js/shared/Utilities.js. GetBasePath uses the response objects from /api and

@@ -30,7 +30,6 @@ Notifications can succeed or fail but that will not cause its associated job to 
 
 Once a Notification Template is created, its configuration can be tested by utilizing the endpoint at `/api/v2/notification_templates/<n>/test`   This will emit a test notification given the configuration defined by the notification.  These test notifications will also appear in the notifications list at `/api/v2/notifications`
 
-
 # Notification Types
 
 The currently defined Notification Types are:

@@ -688,13 +688,19 @@ class TestJobCredentials(TestJobExecution):
         job.websocket_emit_status = mock.Mock()
         job._credentials = []
 
+        def _credentials_filter(credential_type__kind=None):
+            creds = job._credentials
+            if credential_type__kind:
+                creds = [c for c in creds if c.credential_type.kind == credential_type__kind]
+            return mock.Mock(
+                __iter__ = lambda *args: iter(creds),
+                first = lambda: creds[0] if len(creds) else None
+            )
+
         credentials_mock = mock.Mock(**{
             'all': lambda: job._credentials,
             'add': job._credentials.append,
-            'filter.return_value': mock.Mock(
-                __iter__ = lambda *args: iter(job._credentials),
-                first = lambda: job._credentials[0]
-            ),
+            'filter.side_effect': _credentials_filter,
             'prefetch_related': lambda _: credentials_mock,
             'spec_set': ['all', 'add', 'filter', 'prefetch_related'],
         })

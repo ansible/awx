@@ -1,10 +1,7 @@
 from unittest import mock
 import pytest
 
-from rest_framework.exceptions import PermissionDenied
-
 from awx.api.versioning import reverse
-from awx.api.serializers import JobTemplateSerializer
 from awx.main.access import (
     BaseAccess,
     JobTemplateAccess,
@@ -29,16 +26,18 @@ def test_job_template_access_superuser(check_license, user, deploy_jobtemplate):
 
 @pytest.mark.django_db
 def test_job_template_access_read_level(jt_linked, rando):
+    ssh_cred = jt_linked.machine_credential
+    vault_cred = jt_linked.vault_credentials[0]
 
     access = JobTemplateAccess(rando)
     jt_linked.project.read_role.members.add(rando)
     jt_linked.inventory.read_role.members.add(rando)
-    jt_linked.get_deprecated_credential('ssh').read_role.members.add(rando)
+    ssh_cred.read_role.members.add(rando)
 
     proj_pk = jt_linked.project.pk
     assert not access.can_add(dict(inventory=jt_linked.inventory.pk, project=proj_pk))
-    assert not access.can_add(dict(credential=jt_linked.credential, project=proj_pk))
-    assert not access.can_add(dict(vault_credential=jt_linked.vault_credential, project=proj_pk))
+    assert not access.can_add(dict(credential=ssh_cred.pk, project=proj_pk))
+    assert not access.can_add(dict(vault_credential=vault_cred.pk, project=proj_pk))
 
     for cred in jt_linked.credentials.all():
         assert not access.can_unattach(jt_linked, cred, 'credentials', {})
@@ -46,17 +45,19 @@ def test_job_template_access_read_level(jt_linked, rando):
 
 @pytest.mark.django_db
 def test_job_template_access_use_level(jt_linked, rando):
+    ssh_cred = jt_linked.machine_credential
+    vault_cred = jt_linked.vault_credentials[0]
 
     access = JobTemplateAccess(rando)
     jt_linked.project.use_role.members.add(rando)
     jt_linked.inventory.use_role.members.add(rando)
-    jt_linked.get_deprecated_credential('ssh').use_role.members.add(rando)
-    jt_linked.get_deprecated_credential('vault').use_role.members.add(rando)
+    ssh_cred.use_role.members.add(rando)
+    vault_cred.use_role.members.add(rando)
 
     proj_pk = jt_linked.project.pk
     assert access.can_add(dict(inventory=jt_linked.inventory.pk, project=proj_pk))
-    assert access.can_add(dict(credential=jt_linked.credential, project=proj_pk))
-    assert access.can_add(dict(vault_credential=jt_linked.vault_credential, project=proj_pk))
+    assert access.can_add(dict(credential=ssh_cred.pk, project=proj_pk))
+    assert access.can_add(dict(vault_credential=vault_cred.pk, project=proj_pk))
 
     for cred in jt_linked.credentials.all():
         assert not access.can_unattach(jt_linked, cred, 'credentials', {})
@@ -65,6 +66,8 @@ def test_job_template_access_use_level(jt_linked, rando):
 @pytest.mark.django_db
 @pytest.mark.parametrize("role_names", [("admin_role",), ("job_template_admin_role", "inventory_admin_role", "project_admin_role")])
 def test_job_template_access_admin(role_names, jt_linked, rando):
+    ssh_cred = jt_linked.machine_credential
+
     access = JobTemplateAccess(rando)
     # Appoint this user as admin of the organization
     #jt_linked.inventory.organization.admin_role.members.add(rando)
@@ -77,11 +80,11 @@ def test_job_template_access_admin(role_names, jt_linked, rando):
 
     # Assign organization permission in the same way the create view does
     organization = jt_linked.inventory.organization
-    jt_linked.get_deprecated_credential('ssh').admin_role.parents.add(organization.admin_role)
+    ssh_cred.admin_role.parents.add(organization.admin_role)
 
     proj_pk = jt_linked.project.pk
     assert access.can_add(dict(inventory=jt_linked.inventory.pk, project=proj_pk))
-    assert access.can_add(dict(credential=jt_linked.credential, project=proj_pk))
+    assert access.can_add(dict(credential=ssh_cred.pk, project=proj_pk))
 
     for cred in jt_linked.credentials.all():
         assert access.can_unattach(jt_linked, cred, 'credentials', {})
@@ -104,7 +107,7 @@ def test_job_template_extra_credentials_prompts_access(
     jt.execute_role.members.add(rando)
     r = post(
         reverse('api:job_template_launch', kwargs={'version': 'v2', 'pk': jt.id}),
-        {'vault_credential': vault_credential.pk}, rando
+        {'credentials': [machine_credential.pk, vault_credential.pk]}, rando
     )
     assert r.status_code == 403
 
@@ -125,57 +128,6 @@ class TestJobTemplateCredentials:
         # user has permission to apply credential
         assert JobTemplateAccess(rando).can_attach(
             job_template, credential, 'credentials', {})
-
-    def test_job_template_vault_cred_check(self, mocker, job_template, vault_credential, rando, project):
-        # TODO: remove in 3.4
-        job_template.admin_role.members.add(rando)
-        # not allowed to use the vault cred
-        # this is checked in the serializer validate method, not access.py
-        view = mocker.MagicMock()
-        view.request = mocker.MagicMock()
-        view.request.user = rando
-        serializer = JobTemplateSerializer(job_template, context={'view': view})
-        with pytest.raises(PermissionDenied):
-            serializer.validate({
-                'vault_credential': vault_credential.pk,
-                'project': project,  # necessary because job_template fixture fails validation
-                'ask_inventory_on_launch': True,
-            })
-
-    def test_job_template_vault_cred_check_noop(self, mocker, job_template, vault_credential, rando, project):
-        # TODO: remove in 3.4
-        job_template.credentials.add(vault_credential)
-        job_template.admin_role.members.add(rando)
-        # not allowed to use the vault cred
-        # this is checked in the serializer validate method, not access.py
-        view = mocker.MagicMock()
-        view.request = mocker.MagicMock()
-        view.request.user = rando
-        serializer = JobTemplateSerializer(job_template, context={'view': view})
-        # should not raise error:
-        serializer.validate({
-            'vault_credential': vault_credential.pk,
-            'project': project,  # necessary because job_template fixture fails validation
-            'playbook': 'helloworld.yml',
-            'ask_inventory_on_launch': True,
-        })
-
-    def test_new_jt_with_vault(self, mocker, vault_credential, project, rando):
-        project.admin_role.members.add(rando)
-        # TODO: remove in 3.4
-        # this is checked in the serializer validate method, not access.py
-        view = mocker.MagicMock()
-        view.request = mocker.MagicMock()
-        view.request.user = rando
-        serializer = JobTemplateSerializer(context={'view': view})
-        with pytest.raises(PermissionDenied):
-            serializer.validate({
-                'vault_credential': vault_credential.pk,
-                'project': project,
-                'playbook': 'helloworld.yml',
-                'ask_inventory_on_launch': True,
-                'name': 'asdf'
-            })
 
 
 @pytest.mark.django_db

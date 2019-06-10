@@ -16,7 +16,7 @@ from awx.main.models.organization import (  # noqa
     Organization, Profile, Team, UserSessionMembership
 )
 from awx.main.models.credential import (  # noqa
-    Credential, CredentialType, CredentialInputSource, ManagedCredentialType, V1Credential, build_safe_env
+    Credential, CredentialType, CredentialInputSource, ManagedCredentialType, build_safe_env
 )
 from awx.main.models.projects import Project, ProjectUpdate  # noqa
 from awx.main.models.inventory import (  # noqa
@@ -174,9 +174,6 @@ User.add_to_class('is_in_enterprise_category', user_is_in_enterprise_category)
 
 
 def o_auth2_application_get_absolute_url(self, request=None):
-    # this page does not exist in v1
-    if request.version == 'v1':
-        return reverse('api:o_auth2_application_detail', kwargs={'pk': self.pk})  # use default version
     return reverse('api:o_auth2_application_detail', kwargs={'pk': self.pk}, request=request)
 
 
@@ -184,9 +181,6 @@ OAuth2Application.add_to_class('get_absolute_url', o_auth2_application_get_absol
 
 
 def o_auth2_token_get_absolute_url(self, request=None):
-    # this page does not exist in v1
-    if request.version == 'v1':
-        return reverse('api:o_auth2_token_detail', kwargs={'pk': self.pk})  # use default version
     return reverse('api:o_auth2_token_detail', kwargs={'pk': self.pk}, request=request)
 
 

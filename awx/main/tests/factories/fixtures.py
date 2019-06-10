@@ -168,7 +168,7 @@ def mk_job_template(name, job_type='run',
     if persisted and credential:
         jt.save()
         jt.credentials.add(credential)
-        if jt.credential is None:
+        if jt.machine_credential is None:
             jt.ask_credential_on_launch = True
 
     jt.project = project

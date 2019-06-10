@@ -103,8 +103,7 @@ class TestJobTemplateSerializerGetSummaryFields():
         with mocker.patch("awx.api.serializers.role_summary_fields_generator", return_value='Can eat pie'):
             with mocker.patch("awx.main.access.JobTemplateAccess.can_change", return_value='foobar'):
                 with mocker.patch("awx.main.access.JobTemplateAccess.can_copy", return_value='foo'):
-                    with mock.patch.object(jt_obj.__class__, 'get_deprecated_credential', return_value=None):
-                        response = serializer.get_summary_fields(jt_obj)
+                    response = serializer.get_summary_fields(jt_obj)
 
         assert response['user_capabilities']['copy'] == 'foo'
         assert response['user_capabilities']['edit'] == 'foobar'

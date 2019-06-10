@@ -65,7 +65,7 @@ class TestJobTemplateCopyEdit:
         return objects.job_template
 
     def fake_context(self, user):
-        request = RequestFactory().get('/api/v1/resource/42/')
+        request = RequestFactory().get('/api/v2/resource/42/')
         request.user = user
 
         class FakeView(object):
@@ -151,7 +151,7 @@ def mock_access_method(mocker):
 class TestAccessListCapabilities:
     """
     Test that the access_list serializer shows the exact output of the RoleAccess.can_attach
-     - looks at /api/v1/inventories/N/access_list/
+     - looks at /api/v2/inventories/N/access_list/
      - test for types: direct, indirect, and team access
     """
 

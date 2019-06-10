@@ -638,7 +638,7 @@ class CredentialInputField(JSONSchemaField):
                 v != '$encrypted$',
                 model_instance.pk
             ]):
-                if not isinstance(getattr(model_instance, k), str):
+                if not isinstance(model_instance.inputs.get(k), str):
                     raise django_exceptions.ValidationError(
                         _('secret values must be of type string, not {}').format(type(v).__name__),
                         code='invalid',
@@ -704,15 +704,15 @@ class CredentialInputField(JSONSchemaField):
             #   'ssh_key_unlock': 'do-you-need-me?',
             # }
             # ...we have to fetch the actual key value from the database
-            if model_instance.pk and model_instance.ssh_key_data == '$encrypted$':
-                model_instance.ssh_key_data = model_instance.__class__.objects.get(
+            if model_instance.pk and model_instance.inputs.get('ssh_key_data') == '$encrypted$':
+                model_instance.inputs['ssh_key_data'] = model_instance.__class__.objects.get(
                     pk=model_instance.pk
-                ).ssh_key_data
+                ).inputs.get('ssh_key_data')
 
             if model_instance.has_encrypted_ssh_key_data and not value.get('ssh_key_unlock'):
                 errors['ssh_key_unlock'] = [_('must be set when SSH key is encrypted.')]
             if all([
-                model_instance.ssh_key_data,
+                model_instance.inputs.get('ssh_key_data'),
                 value.get('ssh_key_unlock'),
                 not model_instance.has_encrypted_ssh_key_data
             ]):

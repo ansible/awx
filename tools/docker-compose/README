@@ -3,7 +3,7 @@ docker run --name awx_test -it --memory="4g" --cpuset="0,1" -v /Users/meyers/ans
 
 ## How to use the logstash container
 
-POST the following content to `/api/v1/settings/logging/` (this uses
+POST the following content to `/api/v2/settings/logging/` (this uses
 authentication set up inside of the logstash configuration file).
 
 ```

@@ -1001,19 +1001,6 @@ class GroupAccess(BaseAccess):
     def can_delete(self, obj):
         return bool(obj and self.user in obj.inventory.admin_role)
 
-    def can_start(self, obj, validate_license=True):
-        # TODO: Delete for 3.3, only used by v1 serializer
-        # Used as another alias to inventory_source start access for user_capabilities
-        if obj:
-            try:
-                return self.user.can_access(
-                    InventorySource, 'start', obj.deprecated_inventory_source,
-                    validate_license=validate_license)
-                obj.deprecated_inventory_source
-            except Group.deprecated_inventory_source.RelatedObjectDoesNotExist:
-                return False
-        return False
-
 
 class InventorySourceAccess(NotificationAttachMixin, BaseAccess):
     '''
@@ -2386,11 +2373,6 @@ class UnifiedJobTemplateAccess(BaseAccess):
             Q(pk__in=self.model.accessible_pk_qs(self.user, 'read_role')) |
             Q(inventorysource__inventory__id__in=Inventory._accessible_pk_qs(
                 Inventory, self.user, 'read_role')))
-
-    def get_queryset(self):
-        # TODO: remove after the depreciation of v1 API
-        qs = super(UnifiedJobTemplateAccess, self).get_queryset()
-        return qs.exclude(inventorysource__source="")
 
     def can_start(self, obj, validate_license=True):
         access_class = access_registry[obj.__class__]

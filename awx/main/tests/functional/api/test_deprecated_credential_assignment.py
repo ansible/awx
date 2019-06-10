@@ -1,4 +1,3 @@
-import json
 from unittest import mock
 import pytest
 
@@ -23,74 +22,6 @@ def job_template(job_template, project, inventory):
     job_template.ask_credential_on_launch = True
     job_template.save()
     return job_template
-
-
-@pytest.mark.django_db
-@pytest.mark.parametrize('key', ('credential', 'vault_credential'))
-def test_credential_access_empty(get, job_template, admin, key):
-    url = reverse('api:job_template_detail', kwargs={'pk': job_template.pk})
-    resp = get(url, admin)
-    assert resp.data[key] is None
-    assert key not in resp.data['summary_fields']
-
-
-@pytest.mark.django_db
-def test_ssh_credential_access(get, job_template, admin, machine_credential):
-    job_template.credentials.add(machine_credential)
-    url = reverse('api:job_template_detail', kwargs={'pk': job_template.pk})
-    resp = get(url, admin)
-    assert resp.data['credential'] == machine_credential.pk
-    assert resp.data['summary_fields']['credential']['credential_type_id'] == machine_credential.pk
-    assert resp.data['summary_fields']['credential']['kind'] == 'ssh'
-
-
-@pytest.mark.django_db
-@pytest.mark.parametrize('key', ('credential', 'vault_credential', 'cloud_credential', 'network_credential'))
-def test_invalid_credential_update(get, patch, job_template, admin, key):
-    url = reverse('api:job_template_detail', kwargs={'pk': job_template.pk, 'version': 'v1'})
-    resp = patch(url, {key: 999999}, admin, expect=400)
-    assert 'Credential 999999 does not exist' in json.loads(smart_str(smart_str(resp.content)))[key]
-
-
-@pytest.mark.django_db
-def test_ssh_credential_update(get, patch, job_template, admin, machine_credential):
-    url = reverse('api:job_template_detail', kwargs={'pk': job_template.pk})
-    patch(url, {'credential': machine_credential.pk}, admin, expect=200)
-    resp = get(url, admin)
-    assert resp.data['credential'] == machine_credential.pk
-
-
-@pytest.mark.django_db
-def test_ssh_credential_update_invalid_kind(get, patch, job_template, admin, vault_credential):
-    url = reverse('api:job_template_detail', kwargs={'pk': job_template.pk})
-    resp = patch(url, {'credential': vault_credential.pk}, admin, expect=400)
-    assert 'You must provide an SSH credential.' in smart_str(resp.content)
-
-
-@pytest.mark.django_db
-def test_vault_credential_access(get, job_template, admin, vault_credential):
-    job_template.credentials.add(vault_credential)
-    url = reverse('api:job_template_detail', kwargs={'pk': job_template.pk})
-    resp = get(url, admin)
-    assert resp.data['vault_credential'] == vault_credential.pk
-    assert resp.data['summary_fields']['vault_credential']['credential_type_id'] == vault_credential.pk  # noqa
-    assert resp.data['summary_fields']['vault_credential']['kind'] == 'vault'
-
-
-@pytest.mark.django_db
-def test_vault_credential_update(get, patch, job_template, admin, vault_credential):
-    url = reverse('api:job_template_detail', kwargs={'pk': job_template.pk})
-    patch(url, {'vault_credential': vault_credential.pk}, admin, expect=200)
-    resp = get(url, admin)
-    assert resp.data['vault_credential'] == vault_credential.pk
-
-
-@pytest.mark.django_db
-def test_vault_credential_update_invalid_kind(get, patch, job_template, admin,
-                                              machine_credential):
-    url = reverse('api:job_template_detail', kwargs={'pk': job_template.pk})
-    resp = patch(url, {'vault_credential': machine_credential.pk}, admin, expect=400)
-    assert 'You must provide a vault credential.' in smart_str(resp.content)
 
 
 @pytest.mark.django_db
@@ -210,54 +141,12 @@ def test_extra_credentials_unique_by_kind(get, post, job_template, admin,
 
 
 @pytest.mark.django_db
-def test_ssh_credential_at_launch(get, post, job_template, admin, machine_credential):
-    url = reverse('api:job_template_launch', kwargs={'pk': job_template.pk})
-    pk = post(url, {'credential': machine_credential.pk}, admin, expect=201).data['job']
-    summary_fields = get(reverse('api:job_detail', kwargs={'pk': pk}), admin).data['summary_fields']
-
-    assert len(summary_fields['credentials']) == 1
-
-
-@pytest.mark.django_db
-def test_vault_credential_at_launch(get, post, job_template, admin, vault_credential):
-    url = reverse('api:job_template_launch', kwargs={'pk': job_template.pk})
-    pk = post(url, {'vault_credential': vault_credential.pk}, admin, expect=201).data['job']
-    summary_fields = get(reverse('api:job_detail', kwargs={'pk': pk}), admin).data['summary_fields']
-
-    assert len(summary_fields['credentials']) == 1
-
-
-@pytest.mark.django_db
 def test_extra_credentials_at_launch(get, post, job_template, admin, credential):
     url = reverse('api:job_template_launch', kwargs={'pk': job_template.pk})
     pk = post(url, {'extra_credentials': [credential.pk]}, admin, expect=201).data['job']
     summary_fields = get(reverse('api:job_detail', kwargs={'pk': pk}), admin).data['summary_fields']
 
     assert len(summary_fields['credentials']) == 1
-
-
-@pytest.mark.django_db
-def test_modify_ssh_credential_at_launch(get, post, job_template, admin,
-                                         machine_credential, vault_credential, credential):
-    job_template.credentials.add(vault_credential)
-    job_template.credentials.add(credential)
-    url = reverse('api:job_template_launch', kwargs={'pk': job_template.pk})
-    pk = post(url, {'credential': machine_credential.pk}, admin, expect=201).data['job']
-
-    summary_fields = get(reverse('api:job_detail', kwargs={'pk': pk}), admin).data['summary_fields']
-    assert len(summary_fields['credentials']) == 3
-
-
-@pytest.mark.django_db
-def test_modify_vault_credential_at_launch(get, post, job_template, admin,
-                                           machine_credential, vault_credential, credential):
-    job_template.credentials.add(machine_credential)
-    job_template.credentials.add(credential)
-    url = reverse('api:job_template_launch', kwargs={'pk': job_template.pk})
-    pk = post(url, {'vault_credential': vault_credential.pk}, admin, expect=201).data['job']
-
-    summary_fields = get(reverse('api:job_detail', kwargs={'pk': pk}), admin).data['summary_fields']
-    assert len(summary_fields['credentials']) == 3
 
 
 @pytest.mark.django_db
@@ -270,22 +159,6 @@ def test_modify_extra_credentials_at_launch(get, post, job_template, admin,
 
     summary_fields = get(reverse('api:job_detail', kwargs={'pk': pk}), admin).data['summary_fields']
     assert len(summary_fields['credentials']) == 3
-
-
-@pytest.mark.django_db
-def test_overwrite_ssh_credential_at_launch(get, post, job_template, admin, machine_credential):
-    job_template.credentials.add(machine_credential)
-
-    new_cred = machine_credential
-    new_cred.pk = None
-    new_cred.save()
-
-    url = reverse('api:job_template_launch', kwargs={'pk': job_template.pk})
-    pk = post(url, {'credential': new_cred.pk}, admin, expect=201).data['job']
-
-    summary_fields = get(reverse('api:job_detail', kwargs={'pk': pk}), admin).data['summary_fields']
-    assert len(summary_fields['credentials']) == 1
-    assert summary_fields['credentials'][0]['id'] == new_cred.pk
 
 
 @pytest.mark.django_db
@@ -373,49 +246,6 @@ def test_invalid_mixed_credentials_specification(get, post, job_template, admin,
     url = reverse('api:job_template_launch', kwargs={'pk': job_template.pk})
     post(url=url, data={'credentials': [net_credential.pk], 'extra_credentials': [net_credential.pk]},
          user=admin, expect=400)
-
-
-@pytest.mark.django_db
-def test_rbac_default_credential_usage(get, post, job_template, alice, machine_credential):
-    job_template.credentials.add(machine_credential)
-    job_template.execute_role.members.add(alice)
-
-    # alice can launch; she's not adding any _new_ credentials, and she has
-    # execute access to the JT
-    url = reverse('api:job_template_launch', kwargs={'pk': job_template.pk})
-    post(url, {'credential': machine_credential.pk}, alice, expect=201)
-
-    # make (copy) a _new_ SSH cred
-    new_cred = Credential.objects.create(
-        name=machine_credential.name,
-        credential_type=machine_credential.credential_type,
-        inputs=machine_credential.inputs
-    )
-
-    # alice is attempting to launch with a *different* SSH cred, but
-    # she does not have access to it, so she cannot launch
-    url = reverse('api:job_template_launch', kwargs={'pk': job_template.pk})
-    post(url, {'credential': new_cred.pk}, alice, expect=403)
-
-    # if alice has gains access to the credential, she *can* launch
-    new_cred.use_role.members.add(alice)
-    url = reverse('api:job_template_launch', kwargs={'pk': job_template.pk})
-    post(url, {'credential': new_cred.pk}, alice, expect=201)
-
-
-@pytest.mark.django_db
-def test_inventory_source_deprecated_credential(get, patch, admin, ec2_source, credential):
-    url = reverse('api:inventory_source_detail', kwargs={'pk': ec2_source.pk})
-    patch(url, {'credential': credential.pk}, admin, expect=200)
-    resp = get(url, admin, expect=200)
-    assert json.loads(smart_str(resp.content))['credential'] == credential.pk
-
-
-@pytest.mark.django_db
-def test_inventory_source_invalid_deprecated_credential(patch, admin, ec2_source, credential):
-    url = reverse('api:inventory_source_detail', kwargs={'pk': ec2_source.pk})
-    resp = patch(url, {'credential': 999999}, admin, expect=400)
-    assert 'Credential 999999 does not exist' in smart_str(resp.content)
 
 
 @pytest.mark.django_db

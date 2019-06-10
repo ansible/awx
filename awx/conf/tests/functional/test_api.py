@@ -66,41 +66,6 @@ def test_non_admin_user_does_not_see_categories(api_request, dummy_setting, norm
 
 
 @pytest.mark.django_db
-@mock.patch(
-    'awx.conf.views.VERSION_SPECIFIC_CATEGORIES_TO_EXCLUDE',
-    {
-        1: set([]),
-        2: set(['foobar']),
-    }
-)
-def test_version_specific_category_slug_to_exclude_does_not_show_up(api_request, dummy_setting):
-    with dummy_setting(
-        'FOO_BAR',
-        field_class=fields.IntegerField,
-        category='FooBar',
-        category_slug='foobar'
-    ):
-        response = api_request(
-            'get',
-            reverse('api:setting_category_list',
-                    kwargs={'version': 'v2'})
-        )
-        for item in response.data['results']:
-            assert item['slug'] != 'foobar'
-        response = api_request(
-            'get',
-            reverse('api:setting_category_list',
-                    kwargs={'version': 'v1'})
-        )
-        contains = False
-        for item in response.data['results']:
-            if item['slug'] != 'foobar':
-                contains = True
-                break
-        assert contains
-
-
-@pytest.mark.django_db
 def test_setting_singleton_detail_retrieve(api_request, dummy_setting):
     with dummy_setting(
         'FOO_BAR_1',

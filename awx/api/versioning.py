@@ -27,19 +27,6 @@ def drf_reverse(viewname, args=None, kwargs=None, request=None, format=None, **e
     return url
 
 
-def get_request_version(request):
-    """
-    The API version of a request as an integer i.e., 1 or 2
-    """
-    version = settings.REST_FRAMEWORK['DEFAULT_VERSION']
-    if request and hasattr(request, 'version'):
-        version = request.version
-        if version is None:
-            # For requests to /api/
-            return None
-    return int(version.lstrip('v'))
-
-
 def reverse(viewname, args=None, kwargs=None, request=None, format=None, **extra):
     if request is None or getattr(request, 'version', None) is None:
         # We need the "current request" to determine the correct version to

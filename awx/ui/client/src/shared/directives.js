@@ -654,13 +654,13 @@ function(SettingsUtils, i18n, $rootScope) {
                     else {
                         switch(base) {
                             case 'credential':
-                                query += '&kind=ssh&role_level=use_role';
+                                query += '&credential_type__namespace=ssh&role_level=use_role';
                                 break;
                             case 'scm_credential':
-                                query += '&kind=scm&role_level=use_role';
+                                query += '&redential_type__namespace=scm&role_level=use_role';
                                 break;
                             case 'network_credential':
-                                query += '&kind=net&role_level=use_role';
+                                query += '&redential_type__namespace=net&role_level=use_role';
                                 break;
                             case 'cloud_credential':
                                 query += '&cloud=true&role_level=use_role';

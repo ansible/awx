@@ -63,7 +63,10 @@ class TestCreateUnifiedJob:
         second_job = job_with_links.copy_unified_job()
 
         # Check that job data matches the original variables
-        assert second_job.credential == job_with_links.credential
+        assert [c.pk for c in second_job.credentials.all()] == [
+            machine_credential.pk,
+            net_credential.pk
+        ]
         assert second_job.inventory == job_with_links.inventory
         assert second_job.limit == 'my_server'
         assert net_credential in second_job.credentials.all()
