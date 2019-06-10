@@ -78,7 +78,7 @@ class OrganizationDetail extends Component {
           />
           <Detail
             label={i18n._(t`Max Hosts`)}
-            value={''+max_hosts}
+            value={`${max_hosts}`}
           />
           <Detail
             label={i18n._(t`Ansible Environment`)}

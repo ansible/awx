@@ -11,6 +11,7 @@ import {
   Tooltip,
 } from '@patternfly/react-core';
 
+import { Config } from '../../../contexts/Config';
 import { withNetwork } from '../../../contexts/Network';
 import CardCloseButton from '../../../components/CardCloseButton';
 import OrganizationForm from '../components/OrganizationForm';
@@ -71,10 +72,15 @@ class OrganizationAdd extends React.Component {
             </Tooltip>
           </CardHeader>
           <CardBody>
-            <OrganizationForm
-              handleSubmit={this.handleSubmit}
-              handleCancel={this.handleCancel}
-            />
+            <Config>
+              {({ me }) => (
+                <OrganizationForm
+                  handleSubmit={this.handleSubmit}
+                  handleCancel={this.handleCancel}
+                  me={me || {}}
+                />
+              )}
+            </Config>
             {error ? <div>error</div> : ''}
           </CardBody>
         </Card>

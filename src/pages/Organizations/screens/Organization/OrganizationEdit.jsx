@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import { CardBody } from '@patternfly/react-core';
 import OrganizationForm from '../../components/OrganizationForm';
+import { Config } from '../../../../contexts/Config';
 import { withNetwork } from '../../../../contexts/Network';
 import { OrganizationsAPI } from '../../../../api';
 
@@ -64,11 +65,16 @@ class OrganizationEdit extends Component {
 
     return (
       <CardBody>
-        <OrganizationForm
-          organization={organization}
-          handleSubmit={this.handleSubmit}
-          handleCancel={this.handleCancel}
-        />
+        <Config>
+          {({ me }) => (
+            <OrganizationForm
+              organization={organization}
+              handleSubmit={this.handleSubmit}
+              handleCancel={this.handleCancel}
+              me={me || {}}
+            />
+          )}
+        </Config>
         {error ? <div>error</div> : null}
       </CardBody>
     );

@@ -21,7 +21,7 @@ export function maxLength (max, i18n) {
 
 export function minMaxValue (min, max, i18n) {
   return value => {
-    if (typeof value !== 'number' || value > max || value < min) {
+    if (value < min || value > max) {
       return i18n._(t`This field must be a number and have a value between ${min} and ${max}`);
     }
     return undefined;

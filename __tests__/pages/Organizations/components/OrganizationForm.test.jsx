@@ -8,11 +8,16 @@ jest.mock('../../../../src/api');
 
 describe('<OrganizationForm />', () => {
   const network = {};
-
+  const meConfig = {
+    me: {
+      is_superuser: false
+    }
+  };
   const mockData = {
     id: 1,
     name: 'Foo',
     description: 'Bar',
+    max_hosts: 1,
     custom_virtualenv: 'Fizz',
     related: {
       instance_groups: '/api/v2/organizations/1/instance_groups'
@@ -30,6 +35,7 @@ describe('<OrganizationForm />', () => {
           organization={mockData}
           handleSubmit={jest.fn()}
           handleCancel={jest.fn()}
+          me={meConfig.me}
         />
       ), {
         context: { network },
@@ -55,6 +61,7 @@ describe('<OrganizationForm />', () => {
           organization={mockData}
           handleSubmit={jest.fn()}
           handleCancel={jest.fn()}
+          me={meConfig.me}
         />
       ), {
         context: { network },
@@ -72,6 +79,7 @@ describe('<OrganizationForm />', () => {
         organization={mockData}
         handleSubmit={jest.fn()}
         handleCancel={jest.fn()}
+        me={meConfig.me}
       />
     );
 
@@ -98,6 +106,7 @@ describe('<OrganizationForm />', () => {
         organization={mockData}
         handleSubmit={jest.fn()}
         handleCancel={jest.fn()}
+        me={meConfig.me}
       />
     );
 
@@ -110,6 +119,10 @@ describe('<OrganizationForm />', () => {
       target: { value: 'new bar', name: 'description' }
     });
     expect(form.state('values').description).toEqual('new bar');
+    wrapper.find('input#org-max_hosts').simulate('change', {
+      target: { value: '134', name: 'max_hosts' }
+    });
+    expect(form.state('values').max_hosts).toEqual('134');
   });
 
   test('AnsibleSelect component renders if there are virtual environments', () => {
@@ -122,6 +135,7 @@ describe('<OrganizationForm />', () => {
           organization={mockData}
           handleSubmit={jest.fn()}
           handleCancel={jest.fn()}
+          me={meConfig.me}
         />
       ), {
         context: { config },
@@ -138,6 +152,7 @@ describe('<OrganizationForm />', () => {
         organization={mockData}
         handleSubmit={handleSubmit}
         handleCancel={jest.fn()}
+        me={meConfig.me}
       />
     );
     expect(handleSubmit).not.toHaveBeenCalled();
@@ -146,6 +161,7 @@ describe('<OrganizationForm />', () => {
     expect(handleSubmit).toHaveBeenCalledWith({
       name: 'Foo',
       description: 'Bar',
+      max_hosts: 1,
       custom_virtualenv: 'Fizz',
     }, [], []);
   });
@@ -163,6 +179,7 @@ describe('<OrganizationForm />', () => {
     const mockDataForm = {
       name: 'Foo',
       description: 'Bar',
+      max_hosts: 1,
       custom_virtualenv: 'Fizz',
     };
     const handleSubmit = jest.fn();
@@ -175,14 +192,13 @@ describe('<OrganizationForm />', () => {
           organization={mockData}
           handleSubmit={handleSubmit}
           handleCancel={jest.fn()}
+          me={meConfig.me}
         />
       ), {
-        context: { network },
+        context: { network }
       }
     );
-
     await sleep(0);
-
     wrapper.find('InstanceGroupsLookup').prop('onChange')([
       { name: 'One', id: 1 },
       { name: 'Three', id: 3 }
@@ -193,13 +209,95 @@ describe('<OrganizationForm />', () => {
     expect(handleSubmit).toHaveBeenCalledWith(mockDataForm, [3], [2]);
   });
 
+  test('handleSubmit is called with max_hosts value if it is in range', async () => {
+    const handleSubmit = jest.fn();
+
+    // normal mount
+    const wrapper = mountWithContexts(
+      <OrganizationForm
+        organization={mockData}
+        handleSubmit={handleSubmit}
+        handleCancel={jest.fn()}
+        me={meConfig.me}
+      />
+    );
+    wrapper.find('button[aria-label="Save"]').simulate('click');
+    await sleep(0);
+    expect(handleSubmit).toHaveBeenCalledWith({
+      name: 'Foo',
+      description: 'Bar',
+      max_hosts: 1,
+      custom_virtualenv: 'Fizz',
+    }, [], []);
+  });
+
+  test('handleSubmit does not get called if max_hosts value is out of range', async () => {
+    const handleSubmit = jest.fn();
+
+    // not mount with Negative value
+    const mockDataNegative = JSON.parse(JSON.stringify(mockData));
+    mockDataNegative.max_hosts = -5;
+    const wrapper1 = mountWithContexts(
+      <OrganizationForm
+        organization={mockDataNegative}
+        handleSubmit={handleSubmit}
+        handleCancel={jest.fn()}
+        me={meConfig.me}
+      />
+    );
+    wrapper1.find('button[aria-label="Save"]').simulate('click');
+    await sleep(0);
+    expect(handleSubmit).not.toHaveBeenCalled();
+
+    // not mount with Out of Range value
+    const mockDataOoR = JSON.parse(JSON.stringify(mockData));
+    mockDataOoR.max_hosts = 999999999999;
+    const wrapper2 = mountWithContexts(
+      <OrganizationForm
+        organization={mockDataOoR}
+        handleSubmit={handleSubmit}
+        handleCancel={jest.fn()}
+        me={meConfig.me}
+      />
+    );
+    wrapper2.find('button[aria-label="Save"]').simulate('click');
+    await sleep(0);
+    expect(handleSubmit).not.toHaveBeenCalled();
+  });
+
+  test('handleSubmit is called and max_hosts value defaults to 0 if input is not a number', async () => {
+    const handleSubmit = jest.fn();
+
+    // mount with String value (default to zero)
+    const mockDataString = JSON.parse(JSON.stringify(mockData));
+    mockDataString.max_hosts = 'Bee';
+    const wrapper = mountWithContexts(
+      <OrganizationForm
+        organization={mockDataString}
+        handleSubmit={handleSubmit}
+        handleCancel={jest.fn()}
+        me={meConfig.me}
+      />
+    );
+    wrapper.find('button[aria-label="Save"]').simulate('click');
+    await sleep(0);
+    expect(handleSubmit).toHaveBeenCalledWith({
+      name: 'Foo',
+      description: 'Bar',
+      max_hosts: 0,
+      custom_virtualenv: 'Fizz',
+    }, [], []);
+  });
+
   test('calls "handleCancel" when Cancel button is clicked', () => {
     const handleCancel = jest.fn();
+
     const wrapper = mountWithContexts(
       <OrganizationForm
         organization={mockData}
         handleSubmit={jest.fn()}
         handleCancel={handleCancel}
+        me={meConfig.me}
       />
     );
     expect(handleCancel).not.toHaveBeenCalled();
