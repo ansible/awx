@@ -135,6 +135,10 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
     def cloud(self):
         return self.credential_type.kind == 'cloud'
 
+    @property
+    def kubernetes(self):
+        return self.credential_type.kind == 'kubernetes'
+
     def get_absolute_url(self, request=None):
         return reverse('api:credential_detail', kwargs={'pk': self.pk}, request=request)
 
@@ -1080,6 +1084,61 @@ ManagedCredentialType(
             'TOWER_VERIFY_SSL': '{{verify_ssl}}'
         }
     },
+)
+
+ManagedCredentialType(
+    namespace='openshift_username_password',
+    kind='kubernetes',
+    name=ugettext_noop('OpenShift Username / Password'),
+    managed_by_tower=True,
+    inputs={
+        'fields': [{
+            'id': 'host',
+            'label': ugettext_noop('OpenShift API URL'),
+            'type': 'string',
+            'help_text': ugettext_noop('The OpenShift API URL to authenticate with.')
+        }, {
+            'id': 'username',
+            'label': ugettext_noop('Username'),
+            'type': 'string'
+        }, {
+            'id': 'password',
+            'label': ugettext_noop('Password'),
+            'type': 'string',
+            'secret': True,
+        }, {
+            'id': 'verify_ssl',
+            'label': ugettext_noop('Verify SSL'),
+            'type': 'boolean',
+            'secret': False
+        }],
+        'required': ['host', 'username', 'password'],
+    }
+)
+
+ManagedCredentialType(
+    namespace='kubernetes_bearer_token',
+    kind='kubernetes',
+    name=ugettext_noop('OpenShift or Kubernetes API Bearer Token'),
+    inputs={
+        'fields': [{
+            'id': 'host',
+            'label': ugettext_noop('Kubernetes API Endpoint'),
+            'type': 'string',
+            'help_text': ugettext_noop('The Kubernetes API Endpoint to authenticate with.')
+        },{
+            'id': 'bearer_token',
+            'label': ugettext_noop('Bearer token for service account'),
+            'type': 'string',
+            'secret': True,
+        },{
+            'id': 'verify_ssl',
+            'label': ugettext_noop('Verify SSL'),
+            'type': 'boolean',
+            'secret': False
+        }],
+        'required': ['host', 'bearer_token'],
+    }
 )
 
 
