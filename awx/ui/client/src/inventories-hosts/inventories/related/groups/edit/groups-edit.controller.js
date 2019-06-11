@@ -35,6 +35,7 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString', 'rbac
                 scope: $scope,
                 field_id: 'group_group_variables',
                 variable: 'group_variables',
+                readOnly: !$scope.summary_fields.user_capabilities.edit
             });
         }
 

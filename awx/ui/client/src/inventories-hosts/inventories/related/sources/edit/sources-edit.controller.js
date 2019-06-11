@@ -89,6 +89,7 @@ export default ['$state', '$scope', 'ParseVariableString', 'ParseTypeChange',
                     field_id: varName,
                     variable: varName,
                     parse_variable: 'envParseType',
+                    readOnly: !$scope.summary_fields.user_capabilities.edit
                 });
             }
         });

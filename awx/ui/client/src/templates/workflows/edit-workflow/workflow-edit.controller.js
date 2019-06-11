@@ -315,7 +315,11 @@ export default [
                 // Parse extra_vars, converting to YAML.
                 $scope.variables = ParseVariableString(workflowJobTemplateData.extra_vars);
 
-                ParseTypeChange({ scope: $scope, field_id: 'workflow_job_template_variables' });
+                ParseTypeChange({
+                    scope: $scope,
+                    field_id: 'workflow_job_template_variables',
+                    readOnly: !workflowJobTemplateData.summary_fields.user_capabilities.edit
+                });
             }
             if (form.fields[fld].type === 'lookup' && workflowJobTemplateData.summary_fields[form.fields[fld].sourceModel]) {
                 $scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =

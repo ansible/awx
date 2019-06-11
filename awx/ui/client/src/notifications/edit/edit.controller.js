@@ -147,11 +147,13 @@ export default ['Rest', 'Wait',
                     if (!$scope.headers) {
                         $scope.headers = "{\n}";
                     }
+
                     ParseTypeChange({
                         scope: $scope,
                         parse_variable: 'parse_type',
                         variable: 'headers',
                         field_id: 'notification_template_headers',
+                        readOnly: !$scope.notification_template.summary_fields.user_capabilities.edit
                     });
                     Wait('stop');
                 })
@@ -221,6 +223,7 @@ export default ['Rest', 'Wait',
                 parse_variable: 'parse_type',
                 variable: 'headers',
                 field_id: 'notification_template_headers',
+                readOnly: !$scope.notification_template.summary_fields.user_capabilities.edit
             });
         };
 

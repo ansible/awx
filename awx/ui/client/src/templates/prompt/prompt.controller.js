@@ -229,7 +229,7 @@ export default [ 'ProcessErrors', 'CredentialTypeModel', 'TemplatesStrings', '$f
         };
 
         vm.keypress = (event) => {
-          if (vm.steps.survey.tab._active && !vm.readOnlyPrompts && !vm.forms.survey.$valid) {
+          if (vm.steps.survey.tab && vm.steps.survey.tab._active && !vm.readOnlyPrompts && !vm.forms.survey.$valid) {
             return;
           }
           if (document.activeElement.type === 'textarea') {

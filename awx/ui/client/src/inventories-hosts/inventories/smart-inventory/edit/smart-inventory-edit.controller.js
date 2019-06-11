@@ -42,7 +42,8 @@ function SmartInventoryEdit($scope, $location,
             scope: $scope,
             variable: 'smartinventory_variables',
             parse_variable: 'parseType',
-            field_id: 'smartinventory_smartinventory_variables'
+            field_id: 'smartinventory_smartinventory_variables',
+            readOnly: !$scope.inventory_obj.summary_fields.user_capabilities.edit
         });
 
         OrgAdminLookup.checkForAdminAccess({organization: inventoryData.organization})

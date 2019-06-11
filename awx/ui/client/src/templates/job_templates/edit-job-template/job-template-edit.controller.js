@@ -291,7 +291,8 @@ export default
                     scope: $scope,
                     field_id: 'extra_vars',
                     variable: 'extra_vars',
-                    onChange: callback
+                    onChange: callback,
+                    readOnly: !$scope.job_template_obj.summary_fields.user_capabilities.edit
                 });
                 jobTemplateLoadFinished();
                 launchHasBeenEnabled = true;
