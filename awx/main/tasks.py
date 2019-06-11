@@ -601,26 +601,39 @@ def update_inventory_computed_fields(inventory_id, should_update_hosts=True):
         raise
 
 
+def update_smart_memberships_for_inventory(smart_inventory):
+    current = set(SmartInventoryMembership.objects.filter(inventory=smart_inventory).values_list('host_id', flat=True))
+    new = set(smart_inventory.hosts.values_list('id', flat=True))
+    additions = new - current
+    removals = current - new
+    if additions or removals:
+        with transaction.atomic():
+            if removals:
+                SmartInventoryMembership.objects.filter(inventory=smart_inventory, host_id__in=removals).delete()
+            if additions:
+                add_for_inventory = [
+                    SmartInventoryMembership(inventory_id=smart_inventory.id, host_id=host_id)
+                    for host_id in additions
+                ]
+                SmartInventoryMembership.objects.bulk_create(add_for_inventory)
+        logger.debug('Smart host membership cached for {}, {} additions, {} removals, {} total count.'.format(
+            smart_inventory.pk, len(additions), len(removals), len(new)
+        ))
+        return True  # changed
+    return False
+
+
 @task()
 def update_host_smart_inventory_memberships():
-    try:
-        with transaction.atomic():
-            smart_inventories = Inventory.objects.filter(kind='smart', host_filter__isnull=False, pending_deletion=False)
-            SmartInventoryMembership.objects.all().delete()
-            memberships = []
-            changed_inventories = set([])
-            for smart_inventory in smart_inventories:
-                add_for_inventory = [
-                    SmartInventoryMembership(inventory_id=smart_inventory.id, host_id=host_id[0])
-                    for host_id in smart_inventory.hosts.values_list('id')
-                ]
-                memberships.extend(add_for_inventory)
-                if add_for_inventory:
-                    changed_inventories.add(smart_inventory)
-            SmartInventoryMembership.objects.bulk_create(memberships)
-    except IntegrityError as e:
-        logger.error("Update Host Smart Inventory Memberships failed due to an exception: {}".format(e))
-        return
+    smart_inventories = Inventory.objects.filter(kind='smart', host_filter__isnull=False, pending_deletion=False)
+    changed_inventories = set([])
+    for smart_inventory in smart_inventories:
+        try:
+            changed = update_smart_memberships_for_inventory(smart_inventory)
+            if changed:
+                changed_inventories.add(smart_inventory)
+        except IntegrityError:
+            logger.exception('Failed to update smart inventory memberships for {}'.format(smart_inventory.pk))
     # Update computed fields for changed inventories outside atomic action
     for smart_inventory in changed_inventories:
         smart_inventory.update_computed_fields(update_groups=False, update_hosts=False)
@@ -1588,6 +1601,10 @@ class RunJob(BaseTask):
                                             job_explanation=('Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' %
                                                              ('project_update', local_project_sync.name, local_project_sync.id)))
                     raise
+        if job.inventory.kind == 'smart':
+            # cache smart inventory memberships so that the host_filter query is not
+            # ran inside of the event saving code
+            update_smart_memberships_for_inventory(job.inventory)
 
     def final_run_hook(self, job, status, private_data_dir, fact_modification_times, isolated_manager_instance=None):
         super(RunJob, self).final_run_hook(job, status, private_data_dir, fact_modification_times)

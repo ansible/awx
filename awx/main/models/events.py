@@ -346,8 +346,20 @@ class BasePlaybookEvent(CreatedModifiedModel):
 
             # Update host related field from host_name.
             if hasattr(self, 'job') and not self.host_id and self.host_name:
-                host_qs = self.job.inventory.hosts.filter(name=self.host_name)
-                host_id = host_qs.only('id').values_list('id', flat=True).first()
+                if self.job.inventory.kind == 'smart':
+                    # optimization to avoid calling inventory.hosts, which
+                    # can take a long time to run under some circumstances
+                    from awx.main.models.inventory import SmartInventoryMembership
+                    membership = SmartInventoryMembership.objects.filter(
+                        inventory=self.job.inventory, host__name=self.host_name
+                    ).first()
+                    if membership:
+                        host_id = membership.host_id
+                    else:
+                        host_id = None
+                else:
+                    host_qs = self.job.inventory.hosts.filter(name=self.host_name)
+                    host_id = host_qs.only('id').values_list('id', flat=True).first()
                 if host_id != self.host_id:
                     self.host_id = host_id
                     if 'host_id' not in update_fields:
