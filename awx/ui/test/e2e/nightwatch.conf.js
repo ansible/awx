@@ -30,6 +30,7 @@ module.exports = {
             desiredCapabilities: {
                 browserName: 'chrome',
                 chromeOptions: {
+                    w3c: false,
                     args: [
                         'window-size=1024,768'
                     ]
@@ -61,6 +62,7 @@ module.exports = {
             desiredCapabilities: {
                 browserName: 'chrome',
                 chromeOptions: {
+                    w3c: false,
                     args: [
                         'headless',
                         'disable-web-security',
