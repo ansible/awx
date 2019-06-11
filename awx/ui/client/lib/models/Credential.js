@@ -107,7 +107,7 @@ function setDependentResources (id) {
         {
             model: new JobTemplate(),
             params: {
-                credential: id,
+                credentials__id: id,
                 ask_credential_on_launch: false
             }
         },
@@ -120,7 +120,7 @@ function setDependentResources (id) {
         {
             model: new InventorySource(),
             params: {
-                credential: id
+                credentials__id: id
             }
         }
     ];
