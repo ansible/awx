@@ -587,7 +587,9 @@ docker-compose-build: awx-devel-build
 
 # Base development image build
 awx-devel-build:
-	docker build -t ansible/awx_devel -f tools/docker-compose/Dockerfile --cache-from=$(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG) .
+	docker build -t ansible/awx_devel -f tools/docker-compose/Dockerfile \
+		--cache-from=$(DEV_DOCKER_TAG_BASE)/awx_devel:devel \
+		--cache-from=$(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG) .
 	docker tag ansible/awx_devel $(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG)
 	#docker push $(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG)
 
