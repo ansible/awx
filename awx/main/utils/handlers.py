@@ -176,7 +176,7 @@ class BaseHTTPSHandler(BaseHandler):
         self.verify_cert = verify_cert
         super(BaseHTTPSHandler, self).__init__(**kwargs)
         self.session = FuturesSession(executor=VerboseThreadPoolExecutor(
-            max_workers=2  # this is the default used by requests_futures
+            max_workers=1  # changed value from the default to fix python threading bug https://bugs.python.org/issue21009
         ))
         self._add_auth_information()
 
