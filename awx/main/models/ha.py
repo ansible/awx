@@ -176,6 +176,14 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
         null=True,
         on_delete=models.CASCADE
     )
+    credential = models.ForeignKey(
+        'Credential',
+        related_name='%(class)ss',
+        blank=True,
+        null=True,
+        default=None,
+        on_delete=models.SET_NULL,
+    )
     policy_instance_percentage = models.IntegerField(
         default=0,
         help_text=_("Percentage of Instances to automatically assign to this group")
