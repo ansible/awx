@@ -310,7 +310,7 @@ class Command(BaseCommand):
             if enabled is not default:
                 enabled_value = getattr(self, 'enabled_value', None)
                 if enabled_value is not None:
-                    enabled = bool(str(enabled_value) == str(enabled))
+                    enabled = bool(str(enabled_value).lower() == str(enabled).lower())
                 else:
                     enabled = bool(enabled)
         if enabled is default:
