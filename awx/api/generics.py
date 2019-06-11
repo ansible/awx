@@ -348,12 +348,14 @@ class GenericAPIView(generics.GenericAPIView, APIView):
                     'model_verbose_name_plural': smart_text(self.model._meta.verbose_name_plural),
                 })
             serializer = self.get_serializer()
+            metadata = self.metadata_class()
+            metadata.request = self.request
             for method, key in [
                 ('GET', 'serializer_fields'),
                 ('POST', 'serializer_create_fields'),
                 ('PUT', 'serializer_update_fields')
             ]:
-                d[key] = self.metadata_class().get_serializer_info(serializer, method=method)
+                d[key] = metadata.get_serializer_info(serializer, method=method)
         d['settings'] = settings
         return d
 
