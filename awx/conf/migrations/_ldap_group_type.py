@@ -22,7 +22,7 @@ def fill_ldap_group_type_params(apps, schema_editor):
                         modified=now())
 
     init_attrs = set(inspect.getargspec(group_type.__init__).args[1:])
-    for k in group_type_params.keys():
+    for k in list(group_type_params.keys()):
         if k not in init_attrs:
             del group_type_params[k]
 
