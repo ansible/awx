@@ -40,7 +40,7 @@
                         status-tip="{{ project.statusTip }}"
                         status-click="vm.showSCMStatus(project.id)"
                         header-value="{{ project.name }}"
-                        header-link="/#/projects/{{ project.id }}"
+                        header-state="projects.edit({project_id:{{project.id}}})"
                         header-tag="{{ vm.projectTypes[project.scm_type] }}">
                     </at-row-item>
                     <div class="at-Row-actions">
