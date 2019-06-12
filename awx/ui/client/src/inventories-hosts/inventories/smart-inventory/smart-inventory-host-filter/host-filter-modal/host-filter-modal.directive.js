@@ -58,7 +58,7 @@ export default ['templateUrl', function(templateUrl) {
                         hostList.emptyListText = i18n._('Perform a search above to define a host filter');
                         hostList.layoutClass = 'List-defaultLayout';
                         hostList.alwaysShowSearch = true;
-                        hostList.emptyListClass = 'List-noItems List-emptyHostFilter'
+                        hostList.emptyListClass = 'List-noItems List-emptyHostFilter';
                         let html = GenerateList.build({
                             list: hostList,
                             input_type: 'host-filter-modal-body',
