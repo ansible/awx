@@ -200,7 +200,7 @@ export default ['$compile', 'Attr', 'Icon',
                 if (options.showSearch === undefined || options.showSearch === true) {
                     let singleSearchParam = list.singleSearchParam && list.singleSearchParam.param ? `single-search-param="${list.singleSearchParam.param}"` : '';
                     html += `
-                    <div ng-hide="${list.name}.length === 0 && (searchTags | isEmpty)">
+                    <div ng-hide="!${list.alwaysShowSearch} && ${list.name}.length === 0 && (searchTags | isEmpty)">
                         <smart-search
                             django-model="${list.name}"
                             ${singleSearchParam}
@@ -244,7 +244,8 @@ export default ['$compile', 'Attr', 'Icon',
 
                 // Show the "no items" box when loading is done and the user isn't actively searching and there are no results
                 if (options.showEmptyPanel === undefined || options.showEmptyPanel === true){
-                    html += `<div class="List-noItems" ng-show="${list.name}.length === 0 && (searchTags | isEmpty)">`;
+                    const emptyListClass = list.emptyListClass || "List-noItems";
+                    html += `<div class="${emptyListClass}" ng-show="${list.name}.length === 0 && (searchTags | isEmpty)">`;
                     html += (list.emptyListText) ? list.emptyListText :  i18n._("PLEASE ADD ITEMS TO THIS LIST");
                     html += "</div>";
                 }
