@@ -4,6 +4,8 @@ from __future__ import unicode_literals
 
 from django.db import migrations, models
 
+from awx.main.utils.common import set_current_apps
+
 
 class Migration(migrations.Migration):
 
@@ -12,6 +14,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RunPython(migrations.RunPython.noop, lambda apps, schema_editor: set_current_apps(apps)),
         migrations.RemoveField(
             model_name='joborigin',
             name='instance',
@@ -28,4 +31,5 @@ class Migration(migrations.Migration):
         migrations.DeleteModel(
             name='JobOrigin',
         ),
+        migrations.RunPython(lambda apps, schema_editor: set_current_apps(apps), migrations.RunPython.noop)
     ]

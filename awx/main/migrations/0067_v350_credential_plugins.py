@@ -9,9 +9,11 @@ import taggit.managers
 # AWX
 import awx.main.fields
 from awx.main.models import CredentialType
+from awx.main.utils.common import set_current_apps
 
 
 def setup_tower_managed_defaults(apps, schema_editor):
+    set_current_apps(apps)
     CredentialType.setup_tower_managed_defaults()
 
 

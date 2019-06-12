@@ -5,9 +5,11 @@ from __future__ import unicode_literals
 from django.db import migrations, models
 
 from awx.main.models import CredentialType
+from awx.main.utils.common import set_current_apps
 
 
 def migrate_to_static_inputs(apps, schema_editor):
+    set_current_apps(apps)
     CredentialType.setup_tower_managed_defaults()
 
 
