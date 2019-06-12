@@ -2,9 +2,9 @@
 # All Rights Reserved.
 
 # Python
-import cgi
 import dateutil
 import functools
+import html
 import logging
 import re
 import requests
@@ -37,7 +37,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.renderers import JSONRenderer, StaticHTMLRenderer
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
-from rest_framework.views import exception_handler
+from rest_framework.views import exception_handler, get_view_name
 from rest_framework import status
 
 # Django REST Framework YAML
@@ -69,7 +69,7 @@ from awx.api.generics import (
     RetrieveUpdateAPIView, RetrieveUpdateDestroyAPIView, SimpleListAPIView,
     SubDetailAPIView, SubListAPIView, SubListAttachDetachAPIView,
     SubListCreateAPIView, SubListCreateAttachDetachAPIView,
-    SubListDestroyAPIView, get_view_name
+    SubListDestroyAPIView
 )
 from awx.api.versioning import reverse
 from awx.conf.license import get_license
@@ -168,7 +168,7 @@ class DashboardView(APIView):
 
     deprecated = True
 
-    view_name = _("Dashboard")
+    name = _("Dashboard")
     swagger_topic = 'Dashboard'
 
     def get(self, request, format=None):
@@ -270,7 +270,7 @@ class DashboardView(APIView):
 
 class DashboardJobsGraphView(APIView):
 
-    view_name = _("Dashboard Jobs Graphs")
+    name = _("Dashboard Jobs Graphs")
     swagger_topic = 'Jobs'
 
     def get(self, request, format=None):
@@ -320,7 +320,7 @@ class DashboardJobsGraphView(APIView):
 
 class InstanceList(ListAPIView):
 
-    view_name = _("Instances")
+    name = _("Instances")
     model = models.Instance
     serializer_class = serializers.InstanceSerializer
     search_fields = ('hostname',)
@@ -328,7 +328,7 @@ class InstanceList(ListAPIView):
 
 class InstanceDetail(RetrieveUpdateAPIView):
 
-    view_name = _("Instance Detail")
+    name = _("Instance Detail")
     model = models.Instance
     serializer_class = serializers.InstanceSerializer
 
@@ -345,7 +345,7 @@ class InstanceDetail(RetrieveUpdateAPIView):
 
 class InstanceUnifiedJobsList(SubListAPIView):
 
-    view_name = _("Instance Jobs")
+    name = _("Instance Jobs")
     model = models.UnifiedJob
     serializer_class = serializers.UnifiedJobListSerializer
     parent_model = models.Instance
@@ -359,7 +359,7 @@ class InstanceUnifiedJobsList(SubListAPIView):
 
 class InstanceInstanceGroupsList(InstanceGroupMembershipMixin, SubListCreateAttachDetachAPIView):
 
-    view_name = _("Instance's Instance Groups")
+    name = _("Instance's Instance Groups")
     model = models.InstanceGroup
     serializer_class = serializers.InstanceGroupSerializer
     parent_model = models.Instance
@@ -368,7 +368,7 @@ class InstanceInstanceGroupsList(InstanceGroupMembershipMixin, SubListCreateAtta
 
 class InstanceGroupList(ListCreateAPIView):
 
-    view_name = _("Instance Groups")
+    name = _("Instance Groups")
     model = models.InstanceGroup
     serializer_class = serializers.InstanceGroupSerializer
 
@@ -376,7 +376,7 @@ class InstanceGroupList(ListCreateAPIView):
 class InstanceGroupDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
 
     always_allow_superuser = False
-    view_name = _("Instance Group Detail")
+    name = _("Instance Group Detail")
     model = models.InstanceGroup
     serializer_class = serializers.InstanceGroupSerializer
     permission_classes = (InstanceGroupTowerPermission,)
@@ -392,7 +392,7 @@ class InstanceGroupDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAP
 
 class InstanceGroupUnifiedJobsList(SubListAPIView):
 
-    view_name = _("Instance Group Running Jobs")
+    name = _("Instance Group Running Jobs")
     model = models.UnifiedJob
     serializer_class = serializers.UnifiedJobListSerializer
     parent_model = models.InstanceGroup
@@ -401,7 +401,7 @@ class InstanceGroupUnifiedJobsList(SubListAPIView):
 
 class InstanceGroupInstanceList(InstanceGroupMembershipMixin, SubListAttachDetachAPIView):
 
-    view_name = _("Instance Group's Instances")
+    name = _("Instance Group's Instances")
     model = models.Instance
     serializer_class = serializers.InstanceSerializer
     parent_model = models.InstanceGroup
@@ -411,7 +411,7 @@ class InstanceGroupInstanceList(InstanceGroupMembershipMixin, SubListAttachDetac
 
 class ScheduleList(ListCreateAPIView):
 
-    view_name = _("Schedules")
+    name = _("Schedules")
     model = models.Schedule
     serializer_class = serializers.ScheduleSerializer
 
@@ -425,7 +425,7 @@ class ScheduleDetail(RetrieveUpdateDestroyAPIView):
 class SchedulePreview(GenericAPIView):
 
     model = models.Schedule
-    view_name = _('Schedule Recurrence Rule Preview')
+    name = _('Schedule Recurrence Rule Preview')
     serializer_class = serializers.SchedulePreviewSerializer
     permission_classes = (IsAuthenticated,)
 
@@ -508,7 +508,7 @@ class ScheduleUnifiedJobsList(SubListAPIView):
     serializer_class = serializers.UnifiedJobListSerializer
     parent_model = models.Schedule
     relationship = 'unifiedjob_set'
-    view_name = _('Schedule Jobs List')
+    name = _('Schedule Jobs List')
 
 
 class AuthView(APIView):
@@ -704,7 +704,7 @@ class ProjectTeamsList(ListAPIView):
 
 class ProjectSchedulesList(SubListCreateAPIView):
 
-    view_name = _("Project Schedules")
+    name = _("Project Schedules")
 
     model = models.Schedule
     serializer_class = serializers.ScheduleSerializer
@@ -715,7 +715,7 @@ class ProjectSchedulesList(SubListCreateAPIView):
 
 class ProjectScmInventorySources(SubListAPIView):
 
-    view_name = _("Project SCM Inventory Sources")
+    name = _("Project SCM Inventory Sources")
     model = models.InventorySource
     serializer_class = serializers.InventorySourceSerializer
     parent_model = models.Project
@@ -818,7 +818,7 @@ class ProjectUpdateEventsList(SubListAPIView):
     serializer_class = serializers.ProjectUpdateEventSerializer
     parent_model = models.ProjectUpdate
     relationship = 'project_update_events'
-    view_name = _('Project Update Events List')
+    name = _('Project Update Events List')
     search_fields = ('stdout',)
 
     def finalize_response(self, request, response, *args, **kwargs):
@@ -832,7 +832,7 @@ class SystemJobEventsList(SubListAPIView):
     serializer_class = serializers.SystemJobEventSerializer
     parent_model = models.SystemJob
     relationship = 'system_job_events'
-    view_name = _('System Job Events List')
+    name = _('System Job Events List')
     search_fields = ('stdout',)
 
     def finalize_response(self, request, response, *args, **kwargs):
@@ -868,7 +868,7 @@ class ProjectUpdateNotificationsList(SubListAPIView):
 
 class ProjectUpdateScmInventoryUpdates(SubListAPIView):
 
-    view_name = _("Project Update SCM Inventory Updates")
+    name = _("Project Update SCM Inventory Updates")
     model = models.InventoryUpdate
     serializer_class = serializers.InventoryUpdateListSerializer
     parent_model = models.ProjectUpdate
@@ -912,7 +912,7 @@ class UserMeList(ListAPIView):
 
     model = models.User
     serializer_class = serializers.UserSerializer
-    view_name = _('Me')
+    name = _('Me')
 
     def get_queryset(self):
         return self.model.objects.filter(pk=self.request.user.pk)
@@ -920,7 +920,7 @@ class UserMeList(ListAPIView):
 
 class OAuth2ApplicationList(ListCreateAPIView):
 
-    view_name = _("OAuth 2 Applications")
+    name = _("OAuth 2 Applications")
 
     model = models.OAuth2Application
     serializer_class = serializers.OAuth2ApplicationSerializer
@@ -929,7 +929,7 @@ class OAuth2ApplicationList(ListCreateAPIView):
 
 class OAuth2ApplicationDetail(RetrieveUpdateDestroyAPIView):
 
-    view_name = _("OAuth 2 Application Detail")
+    name = _("OAuth 2 Application Detail")
 
     model = models.OAuth2Application
     serializer_class = serializers.OAuth2ApplicationSerializer
@@ -942,7 +942,7 @@ class OAuth2ApplicationDetail(RetrieveUpdateDestroyAPIView):
 
 class ApplicationOAuth2TokenList(SubListCreateAPIView):
 
-    view_name = _("OAuth 2 Application Tokens")
+    name = _("OAuth 2 Application Tokens")
 
     model = models.OAuth2AccessToken
     serializer_class = serializers.OAuth2TokenSerializer
@@ -964,7 +964,7 @@ class OAuth2ApplicationActivityStreamList(SubListAPIView):
 
 class OAuth2TokenList(ListCreateAPIView):
 
-    view_name = _("OAuth2 Tokens")
+    name = _("OAuth2 Tokens")
 
     model = models.OAuth2AccessToken
     serializer_class = serializers.OAuth2TokenSerializer
@@ -973,7 +973,7 @@ class OAuth2TokenList(ListCreateAPIView):
 
 class OAuth2UserTokenList(SubListCreateAPIView):
 
-    view_name = _("OAuth2 User Tokens")
+    name = _("OAuth2 User Tokens")
 
     model = models.OAuth2AccessToken
     serializer_class = serializers.OAuth2TokenSerializer
@@ -985,7 +985,7 @@ class OAuth2UserTokenList(SubListCreateAPIView):
 
 class UserAuthorizedTokenList(SubListCreateAPIView):
 
-    view_name = _("OAuth2 User Authorized Access Tokens")
+    name = _("OAuth2 User Authorized Access Tokens")
 
     model = models.OAuth2AccessToken
     serializer_class = serializers.UserAuthorizedTokenSerializer
@@ -1000,7 +1000,7 @@ class UserAuthorizedTokenList(SubListCreateAPIView):
 
 class OrganizationApplicationList(SubListCreateAPIView):
 
-    view_name = _("Organization OAuth2 Applications")
+    name = _("Organization OAuth2 Applications")
 
     model = models.OAuth2Application
     serializer_class = serializers.OAuth2ApplicationSerializer
@@ -1012,7 +1012,7 @@ class OrganizationApplicationList(SubListCreateAPIView):
 
 class UserPersonalTokenList(SubListCreateAPIView):
 
-    view_name = _("OAuth2 Personal Access Tokens")
+    name = _("OAuth2 Personal Access Tokens")
 
     model = models.OAuth2AccessToken
     serializer_class = serializers.UserPersonalTokenSerializer
@@ -1027,7 +1027,7 @@ class UserPersonalTokenList(SubListCreateAPIView):
 
 class OAuth2TokenDetail(RetrieveUpdateDestroyAPIView):
 
-    view_name = _("OAuth Token Detail")
+    name = _("OAuth Token Detail")
 
     model = models.OAuth2AccessToken
     serializer_class = serializers.OAuth2TokenDetailSerializer
@@ -1373,7 +1373,7 @@ class CredentialExternalTest(SubDetailAPIView):
     before saving them.
     """
 
-    view_name = _('External Credential Test')
+    name = _('External Credential Test')
 
     model = models.Credential
     serializer_class = serializers.EmptySerializer
@@ -1399,7 +1399,7 @@ class CredentialExternalTest(SubDetailAPIView):
 
 class CredentialInputSourceDetail(RetrieveUpdateDestroyAPIView):
 
-    view_name = _("Credential Input Source Detail")
+    name = _("Credential Input Source Detail")
 
     model = models.CredentialInputSource
     serializer_class = serializers.CredentialInputSourceSerializer
@@ -1407,7 +1407,7 @@ class CredentialInputSourceDetail(RetrieveUpdateDestroyAPIView):
 
 class CredentialInputSourceList(ListCreateAPIView):
 
-    view_name = _("Credential Input Sources")
+    name = _("Credential Input Sources")
 
     model = models.CredentialInputSource
     serializer_class = serializers.CredentialInputSourceSerializer
@@ -1415,7 +1415,7 @@ class CredentialInputSourceList(ListCreateAPIView):
 
 class CredentialInputSourceSubList(SubListCreateAPIView):
 
-    view_name = _("Credential Input Sources")
+    name = _("Credential Input Sources")
 
     model = models.CredentialInputSource
     serializer_class = serializers.CredentialInputSourceSerializer
@@ -1430,7 +1430,7 @@ class CredentialTypeExternalTest(SubDetailAPIView):
     saving it.
     """
 
-    view_name = _('External Credential Type Test')
+    name = _('External Credential Type Test')
 
     model = models.CredentialType
     serializer_class = serializers.EmptySerializer
@@ -2004,7 +2004,7 @@ class InventoryTreeView(RetrieveAPIView):
 
 class InventoryInventorySourcesList(SubListCreateAPIView):
 
-    view_name = _('Inventory Source List')
+    name = _('Inventory Source List')
 
     model = models.InventorySource
     serializer_class = serializers.InventorySourceSerializer
@@ -2016,7 +2016,7 @@ class InventoryInventorySourcesList(SubListCreateAPIView):
 
 
 class InventoryInventorySourcesUpdate(RetrieveAPIView):
-    view_name = _('Inventory Sources Update')
+    name = _('Inventory Sources Update')
 
     model = models.Inventory
     obj_permission_type = 'start'
@@ -2079,7 +2079,7 @@ class InventorySourceDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroy
 
 class InventorySourceSchedulesList(SubListCreateAPIView):
 
-    view_name = _("Inventory Source Schedules")
+    name = _("Inventory Source Schedules")
 
     model = models.Schedule
     serializer_class = serializers.ScheduleSerializer
@@ -2448,7 +2448,7 @@ class JobTemplateLaunch(RetrieveAPIView):
 
 class JobTemplateSchedulesList(SubListCreateAPIView):
 
-    view_name = _("Job Template Schedules")
+    name = _("Job Template Schedules")
 
     model = models.Schedule
     serializer_class = serializers.ScheduleSerializer
@@ -3220,7 +3220,7 @@ class WorkflowJobTemplateJobsList(SubListAPIView):
 
 class WorkflowJobTemplateSchedulesList(SubListCreateAPIView):
 
-    view_name = _("Workflow Job Template Schedules")
+    name = _("Workflow Job Template Schedules")
 
     model = models.Schedule
     serializer_class = serializers.ScheduleSerializer
@@ -3388,7 +3388,7 @@ class SystemJobTemplateLaunch(GenericAPIView):
 
 class SystemJobTemplateSchedulesList(SubListCreateAPIView):
 
-    view_name = _("System Job Template Schedules")
+    name = _("System Job Template Schedules")
 
     model = models.Schedule
     serializer_class = serializers.ScheduleSerializer
@@ -3659,7 +3659,7 @@ class BaseJobHostSummariesList(SubListAPIView):
     serializer_class = serializers.JobHostSummarySerializer
     parent_model = None # Subclasses must define this attribute.
     relationship = 'job_host_summaries'
-    view_name = _('Job Host Summaries List')
+    name = _('Job Host Summaries List')
     search_fields = ('host_name',)
 
     def get_queryset(self):
@@ -3708,7 +3708,7 @@ class JobEventChildrenList(SubListAPIView):
     serializer_class = serializers.JobEventSerializer
     parent_model = models.JobEvent
     relationship = 'children'
-    view_name = _('Job Event Children List')
+    name = _('Job Event Children List')
     search_fields = ('stdout',)
 
     def get_queryset(self):
@@ -3724,7 +3724,7 @@ class JobEventHostsList(HostRelatedSearchMixin, SubListAPIView):
     serializer_class = serializers.HostSerializer
     parent_model = models.JobEvent
     relationship = 'hosts'
-    view_name = _('Job Event Hosts List')
+    name = _('Job Event Hosts List')
 
 
 class BaseJobEventsList(SubListAPIView):
@@ -3733,7 +3733,7 @@ class BaseJobEventsList(SubListAPIView):
     serializer_class = serializers.JobEventSerializer
     parent_model = None # Subclasses must define this attribute.
     relationship = 'job_events'
-    view_name = _('Job Events List')
+    name = _('Job Events List')
     search_fields = ('stdout',)
 
     def finalize_response(self, request, response, *args, **kwargs):
@@ -3942,7 +3942,7 @@ class BaseAdHocCommandEventsList(SubListAPIView):
     serializer_class = serializers.AdHocCommandEventSerializer
     parent_model = None # Subclasses must define this attribute.
     relationship = 'ad_hoc_command_events'
-    view_name = _('Ad Hoc Command Events List')
+    name = _('Ad Hoc Command Events List')
     search_fields = ('stdout',)
 
 
@@ -4100,7 +4100,7 @@ class UnifiedJobStdout(RetrieveAPIView):
                 # Remove any ANSI escape sequences containing job event data.
                 content = re.sub(r'\x1b\[K(?:[A-Za-z0-9+/=]+\x1b\[\d+D)+\x1b\[K', '', content)
 
-                body = ansiconv.to_html(cgi.escape(content))
+                body = ansiconv.to_html(html.escape(content))
 
                 context = {
                     'title': get_view_name(self.__class__),
@@ -4195,7 +4195,7 @@ class NotificationTemplateDetail(RetrieveUpdateDestroyAPIView):
 class NotificationTemplateTest(GenericAPIView):
     '''Test a Notification Template'''
 
-    view_name = _('Notification Template Test')
+    name = _('Notification Template Test')
     model = models.NotificationTemplate
     obj_permission_type = 'start'
     serializer_class = serializers.EmptySerializer

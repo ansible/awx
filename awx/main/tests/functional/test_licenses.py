@@ -4,7 +4,11 @@ import json
 import os
 
 from django.conf import settings
-from pip._internal.req import parse_requirements
+
+try:
+    from pip._internal.req import parse_requirements
+except ImportError:
+    from pip.req import parse_requirements
 
 
 def test_python_and_js_licenses():

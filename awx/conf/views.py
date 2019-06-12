@@ -41,7 +41,7 @@ class SettingCategoryList(ListAPIView):
     model = Setting  # Not exactly, but needed for the view.
     serializer_class = SettingCategorySerializer
     filter_backends = []
-    view_name = _('Setting Categories')
+    name = _('Setting Categories')
 
     def get_queryset(self):
         setting_categories = []
@@ -63,7 +63,7 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
     model = Setting  # Not exactly, but needed for the view.
     serializer_class = SettingSingletonSerializer
     filter_backends = []
-    view_name = _('Setting Detail')
+    name = _('Setting Detail')
 
     def get_queryset(self):
         self.category_slug = self.kwargs.get('category_slug', 'all')
@@ -154,7 +154,7 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
 
 class SettingLoggingTest(GenericAPIView):
 
-    view_name = _('Logging Connectivity Test')
+    name = _('Logging Connectivity Test')
     model = Setting
     serializer_class = SettingSingletonSerializer
     permission_classes = (IsSuperUser,)

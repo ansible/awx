@@ -1,5 +1,5 @@
 {% extends 'rest_framework/base.html' %}
-{% load i18n staticfiles %}
+{% load i18n static %}
 
 {% block title %}{{ name }} &middot; {% trans 'AWX REST API' %}{% endblock %}
 
@@ -47,6 +47,15 @@
     </div>
   </div>
 {% endblock %}
+
+{% block content %}
+  {% if deprecated %}
+    <div class="breadcrumb" style="background: #FCC;">
+        <b>This resource has been deprecated and will be removed in a future release.</b>
+    </div>
+  {% endif %}
+{{ block.super }}
+{% endblock content %}
 
 {% block script %}
 <div id="footer">

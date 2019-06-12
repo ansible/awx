@@ -42,7 +42,7 @@ logger = logging.getLogger('awx.api.views.root')
 class ApiRootView(APIView):
 
     permission_classes = (AllowAny,)
-    view_name = _('REST API')
+    name = _('REST API')
     versioning_class = None
     swagger_topic = 'Versioning'
 
@@ -64,7 +64,7 @@ class ApiRootView(APIView):
 class ApiOAuthAuthorizationRootView(APIView):
 
     permission_classes = (AllowAny,)
-    view_name = _("API OAuth 2 Authorization Root")
+    name = _("API OAuth 2 Authorization Root")
     versioning_class = None
     swagger_topic = 'Authentication'
 
@@ -130,7 +130,7 @@ class ApiVersionRootView(APIView):
 
 
 class ApiV2RootView(ApiVersionRootView):
-    view_name = _('Version 2')
+    name = _('Version 2')
 
 
 class ApiV2PingView(APIView):
@@ -139,7 +139,7 @@ class ApiV2PingView(APIView):
     """
     permission_classes = (AllowAny,)
     authentication_classes = ()
-    view_name = _('Ping')
+    name = _('Ping')
     swagger_topic = 'System Configuration'
 
     def get(self, request, format=None):
@@ -171,7 +171,7 @@ class ApiV2PingView(APIView):
 class ApiV2ConfigView(APIView):
 
     permission_classes = (IsAuthenticated,)
-    view_name = _('Configuration')
+    name = _('Configuration')
     swagger_topic = 'System Configuration'
 
     def check_permissions(self, request):
