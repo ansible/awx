@@ -64,9 +64,9 @@ export default ['templateUrl', 'CreateDialog', 'Wait', '$state', '$window',
 
                 scope.closeDialog = function(exitWithUnsavedChanges) {
                     if (
-                        !scope.canAddOrEdit
-                        || exitWithUnsavedChanges
-                        || !(scope.workflowChangesUnsaved || scope.workflowChangesStarted)
+                        !scope.canAddOrEdit ||
+                        exitWithUnsavedChanges ||
+                        !(scope.workflowChangesUnsaved || scope.workflowChangesStarted)
                     ) {
                         scope.unsavedChangesVisible = false;
                         $('#workflow-modal-dialog').dialog('destroy');
