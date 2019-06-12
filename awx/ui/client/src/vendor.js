@@ -31,6 +31,13 @@ require('bootstrap-datepicker');
 const btn = $.fn.button.noConflict();
 $.fn.btn = btn;
 
+// Whitelist table elements so they can be used in popovers
+$.fn.popover.Constructor.Default.whiteList.table = [];
+$.fn.popover.Constructor.Default.whiteList.tr = [];
+$.fn.popover.Constructor.Default.whiteList.td = [];
+$.fn.popover.Constructor.Default.whiteList.tbody = [];
+$.fn.popover.Constructor.Default.whiteList.thead = [];
+
 require('select2');
 
 // Standalone libs
