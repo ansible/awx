@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Switch, Route, withRouter, Redirect } from 'react-router-dom';
-import { Card, CardHeader, PageSection } from '@patternfly/react-core';
+import { Card, CardHeader as PFCardHeader, PageSection } from '@patternfly/react-core';
 import CardCloseButton from '../../../../components/CardCloseButton';
 import ContentError from '../../../../components/ContentError';
 import OrganizationAccess from './OrganizationAccess';
@@ -12,6 +12,7 @@ import OrganizationNotifications from './OrganizationNotifications';
 import OrganizationTeams from './OrganizationTeams';
 import RoutedTabs from '../../../../components/Tabs/RoutedTabs';
 import { OrganizationsAPI } from '../../../../api';
+import styled from 'styled-components';
 
 class Organization extends Component {
   constructor (props) {
@@ -130,23 +131,24 @@ class Organization extends Component {
       });
     }
 
+    const CardHeader = styled(PFCardHeader)`
+      --pf-c-card--first-child--PaddingTop: 0;
+      --pf-c-card--child--PaddingLeft: 0;
+      --pf-c-card--child--PaddingRight: 0;
+      position: relative;
+    `;
+
     let cardHeader = (
-      <CardHeader style={{ padding: 0 }}>
-        <React.Fragment>
-          <div className="awx-orgTabs-container">
-            <RoutedTabs
-              match={match}
-              history={history}
-              labeltext={i18n._(t`Organization detail tabs`)}
-              tabsArray={tabsArray}
-            />
-            <CardCloseButton linkTo="/organizations" />
-            <div
-              className="awx-orgTabs__bottom-border"
-            />
-          </div>
-        </React.Fragment>
-      </CardHeader>
+      loading ? '' : (
+        <CardHeader>
+          <RoutedTabs
+            match={match}
+            history={history}
+            tabsArray={tabsArray}
+          />
+          <CardCloseButton linkTo="/organizations" />
+        </CardHeader>
+      )
     );
 
     if (!isInitialized) {

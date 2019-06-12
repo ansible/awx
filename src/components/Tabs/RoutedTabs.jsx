@@ -1,7 +1,35 @@
 import React from 'react';
 import { shape, string, number, arrayOf } from 'prop-types';
-import { Tab, Tabs } from '@patternfly/react-core';
+import { Tab, Tabs as PFTabs } from '@patternfly/react-core';
 import { withRouter } from 'react-router-dom';
+import styled from 'styled-components';
+
+const Tabs = styled(PFTabs)`
+  --pf-c-tabs__button--PaddingLeft: 20px;
+  --pf-c-tabs__button--PaddingRight: 20px;
+
+  .pf-c-tabs__list {
+    li:first-of-type .pf-c-tabs__button {
+      &::before {
+        border-left: none;
+      }
+      &::after {
+        margin-left: 0;
+      }
+    }
+  }
+
+  &::before {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    content: "";
+    border: solid var(--pf-c-tabs__item--BorderColor);
+    border-width: var(--pf-c-tabs__item--BorderWidth) 0 var(--pf-c-tabs__item--BorderWidth) 0;
+  }
+`;
 
 function RoutedTabs (props) {
   const { history, tabsArray } = props;
