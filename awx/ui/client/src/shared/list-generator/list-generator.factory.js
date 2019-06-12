@@ -244,8 +244,7 @@ export default ['$compile', 'Attr', 'Icon',
 
                 // Show the "no items" box when loading is done and the user isn't actively searching and there are no results
                 if (options.showEmptyPanel === undefined || options.showEmptyPanel === true){
-                    const emptyListClass = list.emptyListClass || "List-noItems";
-                    html += `<div class="${emptyListClass}" ng-show="${list.name}.length === 0 && (searchTags | isEmpty)">`;
+                    html += `<div class="${list.emptyListClass || "List-noItems"}" ng-show="${list.name}.length === 0 && (searchTags | isEmpty)">`;
                     html += (list.emptyListText) ? list.emptyListText :  i18n._("PLEASE ADD ITEMS TO THIS LIST");
                     html += "</div>";
                 }
