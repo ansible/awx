@@ -30,7 +30,6 @@ export default ['i18n', function(i18n) {
                     type: 'text',
                     ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || canAdd)',
                     required: false,
-                    capitalize: true
                 },
                 last_name: {
                     label: i18n._('Last Name'),
