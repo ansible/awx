@@ -64,7 +64,6 @@ export class Job extends Component {
 
     const {
       job,
-      error,
       loading
     } = this.state;
 

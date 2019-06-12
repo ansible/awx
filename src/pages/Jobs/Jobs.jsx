@@ -17,7 +17,7 @@ class Jobs extends Component {
 
     this.state = {
       breadcrumbConfig: {
-        '/jobs': i18n._(`Jobs`)
+        '/jobs': i18n._(t`Jobs`)
       }
     }
   }
