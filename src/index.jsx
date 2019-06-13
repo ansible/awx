@@ -44,7 +44,7 @@ import SystemSettings from './pages/SystemSettings';
 import UISettings from './pages/UISettings';
 import License from './pages/License';
 import Teams from './pages/Teams';
-import Templates from './pages/Templates';
+import Templates from './pages/Templates/Templates';
 import Users from './pages/Users';
 
 // eslint-disable-next-line import/prefer-default-export

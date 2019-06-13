@@ -3,26 +3,39 @@ import PropTypes from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
-  Button,
-  ToolbarItem
+  Button as PFButton,
+  ToolbarItem as PFToolbarItem
 } from '@patternfly/react-core';
 import {
   BarsIcon,
   EqualsIcon,
 } from '@patternfly/react-icons';
+import styled from 'styled-components';
 
-const ToolbarActiveStyle = {
-  backgroundColor: '#007bba',
-  color: 'white',
-  padding: '0 5px',
-};
+const Button = styled(PFButton)`
+    padding: 0;
+    margin: 0;
+    height: 30px;
+    width: 30px;
+    ${props => (props.isActive ? `
+      background-color: #007bba;
+      --pf-c-button--m-plain--active--Color: white;
+      --pf-c-button--m-plain--focus--Color: white;`
+    : null)};
+`;
+
+const ToolbarItem = styled(PFToolbarItem)`
+  & :not(:last-child) {
+  margin-right: 20px;
+  }
+`;
 
 class ExpandCollapse extends React.Component {
   render () {
     const {
+      isCompact,
       onCompact,
       onExpand,
-      isCompact,
       i18n
     } = this.props;
 
@@ -33,7 +46,7 @@ class ExpandCollapse extends React.Component {
             variant="plain"
             aria-label={i18n._(t`Collapse`)}
             onClick={onCompact}
-            style={isCompact ? ToolbarActiveStyle : null}
+            isActive={isCompact}
           >
             <BarsIcon />
           </Button>
@@ -43,7 +56,7 @@ class ExpandCollapse extends React.Component {
             variant="plain"
             aria-label={i18n._(t`Expand`)}
             onClick={onExpand}
-            style={!isCompact ? ToolbarActiveStyle : null}
+            isActive={!isCompact}
           >
             <EqualsIcon />
           </Button>
@@ -56,9 +69,11 @@ class ExpandCollapse extends React.Component {
 ExpandCollapse.propTypes = {
   onCompact: PropTypes.func.isRequired,
   onExpand: PropTypes.func.isRequired,
-  isCompact: PropTypes.bool.isRequired
+  isCompact: PropTypes.bool
 };
 
-ExpandCollapse.defaultProps = {};
+ExpandCollapse.defaultProps = {
+  isCompact: true
+};
 
 export default withI18n()(ExpandCollapse);

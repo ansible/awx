@@ -14,3 +14,10 @@ export function getArticle (str) {
 export function ucFirst (str) {
   return `${str[0].toUpperCase()}${str.substr(1)}`;
 }
+
+export const toTitleCase = (type) => type
+  .toLowerCase()
+  .split('_')
+  .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+  .join(' ');
+
