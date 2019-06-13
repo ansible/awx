@@ -859,7 +859,7 @@ class BaseTask(object):
             process_isolation_params = {
                 'process_isolation': True,
                 'process_isolation_path': settings.AWX_PROOT_BASE_PATH,
-                'process_isolation_show_paths': self.proot_show_paths + [private_data_dir, cwd] + settings.AWX_PROOT_SHOW_PATHS,
+                'process_isolation_show_paths': self.proot_show_paths + [cwd] + settings.AWX_PROOT_SHOW_PATHS,
                 'process_isolation_hide_paths': [
                     settings.AWX_PROOT_BASE_PATH,
                     '/etc/tower',
