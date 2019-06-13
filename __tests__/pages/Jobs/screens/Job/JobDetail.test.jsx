@@ -12,4 +12,13 @@ describe('<JobDetail />', () => {
       <JobDetail job={ mockDetails } />
     );
   });
+
+  test('should display a Close button', () => {
+    const wrapper = mountWithContexts(
+      <JobDetail job={ mockDetails } />
+    );
+
+    expect(wrapper.find('Button[aria-label="close"]').length).toBe(1);
+    wrapper.unmount();
+  });
 });

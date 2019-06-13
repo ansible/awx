@@ -10,7 +10,7 @@ describe('<Jobs />', () => {
     );
   });
 
-  test('should display correct breadcrumb heading', () => {
+  test('should display a breadcrumb heading', () => {
     const history = createMemoryHistory({
       initialEntries: ['/jobs'],
     });
@@ -30,7 +30,7 @@ describe('<Jobs />', () => {
         }
       }
     );
-    expect(wrapper.find('BreadcrumbHeading').text()).toEqual('Jobs');
+    expect(wrapper.find('BreadcrumbHeading').length).toBe(1);
     wrapper.unmount();
   });
 });
