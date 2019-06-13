@@ -415,8 +415,6 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
                                               .filter(unifiedjobtemplate_notification_templates_for_started=self))
         success_notification_templates = list(base_notification_templates
                                               .filter(unifiedjobtemplate_notification_templates_for_success=self))
-        any_notification_templates = list(base_notification_templates
-                                          .filter(unifiedjobtemplate_notification_templates_for_any=self))
         # Get Organization NotificationTemplates
         if self.organization is not None:
             error_notification_templates = set(error_notification_templates +
@@ -428,13 +426,9 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
             success_notification_templates = set(success_notification_templates +
                                                  list(base_notification_templates
                                                       .filter(organization_notification_templates_for_success=self.organization)))
-            any_notification_templates = set(any_notification_templates +
-                                             list(base_notification_templates
-                                                  .filter(organization_notification_templates_for_any=self.organization)))
         return dict(error=list(error_notification_templates),
                     started=list(started_notification_templates),
-                    success=list(success_notification_templates),
-                    any=list(any_notification_templates))
+                    success=list(success_notification_templates))
 
     def get_absolute_url(self, request=None):
         return reverse('api:project_detail', kwargs={'pk': self.pk}, request=request)

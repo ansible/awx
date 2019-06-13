@@ -392,13 +392,6 @@ class NotificationFieldsModel(BaseModel):
         related_name='%(class)s_notification_templates_for_started'
     )
 
-    notification_templates_any = models.ManyToManyField(
-        "NotificationTemplate",
-        blank=True,
-        related_name='%(class)s_notification_templates_for_any'
-    )
-
-
 
 def prevent_search(relation):
     """

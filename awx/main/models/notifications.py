@@ -235,18 +235,16 @@ class JobNotificationMixin(object):
             logger.warn("No notification template defined for emitting notification")
             notification_templates = None
         if notification_templates:
-            all_notification_templates = set()
-            if status_str != 'running':
-                all_notification_templates.update(notification_templates.get('any', []))
-                notification_template_type = 'any'
-            elif status_str == 'succeeded':
+            if status_str == 'succeeded':
                 notification_template_type = 'success'
             elif status_str == 'running':
                 notification_template_type = 'started'
             else:
                 notification_template_type = 'error'
-            all_notification_templates.update(notification_templates.get(notification_template_type, []))
+            all_notification_templates = set(notification_templates.get(notification_template_type, []))
             if len(all_notification_templates):
+                # if status_str != 'running':
+                #     all_notification_templates.update(notification_templates.get('any', []))
                 try:
                     (notification_subject, notification_body) = getattr(self, 'build_notification_%s_message' % status_str)()
                 except AttributeError:

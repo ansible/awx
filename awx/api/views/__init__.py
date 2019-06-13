@@ -748,7 +748,6 @@ class ProjectNotificationTemplatesAnyList(SubListCreateAttachDetachAPIView):
     model = models.NotificationTemplate
     serializer_class = serializers.NotificationTemplateSerializer
     parent_model = models.Project
-    relationship = 'notification_templates_any'
 
 
 class ProjectNotificationTemplatesStartedList(ProjectNotificationTemplatesAnyList):
@@ -2102,7 +2101,6 @@ class InventorySourceNotificationTemplatesAnyList(SubListCreateAttachDetachAPIVi
     model = models.NotificationTemplate
     serializer_class = serializers.NotificationTemplateSerializer
     parent_model = models.InventorySource
-    relationship = 'notification_templates_any'
 
     def post(self, request, *args, **kwargs):
         parent = self.get_parent_object()
@@ -2631,7 +2629,6 @@ class JobTemplateNotificationTemplatesAnyList(SubListCreateAttachDetachAPIView):
     model = models.NotificationTemplate
     serializer_class = serializers.NotificationTemplateSerializer
     parent_model = models.JobTemplate
-    relationship = 'notification_templates_any'
 
 
 class JobTemplateNotificationTemplatesStartedList(JobTemplateNotificationTemplatesAnyList):
@@ -3238,7 +3235,6 @@ class WorkflowJobTemplateNotificationTemplatesAnyList(SubListCreateAttachDetachA
     model = models.NotificationTemplate
     serializer_class = serializers.NotificationTemplateSerializer
     parent_model = models.WorkflowJobTemplate
-    relationship = 'notification_templates_any'
 
 
 class WorkflowJobTemplateNotificationTemplatesStartedList(WorkflowJobTemplateNotificationTemplatesAnyList):
@@ -3414,7 +3410,6 @@ class SystemJobTemplateNotificationTemplatesAnyList(SubListCreateAttachDetachAPI
     model = models.NotificationTemplate
     serializer_class = serializers.NotificationTemplateSerializer
     parent_model = models.SystemJobTemplate
-    relationship = 'notification_templates_any'
 
 
 class SystemJobTemplateNotificationTemplatesStartedList(SystemJobTemplateNotificationTemplatesAnyList):

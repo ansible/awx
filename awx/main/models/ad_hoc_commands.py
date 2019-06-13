@@ -163,7 +163,7 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
             all_orgs.add(h.inventory.organization)
         active_templates = dict(error=set(),
                                 success=set(),
-                                any=set())
+                                started=set())
         base_notification_templates = NotificationTemplate.objects
         for org in all_orgs:
             for templ in base_notification_templates.filter(organization_notification_templates_for_errors=org):
@@ -172,10 +172,7 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
                 active_templates['success'].add(templ)
             for templ in base_notification_templates.filter(organization_notification_templates_for_started=org):
                 active_templates['started'].add(templ)
-            for templ in base_notification_templates.filter(organization_notification_templates_for_any=org):
-                active_templates['any'].add(templ)
         active_templates['error'] = list(active_templates['error'])
-        active_templates['any'] = list(active_templates['any'])
         active_templates['success'] = list(active_templates['success'])
         active_templates['started'] = list(active_templates['started'])
         return active_templates

@@ -178,7 +178,6 @@ class OrganizationNotificationTemplatesAnyList(SubListCreateAttachDetachAPIView)
     model = NotificationTemplate
     serializer_class = NotificationTemplateSerializer
     parent_model = Organization
-    relationship = 'notification_templates_any'
 
 
 class OrganizationNotificationTemplatesStartedList(OrganizationNotificationTemplatesAnyList):

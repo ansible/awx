@@ -38,8 +38,6 @@ urls = [
     url(r'^(?P<pk>[0-9]+)/credentials/$', OrganizationCredentialList.as_view(), name='organization_credential_list'),
     url(r'^(?P<pk>[0-9]+)/activity_stream/$', OrganizationActivityStreamList.as_view(), name='organization_activity_stream_list'),
     url(r'^(?P<pk>[0-9]+)/notification_templates/$', OrganizationNotificationTemplatesList.as_view(), name='organization_notification_templates_list'),
-    url(r'^(?P<pk>[0-9]+)/notification_templates_any/$', OrganizationNotificationTemplatesAnyList.as_view(),
-        name='organization_notification_templates_any_list'),
     url(r'^(?P<pk>[0-9]+)/notification_templates_started/$', OrganizationNotificationTemplatesStartedList.as_view(),
         name='organization_notification_templates_started_list'),
     url(r'^(?P<pk>[0-9]+)/notification_templates_error/$', OrganizationNotificationTemplatesErrorList.as_view(),

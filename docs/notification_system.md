@@ -22,9 +22,7 @@ Notification templates assigned at certain levels will inherit notifications def
 
 ## Workflow
 
-When a job starts, succeeds or fails, the running, error or success handler will pull a list of relevant notifications using the procedure defined above. It will then create a Notification object for each one containing relevant details about the job and then **sends** it to the destination (email addresses, slack channel(s), SMS numbers, etc.). These Notification objects are available as related resources on job types (Jobs, Inventory Updates, Project Updates), and also at `/api/v2/notifications`. You may also see what notifications have been sent from a notifications by examining its related resources.
-
-When a notification is associated to a job via the `/api/v2/.../notification_templates_any/` endpoint, it will send upon success OR fail, but _not_ on start.
+When a job starts, succeeds or fails, the running, success or error handler, respectively, will pull a list of relevant notifications using the procedure defined above. It then creates a Notification Object for each one containing relevant details about the job and then **sends** it to the destination (email addresses, Slack channel(s), SMS numbers, etc.). These Notification objects are available as related resources on job types (Jobs, Inventory Updates, Project Updates), and also at `/api/v2/notifications`. You may also see what notifications have been sent by examining its related resources.
 
 Notifications can succeed or fail but that will _not_ cause its associated job to succeed or fail. The status of the notification can be viewed at its detail endpoint: `/api/v2/notifications/<n>`
 

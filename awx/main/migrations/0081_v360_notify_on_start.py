@@ -22,4 +22,13 @@ class Migration(migrations.Migration):
             name='notification_templates_started',
             field=models.ManyToManyField(blank=True, related_name='unifiedjobtemplate_notification_templates_for_started', to='main.NotificationTemplate'),
         ),
+#        migrations.RunPython() stuff goes in here
+        migrations.RemoveField(
+            model_name='organization',
+            name='notification_templates_any',
+        ),
+        migrations.RemoveField(
+            model_name='unifiedjobtemplate',
+            name='notification_templates_any',
+        ),
     ]

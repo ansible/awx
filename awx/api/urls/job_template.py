@@ -35,8 +35,6 @@ urls = [
     url(r'^(?P<pk>[0-9]+)/schedules/$', JobTemplateSchedulesList.as_view(), name='job_template_schedules_list'),
     url(r'^(?P<pk>[0-9]+)/survey_spec/$', JobTemplateSurveySpec.as_view(), name='job_template_survey_spec'),
     url(r'^(?P<pk>[0-9]+)/activity_stream/$', JobTemplateActivityStreamList.as_view(), name='job_template_activity_stream_list'),
-    url(r'^(?P<pk>[0-9]+)/notification_templates_any/$', JobTemplateNotificationTemplatesAnyList.as_view(),
-        name='job_template_notification_templates_any_list'),
     url(r'^(?P<pk>[0-9]+)/notification_templates_started/$', JobTemplateNotificationTemplatesStartedList.as_view(),
         name='job_template_notification_templates_started_list'),
     url(r'^(?P<pk>[0-9]+)/notification_templates_error/$', JobTemplateNotificationTemplatesErrorList.as_view(),
