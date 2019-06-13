@@ -39,7 +39,7 @@ class SocialAuthMiddleware(SocialAuthExceptionMiddleware):
             request.successful_authenticator = None
 
         if not request.path.startswith('/sso/') and 'migrations_notran' not in request.path:
-            if request.user and request.user.is_authenticated():
+            if request.user and request.user.is_authenticated:
                 # The rest of the code base rely hevily on type/inheritance checks,
                 # LazyObject sent from Django auth middleware can be buggy if not
                 # converted back to its original object.

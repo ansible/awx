@@ -95,7 +95,7 @@ class ModelAccessPermission(permissions.BasePermission):
         '''
 
         # Don't allow anonymous users. 401, not 403, hence no raised exception.
-        if not request.user or request.user.is_anonymous():
+        if not request.user or request.user.is_anonymous:
             return False
 
         # Always allow superusers
