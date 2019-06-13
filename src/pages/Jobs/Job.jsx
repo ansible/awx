@@ -1,12 +1,11 @@
-import React, { Component } from 'react'
+import React, { Component } from 'react';
 import { Route, withRouter, Switch, Redirect } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
-
-import { withNetwork } from '../../contexts/Network';
-import { JobsAPI } from '../../api';
 import { Card, CardHeader as PFCardHeader, PageSection } from '@patternfly/react-core';
+import { JobsAPI } from '../../api';
+import ContentError from '../../components/ContentError';
 import CardCloseButton from '../../components/CardCloseButton';
 import RoutedTabs from '../../components/Tabs/RoutedTabs';
 import JobDetail from './JobDetail';
@@ -18,15 +17,17 @@ export class Job extends Component {
 
     this.state = {
       job: null,
-      error: false,
-      loading: true
-    }
+      contentError: false,
+      contentLoading: true,
+      isInitialized: false
+    };
 
     this.fetchJob = this.fetchJob.bind(this);
   }
 
-  componentDidMount () {
-    this.fetchJob();
+  async componentDidMount () {
+    await this.fetchJob();
+    this.setState({ isInitialized: true });
   }
 
   async componentDidUpdate (prevProps) {
@@ -35,28 +36,28 @@ export class Job extends Component {
       await this.fetchJob();
     }
   }
+
   async fetchJob () {
     const {
       match,
       setBreadcrumb,
-      handleHttpError
     } = this.props;
+    const id = parseInt(match.params.id, 10);
 
+    this.setState({ contentError: false, contentLoading: true });
     try {
-      const { data } = await JobsAPI.readDetail(match.params.id);
+      const { data } = await JobsAPI.readDetail(id);
       setBreadcrumb(data);
-      this.setState({
-        job: data,
-        loading: false
-      })
+      this.setState({ job: data });
     } catch (error) {
-      handleHttpError(error) || this.setState({ error: true, loading: false });
+      this.setState({ contentError: true });
+    } finally {
+      this.setState({ contentLoading: false });
     }
   }
 
-  render() {
+  render () {
     const {
-      location,
       history,
       match,
       i18n
@@ -64,13 +65,15 @@ export class Job extends Component {
 
     const {
       job,
-      loading
+      contentError,
+      contentLoading,
+      isInitialized
     } = this.state;
 
     const tabsArray = [
       { name: i18n._(t`Details`), link: `${match.url}/details`, id: 0 },
       { name: i18n._(t`Output`), link: `${match.url}/output`, id: 1 }
-    ]
+    ];
 
     const CardHeader = styled(PFCardHeader)`
       --pf-c-card--first-child--PaddingTop: 0;
@@ -79,18 +82,34 @@ export class Job extends Component {
       position: relative;
     `;
 
-    const cardHeader = (
-      loading ? '' : (
-        <CardHeader>
-          <RoutedTabs
-            match={match}
-            history={history}
-            tabsArray={tabsArray}
-          />
-          <CardCloseButton linkTo="/jobs" />
-        </CardHeader>
-      )
+    let cardHeader = (
+      <CardHeader>
+        <RoutedTabs
+          match={match}
+          history={history}
+          tabsArray={tabsArray}
+        />
+        <CardCloseButton linkTo="/jobs" />
+      </CardHeader>
     );
+
+    if (!isInitialized) {
+      cardHeader = null;
+    }
+
+    if (!match) {
+      cardHeader = null;
+    }
+
+    if (!contentLoading && contentError) {
+      return (
+        <PageSection>
+          <Card className="awx-c-card">
+            <ContentError />
+          </Card>
+        </PageSection>
+      );
+    }
 
     return (
       <PageSection>
@@ -108,8 +127,6 @@ export class Job extends Component {
                 render={() => (
                   <JobDetail
                     match={match}
-                    history={history}
-                    location={location}
                     job={job}
                   />
                 )}
@@ -121,8 +138,6 @@ export class Job extends Component {
                 render={() => (
                   <JobOutput
                     match={match}
-                    history={history}
-                    location={location}
                     job={job}
                   />
                 )}
@@ -131,8 +146,8 @@ export class Job extends Component {
           </Switch>
         </Card>
       </PageSection>
-    )
+    );
   }
 }
 
-export default withI18n()(withNetwork(withRouter(Job)));
+export default withI18n()(withRouter(Job));

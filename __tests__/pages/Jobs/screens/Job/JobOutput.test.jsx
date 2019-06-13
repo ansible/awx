@@ -1,6 +1,6 @@
 import React from 'react';
 import { mountWithContexts } from '../../../../enzymeHelpers';
-import JobOutput from '../../../../../src/pages/Jobs/JobOutput/';
+import JobOutput from '../../../../../src/pages/Jobs/JobOutput';
 
 describe('<JobOutput />', () => {
   const mockDetails = {
@@ -9,7 +9,7 @@ describe('<JobOutput />', () => {
 
   test('initially renders succesfully', () => {
     mountWithContexts(
-      <JobOutput job={ mockDetails } />
+      <JobOutput job={mockDetails} />
     );
   });
 });

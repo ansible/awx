@@ -2,12 +2,8 @@ import React, { Component, Fragment } from 'react';
 import { Route, withRouter, Switch } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-
-import { NetworkProvider } from '../../contexts/Network';
-import { withRootDialog } from '../../contexts/RootDialog';
-
 import Breadcrumbs from '../../components/Breadcrumbs/Breadcrumbs';
-import Job from './Job';
+import { Job } from '.';
 
 class Jobs extends Component {
   constructor (props) {
@@ -19,7 +15,7 @@ class Jobs extends Component {
       breadcrumbConfig: {
         '/jobs': i18n._(t`Jobs`)
       }
-    }
+    };
   }
 
   setBreadcrumbConfig = (job) => {
@@ -30,17 +26,17 @@ class Jobs extends Component {
     }
 
     const breadcrumbConfig = {
-      '/jobs': i18n._(`Jobs`),
+      '/jobs': i18n._(t`Jobs`),
       [`/jobs/${job.id}`]: `${job.name}`,
-      [`/jobs/${job.id}/details`]: i18n._(`Details`),
-      [`/jobs/${job.id}/output`]: i18n._(`Output`)
+      [`/jobs/${job.id}/details`]: i18n._(t`Details`),
+      [`/jobs/${job.id}/output`]: i18n._(t`Output`)
     };
 
     this.setState({ breadcrumbConfig });
   }
 
   render () {
-    const { match, history, location, setRootDialogMessage, i18n } = this.props;
+    const { match, history, location } = this.props;
     const { breadcrumbConfig } = this.state;
 
     return (
@@ -51,29 +47,12 @@ class Jobs extends Component {
         <Switch>
           <Route
             path={`${match.path}/:id`}
-            render={({ match: newRouteMatch }) => (
-              <NetworkProvider
-                handle404={() => {
-                  history.replace('/jobs');
-                  setRootDialogMessage({
-                    title: '404',
-                    bodyText: (
-                      <Fragment>
-                        {i18n._(t`Cannot find job with ID`)}
-                        <strong>{` ${newRouteMatch.params.id}`}</strong>
-                        .
-                      </Fragment>
-                    ),
-                    variant: 'warning'
-                  });
-                }}
-                >
-                <Job
-                  history={history}
-                  location={location}
-                  setBreadcrumb={this.setBreadcrumbConfig}
-                />
-              </NetworkProvider>
+            render={() => (
+              <Job
+                history={history}
+                location={location}
+                setBreadcrumb={this.setBreadcrumbConfig}
+              />
             )}
           />
         </Switch>
@@ -82,4 +61,4 @@ class Jobs extends Component {
   }
 }
 
-export default withI18n()(withRootDialog(withRouter(Jobs)));
+export default withI18n()(withRouter(Jobs));

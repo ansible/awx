@@ -10,16 +10,11 @@ const ActionButtonWrapper = styled.div`
   justify-content: flex-end;
 `;
 class JobDetail extends Component {
-  constructor (props) {
-    super(props);
-  }
-
   render () {
     const {
       job,
       i18n
     } = this.props;
-
 
     return (
       <CardBody>
@@ -27,10 +22,10 @@ class JobDetail extends Component {
 
         <ActionButtonWrapper>
           <Button
-            variant='secondary'
+            variant="secondary"
             aria-label="close"
             component={Link}
-            to={`/jobs`}
+            to="/jobs"
           >
             {i18n._(t`Close`)}
           </Button>

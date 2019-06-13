@@ -3,6 +3,7 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Switch, Route, withRouter, Redirect } from 'react-router-dom';
 import { Card, CardHeader as PFCardHeader, PageSection } from '@patternfly/react-core';
+import styled from 'styled-components';
 import CardCloseButton from '../../../../components/CardCloseButton';
 import ContentError from '../../../../components/ContentError';
 import OrganizationAccess from './OrganizationAccess';
@@ -12,7 +13,6 @@ import OrganizationNotifications from './OrganizationNotifications';
 import OrganizationTeams from './OrganizationTeams';
 import RoutedTabs from '../../../../components/Tabs/RoutedTabs';
 import { OrganizationsAPI } from '../../../../api';
-import styled from 'styled-components';
 
 class Organization extends Component {
   constructor (props) {
@@ -139,16 +139,14 @@ class Organization extends Component {
     `;
 
     let cardHeader = (
-      loading ? '' : (
-        <CardHeader>
-          <RoutedTabs
-            match={match}
-            history={history}
-            tabsArray={tabsArray}
-          />
-          <CardCloseButton linkTo="/organizations" />
-        </CardHeader>
-      )
+      <CardHeader>
+        <RoutedTabs
+          match={match}
+          history={history}
+          tabsArray={tabsArray}
+        />
+        <CardCloseButton linkTo="/organizations" />
+      </CardHeader>
     );
 
     if (!isInitialized) {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { mountWithContexts } from '../../../../enzymeHelpers';
-import JobDetail from '../../../../../src/pages/Jobs/JobDetail/';
+import JobDetail from '../../../../../src/pages/Jobs/JobDetail';
 
 describe('<JobDetail />', () => {
   const mockDetails = {
@@ -9,13 +9,13 @@ describe('<JobDetail />', () => {
 
   test('initially renders succesfully', () => {
     mountWithContexts(
-      <JobDetail job={ mockDetails } />
+      <JobDetail job={mockDetails} />
     );
   });
 
   test('should display a Close button', () => {
     const wrapper = mountWithContexts(
-      <JobDetail job={ mockDetails } />
+      <JobDetail job={mockDetails} />
     );
 
     expect(wrapper.find('Button[aria-label="close"]').length).toBe(1);
