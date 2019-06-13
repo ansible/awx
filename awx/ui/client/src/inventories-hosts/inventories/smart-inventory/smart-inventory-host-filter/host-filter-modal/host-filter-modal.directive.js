@@ -55,8 +55,10 @@ export default ['templateUrl', function(templateUrl) {
                         delete hostList.fields.inventory.ngClick;
                         hostList.fields.inventory.columnClass = 'col-sm-6';
                         hostList.fields.inventory.ngBind = 'host.summary_fields.inventory.name';
-                        hostList.emptyListText = i18n._('You must have access to at least one host in order to create a smart inventory host filter');
+                        hostList.emptyListText = i18n._('Perform a search above to define a host filter');
                         hostList.layoutClass = 'List-defaultLayout';
+                        hostList.alwaysShowSearch = true;
+                        hostList.emptyListClass = 'List-noItems List-emptyHostFilter';
                         let html = GenerateList.build({
                             list: hostList,
                             input_type: 'host-filter-modal-body',
