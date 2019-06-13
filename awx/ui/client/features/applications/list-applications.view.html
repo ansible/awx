@@ -43,7 +43,7 @@
                 <div class="at-Row-items">
                     <at-row-item
                         header-value="{{ application.name }}"
-                        header-link="/#/applications/{{ application.id }}">
+                        header-state="applications.edit({application_id:{{application.id}}})">
                     </at-row-item>
                     <at-row-item
                         label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_ORGANIZATION') }}"

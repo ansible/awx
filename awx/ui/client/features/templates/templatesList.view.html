@@ -53,13 +53,13 @@
                     <div class="at-Row-container">
                         <at-row-item
                             header-value="{{ template.name }}"
-                            header-link="/#/templates/job_template/{{ template.id }}"
+                            header-state="templates.editJobTemplate({job_template_id:{{template.id}}})"
                             header-tag="{{ vm.templateTypes[template.type] }}"
                             ng-if="template.type === 'job_template'">
                         </at-row-item>
                         <at-row-item
                             header-value="{{ template.name }}"
-                            header-link="/#/templates/workflow_job_template/{{ template.id }}"
+                            header-state="templates.editWorkflowJobTemplate({workflow_job_template_id:{{template.id}}})"
                             header-tag="{{ vm.templateTypes[template.type] }}"
                             ng-if="template.type === 'workflow_job_template'">
                         </at-row-item>
