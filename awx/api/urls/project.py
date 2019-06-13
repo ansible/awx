@@ -14,7 +14,6 @@ from awx.api.views import (
     ProjectUpdatesList,
     ProjectActivityStreamList,
     ProjectSchedulesList,
-    ProjectNotificationTemplatesAnyList,
     ProjectNotificationTemplatesErrorList,
     ProjectNotificationTemplatesStartedList,
     ProjectNotificationTemplatesSuccessList,

@@ -9,7 +9,6 @@ from awx.api.views import (
     SystemJobTemplateLaunch,
     SystemJobTemplateJobsList,
     SystemJobTemplateSchedulesList,
-    SystemJobTemplateNotificationTemplatesAnyList,
     SystemJobTemplateNotificationTemplatesErrorList,
     SystemJobTemplateNotificationTemplatesStartedList,
     SystemJobTemplateNotificationTemplatesSuccessList,

@@ -13,7 +13,6 @@ from awx.api.views import (
     InventorySourceCredentialsList,
     InventorySourceGroupsList,
     InventorySourceHostsList,
-    InventorySourceNotificationTemplatesAnyList,
     InventorySourceNotificationTemplatesErrorList,
     InventorySourceNotificationTemplatesStartedList,
     InventorySourceNotificationTemplatesSuccessList,

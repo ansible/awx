@@ -42,7 +42,7 @@ def test_inventory_source_notification_on_cloud_only(get, post, inventory_source
 
     not_is = inventory_source_factory("not_ec2")
 
-    # Delete the below portion?
+    # Delete the below portion? ******
     # url = reverse('api:inventory_source_notification_templates_any_list', kwargs={'pk': cloud_is.id})
     # response = post(url, dict(id=notification_template.id), u)
     # assert response.status_code == 204

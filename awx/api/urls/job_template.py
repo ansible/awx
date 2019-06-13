@@ -13,7 +13,6 @@ from awx.api.views import (
     JobTemplateSchedulesList,
     JobTemplateSurveySpec,
     JobTemplateActivityStreamList,
-    JobTemplateNotificationTemplatesAnyList,
     JobTemplateNotificationTemplatesErrorList,
     JobTemplateNotificationTemplatesStartedList,
     JobTemplateNotificationTemplatesSuccessList,

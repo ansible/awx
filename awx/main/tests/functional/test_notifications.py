@@ -92,7 +92,7 @@ def test_inherited_notification_templates(get, post, user, organization, project
     isrc.save()
     jt = JobTemplate.objects.create(name='test', inventory=i, project=project, playbook='debug.yml')
     jt.save()
-    # What can we replace the below tests with?
+    # What can we replace the below tests with? ******
     # url = reverse('api:organization_notification_templates_any_list', kwargs={'pk': organization.id})
     # response = post(url, dict(id=notification_templates[0]), u)
     # assert response.status_code == 204
@@ -107,12 +107,13 @@ def test_inherited_notification_templates(get, post, user, organization, project
     # assert len(isrc.notification_templates['any']) == 1
 
 
-@pytest.mark.django_db
-def test_notification_template_merging(get, post, user, organization, project, notification_template):
-    user('admin-poster', True)
-    organization.notification_templates_any.add(notification_template)
-    project.notification_templates_any.add(notification_template)
-    assert len(project.notification_templates['any']) == 1
+# Delete the test below? ******
+# @pytest.mark.django_db
+# def test_notification_template_merging(get, post, user, organization, project, notification_template):
+#     user('admin-poster', True)
+#     organization.notification_templates_any.add(notification_template)
+#     project.notification_templates_any.add(notification_template)
+#     assert len(project.notification_templates['any']) == 1
 
 
 @pytest.mark.django_db

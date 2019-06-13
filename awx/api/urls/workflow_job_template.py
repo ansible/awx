@@ -13,7 +13,6 @@ from awx.api.views import (
     WorkflowJobTemplateSurveySpec,
     WorkflowJobTemplateWorkflowNodesList,
     WorkflowJobTemplateActivityStreamList,
-    WorkflowJobTemplateNotificationTemplatesAnyList,
     WorkflowJobTemplateNotificationTemplatesErrorList,
     WorkflowJobTemplateNotificationTemplatesStartedList,
     WorkflowJobTemplateNotificationTemplatesSuccessList,

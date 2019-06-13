@@ -15,7 +15,6 @@ from awx.api.views import (
     OrganizationCredentialList,
     OrganizationActivityStreamList,
     OrganizationNotificationTemplatesList,
-    OrganizationNotificationTemplatesAnyList,
     OrganizationNotificationTemplatesErrorList,
     OrganizationNotificationTemplatesStartedList,
     OrganizationNotificationTemplatesSuccessList,
