@@ -51,7 +51,7 @@ const NotificationsMixin = (parent) => class extends parent {
     }
 
     if (notificationType === 'error' && associationState === false) {
-      return this.disassociateNotificationTemplatesSuccess(resourceId, notificationId);
+      return this.disassociateNotificationTemplatesError(resourceId, notificationId);
     }
 
     throw new Error(`Unsupported notificationType, associationState combination: ${notificationType}, ${associationState}`);

@@ -1,4 +1,5 @@
 import Organizations from '../../src/api/models/Organizations';
+import { describeNotificationMixin } from './reusable';
 
 describe('OrganizationsAPI', () => {
   const orgId = 1;
@@ -34,3 +35,5 @@ describe('OrganizationsAPI', () => {
     done();
   });
 });
+
+describeNotificationMixin(Organizations, 'Organizations[NotificationsMixin]');
