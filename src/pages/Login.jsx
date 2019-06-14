@@ -110,7 +110,7 @@ class AWXLogin extends Component {
       return null;
     }
 
-    if (isAuthenticated()) {
+    if (isAuthenticated(document.cookie)) {
       return (<Redirect to="/" />);
     }
 

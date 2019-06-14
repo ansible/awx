@@ -78,7 +78,7 @@ export function main (render) {
       <I18n>
         {({ i18n }) => (
           <Background>
-            {!isAuthenticated() ? loginRoutes : (
+            {!isAuthenticated(document.cookie) ? loginRoutes : (
               <Switch>
                 {removeTrailingSlash}
                 <Route path="/login" render={defaultRedirect} />
