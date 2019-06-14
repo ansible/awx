@@ -2908,34 +2908,6 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
             return obj.display_artifacts()
         return {}
 
-    def to_internal_value(self, data):
-        # When creating a new job and a job template is specified, populate any
-        # fields not provided in data from the job template.
-        if not self.instance and isinstance(data, dict) and data.get('job_template', False):
-            try:
-                job_template = JobTemplate.objects.get(pk=data['job_template'])
-            except JobTemplate.DoesNotExist:
-                raise serializers.ValidationError({'job_template': _('Invalid job template.')})
-            data.setdefault('name', job_template.name)
-            data.setdefault('description', job_template.description)
-            data.setdefault('job_type', job_template.job_type)
-            if job_template.inventory:
-                data.setdefault('inventory', job_template.inventory.pk)
-            if job_template.project:
-                data.setdefault('project', job_template.project.pk)
-                data.setdefault('playbook', job_template.playbook)
-            if job_template.credential:
-                data.setdefault('credential', job_template.credential)
-            data.setdefault('forks', job_template.forks)
-            data.setdefault('limit', job_template.limit)
-            data.setdefault('verbosity', job_template.verbosity)
-            data.setdefault('extra_vars', job_template.extra_vars)
-            data.setdefault('job_tags', job_template.job_tags)
-            data.setdefault('force_handlers', job_template.force_handlers)
-            data.setdefault('skip_tags', job_template.skip_tags)
-            data.setdefault('start_at_task', job_template.start_at_task)
-        return super(JobSerializer, self).to_internal_value(data)
-
     def to_representation(self, obj):
         ret = super(JobSerializer, self).to_representation(obj)
         if obj is None:
