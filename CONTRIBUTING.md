@@ -13,6 +13,7 @@ Have questions about this document or anything not covered here? Feel free to re
 * [Build the user interface](#build-the-user-interface)
 * [Accessing the AWX web interface](#accessing-the-awx-web-interface)
 * [AWX REST API Interaction](#awx-rest-api-interaction)
+* [Handling API Errors](#handling-api-errors)
 * [Working with React](#working-with-react)
   * [App structure](#app-structure)
   * [Naming files](#naming-files)
@@ -109,6 +110,15 @@ afterEach(() => {
 
 ...
 ```
+
+## Handling API Errors
+API requests can and will fail occasionally so they should include explicit error handling. The three _main_ categories of errors from our perspective are: content loading errors, form submission errors, and other errors. The patterns currently in place for these are described below:
+
+- **content loading errors** - These are any errors that occur when fetching data to initialize a page or populate a list. For these, we conditionally render a _content error component_ in place of the unresolved content.
+
+- **form submission errors** - If an error is encountered when submitting a form, we display the error message on the form. For field-specific validation errors, we display the error message beneath the specific field(s). For general errors, we display the error message at the bottom of the form near the action buttons. An error that happens when requesting data to populate a form is not a form submission error, it is still a content error and is handled as such (see above).
+
+- **other errors** - Most errors will fall into the first two categories, but for miscellaneous actions like toggling notifications, deleting a list item, etc. we display an alert modal to notify the user that their requested action couldn't be performed.
 
 ## Working with React
 

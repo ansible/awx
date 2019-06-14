@@ -8,7 +8,6 @@ jest.mock('../../../../../src/api');
 
 describe('<OrganizationNotifications />', () => {
   let data;
-  const network = {};
 
   beforeEach(() => {
     data = {
@@ -40,8 +39,7 @@ describe('<OrganizationNotifications />', () => {
 
   test('initially renders succesfully', async () => {
     const wrapper = mountWithContexts(
-      <OrganizationNotifications id={1} canToggleNotifications />,
-      { context: { network } }
+      <OrganizationNotifications id={1} canToggleNotifications />
     );
     await sleep(0);
     wrapper.update();
@@ -50,10 +48,7 @@ describe('<OrganizationNotifications />', () => {
 
   test('should render list fetched of items', async () => {
     const wrapper = mountWithContexts(
-      <OrganizationNotifications id={1} canToggleNotifications />,
-      {
-        context: { network }
-      }
+      <OrganizationNotifications id={1} canToggleNotifications />
     );
     await sleep(0);
     wrapper.update();
@@ -71,10 +66,7 @@ describe('<OrganizationNotifications />', () => {
 
   test('should enable success notification', async () => {
     const wrapper = mountWithContexts(
-      <OrganizationNotifications id={1} canToggleNotifications />,
-      {
-        context: { network }
-      }
+      <OrganizationNotifications id={1} canToggleNotifications />
     );
     await sleep(0);
     wrapper.update();
@@ -84,7 +76,7 @@ describe('<OrganizationNotifications />', () => {
     ).toEqual([1]);
     const items = wrapper.find('NotificationListItem');
     items.at(1).find('Switch').at(0).prop('onChange')();
-    expect(OrganizationsAPI.associateNotificationTemplatesSuccess).toHaveBeenCalled();
+    expect(OrganizationsAPI.updateNotificationTemplateAssociation).toHaveBeenCalledWith(1, 2, 'success', true);
     await sleep(0);
     wrapper.update();
     expect(
@@ -94,10 +86,7 @@ describe('<OrganizationNotifications />', () => {
 
   test('should enable error notification', async () => {
     const wrapper = mountWithContexts(
-      <OrganizationNotifications id={1} canToggleNotifications />,
-      {
-        context: { network }
-      }
+      <OrganizationNotifications id={1} canToggleNotifications />
     );
     await sleep(0);
     wrapper.update();
@@ -107,7 +96,7 @@ describe('<OrganizationNotifications />', () => {
     ).toEqual([2]);
     const items = wrapper.find('NotificationListItem');
     items.at(0).find('Switch').at(1).prop('onChange')();
-    expect(OrganizationsAPI.associateNotificationTemplatesError).toHaveBeenCalled();
+    expect(OrganizationsAPI.updateNotificationTemplateAssociation).toHaveBeenCalledWith(1, 1, 'error', true);
     await sleep(0);
     wrapper.update();
     expect(
@@ -117,10 +106,7 @@ describe('<OrganizationNotifications />', () => {
 
   test('should disable success notification', async () => {
     const wrapper = mountWithContexts(
-      <OrganizationNotifications id={1} canToggleNotifications />,
-      {
-        context: { network }
-      }
+      <OrganizationNotifications id={1} canToggleNotifications />
     );
     await sleep(0);
     wrapper.update();
@@ -130,7 +116,7 @@ describe('<OrganizationNotifications />', () => {
     ).toEqual([1]);
     const items = wrapper.find('NotificationListItem');
     items.at(0).find('Switch').at(0).prop('onChange')();
-    expect(OrganizationsAPI.disassociateNotificationTemplatesSuccess).toHaveBeenCalled();
+    expect(OrganizationsAPI.updateNotificationTemplateAssociation).toHaveBeenCalledWith(1, 1, 'success', false);
     await sleep(0);
     wrapper.update();
     expect(
@@ -140,10 +126,7 @@ describe('<OrganizationNotifications />', () => {
 
   test('should disable error notification', async () => {
     const wrapper = mountWithContexts(
-      <OrganizationNotifications id={1} canToggleNotifications />,
-      {
-        context: { network }
-      }
+      <OrganizationNotifications id={1} canToggleNotifications />
     );
     await sleep(0);
     wrapper.update();
@@ -153,7 +136,7 @@ describe('<OrganizationNotifications />', () => {
     ).toEqual([2]);
     const items = wrapper.find('NotificationListItem');
     items.at(1).find('Switch').at(1).prop('onChange')();
-    expect(OrganizationsAPI.disassociateNotificationTemplatesError).toHaveBeenCalled();
+    expect(OrganizationsAPI.updateNotificationTemplateAssociation).toHaveBeenCalledWith(1, 2, 'error', false);
     await sleep(0);
     wrapper.update();
     expect(

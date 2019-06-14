@@ -2,7 +2,6 @@
 
 exports[`<OrganizationAccess /> initially renders succesfully 1`] = `
 <OrganizationAccess
-  handleHttpError={[Function]}
   history={"/history/"}
   i18n={"/i18n/"}
   location={
@@ -34,8 +33,228 @@ exports[`<OrganizationAccess /> initially renders succesfully 1`] = `
     }
   }
 >
-  <div>
-    Loading...
-  </div>
+  <WithI18n
+    contentError={false}
+    contentLoading={true}
+    itemCount={0}
+    itemName="role"
+    items={Array []}
+    qsConfig={
+      Object {
+        "defaultParams": Object {
+          "order_by": "first_name",
+          "page": 1,
+          "page_size": 5,
+        },
+        "integerFields": Array [
+          "page",
+          "page_size",
+        ],
+        "namespace": "access",
+      }
+    }
+    renderItem={[Function]}
+    renderToolbar={[Function]}
+    toolbarColumns={
+      Array [
+        Object {
+          "isSortable": true,
+          "key": "first_name",
+          "name": "Name",
+        },
+        Object {
+          "isSortable": true,
+          "key": "username",
+          "name": "Username",
+        },
+        Object {
+          "isSortable": true,
+          "key": "last_name",
+          "name": "Last Name",
+        },
+      ]
+    }
+  >
+    <I18n
+      update={true}
+      withHash={true}
+    >
+      <withRouter(PaginatedDataList)
+        contentError={false}
+        contentLoading={true}
+        i18n={"/i18n/"}
+        itemCount={0}
+        itemName="role"
+        items={Array []}
+        qsConfig={
+          Object {
+            "defaultParams": Object {
+              "order_by": "first_name",
+              "page": 1,
+              "page_size": 5,
+            },
+            "integerFields": Array [
+              "page",
+              "page_size",
+            ],
+            "namespace": "access",
+          }
+        }
+        renderItem={[Function]}
+        renderToolbar={[Function]}
+        toolbarColumns={
+          Array [
+            Object {
+              "isSortable": true,
+              "key": "first_name",
+              "name": "Name",
+            },
+            Object {
+              "isSortable": true,
+              "key": "username",
+              "name": "Username",
+            },
+            Object {
+              "isSortable": true,
+              "key": "last_name",
+              "name": "Last Name",
+            },
+          ]
+        }
+      >
+        <Route>
+          <PaginatedDataList
+            contentError={false}
+            contentLoading={true}
+            history={"/history/"}
+            i18n={"/i18n/"}
+            itemCount={0}
+            itemName="role"
+            itemNamePlural=""
+            items={Array []}
+            location={
+              Object {
+                "hash": "",
+                "pathname": "",
+                "search": "",
+                "state": "",
+              }
+            }
+            match={
+              Object {
+                "isExact": false,
+                "params": Object {},
+                "path": "",
+                "url": "",
+              }
+            }
+            qsConfig={
+              Object {
+                "defaultParams": Object {
+                  "order_by": "first_name",
+                  "page": 1,
+                  "page_size": 5,
+                },
+                "integerFields": Array [
+                  "page",
+                  "page_size",
+                ],
+                "namespace": "access",
+              }
+            }
+            renderItem={[Function]}
+            renderToolbar={[Function]}
+            showPageSizeOptions={true}
+            toolbarColumns={
+              Array [
+                Object {
+                  "isSortable": true,
+                  "key": "first_name",
+                  "name": "Name",
+                },
+                Object {
+                  "isSortable": true,
+                  "key": "username",
+                  "name": "Username",
+                },
+                Object {
+                  "isSortable": true,
+                  "key": "last_name",
+                  "name": "Last Name",
+                },
+              ]
+            }
+          >
+            <WithI18n>
+              <I18n
+                update={true}
+                withHash={true}
+              >
+                <ContentLoading
+                  i18n={"/i18n/"}
+                >
+                  <EmptyState
+                    className=""
+                    variant="large"
+                  >
+                    <div
+                      className="pf-c-empty-state pf-m-lg"
+                    >
+                      <EmptyStateBody
+                        className=""
+                      >
+                        <p
+                          className="pf-c-empty-state__body"
+                        >
+                          Loading...
+                        </p>
+                      </EmptyStateBody>
+                    </div>
+                  </EmptyState>
+                </ContentLoading>
+              </I18n>
+            </WithI18n>
+          </PaginatedDataList>
+        </Route>
+      </withRouter(PaginatedDataList)>
+    </I18n>
+  </WithI18n>
+  <_default
+    isOpen={false}
+    onClose={[Function]}
+    title="Error!"
+    variant="danger"
+  >
+    <Modal
+      actions={Array []}
+      ariaDescribedById=""
+      className="awx-c-modal at-c-alertModal at-c-alertModal--danger"
+      hideTitle={false}
+      isLarge={false}
+      isOpen={false}
+      isSmall={false}
+      onClose={[Function]}
+      title="Error!"
+      width={null}
+    >
+      <Portal
+        containerInfo={<div />}
+      >
+        <ModalContent
+          actions={Array []}
+          ariaDescribedById=""
+          className="awx-c-modal at-c-alertModal at-c-alertModal--danger"
+          hideTitle={false}
+          id="pf-modal-0"
+          isLarge={false}
+          isOpen={false}
+          isSmall={false}
+          onClose={[Function]}
+          title="Error!"
+          width={null}
+        />
+      </Portal>
+    </Modal>
+  </_default>
 </OrganizationAccess>
 `;

@@ -4,7 +4,6 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { mountWithContexts, waitForElement } from './enzymeHelpers';
 import { Config } from '../src/contexts/Config';
-import { withRootDialog } from '../src/contexts/RootDialog';
 
 describe('mountWithContexts', () => {
   describe('injected I18nProvider', () => {
@@ -109,68 +108,6 @@ describe('mountWithContexts', () => {
       expect(wrapper.find('Foo')).toMatchSnapshot();
     });
   });
-
-  describe('injected root dialog', () => {
-    it('should mount and render', () => {
-      const Foo = ({ title, setRootDialogMessage }) => (
-        <div>
-          <span>{title}</span>
-          <button
-            type="button"
-            onClick={() => setRootDialogMessage({ title: 'error' })}
-          >
-            click
-          </button>
-        </div>
-      );
-      const Bar = withRootDialog(Foo);
-      const wrapper = mountWithContexts(<Bar />);
-
-      expect(wrapper.find('span').text()).toEqual('');
-      wrapper.find('button').simulate('click');
-      wrapper.update();
-      expect(wrapper.find('span').text()).toEqual('error');
-    });
-
-    it('should mount and render with stubbed value', () => {
-      const dialog = {
-        title: 'this be the title',
-        setRootDialogMessage: jest.fn(),
-      };
-      const Foo = ({ title, setRootDialogMessage }) => (
-        <div>
-          <span>{title}</span>
-          <button
-            type="button"
-            onClick={() => setRootDialogMessage('error')}
-          >
-            click
-          </button>
-        </div>
-      );
-      const Bar = withRootDialog(Foo);
-      const wrapper = mountWithContexts(<Bar />, { context: { dialog } });
-
-      expect(wrapper.find('span').text()).toEqual('this be the title');
-      wrapper.find('button').simulate('click');
-      expect(dialog.setRootDialogMessage).toHaveBeenCalledWith('error');
-    });
-  });
-
-  it('should set props on wrapped component', () => {
-    function TestComponent ({ text }) {
-      return (<div>{text}</div>);
-    }
-
-    const wrapper = mountWithContexts(
-      <TestComponent text="foo" />
-    );
-    expect(wrapper.find('div').text()).toEqual('foo');
-    wrapper.setProps({
-      text: 'bar'
-    });
-    expect(wrapper.find('div').text()).toEqual('bar');
-  });
 });
 
 /**
@@ -184,9 +121,7 @@ class TestAsyncComponent extends Component {
   }
 
   componentDidMount () {
-    setTimeout(() => {
-      this.setState({ displayElement: true });
-    }, 1000);
+    setTimeout(() => this.setState({ displayElement: true }), 500);
   }
 
   render () {
@@ -211,16 +146,15 @@ describe('waitForElement', () => {
   });
 
   it('eventually throws an error for elements that don\'t exist', async (done) => {
-    const selector = '#does-not-exist';
     const wrapper = mountWithContexts(<div />);
 
     let error;
     try {
-      await waitForElement(wrapper, selector);
+      await waitForElement(wrapper, '#does-not-exist');
     } catch (err) {
       error = err;
     } finally {
-      expect(error).toEqual(new Error(`Element not found using ${selector}`));
+      expect(error).toEqual(new Error('Expected condition for <#does-not-exist> not met: el => el.length === 1'));
       done();
     }
   });

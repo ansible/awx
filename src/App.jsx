@@ -6,19 +6,16 @@ import {
   Page,
   PageHeader as PFPageHeader,
   PageSidebar,
-  Button
 } from '@patternfly/react-core';
-import { withI18n } from '@lingui/react';
-import { t } from '@lingui/macro';
 import styled from 'styled-components';
+import { t } from '@lingui/macro';
+import { withI18n } from '@lingui/react';
 
-import { RootDialog } from './contexts/RootDialog';
-import { withNetwork } from './contexts/Network';
-import { Config } from './contexts/Config';
-import { RootAPI } from './api';
+import { ConfigAPI, MeAPI, RootAPI } from './api';
+import { ConfigProvider } from './contexts/Config';
 
-import AlertModal from './components/AlertModal';
 import About from './components/About';
+import AlertModal from './components/AlertModal';
 import NavExpandableGroup from './components/NavExpandableGroup';
 import BrandLogo from './components/BrandLogo';
 import PageHeaderToolbar from './components/PageHeaderToolbar';
@@ -46,129 +43,145 @@ class App extends Component {
       && window.innerWidth >= parseInt(global_breakpoint_md.value, 10);
 
     this.state = {
+      ansible_version: null,
+      custom_virtualenvs: null,
+      me: null,
+      version: null,
       isAboutModalOpen: false,
-      isNavOpen
+      isNavOpen,
+      configError: false,
     };
 
-    this.onLogout = this.onLogout.bind(this);
-    this.onAboutModalClose = this.onAboutModalClose.bind(this);
-    this.onAboutModalOpen = this.onAboutModalOpen.bind(this);
-    this.onNavToggle = this.onNavToggle.bind(this);
+    this.handleLogout = this.handleLogout.bind(this);
+    this.handleAboutClose = this.handleAboutClose.bind(this);
+    this.handleAboutOpen = this.handleAboutOpen.bind(this);
+    this.handleNavToggle = this.handleNavToggle.bind(this);
+    this.handleConfigErrorClose = this.handleConfigErrorClose.bind(this);
   }
 
-  async onLogout () {
-    const { handleHttpError } = this.props;
-    try {
-      await RootAPI.logout();
-      window.location.replace('/#/login');
-    } catch (err) {
-      handleHttpError(err);
-    }
+  async componentDidMount () {
+    await this.loadConfig();
   }
 
-  onAboutModalOpen () {
+  // eslint-disable-next-line class-methods-use-this
+  async handleLogout () {
+    await RootAPI.logout();
+    window.location.replace('/#/login');
+  }
+
+  handleAboutOpen () {
     this.setState({ isAboutModalOpen: true });
   }
 
-  onAboutModalClose () {
+  handleAboutClose () {
     this.setState({ isAboutModalOpen: false });
   }
 
-  onNavToggle () {
+  handleNavToggle () {
     this.setState(({ isNavOpen }) => ({ isNavOpen: !isNavOpen }));
   }
 
-  render () {
-    const { isAboutModalOpen, isNavOpen } = this.state;
+  handleConfigErrorClose () {
+    this.setState({ configError: false });
+  }
 
-    const { render, routeGroups = [], navLabel = '', i18n } = this.props;
+  async loadConfig () {
+    try {
+      const [configRes, meRes] = await Promise.all([ConfigAPI.read(), MeAPI.read()]);
+      const { data: { ansible_version, custom_virtualenvs, version } } = configRes;
+      const { data: { results: [me] } } = meRes;
+
+      this.setState({ ansible_version, custom_virtualenvs, version, me });
+    } catch (err) {
+      this.setState({ configError: true });
+    }
+  }
+
+  render () {
+    const {
+      ansible_version,
+      custom_virtualenvs,
+      isAboutModalOpen,
+      isNavOpen,
+      me,
+      version,
+      configError,
+    } = this.state;
+    const {
+      i18n,
+      render = () => {},
+      routeGroups = [],
+      navLabel = '',
+    } = this.props;
+
+    const header = (
+      <PageHeader
+        showNavToggle
+        onNavToggle={this.handleNavToggle}
+        logo={<BrandLogo />}
+        logoProps={{ href: '/' }}
+        toolbar={(
+          <PageHeaderToolbar
+            loggedInUser={me}
+            isAboutDisabled={!version}
+            onAboutClick={this.handleAboutOpen}
+            onLogoutClick={this.handleLogout}
+          />
+        )}
+      />
+    );
+
+    const sidebar = (
+      <PageSidebar
+        isNavOpen={isNavOpen}
+        nav={(
+          <Nav aria-label={navLabel}>
+            <NavList>
+              {routeGroups.map(
+                ({ groupId, groupTitle, routes }) => (
+                  <NavExpandableGroup
+                    key={groupId}
+                    groupId={groupId}
+                    groupTitle={groupTitle}
+                    routes={routes}
+                  />
+                )
+              )}
+            </NavList>
+          </Nav>
+        )}
+      />
+    );
 
     return (
-      <Config>
-        {({ ansible_version, version, me }) => (
-          <RootDialog>
-            {({
-              title,
-              bodyText,
-              variant = 'info',
-              clearRootDialogMessage
-            }) => (
-              <Fragment>
-                {(title || bodyText) && (
-                  <AlertModal
-                    variant={variant}
-                    isOpen={!!(title || bodyText)}
-                    onClose={clearRootDialogMessage}
-                    title={title}
-                    actions={[
-                      <Button
-                        key="close"
-                        variant="secondary"
-                        onClick={clearRootDialogMessage}
-                      >
-                        {i18n._(t`Close`)}
-                      </Button>
-                    ]}
-                  >
-                    {bodyText}
-                  </AlertModal>
-                )}
-                <Page
-                  usecondensed="True"
-                  header={(
-                    <PageHeader
-                      showNavToggle
-                      onNavToggle={this.onNavToggle}
-                      logo={<BrandLogo />}
-                      logoProps={{ href: '/' }}
-                      toolbar={(
-                        <PageHeaderToolbar
-                          loggedInUser={me}
-                          isAboutDisabled={!version}
-                          onAboutClick={this.onAboutModalOpen}
-                          onLogoutClick={this.onLogout}
-                        />
-                      )}
-                    />
-                  )}
-                  sidebar={(
-                    <PageSidebar
-                      isNavOpen={isNavOpen}
-                      nav={(
-                        <Nav aria-label={navLabel}>
-                          <NavList>
-                            {routeGroups.map(
-                              ({ groupId, groupTitle, routes }) => (
-                                <NavExpandableGroup
-                                  key={groupId}
-                                  groupId={groupId}
-                                  groupTitle={groupTitle}
-                                  routes={routes}
-                                />
-                              )
-                            )}
-                          </NavList>
-                        </Nav>
-                      )}
-                    />
-                  )}
-                >
-                  {render && render({ routeGroups })}
-                </Page>
-                <About
-                  ansible_version={ansible_version}
-                  version={version}
-                  isOpen={isAboutModalOpen}
-                  onClose={this.onAboutModalClose}
-                />
-              </Fragment>
-            )}
-          </RootDialog>
-        )}
-      </Config>
+      <Fragment>
+        <Page
+          usecondensed="True"
+          header={header}
+          sidebar={sidebar}
+        >
+          <ConfigProvider value={{ ansible_version, custom_virtualenvs, me, version }}>
+            {render({ routeGroups })}
+          </ConfigProvider>
+        </Page>
+        <About
+          ansible_version={ansible_version}
+          version={version}
+          isOpen={isAboutModalOpen}
+          onClose={this.handleAboutClose}
+        />
+        <AlertModal
+          isOpen={configError}
+          variant="danger"
+          title={i18n._(t`Error!`)}
+          onClose={this.handleConfigErrorClose}
+        >
+          {i18n._(t`Failed to retrieve configuration.`)}
+        </AlertModal>
+      </Fragment>
     );
   }
 }
 
 export { App as _App };
-export default withI18n()(withNetwork(App));
+export default withI18n()(App);

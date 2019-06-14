@@ -1,21 +1,11 @@
 import React from 'react';
-import { mountWithContexts } from '../../enzymeHelpers';
+import { mountWithContexts, waitForElement } from '../../enzymeHelpers';
 import TemplatesList, { _TemplatesList } from '../../../src/pages/Templates/TemplatesList';
+import { UnifiedJobTemplatesAPI } from '../../../src/api';
 
 jest.mock('../../../src/api');
 
-const setDefaultState = (templatesList) => {
-  templatesList.setState({
-    itemCount: mockUnifiedJobTemplatesFromAPI.length,
-    isLoading: false,
-    isInitialized: true,
-    selected: [],
-    templates: mockUnifiedJobTemplatesFromAPI,
-  });
-  templatesList.update();
-};
-
-const mockUnifiedJobTemplatesFromAPI = [{
+const mockTemplates = [{
   id: 1,
   name: 'Template 1',
   url: '/templates/job_template/1',
@@ -47,6 +37,19 @@ const mockUnifiedJobTemplatesFromAPI = [{
 }];
 
 describe('<TemplatesList />', () => {
+  beforeEach(() => {
+    UnifiedJobTemplatesAPI.read.mockResolvedValue({
+      data: {
+        count: mockTemplates.length,
+        results: mockTemplates
+      }
+    });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   test('initially renders succesfully', () => {
     mountWithContexts(
       <TemplatesList
@@ -55,46 +58,33 @@ describe('<TemplatesList />', () => {
       />
     );
   });
+
   test('Templates are retrieved from the api and the components finishes loading', async (done) => {
-    const readTemplates = jest.spyOn(_TemplatesList.prototype, 'readUnifiedJobTemplates');
-
-    const wrapper = mountWithContexts(<TemplatesList />).find('TemplatesList');
-
-    expect(wrapper.state('isLoading')).toBe(true);
-    await expect(readTemplates).toHaveBeenCalled();
-    wrapper.update();
-    expect(wrapper.state('isLoading')).toBe(false);
+    const loadUnifiedJobTemplates = jest.spyOn(_TemplatesList.prototype, 'loadUnifiedJobTemplates');
+    const wrapper = mountWithContexts(<TemplatesList />);
+    await waitForElement(wrapper, 'TemplatesList', (el) => el.state('contentLoading') === true);
+    expect(loadUnifiedJobTemplates).toHaveBeenCalled();
+    await waitForElement(wrapper, 'TemplatesList', (el) => el.state('contentLoading') === false);
     done();
   });
 
-  test('handleSelect is called when a template list item is selected', async () => {
+  test('handleSelect is called when a template list item is selected', async (done) => {
     const handleSelect = jest.spyOn(_TemplatesList.prototype, 'handleSelect');
-
     const wrapper = mountWithContexts(<TemplatesList />);
-
-    const templatesList = wrapper.find('TemplatesList');
-    setDefaultState(templatesList);
-
-    expect(templatesList.state('isLoading')).toBe(false);
+    await waitForElement(wrapper, 'TemplatesList', (el) => el.state('contentLoading') === false);
     wrapper.find('DataListCheck#select-jobTemplate-1').props().onChange();
     expect(handleSelect).toBeCalled();
-    templatesList.update();
-    expect(templatesList.state('selected').length).toBe(1);
+    await waitForElement(wrapper, 'TemplatesList', (el) => el.state('selected').length === 1);
+    done();
   });
 
-  test('handleSelectAll is called when a template list item is selected', async () => {
+  test('handleSelectAll is called when a template list item is selected', async (done) => {
     const handleSelectAll = jest.spyOn(_TemplatesList.prototype, 'handleSelectAll');
-
     const wrapper = mountWithContexts(<TemplatesList />);
-
-    const templatesList = wrapper.find('TemplatesList');
-    setDefaultState(templatesList);
-
-    expect(templatesList.state('isLoading')).toBe(false);
+    await waitForElement(wrapper, 'TemplatesList', (el) => el.state('contentLoading') === false);
     wrapper.find('Checkbox#select-all').props().onChange(true);
     expect(handleSelectAll).toBeCalled();
-    wrapper.update();
-    expect(templatesList.state('selected').length).toEqual(templatesList.state('templates')
-      .length);
+    await waitForElement(wrapper, 'TemplatesList', (el) => el.state('selected').length === 3);
+    done();
   });
 });

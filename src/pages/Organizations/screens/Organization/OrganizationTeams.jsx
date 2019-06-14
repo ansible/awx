@@ -1,9 +1,8 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import PaginatedDataList from '../../../../components/PaginatedDataList';
 import { getQSConfig, parseNamespacedQueryString } from '../../../../util/qs';
-import { withNetwork } from '../../../../contexts/Network';
 import { OrganizationsAPI } from '../../../../api';
 
 const QS_CONFIG = getQSConfig('team', {
@@ -16,32 +15,32 @@ class OrganizationTeams extends React.Component {
   constructor (props) {
     super(props);
 
-    this.readOrganizationTeamsList = this.readOrganizationTeamsList.bind(this);
+    this.loadOrganizationTeamsList = this.loadOrganizationTeamsList.bind(this);
 
     this.state = {
-      isInitialized: false,
-      isLoading: false,
-      error: null,
+      contentError: false,
+      contentLoading: true,
       itemCount: 0,
       teams: [],
     };
   }
 
   componentDidMount () {
-    this.readOrganizationTeamsList();
+    this.loadOrganizationTeamsList();
   }
 
   componentDidUpdate (prevProps) {
     const { location } = this.props;
     if (location !== prevProps.location) {
-      this.readOrganizationTeamsList();
+      this.loadOrganizationTeamsList();
     }
   }
 
-  async readOrganizationTeamsList () {
-    const { id, handleHttpError, location } = this.props;
+  async loadOrganizationTeamsList () {
+    const { id, location } = this.props;
     const params = parseNamespacedQueryString(QS_CONFIG, location.search);
-    this.setState({ isLoading: true, error: null });
+
+    this.setState({ contentLoading: true, contentError: false });
     try {
       const {
         data: { count = 0, results = [] },
@@ -49,38 +48,25 @@ class OrganizationTeams extends React.Component {
       this.setState({
         itemCount: count,
         teams: results,
-        isLoading: false,
-        isInitialized: true,
       });
-    } catch (error) {
-      handleHttpError(error) || this.setState({
-        error,
-        isLoading: false,
-      });
+    } catch {
+      this.setState({ contentError: true });
+    } finally {
+      this.setState({ contentLoading: false });
     }
   }
 
   render () {
-    const { teams, itemCount, isLoading, isInitialized, error } = this.state;
-
-    if (error) {
-      // TODO: better error state
-      return <div>{error.message}</div>;
-    }
-
-    // TODO: better loading state
+    const { contentError, contentLoading, teams, itemCount } = this.state;
     return (
-      <Fragment>
-        {isLoading && (<div>Loading...</div>)}
-        {isInitialized && (
-          <PaginatedDataList
-            items={teams}
-            itemCount={itemCount}
-            itemName="team"
-            qsConfig={QS_CONFIG}
-          />
-        )}
-      </Fragment>
+      <PaginatedDataList
+        contentError={contentError}
+        contentLoading={contentLoading}
+        items={teams}
+        itemCount={itemCount}
+        itemName="team"
+        qsConfig={QS_CONFIG}
+      />
     );
   }
 }
@@ -90,4 +76,4 @@ OrganizationTeams.propTypes = {
 };
 
 export { OrganizationTeams as _OrganizationTeams };
-export default withNetwork(withRouter(OrganizationTeams));
+export default withRouter(OrganizationTeams);

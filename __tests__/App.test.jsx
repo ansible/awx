@@ -1,16 +1,33 @@
 import React from 'react';
 
 import { mountWithContexts, waitForElement } from './enzymeHelpers';
-
 import { asyncFlush } from '../jest.setup';
 
 import App from '../src/App';
-
-import { RootAPI } from '../src/api';
+import { ConfigAPI, MeAPI, RootAPI } from '../src/api';
 
 jest.mock('../src/api');
 
 describe('<App />', () => {
+  const ansible_version = '111';
+  const custom_virtualenvs = [];
+  const version = '222';
+
+  beforeEach(() => {
+    ConfigAPI.read = () => Promise.resolve({
+      data: {
+        ansible_version,
+        custom_virtualenvs,
+        version
+      }
+    });
+    MeAPI.read = () => Promise.resolve({ data: { results: [{}] } });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   test('expected content is rendered', () => {
     const appWrapper = mountWithContexts(
       <App
@@ -34,7 +51,7 @@ describe('<App />', () => {
         render={({ routeGroups }) => (
           routeGroups.map(({ groupId }) => (<div key={groupId} id={groupId} />))
         )}
-      />
+      />,
     );
 
     // page components
@@ -54,12 +71,8 @@ describe('<App />', () => {
   });
 
   test('opening the about modal renders prefetched config data', async (done) => {
-    const ansible_version = '111';
-    const version = '222';
-
-    const config = { ansible_version, version };
-
-    const wrapper = mountWithContexts(<App />, { context: { config } });
+    const wrapper = mountWithContexts(<App />);
+    wrapper.update();
 
     // open about modal
     const aboutDropdown = 'Dropdown QuestionCircleIcon';
@@ -67,9 +80,11 @@ describe('<App />', () => {
     const aboutModalContent = 'AboutModalBoxContent';
     const aboutModalClose = 'button[aria-label="Close Dialog"]';
 
-    expect(wrapper.find(aboutModalContent)).toHaveLength(0);
+    await waitForElement(wrapper, aboutDropdown);
     wrapper.find(aboutDropdown).simulate('click');
-    wrapper.find(aboutButton).simulate('click');
+
+    const button = await waitForElement(wrapper, aboutButton, el => !el.props().disabled);
+    button.simulate('click');
 
     // check about modal content
     const content = await waitForElement(wrapper, aboutModalContent);
@@ -83,24 +98,21 @@ describe('<App />', () => {
     done();
   });
 
-  test('onNavToggle sets state.isNavOpen to opposite', () => {
+  test('handleNavToggle sets state.isNavOpen to opposite', () => {
     const appWrapper = mountWithContexts(<App />).find('App');
-    const { onNavToggle } = appWrapper.instance();
+
+    const { handleNavToggle } = appWrapper.instance();
     [true, false, true, false, true].forEach(expected => {
       expect(appWrapper.state().isNavOpen).toBe(expected);
-      onNavToggle();
+      handleNavToggle();
     });
   });
 
   test('onLogout makes expected call to api client', async (done) => {
-    const appWrapper = mountWithContexts(<App />, {
-      context: { network: { handleHttpError: () => {} } }
-    }).find('App');
-
-    appWrapper.instance().onLogout();
+    const appWrapper = mountWithContexts(<App />).find('App');
+    appWrapper.instance().handleLogout();
     await asyncFlush();
     expect(RootAPI.logout).toHaveBeenCalledTimes(1);
-
     done();
   });
 });

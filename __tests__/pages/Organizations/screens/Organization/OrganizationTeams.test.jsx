@@ -20,22 +20,21 @@ const listData = {
   }
 };
 
-beforeEach(() => {
-  OrganizationsAPI.readTeams.mockResolvedValue(listData);
-});
-
-afterEach(() => {
-  jest.clearAllMocks();
-});
-
 describe('<OrganizationTeams />', () => {
+  beforeEach(() => {
+    OrganizationsAPI.readTeams.mockResolvedValue(listData);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   test('renders succesfully', () => {
     shallow(
       <_OrganizationTeams
         id={1}
         searchString=""
         location={{ search: '', pathname: '/organizations/1/teams' }}
-        handleHttpError={() => {}}
       />
     );
   });
@@ -45,9 +44,7 @@ describe('<OrganizationTeams />', () => {
       <OrganizationTeams
         id={1}
         searchString=""
-      />, { context: {
-        network: {} }
-      }
+      />
     ).find('OrganizationTeams');
     expect(OrganizationsAPI.readTeams).toHaveBeenCalledWith(1, {
       page: 1,
@@ -61,9 +58,7 @@ describe('<OrganizationTeams />', () => {
       <OrganizationTeams
         id={1}
         searchString=""
-      />, { context: {
-        network: { handleHttpError: () => {} } }
-      }
+      />
     );
 
     await sleep(0);

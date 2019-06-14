@@ -19,7 +19,6 @@ describe('<Lookup />', () => {
         getItems={() => { }}
         columns={mockColumns}
         sortedColumnKey="name"
-        handleHttpError={() => {}}
       />
     );
   });
@@ -34,7 +33,6 @@ describe('<Lookup />', () => {
         getItems={() => ({ data: { results: [{ name: 'test instance', id: 1 }] } })}
         columns={mockColumns}
         sortedColumnKey="name"
-        handleHttpError={() => {}}
       />
     ).find('Lookup');
 
@@ -57,7 +55,6 @@ describe('<Lookup />', () => {
         getItems={() => { }}
         columns={mockColumns}
         sortedColumnKey="name"
-        handleHttpError={() => {}}
       />
     ).find('Lookup');
     expect(spy).not.toHaveBeenCalled();

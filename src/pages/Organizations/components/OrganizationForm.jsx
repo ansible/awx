@@ -14,7 +14,6 @@ import {
 } from '@patternfly/react-core';
 
 import { Config } from '../../../contexts/Config';
-import { withNetwork } from '../../../contexts/Network';
 import FormRow from '../../../components/FormRow';
 import FormField from '../../../components/FormField';
 import FormActionGroup from '../../../components/FormActionGroup/FormActionGroup';
@@ -210,4 +209,4 @@ OrganizationForm.contextTypes = {
 };
 
 export { OrganizationForm as _OrganizationForm };
-export default withI18n()(withNetwork(withRouter(OrganizationForm)));
+export default withI18n()(withRouter(OrganizationForm));

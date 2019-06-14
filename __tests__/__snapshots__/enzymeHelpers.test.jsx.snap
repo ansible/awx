@@ -2,20 +2,16 @@
 
 exports[`mountWithContexts injected ConfigProvider should mount and render with custom Config value 1`] = `
 <Foo>
-  <Config>
-    <div>
-      Fizz
-      1.1
-    </div>
-  </Config>
+  <div>
+    Fizz
+    1.1
+  </div>
 </Foo>
 `;
 
 exports[`mountWithContexts injected ConfigProvider should mount and render with default values 1`] = `
 <Foo>
-  <Config>
-    <div />
-  </Config>
+  <div />
 </Foo>
 `;
 

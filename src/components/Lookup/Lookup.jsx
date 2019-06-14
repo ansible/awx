@@ -11,7 +11,6 @@ import {
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
-import { withNetwork } from '../../contexts/Network';
 import PaginatedDataList from '../PaginatedDataList';
 import DataListToolbar from '../DataListToolbar';
 import CheckboxListItem from '../ListItem';
@@ -53,8 +52,8 @@ class Lookup extends React.Component {
   }
 
   async getData () {
-    const { getItems, handleHttpError, location } = this.props;
-    const queryParams = parseNamespacedQueryString(this.qsConfig, location.search);
+    const { getItems, location: { search } } = this.props;
+    const queryParams = parseNamespacedQueryString(this.qsConfig, search);
 
     this.setState({ error: false });
     try {
@@ -66,7 +65,7 @@ class Lookup extends React.Component {
         count
       });
     } catch (err) {
-      handleHttpError(err) || this.setState({ error: true });
+      this.setState({ error: true });
     }
   }
 
@@ -214,4 +213,4 @@ Lookup.defaultProps = {
 };
 
 export { Lookup as _Lookup };
-export default withI18n()(withNetwork(withRouter(Lookup)));
+export default withI18n()(withRouter(Lookup));
