@@ -10,6 +10,7 @@ describe('<OrganizationDetail />', () => {
     name: 'Foo',
     description: 'Bar',
     custom_virtualenv: 'Fizz',
+    max_hosts: '0',
     created: 'Bat',
     modified: 'Boo',
     summary_fields: {
@@ -71,11 +72,12 @@ describe('<OrganizationDetail />', () => {
     );
 
     const detailWrapper = wrapper.find('Detail');
-    expect(detailWrapper.length).toBe(5);
+    expect(detailWrapper.length).toBe(6);
 
     const nameDetail = detailWrapper.findWhere(node => node.props().label === 'Name');
     const descriptionDetail = detailWrapper.findWhere(node => node.props().label === 'Description');
     const custom_virtualenvDetail = detailWrapper.findWhere(node => node.props().label === 'Ansible Environment');
+    const max_hostsDetail = detailWrapper.findWhere(node => node.props().label === 'Max Hosts');
     const createdDetail = detailWrapper.findWhere(node => node.props().label === 'Created');
     const modifiedDetail = detailWrapper.findWhere(node => node.props().label === 'Last Modified');
     expect(nameDetail.find('dt').text()).toBe('Name');
@@ -92,6 +94,9 @@ describe('<OrganizationDetail />', () => {
 
     expect(modifiedDetail.find('dt').text()).toBe('Last Modified');
     expect(modifiedDetail.find('dd').text()).toBe('Boo');
+
+    expect(max_hostsDetail.find('dt').text()).toBe('Max Hosts');
+    expect(max_hostsDetail.find('dd').text()).toBe('0');
   });
 
   test('should show edit button for users with edit permission', () => {

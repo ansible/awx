@@ -1,10 +1,14 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
+import { QuestionCircleIcon } from '@patternfly/react-icons';
+
 import { withRouter } from 'react-router-dom';
 import { Formik, Field } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
+
 import {
+  Tooltip,
   Form,
   FormGroup,
 } from '@patternfly/react-core';
@@ -16,8 +20,8 @@ import FormField from '../../../components/FormField';
 import FormActionGroup from '../../../components/FormActionGroup/FormActionGroup';
 import AnsibleSelect from '../../../components/AnsibleSelect';
 import InstanceGroupsLookup from './InstanceGroupsLookup';
-import { required } from '../../../util/validators';
 import { OrganizationsAPI } from '../../../api';
+import { required, minMaxValue } from '../../../util/validators';
 
 class OrganizationForm extends Component {
   constructor (props) {
@@ -79,11 +83,15 @@ class OrganizationForm extends Component {
     const groupsToDisassociate = [...initialIds]
       .filter(x => !updatedIds.includes(x));
 
+    if (typeof values.max_hosts !== 'number' || values.max_hosts === 'undefined') {
+      values.max_hosts = 0;
+    }
+
     handleSubmit(values, groupsToAssociate, groupsToDisassociate);
   }
 
   render () {
-    const { organization, handleCancel, i18n } = this.props;
+    const { organization, handleCancel, i18n, me } = this.props;
     const { instanceGroups, formIsValid, error } = this.state;
     const defaultVenv = '/venv/ansible/';
 
@@ -93,6 +101,7 @@ class OrganizationForm extends Component {
           name: organization.name,
           description: organization.description,
           custom_virtualenv: organization.custom_virtualenv || '',
+          max_hosts: organization.max_hosts || '0',
         }}
         onSubmit={this.handleSubmit}
         render={formik => (
@@ -111,6 +120,30 @@ class OrganizationForm extends Component {
                 name="description"
                 type="text"
                 label={i18n._(t`Description`)}
+              />
+              <FormField
+                id="org-max_hosts"
+                name="max_hosts"
+                type="number"
+                label={
+                  (
+                    <Fragment>
+                      {i18n._(t`Max Hosts`)}
+                      {' '}
+                      {(
+                        <Tooltip
+                          position="right"
+                          content="The maximum number of hosts allowed to be managed by this organization. Value defaults to 0 which means no limit. Refer to the Ansible documentation for more details."
+                        >
+                          <QuestionCircleIcon />
+                        </Tooltip>
+                      )}
+                    </Fragment>
+                  )
+                }
+                validate={minMaxValue(0, 2147483647, i18n)}
+                me={me || {}}
+                isDisabled={!me.is_superuser}
               />
               <Config>
                 {({ custom_virtualenvs }) => (
@@ -153,6 +186,10 @@ class OrganizationForm extends Component {
   }
 }
 
+FormField.propTypes = {
+  label: PropTypes.oneOfType([PropTypes.object, PropTypes.string]).isRequired
+};
+
 OrganizationForm.propTypes = {
   organization: PropTypes.shape(),
   handleSubmit: PropTypes.func.isRequired,
@@ -163,8 +200,9 @@ OrganizationForm.defaultProps = {
   organization: {
     name: '',
     description: '',
+    max_hosts: '0',
     custom_virtualenv: '',
-  }
+  },
 };
 
 OrganizationForm.contextTypes = {

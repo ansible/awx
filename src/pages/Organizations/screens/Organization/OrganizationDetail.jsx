@@ -56,6 +56,7 @@ class OrganizationDetail extends Component {
         name,
         description,
         custom_virtualenv,
+        max_hosts,
         created,
         modified,
         summary_fields
@@ -74,6 +75,10 @@ class OrganizationDetail extends Component {
           <Detail
             label={i18n._(t`Description`)}
             value={description}
+          />
+          <Detail
+            label={i18n._(t`Max Hosts`)}
+            value={`${max_hosts}`}
           />
           <Detail
             label={i18n._(t`Ansible Environment`)}

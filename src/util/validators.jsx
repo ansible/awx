@@ -18,3 +18,12 @@ export function maxLength (max, i18n) {
     return undefined;
   };
 }
+
+export function minMaxValue (min, max, i18n) {
+  return value => {
+    if (value < min || value > max) {
+      return i18n._(t`This field must be a number and have a value between ${min} and ${max}`);
+    }
+    return undefined;
+  };
+}
