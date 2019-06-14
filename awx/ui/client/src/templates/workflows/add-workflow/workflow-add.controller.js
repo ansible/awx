@@ -20,7 +20,7 @@ export default [
 
          const workflowTemplate = resolvedModels[1];
 
-         $scope.canAddWorkflowJobTemplate = workflowTemplate.options('actions.POST');
+         $scope.canAddOrEdit = workflowTemplate.options('actions.POST');
 
          $scope.canEditOrg = true;
          $scope.canEditInventory = true;

@@ -26,12 +26,6 @@ export default [
         $scope.sufficientRoleForNotif =  isNotificationAdmin || $scope.user_is_system_auditor;
         $scope.missingTemplates = _.has(workflowLaunch, 'node_templates_missing') && workflowLaunch.node_templates_missing.length > 0 ? true : false;
 
-        $scope.$watch('workflow_job_template_obj.summary_fields.user_capabilities.edit', function(val) {
-            if (val === false) {
-                $scope.canAddWorkflowJobTemplate = false;
-            }
-        });
-
         const criteriaObj = {
             from: (state) => state.name === 'templates.editWorkflowJobTemplate.workflowMaker',
             to: (state) => state.name === 'templates.editWorkflowJobTemplate'
@@ -289,7 +283,7 @@ export default [
 
         $scope.workflow_job_template_obj = workflowJobTemplateData;
         $scope.name = workflowJobTemplateData.name;
-        $scope.can_edit = workflowJobTemplateData.summary_fields.user_capabilities.edit;
+        $scope.can_edit = $scope.canAddOrEdit = workflowJobTemplateData.summary_fields.user_capabilities.edit;
         $scope.breadcrumb.workflow_job_template_name = $scope.name;
         let fld, i;
         for (fld in form.fields) {
