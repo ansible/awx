@@ -64,33 +64,27 @@ export default ['i18n', function(i18n) {
                 label: i18n._('Hosts'),
                 uiSref: ".edit({inventory_id: host.inventory_id,host_id: host.id})",
                 ngClass: "{ 'host-disabled-label': !host.enabled }",
-                columnClass: 'col-lg-3 col-md-3 col-sm-8 col-xs-7',
+                columnClass: 'col-lg-3 col-md-6 col-sm-8 col-xs-7',
                 dataHostId: "{{ host.id }}",
                 dataType: "host",
                 class: 'InventoryManage-breakWord'
             },
             description: {
-                key: true,
                 label: i18n._('Description'),
-                uiSref: ".edit({inventory_id: host.inventory_id,host_id: host.id})",
-                ngClass: "{ 'host-disabled-label': !host.enabled }",
-                columnClass: 'col-lg-3 col-md-3 col-sm-8 col-xs-7',
-                dataHostId: "{{ host.id }}",
-                dataType: "host",
-                class: 'InventoryManage-breakWord'
+                columnClass: 'd-none d-lg-flex col-lg-3'
             },
             groups: {
                 label: i18n._("Related Groups"),
                 type: 'related_groups',
                 nosort: true,
                 showDelete: true,
-                columnClass: 'd-none d-md-flex List-tableCell col-lg-3 col-md-3'
+                columnClass: 'd-none d-lg-flex List-tableCell col-lg-3'
             }
         },
 
         fieldActions: {
 
-            columnClass: 'col-lg-2 col-sm-3 col-xs-5 text-right',
+            columnClass: 'col-lg-3 col-md-6 col-sm-4 col-xs-5 text-right',
             edit: {
                 ngClick: "editHost(host)",
                 icon: 'icon-edit',
