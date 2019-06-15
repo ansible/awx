@@ -64,7 +64,7 @@ export default ['i18n', function(i18n) {
                 label: i18n._('Hosts'),
                 uiSref: ".edit({inventory_id: host.inventory_id,host_id: host.id})",
                 ngClass: "{ 'host-disabled-label': !host.enabled }",
-                columnClass: 'col-lg-3 col-md-6 col-sm-8 col-xs-7',
+                columnClass: 'col-lg-3 col-md-3 col-sm-3 col-xs-7',
                 dataHostId: "{{ host.id }}",
                 dataType: "host",
                 class: 'InventoryManage-breakWord'
