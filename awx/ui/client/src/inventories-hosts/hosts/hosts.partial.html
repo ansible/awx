@@ -43,8 +43,8 @@
                         <div></div>
                         <div></div>
                         <div class="d-flex h-100">
-                            <div class="List-tableHeader" base-path="hosts" collection="hosts" dataset="host_dataset" column-sort="" column-field="name" column-iterator="host" column-no-sort="undefined" column-label="Name" column-custom-class="col-lg-3 col-md-6 col-sm-8 col-xs-7" query-set="host_queryset"></div>
-                            <div class="List-tableHeader" base-path="hosts" collection="hosts" dataset="host_dataset" column-sort="" column-field="description" column-iterator="host" column-no-sort="undefined" column-label="Description" column-custom-class="col-lg-3" query-set="host_queryset"></div>
+                            <div class="List-tableHeader" base-path="hosts" collection="hosts" dataset="host_dataset" column-sort="" column-field="name" column-iterator="host" column-no-sort="undefined" column-label="Name" column-custom-class="col-lg-3 col-md-3 col-sm-3 col-xs-7" query-set="host_queryset"></div>
+                            <div class="List-tableHeader" base-path="hosts" collection="hosts" dataset="host_dataset" column-sort="" column-field="description" column-iterator="host" column-no-sort="undefined" column-label="Description" column-custom-class="d-none d-sm-flex col-sm-3 ellipsis" query-set="host_queryset"></div>
                             <div class="List-tableHeader" base-path="hosts" collection="hosts" dataset="host_dataset" column-sort="" column-field="inventory" column-iterator="host" column-no-sort="undefined" column-label="Inventory" column-custom-class="d-none d-sm-flex col-sm-3 ellipsis" query-set="host_queryset"></div>
                             <div class="List-tableHeader List-tableHeader--actions actions-column col-lg-3 text-right" translate>Actions</div>
                         </div>
@@ -70,10 +70,10 @@
                                         <a ui-sref="hosts.edit({host_id:host.id})">{{host.name }}</a>
                                     </div>
                                 </div>
-                                <div class="List-tableCell name-column InventoryManage-breakWord col-lg-3">
+                                <div class="List-tableCell name-column InventoryManage-breakWord d-none d-sm-flex col-sm-3 ellipsis">
                                     {{host.description }}
                                 </div>
-                                <div class="List-tableCell inventory_name-column col-lg-3 elllipsis">
+                                <div class="List-tableCell inventory_name-column d-none d-sm-flex col-sm-3 ellipsis">
                                     <div class="host-name">
                                         <a href="#/inventories/inventory/{{host.inventory}}">{{host.inventory_name}}</a>
                                     </div>
