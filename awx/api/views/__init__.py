@@ -2997,7 +2997,7 @@ class WorkflowJobTemplateNodeChildrenBaseList(EnforceParentRelationshipMixin, Su
         relationships = ['success_nodes', 'failure_nodes', 'always_nodes']
         relationships.remove(self.relationship)
         qs = functools.reduce(lambda x, y: (x | y),
-                              (Q(**{'{}__in'.format(rel): [sub.id]}) for rel in relationships))
+                              (Q(**{'{}__in'.format(r): [sub.id]}) for r in relationships))
 
         if models.WorkflowJobTemplateNode.objects.filter(Q(pk=parent.id) & qs).exists():
             return {"Error": _("Relationship not allowed.")}

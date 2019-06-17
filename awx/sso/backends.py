@@ -307,7 +307,7 @@ class SAMLAuth(BaseSAMLAuth):
         return super(SAMLAuth, self).get_user(user_id)
 
 
-def _update_m2m_from_groups(user, ldap_user, rel, opts, remove=True):
+def _update_m2m_from_groups(user, ldap_user, related, opts, remove=True):
     '''
     Hepler function to update m2m relationship based on LDAP group membership.
     '''
@@ -328,10 +328,10 @@ def _update_m2m_from_groups(user, ldap_user, rel, opts, remove=True):
                 should_add = True
     if should_add:
         user.save()
-        rel.add(user)
-    elif remove and user in rel.all():
+        related.add(user)
+    elif remove and user in related.all():
         user.save()
-        rel.remove(user)
+        related.remove(user)
 
 
 @receiver(populate_user, dispatch_uid='populate-ldap-user')

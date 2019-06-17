@@ -401,21 +401,21 @@ class ListAPIView(generics.ListAPIView, GenericAPIView):
                 continue
             if getattr(field, 'related_model', None):
                 fields.add('{}__search'.format(field.name))
-        for rel in self.model._meta.related_objects:
-            name = rel.related_name
-            if isinstance(rel, OneToOneRel) and self.model._meta.verbose_name.startswith('unified'):
+        for related in self.model._meta.related_objects:
+            name = related.related_name
+            if isinstance(related, OneToOneRel) and self.model._meta.verbose_name.startswith('unified'):
                 # Add underscores for polymorphic subclasses for user utility
-                name = rel.related_model._meta.verbose_name.replace(" ", "_")
+                name = related.related_model._meta.verbose_name.replace(" ", "_")
             if skip_related_name(name) or name.endswith('+'):
                 continue
             fields.add('{}__search'.format(name))
-        m2m_rel = []
-        m2m_rel += self.model._meta.local_many_to_many
+        m2m_related = []
+        m2m_related += self.model._meta.local_many_to_many
         if issubclass(self.model, UnifiedJobTemplate) and self.model != UnifiedJobTemplate:
-            m2m_rel += UnifiedJobTemplate._meta.local_many_to_many
+            m2m_related += UnifiedJobTemplate._meta.local_many_to_many
         if issubclass(self.model, UnifiedJob) and self.model != UnifiedJob:
-            m2m_rel += UnifiedJob._meta.local_many_to_many
-        for relationship in m2m_rel:
+            m2m_related += UnifiedJob._meta.local_many_to_many
+        for relationship in m2m_related:
             if skip_related_name(relationship.name):
                 continue
             if relationship.related_model._meta.app_label != 'main':

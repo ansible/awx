@@ -113,14 +113,9 @@ class AutoSingleRelatedObjectDescriptor(ReverseOneToOneDescriptor):
 
     def __get__(self, instance, instance_type=None):
         try:
-            return super(AutoSingleRelatedObjectDescriptor,
-                         self).__get__(instance, instance_type)
+            return super(AutoSingleRelatedObjectDescriptor, self).__get__(instance, instance_type)
         except self.related.related_model.DoesNotExist:
             obj = self.related.related_model(**{self.related.field.name: instance})
-            if self.related.field.rel.parent_link:
-                raise NotImplementedError('not supported with polymorphic!')
-                for f in instance._meta.local_fields:
-                    setattr(obj, f.name, getattr(instance, f.name))
             obj.save()
             return obj
 

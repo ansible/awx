@@ -50,7 +50,7 @@ def prevent_inactive_login(backend, details, user=None, *args, **kwargs):
         raise AuthInactive(backend)
 
 
-def _update_m2m_from_expression(user, rel, expr, remove=True):
+def _update_m2m_from_expression(user, related, expr, remove=True):
     '''
     Helper function to update m2m relationship based on user matching one or
     more expressions.
@@ -73,12 +73,12 @@ def _update_m2m_from_expression(user, rel, expr, remove=True):
                 if ex.match(user.username) or ex.match(user.email):
                     should_add = True
     if should_add:
-        rel.add(user)
+        related.add(user)
     elif remove:
-        rel.remove(user)
+        related.remove(user)
 
 
-def _update_org_from_attr(user, rel, attr, remove, remove_admins):
+def _update_org_from_attr(user, related, attr, remove, remove_admins):
     from awx.main.models import Organization
 
     org_ids = []
@@ -87,7 +87,7 @@ def _update_org_from_attr(user, rel, attr, remove, remove_admins):
         org = Organization.objects.get_or_create(name=org_name)[0]
 
         org_ids.append(org.id)
-        getattr(org, rel).members.add(user)
+        getattr(org, related).members.add(user)
 
     if remove:
         [o.member_role.members.remove(user) for o in

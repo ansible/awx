@@ -101,7 +101,7 @@ def test_instance_group_is_isolated(instance_group, isolated_instance_group):
     assert not instance_group.is_isolated
     assert isolated_instance_group.is_isolated
 
-    isolated_instance_group.instances = []
+    isolated_instance_group.instances.set([])
 
     assert isolated_instance_group.is_isolated
 
