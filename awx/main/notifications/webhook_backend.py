@@ -16,13 +16,17 @@ class WebhookBackend(AWXBaseEmailBackend):
 
     init_parameters = {"url": {"label": "Target URL", "type": "string"},
                        "disable_ssl_verification": {"label": "Verify SSL", "type": "bool", "default": False},
+                       "username": {"label": "Username", "type": "string"},
+                       "password": {"label": "Password", "type": "password"},
                        "headers": {"label": "HTTP Headers", "type": "object"}}
     recipient_parameter = "url"
     sender_parameter = None
 
-    def __init__(self, headers, disable_ssl_verification=False, fail_silently=False, **kwargs):
+    def __init__(self, headers, username, password, disable_ssl_verification=False, fail_silently=False, **kwargs):
         self.disable_ssl_verification = disable_ssl_verification
         self.headers = headers
+        self.username = username
+        self.password = password if password != "" else None
         super(WebhookBackend, self).__init__(fail_silently=fail_silently)
 
     def format_body(self, body):
