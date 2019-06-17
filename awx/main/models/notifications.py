@@ -243,8 +243,6 @@ class JobNotificationMixin(object):
                 notification_template_type = 'error'
             all_notification_templates = set(notification_templates.get(notification_template_type, []))
             if len(all_notification_templates):
-                # if status_str != 'running':
-                #     all_notification_templates.update(notification_templates.get('any', []))
                 try:
                     (notification_subject, notification_body) = getattr(self, 'build_notification_%s_message' % status_str)()
                 except AttributeError:
