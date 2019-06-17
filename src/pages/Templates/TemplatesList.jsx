@@ -7,11 +7,14 @@ import {
   PageSection,
   PageSectionVariants,
 } from '@patternfly/react-core';
-import { UnifiedJobTemplatesAPI } from '../../api';
+import { JobTemplatesAPI, UnifiedJobTemplatesAPI, WorkflowJobTemplatesAPI } from '../../api';
 
 import { getQSConfig, parseNamespacedQueryString } from '../../util/qs';
+import AlertModal from '../../components/AlertModal';
 import DatalistToolbar from '../../components/DataListToolbar';
-import PaginatedDataList from '../../components/PaginatedDataList';
+import PaginatedDataList, {
+  ToolbarDeleteButton
+} from '../../components/PaginatedDataList';
 import TemplateListItem from './components/TemplateListItem';
 
 // The type value in const QS_CONFIG below does not have a space between job_template and
@@ -28,26 +31,33 @@ class TemplatesList extends Component {
     super(props);
 
     this.state = {
-      contentError: false,
       contentLoading: true,
+      contentError: false,
+      deletionError: false,
       selected: [],
       templates: [],
       itemCount: 0,
     };
-    this.loadUnifiedJobTemplates = this.loadUnifiedJobTemplates.bind(this);
+    this.loadTemplates = this.loadTemplates.bind(this);
     this.handleSelectAll = this.handleSelectAll.bind(this);
     this.handleSelect = this.handleSelect.bind(this);
+    this.handleTemplateDelete = this.handleTemplateDelete.bind(this);
+    this.handleDeleteErrorClose = this.handleDeleteErrorClose.bind(this);
   }
 
   componentDidMount () {
-    this.loadUnifiedJobTemplates();
+    this.loadTemplates();
   }
 
   componentDidUpdate (prevProps) {
     const { location } = this.props;
     if (location !== prevProps.location) {
-      this.loadUnifiedJobTemplates();
+      this.loadTemplates();
     }
+  }
+
+  handleDeleteErrorClose () {
+    this.setState({ deletionError: false });
   }
 
   handleSelectAll (isSelected) {
@@ -65,7 +75,28 @@ class TemplatesList extends Component {
     }
   }
 
-  async loadUnifiedJobTemplates () {
+  async handleTemplateDelete () {
+    const { selected } = this.state;
+
+    this.setState({ contentLoading: true, deletionError: false });
+    try {
+      await Promise.all(selected.map(({ type, id }) => {
+        let deletePromise;
+        if (type === 'job_template') {
+          deletePromise = JobTemplatesAPI.destroy(id);
+        } else if (type === 'workflow_job_template') {
+          deletePromise = WorkflowJobTemplatesAPI.destroy(id);
+        }
+        return deletePromise;
+      }));
+    } catch (err) {
+      this.setState({ deletionError: true });
+    } finally {
+      await this.loadTemplates();
+    }
+  }
+
+  async loadTemplates () {
     const { location } = this.props;
     const params = parseNamespacedQueryString(QS_CONFIG, location.search);
 
@@ -88,6 +119,7 @@ class TemplatesList extends Component {
     const {
       contentError,
       contentLoading,
+      deletionError,
       templates,
       itemCount,
       selected,
@@ -120,6 +152,14 @@ class TemplatesList extends Component {
                 showExpandCollapse
                 isAllSelected={isAllSelected}
                 onSelectAll={this.handleSelectAll}
+                additionalControls={[
+                  <ToolbarDeleteButton
+                    key="delete"
+                    onDelete={this.handleTemplateDelete}
+                    itemsToDelete={selected}
+                    itemName={i18n._(t`Template`)}
+                  />
+                ]}
               />
             )}
             renderItem={(template) => (
@@ -134,6 +174,14 @@ class TemplatesList extends Component {
             )}
           />
         </Card>
+        <AlertModal
+          isOpen={deletionError}
+          variant="danger"
+          title={i18n._(t`Error!`)}
+          onClose={this.handleDeleteErrorClose}
+        >
+          {i18n._(t`Failed to delete one or more template.`)}
+        </AlertModal>
       </PageSection>
     );
   }

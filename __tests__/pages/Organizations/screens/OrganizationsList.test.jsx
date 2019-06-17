@@ -1,6 +1,5 @@
 import React from 'react';
-import { createMemoryHistory } from 'history';
-import { mountWithContexts } from '../../../enzymeHelpers';
+import { mountWithContexts, waitForElement } from '../../../enzymeHelpers';
 import OrganizationsList, { _OrganizationsList } from '../../../../src/pages/Organizations/screens/OrganizationsList';
 import { OrganizationsAPI } from '../../../../src/api';
 
@@ -122,25 +121,16 @@ describe('<OrganizationsList />', () => {
     expect(fetchOrgs).toBeCalled();
   });
 
-  test('error is thrown when org not successfully deleted from api', async () => {
-    const history = createMemoryHistory({
-      initialEntries: ['organizations?order_by=name&page=1&page_size=5'],
-    });
-    wrapper = mountWithContexts(
-      <OrganizationsList />,
-      { context: { router: { history } } }
-    );
-    await wrapper.setState({
+  test('error is shown when org not successfully deleted from api', async () => {
+    OrganizationsAPI.destroy = () => Promise.reject();
+    wrapper = mountWithContexts(<OrganizationsList />);
+    wrapper.find('OrganizationsList').setState({
       organizations: mockAPIOrgsList.data.results,
       itemCount: 3,
       isInitialized: true,
-      selected: [...mockAPIOrgsList.data.results].push({
-        name: 'Organization 6',
-        id: 'a',
-      })
+      selected: mockAPIOrgsList.data.results.slice(0, 1)
     });
-    wrapper.update();
-    const component = wrapper.find('OrganizationsList');
-    component.instance().handleOrgDelete();
+    wrapper.find('ToolbarDeleteButton').prop('onDelete')();
+    await waitForElement(wrapper, 'Modal', (el) => el.props().isOpen === true && el.props().title === 'Error!');
   });
 });

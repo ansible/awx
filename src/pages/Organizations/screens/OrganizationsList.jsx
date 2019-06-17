@@ -83,7 +83,6 @@ class OrganizationsList extends Component {
     this.setState({ contentLoading: true, deletionError: false });
     try {
       await Promise.all(selected.map((org) => OrganizationsAPI.destroy(org.id)));
-      this.setState({ selected: [] });
     } catch (err) {
       this.setState({ deletionError: true });
     } finally {
