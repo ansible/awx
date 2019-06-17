@@ -2,11 +2,11 @@
 from __future__ import unicode_literals
 
 from django.db import migrations, models
-import awx.main.models.notifications
-import jsonfield.fields
 import django.db.models.deletion
-import awx.main.models.workflow
+
 import awx.main.fields
+import awx.main.models.notifications
+import awx.main.models.workflow
 
 from . import _squashed
 from ._squashed_30 import SQUASHED_30
@@ -161,7 +161,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='workflowjobnode',
             name='char_prompts',
-            field=jsonfield.fields.JSONField(default={}, blank=True),
+            field=awx.main.fields.JSONField(default={}, blank=True),
         ),
         migrations.AddField(
             model_name='workflowjobnode',
@@ -191,7 +191,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='workflowjobtemplatenode',
             name='char_prompts',
-            field=jsonfield.fields.JSONField(default={}, blank=True),
+            field=awx.main.fields.JSONField(default={}, blank=True),
         ),
         migrations.AddField(
             model_name='workflowjobtemplatenode',
@@ -227,12 +227,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='job',
             name='artifacts',
-            field=jsonfield.fields.JSONField(default={}, editable=False, blank=True),
+            field=awx.main.fields.JSONField(default={}, editable=False, blank=True),
         ),
         migrations.AddField(
             model_name='workflowjobnode',
             name='ancestor_artifacts',
-            field=jsonfield.fields.JSONField(default={}, editable=False, blank=True),
+            field=awx.main.fields.JSONField(default={}, editable=False, blank=True),
         ),
         # Job timeout settings
         migrations.AddField(
@@ -291,7 +291,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='project',
             name='playbook_files',
-            field=jsonfield.fields.JSONField(default=[], help_text='List of playbooks found in the project', verbose_name='Playbook Files', editable=False, blank=True),
+            field=awx.main.fields.JSONField(default=[], help_text='List of playbooks found in the project', verbose_name='Playbook Files', editable=False, blank=True),
         ),
         # Job events to stdout
         migrations.AddField(
@@ -397,7 +397,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='workflowjob',
             name='survey_passwords',
-            field=jsonfield.fields.JSONField(default={}, editable=False, blank=True),
+            field=awx.main.fields.JSONField(default={}, editable=False, blank=True),
         ),
         migrations.AddField(
             model_name='workflowjobtemplate',
@@ -407,7 +407,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='workflowjobtemplate',
             name='survey_spec',
-            field=jsonfield.fields.JSONField(default={}, blank=True),
+            field=awx.main.fields.JSONField(default={}, blank=True),
         ),
         # JSON field changes
         migrations.AlterField(

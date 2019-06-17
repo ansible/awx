@@ -11,7 +11,7 @@ from django.urls import resolve
 from django.contrib.auth.models import User
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.backends.sqlite3.base import SQLiteCursorWrapper
-from jsonbfield.fields import JSONField
+from awx.main.fields import JSONField
 
 # AWX
 from awx.main.models.projects import Project

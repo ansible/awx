@@ -5,16 +5,14 @@
 
 from __future__ import unicode_literals
 
-import awx.main.fields
-
+from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
-from django.conf import settings
 from django.utils.timezone import now
 
-import jsonfield.fields
-import jsonbfield.fields
 import taggit.managers
+
+import awx.main.fields
 
 
 def create_system_job_templates(apps, schema_editor):
@@ -160,7 +158,7 @@ class Migration(migrations.Migration):
                 ('notification_type', models.CharField(max_length=32, choices=[('email', 'Email'), ('slack', 'Slack'), ('twilio', 'Twilio'), ('pagerduty', 'Pagerduty'), ('hipchat', 'HipChat'), ('webhook', 'Webhook'), ('mattermost', 'Mattermost'), ('rocketchat', 'Rocket.Chat'), ('irc', 'IRC')])),
                 ('recipients', models.TextField(default='', editable=False, blank=True)),
                 ('subject', models.TextField(default='', editable=False, blank=True)),
-                ('body', jsonfield.fields.JSONField(default=dict, blank=True)),
+                ('body', awx.main.fields.JSONField(default=dict, blank=True)),
             ],
             options={
                 'ordering': ('pk',),
@@ -175,7 +173,7 @@ class Migration(migrations.Migration):
                 ('description', models.TextField(default='', blank=True)),
                 ('name', models.CharField(unique=True, max_length=512)),
                 ('notification_type', models.CharField(max_length=32, choices=[('email', 'Email'), ('slack', 'Slack'), ('twilio', 'Twilio'), ('pagerduty', 'Pagerduty'), ('hipchat', 'HipChat'), ('webhook', 'Webhook'), ('mattermost', 'Mattermost'), ('rocketchat', 'Rocket.Chat'), ('irc', 'IRC')])),
-                ('notification_configuration', jsonfield.fields.JSONField(default=dict)),
+                ('notification_configuration', awx.main.fields.JSONField(default=dict)),
                 ('created_by', models.ForeignKey(related_name="{u'class': 'notificationtemplate', u'app_label': 'main'}(class)s_created+", on_delete=django.db.models.deletion.SET_NULL, default=None, editable=False, to=settings.AUTH_USER_MODEL, null=True)),
                 ('modified_by', models.ForeignKey(related_name="{u'class': 'notificationtemplate', u'app_label': 'main'}(class)s_modified+", on_delete=django.db.models.deletion.SET_NULL, default=None, editable=False, to=settings.AUTH_USER_MODEL, null=True)),
                 ('organization', models.ForeignKey(related_name='notification_templates', on_delete=django.db.models.deletion.SET_NULL, to='main.Organization', null=True)),
@@ -239,7 +237,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('timestamp', models.DateTimeField(default=None, help_text='Date and time of the corresponding fact scan gathering time.', editable=False)),
                 ('module', models.CharField(max_length=128)),
-                ('facts', jsonbfield.fields.JSONField(default={}, help_text='Arbitrary JSON structure of module facts captured at timestamp for a single host.', blank=True)),
+                ('facts', awx.main.fields.JSONField(default={}, help_text='Arbitrary JSON structure of module facts captured at timestamp for a single host.', blank=True)),
                 ('host', models.ForeignKey(related_name='facts', to='main.Host', help_text='Host for the facts that the fact scan captured.')),
             ],
         ),

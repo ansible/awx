@@ -12,6 +12,7 @@ from jinja2.exceptions import UndefinedError, TemplateSyntaxError
 
 # Django
 import django
+from django.contrib.postgres.fields import JSONField as upstream_JSONField
 from django.core import exceptions as django_exceptions
 from django.db.models.signals import (
     post_save,
@@ -34,10 +35,6 @@ from django.utils.translation import ugettext_lazy as _
 # jsonschema
 from jsonschema import Draft4Validator, FormatChecker
 import jsonschema.exceptions
-
-# Django-JSONField
-from jsonfield import JSONField as upstream_JSONField
-from jsonbfield.fields import JSONField as upstream_JSONBField
 
 # DRF
 from rest_framework import serializers
@@ -82,7 +79,7 @@ class JSONField(upstream_JSONField):
         return super(JSONField, self).from_db_value(value, expression, connection, context)
 
 
-class JSONBField(upstream_JSONBField):
+class JSONBField(upstream_JSONField):
     def get_prep_lookup(self, lookup_type, value):
         if isinstance(value, str) and value == "null":
             return 'null'
