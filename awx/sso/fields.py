@@ -93,12 +93,14 @@ class HybridDictField(fields.DictField):
         self.allow_blank = kwargs.pop('allow_blank', False)
 
         fields = [
-            (field_name, obj)
-            for field_name, obj in self.__class__.__dict__.items()
-            if isinstance(obj, Field) and field_name != 'child'
+            sorted(
+                ((field_name, obj) for field_name, obj in cls.__dict__.items()
+                 if isinstance(obj, Field) and field_name != 'child'),
+                key=lambda x: x[1]._creation_counter
+            )
+            for cls in reversed(self.__class__.__mro__)
         ]
-        fields.sort(key=lambda x: x[1]._creation_counter)
-        self._declared_fields = collections.OrderedDict(fields)
+        self._declared_fields = collections.OrderedDict(f for group in fields for f in group)
 
         super().__init__(*args, **kwargs)
 
