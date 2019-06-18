@@ -7,6 +7,7 @@ import logging
 from django.db import models
 from django.conf import settings
 from django.core.mail.message import EmailMessage
+from django.db import connection
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import smart_str, force_text
 
@@ -129,7 +130,7 @@ class NotificationTemplate(CommonModelNameNotUnique):
             if field not in notification_configuration:
                 if 'default' in params:
                     notification_configuration[field] = params['default']
-        backend_obj = self.notification_class(**notification_configuration) 
+        backend_obj = self.notification_class(**notification_configuration)
         notification_obj = EmailMessage(subject, backend_obj.format_body(body), sender, recipients)
         with set_environ(**settings.AWX_TASK_ENV):
             return backend_obj.send_messages([notification_obj])
@@ -221,10 +222,13 @@ class JobNotificationMixin(object):
     def build_notification_failed_message(self):
         return self._build_notification_message('failed')
 
+    def build_notification_running_message(self):
+        return self._build_notification_message('running')
+
     def send_notification_templates(self, status_str):
         from awx.main.tasks import send_notifications  # avoid circular import
-        if status_str not in ['succeeded', 'failed']:
-            raise ValueError(_("status_str must be either succeeded or failed"))
+        if status_str not in ['succeeded', 'failed', 'running']:
+            raise ValueError(_("status_str must be either running, succeeded or failed"))
         try:
             notification_templates = self.get_notification_templates()
         except Exception:
@@ -233,14 +237,19 @@ class JobNotificationMixin(object):
         if notification_templates:
             if status_str == 'succeeded':
                 notification_template_type = 'success'
+            elif status_str == 'running':
+                notification_template_type = 'started'
             else:
                 notification_template_type = 'error'
-            all_notification_templates = set(notification_templates.get(notification_template_type, []) + notification_templates.get('any', []))
+            all_notification_templates = set(notification_templates.get(notification_template_type, []))
             if len(all_notification_templates):
                 try:
                     (notification_subject, notification_body) = getattr(self, 'build_notification_%s_message' % status_str)()
                 except AttributeError:
                     raise NotImplementedError("build_notification_%s_message() does not exist" % status_str)
-                send_notifications.delay([n.generate_notification(notification_subject, notification_body).id
-                                          for n in all_notification_templates],
-                                         job_id=self.id)
+
+                def send_it():
+                    send_notifications.delay([n.generate_notification(notification_subject, notification_body).id
+                                              for n in all_notification_templates],
+                                             job_id=self.id)
+                connection.on_commit(send_it)

@@ -71,7 +71,7 @@ class TestInventorySourceSerializerGetRelated(object):
         'activity_stream',
         'notification_templates_error',
         'notification_templates_success',
-        'notification_templates_any',
+        'notification_templates_started',
         'inventory_updates',
         'update',
         'hosts',

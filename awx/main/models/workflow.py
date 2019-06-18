@@ -419,13 +419,13 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
         base_notification_templates = NotificationTemplate.objects.all()
         error_notification_templates = list(base_notification_templates
                                             .filter(unifiedjobtemplate_notification_templates_for_errors__in=[self]))
+        started_notification_templates = list(base_notification_templates
+                                              .filter(unifiedjobtemplate_notification_templates_for_started__in=[self]))
         success_notification_templates = list(base_notification_templates
                                               .filter(unifiedjobtemplate_notification_templates_for_success__in=[self]))
-        any_notification_templates = list(base_notification_templates
-                                          .filter(unifiedjobtemplate_notification_templates_for_any__in=[self]))
         return dict(error=list(error_notification_templates),
-                    success=list(success_notification_templates),
-                    any=list(any_notification_templates))
+                    started=list(started_notification_templates),
+                    success=list(success_notification_templates))
 
     def create_unified_job(self, **kwargs):
         workflow_job = super(WorkflowJobTemplate, self).create_unified_job(**kwargs)
