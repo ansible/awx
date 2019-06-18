@@ -5,3 +5,5 @@ pytest-runner
 isort
 virtualenv
 m2r
+flit
+intreehooks
