@@ -13,7 +13,7 @@ import RoutedTabs from '@components/RoutedTabs';
 import JobDetail from './JobDetail';
 import JobOutput from './JobOutput';
 
-export class Job extends Component {
+class Job extends Component {
   constructor (props) {
     super(props);
 
@@ -24,22 +24,22 @@ export class Job extends Component {
       isInitialized: false
     };
 
-    this.fetchJob = this.fetchJob.bind(this);
+    this.loadJob = this.loadJob.bind(this);
   }
 
   async componentDidMount () {
-    await this.fetchJob();
+    await this.loadJob();
     this.setState({ isInitialized: true });
   }
 
   async componentDidUpdate (prevProps) {
     const { location } = this.props;
     if (location !== prevProps.location) {
-      await this.fetchJob();
+      await this.loadJob();
     }
   }
 
-  async fetchJob () {
+  async loadJob () {
     const {
       match,
       setBreadcrumb,
@@ -153,3 +153,4 @@ export class Job extends Component {
 }
 
 export default withI18n()(withRouter(Job));
+export { Job as _Job };

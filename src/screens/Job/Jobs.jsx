@@ -5,7 +5,8 @@ import { t } from '@lingui/macro';
 
 import Breadcrumbs from '@components/Breadcrumbs/Breadcrumbs';
 
-import { Job } from '.';
+import Job from './Job';
+import JobList from './JobList/JobList';
 
 class Jobs extends Component {
   constructor (props) {
@@ -48,6 +49,17 @@ class Jobs extends Component {
         />
         <Switch>
           <Route
+            exact
+            path={match.path}
+            render={() => (
+              <JobList
+                history={history}
+                location={location}
+                setBreadcrumb={this.setBreadcrumbConfig}
+              />
+            )}
+          />
+          <Route
             path={`${match.path}/:id`}
             render={() => (
               <Job
@@ -63,4 +75,5 @@ class Jobs extends Component {
   }
 }
 
+export { Jobs as _Jobs };
 export default withI18n()(withRouter(Jobs));
