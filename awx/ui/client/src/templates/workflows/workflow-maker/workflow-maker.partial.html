@@ -137,6 +137,6 @@
     </div>
     <div class="WorkflowMaker-buttonHolder">
         <button type="button" class="btn btn-sm WorkflowMaker-cancelButton" ng-click="closeDialog()"> {{:: strings.get('CLOSE') }}</button>
-        <button type="button" class="btn btn-sm WorkflowMaker-saveButton" ng-click="saveWorkflowMaker()" ng-show="workflowJobTemplateObj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate" ng-disabled="formState.showNodeForm || formState.showLinkForm"> {{:: strings.get('SAVE') }}</button>
+        <button type="button" class="btn btn-sm WorkflowMaker-saveButton" ng-click="saveWorkflowMaker()" ng-show="workflowJobTemplateObj.summary_fields.user_capabilities.edit || canAddOrEdit" ng-disabled="formState.showNodeForm || formState.showLinkForm"> {{:: strings.get('SAVE') }}</button>
     </div>
 </div>
