@@ -8,12 +8,15 @@ module.exports = {
   moduleNameMapper: {
     '\\.(css|scss|less)$': '<rootDir>/__mocks__/styleMock.js'
   },
+  setupFiles: [
+    '@nteract/mockument'
+  ],
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   snapshotSerializers: [
     "enzyme-to-json/serializer"
   ],
   testMatch: [
-    '<rootDir>/__tests__/**/*.test.{js,jsx}'
+    '<rootDir>/**/*.test.{js,jsx}'
   ],
   testEnvironment: 'jsdom',
   testURL: 'http://127.0.0.1:3001',
