@@ -86,15 +86,13 @@ class OrganizationListItem extends React.Component {
                 </Link>
               </span>
             </DataListCell>,
-            <DataListCell key="org-members" righthalf="true" width={2}>
+            <DataListCell key="related-field-counts" righthalf="true" width={2}>
               <ListGroup>
                 {i18n._(t`Members`)}
                 <Badge isRead>
                   {organization.summary_fields.related_field_counts.users}
                 </Badge>
               </ListGroup>
-            </DataListCell>,
-            <DataListCell key="teams">
               <ListGroup>
                 {i18n._(t`Teams`)}
                 <Badge isRead>
