@@ -1,3 +1,1 @@
-import BrandLogo from './BrandLogo';
-
-export default BrandLogo;
+export { default } from './BrandLogo';

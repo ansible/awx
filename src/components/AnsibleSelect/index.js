@@ -1,3 +1,1 @@
-import AnsibleSelect from './AnsibleSelect';
-
-export default AnsibleSelect;
+export { default } from './AnsibleSelect';

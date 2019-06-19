@@ -124,7 +124,7 @@ API requests can and will fail occasionally so they should include explicit erro
 
 ### App structure
 
-All source code lives in the `/src` directory and all tests live in the `/__tests__` directory (mimicing the internal structure of `/src`).
+All source code lives in the `/src` directory and all tests live in the `/testUtils` directory (mimicing the internal structure of `/src`).
 
 Inside these folders, the internal structure is:
 - **/components** - All generic components that are meant to be used in multiple contexts throughout awx.  Things like buttons, tabs go here.
@@ -251,7 +251,7 @@ this.state = {
 
 ### Testing components that use contexts
 
-We have several React contexts that wrap much of the app, including those from react-router, lingui, and some of our own. When testing a component that depends on one or more of these, you can use the `mountWithContexts()` helper function found in `__tests__/enzymeHelpers.jsx`. This can be used just like Enzyme's `mount()` function, except it will wrap the component tree with the necessary context providers and basic stub data.
+We have several React contexts that wrap much of the app, including those from react-router, lingui, and some of our own. When testing a component that depends on one or more of these, you can use the `mountWithContexts()` helper function found in `testUtils/enzymeHelpers.jsx`. This can be used just like Enzyme's `mount()` function, except it will wrap the component tree with the necessary context providers and basic stub data.
 
 If you want to stub the value of a context, or assert actions taken on it, you can customize a contexts value by passing a second parameter to `mountWithContexts`. For example, this provides a custom value for the `Config` context:
 

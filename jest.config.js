@@ -3,7 +3,8 @@ module.exports = {
     'src/**/*.{js,jsx}'
   ],
   coveragePathIgnorePatterns: [
-    '<rootDir>/src/locales'
+    '<rootDir>/src/locales',
+    'index.js'
   ],
   moduleNameMapper: {
     '\\.(css|scss|less)$': '<rootDir>/__mocks__/styleMock.js'

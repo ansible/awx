@@ -1,3 +1,1 @@
-import SelectedList from './SelectedList';
-
-export default SelectedList;
+export { default } from './SelectedList';

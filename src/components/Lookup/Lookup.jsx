@@ -13,7 +13,7 @@ import { t } from '@lingui/macro';
 
 import PaginatedDataList from '../PaginatedDataList';
 import DataListToolbar from '../DataListToolbar';
-import CheckboxListItem from '../ListItem';
+import CheckboxListItem from '../CheckboxListItem';
 import SelectedList from '../SelectedList';
 import { ChipGroup, Chip } from '../Chip';
 import { getQSConfig, parseNamespacedQueryString } from '../../util/qs';

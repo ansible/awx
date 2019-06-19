@@ -1,3 +1,1 @@
-import VerticalSeparator from './VerticalSeparator';
-
-export default VerticalSeparator;
+export { default } from './VerticalSeparator';

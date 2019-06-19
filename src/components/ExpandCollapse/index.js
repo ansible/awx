@@ -1,3 +1,1 @@
-import ExpandCollapse from './ExpandCollapse';
-
-export default ExpandCollapse;
+export { default } from './ExpandCollapse';

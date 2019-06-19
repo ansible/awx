@@ -1,7 +1,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { Formik } from 'formik';
-import { sleep } from '../../../__tests__/testUtils';
+import { sleep } from '../../../testUtils/testUtils';
 import VariablesField from './VariablesField';
 
 describe('VariablesField', () => {

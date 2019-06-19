@@ -1,3 +1,1 @@
-import DataListToolbar from './DataListToolbar';
-
-export default DataListToolbar;
+export { default } from './DataListToolbar';
