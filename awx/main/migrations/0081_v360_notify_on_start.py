@@ -38,7 +38,8 @@ class Migration(migrations.Migration):
             field=models.ManyToManyField(blank=True, related_name='unifiedjobtemplate_notification_templates_for_started', to='main.NotificationTemplate'),
         ),
         # Separate out "any" notifications into "success" and "error" before the "any" state gets deleted.
-        migrations.RunPython(forwards_split_unified_job_template_any, forwards_split_organization_any),
+        migrations.RunPython(forwards_split_unified_job_template_any, None),
+        migrations.RunPython(forwards_split_organization_any, None),
         migrations.RemoveField(
             model_name='organization',
             name='notification_templates_any',
