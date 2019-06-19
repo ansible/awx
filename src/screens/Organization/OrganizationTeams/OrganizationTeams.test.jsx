@@ -1,11 +1,13 @@
 import React from 'react';
 import { shallow } from 'enzyme';
-import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
-import { sleep } from '../../../../testUtils/testUtils';
-import OrganizationTeams from './OrganizationTeams';
-import { OrganizationsAPI } from '../../../api';
 
-jest.mock('../../../api');
+import { OrganizationsAPI } from '@api';
+import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { sleep } from '@testUtils/testUtils';
+
+import OrganizationTeams from './OrganizationTeams';
+
+jest.mock('@api');
 
 const listData = {
   data: {

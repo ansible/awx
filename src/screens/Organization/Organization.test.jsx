@@ -1,9 +1,11 @@
 import React from 'react';
-import { mountWithContexts, waitForElement } from '../../../testUtils/enzymeHelpers';
-import Organization from './Organization';
-import { OrganizationsAPI } from '../../api';
 
-jest.mock('../../api');
+import { OrganizationsAPI } from '@api';
+import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+
+import Organization from './Organization';
+
+jest.mock('@api');
 
 const mockMe = {
   is_super_user: true,

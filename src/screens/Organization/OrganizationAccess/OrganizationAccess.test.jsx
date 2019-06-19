@@ -1,10 +1,13 @@
 import React from 'react';
-import { mountWithContexts, waitForElement } from '../../../../testUtils/enzymeHelpers';
-import OrganizationAccess from './OrganizationAccess';
-import { sleep } from '../../../../testUtils/testUtils';
-import { OrganizationsAPI, TeamsAPI, UsersAPI } from '../../../api';
 
-jest.mock('../../../api');
+import { sleep } from '@testUtils/testUtils';
+import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+
+import { OrganizationsAPI, TeamsAPI, UsersAPI } from '@api';
+
+import OrganizationAccess from './OrganizationAccess';
+
+jest.mock('@api');
 
 describe('<OrganizationAccess />', () => {
   const organization = {

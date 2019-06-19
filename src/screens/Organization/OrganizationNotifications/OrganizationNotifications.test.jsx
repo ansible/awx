@@ -1,10 +1,11 @@
 import React from 'react';
-import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
-import OrganizationNotifications from './OrganizationNotifications';
-import { sleep } from '../../../../testUtils/testUtils';
-import { OrganizationsAPI } from '../../../api';
+import { OrganizationsAPI } from '@api';
+import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { sleep } from '@testUtils/testUtils';
 
-jest.mock('../../../api');
+import OrganizationNotifications from './OrganizationNotifications';
+
+jest.mock('@api');
 
 describe('<OrganizationNotifications />', () => {
   let data;

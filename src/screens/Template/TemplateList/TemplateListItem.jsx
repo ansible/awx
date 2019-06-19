@@ -9,8 +9,8 @@ import {
 } from '@patternfly/react-core';
 import styled from 'styled-components';
 
-import { toTitleCase } from '../../../util/strings';
-import VerticalSeparator from '../../../components/VerticalSeparator';
+import VerticalSeparator from '@components/VerticalSeparator';
+import { toTitleCase } from '@util/strings';
 
 const DataListCell = styled(PFDataListCell)`
   display: flex;

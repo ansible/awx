@@ -1,6 +1,8 @@
 import React from 'react';
+
+import { mountWithContexts } from '@testUtils/enzymeHelpers';
+
 import Templates from './Templates';
-import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 
 describe('<Templates />', () => {
   let pageWrapper;

@@ -13,11 +13,10 @@ import {
 import {
   Link
 } from 'react-router-dom';
-
 import styled from 'styled-components';
 
-import VerticalSeparator from '../../../components/VerticalSeparator';
-import { Organization } from '../../../types';
+import VerticalSeparator from '@components/VerticalSeparator';
+import { Organization } from '@types';
 
 const Badge = styled(PFBadge)`
   align-items: center;

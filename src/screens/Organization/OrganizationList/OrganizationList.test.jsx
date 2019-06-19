@@ -1,9 +1,10 @@
 import React from 'react';
-import { mountWithContexts, waitForElement } from '../../../../testUtils/enzymeHelpers';
-import OrganizationsList, { _OrganizationsList } from './OrganizationList';
-import { OrganizationsAPI } from '../../../api';
+import { OrganizationsAPI } from '@api';
+import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
 
-jest.mock('../../../api');
+import OrganizationsList, { _OrganizationsList } from './OrganizationList';
+
+jest.mock('@api');
 
 const mockAPIOrgsList = {
   data: {

@@ -1,11 +1,11 @@
 import React from 'react';
-import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
+
+import { OrganizationsAPI } from '@api';
+import { mountWithContexts } from '@testUtils/enzymeHelpers';
 
 import OrganizationEdit from './OrganizationEdit';
 
-import { OrganizationsAPI } from '../../../api';
-
-jest.mock('../../../api');
+jest.mock('@api');
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 

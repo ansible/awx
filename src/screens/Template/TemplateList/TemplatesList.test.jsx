@@ -1,9 +1,14 @@
 import React from 'react';
-import { mountWithContexts, waitForElement } from '../../../../testUtils/enzymeHelpers';
-import TemplatesList, { _TemplatesList } from './TemplateList';
-import { JobTemplatesAPI, UnifiedJobTemplatesAPI, WorkflowJobTemplatesAPI } from '../../../api';
+import {
+  JobTemplatesAPI,
+  UnifiedJobTemplatesAPI,
+  WorkflowJobTemplatesAPI
+} from '@api';
+import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
 
-jest.mock('../../../api');
+import TemplatesList, { _TemplatesList } from './TemplateList';
+
+jest.mock('@api');
 
 const mockTemplates = [{
   id: 1,

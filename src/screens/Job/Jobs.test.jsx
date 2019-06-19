@@ -1,6 +1,8 @@
 import React from 'react';
 import { createMemoryHistory } from 'history';
-import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
+
+import { mountWithContexts } from '@testUtils/enzymeHelpers';
+
 import Jobs from './Jobs';
 
 describe('<Jobs />', () => {

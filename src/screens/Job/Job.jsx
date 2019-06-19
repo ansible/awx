@@ -4,10 +4,12 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
 import { Card, CardHeader as PFCardHeader, PageSection } from '@patternfly/react-core';
-import { JobsAPI } from '../../api';
-import ContentError from '../../components/ContentError';
-import CardCloseButton from '../../components/CardCloseButton';
-import RoutedTabs from '../../components/RoutedTabs';
+
+import { JobsAPI } from '@api';
+import ContentError from '@components/ContentError';
+import CardCloseButton from '@components/CardCloseButton';
+import RoutedTabs from '@components/RoutedTabs';
+
 import JobDetail from './JobDetail';
 import JobOutput from './JobOutput';
 

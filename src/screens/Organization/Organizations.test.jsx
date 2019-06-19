@@ -1,8 +1,8 @@
 import React from 'react';
-import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
+import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import Organizations from './Organizations';
 
-jest.mock('../../../src/api');
+jest.mock('@api');
 
 describe('<Organizations />', () => {
   test('initially renders succesfully', () => {

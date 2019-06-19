@@ -5,6 +5,9 @@ const TARGET_PORT = process.env.TARGET_PORT || 8043;
 const TARGET_HOST = process.env.TARGET_HOST || 'localhost';
 const TARGET = `https://${TARGET_HOST}:${TARGET_PORT}`;
 
+const ROOT_PATH = __dirname;
+const SRC_PATH = path.join(ROOT_PATH, 'src');
+
 module.exports = {
   entry: './src/index.jsx',
   module: {
@@ -53,7 +56,16 @@ module.exports = {
     ]
   },
   resolve: {
-    extensions: ['*', '.js', '.jsx', '.css']
+    extensions: ['*', '.js', '.jsx', '.css'],
+    alias: {
+      '@api': path.join(SRC_PATH, 'api'),
+      '@components': path.join(SRC_PATH, 'components'),
+      '@contexts': path.join(SRC_PATH, 'contexts'),
+      '@screens': path.join(SRC_PATH, 'screens'),
+      '@types': path.join(SRC_PATH, 'types'),
+      '@util': path.join(SRC_PATH, 'util'),
+      '@testUtils': path.join(ROOT_PATH, 'testUtils'),
+    }
   },
   output: {
     path: path.resolve(__dirname, '/dist'),

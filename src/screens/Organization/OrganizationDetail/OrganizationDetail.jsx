@@ -5,11 +5,11 @@ import { t } from '@lingui/macro';
 import { CardBody as PFCardBody, Button } from '@patternfly/react-core';
 import styled from 'styled-components';
 
-import { DetailList, Detail } from '../../../components/DetailList';
-import { ChipGroup, Chip } from '../../../components/Chip';
-import ContentError from '../../../components/ContentError';
-import ContentLoading from '../../../components/ContentLoading';
-import { OrganizationsAPI } from '../../../api';
+import { OrganizationsAPI } from '@api';
+import { DetailList, Detail } from '@components/DetailList';
+import { ChipGroup, Chip } from '@components/Chip';
+import ContentError from '@components/ContentError';
+import ContentLoading from '@components/ContentLoading';
 
 const CardBody = styled(PFCardBody)`
   padding-top: 20px;

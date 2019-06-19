@@ -2,10 +2,11 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import { CardBody } from '@patternfly/react-core';
-import OrganizationForm from '../shared/OrganizationForm';
-import { Config } from '../../../contexts/Config';
 
-import { OrganizationsAPI } from '../../../api';
+import { OrganizationsAPI } from '@api';
+import { Config } from '@contexts/Config';
+
+import OrganizationForm from '../shared/OrganizationForm';
 
 class OrganizationEdit extends Component {
   constructor (props) {

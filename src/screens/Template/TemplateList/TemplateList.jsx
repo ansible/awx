@@ -7,14 +7,19 @@ import {
   PageSection,
   PageSectionVariants,
 } from '@patternfly/react-core';
-import { JobTemplatesAPI, UnifiedJobTemplatesAPI, WorkflowJobTemplatesAPI } from '../../../api';
 
-import { getQSConfig, parseNamespacedQueryString } from '../../../util/qs';
-import AlertModal from '../../../components/AlertModal';
-import DatalistToolbar from '../../../components/DataListToolbar';
+import {
+  JobTemplatesAPI,
+  UnifiedJobTemplatesAPI,
+  WorkflowJobTemplatesAPI
+} from '@api';
+import AlertModal from '@components/AlertModal';
+import DatalistToolbar from '@components/DataListToolbar';
 import PaginatedDataList, {
   ToolbarDeleteButton
-} from '../../../components/PaginatedDataList';
+} from '@components/PaginatedDataList';
+import { getQSConfig, parseNamespacedQueryString } from '@util/qs';
+
 import TemplateListItem from './TemplateListItem';
 
 // The type value in const QS_CONFIG below does not have a space between job_template and
