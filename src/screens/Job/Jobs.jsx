@@ -2,7 +2,9 @@ import React, { Component, Fragment } from 'react';
 import { Route, withRouter, Switch } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import Breadcrumbs from '../../components/Breadcrumbs/Breadcrumbs';
+
+import Breadcrumbs from '@components/Breadcrumbs/Breadcrumbs';
+
 import { Job } from '.';
 
 class Jobs extends Component {

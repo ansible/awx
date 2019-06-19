@@ -8,15 +8,16 @@ import {
   PageSectionVariants,
 } from '@patternfly/react-core';
 
+import { OrganizationsAPI } from '@api';
+import AlertModal from '@components/AlertModal';
+import DataListToolbar from '@components/DataListToolbar';
 import PaginatedDataList, {
+  ToolbarAddButton,
   ToolbarDeleteButton,
-  ToolbarAddButton
-} from '../../../components/PaginatedDataList';
-import DataListToolbar from '../../../components/DataListToolbar';
+} from '@components/PaginatedDataList';
+import { getQSConfig, parseNamespacedQueryString } from '@util/qs';
+
 import OrganizationListItem from './OrganizationListItem';
-import AlertModal from '../../../components/AlertModal';
-import { getQSConfig, parseNamespacedQueryString } from '../../../util/qs';
-import { OrganizationsAPI } from '../../../api';
 
 const QS_CONFIG = getQSConfig('organization', {
   page: 1,

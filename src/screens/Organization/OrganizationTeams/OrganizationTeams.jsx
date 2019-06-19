@@ -1,9 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
-import PaginatedDataList from '../../../components/PaginatedDataList';
-import { getQSConfig, parseNamespacedQueryString } from '../../../util/qs';
-import { OrganizationsAPI } from '../../../api';
+
+import { OrganizationsAPI } from '@api';
+import PaginatedDataList from '@components/PaginatedDataList';
+import { getQSConfig, parseNamespacedQueryString } from '@util/qs';
 
 const QS_CONFIG = getQSConfig('team', {
   page: 1,

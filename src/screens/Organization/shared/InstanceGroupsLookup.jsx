@@ -5,9 +5,8 @@ import { t } from '@lingui/macro';
 import { FormGroup, Tooltip } from '@patternfly/react-core';
 import { QuestionCircleIcon } from '@patternfly/react-icons';
 
-import Lookup from '../../../components/Lookup';
-
-import { InstanceGroupsAPI } from '../../../api';
+import { InstanceGroupsAPI } from '@api';
+import Lookup from '@components/Lookup';
 
 const getInstanceGroups = async (params) => InstanceGroupsAPI.read(params);
 

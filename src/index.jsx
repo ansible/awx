@@ -13,36 +13,35 @@ import { t } from '@lingui/macro';
 import '@patternfly/react-core/dist/styles/base.css';
 import './app.scss';
 
-import Background from './components/Background';
+import { isAuthenticated } from '@util/auth';
+import Background from '@components/Background';
+import Applications from '@screens/Application';
+import Credentials from '@screens/Credential';
+import CredentialTypes from '@screens/CredentialType';
+import Dashboard from '@screens/Dashboard';
+import InstanceGroups from '@screens/InstanceGroup';
+import Inventories from '@screens/Inventory';
+import InventoryScripts from '@screens/InventoryScript';
+import { Jobs } from '@screens/Job';
+import Login from '@screens/Login';
+import ManagementJobs from '@screens/ManagementJob';
+import NotificationTemplates from '@screens/NotificationTemplate';
+import Organizations from '@screens/Organization';
+import Portal from '@screens/Portal';
+import Projects from '@screens/Project';
+import Schedules from '@screens/Schedule';
+import AuthSettings from '@screens/AuthSetting';
+import JobsSettings from '@screens/JobsSetting';
+import SystemSettings from '@screens/SystemSetting';
+import UISettings from '@screens/UISetting';
+import License from '@screens/License';
+import Teams from '@screens/Team';
+import Templates from '@screens/Template';
+import Users from '@screens/User';
 
-import RootProvider from './RootProvider';
 import App from './App';
+import RootProvider from './RootProvider';
 import { BrandName } from './variables';
-import { isAuthenticated } from './util/auth';
-
-import Applications from './screens/Application';
-import Credentials from './screens/Credential';
-import CredentialTypes from './screens/CredentialType';
-import Dashboard from './screens/Dashboard';
-import InstanceGroups from './screens/InstanceGroup';
-import Inventories from './screens/Inventory';
-import InventoryScripts from './screens/InventoryScript';
-import { Jobs } from './screens/Job';
-import Login from './screens/Login';
-import ManagementJobs from './screens/ManagementJob';
-import NotificationTemplates from './screens/NotificationTemplate';
-import Organizations from './screens/Organization';
-import Portal from './screens/Portal';
-import Projects from './screens/Project';
-import Schedules from './screens/Schedule';
-import AuthSettings from './screens/AuthSetting';
-import JobsSettings from './screens/JobsSetting';
-import SystemSettings from './screens/SystemSetting';
-import UISettings from './screens/UISetting';
-import License from './screens/License';
-import Teams from './screens/Team';
-import Templates from './screens/Template';
-import Users from './screens/User';
 
 // eslint-disable-next-line import/prefer-default-export
 export function main (render) {

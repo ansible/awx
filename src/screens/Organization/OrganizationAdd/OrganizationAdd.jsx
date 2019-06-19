@@ -11,10 +11,11 @@ import {
   Tooltip,
 } from '@patternfly/react-core';
 
-import { Config } from '../../../contexts/Config';
-import CardCloseButton from '../../../components/CardCloseButton';
+import { OrganizationsAPI } from '@api';
+import { Config } from '@contexts/Config';
+import CardCloseButton from '@components/CardCloseButton';
+
 import OrganizationForm from '../shared/OrganizationForm';
-import { OrganizationsAPI } from '../../../api';
 
 class OrganizationAdd extends React.Component {
   constructor (props) {

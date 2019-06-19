@@ -1,10 +1,12 @@
 import React from 'react';
-import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
-import { sleep } from '../../../../testUtils/testUtils';
-import OrganizationForm from './OrganizationForm';
-import { OrganizationsAPI } from '../../../api';
 
-jest.mock('../../../api');
+import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { sleep } from '@testUtils/testUtils';
+import { OrganizationsAPI } from '@api';
+
+import OrganizationForm from './OrganizationForm';
+
+jest.mock('@api');
 
 describe('<OrganizationForm />', () => {
   const network = {};

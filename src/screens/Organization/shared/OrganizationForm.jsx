@@ -13,14 +13,15 @@ import {
   FormGroup,
 } from '@patternfly/react-core';
 
-import { Config } from '../../../contexts/Config';
-import FormRow from '../../../components/FormRow';
-import FormField from '../../../components/FormField';
-import FormActionGroup from '../../../components/FormActionGroup/FormActionGroup';
-import AnsibleSelect from '../../../components/AnsibleSelect';
+import { OrganizationsAPI } from '@api';
+import { Config } from '@contexts/Config';
+import FormRow from '@components/FormRow';
+import FormField from '@components/FormField';
+import FormActionGroup from '@components/FormActionGroup/FormActionGroup';
+import AnsibleSelect from '@components/AnsibleSelect';
+import { required, minMaxValue } from '@util/validators';
+
 import InstanceGroupsLookup from './InstanceGroupsLookup';
-import { OrganizationsAPI } from '../../../api';
-import { required, minMaxValue } from '../../../util/validators';
 
 class OrganizationForm extends Component {
   constructor (props) {

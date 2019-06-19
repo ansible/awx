@@ -2,19 +2,21 @@ import React, { Fragment } from 'react';
 import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import AlertModal from '../../../components/AlertModal';
-import PaginatedDataList, { ToolbarAddButton } from '../../../components/PaginatedDataList';
-import DataListToolbar from '../../../components/DataListToolbar';
-import OrganizationAccessItem from './OrganizationAccessItem';
-import DeleteRoleConfirmationModal from './DeleteRoleConfirmationModal';
-import AddResourceRole from '../../../components/AddRole/AddResourceRole';
+
+import { OrganizationsAPI, TeamsAPI, UsersAPI } from '@api';
+import AddResourceRole from '@components/AddRole/AddResourceRole';
+import AlertModal from '@components/AlertModal';
+import DataListToolbar from '@components/DataListToolbar';
+import PaginatedDataList, { ToolbarAddButton } from '@components/PaginatedDataList';
 import {
   getQSConfig,
   encodeQueryString,
   parseNamespacedQueryString
-} from '../../../util/qs';
-import { Organization } from '../../../types';
-import { OrganizationsAPI, TeamsAPI, UsersAPI } from '../../../api';
+} from '@util/qs';
+import { Organization } from '@types';
+
+import DeleteRoleConfirmationModal from './DeleteRoleConfirmationModal';
+import OrganizationAccessItem from './OrganizationAccessItem';
 
 const QS_CONFIG = getQSConfig('access', {
   page: 1,
