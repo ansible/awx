@@ -122,5 +122,5 @@ wheel==0.30.0             # via azure-cli-core
 xmltodict==0.12.0         # via pywinrm
 
 # The following packages are considered to be unsafe in a requirements file:
-pip==19.1.1
-setuptools==41.0.1
+pip==9.0.1
+setuptools==36.0.1
