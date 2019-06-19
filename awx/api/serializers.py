@@ -1943,6 +1943,25 @@ class InventorySourceOptionsSerializer(BaseSerializer):
 
         return super(InventorySourceOptionsSerializer, self).validate(attrs)
 
+    # TODO: remove when old 'credential' fields are removed
+    def get_summary_fields(self, obj):
+        summary_fields = super(InventorySourceOptionsSerializer, self).get_summary_fields(obj)
+        all_creds = []
+        if 'credential' in summary_fields:
+            cred = obj.get_cloud_credential()
+            if cred:
+                summarized_cred = {
+                    'id': cred.id, 'name': cred.name, 'description': cred.description,
+                    'kind': cred.kind, 'cloud': True
+                }
+                summary_fields['credential'] = summarized_cred
+                all_creds.append(summarized_cred)
+                summary_fields['credential']['credential_type_id'] = cred.credential_type_id
+            else:
+                summary_fields.pop('credential')
+        summary_fields['credentials'] = all_creds
+        return summary_fields
+
 
 class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOptionsSerializer):
 
