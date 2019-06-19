@@ -3,6 +3,7 @@
 
 import logging
 import requests
+import base64
 
 from django.utils.encoding import smart_text
 from django.utils.translation import ugettext_lazy as _
@@ -16,13 +17,13 @@ class WebhookBackend(AWXBaseEmailBackend):
 
     init_parameters = {"url": {"label": "Target URL", "type": "string"},
                        "disable_ssl_verification": {"label": "Verify SSL", "type": "bool", "default": False},
-                       "username": {"label": "Username", "type": "string"},
-                       "password": {"label": "Password", "type": "password"},
+                       "username": {"label": "Username", "type": "string", "default": ""},
+                       "password": {"label": "Password", "type": "password", "default": ""},
                        "headers": {"label": "HTTP Headers", "type": "object"}}
     recipient_parameter = "url"
     sender_parameter = None
 
-    def __init__(self, headers, username, password, disable_ssl_verification=False, fail_silently=False, **kwargs):
+    def __init__(self, headers, disable_ssl_verification=False, fail_silently=False, username=None, password=None, **kwargs):
         self.disable_ssl_verification = disable_ssl_verification
         self.headers = headers
         self.username = username
@@ -36,6 +37,7 @@ class WebhookBackend(AWXBaseEmailBackend):
         sent_messages = 0
         if 'User-Agent' not in self.headers:
             self.headers['User-Agent'] = "Tower {}".format(get_awx_version())
+        self.headers['Authorization'] = base64.b64encode("{}:{}".format(self.username, self.password).encode())
         for m in messages:
             r = requests.post("{}".format(m.recipients()[0]),
                               json=m.body,
