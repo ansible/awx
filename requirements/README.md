@@ -1,8 +1,6 @@
 The requirements.txt and requirements_ansible.txt files are generated from requirements.in and requirements_ansible.in, respectively, using `pip-tools` `pip-compile`. The following commands should do this if ran inside the tools_awx container.
 
 Run these commands from the root of the awx repo. This will produce python 3 requirements files.
-If you do not wish to upgrade dependencies generally (such as adding a specific dependency
-needed for a feature) then do not use the `-U` flag.
 
 ```
 python3 -m venv /buildit
