@@ -134,7 +134,7 @@ secret_key=awxsecret
 # this variable causes the CA Anchors directory on the host to be bind mounted over
 # /etc/pki/ca-trust/source/anchors in the awx_task and awx_web containers.
 # NOTE: This option is only obeyed in the local_docker install as the container image
-# must to be customized with the `update-ca-trust` command.
+# must be customized with the `update-ca-trust` command.
 #ca_trust_anchors_dir=/etc/pki/ca-trust/source/anchors
 
 # To provide custom CA certificates in deployments with the official AWX images, it is
