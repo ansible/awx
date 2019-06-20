@@ -152,7 +152,7 @@
         args:
           chdir: "{{project_path|quote}}/roles"
         register: galaxy_result
-        when: doesRequirementsExist.stat.exists and (scm_version is undefined or (git_result is defined and git_result['before'] == git_result['after']))
+        when: doesRequirementsExist.stat.exists and (scm_version is undefined or (git_result is not skipped and git_result['before'] == git_result['after']))
         changed_when: "'was installed successfully' in galaxy_result.stdout"
 
       - name: fetch galaxy roles from requirements.yml (forced update)
