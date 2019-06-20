@@ -25,6 +25,10 @@ INTERNAL_API_URL = 'http://awxweb:8052'
 # Container environments don't like chroots
 AWX_PROOT_ENABLED = False
 
+{% if git_ssl_no_verify is defined %}
+# Do not verify git SSL
+AWX_TASK_ENV['GIT_SSL_NO_VERIFY'] = True
+{% endif %}
 
 CLUSTER_HOST_ID = "awx"
 SYSTEM_UUID = '00000000-0000-0000-0000-000000000000'

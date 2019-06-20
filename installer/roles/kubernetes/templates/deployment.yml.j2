@@ -143,7 +143,7 @@ spec:
           volumeMounts:
 {% if ca_trust_dir is defined %}
             - name: {{ kubernetes_deployment_name }}-ca-trust-dir
-              mountPath: "/etc/pki/ca-trust/source/anchors/"
+              mountPath: "/etc/pki/ca-trust"
               readOnly: true
 {% endif %}
 {% if project_data_dir is defined %}
@@ -188,7 +188,7 @@ spec:
           volumeMounts:
 {% if ca_trust_dir is defined %}
             - name: {{ kubernetes_deployment_name }}-ca-trust-dir
-              mountPath: "/etc/pki/ca-trust/source/anchors/"
+              mountPath: "/etc/pki/ca-trust"
               readOnly: true
 {% endif %}
             - name: {{ kubernetes_deployment_name }}-application-config

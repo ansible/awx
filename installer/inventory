@@ -131,9 +131,26 @@ secret_key=awxsecret
 #project_data_dir=/var/lib/awx/projects
 
 # CA Trust directory. If you need to provide custom CA certificates, supplying
-# this variable causes this directory on the host to be bind mounted over
-# /etc/pki/ca-trust in the awx_task and awx_web containers.
-#ca_trust_dir=/etc/pki/ca-trust/source/anchors
+# this variable causes the CA Anchors directory on the host to be bind mounted over
+# /etc/pki/ca-trust/source/anchors in the awx_task and awx_web containers.
+# NOTE: This option is only obeyed in the local_docker install as the container image
+# must to be customized with the `update-ca-trust` command.
+#ca_trust_anchors_dir=/etc/pki/ca-trust/source/anchors
+
+# To provide custom CA certificates in deployments with the official AWX images, it is
+# preferrabled to export the whole /etc/pki/ca-trust directory from the host node to be
+# mounted over the /etc/pki/ca-trust directory in the awx_task and awx_web containers.
+# NOTE: This option will be obeyed in local_docker or kubernetes install and does not require
+# the `update-ca-trust` command.
+#ca_trust_dir=/etc/pki/ca-trust
+
+# Git SCM SSL Verify
+# By default, AWX must trust in the Certificate Authority used to sign an SSL certificate
+# whenever syncing a Git SCM project. If the CA is not trusted, you might face the
+# 'Peer's Certificate issuer is not recognized' error.
+# Besides being not recommended, you can enable this option to allow AWX to sync Git SCM projects
+# with verifying its Certificate Authority.
+#git_ssl_no_verify=true
 
 # Include /etc/nginx/awx_extra.conf
 # Note the use of glob pattern for nginx

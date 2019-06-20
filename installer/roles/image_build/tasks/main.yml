@@ -150,7 +150,7 @@
 
 - name: Stage settings.py
   copy:
-    src: settings.py
+    src: settings.py.j2
     dest: "{{ docker_base_path }}/settings.py"
   delegate_to: localhost
 

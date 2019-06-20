@@ -26,8 +26,11 @@ services:
     {% if project_data_dir is defined %}
       - "{{ project_data_dir +':/var/lib/awx/projects:rw' }}"
     {% endif %}
+    {% if ca_trust_anchors_dir is defined %}
+      - "{{ ca_trust_anchors_dir +':/etc/pki/ca-trust/source/anchors:ro' }}"
+    {% endif %}
     {% if ca_trust_dir is defined %}
-      - "{{ ca_trust_dir +':/etc/pki/ca-trust/source/anchors:ro' }}"
+      - "{{ ca_trust_dir +':/etc/pki/ca-trust:ro' }}"
     {% endif %}
     {% if ssl_certificate is defined %}
       - "{{ ssl_certificate +':/etc/nginx/awxweb.pem:ro' }}"
@@ -75,8 +78,11 @@ services:
     {% if project_data_dir is defined %}
       - "{{ project_data_dir +':/var/lib/awx/projects:rw' }}"
     {% endif %}
+    {% if ca_trust_anchors_dir is defined %}
+      - "{{ ca_trust_anchors_dir +':/etc/pki/ca-trust/source/anchors:ro' }}"
+    {% endif %}
     {% if ca_trust_dir is defined %}
-      - "{{ ca_trust_dir +':/etc/pki/ca-trust/source/anchors:ro' }}"
+      - "{{ ca_trust_dir +':/etc/pki/ca-trust:ro' }}"
     {% endif %}
     {% if ssl_certificate is defined %}
       - "{{ ssl_certificate +':/etc/nginx/awxweb.pem:ro' }}"
