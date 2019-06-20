@@ -1131,6 +1131,7 @@ class BaseTask(object):
 
         try:
             isolated = self.instance.is_isolated()
+            self.instance.send_notification_templates("running")
             self.pre_run_hook(self.instance)
             if self.instance.cancel_flag:
                 self.instance = self.update_model(self.instance.pk, status='canceled')

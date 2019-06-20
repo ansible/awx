@@ -1246,7 +1246,7 @@ class OrganizationSerializer(BaseSerializer):
             applications    = self.reverse('api:organization_applications_list',     kwargs={'pk': obj.pk}),
             activity_stream = self.reverse('api:organization_activity_stream_list', kwargs={'pk': obj.pk}),
             notification_templates = self.reverse('api:organization_notification_templates_list', kwargs={'pk': obj.pk}),
-            notification_templates_any = self.reverse('api:organization_notification_templates_any_list', kwargs={'pk': obj.pk}),
+            notification_templates_started = self.reverse('api:organization_notification_templates_started_list', kwargs={'pk': obj.pk}),
             notification_templates_success = self.reverse('api:organization_notification_templates_success_list', kwargs={'pk': obj.pk}),
             notification_templates_error = self.reverse('api:organization_notification_templates_error_list', kwargs={'pk': obj.pk}),
             object_roles = self.reverse('api:organization_object_roles_list', kwargs={'pk': obj.pk}),
@@ -1352,7 +1352,7 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
             scm_inventory_sources = self.reverse('api:project_scm_inventory_sources', kwargs={'pk': obj.pk}),
             schedules = self.reverse('api:project_schedules_list', kwargs={'pk': obj.pk}),
             activity_stream = self.reverse('api:project_activity_stream_list', kwargs={'pk': obj.pk}),
-            notification_templates_any = self.reverse('api:project_notification_templates_any_list', kwargs={'pk': obj.pk}),
+            notification_templates_started = self.reverse('api:project_notification_templates_started_list', kwargs={'pk': obj.pk}),
             notification_templates_success = self.reverse('api:project_notification_templates_success_list', kwargs={'pk': obj.pk}),
             notification_templates_error = self.reverse('api:project_notification_templates_error_list', kwargs={'pk': obj.pk}),
             access_list = self.reverse('api:project_access_list', kwargs={'pk': obj.pk}),
@@ -1943,6 +1943,25 @@ class InventorySourceOptionsSerializer(BaseSerializer):
 
         return super(InventorySourceOptionsSerializer, self).validate(attrs)
 
+    # TODO: remove when old 'credential' fields are removed
+    def get_summary_fields(self, obj):
+        summary_fields = super(InventorySourceOptionsSerializer, self).get_summary_fields(obj)
+        all_creds = []
+        if 'credential' in summary_fields:
+            cred = obj.get_cloud_credential()
+            if cred:
+                summarized_cred = {
+                    'id': cred.id, 'name': cred.name, 'description': cred.description,
+                    'kind': cred.kind, 'cloud': True
+                }
+                summary_fields['credential'] = summarized_cred
+                all_creds.append(summarized_cred)
+                summary_fields['credential']['credential_type_id'] = cred.credential_type_id
+            else:
+                summary_fields.pop('credential')
+        summary_fields['credentials'] = all_creds
+        return summary_fields
+
 
 class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOptionsSerializer):
 
@@ -1970,7 +1989,7 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
             activity_stream = self.reverse('api:inventory_source_activity_stream_list', kwargs={'pk': obj.pk}),
             hosts = self.reverse('api:inventory_source_hosts_list', kwargs={'pk': obj.pk}),
             groups = self.reverse('api:inventory_source_groups_list', kwargs={'pk': obj.pk}),
-            notification_templates_any = self.reverse('api:inventory_source_notification_templates_any_list', kwargs={'pk': obj.pk}),
+            notification_templates_started = self.reverse('api:inventory_source_notification_templates_started_list', kwargs={'pk': obj.pk}),
             notification_templates_success = self.reverse('api:inventory_source_notification_templates_success_list', kwargs={'pk': obj.pk}),
             notification_templates_error = self.reverse('api:inventory_source_notification_templates_error_list', kwargs={'pk': obj.pk}),
         ))
@@ -2792,7 +2811,7 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
             schedules = self.reverse('api:job_template_schedules_list', kwargs={'pk': obj.pk}),
             activity_stream = self.reverse('api:job_template_activity_stream_list', kwargs={'pk': obj.pk}),
             launch = self.reverse('api:job_template_launch', kwargs={'pk': obj.pk}),
-            notification_templates_any = self.reverse('api:job_template_notification_templates_any_list', kwargs={'pk': obj.pk}),
+            notification_templates_started = self.reverse('api:job_template_notification_templates_started_list', kwargs={'pk': obj.pk}),
             notification_templates_success = self.reverse('api:job_template_notification_templates_success_list', kwargs={'pk': obj.pk}),
             notification_templates_error = self.reverse('api:job_template_notification_templates_error_list', kwargs={'pk': obj.pk}),
             access_list = self.reverse('api:job_template_access_list',      kwargs={'pk': obj.pk}),
@@ -3204,7 +3223,7 @@ class SystemJobTemplateSerializer(UnifiedJobTemplateSerializer):
             jobs = self.reverse('api:system_job_template_jobs_list', kwargs={'pk': obj.pk}),
             schedules = self.reverse('api:system_job_template_schedules_list', kwargs={'pk': obj.pk}),
             launch = self.reverse('api:system_job_template_launch', kwargs={'pk': obj.pk}),
-            notification_templates_any = self.reverse('api:system_job_template_notification_templates_any_list', kwargs={'pk': obj.pk}),
+            notification_templates_started = self.reverse('api:system_job_template_notification_templates_started_list', kwargs={'pk': obj.pk}),
             notification_templates_success = self.reverse('api:system_job_template_notification_templates_success_list', kwargs={'pk': obj.pk}),
             notification_templates_error = self.reverse('api:system_job_template_notification_templates_error_list', kwargs={'pk': obj.pk}),
 
@@ -3271,7 +3290,7 @@ class WorkflowJobTemplateSerializer(JobTemplateMixin, LabelsListMixin, UnifiedJo
             workflow_nodes = self.reverse('api:workflow_job_template_workflow_nodes_list', kwargs={'pk': obj.pk}),
             labels = self.reverse('api:workflow_job_template_label_list', kwargs={'pk': obj.pk}),
             activity_stream = self.reverse('api:workflow_job_template_activity_stream_list', kwargs={'pk': obj.pk}),
-            notification_templates_any = self.reverse('api:workflow_job_template_notification_templates_any_list', kwargs={'pk': obj.pk}),
+            notification_templates_started = self.reverse('api:workflow_job_template_notification_templates_started_list', kwargs={'pk': obj.pk}),
             notification_templates_success = self.reverse('api:workflow_job_template_notification_templates_success_list', kwargs={'pk': obj.pk}),
             notification_templates_error = self.reverse('api:workflow_job_template_notification_templates_error_list', kwargs={'pk': obj.pk}),
             access_list = self.reverse('api:workflow_job_template_access_list', kwargs={'pk': obj.pk}),

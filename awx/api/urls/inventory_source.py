@@ -13,8 +13,8 @@ from awx.api.views import (
     InventorySourceCredentialsList,
     InventorySourceGroupsList,
     InventorySourceHostsList,
-    InventorySourceNotificationTemplatesAnyList,
     InventorySourceNotificationTemplatesErrorList,
+    InventorySourceNotificationTemplatesStartedList,
     InventorySourceNotificationTemplatesSuccessList,
 )
 
@@ -29,8 +29,8 @@ urls = [
     url(r'^(?P<pk>[0-9]+)/credentials/$', InventorySourceCredentialsList.as_view(), name='inventory_source_credentials_list'),
     url(r'^(?P<pk>[0-9]+)/groups/$', InventorySourceGroupsList.as_view(), name='inventory_source_groups_list'),
     url(r'^(?P<pk>[0-9]+)/hosts/$', InventorySourceHostsList.as_view(), name='inventory_source_hosts_list'),
-    url(r'^(?P<pk>[0-9]+)/notification_templates_any/$', InventorySourceNotificationTemplatesAnyList.as_view(),
-        name='inventory_source_notification_templates_any_list'),
+    url(r'^(?P<pk>[0-9]+)/notification_templates_started/$', InventorySourceNotificationTemplatesStartedList.as_view(),
+        name='inventory_source_notification_templates_started_list'),
     url(r'^(?P<pk>[0-9]+)/notification_templates_error/$', InventorySourceNotificationTemplatesErrorList.as_view(),
         name='inventory_source_notification_templates_error_list'),
     url(r'^(?P<pk>[0-9]+)/notification_templates_success/$', InventorySourceNotificationTemplatesSuccessList.as_view(),

@@ -37,6 +37,8 @@ function SmartInventoryEdit($scope, $location,
 
         $scope.parseType = 'yaml';
 
+        $scope.inventory_obj = inventoryData;
+        $rootScope.breadcrumb.inventory_name = inventoryData.name;
 
         ParseTypeChange({
             scope: $scope,
@@ -50,9 +52,6 @@ function SmartInventoryEdit($scope, $location,
         .then(function(canEditOrg){
             $scope.canEditOrg = canEditOrg;
         });
-
-        $scope.inventory_obj = inventoryData;
-        $rootScope.breadcrumb.inventory_name = inventoryData.name;
 
         $scope.smart_hosts = {
             host_filter: encodeURIComponent($scope.host_filter)

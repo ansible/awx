@@ -378,6 +378,7 @@ class TestGenericRun():
         job.status = 'running'
         job.cancel_flag = True
         job.websocket_emit_status = mock.Mock()
+        job.send_notification_templates = mock.Mock()
 
         task = tasks.RunJob()
         task.update_model = mock.Mock(wraps=update_model_wrapper)
@@ -536,6 +537,7 @@ class TestAdhocRun(TestJobExecution):
     def test_options_jinja_usage(self, adhoc_job, adhoc_update_model_wrapper):
         adhoc_job.module_args = '{{ ansible_ssh_pass }}'
         adhoc_job.websocket_emit_status = mock.Mock()
+        adhoc_job.send_notification_templates = mock.Mock()
 
         task = tasks.RunAdHocCommand()
         task.update_model = mock.Mock(wraps=adhoc_update_model_wrapper)

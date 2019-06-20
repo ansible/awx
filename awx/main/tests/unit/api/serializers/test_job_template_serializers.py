@@ -50,7 +50,7 @@ class TestJobTemplateSerializerGetRelated():
         'schedules',
         'activity_stream',
         'launch',
-        'notification_templates_any',
+        'notification_templates_started',
         'notification_templates_success',
         'notification_templates_error',
         'survey_spec',

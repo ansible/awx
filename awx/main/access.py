@@ -1265,7 +1265,7 @@ class TeamAccess(BaseAccess):
                 (self.user.admin_of_organizations.exists() or self.user.auditor_of_organizations.exists()):
             return self.model.objects.all()
         return self.model.objects.filter(
-            Q(organization=Organization.accessible_pk_qs(self.user, 'member_role')) |
+            Q(organization__in=Organization.accessible_pk_qs(self.user, 'member_role')) |
             Q(pk__in=self.model.accessible_pk_qs(self.user, 'read_role'))
         )
 

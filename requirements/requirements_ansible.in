@@ -53,8 +53,8 @@ pycurl==7.43.0.1    # higher versions will not install without SSL backend speci
 pexpect==4.6.0    # same as AWX requirement
 psutil==5.4.3    # same as AWX requirement
 ptyprocess==0.5.2 # via pexpect, but needs to be pinned. Read the blame.
-pip==19.1.1
-setuptools==41.0.1
+setuptools==36.0.1
+pip==9.0.1
 # VMware
 pyvmomi==6.5
 # WinRM

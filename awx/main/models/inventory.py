@@ -1619,20 +1619,20 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, CustomVirtualE
         base_notification_templates = NotificationTemplate.objects
         error_notification_templates = list(base_notification_templates
                                             .filter(unifiedjobtemplate_notification_templates_for_errors__in=[self]))
+        started_notification_templates = list(base_notification_templates
+                                              .filter(unifiedjobtemplate_notification_templates_for_started__in=[self]))
         success_notification_templates = list(base_notification_templates
                                               .filter(unifiedjobtemplate_notification_templates_for_success__in=[self]))
-        any_notification_templates = list(base_notification_templates
-                                          .filter(unifiedjobtemplate_notification_templates_for_any__in=[self]))
         if self.inventory.organization is not None:
             error_notification_templates = set(error_notification_templates + list(base_notification_templates
                                                .filter(organization_notification_templates_for_errors=self.inventory.organization)))
+            started_notification_templates = set(started_notification_templates + list(base_notification_templates
+                                                 .filter(organization_notification_templates_for_started=self.inventory.organization)))
             success_notification_templates = set(success_notification_templates + list(base_notification_templates
                                                  .filter(organization_notification_templates_for_success=self.inventory.organization)))
-            any_notification_templates = set(any_notification_templates + list(base_notification_templates
-                                             .filter(organization_notification_templates_for_any=self.inventory.organization)))
         return dict(error=list(error_notification_templates),
-                    success=list(success_notification_templates),
-                    any=list(any_notification_templates))
+                    started=list(started_notification_templates),
+                    success=list(success_notification_templates))
 
     def clean_source(self):  # TODO: remove in 3.3
         source = self.source

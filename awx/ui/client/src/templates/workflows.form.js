@@ -42,14 +42,14 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n) {
                     label: i18n._('Name'),
                     type: 'text',
                     required: true,
-                    ngDisabled: '!(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)',
+                    ngDisabled: '!(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddOrEdit)',
                     column: 1
                 },
                 description: {
                     label: i18n._('Description'),
                     type: 'text',
                     column: 1,
-                    ngDisabled: '!(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)'
+                    ngDisabled: '!(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddOrEdit)'
                 },
                 organization: {
                     label: i18n._('Organization'),
@@ -65,8 +65,8 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n) {
                         reqExpression: '!current_user.is_superuser'
                     },
                     column: 1,
-                    ngDisabled: '!(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate) || !canEditOrg',
-                    awLookupWhen: '(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate) && canEditOrg'
+                    ngDisabled: '!(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddOrEdit) || !canEditOrg',
+                    awLookupWhen: '(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddOrEdit) && canEditOrg'
                 },
                 inventory: {
                     label: i18n._('Inventory'),
@@ -87,7 +87,7 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n) {
                         ngChange: 'workflow_job_template_form.inventory_name.$validate()',
                         text: i18n._('Prompt on launch')
                     },
-                    ngDisabled: '!(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate) || !canEditInventory',
+                    ngDisabled: '!(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddOrEdit) || !canEditInventory',
                 },
                 labels: {
                     label: i18n._('Labels'),
@@ -102,7 +102,7 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n) {
                         ngShow: 'workflow_job_template_labels_isValid !== true',
                         text: i18n._('Max 512 characters per label.'),
                     },
-                    ngDisabled: '!(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)'
+                    ngDisabled: '!(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddOrEdit)'
                 },
                 variables: {
                     label: i18n._('Extra Variables'),
@@ -119,7 +119,7 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n) {
                         variable: 'ask_variables_on_launch',
                         text: i18n._('Prompt on launch')
                     },
-                    ngDisabled: '!(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)' // TODO: get working
+                    ngDisabled: '!(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddOrEdit)' // TODO: get working
                 },
                 checkbox_group: {
                     label: i18n._('Options'),
@@ -133,7 +133,7 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n) {
                         dataPlacement: 'right',
                         dataTitle: i18n._('Enable Concurrent Jobs'),
                         dataContainer: "body",
-                        ngDisabled: '!(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)'
+                        ngDisabled: '!(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddOrEdit)'
                     }]
                 }
             },
@@ -142,22 +142,22 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n) {
                 launch: {
                     component: 'at-launch-template',
                     templateObj: 'workflow_job_template_obj',
-                    ngShow: '(workflow_job_template_obj.summary_fields.user_capabilities.start || canAddWorkflowJobTemplate)',
+                    ngShow: '(workflow_job_template_obj.summary_fields.user_capabilities.start || canAddOrEdit)',
                     ngDisabled: 'disableLaunch || workflow_job_template_form.$dirty',
                     showTextButton: 'true'
                 },
                 cancel: {
                     ngClick: 'formCancel()',
-                    ngShow: '(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)'
+                    ngShow: '(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddOrEdit)'
                 },
                 close: {
                     ngClick: 'formCancel()',
-                    ngShow: '!(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)'
+                    ngShow: '!(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddOrEdit)'
                 },
                 save: {
                     ngClick: 'formSave()',    //$scope.function to call on click, optional
                     ngDisabled: "workflow_job_template_form.$invalid || can_edit!==true", //Disable when $pristine or $invalid, optional and when can_edit = false, for permission reasons
-                    ngShow: '(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)'
+                    ngShow: '(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddOrEdit)'
                 }
             },
 
@@ -183,7 +183,7 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n) {
                             awToolTip: i18n._('Add a permission'),
                             actionClass: 'at-Button--add',
                             actionId: 'button-add',
-                            ngShow: '(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)'
+                            ngShow: '(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddOrEdit)'
                         }
                     },
 
@@ -226,7 +226,7 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n) {
             relatedButtons: {
                 view_survey: {
                     ngClick: 'editSurvey()',
-                    ngShow: '($state.is(\'templates.addWorkflowJobTemplate\') || $state.is(\'templates.editWorkflowJobTemplate\') || $state.is(\'templates.editWorkflowJobTemplate.workflowMaker\')) && survey_exists && !(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)',
+                    ngShow: '($state.is(\'templates.addWorkflowJobTemplate\') || $state.is(\'templates.editWorkflowJobTemplate\') || $state.is(\'templates.editWorkflowJobTemplate.workflowMaker\')) && survey_exists && !(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddOrEdit)',
                     label: i18n._('View Survey'),
                     class: 'Form-primaryButton'
                 },
