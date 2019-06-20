@@ -2,7 +2,7 @@
 
 Hi there! We're excited to have you as a contributor.
 
-Have questions about this document or anything not covered here? Feel free to reach out to any of the contributors of this repository found here: https://github.com/ansible/awx-pf/graphs/contributors
+Have questions about this document or anything not covered here? Feel free to reach out to any of the contributors of this repository.
 
 ## Table of contents
 
@@ -27,7 +27,7 @@ Have questions about this document or anything not covered here? Feel free to re
 
 ## Things to know prior to submitting code
 
-- All code submissions are done through pull requests against the `master` branch.
+- All code submissions are done through pull requests against the `devel` branch.
 - If collaborating with someone else on the same branch, please use `--force-with-lease` instead of `--force` when pushing up code. This will prevent you from accidentally overwriting commits pushed by someone else. For more information, see https://git-scm.com/docs/git-push#git-push---force-with-leaseltrefnamegt
 
 ## Setting up your development environment
@@ -40,7 +40,7 @@ The UI is built using [ReactJS](https://reactjs.org/docs/getting-started.html) a
 
 The AWX UI requires the following:
 
-- Node 8.x LTS
+- Node 10.x LTS
 - NPM 6.x LTS
 
 Run the following to install all the dependencies:
@@ -124,14 +124,14 @@ API requests can and will fail occasionally so they should include explicit erro
 
 ### App structure
 
-All source code lives in the `/src` directory and all tests live in the `/testUtils` directory (mimicing the internal structure of `/src`).
+All source code lives in the `/src` directory and all tests are colocated with the components that they test.
 
 Inside these folders, the internal structure is:
+- **/api** - All classes used to interact with API's are found here.  See [AWX REST API Interaction](#awx-rest-api-interaction) for more information.
 - **/components** - All generic components that are meant to be used in multiple contexts throughout awx.  Things like buttons, tabs go here.
 - **/contexts** - Components which utilize react's context api.
-- **/pages** - Based on the various routes of awx.
-  - **/components** - Components that are meant to be used specifically by a particular route, but might be sharable across pages of that route. For example, a form component which is used on both add and edit screens.
-  - **/screens** - Individual pages of the route, such as add, edit, list, related lists, etc.
+- **/screens** - Based on the various routes of awx.
+  - **/shared** - Components that are meant to be used specifically by a particular route, but might be sharable across pages of that route. For example, a form component which is used on both add and edit screens.
 - **/util** - Stateless helper functions that aren't tied to react.
 
 #### Bootstrapping the application (root src/ files)
