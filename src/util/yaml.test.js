@@ -1,4 +1,4 @@
-import { yamlToJson, jsonToYaml } from '../../src/util/yaml';
+import { yamlToJson, jsonToYaml } from './yaml';
 
 describe('yamlToJson', () => {
   test('should convert to json', () => {
