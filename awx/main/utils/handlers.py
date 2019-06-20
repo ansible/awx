@@ -19,6 +19,7 @@ from django.conf import settings
 from requests_futures.sessions import FuturesSession
 
 # AWX
+from awx.main.utils.queue import Queue
 from awx.main.utils.formatters import LogstashFormatter
 
 
@@ -76,6 +77,10 @@ class VerboseThreadPoolExecutor(ThreadPoolExecutor):
                 raise
         return super(VerboseThreadPoolExecutor, self).submit(_wrapped, *args,
                                                              **kwargs)
+
+    def __init__(self, *args, **kw):
+        super(VerboseThreadPoolExecutor, self).__init__(*args, **kw)
+        self._work_queue = Queue()
 
 
 class SocketResult:
