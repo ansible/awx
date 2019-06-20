@@ -34,5 +34,8 @@ module.exports = {
   },
   transformIgnorePatterns: [
     '[/\\\\]node_modules[/\\\\].+\\.(?!(axios)/)(js|jsx)$'
+  ],
+  watchPathIgnorePatterns: [
+    '<rootDir>/node_modules'
   ]
 };
