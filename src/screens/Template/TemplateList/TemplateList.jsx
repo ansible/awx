@@ -36,9 +36,9 @@ class TemplatesList extends Component {
     super(props);
 
     this.state = {
-      contentLoading: true,
-      contentError: false,
-      deletionError: false,
+      hasContentLoading: true,
+      hasContentError: false,
+      hasDeletionError: false,
       selected: [],
       templates: [],
       itemCount: 0,
@@ -62,7 +62,7 @@ class TemplatesList extends Component {
   }
 
   handleDeleteErrorClose () {
-    this.setState({ deletionError: false });
+    this.setState({ hasDeletionError: false });
   }
 
   handleSelectAll (isSelected) {
@@ -83,7 +83,7 @@ class TemplatesList extends Component {
   async handleTemplateDelete () {
     const { selected } = this.state;
 
-    this.setState({ contentLoading: true, deletionError: false });
+    this.setState({ hasContentLoading: true, hasDeletionError: false });
     try {
       await Promise.all(selected.map(({ type, id }) => {
         let deletePromise;
@@ -95,7 +95,7 @@ class TemplatesList extends Component {
         return deletePromise;
       }));
     } catch (err) {
-      this.setState({ deletionError: true });
+      this.setState({ hasDeletionError: true });
     } finally {
       await this.loadTemplates();
     }
@@ -105,7 +105,7 @@ class TemplatesList extends Component {
     const { location } = this.props;
     const params = parseNamespacedQueryString(QS_CONFIG, location.search);
 
-    this.setState({ contentError: false, contentLoading: true });
+    this.setState({ hasContentError: false, hasContentLoading: true });
     try {
       const { data: { count, results } } = await UnifiedJobTemplatesAPI.read(params);
       this.setState({
@@ -114,17 +114,17 @@ class TemplatesList extends Component {
         selected: [],
       });
     } catch (err) {
-      this.setState({ contentError: true });
+      this.setState({ hasContentError: true });
     } finally {
-      this.setState({ contentLoading: false });
+      this.setState({ hasContentLoading: false });
     }
   }
 
   render () {
     const {
-      contentError,
-      contentLoading,
-      deletionError,
+      hasContentError,
+      hasContentLoading,
+      hasDeletionError,
       templates,
       itemCount,
       selected,
@@ -139,8 +139,8 @@ class TemplatesList extends Component {
       <PageSection variant={medium}>
         <Card>
           <PaginatedDataList
-            contentError={contentError}
-            contentLoading={contentLoading}
+            hasContentError={hasContentError}
+            hasContentLoading={hasContentLoading}
             items={templates}
             itemCount={itemCount}
             itemName={i18n._(t`Template`)}
@@ -180,7 +180,7 @@ class TemplatesList extends Component {
           />
         </Card>
         <AlertModal
-          isOpen={deletionError}
+          isOpen={hasDeletionError}
           variant="danger"
           title={i18n._(t`Error!`)}
           onClose={this.handleDeleteErrorClose}

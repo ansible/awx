@@ -13,8 +13,8 @@ class Template extends Component {
   constructor (props) {
     super(props);
     this.state = {
-      contentError: false,
-      contentLoading: true,
+      hasContentError: false,
+      hasContentLoading: true,
       template: {}
     };
     this.readTemplate = this.readTemplate.bind(this);
@@ -32,15 +32,15 @@ class Template extends Component {
       setBreadcrumb(data);
       this.setState({ template: data });
     } catch {
-      this.setState({ contentError: true });
+      this.setState({ hasContentError: true });
     } finally {
-      this.setState({ contentLoading: false });
+      this.setState({ hasContentLoading: false });
     }
   }
 
   render () {
     const { match, i18n, history } = this.props;
-    const { contentLoading, template, contentError } = this.state;
+    const { hasContentLoading, template, hasContentError } = this.state;
 
     const tabsArray = [
       { name: i18n._(t`Details`), link: `${match.url}/details`, id: 0 },
@@ -50,7 +50,7 @@ class Template extends Component {
       { name: i18n._(t`Completed Jobs`), link: '/home', id: 4 },
       { name: i18n._(t`Survey`), link: '/home', id: 5 }
     ];
-    const cardHeader = (contentLoading ? null
+    const cardHeader = (hasContentLoading ? null
       : (
         <CardHeader style={{ padding: 0 }}>
           <RoutedTabs
@@ -62,7 +62,7 @@ class Template extends Component {
       )
     );
 
-    if (!contentLoading && contentError) {
+    if (!hasContentLoading && hasContentError) {
       return (
         <PageSection>
           <Card className="awx-c-card">

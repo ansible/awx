@@ -72,8 +72,8 @@ class PaginatedDataList extends React.Component {
   render () {
     const [orderBy, sortOrder] = this.getSortOrder();
     const {
-      contentError,
-      contentLoading,
+      hasContentError,
+      hasContentLoading,
       emptyStateControls,
       items,
       itemCount,
@@ -98,9 +98,9 @@ class PaginatedDataList extends React.Component {
     const emptyContentTitle = i18n._(t`No ${itemDisplayNamePlural} Found `);
 
     let Content;
-    if (contentLoading && items.length <= 0) {
+    if (hasContentLoading && items.length <= 0) {
       Content = (<ContentLoading />);
-    } else if (contentError) {
+    } else if (hasContentError) {
       Content = (<ContentError />);
     } else if (items.length <= 0) {
       Content = (<ContentEmpty title={emptyContentTitle} message={emptyContentMessage} />);
@@ -173,13 +173,13 @@ PaginatedDataList.propTypes = {
   })),
   showPageSizeOptions: PropTypes.bool,
   renderToolbar: PropTypes.func,
-  contentLoading: PropTypes.bool,
-  contentError: PropTypes.bool,
+  hasContentLoading: PropTypes.bool,
+  hasContentError: PropTypes.bool,
 };
 
 PaginatedDataList.defaultProps = {
-  contentLoading: false,
-  contentError: false,
+  hasContentLoading: false,
+  hasContentError: false,
   toolbarColumns: [],
   itemName: 'item',
   itemNamePlural: '',

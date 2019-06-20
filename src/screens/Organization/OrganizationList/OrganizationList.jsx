@@ -30,9 +30,9 @@ class OrganizationsList extends Component {
     super(props);
 
     this.state = {
-      contentLoading: true,
-      contentError: false,
-      deletionError: false,
+      hasContentLoading: true,
+      hasContentError: false,
+      hasDeletionError: false,
       organizations: [],
       selected: [],
       itemCount: 0,
@@ -75,17 +75,17 @@ class OrganizationsList extends Component {
   }
 
   handleDeleteErrorClose () {
-    this.setState({ deletionError: false });
+    this.setState({ hasDeletionError: false });
   }
 
   async handleOrgDelete () {
     const { selected } = this.state;
 
-    this.setState({ contentLoading: true, deletionError: false });
+    this.setState({ hasContentLoading: true, hasDeletionError: false });
     try {
       await Promise.all(selected.map((org) => OrganizationsAPI.destroy(org.id)));
     } catch (err) {
-      this.setState({ deletionError: true });
+      this.setState({ hasDeletionError: true });
     } finally {
       await this.loadOrganizations();
     }
@@ -108,7 +108,7 @@ class OrganizationsList extends Component {
       optionsPromise,
     ]);
 
-    this.setState({ contentError: false, contentLoading: true });
+    this.setState({ hasContentError: false, hasContentLoading: true });
     try {
       const [{ data: { count, results } }, { data: { actions } }] = await promises;
       this.setState({
@@ -118,9 +118,9 @@ class OrganizationsList extends Component {
         selected: [],
       });
     } catch (err) {
-      this.setState(({ contentError: true }));
+      this.setState(({ hasContentError: true }));
     } finally {
-      this.setState({ contentLoading: false });
+      this.setState({ hasContentLoading: false });
     }
   }
 
@@ -131,9 +131,9 @@ class OrganizationsList extends Component {
     const {
       actions,
       itemCount,
-      contentError,
-      contentLoading,
-      deletionError,
+      hasContentError,
+      hasContentLoading,
+      hasDeletionError,
       selected,
       organizations,
     } = this.state;
@@ -147,8 +147,8 @@ class OrganizationsList extends Component {
         <PageSection variant={medium}>
           <Card>
             <PaginatedDataList
-              contentError={contentError}
-              contentLoading={contentLoading}
+              hasContentError={hasContentError}
+              hasContentLoading={hasContentLoading}
               items={organizations}
               itemCount={itemCount}
               itemName="organization"
@@ -194,7 +194,7 @@ class OrganizationsList extends Component {
           </Card>
         </PageSection>
         <AlertModal
-          isOpen={deletionError}
+          isOpen={hasDeletionError}
           variant="danger"
           title={i18n._(t`Error!`)}
           onClose={this.handleDeleteErrorClose}
