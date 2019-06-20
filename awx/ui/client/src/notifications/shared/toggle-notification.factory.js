@@ -45,7 +45,7 @@ export default ['Wait', 'ProcessErrors', 'Rest',
                     notifier[column] = !notifier[column];
                 }
                 // Hide the working spinner
-            Wait('stop');
+                Wait('stop');
             })
             .catch(({data, status}) => {
                 ProcessErrors(scope, data, status, null, { hdr: 'Error!',

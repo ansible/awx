@@ -49,7 +49,7 @@ export default ['Wait', 'GetBasePath', 'ProcessErrors', 'Rest', 'GetChoices',
             scope.relatednotificationsRemove();
         }
         scope.relatednotificationsRemove = scope.$on('relatednotifications', function () {
-                var columns = ['/notification_templates_started/', '/notification_templates_success/', '/notification_templates_error'];
+                var columns = ['/notification_templates_started/', '/notification_templates_success/', '/notification_templates_error/'];
 
                 GetChoices({
                     scope: scope,
@@ -59,14 +59,14 @@ export default ['Wait', 'GetBasePath', 'ProcessErrors', 'Rest', 'GetChoices',
                     callback: 'choicesReadyNotifierList'
                 });
 
-            _.map(columns, function(column){
-                var notifier_url = url + id + column;
+                _.map(columns, function(column){
+                    var notifier_url = url + id + column;
                     Rest.setUrl(notifier_url);
                     Rest.get()
                         .then(function(response) {
-                            let checkForSuccessOrError = response.config.url.indexOf('success')>0 ? "notification_templates_success" : "notification_templates_error";
+                            let checkForSuccessOrError = response.config.url.indexOf('success') > 0 ? "notification_templates_success" : "notification_templates_error";
 
-                            let type = response.config.url.indexOf('started')>0? "notification_templates_started" : checkForSuccessOrError
+                            let type = response.config.url.indexOf('started') > 0 ? "notification_templates_started" : checkForSuccessOrError;
 
                             if (response.data.results) {
                                     _.forEach(response.data.results, function(result){
