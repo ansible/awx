@@ -1,5 +1,5 @@
 --- 
-- name: "Attempt and gracefull roll back demo" 
+- name: Create {{ docker_compose_dir }} directory 
   block: 
     - file: 
         path: "{{ docker_compose_dir }}"
