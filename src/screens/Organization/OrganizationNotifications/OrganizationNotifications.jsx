@@ -26,8 +26,8 @@ class OrganizationNotifications extends Component {
   constructor (props) {
     super(props);
     this.state = {
-      contentError: false,
-      contentLoading: true,
+      hasContentError: false,
+      hasContentLoading: true,
       toggleError: false,
       toggleLoading: false,
       itemCount: 0,
@@ -55,7 +55,7 @@ class OrganizationNotifications extends Component {
     const { id, location } = this.props;
     const params = parseNamespacedQueryString(QS_CONFIG, location.search);
 
-    this.setState({ contentError: false, contentLoading: true });
+    this.setState({ hasContentError: false, hasContentLoading: true });
     try {
       const {
         data: {
@@ -86,9 +86,9 @@ class OrganizationNotifications extends Component {
         errorTemplateIds: errorTemplates.results.map(e => e.id),
       });
     } catch {
-      this.setState({ contentError: true });
+      this.setState({ hasContentError: true });
     } finally {
-      this.setState({ contentLoading: false });
+      this.setState({ hasContentLoading: false });
     }
   }
 
@@ -138,8 +138,8 @@ class OrganizationNotifications extends Component {
   render () {
     const { canToggleNotifications, i18n } = this.props;
     const {
-      contentError,
-      contentLoading,
+      hasContentError,
+      hasContentLoading,
       toggleError,
       toggleLoading,
       itemCount,
@@ -151,8 +151,8 @@ class OrganizationNotifications extends Component {
     return (
       <Fragment>
         <PaginatedDataList
-          contentError={contentError}
-          contentLoading={contentLoading}
+          hasContentError={hasContentError}
+          hasContentLoading={hasContentLoading}
           items={notifications}
           itemCount={itemCount}
           itemName="notification"

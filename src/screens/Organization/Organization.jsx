@@ -22,8 +22,8 @@ class Organization extends Component {
 
     this.state = {
       organization: null,
-      contentLoading: true,
-      contentError: false,
+      hasContentLoading: true,
+      hasContentError: false,
       isInitialized: false,
       isNotifAdmin: false,
       isAuditorOfThisOrg: false,
@@ -52,7 +52,7 @@ class Organization extends Component {
     } = this.props;
     const id = parseInt(match.params.id, 10);
 
-    this.setState({ contentError: false, contentLoading: true });
+    this.setState({ hasContentError: false, hasContentLoading: true });
     try {
       const [{ data }, notifAdminRes, auditorRes, adminRes] = await Promise.all([
         OrganizationsAPI.readDetail(id),
@@ -68,9 +68,9 @@ class Organization extends Component {
         isAdminOfThisOrg: adminRes.data.results.length > 0
       });
     } catch (err) {
-      this.setState(({ contentError: true }));
+      this.setState(({ hasContentError: true }));
     } finally {
-      this.setState({ contentLoading: false });
+      this.setState({ hasContentLoading: false });
     }
   }
 
@@ -81,15 +81,15 @@ class Organization extends Component {
     } = this.props;
     const id = parseInt(match.params.id, 10);
 
-    this.setState({ contentError: false, contentLoading: true });
+    this.setState({ hasContentError: false, hasContentLoading: true });
     try {
       const { data } = await OrganizationsAPI.readDetail(id);
       setBreadcrumb(data);
       this.setState({ organization: data });
     } catch (err) {
-      this.setState(({ contentError: true }));
+      this.setState(({ hasContentError: true }));
     } finally {
-      this.setState({ contentLoading: false });
+      this.setState({ hasContentLoading: false });
     }
   }
 
@@ -104,8 +104,8 @@ class Organization extends Component {
 
     const {
       organization,
-      contentError,
-      contentLoading,
+      hasContentError,
+      hasContentLoading,
       isInitialized,
       isNotifAdmin,
       isAuditorOfThisOrg,
@@ -163,7 +163,7 @@ class Organization extends Component {
       cardHeader = null;
     }
 
-    if (!contentLoading && contentError) {
+    if (!hasContentLoading && hasContentError) {
       return (
         <PageSection>
           <Card className="awx-c-card">

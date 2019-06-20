@@ -20,8 +20,8 @@ class OrganizationDetail extends Component {
     super(props);
 
     this.state = {
-      contentError: false,
-      contentLoading: true,
+      hasContentError: false,
+      hasContentLoading: true,
       instanceGroups: [],
     };
     this.loadInstanceGroups = this.loadInstanceGroups.bind(this);
@@ -34,21 +34,21 @@ class OrganizationDetail extends Component {
   async loadInstanceGroups () {
     const { match: { params: { id } } } = this.props;
 
-    this.setState({ contentLoading: true });
+    this.setState({ hasContentLoading: true });
     try {
       const { data: { results = [] } } = await OrganizationsAPI.readInstanceGroups(id);
       this.setState({ instanceGroups: [...results] });
     } catch (err) {
-      this.setState({ contentError: true });
+      this.setState({ hasContentError: true });
     } finally {
-      this.setState({ contentLoading: false });
+      this.setState({ hasContentLoading: false });
     }
   }
 
   render () {
     const {
-      contentLoading,
-      contentError,
+      hasContentLoading,
+      hasContentError,
       instanceGroups,
     } = this.state;
 
@@ -66,11 +66,11 @@ class OrganizationDetail extends Component {
       i18n
     } = this.props;
 
-    if (contentLoading) {
+    if (hasContentLoading) {
       return (<ContentLoading />);
     }
 
-    if (contentError) {
+    if (hasContentError) {
       return (<ContentError />);
     }
 

@@ -19,8 +19,8 @@ class OrganizationTeams extends React.Component {
     this.loadOrganizationTeamsList = this.loadOrganizationTeamsList.bind(this);
 
     this.state = {
-      contentError: false,
-      contentLoading: true,
+      hasContentError: false,
+      hasContentLoading: true,
       itemCount: 0,
       teams: [],
     };
@@ -41,7 +41,7 @@ class OrganizationTeams extends React.Component {
     const { id, location } = this.props;
     const params = parseNamespacedQueryString(QS_CONFIG, location.search);
 
-    this.setState({ contentLoading: true, contentError: false });
+    this.setState({ hasContentLoading: true, hasContentError: false });
     try {
       const {
         data: { count = 0, results = [] },
@@ -51,18 +51,18 @@ class OrganizationTeams extends React.Component {
         teams: results,
       });
     } catch {
-      this.setState({ contentError: true });
+      this.setState({ hasContentError: true });
     } finally {
-      this.setState({ contentLoading: false });
+      this.setState({ hasContentLoading: false });
     }
   }
 
   render () {
-    const { contentError, contentLoading, teams, itemCount } = this.state;
+    const { hasContentError, hasContentLoading, teams, itemCount } = this.state;
     return (
       <PaginatedDataList
-        contentError={contentError}
-        contentLoading={contentLoading}
+        hasContentError={hasContentError}
+        hasContentLoading={hasContentLoading}
         items={teams}
         itemCount={itemCount}
         itemName="team"

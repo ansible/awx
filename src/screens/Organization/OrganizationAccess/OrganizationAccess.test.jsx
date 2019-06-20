@@ -83,8 +83,8 @@ describe('<OrganizationAccess />', () => {
     const wrapper = mountWithContexts(<OrganizationAccess organization={organization} />);
     await waitForElement(wrapper, 'OrganizationAccessItem', el => el.length === 2);
     expect(wrapper.find('PaginatedDataList').prop('items')).toEqual(data.results);
-    expect(wrapper.find('OrganizationAccess').state('contentLoading')).toBe(false);
-    expect(wrapper.find('OrganizationAccess').state('contentError')).toBe(false);
+    expect(wrapper.find('OrganizationAccess').state('hasContentLoading')).toBe(false);
+    expect(wrapper.find('OrganizationAccess').state('hasContentError')).toBe(false);
     done();
   });
 

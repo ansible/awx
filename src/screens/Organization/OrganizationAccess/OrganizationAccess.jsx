@@ -33,9 +33,9 @@ class OrganizationAccess extends React.Component {
     super(props);
     this.state = {
       accessRecords: [],
-      contentError: false,
-      contentLoading: true,
-      deletionError: false,
+      hasContentError: false,
+      hasContentLoading: true,
+      hasDeletionError: false,
       deletionRecord: null,
       deletionRole: null,
       isAddModalOpen: false,
@@ -70,7 +70,7 @@ class OrganizationAccess extends React.Component {
     const { organization, location } = this.props;
     const params = parseNamespacedQueryString(QS_CONFIG, location.search);
 
-    this.setState({ contentError: false, contentLoading: true });
+    this.setState({ hasContentError: false, hasContentLoading: true });
     try {
       const {
         data: {
@@ -80,9 +80,9 @@ class OrganizationAccess extends React.Component {
       } = await OrganizationsAPI.readAccessList(organization.id, params);
       this.setState({ itemCount, accessRecords });
     } catch (error) {
-      this.setState({ contentError: true });
+      this.setState({ hasContentError: true });
     } finally {
-      this.setState({ contentLoading: false });
+      this.setState({ hasContentLoading: false });
     }
   }
 
@@ -96,7 +96,7 @@ class OrganizationAccess extends React.Component {
 
   handleDeleteErrorClose () {
     this.setState({
-      deletionError: false,
+      hasDeletionError: false,
       deletionRecord: null,
       deletionRole: null
     });
@@ -116,7 +116,7 @@ class OrganizationAccess extends React.Component {
       promise = UsersAPI.disassociateRole(deletionRecord.id, deletionRole.id);
     }
 
-    this.setState({ contentLoading: true });
+    this.setState({ hasContentLoading: true });
     try {
       await promise.then(this.loadAccessList);
       this.setState({
@@ -125,8 +125,8 @@ class OrganizationAccess extends React.Component {
       });
     } catch (error) {
       this.setState({
-        contentLoading: false,
-        deletionError: true
+        hasContentLoading: false,
+        hasDeletionError: true
       });
     }
   }
@@ -148,22 +148,22 @@ class OrganizationAccess extends React.Component {
     const { organization, i18n } = this.props;
     const {
       accessRecords,
-      contentError,
-      contentLoading,
+      hasContentError,
+      hasContentLoading,
       deletionRole,
       deletionRecord,
-      deletionError,
+      hasDeletionError,
       itemCount,
       isAddModalOpen,
     } = this.state;
     const canEdit = organization.summary_fields.user_capabilities.edit;
-    const isDeleteModalOpen = !contentLoading && !deletionError && deletionRole;
+    const isDeleteModalOpen = !hasContentLoading && !hasDeletionError && deletionRole;
 
     return (
       <Fragment>
         <PaginatedDataList
-          contentError={contentError}
-          contentLoading={contentLoading}
+          hasContentError={hasContentError}
+          hasContentLoading={hasContentLoading}
           items={accessRecords}
           itemCount={itemCount}
           itemName="role"
@@ -205,7 +205,7 @@ class OrganizationAccess extends React.Component {
           />
         )}
         <AlertModal
-          isOpen={deletionError}
+          isOpen={hasDeletionError}
           variant="danger"
           title={i18n._(t`Error!`)}
           onClose={this.handleDeleteErrorClose}

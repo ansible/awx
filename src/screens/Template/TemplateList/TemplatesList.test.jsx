@@ -92,16 +92,16 @@ describe('<TemplatesList />', () => {
   test('Templates are retrieved from the api and the components finishes loading', async (done) => {
     const loadTemplates = jest.spyOn(_TemplatesList.prototype, 'loadTemplates');
     const wrapper = mountWithContexts(<TemplatesList />);
-    await waitForElement(wrapper, 'TemplatesList', (el) => el.state('contentLoading') === true);
+    await waitForElement(wrapper, 'TemplatesList', (el) => el.state('hasContentLoading') === true);
     expect(loadTemplates).toHaveBeenCalled();
-    await waitForElement(wrapper, 'TemplatesList', (el) => el.state('contentLoading') === false);
+    await waitForElement(wrapper, 'TemplatesList', (el) => el.state('hasContentLoading') === false);
     done();
   });
 
   test('handleSelect is called when a template list item is selected', async (done) => {
     const handleSelect = jest.spyOn(_TemplatesList.prototype, 'handleSelect');
     const wrapper = mountWithContexts(<TemplatesList />);
-    await waitForElement(wrapper, 'TemplatesList', (el) => el.state('contentLoading') === false);
+    await waitForElement(wrapper, 'TemplatesList', (el) => el.state('hasContentLoading') === false);
     wrapper.find('DataListCheck#select-jobTemplate-1').props().onChange();
     expect(handleSelect).toBeCalled();
     await waitForElement(wrapper, 'TemplatesList', (el) => el.state('selected').length === 1);
@@ -111,7 +111,7 @@ describe('<TemplatesList />', () => {
   test('handleSelectAll is called when a template list item is selected', async (done) => {
     const handleSelectAll = jest.spyOn(_TemplatesList.prototype, 'handleSelectAll');
     const wrapper = mountWithContexts(<TemplatesList />);
-    await waitForElement(wrapper, 'TemplatesList', (el) => el.state('contentLoading') === false);
+    await waitForElement(wrapper, 'TemplatesList', (el) => el.state('hasContentLoading') === false);
     wrapper.find('Checkbox#select-all').props().onChange(true);
     expect(handleSelectAll).toBeCalled();
     await waitForElement(wrapper, 'TemplatesList', (el) => el.state('selected').length === 5);
