@@ -10,6 +10,7 @@ import {
 import styled from 'styled-components';
 
 import VerticalSeparator from '@components/VerticalSeparator';
+import LaunchButton from '@components/LaunchButton';
 import { toTitleCase } from '@util/strings';
 
 const DataListCell = styled(PFDataListCell)`
@@ -17,6 +18,7 @@ const DataListCell = styled(PFDataListCell)`
   align-items: center;
   @media screen and (min-width: 768px) {
     padding-bottom: 0;
+    justify-content: ${props => (props.lastcolumn ? 'flex-end' : 'inherit')};
   }
 `;
 
@@ -27,6 +29,7 @@ class TemplateListItem extends Component {
       isSelected,
       onSelect,
     } = this.props;
+    const canLaunch = template.summary_fields.user_capabilities.start;
 
     return (
       <DataListItem
@@ -49,7 +52,14 @@ class TemplateListItem extends Component {
                 </Link>
               </span>
             </DataListCell>,
-            <DataListCell key="type">{toTitleCase(template.type)}</DataListCell>
+            <DataListCell key="type">{toTitleCase(template.type)}</DataListCell>,
+            <DataListCell lastcolumn="true" key="launch">
+              {canLaunch && template.type === 'job_template' && (
+                <LaunchButton
+                  templateId={template.id}
+                />
+              )}
+            </DataListCell>
           ]}
           />
         </DataListItemRow>
