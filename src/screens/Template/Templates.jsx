@@ -3,9 +3,11 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Route, withRouter, Switch } from 'react-router-dom';
 
+import { Config } from '@contexts/Config';
 import Breadcrumbs from '@components/Breadcrumbs/Breadcrumbs';
 
 import { TemplateList } from './TemplateList';
+import Template from './Template';
 
 class Templates extends Component {
   constructor (props) {
@@ -19,13 +21,41 @@ class Templates extends Component {
     };
   }
 
+  setBreadCrumbConfig = (template) => {
+    const { i18n } = this.props;
+    if (!template) {
+      return;
+    }
+    const breadcrumbConfig = {
+      '/templates': i18n._(t`Templates`),
+      [`/templates/${template.type}/${template.id}/details`]: i18n._(t`${template.name} Details`)
+    };
+    this.setState({ breadcrumbConfig });
+  }
+
   render () {
-    const { match } = this.props;
+    const { match, history, location } = this.props;
     const { breadcrumbConfig } = this.state;
     return (
       <Fragment>
         <Breadcrumbs breadcrumbConfig={breadcrumbConfig} />
         <Switch>
+          <Route
+            path={`${match.path}/:templateType/:id`}
+            render={({ match: newRouteMatch }) => (
+              <Config>
+                {({ me }) => (
+                  <Template
+                    history={history}
+                    location={location}
+                    setBreadcrumb={this.setBreadCrumbConfig}
+                    me={me || {}}
+                    match={newRouteMatch}
+                  />
+                )}
+              </Config>
+            )}
+          />
           <Route
             path={`${match.path}`}
             render={() => (

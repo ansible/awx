@@ -44,7 +44,7 @@ class TemplateListItem extends Component {
             <DataListCell key="divider">
               <VerticalSeparator />
               <span>
-                <Link to="/home">
+                <Link to={`/templates/${template.type}/${template.id}`}>
                   <b>{template.name}</b>
                 </Link>
               </span>
