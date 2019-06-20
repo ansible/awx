@@ -141,6 +141,16 @@ spec:
           ports:
             - containerPort: 8052
           volumeMounts:
+{% if ca_trust_dir is defined %}
+            - name: {{ kubernetes_deployment_name }}-ca-trust-dir
+              mountPath: "/etc/pki/ca-trust/source/anchors/"
+              readOnly: true
+{% endif %}
+{% if project_data_dir is defined %}
+            - name: {{ kubernetes_deployment_name }}-project-data-dir
+              mountPath: "/var/lib/awx/projects"
+              readOnly: false
+{% endif %}
             - name: {{ kubernetes_deployment_name }}-application-config
               mountPath: "/etc/tower/settings.py"
               subPath: settings.py
@@ -176,6 +186,16 @@ spec:
             - /usr/bin/launch_awx_task.sh
           imagePullPolicy: Always
           volumeMounts:
+{% if ca_trust_dir is defined %}
+            - name: {{ kubernetes_deployment_name }}-ca-trust-dir
+              mountPath: "/etc/pki/ca-trust/source/anchors/"
+              readOnly: true
+{% endif %}
+{% if project_data_dir is defined %}
+            - name: {{ kubernetes_deployment_name }}-project-data-dir
+              mountPath: "/var/lib/awx/projects"
+              readOnly: false
+{% endif %}
             - name: {{ kubernetes_deployment_name }}-application-config
               mountPath: "/etc/tower/settings.py"
               subPath: settings.py
@@ -274,6 +294,18 @@ spec:
               cpu: "{{ memcached_cpu_limit }}m"
 {% endif %}
       volumes:
+{% if ca_trust_dir is defined %}
+        - name: {{ kubernetes_deployment_name }}-ca-trust-dir
+          hostPath:
+            path: "{{ ca_trust_dir }}"
+            type: Directory
+{% endif %}
+{% if project_data_dir is defined %}
+        - name: {{ kubernetes_deployment_name }}-project-data-dir
+          hostPath:
+            path: "{{ project_data_dir }}"
+            type: Directory
+{% endif %}
         - name: {{ kubernetes_deployment_name }}-application-config
           configMap:
             name: {{ kubernetes_deployment_name }}-config
