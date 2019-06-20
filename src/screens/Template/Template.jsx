@@ -53,15 +53,11 @@ class Template extends Component {
     const cardHeader = (contentLoading ? null
       : (
         <CardHeader style={{ padding: 0 }}>
-          <Fragment>
-            <div css="display: flex;">
-              <RoutedTabs
-                history={history}
-                tabsArray={tabsArray}
-              />
-              <CardCloseButton linkTo="/templates" />
-            </div>
-          </Fragment>
+          <RoutedTabs
+            history={history}
+            tabsArray={tabsArray}
+          />
+          <CardCloseButton linkTo="/templates" />
         </CardHeader>
       )
     );
