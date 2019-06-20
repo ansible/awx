@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
 import { Card, CardHeader, PageSection } from '@patternfly/react-core';
