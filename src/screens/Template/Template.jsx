@@ -45,7 +45,7 @@ class Template extends Component {
     const tabsArray = [
       { name: i18n._(t`Details`), link: `${match.url}/details`, id: 0 },
       { name: i18n._(t`Access`), link: '/home', id: 1 },
-      { name: i18n._(t`Notification`), link: '/home', id: 2 },
+      { name: i18n._(t`Notifications`), link: '/home', id: 2 },
       { name: i18n._(t`Schedules`), link: '/home', id: 3 },
       { name: i18n._(t`Completed Jobs`), link: '/home', id: 4 },
       { name: i18n._(t`Survey`), link: '/home', id: 5 }
