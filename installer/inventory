@@ -149,7 +149,7 @@ secret_key=awxsecret
 # whenever syncing a Git SCM project. If the CA is not trusted, you might face the
 # 'Peer's Certificate issuer is not recognized' error.
 # Besides being not recommended, you can enable this option to allow AWX to sync Git SCM projects
-# with verifying its Certificate Authority.
+# without verifying its Certificate Authority.
 #git_ssl_no_verify=true
 
 # Include /etc/nginx/awx_extra.conf
