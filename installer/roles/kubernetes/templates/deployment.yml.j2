@@ -191,11 +191,6 @@ spec:
               mountPath: "/etc/pki/ca-trust/source/anchors/"
               readOnly: true
 {% endif %}
-{% if project_data_dir is defined %}
-            - name: {{ kubernetes_deployment_name }}-project-data-dir
-              mountPath: "/var/lib/awx/projects"
-              readOnly: false
-{% endif %}
             - name: {{ kubernetes_deployment_name }}-application-config
               mountPath: "/etc/tower/settings.py"
               subPath: settings.py
