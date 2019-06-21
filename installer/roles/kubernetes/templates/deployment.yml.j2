@@ -373,10 +373,27 @@ kind: Ingress
 metadata:
   name: {{ kubernetes_deployment_name }}-web-svc
   namespace: {{ kubernetes_namespace }}
+{% if kubernetes_ingress_annotations is defined %}
+  annotations:
+{% for key, value in kubernetes_ingress_annotations.items() %}
+    {{ key }}: {{ value }}
+{% endfor %}
+
+spec:
+  rules:
+  - host: {{ kubernetes_ingress_hostname }}
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: {{ kubernetes_deployment_name }}-web-svc
+          servicePort: 80
+{% else %}
 spec:
   backend:
     serviceName: {{ kubernetes_deployment_name }}-web-svc
     servicePort: 80
+{% endif %}
 {% endif %}
 {% if openshift_host is defined %}
 ---
