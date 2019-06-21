@@ -5,20 +5,11 @@ import {
   DataListItemRow,
   DataListItemCells,
   DataListCheck,
-  DataListCell as PFDataListCell,
 } from '@patternfly/react-core';
-import styled from 'styled-components';
 
+import DataListCell from '@components/DataListCell';
 import VerticalSeparator from '@components/VerticalSeparator';
 import { toTitleCase } from '@util/strings';
-
-const DataListCell = styled(PFDataListCell)`
-  display: flex;
-  align-items: center;
-  @media screen and (min-width: 768px) {
-    padding-bottom: 0;
-  }
-`;
 
 class JobListItem extends Component {
   render () {

@@ -5,22 +5,12 @@ import {
   DataListItemRow,
   DataListItemCells,
   DataListCheck,
-  DataListCell as PFDataListCell,
 } from '@patternfly/react-core';
-import styled from 'styled-components';
 
-import VerticalSeparator from '@components/VerticalSeparator';
+import DataListCell from '@components/DataListCell';
 import LaunchButton from '@components/LaunchButton';
+import VerticalSeparator from '@components/VerticalSeparator';
 import { toTitleCase } from '@util/strings';
-
-const DataListCell = styled(PFDataListCell)`
-  display: flex;
-  align-items: center;
-  @media screen and (min-width: 768px) {
-    padding-bottom: 0;
-    justify-content: ${props => (props.lastcolumn ? 'flex-end' : 'inherit')};
-  }
-`;
 
 class TemplateListItem extends Component {
   render () {
