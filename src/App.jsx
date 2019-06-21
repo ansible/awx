@@ -48,7 +48,7 @@ class App extends Component {
       version: null,
       isAboutModalOpen: false,
       isNavOpen,
-      configError: false,
+      hasConfigError: false,
     };
 
     this.handleLogout = this.handleLogout.bind(this);
@@ -81,7 +81,7 @@ class App extends Component {
   }
 
   handleConfigErrorClose () {
-    this.setState({ configError: false });
+    this.setState({ hasConfigError: false });
   }
 
   async loadConfig () {
@@ -92,7 +92,7 @@ class App extends Component {
 
       this.setState({ ansible_version, custom_virtualenvs, version, me });
     } catch (err) {
-      this.setState({ configError: true });
+      this.setState({ hasConfigError: true });
     }
   }
 
@@ -104,7 +104,7 @@ class App extends Component {
       isNavOpen,
       me,
       version,
-      configError,
+      hasConfigError,
     } = this.state;
     const {
       i18n,
@@ -170,7 +170,7 @@ class App extends Component {
           onClose={this.handleAboutClose}
         />
         <AlertModal
-          isOpen={configError}
+          isOpen={hasConfigError}
           variant="danger"
           title={i18n._(t`Error!`)}
           onClose={this.handleConfigErrorClose}
