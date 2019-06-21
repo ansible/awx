@@ -8,13 +8,13 @@ import {
   DataListItemRow,
   DataListItemCells,
   DataListCheck,
-  DataListCell as PFDataListCell,
 } from '@patternfly/react-core';
 import {
   Link
 } from 'react-router-dom';
 import styled from 'styled-components';
 
+import DataListCell from '@components/DataListCell';
 import VerticalSeparator from '@components/VerticalSeparator';
 import { Organization } from '@types';
 
@@ -35,16 +35,6 @@ const ListGroup = styled.span`
     &:first-of-type {
       margin-left: 0;
     }
-  }
-`;
-
-const DataListCell = styled(PFDataListCell)`
-  display: flex;
-  align-items: center;
-  padding-bottom: ${props => (props.righthalf ? '16px' : '8px')};
-
-  @media screen and (min-width: 768px) {
-    padding-bottom: 0;
   }
 `;
 

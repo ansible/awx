@@ -8,48 +8,40 @@ import {
 } from '@patternfly/react-core';
 
 import DataListCell from '@components/DataListCell';
-import LaunchButton from '@components/LaunchButton';
 import VerticalSeparator from '@components/VerticalSeparator';
 import { toTitleCase } from '@util/strings';
 
-class TemplateListItem extends Component {
+class JobListItem extends Component {
   render () {
     const {
-      template,
+      job,
       isSelected,
       onSelect,
     } = this.props;
-    const canLaunch = template.summary_fields.user_capabilities.start;
 
     return (
       <DataListItem
-        aria-labelledby={`check-action-${template.id}`}
+        aria-labelledby={`check-action-${job.id}`}
         css="--pf-c-data-list__expandable-content--BoxShadow: none;"
       >
         <DataListItemRow>
           <DataListCheck
-            id={`select-jobTemplate-${template.id}`}
+            id={`select-job-${job.id}`}
             checked={isSelected}
             onChange={onSelect}
-            aria-labelledby={`check-action-${template.id}`}
+            aria-labelledby={`check-action-${job.id}`}
           />
           <DataListItemCells dataListCells={[
             <DataListCell key="divider">
               <VerticalSeparator />
               <span>
-                <Link to={`/templates/${template.type}/${template.id}`}>
-                  <b>{template.name}</b>
+                <Link to={`/jobs/${job.id}`}>
+                  <b>{job.name}</b>
                 </Link>
               </span>
             </DataListCell>,
-            <DataListCell key="type">{toTitleCase(template.type)}</DataListCell>,
-            <DataListCell lastcolumn="true" key="launch">
-              {canLaunch && template.type === 'job_template' && (
-                <LaunchButton
-                  templateId={template.id}
-                />
-              )}
-            </DataListCell>
+            <DataListCell key="type">{toTitleCase(job.type)}</DataListCell>,
+            <DataListCell key="finished">{job.finished}</DataListCell>,
           ]}
           />
         </DataListItemRow>
@@ -57,5 +49,5 @@ class TemplateListItem extends Component {
     );
   }
 }
-export { TemplateListItem as _TemplateListItem };
-export default TemplateListItem;
+export { JobListItem as _JobListItem };
+export default JobListItem;
