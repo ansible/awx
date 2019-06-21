@@ -77,10 +77,10 @@ class JSONField(upstream_JSONField):
     def db_type(self, connection):
         return 'text'
 
-    def from_db_value(self, value, expression, connection, context):
+    def from_db_value(self, value, expression, connection):
         if value in {'', None} and not self.null:
             return {}
-        return super(JSONField, self).from_db_value(value, expression, connection, context)
+        return super(JSONField, self).from_db_value(value, expression, connection)
 
 
 class JSONBField(upstream_JSONBField):
@@ -97,7 +97,7 @@ class JSONBField(upstream_JSONBField):
             value, connection, prepared
         )
 
-    def from_db_value(self, value, expression, connection, context):
+    def from_db_value(self, value, expression, connection):
         # Work around a bug in django-jsonfield
         # https://bitbucket.org/schinckel/django-jsonfield/issues/57/cannot-use-in-the-same-project-as-djangos
         if isinstance(value, str):
@@ -972,7 +972,7 @@ class OAuth2ClientSecretField(models.CharField):
             encrypt_value(value), connection, prepared
         )
 
-    def from_db_value(self, value, expression, connection, context):
+    def from_db_value(self, value, expression, connection):
         if value and value.startswith('$encrypted$'):
             return decrypt_value(get_encryption_key('value', pk=None), value)
         return value
