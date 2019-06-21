@@ -7,12 +7,13 @@
 export default ['Rest', 'Wait', 'NotificationsFormObject',
     'ProcessErrors', 'GetBasePath', 'Alert',
     'GenerateForm', '$scope', '$state', 'CreateSelect2', 'GetChoices',
-    'NotificationsTypeChange', 'ParseTypeChange', 'i18n',
+    'NotificationsTypeChange', 'ParseTypeChange', 'i18n', 'MessageUtils',
     function(
         Rest, Wait, NotificationsFormObject,
         ProcessErrors, GetBasePath, Alert,
         GenerateForm, $scope, $state, CreateSelect2, GetChoices,
-        NotificationsTypeChange, ParseTypeChange, i18n
+        NotificationsTypeChange, ParseTypeChange, i18n,
+        MessageUtils
     ) {
 
         var generator = GenerateForm,
@@ -31,9 +32,11 @@ export default ['Rest', 'Wait', 'NotificationsFormObject',
                         Alert('Permission Error', 'You do not have permission to add a notification template.', 'alert-info');
                     }
                     // TODO: get default messages off data
-                    $scope.start_message = defaultMessages.start_message = 'It started';
-                    $scope.success_message = defaultMessages.success_message = 'It succeeded';
-                    $scope.error_message =  defaultMessages.error_message = 'It failed';
+                    console.log('OPTIONS:', data);
+                    defaultMessages.start_message = 'It started';
+                    defaultMessages.success_message = 'It succeeded';
+                    defaultMessages.error_message = 'It failed';
+                    MessageUtils.setMessagesOnScope($scope, null, defaultMessages);
                 });
             // apply form definition's default field values
             GenerateForm.applyDefaults(form, $scope);
@@ -189,29 +192,6 @@ export default ['Rest', 'Wait', 'NotificationsFormObject',
             }
         };
 
-        function getMessages () {
-            return {
-                start: {
-                    message: $scope.start_message === defaultMessages.start_message
-                        ? null : $scope.start_message,
-                    body: $scope.start_body === defaultMessages.start_body
-                        ? null : $scope.start_body,
-                },
-                success: {
-                    message: $scope.success_message === defaultMessages.success_message
-                        ? null : $scope.success_message,
-                    body: $scope.success_body === defaultMessages.success_body
-                        ? null : $scope.success_body,
-                },
-                error: {
-                    message: $scope.error_message === defaultMessages.error_message
-                        ? null : $scope.error_message,
-                    body: $scope.error_body === defaultMessages.error_body
-                        ? null : $scope.error_body,
-                }
-            };
-        }
-
         // Save
         $scope.formSave = function() {
             var params,
@@ -222,7 +202,7 @@ export default ['Rest', 'Wait', 'NotificationsFormObject',
                 "name": $scope.name,
                 "description": $scope.description,
                 "organization": $scope.organization,
-                "messages": $scope.customize_messages ? getMessages() : null,
+                "messages": MessageUtils.getMessagesObj($scope, defaultMessages),
                 "notification_type": v,
                 "notification_configuration": {}
             };

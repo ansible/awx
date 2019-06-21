@@ -10,19 +10,22 @@ export default ['Rest', 'Wait',
     'notification_template',
     '$scope', '$state', 'GetChoices', 'CreateSelect2', 'Empty',
     'NotificationsTypeChange', 'ParseTypeChange', 'i18n',
+    'MessageUtils',
     function(
         Rest, Wait,
         NotificationsFormObject, ProcessErrors, GetBasePath,
         GenerateForm,
         notification_template,
         $scope, $state, GetChoices, CreateSelect2, Empty,
-        NotificationsTypeChange, ParseTypeChange, i18n
+        NotificationsTypeChange, ParseTypeChange, i18n,
+        MessageUtils
     ) {
         var generator = GenerateForm,
             id = notification_template.id,
             form = NotificationsFormObject,
             master = {},
-            url = GetBasePath('notification_templates');
+            url = GetBasePath('notification_templates'),
+            defaultMessages = {};
 
         init();
 
@@ -34,6 +37,11 @@ export default ['Rest', 'Wait',
                     $scope.canAdd = false;
                 }
             });
+
+            // TODO: get OPTIONS for defaultMessages
+            defaultMessages.start_message = 'It started';
+            defaultMessages.success_message = 'It succeeded';
+            defaultMessages.error_message = 'It failed';
 
             GetChoices({
                 scope: $scope,
@@ -165,6 +173,9 @@ export default ['Rest', 'Wait',
                         field_id: 'notification_template_headers',
                         readOnly: !$scope.notification_template.summary_fields.user_capabilities.edit
                     });
+
+                    MessageUtils.setMessagesOnScope($scope, data.messages, defaultMessages);
+
                     Wait('stop');
                 })
                 .catch(({data, status}) => {
@@ -174,8 +185,6 @@ export default ['Rest', 'Wait',
                     });
                 });
         });
-
-
 
         $scope.$watch('headers', function validate_headers(str) {
             try {
@@ -277,14 +286,7 @@ export default ['Rest', 'Wait',
                 "name": $scope.name,
                 "description": $scope.description,
                 "organization": $scope.organization,
-                "messages": $scope.customize_messages ? {
-                  start_message: $scope.start_message,
-                  start_body: $scope.start_body,
-                  success_message: $scope.success_message,
-                  success_body: $scope.success_body,
-                  error_message: $scope.error_message,
-                  error_body: $scope.error_body,
-                } : null,
+                "messages": MessageUtils.getMessagesObj($scope, defaultMessages),
                 "notification_type": v,
                 "notification_configuration": {}
             };

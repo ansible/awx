@@ -53,7 +53,7 @@ function atSyntaxHighlightController ($scope, AngularCodeMirror) {
         init();
     });
     $scope.$on('reset-code-mirror', () => {
-        initCodeMirror();
+        setImmediate(initCodeMirror);
     });
 }
 
