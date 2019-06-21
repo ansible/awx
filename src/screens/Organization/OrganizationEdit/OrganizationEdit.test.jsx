@@ -10,8 +10,6 @@ jest.mock('@api');
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 describe('<OrganizationEdit />', () => {
-  let api;
-
   const mockData = {
     name: 'Foo',
     description: 'Bar',
@@ -22,23 +20,8 @@ describe('<OrganizationEdit />', () => {
     }
   };
 
-  beforeEach(() => {
-    api = {
-      getInstanceGroups: jest.fn(),
-      updateOrganizationDetails: jest.fn(),
-      associateInstanceGroup: jest.fn(),
-      disassociate: jest.fn(),
-    };
-  });
-
   test('handleSubmit should call api update', () => {
-    const wrapper = mountWithContexts(
-      <OrganizationEdit
-        organization={mockData}
-      />, { context: { network: {
-        api,
-      } } }
-    );
+    const wrapper = mountWithContexts(<OrganizationEdit organization={mockData} />);
 
     const updatedOrgData = {
       name: 'new name',
@@ -51,13 +34,7 @@ describe('<OrganizationEdit />', () => {
   });
 
   test('handleSubmit associates and disassociates instance groups', async () => {
-    const wrapper = mountWithContexts(
-      <OrganizationEdit
-        organization={mockData}
-      />, { context: { network: {
-        api,
-      } } }
-    );
+    const wrapper = mountWithContexts(<OrganizationEdit organization={mockData} />);
 
     const updatedOrgData = {
       name: 'new name',
@@ -77,14 +54,8 @@ describe('<OrganizationEdit />', () => {
       push: jest.fn(),
     };
     const wrapper = mountWithContexts(
-      <OrganizationEdit
-        organization={mockData}
-      />, { context: {
-        network: {
-          api: { api },
-        },
-        router: { history }
-      } }
+      <OrganizationEdit organization={mockData} />,
+      { context: { router: { history } } }
     );
 
     expect(history.push).not.toHaveBeenCalled();
