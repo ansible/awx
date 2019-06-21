@@ -25,7 +25,7 @@ const QS_CONFIG = getQSConfig('job', {
   not__launch_type: 'sync',
 });
 
-class JobsList extends Component {
+class JobList extends Component {
   constructor (props) {
     super(props);
 
@@ -178,5 +178,5 @@ class JobsList extends Component {
   }
 }
 
-export { JobsList as _JobsList };
-export default withI18n()(withRouter(JobsList));
+export { JobList as _JobList };
+export default withI18n()(withRouter(JobList));
