@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='workflowjob',
             name='char_prompts',
-            field=awx.main.fields.JSONField(blank=True, default={}),
+            field=awx.main.fields.JSONField(blank=True, default=dict),
         ),
         migrations.AddField(
             model_name='workflowjob',

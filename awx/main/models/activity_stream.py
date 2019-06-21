@@ -80,9 +80,7 @@ class ActivityStream(models.Model):
     o_auth2_application = models.ManyToManyField("OAuth2Application", blank=True)
     o_auth2_access_token = models.ManyToManyField("OAuth2AccessToken", blank=True)
 
-
-
-    setting = JSONField(blank=True)
+    setting = JSONField(blank=True, default=dict)
 
     def __str__(self):
         operation = self.operation if 'operation' in self.__dict__ else '_delayed_'

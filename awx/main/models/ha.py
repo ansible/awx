@@ -185,7 +185,7 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
         help_text=_("Static minimum number of Instances to automatically assign to this group")
     )
     policy_instance_list = JSONField(
-        default=[],
+        default=list,
         blank=True,
         help_text=_("List of exact-match Instances that will always be automatically assigned to this group")
     )

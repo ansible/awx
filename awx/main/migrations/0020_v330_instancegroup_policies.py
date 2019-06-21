@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='instancegroup',
             name='policy_instance_list',
-            field=awx.main.fields.JSONField(default=[], help_text='List of exact-match Instances that will always be automatically assigned to this group',
+            field=awx.main.fields.JSONField(default=list, help_text='List of exact-match Instances that will always be automatically assigned to this group',
                                             blank=True),
         ),
         migrations.AddField(

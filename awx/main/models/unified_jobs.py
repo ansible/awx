@@ -641,7 +641,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
     )
     job_env = prevent_search(JSONField(
         blank=True,
-        default={},
+        default=dict,
         editable=False,
     ))
     job_explanation = models.TextField(

@@ -14,6 +14,7 @@ from jinja2.exceptions import UndefinedError, TemplateSyntaxError
 import django
 from django.contrib.postgres.fields import JSONField as upstream_JSONField
 from django.core import exceptions as django_exceptions
+from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models.signals import (
     post_save,
     post_delete,
@@ -71,34 +72,29 @@ Draft4Validator.VALIDATORS['enum'] = __enum_validate__
 class JSONField(upstream_JSONField):
 
     def db_type(self, connection):
+        if connection.vendor == 'postgresql':
+            # Only do jsonb if in pg 9.4+
+            if connection.pg_version >= 90400:
+                return 'jsonb'
         return 'text'
 
-    def from_db_value(self, value, expression, connection, context):
-        if value in {'', None} and not self.null:
-            return {}
-        return super(JSONField, self).from_db_value(value, expression, connection, context)
-
-
-class JSONBField(upstream_JSONField):
-    def get_prep_lookup(self, lookup_type, value):
-        if isinstance(value, str) and value == "null":
-            return 'null'
-        return super(JSONBField, self).get_prep_lookup(lookup_type, value)
-
     def get_db_prep_value(self, value, connection, prepared=False):
-        if connection.vendor == 'sqlite':
+        if prepared:
+            return value
+        if connection.vendor != 'postgresql' or connection.pg_version < 90400:
             # sqlite (which we use for tests) does not support jsonb;
-            return json.dumps(value)
-        return super(JSONBField, self).get_db_prep_value(
-            value, connection, prepared
-        )
+            return json.dumps(value, cls=DjangoJSONEncoder)
+        return super(JSONField, self).get_db_prep_value(value, connection, prepared)
 
     def from_db_value(self, value, expression, connection, context):
-        # Work around a bug in django-jsonfield
-        # https://bitbucket.org/schinckel/django-jsonfield/issues/57/cannot-use-in-the-same-project-as-djangos
-        if isinstance(value, str):
-            return json.loads(value)
+        if connection.vendor != 'postgresql' or connection.pg_version < 90400:
+            if value:
+                return json.loads(value)
         return value
+
+
+JSONBField = JSONField
+
 
 # Based on AutoOneToOneField from django-annoying:
 # https://bitbucket.org/offline/django-annoying/src/a0de8b294db3/annoying/fields.py
@@ -449,21 +445,6 @@ class JSONSchemaField(JSONBField):
                 code='invalid',
                 params={'value': value},
             )
-
-    def get_db_prep_value(self, value, connection, prepared=False):
-        if connection.vendor == 'sqlite':
-            # sqlite (which we use for tests) does not support jsonb;
-            return json.dumps(value)
-        return super(JSONSchemaField, self).get_db_prep_value(
-            value, connection, prepared
-        )
-
-    def from_db_value(self, value, expression, connection, context):
-        # Work around a bug in django-jsonfield
-        # https://bitbucket.org/schinckel/django-jsonfield/issues/57/cannot-use-in-the-same-project-as-djangos
-        if isinstance(value, str):
-            return json.loads(value)
-        return value
 
 
 @JSONSchemaField.format_checker.checks('vault_id')

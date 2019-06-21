@@ -149,7 +149,7 @@ class BasePlaybookEvent(CreatedModifiedModel):
     )
     event_data = JSONField(
         blank=True,
-        default={},
+        default=dict,
     )
     failed = models.BooleanField(
         default=False,
@@ -567,7 +567,7 @@ class BaseCommandEvent(CreatedModifiedModel):
 
     event_data = JSONField(
         blank=True,
-        default={},
+        default=dict,
     )
     uuid = models.CharField(
         max_length=1024,

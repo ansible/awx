@@ -66,7 +66,7 @@ class NotificationTemplate(CommonModelNameNotUnique):
         choices=NOTIFICATION_TYPE_CHOICES,
     )
 
-    notification_configuration = JSONField(blank=False)
+    notification_configuration = JSONField(blank=False, default=dict)
 
     def get_absolute_url(self, request=None):
         return reverse('api:notification_template_detail', kwargs={'pk': self.pk}, request=request)
@@ -193,7 +193,7 @@ class Notification(CreatedModifiedModel):
         default='',
         editable=False,
     )
-    body = JSONField(blank=True)
+    body = JSONField(blank=True, default=dict)
 
     def get_absolute_url(self, request=None):
         return reverse('api:notification_detail', kwargs={'pk': self.pk}, request=request)

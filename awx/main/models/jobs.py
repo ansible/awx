@@ -485,7 +485,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
     )
     artifacts = JSONField(
         blank=True,
-        default={},
+        default=dict,
         editable=False,
     )
     scm_revision = models.CharField(
@@ -847,7 +847,7 @@ class LaunchTimeConfigBase(BaseModel):
     # This is a solution to the nullable CharField problem, specific to prompting
     char_prompts = JSONField(
         blank=True,
-        default={}
+        default=dict
     )
 
     def prompts_dict(self, display=False):
@@ -927,11 +927,11 @@ class LaunchTimeConfig(LaunchTimeConfigBase):
     # Special case prompting fields, even more special than the other ones
     extra_data = JSONField(
         blank=True,
-        default={}
+        default=dict
     )
     survey_passwords = prevent_search(JSONField(
         blank=True,
-        default={},
+        default=dict,
         editable=False,
     ))
     # Credentials needed for non-unified job / unified JT models

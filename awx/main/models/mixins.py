@@ -100,7 +100,7 @@ class SurveyJobTemplateMixin(models.Model):
     )
     survey_spec = prevent_search(JSONField(
         blank=True,
-        default={},
+        default=dict,
     ))
     ask_variables_on_launch = AskForField(
         blank=True,
@@ -360,7 +360,7 @@ class SurveyJobMixin(models.Model):
 
     survey_passwords = prevent_search(JSONField(
         blank=True,
-        default={},
+        default=dict,
         editable=False,
     ))
 

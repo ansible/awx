@@ -276,7 +276,7 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
 
     playbook_files = JSONField(
         blank=True,
-        default=[],
+        default=list,
         editable=False,
         verbose_name=_('Playbook Files'),
         help_text=_('List of playbooks found in the project'),
@@ -284,7 +284,7 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
 
     inventory_files = JSONField(
         blank=True,
-        default=[],
+        default=list,
         editable=False,
         verbose_name=_('Inventory Files'),
         help_text=_('Suggested list of content that could be Ansible inventory in the project'),
