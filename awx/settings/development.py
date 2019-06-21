@@ -63,6 +63,11 @@ SESSION_COOKIE_SECURE = False
 # Disallow sending csrf cookies over insecure connections
 CSRF_COOKIE_SECURE = False
 
+# Enable / Disable HTTP Basic Authentication used in the API browser
+# Note: Session limits are not enforced when using HTTP Basic Authentication.
+# Note: This setting may be overridden by database settings.
+AUTH_BASIC_ENABLED = True
+
 # Override django.template.loaders.cached.Loader in defaults.py
 template = next((tpl_backend for tpl_backend in TEMPLATES if tpl_backend['NAME'] == 'default'), None) # noqa
 template['OPTIONS']['loaders'] = (

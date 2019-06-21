@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 import logging
 from django.utils.timezone import now
 from django.conf import settings
+from awx.conf.models import Setting
 
 logger = logging.getLogger('awx.conf.settings')
 
@@ -30,3 +31,15 @@ def rename_setting(apps, schema_editor, old_key, new_key):
                                modified=now()
                                )
         
+        
+def copy_setting(apps, schema_editor, old_key):
+
+    # If old_key has been set local_settings.py, then set it in Tower Settings (CTinT)
+    if hasattr(settings, old_key):
+        old_setting = getattr(settings, 'AUTH_BASIC_ENABLED')
+        Setting.objects.create(key=old_key, 
+                               value=old_setting, 
+                               created=now(),
+                               modified=now()
+                               )
+
