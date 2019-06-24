@@ -23,8 +23,8 @@ class WebhookBackend(AWXBaseEmailBackend):
     recipient_parameter = "url"
     sender_parameter = None
 
-    def __init__(self, headers, method, disable_ssl_verification=False, fail_silently=False, username=None, password=None, **kwargs):
-        self.method = method
+    def __init__(self, headers, http_method, disable_ssl_verification=False, fail_silently=False, username=None, password=None, **kwargs):
+        self.http_method = http_method
         self.disable_ssl_verification = disable_ssl_verification
         self.headers = headers
         self.username = username
@@ -38,9 +38,9 @@ class WebhookBackend(AWXBaseEmailBackend):
         sent_messages = 0
         if 'User-Agent' not in self.headers:
             self.headers['User-Agent'] = "Tower {}".format(get_awx_version())
-        if self.method.lower() not in ('put', 'post'):
-            raise ValueError("Method must be either 'POST' or 'PUT'.")
-        chosen_method = getattr(requests, self.method.lower(), None)
+        if self.http_method.lower() not in ('put', 'post'):
+            raise ValueError("HTTP method must be either 'POST' or 'PUT'.")
+        chosen_method = getattr(requests, self.http_method.lower(), None)
         for m in messages:
             if chosen_method is not None:
                 r = chosen_method("{}".format(m.recipients()[0]),
