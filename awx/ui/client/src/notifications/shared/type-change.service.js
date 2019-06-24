@@ -53,6 +53,8 @@ function (i18n) {
                     break;
                 case 'webhook':
                     obj.webhook_required = true;
+                    obj.passwordLabel = ' ' + i18n._('Basic Auth Password');
+                    obj.password_required = false;
                     break;
                 case 'mattermost':
                     obj.mattermost_required = true;

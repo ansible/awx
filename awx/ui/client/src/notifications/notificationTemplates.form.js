@@ -63,7 +63,7 @@ export default ['i18n', function(i18n) {
             username: {
                 label: i18n._('Username'),
                 type: 'text',
-                ngShow: "notification_type.value == 'email' ",
+                ngShow: "notification_type.value == 'email' || notification_type.value == 'webhook' ",
                 subForm: 'typeSubForm',
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
@@ -75,7 +75,7 @@ export default ['i18n', function(i18n) {
                     reqExpression: "password_required" ,
                     init: "false"
                 },
-                ngShow: "notification_type.value == 'email' || notification_type.value == 'irc' ",
+                ngShow: "notification_type.value == 'email' || notification_type.value == 'irc' || notification_type.value == 'webhook' ",
                 subForm: 'typeSubForm',
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
@@ -419,6 +419,21 @@ export default ['i18n', function(i18n) {
                 },
                 awPopOver: i18n._('Specify HTTP Headers in JSON format. Refer to the Ansible Tower documentation for example syntax.'),
                 dataPlacement: 'right',
+                ngShow: "notification_type.value == 'webhook' ",
+                subForm: 'typeSubForm',
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
+            },
+            http_method: {
+                label: i18n._('HTTP Method'),
+                dataTitle: i18n._('HTTP Method'),
+                type: 'select',
+                ngOptions: 'choice.id as choice.name for choice in httpMethodChoices',
+                default: 'post',
+                awPopOver: i18n._('Specify an HTTP method for the webhook. Acceptable choices are: POST or PATCH'),
+                awRequiredWhen: {
+                    reqExpression: "webhook_required",
+                    init: "false"
+                },
                 ngShow: "notification_type.value == 'webhook' ",
                 subForm: 'typeSubForm',
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
