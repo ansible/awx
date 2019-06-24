@@ -276,3 +276,5 @@ TEST_OPENSTACK_PROJECT = ''
 # Azure credentials.
 TEST_AZURE_USERNAME = ''
 TEST_AZURE_KEY_DATA = ''
+
+AWX_ANSIBLE_COLLECTIONS_PATHS = ['/tmp/collections']
