@@ -83,7 +83,7 @@ ntlm-auth==1.3.0          # via requests-credssp, requests-ntlm
 oauthlib==3.0.1           # via requests-oauthlib
 openstacksdk==0.23.0
 os-service-types==1.6.0   # via keystoneauth1, openstacksdk
-ovirt-engine-sdk-python==4.2.4
+ovirt-engine-sdk-python==4.3.0
 packaging==19.0
 paramiko==2.4.2           # via azure-cli-core, ncclient
 pbr==5.2.0                # via keystoneauth1, openstacksdk, os-service-types, stevedore
