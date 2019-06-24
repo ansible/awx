@@ -15,7 +15,7 @@ logger = logging.getLogger('awx.main.notifications.webhook_backend')
 class WebhookBackend(AWXBaseEmailBackend):
 
     init_parameters = {"url": {"label": "Target URL", "type": "string"},
-                       "method": {"label": "HTTP Method", "type": "string", "default": "POST"},
+                       "http_method": {"label": "HTTP Method", "type": "string", "default": "POST"},
                        "disable_ssl_verification": {"label": "Verify SSL", "type": "bool", "default": False},
                        "username": {"label": "Username", "type": "string", "default": ""},
                        "password": {"label": "Password", "type": "password", "default": ""},
