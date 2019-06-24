@@ -15,7 +15,7 @@ import django
 from django.contrib.postgres.fields import JSONField as upstream_JSONField
 from django.core import exceptions as django_exceptions
 from django.core.serializers.json import DjangoJSONEncoder
-from django.db import models
+from django.db import connection, models
 from django.db.models.signals import (
     m2m_changed,
     post_delete,
@@ -69,28 +69,25 @@ def __enum_validate__(validator, enums, instance, schema):
 Draft4Validator.VALIDATORS['enum'] = __enum_validate__
 
 
-class JSONField(upstream_JSONField):
+if connection.vendor == 'postgresql':
+    JSONField = upstream_JSONField
+else:
+    class JSONField(upstream_JSONField):
+        def db_type(self, connection):
+            return 'text'
 
-    def db_type(self, connection):
-        if connection.vendor == 'postgresql':
-            # Only do jsonb if in pg 9.4+
-            if connection.pg_version >= 90400:
-                return 'jsonb'
-        return 'text'
+        def get_transform(self, name):
+            return model.TextField.get_transform(name)
 
-    def get_db_prep_value(self, value, connection, prepared=False):
-        if prepared:
-            return value
-        if connection.vendor != 'postgresql' or connection.pg_version < 90400:
-            # sqlite (which we use for tests) does not support jsonb;
+        def get_db_prep_value(self, value, connection, prepared=False):
+            if prepared:
+                return value
             return json.dumps(value, cls=DjangoJSONEncoder)
-        return super(JSONField, self).get_db_prep_value(value, connection, prepared)
 
-    def from_db_value(self, value, expression, connection, context):
-        if connection.vendor != 'postgresql' or connection.pg_version < 90400:
+        def from_db_value(self, value, expression, connection, context):
             if value:
                 return json.loads(value)
-        return value
+            return value
 
 
 # Based on AutoOneToOneField from django-annoying:
