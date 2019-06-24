@@ -1188,6 +1188,9 @@ AWX_REQUEST_PROFILE = False
 # Delete temporary directories created to store playbook run-time
 AWX_CLEANUP_PATHS = True
 
+# Expose collections to Ansible playbooks
+AWX_ANSIBLE_COLLECTIONS_PATHS = os.path.join(os.path.expanduser("~"), 'collections')
+
 MIDDLEWARE = [
     'awx.main.middleware.TimingMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',

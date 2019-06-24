@@ -920,6 +920,7 @@ class BaseTask(object):
         if self.should_use_proot(instance):
             env['PROOT_TMP_DIR'] = settings.AWX_PROOT_BASE_PATH
         env['AWX_PRIVATE_DATA_DIR'] = private_data_dir
+        env['ANSIBLE_COLLECTIONS_PATHS'] = os.environ.get('ANSIBLE_COLLECTIONS_PATHS', '') + ':' + settings.AWX_ANSIBLE_COLLECTIONS_PATHS
         return env
 
     def should_use_proot(self, instance):
