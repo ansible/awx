@@ -385,7 +385,9 @@ def notification_template(organization):
                                                organization=organization,
                                                notification_type="webhook",
                                                notification_configuration=dict(url="http://localhost",
-                                                                               headers={"Test": "Header"}))
+                                                                               username="",
+                                                                               password="",
+                                                                               headers={"Test": "Header",}))
 
 
 @pytest.fixture

@@ -117,7 +117,7 @@ def mk_credential(name, credential_type='ssh', persisted=True):
 def mk_notification_template(name, notification_type='webhook', configuration=None, organization=None, persisted=True):
     nt = NotificationTemplate(name=name)
     nt.notification_type = notification_type
-    nt.notification_configuration = configuration or dict(url="http://localhost", headers={"Test": "Header"})
+    nt.notification_configuration = configuration or dict(url="http://localhost", username="", password="", headers={"Test": "Header"})
 
     if organization is not None:
         nt.organization = organization
@@ -216,7 +216,7 @@ def mk_workflow_job_template(name, extra_vars='', spec=None, organization=None, 
 
 
 def mk_workflow_job_template_node(workflow_job_template=None,
-                                  unified_job_template=None, 
+                                  unified_job_template=None,
                                   success_nodes=None,
                                   failure_nodes=None,
                                   always_nodes=None,
@@ -231,11 +231,11 @@ def mk_workflow_job_template_node(workflow_job_template=None,
     return workflow_node
 
 
-def mk_workflow_job_node(unified_job_template=None, 
+def mk_workflow_job_node(unified_job_template=None,
                          success_nodes=None,
                          failure_nodes=None,
                          always_nodes=None,
-                         workflow_job=None, 
+                         workflow_job=None,
                          job=None,
                          persisted=True):
     workflow_node = WorkflowJobNode(unified_job_template=unified_job_template,
@@ -247,4 +247,3 @@ def mk_workflow_job_node(unified_job_template=None,
     if persisted:
         workflow_node.save()
     return workflow_node
-
