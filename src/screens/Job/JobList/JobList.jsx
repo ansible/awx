@@ -32,7 +32,7 @@ class JobList extends Component {
     this.state = {
       hasContentLoading: true,
       hasContentError: false,
-      deletionError: false,
+      hasDeletionError: false,
       selected: [],
       jobs: [],
       itemCount: 0,
@@ -56,7 +56,7 @@ class JobList extends Component {
   }
 
   handleDeleteErrorClose () {
-    this.setState({ deletionError: false });
+    this.setState({ hasDeletionError: false });
   }
 
   handleSelectAll (isSelected) {
@@ -76,11 +76,11 @@ class JobList extends Component {
 
   async handleDelete () {
     const { selected } = this.state;
-    this.setState({ hasContentLoading: true, deletionError: false });
+    this.setState({ hasContentLoading: true, hasDeletionError: false });
     try {
       await Promise.all(selected.map(({ id }) => UnifiedJobsAPI.destroy(id)));
     } catch (err) {
-      this.setState({ deletionError: true });
+      this.setState({ hasDeletionError: true });
     } finally {
       await this.loadJobs();
     }
@@ -109,7 +109,7 @@ class JobList extends Component {
     const {
       hasContentError,
       hasContentLoading,
-      deletionError,
+      hasDeletionError,
       jobs,
       itemCount,
       selected,
@@ -166,7 +166,7 @@ class JobList extends Component {
           />
         </Card>
         <AlertModal
-          isOpen={deletionError}
+          isOpen={hasDeletionError}
           variant="danger"
           title={i18n._(t`Error!`)}
           onClose={this.handleDeleteErrorClose}

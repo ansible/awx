@@ -1,9 +1,11 @@
 import React from 'react';
-import { mountWithContexts, waitForElement } from '../../../testUtils/enzymeHelpers';
-import AWXLogin from './Login';
-import { RootAPI } from '../../api';
 
-jest.mock('../../api');
+import { RootAPI } from '@api';
+import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+
+import AWXLogin from './Login';
+
+jest.mock('@api');
 
 describe('<Login />', () => {
   async function findChildren (wrapper) {
@@ -60,7 +62,7 @@ describe('<Login />', () => {
     } = await findChildren(loginWrapper);
     expect(usernameInput.props().value).toBe('');
     expect(passwordInput.props().value).toBe('');
-    expect(awxLogin.state('validationError')).toBe(false);
+    expect(awxLogin.state('hasValidationError')).toBe(false);
     expect(submitButton.props().isDisabled).toBe(false);
     done();
   });
@@ -126,14 +128,14 @@ describe('<Login />', () => {
     submitButton.simulate('click');
     await waitForElement(loginWrapper, 'AWXLogin', (el) => el.state('username') === 'invalid');
     await waitForElement(loginWrapper, 'AWXLogin', (el) => el.state('password') === 'invalid');
-    await waitForElement(loginWrapper, 'AWXLogin', (el) => el.state('validationError') === true);
+    await waitForElement(loginWrapper, 'AWXLogin', (el) => el.state('hasValidationError') === true);
     await waitForElement(loginWrapper, formError, (el) => el.length === 1);
 
     usernameInput.props().onChange({ currentTarget: { value: 'dsarif' } });
     passwordInput.props().onChange({ currentTarget: { value: 'freneticpny' } });
     await waitForElement(loginWrapper, 'AWXLogin', (el) => el.state('username') === 'dsarif');
     await waitForElement(loginWrapper, 'AWXLogin', (el) => el.state('password') === 'freneticpny');
-    await waitForElement(loginWrapper, 'AWXLogin', (el) => el.state('validationError') === false);
+    await waitForElement(loginWrapper, 'AWXLogin', (el) => el.state('hasValidationError') === false);
     await waitForElement(loginWrapper, formError, (el) => el.length === 0);
 
     done();
@@ -151,16 +153,16 @@ describe('<Login />', () => {
 
     RootAPI.login.mockRejectedValueOnce({ response: { status: 500 } });
     submitButton.simulate('click');
-    await waitForElement(loginWrapper, 'AWXLogin', (el) => el.state('authenticationError') === true);
+    await waitForElement(loginWrapper, 'AWXLogin', (el) => el.state('hasAuthError') === true);
 
     usernameInput.props().onChange({ currentTarget: { value: 'sgrimes' } });
     passwordInput.props().onChange({ currentTarget: { value: 'ovid' } });
     await waitForElement(loginWrapper, 'AWXLogin', (el) => el.state('username') === 'sgrimes');
     await waitForElement(loginWrapper, 'AWXLogin', (el) => el.state('password') === 'ovid');
-    await waitForElement(loginWrapper, 'AWXLogin', (el) => el.state('authenticationError') === true);
+    await waitForElement(loginWrapper, 'AWXLogin', (el) => el.state('hasAuthError') === true);
 
     submitButton.simulate('click');
-    await waitForElement(loginWrapper, 'AWXLogin', (el) => el.state('authenticationError') === false);
+    await waitForElement(loginWrapper, 'AWXLogin', (el) => el.state('hasAuthError') === false);
     done();
   });
 

@@ -25,8 +25,8 @@ class AWXLogin extends Component {
     this.state = {
       username: '',
       password: '',
-      authenticationError: false,
-      validationError: false,
+      hasAuthError: false,
+      hasValidationError: false,
       isAuthenticating: false,
       isLoading: true,
       logo: null,
@@ -66,16 +66,16 @@ class AWXLogin extends Component {
       return;
     }
 
-    this.setState({ authenticationError: false, isAuthenticating: true });
+    this.setState({ hasAuthError: false, isAuthenticating: true });
     try {
       // note: if authentication is successful, the appropriate cookie will be set automatically
       // and isAuthenticated() (the source of truth) will start returning true.
       await RootAPI.login(username, password);
     } catch (err) {
       if (err && err.response && err.response.status === 401) {
-        this.setState({ validationError: true });
+        this.setState({ hasValidationError: true });
       } else {
-        this.setState({ authenticationError: true });
+        this.setState({ hasAuthError: true });
       }
     } finally {
       this.setState({ isAuthenticating: false });
@@ -83,17 +83,17 @@ class AWXLogin extends Component {
   }
 
   handleChangeUsername (value) {
-    this.setState({ username: value, validationError: false });
+    this.setState({ username: value, hasValidationError: false });
   }
 
   handleChangePassword (value) {
-    this.setState({ password: value, validationError: false });
+    this.setState({ password: value, hasValidationError: false });
   }
 
   render () {
     const {
-      authenticationError,
-      validationError,
+      hasAuthError,
+      hasValidationError,
       username,
       password,
       isLoading,
@@ -115,7 +115,7 @@ class AWXLogin extends Component {
     }
 
     let helperText;
-    if (validationError) {
+    if (hasValidationError) {
       helperText = i18n._(t`Invalid username or password. Please try again.`);
     } else {
       helperText = i18n._(t`There was a problem signing in. Please try again.`);
@@ -129,15 +129,15 @@ class AWXLogin extends Component {
         textContent={loginInfo}
       >
         <LoginForm
-          className={(authenticationError || validationError) ? 'pf-m-error' : ''}
+          className={(hasAuthError || hasValidationError) ? 'pf-m-error' : ''}
           usernameLabel={i18n._(t`Username`)}
           passwordLabel={i18n._(t`Password`)}
-          showHelperText={(authenticationError || validationError)}
+          showHelperText={(hasAuthError || hasValidationError)}
           helperText={helperText}
           usernameValue={username}
           passwordValue={password}
-          isValidUsername={!validationError}
-          isValidPassword={!validationError}
+          isValidUsername={!hasValidationError}
+          isValidPassword={!hasValidationError}
           onChangeUsername={this.handleChangeUsername}
           onChangePassword={this.handleChangePassword}
           onLoginButtonClick={this.handleLoginButtonClick}

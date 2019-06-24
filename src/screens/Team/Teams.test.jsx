@@ -1,5 +1,7 @@
 import React from 'react';
-import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
+
+import { mountWithContexts } from '@testUtils/enzymeHelpers';
+
 import Teams from './Teams';
 
 describe('<Teams />', () => {
