@@ -15,12 +15,12 @@ import django
 from django.contrib.postgres.fields import JSONField as upstream_JSONField
 from django.core import exceptions as django_exceptions
 from django.core.serializers.json import DjangoJSONEncoder
-from django.db.models.signals import (
-    post_save,
-    post_delete,
-)
-from django.db.models.signals import m2m_changed
 from django.db import models
+from django.db.models.signals import (
+    m2m_changed,
+    post_delete,
+    post_save,
+)
 from django.db.models.fields.related import lazy_related_operation
 from django.db.models.fields.related_descriptors import (
     ReverseOneToOneDescriptor,
@@ -91,9 +91,6 @@ class JSONField(upstream_JSONField):
             if value:
                 return json.loads(value)
         return value
-
-
-JSONBField = JSONField
 
 
 # Based on AutoOneToOneField from django-annoying:
@@ -391,7 +388,7 @@ class SmartFilterField(models.TextField):
         return super(SmartFilterField, self).get_prep_value(value)
 
 
-class JSONSchemaField(JSONBField):
+class JSONSchemaField(JSONField):
     """
     A JSONB field that self-validates against a defined JSON schema
     (http://json-schema.org).  This base class is intended to be overwritten by
@@ -405,7 +402,7 @@ class JSONSchemaField(JSONBField):
     empty_values = (None, '')
 
     def get_default(self):
-        return copy.deepcopy(super(JSONBField, self).get_default())
+        return copy.deepcopy(super(JSONField, self).get_default())
 
     def schema(self, model_instance):
         raise NotImplementedError()

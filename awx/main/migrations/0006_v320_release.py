@@ -112,12 +112,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='fact',
             name='facts',
-            field=awx.main.fields.JSONBField(default=dict, help_text='Arbitrary JSON structure of module facts captured at timestamp for a single host.', blank=True),
+            field=awx.main.fields.JSONField(default=dict, help_text='Arbitrary JSON structure of module facts captured at timestamp for a single host.', blank=True),
         ),
         migrations.AddField(
             model_name='host',
             name='ansible_facts',
-            field=awx.main.fields.JSONBField(default=dict, help_text='Arbitrary JSON structure of most recent ansible_facts, per-host.', blank=True),
+            field=awx.main.fields.JSONField(default=dict, help_text='Arbitrary JSON structure of most recent ansible_facts, per-host.', blank=True),
         ),
         migrations.AddField(
             model_name='host',

@@ -183,12 +183,12 @@ class SmartFilter(object):
               relationship refered to to see if it's a jsonb type.
         '''
         def _json_path_to_contains(self, k, v):
-            from awx.main.fields import JSONBField  # avoid a circular import
+            from awx.main.fields import JSONField  # avoid a circular import
             if not k.startswith(SmartFilter.SEARCHABLE_RELATIONSHIP):
                 v = self.strip_quotes_traditional_logic(v)
                 return (k, v)
 
-            for match in JSONBField.get_lookups().keys():
+            for match in JSONField.get_lookups().keys():
                 match = '__{}'.format(match)
                 if k.endswith(match):
                     if match == '__exact':

@@ -61,7 +61,7 @@ from awx.main.models.base import VERBOSITY_CHOICES, NEW_JOB_TYPE_CHOICES
 from awx.main.models.rbac import (
     get_roles_on_resource, role_summary_fields_generator
 )
-from awx.main.fields import ImplicitRoleField, JSONBField
+from awx.main.fields import ImplicitRoleField, JSONField
 from awx.main.utils import (
     get_type_for_model, get_model_for_type,
     camelcase_to_underscore, getattrd, parse_yaml_or_json,
@@ -1571,7 +1571,7 @@ class InventorySerializer(BaseSerializerWithVariables):
     def validate_host_filter(self, host_filter):
         if host_filter:
             try:
-                for match in JSONBField.get_lookups().keys():
+                for match in JSONField.get_lookups().keys():
                     if match == 'exact':
                         # __exact is allowed
                         continue

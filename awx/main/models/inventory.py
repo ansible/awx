@@ -35,7 +35,7 @@ from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.consumers import emit_channel_notification
 from awx.main.fields import (
     ImplicitRoleField,
-    JSONBField,
+    JSONField,
     SmartFilterField,
     OrderedManyToManyField,
 )
@@ -648,7 +648,7 @@ class Host(CommonModelNameNotUnique, RelatedJobsMixin):
         editable=False,
         help_text=_('Inventory source(s) that created or modified this host.'),
     )
-    ansible_facts = JSONBField(
+    ansible_facts = JSONField(
         blank=True,
         default=dict,
         help_text=_('Arbitrary JSON structure of most recent ansible_facts, per-host.'),
