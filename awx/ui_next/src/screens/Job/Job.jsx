@@ -49,7 +49,7 @@ class Job extends Component {
 
     this.setState({ contentError: null, hasContentLoading: true });
     try {
-      const { data } = await JobsAPI.readDetail(id);
+      const { data } = await JobsAPI.readDetail(id, match.params.type);
       setBreadcrumb(data);
       this.setState({ job: data });
     } catch (err) {
@@ -106,17 +106,31 @@ class Job extends Component {
         <Card>
           {cardHeader}
           <Switch>
-            <Redirect from="/jobs/:id" to="/jobs/:id/details" exact />
+            <Redirect
+              from="/jobs/:type/:id"
+              to="/jobs/:type/:id/details"
+              exact
+            />
             {job && (
               <Route
-                path="/jobs/:id/details"
-                render={() => <JobDetail match={match} job={job} />}
+                path="/jobs/:type/:id/details"
+                render={() => (
+                  <JobDetail
+                    match={match}
+                    job={job}
+                  />
+                )}
               />
             )}
             {job && (
               <Route
-                path="/jobs/:id/output"
-                render={() => <JobOutput match={match} job={job} />}
+                path="/jobs/:type/:id/output"
+                render={() => (
+                  <JobOutput
+                    match={match}
+                    job={job}
+                  />
+                )}
               />
             )}
           </Switch>

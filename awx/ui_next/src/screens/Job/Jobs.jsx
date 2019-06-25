@@ -58,7 +58,7 @@ class Jobs extends Component {
             )}
           />
           <Route
-            path={`${match.path}/:id`}
+            path={`${match.path}/:type/:id`}
             render={() => (
               <Job
                 history={history}

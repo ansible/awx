@@ -32,7 +32,7 @@ class JobListItem extends Component {
               <DataListCell key="divider">
                 <VerticalSeparator />
                 <span>
-                  <Link to={`/jobs/${job.id}`}>
+                  <Link to={`/jobs/${job.type}/${job.id}`}>
                     <b>{job.name}</b>
                   </Link>
                 </span>

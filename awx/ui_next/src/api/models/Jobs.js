@@ -5,6 +5,11 @@ class Jobs extends Base {
     super(http);
     this.baseUrl = '/api/v2/jobs/';
   }
+
+  readDetail (id, type) {
+    // TODO: adjust url based on type
+    return this.http.get(`${this.baseUrl}${id}/`);
+  }
 }
 
 export default Jobs;
