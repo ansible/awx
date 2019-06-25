@@ -221,7 +221,7 @@ http://flask.pocoo.org/snippets/111/
 You can also link an `httpbin` service to the development environment for testing webhooks using:
 
 ```
-make docker-compose-notifications
+make docker-compose-httpbin
 ```
 
 This will create an `httpbin` service reachable from the AWX container at `http://httpbin/post`, `http://httpbin/put`, etc. Outside of the container, you can reach the service at `http://localhost:8204`.
