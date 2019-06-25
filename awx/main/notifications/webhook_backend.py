@@ -23,12 +23,12 @@ class WebhookBackend(AWXBaseEmailBackend):
     recipient_parameter = "url"
     sender_parameter = None
 
-    def __init__(self, headers, http_method, disable_ssl_verification=False, fail_silently=False, username=None, password=None, **kwargs):
+    def __init__(self, http_method, headers, disable_ssl_verification=False, fail_silently=False, username=None, password=None, **kwargs):
         self.http_method = http_method
         self.disable_ssl_verification = disable_ssl_verification
         self.headers = headers
         self.username = username
-        self.password = password if password != "" else None
+        self.password = password
         super(WebhookBackend, self).__init__(fail_silently=fail_silently)
 
     def format_body(self, body):
@@ -42,15 +42,17 @@ class WebhookBackend(AWXBaseEmailBackend):
             raise ValueError("HTTP method must be either 'POST' or 'PUT'.")
         chosen_method = getattr(requests, self.http_method.lower(), None)
         for m in messages:
-            if chosen_method is not None:
-                r = chosen_method("{}".format(m.recipients()[0]),
-                                  auth=(self.username, self.password),
-                                  json=m.body,
-                                  headers=self.headers,
-                                  verify=(not self.disable_ssl_verification))
-                if r.status_code >= 400:
-                    logger.error(smart_text(_("Error sending notification webhook: {}").format(r.text)))
-                    if not self.fail_silently:
-                        raise Exception(smart_text(_("Error sending notification webhook: {}").format(r.text)))
-                sent_messages += 1
+            auth = None
+            if self.username and self.password:
+                auth = (self.username, self.password)
+            r = chosen_method("{}".format(m.recipients()[0]),
+                              auth=auth,
+                              json=m.body,
+                              headers=self.headers,
+                              verify=(not self.disable_ssl_verification))
+            if r.status_code >= 400:
+                logger.error(smart_text(_("Error sending notification webhook: {}").format(r.text)))
+                if not self.fail_silently:
+                    raise Exception(smart_text(_("Error sending notification webhook: {}").format(r.text)))
+            sent_messages += 1
         return sent_messages
