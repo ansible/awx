@@ -76,8 +76,10 @@ else:
         def db_type(self, connection):
             return 'text'
 
-        def get_transform(self, name):
-            return model.TextField.get_transform(name)
+        @classmethod
+        def _get_lookup(cls, lookup_name):
+            # Override the search operator lookup to fall back to those for TextField.
+            return models.TextField._get_lookup(lookup_name)
 
         def get_db_prep_value(self, value, connection, prepared=False):
             if prepared:
