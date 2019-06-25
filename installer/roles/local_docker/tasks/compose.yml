@@ -23,7 +23,7 @@
   register: awx_secret_key
 
 - name: Start the containers
-  docker_service:
+  docker_compose:
     project_src: "{{ docker_compose_dir }}"
     restarted: "{{ awx_compose_config is changed or awx_secret_key is changed }}"
   register: awx_compose_start
