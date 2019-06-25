@@ -426,9 +426,9 @@ exports[`<OrganizationAccessItem /> initially renders succesfully 1`] = `
                                           "componentStyle": ComponentStyle {
                                             "componentId": "Detail__DetailName-sc-16ypsyv-0",
                                             "isStatic": false,
-                                            "lastClassName": "gRioSK",
+                                            "lastClassName": "erdIBg",
                                             "rules": Array [
-                                              "font-weight:var(--pf-global--FontWeight--bold);text-align:right;",
+                                              "font-weight:var(--pf-global--FontWeight--bold);",
                                               [Function],
                                             ],
                                           },
@@ -446,16 +446,16 @@ exports[`<OrganizationAccessItem /> initially renders succesfully 1`] = `
                                       fullWidth={false}
                                     >
                                       <Component
-                                        className="Detail__DetailName-sc-16ypsyv-0 gRioSK"
+                                        className="Detail__DetailName-sc-16ypsyv-0 erdIBg"
                                         component="dt"
                                         fullWidth={false}
                                       >
                                         <TextListItem
-                                          className="Detail__DetailName-sc-16ypsyv-0 gRioSK"
+                                          className="Detail__DetailName-sc-16ypsyv-0 erdIBg"
                                           component="dt"
                                         >
                                           <dt
-                                            className="Detail__DetailName-sc-16ypsyv-0 gRioSK"
+                                            className="Detail__DetailName-sc-16ypsyv-0 erdIBg"
                                             data-pf-content={true}
                                           >
                                             Name
@@ -603,9 +603,9 @@ exports[`<OrganizationAccessItem /> initially renders succesfully 1`] = `
                                           "componentStyle": ComponentStyle {
                                             "componentId": "Detail__DetailName-sc-16ypsyv-0",
                                             "isStatic": false,
-                                            "lastClassName": "gRioSK",
+                                            "lastClassName": "erdIBg",
                                             "rules": Array [
-                                              "font-weight:var(--pf-global--FontWeight--bold);text-align:right;",
+                                              "font-weight:var(--pf-global--FontWeight--bold);",
                                               [Function],
                                             ],
                                           },
@@ -623,16 +623,16 @@ exports[`<OrganizationAccessItem /> initially renders succesfully 1`] = `
                                       fullWidth={false}
                                     >
                                       <Component
-                                        className="Detail__DetailName-sc-16ypsyv-0 gRioSK"
+                                        className="Detail__DetailName-sc-16ypsyv-0 erdIBg"
                                         component="dt"
                                         fullWidth={false}
                                       >
                                         <TextListItem
-                                          className="Detail__DetailName-sc-16ypsyv-0 gRioSK"
+                                          className="Detail__DetailName-sc-16ypsyv-0 erdIBg"
                                           component="dt"
                                         >
                                           <dt
-                                            className="Detail__DetailName-sc-16ypsyv-0 gRioSK"
+                                            className="Detail__DetailName-sc-16ypsyv-0 erdIBg"
                                             data-pf-content={true}
                                           >
                                             Team Roles

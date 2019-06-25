@@ -7,6 +7,7 @@ import { Switch, Route, Redirect, withRouter } from 'react-router-dom';
 import CardCloseButton from '@components/CardCloseButton';
 import ContentError from '@components/ContentError';
 import RoutedTabs from '@components/RoutedTabs';
+import JobTemplateDetail from './JobTemplateDetail';
 import { JobTemplatesAPI } from '@api';
 
 class Template extends Component {
@@ -85,7 +86,11 @@ class Template extends Component {
               <Route
                 path="/templates/:templateType/:id/details"
                 render={() => (
-                  <span>Coming soon!</span>
+                  <JobTemplateDetail
+                    match={match}
+                    hasTemplateLoading={hasContentLoading}
+                    template={template}
+                  />
                 )}
               />
             )}

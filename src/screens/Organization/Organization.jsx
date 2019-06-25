@@ -4,17 +4,15 @@ import { t } from '@lingui/macro';
 import { Switch, Route, withRouter, Redirect } from 'react-router-dom';
 import { Card, CardHeader as PFCardHeader, PageSection } from '@patternfly/react-core';
 import styled from 'styled-components';
-
-import { OrganizationsAPI } from '@api';
 import CardCloseButton from '@components/CardCloseButton';
-import ContentError from '@components/ContentError';
 import RoutedTabs from '@components/RoutedTabs';
-
+import ContentError from '@components/ContentError';
 import { OrganizationAccess } from './OrganizationAccess';
 import OrganizationDetail from './OrganizationDetail';
 import OrganizationEdit from './OrganizationEdit';
 import OrganizationNotifications from './OrganizationNotifications';
 import OrganizationTeams from './OrganizationTeams';
+import { OrganizationsAPI } from '@api';
 
 class Organization extends Component {
   constructor (props) {
@@ -141,10 +139,11 @@ class Organization extends Component {
     `;
 
     let cardHeader = (
-      <CardHeader>
+      <CardHeader style={{ padding: 0 }}>
         <RoutedTabs
           match={match}
           history={history}
+          labeltext={i18n._(t`Organization detail tabs`)}
           tabsArray={tabsArray}
         />
         <CardCloseButton linkTo="/organizations" />

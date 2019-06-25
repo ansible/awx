@@ -7,7 +7,6 @@ const DetailName = styled(({ fullWidth, ...props }) => (
   <TextListItem {...props} />
 ))`
   font-weight: var(--pf-global--FontWeight--bold);
-  text-align: right;
   ${props => props.fullWidth && `
     grid-column: 1;
   `}
