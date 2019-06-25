@@ -28,7 +28,8 @@ class Templates extends Component {
     }
     const breadcrumbConfig = {
       '/templates': i18n._(t`Templates`),
-      [`/templates/${template.type}/${template.id}/details`]: i18n._(t`${template.name} Details`)
+      [`/templates/${template.type}/${template.id}/details`]: i18n._(t`${template.name} Details`),
+      [`/templates/${template.type}/${template.id}/edit`]: i18n._(t`${template.name} Edit`)
     };
     this.setState({ breadcrumbConfig });
   }

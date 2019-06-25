@@ -2,7 +2,7 @@ import { t } from '@lingui/macro';
 
 export function required (message, i18n) {
   return value => {
-    if (!value.trim()) {
+    if (typeof value === 'string' && !value.trim()) {
       return message || i18n._(t`This field must not be blank`);
     }
     return undefined;
