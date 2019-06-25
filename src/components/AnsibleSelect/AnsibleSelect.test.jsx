@@ -2,8 +2,17 @@ import React from 'react';
 import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import AnsibleSelect, { _AnsibleSelect } from './AnsibleSelect';
 
-const label = 'test select';
-const mockData = ['/venv/baz/', '/venv/ansible/'];
+const mockData = [
+  {
+    label: 'Baz',
+    value: '/venv/baz/'
+  },
+  {
+    label: 'Default',
+    value: '/venv/ansible/'
+  }
+];
+
 describe('<AnsibleSelect />', () => {
   test('initially renders succesfully', async () => {
     mountWithContexts(
@@ -11,7 +20,6 @@ describe('<AnsibleSelect />', () => {
         value="foo"
         name="bar"
         onChange={() => { }}
-        label={label}
         data={mockData}
       />
     );
@@ -24,7 +32,6 @@ describe('<AnsibleSelect />', () => {
         value="foo"
         name="bar"
         onChange={() => { }}
-        label={label}
         data={mockData}
       />
     );
@@ -33,17 +40,17 @@ describe('<AnsibleSelect />', () => {
     expect(spy).toHaveBeenCalled();
   });
 
-  test('Returns correct select options if defaultSelected props is passed', () => {
+  test('Returns correct select options', () => {
     const wrapper = mountWithContexts(
       <AnsibleSelect
         value="foo"
         name="bar"
         onChange={() => { }}
-        label={label}
         data={mockData}
-        defaultSelected={mockData[1]}
       />
     );
+    // console.log(wrapper.debug());
     expect(wrapper.find('FormSelect')).toHaveLength(1);
+    expect(wrapper.find('FormSelectOption')).toHaveLength(2);
   });
 });
