@@ -49,7 +49,7 @@ describe('<AnsibleSelect />', () => {
         data={mockData}
       />
     );
-    // console.log(wrapper.debug());
+
     expect(wrapper.find('FormSelect')).toHaveLength(1);
     expect(wrapper.find('FormSelectOption')).toHaveLength(2);
   });

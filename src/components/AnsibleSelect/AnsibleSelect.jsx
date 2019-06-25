@@ -33,7 +33,7 @@ class AnsibleSelect extends React.Component {
             key={datum.value}
             value={datum.value}
             label={datum.label}
-            isDisabled={datum.disabled}
+            isDisabled={datum.isDisabled}
           />
         ))}
       </FormSelect>

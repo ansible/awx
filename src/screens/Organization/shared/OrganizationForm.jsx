@@ -139,7 +139,7 @@ class OrganizationForm extends Component {
                           position="right"
                           content={i18n._(t`The maximum number of hosts allowed
                           to be managed by this organization. Value defaults to
-                          0 which means no limit. Refer tothe Ansible
+                          0 which means no limit. Refer to the Ansible
                           documentation for more details.`)}
                         >
                           <QuestionCircleIcon />

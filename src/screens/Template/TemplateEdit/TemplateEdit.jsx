@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { withRouter, Redirect } from 'react-router-dom';
 import { CardBody } from '@patternfly/react-core';
 import TemplateForm from '../shared/TemplateForm';
@@ -9,7 +8,6 @@ import { JobTemplate } from '@types';
 class TemplateEdit extends Component {
   static propTypes = {
     template: JobTemplate.isRequired,
-    hasPermissions: PropTypes.bool.isRequired,
   };
 
   constructor (props) {
@@ -40,10 +38,11 @@ class TemplateEdit extends Component {
   }
 
   render () {
-    const { template, hasPermissions } = this.props;
+    const { template } = this.props;
     const { error } = this.state;
+    const canEdit = template.summary_fields.user_capabilities.edit;
 
-    if (!hasPermissions) {
+    if (!canEdit) {
       const { template: { id, type } } = this.props;
       return <Redirect to={`/templates/${type}/${id}/details`} />;
     }

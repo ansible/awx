@@ -27,7 +27,6 @@ class Template extends Component {
       hasContentError: false,
       hasContentLoading: true,
       template: null,
-      actions: null,
     };
     this.loadTemplate = this.loadTemplate.bind(this);
   }
@@ -44,29 +43,15 @@ class Template extends Component {
   }
 
   async loadTemplate () {
-    const { actions: cachedActions } = this.state;
     const { setBreadcrumb, match } = this.props;
     const { id } = match.params;
 
-    let optionsPromise;
-    if (cachedActions) {
-      optionsPromise = Promise.resolve({ data: { actions: cachedActions } });
-    } else {
-      optionsPromise = JobTemplatesAPI.readOptions();
-    }
-
-    const promises = Promise.all([
-      JobTemplatesAPI.readDetail(id),
-      optionsPromise
-    ]);
-
     this.setState({ hasContentError: false, hasContentLoading: true });
     try {
-      const [{ data }, { data: { actions } }] = await promises;
+      const { data } = await JobTemplatesAPI.readDetail(id);
       setBreadcrumb(data);
       this.setState({
         template: data,
-        actions
       });
     } catch {
       this.setState({ hasContentError: true });
@@ -82,15 +67,11 @@ class Template extends Component {
       location,
       match,
     } = this.props;
-
     const {
-      actions,
       hasContentError,
       hasContentLoading,
       template
     } = this.state;
-
-    const canAdd = actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
 
     const tabsArray = [
       { name: i18n._(t`Details`), link: `${match.url}/details`, id: 0 },
@@ -154,7 +135,6 @@ class Template extends Component {
                 render={() => (
                   <TemplateEdit
                     template={template}
-                    hasPermissions={canAdd}
                   />
                 )}
               />

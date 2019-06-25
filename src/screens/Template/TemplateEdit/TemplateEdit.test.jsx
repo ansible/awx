@@ -14,14 +14,18 @@ describe('<TemplateEdit />', () => {
     inventory: 2,
     project: 3,
     playbook: 'Baz',
-    type: 'job_template'
+    type: 'job_template',
+    summary_fields: {
+      user_capabilities: {
+        edit: true
+      }
+    }
   };
 
   test('initially renders successfully', () => {
     mountWithContexts(
       <TemplateEdit
         template={mockData}
-        hasPermissions
       />
     );
   });
@@ -30,7 +34,6 @@ describe('<TemplateEdit />', () => {
     const wrapper = mountWithContexts(
       <TemplateEdit
         template={mockData}
-        hasPermissions
       />
     );
     const updatedTemplateData = {
@@ -50,7 +53,6 @@ describe('<TemplateEdit />', () => {
     const wrapper = mountWithContexts(
       <TemplateEdit
         template={mockData}
-        hasPermissions
       />,
       { context: { router: { history } } }
     );
