@@ -10,7 +10,8 @@
     "lint": "eslint --ext .js --ext .jsx .",
     "add-locale": "lingui add-locale",
     "extract-strings": "lingui extract",
-    "compile-strings": "lingui compile"
+    "compile-strings": "lingui compile",
+    "prettier": "prettier --write \"src/**/*.{js,jsx,scss}\""
   },
   "keywords": [],
   "author": "",
@@ -36,6 +37,7 @@
     "enzyme-to-json": "^3.3.5",
     "eslint": "^5.6.0",
     "eslint-config-airbnb": "^17.1.0",
+    "eslint-config-prettier": "^5.0.0",
     "eslint-import-resolver-webpack": "0.11.1",
     "eslint-plugin-import": "^2.14.0",
     "eslint-plugin-jsx-a11y": "^6.1.1",
@@ -44,6 +46,7 @@
     "history": "^4.9.0",
     "jest": "^24.7.1",
     "node-sass": "^4.12.0",
+    "prettier": "^1.18.2",
     "react-hot-loader": "^4.3.3",
     "sass-loader": "^7.1.0",
     "style-loader": "^0.23.0",

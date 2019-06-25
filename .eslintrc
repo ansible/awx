@@ -8,13 +8,11 @@
       "modules": true
     }
   },
-  "extends": [
-    "airbnb"
-  ],
+  "extends": ["airbnb", "prettier", "prettier/react"],
   "settings": {
-    'import/resolver': {
-      webpack: {
-        config: 'webpack.config.js'
+    "import/resolver": {
+      "webpack": {
+        "config": "webpack.config.js"
       }
     },
     "react": {
@@ -33,16 +31,16 @@
     "camelcase": "off",
     "arrow-parens": "off",
     "comma-dangle": "off",
-    // https://github.com/benmosher/eslint-plugin-import/issues/479#issuecomment-252500896
+    "//": "https://github.com/benmosher/eslint-plugin-import/issues/479#issuecomment-252500896",
     "import/no-extraneous-dependencies": "off",
-    "indent": ["error", 2, {
-      "SwitchCase": 1
-    }],
-    "max-len": ["error", {
-      "code": 100,
-      "ignoreStrings": true,
-      "ignoreTemplateLiterals": true
-    }],
+    "max-len": [
+      "error",
+      {
+        "code": 100,
+        "ignoreStrings": true,
+        "ignoreTemplateLiterals": true
+      }
+    ],
     "no-continue": "off",
     "no-debugger": "off",
     "no-mixed-operators": "off",
@@ -52,7 +50,6 @@
     "no-use-before-define": "off",
     "no-multiple-empty-lines": ["error", { "max": 1 }],
     "object-curly-newline": "off",
-    "space-before-function-paren": ["error", "always"],
     "no-trailing-spaces": ["error"],
     "no-unused-expressions": ["error", { "allowShortCircuit": true }],
     "react/prefer-stateless-function": "off",
