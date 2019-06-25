@@ -583,9 +583,6 @@ docker-compose-credential-plugins: docker-auth
 	echo -e "\033[0;31mTo generate a CyberArk Conjur API key: docker exec -it tools_conjur_1 conjurctl account create quick-start\033[0m"
 	CURRENT_UID=$(shell id -u) TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose.yml -f tools/docker-credential-plugins-override.yml up --no-recreate awx
 
-docker-compose-httpbin: docker-auth
-	CURRENT_UID=$(shell id -u) TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose.yml -f tools/docker-httpbin-override.yml up --no-recreate awx
-
 docker-compose-test: docker-auth
 	cd tools && CURRENT_UID=$(shell id -u) OS="$(shell docker info | grep 'Operating System')" TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose run --rm --service-ports awx /bin/bash
 
