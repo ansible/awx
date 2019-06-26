@@ -15,7 +15,7 @@ const StyledLaunchButton = styled(Button)`
   padding: 5px 8px;
 
   &:hover {
-    background-color:#d9534f;
+    background-color: #0066cc;
     color: white;
   }
 `;
