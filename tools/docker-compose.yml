@@ -29,6 +29,7 @@ services:
     #   - sync
     # volumes_from:
     #   - sync
+    working_dir: "/awx_devel"
     volumes:
       - "../:/awx_devel"
     privileged: true
