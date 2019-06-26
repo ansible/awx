@@ -1,6 +1,9 @@
 import React from 'react';
-import { mountWithContexts, waitForElement } from '../../../../testUtils/enzymeHelpers';
+import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
 import JobTemplateDetail, { _JobTemplateDetail } from './JobTemplateDetail';
+import { JobTemplatesAPI } from '@api';
+
+jest.mock('@api');
 
 describe('<JobTemplateDetail />', () => {
   const template = {
@@ -38,6 +41,14 @@ describe('<JobTemplateDetail />', () => {
 
   const readInstanceGroups = jest.spyOn(_JobTemplateDetail.prototype, 'readInstanceGroups');
 
+  beforeEach(() => {
+    JobTemplatesAPI.readInstanceGroups.mockResolvedValue(mockInstanceGroups);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   test('initially renders succesfully', () => {
     const wrapper = mountWithContexts(
       <JobTemplateDetail
@@ -55,6 +66,7 @@ describe('<JobTemplateDetail />', () => {
     await waitForElement(wrapper, 'JobTemplateDetail', (el) => el.state('hasContentLoading') === true);
     expect(readInstanceGroups).toHaveBeenCalled();
     await waitForElement(wrapper, 'JobTemplateDetail', (el) => el.state('hasContentLoading') === false);
+    expect(JobTemplatesAPI.readInstanceGroups).toHaveBeenCalledTimes(1);
     done();
   });
   test('Edit button is absent when user does not have edit privilege', async (done) => {

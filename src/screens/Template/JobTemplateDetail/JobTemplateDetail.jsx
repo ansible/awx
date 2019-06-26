@@ -5,12 +5,12 @@ import { CardBody, Button, TextList, TextListItem, TextListItemVariants, TextLis
 import styled from 'styled-components';
 import { t } from '@lingui/macro';
 
-import ContentError from '../../../components/ContentError';
-import ContentLoading from '../../../components/ContentLoading';
-import { ChipGroup, Chip } from '../../../components/Chip';
-import { DetailList, Detail } from '../../../components/DetailList';
-import { JobTemplatesAPI } from '../../../api';
-import { toTitleCase } from '../../../util/strings';
+import ContentError from '@components/ContentError';
+import ContentLoading from '@components/ContentLoading';
+import { ChipGroup, Chip } from '@components/Chip';
+import { DetailList, Detail } from '@components/DetailList';
+import { JobTemplatesAPI } from '@api';
+import { toTitleCase } from '@util/strings';
 
 const ButtonGroup = styled.div`
   display: flex;
