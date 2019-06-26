@@ -5,7 +5,7 @@ import TemplateForm from '../shared/TemplateForm';
 import { JobTemplatesAPI } from '@api';
 import { JobTemplate } from '@types';
 
-class TemplateEdit extends Component {
+class JobTemplateEdit extends Component {
   static propTypes = {
     template: JobTemplate.isRequired,
   };
@@ -60,4 +60,4 @@ class TemplateEdit extends Component {
   }
 }
 
-export default withRouter(TemplateEdit);
+export default withRouter(JobTemplateEdit);
