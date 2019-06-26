@@ -1,4 +1,4 @@
-import React, { Component, useState, useEffect } from 'react';
+import React from 'react';
 import { Link, withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -6,8 +6,7 @@ import { CardBody, Button } from '@patternfly/react-core';
 import styled from 'styled-components';
 import { DetailList, Detail } from '@components/DetailList';
 import { ChipGroup, Chip } from '@components/Chip';
-import ContentError from '@components/ContentError';
-import ContentLoading from '@components/ContentLoading';
+import { VariablesInput } from '@components/CodeMirrorInput';
 import { toTitleCase } from '@util/strings';
 
 const ActionButtonWrapper = styled.div`
@@ -24,13 +23,13 @@ const VERBOSITY = {
 };
 
 function JobDetail ({ job, i18n }) {
-  const [instanceGroups, setInstanceGroups] = useState(null);
-  console.log(job);
   const {
     job_template: jobTemplate,
     project,
     inventory,
     instance_group: instanceGroup,
+    credentials,
+    labels,
   } = job.summary_fields;
 
   return (
@@ -114,20 +113,49 @@ function JobDetail ({ job, i18n }) {
           label={i18n._(t`Job Slice`)}
           value={`${job.job_slice_number}/${job.job_slice_count}`}
         />
-        {(instanceGroups && instanceGroups.length > 0) && (
+        {(credentials && credentials.length > 0) && (
           <Detail
             fullWidth
-            label={i18n._(t`Instance Groups`)}
+            label={i18n._(t`Credentials`)}
             value={(
               <ChipGroup showOverflowAfter={5}>
-                {instanceGroups.map(ig => (
-                  <Chip key={ig.id} isReadOnly>{ig.name}</Chip>
+                {credentials.map(c => (
+                  <Chip key={c.id} isReadOnly>{c.name}</Chip>
+                ))}
+              </ChipGroup>
+            )}
+          />
+        )}
+        {(labels && labels.count > 0) && (
+          <Detail
+            fullWidth
+            label={i18n._(t`Credentials`)}
+            value={(
+              <ChipGroup showOverflowAfter={5}>
+                {labels.results.map(l => (
+                  <Chip key={l.id} isReadOnly>{l.name}</Chip>
                 ))}
               </ChipGroup>
             )}
           />
         )}
       </DetailList>
+      <VariablesInput
+        css="margin: 20px 0"
+        id="job-variables"
+        readOnly
+        value={job.extra_vars}
+        rows={4}
+        label={i18n._(t`Variables`)}
+      />
+      <VariablesInput
+        css="margin: 20px 0"
+        id="job-artifacts"
+        readOnly
+        value={job.artifacts ? JSON.stringify(job.artifacts) : '{}'}
+        rows={4}
+        label={i18n._(t`Artifacts`)}
+      />
       <ActionButtonWrapper>
         <Button
           variant="secondary"
