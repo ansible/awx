@@ -20,7 +20,6 @@ from django.test import TransactionTestCase
 from django.core.exceptions import ValidationError
 
 
-@pytest.mark.django_db
 class TestWorkflowDAGFunctional(TransactionTestCase):
     def workflow_job(self, states=['new', 'new', 'new', 'new', 'new']):
         """
