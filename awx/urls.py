@@ -8,6 +8,7 @@ from awx.main.views import (
     handle_403,
     handle_404,
     handle_500,
+    handle_csp_violation,
 )
 
 
@@ -20,6 +21,7 @@ urlpatterns = [
     url(r'^(?:api/)?403.html$', handle_403),
     url(r'^(?:api/)?404.html$', handle_404),
     url(r'^(?:api/)?500.html$', handle_500),
+    url(r'^csp-violation/', handle_csp_violation),
 ]
 
 if settings.SETTINGS_MODULE == 'awx.settings.development':

@@ -1,13 +1,19 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
+import json
+
 # Django
+from django.http import HttpResponse
 from django.shortcuts import render
 from django.utils.html import format_html
 from django.utils.translation import ugettext_lazy as _
+from django.views.decorators.csrf import csrf_exempt
 
 # Django REST Framework
 from rest_framework import exceptions, permissions, views
+
+import logging
 
 
 def _force_raising_exception(view_obj, request, format=None):
@@ -84,3 +90,10 @@ def handle_500(request):
         'content': _('A server error has occurred.'),
     }
     return handle_error(request, 500, **kwargs)
+
+
+@csrf_exempt
+def handle_csp_violation(request):
+    logger = logging.getLogger('awx')
+    logger.error(json.loads(request.body))
+    return HttpResponse(content=None)
