@@ -1,11 +1,11 @@
 import React from 'react';
 import { JobTemplatesAPI } from '@api';
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
-import TemplateEdit from './TemplateEdit';
+import JobTemplateEdit from './JobTemplateEdit';
 
 jest.mock('@api');
 
-describe('<TemplateEdit />', () => {
+describe('<JobTemplateEdit />', () => {
   const mockData = {
     id: 1,
     name: 'Foo',
@@ -24,7 +24,7 @@ describe('<TemplateEdit />', () => {
 
   test('initially renders successfully', () => {
     mountWithContexts(
-      <TemplateEdit
+      <JobTemplateEdit
         template={mockData}
       />
     );
@@ -32,7 +32,7 @@ describe('<TemplateEdit />', () => {
 
   test('handleSubmit should call api update', () => {
     const wrapper = mountWithContexts(
-      <TemplateEdit
+      <JobTemplateEdit
         template={mockData}
       />
     );
@@ -51,7 +51,7 @@ describe('<TemplateEdit />', () => {
       push: jest.fn(),
     };
     const wrapper = mountWithContexts(
-      <TemplateEdit
+      <JobTemplateEdit
         template={mockData}
       />,
       { context: { router: { history } } }

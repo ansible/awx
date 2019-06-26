@@ -17,7 +17,7 @@ import ContentError from '@components/ContentError';
 import RoutedTabs from '@components/RoutedTabs';
 import JobTemplateDetail from './JobTemplateDetail';
 import { JobTemplatesAPI } from '@api';
-import TemplateEdit from './TemplateEdit';
+import JobTemplateEdit from './JobTemplateEdit';
 
 class Template extends Component {
   constructor (props) {
@@ -131,7 +131,7 @@ class Template extends Component {
               <Route
                 path="/templates/:templateType/:id/edit"
                 render={() => (
-                  <TemplateEdit
+                  <JobTemplateEdit
                     template={template}
                   />
                 )}
