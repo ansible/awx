@@ -80,7 +80,7 @@ describe('<TemplatesList />', () => {
     jest.clearAllMocks();
   });
 
-  test('initially renders succesfully', () => {
+  test('initially renders successfully', () => {
     mountWithContexts(
       <TemplatesList
         match={{ path: '/templates', url: '/templates' }}

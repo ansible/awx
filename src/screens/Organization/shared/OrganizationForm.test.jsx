@@ -144,7 +144,8 @@ describe('<OrganizationForm />', () => {
       }
     );
     expect(wrapper.find('FormSelect')).toHaveLength(1);
-    expect(wrapper.find('FormSelectOption')).toHaveLength(2);
+    expect(wrapper.find('FormSelectOption')).toHaveLength(3);
+    expect(wrapper.find('FormSelectOption').first().prop('value')).toEqual('/venv/ansible/');
   });
 
   test('calls handleSubmit when form submitted', async () => {

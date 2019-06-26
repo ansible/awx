@@ -93,7 +93,11 @@ class OrganizationForm extends Component {
   render () {
     const { organization, handleCancel, i18n, me } = this.props;
     const { instanceGroups, formIsValid, error } = this.state;
-    const defaultVenv = '/venv/ansible/';
+    const defaultVenv = {
+      label: i18n._(t`Use Default Ansible Environment`),
+      value: '/venv/ansible/',
+      key: 'default'
+    };
 
     return (
       <Formik
@@ -133,7 +137,10 @@ class OrganizationForm extends Component {
                       {(
                         <Tooltip
                           position="right"
-                          content="The maximum number of hosts allowed to be managed by this organization. Value defaults to 0 which means no limit. Refer to the Ansible documentation for more details."
+                          content={i18n._(t`The maximum number of hosts allowed
+                          to be managed by this organization. Value defaults to
+                          0 which means no limit. Refer to the Ansible
+                          documentation for more details.`)}
                         >
                           <QuestionCircleIcon />
                         </Tooltip>
@@ -156,9 +163,10 @@ class OrganizationForm extends Component {
                           label={i18n._(t`Ansible Environment`)}
                         >
                           <AnsibleSelect
-                            data={custom_virtualenvs}
-                            defaultSelected={defaultVenv}
-                            label={i18n._(t`Ansible Environment`)}
+                            data={[defaultVenv, ...custom_virtualenvs
+                              .filter(datum => datum !== defaultVenv.value)
+                              .map(datum => ({ label: datum, value: datum, key: datum }))
+                            ]}
                             {...field}
                           />
                         </FormGroup>

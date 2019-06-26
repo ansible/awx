@@ -75,6 +75,7 @@ class JobTemplateDetail extends Component {
       },
       hasTemplateLoading,
       i18n,
+      match,
     } = this.props;
     const { instanceGroups, hasContentLoading, contentError } = this.state;
     const verbosityOptions = [
@@ -307,7 +308,7 @@ class JobTemplateDetail extends Component {
             {summary_fields.user_capabilities.edit && (
               <Button
                 component={Link}
-                to="/home"
+                to={`/templates/${match.params.templateType}/${match.params.id}/edit`}
                 aria-label={i18n._(t`Edit`)}
 
               >

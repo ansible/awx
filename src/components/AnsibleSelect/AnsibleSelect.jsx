@@ -20,7 +20,8 @@ class AnsibleSelect extends React.Component {
   }
 
   render () {
-    const { label, value, data, defaultSelected, i18n } = this.props;
+    const { value, data, i18n } = this.props;
+
     return (
       <FormSelect
         value={value}
@@ -28,15 +29,12 @@ class AnsibleSelect extends React.Component {
         aria-label={i18n._(t`Select Input`)}
       >
         {data.map((datum) => (
-          datum === defaultSelected ? (
-            <FormSelectOption
-              key=""
-              value=""
-              label={i18n._(t`Use Default ${label}`)}
-            />
-          ) : (
-            <FormSelectOption key={datum} value={datum} label={datum} />
-          )
+          <FormSelectOption
+            key={datum.key}
+            value={datum.value}
+            label={datum.label}
+            isDisabled={datum.isDisabled}
+          />
         ))}
       </FormSelect>
     );
@@ -45,15 +43,10 @@ class AnsibleSelect extends React.Component {
 
 AnsibleSelect.defaultProps = {
   data: [],
-  label: 'Ansible Select',
-  defaultSelected: null,
 };
 
 AnsibleSelect.propTypes = {
-  data: PropTypes.arrayOf(PropTypes.string),
-  defaultSelected: PropTypes.string,
-  label: PropTypes.string,
-  name: PropTypes.string.isRequired,
+  data: PropTypes.arrayOf(PropTypes.object),
   onChange: PropTypes.func.isRequired,
   value: PropTypes.string.isRequired,
 };

@@ -105,7 +105,8 @@ describe('<OrganizationAdd />', () => {
       { context: { config } }
     ).find('AnsibleSelect');
     expect(wrapper.find('FormSelect')).toHaveLength(1);
-    expect(wrapper.find('FormSelectOption')).toHaveLength(2);
+    expect(wrapper.find('FormSelectOption')).toHaveLength(3);
+    expect(wrapper.find('FormSelectOption').first().prop('value')).toEqual('/venv/ansible/');
   });
 
   test('AnsibleSelect component does not render if there are 0 virtual environments', () => {
