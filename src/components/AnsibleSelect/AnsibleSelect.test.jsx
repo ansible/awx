@@ -4,10 +4,12 @@ import AnsibleSelect, { _AnsibleSelect } from './AnsibleSelect';
 
 const mockData = [
   {
+    key: 'baz',
     label: 'Baz',
     value: '/venv/baz/'
   },
   {
+    key: 'default',
     label: 'Default',
     value: '/venv/ansible/'
   }
