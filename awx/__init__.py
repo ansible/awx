@@ -25,7 +25,6 @@ import hashlib
 
 try:
     import django
-    from django.utils.encoding import force_bytes
     from django.db.backends.base import schema
     from django.db.backends.utils import names_digest
     HAS_DJANGO = True
@@ -41,7 +40,7 @@ if HAS_DJANGO is True:
     # but will support the `usedforsecurity` keyword on RHEL and Centos systems.
 
     # Keep an eye on https://code.djangoproject.com/ticket/28401
-    target_version = '2.0.13'
+    target_version = '2.2.2'
     if django.__version__ != target_version:
         raise RuntimeError(
             "Django version other than {target} detected: {current}. "

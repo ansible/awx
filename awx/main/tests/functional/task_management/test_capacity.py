@@ -1,5 +1,3 @@
-import pytest
-
 from django.test import TransactionTestCase
 
 from awx.main.models import (
