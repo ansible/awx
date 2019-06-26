@@ -43,7 +43,16 @@ describe('LaunchButton', () => {
     done();
   });
   test('displays error modal after unsuccessful launch', async (done) => {
-    JobTemplatesAPI.launch.mockRejectedValue({});
+    JobTemplatesAPI.launch.mockRejectedValue(new Error({
+      response: {
+        config: {
+          method: 'post',
+          url: '/api/v2/job_templates/1/launch'
+        },
+        data: 'An error occurred',
+        status: 403
+      }
+    }));
     const wrapper = mountWithContexts(<LaunchButton templateId={1} />);
     const launchButton = wrapper.find('LaunchButton__StyledLaunchButton');
     launchButton.simulate('click');

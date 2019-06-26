@@ -17,6 +17,7 @@ import AlertModal from '@components/AlertModal';
 import NavExpandableGroup from '@components/NavExpandableGroup';
 import BrandLogo from '@components/BrandLogo';
 import PageHeaderToolbar from '@components/PageHeaderToolbar';
+import ErrorDetail from '@components/ErrorDetail';
 import { ConfigProvider } from '@contexts/Config';
 
 const PageHeader = styled(PFPageHeader)`
@@ -48,7 +49,7 @@ class App extends Component {
       version: null,
       isAboutModalOpen: false,
       isNavOpen,
-      hasConfigError: false,
+      configError: null
     };
 
     this.handleLogout = this.handleLogout.bind(this);
@@ -81,7 +82,9 @@ class App extends Component {
   }
 
   handleConfigErrorClose () {
-    this.setState({ hasConfigError: false });
+    this.setState({
+      configError: null
+    });
   }
 
   async loadConfig () {
@@ -92,7 +95,7 @@ class App extends Component {
 
       this.setState({ ansible_version, custom_virtualenvs, version, me });
     } catch (err) {
-      this.setState({ hasConfigError: true });
+      this.setState({ configError: err });
     }
   }
 
@@ -104,7 +107,7 @@ class App extends Component {
       isNavOpen,
       me,
       version,
-      hasConfigError,
+      configError
     } = this.state;
     const {
       i18n,
@@ -170,12 +173,13 @@ class App extends Component {
           onClose={this.handleAboutClose}
         />
         <AlertModal
-          isOpen={hasConfigError}
+          isOpen={configError}
           variant="danger"
           title={i18n._(t`Error!`)}
           onClose={this.handleConfigErrorClose}
         >
           {i18n._(t`Failed to retrieve configuration.`)}
+          <ErrorDetail error={configError} />
         </AlertModal>
       </Fragment>
     );

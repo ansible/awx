@@ -19,7 +19,7 @@ class Job extends Component {
 
     this.state = {
       job: null,
-      hasContentError: false,
+      contentError: null,
       hasContentLoading: true,
       isInitialized: false
     };
@@ -46,13 +46,13 @@ class Job extends Component {
     } = this.props;
     const id = parseInt(match.params.id, 10);
 
-    this.setState({ hasContentError: false, hasContentLoading: true });
+    this.setState({ contentError: null, hasContentLoading: true });
     try {
       const { data } = await JobsAPI.readDetail(id);
       setBreadcrumb(data);
       this.setState({ job: data });
-    } catch (error) {
-      this.setState({ hasContentError: true });
+    } catch (err) {
+      this.setState({ contentError: err });
     } finally {
       this.setState({ hasContentLoading: false });
     }
@@ -67,7 +67,7 @@ class Job extends Component {
 
     const {
       job,
-      hasContentError,
+      contentError,
       hasContentLoading,
       isInitialized
     } = this.state;
@@ -103,11 +103,11 @@ class Job extends Component {
       cardHeader = null;
     }
 
-    if (!hasContentLoading && hasContentError) {
+    if (!hasContentLoading && contentError) {
       return (
         <PageSection>
           <Card className="awx-c-card">
-            <ContentError />
+            <ContentError error={contentError} />
           </Card>
         </PageSection>
       );

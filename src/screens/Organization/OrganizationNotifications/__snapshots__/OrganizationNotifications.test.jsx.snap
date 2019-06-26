@@ -39,7 +39,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
             }
           >
             <WithI18n
-              hasContentError={false}
+              contentError={null}
               hasContentLoading={false}
               itemCount={2}
               itemName="notification"
@@ -101,7 +101,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                 withHash={true}
               >
                 <withRouter(PaginatedDataList)
-                  hasContentError={false}
+                  contentError={null}
                   hasContentLoading={false}
                   i18n={"/i18n/"}
                   itemCount={2}
@@ -161,7 +161,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                 >
                   <Route>
                     <PaginatedDataList
-                      hasContentError={false}
+                      contentError={null}
                       hasContentLoading={false}
                       history={"/history/"}
                       i18n={"/i18n/"}
@@ -3295,7 +3295,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
               </I18n>
             </WithI18n>
             <_default
-              isOpen={false}
+              isOpen={null}
               onClose={[Function]}
               title="Error!"
               variant="danger"

@@ -24,7 +24,7 @@ class JobTemplateDetail extends Component {
   constructor (props) {
     super(props);
     this.state = {
-      contentError: false,
+      contentError: null,
       hasContentLoading: true,
       instanceGroups: []
     };
@@ -40,8 +40,8 @@ class JobTemplateDetail extends Component {
     try {
       const { data } = await JobTemplatesAPI.readInstanceGroups(match.params.id);
       this.setState({ instanceGroups: [...data.results] });
-    } catch {
-      this.setState({ contentError: true });
+    } catch (err) {
+      this.setState({ contentError: err });
     } finally {
       this.setState({ hasContentLoading: false });
     }
@@ -131,7 +131,7 @@ class JobTemplateDetail extends Component {
     );
 
     if (contentError) {
-      return (<ContentError />);
+      return (<ContentError error={contentError} />);
     }
 
     if (hasContentLoading) {

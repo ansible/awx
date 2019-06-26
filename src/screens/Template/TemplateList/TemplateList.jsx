@@ -15,6 +15,7 @@ import {
 } from '@api';
 import AlertModal from '@components/AlertModal';
 import DatalistToolbar from '@components/DataListToolbar';
+import ErrorDetail from '@components/ErrorDetail';
 import PaginatedDataList, {
   ToolbarDeleteButton
 } from '@components/PaginatedDataList';
@@ -37,8 +38,8 @@ class TemplatesList extends Component {
 
     this.state = {
       hasContentLoading: true,
-      hasContentError: false,
-      hasDeletionError: false,
+      contentError: null,
+      deletionError: null,
       selected: [],
       templates: [],
       itemCount: 0,
@@ -62,7 +63,7 @@ class TemplatesList extends Component {
   }
 
   handleDeleteErrorClose () {
-    this.setState({ hasDeletionError: false });
+    this.setState({ deletionError: null });
   }
 
   handleSelectAll (isSelected) {
@@ -83,7 +84,7 @@ class TemplatesList extends Component {
   async handleTemplateDelete () {
     const { selected } = this.state;
 
-    this.setState({ hasContentLoading: true, hasDeletionError: false });
+    this.setState({ hasContentLoading: true });
     try {
       await Promise.all(selected.map(({ type, id }) => {
         let deletePromise;
@@ -95,7 +96,7 @@ class TemplatesList extends Component {
         return deletePromise;
       }));
     } catch (err) {
-      this.setState({ hasDeletionError: true });
+      this.setState({ deletionError: err });
     } finally {
       await this.loadTemplates();
     }
@@ -105,7 +106,7 @@ class TemplatesList extends Component {
     const { location } = this.props;
     const params = parseNamespacedQueryString(QS_CONFIG, location.search);
 
-    this.setState({ hasContentError: false, hasContentLoading: true });
+    this.setState({ contentError: null, hasContentLoading: true });
     try {
       const { data: { count, results } } = await UnifiedJobTemplatesAPI.read(params);
       this.setState({
@@ -114,7 +115,7 @@ class TemplatesList extends Component {
         selected: [],
       });
     } catch (err) {
-      this.setState({ hasContentError: true });
+      this.setState({ contentError: err });
     } finally {
       this.setState({ hasContentLoading: false });
     }
@@ -122,9 +123,9 @@ class TemplatesList extends Component {
 
   render () {
     const {
-      hasContentError,
+      contentError,
       hasContentLoading,
-      hasDeletionError,
+      deletionError,
       templates,
       itemCount,
       selected,
@@ -139,7 +140,7 @@ class TemplatesList extends Component {
       <PageSection variant={medium}>
         <Card>
           <PaginatedDataList
-            hasContentError={hasContentError}
+            error={contentError}
             hasContentLoading={hasContentLoading}
             items={templates}
             itemCount={itemCount}
@@ -180,12 +181,13 @@ class TemplatesList extends Component {
           />
         </Card>
         <AlertModal
-          isOpen={hasDeletionError}
+          isOpen={deletionError}
           variant="danger"
           title={i18n._(t`Error!`)}
           onClose={this.handleDeleteErrorClose}
         >
           {i18n._(t`Failed to delete one or more template.`)}
+          <ErrorDetail error={deletionError} />
         </AlertModal>
       </PageSection>
     );

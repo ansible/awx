@@ -11,6 +11,7 @@ import {
 import { UnifiedJobsAPI } from '@api';
 import AlertModal from '@components/AlertModal';
 import DatalistToolbar from '@components/DataListToolbar';
+import ErrorDetail from '@components/ErrorDetail';
 import PaginatedDataList, {
   ToolbarDeleteButton
 } from '@components/PaginatedDataList';
@@ -31,8 +32,8 @@ class JobList extends Component {
 
     this.state = {
       hasContentLoading: true,
-      hasContentError: false,
-      hasDeletionError: false,
+      contentError: null,
+      deletionError: null,
       selected: [],
       jobs: [],
       itemCount: 0,
@@ -56,7 +57,7 @@ class JobList extends Component {
   }
 
   handleDeleteErrorClose () {
-    this.setState({ hasDeletionError: false });
+    this.setState({ deletionError: null });
   }
 
   handleSelectAll (isSelected) {
@@ -76,11 +77,11 @@ class JobList extends Component {
 
   async handleDelete () {
     const { selected } = this.state;
-    this.setState({ hasContentLoading: true, hasDeletionError: false });
+    this.setState({ hasContentLoading: true });
     try {
       await Promise.all(selected.map(({ id }) => UnifiedJobsAPI.destroy(id)));
     } catch (err) {
-      this.setState({ hasDeletionError: true });
+      this.setState({ deletionError: err });
     } finally {
       await this.loadJobs();
     }
@@ -90,7 +91,7 @@ class JobList extends Component {
     const { location } = this.props;
     const params = parseNamespacedQueryString(QS_CONFIG, location.search);
 
-    this.setState({ hasContentError: false, hasContentLoading: true });
+    this.setState({ contentError: null, hasContentLoading: true });
     try {
       const { data: { count, results } } = await UnifiedJobsAPI.read(params);
       this.setState({
@@ -99,7 +100,7 @@ class JobList extends Component {
         selected: [],
       });
     } catch (err) {
-      this.setState({ hasContentError: true });
+      this.setState({ contentError: err });
     } finally {
       this.setState({ hasContentLoading: false });
     }
@@ -107,9 +108,9 @@ class JobList extends Component {
 
   render () {
     const {
-      hasContentError,
+      contentError,
       hasContentLoading,
-      hasDeletionError,
+      deletionError,
       jobs,
       itemCount,
       selected,
@@ -125,7 +126,7 @@ class JobList extends Component {
       <PageSection variant={medium}>
         <Card>
           <PaginatedDataList
-            hasContentError={hasContentError}
+            contentError={contentError}
             hasContentLoading={hasContentLoading}
             items={jobs}
             itemCount={itemCount}
@@ -166,12 +167,13 @@ class JobList extends Component {
           />
         </Card>
         <AlertModal
-          isOpen={hasDeletionError}
+          isOpen={deletionError}
           variant="danger"
           title={i18n._(t`Error!`)}
           onClose={this.handleDeleteErrorClose}
         >
           {i18n._(t`Failed to delete one or more jobs.`)}
+          <ErrorDetail error={deletionError} />
         </AlertModal>
       </PageSection>
     );

@@ -24,7 +24,7 @@ class Template extends Component {
     super(props);
 
     this.state = {
-      hasContentError: false,
+      contentError: null,
       hasContentLoading: true,
       template: null,
     };
@@ -46,15 +46,13 @@ class Template extends Component {
     const { setBreadcrumb, match } = this.props;
     const { id } = match.params;
 
-    this.setState({ hasContentError: false, hasContentLoading: true });
+    this.setState({ contentError: null, hasContentLoading: true });
     try {
       const { data } = await JobTemplatesAPI.readDetail(id);
       setBreadcrumb(data);
-      this.setState({
-        template: data,
-      });
-    } catch {
-      this.setState({ hasContentError: true });
+      this.setState({ template: data });
+    } catch (err) {
+      this.setState({ contentError: err });
     } finally {
       this.setState({ hasContentLoading: false });
     }
@@ -68,7 +66,7 @@ class Template extends Component {
       match,
     } = this.props;
     const {
-      hasContentError,
+      contentError,
       hasContentLoading,
       template
     } = this.state;
@@ -98,11 +96,11 @@ class Template extends Component {
       cardHeader = null;
     }
 
-    if (!hasContentLoading && hasContentError) {
+    if (!hasContentLoading && contentError) {
       return (
         <PageSection>
           <Card className="awx-c-card">
-            <ContentError />
+            <ContentError error={contentError} />
           </Card>
         </PageSection>
       );

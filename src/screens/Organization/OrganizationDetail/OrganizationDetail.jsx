@@ -20,7 +20,7 @@ class OrganizationDetail extends Component {
     super(props);
 
     this.state = {
-      hasContentError: false,
+      contentError: null,
       hasContentLoading: true,
       instanceGroups: [],
     };
@@ -39,7 +39,7 @@ class OrganizationDetail extends Component {
       const { data: { results = [] } } = await OrganizationsAPI.readInstanceGroups(id);
       this.setState({ instanceGroups: [...results] });
     } catch (err) {
-      this.setState({ hasContentError: true });
+      this.setState({ contentError: err });
     } finally {
       this.setState({ hasContentLoading: false });
     }
@@ -48,7 +48,7 @@ class OrganizationDetail extends Component {
   render () {
     const {
       hasContentLoading,
-      hasContentError,
+      contentError,
       instanceGroups,
     } = this.state;
 
@@ -70,8 +70,8 @@ class OrganizationDetail extends Component {
       return (<ContentLoading />);
     }
 
-    if (hasContentError) {
-      return (<ContentError />);
+    if (contentError) {
+      return (<ContentError error={contentError} />);
     }
 
     return (

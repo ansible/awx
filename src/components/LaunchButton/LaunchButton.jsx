@@ -8,6 +8,7 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
 import AlertModal from '@components/AlertModal';
+import ErrorDetail from '@components/ErrorDetail';
 import { JobTemplatesAPI } from '@api';
 
 const StyledLaunchButton = styled(Button)`
@@ -28,7 +29,7 @@ class LaunchButton extends React.Component {
     super(props);
 
     this.state = {
-      launchError: false,
+      launchError: null,
       promptError: false
     };
 
@@ -38,7 +39,7 @@ class LaunchButton extends React.Component {
   }
 
   handleLaunchErrorClose () {
-    this.setState({ launchError: false });
+    this.setState({ launchError: null });
   }
 
   handlePromptErrorClose () {
@@ -55,8 +56,8 @@ class LaunchButton extends React.Component {
       } else {
         this.setState({ promptError: true });
       }
-    } catch (error) {
-      this.setState({ launchError: true });
+    } catch (err) {
+      this.setState({ launchError: err });
     }
   }
 
@@ -89,6 +90,7 @@ class LaunchButton extends React.Component {
           onClose={this.handleLaunchErrorClose}
         >
           {i18n._(t`Failed to launch job.`)}
+          <ErrorDetail error={launchError} />
         </AlertModal>
         <AlertModal
           isOpen={promptError}

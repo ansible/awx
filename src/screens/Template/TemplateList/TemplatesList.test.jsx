@@ -151,7 +151,15 @@ describe('<TemplatesList />', () => {
   });
 
   test('error is shown when template not successfully deleted from api', async () => {
-    JobTemplatesAPI.destroy = () => Promise.reject();
+    JobTemplatesAPI.destroy.mockRejectedValue(new Error({
+      response: {
+        config: {
+          method: 'delete',
+          url: '/api/v2/job_templates/1'
+        },
+        data: 'An error occurred'
+      }
+    }));
     const wrapper = mountWithContexts(<TemplatesList />);
     wrapper.find('TemplatesList').setState({
       templates: mockTemplates,

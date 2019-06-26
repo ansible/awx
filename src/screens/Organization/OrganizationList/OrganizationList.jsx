@@ -11,6 +11,7 @@ import {
 import { OrganizationsAPI } from '@api';
 import AlertModal from '@components/AlertModal';
 import DataListToolbar from '@components/DataListToolbar';
+import ErrorDetail from '@components/ErrorDetail';
 import PaginatedDataList, {
   ToolbarAddButton,
   ToolbarDeleteButton,
@@ -31,8 +32,8 @@ class OrganizationsList extends Component {
 
     this.state = {
       hasContentLoading: true,
-      hasContentError: false,
-      hasDeletionError: false,
+      contentError: null,
+      deletionError: null,
       organizations: [],
       selected: [],
       itemCount: 0,
@@ -75,17 +76,17 @@ class OrganizationsList extends Component {
   }
 
   handleDeleteErrorClose () {
-    this.setState({ hasDeletionError: false });
+    this.setState({ deletionError: null });
   }
 
   async handleOrgDelete () {
     const { selected } = this.state;
 
-    this.setState({ hasContentLoading: true, hasDeletionError: false });
+    this.setState({ hasContentLoading: true });
     try {
       await Promise.all(selected.map((org) => OrganizationsAPI.destroy(org.id)));
     } catch (err) {
-      this.setState({ hasDeletionError: true });
+      this.setState({ deletionError: err });
     } finally {
       await this.loadOrganizations();
     }
@@ -108,7 +109,7 @@ class OrganizationsList extends Component {
       optionsPromise,
     ]);
 
-    this.setState({ hasContentError: false, hasContentLoading: true });
+    this.setState({ contentError: null, hasContentLoading: true });
     try {
       const [{ data: { count, results } }, { data: { actions } }] = await promises;
       this.setState({
@@ -118,7 +119,7 @@ class OrganizationsList extends Component {
         selected: [],
       });
     } catch (err) {
-      this.setState(({ hasContentError: true }));
+      this.setState(({ contentError: err }));
     } finally {
       this.setState({ hasContentLoading: false });
     }
@@ -131,9 +132,9 @@ class OrganizationsList extends Component {
     const {
       actions,
       itemCount,
-      hasContentError,
+      contentError,
       hasContentLoading,
-      hasDeletionError,
+      deletionError,
       selected,
       organizations,
     } = this.state;
@@ -147,7 +148,7 @@ class OrganizationsList extends Component {
         <PageSection variant={medium}>
           <Card>
             <PaginatedDataList
-              hasContentError={hasContentError}
+              contentError={contentError}
               hasContentLoading={hasContentLoading}
               items={organizations}
               itemCount={itemCount}
@@ -194,12 +195,13 @@ class OrganizationsList extends Component {
           </Card>
         </PageSection>
         <AlertModal
-          isOpen={hasDeletionError}
+          isOpen={deletionError}
           variant="danger"
           title={i18n._(t`Error!`)}
           onClose={this.handleDeleteErrorClose}
         >
           {i18n._(t`Failed to delete one or more organizations.`)}
+          <ErrorDetail error={deletionError} />
         </AlertModal>
       </Fragment>
     );

@@ -34,7 +34,7 @@ exports[`<OrganizationAccess /> initially renders succesfully 1`] = `
   }
 >
   <WithI18n
-    hasContentError={false}
+    error={null}
     hasContentLoading={true}
     itemCount={0}
     itemName="role"
@@ -80,7 +80,7 @@ exports[`<OrganizationAccess /> initially renders succesfully 1`] = `
       withHash={true}
     >
       <withRouter(PaginatedDataList)
-        hasContentError={false}
+        error={null}
         hasContentLoading={true}
         i18n={"/i18n/"}
         itemCount={0}
@@ -124,7 +124,8 @@ exports[`<OrganizationAccess /> initially renders succesfully 1`] = `
       >
         <Route>
           <PaginatedDataList
-            hasContentError={false}
+            contentError={null}
+            error={null}
             hasContentLoading={true}
             history={"/history/"}
             i18n={"/i18n/"}
@@ -220,7 +221,7 @@ exports[`<OrganizationAccess /> initially renders succesfully 1`] = `
     </I18n>
   </WithI18n>
   <_default
-    isOpen={false}
+    isOpen={null}
     onClose={[Function]}
     title="Error!"
     variant="danger"

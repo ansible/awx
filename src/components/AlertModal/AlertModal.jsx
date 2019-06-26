@@ -20,9 +20,13 @@ const getIcon = (variant) => {
   return icon;
 };
 
-export default ({ variant, children, ...props }) => (
-  <Modal className={`awx-c-modal${variant && ` at-c-alertModal at-c-alertModal--${variant}`}`} {...props}>
-    {children}
-    {getIcon(variant)}
-  </Modal>
-);
+export default ({ variant, children, ...props }) => {
+  const { isOpen = null } = props;
+  props.isOpen = Boolean(isOpen);
+  return (
+    <Modal className={`awx-c-modal${variant && ` at-c-alertModal at-c-alertModal--${variant}`}`} {...props}>
+      {children}
+      {getIcon(variant)}
+    </Modal>
+  );
+};

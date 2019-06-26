@@ -21,7 +21,7 @@ class Organization extends Component {
     this.state = {
       organization: null,
       hasContentLoading: true,
-      hasContentError: false,
+      contentError: null,
       isInitialized: false,
       isNotifAdmin: false,
       isAuditorOfThisOrg: false,
@@ -50,7 +50,7 @@ class Organization extends Component {
     } = this.props;
     const id = parseInt(match.params.id, 10);
 
-    this.setState({ hasContentError: false, hasContentLoading: true });
+    this.setState({ contentError: null, hasContentLoading: true });
     try {
       const [{ data }, notifAdminRes, auditorRes, adminRes] = await Promise.all([
         OrganizationsAPI.readDetail(id),
@@ -66,7 +66,7 @@ class Organization extends Component {
         isAdminOfThisOrg: adminRes.data.results.length > 0
       });
     } catch (err) {
-      this.setState(({ hasContentError: true }));
+      this.setState(({ contentError: err }));
     } finally {
       this.setState({ hasContentLoading: false });
     }
@@ -79,13 +79,13 @@ class Organization extends Component {
     } = this.props;
     const id = parseInt(match.params.id, 10);
 
-    this.setState({ hasContentError: false, hasContentLoading: true });
+    this.setState({ contentError: null, hasContentLoading: true });
     try {
       const { data } = await OrganizationsAPI.readDetail(id);
       setBreadcrumb(data);
       this.setState({ organization: data });
     } catch (err) {
-      this.setState(({ hasContentError: true }));
+      this.setState(({ contentError: err }));
     } finally {
       this.setState({ hasContentLoading: false });
     }
@@ -102,7 +102,7 @@ class Organization extends Component {
 
     const {
       organization,
-      hasContentError,
+      contentError,
       hasContentLoading,
       isInitialized,
       isNotifAdmin,
@@ -162,11 +162,11 @@ class Organization extends Component {
       cardHeader = null;
     }
 
-    if (!hasContentLoading && hasContentError) {
+    if (!hasContentLoading && contentError) {
       return (
         <PageSection>
           <Card className="awx-c-card">
-            <ContentError />
+            <ContentError error={contentError} />
           </Card>
         </PageSection>
       );

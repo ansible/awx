@@ -60,6 +60,20 @@ const mockAPIOrgsList = {
 describe('<OrganizationsList />', () => {
   let wrapper;
 
+  beforeEach(() => {
+    OrganizationsAPI.read = () => Promise.resolve({
+      data: {
+        count: 0,
+        results: []
+      }
+    });
+    OrganizationsAPI.readOptions = () => Promise.resolve({
+      data: {
+        actions: []
+      }
+    });
+  });
+
   test('initially renders succesfully', () => {
     mountWithContexts(<OrganizationsList />);
   });
@@ -122,8 +136,17 @@ describe('<OrganizationsList />', () => {
     expect(fetchOrgs).toBeCalled();
   });
 
-  test('error is shown when org not successfully deleted from api', async () => {
-    OrganizationsAPI.destroy = () => Promise.reject();
+  test('error is shown when org not successfully deleted from api', async (done) => {
+    OrganizationsAPI.destroy.mockRejectedValue(new Error({
+      response: {
+        config: {
+          method: 'delete',
+          url: '/api/v2/organizations/1'
+        },
+        data: 'An error occurred'
+      }
+    }));
+
     wrapper = mountWithContexts(<OrganizationsList />);
     wrapper.find('OrganizationsList').setState({
       organizations: mockAPIOrgsList.data.results,
@@ -133,5 +156,6 @@ describe('<OrganizationsList />', () => {
     });
     wrapper.find('ToolbarDeleteButton').prop('onDelete')();
     await waitForElement(wrapper, 'Modal', (el) => el.props().isOpen === true && el.props().title === 'Error!');
+    done();
   });
 });

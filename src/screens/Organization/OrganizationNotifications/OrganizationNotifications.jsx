@@ -6,6 +6,7 @@ import { t } from '@lingui/macro';
 
 import { OrganizationsAPI } from '@api';
 import AlertModal from '@components/AlertModal';
+import ErrorDetail from '@components/ErrorDetail';
 import NotificationListItem from '@components/NotificationsList/NotificationListItem';
 import PaginatedDataList from '@components/PaginatedDataList';
 import { getQSConfig, parseNamespacedQueryString } from '@util/qs';
@@ -26,9 +27,9 @@ class OrganizationNotifications extends Component {
   constructor (props) {
     super(props);
     this.state = {
-      hasContentError: false,
+      contentError: null,
       hasContentLoading: true,
-      toggleError: false,
+      toggleError: null,
       toggleLoading: false,
       itemCount: 0,
       notifications: [],
@@ -55,7 +56,7 @@ class OrganizationNotifications extends Component {
     const { id, location } = this.props;
     const params = parseNamespacedQueryString(QS_CONFIG, location.search);
 
-    this.setState({ hasContentError: false, hasContentLoading: true });
+    this.setState({ contentError: null, hasContentLoading: true });
     try {
       const {
         data: {
@@ -85,8 +86,8 @@ class OrganizationNotifications extends Component {
         successTemplateIds: successTemplates.results.map(s => s.id),
         errorTemplateIds: errorTemplates.results.map(e => e.id),
       });
-    } catch {
-      this.setState({ hasContentError: true });
+    } catch (err) {
+      this.setState({ contentError: err });
     } finally {
       this.setState({ hasContentLoading: false });
     }
@@ -125,20 +126,20 @@ class OrganizationNotifications extends Component {
       );
       this.setState(stateUpdateFunction);
     } catch (err) {
-      this.setState({ toggleError: true });
+      this.setState({ toggleError: err });
     } finally {
       this.setState({ toggleLoading: false });
     }
   }
 
   handleNotificationErrorClose () {
-    this.setState({ toggleError: false });
+    this.setState({ toggleError: null });
   }
 
   render () {
     const { canToggleNotifications, i18n } = this.props;
     const {
-      hasContentError,
+      contentError,
       hasContentLoading,
       toggleError,
       toggleLoading,
@@ -151,7 +152,7 @@ class OrganizationNotifications extends Component {
     return (
       <Fragment>
         <PaginatedDataList
-          hasContentError={hasContentError}
+          contentError={contentError}
           hasContentLoading={hasContentLoading}
           items={notifications}
           itemCount={itemCount}
@@ -171,12 +172,13 @@ class OrganizationNotifications extends Component {
           )}
         />
         <AlertModal
+          isOpen={toggleError}
           variant="danger"
           title={i18n._(t`Error!`)}
-          isOpen={toggleError && !toggleLoading}
           onClose={this.handleNotificationErrorClose}
         >
           {i18n._(t`Failed to toggle notification.`)}
+          <ErrorDetail error={toggleError} />
         </AlertModal>
       </Fragment>
     );
