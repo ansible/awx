@@ -30,7 +30,7 @@ class AnsibleSelect extends React.Component {
       >
         {data.map((datum) => (
           <FormSelectOption
-            key={datum.value}
+            key={datum.key}
             value={datum.value}
             label={datum.label}
             isDisabled={datum.isDisabled}

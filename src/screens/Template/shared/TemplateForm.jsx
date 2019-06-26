@@ -38,9 +38,9 @@ class TemplateForm extends Component {
     } = this.props;
 
     const jobTypeOptions = [
-      { value: '', label: i18n._(t`Choose a job type`), isDisabled: true },
-      { value: 'run', label: i18n._(t`Run`), isDisabled: false },
-      { value: 'check', label: i18n._(t`Check`), isDisabled: false }
+      { value: '', key: '', label: i18n._(t`Choose a job type`), isDisabled: true },
+      { value: 'run', key: 'run', label: i18n._(t`Run`), isDisabled: false },
+      { value: 'check', key: 'check', label: i18n._(t`Check`), isDisabled: false }
     ];
 
     return (
