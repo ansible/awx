@@ -1,11 +1,11 @@
 import React from 'react';
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import { sleep } from '@testUtils/testUtils';
-import TemplateForm from './TemplateForm';
+import JobTemplateForm from './JobTemplateForm';
 
 jest.mock('@api');
 
-describe('<TemplateForm />', () => {
+describe('<JobTemplateForm />', () => {
   const mockData = {
     id: 1,
     name: 'Foo',
@@ -23,7 +23,7 @@ describe('<TemplateForm />', () => {
 
   test('initially renders successfully', () => {
     mountWithContexts(
-      <TemplateForm
+      <JobTemplateForm
         template={mockData}
         handleSubmit={jest.fn()}
         handleCancel={jest.fn()}
@@ -33,7 +33,7 @@ describe('<TemplateForm />', () => {
 
   test('should update form values on input changes', () => {
     const wrapper = mountWithContexts(
-      <TemplateForm
+      <JobTemplateForm
         template={mockData}
         handleSubmit={jest.fn()}
         handleCancel={jest.fn()}
@@ -70,7 +70,7 @@ describe('<TemplateForm />', () => {
   test('should call handleSubmit when Submit button is clicked', async () => {
     const handleSubmit = jest.fn();
     const wrapper = mountWithContexts(
-      <TemplateForm
+      <JobTemplateForm
         template={mockData}
         handleSubmit={handleSubmit}
         handleCancel={jest.fn()}
@@ -86,7 +86,7 @@ describe('<TemplateForm />', () => {
   test('should call handleCancel when Cancel button is clicked', () => {
     const handleCancel = jest.fn();
     const wrapper = mountWithContexts(
-      <TemplateForm
+      <JobTemplateForm
         template={mockData}
         handleSubmit={jest.fn()}
         handleCancel={handleCancel}

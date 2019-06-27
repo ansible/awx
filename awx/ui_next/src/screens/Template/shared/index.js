@@ -1,1 +1,1 @@
-export { default } from './TemplateForm';
+export { default } from './JobTemplateForm';
