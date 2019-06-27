@@ -75,7 +75,7 @@ def get_field_from_path(model, path):
         (<IntegerField for timeout>, 'project__timeout')
     '''
     # Store of all the fields used to detect repeats
-    field_set = set([])
+    field_set = set()
     new_parts = []
     for name in path.split('__'):
         if model is None:
@@ -92,6 +92,9 @@ def get_field_from_path(model, path):
         if name == 'type' and 'polymorphic_ctype' in get_all_field_names(model):
             name = 'polymorphic_ctype'
             new_parts.append('polymorphic_ctype__model')
+        elif name == 'deleted_actor':
+            # FIXME: make use of a cast of JSONField `deleted_actor` to text to continue to support searches
+            new_parts.append('deleted_actor_text')
         else:
             new_parts.append(name)
 

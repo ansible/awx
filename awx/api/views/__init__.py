@@ -18,7 +18,8 @@ from collections import OrderedDict, Iterable
 # Django
 from django.conf import settings
 from django.core.exceptions import FieldError, ObjectDoesNotExist
-from django.db.models import Q, Sum
+from django.db.models import Q, Sum, TextField
+from django.db.models.functions import Cast
 from django.db import IntegrityError, transaction, connection
 from django.shortcuts import get_object_or_404
 from django.utils.safestring import mark_safe
@@ -4260,6 +4261,11 @@ class ActivityStreamList(SimpleListAPIView):
     model = models.ActivityStream
     serializer_class = serializers.ActivityStreamSerializer
     search_fields = ('changes',)
+
+    # FIXME: cast to text and annotate the queryset the JSONField `deleted_actor`
+    def get_queryset(self):
+        qs = super(ActivityStreamList, self).get_queryset()
+        return qs.annotate(deleted_actor_text=Cast('deleted_actor', TextField()))
 
 
 class ActivityStreamDetail(RetrieveAPIView):
