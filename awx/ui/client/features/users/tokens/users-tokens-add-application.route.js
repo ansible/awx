@@ -41,14 +41,13 @@ export default {
                 name: {
                     key: true,
                     label: 'Name',
-                    columnClass: 'col-lg-2 col-md-3 col-sm-4 col-xs-4',
+                    columnClass: 'col-sm-6',
                     awToolTip: '{{application.description | sanitize}}',
                     dataPlacement: 'top'
                 },
                 organization: {
                     label: 'Organization',
-                    columnClass: 'col-lg-2 col-md-3 col-sm-4 col-xs-4',
-                    modalColumnClass: 'col-lg-2 col-md-3 col-sm-4 col-xs-4',
+                    columnClass: 'col-sm-6',
                     key: false,
                     ngBind: 'application.summary_fields.organization.name',
                     sourceModel: 'organization',
