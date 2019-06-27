@@ -13,7 +13,6 @@ from django.conf import settings
 from django.utils.timezone import now
 
 import jsonfield.fields
-import jsonbfield.fields
 import taggit.managers
 
 
@@ -239,7 +238,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('timestamp', models.DateTimeField(default=None, help_text='Date and time of the corresponding fact scan gathering time.', editable=False)),
                 ('module', models.CharField(max_length=128)),
-                ('facts', jsonbfield.fields.JSONField(default={}, help_text='Arbitrary JSON structure of module facts captured at timestamp for a single host.', blank=True)),
+                ('facts', awx.main.fields.JSONBField(default={}, help_text='Arbitrary JSON structure of module facts captured at timestamp for a single host.', blank=True)),
                 ('host', models.ForeignKey(related_name='facts', to='main.Host', help_text='Host for the facts that the fact scan captured.')),
             ],
         ),

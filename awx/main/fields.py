@@ -12,7 +12,9 @@ from jinja2.exceptions import UndefinedError, TemplateSyntaxError
 
 # Django
 import django
+from django.contrib.postgres.fields import JSONField as upstream_JSONBField
 from django.core import exceptions as django_exceptions
+from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models.signals import (
     post_save,
     post_delete,
@@ -37,7 +39,6 @@ import jsonschema.exceptions
 
 # Django-JSONField
 from jsonfield import JSONField as upstream_JSONField
-from jsonbfield.fields import JSONField as upstream_JSONBField
 
 # DRF
 from rest_framework import serializers
@@ -91,7 +92,7 @@ class JSONBField(upstream_JSONBField):
     def get_db_prep_value(self, value, connection, prepared=False):
         if connection.vendor == 'sqlite':
             # sqlite (which we use for tests) does not support jsonb;
-            return json.dumps(value)
+            return json.dumps(value, cls=DjangoJSONEncoder)
         return super(JSONBField, self).get_db_prep_value(
             value, connection, prepared
         )
@@ -452,21 +453,6 @@ class JSONSchemaField(JSONBField):
                 code='invalid',
                 params={'value': value},
             )
-
-    def get_db_prep_value(self, value, connection, prepared=False):
-        if connection.vendor == 'sqlite':
-            # sqlite (which we use for tests) does not support jsonb;
-            return json.dumps(value)
-        return super(JSONSchemaField, self).get_db_prep_value(
-            value, connection, prepared
-        )
-
-    def from_db_value(self, value, expression, connection, context):
-        # Work around a bug in django-jsonfield
-        # https://bitbucket.org/schinckel/django-jsonfield/issues/57/cannot-use-in-the-same-project-as-djangos
-        if isinstance(value, str):
-            return json.loads(value)
-        return value
 
 
 @JSONSchemaField.format_checker.checks('vault_id')
