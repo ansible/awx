@@ -153,6 +153,12 @@ def projects_by_scm_type(since):
     return counts
 
 
+def _get_isolated_datetime(last_check):
+    if last_check:
+        return last_check.isoformat()
+    return last_check
+
+
 @register('instance_info')
 def instance_info(since):
     info = {}
@@ -166,7 +172,7 @@ def instance_info(since):
             'cpu': instance['cpu'],
             'memory': instance['memory'],
             'managed_by_policy': instance['managed_by_policy'],
-            'last_isolated_check': instance['last_isolated_check'],
+            'last_isolated_check': _get_isolated_datetime(instance['last_isolated_check']),
             'enabled': instance['enabled']
         }
         info[instance['uuid']] = instance_info
