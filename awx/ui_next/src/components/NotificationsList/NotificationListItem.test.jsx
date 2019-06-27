@@ -6,6 +6,16 @@ describe('<NotificationListItem canToggleNotifications />', () => {
   let wrapper;
   let toggleNotification;
 
+  const mockNotif = {
+    id: 9000,
+    name: 'Foo',
+    notification_type: 'slack'
+  };
+
+  const typeLabels = {
+    slack: 'Slack'
+  };
+
   beforeEach(() => {
     toggleNotification = jest.fn();
   });
@@ -18,34 +28,42 @@ describe('<NotificationListItem canToggleNotifications />', () => {
     jest.clearAllMocks();
   });
 
-  test('initially renders succesfully', () => {
+  test('initially renders succesfully and displays correct label', () => {
     wrapper = mountWithContexts(
       <NotificationListItem
-        notification={{
-          id: 9000,
-          name: 'Foo',
-          notification_type: 'slack',
-        }}
+        notification={mockNotif}
         toggleNotification={toggleNotification}
         detailUrl="/foo"
         canToggleNotifications
+        typeLabels={typeLabels}
       />
     );
     expect(wrapper.find('NotificationListItem')).toMatchSnapshot();
   });
 
+  test('displays correct label in correct column', () => {
+    wrapper = mountWithContexts(
+      <NotificationListItem
+        notification={mockNotif}
+        toggleNotification={toggleNotification}
+        detailUrl="/foo"
+        canToggleNotifications
+        typeLabels={typeLabels}
+      />
+    );
+    const typeCell = wrapper.find('DataListCell').at(1).find('div');
+    expect(typeCell.text()).toBe('Slack');
+  });
+
   test('handles success click when toggle is on', () => {
     wrapper = mountWithContexts(
       <NotificationListItem
-        notification={{
-          id: 9000,
-          name: 'Foo',
-          notification_type: 'slack',
-        }}
+        notification={mockNotif}
         successTurnedOn
         toggleNotification={toggleNotification}
         detailUrl="/foo"
         canToggleNotifications
+        typeLabels={typeLabels}
       />
     );
     wrapper
@@ -59,15 +77,12 @@ describe('<NotificationListItem canToggleNotifications />', () => {
   test('handles success click when toggle is off', () => {
     wrapper = mountWithContexts(
       <NotificationListItem
-        notification={{
-          id: 9000,
-          name: 'Foo',
-          notification_type: 'slack',
-        }}
+        notification={mockNotif}
         successTurnedOn={false}
         toggleNotification={toggleNotification}
         detailUrl="/foo"
         canToggleNotifications
+        typeLabels={typeLabels}
       />
     );
     wrapper
@@ -81,15 +96,12 @@ describe('<NotificationListItem canToggleNotifications />', () => {
   test('handles error click when toggle is on', () => {
     wrapper = mountWithContexts(
       <NotificationListItem
-        notification={{
-          id: 9000,
-          name: 'Foo',
-          notification_type: 'slack',
-        }}
+        notification={mockNotif}
         errorTurnedOn
         toggleNotification={toggleNotification}
         detailUrl="/foo"
         canToggleNotifications
+        typeLabels={typeLabels}
       />
     );
     wrapper
@@ -103,15 +115,12 @@ describe('<NotificationListItem canToggleNotifications />', () => {
   test('handles error click when toggle is off', () => {
     wrapper = mountWithContexts(
       <NotificationListItem
-        notification={{
-          id: 9000,
-          name: 'Foo',
-          notification_type: 'slack',
-        }}
+        notification={mockNotif}
         errorTurnedOn={false}
         toggleNotification={toggleNotification}
         detailUrl="/foo"
         canToggleNotifications
+        typeLabels={typeLabels}
       />
     );
     wrapper

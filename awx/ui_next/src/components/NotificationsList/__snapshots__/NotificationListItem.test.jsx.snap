@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`<NotificationListItem canToggleNotifications /> initially renders succesfully 1`] = `
+exports[`<NotificationListItem canToggleNotifications /> initially renders succesfully and displays correct label 1`] = `
 <NotificationListItem
   canToggleNotifications={true}
   detailUrl="/foo"
@@ -15,6 +15,11 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
   }
   successTurnedOn={false}
   toggleNotification={[MockFunction]}
+  typeLabels={
+    Object {
+      "slack": "Slack",
+    }
+  }
 >
   <DataListItem
     aria-labelledby="items-list-item-9000"
@@ -52,11 +57,9 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                       Foo
                     </b>
                   </ForwardRef>
-                  <ForwardRef
-                    isRead={true}
-                  >
-                    slack
-                  </ForwardRef>
+                </ForwardRef>,
+                <ForwardRef>
+                  Slack
                 </ForwardRef>,
                 <ForwardRef
                   righthalf="true"
@@ -189,47 +192,55 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                           </Link>
                         </StyledComponent>
                       </Styled(Link)>
-                      <Styled(Badge)
-                        isRead={true}
-                      >
-                        <StyledComponent
-                          forwardedComponent={
-                            Object {
-                              "$$typeof": Symbol(react.forward_ref),
-                              "attrs": Array [],
-                              "componentStyle": ComponentStyle {
-                                "componentId": "sc-bwzfXH",
-                                "isStatic": true,
-                                "lastClassName": "chTbOZ",
-                                "rules": Array [
-                                  "text-transform: capitalize;",
-                                ],
-                              },
-                              "displayName": "Styled(Badge)",
-                              "foldedComponentIds": Array [],
-                              "render": [Function],
-                              "styledComponentId": "sc-bwzfXH",
-                              "target": [Function],
-                              "toString": [Function],
-                              "warnTooManyClasses": [Function],
-                              "withComponent": [Function],
-                            }
-                          }
-                          forwardedRef={null}
-                          isRead={true}
-                        >
-                          <Badge
-                            className="sc-bwzfXH chTbOZ"
-                            isRead={true}
-                          >
-                            <span
-                              className="pf-c-badge pf-m-read sc-bwzfXH chTbOZ"
-                            >
-                              slack
-                            </span>
-                          </Badge>
-                        </StyledComponent>
-                      </Styled(Badge)>
+                    </div>
+                  </DataListCell>
+                </StyledComponent>
+              </NotificationListItem__DataListCell>
+              <NotificationListItem__DataListCell
+                key="type"
+              >
+                <StyledComponent
+                  forwardedComponent={
+                    Object {
+                      "$$typeof": Symbol(react.forward_ref),
+                      "attrs": Array [],
+                      "componentStyle": ComponentStyle {
+                        "componentId": "NotificationListItem__DataListCell-j7c411-0",
+                        "isStatic": false,
+                        "lastClassName": "hoXOpW",
+                        "rules": Array [
+                          "display:flex;justify-content:",
+                          [Function],
+                          ";padding-bottom:",
+                          [Function],
+                          ";@media screen and (min-width:768px){justify-content:",
+                          [Function],
+                          ";padding-bottom:0;}",
+                        ],
+                      },
+                      "displayName": "NotificationListItem__DataListCell",
+                      "foldedComponentIds": Array [],
+                      "render": [Function],
+                      "styledComponentId": "NotificationListItem__DataListCell-j7c411-0",
+                      "target": [Function],
+                      "toString": [Function],
+                      "warnTooManyClasses": [Function],
+                      "withComponent": [Function],
+                    }
+                  }
+                  forwardedRef={null}
+                >
+                  <DataListCell
+                    alignRight={false}
+                    className="NotificationListItem__DataListCell-j7c411-0 kIdLtz"
+                    isFilled={true}
+                    isIcon={false}
+                    width={1}
+                  >
+                    <div
+                      className="pf-c-data-list__cell NotificationListItem__DataListCell-j7c411-0 kIdLtz"
+                    >
+                      Slack
                     </div>
                   </DataListCell>
                 </StyledComponent>
