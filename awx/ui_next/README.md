@@ -5,8 +5,8 @@
 
 ## Usage
 
-* `git clone git@github.com:ansible/awx-pf.git`
-* cd awx-pf
+* `git clone git@github.com:ansible/awx.git`
+* cd awx/ui_next
 * npm install
 * npm start
 * visit `https://127.0.0.1:3001/`
