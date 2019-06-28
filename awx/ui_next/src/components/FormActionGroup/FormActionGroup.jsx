@@ -2,10 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import {
-  ActionGroup as PFActionGroup,
-  Button
-} from '@patternfly/react-core';
+import { ActionGroup as PFActionGroup, Button } from '@patternfly/react-core';
 import styled from 'styled-components';
 
 const ActionGroup = styled(PFActionGroup)`
@@ -27,8 +24,23 @@ const ActionGroup = styled(PFActionGroup)`
 
 const FormActionGroup = ({ onSubmit, submitDisabled, onCancel, i18n }) => (
   <ActionGroup>
-    <Button aria-label={i18n._(t`Save`)} variant="primary" type="submit" onClick={onSubmit} isDisabled={submitDisabled}>{i18n._(t`Save`)}</Button>
-    <Button aria-label={i18n._(t`Cancel`)} variant="secondary" type="button" onClick={onCancel}>{i18n._(t`Cancel`)}</Button>
+    <Button
+      aria-label={i18n._(t`Save`)}
+      variant="primary"
+      type="submit"
+      onClick={onSubmit}
+      isDisabled={submitDisabled}
+    >
+      {i18n._(t`Save`)}
+    </Button>
+    <Button
+      aria-label={i18n._(t`Cancel`)}
+      variant="secondary"
+      type="button"
+      onClick={onCancel}
+    >
+      {i18n._(t`Cancel`)}
+    </Button>
   </ActionGroup>
 );
 

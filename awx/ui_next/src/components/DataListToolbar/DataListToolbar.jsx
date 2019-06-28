@@ -24,7 +24,8 @@ const AWXToolbar = styled.div`
   --pf-global--target-size--MinWidth: 0;
   --pf-global--FontSize--md: 14px;
 
-  border-bottom: var(--awx-toolbar--BorderWidth) solid var(--awx-toolbar--BorderColor);
+  border-bottom: var(--awx-toolbar--BorderWidth) solid
+    var(--awx-toolbar--BorderColor);
   background-color: var(--awx-toolbar--BackgroundColor);
   display: flex;
   min-height: 70px;
@@ -70,13 +71,13 @@ const AdditionalControlsWrapper = styled.div`
   justify-content: flex-end;
   align-items: center;
 
-  & > :not(:first-child)  {
-  margin-left: 20px;
+  & > :not(:first-child) {
+    margin-left: 20px;
   }
 `;
 
 class DataListToolbar extends React.Component {
-  render () {
+  render() {
     const {
       columns,
       showSelectAll,
@@ -91,15 +92,15 @@ class DataListToolbar extends React.Component {
       sortOrder,
       sortedColumnKey,
       additionalControls,
-      i18n
+      i18n,
     } = this.props;
 
-    const showExpandCollapse = (onCompact && onExpand);
+    const showExpandCollapse = onCompact && onExpand;
     return (
       <AWXToolbar>
         <Toolbar marginleft={noLeftMargin ? 1 : 0}>
           <ColumnLeft>
-            { showSelectAll && (
+            {showSelectAll && (
               <Fragment>
                 <ToolbarItem>
                   <Checkbox
@@ -140,9 +141,7 @@ class DataListToolbar extends React.Component {
                     onExpand={onExpand}
                   />
                 </ToolbarGroup>
-                { additionalControls && (
-                  <VerticalSeparator />
-                )}
+                {additionalControls && <VerticalSeparator />}
               </Fragment>
             )}
             <AdditionalControlsWrapper>

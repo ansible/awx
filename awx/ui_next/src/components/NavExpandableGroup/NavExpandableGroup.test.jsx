@@ -21,7 +21,9 @@ describe('NavExpandableGroup', () => {
           />
         </Nav>
       </MemoryRouter>
-    ).find('NavExpandableGroup').instance();
+    )
+      .find('NavExpandableGroup')
+      .instance();
 
     expect(component.navItemPaths).toEqual(['/foo', '/bar', '/fiz']);
     expect(component.isActiveGroup()).toEqual(true);
@@ -54,7 +56,9 @@ describe('NavExpandableGroup', () => {
               />
             </Nav>
           </MemoryRouter>
-        ).find('NavExpandableGroup').instance();
+        )
+          .find('NavExpandableGroup')
+          .instance();
 
         expect(component.isActivePath(path)).toEqual(expected);
       });

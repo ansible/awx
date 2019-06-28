@@ -17,24 +17,20 @@ const DetailWrapper = styled(TextContent)`
   grid-gap: 10px;
 `;
 
-export default function PaginatedDataListItem ({ item }) {
+export default function PaginatedDataListItem({ item }) {
   return (
-    <DataListItem
-      aria-labelledby={`items-list-item-${item.id}`}
-      key={item.id}
-    >
+    <DataListItem aria-labelledby={`items-list-item-${item.id}`} key={item.id}>
       <DataListItemRow>
-        <DataListItemCells dataListCells={[
-          <DataListCell key="team-name">
-            <DetailWrapper>
-              <Link to={{ pathname: item.url }}>
-                <b id={`items-list-item-${item.id}`}>
-                  {item.name}
-                </b>
-              </Link>
-            </DetailWrapper>
-          </DataListCell>
-        ]}
+        <DataListItemCells
+          dataListCells={[
+            <DataListCell key="team-name">
+              <DetailWrapper>
+                <Link to={{ pathname: item.url }}>
+                  <b id={`items-list-item-${item.id}`}>{item.name}</b>
+                </Link>
+              </DetailWrapper>
+            </DataListCell>,
+          ]}
         />
       </DataListItemRow>
     </DataListItem>

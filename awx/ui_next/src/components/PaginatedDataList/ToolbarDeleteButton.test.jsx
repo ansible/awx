@@ -16,10 +16,7 @@ const itemB = {
 describe('<ToolbarDeleteButton />', () => {
   test('should render button', () => {
     const wrapper = mountWithContexts(
-      <ToolbarDeleteButton
-        onDelete={() => {}}
-        itemsToDelete={[]}
-      />
+      <ToolbarDeleteButton onDelete={() => {}} itemsToDelete={[]} />
     );
     expect(wrapper.find('button')).toHaveLength(1);
     expect(wrapper.find('ToolbarDeleteButton')).toMatchSnapshot();
@@ -27,14 +24,10 @@ describe('<ToolbarDeleteButton />', () => {
 
   test('should open confirmation modal', () => {
     const wrapper = mountWithContexts(
-      <ToolbarDeleteButton
-        onDelete={() => {}}
-        itemsToDelete={[itemA]}
-      />
+      <ToolbarDeleteButton onDelete={() => {}} itemsToDelete={[itemA]} />
     );
     wrapper.find('button').simulate('click');
-    expect(wrapper.find('ToolbarDeleteButton').state('isModalOpen'))
-      .toBe(true);
+    expect(wrapper.find('ToolbarDeleteButton').state('isModalOpen')).toBe(true);
     wrapper.update();
     expect(wrapper.find('Modal')).toHaveLength(1);
   });
@@ -42,33 +35,26 @@ describe('<ToolbarDeleteButton />', () => {
   test('should invoke onDelete prop', () => {
     const onDelete = jest.fn();
     const wrapper = mountWithContexts(
-      <ToolbarDeleteButton
-        onDelete={onDelete}
-        itemsToDelete={[itemA]}
-      />
+      <ToolbarDeleteButton onDelete={onDelete} itemsToDelete={[itemA]} />
     );
     wrapper.find('ToolbarDeleteButton').setState({ isModalOpen: true });
     wrapper.find('button.pf-m-danger').simulate('click');
     expect(onDelete).toHaveBeenCalled();
-    expect(wrapper.find('ToolbarDeleteButton').state('isModalOpen')).toBe(false);
+    expect(wrapper.find('ToolbarDeleteButton').state('isModalOpen')).toBe(
+      false
+    );
   });
 
   test('should disable button when no delete permissions', () => {
     const wrapper = mountWithContexts(
-      <ToolbarDeleteButton
-        onDelete={() => {}}
-        itemsToDelete={[itemB]}
-      />
+      <ToolbarDeleteButton onDelete={() => {}} itemsToDelete={[itemB]} />
     );
     expect(wrapper.find('button[disabled]')).toHaveLength(1);
   });
 
   test('should render tooltip', () => {
     const wrapper = mountWithContexts(
-      <ToolbarDeleteButton
-        onDelete={() => {}}
-        itemsToDelete={[itemA]}
-      />
+      <ToolbarDeleteButton onDelete={() => {}} itemsToDelete={[itemA]} />
     );
     expect(wrapper.find('Tooltip')).toHaveLength(1);
     expect(wrapper.find('Tooltip').prop('content')).toEqual('Delete');

@@ -1,15 +1,10 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import {
-  withRouter
-} from 'react-router-dom';
-import {
-  NavExpandable,
-  NavItem,
-} from '@patternfly/react-core';
+import { withRouter } from 'react-router-dom';
+import { NavExpandable, NavItem } from '@patternfly/react-core';
 
 class NavExpandableGroup extends Component {
-  constructor (props) {
+  constructor(props) {
     super(props);
     const { routes } = this.props;
     // Extract a list of paths from the route params and store them for later. This creates
@@ -20,17 +15,17 @@ class NavExpandableGroup extends Component {
     this.isActivePath = this.isActivePath.bind(this);
   }
 
-  isActiveGroup () {
+  isActiveGroup() {
     return this.navItemPaths.some(this.isActivePath);
   }
 
-  isActivePath (path) {
+  isActivePath(path) {
     const { history } = this.props;
 
     return history.location.pathname.startsWith(path);
   }
 
-  render () {
+  render() {
     const { groupId, groupTitle, routes } = this.props;
     const isActive = this.isActiveGroup();
 

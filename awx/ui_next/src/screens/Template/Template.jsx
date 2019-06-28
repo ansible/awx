@@ -1,17 +1,8 @@
 import React, { Component } from 'react';
 import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
-import {
-  Card,
-  CardHeader,
-  PageSection,
-} from '@patternfly/react-core';
-import {
-  Switch,
-  Route,
-  Redirect,
-  withRouter,
-} from 'react-router-dom';
+import { Card, CardHeader, PageSection } from '@patternfly/react-core';
+import { Switch, Route, Redirect, withRouter } from 'react-router-dom';
 import CardCloseButton from '@components/CardCloseButton';
 import ContentError from '@components/ContentError';
 import RoutedTabs from '@components/RoutedTabs';
@@ -20,7 +11,7 @@ import { JobTemplatesAPI } from '@api';
 import JobTemplateEdit from './JobTemplateEdit';
 
 class Template extends Component {
-  constructor (props) {
+  constructor(props) {
     super(props);
 
     this.state = {
@@ -31,18 +22,18 @@ class Template extends Component {
     this.loadTemplate = this.loadTemplate.bind(this);
   }
 
-  async componentDidMount () {
+  async componentDidMount() {
     await this.loadTemplate();
   }
 
-  async componentDidUpdate (prevProps) {
+  async componentDidUpdate(prevProps) {
     const { location } = this.props;
     if (location !== prevProps.location) {
       await this.loadTemplate();
     }
   }
 
-  async loadTemplate () {
+  async loadTemplate() {
     const { setBreadcrumb, match } = this.props;
     const { id } = match.params;
 
@@ -58,18 +49,9 @@ class Template extends Component {
     }
   }
 
-  render () {
-    const {
-      history,
-      i18n,
-      location,
-      match,
-    } = this.props;
-    const {
-      contentError,
-      hasContentLoading,
-      template
-    } = this.state;
+  render() {
+    const { history, i18n, location, match } = this.props;
+    const { contentError, hasContentLoading, template } = this.state;
 
     const tabsArray = [
       { name: i18n._(t`Details`), link: `${match.url}/details`, id: 0 },
@@ -77,19 +59,14 @@ class Template extends Component {
       { name: i18n._(t`Notifications`), link: '/home', id: 2 },
       { name: i18n._(t`Schedules`), link: '/home', id: 3 },
       { name: i18n._(t`Completed Jobs`), link: '/home', id: 4 },
-      { name: i18n._(t`Survey`), link: '/home', id: 5 }
+      { name: i18n._(t`Survey`), link: '/home', id: 5 },
     ];
 
-    let cardHeader = (hasContentLoading ? null
-      : (
-        <CardHeader style={{ padding: 0 }}>
-          <RoutedTabs
-            history={history}
-            tabsArray={tabsArray}
-          />
-          <CardCloseButton linkTo="/templates" />
-        </CardHeader>
-      )
+    let cardHeader = hasContentLoading ? null : (
+      <CardHeader style={{ padding: 0 }}>
+        <RoutedTabs history={history} tabsArray={tabsArray} />
+        <CardCloseButton linkTo="/templates" />
+      </CardHeader>
     );
 
     if (location.pathname.endsWith('edit')) {
@@ -108,7 +85,7 @@ class Template extends Component {
     return (
       <PageSection>
         <Card className="awx-c-card">
-          { cardHeader }
+          {cardHeader}
           <Switch>
             <Redirect
               from="/templates/:templateType/:id"
@@ -130,11 +107,7 @@ class Template extends Component {
             {template && (
               <Route
                 path="/templates/:templateType/:id/edit"
-                render={() => (
-                  <JobTemplateEdit
-                    template={template}
-                  />
-                )}
+                render={() => <JobTemplateEdit template={template} />}
               />
             )}
           </Switch>

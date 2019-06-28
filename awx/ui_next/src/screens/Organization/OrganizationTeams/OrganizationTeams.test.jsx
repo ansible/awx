@@ -18,8 +18,8 @@ const listData = {
       { id: 3, name: 'three', url: '/org/team/3' },
       { id: 4, name: 'four', url: '/org/team/4' },
       { id: 5, name: 'five', url: '/org/team/5' },
-    ]
-  }
+    ],
+  },
 };
 
 describe('<OrganizationTeams />', () => {
@@ -42,12 +42,9 @@ describe('<OrganizationTeams />', () => {
   });
 
   test('should load teams on mount', () => {
-    mountWithContexts(
-      <OrganizationTeams
-        id={1}
-        searchString=""
-      />
-    ).find('OrganizationTeams');
+    mountWithContexts(<OrganizationTeams id={1} searchString="" />).find(
+      'OrganizationTeams'
+    );
     expect(OrganizationsAPI.readTeams).toHaveBeenCalledWith(1, {
       page: 1,
       page_size: 5,
@@ -57,10 +54,7 @@ describe('<OrganizationTeams />', () => {
 
   test('should pass fetched teams to PaginatedDatalist', async () => {
     const wrapper = mountWithContexts(
-      <OrganizationTeams
-        id={1}
-        searchString=""
-      />
+      <OrganizationTeams id={1} searchString="" />
     );
 
     await sleep(0);

@@ -10,7 +10,7 @@ import SelectedList from '../SelectedList';
 import { getQSConfig, parseNamespacedQueryString } from '../../util/qs';
 
 class SelectResourceStep extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props);
 
     this.state = {
@@ -27,20 +27,23 @@ class SelectResourceStep extends React.Component {
     });
   }
 
-  componentDidMount () {
+  componentDidMount() {
     this.readResourceList();
   }
 
-  componentDidUpdate (prevProps) {
+  componentDidUpdate(prevProps) {
     const { location } = this.props;
     if (location !== prevProps.location) {
       this.readResourceList();
     }
   }
 
-  async readResourceList () {
+  async readResourceList() {
     const { onSearch, location } = this.props;
-    const queryParams = parseNamespacedQueryString(this.qsConfig, location.search);
+    const queryParams = parseNamespacedQueryString(
+      this.qsConfig,
+      location.search
+    );
 
     this.setState({
       isLoading: true,
@@ -65,14 +68,8 @@ class SelectResourceStep extends React.Component {
     }
   }
 
-  render () {
-    const {
-      isInitialized,
-      isLoading,
-      count,
-      error,
-      resources,
-    } = this.state;
+  render() {
+    const { isInitialized, isLoading, count, error, resources } = this.state;
 
     const {
       columns,
@@ -81,12 +78,12 @@ class SelectResourceStep extends React.Component {
       selectedLabel,
       selectedResourceRows,
       itemName,
-      i18n
+      i18n,
     } = this.props;
 
     return (
       <Fragment>
-        {isLoading && (<div>{i18n._(t`Loading...`)}</div>)}
+        {isLoading && <div>{i18n._(t`Loading...`)}</div>}
         {isInitialized && (
           <Fragment>
             {selectedResourceRows.length > 0 && (
@@ -113,14 +110,14 @@ class SelectResourceStep extends React.Component {
                   onSelect={() => onRowClick(item)}
                 />
               )}
-              renderToolbar={(props) => (
+              renderToolbar={props => (
                 <DataListToolbar {...props} alignToolbarLeft />
               )}
               showPageSizeOptions={false}
             />
           </Fragment>
         )}
-        { error ? <div>error</div> : '' }
+        {error ? <div>error</div> : ''}
       </Fragment>
     );
   }

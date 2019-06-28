@@ -11,7 +11,7 @@ import OrganizationAdd from './OrganizationAdd/OrganizationAdd';
 import Organization from './Organization';
 
 class Organizations extends Component {
-  constructor (props) {
+  constructor(props) {
     super(props);
 
     const { i18n } = props;
@@ -19,12 +19,12 @@ class Organizations extends Component {
     this.state = {
       breadcrumbConfig: {
         '/organizations': i18n._(t`Organizations`),
-        '/organizations/add': i18n._(t`Create New Organization`)
-      }
+        '/organizations/add': i18n._(t`Create New Organization`),
+      },
     };
   }
 
-  setBreadcrumbConfig = (organization) => {
+  setBreadcrumbConfig = organization => {
     const { i18n } = this.props;
 
     if (!organization) {
@@ -39,27 +39,25 @@ class Organizations extends Component {
       [`/organizations/${organization.id}/details`]: i18n._(t`Details`),
       [`/organizations/${organization.id}/access`]: i18n._(t`Access`),
       [`/organizations/${organization.id}/teams`]: i18n._(t`Teams`),
-      [`/organizations/${organization.id}/notifications`]: i18n._(t`Notifications`),
+      [`/organizations/${organization.id}/notifications`]: i18n._(
+        t`Notifications`
+      ),
     };
 
     this.setState({ breadcrumbConfig });
-  }
+  };
 
-  render () {
+  render() {
     const { match, history, location } = this.props;
     const { breadcrumbConfig } = this.state;
 
     return (
       <Fragment>
-        <Breadcrumbs
-          breadcrumbConfig={breadcrumbConfig}
-        />
+        <Breadcrumbs breadcrumbConfig={breadcrumbConfig} />
         <Switch>
           <Route
             path={`${match.path}/add`}
-            render={() => (
-              <OrganizationAdd />
-            )}
+            render={() => <OrganizationAdd />}
           />
           <Route
             path={`${match.path}/:id`}
@@ -76,12 +74,7 @@ class Organizations extends Component {
               </Config>
             )}
           />
-          <Route
-            path={`${match.path}`}
-            render={() => (
-              <OrganizationsList />
-            )}
-          />
+          <Route path={`${match.path}`} render={() => <OrganizationsList />} />
         </Switch>
       </Fragment>
     );

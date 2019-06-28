@@ -17,25 +17,17 @@ describe('<JobTemplateEdit />', () => {
     type: 'job_template',
     summary_fields: {
       user_capabilities: {
-        edit: true
-      }
-    }
+        edit: true,
+      },
+    },
   };
 
   test('initially renders successfully', () => {
-    mountWithContexts(
-      <JobTemplateEdit
-        template={mockData}
-      />
-    );
+    mountWithContexts(<JobTemplateEdit template={mockData} />);
   });
 
   test('handleSubmit should call api update', () => {
-    const wrapper = mountWithContexts(
-      <JobTemplateEdit
-        template={mockData}
-      />
-    );
+    const wrapper = mountWithContexts(<JobTemplateEdit template={mockData} />);
     const updatedTemplateData = {
       name: 'new name',
       description: 'new description',
@@ -50,15 +42,14 @@ describe('<JobTemplateEdit />', () => {
     const history = {
       push: jest.fn(),
     };
-    const wrapper = mountWithContexts(
-      <JobTemplateEdit
-        template={mockData}
-      />,
-      { context: { router: { history } } }
-    );
+    const wrapper = mountWithContexts(<JobTemplateEdit template={mockData} />, {
+      context: { router: { history } },
+    });
 
     expect(history.push).not.toHaveBeenCalled();
     wrapper.find('button[aria-label="Cancel"]').prop('onClick')();
-    expect(history.push).toHaveBeenCalledWith('/templates/job_template/1/details');
+    expect(history.push).toHaveBeenCalledWith(
+      '/templates/job_template/1/details'
+    );
   });
 });

@@ -7,7 +7,7 @@ import { t } from '@lingui/macro';
 import {
   Card as PFCard,
   CardBody as PFCardBody,
-  Expandable as PFExpandable
+  Expandable as PFExpandable,
 } from '@patternfly/react-core';
 
 const Card = styled(PFCard)`
@@ -25,11 +25,11 @@ const Expandable = styled(PFExpandable)`
 `;
 
 class ErrorDetail extends Component {
-  constructor (props) {
+  constructor(props) {
     super(props);
 
     this.state = {
-      isExpanded: false
+      isExpanded: false,
     };
 
     this.handleToggle = this.handleToggle.bind(this);
@@ -37,51 +37,48 @@ class ErrorDetail extends Component {
     this.renderStack = this.renderStack.bind(this);
   }
 
-  handleToggle () {
+  handleToggle() {
     const { isExpanded } = this.state;
     this.setState({ isExpanded: !isExpanded });
   }
 
-  renderNetworkError () {
+  renderNetworkError() {
     const { error } = this.props;
     const { response } = error;
 
-    const message = typeof response.data === 'string'
-      ? response.data
-      : response.data.detail;
+    const message =
+      typeof response.data === 'string' ? response.data : response.data.detail;
 
     return (
       <Fragment>
         <CardBody>
-          {response.config.method.toUpperCase()}
-          {' '}
-          {response.config.url}
-          {' '}
-          <strong>
-            {response.status}
-          </strong>
+          {response.config.method.toUpperCase()} {response.config.url}{' '}
+          <strong>{response.status}</strong>
         </CardBody>
         <CardBody>{message}</CardBody>
       </Fragment>
     );
   }
 
-  renderStack () {
+  renderStack() {
     const { error } = this.props;
-    return (<CardBody>{error.stack}</CardBody>);
+    return <CardBody>{error.stack}</CardBody>;
   }
 
-  render () {
+  render() {
     const { isExpanded } = this.state;
     const { error, i18n } = this.props;
 
     return (
-      <Expandable toggleText={i18n._(t`Details`)} onToggle={this.handleToggle} isExpanded={isExpanded}>
+      <Expandable
+        toggleText={i18n._(t`Details`)}
+        onToggle={this.handleToggle}
+        isExpanded={isExpanded}
+      >
         <Card>
           {Object.prototype.hasOwnProperty.call(error, 'response')
             ? this.renderNetworkError()
-            : this.renderStack()
-          }
+            : this.renderStack()}
         </Card>
       </Expandable>
     );
@@ -89,7 +86,7 @@ class ErrorDetail extends Component {
 }
 
 ErrorDetail.propTypes = {
-  error: PropTypes.instanceOf(Error).isRequired
+  error: PropTypes.instanceOf(Error).isRequired,
 };
 
 export default withI18n()(ErrorDetail);

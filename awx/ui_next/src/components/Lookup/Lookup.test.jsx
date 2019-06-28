@@ -5,9 +5,7 @@ import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import Lookup, { _Lookup } from './Lookup';
 
 let mockData = [{ name: 'foo', id: 1, isChecked: false }];
-const mockColumns = [
-  { name: 'Name', key: 'name', isSortable: true }
-];
+const mockColumns = [{ name: 'Name', key: 'name', isSortable: true }];
 describe('<Lookup />', () => {
   test('initially renders succesfully', () => {
     mountWithContexts(
@@ -15,29 +13,33 @@ describe('<Lookup />', () => {
         lookupHeader="Foo Bar"
         name="fooBar"
         value={mockData}
-        onLookupSave={() => { }}
-        getItems={() => { }}
+        onLookupSave={() => {}}
+        getItems={() => {}}
         columns={mockColumns}
         sortedColumnKey="name"
       />
     );
   });
 
-  test('API response is formatted properly', (done) => {
+  test('API response is formatted properly', done => {
     const wrapper = mountWithContexts(
       <Lookup
         lookupHeader="Foo Bar"
         name="fooBar"
         value={mockData}
-        onLookupSave={() => { }}
-        getItems={() => ({ data: { results: [{ name: 'test instance', id: 1 }] } })}
+        onLookupSave={() => {}}
+        getItems={() => ({
+          data: { results: [{ name: 'test instance', id: 1 }] },
+        })}
         columns={mockColumns}
         sortedColumnKey="name"
       />
     ).find('Lookup');
 
     setImmediate(() => {
-      expect(wrapper.state().results).toEqual([{ id: 1, name: 'test instance' }]);
+      expect(wrapper.state().results).toEqual([
+        { id: 1, name: 'test instance' },
+      ]);
       done();
     });
   });
@@ -51,8 +53,8 @@ describe('<Lookup />', () => {
         lookupHeader="Foo Bar"
         name="fooBar"
         value={mockSelected}
-        onLookupSave={() => { }}
-        getItems={() => { }}
+        onLookupSave={() => {}}
+        getItems={() => {}}
         columns={mockColumns}
         sortedColumnKey="name"
       />
@@ -62,20 +64,20 @@ describe('<Lookup />', () => {
     const searchItem = wrapper.find('button[aria-label="Search"]');
     searchItem.first().simulate('click');
     expect(spy).toHaveBeenCalled();
-    expect(wrapper.state('lookupSelectedItems')).toEqual([{
-      id: 1,
-      name: 'foo'
-    }]);
+    expect(wrapper.state('lookupSelectedItems')).toEqual([
+      {
+        id: 1,
+        name: 'foo',
+      },
+    ]);
     expect(wrapper.state('isModalOpen')).toEqual(true);
   });
 
-  test('calls "toggleSelected" when a user changes a checkbox', (done) => {
+  test('calls "toggleSelected" when a user changes a checkbox', done => {
     const spy = jest.spyOn(_Lookup.prototype, 'toggleSelected');
     const mockSelected = [{ name: 'foo', id: 1 }];
     const data = {
-      results: [
-        { name: 'test instance', id: 1, url: '/foo' }
-      ],
+      results: [{ name: 'test instance', id: 1, url: '/foo' }],
       count: 1,
     };
     const wrapper = mountWithContexts(
@@ -84,7 +86,7 @@ describe('<Lookup />', () => {
         lookupHeader="Foo Bar"
         name="fooBar"
         value={mockSelected}
-        onLookupSave={() => { }}
+        onLookupSave={() => {}}
         getItems={() => ({ data })}
         columns={mockColumns}
         sortedColumnKey="name"
@@ -103,9 +105,7 @@ describe('<Lookup />', () => {
     const spy = jest.spyOn(_Lookup.prototype, 'toggleSelected');
     mockData = [{ name: 'foo', id: 1 }, { name: 'bar', id: 2 }];
     const data = {
-      results: [
-        { name: 'test instance', id: 1, url: '/foo' }
-      ],
+      results: [{ name: 'test instance', id: 1, url: '/foo' }],
       count: 1,
     };
     const wrapper = mountWithContexts(
@@ -114,7 +114,7 @@ describe('<Lookup />', () => {
         lookupHeader="Foo Bar"
         name="fooBar"
         value={mockData}
-        onLookupSave={() => { }}
+        onLookupSave={() => {}}
         getItems={() => ({ data })}
         columns={mockColumns}
         sortedColumnKey="name"
@@ -130,10 +130,10 @@ describe('<Lookup />', () => {
     const wrapper = mountWithContexts(
       <Lookup
         lookupHeader="Foo Bar"
-        onLookupSave={() => { }}
+        onLookupSave={() => {}}
         value={mockData}
         selected={[]}
-        getItems={() => { }}
+        getItems={() => {}}
         columns={mockColumns}
         sortedColumnKey="name"
       />
@@ -147,24 +147,26 @@ describe('<Lookup />', () => {
     const wrapper = mountWithContexts(
       <Lookup
         lookupHeader="Foo Bar"
-        onLookupSave={() => { }}
+        onLookupSave={() => {}}
         value={mockData}
-        getItems={() => { }}
+        getItems={() => {}}
         columns={mockColumns}
         sortedColumnKey="name"
       />
     ).find('Lookup');
     wrapper.instance().toggleSelected({
       id: 1,
-      name: 'foo'
+      name: 'foo',
     });
-    expect(wrapper.state('lookupSelectedItems')).toEqual([{
-      id: 1,
-      name: 'foo'
-    }]);
+    expect(wrapper.state('lookupSelectedItems')).toEqual([
+      {
+        id: 1,
+        name: 'foo',
+      },
+    ]);
     wrapper.instance().toggleSelected({
       id: 1,
-      name: 'foo'
+      name: 'foo',
     });
     expect(wrapper.state('lookupSelectedItems')).toEqual([]);
   });
@@ -178,23 +180,30 @@ describe('<Lookup />', () => {
         name="fooBar"
         value={mockData}
         onLookupSave={onLookupSaveFn}
-        getItems={() => { }}
+        getItems={() => {}}
         sortedColumnKey="name"
       />
     ).find('Lookup');
     wrapper.instance().toggleSelected({
       id: 1,
-      name: 'foo'
+      name: 'foo',
     });
-    expect(wrapper.state('lookupSelectedItems')).toEqual([{
-      id: 1,
-      name: 'foo'
-    }]);
+    expect(wrapper.state('lookupSelectedItems')).toEqual([
+      {
+        id: 1,
+        name: 'foo',
+      },
+    ]);
     wrapper.instance().saveModal();
-    expect(onLookupSaveFn).toHaveBeenCalledWith([{
-      id: 1,
-      name: 'foo'
-    }], 'fooBar');
+    expect(onLookupSaveFn).toHaveBeenCalledWith(
+      [
+        {
+          id: 1,
+          name: 'foo',
+        },
+      ],
+      'fooBar'
+    );
   });
 
   test('should re-fetch data when URL params change', async () => {
@@ -205,7 +214,7 @@ describe('<Lookup />', () => {
     const wrapper = mountWithContexts(
       <_Lookup
         lookupHeader="Foo Bar"
-        onLookupSave={() => { }}
+        onLookupSave={() => {}}
         value={mockData}
         selected={[]}
         columns={mockColumns}

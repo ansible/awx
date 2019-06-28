@@ -15,7 +15,7 @@ const SmallButton = styled(Button)`
   font-size: var(--pf-global--FontSize--xs);
 `;
 
-function VariablesField ({ id, name, label, readOnly }) {
+function VariablesField({ id, name, label, readOnly }) {
   const [mode, setMode] = useState(YAML_MODE);
 
   return (
@@ -25,13 +25,17 @@ function VariablesField ({ id, name, label, readOnly }) {
         <div className="pf-c-form__group">
           <Split gutter="sm">
             <SplitItem>
-              <label htmlFor={id} className="pf-c-form__label">{label}</label>
+              <label htmlFor={id} className="pf-c-form__label">
+                {label}
+              </label>
             </SplitItem>
             <SplitItem>
               <ButtonGroup>
                 <SmallButton
                   onClick={() => {
-                    if (mode === YAML_MODE) { return; }
+                    if (mode === YAML_MODE) {
+                      return;
+                    }
                     try {
                       form.setFieldValue(name, jsonToYaml(field.value));
                       setMode(YAML_MODE);
@@ -45,7 +49,9 @@ function VariablesField ({ id, name, label, readOnly }) {
                 </SmallButton>
                 <SmallButton
                   onClick={() => {
-                    if (mode === JSON_MODE) { return; }
+                    if (mode === JSON_MODE) {
+                      return;
+                    }
                     try {
                       form.setFieldValue(name, yamlToJson(field.value));
                       setMode(JSON_MODE);
@@ -64,7 +70,7 @@ function VariablesField ({ id, name, label, readOnly }) {
             mode={mode}
             readOnly={readOnly}
             {...field}
-            onChange={(value) => {
+            onChange={value => {
               form.setFieldValue(name, value);
             }}
             hasErrors={!!form.errors[field.name]}
@@ -76,7 +82,7 @@ function VariablesField ({ id, name, label, readOnly }) {
             >
               {form.errors[field.name]}
             </div>
-          ) : null }
+          ) : null}
         </div>
       )}
     />

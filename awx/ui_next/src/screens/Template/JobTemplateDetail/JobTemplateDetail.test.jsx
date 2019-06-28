@@ -23,23 +23,24 @@ describe('<JobTemplateDetail />', () => {
       modified_by: { username: 'Joe' },
       credentials: [
         { id: 1, kind: 'ssh', name: 'Credential 1' },
-        { id: 2, kind: 'awx', name: 'Credential 2' }
+        { id: 2, kind: 'awx', name: 'Credential 2' },
       ],
       inventory: { name: 'Inventory' },
-      project: { name: 'Project' }
-    }
+      project: { name: 'Project' },
+    },
   };
 
   const mockInstanceGroups = {
     count: 5,
     data: {
-      results: [
-        { id: 1, name: 'IG1' },
-        { id: 2, name: 'IG2' }]
-    }
+      results: [{ id: 1, name: 'IG1' }, { id: 2, name: 'IG2' }],
+    },
   };
 
-  const readInstanceGroups = jest.spyOn(_JobTemplateDetail.prototype, 'readInstanceGroups');
+  const readInstanceGroups = jest.spyOn(
+    _JobTemplateDetail.prototype,
+    'readInstanceGroups'
+  );
 
   beforeEach(() => {
     JobTemplatesAPI.readInstanceGroups.mockResolvedValue(mockInstanceGroups);
@@ -51,25 +52,29 @@ describe('<JobTemplateDetail />', () => {
 
   test('initially renders succesfully', () => {
     const wrapper = mountWithContexts(
-      <JobTemplateDetail
-        template={template}
-      />
+      <JobTemplateDetail template={template} />
     );
     expect(wrapper).toMatchSnapshot();
   });
-  test('When component mounts API is called to get instance groups', async (done) => {
+  test('When component mounts API is called to get instance groups', async done => {
     const wrapper = mountWithContexts(
-      <JobTemplateDetail
-        template={template}
-      />
+      <JobTemplateDetail template={template} />
     );
-    await waitForElement(wrapper, 'JobTemplateDetail', (el) => el.state('hasContentLoading') === true);
+    await waitForElement(
+      wrapper,
+      'JobTemplateDetail',
+      el => el.state('hasContentLoading') === true
+    );
     expect(readInstanceGroups).toHaveBeenCalled();
-    await waitForElement(wrapper, 'JobTemplateDetail', (el) => el.state('hasContentLoading') === false);
+    await waitForElement(
+      wrapper,
+      'JobTemplateDetail',
+      el => el.state('hasContentLoading') === false
+    );
     expect(JobTemplatesAPI.readInstanceGroups).toHaveBeenCalledTimes(1);
     done();
   });
-  test('Edit button is absent when user does not have edit privilege', async (done) => {
+  test('Edit button is absent when user does not have edit privilege', async done => {
     const regularUser = {
       forks: 1,
       host_config_key: 'ssh',
@@ -90,34 +95,34 @@ describe('<JobTemplateDetail />', () => {
         modified_by: { username: 'Joe' },
         inventory: { name: 'Inventory' },
         project: { name: 'Project' },
-        labels: { count: 1, results: [{ name: 'Label', id: 1 }] }
-      }
+        labels: { count: 1, results: [{ name: 'Label', id: 1 }] },
+      },
     };
     const wrapper = mountWithContexts(
-      <JobTemplateDetail
-        template={regularUser}
-      />
+      <JobTemplateDetail template={regularUser} />
     );
     const jobTemplateDetail = wrapper.find('JobTemplateDetail');
     const editButton = jobTemplateDetail.find('button[aria-label="Edit"]');
 
     jobTemplateDetail.setState({
-      instanceGroups: mockInstanceGroups, hasContentLoading: false, contentError: false
+      instanceGroups: mockInstanceGroups,
+      hasContentLoading: false,
+      contentError: false,
     });
     expect(editButton.length).toBe(0);
     done();
   });
 
-  test('Credential type is Cloud if credential.kind is null', async (done) => {
-    template.summary_fields.credentials = [{ id: 1, name: 'cred', kind: null, }];
+  test('Credential type is Cloud if credential.kind is null', async done => {
+    template.summary_fields.credentials = [{ id: 1, name: 'cred', kind: null }];
     const wrapper = mountWithContexts(
-      <JobTemplateDetail
-        template={template}
-      />
+      <JobTemplateDetail template={template} />
     );
     const jobTemplateDetail = wrapper.find('JobTemplateDetail');
     jobTemplateDetail.setState({
-      instanceGroups: mockInstanceGroups.data.results, hasContentLoading: false, contentError: false
+      instanceGroups: mockInstanceGroups.data.results,
+      hasContentLoading: false,
+      contentError: false,
     });
     const cred = wrapper.find('strong.credential');
     expect(cred.text()).toContain('Cloud:');

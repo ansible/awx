@@ -48,7 +48,11 @@ describe('<NotificationListItem canToggleNotifications />', () => {
         canToggleNotifications
       />
     );
-    wrapper.find('Switch').first().find('input').simulate('change');
+    wrapper
+      .find('Switch')
+      .first()
+      .find('input')
+      .simulate('change');
     expect(toggleNotification).toHaveBeenCalledWith(9000, true, 'success');
   });
 
@@ -66,7 +70,11 @@ describe('<NotificationListItem canToggleNotifications />', () => {
         canToggleNotifications
       />
     );
-    wrapper.find('Switch').first().find('input').simulate('change');
+    wrapper
+      .find('Switch')
+      .first()
+      .find('input')
+      .simulate('change');
     expect(toggleNotification).toHaveBeenCalledWith(9000, false, 'success');
   });
 
@@ -84,7 +92,11 @@ describe('<NotificationListItem canToggleNotifications />', () => {
         canToggleNotifications
       />
     );
-    wrapper.find('Switch').at(1).find('input').simulate('change');
+    wrapper
+      .find('Switch')
+      .at(1)
+      .find('input')
+      .simulate('change');
     expect(toggleNotification).toHaveBeenCalledWith(9000, true, 'error');
   });
 
@@ -102,7 +114,11 @@ describe('<NotificationListItem canToggleNotifications />', () => {
         canToggleNotifications
       />
     );
-    wrapper.find('Switch').at(1).find('input').simulate('change');
+    wrapper
+      .find('Switch')
+      .at(1)
+      .find('input')
+      .simulate('change');
     expect(toggleNotification).toHaveBeenCalledWith(9000, false, 'error');
   });
 });

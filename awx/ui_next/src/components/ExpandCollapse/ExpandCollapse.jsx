@@ -4,40 +4,34 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
   Button as PFButton,
-  ToolbarItem as PFToolbarItem
+  ToolbarItem as PFToolbarItem,
 } from '@patternfly/react-core';
-import {
-  BarsIcon,
-  EqualsIcon,
-} from '@patternfly/react-icons';
+import { BarsIcon, EqualsIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
 
 const Button = styled(PFButton)`
-    padding: 0;
-    margin: 0;
-    height: 30px;
-    width: 30px;
-    ${props => (props.isActive ? `
+  padding: 0;
+  margin: 0;
+  height: 30px;
+  width: 30px;
+  ${props =>
+    props.isActive
+      ? `
       background-color: #007bba;
       --pf-c-button--m-plain--active--Color: white;
       --pf-c-button--m-plain--focus--Color: white;`
-    : null)};
+      : null};
 `;
 
 const ToolbarItem = styled(PFToolbarItem)`
   & :not(:last-child) {
-  margin-right: 20px;
+    margin-right: 20px;
   }
 `;
 
 class ExpandCollapse extends React.Component {
-  render () {
-    const {
-      isCompact,
-      onCompact,
-      onExpand,
-      i18n
-    } = this.props;
+  render() {
+    const { isCompact, onCompact, onExpand, i18n } = this.props;
 
     return (
       <Fragment>
@@ -69,11 +63,11 @@ class ExpandCollapse extends React.Component {
 ExpandCollapse.propTypes = {
   onCompact: PropTypes.func.isRequired,
   onExpand: PropTypes.func.isRequired,
-  isCompact: PropTypes.bool
+  isCompact: PropTypes.bool,
 };
 
 ExpandCollapse.defaultProps = {
-  isCompact: true
+  isCompact: true,
 };
 
 export default withI18n()(ExpandCollapse);

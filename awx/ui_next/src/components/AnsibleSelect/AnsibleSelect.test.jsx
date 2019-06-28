@@ -6,13 +6,13 @@ const mockData = [
   {
     key: 'baz',
     label: 'Baz',
-    value: '/venv/baz/'
+    value: '/venv/baz/',
   },
   {
     key: 'default',
     label: 'Default',
-    value: '/venv/ansible/'
-  }
+    value: '/venv/ansible/',
+  },
 ];
 
 describe('<AnsibleSelect />', () => {
@@ -21,7 +21,7 @@ describe('<AnsibleSelect />', () => {
       <AnsibleSelect
         value="foo"
         name="bar"
-        onChange={() => { }}
+        onChange={() => {}}
         data={mockData}
       />
     );
@@ -33,7 +33,7 @@ describe('<AnsibleSelect />', () => {
       <AnsibleSelect
         value="foo"
         name="bar"
-        onChange={() => { }}
+        onChange={() => {}}
         data={mockData}
       />
     );
@@ -47,7 +47,7 @@ describe('<AnsibleSelect />', () => {
       <AnsibleSelect
         value="foo"
         name="bar"
-        onChange={() => { }}
+        onChange={() => {}}
         data={mockData}
       />
     );

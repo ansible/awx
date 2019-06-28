@@ -17,17 +17,14 @@ describe('<OrganizationDetail />', () => {
     modified: 'Boo',
     summary_fields: {
       user_capabilities: {
-        edit: true
-      }
-    }
+        edit: true,
+      },
+    },
   };
   const mockInstanceGroups = {
     data: {
-      results: [
-        { name: 'One', id: 1 },
-        { name: 'Two', id: 2 }
-      ]
-    }
+      results: [{ name: 'One', id: 1 }, { name: 'Two', id: 2 }],
+    },
   };
 
   beforeEach(() => {
@@ -47,17 +44,21 @@ describe('<OrganizationDetail />', () => {
     expect(OrganizationsAPI.readInstanceGroups).toHaveBeenCalledTimes(1);
   });
 
-  test('should handle setting instance groups to state', async (done) => {
+  test('should handle setting instance groups to state', async done => {
     const wrapper = mountWithContexts(
       <OrganizationDetail organization={mockOrganization} />
     );
     const component = await waitForElement(wrapper, 'OrganizationDetail');
-    expect(component.state().instanceGroups).toEqual(mockInstanceGroups.data.results);
+    expect(component.state().instanceGroups).toEqual(
+      mockInstanceGroups.data.results
+    );
     done();
   });
 
-  test('should render Details', async (done) => {
-    const wrapper = mountWithContexts(<OrganizationDetail organization={mockOrganization} />);
+  test('should render Details', async done => {
+    const wrapper = mountWithContexts(
+      <OrganizationDetail organization={mockOrganization} />
+    );
     const testParams = [
       { label: 'Name', value: 'Foo' },
       { label: 'Description', value: 'Bar' },
@@ -76,18 +77,25 @@ describe('<OrganizationDetail />', () => {
     done();
   });
 
-  test('should show edit button for users with edit permission', async (done) => {
-    const wrapper = mountWithContexts(<OrganizationDetail organization={mockOrganization} />);
-    const editButton = await waitForElement(wrapper, 'OrganizationDetail Button');
+  test('should show edit button for users with edit permission', async done => {
+    const wrapper = mountWithContexts(
+      <OrganizationDetail organization={mockOrganization} />
+    );
+    const editButton = await waitForElement(
+      wrapper,
+      'OrganizationDetail Button'
+    );
     expect(editButton.text()).toEqual('Edit');
     expect(editButton.prop('to')).toBe('/organizations/undefined/edit');
     done();
   });
 
-  test('should hide edit button for users without edit permission', async (done) => {
+  test('should hide edit button for users without edit permission', async done => {
     const readOnlyOrg = { ...mockOrganization };
     readOnlyOrg.summary_fields.user_capabilities.edit = false;
-    const wrapper = mountWithContexts(<OrganizationDetail organization={readOnlyOrg} />);
+    const wrapper = mountWithContexts(
+      <OrganizationDetail organization={readOnlyOrg} />
+    );
     await waitForElement(wrapper, 'OrganizationDetail');
     expect(wrapper.find('OrganizationDetail Button').length).toBe(0);
     done();

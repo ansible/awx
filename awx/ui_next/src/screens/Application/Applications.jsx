@@ -8,16 +8,14 @@ import {
 } from '@patternfly/react-core';
 
 class Applications extends Component {
-  render () {
+  render() {
     const { i18n } = this.props;
     const { light, medium } = PageSectionVariants;
 
     return (
       <Fragment>
         <PageSection variant={light} className="pf-m-condensed">
-          <Title size="2xl">
-            {i18n._(t`Applications`)}
-          </Title>
+          <Title size="2xl">{i18n._(t`Applications`)}</Title>
         </PageSection>
         <PageSection variant={medium} />
       </Fragment>

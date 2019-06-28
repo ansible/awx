@@ -12,8 +12,8 @@ describe('<OrganizationForm />', () => {
   const network = {};
   const meConfig = {
     me: {
-      is_superuser: false
-    }
+      is_superuser: false,
+    },
   };
   const mockData = {
     id: 1,
@@ -22,8 +22,8 @@ describe('<OrganizationForm />', () => {
     max_hosts: 1,
     custom_virtualenv: 'Fizz',
     related: {
-      instance_groups: '/api/v2/organizations/1/instance_groups'
-    }
+      instance_groups: '/api/v2/organizations/1/instance_groups',
+    },
   };
 
   afterEach(() => {
@@ -32,14 +32,13 @@ describe('<OrganizationForm />', () => {
 
   test('should request related instance groups from api', () => {
     mountWithContexts(
-      (
-        <OrganizationForm
-          organization={mockData}
-          handleSubmit={jest.fn()}
-          handleCancel={jest.fn()}
-          me={meConfig.me}
-        />
-      ), {
+      <OrganizationForm
+        organization={mockData}
+        handleSubmit={jest.fn()}
+        handleCancel={jest.fn()}
+        me={meConfig.me}
+      />,
+      {
         context: { network },
       }
     );
@@ -48,31 +47,29 @@ describe('<OrganizationForm />', () => {
   });
 
   test('componentDidMount should set instanceGroups to state', async () => {
-    const mockInstanceGroups = [
-      { name: 'One', id: 1 },
-      { name: 'Two', id: 2 }
-    ];
+    const mockInstanceGroups = [{ name: 'One', id: 1 }, { name: 'Two', id: 2 }];
     OrganizationsAPI.readInstanceGroups.mockReturnValue({
       data: {
-        results: mockInstanceGroups
-      }
+        results: mockInstanceGroups,
+      },
     });
     const wrapper = mountWithContexts(
-      (
-        <OrganizationForm
-          organization={mockData}
-          handleSubmit={jest.fn()}
-          handleCancel={jest.fn()}
-          me={meConfig.me}
-        />
-      ), {
+      <OrganizationForm
+        organization={mockData}
+        handleSubmit={jest.fn()}
+        handleCancel={jest.fn()}
+        me={meConfig.me}
+      />,
+      {
         context: { network },
       }
     );
 
     await sleep(0);
     expect(OrganizationsAPI.readInstanceGroups).toHaveBeenCalled();
-    expect(wrapper.find('OrganizationForm').state().instanceGroups).toEqual(mockInstanceGroups);
+    expect(wrapper.find('OrganizationForm').state().instanceGroups).toEqual(
+      mockInstanceGroups
+    );
   });
 
   test('changing instance group successfully sets instanceGroups state', () => {
@@ -88,17 +85,20 @@ describe('<OrganizationForm />', () => {
     const lookup = wrapper.find('InstanceGroupsLookup');
     expect(lookup.length).toBe(1);
 
-    lookup.prop('onChange')([
-      {
-        id: 1,
-        name: 'foo'
-      }
-    ], 'instanceGroups');
+    lookup.prop('onChange')(
+      [
+        {
+          id: 1,
+          name: 'foo',
+        },
+      ],
+      'instanceGroups'
+    );
     expect(wrapper.find('OrganizationForm').state().instanceGroups).toEqual([
       {
         id: 1,
-        name: 'foo'
-      }
+        name: 'foo',
+      },
     ]);
   });
 
@@ -114,15 +114,15 @@ describe('<OrganizationForm />', () => {
 
     const form = wrapper.find('Formik');
     wrapper.find('input#org-name').simulate('change', {
-      target: { value: 'new foo', name: 'name' }
+      target: { value: 'new foo', name: 'name' },
     });
     expect(form.state('values').name).toEqual('new foo');
     wrapper.find('input#org-description').simulate('change', {
-      target: { value: 'new bar', name: 'description' }
+      target: { value: 'new bar', name: 'description' },
     });
     expect(form.state('values').description).toEqual('new bar');
     wrapper.find('input#org-max_hosts').simulate('change', {
-      target: { value: '134', name: 'max_hosts' }
+      target: { value: '134', name: 'max_hosts' },
     });
     expect(form.state('values').max_hosts).toEqual('134');
   });
@@ -132,20 +132,24 @@ describe('<OrganizationForm />', () => {
       custom_virtualenvs: ['foo', 'bar'],
     };
     const wrapper = mountWithContexts(
-      (
-        <OrganizationForm
-          organization={mockData}
-          handleSubmit={jest.fn()}
-          handleCancel={jest.fn()}
-          me={meConfig.me}
-        />
-      ), {
+      <OrganizationForm
+        organization={mockData}
+        handleSubmit={jest.fn()}
+        handleCancel={jest.fn()}
+        me={meConfig.me}
+      />,
+      {
         context: { config },
       }
     );
     expect(wrapper.find('FormSelect')).toHaveLength(1);
     expect(wrapper.find('FormSelectOption')).toHaveLength(3);
-    expect(wrapper.find('FormSelectOption').first().prop('value')).toEqual('/venv/ansible/');
+    expect(
+      wrapper
+        .find('FormSelectOption')
+        .first()
+        .prop('value')
+    ).toEqual('/venv/ansible/');
   });
 
   test('calls handleSubmit when form submitted', async () => {
@@ -161,23 +165,24 @@ describe('<OrganizationForm />', () => {
     expect(handleSubmit).not.toHaveBeenCalled();
     wrapper.find('button[aria-label="Save"]').simulate('click');
     await sleep(1);
-    expect(handleSubmit).toHaveBeenCalledWith({
-      name: 'Foo',
-      description: 'Bar',
-      max_hosts: 1,
-      custom_virtualenv: 'Fizz',
-    }, [], []);
+    expect(handleSubmit).toHaveBeenCalledWith(
+      {
+        name: 'Foo',
+        description: 'Bar',
+        max_hosts: 1,
+        custom_virtualenv: 'Fizz',
+      },
+      [],
+      []
+    );
   });
 
   test('handleSubmit associates and disassociates instance groups', async () => {
-    const mockInstanceGroups = [
-      { name: 'One', id: 1 },
-      { name: 'Two', id: 2 }
-    ];
+    const mockInstanceGroups = [{ name: 'One', id: 1 }, { name: 'Two', id: 2 }];
     OrganizationsAPI.readInstanceGroups.mockReturnValue({
       data: {
-        results: mockInstanceGroups
-      }
+        results: mockInstanceGroups,
+      },
     });
     const mockDataForm = {
       name: 'Foo',
@@ -190,22 +195,21 @@ describe('<OrganizationForm />', () => {
     OrganizationsAPI.associateInstanceGroup.mockResolvedValue('done');
     OrganizationsAPI.disassociateInstanceGroup.mockResolvedValue('done');
     const wrapper = mountWithContexts(
-      (
-        <OrganizationForm
-          organization={mockData}
-          handleSubmit={handleSubmit}
-          handleCancel={jest.fn()}
-          me={meConfig.me}
-        />
-      ), {
-        context: { network }
+      <OrganizationForm
+        organization={mockData}
+        handleSubmit={handleSubmit}
+        handleCancel={jest.fn()}
+        me={meConfig.me}
+      />,
+      {
+        context: { network },
       }
     );
     await sleep(0);
-    wrapper.find('InstanceGroupsLookup').prop('onChange')([
-      { name: 'One', id: 1 },
-      { name: 'Three', id: 3 }
-    ], 'instanceGroups');
+    wrapper.find('InstanceGroupsLookup').prop('onChange')(
+      [{ name: 'One', id: 1 }, { name: 'Three', id: 3 }],
+      'instanceGroups'
+    );
 
     wrapper.find('button[aria-label="Save"]').simulate('click');
     await sleep(0);
@@ -226,12 +230,16 @@ describe('<OrganizationForm />', () => {
     );
     wrapper.find('button[aria-label="Save"]').simulate('click');
     await sleep(0);
-    expect(handleSubmit).toHaveBeenCalledWith({
-      name: 'Foo',
-      description: 'Bar',
-      max_hosts: 1,
-      custom_virtualenv: 'Fizz',
-    }, [], []);
+    expect(handleSubmit).toHaveBeenCalledWith(
+      {
+        name: 'Foo',
+        description: 'Bar',
+        max_hosts: 1,
+        custom_virtualenv: 'Fizz',
+      },
+      [],
+      []
+    );
   });
 
   test('handleSubmit does not get called if max_hosts value is out of range', async () => {
@@ -284,12 +292,16 @@ describe('<OrganizationForm />', () => {
     );
     wrapper.find('button[aria-label="Save"]').simulate('click');
     await sleep(0);
-    expect(handleSubmit).toHaveBeenCalledWith({
-      name: 'Foo',
-      description: 'Bar',
-      max_hosts: 0,
-      custom_virtualenv: 'Fizz',
-    }, [], []);
+    expect(handleSubmit).toHaveBeenCalledWith(
+      {
+        name: 'Foo',
+        description: 'Bar',
+        max_hosts: 0,
+        custom_virtualenv: 'Fizz',
+      },
+      [],
+      []
+    );
   });
 
   test('calls "handleCancel" when Cancel button is clicked', () => {

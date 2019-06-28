@@ -57,7 +57,12 @@ describe('<ChipGroup />', () => {
     });
     wrapper.update();
     expect(wrapper.find(Chip)).toHaveLength(8);
-    expect(wrapper.find(Chip).at(7).text()).toEqual('Show Less');
+    expect(
+      wrapper
+        .find(Chip)
+        .at(7)
+        .text()
+    ).toEqual('Show Less');
     act(() => {
       const toggle2 = wrapper.find(Chip).at(7);
       expect(toggle2.prop('isOverflowChip')).toBe(true);

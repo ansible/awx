@@ -7,7 +7,9 @@ const DetailName = styled(({ fullWidth, ...props }) => (
   <TextListItem {...props} />
 ))`
   font-weight: var(--pf-global--FontWeight--bold);
-  ${props => props.fullWidth && `
+  ${props =>
+    props.fullWidth &&
+    `
     grid-column: 1;
   `}
 `;
@@ -16,7 +18,9 @@ const DetailValue = styled(({ fullWidth, ...props }) => (
   <TextListItem {...props} />
 ))`
   word-break: break-all;
-  ${props => props.fullWidth && `
+  ${props =>
+    props.fullWidth &&
+    `
     grid-column: 2 / -1;
   `}
 `;
@@ -25,16 +29,10 @@ const Detail = ({ label, value, fullWidth }) => {
   if (!value) return null;
   return (
     <Fragment>
-      <DetailName
-        component={TextListItemVariants.dt}
-        fullWidth={fullWidth}
-      >
+      <DetailName component={TextListItemVariants.dt} fullWidth={fullWidth}>
         {label}
       </DetailName>
-      <DetailValue
-        component={TextListItemVariants.dd}
-        fullWidth={fullWidth}
-      >
+      <DetailValue component={TextListItemVariants.dd} fullWidth={fullWidth}>
         {value}
       </DetailValue>
     </Fragment>

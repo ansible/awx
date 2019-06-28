@@ -1,9 +1,6 @@
 import React, { Fragment } from 'react';
 
-import {
-  BackgroundImage,
-  BackgroundImageSrc,
-} from '@patternfly/react-core';
+import { BackgroundImage, BackgroundImageSrc } from '@patternfly/react-core';
 import bgFilter from '@patternfly/patternfly/assets/images/background-filter.svg';
 
 const backgroundImageConfig = {
@@ -18,6 +15,6 @@ const backgroundImageConfig = {
 export default ({ children }) => (
   <Fragment>
     <BackgroundImage src={backgroundImageConfig} />
-    { children }
+    {children}
   </Fragment>
 );

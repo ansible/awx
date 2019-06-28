@@ -15,16 +15,15 @@ const Button = styled(PFButton)`
   }
 `;
 
-function ToolbarAddButton ({ linkTo, onClick, i18n }) {
+function ToolbarAddButton({ linkTo, onClick, i18n }) {
   if (!linkTo && !onClick) {
-    throw new Error('ToolbarAddButton requires either `linkTo` or `onClick` prop');
+    throw new Error(
+      'ToolbarAddButton requires either `linkTo` or `onClick` prop'
+    );
   }
   if (linkTo) {
     return (
-      <Tooltip
-        content={i18n._(t`Add`)}
-        position="top"
-      >
+      <Tooltip content={i18n._(t`Add`)} position="top">
         <Button
           component={Link}
           to={linkTo}
@@ -37,11 +36,7 @@ function ToolbarAddButton ({ linkTo, onClick, i18n }) {
     );
   }
   return (
-    <Button
-      variant="primary"
-      aria-label={i18n._(t`Add`)}
-      onClick={onClick}
-    >
+    <Button variant="primary" aria-label={i18n._(t`Add`)} onClick={onClick}>
       <PlusIcon />
     </Button>
   );
@@ -52,7 +47,7 @@ ToolbarAddButton.propTypes = {
 };
 ToolbarAddButton.defaultProps = {
   linkTo: null,
-  onClick: null
+  onClick: null,
 };
 
 export default withI18n()(ToolbarAddButton);

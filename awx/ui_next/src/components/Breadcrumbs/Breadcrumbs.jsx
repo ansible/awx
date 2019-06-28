@@ -5,13 +5,9 @@ import {
   PageSectionVariants,
   Breadcrumb,
   BreadcrumbItem,
-  BreadcrumbHeading as PFBreadcrumbHeading
+  BreadcrumbHeading as PFBreadcrumbHeading,
 } from '@patternfly/react-core';
-import {
-  Link,
-  Route,
-  withRouter
-} from 'react-router-dom';
+import { Link, Route, withRouter } from 'react-router-dom';
 import styled from 'styled-components';
 
 const PageSection = styled(PFPageSection)`
@@ -20,7 +16,7 @@ const PageSection = styled(PFPageSection)`
 `;
 
 const BreadcrumbHeading = styled(PFBreadcrumbHeading)`
-   --pf-c-breadcrumb__heading--FontSize: 20px;
+  --pf-c-breadcrumb__heading--FontSize: 20px;
   line-height: 24px;
   flex: 100%;
 `;
@@ -29,13 +25,13 @@ const Breadcrumbs = ({ breadcrumbConfig }) => {
   const { light } = PageSectionVariants;
 
   return (
-    <PageSection
-      variant={light}
-    >
+    <PageSection variant={light}>
       <Breadcrumb>
         <Route
           path="/:path"
-          render={(props) => <Crumb breadcrumbConfig={breadcrumbConfig} {...props} />}
+          render={props => (
+            <Crumb breadcrumbConfig={breadcrumbConfig} {...props} />
+          )}
         />
       </Breadcrumb>
     </PageSection>
@@ -47,19 +43,13 @@ const Crumb = ({ breadcrumbConfig, match }) => {
 
   let crumbElement = (
     <BreadcrumbItem key={match.url}>
-      <Link to={match.url}>
-        {crumb}
-      </Link>
+      <Link to={match.url}>{crumb}</Link>
     </BreadcrumbItem>
   );
 
   if (match.isExact) {
     crumbElement = (
-      <BreadcrumbHeading
-        key="breadcrumb-heading"
-      >
-        {crumb}
-      </BreadcrumbHeading>
+      <BreadcrumbHeading key="breadcrumb-heading">{crumb}</BreadcrumbHeading>
     );
   }
 
@@ -72,7 +62,9 @@ const Crumb = ({ breadcrumbConfig, match }) => {
       {crumbElement}
       <Route
         path={`${match.url}/:path`}
-        render={(props) => <Crumb breadcrumbConfig={breadcrumbConfig} {...props} />}
+        render={props => (
+          <Crumb breadcrumbConfig={breadcrumbConfig} {...props} />
+        )}
       />
     </Fragment>
   );

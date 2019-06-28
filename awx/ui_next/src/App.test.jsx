@@ -14,13 +14,14 @@ describe('<App />', () => {
   const version = '222';
 
   beforeEach(() => {
-    ConfigAPI.read = () => Promise.resolve({
-      data: {
-        ansible_version,
-        custom_virtualenvs,
-        version
-      }
-    });
+    ConfigAPI.read = () =>
+      Promise.resolve({
+        data: {
+          ansible_version,
+          custom_virtualenvs,
+          version,
+        },
+      });
     MeAPI.read = () => Promise.resolve({ data: { results: [{}] } });
   });
 
@@ -43,15 +44,13 @@ describe('<App />', () => {
           {
             groupTitle: 'Group Two',
             groupId: 'group_two',
-            routes: [
-              { title: 'Fiz', path: '/fiz' },
-            ]
-          }
+            routes: [{ title: 'Fiz', path: '/fiz' }],
+          },
         ]}
-        render={({ routeGroups }) => (
-          routeGroups.map(({ groupId }) => (<div key={groupId} id={groupId} />))
-        )}
-      />,
+        render={({ routeGroups }) =>
+          routeGroups.map(({ groupId }) => <div key={groupId} id={groupId} />)
+        }
+      />
     );
 
     // page components
@@ -70,7 +69,7 @@ describe('<App />', () => {
     expect(appWrapper.find('#group_two').length).toBe(1);
   });
 
-  test('opening the about modal renders prefetched config data', async (done) => {
+  test('opening the about modal renders prefetched config data', async done => {
     const wrapper = mountWithContexts(<App />);
     wrapper.update();
 
@@ -83,7 +82,11 @@ describe('<App />', () => {
     await waitForElement(wrapper, aboutDropdown);
     wrapper.find(aboutDropdown).simulate('click');
 
-    const button = await waitForElement(wrapper, aboutButton, el => !el.props().disabled);
+    const button = await waitForElement(
+      wrapper,
+      aboutButton,
+      el => !el.props().disabled
+    );
     button.simulate('click');
 
     // check about modal content
@@ -108,7 +111,7 @@ describe('<App />', () => {
     });
   });
 
-  test('onLogout makes expected call to api client', async (done) => {
+  test('onLogout makes expected call to api client', async done => {
     const appWrapper = mountWithContexts(<App />).find('App');
     appWrapper.instance().handleLogout();
     await asyncFlush();

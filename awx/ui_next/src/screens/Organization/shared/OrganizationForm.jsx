@@ -7,11 +7,7 @@ import { Formik, Field } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
-import {
-  Tooltip,
-  Form,
-  FormGroup,
-} from '@patternfly/react-core';
+import { Tooltip, Form, FormGroup } from '@patternfly/react-core';
 
 import { OrganizationsAPI } from '@api';
 import { Config } from '@contexts/Config';
@@ -24,11 +20,13 @@ import { required, minMaxValue } from '@util/validators';
 import InstanceGroupsLookup from './InstanceGroupsLookup';
 
 class OrganizationForm extends Component {
-  constructor (props) {
+  constructor(props) {
     super(props);
 
     this.getRelatedInstanceGroups = this.getRelatedInstanceGroups.bind(this);
-    this.handleInstanceGroupsChange = this.handleInstanceGroupsChange.bind(this);
+    this.handleInstanceGroupsChange = this.handleInstanceGroupsChange.bind(
+      this
+    );
     this.handleSubmit = this.handleSubmit.bind(this);
 
     this.state = {
@@ -38,7 +36,7 @@ class OrganizationForm extends Component {
     };
   }
 
-  async componentDidMount () {
+  async componentDidMount() {
     let instanceGroups = [];
 
     if (!this.isEditingNewOrganization()) {
@@ -55,48 +53,53 @@ class OrganizationForm extends Component {
     });
   }
 
-  async getRelatedInstanceGroups () {
+  async getRelatedInstanceGroups() {
     const {
-      organization: { id }
+      organization: { id },
     } = this.props;
     const { data } = await OrganizationsAPI.readInstanceGroups(id);
     return data.results;
   }
 
-  isEditingNewOrganization () {
+  isEditingNewOrganization() {
     const { organization } = this.props;
     return !organization.id;
   }
 
-  handleInstanceGroupsChange (instanceGroups) {
+  handleInstanceGroupsChange(instanceGroups) {
     this.setState({ instanceGroups });
   }
 
-  handleSubmit (values) {
+  handleSubmit(values) {
     const { handleSubmit } = this.props;
     const { instanceGroups, initialInstanceGroups } = this.state;
 
     const initialIds = initialInstanceGroups.map(ig => ig.id);
     const updatedIds = instanceGroups.map(ig => ig.id);
-    const groupsToAssociate = [...updatedIds]
-      .filter(x => !initialIds.includes(x));
-    const groupsToDisassociate = [...initialIds]
-      .filter(x => !updatedIds.includes(x));
+    const groupsToAssociate = [...updatedIds].filter(
+      x => !initialIds.includes(x)
+    );
+    const groupsToDisassociate = [...initialIds].filter(
+      x => !updatedIds.includes(x)
+    );
 
-    if (typeof values.max_hosts !== 'number' || values.max_hosts === 'undefined') {
+    if (
+      typeof values.max_hosts !== 'number' ||
+      values.max_hosts === 'undefined'
+    ) {
       values.max_hosts = 0;
     }
 
     handleSubmit(values, groupsToAssociate, groupsToDisassociate);
   }
 
-  render () {
+  render() {
     const { organization, handleCancel, i18n, me } = this.props;
     const { instanceGroups, formIsValid, error } = this.state;
     const defaultVenv = {
       label: i18n._(t`Use Default Ansible Environment`),
       value: '/venv/ansible/',
-      key: 'default'
+      key: 'default',
     };
 
     return (
@@ -130,31 +133,29 @@ class OrganizationForm extends Component {
                 name="max_hosts"
                 type="number"
                 label={
-                  (
-                    <Fragment>
-                      {i18n._(t`Max Hosts`)}
-                      {' '}
-                      {(
-                        <Tooltip
-                          position="right"
-                          content={i18n._(t`The maximum number of hosts allowed
+                  <Fragment>
+                    {i18n._(t`Max Hosts`)}{' '}
+                    {
+                      <Tooltip
+                        position="right"
+                        content={i18n._(t`The maximum number of hosts allowed
                           to be managed by this organization. Value defaults to
                           0 which means no limit. Refer to the Ansible
                           documentation for more details.`)}
-                        >
-                          <QuestionCircleIcon />
-                        </Tooltip>
-                      )}
-                    </Fragment>
-                  )
+                      >
+                        <QuestionCircleIcon />
+                      </Tooltip>
+                    }
+                  </Fragment>
                 }
                 validate={minMaxValue(0, 2147483647, i18n)}
                 me={me || {}}
                 isDisabled={!me.is_superuser}
               />
               <Config>
-                {({ custom_virtualenvs }) => (
-                  custom_virtualenvs && custom_virtualenvs.length > 1 && (
+                {({ custom_virtualenvs }) =>
+                  custom_virtualenvs &&
+                  custom_virtualenvs.length > 1 && (
                     <Field
                       name="custom_virtualenv"
                       render={({ field }) => (
@@ -163,9 +164,15 @@ class OrganizationForm extends Component {
                           label={i18n._(t`Ansible Environment`)}
                         >
                           <AnsibleSelect
-                            data={[defaultVenv, ...custom_virtualenvs
-                              .filter(datum => datum !== defaultVenv.value)
-                              .map(datum => ({ label: datum, value: datum, key: datum }))
+                            data={[
+                              defaultVenv,
+                              ...custom_virtualenvs
+                                .filter(datum => datum !== defaultVenv.value)
+                                .map(datum => ({
+                                  label: datum,
+                                  value: datum,
+                                  key: datum,
+                                })),
                             ]}
                             {...field}
                           />
@@ -173,13 +180,15 @@ class OrganizationForm extends Component {
                       )}
                     />
                   )
-                )}
+                }
               </Config>
             </FormRow>
             <InstanceGroupsLookup
               value={instanceGroups}
               onChange={this.handleInstanceGroupsChange}
-              tooltip={i18n._(t`Select the Instance Groups for this Organization to run on.`)}
+              tooltip={i18n._(
+                t`Select the Instance Groups for this Organization to run on.`
+              )}
             />
             <FormActionGroup
               onCancel={handleCancel}
@@ -195,7 +204,7 @@ class OrganizationForm extends Component {
 }
 
 FormField.propTypes = {
-  label: PropTypes.oneOfType([PropTypes.object, PropTypes.string]).isRequired
+  label: PropTypes.oneOfType([PropTypes.object, PropTypes.string]).isRequired,
 };
 
 OrganizationForm.propTypes = {
@@ -214,7 +223,7 @@ OrganizationForm.defaultProps = {
 };
 
 OrganizationForm.contextTypes = {
-  custom_virtualenvs: PropTypes.arrayOf(PropTypes.string)
+  custom_virtualenvs: PropTypes.arrayOf(PropTypes.string),
 };
 
 export { OrganizationForm as _OrganizationForm };

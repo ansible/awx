@@ -2,7 +2,11 @@ import React, { Component } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Switch, Route, withRouter, Redirect } from 'react-router-dom';
-import { Card, CardHeader as PFCardHeader, PageSection } from '@patternfly/react-core';
+import {
+  Card,
+  CardHeader as PFCardHeader,
+  PageSection,
+} from '@patternfly/react-core';
 import styled from 'styled-components';
 import CardCloseButton from '@components/CardCloseButton';
 import RoutedTabs from '@components/RoutedTabs';
@@ -15,7 +19,7 @@ import OrganizationTeams from './OrganizationTeams';
 import { OrganizationsAPI } from '@api';
 
 class Organization extends Component {
-  constructor (props) {
+  constructor(props) {
     super(props);
 
     this.state = {
@@ -31,52 +35,51 @@ class Organization extends Component {
     this.loadOrganizationAndRoles = this.loadOrganizationAndRoles.bind(this);
   }
 
-  async componentDidMount () {
+  async componentDidMount() {
     await this.loadOrganizationAndRoles();
     this.setState({ isInitialized: true });
   }
 
-  async componentDidUpdate (prevProps) {
+  async componentDidUpdate(prevProps) {
     const { location } = this.props;
     if (location !== prevProps.location) {
       await this.loadOrganization();
     }
   }
 
-  async loadOrganizationAndRoles () {
-    const {
-      match,
-      setBreadcrumb,
-    } = this.props;
+  async loadOrganizationAndRoles() {
+    const { match, setBreadcrumb } = this.props;
     const id = parseInt(match.params.id, 10);
 
     this.setState({ contentError: null, hasContentLoading: true });
     try {
-      const [{ data }, notifAdminRes, auditorRes, adminRes] = await Promise.all([
-        OrganizationsAPI.readDetail(id),
-        OrganizationsAPI.read({ page_size: 1, role_level: 'notification_admin_role' }),
-        OrganizationsAPI.read({ id, role_level: 'auditor_role' }),
-        OrganizationsAPI.read({ id, role_level: 'admin_role' }),
-      ]);
+      const [{ data }, notifAdminRes, auditorRes, adminRes] = await Promise.all(
+        [
+          OrganizationsAPI.readDetail(id),
+          OrganizationsAPI.read({
+            page_size: 1,
+            role_level: 'notification_admin_role',
+          }),
+          OrganizationsAPI.read({ id, role_level: 'auditor_role' }),
+          OrganizationsAPI.read({ id, role_level: 'admin_role' }),
+        ]
+      );
       setBreadcrumb(data);
       this.setState({
         organization: data,
         isNotifAdmin: notifAdminRes.data.results.length > 0,
         isAuditorOfThisOrg: auditorRes.data.results.length > 0,
-        isAdminOfThisOrg: adminRes.data.results.length > 0
+        isAdminOfThisOrg: adminRes.data.results.length > 0,
       });
     } catch (err) {
-      this.setState(({ contentError: err }));
+      this.setState({ contentError: err });
     } finally {
       this.setState({ hasContentLoading: false });
     }
   }
 
-  async loadOrganization () {
-    const {
-      match,
-      setBreadcrumb,
-    } = this.props;
+  async loadOrganization() {
+    const { match, setBreadcrumb } = this.props;
     const id = parseInt(match.params.id, 10);
 
     this.setState({ contentError: null, hasContentLoading: true });
@@ -85,20 +88,14 @@ class Organization extends Component {
       setBreadcrumb(data);
       this.setState({ organization: data });
     } catch (err) {
-      this.setState(({ contentError: err }));
+      this.setState({ contentError: err });
     } finally {
       this.setState({ hasContentLoading: false });
     }
   }
 
-  render () {
-    const {
-      location,
-      match,
-      me,
-      history,
-      i18n
-    } = this.props;
+  render() {
+    const { location, match, me, history, i18n } = this.props;
 
     const {
       organization,
@@ -107,27 +104,26 @@ class Organization extends Component {
       isInitialized,
       isNotifAdmin,
       isAuditorOfThisOrg,
-      isAdminOfThisOrg
+      isAdminOfThisOrg,
     } = this.state;
 
-    const canSeeNotificationsTab = me.is_system_auditor || isNotifAdmin || isAuditorOfThisOrg;
-    const canToggleNotifications = isNotifAdmin && (
-      me.is_system_auditor
-      || isAuditorOfThisOrg
-      || isAdminOfThisOrg
-    );
+    const canSeeNotificationsTab =
+      me.is_system_auditor || isNotifAdmin || isAuditorOfThisOrg;
+    const canToggleNotifications =
+      isNotifAdmin &&
+      (me.is_system_auditor || isAuditorOfThisOrg || isAdminOfThisOrg);
 
     const tabsArray = [
       { name: i18n._(t`Details`), link: `${match.url}/details`, id: 0 },
       { name: i18n._(t`Access`), link: `${match.url}/access`, id: 1 },
-      { name: i18n._(t`Teams`), link: `${match.url}/teams`, id: 2 }
+      { name: i18n._(t`Teams`), link: `${match.url}/teams`, id: 2 },
     ];
 
     if (canSeeNotificationsTab) {
       tabsArray.push({
         name: i18n._(t`Notifications`),
         link: `${match.url}/notifications`,
-        id: 3
+        id: 3,
       });
     }
 
@@ -186,10 +182,7 @@ class Organization extends Component {
               <Route
                 path="/organizations/:id/edit"
                 render={() => (
-                  <OrganizationEdit
-                    match={match}
-                    organization={organization}
-                  />
+                  <OrganizationEdit match={match} organization={organization} />
                 )}
               />
             )}
@@ -208,17 +201,13 @@ class Organization extends Component {
               <Route
                 path="/organizations/:id/access"
                 render={() => (
-                  <OrganizationAccess
-                    organization={organization}
-                  />
+                  <OrganizationAccess organization={organization} />
                 )}
               />
             )}
             <Route
               path="/organizations/:id/teams"
-              render={() => (
-                <OrganizationTeams id={Number(match.params.id)} />
-              )}
+              render={() => <OrganizationTeams id={Number(match.params.id)} />}
             />
             {canSeeNotificationsTab && (
               <Route

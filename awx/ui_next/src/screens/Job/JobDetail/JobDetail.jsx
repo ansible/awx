@@ -10,11 +10,8 @@ const ActionButtonWrapper = styled.div`
   justify-content: flex-end;
 `;
 class JobDetail extends Component {
-  render () {
-    const {
-      job,
-      i18n
-    } = this.props;
+  render() {
+    const { job, i18n } = this.props;
 
     return (
       <CardBody>

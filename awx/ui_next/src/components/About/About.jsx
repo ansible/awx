@@ -6,14 +6,14 @@ import {
   AboutModal,
   TextContent,
   TextList,
-  TextListItem
+  TextListItem,
 } from '@patternfly/react-core';
 
 import { BrandName } from '../../variables';
 import brandLogoImg from '../../../images/brand-logo.svg';
 
 class About extends React.Component {
-  static createSpeechBubble (version) {
+  static createSpeechBubble(version) {
     let text = `${BrandName} ${version}`;
     let top = '';
     let bottom = '';
@@ -30,20 +30,14 @@ class About extends React.Component {
     return top + text + bottom;
   }
 
-  constructor (props) {
+  constructor(props) {
     super(props);
 
     this.createSpeechBubble = this.constructor.createSpeechBubble.bind(this);
   }
 
-  render () {
-    const {
-      ansible_version,
-      version,
-      isOpen,
-      onClose,
-      i18n
-    } = this.props;
+  render() {
+    const { ansible_version, version, isOpen, onClose, i18n } = this.props;
 
     const speechBubble = this.createSpeechBubble(version);
 
@@ -57,7 +51,7 @@ class About extends React.Component {
         brandImageAlt={i18n._(t`Brand Image`)}
       >
         <pre>
-          { speechBubble }
+          {speechBubble}
           {`
           \\
           \\   ^__^
@@ -72,7 +66,7 @@ class About extends React.Component {
             <TextListItem component="dt">
               {i18n._(t`Ansible Version`)}
             </TextListItem>
-            <TextListItem component="dd">{ ansible_version }</TextListItem>
+            <TextListItem component="dd">{ansible_version}</TextListItem>
           </TextList>
         </TextContent>
       </AboutModal>

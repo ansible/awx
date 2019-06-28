@@ -58,10 +58,7 @@ export const JobTemplate = shape({
   name: string.isRequired,
   description: string,
   inventory: number.isRequired,
-  job_type: oneOf([
-    'run',
-    'check'
-  ]),
+  job_type: oneOf(['run', 'check']),
   playbook: string.isRequired,
   project: number.isRequired,
 });

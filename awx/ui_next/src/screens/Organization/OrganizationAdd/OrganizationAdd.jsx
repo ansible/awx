@@ -18,31 +18,34 @@ import CardCloseButton from '@components/CardCloseButton';
 import OrganizationForm from '../shared/OrganizationForm';
 
 class OrganizationAdd extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleCancel = this.handleCancel.bind(this);
     this.state = { error: '' };
   }
 
-  async handleSubmit (values, groupsToAssociate) {
+  async handleSubmit(values, groupsToAssociate) {
     const { history } = this.props;
     try {
       const { data: response } = await OrganizationsAPI.create(values);
-      await Promise.all(groupsToAssociate.map(id => OrganizationsAPI
-        .associateInstanceGroup(response.id, id)));
+      await Promise.all(
+        groupsToAssociate.map(id =>
+          OrganizationsAPI.associateInstanceGroup(response.id, id)
+        )
+      );
       history.push(`/organizations/${response.id}`);
     } catch (error) {
       this.setState({ error });
     }
   }
 
-  handleCancel () {
+  handleCancel() {
     const { history } = this.props;
     history.push('/organizations');
   }
 
-  render () {
+  render() {
     const { error } = this.state;
     const { i18n } = this.props;
 
@@ -50,10 +53,7 @@ class OrganizationAdd extends React.Component {
       <PageSection>
         <Card>
           <CardHeader className="at-u-textRight">
-            <Tooltip
-              content={i18n._(t`Close`)}
-              position="top"
-            >
+            <Tooltip content={i18n._(t`Close`)} position="top">
               <CardCloseButton onClick={this.handleCancel} />
             </Tooltip>
           </CardHeader>
@@ -76,7 +76,7 @@ class OrganizationAdd extends React.Component {
 }
 
 OrganizationAdd.contextTypes = {
-  custom_virtualenvs: PropTypes.arrayOf(PropTypes.string)
+  custom_virtualenvs: PropTypes.arrayOf(PropTypes.string),
 };
 
 export { OrganizationAdd as _OrganizationAdd };

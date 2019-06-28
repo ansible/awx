@@ -13,17 +13,20 @@ describe('<OrganizationNotifications />', () => {
   beforeEach(() => {
     data = {
       count: 2,
-      results: [{
-        id: 1,
-        name: 'Notification one',
-        url: '/api/v2/notification_templates/1/',
-        notification_type: 'email',
-      }, {
-        id: 2,
-        name: 'Notification two',
-        url: '/api/v2/notification_templates/2/',
-        notification_type: 'email',
-      }]
+      results: [
+        {
+          id: 1,
+          name: 'Notification one',
+          url: '/api/v2/notification_templates/1/',
+          notification_type: 'email',
+        },
+        {
+          id: 2,
+          name: 'Notification two',
+          url: '/api/v2/notification_templates/2/',
+          notification_type: 'email',
+        },
+      ],
     };
     OrganizationsAPI.readNotificationTemplates.mockReturnValue({ data });
     OrganizationsAPI.readNotificationTemplatesSuccess.mockReturnValue({
@@ -55,8 +58,9 @@ describe('<OrganizationNotifications />', () => {
     wrapper.update();
 
     expect(OrganizationsAPI.readNotificationTemplates).toHaveBeenCalled();
-    expect(wrapper.find('OrganizationNotifications').state('notifications'))
-      .toEqual(data.results);
+    expect(
+      wrapper.find('OrganizationNotifications').state('notifications')
+    ).toEqual(data.results);
     const items = wrapper.find('NotificationListItem');
     expect(items).toHaveLength(2);
     expect(items.at(0).prop('successTurnedOn')).toEqual(true);
@@ -76,8 +80,14 @@ describe('<OrganizationNotifications />', () => {
       wrapper.find('OrganizationNotifications').state('successTemplateIds')
     ).toEqual([1]);
     const items = wrapper.find('NotificationListItem');
-    items.at(1).find('Switch').at(0).prop('onChange')();
-    expect(OrganizationsAPI.updateNotificationTemplateAssociation).toHaveBeenCalledWith(1, 2, 'success', true);
+    items
+      .at(1)
+      .find('Switch')
+      .at(0)
+      .prop('onChange')();
+    expect(
+      OrganizationsAPI.updateNotificationTemplateAssociation
+    ).toHaveBeenCalledWith(1, 2, 'success', true);
     await sleep(0);
     wrapper.update();
     expect(
@@ -96,8 +106,14 @@ describe('<OrganizationNotifications />', () => {
       wrapper.find('OrganizationNotifications').state('errorTemplateIds')
     ).toEqual([2]);
     const items = wrapper.find('NotificationListItem');
-    items.at(0).find('Switch').at(1).prop('onChange')();
-    expect(OrganizationsAPI.updateNotificationTemplateAssociation).toHaveBeenCalledWith(1, 1, 'error', true);
+    items
+      .at(0)
+      .find('Switch')
+      .at(1)
+      .prop('onChange')();
+    expect(
+      OrganizationsAPI.updateNotificationTemplateAssociation
+    ).toHaveBeenCalledWith(1, 1, 'error', true);
     await sleep(0);
     wrapper.update();
     expect(
@@ -116,8 +132,14 @@ describe('<OrganizationNotifications />', () => {
       wrapper.find('OrganizationNotifications').state('successTemplateIds')
     ).toEqual([1]);
     const items = wrapper.find('NotificationListItem');
-    items.at(0).find('Switch').at(0).prop('onChange')();
-    expect(OrganizationsAPI.updateNotificationTemplateAssociation).toHaveBeenCalledWith(1, 1, 'success', false);
+    items
+      .at(0)
+      .find('Switch')
+      .at(0)
+      .prop('onChange')();
+    expect(
+      OrganizationsAPI.updateNotificationTemplateAssociation
+    ).toHaveBeenCalledWith(1, 1, 'success', false);
     await sleep(0);
     wrapper.update();
     expect(
@@ -136,8 +158,14 @@ describe('<OrganizationNotifications />', () => {
       wrapper.find('OrganizationNotifications').state('errorTemplateIds')
     ).toEqual([2]);
     const items = wrapper.find('NotificationListItem');
-    items.at(1).find('Switch').at(1).prop('onChange')();
-    expect(OrganizationsAPI.updateNotificationTemplateAssociation).toHaveBeenCalledWith(1, 2, 'error', false);
+    items
+      .at(1)
+      .find('Switch')
+      .at(1)
+      .prop('onChange')();
+    expect(
+      OrganizationsAPI.updateNotificationTemplateAssociation
+    ).toHaveBeenCalledWith(1, 2, 'error', false);
     await sleep(0);
     wrapper.update();
     expect(

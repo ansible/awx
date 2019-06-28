@@ -9,7 +9,7 @@ const QuestionCircleIcon = styled(PFQuestionCircleIcon)`
   margin-left: 10px;
 `;
 
-function FormField (props) {
+function FormField(props) {
   const { id, name, label, tooltip, validate, isRequired, ...rest } = props;
 
   return (
@@ -17,7 +17,8 @@ function FormField (props) {
       name={name}
       validate={validate}
       render={({ field, form }) => {
-        const isValid = form && (!form.touched[field.name] || !form.errors[field.name]);
+        const isValid =
+          form && (!form.touched[field.name] || !form.errors[field.name]);
 
         return (
           <FormGroup
@@ -28,13 +29,9 @@ function FormField (props) {
             label={label}
           >
             {tooltip && (
-              <Tooltip
-                position="right"
-                content={tooltip}
-              >
+              <Tooltip position="right" content={tooltip}>
                 <QuestionCircleIcon />
               </Tooltip>
-
             )}
             <TextInput
               id={id}
@@ -67,7 +64,7 @@ FormField.defaultProps = {
   type: 'text',
   validate: () => {},
   isRequired: false,
-  tooltip: null
+  tooltip: null,
 };
 
 export default FormField;

@@ -4,11 +4,7 @@ import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Formik, Field } from 'formik';
-import {
-  Form,
-  FormGroup,
-  Tooltip,
-} from '@patternfly/react-core';
+import { Form, FormGroup, Tooltip } from '@patternfly/react-core';
 import { QuestionCircleIcon as PFQuestionCircleIcon } from '@patternfly/react-icons';
 import AnsibleSelect from '@components/AnsibleSelect';
 import FormActionGroup from '@components/FormActionGroup';
@@ -29,18 +25,23 @@ class TemplateForm extends Component {
     handleSubmit: PropTypes.func.isRequired,
   };
 
-  render () {
-    const {
-      handleCancel,
-      handleSubmit,
-      i18n,
-      template
-    } = this.props;
+  render() {
+    const { handleCancel, handleSubmit, i18n, template } = this.props;
 
     const jobTypeOptions = [
-      { value: '', key: '', label: i18n._(t`Choose a job type`), isDisabled: true },
+      {
+        value: '',
+        key: '',
+        label: i18n._(t`Choose a job type`),
+        isDisabled: true,
+      },
       { value: 'run', key: 'run', label: i18n._(t`Run`), isDisabled: false },
-      { value: 'check', key: 'check', label: i18n._(t`Check`), isDisabled: false }
+      {
+        value: 'check',
+        key: 'check',
+        label: i18n._(t`Check`),
+        isDisabled: false,
+      },
     ];
 
     return (
@@ -51,7 +52,7 @@ class TemplateForm extends Component {
           job_type: template.job_type,
           inventory: template.inventory,
           project: template.project,
-          playbook: template.playbook
+          playbook: template.playbook,
         }}
         onSubmit={handleSubmit}
         render={formik => (
@@ -89,10 +90,7 @@ class TemplateForm extends Component {
                     >
                       <QuestionCircleIcon />
                     </Tooltip>
-                    <AnsibleSelect
-                      data={jobTypeOptions}
-                      {...field}
-                    />
+                    <AnsibleSelect data={jobTypeOptions} {...field} />
                   </FormGroup>
                 )}
               />
@@ -121,7 +119,9 @@ class TemplateForm extends Component {
                 name="playbook"
                 type="text"
                 label={i18n._(t`Playbook`)}
-                tooltip={i18n._(t`Select the playbook to be executed by this job.`)}
+                tooltip={i18n._(
+                  t`Select the playbook to be executed by this job.`
+                )}
                 isRequired
                 validate={required(null, i18n)}
               />
@@ -138,4 +138,3 @@ class TemplateForm extends Component {
 }
 
 export default withI18n()(withRouter(TemplateForm));
-

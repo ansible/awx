@@ -14,7 +14,7 @@ describe('<TemplateForm />', () => {
     inventory: 2,
     project: 3,
     playbook: 'Baz',
-    type: 'job_template'
+    type: 'job_template',
   };
 
   afterEach(() => {
@@ -42,27 +42,27 @@ describe('<TemplateForm />', () => {
 
     const form = wrapper.find('Formik');
     wrapper.find('input#template-name').simulate('change', {
-      target: { value: 'new foo', name: 'name' }
+      target: { value: 'new foo', name: 'name' },
     });
     expect(form.state('values').name).toEqual('new foo');
     wrapper.find('input#template-description').simulate('change', {
-      target: { value: 'new bar', name: 'description' }
+      target: { value: 'new bar', name: 'description' },
     });
     expect(form.state('values').description).toEqual('new bar');
     wrapper.find('AnsibleSelect[name="job_type"]').simulate('change', {
-      target: { value: 'new job type', name: 'job_type' }
+      target: { value: 'new job type', name: 'job_type' },
     });
     expect(form.state('values').job_type).toEqual('new job type');
     wrapper.find('input#template-inventory').simulate('change', {
-      target: { value: 3, name: 'inventory' }
+      target: { value: 3, name: 'inventory' },
     });
     expect(form.state('values').inventory).toEqual(3);
     wrapper.find('input#template-project').simulate('change', {
-      target: { value: 4, name: 'project' }
+      target: { value: 4, name: 'project' },
     });
     expect(form.state('values').project).toEqual(4);
     wrapper.find('input#template-playbook').simulate('change', {
-      target: { value: 'new baz type', name: 'playbook' }
+      target: { value: 'new baz type', name: 'playbook' },
     });
     expect(form.state('values').playbook).toEqual('new baz type');
   });

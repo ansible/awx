@@ -10,11 +10,7 @@ describe('CodeMirrorInput', () => {
   it('should trigger onChange prop', () => {
     const onChange = jest.fn();
     const wrapper = mount(
-      <CodeMirrorInput
-        value="---\n"
-        onChange={onChange}
-        mode="yaml"
-      />
+      <CodeMirrorInput value="---\n" onChange={onChange} mode="yaml" />
     );
     const codemirror = wrapper.find('Controlled');
     expect(codemirror.prop('mode')).toEqual('yaml');
@@ -26,12 +22,7 @@ describe('CodeMirrorInput', () => {
   it('should render in read only mode', () => {
     const onChange = jest.fn();
     const wrapper = mount(
-      <CodeMirrorInput
-        value="---\n"
-        onChange={onChange}
-        mode="yaml"
-        readOnly
-      />
+      <CodeMirrorInput value="---\n" onChange={onChange} mode="yaml" readOnly />
     );
     const codemirror = wrapper.find('Controlled');
     expect(codemirror.prop('options').readOnly).toEqual(true);

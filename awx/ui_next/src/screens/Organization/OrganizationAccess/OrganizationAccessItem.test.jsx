@@ -11,19 +11,21 @@ const accessRecord = {
   first_name: 'jane',
   last_name: 'brown',
   summary_fields: {
-    direct_access: [{
-      role: {
-        id: 3,
-        name: 'Member',
-        resource_name: 'Org',
-        resource_type: 'organization',
-        team_id: 5,
-        team_name: 'The Team',
-        user_capabilities: { unattach: true },
-      }
-    }],
+    direct_access: [
+      {
+        role: {
+          id: 3,
+          name: 'Member',
+          resource_name: 'Org',
+          resource_type: 'organization',
+          team_id: 5,
+          team_name: 'The Team',
+          user_capabilities: { unattach: true },
+        },
+      },
+    ],
     indirect_access: [],
-  }
+  },
 };
 
 describe('<OrganizationAccessItem />', () => {

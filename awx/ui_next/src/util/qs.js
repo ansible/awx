@@ -4,7 +4,7 @@
  * @param {object} query param object
  * @return {string} url query string
  */
-export const encodeQueryString = (params) => {
+export const encodeQueryString = params => {
   if (!params) {
     return '';
   }
@@ -12,8 +12,11 @@ export const encodeQueryString = (params) => {
   return Object.keys(params)
     .sort()
     .filter(key => params[key] !== null)
-    .map(key => ([key, params[key]]))
-    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+    .map(key => [key, params[key]])
+    .map(
+      ([key, value]) =>
+        `${encodeURIComponent(key)}=${encodeURIComponent(value)}`
+    )
     .join('&');
 };
 
@@ -25,10 +28,15 @@ export const encodeQueryString = (params) => {
  * @param {array} array of keys to parse as integers
  * @return {object} query param object
  */
-export const parseQueryString = (queryString, integerFields = ['page', 'page_size']) => {
+export const parseQueryString = (
+  queryString,
+  integerFields = ['page', 'page_size']
+) => {
   if (!queryString) return {};
 
-  const keyValuePairs = queryString.replace(/^\?/, '').split('&')
+  const keyValuePairs = queryString
+    .replace(/^\?/, '')
+    .split('&')
     .map(s => s.split('='))
     .map(([key, value]) => {
       if (integerFields.includes(key)) {
@@ -41,7 +49,7 @@ export const parseQueryString = (queryString, integerFields = ['page', 'page_siz
   return Object.assign(...keyValuePairs.map(([k, v]) => ({ [k]: v })));
 };
 
-export function getQSConfig (
+export function getQSConfig(
   namespace,
   defaultParams = { page: 1, page_size: 5, order_by: 'name' },
   integerFields = ['page', 'page_size']
@@ -56,12 +64,19 @@ export function getQSConfig (
   };
 }
 
-export function encodeNamespacedQueryString (config, params) {
+export function encodeNamespacedQueryString(config, params) {
   return encodeQueryString(namespaceParams(config.namespace, params));
 }
 
-export function parseNamespacedQueryString (config, queryString, includeDefaults = true) {
-  const integerFields = prependNamespaceToArray(config.namespace, config.integerFields);
+export function parseNamespacedQueryString(
+  config,
+  queryString,
+  includeDefaults = true
+) {
+  const integerFields = prependNamespaceToArray(
+    config.namespace,
+    config.integerFields
+  );
   const parsed = parseQueryString(queryString, integerFields);
 
   const namespace = {};
@@ -75,12 +90,12 @@ export function parseNamespacedQueryString (config, queryString, includeDefaults
     }
   });
   return {
-    ...includeDefaults ? config.defaultParams : {},
+    ...(includeDefaults ? config.defaultParams : {}),
     ...namespace,
   };
 }
 
-export function updateNamespacedQueryString (config, queryString, newParams) {
+export function updateNamespacedQueryString(config, queryString, newParams) {
   const params = parseQueryString(queryString);
   return encodeQueryString({
     ...params,
@@ -88,7 +103,7 @@ export function updateNamespacedQueryString (config, queryString, newParams) {
   });
 }
 
-function namespaceParams (ns, params) {
+function namespaceParams(ns, params) {
   if (!ns) return params;
 
   const namespaced = {};
@@ -98,14 +113,14 @@ function namespaceParams (ns, params) {
   return namespaced;
 }
 
-function namespaceMatches (namespace, fieldname) {
+function namespaceMatches(namespace, fieldname) {
   if (!namespace) {
     return !fieldname.includes('.');
   }
   return fieldname.startsWith(`${namespace}.`);
 }
 
-function prependNamespaceToArray (namespace, arr) {
+function prependNamespaceToArray(namespace, arr) {
   if (!namespace) {
     return arr;
   }

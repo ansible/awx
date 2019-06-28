@@ -8,11 +8,9 @@ import {
   DropdownPosition,
   DropdownToggle,
   DropdownItem,
-  TextInput as PFTextInput
+  TextInput as PFTextInput,
 } from '@patternfly/react-core';
-import {
-  SearchIcon
-} from '@patternfly/react-icons';
+import { SearchIcon } from '@patternfly/react-icons';
 
 import styled from 'styled-components';
 
@@ -27,7 +25,8 @@ const Button = styled(PFButton)`
 `;
 
 const Dropdown = styled(PFDropdown)`
-  &&& { /* Higher specificity required because we are selecting unclassed elements */
+  &&& {
+    /* Higher specificity required because we are selecting unclassed elements */
     > button {
       min-height: 30px;
       min-width: 70px;
@@ -35,20 +34,22 @@ const Dropdown = styled(PFDropdown)`
       padding: 0 10px;
       margin: 0px;
 
-      > span { /* text element */
+      > span {
+        /* text element */
         width: auto;
       }
 
-      > svg { /* caret icon */
+      > svg {
+        /* caret icon */
         margin: 0px;
         padding-top: 3px;
         padding-left: 3px;
       }
     }
-  }  
+  }
 `;
 class Search extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props);
 
     const { sortedColumnKey } = this.props;
@@ -64,11 +65,11 @@ class Search extends React.Component {
     this.handleSearch = this.handleSearch.bind(this);
   }
 
-  handleDropdownToggle (isSearchDropdownOpen) {
+  handleDropdownToggle(isSearchDropdownOpen) {
     this.setState({ isSearchDropdownOpen });
   }
 
-  handleDropdownSelect ({ target }) {
+  handleDropdownSelect({ target }) {
     const { columns } = this.props;
     const { innerText } = target;
 
@@ -76,30 +77,25 @@ class Search extends React.Component {
     this.setState({ isSearchDropdownOpen: false, searchKey });
   }
 
-  handleSearch () {
+  handleSearch() {
     const { searchValue } = this.state;
     const { onSearch } = this.props;
 
     onSearch(searchValue);
   }
 
-  handleSearchInputChange (searchValue) {
+  handleSearchInputChange(searchValue) {
     this.setState({ searchValue });
   }
 
-  render () {
+  render() {
     const { up } = DropdownPosition;
-    const {
-      columns,
-      i18n
-    } = this.props;
-    const {
-      isSearchDropdownOpen,
-      searchKey,
-      searchValue,
-    } = this.state;
+    const { columns, i18n } = this.props;
+    const { isSearchDropdownOpen, searchKey, searchValue } = this.state;
 
-    const { name: searchColumnName } = columns.find(({ key }) => key === searchKey);
+    const { name: searchColumnName } = columns.find(
+      ({ key }) => key === searchKey
+    );
 
     const searchDropdownItems = columns
       .filter(({ key }) => key !== searchKey)
@@ -116,14 +112,14 @@ class Search extends React.Component {
           onSelect={this.handleDropdownSelect}
           direction={up}
           isOpen={isSearchDropdownOpen}
-          toggle={(
+          toggle={
             <DropdownToggle
               id="awx-search"
               onToggle={this.handleDropdownToggle}
             >
               {searchColumnName}
             </DropdownToggle>
-          )}
+          }
           dropdownItems={searchDropdownItems}
         />
         <TextInput
@@ -153,7 +149,7 @@ Search.propTypes = {
 
 Search.defaultProps = {
   onSearch: null,
-  sortedColumnKey: 'name'
+  sortedColumnKey: 'name',
 };
 
 export default withI18n()(Search);

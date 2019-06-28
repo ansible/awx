@@ -19,20 +19,18 @@ const SplitLabelItem = styled(SplitItem)`
 `;
 
 class SelectedList extends Component {
-  render () {
+  render() {
     const {
       label,
       selected,
       showOverflowAfter,
       onRemove,
       displayKey,
-      isReadOnly
+      isReadOnly,
     } = this.props;
     return (
       <Split>
-        <SplitLabelItem>
-          {label}
-        </SplitLabelItem>
+        <SplitLabelItem>{label}</SplitLabelItem>
         <VerticalSeparator />
         <SplitItem>
           <ChipGroup showOverflowAfter={showOverflowAfter}>
@@ -58,7 +56,7 @@ SelectedList.propTypes = {
   onRemove: PropTypes.func,
   selected: PropTypes.arrayOf(PropTypes.object).isRequired,
   showOverflowAfter: PropTypes.number,
-  isReadOnly: PropTypes.bool
+  isReadOnly: PropTypes.bool,
 };
 
 SelectedList.defaultProps = {
@@ -66,7 +64,7 @@ SelectedList.defaultProps = {
   label: 'Selected',
   onRemove: () => null,
   showOverflowAfter: 5,
-  isReadOnly: false
+  isReadOnly: false,
 };
 
 export default SelectedList;

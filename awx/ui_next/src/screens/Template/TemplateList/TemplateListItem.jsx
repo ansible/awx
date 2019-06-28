@@ -13,12 +13,8 @@ import VerticalSeparator from '@components/VerticalSeparator';
 import { toTitleCase } from '@util/strings';
 
 class TemplateListItem extends Component {
-  render () {
-    const {
-      template,
-      isSelected,
-      onSelect,
-    } = this.props;
+  render() {
+    const { template, isSelected, onSelect } = this.props;
     const canLaunch = template.summary_fields.user_capabilities.start;
 
     return (
@@ -33,24 +29,25 @@ class TemplateListItem extends Component {
             onChange={onSelect}
             aria-labelledby={`check-action-${template.id}`}
           />
-          <DataListItemCells dataListCells={[
-            <DataListCell key="divider">
-              <VerticalSeparator />
-              <span>
-                <Link to={`/templates/${template.type}/${template.id}`}>
-                  <b>{template.name}</b>
-                </Link>
-              </span>
-            </DataListCell>,
-            <DataListCell key="type">{toTitleCase(template.type)}</DataListCell>,
-            <DataListCell lastcolumn="true" key="launch">
-              {canLaunch && template.type === 'job_template' && (
-                <LaunchButton
-                  templateId={template.id}
-                />
-              )}
-            </DataListCell>
-          ]}
+          <DataListItemCells
+            dataListCells={[
+              <DataListCell key="divider">
+                <VerticalSeparator />
+                <span>
+                  <Link to={`/templates/${template.type}/${template.id}`}>
+                    <b>{template.name}</b>
+                  </Link>
+                </span>
+              </DataListCell>,
+              <DataListCell key="type">
+                {toTitleCase(template.type)}
+              </DataListCell>,
+              <DataListCell lastcolumn="true" key="launch">
+                {canLaunch && template.type === 'job_template' && (
+                  <LaunchButton templateId={template.id} />
+                )}
+              </DataListCell>,
+            ]}
           />
         </DataListItemRow>
       </DataListItem>

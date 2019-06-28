@@ -16,7 +16,7 @@ const CardBody = styled(PFCardBody)`
 `;
 
 class OrganizationDetail extends Component {
-  constructor (props) {
+  constructor(props) {
     super(props);
 
     this.state = {
@@ -27,16 +27,22 @@ class OrganizationDetail extends Component {
     this.loadInstanceGroups = this.loadInstanceGroups.bind(this);
   }
 
-  componentDidMount () {
+  componentDidMount() {
     this.loadInstanceGroups();
   }
 
-  async loadInstanceGroups () {
-    const { match: { params: { id } } } = this.props;
+  async loadInstanceGroups() {
+    const {
+      match: {
+        params: { id },
+      },
+    } = this.props;
 
     this.setState({ hasContentLoading: true });
     try {
-      const { data: { results = [] } } = await OrganizationsAPI.readInstanceGroups(id);
+      const {
+        data: { results = [] },
+      } = await OrganizationsAPI.readInstanceGroups(id);
       this.setState({ instanceGroups: [...results] });
     } catch (err) {
       this.setState({ contentError: err });
@@ -45,12 +51,8 @@ class OrganizationDetail extends Component {
     }
   }
 
-  render () {
-    const {
-      hasContentLoading,
-      contentError,
-      instanceGroups,
-    } = this.state;
+  render() {
+    const { hasContentLoading, contentError, instanceGroups } = this.state;
 
     const {
       organization: {
@@ -60,58 +62,45 @@ class OrganizationDetail extends Component {
         max_hosts,
         created,
         modified,
-        summary_fields
+        summary_fields,
       },
       match,
-      i18n
+      i18n,
     } = this.props;
 
     if (hasContentLoading) {
-      return (<ContentLoading />);
+      return <ContentLoading />;
     }
 
     if (contentError) {
-      return (<ContentError error={contentError} />);
+      return <ContentError error={contentError} />;
     }
 
     return (
       <CardBody>
         <DetailList>
-          <Detail
-            label={i18n._(t`Name`)}
-            value={name}
-          />
-          <Detail
-            label={i18n._(t`Description`)}
-            value={description}
-          />
-          <Detail
-            label={i18n._(t`Max Hosts`)}
-            value={`${max_hosts}`}
-          />
+          <Detail label={i18n._(t`Name`)} value={name} />
+          <Detail label={i18n._(t`Description`)} value={description} />
+          <Detail label={i18n._(t`Max Hosts`)} value={`${max_hosts}`} />
           <Detail
             label={i18n._(t`Ansible Environment`)}
             value={custom_virtualenv}
           />
-          <Detail
-            label={i18n._(t`Created`)}
-            value={created}
-          />
-          <Detail
-            label={i18n._(t`Last Modified`)}
-            value={modified}
-          />
-          {(instanceGroups && instanceGroups.length > 0) && (
+          <Detail label={i18n._(t`Created`)} value={created} />
+          <Detail label={i18n._(t`Last Modified`)} value={modified} />
+          {instanceGroups && instanceGroups.length > 0 && (
             <Detail
               fullWidth
               label={i18n._(t`Instance Groups`)}
-              value={(
+              value={
                 <ChipGroup showOverflowAfter={5}>
                   {instanceGroups.map(ig => (
-                    <Chip key={ig.id} isReadOnly>{ig.name}</Chip>
+                    <Chip key={ig.id} isReadOnly>
+                      {ig.name}
+                    </Chip>
                   ))}
                 </ChipGroup>
-              )}
+              }
             />
           )}
         </DetailList>

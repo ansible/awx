@@ -13,9 +13,7 @@ const findChildren = () => {
 
 describe('<BrandLogo />', () => {
   test('initially renders without crashing', () => {
-    logoWrapper = mountWithContexts(
-      <BrandLogo />
-    );
+    logoWrapper = mountWithContexts(<BrandLogo />);
     findChildren();
     expect(logoWrapper.length).toBe(1);
     expect(brandLogoElem.length).toBe(1);

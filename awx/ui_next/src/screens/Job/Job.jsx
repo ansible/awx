@@ -3,7 +3,11 @@ import { Route, withRouter, Switch, Redirect } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
-import { Card, CardHeader as PFCardHeader, PageSection } from '@patternfly/react-core';
+import {
+  Card,
+  CardHeader as PFCardHeader,
+  PageSection,
+} from '@patternfly/react-core';
 
 import { JobsAPI } from '@api';
 import ContentError from '@components/ContentError';
@@ -14,36 +18,33 @@ import JobDetail from './JobDetail';
 import JobOutput from './JobOutput';
 
 class Job extends Component {
-  constructor (props) {
+  constructor(props) {
     super(props);
 
     this.state = {
       job: null,
       contentError: null,
       hasContentLoading: true,
-      isInitialized: false
+      isInitialized: false,
     };
 
     this.loadJob = this.loadJob.bind(this);
   }
 
-  async componentDidMount () {
+  async componentDidMount() {
     await this.loadJob();
     this.setState({ isInitialized: true });
   }
 
-  async componentDidUpdate (prevProps) {
+  async componentDidUpdate(prevProps) {
     const { location } = this.props;
     if (location !== prevProps.location) {
       await this.loadJob();
     }
   }
 
-  async loadJob () {
-    const {
-      match,
-      setBreadcrumb,
-    } = this.props;
+  async loadJob() {
+    const { match, setBreadcrumb } = this.props;
     const id = parseInt(match.params.id, 10);
 
     this.setState({ contentError: null, hasContentLoading: true });
@@ -58,23 +59,14 @@ class Job extends Component {
     }
   }
 
-  render () {
-    const {
-      history,
-      match,
-      i18n
-    } = this.props;
+  render() {
+    const { history, match, i18n } = this.props;
 
-    const {
-      job,
-      contentError,
-      hasContentLoading,
-      isInitialized
-    } = this.state;
+    const { job, contentError, hasContentLoading, isInitialized } = this.state;
 
     const tabsArray = [
       { name: i18n._(t`Details`), link: `${match.url}/details`, id: 0 },
-      { name: i18n._(t`Output`), link: `${match.url}/output`, id: 1 }
+      { name: i18n._(t`Output`), link: `${match.url}/output`, id: 1 },
     ];
 
     const CardHeader = styled(PFCardHeader)`
@@ -86,11 +78,7 @@ class Job extends Component {
 
     let cardHeader = (
       <CardHeader>
-        <RoutedTabs
-          match={match}
-          history={history}
-          tabsArray={tabsArray}
-        />
+        <RoutedTabs match={match} history={history} tabsArray={tabsArray} />
         <CardCloseButton linkTo="/jobs" />
       </CardHeader>
     );
@@ -116,33 +104,19 @@ class Job extends Component {
     return (
       <PageSection>
         <Card>
-          { cardHeader }
+          {cardHeader}
           <Switch>
-            <Redirect
-              from="/jobs/:id"
-              to="/jobs/:id/details"
-              exact
-            />
+            <Redirect from="/jobs/:id" to="/jobs/:id/details" exact />
             {job && (
               <Route
                 path="/jobs/:id/details"
-                render={() => (
-                  <JobDetail
-                    match={match}
-                    job={job}
-                  />
-                )}
+                render={() => <JobDetail match={match} job={job} />}
               />
             )}
             {job && (
               <Route
                 path="/jobs/:id/output"
-                render={() => (
-                  <JobOutput
-                    match={match}
-                    job={job}
-                  />
-                )}
+                render={() => <JobOutput match={match} job={job} />}
               />
             )}
           </Switch>

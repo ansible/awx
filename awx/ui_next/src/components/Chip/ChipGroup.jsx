@@ -7,10 +7,11 @@ const ChipGroup = ({ children, className, showOverflowAfter, ...props }) => {
   const [isExpanded, setIsExpanded] = useState(!showOverflowAfter);
   const toggleIsOpen = () => setIsExpanded(!isExpanded);
 
-  const mappedChildren = React.Children.map(children, c => (
+  const mappedChildren = React.Children.map(children, c =>
     React.cloneElement(c, { component: 'li' })
-  ));
-  const showOverflowToggle = showOverflowAfter && children.length > showOverflowAfter;
+  );
+  const showOverflowToggle =
+    showOverflowAfter && children.length > showOverflowAfter;
   const numToShow = isExpanded
     ? children.length
     : Math.min(showOverflowAfter, children.length);

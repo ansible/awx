@@ -25,13 +25,14 @@ const Tabs = styled(PFTabs)`
     right: 0;
     bottom: 0;
     left: 0;
-    content: "";
+    content: '';
     border: solid var(--pf-c-tabs__item--BorderColor);
-    border-width: var(--pf-c-tabs__item--BorderWidth) 0 var(--pf-c-tabs__item--BorderWidth) 0;
+    border-width: var(--pf-c-tabs__item--BorderWidth) 0
+      var(--pf-c-tabs__item--BorderWidth) 0;
   }
 `;
 
-function RoutedTabs (props) {
+function RoutedTabs(props) {
   const { history, tabsArray } = props;
 
   const getActiveTabId = () => {
@@ -42,7 +43,7 @@ function RoutedTabs (props) {
     return 0;
   };
 
-  function handleTabSelect (event, eventKey) {
+  function handleTabSelect(event, eventKey) {
     const match = tabsArray.find(tab => tab.id === eventKey);
     if (match) {
       history.push(match.link);
@@ -50,10 +51,7 @@ function RoutedTabs (props) {
   }
 
   return (
-    <Tabs
-      activeKey={getActiveTabId()}
-      onSelect={handleTabSelect}
-    >
+    <Tabs activeKey={getActiveTabId()} onSelect={handleTabSelect}>
       {tabsArray.map(tab => (
         <Tab
           className={`${tab.name}`}
@@ -70,14 +68,16 @@ function RoutedTabs (props) {
 RoutedTabs.propTypes = {
   history: shape({
     location: shape({
-      pathname: string.isRequired
+      pathname: string.isRequired,
     }).isRequired,
   }).isRequired,
-  tabsArray: arrayOf(shape({
-    id: number.isRequired,
-    link: string.isRequired,
-    name: string.isRequired,
-  })).isRequired,
+  tabsArray: arrayOf(
+    shape({
+      id: number.isRequired,
+      link: string.isRequired,
+      name: string.isRequired,
+    })
+  ).isRequired,
 };
 
 export { RoutedTabs as _RoutedTabs };

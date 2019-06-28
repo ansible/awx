@@ -15,7 +15,7 @@ describe('<JobListItem />', () => {
         job={{
           id: 1,
           name: 'Job',
-          type: 'project update'
+          type: 'project update',
         }}
         detailUrl="/organization/1"
         isSelected

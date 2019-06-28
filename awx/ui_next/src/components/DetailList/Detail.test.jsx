@@ -5,9 +5,7 @@ import Detail from './Detail';
 
 describe('Detail', () => {
   test('renders the expected content', () => {
-    const wrapper = mount(
-      <Detail label="foo" />
-    );
+    const wrapper = mount(<Detail label="foo" />);
     expect(wrapper).toHaveLength(1);
   });
 });

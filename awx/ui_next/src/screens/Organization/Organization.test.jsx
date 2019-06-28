@@ -9,14 +9,14 @@ jest.mock('@api');
 
 const mockMe = {
   is_super_user: true,
-  is_system_auditor: false
+  is_system_auditor: false,
 };
 
 const mockNoResults = {
   count: 0,
   next: null,
   previous: null,
-  data: { results: [] }
+  data: { results: [] },
 };
 
 const mockDetails = {
@@ -26,46 +26,49 @@ const mockDetails = {
     url: '/api/v2/organizations/1/',
     related: {
       notification_templates: '/api/v2/organizations/1/notification_templates/',
-      notification_templates_any: '/api/v2/organizations/1/notification_templates_any/',
-      notification_templates_success: '/api/v2/organizations/1/notification_templates_success/',
-      notification_templates_error: '/api/v2/organizations/1/notification_templates_error/',
+      notification_templates_any:
+        '/api/v2/organizations/1/notification_templates_any/',
+      notification_templates_success:
+        '/api/v2/organizations/1/notification_templates_success/',
+      notification_templates_error:
+        '/api/v2/organizations/1/notification_templates_error/',
       object_roles: '/api/v2/organizations/1/object_roles/',
       access_list: '/api/v2/organizations/1/access_list/',
-      instance_groups: '/api/v2/organizations/1/instance_groups/'
+      instance_groups: '/api/v2/organizations/1/instance_groups/',
     },
     summary_fields: {
       created_by: {
         id: 1,
         username: 'admin',
         first_name: 'Super',
-        last_name: 'User'
+        last_name: 'User',
       },
       modified_by: {
         id: 1,
         username: 'admin',
         first_name: 'Super',
-        last_name: 'User'
+        last_name: 'User',
       },
       object_roles: {
         admin_role: {
           description: 'Can manage all aspects of the organization',
           name: 'Admin',
-          id: 42
+          id: 42,
         },
         notification_admin_role: {
           description: 'Can manage all notifications of the organization',
           name: 'Notification Admin',
-          id: 1683
+          id: 1683,
         },
         auditor_role: {
           description: 'Can view all aspects of the organization',
           name: 'Auditor',
-          id: 41
+          id: 41,
         },
       },
       user_capabilities: {
         edit: true,
-        delete: true
+        delete: true,
       },
       related_field_counts: {
         users: 51,
@@ -73,16 +76,16 @@ const mockDetails = {
         inventories: 23,
         teams: 12,
         projects: 33,
-        job_templates: 30
-      }
+        job_templates: 30,
+      },
     },
     created: '2015-07-07T17:21:26.429745Z',
     modified: '2017-09-05T19:23:15.418808Z',
     name: 'Sarif Industries',
     description: '',
     max_hosts: 0,
-    custom_virtualenv: null
-  }
+    custom_virtualenv: null,
+  },
 };
 
 const adminOrganization = {
@@ -99,13 +102,13 @@ const adminOrganization = {
       id: 1,
       username: 'admin',
       first_name: 'Super',
-      last_name: 'User'
+      last_name: 'User',
     },
     modified_by: {
       id: 1,
       username: 'admin',
       first_name: 'Super',
-      last_name: 'User'
+      last_name: 'User',
     },
   },
   created: '2015-07-07T17:21:26.429745Z',
@@ -113,7 +116,7 @@ const adminOrganization = {
   name: 'Sarif Industries',
   description: '',
   max_hosts: 0,
-  custom_virtualenv: null
+  custom_virtualenv: null,
 };
 
 const auditorOrganization = {
@@ -130,13 +133,13 @@ const auditorOrganization = {
       id: 2,
       username: 'admin',
       first_name: 'Super',
-      last_name: 'User'
+      last_name: 'User',
     },
     modified_by: {
       id: 2,
       username: 'admin',
       first_name: 'Super',
-      last_name: 'User'
+      last_name: 'User',
     },
   },
   created: '2015-07-07T17:21:26.429745Z',
@@ -144,7 +147,7 @@ const auditorOrganization = {
   name: 'Autobots',
   description: '',
   max_hosts: 0,
-  custom_virtualenv: null
+  custom_virtualenv: null,
 };
 
 const notificationAdminOrganization = {
@@ -161,13 +164,13 @@ const notificationAdminOrganization = {
       id: 1,
       username: 'admin',
       first_name: 'Super',
-      last_name: 'User'
+      last_name: 'User',
     },
     modified_by: {
       id: 1,
       username: 'admin',
       first_name: 'Super',
-      last_name: 'User'
+      last_name: 'User',
     },
   },
   created: '2015-07-07T17:21:26.429745Z',
@@ -175,16 +178,16 @@ const notificationAdminOrganization = {
   name: 'Decepticons',
   description: '',
   max_hosts: 0,
-  custom_virtualenv: null
+  custom_virtualenv: null,
 };
 
 const allOrganizations = [
   adminOrganization,
   auditorOrganization,
-  notificationAdminOrganization
+  notificationAdminOrganization,
 ];
 
-async function getOrganizations (params) {
+async function getOrganizations(params) {
   let results = allOrganizations;
   if (params && params.role_level) {
     if (params.role_level === 'admin_role') {
@@ -201,7 +204,7 @@ async function getOrganizations (params) {
     count: results.length,
     next: null,
     previous: null,
-    data: { results }
+    data: { results },
   };
 }
 
@@ -212,22 +215,34 @@ describe.only('<Organization />', () => {
     mountWithContexts(<Organization setBreadcrumb={() => {}} me={mockMe} />);
   });
 
-  test('notifications tab shown for admins', async (done) => {
+  test('notifications tab shown for admins', async done => {
     OrganizationsAPI.readDetail.mockResolvedValue(mockDetails);
     OrganizationsAPI.read.mockImplementation(getOrganizations);
 
-    const wrapper = mountWithContexts(<Organization setBreadcrumb={() => {}} me={mockMe} />);
-    const tabs = await waitForElement(wrapper, '.pf-c-tabs__item', el => el.length === 4);
+    const wrapper = mountWithContexts(
+      <Organization setBreadcrumb={() => {}} me={mockMe} />
+    );
+    const tabs = await waitForElement(
+      wrapper,
+      '.pf-c-tabs__item',
+      el => el.length === 4
+    );
     expect(tabs.last().text()).toEqual('Notifications');
     done();
   });
 
-  test('notifications tab hidden with reduced permissions', async (done) => {
+  test('notifications tab hidden with reduced permissions', async done => {
     OrganizationsAPI.readDetail.mockResolvedValue(mockDetails);
     OrganizationsAPI.read.mockResolvedValue(mockNoResults);
 
-    const wrapper = mountWithContexts(<Organization setBreadcrumb={() => {}} me={mockMe} />);
-    const tabs = await waitForElement(wrapper, '.pf-c-tabs__item', el => el.length === 3);
+    const wrapper = mountWithContexts(
+      <Organization setBreadcrumb={() => {}} me={mockMe} />
+    );
+    const tabs = await waitForElement(
+      wrapper,
+      '.pf-c-tabs__item',
+      el => el.length === 3
+    );
     tabs.forEach(tab => expect(tab.text()).not.toEqual('Notifications'));
     done();
   });

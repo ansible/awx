@@ -8,14 +8,13 @@ import SelectRoleStep from './SelectRoleStep';
 import SelectableCard from './SelectableCard';
 import { TeamsAPI, UsersAPI } from '../../api';
 
-const readUsers = async (queryParams) => UsersAPI.read(
-  Object.assign(queryParams, { is_superuser: false })
-);
+const readUsers = async queryParams =>
+  UsersAPI.read(Object.assign(queryParams, { is_superuser: false }));
 
-const readTeams = async (queryParams) => TeamsAPI.read(queryParams);
+const readTeams = async queryParams => TeamsAPI.read(queryParams);
 
 class AddResourceRole extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props);
 
     this.state = {
@@ -25,67 +24,69 @@ class AddResourceRole extends React.Component {
       currentStepId: 1,
     };
 
-    this.handleResourceCheckboxClick = this.handleResourceCheckboxClick.bind(this);
+    this.handleResourceCheckboxClick = this.handleResourceCheckboxClick.bind(
+      this
+    );
     this.handleResourceSelect = this.handleResourceSelect.bind(this);
     this.handleRoleCheckboxClick = this.handleRoleCheckboxClick.bind(this);
     this.handleWizardNext = this.handleWizardNext.bind(this);
     this.handleWizardSave = this.handleWizardSave.bind(this);
   }
 
-  handleResourceCheckboxClick (user) {
+  handleResourceCheckboxClick(user) {
     const { selectedResourceRows } = this.state;
 
-    const selectedIndex = selectedResourceRows
-      .findIndex(selectedRow => selectedRow.id === user.id);
+    const selectedIndex = selectedResourceRows.findIndex(
+      selectedRow => selectedRow.id === user.id
+    );
 
     if (selectedIndex > -1) {
       selectedResourceRows.splice(selectedIndex, 1);
       this.setState({ selectedResourceRows });
     } else {
       this.setState(prevState => ({
-        selectedResourceRows: [...prevState.selectedResourceRows, user]
+        selectedResourceRows: [...prevState.selectedResourceRows, user],
       }));
     }
   }
 
-  handleRoleCheckboxClick (role) {
+  handleRoleCheckboxClick(role) {
     const { selectedRoleRows } = this.state;
 
-    const selectedIndex = selectedRoleRows
-      .findIndex(selectedRow => selectedRow.id === role.id);
+    const selectedIndex = selectedRoleRows.findIndex(
+      selectedRow => selectedRow.id === role.id
+    );
 
     if (selectedIndex > -1) {
       selectedRoleRows.splice(selectedIndex, 1);
       this.setState({ selectedRoleRows });
     } else {
       this.setState(prevState => ({
-        selectedRoleRows: [...prevState.selectedRoleRows, role]
+        selectedRoleRows: [...prevState.selectedRoleRows, role],
       }));
     }
   }
 
-  handleResourceSelect (resourceType) {
+  handleResourceSelect(resourceType) {
     this.setState({
       selectedResource: resourceType,
       selectedResourceRows: [],
-      selectedRoleRows: []
+      selectedRoleRows: [],
     });
   }
 
-  handleWizardNext (step) {
+  handleWizardNext(step) {
     this.setState({
       currentStepId: step.id,
     });
   }
 
-  async handleWizardSave () {
-    const {
-      onSave
-    } = this.props;
+  async handleWizardSave() {
+    const { onSave } = this.props;
     const {
       selectedResourceRows,
       selectedRoleRows,
-      selectedResource
+      selectedResource,
     } = this.state;
 
     try {
@@ -95,11 +96,17 @@ class AddResourceRole extends React.Component {
         for (let j = 0; j < selectedRoleRows.length; j++) {
           if (selectedResource === 'users') {
             roleRequests.push(
-              UsersAPI.associateRole(selectedResourceRows[i].id, selectedRoleRows[j].id)
+              UsersAPI.associateRole(
+                selectedResourceRows[i].id,
+                selectedRoleRows[j].id
+              )
             );
           } else if (selectedResource === 'teams') {
             roleRequests.push(
-              TeamsAPI.associateRole(selectedResourceRows[i].id, selectedRoleRows[j].id)
+              TeamsAPI.associateRole(
+                selectedResourceRows[i].id,
+                selectedRoleRows[j].id
+              )
             );
           }
         }
@@ -112,25 +119,21 @@ class AddResourceRole extends React.Component {
     }
   }
 
-  render () {
+  render() {
     const {
       selectedResource,
       selectedResourceRows,
       selectedRoleRows,
       currentStepId,
     } = this.state;
-    const {
-      onClose,
-      roles,
-      i18n
-    } = this.props;
+    const { onClose, roles, i18n } = this.props;
 
     const userColumns = [
-      { name: i18n._(t`Username`), key: 'username', isSortable: true }
+      { name: i18n._(t`Username`), key: 'username', isSortable: true },
     ];
 
     const teamColumns = [
-      { name: i18n._(t`Name`), key: 'name', isSortable: true }
+      { name: i18n._(t`Name`), key: 'name', isSortable: true },
     ];
 
     let wizardTitle = '';
@@ -164,7 +167,7 @@ class AddResourceRole extends React.Component {
             />
           </div>
         ),
-        enableNext: selectedResource !== null
+        enableNext: selectedResource !== null,
       },
       {
         id: 2,
@@ -195,7 +198,7 @@ class AddResourceRole extends React.Component {
             )}
           </Fragment>
         ),
-        enableNext: selectedResourceRows.length > 0
+        enableNext: selectedResourceRows.length > 0,
       },
       {
         id: 3,
@@ -211,8 +214,8 @@ class AddResourceRole extends React.Component {
           />
         ),
         nextButtonText: i18n._(t`Save`),
-        enableNext: selectedRoleRows.length > 0
-      }
+        enableNext: selectedRoleRows.length > 0,
+      },
     ];
 
     const currentStep = steps.find(step => step.id === currentStepId);
@@ -236,11 +239,11 @@ class AddResourceRole extends React.Component {
 AddResourceRole.propTypes = {
   onClose: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
-  roles: PropTypes.shape()
+  roles: PropTypes.shape(),
 };
 
 AddResourceRole.defaultProps = {
-  roles: {}
+  roles: {},
 };
 
 export { AddResourceRole as _AddResourceRole };

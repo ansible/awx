@@ -8,13 +8,13 @@ import { t } from '@lingui/macro';
 import styled from 'styled-components';
 
 const Link = styled(RRLink)`
-    position: absolute;
-    top: 5px;
-    right: 4px;
-    color: var(--pf-c-button--m-plain--Color);
+  position: absolute;
+  top: 5px;
+  right: 4px;
+  color: var(--pf-c-button--m-plain--Color);
 `;
 
-function CardCloseButton ({ linkTo, i18n, i18nHash, ...props }) {
+function CardCloseButton({ linkTo, i18n, i18nHash, ...props }) {
   if (linkTo) {
     return (
       <Link
@@ -29,11 +29,7 @@ function CardCloseButton ({ linkTo, i18n, i18nHash, ...props }) {
     );
   }
   return (
-    <Button
-      variant="plain"
-      aria-label={i18n._(t`Close`)}
-      {...props}
-    >
+    <Button variant="plain" aria-label={i18n._(t`Close`)} {...props}>
       <TimesIcon />
     </Button>
   );

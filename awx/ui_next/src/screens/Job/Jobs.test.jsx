@@ -7,9 +7,7 @@ import Jobs from './Jobs';
 
 describe('<Jobs />', () => {
   test('initially renders succesfully', () => {
-    mountWithContexts(
-      <Jobs />
-    );
+    mountWithContexts(<Jobs />);
   });
 
   test('should display a breadcrumb heading', () => {
@@ -18,20 +16,17 @@ describe('<Jobs />', () => {
     });
     const match = { path: '/jobs', url: '/jobs', isExact: true };
 
-    const wrapper = mountWithContexts(
-      <Jobs />,
-      {
-        context: {
-          router: {
-            history,
-            route: {
-              location: history.location,
-              match
-            }
-          }
-        }
-      }
-    );
+    const wrapper = mountWithContexts(<Jobs />, {
+      context: {
+        router: {
+          history,
+          route: {
+            location: history.location,
+            match,
+          },
+        },
+      },
+    });
     expect(wrapper.find('BreadcrumbHeading').length).toBe(1);
     wrapper.unmount();
   });

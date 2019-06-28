@@ -11,9 +11,12 @@ const DetailList = ({ children, stacked, ...props }) => (
 export default styled(DetailList)`
   display: grid;
   grid-gap: 20px;
-  ${props => (props.stacked ? (`
+  ${props =>
+    props.stacked
+      ? `
     grid-template-columns: auto 1fr;
-  `) : (`
+  `
+      : `
     --column-count: 1;
     grid-template-columns: repeat(var(--column-count), auto minmax(10em, 1fr));
 
@@ -24,5 +27,5 @@ export default styled(DetailList)`
     @media (min-width: 1210px) {
       --column-count: 3;
     }
-  `))}
+  `}
 `;

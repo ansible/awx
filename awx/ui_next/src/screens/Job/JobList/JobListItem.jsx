@@ -12,12 +12,8 @@ import VerticalSeparator from '@components/VerticalSeparator';
 import { toTitleCase } from '@util/strings';
 
 class JobListItem extends Component {
-  render () {
-    const {
-      job,
-      isSelected,
-      onSelect,
-    } = this.props;
+  render() {
+    const { job, isSelected, onSelect } = this.props;
 
     return (
       <DataListItem
@@ -31,18 +27,19 @@ class JobListItem extends Component {
             onChange={onSelect}
             aria-labelledby={`check-action-${job.id}`}
           />
-          <DataListItemCells dataListCells={[
-            <DataListCell key="divider">
-              <VerticalSeparator />
-              <span>
-                <Link to={`/jobs/${job.id}`}>
-                  <b>{job.name}</b>
-                </Link>
-              </span>
-            </DataListCell>,
-            <DataListCell key="type">{toTitleCase(job.type)}</DataListCell>,
-            <DataListCell key="finished">{job.finished}</DataListCell>,
-          ]}
+          <DataListItemCells
+            dataListCells={[
+              <DataListCell key="divider">
+                <VerticalSeparator />
+                <span>
+                  <Link to={`/jobs/${job.id}`}>
+                    <b>{job.name}</b>
+                  </Link>
+                </span>
+              </DataListCell>,
+              <DataListCell key="type">{toTitleCase(job.type)}</DataListCell>,
+              <DataListCell key="finished">{job.finished}</DataListCell>,
+            ]}
           />
         </DataListItemRow>
       </DataListItem>

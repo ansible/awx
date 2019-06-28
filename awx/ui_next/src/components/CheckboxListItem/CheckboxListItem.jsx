@@ -10,12 +10,7 @@ import {
 
 import VerticalSeparator from '../VerticalSeparator';
 
-const CheckboxListItem = ({
-  itemId,
-  name,
-  isSelected,
-  onSelect,
-}) => (
+const CheckboxListItem = ({ itemId, name, isSelected, onSelect }) => (
   <DataListItem key={itemId} aria-labelledby={`check-action-item-${itemId}`}>
     <DataListItemRow>
       <DataListCheck
@@ -25,20 +20,21 @@ const CheckboxListItem = ({
         aria-labelledby={`check-action-item-${itemId}`}
         value={itemId}
       />
-      <DataListItemCells dataListCells={[
-        <DataListCell key="divider" className="pf-c-data-list__cell--divider">
-          <VerticalSeparator />
-        </DataListCell>,
-        <DataListCell key="name">
-          <label
-            id={`check-action-item-${itemId}`}
-            htmlFor={`selected-${itemId}`}
-            className="check-action-item"
-          >
-            <b>{name}</b>
-          </label>
-        </DataListCell>
-      ]}
+      <DataListItemCells
+        dataListCells={[
+          <DataListCell key="divider" className="pf-c-data-list__cell--divider">
+            <VerticalSeparator />
+          </DataListCell>,
+          <DataListCell key="name">
+            <label
+              id={`check-action-item-${itemId}`}
+              htmlFor={`selected-${itemId}`}
+              className="check-action-item"
+            >
+              <b>{name}</b>
+            </label>
+          </DataListCell>,
+        ]}
       />
     </DataListItemRow>
   </DataListItem>

@@ -36,5 +36,5 @@ export {
   UnifiedJobTemplatesAPI,
   UnifiedJobsAPI,
   UsersAPI,
-  WorkflowJobTemplatesAPI
+  WorkflowJobTemplatesAPI,
 };

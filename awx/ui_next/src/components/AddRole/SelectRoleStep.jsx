@@ -8,7 +8,7 @@ import CheckboxCard from './CheckboxCard';
 import SelectedList from '../SelectedList';
 
 class RolesStep extends React.Component {
-  render () {
+  render() {
     const {
       onRolesClick,
       roles,
@@ -16,7 +16,7 @@ class RolesStep extends React.Component {
       selectedListLabel,
       selectedResourceRows,
       selectedRoleRows,
-      i18n
+      i18n,
     } = this.props;
 
     return (
@@ -32,14 +32,21 @@ class RolesStep extends React.Component {
             />
           )}
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px 20px', marginTop: '20px' }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: '20px 20px',
+            marginTop: '20px',
+          }}
+        >
           {Object.keys(roles).map(role => (
             <CheckboxCard
               description={roles[role].description}
               itemId={roles[role].id}
-              isSelected={
-                selectedRoleRows.some(item => item.id === roles[role].id)
-              }
+              isSelected={selectedRoleRows.some(
+                item => item.id === roles[role].id
+              )}
               key={roles[role].id}
               name={roles[role].name}
               onSelect={() => onRolesClick(roles[role])}
@@ -57,7 +64,7 @@ RolesStep.propTypes = {
   selectedListKey: PropTypes.string,
   selectedListLabel: PropTypes.string,
   selectedResourceRows: PropTypes.arrayOf(PropTypes.object),
-  selectedRoleRows: PropTypes.arrayOf(PropTypes.object)
+  selectedRoleRows: PropTypes.arrayOf(PropTypes.object),
 };
 
 RolesStep.defaultProps = {
@@ -65,7 +72,7 @@ RolesStep.defaultProps = {
   selectedListKey: 'name',
   selectedListLabel: null,
   selectedResourceRows: [],
-  selectedRoleRows: []
+  selectedRoleRows: [],
 };
 
 export default withI18n()(RolesStep);

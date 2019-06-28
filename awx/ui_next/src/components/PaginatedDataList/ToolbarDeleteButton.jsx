@@ -12,7 +12,7 @@ const DeleteButton = styled(Button)`
   padding: 5px 8px;
 
   &:hover {
-    background-color:#d9534f;
+    background-color: #d9534f;
     color: white;
   }
 
@@ -33,7 +33,7 @@ const ItemToDelete = shape({
   }).isRequired,
 });
 
-function cannotDelete (item) {
+function cannotDelete(item) {
   return !item.summary_fields.user_capabilities.delete;
 }
 
@@ -48,7 +48,7 @@ class ToolbarDeleteButton extends React.Component {
     itemName: 'item',
   };
 
-  constructor (props) {
+  constructor(props) {
     super(props);
 
     this.state = {
@@ -60,34 +60,34 @@ class ToolbarDeleteButton extends React.Component {
     this.handleDelete = this.handleDelete.bind(this);
   }
 
-  handleConfirmDelete () {
+  handleConfirmDelete() {
     this.setState({ isModalOpen: true });
   }
 
-  handleCancelDelete () {
-    this.setState({ isModalOpen: false, });
+  handleCancelDelete() {
+    this.setState({ isModalOpen: false });
   }
 
-  handleDelete () {
+  handleDelete() {
     const { onDelete } = this.props;
     onDelete();
     this.setState({ isModalOpen: false });
   }
 
-  renderTooltip () {
+  renderTooltip() {
     const { itemsToDelete, itemName, i18n } = this.props;
 
     const itemsUnableToDelete = itemsToDelete
       .filter(cannotDelete)
-      .map(item => (
-        <div key={item.id}>
-          {item.name}
-        </div>
-      ));
+      .map(item => <div key={item.id}>{item.name}</div>);
     if (itemsToDelete.some(cannotDelete)) {
       return (
         <div>
-          {i18n._(t`You do not have permission to delete the following ${pluralize(itemName)}: ${itemsUnableToDelete}`)}
+          {i18n._(
+            t`You do not have permission to delete the following ${pluralize(
+              itemName
+            )}: ${itemsUnableToDelete}`
+          )}
         </div>
       );
     }
@@ -97,22 +97,19 @@ class ToolbarDeleteButton extends React.Component {
     return i18n._(t`Select a row to delete`);
   }
 
-  render () {
+  render() {
     const { itemsToDelete, itemName, i18n } = this.props;
     const { isModalOpen } = this.state;
 
-    const isDisabled = itemsToDelete.length === 0
-      || itemsToDelete.some(cannotDelete);
+    const isDisabled =
+      itemsToDelete.length === 0 || itemsToDelete.some(cannotDelete);
 
     // NOTE: Once PF supports tooltips on disabled elements,
     // we can delete the extra <div> around the <DeleteButton> below.
     // See: https://github.com/patternfly/patternfly-react/issues/1894
     return (
       <Fragment>
-        <Tooltip
-          content={this.renderTooltip()}
-          position="top"
-        >
+        <Tooltip content={this.renderTooltip()} position="top">
           <div>
             <DeleteButton
               variant="plain"
@@ -124,12 +121,13 @@ class ToolbarDeleteButton extends React.Component {
             </DeleteButton>
           </div>
         </Tooltip>
-        { isModalOpen && (
+        {isModalOpen && (
           <AlertModal
             variant="danger"
-            title={itemsToDelete === 1
-              ? i18n._(t`Delete ${itemName}`)
-              : i18n._(t`Delete ${pluralize(itemName)}`)
+            title={
+              itemsToDelete === 1
+                ? i18n._(t`Delete ${itemName}`)
+                : i18n._(t`Delete ${pluralize(itemName)}`)
             }
             isOpen={isModalOpen}
             onClose={this.handleCancelDelete}
@@ -149,16 +147,14 @@ class ToolbarDeleteButton extends React.Component {
                 onClick={this.handleCancelDelete}
               >
                 {i18n._(t`Cancel`)}
-              </Button>
+              </Button>,
             ]}
           >
             {i18n._(t`Are you sure you want to delete:`)}
             <br />
-            {itemsToDelete.map((item) => (
+            {itemsToDelete.map(item => (
               <span key={item.id}>
-                <strong>
-                  {item.name}
-                </strong>
+                <strong>{item.name}</strong>
                 <br />
               </span>
             ))}

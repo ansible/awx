@@ -13,7 +13,7 @@ const QS_CONFIG = getQSConfig('team', {
 });
 
 class OrganizationTeams extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props);
 
     this.loadOrganizationTeamsList = this.loadOrganizationTeamsList.bind(this);
@@ -26,18 +26,18 @@ class OrganizationTeams extends React.Component {
     };
   }
 
-  componentDidMount () {
+  componentDidMount() {
     this.loadOrganizationTeamsList();
   }
 
-  componentDidUpdate (prevProps) {
+  componentDidUpdate(prevProps) {
     const { location } = this.props;
     if (location !== prevProps.location) {
       this.loadOrganizationTeamsList();
     }
   }
 
-  async loadOrganizationTeamsList () {
+  async loadOrganizationTeamsList() {
     const { id, location } = this.props;
     const params = parseNamespacedQueryString(QS_CONFIG, location.search);
 
@@ -57,7 +57,7 @@ class OrganizationTeams extends React.Component {
     }
   }
 
-  render () {
+  render() {
     const { contentError, hasContentLoading, teams, itemCount } = this.state;
     return (
       <PaginatedDataList
@@ -73,7 +73,7 @@ class OrganizationTeams extends React.Component {
 }
 
 OrganizationTeams.propTypes = {
-  id: PropTypes.number.isRequired
+  id: PropTypes.number.isRequired,
 };
 
 export { OrganizationTeams as _OrganizationTeams };

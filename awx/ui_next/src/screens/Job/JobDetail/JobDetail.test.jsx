@@ -6,19 +6,15 @@ import JobDetail from './JobDetail';
 
 describe('<JobDetail />', () => {
   const mockDetails = {
-    name: 'Foo'
+    name: 'Foo',
   };
 
   test('initially renders succesfully', () => {
-    mountWithContexts(
-      <JobDetail job={mockDetails} />
-    );
+    mountWithContexts(<JobDetail job={mockDetails} />);
   });
 
   test('should display a Close button', () => {
-    const wrapper = mountWithContexts(
-      <JobDetail job={mockDetails} />
-    );
+    const wrapper = mountWithContexts(<JobDetail job={mockDetails} />);
 
     expect(wrapper.find('Button[aria-label="close"]').length).toBe(1);
     wrapper.unmount();

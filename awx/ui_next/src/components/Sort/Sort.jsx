@@ -7,13 +7,13 @@ import {
   Dropdown as PFDropdown,
   DropdownPosition,
   DropdownToggle,
-  DropdownItem
+  DropdownItem,
 } from '@patternfly/react-core';
 import {
   SortAlphaDownIcon,
   SortAlphaUpIcon,
   SortNumericDownIcon,
-  SortNumericUpIcon
+  SortNumericUpIcon,
 } from '@patternfly/react-icons';
 
 import styled from 'styled-components';
@@ -27,17 +27,19 @@ const Dropdown = styled(PFDropdown)`
       padding: 0 10px;
       margin: 0px;
 
-      > span { /* text element within dropdown */
+      > span {
+        /* text element within dropdown */
         width: auto;
       }
 
-      > svg { /* caret icon */
+      > svg {
+        /* caret icon */
         margin: 0px;
         padding-top: 3px;
         padding-left: 3px;
       }
     }
-  }  
+  }
 `;
 
 const IconWrapper = styled.span`
@@ -47,7 +49,7 @@ const IconWrapper = styled.span`
 `;
 
 class Sort extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props);
 
     this.state = {
@@ -59,40 +61,36 @@ class Sort extends React.Component {
     this.handleSort = this.handleSort.bind(this);
   }
 
-  handleDropdownToggle (isSortDropdownOpen) {
+  handleDropdownToggle(isSortDropdownOpen) {
     this.setState({ isSortDropdownOpen });
   }
 
-  handleDropdownSelect ({ target }) {
+  handleDropdownSelect({ target }) {
     const { columns, onSort, sortOrder } = this.props;
     const { innerText } = target;
 
-    const [{ key: searchKey }] = columns.filter(({ name }) => name === innerText);
+    const [{ key: searchKey }] = columns.filter(
+      ({ name }) => name === innerText
+    );
 
     this.setState({ isSortDropdownOpen: false });
     onSort(searchKey, sortOrder);
   }
 
-  handleSort () {
+  handleSort() {
     const { onSort, sortedColumnKey, sortOrder } = this.props;
     const newSortOrder = sortOrder === 'ascending' ? 'descending' : 'ascending';
 
     onSort(sortedColumnKey, newSortOrder);
   }
 
-  render () {
+  render() {
     const { up } = DropdownPosition;
-    const {
-      columns,
-      sortedColumnKey,
-      sortOrder,
-      i18n
-    } = this.props;
-    const {
-      isSortDropdownOpen
-    } = this.state;
-    const [{ name: sortedColumnName, isNumeric }] = columns
-      .filter(({ key }) => key === sortedColumnKey);
+    const { columns, sortedColumnKey, sortOrder, i18n } = this.props;
+    const { isSortDropdownOpen } = this.state;
+    const [{ name: sortedColumnName, isNumeric }] = columns.filter(
+      ({ key }) => key === sortedColumnKey
+    );
 
     const sortDropdownItems = columns
       .filter(({ key, isSortable }) => isSortable && key !== sortedColumnKey)
@@ -104,28 +102,30 @@ class Sort extends React.Component {
 
     let SortIcon;
     if (isNumeric) {
-      SortIcon = sortOrder === 'ascending' ? SortNumericUpIcon : SortNumericDownIcon;
+      SortIcon =
+        sortOrder === 'ascending' ? SortNumericUpIcon : SortNumericDownIcon;
     } else {
-      SortIcon = sortOrder === 'ascending' ? SortAlphaUpIcon : SortAlphaDownIcon;
+      SortIcon =
+        sortOrder === 'ascending' ? SortAlphaUpIcon : SortAlphaDownIcon;
     }
 
     return (
       <React.Fragment>
-        { sortDropdownItems.length > 1 && (
+        {sortDropdownItems.length > 1 && (
           <Dropdown
             style={{ marginRight: '20px' }}
             onToggle={this.handleDropdownToggle}
             onSelect={this.handleDropdownSelect}
             direction={up}
             isOpen={isSortDropdownOpen}
-            toggle={(
+            toggle={
               <DropdownToggle
                 id="awx-sort"
                 onToggle={this.handleDropdownToggle}
               >
                 {sortedColumnName}
               </DropdownToggle>
-            )}
+            }
             dropdownItems={sortDropdownItems}
           />
         )}
@@ -148,13 +148,13 @@ Sort.propTypes = {
   columns: PropTypes.arrayOf(PropTypes.object).isRequired,
   onSort: PropTypes.func,
   sortOrder: PropTypes.string,
-  sortedColumnKey: PropTypes.string
+  sortedColumnKey: PropTypes.string,
 };
 
 Sort.defaultProps = {
   onSort: null,
   sortOrder: 'ascending',
-  sortedColumnKey: 'name'
+  sortedColumnKey: 'name',
 };
 
 export default withI18n()(Sort);

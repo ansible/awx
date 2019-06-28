@@ -13,20 +13,22 @@ class DeleteRoleConfirmationModal extends React.Component {
     username: string,
     onCancel: func.isRequired,
     onConfirm: func.isRequired,
-  }
+  };
 
   static defaultProps = {
     username: '',
-  }
+  };
 
-  isTeamRole () {
+  isTeamRole() {
     const { role } = this.props;
     return typeof role.team_id !== 'undefined';
   }
 
-  render () {
+  render() {
     const { role, username, onCancel, onConfirm, i18n } = this.props;
-    const title = i18n._(t`Remove ${this.isTeamRole() ? i18n._(t`Team`) : i18n._(t`User`)} Access`);
+    const title = i18n._(
+      t`Remove ${this.isTeamRole() ? i18n._(t`Team`) : i18n._(t`User`)} Access`
+    );
     return (
       <AlertModal
         variant="danger"
@@ -44,19 +46,29 @@ class DeleteRoleConfirmationModal extends React.Component {
           </Button>,
           <Button key="cancel" variant="secondary" onClick={onCancel}>
             {i18n._(t`Cancel`)}
-          </Button>
+          </Button>,
         ]}
       >
         {this.isTeamRole() ? (
           <Fragment>
-            {i18n._(t`Are you sure you want to remove ${role.name} access from ${role.team_name}?  Doing so affects all members of the team.`)}
+            {i18n._(
+              t`Are you sure you want to remove ${role.name} access from ${role.team_name}?  Doing so affects all members of the team.`
+            )}
             <br />
             <br />
-            {i18n._(t`If you ${(<b><i>only</i></b>)} want to remove access for this particular user, please remove them from the team.`)}
+            {i18n._(
+              t`If you ${(
+                <b>
+                  <i>only</i>
+                </b>
+              )} want to remove access for this particular user, please remove them from the team.`
+            )}
           </Fragment>
         ) : (
           <Fragment>
-            {i18n._(t`Are you sure you want to remove ${role.name} access from ${username}?`)}
+            {i18n._(
+              t`Are you sure you want to remove ${role.name} access from ${username}?`
+            )}
           </Fragment>
         )}
       </AlertModal>

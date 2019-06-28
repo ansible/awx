@@ -1,13 +1,13 @@
 import Base from '../Base';
 
 class Root extends Base {
-  constructor (http) {
+  constructor(http) {
     super(http);
     this.baseUrl = '/api/';
     this.redirectURL = '/api/v2/config/';
   }
 
-  async login (username, password, redirect = this.redirectURL) {
+  async login(username, password, redirect = this.redirectURL) {
     const loginUrl = `${this.baseUrl}login/`;
     const un = encodeURIComponent(username);
     const pw = encodeURIComponent(password);
@@ -22,7 +22,7 @@ class Root extends Base {
     return response;
   }
 
-  logout () {
+  logout() {
     return this.http.get(`${this.baseUrl}logout/`);
   }
 }

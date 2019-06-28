@@ -13,7 +13,7 @@ describe('<Breadcrumb />', () => {
     '/foo': 'Foo',
     '/foo/1': 'One',
     '/foo/1/bar': 'Bar',
-    '/foo/1/bar/fiz': 'Fiz'
+    '/foo/1/bar/fiz': 'Fiz',
   };
 
   const findChildren = () => {
@@ -25,9 +25,7 @@ describe('<Breadcrumb />', () => {
   test('initially renders succesfully', () => {
     breadcrumbWrapper = mount(
       <MemoryRouter initialEntries={['/foo/1/bar']} initialIndex={0}>
-        <Breadcrumbs
-          breadcrumbConfig={config}
-        />
+        <Breadcrumbs breadcrumbConfig={config} />
       </MemoryRouter>
     );
 
@@ -55,13 +53,13 @@ describe('<Breadcrumb />', () => {
     routes.forEach(([location, crumbLength]) => {
       breadcrumbWrapper = mount(
         <MemoryRouter initialEntries={[location]}>
-          <Breadcrumbs
-            breadcrumbConfig={config}
-          />
+          <Breadcrumbs breadcrumbConfig={config} />
         </MemoryRouter>
       );
 
-      expect(breadcrumbWrapper.find('BreadcrumbItem')).toHaveLength(crumbLength);
+      expect(breadcrumbWrapper.find('BreadcrumbItem')).toHaveLength(
+        crumbLength
+      );
       breadcrumbWrapper.unmount();
     });
   });

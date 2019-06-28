@@ -15,10 +15,12 @@ describe('<OrganizationListItem />', () => {
             organization={{
               id: 1,
               name: 'Org',
-              summary_fields: { related_field_counts: {
-                users: 1,
-                teams: 1,
-              } }
+              summary_fields: {
+                related_field_counts: {
+                  users: 1,
+                  teams: 1,
+                },
+              },
             }}
             detailUrl="/organization/1"
             isSelected

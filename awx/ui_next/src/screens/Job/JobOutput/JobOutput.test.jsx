@@ -6,12 +6,10 @@ import JobOutput from './JobOutput';
 
 describe('<JobOutput />', () => {
   const mockDetails = {
-    name: 'Foo'
+    name: 'Foo',
   };
 
   test('initially renders succesfully', () => {
-    mountWithContexts(
-      <JobOutput job={mockDetails} />
-    );
+    mountWithContexts(<JobOutput job={mockDetails} />);
   });
 });

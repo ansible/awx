@@ -28,17 +28,17 @@ class OrganizationAccessItem extends React.Component {
     onRoleDelete: func.isRequired,
   };
 
-  constructor (props) {
+  constructor(props) {
     super(props);
     this.renderChip = this.renderChip.bind(this);
   }
 
-  getRoleLists () {
+  getRoleLists() {
     const { accessRecord } = this.props;
     const teamRoles = [];
     const userRoles = [];
 
-    function sort (item) {
+    function sort(item) {
       const { role } = item;
       if (role.team_id) {
         teamRoles.push(role);
@@ -52,85 +52,79 @@ class OrganizationAccessItem extends React.Component {
     return [teamRoles, userRoles];
   }
 
-  renderChip (role) {
+  renderChip(role) {
     const { accessRecord, onRoleDelete } = this.props;
     return (
       <Chip
         key={role.id}
         isReadOnly={!role.user_capabilities.unattach}
-        onClick={() => { onRoleDelete(role, accessRecord); }}
+        onClick={() => {
+          onRoleDelete(role, accessRecord);
+        }}
       >
         {role.name}
       </Chip>
     );
   }
 
-  render () {
+  render() {
     const { accessRecord, i18n } = this.props;
     const [teamRoles, userRoles] = this.getRoleLists();
 
     return (
       <DataListItem aria-labelledby="access-list-item" key={accessRecord.id}>
         <DataListItemRow>
-          <DataListItemCells dataListCells={[
-            <DataListCell key="name">
-              {accessRecord.username && (
-                <TextContent>
-                  {accessRecord.url ? (
-                    <Text component={TextVariants.h6}>
-                      <Link
-                        to={{ pathname: accessRecord.url }}
-                        css="font-weight: bold"
-                      >
+          <DataListItemCells
+            dataListCells={[
+              <DataListCell key="name">
+                {accessRecord.username && (
+                  <TextContent>
+                    {accessRecord.url ? (
+                      <Text component={TextVariants.h6}>
+                        <Link
+                          to={{ pathname: accessRecord.url }}
+                          css="font-weight: bold"
+                        >
+                          {accessRecord.username}
+                        </Link>
+                      </Text>
+                    ) : (
+                      <Text component={TextVariants.h6} css="font-weight: bold">
                         {accessRecord.username}
-                      </Link>
-                    </Text>
-                  ) : (
-                    <Text
-                      component={TextVariants.h6}
-                      css="font-weight: bold"
-                    >
-                      {accessRecord.username}
-                    </Text>
-                  )}
-                </TextContent>
-              )}
-              {accessRecord.first_name || accessRecord.last_name ? (
+                      </Text>
+                    )}
+                  </TextContent>
+                )}
+                {accessRecord.first_name || accessRecord.last_name ? (
+                  <DetailList stacked>
+                    <Detail
+                      label={i18n._(t`Name`)}
+                      value={`${accessRecord.first_name} ${accessRecord.last_name}`}
+                    />
+                  </DetailList>
+                ) : null}
+              </DataListCell>,
+              <DataListCell key="roles">
                 <DetailList stacked>
-                  <Detail
-                    label={i18n._(t`Name`)}
-                    value={`${accessRecord.first_name} ${accessRecord.last_name}`}
-                  />
+                  {userRoles.length > 0 && (
+                    <Detail
+                      label={i18n._(t`User Roles`)}
+                      value={
+                        <ChipGroup>{userRoles.map(this.renderChip)}</ChipGroup>
+                      }
+                    />
+                  )}
+                  {teamRoles.length > 0 && (
+                    <Detail
+                      label={i18n._(t`Team Roles`)}
+                      value={
+                        <ChipGroup>{teamRoles.map(this.renderChip)}</ChipGroup>
+                      }
+                    />
+                  )}
                 </DetailList>
-              ) : (
-                null
-              )}
-            </DataListCell>,
-            <DataListCell key="roles">
-              <DetailList stacked>
-                {userRoles.length > 0 && (
-                  <Detail
-                    label={i18n._(t`User Roles`)}
-                    value={(
-                      <ChipGroup>
-                        {userRoles.map(this.renderChip)}
-                      </ChipGroup>
-                    )}
-                  />
-                )}
-                {teamRoles.length > 0 && (
-                  <Detail
-                    label={i18n._(t`Team Roles`)}
-                    value={(
-                      <ChipGroup>
-                        {teamRoles.map(this.renderChip)}
-                      </ChipGroup>
-                    )}
-                  />
-                )}
-              </DetailList>
-            </DataListCell>
-          ]}
+              </DataListCell>,
+            ]}
           />
         </DataListItemRow>
       </DataListItem>

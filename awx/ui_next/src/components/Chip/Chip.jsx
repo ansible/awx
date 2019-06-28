@@ -1,4 +1,3 @@
-
 import { Chip } from '@patternfly/react-core';
 import styled from 'styled-components';
 
@@ -12,7 +11,9 @@ export default styled(Chip)`
     padding: 3px 8px;
   }
 
-  ${props => (props.isOverflowChip && `
+  ${props =>
+    props.isOverflowChip &&
+    `
     padding: 0;
-  `)}
+  `}
 `;

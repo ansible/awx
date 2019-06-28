@@ -11,23 +11,20 @@ describe('<_AddResourceRole />', () => {
   UsersAPI.read.mockResolvedValue({
     data: {
       count: 2,
-      results: [
-        { id: 1, username: 'foo' },
-        { id: 2, username: 'bar' }
-      ]
-    }
+      results: [{ id: 1, username: 'foo' }, { id: 2, username: 'bar' }],
+    },
   });
   const roles = {
     admin_role: {
       description: 'Can manage all aspects of the organization',
       id: 1,
-      name: 'Admin'
+      name: 'Admin',
     },
     execute_role: {
       description: 'May run any executable resources in the organization',
       id: 2,
-      name: 'Execute'
-    }
+      name: 'Execute',
+    },
   };
   test('initially renders without crashing', () => {
     shallow(
@@ -53,26 +50,28 @@ describe('<_AddResourceRole />', () => {
         {
           description: 'Can manage all aspects of the organization',
           name: 'Admin',
-          id: 1
-        }
-      ]
+          id: 1,
+        },
+      ],
     });
     wrapper.instance().handleRoleCheckboxClick({
       description: 'Can manage all aspects of the organization',
       name: 'Admin',
-      id: 1
+      id: 1,
     });
     expect(wrapper.state('selectedRoleRows')).toEqual([]);
     wrapper.instance().handleRoleCheckboxClick({
       description: 'Can manage all aspects of the organization',
       name: 'Admin',
-      id: 1
+      id: 1,
     });
-    expect(wrapper.state('selectedRoleRows')).toEqual([{
-      description: 'Can manage all aspects of the organization',
-      name: 'Admin',
-      id: 1
-    }]);
+    expect(wrapper.state('selectedRoleRows')).toEqual([
+      {
+        description: 'Can manage all aspects of the organization',
+        name: 'Admin',
+        id: 1,
+      },
+    ]);
   });
   test('handleResourceCheckboxClick properly updates state', () => {
     const wrapper = shallow(
@@ -87,32 +86,31 @@ describe('<_AddResourceRole />', () => {
       selectedResourceRows: [
         {
           id: 1,
-          username: 'foobar'
-        }
-      ]
+          username: 'foobar',
+        },
+      ],
     });
     wrapper.instance().handleResourceCheckboxClick({
       id: 1,
-      username: 'foobar'
+      username: 'foobar',
     });
     expect(wrapper.state('selectedResourceRows')).toEqual([]);
     wrapper.instance().handleResourceCheckboxClick({
       id: 1,
-      username: 'foobar'
+      username: 'foobar',
     });
-    expect(wrapper.state('selectedResourceRows')).toEqual([{
-      id: 1,
-      username: 'foobar'
-    }]);
+    expect(wrapper.state('selectedResourceRows')).toEqual([
+      {
+        id: 1,
+        username: 'foobar',
+      },
+    ]);
   });
   test('clicking user/team cards updates state', () => {
     const spy = jest.spyOn(_AddResourceRole.prototype, 'handleResourceSelect');
     const wrapper = mountWithContexts(
-      <AddResourceRole
-        onClose={() => {}}
-        onSave={() => {}}
-        roles={roles}
-      />, { context: { network: { handleHttpError: () => {} } } }
+      <AddResourceRole onClose={() => {}} onSave={() => {}} roles={roles} />,
+      { context: { network: { handleHttpError: () => {} } } }
     ).find('AddResourceRole');
     const selectableCardWrapper = wrapper.find('SelectableCard');
     expect(selectableCardWrapper.length).toBe(2);
@@ -137,16 +135,16 @@ describe('<_AddResourceRole />', () => {
       selectedResourceRows: [
         {
           id: 1,
-          username: 'foobar'
-        }
+          username: 'foobar',
+        },
       ],
       selectedRoleRows: [
         {
           description: 'Can manage all aspects of the organization',
           id: 1,
-          name: 'Admin'
-        }
-      ]
+          name: 'Admin',
+        },
+      ],
     });
     wrapper.instance().handleResourceSelect('users');
     expect(wrapper.state()).toEqual({
@@ -160,38 +158,35 @@ describe('<_AddResourceRole />', () => {
       selectedResource: 'teams',
       selectedResourceRows: [],
       selectedRoleRows: [],
-      currentStepId: 1
+      currentStepId: 1,
     });
   });
   test('handleWizardSave makes correct api calls, calls onSave when done', async () => {
     const handleSave = jest.fn();
     const wrapper = mountWithContexts(
-      <AddResourceRole
-        onClose={() => {}}
-        onSave={handleSave}
-        roles={roles}
-      />, { context: { network: { handleHttpError: () => {} } } }
+      <AddResourceRole onClose={() => {}} onSave={handleSave} roles={roles} />,
+      { context: { network: { handleHttpError: () => {} } } }
     ).find('AddResourceRole');
     wrapper.setState({
       selectedResource: 'users',
       selectedResourceRows: [
         {
           id: 1,
-          username: 'foobar'
-        }
+          username: 'foobar',
+        },
       ],
       selectedRoleRows: [
         {
           description: 'Can manage all aspects of the organization',
           id: 1,
-          name: 'Admin'
+          name: 'Admin',
         },
         {
           description: 'May run any executable resources in the organization',
           id: 2,
-          name: 'Execute'
-        }
-      ]
+          name: 'Execute',
+        },
+      ],
     });
     await wrapper.instance().handleWizardSave();
     expect(UsersAPI.associateRole).toHaveBeenCalledTimes(2);
@@ -201,21 +196,21 @@ describe('<_AddResourceRole />', () => {
       selectedResourceRows: [
         {
           id: 1,
-          name: 'foobar'
-        }
+          name: 'foobar',
+        },
       ],
       selectedRoleRows: [
         {
           description: 'Can manage all aspects of the organization',
           id: 1,
-          name: 'Admin'
+          name: 'Admin',
         },
         {
           description: 'May run any executable resources in the organization',
           id: 2,
-          name: 'Execute'
-        }
-      ]
+          name: 'Execute',
+        },
+      ],
     });
     await wrapper.instance().handleWizardSave();
     expect(TeamsAPI.associateRole).toHaveBeenCalledTimes(2);

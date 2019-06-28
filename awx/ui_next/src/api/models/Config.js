@@ -1,7 +1,7 @@
 import Base from '../Base';
 
 class Config extends Base {
-  constructor (http) {
+  constructor(http) {
     super(http);
     this.baseUrl = '/api/v2/config/';
   }

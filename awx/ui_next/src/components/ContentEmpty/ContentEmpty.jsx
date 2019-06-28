@@ -5,19 +5,15 @@ import {
   Title,
   EmptyState,
   EmptyStateIcon,
-  EmptyStateBody
+  EmptyStateBody,
 } from '@patternfly/react-core';
 import { CubesIcon } from '@patternfly/react-icons';
 
 const ContentEmpty = ({ i18n, title = '', message = '' }) => (
   <EmptyState>
     <EmptyStateIcon icon={CubesIcon} />
-    <Title size="lg">
-      {title || i18n._(t`No items found.`)}
-    </Title>
-    <EmptyStateBody>
-      {message}
-    </EmptyStateBody>
+    <Title size="lg">{title || i18n._(t`No items found.`)}</Title>
+    <EmptyStateBody>{message}</EmptyStateBody>
   </EmptyState>
 );
 

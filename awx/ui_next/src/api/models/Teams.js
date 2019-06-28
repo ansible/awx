@@ -1,17 +1,20 @@
 import Base from '../Base';
 
 class Teams extends Base {
-  constructor (http) {
+  constructor(http) {
     super(http);
     this.baseUrl = '/api/v2/teams/';
   }
 
-  associateRole (teamId, roleId) {
+  associateRole(teamId, roleId) {
     return this.http.post(`${this.baseUrl}${teamId}/roles/`, { id: roleId });
   }
 
-  disassociateRole (teamId, roleId) {
-    return this.http.post(`${this.baseUrl}${teamId}/roles/`, { id: roleId, disassociate: true });
+  disassociateRole(teamId, roleId) {
+    return this.http.post(`${this.baseUrl}${teamId}/roles/`, {
+      id: roleId,
+      disassociate: true,
+    });
   }
 }
 

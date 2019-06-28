@@ -17,11 +17,13 @@ const CodeMirror = styled(ReactCodeMirror)`
   }
 
   & > .CodeMirror {
-    height: ${props => (props.rows * LINE_HEIGHT + PADDING)}px;
+    height: ${props => props.rows * LINE_HEIGHT + PADDING}px;
     font-family: var(--pf-global--FontFamily--monospace);
   }
 
-  ${props => props.hasErrors && `
+  ${props =>
+    props.hasErrors &&
+    `
     && {
       --pf-c-form-control--PaddingRight: var(--pf-c-form-control--invalid--PaddingRight);
       --pf-c-form-control--BorderBottomColor: var(--pf-c-form-control--invalid--BorderBottomColor);
@@ -32,7 +34,7 @@ const CodeMirror = styled(ReactCodeMirror)`
     }`}
 `;
 
-function CodeMirrorInput ({ value, onChange, mode, readOnly, hasErrors, rows }) {
+function CodeMirrorInput({ value, onChange, mode, readOnly, hasErrors, rows }) {
   return (
     <CodeMirror
       className="pf-c-form-control"
@@ -43,7 +45,7 @@ function CodeMirrorInput ({ value, onChange, mode, readOnly, hasErrors, rows }) 
       options={{
         smartIndent: false,
         lineNumbers: true,
-        readOnly
+        readOnly,
       }}
       rows={rows}
     />

@@ -12,14 +12,19 @@ describe('qs (qs.js)', () => {
     [
       [null, ''],
       [{}, ''],
-      [{ order_by: 'name', page: 1, page_size: 5 }, 'order_by=name&page=1&page_size=5'],
-      [{ '-order_by': 'name', page: '1', page_size: 5 }, '-order_by=name&page=1&page_size=5'],
-    ]
-      .forEach(([params, expectedQueryString]) => {
-        const actualQueryString = encodeQueryString(params);
+      [
+        { order_by: 'name', page: 1, page_size: 5 },
+        'order_by=name&page=1&page_size=5',
+      ],
+      [
+        { '-order_by': 'name', page: '1', page_size: 5 },
+        '-order_by=name&page=1&page_size=5',
+      ],
+    ].forEach(([params, expectedQueryString]) => {
+      const actualQueryString = encodeQueryString(params);
 
-        expect(actualQueryString).toEqual(expectedQueryString);
-      });
+      expect(actualQueryString).toEqual(expectedQueryString);
+    });
   });
 
   test('encodeQueryString omits null values', () => {
@@ -33,14 +38,21 @@ describe('qs (qs.js)', () => {
   describe('parseQueryString', () => {
     test('parseQueryString returns the expected queryParams', () => {
       [
-        ['order_by=name&page=1&page_size=5', ['page', 'page_size'], { order_by: 'name', page: 1, page_size: 5 }],
-        ['order_by=name&page=1&page_size=5', ['page_size'], { order_by: 'name', page: '1', page_size: 5 }],
-      ]
-        .forEach(([queryString, integerFields, expectedQueryParams]) => {
-          const actualQueryParams = parseQueryString(queryString, integerFields);
+        [
+          'order_by=name&page=1&page_size=5',
+          ['page', 'page_size'],
+          { order_by: 'name', page: 1, page_size: 5 },
+        ],
+        [
+          'order_by=name&page=1&page_size=5',
+          ['page_size'],
+          { order_by: 'name', page: '1', page_size: 5 },
+        ],
+      ].forEach(([queryString, integerFields, expectedQueryParams]) => {
+        const actualQueryParams = parseQueryString(queryString, integerFields);
 
-          expect(actualQueryParams).toEqual(expectedQueryParams);
-        });
+        expect(actualQueryParams).toEqual(expectedQueryParams);
+      });
     });
 
     test('parseQueryString should strip leading "?"', () => {

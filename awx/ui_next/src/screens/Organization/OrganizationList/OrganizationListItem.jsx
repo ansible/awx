@@ -9,9 +9,7 @@ import {
   DataListItemCells,
   DataListCheck,
 } from '@patternfly/react-core';
-import {
-  Link
-} from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
 import DataListCell from '@components/DataListCell';
@@ -43,17 +41,11 @@ class OrganizationListItem extends React.Component {
     organization: Organization.isRequired,
     detailUrl: string.isRequired,
     isSelected: bool.isRequired,
-    onSelect: func.isRequired
-  }
+    onSelect: func.isRequired,
+  };
 
-  render () {
-    const {
-      organization,
-      isSelected,
-      onSelect,
-      detailUrl,
-      i18n
-    } = this.props;
+  render() {
+    const { organization, isSelected, onSelect, detailUrl, i18n } = this.props;
     const labelId = `check-action-${organization.id}`;
     return (
       <DataListItem key={organization.id} aria-labelledby={labelId}>
@@ -64,32 +56,35 @@ class OrganizationListItem extends React.Component {
             onChange={onSelect}
             aria-labelledby={labelId}
           />
-          <DataListItemCells dataListCells={[
-            <DataListCell key="divider">
-              <VerticalSeparator />
-              <span id={labelId}>
-                <Link
-                  to={`${detailUrl}`}
-                >
-                  <b>{organization.name}</b>
-                </Link>
-              </span>
-            </DataListCell>,
-            <DataListCell key="related-field-counts" righthalf="true" width={2}>
-              <ListGroup>
-                {i18n._(t`Members`)}
-                <Badge isRead>
-                  {organization.summary_fields.related_field_counts.users}
-                </Badge>
-              </ListGroup>
-              <ListGroup>
-                {i18n._(t`Teams`)}
-                <Badge isRead>
-                  {organization.summary_fields.related_field_counts.teams}
-                </Badge>
-              </ListGroup>
-            </DataListCell>
-          ]}
+          <DataListItemCells
+            dataListCells={[
+              <DataListCell key="divider">
+                <VerticalSeparator />
+                <span id={labelId}>
+                  <Link to={`${detailUrl}`}>
+                    <b>{organization.name}</b>
+                  </Link>
+                </span>
+              </DataListCell>,
+              <DataListCell
+                key="related-field-counts"
+                righthalf="true"
+                width={2}
+              >
+                <ListGroup>
+                  {i18n._(t`Members`)}
+                  <Badge isRead>
+                    {organization.summary_fields.related_field_counts.users}
+                  </Badge>
+                </ListGroup>
+                <ListGroup>
+                  {i18n._(t`Teams`)}
+                  <Badge isRead>
+                    {organization.summary_fields.related_field_counts.teams}
+                  </Badge>
+                </ListGroup>
+              </DataListCell>,
+            ]}
           />
         </DataListItemRow>
       </DataListItem>

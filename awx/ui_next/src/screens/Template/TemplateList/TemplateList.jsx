@@ -2,22 +2,18 @@ import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import {
-  Card,
-  PageSection,
-  PageSectionVariants,
-} from '@patternfly/react-core';
+import { Card, PageSection, PageSectionVariants } from '@patternfly/react-core';
 
 import {
   JobTemplatesAPI,
   UnifiedJobTemplatesAPI,
-  WorkflowJobTemplatesAPI
+  WorkflowJobTemplatesAPI,
 } from '@api';
 import AlertModal from '@components/AlertModal';
 import DatalistToolbar from '@components/DataListToolbar';
 import ErrorDetail from '@components/ErrorDetail';
 import PaginatedDataList, {
-  ToolbarDeleteButton
+  ToolbarDeleteButton,
 } from '@components/PaginatedDataList';
 import { getQSConfig, parseNamespacedQueryString } from '@util/qs';
 
@@ -29,11 +25,11 @@ const QS_CONFIG = getQSConfig('template', {
   page: 1,
   page_size: 5,
   order_by: 'name',
-  type: 'job_template,workflow_job_template'
+  type: 'job_template,workflow_job_template',
 });
 
 class TemplatesList extends Component {
-  constructor (props) {
+  constructor(props) {
     super(props);
 
     this.state = {
@@ -51,28 +47,28 @@ class TemplatesList extends Component {
     this.handleDeleteErrorClose = this.handleDeleteErrorClose.bind(this);
   }
 
-  componentDidMount () {
+  componentDidMount() {
     this.loadTemplates();
   }
 
-  componentDidUpdate (prevProps) {
+  componentDidUpdate(prevProps) {
     const { location } = this.props;
     if (location !== prevProps.location) {
       this.loadTemplates();
     }
   }
 
-  handleDeleteErrorClose () {
+  handleDeleteErrorClose() {
     this.setState({ deletionError: null });
   }
 
-  handleSelectAll (isSelected) {
+  handleSelectAll(isSelected) {
     const { templates } = this.state;
     const selected = isSelected ? [...templates] : [];
     this.setState({ selected });
   }
 
-  handleSelect (template) {
+  handleSelect(template) {
     const { selected } = this.state;
     if (selected.some(s => s.id === template.id)) {
       this.setState({ selected: selected.filter(s => s.id !== template.id) });
@@ -81,20 +77,22 @@ class TemplatesList extends Component {
     }
   }
 
-  async handleTemplateDelete () {
+  async handleTemplateDelete() {
     const { selected } = this.state;
 
     this.setState({ hasContentLoading: true });
     try {
-      await Promise.all(selected.map(({ type, id }) => {
-        let deletePromise;
-        if (type === 'job_template') {
-          deletePromise = JobTemplatesAPI.destroy(id);
-        } else if (type === 'workflow_job_template') {
-          deletePromise = WorkflowJobTemplatesAPI.destroy(id);
-        }
-        return deletePromise;
-      }));
+      await Promise.all(
+        selected.map(({ type, id }) => {
+          let deletePromise;
+          if (type === 'job_template') {
+            deletePromise = JobTemplatesAPI.destroy(id);
+          } else if (type === 'workflow_job_template') {
+            deletePromise = WorkflowJobTemplatesAPI.destroy(id);
+          }
+          return deletePromise;
+        })
+      );
     } catch (err) {
       this.setState({ deletionError: err });
     } finally {
@@ -102,13 +100,15 @@ class TemplatesList extends Component {
     }
   }
 
-  async loadTemplates () {
+  async loadTemplates() {
     const { location } = this.props;
     const params = parseNamespacedQueryString(QS_CONFIG, location.search);
 
     this.setState({ contentError: null, hasContentLoading: true });
     try {
-      const { data: { count, results } } = await UnifiedJobTemplatesAPI.read(params);
+      const {
+        data: { count, results },
+      } = await UnifiedJobTemplatesAPI.read(params);
       this.setState({
         itemCount: count,
         templates: results,
@@ -121,7 +121,7 @@ class TemplatesList extends Component {
     }
   }
 
-  render () {
+  render() {
     const {
       contentError,
       hasContentLoading,
@@ -130,10 +130,7 @@ class TemplatesList extends Component {
       itemCount,
       selected,
     } = this.state;
-    const {
-      match,
-      i18n
-    } = this.props;
+    const { match, i18n } = this.props;
     const isAllSelected = selected.length === templates.length;
     const { medium } = PageSectionVariants;
     return (
@@ -148,10 +145,20 @@ class TemplatesList extends Component {
             qsConfig={QS_CONFIG}
             toolbarColumns={[
               { name: i18n._(t`Name`), key: 'name', isSortable: true },
-              { name: i18n._(t`Modified`), key: 'modified', isSortable: true, isNumeric: true },
-              { name: i18n._(t`Created`), key: 'created', isSortable: true, isNumeric: true },
+              {
+                name: i18n._(t`Modified`),
+                key: 'modified',
+                isSortable: true,
+                isNumeric: true,
+              },
+              {
+                name: i18n._(t`Created`),
+                key: 'created',
+                isSortable: true,
+                isNumeric: true,
+              },
             ]}
-            renderToolbar={(props) => (
+            renderToolbar={props => (
               <DatalistToolbar
                 {...props}
                 showSelectAll
@@ -164,11 +171,11 @@ class TemplatesList extends Component {
                     onDelete={this.handleTemplateDelete}
                     itemsToDelete={selected}
                     itemName={i18n._(t`Template`)}
-                  />
+                  />,
                 ]}
               />
             )}
-            renderItem={(template) => (
+            renderItem={template => (
               <TemplateListItem
                 key={template.id}
                 value={template.name}

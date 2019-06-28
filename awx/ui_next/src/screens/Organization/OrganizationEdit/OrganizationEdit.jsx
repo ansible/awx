@@ -9,7 +9,7 @@ import { Config } from '@contexts/Config';
 import OrganizationForm from '../shared/OrganizationForm';
 
 class OrganizationEdit extends Component {
-  constructor (props) {
+  constructor(props) {
     super(props);
 
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -22,7 +22,7 @@ class OrganizationEdit extends Component {
     };
   }
 
-  async handleSubmit (values, groupsToAssociate, groupsToDisassociate) {
+  async handleSubmit(values, groupsToAssociate, groupsToDisassociate) {
     const { organization } = this.props;
     try {
       await OrganizationsAPI.update(organization.id, values);
@@ -33,25 +33,33 @@ class OrganizationEdit extends Component {
     }
   }
 
-  handleCancel () {
-    const { organization: { id }, history } = this.props;
+  handleCancel() {
+    const {
+      organization: { id },
+      history,
+    } = this.props;
     history.push(`/organizations/${id}`);
   }
 
-  handleSuccess () {
-    const { organization: { id }, history } = this.props;
+  handleSuccess() {
+    const {
+      organization: { id },
+      history,
+    } = this.props;
     history.push(`/organizations/${id}`);
   }
 
-  async submitInstanceGroups (groupsToAssociate, groupsToDisassociate) {
+  async submitInstanceGroups(groupsToAssociate, groupsToDisassociate) {
     const { organization } = this.props;
     try {
       await Promise.all(
-        groupsToAssociate.map(id => OrganizationsAPI.associateInstanceGroup(organization.id, id))
+        groupsToAssociate.map(id =>
+          OrganizationsAPI.associateInstanceGroup(organization.id, id)
+        )
       );
       await Promise.all(
-        groupsToDisassociate.map(
-          id => OrganizationsAPI.disassociateInstanceGroup(organization.id, id)
+        groupsToDisassociate.map(id =>
+          OrganizationsAPI.disassociateInstanceGroup(organization.id, id)
         )
       );
     } catch (err) {
@@ -59,7 +67,7 @@ class OrganizationEdit extends Component {
     }
   }
 
-  render () {
+  render() {
     const { organization } = this.props;
     const { error } = this.state;
 
@@ -86,7 +94,7 @@ OrganizationEdit.propTypes = {
 };
 
 OrganizationEdit.contextTypes = {
-  custom_virtualenvs: PropTypes.arrayOf(PropTypes.string)
+  custom_virtualenvs: PropTypes.arrayOf(PropTypes.string),
 };
 
 export { OrganizationEdit as _OrganizationEdit };

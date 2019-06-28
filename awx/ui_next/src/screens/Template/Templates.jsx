@@ -10,18 +10,18 @@ import { TemplateList } from './TemplateList';
 import Template from './Template';
 
 class Templates extends Component {
-  constructor (props) {
+  constructor(props) {
     super(props);
     const { i18n } = this.props;
 
     this.state = {
       breadcrumbConfig: {
-        '/templates': i18n._(t`Templates`)
-      }
+        '/templates': i18n._(t`Templates`),
+      },
     };
   }
 
-  setBreadCrumbConfig = (template) => {
+  setBreadCrumbConfig = template => {
     const { i18n } = this.props;
     if (!template) {
       return;
@@ -29,13 +29,17 @@ class Templates extends Component {
     const breadcrumbConfig = {
       '/templates': i18n._(t`Templates`),
       [`/templates/${template.type}/${template.id}`]: `${template.name}`,
-      [`/templates/${template.type}/${template.id}/details`]: i18n._(t`Details`),
-      [`/templates/${template.type}/${template.id}/edit`]: i18n._(t`Edit Details`),
+      [`/templates/${template.type}/${template.id}/details`]: i18n._(
+        t`Details`
+      ),
+      [`/templates/${template.type}/${template.id}/edit`]: i18n._(
+        t`Edit Details`
+      ),
     };
     this.setState({ breadcrumbConfig });
-  }
+  };
 
-  render () {
+  render() {
     const { match, history, location } = this.props;
     const { breadcrumbConfig } = this.state;
     return (
@@ -58,12 +62,7 @@ class Templates extends Component {
               </Config>
             )}
           />
-          <Route
-            path={`${match.path}`}
-            render={() => (
-              <TemplateList />
-            )}
-          />
+          <Route path={`${match.path}`} render={() => <TemplateList />} />
         </Switch>
       </Fragment>
     );

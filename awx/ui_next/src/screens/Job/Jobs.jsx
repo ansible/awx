@@ -9,19 +9,19 @@ import Job from './Job';
 import JobList from './JobList/JobList';
 
 class Jobs extends Component {
-  constructor (props) {
+  constructor(props) {
     super(props);
 
     const { i18n } = props;
 
     this.state = {
       breadcrumbConfig: {
-        '/jobs': i18n._(t`Jobs`)
-      }
+        '/jobs': i18n._(t`Jobs`),
+      },
     };
   }
 
-  setBreadcrumbConfig = (job) => {
+  setBreadcrumbConfig = job => {
     const { i18n } = this.props;
 
     if (!job) {
@@ -32,21 +32,19 @@ class Jobs extends Component {
       '/jobs': i18n._(t`Jobs`),
       [`/jobs/${job.id}`]: `${job.name}`,
       [`/jobs/${job.id}/details`]: i18n._(t`Details`),
-      [`/jobs/${job.id}/output`]: i18n._(t`Output`)
+      [`/jobs/${job.id}/output`]: i18n._(t`Output`),
     };
 
     this.setState({ breadcrumbConfig });
-  }
+  };
 
-  render () {
+  render() {
     const { match, history, location } = this.props;
     const { breadcrumbConfig } = this.state;
 
     return (
       <Fragment>
-        <Breadcrumbs
-          breadcrumbConfig={breadcrumbConfig}
-        />
+        <Breadcrumbs breadcrumbConfig={breadcrumbConfig} />
         <Switch>
           <Route
             exact

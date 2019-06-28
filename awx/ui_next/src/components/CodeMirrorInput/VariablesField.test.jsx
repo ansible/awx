@@ -15,11 +15,7 @@ describe('VariablesField', () => {
       <Formik
         initialValues={{ variables: value }}
         render={() => (
-          <VariablesField
-            id="the-field"
-            name="variables"
-            label="Variables"
-          />
+          <VariablesField id="the-field" name="variables" label="Variables" />
         )}
       />
     );
@@ -33,11 +29,7 @@ describe('VariablesField', () => {
       <Formik
         initialValues={{ variables: value }}
         render={() => (
-          <VariablesField
-            id="the-field"
-            name="variables"
-            label="Variables"
-          />
+          <VariablesField id="the-field" name="variables" label="Variables" />
         )}
       />
     );
@@ -63,15 +55,14 @@ describe('VariablesField', () => {
       <Formik
         initialValues={{ variables: value }}
         render={() => (
-          <VariablesField
-            id="the-field"
-            name="variables"
-            label="Variables"
-          />
+          <VariablesField id="the-field" name="variables" label="Variables" />
         )}
       />
     );
-    wrapper.find('Button').at(1).simulate('click');
+    wrapper
+      .find('Button')
+      .at(1)
+      .simulate('click');
     wrapper.update();
 
     const field = wrapper.find('CodeMirrorInput');
@@ -86,14 +77,12 @@ describe('VariablesField', () => {
       <Formik
         initialValues={{ variables: value }}
         onSubmit={handleSubmit}
-        render={(formik) => (
+        render={formik => (
           <form onSubmit={formik.handleSubmit}>
-            <VariablesField
-              id="the-field"
-              name="variables"
-              label="Variables"
-            />
-            <button type="submit" id="submit">Submit</button>
+            <VariablesField id="the-field" name="variables" label="Variables" />
+            <button type="submit" id="submit">
+              Submit
+            </button>
           </form>
         )}
       />
@@ -105,7 +94,7 @@ describe('VariablesField', () => {
 
     expect(handleSubmit).toHaveBeenCalled();
     expect(handleSubmit.mock.calls[0][0]).toEqual({
-      variables: '---\nnewval: changed'
+      variables: '---\nnewval: changed',
     });
   });
 });

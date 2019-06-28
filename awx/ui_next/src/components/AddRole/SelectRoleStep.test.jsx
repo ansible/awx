@@ -9,26 +9,26 @@ describe('<SelectRoleStep />', () => {
     project_admin_role: {
       id: 1,
       name: 'Project Admin',
-      description: 'Can manage all projects of the organization'
+      description: 'Can manage all projects of the organization',
     },
     execute_role: {
       id: 2,
       name: 'Execute',
-      description: 'May run any executable resources in the organization'
-    }
+      description: 'May run any executable resources in the organization',
+    },
   };
   const selectedRoles = [
     {
       id: 1,
       name: 'Project Admin',
-      description: 'Can manage all projects of the organization'
-    }
+      description: 'Can manage all projects of the organization',
+    },
   ];
   const selectedResourceRows = [
     {
       id: 1,
-      name: 'foo'
-    }
+      name: 'foo',
+    },
   ];
   test('initially renders without crashing', () => {
     wrapper = shallow(
@@ -57,7 +57,7 @@ describe('<SelectRoleStep />', () => {
     expect(onRolesClick).toBeCalledWith({
       id: 1,
       name: 'Project Admin',
-      description: 'Can manage all projects of the organization'
+      description: 'Can manage all projects of the organization',
     });
     wrapper.unmount();
   });

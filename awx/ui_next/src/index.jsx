@@ -1,13 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {
-  Route,
-  Switch,
-  Redirect
-} from 'react-router-dom';
-import {
-  I18n
-} from '@lingui/react';
+import { Route, Switch, Redirect } from 'react-router-dom';
+import { I18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
 import '@patternfly/react-core/dist/styles/base.css';
@@ -44,19 +38,21 @@ import RootProvider from './RootProvider';
 import { BrandName } from './variables';
 
 // eslint-disable-next-line import/prefer-default-export
-export function main (render) {
+export function main(render) {
   const el = document.getElementById('app');
   document.title = `Ansible ${BrandName}`;
 
-  const defaultRedirect = () => (<Redirect to="/home" />);
+  const defaultRedirect = () => <Redirect to="/home" />;
   const removeTrailingSlash = (
     <Route
       exact
       strict
       path="/*/"
-      render={({ history: { location: { pathname, search, hash } } }) => (
-        <Redirect to={`${pathname.slice(0, -1)}${search}${hash}`} />
-      )}
+      render={({
+        history: {
+          location: { pathname, search, hash },
+        },
+      }) => <Redirect to={`${pathname.slice(0, -1)}${search}${hash}`} />}
     />
   );
   const loginRoutes = (
@@ -64,9 +60,7 @@ export function main (render) {
       {removeTrailingSlash}
       <Route
         path="/login"
-        render={() => (
-          <Login isAuthenticated={isAuthenticated} />
-        )}
+        render={() => <Login isAuthenticated={isAuthenticated} />}
       />
       <Redirect to="/login" />
     </Switch>
@@ -77,7 +71,9 @@ export function main (render) {
       <I18n>
         {({ i18n }) => (
           <Background>
-            {!isAuthenticated(document.cookie) ? loginRoutes : (
+            {!isAuthenticated(document.cookie) ? (
+              loginRoutes
+            ) : (
               <Switch>
                 {removeTrailingSlash}
                 <Route path="/login" render={defaultRedirect} />
@@ -94,22 +90,22 @@ export function main (render) {
                             {
                               title: i18n._(t`Dashboard`),
                               path: '/home',
-                              component: Dashboard
+                              component: Dashboard,
                             },
                             {
                               title: i18n._(t`Jobs`),
                               path: '/jobs',
-                              component: Jobs
+                              component: Jobs,
                             },
                             {
                               title: i18n._(t`Schedules`),
                               path: '/schedules',
-                              component: Schedules
+                              component: Schedules,
                             },
                             {
                               title: i18n._(t`My View`),
                               path: '/portal',
-                              component: Portal
+                              component: Portal,
                             },
                           ],
                         },
@@ -120,27 +116,27 @@ export function main (render) {
                             {
                               title: i18n._(t`Templates`),
                               path: '/templates',
-                              component: Templates
+                              component: Templates,
                             },
                             {
                               title: i18n._(t`Credentials`),
                               path: '/credentials',
-                              component: Credentials
+                              component: Credentials,
                             },
                             {
                               title: i18n._(t`Projects`),
                               path: '/projects',
-                              component: Projects
+                              component: Projects,
                             },
                             {
                               title: i18n._(t`Inventories`),
                               path: '/inventories',
-                              component: Inventories
+                              component: Inventories,
                             },
                             {
                               title: i18n._(t`Inventory Scripts`),
                               path: '/inventory_scripts',
-                              component: InventoryScripts
+                              component: InventoryScripts,
                             },
                           ],
                         },
@@ -151,17 +147,17 @@ export function main (render) {
                             {
                               title: i18n._(t`Organizations`),
                               path: '/organizations',
-                              component: Organizations
+                              component: Organizations,
                             },
                             {
                               title: i18n._(t`Users`),
                               path: '/users',
-                              component: Users
+                              component: Users,
                             },
                             {
                               title: i18n._(t`Teams`),
                               path: '/teams',
-                              component: Teams
+                              component: Teams,
                             },
                           ],
                         },
@@ -172,27 +168,27 @@ export function main (render) {
                             {
                               title: i18n._(t`Credential Types`),
                               path: '/credential_types',
-                              component: CredentialTypes
+                              component: CredentialTypes,
                             },
                             {
                               title: i18n._(t`Notifications`),
                               path: '/notification_templates',
-                              component: NotificationTemplates
+                              component: NotificationTemplates,
                             },
                             {
                               title: i18n._(t`Management Jobs`),
                               path: '/management_jobs',
-                              component: ManagementJobs
+                              component: ManagementJobs,
                             },
                             {
                               title: i18n._(t`Instance Groups`),
                               path: '/instance_groups',
-                              component: InstanceGroups
+                              component: InstanceGroups,
                             },
                             {
                               title: i18n._(t`Integrations`),
                               path: '/applications',
-                              component: Applications
+                              component: Applications,
                             },
                           ],
                         },
@@ -203,34 +199,37 @@ export function main (render) {
                             {
                               title: i18n._(t`Authentication`),
                               path: '/auth_settings',
-                              component: AuthSettings
+                              component: AuthSettings,
                             },
                             {
                               title: i18n._(t`Jobs`),
                               path: '/jobs_settings',
-                              component: JobsSettings
+                              component: JobsSettings,
                             },
                             {
                               title: i18n._(t`System`),
                               path: '/system_settings',
-                              component: SystemSettings
+                              component: SystemSettings,
                             },
                             {
                               title: i18n._(t`User Interface`),
                               path: '/ui_settings',
-                              component: UISettings
+                              component: UISettings,
                             },
                             {
                               title: i18n._(t`License`),
                               path: '/license',
-                              component: License
+                              component: License,
                             },
                           ],
                         },
                       ]}
-                      render={({ routeGroups }) => (
+                      render={({ routeGroups }) =>
                         routeGroups
-                          .reduce((allRoutes, { routes }) => allRoutes.concat(routes), [])
+                          .reduce(
+                            (allRoutes, { routes }) => allRoutes.concat(routes),
+                            []
+                          )
                           .map(({ component: PageComponent, path }) => (
                             <Route
                               key={path}
@@ -240,7 +239,7 @@ export function main (render) {
                               )}
                             />
                           ))
-                      )}
+                      }
                     />
                   )}
                 />
@@ -249,7 +248,8 @@ export function main (render) {
           </Background>
         )}
       </I18n>
-    </RootProvider>, el || document.createElement('div')
+    </RootProvider>,
+    el || document.createElement('div')
   );
 }
 

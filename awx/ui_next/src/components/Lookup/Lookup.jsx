@@ -19,7 +19,7 @@ import { ChipGroup, Chip } from '../Chip';
 import { getQSConfig, parseNamespacedQueryString } from '../../util/qs';
 
 class Lookup extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props);
 
     this.state = {
@@ -40,19 +40,22 @@ class Lookup extends React.Component {
     this.getData = this.getData.bind(this);
   }
 
-  componentDidMount () {
+  componentDidMount() {
     this.getData();
   }
 
-  componentDidUpdate (prevProps) {
+  componentDidUpdate(prevProps) {
     const { location } = this.props;
     if (location !== prevProps.location) {
       this.getData();
     }
   }
 
-  async getData () {
-    const { getItems, location: { search } } = this.props;
+  async getData() {
+    const {
+      getItems,
+      location: { search },
+    } = this.props;
     const queryParams = parseNamespacedQueryString(this.qsConfig, search);
 
     this.setState({ error: false });
@@ -62,26 +65,30 @@ class Lookup extends React.Component {
 
       this.setState({
         results,
-        count
+        count,
       });
     } catch (err) {
       this.setState({ error: true });
     }
   }
 
-  toggleSelected (row) {
+  toggleSelected(row) {
     const { name, onLookupSave } = this.props;
-    const { lookupSelectedItems: updatedSelectedItems, isModalOpen } = this.state;
+    const {
+      lookupSelectedItems: updatedSelectedItems,
+      isModalOpen,
+    } = this.state;
 
-    const selectedIndex = updatedSelectedItems
-      .findIndex(selectedRow => selectedRow.id === row.id);
+    const selectedIndex = updatedSelectedItems.findIndex(
+      selectedRow => selectedRow.id === row.id
+    );
 
     if (selectedIndex > -1) {
       updatedSelectedItems.splice(selectedIndex, 1);
       this.setState({ lookupSelectedItems: updatedSelectedItems });
     } else {
       this.setState(prevState => ({
-        lookupSelectedItems: [...prevState.lookupSelectedItems, row]
+        lookupSelectedItems: [...prevState.lookupSelectedItems, row],
       }));
     }
 
@@ -93,7 +100,7 @@ class Lookup extends React.Component {
     }
   }
 
-  handleModalToggle () {
+  handleModalToggle() {
     const { isModalOpen } = this.state;
     const { value } = this.props;
     // Resets the selected items from parent state whenever modal is opened
@@ -102,19 +109,19 @@ class Lookup extends React.Component {
     if (!isModalOpen) {
       this.setState({ lookupSelectedItems: [...value] });
     }
-    this.setState((prevState) => ({
+    this.setState(prevState => ({
       isModalOpen: !prevState.isModalOpen,
     }));
   }
 
-  saveModal () {
+  saveModal() {
     const { onLookupSave, name } = this.props;
     const { lookupSelectedItems } = this.state;
     onLookupSave(lookupSelectedItems, name);
     this.handleModalToggle();
   }
 
-  render () {
+  render() {
     const {
       isModalOpen,
       lookupSelectedItems,
@@ -147,9 +154,7 @@ class Lookup extends React.Component {
           >
             <SearchIcon />
           </Button>
-          <div className="pf-c-form-control">
-            {chips}
-          </div>
+          <div className="pf-c-form-control">{chips}</div>
         </InputGroup>
         <Modal
           className="awx-c-modal"
@@ -157,8 +162,21 @@ class Lookup extends React.Component {
           isOpen={isModalOpen}
           onClose={this.handleModalToggle}
           actions={[
-            <Button key="save" variant="primary" onClick={this.saveModal} style={(results.length === 0) ? { display: 'none' } : {}}>{i18n._(t`Save`)}</Button>,
-            <Button key="cancel" variant="secondary" onClick={this.handleModalToggle}>{(results.length === 0) ? i18n._(t`Close`) : i18n._(t`Cancel`)}</Button>
+            <Button
+              key="save"
+              variant="primary"
+              onClick={this.saveModal}
+              style={results.length === 0 ? { display: 'none' } : {}}
+            >
+              {i18n._(t`Save`)}
+            </Button>,
+            <Button
+              key="cancel"
+              variant="secondary"
+              onClick={this.handleModalToggle}
+            >
+              {results.length === 0 ? i18n._(t`Close`) : i18n._(t`Cancel`)}
+            </Button>,
           ]}
         >
           <PaginatedDataList
@@ -176,7 +194,7 @@ class Lookup extends React.Component {
                 onSelect={() => this.toggleSelected(item)}
               />
             )}
-            renderToolbar={(props) => (
+            renderToolbar={props => (
               <DataListToolbar {...props} alignToolbarLeft />
             )}
             showPageSizeOptions={false}
@@ -189,7 +207,7 @@ class Lookup extends React.Component {
               onRemove={this.toggleSelected}
             />
           )}
-          { error ? <div>error</div> : '' }
+          {error ? <div>error</div> : ''}
         </Modal>
       </Fragment>
     );

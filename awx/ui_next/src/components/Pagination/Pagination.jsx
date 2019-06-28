@@ -1,18 +1,24 @@
 import React from 'react';
 import styled, { css } from 'styled-components';
-import { Pagination as PFPagination, DropdownDirection } from '@patternfly/react-core';
+import {
+  Pagination as PFPagination,
+  DropdownDirection,
+} from '@patternfly/react-core';
 import { I18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
 const AWXPagination = styled(PFPagination)`
-  ${props => (props.perPageOptions && !props.perPageOptions.length && css`
-    .pf-c-options-menu__toggle-button {
+  ${props =>
+    props.perPageOptions &&
+    !props.perPageOptions.length &&
+    css`
+      .pf-c-options-menu__toggle-button {
         display: none;
       }
-  `)}
+    `}
 `;
 
-export default (props) => (
+export default props => (
   <I18n>
     {({ i18n }) => (
       <AWXPagination
@@ -27,7 +33,7 @@ export default (props) => (
           toNextPage: i18n._(t`Go to next page`),
           optionsToggle: i18n._(t`Select`),
           currPage: i18n._(t`Current page`),
-          paginationTitle: i18n._(t`Pagination`)
+          paginationTitle: i18n._(t`Pagination`),
         }}
         dropDirection={DropdownDirection.up}
         {...props}

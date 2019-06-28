@@ -21,12 +21,8 @@ const Group = styled.div`
   }
 `;
 
-function ButtonGroup ({ children }) {
-  return (
-    <Group>
-      {children}
-    </Group>
-  );
+function ButtonGroup({ children }) {
+  return <Group>{children}</Group>;
 }
 
 export default ButtonGroup;

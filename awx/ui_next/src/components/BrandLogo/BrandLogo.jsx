@@ -5,57 +5,57 @@ import { t } from '@lingui/macro';
 import styled from 'styled-components';
 
 const ST0 = styled.g`
-  display:none;
+  display: none;
 `;
 
 const ST1 = styled.path`
-  display:inline;
-  fill:#ED1C24;
+  display: inline;
+  fill: #ed1c24;
 `;
 
 const ST2 = styled.path`
-  fill:#42210B;
+  fill: #42210b;
 `;
 
 const ST3 = styled.path`
-  fill:#FFFFFF;
+  fill: #ffffff;
 `;
 
 const ST4 = styled.path`
-  fill:#C69C6D;
-  stroke:#8C6239;
-  stroke-width:5;
-  stroke-miterlimit:10;
+  fill: #c69c6d;
+  stroke: #8c6239;
+  stroke-width: 5;
+  stroke-miterlimit: 10;
 `;
 
 const ST5 = styled.path`
-  fill:#FFFFFF;
-  stroke:#42210B;
-  stroke-width:3;
-  stroke-miterlimit:10;
+  fill: #ffffff;
+  stroke: #42210b;
+  stroke-width: 3;
+  stroke-miterlimit: 10;
 `;
 
 const ST6 = styled.ellipse`
-  fill:#ED1C24;
-  stroke:#8C6239;
-  stroke-width:5;
-  stroke-miterlimit:10;
+  fill: #ed1c24;
+  stroke: #8c6239;
+  stroke-width: 5;
+  stroke-miterlimit: 10;
 `;
 
 const ST7 = styled.path`
-  fill:#A67C52;
+  fill: #a67c52;
 `;
 
 const ST8 = styled.path`
-  fill: #ED1C24;
+  fill: #ed1c24;
 `;
 
 const ST9 = styled.ellipse`
-  fill:#42210B;
+  fill: #42210b;
 `;
 
 class BrandLogo extends Component {
-  render () {
+  render() {
     const { i18n } = this.props;
     return (
       <svg
@@ -195,24 +195,12 @@ class BrandLogo extends Component {
               />
             </g>
           </g>
-          <ST5
-            d="M215.5,166.5l34-73c0,0,35,0,46,21c7.5,14.3,8,39,8,39L215.5,166.5z"
-          />
-          <ST5
-            d="M208.2,170.5l-79.5-12.7c0,0-19.6,29-8.4,49.9c7.6,14.2,27.8,28.5,27.8,28.5L208.2,170.5z"
-          />
-          <ST2
-            d="M210.5,164.5l33-74c0,0-2.5-5.5-8-7s-12,0-12,0L210.5,164.5z"
-          />
-          <ST2
-            d="M207.4,165.3l-73.1-35c0,0-5.6,2.4-7.2,7.8c-1.6,5.5-0.3,12-0.3,12L207.4,165.3z"
-          />
-          <path
-            d="M215.5,166.5L234,127c0,0,17-6,25.5,7.5c8.6,13.6-3.5,25.5-3.5,25.5L215.5,166.5z"
-          />
-          <path
-            d="M206.7,170.9l-29.6,32c0,0-18,0.5-22-14.9c-4-15.6,11.1-23.2,11.1-23.2L206.7,170.9z"
-          />
+          <ST5 d="M215.5,166.5l34-73c0,0,35,0,46,21c7.5,14.3,8,39,8,39L215.5,166.5z" />
+          <ST5 d="M208.2,170.5l-79.5-12.7c0,0-19.6,29-8.4,49.9c7.6,14.2,27.8,28.5,27.8,28.5L208.2,170.5z" />
+          <ST2 d="M210.5,164.5l33-74c0,0-2.5-5.5-8-7s-12,0-12,0L210.5,164.5z" />
+          <ST2 d="M207.4,165.3l-73.1-35c0,0-5.6,2.4-7.2,7.8c-1.6,5.5-0.3,12-0.3,12L207.4,165.3z" />
+          <path d="M215.5,166.5L234,127c0,0,17-6,25.5,7.5c8.6,13.6-3.5,25.5-3.5,25.5L215.5,166.5z" />
+          <path d="M206.7,170.9l-29.6,32c0,0-18,0.5-22-14.9c-4-15.6,11.1-23.2,11.1-23.2L206.7,170.9z" />
           <g>
             <g>
               <ST3

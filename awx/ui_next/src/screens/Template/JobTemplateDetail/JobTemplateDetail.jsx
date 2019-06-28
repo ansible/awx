@@ -1,7 +1,14 @@
 import React, { Component } from 'react';
 import { Link, withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
-import { CardBody, Button, TextList, TextListItem, TextListItemVariants, TextListVariants } from '@patternfly/react-core';
+import {
+  CardBody,
+  Button,
+  TextList,
+  TextListItem,
+  TextListItemVariants,
+  TextListVariants,
+} from '@patternfly/react-core';
 import styled from 'styled-components';
 import { t } from '@lingui/macro';
 
@@ -16,29 +23,31 @@ const ButtonGroup = styled.div`
   display: flex;
   justify-content: flex-end;
   margin-top: 20px;
-  & > :not(:first-child){
+  & > :not(:first-child) {
     margin-left: 20px;
   }
 `;
 class JobTemplateDetail extends Component {
-  constructor (props) {
+  constructor(props) {
     super(props);
     this.state = {
       contentError: null,
       hasContentLoading: true,
-      instanceGroups: []
+      instanceGroups: [],
     };
     this.readInstanceGroups = this.readInstanceGroups.bind(this);
   }
 
-  componentDidMount () {
+  componentDidMount() {
     this.readInstanceGroups();
   }
 
-  async readInstanceGroups () {
+  async readInstanceGroups() {
     const { match } = this.props;
     try {
-      const { data } = await JobTemplatesAPI.readInstanceGroups(match.params.id);
+      const { data } = await JobTemplatesAPI.readInstanceGroups(
+        match.params.id
+      );
       this.setState({ instanceGroups: [...data.results] });
     } catch (err) {
       this.setState({ contentError: err });
@@ -47,7 +56,7 @@ class JobTemplateDetail extends Component {
     }
   }
 
-  render () {
+  render() {
     const {
       template: {
         allow_simultaneous,
@@ -71,7 +80,7 @@ class JobTemplateDetail extends Component {
         summary_fields,
         use_fact_cache,
         url,
-        verbosity
+        verbosity,
       },
       hasTemplateLoading,
       i18n,
@@ -92,38 +101,31 @@ class JobTemplateDetail extends Component {
     const generateCallBackUrl = `${window.location.origin + url}callback/`;
     const isInitialized = !hasTemplateLoading && !hasContentLoading;
 
-    const credentialType = (c) => (c === 'aws' || c === 'ssh' ? c.toUpperCase() : toTitleCase(c));
+    const credentialType = c =>
+      c === 'aws' || c === 'ssh' ? c.toUpperCase() : toTitleCase(c);
 
-    const renderOptionsField = become_enabled || host_config_key || allow_simultaneous
-      || use_fact_cache;
+    const renderOptionsField =
+      become_enabled || host_config_key || allow_simultaneous || use_fact_cache;
 
     const renderOptions = (
       <TextList component={TextListVariants.ul}>
         {become_enabled && (
-          <TextListItem
-            component={TextListItemVariants.li}
-          >
+          <TextListItem component={TextListItemVariants.li}>
             {i18n._(t`Enable Privilege Escalation`)}
           </TextListItem>
         )}
         {host_config_key && (
-          <TextListItem
-            component={TextListItemVariants.li}
-          >
+          <TextListItem component={TextListItemVariants.li}>
             {i18n._(t`Allow Provisioning Callbacks`)}
           </TextListItem>
         )}
         {allow_simultaneous && (
-          <TextListItem
-            component={TextListItemVariants.li}
-          >
+          <TextListItem component={TextListItemVariants.li}>
             {i18n._(t`Enable Concurrent Jobs`)}
           </TextListItem>
         )}
         {use_fact_cache && (
-          <TextListItem
-            component={TextListItemVariants.li}
-          >
+          <TextListItem component={TextListItemVariants.li}>
             {i18n._(t`Use Fact Cache`)}
           </TextListItem>
         )}
@@ -131,29 +133,20 @@ class JobTemplateDetail extends Component {
     );
 
     if (contentError) {
-      return (<ContentError error={contentError} />);
+      return <ContentError error={contentError} />;
     }
 
     if (hasContentLoading) {
-      return (<ContentLoading />);
+      return <ContentLoading />;
     }
 
     return (
       isInitialized && (
         <CardBody css="padding-top: 20px;">
           <DetailList gutter="sm">
-            <Detail
-              label={i18n._(t`Name`)}
-              value={name}
-            />
-            <Detail
-              label={i18n._(t`Description`)}
-              value={description}
-            />
-            <Detail
-              label={i18n._(t`Job Type`)}
-              value={job_type}
-            />
+            <Detail label={i18n._(t`Name`)} value={name} />
+            <Detail label={i18n._(t`Description`)} value={description} />
+            <Detail label={i18n._(t`Job Type`)} value={job_type} />
             {inventory && (
               <Detail
                 label={i18n._(t`Inventory`)}
@@ -166,26 +159,14 @@ class JobTemplateDetail extends Component {
                 value={summary_fields.project.name}
               />
             )}
-            <Detail
-              label={i18n._(t`Playbook`)}
-              value={playbook}
-            />
-            <Detail
-              label={i18n._(t`Forks`)}
-              value={forks || '0'}
-            />
-            <Detail
-              label={i18n._(t`Limit`)}
-              value={limit}
-            />
+            <Detail label={i18n._(t`Playbook`)} value={playbook} />
+            <Detail label={i18n._(t`Forks`)} value={forks || '0'} />
+            <Detail label={i18n._(t`Limit`)} value={limit} />
             <Detail
               label={i18n._(t`Verbosity`)}
               value={verbosityDetails[0].details}
             />
-            <Detail
-              label={i18n._(t`Timeout`)}
-              value={timeout || '0'}
-            />
+            <Detail label={i18n._(t`Timeout`)} value={timeout || '0'} />
             <Detail
               label={i18n._(t`Created`)}
               value={`${created} by ${summary_fields.created_by.username}`} // TODO: link to user in users
@@ -198,10 +179,7 @@ class JobTemplateDetail extends Component {
               label={i18n._(t`Show Changes`)}
               value={diff_mode ? 'On' : 'Off'}
             />
-            <Detail
-              label={i18n._(t` Job Slicing`)}
-              value={job_slice_count}
-            />
+            <Detail label={i18n._(t` Job Slicing`)} value={job_slice_count} />
             {host_config_key && (
               <React.Fragment>
                 <Detail
@@ -215,52 +193,48 @@ class JobTemplateDetail extends Component {
               </React.Fragment>
             )}
             {renderOptionsField && (
-              <Detail
-                label={i18n._(t`Options`)}
-                value={renderOptions}
-              />
+              <Detail label={i18n._(t`Options`)} value={renderOptions} />
             )}
-            {(summary_fields.credentials && summary_fields.credentials.length > 0) && (
-              <Detail
-                fullWidth
-                label={i18n._(t`Credentials`)}
-                value={(
-                  <ChipGroup showOverflowAfter={5}>
-                    {summary_fields.credentials.map(c => (
-                      <Chip key={c.id} isReadOnly>
-                        <strong className="credential">
-                          {c.kind ? credentialType(c.kind) : i18n._(t`Cloud`)}
-:
-                        </strong>
-                        {` ${c.name}`}
-                      </Chip>
-                    ))
-                    }
-                  </ChipGroup>
-                )}
-              />
-            )}
-            {(summary_fields.labels && summary_fields.labels.results.length > 0) && (
+            {summary_fields.credentials &&
+              summary_fields.credentials.length > 0 && (
+                <Detail
+                  fullWidth
+                  label={i18n._(t`Credentials`)}
+                  value={
+                    <ChipGroup showOverflowAfter={5}>
+                      {summary_fields.credentials.map(c => (
+                        <Chip key={c.id} isReadOnly>
+                          <strong className="credential">
+                            {c.kind ? credentialType(c.kind) : i18n._(t`Cloud`)}
+                            :
+                          </strong>
+                          {` ${c.name}`}
+                        </Chip>
+                      ))}
+                    </ChipGroup>
+                  }
+                />
+              )}
+            {summary_fields.labels && summary_fields.labels.results.length > 0 && (
               <Detail
                 fullWidth
                 label={i18n._(t`Labels`)}
-                value={(
+                value={
                   <ChipGroup showOverflowAfter={5}>
                     {summary_fields.labels.results.map(l => (
                       <Chip key={l.id} isReadOnly>
                         {l.name}
                       </Chip>
-                    ))
-                    }
+                    ))}
                   </ChipGroup>
-                )}
+                }
               />
             )}
-            {(instanceGroups.length > 0) && (
+            {instanceGroups.length > 0 && (
               <Detail
                 fullWidth
                 label={i18n._(t`Instance Groups`)}
-                value={(
+                value={
                   <ChipGroup showOverflowAfter={5}>
                     {instanceGroups.map(ig => (
                       <Chip key={ig.id} isReadOnly>
@@ -268,39 +242,37 @@ class JobTemplateDetail extends Component {
                       </Chip>
                     ))}
                   </ChipGroup>
-                )}
+                }
               />
             )}
-            {(job_tags && job_tags.length > 0) && (
+            {job_tags && job_tags.length > 0 && (
               <Detail
                 fullWidth
                 label={i18n._(t`Job tags`)}
-                value={(
+                value={
                   <ChipGroup showOverflowAfter={5}>
                     {job_tags.split(',').map(jobTag => (
                       <Chip key={jobTag} isReadOnly>
                         {jobTag}
                       </Chip>
-                    ))
-                    }
+                    ))}
                   </ChipGroup>
-                )}
+                }
               />
             )}
-            {(skip_tags && skip_tags.length > 0) && (
+            {skip_tags && skip_tags.length > 0 && (
               <Detail
                 fullWidth
                 label={i18n._(t`Skip tags`)}
-                value={(
+                value={
                   <ChipGroup showOverflowAfter={5}>
                     {skip_tags.split(',').map(skipTag => (
                       <Chip key={skipTag} isReadOnly>
                         {skipTag}
                       </Chip>
-                    ))
-                    }
+                    ))}
                   </ChipGroup>
-                )}
+                }
               />
             )}
           </DetailList>
@@ -310,7 +282,6 @@ class JobTemplateDetail extends Component {
                 component={Link}
                 to={`/templates/${match.params.templateType}/${match.params.id}/edit`}
                 aria-label={i18n._(t`Edit`)}
-
               >
                 {i18n._(t`Edit`)}
               </Button>

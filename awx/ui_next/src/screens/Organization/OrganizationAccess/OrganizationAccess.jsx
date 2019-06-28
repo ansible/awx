@@ -8,11 +8,13 @@ import AddResourceRole from '@components/AddRole/AddResourceRole';
 import AlertModal from '@components/AlertModal';
 import DataListToolbar from '@components/DataListToolbar';
 import ErrorDetail from '@components/ErrorDetail';
-import PaginatedDataList, { ToolbarAddButton } from '@components/PaginatedDataList';
+import PaginatedDataList, {
+  ToolbarAddButton,
+} from '@components/PaginatedDataList';
 import {
   getQSConfig,
   encodeQueryString,
-  parseNamespacedQueryString
+  parseNamespacedQueryString,
 } from '@util/qs';
 import { Organization } from '@types';
 
@@ -30,7 +32,7 @@ class OrganizationAccess extends React.Component {
     organization: Organization.isRequired,
   };
 
-  constructor (props) {
+  constructor(props) {
     super(props);
     this.state = {
       accessRecords: [],
@@ -52,32 +54,35 @@ class OrganizationAccess extends React.Component {
     this.handleDeleteOpen = this.handleDeleteOpen.bind(this);
   }
 
-  componentDidMount () {
+  componentDidMount() {
     this.loadAccessList();
   }
 
-  componentDidUpdate (prevProps) {
+  componentDidUpdate(prevProps) {
     const { location } = this.props;
 
-    const prevParams = parseNamespacedQueryString(QS_CONFIG, prevProps.location.search);
-    const currentParams = parseNamespacedQueryString(QS_CONFIG, location.search);
+    const prevParams = parseNamespacedQueryString(
+      QS_CONFIG,
+      prevProps.location.search
+    );
+    const currentParams = parseNamespacedQueryString(
+      QS_CONFIG,
+      location.search
+    );
 
     if (encodeQueryString(currentParams) !== encodeQueryString(prevParams)) {
       this.loadAccessList();
     }
   }
 
-  async loadAccessList () {
+  async loadAccessList() {
     const { organization, location } = this.props;
     const params = parseNamespacedQueryString(QS_CONFIG, location.search);
 
     this.setState({ contentError: null, hasContentLoading: true });
     try {
       const {
-        data: {
-          results: accessRecords = [],
-          count: itemCount = 0
-        }
+        data: { results: accessRecords = [], count: itemCount = 0 },
       } = await OrganizationsAPI.readAccessList(organization.id, params);
       this.setState({ itemCount, accessRecords });
     } catch (err) {
@@ -87,23 +92,23 @@ class OrganizationAccess extends React.Component {
     }
   }
 
-  handleDeleteOpen (deletionRole, deletionRecord) {
+  handleDeleteOpen(deletionRole, deletionRecord) {
     this.setState({ deletionRole, deletionRecord });
   }
 
-  handleDeleteCancel () {
+  handleDeleteCancel() {
     this.setState({ deletionRole: null, deletionRecord: null });
   }
 
-  handleDeleteErrorClose () {
+  handleDeleteErrorClose() {
     this.setState({
       deletionError: null,
       deletionRecord: null,
-      deletionRole: null
+      deletionRole: null,
     });
   }
 
-  async handleDeleteConfirm () {
+  async handleDeleteConfirm() {
     const { deletionRole, deletionRecord } = this.state;
 
     if (!deletionRole || !deletionRecord) {
@@ -112,7 +117,10 @@ class OrganizationAccess extends React.Component {
 
     let promise;
     if (typeof deletionRole.team_id !== 'undefined') {
-      promise = TeamsAPI.disassociateRole(deletionRole.team_id, deletionRole.id);
+      promise = TeamsAPI.disassociateRole(
+        deletionRole.team_id,
+        deletionRole.id
+      );
     } else {
       promise = UsersAPI.disassociateRole(deletionRecord.id, deletionRole.id);
     }
@@ -122,30 +130,30 @@ class OrganizationAccess extends React.Component {
       await promise.then(this.loadAccessList);
       this.setState({
         deletionRole: null,
-        deletionRecord: null
+        deletionRecord: null,
       });
     } catch (err) {
       this.setState({
         hasContentLoading: false,
-        deletionError: err
+        deletionError: err,
       });
     }
   }
 
-  handleAddClose () {
+  handleAddClose() {
     this.setState({ isAddModalOpen: false });
   }
 
-  handleAddOpen () {
+  handleAddOpen() {
     this.setState({ isAddModalOpen: true });
   }
 
-  handleAddSuccess () {
+  handleAddSuccess() {
     this.setState({ isAddModalOpen: false });
     this.loadAccessList();
   }
 
-  render () {
+  render() {
     const { organization, i18n } = this.props;
     const {
       accessRecords,
@@ -155,10 +163,11 @@ class OrganizationAccess extends React.Component {
       deletionRecord,
       deletionError,
       itemCount,
-      isAddModalOpen
+      isAddModalOpen,
     } = this.state;
     const canEdit = organization.summary_fields.user_capabilities.edit;
-    const isDeleteModalOpen = !hasContentLoading && !deletionError && deletionRole;
+    const isDeleteModalOpen =
+      !hasContentLoading && !deletionError && deletionRole;
 
     return (
       <Fragment>
@@ -174,12 +183,19 @@ class OrganizationAccess extends React.Component {
             { name: i18n._(t`Username`), key: 'username', isSortable: true },
             { name: i18n._(t`Last Name`), key: 'last_name', isSortable: true },
           ]}
-          renderToolbar={(props) => (
+          renderToolbar={props => (
             <DataListToolbar
               {...props}
-              additionalControls={canEdit ? [
-                <ToolbarAddButton key="add" onClick={this.handleAddOpen} />
-              ] : null}
+              additionalControls={
+                canEdit
+                  ? [
+                      <ToolbarAddButton
+                        key="add"
+                        onClick={this.handleAddOpen}
+                      />,
+                    ]
+                  : null
+              }
             />
           )}
           renderItem={accessRecord => (

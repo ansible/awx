@@ -6,7 +6,7 @@ import {
   Title,
   EmptyState as PFEmptyState,
   EmptyStateIcon,
-  EmptyStateBody
+  EmptyStateBody,
 } from '@patternfly/react-core';
 import { ExclamationTriangleIcon } from '@patternfly/react-icons';
 
@@ -17,20 +17,18 @@ const EmptyState = styled(PFEmptyState)`
 `;
 
 class ContentError extends React.Component {
-  render () {
+  render() {
     const { error, i18n } = this.props;
     return (
       <EmptyState>
         <EmptyStateIcon icon={ExclamationTriangleIcon} />
-        <Title size="lg">
-          {i18n._(t`Something went wrong...`)}
-        </Title>
+        <Title size="lg">{i18n._(t`Something went wrong...`)}</Title>
         <EmptyStateBody>
-          {i18n._(t`There was an error loading this content. Please reload the page.`)}
+          {i18n._(
+            t`There was an error loading this content. Please reload the page.`
+          )}
         </EmptyStateBody>
-        {error && (
-          <ErrorDetail error={error} />
-        )}
+        {error && <ErrorDetail error={error} />}
       </EmptyState>
     );
   }

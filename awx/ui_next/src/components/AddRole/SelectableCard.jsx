@@ -7,7 +7,10 @@ const SelectableItem = styled.div`
   border: 1px solid var(--pf-global--BorderColor--200);
   border-radius: var(--pf-global--BorderRadius--sm);
   border: 1px solid;
-  border-color: ${props => (props.isSelected ? 'var(--pf-global--active-color--100)' : 'var(--pf-global--BorderColor--200)')};
+  border-color: ${props =>
+    props.isSelected
+      ? 'var(--pf-global--active-color--100)'
+      : 'var(--pf-global--BorderColor--200)'};
   margin-right: 20px;
   font-weight: bold;
   display: flex;
@@ -17,7 +20,8 @@ const SelectableItem = styled.div`
 const Indicator = styled.div`
   display: flex;
   flex: 0 0 5px;
-  background-color: ${props => (props.isSelected ? 'var(--pf-global--active-color--100)' : null)};
+  background-color: ${props =>
+    props.isSelected ? 'var(--pf-global--active-color--100)' : null};
 `;
 
 const Label = styled.div`
@@ -28,12 +32,8 @@ const Label = styled.div`
 `;
 
 class SelectableCard extends Component {
-  render () {
-    const {
-      label,
-      onClick,
-      isSelected
-    } = this.props;
+  render() {
+    const { label, onClick, isSelected } = this.props;
 
     return (
       <SelectableItem
@@ -43,10 +43,7 @@ class SelectableCard extends Component {
         tabIndex="0"
         isSelected={isSelected}
       >
-
-        <Indicator
-          isSelected={isSelected}
-        />
+        <Indicator isSelected={isSelected} />
         <Label>{label}</Label>
       </SelectableItem>
     );
@@ -56,12 +53,12 @@ class SelectableCard extends Component {
 SelectableCard.propTypes = {
   label: PropTypes.string,
   onClick: PropTypes.func.isRequired,
-  isSelected: PropTypes.bool
+  isSelected: PropTypes.bool,
 };
 
 SelectableCard.defaultProps = {
   label: '',
-  isSelected: false
+  isSelected: false,
 };
 
 export default SelectableCard;

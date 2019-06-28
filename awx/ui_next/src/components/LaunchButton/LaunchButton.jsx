@@ -25,12 +25,12 @@ class LaunchButton extends React.Component {
     templateId: number.isRequired,
   };
 
-  constructor (props) {
+  constructor(props) {
     super(props);
 
     this.state = {
       launchError: null,
-      promptError: false
+      promptError: false,
     };
 
     this.handleLaunch = this.handleLaunch.bind(this);
@@ -38,18 +38,20 @@ class LaunchButton extends React.Component {
     this.handlePromptErrorClose = this.handlePromptErrorClose.bind(this);
   }
 
-  handleLaunchErrorClose () {
+  handleLaunchErrorClose() {
     this.setState({ launchError: null });
   }
 
-  handlePromptErrorClose () {
+  handlePromptErrorClose() {
     this.setState({ promptError: false });
   }
 
-  async handleLaunch () {
+  async handleLaunch() {
     const { history, templateId } = this.props;
     try {
-      const { data: launchConfig } = await JobTemplatesAPI.readLaunch(templateId);
+      const { data: launchConfig } = await JobTemplatesAPI.readLaunch(
+        templateId
+      );
       if (launchConfig.can_start_without_user_input) {
         const { data: job } = await JobTemplatesAPI.launch(templateId);
         history.push(`/jobs/${job.id}/details`);
@@ -61,18 +63,12 @@ class LaunchButton extends React.Component {
     }
   }
 
-  render () {
-    const {
-      launchError,
-      promptError
-    } = this.state;
+  render() {
+    const { launchError, promptError } = this.state;
     const { i18n } = this.props;
     return (
       <Fragment>
-        <Tooltip
-          content={i18n._(t`Launch Job`)}
-          position="top"
-        >
+        <Tooltip content={i18n._(t`Launch Job`)} position="top">
           <div>
             <StyledLaunchButton
               variant="plain"
@@ -98,7 +94,9 @@ class LaunchButton extends React.Component {
           title={i18n._(t`Attention!`)}
           onClose={this.handlePromptErrorClose}
         >
-          {i18n._(t`Launching jobs with promptable fields is not supported at this time.`)}
+          {i18n._(
+            t`Launching jobs with promptable fields is not supported at this time.`
+          )}
         </AlertModal>
       </Fragment>
     );

@@ -3,10 +3,7 @@ import { Redirect, withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
-import {
-  LoginForm,
-  LoginPage as PFLoginPage,
-} from '@patternfly/react-core';
+import { LoginForm, LoginPage as PFLoginPage } from '@patternfly/react-core';
 import { RootAPI } from '../../api';
 import { BrandName } from '../../variables';
 
@@ -19,7 +16,7 @@ const LoginPage = styled(PFLoginPage)`
 `;
 
 class AWXLogin extends Component {
-  constructor (props) {
+  constructor(props) {
     super(props);
 
     this.state = {
@@ -39,14 +36,16 @@ class AWXLogin extends Component {
     this.loadCustomLoginInfo = this.loadCustomLoginInfo.bind(this);
   }
 
-  async componentDidMount () {
+  async componentDidMount() {
     await this.loadCustomLoginInfo();
   }
 
-  async loadCustomLoginInfo () {
+  async loadCustomLoginInfo() {
     this.setState({ isLoading: true });
     try {
-      const { data: { custom_logo, custom_login_info } } = await RootAPI.read();
+      const {
+        data: { custom_logo, custom_login_info },
+      } = await RootAPI.read();
       const logo = custom_logo ? `data:image/jpeg;${custom_logo}` : brandLogo;
 
       this.setState({ logo, loginInfo: custom_login_info });
@@ -57,7 +56,7 @@ class AWXLogin extends Component {
     }
   }
 
-  async handleLoginButtonClick (event) {
+  async handleLoginButtonClick(event) {
     const { username, password, isAuthenticating } = this.state;
 
     event.preventDefault();
@@ -82,15 +81,15 @@ class AWXLogin extends Component {
     }
   }
 
-  handleChangeUsername (value) {
+  handleChangeUsername(value) {
     this.setState({ username: value, hasValidationError: false });
   }
 
-  handleChangePassword (value) {
+  handleChangePassword(value) {
     this.setState({ password: value, hasValidationError: false });
   }
 
-  render () {
+  render() {
     const {
       hasAuthError,
       hasValidationError,
@@ -111,7 +110,7 @@ class AWXLogin extends Component {
     }
 
     if (isAuthenticated(document.cookie)) {
-      return (<Redirect to="/" />);
+      return <Redirect to="/" />;
     }
 
     let helperText;
@@ -129,10 +128,10 @@ class AWXLogin extends Component {
         textContent={loginInfo}
       >
         <LoginForm
-          className={(hasAuthError || hasValidationError) ? 'pf-m-error' : ''}
+          className={hasAuthError || hasValidationError ? 'pf-m-error' : ''}
           usernameLabel={i18n._(t`Username`)}
           passwordLabel={i18n._(t`Password`)}
-          showHelperText={(hasAuthError || hasValidationError)}
+          showHelperText={hasAuthError || hasValidationError}
           helperText={helperText}
           usernameValue={username}
           passwordValue={password}
