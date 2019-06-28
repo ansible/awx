@@ -4680,6 +4680,22 @@ class ActivityStreamSerializer(BaseSerializer):
                 obj._prefetched_objects_cache[related_manager.prefetch_cache_name] = list(related_manager.all())
         return related_manager.all()
 
+    def _job_method(self, obj, fk, summary_fields):
+        summary_keys = {'job': 'job_template',
+                        'workflow_job_template_node': 'workflow_job_template'}
+        if fk not in summary_keys:
+            return
+        summary_fields[summary_keys[fk]] = []
+        item = {}
+        fields = SUMMARIZABLE_FK_FIELDS[summary_keys[fk]]
+        related_obj = getattr(obj, summary_keys[fk], None)
+        if related_obj is not None:
+            for field in fields:
+                fval = getattr(related_obj, field, None)
+                if fval is not None:
+                    item[field] = fval
+            summary_fields[summary_keys[fk]].append(item)
+
     def get_summary_fields(self, obj):
         summary_fields = OrderedDict()
         for fk, related_fields in self._local_summarizable_fk_fields:
@@ -4690,33 +4706,13 @@ class ActivityStreamSerializer(BaseSerializer):
                 if m2m_list:
                     summary_fields[fk] = []
                     for thisItem in m2m_list:
-                        if fk == 'job':
-                            summary_fields['job_template'] = []
-                            job_template_item = {}
-                            job_template_fields = SUMMARIZABLE_FK_FIELDS['job_template']
-                            job_template = getattr(thisItem, 'job_template', None)
-                            if job_template is not None:
-                                for field in job_template_fields:
-                                    fval = getattr(job_template, field, None)
-                                    if fval is not None:
-                                        job_template_item[field] = fval
-                                summary_fields['job_template'].append(job_template_item)
-                        if fk == 'workflow_job_template_node':
-                            summary_fields['workflow_job_template'] = []
-                            workflow_job_template_item = {}
-                            workflow_job_template_fields = SUMMARIZABLE_FK_FIELDS['workflow_job_template']
-                            workflow_job_template = getattr(thisItem, 'workflow_job_template', None)
-                            if workflow_job_template is not None:
-                                for field in workflow_job_template_fields:
-                                    fval = getattr(workflow_job_template, field, None)
-                                    if fval is not None:
-                                        workflow_job_template_item[field] = fval
-                                summary_fields['workflow_job_template'].append(workflow_job_template_item)
                         if fk == 'schedule':
                             unified_job_template = getattr(thisItem, 'unified_job_template', None)
                             if unified_job_template is not None:
                                 summary_fields[get_type_for_model(unified_job_template)] = {'id': unified_job_template.id,
                                                                                             'name': unified_job_template.name}
+                        else:
+                            self._job_method(thisItem, fk, summary_fields)
                         thisItemDict = {}
                         for field in related_fields:
                             fval = getattr(thisItem, field, None)
