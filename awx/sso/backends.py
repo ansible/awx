@@ -2,6 +2,7 @@
 # All Rights Reserved.
 
 # Python
+from collections import OrderedDict
 import logging
 import uuid
 
@@ -53,6 +54,20 @@ class LDAPSettings(BaseLDAPSettings):
             options = getattr(self, 'CONNECTION_OPTIONS', {})
             options[ldap.OPT_NETWORK_TIMEOUT] = 30
             self.CONNECTION_OPTIONS = options
+
+        # when specifying `.set_option()` calls for TLS in python-ldap, the
+        # *order* in which you invoke them *matters*, particularly in Python3,
+        # where dictionary insertion order is persisted
+        #
+        # specifically, it is *critical* that `ldap.OPT_X_TLS_NEWCTX` be set *last*
+        # this manual sorting puts `OPT_X_TLS_NEWCTX` *after* other TLS-related
+        # options
+        #
+        # see: https://github.com/python-ldap/python-ldap/issues/55
+        newctx_option = self.CONNECTION_OPTIONS.pop(ldap.OPT_X_TLS_NEWCTX, None)
+        self.CONNECTION_OPTIONS = OrderedDict(self.CONNECTION_OPTIONS)
+        if newctx_option:
+            self.CONNECTION_OPTIONS[ldap.OPT_X_TLS_NEWCTX] = newctx_option
 
 
 class LDAPBackend(BaseLDAPBackend):
