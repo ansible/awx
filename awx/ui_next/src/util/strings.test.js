@@ -1,4 +1,4 @@
-import { pluralize, getArticle, ucFirst } from './strings';
+import { pluralize, getArticle, ucFirst, toTitleCase } from './strings';
 
 describe('string utils', () => {
   describe('pluralize', () => {
@@ -29,6 +29,16 @@ describe('string utils', () => {
   describe('ucFirst', () => {
     test('should capitalize first character', () => {
       expect(ucFirst('team')).toEqual('Team');
+    });
+  });
+
+  describe('toTitleCase', () => {
+    test('should upper case each word', () => {
+      expect(toTitleCase('a_string_of_words')).toEqual('A String Of Words');
+    });
+
+    test('should return empty string for undefined', () => {
+      expect(toTitleCase(undefined)).toEqual('');
     });
   });
 });

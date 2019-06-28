@@ -3,7 +3,7 @@ import { string, func, bool, number } from 'prop-types';
 import { Button, Split, SplitItem } from '@patternfly/react-core';
 import styled from 'styled-components';
 import ButtonGroup from '@components/ButtonGroup';
-import { yamlToJson, jsonToYaml } from '@util/yaml';
+import { yamlToJson, jsonToYaml, isJson } from '@util/yaml';
 import CodeMirrorInput from './CodeMirrorInput';
 
 const YAML_MODE = 'yaml';
@@ -15,8 +15,19 @@ const SmallButton = styled(Button)`
 `;
 
 function VariablesInput (props) {
-  const { id, label, value, readOnly, rows, error, onChange, onError, className } = props;
-  const [mode, setMode] = useState(YAML_MODE);
+  const { id, label, readOnly, rows, error, onError, className } = props;
+  // eslint-disable-next-line react/destructuring-assignment
+  const [value, setValue] = useState(props.value);
+  const [mode, setMode] = useState(isJson(value) ? JSON_MODE : YAML_MODE);
+  // eslint-disable-next-line react/destructuring-assignment
+  const isControlled = !!props.onChange;
+
+  const onChange = (newValue) => {
+    if (isControlled) {
+      props.onChange(newValue);
+    }
+    setValue(newValue);
+  };
 
   return (
     <div className={`pf-c-form__group ${className || ''}`}>
@@ -88,7 +99,7 @@ VariablesInput.propTypes = {
 };
 VariablesInput.defaultProps = {
   readOnly: false,
-  onChange: () => {},
+  onChange: null,
   rows: 6,
   error: null,
   onError: () => {},
