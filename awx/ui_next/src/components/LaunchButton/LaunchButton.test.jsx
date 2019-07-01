@@ -13,9 +13,14 @@ describe('LaunchButton', () => {
       can_start_without_user_input: true,
     },
   });
+  const children = handleLaunch => (
+    <button type="submit" onClick={handleLaunch} />
+  );
 
   test('renders the expected content', () => {
-    const wrapper = mountWithContexts(<LaunchButton templateId={1} />);
+    const wrapper = mountWithContexts(
+      <LaunchButton templateId={1}>{children}</LaunchButton>
+    );
     expect(wrapper).toHaveLength(1);
   });
   test('redirects to details after successful launch', async done => {
@@ -27,15 +32,18 @@ describe('LaunchButton', () => {
         id: 9000,
       },
     });
-    const wrapper = mountWithContexts(<LaunchButton templateId={1} />, {
-      context: {
-        router: { history },
-      },
-    });
-    const launchButton = wrapper.find('LaunchButton__StyledLaunchButton');
-    launchButton.simulate('click');
-    await sleep(0);
+    const wrapper = mountWithContexts(
+      <LaunchButton templateId={1}>{children}</LaunchButton>,
+      {
+        context: {
+          router: { history },
+        },
+      }
+    );
+    const button = wrapper.find('button');
+    button.prop('onClick')();
     expect(JobTemplatesAPI.readLaunch).toHaveBeenCalledWith(1);
+    await sleep(0);
     expect(JobTemplatesAPI.launch).toHaveBeenCalledWith(1);
     expect(history.push).toHaveBeenCalledWith('/jobs/9000/details');
     done();
@@ -53,9 +61,11 @@ describe('LaunchButton', () => {
         },
       })
     );
-    const wrapper = mountWithContexts(<LaunchButton templateId={1} />);
-    const launchButton = wrapper.find('LaunchButton__StyledLaunchButton');
-    launchButton.simulate('click');
+    const wrapper = mountWithContexts(
+      <LaunchButton templateId={1}>{children}</LaunchButton>
+    );
+    const button = wrapper.find('button');
+    button.prop('onClick')();
     await waitForElement(
       wrapper,
       'Modal.at-c-alertModal--danger',

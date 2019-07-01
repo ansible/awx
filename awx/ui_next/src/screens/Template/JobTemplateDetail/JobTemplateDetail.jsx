@@ -13,6 +13,7 @@ import styled from 'styled-components';
 import { t } from '@lingui/macro';
 
 import ContentError from '@components/ContentError';
+import LaunchButton from '@components/LaunchButton';
 import ContentLoading from '@components/ContentLoading';
 import { ChipGroup, Chip } from '@components/Chip';
 import { DetailList, Detail } from '@components/DetailList';
@@ -83,9 +84,11 @@ class JobTemplateDetail extends Component {
         verbosity,
       },
       hasTemplateLoading,
+      template,
       i18n,
       match,
     } = this.props;
+    const canLaunch = summary_fields.user_capabilities.start;
     const { instanceGroups, hasContentLoading, contentError } = this.state;
     const verbosityOptions = [
       { verbosity: 0, details: i18n._(t`0 (Normal)`) },
@@ -286,14 +289,25 @@ class JobTemplateDetail extends Component {
                 {i18n._(t`Edit`)}
               </Button>
             )}
-            <Button
-              variant="secondary"
-              component={Link}
-              to="/templates"
-              aria-label={i18n._(t`Launch`)}
-            >
-              {i18n._(t`Launch`)}
-            </Button>
+            {canLaunch && (
+              <LaunchButton
+                variant="secondary"
+                component={Link}
+                to="/templates"
+                templateId={template.id}
+                aria-label={i18n._(t`Launch`)}
+              >
+                {handleLaunch => (
+                  <Button
+                    variant="secondary"
+                    type="submit"
+                    onClick={handleLaunch}
+                  >
+                    {i18n._(t`Launch`)}
+                  </Button>
+                )}
+              </LaunchButton>
+            )}
             <Button
               variant="secondary"
               component={Link}
