@@ -8,26 +8,37 @@ import OrganizationNotifications from './OrganizationNotifications';
 jest.mock('@api');
 
 describe('<OrganizationNotifications />', () => {
-  let data;
+  const data = {
+    count: 2,
+    results: [
+      {
+        id: 1,
+        name: 'Notification one',
+        url: '/api/v2/notification_templates/1/',
+        notification_type: 'email',
+      },
+      {
+        id: 2,
+        name: 'Notification two',
+        url: '/api/v2/notification_templates/2/',
+        notification_type: 'email',
+      },
+    ],
+  };
+
+  OrganizationsAPI.readOptionsNotificationTemplates.mockReturnValue({
+    data: {
+      actions: {
+        GET: {
+          notification_type: {
+            choices: [['email', 'Email']],
+          },
+        },
+      },
+    },
+  });
 
   beforeEach(() => {
-    data = {
-      count: 2,
-      results: [
-        {
-          id: 1,
-          name: 'Notification one',
-          url: '/api/v2/notification_templates/1/',
-          notification_type: 'email',
-        },
-        {
-          id: 2,
-          name: 'Notification two',
-          url: '/api/v2/notification_templates/2/',
-          notification_type: 'email',
-        },
-      ],
-    };
     OrganizationsAPI.readNotificationTemplates.mockReturnValue({ data });
     OrganizationsAPI.readNotificationTemplatesSuccess.mockReturnValue({
       data: { results: [{ id: 1 }] },

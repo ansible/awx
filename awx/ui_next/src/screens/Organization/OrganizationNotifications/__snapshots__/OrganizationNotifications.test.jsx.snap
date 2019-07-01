@@ -410,9 +410,9 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                         "$$typeof": Symbol(react.forward_ref),
                                                         "attrs": Array [],
                                                         "componentStyle": ComponentStyle {
-                                                          "componentId": "sc-bxivhb",
+                                                          "componentId": "sc-htpNat",
                                                           "isStatic": true,
-                                                          "lastClassName": "gYEJOJ",
+                                                          "lastClassName": "dqEVhr",
                                                           "rules": Array [
                                                             "flex-grow: 1;",
                                                           ],
@@ -420,7 +420,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                         "displayName": "Styled(ToolbarItem)",
                                                         "foldedComponentIds": Array [],
                                                         "render": [Function],
-                                                        "styledComponentId": "sc-bxivhb",
+                                                        "styledComponentId": "sc-htpNat",
                                                         "target": [Function],
                                                         "toString": [Function],
                                                         "warnTooManyClasses": [Function],
@@ -430,10 +430,10 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                     forwardedRef={null}
                                                   >
                                                     <ToolbarItem
-                                                      className="sc-bxivhb gYEJOJ"
+                                                      className="sc-htpNat dqEVhr"
                                                     >
                                                       <div
-                                                        className="pf-l-toolbar__item sc-bxivhb gYEJOJ"
+                                                        className="pf-l-toolbar__item sc-htpNat dqEVhr"
                                                       >
                                                         <WithI18n
                                                           columns={
@@ -1441,9 +1441,9 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                                   "$$typeof": Symbol(react.forward_ref),
                                                                   "attrs": Array [],
                                                                   "componentStyle": ComponentStyle {
-                                                                    "componentId": "sc-htpNat",
+                                                                    "componentId": "sc-bwzfXH",
                                                                     "isStatic": true,
-                                                                    "lastClassName": "jWbbwS",
+                                                                    "lastClassName": "iNPUwu",
                                                                     "rules": Array [
                                                                       "padding: 0;",
                                                                     ],
@@ -1451,7 +1451,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                                   "displayName": "Styled(Button)",
                                                                   "foldedComponentIds": Array [],
                                                                   "render": [Function],
-                                                                  "styledComponentId": "sc-htpNat",
+                                                                  "styledComponentId": "sc-bwzfXH",
                                                                   "target": [Function],
                                                                   "toString": [Function],
                                                                   "warnTooManyClasses": [Function],
@@ -1464,7 +1464,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                             >
                                                               <Button
                                                                 aria-label="Sort"
-                                                                className="sc-htpNat jWbbwS"
+                                                                className="sc-bwzfXH iNPUwu"
                                                                 component="button"
                                                                 isActive={false}
                                                                 isBlock={false}
@@ -1479,7 +1479,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                                 <button
                                                                   aria-disabled={null}
                                                                   aria-label="Sort"
-                                                                  className="pf-c-button pf-m-plain sc-htpNat jWbbwS"
+                                                                  className="pf-c-button pf-m-plain sc-bwzfXH iNPUwu"
                                                                   disabled={false}
                                                                   onClick={[Function]}
                                                                   tabIndex={null}
@@ -1619,6 +1619,11 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                             }
                             successTurnedOn={true}
                             toggleNotification={[Function]}
+                            typeLabels={
+                              Object {
+                                "email": "Email",
+                              }
+                            }
                           >
                             <I18n
                               update={true}
@@ -1639,6 +1644,11 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                 }
                                 successTurnedOn={true}
                                 toggleNotification={[Function]}
+                                typeLabels={
+                                  Object {
+                                    "email": "Email",
+                                  }
+                                }
                               >
                                 <DataListItem
                                   aria-labelledby="items-list-item-1"
@@ -1676,11 +1686,9 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                     Notification one
                                                   </b>
                                                 </ForwardRef>
-                                                <ForwardRef
-                                                  isRead={true}
-                                                >
-                                                  email
-                                                </ForwardRef>
+                                              </ForwardRef>,
+                                              <ForwardRef>
+                                                Email
                                               </ForwardRef>,
                                               <ForwardRef
                                                 righthalf="true"
@@ -1813,47 +1821,55 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                         </Link>
                                                       </StyledComponent>
                                                     </Styled(Link)>
-                                                    <Styled(Badge)
-                                                      isRead={true}
-                                                    >
-                                                      <StyledComponent
-                                                        forwardedComponent={
-                                                          Object {
-                                                            "$$typeof": Symbol(react.forward_ref),
-                                                            "attrs": Array [],
-                                                            "componentStyle": ComponentStyle {
-                                                              "componentId": "sc-bwzfXH",
-                                                              "isStatic": true,
-                                                              "lastClassName": "chTbOZ",
-                                                              "rules": Array [
-                                                                "text-transform: capitalize;",
-                                                              ],
-                                                            },
-                                                            "displayName": "Styled(Badge)",
-                                                            "foldedComponentIds": Array [],
-                                                            "render": [Function],
-                                                            "styledComponentId": "sc-bwzfXH",
-                                                            "target": [Function],
-                                                            "toString": [Function],
-                                                            "warnTooManyClasses": [Function],
-                                                            "withComponent": [Function],
-                                                          }
-                                                        }
-                                                        forwardedRef={null}
-                                                        isRead={true}
-                                                      >
-                                                        <Badge
-                                                          className="sc-bwzfXH chTbOZ"
-                                                          isRead={true}
-                                                        >
-                                                          <span
-                                                            className="pf-c-badge pf-m-read sc-bwzfXH chTbOZ"
-                                                          >
-                                                            email
-                                                          </span>
-                                                        </Badge>
-                                                      </StyledComponent>
-                                                    </Styled(Badge)>
+                                                  </div>
+                                                </DataListCell>
+                                              </StyledComponent>
+                                            </NotificationListItem__DataListCell>
+                                            <NotificationListItem__DataListCell
+                                              key="type"
+                                            >
+                                              <StyledComponent
+                                                forwardedComponent={
+                                                  Object {
+                                                    "$$typeof": Symbol(react.forward_ref),
+                                                    "attrs": Array [],
+                                                    "componentStyle": ComponentStyle {
+                                                      "componentId": "NotificationListItem__DataListCell-j7c411-0",
+                                                      "isStatic": false,
+                                                      "lastClassName": "hoXOpW",
+                                                      "rules": Array [
+                                                        "display:flex;justify-content:",
+                                                        [Function],
+                                                        ";padding-bottom:",
+                                                        [Function],
+                                                        ";@media screen and (min-width:768px){justify-content:",
+                                                        [Function],
+                                                        ";padding-bottom:0;}",
+                                                      ],
+                                                    },
+                                                    "displayName": "NotificationListItem__DataListCell",
+                                                    "foldedComponentIds": Array [],
+                                                    "render": [Function],
+                                                    "styledComponentId": "NotificationListItem__DataListCell-j7c411-0",
+                                                    "target": [Function],
+                                                    "toString": [Function],
+                                                    "warnTooManyClasses": [Function],
+                                                    "withComponent": [Function],
+                                                  }
+                                                }
+                                                forwardedRef={null}
+                                              >
+                                                <DataListCell
+                                                  alignRight={false}
+                                                  className="NotificationListItem__DataListCell-j7c411-0 kIdLtz"
+                                                  isFilled={true}
+                                                  isIcon={false}
+                                                  width={1}
+                                                >
+                                                  <div
+                                                    className="pf-c-data-list__cell NotificationListItem__DataListCell-j7c411-0 kIdLtz"
+                                                  >
+                                                    Email
                                                   </div>
                                                 </DataListCell>
                                               </StyledComponent>
@@ -2094,6 +2110,11 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                             }
                             successTurnedOn={false}
                             toggleNotification={[Function]}
+                            typeLabels={
+                              Object {
+                                "email": "Email",
+                              }
+                            }
                           >
                             <I18n
                               update={true}
@@ -2114,6 +2135,11 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                 }
                                 successTurnedOn={false}
                                 toggleNotification={[Function]}
+                                typeLabels={
+                                  Object {
+                                    "email": "Email",
+                                  }
+                                }
                               >
                                 <DataListItem
                                   aria-labelledby="items-list-item-2"
@@ -2151,11 +2177,9 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                     Notification two
                                                   </b>
                                                 </ForwardRef>
-                                                <ForwardRef
-                                                  isRead={true}
-                                                >
-                                                  email
-                                                </ForwardRef>
+                                              </ForwardRef>,
+                                              <ForwardRef>
+                                                Email
                                               </ForwardRef>,
                                               <ForwardRef
                                                 righthalf="true"
@@ -2288,47 +2312,55 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                         </Link>
                                                       </StyledComponent>
                                                     </Styled(Link)>
-                                                    <Styled(Badge)
-                                                      isRead={true}
-                                                    >
-                                                      <StyledComponent
-                                                        forwardedComponent={
-                                                          Object {
-                                                            "$$typeof": Symbol(react.forward_ref),
-                                                            "attrs": Array [],
-                                                            "componentStyle": ComponentStyle {
-                                                              "componentId": "sc-bwzfXH",
-                                                              "isStatic": true,
-                                                              "lastClassName": "chTbOZ",
-                                                              "rules": Array [
-                                                                "text-transform: capitalize;",
-                                                              ],
-                                                            },
-                                                            "displayName": "Styled(Badge)",
-                                                            "foldedComponentIds": Array [],
-                                                            "render": [Function],
-                                                            "styledComponentId": "sc-bwzfXH",
-                                                            "target": [Function],
-                                                            "toString": [Function],
-                                                            "warnTooManyClasses": [Function],
-                                                            "withComponent": [Function],
-                                                          }
-                                                        }
-                                                        forwardedRef={null}
-                                                        isRead={true}
-                                                      >
-                                                        <Badge
-                                                          className="sc-bwzfXH chTbOZ"
-                                                          isRead={true}
-                                                        >
-                                                          <span
-                                                            className="pf-c-badge pf-m-read sc-bwzfXH chTbOZ"
-                                                          >
-                                                            email
-                                                          </span>
-                                                        </Badge>
-                                                      </StyledComponent>
-                                                    </Styled(Badge)>
+                                                  </div>
+                                                </DataListCell>
+                                              </StyledComponent>
+                                            </NotificationListItem__DataListCell>
+                                            <NotificationListItem__DataListCell
+                                              key="type"
+                                            >
+                                              <StyledComponent
+                                                forwardedComponent={
+                                                  Object {
+                                                    "$$typeof": Symbol(react.forward_ref),
+                                                    "attrs": Array [],
+                                                    "componentStyle": ComponentStyle {
+                                                      "componentId": "NotificationListItem__DataListCell-j7c411-0",
+                                                      "isStatic": false,
+                                                      "lastClassName": "hoXOpW",
+                                                      "rules": Array [
+                                                        "display:flex;justify-content:",
+                                                        [Function],
+                                                        ";padding-bottom:",
+                                                        [Function],
+                                                        ";@media screen and (min-width:768px){justify-content:",
+                                                        [Function],
+                                                        ";padding-bottom:0;}",
+                                                      ],
+                                                    },
+                                                    "displayName": "NotificationListItem__DataListCell",
+                                                    "foldedComponentIds": Array [],
+                                                    "render": [Function],
+                                                    "styledComponentId": "NotificationListItem__DataListCell-j7c411-0",
+                                                    "target": [Function],
+                                                    "toString": [Function],
+                                                    "warnTooManyClasses": [Function],
+                                                    "withComponent": [Function],
+                                                  }
+                                                }
+                                                forwardedRef={null}
+                                              >
+                                                <DataListCell
+                                                  alignRight={false}
+                                                  className="NotificationListItem__DataListCell-j7c411-0 kIdLtz"
+                                                  isFilled={true}
+                                                  isIcon={false}
+                                                  width={1}
+                                                >
+                                                  <div
+                                                    className="pf-c-data-list__cell NotificationListItem__DataListCell-j7c411-0 kIdLtz"
+                                                  >
+                                                    Email
                                                   </div>
                                                 </DataListCell>
                                               </StyledComponent>

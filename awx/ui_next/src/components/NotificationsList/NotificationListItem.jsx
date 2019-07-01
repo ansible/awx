@@ -4,7 +4,6 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 import {
-  Badge,
   Switch as PFSwitch,
   DataListItem,
   DataListItemRow,
@@ -39,6 +38,7 @@ function NotificationListItem(props) {
     errorTurnedOn,
     toggleNotification,
     i18n,
+    typeLabels,
   } = props;
 
   return (
@@ -60,9 +60,9 @@ function NotificationListItem(props) {
                   {notification.name}
                 </b>
               </Link>
-              <Badge css="text-transform: capitalize;" isRead>
-                {notification.notification_type}
-              </Badge>
+            </DataListCell>,
+            <DataListCell key="type">
+              {typeLabels[notification.notification_type]}
             </DataListCell>,
             <DataListCell righthalf="true" key="toggles">
               <Switch
@@ -108,6 +108,7 @@ NotificationListItem.propTypes = {
   errorTurnedOn: bool,
   successTurnedOn: bool,
   toggleNotification: func.isRequired,
+  typeLabels: shape().isRequired,
 };
 
 NotificationListItem.defaultProps = {

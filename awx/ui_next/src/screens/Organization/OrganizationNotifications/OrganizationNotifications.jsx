@@ -35,6 +35,7 @@ class OrganizationNotifications extends Component {
       notifications: [],
       successTemplateIds: [],
       errorTemplateIds: [],
+      typeLabels: null,
     };
     this.handleNotificationToggle = this.handleNotificationToggle.bind(this);
     this.handleNotificationErrorClose = this.handleNotificationErrorClose.bind(
@@ -56,13 +57,23 @@ class OrganizationNotifications extends Component {
 
   async loadNotifications() {
     const { id, location } = this.props;
+    const { typeLabels } = this.state;
     const params = parseNamespacedQueryString(QS_CONFIG, location.search);
+
+    const promises = [OrganizationsAPI.readNotificationTemplates(id, params)];
+
+    if (!typeLabels) {
+      promises.push(OrganizationsAPI.readOptionsNotificationTemplates(id));
+    }
 
     this.setState({ contentError: null, hasContentLoading: true });
     try {
-      const {
-        data: { count: itemCount = 0, results: notifications = [] },
-      } = await OrganizationsAPI.readNotificationTemplates(id, params);
+      const [
+        {
+          data: { count: itemCount = 0, results: notifications = [] },
+        },
+        optionsResponse,
+      ] = await Promise.all(promises);
 
       let idMatchParams;
       if (notifications.length > 0) {
@@ -79,12 +90,31 @@ class OrganizationNotifications extends Component {
         OrganizationsAPI.readNotificationTemplatesError(id, idMatchParams),
       ]);
 
-      this.setState({
+      const stateToUpdate = {
         itemCount,
         notifications,
         successTemplateIds: successTemplates.results.map(s => s.id),
         errorTemplateIds: errorTemplates.results.map(e => e.id),
-      });
+      };
+
+      if (!typeLabels) {
+        const {
+          data: {
+            actions: {
+              GET: {
+                notification_type: { choices },
+              },
+            },
+          },
+        } = optionsResponse;
+        // The structure of choices looks like [['slack', 'Slack'], ['email', 'Email'], ...]
+        stateToUpdate.typeLabels = choices.reduce(
+          (map, notifType) => ({ ...map, [notifType[0]]: notifType[1] }),
+          {}
+        );
+      }
+
+      this.setState(stateToUpdate);
     } catch (err) {
       this.setState({ contentError: err });
     } finally {
@@ -148,6 +178,7 @@ class OrganizationNotifications extends Component {
       notifications,
       successTemplateIds,
       errorTemplateIds,
+      typeLabels,
     } = this.state;
 
     return (
@@ -169,6 +200,7 @@ class OrganizationNotifications extends Component {
               toggleNotification={this.handleNotificationToggle}
               errorTurnedOn={errorTemplateIds.includes(notification.id)}
               successTurnedOn={successTemplateIds.includes(notification.id)}
+              typeLabels={typeLabels}
             />
           )}
         />

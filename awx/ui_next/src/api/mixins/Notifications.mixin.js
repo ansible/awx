@@ -1,5 +1,9 @@
 const NotificationsMixin = parent =>
   class extends parent {
+    readOptionsNotificationTemplates(id) {
+      return this.http.options(`${this.baseUrl}${id}/notification_templates/`);
+    }
+
     readNotificationTemplates(id, params = {}) {
       return this.http.get(`${this.baseUrl}${id}/notification_templates/`, {
         params,
