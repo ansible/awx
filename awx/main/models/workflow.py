@@ -38,7 +38,8 @@ from awx.main.fields import JSONField
 from copy import copy
 from urllib.parse import urljoin
 
-__all__ = ['WorkflowJobTemplate', 'WorkflowJob', 'WorkflowJobOptions', 'WorkflowJobNode', 'WorkflowJobTemplateNode',]
+__all__ = ['WorkflowJobTemplate', 'WorkflowJob', 'WorkflowJobOptions', 'WorkflowJobNode',
+           'WorkflowJobTemplateNode', 'WorkflowApprovalTemplate', 'WorkflowApproval']
 
 
 logger = logging.getLogger('awx.main.models.workflow')
@@ -600,3 +601,23 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
         # WorkflowJobs don't _actually_ run anything in the dispatcher, so
         # there's no point in asking the dispatcher if it knows about this task
         return self.status == 'running'
+
+
+class WorkflowApprovalTemplate(UnifiedJobTemplate):
+
+    class Meta:
+        app_label = 'main'
+
+    @classmethod
+    def _get_unified_job_class(cls):
+        return WorkflowApproval
+
+    @classmethod
+    def _get_unified_job_field_names(cls):
+        return ['name', 'description']
+
+
+class WorkflowApproval(UnifiedJob):
+
+    class Meta:
+        app_label = 'main'
