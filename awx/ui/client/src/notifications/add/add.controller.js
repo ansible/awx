@@ -31,11 +31,7 @@ export default ['Rest', 'Wait', 'NotificationsFormObject',
                         $state.go("^");
                         Alert('Permission Error', 'You do not have permission to add a notification template.', 'alert-info');
                     }
-                    // TODO: get default messages off data
-                    console.log('OPTIONS:', data);
-                    defaultMessages.start_message = 'It started';
-                    defaultMessages.success_message = 'It succeeded';
-                    defaultMessages.error_message = 'It failed';
+                    defaultMessages = data.actions.POST.messages.default;
                     MessageUtils.setMessagesOnScope($scope, null, defaultMessages);
                 });
             // apply form definition's default field values

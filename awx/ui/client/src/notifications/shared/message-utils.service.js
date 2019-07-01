@@ -6,29 +6,32 @@ export default [function () {
             }
             return {
                 start: {
-                    message: $scope.start_message === defaultMessages.start_message
+                    message: $scope.start_message === defaultMessages.start.message
                         ? null : $scope.start_message,
-                    body: $scope.start_body === defaultMessages.start_body
+                    body: $scope.start_body === defaultMessages.start.body
                         ? null : $scope.start_body,
                 },
                 success: {
-                    message: $scope.success_message === defaultMessages.success_message
+                    message: $scope.success_message === defaultMessages.success.message
                         ? null : $scope.success_message,
-                    body: $scope.success_body === defaultMessages.success_body
+                    body: $scope.success_body === defaultMessages.success.body
                         ? null : $scope.success_body,
                 },
                 error: {
-                    message: $scope.error_message === defaultMessages.error_message
+                    message: $scope.error_message === defaultMessages.error.message
                         ? null : $scope.error_message,
-                    body: $scope.error_body === defaultMessages.error_body
+                    body: $scope.error_body === defaultMessages.error.body
                         ? null : $scope.error_body,
                 }
             };
         },
         setMessagesOnScope: function ($scope, messages, defaultMessages) {
-          $scope.start_message = defaultMessages.start_message;
-          $scope.success_message = defaultMessages.success_message;
-          $scope.error_message = defaultMessages.error_message;
+          $scope.start_message = defaultMessages.start.message;
+          $scope.start_body = defaultMessages.start.body;
+          $scope.success_message = defaultMessages.success.message;
+          $scope.success_body = defaultMessages.success.body;
+          $scope.error_message = defaultMessages.error.message;
+          $scope.error_body = defaultMessages.error.body;
           if (!messages) {
             return;
           }

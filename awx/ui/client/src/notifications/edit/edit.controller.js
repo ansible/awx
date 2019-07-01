@@ -38,10 +38,15 @@ export default ['Rest', 'Wait',
                 }
             });
 
-            // TODO: get OPTIONS for defaultMessages
-            defaultMessages.start_message = 'It started';
-            defaultMessages.success_message = 'It succeeded';
-            defaultMessages.error_message = 'It failed';
+            Rest.setUrl(GetBasePath('notification_templates'));
+            Rest.options()
+                .then(({data}) => {
+                    if (!data.actions.POST) {
+                        $state.go("^");
+                        Alert('Permission Error', 'You do not have permission to add a notification template.', 'alert-info');
+                    }
+                    defaultMessages = data.actions.POST.messages.default;
+                });
 
             GetChoices({
                 scope: $scope,
