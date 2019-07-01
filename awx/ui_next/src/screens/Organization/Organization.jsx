@@ -107,8 +107,6 @@ class Organization extends Component {
       isAdminOfThisOrg,
     } = this.state;
 
-    const foo = 'testing linter';
-
     const canSeeNotificationsTab =
       me.is_system_auditor || isNotifAdmin || isAuditorOfThisOrg;
     const canToggleNotifications =

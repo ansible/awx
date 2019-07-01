@@ -213,7 +213,6 @@ describe.only('<Organization />', () => {
     OrganizationsAPI.readDetail.mockResolvedValue(mockDetails);
     OrganizationsAPI.read.mockImplementation(getOrganizations);
     mountWithContexts(<Organization setBreadcrumb={() => {}} me={mockMe} />);
-    expect(1).toBe(2);
   });
 
   test('notifications tab shown for admins', async done => {
