@@ -47,47 +47,50 @@ function NotificationListItem(props) {
       key={notification.id}
     >
       <DataListItemRow>
-        <DataListItemCells dataListCells={[
-          <DataListCell key="name">
-            <Link
-              to={{
-                pathname: detailUrl
-              }}
-              css="margin-right: 1.5em;"
-            >
-              <b id={`items-list-item-${notification.id}`}>{notification.name}</b>
-            </Link>
-          </DataListCell>,
-          <DataListCell key="type">
-            {typeLabels[notification.notification_type]}
-          </DataListCell>,
-          <DataListCell righthalf="true" key="toggles">
-            <Switch
-              id={`notification-${notification.id}-success-toggle`}
-              label={i18n._(t`Successful`)}
-              isChecked={successTurnedOn}
-              isDisabled={!canToggleNotifications}
-              onChange={() => toggleNotification(
-                notification.id,
-                successTurnedOn,
-                'success'
-              )}
-              aria-label={i18n._(t`Toggle notification success`)}
-            />
-            <Switch
-              id={`notification-${notification.id}-error-toggle`}
-              label={i18n._(t`Failure`)}
-              isChecked={errorTurnedOn}
-              isDisabled={!canToggleNotifications}
-              onChange={() => toggleNotification(
-                notification.id,
-                errorTurnedOn,
-                'error'
-              )}
-              aria-label={i18n._(t`Toggle notification failure`)}
-            />
-          </DataListCell>
-        ]}
+        <DataListItemCells
+          dataListCells={[
+            <DataListCell key="name">
+              <Link
+                to={{
+                  pathname: detailUrl,
+                }}
+                css="margin-right: 1.5em;"
+              >
+                <b id={`items-list-item-${notification.id}`}>
+                  {notification.name}
+                </b>
+              </Link>
+            </DataListCell>,
+            <DataListCell key="type">
+              {typeLabels[notification.notification_type]}
+            </DataListCell>,
+            <DataListCell righthalf="true" key="toggles">
+              <Switch
+                id={`notification-${notification.id}-success-toggle`}
+                label={i18n._(t`Successful`)}
+                isChecked={successTurnedOn}
+                isDisabled={!canToggleNotifications}
+                onChange={() =>
+                  toggleNotification(
+                    notification.id,
+                    successTurnedOn,
+                    'success'
+                  )
+                }
+                aria-label={i18n._(t`Toggle notification success`)}
+              />
+              <Switch
+                id={`notification-${notification.id}-error-toggle`}
+                label={i18n._(t`Failure`)}
+                isChecked={errorTurnedOn}
+                isDisabled={!canToggleNotifications}
+                onChange={() =>
+                  toggleNotification(notification.id, errorTurnedOn, 'error')
+                }
+                aria-label={i18n._(t`Toggle notification failure`)}
+              />
+            </DataListCell>,
+          ]}
         />
       </DataListItemRow>
     </DataListItem>
@@ -105,7 +108,7 @@ NotificationListItem.propTypes = {
   errorTurnedOn: bool,
   successTurnedOn: bool,
   toggleNotification: func.isRequired,
-  typeLabels: shape().isRequired
+  typeLabels: shape().isRequired,
 };
 
 NotificationListItem.defaultProps = {

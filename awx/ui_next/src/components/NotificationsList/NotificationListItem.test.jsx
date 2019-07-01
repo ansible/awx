@@ -9,11 +9,11 @@ describe('<NotificationListItem canToggleNotifications />', () => {
   const mockNotif = {
     id: 9000,
     name: 'Foo',
-    notification_type: 'slack'
+    notification_type: 'slack',
   };
 
   const typeLabels = {
-    slack: 'Slack'
+    slack: 'Slack',
   };
 
   beforeEach(() => {
@@ -51,7 +51,10 @@ describe('<NotificationListItem canToggleNotifications />', () => {
         typeLabels={typeLabels}
       />
     );
-    const typeCell = wrapper.find('DataListCell').at(1).find('div');
+    const typeCell = wrapper
+      .find('DataListCell')
+      .at(1)
+      .find('div');
     expect(typeCell.text()).toBe('Slack');
   });
 

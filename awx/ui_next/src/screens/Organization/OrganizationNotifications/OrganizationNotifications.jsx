@@ -35,7 +35,7 @@ class OrganizationNotifications extends Component {
       notifications: [],
       successTemplateIds: [],
       errorTemplateIds: [],
-      typeLabels: null
+      typeLabels: null,
     };
     this.handleNotificationToggle = this.handleNotificationToggle.bind(this);
     this.handleNotificationErrorClose = this.handleNotificationErrorClose.bind(
@@ -60,9 +60,7 @@ class OrganizationNotifications extends Component {
     const { typeLabels } = this.state;
     const params = parseNamespacedQueryString(QS_CONFIG, location.search);
 
-    const promises = [
-      OrganizationsAPI.readNotificationTemplates(id, params)
-    ];
+    const promises = [OrganizationsAPI.readNotificationTemplates(id, params)];
 
     if (!typeLabels) {
       promises.push(OrganizationsAPI.readOptionsNotificationTemplates(id));
@@ -70,12 +68,12 @@ class OrganizationNotifications extends Component {
 
     this.setState({ contentError: null, hasContentLoading: true });
     try {
-      const [{
-        data: {
-          count: itemCount = 0,
-          results: notifications = [],
-        }
-      }, optionsResponse] = await Promise.all(promises);
+      const [
+        {
+          data: { count: itemCount = 0, results: notifications = [] },
+        },
+        optionsResponse,
+      ] = await Promise.all(promises);
 
       let idMatchParams;
       if (notifications.length > 0) {
@@ -100,10 +98,20 @@ class OrganizationNotifications extends Component {
       };
 
       if (!typeLabels) {
-        const { data: { actions: { GET: { notification_type: {choices} } } } } = optionsResponse;
+        const {
+          data: {
+            actions: {
+              GET: {
+                notification_type: { choices },
+              },
+            },
+          },
+        } = optionsResponse;
         // The structure of choices looks like [['slack', 'Slack'], ['email', 'Email'], ...]
-        stateToUpdate.typeLabels =
-          choices.reduce((map, notifType) => ({ ...map, [notifType[0]]: notifType[1]}), {});
+        stateToUpdate.typeLabels = choices.reduce(
+          (map, notifType) => ({ ...map, [notifType[0]]: notifType[1] }),
+          {}
+        );
       }
 
       this.setState(stateToUpdate);

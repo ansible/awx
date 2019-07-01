@@ -10,17 +10,20 @@ jest.mock('@api');
 describe('<OrganizationNotifications />', () => {
   const data = {
     count: 2,
-    results: [{
-      id: 1,
-      name: 'Notification one',
-      url: '/api/v2/notification_templates/1/',
-      notification_type: 'email',
-    }, {
-      id: 2,
-      name: 'Notification two',
-      url: '/api/v2/notification_templates/2/',
-      notification_type: 'email',
-    }]
+    results: [
+      {
+        id: 1,
+        name: 'Notification one',
+        url: '/api/v2/notification_templates/1/',
+        notification_type: 'email',
+      },
+      {
+        id: 2,
+        name: 'Notification two',
+        url: '/api/v2/notification_templates/2/',
+        notification_type: 'email',
+      },
+    ],
   };
 
   OrganizationsAPI.readOptionsNotificationTemplates.mockReturnValue({
@@ -28,13 +31,11 @@ describe('<OrganizationNotifications />', () => {
       actions: {
         GET: {
           notification_type: {
-            choices: [
-              ['email', 'Email']
-            ]
-          }
-        }
-      }
-    }
+            choices: [['email', 'Email']],
+          },
+        },
+      },
+    },
   });
 
   beforeEach(() => {
