@@ -119,24 +119,28 @@ def ship(path):
     """
     Ship gathered metrics via the Insights agent
     """
-    agent = 'insights-client'
-    if shutil.which(agent) is None:
-        logger.error('could not find {} on PATH'.format(agent))
-        return
-    logger.debug('shipping analytics file: {}'.format(path))
     try:
-        cmd = [
-            agent, '--payload', path, '--content-type', settings.INSIGHTS_AGENT_MIME
-        ]
-        output = smart_str(subprocess.check_output(cmd, timeout=60 * 5))
-        logger.debug(output)
-        # reset the `last_run` when data is shipped
-        run_now = now()
-        state = TowerAnalyticsState.get_solo()
-        state.last_run = run_now
-        state.save()
+        agent = 'insights-client'
+        if shutil.which(agent) is None:
+            logger.error('could not find {} on PATH'.format(agent))
+            return
+        logger.debug('shipping analytics file: {}'.format(path))
+        try:
+            cmd = [
+                agent, '--payload', path, '--content-type', settings.INSIGHTS_AGENT_MIME
+            ]
+            output = smart_str(subprocess.check_output(cmd, timeout=60 * 5))
+            logger.debug(output)
+            # reset the `last_run` when data is shipped
+            run_now = now()
+            state = TowerAnalyticsState.get_solo()
+            state.last_run = run_now
+            state.save()
 
-    except subprocess.CalledProcessError:
-        logger.exception('{} failure:'.format(cmd))
-    except subprocess.TimeoutExpired:
-        logger.exception('{} timeout:'.format(cmd))
+        except subprocess.CalledProcessError:
+            logger.exception('{} failure:'.format(cmd))
+        except subprocess.TimeoutExpired:
+            logger.exception('{} timeout:'.format(cmd))
+    finally:
+        # cleanup tar.gz
+        os.remove(path)
