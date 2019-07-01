@@ -161,6 +161,7 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
                     !launchConf.ask_tags_on_launch &&
                     !launchConf.ask_skip_tags_on_launch &&
                     !launchConf.ask_diff_mode_on_launch &&
+                    !launchConf.ask_scm_branch_on_launch &&
                     !launchConf.survey_enabled &&
                     !launchConf.credential_needed_to_start &&
                     !launchConf.inventory_needed_to_start &&
@@ -248,6 +249,7 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
                     !launchConf.ask_tags_on_launch &&
                     !launchConf.ask_skip_tags_on_launch &&
                     !launchConf.ask_diff_mode_on_launch &&
+                    !launchConf.ask_scm_branch_on_launch &&
                     !launchConf.survey_enabled &&
                     !launchConf.credential_needed_to_start &&
                     !launchConf.inventory_needed_to_start &&

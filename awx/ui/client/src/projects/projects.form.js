@@ -183,6 +183,18 @@ export default ['i18n', 'NotificationsList', 'TemplateList',
                     dataPlacement: 'right',
                     labelClass: 'checkbox-options stack-inline',
                     ngDisabled: '!(project_obj.summary_fields.user_capabilities.edit || canAdd)'
+                },
+                {
+                    name: 'allow_override',
+                    label: i18n._('Allow branch override'),
+                    type: 'checkbox',
+                    awPopOver: '<p>' + i18n._('Allow changing the SCM branch or revision in a job template that uses this project.') + '</p>',
+                    dataTitle: i18n._('Allow branch override'),
+                    dataContainer: 'body',
+                    dataPlacement: 'right',
+                    labelClass: 'checkbox-options stack-inline',
+                    ngDisabled: '!(project_obj.summary_fields.user_capabilities.edit || canAdd)',
+                    ngShow: "scm_type && scm_type.value !== 'insights'",
                 }]
             },
             scm_update_cache_timeout: {

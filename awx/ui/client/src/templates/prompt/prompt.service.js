@@ -10,7 +10,8 @@ function PromptService (Empty, $filter)  {
             limit: {},
             tags: {},
             skipTags: {},
-            diffMode: {}
+            diffMode: {},
+            scmBranch: {}
         };
 
         prompts.credentials.value = _.has(params, 'launchConf.defaults.credentials') ? _.cloneDeep(params.launchConf.defaults.credentials) : [];
@@ -41,7 +42,7 @@ function PromptService (Empty, $filter)  {
         prompts.tags.value = (jobTags && jobTags !== "") ? jobTags.split(',').map((i) => ({name: i, label: i, value: i})) : [];
         prompts.skipTags.value = (skipTags && skipTags !== "") ? skipTags.split(',').map((i) => ({name: i, label: i, value: i})) : [];
         prompts.diffMode.value = _.has(params, 'currentValues.diff_mode') && typeof params.currentValues.diff_mode === 'boolean' ? params.currentValues.diff_mode : (_.has(params, 'launchConf.defaults.diff_mode') ? params.launchConf.defaults.diff_mode : null);
-
+        prompts.scmBranch.value = _.has(params, 'currentValues.scm_branch') && params.currentValues.scm_branch ? params.currentValues.scm_branch : (_.has(params, 'launchConf.defaults.scm_branch') ? params.launchConf.defaults.scm_branch : "");
         return prompts;
     };
 
@@ -163,6 +164,9 @@ function PromptService (Empty, $filter)  {
         if (promptData.launchConf.ask_diff_mode_on_launch && _.has(promptData, 'prompts.diffMode.value')) {
             launchData.diff_mode = promptData.prompts.diffMode.value;
         }
+        if (promptData.launchConf.ask_scm_branch_on_launch && _.has(promptData, 'prompts.scmBranch.value')) {
+            launchData.scm_branch = promptData.prompts.scmBranch.value;
+        }
         if (promptData.prompts.credentials.passwords) {
             _.forOwn(promptData.prompts.credentials.passwords, (val, key) => {
                 if (!launchData.credential_passwords) {
@@ -277,7 +281,9 @@ function PromptService (Empty, $filter)  {
         if(_.has(params, 'promptData.prompts.diffMode.value') && _.get(params, 'promptData.launchConf.ask_diff_mode_on_launch')){
             promptDataToSave.diff_mode = launchConfDefaults.diff_mode && launchConfDefaults.diff_mode === params.promptData.prompts.diffMode.value ? null : params.promptData.prompts.diffMode.value;
         }
-
+        if(_.has(params, 'promptData.prompts.scmBranch.value') && _.get(params, 'promptData.launchConf.ask_scm_branch_on_launch')){
+            promptDataToSave.scm_branch = launchConfDefaults.scm_branch && launchConfDefaults.scm_branch === params.promptData.prompts.scmBranch.value ? null : params.promptData.prompts.scmBranch.value;
+        }
         return promptDataToSave;
     };
 }

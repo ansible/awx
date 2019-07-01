@@ -218,6 +218,12 @@
     </div>
 </div>
 
+<!-- BRANCH DETAIL -->
+<div class="JobResults-resultRow" ng-if="vm.scmBranch">
+    <label class="JobResults-resultRowLabel">{{ vm.scmBranch.label }}</label>
+    <div class="JobResults-resultRowText">{{ vm.scmBranch.value }}</div>
+</div>    
+
 <!-- INVENTORY SCM DETAIL -->
 <div class="JobResults-resultRow" ng-if="!vm.project && vm.inventoryScm">
     <label class="JobResults-resultRowLabel">{{ vm.inventoryScm.label }}</label>

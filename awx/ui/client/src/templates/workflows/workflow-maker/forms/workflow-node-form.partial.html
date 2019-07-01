@@ -145,6 +145,7 @@
                      nodeConfig.node.originalNodeObject.job_tags !== null ||
                      nodeConfig.node.originalNodeObject.skip_tags !== null ||
                      nodeConfig.node.originalNodeObject.diff_mode !== null ||
+                     nodeConfig.node.originalNodeObject.scm_branch !== null ||
                      showExtraVars">
             {{:: strings.get('workflow_maker.READ_ONLY_PROMPT_VALUES')}}
         </div>
@@ -158,6 +159,7 @@
                      nodeConfig.node.originalNodeObject.job_tags !== null ||
                      nodeConfig.node.originalNodeObject.skip_tags !== null ||
                      nodeConfig.node.originalNodeObject.diff_mode !== null ||
+                     nodeConfig.node.originalNodeObject.scm_branch !== null ||
                      showExtraVars)">
             {{:: strings.get('workflow_maker.READ_ONLY_NO_PROMPT_VALUES')}}
         </div>
@@ -218,6 +220,10 @@
                 <span ng-if="promptData.prompts.diffMode.value">{{:: strings.get('ON') }}</span>
                 <span ng-if="!promptData.prompts.diffMode.value">{{:: strings.get('OFF') }}</span>
             </div>
+        </div>
+        <div class="Prompt-previewRow--flex" ng-if="nodeConfig.node.originalNodeObject.scm_branch !== null">
+            <div class="Prompt-previewRowTitle">{{:: strings.get('prompt.SCM_BRANCH') }}</div>
+            <div class="Prompt-previewRowValue" ng-bind="nodeConfig.node.originalNodeObject.scm_branch"></div>
         </div>
         <div class="Prompt-previewRow--noflex" ng-show="showExtraVars">
             <div class="Prompt-previewRowTitle">{{:: strings.get('prompt.EXTRA_VARIABLES') }}</div>

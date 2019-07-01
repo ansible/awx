@@ -66,6 +66,8 @@ function TemplatesStrings (BaseString) {
         VALID_INTEGER: t.s('Please enter an answer that is a valid integer.'),
         VALID_DECIMAL: t.s('Please enter an answer that is a decimal number.'),
         PLAYBOOK_RUN: t.s('Playbook Run'),
+        SCM_BRANCH: t.s('SCM Branch'),
+        SCM_BRANCH_HELP: t.s('Branch to use in job run. Project default used if blank.'),
         CHECK: t.s('Check'),
         NO_CREDS_MATCHING_TYPE: t.s('No Credentials Matching This Type Have Been Created'),
         CREDENTIAL_TYPE_MISSING: typeLabel => t.s('This job template has a default {{typeLabel}} credential which must be included or replaced before proceeding.', { typeLabel })
