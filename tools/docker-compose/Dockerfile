@@ -71,7 +71,12 @@ RUN yum -y install acl \
   xorg-x11-fonts-misc \
   xorg-x11-fonts-Type1 \
   xorg-x11-utils \
-  yum-utils
+  yum-utils \
+  zlib-devel.i686 # Needed for the pre-built sqlite3 binaries ↓
+
+RUN cd /tmp/ && curl -LO https://www.sqlite.org/2019/sqlite-tools-linux-x86-3280000.zip && \
+  unzip sqlite-tools-linux-x86-3280000.zip && cd sqlite-tools-linux-x86-3280000 && \
+  cp sql* /usr/local/bin/ && cd /tmp && rm -rf sqlite-tools-linux-x86-3280000*
 
 RUN yum install -y https://github.com/krallin/tini/releases/download/v0.18.0/tini_0.18.0.rpm
 
