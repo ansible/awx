@@ -1,0 +1,199 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<JobTemplateDetail /> initially renders succesfully 1`] = `
+<Wrap>
+  <WithI18n
+    template={
+      Object {
+        "forks": 1,
+        "host_config_key": "ssh",
+        "id": 1,
+        "inventory": 1,
+        "job_type": "run",
+        "limit": "1",
+        "name": "Temp 1",
+        "playbook": "",
+        "project": 7,
+        "summary_fields": Object {
+          "created_by": Object {
+            "username": "Joe",
+          },
+          "credentials": Array [
+            Object {
+              "id": 1,
+              "kind": "ssh",
+              "name": "Credential 1",
+            },
+            Object {
+              "id": 2,
+              "kind": "awx",
+              "name": "Credential 2",
+            },
+          ],
+          "inventory": Object {
+            "name": "Inventory",
+          },
+          "modified_by": Object {
+            "username": "Joe",
+          },
+          "project": Object {
+            "name": "Project",
+          },
+          "user_capabilities": Object {
+            "edit": true,
+          },
+        },
+        "verbosity": 1,
+      }
+    }
+  >
+    <I18n
+      update={true}
+      withHash={true}
+    >
+      <withRouter(JobTemplateDetail)
+        i18n={"/i18n/"}
+        template={
+          Object {
+            "forks": 1,
+            "host_config_key": "ssh",
+            "id": 1,
+            "inventory": 1,
+            "job_type": "run",
+            "limit": "1",
+            "name": "Temp 1",
+            "playbook": "",
+            "project": 7,
+            "summary_fields": Object {
+              "created_by": Object {
+                "username": "Joe",
+              },
+              "credentials": Array [
+                Object {
+                  "id": 1,
+                  "kind": "ssh",
+                  "name": "Credential 1",
+                },
+                Object {
+                  "id": 2,
+                  "kind": "awx",
+                  "name": "Credential 2",
+                },
+              ],
+              "inventory": Object {
+                "name": "Inventory",
+              },
+              "modified_by": Object {
+                "username": "Joe",
+              },
+              "project": Object {
+                "name": "Project",
+              },
+              "user_capabilities": Object {
+                "edit": true,
+              },
+            },
+            "verbosity": 1,
+          }
+        }
+      >
+        <Route>
+          <JobTemplateDetail
+            history={"/history/"}
+            i18n={"/i18n/"}
+            location={
+              Object {
+                "hash": "",
+                "pathname": "",
+                "search": "",
+                "state": "",
+              }
+            }
+            match={
+              Object {
+                "isExact": false,
+                "params": Object {},
+                "path": "",
+                "url": "",
+              }
+            }
+            template={
+              Object {
+                "forks": 1,
+                "host_config_key": "ssh",
+                "id": 1,
+                "inventory": 1,
+                "job_type": "run",
+                "limit": "1",
+                "name": "Temp 1",
+                "playbook": "",
+                "project": 7,
+                "summary_fields": Object {
+                  "created_by": Object {
+                    "username": "Joe",
+                  },
+                  "credentials": Array [
+                    Object {
+                      "id": 1,
+                      "kind": "ssh",
+                      "name": "Credential 1",
+                    },
+                    Object {
+                      "id": 2,
+                      "kind": "awx",
+                      "name": "Credential 2",
+                    },
+                  ],
+                  "inventory": Object {
+                    "name": "Inventory",
+                  },
+                  "modified_by": Object {
+                    "username": "Joe",
+                  },
+                  "project": Object {
+                    "name": "Project",
+                  },
+                  "user_capabilities": Object {
+                    "edit": true,
+                  },
+                },
+                "verbosity": 1,
+              }
+            }
+          >
+            <WithI18n>
+              <I18n
+                update={true}
+                withHash={true}
+              >
+                <ContentLoading
+                  i18n={"/i18n/"}
+                >
+                  <EmptyState
+                    className=""
+                    variant="large"
+                  >
+                    <div
+                      className="pf-c-empty-state pf-m-lg"
+                    >
+                      <EmptyStateBody
+                        className=""
+                      >
+                        <p
+                          className="pf-c-empty-state__body"
+                        >
+                          Loading...
+                        </p>
+                      </EmptyStateBody>
+                    </div>
+                  </EmptyState>
+                </ContentLoading>
+              </I18n>
+            </WithI18n>
+          </JobTemplateDetail>
+        </Route>
+      </withRouter(JobTemplateDetail)>
+    </I18n>
+  </WithI18n>
+</Wrap>
+`;

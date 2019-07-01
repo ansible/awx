@@ -73,6 +73,9 @@ clean-ui:
 	rm -rf awx/ui/test/spec/reports/
 	rm -rf awx/ui/test/e2e/reports/
 	rm -rf awx/ui/client/languages/
+	rm -rf awx/ui_next/node_modules/
+	rm -rf awx/ui_next/coverage/
+	rm -rf awx/ui_next/build/locales/_build/
 	rm -f $(UI_DEPS_FLAG_FILE)
 	rm -f $(UI_RELEASE_DEPS_FLAG_FILE)
 	rm -f $(UI_RELEASE_FLAG_FILE)
@@ -513,6 +516,20 @@ jshint: $(UI_DEPS_FLAG_FILE)
 	$(NPM_BIN) run --prefix awx/ui lint
 
 # END UI TASKS
+# --------------------------------------
+
+# UI NEXT TASKS
+# --------------------------------------
+
+ui-next-lint:
+	$(NPM_BIN) --prefix awx/ui_next install
+	$(NPM_BIN) run --prefix awx/ui_next lint
+
+ui-next-test:
+	$(NPM_BIN) --prefix awx/ui_next install
+	$(NPM_BIN) run --prefix awx/ui_next test
+
+# END UI NEXT TASKS
 # --------------------------------------
 
 # Build a pip-installable package into dist/ with a timestamped version number.

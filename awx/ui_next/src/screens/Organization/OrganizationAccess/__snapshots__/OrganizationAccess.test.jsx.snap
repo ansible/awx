@@ -1,0 +1,261 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<OrganizationAccess /> initially renders succesfully 1`] = `
+<OrganizationAccess
+  history={"/history/"}
+  i18n={"/i18n/"}
+  location={
+    Object {
+      "hash": "",
+      "pathname": "",
+      "search": "",
+      "state": "",
+    }
+  }
+  match={
+    Object {
+      "isExact": false,
+      "params": Object {},
+      "path": "",
+      "url": "",
+    }
+  }
+  organization={
+    Object {
+      "id": 1,
+      "name": "Default",
+      "summary_fields": Object {
+        "object_roles": Object {},
+        "user_capabilities": Object {
+          "edit": true,
+        },
+      },
+    }
+  }
+>
+  <WithI18n
+    error={null}
+    hasContentLoading={true}
+    itemCount={0}
+    itemName="role"
+    items={Array []}
+    qsConfig={
+      Object {
+        "defaultParams": Object {
+          "order_by": "first_name",
+          "page": 1,
+          "page_size": 5,
+        },
+        "integerFields": Array [
+          "page",
+          "page_size",
+        ],
+        "namespace": "access",
+      }
+    }
+    renderItem={[Function]}
+    renderToolbar={[Function]}
+    toolbarColumns={
+      Array [
+        Object {
+          "isSortable": true,
+          "key": "first_name",
+          "name": "Name",
+        },
+        Object {
+          "isSortable": true,
+          "key": "username",
+          "name": "Username",
+        },
+        Object {
+          "isSortable": true,
+          "key": "last_name",
+          "name": "Last Name",
+        },
+      ]
+    }
+  >
+    <I18n
+      update={true}
+      withHash={true}
+    >
+      <withRouter(PaginatedDataList)
+        error={null}
+        hasContentLoading={true}
+        i18n={"/i18n/"}
+        itemCount={0}
+        itemName="role"
+        items={Array []}
+        qsConfig={
+          Object {
+            "defaultParams": Object {
+              "order_by": "first_name",
+              "page": 1,
+              "page_size": 5,
+            },
+            "integerFields": Array [
+              "page",
+              "page_size",
+            ],
+            "namespace": "access",
+          }
+        }
+        renderItem={[Function]}
+        renderToolbar={[Function]}
+        toolbarColumns={
+          Array [
+            Object {
+              "isSortable": true,
+              "key": "first_name",
+              "name": "Name",
+            },
+            Object {
+              "isSortable": true,
+              "key": "username",
+              "name": "Username",
+            },
+            Object {
+              "isSortable": true,
+              "key": "last_name",
+              "name": "Last Name",
+            },
+          ]
+        }
+      >
+        <Route>
+          <PaginatedDataList
+            contentError={null}
+            error={null}
+            hasContentLoading={true}
+            history={"/history/"}
+            i18n={"/i18n/"}
+            itemCount={0}
+            itemName="role"
+            itemNamePlural=""
+            items={Array []}
+            location={
+              Object {
+                "hash": "",
+                "pathname": "",
+                "search": "",
+                "state": "",
+              }
+            }
+            match={
+              Object {
+                "isExact": false,
+                "params": Object {},
+                "path": "",
+                "url": "",
+              }
+            }
+            qsConfig={
+              Object {
+                "defaultParams": Object {
+                  "order_by": "first_name",
+                  "page": 1,
+                  "page_size": 5,
+                },
+                "integerFields": Array [
+                  "page",
+                  "page_size",
+                ],
+                "namespace": "access",
+              }
+            }
+            renderItem={[Function]}
+            renderToolbar={[Function]}
+            showPageSizeOptions={true}
+            toolbarColumns={
+              Array [
+                Object {
+                  "isSortable": true,
+                  "key": "first_name",
+                  "name": "Name",
+                },
+                Object {
+                  "isSortable": true,
+                  "key": "username",
+                  "name": "Username",
+                },
+                Object {
+                  "isSortable": true,
+                  "key": "last_name",
+                  "name": "Last Name",
+                },
+              ]
+            }
+          >
+            <WithI18n>
+              <I18n
+                update={true}
+                withHash={true}
+              >
+                <ContentLoading
+                  i18n={"/i18n/"}
+                >
+                  <EmptyState
+                    className=""
+                    variant="large"
+                  >
+                    <div
+                      className="pf-c-empty-state pf-m-lg"
+                    >
+                      <EmptyStateBody
+                        className=""
+                      >
+                        <p
+                          className="pf-c-empty-state__body"
+                        >
+                          Loading...
+                        </p>
+                      </EmptyStateBody>
+                    </div>
+                  </EmptyState>
+                </ContentLoading>
+              </I18n>
+            </WithI18n>
+          </PaginatedDataList>
+        </Route>
+      </withRouter(PaginatedDataList)>
+    </I18n>
+  </WithI18n>
+  <_default
+    isOpen={null}
+    onClose={[Function]}
+    title="Error!"
+    variant="danger"
+  >
+    <Modal
+      actions={Array []}
+      ariaDescribedById=""
+      className="awx-c-modal at-c-alertModal at-c-alertModal--danger"
+      hideTitle={false}
+      isLarge={false}
+      isOpen={false}
+      isSmall={false}
+      onClose={[Function]}
+      title="Error!"
+      width={null}
+    >
+      <Portal
+        containerInfo={<div />}
+      >
+        <ModalContent
+          actions={Array []}
+          ariaDescribedById=""
+          className="awx-c-modal at-c-alertModal at-c-alertModal--danger"
+          hideTitle={false}
+          id="pf-modal-0"
+          isLarge={false}
+          isOpen={false}
+          isSmall={false}
+          onClose={[Function]}
+          title="Error!"
+          width={null}
+        />
+      </Portal>
+    </Modal>
+  </_default>
+</OrganizationAccess>
+`;
