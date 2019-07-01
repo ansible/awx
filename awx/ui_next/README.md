@@ -24,6 +24,6 @@ To run the unit tests on files that you've changed:
 * `npm test`
 
 To run a single test (in this case the login page test):
-* `npm test -- testUtils/pages/Login.test.jsx`
+* `npm test -- src/screens/Login/Login.test.jsx`
 
 **note:** Once the test watcher is up and running you can hit `a` to run all the tests
