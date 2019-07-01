@@ -10,6 +10,8 @@ const mockData = [
   { id: 3, name: 'three', url: '/org/team/3' },
   { id: 4, name: 'four', url: '/org/team/4' },
   { id: 5, name: 'five', url: '/org/team/5' },
+  { id: 6, name: 'six', url: '/org/team/6' },
+  { id: 7, name: 'seven', url: '/org/team/7' },
 ];
 
 const qsConfig = {
@@ -122,5 +124,35 @@ describe('<PaginatedDataList />', () => {
     wrapper.update();
     pagination.prop('onPerPageSelect')(null, 25);
     expect(history.location.search).toEqual('?item.page_size=25');
+  });
+  test('should navigate to correct current page when list items change', () => {
+    const customQSConfig = {
+      namespace: 'foo',
+      defaultParams: { page: 7, page_size: 1 }, // show only 1 item per page
+      integerFields: [],
+    };
+    const testParams = [5, 25, 0, -1]; // number of items
+    const expected = [5, 5, 1, 1] // expected current page
+    const history = createMemoryHistory({
+      initialEntries: ['/organizations/1/teams'],
+    });
+    const wrapper = mountWithContexts(
+      <PaginatedDataList
+        items={mockData}
+        itemCount={7}
+        queryParams={{
+          page: 1,
+          page_size: 5,
+          order_by: 'name',
+        }}
+        qsConfig={customQSConfig}
+      />, { context: { router: { history } } }
+    );
+    testParams.forEach((param, i) => {
+      wrapper.setProps({ itemCount: param });
+      expect(history.location.search).toEqual(`?${customQSConfig.namespace}.page=${expected[i]}`)
+      wrapper.update();
+    })
+    wrapper.unmount();
   });
 });
