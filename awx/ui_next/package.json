@@ -11,7 +11,8 @@
     "add-locale": "lingui add-locale",
     "extract-strings": "lingui extract",
     "compile-strings": "lingui compile",
-    "prettier": "prettier --write \"src/**/*.{js,jsx,scss}\""
+    "prettier": "prettier --write \"src/**/*.{js,jsx,scss}\"",
+    "prettier-check": "prettier --check \"src/**/*.{js,jsx,scss}\""
   },
   "keywords": [],
   "author": "",

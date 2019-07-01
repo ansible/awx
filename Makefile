@@ -524,6 +524,7 @@ jshint: $(UI_DEPS_FLAG_FILE)
 ui-next-lint:
 	$(NPM_BIN) --prefix awx/ui_next install
 	$(NPM_BIN) run --prefix awx/ui_next lint
+	$(NPM_BIN) run --prefix awx/ui_next prettier-check
 
 ui-next-test:
 	$(NPM_BIN) --prefix awx/ui_next install

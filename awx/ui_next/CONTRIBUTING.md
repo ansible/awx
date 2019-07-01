@@ -29,6 +29,7 @@ Have questions about this document or anything not covered here? Feel free to re
 
 - All code submissions are done through pull requests against the `devel` branch.
 - If collaborating with someone else on the same branch, please use `--force-with-lease` instead of `--force` when pushing up code. This will prevent you from accidentally overwriting commits pushed by someone else. For more information, see https://git-scm.com/docs/git-push#git-push---force-with-leaseltrefnamegt
+- We use a [code formatter](https://prettier.io/). Before adding a new commit or opening a PR, please apply the formatter using `npm run prettier`
 
 ## Setting up your development environment
 
