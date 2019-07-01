@@ -258,6 +258,13 @@ export default ['Rest', 'Wait',
                 });
             }
         });
+        $scope.$watch('notification_type', (value) => {
+            if (value) {
+                $scope.$broadcast('reset-code-mirror', {
+                    customize_messages: $scope.customize_messages,
+                });
+            }
+        });
 
         $scope.emailOptionsChange = function () {
             if ($scope.email_options === 'use_ssl') {
