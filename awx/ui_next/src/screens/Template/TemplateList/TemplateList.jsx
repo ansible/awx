@@ -78,7 +78,7 @@ class TemplatesList extends Component {
   }
 
   async handleTemplateDelete() {
-    const { selected } = this.state;
+    const { selected, itemCount } = this.state;
 
     this.setState({ hasContentLoading: true });
     try {
@@ -93,6 +93,7 @@ class TemplatesList extends Component {
           return deletePromise;
         })
       );
+      this.setState({ itemCount: itemCount - selected.length });
     } catch (err) {
       this.setState({ deletionError: err });
     } finally {

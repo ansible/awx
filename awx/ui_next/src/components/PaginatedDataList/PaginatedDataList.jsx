@@ -38,6 +38,14 @@ class PaginatedDataList extends React.Component {
     this.handleSort = this.handleSort.bind(this);
   }
 
+  componentDidUpdate(prevProps) {
+    const { itemCount: prevItemCount } = prevProps;
+    const { itemCount } = this.props;
+    if (prevItemCount !== itemCount) {
+      this.getCurrPage(itemCount);
+    }
+  }
+
   getSortOrder() {
     const { qsConfig, location } = this.props;
     const queryParams = parseNamespacedQueryString(qsConfig, location.search);
@@ -45,6 +53,21 @@ class PaginatedDataList extends React.Component {
       return [queryParams.order_by.substr(1), 'descending'];
     }
     return [queryParams.order_by, 'ascending'];
+  }
+
+  getCurrPage(itemCount) {
+    if (itemCount < 0) {
+      return;
+    }
+    const { qsConfig, location } = this.props;
+    const { page_size, page: currPage } = parseNamespacedQueryString(
+      qsConfig,
+      location.search
+    );
+    const lastPage = Math.ceil(itemCount / page_size);
+    if (currPage > lastPage) {
+      this.pushHistoryState({ page: lastPage || 1 });
+    }
   }
 
   handleSetPage(event, pageNumber) {
