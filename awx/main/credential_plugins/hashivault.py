@@ -89,7 +89,7 @@ def kv_backend(**kwargs):
             params['version'] = kwargs['secret_version']
         try:
             mount_point, *path = pathlib.Path(secret_path.lstrip(os.sep)).parts
-            '/'.join(*path)
+            '/'.join(path)
         except Exception:
             mount_point, path = secret_path, []
         # https://www.vaultproject.io/api/secret/kv/kv-v2.html#read-secret-version
