@@ -132,7 +132,7 @@ describe('<PaginatedDataList />', () => {
       integerFields: [],
     };
     const testParams = [5, 25, 0, -1]; // number of items
-    const expected = [5, 5, 1, 1] // expected current page
+    const expected = [5, 5, 1, 1]; // expected current page
     const history = createMemoryHistory({
       initialEntries: ['/organizations/1/teams'],
     });
@@ -146,13 +146,16 @@ describe('<PaginatedDataList />', () => {
           order_by: 'name',
         }}
         qsConfig={customQSConfig}
-      />, { context: { router: { history } } }
+      />,
+      { context: { router: { history } } }
     );
     testParams.forEach((param, i) => {
       wrapper.setProps({ itemCount: param });
-      expect(history.location.search).toEqual(`?${customQSConfig.namespace}.page=${expected[i]}`)
+      expect(history.location.search).toEqual(
+        `?${customQSConfig.namespace}.page=${expected[i]}`
+      );
       wrapper.update();
-    })
+    });
     wrapper.unmount();
   });
 });

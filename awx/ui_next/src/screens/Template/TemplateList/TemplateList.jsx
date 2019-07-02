@@ -77,20 +77,22 @@ class TemplatesList extends Component {
     }
   }
 
-  async handleTemplateDelete () {
+  async handleTemplateDelete() {
     const { selected, itemCount } = this.state;
 
     this.setState({ hasContentLoading: true });
     try {
-      await Promise.all(selected.map(({ type, id }) => {
-        let deletePromise;
-        if (type === 'job_template') {
-          deletePromise = JobTemplatesAPI.destroy(id);
-        } else if (type === 'workflow_job_template') {
-          deletePromise = WorkflowJobTemplatesAPI.destroy(id);
-        }
-        return deletePromise;
-      }));
+      await Promise.all(
+        selected.map(({ type, id }) => {
+          let deletePromise;
+          if (type === 'job_template') {
+            deletePromise = JobTemplatesAPI.destroy(id);
+          } else if (type === 'workflow_job_template') {
+            deletePromise = WorkflowJobTemplatesAPI.destroy(id);
+          }
+          return deletePromise;
+        })
+      );
       this.setState({ itemCount: itemCount - selected.length });
     } catch (err) {
       this.setState({ deletionError: err });

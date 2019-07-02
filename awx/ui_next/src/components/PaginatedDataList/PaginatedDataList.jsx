@@ -40,13 +40,13 @@ class PaginatedDataList extends React.Component {
 
   componentDidUpdate(prevProps) {
     const { itemCount: prevItemCount } = prevProps;
-    const { itemCount } = this.props
+    const { itemCount } = this.props;
     if (prevItemCount !== itemCount) {
       this.getCurrPage(itemCount);
     }
   }
 
-  getSortOrder () {
+  getSortOrder() {
     const { qsConfig, location } = this.props;
     const queryParams = parseNamespacedQueryString(qsConfig, location.search);
     if (queryParams.order_by && queryParams.order_by.startsWith('-')) {
@@ -55,20 +55,22 @@ class PaginatedDataList extends React.Component {
     return [queryParams.order_by, 'ascending'];
   }
 
-  getCurrPage (itemCount) {
+  getCurrPage(itemCount) {
     if (itemCount < 0) {
       return;
     }
     const { qsConfig, location } = this.props;
-    const queryParams = parseNamespacedQueryString(qsConfig, location.search);
-    const maxPages = Math.ceil(itemCount / queryParams.page_size);
-    const currPage = queryParams.page;
-    if (currPage > maxPages) {
-      this.pushHistoryState({ page: (currPage + (maxPages - currPage)) || 1 })
+    const { page_size, page: currPage } = parseNamespacedQueryString(
+      qsConfig,
+      location.search
+    );
+    const lastPage = Math.ceil(itemCount / page_size);
+    if (currPage > lastPage) {
+      this.pushHistoryState({ page: lastPage || 1 });
     }
   }
 
-  handleSetPage (event, pageNumber) {
+  handleSetPage(event, pageNumber) {
     this.pushHistoryState({ page: pageNumber });
   }
 
