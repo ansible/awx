@@ -1,4 +1,5 @@
 import React from 'react';
+import { shape } from 'prop-types';
 import { Link, withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -48,35 +49,41 @@ function JobDetail ({ job, i18n }) {
           label={i18n._(t`Finished`)}
           value={job.finished}
         />
-        <Detail
-          label={i18n._(t`Template`)}
-          value={(
-            <Link to={`/templates/job_template/${jobTemplate.id}`}>
-              {jobTemplate.name}
-            </Link>
-          )}
-        />
+        {jobTemplate && (
+          <Detail
+            label={i18n._(t`Template`)}
+            value={(
+              <Link to={`/templates/job_template/${jobTemplate.id}`}>
+                {jobTemplate.name}
+              </Link>
+            )}
+          />
+        )}
         <Detail
           label={i18n._(t`Job Type`)}
           value={toTitleCase(job.job_type)}
         />
-        <Detail
-          label={i18n._(t`Inventory`)}
-          value={(
-            <Link to={`/inventory/${inventory.id}`}>
-              {inventory.name}
-            </Link>
-          )}
-        />
+        {inventory && (
+          <Detail
+            label={i18n._(t`Inventory`)}
+            value={(
+              <Link to={`/inventory/${inventory.id}`}>
+                {inventory.name}
+              </Link>
+            )}
+          />
+        )}
         {/* TODO: show project status icon */}
-        <Detail
-          label={i18n._(t`Project`)}
-          value={(
-            <Link to={`/projects/${project.id}`}>
-              {project.name}
-            </Link>
-          )}
-        />
+        {project && (
+          <Detail
+            label={i18n._(t`Project`)}
+            value={(
+              <Link to={`/projects/${project.id}`}>
+                {project.name}
+              </Link>
+            )}
+          />
+        )}
         <Detail
           label={i18n._(t`Revision`)}
           value={job.scm_revision}
@@ -101,18 +108,26 @@ function JobDetail ({ job, i18n }) {
           label={i18n._(t`Execution Node`)}
           value={job.exucution_node}
         />
-        <Detail
-          label={i18n._(t`Instance Group`)}
-          value={(
-            <Link to={`/instance_groups/${instanceGroup.id}`}>
-              {instanceGroup.name}
-            </Link>
-          )}
-        />
-        <Detail
-          label={i18n._(t`Job Slice`)}
-          value={`${job.job_slice_number}/${job.job_slice_count}`}
-        />
+        {instanceGroup && (
+          <Detail
+            label={i18n._(t`Instance Group`)}
+            value={(
+              <Link to={`/instance_groups/${instanceGroup.id}`}>
+                {instanceGroup.name}
+              </Link>
+            )}
+          />
+        )}
+        {
+          typeof job.job_slice_number === 'number'
+          && typeof job.job_slice_count === 'number'
+          && (
+            <Detail
+              label={i18n._(t`Job Slice`)}
+              value={`${job.job_slice_number}/${job.job_slice_count}`}
+            />
+          )
+        }
         {(credentials && credentials.length > 0) && (
           <Detail
             fullWidth
@@ -140,14 +155,16 @@ function JobDetail ({ job, i18n }) {
           />
         )}
       </DetailList>
-      <VariablesInput
-        css="margin: 20px 0"
-        id="job-variables"
-        readOnly
-        value={job.extra_vars}
-        rows={4}
-        label={i18n._(t`Variables`)}
-      />
+      {job.extra_vars && (
+        <VariablesInput
+          css="margin: 20px 0"
+          id="job-variables"
+          readOnly
+          value={job.extra_vars}
+          rows={4}
+          label={i18n._(t`Variables`)}
+        />
+      )}
       <VariablesInput
         css="margin: 20px 0"
         id="job-artifacts"
@@ -169,5 +186,8 @@ function JobDetail ({ job, i18n }) {
     </CardBody>
   );
 }
+JobDetail.propTypes = {
+  job: shape({}).isRequired,
+};
 
 export default withI18n()(withRouter(JobDetail));

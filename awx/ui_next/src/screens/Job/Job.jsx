@@ -8,7 +8,6 @@ import {
   CardHeader as PFCardHeader,
   PageSection,
 } from '@patternfly/react-core';
-
 import { JobsAPI } from '@api';
 import ContentError from '@components/ContentError';
 import CardCloseButton from '@components/CardCloseButton';
@@ -111,28 +110,18 @@ class Job extends Component {
               to="/jobs/:type/:id/details"
               exact
             />
-            {job && (
+            {job && [
               <Route
+                key="details"
                 path="/jobs/:type/:id/details"
-                render={() => (
-                  <JobDetail
-                    match={match}
-                    job={job}
-                  />
-                )}
-              />
-            )}
-            {job && (
+                render={() => <JobDetail type={match.params.type} job={job} />}
+              />,
               <Route
+                key="output"
                 path="/jobs/:type/:id/output"
-                render={() => (
-                  <JobOutput
-                    match={match}
-                    job={job}
-                  />
-                )}
-              />
-            )}
+                render={() => <JobOutput type={match.params.type} job={job} />}
+              />,
+            ]}
           </Switch>
         </Card>
       </PageSection>

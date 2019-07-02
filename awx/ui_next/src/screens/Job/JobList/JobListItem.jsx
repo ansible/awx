@@ -11,6 +11,15 @@ import DataListCell from '@components/DataListCell';
 import VerticalSeparator from '@components/VerticalSeparator';
 import { toTitleCase } from '@util/strings';
 
+const JOB_TYPE_URLS = {
+  job: 'playbook',
+  project_update: 'project',
+  system_job: 'system',
+  inventory_update: 'inventory',
+  ad_hoc_command: 'command',
+  workflow_job: 'workflow',
+};
+
 class JobListItem extends Component {
   render() {
     const { job, isSelected, onSelect } = this.props;
@@ -27,19 +36,18 @@ class JobListItem extends Component {
             onChange={onSelect}
             aria-labelledby={`check-action-${job.id}`}
           />
-          <DataListItemCells
-            dataListCells={[
-              <DataListCell key="divider">
-                <VerticalSeparator />
-                <span>
-                  <Link to={`/jobs/${job.type}/${job.id}`}>
-                    <b>{job.name}</b>
-                  </Link>
-                </span>
-              </DataListCell>,
-              <DataListCell key="type">{toTitleCase(job.type)}</DataListCell>,
-              <DataListCell key="finished">{job.finished}</DataListCell>,
-            ]}
+          <DataListItemCells dataListCells={[
+            <DataListCell key="divider">
+              <VerticalSeparator />
+              <span>
+                <Link to={`/jobs/${JOB_TYPE_URLS[job.type]}/${job.id}`}>
+                  <b>{job.name}</b>
+                </Link>
+              </span>
+            </DataListCell>,
+            <DataListCell key="type">{toTitleCase(job.type)}</DataListCell>,
+            <DataListCell key="finished">{job.finished}</DataListCell>,
+          ]}
           />
         </DataListItemRow>
       </DataListItem>
