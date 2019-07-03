@@ -29,9 +29,9 @@ class JobTemplateForm extends Component {
     template: {
       name: '',
       description: '',
-      inventory: 0,
+      inventory: '',
       job_type: 'run',
-      project: 0,
+      project: '',
       playbook: '',
     },
   };

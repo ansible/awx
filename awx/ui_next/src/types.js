@@ -1,4 +1,12 @@
-import { shape, arrayOf, number, string, bool, oneOf } from 'prop-types';
+import {
+  shape,
+  arrayOf,
+  number,
+  string,
+  bool,
+  oneOf,
+  oneOfType,
+} from 'prop-types';
 
 export const Role = shape({
   descendent_roles: arrayOf(string),
@@ -57,8 +65,8 @@ export const QSConfig = shape({
 export const JobTemplate = shape({
   name: string.isRequired,
   description: string,
-  inventory: number.isRequired,
+  inventory: oneOfType([number, string]).isRequired,
   job_type: oneOf(['run', 'check']),
   playbook: string.isRequired,
-  project: number.isRequired,
+  project: oneOfType([number, string]).isRequired,
 });

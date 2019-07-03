@@ -14,13 +14,13 @@ import JobTemplateForm from '../shared/JobTemplateForm';
 import { JobTemplatesAPI } from '@api';
 
 function JobTemplateAdd({ history, i18n }) {
-  const [error, setError] = useState('');
+  const [error, setError] = useState(null);
 
   const handleSubmit = async values => {
+    setError(null);
     try {
-      const data = await JobTemplatesAPI.create(values);
-      const { response } = data;
-      history.push(`/templates/${response.type}/${response.id}/details`);
+      const { data } = await JobTemplatesAPI.create(values);
+      history.push(`/templates/${data.type}/${data.id}/details`);
     } catch (err) {
       setError(err);
     }
