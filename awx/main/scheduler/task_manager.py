@@ -251,6 +251,8 @@ class TaskManager():
                 task.controller_node = controller_node
                 logger.debug('Submitting isolated {} to queue {} controlled by {}.'.format(
                              task.log_format, task.execution_node, controller_node))
+            elif rampart_group.is_containerized:
+                task.instance_group = rampart_group
             else:
                 task.instance_group = rampart_group
                 if instance is not None:
@@ -447,7 +449,7 @@ class TaskManager():
             for rampart_group in preferred_instance_groups:
                 if idle_instance_that_fits is None:
                     idle_instance_that_fits = rampart_group.find_largest_idle_instance()
-                if self.get_remaining_capacity(rampart_group.name) <= 0:
+                if not rampart_group.is_containerized and self.get_remaining_capacity(rampart_group.name) <= 0:
                     logger.debug("Skipping group {} capacity <= 0".format(rampart_group.name))
                     continue
 
@@ -456,10 +458,11 @@ class TaskManager():
                     logger.debug("Starting dependent {} in group {} instance {}".format(
                                  task.log_format, rampart_group.name, execution_instance.hostname))
                 elif not execution_instance and idle_instance_that_fits:
-                    execution_instance = idle_instance_that_fits
-                    logger.debug("Starting dependent {} in group {} on idle instance {}".format(
-                                 task.log_format, rampart_group.name, execution_instance.hostname))
-                if execution_instance:
+                    if not rampart_group.is_containerized:
+                        execution_instance = idle_instance_that_fits
+                        logger.debug("Starting dependent {} in group {} on idle instance {}".format(
+                                     task.log_format, rampart_group.name, execution_instance.hostname))
+                if execution_instance or rampart_group.is_containerized:
                     self.graph[rampart_group.name]['graph'].add_job(task)
                     tasks_to_fail = [t for t in dependency_tasks if t != task]
                     tasks_to_fail += [dependent_task]
@@ -492,10 +495,16 @@ class TaskManager():
                 self.start_task(task, None, task.get_jobs_fail_chain(), None)
                 continue
             for rampart_group in preferred_instance_groups:
+                if task.can_run_containerized and rampart_group.is_containerized:
+                    self.graph[rampart_group.name]['graph'].add_job(task)
+                    self.start_task(task, rampart_group, task.get_jobs_fail_chain(), None)
+                    found_acceptable_queue = True
+                    break
+
                 if idle_instance_that_fits is None:
                     idle_instance_that_fits = rampart_group.find_largest_idle_instance()
                 remaining_capacity = self.get_remaining_capacity(rampart_group.name)
-                if remaining_capacity <= 0:
+                if not rampart_group.is_containerized and self.get_remaining_capacity(rampart_group.name) <= 0:
                     logger.debug("Skipping group {}, remaining_capacity {} <= 0".format(
                                  rampart_group.name, remaining_capacity))
                     continue
@@ -505,10 +514,11 @@ class TaskManager():
                     logger.debug("Starting {} in group {} instance {} (remaining_capacity={})".format(
                                  task.log_format, rampart_group.name, execution_instance.hostname, remaining_capacity))
                 elif not execution_instance and idle_instance_that_fits:
-                    execution_instance = idle_instance_that_fits
-                    logger.debug("Starting {} in group {} instance {} (remaining_capacity={})".format(
-                                 task.log_format, rampart_group.name, execution_instance.hostname, remaining_capacity))
-                if execution_instance:
+                    if not rampart_group.is_containerized:
+                        execution_instance = idle_instance_that_fits
+                        logger.debug("Starting {} in group {} instance {} (remaining_capacity={})".format(
+                                     task.log_format, rampart_group.name, execution_instance.hostname, remaining_capacity))
+                if execution_instance or rampart_group.is_containerized:
                     self.graph[rampart_group.name]['graph'].add_job(task)
                     self.start_task(task, rampart_group, task.get_jobs_fail_chain(), execution_instance)
                     found_acceptable_queue = True

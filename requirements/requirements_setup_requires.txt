@@ -1,5 +1,5 @@
 pbr>=1.8
-setuptools_scm>=1.15.0,<3.0
+setuptools_scm>=3.1.0
 vcversioner>=2.16.0.0
 pytest-runner
 isort

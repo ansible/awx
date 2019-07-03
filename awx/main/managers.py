@@ -221,8 +221,9 @@ class InstanceGroupManager(models.Manager):
             elif t.status == 'running':
                 # Subtract capacity from all groups that contain the instance
                 if t.execution_node not in instance_ig_mapping:
-                    logger.warning('Detected %s running inside lost instance, '
-                                   'may still be waiting for reaper.', t.log_format)
+                    if not t.is_containerized:
+                        logger.warning('Detected %s running inside lost instance, '
+                                       'may still be waiting for reaper.', t.log_format)
                     if t.instance_group:
                         impacted_groups = [t.instance_group.name]
                     else:

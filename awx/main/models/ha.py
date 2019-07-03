@@ -18,7 +18,7 @@ from awx import __version__ as awx_application_version
 from awx.api.versioning import reverse
 from awx.main.managers import InstanceManager, InstanceGroupManager
 from awx.main.fields import JSONField
-from awx.main.models.base import BaseModel, HasEditsMixin
+from awx.main.models.base import BaseModel, HasEditsMixin, prevent_search
 from awx.main.models.unified_jobs import UnifiedJob
 from awx.main.utils import get_cpu_capacity, get_mem_capacity, get_system_task_capacity
 from awx.main.models.mixins import RelatedJobsMixin
@@ -90,6 +90,10 @@ class Instance(HasPolicyEditsMixin, BaseModel):
     )
     mem_capacity = models.IntegerField(
         default=0,
+        editable=False,
+    )
+    is_containerized = models.BooleanField(
+        default=False,
         editable=False,
     )
 
@@ -184,6 +188,10 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
         default=None,
         on_delete=models.SET_NULL,
     )
+    pod_spec_override = prevent_search(models.TextField(
+        blank=True,
+        default='',
+    ))
     policy_instance_percentage = models.IntegerField(
         default=0,
         help_text=_("Percentage of Instances to automatically assign to this group")
@@ -225,6 +233,10 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
     @property
     def is_isolated(self):
         return bool(self.controller)
+
+    @property
+    def is_containerized(self):
+        return bool(self.credential and self.credential.kubernetes)
 
     '''
     RelatedJobsMixin
@@ -279,23 +291,27 @@ def schedule_policy_task():
 @receiver(post_save, sender=InstanceGroup)
 def on_instance_group_saved(sender, instance, created=False, raw=False, **kwargs):
     if created or instance.has_policy_changes():
-        schedule_policy_task()
+        if not instance.is_containerized:
+            schedule_policy_task()
 
 
 @receiver(post_save, sender=Instance)
 def on_instance_saved(sender, instance, created=False, raw=False, **kwargs):
     if created or instance.has_policy_changes():
-        schedule_policy_task()
+        if not instance.is_containerized:
+            schedule_policy_task()
 
 
 @receiver(post_delete, sender=InstanceGroup)
 def on_instance_group_deleted(sender, instance, using, **kwargs):
-    schedule_policy_task()
+    if not instance.is_containerized:
+        schedule_policy_task()
 
 
 @receiver(post_delete, sender=Instance)
 def on_instance_deleted(sender, instance, using, **kwargs):
-    schedule_policy_task()
+    if not instance.is_containerized:
+        schedule_policy_task()
 
 
 class UnifiedJobTemplateInstanceGroupMembership(models.Model):

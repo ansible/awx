@@ -85,6 +85,7 @@ def test_default_cred_types():
         'hashivault_kv',
         'hashivault_ssh',
         'insights',
+        'kubernetes_bearer_token',
         'net',
         'openstack',
         'rhv',

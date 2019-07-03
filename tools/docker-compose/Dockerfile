@@ -124,6 +124,14 @@ RUN cd sqlite-autoconf-3290000 && ./configure && make && make install
 RUN mv -f /usr/local/lib/libsqlite3.so.0 /lib64/
 RUN mv -f /usr/local/lib/libsqlite3.so.0.8.6 /lib64/
 
+# Install OpenShift CLI
+RUN cd /usr/local/bin && \
+    curl -L https://github.com/openshift/origin/releases/download/v3.9.0/openshift-origin-client-tools-v3.9.0-191fece-linux-64bit.tar.gz | \
+    tar -xz --strip-components=1 --wildcards --no-anchored 'oc'
+
+ADD tools/docker-compose/google-cloud-sdk.repo /etc/yum.repos.d/
+RUN yum install -y kubectl
+
 RUN yum -y remove cyrus-sasl-devel \
   gcc \
   gcc-c++ \

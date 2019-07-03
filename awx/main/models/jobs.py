@@ -717,6 +717,14 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         return artifacts
 
     @property
+    def can_run_containerized(self):
+        return any([ig for ig in self.preferred_instance_groups if ig.is_containerized])
+
+    @property
+    def is_containerized(self):
+        return bool(self.instance_group and self.instance_group.is_containerized)
+
+    @property
     def preferred_instance_groups(self):
         if self.project is not None and self.project.organization is not None:
             organization_groups = [x for x in self.project.organization.instance_groups.all()]

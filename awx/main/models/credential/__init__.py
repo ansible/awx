@@ -1086,35 +1086,6 @@ ManagedCredentialType(
     },
 )
 
-ManagedCredentialType(
-    namespace='openshift_username_password',
-    kind='kubernetes',
-    name=ugettext_noop('OpenShift Username / Password'),
-    managed_by_tower=True,
-    inputs={
-        'fields': [{
-            'id': 'host',
-            'label': ugettext_noop('OpenShift API URL'),
-            'type': 'string',
-            'help_text': ugettext_noop('The OpenShift API URL to authenticate with.')
-        }, {
-            'id': 'username',
-            'label': ugettext_noop('Username'),
-            'type': 'string'
-        }, {
-            'id': 'password',
-            'label': ugettext_noop('Password'),
-            'type': 'string',
-            'secret': True,
-        }, {
-            'id': 'verify_ssl',
-            'label': ugettext_noop('Verify SSL'),
-            'type': 'boolean',
-            'secret': False
-        }],
-        'required': ['host', 'username', 'password'],
-    }
-)
 
 ManagedCredentialType(
     namespace='kubernetes_bearer_token',
@@ -1123,19 +1094,25 @@ ManagedCredentialType(
     inputs={
         'fields': [{
             'id': 'host',
-            'label': ugettext_noop('Kubernetes API Endpoint'),
+            'label': ugettext_noop('OpenShift or Kubernetes API Endpoint'),
             'type': 'string',
-            'help_text': ugettext_noop('The Kubernetes API Endpoint to authenticate with.')
+            'help_text': ugettext_noop('The OpenShift or Kubernetes API Endpoint to authenticate with.')
         },{
             'id': 'bearer_token',
-            'label': ugettext_noop('Bearer token for service account'),
+            'label': ugettext_noop('API authentication bearer token.'),
             'type': 'string',
             'secret': True,
         },{
             'id': 'verify_ssl',
             'label': ugettext_noop('Verify SSL'),
             'type': 'boolean',
-            'secret': False
+            'default': True,
+        },{
+            'id': 'ssl_ca_cert',
+            'label': ugettext_noop('Certificate Authority data'),
+            'type': 'string',
+            'secret': True,
+            'multiline': True,
         }],
         'required': ['host', 'bearer_token'],
     }

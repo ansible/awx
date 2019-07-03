@@ -11,12 +11,28 @@
     secret: "{{ lookup('pipe', 'cat ' + src + '/env/ssh_key') }}"
 
   tasks:
-
     - name: synchronize job environment with isolated host
       synchronize:
-        copy_links: true
-        src: "{{src}}"
-        dest: "{{dest}}"
+        copy_links: yes
+        src: "{{ src }}"
+        dest: "{{ dest }}"
+      when: ansible_kubectl_config is not defined
+
+    - name: synchronize job environment with remote job container
+      synchronize:
+        copy_links: yes
+        src: "{{ src }}"
+        dest: "{{ dest }}"
+        set_remote_user: no
+        rsync_opts:
+          - "--rsh=$RSH"
+      environment:
+        RSH: >-
+          oc rsh --token={{ ansible_kubectl_token }}
+          --server={{ ansible_kubectl_host }}
+          --insecure-skip-tls-verify=true -n awx
+      delegate_to: localhost
+      when: ansible_kubectl_config is defined
 
     - local_action: stat path="{{src}}/env/ssh_key"
       register: key

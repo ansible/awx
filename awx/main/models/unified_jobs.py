@@ -713,6 +713,10 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
     def supports_isolation(cls):
         return False
 
+    @property
+    def can_run_containerized(self):
+        return False
+
     def _get_parent_field_name(self):
         return 'unified_job_template' # Override in subclasses.
 
@@ -1422,3 +1426,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
 
     def is_isolated(self):
         return bool(self.controller_node)
+
+    @property
+    def is_containerized(self):
+        return False

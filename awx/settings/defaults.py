@@ -67,6 +67,10 @@ DATABASES = {
     }
 }
 
+AWX_CONTAINER_GROUP_DEFAULT_LAUNCH_TIMEOUT = 10
+AWX_CONTAINER_GROUP_DEFAULT_NAMESPACE = 'default'
+AWX_CONTAINER_GROUP_DEFAULT_IMAGE = 'ansible/ansible-runner'
+
 # Internationalization
 # https://docs.djangoproject.com/en/dev/topics/i18n/
 #

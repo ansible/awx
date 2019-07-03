@@ -11,7 +11,9 @@ from django.conf import settings
 import ansible_runner
 
 import awx
-from awx.main.utils import get_system_task_capacity
+from awx.main.utils import (
+    get_system_task_capacity
+)
 from awx.main.queue import CallbackQueueDispatcher
 
 logger = logging.getLogger('awx.isolated.manager')
@@ -40,6 +42,50 @@ class IsolatedManager(object):
         self.idle_timeout = max(60, 2 * settings.AWX_ISOLATED_CONNECTION_TIMEOUT)
         self.started_at = None
         self.captured_command_artifact = False
+        self.instance = None
+
+    def build_inventory(self, hosts):
+        if self.instance and self.instance.is_containerized:
+            inventory = {'all': {'hosts': {}}}
+            for host in hosts:
+                inventory['all']['hosts'][host] = self.kubectl_or_oc_vars()
+        else:
+            inventory = '\n'.join([
+                '{} ansible_ssh_user={}'.format(host, settings.AWX_ISOLATED_USERNAME)
+                for host in hosts
+            ])
+
+        return inventory
+
+    def kubectl_or_oc_vars(self):
+        extravars = {}
+
+        credential = self.instance.instance_group.credential
+
+        extravars['ansible_connection'] = 'kubectl'
+        extravars['ansible_kubectl_host'] = credential.get_input('host')
+        extravars['ansible_kubectl_namespace'] = 'awx'
+
+        if credential.kind == 'kubernetes_bearer_token':
+            extravars['ansible_kubectl_token'] = credential.get_input('bearer_token')
+
+        if credential.get_input('verify_ssl'):
+            ca_cert_data = credential.get_input('ssl_ca_cert')
+            fd, path = tempfile.mkstemp(dir=self.private_data_dir)
+            with open(path, 'wb') as temp:
+                temp.write(ca_cert_data.encode())
+                temp.flush()
+                # There seems to be a bug in the kubectl connection plugin
+                # where it just doesnt respect the ansible_kubectl_ca_cert var.
+                # This is a workaround.
+                extravars['ansible_kubectl_ca_cert'] = temp.name
+                extravars['ansible_kubectl_extra_args'] = f"--certificate-authority={temp.name}"
+        else:
+            extravars['ansible_kubectl_extra_args'] = '--insecure-skip-tls-verify'
+            extravars['ansible_kubectl_verify_ssl'] = False
+
+        return extravars
+
 
     def build_runner_params(self, hosts, verbosity=1):
         env = dict(os.environ.items())
@@ -69,17 +115,12 @@ class IsolatedManager(object):
             else:
                 playbook_logger.info(runner_obj.stdout.read())
 
-        inventory = '\n'.join([
-            '{} ansible_ssh_user={}'.format(host, settings.AWX_ISOLATED_USERNAME)
-            for host in hosts
-        ])
-
         return {
             'project_dir': os.path.abspath(os.path.join(
                 os.path.dirname(awx.__file__),
                 'playbooks'
             )),
-            'inventory': inventory,
+            'inventory': self.build_inventory(hosts),
             'envvars': env,
             'finished_callback': finished_callback,
             'verbosity': verbosity,
@@ -153,6 +194,12 @@ class IsolatedManager(object):
         runner_obj = self.run_management_playbook('run_isolated.yml',
                                                   self.private_data_dir,
                                                   extravars=extravars)
+
+        # Do we want to do this for all jobs rather that just containerized jobs?
+        if runner_obj.status == 'failed' and self.instance.is_containerized:
+            self.instance.result_traceback = runner_obj.stdout.read()
+            self.instance.save(update_fields=['result_traceback'])
+
         return runner_obj.status, runner_obj.rc
 
     def check(self, interval=None):
@@ -175,6 +222,7 @@ class IsolatedManager(object):
         rc = None
         last_check = time.time()
         dispatcher = CallbackQueueDispatcher()
+
         while status == 'failed':
             canceled = self.cancelled_callback() if self.cancelled_callback else False
             if not canceled and time.time() - last_check < interval:
@@ -279,7 +327,6 @@ class IsolatedManager(object):
 
 
     def cleanup(self):
-        # If the job failed for any reason, make a last-ditch effort at cleanup
         extravars = {
             'private_data_dir': self.private_data_dir,
             'cleanup_dirs': [
@@ -393,6 +440,7 @@ class IsolatedManager(object):
             [instance.execution_node],
             verbosity=min(5, self.instance.verbosity)
         )
+
         status, rc = self.dispatch(playbook, module, module_args)
         if status == 'successful':
             status, rc = self.check()
