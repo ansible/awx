@@ -4446,26 +4446,6 @@ class WorkflowApprovalTemplateNotificationTemplatesSuccessList(WorkflowApprovalT
     relationship = 'notification_templates_success'
 
 
-class WorkflowApprovalTemplateLaunch(GenericAPIView):
-
-    model = models.WorkflowApprovalTemplate
-    obj_permission_type = 'start'
-    serializer_class = serializers.EmptySerializer
-
-    def get(self, request, *args, **kwargs):
-        return Response({})
-
-    def post(self, request, *args, **kwargs):
-        obj = self.get_object()
-        new_job = obj.create_unified_job(extra_vars=request.data.get('extra_vars', {}))
-        new_job.signal_start()
-        data = OrderedDict()
-        data['workflow_approval'] = new_job.id
-        data.update(serializers.WorkflowApprovalSerializer(new_job, context=self.get_serializer_context()).to_representation(new_job))
-        headers = {'Location': new_job.get_absolute_url(request)}
-        return Response(data, status=status.HTTP_201_CREATED, headers=headers)
-
-
 class WorkflowApprovalTemplateJobsList(SubListAPIView):
 
     model = models.WorkflowApproval

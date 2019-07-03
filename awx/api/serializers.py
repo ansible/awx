@@ -3405,7 +3405,7 @@ class WorkflowApprovalSerializer(UnifiedJobSerializer):
 
     class Meta:
         model = WorkflowApproval
-        fields = ('*', 'result_stdout', '-controller_node', '-execution_node',)
+        fields = ('*', '-controller_node', '-execution_node',)
 
     def get_related(self, obj):
         res = super(WorkflowApprovalSerializer, self).get_related(obj)
@@ -3415,9 +3415,6 @@ class WorkflowApprovalSerializer(UnifiedJobSerializer):
                                                              kwargs={'pk': obj.workflow_approval_template.pk})
             res['notifications'] = self.reverse('api:workflow_approval_notifications_list', kwargs={'pk': obj.pk})
         return res
-
-    def get_result_stdout(self, obj):
-        return obj.result_stdout
 
 
 class WorkflowApprovalListSerializer(WorkflowApprovalSerializer, UnifiedJobListSerializer):
