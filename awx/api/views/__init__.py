@@ -4405,3 +4405,97 @@ for attr, value in list(locals().items()):
         name = camelcase_to_underscore(attr)
         view = value.as_view()
         setattr(this_module, name, view)
+
+
+class WorfklowApprovalTemplateList(ListAPIView):
+
+    model = models.WorkflowApprovalTemplate
+    serializer_class = serializers.WorkflowApprovalTemplateSerializer
+
+    def get(self, request, *args, **kwargs):
+        if not request.user.is_superuser and not request.user.is_system_auditor:
+            raise PermissionDenied(_("Superuser privileges needed."))
+        return super(WorfklowApprovalTemplateList, self).get(request, *args, **kwargs)
+
+
+class WorfklowApprovalTemplateDetail(RetrieveAPIView):
+
+    model = models.WorkflowApprovalTemplate
+    serializer_class = serializers.WorkflowApprovalTemplateSerializer
+
+
+class WorkflowApprovalTemplateNotificationTemplatesAnyList(SubListCreateAttachDetachAPIView):
+
+    model = models.NotificationTemplate
+    serializer_class = serializers.NotificationTemplateSerializer
+    parent_model = models.WorkflowApprovalTemplate
+
+
+class WorkflowApprovalTemplateNotificationTemplatesStartedList(WorkflowApprovalTemplateNotificationTemplatesAnyList):
+
+    relationship = 'notification_templates_started'
+
+
+class WorkflowApprovalTemplateNotificationTemplatesErrorList(WorkflowApprovalTemplateNotificationTemplatesAnyList):
+
+    relationship = 'notification_templates_error'
+
+
+class WorkflowApprovalTemplateNotificationTemplatesSuccessList(WorkflowApprovalTemplateNotificationTemplatesAnyList):
+
+    relationship = 'notification_templates_success'
+
+
+class WorkflowApprovalTemplateLaunch(GenericAPIView):
+
+    model = models.WorkflowApprovalTemplate
+    obj_permission_type = 'start'
+    serializer_class = serializers.EmptySerializer
+
+    def get(self, request, *args, **kwargs):
+        return Response({})
+
+    def post(self, request, *args, **kwargs):
+        obj = self.get_object()
+        new_job = obj.create_unified_job(extra_vars=request.data.get('extra_vars', {}))
+        new_job.signal_start()
+        data = OrderedDict()
+        data['workflow_approval'] = new_job.id
+        data.update(serializers.WorkflowApprovalSerializer(new_job, context=self.get_serializer_context()).to_representation(new_job))
+        headers = {'Location': new_job.get_absolute_url(request)}
+        return Response(data, status=status.HTTP_201_CREATED, headers=headers)
+
+
+class WorkflowApprovalTemplateJobsList(SubListAPIView):
+
+    model = models.WorkflowApproval
+    serializer_class = serializers.WorkflowApprovalListSerializer
+    parent_model = models.WorkflowApprovalTemplate
+    relationship = 'approvals'
+    parent_key = 'workflow_approval_template'
+
+
+class WorkflowApprovalList(ListCreateAPIView):
+
+    model = models.WorkflowApproval
+    serializer_class = serializers.WorkflowApprovalListSerializer
+
+    def get(self, request, *args, **kwargs):
+        if not request.user.is_superuser and not request.user.is_system_auditor:
+            raise PermissionDenied(_("Superuser privileges needed."))
+        return super(WorkflowApprovalList, self).get(request, *args, **kwargs)
+
+
+class WorkflowApprovalDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
+
+    model = models.WorkflowApproval
+    serializer_class = serializers.WorkflowApprovalSerializer
+
+
+class WorkflowApprovalNotificationsList(SubListAPIView):
+
+    model = models.Notification
+    serializer_class = serializers.NotificationSerializer
+    parent_model = models.WorkflowApproval
+    relationship = 'notifications'
+    search_fields = ('subject', 'notification_type', 'body',)

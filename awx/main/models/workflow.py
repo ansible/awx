@@ -34,6 +34,7 @@ from awx.main.models.jobs import LaunchTimeConfigBase, LaunchTimeConfig, JobTemp
 from awx.main.models.credential import Credential
 from awx.main.redact import REPLACE_STR
 from awx.main.fields import JSONField
+from awx.main.utils import schedule_task_manager
 
 from copy import copy
 from urllib.parse import urljoin
@@ -604,7 +605,6 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
 
 
 class WorkflowApprovalTemplate(UnifiedJobTemplate):
-
     class Meta:
         app_label = 'main'
 
@@ -616,8 +616,42 @@ class WorkflowApprovalTemplate(UnifiedJobTemplate):
     def _get_unified_job_field_names(cls):
         return ['name', 'description']
 
+    def get_absolute_url(self, request=None):
+        return reverse('api:workflow_approval_template_detail', kwargs={'pk': self.pk}, request=request)
+
 
 class WorkflowApproval(UnifiedJob):
-
     class Meta:
         app_label = 'main'
+
+    workflow_approval_template = models.ForeignKey(
+        'WorkflowApprovalTemplate',
+        related_name='approvals',
+        blank=True,
+        null=True,
+        default=None,
+        on_delete=models.SET_NULL,
+    )
+
+    @classmethod
+    def _get_unified_job_template_class(cls):
+        return WorkflowApprovalTemplate
+
+    def get_absolute_url(self, request=None):
+        return reverse('api:workflow_approval_detail', kwargs={'pk': self.pk}, request=request)
+
+    @property
+    def event_class(self):
+        return None
+
+    def approve(self, request=None):
+        self.status = 'successful'
+        self.save()
+        schedule_task_manager()
+        return reverse('api:approved_workflow', kwargs={'pk': self.pk}, request=request)
+
+    def reject(self, request=None):
+        self.status = 'failed'
+        self.save()
+        schedule_task_manager()
+        return reverse('api:rejected_workflow', kwargs={'pk': self.pk}, request=request)

@@ -50,16 +50,16 @@ from awx.main.constants import (
     CENSOR_VALUE,
 )
 from awx.main.models import (
-    ActivityStream, AdHocCommand, AdHocCommandEvent, Credential,
-    CredentialInputSource, CredentialType, CustomInventoryScript,
-    Group, Host, Instance, InstanceGroup, Inventory, InventorySource,
-    InventoryUpdate, InventoryUpdateEvent, Job, JobEvent, JobHostSummary,
-    JobLaunchConfig, JobNotificationMixin, JobTemplate, Label, Notification,
-    NotificationTemplate, OAuth2AccessToken, OAuth2Application, Organization,
-    Project, ProjectUpdate, ProjectUpdateEvent, RefreshToken, Role, Schedule,
-    StdoutMaxBytesExceeded, SystemJob, SystemJobEvent, SystemJobTemplate,
-    Team, UnifiedJob, UnifiedJobTemplate, WorkflowJob, WorkflowJobNode,
-    WorkflowJobTemplate, WorkflowJobTemplateNode
+    ActivityStream, AdHocCommand, AdHocCommandEvent, Credential, CredentialInputSource,
+    CredentialType, CustomInventoryScript, Group, Host, Instance,
+    InstanceGroup, Inventory, InventorySource, InventoryUpdate,
+    InventoryUpdateEvent, Job, JobEvent, JobHostSummary, JobLaunchConfig,
+    JobNotificationMixin, JobTemplate, Label, Notification, NotificationTemplate,
+    OAuth2AccessToken, OAuth2Application, Organization, Project,
+    ProjectUpdate, ProjectUpdateEvent, RefreshToken, Role, Schedule,
+    SystemJob, SystemJobEvent, SystemJobTemplate, Team, UnifiedJob,
+    UnifiedJobTemplate, WorkflowApproval, WorkflowApprovalTemplate, WorkflowJob,
+    WorkflowJobNode, WorkflowJobTemplate, WorkflowJobTemplateNode, StdoutMaxBytesExceeded
 )
 from awx.main.models.base import VERBOSITY_CHOICES, NEW_JOB_TYPE_CHOICES
 from awx.main.models.rbac import (
@@ -681,6 +681,8 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
                 serializer_class = SystemJobTemplateSerializer
             elif isinstance(obj, WorkflowJobTemplate):
                 serializer_class = WorkflowJobTemplateSerializer
+            elif isinstance(obj, WorkflowApprovalTemplate):
+                serializer_class = WorkflowApprovalTemplateSerializer
         return serializer_class
 
     def to_representation(self, obj):
@@ -782,6 +784,8 @@ class UnifiedJobSerializer(BaseSerializer):
                 serializer_class = SystemJobSerializer
             elif isinstance(obj, WorkflowJob):
                 serializer_class = WorkflowJobSerializer
+            elif isinstance(obj, WorkflowApproval):
+                serializer_class = WorkflowApprovalSerializer
         return serializer_class
 
     def to_representation(self, obj):
@@ -838,6 +842,8 @@ class UnifiedJobListSerializer(UnifiedJobSerializer):
                 serializer_class = SystemJobListSerializer
             elif isinstance(obj, WorkflowJob):
                 serializer_class = WorkflowJobListSerializer
+            elif isinstance(obj, WorkflowApproval):
+                serializer_class = WorkflowApprovalListSerializer
         return serializer_class
 
     def to_representation(self, obj):
@@ -3393,6 +3399,51 @@ class WorkflowJobCancelSerializer(WorkflowJobSerializer):
 
     class Meta:
         fields = ('can_cancel',)
+
+
+class WorkflowApprovalSerializer(UnifiedJobSerializer):
+
+    class Meta:
+        model = WorkflowApproval
+        fields = ('*', 'result_stdout', '-controller_node', '-execution_node',)
+
+    def get_related(self, obj):
+        res = super(WorkflowApprovalSerializer, self).get_related(obj)
+
+        if obj.workflow_approval_template:
+            res['workflow_approval_template'] = self.reverse('api:workflow_approval_template_detail',
+                                                             kwargs={'pk': obj.workflow_approval_template.pk})
+            res['notifications'] = self.reverse('api:workflow_approval_notifications_list', kwargs={'pk': obj.pk})
+        return res
+
+    def get_result_stdout(self, obj):
+        return obj.result_stdout
+
+
+class WorkflowApprovalListSerializer(WorkflowApprovalSerializer, UnifiedJobListSerializer):
+
+    class Meta:
+        fields = ('*', '-execution_node', '-controller_node',)
+
+
+class WorkflowApprovalTemplateSerializer(UnifiedJobTemplateSerializer):
+
+    class Meta:
+        model = WorkflowApprovalTemplate
+        fields = ('*',)
+
+    def get_related(self, obj):
+        res = super(WorkflowApprovalTemplateSerializer, self).get_related(obj)
+        if 'last_job' in res:
+            del res['last_job']
+
+        res.update(dict(
+            jobs = self.reverse('api:workflow_approval_template_jobs_list', kwargs={'pk': obj.pk}),
+            notification_templates_started = self.reverse('api:workflow_approval_template_notification_templates_started_list', kwargs={'pk': obj.pk}),
+            notification_templates_success = self.reverse('api:workflow_approval_template_notification_templates_success_list', kwargs={'pk': obj.pk}),
+            notification_templates_error = self.reverse('api:workflow_approval_template_notification_templates_error_list', kwargs={'pk': obj.pk}),
+        ))
+        return res
 
 
 class LaunchConfigurationBaseSerializer(BaseSerializer):

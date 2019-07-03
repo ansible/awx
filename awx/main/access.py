@@ -37,6 +37,7 @@ from awx.main.models import (
     ProjectUpdateEvent, Role, Schedule, SystemJob, SystemJobEvent,
     SystemJobTemplate, Team, UnifiedJob, UnifiedJobTemplate, WorkflowJob,
     WorkflowJobNode, WorkflowJobTemplate, WorkflowJobTemplateNode,
+    WorkflowApproval, WorkflowApprovalTemplate,
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR, ROLE_SINGLETON_SYSTEM_AUDITOR
 )
 from awx.main.models.mixins import ResourceMixin
@@ -2767,6 +2768,51 @@ class RoleAccess(BaseAccess):
     def can_delete(self, obj):
         # Unsupported for now
         return False
+
+
+class WorkflowApprovalAccess(BaseAccess):
+    '''
+    I can approve workflows when:
+     - I'm authenticated
+    I can create when:
+     - I'm a superuser:
+    '''
+
+    model = WorkflowApproval
+    prefetch_related = ('created_by', 'modified_by',)
+
+    def can_read(self, obj):
+        return True
+
+    def can_use(self, obj):
+        return True
+
+    def filtered_queryset(self):
+        return self.model.objects.all()
+
+    def can_start(self, obj, validate_license=True):
+        return False
+
+
+class WorkflowApprovalTemplateAccess(BaseAccess):
+    '''
+    I can approve workflows when:
+     - I'm authenticated
+    I can create when:
+     - I'm a superuser:
+    '''
+
+    model = WorkflowApprovalTemplate
+    prefetch_related = ('created_by', 'modified_by',)
+
+    def can_read(self, obj):
+        return True
+
+    def can_use(self, obj):
+        return True
+
+    def filtered_queryset(self):
+        return self.model.objects.all()
 
 
 for cls in BaseAccess.__subclasses__():
