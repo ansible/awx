@@ -20,12 +20,42 @@
         mode: pull
         delete: yes
         recursive: yes
+      when: ansible_kubectl_config is not defined
 
     - name: Copy daemon log from the isolated host
       synchronize:
         src: "{{src}}/daemon.log"
         dest: "{{src}}/daemon.log"
         mode: pull
+      when: ansible_kubectl_config is not defined
+
+    - name: Copy artifacts from pod
+      synchronize:
+        src: "{{src}}/artifacts/"
+        dest: "{{src}}/artifacts/"
+        mode: pull
+        delete: yes
+        recursive: yes
+        set_remote_user: no
+        rsync_opts:
+          - "--rsh=$RSH"
+      environment:
+        RSH: "oc rsh --config={{ ansible_kubectl_config }}"
+      delegate_to: localhost
+      when: ansible_kubectl_config is defined
+
+    - name: Copy daemon log from pod
+      synchronize:
+        src: "{{src}}/daemon.log"
+        dest: "{{src}}/daemon.log"
+        mode: pull
+        set_remote_user: no
+        rsync_opts:
+          - "--rsh=$RSH"
+      environment:
+        RSH: "oc rsh --config={{ ansible_kubectl_config }}"
+      delegate_to: localhost
+      when: ansible_kubectl_config is defined
 
     - name: Fail if previous check determined that process is not alive.
       fail:

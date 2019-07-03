@@ -204,6 +204,13 @@ def organization(instance):
 
 
 @pytest.fixture
+def credentialtype_kube():
+    kube = CredentialType.defaults['kubernetes_bearer_token']()
+    kube.save()
+    return kube
+
+
+@pytest.fixture
 def credentialtype_ssh():
     ssh = CredentialType.defaults['ssh']()
     ssh.save()
@@ -334,6 +341,12 @@ def external_credential(credentialtype_external):
 def other_external_credential(credentialtype_external):
     return Credential.objects.create(credential_type=credentialtype_external, name='other-external-cred',
                                      inputs={'url': 'http://testhost.com', 'token': 'secret2'})
+
+
+@pytest.fixture
+def kube_credential(credentialtype_kube):
+    return Credential.objects.create(credential_type=credentialtype_kube, name='kube-cred',
+                                     inputs={'host': 'my.cluster', 'bearer_token': 'my-token', 'verify_ssl': False})
 
 
 @pytest.fixture
