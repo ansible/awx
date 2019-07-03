@@ -43,8 +43,15 @@ class Organization extends Component {
   async componentDidUpdate(prevProps) {
     const { location, match } = this.props;
     const url = `/organizations/${match.params.id}/`;
-    const shouldUpdate = prevProps.location.pathname.includes(url);
-    if (location !== prevProps.location && shouldUpdate) {
+    const tabs = ['details', 'access', 'teams', 'notifications', 'edit'].map(
+      tab => `${url}${tab}`
+    );
+    const didNavigateFromTab = tabs.includes(prevProps.location.pathname);
+    if (
+      prevProps.location !== location &&
+      didNavigateFromTab &&
+      location.pathname === `${url}details`
+    ) {
       await this.loadOrganization();
     }
   }

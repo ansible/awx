@@ -38,7 +38,7 @@ class OrganizationEdit extends Component {
       organization: { id },
       history,
     } = this.props;
-    history.push(`/organizations/${id}`);
+    history.push(`/organizations/${id}/details`);
   }
 
   handleSuccess() {
@@ -46,7 +46,7 @@ class OrganizationEdit extends Component {
       organization: { id },
       history,
     } = this.props;
-    history.push(`/organizations/${id}`);
+    history.push(`/organizations/${id}/details`);
   }
 
   async submitInstanceGroups(groupsToAssociate, groupsToDisassociate) {

@@ -76,6 +76,6 @@ describe('<OrganizationEdit />', () => {
     expect(history.push).not.toHaveBeenCalled();
     wrapper.find('button[aria-label="Cancel"]').prop('onClick')();
 
-    expect(history.push).toHaveBeenCalledWith('/organizations/1');
+    expect(history.push).toHaveBeenCalledWith('/organizations/1/details');
   });
 });
