@@ -256,7 +256,7 @@ class TestExtraVarSanitation(TestJobExecution):
 
     def test_vars_unsafe_by_default(self, job, private_data_dir):
         job.created_by = User(pk=123, username='angry-spud')
-        job.inventory = Inventory(pk=123, name='example-inv') 
+        job.inventory = Inventory(pk=123, name='example-inv')
 
         task = tasks.RunJob()
         task.build_extra_vars_file(job, private_data_dir)
@@ -367,10 +367,10 @@ class TestGenericRun():
         task = tasks.RunJob()
         task.update_model = mock.Mock(return_value=job)
         task.build_private_data_files = mock.Mock(side_effect=OSError())
-        task.copy_folders = mock.Mock()
 
-        with pytest.raises(Exception):
-            task.run(1)
+        with mock.patch('awx.main.tasks.copy_tree'):
+            with pytest.raises(Exception):
+                task.run(1)
 
         update_model_call = task.update_model.call_args[1]
         assert 'OSError' in update_model_call['result_traceback']
@@ -386,10 +386,10 @@ class TestGenericRun():
         task = tasks.RunJob()
         task.update_model = mock.Mock(wraps=update_model_wrapper)
         task.build_private_data_files = mock.Mock()
-        task.copy_folders = mock.Mock()
 
-        with pytest.raises(Exception):
-            task.run(1)
+        with mock.patch('awx.main.tasks.copy_tree'):
+            with pytest.raises(Exception):
+                task.run(1)
 
         for c in [
             mock.call(1, status='running', start_args=''),
@@ -1721,8 +1721,6 @@ class TestProjectUpdateCredentials(TestJobExecution):
 
         call_args, _ = task._write_extra_vars_file.call_args_list[0]
         _, extra_vars = call_args
-
-        assert extra_vars["scm_revision_output"] == 'foobar'
 
     def test_username_and_password_auth(self, project_update, scm_type):
         task = tasks.RunProjectUpdate()

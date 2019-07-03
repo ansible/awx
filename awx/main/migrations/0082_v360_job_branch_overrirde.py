@@ -38,4 +38,9 @@ class Migration(migrations.Migration):
             name='scm_update_cache_timeout',
             field=models.PositiveIntegerField(blank=True, default=0, help_text='The number of seconds after the last project update ran that a new project update will be launched as a job dependency.'),
         ),
+        migrations.AddField(
+            model_name='projectupdate',
+            name='scm_revision',
+            field=models.CharField(blank=True, default='', editable=False, help_text='The SCM Revision discovered by this update for the given project and branch.', max_length=1024, verbose_name='SCM Revision'),
+        ),
     ]

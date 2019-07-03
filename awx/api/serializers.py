@@ -1286,7 +1286,7 @@ class ProjectOptionsSerializer(BaseSerializer):
 
     class Meta:
         fields = ('*', 'local_path', 'scm_type', 'scm_url', 'scm_branch',
-                  'scm_clean', 'scm_delete_on_update', 'credential', 'timeout',)
+                  'scm_clean', 'scm_delete_on_update', 'credential', 'timeout', 'scm_revision')
 
     def get_related(self, obj):
         res = super(ProjectOptionsSerializer, self).get_related(obj)
@@ -1338,7 +1338,7 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
     class Meta:
         model = Project
         fields = ('*', 'organization', 'scm_update_on_launch',
-                  'scm_update_cache_timeout', 'scm_revision', 'allow_override', 'custom_virtualenv',) + \
+                  'scm_update_cache_timeout', 'allow_override', 'custom_virtualenv',) + \
                  ('last_update_failed', 'last_updated')  # Backwards compatibility
 
     def get_related(self, obj):
@@ -1387,6 +1387,11 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
             organization = attrs['organization']
         elif self.instance:
             organization = self.instance.organization
+
+        if 'allow_override' in attrs and self.instance:
+            if attrs['allow_override'] != self.instance.allow_override:
+                raise serializers.ValidationError({
+                    'allow_override': _('Branch override behavior of a project cannot be changed after creation.')})
 
         view = self.context.get('view', None)
         if not organization and not view.request.user.is_superuser:
@@ -2748,8 +2753,11 @@ class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
 
     def validate(self, attrs):
         if 'project' in self.fields and 'playbook' in self.fields:
-            project = attrs.get('project', self.instance and self.instance.project or None)
+            project = attrs.get('project', self.instance.project if self.instance else None)
             playbook = attrs.get('playbook', self.instance and self.instance.playbook or '')
+            scm_branch = attrs.get('scm_branch', self.instance.scm_branch if self.instance else None)
+            ask_scm_branch_on_launch = attrs.get(
+                'ask_scm_branch_on_launch', self.instance.ask_scm_branch_on_launch if self.instance else None)
             if not project:
                 raise serializers.ValidationError({'project': _('This field is required.')})
             playbook_not_found = bool(
@@ -2763,6 +2771,10 @@ class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
                 raise serializers.ValidationError({'playbook': _('Playbook not found for project.')})
             if project and not playbook:
                 raise serializers.ValidationError({'playbook': _('Must select playbook for project.')})
+            if scm_branch and not project.allow_override:
+                raise serializers.ValidationError({'scm_branch': _('Project does not allow overriding branch.')})
+            if ask_scm_branch_on_launch and not project.allow_override:
+                raise serializers.ValidationError({'ask_scm_branch_on_launch': _('Project does not allow overriding branch.')})
 
         ret = super(JobOptionsSerializer, self).validate(attrs)
         return ret

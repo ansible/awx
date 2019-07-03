@@ -101,7 +101,7 @@ class JobOptions(BaseModel):
         default='',
         blank=True,
         help_text=_('Branch to use in job run. Project default used if blank. '
-                  'Only allowed if project allow_override field is set to true.'),
+                    'Only allowed if project allow_override field is set to true.'),
     )
     forks = models.PositiveIntegerField(
         blank=True,
@@ -400,6 +400,16 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
                 # counted as neither accepted or ignored
                 continue
             elif getattr(self, ask_field_name):
+                # Special case where prompts can be rejected based on project setting
+                if field_name == 'scm_branch':
+                    if not self.project:
+                        rejected_data[field_name] = new_value
+                        errors_dict[field_name] = _('Project is missing.')
+                        continue
+                    if kwargs['scm_branch'] != self.project.scm_branch and not self.project.allow_override:
+                        rejected_data[field_name] = new_value
+                        errors_dict[field_name] = _('Project does not allow override of branch.')
+                        continue
                 # accepted prompt
                 prompted_data[field_name] = new_value
             else:
@@ -408,7 +418,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
                 # Not considered an error for manual launch, to support old
                 # behavior of putting them in ignored_fields and launching anyway
                 if 'prompts' not in exclude_errors:
-                    errors_dict[field_name] = _('Field is not configured to prompt on launch.').format(field_name=field_name)
+                    errors_dict[field_name] = _('Field is not configured to prompt on launch.')
 
         if ('prompts' not in exclude_errors and
                 (not getattr(self, 'ask_credential_on_launch', False)) and

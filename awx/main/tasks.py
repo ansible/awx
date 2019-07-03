@@ -1593,17 +1593,6 @@ class RunJob(BaseTask):
         '''
         return getattr(settings, 'AWX_PROOT_ENABLED', False)
 
-    def copy_folders(self, project_path, galaxy_install_path, private_data_dir):
-        if project_path is None:
-            raise RuntimeError('project does not supply a valid path')
-        elif not os.path.exists(project_path):
-            raise RuntimeError('project path %s cannot be found' % project_path)
-        runner_project_folder = os.path.join(private_data_dir, 'project')
-        copy_tree(project_path, runner_project_folder)
-        if galaxy_install_path:
-            galaxy_run_path = os.path.join(private_data_dir, 'project', 'roles')
-            copy_tree(galaxy_install_path, galaxy_run_path)
-
     def pre_run_hook(self, job, private_data_dir):
         if job.inventory is None:
             error = _('Job could not start because it does not have a valid inventory.')
@@ -1620,8 +1609,6 @@ class RunJob(BaseTask):
             job = self.update_model(job.pk, status='failed', job_explanation=msg)
             raise RuntimeError(msg)
 
-        galaxy_install_path = None
-        git_repo = None
         project_path = job.project.get_project_path(check_if_exists=False)
         job_revision = job.project.scm_revision
         needs_sync = True
@@ -1630,21 +1617,20 @@ class RunJob(BaseTask):
             needs_sync = False
         elif not os.path.exists(project_path):
             logger.debug('Performing fresh clone of {} on this instance.'.format(job.project))
-            needs_sync = True
+        elif job.project.scm_revision:
+            logger.debug('Revision not known for {}, will sync with remote'.format(job.project))
         elif job.project.scm_type == 'git':
             git_repo = git.Repo(project_path)
-            if job.scm_branch and job.scm_branch != job.project.scm_branch and git_repo:
-                try:
-                    commit = git_repo.commit(job.scm_branch)
-                    job_revision = commit.hexsha
-                    logger.info('Skipping project sync for {} because commit is locally available'.format(job.log_format))
-                    needs_sync = False  # requested commit is already locally available
-                except (ValueError, BadGitName):
-                    pass
-            else:
-                if git_repo.head.commit.hexsha == job.project.scm_revision:
-                    logger.info('Source tree for for {} is already up to date'.format(job.log_format))
-                    needs_sync = False
+            try:
+                desired_revision = job.project.scm_revision
+                if job.scm_branch and job.scm_branch != job.project.scm_branch:
+                    desired_revision = job.scm_branch  # could be commit or not, but will try as commit
+                commit = git_repo.commit(desired_revision)
+                job_revision = commit.hexsha
+                logger.info('Skipping project sync for {} because commit is locally available'.format(job.log_format))
+                needs_sync = False
+            except (ValueError, BadGitName):
+                logger.debug('Needed commit for {} not in local source tree, will sync with remote'.format(job.log_format))
         # Galaxy requirements are not supported for manual projects
         if not needs_sync and job.project.scm_type:
             # see if we need a sync because of presence of roles
@@ -1653,6 +1639,7 @@ class RunJob(BaseTask):
                 logger.debug('Running project sync for {} because of galaxy role requirements.'.format(job.log_format))
                 needs_sync = True
 
+        galaxy_install_path = None
         if needs_sync:
             pu_ig = job.instance_group
             pu_en = job.execution_node
@@ -1682,28 +1669,8 @@ class RunJob(BaseTask):
             try:
                 sync_task = project_update_task(roles_destination=galaxy_install_path)
                 sync_task.run(local_project_sync.id)
-                # if job overrided the branch, we need to find the revision that will be ran
-                if job.scm_branch and job.scm_branch != job.project.scm_branch:
-                    # TODO: handle case of non-git
-                    if job.project.scm_type == 'git':
-                        git_repo = git.Repo(project_path)
-                        try:
-                            commit = git_repo.commit(job.scm_branch)
-                            job_revision = commit.hexsha
-                            logger.debug('Evaluated {} to be a valid commit for {}'.format(job.scm_branch, job.log_format))
-                        except (ValueError, BadGitName):
-                            # not a commit, see if it is a ref
-                            try:
-                                user_branch = getattr(git_repo.refs, job.scm_branch)
-                                job_revision = user_branch.commit.hexsha
-                                logger.debug('Evaluated {} to be a valid ref for {}'.format(job.scm_branch, job.log_format))
-                            except git.exc.NoSuchPathError as exc:
-                                raise RuntimeError('Could not find specified version {}, error: {}'.format(
-                                    job.scm_branch, exc
-                                ))
-                else:
-                    job_revision = sync_task.updated_revision
-                job = self.update_model(job.pk, scm_revision=job_revision)
+                local_project_sync.refresh_from_db()
+                job = self.update_model(job.pk, scm_revision=local_project_sync.scm_revision)
             except Exception:
                 local_project_sync.refresh_from_db()
                 if local_project_sync.status != 'canceled':
@@ -1725,6 +1692,8 @@ class RunJob(BaseTask):
                 os.mkdir(runner_project_folder)
             tmp_branch_name = 'awx_internal/{}'.format(uuid4())
             # always clone based on specific job revision
+            if not job.scm_revision:
+                raise RuntimeError('Unexpectedly could not determine a revision to run from project.')
             source_branch = git_repo.create_head(tmp_branch_name, job.scm_revision)
             git_repo.clone(runner_project_folder, branch=source_branch, depth=1, single_branch=True)
             # force option is necessary because remote refs are not counted, although no information is lost
@@ -1779,7 +1748,7 @@ class RunProjectUpdate(BaseTask):
 
     def __init__(self, *args, roles_destination=None, **kwargs):
         super(RunProjectUpdate, self).__init__(*args, **kwargs)
-        self.updated_revision = None
+        self.playbook_new_revision = None
         self.roles_destination = roles_destination
 
     def event_handler(self, event_data):
@@ -1788,7 +1757,7 @@ class RunProjectUpdate(BaseTask):
         if returned_data.get('task_action', '') == 'set_fact':
             returned_facts = returned_data.get('res', {}).get('ansible_facts', {})
             if 'scm_version' in returned_facts:
-                self.updated_revision = returned_facts['scm_version']
+                self.playbook_new_revision = returned_facts['scm_version']
 
     def build_private_data(self, project_update, private_data_dir):
         '''
@@ -1903,10 +1872,12 @@ class RunProjectUpdate(BaseTask):
         scm_url, extra_vars_new = self._build_scm_url_extra_vars(project_update)
         extra_vars.update(extra_vars_new)
 
-        if project_update.project.scm_revision and project_update.job_type == 'run' and not project_update.project.allow_override:
+        scm_branch = project_update.scm_branch
+        branch_override = bool(project_update.scm_branch != project_update.project.scm_branch)
+        if project_update.job_type == 'run' and scm_branch and (not branch_override):
             scm_branch = project_update.project.scm_revision
-        else:
-            scm_branch = project_update.scm_branch or {'hg': 'tip'}.get(project_update.scm_type, 'HEAD')
+        elif not scm_branch:
+            scm_branch = {'hg': 'tip'}.get(project_update.scm_type, 'HEAD')
         extra_vars.update({
             'project_path': project_update.get_project_path(check_if_exists=False),
             'insights_url': settings.INSIGHTS_URL_BASE,
@@ -1918,12 +1889,12 @@ class RunProjectUpdate(BaseTask):
             'scm_clean': project_update.scm_clean,
             'scm_delete_on_update': project_update.scm_delete_on_update if project_update.job_type == 'check' else False,
             'scm_full_checkout': True if project_update.job_type == 'run' else False,
-            'scm_revision': project_update.project.scm_revision,
             'roles_enabled': getattr(settings, 'AWX_ROLES_ENABLED', True) if project_update.job_type != 'check' else False
         })
+        # TODO: apply custom refspec from user for PR refs and the like
         if project_update.project.allow_override:
             # If branch is override-able, do extra fetch for all branches
-            # coming feature TODO: obtain custom refspec from user for PR refs and the like
+            # coming feature
             extra_vars['git_refspec'] = 'refs/heads/*:refs/remotes/origin/*'
         if self.roles_destination:
             extra_vars['roles_destination'] = self.roles_destination
@@ -2053,16 +2024,39 @@ class RunProjectUpdate(BaseTask):
         self.acquire_lock(instance)
 
     def post_run_hook(self, instance, status):
+        # TODO: find the effective revision and save to scm_revision
         self.release_lock(instance)
         p = instance.project
+        if self.playbook_new_revision:
+            instance.scm_revision = self.playbook_new_revision
+            # If branch of the update differs from project, then its revision will differ
+            if instance.scm_branch != p.scm_branch and p.scm_type == 'git':
+                project_path = p.get_project_path(check_if_exists=False)
+                git_repo = git.Repo(project_path)
+                try:
+                    commit = git_repo.commit(instance.scm_branch)
+                    instance.scm_revision = commit.hexsha  # obtain 40 char long-form of SHA1
+                    logger.debug('Evaluated {} to be a valid commit for {}'.format(instance.scm_branch, instance.log_format))
+                except (ValueError, BadGitName):
+                    # not a commit, see if it is a ref
+                    try:
+                        user_branch = getattr(git_repo.remotes.origin.refs, instance.scm_branch)
+                        instance.scm_revision = user_branch.commit.hexsha  # head of ref
+                        logger.debug('Evaluated {} to be a valid ref for {}'.format(instance.scm_branch, instance.log_format))
+                    except (git.exc.NoSuchPathError, AttributeError) as exc:
+                        raise RuntimeError('Could not find specified version {}, error: {}'.format(
+                            instance.scm_branch, exc
+                        ))
+            instance.save(update_fields=['scm_revision'])
         if instance.job_type == 'check' and status not in ('failed', 'canceled',):
-            if self.updated_revision:
-                p.scm_revision = self.updated_revision
+            if self.playbook_new_revision:
+                p.scm_revision = self.playbook_new_revision
             else:
-                logger.info("{} Could not find scm revision in check".format(instance.log_format))
+                if status == 'successful':
+                    logger.error("{} Could not find scm revision in check".format(instance.log_format))
             p.playbook_files = p.playbooks
             p.inventory_files = p.inventories
-            p.save()
+            p.save(update_fields=['scm_revision', 'playbook_files', 'inventory_files'])
 
         # Update any inventories that depend on this project
         dependent_inventory_sources = p.scm_inventory_sources.filter(update_on_project_update=True)

@@ -476,6 +476,14 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
         choices=PROJECT_UPDATE_JOB_TYPE_CHOICES,
         default='check',
     )
+    scm_revision = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+        editable=False,
+        verbose_name=_('SCM Revision'),
+        help_text=_('The SCM Revision discovered by this update for the given project and branch.'),
+    )
 
     def _get_parent_field_name(self):
         return 'project'
