@@ -33,7 +33,11 @@ def reap(instance=None, status='failed', excluded_uuids=[]):
     '''
     Reap all jobs in waiting|running for this instance.
     '''
-    me = instance or Instance.objects.me()
+    me = instance
+    if me is None:
+        (changed, me) = Instance.objects.get_or_register()
+        if changed:
+            logger.info("Registered tower node '{}'".format(me.hostname))
     now = tz_now()
     workflow_ctype_id = ContentType.objects.get_for_model(WorkflowJob).id
     jobs = UnifiedJob.objects.filter(
