@@ -66,7 +66,7 @@ class LDAPSettings(BaseLDAPSettings):
         # see: https://github.com/python-ldap/python-ldap/issues/55
         newctx_option = self.CONNECTION_OPTIONS.pop(ldap.OPT_X_TLS_NEWCTX, None)
         self.CONNECTION_OPTIONS = OrderedDict(self.CONNECTION_OPTIONS)
-        if newctx_option:
+        if newctx_option is not None:
             self.CONNECTION_OPTIONS[ldap.OPT_X_TLS_NEWCTX] = newctx_option
 
 
