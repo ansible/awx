@@ -1397,6 +1397,13 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
                 r['{}_user_email'.format(name)] = created_by.email
                 r['{}_user_first_name'.format(name)] = created_by.first_name
                 r['{}_user_last_name'.format(name)] = created_by.last_name
+
+        inventory = getattr_dne(self, 'inventory')
+        if inventory:
+            for name in ('awx', 'tower'):
+                r['{}_inventory_id'.format(name)] = inventory.pk
+                r['{}_inventory_name'.format(name)] = inventory.name
+
         return r
 
     def get_queue_name(self):
