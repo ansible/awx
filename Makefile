@@ -66,7 +66,7 @@ I18N_FLAG_FILE = .i18n_built
 	ui-test ui-deps ui-test-ci VERSION
 
 # remove ui build artifacts
-clean-ui:
+clean-ui: clean-languages
 	rm -rf awx/ui/static/
 	rm -rf awx/ui/node_modules/
 	rm -rf awx/ui/test/unit/reports/
@@ -94,6 +94,10 @@ clean-schema:
 	rm -rf schema.json
 	rm -rf reference-schema.json
 
+clean-languages:
+	rm -f $(I18N_FLAG_FILE)
+	find . -type f -regex ".*\.mo$$" -delete
+
 # Remove temporary build files, compiled Python files.
 clean: clean-ui clean-dist
 	rm -rf awx/public
@@ -104,7 +108,6 @@ clean: clean-ui clean-dist
 	rm -f awx/awx_test.sqlite3*
 	rm -rf requirements/vendor
 	rm -rf tmp
-	rm -rf $(I18N_FLAG_FILE)
 	mkdir tmp
 	rm -rf build $(NAME)-$(VERSION) *.egg-info
 	find . -type f -regex ".*\.py[co]$$" -delete
@@ -451,10 +454,17 @@ messages:
 # generate l10n .json .mo
 languages: $(I18N_FLAG_FILE)
 
-$(I18N_FLAG_FILE): $(UI_RELEASE_DEPS_FLAG_FILE)
-	$(NPM_BIN) --prefix awx/ui run languages
-	$(PYTHON) tools/scripts/compilemessages.py
-	touch $(I18N_FLAG_FILE)
+$(I18N_FLAG_FILE):
+	@if [ -f ${UI_RELEASE_DEPS_FLAG_FILE} -o -f ${UI_DEPS_FLAG_FILE} ]; then \
+		$(NPM_BIN) --prefix awx/ui run languages; \
+		$(PYTHON) tools/scripts/compilemessages.py; \
+		touch $(I18N_FLAG_FILE); \
+	else \
+		echo "#############################################"; \
+		echo "Skipped:"; \
+		echo "languages runs from ui-devel or ui-release"; \
+		echo "#############################################"; \
+	fi;
 
 # End l10n TASKS
 # --------------------------------------
@@ -463,7 +473,7 @@ $(I18N_FLAG_FILE): $(UI_RELEASE_DEPS_FLAG_FILE)
 # --------------------------------------
 ui-release: $(UI_RELEASE_FLAG_FILE)
 
-$(UI_RELEASE_FLAG_FILE): $(I18N_FLAG_FILE) $(UI_RELEASE_DEPS_FLAG_FILE)
+$(UI_RELEASE_FLAG_FILE): $(UI_RELEASE_DEPS_FLAG_FILE) $(I18N_FLAG_FILE)
 	$(NPM_BIN) --prefix awx/ui run build-release
 	touch $(UI_RELEASE_FLAG_FILE)
 
@@ -494,7 +504,7 @@ ui-docker: $(UI_DEPS_FLAG_FILE)
 	$(NPM_BIN) --prefix awx/ui run ui-docker -- $(MAKEFLAGS)
 
 # Builds UI with development UI without raising browser-sync or filesystem polling.
-ui-devel: $(UI_DEPS_FLAG_FILE)
+ui-devel: $(UI_DEPS_FLAG_FILE) $(I18N_FLAG_FILE)
 	$(NPM_BIN) --prefix awx/ui run build-devel -- $(MAKEFLAGS)
 
 ui-test: $(UI_DEPS_FLAG_FILE)
