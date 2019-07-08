@@ -39,13 +39,13 @@ export default function BuildAnchor($log, $filter) {
                  case 'schedule':
                      // schedule urls depend on the resource they're associated with
                      if (activity.summary_fields.job_template){
-                         url += 'templates/job_template/' + activity.summary_fields.job_template.id + '/schedules/' + obj.id;
+                         url += 'templates/job_template/' + activity.summary_fields.job_template[0].id + '/schedules/' + obj.id;
                      }
                      else if (activity.summary_fields.project){
-                         url += 'projects/' + activity.summary_fields.project.id + '/schedules/' + obj.id;
+                         url += 'projects/' + activity.summary_fields.project[0].id + '/schedules/' + obj.id;
                      }
                      else if (activity.summary_fields.system_job_template){
-                         url += 'management_jobs/' + activity.summary_fields.system_job_template.id + '/schedules/edit/' + obj.id;
+                         url += 'management_jobs/management_jobs/' + activity.summary_fields.system_job_template[0].id + '/schedules/edit/' + obj.id;
                      }
                      // urls for inventory sync schedules currently depend on having an inventory id and group id
                      else {

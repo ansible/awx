@@ -4682,19 +4682,20 @@ class ActivityStreamSerializer(BaseSerializer):
 
     def _job_method(self, obj, fk, summary_fields):
         summary_keys = {'job': 'job_template',
-                        'workflow_job_template_node': 'workflow_job_template'}
+                        'workflow_job_template_node': 'workflow_job_template',
+                        'schedule': 'unified_job_template'}
         if fk not in summary_keys:
             return
-        summary_fields[summary_keys[fk]] = []
+        related_obj = getattr(obj, summary_keys[fk], None)
+        summary_fields[get_type_for_model(related_obj)] = []
         item = {}
         fields = SUMMARIZABLE_FK_FIELDS[summary_keys[fk]]
-        related_obj = getattr(obj, summary_keys[fk], None)
         if related_obj is not None:
             for field in fields:
                 fval = getattr(related_obj, field, None)
                 if fval is not None:
                     item[field] = fval
-            summary_fields[summary_keys[fk]].append(item)
+            summary_fields[get_type_for_model(related_obj)].append(item)
 
     def get_summary_fields(self, obj):
         summary_fields = OrderedDict()
@@ -4706,13 +4707,7 @@ class ActivityStreamSerializer(BaseSerializer):
                 if m2m_list:
                     summary_fields[fk] = []
                     for thisItem in m2m_list:
-                        if fk == 'schedule':
-                            unified_job_template = getattr(thisItem, 'unified_job_template', None)
-                            if unified_job_template is not None:
-                                summary_fields[get_type_for_model(unified_job_template)] = {'id': unified_job_template.id,
-                                                                                            'name': unified_job_template.name}
-                        else:
-                            self._job_method(thisItem, fk, summary_fields)
+                        self._job_method(thisItem, fk, summary_fields)
                         thisItemDict = {}
                         for field in related_fields:
                             fval = getattr(thisItem, field, None)
