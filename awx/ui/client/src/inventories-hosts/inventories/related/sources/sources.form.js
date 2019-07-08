@@ -380,7 +380,7 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n){
                     ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)'
                 }, {
                     name: 'update_on_project_update',
-                    label: i18n._('Update on Project Change'),
+                    label: i18n._('Update on Project Update'),
                     type: 'checkbox',
                     ngShow: "source.value === 'scm'",
                     awPopOver: "<p>" + i18n._("After every project update where the SCM revision changes, " +
