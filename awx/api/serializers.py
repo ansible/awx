@@ -4680,7 +4680,7 @@ class ActivityStreamSerializer(BaseSerializer):
                 obj._prefetched_objects_cache[related_manager.prefetch_cache_name] = list(related_manager.all())
         return related_manager.all()
 
-    def _job_method(self, obj, fk, summary_fields):
+    def _summarize_parent_ujt(self, obj, fk, summary_fields):
         summary_keys = {'job': 'job_template',
                         'workflow_job_template_node': 'workflow_job_template',
                         'schedule': 'unified_job_template'}
@@ -4707,7 +4707,7 @@ class ActivityStreamSerializer(BaseSerializer):
                 if m2m_list:
                     summary_fields[fk] = []
                     for thisItem in m2m_list:
-                        self._job_method(thisItem, fk, summary_fields)
+                        self._summarize_parent_ujt(thisItem, fk, summary_fields)
                         thisItemDict = {}
                         for field in related_fields:
                             fval = getattr(thisItem, field, None)
