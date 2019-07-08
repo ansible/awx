@@ -1,11 +1,9 @@
-FROM centos:7
+FROM fedora:27
 
 ARG UID=0
 
-RUN yum -y update && yum -y install epel-release
-
 # sync with installer/roles/image_build/templates/Dockerfile.j2
-RUN yum -y install acl \
+RUN dnf -y install acl \
   alsa-lib \
   ansible \
   atk \
@@ -14,12 +12,15 @@ RUN yum -y install acl \
   curl \
   cyrus-sasl \
   cyrus-sasl-devel \
+  findutils \
   gcc \
   gcc-c++ \
   GConf2 \
   git \
+  glibc-locale-source \
   gtk3 \
   ipa-gothic-fonts \
+  iproute \
   krb5-devel \
   krb5-libs \
   krb5-workstation \
@@ -51,10 +52,9 @@ RUN yum -y install acl \
   python-psutil \
   python-psycopg2 \
   python-setuptools \
-  python36-devel \
-  python36-setuptools \
+  python3-devel \
+  python3-setuptools \
   rsync \
-  setools-libs \
   subversion \
   sudo \
   swig \
