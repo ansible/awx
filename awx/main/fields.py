@@ -1003,38 +1003,6 @@ class OrderedManyToManyDescriptor(ManyToManyDescriptor):
                         '%s__position' % self.through._meta.model_name
                     )
 
-                def add(self, *objs):
-                    # Django < 2 doesn't support this method on
-                    # ManyToManyFields w/ an intermediary model
-                    # We should be able to remove this code snippet when we
-                    # upgrade Django.
-                    # see: https://github.com/django/django/blob/stable/1.11.x/django/db/models/fields/related_descriptors.py#L926
-                    if not django.__version__.startswith('1.'):
-                        raise RuntimeError(
-                            'This method is no longer necessary in Django>=2'
-                        )
-                    try:
-                        self.through._meta.auto_created = True
-                        super(OrderedManyRelatedManager, self).add(*objs)
-                    finally:
-                        self.through._meta.auto_created = False
-
-                def remove(self, *objs):
-                    # Django < 2 doesn't support this method on
-                    # ManyToManyFields w/ an intermediary model
-                    # We should be able to remove this code snippet when we
-                    # upgrade Django.
-                    # see: https://github.com/django/django/blob/stable/1.11.x/django/db/models/fields/related_descriptors.py#L944
-                    if not django.__version__.startswith('1.'):
-                        raise RuntimeError(
-                            'This method is no longer necessary in Django>=2'
-                        )
-                    try:
-                        self.through._meta.auto_created = True
-                        super(OrderedManyRelatedManager, self).remove(*objs)
-                    finally:
-                        self.through._meta.auto_created = False
-
             return OrderedManyRelatedManager
 
         return add_custom_queryset_to_many_related_manager(
