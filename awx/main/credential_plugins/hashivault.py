@@ -1,6 +1,9 @@
 import copy
 import os
 import pathlib
+import stat
+import tempfile
+import threading
 from urllib.parse import urljoin
 
 from .plugin import CredentialPlugin
@@ -22,6 +25,12 @@ base_inputs = {
         'type': 'string',
         'secret': True,
         'help_text': _('The access token used to authenticate to the Vault server'),
+    }, {
+        'id': 'cacert',
+        'label': _('CA Certificate'),
+        'type': 'string',
+        'multiline': True,
+        'help_text': _('The CA certificate used to verify the SSL certificate of the Vault server')
     }],
     'metadata': [{
         'id': 'secret_path',
@@ -73,16 +82,34 @@ hashi_ssh_inputs['metadata'] = [{
 hashi_ssh_inputs['required'].extend(['public_key', 'role'])
 
 
+def create_temporary_fifo(data):
+    """Open fifo named pipe in a new thread using a temporary file path. The
+    thread blocks until data is read from the pipe.
+    Returns the path to the fifo.
+    :param data(bytes): Data to write to the pipe.
+    """
+    path = os.path.join(tempfile.mkdtemp(), next(tempfile._get_candidate_names()))
+    os.mkfifo(path, stat.S_IRUSR | stat.S_IWUSR)
+
+    threading.Thread(
+        target=lambda p, d: open(p, 'wb').write(d),
+        args=(path, data)
+    ).start()
+    return path
+
+
 def kv_backend(**kwargs):
     token = kwargs['token']
     url = urljoin(kwargs['url'], 'v1')
     secret_path = kwargs['secret_path']
     secret_key = kwargs.get('secret_key', None)
+    cacert = kwargs.get('cacert', None)
 
     api_version = kwargs['api_version']
 
     sess = requests.Session()
     sess.headers['Authorization'] = 'Bearer {}'.format(token)
+
     if api_version == 'v2':
         params = {}
         if kwargs.get('secret_version'):
@@ -93,16 +120,27 @@ def kv_backend(**kwargs):
         except Exception:
             mount_point, path = secret_path, []
         # https://www.vaultproject.io/api/secret/kv/kv-v2.html#read-secret-version
-        response = sess.get(
-            '/'.join([url, mount_point, 'data'] + path).rstrip('/'),
-            params=params,
-            timeout=30
-        )
+        if cacert:
+            response = sess.get(
+                '/'.join([url, mount_point, 'data'] + path).rstrip('/'),
+                params=params,
+                verify=create_temporary_fifo(cacert.encode()) ,
+                timeout=30
+            )
+        else:
+            response = sess.get(
+                '/'.join([url, mount_point, 'data'] + path).rstrip('/'),
+                params=params,
+                timeout=30
+            )
         response.raise_for_status()
         json = response.json()['data']
     else:
         # https://www.vaultproject.io/api/secret/kv/kv-v1.html#read-secret
-        response = sess.get('/'.join([url, secret_path]).rstrip('/'), timeout=30)
+        if cacert:
+            response = sess.get('/'.join([url, secret_path]).rstrip('/'), verify=create_temporary_fifo(cacert.encode()), timeout=30)
+        else:
+            response = sess.get('/'.join([url, secret_path]).rstrip('/'), timeout=30)
         response.raise_for_status()
         json = response.json()
 
@@ -121,6 +159,7 @@ def ssh_backend(**kwargs):
     url = urljoin(kwargs['url'], 'v1')
     secret_path = kwargs['secret_path']
     role = kwargs['role']
+    cacert = kwargs.get('cacert', None)
 
     sess = requests.Session()
     sess.headers['Authorization'] = 'Bearer {}'.format(token)
@@ -129,12 +168,21 @@ def ssh_backend(**kwargs):
     }
     if kwargs.get('valid_principals'):
         json['valid_principals'] = kwargs['valid_principals']
+
     # https://www.vaultproject.io/api/secret/ssh/index.html#sign-ssh-key
-    resp = sess.post(
-        '/'.join([url, secret_path, 'sign', role]).rstrip('/'),
-        json=json,
-        timeout=30
-    )
+    if cacert:
+        resp = sess.post(
+            '/'.join([url, secret_path, 'sign', role]).rstrip('/'),
+            json=json,
+            verify=create_temporary_fifo(cacert.encode()),
+            timeout=30
+        )
+    else:
+        resp = sess.post(
+            '/'.join([url, secret_path, 'sign', role]).rstrip('/'),
+            json=json,
+            timeout=30
+        )
     resp.raise_for_status()
     return resp.json()['data']['signed_key']
 
