@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { withRouter, Redirect } from 'react-router-dom';
 import { CardBody } from '@patternfly/react-core';
-import TemplateForm from '../shared/TemplateForm';
+import JobTemplateForm from '../shared/JobTemplateForm';
 import { JobTemplatesAPI } from '@api';
 import { JobTemplate } from '@types';
 
@@ -57,7 +57,7 @@ class JobTemplateEdit extends Component {
 
     return (
       <CardBody>
-        <TemplateForm
+        <JobTemplateForm
           template={template}
           handleCancel={this.handleCancel}
           handleSubmit={this.handleSubmit}

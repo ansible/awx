@@ -18,11 +18,22 @@ const QuestionCircleIcon = styled(PFQuestionCircleIcon)`
   margin-left: 10px;
 `;
 
-class TemplateForm extends Component {
+class JobTemplateForm extends Component {
   static propTypes = {
-    template: JobTemplate.isRequired,
+    template: JobTemplate,
     handleCancel: PropTypes.func.isRequired,
     handleSubmit: PropTypes.func.isRequired,
+  };
+
+  static defaultProps = {
+    template: {
+      name: '',
+      description: '',
+      inventory: '',
+      job_type: 'run',
+      project: '',
+      playbook: '',
+    },
   };
 
   render() {
@@ -137,4 +148,4 @@ class TemplateForm extends Component {
   }
 }
 
-export default withI18n()(withRouter(TemplateForm));
+export default withI18n()(withRouter(JobTemplateForm));

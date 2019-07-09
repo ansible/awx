@@ -34,7 +34,7 @@ describe('<JobTemplateEdit />', () => {
       job_type: 'check',
     };
 
-    wrapper.find('TemplateForm').prop('handleSubmit')(updatedTemplateData);
+    wrapper.find('JobTemplateForm').prop('handleSubmit')(updatedTemplateData);
     expect(JobTemplatesAPI.update).toHaveBeenCalledWith(1, updatedTemplateData);
   });
 
