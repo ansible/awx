@@ -112,12 +112,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='fact',
             name='facts',
-            field=awx.main.fields.JSONBField(default={}, help_text='Arbitrary JSON structure of module facts captured at timestamp for a single host.', blank=True),
+            field=awx.main.fields.JSONBField(default=dict, help_text='Arbitrary JSON structure of module facts captured at timestamp for a single host.', blank=True),
         ),
         migrations.AddField(
             model_name='host',
             name='ansible_facts',
-            field=awx.main.fields.JSONBField(default={}, help_text='Arbitrary JSON structure of most recent ansible_facts, per-host.', blank=True),
+            field=awx.main.fields.JSONBField(default=dict, help_text='Arbitrary JSON structure of most recent ansible_facts, per-host.', blank=True),
         ),
         migrations.AddField(
             model_name='host',
@@ -382,8 +382,8 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=512)),
                 ('kind', models.CharField(max_length=32, choices=[('ssh', 'Machine'), ('vault', 'Vault'), ('net', 'Network'), ('scm', 'Source Control'), ('cloud', 'Cloud'), ('insights', 'Insights')])),
                 ('managed_by_tower', models.BooleanField(default=False, editable=False)),
-                ('inputs', awx.main.fields.CredentialTypeInputField(default={}, blank=True, help_text='Enter inputs using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax.')),
-                ('injectors', awx.main.fields.CredentialTypeInjectorField(default={}, blank=True, help_text='Enter injectors using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax.')),
+                ('inputs', awx.main.fields.CredentialTypeInputField(default=dict, blank=True, help_text='Enter inputs using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax.')),
+                ('injectors', awx.main.fields.CredentialTypeInjectorField(default=dict, blank=True, help_text='Enter injectors using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax.')),
                 ('created_by', models.ForeignKey(related_name="{u'class': 'credentialtype', u'app_label': 'main'}(class)s_created+", on_delete=models.deletion.SET_NULL, default=None, editable=False, to=settings.AUTH_USER_MODEL, null=True)),
                 ('modified_by', models.ForeignKey(related_name="{u'class': 'credentialtype', u'app_label': 'main'}(class)s_modified+", on_delete=models.deletion.SET_NULL, default=None, editable=False, to=settings.AUTH_USER_MODEL, null=True)),
                 ('tags', taggit.managers.TaggableManager(to='taggit.Tag', through='taggit.TaggedItem', blank=True, help_text='A comma-separated list of tags.', verbose_name='Tags')),
@@ -399,7 +399,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='credential',
             name='inputs',
-            field=awx.main.fields.CredentialInputField(default={}, blank=True),
+            field=awx.main.fields.CredentialInputField(default=dict, blank=True),
         ),
         migrations.AddField(
             model_name='credential',

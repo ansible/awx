@@ -105,7 +105,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
     )
     inputs = CredentialInputField(
         blank=True,
-        default={},
+        default=dict,
         help_text=_('Enter inputs using either JSON or YAML syntax. Use the '
                     'radio button to toggle between the two. Refer to the '
                     'Ansible Tower documentation for example syntax.')
@@ -343,14 +343,14 @@ class CredentialType(CommonModelNameNotUnique):
     )
     inputs = CredentialTypeInputField(
         blank=True,
-        default={},
+        default=dict,
         help_text=_('Enter inputs using either JSON or YAML syntax. Use the '
                     'radio button to toggle between the two. Refer to the '
                     'Ansible Tower documentation for example syntax.')
     )
     injectors = CredentialTypeInjectorField(
         blank=True,
-        default={},
+        default=dict,
         help_text=_('Enter injectors using either JSON or YAML syntax. Use the '
                     'radio button to toggle between the two. Refer to the '
                     'Ansible Tower documentation for example syntax.')
@@ -1117,7 +1117,7 @@ class CredentialInputSource(PrimordialModel):
     )
     metadata = DynamicCredentialInputField(
         blank=True,
-        default={}
+        default=dict
     )
 
     def clean_target_credential(self):

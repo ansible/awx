@@ -180,7 +180,7 @@ class WorkflowJobNode(WorkflowNodeBase):
     )
     ancestor_artifacts = JSONField(
         blank=True,
-        default={},
+        default=dict,
         editable=False,
     )
     do_not_run = models.BooleanField(

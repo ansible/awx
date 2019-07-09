@@ -108,7 +108,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='credential',
             name='inputs',
-            field=awx.main.fields.CredentialInputField(default={}, help_text='Enter inputs using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax.', blank=True),
+            field=awx.main.fields.CredentialInputField(default=dict, help_text='Enter inputs using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax.', blank=True),
         ),
         migrations.RemoveField(
             model_name='job',
