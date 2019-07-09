@@ -106,7 +106,7 @@ def kv_backend(**kwargs):
     cacert = kwargs.get('cacert', None)
     api_version = kwargs['api_version']
 
-    request_kwargs = { 'timeout': 30 }
+    request_kwargs = {'timeout': 30}
     if cacert:
         request_kwargs['verify'] = create_temporary_fifo(cacert.encode())
 
@@ -115,7 +115,7 @@ def kv_backend(**kwargs):
 
     if api_version == 'v2':
         if kwargs.get('secret_version'):
-            request_kwargs['params'] = { 'version': kwargs['secret_version'] }
+            request_kwargs['params'] = {'version': kwargs['secret_version']}
         try:
             mount_point, *path = pathlib.Path(secret_path.lstrip(os.sep)).parts
             '/'.join(path) 
@@ -151,11 +151,11 @@ def ssh_backend(**kwargs):
     role = kwargs['role']
     cacert = kwargs.get('cacert', None)
 
-    request_kwargs = { 'timeout': 30 }
+    request_kwargs = {'timeout': 30}
     if cacert:
         request_kwargs['verify'] = create_temporary_fifo(cacert.encode())
 
-    request_kwargs['json'] = { 'public_key': kwargs['public_key'] }
+    request_kwargs['json'] = {'public_key': kwargs['public_key']}
     if kwargs.get('valid_principals'):
         request_kwargs['json']['valid_principals'] = kwargs['valid_principals']
 
