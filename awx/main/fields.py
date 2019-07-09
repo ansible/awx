@@ -11,7 +11,6 @@ from jinja2 import Environment, StrictUndefined
 from jinja2.exceptions import UndefinedError, TemplateSyntaxError
 
 # Django
-import django
 from django.contrib.postgres.fields import JSONField as upstream_JSONBField
 from django.core import exceptions as django_exceptions
 from django.core.serializers.json import DjangoJSONEncoder
