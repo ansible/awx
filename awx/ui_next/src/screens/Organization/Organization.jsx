@@ -41,8 +41,14 @@ class Organization extends Component {
   }
 
   async componentDidUpdate(prevProps) {
-    const { location } = this.props;
-    if (location !== prevProps.location) {
+    const { location, match } = this.props;
+    const url = `/organizations/${match.params.id}/`;
+
+    if (
+      prevProps.location.pathname.startsWith(url) &&
+      prevProps.location !== location &&
+      location.pathname === `${url}details`
+    ) {
       await this.loadOrganization();
     }
   }
