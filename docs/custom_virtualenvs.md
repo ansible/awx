@@ -98,48 +98,42 @@ Once the AWX API is available, update the `CUSTOM_VENV_PATHS` setting as describ
 
 Kubernetes Custom Virtualenvs
 =============================
+You can add custom virtual environments without modifying images by including
+the following variables in your `install.yml` playbook run. Your variables file
+must have a variable called `custom_venvs` with a list of your custom
+virtualenvs containing the name, python interpreter, ansible version, and a list
+of modules that should be installed in each one:
 
-You can create custom virtualenvs without updating the awx images by using initContainers and a shared emptydir within Kubernetes.  To start create an emptydir volume in the volumes stanza.
+```yaml
+# venv_vars.yaml
+---
+custom_venvs:
+  - name: dns_team
+    python: python3 # Defaults to python2
+    python_ansible_version: 2.8.1
+    python_modules:
+      - dnspython
+      - infoblox-client
+  - name: windows_team
+    python: python2
+    python_ansible_version: 2.8.0
+    python_modules:
+      - winrm
+  - name: vmware_team
+    python_ansible_version: 2.7.10
+    python_modules:
+      - pyvmomi
+```
 
-    volumes:
-        - emptyDir: {}
-          name: custom-venv
+The virtualenvs will be created in `/opt/custom-venvs` by default, but you can
+override that location by setting the variable `custom_venvs_path`.
 
-Now create an initContainer stanza.  You can subsititute your own custom images for this example we are using centos:7 as the base to build upon.  The command stanza is where you will add the python modules you require in your virtualenv.
+You can use the variables file like so:
 
-    initContainers:
-        - image: 'centos:7'
-          name: init-custom-venv
-          command:
-            - sh
-            - '-c'
-            - >-
-              yum install -y ansible python-pip curl python-setuptools epel-release openssl openssl-devel gcc python-devel &&
-              curl 'https://bootstrap.pypa.io/get-pip.py' | python &&
-              pip install virtualenv &&
-              mkdir -p /opt/my-envs &&
-              virtualenv /opt/my-envs/custom-venv &&
-              source /opt/my-envs/custom-venv/bin/activate &&
-              /opt/my-envs/custom-venv/bin/pip install psutil &&
-              /opt/my-envs/custom-venv/bin/pip install -U "ansible == X.Y.Z" &&
-              /opt/my-envs/custom-venv/bin/pip install -U custom-python-module
-          volumeMounts:
-            - mountPath: /opt/my-envs/custom-venv
-              name: custom-venv
+    $ ansible-playbook install.yml --extra-vars "@venv_vars.yaml"
 
-Finally in the awx-celery and awx-web containers stanza add the shared volume as a mount.
-
-    volumeMounts:
-        - mountPath: /opt/my-envs/custom-venv
-          name: custom-venv
-        - mountPath: /etc/tower
-          name: awx-application-config
-          readOnly: true
-        - mountPath: /etc/tower/conf.d
-          name: awx-confd
-          readOnly: true
-
-Once the AWX API is available, update the `CUSTOM_VENV_PATHS` setting as described in `Preparing a New Custom Virtualenv`.
+Once the AWX API is available, you will need to update the `CUSTOM_VENV_PATHS`
+setting as described in `Preparing a New Custom Virtualenv`.
 
 Assigning Custom Virtualenvs
 ============================

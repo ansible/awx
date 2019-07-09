@@ -46,3 +46,6 @@ kubernetes_deployment_replica_size: 1
 postgress_activate_wait: 60
 
 insights_url_base: "https://example.org"
+
+custom_venvs_path: "/opt/custom-venvs"
+custom_venvs_python: "python2"

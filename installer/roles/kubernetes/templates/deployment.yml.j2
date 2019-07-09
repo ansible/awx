@@ -134,6 +134,35 @@ spec:
     spec:
       serviceAccountName: awx
       terminationGracePeriodSeconds: 10
+{% if custom_venvs is defined %}
+      initContainers:
+        - image: 'centos:7'
+          name: init-custom-venvs
+          command:
+            - sh
+            - '-c'
+            - >-
+              yum install -y ansible curl python-setuptools epel-release \
+                openssl openssl-devel gcc python-devel &&
+              yum install -y python-virtualenv python36 python36-devel &&
+              mkdir -p {{ custom_venvs_path }} &&
+{% for custom_venv in custom_venvs %}
+              virtualenv -p {{ custom_venv.python | default(custom_venvs_python) }} \
+                {{ custom_venvs_path }}/{{ custom_venv.name }} &&
+              source {{ custom_venvs_path }}/{{ custom_venv.name }}/bin/activate &&
+              {{ custom_venvs_path }}/{{ custom_venv.name }}/bin/pip install -U psutil \
+                "ansible=={{ custom_venv.python_ansible_version }}" &&
+{% if custom_venv.python_modules is defined %}
+              {{ custom_venvs_path }}/{{ custom_venv.name }}/bin/pip install -U \
+                {% for module in custom_venv.python_modules %}{{ module }} {% endfor %} &&
+{% endif %}
+              deactivate && 
+{% endfor %}
+              :
+          volumeMounts:
+            - name: custom-venvs
+              mountPath: {{ custom_venvs_path }}
+{% endif %}
       containers:
         - name: {{ kubernetes_deployment_name }}-web
           image: "{{ kubernetes_web_image }}:{{ kubernetes_web_version }}"
@@ -150,6 +179,10 @@ spec:
             - name: {{ kubernetes_deployment_name }}-project-data-dir
               mountPath: "/var/lib/awx/projects"
               readOnly: false
+{% endif %}
+{% if custom_venvs is defined %}
+            - name: custom-venvs
+              mountPath: {{ custom_venvs_path }}
 {% endif %}
             - name: {{ kubernetes_deployment_name }}-application-config
               mountPath: "/etc/tower/settings.py"
@@ -190,6 +223,10 @@ spec:
             - name: {{ kubernetes_deployment_name }}-ca-trust-dir
               mountPath: "/etc/pki/ca-trust/source/anchors/"
               readOnly: true
+{% endif %}
+{% if custom_venvs is defined %}
+            - name: custom-venvs
+              mountPath: {{ custom_venvs_path }}
 {% endif %}
             - name: {{ kubernetes_deployment_name }}-application-config
               mountPath: "/etc/tower/settings.py"
@@ -300,6 +337,10 @@ spec:
           hostPath:
             path: "{{ project_data_dir }}"
             type: Directory
+{% endif %}
+{% if custom_venvs is defined %}
+        - name: custom-venvs 
+          emptyDir: {}
 {% endif %}
         - name: {{ kubernetes_deployment_name }}-application-config
           configMap:
