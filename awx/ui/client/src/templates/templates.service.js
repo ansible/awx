@@ -136,7 +136,7 @@ export default ['Rest', 'GetBasePath', '$q', 'NextPage', function(Rest, GetBaseP
           url = url + id + '/workflow_nodes?page_size=200';
 
           if(page) {
-              url += '/&page=' + page;
+              url += '&page=' + page;
           }
 
           Rest.setUrl(url);
