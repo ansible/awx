@@ -104,43 +104,33 @@ def kv_backend(**kwargs):
     secret_path = kwargs['secret_path']
     secret_key = kwargs.get('secret_key', None)
     cacert = kwargs.get('cacert', None)
-
     api_version = kwargs['api_version']
+
+    request_kwargs = { 'timeout': 30 }
+    if cacert:
+        request_kwargs['verify'] = create_temporary_fifo(cacert.encode())
 
     sess = requests.Session()
     sess.headers['Authorization'] = 'Bearer {}'.format(token)
 
     if api_version == 'v2':
-        params = {}
         if kwargs.get('secret_version'):
-            params['version'] = kwargs['secret_version']
+            request_kwargs['params'] = { 'version': kwargs['secret_version'] }
         try:
             mount_point, *path = pathlib.Path(secret_path.lstrip(os.sep)).parts
-            '/'.join(path)
+            '/'.join(path) 
         except Exception:
             mount_point, path = secret_path, []
         # https://www.vaultproject.io/api/secret/kv/kv-v2.html#read-secret-version
-        if cacert:
-            response = sess.get(
-                '/'.join([url, mount_point, 'data'] + path).rstrip('/'),
-                params=params,
-                verify=create_temporary_fifo(cacert.encode()) ,
-                timeout=30
-            )
-        else:
-            response = sess.get(
-                '/'.join([url, mount_point, 'data'] + path).rstrip('/'),
-                params=params,
-                timeout=30
-            )
+        request_url = '/'.join([url, mount_point, 'data'] + path).rstrip('/')
+        response = sess.get(request_url, **request_kwargs)
+
         response.raise_for_status()
         json = response.json()['data']
     else:
-        # https://www.vaultproject.io/api/secret/kv/kv-v1.html#read-secret
-        if cacert:
-            response = sess.get('/'.join([url, secret_path]).rstrip('/'), verify=create_temporary_fifo(cacert.encode()), timeout=30)
-        else:
-            response = sess.get('/'.join([url, secret_path]).rstrip('/'), timeout=30)
+        request_url = '/'.join([url, secret_path]).rstrip('/')
+        response = sess.get(request_url, **request_kwargs)
+
         response.raise_for_status()
         json = response.json()
 
@@ -161,28 +151,20 @@ def ssh_backend(**kwargs):
     role = kwargs['role']
     cacert = kwargs.get('cacert', None)
 
+    request_kwargs = { 'timeout': 30 }
+    if cacert:
+        request_kwargs['verify'] = create_temporary_fifo(cacert.encode())
+
+    request_kwargs['json'] = { 'public_key': kwargs['public_key'] }
+    if kwargs.get('valid_principals'):
+        request_kwargs['json']['valid_principals'] = kwargs['valid_principals']
+
     sess = requests.Session()
     sess.headers['Authorization'] = 'Bearer {}'.format(token)
-    json = {
-        'public_key': kwargs['public_key']
-    }
-    if kwargs.get('valid_principals'):
-        json['valid_principals'] = kwargs['valid_principals']
-
     # https://www.vaultproject.io/api/secret/ssh/index.html#sign-ssh-key
-    if cacert:
-        resp = sess.post(
-            '/'.join([url, secret_path, 'sign', role]).rstrip('/'),
-            json=json,
-            verify=create_temporary_fifo(cacert.encode()),
-            timeout=30
-        )
-    else:
-        resp = sess.post(
-            '/'.join([url, secret_path, 'sign', role]).rstrip('/'),
-            json=json,
-            timeout=30
-        )
+    request_url = '/'.join([url, secret_path, 'sign', role]).rstrip('/')
+    resp = sess.post(request_url, **request_kwargs)
+
     resp.raise_for_status()
     return resp.json()['data']['signed_key']
 
