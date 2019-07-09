@@ -140,7 +140,7 @@ User.add_to_class('is_system_auditor', user_is_system_auditor)
 
 
 def user_is_in_enterprise_category(user, category):
-    ret = (category,) in user.enterprise_auth.all().values_list('provider') and not user.has_usable_password()
+    ret = (category,) in user.enterprise_auth.values_list('provider') and not user.has_usable_password()
     # NOTE: this if-else block ensures existing enterprise users are still able to
     # log in. Remove it in a future release
     if category == 'radius':

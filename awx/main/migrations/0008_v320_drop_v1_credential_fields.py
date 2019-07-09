@@ -103,7 +103,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='credential',
             name='credential_type',
-            field=models.ForeignKey(related_name='credentials', to='main.CredentialType', null=False, help_text='Specify the type of credential you want to create. Refer to the Ansible Tower documentation for details on each type.')
+            field=models.ForeignKey(related_name='credentials', to='main.CredentialType', on_delete=models.CASCADE, null=False, help_text='Specify the type of credential you want to create. Refer to the Ansible Tower documentation for details on each type.')
         ),
         migrations.AlterField(
             model_name='credential',

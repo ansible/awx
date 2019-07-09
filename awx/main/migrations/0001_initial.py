@@ -62,7 +62,7 @@ class Migration(migrations.Migration):
                 ('expires', models.DateTimeField(default=django.utils.timezone.now)),
                 ('request_hash', models.CharField(default='', max_length=40, blank=True)),
                 ('reason', models.CharField(default='', help_text='Reason the auth token was invalidated.', max_length=1024, blank=True)),
-                ('user', models.ForeignKey(related_name='auth_tokens', to=settings.AUTH_USER_MODEL)),
+                ('user', models.ForeignKey(related_name='auth_tokens', on_delete=models.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
         ),
         migrations.CreateModel(
@@ -241,7 +241,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('modified', models.DateTimeField(auto_now=True)),
-                ('instance', models.ForeignKey(to='main.Instance')),
+                ('instance', models.ForeignKey(on_delete=models.CASCADE, to='main.Instance')),
             ],
         ),
         migrations.CreateModel(
@@ -287,7 +287,7 @@ class Migration(migrations.Migration):
                 ('created', models.DateTimeField(default=None, editable=False)),
                 ('modified', models.DateTimeField(default=None, editable=False)),
                 ('ldap_dn', models.CharField(default='', max_length=1024)),
-                ('user', awx.main.fields.AutoOneToOneField(related_name='profile', editable=False, to=settings.AUTH_USER_MODEL)),
+                ('user', awx.main.fields.AutoOneToOneField(related_name='profile', editable=False, on_delete=models.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
         ),
         migrations.CreateModel(
@@ -343,7 +343,7 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=512)),
                 ('old_pk', models.PositiveIntegerField(default=None, null=True, editable=False)),
                 ('launch_type', models.CharField(default='manual', max_length=20, editable=False, choices=[('manual', 'Manual'), ('relaunch', 'Relaunch'), ('callback', 'Callback'), ('scheduled', 'Scheduled'), ('dependency', 'Dependency')])),
-                ('cancel_flag', models.BooleanField(default=False, editable=False)),
+                ('cancel_flag', models.BooleanField(blank=True, default=False, editable=False)),
                 ('status', models.CharField(default='new', max_length=20, editable=False, choices=[('new', 'New'), ('pending', 'Pending'), ('waiting', 'Waiting'), ('running', 'Running'), ('successful', 'Successful'), ('failed', 'Failed'), ('error', 'Error'), ('canceled', 'Canceled')])),
                 ('failed', models.BooleanField(default=False, editable=False)),
                 ('started', models.DateTimeField(default=None, null=True, editable=False)),
@@ -380,7 +380,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='AdHocCommand',
             fields=[
-                ('unifiedjob_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='main.UnifiedJob')),
+                ('unifiedjob_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, on_delete=django.db.models.deletion.CASCADE, serialize=False, to='main.UnifiedJob')),
                 ('job_type', models.CharField(default='run', max_length=64, choices=[('run', 'Run'), ('check', 'Check')])),
                 ('limit', models.CharField(default='', max_length=1024, blank=True)),
                 ('module_name', models.CharField(default='', max_length=1024, blank=True)),
@@ -394,7 +394,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='InventorySource',
             fields=[
-                ('unifiedjobtemplate_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='main.UnifiedJobTemplate')),
+                ('unifiedjobtemplate_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, on_delete=django.db.models.deletion.CASCADE, serialize=False, to='main.UnifiedJobTemplate')),
                 ('source', models.CharField(default='', max_length=32, blank=True, choices=[('', 'Manual'), ('file', 'Local File, Directory or Script'), ('rax', 'Rackspace Cloud Servers'), ('ec2', 'Amazon EC2'), ('gce', 'Google Compute Engine'), ('azure', 'Microsoft Azure'), ('vmware', 'VMware vCenter'), ('openstack', 'OpenStack'), ('custom', 'Custom Script')])),
                 ('source_path', models.CharField(default='', max_length=1024, editable=False, blank=True)),
                 ('source_vars', models.TextField(default='', help_text='Inventory source variables in YAML or JSON format.', blank=True)),
@@ -411,7 +411,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='InventoryUpdate',
             fields=[
-                ('unifiedjob_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='main.UnifiedJob')),
+                ('unifiedjob_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, on_delete=django.db.models.deletion.CASCADE, serialize=False, to='main.UnifiedJob')),
                 ('source', models.CharField(default='', max_length=32, blank=True, choices=[('', 'Manual'), ('file', 'Local File, Directory or Script'), ('rax', 'Rackspace Cloud Servers'), ('ec2', 'Amazon EC2'), ('gce', 'Google Compute Engine'), ('azure', 'Microsoft Azure'), ('vmware', 'VMware vCenter'), ('openstack', 'OpenStack'), ('custom', 'Custom Script')])),
                 ('source_path', models.CharField(default='', max_length=1024, editable=False, blank=True)),
                 ('source_vars', models.TextField(default='', help_text='Inventory source variables in YAML or JSON format.', blank=True)),
@@ -427,7 +427,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Job',
             fields=[
-                ('unifiedjob_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='main.UnifiedJob')),
+                ('unifiedjob_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, on_delete=django.db.models.deletion.CASCADE, serialize=False, to='main.UnifiedJob')),
                 ('job_type', models.CharField(default='run', max_length=64, choices=[('run', 'Run'), ('check', 'Check'), ('scan', 'Scan')])),
                 ('playbook', models.CharField(default='', max_length=1024, blank=True)),
                 ('forks', models.PositiveIntegerField(default=0, blank=True)),
@@ -435,7 +435,7 @@ class Migration(migrations.Migration):
                 ('verbosity', models.PositiveIntegerField(default=0, blank=True, choices=[(0, '0 (Normal)'), (1, '1 (Verbose)'), (2, '2 (More Verbose)'), (3, '3 (Debug)'), (4, '4 (Connection Debug)'), (5, '5 (WinRM Debug)')])),
                 ('extra_vars', models.TextField(default='', blank=True)),
                 ('job_tags', models.CharField(default='', max_length=1024, blank=True)),
-                ('force_handlers', models.BooleanField(default=False)),
+                ('force_handlers', models.BooleanField(blank=True, default=False)),
                 ('skip_tags', models.CharField(default='', max_length=1024, blank=True)),
                 ('start_at_task', models.CharField(default='', max_length=1024, blank=True)),
                 ('become_enabled', models.BooleanField(default=False)),
@@ -448,7 +448,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='JobTemplate',
             fields=[
-                ('unifiedjobtemplate_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='main.UnifiedJobTemplate')),
+                ('unifiedjobtemplate_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, on_delete=django.db.models.deletion.CASCADE, serialize=False, to='main.UnifiedJobTemplate')),
                 ('job_type', models.CharField(default='run', max_length=64, choices=[('run', 'Run'), ('check', 'Check'), ('scan', 'Scan')])),
                 ('playbook', models.CharField(default='', max_length=1024, blank=True)),
                 ('forks', models.PositiveIntegerField(default=0, blank=True)),
@@ -456,7 +456,7 @@ class Migration(migrations.Migration):
                 ('verbosity', models.PositiveIntegerField(default=0, blank=True, choices=[(0, '0 (Normal)'), (1, '1 (Verbose)'), (2, '2 (More Verbose)'), (3, '3 (Debug)'), (4, '4 (Connection Debug)'), (5, '5 (WinRM Debug)')])),
                 ('extra_vars', models.TextField(default='', blank=True)),
                 ('job_tags', models.CharField(default='', max_length=1024, blank=True)),
-                ('force_handlers', models.BooleanField(default=False)),
+                ('force_handlers', models.BooleanField(blank=True, default=False)),
                 ('skip_tags', models.CharField(default='', max_length=1024, blank=True)),
                 ('start_at_task', models.CharField(default='', max_length=1024, blank=True)),
                 ('become_enabled', models.BooleanField(default=False)),
@@ -473,7 +473,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Project',
             fields=[
-                ('unifiedjobtemplate_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='main.UnifiedJobTemplate')),
+                ('unifiedjobtemplate_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, on_delete=django.db.models.deletion.CASCADE, serialize=False, to='main.UnifiedJobTemplate')),
                 ('local_path', models.CharField(help_text='Local path (relative to PROJECTS_ROOT) containing playbooks and related files for this project.', max_length=1024, blank=True)),
                 ('scm_type', models.CharField(default='', max_length=8, verbose_name='SCM Type', blank=True, choices=[('', 'Manual'), ('git', 'Git'), ('hg', 'Mercurial'), ('svn', 'Subversion')])),
                 ('scm_url', models.CharField(default='', max_length=1024, verbose_name='SCM URL', blank=True)),
@@ -492,7 +492,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='ProjectUpdate',
             fields=[
-                ('unifiedjob_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='main.UnifiedJob')),
+                ('unifiedjob_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, on_delete=django.db.models.deletion.CASCADE, serialize=False, to='main.UnifiedJob')),
                 ('local_path', models.CharField(help_text='Local path (relative to PROJECTS_ROOT) containing playbooks and related files for this project.', max_length=1024, blank=True)),
                 ('scm_type', models.CharField(default='', max_length=8, verbose_name='SCM Type', blank=True, choices=[('', 'Manual'), ('git', 'Git'), ('hg', 'Mercurial'), ('svn', 'Subversion')])),
                 ('scm_url', models.CharField(default='', max_length=1024, verbose_name='SCM URL', blank=True)),
@@ -505,7 +505,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='SystemJob',
             fields=[
-                ('unifiedjob_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='main.UnifiedJob')),
+                ('unifiedjob_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, on_delete=django.db.models.deletion.CASCADE, serialize=False, to='main.UnifiedJob')),
                 ('job_type', models.CharField(default='', max_length=32, blank=True, choices=[('cleanup_jobs', 'Remove jobs older than a certain number of days'), ('cleanup_activitystream', 'Remove activity stream entries older than a certain number of days'), ('cleanup_deleted', 'Purge previously deleted items from the database'), ('cleanup_facts', 'Purge and/or reduce the granularity of system tracking data')])),
                 ('extra_vars', models.TextField(default='', blank=True)),
             ],
@@ -517,7 +517,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='SystemJobTemplate',
             fields=[
-                ('unifiedjobtemplate_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='main.UnifiedJobTemplate')),
+                ('unifiedjobtemplate_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, on_delete=django.db.models.deletion.CASCADE, serialize=False, to='main.UnifiedJobTemplate')),
                 ('job_type', models.CharField(default='', max_length=32, blank=True, choices=[('cleanup_jobs', 'Remove jobs older than a certain number of days'), ('cleanup_activitystream', 'Remove activity stream entries older than a certain number of days'), ('cleanup_deleted', 'Purge previously deleted items from the database'), ('cleanup_facts', 'Purge and/or reduce the granularity of system tracking data')])),
             ],
             bases=('main.unifiedjobtemplate', models.Model),
@@ -550,7 +550,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='unifiedjobtemplate',
             name='polymorphic_ctype',
-            field=models.ForeignKey(related_name='polymorphic_main.unifiedjobtemplate_set+', editable=False, to='contenttypes.ContentType', null=True),
+            field=models.ForeignKey(related_name='polymorphic_main.unifiedjobtemplate_set+', editable=False, on_delete=django.db.models.deletion.CASCADE, to='contenttypes.ContentType', null=True),
         ),
         migrations.AddField(
             model_name='unifiedjobtemplate',
@@ -575,7 +575,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='unifiedjob',
             name='polymorphic_ctype',
-            field=models.ForeignKey(related_name='polymorphic_main.unifiedjob_set+', editable=False, to='contenttypes.ContentType', null=True),
+            field=models.ForeignKey(related_name='polymorphic_main.unifiedjob_set+', editable=False, on_delete=django.db.models.deletion.CASCADE, to='contenttypes.ContentType', null=True),
         ),
         migrations.AddField(
             model_name='unifiedjob',
@@ -595,7 +595,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='schedule',
             name='unified_job_template',
-            field=models.ForeignKey(related_name='schedules', to='main.UnifiedJobTemplate'),
+            field=models.ForeignKey(related_name='schedules', on_delete=django.db.models.deletion.CASCADE, to='main.UnifiedJobTemplate'),
         ),
         migrations.AddField(
             model_name='permission',
@@ -610,12 +610,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='joborigin',
             name='unified_job',
-            field=models.OneToOneField(related_name='job_origin', to='main.UnifiedJob'),
+            field=models.OneToOneField(related_name='job_origin', on_delete=django.db.models.deletion.CASCADE, to='main.UnifiedJob'),
         ),
         migrations.AddField(
             model_name='inventory',
             name='organization',
-            field=models.ForeignKey(related_name='inventories', to='main.Organization', help_text='Organization containing this inventory.'),
+            field=models.ForeignKey(related_name='inventories', on_delete=django.db.models.deletion.CASCADE, to='main.Organization', help_text='Organization containing this inventory.'),
         ),
         migrations.AddField(
             model_name='inventory',
@@ -625,7 +625,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='host',
             name='inventory',
-            field=models.ForeignKey(related_name='hosts', to='main.Inventory'),
+            field=models.ForeignKey(related_name='hosts', on_delete=django.db.models.deletion.CASCADE, to='main.Inventory'),
         ),
         migrations.AddField(
             model_name='host',
@@ -650,7 +650,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='group',
             name='inventory',
-            field=models.ForeignKey(related_name='groups', to='main.Inventory'),
+            field=models.ForeignKey(related_name='groups', on_delete=django.db.models.deletion.CASCADE, to='main.Inventory'),
         ),
         migrations.AddField(
             model_name='group',
@@ -680,12 +680,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='credential',
             name='team',
-            field=models.ForeignKey(related_name='credentials', default=None, blank=True, to='main.Team', null=True),
+            field=models.ForeignKey(related_name='credentials', on_delete=django.db.models.deletion.SET_NULL, default=None, blank=True, to='main.Team', null=True),
         ),
         migrations.AddField(
             model_name='credential',
             name='user',
-            field=models.ForeignKey(related_name='credentials', default=None, blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='credentials', on_delete=django.db.models.deletion.SET_NULL, default=None, blank=True, to=settings.AUTH_USER_MODEL, null=True),
         ),
         migrations.AddField(
             model_name='adhoccommandevent',
@@ -774,7 +774,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='projectupdate',
             name='project',
-            field=models.ForeignKey(related_name='project_updates', editable=False, to='main.Project'),
+            field=models.ForeignKey(related_name='project_updates', on_delete=django.db.models.deletion.CASCADE, editable=False, to='main.Project'),
         ),
         migrations.AddField(
             model_name='project',
@@ -814,12 +814,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='jobhostsummary',
             name='job',
-            field=models.ForeignKey(related_name='job_host_summaries', editable=False, to='main.Job'),
+            field=models.ForeignKey(related_name='job_host_summaries', on_delete=django.db.models.deletion.CASCADE, editable=False, to='main.Job'),
         ),
         migrations.AddField(
             model_name='jobevent',
             name='job',
-            field=models.ForeignKey(related_name='job_events', editable=False, to='main.Job'),
+            field=models.ForeignKey(related_name='job_events', on_delete=django.db.models.deletion.CASCADE, editable=False, to='main.Job'),
         ),
         migrations.AddField(
             model_name='job',
@@ -859,7 +859,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='inventoryupdate',
             name='inventory_source',
-            field=models.ForeignKey(related_name='inventory_updates', editable=False, to='main.InventorySource'),
+            field=models.ForeignKey(related_name='inventory_updates', on_delete=django.db.models.deletion.CASCADE, editable=False, to='main.InventorySource'),
         ),
         migrations.AddField(
             model_name='inventoryupdate',
@@ -874,12 +874,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='inventorysource',
             name='group',
-            field=awx.main.fields.AutoOneToOneField(related_name='inventory_source', null=True, default=None, editable=False, to='main.Group'),
+            field=awx.main.fields.AutoOneToOneField(related_name='inventory_source', on_delete=django.db.models.deletion.SET_NULL, null=True, default=None, editable=False, to='main.Group'),
         ),
         migrations.AddField(
             model_name='inventorysource',
             name='inventory',
-            field=models.ForeignKey(related_name='inventory_sources', default=None, editable=False, to='main.Inventory', null=True),
+            field=models.ForeignKey(related_name='inventory_sources', on_delete=django.db.models.deletion.SET_NULL, default=None, editable=False, to='main.Inventory', null=True),
         ),
         migrations.AddField(
             model_name='inventorysource',
@@ -916,7 +916,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='adhoccommandevent',
             name='ad_hoc_command',
-            field=models.ForeignKey(related_name='ad_hoc_command_events', editable=False, to='main.AdHocCommand'),
+            field=models.ForeignKey(related_name='ad_hoc_command_events', on_delete=django.db.models.deletion.CASCADE, editable=False, to='main.AdHocCommand'),
         ),
         migrations.AddField(
             model_name='adhoccommand',

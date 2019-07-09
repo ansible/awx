@@ -116,7 +116,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='team',
             name='organization',
-            field=models.ForeignKey(related_name='teams', to='main.Organization'),
+            field=models.ForeignKey(related_name='teams', on_delete=models.CASCADE, to='main.Organization'),
             preserve_default=False,
         ),
     ] + _squashed.operations(SQUASHED_30, applied=True)

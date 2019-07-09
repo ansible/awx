@@ -74,7 +74,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='WorkflowJob',
             fields=[
-                ('unifiedjob_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='main.UnifiedJob')),
+                ('unifiedjob_ptr', models.OneToOneField(parent_link=True, auto_created=True, on_delete=models.CASCADE, primary_key=True, serialize=False, to='main.UnifiedJob')),
                 ('extra_vars', models.TextField(default='', blank=True)),
             ],
             options={
@@ -100,7 +100,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='WorkflowJobTemplate',
             fields=[
-                ('unifiedjobtemplate_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='main.UnifiedJobTemplate')),
+                ('unifiedjobtemplate_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, on_delete=models.CASCADE, serialize=False, to='main.UnifiedJobTemplate')),
                 ('extra_vars', models.TextField(default='', blank=True)),
                 ('admin_role', awx.main.fields.ImplicitRoleField(related_name='+', parent_role='singleton:system_administrator', to='main.Role', null='True')),
             ],
@@ -116,7 +116,7 @@ class Migration(migrations.Migration):
                 ('failure_nodes', models.ManyToManyField(related_name='workflowjobtemplatenodes_failure', to='main.WorkflowJobTemplateNode', blank=True)),
                 ('success_nodes', models.ManyToManyField(related_name='workflowjobtemplatenodes_success', to='main.WorkflowJobTemplateNode', blank=True)),
                 ('unified_job_template', models.ForeignKey(related_name='workflowjobtemplatenodes', on_delete=django.db.models.deletion.SET_NULL, default=None, blank=True, to='main.UnifiedJobTemplate', null=True)),
-                ('workflow_job_template', models.ForeignKey(related_name='workflow_job_template_nodes', default=None, blank=True, to='main.WorkflowJobTemplate', null=True)),
+                ('workflow_job_template', models.ForeignKey(related_name='workflow_job_template_nodes', on_delete=models.SET_NULL, default=None, blank=True, to='main.WorkflowJobTemplate', null=True)),
             ],
             options={
                 'abstract': False,
@@ -211,7 +211,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='workflowjobnode',
             name='workflow_job',
-            field=models.ForeignKey(related_name='workflow_job_nodes', default=None, blank=True, to='main.WorkflowJob', null=True),
+            field=models.ForeignKey(related_name='workflow_job_nodes', on_delete=django.db.models.deletion.CASCADE, default=None, blank=True, to='main.WorkflowJob', null=True),
         ),
         migrations.AlterField(
             model_name='workflowjobtemplate',

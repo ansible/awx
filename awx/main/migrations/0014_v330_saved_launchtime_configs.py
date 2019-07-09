@@ -94,51 +94,51 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='workflowjobtemplate',
             name='ask_variables_on_launch',
-            field=awx.main.fields.AskForField(default=False),
+            field=awx.main.fields.AskForField(blank=True, default=False),
         ),
         migrations.AlterField(
             model_name='jobtemplate',
             name='ask_credential_on_launch',
-            field=awx.main.fields.AskForField(default=False),
+            field=awx.main.fields.AskForField(blank=True, default=False),
         ),
         migrations.AlterField(
             model_name='jobtemplate',
             name='ask_diff_mode_on_launch',
-            field=awx.main.fields.AskForField(default=False),
+            field=awx.main.fields.AskForField(blank=True, default=False),
         ),
         migrations.AlterField(
             model_name='jobtemplate',
             name='ask_inventory_on_launch',
-            field=awx.main.fields.AskForField(default=False),
+            field=awx.main.fields.AskForField(blank=True, default=False),
         ),
         migrations.AlterField(
             model_name='jobtemplate',
             name='ask_job_type_on_launch',
-            field=awx.main.fields.AskForField(default=False),
+            field=awx.main.fields.AskForField(blank=True, default=False),
         ),
         migrations.AlterField(
             model_name='jobtemplate',
             name='ask_limit_on_launch',
-            field=awx.main.fields.AskForField(default=False),
+            field=awx.main.fields.AskForField(blank=True, default=False),
         ),
         migrations.AlterField(
             model_name='jobtemplate',
             name='ask_skip_tags_on_launch',
-            field=awx.main.fields.AskForField(default=False),
+            field=awx.main.fields.AskForField(blank=True, default=False),
         ),
         migrations.AlterField(
             model_name='jobtemplate',
             name='ask_tags_on_launch',
-            field=awx.main.fields.AskForField(default=False),
+            field=awx.main.fields.AskForField(blank=True, default=False),
         ),
         migrations.AlterField(
             model_name='jobtemplate',
             name='ask_variables_on_launch',
-            field=awx.main.fields.AskForField(default=False),
+            field=awx.main.fields.AskForField(blank=True, default=False),
         ),
         migrations.AlterField(
             model_name='jobtemplate',
             name='ask_verbosity_on_launch',
-            field=awx.main.fields.AskForField(default=False),
+            field=awx.main.fields.AskForField(blank=True, default=False),
         ),
     ]
