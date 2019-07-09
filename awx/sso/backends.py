@@ -179,7 +179,7 @@ def _decorate_enterprise_user(user, provider):
 def _get_or_set_enterprise_user(username, password, provider):
     created = False
     try:
-        user = User.objects.all().prefetch_related('enterprise_auth').get(username=username)
+        user = User.objects.prefetch_related('enterprise_auth').get(username=username)
     except User.DoesNotExist:
         user = User(username=username)
         enterprise_auth = _decorate_enterprise_user(user, provider)
