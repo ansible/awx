@@ -422,10 +422,18 @@ function menuLast () {
 
 function down () {
     scroll.moveDown();
+
+    if (scroll.isBeyondLowerThreshold()) {
+        next();
+    }
 }
 
 function up () {
     scroll.moveUp();
+
+    if (scroll.isBeyondUpperThreshold()) {
+        previous();
+    }
 }
 
 function togglePanelExpand () {
