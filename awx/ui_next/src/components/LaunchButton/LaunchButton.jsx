@@ -1,24 +1,12 @@
 import React, { Fragment } from 'react';
 import { withRouter } from 'react-router-dom';
 import { number } from 'prop-types';
-import { Button, Tooltip } from '@patternfly/react-core';
-import { RocketIcon } from '@patternfly/react-icons';
-import styled from 'styled-components';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
 import AlertModal from '@components/AlertModal';
 import ErrorDetail from '@components/ErrorDetail';
 import { JobTemplatesAPI } from '@api';
-
-const StyledLaunchButton = styled(Button)`
-  padding: 5px 8px;
-
-  &:hover {
-    background-color: #0066cc;
-    color: white;
-  }
-`;
 
 class LaunchButton extends React.Component {
   static propTypes = {
@@ -65,20 +53,10 @@ class LaunchButton extends React.Component {
 
   render() {
     const { launchError, promptError } = this.state;
-    const { i18n } = this.props;
+    const { i18n, children } = this.props;
     return (
       <Fragment>
-        <Tooltip content={i18n._(t`Launch Job`)} position="top">
-          <div>
-            <StyledLaunchButton
-              variant="plain"
-              aria-label={i18n._(t`Launch`)}
-              onClick={this.handleLaunch}
-            >
-              <RocketIcon />
-            </StyledLaunchButton>
-          </div>
-        </Tooltip>
+        {children(this.handleLaunch)}
         <AlertModal
           isOpen={launchError}
           variant="danger"

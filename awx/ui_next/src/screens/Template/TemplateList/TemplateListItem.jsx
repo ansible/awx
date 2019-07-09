@@ -5,16 +5,30 @@ import {
   DataListItemRow,
   DataListItemCells,
   DataListCheck,
+  Tooltip,
+  Button as PFButton,
 } from '@patternfly/react-core';
+import { t } from '@lingui/macro';
+import { withI18n } from '@lingui/react';
+import { RocketIcon } from '@patternfly/react-icons';
+import styled from 'styled-components';
 
 import DataListCell from '@components/DataListCell';
 import LaunchButton from '@components/LaunchButton';
 import VerticalSeparator from '@components/VerticalSeparator';
 import { toTitleCase } from '@util/strings';
 
+const StyledButton = styled(PFButton)`
+  padding: 5px 8px;
+  border: none;
+  &:hover {
+    background-color: #0066cc;
+    color: white;
+  }
+`;
 class TemplateListItem extends Component {
   render() {
-    const { template, isSelected, onSelect } = this.props;
+    const { i18n, template, isSelected, onSelect } = this.props;
     const canLaunch = template.summary_fields.user_capabilities.start;
 
     return (
@@ -44,7 +58,19 @@ class TemplateListItem extends Component {
               </DataListCell>,
               <DataListCell lastcolumn="true" key="launch">
                 {canLaunch && template.type === 'job_template' && (
-                  <LaunchButton templateId={template.id} />
+                  <Tooltip content={i18n._(t`Launch`)} position="top">
+                    <LaunchButton
+                      component={Link}
+                      to="/templates"
+                      templateId={template.id}
+                    >
+                      {handleLaunch => (
+                        <StyledButton variant="plain" onClick={handleLaunch}>
+                          <RocketIcon />
+                        </StyledButton>
+                      )}
+                    </LaunchButton>
+                  </Tooltip>
                 )}
               </DataListCell>,
             ]}
@@ -55,4 +81,4 @@ class TemplateListItem extends Component {
   }
 }
 export { TemplateListItem as _TemplateListItem };
-export default TemplateListItem;
+export default withI18n()(TemplateListItem);
