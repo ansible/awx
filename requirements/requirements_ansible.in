@@ -63,4 +63,4 @@ pywinrm[kerberos]==0.3.0
 requests
 requests-credssp==1.0.2   # For windows authentication awx/issues/1144
 # OpenStack
-openstacksdk==0.23.0
+openstacksdk==0.31.1
