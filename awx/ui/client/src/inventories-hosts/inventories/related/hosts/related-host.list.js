@@ -67,11 +67,15 @@ export default ['i18n', function(i18n) {
                 columnClass: 'col-lg-3 col-md-3 col-sm-3 col-xs-7',
                 dataHostId: "{{ host.id }}",
                 dataType: "host",
-                class: 'InventoryManage-breakWord'
             },
             description: {
                 label: i18n._('Description'),
-                columnClass: 'd-none d-lg-flex col-lg-3'
+                columnClass: 'd-none d-lg-flex col-lg-3',
+                template: `
+                    <div class="d-inline-block text-truncate">
+                        {{ host.description }}
+                    </div>
+                `
             },
             groups: {
                 label: i18n._("Related Groups"),

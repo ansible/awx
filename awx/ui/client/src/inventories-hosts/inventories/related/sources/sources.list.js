@@ -40,7 +40,6 @@
                 key: true,
                 uiSref: "inventories.edit.inventory_sources.edit({inventory_source_id:inventory_source.id})",
                 columnClass: 'col-lg-4 col-md-4 col-sm-4 col-xs-4',
-                class: 'InventoryManage-breakWord',
             },
             source: {
                 label: i18n._('Type'),
