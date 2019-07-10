@@ -1016,6 +1016,7 @@ class classproperty:
     def __get__(self, instance, ownerclass):
         return self.fget(ownerclass)
 
+
 def create_temporary_fifo(data):
     """Open fifo named pipe in a new thread using a temporary file path. The
     thread blocks until data is read from the pipe.
