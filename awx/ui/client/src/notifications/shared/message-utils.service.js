@@ -6,22 +6,22 @@ export default [function () {
             }
             return {
                 started: {
-                    message: $scope.started_message === defaultMessages.started.message
-                        ? null : $scope.started_message,
-                    body: $scope.started_body === defaultMessages.started.body
-                        ? null : $scope.started_body,
+                    message: $scope.started_message === defaultMessages.started.message ?
+                        null : $scope.started_message,
+                    body: $scope.started_body === defaultMessages.started.body ?
+                        null : $scope.started_body,
                 },
                 success: {
-                    message: $scope.success_message === defaultMessages.success.message
-                        ? null : $scope.success_message,
-                    body: $scope.success_body === defaultMessages.success.body
-                        ? null : $scope.success_body,
+                    message: $scope.success_message === defaultMessages.success.message ?
+                        null : $scope.success_message,
+                    body: $scope.success_body === defaultMessages.success.body ?
+                        null : $scope.success_body,
                 },
                 error: {
-                    message: $scope.error_message === defaultMessages.error.message
-                        ? null : $scope.error_message,
-                    body: $scope.error_body === defaultMessages.error.body
-                        ? null : $scope.error_body,
+                    message: $scope.error_message === defaultMessages.error.message ?
+                        null : $scope.error_message,
+                    body: $scope.error_body === defaultMessages.error.body ?
+                        null : $scope.error_body,
                 }
             };
         },
@@ -62,5 +62,5 @@ export default [function () {
           }
           $scope.customize_messages = customized;
         }
-    }
-}]
+    };
+}];
