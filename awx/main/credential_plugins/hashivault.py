@@ -11,6 +11,10 @@ from .plugin import CredentialPlugin
 import requests
 from django.utils.translation import ugettext_lazy as _
 
+# AWX
+from awx.main.utils import (
+    create_temporary_fifo,
+)
 
 base_inputs = {
     'fields': [{
@@ -80,23 +84,6 @@ hashi_ssh_inputs['metadata'] = [{
     'help_text': _('Valid principals (either usernames or hostnames) that the certificate should be signed for.'),
 }]
 hashi_ssh_inputs['required'].extend(['public_key', 'role'])
-
-
-def create_temporary_fifo(data):
-    """Open fifo named pipe in a new thread using a temporary file path. The
-    thread blocks until data is read from the pipe.
-    Returns the path to the fifo.
-    :param data(bytes): Data to write to the pipe.
-    """
-    path = os.path.join(tempfile.mkdtemp(), next(tempfile._get_candidate_names()))
-    os.mkfifo(path, stat.S_IRUSR | stat.S_IWUSR)
-
-    threading.Thread(
-        target=lambda p, d: open(p, 'wb').write(d),
-        args=(path, data)
-    ).start()
-    return path
-
 
 def kv_backend(**kwargs):
     token = kwargs['token']

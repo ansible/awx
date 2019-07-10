@@ -44,7 +44,7 @@ __all__ = ['get_object_or_400', 'camelcase_to_underscore', 'underscore_to_camelc
            'wrap_args_with_proot', 'build_proot_temp_dir', 'check_proot_installed', 'model_to_dict',
            'model_instance_diff', 'parse_yaml_or_json', 'RequireDebugTrueOrTest',
            'has_model_field_prefetched', 'set_environ', 'IllegalArgumentError', 'get_custom_venv_choices', 'get_external_account',
-           'task_manager_bulk_reschedule', 'schedule_task_manager', 'classproperty']
+           'task_manager_bulk_reschedule', 'schedule_task_manager', 'classproperty', 'create_temporary_fifo']
 
 
 def get_object_or_400(klass, *args, **kwargs):
@@ -1015,3 +1015,19 @@ class classproperty:
 
     def __get__(self, instance, ownerclass):
         return self.fget(ownerclass)
+
+def create_temporary_fifo(data):
+    """Open fifo named pipe in a new thread using a temporary file path. The
+    thread blocks until data is read from the pipe.
+    Returns the path to the fifo.
+    :param data(bytes): Data to write to the pipe.
+    """
+    path = os.path.join(tempfile.mkdtemp(), next(tempfile._get_candidate_names()))
+    os.mkfifo(path, stat.S_IRUSR | stat.S_IWUSR)
+
+    threading.Thread(
+        target=lambda p, d: open(p, 'wb').write(d),
+        args=(path, data)
+    ).start()
+    return path
+
