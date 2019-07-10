@@ -113,19 +113,21 @@ describe('<JobTemplateDetail />', () => {
     done();
   });
 
-  test('Credential type is Cloud if credential.kind is null', async done => {
+  test('should render CredentialChip', () => {
     template.summary_fields.credentials = [{ id: 1, name: 'cred', kind: null }];
     const wrapper = mountWithContexts(
       <JobTemplateDetail template={template} />
     );
-    const jobTemplateDetail = wrapper.find('JobTemplateDetail');
-    jobTemplateDetail.setState({
-      instanceGroups: mockInstanceGroups.data.results,
+    wrapper.find('JobTemplateDetail').setState({
+      instanceGroups: mockInstanceGroups,
       hasContentLoading: false,
       contentError: false,
     });
-    const cred = wrapper.find('strong.credential');
-    expect(cred.text()).toContain('Cloud:');
-    done();
+
+    const chip = wrapper.find('CredentialChip');
+    expect(chip).toHaveLength(1);
+    expect(chip.prop('credential')).toEqual(
+      template.summary_fields.credentials[0]
+    );
   });
 });

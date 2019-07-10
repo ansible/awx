@@ -9,20 +9,27 @@ import CodeMirrorInput from './CodeMirrorInput';
 const YAML_MODE = 'yaml';
 const JSON_MODE = 'javascript';
 
+function formatJson(jsonString) {
+  return JSON.stringify(JSON.parse(jsonString), null, 2);
+}
+
 const SmallButton = styled(Button)`
   padding: 3px 8px;
   font-size: var(--pf-global--FontSize--xs);
 `;
 
-function VariablesInput (props) {
+function VariablesInput(props) {
   const { id, label, readOnly, rows, error, onError, className } = props;
-  // eslint-disable-next-line react/destructuring-assignment
-  const [value, setValue] = useState(props.value);
+  /* eslint-disable react/destructuring-assignment */
+  const defaultValue = isJson(props.value)
+    ? formatJson(props.value)
+    : props.value;
+  const [value, setValue] = useState(defaultValue);
   const [mode, setMode] = useState(isJson(value) ? JSON_MODE : YAML_MODE);
-  // eslint-disable-next-line react/destructuring-assignment
   const isControlled = !!props.onChange;
+  /* eslint-enable react/destructuring-assignment */
 
-  const onChange = (newValue) => {
+  const onChange = newValue => {
     if (isControlled) {
       props.onChange(newValue);
     }
@@ -33,13 +40,17 @@ function VariablesInput (props) {
     <div className={`pf-c-form__group ${className || ''}`}>
       <Split gutter="sm">
         <SplitItem>
-          <label htmlFor={id} className="pf-c-form__label">{label}</label>
+          <label htmlFor={id} className="pf-c-form__label">
+            {label}
+          </label>
         </SplitItem>
         <SplitItem>
           <ButtonGroup>
             <SmallButton
               onClick={() => {
-                if (mode === YAML_MODE) { return; }
+                if (mode === YAML_MODE) {
+                  return;
+                }
                 try {
                   onChange(jsonToYaml(value));
                   setMode(YAML_MODE);
@@ -53,7 +64,9 @@ function VariablesInput (props) {
             </SmallButton>
             <SmallButton
               onClick={() => {
-                if (mode === JSON_MODE) { return; }
+                if (mode === JSON_MODE) {
+                  return;
+                }
                 try {
                   onChange(yamlToJson(value));
                   setMode(JSON_MODE);
@@ -77,13 +90,10 @@ function VariablesInput (props) {
         hasErrors={!!error}
       />
       {error ? (
-        <div
-          className="pf-c-form__helper-text pf-m-error"
-          aria-live="polite"
-        >
+        <div className="pf-c-form__helper-text pf-m-error" aria-live="polite">
           {error}
         </div>
-      ) : null }
+      ) : null}
     </div>
   );
 }
