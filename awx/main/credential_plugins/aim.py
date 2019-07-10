@@ -1,9 +1,5 @@
 from .plugin import CredentialPlugin
 
-import os
-import stat
-import tempfile
-import threading
 from urllib.parse import quote, urlencode, urljoin
 
 from django.utils.translation import ugettext_lazy as _

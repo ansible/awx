@@ -1,9 +1,6 @@
 import copy
 import os
 import pathlib
-import stat
-import tempfile
-import threading
 from urllib.parse import urljoin
 
 from .plugin import CredentialPlugin
@@ -84,6 +81,7 @@ hashi_ssh_inputs['metadata'] = [{
     'help_text': _('Valid principals (either usernames or hostnames) that the certificate should be signed for.'),
 }]
 hashi_ssh_inputs['required'].extend(['public_key', 'role'])
+
 
 def kv_backend(**kwargs):
     token = kwargs['token']

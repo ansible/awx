@@ -1,10 +1,6 @@
 from .plugin import CredentialPlugin
 
 import base64
-import os
-import stat
-import tempfile
-import threading
 from urllib.parse import urljoin, quote_plus
 
 from django.utils.translation import ugettext_lazy as _
