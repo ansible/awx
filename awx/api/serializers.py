@@ -3401,11 +3401,18 @@ class WorkflowJobCancelSerializer(WorkflowJobSerializer):
         fields = ('can_cancel',)
 
 
+class WorkflowApprovalViewSerializer(UnifiedJobSerializer):
+
+    class Meta:
+        model = WorkflowApproval
+        fields = []
+
+
 class WorkflowApprovalSerializer(UnifiedJobSerializer):
 
     class Meta:
         model = WorkflowApproval
-        fields = ('*', '-controller_node', '-execution_node',)
+        fields = (['*', '-controller_node', '-execution_node',])
 
     def get_related(self, obj):
         res = super(WorkflowApprovalSerializer, self).get_related(obj)
@@ -3414,7 +3421,10 @@ class WorkflowApprovalSerializer(UnifiedJobSerializer):
             res['workflow_approval_template'] = self.reverse('api:workflow_approval_template_detail',
                                                              kwargs={'pk': obj.workflow_approval_template.pk})
             res['notifications'] = self.reverse('api:workflow_approval_notifications_list', kwargs={'pk': obj.pk})
+        res['approve'] = self.reverse('api:workflow_approval_approve', kwargs={'pk': obj.pk})
+        res['deny'] = self.reverse('api:workflow_approval_deny', kwargs={'pk': obj.pk})
         return res
+
 
 
 class WorkflowApprovalListSerializer(WorkflowApprovalSerializer, UnifiedJobListSerializer):

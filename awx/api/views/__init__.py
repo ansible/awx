@@ -4407,18 +4407,13 @@ for attr, value in list(locals().items()):
         setattr(this_module, name, view)
 
 
-class WorfklowApprovalTemplateList(ListAPIView):
+class WorkflowApprovalTemplateList(ListCreateAPIView):
 
     model = models.WorkflowApprovalTemplate
     serializer_class = serializers.WorkflowApprovalTemplateSerializer
 
-    def get(self, request, *args, **kwargs):
-        if not request.user.is_superuser and not request.user.is_system_auditor:
-            raise PermissionDenied(_("Superuser privileges needed."))
-        return super(WorfklowApprovalTemplateList, self).get(request, *args, **kwargs)
 
-
-class WorfklowApprovalTemplateDetail(RetrieveAPIView):
+class WorkflowApprovalTemplateDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
 
     model = models.WorkflowApprovalTemplate
     serializer_class = serializers.WorkflowApprovalTemplateSerializer
@@ -4470,6 +4465,26 @@ class WorkflowApprovalDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
 
     model = models.WorkflowApproval
     serializer_class = serializers.WorkflowApprovalSerializer
+
+
+class WorkflowApprovalApprove(RetrieveAPIView):
+    model = models.WorkflowApproval
+    serializer_class = serializers.WorkflowApprovalViewSerializer
+
+    def post(self, request, *args, **kwargs):
+        obj = self.get_object()
+        obj.approve()
+        return Response(status=status.HTTP_202_ACCEPTED)
+
+
+class WorkflowApprovalDeny(RetrieveAPIView):
+    model = models.WorkflowApproval
+    serializer_class = serializers.WorkflowApprovalViewSerializer
+
+    def post(self, request, *args, **kwargs):
+        obj = self.get_object()
+        obj.deny()
+        return Response(status=status.HTTP_202_ACCEPTED)
 
 
 class WorkflowApprovalNotificationsList(SubListAPIView):

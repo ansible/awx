@@ -4,8 +4,8 @@
 from django.conf.urls import url
 
 from awx.api.views import (
-    WorfklowApprovalTemplateList,
-    WorfklowApprovalTemplateDetail,
+    WorkflowApprovalTemplateList,
+    WorkflowApprovalTemplateDetail,
     WorkflowApprovalTemplateJobsList,
     WorkflowApprovalTemplateNotificationTemplatesErrorList,
     WorkflowApprovalTemplateNotificationTemplatesStartedList,
@@ -14,8 +14,8 @@ from awx.api.views import (
 
 
 urls = [
-    url(r'^$', WorfklowApprovalTemplateList.as_view(), name='workflow_approval_template_list'),
-    url(r'^(?P<pk>[0-9]+)/$', WorfklowApprovalTemplateDetail.as_view(), name='workflow_approval_template_detail'),
+    url(r'^$', WorkflowApprovalTemplateList.as_view(), name='workflow_approval_template_list'),
+    url(r'^(?P<pk>[0-9]+)/$', WorkflowApprovalTemplateDetail.as_view(), name='workflow_approval_template_detail'),
     url(r'^(?P<pk>[0-9]+)/approvals/$', WorkflowApprovalTemplateJobsList.as_view(), name='workflow_approval_template_jobs_list'),
     url(r'^(?P<pk>[0-9]+)/notification_templates_started/$', WorkflowApprovalTemplateNotificationTemplatesStartedList.as_view(),
         name='workflow_approval_template_notification_templates_started_list'),

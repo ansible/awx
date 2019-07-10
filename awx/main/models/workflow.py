@@ -648,10 +648,10 @@ class WorkflowApproval(UnifiedJob):
         self.status = 'successful'
         self.save()
         schedule_task_manager()
-        return reverse('api:approved_workflow', kwargs={'pk': self.pk}, request=request)
+        return reverse('api:workflow_approval_approve', kwargs={'pk': self.pk}, request=request)
 
-    def reject(self, request=None):
+    def deny(self, request=None):
         self.status = 'failed'
         self.save()
         schedule_task_manager()
-        return reverse('api:rejected_workflow', kwargs={'pk': self.pk}, request=request)
+        return reverse('api:workflow_approval_deny', kwargs={'pk': self.pk}, request=request)

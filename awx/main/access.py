@@ -2812,7 +2812,7 @@ class WorkflowApprovalTemplateAccess(BaseAccess):
         return True
 
     def filtered_queryset(self):
-        return self.model.objects.all()
+        return self.model.filter(workflowjobtemplatenodes__workflow_job_template=WorkflowJobTemplate.accessible_pk_qs(self.user, 'read_role'))
 
 
 for cls in BaseAccess.__subclasses__():
