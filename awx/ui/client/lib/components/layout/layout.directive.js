@@ -25,6 +25,10 @@ function AtLayoutController ($scope, $http, strings, ProcessErrors, $transitions
         }
     });
 
+    $scope.$watch('$root.pendingApprovalCount', () => {
+        vm.approvalsCount = _.get($scope, '$root.pendingApprovalCount') || 0;
+    });
+
     $scope.$watch('$root.socketStatus', (newStatus) => {
         vm.socketState = newStatus;
         vm.socketIconClass = `icon-socket-${vm.socketState}`;
@@ -40,6 +44,14 @@ function AtLayoutController ($scope, $http, strings, ProcessErrors, $transitions
         } catch (err) {
             return strings.get(string);
         }
+    };
+
+    vm.openApprovals = () => {
+        vm.showApprovals = true;
+    };
+
+    vm.closeApprovals = () => {
+        vm.showApprovals = false;
     };
 
     function checkOrgAdmin () {

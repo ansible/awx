@@ -1,9 +1,18 @@
 <div ng-show="nodeFormDataLoaded">
     <div class="WorkflowMaker-formTitle">{{nodeConfig.mode === 'edit' ? nodeConfig.node.fullUnifiedJobTemplateObject.name || nodeConfig.node.unifiedJobTemplate.name : strings.get('workflow_maker.ADD_A_NODE')}}</div>
-    <div class="Form-tabHolder" ng-show="!readOnly">
-        <div class="Form-tab WorkflowMaker-formTab" ng-class="{'is-selected': activeTab === 'jobs'}" ng-click="activeTab = 'jobs'">{{strings.get('workflow_maker.JOBS')}}</div>
-        <div class="Form-tab WorkflowMaker-formTab" ng-class="{'is-selected': activeTab === 'project_syncs'}" ng-click="activeTab = 'project_syncs'">{{strings.get('workflow_maker.PROJECT_SYNC')}}</div>
-        <div class="Form-tab WorkflowMaker-formTab" ng-class="{'is-selected': activeTab === 'inventory_syncs'}" ng-click="activeTab = 'inventory_syncs'">{{strings.get('workflow_maker.INVENTORY_SYNC')}}</div>
+    <div class="WorkflowMaker-formTypeDropdown" ng-show="!readOnly">
+        <select
+            id="workflow-node-types"
+            ng-model="activeTab"
+            class="form-control Form-dropDown"
+            name="activeTab"
+            aria-hidden="true"
+        >
+            <option value="jobs" selected="selected">{{strings.get('workflow_maker.JOBS')}}</option>
+            <option value="project_syncs" selected="selected">{{strings.get('workflow_maker.PROJECT_SYNC')}}</option>
+            <option value="inventory_syncs" selected="selected">{{strings.get('workflow_maker.INVENTORY_SYNC')}}</option>
+            <option value="pause" selected="selected">{{strings.get('workflow_maker.PAUSE_NODE')}}</option>
+        </select>
     </div>
     <div class="WorkflowMaker-formLists" ng-show="!readOnly">
         <div id="workflow-jobs-list" ng-show="activeTab === 'jobs'">
@@ -102,6 +111,36 @@
                 </div>
             </div>
             <paginate base-path="inventory_sources" collection="wf_maker_inventory_sources" dataset="wf_maker_inventory_source_dataset" iterator="wf_maker_inventory_source" query-set="wf_maker_inventory_source_queryset" hide-view-per-page="true" max-visible-pages="5"></paginate>
+        </div>
+        <div id="workflow-pause" ng-show="activeTab === 'pause'">
+            <label class="WorkflowMaker-pauseCheckbox">
+                <input type="checkbox" ng-model="pauseNode.isPauseNode" />
+                <!-- translate -->
+                <span class="Form-inputLabel">Make this a pause node</span>
+            </label>
+            <div ng-hide="!pauseNode.isPauseNode">
+                <div class="form-group Form-formGroup Form-formGroup--singleColumn">
+                    <label for="pauseName" class="Form-inputLabelContainer">
+                            <span class="Form-requiredAsterisk">*</span>
+                            <!-- translate -->
+                            <span class="Form-inputLabel">Name</span>
+                        </label>
+                        <div>
+                            <input type="text" ng-model="pauseNode.name" name="pauseName" id="workflow_job_template_pauseName" class="form-control Form-textInput" />
+                        </div>
+                    </label>
+                </div>
+                <div class="form-group Form-formGroup Form-formGroup--singleColumn"></div>
+                    <label for="pauseDesc" class="Form-inputLabelContainer">
+                            <!-- translate -->
+                            <span class="Form-inputLabel">Description</span>
+                        </label>
+                        <div>
+                            <input type="text" ng-model="pauseNode.description" name="pauseDesc" id="workflow_job_template_pauseDesc" class="form-control Form-textInput" />
+                        </div>
+                    </label>
+                </div>
+            </div>
         </div>
     </div>
     <div ng-if="selectedTemplate && selectedTemplateInvalid">
@@ -238,7 +277,8 @@
         <button type="button" class="btn btn-sm Form-primaryButton Form-primaryButton--noMargin" id="workflow_maker_prompt_btn" ng-show="showPromptButton && activeTab == 'jobs' " ng-click="openPromptModal()"> {{:: strings.get('prompt.PROMPT') }}</button>
         <button type="button" class="btn btn-sm Form-cancelButton" id="workflow_maker_cancel_node_btn" ng-show="!readOnly" ng-click="cancel()"> {{:: strings.get('CANCEL') }}</button>
         <button type="button" class="btn btn-sm Form-cancelButton" id="workflow_maker_close_node_btn" ng-show="readOnly" ng-click="cancel()"> {{:: strings.get('CLOSE') }}</button>
-        <button type="button" class="btn btn-sm Form-saveButton" id="workflow_maker_select_node_btn" ng-show="!readOnly" ng-click="select({selectedTemplate, promptData, edgeType})" ng-disabled="!selectedTemplate || promptModalMissingReqFields || credentialRequiresPassword || selectedTemplateInvalid"> {{:: strings.get('workflow_maker.SELECT') }}</button>
+        <!-- need to figure out how to disable this button when pause node is incomplete -->
+        <button type="button" class="btn btn-sm Form-saveButton" id="workflow_maker_select_node_btn" ng-show="!readOnly" ng-click="select({selectedTemplate, promptData, edgeType, pauseNode})" ng-disabled="!(selectedTemplate || pauseNode.isPauseNode) || promptModalMissingReqFields || credentialRequiresPassword || selectedTemplateInvalid || (pauseNode.isPauseNode && !pauseNode.name)"> {{:: strings.get('workflow_maker.SELECT') }}</button>
     </div>
     <prompt prompt-data="promptData" action-text="{{:: strings.get('prompt.CONFIRM')}}" prevent-creds-with-passwords="preventCredsWithPasswords" read-only-prompts="readOnly"></prompt>
 </div>

@@ -117,7 +117,7 @@ function TemplatesStrings (BaseString) {
         TOTAL_NODES: t.s('TOTAL NODES'),
         ADD_A_NODE: t.s('ADD A NODE'),
         EDIT_TEMPLATE: t.s('EDIT TEMPLATE'),
-        JOBS: t.s('JOBS'),
+        JOBS: t.s('Jobs'),
         PLEASE_CLICK_THE_START_BUTTON: t.s('Please click the start button to build your workflow.'),
         PLEASE_HOVER_OVER_A_TEMPLATE: t.s('Please hover over a template for additional options.'),
         EDIT_LINK_TOOLTIP: t.s('Click to edit link'),
@@ -144,7 +144,8 @@ function TemplatesStrings (BaseString) {
         UNSAVED_CHANGES_PROMPT_TEXT: t.s('Are you sure you want to exit the Workflow Creator without saving your changes?'),
         EXIT: t.s('EXIT'),
         CANCEL: t.s('CANCEL'),
-        SAVE_AND_EXIT: t.s('SAVE & EXIT')
+        SAVE_AND_EXIT: t.s('SAVE & EXIT'),
+        PAUSE_NODE: t.s('Pause Node')
     };
 }
 

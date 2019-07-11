@@ -2,6 +2,7 @@ import atLibServices from '~services';
 
 import actionGroup from '~components/action/action-group.directive';
 import actionButton from '~components/action/action-button.directive';
+import approvalsDrawer from '~components/approvalsDrawer/approvalsDrawer.directive';
 import dialog from '~components/dialog/dialog.component';
 import divider from '~components/utility/divider.directive';
 import dynamicSelect from '~components/input/dynamic-select.directive';
@@ -60,6 +61,7 @@ angular
     ])
     .directive('atActionGroup', actionGroup)
     .directive('atActionButton', actionButton)
+    .directive('atApprovalsDrawer', approvalsDrawer)
     .component('atDialog', dialog)
     .directive('atDivider', divider)
     .directive('atDynamicSelect', dynamicSelect)

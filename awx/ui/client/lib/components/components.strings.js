@@ -119,6 +119,10 @@ function ComponentsStrings (BaseString) {
         EXPANDED: t.s('Expanded'),
         SORT_BY: t.s('SORT BY')
     };
+
+    ns.approvals = {
+        NONE: t.s('There are no jobs awaiting approval')
+    };
 }
 
 ComponentsStrings.$inject = ['BaseStringService'];

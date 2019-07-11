@@ -1,7 +1,7 @@
 import atLibServices from '~services';
 
-import Application from '~models/Application';
 import AdHocCommand from '~models/AdHocCommand';
+import Application from '~models/Application';
 import Base from '~models/Base';
 import Config from '~models/Config';
 import Credential from '~models/Credential';
@@ -19,16 +19,16 @@ import Me from '~models/Me';
 import NotificationTemplate from '~models/NotificationTemplate';
 import Organization from '~models/Organization';
 import Project from '~models/Project';
-import Schedule from '~models/Schedule';
 import ProjectUpdate from '~models/ProjectUpdate';
+import Schedule from '~models/Schedule';
 import SystemJob from '~models/SystemJob';
 import Token from '~models/Token';
+import UnifiedJob from '~models/UnifiedJob';
 import UnifiedJobTemplate from '~models/UnifiedJobTemplate';
+import User from '~models/User';
 import WorkflowJob from '~models/WorkflowJob';
 import WorkflowJobTemplate from '~models/WorkflowJobTemplate';
 import WorkflowJobTemplateNode from '~models/WorkflowJobTemplateNode';
-import UnifiedJob from '~models/UnifiedJob';
-import User from '~models/User';
 
 import ModelsStrings from '~models/models.strings';
 
@@ -38,8 +38,8 @@ angular
     .module(MODULE_NAME, [
         atLibServices
     ])
-    .service('ApplicationModel', Application)
     .service('AdHocCommandModel', AdHocCommand)
+    .service('ApplicationModel', Application)
     .service('BaseModel', Base)
     .service('ConfigModel', Config)
     .service('CredentialModel', Credential)
@@ -54,19 +54,19 @@ angular
     .service('JobModel', Job)
     .service('JobTemplateModel', JobTemplate)
     .service('MeModel', Me)
+    .service('ModelsStrings', ModelsStrings)
     .service('NotificationTemplate', NotificationTemplate)
     .service('OrganizationModel', Organization)
     .service('ProjectModel', Project)
-    .service('ScheduleModel', Schedule)
-    .service('UnifiedJobModel', UnifiedJob)
     .service('ProjectUpdateModel', ProjectUpdate)
+    .service('ScheduleModel', Schedule)
     .service('SystemJobModel', SystemJob)
     .service('TokenModel', Token)
+    .service('UnifiedJobModel', UnifiedJob)
     .service('UnifiedJobTemplateModel', UnifiedJobTemplate)
+    .service('UserModel', User)
     .service('WorkflowJobModel', WorkflowJob)
     .service('WorkflowJobTemplateModel', WorkflowJobTemplate)
-    .service('WorkflowJobTemplateNodeModel', WorkflowJobTemplateNode)
-    .service('UserModel', User)
-    .service('ModelsStrings', ModelsStrings);
+    .service('WorkflowJobTemplateNodeModel', WorkflowJobTemplateNode);
 
 export default MODULE_NAME;

@@ -32,6 +32,7 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
 
         $scope.strings = TemplatesStrings;
         $scope.editNodeHelpMessage = null;
+        $scope.pauseNode = {};
 
         let templateList = _.cloneDeep(TemplateList);
         delete templateList.actions;
@@ -463,6 +464,7 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
             }
 
             $scope.promptData = null;
+            $scope.pauseNode = {};
             $scope.editNodeHelpMessage = getEditNodeHelpMessage(selectedTemplate, $scope.workflowJobTemplateObj);
 
             if (selectedTemplate.type === "job_template" || selectedTemplate.type === "workflow_job_template") {
@@ -616,26 +618,48 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
                 })
             );
 
+            CreateSelect2({
+                element: '#workflow-node-types',
+                multiple: false
+            });
+
             $q.all(listPromises)
                 .then(() => {
                     if ($scope.nodeConfig.mode === "edit") {
-                        // Make sure that we have the full unified job template object
-                        if (!$scope.nodeConfig.node.fullUnifiedJobTemplateObject) {
-                            // This is a node that we got back from the api with an incomplete
-                            // unified job template so we're going to pull down the whole object
-                            TemplatesService.getUnifiedJobTemplate($scope.nodeConfig.node.originalNodeObject.summary_fields.unified_job_template.id)
-                                .then(({data}) => {
-                                    $scope.nodeConfig.node.fullUnifiedJobTemplateObject = data.results[0];
-                                    finishConfiguringEdit();
-                                }, (error) => {
-                                    ProcessErrors($scope, error.data, error.status, null, {
-                                        hdr: 'Error!',
-                                        msg: 'Failed to get unified job template. GET returned ' +
-                                            'status: ' + error.status
-                                    });
-                                });
+                        if ($scope.nodeConfig.node.unifiedJobTemplate && $scope.nodeConfig.node.unifiedJobTemplate.unified_job_type === "workflow_approval") {
+                            $scope.selectedTemplate = null;
+                            $scope.activeTab = "pause";
+                            CreateSelect2({
+                                element: '#workflow_node_edge',
+                                multiple: false
+                            });
+
+                            $scope.pauseNode = {
+                                isPauseNode: true,
+                                name: $scope.nodeConfig.node.unifiedJobTemplate.name,
+                                description: $scope.nodeConfig.node.unifiedJobTemplate.description,
+                            };
+                
+                            $scope.nodeFormDataLoaded = true;
                         } else {
-                            finishConfiguringEdit();
+                            // Make sure that we have the full unified job template object
+                            if (!$scope.nodeConfig.node.fullUnifiedJobTemplateObject) {
+                                // This is a node that we got back from the api with an incomplete
+                                // unified job template so we're going to pull down the whole object
+                                TemplatesService.getUnifiedJobTemplate($scope.nodeConfig.node.originalNodeObject.summary_fields.unified_job_template.id)
+                                    .then(({data}) => {
+                                        $scope.nodeConfig.node.fullUnifiedJobTemplateObject = data.results[0];
+                                        finishConfiguringEdit();
+                                    }, (error) => {
+                                        ProcessErrors($scope, error.data, error.status, null, {
+                                            hdr: 'Error!',
+                                            msg: 'Failed to get unified job template. GET returned ' +
+                                                'status: ' + error.status
+                                        });
+                                    });
+                            } else {
+                                finishConfiguringEdit();
+                            }
                         }
                     } else {
                         finishConfiguringAdd();

@@ -770,12 +770,23 @@ export default ['moment', '$timeout', '$window', '$filter', 'TemplatesStrings',
                         });
 
                     baseSvg.selectAll(".WorkflowChart-nameText")
-                        .attr("x", function(d){ return (scope.mode === 'details' && d.job && d.job.status) ? 20 : nodeW / 2; })
-                        .attr("y", function(d){ return (scope.mode === 'details' && d.job && d.job.status) ? 10 : nodeH / 2; })
+                        .attr("x", 0)
+                        .attr("y", function(d){ return (scope.mode === 'details' && d.job && d.job.status) ? 10 : (nodeH / 2) - 10; })
                         .attr("text-anchor", function(d){ return (scope.mode === 'details' && d.job && d.job.status) ? "inherit" : "middle"; })
-                        .text(function (d) {
+                        .html(function (d) {
                             const name = _.get(d, 'unifiedJobTemplate.name');
-                            return name ? wrap(name) : "";
+                            const wrappedName = name ? wrap(name) : "";
+                            // TODO: clean this up
+                            if (d.unifiedJobTemplate && d.unifiedJobTemplate.unified_job_type === 'workflow_approval') {
+                                return `<span>
+                                    <div style="background-color: #EBEBEB;height: 20px;width: 20px;border-radius: 50%;display: inline-block;margin-right:5px;">
+                                        <span style="color:#707070" class="fa fa-pause"></span>
+                                    </div>
+                                    <span>${wrappedName}</span>
+                                </span>`;
+                            } else {
+                                return `<span>${wrappedName}</span>`;
+                            }
                         });
 
                     baseSvg.selectAll(".WorkflowChart-detailsLink")
@@ -884,19 +895,31 @@ export default ['moment', '$timeout', '$window', '$filter', 'TemplatesStrings',
                                 .attr("class", "WorkflowChart-activeNode")
                                 .style("display", function(d) { return d.id === scope.graphState.nodeBeingEdited ? null : "none"; });
 
-                            thisNode.append("text")
-                                .attr("x", function(d){ return (scope.mode === 'details' && d.job && d.job.status) ? 20 : nodeW / 2; })
-                                .attr("y", function(d){ return (scope.mode === 'details' && d.job && d.job.status) ? 10 : nodeH / 2; })
+                            thisNode.append("foreignObject")
+                                // .attr("x", function(d){ return (scope.mode === 'details' && d.job && d.job.status) ? 20 : nodeW / 2; })
+                                .attr("x", 0)
+                                .attr("y", function(d){ return (scope.mode === 'details' && d.job && d.job.status) ? 10 : (nodeH / 2) - 10; })
                                 .attr("dy", ".35em")
                                 .attr("text-anchor", function(d){ return (scope.mode === 'details' && d.job && d.job.status) ? "inherit" : "middle"; })
                                 .attr("class", "WorkflowChart-defaultText WorkflowChart-nameText")
-                                .text(function (d) {
+                                .html(function (d) {
                                     const name = _.get(d, 'unifiedJobTemplate.name');
-                                    return name ? wrap(name) : "";
+                                    const wrappedName = name ? wrap(name) : "";
+                                    // TODO: clean this up
+                                    if (d.unifiedJobTemplate && d.unifiedJobTemplate.unified_job_type === 'workflow_approval') {
+                                        return `<span>
+                                            <div style="background-color: #EBEBEB;height: 20px;width: 20px;border-radius: 50%;display: inline-block;margin-right:5px;">
+                                                <span style="color:#707070" class="fa fa-pause"></span>
+                                            </div>
+                                            <span>${wrappedName}</span>
+                                        </span>`;
+                                    } else {
+                                        return `<span>${wrappedName}</span>`;
+                                    }
                                 });
 
                             thisNode.append("foreignObject")
-                                .attr("x", 62)
+                                .attr("x", 0)
                                 .attr("y", 22)
                                 .attr("dy", ".35em")
                                 .attr("text-anchor", "middle")

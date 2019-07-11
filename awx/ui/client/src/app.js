@@ -161,16 +161,16 @@ angular
             // })
         }
     ])
-    .run(['$stateExtender', '$q', '$compile', '$cookies', '$rootScope', '$log', '$stateParams',
+    .run(['$q', '$cookies', '$rootScope', '$log', '$stateParams',
         'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'Timer',
-        'LoadConfig', 'Store', 'pendoService', 'Prompt', 'Rest',
-        'Wait', 'ProcessErrors', '$state', 'GetBasePath', 'ConfigService',
-        '$filter', 'SocketService', 'AppStrings', '$transitions',
-        function($stateExtender, $q, $compile, $cookies, $rootScope, $log, $stateParams,
+        'LoadConfig', 'Store', 'pendoService', 'Rest',
+        '$state', 'GetBasePath', 'ConfigService',
+        'SocketService', 'AppStrings', '$transitions',
+        function($q, $cookies, $rootScope, $log, $stateParams,
             CheckLicense, $location, Authorization, LoadBasePaths, Timer,
-            LoadConfig, Store, pendoService, Prompt, Rest, Wait,
-            ProcessErrors, $state, GetBasePath, ConfigService,
-            $filter, SocketService, AppStrings, $transitions) {
+            LoadConfig, Store, pendoService, Rest,
+            $state, GetBasePath, ConfigService,
+            SocketService, AppStrings, $transitions) {
 
             $rootScope.$state = $state;
             $rootScope.$state.matches = function(stateName) {
@@ -387,6 +387,15 @@ angular
                                 }
                             });
                         });
+
+                        Rest.setUrl(`${GetBasePath('workflow_approval')}?status=pending&page_size=1`);
+                        Rest.get()
+                            .then(({data}) => {
+                                $rootScope.pendingApprovalCount = data.count;
+                            })
+                            .catch(() => {
+                                // TODO: handle this
+                            });
                     }
                 }
 

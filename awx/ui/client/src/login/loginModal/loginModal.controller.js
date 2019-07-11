@@ -39,14 +39,14 @@
  * This is usage information.
  */
 
-export default ['$log', '$cookies', '$compile', '$rootScope',
+export default ['$log', '$cookies', '$rootScope',
     '$location', 'Authorization', 'Alert', 'Wait', 'Timer',
     'Empty', '$scope', 'pendoService', 'ConfigService',
-    'CheckLicense', 'SocketService',
-    function ($log, $cookies, $compile, $rootScope, $location,
-        Authorization, Alert, Wait, Timer, Empty,
-        scope, pendoService, ConfigService, CheckLicense,
-        SocketService) {
+    'CheckLicense', 'SocketService', 'Rest', 'GetBasePath',
+    function ($log, $cookies, $rootScope,
+        $location, Authorization, Alert, Wait, Timer,
+        Empty, scope, pendoService, ConfigService,
+        CheckLicense, SocketService, Rest, GetBasePath) {
     var lastPath, lastUser, sessionExpired, loginAgain, preAuthUrl;
 
     loginAgain = function() {
@@ -138,6 +138,15 @@ export default ['$log', '$cookies', '$compile', '$rootScope',
                     Wait('stop');
                     Alert('Error', 'Failed to access user information. GET returned status: ' + status, 'alert-danger', loginAgain);
                 });
+            });
+
+        Rest.setUrl(`${GetBasePath('workflow_approval')}?status=pending&page_size=1`);
+        Rest.get()
+            .then(({data}) => {
+                $rootScope.pendingApprovalCount = data.count;
+            })
+            .catch(() => {
+                // TODO: handle this
             });
     });
 

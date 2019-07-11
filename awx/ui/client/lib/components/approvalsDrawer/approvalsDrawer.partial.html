@@ -1,0 +1,79 @@
+<div style="width: 100%;height: 100%;position: fixed;top: 0;right: 0;opacity: 0.5;background-color: black;z-index: 10000;"></div>
+<div class="at-ApprovalsDrawer" ng-if="vm.listLoaded">
+    <div class="at-ApprovalsDrawer-header">
+        <div class="at-ApprovalsDrawer-title">
+            <span>
+                NOTIFICATIONS
+            </span>
+            <span class="at-Panel-headingTitleBadge">
+                {{vm.count}}
+            </span>
+        </div>
+        <div class="at-ApprovalsDrawer-exit">
+          <button class="close" ng-click="closeApprovals()">
+            <i class="fa fa-times-circle"></i>
+          </button>
+        </div>
+    </div>
+    <at-list-toolbar
+        ng-if="vm.approvals.length > 0"
+        sort-only="true"
+        sort-value="vm.toolbarSortValue"
+        sort-options="vm.toolbarSortOptions"
+        on-sort="vm.onToolbarSort">
+    </at-list-toolbar>
+    <at-list results="vm.approvals" id="approvals_list" empty-list-reason="{{ vm.emptyListReason }}">
+        <at-row ng-repeat="approval in vm.approvals"
+            id="approval-row-{{ approval.id }}">
+            <div class="at-Row-items">
+                <div class="at-Row-container">
+                    <div class="at-Row-container">
+                        <!-- TODO: translate header tag -->
+                        <at-row-item
+                            header-value="{{ approval.summary_fields.source_workflow_job.name }}"
+                            header-state="workflowResults({id: {{approval.summary_fields.source_workflow_job.id}}})"
+                            header-tag="Workflow Template">
+                        </at-row-item>
+                    </div>
+                </div>
+                <div class="at-Row-container--wrapped">
+                    <at-row-item
+                        value-bind-html="{{ approval.created | longDate }}">
+                    </at-row-item>
+                    <at-row-item
+                        style="color: red;"
+                        value-bind-html="Expires: Never">
+                    </at-row-item>
+                    <!-- <at-row-item
+                        style="color: red;"
+                        value-bind-html="Expires {{ approval.created | longDate }}">
+                    </at-row-item> -->
+                </div>
+                <div class="at-Row-container--wrapped">
+                    <div style="display: flex; justify-content: flex-end; width: 100%; margin-top: 10px;">
+                      <div>Continue workflow job?</div>
+                      <button class="btn at-Button--success"
+                          style="margin-left: 15px;"
+                          ng-click="vm.approve(approval)"
+                          type="button">
+                          APPROVE
+                      </button>
+                      <button class="btn at-Button--error"
+                          style="margin-left: 15px;"
+                          ng-click="vm.deny(approval)"
+                          type="button">
+                          DENY
+                      </button>
+                    </div>
+                </div>
+            </div>
+        </at-row>
+    </at-list>
+    <paginate
+        collection="vm.approvals"
+        dataset="vm.dataset"
+        iterator="template"
+        base-path="unified_job_templates"
+        query-set="vm.queryset">
+    </paginate>
+</div>
