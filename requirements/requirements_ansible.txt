@@ -79,7 +79,7 @@ openstacksdk==0.31.1
 os-service-types==1.7.0   # via keystoneauth1, openstacksdk
 ovirt-engine-sdk-python==4.3.0
 packaging==19.0
-paramiko==2.4.2           # via azure-cli-core, ncclient
+paramiko==2.6.0           # via azure-cli-core, ncclient
 pbr==5.2.0                # via keystoneauth1, openstacksdk, os-service-types, stevedore
 pexpect==4.6.0
 psutil==5.4.3
