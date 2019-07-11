@@ -1,9 +1,10 @@
 import React from 'react';
-import { shape, string, bool } from 'prop-types';
+import { shape } from 'prop-types';
 import { toTitleCase } from '@util/strings';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import Chip from './Chip';
+import { Credential } from '../../types';
 
 function CredentialChip ({ credential, i18n, ...props }) {
   let type;
@@ -23,11 +24,7 @@ function CredentialChip ({ credential, i18n, ...props }) {
   )
 }
 CredentialChip.propTypes = {
-  credential: shape({
-    cloud: bool,
-    kind: string,
-    name: string.isRequired,
-  }).isRequired,
+  credential: Credential.isRequired,
   i18n: shape({}).isRequired,
 };
 

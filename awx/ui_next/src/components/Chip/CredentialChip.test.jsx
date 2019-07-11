@@ -5,6 +5,7 @@ import CredentialChip from './CredentialChip';
 describe('CredentialChip', () => {
   test('should render SSH kind', () => {
     const credential = {
+      id: 1,
       kind: 'ssh',
       name: 'foo',
     };
@@ -17,6 +18,7 @@ describe('CredentialChip', () => {
 
   test('should render AWS kind', () => {
     const credential = {
+      id: 1,
       kind: 'aws',
       name: 'foo',
     };
@@ -29,6 +31,7 @@ describe('CredentialChip', () => {
 
   test('should render with "Cloud"', () => {
     const credential = {
+      id: 1,
       cloud: true,
       kind: 'other',
       name: 'foo',
@@ -42,6 +45,7 @@ describe('CredentialChip', () => {
 
   test('should render with other kind', () => {
     const credential = {
+      id: 1,
       kind: 'other',
       name: 'foo',
     };

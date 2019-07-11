@@ -1,5 +1,4 @@
 import React from 'react';
-import { shape } from 'prop-types';
 import { Link, withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -9,6 +8,7 @@ import { DetailList, Detail } from '@components/DetailList';
 import { ChipGroup, Chip, CredentialChip } from '@components/Chip';
 import { VariablesInput } from '@components/CodeMirrorInput';
 import { toTitleCase } from '@util/strings';
+import { Job } from '../../../types';
 
 const ActionButtonWrapper = styled.div`
   display: flex;
@@ -105,7 +105,7 @@ function JobDetail({ job, i18n }) {
         {labels && labels.count > 0 && (
           <Detail
             fullWidth
-            label={i18n._(t`Credentials`)}
+            label={i18n._(t`Labels`)}
             value={
               <ChipGroup showOverflowAfter={5}>
                 {labels.results.map(l => (
@@ -150,7 +150,7 @@ function JobDetail({ job, i18n }) {
   );
 }
 JobDetail.propTypes = {
-  job: shape({}).isRequired,
+  job: Job.isRequired,
 };
 
 export default withI18n()(withRouter(JobDetail));
