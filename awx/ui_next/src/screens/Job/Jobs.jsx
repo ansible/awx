@@ -27,7 +27,7 @@ class Jobs extends Component {
       return;
     }
 
-    const type =JOB_TYPE_URLS[job.type];
+    const type = JOB_TYPE_URLS[job.type];
     const breadcrumbConfig = {
       '/jobs': i18n._(t`Jobs`),
       [`/jobs/${type}/${job.id}`]: `${job.name}`,

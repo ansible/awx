@@ -15,7 +15,7 @@ class Jobs extends Base {
     this.baseUrl = '/api/v2/jobs/';
   }
 
-  readDetail (id, type) {
+  readDetail(id, type) {
     return this.http.get(`/api/v2${BASE_URLS[type]}${id}/`);
   }
 }

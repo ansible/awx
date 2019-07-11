@@ -6,7 +6,7 @@ import { t } from '@lingui/macro';
 import Chip from './Chip';
 import { Credential } from '../../types';
 
-function CredentialChip ({ credential, i18n, ...props }) {
+function CredentialChip({ credential, i18n, ...props }) {
   let type;
   if (credential.cloud) {
     type = i18n._(t`Cloud`);
@@ -21,7 +21,7 @@ function CredentialChip ({ credential, i18n, ...props }) {
       <strong>{type}: </strong>
       {credential.name}
     </Chip>
-  )
+  );
 }
 CredentialChip.propTypes = {
   credential: Credential.isRequired,

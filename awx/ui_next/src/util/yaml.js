@@ -22,8 +22,10 @@ export function jsonToYaml(jsonString) {
   return yaml.safeDump(value);
 }
 
-export function isJson (jsonString) {
-  if (typeof jsonString !== 'string') { return false; }
+export function isJson(jsonString) {
+  if (typeof jsonString !== 'string') {
+    return false;
+  }
   let value;
   try {
     value = JSON.parse(jsonString);

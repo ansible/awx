@@ -27,18 +27,19 @@ class JobListItem extends Component {
             onChange={onSelect}
             aria-labelledby={`check-action-${job.id}`}
           />
-          <DataListItemCells dataListCells={[
-            <DataListCell key="divider">
-              <VerticalSeparator />
-              <span>
-                <Link to={`/jobs/${JOB_TYPE_URLS[job.type]}/${job.id}`}>
-                  <b>{job.name}</b>
-                </Link>
-              </span>
-            </DataListCell>,
-            <DataListCell key="type">{toTitleCase(job.type)}</DataListCell>,
-            <DataListCell key="finished">{job.finished}</DataListCell>,
-          ]}
+          <DataListItemCells
+            dataListCells={[
+              <DataListCell key="divider">
+                <VerticalSeparator />
+                <span>
+                  <Link to={`/jobs/${JOB_TYPE_URLS[job.type]}/${job.id}`}>
+                    <b>{job.name}</b>
+                  </Link>
+                </span>
+              </DataListCell>,
+              <DataListCell key="type">{toTitleCase(job.type)}</DataListCell>,
+              <DataListCell key="finished">{job.finished}</DataListCell>,
+            ]}
           />
         </DataListItemRow>
       </DataListItem>
