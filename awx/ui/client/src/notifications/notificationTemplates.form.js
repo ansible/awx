@@ -587,6 +587,7 @@ export default ['i18n', function(i18n) {
               type: 'checkbox',
               class: 'Form-formGroup--fullWidth',
               default: false,
+              ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
             },
             started_message: {
                 label: i18n._('Start Message'),
@@ -596,6 +597,7 @@ export default ['i18n', function(i18n) {
                 default: '',
                 ngShow: "customize_messages",
                 rows: 2,
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
             },
             started_body: {
                 label: i18n._('Start Expanded Message'),
@@ -604,6 +606,7 @@ export default ['i18n', function(i18n) {
                 mode: 'jinja2',
                 default: '',
                 ngShow: "customize_messages && notification_type.value == 'email'",
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
             },
             success_message: {
                 label: i18n._('Success Message'),
@@ -613,6 +616,7 @@ export default ['i18n', function(i18n) {
                 default: '',
                 ngShow: "customize_messages",
                 rows: 2,
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
             },
             success_body: {
                 label: i18n._('Success Expanded Message'),
@@ -621,6 +625,7 @@ export default ['i18n', function(i18n) {
                 mode: 'jinja2',
                 default: '',
                 ngShow: "customize_messages && notification_type.value == 'email'",
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
             },
             error_message: {
                 label: i18n._('Error Message'),
@@ -630,6 +635,7 @@ export default ['i18n', function(i18n) {
                 default: '',
                 ngShow: "customize_messages",
                 rows: 2,
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
             },
             error_body: {
                 label: i18n._('Error Expanded Message'),
@@ -638,6 +644,7 @@ export default ['i18n', function(i18n) {
                 mode: 'jinja2',
                 default: '',
                 ngShow: "customize_messages && notification_type.value == 'email'",
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
             },
         },
 

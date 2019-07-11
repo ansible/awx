@@ -10,7 +10,7 @@ export default ['Rest', 'Wait',
     'notification_template',
     '$scope', '$state', 'GetChoices', 'CreateSelect2', 'Empty',
     'NotificationsTypeChange', 'ParseTypeChange', 'i18n',
-    'MessageUtils', 'Alert',
+    'MessageUtils',
     function(
         Rest, Wait,
         NotificationsFormObject, ProcessErrors, GetBasePath,
@@ -18,7 +18,7 @@ export default ['Rest', 'Wait',
         notification_template,
         $scope, $state, GetChoices, CreateSelect2, Empty,
         NotificationsTypeChange, ParseTypeChange, i18n,
-        MessageUtils, Alert
+        MessageUtils
     ) {
         var generator = GenerateForm,
             id = notification_template.id,
@@ -41,11 +41,19 @@ export default ['Rest', 'Wait',
             Rest.setUrl(GetBasePath('notification_templates'));
             Rest.options()
                 .then(({data}) => {
-                    if (!data.actions.POST) {
-                        $state.go("^");
-                        Alert('Permission Error', 'You do not have permission to add a notification template.', 'alert-info');
+                    if (data.actions.POST) {
+                        defaultMessages = data.actions.POST.messages.default;
+                    } else {
+                        const defaults = {
+                            message: '<DEFAULT_MESSAGE>',
+                            body: '<DEFAULT_BODY>',
+                        };
+                        defaultMessages = {
+                            started: defaults,
+                            success: defaults,
+                            error: defaults,
+                        };
                     }
-                    defaultMessages = data.actions.POST.messages.default;
                 });
 
             GetChoices({
