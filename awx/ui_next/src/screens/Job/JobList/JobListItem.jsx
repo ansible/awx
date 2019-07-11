@@ -6,19 +6,10 @@ import {
   DataListItemCells,
   DataListCheck,
 } from '@patternfly/react-core';
-
 import DataListCell from '@components/DataListCell';
 import VerticalSeparator from '@components/VerticalSeparator';
 import { toTitleCase } from '@util/strings';
-
-const JOB_TYPE_URLS = {
-  job: 'playbook',
-  project_update: 'project',
-  system_job: 'system',
-  inventory_update: 'inventory',
-  ad_hoc_command: 'command',
-  workflow_job: 'workflow',
-};
+import { JOB_TYPE_URLS } from '../constants';
 
 class JobListItem extends Component {
   render() {
