@@ -636,7 +636,7 @@ export default ['$scope', 'TemplatesService',
                         name: pauseNode.name,
                         description: pauseNode.description,
                         unified_job_type: "workflow_approval"
-                    },
+                    };
                     nodeRef[$scope.nodeConfig.nodeId].isEdited = true;
                 }
             }
