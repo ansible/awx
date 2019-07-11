@@ -14,12 +14,18 @@ class JobOutput extends Component {
 
     return (
       <CardBody>
-        <b>{job.name} - Heading and Job Stats placeholder</b> <br /> {/*Heading and Job Stats */}
-        <b>Host Status Bar placeholder</b> <br /> {/*Host Status Bar */}
-        <OutputToolbar> {/* Filter and Pagination */}
+        <b>{job.name}</b>
+        {/*Heading and Job Stats */}
+        {/*Host Status Bar */}
+        <OutputToolbar>
+          {/* Filter and Pagination */}
           <b>Filter placeholder</b>
           <MenuControls />
         </OutputToolbar>
+        <ul>
+          <li>
+          </li>
+        </ul>
       </CardBody>
     );
   }

@@ -26,29 +26,19 @@ class MenuControls extends Component {
   render() {
     return (
       <Wrapper>
-        <Button
-          variant="plain"
-        >
+        <Button variant="plain">
           <PlusIcon />
         </Button>
-        <Button
-          variant="plain"
-        >
+        <Button variant="plain">
           <AngleUpIcon />
         </Button>
-        <Button
-          variant="plain"
-        >
+        <Button variant="plain">
           <AngleDownIcon />
         </Button>
-        <Button
-          variant="plain"
-        >
+        <Button variant="plain">
           <AngleDoubleUpIcon />
         </Button>
-        <Button
-          variant="plain"
-        >
+        <Button variant="plain">
           <AngleDoubleDownIcon />
         </Button>
       </Wrapper>
