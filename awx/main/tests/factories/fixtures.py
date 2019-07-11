@@ -159,7 +159,7 @@ def mk_job_template(name, job_type='run',
         extra_vars = json.dumps(extra_vars)
 
     jt = JobTemplate(name=name, job_type=job_type, extra_vars=extra_vars,
-                     playbook='helloworld.yml')
+                     playbook='helloworld.yml', organization=organization)
 
     jt.inventory = inventory
     if jt.inventory is None:

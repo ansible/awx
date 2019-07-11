@@ -94,7 +94,7 @@ class OrganizationDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPI
         org_counts['projects'] = Project.accessible_objects(**access_kwargs).filter(
             organization__id=org_id).count()
         org_counts['job_templates'] = JobTemplate.accessible_objects(**access_kwargs).filter(
-            project__organization__id=org_id).count()
+            organization__id=org_id).count()
 
         full_context['related_field_counts'] = {}
         full_context['related_field_counts'][org_id] = org_counts

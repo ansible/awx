@@ -73,24 +73,26 @@ def user():
 
 
 @pytest.fixture
-def check_jobtemplate(project, inventory, credential):
+def check_jobtemplate(project, inventory, credential, organization):
     jt = JobTemplate.objects.create(
         job_type='check',
         project=project,
         inventory=inventory,
-        name='check-job-template'
+        name='check-job-template',
+        organization=organization
     )
     jt.credentials.add(credential)
     return jt
 
 
 @pytest.fixture
-def deploy_jobtemplate(project, inventory, credential):
+def deploy_jobtemplate(project, inventory, credential, organization):
     jt = JobTemplate.objects.create(
         job_type='run',
         project=project,
         inventory=inventory,
-        name='deploy-job-template'
+        name='deploy-job-template',
+        organization=organization
     )
     jt.credentials.add(credential)
     return jt
@@ -657,7 +659,7 @@ def ad_hoc_command_factory(inventory, machine_credential, admin):
 
 @pytest.fixture
 def job_template(organization):
-    jt = JobTemplate(name='test-job_template')
+    jt = JobTemplate(name='test-job_template', organization=organization)
     jt.save()
 
     return jt

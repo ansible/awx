@@ -30,7 +30,8 @@ def organization_resource_creator(organization, user):
             project.jobtemplates.create(name="test-jt %s" % i,
                                         description="test-job-template-desc",
                                         inventory=inventory,
-                                        playbook="test_playbook.yml")
+                                        playbook="test_playbook.yml",
+                                        organization=organization)
             i_proj += 1
             i_inv += 1
             if i_proj >= organization.projects.count():
@@ -184,7 +185,8 @@ def test_JT_not_double_counted(resourced_organization, user, get):
         job_type='run',
         inventory=resourced_organization.inventories.all()[0],
         project=resourced_organization.projects.all()[0],
-        name='double-linked-job-template')
+        name='double-linked-job-template',
+        organization=resourced_organization)
     counts_dict = COUNTS_PRIMES
     counts_dict['job_templates'] += 1
 
@@ -197,38 +199,3 @@ def test_JT_not_double_counted(resourced_organization, user, get):
     detail_response = get(reverse('api:organization_detail', kwargs={'pk': resourced_organization.pk}), admin_user)
     assert detail_response.status_code == 200
     assert detail_response.data['summary_fields']['related_field_counts'] == counts_dict
-
-
-@pytest.mark.django_db
-def test_JT_associated_with_project(organizations, project, user, get):
-    # Check that adding a project to an organization gets the project's JT
-    #  included in the organization's JT count
-    external_admin = user('admin', True)
-    two_orgs = organizations(2)
-    organization = two_orgs[0]
-    other_org = two_orgs[1]
-
-    unrelated_inv = other_org.inventories.create(name='not-in-organization')
-    organization.projects.add(project)
-    project.jobtemplates.create(name="test-jt",
-                                description="test-job-template-desc",
-                                inventory=unrelated_inv,
-                                playbook="test_playbook.yml")
-
-    response = get(reverse('api:organization_list'), external_admin)
-    assert response.status_code == 200
-
-    org_id = organization.id
-    counts = {}
-    for org_json in response.data['results']:
-        working_id = org_json['id']
-        counts[working_id] = org_json['summary_fields']['related_field_counts']
-
-    assert counts[org_id] == {
-        'users': 0,
-        'admins': 0,
-        'job_templates': 1,
-        'projects': 1,
-        'inventories': 0,
-        'teams': 0
-    }

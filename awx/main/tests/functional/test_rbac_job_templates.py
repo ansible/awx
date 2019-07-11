@@ -69,14 +69,12 @@ def test_job_template_access_admin(role_names, jt_linked, rando):
     ssh_cred = jt_linked.machine_credential
 
     access = JobTemplateAccess(rando)
-    # Appoint this user as admin of the organization
-    #jt_linked.inventory.organization.admin_role.members.add(rando)
+
     assert not access.can_read(jt_linked)
     assert not access.can_delete(jt_linked)
 
-    for role_name in role_names:
-        role = getattr(jt_linked.inventory.organization, role_name)
-        role.members.add(rando)
+    # Appoint this user as admin of the organization
+    jt_linked.organization.admin_role.members.add(rando)
 
     # Assign organization permission in the same way the create view does
     organization = jt_linked.inventory.organization
@@ -239,7 +237,7 @@ class TestJobTemplateSchedules:
 @pytest.mark.django_db
 def test_jt_org_ownership_change(user, jt_linked):
     admin1 = user('admin1')
-    org1 = jt_linked.project.organization
+    org1 = jt_linked.organization
     org1.admin_role.members.add(admin1)
     a1_access = JobTemplateAccess(admin1)
 
@@ -254,10 +252,8 @@ def test_jt_org_ownership_change(user, jt_linked):
     assert not a2_access.can_read(jt_linked)
 
 
-    jt_linked.project.organization = org2
-    jt_linked.project.save()
-    jt_linked.inventory.organization = org2
-    jt_linked.inventory.save()
+    jt_linked.organization = org2
+    jt_linked.save()
 
     assert a2_access.can_read(jt_linked)
     assert not a1_access.can_read(jt_linked)

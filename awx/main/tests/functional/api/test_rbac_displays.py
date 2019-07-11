@@ -61,7 +61,7 @@ class TestJobTemplateCopyEdit:
     def jt_copy_edit(self, job_template_factory, project):
         objects = job_template_factory(
             'copy-edit-job-template',
-            project=project)
+            project=project, organization=project.organization)
         return objects.job_template
 
     def fake_context(self, user):

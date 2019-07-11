@@ -66,6 +66,13 @@ class JobOptions(BaseModel):
     class Meta:
         abstract = True
 
+    organization = models.ForeignKey(
+        'Organization',
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name='%(class)ss',
+    )
     diff_mode = models.BooleanField(
         default=False,
         help_text=_("If enabled, textual changes made to any templated files on the host are shown in the standard output"),
@@ -196,7 +203,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         'labels', 'instance_groups', 'credentials', 'survey_spec'
     ]
     FIELDS_TO_DISCARD_AT_COPY = ['vault_credential', 'credential']
-    SOFT_UNIQUE_TOGETHER = [('polymorphic_ctype', 'name')]
+    SOFT_UNIQUE_TOGETHER = [('polymorphic_ctype', 'name', 'organization')]
 
     class Meta:
         app_label = 'main'
@@ -254,13 +261,13 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
     )
 
     admin_role = ImplicitRoleField(
-        parent_role=['project.organization.job_template_admin_role', 'inventory.organization.job_template_admin_role']
+        parent_role=['organization.job_template_admin_role']
     )
     execute_role = ImplicitRoleField(
-        parent_role=['admin_role', 'project.organization.execute_role', 'inventory.organization.execute_role'],
+        parent_role=['admin_role', 'organization.execute_role'],
     )
     read_role = ImplicitRoleField(
-        parent_role=['project.organization.auditor_role', 'inventory.organization.auditor_role', 'execute_role', 'admin_role'],
+        parent_role=['organization.auditor_role', 'execute_role', 'admin_role'],
     )
 
 
@@ -466,13 +473,13 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         success_notification_templates = list(base_notification_templates.filter(
             unifiedjobtemplate_notification_templates_for_success__in=[self, self.project]))
         # Get Organization NotificationTemplates
-        if self.project is not None and self.project.organization is not None:
+        if self.organization is not None:
             error_notification_templates = set(error_notification_templates + list(base_notification_templates.filter(
-                organization_notification_templates_for_errors=self.project.organization)))
+                organization_notification_templates_for_errors=self.organization)))
             started_notification_templates = set(started_notification_templates + list(base_notification_templates.filter(
-                organization_notification_templates_for_started=self.project.organization)))
+                organization_notification_templates_for_started=self.organization)))
             success_notification_templates = set(success_notification_templates + list(base_notification_templates.filter(
-                organization_notification_templates_for_success=self.project.organization)))
+                organization_notification_templates_for_success=self.organization)))
         return dict(error=list(error_notification_templates),
                     started=list(started_notification_templates),
                     success=list(success_notification_templates))
@@ -575,7 +582,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         for virtualenv in (
             self.job_template.custom_virtualenv if self.job_template else None,
             self.project.custom_virtualenv,
-            self.project.organization.custom_virtualenv if self.project.organization else None
+            self.organization.custom_virtualenv if self.organization else None
         ):
             if virtualenv:
                 return virtualenv
@@ -708,8 +715,8 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
 
     @property
     def preferred_instance_groups(self):
-        if self.project is not None and self.project.organization is not None:
-            organization_groups = [x for x in self.project.organization.instance_groups.all()]
+        if self.organization is not None:
+            organization_groups = [x for x in self.organization.instance_groups.all()]
         else:
             organization_groups = []
         if self.inventory is not None:

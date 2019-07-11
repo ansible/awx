@@ -56,7 +56,8 @@ from awx.main import utils
 
 __all__ = ['AutoOneToOneField', 'ImplicitRoleField', 'JSONField',
            'SmartFilterField', 'OrderedManyToManyField',
-           'update_role_parentage_for_instance', 'is_implicit_parent']
+           'update_role_parentage_for_instance',
+           'is_implicit_parent']
 
 
 # Provide a (better) custom error message for enum jsonschema validation
@@ -140,8 +141,9 @@ def resolve_role_field(obj, field):
         return []
 
     if len(field_components) == 1:
-        role_cls = str(utils.get_current_apps().get_model('main', 'Role'))
-        if not str(type(obj)) == role_cls:
+        # use extremely generous duck typing to accomidate all possible forms
+        # of the model that may be used during various migrations
+        if obj._meta.model_name != 'role' or obj._meta.app_label != 'main':
             raise Exception(smart_text('{} refers to a {}, not a Role'.format(field, type(obj))))
         ret.append(obj.id)
     else:
@@ -164,7 +166,7 @@ def is_implicit_parent(parent_role, child_role):
         # The only singleton implicit parent is the system admin being
         # a parent of the system auditor role
         return bool(
-            child_role.singleton_name == ROLE_SINGLETON_SYSTEM_AUDITOR and 
+            child_role.singleton_name == ROLE_SINGLETON_SYSTEM_AUDITOR and
             parent_role.singleton_name == ROLE_SINGLETON_SYSTEM_ADMINISTRATOR
         )
     # Get the list of implicit parents that were defined at the class level.
@@ -197,18 +199,30 @@ def update_role_parentage_for_instance(instance):
     updates the parents listing for all the roles
     of a given instance if they have changed
     '''
+    changed_ct = 0
     for implicit_role_field in getattr(instance.__class__, '__implicit_role_fields'):
+        changed = False
         cur_role = getattr(instance, implicit_role_field.name)
         original_parents = set(json.loads(cur_role.implicit_parents))
         new_parents = implicit_role_field._resolve_parent_roles(instance)
-        cur_role.parents.remove(*list(original_parents - new_parents))
-        cur_role.parents.add(*list(new_parents - original_parents))
+        removals = original_parents - new_parents
+        if removals:
+            changed = True
+            cur_role.parents.remove(*list(removals))
+        additions = new_parents - original_parents
+        if additions:
+            changed = True
+            cur_role.parents.add(*list(additions))
         new_parents_list = list(new_parents)
         new_parents_list.sort()
         new_parents_json = json.dumps(new_parents_list)
         if cur_role.implicit_parents != new_parents_json:
+            changed = True
             cur_role.implicit_parents = new_parents_json
             cur_role.save()
+        if changed:
+            changed_ct += 1
+    return changed_ct
 
 
 class ImplicitRoleDescriptor(ForwardManyToOneDescriptor):

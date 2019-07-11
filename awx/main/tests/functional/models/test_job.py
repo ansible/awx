@@ -29,18 +29,19 @@ def test_prevent_slicing():
 
 
 @pytest.mark.django_db
-def test_awx_custom_virtualenv(inventory, project, machine_credential):
+def test_awx_custom_virtualenv(inventory, project, machine_credential, organization):
     jt = JobTemplate.objects.create(
         name='my-jt',
         inventory=inventory,
         project=project,
-        playbook='helloworld.yml'
+        playbook='helloworld.yml',
+        organization=organization
     )
     jt.credentials.add(machine_credential)
     job = jt.create_unified_job()
 
-    job.project.organization.custom_virtualenv = '/venv/fancy-org'
-    job.project.organization.save()
+    job.organization.custom_virtualenv = '/venv/fancy-org'
+    job.organization.save()
     assert job.ansible_virtualenv_path == '/venv/fancy-org'
 
     job.project.custom_virtualenv = '/venv/fancy-proj'
