@@ -7,6 +7,12 @@ requirements="$(readlink -f ./requirements.txt)"
 requirements_ansible="$(readlink -f ./requirements_ansible.txt)"
 pip_compile="pip-compile --no-header --quiet -r --allow-unsafe"
 
+check_prerequisites() {
+  for thing in patch awk python3 python2 virtualenv ; do
+      command -v $thing >/dev/null 2>&1 || { echo "$thing not installed or available. Please fix this before running." ; exit 1 ; }
+  done
+}
+
 _cleanup() {
   cd /
   test "${KEEP_TMP:-0}" = 1 || rm -rf "${_tmp}"
@@ -54,6 +60,8 @@ generate_patch() {
 }
 
 main() {
+  check_prerequisites
+
   _tmp="$(mktemp -d --suffix .awx-requirements XXXX -p /tmp)"
   trap _cleanup INT TERM EXIT
 
