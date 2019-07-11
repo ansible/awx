@@ -81,9 +81,7 @@ ovirt-engine-sdk-python==4.3.0
 packaging==19.0
 paramiko==2.6.0           # via azure-cli-core, ncclient
 pbr==5.2.0                # via keystoneauth1, openstacksdk, os-service-types, stevedore
-pexpect==4.6.0
 psutil==5.4.3
-ptyprocess==0.5.2
 pyasn1-modules==0.2.5     # via google-auth
 pyasn1==0.4.5             # via paramiko, pyasn1-modules, requests-credssp, rsa
 pycparser==2.19           # via cffi
