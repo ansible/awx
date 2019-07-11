@@ -118,7 +118,7 @@ services:
       no_proxy: {{ no_proxy | default('') }}
 
   memcached:
-    image: memcached:alpine
+    image: "{{ memcached_image }}:{{ memcached_version }}"
     container_name: awx_memcached
     restart: unless-stopped
     environment:
