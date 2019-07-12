@@ -34,7 +34,7 @@ const AWXToolbar = styled.div`
 
 const Toolbar = styled(PFToolbar)`
   flex-grow: 1;
-  margin-left: ${props => (props.marginleft ? '0' : '20px')};
+  margin-left: 20px;
   margin-right: 20px;
 `;
 
@@ -46,23 +46,18 @@ const ToolbarGroup = styled(PFToolbarGroup)`
 
 const ColumnLeft = styled.div`
   display: flex;
-  flex-basis: 100%;
+  flex-grow: 1;
   justify-content: flex-start;
   align-items: center;
   padding: 10px 0 8px 0;
-
-  @media screen and (min-width: 980px) {
-    flex-basis: 50%;
-  }
 `;
 
-const ColumnRight = styled(ColumnLeft)`
-  padding: 8px 0 10px 0;
-
-  @media screen and (min-width: 980px) {
-    margin-left: 0;
-    padding: 10px 0 8px 0;
-  }
+const ColumnRight = styled.div`
+  flex-grow: 0;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 10px 0 8px 0;
 `;
 
 const AdditionalControlsWrapper = styled.div`
@@ -83,7 +78,7 @@ class DataListToolbar extends React.Component {
       showSelectAll,
       isAllSelected,
       isCompact,
-      noLeftMargin,
+      fillWidth,
       onSort,
       onSearch,
       onCompact,
@@ -98,7 +93,7 @@ class DataListToolbar extends React.Component {
     const showExpandCollapse = onCompact && onExpand;
     return (
       <AWXToolbar>
-        <Toolbar marginleft={noLeftMargin ? 1 : 0}>
+        <Toolbar css={fillWidth ? 'margin-right: 0; margin-left: 0' : ''}>
           <ColumnLeft>
             {showSelectAll && (
               <Fragment>
@@ -159,7 +154,7 @@ DataListToolbar.propTypes = {
   showSelectAll: PropTypes.bool,
   isAllSelected: PropTypes.bool,
   isCompact: PropTypes.bool,
-  noLeftMargin: PropTypes.bool,
+  fillWidth: PropTypes.bool,
   onCompact: PropTypes.func,
   onExpand: PropTypes.func,
   onSearch: PropTypes.func,
@@ -174,7 +169,7 @@ DataListToolbar.defaultProps = {
   showSelectAll: false,
   isAllSelected: false,
   isCompact: false,
-  noLeftMargin: false,
+  fillWidth: false,
   onCompact: null,
   onExpand: null,
   onSearch: null,
