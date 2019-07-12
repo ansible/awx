@@ -98,7 +98,7 @@ class LDAPBackend(BaseLDAPBackend):
 
     settings = property(_get_settings, _set_settings)
 
-    def authenticate(self, username, password):
+    def authenticate(self, request, username, password):
         if self.settings.START_TLS and ldap.OPT_X_TLS_REQUIRE_CERT in self.settings.CONNECTION_OPTIONS:
             # with python-ldap, if you want to set connection-specific TLS
             # parameters, you must also specify OPT_X_TLS_NEWCTX = 0
@@ -124,7 +124,7 @@ class LDAPBackend(BaseLDAPBackend):
                     raise ImproperlyConfigured(
                         "{} must be an {} instance.".format(setting_name, type_)
                     )
-            return super(LDAPBackend, self).authenticate(None, username, password)
+            return super(LDAPBackend, self).authenticate(request, username, password)
         except Exception:
             logger.exception("Encountered an error authenticating to LDAP")
             return None
@@ -196,10 +196,10 @@ class RADIUSBackend(BaseRADIUSBackend):
     Custom Radius backend to verify license status
     '''
 
-    def authenticate(self, username, password):
+    def authenticate(self, request, username, password):
         if not django_settings.RADIUS_SERVER:
             return None
-        return super(RADIUSBackend, self).authenticate(None, username, password)
+        return super(RADIUSBackend, self).authenticate(request, username, password)
 
     def get_user(self, user_id):
         if not django_settings.RADIUS_SERVER:
@@ -217,7 +217,7 @@ class TACACSPlusBackend(object):
     Custom TACACS+ auth backend for AWX
     '''
 
-    def authenticate(self, username, password):
+    def authenticate(self, request, username, password):
         if not django_settings.TACACSPLUS_HOST:
             return None
         try:
@@ -284,13 +284,13 @@ class SAMLAuth(BaseSAMLAuth):
         idp_config = self.setting('ENABLED_IDPS')[idp_name]
         return TowerSAMLIdentityProvider(idp_name, **idp_config)
 
-    def authenticate(self, *args, **kwargs):
+    def authenticate(self, request, *args, **kwargs):
         if not all([django_settings.SOCIAL_AUTH_SAML_SP_ENTITY_ID, django_settings.SOCIAL_AUTH_SAML_SP_PUBLIC_CERT,
                     django_settings.SOCIAL_AUTH_SAML_SP_PRIVATE_KEY, django_settings.SOCIAL_AUTH_SAML_ORG_INFO,
                     django_settings.SOCIAL_AUTH_SAML_TECHNICAL_CONTACT, django_settings.SOCIAL_AUTH_SAML_SUPPORT_CONTACT,
                     django_settings.SOCIAL_AUTH_SAML_ENABLED_IDPS]):
             return None
-        user = super(SAMLAuth, self).authenticate(*args, **kwargs)
+        user = super(SAMLAuth, self).authenticate(request, *args, **kwargs)
         # Comes from https://github.com/omab/python-social-auth/blob/v0.2.21/social/backends/base.py#L91
         if getattr(user, 'is_new', False):
             _decorate_enterprise_user(user, 'saml')
