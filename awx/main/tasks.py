@@ -828,8 +828,10 @@ class BaseTask(object):
                     os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
                 private_data_files['credentials'][credential] = path
             for credential, data in private_data.get('certificates', {}).items():
-                name = 'credential_%d-cert.pub' % credential.pk
-                path = os.path.join(private_data_dir, name)
+                artifact_dir = os.path.join(private_data_dir, 'artifacts', str(self.instance.id))
+                if not os.path.exists(artifact_dir):
+                    os.makedirs(artifact_dir, mode=0o700)
+                path = os.path.join(artifact_dir, 'ssh_key_data-cert.pub')
                 with open(path, 'w') as f:
                     f.write(data)
                     f.close()
