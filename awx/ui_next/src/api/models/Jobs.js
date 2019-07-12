@@ -19,10 +19,14 @@ class Jobs extends Base {
     return this.http.get(`/api/v2${BASE_URLS[type]}${id}/`);
   }
 
-  readJobEvents(id, params = {}) {
-    return this.http.get(`${this.baseUrl}${id}/job_events/`, {
-      params,
-    });
+  readEvents(id, jobType = 'job', params = {}) {
+    let endpoint;
+    if (jobType === 'job') {
+      endpoint = `${this.baseUrl}${id}/job_events/`;
+    } else {
+      endpoint = `${this.baseUrl}${id}/events/`;
+    }
+    return this.http.get(endpoint, { params });
   }
 }
 

@@ -1,11 +1,14 @@
+import styled from 'styled-components';
+import { List, AutoSizer } from 'react-virtualized';
+
 import React, { Component } from 'react';
 import { CardBody } from '@patternfly/react-core';
-import styled from 'styled-components';
+
 import { JobsAPI } from '@api';
 import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
+import JobEvent from './JobEvent';
 import MenuControls from './shared/MenuControls';
-import { List, AutoSizer } from 'react-virtualized';
 
 const OutputToolbar = styled.div`
   display: flex;
@@ -15,9 +18,17 @@ const OutputWrapper = styled.div`
   height: calc(100vh - 325px);
   background-color: #fafafa;
   margin-top: 24px;
-`;
-const OutputRow = styled.div`
+  font-family: monospace;
+  font-size: 15px;
+  border: 1px solid #b7b7b7;
   display: flex;
+  flex-direction: column;
+`;
+const OutputFooter = styled.div`
+  background-color: #ebebeb;
+  border-right: 1px solid #b7b7b7;
+  width: 75px;
+  flex: 1;
 `;
 
 class JobOutput extends Component {
@@ -41,6 +52,7 @@ class JobOutput extends Component {
     this.handleScrollBottom = this.handleScrollBottom.bind(this);
     this.handleScrollNext = this.handleScrollNext.bind(this);
     this.handleScrollPrevious = this.handleScrollPrevious.bind(this);
+    this.onRowsRendered = this.onRowsRendered.bind(this);
   }
 
   componentDidMount() {
@@ -50,11 +62,15 @@ class JobOutput extends Component {
   async loadJobEvents() {
     const { job } = this.props;
 
+    this.setState({ hasContentLoading: true });
     try {
       const {
         data: { results = [] },
-      } = await JobsAPI.readJobEvents(job.id);
-      this.setState({ results, hasContentLoading: true });
+      } = await JobsAPI.readEvents(job.id, job.type, {
+        page_size: 200,
+        order_by: 'start_line',
+      });
+      this.setState({ results });
     } catch (err) {
       this.setState({ contentError: err });
     } finally {
@@ -64,17 +80,23 @@ class JobOutput extends Component {
 
   renderRow({ index, key, style }) {
     const { results } = this.state;
+    const { created, event, stdout, start_line } = results[index];
     return (
-      <OutputRow key={key} style={style} className="row">
-        <div className="id">{results[index].id}</div>
-        <div className="content">{results[index].stdout}</div>
-      </OutputRow>
+      <JobEvent
+        className="row"
+        key={key}
+        style={style}
+        created={created}
+        event={event}
+        start_line={start_line}
+        stdout={stdout}
+      />
     );
   }
 
-  onRowsRendered = ({ startIndex, stopIndex }) => {
+  onRowsRendered({ startIndex, stopIndex }) {
     this.setState({ startIndex, stopIndex });
-  };
+  }
 
   handleScrollPrevious() {
     const { startIndex, stopIndex } = this.state;
@@ -84,7 +106,7 @@ class JobOutput extends Component {
 
   handleScrollNext() {
     const { stopIndex } = this.state;
-    this.setState({ scrollToIndex: stopIndex + 1});
+    this.setState({ scrollToIndex: stopIndex + 1 });
   }
 
   handleScrollTop() {
@@ -104,7 +126,7 @@ class JobOutput extends Component {
       contentError,
       scrollToIndex,
       startIndex,
-      stopIndex
+      stopIndex,
     } = this.state;
 
     if (hasContentLoading) {
@@ -137,10 +159,10 @@ class JobOutput extends Component {
                   ref={this.listRef}
                   width={width}
                   height={height}
-                  rowHeight={50}
+                  rowHeight={25}
                   rowRenderer={this.renderRow}
                   rowCount={results.length}
-                  overscanRowCount={5}
+                  overscanRowCount={50}
                   scrollToIndex={scrollToIndex}
                   onRowsRendered={this.onRowsRendered}
                   scrollToAlignment="start"
@@ -148,6 +170,7 @@ class JobOutput extends Component {
               );
             }}
           </AutoSizer>
+          <OutputFooter />
         </OutputWrapper>
       </CardBody>
     );
