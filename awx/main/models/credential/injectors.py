@@ -39,12 +39,6 @@ def gce(cred, env, private_data_dir):
     f.close()
     os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
     env['GCE_CREDENTIALS_FILE_PATH'] = path
-
-    handle, path = tempfile.mkstemp(dir=private_data_dir)
-    f = os.fdopen(handle, 'w')
-    json.dump(json_cred, f, indent=2)
-    f.close()
-    os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
     env['GCP_SERVICE_ACCOUNT_FILE'] = path
 
     # Handle env variables for new module types.
