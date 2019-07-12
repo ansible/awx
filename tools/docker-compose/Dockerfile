@@ -46,6 +46,7 @@ RUN dnf -y install acl \
   nodejs \
   openldap-devel \
   openssh-server \
+  postgresql-contrib \
   postgresql-devel \
   python-devel \
   python-pip \
