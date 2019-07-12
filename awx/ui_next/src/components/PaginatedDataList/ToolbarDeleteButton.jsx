@@ -79,7 +79,8 @@ class ToolbarDeleteButton extends React.Component {
 
     const itemsUnableToDelete = itemsToDelete
       .filter(cannotDelete)
-      .map(item => <div key={item.id}>{item.name}</div>);
+      .map(item => item.name)
+      .join(', ');
     if (itemsToDelete.some(cannotDelete)) {
       return (
         <div>
