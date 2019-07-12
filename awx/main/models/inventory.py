@@ -1991,6 +1991,8 @@ class azure_rm(PluginFileInjector):
 
         source_vars = inventory_update.source_vars_dict
 
+        ret['fail_on_template_errors'] = False
+
         group_by_hostvar = {
             'location': {'prefix': '', 'separator': '', 'key': 'location'},
             'tag': {'prefix': '', 'separator': '', 'key': 'tags.keys() | list if tags else []'},
