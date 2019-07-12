@@ -13,6 +13,7 @@ from django.dispatch import receiver
 from django.contrib.auth.models import User
 from django.conf import settings as django_settings
 from django.core.signals import setting_changed
+from django.utils.encoding import force_text
 
 # django-auth-ldap
 from django_auth_ldap.backend import LDAPSettings as BaseLDAPSettings
@@ -209,7 +210,7 @@ class RADIUSBackend(BaseRADIUSBackend):
             return user
 
     def get_django_user(self, username, password=None):
-        return _get_or_set_enterprise_user(username, password, 'radius')
+        return _get_or_set_enterprise_user(force_text(username), force_text(password), 'radius')
 
 
 class TACACSPlusBackend(object):
