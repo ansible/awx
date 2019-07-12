@@ -23,22 +23,32 @@ const Button = styled(PFButton)`
 `;
 
 class MenuControls extends Component {
+  constructor(props) {
+    super(props);
+  }
+
   render() {
+    const {
+      onScrollTop,
+      onScrollBottom,
+      onScrollNext,
+      onScrollPrevious,
+    } = this.props;
     return (
       <Wrapper>
         <Button variant="plain">
           <PlusIcon />
         </Button>
-        <Button variant="plain">
+        <Button onClick={onScrollPrevious} variant="plain">
           <AngleUpIcon />
         </Button>
-        <Button variant="plain">
+        <Button onClick={onScrollNext} variant="plain">
           <AngleDownIcon />
         </Button>
-        <Button variant="plain">
+        <Button onClick={onScrollTop} variant="plain">
           <AngleDoubleUpIcon />
         </Button>
-        <Button variant="plain">
+        <Button onClick={onScrollBottom} variant="plain">
           <AngleDoubleDownIcon />
         </Button>
       </Wrapper>

@@ -18,6 +18,12 @@ class Jobs extends Base {
   readDetail(id, type) {
     return this.http.get(`/api/v2${BASE_URLS[type]}${id}/`);
   }
+
+  readJobEvents(id, params = {}) {
+    return this.http.get(`${this.baseUrl}${id}/job_events/`, {
+      params,
+    });
+  }
 }
 
 export default Jobs;

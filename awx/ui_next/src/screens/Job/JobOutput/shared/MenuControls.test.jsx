@@ -15,7 +15,7 @@ const findChildren = () => {
   AngleDoubleDownIcon = wrapper.find('AngleDoubleDownIcon');
   AngleUpIcon = wrapper.find('AngleUpIcon');
   AngleDownIcon = wrapper.find('AngleDownIcon');
-}
+};
 
 describe('MenuControls', () => {
   test('should render successfully', () => {

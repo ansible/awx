@@ -1,1 +1,1 @@
-export { default as MenuControls } from './MenuControls';
+export { default } from './MenuControls';
