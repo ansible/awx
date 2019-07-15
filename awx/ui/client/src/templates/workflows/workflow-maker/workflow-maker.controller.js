@@ -585,8 +585,8 @@ export default ['$scope', 'TemplatesService',
 
         $scope.confirmNodeForm = (nodeFormData) => {
             const { edgeType, selectedTemplate, promptData } = nodeFormData;
-            const isPauseNode = selectedTemplate.type === "workflow_approval" 
-                || selectedTemplate.unified_job_type === "workflow_approval";
+            const isPauseNode = selectedTemplate.type === "workflow_approval" ||
+                selectedTemplate.unified_job_type === "workflow_approval";
             // edgeType, selectedTemplate, promptData
             // can determine pause node by looking at the type (?) or maybe unified_job_type
             $scope.workflowChangesUnsaved = true;
