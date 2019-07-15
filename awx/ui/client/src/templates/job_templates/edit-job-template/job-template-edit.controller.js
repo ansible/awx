@@ -664,12 +664,12 @@ export default
                             for(var i=0; i<form.fields[fld].fields.length; i++) {
                                 data[form.fields[fld].fields[i].name] = $scope[form.fields[fld].fields[i].name];
                             }
-                        }
-                        else {
+                        } else if (fld === 'scm_branch' && $scope.allow_branch_override) {
+                            data[fld] = $scope[fld];
+                        } else {
                             if (fld !== 'extra_vars' &&
                                 fld !== 'survey' &&
-                                fld !== 'forks' &&
-                                (fld === 'scm_branch' && $scope.allow_branch_override)) {
+                                fld !== 'forks') {
                                 data[fld] = $scope[fld];
                             }
                         }
