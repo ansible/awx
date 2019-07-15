@@ -1,16 +1,25 @@
 .at-ApprovalsDrawer {
-  position: absolute;
-  right: 0px;
+  position: fixed;
   top: 0;
-  height: 100%;
-  width: 540px;
-  background-color: white;
-  z-index: 1000000;
-  animation-duration: 0.5s;
-  // TODO: fix animation?
-  // animation-name: slidein;
-  padding: 20px;
-  box-shadow: -3px 0px 8px -2px #aaaaaa;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  // z-index of the nav header is 1040
+  z-index: 1041;
+  background-color: rgba(0, 0, 0, 0.3);
+
+  &-drawer {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    width: 540px;
+    background-color: @default-bg;
+    animation-name: slidein;
+    animation-duration: 250ms;
+    padding: 20px;
+    overflow-y: scroll;
+  }
 
   &-header {
     display: flex;
@@ -20,10 +29,21 @@
 
   &-title {
     flex: 1 0 auto;
-    color: #606060;
+    color: @default-interface-txt;
     font-size: 14px;
     font-weight: bold;
     width: calc(82%);
+  }
+
+  &-actionRow {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    margin-top: 10px;
+
+    button {
+      margin-left: 15px;
+    }
   }
 
   &-exit {
@@ -33,7 +53,7 @@
     button {
       height: 20px;
       font-size: 20px;
-      color: #D7D7D7;
+      color: @d7grey;
       line-height: 1;
       opacity: 1;
     }
@@ -41,7 +61,7 @@
     button:hover{
       color: @default-icon;
       opacity: 1;
-  }
+    }
   }
 }
 

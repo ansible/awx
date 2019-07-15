@@ -8,52 +8,36 @@ function AtApprovalsDrawerController (strings, Rest, GetBasePath, $rootScope) {
         value: 'created'
     };
 
+    vm.strings = strings;
     vm.toolbarSortValue = toolbarSortDefault;
+    vm.queryset = {
+        page: 1,
+        page_size: 5,
+        order_by: 'created',
+        status: 'pending'
+    };
+    vm.emptyListReason = vm.strings.get('approvals.NONE');
 
     // This will probably need to be expanded
     vm.toolbarSortOptions = [
         toolbarSortDefault,
-        { label: `${strings.get('sort.CREATED_DESCENDING')}`, value: '-created' }
+        { label: `${vm.strings.get('sort.CREATED_DESCENDING')}`, value: '-created' }
     ];
 
-    vm.queryset = {
-        page_size: 5
-    };
-
-    vm.emptyListReason = strings.get('approvals.NONE');
-
     const loadTheList = () => {
-        Rest.setUrl(`${GetBasePath('workflow_approval')}?page_size=5&order_by=created&status=pending`);
-        Rest.get()
+        const queryParams = Object.keys(vm.queryset).map(key => `${key}=${vm.queryset[key]}`).join('&');
+        Rest.setUrl(`${GetBasePath('workflow_approval')}?${queryParams}`);
+        return Rest.get()
             .then(({ data }) => {
                 vm.dataset = data;
                 vm.approvals = data.results;
                 vm.count = data.count;
                 $rootScope.pendingApprovalCount = data.count;
-                vm.listLoaded = true;
             });
     };
 
-    loadTheList();
-
-    vm.onToolbarSort = (sort) => {
-        vm.toolbarSortValue = sort;
-
-        // TODO: this...
-        // const queryParams = Object.assign(
-        //     {},
-        //     $state.params.user_search,
-        //     paginateQuerySet,
-        //     { order_by: sort.value }
-        // );
-
-        // // Update URL with params
-        // $state.go('.', {
-        //     user_search: queryParams
-        // }, { notify: false, location: 'replace' });
-
-        // rather than ^^ we want to just re-load the data based on new params
-    };
+    loadTheList()
+        .then(() => { vm.listLoaded = true; });
 
     vm.approve = (approval) => {
         Rest.setUrl(`${GetBasePath('workflow_approval')}${approval.id}/approve`);
@@ -65,6 +49,13 @@ function AtApprovalsDrawerController (strings, Rest, GetBasePath, $rootScope) {
         Rest.setUrl(`${GetBasePath('workflow_approval')}${approval.id}/deny`);
         Rest.post()
             .then(() => loadTheList());
+    };
+
+    vm.onToolbarSort = (sort) => {
+        vm.toolbarSortValue = sort;
+        vm.queryset.page = 1;
+        vm.queryset.order_by = sort.value;
+        loadTheList();
     };
 }
 

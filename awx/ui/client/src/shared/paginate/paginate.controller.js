@@ -1,5 +1,5 @@
-export default ['$scope', '$stateParams', '$state', '$filter', 'GetBasePath', 'QuerySet', '$interpolate',
-    function($scope, $stateParams, $state, $filter, GetBasePath, qs, $interpolate) {
+export default ['$scope', '$stateParams', '$state', 'GetBasePath', 'QuerySet', '$interpolate',
+    function($scope, $stateParams, $state, GetBasePath, qs, $interpolate) {
 
         let pageSize = $scope.querySet ? $scope.querySet.page_size || 20 : $stateParams[`${$scope.iterator}_search`].page_size || 20,
             queryset, path;

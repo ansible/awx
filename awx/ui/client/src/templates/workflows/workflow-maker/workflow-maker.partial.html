@@ -128,7 +128,7 @@
         </div>
         <div class="WorkflowMaker-contentRight">
             <span ng-if="formState.showNodeForm">
-                <workflow-node-form node-config="nodeConfig" workflow-job-template-obj="workflowJobTemplateObj" select="confirmNodeForm(selectedTemplate, promptData, edgeType, pauseNode)" cancel="cancelNodeForm()" read-only="!workflowJobTemplateObj.summary_fields.user_capabilities.edit"/>
+                <workflow-node-form node-config="nodeConfig" workflow-job-template-obj="workflowJobTemplateObj" select="confirmNodeForm(nodeFormData)" cancel="cancelNodeForm()" read-only="!workflowJobTemplateObj.summary_fields.user_capabilities.edit"/>
             </span>
             <span ng-if="formState.showLinkForm">
                 <workflow-link-form link-config="linkConfig" read-only="!workflowJobTemplateObj.summary_fields.user_capabilities.edit" select="confirmLinkForm(edgeType)" cancel="cancelLinkForm()" unlink="unlink()"/>

@@ -226,7 +226,7 @@ export default ['$scope', 'TemplatesService',
                                 }).then(({data: approvalTemplateData}) => {
                                     // Make sure that this isn't overwriting everything on the node...
                                     editPromises.push(TemplatesService.editWorkflowNode({
-                                        url: $scope.workflowJobTemplateObj.related.workflow_nodes,
+                                        id: node.originalNodeObject.id,
                                         data: {
                                             unified_job_template: approvalTemplateData.id
                                         }
@@ -583,24 +583,29 @@ export default ['$scope', 'TemplatesService',
             $scope.formState.showNodeForm = true;
         };
 
-        $scope.confirmNodeForm = (selectedTemplate, promptData, edgeType, pauseNode) => {
+        $scope.confirmNodeForm = (nodeFormData) => {
+            const { edgeType, selectedTemplate, promptData } = nodeFormData;
+            const isPauseNode = selectedTemplate.type === "workflow_approval" 
+                || selectedTemplate.unified_job_type === "workflow_approval";
+            // edgeType, selectedTemplate, promptData
+            // can determine pause node by looking at the type (?) or maybe unified_job_type
             $scope.workflowChangesUnsaved = true;
             const nodeId = $scope.nodeConfig.nodeId;
             if ($scope.nodeConfig.mode === "add") {
-                if (edgeType && edgeType.value) {
-                    if (selectedTemplate) {
+                if (edgeType && edgeType.value && selectedTemplate) {
+                    if (isPauseNode) {
+                        nodeRef[$scope.nodeConfig.nodeId] = {
+                            unifiedJobTemplate: {
+                                name: selectedTemplate.name,
+                                description: selectedTemplate.description,
+                                unified_job_type: "workflow_approval"
+                            },
+                            isNew: true
+                        };
+                    } else {
                         nodeRef[$scope.nodeConfig.nodeId] = {
                             fullUnifiedJobTemplateObject: selectedTemplate,
                             promptData,
-                            isNew: true
-                        };
-                    } else if (pauseNode && pauseNode.isPauseNode) {
-                        nodeRef[$scope.nodeConfig.nodeId] = {
-                            unifiedJobTemplate: {
-                                name: pauseNode.name,
-                                description: pauseNode.description,
-                                unified_job_type: "workflow_approval"
-                            },
                             isNew: true
                         };
                     }
@@ -629,12 +634,12 @@ export default ['$scope', 'TemplatesService',
                             link.source.unifiedJobTemplate = selectedTemplate;
                         }
                     });
-                } else if (pauseNode && pauseNode.isPauseNode) {
+                } else if (isPauseNode) {
                     // If it's a _new_ pause node then we'll want to create the new ujt
                     // If it's an existing pause node then we'll want to update the ujt
                     nodeRef[$scope.nodeConfig.nodeId].unifiedJobTemplate = {
-                        name: pauseNode.name,
-                        description: pauseNode.description,
+                        name: selectedTemplate.name,
+                        description: selectedTemplate.description,
                         unified_job_type: "workflow_approval"
                     };
                     nodeRef[$scope.nodeConfig.nodeId].isEdited = true;
@@ -643,11 +648,11 @@ export default ['$scope', 'TemplatesService',
 
             $scope.graphState.arrayOfNodesForChart.map( (node) => {
                 if (node.id === nodeId) {
-                    if (pauseNode && pauseNode.isPauseNode) {
+                    if (isPauseNode) {
                         node.unifiedJobTemplate = {
                             unified_job_type: 'workflow_approval',
-                            name: pauseNode.name,
-                            description: pauseNode.description
+                            name: selectedTemplate.name,
+                            description: selectedTemplate.description
                         };
                     } else {
                         node.unifiedJobTemplate = selectedTemplate;
