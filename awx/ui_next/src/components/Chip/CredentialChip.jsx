@@ -13,7 +13,7 @@ function CredentialChip({ credential, i18n, ...props }) {
   } else if (credential.kind === 'aws' || credential.kind === 'ssh') {
     type = credential.kind.toUpperCase();
   } else {
-    type = toTitleCase(credential.kind);
+    type = i18n._(toTitleCase(credential.kind));
   }
 
   return (
