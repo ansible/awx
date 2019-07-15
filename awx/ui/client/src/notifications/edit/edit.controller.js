@@ -41,19 +41,7 @@ export default ['Rest', 'Wait',
             Rest.setUrl(GetBasePath('notification_templates'));
             Rest.options()
                 .then(({data}) => {
-                    if (data.actions.POST) {
-                        defaultMessages = data.actions.POST.messages.default;
-                    } else {
-                        const defaults = {
-                            message: '<DEFAULT_MESSAGE>',
-                            body: '<DEFAULT_BODY>',
-                        };
-                        defaultMessages = {
-                            started: defaults,
-                            success: defaults,
-                            error: defaults,
-                        };
-                    }
+                    defaultMessages = data.actions.GET.messages.default;
                 });
 
             GetChoices({
