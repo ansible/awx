@@ -650,7 +650,7 @@ class Host(CommonModelNameNotUnique, RelatedJobsMixin):
     )
     ansible_facts = JSONBField(
         blank=True,
-        default={},
+        default=dict,
         help_text=_('Arbitrary JSON structure of most recent ansible_facts, per-host.'),
     )
     ansible_facts_modified = models.DateTimeField(

@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='workflowjob',
             name='char_prompts',
-            field=awx.main.fields.JSONField(blank=True, default={}),
+            field=awx.main.fields.JSONField(blank=True, default=dict),
         ),
         migrations.AddField(
             model_name='workflowjob',
@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='workflowjobtemplate',
             name='ask_inventory_on_launch',
-            field=awx.main.fields.AskForField(default=False),
+            field=awx.main.fields.AskForField(blank=True, default=False),
         ),
         migrations.AddField(
             model_name='workflowjobtemplate',

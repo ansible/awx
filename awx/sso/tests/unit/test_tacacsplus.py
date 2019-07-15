@@ -4,7 +4,7 @@ from unittest import mock
 def test_empty_host_fails_auth(tacacsplus_backend):
     with mock.patch('awx.sso.backends.django_settings') as settings:
         settings.TACACSPLUS_HOST = ''
-        ret_user = tacacsplus_backend.authenticate(u"user", u"pass")
+        ret_user = tacacsplus_backend.authenticate(None, u"user", u"pass")
         assert ret_user is None
 
 
@@ -16,7 +16,7 @@ def test_client_raises_exception(tacacsplus_backend):
             mock.patch('tacacs_plus.TACACSClient', return_value=client):
         settings.TACACSPLUS_HOST = 'localhost'
         settings.TACACSPLUS_AUTH_PROTOCOL = 'ascii'
-        ret_user = tacacsplus_backend.authenticate(u"user", u"pass")
+        ret_user = tacacsplus_backend.authenticate(None, u"user", u"pass")
         assert ret_user is None
         logger.exception.assert_called_once_with(
             "TACACS+ Authentication Error: foo"
@@ -32,7 +32,7 @@ def test_client_return_invalid_fails_auth(tacacsplus_backend):
             mock.patch('tacacs_plus.TACACSClient', return_value=client):
         settings.TACACSPLUS_HOST = 'localhost'
         settings.TACACSPLUS_AUTH_PROTOCOL = 'ascii'
-        ret_user = tacacsplus_backend.authenticate(u"user", u"pass")
+        ret_user = tacacsplus_backend.authenticate(None, u"user", u"pass")
         assert ret_user is None
 
 
@@ -48,5 +48,5 @@ def test_client_return_valid_passes_auth(tacacsplus_backend):
             mock.patch('awx.sso.backends._get_or_set_enterprise_user', return_value=user):
         settings.TACACSPLUS_HOST = 'localhost'
         settings.TACACSPLUS_AUTH_PROTOCOL = 'ascii'
-        ret_user = tacacsplus_backend.authenticate(u"user", u"pass")
+        ret_user = tacacsplus_backend.authenticate(None, u"user", u"pass")
         assert ret_user == user

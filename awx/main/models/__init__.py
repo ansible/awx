@@ -62,24 +62,6 @@ from awx.main.models.oauth import ( # noqa
 from oauth2_provider.models import Grant, RefreshToken # noqa -- needed django-oauth-toolkit model migrations
 
 
-
-# Monkeypatch Django serializer to ignore django-taggit fields (which break
-# the dumpdata command; see https://github.com/alex/django-taggit/issues/155).
-from django.core.serializers.python import Serializer as _PythonSerializer
-_original_handle_m2m_field = _PythonSerializer.handle_m2m_field
-
-
-def _new_handle_m2m_field(self, obj, field):
-    try:
-        field.rel.through._meta
-    except AttributeError:
-        return
-    return _original_handle_m2m_field(self, obj, field)
-
-
-_PythonSerializer.handle_m2m_field = _new_handle_m2m_field
-
-
 # Add custom methods to User model for permissions checks.
 from django.contrib.auth.models import User  # noqa
 from awx.main.access import (  # noqa
@@ -158,7 +140,7 @@ User.add_to_class('is_system_auditor', user_is_system_auditor)
 
 
 def user_is_in_enterprise_category(user, category):
-    ret = (category,) in user.enterprise_auth.all().values_list('provider') and not user.has_usable_password()
+    ret = (category,) in user.enterprise_auth.values_list('provider') and not user.has_usable_password()
     # NOTE: this if-else block ensures existing enterprise users are still able to
     # log in. Remove it in a future release
     if category == 'radius':

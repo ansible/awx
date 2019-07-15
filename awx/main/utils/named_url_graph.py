@@ -208,7 +208,7 @@ def _check_unique_together_fields(model, ut):
         field = model._meta.get_field(field_name)
         if field_name == 'name':
             has_name = True
-        elif type(field) == models.ForeignKey and field.rel.to != model:
+        elif type(field) == models.ForeignKey and field.related_model != model:
             fk_names.append(field_name)
         elif issubclass(type(field), models.CharField) and field.choices:
             fields.append(field_name)
@@ -256,7 +256,7 @@ def _dfs(configuration, model, graph, dead_ends, new_deadends, parents):
     fields, fk_names = configuration[model][0][:], configuration[model][1][:]
     adj_list = []
     for fk_name in fk_names:
-        next_model = model._meta.get_field(fk_name).rel.to
+        next_model = model._meta.get_field(fk_name).related_model
         if issubclass(next_model, ContentType):
             continue
         if next_model not in configuration or\

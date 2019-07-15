@@ -2560,7 +2560,7 @@ class CredentialSerializer(BaseSerializer):
 
     def validate_credential_type(self, credential_type):
         if self.instance and credential_type.pk != self.instance.credential_type.pk:
-            for rel in (
+            for related_objects in (
                 'ad_hoc_commands',
                 'insights_inventories',
                 'unifiedjobs',
@@ -2569,7 +2569,7 @@ class CredentialSerializer(BaseSerializer):
                 'projectupdates',
                 'workflowjobnodes'
             ):
-                if getattr(self.instance, rel).count() > 0:
+                if getattr(self.instance, related_objects).count() > 0:
                     raise ValidationError(
                         _('You cannot change the credential type of the credential, as it may break the functionality'
                           ' of the resources using it.'),
@@ -4640,37 +4640,37 @@ class ActivityStreamSerializer(BaseSerializer):
             return ""
 
     def get_related(self, obj):
-        rel = {}
+        data = {}
         if obj.actor is not None:
-            rel['actor'] = self.reverse('api:user_detail', kwargs={'pk': obj.actor.pk})
+            data['actor'] = self.reverse('api:user_detail', kwargs={'pk': obj.actor.pk})
         for fk, __ in self._local_summarizable_fk_fields:
             if not hasattr(obj, fk):
                 continue
-            m2m_list = self._get_rel(obj, fk)
+            m2m_list = self._get_related_objects(obj, fk)
             if m2m_list:
-                rel[fk] = []
+                data[fk] = []
                 id_list = []
-                for thisItem in m2m_list:
-                    if getattr(thisItem, 'id', None) in id_list:
+                for item in m2m_list:
+                    if getattr(item, 'id', None) in id_list:
                         continue
-                    id_list.append(getattr(thisItem, 'id', None))
-                    if hasattr(thisItem, 'get_absolute_url'):
-                        rel_url = thisItem.get_absolute_url(self.context.get('request'))
+                    id_list.append(getattr(item, 'id', None))
+                    if hasattr(item, 'get_absolute_url'):
+                        url = item.get_absolute_url(self.context.get('request'))
                     else:
                         view_name = fk + '_detail'
-                        rel_url = self.reverse('api:' + view_name, kwargs={'pk': thisItem.id})
-                    rel[fk].append(rel_url)
+                        url = self.reverse('api:' + view_name, kwargs={'pk': item.id})
+                    data[fk].append(url)
 
                     if fk == 'schedule':
-                        rel['unified_job_template'] = thisItem.unified_job_template.get_absolute_url(self.context.get('request'))
+                        data['unified_job_template'] = item.unified_job_template.get_absolute_url(self.context.get('request'))
         if obj.setting and obj.setting.get('category', None):
-            rel['setting'] = self.reverse(
+            data['setting'] = self.reverse(
                 'api:setting_singleton_detail',
                 kwargs={'category_slug': obj.setting['category']}
             )
-        return rel
+        return data
 
-    def _get_rel(self, obj, fk):
+    def _get_related_objects(self, obj, fk):
         related_model = ActivityStream._meta.get_field(fk).related_model
         related_manager = getattr(obj, fk)
         if issubclass(related_model, PolymorphicModel) and hasattr(obj, '_prefetched_objects_cache'):
@@ -4703,7 +4703,7 @@ class ActivityStreamSerializer(BaseSerializer):
             try:
                 if not hasattr(obj, fk):
                     continue
-                m2m_list = self._get_rel(obj, fk)
+                m2m_list = self._get_related_objects(obj, fk)
                 if m2m_list:
                     summary_fields[fk] = []
                     for thisItem in m2m_list:

@@ -42,7 +42,7 @@ def test_job_notification_data(inventory, machine_credential, project):
         survey_passwords={"SSN": encrypted_str},
         project=project,
     )
-    job.credentials = [machine_credential]
+    job.credentials.set([machine_credential])
     notification_data = job.notification_data(block=0)
     assert json.loads(notification_data['extra_vars'])['SSN'] == encrypted_str
 

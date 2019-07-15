@@ -55,12 +55,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='inventorysource',
             name='deprecated_group',
-            field=models.OneToOneField(related_name='deprecated_inventory_source', null=True, default=None, to='main.Group'),
+            field=models.OneToOneField(related_name='deprecated_inventory_source', on_delete=models.CASCADE, null=True, default=None, to='main.Group'),
         ),
         migrations.AlterField(
             model_name='inventorysource',
             name='inventory',
-            field=models.ForeignKey(related_name='inventory_sources', default=None, to='main.Inventory', null=True),
+            field=models.ForeignKey(related_name='inventory_sources', default=None, to='main.Inventory', on_delete=models.CASCADE, null=True),
         ),
 
         # Smart Inventory
@@ -78,13 +78,13 @@ class Migration(migrations.Migration):
             name='SmartInventoryMembership',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('host', models.ForeignKey(related_name='+', to='main.Host')),
+                ('host', models.ForeignKey(related_name='+', on_delete=models.CASCADE, to='main.Host')),
             ],
         ),
         migrations.AddField(
             model_name='smartinventorymembership',
             name='inventory',
-            field=models.ForeignKey(related_name='+', to='main.Inventory'),
+            field=models.ForeignKey(on_delete=models.CASCADE, related_name='+', to='main.Inventory'),
         ),
         migrations.AddField(
             model_name='host',
@@ -105,19 +105,19 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='inventory',
             name='organization',
-            field=models.ForeignKey(related_name='inventories', on_delete=models.deletion.SET_NULL, to='main.Organization', help_text='Organization containing this inventory.', null=True),
+            field=models.ForeignKey(related_name='inventories', on_delete=models.SET_NULL, to='main.Organization', help_text='Organization containing this inventory.', null=True),
         ),
 
         # Facts
         migrations.AlterField(
             model_name='fact',
             name='facts',
-            field=awx.main.fields.JSONBField(default={}, help_text='Arbitrary JSON structure of module facts captured at timestamp for a single host.', blank=True),
+            field=awx.main.fields.JSONBField(default=dict, help_text='Arbitrary JSON structure of module facts captured at timestamp for a single host.', blank=True),
         ),
         migrations.AddField(
             model_name='host',
             name='ansible_facts',
-            field=awx.main.fields.JSONBField(default={}, help_text='Arbitrary JSON structure of most recent ansible_facts, per-host.', blank=True),
+            field=awx.main.fields.JSONBField(default=dict, help_text='Arbitrary JSON structure of most recent ansible_facts, per-host.', blank=True),
         ),
         migrations.AddField(
             model_name='host',
@@ -148,12 +148,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='inventorysource',
             name='source_project',
-            field=models.ForeignKey(related_name='scm_inventory_sources', default=None, blank=True, to='main.Project', help_text='Project containing inventory file used as source.', null=True),
+            field=models.ForeignKey(related_name='scm_inventory_sources', on_delete=models.CASCADE, default=None, blank=True, to='main.Project', help_text='Project containing inventory file used as source.', null=True),
         ),
         migrations.AddField(
             model_name='inventoryupdate',
             name='source_project_update',
-            field=models.ForeignKey(related_name='scm_inventory_updates', default=None, blank=True, to='main.ProjectUpdate', help_text='Inventory files from this Project Update were used for the inventory update.', null=True),
+            field=models.ForeignKey(related_name='scm_inventory_updates', on_delete=models.CASCADE, default=None, blank=True, to='main.ProjectUpdate', help_text='Inventory files from this Project Update were used for the inventory update.', null=True),
         ),
         migrations.AddField(
             model_name='project',
@@ -200,7 +200,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='notificationtemplate',
             name='organization',
-            field=models.ForeignKey(related_name='notification_templates', to='main.Organization', null=True),
+            field=models.ForeignKey(related_name='notification_templates', on_delete=models.CASCADE, to='main.Organization', null=True),
         ),
         migrations.AlterUniqueTogether(
             name='notificationtemplate',
@@ -312,7 +312,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='inventory',
             name='insights_credential',
-            field=models.ForeignKey(related_name='insights_inventories', on_delete=models.deletion.SET_NULL, default=None, blank=True, to='main.Credential', help_text='Credentials to be used by hosts belonging to this inventory when accessing Red Hat Insights API.', null=True),
+            field=models.ForeignKey(related_name='insights_inventories', on_delete=models.SET_NULL, default=None, blank=True, to='main.Credential', help_text='Credentials to be used by hosts belonging to this inventory when accessing Red Hat Insights API.', null=True),
         ),
         migrations.AlterField(
             model_name='inventory',
@@ -382,10 +382,10 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=512)),
                 ('kind', models.CharField(max_length=32, choices=[('ssh', 'Machine'), ('vault', 'Vault'), ('net', 'Network'), ('scm', 'Source Control'), ('cloud', 'Cloud'), ('insights', 'Insights')])),
                 ('managed_by_tower', models.BooleanField(default=False, editable=False)),
-                ('inputs', awx.main.fields.CredentialTypeInputField(default={}, blank=True, help_text='Enter inputs using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax.')),
-                ('injectors', awx.main.fields.CredentialTypeInjectorField(default={}, blank=True, help_text='Enter injectors using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax.')),
-                ('created_by', models.ForeignKey(related_name="{u'class': 'credentialtype', u'app_label': 'main'}(class)s_created+", on_delete=models.deletion.SET_NULL, default=None, editable=False, to=settings.AUTH_USER_MODEL, null=True)),
-                ('modified_by', models.ForeignKey(related_name="{u'class': 'credentialtype', u'app_label': 'main'}(class)s_modified+", on_delete=models.deletion.SET_NULL, default=None, editable=False, to=settings.AUTH_USER_MODEL, null=True)),
+                ('inputs', awx.main.fields.CredentialTypeInputField(default=dict, blank=True, help_text='Enter inputs using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax.')),
+                ('injectors', awx.main.fields.CredentialTypeInjectorField(default=dict, blank=True, help_text='Enter injectors using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax.')),
+                ('created_by', models.ForeignKey(related_name="{u'class': 'credentialtype', u'app_label': 'main'}(class)s_created+", on_delete=models.SET_NULL, default=None, editable=False, to=settings.AUTH_USER_MODEL, null=True)),
+                ('modified_by', models.ForeignKey(related_name="{u'class': 'credentialtype', u'app_label': 'main'}(class)s_modified+", on_delete=models.SET_NULL, default=None, editable=False, to=settings.AUTH_USER_MODEL, null=True)),
                 ('tags', taggit.managers.TaggableManager(to='taggit.Tag', through='taggit.TaggedItem', blank=True, help_text='A comma-separated list of tags.', verbose_name='Tags')),
             ],
             options={
@@ -399,23 +399,23 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='credential',
             name='inputs',
-            field=awx.main.fields.CredentialInputField(default={}, blank=True),
+            field=awx.main.fields.CredentialInputField(default=dict, blank=True),
         ),
         migrations.AddField(
             model_name='credential',
             name='credential_type',
-            field=models.ForeignKey(related_name='credentials', to='main.CredentialType', null=True),
+            field=models.ForeignKey(related_name='credentials', on_delete=models.CASCADE, to='main.CredentialType', null=True),
             preserve_default=False,
         ),
         migrations.AddField(
             model_name='job',
             name='vault_credential',
-            field=models.ForeignKey(related_name='jobs_as_vault_credential+', on_delete=models.deletion.SET_NULL, default=None, blank=True, to='main.Credential', null=True),
+            field=models.ForeignKey(related_name='jobs_as_vault_credential+', on_delete=models.SET_NULL, default=None, blank=True, to='main.Credential', null=True),
         ),
         migrations.AddField(
             model_name='jobtemplate',
             name='vault_credential',
-            field=models.ForeignKey(related_name='jobtemplates_as_vault_credential+', on_delete=models.deletion.SET_NULL, default=None, blank=True, to='main.Credential', null=True),
+            field=models.ForeignKey(related_name='jobtemplates_as_vault_credential+', on_delete=models.SET_NULL, default=None, blank=True, to='main.Credential', null=True),
         ),
         migrations.AddField(
             model_name='job',
@@ -452,7 +452,7 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(unique=True, max_length=250)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('modified', models.DateTimeField(auto_now=True)),
-                ('controller', models.ForeignKey(related_name='controlled_groups', default=None, editable=False, to='main.InstanceGroup', help_text='Instance Group to remotely control this group.', null=True)),
+                ('controller', models.ForeignKey(related_name='controlled_groups', on_delete=models.CASCADE, default=None, editable=False, to='main.InstanceGroup', help_text='Instance Group to remotely control this group.', null=True)),
                 ('instances', models.ManyToManyField(help_text='Instances that are members of this InstanceGroup', related_name='rampart_groups', editable=False, to='main.Instance')),
             ],
         ),
@@ -464,7 +464,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='unifiedjob',
             name='instance_group',
-            field=models.ForeignKey(on_delete=models.deletion.SET_NULL, default=None, blank=True, to='main.InstanceGroup', help_text='The Rampart/Instance group the job was run under', null=True),
+            field=models.ForeignKey(on_delete=models.SET_NULL, default=None, blank=True, to='main.InstanceGroup', help_text='The Rampart/Instance group the job was run under', null=True),
         ),
         migrations.AddField(
             model_name='unifiedjobtemplate',

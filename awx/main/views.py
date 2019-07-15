@@ -60,7 +60,7 @@ def handle_error(request, status=404, **kwargs):
         return render(request, 'error.html', kwargs, status=status)
 
 
-def handle_400(request):
+def handle_400(request, exception):
     kwargs = {
         'name': _('Bad Request'),
         'content': _('The request could not be understood by the server.'),
@@ -68,7 +68,7 @@ def handle_400(request):
     return handle_error(request, 400, **kwargs)
 
 
-def handle_403(request):
+def handle_403(request, exception):
     kwargs = {
         'name': _('Forbidden'),
         'content': _('You don\'t have permission to access the requested resource.'),
@@ -76,7 +76,7 @@ def handle_403(request):
     return handle_error(request, 403, **kwargs)
 
 
-def handle_404(request):
+def handle_404(request, exception):
     kwargs = {
         'name': _('Not Found'),
         'content': _('The requested resource could not be found.'),

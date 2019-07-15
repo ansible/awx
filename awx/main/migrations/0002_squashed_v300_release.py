@@ -13,7 +13,6 @@ from django.conf import settings
 from django.utils.timezone import now
 
 import jsonfield.fields
-import jsonbfield.fields
 import taggit.managers
 
 
@@ -144,7 +143,7 @@ class Migration(migrations.Migration):
                 ('category', models.CharField(max_length=128)),
                 ('value', models.TextField(blank=True)),
                 ('value_type', models.CharField(max_length=12, choices=[('string', 'String'), ('int', 'Integer'), ('float', 'Decimal'), ('json', 'JSON'), ('bool', 'Boolean'), ('password', 'Password'), ('list', 'List')])),
-                ('user', models.ForeignKey(related_name='settings', default=None, editable=False, to=settings.AUTH_USER_MODEL, null=True)),
+                ('user', models.ForeignKey(related_name='settings', default=None, editable=False, to=settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)),
             ],
         ),
         # Notification changes
@@ -185,7 +184,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='notification',
             name='notification_template',
-            field=models.ForeignKey(related_name='notifications', editable=False, to='main.NotificationTemplate'),
+            field=models.ForeignKey(related_name='notifications', editable=False, on_delete=models.CASCADE, to='main.NotificationTemplate'),
         ),
         migrations.AddField(
             model_name='activitystream',
@@ -239,8 +238,8 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('timestamp', models.DateTimeField(default=None, help_text='Date and time of the corresponding fact scan gathering time.', editable=False)),
                 ('module', models.CharField(max_length=128)),
-                ('facts', jsonbfield.fields.JSONField(default={}, help_text='Arbitrary JSON structure of module facts captured at timestamp for a single host.', blank=True)),
-                ('host', models.ForeignKey(related_name='facts', to='main.Host', help_text='Host for the facts that the fact scan captured.')),
+                ('facts', awx.main.fields.JSONBField(default=dict, help_text='Arbitrary JSON structure of module facts captured at timestamp for a single host.', blank=True)),
+                ('host', models.ForeignKey(related_name='facts', to='main.Host', on_delete=models.CASCADE, help_text='Host for the facts that the fact scan captured.')),
             ],
         ),
         migrations.AlterIndexTogether(
@@ -318,7 +317,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='project',
             name='organization',
-            field=models.ForeignKey(related_name='projects', to='main.Organization', blank=True, null=True),
+            field=models.ForeignKey(related_name='projects', to='main.Organization', on_delete=models.CASCADE, blank=True, null=True),
         ),
         migrations.AlterField(
             model_name='team',
@@ -367,7 +366,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='credential',
             name='organization',
-            field=models.ForeignKey(related_name='credentials', default=None, blank=True, to='main.Organization', null=True),
+            field=models.ForeignKey(related_name='credentials', on_delete=models.CASCADE, default=None, blank=True, to='main.Organization', null=True),
         ),
 
         #
@@ -382,7 +381,7 @@ class Migration(migrations.Migration):
                 ('members', models.ManyToManyField(related_name='roles', to=settings.AUTH_USER_MODEL)),
                 ('parents', models.ManyToManyField(related_name='children', to='main.Role')),
                 ('implicit_parents', models.TextField(default='[]')),
-                ('content_type', models.ForeignKey(default=None, to='contenttypes.ContentType', null=True)),
+                ('content_type', models.ForeignKey(default=None, to='contenttypes.ContentType', on_delete=models.CASCADE, null=True)),
                 ('object_id', models.PositiveIntegerField(default=None, null=True)),
 
             ],
@@ -398,8 +397,8 @@ class Migration(migrations.Migration):
                 ('role_field', models.TextField()),
                 ('content_type_id', models.PositiveIntegerField()),
                 ('object_id', models.PositiveIntegerField()),
-                ('ancestor', models.ForeignKey(related_name='+', to='main.Role')),
-                ('descendent', models.ForeignKey(related_name='+', to='main.Role')),
+                ('ancestor', models.ForeignKey(on_delete=models.CASCADE, related_name='+', to='main.Role')),
+                ('descendent', models.ForeignKey(on_delete=models.CASCADE, related_name='+', to='main.Role')),
             ],
             options={
                 'db_table': 'main_rbac_role_ancestors',
@@ -569,7 +568,7 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=512)),
                 ('created_by', models.ForeignKey(related_name="{u'class': 'label', u'app_label': 'main'}(class)s_created+", on_delete=django.db.models.deletion.SET_NULL, default=None, editable=False, to=settings.AUTH_USER_MODEL, null=True)),
                 ('modified_by', models.ForeignKey(related_name="{u'class': 'label', u'app_label': 'main'}(class)s_modified+", on_delete=django.db.models.deletion.SET_NULL, default=None, editable=False, to=settings.AUTH_USER_MODEL, null=True)),
-                ('organization', models.ForeignKey(related_name='labels', to='main.Organization', help_text='Organization this label belongs to.')),
+                ('organization', models.ForeignKey(related_name='labels', on_delete=django.db.models.deletion.CASCADE, to='main.Organization', help_text='Organization this label belongs to.')),
                 ('tags', taggit.managers.TaggableManager(to='taggit.Tag', through='taggit.TaggedItem', blank=True, help_text='A comma-separated list of tags.', verbose_name='Tags')),
             ],
             options={
@@ -599,12 +598,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='label',
             name='organization',
-            field=models.ForeignKey(related_name='labels', on_delete=django.db.models.deletion.SET_NULL, default=None, blank=True, to='main.Organization', help_text='Organization this label belongs to.', null=True),
+            field=models.ForeignKey(related_name='labels', on_delete=django.db.models.deletion.CASCADE, default=None, blank=True, to='main.Organization', help_text='Organization this label belongs to.', null=True),
         ),
         migrations.AlterField(
             model_name='label',
             name='organization',
-            field=models.ForeignKey(related_name='labels', to='main.Organization', help_text='Organization this label belongs to.'),
+            field=models.ForeignKey(related_name='labels', on_delete=django.db.models.deletion.CASCADE, to='main.Organization', help_text='Organization this label belongs to.'),
         ),
         # InventorySource Credential
         migrations.AddField(
@@ -630,12 +629,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='credential',
             name='deprecated_team',
-            field=models.ForeignKey(related_name='deprecated_credentials', default=None, blank=True, to='main.Team', null=True),
+            field=models.ForeignKey(related_name='deprecated_credentials', on_delete=django.db.models.deletion.SET_NULL, default=None, blank=True, to='main.Team', null=True),
         ),
         migrations.AlterField(
             model_name='credential',
             name='deprecated_user',
-            field=models.ForeignKey(related_name='deprecated_credentials', default=None, blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='deprecated_credentials', on_delete=django.db.models.deletion.SET_NULL, default=None, blank=True, to=settings.AUTH_USER_MODEL, null=True),
         ),
         migrations.AlterField(
             model_name='credential',

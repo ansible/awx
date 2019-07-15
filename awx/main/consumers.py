@@ -24,7 +24,7 @@ def ws_connect(message):
     headers = dict(message.content.get('headers', ''))
     message.reply_channel.send({"accept": True})
     message.content['method'] = 'FAKE'
-    if message.user.is_authenticated():
+    if message.user.is_authenticated:
         message.reply_channel.send(
             {"text": json.dumps({"accept": True, "user": message.user.id})}
         )
