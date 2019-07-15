@@ -1,5 +1,10 @@
 import styled from 'styled-components';
-import { List, AutoSizer } from 'react-virtualized';
+import {
+  AutoSizer,
+  CellMeasurer,
+  CellMeasurerCache,
+  List,
+} from 'react-virtualized';
 
 import React, { Component } from 'react';
 import { CardBody } from '@patternfly/react-core';
@@ -46,12 +51,18 @@ class JobOutput extends Component {
       stopIndex: 0,
     };
 
+    this.cache = new CellMeasurerCache({
+      fixedWidth: true,
+      defaultHeight: 25,
+    });
+
     this.loadJobEvents = this.loadJobEvents.bind(this);
     this.renderRow = this.renderRow.bind(this);
     this.handleScrollTop = this.handleScrollTop.bind(this);
     this.handleScrollBottom = this.handleScrollBottom.bind(this);
     this.handleScrollNext = this.handleScrollNext.bind(this);
     this.handleScrollPrevious = this.handleScrollPrevious.bind(this);
+    this.handleResize = this.handleResize.bind(this);
     this.onRowsRendered = this.onRowsRendered.bind(this);
   }
 
@@ -78,19 +89,26 @@ class JobOutput extends Component {
     }
   }
 
-  renderRow({ index, key, style }) {
+  renderRow({ index, parent, key, style }) {
     const { results } = this.state;
     const { created, event, stdout, start_line } = results[index];
     return (
-      <JobEvent
-        className="row"
+      <CellMeasurer
         key={key}
-        style={style}
-        created={created}
-        event={event}
-        start_line={start_line}
-        stdout={stdout}
-      />
+        cache={this.cache}
+        parent={parent}
+        rowIndex={index}
+        columnIndex={0}
+      >
+        <JobEvent
+          className="row"
+          style={style}
+          created={created}
+          event={event}
+          start_line={start_line}
+          stdout={stdout}
+        />
+      </CellMeasurer>
     );
   }
 
@@ -116,6 +134,14 @@ class JobOutput extends Component {
   handleScrollBottom() {
     const { results } = this.state;
     this.setState({ scrollToIndex: results.length - 1 });
+  }
+
+  handleResize({ width }) {
+    if (width !== this._previousWidth) {
+      this.cache.clearAll();
+      this.listRef.current.recomputeRowHeights();
+    }
+    this._previousWidth = width;
   }
 
   render() {
@@ -149,7 +175,7 @@ class JobOutput extends Component {
           />
         </OutputToolbar>
         <OutputWrapper>
-          <AutoSizer>
+          <AutoSizer onResize={this.handleResize}>
             {({ width, height }) => {
               console.log('scroll to index', scrollToIndex);
               console.log('start index', startIndex);
@@ -159,7 +185,8 @@ class JobOutput extends Component {
                   ref={this.listRef}
                   width={width}
                   height={height}
-                  rowHeight={25}
+                  deferredMeasurementCache={this.cache}
+                  rowHeight={this.cache.rowHeight}
                   rowRenderer={this.renderRow}
                   rowCount={results.length}
                   overscanRowCount={50}
