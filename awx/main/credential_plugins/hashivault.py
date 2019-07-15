@@ -33,13 +33,8 @@ base_inputs = {
         'multiline': True,
         'help_text': _('The CA certificate used to verify the SSL certificate of the Vault server')
     }],
-    'metadata': [{
-        'id': 'secret_path',
-        'label': _('Path to Secret'),
-        'type': 'string',
-        'help_text': _('The path to the secret e.g., /some-engine/some-secret/'),
-    }],
-    'required': ['url', 'token', 'secret_path'],
+    'metadata': [],
+    'required': ['url', 'token'],
 }
 
 hashi_kv_inputs = copy.deepcopy(base_inputs)
@@ -51,6 +46,12 @@ hashi_kv_inputs['fields'].append({
     'default': 'v1',
 })
 hashi_kv_inputs['metadata'].extend([{
+    'id': 'secret_path',
+    'label': _('Path to Secret'),
+    'type': 'string',
+    'help_text': _("""The path to the secret e.g., /some-engine/some-secret/.
+        For v2 secrets, "data" should separate the secret engine and secret location e.g /some-engine/data/some-secret""")
+}, {
     'id': 'secret_key',
     'label': _('Key Name'),
     'type': 'string',
@@ -61,10 +62,15 @@ hashi_kv_inputs['metadata'].extend([{
     'type': 'string',
     'help_text': _('Used to specify a specific secret version (if left empty, the latest version will be used).'),
 }])
-hashi_kv_inputs['required'].extend(['api_version', 'secret_key'])
+hashi_kv_inputs['required'].extend(['api_version', 'secret_key', 'secret_path'])
 
 hashi_ssh_inputs = copy.deepcopy(base_inputs)
 hashi_ssh_inputs['metadata'] = [{
+    'id': 'secret_path',
+    'label': _('Path to Secret'),
+    'type': 'string',
+    'help_text': _('The path to the secret e.g., /some-engine/some-secret/')
+}, {
     'id': 'public_key',
     'label': _('Unsigned Public Key'),
     'type': 'string',
@@ -80,7 +86,7 @@ hashi_ssh_inputs['metadata'] = [{
     'type': 'string',
     'help_text': _('Valid principals (either usernames or hostnames) that the certificate should be signed for.'),
 }]
-hashi_ssh_inputs['required'].extend(['public_key', 'role'])
+hashi_ssh_inputs['required'].extend(['public_key', 'role', 'secret_path'])
 
 
 def kv_backend(**kwargs):
@@ -98,27 +104,30 @@ def kv_backend(**kwargs):
     sess = requests.Session()
     sess.headers['Authorization'] = 'Bearer {}'.format(token)
 
+    request_url = '/'.join([url, secret_path]).rstrip('/')
     if api_version == 'v2':
         if kwargs.get('secret_version'):
             request_kwargs['params'] = {'version': kwargs['secret_version']}
-        try:
-            mount_point, *path = pathlib.Path(secret_path.lstrip(os.sep)).parts
-            '/'.join(path) 
-        except Exception:
-            mount_point, path = secret_path, []
-        # https://www.vaultproject.io/api/secret/kv/kv-v2.html#read-secret-version
-        request_url = '/'.join([url, mount_point, 'data'] + path).rstrip('/')
-        response = sess.get(request_url, **request_kwargs)
+        if 'data' not in secret_path.split('/'):
+            # The secret engine (mount point) must be separated from the secret
+            # location using a 'data' path part. If the given path doesn't have
+            # this separator, we assume that just the first part of the path is
+            # the mount point.
+            try:
+                mount_point, *path = pathlib.Path(secret_path.lstrip(os.sep)).parts
+                '/'.join(path)
+            except Exception:
+                mount_point, path = secret_path, []
+            # https://www.vaultproject.io/api/secret/kv/kv-v2.html#read-secret-version
+            request_url = '/'.join([url, mount_point, 'data'] + path).rstrip('/')
 
-        response.raise_for_status()
-        json = response.json()['data']
-    else:
-        request_url = '/'.join([url, secret_path]).rstrip('/')
-        response = sess.get(request_url, **request_kwargs)
+    response = sess.get(request_url, **request_kwargs)
+    response.raise_for_status()
+    json = response.json()
 
-        response.raise_for_status()
-        json = response.json()
-
+    if api_version == 'v2':
+        json = json['data']
+ 
     if secret_key:
         try:
             return json['data'][secret_key]
