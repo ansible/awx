@@ -363,7 +363,7 @@ export default ['$compile', 'Attr', 'Icon',
                     innerTable += `</div>`;
                 }
 
-                innerTable += `<div class='d-flex h-100'>`;
+                innerTable += `<div class='d-flex h-100' style='min-width: 0;'>`;
 
                 if (list.index) {
                     innerTable += "<div class=\"d-none d-sm-flex index-column List-tableCell\">{{ $index + ((" + list.iterator + "_page - 1) * " + list.iterator + "_page_size) + 1 }}.</div>\n";

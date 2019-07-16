@@ -71,7 +71,6 @@ export default ['i18n', function(i18n) {
                 columnClass: 'col-sm-4',
                 dataHostId: "{{ host.id }}",
                 dataType: "host",
-                class: 'InventoryManage-breakWord'
             },
             inventory: {
                 label: i18n._('Inventory'),

@@ -66,16 +66,24 @@ export default ['i18n', function(i18n) {
                 label: i18n._('Hosts'),
                 uiSref: "inventories.edit.hosts.edit({host_id: nested_host.id})",
                 ngClass: "{ 'host-disabled-label': !nested_host.enabled }",
-                columnClass: 'col-lg-6 col-md-8 col-sm-8 col-xs-7',
+                columnClass: 'col-lg-4 col-md-8 col-sm-8 col-xs-7',
                 dataHostId: "{{ nested_host.id }}",
                 dataType: "nested_host",
-                class: 'InventoryManage-breakWord'
-            }
+            },
+            description: {
+                label: i18n._('Description'),
+                columnClass: 'd-none d-lg-flex col-lg-4',
+                template: `
+                    <div class="d-inline-block text-truncate">
+                        {{ nested_host.description }}
+                    </div>
+                `
+            },
         },
 
         fieldActions: {
 
-            columnClass: 'col-lg-6 col-md-4 col-sm-4 col-xs-5 text-right',
+            columnClass: 'col-lg-4 col-md-4 col-sm-4 col-xs-5 text-right',
             edit: {
                 ngClick: "editHost(nested_host.id)",
                 icon: 'icon-edit',
