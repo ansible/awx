@@ -146,7 +146,7 @@ CMD ["/bin/bash"]
 RUN for dir in /var/lib/awx/ /var/log/tower/ /projects /.ansible /var/log/nginx /var/lib/nginx /.local; \
   do mkdir -p $dir; chmod -R g+rwx $dir; chgrp -R root $dir; done
 
-RUN for file in /etc/passwd /etc/supervisord.conf \
+RUN for file in /etc/passwd /etc/nginx/nginx.key /etc/supervisord.conf \
   /venv/awx/lib/python3.6/site-packages/awx.egg-link /var/run/nginx.pid; \
   do touch $file; chmod -R g+rwx $file; chgrp -R root $file; done
 
