@@ -37,7 +37,7 @@ base_inputs = {
         'id': 'secret_path',
         'label': _('Path to Secret'),
         'type': 'string',
-        'help_text': _('The path to the secret e.g., /some-engine/some-secret/'),
+        'help_text': _('The path to the secret stored in the secret backend e.g, /some/secret/')
     }],
     'required': ['url', 'token', 'secret_path'],
 }
@@ -50,7 +50,12 @@ hashi_kv_inputs['fields'].append({
     'help_text': _('API v1 is for static key/value lookups.  API v2 is for versioned key/value lookups.'),
     'default': 'v1',
 })
-hashi_kv_inputs['metadata'].extend([{
+hashi_kv_inputs['metadata'] = [{
+    'id': 'secret_backend',
+    'label': _('Name of Secret Backend'),
+    'type': 'string',
+    'help_text': _('The name of the kv secret backend (if left empty, the first segment of the secret path will be used).')
+}] + hashi_kv_inputs['metadata'] + [{
     'id': 'secret_key',
     'label': _('Key Name'),
     'type': 'string',
@@ -60,7 +65,7 @@ hashi_kv_inputs['metadata'].extend([{
     'label': _('Secret Version (v2 only)'),
     'type': 'string',
     'help_text': _('Used to specify a specific secret version (if left empty, the latest version will be used).'),
-}])
+}]
 hashi_kv_inputs['required'].extend(['api_version', 'secret_key'])
 
 hashi_ssh_inputs = copy.deepcopy(base_inputs)
@@ -85,8 +90,9 @@ hashi_ssh_inputs['required'].extend(['public_key', 'role'])
 
 def kv_backend(**kwargs):
     token = kwargs['token']
-    url = urljoin(kwargs['url'], 'v1')
+    url = kwargs['url']
     secret_path = kwargs['secret_path']
+    secret_backend = kwargs.get('secret_backend', None)
     secret_key = kwargs.get('secret_key', None)
     cacert = kwargs.get('cacert', None)
     api_version = kwargs['api_version']
@@ -101,23 +107,29 @@ def kv_backend(**kwargs):
     if api_version == 'v2':
         if kwargs.get('secret_version'):
             request_kwargs['params'] = {'version': kwargs['secret_version']}
-        try:
-            mount_point, *path = pathlib.Path(secret_path.lstrip(os.sep)).parts
-            '/'.join(path) 
-        except Exception:
-            mount_point, path = secret_path, []
-        # https://www.vaultproject.io/api/secret/kv/kv-v2.html#read-secret-version
-        request_url = '/'.join([url, mount_point, 'data'] + path).rstrip('/')
-        response = sess.get(request_url, **request_kwargs)
-
-        response.raise_for_status()
-        json = response.json()['data']
+        if secret_backend:
+            path_segments = [secret_backend, 'data', secret_path]
+        else:
+            try:
+                mount_point, *path = pathlib.Path(secret_path.lstrip(os.sep)).parts
+                '/'.join(path)
+            except Exception:
+                mount_point, path = secret_path, []
+            # https://www.vaultproject.io/api/secret/kv/kv-v2.html#read-secret-version
+            path_segments = [mount_point, 'data'] + path
     else:
-        request_url = '/'.join([url, secret_path]).rstrip('/')
-        response = sess.get(request_url, **request_kwargs)
+        if secret_backend:
+            path_segments = [secret_backend, secret_path]
+        else:
+            path_segments = [secret_path]
 
-        response.raise_for_status()
-        json = response.json()
+    request_url = urljoin(url, '/'.join(['v1'] + path_segments)).rstrip('/')
+    response = sess.get(request_url, **request_kwargs)
+    response.raise_for_status()
+
+    json = response.json()
+    if api_version == 'v2':
+        json = json['data']
 
     if secret_key:
         try:
