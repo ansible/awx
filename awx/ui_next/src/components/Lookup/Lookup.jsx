@@ -194,9 +194,7 @@ class Lookup extends React.Component {
                 onSelect={() => this.toggleSelected(item)}
               />
             )}
-            renderToolbar={props => (
-              <DataListToolbar {...props} alignToolbarLeft />
-            )}
+            renderToolbar={props => <DataListToolbar {...props} fillWidth />}
             showPageSizeOptions={false}
           />
           {lookupSelectedItems.length > 0 && (
