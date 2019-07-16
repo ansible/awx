@@ -106,6 +106,14 @@ RUN cd /tmp && VENV_BASE="/venv" make requirements_dev
 RUN npm install -g n
 RUN n 10.15.0
 
+# Install a newer SQLite to make Django happy (centos7 has a really old one,
+# and we can probably stop doing this in centos8)
+RUN curl -O "https://sqlite.org/2019/sqlite-autoconf-3290000.tar.gz"
+RUN tar zxvf sqlite-autoconf-3290000.tar.gz
+RUN cd sqlite-autoconf-3290000 && ./configure && make && make install
+RUN mv -f /usr/local/lib/libsqlite3.so.0 /lib64/
+RUN mv -f /usr/local/lib/libsqlite3.so.0.8.6 /lib64/
+
 RUN yum -y remove cyrus-sasl-devel \
   gcc \
   gcc-c++ \
