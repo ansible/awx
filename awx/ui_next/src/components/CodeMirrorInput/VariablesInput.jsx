@@ -18,6 +18,10 @@ const SmallButton = styled(Button)`
   font-size: var(--pf-global--FontSize--xs);
 `;
 
+const SplitItemRight = styled(SplitItem)`
+  margin-bottom: 5px;
+`;
+
 function VariablesInput(props) {
   const { id, label, readOnly, rows, error, onError, className } = props;
   /* eslint-disable react/destructuring-assignment */
@@ -44,7 +48,7 @@ function VariablesInput(props) {
             {label}
           </label>
         </SplitItem>
-        <SplitItem>
+        <SplitItemRight>
           <ButtonGroup>
             <SmallButton
               onClick={() => {
@@ -79,7 +83,7 @@ function VariablesInput(props) {
               JSON
             </SmallButton>
           </ButtonGroup>
-        </SplitItem>
+        </SplitItemRight>
       </Split>
       <CodeMirrorInput
         mode={mode}

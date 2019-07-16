@@ -6,13 +6,19 @@ import { CardBody, Button } from '@patternfly/react-core';
 import styled from 'styled-components';
 import { DetailList, Detail } from '@components/DetailList';
 import { ChipGroup, Chip, CredentialChip } from '@components/Chip';
-import { VariablesInput } from '@components/CodeMirrorInput';
+import { VariablesInput as _VariablesInput } from '@components/CodeMirrorInput';
 import { toTitleCase } from '@util/strings';
 import { Job } from '../../../types';
 
 const ActionButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
+`;
+
+const VariablesInput = styled(_VariablesInput)`
+  .pf-c-form__label {
+    --pf-c-form__label--FontWeight: var(--pf-global--FontWeight--bold);
+  }
 `;
 
 const VERBOSITY = {
@@ -128,14 +134,16 @@ function JobDetail({ job, i18n }) {
           label={i18n._(t`Variables`)}
         />
       )}
-      <VariablesInput
-        css="margin: 20px 0"
-        id="job-artifacts"
-        readOnly
-        value={job.artifacts ? JSON.stringify(job.artifacts) : '{}'}
-        rows={4}
-        label={i18n._(t`Artifacts`)}
-      />
+      {job.artifacts && (
+        <VariablesInput
+          css="margin: 20px 0"
+          id="job-artifacts"
+          readOnly
+          value={JSON.stringify(job.artifacts)}
+          rows={4}
+          label={i18n._(t`Artifacts`)}
+        />
+      )}
       <ActionButtonWrapper>
         <Button
           variant="secondary"
