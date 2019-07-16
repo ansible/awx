@@ -1,9 +1,11 @@
-FROM fedora:27
+FROM centos:7
 
 ARG UID=0
 
+RUN yum -y update && yum -y install epel-release
+
 # sync with installer/roles/image_build/templates/Dockerfile.j2
-RUN dnf -y install acl \
+RUN yum -y install acl \
   alsa-lib \
   ansible \
   atk \
@@ -12,15 +14,12 @@ RUN dnf -y install acl \
   curl \
   cyrus-sasl \
   cyrus-sasl-devel \
-  findutils \
   gcc \
   gcc-c++ \
   GConf2 \
   git \
-  glibc-locale-source \
   gtk3 \
   ipa-gothic-fonts \
-  iproute \
   krb5-devel \
   krb5-libs \
   krb5-workstation \
@@ -53,9 +52,10 @@ RUN dnf -y install acl \
   python-psutil \
   python-psycopg2 \
   python-setuptools \
-  python3-devel \
-  python3-setuptools \
+  python36-devel \
+  python36-setuptools \
   rsync \
+  setools-libs \
   subversion \
   sudo \
   swig \
@@ -105,6 +105,14 @@ RUN cd /tmp && VENV_BASE="/venv" make requirements_dev
 # Use the distro provided npm to bootstrap our required version of node
 RUN npm install -g n
 RUN n 10.15.0
+
+# Install a newer SQLite to make Django happy (centos7 has a really old one,
+# and we can probably stop doing this in centos8)
+RUN curl -O "https://sqlite.org/2019/sqlite-autoconf-3290000.tar.gz"
+RUN tar zxvf sqlite-autoconf-3290000.tar.gz
+RUN cd sqlite-autoconf-3290000 && ./configure && make && make install
+RUN mv -f /usr/local/lib/libsqlite3.so.0 /lib64/
+RUN mv -f /usr/local/lib/libsqlite3.so.0.8.6 /lib64/
 
 RUN yum -y remove cyrus-sasl-devel \
   gcc \
