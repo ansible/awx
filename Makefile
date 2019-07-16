@@ -15,7 +15,7 @@ VERSION := $(shell cat VERSION)
 
 # NOTE: This defaults the container image version to the branch that's active
 COMPOSE_TAG ?= $(GIT_BRANCH)
-COMPOSE_HOST ?= $(shell hostname)
+COMPOSE_HOST ?= $(shell cat /etc/hostname)
 
 VENV_BASE ?= /venv
 SCL_PREFIX ?=
