@@ -4,8 +4,9 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import Breadcrumbs from '@components/Breadcrumbs/Breadcrumbs';
 import Job from './Job';
+import JobTypeRedirect from './JobTypeRedirect';
 import JobList from './JobList/JobList';
-import { JOB_TYPE_URLS } from './constants';
+import { JOB_TYPE_URL_SEGMENTS } from './constants';
 
 class Jobs extends Component {
   constructor(props) {
@@ -27,7 +28,7 @@ class Jobs extends Component {
       return;
     }
 
-    const type = JOB_TYPE_URLS[job.type];
+    const type = JOB_TYPE_URL_SEGMENTS[job.type];
     const breadcrumbConfig = {
       '/jobs': i18n._(t`Jobs`),
       [`/jobs/${type}/${job.id}`]: `${job.name}`,
@@ -58,6 +59,18 @@ class Jobs extends Component {
             )}
           />
           <Route
+            path={`${match.path}/:id/details`}
+            render={({ match: m }) => (
+              <JobTypeRedirect id={m.params.id} path={m.path} view="details" />
+            )}
+          />
+          <Route
+            path={`${match.path}/:id/output`}
+            render={({ match: m }) => (
+              <JobTypeRedirect id={m.params.id} path={m.path} view="output" />
+            )}
+          />
+          <Route
             path={`${match.path}/:type/:id`}
             render={() => (
               <Job
@@ -65,6 +78,12 @@ class Jobs extends Component {
                 location={location}
                 setBreadcrumb={this.setBreadcrumbConfig}
               />
+            )}
+          />
+          <Route
+            path={`${match.path}/:id`}
+            render={({ match: m }) => (
+              <JobTypeRedirect id={m.params.id} path={m.path} />
             )}
           />
         </Switch>

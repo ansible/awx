@@ -15,6 +15,7 @@ import RoutedTabs from '@components/RoutedTabs';
 
 import JobDetail from './JobDetail';
 import JobOutput from './JobOutput';
+import { JOB_TYPE_URL_SEGMENTS } from './constants';
 
 class Job extends Component {
   constructor(props) {
@@ -59,9 +60,13 @@ class Job extends Component {
   }
 
   render() {
-    const { history, match, i18n } = this.props;
+    const { history, match, i18n, lookup } = this.props;
 
     const { job, contentError, hasContentLoading, isInitialized } = this.state;
+    let jobType;
+    if (job) {
+      jobType = JOB_TYPE_URL_SEGMENTS[job.type];
+    }
 
     const tabsArray = [
       { name: i18n._(t`Details`), link: `${match.url}/details`, id: 0 },
@@ -97,6 +102,19 @@ class Job extends Component {
             <ContentError error={contentError} />
           </Card>
         </PageSection>
+      );
+    }
+
+    if (lookup && job) {
+      return (
+        <Switch>
+          <Redirect from="jobs/:id" to={`/jobs/${jobType}/:id/details`} />
+          <Redirect
+            from="jobs/:id/details"
+            to={`/jobs/${jobType}/:id/details`}
+          />
+          <Redirect from="jobs/:id/output" to={`/jobs/${jobType}/:id/output`} />
+        </Switch>
       );
     }
 
