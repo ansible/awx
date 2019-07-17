@@ -5,11 +5,12 @@ import { SearchIcon } from '@patternfly/react-icons';
 import {
   Button,
   ButtonVariant,
-  InputGroup,
+  InputGroup as PFInputGroup,
   Modal,
 } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
+import styled from 'styled-components';
 
 import PaginatedDataList from '../PaginatedDataList';
 import DataListToolbar from '../DataListToolbar';
@@ -17,6 +18,13 @@ import CheckboxListItem from '../CheckboxListItem';
 import SelectedList from '../SelectedList';
 import { ChipGroup, Chip } from '../Chip';
 import { getQSConfig, parseNamespacedQueryString } from '../../util/qs';
+
+const InputGroup = styled(PFInputGroup)`
+  ${props => props.multiple && (`
+    --pf-c-form-control--Height: 90px;
+    overflow-y: auto;
+  `)}
+`;
 
 class Lookup extends React.Component {
   constructor(props) {
@@ -145,7 +153,7 @@ class Lookup extends React.Component {
 
     return (
       <Fragment>
-        <InputGroup className="awx-lookup">
+        <InputGroup>
           <Button
             aria-label="Search"
             id={id}
@@ -220,12 +228,14 @@ Lookup.propTypes = {
   onLookupSave: PropTypes.func.isRequired,
   value: PropTypes.arrayOf(PropTypes.object).isRequired,
   sortedColumnKey: PropTypes.string.isRequired,
+  multiple: PropTypes.bool,
 };
 
 Lookup.defaultProps = {
   id: 'lookup-search',
   lookupHeader: null,
   name: null,
+  multiple: false,
 };
 
 export { Lookup as _Lookup };

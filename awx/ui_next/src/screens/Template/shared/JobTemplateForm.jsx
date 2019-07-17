@@ -10,6 +10,7 @@ import AnsibleSelect from '@components/AnsibleSelect';
 import FormActionGroup from '@components/FormActionGroup';
 import FormField from '@components/FormField';
 import FormRow from '@components/FormRow';
+import Lookup from '@components/Lookup';
 import { required } from '@util/validators';
 import styled from 'styled-components';
 import { JobTemplate } from '@types';
@@ -105,7 +106,37 @@ class JobTemplateForm extends Component {
                   </FormGroup>
                 )}
               />
-              <FormField
+              <Field
+                name="inventory"
+                validate={required(null, i18n)}
+                render={({ field, form }) => (
+                  <FormGroup
+                    fieldId="template-inventory"
+                    helperTextInvalid={form.errors.inventory}
+                    isRequired
+                    label={i18n._(t`Inventory`)}
+                  >
+                    <Lookup
+                      id="template-inventory"
+                      lookupHeader={i18n._(t`Inventory`)}
+                      name="inventory"
+                      value={[field.value]}
+                      onLookupSave={(value) => {console.log(value)}}
+                      getItems={() => ({
+                        data: {
+                          results: [{id: 1, name: 'foo'}],
+                          count: 1
+                        }
+                      })}
+                      columns={[
+                        { name: i18n._(t`Name`), key: 'name', isSortable: true},
+                      ]}
+                      sortedColumnsKey="name"
+                    />
+                  </FormGroup>
+                )}
+              />
+              {/* <FormField
                 id="template-inventory"
                 name="inventory"
                 type="number"
@@ -114,7 +145,7 @@ class JobTemplateForm extends Component {
                 you want this job to manage.`)}
                 isRequired
                 validate={required(null, i18n)}
-              />
+              /> */}
               <FormField
                 id="template-project"
                 name="project"

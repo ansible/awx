@@ -5,12 +5,12 @@ import { t } from '@lingui/macro';
 import { FormGroup, Tooltip } from '@patternfly/react-core';
 import { QuestionCircleIcon } from '@patternfly/react-icons';
 
-import { InstanceGroupsAPI } from '@api';
+import { InventoriesAPI } from '@api';
 import Lookup from '@components/Lookup';
 
-const getInstanceGroups = async params => InstanceGroupsAPI.read(params);
+const getInventories = async params => InventoriesAPI.read(params);
 
-class InstanceGroupsLookup extends React.Component {
+class InventoriesLookup extends React.Component {
   render() {
     const { value, tooltip, onChange, i18n } = this.props;
 
@@ -18,7 +18,7 @@ class InstanceGroupsLookup extends React.Component {
       <FormGroup
         label={
           <Fragment>
-            {i18n._(t`Instance Groups`)}{' '}
+            {i18n._(t`Inventories`)}{' '}
             {tooltip && (
               <Tooltip position="right" content={tooltip}>
                 <QuestionCircleIcon />
@@ -26,15 +26,15 @@ class InstanceGroupsLookup extends React.Component {
             )}
           </Fragment>
         }
-        fieldId="org-instance-groups"
+        fieldId="inventories-lookup"
       >
         <Lookup
-          id="org-instance-groups"
-          lookupHeader={i18n._(t`Instance Groups`)}
-          name="instanceGroups"
+          id="inventories-lookup"
+          lookupHeader={i18n._(t`Inventories`)}
+          name="inventories"
           value={value}
           onLookupSave={onChange}
-          getItems={getInstanceGroups}
+          getItems={getInventories}
           multiple
           columns={[
             { name: i18n._(t`Name`), key: 'name', isSortable: true },
@@ -58,14 +58,14 @@ class InstanceGroupsLookup extends React.Component {
   }
 }
 
-InstanceGroupsLookup.propTypes = {
+InventoriesLookup.propTypes = {
   value: PropTypes.arrayOf(PropTypes.object).isRequired,
   tooltip: PropTypes.string,
   onChange: PropTypes.func.isRequired,
 };
 
-InstanceGroupsLookup.defaultProps = {
+InventoriesLookup.defaultProps = {
   tooltip: '',
 };
 
-export default withI18n()(InstanceGroupsLookup);
+export default withI18n()(InventoriesLookup);
