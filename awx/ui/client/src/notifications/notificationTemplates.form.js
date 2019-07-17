@@ -588,7 +588,7 @@ export default ['i18n', function(i18n) {
               class: 'Form-formGroup--fullWidth',
               default: false,
             },
-            start_message: {
+            started_message: {
                 label: i18n._('Start Message'),
                 class: 'Form-formGroup--fullWidth',
                 type: 'syntax_highlight',
@@ -597,7 +597,7 @@ export default ['i18n', function(i18n) {
                 ngShow: "customize_messages",
                 rows: 2,
             },
-            start_body: {
+            started_body: {
                 label: i18n._('Start Expanded Message'),
                 class: 'Form-formGroup--fullWidth',
                 type: 'syntax_highlight',

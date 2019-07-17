@@ -5,11 +5,11 @@ export default [function () {
               return null;
             }
             return {
-                start: {
-                    message: $scope.start_message === defaultMessages.start.message
-                        ? null : $scope.start_message,
-                    body: $scope.start_body === defaultMessages.start.body
-                        ? null : $scope.start_body,
+                started: {
+                    message: $scope.started_message === defaultMessages.started.message
+                        ? null : $scope.started_message,
+                    body: $scope.started_body === defaultMessages.started.body
+                        ? null : $scope.started_body,
                 },
                 success: {
                     message: $scope.success_message === defaultMessages.success.message
@@ -26,8 +26,8 @@ export default [function () {
             };
         },
         setMessagesOnScope: function ($scope, messages, defaultMessages) {
-          $scope.start_message = defaultMessages.start.message;
-          $scope.start_body = defaultMessages.start.body;
+          $scope.started_message = defaultMessages.started.message;
+          $scope.started_body = defaultMessages.started.body;
           $scope.success_message = defaultMessages.success.message;
           $scope.success_body = defaultMessages.success.body;
           $scope.error_message = defaultMessages.error.message;
@@ -36,13 +36,13 @@ export default [function () {
             return;
           }
           let customized = false;
-          if (messages.start.message) {
+          if (messages.started.message) {
             customized = true;
-            $scope.start_message = messages.start.message;
+            $scope.started_message = messages.started.message;
           }
-          if (messages.start.body) {
+          if (messages.started.body) {
             customized = true;
-            $scope.start_body = messages.start.body;
+            $scope.started_body = messages.started.body;
           }
           if (messages.success.message) {
             customized = true;
