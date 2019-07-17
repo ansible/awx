@@ -262,6 +262,7 @@ def test_inventory_update_injected_content(this_kind, script_or_plugin, inventor
         """
         private_data_dir = envvars.pop('AWX_PRIVATE_DATA_DIR')
         assert envvars.pop('ANSIBLE_INVENTORY_ENABLED') == ('auto' if use_plugin else 'script')
+        assert envvars.pop('ANSIBLE_COLLECTIONS_PATHS') == os.pathsep.join(settings.AWX_ANSIBLE_COLLECTIONS_PATHS)
         set_files = bool(os.getenv("MAKE_INVENTORY_REFERENCE_FILES", 'false').lower()[0] not in ['f', '0'])
         env, content = read_content(private_data_dir, envvars, inventory_update)
         base_dir = os.path.join(DATA, script_or_plugin)
