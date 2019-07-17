@@ -4687,10 +4687,10 @@ class ActivityStreamSerializer(BaseSerializer):
         if fk not in summary_keys:
             return
         related_obj = getattr(obj, summary_keys[fk], None)
-        summary_fields[get_type_for_model(related_obj)] = []
         item = {}
         fields = SUMMARIZABLE_FK_FIELDS[summary_keys[fk]]
         if related_obj is not None:
+            summary_fields[get_type_for_model(related_obj)] = []
             for field in fields:
                 fval = getattr(related_obj, field, None)
                 if fval is not None:
