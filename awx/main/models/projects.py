@@ -106,6 +106,13 @@ class ProjectOptions(models.Model):
         verbose_name=_('SCM Branch'),
         help_text=_('Specific branch, tag or commit to checkout.'),
     )
+    scm_refspec = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+        verbose_name=_('SCM refspec'),
+        help_text=_('For git projects, an additional refspec to fetch.'),
+    )
     scm_clean = models.BooleanField(
         default=False,
         help_text=_('Discard any local changes before syncing the project.'),
@@ -241,7 +248,7 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
     SOFT_UNIQUE_TOGETHER = [('polymorphic_ctype', 'name', 'organization')]
     FIELDS_TO_PRESERVE_AT_COPY = ['labels', 'instance_groups', 'credentials']
     FIELDS_TO_DISCARD_AT_COPY = ['local_path']
-    FIELDS_TRIGGER_UPDATE = frozenset(['scm_url', 'scm_branch', 'scm_type'])
+    FIELDS_TRIGGER_UPDATE = frozenset(['scm_url', 'scm_branch', 'scm_type', 'scm_refspec'])
 
     class Meta:
         app_label = 'main'

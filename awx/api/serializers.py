@@ -1285,7 +1285,7 @@ class OrganizationSerializer(BaseSerializer):
 class ProjectOptionsSerializer(BaseSerializer):
 
     class Meta:
-        fields = ('*', 'local_path', 'scm_type', 'scm_url', 'scm_branch',
+        fields = ('*', 'local_path', 'scm_type', 'scm_url', 'scm_branch', 'scm_refspec',
                   'scm_clean', 'scm_delete_on_update', 'credential', 'timeout', 'scm_revision')
 
     def get_related(self, obj):
@@ -1311,6 +1311,8 @@ class ProjectOptionsSerializer(BaseSerializer):
             attrs.pop('local_path', None)
         if 'local_path' in attrs and attrs['local_path'] not in valid_local_paths:
             errors['local_path'] = _('This path is already being used by another manual project.')
+        if attrs.get('scm_refspec') and scm_type != 'git':
+            errors['scm_refspec'] = _('SCM refspec can only be used with git projects.')
 
         if errors:
             raise serializers.ValidationError(errors)

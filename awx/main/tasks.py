@@ -1667,7 +1667,7 @@ class RunJob(BaseTask):
             os.chmod(galaxy_install_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
             project_update_task = local_project_sync._get_task_class()
             try:
-                sync_task = project_update_task(roles_destination=galaxy_install_path)
+                sync_task = project_update_task(job_private_data_dir=private_data_dir, roles_destination=galaxy_install_path)
                 sync_task.run(local_project_sync.id)
                 local_project_sync.refresh_from_db()
                 job = self.update_model(job.pk, scm_revision=local_project_sync.scm_revision)
@@ -1678,6 +1678,9 @@ class RunJob(BaseTask):
                                             job_explanation=('Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' %
                                                              ('project_update', local_project_sync.name, local_project_sync.id)))
                     raise
+                job.refresh_from_db()
+                if job.cancel_flag:
+                    return
         else:
             # Case where a local sync is not needed, meaning that local tree is
             # up-to-date with project, job is running project current version
@@ -1742,13 +1745,14 @@ class RunProjectUpdate(BaseTask):
     @property
     def proot_show_paths(self):
         show_paths = [settings.PROJECTS_ROOT]
-        if self.roles_destination:
-            show_paths.append(self.roles_destination)
+        if self.job_private_data_dir:
+            show_paths.append(self.job_private_data_dir)
         return show_paths
 
-    def __init__(self, *args, roles_destination=None, **kwargs):
+    def __init__(self, *args, job_private_data_dir=None, roles_destination=None, **kwargs):
         super(RunProjectUpdate, self).__init__(*args, **kwargs)
         self.playbook_new_revision = None
+        self.job_private_data_dir = job_private_data_dir
         self.roles_destination = roles_destination
 
     def event_handler(self, event_data):
@@ -1891,11 +1895,12 @@ class RunProjectUpdate(BaseTask):
             'scm_full_checkout': True if project_update.job_type == 'run' else False,
             'roles_enabled': getattr(settings, 'AWX_ROLES_ENABLED', True) if project_update.job_type != 'check' else False
         })
-        # TODO: apply custom refspec from user for PR refs and the like
-        if project_update.project.allow_override:
+        # apply custom refspec from user for PR refs and the like
+        if project_update.scm_refspec:
+            extra_vars['scm_refspec'] = project_update.scm_refspec
+        elif project_update.project.allow_override:
             # If branch is override-able, do extra fetch for all branches
-            # coming feature
-            extra_vars['git_refspec'] = 'refs/heads/*:refs/remotes/origin/*'
+            extra_vars['scm_refspec'] = 'refs/heads/*:refs/remotes/origin/*'
         if self.roles_destination:
             extra_vars['roles_destination'] = self.roles_destination
         self._write_extra_vars_file(private_data_dir, extra_vars)
