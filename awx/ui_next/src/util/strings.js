@@ -14,9 +14,13 @@ export function ucFirst(str) {
   return `${str[0].toUpperCase()}${str.substr(1)}`;
 }
 
-export const toTitleCase = string =>
-  string
+export const toTitleCase = string => {
+  if (!string) {
+    return '';
+  }
+  return string
     .toLowerCase()
     .split('_')
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
+};

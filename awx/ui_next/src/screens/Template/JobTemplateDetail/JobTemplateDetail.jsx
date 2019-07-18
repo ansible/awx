@@ -15,10 +15,9 @@ import { t } from '@lingui/macro';
 import ContentError from '@components/ContentError';
 import LaunchButton from '@components/LaunchButton';
 import ContentLoading from '@components/ContentLoading';
-import { ChipGroup, Chip } from '@components/Chip';
+import { ChipGroup, Chip, CredentialChip } from '@components/Chip';
 import { DetailList, Detail } from '@components/DetailList';
 import { JobTemplatesAPI } from '@api';
-import { toTitleCase } from '@util/strings';
 
 const ButtonGroup = styled.div`
   display: flex;
@@ -103,9 +102,6 @@ class JobTemplateDetail extends Component {
     );
     const generateCallBackUrl = `${window.location.origin + url}callback/`;
     const isInitialized = !hasTemplateLoading && !hasContentLoading;
-
-    const credentialType = c =>
-      c === 'aws' || c === 'ssh' ? c.toUpperCase() : toTitleCase(c);
 
     const renderOptionsField =
       become_enabled || host_config_key || allow_simultaneous || use_fact_cache;
@@ -206,13 +202,7 @@ class JobTemplateDetail extends Component {
                   value={
                     <ChipGroup showOverflowAfter={5}>
                       {summary_fields.credentials.map(c => (
-                        <Chip key={c.id} isReadOnly>
-                          <strong className="credential">
-                            {c.kind ? credentialType(c.kind) : i18n._(t`Cloud`)}
-                            :
-                          </strong>
-                          {` ${c.name}`}
-                        </Chip>
+                        <CredentialChip key={c.id} credential={c} isReadOnly />
                       ))}
                     </ChipGroup>
                   }

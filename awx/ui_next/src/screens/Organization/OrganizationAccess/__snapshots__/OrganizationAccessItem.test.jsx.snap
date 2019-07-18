@@ -377,9 +377,9 @@ exports[`<OrganizationAccessItem /> initially renders succesfully 1`] = `
                               "componentStyle": ComponentStyle {
                                 "componentId": "DetailList-sc-12g7m4-0",
                                 "isStatic": false,
-                                "lastClassName": "hndBXy",
+                                "lastClassName": "gmERnX",
                                 "rules": Array [
-                                  "display:grid;grid-gap:20px;",
+                                  "display:grid;grid-gap:20px;align-items:baseline;",
                                   [Function],
                                 ],
                               },
@@ -397,15 +397,15 @@ exports[`<OrganizationAccessItem /> initially renders succesfully 1`] = `
                           stacked={true}
                         >
                           <DetailList
-                            className="DetailList-sc-12g7m4-0 hndBXy"
+                            className="DetailList-sc-12g7m4-0 gmERnX"
                             stacked={true}
                           >
                             <TextList
-                              className="DetailList-sc-12g7m4-0 hndBXy"
+                              className="DetailList-sc-12g7m4-0 gmERnX"
                               component="dl"
                             >
                               <dl
-                                className="DetailList-sc-12g7m4-0 hndBXy"
+                                className="DetailList-sc-12g7m4-0 gmERnX"
                                 data-pf-content={true}
                               >
                                 <Detail
@@ -545,9 +545,9 @@ exports[`<OrganizationAccessItem /> initially renders succesfully 1`] = `
                               "componentStyle": ComponentStyle {
                                 "componentId": "DetailList-sc-12g7m4-0",
                                 "isStatic": false,
-                                "lastClassName": "hndBXy",
+                                "lastClassName": "gmERnX",
                                 "rules": Array [
-                                  "display:grid;grid-gap:20px;",
+                                  "display:grid;grid-gap:20px;align-items:baseline;",
                                   [Function],
                                 ],
                               },
@@ -565,15 +565,15 @@ exports[`<OrganizationAccessItem /> initially renders succesfully 1`] = `
                           stacked={true}
                         >
                           <DetailList
-                            className="DetailList-sc-12g7m4-0 hndBXy"
+                            className="DetailList-sc-12g7m4-0 gmERnX"
                             stacked={true}
                           >
                             <TextList
-                              className="DetailList-sc-12g7m4-0 hndBXy"
+                              className="DetailList-sc-12g7m4-0 gmERnX"
                               component="dl"
                             >
                               <dl
-                                className="DetailList-sc-12g7m4-0 hndBXy"
+                                className="DetailList-sc-12g7m4-0 gmERnX"
                                 data-pf-content={true}
                               >
                                 <Detail

@@ -21,3 +21,17 @@ export function jsonToYaml(jsonString) {
   }
   return yaml.safeDump(value);
 }
+
+export function isJson(jsonString) {
+  if (typeof jsonString !== 'string') {
+    return false;
+  }
+  let value;
+  try {
+    value = JSON.parse(jsonString);
+  } catch (e) {
+    return false;
+  }
+
+  return typeof value === 'object' && value !== null;
+}

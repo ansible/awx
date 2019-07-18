@@ -11,6 +11,7 @@ const DetailList = ({ children, stacked, ...props }) => (
 export default styled(DetailList)`
   display: grid;
   grid-gap: 20px;
+  align-items: baseline;
   ${props =>
     props.stacked
       ? `

@@ -8,7 +8,6 @@ import {
   CardHeader as PFCardHeader,
   PageSection,
 } from '@patternfly/react-core';
-
 import { JobsAPI } from '@api';
 import ContentError from '@components/ContentError';
 import CardCloseButton from '@components/CardCloseButton';
@@ -16,6 +15,7 @@ import RoutedTabs from '@components/RoutedTabs';
 
 import JobDetail from './JobDetail';
 import JobOutput from './JobOutput';
+import { JOB_TYPE_URL_SEGMENTS } from './constants';
 
 class Job extends Component {
   constructor(props) {
@@ -49,7 +49,7 @@ class Job extends Component {
 
     this.setState({ contentError: null, hasContentLoading: true });
     try {
-      const { data } = await JobsAPI.readDetail(id);
+      const { data } = await JobsAPI.readDetail(id, match.params.type);
       setBreadcrumb(data);
       this.setState({ job: data });
     } catch (err) {
@@ -60,9 +60,13 @@ class Job extends Component {
   }
 
   render() {
-    const { history, match, i18n } = this.props;
+    const { history, match, i18n, lookup } = this.props;
 
     const { job, contentError, hasContentLoading, isInitialized } = this.state;
+    let jobType;
+    if (job) {
+      jobType = JOB_TYPE_URL_SEGMENTS[job.type];
+    }
 
     const tabsArray = [
       { name: i18n._(t`Details`), link: `${match.url}/details`, id: 0 },
@@ -101,24 +105,41 @@ class Job extends Component {
       );
     }
 
+    if (lookup && job) {
+      return (
+        <Switch>
+          <Redirect from="jobs/:id" to={`/jobs/${jobType}/:id/details`} />
+          <Redirect
+            from="jobs/:id/details"
+            to={`/jobs/${jobType}/:id/details`}
+          />
+          <Redirect from="jobs/:id/output" to={`/jobs/${jobType}/:id/output`} />
+        </Switch>
+      );
+    }
+
     return (
       <PageSection>
         <Card>
           {cardHeader}
           <Switch>
-            <Redirect from="/jobs/:id" to="/jobs/:id/details" exact />
-            {job && (
+            <Redirect
+              from="/jobs/:type/:id"
+              to="/jobs/:type/:id/details"
+              exact
+            />
+            {job && [
               <Route
-                path="/jobs/:id/details"
-                render={() => <JobDetail match={match} job={job} />}
-              />
-            )}
-            {job && (
+                key="details"
+                path="/jobs/:type/:id/details"
+                render={() => <JobDetail type={match.params.type} job={job} />}
+              />,
               <Route
-                path="/jobs/:id/output"
-                render={() => <JobOutput match={match} job={job} />}
-              />
-            )}
+                key="output"
+                path="/jobs/:type/:id/output"
+                render={() => <JobOutput type={match.params.type} job={job} />}
+              />,
+            ]}
           </Switch>
         </Card>
       </PageSection>

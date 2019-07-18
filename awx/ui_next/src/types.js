@@ -65,8 +65,61 @@ export const QSConfig = shape({
 export const JobTemplate = shape({
   name: string.isRequired,
   description: string,
-  inventory: oneOfType([number, string]).isRequired,
+  inventory: number,
   job_type: oneOf(['run', 'check']),
-  playbook: string.isRequired,
-  project: oneOfType([number, string]).isRequired,
+  playbook: string,
+  project: number,
+});
+
+export const Project = shape({
+  id: number.isRequired,
+  name: string.isRequired,
+});
+
+export const Inventory = shape({
+  id: number.isRequired,
+  name: string.isRequired,
+});
+
+export const InstanceGroup = shape({
+  id: number.isRequired,
+  name: string.isRequired,
+});
+
+export const Label = shape({
+  id: number.isRequired,
+  name: string.isRequired,
+});
+
+export const Credential = shape({
+  id: number.isRequired,
+  name: string.isRequired,
+  cloud: bool,
+  kind: string,
+});
+
+export const Job = shape({
+  status: string,
+  started: string,
+  finished: string,
+  job_type: string,
+  summary_fields: shape({
+    job_template: JobTemplate,
+    project: Project,
+    inventory: Inventory,
+    instance_group: InstanceGroup,
+    credentials: arrayOf(Credential),
+    labels: shape({
+      count: number,
+      results: arrayOf(Label),
+    }),
+  }),
+  scm_revision: string,
+  limit: oneOfType([number, string]),
+  verbosity: number,
+  execution_mode: string,
+  job_slice_number: number,
+  job_slice_count: number,
+  extra_vars: string,
+  artifacts: shape({}),
 });

@@ -6,10 +6,10 @@ import {
   DataListItemCells,
   DataListCheck,
 } from '@patternfly/react-core';
-
 import DataListCell from '@components/DataListCell';
 import VerticalSeparator from '@components/VerticalSeparator';
 import { toTitleCase } from '@util/strings';
+import { JOB_TYPE_URL_SEGMENTS } from '../constants';
 
 class JobListItem extends Component {
   render() {
@@ -32,7 +32,9 @@ class JobListItem extends Component {
               <DataListCell key="divider">
                 <VerticalSeparator />
                 <span>
-                  <Link to={`/jobs/${job.id}`}>
+                  <Link
+                    to={`/jobs/${JOB_TYPE_URL_SEGMENTS[job.type]}/${job.id}`}
+                  >
                     <b>{job.name}</b>
                   </Link>
                 </span>

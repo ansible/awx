@@ -26,7 +26,9 @@ const DetailValue = styled(({ fullWidth, ...props }) => (
 `;
 
 const Detail = ({ label, value, fullWidth }) => {
-  if (!value) return null;
+  if (!value && typeof value !== 'number') {
+    return null;
+  }
   return (
     <Fragment>
       <DetailName component={TextListItemVariants.dt} fullWidth={fullWidth}>
