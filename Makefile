@@ -101,7 +101,7 @@ clean: clean-ui clean-dist
 	rm -rf awx/job_status
 	rm -rf awx/job_output
 	rm -rf reports
-	rm -f awx/awx_test.sqlite3
+	rm -f awx/awx_test.sqlite3*
 	rm -rf requirements/vendor
 	rm -rf tmp
 	rm -rf $(I18N_FLAG_FILE)
