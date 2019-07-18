@@ -87,7 +87,7 @@ def test_notification_template_access_admin(role, organization_factory, notifica
     assert access.can_change(notification_template, {'organization': present_org.id})
     assert access.can_delete(notification_template)
 
-    nf = notification_template_factory("test-orphaned")
+    nf = notification_template_factory("test-orphaned").notification_template
     assert not access.can_read(nf)
     assert not access.can_change(nf, None)
     assert not access.can_delete(nf)
