@@ -532,8 +532,10 @@ class LDAPSingleOrganizationMapField(HybridDictField):
 
     admins = LDAPDNMapField(allow_null=True, required=False)
     users = LDAPDNMapField(allow_null=True, required=False)
+    auditors = LDAPDNMapField(allow_null=True, required=False)
     remove_admins = fields.BooleanField(required=False)
     remove_users = fields.BooleanField(required=False)
+    remove_auditors = fields.BooleanField(required=False)
 
     child = _Forbidden()
 
@@ -729,6 +731,8 @@ class SAMLOrgAttrField(HybridDictField):
     saml_attr = fields.CharField(required=False, allow_null=True)
     remove_admins = fields.BooleanField(required=False)
     saml_admin_attr = fields.CharField(required=False, allow_null=True)
+    remove_auditors = fields.BooleanField(required=False)
+    saml_auditor_attr = fields.CharField(required=False, allow_null=True)
 
     child = _Forbidden()
 

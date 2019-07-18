@@ -150,6 +150,7 @@ class TestSAMLAttr():
                 'attributes': {
                     'memberOf': ['Default1', 'Default2'],
                     'admins': ['Default3'],
+                    'auditors': ['Default4'],
                     'groups': ['Blue', 'Red'],
                     'User.email': ['cmeyers@redhat.com'],
                     'User.LastName': ['Meyers'],
@@ -178,6 +179,7 @@ class TestSAMLAttr():
             SOCIAL_AUTH_SAML_ORGANIZATION_ATTR = {
                 'saml_attr': 'memberOf',
                 'saml_admin_attr': 'admins',
+                'saml_auditor_attr': 'auditors',
                 'remove': True,
                 'remove_admins': True,
             }
