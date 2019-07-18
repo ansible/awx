@@ -327,35 +327,7 @@
                 <div class="WorkflowLegend-details">
                     <div class="WorkflowLegend-details--left">
                         <i ng-class="{{ keyClassList }}" class="fa fa-compass Key-menuIcon" ng-click="toggleKey()"></i>
-                        <ul ng-show="showKey" class="Key-list noselect">
-                            <li class="Key-listItem">
-                                <p class="Key-heading">{{strings.legend.KEY}}</p>
-                            </li>
-                            <li class="Key-listItem">
-                                <div class="Key-icon Key-icon--success"></div>
-                                <p class="Key-listItemContent">{{strings.legend.ON_SUCCESS}}</p>
-                            </li>
-                            <li class="Key-listItem">
-                                <div class="Key-icon Key-icon--fail"></div>
-                                <p class="Key-listItemContent">{{strings.legend.ON_FAILURE}}</p>
-                            </li>
-                            <li class="Key-listItem">
-                                <div class="Key-icon Key-icon--always"></div>
-                                <p class="Key-listItemContent">{{strings.legend.ALWAYS}}</p>
-                            </li>
-                            <li class="Key-listItem">
-                                <div class="Key-icon Key-icon--circle Key-icon--default">P</div>
-                                <p class="Key-listItemContent Key-listItemContent--circle">{{strings.legend.PROJECT_SYNC}}</p>
-                            </li>
-                            <li class="Key-listItem">
-                                <div class="Key-icon Key-icon--circle Key-icon--default">I</div>
-                                <p class="Key-listItemContent Key-listItemContent--circle">{{strings.legend.INVENTORY_SYNC}}</p>
-                            </li>
-                            <li class="Key-listItem">
-                                <div class="Key-icon Key-icon--circle Key-icon--default">W</div>
-                                <p class="Key-listItemContent Key-listItemContent--circle">{{strings.legend.WORKFLOW}}</p>
-                            </li>
-                        </ul>
+                        <workflow-key ng-show="showKey"></workflow-key>
                     </div>
                     <div class="WorkflowLegend-details--right">
                         <i ng-class="{'WorkflowMaker-manualControlsIcon--active': showManualControls}" class="fa fa-cog WorkflowMaker-manualControlsIcon" aria-hidden="true" alt="Controls" ng-click="toggleManualControls()"></i>

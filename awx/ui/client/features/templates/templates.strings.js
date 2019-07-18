@@ -110,9 +110,12 @@ function TemplatesStrings (BaseString) {
         ON_SUCCESS: t.s('On Success'),
         ON_FAILURE: t.s('On Failure'),
         ALWAYS: t.s('Always'),
+        PAUSE: t.s('Wait For Approval'),
+        JOB_TEMPLATE: t.s('Job Template'),
         PROJECT_SYNC: t.s('Project Sync'),
         INVENTORY_SYNC: t.s('Inventory Sync'),
         WORKFLOW: t.s('Workflow'),
+        TEMPLATE: t.s('Template'),
         WARNING: t.s('Warning'),
         TOTAL_NODES: t.s('TOTAL NODES'),
         ADD_A_NODE: t.s('ADD A NODE'),
@@ -145,7 +148,7 @@ function TemplatesStrings (BaseString) {
         EXIT: t.s('EXIT'),
         CANCEL: t.s('CANCEL'),
         SAVE_AND_EXIT: t.s('SAVE & EXIT'),
-        PAUSE_NODE: t.s('Pause Node')
+        APPROVAL: t.s('Approval')
     };
 }
 

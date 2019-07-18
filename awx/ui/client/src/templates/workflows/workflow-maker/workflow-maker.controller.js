@@ -145,21 +145,24 @@ export default ['$scope', 'TemplatesService',
                 let editPromises = [];
                 let credentialRequests = [];
 
+                // TODO: clean up data generation of approval template requests
                 Object.keys(nodeRef).map((workflowMakerNodeId) => {
                     const node = nodeRef[workflowMakerNodeId];
                     if (node.isNew) {
                         if (node.unifiedJobTemplate && node.unifiedJobTemplate.unified_job_type === "workflow_approval") {
-                            approvalTemplatePromises.push(TemplatesService.createApprovalTemplate({
-                                name: node.unifiedJobTemplate.name
-                            }).then(({data: approvalTemplateData}) => {
-                                addPromises.push(TemplatesService.addWorkflowNode({
-                                    url: $scope.workflowJobTemplateObj.related.workflow_nodes,
+                            addPromises.push(TemplatesService.addWorkflowNode({
+                                url: $scope.workflowJobTemplateObj.related.workflow_nodes,
+                                data: {}
+                            }).then(({data}) => {
+                                approvalTemplatePromises.push(TemplatesService.createApprovalTemplate({
+                                    url: data.related.create_approval_template,
                                     data: {
-                                        unified_job_template: approvalTemplateData.id
+                                        name: node.unifiedJobTemplate.name,
+                                        description: node.unifiedJobTemplate.description
                                     }
-                                }).then(({data: nodeData}) => {
-                                    node.originalNodeObject = nodeData;
-                                    nodeIdToChartNodeIdMapping[nodeData.id] = parseInt(workflowMakerNodeId);
+                                }).then(() => {
+                                    node.originalNodeObject = data;
+                                    nodeIdToChartNodeIdMapping[data.id] = parseInt(workflowMakerNodeId);
                                 }).catch(({ data, status }) => {
                                     Wait('stop');
                                     ProcessErrors($scope, data, status, null, {
@@ -222,20 +225,11 @@ export default ['$scope', 'TemplatesService',
                                 }));
                             } else {
                                 approvalTemplatePromises.push(TemplatesService.createApprovalTemplate({
-                                    name: node.unifiedJobTemplate.name
-                                }).then(({data: approvalTemplateData}) => {
-                                    // Make sure that this isn't overwriting everything on the node...
-                                    editPromises.push(TemplatesService.editWorkflowNode({
-                                        id: node.originalNodeObject.id,
-                                        data: {
-                                            unified_job_template: approvalTemplateData.id
-                                        }
-                                    }).catch(({ data, status }) => {
-                                        Wait('stop');
-                                        ProcessErrors($scope, data, status, null, {
-                                            hdr: $scope.strings.get('error.HEADER')
-                                        });
-                                    }));
+                                    url: node.originalNodeObject.related.create_approval_template,
+                                    data: {
+                                        name: node.unifiedJobTemplate.name,
+                                        description: node.unifiedJobTemplate.description
+                                    }
                                 }).catch(({ data, status }) => {
                                     Wait('stop');
                                     ProcessErrors($scope, data, status, null, {
@@ -302,176 +296,173 @@ export default ['$scope', 'TemplatesService',
                     return TemplatesService.deleteWorkflowJobTemplateNode(nodeId);
                 });
 
-                $q.all(approvalTemplatePromises)
+                $q.all(addPromises.concat(editPromises, deletePromises))
                     .then(() => {
-                        $q.all(addPromises.concat(editPromises, deletePromises))
-                        .then(() => {
-                            let disassociatePromises = [];
-                            let associatePromises = [];
-                            let linkMap = {};
+                        $q.all(approvalTemplatePromises)
+                            .then(() => {
+                                let disassociatePromises = [];
+                                let associatePromises = [];
+                                let linkMap = {};
 
-                            // Build a link map for easy access
-                            $scope.graphState.arrayOfLinksForChart.forEach(link => {
-                                // link.source.id of 1 is our artificial start node
-                                if (link.source.id !== 1) {
-                                    const sourceNodeId = nodeRef[link.source.id].originalNodeObject.id;
-                                    const targetNodeId = nodeRef[link.target.id].originalNodeObject.id;
-                                    if (!linkMap[sourceNodeId]) {
-                                        linkMap[sourceNodeId] = {};
+                                // Build a link map for easy access
+                                $scope.graphState.arrayOfLinksForChart.forEach(link => {
+                                    // link.source.id of 1 is our artificial start node
+                                    if (link.source.id !== 1) {
+                                        const sourceNodeId = nodeRef[link.source.id].originalNodeObject.id;
+                                        const targetNodeId = nodeRef[link.target.id].originalNodeObject.id;
+                                        if (!linkMap[sourceNodeId]) {
+                                            linkMap[sourceNodeId] = {};
+                                        }
+
+                                        linkMap[sourceNodeId][targetNodeId] = link.edgeType;
                                     }
+                                });
 
-                                    linkMap[sourceNodeId][targetNodeId] = link.edgeType;
-                                }
-                            });
-
-                            Object.keys(nodeRef).map((workflowNodeId) => {
-                                let nodeId = nodeRef[workflowNodeId].originalNodeObject.id;
-                                if (nodeRef[workflowNodeId].originalNodeObject.success_nodes) {
-                                    nodeRef[workflowNodeId].originalNodeObject.success_nodes.forEach((successNodeId) => {
-                                        if (
-                                            !deletedNodeIds.includes(successNodeId) &&
-                                            (!linkMap[nodeId] ||
-                                            !linkMap[nodeId][successNodeId] ||
-                                            linkMap[nodeId][successNodeId] !== "success")
-                                        ) {
-                                            disassociatePromises.push(
-                                                TemplatesService.disassociateWorkflowNode({
-                                                    parentId: nodeId,
-                                                    nodeId: successNodeId,
-                                                    edge: "success"
-                                                })
-                                            );
-                                        }
-                                    });
-                                }
-                                if (nodeRef[workflowNodeId].originalNodeObject.failure_nodes) {
-                                    nodeRef[workflowNodeId].originalNodeObject.failure_nodes.forEach((failureNodeId) => {
-                                        if (
-                                            !deletedNodeIds.includes(failureNodeId) &&
-                                            (!linkMap[nodeId] ||
-                                            !linkMap[nodeId][failureNodeId] ||
-                                            linkMap[nodeId][failureNodeId] !== "failure")
-                                        ) {
-                                            disassociatePromises.push(
-                                                TemplatesService.disassociateWorkflowNode({
-                                                    parentId: nodeId,
-                                                    nodeId: failureNodeId,
-                                                    edge: "failure"
-                                                })
-                                            );
-                                        }
-                                    });
-                                }
-                                if (nodeRef[workflowNodeId].originalNodeObject.always_nodes) {
-                                    nodeRef[workflowNodeId].originalNodeObject.always_nodes.forEach((alwaysNodeId) => {
-                                        if (
-                                            !deletedNodeIds.includes(alwaysNodeId) &&
-                                            (!linkMap[nodeId] ||
-                                            !linkMap[nodeId][alwaysNodeId] ||
-                                            linkMap[nodeId][alwaysNodeId] !== "always")
-                                        ) {
-                                            disassociatePromises.push(
-                                                TemplatesService.disassociateWorkflowNode({
-                                                    parentId: nodeId,
-                                                    nodeId: alwaysNodeId,
-                                                    edge: "always"
-                                                })
-                                            );
-                                        }
-                                    });
-                                }
-                            });
-
-                            Object.keys(linkMap).map((sourceNodeId) => {
-                                Object.keys(linkMap[sourceNodeId]).map((targetNodeId) => {
-                                    const sourceChartNodeId = nodeIdToChartNodeIdMapping[sourceNodeId];
-                                    const targetChartNodeId = nodeIdToChartNodeIdMapping[targetNodeId];
-                                    switch(linkMap[sourceNodeId][targetNodeId]) {
-                                        case "success":
+                                Object.keys(nodeRef).map((workflowNodeId) => {
+                                    let nodeId = nodeRef[workflowNodeId].originalNodeObject.id;
+                                    if (nodeRef[workflowNodeId].originalNodeObject.success_nodes) {
+                                        nodeRef[workflowNodeId].originalNodeObject.success_nodes.forEach((successNodeId) => {
                                             if (
-                                                !nodeRef[sourceChartNodeId].originalNodeObject.success_nodes ||
-                                                !nodeRef[sourceChartNodeId].originalNodeObject.success_nodes.includes(nodeRef[targetChartNodeId].originalNodeObject.id)
+                                                !deletedNodeIds.includes(successNodeId) &&
+                                                (!linkMap[nodeId] ||
+                                                !linkMap[nodeId][successNodeId] ||
+                                                linkMap[nodeId][successNodeId] !== "success")
                                             ) {
-                                                associatePromises.push(
-                                                    TemplatesService.associateWorkflowNode({
-                                                        parentId: parseInt(sourceNodeId),
-                                                        nodeId: parseInt(targetNodeId),
+                                                disassociatePromises.push(
+                                                    TemplatesService.disassociateWorkflowNode({
+                                                        parentId: nodeId,
+                                                        nodeId: successNodeId,
                                                         edge: "success"
                                                     })
                                                 );
                                             }
-                                            break;
-                                        case "failure":
+                                        });
+                                    }
+                                    if (nodeRef[workflowNodeId].originalNodeObject.failure_nodes) {
+                                        nodeRef[workflowNodeId].originalNodeObject.failure_nodes.forEach((failureNodeId) => {
                                             if (
-                                                !nodeRef[sourceChartNodeId].originalNodeObject.failure_nodes ||
-                                                !nodeRef[sourceChartNodeId].originalNodeObject.failure_nodes.includes(nodeRef[targetChartNodeId].originalNodeObject.id)
+                                                !deletedNodeIds.includes(failureNodeId) &&
+                                                (!linkMap[nodeId] ||
+                                                !linkMap[nodeId][failureNodeId] ||
+                                                linkMap[nodeId][failureNodeId] !== "failure")
                                             ) {
-                                                associatePromises.push(
-                                                    TemplatesService.associateWorkflowNode({
-                                                        parentId: parseInt(sourceNodeId),
-                                                        nodeId: parseInt(targetNodeId),
+                                                disassociatePromises.push(
+                                                    TemplatesService.disassociateWorkflowNode({
+                                                        parentId: nodeId,
+                                                        nodeId: failureNodeId,
                                                         edge: "failure"
                                                     })
                                                 );
                                             }
-                                            break;
-                                        case "always":
+                                        });
+                                    }
+                                    if (nodeRef[workflowNodeId].originalNodeObject.always_nodes) {
+                                        nodeRef[workflowNodeId].originalNodeObject.always_nodes.forEach((alwaysNodeId) => {
                                             if (
-                                                !nodeRef[sourceChartNodeId].originalNodeObject.always_nodes ||
-                                                !nodeRef[sourceChartNodeId].originalNodeObject.always_nodes.includes(nodeRef[targetChartNodeId].originalNodeObject.id)
+                                                !deletedNodeIds.includes(alwaysNodeId) &&
+                                                (!linkMap[nodeId] ||
+                                                !linkMap[nodeId][alwaysNodeId] ||
+                                                linkMap[nodeId][alwaysNodeId] !== "always")
                                             ) {
-                                                associatePromises.push(
-                                                    TemplatesService.associateWorkflowNode({
-                                                        parentId: parseInt(sourceNodeId),
-                                                        nodeId: parseInt(targetNodeId),
+                                                disassociatePromises.push(
+                                                    TemplatesService.disassociateWorkflowNode({
+                                                        parentId: nodeId,
+                                                        nodeId: alwaysNodeId,
                                                         edge: "always"
                                                     })
                                                 );
                                             }
-                                            break;
+                                        });
                                     }
                                 });
-                            });
 
-                            $q.all(disassociatePromises)
-                                .then(() => {
-                                    let credentialPromises = credentialRequests.map((request) => {
-                                        return TemplatesService.postWorkflowNodeCredential({
-                                            id: request.id,
-                                            data: request.data
-                                        });
-                                    });
-
-                                    return $q.all(associatePromises.concat(credentialPromises))
-                                        .then(() => {
-                                            Wait('stop');
-                                            $scope.workflowChangesUnsaved = false;
-                                            $scope.workflowChangesStarted = false;
-                                            $scope.closeDialog();
-                                        }).catch(({ data, status }) => {
-                                            Wait('stop');
-                                            ProcessErrors($scope, data, status, null, {
-                                                hdr: $scope.strings.get('error.HEADER')
-                                            });
-                                        });
-                                }).catch(({
-                                    data,
-                                    status
-                                }) => {
-                                    Wait('stop');
-                                    ProcessErrors($scope, data, status, null, {
-                                        hdr: $scope.strings.get('error.HEADER')
+                                Object.keys(linkMap).map((sourceNodeId) => {
+                                    Object.keys(linkMap[sourceNodeId]).map((targetNodeId) => {
+                                        const sourceChartNodeId = nodeIdToChartNodeIdMapping[sourceNodeId];
+                                        const targetChartNodeId = nodeIdToChartNodeIdMapping[targetNodeId];
+                                        switch(linkMap[sourceNodeId][targetNodeId]) {
+                                            case "success":
+                                                if (
+                                                    !nodeRef[sourceChartNodeId].originalNodeObject.success_nodes ||
+                                                    !nodeRef[sourceChartNodeId].originalNodeObject.success_nodes.includes(nodeRef[targetChartNodeId].originalNodeObject.id)
+                                                ) {
+                                                    associatePromises.push(
+                                                        TemplatesService.associateWorkflowNode({
+                                                            parentId: parseInt(sourceNodeId),
+                                                            nodeId: parseInt(targetNodeId),
+                                                            edge: "success"
+                                                        })
+                                                    );
+                                                }
+                                                break;
+                                            case "failure":
+                                                if (
+                                                    !nodeRef[sourceChartNodeId].originalNodeObject.failure_nodes ||
+                                                    !nodeRef[sourceChartNodeId].originalNodeObject.failure_nodes.includes(nodeRef[targetChartNodeId].originalNodeObject.id)
+                                                ) {
+                                                    associatePromises.push(
+                                                        TemplatesService.associateWorkflowNode({
+                                                            parentId: parseInt(sourceNodeId),
+                                                            nodeId: parseInt(targetNodeId),
+                                                            edge: "failure"
+                                                        })
+                                                    );
+                                                }
+                                                break;
+                                            case "always":
+                                                if (
+                                                    !nodeRef[sourceChartNodeId].originalNodeObject.always_nodes ||
+                                                    !nodeRef[sourceChartNodeId].originalNodeObject.always_nodes.includes(nodeRef[targetChartNodeId].originalNodeObject.id)
+                                                ) {
+                                                    associatePromises.push(
+                                                        TemplatesService.associateWorkflowNode({
+                                                            parentId: parseInt(sourceNodeId),
+                                                            nodeId: parseInt(targetNodeId),
+                                                            edge: "always"
+                                                        })
+                                                    );
+                                                }
+                                                break;
+                                        }
                                     });
                                 });
-                        }).catch(({ data, status }) => {
-                            Wait('stop');
-                            ProcessErrors($scope, data, status, null, {
-                                hdr: $scope.strings.get('error.HEADER')
+
+                                $q.all(disassociatePromises)
+                                    .then(() => {
+                                        let credentialPromises = credentialRequests.map((request) => {
+                                            return TemplatesService.postWorkflowNodeCredential({
+                                                id: request.id,
+                                                data: request.data
+                                            });
+                                        });
+
+                                        return $q.all(associatePromises.concat(credentialPromises))
+                                            .then(() => {
+                                                Wait('stop');
+                                                $scope.workflowChangesUnsaved = false;
+                                                $scope.workflowChangesStarted = false;
+                                                $scope.closeDialog();
+                                            }).catch(({ data, status }) => {
+                                                Wait('stop');
+                                                ProcessErrors($scope, data, status, null, {
+                                                    hdr: $scope.strings.get('error.HEADER')
+                                                });
+                                            });
+                                    }).catch(({
+                                        data,
+                                        status
+                                    }) => {
+                                        Wait('stop');
+                                        ProcessErrors($scope, data, status, null, {
+                                            hdr: $scope.strings.get('error.HEADER')
+                                        });
+                                    });
                             });
+                    }).catch(({ data, status }) => {
+                        Wait('stop');
+                        ProcessErrors($scope, data, status, null, {
+                            hdr: $scope.strings.get('error.HEADER')
                         });
-                    })
-                    .catch(() => {
-                        // TODO: handle
                     });
             } else {
 
