@@ -1475,6 +1475,8 @@ class RunJob(BaseTask):
             if authorize:
                 env['ANSIBLE_NET_AUTH_PASS'] = network_cred.get_input('authorize_password', default='')
 
+        env['ANSIBLE_COLLECTIONS_PATHS'] = os.path.join(private_data_dir, 'requirements_collections')
+
         return env
 
     def build_args(self, job, private_data_dir, passwords):
@@ -1781,6 +1783,10 @@ class RunProjectUpdate(BaseTask):
             credential = project_update.credential
             if credential.has_input('ssh_key_data'):
                 private_data['credentials'][credential] = credential.get_input('ssh_key_data', default='')
+
+        # Create dir where collections will live for the job run
+        if project_update.job_type != 'check' and getattr(self, 'job_private_data_dir'):
+            os.mkdir(os.path.join(self.job_private_data_dir, 'requirements_collections'), stat.S_IREAD | stat.S_IWRITE | stat.S_IEXEC)
         return private_data
 
     def build_passwords(self, project_update, runtime_passwords):
@@ -1893,8 +1899,11 @@ class RunProjectUpdate(BaseTask):
             'scm_clean': project_update.scm_clean,
             'scm_delete_on_update': project_update.scm_delete_on_update if project_update.job_type == 'check' else False,
             'scm_full_checkout': True if project_update.job_type == 'run' else False,
-            'roles_enabled': getattr(settings, 'AWX_ROLES_ENABLED', True) if project_update.job_type != 'check' else False
+            'roles_enabled': getattr(settings, 'AWX_ROLES_ENABLED', True) if project_update.job_type != 'check' else False,
+            'collections_enabled': getattr(settings, 'AWX_COLLECTIONS_ENABLED', True) if project_update.job_type != 'check' else False,
         })
+        if project_update.job_type != 'check':
+            extra_vars['collections_destination'] = os.path.join(self.job_private_data_dir, 'requirements_collections')
         # apply custom refspec from user for PR refs and the like
         if project_update.scm_refspec:
             extra_vars['scm_refspec'] = project_update.scm_refspec

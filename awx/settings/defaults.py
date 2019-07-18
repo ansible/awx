@@ -604,6 +604,11 @@ ALLOW_JINJA_IN_EXTRA_VARS = 'template'
 # Note: This setting may be overridden by database settings.
 AWX_ROLES_ENABLED = True
 
+# Enable dynamically pulling collections from a requirement.yml file
+# when updating SCM projects
+# Note: This setting may be overridden by database settings.
+AWX_COLLECTIONS_ENABLED = True
+
 # Enable bubblewrap support for running jobs (playbook runs only).
 # Note: This setting may be overridden by database settings.
 AWX_PROOT_ENABLED = True
