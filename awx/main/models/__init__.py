@@ -174,7 +174,7 @@ def o_auth2_token_get_absolute_url(self, request=None):
 
 
 OAuth2AccessToken.add_to_class('get_absolute_url', o_auth2_token_get_absolute_url)
-# &&&&&& "Add model here" - Alan
+# &&&&&& Add model here
 from awx.main.registrar import activity_stream_registrar # noqa
 activity_stream_registrar.connect(Organization)
 activity_stream_registrar.connect(Inventory)

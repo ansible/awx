@@ -3018,7 +3018,6 @@ class WorkflowJobTemplateNodeCreateApproval(RetrieveAPIView):
     model = models.WorkflowJobTemplateNode
     serializer_class = serializers.WorkflowJobTemplateNodeCreateApprovalSerializer
 
-# &&&&&&
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if not serializer.is_valid():
@@ -3597,7 +3596,7 @@ class JobRelaunch(RetrieveAPIView):
             headers = {'Location': new_job.get_absolute_url(request=request)}
             return Response(data, status=status.HTTP_201_CREATED, headers=headers)
 
-# &&&&&& Reference
+
 class JobCreateSchedule(RetrieveAPIView):
 
     model = models.Job
@@ -4422,12 +4421,6 @@ for attr, value in list(locals().items()):
         setattr(this_module, name, view)
 
 
-class WorkflowApprovalTemplateList(ListCreateAPIView):
-
-    model = models.WorkflowApprovalTemplate
-    serializer_class = serializers.WorkflowApprovalTemplateSerializer
-
-
 class WorkflowApprovalTemplateDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
 
     model = models.WorkflowApprovalTemplate
@@ -4481,11 +4474,12 @@ class WorkflowApprovalDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
     model = models.WorkflowApproval
     serializer_class = serializers.WorkflowApprovalSerializer
 
-# &&&&&& Include checks in the below two post methods
+
 class WorkflowApprovalApprove(RetrieveAPIView):
     model = models.WorkflowApproval
     serializer_class = serializers.WorkflowApprovalViewSerializer
 
+    # &&&&&& To address later
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         obj.approve()
@@ -4496,6 +4490,7 @@ class WorkflowApprovalDeny(RetrieveAPIView):
     model = models.WorkflowApproval
     serializer_class = serializers.WorkflowApprovalViewSerializer
 
+    # &&&&&& To address later
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         obj.deny()

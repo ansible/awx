@@ -200,8 +200,6 @@ class Command(BaseCommand):
         skipped += WorkflowJob.objects.filter(created__gte=self.cutoff).count()
         return skipped, deleted
 
-# &&&&&& Add cleanup of orphaned approval nodes here?
-
     def cleanup_notifications(self):
         skipped, deleted = 0, 0
         notifications = Notification.objects.filter(created__lt=self.cutoff)

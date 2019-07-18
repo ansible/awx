@@ -3,7 +3,7 @@
 
 from django.db.models.signals import pre_save, post_save, pre_delete, m2m_changed
 
-# &&&&&& Where the signals are hooked up ??
+
 class ActivityStreamRegistrar(object):
 
     def __init__(self):

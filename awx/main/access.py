@@ -2788,18 +2788,17 @@ class WorkflowApprovalAccess(BaseAccess):
         return True
 
     def filtered_queryset(self):
-        return self.model.objects.all()
+        return self.model.objects.filter(
+            unified_job_node__in=WorkflowJobNode.accessible_pk_qs(
+                self.user, 'read_role'))
 
-    def can_start(self, obj, validate_license=True):
-        return False
-    # &&&&&& ??? Start of the RBAC method ???
+    # &&&&&&
     # def can_approve_or_deny(self, obj):
-    #     if self.user.is_superuser: # &&&&&& add "or self.user.approval_role"?
+    #     if self.user.is_superuser: or "self.user.approval_role"?
     #         return True
     #     return self.can_change(obj, ????)
 
 
-# &&&&&& Why is the below not showing up as a class now??
 class WorkflowApprovalTemplateAccess(BaseAccess):
     '''
     I can create approval nodes when:
@@ -2811,16 +2810,17 @@ class WorkflowApprovalTemplateAccess(BaseAccess):
     model = WorkflowApprovalTemplate
     prefetch_related = ('created_by', 'modified_by',)
 
-    # &&&&&& I need to get the admin role of the WFJT, where WFJT is provided in the key portion vs the data (Alan said that, what does it mean exactly???)
     @check_superuser
     def can_add(self, data):
         if data is None:  # Hide direct creation in API browser
             return False
-        return (
-            self.check_related('workflow_approval_template', UnifiedJobTemplate, role_field='admin_role')
+        else:
+            return (self.check_related('workflow_approval_template', UnifiedJobTemplate, role_field='admin_role'))
 
     def filtered_queryset(self):
-        return self.model.filter(workflowjobtemplatenodes__workflow_job_template=WorkflowJobTemplate.accessible_pk_qs(self.user, 'read_role'))
+        return self.model.objects.filter(
+            workflowjobtemplatenodes__workflow_job_template__in=WorkflowJobTemplate.accessible_pk_qs(
+                self.user, 'read_role'))
 
 
 for cls in BaseAccess.__subclasses__():
