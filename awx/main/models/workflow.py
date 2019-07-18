@@ -162,6 +162,13 @@ class WorkflowJobTemplateNode(WorkflowNodeBase):
             new_node.credentials.add(cred)
         return new_node
 
+    def create_approval_template(self, **kwargs):
+        approval_template = WorkflowApprovalTemplate(**kwargs)
+        approval_template.save()
+        self.unified_job_template = approval_template
+        self.save()
+        return approval_template
+
 
 class WorkflowJobNode(WorkflowNodeBase):
     job = models.OneToOneField(
@@ -388,6 +395,11 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
         'singleton:' + ROLE_SINGLETON_SYSTEM_AUDITOR,
         'organization.auditor_role', 'execute_role', 'admin_role'
     ])
+# &&&&&& The below keeps complaining - fixed by new migration file, perhaps?
+    approval_role = ImplicitRoleField(parent_role=[
+        'singleton:' + ROLE_SINGLETON_SYSTEM_AUDITOR,
+        'organization.approval_role', 'admin_role',
+    ])
 
     @property
     def workflow_nodes(self):
@@ -608,6 +620,12 @@ class WorkflowApprovalTemplate(UnifiedJobTemplate):
     class Meta:
         app_label = 'main'
 
+    timeout = models.IntegerField(
+        blank=True,
+        default=0,
+        help_text=_("The amount of time (in seconds) before the approval node expires and fails."),
+    )
+
     @classmethod
     def _get_unified_job_class(cls):
         return WorkflowApproval
@@ -618,6 +636,28 @@ class WorkflowApprovalTemplate(UnifiedJobTemplate):
 
     def get_absolute_url(self, request=None):
         return reverse('api:workflow_approval_template_detail', kwargs={'pk': self.pk}, request=request)
+
+    # @property
+    # def notification_templates(self):
+    #     # Return all notification_templates defined on the Job Template, on the Project, and on the Organization for each trigger type
+    #     base_notification_templates = NotificationTemplate.objects
+    #     error_notification_templates = list(base_notification_templates.filter(
+    #         unifiedjobtemplate_notification_templates_for_errors__in=[self, self.project]))
+    #     started_notification_templates = list(base_notification_templates.filter(
+    #         unifiedjobtemplate_notification_templates_for_started__in=[self, self.project]))
+    #     success_notification_templates = list(base_notification_templates.filter(
+    #         unifiedjobtemplate_notification_templates_for_success__in=[self, self.project]))
+# &&&&&& Approvals don't have orgs! How to pull them in? Alan said to "get creative"!
+    #     if self.project is not None and self.project.organization is not None:
+    #         error_notification_templates = set(error_notification_templates + list(base_notification_templates.filter(
+    #             organization_notification_templates_for_errors=self.project.organization)))
+    #         started_notification_templates = set(started_notification_templates + list(base_notification_templates.filter(
+    #             organization_notification_templates_for_started=self.project.organization)))
+    #         success_notification_templates = set(success_notification_templates + list(base_notification_templates.filter(
+    #             organization_notification_templates_for_success=self.project.organization)))
+    #     return dict(error=list(error_notification_templates),
+    #                 started=list(started_notification_templates),
+    #                 success=list(success_notification_templates))
 
 
 class WorkflowApproval(UnifiedJob):

@@ -355,6 +355,26 @@ def update_host_last_job_after_job_deleted(sender, **kwargs):
     for host in Host.objects.filter(pk__in=hosts_pks):
         _update_host_last_jhs(host)
 
+
+# &&&&&& Argh.  Which one looks better?
+# @receiver(pre_delete, sender=Job)
+# def delete_detached_approval_nodes(sender, instance, **kwargs):
+#     for l in instance.labels.all():
+#         if l.is_candidate_for_detach():
+#             l.delete()
+#
+#
+# @receiver(pre_delete, sender=Organization)
+# def delete_detached_approval_nodes(sender, instance, **kwargs):
+#     approval_node = ???
+#     user = get_current_user_or_none()
+#     for node in approval_node:
+#         try:
+#             node.schedule_deletion(user_id=getattr(user, 'id', None))
+#         except RuntimeError as e:
+#             logger.debug(e)
+
+
 # Set via ActivityStreamRegistrar to record activity stream events
 
 
@@ -434,7 +454,7 @@ def model_serializer_mapping():
         models.OAuth2Application: serializers.OAuth2ApplicationSerializer,
     }
 
-
+# &&&&&& Can customize how/what the activity stream shows info
 def activity_stream_create(sender, instance, created, **kwargs):
     if created and activity_stream_enabled:
         # TODO: remove deprecated_group conditional in 3.3
@@ -462,6 +482,8 @@ def activity_stream_create(sender, instance, created, **kwargs):
             object1=object1,
             changes=json.dumps(changes),
             actor=get_current_user_or_none())
+        # if type(instance) == WorkflowApproval: &&&&&&
+        #     changes['status'] = #???
         #TODO: Weird situation where cascade SETNULL doesn't work
         #      it might actually be a good idea to remove all of these FK references since
         #      we don't really use them anyway.

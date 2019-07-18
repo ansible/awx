@@ -89,6 +89,10 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin, CustomVi
                      'notification_admin_role', 'credential_admin_role',
                      'job_template_admin_role',],
     )
+# &&&&&& The below keeps complaining - fixed by new migration file, perhaps?
+    approval_role = ImplicitRoleField(
+        parent_role='admin_role',
+    )
 
 
     def get_absolute_url(self, request=None):

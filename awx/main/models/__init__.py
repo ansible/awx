@@ -174,7 +174,7 @@ def o_auth2_token_get_absolute_url(self, request=None):
 
 
 OAuth2AccessToken.add_to_class('get_absolute_url', o_auth2_token_get_absolute_url)
-
+# &&&&&& "Add model here" - Alan
 from awx.main.registrar import activity_stream_registrar # noqa
 activity_stream_registrar.connect(Organization)
 activity_stream_registrar.connect(Inventory)
@@ -202,6 +202,8 @@ activity_stream_registrar.connect(User)
 activity_stream_registrar.connect(WorkflowJobTemplate)
 activity_stream_registrar.connect(WorkflowJobTemplateNode)
 activity_stream_registrar.connect(WorkflowJob)
+# activity_stream_registrar.connect(WorkflowApproval) &&&&&&
+# activity_stream_registrar.connect(WorkflowApprovalTemplate)
 activity_stream_registrar.connect(OAuth2Application)
 activity_stream_registrar.connect(OAuth2AccessToken)
 

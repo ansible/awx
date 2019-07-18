@@ -26,7 +26,7 @@ function AtApprovalsDrawerController (strings, Rest, GetBasePath, $rootScope) {
 
     const loadTheList = () => {
         const queryParams = Object.keys(vm.queryset).map(key => `${key}=${vm.queryset[key]}`).join('&');
-        Rest.setUrl(`${GetBasePath('workflow_approval')}?${queryParams}`);
+        Rest.setUrl(`${GetBasePath('workflow_approvals')}?${queryParams}`);
         return Rest.get()
             .then(({ data }) => {
                 vm.dataset = data;
@@ -40,13 +40,13 @@ function AtApprovalsDrawerController (strings, Rest, GetBasePath, $rootScope) {
         .then(() => { vm.listLoaded = true; });
 
     vm.approve = (approval) => {
-        Rest.setUrl(`${GetBasePath('workflow_approval')}${approval.id}/approve`);
+        Rest.setUrl(`${GetBasePath('workflow_approvals')}${approval.id}/approve`);
         Rest.post()
             .then(() => loadTheList());
     };
 
     vm.deny = (approval) => {
-        Rest.setUrl(`${GetBasePath('workflow_approval')}${approval.id}/deny`);
+        Rest.setUrl(`${GetBasePath('workflow_approvals')}${approval.id}/deny`);
         Rest.post()
             .then(() => loadTheList());
     };

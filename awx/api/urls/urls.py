@@ -133,8 +133,8 @@ v2_urls = [
     url(r'^unified_job_templates/$', UnifiedJobTemplateList.as_view(), name='unified_job_template_list'),
     url(r'^unified_jobs/$', UnifiedJobList.as_view(), name='unified_job_list'),
     url(r'^activity_stream/', include(activity_stream_urls)),
-    url(r'^workflow_approval_templates/', include(workflow_approval_template_urls)),
-    url(r'^workflow_approval/', include(workflow_approval_urls)),
+    url(r'^workflow_approval_templates/', include(workflow_approval_template_urls)),  # &&&&&& Take this line out completely?
+    url(r'^workflow_approvals/', include(workflow_approval_urls)),
 ]
 
 

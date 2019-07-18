@@ -3013,6 +3013,21 @@ class WorkflowJobTemplateNodeChildrenBaseList(EnforceParentRelationshipMixin, Su
         return None
 
 
+class WorkflowJobTemplateNodeCreateApproval(RetrieveAPIView):
+
+    model = models.WorkflowJobTemplateNode
+    serializer_class = serializers.WorkflowJobTemplateNodeCreateApprovalSerializer
+
+# &&&&&&
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        obj = self.get_object()
+        approval_template = obj.create_approval_template(**serializer.validated_data)
+        return Response(data={'id':approval_template.pk}, status=status.HTTP_200_OK)
+
+
 class WorkflowJobTemplateNodeSuccessNodesList(WorkflowJobTemplateNodeChildrenBaseList):
     relationship = 'success_nodes'
 
@@ -3582,7 +3597,7 @@ class JobRelaunch(RetrieveAPIView):
             headers = {'Location': new_job.get_absolute_url(request=request)}
             return Response(data, status=status.HTTP_201_CREATED, headers=headers)
 
-
+# &&&&&& Reference
 class JobCreateSchedule(RetrieveAPIView):
 
     model = models.Job
@@ -4466,7 +4481,7 @@ class WorkflowApprovalDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
     model = models.WorkflowApproval
     serializer_class = serializers.WorkflowApprovalSerializer
 
-
+# &&&&&& Include checks in the below two post methods
 class WorkflowApprovalApprove(RetrieveAPIView):
     model = models.WorkflowApproval
     serializer_class = serializers.WorkflowApprovalViewSerializer

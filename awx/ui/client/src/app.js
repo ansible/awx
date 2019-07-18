@@ -388,7 +388,7 @@ angular
                             });
                         });
 
-                        Rest.setUrl(`${GetBasePath('workflow_approval')}?status=pending&page_size=1`);
+                        Rest.setUrl(`${GetBasePath('workflow_approvals')}?status=pending&page_size=1`);
                         Rest.get()
                             .then(({data}) => {
                                 $rootScope.pendingApprovalCount = data.count;
