@@ -10,10 +10,10 @@ import AnsibleSelect from '@components/AnsibleSelect';
 import FormActionGroup from '@components/FormActionGroup';
 import FormField from '@components/FormField';
 import FormRow from '@components/FormRow';
-import Lookup from '@components/Lookup';
 import { required } from '@util/validators';
 import styled from 'styled-components';
 import { JobTemplate } from '@types';
+import InventoriesLookup from './InventoriesLookup';
 
 const QuestionCircleIcon = styled(PFQuestionCircleIcon)`
   margin-left: 10px;
@@ -34,11 +34,21 @@ class JobTemplateForm extends Component {
       job_type: 'run',
       project: '',
       playbook: '',
+      summary_fields: {},
     },
   };
 
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      inventory: props.template.summary_fields.inventory,
+    };
+  }
+
   render() {
     const { handleCancel, handleSubmit, i18n, template } = this.props;
+    const { inventory } = this.state;
 
     const jobTypeOptions = [
       {
@@ -109,8 +119,19 @@ class JobTemplateForm extends Component {
               <Field
                 name="inventory"
                 validate={required(null, i18n)}
-                render={({ field, form }) => (
-                  <FormGroup
+                render={({ form }) => (
+                  <InventoriesLookup
+                    value={inventory}
+                    tooltip={i18n._(t`Select the inventory containing the hosts
+                      you want this job to manage.`)}
+                    onChange={value => {
+                      form.setFieldValue('inventory', value.id);
+                      this.setState({ inventory: value });
+                    }}
+                  />
+                )}
+              />
+              {/* <FormGroup
                     fieldId="template-inventory"
                     helperTextInvalid={form.errors.inventory}
                     isRequired
@@ -124,8 +145,8 @@ class JobTemplateForm extends Component {
                       onLookupSave={(value) => {console.log(value)}}
                       getItems={() => ({
                         data: {
-                          results: [{id: 1, name: 'foo'}],
-                          count: 1
+                          results: [{id: 1, name: 'foo'}, {id: 2, name: 'bar'}],
+                          count: 2
                         }
                       })}
                       columns={[
@@ -133,9 +154,7 @@ class JobTemplateForm extends Component {
                       ]}
                       sortedColumnsKey="name"
                     />
-                  </FormGroup>
-                )}
-              />
+                  </FormGroup> */}
               {/* <FormField
                 id="template-inventory"
                 name="inventory"

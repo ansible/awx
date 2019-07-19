@@ -1,5 +1,13 @@
 import React, { Fragment } from 'react';
-import PropTypes from 'prop-types';
+import {
+  string,
+  bool,
+  arrayOf,
+  func,
+  number,
+  oneOfType,
+  shape,
+} from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import { SearchIcon } from '@patternfly/react-icons';
 import {
@@ -20,19 +28,24 @@ import { ChipGroup, Chip } from '../Chip';
 import { getQSConfig, parseNamespacedQueryString } from '../../util/qs';
 
 const InputGroup = styled(PFInputGroup)`
-  ${props => props.multiple && (`
+  ${props =>
+    props.multiple &&
+    `
     --pf-c-form-control--Height: 90px;
     overflow-y: auto;
-  `)}
+  `}
 `;
 
 class Lookup extends React.Component {
   constructor(props) {
     super(props);
 
+    this.assertCorrectValueType();
     this.state = {
       isModalOpen: false,
-      lookupSelectedItems: [...props.value] || [],
+      lookupSelectedItems: props.multiple
+        ? [...props.value] || []
+        : [props.value],
       results: [],
       count: 0,
       error: null,
@@ -59,6 +72,18 @@ class Lookup extends React.Component {
     }
   }
 
+  assertCorrectValueType() {
+    const { multiple, value } = this.props;
+    if (!multiple && Array.isArray(value)) {
+      throw new Error(
+        'Lookup value must not be an array unless `multiple` is set'
+      );
+    }
+    if (multiple && !Array.isArray(value)) {
+      throw new Error('Lookup value must be an array if `multiple` is set');
+    }
+  }
+
   async getData() {
     const {
       getItems,
@@ -81,7 +106,7 @@ class Lookup extends React.Component {
   }
 
   toggleSelected(row) {
-    const { name, onLookupSave } = this.props;
+    const { name, onLookupSave, multiple } = this.props;
     const {
       lookupSelectedItems: updatedSelectedItems,
       isModalOpen,
@@ -91,13 +116,17 @@ class Lookup extends React.Component {
       selectedRow => selectedRow.id === row.id
     );
 
-    if (selectedIndex > -1) {
-      updatedSelectedItems.splice(selectedIndex, 1);
-      this.setState({ lookupSelectedItems: updatedSelectedItems });
+    if (multiple) {
+      if (selectedIndex > -1) {
+        updatedSelectedItems.splice(selectedIndex, 1);
+        this.setState({ lookupSelectedItems: updatedSelectedItems });
+      } else {
+        this.setState(prevState => ({
+          lookupSelectedItems: [...prevState.lookupSelectedItems, row],
+        }));
+      }
     } else {
-      this.setState(prevState => ({
-        lookupSelectedItems: [...prevState.lookupSelectedItems, row],
-      }));
+      this.setState({ lookupSelectedItems: [row] });
     }
 
     // Updates the selected items from parent state
@@ -110,12 +139,14 @@ class Lookup extends React.Component {
 
   handleModalToggle() {
     const { isModalOpen } = this.state;
-    const { value } = this.props;
+    const { value, multiple } = this.props;
     // Resets the selected items from parent state whenever modal is opened
     // This handles the case where the user closes/cancels the modal and
     // opens it again
     if (!isModalOpen) {
-      this.setState({ lookupSelectedItems: [...value] });
+      this.setState({
+        lookupSelectedItems: multiple ? [...value] : [value],
+      });
     }
     this.setState(prevState => ({
       isModalOpen: !prevState.isModalOpen,
@@ -123,9 +154,10 @@ class Lookup extends React.Component {
   }
 
   saveModal() {
-    const { onLookupSave, name } = this.props;
+    const { onLookupSave, name, multiple } = this.props;
     const { lookupSelectedItems } = this.state;
-    onLookupSave(lookupSelectedItems, name);
+    const value = multiple ? lookupSelectedItems : lookupSelectedItems[0];
+    onLookupSave(value, name);
     this.handleModalToggle();
   }
 
@@ -137,13 +169,21 @@ class Lookup extends React.Component {
       results,
       count,
     } = this.state;
-    const { id, lookupHeader, value, columns, i18n } = this.props;
+    const {
+      id,
+      lookupHeader,
+      value,
+      columns,
+      multiple,
+      name,
+      i18n,
+    } = this.props;
 
     const header = lookupHeader || i18n._(t`items`);
 
     const chips = value ? (
       <ChipGroup>
-        {value.map(chip => (
+        {(multiple ? value : [value]).map(chip => (
           <Chip key={chip.id} onClick={() => this.toggleSelected(chip)}>
             {chip.name}
           </Chip>
@@ -197,9 +237,11 @@ class Lookup extends React.Component {
               <CheckboxListItem
                 key={item.id}
                 itemId={item.id}
-                name={item.name}
+                name={multiple ? item.name : name}
+                label={item.name}
                 isSelected={lookupSelectedItems.some(i => i.id === item.id)}
                 onSelect={() => this.toggleSelected(item)}
+                isRadio={!multiple}
               />
             )}
             renderToolbar={props => <DataListToolbar {...props} fillWidth />}
@@ -220,15 +262,19 @@ class Lookup extends React.Component {
   }
 }
 
+const Item = shape({
+  id: number.isRequired,
+});
+
 Lookup.propTypes = {
-  id: PropTypes.string,
-  getItems: PropTypes.func.isRequired,
-  lookupHeader: PropTypes.string,
-  name: PropTypes.string, // TODO: delete, unused ?
-  onLookupSave: PropTypes.func.isRequired,
-  value: PropTypes.arrayOf(PropTypes.object).isRequired,
-  sortedColumnKey: PropTypes.string.isRequired,
-  multiple: PropTypes.bool,
+  id: string,
+  getItems: func.isRequired,
+  lookupHeader: string,
+  name: string,
+  onLookupSave: func.isRequired,
+  value: oneOfType([Item, arrayOf(Item)]).isRequired,
+  sortedColumnKey: string.isRequired,
+  multiple: bool,
 };
 
 Lookup.defaultProps = {

@@ -1,5 +1,5 @@
 import React, { Fragment } from 'react';
-import PropTypes from 'prop-types';
+import { string, func } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { FormGroup, Tooltip } from '@patternfly/react-core';
@@ -7,6 +7,7 @@ import { QuestionCircleIcon } from '@patternfly/react-icons';
 
 import { InventoriesAPI } from '@api';
 import Lookup from '@components/Lookup';
+import { Inventory } from '../../../types';
 
 const getInventories = async params => InventoriesAPI.read(params);
 
@@ -35,7 +36,6 @@ class InventoriesLookup extends React.Component {
           value={value}
           onLookupSave={onChange}
           getItems={getInventories}
-          multiple
           columns={[
             { name: i18n._(t`Name`), key: 'name', isSortable: true },
             {
@@ -59,9 +59,9 @@ class InventoriesLookup extends React.Component {
 }
 
 InventoriesLookup.propTypes = {
-  value: PropTypes.arrayOf(PropTypes.object).isRequired,
-  tooltip: PropTypes.string,
-  onChange: PropTypes.func.isRequired,
+  value: Inventory.isRequired,
+  tooltip: string,
+  onChange: func.isRequired,
 };
 
 InventoriesLookup.defaultProps = {

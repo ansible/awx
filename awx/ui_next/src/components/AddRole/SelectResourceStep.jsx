@@ -107,6 +107,7 @@ class SelectResourceStep extends React.Component {
                   itemId={item.id}
                   key={item.id}
                   name={item[displayKey]}
+                  label={item[displayKey]}
                   onSelect={() => onRowClick(item)}
                 />
               )}

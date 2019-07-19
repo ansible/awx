@@ -123,3 +123,19 @@ export const Job = shape({
   extra_vars: string,
   artifacts: shape({}),
 });
+
+export const Inventory = shape({
+  id: number.isRequired,
+  description: string,
+  groups_with_active_failures: number,
+  has_active_failures: bool,
+  has_inventory_sources: bool,
+  hosts_with_active_failures: number,
+  inventory_sources_with_failures: number,
+  kind: string,
+  name: string,
+  organization_id: number,
+  total_groups: number,
+  total_hosts: number,
+  total_inventory_sources: number,
+});
