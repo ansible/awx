@@ -26,26 +26,6 @@ def node(workflow_job_template, post, admin_user, job_template):
     )
 
 
-
-@pytest.mark.django_db
-def test_blank_UJT_unallowed(workflow_job_template, post, admin_user):
-    url = reverse('api:workflow_job_template_workflow_nodes_list',
-                  kwargs={'pk': workflow_job_template.pk})
-    r = post(url, {}, user=admin_user, expect=400)
-    assert 'unified_job_template' in r.data
-
-
-@pytest.mark.django_db
-def test_cannot_remove_UJT(node, patch, admin_user):
-    r = patch(
-        node.get_absolute_url(),
-        data={'unified_job_template': None},
-        user=admin_user,
-        expect=400
-    )
-    assert 'unified_job_template' in r.data
-
-
 @pytest.mark.django_db
 def test_node_rejects_unprompted_fields(inventory, project, workflow_job_template, post, admin_user):
     job_template = JobTemplate.objects.create(

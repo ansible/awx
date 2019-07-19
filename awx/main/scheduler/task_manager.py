@@ -23,6 +23,7 @@ from awx.main.models import (
     Project,
     ProjectUpdate,
     SystemJob,
+    # &&&&&& WorkflowApproval,
     WorkflowJob,
     WorkflowJobTemplate
 )
@@ -238,6 +239,11 @@ class TaskManager():
                 task.send_notification_templates('running')
                 logger.debug('Transitioning %s to running status.', task.log_format)
                 schedule_task_manager()
+            # elif type(task) is WorkflowApproval: (&&&&&& placeholder for notification work)
+            #     task.status = 'pending'
+            #     task.send_notification_templates('pending')
+            #     logger.debug('Transitioning %s to pending status.', task.log_format)
+            #     schedule_task_manager()
             elif not task.supports_isolation() and rampart_group.controller_id:
                 # non-Ansible jobs on isolated instances run on controller
                 task.instance_group = rampart_group.controller

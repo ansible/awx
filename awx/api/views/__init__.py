@@ -4434,9 +4434,9 @@ class WorkflowApprovalTemplateNotificationTemplatesAnyList(SubListCreateAttachDe
     parent_model = models.WorkflowApprovalTemplate
 
 
-class WorkflowApprovalTemplateNotificationTemplatesStartedList(WorkflowApprovalTemplateNotificationTemplatesAnyList):
+class WorkflowApprovalTemplateNotificationTemplatesNeedsApprovalList(WorkflowApprovalTemplateNotificationTemplatesAnyList):
 
-    relationship = 'notification_templates_started'
+    relationship = 'notification_templates_needs_approval'
 
 
 class WorkflowApprovalTemplateNotificationTemplatesErrorList(WorkflowApprovalTemplateNotificationTemplatesAnyList):

@@ -638,6 +638,25 @@ def delete_inventory_for_org(sender, instance, **kwargs):
             logger.debug(e)
 
 
+# &&&&&& Placeholder code below for approval node deletion.
+# @receiver(pre_delete, sender=Job)
+# def delete_detached_approval_nodes(sender, instance, **kwargs):
+#     for l in instance.labels.all():
+#         if l.is_candidate_for_detach():
+#             l.delete()
+#
+#
+# @receiver(pre_delete, sender=Organization)
+# def delete_detached_approval_nodes(sender, instance, **kwargs):
+#     approval_node = ???
+#     user = get_current_user_or_none()
+#     for node in approval_node:
+#         try:
+#             node.schedule_deletion(user_id=getattr(user, 'id', None))
+#         except RuntimeError as e:
+#             logger.debug(e)
+
+
 @receiver(post_save, sender=Session)
 def save_user_session_membership(sender, **kwargs):
     session = kwargs.get('instance', None)

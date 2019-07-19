@@ -392,6 +392,13 @@ class NotificationFieldsModel(BaseModel):
         related_name='%(class)s_notification_templates_for_started'
     )
 
+    # &&&&&& Placeholder for workflow pause/approve notifications
+    # notification_templates_needs_approval = models.ManyToManyField(
+    #     "NotificationTemplate",
+    #     blank=True,
+    #     related_name='%(class)s_notification_templates_for_needs_approval'
+    # )
+
 
 def prevent_search(relation):
     """

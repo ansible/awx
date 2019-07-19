@@ -3446,7 +3446,7 @@ class WorkflowApprovalTemplateSerializer(UnifiedJobTemplateSerializer):
 
         res.update(dict(
             jobs = self.reverse('api:workflow_approval_template_jobs_list', kwargs={'pk': obj.pk}),
-            notification_templates_started = self.reverse('api:workflow_approval_template_notification_templates_started_list', kwargs={'pk': obj.pk}),
+            notification_templates_needs_approval = self.reverse('api:workflow_approval_template_notification_templates_needs_approval', kwargs={'pk': obj.pk}),
             notification_templates_success = self.reverse('api:workflow_approval_template_notification_templates_success_list', kwargs={'pk': obj.pk}),
             notification_templates_error = self.reverse('api:workflow_approval_template_notification_templates_error_list', kwargs={'pk': obj.pk}),
         ))
@@ -3520,6 +3520,8 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
             ujt = attrs['unified_job_template']
         elif self.instance:
             ujt = self.instance.unified_job_template
+        if ujt is None:
+            return {'workflow_job_template': attrs['workflow_job_template']}
 
         # build additional field survey_passwords to track redacted variables
         password_dict = {}
