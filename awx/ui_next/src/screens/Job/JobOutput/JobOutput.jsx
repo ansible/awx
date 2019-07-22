@@ -46,7 +46,7 @@ class JobOutput extends Component {
     this.state = {
       contentError: null,
       hasContentLoading: true,
-      results: [],
+      results: {},
       scrollToIndex: -1,
       loadedRowCount: 0,
       loadedRowsMap: {},
@@ -80,12 +80,18 @@ class JobOutput extends Component {
     this.setState({ hasContentLoading: true });
     try {
       const {
-        data: { results = [], count },
+        data: { results: newResults = [], count },
       } = await JobsAPI.readEvents(job.id, job.type, {
         page_size: 50,
         order_by: 'start_line',
       });
-      this.setState({ results, remoteRowCount: count + 1 });
+
+      this.setState(({ results }) => {
+        newResults.forEach(jobEvent => {
+          results[jobEvent.counter] = jobEvent;
+        });
+        return { results, remoteRowCount: count + 1 };
+      });
     } catch (err) {
       this.setState({ contentError: err });
     } finally {
@@ -126,7 +132,6 @@ class JobOutput extends Component {
 
   async loadMoreRows({ startIndex, stopIndex }) {
     const { job } = this.props;
-    const { results } = this.state;
 
     let params = {
       counter__gte: startIndex,
@@ -135,7 +140,12 @@ class JobOutput extends Component {
     };
 
     return await JobsAPI.readEvents(job.id, job.type, params).then(response => {
-      this.setState({ results: [...results, ...response.data.results] });
+      this.setState(({ results }) => {
+        response.data.results.forEach(jobEvent => {
+          results[jobEvent.counter] = jobEvent;
+        });
+        return { results };
+      });
     });
   }
 
@@ -158,6 +168,7 @@ class JobOutput extends Component {
   handleScrollBottom() {
     const { remoteRowCount } = this.state;
     this.listRef.scrollToRow(remoteRowCount - 1);
+    this.setState({ scrollToIndex: remoteRowCount - 1 });
   }
 
   handleResize({ width }) {
