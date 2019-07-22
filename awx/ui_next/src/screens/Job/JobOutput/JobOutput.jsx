@@ -3,6 +3,7 @@ import {
   AutoSizer,
   CellMeasurer,
   CellMeasurerCache,
+  InfiniteLoader,
   List,
 } from 'react-virtualized';
 
@@ -47,8 +48,10 @@ class JobOutput extends Component {
       hasContentLoading: true,
       results: [],
       scrollToIndex: -1,
-      startIndex: 0,
-      stopIndex: 0,
+      loadedRowCount: 0,
+      loadedRowsMap: {},
+      loadingRowCount: 0,
+      remoteRowCount: 0,
     };
 
     this.cache = new CellMeasurerCache({
@@ -57,13 +60,14 @@ class JobOutput extends Component {
     });
 
     this.loadJobEvents = this.loadJobEvents.bind(this);
-    this.renderRow = this.renderRow.bind(this);
+    this.rowRenderer = this.rowRenderer.bind(this);
     this.handleScrollTop = this.handleScrollTop.bind(this);
     this.handleScrollBottom = this.handleScrollBottom.bind(this);
     this.handleScrollNext = this.handleScrollNext.bind(this);
     this.handleScrollPrevious = this.handleScrollPrevious.bind(this);
     this.handleResize = this.handleResize.bind(this);
-    this.onRowsRendered = this.onRowsRendered.bind(this);
+    this.isRowLoaded = this.isRowLoaded.bind(this);
+    this.loadMoreRows = this.loadMoreRows.bind(this);
   }
 
   componentDidMount() {
@@ -76,12 +80,12 @@ class JobOutput extends Component {
     this.setState({ hasContentLoading: true });
     try {
       const {
-        data: { results = [] },
+        data: { results = [], count },
       } = await JobsAPI.readEvents(job.id, job.type, {
-        page_size: 200,
+        page_size: 50,
         order_by: 'start_line',
       });
-      this.setState({ results });
+      this.setState({ results, remoteRowCount: count + 1 });
     } catch (err) {
       this.setState({ contentError: err });
     } finally {
@@ -89,8 +93,16 @@ class JobOutput extends Component {
     }
   }
 
-  renderRow({ index, parent, key, style }) {
+  isRowLoaded({ index }) {
     const { results } = this.state;
+    return !!results[index];
+  }
+
+  rowRenderer({ index, parent, key, style }) {
+    const { results } = this.state;
+    if (!results[index]) {
+      return;
+    }
     const { created, event, stdout, start_line } = results[index];
     return (
       <CellMeasurer
@@ -112,34 +124,46 @@ class JobOutput extends Component {
     );
   }
 
-  onRowsRendered({ startIndex, stopIndex }) {
-    this.setState({ startIndex, stopIndex });
+  async loadMoreRows({ startIndex, stopIndex }) {
+    const { job } = this.props;
+    const { results } = this.state;
+
+    let params = {
+      counter__gte: startIndex,
+      counter__lte: stopIndex,
+      order_by: 'start_line',
+    };
+
+    return await JobsAPI.readEvents(job.id, job.type, params).then(response => {
+      this.setState({ results: [...results, ...response.data.results] });
+    });
   }
 
   handleScrollPrevious() {
-    const { startIndex, stopIndex } = this.state;
-    const index = startIndex - (stopIndex - startIndex);
-    this.setState({ scrollToIndex: Math.max(0, index) });
+    const startIndex = this.listRef.Grid._renderedRowStartIndex;
+    const stopIndex = this.listRef.Grid._renderedRowStopIndex;
+    const range = stopIndex - startIndex + 1;
+    this.listRef.scrollToRow(Math.max(0, startIndex - range));
   }
 
   handleScrollNext() {
-    const { stopIndex } = this.state;
-    this.setState({ scrollToIndex: stopIndex + 1 });
+    const stopIndex = this.listRef.Grid._renderedRowStopIndex;
+    this.listRef.scrollToRow(stopIndex - 1);
   }
 
   handleScrollTop() {
-    this.setState({ scrollToIndex: 0 });
+    this.listRef.scrollToRow(0);
   }
 
   handleScrollBottom() {
-    const { results } = this.state;
-    this.setState({ scrollToIndex: results.length - 1 });
+    const { remoteRowCount } = this.state;
+    this.listRef.scrollToRow(remoteRowCount - 1);
   }
 
   handleResize({ width }) {
     if (width !== this._previousWidth) {
       this.cache.clearAll();
-      this.listRef.current.recomputeRowHeights();
+      this.listRef.recomputeRowHeights();
     }
     this._previousWidth = width;
   }
@@ -147,12 +171,10 @@ class JobOutput extends Component {
   render() {
     const { job } = this.props;
     const {
-      results,
       hasContentLoading,
       contentError,
       scrollToIndex,
-      startIndex,
-      stopIndex,
+      remoteRowCount,
     } = this.state;
 
     if (hasContentLoading) {
@@ -175,28 +197,35 @@ class JobOutput extends Component {
           />
         </OutputToolbar>
         <OutputWrapper>
-          <AutoSizer onResize={this.handleResize}>
-            {({ width, height }) => {
-              console.log('scroll to index', scrollToIndex);
-              console.log('start index', startIndex);
-              console.log('stop index', stopIndex);
-              return (
-                <List
-                  ref={this.listRef}
-                  width={width}
-                  height={height}
-                  deferredMeasurementCache={this.cache}
-                  rowHeight={this.cache.rowHeight}
-                  rowRenderer={this.renderRow}
-                  rowCount={results.length}
-                  overscanRowCount={50}
-                  scrollToIndex={scrollToIndex}
-                  onRowsRendered={this.onRowsRendered}
-                  scrollToAlignment="start"
-                />
-              );
-            }}
-          </AutoSizer>
+          <InfiniteLoader
+            isRowLoaded={this.isRowLoaded}
+            loadMoreRows={this.loadMoreRows}
+            rowCount={remoteRowCount}
+          >
+            {({ onRowsRendered, registerChild }) => (
+              <AutoSizer onResize={this.handleResize}>
+                {({ width, height }) => {
+                  return (
+                    <List
+                      ref={ref => {
+                        this.listRef = ref;
+                        registerChild(ref);
+                      }}
+                      deferredMeasurementCache={this.cache}
+                      height={height}
+                      onRowsRendered={onRowsRendered}
+                      rowCount={remoteRowCount}
+                      rowHeight={this.cache.rowHeight}
+                      rowRenderer={this.rowRenderer}
+                      scrollToAlignment="start"
+                      scrollToIndex={scrollToIndex}
+                      width={width}
+                    />
+                  );
+                }}
+              </AutoSizer>
+            )}
+          </InfiniteLoader>
           <OutputFooter />
         </OutputWrapper>
       </CardBody>
