@@ -38,7 +38,7 @@ class WebhookBackend(AWXBaseEmailBackend):
         sent_messages = 0
         if 'User-Agent' not in self.headers:
             self.headers['User-Agent'] = "Tower {}".format(get_awx_version())
-        if self.http_method.lower() not in ('put', 'post'):
+        if self.http_method.lower() not in ['put','post']:
             raise ValueError("HTTP method must be either 'POST' or 'PUT'.")
         chosen_method = getattr(requests, self.http_method.lower(), None)
         for m in messages:
