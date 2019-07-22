@@ -2736,6 +2736,8 @@ class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
                 res['project'] = self.reverse('api:project_detail', kwargs={'pk': obj.project.pk})
         except ObjectDoesNotExist:
             setattr(obj, 'project', None)
+        if obj.organization_id:
+            res['organization'] = self.reverse('api:organization_detail', kwargs={'pk': obj.organization_id})
         if isinstance(obj, UnifiedJobTemplate):
             res['extra_credentials'] = self.reverse(
                 'api:job_template_extra_credentials_list',
