@@ -43,7 +43,7 @@ class WebhookBackend(AWXBaseEmailBackend):
         chosen_method = getattr(requests, self.http_method.lower(), None)
         for m in messages:
             auth = None
-            if self.username and self.password:
+            if self.username:
                 auth = (self.username, self.password)
             r = chosen_method("{}".format(m.recipients()[0]),
                               auth=auth,
