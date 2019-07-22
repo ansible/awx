@@ -602,26 +602,25 @@ def update_inventory_computed_fields(inventory_id, should_update_hosts=True):
 
 
 def update_smart_memberships_for_inventory(smart_inventory):
-    with advisory_lock('update_smart_memberships_for_inventory-{}'.format(smart_inventory.id)):
-        current = set(SmartInventoryMembership.objects.filter(inventory=smart_inventory).values_list('host_id', flat=True))
-        new = set(smart_inventory.hosts.values_list('id', flat=True))
-        additions = new - current
-        removals = current - new
-        if additions or removals:
-            with transaction.atomic():
-                if removals:
-                    SmartInventoryMembership.objects.filter(inventory=smart_inventory, host_id__in=removals).delete()
-                if additions:
-                    add_for_inventory = [
-                        SmartInventoryMembership(inventory_id=smart_inventory.id, host_id=host_id)
-                        for host_id in additions
-                    ]
-                    SmartInventoryMembership.objects.bulk_create(add_for_inventory)
-            logger.debug('Smart host membership cached for {}, {} additions, {} removals, {} total count.'.format(
-                smart_inventory.pk, len(additions), len(removals), len(new)
-            ))
-            return True  # changed
-        return False
+    current = set(SmartInventoryMembership.objects.filter(inventory=smart_inventory).values_list('host_id', flat=True))
+    new = set(smart_inventory.hosts.values_list('id', flat=True))
+    additions = new - current
+    removals = current - new
+    if additions or removals:
+        with transaction.atomic():
+            if removals:
+                SmartInventoryMembership.objects.filter(inventory=smart_inventory, host_id__in=removals).delete()
+            if additions:
+                add_for_inventory = [
+                    SmartInventoryMembership(inventory_id=smart_inventory.id, host_id=host_id)
+                    for host_id in additions
+                ]
+                SmartInventoryMembership.objects.bulk_create(add_for_inventory, ignore_conflicts=True)
+        logger.debug('Smart host membership cached for {}, {} additions, {} removals, {} total count.'.format(
+            smart_inventory.pk, len(additions), len(removals), len(new)
+        ))
+        return True  # changed
+    return False
 
 
 @task()
