@@ -128,43 +128,10 @@ class JobTemplateForm extends Component {
                       form.setFieldValue('inventory', value.id);
                       this.setState({ inventory: value });
                     }}
+                    required
                   />
                 )}
               />
-              {/* <FormGroup
-                    fieldId="template-inventory"
-                    helperTextInvalid={form.errors.inventory}
-                    isRequired
-                    label={i18n._(t`Inventory`)}
-                  >
-                    <Lookup
-                      id="template-inventory"
-                      lookupHeader={i18n._(t`Inventory`)}
-                      name="inventory"
-                      value={[field.value]}
-                      onLookupSave={(value) => {console.log(value)}}
-                      getItems={() => ({
-                        data: {
-                          results: [{id: 1, name: 'foo'}, {id: 2, name: 'bar'}],
-                          count: 2
-                        }
-                      })}
-                      columns={[
-                        { name: i18n._(t`Name`), key: 'name', isSortable: true},
-                      ]}
-                      sortedColumnsKey="name"
-                    />
-                  </FormGroup> */}
-              {/* <FormField
-                id="template-inventory"
-                name="inventory"
-                type="number"
-                label={i18n._(t`Inventory`)}
-                tooltip={i18n._(t`Select the inventory containing the hosts
-                you want this job to manage.`)}
-                isRequired
-                validate={required(null, i18n)}
-              /> */}
               <FormField
                 id="template-project"
                 name="project"

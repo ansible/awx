@@ -1,5 +1,5 @@
 import React, { Fragment } from 'react';
-import { string, func } from 'prop-types';
+import { string, func, bool } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { FormGroup, Tooltip } from '@patternfly/react-core';
@@ -13,7 +13,7 @@ const getInventories = async params => InventoriesAPI.read(params);
 
 class InventoriesLookup extends React.Component {
   render() {
-    const { value, tooltip, onChange, i18n } = this.props;
+    const { value, tooltip, onChange, required, i18n } = this.props;
 
     return (
       <FormGroup
@@ -36,6 +36,7 @@ class InventoriesLookup extends React.Component {
           value={value}
           onLookupSave={onChange}
           getItems={getInventories}
+          required={required}
           columns={[
             { name: i18n._(t`Name`), key: 'name', isSortable: true },
             {
@@ -59,13 +60,16 @@ class InventoriesLookup extends React.Component {
 }
 
 InventoriesLookup.propTypes = {
-  value: Inventory.isRequired,
+  value: Inventory,
   tooltip: string,
   onChange: func.isRequired,
+  required: bool,
 };
 
 InventoriesLookup.defaultProps = {
+  value: null,
   tooltip: '',
+  required: false,
 };
 
 export default withI18n()(InventoriesLookup);

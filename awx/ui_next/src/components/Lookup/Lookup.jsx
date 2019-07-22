@@ -176,15 +176,21 @@ class Lookup extends React.Component {
       columns,
       multiple,
       name,
+      required,
       i18n,
     } = this.props;
 
     const header = lookupHeader || i18n._(t`items`);
+    const canDelete = !required || (multiple && value.length > 1);
 
     const chips = value ? (
       <ChipGroup>
         {(multiple ? value : [value]).map(chip => (
-          <Chip key={chip.id} onClick={() => this.toggleSelected(chip)}>
+          <Chip
+            key={chip.id}
+            onClick={() => this.toggleSelected(chip)}
+            isReadOnly={!canDelete}
+          >
             {chip.name}
           </Chip>
         ))}
@@ -253,6 +259,7 @@ class Lookup extends React.Component {
               selected={lookupSelectedItems}
               showOverflowAfter={5}
               onRemove={this.toggleSelected}
+              isReadOnly={!canDelete}
             />
           )}
           {error ? <div>error</div> : ''}
@@ -272,16 +279,19 @@ Lookup.propTypes = {
   lookupHeader: string,
   name: string,
   onLookupSave: func.isRequired,
-  value: oneOfType([Item, arrayOf(Item)]).isRequired,
+  value: oneOfType([Item, arrayOf(Item)]),
   sortedColumnKey: string.isRequired,
   multiple: bool,
+  required: bool,
 };
 
 Lookup.defaultProps = {
   id: 'lookup-search',
   lookupHeader: null,
   name: null,
+  value: null,
   multiple: false,
+  required: false,
 };
 
 export { Lookup as _Lookup };
