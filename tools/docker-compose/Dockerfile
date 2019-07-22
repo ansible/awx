@@ -2,7 +2,7 @@ FROM centos:7
 
 ARG UID=0
 
-RUN yum -y update && yum -y install epel-release
+RUN yum -y update && yum -y install epel-release && yum -y install https://centos7.iuscommunity.org/ius-release.rpm
 
 # sync with installer/roles/image_build/templates/Dockerfile.j2
 RUN yum -y install acl \
@@ -17,7 +17,8 @@ RUN yum -y install acl \
   gcc \
   gcc-c++ \
   GConf2 \
-  git \
+  git2u \
+  git2u-core \
   gtk3 \
   ipa-gothic-fonts \
   krb5-devel \
