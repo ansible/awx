@@ -695,9 +695,9 @@ exports[`<OrganizationAccessItem /> initially renders succesfully 1`] = `
                                                     "componentStyle": ComponentStyle {
                                                       "componentId": "ChipGroup-sc-10zu8t0-0",
                                                       "isStatic": true,
-                                                      "lastClassName": "vIGxT",
+                                                      "lastClassName": "ldAQsx",
                                                       "rules": Array [
-                                                        "--pf-c-chip-group--c-chip--MarginRight:10px;--pf-c-chip-group--c-chip--MarginBottom:10px;",
+                                                        "--pf-c-chip-group--c-chip--MarginRight:10px;--pf-c-chip-group--c-chip--MarginBottom:10px;> .pf-c-chip.pf-m-overflow button{padding:3px 8px;}",
                                                       ],
                                                     },
                                                     "displayName": "ChipGroup",
@@ -713,11 +713,12 @@ exports[`<OrganizationAccessItem /> initially renders succesfully 1`] = `
                                                 forwardedRef={null}
                                               >
                                                 <ChipGroup
-                                                  className="ChipGroup-sc-10zu8t0-0 vIGxT"
+                                                  className="ChipGroup-sc-10zu8t0-0 ldAQsx"
+                                                  displayAll={false}
                                                   showOverflowAfter={null}
                                                 >
                                                   <ul
-                                                    className="pf-c-chip-group ChipGroup-sc-10zu8t0-0 vIGxT"
+                                                    className="pf-c-chip-group ChipGroup-sc-10zu8t0-0 ldAQsx"
                                                   >
                                                     <Chip
                                                       component="li"

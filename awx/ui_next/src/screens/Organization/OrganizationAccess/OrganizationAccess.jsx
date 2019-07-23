@@ -7,14 +7,11 @@ import { OrganizationsAPI, TeamsAPI, UsersAPI } from '@api';
 import AddResourceRole from '@components/AddRole/AddResourceRole';
 import AlertModal from '@components/AlertModal';
 import DataListToolbar from '@components/DataListToolbar';
-import ErrorDetail from '@components/ErrorDetail';
-import PaginatedDataList, {
-  ToolbarAddButton,
-} from '@components/PaginatedDataList';
+import PaginatedDataList, { ToolbarAddButton } from '@components/PaginatedDataList';
 import {
   getQSConfig,
   encodeQueryString,
-  parseNamespacedQueryString,
+  parseQueryString
 } from '@util/qs';
 import { Organization } from '@types';
 
@@ -32,13 +29,13 @@ class OrganizationAccess extends React.Component {
     organization: Organization.isRequired,
   };
 
-  constructor(props) {
+  constructor (props) {
     super(props);
     this.state = {
       accessRecords: [],
-      contentError: null,
+      hasContentError: false,
       hasContentLoading: true,
-      deletionError: null,
+      hasDeletionError: false,
       deletionRecord: null,
       deletionRole: null,
       isAddModalOpen: false,
@@ -54,61 +51,58 @@ class OrganizationAccess extends React.Component {
     this.handleDeleteOpen = this.handleDeleteOpen.bind(this);
   }
 
-  componentDidMount() {
+  componentDidMount () {
     this.loadAccessList();
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate (prevProps) {
     const { location } = this.props;
 
-    const prevParams = parseNamespacedQueryString(
-      QS_CONFIG,
-      prevProps.location.search
-    );
-    const currentParams = parseNamespacedQueryString(
-      QS_CONFIG,
-      location.search
-    );
+    const prevParams = parseQueryString(QS_CONFIG, prevProps.location.search);
+    const currentParams = parseQueryString(QS_CONFIG, location.search);
 
     if (encodeQueryString(currentParams) !== encodeQueryString(prevParams)) {
       this.loadAccessList();
     }
   }
 
-  async loadAccessList() {
+  async loadAccessList () {
     const { organization, location } = this.props;
-    const params = parseNamespacedQueryString(QS_CONFIG, location.search);
+    const params = parseQueryString(QS_CONFIG, location.search);
 
-    this.setState({ contentError: null, hasContentLoading: true });
+    this.setState({ hasContentError: false, hasContentLoading: true });
     try {
       const {
-        data: { results: accessRecords = [], count: itemCount = 0 },
+        data: {
+          results: accessRecords = [],
+          count: itemCount = 0
+        }
       } = await OrganizationsAPI.readAccessList(organization.id, params);
       this.setState({ itemCount, accessRecords });
-    } catch (err) {
-      this.setState({ contentError: err });
+    } catch (error) {
+      this.setState({ hasContentError: true });
     } finally {
       this.setState({ hasContentLoading: false });
     }
   }
 
-  handleDeleteOpen(deletionRole, deletionRecord) {
+  handleDeleteOpen (deletionRole, deletionRecord) {
     this.setState({ deletionRole, deletionRecord });
   }
 
-  handleDeleteCancel() {
+  handleDeleteCancel () {
     this.setState({ deletionRole: null, deletionRecord: null });
   }
 
-  handleDeleteErrorClose() {
+  handleDeleteErrorClose () {
     this.setState({
-      deletionError: null,
+      hasDeletionError: false,
       deletionRecord: null,
-      deletionRole: null,
+      deletionRole: null
     });
   }
 
-  async handleDeleteConfirm() {
+  async handleDeleteConfirm () {
     const { deletionRole, deletionRecord } = this.state;
 
     if (!deletionRole || !deletionRecord) {
@@ -117,10 +111,7 @@ class OrganizationAccess extends React.Component {
 
     let promise;
     if (typeof deletionRole.team_id !== 'undefined') {
-      promise = TeamsAPI.disassociateRole(
-        deletionRole.team_id,
-        deletionRole.id
-      );
+      promise = TeamsAPI.disassociateRole(deletionRole.team_id, deletionRole.id);
     } else {
       promise = UsersAPI.disassociateRole(deletionRecord.id, deletionRole.id);
     }
@@ -130,72 +121,64 @@ class OrganizationAccess extends React.Component {
       await promise.then(this.loadAccessList);
       this.setState({
         deletionRole: null,
-        deletionRecord: null,
+        deletionRecord: null
       });
-    } catch (err) {
+    } catch (error) {
       this.setState({
         hasContentLoading: false,
-        deletionError: err,
+        hasDeletionError: true
       });
     }
   }
 
-  handleAddClose() {
+  handleAddClose () {
     this.setState({ isAddModalOpen: false });
   }
 
-  handleAddOpen() {
+  handleAddOpen () {
     this.setState({ isAddModalOpen: true });
   }
 
-  handleAddSuccess() {
+  handleAddSuccess () {
     this.setState({ isAddModalOpen: false });
     this.loadAccessList();
   }
 
-  render() {
+  render () {
     const { organization, i18n } = this.props;
     const {
       accessRecords,
-      contentError,
+      hasContentError,
       hasContentLoading,
       deletionRole,
       deletionRecord,
-      deletionError,
+      hasDeletionError,
       itemCount,
       isAddModalOpen,
     } = this.state;
     const canEdit = organization.summary_fields.user_capabilities.edit;
-    const isDeleteModalOpen =
-      !hasContentLoading && !deletionError && deletionRole;
+    const isDeleteModalOpen = !hasContentLoading && !hasDeletionError && deletionRole;
 
     return (
       <Fragment>
         <PaginatedDataList
-          error={contentError}
+          hasContentError={hasContentError}
           hasContentLoading={hasContentLoading}
           items={accessRecords}
           itemCount={itemCount}
           itemName="role"
           qsConfig={QS_CONFIG}
           toolbarColumns={[
-            { name: i18n._(t`Name`), key: 'first_name', isSortable: true },
-            { name: i18n._(t`Username`), key: 'username', isSortable: true },
-            { name: i18n._(t`Last Name`), key: 'last_name', isSortable: true },
+            { name: i18n._(t`First Name`), key: 'first_name', isSortable: true, isSearchable: true },
+            { name: i18n._(t`Username`), key: 'username', isSortable: true, isSearchable: true },
+            { name: i18n._(t`Last Name`), key: 'last_name', isSortable: true, isSearchable: true },
           ]}
-          renderToolbar={props => (
+          renderToolbar={(props) => (
             <DataListToolbar
               {...props}
-              additionalControls={
-                canEdit
-                  ? [
-                      <ToolbarAddButton
-                        key="add"
-                        onClick={this.handleAddOpen}
-                      />,
-                    ]
-                  : null
-              }
+              additionalControls={canEdit ? [
+                <ToolbarAddButton key="add" onClick={this.handleAddOpen} />
+              ] : null}
             />
           )}
           renderItem={accessRecord => (
@@ -222,13 +205,12 @@ class OrganizationAccess extends React.Component {
           />
         )}
         <AlertModal
-          isOpen={deletionError}
+          isOpen={hasDeletionError}
           variant="danger"
           title={i18n._(t`Error!`)}
           onClose={this.handleDeleteErrorClose}
         >
           {i18n._(t`Failed to delete role`)}
-          <ErrorDetail error={deletionError} />
         </AlertModal>
       </Fragment>
     );

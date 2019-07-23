@@ -2,17 +2,20 @@ import React, { Component, Fragment } from 'react';
 import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Card, PageSection, PageSectionVariants } from '@patternfly/react-core';
+import {
+  Card,
+  PageSection,
+  PageSectionVariants,
+} from '@patternfly/react-core';
 
 import { OrganizationsAPI } from '@api';
 import AlertModal from '@components/AlertModal';
 import DataListToolbar from '@components/DataListToolbar';
-import ErrorDetail from '@components/ErrorDetail';
 import PaginatedDataList, {
   ToolbarAddButton,
   ToolbarDeleteButton,
 } from '@components/PaginatedDataList';
-import { getQSConfig, parseNamespacedQueryString } from '@util/qs';
+import { getQSConfig, parseQueryString } from '@util/qs';
 
 import OrganizationListItem from './OrganizationListItem';
 
@@ -23,13 +26,13 @@ const QS_CONFIG = getQSConfig('organization', {
 });
 
 class OrganizationsList extends Component {
-  constructor(props) {
+  constructor (props) {
     super(props);
 
     this.state = {
       hasContentLoading: true,
-      contentError: null,
-      deletionError: null,
+      hasContentError: false,
+      hasDeletionError: false,
       organizations: [],
       selected: [],
       itemCount: 0,
@@ -43,25 +46,25 @@ class OrganizationsList extends Component {
     this.loadOrganizations = this.loadOrganizations.bind(this);
   }
 
-  componentDidMount() {
+  componentDidMount () {
     this.loadOrganizations();
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate (prevProps) {
     const { location } = this.props;
     if (location !== prevProps.location) {
       this.loadOrganizations();
     }
   }
 
-  handleSelectAll(isSelected) {
+  handleSelectAll (isSelected) {
     const { organizations } = this.state;
 
     const selected = isSelected ? [...organizations] : [];
     this.setState({ selected });
   }
 
-  handleSelect(row) {
+  handleSelect (row) {
     const { selected } = this.state;
 
     if (selected.some(s => s.id === row.id)) {
@@ -71,28 +74,27 @@ class OrganizationsList extends Component {
     }
   }
 
-  handleDeleteErrorClose() {
-    this.setState({ deletionError: null });
+  handleDeleteErrorClose () {
+    this.setState({ hasDeletionError: false });
   }
 
-  async handleOrgDelete() {
-    const { selected, itemCount } = this.state;
+  async handleOrgDelete () {
+    const { selected } = this.state;
 
-    this.setState({ hasContentLoading: true });
+    this.setState({ hasContentLoading: true, hasDeletionError: false });
     try {
-      await Promise.all(selected.map(org => OrganizationsAPI.destroy(org.id)));
-      this.setState({ itemCount: itemCount - selected.length });
+      await Promise.all(selected.map((org) => OrganizationsAPI.destroy(org.id)));
     } catch (err) {
-      this.setState({ deletionError: err });
+      this.setState({ hasDeletionError: true });
     } finally {
       await this.loadOrganizations();
     }
   }
 
-  async loadOrganizations() {
+  async loadOrganizations () {
     const { location } = this.props;
     const { actions: cachedActions } = this.state;
-    const params = parseNamespacedQueryString(QS_CONFIG, location.search);
+    const params = parseQueryString(QS_CONFIG, location.search);
 
     let optionsPromise;
     if (cachedActions) {
@@ -106,16 +108,9 @@ class OrganizationsList extends Component {
       optionsPromise,
     ]);
 
-    this.setState({ contentError: null, hasContentLoading: true });
+    this.setState({ hasContentError: false, hasContentLoading: true });
     try {
-      const [
-        {
-          data: { count, results },
-        },
-        {
-          data: { actions },
-        },
-      ] = await promises;
+      const [{ data: { count, results } }, { data: { actions } }] = await promises;
       this.setState({
         actions,
         itemCount: count,
@@ -123,27 +118,28 @@ class OrganizationsList extends Component {
         selected: [],
       });
     } catch (err) {
-      this.setState({ contentError: err });
+      this.setState(({ hasContentError: true }));
     } finally {
       this.setState({ hasContentLoading: false });
     }
   }
 
-  render() {
-    const { medium } = PageSectionVariants;
+  render () {
+    const {
+      medium,
+    } = PageSectionVariants;
     const {
       actions,
       itemCount,
-      contentError,
+      hasContentError,
       hasContentLoading,
-      deletionError,
+      hasDeletionError,
       selected,
       organizations,
     } = this.state;
     const { match, i18n } = this.props;
 
-    const canAdd =
-      actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
+    const canAdd = actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
     const isAllSelected = selected.length === organizations.length;
 
     return (
@@ -151,28 +147,18 @@ class OrganizationsList extends Component {
         <PageSection variant={medium}>
           <Card>
             <PaginatedDataList
-              contentError={contentError}
+              hasContentError={hasContentError}
               hasContentLoading={hasContentLoading}
               items={organizations}
               itemCount={itemCount}
               itemName="organization"
               qsConfig={QS_CONFIG}
               toolbarColumns={[
-                { name: i18n._(t`Name`), key: 'name', isSortable: true },
-                {
-                  name: i18n._(t`Modified`),
-                  key: 'modified',
-                  isSortable: true,
-                  isNumeric: true,
-                },
-                {
-                  name: i18n._(t`Created`),
-                  key: 'created',
-                  isSortable: true,
-                  isNumeric: true,
-                },
+                { name: i18n._(t`Name`), key: 'name', isSortable: true, isSearchable: true },
+                { name: i18n._(t`Modified`), key: 'modified', isSortable: true, isNumeric: true },
+                { name: i18n._(t`Created`), key: 'created', isSortable: true, isNumeric: true },
               ]}
-              renderToolbar={props => (
+              renderToolbar={(props) => (
                 <DataListToolbar
                   {...props}
                   showSelectAll
@@ -185,13 +171,13 @@ class OrganizationsList extends Component {
                       itemsToDelete={selected}
                       itemName="Organization"
                     />,
-                    canAdd ? (
-                      <ToolbarAddButton key="add" linkTo={`${match.url}/add`} />
-                    ) : null,
+                    canAdd
+                      ? <ToolbarAddButton key="add" linkTo={`${match.url}/add`} />
+                      : null,
                   ]}
                 />
               )}
-              renderItem={o => (
+              renderItem={(o) => (
                 <OrganizationListItem
                   key={o.id}
                   organization={o}
@@ -201,21 +187,19 @@ class OrganizationsList extends Component {
                 />
               )}
               emptyStateControls={
-                canAdd ? (
-                  <ToolbarAddButton key="add" linkTo={`${match.url}/add`} />
-                ) : null
+                canAdd ? <ToolbarAddButton key="add" linkTo={`${match.url}/add`} />
+                  : null
               }
             />
           </Card>
         </PageSection>
         <AlertModal
-          isOpen={deletionError}
+          isOpen={hasDeletionError}
           variant="danger"
           title={i18n._(t`Error!`)}
           onClose={this.handleDeleteErrorClose}
         >
           {i18n._(t`Failed to delete one or more organizations.`)}
-          <ErrorDetail error={deletionError} />
         </AlertModal>
       </Fragment>
     );

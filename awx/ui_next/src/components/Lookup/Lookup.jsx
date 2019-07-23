@@ -25,7 +25,7 @@ import DataListToolbar from '../DataListToolbar';
 import CheckboxListItem from '../CheckboxListItem';
 import SelectedList from '../SelectedList';
 import { ChipGroup, Chip } from '../Chip';
-import { getQSConfig, parseNamespacedQueryString } from '../../util/qs';
+import { getQSConfig, parseQueryString } from '../../util/qs';
 
 const InputGroup = styled(PFInputGroup)`
   ${props =>
@@ -95,7 +95,7 @@ class Lookup extends React.Component {
       getItems,
       location: { search },
     } = this.props;
-    const queryParams = parseNamespacedQueryString(this.qsConfig, search);
+    const queryParams = parseQueryString(this.qsConfig, search);
 
     this.setState({ error: false });
     try {

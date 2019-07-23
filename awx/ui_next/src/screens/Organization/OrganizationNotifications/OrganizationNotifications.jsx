@@ -9,7 +9,7 @@ import AlertModal from '@components/AlertModal';
 import ErrorDetail from '@components/ErrorDetail';
 import NotificationListItem from '@components/NotificationsList/NotificationListItem';
 import PaginatedDataList from '@components/PaginatedDataList';
-import { getQSConfig, parseNamespacedQueryString } from '@util/qs';
+import { getQSConfig, parseQueryString } from '@util/qs';
 
 const QS_CONFIG = getQSConfig('notification', {
   page: 1,
@@ -18,18 +18,18 @@ const QS_CONFIG = getQSConfig('notification', {
 });
 
 const COLUMNS = [
-  { key: 'name', name: 'Name', isSortable: true },
+  { key: 'name', name: 'Name', isSortable: true, isSearchable: true },
   { key: 'modified', name: 'Modified', isSortable: true, isNumeric: true },
   { key: 'created', name: 'Created', isSortable: true, isNumeric: true },
 ];
 
 class OrganizationNotifications extends Component {
-  constructor(props) {
+  constructor (props) {
     super(props);
     this.state = {
       contentError: null,
       hasContentLoading: true,
-      toggleError: null,
+      toggleError: false,
       toggleLoading: false,
       itemCount: 0,
       notifications: [],
@@ -38,27 +38,25 @@ class OrganizationNotifications extends Component {
       typeLabels: null,
     };
     this.handleNotificationToggle = this.handleNotificationToggle.bind(this);
-    this.handleNotificationErrorClose = this.handleNotificationErrorClose.bind(
-      this
-    );
+    this.handleNotificationErrorClose = this.handleNotificationErrorClose.bind(this);
     this.loadNotifications = this.loadNotifications.bind(this);
   }
 
-  componentDidMount() {
+  componentDidMount () {
     this.loadNotifications();
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate (prevProps) {
     const { location } = this.props;
     if (location !== prevProps.location) {
       this.loadNotifications();
     }
   }
 
-  async loadNotifications() {
+  async loadNotifications () {
     const { id, location } = this.props;
     const { typeLabels } = this.state;
-    const params = parseNamespacedQueryString(QS_CONFIG, location.search);
+    const params = parseQueryString(QS_CONFIG, location.search);
 
     const promises = [OrganizationsAPI.readNotificationTemplates(id, params)];
 
@@ -68,12 +66,14 @@ class OrganizationNotifications extends Component {
 
     this.setState({ contentError: null, hasContentLoading: true });
     try {
-      const [
-        {
-          data: { count: itemCount = 0, results: notifications = [] },
-        },
-        optionsResponse,
-      ] = await Promise.all(promises);
+      const {
+        data: {
+          count: itemCount = 0,
+          results: notifications = [],
+        }
+      } = await OrganizationsAPI.readNotificationTemplates(id, params);
+
+      const optionsResponse = await OrganizationsAPI.readOptionsNotificationTemplates(id, params);
 
       let idMatchParams;
       if (notifications.length > 0) {
@@ -122,7 +122,7 @@ class OrganizationNotifications extends Component {
     }
   }
 
-  async handleNotificationToggle(notificationId, isCurrentlyOn, status) {
+  async handleNotificationToggle (notificationId, isCurrentlyOn, status) {
     const { id } = this.props;
 
     let stateArrayName;
@@ -135,15 +135,13 @@ class OrganizationNotifications extends Component {
     let stateUpdateFunction;
     if (isCurrentlyOn) {
       // when switching off, remove the toggled notification id from the array
-      stateUpdateFunction = prevState => ({
-        [stateArrayName]: prevState[stateArrayName].filter(
-          i => i !== notificationId
-        ),
+      stateUpdateFunction = (prevState) => ({
+        [stateArrayName]: prevState[stateArrayName].filter(i => i !== notificationId)
       });
     } else {
       // when switching on, add the toggled notification id to the array
-      stateUpdateFunction = prevState => ({
-        [stateArrayName]: prevState[stateArrayName].concat(notificationId),
+      stateUpdateFunction = (prevState) => ({
+        [stateArrayName]: prevState[stateArrayName].concat(notificationId)
       });
     }
 
@@ -157,17 +155,17 @@ class OrganizationNotifications extends Component {
       );
       this.setState(stateUpdateFunction);
     } catch (err) {
-      this.setState({ toggleError: err });
+      this.setState({ toggleError: true });
     } finally {
       this.setState({ toggleLoading: false });
     }
   }
 
-  handleNotificationErrorClose() {
-    this.setState({ toggleError: null });
+  handleNotificationErrorClose () {
+    this.setState({ toggleError: false });
   }
 
-  render() {
+  render () {
     const { canToggleNotifications, i18n } = this.props;
     const {
       contentError,
@@ -178,7 +176,7 @@ class OrganizationNotifications extends Component {
       notifications,
       successTemplateIds,
       errorTemplateIds,
-      typeLabels,
+      typeLabels
     } = this.state;
 
     return (
@@ -191,7 +189,7 @@ class OrganizationNotifications extends Component {
           itemName="notification"
           qsConfig={QS_CONFIG}
           toolbarColumns={COLUMNS}
-          renderItem={notification => (
+          renderItem={(notification) => (
             <NotificationListItem
               key={notification.id}
               notification={notification}
@@ -205,9 +203,9 @@ class OrganizationNotifications extends Component {
           )}
         />
         <AlertModal
-          isOpen={toggleError}
           variant="danger"
           title={i18n._(t`Error!`)}
+          isOpen={toggleError && !toggleLoading}
           onClose={this.handleNotificationErrorClose}
         >
           {i18n._(t`Failed to toggle notification.`)}
