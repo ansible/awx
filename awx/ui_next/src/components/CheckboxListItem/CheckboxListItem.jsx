@@ -10,7 +10,14 @@ import {
 import DataListRadio from '@components/DataListRadio';
 import VerticalSeparator from '../VerticalSeparator';
 
-const CheckboxListItem = ({ itemId, name, label, isSelected, onSelect, isRadio }) => {
+const CheckboxListItem = ({
+  itemId,
+  name,
+  label,
+  isSelected,
+  onSelect,
+  isRadio,
+}) => {
   const CheckboxRadio = isRadio ? DataListRadio : DataListCheck;
   return (
     <DataListItem key={itemId} aria-labelledby={`check-action-item-${itemId}`}>
