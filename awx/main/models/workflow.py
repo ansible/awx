@@ -19,7 +19,7 @@ from awx.main.models.notifications import (
     NotificationTemplate,
     JobNotificationMixin
 )
-from awx.main.models.base import BaseModel, CreatedModifiedModel, VarsDictProperty
+from awx.main.models.base import CreatedModifiedModel, VarsDictProperty
 from awx.main.models.rbac import (
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
     ROLE_SINGLETON_SYSTEM_AUDITOR
@@ -207,11 +207,14 @@ class WorkflowJobNode(WorkflowNodeBase):
     def prompts_dict(self, *args, **kwargs):
         r = super(WorkflowJobNode, self).prompts_dict(*args, **kwargs)
         # Explanation - WFJT extra_vars still break pattern, so they are not
-        # put through prompts processing, but inventory is only accepted
+        # put through prompts processing, but inventory and others are only accepted
         # if JT prompts for it, so it goes through this mechanism
-        if self.workflow_job and self.workflow_job.inventory_id:
-            # workflow job inventory takes precedence
-            r['inventory'] = self.workflow_job.inventory
+        if self.workflow_job:
+            if self.workflow_job.inventory_id:
+                # workflow job inventory takes precedence
+                r['inventory'] = self.workflow_job.inventory
+            if self.workflow_job.char_prompts:
+                r.update(self.workflow_job.char_prompts)
         return r
 
     def get_job_kwargs(self):
@@ -298,7 +301,7 @@ class WorkflowJobNode(WorkflowNodeBase):
         return data
 
 
-class WorkflowJobOptions(BaseModel):
+class WorkflowJobOptions(LaunchTimeConfigBase):
     class Meta:
         abstract = True
 
@@ -318,10 +321,11 @@ class WorkflowJobOptions(BaseModel):
 
     @classmethod
     def _get_unified_job_field_names(cls):
-        return set(f.name for f in WorkflowJobOptions._meta.fields) | set(
-            # NOTE: if other prompts are added to WFJT, put fields in WJOptions, remove inventory
-            ['name', 'description', 'schedule', 'survey_passwords', 'labels', 'inventory']
+        r = set(f.name for f in WorkflowJobOptions._meta.fields) | set(
+            ['name', 'description', 'survey_passwords', 'labels', 'limit', 'scm_branch']
         )
+        r.remove('char_prompts')  # needed due to copying launch config to launch config
+        return r
 
     def _create_workflow_nodes(self, old_node_list, user=None):
         node_links = {}
@@ -372,16 +376,15 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
         on_delete=models.SET_NULL,
         related_name='workflows',
     )
-    inventory = models.ForeignKey(
-        'Inventory',
-        related_name='%(class)ss',
-        blank=True,
-        null=True,
-        default=None,
-        on_delete=models.SET_NULL,
-        help_text=_('Inventory applied to all job templates in workflow that prompt for inventory.'),
-    )
     ask_inventory_on_launch = AskForField(
+        blank=True,
+        default=False,
+    )
+    ask_limit_on_launch = AskForField(
+        blank=True,
+        default=False,
+    )
+    ask_scm_branch_on_launch = AskForField(
         blank=True,
         default=False,
     )
@@ -515,7 +518,7 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
         return WorkflowJob.objects.filter(workflow_job_template=self)
 
 
-class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificationMixin, LaunchTimeConfigBase):
+class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificationMixin):
     class Meta:
         app_label = 'main'
         ordering = ('id',)

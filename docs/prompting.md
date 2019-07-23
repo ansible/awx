@@ -59,7 +59,7 @@ actions in the API.
  - POST to `/api/v2/job_templates/N/launch/`
    - can accept all prompt-able fields
  - POST to `/api/v2/workflow_job_templates/N/launch/`
-   - can accept extra_vars and inventory
+   - can accept certain fields, see `workflow.md`
  - POST to `/api/v2/system_job_templates/N/launch/`
    - can accept certain fields, with no user configuration
 
@@ -174,7 +174,7 @@ job. If a user creates a node that would do this, a 400 response will be returne
 
 Workflow JTs are different than other cases, because they do not have a
 template directly linked, so their prompts are a form of action-at-a-distance.
-When the node's prompts are gathered, any prompts from the workflow job
+When the node's prompts are gathered to spawn its job, any prompts from the workflow job
 will take precedence over the node's value.
 
 As a special exception, `extra_vars` from a workflow will not obey JT survey
@@ -182,8 +182,7 @@ and prompting rules, both both historical and ease-of-understanding reasons.
 This behavior may change in the future.
 
 Other than that exception, JT prompting rules are still adhered to when
-a job is spawned, although so far this only applies to the workflow job's
-`inventory` field.
+a job is spawned.
 
 #### Job Relaunch and Re-scheduling
 

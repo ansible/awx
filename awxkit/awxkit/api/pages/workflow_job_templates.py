@@ -48,8 +48,9 @@ class WorkflowJobTemplate(HasCopy, HasCreate, HasNotifications, HasSurvey, Unifi
 
         if kwargs.get('inventory'):
             payload.inventory = kwargs.get('inventory').id
-        if kwargs.get('ask_inventory_on_launch'):
-            payload.ask_inventory_on_launch = kwargs.get('ask_inventory_on_launch')
+        for field_name in ('ask_inventory_on_launch', 'limit', 'scm_branch', 'ask_scm_branch_on_launch'):
+            if field_name in kwargs:
+                setattr(payload, field_name, kwargs.get(field_name))
 
         return payload
 

@@ -69,7 +69,9 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
                     SLICE_TEMPLATE: i18n._('Slice Job Template'),
                     JOB_EXPLANATION: i18n._('Explanation'),
                     SOURCE_WORKFLOW_JOB: i18n._('Source Workflow'),
-                    INVENTORY: i18n._('Inventory')
+                    INVENTORY: i18n._('Inventory'),
+                    LIMIT: i18n._('Inventory Limit'),
+                    SCM_BRANCH: i18n._('SCM Branch')
                 },
                 details: {
                     HEADER: i18n._('DETAILS'),

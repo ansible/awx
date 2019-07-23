@@ -3314,11 +3314,14 @@ class WorkflowJobTemplateSerializer(JobTemplateMixin, LabelsListMixin, UnifiedJo
         'admin', 'execute',
         {'copy': 'organization.workflow_admin'}
     ]
+    limit = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
+    scm_branch = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
 
     class Meta:
         model = WorkflowJobTemplate
         fields = ('*', 'extra_vars', 'organization', 'survey_enabled', 'allow_simultaneous',
-                  'ask_variables_on_launch', 'inventory', 'ask_inventory_on_launch',)
+                  'ask_variables_on_launch', 'inventory', 'limit', 'scm_branch',
+                  'ask_inventory_on_launch', 'ask_scm_branch_on_launch', 'ask_limit_on_launch',)
 
     def get_related(self, obj):
         res = super(WorkflowJobTemplateSerializer, self).get_related(obj)
@@ -3344,6 +3347,22 @@ class WorkflowJobTemplateSerializer(JobTemplateMixin, LabelsListMixin, UnifiedJo
     def validate_extra_vars(self, value):
         return vars_validate_or_raise(value)
 
+    def validate(self, attrs):
+        attrs = super(WorkflowJobTemplateSerializer, self).validate(attrs)
+
+        # process char_prompts, these are not direct fields on the model
+        mock_obj = self.Meta.model()
+        for field_name in ('scm_branch', 'limit'):
+            if field_name in attrs:
+                setattr(mock_obj, field_name, attrs[field_name])
+                attrs.pop(field_name)
+
+        # Model `.save` needs the container dict, not the psuedo fields
+        if mock_obj.char_prompts:
+            attrs['char_prompts'] = mock_obj.char_prompts
+
+        return attrs
+
 
 class WorkflowJobTemplateWithSpecSerializer(WorkflowJobTemplateSerializer):
     '''
@@ -3356,13 +3375,15 @@ class WorkflowJobTemplateWithSpecSerializer(WorkflowJobTemplateSerializer):
 
 
 class WorkflowJobSerializer(LabelsListMixin, UnifiedJobSerializer):
+    limit = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
+    scm_branch = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
 
     class Meta:
         model = WorkflowJob
         fields = ('*', 'workflow_job_template', 'extra_vars', 'allow_simultaneous',
                   'job_template', 'is_sliced_job',
                   '-execution_node', '-event_processing_finished', '-controller_node',
-                  'inventory',)
+                  'inventory', 'limit', 'scm_branch',)
 
     def get_related(self, obj):
         res = super(WorkflowJobSerializer, self).get_related(obj)
@@ -4180,12 +4201,16 @@ class WorkflowJobLaunchSerializer(BaseSerializer):
         queryset=Inventory.objects.all(),
         required=False, write_only=True
     )
+    limit = serializers.CharField(required=False, write_only=True, allow_blank=True)
+    scm_branch = serializers.CharField(required=False, write_only=True, allow_blank=True)
     workflow_job_template_data = serializers.SerializerMethodField()
 
     class Meta:
         model = WorkflowJobTemplate
-        fields = ('ask_inventory_on_launch', 'can_start_without_user_input', 'defaults', 'extra_vars',
-                  'inventory', 'survey_enabled', 'variables_needed_to_start',
+        fields = ('ask_inventory_on_launch', 'ask_limit_on_launch', 'ask_scm_branch_on_launch',
+                  'can_start_without_user_input', 'defaults', 'extra_vars',
+                  'inventory', 'limit', 'scm_branch',
+                  'survey_enabled', 'variables_needed_to_start',
                   'node_templates_missing', 'node_prompts_rejected',
                   'workflow_job_template_data', 'survey_enabled', 'ask_variables_on_launch')
         read_only_fields = ('ask_inventory_on_launch', 'ask_variables_on_launch')
@@ -4225,9 +4250,14 @@ class WorkflowJobLaunchSerializer(BaseSerializer):
 
         WFJT_extra_vars = template.extra_vars
         WFJT_inventory = template.inventory
+        WFJT_limit = template.limit
+        WFJT_scm_branch = template.scm_branch
         super(WorkflowJobLaunchSerializer, self).validate(attrs)
         template.extra_vars = WFJT_extra_vars
         template.inventory = WFJT_inventory
+        template.limit = WFJT_limit
+        template.scm_branch = WFJT_scm_branch
+
         return accepted
 
 

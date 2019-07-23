@@ -25,6 +25,7 @@ class WorkflowJobTemplateNode(HasCreate, base.Base):
             'diff_mode',
             'extra_data',
             'limit',
+            'scm_branch',
             'job_tags',
             'job_type',
             'skip_tags',

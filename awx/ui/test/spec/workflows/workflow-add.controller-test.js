@@ -144,6 +144,8 @@ describe('Controller: WorkflowAdd', () => {
                 description: "This is a test description",
                 organization: undefined,
                 inventory: undefined,
+                limit: undefined,
+                scm_branch: undefined,
                 labels: undefined,
                 variables: undefined,
                 allow_simultaneous: undefined,

@@ -140,6 +140,26 @@
                         </div>
                     </div>
 
+                    <!-- LIMIT -->
+                    <div class="WorkflowResults-resultRow" ng-show="workflow.limit">
+                      <label class="WorkflowResults-resultRowLabel">
+                          {{ strings.labels.LIMIT }}
+                      </label>
+                      <div class="WorkflowResults-resultRowText">
+                          {{ workflow.limit }}
+                      </div>
+                    </div>
+
+                    <!-- BRANCH -->
+                    <div class="WorkflowResults-resultRow" ng-show="workflow.scm_branch">
+                      <label class="WorkflowResults-resultRowLabel">
+                          {{ strings.labels.SCM_BRANCH }}
+                      </label>
+                      <div class="WorkflowResults-resultRowText">
+                          {{ workflow.scm_branch }}
+                      </div>
+                    </div>
+
                     <!-- TEMPLATE DETAIL -->
                     <div class="WorkflowResults-resultRow"
                         ng-show="workflow.summary_fields.workflow_job_template.name">

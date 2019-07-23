@@ -89,6 +89,34 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n) {
                     },
                     ngDisabled: '!(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddOrEdit) || !canEditInventory',
                 },
+                limit: {
+                    label: i18n._('Limit'),
+                    type: 'text',
+                    column: 1,
+                    awPopOver: "<p>" + i18n._("Select a limit for the workflow. This limit is applied to all job template nodes that prompt for a limit.") + "</p>",
+                    dataTitle: i18n._('Limit'),
+                    dataPlacement: 'right',
+                    dataContainer: "body",
+                    subCheckbox: {
+                        variable: 'ask_limit_on_launch',
+                        text: i18n._('Prompt on launch')
+                    },
+                    ngDisabled: '!(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddOrEdit) || !canEditInventory',
+                },
+                scm_branch: {
+                    label: i18n._('SCM Branch'),
+                    type: 'text',
+                    column: 1,
+                    awPopOver: "<p>" + i18n._("Select a branch for the workflow. This branch is applied to all job template nodes that prompt for a branch.") + "</p>",
+                    dataTitle: i18n._('SCM Branch'),
+                    dataPlacement: 'right',
+                    dataContainer: "body",
+                    subCheckbox: {
+                        variable: 'ask_scm_branch_on_launch',
+                        text: i18n._('Prompt on launch')
+                    },
+                    ngDisabled: '!(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddOrEdit)',
+                },
                 labels: {
                     label: i18n._('Labels'),
                     type: 'select',
