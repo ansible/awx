@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { string, bool, func } from 'prop-types';
-import styled from 'styled-components';
 
 function DataListRadio({
   className = '',
@@ -17,7 +16,7 @@ function DataListRadio({
         <input
           {...props}
           type="radio"
-          onChange={event => onChange(event.currentTarget.checked, event)}
+          onChange={event => onChange(event.currentTarget.checked, event) }
           aria-invalid={!isValid}
           disabled={isDisabled}
           checked={isChecked || checked}
@@ -43,6 +42,6 @@ DataListRadio.defaultProps = {
   checked: false,
   onChange: () => {},
   'aria-labelledby': '',
-}
+};
 
 export default DataListRadio;

@@ -41,11 +41,13 @@ class Lookup extends React.Component {
     super(props);
 
     this.assertCorrectValueType();
+    let lookupSelectedItems = [];
+    if (props.value) {
+      lookupSelectedItems = props.multiple ? [...props.value] : [props.value];
+    }
     this.state = {
       isModalOpen: false,
-      lookupSelectedItems: props.multiple
-        ? [...props.value] || []
-        : [props.value],
+      lookupSelectedItems,
       results: [],
       count: 0,
       error: null,
@@ -144,9 +146,11 @@ class Lookup extends React.Component {
     // This handles the case where the user closes/cancels the modal and
     // opens it again
     if (!isModalOpen) {
-      this.setState({
-        lookupSelectedItems: multiple ? [...value] : [value],
-      });
+      let lookupSelectedItems = [];
+      if (value) {
+        lookupSelectedItems = multiple ? [...value] : [value];
+      }
+      this.setState({ lookupSelectedItems });
     }
     this.setState(prevState => ({
       isModalOpen: !prevState.isModalOpen,
@@ -156,7 +160,9 @@ class Lookup extends React.Component {
   saveModal() {
     const { onLookupSave, name, multiple } = this.props;
     const { lookupSelectedItems } = this.state;
-    const value = multiple ? lookupSelectedItems : lookupSelectedItems[0];
+    const value = multiple
+      ? lookupSelectedItems
+      : lookupSelectedItems[0] || null;
     onLookupSave(value, name);
     this.handleModalToggle();
   }

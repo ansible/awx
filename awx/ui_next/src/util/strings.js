@@ -2,7 +2,7 @@
 export function pluralize(str) {
   const lastChar = str[str.length - 1];
   if (lastChar === 's') {
-    return `${str}es`
+    return `${str}es`;
   }
   if (lastChar === 'y') {
     return `${str.substr(0, str.length - 1)}ies`;

@@ -61,7 +61,7 @@ describe('<JobTemplateForm />', () => {
     expect(form.state('values').job_type).toEqual('new job type');
     wrapper.find('InventoriesLookup').prop('onChange')({
       id: 3,
-      name: 'inventory'
+      name: 'inventory',
     });
     expect(form.state('values').inventory).toEqual(3);
     wrapper.find('input#template-project').simulate('change', {

@@ -225,18 +225,24 @@ describe('<Lookup />', () => {
         onLookupSave={onLookupSaveFn}
         getItems={() => ({
           data: {
-            results: [ mockData ],
+            results: [mockData],
             count: 1,
-          }
+          },
         })}
         sortedColumnKey="name"
       />
     );
-    wrapper.find('Lookup').instance().toggleSelected({
-      id: 1,
-      name: 'foo',
-    });
-    wrapper.find('Lookup').instance().saveModal();
+    wrapper
+      .find('Lookup')
+      .instance()
+      .toggleSelected({
+        id: 1,
+        name: 'foo',
+      });
+    wrapper
+      .find('Lookup')
+      .instance()
+      .saveModal();
     expect(onLookupSaveFn).toHaveBeenCalledWith(
       {
         id: 1,
