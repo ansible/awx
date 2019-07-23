@@ -14,6 +14,7 @@ import { JobsAPI } from '@api';
 import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
 import JobEvent from './JobEvent';
+import JobEventSkeleton from './JobEventSkeleton';
 import MenuControls from './shared/MenuControls';
 
 const OutputToolbar = styled.div`
@@ -37,9 +38,15 @@ const OutputFooter = styled.div`
   flex: 1;
 `;
 
-class JobOutput extends Component {
-  listRef = React.createRef();
+function range(low, high) {
+  const numbers = [];
+  for (let n = low; n <= high; n++) {
+    numbers.push(n);
+  }
+  return numbers;
+}
 
+class JobOutput extends Component {
   constructor(props) {
     super(props);
 
@@ -47,10 +54,7 @@ class JobOutput extends Component {
       contentError: null,
       hasContentLoading: true,
       results: {},
-      scrollToIndex: -1,
-      loadedRowCount: 0,
-      loadedRowsMap: {},
-      loadingRowCount: 0,
+      currentlyLoading: [],
       remoteRowCount: 0,
     };
 
@@ -74,10 +78,32 @@ class JobOutput extends Component {
     this.loadJobEvents();
   }
 
+  componentDidUpdate(prevProps, prevState) {
+    // recompute row heights for any job events that have transitioned
+    // from loading to loaded
+    const { currentlyLoading } = this.state;
+    let shouldRecomputeRowHeights = false;
+    prevState.currentlyLoading
+      .filter(n => !currentlyLoading.includes(n))
+      .forEach(n => {
+        shouldRecomputeRowHeights = true;
+        this.cache.clear(n);
+      });
+    if (shouldRecomputeRowHeights) {
+      this.listRef.recomputeRowHeights();
+    }
+  }
+
+  listRef = React.createRef();
+
   async loadJobEvents() {
     const { job } = this.props;
 
-    this.setState({ hasContentLoading: true });
+    const loadRange = range(1, 50);
+    this.setState(({ currentlyLoading }) => ({
+      hasContentLoading: true,
+      currentlyLoading: currentlyLoading.concat(loadRange),
+    }));
     try {
       const {
         data: { results: newResults = [], count },
@@ -85,7 +111,6 @@ class JobOutput extends Component {
         page_size: 50,
         order_by: 'start_line',
       });
-
       this.setState(({ results }) => {
         newResults.forEach(jobEvent => {
           results[jobEvent.counter] = jobEvent;
@@ -95,21 +120,23 @@ class JobOutput extends Component {
     } catch (err) {
       this.setState({ contentError: err });
     } finally {
-      this.setState({ hasContentLoading: false });
+      this.setState(({ currentlyLoading }) => ({
+        hasContentLoading: false,
+        currentlyLoading: currentlyLoading.filter(n => !loadRange.includes(n)),
+      }));
     }
   }
 
   isRowLoaded({ index }) {
-    const { results } = this.state;
-    return !!results[index];
+    const { results, currentlyLoading } = this.state;
+    if (results[index]) {
+      return true;
+    }
+    return currentlyLoading.includes(index);
   }
 
   rowRenderer({ index, parent, key, style }) {
     const { results } = this.state;
-    if (!results[index]) {
-      return;
-    }
-    const { created, event, stdout, start_line } = results[index];
     return (
       <CellMeasurer
         key={key}
@@ -118,33 +145,43 @@ class JobOutput extends Component {
         rowIndex={index}
         columnIndex={0}
       >
-        <JobEvent
-          className="row"
-          style={style}
-          created={created}
-          event={event}
-          start_line={start_line}
-          stdout={stdout}
-        />
+        {results[index] ? (
+          <JobEvent className="row" style={style} {...results[index]} />
+        ) : (
+          <JobEventSkeleton
+            className="row"
+            style={style}
+            counter={index}
+            contentLength={80}
+          />
+        )}
       </CellMeasurer>
     );
   }
 
-  async loadMoreRows({ startIndex, stopIndex }) {
+  loadMoreRows({ startIndex, stopIndex }) {
     const { job } = this.props;
 
-    let params = {
+    const loadRange = range(startIndex, stopIndex);
+    this.setState(({ currentlyLoading }) => ({
+      currentlyLoading: currentlyLoading.concat(loadRange),
+    }));
+    const params = {
       counter__gte: startIndex,
       counter__lte: stopIndex,
       order_by: 'start_line',
     };
-
-    return await JobsAPI.readEvents(job.id, job.type, params).then(response => {
-      this.setState(({ results }) => {
+    return JobsAPI.readEvents(job.id, job.type, params).then(response => {
+      this.setState(({ results, currentlyLoading }) => {
         response.data.results.forEach(jobEvent => {
           results[jobEvent.counter] = jobEvent;
         });
-        return { results };
+        return {
+          results,
+          currentlyLoading: currentlyLoading.filter(
+            n => !loadRange.includes(n)
+          ),
+        };
       });
     });
   }
@@ -152,8 +189,8 @@ class JobOutput extends Component {
   handleScrollPrevious() {
     const startIndex = this.listRef.Grid._renderedRowStartIndex;
     const stopIndex = this.listRef.Grid._renderedRowStopIndex;
-    const range = stopIndex - startIndex + 1;
-    this.listRef.scrollToRow(Math.max(0, startIndex - range));
+    const scrollRange = stopIndex - startIndex + 1;
+    this.listRef.scrollToRow(Math.max(0, startIndex - scrollRange));
   }
 
   handleScrollNext() {
@@ -168,7 +205,6 @@ class JobOutput extends Component {
   handleScrollBottom() {
     const { remoteRowCount } = this.state;
     this.listRef.scrollToRow(remoteRowCount - 1);
-    this.setState({ scrollToIndex: remoteRowCount - 1 });
   }
 
   handleResize({ width }) {
@@ -181,12 +217,7 @@ class JobOutput extends Component {
 
   render() {
     const { job } = this.props;
-    const {
-      hasContentLoading,
-      contentError,
-      scrollToIndex,
-      remoteRowCount,
-    } = this.state;
+    const { hasContentLoading, contentError, remoteRowCount } = this.state;
 
     if (hasContentLoading) {
       return <ContentLoading />;
@@ -229,8 +260,8 @@ class JobOutput extends Component {
                       rowHeight={this.cache.rowHeight}
                       rowRenderer={this.rowRenderer}
                       scrollToAlignment="start"
-                      scrollToIndex={scrollToIndex}
                       width={width}
+                      overscanRowCount={20}
                     />
                   );
                 }}

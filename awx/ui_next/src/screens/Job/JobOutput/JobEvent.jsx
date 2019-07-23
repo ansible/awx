@@ -98,11 +98,11 @@ function getTimestamp({ created }) {
   const dateMinutes = date.getMinutes();
   const dateSeconds = date.getSeconds();
 
-  const stampHour = dateHours < 10 ? `0${dateHours}` : dateHours;
-  const stampMinute = dateMinutes < 10 ? `0${dateMinutes}` : dateMinutes;
-  const stampSecond = dateSeconds < 10 ? `0${dateSeconds}` : dateSeconds;
+  const stampHours = dateHours < 10 ? `0${dateHours}` : dateHours;
+  const stampMinutes = dateMinutes < 10 ? `0${dateMinutes}` : dateMinutes;
+  const stampSeconds = dateSeconds < 10 ? `0${dateSeconds}` : dateSeconds;
 
-  return `${stampHour}:${stampMinute}:${stampSecond}`;
+  return `${stampHours}:${stampMinutes}:${stampSeconds}`;
 }
 
 function getLineTextHtml({ created, event, start_line, stdout }) {
@@ -127,13 +127,16 @@ function getLineTextHtml({ created, event, start_line, stdout }) {
   });
 }
 
-function JobEvent({ created, event, stdout, start_line, ...rest }) {
+function JobEvent({ counter, created, event, stdout, start_line, ...rest }) {
   return !stdout ? null : (
     <JobEventWrapper {...rest}>
       {getLineTextHtml({ created, event, start_line, stdout }).map(
         ({ lineNumber, html }) =>
-          lineNumber > 0 && (
-            <JobEventLine key={lineNumber} isFirst={lineNumber === 1}>
+          lineNumber !== 0 && (
+            <JobEventLine
+              key={`${counter}-${lineNumber}`}
+              isFirst={lineNumber === 1}
+            >
               <JobEventLineToggle />
               <JobEventLineNumber>{lineNumber}</JobEventLineNumber>
               <JobEventLineText
