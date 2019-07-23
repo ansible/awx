@@ -68,8 +68,12 @@ angular.module('notifications', [
                                     var url = getBasePath('notification_templates') + notificationTemplateId + '/';
                                     rest.setUrl(url);
                                     return rest.get()
-                                        .then(function(data) {
-                                            return data.data;
+                                        .then(function(res) {
+                                            if (_.get(res, ['data', 'notification_type'] === 'webhook') &&
+                                                _.get(res, ['data', 'notification_configuration', 'http_method'])) {
+                                                res.data.notification_configuration.http_method = res.data.notification_configuration.http_method.toUpperCase();
+                                            }
+                                            return res.data;
                                         }).catch(function(response) {
                                             ProcessErrors(null, response.data, response.status, null, {
                                                 hdr: 'Error!',

@@ -429,7 +429,7 @@ export default ['i18n', function(i18n) {
                 type: 'select',
                 ngOptions: 'choice.id as choice.name for choice in httpMethodChoices',
                 default: 'post',
-                awPopOver: i18n._('Specify an HTTP method for the webhook. Acceptable choices are: POST or PATCH'),
+                awPopOver: i18n._('Specify an HTTP method for the webhook. Acceptable choices are: POST or PUT'),
                 awRequiredWhen: {
                     reqExpression: "webhook_required",
                     init: "false"
