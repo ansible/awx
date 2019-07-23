@@ -2048,8 +2048,10 @@ class azure_rm(PluginFileInjector):
             'provisioning_state': 'provisioning_state | title',
             'computer_name': 'name',
             'type': 'resource_type',
-            'private_ip': 'private_ipv4_addresses[0]',
-            'public_ip': 'public_ipv4_addresses[0]',
+            'private_ip': 'private_ipv4_addresses[0] if private_ipv4_addresses else None',
+            'public_ip': 'public_ipv4_addresses[0] if public_ipv4_addresses else None',
+            'public_ip_name': 'public_ip_name if public_ip_name is defined else None',
+            'public_ip_id': 'public_ip_id if public_ip_id is defined else None',
             'tags': 'tags if tags else None'
         }
         # Special functionality from script
