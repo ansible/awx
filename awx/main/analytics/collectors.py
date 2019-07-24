@@ -160,7 +160,7 @@ def _get_isolated_datetime(last_check):
 
 
 @register('instance_info')
-def instance_info(since):
+def instance_info(since, include_hostnames=False):
     info = {}
     instances = models.Instance.objects.values_list('hostname').values(
         'uuid', 'version', 'capacity', 'cpu', 'memory', 'managed_by_policy', 'hostname', 'last_isolated_check', 'enabled')
@@ -175,6 +175,8 @@ def instance_info(since):
             'last_isolated_check': _get_isolated_datetime(instance['last_isolated_check']),
             'enabled': instance['enabled']
         }
+        if include_hostnames is True:
+            instance_info['hostname'] = instance['hostname']
         info[instance['uuid']] = instance_info
     return info
 
