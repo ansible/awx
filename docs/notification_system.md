@@ -218,6 +218,14 @@ https://gist.github.com/matburt/73bfbf85c2443f39d272
 The link below shows how to define an endpoint and parse headers and json content. It doesn't show how to configure Flask for HTTPS, but is fairly straightforward:
 http://flask.pocoo.org/snippets/111/
 
+You can also link an `httpbin` service to the development environment for testing webhooks using:
+
+```
+docker run --network="tools_default" --name httpbin -p 8204:80 kennethreitz/httpbin
+```
+
+This will create an `httpbin` service reachable from the AWX container at `http://httpbin/post`, `http://httpbin/put`, etc. Outside of the container, you can reach the service at `http://localhost:8204`.
+
 
 ## Grafana
 

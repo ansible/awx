@@ -4237,6 +4237,8 @@ class NotificationTemplateSerializer(BaseSerializer):
                 continue
             if field_type == "password" and field_val == "$encrypted$" and object_actual is not None:
                 attrs['notification_configuration'][field] = object_actual.notification_configuration[field]
+            if field == "http_method" and field_val.lower() not in ['put', 'post']:
+                error_list.append(_("HTTP method must be either 'POST' or 'PUT'."))
         if missing_fields:
             error_list.append(_("Missing required fields for Notification Configuration: {}.").format(missing_fields))
         if incorrect_type_fields:

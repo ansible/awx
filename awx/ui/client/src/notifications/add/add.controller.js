@@ -87,6 +87,15 @@ export default ['Rest', 'Wait', 'NotificationsFormObject',
                 element: '#notification_template_color',
                 multiple: false
             });
+
+            $scope.httpMethodChoices = [
+                {'id': 'POST', 'name': i18n._('POST')},
+                {'id': 'PUT', 'name': i18n._('PUT')},
+            ];
+            CreateSelect2({
+                element: '#notification_template_http_method',
+                multiple: false,
+            });
         });
 
         $scope.$watch('headers', function validate_headers(str) {
