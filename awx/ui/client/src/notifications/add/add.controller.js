@@ -90,7 +90,7 @@ export default ['Rest', 'Wait', 'NotificationsFormObject',
 
             $scope.httpMethodChoices = [
                 {'id': 'POST', 'name': i18n._('POST')},
-                {'id': 'POST', 'name': i18n._('PUT')},
+                {'id': 'PUT', 'name': i18n._('PUT')},
             ];
             CreateSelect2({
                 element: '#notification_template_http_method',
