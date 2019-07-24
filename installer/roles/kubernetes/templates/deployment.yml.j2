@@ -5,6 +5,67 @@ metadata:
   name: awx
   namespace: {{ kubernetes_namespace }}
 
+{% if rbac is defined and rbac == 'true' %}
+{% if awx_psp_create is defined and awx_psp_create == 'true' %}
+---
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: {{ awx_psp_name }}-psp
+spec:
+{% if awx_privileged is defined %}
+  privileged: {{ awx_privileged }}
+  allowPrivilegeEscalation: {{ awx_privileged }}
+{% endif %}
+  fsGroup:
+    rule: RunAsAny
+  runAsUser:
+    rule: RunAsAny
+  seLinux:
+    rule: RunAsAny
+  supplementalGroups:
+    rule: RunAsAny
+  volumes:
+  - emptyDir
+  - secret
+  - persistentVolumeClaim
+  - configMap
+  - hostPath
+  hostNetwork: false
+{% endif %}
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: {{ kubernetes_namespace }}
+  name: {{ awx_psp_name }}-rl
+rules:
+- apiGroups:
+  - policy
+  resources:
+  - podsecuritypolicies
+  resourceNames:
+  - {{ awx_psp_name }}-psp
+  verbs:
+  - use
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ awx_psp_name }}-rb
+  namespace: {{ kubernetes_namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ awx_psp_name }}-rl
+subjects:
+- kind: ServiceAccount
+  name: awx
+  namespace: {{ kubernetes_namespace }}
+{% endif %}
+
 ---
 kind: Service
 apiVersion: v1
@@ -167,6 +228,13 @@ spec:
         - name: {{ kubernetes_deployment_name }}-web
           image: "{{ kubernetes_web_image }}:{{ kubernetes_web_version }}"
           imagePullPolicy: Always
+{% if web_security_context is defined and web_security_context == 'true' %}
+          securityContext:
+            privileged: false
+{% if web_sc_user is defined %}
+            runAsUser: {{ web_sc_user }}
+{% endif %}
+{% endif %}
           ports:
             - containerPort: 8052
           volumeMounts:
@@ -212,8 +280,15 @@ spec:
               cpu: "{{ web_cpu_limit }}m"
 {% endif %}
         - name: {{ kubernetes_deployment_name }}-celery
+{% if task_security_context is defined and task_security_context == 'true' %}
           securityContext:
-            privileged: true
+{% if task_sc_user is defined %}
+            runAsUser: {{ task_sc_user }}
+{% endif %}
+{% if awx_privileged is defined %}
+            privileged: {{ awx_privileged }}
+{% endif %}
+{% endif %}
           image: "{{ kubernetes_task_image }}:{{ kubernetes_task_version }}"
           command:
             - /usr/bin/launch_awx_task.sh
@@ -309,9 +384,29 @@ spec:
 {% if rabbitmq_cpu_limit is defined %}
               cpu: "{{ rabbitmq_cpu_limit }}m"
 {% endif %}
+{% if rabbitmq_security_context is defined and rabbitmq_security_context == 'true' %}
+          securityContext:
+            privileged: false
+{% if rabbitmq_sc_user is defined %}
+            runAsUser: {{ rabbitmq_sc_user }}
+{% endif %}
+{% if rabbitmq_sc_group is defined %}
+            runAsGroup: {{ rabbitmq_sc_group }}
+{% endif %}
+{% if rabbitmq_sc_non_root is defined %}
+            runAsNonRoot: {{ rabbitmq_sc_non_root }}
+{% endif %}
+{% endif %}
         - name: {{ kubernetes_deployment_name }}-memcached
           image: "{{ kubernetes_memcached_image }}:{{ kubernetes_memcached_version }}"
           imagePullPolicy: Always
+{% if memcached_security_context is defined and memcached_security_context == 'true' %}
+          securityContext:
+            privileged: false
+{% if memcached_sc_user is defined %}
+            runAsUser: {{ memcached_sc_user }}
+{% endif %}
+{% endif %}
           resources:
             requests:
               memory: "{{ memcached_mem_request }}Gi"
