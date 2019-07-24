@@ -8,7 +8,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0081_v360_notify_on_start'),
+        ('main', '0082_v360_workflowapproval'),
     ]
 
     operations = [

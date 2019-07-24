@@ -636,31 +636,6 @@ class WorkflowApprovalTemplate(UnifiedJobTemplate):
     def get_absolute_url(self, request=None):
         return reverse('api:workflow_approval_template_detail', kwargs={'pk': self.pk}, request=request)
 
-    # @property
-    # def notification_templates(self):
-    #     # Return all notification_templates defined on the Job Template, on the Project, and on the Organization for each trigger type
-    #     base_notification_templates = NotificationTemplate.objects.all()
-    #     error_notification_templates = list(base_notification_templates.filter(
-    #         unifiedjobtemplate_notification_templates_for_errors__in=[self]))
-    #     needs_approval_notification_templates = list(base_notification_templates.filter(
-    #         notification_templates_needs_approval__in=[self]))
-    #     success_notification_templates = list(base_notification_templates.filter(
-    #         unifiedjobtemplate_notification_templates_for_success__in=[self]))
-    #     return dict(error=list(error_notification_templates),
-    #                 needs_approval=list(needs_approval_notification_templates),
-    #                 success=list(success_notification_templates))
-# &&&&&& Approval nodes don't have orgs!
-        # if self.project is not None and self.project.organization is not None:
-        #     error_notification_templates = set(error_notification_templates + list(base_notification_templates.filter(
-        #         organization_notification_templates_for_errors=self.project.organization)))
-        #     started_notification_templates = set(started_notification_templates + list(base_notification_templates.filter(
-        #         organization_notification_templates_for_started=self.project.organization)))
-        #     success_notification_templates = set(success_notification_templates + list(base_notification_templates.filter(
-        #         organization_notification_templates_for_success=self.project.organization)))
-        # return dict(error=list(error_notification_templates),
-        #             needs_approval=list(needs_approval_notification_templates),
-        #             success=list(success_notification_templates))
-
 
 class WorkflowApproval(UnifiedJob):
     class Meta:

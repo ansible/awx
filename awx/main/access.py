@@ -2795,11 +2795,13 @@ class WorkflowApprovalAccess(BaseAccess):
             unified_job_node__in=WorkflowJobNode.accessible_pk_qs(
                 self.user, 'read_role'))
 
-    # &&&&&&
-    # def can_approve_or_deny(self, obj):
-    #     if self.user.is_superuser: or "self.user.approval_role"?
-    #         return True
-    #     return self.can_change(obj, ????)
+    def get_queryset(self):
+        return super(UnifiedJobTemplateAccess, self).get_queryset().exclude(
+            workflowapprovaltemplate__isnull=False)
+
+    def can_approve_or_deny(self, obj):
+        if self.user.approval_role:
+            return True
 
 
 class WorkflowApprovalTemplateAccess(BaseAccess):
@@ -2824,6 +2826,10 @@ class WorkflowApprovalTemplateAccess(BaseAccess):
         return self.model.objects.filter(
             workflowjobtemplatenodes__workflow_job_template__in=WorkflowJobTemplate.accessible_pk_qs(
                 self.user, 'read_role'))
+
+    def get_queryset(self):
+        return super(UnifiedJobAccess, self).get_queryset().exclude(
+            workflowapproval__isnull=False)
 
 
 for cls in BaseAccess.__subclasses__():

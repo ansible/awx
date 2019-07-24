@@ -430,6 +430,8 @@ def model_serializer_mapping():
         models.Label: serializers.LabelSerializer,
         models.WorkflowJobTemplate: serializers.WorkflowJobTemplateWithSpecSerializer,
         models.WorkflowJobTemplateNode: serializers.WorkflowJobTemplateNodeSerializer,
+        models.WorkflowApproval: serializers.WorkflowApprovalSerializer,
+        models.WorkflowApprovalTemplate: serializers.WorkflowApprovalTemplateSerializer,  # &&&&&&
         models.WorkflowJob: serializers.WorkflowJobSerializer,
         models.OAuth2AccessToken: serializers.OAuth2TokenSerializer,
         models.OAuth2Application: serializers.OAuth2ApplicationSerializer,
@@ -503,6 +505,11 @@ def activity_stream_update(sender, instance, **kwargs):
     else:
         activity_entry.setting = conf_to_dict(instance)
         activity_entry.save()
+
+# &&&&&&
+    # if isinstance(obj1, WorkflowApprovalTemplate) or isinstance(obj2_actual, WorkflowApprovalTemplate):
+    #     continue
+
 
 
 def activity_stream_delete(sender, instance, **kwargs):

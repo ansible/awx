@@ -3446,9 +3446,12 @@ class WorkflowApprovalTemplateSerializer(UnifiedJobTemplateSerializer):
 
         res.update(dict(
             jobs = self.reverse('api:workflow_approval_template_jobs_list', kwargs={'pk': obj.pk}),
-            notification_templates_needs_approval = self.reverse('api:workflow_approval_template_notification_templates_needs_approval', kwargs={'pk': obj.pk}),
-            notification_templates_success = self.reverse('api:workflow_approval_template_notification_templates_success_list', kwargs={'pk': obj.pk}),
-            notification_templates_error = self.reverse('api:workflow_approval_template_notification_templates_error_list', kwargs={'pk': obj.pk}),
+            # &&&&&& Placeholder for notification things!
+            # notification_templates_started = self.reverse('api:workflow_approval_template_notification_templates_started_list', kwargs={'pk': obj.pk}),
+            # notification_templates_needs_approval = self.reverse(
+            #'api:workflow_approval_template_notification_templates_needs_approval_list', kwargs={'pk': obj.pk}),
+            # notification_templates_success = self.reverse('api:workflow_approval_template_notification_templates_success_list', kwargs={'pk': obj.pk}),
+            # notification_templates_error = self.reverse('api:workflow_approval_template_notification_templates_error_list', kwargs={'pk': obj.pk}),
         ))
         return res
 

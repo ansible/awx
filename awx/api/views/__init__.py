@@ -4427,28 +4427,6 @@ class WorkflowApprovalTemplateDetail(RelatedJobsPreventDeleteMixin, RetrieveUpda
     serializer_class = serializers.WorkflowApprovalTemplateSerializer
 
 
-class WorkflowApprovalTemplateNotificationTemplatesAnyList(SubListCreateAttachDetachAPIView):
-
-    model = models.NotificationTemplate
-    serializer_class = serializers.NotificationTemplateSerializer
-    parent_model = models.WorkflowApprovalTemplate
-
-
-class WorkflowApprovalTemplateNotificationTemplatesNeedsApprovalList(WorkflowApprovalTemplateNotificationTemplatesAnyList):
-
-    relationship = 'notification_templates_needs_approval'
-
-
-class WorkflowApprovalTemplateNotificationTemplatesErrorList(WorkflowApprovalTemplateNotificationTemplatesAnyList):
-
-    relationship = 'notification_templates_error'
-
-
-class WorkflowApprovalTemplateNotificationTemplatesSuccessList(WorkflowApprovalTemplateNotificationTemplatesAnyList):
-
-    relationship = 'notification_templates_success'
-
-
 class WorkflowApprovalTemplateJobsList(SubListAPIView):
 
     model = models.WorkflowApproval
