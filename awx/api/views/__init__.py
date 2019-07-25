@@ -839,8 +839,6 @@ class SystemJobEventsList(SubListAPIView):
         return super(SystemJobEventsList, self).finalize_response(request, response, *args, **kwargs)
 
 
-
-
 class ProjectUpdateCancel(RetrieveAPIView):
 
     model = models.ProjectUpdate

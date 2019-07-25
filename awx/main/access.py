@@ -2631,6 +2631,7 @@ class ActivityStreamAccess(BaseAccess):
         app_set = OAuth2ApplicationAccess(self.user).filtered_queryset()
         token_set = OAuth2TokenAccess(self.user).filtered_queryset()
 
+# &&&&&& Activity Stream + RBAC here??
         return qs.filter(
             Q(ad_hoc_command__inventory__in=inventory_set) |
             Q(o_auth2_application__in=app_set) |
@@ -2796,11 +2797,11 @@ class WorkflowApprovalAccess(BaseAccess):
                 self.user, 'read_role'))
 
     def get_queryset(self):
-        return super(UnifiedJobTemplateAccess, self).get_queryset().exclude(
-            workflowapprovaltemplate__isnull=False)
+        return super(WorkflowApprovalAccess, self).get_queryset().exclude(
+            workflow_approval_template__isnull=False)
 
     def can_approve_or_deny(self, obj):
-        if self.user.approval_role:
+        if self.user.approval_role or self.user.system_administrator:
             return True
 
 
@@ -2828,8 +2829,8 @@ class WorkflowApprovalTemplateAccess(BaseAccess):
                 self.user, 'read_role'))
 
     def get_queryset(self):
-        return super(UnifiedJobAccess, self).get_queryset().exclude(
-            workflowapproval__isnull=False)
+        return super(WorkflowApprovalTemplateAccess, self).get_queryset().filter(
+            approvals__isnull=False)
 
 
 for cls in BaseAccess.__subclasses__():

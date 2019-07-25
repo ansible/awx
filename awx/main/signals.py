@@ -34,8 +34,8 @@ from awx.main.models import (
     InventorySource, InventoryUpdateEvent, Job, JobEvent, JobHostSummary,
     JobTemplate, OAuth2AccessToken, Organization, Project, ProjectUpdateEvent,
     Role, SystemJob, SystemJobEvent, SystemJobTemplate, UnifiedJob,
-    UnifiedJobTemplate, User, UserSessionMembership,
-    ROLE_SINGLETON_SYSTEM_ADMINISTRATOR
+    UnifiedJobTemplate, User, UserSessionMembership, WorkflowJobTemplateNode,
+    WorkflowApprovalTemplate, ROLE_SINGLETON_SYSTEM_ADMINISTRATOR
 )
 from awx.main.constants import CENSOR_VALUE
 from awx.main.utils import model_instance_diff, model_to_dict, camelcase_to_underscore, get_current_apps
@@ -431,7 +431,7 @@ def model_serializer_mapping():
         models.WorkflowJobTemplate: serializers.WorkflowJobTemplateWithSpecSerializer,
         models.WorkflowJobTemplateNode: serializers.WorkflowJobTemplateNodeSerializer,
         models.WorkflowApproval: serializers.WorkflowApprovalSerializer,
-        models.WorkflowApprovalTemplate: serializers.WorkflowApprovalTemplateSerializer,  # &&&&&&
+        models.WorkflowApprovalTemplate: serializers.WorkflowApprovalTemplateSerializer,
         models.WorkflowJob: serializers.WorkflowJobSerializer,
         models.OAuth2AccessToken: serializers.OAuth2TokenSerializer,
         models.OAuth2Application: serializers.OAuth2ApplicationSerializer,
@@ -505,11 +505,6 @@ def activity_stream_update(sender, instance, **kwargs):
     else:
         activity_entry.setting = conf_to_dict(instance)
         activity_entry.save()
-
-# &&&&&&
-    # if isinstance(obj1, WorkflowApprovalTemplate) or isinstance(obj2_actual, WorkflowApprovalTemplate):
-    #     continue
-
 
 
 def activity_stream_delete(sender, instance, **kwargs):
@@ -645,23 +640,23 @@ def delete_inventory_for_org(sender, instance, **kwargs):
             logger.debug(e)
 
 
-# &&&&&& Placeholder code below for approval node deletion.
-# @receiver(pre_delete, sender=Job)
-# def delete_detached_approval_nodes(sender, instance, **kwargs):
-#     for l in instance.labels.all():
-#         if l.is_candidate_for_detach():
-#             l.delete()
-#
-#
-# @receiver(pre_delete, sender=Organization)
-# def delete_detached_approval_nodes(sender, instance, **kwargs):
-#     approval_node = ???
-#     user = get_current_user_or_none()
-#     for node in approval_node:
-#         try:
-#             node.schedule_deletion(user_id=getattr(user, 'id', None))
-#         except RuntimeError as e:
-#             logger.debug(e)
+@receiver(pre_delete, sender=WorkflowJobTemplateNode)
+def delete_approval_nodes(sender, instance, **kwargs):
+    if type(instance.unified_job_template) is WorkflowApprovalTemplate:
+        instance.unified_job_template.delete()
+
+
+# When setting UJT to anything other than "is approval node" - update this comment!
+@receiver(pre_save, sender=WorkflowJobTemplateNode)
+def placeholder_name(sender, instance, **kwargs):
+    try:
+        old = WorkflowJobTemplateNode.objects.get(id=instance.id)
+    except sender.DoesNotExist:
+        return
+    if old.unified_job_template == instance.unified_job_template:
+        return
+    if type(old.unified_job_template) is WorkflowApprovalTemplate:
+        old.unified_job_template.delete()
 
 
 @receiver(post_save, sender=Session)
