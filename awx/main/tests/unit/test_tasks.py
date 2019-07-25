@@ -526,7 +526,10 @@ class TestGenericRun():
         with mock.patch('awx.main.tasks.settings.AWX_ANSIBLE_COLLECTIONS_PATHS', ['/AWX_COLLECTION_PATH']):
             with mock.patch('awx.main.tasks.settings.AWX_TASK_ENV', {'ANSIBLE_COLLECTIONS_PATHS': '/MY_COLLECTION1:/MY_COLLECTION2'}):
                 env = task.build_env(job, private_data_dir)
-        assert env['ANSIBLE_COLLECTIONS_PATHS'] == '/MY_COLLECTION1:/MY_COLLECTION2:/AWX_COLLECTION_PATH'
+        used_paths = env['ANSIBLE_COLLECTIONS_PATHS'].split(':')
+        assert used_paths[-1].endswith('/requirements_collections')
+        used_paths.pop()
+        assert used_paths == ['/MY_COLLECTION1', '/MY_COLLECTION2', '/AWX_COLLECTION_PATH']
 
     def test_valid_custom_virtualenv(self, patch_Job, private_data_dir):
         job = Job(project=Project(), inventory=Inventory())
