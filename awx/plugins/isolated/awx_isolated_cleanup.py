@@ -51,9 +51,11 @@ def main():
                 try:
                     re_match = re.match(r'\/tmp\/awx_\d+_.+', path)
                     if re_match is not None:
-                        if subprocess.check_call(['ansible-runner', 'is-alive', path]) == 0:
-                            continue
-                        else:
+                        try:
+                            if subprocess.check_call(['ansible-runner', 'is-alive', path]) == 0:
+                                continue
+                        except subprocess.CalledProcessError:
+                            # the job isn't running anymore, clean up this path
                             module.debug('Deleting path {} its job has completed.'.format(path))
                 except (ValueError, IndexError):
                     continue
