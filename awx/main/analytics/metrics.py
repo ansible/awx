@@ -15,6 +15,7 @@ from awx.main.analytics.collectors import (
     counts, 
     instance_info,
     job_instance_counts,
+    job_counts,
 )
 
 
@@ -36,6 +37,8 @@ INV_SCRIPT_COUNT = Gauge('awx_inventory_scripts_total', 'Number of invetory scri
 USER_SESSIONS = Gauge('awx_sessions_total', 'Number of sessions', ['type',])
 CUSTOM_VENVS = Gauge('awx_custom_virtualenvs_total', 'Number of virtualenvs')
 RUNNING_JOBS = Gauge('awx_running_jobs_total', 'Number of running jobs on the Tower system')
+PENDING_JOBS = Gauge('awx_pending_jobs_total', 'Number of pending jobs on the Tower system')
+STATUS = Gauge('awx_status_total', 'Status of Job launched', ['status',])
 
 INSTANCE_CAPACITY = Gauge('awx_instance_capacity', 'Capacity of each node in a Tower system', ['hostname', 'instance_uuid',])
 INSTANCE_CPU = Gauge('awx_instance_cpu', 'CPU cores on each node in a Tower system', ['hostname', 'instance_uuid',])
@@ -87,7 +90,13 @@ def metrics():
     USER_SESSIONS.labels(type='user').set(current_counts['active_user_sessions'])
     USER_SESSIONS.labels(type='anonymous').set(current_counts['active_anonymous_sessions'])
 
+    all_job_data = job_counts(None)
+    statuses = all_job_data.get('status', {})
+    for status, value in statuses.items():
+        STATUS.labels(status=status).set(value)
+
     RUNNING_JOBS.set(current_counts['running_jobs'])
+    PENDING_JOBS.set(current_counts['pending_jobs'])
 
     instance_data = instance_info(None, include_hostnames=True)
     for uuid, info in instance_data.items():

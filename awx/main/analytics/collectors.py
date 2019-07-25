@@ -93,6 +93,7 @@ def counts(since):
     counts['active_user_sessions'] = active_user_sessions
     counts['active_anonymous_sessions'] = active_anonymous_sessions
     counts['running_jobs'] = models.UnifiedJob.objects.exclude(launch_type='sync').filter(status__in=('running', 'waiting',)).count()
+    counts['pending_jobs'] = models.UnifiedJob.objects.exclude(launch_type='sync').filter(status__in=('pending',)).count()
     return counts
 
     
