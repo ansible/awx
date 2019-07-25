@@ -65,8 +65,8 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
     # status inherits from related jobs. Thus, status must be able to be set to any status that a job status is settable to.
     JOB_STATUS_CHOICES = [
         ('new', _('New')),                  # Job has been created, but not started.
-        ('pending', _('Pending')),          # Job has been queued, but is not yet running.
-        ('waiting', _('Waiting')),          # Job is waiting on an update/dependency.
+        ('pending', _('Pending')),          # Job is pending Task Manager processing (blocked by dependency req, capacity or a concurrent job)
+        ('waiting', _('Waiting')),          # Job has been assigned to run on a specific node (and is about to run).
         ('running', _('Running')),          # Job is currently running.
         ('successful', _('Successful')),    # Job completed successfully.
         ('failed', _('Failed')),            # Job completed, but with failures.
