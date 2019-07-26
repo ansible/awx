@@ -164,7 +164,6 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                   <Route>
                     <PaginatedDataList
                       contentError={null}
-                      hasContentError={false}
                       hasContentLoading={false}
                       history={"/history/"}
                       i18n={"/i18n/"}

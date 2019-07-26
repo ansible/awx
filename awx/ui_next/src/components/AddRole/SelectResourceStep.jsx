@@ -40,10 +40,7 @@ class SelectResourceStep extends React.Component {
 
   async readResourceList() {
     const { onSearch, location } = this.props;
-    const queryParams = parseQueryString(
-      this.qsConfig,
-      location.search
-    );
+    const queryParams = parseQueryString(this.qsConfig, location.search);
 
     this.setState({
       isLoading: true,

@@ -12,7 +12,9 @@ describe('<Sort />', () => {
   });
 
   test('it triggers the expected callbacks', () => {
-    const columns = [{ name: 'Name', key: 'name', isSortable: true, isSearchable: true }];
+    const columns = [
+      { name: 'Name', key: 'name', isSortable: true, isSearchable: true },
+    ];
 
     const sortBtn = 'button[aria-label="Sort"]';
 
@@ -38,7 +40,7 @@ describe('<Sort />', () => {
       { name: 'Foo', key: 'foo', isSortable: true },
       { name: 'Bar', key: 'bar', isSortable: true },
       { name: 'Bakery', key: 'bakery', isSortable: true },
-      { name: 'Baz', key: 'baz' }
+      { name: 'Baz', key: 'baz' },
     ];
 
     const onSort = jest.fn();
@@ -62,7 +64,7 @@ describe('<Sort />', () => {
       { name: 'Foo', key: 'foo', isSortable: true },
       { name: 'Bar', key: 'bar', isSortable: true },
       { name: 'Bakery', key: 'bakery', isSortable: true },
-      { name: 'Baz', key: 'baz' }
+      { name: 'Baz', key: 'baz' },
     ];
 
     const onSort = jest.fn();
@@ -86,7 +88,7 @@ describe('<Sort />', () => {
       { name: 'Foo', key: 'foo', isSortable: true },
       { name: 'Bar', key: 'bar', isSortable: true },
       { name: 'Bakery', key: 'bakery', isSortable: true },
-      { name: 'Baz', key: 'baz' }
+      { name: 'Baz', key: 'baz' },
     ];
 
     const onSort = jest.fn();
@@ -109,7 +111,7 @@ describe('<Sort />', () => {
       { name: 'Foo', key: 'foo', isSortable: true },
       { name: 'Bar', key: 'bar', isSortable: true },
       { name: 'Bakery', key: 'bakery', isSortable: true },
-      { name: 'Baz', key: 'baz' }
+      { name: 'Baz', key: 'baz' },
     ];
 
     const onSort = jest.fn();
@@ -133,8 +135,12 @@ describe('<Sort />', () => {
     const downAlphaIconSelector = 'SortAlphaDownIcon';
     const upAlphaIconSelector = 'SortAlphaUpIcon';
 
-    const numericColumns = [{ name: 'ID', key: 'id', isSortable: true, isNumeric: true }];
-    const alphaColumns = [{ name: 'Name', key: 'name', isSortable: true, isNumeric: false }];
+    const numericColumns = [
+      { name: 'ID', key: 'id', isSortable: true, isNumeric: true },
+    ];
+    const alphaColumns = [
+      { name: 'Name', key: 'name', isSortable: true, isNumeric: false },
+    ];
     const onSort = jest.fn();
 
     sort = mountWithContexts(

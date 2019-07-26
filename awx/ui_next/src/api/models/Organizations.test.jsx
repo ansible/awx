@@ -4,7 +4,7 @@ import { describeNotificationMixin } from '../../../testUtils/apiReusable';
 describe('OrganizationsAPI', () => {
   const orgId = 1;
   const createPromise = () => Promise.resolve();
-  const mockHttp = ({ get: jest.fn(createPromise) });
+  const mockHttp = { get: jest.fn(createPromise) };
 
   const OrganizationsAPI = new Organizations(mockHttp);
 
@@ -12,9 +12,9 @@ describe('OrganizationsAPI', () => {
     jest.clearAllMocks();
   });
 
-  test('read access list calls get with expected params', async (done) => {
+  test('read access list calls get with expected params', async done => {
     const testParams = { foo: 'bar' };
-    const testParamsDuplicates = { foo: ['bar', 'baz']};
+    const testParamsDuplicates = { foo: ['bar', 'baz'] };
 
     const mockBaseURL = `/api/v2/organizations/${orgId}/access_list/`;
 
@@ -24,17 +24,19 @@ describe('OrganizationsAPI', () => {
 
     expect(mockHttp.get).toHaveBeenCalledTimes(3);
     expect(mockHttp.get.mock.calls[0][0]).toEqual(`${mockBaseURL}`);
-    expect(mockHttp.get.mock.calls[0][1]).toEqual({"params": undefined});
+    expect(mockHttp.get.mock.calls[0][1]).toEqual({ params: undefined });
     expect(mockHttp.get.mock.calls[1][0]).toEqual(`${mockBaseURL}`);
-    expect(mockHttp.get.mock.calls[1][1]).toEqual({"params": {"foo": "bar"}});
+    expect(mockHttp.get.mock.calls[1][1]).toEqual({ params: { foo: 'bar' } });
     expect(mockHttp.get.mock.calls[2][0]).toEqual(`${mockBaseURL}`);
-    expect(mockHttp.get.mock.calls[2][1]).toEqual({"params": {"foo": ["bar", "baz"]}});
+    expect(mockHttp.get.mock.calls[2][1]).toEqual({
+      params: { foo: ['bar', 'baz'] },
+    });
     done();
   });
 
-  test('read teams calls get with expected params', async (done) => {
+  test('read teams calls get with expected params', async done => {
     const testParams = { foo: 'bar' };
-    const testParamsDuplicates = { foo: ['bar', 'baz']};
+    const testParamsDuplicates = { foo: ['bar', 'baz'] };
 
     const mockBaseURL = `/api/v2/organizations/${orgId}/teams/`;
 
@@ -44,11 +46,13 @@ describe('OrganizationsAPI', () => {
 
     expect(mockHttp.get).toHaveBeenCalledTimes(3);
     expect(mockHttp.get.mock.calls[0][0]).toEqual(`${mockBaseURL}`);
-    expect(mockHttp.get.mock.calls[0][1]).toEqual({"params": undefined});
+    expect(mockHttp.get.mock.calls[0][1]).toEqual({ params: undefined });
     expect(mockHttp.get.mock.calls[1][0]).toEqual(`${mockBaseURL}`);
-    expect(mockHttp.get.mock.calls[1][1]).toEqual({"params": {"foo": "bar"}});
+    expect(mockHttp.get.mock.calls[1][1]).toEqual({ params: { foo: 'bar' } });
     expect(mockHttp.get.mock.calls[2][0]).toEqual(`${mockBaseURL}`);
-    expect(mockHttp.get.mock.calls[2][1]).toEqual({"params": {"foo": ["bar", "baz"]}});
+    expect(mockHttp.get.mock.calls[2][1]).toEqual({
+      params: { foo: ['bar', 'baz'] },
+    });
     done();
   });
 });

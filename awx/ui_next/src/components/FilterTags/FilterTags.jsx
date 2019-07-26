@@ -9,19 +9,19 @@ import { ChipGroup, Chip } from '@components/Chip';
 import VerticalSeparator from '@components/VerticalSeparator';
 
 const FilterTagsRow = styled.div`
-    display: flex;
-    padding: 15px 20px;
-    border-top: 1px solid #d2d2d2;
-    font-size: 14px;
-    align-items: center;
+  display: flex;
+  padding: 15px 20px;
+  border-top: 1px solid #d2d2d2;
+  font-size: 14px;
+  align-items: center;
 `;
 
 const ResultCount = styled.span`
-    font-weight: bold;
+  font-weight: bold;
 `;
 
 const FilterLabel = styled.span`
-    padding-right: 20px;
+  padding-right: 20px;
 `;
 
 // remove non-default query params so they don't show up as filter tags
@@ -30,50 +30,59 @@ const filterDefaultParams = (paramsArr, config) => {
   return paramsArr.filter(key => defaultParamsKeys.indexOf(key) === -1);
 };
 
-const FilterTags = ({ i18n, itemCount, qsConfig, location, onRemove, onRemoveAll }) => {
+const FilterTags = ({
+  i18n,
+  itemCount,
+  qsConfig,
+  location,
+  onRemove,
+  onRemoveAll,
+}) => {
   const queryParams = parseQueryString(qsConfig, location.search);
   const queryParamsArr = [];
   const displayAll = true;
-  const nonDefaultParams = filterDefaultParams(Object.keys(queryParams), qsConfig);
-  nonDefaultParams
-    .forEach(key => {
-      if (Array.isArray(queryParams[key])) {
-        queryParams[key].forEach(val => queryParamsArr.push({ key, value: val }));
-      } else {
-        queryParamsArr.push({ key, value: queryParams[key] });
-      }
-    });
+  const nonDefaultParams = filterDefaultParams(
+    Object.keys(queryParams),
+    qsConfig
+  );
+  nonDefaultParams.forEach(key => {
+    if (Array.isArray(queryParams[key])) {
+      queryParams[key].forEach(val => queryParamsArr.push({ key, value: val }));
+    } else {
+      queryParamsArr.push({ key, value: queryParams[key] });
+    }
+  });
 
-  return (queryParamsArr.length > 0) && (
-    <FilterTagsRow>
-      <ResultCount>
-        {`${itemCount} results`}
-      </ResultCount>
-      <VerticalSeparator />
-      <FilterLabel>{i18n._(t`Active Filters:`)}</FilterLabel>
-      <ChipGroup displayAll={displayAll}>
-        {queryParamsArr.map(({ key, value }) => (
-          <Chip
-            className="searchTagChip"
-            key={`${key}__${value}`}
-            isReadOnly={false}
-            onClick={() => onRemove(key, value)}
-          >
-            {value}
-          </Chip>
-        ))}
-        <div className="pf-c-chip pf-m-overflow">
-          <Button
-            variant="plain"
-            type="button"
-            aria-label={i18n._(t`Clear all search filters`)}
-            onClick={onRemoveAll}
-          >
-            <span className="pf-c-chip__text">{i18n._(t`Clear all`)}</span>
-          </Button>
-        </div>
-      </ChipGroup>
-    </FilterTagsRow>
+  return (
+    queryParamsArr.length > 0 && (
+      <FilterTagsRow>
+        <ResultCount>{`${itemCount} results`}</ResultCount>
+        <VerticalSeparator />
+        <FilterLabel>{i18n._(t`Active Filters:`)}</FilterLabel>
+        <ChipGroup displayAll={displayAll}>
+          {queryParamsArr.map(({ key, value }) => (
+            <Chip
+              className="searchTagChip"
+              key={`${key}__${value}`}
+              isReadOnly={false}
+              onClick={() => onRemove(key, value)}
+            >
+              {value}
+            </Chip>
+          ))}
+          <div className="pf-c-chip pf-m-overflow">
+            <Button
+              variant="plain"
+              type="button"
+              aria-label={i18n._(t`Clear all search filters`)}
+              onClick={onRemoveAll}
+            >
+              <span className="pf-c-chip__text">{i18n._(t`Clear all`)}</span>
+            </Button>
+          </div>
+        </ChipGroup>
+      </FilterTagsRow>
+    )
   );
 };
 

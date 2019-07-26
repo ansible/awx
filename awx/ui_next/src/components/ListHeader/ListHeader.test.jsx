@@ -17,7 +17,9 @@ describe('ListHeader', () => {
       <ListHeader
         itemCount={50}
         qsConfig={qsConfig}
-        columns={[{ name: 'foo', key: 'foo', isSearchable: true, isSortable: true }]}
+        columns={[
+          { name: 'foo', key: 'foo', isSearchable: true, isSortable: true },
+        ]}
         renderToolbar={renderToolbarFn}
       />
     );
@@ -33,8 +35,11 @@ describe('ListHeader', () => {
       <ListHeader
         itemCount={7}
         qsConfig={qsConfig}
-        columns={[{ name: 'name', key: 'name', isSearchable: true, isSortable: true }]}
-      />, { context: { router: { history } } }
+        columns={[
+          { name: 'name', key: 'name', isSearchable: true, isSortable: true },
+        ]}
+      />,
+      { context: { router: { history } } }
     );
 
     const toolbar = wrapper.find('DataListToolbar');

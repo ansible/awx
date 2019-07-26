@@ -2,17 +2,13 @@ import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import {
-  Card,
-  PageSection,
-  PageSectionVariants,
-} from '@patternfly/react-core';
+import { Card, PageSection, PageSectionVariants } from '@patternfly/react-core';
 
 import { UnifiedJobsAPI } from '@api';
 import AlertModal from '@components/AlertModal';
 import DatalistToolbar from '@components/DataListToolbar';
 import PaginatedDataList, {
-  ToolbarDeleteButton
+  ToolbarDeleteButton,
 } from '@components/PaginatedDataList';
 import { getQSConfig, parseQueryString } from '@util/qs';
 
@@ -26,12 +22,12 @@ const QS_CONFIG = getQSConfig('job', {
 });
 
 class JobList extends Component {
-  constructor (props) {
+  constructor(props) {
     super(props);
 
     this.state = {
       hasContentLoading: true,
-      hasContentError: false,
+      contentError: null,
       deletionError: false,
       selected: [],
       jobs: [],
@@ -44,28 +40,28 @@ class JobList extends Component {
     this.handleDeleteErrorClose = this.handleDeleteErrorClose.bind(this);
   }
 
-  componentDidMount () {
+  componentDidMount() {
     this.loadJobs();
   }
 
-  componentDidUpdate (prevProps) {
+  componentDidUpdate(prevProps) {
     const { location } = this.props;
     if (location !== prevProps.location) {
       this.loadJobs();
     }
   }
 
-  handleDeleteErrorClose () {
+  handleDeleteErrorClose() {
     this.setState({ deletionError: false });
   }
 
-  handleSelectAll (isSelected) {
+  handleSelectAll(isSelected) {
     const { jobs } = this.state;
     const selected = isSelected ? [...jobs] : [];
     this.setState({ selected });
   }
 
-  handleSelect (item) {
+  handleSelect(item) {
     const { selected } = this.state;
     if (selected.some(s => s.id === item.id)) {
       this.setState({ selected: selected.filter(s => s.id !== item.id) });
@@ -74,7 +70,7 @@ class JobList extends Component {
     }
   }
 
-  async handleDelete () {
+  async handleDelete() {
     const { selected } = this.state;
     this.setState({ hasContentLoading: true, deletionError: false });
     try {
@@ -86,38 +82,37 @@ class JobList extends Component {
     }
   }
 
-  async loadJobs () {
+  async loadJobs() {
     const { location } = this.props;
     const params = parseQueryString(QS_CONFIG, location.search);
 
-    this.setState({ hasContentError: false, hasContentLoading: true });
+    this.setState({ contentError: null, hasContentLoading: true });
     try {
-      const { data: { count, results } } = await UnifiedJobsAPI.read(params);
+      const {
+        data: { count, results },
+      } = await UnifiedJobsAPI.read(params);
       this.setState({
         itemCount: count,
         jobs: results,
         selected: [],
       });
     } catch (err) {
-      this.setState({ hasContentError: true });
+      this.setState({ contentError: err });
     } finally {
       this.setState({ hasContentLoading: false });
     }
   }
 
-  render () {
+  render() {
     const {
-      hasContentError,
+      contentError,
       hasContentLoading,
       deletionError,
       jobs,
       itemCount,
       selected,
     } = this.state;
-    const {
-      match,
-      i18n
-    } = this.props;
+    const { match, i18n } = this.props;
     const { medium } = PageSectionVariants;
     const isAllSelected = selected.length === jobs.length;
     const itemName = i18n._(t`Job`);
@@ -125,17 +120,27 @@ class JobList extends Component {
       <PageSection variant={medium}>
         <Card>
           <PaginatedDataList
-            hasContentError={hasContentError}
+            contentError={contentError}
             hasContentLoading={hasContentLoading}
             items={jobs}
             itemCount={itemCount}
             itemName={itemName}
             qsConfig={QS_CONFIG}
             toolbarColumns={[
-              { name: i18n._(t`Name`), key: 'name', isSortable: true, isSearchable: true },
-              { name: i18n._(t`Finished`), key: 'finished', isSortable: true, isNumeric: true },
+              {
+                name: i18n._(t`Name`),
+                key: 'name',
+                isSortable: true,
+                isSearchable: true,
+              },
+              {
+                name: i18n._(t`Finished`),
+                key: 'finished',
+                isSortable: true,
+                isNumeric: true,
+              },
             ]}
-            renderToolbar={(props) => (
+            renderToolbar={props => (
               <DatalistToolbar
                 {...props}
                 showSelectAll
@@ -148,11 +153,11 @@ class JobList extends Component {
                     onDelete={this.handleDelete}
                     itemsToDelete={selected}
                     itemName={itemName}
-                  />
+                  />,
                 ]}
               />
             )}
-            renderItem={(job) => (
+            renderItem={job => (
               <JobListItem
                 key={job.id}
                 value={job.name}

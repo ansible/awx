@@ -13,7 +13,9 @@ describe('<DataListToolbar />', () => {
   });
 
   test('it triggers the expected callbacks', () => {
-    const columns = [{ name: 'Name', key: 'name', isSortable: true, isSearchable: true }];
+    const columns = [
+      { name: 'Name', key: 'name', isSortable: true, isSearchable: true },
+    ];
 
     const search = 'button[aria-label="Search submit button"]';
     const searchTextInput = 'input[aria-label="Search text input"]';
@@ -59,14 +61,16 @@ describe('<DataListToolbar />', () => {
   test('dropdown items sortable/searchable columns work', () => {
     const sortDropdownToggleSelector = 'button[id="awx-sort"]';
     const searchDropdownToggleSelector = 'button[id="awx-search"]';
-    const sortDropdownMenuItems = 'DropdownMenu > ul[aria-labelledby="awx-sort"]';
-    const searchDropdownMenuItems = 'DropdownMenu > ul[aria-labelledby="awx-search"]';
+    const sortDropdownMenuItems =
+      'DropdownMenu > ul[aria-labelledby="awx-sort"]';
+    const searchDropdownMenuItems =
+      'DropdownMenu > ul[aria-labelledby="awx-search"]';
 
     const multipleColumns = [
       { name: 'Foo', key: 'foo', isSortable: true, isSearchable: true },
       { name: 'Bar', key: 'bar', isSortable: true, isSearchable: true },
       { name: 'Bakery', key: 'bakery', isSortable: true },
-      { name: 'Baz', key: 'baz' }
+      { name: 'Baz', key: 'baz' },
     ];
 
     const onSort = jest.fn();
@@ -103,12 +107,16 @@ describe('<DataListToolbar />', () => {
     );
     toolbar.update();
 
-    const sortDropdownToggleDescending = toolbar.find(sortDropdownToggleSelector);
+    const sortDropdownToggleDescending = toolbar.find(
+      sortDropdownToggleSelector
+    );
     expect(sortDropdownToggleDescending.length).toBe(1);
     sortDropdownToggleDescending.simulate('click');
     toolbar.update();
 
-    const sortDropdownItemsDescending = toolbar.find(sortDropdownMenuItems).children();
+    const sortDropdownItemsDescending = toolbar
+      .find(sortDropdownMenuItems)
+      .children();
     expect(sortDropdownItemsDescending.length).toBe(2);
     sortDropdownToggleDescending.simulate('click'); // toggle close the sort dropdown
 
@@ -134,8 +142,12 @@ describe('<DataListToolbar />', () => {
     const downAlphaIconSelector = 'SortAlphaDownIcon';
     const upAlphaIconSelector = 'SortAlphaUpIcon';
 
-    const numericColumns = [{ name: 'ID', key: 'id', isSortable: true, isNumeric: true }];
-    const alphaColumns = [{ name: 'Name', key: 'name', isSortable: true, isNumeric: false }];
+    const numericColumns = [
+      { name: 'ID', key: 'id', isSortable: true, isNumeric: true },
+    ];
+    const alphaColumns = [
+      { name: 'Name', key: 'name', isSortable: true, isNumeric: false },
+    ];
 
     toolbar = mountWithContexts(
       <DataListToolbar
@@ -183,7 +195,9 @@ describe('<DataListToolbar />', () => {
   });
 
   test('should render additionalControls', () => {
-    const columns = [{ name: 'Name', key: 'name', isSortable: true, isSearchable: true }];
+    const columns = [
+      { name: 'Name', key: 'name', isSortable: true, isSearchable: true },
+    ];
     const onSearch = jest.fn();
     const onSort = jest.fn();
     const onSelectAll = jest.fn();
@@ -194,7 +208,11 @@ describe('<DataListToolbar />', () => {
         onSearch={onSearch}
         onSort={onSort}
         onSelectAll={onSelectAll}
-        additionalControls={[<button key="1" id="test" type="button">click</button>]}
+        additionalControls={[
+          <button key="1" id="test" type="button">
+            click
+          </button>,
+        ]}
       />
     );
 

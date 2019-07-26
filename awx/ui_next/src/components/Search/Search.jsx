@@ -10,11 +10,9 @@ import {
   DropdownItem,
   Form,
   FormGroup,
-  TextInput as PFTextInput
+  TextInput as PFTextInput,
 } from '@patternfly/react-core';
-import {
-  SearchIcon
-} from '@patternfly/react-icons';
+import { SearchIcon } from '@patternfly/react-icons';
 
 import styled from 'styled-components';
 
@@ -29,7 +27,8 @@ const Button = styled(PFButton)`
 `;
 
 const Dropdown = styled(PFDropdown)`
-  &&& { /* Higher specificity required because we are selecting unclassed elements */
+  &&& {
+    /* Higher specificity required because we are selecting unclassed elements */
     > button {
       min-height: 30px;
       min-width: 70px;
@@ -37,17 +36,19 @@ const Dropdown = styled(PFDropdown)`
       padding: 0 10px;
       margin: 0px;
 
-      > span { /* text element */
+      > span {
+        /* text element */
         width: auto;
       }
 
-      > svg { /* caret icon */
+      > svg {
+        /* caret icon */
         margin: 0px;
         padding-top: 3px;
         padding-left: 3px;
       }
     }
-  }  
+  }
 `;
 
 const NoOptionDropdown = styled.div`
@@ -61,7 +62,7 @@ const InputFormGroup = styled(FormGroup)`
 `;
 
 class Search extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props);
 
     const { sortedColumnKey } = this.props;
@@ -77,11 +78,11 @@ class Search extends React.Component {
     this.handleSearch = this.handleSearch.bind(this);
   }
 
-  handleDropdownToggle (isSearchDropdownOpen) {
+  handleDropdownToggle(isSearchDropdownOpen) {
     this.setState({ isSearchDropdownOpen });
   }
 
-  handleDropdownSelect ({ target }) {
+  handleDropdownSelect({ target }) {
     const { columns } = this.props;
     const { innerText } = target;
 
@@ -89,7 +90,7 @@ class Search extends React.Component {
     this.setState({ isSearchDropdownOpen: false, searchKey });
   }
 
-  handleSearch (e) {
+  handleSearch(e) {
     // keeps page from fully reloading
     e.preventDefault();
 
@@ -102,22 +103,17 @@ class Search extends React.Component {
     this.setState({ searchValue: '' });
   }
 
-  handleSearchInputChange (searchValue) {
+  handleSearchInputChange(searchValue) {
     this.setState({ searchValue });
   }
 
-  render () {
+  render() {
     const { up } = DropdownPosition;
-    const {
-      columns,
-      i18n
-    } = this.props;
-    const {
-      isSearchDropdownOpen,
-      searchKey,
-      searchValue,
-    } = this.state;
-    const { name: searchColumnName } = columns.find(({ key }) => key === searchKey);
+    const { columns, i18n } = this.props;
+    const { isSearchDropdownOpen, searchKey, searchValue } = this.state;
+    const { name: searchColumnName } = columns.find(
+      ({ key }) => key === searchKey
+    );
 
     const searchDropdownItems = columns
       .filter(({ key, isSearchable }) => isSearchable && key !== searchKey)
@@ -133,32 +129,38 @@ class Search extends React.Component {
           {searchDropdownItems.length > 0 ? (
             <FormGroup
               fieldId="searchKeyDropdown"
-              label={(<span className="pf-screen-reader">{i18n._(t`Search key dropdown`)}</span>)}
+              label={
+                <span className="pf-screen-reader">
+                  {i18n._(t`Search key dropdown`)}
+                </span>
+              }
             >
               <Dropdown
                 onToggle={this.handleDropdownToggle}
                 onSelect={this.handleDropdownSelect}
                 direction={up}
                 isOpen={isSearchDropdownOpen}
-                toggle={(
+                toggle={
                   <DropdownToggle
                     id="awx-search"
                     onToggle={this.handleDropdownToggle}
                   >
                     {searchColumnName}
                   </DropdownToggle>
-                )}
+                }
                 dropdownItems={searchDropdownItems}
               />
             </FormGroup>
           ) : (
-            <NoOptionDropdown>
-              {searchColumnName}
-            </NoOptionDropdown>
+            <NoOptionDropdown>{searchColumnName}</NoOptionDropdown>
           )}
           <InputFormGroup
             fieldId="searchValueTextInput"
-            label={(<span className="pf-screen-reader">{i18n._(t`Search value text input`)}</span>)}
+            label={
+              <span className="pf-screen-reader">
+                {i18n._(t`Search value text input`)}
+              </span>
+            }
           >
             <TextInput
               type="search"
@@ -190,7 +192,7 @@ Search.propTypes = {
 
 Search.defaultProps = {
   onSearch: null,
-  sortedColumnKey: 'name'
+  sortedColumnKey: 'name',
 };
 
 export default withI18n()(Search);

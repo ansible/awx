@@ -4,16 +4,17 @@
  * @param {array} array in the format [ [ key, value ], ...]
  * @return {object} object in the forms { key: value, ... }
  */
-const toObject = (entriesArr) => entriesArr.reduce((acc, [key, value]) => {
-  if (acc[key] && Array.isArray(acc[key])) {
-    acc[key].push(value);
-  } else if (acc[key]) {
-    acc[key] = [acc[key], value];
-  } else {
-    acc[key] = value;
-  }
-  return acc;
-}, {});
+const toObject = entriesArr =>
+  entriesArr.reduce((acc, [key, value]) => {
+    if (acc[key] && Array.isArray(acc[key])) {
+      acc[key].push(value);
+    } else if (acc[key]) {
+      acc[key] = [acc[key], value];
+    } else {
+      acc[key] = value;
+    }
+    return acc;
+  }, {});
 
 /**
  * helper function to namespace params object
@@ -30,7 +31,7 @@ const namespaceParams = (namespace, params = {}) => {
   });
 
   return namespaced || {};
-}
+};
 
 /**
  * helper function to remove namespace from params object
@@ -47,7 +48,7 @@ const denamespaceParams = (namespace, params = {}) => {
   });
 
   return denamespaced || {};
-}
+};
 
 /**
  * helper function to check the namespace of a param is what you expec
@@ -59,7 +60,7 @@ const namespaceMatches = (namespace, fieldname) => {
   if (!namespace) return !fieldname.includes('.');
 
   return fieldname.startsWith(`${namespace}.`);
-}
+};
 
 /**
  * helper function to check the value of a param is equal to another
@@ -72,13 +73,15 @@ const paramValueIsEqual = (one, two) => {
 
   if (Array.isArray(one) && Array.isArray(two)) {
     isEqual = one.filter(val => two.indexOf(val) > -1).length === 0;
-  } else if ((typeof(one) === "string" && typeof(two) === "string") ||
-      (typeof(one) === "number" && typeof(two) === "number")){
+  } else if (
+    (typeof one === 'string' && typeof two === 'string') ||
+    (typeof one === 'number' && typeof two === 'number')
+  ) {
     isEqual = one === two;
   }
 
   return isEqual;
-}
+};
 
 /**
  * Convert query param object to url query string
@@ -87,17 +90,19 @@ const paramValueIsEqual = (one, two) => {
  * @param {object} query param object
  * @return {string} url query string
  */
-export const encodeQueryString = (params) => {
+export const encodeQueryString = params => {
   if (!params) return '';
 
   return Object.keys(params)
     .sort()
     .filter(key => params[key] !== null)
-    .map(key => ([key, params[key]]))
+    .map(key => [key, params[key]])
     .map(([key, value]) => {
       // if value is array, should return more than one key value pair
       if (Array.isArray(value)) {
-        return value.map(val => `${encodeURIComponent(key)}=${encodeURIComponent(val)}`).join('&');
+        return value
+          .map(val => `${encodeURIComponent(key)}=${encodeURIComponent(val)}`)
+          .join('&');
       }
       return `${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
     })
@@ -115,22 +120,31 @@ export const encodeNonDefaultQueryString = (config, params) => {
   if (!params) return '';
 
   const namespacedParams = namespaceParams(config.namespace, params);
-  const namespacedDefaults = namespaceParams(config.namespace, config.defaultParams);
+  const namespacedDefaults = namespaceParams(
+    config.namespace,
+    config.defaultParams
+  );
   const namespacedDefaultKeys = Object.keys(namespacedDefaults);
-  const namespacedParamsWithoutDefaultsKeys = Object.keys(namespacedParams)
-    .filter(key => namespacedDefaultKeys.indexOf(key) === -1 ||
-      !paramValueIsEqual(namespacedParams[key], namespacedDefaults[key]));
+  const namespacedParamsWithoutDefaultsKeys = Object.keys(
+    namespacedParams
+  ).filter(
+    key =>
+      namespacedDefaultKeys.indexOf(key) === -1 ||
+      !paramValueIsEqual(namespacedParams[key], namespacedDefaults[key])
+  );
 
   return namespacedParamsWithoutDefaultsKeys
     .sort()
     .filter(key => namespacedParams[key] !== null)
     .map(key => {
-      return ([key, namespacedParams[key]])
+      return [key, namespacedParams[key]];
     })
     .map(([key, value]) => {
       // if value is array, should return more than one key value pair
       if (Array.isArray(value)) {
-        return value.map(val => `${encodeURIComponent(key)}=${encodeURIComponent(val)}`).join('&');
+        return value
+          .map(val => `${encodeURIComponent(key)}=${encodeURIComponent(val)}`)
+          .join('&');
       }
       return `${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
     })
@@ -144,7 +158,7 @@ export const encodeNonDefaultQueryString = (config, params) => {
  * @param {array} params that are number fields
  * @return {object} query param object
  */
-export function getQSConfig (
+export function getQSConfig(
   namespace,
   defaultParams = { page: 1, page_size: 5, order_by: 'name' },
   integerFields = ['page', 'page_size']
@@ -165,12 +179,16 @@ export function getQSConfig (
  * @param {string} url query string
  * @return {object} query param object
  */
-export function parseQueryString (config, queryString) {
+export function parseQueryString(config, queryString) {
   if (!queryString) return config.defaultParams;
 
-  const namespacedIntegerFields = config.integerFields.map(f => config.namespace ? `${config.namespace}.${f}` : f);
+  const namespacedIntegerFields = config.integerFields.map(f =>
+    config.namespace ? `${config.namespace}.${f}` : f
+  );
 
-  const keyValuePairs = queryString.replace(/^\?/, '').split('&')
+  const keyValuePairs = queryString
+    .replace(/^\?/, '')
+    .split('&')
     .map(s => s.split('='))
     .map(([key, value]) => {
       if (namespacedIntegerFields.includes(key)) {
@@ -185,37 +203,38 @@ export function parseQueryString (config, queryString) {
   // needs to return array for duplicate keys
   // ie [[k1, v1], [k1, v2], [k2, v3]]
   // -> [[k1, [v1, v2]], [k2, v3]]
-  const dedupedKeyValuePairs = Object.keys(keyValueObject)
-    .map(key => {
-      const values = keyValuePairs
-        .filter(([k]) => k === key)
-        .map(([, v]) => v);
+  const dedupedKeyValuePairs = Object.keys(keyValueObject).map(key => {
+    const values = keyValuePairs.filter(([k]) => k === key).map(([, v]) => v);
 
-      if (values.length === 1) {
-        return [key, values[0]];
-      }
+    if (values.length === 1) {
+      return [key, values[0]];
+    }
 
-      return [key, values];
-    });
+    return [key, values];
+  });
 
-  const parsed = Object.assign(...dedupedKeyValuePairs.map(([k, v]) => ({
-    [k]: v
-  })));
+  const parsed = Object.assign(
+    ...dedupedKeyValuePairs.map(([k, v]) => ({
+      [k]: v,
+    }))
+  );
 
   const namespacedParams = {};
 
-  Object.keys(parsed)
-    .forEach(field => {
-      if (namespaceMatches(config.namespace, field)) {
-        let fieldname = field;
-        if (config.namespace) {
-          fieldname = field.substr(config.namespace.length + 1);
-        }
-        namespacedParams[fieldname] = parsed[field];
+  Object.keys(parsed).forEach(field => {
+    if (namespaceMatches(config.namespace, field)) {
+      let fieldname = field;
+      if (config.namespace) {
+        fieldname = field.substr(config.namespace.length + 1);
       }
-    });
+      namespacedParams[fieldname] = parsed[field];
+    }
+  });
 
-  const namespacedDefaults = namespaceParams(config.namespace, config.defaultParams);
+  const namespacedDefaults = namespaceParams(
+    config.namespace,
+    config.defaultParams
+  );
 
   Object.keys(namespacedDefaults)
     .filter(key => Object.keys(parsed).indexOf(key) === -1)
@@ -238,11 +257,12 @@ export function parseQueryString (config, queryString) {
  * @param {object} namespaced params object of default params
  * @return {object} namespaced params object of only defaults
  */
-const getDefaultParams = (params, defaults) => toObject(
-  Object.keys(params)
-    .filter(key => Object.keys(defaults).indexOf(key) > -1)
-    .map(key => [key, params[key]])
-);
+const getDefaultParams = (params, defaults) =>
+  toObject(
+    Object.keys(params)
+      .filter(key => Object.keys(defaults).indexOf(key) > -1)
+      .map(key => [key, params[key]])
+  );
 
 /**
  * helper function to get params that are not defaults
@@ -250,11 +270,12 @@ const getDefaultParams = (params, defaults) => toObject(
  * @param {object} namespaced params object of default params
  * @return {object} namespaced params object of non-defaults
  */
-const getNonDefaultParams = (params, defaults) => toObject(
-  Object.keys(params)
-    .filter(key => Object.keys(defaults).indexOf(key) === -1)
-    .map(key => [key, params[key]])
-);
+const getNonDefaultParams = (params, defaults) =>
+  toObject(
+    Object.keys(params)
+      .filter(key => Object.keys(defaults).indexOf(key) === -1)
+      .map(key => [key, params[key]])
+  );
 
 /**
  * helper function to merge old and new params together
@@ -262,9 +283,9 @@ const getNonDefaultParams = (params, defaults) => toObject(
  * @param {object} namespaced params object of new params
  * @return {object} merged namespaced params object
  */
-const getMergedParams = (oldParams, newParams) => toObject(
-  Object.keys(oldParams)
-    .map(key => {
+const getMergedParams = (oldParams, newParams) =>
+  toObject(
+    Object.keys(oldParams).map(key => {
       let oldVal = oldParams[key];
       const newVal = newParams[key];
       if (newVal) {
@@ -276,7 +297,7 @@ const getMergedParams = (oldParams, newParams) => toObject(
       }
       return [key, oldVal];
     })
-);
+  );
 
 /**
  * helper function to get new params that are not in merged params
@@ -284,11 +305,12 @@ const getMergedParams = (oldParams, newParams) => toObject(
  * @param {object} namespaced params object of new params
  * @return {object} remaining new namespaced params object
  */
-const getRemainingNewParams = (mergedParams, newParams) => toObject(
-  Object.keys(newParams)
-    .filter(key => Object.keys(mergedParams).indexOf(key) === -1)
-    .map(key => [key, newParams[key]])
-);
+const getRemainingNewParams = (mergedParams, newParams) =>
+  toObject(
+    Object.keys(newParams)
+      .filter(key => Object.keys(mergedParams).indexOf(key) === -1)
+      .map(key => [key, newParams[key]])
+  );
 
 /**
  * Merges existing params of search string with new ones and returns the updated list of params
@@ -297,13 +319,16 @@ const getRemainingNewParams = (mergedParams, newParams) => toObject(
  * @param {object} object with new params to add
  * @return {object} query param object
  */
-export function addParams (config, searchString, newParams) {
+export function addParams(config, searchString, newParams) {
   const namespacedOldParams = namespaceParams(
     config.namespace,
     parseQueryString(config, searchString)
   );
   const namespacedNewParams = namespaceParams(config.namespace, newParams);
-  const namespacedDefaultParams = namespaceParams(config.namespace, config.defaultParams);
+  const namespacedDefaultParams = namespaceParams(
+    config.namespace,
+    config.defaultParams
+  );
 
   const namespacedOldParamsNotDefaults = getNonDefaultParams(
     namespacedOldParams,
@@ -320,7 +345,7 @@ export function addParams (config, searchString, newParams) {
   return denamespaceParams(config.namespace, {
     ...getDefaultParams(namespacedOldParams, namespacedDefaultParams),
     ...namespacedMergedParams,
-    ...getRemainingNewParams(namespacedMergedParams, namespacedNewParams)
+    ...getRemainingNewParams(namespacedMergedParams, namespacedNewParams),
   });
 }
 
@@ -331,26 +356,29 @@ export function addParams (config, searchString, newParams) {
  * @param {object} object with new params to remove
  * @return {object} query param object
  */
-export function removeParams (config, searchString, paramsToRemove) {
+export function removeParams(config, searchString, paramsToRemove) {
   const oldParams = parseQueryString(config, searchString);
   const paramsEntries = [];
-  Object.entries(oldParams)
-    .forEach(([key, value]) => {
-      if (Array.isArray(value)) {
-        value.forEach(val => {
-          paramsEntries.push([key, val]);
-        })
-      } else {
-        paramsEntries.push([key, value]);
-      }
-    })
+  Object.entries(oldParams).forEach(([key, value]) => {
+    if (Array.isArray(value)) {
+      value.forEach(val => {
+        paramsEntries.push([key, val]);
+      });
+    } else {
+      paramsEntries.push([key, value]);
+    }
+  });
   const paramsToRemoveEntries = Object.entries(paramsToRemove);
-  const remainingEntries = paramsEntries
-    .filter(([key, value]) => paramsToRemoveEntries
-      .filter(([newKey, newValue]) => key === newKey && value === newValue).length === 0);
+  const remainingEntries = paramsEntries.filter(
+    ([key, value]) =>
+      paramsToRemoveEntries.filter(
+        ([newKey, newValue]) => key === newKey && value === newValue
+      ).length === 0
+  );
   const remainingObject = toObject(remainingEntries);
-  const defaultEntriesLeftover = Object.entries(config.defaultParams)
-    .filter(([key]) => !remainingObject[key]);
+  const defaultEntriesLeftover = Object.entries(config.defaultParams).filter(
+    ([key]) => !remainingObject[key]
+  );
   const finalParamsEntries = remainingEntries;
   defaultEntriesLeftover.forEach(value => {
     finalParamsEntries.push(value);

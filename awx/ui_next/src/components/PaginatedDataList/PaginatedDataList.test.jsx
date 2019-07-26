@@ -51,7 +51,8 @@ describe('<PaginatedDataList />', () => {
           order_by: 'name',
         }}
         qsConfig={qsConfig}
-      />, { context: { router: { history } } }
+      />,
+      { context: { router: { history } } }
     );
 
     const pagination = wrapper.find('Pagination');
@@ -77,7 +78,8 @@ describe('<PaginatedDataList />', () => {
           order_by: 'name',
         }}
         qsConfig={qsConfig}
-      />, { context: { router: { history } } }
+      />,
+      { context: { router: { history } } }
     );
 
     const pagination = wrapper.find('Pagination');

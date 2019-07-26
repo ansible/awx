@@ -26,14 +26,19 @@ describe('<ExpandCollapse />', () => {
 
   test('renders non-default param tags based on location history', () => {
     const history = createMemoryHistory({
-      initialEntries: ['/foo?item.page=1&item.page_size=2&item.foo=bar&item.baz=bust'],
+      initialEntries: [
+        '/foo?item.page=1&item.page_size=2&item.foo=bar&item.baz=bust',
+      ],
     });
     const wrapper = mountWithContexts(
       <FilterTags
         qsConfig={qsConfig}
         onRemove={onRemoveFn}
         onRemoveAll={onRemoveAllFn}
-      />, { context: { router: { history, route: { location: history.location } } } }
+      />,
+      {
+        context: { router: { history, route: { location: history.location } } },
+      }
     );
     const chips = wrapper.find('.pf-c-chip.searchTagChip');
     expect(chips.length).toBe(2);

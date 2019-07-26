@@ -7,7 +7,7 @@ import SelectResourceStep from './SelectResourceStep';
 
 describe('<SelectResourceStep />', () => {
   const columns = [
-    { name: 'Username', key: 'username', isSortable: true, isSearchable: true }
+    { name: 'Username', key: 'username', isSortable: true, isSearchable: true },
   ];
   afterEach(() => {
     jest.restoreAllMocks();
@@ -30,9 +30,9 @@ describe('<SelectResourceStep />', () => {
         count: 2,
         results: [
           { id: 1, username: 'foo', url: 'item/1' },
-          { id: 2, username: 'bar', url: 'item/2' }
-        ]
-      }
+          { id: 2, username: 'bar', url: 'item/2' },
+        ],
+      },
     });
     mountWithContexts(
       <SelectResourceStep
@@ -46,25 +46,25 @@ describe('<SelectResourceStep />', () => {
     expect(handleSearch).toHaveBeenCalledWith({
       order_by: 'username',
       page: 1,
-      page_size: 5
+      page_size: 5,
     });
   });
 
   test('readResourceList properly adds rows to state', async () => {
-    const selectedResourceRows = [
-      { id: 1, username: 'foo', url: 'item/1' }
-    ];
+    const selectedResourceRows = [{ id: 1, username: 'foo', url: 'item/1' }];
     const handleSearch = jest.fn().mockResolvedValue({
       data: {
         count: 2,
         results: [
           { id: 1, username: 'foo', url: 'item/1' },
-          { id: 2, username: 'bar', url: 'item/2' }
-        ]
-      }
+          { id: 2, username: 'bar', url: 'item/2' },
+        ],
+      },
     });
     const history = createMemoryHistory({
-      initialEntries: ['/organizations/1/access?resource.page=1&resource.order_by=-username'],
+      initialEntries: [
+        '/organizations/1/access?resource.page=1&resource.order_by=-username',
+      ],
     });
     const wrapper = await mountWithContexts(
       <SelectResourceStep
@@ -74,7 +74,10 @@ describe('<SelectResourceStep />', () => {
         onSearch={handleSearch}
         selectedResourceRows={selectedResourceRows}
         sortedColumnKey="username"
-      />, { context: { router: { history, route: { location: history.location } } } }
+      />,
+      {
+        context: { router: { history, route: { location: history.location } } },
+      }
     ).find('SelectResourceStep');
     await wrapper.instance().readResourceList();
     expect(handleSearch).toHaveBeenCalledWith({
@@ -84,7 +87,7 @@ describe('<SelectResourceStep />', () => {
     });
     expect(wrapper.state('resources')).toEqual([
       { id: 1, username: 'foo', url: 'item/1' },
-      { id: 2, username: 'bar', url: 'item/2' }
+      { id: 2, username: 'bar', url: 'item/2' },
     ]);
   });
 
@@ -94,8 +97,8 @@ describe('<SelectResourceStep />', () => {
       count: 2,
       results: [
         { id: 1, username: 'foo', url: 'item/1' },
-        { id: 2, username: 'bar', url: 'item/2' }
-      ]
+        { id: 2, username: 'bar', url: 'item/2' },
+      ],
     };
     const wrapper = mountWithContexts(
       <SelectResourceStep
@@ -111,7 +114,9 @@ describe('<SelectResourceStep />', () => {
     wrapper.update();
     const checkboxListItemWrapper = wrapper.find('CheckboxListItem');
     expect(checkboxListItemWrapper.length).toBe(2);
-    checkboxListItemWrapper.first().find('input[type="checkbox"]')
+    checkboxListItemWrapper
+      .first()
+      .find('input[type="checkbox"]')
       .simulate('change', { target: { checked: true } });
     expect(handleRowClick).toHaveBeenCalledWith(data.results[0]);
   });

@@ -4,7 +4,7 @@ import {
   parseQueryString,
   getQSConfig,
   addParams,
-  removeParams
+  removeParams,
 } from './qs';
 
 describe('qs (qs.js)', () => {
@@ -13,14 +13,19 @@ describe('qs (qs.js)', () => {
       [
         [null, ''],
         [{}, ''],
-        [{ order_by: 'name', page: 1, page_size: 5 }, 'order_by=name&page=1&page_size=5'],
-        [{ '-order_by': 'name', page: '1', page_size: 5 }, '-order_by=name&page=1&page_size=5'],
-      ]
-        .forEach(([params, expectedQueryString]) => {
-          const actualQueryString = encodeQueryString(params);
+        [
+          { order_by: 'name', page: 1, page_size: 5 },
+          'order_by=name&page=1&page_size=5',
+        ],
+        [
+          { '-order_by': 'name', page: '1', page_size: 5 },
+          '-order_by=name&page=1&page_size=5',
+        ],
+      ].forEach(([params, expectedQueryString]) => {
+        const actualQueryString = encodeQueryString(params);
 
-          expect(actualQueryString).toEqual(expectedQueryString);
-        });
+        expect(actualQueryString).toEqual(expectedQueryString);
+      });
     });
 
     test('encodeQueryString omits null values', () => {
@@ -35,7 +40,7 @@ describe('qs (qs.js)', () => {
   describe('encodeNonDefaultQueryString', () => {
     const config = {
       namespace: null,
-      defaultParams: { page: 1, page_size: 5, order_by: 'name'},
+      defaultParams: { page: 1, page_size: 5, order_by: 'name' },
       integerFields: ['page'],
     };
 
@@ -45,14 +50,19 @@ describe('qs (qs.js)', () => {
         [{}, ''],
         [{ order_by: 'name', page: 1, page_size: 5 }, ''],
         [{ order_by: '-name', page: 1, page_size: 5 }, 'order_by=-name'],
-        [{ order_by: '-name', page: 3, page_size: 10 }, 'order_by=-name&page=3&page_size=10'],
-        [{ order_by: '-name', page: 3, page_size: 10, foo: 'bar' }, 'foo=bar&order_by=-name&page=3&page_size=10'],
-      ]
-        .forEach(([params, expectedQueryString]) => {
-          const actualQueryString = encodeNonDefaultQueryString(config, params);
+        [
+          { order_by: '-name', page: 3, page_size: 10 },
+          'order_by=-name&page=3&page_size=10',
+        ],
+        [
+          { order_by: '-name', page: 3, page_size: 10, foo: 'bar' },
+          'foo=bar&order_by=-name&page=3&page_size=10',
+        ],
+      ].forEach(([params, expectedQueryString]) => {
+        const actualQueryString = encodeNonDefaultQueryString(config, params);
 
-          expect(actualQueryString).toEqual(expectedQueryString);
-        });
+        expect(actualQueryString).toEqual(expectedQueryString);
+      });
     });
 
     test('encodeNonDefaultQueryString omits null values', () => {
@@ -114,7 +124,7 @@ describe('qs (qs.js)', () => {
       const query = '';
       expect(parseQueryString(config, query)).toEqual({
         page: 1,
-        page_size: 15
+        page_size: 15,
       });
     });
 
@@ -222,7 +232,7 @@ describe('qs (qs.js)', () => {
         integerFields: ['page', 'page_size'],
       };
       const query = '?baz=bar&page=3';
-      const newParams = { bag: 'boom' }
+      const newParams = { bag: 'boom' };
       expect(addParams(config, query, newParams)).toEqual({
         baz: 'bar',
         bag: 'boom',
@@ -238,7 +248,7 @@ describe('qs (qs.js)', () => {
         integerFields: ['page', 'page_size'],
       };
       const query = '?baz=bar&baz=bang&page=3';
-      const newParams = { baz: 'boom' }
+      const newParams = { baz: 'boom' };
       expect(addParams(config, query, newParams)).toEqual({
         baz: ['bar', 'bang', 'boom'],
         page: 3,
@@ -253,7 +263,7 @@ describe('qs (qs.js)', () => {
         integerFields: ['page', 'page_size'],
       };
       const query = '?baz=bar&baz=bang&page=3';
-      const newParams = { page: 5 }
+      const newParams = { page: 5 };
       expect(addParams(config, query, newParams)).toEqual({
         baz: ['bar', 'bang'],
         page: 5,
@@ -268,7 +278,7 @@ describe('qs (qs.js)', () => {
         integerFields: ['page', 'page_size'],
       };
       const query = '?baz=bar&baz=bang&page=3';
-      const newParams = { baz: 'bust', pat: 'pal' }
+      const newParams = { baz: 'bust', pat: 'pal' };
       expect(addParams(config, query, newParams)).toEqual({
         baz: ['bar', 'bang', 'bust'],
         pat: 'pal',
@@ -284,7 +294,7 @@ describe('qs (qs.js)', () => {
         integerFields: ['page', 'page_size'],
       };
       const query = '?item.baz=bar&item.page=3';
-      const newParams = { bag: 'boom' }
+      const newParams = { bag: 'boom' };
       expect(addParams(config, query, newParams)).toEqual({
         baz: 'bar',
         bag: 'boom',
@@ -300,7 +310,7 @@ describe('qs (qs.js)', () => {
         integerFields: ['page', 'page_size'],
       };
       const query = '?item.baz=bar&foo.page=3';
-      const newParams = { bag: 'boom' }
+      const newParams = { bag: 'boom' };
       expect(addParams(config, query, newParams)).toEqual({
         baz: 'bar',
         bag: 'boom',
@@ -316,7 +326,7 @@ describe('qs (qs.js)', () => {
         integerFields: ['page', 'page_size'],
       };
       const query = '?item.baz=bar&item.baz=bang&item.page=3';
-      const newParams = { baz: 'boom' }
+      const newParams = { baz: 'boom' };
       expect(addParams(config, query, newParams)).toEqual({
         baz: ['bar', 'bang', 'boom'],
         page: 3,
@@ -331,7 +341,7 @@ describe('qs (qs.js)', () => {
         integerFields: ['page', 'page_size'],
       };
       const query = '?item.baz=bar&item.baz=bang&item.page=3';
-      const newParams = { page: 5 }
+      const newParams = { page: 5 };
       expect(addParams(config, query, newParams)).toEqual({
         baz: ['bar', 'bang'],
         page: 5,
@@ -346,7 +356,7 @@ describe('qs (qs.js)', () => {
         integerFields: ['page', 'page_size'],
       };
       const query = '?item.baz=bar&item.baz=bang&item.page=3';
-      const newParams = { baz: 'bust', pat: 'pal' }
+      const newParams = { baz: 'bust', pat: 'pal' };
       expect(addParams(config, query, newParams)).toEqual({
         baz: ['bar', 'bang', 'bust'],
         pat: 'pal',
@@ -364,7 +374,7 @@ describe('qs (qs.js)', () => {
         integerFields: ['page', 'page_size'],
       };
       const query = '?baz=bar&page=3&bag=boom';
-      const newParams = { bag: 'boom' }
+      const newParams = { bag: 'boom' };
       expect(removeParams(config, query, newParams)).toEqual({
         baz: 'bar',
         page: 3,
@@ -379,7 +389,7 @@ describe('qs (qs.js)', () => {
         integerFields: ['page', 'page_size'],
       };
       const query = '?baz=bar&baz=bang&page=3';
-      const newParams = { baz: 'bar' }
+      const newParams = { baz: 'bar' };
       expect(removeParams(config, query, newParams)).toEqual({
         baz: 'bang',
         page: 3,
@@ -394,7 +404,7 @@ describe('qs (qs.js)', () => {
         integerFields: ['page', 'page_size'],
       };
       const query = '?baz=bar&baz=bang&baz=bust&page=3';
-      const newParams = { baz: 'bar' }
+      const newParams = { baz: 'bar' };
       expect(removeParams(config, query, newParams)).toEqual({
         baz: ['bang', 'bust'],
         page: 3,
@@ -409,7 +419,7 @@ describe('qs (qs.js)', () => {
         integerFields: ['page', 'page_size'],
       };
       const query = '?baz=bar&baz=bang&page=3';
-      const newParams = { page: 3 }
+      const newParams = { page: 3 };
       expect(removeParams(config, query, newParams)).toEqual({
         baz: ['bar', 'bang'],
         page: 1,
@@ -424,7 +434,7 @@ describe('qs (qs.js)', () => {
         integerFields: ['page', 'page_size'],
       };
       const query = '?baz=bar&baz=bang&baz=bust&pat=pal&page=3';
-      const newParams = { baz: 'bust', pat: 'pal' }
+      const newParams = { baz: 'bust', pat: 'pal' };
       expect(removeParams(config, query, newParams)).toEqual({
         baz: ['bar', 'bang'],
         page: 3,
@@ -439,7 +449,7 @@ describe('qs (qs.js)', () => {
         integerFields: ['page', 'page_size'],
       };
       const query = '?item.baz=bar&item.page=3';
-      const newParams = { baz: 'bar' }
+      const newParams = { baz: 'bar' };
       expect(removeParams(config, query, newParams)).toEqual({
         page: 3,
         page_size: 15,
@@ -453,7 +463,7 @@ describe('qs (qs.js)', () => {
         integerFields: ['page', 'page_size'],
       };
       const query = '?item.baz=bar&foo.page=3';
-      const newParams = { baz: 'bar' }
+      const newParams = { baz: 'bar' };
       expect(removeParams(config, query, newParams)).toEqual({
         page: 1,
         page_size: 15,
@@ -467,7 +477,7 @@ describe('qs (qs.js)', () => {
         integerFields: ['page', 'page_size'],
       };
       const query = '?item.baz=bar&item.baz=bang&item.page=3';
-      const newParams = { baz: 'bar' }
+      const newParams = { baz: 'bar' };
       expect(removeParams(config, query, newParams)).toEqual({
         baz: 'bang',
         page: 3,
@@ -482,7 +492,7 @@ describe('qs (qs.js)', () => {
         integerFields: ['page', 'page_size'],
       };
       const query = '?item.baz=bar&item.baz=bang&item.baz=bust&item.page=3';
-      const newParams = { baz: 'bar' }
+      const newParams = { baz: 'bar' };
       expect(removeParams(config, query, newParams)).toEqual({
         baz: ['bang', 'bust'],
         page: 3,
@@ -497,7 +507,7 @@ describe('qs (qs.js)', () => {
         integerFields: ['page', 'page_size'],
       };
       const query = '?item.baz=bar&item.baz=bang&item.page=3';
-      const newParams = { page: 3 }
+      const newParams = { page: 3 };
       expect(removeParams(config, query, newParams)).toEqual({
         baz: ['bar', 'bang'],
         page: 1,
@@ -511,8 +521,9 @@ describe('qs (qs.js)', () => {
         defaultParams: { page: 1, page_size: 15 },
         integerFields: ['page', 'page_size'],
       };
-      const query = '?item.baz=bar&item.baz=bang&item.baz=bust&item.pat=pal&item.page=3';
-      const newParams = { baz: 'bust', pat: 'pal' }
+      const query =
+        '?item.baz=bar&item.baz=bang&item.baz=bust&item.pat=pal&item.page=3';
+      const newParams = { baz: 'bust', pat: 'pal' };
       expect(removeParams(config, query, newParams)).toEqual({
         baz: ['bar', 'bang'],
         page: 3,

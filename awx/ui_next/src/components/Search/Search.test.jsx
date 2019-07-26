@@ -12,7 +12,9 @@ describe('<Search />', () => {
   });
 
   test('it triggers the expected callbacks', () => {
-    const columns = [{ name: 'Name', key: 'name', isSortable: true, isSearchable: true }];
+    const columns = [
+      { name: 'Name', key: 'name', isSortable: true, isSearchable: true },
+    ];
 
     const searchBtn = 'button[aria-label="Search submit button"]';
     const searchTextInput = 'input[aria-label="Search text input"]';
@@ -20,11 +22,7 @@ describe('<Search />', () => {
     const onSearch = jest.fn();
 
     search = mountWithContexts(
-      <Search
-        sortedColumnKey="name"
-        columns={columns}
-        onSearch={onSearch}
-      />
+      <Search sortedColumnKey="name" columns={columns} onSearch={onSearch} />
     );
 
     search.find(searchTextInput).instance().value = 'test-321';
@@ -36,14 +34,12 @@ describe('<Search />', () => {
   });
 
   test('handleDropdownToggle properly updates state', async () => {
-    const columns = [{ name: 'Name', key: 'name', isSortable: true, isSearchable: true }];
+    const columns = [
+      { name: 'Name', key: 'name', isSortable: true, isSearchable: true },
+    ];
     const onSearch = jest.fn();
     const wrapper = mountWithContexts(
-      <Search
-        sortedColumnKey="name"
-        columns={columns}
-        onSearch={onSearch}
-      />
+      <Search sortedColumnKey="name" columns={columns} onSearch={onSearch} />
     ).find('Search');
     expect(wrapper.state('isSearchDropdownOpen')).toEqual(false);
     wrapper.instance().handleDropdownToggle(true);
@@ -53,18 +49,21 @@ describe('<Search />', () => {
   test('handleDropdownSelect properly updates state', async () => {
     const columns = [
       { name: 'Name', key: 'name', isSortable: true, isSearchable: true },
-      { name: 'Description', key: 'description', isSortable: true, isSearchable: true }
+      {
+        name: 'Description',
+        key: 'description',
+        isSortable: true,
+        isSearchable: true,
+      },
     ];
     const onSearch = jest.fn();
     const wrapper = mountWithContexts(
-      <Search
-        sortedColumnKey="name"
-        columns={columns}
-        onSearch={onSearch}
-      />
+      <Search sortedColumnKey="name" columns={columns} onSearch={onSearch} />
     ).find('Search');
     expect(wrapper.state('searchKey')).toEqual('name');
-    wrapper.instance().handleDropdownSelect({ target: { innerText: 'Description' } });
+    wrapper
+      .instance()
+      .handleDropdownSelect({ target: { innerText: 'Description' } });
     expect(wrapper.state('searchKey')).toEqual('description');
   });
 });

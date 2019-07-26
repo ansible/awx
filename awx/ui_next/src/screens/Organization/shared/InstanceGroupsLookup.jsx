@@ -8,30 +8,24 @@ import { QuestionCircleIcon } from '@patternfly/react-icons';
 import { InstanceGroupsAPI } from '@api';
 import Lookup from '@components/Lookup';
 
-const getInstanceGroups = async (params) => InstanceGroupsAPI.read(params);
+const getInstanceGroups = async params => InstanceGroupsAPI.read(params);
 
 class InstanceGroupsLookup extends React.Component {
-  render () {
+  render() {
     const { value, tooltip, onChange, i18n } = this.props;
 
     return (
       <FormGroup
-        label={(
+        label={
           <Fragment>
-            {i18n._(t`Instance Groups`)}
-            {' '}
-            {
-              tooltip && (
-                <Tooltip
-                  position="right"
-                  content={tooltip}
-                >
-                  <QuestionCircleIcon />
-                </Tooltip>
-              )
-            }
+            {i18n._(t`Instance Groups`)}{' '}
+            {tooltip && (
+              <Tooltip position="right" content={tooltip}>
+                <QuestionCircleIcon />
+              </Tooltip>
+            )}
           </Fragment>
-        )}
+        }
         fieldId="org-instance-groups"
       >
         <Lookup
@@ -43,9 +37,24 @@ class InstanceGroupsLookup extends React.Component {
           getItems={getInstanceGroups}
           multiple
           columns={[
-            { name: i18n._(t`Name`), key: 'name', isSortable: true, isSearchable: true },
-            { name: i18n._(t`Modified`), key: 'modified', isSortable: false, isNumeric: true },
-            { name: i18n._(t`Created`), key: 'created', isSortable: false, isNumeric: true }
+            {
+              name: i18n._(t`Name`),
+              key: 'name',
+              isSortable: true,
+              isSearchable: true,
+            },
+            {
+              name: i18n._(t`Modified`),
+              key: 'modified',
+              isSortable: false,
+              isNumeric: true,
+            },
+            {
+              name: i18n._(t`Created`),
+              key: 'created',
+              isSortable: false,
+              isNumeric: true,
+            },
           ]}
           sortedColumnKey="name"
         />
