@@ -158,4 +158,6 @@ RUN for file in /etc/passwd /etc/supervisord.conf \
   /venv/awx/lib/python3.6/site-packages/awx.egg-link /var/run/nginx.pid; \
   do touch $file; chmod -R g+rwx $file; chgrp -R root $file; done
 
+ENV HOME /var/lib/awx
+
 ENV PATH=/usr/local/n/versions/node/10.15.0/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
