@@ -50,7 +50,7 @@ class ListHeader extends React.Component {
     this.pushHistoryState(addParams(qsConfig, search, { [key]: value }));
   }
 
-  handleRemove ({ key, value }) {
+  handleRemove (key, value) {
     const { history, qsConfig } = this.props;
     const { search } = history.location;
     this.pushHistoryState(removeParams(qsConfig, search, { [key]: value }));
