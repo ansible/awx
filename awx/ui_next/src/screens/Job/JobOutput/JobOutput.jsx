@@ -164,7 +164,7 @@ class JobOutput extends Component {
 
   loadMoreRows({ startIndex, stopIndex }) {
     if (startIndex === 0 && stopIndex === 0) {
-      return;
+      return Promise.resolve(null);
     }
     const { job } = this.props;
 

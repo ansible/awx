@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { Button as PFButton } from '@patternfly/react-core';
 import {
   PlusIcon,
@@ -22,38 +22,29 @@ const Button = styled(PFButton)`
   }
 `;
 
-class MenuControls extends Component {
-  constructor(props) {
-    super(props);
-  }
-
-  render() {
-    const {
-      onScrollTop,
-      onScrollBottom,
-      onScrollNext,
-      onScrollPrevious,
-    } = this.props;
-    return (
-      <Wrapper>
-        <Button variant="plain">
-          <PlusIcon />
-        </Button>
-        <Button onClick={onScrollPrevious} variant="plain">
-          <AngleUpIcon />
-        </Button>
-        <Button onClick={onScrollNext} variant="plain">
-          <AngleDownIcon />
-        </Button>
-        <Button onClick={onScrollTop} variant="plain">
-          <AngleDoubleUpIcon />
-        </Button>
-        <Button onClick={onScrollBottom} variant="plain">
-          <AngleDoubleDownIcon />
-        </Button>
-      </Wrapper>
-    );
-  }
-}
+const MenuControls = ({
+  onScrollTop,
+  onScrollBottom,
+  onScrollNext,
+  onScrollPrevious,
+}) => (
+  <Wrapper>
+    <Button variant="plain">
+      <PlusIcon />
+    </Button>
+    <Button onClick={onScrollPrevious} variant="plain">
+      <AngleUpIcon />
+    </Button>
+    <Button onClick={onScrollNext} variant="plain">
+      <AngleDownIcon />
+    </Button>
+    <Button onClick={onScrollTop} variant="plain">
+      <AngleDoubleUpIcon />
+    </Button>
+    <Button onClick={onScrollBottom} variant="plain">
+      <AngleDoubleDownIcon />
+    </Button>
+  </Wrapper>
+);
 
 export default MenuControls;
