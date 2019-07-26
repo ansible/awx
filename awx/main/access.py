@@ -538,7 +538,7 @@ class InstanceGroupAccess(BaseAccess):
 
     def filtered_queryset(self):
         return InstanceGroup.objects.filter(
-            organization__in=Organization.accessible_pk_qs(self.user, 'admin_role'))
+            organization__in=Organization.accessible_pk_qs(self.user, 'admin_role')).distinct()
 
     def can_add(self, data):
         return self.user.is_superuser
