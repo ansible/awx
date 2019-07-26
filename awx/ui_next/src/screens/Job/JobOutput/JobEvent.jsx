@@ -71,7 +71,7 @@ const JobEventLineNumber = styled.div`
   text-align: right;
   vertical-align: top;
   padding-right: 5px;
-  border-right: 1px solid #b7b7b7;
+  border-right: 1px solid #d7d7d7;
   user-select: none;
 `;
 const JobEventLineText = styled.div`
@@ -132,10 +132,10 @@ function JobEvent({ counter, created, event, stdout, start_line, ...rest }) {
     <JobEventWrapper {...rest}>
       {getLineTextHtml({ created, event, start_line, stdout }).map(
         ({ lineNumber, html }) =>
-          lineNumber !== 0 && (
+          lineNumber >= 0 && (
             <JobEventLine
               key={`${counter}-${lineNumber}`}
-              isFirst={lineNumber === 1}
+              isFirst={lineNumber === 0}
             >
               <JobEventLineToggle />
               <JobEventLineNumber>{lineNumber}</JobEventLineNumber>

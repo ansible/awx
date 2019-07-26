@@ -17,23 +17,26 @@ import JobEvent from './JobEvent';
 import JobEventSkeleton from './JobEventSkeleton';
 import MenuControls from './shared/MenuControls';
 
+const OutputHeader = styled.div`
+  font-weight: var(--pf-global--FontWeight--bold);
+`;
 const OutputToolbar = styled.div`
   display: flex;
   justify-content: flex-end;
 `;
 const OutputWrapper = styled.div`
-  height: calc(100vh - 325px);
+  height: calc(100vh - 350px);
   background-color: #fafafa;
   margin-top: 24px;
   font-family: monospace;
   font-size: 15px;
-  border: 1px solid #b7b7b7;
+  outline: 1px solid #d7d7d7;
   display: flex;
   flex-direction: column;
 `;
 const OutputFooter = styled.div`
   background-color: #ebebeb;
-  border-right: 1px solid #b7b7b7;
+  border-right: 1px solid #d7d7d7;
   width: 75px;
   flex: 1;
 `;
@@ -160,6 +163,9 @@ class JobOutput extends Component {
   }
 
   loadMoreRows({ startIndex, stopIndex }) {
+    if (startIndex === 0 && stopIndex === 0) {
+      return;
+    }
     const { job } = this.props;
 
     const loadRange = range(startIndex, stopIndex);
@@ -171,6 +177,7 @@ class JobOutput extends Component {
       counter__lte: stopIndex,
       order_by: 'start_line',
     };
+
     return JobsAPI.readEvents(job.id, job.type, params).then(response => {
       this.setState(({ results, currentlyLoading }) => {
         response.data.results.forEach(jobEvent => {
@@ -229,7 +236,7 @@ class JobOutput extends Component {
 
     return (
       <CardBody>
-        <b>{job.name}</b>
+        <OutputHeader>{job.name}</OutputHeader>
         <OutputToolbar>
           <MenuControls
             onScrollTop={this.handleScrollTop}
