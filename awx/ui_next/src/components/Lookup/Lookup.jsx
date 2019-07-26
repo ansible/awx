@@ -14,7 +14,7 @@ import {
   Button,
   ButtonVariant,
   InputGroup as PFInputGroup,
-  Modal,
+  Modal as PFModal,
 } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -34,6 +34,10 @@ const InputGroup = styled(PFInputGroup)`
     --pf-c-form-control--Height: 90px;
     overflow-y: auto;
   `}
+`;
+
+const Modal = styled(PFModal)`
+  --pf-c-modal-box--body--MinHeight: 460px;
 `;
 
 class Lookup extends React.Component {
