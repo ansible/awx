@@ -1649,6 +1649,11 @@ class RunJob(BaseTask):
                 logger.debug('Running project sync for {} because of galaxy role requirements.'.format(job.log_format))
                 needs_sync = True
 
+            galaxy_collections_req_path = os.path.join(project_path, 'collections', 'requirements.yml')
+            if os.path.exists(galaxy_collections_req_path):
+                logger.debug('Running project sync for {} because of galaxy collections requirements.'.format(job.log_format))
+                needs_sync = True
+
         if needs_sync:
             pu_ig = job.instance_group
             pu_en = job.execution_node
