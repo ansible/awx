@@ -1,5 +1,6 @@
 import Config from './models/Config';
 import InstanceGroups from './models/InstanceGroups';
+import Inventories from './models/Inventories';
 import JobTemplates from './models/JobTemplates';
 import Jobs from './models/Jobs';
 import Me from './models/Me';
@@ -13,6 +14,7 @@ import WorkflowJobTemplates from './models/WorkflowJobTemplates';
 
 const ConfigAPI = new Config();
 const InstanceGroupsAPI = new InstanceGroups();
+const InventoriesAPI = new Inventories();
 const JobTemplatesAPI = new JobTemplates();
 const JobsAPI = new Jobs();
 const MeAPI = new Me();
@@ -27,6 +29,7 @@ const WorkflowJobTemplatesAPI = new WorkflowJobTemplates();
 export {
   ConfigAPI,
   InstanceGroupsAPI,
+  InventoriesAPI,
   JobTemplatesAPI,
   JobsAPI,
   MeAPI,

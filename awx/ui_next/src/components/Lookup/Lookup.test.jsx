@@ -17,6 +17,7 @@ describe('<Lookup />', () => {
         getItems={() => {}}
         columns={mockColumns}
         sortedColumnKey="name"
+        multiple
       />
     );
   });
@@ -33,6 +34,7 @@ describe('<Lookup />', () => {
         })}
         columns={mockColumns}
         sortedColumnKey="name"
+        multiple
       />
     ).find('Lookup');
 
@@ -57,6 +59,7 @@ describe('<Lookup />', () => {
         getItems={() => {}}
         columns={mockColumns}
         sortedColumnKey="name"
+        multiple
       />
     ).find('Lookup');
     expect(spy).not.toHaveBeenCalled();
@@ -90,6 +93,7 @@ describe('<Lookup />', () => {
         getItems={() => ({ data })}
         columns={mockColumns}
         sortedColumnKey="name"
+        multiple
       />
     );
     setImmediate(() => {
@@ -118,6 +122,7 @@ describe('<Lookup />', () => {
         getItems={() => ({ data })}
         columns={mockColumns}
         sortedColumnKey="name"
+        multiple
       />
     );
     const removeIcon = wrapper.find('button[aria-label="close"]').first();
@@ -136,6 +141,7 @@ describe('<Lookup />', () => {
         getItems={() => {}}
         columns={mockColumns}
         sortedColumnKey="name"
+        multiple
       />
     ).find('Lookup');
     const chip = wrapper.find('.pf-c-chip');
@@ -152,6 +158,7 @@ describe('<Lookup />', () => {
         getItems={() => {}}
         columns={mockColumns}
         sortedColumnKey="name"
+        multiple
       />
     ).find('Lookup');
     wrapper.instance().toggleSelected({
@@ -182,6 +189,7 @@ describe('<Lookup />', () => {
         onLookupSave={onLookupSaveFn}
         getItems={() => {}}
         sortedColumnKey="name"
+        multiple
       />
     ).find('Lookup');
     wrapper.instance().toggleSelected({
@@ -206,7 +214,46 @@ describe('<Lookup />', () => {
     );
   });
 
+  test('should call callback with selected single item', () => {
+    mockData = { name: 'foo', id: 1, isChecked: false, url: 'https://foo' };
+    const onLookupSaveFn = jest.fn();
+    const wrapper = mountWithContexts(
+      <Lookup
+        lookupHeader="Foo Bar"
+        name="fooBar"
+        value={mockData}
+        onLookupSave={onLookupSaveFn}
+        getItems={() => ({
+          data: {
+            results: [mockData],
+            count: 1,
+          },
+        })}
+        sortedColumnKey="name"
+      />
+    );
+    wrapper
+      .find('Lookup')
+      .instance()
+      .toggleSelected({
+        id: 1,
+        name: 'foo',
+      });
+    wrapper
+      .find('Lookup')
+      .instance()
+      .saveModal();
+    expect(onLookupSaveFn).toHaveBeenCalledWith(
+      {
+        id: 1,
+        name: 'foo',
+      },
+      'fooBar'
+    );
+  });
+
   test('should re-fetch data when URL params change', async () => {
+    mockData = [{ name: 'foo', id: 1, isChecked: false }];
     const history = createMemoryHistory({
       initialEntries: ['/organizations/add'],
     });
@@ -220,6 +267,7 @@ describe('<Lookup />', () => {
         columns={mockColumns}
         sortedColumnKey="name"
         getItems={getItems}
+        multiple
         handleHttpError={() => {}}
         location={{ history }}
         i18n={{ _: val => val.toString() }}

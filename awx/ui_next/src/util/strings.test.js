@@ -9,6 +9,10 @@ describe('string utils', () => {
     test('should add an "es"', () => {
       expect(pluralize('class')).toEqual('classes');
     });
+
+    test('should handle word ending in y', () => {
+      expect(pluralize('inventory')).toEqual('inventories');
+    });
   });
 
   describe('getArticle', () => {

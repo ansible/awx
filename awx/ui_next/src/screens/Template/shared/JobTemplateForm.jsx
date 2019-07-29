@@ -13,6 +13,7 @@ import FormRow from '@components/FormRow';
 import { required } from '@util/validators';
 import styled from 'styled-components';
 import { JobTemplate } from '@types';
+import InventoriesLookup from './InventoriesLookup';
 
 const QuestionCircleIcon = styled(PFQuestionCircleIcon)`
   margin-left: 10px;
@@ -33,11 +34,23 @@ class JobTemplateForm extends Component {
       job_type: 'run',
       project: '',
       playbook: '',
+      summary_fields: {
+        inventory: null,
+      },
     },
   };
 
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      inventory: props.template.summary_fields.inventory,
+    };
+  }
+
   render() {
     const { handleCancel, handleSubmit, i18n, template } = this.props;
+    const { inventory } = this.state;
 
     const jobTypeOptions = [
       {
@@ -105,15 +118,21 @@ class JobTemplateForm extends Component {
                   </FormGroup>
                 )}
               />
-              <FormField
-                id="template-inventory"
+              <Field
                 name="inventory"
-                type="number"
-                label={i18n._(t`Inventory`)}
-                tooltip={i18n._(t`Select the inventory containing the hosts
-                you want this job to manage.`)}
-                isRequired
                 validate={required(null, i18n)}
+                render={({ form }) => (
+                  <InventoriesLookup
+                    value={inventory}
+                    tooltip={i18n._(t`Select the inventory containing the hosts
+                      you want this job to manage.`)}
+                    onChange={value => {
+                      form.setFieldValue('inventory', value.id);
+                      this.setState({ inventory: value });
+                    }}
+                    required
+                  />
+                )}
               />
               <FormField
                 id="template-project"

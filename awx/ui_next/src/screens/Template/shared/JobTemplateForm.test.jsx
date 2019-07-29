@@ -15,6 +15,12 @@ describe('<JobTemplateForm />', () => {
     project: 3,
     playbook: 'Baz',
     type: 'job_template',
+    summary_fields: {
+      inventory: {
+        id: 2,
+        name: 'foo',
+      },
+    },
   };
 
   afterEach(() => {
@@ -31,7 +37,7 @@ describe('<JobTemplateForm />', () => {
     );
   });
 
-  test('should update form values on input changes', () => {
+  test('should update form values on input changes', async () => {
     const wrapper = mountWithContexts(
       <JobTemplateForm
         template={mockData}
@@ -53,8 +59,9 @@ describe('<JobTemplateForm />', () => {
       target: { value: 'new job type', name: 'job_type' },
     });
     expect(form.state('values').job_type).toEqual('new job type');
-    wrapper.find('input#template-inventory').simulate('change', {
-      target: { value: 3, name: 'inventory' },
+    wrapper.find('InventoriesLookup').prop('onChange')({
+      id: 3,
+      name: 'inventory',
     });
     expect(form.state('values').inventory).toEqual(3);
     wrapper.find('input#template-project').simulate('change', {
