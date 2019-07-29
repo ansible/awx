@@ -1031,7 +1031,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
                 fd.write = lambda s: _write(smart_text(s))
 
                 cursor.copy_expert(
-                    "copy (select stdout from {} where {}={} order by start_line) to stdout".format(
+                    "copy (select stdout from {} where {}={} and stdout != '' order by start_line) to stdout".format(
                         self._meta.db_table + 'event',
                         self.event_parent_key,
                         self.id
