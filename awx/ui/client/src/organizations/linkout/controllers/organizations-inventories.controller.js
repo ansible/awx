@@ -68,6 +68,7 @@ export default ['$scope', '$rootScope', '$location',
             }
 
             item.kind_label = item.kind === '' ? i18n._('Inventory') : (item.kind === 'smart' ? i18n._('Smart Inventory'): i18n._('Inventory'));
+            item.linkToDetails = (item.kind && item.kind === 'smart') ? `inventories.editSmartInventory({smartinventory_id:${item.id}})` : `inventories.edit({inventory_id:${item.id}})`;
 
             return item;
         }
