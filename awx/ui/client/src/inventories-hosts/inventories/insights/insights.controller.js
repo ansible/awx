@@ -5,9 +5,11 @@
  *************************************************/
 
 export default [ 'InsightsData', '$scope', 'moment', '$state', 'InventoryData',
-    'InsightsService', 'CanRemediate',
+    'InsightsService', 'CanRemediate', 'InsightsStrings',
 function (data, $scope, moment, $state, InventoryData, InsightsService,
-    CanRemediate) {
+    CanRemediate, strings) {
+
+    $scope.strings = strings;
 
     function init() {
         $scope.reports = (data && data.reports) ? data.reports : [];
