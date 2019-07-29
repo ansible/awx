@@ -73,7 +73,7 @@ from awx.main.utils import (get_ssh_version, update_scm_url,
                             ignore_inventory_computed_fields,
                             ignore_inventory_group_removal, extract_ansible_vars, schedule_task_manager,
                             get_awx_version)
-from awx.main.utils.common import _get_ansible_version, get_custom_venv_choices
+from awx.main.utils.common import get_ansible_version, _get_ansible_version, get_custom_venv_choices
 from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja
 from awx.main.utils.reload import stop_local_services
 from awx.main.utils.pglock import advisory_lock
@@ -1709,7 +1709,13 @@ class RunJob(BaseTask):
             if not job.scm_revision:
                 raise RuntimeError('Unexpectedly could not determine a revision to run from project.')
             source_branch = git_repo.create_head(tmp_branch_name, job.scm_revision)
-            git_repo.clone(runner_project_folder, branch=source_branch, depth=1, single_branch=True)
+            # git clone must take file:// syntax for source repo or else options like depth will be ignored
+            source_as_uri = Path(project_path).as_uri()
+            git.Repo.clone_from(
+                source_as_uri, runner_project_folder, branch=source_branch,
+                depth=1, single_branch=True,  # shallow, do not copy full history
+                recursive=True  # include submodules
+            )
             # force option is necessary because remote refs are not counted, although no information is lost
             git_repo.delete_head(tmp_branch_name, force=True)
         else:
@@ -1759,6 +1765,7 @@ class RunProjectUpdate(BaseTask):
     def __init__(self, *args, job_private_data_dir=None, **kwargs):
         super(RunProjectUpdate, self).__init__(*args, **kwargs)
         self.playbook_new_revision = None
+        self.original_branch = None
         self.job_private_data_dir = job_private_data_dir
 
     def event_handler(self, event_data):
@@ -1894,6 +1901,15 @@ class RunProjectUpdate(BaseTask):
             scm_branch = project_update.project.scm_revision
         elif not scm_branch:
             scm_branch = {'hg': 'tip'}.get(project_update.scm_type, 'HEAD')
+        if project_update.job_type == 'check':
+            roles_enabled = False
+            collections_enabled = False
+        else:
+            roles_enabled = getattr(settings, 'AWX_ROLES_ENABLED', True)
+            collections_enabled = getattr(settings, 'AWX_COLLECTIONS_ENABLED', True)
+            # collections were introduced in Ansible version 2.8
+            if Version(get_ansible_version()) <= Version('2.8'):
+                collections_enabled = False
         extra_vars.update({
             'project_path': project_update.get_project_path(check_if_exists=False),
             'insights_url': settings.INSIGHTS_URL_BASE,
@@ -1905,8 +1921,8 @@ class RunProjectUpdate(BaseTask):
             'scm_clean': project_update.scm_clean,
             'scm_delete_on_update': project_update.scm_delete_on_update if project_update.job_type == 'check' else False,
             'scm_full_checkout': True if project_update.job_type == 'run' else False,
-            'roles_enabled': getattr(settings, 'AWX_ROLES_ENABLED', True) if project_update.job_type != 'check' else False,
-            'collections_enabled': getattr(settings, 'AWX_COLLECTIONS_ENABLED', True) if project_update.job_type != 'check' else False,
+            'roles_enabled': roles_enabled,
+            'collections_enabled': collections_enabled,
         })
         if project_update.job_type != 'check' and self.job_private_data_dir:
             extra_vars['collections_destination'] = os.path.join(self.job_private_data_dir, 'requirements_collections')
@@ -2041,31 +2057,26 @@ class RunProjectUpdate(BaseTask):
         if not os.path.exists(settings.PROJECTS_ROOT):
             os.mkdir(settings.PROJECTS_ROOT)
         self.acquire_lock(instance)
+        self.original_branch = None
+        if instance.scm_type == 'git' and instance.job_type == 'run' and instance.project:
+            project_path = instance.project.get_project_path(check_if_exists=False)
+            if os.path.exists(project_path):
+                git_repo = git.Repo(project_path)
+                self.original_branch = git_repo.active_branch
 
     def post_run_hook(self, instance, status):
-        # TODO: find the effective revision and save to scm_revision
+        if self.original_branch:
+            # for git project syncs, non-default branches can be problems
+            # restore to branch the repo was on before this run
+            try:
+                self.original_branch.checkout()
+            except Exception:
+                # this could have failed due to dirty tree, but difficult to predict all cases
+                logger.exception('Failed to restore project repo to prior state after {}'.format(instance.log_format))
         self.release_lock(instance)
         p = instance.project
         if self.playbook_new_revision:
             instance.scm_revision = self.playbook_new_revision
-            # If branch of the update differs from project, then its revision will differ
-            if instance.scm_branch != p.scm_branch and p.scm_type == 'git':
-                project_path = p.get_project_path(check_if_exists=False)
-                git_repo = git.Repo(project_path)
-                try:
-                    commit = git_repo.commit(instance.scm_branch)
-                    instance.scm_revision = commit.hexsha  # obtain 40 char long-form of SHA1
-                    logger.debug('Evaluated {} to be a valid commit for {}'.format(instance.scm_branch, instance.log_format))
-                except (ValueError, BadGitName):
-                    # not a commit, see if it is a ref
-                    try:
-                        user_branch = getattr(git_repo.remotes.origin.refs, instance.scm_branch)
-                        instance.scm_revision = user_branch.commit.hexsha  # head of ref
-                        logger.debug('Evaluated {} to be a valid ref for {}'.format(instance.scm_branch, instance.log_format))
-                    except (git.exc.NoSuchPathError, AttributeError) as exc:
-                        raise RuntimeError('Could not find specified version {}, error: {}'.format(
-                            instance.scm_branch, exc
-                        ))
             instance.save(update_fields=['scm_revision'])
         if instance.job_type == 'check' and status not in ('failed', 'canceled',):
             if self.playbook_new_revision:

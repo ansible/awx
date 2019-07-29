@@ -272,7 +272,7 @@ If an Instance Group is configured but all instances in that group are offline o
 
 #### Project synchronization behavior
 
-Project updates behave differently than they did before. Previously they were ordinary jobs that ran on a single instance. It's now important that they run successfully on any instance that could potentially run a job. Projects will sync themselves to the correct version on the instance immediately prior to running the job. If the needed revision is already locally available and galaxy or collections updates are not needed, then a sync may not be performed.
+Project updates behave differently than they did before. Previously they were ordinary jobs that ran on a single instance. It's now important that they run successfully on any instance that could potentially run a job. Projects will sync themselves to the correct version on the instance immediately prior to running the job. If the needed revision is already locally checked out and galaxy or collections updates are not needed, then a sync may not be performed.
 
 When the sync happens, it is recorded in the database as a project update with a `launch_type` of "sync" and a `job_type` of "run". Project syncs will not change the status or version of the project; instead, they will update the source tree _only_ on the instance where they run. The only exception to this behavior is when the project is in the "never updated" state (meaning that no project updates of any type have been run), in which case a sync should fill in the project's initial revision and status, and subsequent syncs should not make such changes.
 

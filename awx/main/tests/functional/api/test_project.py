@@ -5,6 +5,7 @@ from django.conf import settings
 import pytest
 
 from awx.api.versioning import reverse
+from awx.main.models import Project, JobTemplate
 
 
 @pytest.mark.django_db
@@ -47,7 +48,7 @@ def test_project_unset_custom_virtualenv(get, patch, project, admin, value):
 
 
 @pytest.mark.django_db
-def test_no_changing_overwrite_behavior(post, patch, organization, admin_user):
+def test_no_changing_overwrite_behavior_if_used(post, patch, organization, admin_user):
     r1 = post(
         url=reverse('api:project_list'),
         data={
@@ -58,10 +59,38 @@ def test_no_changing_overwrite_behavior(post, patch, organization, admin_user):
         user=admin_user,
         expect=201
     )
+    JobTemplate.objects.create(
+        name='provides branch', project_id=r1.data['id'],
+        playbook='helloworld.yml',
+        scm_branch='foobar'
+    )
     r2 = patch(
         url=reverse('api:project_detail', kwargs={'pk': r1.data['id']}),
         data={'allow_override': False},
         user=admin_user,
         expect=400
     )
-    assert 'cannot be changed' in str(r2.data['allow_override'])
+    assert 'job templates already specify a branch for this project' in str(r2.data['allow_override'])
+    assert 'ids: 2' in str(r2.data['allow_override'])
+    assert Project.objects.get(pk=r1.data['id']).allow_override is True
+
+
+@pytest.mark.django_db
+def test_changing_overwrite_behavior_okay_if_not_used(post, patch, organization, admin_user):
+    r1 = post(
+        url=reverse('api:project_list'),
+        data={
+            'name': 'fooo',
+            'organization': organization.id,
+            'allow_override': True
+        },
+        user=admin_user,
+        expect=201
+    )
+    patch(
+        url=reverse('api:project_detail', kwargs={'pk': r1.data['id']}),
+        data={'allow_override': False},
+        user=admin_user,
+        expect=200
+    )
+    assert Project.objects.get(pk=r1.data['id']).allow_override is False
