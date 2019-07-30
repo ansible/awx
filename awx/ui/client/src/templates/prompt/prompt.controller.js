@@ -13,8 +13,6 @@ export default [ 'ProcessErrors', 'CredentialTypeModel', 'TemplatesStrings', '$f
             scope = _scope_;
             ({ modal } = scope[scope.ns]);
 
-            modal.preventOutsideClick = true;
-
             scope.$watch('vm.promptData.triggerModalOpen', () => {
                 vm.actionButtonClicked = false;
                 if(vm.promptData && vm.promptData.triggerModalOpen) {
