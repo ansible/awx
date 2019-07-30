@@ -1,11 +1,12 @@
 FROM centos:7
 
-RUN yum install -y epel-release
+RUN yum -y update && yum -y install epel-release && yum -y install https://centos7.iuscommunity.org/ius-release.rpm
 
 RUN yum install -y bzip2 \
     gcc-c++ \
     gettext \
-    git \
+    git2u \
+    git2u-core \
     make \
     nodejs \
     python36-setuptools
