@@ -20,6 +20,7 @@ describe('<JobTemplateForm />', () => {
         id: 2,
         name: 'foo',
       },
+      labels: { results: [{ name: 'Sushi', id: 1 }, { name: 'Major', id: 2 }] },
     },
   };
 

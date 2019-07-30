@@ -4,9 +4,17 @@ import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Formik, Field } from 'formik';
-import { Form, FormGroup, Tooltip } from '@patternfly/react-core';
+import {
+  Form,
+  FormGroup,
+  Tooltip,
+  PageSection,
+  Card,
+} from '@patternfly/react-core';
 import { QuestionCircleIcon as PFQuestionCircleIcon } from '@patternfly/react-icons';
+import ContentError from '@components/ContentError';
 import AnsibleSelect from '@components/AnsibleSelect';
+import MultiSelect from '@components/MultiSelect';
 import FormActionGroup from '@components/FormActionGroup';
 import FormField from '@components/FormField';
 import FormRow from '@components/FormRow';
@@ -14,10 +22,16 @@ import { required } from '@util/validators';
 import styled from 'styled-components';
 import { JobTemplate } from '@types';
 import InventoriesLookup from './InventoriesLookup';
+import { LabelsAPI } from '@api';
 
 const QuestionCircleIcon = styled(PFQuestionCircleIcon)`
   margin-left: 10px;
 `;
+const QSConfig = {
+  page: 1,
+  page_size: 200,
+  order_by: 'name',
+};
 
 class JobTemplateForm extends Component {
   static propTypes = {
@@ -36,22 +50,107 @@ class JobTemplateForm extends Component {
       playbook: '',
       summary_fields: {
         inventory: null,
+        labels: { results: [] },
       },
     },
   };
 
   constructor(props) {
     super(props);
-
     this.state = {
+      hasContentLoading: true,
+      contentError: false,
+      loadedLabels: [],
+      newLabels: [],
+      removedLabels: [],
       inventory: props.template.summary_fields.inventory,
     };
+    this.handleNewLabel = this.handleNewLabel.bind(this);
+    this.loadLabels = this.loadLabels.bind(this);
+    this.disassociateLabel = this.disassociateLabel.bind(this);
+  }
+
+  componentDidMount() {
+    this.loadLabels(QSConfig);
+  }
+
+  async loadLabels(QueryConfig) {
+    const { loadedLabels } = this.state;
+    this.setState({ contentError: null, hasContentLoading: true });
+    try {
+      const { data } = await LabelsAPI.read(QueryConfig);
+      const labels = [...data.results];
+      this.setState({ loadedLabels: loadedLabels.concat(labels) });
+      if (data.next && data.next.includes('page=2')) {
+        this.loadLabels({
+          page: 2,
+          page_size: 200,
+          order_by: 'name',
+        });
+      }
+    } catch (err) {
+      this.setState({ contentError: err });
+    } finally {
+      this.setState({ hasContentLoading: false });
+    }
+  }
+
+  handleNewLabel(label) {
+    const { newLabels } = this.state;
+    const { template } = this.props;
+    const isIncluded = newLabels.some(newLabel => newLabel.name === label.name);
+    if (isIncluded) {
+      const filteredLabels = newLabels.filter(
+        newLabel => newLabel.name !== label
+      );
+      this.setState({ newLabels: filteredLabels });
+    } else if (typeof label === 'string') {
+      this.setState({
+        newLabels: [
+          ...newLabels,
+          {
+            name: label,
+            organization: template.summary_fields.inventory.organization_id,
+          },
+        ],
+      });
+    } else {
+      this.setState({
+        newLabels: [...newLabels, { associate: true, id: label.id }],
+      });
+    }
+  }
+
+  disassociateLabel(label) {
+    const { removedLabels, newLabels } = this.state;
+    const isNewCreatedLabel = newLabels.some(
+      newLabel => newLabel === label.name
+    );
+    if (isNewCreatedLabel) {
+      const filteredLabels = newLabels.filter(
+        newLabel => newLabel !== label.name
+      );
+      this.setState({ newLabels: filteredLabels });
+    } else {
+      this.setState({
+        removedLabels: removedLabels.concat({
+          disassociate: true,
+          id: label.id,
+        }),
+      });
+    }
   }
 
   render() {
+    const {
+      loadedLabels,
+      contentError,
+      hasContentLoading,
+      inventory,
+      newLabels,
+      removedLabels,
+    } = this.state;
     const { handleCancel, handleSubmit, i18n, template } = this.props;
-    const { inventory } = this.state;
-
     const jobTypeOptions = [
       {
         value: '',
@@ -68,6 +167,15 @@ class JobTemplateForm extends Component {
       },
     ];
 
+    if (!hasContentLoading && contentError) {
+      return (
+        <PageSection>
+          <Card className="awx-c-card">
+            <ContentError error={contentError} />
+          </Card>
+        </PageSection>
+      );
+    }
     return (
       <Formik
         initialValues={{
@@ -77,8 +185,11 @@ class JobTemplateForm extends Component {
           inventory: template.inventory,
           project: template.project,
           playbook: template.playbook,
+          labels: template.summary_fields.labels.results,
         }}
-        onSubmit={handleSubmit}
+        onSubmit={values => {
+          handleSubmit(values, newLabels, removedLabels);
+        }}
         render={formik => (
           <Form autoComplete="off" onSubmit={formik.handleSubmit}>
             <FormRow>
@@ -156,9 +267,31 @@ class JobTemplateForm extends Component {
                 validate={required(null, i18n)}
               />
             </FormRow>
+            <FormRow>
+              <FormGroup label={i18n._(t`Labels`)} fieldId="template-labels">
+                <Tooltip
+                  position="right"
+                  content={i18n._(
+                    t`Optional labels that describe this job template, such as 'dev' or 'test'. Labels can be used to group and filter job templates and completed jobs.`
+                  )}
+                >
+                  <QuestionCircleIcon />
+                </Tooltip>
+                <Field
+                  render={() => (
+                    <MultiSelect
+                      onAddNewItem={this.handleNewLabel}
+                      onRemoveItem={this.disassociateLabel}
+                      associatedItems={template.summary_fields.labels.results}
+                      options={loadedLabels}
+                    />
+                  )}
+                />
+              </FormGroup>
+            </FormRow>
             <FormActionGroup
               onCancel={handleCancel}
-              onSubmit={formik.handleSubmit}
+              onSubmit={values => handleSubmit(values)}
             />
           </Form>
         )}
@@ -166,5 +299,5 @@ class JobTemplateForm extends Component {
     );
   }
 }
-
+export { JobTemplateForm as _JobTemplateForm };
 export default withI18n()(withRouter(JobTemplateForm));

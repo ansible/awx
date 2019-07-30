@@ -3,6 +3,7 @@ import InstanceGroups from './models/InstanceGroups';
 import Inventories from './models/Inventories';
 import JobTemplates from './models/JobTemplates';
 import Jobs from './models/Jobs';
+import Labels from './models/Labels';
 import Me from './models/Me';
 import Organizations from './models/Organizations';
 import Root from './models/Root';
@@ -17,6 +18,7 @@ const InstanceGroupsAPI = new InstanceGroups();
 const InventoriesAPI = new Inventories();
 const JobTemplatesAPI = new JobTemplates();
 const JobsAPI = new Jobs();
+const LabelsAPI = new Labels();
 const MeAPI = new Me();
 const OrganizationsAPI = new Organizations();
 const RootAPI = new Root();
@@ -32,6 +34,7 @@ export {
   InventoriesAPI,
   JobTemplatesAPI,
   JobsAPI,
+  LabelsAPI,
   MeAPI,
   OrganizationsAPI,
   RootAPI,

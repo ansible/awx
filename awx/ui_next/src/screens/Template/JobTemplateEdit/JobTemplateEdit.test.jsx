@@ -19,6 +19,9 @@ describe('<JobTemplateEdit />', () => {
       user_capabilities: {
         edit: true,
       },
+      labels: {
+        results: [{ name: 'Sushi', id: 1 }, { name: 'Major', id: 2 }],
+      },
     },
   };
 

@@ -8,6 +8,7 @@ class JobTemplates extends InstanceGroupsMixin(Base) {
 
     this.launch = this.launch.bind(this);
     this.readLaunch = this.readLaunch.bind(this);
+    this.updateLabels = this.updateLabels.bind(this);
   }
 
   launch(id, data) {
@@ -16,6 +17,10 @@ class JobTemplates extends InstanceGroupsMixin(Base) {
 
   readLaunch(id) {
     return this.http.get(`${this.baseUrl}${id}/launch/`);
+  }
+
+  updateLabels(id, data) {
+    return this.http.post(`${this.baseUrl}${id}/labels/`, data)
   }
 }
 
