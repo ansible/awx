@@ -47,13 +47,15 @@ class ListHeader extends React.Component {
   handleSearch(key, value) {
     const { history, qsConfig } = this.props;
     const { search } = history.location;
-    this.pushHistoryState(addParams(qsConfig, search, { [key]: value }));
+    const oldParams = parseQueryString(qsConfig, search);
+    this.pushHistoryState(addParams(qsConfig, oldParams, { [key]: value }));
   }
 
   handleRemove(key, value) {
     const { history, qsConfig } = this.props;
     const { search } = history.location;
-    this.pushHistoryState(removeParams(qsConfig, search, { [key]: value }));
+    const oldParams = parseQueryString(qsConfig, search);
+    this.pushHistoryState(removeParams(qsConfig, oldParams, { [key]: value }));
   }
 
   handleRemoveAll() {
@@ -63,8 +65,9 @@ class ListHeader extends React.Component {
   handleSort(key, order) {
     const { history, qsConfig } = this.props;
     const { search } = history.location;
+    const oldParams = parseQueryString(qsConfig, search);
     this.pushHistoryState(
-      addParams(qsConfig, search, {
+      addParams(qsConfig, oldParams, {
         order_by: order === 'ascending' ? key : `-${key}`,
         page: null,
       })

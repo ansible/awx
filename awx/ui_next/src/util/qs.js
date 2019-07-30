@@ -315,16 +315,16 @@ const getRemainingNewParams = (mergedParams, newParams) =>
 /**
  * Merges existing params of search string with new ones and returns the updated list of params
  * @param {object} qs config object (used for getting defaults, current query params etc.)
- * @param {string} url query string
+ * @param {object} object with params from existing search
  * @param {object} object with new params to add
  * @return {object} query param object
  */
-export function addParams(config, searchString, newParams) {
+export function addParams(config, oldParams, paramsToAdd) {
   const namespacedOldParams = namespaceParams(
     config.namespace,
-    parseQueryString(config, searchString)
+    oldParams
   );
-  const namespacedNewParams = namespaceParams(config.namespace, newParams);
+  const namespacedParamsToAdd = namespaceParams(config.namespace, paramsToAdd);
   const namespacedDefaultParams = namespaceParams(
     config.namespace,
     config.defaultParams
@@ -336,7 +336,7 @@ export function addParams(config, searchString, newParams) {
   );
   const namespacedMergedParams = getMergedParams(
     namespacedOldParamsNotDefaults,
-    namespacedNewParams
+    namespacedParamsToAdd
   );
 
   // return updated params.
@@ -345,19 +345,18 @@ export function addParams(config, searchString, newParams) {
   return denamespaceParams(config.namespace, {
     ...getDefaultParams(namespacedOldParams, namespacedDefaultParams),
     ...namespacedMergedParams,
-    ...getRemainingNewParams(namespacedMergedParams, namespacedNewParams),
+    ...getRemainingNewParams(namespacedMergedParams, namespacedParamsToAdd),
   });
 }
 
 /**
  * Removes params from the search string and returns the updated list of params
  * @param {object} qs config object (used for getting defaults, current query params etc.)
- * @param {string} url query string
+ * @param {object} object with params from existing search
  * @param {object} object with new params to remove
  * @return {object} query param object
  */
-export function removeParams(config, searchString, paramsToRemove) {
-  const oldParams = parseQueryString(config, searchString);
+export function removeParams(config, oldParams, paramsToRemove) {
   const paramsEntries = [];
   Object.entries(oldParams).forEach(([key, value]) => {
     if (Array.isArray(value)) {
