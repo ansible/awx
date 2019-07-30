@@ -75,7 +75,7 @@ class OrganizationAccess extends React.Component {
       } = await OrganizationsAPI.readAccessList(organization.id, params);
       this.setState({ itemCount, accessRecords });
     } catch (err) {
-      this.setState({ cotentError: err });
+      this.setState({ contentError: err });
     } finally {
       this.setState({ hasContentLoading: false });
     }

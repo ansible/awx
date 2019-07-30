@@ -1,15 +1,9 @@
 import React, { useState } from 'react';
-import { number, bool } from 'prop-types';
+import { number } from 'prop-types';
 import styled from 'styled-components';
 import Chip from './Chip';
 
-const ChipGroup = ({
-  children,
-  className,
-  showOverflowAfter,
-  displayAll,
-  ...props
-}) => {
+const ChipGroup = ({ children, className, showOverflowAfter, ...props }) => {
   const [isExpanded, setIsExpanded] = useState(!showOverflowAfter);
   const toggleIsOpen = () => setIsExpanded(!isExpanded);
 
@@ -26,8 +20,8 @@ const ChipGroup = ({
 
   return (
     <ul className={`pf-c-chip-group ${className}`} {...props}>
-      {displayAll ? mappedChildren : mappedChildren.slice(0, numToShow)}
-      {!displayAll && showOverflowToggle && (
+      {!showOverflowAfter ? mappedChildren : mappedChildren.slice(0, numToShow)}
+      {showOverflowAfter && showOverflowToggle && (
         <Chip isOverflowChip onClick={toggleIsOpen} component="li">
           {isExpanded ? expandedText : collapsedText}
         </Chip>
@@ -37,11 +31,9 @@ const ChipGroup = ({
 };
 ChipGroup.propTypes = {
   showOverflowAfter: number,
-  displayAll: bool,
 };
 ChipGroup.defaultProps = {
   showOverflowAfter: null,
-  displayAll: false,
 };
 
 export default styled(ChipGroup)`

@@ -403,7 +403,11 @@ describe('qs (qs.js)', () => {
         defaultParams: { page: 1, page_size: 15 },
         integerFields: ['page', 'page_size'],
       };
-      const oldParams = { baz: ['bar', 'bang', 'bust'], page: 3, page_size: 15 };
+      const oldParams = {
+        baz: ['bar', 'bang', 'bust'],
+        page: 3,
+        page_size: 15,
+      };
       const newParams = { baz: 'bar' };
       expect(removeParams(config, oldParams, newParams)).toEqual({
         baz: ['bang', 'bust'],
@@ -433,7 +437,12 @@ describe('qs (qs.js)', () => {
         defaultParams: { page: 1, page_size: 15 },
         integerFields: ['page', 'page_size'],
       };
-      const oldParams = { baz: ['bar', 'bang', 'bust'], pat: 'pal', page: 3, page_size: 15 };
+      const oldParams = {
+        baz: ['bar', 'bang', 'bust'],
+        pat: 'pal',
+        page: 3,
+        page_size: 15,
+      };
       const newParams = { baz: 'bust', pat: 'pal' };
       expect(removeParams(config, oldParams, newParams)).toEqual({
         baz: ['bar', 'bang'],
@@ -491,7 +500,11 @@ describe('qs (qs.js)', () => {
         defaultParams: { page: 1, page_size: 15 },
         integerFields: ['page', 'page_size'],
       };
-      const oldParams = { baz: ['bar', 'bang', 'bust'], page: 3, page_size: 15 };
+      const oldParams = {
+        baz: ['bar', 'bang', 'bust'],
+        page: 3,
+        page_size: 15,
+      };
       const newParams = { baz: 'bar' };
       expect(removeParams(config, oldParams, newParams)).toEqual({
         baz: ['bang', 'bust'],
@@ -521,7 +534,12 @@ describe('qs (qs.js)', () => {
         defaultParams: { page: 1, page_size: 15 },
         integerFields: ['page', 'page_size'],
       };
-      const oldParams = { baz: ['bar', 'bang', 'bust'], pat: 'pal', page: 3, page_size: 15 };
+      const oldParams = {
+        baz: ['bar', 'bang', 'bust'],
+        pat: 'pal',
+        page: 3,
+        page_size: 15,
+      };
       const newParams = { baz: 'bust', pat: 'pal' };
       expect(removeParams(config, oldParams, newParams)).toEqual({
         baz: ['bar', 'bang'],

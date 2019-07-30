@@ -320,10 +320,7 @@ const getRemainingNewParams = (mergedParams, newParams) =>
  * @return {object} query param object
  */
 export function addParams(config, oldParams, paramsToAdd) {
-  const namespacedOldParams = namespaceParams(
-    config.namespace,
-    oldParams
-  );
+  const namespacedOldParams = namespaceParams(config.namespace, oldParams);
   const namespacedParamsToAdd = namespaceParams(config.namespace, paramsToAdd);
   const namespacedDefaultParams = namespaceParams(
     config.namespace,

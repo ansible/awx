@@ -40,7 +40,6 @@ const FilterTags = ({
 }) => {
   const queryParams = parseQueryString(qsConfig, location.search);
   const queryParamsArr = [];
-  const displayAll = true;
   const nonDefaultParams = filterDefaultParams(
     Object.keys(queryParams),
     qsConfig
@@ -59,7 +58,7 @@ const FilterTags = ({
         <ResultCount>{`${itemCount} results`}</ResultCount>
         <VerticalSeparator />
         <FilterLabel>{i18n._(t`Active Filters:`)}</FilterLabel>
-        <ChipGroup displayAll={displayAll}>
+        <ChipGroup>
           {queryParamsArr.map(({ key, value }) => (
             <Chip
               className="searchTagChip"

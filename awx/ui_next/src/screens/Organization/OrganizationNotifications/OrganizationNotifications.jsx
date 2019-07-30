@@ -151,12 +151,19 @@ class OrganizationNotifications extends Component {
 
     this.setState({ toggleLoading: true });
     try {
-      await OrganizationsAPI.updateNotificationTemplateAssociation(
-        id,
-        notificationId,
-        status,
-        !isCurrentlyOn
-      );
+      if (isCurrentlyOn) {
+        await OrganizationsAPI.disassociateNotificationTemplate(
+          id,
+          notificationId,
+          status
+        );
+      } else {
+        await OrganizationsAPI.associateNotificationTemplate(
+          id,
+          notificationId,
+          status
+        );
+      }
       this.setState(stateUpdateFunction);
     } catch (err) {
       this.setState({ toggleError: true });

@@ -714,7 +714,6 @@ exports[`<OrganizationAccessItem /> initially renders succesfully 1`] = `
                                               >
                                                 <ChipGroup
                                                   className="ChipGroup-sc-10zu8t0-0 ldAQsx"
-                                                  displayAll={false}
                                                   showOverflowAfter={null}
                                                 >
                                                   <ul

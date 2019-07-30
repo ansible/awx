@@ -108,8 +108,6 @@ Similar to the way the list grabs data based on changes to the react-router para
 
 Currently the filter tags do not display the key, though that data is available and they could very easily do so.
 
-Some small changes were made to our custom ChipGroup component to make this possible--a new displayAll bool prop which bypasses all chip hiding based on number of chips.
-
 ## QS Updates (and supporting duplicate keys)
 
 The logic that was updated to handle search tags can be found in the qs.js util file.
