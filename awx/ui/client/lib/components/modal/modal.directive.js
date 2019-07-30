@@ -44,7 +44,6 @@ function AtModalController ($timeout, eventService, strings) {
     };
 
     vm.hide = () => {
-        console.log('hide');
         overlay.style.opacity = 0;
 
         if (!vm.modal.preventOutsideClick) {
