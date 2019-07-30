@@ -33,18 +33,23 @@ function AtModalController ($timeout, eventService, strings) {
         vm.modal.title = title;
         vm.modal.message = message;
 
-        listeners = eventService.addListeners([
-            [overlay, 'click', vm.clickToHide]
-        ]);
+        if (!vm.modal.preventOutsideClick) {
+            listeners = eventService.addListeners([
+                [overlay, 'click', vm.clickToHide]
+            ]);
+        }
 
         overlay.style.display = 'block';
         overlay.style.opacity = 1;
     };
 
     vm.hide = () => {
+        console.log('hide');
         overlay.style.opacity = 0;
 
-        eventService.remove(listeners);
+        if (!vm.modal.preventOutsideClick) {
+            eventService.remove(listeners);
+        }
 
         setTimeout(() => {
             overlay.style.display = 'none';
