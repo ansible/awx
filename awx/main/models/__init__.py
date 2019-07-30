@@ -122,18 +122,22 @@ def user_is_system_auditor(user):
 
 @user_is_system_auditor.setter
 def user_is_system_auditor(user, tf):
-    if user.id:
-        if tf:
-            role = Role.singleton('system_auditor')
-            # must check if member to not duplicate activity stream
-            if user not in role.members.all():
-                role.members.add(user)
-            user._is_system_auditor = True
-        else:
-            role = Role.singleton('system_auditor')
-            if user in role.members.all():
-                role.members.remove(user)
-            user._is_system_auditor = False
+    if not user.id:
+        # If the user doesn't have a primary key yet (i.e., this is the *first*
+        # time they've logged in, and we've just created the new User in this
+        # request), we need one to set up the system auditor role
+        user.save()
+    if tf:
+        role = Role.singleton('system_auditor')
+        # must check if member to not duplicate activity stream
+        if user not in role.members.all():
+            role.members.add(user)
+        user._is_system_auditor = True
+    else:
+        role = Role.singleton('system_auditor')
+        if user in role.members.all():
+            role.members.remove(user)
+        user._is_system_auditor = False
 
 
 User.add_to_class('is_system_auditor', user_is_system_auditor)
