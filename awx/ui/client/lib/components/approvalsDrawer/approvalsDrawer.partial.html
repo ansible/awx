@@ -28,7 +28,6 @@
                 <div class="at-Row-items">
                     <div class="at-Row-container">
                         <div class="at-Row-container">
-                            <!-- TODO: translate header tag -->
                             <at-row-item
                                 header-value="{{ approval.summary_fields.source_workflow_job.name }}"
                                 header-state="workflowResults({id: {{approval.summary_fields.source_workflow_job.id}}})"
@@ -40,10 +39,12 @@
                         <at-row-item
                             value-bind-html="{{ approval.created | longDate }}">
                         </at-row-item>
+                        <!-- todo: clean this up if it becomes a real thing-->
                         <at-row-item
                             style="color: red;"
                             value-bind-html="Expires: Never">
                         </at-row-item>
+                        <!-- todo: hook this up when timeout is active-->
                         <!-- <at-row-item
                             style="color: red;"
                             value-bind-html="Expires {{ approval.created | longDate }}">

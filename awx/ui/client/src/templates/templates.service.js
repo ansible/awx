@@ -290,15 +290,6 @@ export default ['Rest', 'GetBasePath', '$q', 'NextPage', function(Rest, GetBaseP
 
             Rest.setUrl(url);
             return Rest.post(params.data);
-        },
-        createApprovalTemplate: ({url, data}) => {
-            data = data || {};
-            Rest.setUrl(url);
-            return Rest.post(data);
-        },
-        patchApprovalTemplate: ({id, data}) => {
-            Rest.setUrl(`/api/v2/workflow_approval_templates/${id}`);
-            return Rest.patch(data);
         }
     };
 }];

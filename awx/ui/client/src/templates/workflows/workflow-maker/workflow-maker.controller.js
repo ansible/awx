@@ -5,11 +5,11 @@
  *************************************************/
 
 export default ['$scope', 'TemplatesService',
-    'ProcessErrors', '$q',
+    'ProcessErrors', '$q', 'Rest',
     'PromptService', 'TemplatesStrings', 'WorkflowChartService',
     'Wait', '$state',
     function ($scope, TemplatesService,
-        ProcessErrors, $q,
+        ProcessErrors, $q, Rest,
         PromptService, TemplatesStrings, WorkflowChartService,
         Wait, $state
     ) {
@@ -145,7 +145,6 @@ export default ['$scope', 'TemplatesService',
                 let editPromises = [];
                 let credentialRequests = [];
 
-                // TODO: clean up data generation of approval template requests
                 Object.keys(nodeRef).map((workflowMakerNodeId) => {
                     const node = nodeRef[workflowMakerNodeId];
                     if (node.isNew) {
@@ -153,16 +152,15 @@ export default ['$scope', 'TemplatesService',
                             addPromises.push(TemplatesService.addWorkflowNode({
                                 url: $scope.workflowJobTemplateObj.related.workflow_nodes,
                                 data: {}
-                            }).then(({data}) => {
-                                approvalTemplatePromises.push(TemplatesService.createApprovalTemplate({
-                                    url: data.related.create_approval_template,
-                                    data: {
-                                        name: node.unifiedJobTemplate.name,
-                                        description: node.unifiedJobTemplate.description
-                                    }
+                            }).then(({data: newNodeData}) => {
+                                Rest.setUrl(newNodeData.related.create_approval_template);
+                                approvalTemplatePromises.push(Rest.post({
+                                    name: node.unifiedJobTemplate.name,
+                                    description: node.unifiedJobTemplate.description,
+                                    timeout: node.unifiedJobTemplate.timeout
                                 }).then(() => {
-                                    node.originalNodeObject = data;
-                                    nodeIdToChartNodeIdMapping[data.id] = parseInt(workflowMakerNodeId);
+                                    node.originalNodeObject = newNodeData;
+                                    nodeIdToChartNodeIdMapping[newNodeData.id] = parseInt(workflowMakerNodeId);
                                 }).catch(({ data, status }) => {
                                     Wait('stop');
                                     ProcessErrors($scope, data, status, null, {
@@ -179,9 +177,9 @@ export default ['$scope', 'TemplatesService',
                             addPromises.push(TemplatesService.addWorkflowNode({
                                 url: $scope.workflowJobTemplateObj.related.workflow_nodes,
                                 data: buildSendableNodeData(node)
-                            }).then(({data}) => {
-                                node.originalNodeObject = data;
-                                nodeIdToChartNodeIdMapping[data.id] = parseInt(workflowMakerNodeId);
+                            }).then(({data: newNodeData}) => {
+                                node.originalNodeObject = newNodeData;
+                                nodeIdToChartNodeIdMapping[newNodeData.id] = parseInt(workflowMakerNodeId);
                                 if (_.get(node, 'promptData.launchConf.ask_credential_on_launch')) {
                                     // This finds the credentials that were selected in the prompt but don't occur
                                     // in the template defaults
@@ -194,7 +192,7 @@ export default ['$scope', 'TemplatesService',
 
                                     credentialIdsToPost.forEach((credentialToPost) => {
                                         credentialRequests.push({
-                                            id: data.id,
+                                            id: newNodeData.id,
                                             data: {
                                                 id: credentialToPost.id
                                             }
@@ -211,12 +209,11 @@ export default ['$scope', 'TemplatesService',
                     } else if (node.isEdited) {
                         if (node.unifiedJobTemplate && node.unifiedJobTemplate.unified_job_type === "workflow_approval") {
                             if (node.originalNodeObject.summary_fields.unified_job_template.unified_job_type === "workflow_approval") {
-                                approvalTemplatePromises.push(TemplatesService.patchApprovalTemplate({
-                                    id: node.originalNodeObject.summary_fields.unified_job_template.id,
-                                    data: {
-                                        name: node.unifiedJobTemplate.name,
-                                        description: node.unifiedJobTemplate.description
-                                    }
+                                Rest.setUrl(node.originalNodeObject.related.unified_job_template);
+                                approvalTemplatePromises.push(Rest.patch({
+                                    name: node.unifiedJobTemplate.name,
+                                    description: node.unifiedJobTemplate.description,
+                                    timeout: node.unifiedJobTemplate.timeout
                                 }).catch(({ data, status }) => {
                                     Wait('stop');
                                     ProcessErrors($scope, data, status, null, {
@@ -224,12 +221,11 @@ export default ['$scope', 'TemplatesService',
                                     });
                                 }));
                             } else {
-                                approvalTemplatePromises.push(TemplatesService.createApprovalTemplate({
-                                    url: node.originalNodeObject.related.create_approval_template,
-                                    data: {
-                                        name: node.unifiedJobTemplate.name,
-                                        description: node.unifiedJobTemplate.description
-                                    }
+                                Rest.setUrl(newNodeData.related.create_approval_template);
+                                approvalTemplatePromises.push(Rest.post({
+                                    name: node.unifiedJobTemplate.name,
+                                    description: node.unifiedJobTemplate.description,
+                                    timeout: node.unifiedJobTemplate.timeout
                                 }).catch(({ data, status }) => {
                                     Wait('stop');
                                     ProcessErrors($scope, data, status, null, {
@@ -301,7 +297,6 @@ export default ['$scope', 'TemplatesService',
                         $q.all(approvalTemplatePromises)
                             .then(() => {
                                 let disassociatePromises = [];
-                                let associatePromises = [];
                                 let linkMap = {};
 
                                 // Build a link map for easy access
@@ -376,59 +371,60 @@ export default ['$scope', 'TemplatesService',
                                     }
                                 });
 
-                                Object.keys(linkMap).map((sourceNodeId) => {
-                                    Object.keys(linkMap[sourceNodeId]).map((targetNodeId) => {
-                                        const sourceChartNodeId = nodeIdToChartNodeIdMapping[sourceNodeId];
-                                        const targetChartNodeId = nodeIdToChartNodeIdMapping[targetNodeId];
-                                        switch(linkMap[sourceNodeId][targetNodeId]) {
-                                            case "success":
-                                                if (
-                                                    !nodeRef[sourceChartNodeId].originalNodeObject.success_nodes ||
-                                                    !nodeRef[sourceChartNodeId].originalNodeObject.success_nodes.includes(nodeRef[targetChartNodeId].originalNodeObject.id)
-                                                ) {
-                                                    associatePromises.push(
-                                                        TemplatesService.associateWorkflowNode({
-                                                            parentId: parseInt(sourceNodeId),
-                                                            nodeId: parseInt(targetNodeId),
-                                                            edge: "success"
-                                                        })
-                                                    );
-                                                }
-                                                break;
-                                            case "failure":
-                                                if (
-                                                    !nodeRef[sourceChartNodeId].originalNodeObject.failure_nodes ||
-                                                    !nodeRef[sourceChartNodeId].originalNodeObject.failure_nodes.includes(nodeRef[targetChartNodeId].originalNodeObject.id)
-                                                ) {
-                                                    associatePromises.push(
-                                                        TemplatesService.associateWorkflowNode({
-                                                            parentId: parseInt(sourceNodeId),
-                                                            nodeId: parseInt(targetNodeId),
-                                                            edge: "failure"
-                                                        })
-                                                    );
-                                                }
-                                                break;
-                                            case "always":
-                                                if (
-                                                    !nodeRef[sourceChartNodeId].originalNodeObject.always_nodes ||
-                                                    !nodeRef[sourceChartNodeId].originalNodeObject.always_nodes.includes(nodeRef[targetChartNodeId].originalNodeObject.id)
-                                                ) {
-                                                    associatePromises.push(
-                                                        TemplatesService.associateWorkflowNode({
-                                                            parentId: parseInt(sourceNodeId),
-                                                            nodeId: parseInt(targetNodeId),
-                                                            edge: "always"
-                                                        })
-                                                    );
-                                                }
-                                                break;
-                                        }
-                                    });
-                                });
-
                                 $q.all(disassociatePromises)
                                     .then(() => {
+                                        let associatePromises = [];
+                                        Object.keys(linkMap).map((sourceNodeId) => {
+                                            Object.keys(linkMap[sourceNodeId]).map((targetNodeId) => {
+                                                const sourceChartNodeId = nodeIdToChartNodeIdMapping[sourceNodeId];
+                                                const targetChartNodeId = nodeIdToChartNodeIdMapping[targetNodeId];
+                                                switch(linkMap[sourceNodeId][targetNodeId]) {
+                                                    case "success":
+                                                        if (
+                                                            !nodeRef[sourceChartNodeId].originalNodeObject.success_nodes ||
+                                                            !nodeRef[sourceChartNodeId].originalNodeObject.success_nodes.includes(nodeRef[targetChartNodeId].originalNodeObject.id)
+                                                        ) {
+                                                            associatePromises.push(
+                                                                TemplatesService.associateWorkflowNode({
+                                                                    parentId: parseInt(sourceNodeId),
+                                                                    nodeId: parseInt(targetNodeId),
+                                                                    edge: "success"
+                                                                })
+                                                            );
+                                                        }
+                                                        break;
+                                                    case "failure":
+                                                        if (
+                                                            !nodeRef[sourceChartNodeId].originalNodeObject.failure_nodes ||
+                                                            !nodeRef[sourceChartNodeId].originalNodeObject.failure_nodes.includes(nodeRef[targetChartNodeId].originalNodeObject.id)
+                                                        ) {
+                                                            associatePromises.push(
+                                                                TemplatesService.associateWorkflowNode({
+                                                                    parentId: parseInt(sourceNodeId),
+                                                                    nodeId: parseInt(targetNodeId),
+                                                                    edge: "failure"
+                                                                })
+                                                            );
+                                                        }
+                                                        break;
+                                                    case "always":
+                                                        if (
+                                                            !nodeRef[sourceChartNodeId].originalNodeObject.always_nodes ||
+                                                            !nodeRef[sourceChartNodeId].originalNodeObject.always_nodes.includes(nodeRef[targetChartNodeId].originalNodeObject.id)
+                                                        ) {
+                                                            associatePromises.push(
+                                                                TemplatesService.associateWorkflowNode({
+                                                                    parentId: parseInt(sourceNodeId),
+                                                                    nodeId: parseInt(targetNodeId),
+                                                                    edge: "always"
+                                                                })
+                                                            );
+                                                        }
+                                                        break;
+                                                }
+                                            });
+                                        });
+
                                         let credentialPromises = credentialRequests.map((request) => {
                                             return TemplatesService.postWorkflowNodeCredential({
                                                 id: request.id,
@@ -589,6 +585,7 @@ export default ['$scope', 'TemplatesService',
                             unifiedJobTemplate: {
                                 name: selectedTemplate.name,
                                 description: selectedTemplate.description,
+                                timeout: selectedTemplate.timeout,
                                 unified_job_type: "workflow_approval"
                             },
                             isNew: true
@@ -631,6 +628,7 @@ export default ['$scope', 'TemplatesService',
                     nodeRef[$scope.nodeConfig.nodeId].unifiedJobTemplate = {
                         name: selectedTemplate.name,
                         description: selectedTemplate.description,
+                        timeout: selectedTemplate.timeout,
                         unified_job_type: "workflow_approval"
                     };
                     nodeRef[$scope.nodeConfig.nodeId].isEdited = true;
@@ -643,7 +641,8 @@ export default ['$scope', 'TemplatesService',
                         node.unifiedJobTemplate = {
                             unified_job_type: 'workflow_approval',
                             name: selectedTemplate.name,
-                            description: selectedTemplate.description
+                            description: selectedTemplate.description,
+                            timeout: selectedTemplate.timeout,
                         };
                     } else {
                         node.unifiedJobTemplate = selectedTemplate;

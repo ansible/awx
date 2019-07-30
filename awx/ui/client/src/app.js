@@ -165,12 +165,12 @@ angular
         'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'Timer',
         'LoadConfig', 'Store', 'pendoService', 'Rest',
         '$state', 'GetBasePath', 'ConfigService',
-        'SocketService', 'AppStrings', '$transitions',
+        'SocketService', 'AppStrings', '$transitions', 'i18n',
         function($q, $cookies, $rootScope, $log, $stateParams,
             CheckLicense, $location, Authorization, LoadBasePaths, Timer,
             LoadConfig, Store, pendoService, Rest,
             $state, GetBasePath, ConfigService,
-            SocketService, AppStrings, $transitions) {
+            SocketService, AppStrings, $transitions, i18n) {
 
             $rootScope.$state = $state;
             $rootScope.$state.matches = function(stateName) {
@@ -393,8 +393,11 @@ angular
                             .then(({data}) => {
                                 $rootScope.pendingApprovalCount = data.count;
                             })
-                            .catch(() => {
-                                // TODO: handle this
+                            .catch(({data, status}) => {
+                                ProcessErrors($scope, data, status, null, {
+                                    hdr: i18n._('Error!'),
+                                    msg: i18n._('Failed to get workflow jobs pending approval. GET returned status: ') + status
+                                });
                             });
                     }
                 }

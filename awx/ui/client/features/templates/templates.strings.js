@@ -148,7 +148,8 @@ function TemplatesStrings (BaseString) {
         EXIT: t.s('EXIT'),
         CANCEL: t.s('CANCEL'),
         SAVE_AND_EXIT: t.s('SAVE & EXIT'),
-        APPROVAL: t.s('Approval')
+        APPROVAL: t.s('Approval'),
+        TIMEOUT_POPOVER: t.s('The amount of time (in seconds) to wait before this approval step is automatically denied. Defaults to 0 for no timeout.')
     };
 }
 

@@ -15,6 +15,7 @@ export default {
         job_search: {
             value: {
                 not__launch_type: 'sync',
+                not__type: 'workflow_approval',
                 order_by: '-finished'
             },
             dynamic: true,
