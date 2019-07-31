@@ -864,9 +864,17 @@ class BaseTask(object):
             # Help the user out by including the collections path inside the bubblewrap environment
             if getattr(settings, 'AWX_ANSIBLE_COLLECTIONS_PATHS', []):
                 show_paths.extend(settings.AWX_ANSIBLE_COLLECTIONS_PATHS)
+
+            pi_path = tempfile.mkdtemp(
+                prefix='ansible_runner_pi_',
+                dir=settings.AWX_PROOT_BASE_PATH
+            )
+            os.chmod(pi_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
+            self.cleanup_paths.append(pi_path)
+
             process_isolation_params = {
                 'process_isolation': True,
-                'process_isolation_path': settings.AWX_PROOT_BASE_PATH,
+                'process_isolation_path': pi_path,
                 'process_isolation_show_paths': show_paths,
                 'process_isolation_hide_paths': [
                     settings.AWX_PROOT_BASE_PATH,
