@@ -83,62 +83,53 @@ ignored.
 Under this model, the only purpose for `ask_credential_on_launch` is to signal
 that API clients should prompt the user for (optional) changes at launch time.
 
-Backwards Compatability Concerns
+Backwards Compatibility Concerns
 --------------------------------
-A variety of API clients rely on now-deprecated mechanisms for Credential
-retrieval and assignment, and those are still supported in a backwards
-compatible way under this new API change.  Requests to update
-`JobTemplate.credential` and `JobTemplate.vault_credential` will still behave
-as they did before:
+Requests to update `JobTemplate.credential` and `JobTemplate.vault_credential`
+will no longer work. Example request format:
 
 `PATCH /api/v2/job_templates/N/ {'credential': X, 'vault_credential': Y}`
 
-If the job template (with pk=N) only has 1 vault credential,
-that will be replaced with the new `Y` vault credential.
+This request will have no effect because support for using these
+fields has been removed.
 
-If the job template has multiple vault credentials, and these do not include
-`Y`, then the new list will _only_ contain the single vault credential `Y`
-specified in the deprecated request.
-
-If the JobTemplate already has the `Y` vault credential associated with it,
-then no change will take effect (the other vault credentials will not be
-removed in this case). This is so that clients making deprecated requests
-do not interfere with clients using the new `credentials` relation.
+The relationship `extra_credentials` is deprecated but still supported for now.
+Clients should favor the `credentials` relationship instead.
 
 `GET` requests to `/api/v2/job_templates/N/` and `/api/v2/jobs/N/`
-have traditionally included a variety of metadata in the response via
-`related_fields`:
+will include this via `related_fields`:
 
 ```
 {
     "related": {
         ...
-        "credential": "/api/v2/credentials/1/",
-        "vault_credential": "/api/v2/credentials/3/",
+        "credentials": "/api/v2/job_templates/5/credentials/",
         "extra_credentials": "/api/v2/job_templates/5/extra_credentials/",
     }
 }
 ```
 
-...and `summary_fields`:
+...and `summary_fields`, which is not included in list views:
 
 ```
 {
     "summary_fields": {
-        "credential": {
-            "description": "",
-            "credential_type_id": 1,
-            "id": 1,
-            "kind": "ssh",
-            "name": "Demo Credential"
-        },
-        "vault_credential": {
-            "description": "",
-            "credential_type_id": 3,
-            "id": 3,
-            "kind": "vault",
-            "name": "some-vault"
-        },
+        "credentials": [
+            {
+                "description": "",
+                "credential_type_id": 5,
+                "id": 2,
+                "kind": "aws",
+                "name": "some-aws"
+            },
+            {
+                "description": "",
+                "credential_type_id": 10,
+                "id": 4,
+                "kind": "gce",
+                "name": "some-gce"
+            }
+        ],
         "extra_credentials": [
             {
                 "description": "",
@@ -159,16 +150,15 @@ have traditionally included a variety of metadata in the response via
 }
 ```
 
-These metadata will continue to exist and function in a backwards-compatible way.
+The only difference between `credentials` and `extra_credentials` is that the
+latter is filtered to only show "cloud" type credentials, whereas the former
+can be used to manage all types of related credentials.
 
-The `/api/v2/job_templates/N/extra_credentials` endpoint has been deprecated, but
-will also continue to exist and function in the same manner for multiple releases.
-
-The `/api/v2/job_templates/N/launch/` endpoint also provides
-deprecated,backwards compatible support for specifying credentials at launch time
-via the `credential`, `vault_credential`, and `extra_credentials` fields:
-
-`POST /api/v2/job_templates/N/launch/ {'credential': A, 'vault_credential': B, 'extra_credentials': [C, D]}`
+The `/api/v2/job_templates/N/launch/` endpoint no longer provides
+backwards compatible support for specifying credentials at launch time
+via the `credential` or `vault_credential` fields.
+The launch endpoint can still accept a list under the `extra_credentials` key,
+but this is deprecated in favor `credentials`.
 
 
 Specifying Multiple Vault Credentials
