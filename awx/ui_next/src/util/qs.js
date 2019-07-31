@@ -47,7 +47,7 @@ const denamespaceParams = (namespace, params = {}) => {
     denamespaced[key.substr(namespace.length + 1)] = params[key];
   });
 
-  return denamespaced || {};
+  return denamespaced;
 };
 
 /**
