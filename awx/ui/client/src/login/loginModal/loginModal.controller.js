@@ -39,11 +39,11 @@
  * This is usage information.
  */
 
-export default ['$log', '$cookies', '$rootScope',
+export default ['$log', '$cookies', '$rootScope', 'ProcessErrors',
     '$location', 'Authorization', 'Alert', 'Wait', 'Timer',
     'Empty', '$scope', 'pendoService', 'ConfigService',
     'CheckLicense', 'SocketService', 'Rest', 'GetBasePath', 'i18n',
-    function ($log, $cookies, $rootScope,
+    function ($log, $cookies, $rootScope, ProcessErrors,
         $location, Authorization, Alert, Wait, Timer,
         Empty, scope, pendoService, ConfigService,
         CheckLicense, SocketService, Rest, GetBasePath, i18n) {
@@ -146,7 +146,7 @@ export default ['$log', '$cookies', '$rootScope',
                 $rootScope.pendingApprovalCount = data.count;
             })
             .catch(({data, status}) => {
-                ProcessErrors($scope, data, status, null, {
+                ProcessErrors({}, data, status, null, {
                     hdr: i18n._('Error!'),
                     msg: i18n._('Failed to get workflow jobs pending approval. GET returned status: ') + status
                 });

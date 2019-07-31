@@ -164,12 +164,12 @@ angular
     .run(['$q', '$cookies', '$rootScope', '$log', '$stateParams',
         'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'Timer',
         'LoadConfig', 'Store', 'pendoService', 'Rest',
-        '$state', 'GetBasePath', 'ConfigService',
+        '$state', 'GetBasePath', 'ConfigService', 'ProcessErrors',
         'SocketService', 'AppStrings', '$transitions', 'i18n',
         function($q, $cookies, $rootScope, $log, $stateParams,
             CheckLicense, $location, Authorization, LoadBasePaths, Timer,
             LoadConfig, Store, pendoService, Rest,
-            $state, GetBasePath, ConfigService,
+            $state, GetBasePath, ConfigService, ProcessErrors,
             SocketService, AppStrings, $transitions, i18n) {
 
             $rootScope.$state = $state;
@@ -394,7 +394,7 @@ angular
                                 $rootScope.pendingApprovalCount = data.count;
                             })
                             .catch(({data, status}) => {
-                                ProcessErrors($scope, data, status, null, {
+                                ProcessErrors({}, data, status, null, {
                                     hdr: i18n._('Error!'),
                                     msg: i18n._('Failed to get workflow jobs pending approval. GET returned status: ') + status
                                 });
