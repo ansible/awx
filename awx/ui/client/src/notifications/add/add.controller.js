@@ -199,7 +199,7 @@ export default ['Rest', 'Wait', 'NotificationsFormObject',
                         $scope[i] = null;
                     }
                     else {
-                        $scope[i] = $scope[i].toString().split('\n');
+                        $scope[i] = $scope[i] ? $scope[i].toString().split('\n') : "";
                     }
                 }
                 if (field.type === 'checkbox') {
