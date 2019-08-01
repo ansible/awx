@@ -589,6 +589,19 @@ export default ['i18n', function(i18n) {
               default: false,
               ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
             },
+            custom_message_description: {
+                type: 'alertblock',
+                ngShow: "customize_messages",
+                alertTxt: i18n._('Use custom messages to change the content of notifications ' +
+                    'sent when a job starts, succeeds, or fails. Use curly braces to access ' +
+                    'information about the job: <code ng-non-bindable>{{ job_friendly_name }}</code>, ' +
+                    '<code ng-non-bindable>{{ url }}</code>, or attributes of the job such as ' +
+                    '<code ng-non-bindable>{{ job.status }}</code>. You may apply a number of possible ' +
+                    'variables in the message. Refer to the ' +
+                    '<a href="https://docs.ansible.com/ansible-tower/latest/html/userguide/notifications.html#create-a-notification-template">Ansible ' +
+                    'Tower documentation</a> for more details.'),
+                closeable: false
+            },
             started_message: {
                 label: i18n._('Start Message'),
                 class: 'Form-formGroup--fullWidth',
@@ -600,7 +613,7 @@ export default ['i18n', function(i18n) {
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
             },
             started_body: {
-                label: i18n._('Start Expanded Message'),
+                label: i18n._('Start Message Body'),
                 class: 'Form-formGroup--fullWidth',
                 type: 'syntax_highlight',
                 mode: 'jinja2',
@@ -619,7 +632,7 @@ export default ['i18n', function(i18n) {
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
             },
             success_body: {
-                label: i18n._('Success Expanded Message'),
+                label: i18n._('Success Message Body'),
                 class: 'Form-formGroup--fullWidth',
                 type: 'syntax_highlight',
                 mode: 'jinja2',
@@ -638,7 +651,7 @@ export default ['i18n', function(i18n) {
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
             },
             error_body: {
-                label: i18n._('Error Expanded Message'),
+                label: i18n._('Error Message Body'),
                 class: 'Form-formGroup--fullWidth',
                 type: 'syntax_highlight',
                 mode: 'jinja2',
