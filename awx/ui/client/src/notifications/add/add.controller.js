@@ -24,6 +24,7 @@ export default ['Rest', 'Wait', 'NotificationsFormObject',
         init();
 
         function init() {
+            $scope.customize_messages = false;
             Rest.setUrl(GetBasePath('notification_templates'));
             Rest.options()
                 .then(({data}) => {
@@ -164,6 +165,9 @@ export default ['Rest', 'Wait', 'NotificationsFormObject',
                 });
             }
         });
+        $scope.toggleForm = function(key) {
+            $scope[key] = !$scope[key];
+        };
         $scope.$watch('notification_type', (value) => {
             if (value) {
                 $scope.$broadcast('reset-code-mirror', {

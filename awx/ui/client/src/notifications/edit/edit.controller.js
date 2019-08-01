@@ -254,6 +254,9 @@ export default ['Rest', 'Wait',
                 });
             }
         });
+        $scope.toggleForm = function(key) {
+            $scope[key] = !$scope[key];
+        };
         $scope.$watch('notification_type', (value) => {
             if (value) {
                 $scope.$broadcast('reset-code-mirror', {

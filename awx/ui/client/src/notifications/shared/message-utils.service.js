@@ -35,32 +35,32 @@ export default [function () {
           if (!messages) {
             return;
           }
-          let customized = false;
+          let isCustomized = false;
           if (messages.started.message) {
-            customized = true;
+            isCustomized = true;
             $scope.started_message = messages.started.message;
           }
           if (messages.started.body) {
-            customized = true;
+            isCustomized = true;
             $scope.started_body = messages.started.body;
           }
           if (messages.success.message) {
-            customized = true;
+            isCustomized = true;
             $scope.success_message = messages.success.message;
           }
           if (messages.success.body) {
-            customized = true;
+            isCustomized = true;
             $scope.success_body = messages.success.body;
           }
           if (messages.error.message) {
-            customized = true;
+            isCustomized = true;
             $scope.error_message = messages.error.message;
           }
           if (messages.error.body) {
-            customized = true;
+            isCustomized = true;
             $scope.error_body = messages.error.body;
           }
-          $scope.customize_messages = customized;
+          $scope.customize_messages = isCustomized;
         }
     };
 }];

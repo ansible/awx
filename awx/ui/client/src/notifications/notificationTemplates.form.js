@@ -584,9 +584,9 @@ export default ['i18n', function(i18n) {
             },
             customize_messages: {
               label: i18n._('Customize messages…'),
-              type: 'checkbox',
+              type: 'toggleSwitch',
+              toggleSource: 'customize_messages',
               class: 'Form-formGroup--fullWidth',
-              default: false,
               ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
             },
             custom_message_description: {
