@@ -46,6 +46,7 @@ RUN yum -y install acl \
   nodejs \
   openldap-devel \
   openssh-server \
+  patch \
   postgresql-contrib \
   postgresql-devel \
   python-devel \
