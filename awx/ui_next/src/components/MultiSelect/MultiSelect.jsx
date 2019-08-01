@@ -1,5 +1,7 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
+import { withI18n } from '@lingui/react';
+import { withRouter } from 'react-router-dom';
 import { Chip, ChipGroup } from '@components/Chip';
 import {
   Dropdown as PFDropdown,
@@ -123,7 +125,7 @@ class MultiSelect extends Component {
   removeChip(e, item) {
     const { onRemoveItem } = this.props;
     const { chipItems } = this.state;
-    const chips = chipItems.filter(chip => chip.name !== item.name);
+    const chips = chipItems.filter(chip => chip.id !== item.id);
 
     this.setState({ chipItems: chips });
     onRemoveItem(item);
@@ -199,4 +201,5 @@ class MultiSelect extends Component {
     );
   }
 }
-export default MultiSelect;
+export { MultiSelect as _MultiSelect };
+export default withI18n()(withRouter(MultiSelect));

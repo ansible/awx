@@ -75,19 +75,22 @@ class JobTemplateForm extends Component {
   }
 
   async loadLabels(QueryConfig) {
-    const { loadedLabels } = this.state;
     this.setState({ contentError: null, hasContentLoading: true });
+    let loadedLabels;
     try {
       const { data } = await LabelsAPI.read(QueryConfig);
-      const labels = [...data.results];
-      this.setState({ loadedLabels: loadedLabels.concat(labels) });
+      loadedLabels = [...data.results];
       if (data.next && data.next.includes('page=2')) {
-        this.loadLabels({
+        const {
+          data: { results },
+        } = await LabelsAPI.read({
           page: 2,
           page_size: 200,
           order_by: 'name',
         });
+        loadedLabels = loadedLabels.concat(results);
       }
+      this.setState({ loadedLabels });
     } catch (err) {
       this.setState({ contentError: err });
     } finally {
@@ -116,19 +119,22 @@ class JobTemplateForm extends Component {
       });
     } else {
       this.setState({
-        newLabels: [...newLabels, { associate: true, id: label.id }],
+        newLabels: [
+          ...newLabels,
+          { name: label.name, associate: true, id: label.id },
+        ],
       });
     }
   }
 
   disassociateLabel(label) {
-    const { removedLabels, newLabels } = this.state;
-    const isNewCreatedLabel = newLabels.some(
-      newLabel => newLabel === label.name
+    const { removedLabels, loadedLabels, newLabels } = this.state;
+    const isNewCreatedLabel = loadedLabels.some(
+      loadedLabel => loadedLabel.name !== label.name
     );
     if (isNewCreatedLabel) {
       const filteredLabels = newLabels.filter(
-        newLabel => newLabel !== label.name
+        newLabel => newLabel.name !== label.name
       );
       this.setState({ newLabels: filteredLabels });
     } else {
@@ -277,21 +283,17 @@ class JobTemplateForm extends Component {
                 >
                   <QuestionCircleIcon />
                 </Tooltip>
-                <Field
-                  render={() => (
-                    <MultiSelect
-                      onAddNewItem={this.handleNewLabel}
-                      onRemoveItem={this.disassociateLabel}
-                      associatedItems={template.summary_fields.labels.results}
-                      options={loadedLabels}
-                    />
-                  )}
+                <MultiSelect
+                  onAddNewItem={this.handleNewLabel}
+                  onRemoveItem={this.disassociateLabel}
+                  associatedItems={template.summary_fields.labels.results}
+                  options={loadedLabels}
                 />
               </FormGroup>
             </FormRow>
             <FormActionGroup
               onCancel={handleCancel}
-              onSubmit={values => handleSubmit(values)}
+              onSubmit={formik.handleSubmit}
             />
           </Form>
         )}

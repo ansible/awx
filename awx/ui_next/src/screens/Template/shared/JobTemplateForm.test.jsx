@@ -1,7 +1,8 @@
 import React from 'react';
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import { sleep } from '@testUtils/testUtils';
-import JobTemplateForm from './JobTemplateForm';
+import JobTemplateForm, { _JobTemplateForm } from './JobTemplateForm';
+import { LabelsAPI } from '@api';
 
 jest.mock('@api');
 
@@ -19,10 +20,16 @@ describe('<JobTemplateForm />', () => {
       inventory: {
         id: 2,
         name: 'foo',
+        organization_id: 1,
       },
       labels: { results: [{ name: 'Sushi', id: 1 }, { name: 'Major', id: 2 }] },
     },
   };
+  beforeEach(() => {
+    LabelsAPI.read.mockReturnValue({
+      data: mockData.summary_fields.labels,
+    });
+  });
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -36,6 +43,7 @@ describe('<JobTemplateForm />', () => {
         handleCancel={jest.fn()}
       />
     );
+    expect(LabelsAPI.read).toHaveBeenCalled();
   });
 
   test('should update form values on input changes', async () => {
@@ -103,5 +111,60 @@ describe('<JobTemplateForm />', () => {
     expect(handleCancel).not.toHaveBeenCalled();
     wrapper.find('button[aria-label="Cancel"]').prop('onClick')();
     expect(handleCancel).toBeCalled();
+  });
+
+  test('handleNewLabel should arrange new labels properly', async () => {
+    const handleNewLabel = jest.spyOn(
+      _JobTemplateForm.prototype,
+      'handleNewLabel'
+    );
+    const event = { key: 'Tab' };
+    const wrapper = mountWithContexts(
+      <JobTemplateForm
+        template={mockData}
+        handleSubmit={jest.fn()}
+        handleCancel={jest.fn()}
+      />
+    );
+    const multiSelect = wrapper.find('MultiSelect');
+    const component = wrapper.find('JobTemplateForm');
+
+    wrapper.setState({ newLabels: [], loadedLabels: [], removedLabels: [] });
+    multiSelect.setState({ input: 'Foo' });
+
+    wrapper.find('input[aria-label="labels"]').prop('onKeyDown')(event);
+    expect(handleNewLabel).toHaveBeenCalledWith('Foo');
+
+    component.instance().handleNewLabel({ name: 'Bar', id: 2 });
+    expect(component.state().newLabels).toEqual([
+      { name: 'Foo', organization: 1 },
+      { associate: true, id: 2, name: 'Bar' },
+    ]);
+  });
+  test('disassociateLabel should arrange new labels properly', async () => {
+    const wrapper = mountWithContexts(
+      <JobTemplateForm
+        template={mockData}
+        handleSubmit={jest.fn()}
+        handleCancel={jest.fn()}
+      />
+    );
+    const multiSelect = wrapper.find('MultiSelect');
+    const component = wrapper.find('JobTemplateForm');
+
+    component.setState({
+      newLabels: [{ name: 'Foo', id: 1 }],
+      loadedLabels: [{ name: 'Bar', id: 3 }],
+      removedLabels: [],
+    });
+    component.update();
+    multiSelect.setState({ input: 'Wowza' });
+    component.instance().disassociateLabel({ name: 'Foo', id: 1 });
+    expect(component.state().newLabels.length).toBe(0);
+    expect(component.state().removedLabels.length).toBe(0);
+
+    component.instance().disassociateLabel({ name: 'Bar', id: 3 });
+    expect(component.state().newLabels.length).toBe(0);
+    expect(component.state().removedLabels.length).toBe(1);
   });
 });
