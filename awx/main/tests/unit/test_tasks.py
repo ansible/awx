@@ -445,7 +445,7 @@ class TestGenericRun():
 
         process_isolation_params = task.build_params_process_isolation(job, private_data_dir, cwd)
         assert True is process_isolation_params['process_isolation']
-        assert settings.AWX_PROOT_BASE_PATH == process_isolation_params['process_isolation_path'], \
+        assert process_isolation_params['process_isolation_path'].startswith(settings.AWX_PROOT_BASE_PATH), \
             "Directory where a temp directory will be created for the remapping to take place"
         assert private_data_dir in process_isolation_params['process_isolation_show_paths'], \
             "The per-job private data dir should be in the list of directories the user can see."
