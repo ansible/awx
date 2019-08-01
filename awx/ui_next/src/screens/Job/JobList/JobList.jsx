@@ -7,11 +7,10 @@ import { Card, PageSection, PageSectionVariants } from '@patternfly/react-core';
 import { UnifiedJobsAPI } from '@api';
 import AlertModal from '@components/AlertModal';
 import DatalistToolbar from '@components/DataListToolbar';
-import ErrorDetail from '@components/ErrorDetail';
 import PaginatedDataList, {
   ToolbarDeleteButton,
 } from '@components/PaginatedDataList';
-import { getQSConfig, parseNamespacedQueryString } from '@util/qs';
+import { getQSConfig, parseQueryString } from '@util/qs';
 
 import JobListItem from './JobListItem';
 
@@ -29,7 +28,7 @@ class JobList extends Component {
     this.state = {
       hasContentLoading: true,
       contentError: null,
-      deletionError: null,
+      deletionError: false,
       selected: [],
       jobs: [],
       itemCount: 0,
@@ -53,7 +52,7 @@ class JobList extends Component {
   }
 
   handleDeleteErrorClose() {
-    this.setState({ deletionError: null });
+    this.setState({ deletionError: false });
   }
 
   handleSelectAll(isSelected) {
@@ -73,11 +72,11 @@ class JobList extends Component {
 
   async handleDelete() {
     const { selected } = this.state;
-    this.setState({ hasContentLoading: true });
+    this.setState({ hasContentLoading: true, deletionError: false });
     try {
       await Promise.all(selected.map(({ id }) => UnifiedJobsAPI.destroy(id)));
     } catch (err) {
-      this.setState({ deletionError: err });
+      this.setState({ deletionError: true });
     } finally {
       await this.loadJobs();
     }
@@ -85,7 +84,7 @@ class JobList extends Component {
 
   async loadJobs() {
     const { location } = this.props;
-    const params = parseNamespacedQueryString(QS_CONFIG, location.search);
+    const params = parseQueryString(QS_CONFIG, location.search);
 
     this.setState({ contentError: null, hasContentLoading: true });
     try {
@@ -128,7 +127,12 @@ class JobList extends Component {
             itemName={itemName}
             qsConfig={QS_CONFIG}
             toolbarColumns={[
-              { name: i18n._(t`Name`), key: 'name', isSortable: true },
+              {
+                name: i18n._(t`Name`),
+                key: 'name',
+                isSortable: true,
+                isSearchable: true,
+              },
               {
                 name: i18n._(t`Finished`),
                 key: 'finished',
@@ -172,7 +176,6 @@ class JobList extends Component {
           onClose={this.handleDeleteErrorClose}
         >
           {i18n._(t`Failed to delete one or more jobs.`)}
-          <ErrorDetail error={deletionError} />
         </AlertModal>
       </PageSection>
     );

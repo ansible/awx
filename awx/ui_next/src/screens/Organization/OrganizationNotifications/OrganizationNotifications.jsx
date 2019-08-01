@@ -9,7 +9,7 @@ import AlertModal from '@components/AlertModal';
 import ErrorDetail from '@components/ErrorDetail';
 import NotificationListItem from '@components/NotificationsList/NotificationListItem';
 import PaginatedDataList from '@components/PaginatedDataList';
-import { getQSConfig, parseNamespacedQueryString } from '@util/qs';
+import { getQSConfig, parseQueryString } from '@util/qs';
 
 const QS_CONFIG = getQSConfig('notification', {
   page: 1,
@@ -18,7 +18,7 @@ const QS_CONFIG = getQSConfig('notification', {
 });
 
 const COLUMNS = [
-  { key: 'name', name: 'Name', isSortable: true },
+  { key: 'name', name: 'Name', isSortable: true, isSearchable: true },
   { key: 'modified', name: 'Modified', isSortable: true, isNumeric: true },
   { key: 'created', name: 'Created', isSortable: true, isNumeric: true },
 ];
@@ -29,7 +29,7 @@ class OrganizationNotifications extends Component {
     this.state = {
       contentError: null,
       hasContentLoading: true,
-      toggleError: null,
+      toggleError: false,
       toggleLoading: false,
       itemCount: 0,
       notifications: [],
@@ -58,7 +58,7 @@ class OrganizationNotifications extends Component {
   async loadNotifications() {
     const { id, location } = this.props;
     const { typeLabels } = this.state;
-    const params = parseNamespacedQueryString(QS_CONFIG, location.search);
+    const params = parseQueryString(QS_CONFIG, location.search);
 
     const promises = [OrganizationsAPI.readNotificationTemplates(id, params)];
 
@@ -68,12 +68,14 @@ class OrganizationNotifications extends Component {
 
     this.setState({ contentError: null, hasContentLoading: true });
     try {
-      const [
-        {
-          data: { count: itemCount = 0, results: notifications = [] },
-        },
-        optionsResponse,
-      ] = await Promise.all(promises);
+      const {
+        data: { count: itemCount = 0, results: notifications = [] },
+      } = await OrganizationsAPI.readNotificationTemplates(id, params);
+
+      const optionsResponse = await OrganizationsAPI.readOptionsNotificationTemplates(
+        id,
+        params
+      );
 
       let idMatchParams;
       if (notifications.length > 0) {
@@ -149,22 +151,29 @@ class OrganizationNotifications extends Component {
 
     this.setState({ toggleLoading: true });
     try {
-      await OrganizationsAPI.updateNotificationTemplateAssociation(
-        id,
-        notificationId,
-        status,
-        !isCurrentlyOn
-      );
+      if (isCurrentlyOn) {
+        await OrganizationsAPI.disassociateNotificationTemplate(
+          id,
+          notificationId,
+          status
+        );
+      } else {
+        await OrganizationsAPI.associateNotificationTemplate(
+          id,
+          notificationId,
+          status
+        );
+      }
       this.setState(stateUpdateFunction);
     } catch (err) {
-      this.setState({ toggleError: err });
+      this.setState({ toggleError: true });
     } finally {
       this.setState({ toggleLoading: false });
     }
   }
 
   handleNotificationErrorClose() {
-    this.setState({ toggleError: null });
+    this.setState({ toggleError: false });
   }
 
   render() {
@@ -205,9 +214,9 @@ class OrganizationNotifications extends Component {
           )}
         />
         <AlertModal
-          isOpen={toggleError}
           variant="danger"
           title={i18n._(t`Error!`)}
+          isOpen={toggleError && !toggleLoading}
           onClose={this.handleNotificationErrorClose}
         >
           {i18n._(t`Failed to toggle notification.`)}

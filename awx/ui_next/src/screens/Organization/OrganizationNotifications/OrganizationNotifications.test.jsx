@@ -96,9 +96,11 @@ describe('<OrganizationNotifications />', () => {
       .find('Switch')
       .at(0)
       .prop('onChange')();
-    expect(
-      OrganizationsAPI.updateNotificationTemplateAssociation
-    ).toHaveBeenCalledWith(1, 2, 'success', true);
+    expect(OrganizationsAPI.associateNotificationTemplate).toHaveBeenCalledWith(
+      1,
+      2,
+      'success'
+    );
     await sleep(0);
     wrapper.update();
     expect(
@@ -122,9 +124,11 @@ describe('<OrganizationNotifications />', () => {
       .find('Switch')
       .at(1)
       .prop('onChange')();
-    expect(
-      OrganizationsAPI.updateNotificationTemplateAssociation
-    ).toHaveBeenCalledWith(1, 1, 'error', true);
+    expect(OrganizationsAPI.associateNotificationTemplate).toHaveBeenCalledWith(
+      1,
+      1,
+      'error'
+    );
     await sleep(0);
     wrapper.update();
     expect(
@@ -149,8 +153,8 @@ describe('<OrganizationNotifications />', () => {
       .at(0)
       .prop('onChange')();
     expect(
-      OrganizationsAPI.updateNotificationTemplateAssociation
-    ).toHaveBeenCalledWith(1, 1, 'success', false);
+      OrganizationsAPI.disassociateNotificationTemplate
+    ).toHaveBeenCalledWith(1, 1, 'success');
     await sleep(0);
     wrapper.update();
     expect(
@@ -175,8 +179,8 @@ describe('<OrganizationNotifications />', () => {
       .at(1)
       .prop('onChange')();
     expect(
-      OrganizationsAPI.updateNotificationTemplateAssociation
-    ).toHaveBeenCalledWith(1, 2, 'error', false);
+      OrganizationsAPI.disassociateNotificationTemplate
+    ).toHaveBeenCalledWith(1, 2, 'error');
     await sleep(0);
     wrapper.update();
     expect(

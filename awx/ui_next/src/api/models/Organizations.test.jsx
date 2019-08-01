@@ -3,7 +3,6 @@ import { describeNotificationMixin } from '../../../testUtils/apiReusable';
 
 describe('OrganizationsAPI', () => {
   const orgId = 1;
-  const searchParams = { foo: 'bar' };
   const createPromise = () => Promise.resolve();
   const mockHttp = { get: jest.fn(createPromise) };
 
@@ -14,36 +13,46 @@ describe('OrganizationsAPI', () => {
   });
 
   test('read access list calls get with expected params', async done => {
+    const testParams = { foo: 'bar' };
+    const testParamsDuplicates = { foo: ['bar', 'baz'] };
+
+    const mockBaseURL = `/api/v2/organizations/${orgId}/access_list/`;
+
     await OrganizationsAPI.readAccessList(orgId);
-    await OrganizationsAPI.readAccessList(orgId, searchParams);
+    await OrganizationsAPI.readAccessList(orgId, testParams);
+    await OrganizationsAPI.readAccessList(orgId, testParamsDuplicates);
 
-    expect(mockHttp.get).toHaveBeenCalledTimes(2);
-    expect(mockHttp.get.mock.calls[0]).toContainEqual(
-      `/api/v2/organizations/${orgId}/access_list/`,
-      { params: {} }
-    );
-    expect(mockHttp.get.mock.calls[1]).toContainEqual(
-      `/api/v2/organizations/${orgId}/access_list/`,
-      { params: searchParams }
-    );
-
+    expect(mockHttp.get).toHaveBeenCalledTimes(3);
+    expect(mockHttp.get.mock.calls[0][0]).toEqual(`${mockBaseURL}`);
+    expect(mockHttp.get.mock.calls[0][1]).toEqual({ params: undefined });
+    expect(mockHttp.get.mock.calls[1][0]).toEqual(`${mockBaseURL}`);
+    expect(mockHttp.get.mock.calls[1][1]).toEqual({ params: { foo: 'bar' } });
+    expect(mockHttp.get.mock.calls[2][0]).toEqual(`${mockBaseURL}`);
+    expect(mockHttp.get.mock.calls[2][1]).toEqual({
+      params: { foo: ['bar', 'baz'] },
+    });
     done();
   });
 
   test('read teams calls get with expected params', async done => {
+    const testParams = { foo: 'bar' };
+    const testParamsDuplicates = { foo: ['bar', 'baz'] };
+
+    const mockBaseURL = `/api/v2/organizations/${orgId}/teams/`;
+
     await OrganizationsAPI.readTeams(orgId);
-    await OrganizationsAPI.readTeams(orgId, searchParams);
+    await OrganizationsAPI.readTeams(orgId, testParams);
+    await OrganizationsAPI.readTeams(orgId, testParamsDuplicates);
 
-    expect(mockHttp.get).toHaveBeenCalledTimes(2);
-    expect(mockHttp.get.mock.calls[0]).toContainEqual(
-      `/api/v2/organizations/${orgId}/teams/`,
-      { params: {} }
-    );
-    expect(mockHttp.get.mock.calls[1]).toContainEqual(
-      `/api/v2/organizations/${orgId}/teams/`,
-      { params: searchParams }
-    );
-
+    expect(mockHttp.get).toHaveBeenCalledTimes(3);
+    expect(mockHttp.get.mock.calls[0][0]).toEqual(`${mockBaseURL}`);
+    expect(mockHttp.get.mock.calls[0][1]).toEqual({ params: undefined });
+    expect(mockHttp.get.mock.calls[1][0]).toEqual(`${mockBaseURL}`);
+    expect(mockHttp.get.mock.calls[1][1]).toEqual({ params: { foo: 'bar' } });
+    expect(mockHttp.get.mock.calls[2][0]).toEqual(`${mockBaseURL}`);
+    expect(mockHttp.get.mock.calls[2][1]).toEqual({
+      params: { foo: ['bar', 'baz'] },
+    });
     done();
   });
 });

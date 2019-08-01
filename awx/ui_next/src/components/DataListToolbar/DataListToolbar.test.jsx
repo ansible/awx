@@ -13,9 +13,11 @@ describe('<DataListToolbar />', () => {
   });
 
   test('it triggers the expected callbacks', () => {
-    const columns = [{ name: 'Name', key: 'name', isSortable: true }];
+    const columns = [
+      { name: 'Name', key: 'name', isSortable: true, isSearchable: true },
+    ];
 
-    const search = 'button[aria-label="Search"]';
+    const search = 'button[aria-label="Search submit button"]';
     const searchTextInput = 'input[aria-label="Search text input"]';
     const selectAll = 'input[aria-label="Select all"]';
     const sort = 'button[aria-label="Sort"]';
@@ -53,17 +55,20 @@ describe('<DataListToolbar />', () => {
     toolbar.find(search).simulate('click');
 
     expect(onSearch).toHaveBeenCalledTimes(1);
-    expect(onSearch).toBeCalledWith('test-321');
+    expect(onSearch).toBeCalledWith('name__icontains', 'test-321');
   });
 
-  test('dropdown items sortable columns work', () => {
+  test('dropdown items sortable/searchable columns work', () => {
     const sortDropdownToggleSelector = 'button[id="awx-sort"]';
     const searchDropdownToggleSelector = 'button[id="awx-search"]';
-    const dropdownMenuItems = 'DropdownMenu > ul';
+    const sortDropdownMenuItems =
+      'DropdownMenu > ul[aria-labelledby="awx-sort"]';
+    const searchDropdownMenuItems =
+      'DropdownMenu > ul[aria-labelledby="awx-search"]';
 
     const multipleColumns = [
-      { name: 'Foo', key: 'foo', isSortable: true },
-      { name: 'Bar', key: 'bar', isSortable: true },
+      { name: 'Foo', key: 'foo', isSortable: true, isSearchable: true },
+      { name: 'Bar', key: 'bar', isSortable: true, isSearchable: true },
       { name: 'Bakery', key: 'bakery', isSortable: true },
       { name: 'Baz', key: 'baz' },
     ];
@@ -82,9 +87,14 @@ describe('<DataListToolbar />', () => {
     expect(sortDropdownToggle.length).toBe(1);
     sortDropdownToggle.simulate('click');
     toolbar.update();
-    const sortDropdownItems = toolbar.find(dropdownMenuItems).children();
+    const sortDropdownItems = toolbar.find(sortDropdownMenuItems).children();
     expect(sortDropdownItems.length).toBe(2);
-
+    let searchDropdownToggle = toolbar.find(searchDropdownToggleSelector);
+    expect(searchDropdownToggle.length).toBe(1);
+    searchDropdownToggle.simulate('click');
+    toolbar.update();
+    let searchDropdownItems = toolbar.find(searchDropdownMenuItems).children();
+    expect(searchDropdownItems.length).toBe(1);
     const mockedSortEvent = { target: { innerText: 'Bar' } };
     sortDropdownItems.at(0).simulate('click', mockedSortEvent);
     toolbar = mountWithContexts(
@@ -105,7 +115,7 @@ describe('<DataListToolbar />', () => {
     toolbar.update();
 
     const sortDropdownItemsDescending = toolbar
-      .find(dropdownMenuItems)
+      .find(sortDropdownMenuItems)
       .children();
     expect(sortDropdownItemsDescending.length).toBe(2);
     sortDropdownToggleDescending.simulate('click'); // toggle close the sort dropdown
@@ -114,13 +124,13 @@ describe('<DataListToolbar />', () => {
     sortDropdownItems.at(0).simulate('click', mockedSortEventDescending);
     toolbar.update();
 
-    const searchDropdownToggle = toolbar.find(searchDropdownToggleSelector);
+    searchDropdownToggle = toolbar.find(searchDropdownToggleSelector);
     expect(searchDropdownToggle.length).toBe(1);
     searchDropdownToggle.simulate('click');
     toolbar.update();
 
-    const searchDropdownItems = toolbar.find(dropdownMenuItems).children();
-    expect(searchDropdownItems.length).toBe(3);
+    searchDropdownItems = toolbar.find(searchDropdownMenuItems).children();
+    expect(searchDropdownItems.length).toBe(1);
 
     const mockedSearchEvent = { target: { innerText: 'Bar' } };
     searchDropdownItems.at(0).simulate('click', mockedSearchEvent);
@@ -185,7 +195,9 @@ describe('<DataListToolbar />', () => {
   });
 
   test('should render additionalControls', () => {
-    const columns = [{ name: 'Name', key: 'name', isSortable: true }];
+    const columns = [
+      { name: 'Name', key: 'name', isSortable: true, isSearchable: true },
+    ];
     const onSearch = jest.fn();
     const onSort = jest.fn();
     const onSelectAll = jest.fn();

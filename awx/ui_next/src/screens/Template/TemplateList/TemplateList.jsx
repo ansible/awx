@@ -11,11 +11,10 @@ import {
 } from '@api';
 import AlertModal from '@components/AlertModal';
 import DatalistToolbar from '@components/DataListToolbar';
-import ErrorDetail from '@components/ErrorDetail';
 import PaginatedDataList, {
   ToolbarDeleteButton,
 } from '@components/PaginatedDataList';
-import { getQSConfig, parseNamespacedQueryString } from '@util/qs';
+import { getQSConfig, parseQueryString } from '@util/qs';
 
 import TemplateListItem from './TemplateListItem';
 
@@ -35,7 +34,7 @@ class TemplatesList extends Component {
     this.state = {
       hasContentLoading: true,
       contentError: null,
-      deletionError: null,
+      hasDeletionError: false,
       selected: [],
       templates: [],
       itemCount: 0,
@@ -59,7 +58,7 @@ class TemplatesList extends Component {
   }
 
   handleDeleteErrorClose() {
-    this.setState({ deletionError: null });
+    this.setState({ hasDeletionError: false });
   }
 
   handleSelectAll(isSelected) {
@@ -78,9 +77,9 @@ class TemplatesList extends Component {
   }
 
   async handleTemplateDelete() {
-    const { selected, itemCount } = this.state;
+    const { selected } = this.state;
 
-    this.setState({ hasContentLoading: true });
+    this.setState({ hasContentLoading: true, hasDeletionError: false });
     try {
       await Promise.all(
         selected.map(({ type, id }) => {
@@ -93,9 +92,8 @@ class TemplatesList extends Component {
           return deletePromise;
         })
       );
-      this.setState({ itemCount: itemCount - selected.length });
     } catch (err) {
-      this.setState({ deletionError: err });
+      this.setState({ hasDeletionError: true });
     } finally {
       await this.loadTemplates();
     }
@@ -103,7 +101,7 @@ class TemplatesList extends Component {
 
   async loadTemplates() {
     const { location } = this.props;
-    const params = parseNamespacedQueryString(QS_CONFIG, location.search);
+    const params = parseQueryString(QS_CONFIG, location.search);
 
     this.setState({ contentError: null, hasContentLoading: true });
     try {
@@ -126,7 +124,7 @@ class TemplatesList extends Component {
     const {
       contentError,
       hasContentLoading,
-      deletionError,
+      hasDeletionError,
       templates,
       itemCount,
       selected,
@@ -138,14 +136,19 @@ class TemplatesList extends Component {
       <PageSection variant={medium}>
         <Card>
           <PaginatedDataList
-            error={contentError}
+            err={contentError}
             hasContentLoading={hasContentLoading}
             items={templates}
             itemCount={itemCount}
             itemName={i18n._(t`Template`)}
             qsConfig={QS_CONFIG}
             toolbarColumns={[
-              { name: i18n._(t`Name`), key: 'name', isSortable: true },
+              {
+                name: i18n._(t`Name`),
+                key: 'name',
+                isSortable: true,
+                isSearchable: true,
+              },
               {
                 name: i18n._(t`Modified`),
                 key: 'modified',
@@ -189,13 +192,12 @@ class TemplatesList extends Component {
           />
         </Card>
         <AlertModal
-          isOpen={deletionError}
+          isOpen={hasDeletionError}
           variant="danger"
           title={i18n._(t`Error!`)}
           onClose={this.handleDeleteErrorClose}
         >
           {i18n._(t`Failed to delete one or more template.`)}
-          <ErrorDetail error={deletionError} />
         </AlertModal>
       </PageSection>
     );

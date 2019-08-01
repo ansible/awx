@@ -37,7 +37,12 @@ class InstanceGroupsLookup extends React.Component {
           getItems={getInstanceGroups}
           multiple
           columns={[
-            { name: i18n._(t`Name`), key: 'name', isSortable: true },
+            {
+              name: i18n._(t`Name`),
+              key: 'name',
+              isSortable: true,
+              isSearchable: true,
+            },
             {
               name: i18n._(t`Modified`),
               key: 'modified',

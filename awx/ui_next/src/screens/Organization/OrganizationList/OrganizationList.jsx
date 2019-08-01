@@ -7,12 +7,11 @@ import { Card, PageSection, PageSectionVariants } from '@patternfly/react-core';
 import { OrganizationsAPI } from '@api';
 import AlertModal from '@components/AlertModal';
 import DataListToolbar from '@components/DataListToolbar';
-import ErrorDetail from '@components/ErrorDetail';
 import PaginatedDataList, {
   ToolbarAddButton,
   ToolbarDeleteButton,
 } from '@components/PaginatedDataList';
-import { getQSConfig, parseNamespacedQueryString } from '@util/qs';
+import { getQSConfig, parseQueryString } from '@util/qs';
 
 import OrganizationListItem from './OrganizationListItem';
 
@@ -29,7 +28,7 @@ class OrganizationsList extends Component {
     this.state = {
       hasContentLoading: true,
       contentError: null,
-      deletionError: null,
+      hasDeletionError: false,
       organizations: [],
       selected: [],
       itemCount: 0,
@@ -72,18 +71,17 @@ class OrganizationsList extends Component {
   }
 
   handleDeleteErrorClose() {
-    this.setState({ deletionError: null });
+    this.setState({ hasDeletionError: false });
   }
 
   async handleOrgDelete() {
-    const { selected, itemCount } = this.state;
+    const { selected } = this.state;
 
-    this.setState({ hasContentLoading: true });
+    this.setState({ hasContentLoading: true, hasDeletionError: false });
     try {
       await Promise.all(selected.map(org => OrganizationsAPI.destroy(org.id)));
-      this.setState({ itemCount: itemCount - selected.length });
     } catch (err) {
-      this.setState({ deletionError: err });
+      this.setState({ hasDeletionError: true });
     } finally {
       await this.loadOrganizations();
     }
@@ -92,7 +90,7 @@ class OrganizationsList extends Component {
   async loadOrganizations() {
     const { location } = this.props;
     const { actions: cachedActions } = this.state;
-    const params = parseNamespacedQueryString(QS_CONFIG, location.search);
+    const params = parseQueryString(QS_CONFIG, location.search);
 
     let optionsPromise;
     if (cachedActions) {
@@ -136,7 +134,7 @@ class OrganizationsList extends Component {
       itemCount,
       contentError,
       hasContentLoading,
-      deletionError,
+      hasDeletionError,
       selected,
       organizations,
     } = this.state;
@@ -151,14 +149,19 @@ class OrganizationsList extends Component {
         <PageSection variant={medium}>
           <Card>
             <PaginatedDataList
-              contentError={contentError}
+              error={contentError}
               hasContentLoading={hasContentLoading}
               items={organizations}
               itemCount={itemCount}
               itemName="organization"
               qsConfig={QS_CONFIG}
               toolbarColumns={[
-                { name: i18n._(t`Name`), key: 'name', isSortable: true },
+                {
+                  name: i18n._(t`Name`),
+                  key: 'name',
+                  isSortable: true,
+                  isSearchable: true,
+                },
                 {
                   name: i18n._(t`Modified`),
                   key: 'modified',
@@ -209,13 +212,12 @@ class OrganizationsList extends Component {
           </Card>
         </PageSection>
         <AlertModal
-          isOpen={deletionError}
+          isOpen={hasDeletionError}
           variant="danger"
           title={i18n._(t`Error!`)}
           onClose={this.handleDeleteErrorClose}
         >
           {i18n._(t`Failed to delete one or more organizations.`)}
-          <ErrorDetail error={deletionError} />
         </AlertModal>
       </Fragment>
     );

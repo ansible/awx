@@ -7,7 +7,7 @@ import PaginatedDataList from '../PaginatedDataList';
 import DataListToolbar from '../DataListToolbar';
 import CheckboxListItem from '../CheckboxListItem';
 import SelectedList from '../SelectedList';
-import { getQSConfig, parseNamespacedQueryString } from '../../util/qs';
+import { getQSConfig, parseQueryString } from '../../util/qs';
 
 class SelectResourceStep extends React.Component {
   constructor(props) {
@@ -40,10 +40,7 @@ class SelectResourceStep extends React.Component {
 
   async readResourceList() {
     const { onSearch, location } = this.props;
-    const queryParams = parseNamespacedQueryString(
-      this.qsConfig,
-      location.search
-    );
+    const queryParams = parseQueryString(this.qsConfig, location.search);
 
     this.setState({
       isLoading: true,

@@ -129,11 +129,21 @@ class AddResourceRole extends React.Component {
     const { onClose, roles, i18n } = this.props;
 
     const userColumns = [
-      { name: i18n._(t`Username`), key: 'username', isSortable: true },
+      {
+        name: i18n._(t`Username`),
+        key: 'username',
+        isSortable: true,
+        isSearchable: true,
+      },
     ];
 
     const teamColumns = [
-      { name: i18n._(t`Name`), key: 'name', isSortable: true },
+      {
+        name: i18n._(t`Name`),
+        key: 'name',
+        isSortable: true,
+        isSearchable: true,
+      },
     ];
 
     let wizardTitle = '';
