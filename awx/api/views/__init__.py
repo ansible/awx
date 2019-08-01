@@ -4440,8 +4440,6 @@ class WorkflowApprovalList(ListCreateAPIView):
     serializer_class = serializers.WorkflowApprovalListSerializer
 
     def get(self, request, *args, **kwargs):
-        if not request.user.is_superuser and not request.user.is_system_auditor:
-            raise PermissionDenied(_("Superuser privileges needed."))
         return super(WorkflowApprovalList, self).get(request, *args, **kwargs)
 
 
@@ -4455,22 +4453,29 @@ class WorkflowApprovalApprove(RetrieveAPIView):
     model = models.WorkflowApproval
     serializer_class = serializers.WorkflowApprovalViewSerializer
 
-    # &&&&&& To address later
+    # &&&&&& Changed per the PR review, notes/questions in additional comments...
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
+        request.user.can_access(models.WorkflowApproval, 'approve_or_deny', obj)
+        if obj.status != 'pending':
+            return Response("This workflow step has already been approved or denied.", status=status.HTTP_400_BAD_REQUEST)
         obj.approve()
-        return Response(status=status.HTTP_202_ACCEPTED)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class WorkflowApprovalDeny(RetrieveAPIView):
     model = models.WorkflowApproval
     serializer_class = serializers.WorkflowApprovalViewSerializer
 
-    # &&&&&& To address later
+    # &&&&&& Changed per the PR review, notes/questions in additional comments...
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
+        request.user.can_access(models.WorkflowApproval, 'approve_or_deny', obj)
+        if obj.status != 'pending':
+            return Response("This workflow step has already been approved or denied.", status=status.HTTP_400_BAD_REQUEST)
         obj.deny()
-        return Response(status=status.HTTP_202_ACCEPTED)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 
 class WorkflowApprovalNotificationsList(SubListAPIView):

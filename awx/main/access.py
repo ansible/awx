@@ -2378,7 +2378,8 @@ class UnifiedJobTemplateAccess(BaseAccess):
         return self.model.objects.filter(
             Q(pk__in=self.model.accessible_pk_qs(self.user, 'read_role')) |
             Q(inventorysource__inventory__id__in=Inventory._accessible_pk_qs(
-                Inventory, self.user, 'read_role')))
+                Inventory, self.user, 'read_role'))
+        ).exclude(polymorphic_ctype__model='workflowapprovaltemplate')  # &&&&&&
 
     def can_start(self, obj, validate_license=True):
         access_class = access_registry[obj.__class__]
@@ -2428,7 +2429,7 @@ class UnifiedJobAccess(BaseAccess):
             Q(adhoccommand__inventory__id__in=inv_pk_qs) |
             Q(job__inventory__organization__in=org_auditor_qs) |
             Q(job__project__organization__in=org_auditor_qs)
-        )
+        ).exclude(polymorphic_ctype__model='workflowapproval')  # &&&&&&
         return qs
 
 
@@ -2793,7 +2794,7 @@ class WorkflowApprovalAccess(BaseAccess):
 
     def filtered_queryset(self):
         return self.model.objects.filter(
-            unified_job_node__in=WorkflowJobNode.accessible_pk_qs(
+            unified_job_node__workflow_job__unified_job_template__in=WorkflowJobTemplate.accessible_pk_qs(
                 self.user, 'read_role'))
 
     def get_queryset(self):
@@ -2801,7 +2802,8 @@ class WorkflowApprovalAccess(BaseAccess):
             workflow_approval_template__isnull=False)
 
     def can_approve_or_deny(self, obj):
-        if self.user.approval_role or self.user.system_administrator:
+        wfjt = obj.unified_job_node.workflow_job.unified_job_template
+        if self.user in wfjt.approval_role or self.user.is_superuser:
             return True
 
 

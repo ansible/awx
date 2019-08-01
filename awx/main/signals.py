@@ -505,6 +505,10 @@ def activity_stream_update(sender, instance, **kwargs):
     else:
         activity_entry.setting = conf_to_dict(instance)
         activity_entry.save()
+    # &&&&&&
+    # for approvals in kwargs['pk_set']:
+    #     if isinstance(WorkflowApprovalTemplate) or isinstance(kwargs['model'].objects.filter(id=approvals), WorkflowApprovalTemplate):
+    #         continue
 
 
 def activity_stream_delete(sender, instance, **kwargs):
@@ -641,14 +645,14 @@ def delete_inventory_for_org(sender, instance, **kwargs):
 
 
 @receiver(pre_delete, sender=WorkflowJobTemplateNode)
-def delete_approval_nodes(sender, instance, **kwargs):
+def delete_approval_templates(sender, instance, **kwargs):
     if type(instance.unified_job_template) is WorkflowApprovalTemplate:
         instance.unified_job_template.delete()
 
 
-# When setting UJT to anything other than "is approval node" - update this comment!
+# When setting UJT to anything other than "is approval node" - delete this comment!
 @receiver(pre_save, sender=WorkflowJobTemplateNode)
-def placeholder_name(sender, instance, **kwargs):
+def delete_approval_node_type_change(sender, instance, **kwargs):
     try:
         old = WorkflowJobTemplateNode.objects.get(id=instance.id)
     except sender.DoesNotExist:
@@ -657,6 +661,13 @@ def placeholder_name(sender, instance, **kwargs):
         return
     if type(old.unified_job_template) is WorkflowApprovalTemplate:
         old.unified_job_template.delete()
+
+
+# &&&&&& New stuff to test!
+@receiver(post_delete, sender=WorkflowApprovalTemplate)
+def deny_orphaned_approvals(sender, instance, **kwargs):
+    for approval in WorkflowApproval.objects.filter(workflow_approval_template=instance, status='pending'):
+        approval.deny()
 
 
 @receiver(post_save, sender=Session)

@@ -3410,9 +3410,16 @@ class WorkflowApprovalViewSerializer(UnifiedJobSerializer):
 
 class WorkflowApprovalSerializer(UnifiedJobSerializer):
 
+    can_approve_or_deny = serializers.SerializerMethodField()
+
     class Meta:
         model = WorkflowApproval
-        fields = (['*', '-controller_node', '-execution_node',])
+        fields = (['*', '-controller_node', '-execution_node', 'can_approve_or_deny'])
+
+    def get_can_approve_or_deny(self, obj):
+        request = self.context.get('request', None)
+        allowed = request.user.can_access(WorkflowApproval, 'approve_or_deny', obj)
+        return allowed is True and obj.status == 'pending'
 
     def get_related(self, obj):
         res = super(WorkflowApprovalSerializer, self).get_related(obj)
@@ -3420,17 +3427,21 @@ class WorkflowApprovalSerializer(UnifiedJobSerializer):
         if obj.workflow_approval_template:
             res['workflow_approval_template'] = self.reverse('api:workflow_approval_template_detail',
                                                              kwargs={'pk': obj.workflow_approval_template.pk})
-            res['notifications'] = self.reverse('api:workflow_approval_notifications_list', kwargs={'pk': obj.pk})
         res['approve'] = self.reverse('api:workflow_approval_approve', kwargs={'pk': obj.pk})
         res['deny'] = self.reverse('api:workflow_approval_deny', kwargs={'pk': obj.pk})
         return res
 
 
-
 class WorkflowApprovalListSerializer(WorkflowApprovalSerializer, UnifiedJobListSerializer):
 
+    can_approve_or_deny = serializers.SerializerMethodField()
+
     class Meta:
-        fields = ('*', '-execution_node', '-controller_node',)
+        fields = ('*', '-execution_node', '-controller_node', 'can_approve_or_deny')
+
+    def get_can_approve_or_deny(self, obj):
+        request = self.context.get('request', None)
+        return request.user.can_access(WorkflowApproval, 'approve_or_deny', obj) is True
 
 
 class WorkflowApprovalTemplateSerializer(UnifiedJobTemplateSerializer):
@@ -3446,13 +3457,7 @@ class WorkflowApprovalTemplateSerializer(UnifiedJobTemplateSerializer):
 
         res.update(dict(
             jobs = self.reverse('api:workflow_approval_template_jobs_list', kwargs={'pk': obj.pk}),
-            # &&&&&& Placeholder for notification things!
-            # notification_templates_started = self.reverse('api:workflow_approval_template_notification_templates_started_list', kwargs={'pk': obj.pk}),
-            # notification_templates_needs_approval = self.reverse(
-            #'api:workflow_approval_template_notification_templates_needs_approval_list', kwargs={'pk': obj.pk}),
-            # notification_templates_success = self.reverse('api:workflow_approval_template_notification_templates_success_list', kwargs={'pk': obj.pk}),
-            # notification_templates_error = self.reverse('api:workflow_approval_template_notification_templates_error_list', kwargs={'pk': obj.pk}),
-        ))
+            ))
         return res
 
 
