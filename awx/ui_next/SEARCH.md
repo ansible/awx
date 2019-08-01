@@ -35,6 +35,7 @@
 - make default params only accept page, page_size and order_by
 - support custom order_by being typed in the url bar
 - fix up which keys are displayed in the various lists (note this will also require non-string widgetry to the right of the search key dropdown, for integers, dates, etc.)
+- fix any spacing issues like collision with action buttons and overall width of the search bar
 
 ## Lists affected in 3.6 timeframe
 
