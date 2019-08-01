@@ -125,6 +125,23 @@ export default ['i18n', 'NotificationsList', 'TemplateList',
                 type: 'text',
                 ngShow: "scm_type && scm_type.value !== 'manual' && scm_type.value !== 'insights'",
                 ngDisabled: '!(project_obj.summary_fields.user_capabilities.edit || canAdd)',
+                awPopOver: '<p>' + i18n._("Branch to checkout.  You can input other refs like tags and commit hashes as well.  You can set a custom refspec, to allow for other refs to be input.") + '</p>',
+                dataTitle: i18n._('SCM Branch'),
+                subForm: 'sourceSubForm',
+            },
+            scm_refspec: {
+                labelBind: "scmRefspecLabel",
+                type: 'text',
+                ngShow: "scm_type && scm_type.value === 'git'",
+                ngDisabled: '!(project_obj.summary_fields.user_capabilities.edit || canAdd)',
+                awPopOver: '<p>' + i18n._('A refspec to fetch (passed to the Ansible git module).  This parameter allows access to references via the branch field not otherwise available.') + '</p>' +
+                    '<p>' + i18n._('NOTE: This field assumes the remote name is "origin".') + '</p>' +
+                    '<p>' + i18n._('Examples include:') + '</p>' +
+                    '</p><ul class=\"no-bullets\"><li>refs/*:refs/remotes/origin/*</li>' +
+                    '<li>refs/pull/62/head:refs/remotes/origin/pull/62/head</li></ul>' +
+                    '<p>' + i18n._('The first fetches all references.  The second fetches only the Github pull request number 62, in this example the branch needs to be `refs/pull/62/head`.') +
+                    '</p>',
+                dataTitle: i18n._('SCM Refspec'),
                 subForm: 'sourceSubForm',
             },
             credential: {
