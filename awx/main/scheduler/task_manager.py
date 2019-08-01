@@ -482,10 +482,6 @@ class TaskManager():
             found_acceptable_queue = False
             idle_instance_that_fits = None
             if isinstance(task, WorkflowJob):
-                # &&&&&& Timeout implementation (pseudo-code)
-                # if (tz_now() - task.created).seconds > the_timeout_in_seconds:
-                #     logger.error('meaning log message')
-                #     mark it as status failed and set a reasonable `job_explanation` value
                 if task.unified_job_template_id in running_workflow_templates:
                     if not task.allow_simultaneous:
                         logger.debug("{} is blocked from running, workflow already running".format(task.log_format))

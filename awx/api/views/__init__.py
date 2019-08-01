@@ -4453,7 +4453,6 @@ class WorkflowApprovalApprove(RetrieveAPIView):
     model = models.WorkflowApproval
     serializer_class = serializers.WorkflowApprovalViewSerializer
 
-    # &&&&&& Changed per the PR review, notes/questions in additional comments...
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         request.user.can_access(models.WorkflowApproval, 'approve_or_deny', obj)
@@ -4467,7 +4466,6 @@ class WorkflowApprovalDeny(RetrieveAPIView):
     model = models.WorkflowApproval
     serializer_class = serializers.WorkflowApprovalViewSerializer
 
-    # &&&&&& Changed per the PR review, notes/questions in additional comments...
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         request.user.can_access(models.WorkflowApproval, 'approve_or_deny', obj)

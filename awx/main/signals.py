@@ -35,7 +35,7 @@ from awx.main.models import (
     JobTemplate, OAuth2AccessToken, Organization, Project, ProjectUpdateEvent,
     Role, SystemJob, SystemJobEvent, SystemJobTemplate, UnifiedJob,
     UnifiedJobTemplate, User, UserSessionMembership, WorkflowJobTemplateNode,
-    WorkflowApprovalTemplate, ROLE_SINGLETON_SYSTEM_ADMINISTRATOR
+    WorkflowApproval, WorkflowApprovalTemplate, ROLE_SINGLETON_SYSTEM_ADMINISTRATOR
 )
 from awx.main.constants import CENSOR_VALUE
 from awx.main.utils import model_instance_diff, model_to_dict, camelcase_to_underscore, get_current_apps
@@ -505,10 +505,6 @@ def activity_stream_update(sender, instance, **kwargs):
     else:
         activity_entry.setting = conf_to_dict(instance)
         activity_entry.save()
-    # &&&&&&
-    # for approvals in kwargs['pk_set']:
-    #     if isinstance(WorkflowApprovalTemplate) or isinstance(kwargs['model'].objects.filter(id=approvals), WorkflowApprovalTemplate):
-    #         continue
 
 
 def activity_stream_delete(sender, instance, **kwargs):
@@ -650,7 +646,6 @@ def delete_approval_templates(sender, instance, **kwargs):
         instance.unified_job_template.delete()
 
 
-# When setting UJT to anything other than "is approval node" - delete this comment!
 @receiver(pre_save, sender=WorkflowJobTemplateNode)
 def delete_approval_node_type_change(sender, instance, **kwargs):
     try:
@@ -663,7 +658,6 @@ def delete_approval_node_type_change(sender, instance, **kwargs):
         old.unified_job_template.delete()
 
 
-# &&&&&& New stuff to test!
 @receiver(post_delete, sender=WorkflowApprovalTemplate)
 def deny_orphaned_approvals(sender, instance, **kwargs):
     for approval in WorkflowApproval.objects.filter(workflow_approval_template=instance, status='pending'):
