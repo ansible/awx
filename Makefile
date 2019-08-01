@@ -66,7 +66,7 @@ I18N_FLAG_FILE = .i18n_built
 	ui-test ui-deps ui-test-ci VERSION
 
 # remove ui build artifacts
-clean-ui:
+clean-ui: clean-languages
 	rm -rf awx/ui/static/
 	rm -rf awx/ui/node_modules/
 	rm -rf awx/ui/test/unit/reports/
@@ -93,6 +93,10 @@ clean-schema:
 	rm -rf swagger.json
 	rm -rf schema.json
 	rm -rf reference-schema.json
+
+clean-languages:
+	rm -f $(I18N_FLAG_FILE)
+	find . -type f -regex ".*\.mo$$" -delete
 
 # Remove temporary build files, compiled Python files.
 clean: clean-ui clean-dist

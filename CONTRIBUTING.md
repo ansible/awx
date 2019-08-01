@@ -134,6 +134,8 @@ Run the following to build the AWX UI:
 ```bash
 (host) $ make ui-devel
 ```
+See [the ui development documentation](awx/ui/README.md) for more information on using the frontend development, build, and test tooling.
+
 ### Running the environment
 
 #### Start the containers

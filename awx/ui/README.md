@@ -60,6 +60,7 @@ npm --prefix awx/ui run e2e
 ```shell
 # add an exact development or build dependency
 npm install --prefix awx/ui --save-dev --save-exact dev-package@1.2.3
+
 # add an exact production dependency
 npm install --prefix awx/ui --save --save-exact prod-package@1.23
 
@@ -81,3 +82,22 @@ npm uninstall --prefix awx/ui --save prod-package
 # built files are placed in awx/ui/static
 make ui-release
 ```
+
+## Internationalization
+Application strings marked for translation are extracted and used to generate `.pot` files using the following command:
+```shell
+# extract strings and generate .pot files
+make pot
+```
+To include the translations in the development environment, we compile them prior to building the ui:
+```shell
+# remove any prior ui builds
+make clean-ui
+
+# compile the .pot files to javascript files usable by the application
+make languages
+
+# build the ui with translations included
+make ui-devel
+```
+**Note**: Python 3.6 is required to compile the `.pot` files.
