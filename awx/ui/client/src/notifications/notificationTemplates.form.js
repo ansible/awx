@@ -565,12 +565,12 @@ export default ['i18n', function(i18n) {
                     value: 'use_tls',
                     label: i18n._('Use TLS'),
                     ngShow: "notification_type.value == 'email' ",
-                    labelClass: 'NotificationsForm-radioButtons'
+                    labelClass: 'Form-inputLabel'
                 }, {
                     value: 'use_ssl',
                     label: i18n._('Use SSL'),
                     ngShow: "notification_type.value == 'email'",
-                    labelClass: 'NotificationsForm-radioButtons'
+                    labelClass: 'Form-inputLabel'
                 }]
             },
             hex_color: {
