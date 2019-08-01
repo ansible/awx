@@ -21,15 +21,12 @@
 - DONE make filter and list header tests
 - DONE change api paramsSerializer to handle duplicate key stuff
 - DONE update qs update function to be smaller, simple param functions, as opposed to one big one with a lot of params
-
-## TODO for this PR
-
-- add search filter removal test for qs.
-- bug: remove button for search tags of duplicate keys are broken, fix that
+- DONE add search filter removal test for qs.
+- DONE remove button for search tags of duplicate keys are broken, fix that
 
 ## TODO later on in 3.6: stuff to be finished for search iteration 1 (I'll card up an issue to tackle this. I plan on doing this after I finished the awx project branch work)
 
-- currently handleSearch in Search.jsx always appends the __icontains post-fix to make the filtering ux expected work right. Once we start adding number-based params we will won't to change this behavior.
+- currently handleSearch in Search.jsx always appends the `__icontains` post-fix to make the filtering ux expected work right. Once we start adding number-based params we will won't to change this behavior.
 - utilize new defaultSearchKey prop instead of relying on sort key
 - make access have username as the default key?
 - make default params only accept page, page_size and order_by
