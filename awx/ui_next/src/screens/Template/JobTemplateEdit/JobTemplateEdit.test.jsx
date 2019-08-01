@@ -36,9 +36,26 @@ describe('<JobTemplateEdit />', () => {
       description: 'new description',
       job_type: 'check',
     };
+    const newLabels = [
+      { associate: true, id: 3 },
+      { associate: true, id: 3 },
+      { name: 'Mapel', organization: 1 },
+      { name: 'Tree', organization: 1 },
+    ];
+    const removedLabels = [
+      { disassociate: true, id: 1 },
+      { disassociate: true, id: 2 },
+    ];
 
-    wrapper.find('JobTemplateForm').prop('handleSubmit')(updatedTemplateData);
+    wrapper.find('JobTemplateForm').prop('handleSubmit')(
+      updatedTemplateData,
+      newLabels,
+      removedLabels
+    );
     expect(JobTemplatesAPI.update).toHaveBeenCalledWith(1, updatedTemplateData);
+    expect(JobTemplatesAPI.disassociateLabel).toHaveBeenCalledTimes(2);
+    expect(JobTemplatesAPI.associateLabel).toHaveBeenCalledTimes(2);
+    expect(JobTemplatesAPI.generateLabel).toHaveBeenCalledTimes(2);
   });
 
   test('should navigate to job template detail when cancel is clicked', () => {

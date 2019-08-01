@@ -1,8 +1,6 @@
 import axios from 'axios';
 
-import {
-  encodeQueryString
-} from '@util/qs';
+import { encodeQueryString } from '@util/qs';
 
 const defaultHttp = axios.create({
   xsrfCookieName: 'csrftoken',
@@ -28,7 +26,7 @@ class Base {
 
   read(params) {
     return this.http.get(this.baseUrl, {
-      params
+      params,
     });
   }
 

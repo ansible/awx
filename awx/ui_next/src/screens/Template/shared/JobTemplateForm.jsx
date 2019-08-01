@@ -67,12 +67,17 @@ class JobTemplateForm extends Component {
     };
     this.handleNewLabel = this.handleNewLabel.bind(this);
     this.loadLabels = this.loadLabels.bind(this);
-    this.disassociateLabel = this.disassociateLabel.bind(this);
+    this.removeLabel = this.removeLabel.bind(this);
   }
 
   componentDidMount() {
     this.loadLabels(QSConfig);
   }
+
+  // The function below assumes that the user has no more than 400
+  // labels. For the vast majority of users this will be more thans
+  // enough.This can be updated to allow more than 400 labels if we
+  // decide it is necessary.
 
   async loadLabels(QueryConfig) {
     this.setState({ contentError: null, hasContentLoading: true });
@@ -127,23 +132,26 @@ class JobTemplateForm extends Component {
     }
   }
 
-  disassociateLabel(label) {
-    const { removedLabels, loadedLabels, newLabels } = this.state;
-    const isNewCreatedLabel = loadedLabels.some(
-      loadedLabel => loadedLabel.name !== label.name
+  removeLabel(label) {
+    const { removedLabels, newLabels } = this.state;
+    const { template } = this.props;
+
+    const isAssociatedLabel = template.summary_fields.labels.results.some(
+      tempLabel => tempLabel.id === label.id
     );
-    if (isNewCreatedLabel) {
-      const filteredLabels = newLabels.filter(
-        newLabel => newLabel.name !== label.name
-      );
-      this.setState({ newLabels: filteredLabels });
-    } else {
+
+    if (isAssociatedLabel) {
       this.setState({
         removedLabels: removedLabels.concat({
           disassociate: true,
           id: label.id,
         }),
       });
+    } else {
+      const filteredLabels = newLabels.filter(
+        newLabel => newLabel.name !== label.name
+      );
+      this.setState({ newLabels: filteredLabels });
     }
   }
 
@@ -285,7 +293,7 @@ class JobTemplateForm extends Component {
                 </Tooltip>
                 <MultiSelect
                   onAddNewItem={this.handleNewLabel}
-                  onRemoveItem={this.disassociateLabel}
+                  onRemoveItem={this.removeLabel}
                   associatedItems={template.summary_fields.labels.results}
                   options={loadedLabels}
                 />

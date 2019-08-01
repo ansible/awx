@@ -36,14 +36,16 @@ describe('<JobTemplateForm />', () => {
   });
 
   test('initially renders successfully', () => {
-    mountWithContexts(
+    const wrapper = mountWithContexts(
       <JobTemplateForm
         template={mockData}
         handleSubmit={jest.fn()}
         handleCancel={jest.fn()}
       />
     );
+    const component = wrapper.find('ChipGroup');
     expect(LabelsAPI.read).toHaveBeenCalled();
+    expect(component.find('span#pf-random-id-1').text()).toEqual('Sushi');
   });
 
   test('should update form values on input changes', async () => {
@@ -131,8 +133,7 @@ describe('<JobTemplateForm />', () => {
 
     wrapper.setState({ newLabels: [], loadedLabels: [], removedLabels: [] });
     multiSelect.setState({ input: 'Foo' });
-
-    wrapper.find('input[aria-label="labels"]').prop('onKeyDown')(event);
+    component.find('input[aria-label="labels"]').prop('onKeyDown')(event);
     expect(handleNewLabel).toHaveBeenCalledWith('Foo');
 
     component.instance().handleNewLabel({ name: 'Bar', id: 2 });
@@ -149,21 +150,16 @@ describe('<JobTemplateForm />', () => {
         handleCancel={jest.fn()}
       />
     );
-    const multiSelect = wrapper.find('MultiSelect');
     const component = wrapper.find('JobTemplateForm');
-
-    component.setState({
-      newLabels: [{ name: 'Foo', id: 1 }],
-      loadedLabels: [{ name: 'Bar', id: 3 }],
-      removedLabels: [],
-    });
-    component.update();
-    multiSelect.setState({ input: 'Wowza' });
-    component.instance().disassociateLabel({ name: 'Foo', id: 1 });
+    // This asserts that the user generated a label or clicked
+    // on a label option, and then changed their mind and
+    // removed the label.
+    component.instance().removeLabel({ name: 'Alex', id: 17 });
     expect(component.state().newLabels.length).toBe(0);
     expect(component.state().removedLabels.length).toBe(0);
-
-    component.instance().disassociateLabel({ name: 'Bar', id: 3 });
+    // This asserts that the user removed a label that was associated
+    // with the template when the template loaded.
+    component.instance().removeLabel({ name: 'Sushi', id: 1 });
     expect(component.state().newLabels.length).toBe(0);
     expect(component.state().removedLabels.length).toBe(1);
   });

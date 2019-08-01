@@ -51,10 +51,9 @@ class MultiSelect extends Component {
 
   constructor(props) {
     super(props);
-    this.myRef = React.createRef();
     this.state = {
       input: '',
-      chipItems: [],
+      chipItems: this.getInitialChipItems(),
       isExpanded: false,
     };
     this.handleAddItem = this.handleAddItem.bind(this);
@@ -65,8 +64,20 @@ class MultiSelect extends Component {
   }
 
   componentDidMount() {
-    this.renderChips();
     document.addEventListener('mousedown', this.handleClick, false);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('mousedown', this.handleClick, false);
+  }
+
+  getInitialChipItems() {
+    const { associatedItems } = this.props;
+    return associatedItems.map(item => ({
+      name: item.name,
+      id: item.id,
+      organization: item.organization,
+    }));
   }
 
   handleClick(e, option) {
@@ -74,48 +85,37 @@ class MultiSelect extends Component {
       if (option) {
         this.handleSelection(e, option);
       }
-      this.setState({ isExpanded: true });
     } else {
       this.setState({ isExpanded: false });
     }
   }
 
-  renderChips() {
-    const { associatedItems } = this.props;
-    const items = associatedItems.map(item => ({
-      name: item.name,
-      id: item.id,
-      organization: item.organization,
-    }));
-    this.setState({
-      chipItems: items,
-    });
-  }
-
   handleSelection(e, item) {
     const { chipItems } = this.state;
     const { onAddNewItem } = this.props;
+    e.preventDefault();
 
     this.setState({
       chipItems: chipItems.concat({ name: item.name, id: item.id }),
+      isExpanded: false,
     });
     onAddNewItem(item);
-    e.preventDefault();
   }
 
   handleAddItem(event) {
     const { input, chipItems } = this.state;
     const { onAddNewItem } = this.props;
     const newChip = { name: input, id: Math.random() };
-    if (event.key === 'Tab') {
-      this.setState({
-        chipItems: chipItems.concat(newChip),
-        isExpanded: false,
-        input: '',
-      });
-
-      onAddNewItem(input);
+    if (event.key !== 'Tab') {
+      return;
     }
+    this.setState({
+      chipItems: chipItems.concat(newChip),
+      isExpanded: false,
+      input: '',
+    });
+
+    onAddNewItem(input);
   }
 
   handleInputChange(e) {
