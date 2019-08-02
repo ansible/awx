@@ -13,6 +13,11 @@ describe('<JobTemplateAdd />', () => {
     name: '',
     playbook: '',
     project: '',
+    summary_fields: {
+      user_capabilities: {
+        edit: true,
+      },
+    },
   };
 
   afterEach(() => {

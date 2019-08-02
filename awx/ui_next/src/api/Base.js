@@ -25,7 +25,9 @@ class Base {
   }
 
   read(params) {
-    return this.http.get(this.baseUrl, { params });
+    return this.http.get(this.baseUrl, {
+      params,
+    });
   }
 
   readDetail(id) {

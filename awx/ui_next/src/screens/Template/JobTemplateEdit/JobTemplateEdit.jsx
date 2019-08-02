@@ -21,14 +21,28 @@ class JobTemplateEdit extends Component {
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  async handleSubmit(values) {
+  async handleSubmit(values, newLabels = [], removedLabels = []) {
     const {
       template: { id, type },
       history,
     } = this.props;
 
+    const disassociatedLabels = removedLabels.forEach(removedLabel =>
+      JobTemplatesAPI.disassociateLabel(id, removedLabel)
+    );
+    const associatedLabels = newLabels
+      .filter(newLabel => !newLabel.organization)
+      .forEach(newLabel => JobTemplatesAPI.associateLabel(id, newLabel));
+    const generatedLabels = newLabels
+      .filter(newLabel => newLabel.organization)
+      .forEach(newLabel => JobTemplatesAPI.generateLabel(id, newLabel));
     try {
-      await JobTemplatesAPI.update(id, { ...values });
+      await Promise.all([
+        JobTemplatesAPI.update(id, { ...values }),
+        disassociatedLabels,
+        associatedLabels,
+        generatedLabels,
+      ]);
       history.push(`/templates/${type}/${id}/details`);
     } catch (error) {
       this.setState({ error });
