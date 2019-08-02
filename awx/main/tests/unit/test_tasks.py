@@ -434,6 +434,7 @@ class TestGenericRun():
         job = Job(project=Project(), inventory=Inventory())
         task = tasks.RunJob()
         task.should_use_proot = lambda instance: True
+        task.instance = job
 
         private_data_dir = '/foo'
         cwd = '/bar'
@@ -1701,6 +1702,7 @@ class TestProjectUpdateCredentials(TestJobExecution):
     def test_process_isolation_exposes_projects_root(self, private_data_dir, project_update):
         task = tasks.RunProjectUpdate()
         task.revision_path = 'foobar'
+        task.instance = project_update
         ssh = CredentialType.defaults['ssh']()
         project_update.scm_type = 'git'
         project_update.credential = Credential(
