@@ -23,6 +23,7 @@ from awx.main.models import (
     Project,
     ProjectUpdate,
     SystemJob,
+    WorkflowApproval,
     WorkflowJob,
     WorkflowJobTemplate
 )
@@ -518,6 +519,19 @@ class TaskManager():
             if not found_acceptable_queue:
                 logger.debug("{} couldn't be scheduled on graph, waiting for next cycle".format(task.log_format))
 
+    def timeout_approval_node(self):
+        workflow_approval = WorkflowApproval.objects.filter(status='pending').prefetch_related('workflow_approval_template')
+        now = tz_now()
+        for task in workflow_approval:
+            approval_timeout_seconds = timedelta(seconds=task.workflow_approval_template.timeout)
+            if task.workflow_approval_template.timeout == 0:
+                continue
+            if (now - task.created) >= approval_timeout_seconds:
+                logger.info("This approval node has timed out.")
+                task.status = 'failed'
+                task.job_explanation = _("This approval node has timed out.")
+                task.save(update_fields=['status', 'job_explanation'])
+
     def calculate_capacity_consumed(self, tasks):
         self.graph = InstanceGroup.objects.capacity_values(tasks=tasks, graph=self.graph)
 
@@ -572,6 +586,8 @@ class TaskManager():
                     logger.debug('Removed %s from job spawning consideration.', workflow_job.log_format)
 
             self.spawn_workflow_graph_jobs(running_workflow_tasks)
+
+            self.timeout_approval_node()
 
             self.process_tasks(all_sorted_tasks)
         return finished_wfjs

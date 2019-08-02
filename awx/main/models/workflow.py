@@ -661,6 +661,9 @@ class WorkflowApproval(UnifiedJob):
     def event_class(self):
         return None
 
+    def _get_parent_field_name(self):
+        return 'workflow_approval_template'
+
     def approve(self, request=None):
         self.status = 'successful'
         self.save()
