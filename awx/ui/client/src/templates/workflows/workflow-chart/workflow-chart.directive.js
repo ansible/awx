@@ -23,9 +23,16 @@ export default ['moment', '$timeout', '$window', '$filter', 'TemplatesStrings',
         restrict: 'E',
         link: function(scope, element) {
 
+            // Quickly render the start text so we see how wide it is and know how wide to make the start
+            // node element.
+            const startNodeText = $(`<span class="WorkflowChart-node" style="visibility:hidden;"><span class="WorkflowChart-startText">${TemplatesStrings.get('workflow_maker.START')}</span></span>`);
+            startNodeText.appendTo(document.body);
+            const startNodeTextWidth = startNodeText.width();
+            startNodeText.remove();
+
             let nodeW = 180,
                 nodeH = 60,
-                rootW = 60,
+                rootW = startNodeTextWidth + 25,
                 rootH = 40,
                 startNodeOffsetY = scope.mode === 'details' ? 17 : 10,
                 maxNodeTextLength = 27,
