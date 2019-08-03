@@ -1,5 +1,5 @@
-export default [ '$scope', 'Empty', 'Wait', 'GetBasePath', 'Rest', 'ProcessErrors', '$state',
-    function($scope, Empty, Wait, GetBasePath, Rest, ProcessErrors, $state) {
+export default [ '$scope', 'Empty', 'Wait', 'GetBasePath', 'Rest', 'ProcessErrors',
+    function($scope, Empty, Wait, GetBasePath, Rest, ProcessErrors) {
 
         $scope.gatherRecentJobs = function(event) {
             if (!Empty($scope.inventory.id)) {

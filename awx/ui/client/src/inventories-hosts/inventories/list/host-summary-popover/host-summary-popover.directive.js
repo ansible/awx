@@ -25,7 +25,7 @@ export default ['templateUrl', 'Wait', '$filter', '$compile', 'i18n', '$log',
                         elem.popover('dispose');
                     }
                     catch(err) {
-                        $log.debug(error);
+                        $log.debug(err);
                     }
                     $('.popover').each(function() {
                         // remove lingering popover <div>. Seems to be a bug in TB3 RC1
