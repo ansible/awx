@@ -33,6 +33,7 @@ $.fn.btn = btn;
 
 // Whitelist table elements so they can be used in popovers
 $.fn.popover.Constructor.Default.whiteList.table = [];
+$.fn.popover.Constructor.Default.whiteList.th = [];
 $.fn.popover.Constructor.Default.whiteList.tr = [];
 $.fn.popover.Constructor.Default.whiteList.td = [];
 $.fn.popover.Constructor.Default.whiteList.tbody = [];

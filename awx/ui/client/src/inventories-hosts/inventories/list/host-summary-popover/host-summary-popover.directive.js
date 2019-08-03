@@ -1,5 +1,5 @@
-export default ['templateUrl', 'Wait', '$filter', '$compile', 'i18n',
-    function(templateUrl, Wait, $filter, $compile, i18n) {
+export default ['templateUrl', 'Wait', '$filter', '$compile', 'i18n', '$log',
+    function(templateUrl, Wait, $filter, $compile, i18n, $log) {
         return {
             restrict: 'E',
             replace: false,
@@ -19,19 +19,20 @@ export default ['templateUrl', 'Wait', '$filter', '$compile', 'i18n',
 
                 function attachElem(event, html, title) {
                     var elem = $(event.target).parent();
+
                     try {
                         elem.tooltip('hide');
-                        elem.popover('destroy');
+                        elem.popover('dispose');
                     }
                     catch(err) {
-                        //ignore
+                        $log.debug(err);
                     }
                     $('.popover').each(function() {
                         // remove lingering popover <div>. Seems to be a bug in TB3 RC1
                         $(this).remove();
                     });
                     $('.tooltip').each( function() {
-                        // close any lingering tool tipss
+                        // close any lingering tooltips
                         $(this).hide();
                     });
                     elem.attr({
@@ -44,36 +45,59 @@ export default ['templateUrl', 'Wait', '$filter', '$compile', 'i18n',
                 }
 
                 scope.generateTable = function(data, event){
-                    var html, title = (scope.inventory.has_active_failures) ? "Recent Failed Jobs" : "Recent Successful Jobs";
+                    var html, title = (scope.inventory.has_active_failures) ? i18n._("Recent Failed Jobs") : i18n._("Recent Successful Jobs");
                     Wait('stop');
                     if (data.count > 0) {
-                        html = "<table class=\"table table-condensed flyout\" style=\"width: 100%\">\n";
-                        html += "<thead>\n";
-                        html += "<tr>";
-                        html += "<th>" + i18n._("Status") + "</th>";
-                        html += "<th>" + i18n._("Finished") + "</th>";
-                        html += "<th>" + i18n._("Name") + "</th>";
-                        html += "</tr>\n";
-                        html += "</thead>\n";
-                        html += "<tbody>\n";
+                        html = `
+                            <table class="table table-condensed flyout" style="width: 100%">
+                                <thead>
+                                    <tr>
+                                        <th>${i18n._("Status")}</th>
+                                        <th>${i18n._("Finished")}</th>
+                                        <th>${i18n._("Name")}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                        `;
 
                         data.results.forEach(function(row) {
+                            let href = '';
+                            switch (row.type) {
+                                case 'job':
+                                case 'ad_hoc_command':
+                                case 'system_job':
+                                case 'project_update':
+                                case 'inventory_update':
+                                    href = `#/jobs/${row.id}`;
+                                    break;
+                                case 'workflow_job':
+                                    href = `#/workflows/${row.id}`;
+                                    break;
+                                default:
+                                    break;
+                            }
                             if ((scope.inventory.has_active_failures && row.status === 'failed') || (!scope.inventory.has_active_failures && row.status === 'successful')) {
-                                html += "<tr>\n";
-                                html += "<td><a href=\"\" ng-click=\"viewJob(" + row.id + "," + "'" + row.type + "'" + ")\" " + "aw-tool-tip=\"" + row.status.charAt(0).toUpperCase() + row.status.slice(1) +
-                                    ". Click for details\" aw-tip-placement=\"top\" data-tooltip-outer-class=\"Tooltip-secondary\"><i class=\"fa SmartStatus-tooltip--" + row.status + " icon-job-" + row.status + "\"></i></a></td>\n";
-                                html += "<td>" + ($filter('longDate')(row.finished)) + "</td>";
-                                html += "<td><a href=\"\" ng-click=\"viewJob(" + row.id + "," + "'" + row.type + "'" + ")\" " + "aw-tool-tip=\"" + row.status.charAt(0).toUpperCase() + row.status.slice(1) +
-                                    ". Click for details\" aw-tip-placement=\"top\" data-tooltip-outer-class=\"Tooltip-secondary\">" + $filter('sanitize')(ellipsis(row.name)) + "</a></td>";
-                                html += "</tr>\n";
+                                html += `
+                                    <tr>
+                                        <td>
+                                            <a href="${href}">
+                                                <i class="fa SmartStatus-tooltip--${row.status} icon-job-${row.status}"></i>
+                                            </a>
+                                        </td>
+                                        <td>${($filter('longDate')(row.finished))}</td>
+                                        <td>
+                                            <a href="${href}">${$filter('sanitize')(ellipsis(row.name))}</a>
+                                        </td>
+                                    </tr>
+                                `;
                             }
                         });
-                        html += "</tbody>\n";
-                        html += "</table>\n";
+                        html += `</tbody></table>`;
                     }
                     else {
-                        html = "<p>" + i18n._("No recent job data available for this inventory.") + "</p>\n";
+                        html = `<p>${i18n._("No recent job data available for this inventory.")}</p>`;
                     }
+
                     attachElem(event, html, title);
                 };
 

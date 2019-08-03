@@ -21,7 +21,7 @@ export default ['templateUrl', '$compile', 'Wait', '$filter', 'i18n',
                     var elem = $(event.target).parent();
                     try {
                         elem.tooltip('hide');
-                        elem.popover('destroy');
+                        elem.popover('dispose');
                     }
                     catch(err) {
                         //ignore
