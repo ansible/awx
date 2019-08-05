@@ -2058,7 +2058,8 @@ class RunProjectUpdate(BaseTask):
             os.mkdir(settings.PROJECTS_ROOT)
         self.acquire_lock(instance)
         self.original_branch = None
-        if instance.scm_type == 'git' and instance.job_type == 'run' and instance.project:
+        if (instance.scm_type == 'git' and instance.job_type == 'run' and instance.project and
+                instance.scm_branch != instance.project.scm_branch):
             project_path = instance.project.get_project_path(check_if_exists=False)
             if os.path.exists(project_path):
                 git_repo = git.Repo(project_path)
