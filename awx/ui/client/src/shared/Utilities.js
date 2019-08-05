@@ -183,8 +183,8 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
             } else if (form) { //if no error code is detected it begins to loop through to see where the api threw an error
                 fieldErrors = false;
 
-                const addApiErrors = (data, field, fld) => {
-                    if (data && field.tab) {
+                const addApiErrors = (field, fld) => {
+                    if (data[fld] && field.tab) {
                         // If the form is part of a tab group, activate the tab
                         $('#' + form.name + "_tabs a[href=\"#" + field.tab + '"]').tab('show');
                     }
@@ -198,17 +198,17 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                         }
                     }
                     if (field.sourceModel) {
-                        if (data) {
+                        if (data[fld]) {
                             scope[field.sourceModel + '_' + field.sourceField + '_api_error'] =
-                                data[0];
+                                data[fld][0];
                             //scope[form.name + '_form'][form.fields[field].sourceModel + '_' + form.fields[field].sourceField].$setValidity('apiError', false);
                             $('[name="' + field.sourceModel + '_' + field.sourceField + '"]').addClass('ng-invalid');
                             $('[name="' + field.sourceModel + '_' + field.sourceField + '"]').ScrollTo({ "onlyIfOutside": true, "offsetTop": 100 });
                             fieldErrors = true;
                         }
                     } else {
-                        if (data) {
-                            scope[fld + '_api_error'] = data[0];
+                        if (data[fld]) {
+                            scope[fld + '_api_error'] = data[fld][0];
                             $('[name="' + fld + '"]').addClass('ng-invalid');
                             $('label[for="' + fld + '"] span').addClass('error-color');
                             $('html, body').animate({scrollTop: $('[name="' + fld + '"]').offset().top}, 0);
@@ -223,10 +223,10 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                 for (field in form.fields) {
                     if (form.fields[field].type === "checkbox_group") {
                         form.fields[field].fields.forEach(fld => {
-                            addApiErrors(data[fld.name], fld, fld.name)
+                            addApiErrors(fld, fld.name);
                         });
                     } else {
-                        addApiErrors(data[field], form.fields[field], field);
+                        addApiErrors(form.fields[field], field);
                     }
                 }
                 if (defaultMsg) {
