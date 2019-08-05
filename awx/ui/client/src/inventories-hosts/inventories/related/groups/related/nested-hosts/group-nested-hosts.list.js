@@ -23,7 +23,7 @@ export default ['i18n', function(i18n) {
             {
                 field: 'toggleHost',
                 content: {
-                    ngDisabled: '!nested_host.summary_fields.user_capabilities.edit || nested_host.has_inventory_sources',
+                    ngDisabled: '!nested_host.summary_fields.user_capabilities.edit',
                     label: '',
                     columnClass: 'List-staticColumn--toggle',
                     type: "toggle",
@@ -32,8 +32,8 @@ export default ['i18n', function(i18n) {
                         i18n._("Indicates if a host is available and should be included in running jobs.") +
                         "</p><p>" +
                         i18n._("For hosts that are part of an external" +
-                               " inventory, this flag cannot be changed. It will be" +
-                               " set by the inventory sync process.") +
+                               " inventory, this flag may be" +
+                               " reset by the inventory sync process.") +
                         "</p>",
                     dataPlacement: "right",
                     nosort: true,
