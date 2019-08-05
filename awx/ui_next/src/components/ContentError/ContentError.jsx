@@ -9,8 +9,8 @@ import {
   EmptyStateBody,
 } from '@patternfly/react-core';
 import { ExclamationTriangleIcon } from '@patternfly/react-icons';
-
 import ErrorDetail from '@components/ErrorDetail';
+import NotFoundError from './NotFoundError';
 
 const EmptyState = styled(PFEmptyState)`
   width: var(--pf-c-empty-state--m-lg--MaxWidth);
@@ -19,6 +19,12 @@ const EmptyState = styled(PFEmptyState)`
 class ContentError extends React.Component {
   render() {
     const { error, i18n } = this.props;
+    if (error && error.response && error.response.status === 401) {
+      // TODO: check for session timeout & redirect to /login
+    }
+    if (error && error.response && error.response.status === 404) {
+      return <NotFoundError error={error} />;
+    }
     return (
       <EmptyState>
         <EmptyStateIcon icon={ExclamationTriangleIcon} />
