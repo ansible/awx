@@ -45,24 +45,12 @@
             <at-row ng-repeat="instance in vm.instances"
                 ng-class="{'at-Row--active': (instance.id === vm.activeId)}">
                 <div class="at-Row-toggle">
-                    <div class="ScheduleToggle"
-                        ng-class="{'is-on': instance.enabled,
-                            'ScheduleToggle--disabled': vm.rowAction.toggle._disabled}">
-                        <button ng-show="instance.enabled"
-                            type="button"
-                            class="ScheduleToggle-switch is-on ng-hide"
-                            ng-click="vm.toggle(instance)"
-                            ng-disabled="vm.rowAction.toggle._disabled">
-                            {{:: vm.strings.get('ON') }}
-                        </button>
-                        <button ng-show="!instance.enabled"
-                            type="button"
-                            class="ScheduleToggle-switch"
-                            ng-click="vm.toggle(instance)"
-                            ng-disabled="vm.rowAction.toggle._disabled">
-                            {{:: vm.strings.get('OFF') }}
-                        </button>
-                    </div>
+                    <span class="awxSwitch-outer" ng-class="{'awxSwitch-on': instance.enabled, 'awxSwitch-disabled': vm.rowAction.toggle._disabled}">
+                        <span class="awxSwitch-inner" ng-click="vm.toggle(instance)">
+                            <span class="awxSwitch-slider"></span>
+                            <i class="fa fa-check"></i>
+                        </span>
+                    </span>
                 </div>
 
                 <div class="at-Row-items at-Row-items--instances">

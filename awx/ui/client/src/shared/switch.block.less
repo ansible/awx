@@ -1,0 +1,85 @@
+.awxSwitch-listTableCell {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  justify-content: flex-end;
+  padding-right: 0px;
+}
+
+.awxSwitch-outer {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 26px;
+  cursor: pointer;
+
+  .fa {
+      display: none;
+  }
+}
+
+.awxSwitch-on {
+  .awxSwitch-slider {
+      background-color: @default-link;
+  }
+
+  .awxSwitch-slider:before {
+      -webkit-transform: translateX(16px);
+      -ms-transform: translateX(16px);
+      transform: translateX(16px);
+  }
+
+  .fa {
+      display: block;
+      position: absolute;
+      top: 7px;
+      left: 4px;
+      color: @default-bg;
+      font-size: 12px;
+  }
+}
+
+.awxSwitch-disabled {
+  cursor: not-allowed;
+
+  .awxSwitch-inner {
+      pointer-events: none;
+  }
+  
+  .awxSwitch-slider {
+      background-color: @default-icon;
+  }
+
+  .awxSwitch-slider:before {
+      background-color: @d2grey;
+  }
+
+  .fa {
+      color: @d2grey;
+  }
+}
+
+.awxSwitch-slider {
+  position: absolute;
+  border-radius: 34px;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: @d2grey;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.awxSwitch-slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 4px;
+  bottom: 5px;
+  background-color: @default-bg;
+  -webkit-transition: .4s;
+  transition: .4s;
+  border-radius: 50%;
+}

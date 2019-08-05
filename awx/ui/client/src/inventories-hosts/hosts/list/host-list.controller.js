@@ -80,9 +80,8 @@ function HostsList($scope, HostsList, $rootScope, GetBasePath,
         }
 
         host.enabled = !host.enabled;
-
-        HostsService.put(host).then(function(){
-            $state.go($state.current, null, {reload: true});
+        HostsService.patch(host.id, {
+            enabled: host.enabled
         });
     };
 

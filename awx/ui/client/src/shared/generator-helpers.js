@@ -527,21 +527,16 @@ angular.module('GeneratorHelpers', [systemStatus.name])
             } else if (field.type === 'template') {
                 html = Template(field);
             } else if (field.type === 'toggle') {
-                html += "<div class=\"ScheduleToggle-listTableCell " + fld + "-column";
-                html += (field['class']) ? " " + field['class'] : "";
-                html += field.columnClass ? " " + field.columnClass : "";
-                html += "\"><div class='ScheduleToggle' ng-class='{\"is-on\": " + list.iterator + ".";
-                html += (field.flag) ? field.flag : "enabled";
-                html += (field.ngDisabled) ? ', "ScheduleToggle--disabled": ' + field.ngDisabled : '';
-                html += "\}' aw-tool-tip='" + field.awToolTip + "' data-placement='" + field.dataPlacement + "' data-tip-watch='" + field.dataTipWatch + "'><button type='button'";
-                html += (field.ngDisabled) ? `ng-disabled="${field.ngDisabled}" ` : "";
-                html += "ng-show='" + list.iterator + "." ;
-                html += (field.flag) ? field.flag : 'enabled';
-                html += "' class='ScheduleToggle-switch is-on' ng-click='" + field.ngClick + "'>" + i18n._("ON") + "</button><button type='button'";
-                html += (field.ngDisabled) ? `ng-disabled="${field.ngDisabled}" ` : "";
-                html += "ng-show='!" + list.iterator + "." ;
-                html += (field.flag) ? field.flag : "enabled";
-                html += "' class='ScheduleToggle-switch' ng-click='" + field.ngClick + "'>" + i18n._("OFF") + "</button></div></div>";
+                html += `
+                    <div class="awxSwitch-listTableCell ${field}-column ${field['class']} ${field.columnClass}">
+                        <span class="awxSwitch-outer" ng-class="{'awxSwitch-on': ${"flag" in field} ? ${list.iterator}.${field.flag} : ${list.iterator}.enabled, 'awxSwitch-disabled': ${"ngDisabled" in field} ? ${field.ngDisabled} : false}" aw-tool-tip="${field.awToolTip}" data-placement="${field.dataPlacement ? field.dataPlacement : 'right'}" data-tip-watch="${field.dataTipWatch}">
+                            <span class="awxSwitch-inner" ng-click="${field.ngClick}">
+                                <span class="awxSwitch-slider"></span>
+                                <i class="fa fa-check"></i>
+                            </span>
+                        </span>
+                    </div>
+                `;
             } else if (field.type === 'invalid') {
                 html += `<div class='List-tableRow--invalid'><div class='List-tableRow--invalidBar' ng-show="${field.ngShow}"`;
                 html += `aw-tool-tip="${field.awToolTip}" data-placement=${field.dataPlacement}>`;

@@ -22,10 +22,12 @@
     <div class="SurveyMaker-header">
         <div class="SurveyMaker-title">
             <div class="SurveyMaker-titleText">{{name || "New Job Template"}}<div class="SurveyMaker-titleLockup"></div><span translate>SURVEY</span></div>
-            <div class="ScheduleToggle" ng-class="{'is-on': survey_enabled}" aw-tool-tip="surveyEnabledTooltip" data-container="#survey-modal-dialog" data-placement="right" data-tip-watch="surveyEnabledTooltip">
-                <button type="button" ng-show="survey_enabled" class="ScheduleToggle-switch is-on" ng-click="toggleSurveyEnabled()" translate>ON</button>
-                <button type="button" ng-show="!survey_enabled" class="ScheduleToggle-switch" ng-click="toggleSurveyEnabled()" translate>OFF</button>
-            </div>
+            <span class="awxSwitch-outer" ng-class="{'awxSwitch-on': survey_enabled, 'awxSwitch-disabled': (!job_template_obj.summary_fields.user_capabilities.edit && !workflow_job_template_obj.summary_fields.user_capabilities.edit && !canAdd)}" aw-tool-tip="surveyEnabledTooltip" data-container="#survey-modal-dialog" data-placement="right" data-tip-watch="surveyEnabledTooltip">
+                <span class="awxSwitch-inner" ng-click="toggleSurveyEnabled()">
+                    <span class="awxSwitch-slider"></span>
+                    <i class="fa fa-check"></i>
+                </span>
+            </span>
         </div>
         <div class="SurveyMaker-close">
             <button class="SurveyMaker-exit" ng-click="closeSurvey('survey-modal-dialog')"><i class="fa fa-times-circle"></i></button>
