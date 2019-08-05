@@ -84,7 +84,7 @@ module.exports = {
     'Test projects list blinking icon': client => {
         client
             .useCss()
-            .findThenClick('[ui-sref=projects]', 'css')
+            .navigateTo(`${AWX_E2E_URL}/#/projects`)
             .waitForElementVisible('.SmartSearch-input')
             .clearValue('.SmartSearch-input')
             .setValue(
@@ -92,6 +92,7 @@ module.exports = {
                 ['name.iexact:"test-websockets-project"', client.Keys.ENTER]
             );
         getUpdatedProject('test-websockets');
+        getUpdatedProject('test-websockets'); // occasionally 1st update is too quick
 
         client.expect.element('i.icon-job-running')
             .to.be.visible.before(AWX_E2E_TIMEOUT_ASYNC);
@@ -136,14 +137,17 @@ module.exports = {
     'Test project blinking icon within an organization view': client => {
         client
             .useCss()
-            .navigateTo(`${AWX_E2E_URL}/#/organizations/${data.org.id}/projects`, false)
+            .navigateTo(`${AWX_E2E_URL}/#/organizations/${data.org.id}/projects`)
             .waitForElementVisible('.projectsList .SmartSearch-input')
             .clearValue('.projectsList .SmartSearch-input')
             .setValue(
                 '.projectsList .SmartSearch-input',
                 ['test-websockets-project', client.Keys.ENTER]
             );
+        client.useXpath().waitForElementVisible('//i[contains(@class, "icon-job")]');
+        client.useCss();
         getUpdatedProject('test-websockets');
+        getUpdatedProject('test-websockets'); // sometimes project update is too fast
 
         client.expect.element('i.icon-job-running')
             .to.be.visible.before(AWX_E2E_TIMEOUT_ASYNC);
@@ -151,7 +155,7 @@ module.exports = {
             .to.be.visible.before(AWX_E2E_TIMEOUT_ASYNC);
     },
     'Test job slicing sparkline behavior': client => {
-        client.findThenClick('[ui-sref=dashboard]', 'css');
+        client.navigateTo(`${AWX_E2E_URL}/#/home`, false);
         getJob('test-websockets', 'debug.yml', 'test-ws-split-job-template', false);
 
         client.useXpath().expect.element(`${sparklineIcon}[1]${running}`)
