@@ -140,6 +140,7 @@ function JobEvent({ counter, created, event, stdout, start_line, ...rest }) {
               <JobEventLineToggle />
               <JobEventLineNumber>{lineNumber}</JobEventLineNumber>
               <JobEventLineText
+                type="job_event_line_text"
                 dangerouslySetInnerHTML={{
                   __html: html,
                 }}
