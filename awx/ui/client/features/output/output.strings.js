@@ -79,6 +79,7 @@ function OutputStrings (BaseString) {
         PLAYBOOK: t.s('Playbook'),
         PROJECT: t.s('Project'),
         SCM_BRANCH: t.s('Branch'),
+        SCM_REFSPEC: t.s('Refspec'),
         RESULT_TRACEBACK: t.s('Error Details'),
         SCM_REVISION: t.s('Revision'),
         SKIP_TAGS: t.s('Skip Tags'),

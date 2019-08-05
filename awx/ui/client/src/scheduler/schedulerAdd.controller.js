@@ -20,6 +20,20 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
         scheduler,
         job_type;
 
+    const shouldShowPromptButton = (launchConf) => launchConf.survey_enabled ||
+        launchConf.ask_inventory_on_launch ||
+        launchConf.ask_credential_on_launch ||
+        launchConf.ask_verbosity_on_launch ||
+        launchConf.ask_job_type_on_launch ||
+        launchConf.ask_limit_on_launch ||
+        launchConf.ask_tags_on_launch ||
+        launchConf.ask_skip_tags_on_launch ||
+        launchConf.ask_diff_mode_on_launch ||
+        launchConf.credential_needed_to_start ||
+        launchConf.ask_variables_on_launch ||
+        launchConf.ask_scm_branch_on_launch ||
+        launchConf.variables_needed_to_start.length !== 0;
+
     var schedule_url = ParentObject.related.schedules || `${ParentObject.related.inventory_source}schedules`;
     if (ParentObject){
         $scope.parentObject = ParentObject;
@@ -152,20 +166,7 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
                     $scope.noVars = true;
                 }
 
-                if (!launchConf.survey_enabled &&
-                    !launchConf.ask_inventory_on_launch &&
-                    !launchConf.ask_credential_on_launch &&
-                    !launchConf.ask_verbosity_on_launch &&
-                    !launchConf.ask_job_type_on_launch &&
-                    !launchConf.ask_limit_on_launch &&
-                    !launchConf.ask_tags_on_launch &&
-                    !launchConf.ask_skip_tags_on_launch &&
-                    !launchConf.ask_diff_mode_on_launch &&
-                    !launchConf.ask_scm_branch_on_launch &&
-                    !launchConf.survey_enabled &&
-                    !launchConf.credential_needed_to_start &&
-                    !launchConf.inventory_needed_to_start &&
-                    launchConf.variables_needed_to_start.length === 0) {
+                if (!shouldShowPromptButton(launchConf)) {
                         $scope.showPromptButton = false;
                 } else {
                     $scope.showPromptButton = true;
@@ -240,21 +241,8 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
                     });
                 };
 
-                if (!launchConf.survey_enabled &&
-                    !launchConf.ask_inventory_on_launch &&
-                    !launchConf.ask_credential_on_launch &&
-                    !launchConf.ask_verbosity_on_launch &&
-                    !launchConf.ask_job_type_on_launch &&
-                    !launchConf.ask_limit_on_launch &&
-                    !launchConf.ask_tags_on_launch &&
-                    !launchConf.ask_skip_tags_on_launch &&
-                    !launchConf.ask_diff_mode_on_launch &&
-                    !launchConf.ask_scm_branch_on_launch &&
-                    !launchConf.survey_enabled &&
-                    !launchConf.credential_needed_to_start &&
-                    !launchConf.inventory_needed_to_start &&
-                    launchConf.variables_needed_to_start.length === 0) {
-                        $scope.showPromptButton = false;
+                if (!shouldShowPromptButton(launchConf)) {
+                    $scope.showPromptButton = false;
                 } else {
                     $scope.showPromptButton = true;
 

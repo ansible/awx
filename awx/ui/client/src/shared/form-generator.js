@@ -1156,6 +1156,9 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                 field.max + "</div>\n";
                         }
                         html += "<div class=\"error api-error\" id=\"" + this.form.name + "-" + fld + "-api-error\" ng-bind=\"" + fld + "_api_error\"></div>\n";
+                        for (i = 0; i < field.fields.length; i++) {
+                            html += "<div class=\"error api-error\" id=\"" + this.form.name + "-" + field.fields[i].name + "-api-error\" ng-bind=\"" + field.fields[i].name + "_api_error\"></div>\n";
+                        }
                         html += "</div><!-- checkbox-group -->\n";
                         html += "</div>\n";
                     }

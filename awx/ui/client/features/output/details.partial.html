@@ -222,7 +222,13 @@
 <div class="JobResults-resultRow" ng-if="vm.scmBranch">
     <label class="JobResults-resultRowLabel">{{ vm.scmBranch.label }}</label>
     <div class="JobResults-resultRowText">{{ vm.scmBranch.value }}</div>
-</div>    
+</div>
+
+<!-- REFSPEC DETAIL -->
+<div class="JobResults-resultRow" ng-if="vm.scmRefspec">
+    <label class="JobResults-resultRowLabel">{{ vm.scmRefspec.label }}</label>
+    <div class="JobResults-resultRowText">{{ vm.scmRefspec.value }}</div>
+</div>
 
 <!-- INVENTORY SCM DETAIL -->
 <div class="JobResults-resultRow" ng-if="!vm.project && vm.inventoryScm">

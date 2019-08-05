@@ -125,7 +125,7 @@ export default ['i18n', 'NotificationsList', 'TemplateList',
                 type: 'text',
                 ngShow: "scm_type && scm_type.value !== 'manual' && scm_type.value !== 'insights'",
                 ngDisabled: '!(project_obj.summary_fields.user_capabilities.edit || canAdd)',
-                awPopOver: '<p>' + i18n._("Branch to checkout.  You can input other refs like tags and commit hashes as well.  You can set a custom refspec, to allow for other refs to be input.") + '</p>',
+                awPopOver: '<p>' + i18n._("Branch to checkout.  In addition to branches, you can input tags, commit hashes, and arbitrary refs.  Some commit hashes and refs may not be availble unless you also provide a custom refspec.") + '</p>',
                 dataTitle: i18n._('SCM Branch'),
                 subForm: 'sourceSubForm',
             },
@@ -140,7 +140,8 @@ export default ['i18n', 'NotificationsList', 'TemplateList',
                     '</p><ul class=\"no-bullets\"><li>refs/*:refs/remotes/origin/*</li>' +
                     '<li>refs/pull/62/head:refs/remotes/origin/pull/62/head</li></ul>' +
                     '<p>' + i18n._('The first fetches all references.  The second fetches only the Github pull request number 62, in this example the branch needs to be `refs/pull/62/head`.') +
-                    '</p>',
+                    '</p>' +
+                    '<p>' + i18n._('For more information, refer to the') + '<a target="_blank" href="https://docs.ansible.com/ansible-tower/latest/html/userguide/projects.html#manage-playbooks-using-source-control"> ' + i18n._('Ansible Tower Documentation') + '</a>.</p>',
                 dataTitle: i18n._('SCM Refspec'),
                 subForm: 'sourceSubForm',
             },

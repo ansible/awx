@@ -354,6 +354,17 @@ function getSCMBranchDetails (scmBranch) {
     return { label, value };
 }
 
+function getSCMRefspecDetails (scmRefspec) {
+    const label = strings.get('labels.SCM_REFSPEC');
+    const value = scmRefspec || resource.model.get('scm_refspec');
+
+    if (!value) {
+        return null;
+    }
+
+    return { label, value };
+}
+
 function getInventoryScmDetails (updateId, updateStatus) {
     const projectId = resource.model.get('summary_fields.source_project.id');
     const projectName = resource.model.get('summary_fields.source_project.name');
@@ -812,6 +823,7 @@ function JobDetailsController (
         vm.projectUpdate = getProjectUpdateDetails();
         vm.projectStatus = getProjectStatusDetails();
         vm.scmBranch = getSCMBranchDetails();
+        vm.scmRefspec = getSCMRefspecDetails();
         vm.scmRevision = getSCMRevisionDetails();
         vm.inventoryScm = getInventoryScmDetails();
         vm.playbook = getPlaybookDetails();
@@ -853,6 +865,7 @@ function JobDetailsController (
             finished,
             scm,
             scmBranch,
+            scmRefspec,
             inventoryScm,
             scmRevision,
             instanceGroup,
@@ -865,6 +878,7 @@ function JobDetailsController (
             vm.projectUpdate = getProjectUpdateDetails(scm.id);
             vm.projectStatus = getProjectStatusDetails(scm.status);
             vm.scmBranch = getSCMBranchDetails(scmBranch);
+            vm.scmRefspec = getSCMRefspecDetails(scmRefspec);
             vm.environment = getEnvironmentDetails(environment);
             vm.artifacts = getArtifactsDetails(artifacts);
             vm.executionNode = getExecutionNodeDetails(executionNode);
