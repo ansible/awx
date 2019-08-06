@@ -137,7 +137,6 @@
       delegate_to: localhost
 
     - block:
-      # TODO: don't run this if ansible verison doens't support collections
       - name: detect collections/requirements.yml
         stat: path={{project_path|quote}}/collections/requirements.yml
         register: doesCollectionRequirementsExist

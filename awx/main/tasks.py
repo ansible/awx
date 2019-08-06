@@ -702,8 +702,7 @@ class BaseTask(object):
     abstract = True
     proot_show_paths = []
 
-    def __init__(self, *args, **kwargs):
-        super(BaseTask, self).__init__(*args, **kwargs)
+    def __init__(self):
         self.cleanup_paths = []
 
     def update_model(self, pk, _attempt=0, **updates):

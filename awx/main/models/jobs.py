@@ -399,6 +399,10 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
                 # no-op case: Fields the same as template's value
                 # counted as neither accepted or ignored
                 continue
+            elif field_name == 'scm_branch' and old_value == '' and self.project and new_value == self.project.scm_branch:
+                # special case of "not provided" for branches
+                # job template does not provide branch, runs with default branch
+                continue
             elif getattr(self, ask_field_name):
                 # Special case where prompts can be rejected based on project setting
                 if field_name == 'scm_branch':
