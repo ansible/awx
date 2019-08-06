@@ -91,7 +91,8 @@ from awx.main.redact import UriCleaner
 from awx.api.permissions import (
     JobTemplateCallbackPermission, TaskPermission, ProjectUpdatePermission,
     InventoryInventorySourcesUpdatePermission, UserPermission,
-    InstanceGroupTowerPermission, VariableDataPermission
+    InstanceGroupTowerPermission, VariableDataPermission,
+    WorkflowApprovalPermission
 )
 from awx.api import renderers
 from awx.api import serializers
@@ -4452,6 +4453,7 @@ class WorkflowApprovalDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
 class WorkflowApprovalApprove(RetrieveAPIView):
     model = models.WorkflowApproval
     serializer_class = serializers.WorkflowApprovalViewSerializer
+    permission_classes = (WorkflowApprovalPermission,)
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
@@ -4465,6 +4467,7 @@ class WorkflowApprovalApprove(RetrieveAPIView):
 class WorkflowApprovalDeny(RetrieveAPIView):
     model = models.WorkflowApproval
     serializer_class = serializers.WorkflowApprovalViewSerializer
+    permission_classes = (WorkflowApprovalPermission,)
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()

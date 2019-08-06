@@ -523,6 +523,7 @@ class TaskManager():
         workflow_approval = WorkflowApproval.objects.filter(status='pending').prefetch_related('workflow_approval_template')
         now = tz_now()
         for task in workflow_approval:
+            # TODO: copy the timeout to the job itself at launch time, not the template
             approval_timeout_seconds = timedelta(seconds=task.workflow_approval_template.timeout)
             if task.workflow_approval_template.timeout == 0:
                 continue

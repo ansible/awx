@@ -17,7 +17,7 @@ logger = logging.getLogger('awx.api.permissions')
 
 __all__ = ['ModelAccessPermission', 'JobTemplateCallbackPermission', 'VariableDataPermission',
            'TaskPermission', 'ProjectUpdatePermission', 'InventoryInventorySourcesUpdatePermission',
-           'UserPermission', 'IsSuperUser', 'InstanceGroupTowerPermission',]
+           'UserPermission', 'IsSuperUser', 'InstanceGroupTowerPermission', 'WorkflowApprovalPermission']
 
 
 class ModelAccessPermission(permissions.BasePermission):
@@ -194,6 +194,17 @@ class TaskPermission(ModelAccessPermission):
             return bool(not obj or obj.pk == unified_job.inventory_id)
         else:
             return False
+
+
+class WorkflowApprovalPermission(ModelAccessPermission):
+    '''
+    Permission check used by workflow approval and deny views
+    to determine who can has access to approve and deny paused workflow nodes
+    '''
+
+    def check_post_permissions(self, request, view, obj=None):
+        approval = get_object_or_400(view.model, pk=view.kwargs['pk'])
+        return check_user_access(request.user, view.model, 'approve_or_deny', approval)
 
 
 class ProjectUpdatePermission(ModelAccessPermission):

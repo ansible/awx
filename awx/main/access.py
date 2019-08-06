@@ -2799,9 +2799,11 @@ class WorkflowApprovalAccess(BaseAccess):
 
     def get_queryset(self):
         return super(WorkflowApprovalAccess, self).get_queryset().exclude(
-            workflow_approval_template__isnull=False)
+            workflow_approval_template__isnull=True)
 
     def can_approve_or_deny(self, obj):
+        if obj.status != 'pending':
+            return False
         wfjt = obj.unified_job_node.workflow_job.unified_job_template
         if self.user in wfjt.approval_role or self.user.is_superuser:
             return True

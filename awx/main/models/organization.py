@@ -87,7 +87,7 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin, CustomVi
                      'execute_role', 'project_admin_role',
                      'inventory_admin_role', 'workflow_admin_role',
                      'notification_admin_role', 'credential_admin_role',
-                     'job_template_admin_role',],
+                     'job_template_admin_role', 'approval_role',],
     )
     approval_role = ImplicitRoleField(
         parent_role='admin_role',
