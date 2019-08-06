@@ -36,7 +36,7 @@ This document provides a guide for installing AWX.
       - [PostgreSQL](#postgresql-1)
       - [Proxy settings](#proxy-settings)
   - [Start the build](#start-the-build-2)
-  - [Post build](#post-build-1)
+  - [Post build](#post-build-2)
   - [Accessing AWX](#accessing-awx-2)
 
 ## Getting started
