@@ -5,11 +5,26 @@ from django.utils.encoding import force_bytes
 from rest_framework.exceptions import PermissionDenied
 
 from awx.api.generics import APIView
+from awx.main.models import JobTemplate, WorkflowJobTemplate
 
 
 class WebhookReceiverBase(APIView):
+    lookup_url_kwarg = None
+    lookup_field = 'pk'
+
+    def get_queryset(self):
+        qs_models = {
+            'job_templates': JobTemplate,
+            'workflow_job_templates': WorkflowJobTemplate,
+        }
+        model = qs_models.get(self.kwargs['model_kwarg'])
+        if model is None:
+            raise PermissionDenied
+
+        return model.objects.filter(webhook_service=self.service)
+
     def get_object(self):
-        queryset = self.queryset.filter(webhook_service=self.service)
+        queryset = self.get_queryset()
         lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
         filter_kwargs = {self.lookup_field: self.kwargs[lookup_url_kwarg]}
 
