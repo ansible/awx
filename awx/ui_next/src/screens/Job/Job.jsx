@@ -15,7 +15,7 @@ import RoutedTabs from '@components/RoutedTabs';
 
 import JobDetail from './JobDetail';
 import JobOutput from './JobOutput';
-import { JOB_TYPE_URL_SEGMENTS } from './constants';
+import { JOB_TYPE_URL_SEGMENTS } from '../../constants';
 
 class Job extends Component {
   constructor(props) {

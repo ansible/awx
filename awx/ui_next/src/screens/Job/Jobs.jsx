@@ -6,7 +6,7 @@ import Breadcrumbs from '@components/Breadcrumbs/Breadcrumbs';
 import Job from './Job';
 import JobTypeRedirect from './JobTypeRedirect';
 import JobList from './JobList/JobList';
-import { JOB_TYPE_URL_SEGMENTS } from './constants';
+import { JOB_TYPE_URL_SEGMENTS } from '../../constants';
 
 class Jobs extends Component {
   constructor(props) {

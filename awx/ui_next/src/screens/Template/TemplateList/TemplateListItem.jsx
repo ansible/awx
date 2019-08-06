@@ -16,6 +16,7 @@ import styled from 'styled-components';
 import DataListCell from '@components/DataListCell';
 import LaunchButton from '@components/LaunchButton';
 import VerticalSeparator from '@components/VerticalSeparator';
+import { Sparkline } from '@components/Sparkline';
 import { toTitleCase } from '@util/strings';
 
 const StyledButton = styled(PFButton)`
@@ -55,6 +56,11 @@ class TemplateListItem extends Component {
               </DataListCell>,
               <DataListCell key="type">
                 {toTitleCase(template.type)}
+              </DataListCell>,
+              <DataListCell key="sparkline">
+                <Sparkline 
+                  jobs={template.summary_fields.recent_jobs}
+                />
               </DataListCell>,
               <DataListCell lastcolumn="true" key="launch">
                 {canLaunch && template.type === 'job_template' && (

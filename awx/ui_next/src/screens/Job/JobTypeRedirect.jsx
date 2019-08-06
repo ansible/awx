@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 import { UnifiedJobsAPI } from '@api';
-import { JOB_TYPE_URL_SEGMENTS } from './constants';
+import { JOB_TYPE_URL_SEGMENTS } from '../../constants';
 
 class JobTypeRedirect extends Component {
   static defaultProps = {
