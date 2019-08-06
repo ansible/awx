@@ -7,12 +7,12 @@ from copy import copy, deepcopy
 # Django
 from django.apps import apps
 from django.conf import settings
-from django.db import models
-from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User # noqa
-from django.utils.translation import ugettext_lazy as _
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
+from django.db import models
 from django.db.models.query import QuerySet
+from django.utils.translation import ugettext_lazy as _
 
 # AWX
 from awx.main.models.base import prevent_search
@@ -483,3 +483,31 @@ class RelatedJobsMixin(object):
             raise RuntimeError("Programmer error. Expected _get_active_jobs() to return a QuerySet.")
 
         return [dict(id=t[0], type=mapping[t[1]]) for t in jobs.values_list('id', 'polymorphic_ctype_id')]
+
+
+class WebhookMixin(models.Model):
+    class Meta:
+        abstract = True
+
+    SERVICES = [
+        ('github', "Github"),
+        ('gitlab', "Gitlab"),
+        ('bitbucket', "Bitbucket"),
+    ]
+
+    webhook_service = models.CharField(
+        max_length=16,
+        choices=SERVICES,
+        blank=True
+    )
+    webhook_key = prevent_search(models.CharField(
+        max_length=64,
+        blank=True
+    ))
+    webhook_credential = models.ForeignKey(
+        'Credential',
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name='%(class)ss'
+    )
