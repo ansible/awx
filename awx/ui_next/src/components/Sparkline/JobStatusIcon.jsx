@@ -1,5 +1,5 @@
 import React, { Fragment } from 'react';
-import { node, object, string } from 'prop-types';
+import { node, number, shape, string } from 'prop-types';
 import { Link } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
 import { Tooltip } from '@patternfly/react-core';
@@ -100,7 +100,10 @@ const JobStatusIcon = ({ job, link, tooltip, ...props }) => {
 };
 
 JobStatusIcon.propTypes = {
-  job: object.isRequired,
+  job: shape({
+    id: number.isRequired,
+    status: string.isRequired,
+  }).isRequired,
   link: string,
   tooltip: node,
 };

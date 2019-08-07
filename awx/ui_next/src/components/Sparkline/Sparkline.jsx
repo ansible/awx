@@ -6,9 +6,11 @@ import styled from 'styled-components';
 import { t } from '@lingui/macro';
 import { JOB_TYPE_URL_SEGMENTS } from '../../constants';
 
+/* eslint-disable react/jsx-pascal-case */
 const JobStatusIcon = styled(props => <_JobStatusIcon {...props} />)`
   margin-right: 5px;
 `;
+/* eslint-enable react/jsx-pascal-case */
 
 const Sparkline = ({ i18n, jobs }) => {
   const generateTooltip = job => (
