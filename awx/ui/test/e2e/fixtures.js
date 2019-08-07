@@ -438,17 +438,22 @@ const getUser = (
     // where a user and org both exist, but the user is not in the organization.
     // this ensures a new user is always created.
     username = `user-${uuid().substr(0, 8)}`,
-    isSuperuser = false
+    password = AWX_E2E_PASSWORD,
+    isSuperuser = false,
+    isSystemAuditor = false,
+    email = `email-${uuid().substr(0, 8)}@example.com`,
+    firstName = `first-name-${uuid().substr(0, 8)}`,
+    lastName = `last-name-${uuid().substr(0, 8)}`
 ) => getOrganization(namespace)
     .then(organization => getOrCreate(`/organizations/${organization.id}/users/`, {
-        username: `${username}-${uuid().substr(0, 8)}`,
+        email,
+        first_name: firstName,
+        is_superuser: isSuperuser,
+        is_system_auditor: isSystemAuditor,
+        last_name: lastName,
         organization: organization.id,
-        first_name: 'firstname',
-        last_name: 'lastname',
-        email: 'null@ansible.com',
-        is_superuser: `${isSuperuser}`,
-        is_system_auditor: false,
-        password: AWX_E2E_PASSWORD
+        password,
+        username,
     }, ['username']));
 
 /* Retrieves a job template admin, and creates it if it does not exist.

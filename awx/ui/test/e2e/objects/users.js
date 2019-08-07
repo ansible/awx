@@ -92,6 +92,63 @@ module.exports = {
             this.expect.element('.List-titleBadge').text.to.contain('1');
             this.expect.element(row).text.contain(username);
         },
+        createToken (username, token, callback) {
+            this.search(username);
+            const editButton = `${row} i[class*="fa-pencil"]`;
+            this
+                .waitForElementVisible(editButton)
+                .click(editButton);
+            this.section.tokens
+                .waitForElementVisible('@tokensTab')
+                .click('@tokensTab')
+                .waitForSpinny()
+                .click('@add');
+            const { createToken } = this.section;
+            createToken.waitForElementVisible('@application');
+            this.expect.element(this.section.breadcrumb.selector).text.to.contain(`USERS ${username} TOKENS CREATE TOKEN`);
+            if (token.application) {
+                createToken.setValue('@application', token.application);
+            }
+            if (token.description) {
+                createToken.setValue('@description', token.description);
+            }
+            if (token.scope) {
+                createToken
+                    .click('@scope')
+                    .click(`option[label=${token.scope}]`);
+            }
+            createToken.click('@saveButton');
+            this.waitForSpinny()
+                .waitForElementVisible('#alert-modal-msg');
+
+            const tokenInfo = {
+                token: null,
+                refreshToken: null,
+                expires: null,
+            };
+
+            this.getText(
+                '#alert-modal-msg .PopupModal:nth-of-type(1) .PopupModal-value',
+                (result) => { tokenInfo.token = result.value; }
+            );
+            this.getText(
+                '#alert-modal-msg .PopupModal:nth-of-type(2) .PopupModal-value',
+                (result) => { tokenInfo.refreshToken = result.value; }
+            );
+            this.getText(
+                '#alert-modal-msg .PopupModal:nth-of-type(3) .PopupModal-value',
+                (result) => { tokenInfo.expires = result.value; }
+            );
+
+            this.findThenClick('#alert_ok_btn', 'css')
+                .waitForElementNotVisible('#alert-modal-msg');
+
+            this.api.perform(() => {
+                if (typeof callback === 'function') {
+                    callback.call(this.api, tokenInfo);
+                }
+            });
+        },
     }],
     sections: {
         header,
@@ -134,7 +191,24 @@ module.exports = {
                     }
                 })
             }
-        }
+        },
+        tokens: {
+            selector: 'div[ui-view="form"]',
+            elements: {
+                add: '#button-add',
+                tokensTab: '#tokens_tab',
+            },
+        },
+        createToken: {
+            selector: 'div[ui-view="preFormView"]',
+            elements: {
+                application: 'input[tabindex="1"]',
+                description: 'input[tabindex="2"]',
+                scope: 'select[tabindex="3"]',
+                cancelButton: 'button[type="cancel"]',
+                saveButton: 'button[type="save"]',
+            }
+        },
     },
     elements: {
         cancel: 'button[class*="Form-cancelButton"]',

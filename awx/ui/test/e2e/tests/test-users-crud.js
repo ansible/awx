@@ -54,15 +54,12 @@ module.exports = {
         });
         const resources = [
             getOrganization(store.organization.name),
-            getAuditor(store.auditor.username),
-            getUser(store.user.username),
-            getUser(store.admin.username, true)
         ];
 
         Promise.all(resources)
             .then(([organization, auditor, user, admin]) => {
                 store.organization.name = `${store.organization.name}-organization`;
-                data = { organization, auditor, user, admin };
+                data = { organization };
                 done();
             });
         client.login();
