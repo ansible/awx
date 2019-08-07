@@ -2379,7 +2379,7 @@ class UnifiedJobTemplateAccess(BaseAccess):
             Q(pk__in=self.model.accessible_pk_qs(self.user, 'read_role')) |
             Q(inventorysource__inventory__id__in=Inventory._accessible_pk_qs(
                 Inventory, self.user, 'read_role'))
-        ).exclude(polymorphic_ctype__model='workflowapprovaltemplate')  # &&&&&&
+        )  # &&&&&& (filter out approvals from UJT endpoint here...?)
 
     def can_start(self, obj, validate_license=True):
         access_class = access_registry[obj.__class__]
@@ -2429,7 +2429,7 @@ class UnifiedJobAccess(BaseAccess):
             Q(adhoccommand__inventory__id__in=inv_pk_qs) |
             Q(job__inventory__organization__in=org_auditor_qs) |
             Q(job__project__organization__in=org_auditor_qs)
-        ).exclude(polymorphic_ctype__model='workflowapproval')  # &&&&&&
+        )  # &&&&&& (for filtering out approvals from UJ endpoint...?)
         return qs
 
 
@@ -2632,7 +2632,6 @@ class ActivityStreamAccess(BaseAccess):
         app_set = OAuth2ApplicationAccess(self.user).filtered_queryset()
         token_set = OAuth2TokenAccess(self.user).filtered_queryset()
 
-# &&&&&& Activity Stream + RBAC here??
         return qs.filter(
             Q(ad_hoc_command__inventory__in=inventory_set) |
             Q(o_auth2_application__in=app_set) |

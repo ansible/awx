@@ -632,7 +632,7 @@ class WorkflowApprovalTemplate(UnifiedJobTemplate):
 
     @classmethod
     def _get_unified_job_field_names(cls):
-        return ['name', 'description']
+        return ['name', 'description', 'timeout']
 
     def get_absolute_url(self, request=None):
         return reverse('api:workflow_approval_template_detail', kwargs={'pk': self.pk}, request=request)
@@ -649,6 +649,11 @@ class WorkflowApproval(UnifiedJob):
         null=True,
         default=None,
         on_delete=models.SET_NULL,
+    )
+    timeout = models.IntegerField(
+        blank=True,
+        default=0,
+        help_text=_("The amount of time (in seconds) before the approval node expires and fails."),
     )
 
     @classmethod
@@ -676,3 +681,9 @@ class WorkflowApproval(UnifiedJob):
         self.save()
         schedule_task_manager()
         return reverse('api:workflow_approval_deny', kwargs={'pk': self.pk}, request=request)
+
+    # &&&&&& Possible placeholder for websocket support
+    # def websocket_emit_data(self):
+    #     websocket_data = super(WorkflowApproval, self).websocket_emit_data()
+    #     websocket_data.update(dict(project_id=self.project.id))  # ?????
+    #     return websocket_data

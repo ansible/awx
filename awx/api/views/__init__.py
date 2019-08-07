@@ -4457,7 +4457,8 @@ class WorkflowApprovalApprove(RetrieveAPIView):
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
-        request.user.can_access(models.WorkflowApproval, 'approve_or_deny', obj)
+        if not request.user.can_access(models.WorkflowApproval, 'approve_or_deny', obj):
+            raise PermissionDenied(detail=_("User does not have permission to approve or deny this workflow."))
         if obj.status != 'pending':
             return Response("This workflow step has already been approved or denied.", status=status.HTTP_400_BAD_REQUEST)
         obj.approve()
@@ -4471,7 +4472,8 @@ class WorkflowApprovalDeny(RetrieveAPIView):
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
-        request.user.can_access(models.WorkflowApproval, 'approve_or_deny', obj)
+        if not request.user.can_access(models.WorkflowApproval, 'approve_or_deny', obj):
+            raise PermissionDenied(detail=_("User does not have permission to approve or deny this workflow."))
         if obj.status != 'pending':
             return Response("This workflow step has already been approved or denied.", status=status.HTTP_400_BAD_REQUEST)
         obj.deny()

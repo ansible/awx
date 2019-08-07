@@ -70,4 +70,9 @@ class Migration(migrations.Migration):
             name='read_role',
             field=awx.main.fields.ImplicitRoleField(editable=False, null='True', on_delete=django.db.models.deletion.CASCADE, parent_role=['singleton:system_auditor', 'organization.auditor_role', 'execute_role', 'admin_role', 'approval_role'], related_name='+', to='main.Role'),
         ),
+        migrations.AddField(
+            model_name='workflowapproval',
+            name='timeout',
+            field=models.IntegerField(blank=True, default=0, help_text='The amount of time (in seconds) before the approval node expires and fails.'),
+        ),
     ]

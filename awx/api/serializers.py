@@ -121,8 +121,8 @@ SUMMARIZABLE_FK_FIELDS = {
     'job_template': DEFAULT_SUMMARY_FIELDS,
     'workflow_job_template': DEFAULT_SUMMARY_FIELDS,
     'workflow_job': DEFAULT_SUMMARY_FIELDS,
-    'workflow_approval_template': DEFAULT_SUMMARY_FIELDS,
-    'workflow_approval': DEFAULT_SUMMARY_FIELDS,
+    'workflow_approval_template': DEFAULT_SUMMARY_FIELDS + ('timeout',),
+    'workflow_approval': DEFAULT_SUMMARY_FIELDS + ('timeout',),
     'schedule': DEFAULT_SUMMARY_FIELDS + ('next_run',),
     'unified_job_template': DEFAULT_SUMMARY_FIELDS + ('unified_job_type',),
     'last_job': DEFAULT_SUMMARY_FIELDS + ('finished', 'status', 'failed', 'license_error'),
@@ -3413,10 +3413,16 @@ class WorkflowApprovalViewSerializer(UnifiedJobSerializer):
 class WorkflowApprovalSerializer(UnifiedJobSerializer):
 
     can_approve_or_deny = serializers.SerializerMethodField()
+    approval_expiration = serializers.SerializerMethodField()
 
     class Meta:
         model = WorkflowApproval
-        fields = (['*', '-controller_node', '-execution_node', 'can_approve_or_deny'])
+        fields = (['*', '-controller_node', '-execution_node', 'can_approve_or_deny', 'approval_expiration'])
+
+    def get_approval_expiration(self, obj):
+        if obj.status != 'pending' or obj.timeout == 0:
+            return None
+        return now() + timedelta(seconds=obj.timeout)
 
     def get_can_approve_or_deny(self, obj):
         request = self.context.get('request', None)
@@ -3437,9 +3443,15 @@ class WorkflowApprovalSerializer(UnifiedJobSerializer):
 class WorkflowApprovalListSerializer(WorkflowApprovalSerializer, UnifiedJobListSerializer):
 
     can_approve_or_deny = serializers.SerializerMethodField()
+    approval_expiration = serializers.SerializerMethodField()
 
     class Meta:
-        fields = ('*', '-execution_node', '-controller_node', 'can_approve_or_deny')
+        fields = ('*', '-execution_node', '-controller_node', 'can_approve_or_deny', 'approval_expiration')
+
+    def get_approval_expiration(self, obj):
+        if obj.status != 'pending' or obj.timeout == 0:
+            return None
+        return now() + timedelta(seconds=obj.timeout)
 
     def get_can_approve_or_deny(self, obj):
         request = self.context.get('request', None)
