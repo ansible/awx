@@ -12,7 +12,7 @@ from awx.main.migrations._rbac import rebuild_role_parentage, migrate_jt_organiz
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0081_v360_notify_on_start'),
+        ('main', '0082_v360_webhook_http_method'),
     ]
 
     operations = [
