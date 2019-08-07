@@ -19,9 +19,11 @@ const Sparkline = ({ i18n, jobs }) => {
       <div>
         {i18n._(t`STATUS:`)} {job.status.toUpperCase()}
       </div>
-      <div>
-        {i18n._(t`FINISHED:`)} {job.finished}
-      </div>
+      {job.finished && (
+        <div>
+          {i18n._(t`FINISHED:`)} {job.finished}
+        </div>
+      )}
     </Fragment>
   );
 
