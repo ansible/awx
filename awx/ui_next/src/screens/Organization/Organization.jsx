@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Switch, Route, withRouter, Redirect } from 'react-router-dom';
+import { Switch, Route, withRouter, Redirect, Link } from 'react-router-dom';
 import {
   Card,
   CardHeader as PFCardHeader,
@@ -10,7 +10,7 @@ import {
 import styled from 'styled-components';
 import CardCloseButton from '@components/CardCloseButton';
 import RoutedTabs from '@components/RoutedTabs';
-import ContentError from '@components/ContentError';
+import ContentError, { NotFoundError } from '@components/ContentError';
 import { OrganizationAccess } from './OrganizationAccess';
 import OrganizationDetail from './OrganizationDetail';
 import OrganizationEdit from './OrganizationEdit';
@@ -168,7 +168,16 @@ class Organization extends Component {
       return (
         <PageSection>
           <Card className="awx-c-card">
-            <ContentError error={contentError} />
+            <ContentError error={contentError}>
+              {contentError.response.status === 404 && (
+                <span>
+                  {i18n._(`Organization not found.`)}{' '}
+                  <Link to="/organizations">
+                    {i18n._(`View all Organizations.`)}
+                  </Link>
+                </span>
+              )}
+            </ContentError>
           </Card>
         </PageSection>
       );
@@ -226,6 +235,21 @@ class Organization extends Component {
                 )}
               />
             )}
+            <Route
+              key="not-found"
+              path="*"
+              render={() => (
+                <NotFoundError>
+                  {i18n._(`The page you requested could not be found.`)}{' '}
+                  {match.params.id && (
+                    <Link to={`/organizations/${match.params.id}/details`}>
+                      {i18n._(`View Organization Details`)}
+                    </Link>
+                  )}
+                </NotFoundError>
+              )}
+            />
+            ,
           </Switch>
         </Card>
       </PageSection>

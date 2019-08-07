@@ -2,9 +2,9 @@ import React, { Component } from 'react';
 import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
 import { Card, CardHeader, PageSection } from '@patternfly/react-core';
-import { Switch, Route, Redirect, withRouter } from 'react-router-dom';
+import { Switch, Route, Redirect, withRouter, Link } from 'react-router-dom';
 import CardCloseButton from '@components/CardCloseButton';
-import ContentError from '@components/ContentError';
+import ContentError, { NotFoundError } from '@components/ContentError';
 import RoutedTabs from '@components/RoutedTabs';
 import JobTemplateDetail from './JobTemplateDetail';
 import { JobTemplatesAPI } from '@api';
@@ -77,7 +77,14 @@ class Template extends Component {
       return (
         <PageSection>
           <Card className="awx-c-card">
-            <ContentError error={contentError} />
+            <ContentError error={contentError}>
+              {contentError.response.status === 404 && (
+                <span>
+                  {i18n._(`Template not found.`)}{' '}
+                  <Link to="/templates">{i18n._(`View all Templates.`)}</Link>
+                </span>
+              )}
+            </ContentError>
           </Card>
         </PageSection>
       );
@@ -92,8 +99,9 @@ class Template extends Component {
               to="/templates/:templateType/:id/details"
               exact
             />
-            {template && (
+            {template && [
               <Route
+                key="details"
                 path="/templates/:templateType/:id/details"
                 render={() => (
                   <JobTemplateDetail
@@ -102,14 +110,29 @@ class Template extends Component {
                     template={template}
                   />
                 )}
-              />
-            )}
-            {template && (
+              />,
               <Route
+                key="edit"
                 path="/templates/:templateType/:id/edit"
                 render={() => <JobTemplateEdit template={template} />}
-              />
-            )}
+              />,
+              <Route
+                key="not-found"
+                path="*"
+                render={() => (
+                  <NotFoundError>
+                    {i18n._(`The page you requested could not be found.`)}{' '}
+                    {match.params.id && (
+                      <Link
+                        to={`/templates/${match.params.templateType}/${match.params.id}/details`}
+                      >
+                        {i18n._(`View Template Details`)}
+                      </Link>
+                    )}
+                  </NotFoundError>
+                )}
+              />,
+            ]}
           </Switch>
         </Card>
       </PageSection>

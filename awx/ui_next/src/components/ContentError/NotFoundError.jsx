@@ -15,15 +15,13 @@ const EmptyState = styled(PFEmptyState)`
   width: var(--pf-c-empty-state--m-lg--MaxWidth);
 `;
 
-function NotFoundError ({ i18n, error }) {
+function NotFoundError({ i18n, error, children }) {
   return (
     <EmptyState>
       <EmptyStateIcon icon={ExclamationTriangleIcon} />
-      <Title size="lg">
-        {i18n._(t`Not Found`)}
-      </Title>
+      <Title size="lg">{i18n._(t`Not Found`)}</Title>
       <EmptyStateBody>
-        {i18n._(`The page you requested could not be found.`)}
+        {children || i18n._(`The page you requested could not be found.`)}
       </EmptyStateBody>
       {error && <ErrorDetail error={error} />}
     </EmptyState>
