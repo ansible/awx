@@ -44,6 +44,9 @@ class WebhookReceiverBase(APIView):
         raise NotImplementedError
 
     def check_signature(self, obj):
+        if not obj.webhook_key:
+            raise PermissionDenied
+
         mac = hmac.new(force_bytes(obj.webhook_key), msg=force_bytes(self.request.body), digestmod=sha1)
         if not hmac.compare_digest(force_bytes(mac.hexdigest()), self.get_signature()):
             raise PermissionDenied
@@ -86,9 +89,12 @@ class GitlabWebhookReceiver(WebhookReceiverBase):
         return self.request.META.get('HTTP_X_GITLAB_TOKEN')
 
     def check_signature(self, obj):
-        # Gitlab only returns the secret token, not an hmac hash
+        if not obj.webhook_key:
+            raise PermissionDenied
 
-        # Use the hmac `compare_digest` helper function to prevent timing analysis by attackers.
+        # Gitlab only returns the secret token, not an hmac hash.  Use
+        # the hmac `compare_digest` helper function to prevent timing
+        # analysis by attackers.
         if not hmac.compare_digest(force_bytes(obj.webhook_key), self.get_signature()):
             raise PermissionDenied
 
