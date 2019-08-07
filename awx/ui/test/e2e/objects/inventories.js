@@ -18,7 +18,7 @@ const standardInvDetails = createFormSection({
             '#inventory_form .Form-textArea',
             '#inventory_form input[type="checkbox"]',
             '#inventory_form .ui-spinner-input',
-            '#inventory_form .awxSwitch-inner'
+            '#inventory_form .atSwitch-inner'
         ]
     },
     labels: {

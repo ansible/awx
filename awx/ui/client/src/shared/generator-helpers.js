@@ -528,7 +528,7 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                 html = Template(field);
             } else if (field.type === 'toggle') {
                 html += `
-                    <div class="awxSwitch-listTableCell ${field}-column ${field['class']} ${field.columnClass}">
+                    <div class="atSwitch-listTableCell ${field}-column ${field['class']} ${field.columnClass}">
                         <at-switch on-toggle="${field.ngClick}" switch-on="${"flag" in field} ? ${list.iterator}.${field.flag} : ${list.iterator}.enabled" switch-disabled="${"ngDisabled" in field} ? ${field.ngDisabled} : false" tooltip-string="${field.awToolTip}" tooltip-placement="${field.dataPlacement ? field.dataPlacement : 'right'}" tooltip-watch="${field.dataTipWatch}"></at-switch>
                     </div>
                 `;

@@ -19,7 +19,7 @@ const details = createFormSection({
             '#notification_template_form input[type="radio"]',
             '#notification_template_form .ui-spinner-input',
             '#notification_template_form .Form-textArea',
-            '#notification_template_form .awxSwitch-inner',
+            '#notification_template_form .atSwitch-inner',
             '#notification_template_form .Form-lookupButton'
         ]
     }
