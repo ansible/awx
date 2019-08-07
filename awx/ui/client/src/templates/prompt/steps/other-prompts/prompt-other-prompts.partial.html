@@ -111,12 +111,7 @@
             </a>
         </label>
         <div>
-            <span class="awxSwitch-outer" ng-class="{'awxSwitch-on': promptData.prompts.diffMode.value, 'awxSwitch-disabled': readOnlyPrompts}">
-                <span class="awxSwitch-inner" ng-click="!readOnlyPrompts && vm.toggleDiff()">
-                    <span class="awxSwitch-slider"></span>
-                    <i class="fa fa-check"></i>
-                </span>
-            </span>
+            <at-switch on-toggle="vm.toggleDiff()" switch-on="promptData.prompts.diffMode.value" switch-disabled="readOnlyPrompts"></at-switch>
         </div>
     </div>
     <div class="form-group Form-formGroup Form-formGroup--singleColumn" ng-if="promptData.launchConf.ask_variables_on_launch && !promptData.prompts.variables.ignore">

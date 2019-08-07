@@ -44,6 +44,7 @@ import truncate from '~components/truncate/truncate.directive';
 import atCodeMirror from '~components/code-mirror';
 import card from '~components/cards/card.directive';
 import cardGroup from '~components/cards/group.directive';
+import atSwitch from '~components/switch/switch.directive';
 
 import BaseInputController from '~components/input/base.controller';
 import ComponentsStrings from '~components/components.strings';
@@ -98,6 +99,7 @@ angular
     .directive('atTruncate', truncate)
     .directive('atCard', card)
     .directive('atCardGroup', cardGroup)
+    .directive('atSwitch', atSwitch)
     .service('BaseInputController', BaseInputController)
     .service('ComponentsStrings', ComponentsStrings);
 

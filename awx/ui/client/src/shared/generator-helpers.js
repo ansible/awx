@@ -529,12 +529,7 @@ angular.module('GeneratorHelpers', [systemStatus.name])
             } else if (field.type === 'toggle') {
                 html += `
                     <div class="awxSwitch-listTableCell ${field}-column ${field['class']} ${field.columnClass}">
-                        <span class="awxSwitch-outer" ng-class="{'awxSwitch-on': ${"flag" in field} ? ${list.iterator}.${field.flag} : ${list.iterator}.enabled, 'awxSwitch-disabled': ${"ngDisabled" in field} ? ${field.ngDisabled} : false}" aw-tool-tip="${field.awToolTip}" data-placement="${field.dataPlacement ? field.dataPlacement : 'right'}" data-tip-watch="${field.dataTipWatch}">
-                            <span class="awxSwitch-inner" ng-click="${field.ngClick}">
-                                <span class="awxSwitch-slider"></span>
-                                <i class="fa fa-check"></i>
-                            </span>
-                        </span>
+                        <at-switch on-toggle="${field.ngClick}" switch-on="${"flag" in field} ? ${list.iterator}.${field.flag} : ${list.iterator}.enabled" switch-disabled="${"ngDisabled" in field} ? ${field.ngDisabled} : false" tooltip-string="${field.awToolTip}" tooltip-placement="${field.dataPlacement ? field.dataPlacement : 'right'}" tooltip-watch="${field.dataTipWatch}"></at-switch>
                     </div>
                 `;
             } else if (field.type === 'invalid') {

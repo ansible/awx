@@ -35,12 +35,7 @@
                             <i class="fa fa-question-circle"></i>
                         </a>
                     </label>
-                    <span class="awxSwitch-outer" ng-class="{'awxSwitch-on': LOG_AGGREGATOR_ENABLED, 'awxSwitch-disabled': (!LOG_AGGREGATOR_ENABLED && (!requiredLogValues.LOG_AGGREGATOR_HOST || requiredLogValues.LOG_AGGREGATOR_HOST === '' || !requiredLogValues.LOG_AGGREGATOR_TYPE || requiredLogValues.LOG_AGGREGATOR_TYPE === '')) || $rootScope.user_is_system_auditor}">
-                        <span class="awxSwitch-inner" ng-click="toggleForm('LOG_AGGREGATOR_ENABLED')">
-                            <span class="awxSwitch-slider"></span>
-                            <i class="fa fa-check"></i>
-                        </span>
-                    </span>
+                    <at-switch on-toggle="toggleForm('LOG_AGGREGATOR_ENABLED')" switch-on="LOG_AGGREGATOR_ENABLED" switch-disabled="(!LOG_AGGREGATOR_ENABLED && (!requiredLogValues.LOG_AGGREGATOR_HOST || requiredLogValues.LOG_AGGREGATOR_HOST === '' || !requiredLogValues.LOG_AGGREGATOR_TYPE || requiredLogValues.LOG_AGGREGATOR_TYPE === '')) || $rootScope.user_is_system_auditor"></at-switch>
                 </div>
                 <div id="system-logging-form">
 

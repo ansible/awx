@@ -514,12 +514,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 if (field.type === 'toggle'){
                     html += `
                         <div class="Field-header--${key} ${field['class']} ${field.columnClass}">
-                            <span class="awxSwitch-outer" ng-class="{'awxSwitch-on': ${"flag" in field} ? ${form.iterator}.${field.flag} : ${form.iterator}.enabled, 'awxSwitch-disabled': ${"ngDisabled" in field} ? ${field.ngDisabled} : false}" aw-tool-tip="${field.awToolTip}" data-placement="${field.dataPlacement ? field.dataPlacement : 'right'}" data-tip-watch="${field.dataTipWatch}">
-                                <span class="awxSwitch-inner" ng-click="${field.ngClick}">
-                                    <span class="awxSwitch-slider"></span>
-                                    <i class="fa fa-check"></i>
-                                </span>
-                            </span>
+                            <at-switch on-toggle="${field.ngClick}" switch-on="${"flag" in field} ? ${form.iterator}.${field.flag} : ${form.iterator}.enabled" switch-disabled="${"ngDisabled" in field} ? ${field.ngDisabled} : false" tooltip-string="${field.awToolTip}" tooltip-placement="${field.dataPlacement ? field.dataPlacement : 'right'}"></at-switch>
                         </div>
                     `;
                 } else if (field.type === 'html') {
@@ -673,12 +668,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 if (field.type === 'toggle'){
                     html += `
                         <td class="List-tableCell-${fld}-column ${field['class']} ${field.columnClass}">
-                            <span class="awxSwitch-outer" ng-class="{'awxSwitch-on': ${"flag" in field} ? ${form.iterator}.${field.flag} : ${form.iterator}.enabled, 'awxSwitch-disabled': ${"ngDisabled" in field} ? ${field.ngDisabled} : false}" aw-tool-tip="${field.awToolTip}" data-placement="${field.dataPlacement ? field.dataPlacement : 'right'}" data-tip-watch="${field.dataTipWatch}">
-                                <span class="awxSwitch-inner" ng-click="${field.ngClick}">
-                                    <span class="awxSwitch-slider"></span>
-                                    <i class="fa fa-check"></i>
-                                </span>
-                            </span>
+                            <at-switch on-toggle="${field.ngClick}" switch-on="${"flag" in field} ? ${form.iterator}.${field.flag} : ${form.iterator}.enabled" switch-disabled="${"ngDisabled" in field} ? ${field.ngDisabled} : false" tooltip-string="${field.awToolTip}" tooltip-placement="${field.dataPlacement ? field.dataPlacement : 'right'}"></at-switch>
                         </td>
                     `;
                 }
@@ -737,12 +727,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                         html += `
                             <div>
-                                <span class="awxSwitch-outer" ng-class="{'awxSwitch-on': ${field.toggleSource}, 'awxSwitch-disabled': ${"ngDisabled" in field} ? ${field.ngDisabled} : false}" ng-show="${"ngShow" in field ? field.ngShow : true}">
-                                    <span class="awxSwitch-inner" ng-click="toggleForm('${field.toggleSource}')">
-                                        <span class="awxSwitch-slider"></span>
-                                        <i class="fa fa-check"></i>
-                                    </span>
-                                </span>
+                                <at-switch on-toggle="toggleForm('${field.toggleSource}')" switch-on="${field.toggleSource}" switch-disabled="${"ngDisabled" in field} ? ${field.ngDisabled} : false" hide="!(${"ngShow" in field ? field.ngShow : true})"></at-switch>
                             </div>
                         `;
                     }
