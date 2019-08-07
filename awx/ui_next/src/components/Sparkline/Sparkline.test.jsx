@@ -13,12 +13,13 @@ describe('Sparkline', () => {
     const jobs = [
       {
         id: 1,
-        status: 'successful'
-      }, {
+        status: 'successful',
+      },
+      {
         id: 2,
-        status: 'failed'
-      }
-    ]
+        status: 'failed',
+      },
+    ];
     const wrapper = mountWithContexts(<Sparkline jobs={jobs} />);
     expect(wrapper.find('JobStatusIcon')).toHaveLength(2);
   });

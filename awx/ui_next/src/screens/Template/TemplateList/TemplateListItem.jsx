@@ -58,9 +58,7 @@ class TemplateListItem extends Component {
                 {toTitleCase(template.type)}
               </DataListCell>,
               <DataListCell key="sparkline">
-                <Sparkline 
-                  jobs={template.summary_fields.recent_jobs}
-                />
+                <Sparkline jobs={template.summary_fields.recent_jobs} />
               </DataListCell>,
               <DataListCell lastcolumn="true" key="launch">
                 {canLaunch && template.type === 'job_template' && (

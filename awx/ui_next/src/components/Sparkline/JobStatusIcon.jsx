@@ -21,10 +21,7 @@ const Wrapper = styled.div`
 const RunningJob = styled(Wrapper)`
   background-color: #5cb85c;
   padding-right: 0px;
-  text-shadow:
-    -1px -1px 0 #ffffff,
-    1px -1px 0 #ffffff,
-    -1px 1px 0 #ffffff,
+  text-shadow: -1px -1px 0 #ffffff, 1px -1px 0 #ffffff, -1px 1px 0 #ffffff,
     1px 1px 0 #ffffff;
   animation: ${Pulse} 1.5s linear infinite alternate;
 `;
@@ -58,43 +55,35 @@ const FailedTop = styled.div`
 `;
 
 const FailedBottom = styled.div`
-  background-color: #D9534F;
+  background-color: #d9534f;
 `;
 
 const JobStatusIcon = ({ job, link, tooltip, ...props }) => {
   let Icon = (
     <Fragment>
-        { job.status === 'running' && <RunningJob /> }
-        { (job.status === 'new'
-          || job.status === 'pending'
-          || job.status === 'waiting')
-          && <WaitingJob />
-        }
-        { (job.status === 'failed'
-          || job.status === 'error'
-          || job.status === 'canceled')
-          && (
-            <FinishedJob>
-              <FailedTop />
-              <FailedBottom />
-            </FinishedJob>
-          )
-        }
-        { job.status === 'successful' && (
-          <FinishedJob>
-            <SuccessfulTop />
-            <SuccessfulBottom />
-          </FinishedJob>
-        )}
-      </Fragment>
+      {job.status === 'running' && <RunningJob />}
+      {(job.status === 'new' ||
+        job.status === 'pending' ||
+        job.status === 'waiting') && <WaitingJob />}
+      {(job.status === 'failed' ||
+        job.status === 'error' ||
+        job.status === 'canceled') && (
+        <FinishedJob>
+          <FailedTop />
+          <FailedBottom />
+        </FinishedJob>
+      )}
+      {job.status === 'successful' && (
+        <FinishedJob>
+          <SuccessfulTop />
+          <SuccessfulBottom />
+        </FinishedJob>
+      )}
+    </Fragment>
   );
 
   if (link) {
-    Icon = (
-      <Link to={link}>
-        {Icon}
-      </Link>
-    );
+    Icon = <Link to={link}>{Icon}</Link>;
   }
 
   if (tooltip) {
@@ -107,17 +96,13 @@ const JobStatusIcon = ({ job, link, tooltip, ...props }) => {
     );
   }
 
-  return (
-    <div {...props}>
-      {Icon}
-    </div>
-  );
-}
+  return <div {...props}>{Icon}</div>;
+};
 
 JobStatusIcon.propTypes = {
   job: object.isRequired,
   link: string,
-  tooltip: node
+  tooltip: node,
 };
 
 JobStatusIcon.defaultProps = {

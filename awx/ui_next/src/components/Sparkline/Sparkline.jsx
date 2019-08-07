@@ -11,24 +11,28 @@ const JobStatusIcon = styled(props => <_JobStatusIcon {...props} />)`
 `;
 
 const Sparkline = ({ i18n, jobs }) => {
-  const generateTooltip = (job) => (
+  const generateTooltip = job => (
     <Fragment>
-      <div>{i18n._(t`JOB ID:`)} {job.id}</div>
-      <div>{i18n._(t`STATUS:`)} {job.status.toUpperCase()}</div>
-      <div>{i18n._(t`FINISHED:`)} {job.finished}</div>
+      <div>
+        {i18n._(t`JOB ID:`)} {job.id}
+      </div>
+      <div>
+        {i18n._(t`STATUS:`)} {job.status.toUpperCase()}
+      </div>
+      <div>
+        {i18n._(t`FINISHED:`)} {job.finished}
+      </div>
     </Fragment>
   );
 
-  return (
-    (jobs.map(job => (
-      <JobStatusIcon
-        key={job.id}
-        job={job}
-        link={`/jobs/${JOB_TYPE_URL_SEGMENTS[job.type]}/${job.id}`}
-        tooltip={generateTooltip(job)}
-      />
-    )))
-  )
+  return jobs.map(job => (
+    <JobStatusIcon
+      key={job.id}
+      job={job}
+      link={`/jobs/${JOB_TYPE_URL_SEGMENTS[job.type]}/${job.id}`}
+      tooltip={generateTooltip(job)}
+    />
+  ));
 };
 
 Sparkline.propTypes = {
