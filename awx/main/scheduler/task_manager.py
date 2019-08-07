@@ -520,15 +520,15 @@ class TaskManager():
                 logger.debug("{} couldn't be scheduled on graph, waiting for next cycle".format(task.log_format))
 
     def timeout_approval_node(self):
-        workflow_approval = WorkflowApproval.objects.filter(status='pending').prefetch_related('workflow_approval_template')
+        workflow_approvals = WorkflowApproval.objects.filter(status='pending').prefetch_related('workflow_approval_template')
         now = tz_now()
-        for task in workflow_approval:
+        for task in workflow_approvals:
             # TODO: copy the timeout to the job itself at launch time, not the template
             approval_timeout_seconds = timedelta(seconds=task.workflow_approval_template.timeout)
             if task.workflow_approval_template.timeout == 0:
                 continue
             if (now - task.created) >= approval_timeout_seconds:
-                logger.info("This approval node has timed out.")
+                logger.info("The approval node {} ({}) has expired after {} seconds.".format(task.name, task.id, task.workflow_approval_template.timeout))
                 task.status = 'failed'
                 task.job_explanation = _("This approval node has timed out.")
                 task.save(update_fields=['status', 'job_explanation'])
