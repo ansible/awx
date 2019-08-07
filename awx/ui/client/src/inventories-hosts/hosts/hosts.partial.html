@@ -52,10 +52,7 @@
                     <div class="List-staticColumnLayout--hosts List-tableRow" ng-repeat="host in hosts track by host.id">
                             <div></div>
                             <div class="List-tableCell toggleHost-column List-staticColumn--toggle">
-                                <div class="ScheduleToggle" ng-class="{'is-on': host.enabled}" aw-tool-tip="{{strings.get('hostList.DISABLED_TOGGLE_TOOLTIP')}}" data-placement="right" data-tip-watch="undefined">
-                                    <button type="button" ng-show="host.enabled" class="ScheduleToggle-switch is-on" ng-click="toggleHost($event, host)" translate>ON</button>
-                                    <button type="button" ng-show="!host.enabled" class="ScheduleToggle-switch" ng-click="toggleHost($event, host)" translate>OFF</button>
-                                </div>
+                                <at-switch on-toggle="toggleHost($event, host)" switch-on="host.enabled" switch-disabled="!host.summary_fields.user_capabilities.edit" tooltip="strings.get('hostList.DISABLED_TOGGLE_TOOLTIP')" tooltip-placement="right"></at-switch>
                             </div>
                             <div class="List-tableCell active_failures-column status-column List-staticColumn--smallStatus">
                                 <div class="host-name">
