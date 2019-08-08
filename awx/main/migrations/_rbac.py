@@ -2,6 +2,7 @@ import logging
 from time import time
 
 from django.db.models import F
+from django.db.models import Subquery, OuterRef
 
 from awx.main.fields import update_role_parentage_for_instance
 from awx.main.models.rbac import Role, batch_role_ancestor_rebuilding
@@ -51,28 +52,72 @@ def migrate_ujt_organization(apps, schema_editor):
     '''
     Move organization from project to job template
     '''
+    updated_ujt = 0
+    UnifiedJobTemplate = apps.get_model('main', 'UnifiedJobTemplate')
     MIGRATE_TEMPLATE_FIELD = (
         # Job Templates had an implicit organization via their project
-        ('JobTemplate', 'project.organization'),
+        ('jobtemplate', 'project'),
         # Inventory Sources had an implicit organization via their inventory
-        ('InventorySource', 'inventory.organization'),
+        ('inventorysource', 'inventory'),
         # Projects had an explicit organization in their subclass table
-        ('Project', 'tmp_organization'),
+        ('project', None),
         # Workflow JTs also had an explicit organization in their subclass table
-        ('WorkflowJobTemplate', 'tmp_organization'),
+        ('workflowjobtemplate', None),
     )
-    # Both the implicit organizations and the explicit organizations are moved
-    # all the way up to the base model, UnifiedJobTemplate first
-    UnifiedJobTemplate = apps.get_model('main', 'UnifiedJobTemplate')
-    for cls_name, source_field in MIGRATE_TEMPLATE_FIELD:
-        cls = apps.get_model('main', cls_name)
-        name = cls._meta.model_name
-        logger.debug('Migrating {} from {} to new organization field'.format(cls_name, source_field))
-        r = UnifiedJobTemplate.objects.filter(**{'{}__isnull'.format(name): False}).update(
-            organization=F('{}.{}'.format(name, source_field))
-        )
-        logger.info('result')
-        logger.info(str(r))
+    for ujt in UnifiedJobTemplate.objects.iterator():
+        model_name = ujt._meta.model_name
+        for cls_name, source_field in MIGRATE_TEMPLATE_FIELD:
+            if model_name == cls_name:
+                rel_obj = ujt
+                if source_field is not None:
+                    rel_obj = getattr(ujt, source_field)
+                if rel_obj is None or rel_obj.organization_id is None:
+                    logger.debug('No organization for {}-{}'.format(model_name, ujt.pk))
+                    break
+                ujt.organization_id = rel_obj.organization_id
+                ujt.save(update_fields=['organization_id'])
+                updated_ujt += 1
+                logger.debug('Migrated {}-{} organization field for {}'.format(
+                    model_name, ujt.pk, ujt.organization_id
+                ))
+                break
+        else:
+            # no migration needed for system jobs
+            if model_name != 'systemjobtemplate':
+                raise Exception('unexpected type')
+    logger.info('Migrated organization field for {} UJTs'.format(updated_ujt))
+    # MIGRATE_TEMPLATE_FIELD = (
+    #     # Job Templates had an implicit organization via their project
+    #     ('JobTemplate', 'projects__jobtemplates'),
+    #     # Inventory Sources had an implicit organization via their inventory
+    #     ('InventorySource', 'inventories__inventory_sources'),
+    #     # Projects had an explicit organization in their subclass table
+    #     ('Project', 'projects'),
+    #     # Workflow JTs also had an explicit organization in their subclass table
+    #     ('WorkflowJobTemplate', 'workflows'),
+    # )
+    # # Both the implicit organizations and the explicit organizations are moved
+    # # all the way up to the base model, UnifiedJobTemplate first
+    # UnifiedJobTemplate = apps.get_model('main', 'UnifiedJobTemplate')
+    # # for cls_name, source_field in MIGRATE_TEMPLATE_FIELD:
+    # for cls_name, reverse_ref in MIGRATE_TEMPLATE_FIELD:
+    #     cls = apps.get_model('main', cls_name)
+    #     name = cls._meta.model_name
+    #     logger.debug('Migrating {} from {} to new organization field'.format(cls_name, reverse_ref))
+    #     # sub_qs = cls.objects.filter(
+    #     #     id=OuterRef(name)
+    #     # ).values('{}_id'.format(source_field))[:1]
+    #     sub_qs = Organization.objects.filter(
+    #         **{reverse_ref: OuterRef(name)}
+    #     ).values('id')
+    #     # sub_qs = Project.objects.filter(
+    #     #     jobtemplates=OuterRef(name)
+    #     # ).values('organization_id')[:1]
+    #     r = UnifiedJobTemplate.objects.filter(**{'{}__isnull'.format(name): False}).update(
+    #         tmp_organization=Subquery(sub_qs)
+    #     )
+    #     logger.info('result')
+    #     logger.info(str(r))
     # # Job Templates had an implicit organization via their project
     # InventorySource = apps.get_model('main', 'InventorySource')
     # r = UnifiedJobTemplate.objects.filter(inventorysource__isnull=False).update(organization=F('jobtemplate.project.organization'))
@@ -88,26 +133,53 @@ def migrate_ujt_organization(apps, schema_editor):
 
     MIGRATE_JOB_FIELD = (
         # Jobs inherited project from job templates as a convience field
-        ('Job', 'project.organization'),
+        ('Job', 'project'),
         # Inventory Sources had an convience field of inventory
-        ('InventoryUpdate', 'inventory.organization'),
+        ('InventoryUpdate', 'inventory'),
         # Project Updates did not have a direct organization field, obtained it from project
-        ('ProjectUpdate', 'project.tmp_organization'),
+        ('ProjectUpdate', 'project'),
         # Workflow Jobs are handled same as project updates
         # Sliced jobs are a special case, but old data is not given special treatment for simplicity
-        ('WorkflowJob', 'workflow_job_template.tmp_organization'),
+        ('WorkflowJob', 'workflow_job_template'),
     )
     # UnifiedJob organization field migrated here
     UnifiedJob = apps.get_model('main', 'UnifiedJob')
-    for cls_name, source_field in MIGRATE_JOB_FIELD:
-        cls = apps.get_model('main', cls_name)
-        name = cls._meta.model_name
-        logger.debug('Migrating {} from {} to new organization field'.format(cls_name, source_field))
-        r = UnifiedJob.objects.filter(**{'{}__isnull'.format(name): False}).update(
-            organization=F('{}.{}'.format(name, source_field))
-        )
-        logger.info('result')
-        logger.info(str(r))
+    updated_uj = 0
+    for uj in UnifiedJob.objects.iterator():
+        model_name = uj._meta.model_name
+        for cls_name, source_field in MIGRATE_JOB_FIELD:
+            if model_name == cls_name:
+                rel_obj = uj
+                if source_field is not None:
+                    rel_obj = getattr(uj, source_field)
+                if rel_obj is None or rel_obj.organization_id is None:
+                    logger.debug('No organization for {}-{}'.format(model_name, uj.pk))
+                    break
+                uj.organization_id = rel_obj.organization_id
+                uj.save(update_fields=['organization_id'])
+                updated_uj += 1
+                logger.debug('Migrated {}-{} organization field for {}'.format(
+                    model_name, uj.pk, uj.organization_id
+                ))
+                break
+        else:
+            # no migration needed for system jobs
+            if model_name != 'systemjob':
+                raise Exception('unexpected type')
+    logger.info('Migrated organization field for {} UJs'.format(updated_uj))
+
+    # for cls_name, source_field in MIGRATE_JOB_FIELD:
+    #     cls = apps.get_model('main', cls_name)
+    #     name = cls._meta.model_name
+    #     logger.debug('Migrating {} from {} to new organization field'.format(cls_name, source_field))
+    #     sub_qs = cls.objects.filter(
+    #         id=OuterRef('{}_id'.format(name))
+    #     ).values(source_field)[:1]
+    #     r = UnifiedJob.objects.filter(**{'{}__isnull'.format(name): False}).update(
+    #         tmp_organization=Subquery(sub_qs)
+    #     )
+    #     logger.info('result')
+    #     logger.info(str(r))
 
     # updated_ct = 0
     # for jt in JobTemplate.objects.iterator():
