@@ -2016,7 +2016,7 @@ class WorkflowJobTemplateAccess(NotificationAttachMixin, BaseAccess):
                     if self.user not in cred.use_role:
                         missing_credentials.append(cred.name)
                 ujt = node.unified_job_template
-                if ujt and not self.user.can_access(UnifiedJobTemplate, 'start', ujt, validate_license=False):
+                if ujt and not isinstance(ujt, WorkflowApprovalTemplate) and not self.user.can_access(UnifiedJobTemplate, 'start', ujt, validate_license=False):
                     missing_ujt.append(ujt.name)
             if missing_ujt:
                 self.messages['templates_unable_to_copy'] = missing_ujt
@@ -2379,12 +2379,16 @@ class UnifiedJobTemplateAccess(BaseAccess):
             Q(pk__in=self.model.accessible_pk_qs(self.user, 'read_role')) |
             Q(inventorysource__inventory__id__in=Inventory._accessible_pk_qs(
                 Inventory, self.user, 'read_role'))
-        )  # &&&&&& (filter out approvals from UJT endpoint here...?)
+        )
 
     def can_start(self, obj, validate_license=True):
         access_class = access_registry[obj.__class__]
         access_instance = access_class(self.user)
         return access_instance.can_start(obj, validate_license=validate_license)
+
+    def get_queryset(self):
+        return super(UnifiedJobTemplateAccess, self).get_queryset().filter(
+            workflowapprovaltemplate__isnull=True)
 
 
 class UnifiedJobAccess(BaseAccess):
@@ -2429,8 +2433,12 @@ class UnifiedJobAccess(BaseAccess):
             Q(adhoccommand__inventory__id__in=inv_pk_qs) |
             Q(job__inventory__organization__in=org_auditor_qs) |
             Q(job__project__organization__in=org_auditor_qs)
-        )  # &&&&&& (for filtering out approvals from UJ endpoint...?)
+        )
         return qs
+
+    def get_queryset(self):
+        return super(UnifiedJobAccess, self).get_queryset().filter(
+            workflowapproval__isnull=True)
 
 
 class ScheduleAccess(BaseAccess):
@@ -2796,10 +2804,6 @@ class WorkflowApprovalAccess(BaseAccess):
             unified_job_node__workflow_job__unified_job_template__in=WorkflowJobTemplate.accessible_pk_qs(
                 self.user, 'read_role'))
 
-    def get_queryset(self):
-        return super(WorkflowApprovalAccess, self).get_queryset().exclude(
-            workflow_approval_template__isnull=True)
-
     def can_approve_or_deny(self, obj):
         if obj.status != 'pending':
             return False
@@ -2830,10 +2834,6 @@ class WorkflowApprovalTemplateAccess(BaseAccess):
         return self.model.objects.filter(
             workflowjobtemplatenodes__workflow_job_template__in=WorkflowJobTemplate.accessible_pk_qs(
                 self.user, 'read_role'))
-
-    def get_queryset(self):
-        return super(WorkflowApprovalTemplateAccess, self).get_queryset().filter(
-            approvals__isnull=False)
 
 
 for cls in BaseAccess.__subclasses__():

@@ -3414,15 +3414,16 @@ class WorkflowApprovalSerializer(UnifiedJobSerializer):
 
     can_approve_or_deny = serializers.SerializerMethodField()
     approval_expiration = serializers.SerializerMethodField()
+    timed_out = serializers.ReadOnlyField()
 
     class Meta:
         model = WorkflowApproval
-        fields = (['*', '-controller_node', '-execution_node', 'can_approve_or_deny', 'approval_expiration'])
+        fields = ('*', '-controller_node', '-execution_node', 'can_approve_or_deny', 'approval_expiration', 'timed_out',)
 
     def get_approval_expiration(self, obj):
         if obj.status != 'pending' or obj.timeout == 0:
             return None
-        return now() + timedelta(seconds=obj.timeout)
+        return obj.created + timedelta(seconds=obj.timeout)
 
     def get_can_approve_or_deny(self, obj):
         request = self.context.get('request', None)
@@ -3442,20 +3443,8 @@ class WorkflowApprovalSerializer(UnifiedJobSerializer):
 
 class WorkflowApprovalListSerializer(WorkflowApprovalSerializer, UnifiedJobListSerializer):
 
-    can_approve_or_deny = serializers.SerializerMethodField()
-    approval_expiration = serializers.SerializerMethodField()
-
     class Meta:
-        fields = ('*', '-execution_node', '-controller_node', 'can_approve_or_deny', 'approval_expiration')
-
-    def get_approval_expiration(self, obj):
-        if obj.status != 'pending' or obj.timeout == 0:
-            return None
-        return now() + timedelta(seconds=obj.timeout)
-
-    def get_can_approve_or_deny(self, obj):
-        request = self.context.get('request', None)
-        return request.user.can_access(WorkflowApproval, 'approve_or_deny', obj) is True
+        fields = ('*', '-controller_node', '-execution_node', 'can_approve_or_deny', 'approval_expiration', 'timed_out',)
 
 
 class WorkflowApprovalTemplateSerializer(UnifiedJobTemplateSerializer):

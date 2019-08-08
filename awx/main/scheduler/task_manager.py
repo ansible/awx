@@ -519,26 +519,19 @@ class TaskManager():
             if not found_acceptable_queue:
                 logger.debug("{} couldn't be scheduled on graph, waiting for next cycle".format(task.log_format))
 
-    def timeout_approval_node(self): # Add websocket stuff for when it transitions to "timed out" (maybe a websocket_emit_status() call)
+    def timeout_approval_node(self):
         workflow_approvals = WorkflowApproval.objects.filter(status='pending')
         now = tz_now()
         for task in workflow_approvals:
-            # TODO: copy the timeout to the job itself at launch time, not the template <---- Started to implement steps to do this, but unsure...
             approval_timeout_seconds = timedelta(seconds=task.timeout)
             if task.timeout == 0:
                 continue
             if (now - task.created) >= approval_timeout_seconds:
                 logger.info("The approval node {} ({}) has expired after {} seconds.".format(task.name, task.pk, task.timeout))
+                task.timed_out = True
                 task.status = 'failed'
                 task.job_explanation = _("This approval node has timed out.")
-                task.save(update_fields=['status', 'job_explanation'])
-
-    # &&&&&& Placeholder for websocket support
-    # def detect_pending_approval(self):
-    #     workflow_approvals = WorkflowApproval.objects.filter(status='pending').prefetch_related('workflow_approval_template')
-    #         for task in workflow_approvals:
-    #             if task.status == 'pending':
-    #                 workflow_approvals.websocket_emit_status(task.status)
+                task.save(update_fields=['status', 'job_explanation', 'timed_out'])
 
     def calculate_capacity_consumed(self, tasks):
         self.graph = InstanceGroup.objects.capacity_values(tasks=tasks, graph=self.graph)

@@ -4461,7 +4461,7 @@ class WorkflowApprovalApprove(RetrieveAPIView):
             raise PermissionDenied(detail=_("User does not have permission to approve or deny this workflow."))
         if obj.status != 'pending':
             return Response("This workflow step has already been approved or denied.", status=status.HTTP_400_BAD_REQUEST)
-        obj.approve()
+        obj.approve(request)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -4476,7 +4476,7 @@ class WorkflowApprovalDeny(RetrieveAPIView):
             raise PermissionDenied(detail=_("User does not have permission to approve or deny this workflow."))
         if obj.status != 'pending':
             return Response("This workflow step has already been approved or denied.", status=status.HTTP_400_BAD_REQUEST)
-        obj.deny()
+        obj.deny(request)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 

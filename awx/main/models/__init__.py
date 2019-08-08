@@ -203,7 +203,6 @@ activity_stream_registrar.connect(WorkflowJobTemplate)
 activity_stream_registrar.connect(WorkflowJobTemplateNode)
 activity_stream_registrar.connect(WorkflowJob)
 activity_stream_registrar.connect(WorkflowApproval)
-# activity_stream_registrar.connect(WorkflowApprovalTemplate)
 activity_stream_registrar.connect(OAuth2Application)
 activity_stream_registrar.connect(OAuth2AccessToken)
 

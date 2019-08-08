@@ -2,6 +2,7 @@
 # All Rights Reserved.
 
 # Python
+import json
 import logging
 
 # Django
@@ -31,10 +32,12 @@ from awx.main.models.mixins import (
     RelatedJobsMixin,
 )
 from awx.main.models.jobs import LaunchTimeConfigBase, LaunchTimeConfig, JobTemplate
+from awx.main.models.activity_stream import ActivityStream
 from awx.main.models.credential import Credential
 from awx.main.redact import REPLACE_STR
 from awx.main.fields import JSONField
-from awx.main.utils import schedule_task_manager
+from awx.main.utils import model_to_dict, schedule_task_manager
+
 
 from copy import copy
 from urllib.parse import urljoin
@@ -397,7 +400,6 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
         'approval_role',
     ])
     approval_role = ImplicitRoleField(parent_role=[
-        'singleton:' + ROLE_SINGLETON_SYSTEM_AUDITOR,
         'organization.approval_role', 'admin_role',
     ])
 
@@ -655,6 +657,11 @@ class WorkflowApproval(UnifiedJob):
         default=0,
         help_text=_("The amount of time (in seconds) before the approval node expires and fails."),
     )
+    timed_out = models.BooleanField(
+        default=False,
+        help_text=_("Shows when an approval node (with a timeout assigned to it) has timed out.")
+    )
+
 
     @classmethod
     def _get_unified_job_template_class(cls):
@@ -671,19 +678,31 @@ class WorkflowApproval(UnifiedJob):
         return 'workflow_approval_template'
 
     def approve(self, request=None):
+        from awx.main.signals import model_serializer_mapping  # circular import
         self.status = 'successful'
         self.save()
+        changes = model_to_dict(self, model_serializer_mapping())
+        changes['status']=['pending', 'successful']
+        ActivityStream(
+            operation='update',
+            object1='workflow_approval',
+            actor=request.user,
+            changes=json.dumps(changes),
+        ).save()
         schedule_task_manager()
         return reverse('api:workflow_approval_approve', kwargs={'pk': self.pk}, request=request)
 
     def deny(self, request=None):
+        from awx.main.signals import model_serializer_mapping  # circular import
         self.status = 'failed'
         self.save()
+        changes = model_to_dict(self, model_serializer_mapping())
+        changes['status']=['pending', 'failed']
+        ActivityStream(
+            operation='update',
+            object1='workflow_approval',
+            actor=request.user,
+            changes=json.dumps(changes),
+        ).save()
         schedule_task_manager()
         return reverse('api:workflow_approval_deny', kwargs={'pk': self.pk}, request=request)
-
-    # &&&&&& Possible placeholder for websocket support
-    # def websocket_emit_data(self):
-    #     websocket_data = super(WorkflowApproval, self).websocket_emit_data()
-    #     websocket_data.update(dict(project_id=self.project.id))  # ?????
-    #     return websocket_data

@@ -29,7 +29,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='workflowjobtemplate',
             name='approval_role',
-            field=awx.main.fields.ImplicitRoleField(editable=False, null='True', on_delete=django.db.models.deletion.CASCADE, parent_role=['singleton:system_auditor', 'organization.approval_role', 'admin_role'], related_name='+', to='main.Role'),
+            field=awx.main.fields.ImplicitRoleField(editable=False, null='True', on_delete=django.db.models.deletion.CASCADE, parent_role=['organization.approval_role', 'admin_role'], related_name='+', to='main.Role'),
             preserve_default='True',
         ),
         migrations.AlterField(
@@ -74,5 +74,10 @@ class Migration(migrations.Migration):
             model_name='workflowapproval',
             name='timeout',
             field=models.IntegerField(blank=True, default=0, help_text='The amount of time (in seconds) before the approval node expires and fails.'),
+        ),
+        migrations.AddField(
+            model_name='workflowapproval',
+            name='timed_out',
+            field=models.BooleanField(default=False, help_text='Shows when an approval node (with a timeout assigned to it) has timed out.'),
         ),
     ]
