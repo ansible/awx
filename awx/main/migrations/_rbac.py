@@ -1,8 +1,7 @@
 import logging
 from time import time
 
-from django.db.models import F
-from django.db.models import Subquery, OuterRef
+from django.db.models import F, Subquery, OuterRef
 
 from awx.main.fields import update_role_parentage_for_instance
 from awx.main.models.rbac import Role, batch_role_ancestor_rebuilding
@@ -92,10 +91,6 @@ def _migrate_unified_organization(apps, unified_cls_name, org_field_mapping):
     """
     UnifiedClass = apps.get_model('main', unified_cls_name)
     ContentType = apps.get_model('contenttypes', 'ContentType')
-    changed_ct = 0
-    unified_ct_mapping = {}
-    for cls_name in org_field_mapping:
-        unified_ct_mapping[ContentType.objects.get(model=cls_name).id] = cls_name
 
     for cls_name, source_field in org_field_mapping.items():
         print_field = []
@@ -114,9 +109,10 @@ def _migrate_unified_organization(apps, unified_cls_name, org_field_mapping):
             rel_model = field.related_model
             logger.info(rel_model)
             reverse_rel = field.remote_field.name
-            sub_qs = rel_model.objects.filter(**{'{}'.format(reverse_rel): OuterRef('organization_id')})
+            sub_qs = rel_model.objects.filter(**{'{}'.format(reverse_rel): OuterRef('{}'.format(cls_name))})
 
-        r = UnifiedClass.objects.update(tmp_organization=Subquery(sub_qs))
+        this_ct = ContentType.objects.get(model=cls_name)
+        r = UnifiedClass.objects.filter(polymorphic_ctype=this_ct).update(tmp_organization=Subquery(sub_qs))
         logger.info('result')
         logger.info(str(r))
 
