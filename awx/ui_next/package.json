@@ -5,8 +5,8 @@
   "main": "index.jsx",
   "scripts": {
     "start": "webpack-dev-server --config ./webpack.config.js --mode development",
-    "test": "jest --coverage",
-    "test-watch": "jest --watch",
+    "test": "TZ='UTC' jest --coverage",
+    "test-watch": "TZ='UTC' jest --watch",
     "lint": "eslint --ext .js --ext .jsx .",
     "add-locale": "lingui add-locale",
     "extract-strings": "lingui extract",

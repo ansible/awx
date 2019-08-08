@@ -24,12 +24,6 @@ const selectors = {
   lineText: 'JobEvent__JobEventLineText',
 };
 
-function tzHours(hours) {
-  const date = new Date();
-  date.setUTCHours(hours);
-  return date.getHours();
-}
-
 describe('<JobEvent />', () => {
   test('initially renders successfully', () => {
     mountWithContexts(<JobEvent {...mockOnPlayStartEvent} />);
@@ -39,7 +33,7 @@ describe('<JobEvent />', () => {
     let wrapper = mountWithContexts(<JobEvent {...mockOnPlayStartEvent} />);
     let lineText = wrapper.find(selectors.lineText);
     expect(
-      lineText.filterWhere(e => e.html().includes(`${tzHours(18)}:11:22`))
+      lineText.filterWhere(e => e.text().includes('18:11:22'))
     ).toHaveLength(1);
 
     const singleDigitTimestampEvent = {
@@ -49,7 +43,7 @@ describe('<JobEvent />', () => {
     wrapper = mountWithContexts(<JobEvent {...singleDigitTimestampEvent} />);
     lineText = wrapper.find(selectors.lineText);
     expect(
-      lineText.filterWhere(e => e.html().includes(`${tzHours(8)}:01:02`))
+      lineText.filterWhere(e => e.text().includes('08:01:02'))
     ).toHaveLength(1);
   });
 

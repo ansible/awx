@@ -8,7 +8,7 @@ import mockJobEventsData from './data.job_events.json';
 jest.mock('@api');
 
 async function checkOutput(wrapper, expectedLines) {
-  await waitForElement(wrapper, 'div[type="job_event"]', e => e.length > 1);
+  await waitForElement(wrapper, 'div[type="job_event"]', el => el.length > 1);
   const jobEventLines = wrapper.find('div[type="job_event_line_text"]');
   const actualLines = [];
   jobEventLines.forEach(line => {
@@ -65,9 +65,9 @@ describe('<JobOutput />', () => {
     await waitForElement(wrapper, 'JobEvent', el => el.length > 0);
     await checkOutput(wrapper, [
       '',
-      'PLAY [all] *********************************************************************11:37:25',
+      'PLAY [all] *********************************************************************15:37:25',
       '',
-      'TASK [debug] *******************************************************************11:37:25',
+      'TASK [debug] *******************************************************************15:37:25',
       'ok: [localhost] => (item=1) => {',
       '    "msg": "This is a debug message: 1"',
       '}',
@@ -171,7 +171,7 @@ describe('<JobOutput />', () => {
       'handleScrollLast'
     );
     wrapper = mountWithContexts(<JobOutput job={mockJob} />);
-    await waitForElement(wrapper, 'EmptyStateBody', e => e.length === 0);
+    await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
     wrapper
       .find('JobOutput')
       .instance()
@@ -190,7 +190,7 @@ describe('<JobOutput />', () => {
   test('should throw error', async done => {
     JobsAPI.readEvents = () => Promise.reject(new Error());
     wrapper = mountWithContexts(<JobOutput job={mockJob} />);
-    await waitForElement(wrapper, 'ContentError', e => e.length === 1);
+    await waitForElement(wrapper, 'ContentError', el => el.length === 1);
     done();
   });
 });
