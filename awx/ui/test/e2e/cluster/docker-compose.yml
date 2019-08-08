@@ -38,5 +38,4 @@ services:
     environment:
       AWX_E2E_CLUSTER_HOST: hub
       AWX_E2E_CLUSTER_PORT: 4444
-      E2E_RETRIES: ${E2E_RETRIES}
       DBUS_SESSION_BUS_ADDRESS: /dev/null
