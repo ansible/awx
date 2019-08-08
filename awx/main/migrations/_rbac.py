@@ -48,13 +48,47 @@ def delete_all_user_roles(apps, schema_editor):
         role.delete()
 
 
+def _migrate_unified_organization(apps, unified_cls_name, org_field_mapping):
+    """Given a unified base model (either UJT or UJ)
+    and a dict org_field_mapping which gives related model to get org from
+    saves organization for those objects to the temporary migration
+    variable tmp_organization on the unified model
+    """
+    UnifiedClass = apps.get_model('main', unified_cls_name)
+    ContentType = apps.get_model('contenttypes', 'ContentType')
+    changed_ct = 0
+    unified_ct_mapping = {}
+    for cls_name in org_field_mapping:
+        unified_ct_mapping[ContentType.objects.get(model=cls_name).id] = cls_name
+
+    for obj in UnifiedClass.objects.iterator():
+        if obj.polymorphic_ctype_id not in unified_ct_mapping:
+            logger.debug('No organization for {}-{}'.format(obj.name, obj.pk))
+            continue
+        cls_name = unified_ct_mapping[obj.polymorphic_ctype_id]
+        source_field = org_field_mapping[cls_name]
+        # polymorphic does not work the same in migrations, get the subclass object
+        rel_obj = getattr(obj, cls_name)
+        if source_field is not None:
+            rel_obj = getattr(rel_obj, source_field)
+        if rel_obj is None or rel_obj.organization_id is None:
+            logger.debug('No organization for {} {}-{}'.format(cls_name, obj.name, obj.pk))
+            continue
+
+        obj.tmp_organization_id = rel_obj.organization_id
+        obj.save(update_fields=['tmp_organization_id'])
+        changed_ct += 1
+        logger.debug('Migrated {} {}-{} organization field, org pk={}'.format(
+            cls_name, obj.name, obj.pk, obj.tmp_organization_id
+        ))
+
+    logger.info('Migrated organization field for {} {}s'.format(changed_ct, unified_cls_name))
+
+
 def migrate_ujt_organization(apps, schema_editor):
     '''
     Move organization from project to job template
     '''
-    updated_ujt = 0
-    UnifiedJobTemplate = apps.get_model('main', 'UnifiedJobTemplate')
-    ContentType = apps.get_model('contenttypes', 'ContentType')
     # MIGRATE_TEMPLATE_FIELD = (
     #     # Job Templates had an implicit organization via their project
     #     ('jobtemplate', 'project'),
@@ -75,31 +109,7 @@ def migrate_ujt_organization(apps, schema_editor):
         # Workflow JTs also had an explicit organization in their subclass table
         'workflowjobtemplate': None
     }
-    ujt_cts = {}
-    for cls_name in org_lookups:
-        ujt_cts[ContentType.objects.get(model=cls_name).id] = cls_name
-    other_ujts = set(ContentType.objects.get(model=cls_name) for cls_name in (
-        'systemjobtemplate', 'workflowapprovaltemplate'))
-    for ujt in UnifiedJobTemplate.objects.iterator():
-        if ujt.polymorphic_ctype in other_ujts:
-            logger.debug('No related organization for {}-{}'.format(ujt.name, ujt.pk))
-            continue
-        cls_name = ujt_cts[ujt.polymorphic_ctype_id]
-        source_field = org_lookups[cls_name]
-        # polymorphic does not work the same in migrations, get the subclass object
-        rel_obj = getattr(ujt, cls_name)
-        if source_field is not None:
-            rel_obj = getattr(rel_obj, source_field)
-        if rel_obj is None or rel_obj.organization_id is None:
-            logger.debug('No organization for {} {}-{}'.format(cls_name, ujt.name, ujt.pk))
-            break
-        ujt.tmp_organization_id = rel_obj.organization_id
-        ujt.save(update_fields=['tmp_organization_id'])
-        updated_ujt += 1
-        logger.debug('Migrated {} {}-{} organization field, org pk={}'.format(
-            cls_name, ujt.name, ujt.pk, ujt.tmp_organization_id
-        ))
-    logger.info('Migrated organization field for {} UJTs'.format(updated_ujt))
+    _migrate_unified_organization(apps, 'UnifiedJobTemplate', org_lookups)
     # MIGRATE_TEMPLATE_FIELD = (
     #     # Job Templates had an implicit organization via their project
     #     ('JobTemplate', 'projects__jobtemplates'),
@@ -167,34 +177,7 @@ def migrate_ujt_organization(apps, schema_editor):
         # Sliced jobs are a special case, but old data is not given special treatment for simplicity
         'workflowjob': 'workflow_job_template'
     }
-    uj_cts = {}
-    for cls_name in job_org_lookups:
-        uj_cts[ContentType.objects.get(model=cls_name).id] = cls_name
-    other_ujs = set(ContentType.objects.get(model=cls_name) for cls_name in ('systemjob', 'workflowapproval'))
-    # UnifiedJob organization field migrated here
-    UnifiedJob = apps.get_model('main', 'UnifiedJob')
-    updated_uj = 0
-    for uj in UnifiedJob.objects.iterator():
-        if uj.polymorphic_ctype in other_ujs:
-            logger.debug('No related organization for {}-{}'.format(uj.name, uj.pk))
-            continue
-        cls_name = uj_cts[uj.polymorphic_ctype_id]
-        source_field = job_org_lookups[cls_name]
-        # polymorphic does not work the same in migrations, get the subclass object
-        rel_obj = getattr(uj, cls_name)
-        rel_obj = getattr(rel_obj, source_field)
-        if rel_obj is None or rel_obj.organization_id is None:
-            logger.debug('No organization for {} {}-{}'.format(cls_name, uj.name, uj.pk))
-            break
-
-        uj.tmp_organization_id = rel_obj.organization_id
-        uj.save(update_fields=['tmp_organization_id'])
-        updated_uj += 1
-        logger.debug('Migrated {} {}-{} organization field, org pk={}'.format(
-            cls_name, uj.name, uj.pk, uj.tmp_organization_id
-        ))
-
-    logger.info('Migrated organization field for {} UJs'.format(updated_uj))
+    _migrate_unified_organization(apps, 'UnifiedJob', job_org_lookups)
 
     # for cls_name, source_field in MIGRATE_JOB_FIELD:
     #     cls = apps.get_model('main', cls_name)
