@@ -76,6 +76,12 @@ describe('<TemplatesList />', () => {
         results: mockTemplates,
       },
     });
+
+    UnifiedJobTemplatesAPI.readOptions.mockResolvedValue({
+      data: {
+        actions: [],
+      },
+    });
   });
 
   afterEach(() => {
@@ -116,7 +122,7 @@ describe('<TemplatesList />', () => {
       'TemplatesList',
       el => el.state('hasContentLoading') === false
     );
-    wrapper
+    await wrapper
       .find('DataListCheck#select-jobTemplate-1')
       .props()
       .onChange();
