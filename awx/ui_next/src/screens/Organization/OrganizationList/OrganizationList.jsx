@@ -149,7 +149,7 @@ class OrganizationsList extends Component {
         <PageSection variant={medium}>
           <Card>
             <PaginatedDataList
-              error={contentError}
+              contentError={contentError}
               hasContentLoading={hasContentLoading}
               items={organizations}
               itemCount={itemCount}

@@ -175,7 +175,7 @@ class TemplatesList extends Component {
       <PageSection variant={medium}>
         <Card>
           <PaginatedDataList
-            err={contentError}
+            contentError={contentError}
             hasContentLoading={hasContentLoading}
             items={templates}
             itemCount={itemCount}
