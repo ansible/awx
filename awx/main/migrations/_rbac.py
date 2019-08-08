@@ -100,16 +100,14 @@ def _migrate_unified_organization(apps, unified_cls_name, org_field_mapping):
         logger.debug('Migrating {} from {} to new organization field'.format(cls_name, '__'.join(print_field)))
 
         rel_model = apps.get_model('main', cls_name)
+        unified_field = UnifiedClass._meta.get_field(cls_name)
+        unified_field_reverse = unified_field.remote_field.name
         if source_field is None:
-            field = rel_model._meta.get_field('organization')
-            reverse_rel = field.remote_field.name
-            sub_qs = rel_model.objects.filter(**{'{}_id'.format(reverse_rel): OuterRef('id')})
+            sub_qs = rel_model.objects.filter(**{
+                unified_field_reverse: OuterRef('id')}).values_list('organization')
         else:
-            field = rel_model._meta.get_field(source_field)
-            rel_model = field.related_model
-            logger.info(rel_model)
-            reverse_rel = field.remote_field.name
-            sub_qs = rel_model.objects.filter(**{'{}'.format(reverse_rel): OuterRef('{}'.format(cls_name))})
+            sub_qs = rel_model.objects.filter(**{
+                unified_field_reverse: OuterRef('id')}).values_list('{}__organization'.format(source_field))
 
         this_ct = ContentType.objects.get(model=cls_name)
         r = UnifiedClass.objects.filter(polymorphic_ctype=this_ct).update(tmp_organization=Subquery(sub_qs))
