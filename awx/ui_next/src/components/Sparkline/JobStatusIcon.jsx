@@ -1,8 +1,6 @@
-import React, { Fragment } from 'react';
-import { node, number, shape, string } from 'prop-types';
-import { Link } from 'react-router-dom';
+import React from 'react';
+import { string } from 'prop-types';
 import styled, { keyframes } from 'styled-components';
-import { Tooltip } from '@patternfly/react-core';
 
 const Pulse = keyframes`
   from {
@@ -58,59 +56,31 @@ const FailedBottom = styled.div`
   background-color: #d9534f;
 `;
 
-const JobStatusIcon = ({ job, link, tooltip, ...props }) => {
-  let Icon = (
-    <Fragment>
-      {job.status === 'running' && <RunningJob />}
-      {(job.status === 'new' ||
-        job.status === 'pending' ||
-        job.status === 'waiting') && <WaitingJob />}
-      {(job.status === 'failed' ||
-        job.status === 'error' ||
-        job.status === 'canceled') && (
+const JobStatusIcon = ({ status, ...props }) => {
+  return (
+    <div {...props}>
+      {status === 'running' && <RunningJob />}
+      {(status === 'new' || status === 'pending' || status === 'waiting') && (
+        <WaitingJob />
+      )}
+      {(status === 'failed' || status === 'error' || status === 'canceled') && (
         <FinishedJob>
           <FailedTop />
           <FailedBottom />
         </FinishedJob>
       )}
-      {job.status === 'successful' && (
+      {status === 'successful' && (
         <FinishedJob>
           <SuccessfulTop />
           <SuccessfulBottom />
         </FinishedJob>
       )}
-    </Fragment>
+    </div>
   );
-
-  if (link) {
-    Icon = <Link to={link}>{Icon}</Link>;
-  }
-
-  if (tooltip) {
-    return (
-      <div {...props}>
-        <Tooltip position="top" content={tooltip}>
-          {Icon}
-        </Tooltip>
-      </div>
-    );
-  }
-
-  return <div {...props}>{Icon}</div>;
 };
 
 JobStatusIcon.propTypes = {
-  job: shape({
-    id: number.isRequired,
-    status: string.isRequired,
-  }).isRequired,
-  link: string,
-  tooltip: node,
-};
-
-JobStatusIcon.defaultProps = {
-  link: null,
-  tooltip: null,
+  status: string.isRequired,
 };
 
 export default JobStatusIcon;

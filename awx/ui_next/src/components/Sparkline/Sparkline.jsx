@@ -1,13 +1,15 @@
 import React, { Fragment } from 'react';
 import { arrayOf, object } from 'prop-types';
 import { withI18n } from '@lingui/react';
-import { JobStatusIcon as _JobStatusIcon } from '@components/Sparkline';
+import { Link as _Link } from 'react-router-dom';
+import { JobStatusIcon } from '@components/Sparkline';
+import { Tooltip } from '@patternfly/react-core';
 import styled from 'styled-components';
 import { t } from '@lingui/macro';
 import { JOB_TYPE_URL_SEGMENTS } from '../../constants';
 
 /* eslint-disable react/jsx-pascal-case */
-const JobStatusIcon = styled(props => <_JobStatusIcon {...props} />)`
+const Link = styled(props => <_Link {...props} />)`
   margin-right: 5px;
 `;
 /* eslint-enable react/jsx-pascal-case */
@@ -30,12 +32,11 @@ const Sparkline = ({ i18n, jobs }) => {
   );
 
   return jobs.map(job => (
-    <JobStatusIcon
-      key={job.id}
-      job={job}
-      link={`/jobs/${JOB_TYPE_URL_SEGMENTS[job.type]}/${job.id}`}
-      tooltip={generateTooltip(job)}
-    />
+    <Tooltip position="top" content={generateTooltip(job)} key={job.id}>
+      <Link to={`/jobs/${JOB_TYPE_URL_SEGMENTS[job.type]}/${job.id}`}>
+        <JobStatusIcon status={job.status} />
+      </Link>
+    </Tooltip>
   ));
 };
 
