@@ -1,11 +1,10 @@
 import React, { Component, Fragment } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Route, withRouter, Switch, Link } from 'react-router-dom';
+import { Route, withRouter, Switch } from 'react-router-dom';
 
 import { Config } from '@contexts/Config';
 import Breadcrumbs from '@components/Breadcrumbs/Breadcrumbs';
-import { NotFoundError } from '@components/ContentError';
 import { TemplateList } from './TemplateList';
 import Template from './Template';
 import JobTemplateAdd from './JobTemplateAdd';

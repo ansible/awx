@@ -56,7 +56,8 @@ class JobTypeRedirect extends Component {
           <Card className="awx-c-card">
             {error === NOT_FOUND ? (
               <NotFoundError>
-                The requested job could not be found. <Link to="/jobs">View all Jobs.</Link>
+                The requested job could not be found.{' '}
+                <Link to="/jobs">View all Jobs.</Link>
               </NotFoundError>
             ) : (
               <ContentError error={error} />

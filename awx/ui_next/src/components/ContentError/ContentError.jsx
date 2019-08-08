@@ -23,7 +23,6 @@ async function logout() {
 }
 
 class ContentError extends React.Component {
-
   render() {
     const { error, children, i18n } = this.props;
     if (error && error.response && error.response.status === 401) {
