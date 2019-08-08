@@ -65,25 +65,34 @@ def migrate_ujt_organization(apps, schema_editor):
         ('workflowjobtemplate', None),
     )
     for ujt in UnifiedJobTemplate.objects.iterator():
+        logger.info(ujt.__dict__)
+        logger.info(ujt._meta.__dict__)
         model_name = ujt._meta.model_name
         for cls_name, source_field in MIGRATE_TEMPLATE_FIELD:
-            if model_name == cls_name:
-                rel_obj = ujt
-                if source_field is not None:
-                    rel_obj = getattr(ujt, source_field)
-                if rel_obj is None or rel_obj.organization_id is None:
-                    logger.debug('No organization for {}-{}'.format(model_name, ujt.pk))
-                    break
-                ujt.organization_id = rel_obj.organization_id
-                ujt.save(update_fields=['organization_id'])
-                updated_ujt += 1
-                logger.debug('Migrated {}-{} organization field for {}'.format(
-                    model_name, ujt.pk, ujt.organization_id
-                ))
+            rel_obj = getattr(ujt, cls_name)
+            if rel_obj is None:
+                logger.debug('no sub type {}-{}'.format(cls_name, ujt.pk))
+                continue
+            logger.debug('rel obj')
+            print(rel_obj.__dict__)
+            if source_field is not None:
+                logger.debug('No {} for {}-{}'.format(source_field, cls_name, ujt.pk))
+                rel_obj = getattr(ujt, source_field)
+            if rel_obj is None or rel_obj.organization_id is None:
+                logger.debug('No organization for {}-{}'.format(cls_name, ujt.pk))
                 break
+            ujt.organization_id = rel_obj.organization_id
+            ujt.save(update_fields=['organization_id'])
+            updated_ujt += 1
+            logger.debug('Migrated {}-{} organization field for {}'.format(
+                cls_name, ujt.pk, ujt.organization_id
+            ))
+            break
         else:
             # no migration needed for system jobs
             if model_name != 'systemjobtemplate':
+                logger.info(ujt.__dict__)
+                logger.info('model name {}-{}'.format(model_name, ujt.pk))
                 raise Exception('unexpected type')
     logger.info('Migrated organization field for {} UJTs'.format(updated_ujt))
     # MIGRATE_TEMPLATE_FIELD = (
