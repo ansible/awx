@@ -23,8 +23,8 @@ const Button = styled(PFButton)`
 `;
 
 const MenuControls = ({
-  onScrollTop,
-  onScrollBottom,
+  onScrollFirst,
+  onScrollLast,
   onScrollNext,
   onScrollPrevious,
 }) => (
@@ -32,16 +32,20 @@ const MenuControls = ({
     <Button variant="plain">
       <PlusIcon />
     </Button>
-    <Button onClick={onScrollPrevious} variant="plain">
+    <Button
+      aria-label="scroll previous"
+      onClick={onScrollPrevious}
+      variant="plain"
+    >
       <AngleUpIcon />
     </Button>
-    <Button onClick={onScrollNext} variant="plain">
+    <Button aria-label="scroll next" onClick={onScrollNext} variant="plain">
       <AngleDownIcon />
     </Button>
-    <Button onClick={onScrollTop} variant="plain">
+    <Button aria-label="scroll first" onClick={onScrollFirst} variant="plain">
       <AngleDoubleUpIcon />
     </Button>
-    <Button onClick={onScrollBottom} variant="plain">
+    <Button aria-label="scroll last" onClick={onScrollLast} variant="plain">
       <AngleDoubleDownIcon />
     </Button>
   </Wrapper>

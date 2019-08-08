@@ -15,7 +15,7 @@ import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
 import JobEvent from './JobEvent';
 import JobEventSkeleton from './JobEventSkeleton';
-import MenuControls from './shared/MenuControls';
+import MenuControls from './MenuControls';
 
 const OutputHeader = styled.div`
   font-weight: var(--pf-global--FontWeight--bold);
@@ -52,7 +52,7 @@ function range(low, high) {
 class JobOutput extends Component {
   constructor(props) {
     super(props);
-
+    this.listRef = React.createRef();
     this.state = {
       contentError: null,
       hasContentLoading: true,
@@ -68,13 +68,14 @@ class JobOutput extends Component {
 
     this.loadJobEvents = this.loadJobEvents.bind(this);
     this.rowRenderer = this.rowRenderer.bind(this);
-    this.handleScrollTop = this.handleScrollTop.bind(this);
-    this.handleScrollBottom = this.handleScrollBottom.bind(this);
+    this.handleScrollFirst = this.handleScrollFirst.bind(this);
+    this.handleScrollLast = this.handleScrollLast.bind(this);
     this.handleScrollNext = this.handleScrollNext.bind(this);
     this.handleScrollPrevious = this.handleScrollPrevious.bind(this);
     this.handleResize = this.handleResize.bind(this);
     this.isRowLoaded = this.isRowLoaded.bind(this);
     this.loadMoreRows = this.loadMoreRows.bind(this);
+    this.scrollToRow = this.scrollToRow.bind(this);
   }
 
   componentDidMount() {
@@ -93,11 +94,11 @@ class JobOutput extends Component {
         this.cache.clear(n);
       });
     if (shouldRecomputeRowHeights) {
-      this.listRef.recomputeRowHeights();
+      if (this.listRef.recomputeRowHeights) {
+        this.listRef.recomputeRowHeights();
+      }
     }
   }
-
-  listRef = React.createRef();
 
   async loadJobEvents() {
     const { job } = this.props;
@@ -193,25 +194,29 @@ class JobOutput extends Component {
     });
   }
 
+  scrollToRow(rowIndex) {
+    this.listRef.scrollToRow(rowIndex);
+  }
+
   handleScrollPrevious() {
     const startIndex = this.listRef.Grid._renderedRowStartIndex;
     const stopIndex = this.listRef.Grid._renderedRowStopIndex;
     const scrollRange = stopIndex - startIndex + 1;
-    this.listRef.scrollToRow(Math.max(0, startIndex - scrollRange));
+    this.scrollToRow(Math.max(0, startIndex - scrollRange));
   }
 
   handleScrollNext() {
     const stopIndex = this.listRef.Grid._renderedRowStopIndex;
-    this.listRef.scrollToRow(stopIndex - 1);
+    this.scrollToRow(stopIndex - 1);
   }
 
-  handleScrollTop() {
-    this.listRef.scrollToRow(0);
+  handleScrollFirst() {
+    this.scrollToRow(0);
   }
 
-  handleScrollBottom() {
+  handleScrollLast() {
     const { remoteRowCount } = this.state;
-    this.listRef.scrollToRow(remoteRowCount - 1);
+    this.scrollToRow(remoteRowCount - 1);
   }
 
   handleResize({ width }) {
@@ -239,8 +244,8 @@ class JobOutput extends Component {
         <OutputHeader>{job.name}</OutputHeader>
         <OutputToolbar>
           <MenuControls
-            onScrollTop={this.handleScrollTop}
-            onScrollBottom={this.handleScrollBottom}
+            onScrollFirst={this.handleScrollFirst}
+            onScrollLast={this.handleScrollLast}
             onScrollNext={this.handleScrollNext}
             onScrollPrevious={this.handleScrollPrevious}
           />
@@ -261,13 +266,13 @@ class JobOutput extends Component {
                         registerChild(ref);
                       }}
                       deferredMeasurementCache={this.cache}
-                      height={height}
+                      height={height || 1}
                       onRowsRendered={onRowsRendered}
                       rowCount={remoteRowCount}
                       rowHeight={this.cache.rowHeight}
                       rowRenderer={this.rowRenderer}
                       scrollToAlignment="start"
-                      width={width}
+                      width={width || 1}
                       overscanRowCount={20}
                     />
                   );
