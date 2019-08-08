@@ -65,6 +65,14 @@ def test_cancel_job_explanation(unified_job):
     unified_job.save.assert_called_with(update_fields=['cancel_flag', 'start_args', 'status', 'job_explanation'])
 
 
+def test_organization_copy_to_jobs():
+    '''
+    All unified job types should infer their organization from their template organization
+    '''
+    for cls in UnifiedJobTemplate.__subclasses__():
+        assert 'organization' in cls._get_unified_job_field_names()
+
+
 def test_log_representation():
     '''
     Common representation used inside of log messages

@@ -66,13 +66,6 @@ class JobOptions(BaseModel):
     class Meta:
         abstract = True
 
-    organization = models.ForeignKey(
-        'Organization',
-        blank=True,
-        null=True,
-        on_delete=models.SET_NULL,
-        related_name='%(class)ss',
-    )
     diff_mode = models.BooleanField(
         default=False,
         help_text=_("If enabled, textual changes made to any templated files on the host are shown in the standard output"),
@@ -278,7 +271,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
     @classmethod
     def _get_unified_job_field_names(cls):
         return set(f.name for f in JobOptions._meta.fields) | set(
-            ['name', 'description', 'schedule', 'survey_passwords', 'labels', 'credentials',
+            ['name', 'description', 'organization', 'schedule', 'survey_passwords', 'labels', 'credentials',
              'job_slice_number', 'job_slice_count']
         )
 
@@ -1153,7 +1146,7 @@ class SystemJobTemplate(UnifiedJobTemplate, SystemJobOptions):
 
     @classmethod
     def _get_unified_job_field_names(cls):
-        return ['name', 'description', 'job_type', 'extra_vars']
+        return ['name', 'description', 'organization', 'job_type', 'extra_vars']
 
     def get_absolute_url(self, request=None):
         return reverse('api:system_job_template_detail', kwargs={'pk': self.pk}, request=request)

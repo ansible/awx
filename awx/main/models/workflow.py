@@ -309,7 +309,7 @@ class WorkflowJobOptions(BaseModel):
     def _get_unified_job_field_names(cls):
         return set(f.name for f in WorkflowJobOptions._meta.fields) | set(
             # NOTE: if other prompts are added to WFJT, put fields in WJOptions, remove inventory
-            ['name', 'description', 'schedule', 'survey_passwords', 'labels', 'inventory']
+            ['name', 'description', 'organization', 'schedule', 'survey_passwords', 'labels', 'inventory']
         )
 
     def _create_workflow_nodes(self, old_node_list, user=None):
@@ -354,13 +354,13 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
     class Meta:
         app_label = 'main'
 
-    organization = models.ForeignKey(
-        'Organization',
-        blank=True,
-        null=True,
-        on_delete=models.SET_NULL,
-        related_name='workflows',
-    )
+    # tmp_organization = models.ForeignKey(
+    #     'Organization',
+    #     blank=True,
+    #     null=True,
+    #     on_delete=models.SET_NULL,
+    #     related_name='workflows',
+    # )
     inventory = models.ForeignKey(
         'Inventory',
         related_name='%(class)ss',

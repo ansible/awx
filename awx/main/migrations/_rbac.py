@@ -1,6 +1,8 @@
 import logging
 from time import time
 
+from django.db.models import F
+
 from awx.main.fields import update_role_parentage_for_instance
 from awx.main.models.rbac import Role, batch_role_ancestor_rebuilding
 
@@ -45,23 +47,80 @@ def delete_all_user_roles(apps, schema_editor):
         role.delete()
 
 
-def migrate_jt_organization(apps, schema_editor):
+def migrate_ujt_organization(apps, schema_editor):
     '''
     Move organization from project to job template
     '''
-    JobTemplate = apps.get_model('main', 'JobTemplate')
-    updated_ct = 0
-    for jt in JobTemplate.objects.iterator():
-        if not jt.project:
-            continue
-        project = jt.project
-        if not project.organization:
-            continue
-        jt.organization = project.organization
-        jt.save(update_fields=['organization'])
-        updated_ct += 1
-    logger.info('Migrated project to JT field for {} JTs'.format(updated_ct))
-    return
+    MIGRATE_TEMPLATE_FIELD = (
+        # Job Templates had an implicit organization via their project
+        ('JobTemplate', 'project.organization'),
+        # Inventory Sources had an implicit organization via their inventory
+        ('InventorySource', 'inventory.organization'),
+        # Projects had an explicit organization in their subclass table
+        ('Project', 'tmp_organization'),
+        # Workflow JTs also had an explicit organization in their subclass table
+        ('WorkflowJobTemplate', 'tmp_organization'),
+    )
+    # Both the implicit organizations and the explicit organizations are moved
+    # all the way up to the base model, UnifiedJobTemplate first
+    UnifiedJobTemplate = apps.get_model('main', 'UnifiedJobTemplate')
+    for cls_name, source_field in MIGRATE_TEMPLATE_FIELD:
+        cls = apps.get_model('main', cls_name)
+        name = cls._meta.model_name
+        logger.debug('Migrating {} from {} to new organization field'.format(cls_name, source_field))
+        r = UnifiedJobTemplate.objects.filter(**{'{}__isnull'.format(name): False}).update(
+            organization=F('{}.{}'.format(name, source_field))
+        )
+        logger.info('result')
+        logger.info(str(r))
+    # # Job Templates had an implicit organization via their project
+    # InventorySource = apps.get_model('main', 'InventorySource')
+    # r = UnifiedJobTemplate.objects.filter(inventorysource__isnull=False).update(organization=F('jobtemplate.project.organization'))
+    # logger.info(str(r))
+    # # Job Templates had an implicit organization via their project
+    # Project = apps.get_model('main', 'Project')
+    # r = UnifiedJobTemplate.objects.filter(project__isnull=False).update(organization=F('jobtemplate.project.organization'))
+    # logger.info(str(r))
+    # # Job Templates had an implicit organization via their project
+    # WorkflowJobTemplate = apps.get_model('main', 'WorkflowJobTemplate')
+    # r = UnifiedJobTemplate.objects.filter(workflowjobtemplate__isnull=False).update(organization=F('jobtemplate.project.organization'))
+    # logger.info(str(r))
+
+    MIGRATE_JOB_FIELD = (
+        # Jobs inherited project from job templates as a convience field
+        ('Job', 'project.organization'),
+        # Inventory Sources had an convience field of inventory
+        ('InventoryUpdate', 'inventory.organization'),
+        # Project Updates did not have a direct organization field, obtained it from project
+        ('ProjectUpdate', 'project.tmp_organization'),
+        # Workflow Jobs are handled same as project updates
+        # Sliced jobs are a special case, but old data is not given special treatment for simplicity
+        ('WorkflowJob', 'workflow_job_template.tmp_organization'),
+    )
+    # UnifiedJob organization field migrated here
+    UnifiedJob = apps.get_model('main', 'UnifiedJob')
+    for cls_name, source_field in MIGRATE_JOB_FIELD:
+        cls = apps.get_model('main', cls_name)
+        name = cls._meta.model_name
+        logger.debug('Migrating {} from {} to new organization field'.format(cls_name, source_field))
+        r = UnifiedJob.objects.filter(**{'{}__isnull'.format(name): False}).update(
+            organization=F('{}.{}'.format(name, source_field))
+        )
+        logger.info('result')
+        logger.info(str(r))
+
+    # updated_ct = 0
+    # for jt in JobTemplate.objects.iterator():
+    #     if not jt.project:
+    #         continue
+    #     project = jt.project
+    #     if not project.organization:
+    #         continue
+    #     jt.organization = project.organization
+    #     jt.save(update_fields=['organization'])
+    #     updated_ct += 1
+    # logger.info('Migrated project to JT field for {} JTs'.format(updated_ct))
+    # return
 
 
 def rebuild_role_hierarchy(apps, schema_editor):
