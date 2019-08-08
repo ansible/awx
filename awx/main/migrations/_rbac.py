@@ -54,46 +54,51 @@ def migrate_ujt_organization(apps, schema_editor):
     '''
     updated_ujt = 0
     UnifiedJobTemplate = apps.get_model('main', 'UnifiedJobTemplate')
-    MIGRATE_TEMPLATE_FIELD = (
+    ContentType = apps.get_model('contenttypes', 'ContentType')
+    # MIGRATE_TEMPLATE_FIELD = (
+    #     # Job Templates had an implicit organization via their project
+    #     ('jobtemplate', 'project'),
+    #     # Inventory Sources had an implicit organization via their inventory
+    #     ('inventorysource', 'inventory'),
+    #     # Projects had an explicit organization in their subclass table
+    #     ('project', None),
+    #     # Workflow JTs also had an explicit organization in their subclass table
+    #     ('workflowjobtemplate', None),
+    # )
+    org_lookups = {
         # Job Templates had an implicit organization via their project
-        ('jobtemplate', 'project'),
+        'jobtemplate': 'project',
         # Inventory Sources had an implicit organization via their inventory
-        ('inventorysource', 'inventory'),
+        'inventorysource': 'inventory',
         # Projects had an explicit organization in their subclass table
-        ('project', None),
+        'project': None,
         # Workflow JTs also had an explicit organization in their subclass table
-        ('workflowjobtemplate', None),
-    )
+        'workflowjobtemplate': None
+    }
+    ujt_cts = {}
+    for cls_name in org_lookups:
+        ujt_cts[ContentType.objects.get(model=cls_name).id] = cls_name
+    other_ujts = set(ContentType.objects.get(model=cls_name) for cls_name in (
+        'systemjobtemplate', 'workflowapprovaltemplate'))
     for ujt in UnifiedJobTemplate.objects.iterator():
-        logger.info(ujt.__dict__)
-        logger.info(ujt._meta.__dict__)
-        model_name = ujt._meta.model_name
-        for cls_name, source_field in MIGRATE_TEMPLATE_FIELD:
-            rel_obj = getattr(ujt, cls_name)
-            if rel_obj is None:
-                logger.debug('no sub type {}-{}'.format(cls_name, ujt.pk))
-                continue
-            logger.debug('rel obj')
-            print(rel_obj.__dict__)
-            if source_field is not None:
-                logger.debug('No {} for {}-{}'.format(source_field, cls_name, ujt.pk))
-                rel_obj = getattr(ujt, source_field)
-            if rel_obj is None or rel_obj.organization_id is None:
-                logger.debug('No organization for {}-{}'.format(cls_name, ujt.pk))
-                break
-            ujt.organization_id = rel_obj.organization_id
-            ujt.save(update_fields=['organization_id'])
-            updated_ujt += 1
-            logger.debug('Migrated {}-{} organization field for {}'.format(
-                cls_name, ujt.pk, ujt.organization_id
-            ))
+        if ujt.polymorphic_ctype in other_ujts:
+            logger.debug('No related organization for {}-{}'.format(ujt.name, ujt.pk))
+            continue
+        cls_name = ujt_cts[ujt.polymorphic_ctype_id]
+        source_field = org_lookups[cls_name]
+        # polymorphic does not work the same in migrations, get the subclass object
+        rel_obj = getattr(ujt, cls_name)
+        if source_field is not None:
+            rel_obj = getattr(rel_obj, source_field)
+        if rel_obj is None or rel_obj.organization_id is None:
+            logger.debug('No organization for {} {}-{}'.format(cls_name, ujt.name, ujt.pk))
             break
-        else:
-            # no migration needed for system jobs
-            if model_name != 'systemjobtemplate':
-                logger.info(ujt.__dict__)
-                logger.info('model name {}-{}'.format(model_name, ujt.pk))
-                raise Exception('unexpected type')
+        ujt.tmp_organization_id = rel_obj.organization_id
+        ujt.save(update_fields=['tmp_organization_id'])
+        updated_ujt += 1
+        logger.debug('Migrated {} {}-{} organization field, org pk={}'.format(
+            cls_name, ujt.name, ujt.pk, ujt.tmp_organization_id
+        ))
     logger.info('Migrated organization field for {} UJTs'.format(updated_ujt))
     # MIGRATE_TEMPLATE_FIELD = (
     #     # Job Templates had an implicit organization via their project
@@ -140,41 +145,55 @@ def migrate_ujt_organization(apps, schema_editor):
     # r = UnifiedJobTemplate.objects.filter(workflowjobtemplate__isnull=False).update(organization=F('jobtemplate.project.organization'))
     # logger.info(str(r))
 
-    MIGRATE_JOB_FIELD = (
+    # MIGRATE_JOB_FIELD = (
+    #     # Jobs inherited project from job templates as a convience field
+    #     ('Job', 'project'),
+    #     # Inventory Sources had an convience field of inventory
+    #     ('InventoryUpdate', 'inventory'),
+    #     # Project Updates did not have a direct organization field, obtained it from project
+    #     ('ProjectUpdate', 'project'),
+    #     # Workflow Jobs are handled same as project updates
+    #     # Sliced jobs are a special case, but old data is not given special treatment for simplicity
+    #     ('WorkflowJob', 'workflow_job_template'),
+    # )
+    job_org_lookups = {
         # Jobs inherited project from job templates as a convience field
-        ('Job', 'project'),
+        'job': 'project',
         # Inventory Sources had an convience field of inventory
-        ('InventoryUpdate', 'inventory'),
+        'inventoryupdate': 'inventory',
         # Project Updates did not have a direct organization field, obtained it from project
-        ('ProjectUpdate', 'project'),
+        'projectupdate': 'project',
         # Workflow Jobs are handled same as project updates
         # Sliced jobs are a special case, but old data is not given special treatment for simplicity
-        ('WorkflowJob', 'workflow_job_template'),
-    )
+        'workflowjob': 'workflow_job_template'
+    }
+    uj_cts = {}
+    for cls_name in job_org_lookups:
+        uj_cts[ContentType.objects.get(model=cls_name).id] = cls_name
+    other_ujs = set(ContentType.objects.get(model=cls_name) for cls_name in ('systemjob', 'workflowapproval'))
     # UnifiedJob organization field migrated here
     UnifiedJob = apps.get_model('main', 'UnifiedJob')
     updated_uj = 0
     for uj in UnifiedJob.objects.iterator():
-        model_name = uj._meta.model_name
-        for cls_name, source_field in MIGRATE_JOB_FIELD:
-            if model_name == cls_name:
-                rel_obj = uj
-                if source_field is not None:
-                    rel_obj = getattr(uj, source_field)
-                if rel_obj is None or rel_obj.organization_id is None:
-                    logger.debug('No organization for {}-{}'.format(model_name, uj.pk))
-                    break
-                uj.organization_id = rel_obj.organization_id
-                uj.save(update_fields=['organization_id'])
-                updated_uj += 1
-                logger.debug('Migrated {}-{} organization field for {}'.format(
-                    model_name, uj.pk, uj.organization_id
-                ))
-                break
-        else:
-            # no migration needed for system jobs
-            if model_name != 'systemjob':
-                raise Exception('unexpected type')
+        if uj.polymorphic_ctype in other_ujs:
+            logger.debug('No related organization for {}-{}'.format(uj.name, uj.pk))
+            continue
+        cls_name = uj_cts[uj.polymorphic_ctype_id]
+        source_field = job_org_lookups[cls_name]
+        # polymorphic does not work the same in migrations, get the subclass object
+        rel_obj = getattr(uj, cls_name)
+        rel_obj = getattr(rel_obj, source_field)
+        if rel_obj is None or rel_obj.organization_id is None:
+            logger.debug('No organization for {} {}-{}'.format(cls_name, uj.name, uj.pk))
+            break
+
+        uj.tmp_organization_id = rel_obj.organization_id
+        uj.save(update_fields=['tmp_organization_id'])
+        updated_uj += 1
+        logger.debug('Migrated {} {}-{} organization field, org pk={}'.format(
+            cls_name, uj.name, uj.pk, uj.tmp_organization_id
+        ))
+
     logger.info('Migrated organization field for {} UJs'.format(updated_uj))
 
     # for cls_name, source_field in MIGRATE_JOB_FIELD:
