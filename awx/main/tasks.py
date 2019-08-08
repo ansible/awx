@@ -330,10 +330,12 @@ def send_notifications(notification_list, job_id=None):
 
 @task()
 def gather_analytics():
-    if settings.PENDO_TRACKING_STATE == 'off':
+    if not settings.INSIGHTS_TRACKING_STATE:
         return
     try:
         tgz = analytics.gather()
+        if not tgz:
+            return
         logger.debug('gathered analytics: {}'.format(tgz))
         analytics.ship(tgz)
     finally:
