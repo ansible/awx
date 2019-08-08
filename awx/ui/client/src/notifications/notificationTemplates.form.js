@@ -608,7 +608,7 @@ export default ['i18n', function(i18n) {
                 type: 'syntax_highlight',
                 mode: 'jinja2',
                 default: '',
-                ngShow: "customize_messages",
+                ngShow: "customize_messages && notification_type.value != 'webhook'",
                 rows: 2,
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
             },
@@ -618,7 +618,10 @@ export default ['i18n', function(i18n) {
                 type: 'syntax_highlight',
                 mode: 'jinja2',
                 default: '',
-                ngShow: "customize_messages && notification_type.value == 'email'",
+                ngShow: "customize_messages && " +
+                  "(notification_type.value == 'email' " +
+                  "|| notification_type.value == 'pagerduty' " +
+                  "|| notification_type.value == 'webhook')",
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
             },
             success_message: {
@@ -627,7 +630,7 @@ export default ['i18n', function(i18n) {
                 type: 'syntax_highlight',
                 mode: 'jinja2',
                 default: '',
-                ngShow: "customize_messages",
+                ngShow: "customize_messages && notification_type.value != 'webhook'",
                 rows: 2,
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
             },
@@ -637,7 +640,10 @@ export default ['i18n', function(i18n) {
                 type: 'syntax_highlight',
                 mode: 'jinja2',
                 default: '',
-                ngShow: "customize_messages && notification_type.value == 'email'",
+                ngShow: "customize_messages && " +
+                  "(notification_type.value == 'email' " +
+                  "|| notification_type.value == 'pagerduty' " +
+                  "|| notification_type.value == 'webhook')",
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
             },
             error_message: {
@@ -646,7 +652,7 @@ export default ['i18n', function(i18n) {
                 type: 'syntax_highlight',
                 mode: 'jinja2',
                 default: '',
-                ngShow: "customize_messages",
+                ngShow: "customize_messages && notification_type.value != 'webhook'",
                 rows: 2,
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
             },
@@ -656,7 +662,10 @@ export default ['i18n', function(i18n) {
                 type: 'syntax_highlight',
                 mode: 'jinja2',
                 default: '',
-                ngShow: "customize_messages && notification_type.value == 'email'",
+                ngShow: "customize_messages && " +
+                  "(notification_type.value == 'email' " +
+                  "|| notification_type.value == 'pagerduty' " +
+                  "|| notification_type.value == 'webhook')",
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
             },
         },
