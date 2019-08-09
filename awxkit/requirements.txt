@@ -1,0 +1,9 @@
+PyYAML>=5.1
+cryptography
+flake8
+prometheus-client
+python-dateutil
+requests
+termcolor
+toposort
+websocket-client>=0.54.0

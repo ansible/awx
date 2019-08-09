@@ -1,0 +1,4 @@
+include requirements.txt
+include setup.py
+recursive-include awxkit *.py *.yml *.md
+recursive-include test *.py *.yml *.md
