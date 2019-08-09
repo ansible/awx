@@ -47,82 +47,7 @@ def delete_all_user_roles(apps, schema_editor):
         role.delete()
 
 
-def _migrate_unified_organization_iterator(apps, unified_cls_name, org_field_mapping, backward=False):
-    """Slow method to do operation
-    """
-    UnifiedClass = apps.get_model('main', unified_cls_name)
-    ContentType = apps.get_model('contenttypes', 'ContentType')
-    changed_ct = 0
-    unified_ct_mapping = {}
-    for cls_name in org_field_mapping:
-        unified_ct_mapping[ContentType.objects.get(model=cls_name).id] = cls_name
-
-    for obj in UnifiedClass.objects.iterator():
-        if obj.polymorphic_ctype_id not in unified_ct_mapping:
-            logger.debug('No organization for {}-{}'.format(obj.name, obj.pk))
-            continue
-        cls_name = unified_ct_mapping[obj.polymorphic_ctype_id]
-        source_field = org_field_mapping[cls_name]
-        # polymorphic does not work the same in migrations, get the subclass object
-        rel_obj = getattr(obj, cls_name)
-        if source_field is not None:
-            rel_obj = getattr(rel_obj, source_field)
-        if backward:
-            if obj.tmp_organization_id is None:
-                continue
-        else:
-            if rel_obj is None or rel_obj.organization_id is None:
-                logger.debug('No organization for {} {}-{}'.format(cls_name, obj.name, obj.pk))
-                continue
-
-        if backward:
-            rel_obj.organization_id = obj.tmp_organization_id
-            rel_obj.save(update_fields=['organization_id'])
-        else:
-            obj.tmp_organization_id = rel_obj.organization_id
-            obj.save(update_fields=['tmp_organization_id'])
-        changed_ct += 1
-        logger.debug('Migrated {} {}-{} organization field, org pk={}'.format(
-            cls_name, obj.name, obj.pk, obj.tmp_organization_id
-        ))
-
-    logger.info('Migrated organization field for {} {}s'.format(changed_ct, unified_cls_name))
-
-
-def _migrate_unified_organization(apps, unified_cls_name, org_field_mapping):
-    """Given a unified base model (either UJT or UJ)
-    and a dict org_field_mapping which gives related model to get org from
-    saves organization for those objects to the temporary migration
-    variable tmp_organization on the unified model
-    (optimized method)
-    """
-    UnifiedClass = apps.get_model('main', unified_cls_name)
-    ContentType = apps.get_model('contenttypes', 'ContentType')
-
-    for cls_name, source_field in org_field_mapping.items():
-        print_field = []
-        if source_field:
-            print_field.append(source_field)
-        print_field.append('organization')
-        logger.debug('Migrating {} from {} to new organization field'.format(cls_name, '__'.join(print_field)))
-
-        rel_model = apps.get_model('main', cls_name)
-        unified_field = UnifiedClass._meta.get_field(cls_name)
-        unified_field_reverse = unified_field.remote_field.name
-        if source_field is None:
-            sub_qs = rel_model.objects.filter(**{
-                unified_field_reverse: OuterRef('id')}).values_list('organization')
-        else:
-            sub_qs = rel_model.objects.filter(**{
-                unified_field_reverse: OuterRef('id')}).values_list('{}__organization'.format(source_field))
-
-        this_ct = ContentType.objects.get(model=cls_name)
-        r = UnifiedClass.objects.filter(polymorphic_ctype=this_ct).update(tmp_organization=Subquery(sub_qs))
-        if r:
-            logger.info('Organization migration on {} affected {} rows.'.format(cls_name, r))
-
-
-TEMPLATE_ORG_LOOKUPS = {
+UNIFIED_ORG_LOOKUPS = {
     # Job Templates had an implicit organization via their project
     'jobtemplate': 'project',
     # Inventory Sources had an implicit organization via their inventory
@@ -130,11 +55,7 @@ TEMPLATE_ORG_LOOKUPS = {
     # Projects had an explicit organization in their subclass table
     'project': None,
     # Workflow JTs also had an explicit organization in their subclass table
-    'workflowjobtemplate': None
-}
-
-
-JOB_ORG_LOOKUPS = {
+    'workflowjobtemplate': None,
     # Jobs inherited project from job templates as a convience field
     'job': 'project',
     # Inventory Sources had an convience field of inventory
@@ -149,18 +70,112 @@ JOB_ORG_LOOKUPS = {
 }
 
 
+def _migrate_unified_organization_iterator(apps, unified_cls_name, backward=False):
+    """Slow method to do operation
+    """
+    UnifiedClass = apps.get_model('main', unified_cls_name)
+    ContentType = apps.get_model('contenttypes', 'ContentType')
+    changed_ct = 0
+    unified_ct_mapping = {}
+    for cls_name in UNIFIED_ORG_LOOKUPS:
+        unified_ct_mapping[ContentType.objects.get(model=cls_name).id] = cls_name
+
+    for obj in UnifiedClass.objects.iterator():
+        if obj.polymorphic_ctype_id not in unified_ct_mapping:
+            logger.debug('No organization for {}-{}'.format(obj.name, obj.pk))
+            continue
+        cls_name = unified_ct_mapping[obj.polymorphic_ctype_id]
+        source_field = UNIFIED_ORG_LOOKUPS[cls_name]
+        # polymorphic does not work the same in migrations, get the subclass object
+        rel_obj = getattr(obj, cls_name)
+        if source_field is not None:
+            rel_obj = getattr(rel_obj, source_field)
+        if backward:
+            if obj.tmp_organization_id is None:
+                continue
+        else:
+            if rel_obj is None or rel_obj.organization_id is None:
+                logger.debug('No organization for {} {}-{}'.format(cls_name, obj.name, obj.pk))
+                continue
+
+        if backward:
+            rel_obj.organization_id = obj.tmp_organization_id
+            logger.info(rel_obj)
+            logger.info(cls_name)
+            rel_obj.save(update_fields=['organization_id'])
+        else:
+            obj.tmp_organization_id = rel_obj.organization_id
+            obj.save(update_fields=['tmp_organization_id'])
+        changed_ct += 1
+        logger.debug('Migrated {} {}-{} organization field, org pk={}'.format(
+            cls_name, obj.name, obj.pk, obj.tmp_organization_id
+        ))
+
+    logger.info('Migrated organization field for {} {}s'.format(changed_ct, unified_cls_name))
+
+
+def implicit_org_subquery(UnifiedClass, cls, backward=False):
+    """Returns a subquery that returns the so-called organization for objects
+    in the class in question, before migration to the explicit unified org field.
+    In some cases, this can still be applied post-migration.
+    """
+    if cls._meta.model_name not in UNIFIED_ORG_LOOKUPS:
+        return None
+    cls_name = cls._meta.model_name
+    source_field = UNIFIED_ORG_LOOKUPS[cls_name]
+
+    unified_field = UnifiedClass._meta.get_field(cls_name)
+    unified_ptr = unified_field.remote_field.name
+    if backward:
+        return UnifiedClass.objects.filter(**{cls_name: OuterRef('id')}).values_list('tmp_organization')
+    elif source_field is None:
+        return cls.objects.filter(**{unified_ptr: OuterRef('id')}).values_list('organization')
+    else:
+        return cls.objects.filter(**{
+            unified_ptr: OuterRef('id')}).values_list('{}__organization'.format(source_field))
+
+
+def _migrate_unified_organization(apps, unified_cls_name, backward=False):
+    """Given a unified base model (either UJT or UJ)
+    and a dict org_field_mapping which gives related model to get org from
+    saves organization for those objects to the temporary migration
+    variable tmp_organization on the unified model
+    (optimized method)
+    """
+    UnifiedClass = apps.get_model('main', unified_cls_name)
+    ContentType = apps.get_model('contenttypes', 'ContentType')
+
+    for cls in UnifiedClass.__subclasses__():
+        cls_name = cls._meta.model_name
+        if backward and UNIFIED_ORG_LOOKUPS.get(cls_name, 'not-found') is not None:
+            logger.debug('Not reverse migrating {}, existing data should remain valid'.format(cls_name))
+            continue
+        logger.debug('Migrating {} to new organization field'.format(cls_name))
+
+        sub_qs = implicit_org_subquery(UnifiedClass, cls, backward=backward)
+        if sub_qs is None:
+            logger.debug('Class {} has no organization migration'.format(cls_name))
+            continue
+
+        this_ct = ContentType.objects.get(model=cls_name)
+        if backward:
+            r = cls.objects.update(organization=Subquery(sub_qs))
+        else:
+            r = UnifiedClass.objects.filter(polymorphic_ctype=this_ct).update(tmp_organization=Subquery(sub_qs))
+        if r:
+            logger.info('Organization migration on {} affected {} rows.'.format(cls_name, r))
+
+
 def migrate_ujt_organization(apps, schema_editor):
     '''Move organization field to UJT and UJ models'''
-    _migrate_unified_organization(apps, 'UnifiedJobTemplate', TEMPLATE_ORG_LOOKUPS)
-    _migrate_unified_organization(apps, 'UnifiedJob', JOB_ORG_LOOKUPS)
+    _migrate_unified_organization(apps, 'UnifiedJobTemplate')
+    _migrate_unified_organization(apps, 'UnifiedJob')
 
 
 def migrate_ujt_organization_backward(apps, schema_editor):
     '''Move organization field from UJT and UJ models back to their original places'''
-    _migrate_unified_organization_iterator(
-        apps, 'UnifiedJobTemplate', TEMPLATE_ORG_LOOKUPS, backward=True)
-    _migrate_unified_organization_iterator(
-        apps, 'UnifiedJob', JOB_ORG_LOOKUPS, backward=True)
+    _migrate_unified_organization(apps, 'UnifiedJobTemplate', backward=True)
+    _migrate_unified_organization(apps, 'UnifiedJob', backward=True)
 
 
 def rebuild_role_hierarchy(apps, schema_editor):
