@@ -354,13 +354,6 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
     class Meta:
         app_label = 'main'
 
-    # tmp_organization = models.ForeignKey(
-    #     'Organization',
-    #     blank=True,
-    #     null=True,
-    #     on_delete=models.SET_NULL,
-    #     related_name='workflows',
-    # )
     inventory = models.ForeignKey(
         'Inventory',
         related_name='%(class)ss',

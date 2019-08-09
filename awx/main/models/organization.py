@@ -94,6 +94,13 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin, CustomVi
     def get_absolute_url(self, request=None):
         return reverse('api:organization_detail', kwargs={'pk': self.pk}, request=request)
 
+    @property
+    def projects(self):
+        """This is an old related name from when Project linked to organization
+        as opposed to UnifiedJobTemplate.
+        """
+        return self.unifiedjobtemplates.filter(project__isnull=False)
+
     '''
     RelatedJobsMixin
     '''
