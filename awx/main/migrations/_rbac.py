@@ -121,7 +121,7 @@ def _migrate_unified_organization(apps, unified_cls_name, backward=False):
             logger.debug('Class {} has no organization migration'.format(cls_name))
             continue
 
-        this_ct = ContentType.objects.get(model=cls_name)
+        this_ct = ContentType.objects.get_for_model(cls)
         if backward:
             r = cls.objects.order_by().update(organization=sub_qs)
         else:
