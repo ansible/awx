@@ -10,7 +10,7 @@ import {
 import styled from 'styled-components';
 import CardCloseButton from '@components/CardCloseButton';
 import RoutedTabs from '@components/RoutedTabs';
-import ContentError, { NotFoundError } from '@components/ContentError';
+import ContentError from '@components/ContentError';
 import { OrganizationAccess } from './OrganizationAccess';
 import OrganizationDetail from './OrganizationDetail';
 import OrganizationEdit from './OrganizationEdit';
@@ -239,14 +239,13 @@ class Organization extends Component {
               key="not-found"
               path="*"
               render={() => (
-                <NotFoundError>
-                  {i18n._(`The page you requested could not be found.`)}{' '}
+                <ContentError isNotFound>
                   {match.params.id && (
                     <Link to={`/organizations/${match.params.id}/details`}>
                       {i18n._(`View Organization Details`)}
                     </Link>
                   )}
-                </NotFoundError>
+                </ContentError>
               )}
             />
             ,

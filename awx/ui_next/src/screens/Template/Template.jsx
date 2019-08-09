@@ -4,7 +4,7 @@ import { withI18n } from '@lingui/react';
 import { Card, CardHeader, PageSection } from '@patternfly/react-core';
 import { Switch, Route, Redirect, withRouter, Link } from 'react-router-dom';
 import CardCloseButton from '@components/CardCloseButton';
-import ContentError, { NotFoundError } from '@components/ContentError';
+import ContentError from '@components/ContentError';
 import RoutedTabs from '@components/RoutedTabs';
 import JobTemplateDetail from './JobTemplateDetail';
 import { JobTemplatesAPI } from '@api';
@@ -120,8 +120,7 @@ class Template extends Component {
                 key="not-found"
                 path="*"
                 render={() => (
-                  <NotFoundError>
-                    {i18n._(`The page you requested could not be found.`)}{' '}
+                  <ContentError isNotFound>
                     {match.params.id && (
                       <Link
                         to={`/templates/${match.params.templateType}/${match.params.id}/details`}
@@ -129,7 +128,7 @@ class Template extends Component {
                         {i18n._(`View Template Details`)}
                       </Link>
                     )}
-                  </NotFoundError>
+                  </ContentError>
                 )}
               />,
             ]}

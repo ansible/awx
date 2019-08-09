@@ -1,12 +1,12 @@
 import React from 'react';
 import { PageSection, Card } from '@patternfly/react-core';
-import { NotFoundError } from '@components/ContentError';
+import ContentError from '@components/ContentError';
 
 function NotFound() {
   return (
     <PageSection>
       <Card className="awx-c-card">
-        <NotFoundError />
+        <ContentError isNotFound />
       </Card>
     </PageSection>
   );

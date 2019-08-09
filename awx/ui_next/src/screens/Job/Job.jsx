@@ -9,7 +9,7 @@ import {
   PageSection,
 } from '@patternfly/react-core';
 import { JobsAPI } from '@api';
-import ContentError, { NotFoundError } from '@components/ContentError';
+import ContentError from '@components/ContentError';
 import CardCloseButton from '@components/CardCloseButton';
 import RoutedTabs from '@components/RoutedTabs';
 
@@ -150,14 +150,13 @@ class Job extends Component {
                 key="not-found"
                 path="*"
                 render={() => (
-                  <NotFoundError>
-                    {i18n._(`The page you requested could not be found.`)}{' '}
+                  <ContentError isNotFound>
                     <Link
                       to={`/jobs/${match.params.type}/${match.params.id}/details`}
                     >
                       {i18n._(`View Job Details`)}
                     </Link>
-                  </NotFoundError>
+                  </ContentError>
                 )}
               />,
             ]}
