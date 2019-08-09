@@ -555,9 +555,9 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
     '''
     def _get_related_jobs(self):
         return UnifiedJob.objects.non_polymorphic().filter(
-            Q(Job___inventory=self) |
-            Q(InventoryUpdate__inventory=self) |
-            Q(AdHocCommand___inventory=self)
+            Q(job__inventory=self) |
+            Q(inventoryupdate__inventory=self) |
+            Q(adhoccommand__inventory=self)
         )
 
 
@@ -1032,8 +1032,8 @@ class Group(CommonModelNameNotUnique, RelatedJobsMixin):
     '''
     def _get_related_jobs(self):
         return UnifiedJob.objects.non_polymorphic().filter(
-            Q(Job___inventory=self.inventory) |
-            Q(InventoryUpdate___inventory_source__groups=self)
+            Q(Job__inventory=self.inventory) |
+            Q(InventoryUpdate__inventory_source__groups=self)
         )
 
 
