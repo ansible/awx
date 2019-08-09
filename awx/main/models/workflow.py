@@ -619,6 +619,9 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
 
 
 class WorkflowApprovalTemplate(UnifiedJobTemplate):
+
+    FIELDS_TO_PRESERVE_AT_COPY = ['description', 'timeout',]
+
     class Meta:
         app_label = 'main'
 

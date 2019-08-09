@@ -34,7 +34,8 @@ from rest_framework.negotiation import DefaultContentNegotiation
 # AWX
 from awx.api.filters import FieldLookupBackend
 from awx.main.models import (
-    UnifiedJob, UnifiedJobTemplate, User, Role, Credential
+    UnifiedJob, UnifiedJobTemplate, User, Role, Credential,
+    WorkflowJobTemplateNode, WorkflowApprovalTemplate
 )
 from awx.main.access import access_registry
 from awx.main.utils import (
@@ -882,6 +883,21 @@ class CopyAPIView(GenericAPIView):
                 create_kwargs[field.name] = CopyAPIView._decrypt_model_field_if_needed(
                     obj, field.name, field_val
                 )
+
+        # WorkflowJobTemplateNodes that represent an approval are *special*;
+        # when we copy them, we actually want to *copy* the UJT they point at
+        # rather than share the template reference between nodes in disparate
+        # workflows
+        if (
+            isinstance(obj, WorkflowJobTemplateNode) and
+            isinstance(getattr(obj, 'unified_job_template'), WorkflowApprovalTemplate)
+        ):
+            new_approval_template, sub_objs = CopyAPIView.copy_model_obj(
+                None, None, WorkflowApprovalTemplate,
+                obj.unified_job_template, creater
+            )
+            create_kwargs['unified_job_template'] = new_approval_template
+
         new_obj = model.objects.create(**create_kwargs)
         logger.debug('Deep copy: Created new object {}({})'.format(
             new_obj, model

@@ -2016,7 +2016,7 @@ class WorkflowJobTemplateAccess(NotificationAttachMixin, BaseAccess):
                     if self.user not in cred.use_role:
                         missing_credentials.append(cred.name)
                 ujt = node.unified_job_template
-                if ujt and not isinstance(ujt, WorkflowApprovalTemplate) and not self.user.can_access(UnifiedJobTemplate, 'start', ujt, validate_license=False):
+                if ujt and not self.user.can_access(UnifiedJobTemplate, 'start', ujt, validate_license=False):
                     missing_ujt.append(ujt.name)
             if missing_ujt:
                 self.messages['templates_unable_to_copy'] = missing_ujt
@@ -2828,6 +2828,13 @@ class WorkflowApprovalTemplateAccess(BaseAccess):
             return False
         else:
             return (self.check_related('workflow_approval_template', UnifiedJobTemplate, role_field='admin_role'))
+
+    def can_start(self, obj, validate_license=False):
+        # Super users can start any job
+        if self.user.is_superuser:
+            return True
+
+        return self.user in obj.workflow_job_template.execute_role
 
     def filtered_queryset(self):
         return self.model.objects.filter(
