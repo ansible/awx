@@ -127,12 +127,13 @@ def implicit_org_subquery(UnifiedClass, cls, backward=False):
     unified_field = UnifiedClass._meta.get_field(cls_name)
     unified_ptr = unified_field.remote_field.name
     if backward:
-        return UnifiedClass.objects.filter(**{cls_name: OuterRef('id')}).values_list('tmp_organization')
+        qs = UnifiedClass.objects.filter(**{cls_name: OuterRef('id')}).values_list('tmp_organization')
     elif source_field is None:
-        return cls.objects.filter(**{unified_ptr: OuterRef('id')}).values_list('organization')
+        qs = cls.objects.filter(**{unified_ptr: OuterRef('id')}).values_list('organization')
     else:
-        return cls.objects.filter(**{
+        qs = cls.objects.filter(**{
             unified_ptr: OuterRef('id')}).values_list('{}__organization'.format(source_field))
+    return Subquery(qs)
 
 
 def _migrate_unified_organization(apps, unified_cls_name, backward=False):
@@ -159,9 +160,9 @@ def _migrate_unified_organization(apps, unified_cls_name, backward=False):
 
         this_ct = ContentType.objects.get(model=cls_name)
         if backward:
-            r = cls.objects.update(organization=Subquery(sub_qs))
+            r = cls.objects.update(organization=sub_qs)
         else:
-            r = UnifiedClass.objects.filter(polymorphic_ctype=this_ct).update(tmp_organization=Subquery(sub_qs))
+            r = UnifiedClass.objects.filter(polymorphic_ctype=this_ct).update(tmp_organization=sub_qs)
         if r:
             logger.info('Organization migration on {} affected {} rows.'.format(cls_name, r))
 
