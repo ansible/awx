@@ -148,13 +148,16 @@ def format_human(output, fmt):
     else:
         output = [output]
 
-    return tabulate([
+    return tabulate(
+        [
             dict(
                 (col, record.get(col, ''))
                 for col in column_names
             )
             for record in output
-        ], headers='keys', tablefmt='rst'
+        ],
+        headers='keys',
+        tablefmt='rst'
     )
 
 

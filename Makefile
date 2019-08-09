@@ -376,6 +376,7 @@ test:
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	PYTHONDONTWRITEBYTECODE=1 py.test -p no:cacheprovider -n auto $(TEST_DIRS)
+	cd awxkit && $(VENV_BASE)/awx/bin/tox -re py3
 	awx-manage check_migrations --dry-run --check  -n 'vNNN_missing_migration_file'
 
 test_unit:

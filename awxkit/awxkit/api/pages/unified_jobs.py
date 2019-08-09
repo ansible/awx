@@ -33,8 +33,8 @@ class UnifiedJob(HasStatus, base.Base):
     def result_stdout(self):
         if 'result_stdout' not in self.json and 'stdout' in self.related:
             return self.connection.get(
-                    self.related.stdout, query_parameters=dict(format='txt_download')
-                ).content.decode()
+                self.related.stdout, query_parameters=dict(format='txt_download')
+            ).content.decode()
         if str(self.json.get('result_stdout')) == 'stdout capture is missing' and 'stdout' in self.related:
             ping = self.walk(resources.ping)
             if self.execution_node != ping.active_node:
@@ -60,7 +60,7 @@ class UnifiedJob(HasStatus, base.Base):
             pretty_stdout = pformat(stdout)
             raise AssertionError(
                 'Expected "{}", but it was not found in stdout. Full stdout:\n {}'.format(expected_text, pretty_stdout)
-                )
+            )
 
     @property
     def is_successful(self):

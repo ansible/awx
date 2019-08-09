@@ -375,14 +375,14 @@ class HasCreate(object):
         to_teardown = all_instantiated_dependencies(self)
         to_teardown_types = set(map(get_class_if_instance, to_teardown))
         order = [
-                set(
-                    [
-                        potential for potential in (
-                            get_class_if_instance(x) for x in group) if potential in to_teardown_types
-                        ]
-                    )
-                for group in page_creation_order(self, *to_teardown)
+            set(
+                [
+                    potential for potential in (
+                        get_class_if_instance(x) for x in group) if potential in to_teardown_types
                 ]
+            )
+            for group in page_creation_order(self, *to_teardown)
+        ]
         order.reverse()
         for teardown_group in order:
             for teardown_class in teardown_group:

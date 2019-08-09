@@ -14,6 +14,7 @@ pytest-pythonpath
 pytest-mock
 pytest-timeout
 pytest-xdist<1.28.0
+tox  # for awxkit
 logutils
 jupyter
 matplotlib

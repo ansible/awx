@@ -51,20 +51,21 @@ class CleanCommand(Command):
 
 
 version = '0.1.0'
-setup(name='awxkit',
-      version=version,
-      description='awx cli client',
-      packages=find_packages(exclude=['test']),
-      cmdclass={
-          'clean': CleanCommand,
-      },
-      include_package_data=True,
-      install_requires=requirements,
-      python_requires=">= 3.5",
-      entry_points={
-          'console_scripts': [
-              'akit=awxkit.scripts.basic_session:load_interactive',
-              'awx=awxkit.cli:run'
-          ]
-      }
+setup(
+    name='awxkit',
+    version=version,
+    description='awx cli client',
+    packages=find_packages(exclude=['test']),
+    cmdclass={
+        'clean': CleanCommand,
+    },
+    include_package_data=True,
+    install_requires=requirements,
+    python_requires=">= 3.5",
+    entry_points={
+        'console_scripts': [
+            'akit=awxkit.scripts.basic_session:load_interactive',
+            'awx=awxkit.cli:run'
+        ]
+    }
 )

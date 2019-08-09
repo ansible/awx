@@ -29,8 +29,9 @@ class User(HasCreate, base.Base):
                 random_title()),
             email=kwargs.get(
                 'email',
-                '{}@example.com'.format(random_title(5, non_ascii=False)))
-                )
+                '{}@example.com'.format(random_title(5, non_ascii=False))
+            )
+        )
         return payload
 
     def create_payload(self, username='', password='', **kwargs):
