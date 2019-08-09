@@ -36,7 +36,6 @@ from awx.api.generics import (
 from awx.api.serializers import (
     OrganizationSerializer,
     InventorySerializer,
-    ProjectSerializer,
     UserSerializer,
     TeamSerializer,
     ActivityStreamSerializer,

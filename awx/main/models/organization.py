@@ -6,7 +6,6 @@
 # Django
 from django.conf import settings
 from django.db import models
-from django.db.models import Q
 from django.contrib.auth.models import User
 from django.contrib.sessions.models import Session
 from django.utils.timezone import now as tz_now

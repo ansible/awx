@@ -12,6 +12,7 @@ from awx.main.models import (
     CredentialType,
     Inventory,
     InventorySource,
+    Project,
     User
 )
 
@@ -99,8 +100,8 @@ class TestRolesAssociationEntries:
             ).count() == 1, 'In loop %s' % i
 
     def test_model_associations_are_recorded(self, organization):
-        proj1 = organization.projects.create(name='proj1')
-        proj2 = organization.projects.create(name='proj2')
+        proj1 = Project.objects.create(name='proj1', organization=organization)
+        proj2 = Project.objects.create(name='proj2', organization=organization)
         proj2.use_role.parents.add(proj1.admin_role)
         assert ActivityStream.objects.filter(role=proj1.admin_role, project=proj2).count() == 1
 

@@ -1426,7 +1426,7 @@ class JobTemplateAccess(NotificationAttachMixin, BaseAccess):
     '''
 
     model = JobTemplate
-    select_related = ('created_by', 'modified_by', 'inventory', 'project',
+    select_related = ('created_by', 'modified_by', 'inventory', 'project', 'organization',
                       'next_schedule',)
     prefetch_related = (
         'instance_groups',
@@ -1602,6 +1602,7 @@ class JobAccess(BaseAccess):
     select_related = ('created_by', 'modified_by', 'job_template', 'inventory',
                       'project', 'project_update',)
     prefetch_related = (
+        'organization',
         'unified_job_template',
         'instance_group',
         'credentials__credential_type',
@@ -1942,11 +1943,11 @@ class WorkflowJobNodeAccess(BaseAccess):
 # TODO: notification attachments?
 class WorkflowJobTemplateAccess(NotificationAttachMixin, BaseAccess):
     '''
-    I can only see/manage Workflow Job Templates if I'm a super user
+    I can see/manage Workflow Job Templates based on object roles
     '''
 
     model = WorkflowJobTemplate
-    select_related = ('created_by', 'modified_by', 'next_schedule',
+    select_related = ('created_by', 'modified_by', 'organization', 'next_schedule',
                       'admin_role', 'execute_role', 'read_role',)
 
     def filtered_queryset(self):
@@ -2040,7 +2041,7 @@ class WorkflowJobAccess(BaseAccess):
        I can also cancel it if I started it
     '''
     model = WorkflowJob
-    select_related = ('created_by', 'modified_by',)
+    select_related = ('created_by', 'modified_by', 'organization',)
 
     def filtered_queryset(self):
         return WorkflowJob.objects.filter(
@@ -2337,6 +2338,7 @@ class UnifiedJobTemplateAccess(BaseAccess):
     prefetch_related = (
         'last_job',
         'current_job',
+        'organization',
         'credentials__credential_type',
         Prefetch('labels', queryset=Label.objects.all().order_by('name')),
     )
@@ -2371,6 +2373,7 @@ class UnifiedJobAccess(BaseAccess):
     prefetch_related = (
         'created_by',
         'modified_by',
+        'organization',
         'unified_job_node__workflow_job',
         'unified_job_template',
         'instance_group',
