@@ -683,12 +683,14 @@ class WorkflowApproval(UnifiedJob):
         self.save()
         changes = model_to_dict(self, model_serializer_mapping())
         changes['status']=['pending', 'successful']
-        ActivityStream(
+        activity_entry = ActivityStream(
             operation='update',
             object1='workflow_approval',
             actor=request.user,
             changes=json.dumps(changes),
-        ).save()
+        )
+        activity_entry.save()
+        getattr(activity_entry, 'workflow_approval').add(self.pk)
         schedule_task_manager()
         return reverse('api:workflow_approval_approve', kwargs={'pk': self.pk}, request=request)
 
@@ -698,11 +700,17 @@ class WorkflowApproval(UnifiedJob):
         self.save()
         changes = model_to_dict(self, model_serializer_mapping())
         changes['status']=['pending', 'failed']
-        ActivityStream(
+        activity_entry = ActivityStream(
             operation='update',
             object1='workflow_approval',
             actor=request.user,
             changes=json.dumps(changes),
-        ).save()
+        )
+        activity_entry.save()
+        getattr(activity_entry, 'workflow_approval').add(self.pk)
         schedule_task_manager()
         return reverse('api:workflow_approval_deny', kwargs={'pk': self.pk}, request=request)
+
+    @property
+    def workflow_job_template(self):
+        return self.unified_job_node.workflow_job.unified_job_template
