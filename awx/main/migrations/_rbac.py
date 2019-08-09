@@ -127,12 +127,19 @@ def implicit_org_subquery(UnifiedClass, cls, backward=False):
     unified_field = UnifiedClass._meta.get_field(cls_name)
     unified_ptr = unified_field.remote_field.name
     if backward:
-        qs = UnifiedClass.objects.filter(**{cls_name: OuterRef('id')}).values_list('tmp_organization')
+        qs = UnifiedClass.objects.filter(**{cls_name: OuterRef('id')}).order_by().values_list('tmp_organization')[:1]
     elif source_field is None:
-        qs = cls.objects.filter(**{unified_ptr: OuterRef('id')}).values_list('organization')
+        qs = cls.objects.filter(**{unified_ptr: OuterRef('id')}).order_by().values_list('organization')[:1]
     else:
-        qs = cls.objects.filter(**{
-            unified_ptr: OuterRef('id')}).values_list('{}__organization'.format(source_field))
+        intermediary_field = cls._meta.get_field(source_field)
+        intermediary_model = intermediary_field.related_model
+        intermediary_reverse_rel = intermediary_field.remote_field.name
+        qs = intermediary_model.objects.filter(**{
+            # this filter leverages the fact that the Unified models have same pk as subclasses.
+            # For instance... filters projects used in job template, where that job template
+            # has same id same as UJT from the outer reference (which it does)
+            intermediary_reverse_rel: OuterRef('id')}
+        ).order_by().values_list('organization')[:1]
     return Subquery(qs)
 
 
@@ -160,9 +167,9 @@ def _migrate_unified_organization(apps, unified_cls_name, backward=False):
 
         this_ct = ContentType.objects.get(model=cls_name)
         if backward:
-            r = cls.objects.update(organization=sub_qs)
+            r = cls.objects.order_by().update(organization=sub_qs)
         else:
-            r = UnifiedClass.objects.filter(polymorphic_ctype=this_ct).update(tmp_organization=sub_qs)
+            r = UnifiedClass.objects.order_by().filter(polymorphic_ctype=this_ct).update(tmp_organization=sub_qs)
         if r:
             logger.info('Organization migration on {} affected {} rows.'.format(cls_name, r))
 
