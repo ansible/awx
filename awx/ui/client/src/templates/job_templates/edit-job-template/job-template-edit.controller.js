@@ -204,11 +204,6 @@ export default
                 }));
 
                 select2LoadDefer.push(CreateSelect2({
-                    element:'#playbook-select',
-                    multiple: false
-                }));
-
-                select2LoadDefer.push(CreateSelect2({
                     element:'#job_template_job_tags',
                     multiple: true,
                     addNew: true
