@@ -4,7 +4,7 @@ import awx.main.fields
 from django.db import migrations, models
 import django.db.models.deletion
 
-from awx.main.migrations._rbac import rebuild_role_parentage, migrate_ujt_organization
+from awx.main.migrations._rbac import rebuild_role_parentage, migrate_ujt_organization, migrate_ujt_organization_backward
 
 
 class Migration(migrations.Migration):
@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(blank=True, help_text='The organization used to determine access to this template.', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='unifiedjobtemplates', to='main.Organization'),
         ),
         # while new and old fields exist, copy the organization fields
-        migrations.RunPython(migrate_ujt_organization, migrations.RunPython.noop),
+        migrations.RunPython(migrate_ujt_organization, migrate_ujt_organization_backward),
         # temporarily null parents of project / workflow models
         migrations.AlterField(
             model_name='workflowjobtemplate',

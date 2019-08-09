@@ -1,7 +1,7 @@
 import logging
 from time import time
 
-from django.db.models import F, Subquery, OuterRef
+from django.db.models import Subquery, OuterRef
 
 from awx.main.fields import update_role_parentage_for_instance
 from awx.main.models.rbac import Role, batch_role_ancestor_rebuilding
@@ -47,7 +47,7 @@ def delete_all_user_roles(apps, schema_editor):
         role.delete()
 
 
-def _migrate_unified_organization_iterator(apps, unified_cls_name, org_field_mapping):
+def _migrate_unified_organization_iterator(apps, unified_cls_name, org_field_mapping, backward=False):
     """Slow method to do operation
     """
     UnifiedClass = apps.get_model('main', unified_cls_name)
@@ -57,27 +57,34 @@ def _migrate_unified_organization_iterator(apps, unified_cls_name, org_field_map
     for cls_name in org_field_mapping:
         unified_ct_mapping[ContentType.objects.get(model=cls_name).id] = cls_name
 
-    for cls_name, source_field in org_field_mapping.items():
-        print_field = []
-        if source_field:
-            print_field.append(source_field)
-        print_field.append('organization')
-        logger.debug('Migrating {} from {} to new organization field'.format(cls_name, '__'.join(source_field)))
-
-        rel_model = apps.get_model('main', cls_name)
-        if source_field is None:
-            field = rel_model._meta.get_field('organization')
-            reverse_rel = field.remote_field.name
-            sub_qs = rel_model.objects.filter(**{'{}_id'.format(reverse_rel): OuterRef('id')})
+    for obj in UnifiedClass.objects.iterator():
+        if obj.polymorphic_ctype_id not in unified_ct_mapping:
+            logger.debug('No organization for {}-{}'.format(obj.name, obj.pk))
+            continue
+        cls_name = unified_ct_mapping[obj.polymorphic_ctype_id]
+        source_field = org_field_mapping[cls_name]
+        # polymorphic does not work the same in migrations, get the subclass object
+        rel_obj = getattr(obj, cls_name)
+        if source_field is not None:
+            rel_obj = getattr(rel_obj, source_field)
+        if backward:
+            if obj.tmp_organization_id is None:
+                continue
         else:
-            field = rel_model._meta.get_field(source_field)
-            rel_model = field.related_model
-            reverse_rel = field.remote_field.name
-            sub_qs = rel_model.objects.filter(**{'{}_id'.format(reverse_rel): OuterRef('organization_id')})
+            if rel_obj is None or rel_obj.organization_id is None:
+                logger.debug('No organization for {} {}-{}'.format(cls_name, obj.name, obj.pk))
+                continue
 
-        r = UnifiedClass.objects.update(tmp_organization=Subquery(sub_qs))
-        logger.info('result')
-        logger.info(str(r))
+        if backward:
+            rel_obj.organization_id = obj.tmp_organization_id
+            rel_obj.save(update_fields=['organization_id'])
+        else:
+            obj.tmp_organization_id = rel_obj.organization_id
+            obj.save(update_fields=['tmp_organization_id'])
+        changed_ct += 1
+        logger.debug('Migrated {} {}-{} organization field, org pk={}'.format(
+            cls_name, obj.name, obj.pk, obj.tmp_organization_id
+        ))
 
     logger.info('Migrated organization field for {} {}s'.format(changed_ct, unified_cls_name))
 
@@ -111,40 +118,49 @@ def _migrate_unified_organization(apps, unified_cls_name, org_field_mapping):
 
         this_ct = ContentType.objects.get(model=cls_name)
         r = UnifiedClass.objects.filter(polymorphic_ctype=this_ct).update(tmp_organization=Subquery(sub_qs))
-        logger.info('result')
-        logger.info(str(r))
+        if r:
+            logger.info('Organization migration on {} affected {} rows.'.format(cls_name, r))
+
+
+TEMPLATE_ORG_LOOKUPS = {
+    # Job Templates had an implicit organization via their project
+    'jobtemplate': 'project',
+    # Inventory Sources had an implicit organization via their inventory
+    'inventorysource': 'inventory',
+    # Projects had an explicit organization in their subclass table
+    'project': None,
+    # Workflow JTs also had an explicit organization in their subclass table
+    'workflowjobtemplate': None
+}
+
+
+JOB_ORG_LOOKUPS = {
+    # Jobs inherited project from job templates as a convience field
+    'job': 'project',
+    # Inventory Sources had an convience field of inventory
+    'inventoryupdate': 'inventory',
+    # Project Updates did not have a direct organization field, obtained it from project
+    'projectupdate': 'project',
+    # Workflow Jobs are handled same as project updates
+    # Sliced jobs are a special case, but old data is not given special treatment for simplicity
+    'workflowjob': 'workflow_job_template',
+    # AdHocCommands do not have a template, but still migrate them
+    'adhoccommand': 'inventory'
+}
 
 
 def migrate_ujt_organization(apps, schema_editor):
-    '''
-    Move organization from project to job template
-    '''
-    org_lookups = {
-        # Job Templates had an implicit organization via their project
-        'jobtemplate': 'project',
-        # Inventory Sources had an implicit organization via their inventory
-        'inventorysource': 'inventory',
-        # Projects had an explicit organization in their subclass table
-        'project': None,
-        # Workflow JTs also had an explicit organization in their subclass table
-        'workflowjobtemplate': None
-    }
-    _migrate_unified_organization(apps, 'UnifiedJobTemplate', org_lookups)
+    '''Move organization field to UJT and UJ models'''
+    _migrate_unified_organization(apps, 'UnifiedJobTemplate', TEMPLATE_ORG_LOOKUPS)
+    _migrate_unified_organization(apps, 'UnifiedJob', JOB_ORG_LOOKUPS)
 
-    job_org_lookups = {
-        # Jobs inherited project from job templates as a convience field
-        'job': 'project',
-        # Inventory Sources had an convience field of inventory
-        'inventoryupdate': 'inventory',
-        # Project Updates did not have a direct organization field, obtained it from project
-        'projectupdate': 'project',
-        # Workflow Jobs are handled same as project updates
-        # Sliced jobs are a special case, but old data is not given special treatment for simplicity
-        'workflowjob': 'workflow_job_template',
-        # AdHocCommands do not have a template, but still migrate them
-        'adhoccommand': 'inventory'
-    }
-    _migrate_unified_organization(apps, 'UnifiedJob', job_org_lookups)
+
+def migrate_ujt_organization_backward(apps, schema_editor):
+    '''Move organization field from UJT and UJ models back to their original places'''
+    _migrate_unified_organization_iterator(
+        apps, 'UnifiedJobTemplate', TEMPLATE_ORG_LOOKUPS, backward=True)
+    _migrate_unified_organization_iterator(
+        apps, 'UnifiedJob', JOB_ORG_LOOKUPS, backward=True)
 
 
 def rebuild_role_hierarchy(apps, schema_editor):
@@ -163,7 +179,7 @@ def rebuild_role_hierarchy(apps, schema_editor):
     start = time()
     Role.rebuild_role_ancestor_list(roots, [])
     stop = time()
-    logger.info('Rebuild completed in %f seconds' % (stop - start))
+    logger.info('Rebuild ancestors completed in %f seconds' % (stop - start))
     logger.info('Done.')
 
 
@@ -178,6 +194,7 @@ def rebuild_role_parentage(apps, schema_editor):
     This is like rebuild_role_hierarchy, but that method updates ancestors,
     whereas this method updates parents.
     '''
+    start = time()
     seen_models = set()
     updated_ct = 0
     model_ct = 0
@@ -206,6 +223,8 @@ def rebuild_role_parentage(apps, schema_editor):
         else:
             logger.debug('No changes to role parents of {}'.format(content_object))
         updated_ct += updated
+
+    logger.info('Rebuild parentage completed in %f seconds' % (time() - start))
 
     if updated_ct:
         logger.info('Updated parentage for {} roles of {} resources'.format(updated_ct, model_ct))
