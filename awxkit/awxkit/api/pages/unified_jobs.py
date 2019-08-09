@@ -35,11 +35,6 @@ class UnifiedJob(HasStatus, base.Base):
             return self.connection.get(
                 self.related.stdout, query_parameters=dict(format='txt_download')
             ).content.decode()
-        if str(self.json.get('result_stdout')) == 'stdout capture is missing' and 'stdout' in self.related:
-            ping = self.walk(resources.ping)
-            if self.execution_node != ping.active_node:
-                self.connection.get(self.related.stdout, query_parameters=dict(format='txt_download'))
-                self.get()
         return self.json.result_stdout.decode()
 
     def assert_text_in_stdout(self, expected_text, replace_spaces=None, replace_newlines=' '):
