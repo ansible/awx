@@ -20,12 +20,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='unifiedjob',
             name='tmp_organization',
-            field=models.ForeignKey(blank=True, help_text='The organization used to determine access to this unified job.', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='unifiedjobs', to='main.Organization'),
+            field=models.ForeignKey(blank=True, help_text='The organization used to determine access to this unified job.', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='unifiedjobs', to='main.Organization'),
         ),
         migrations.AddField(
             model_name='unifiedjobtemplate',
             name='tmp_organization',
-            field=models.ForeignKey(blank=True, help_text='The organization used to determine access to this template.', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='unifiedjobtemplates', to='main.Organization'),
+            field=models.ForeignKey(blank=True, help_text='The organization used to determine access to this template.', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='unifiedjobtemplates', to='main.Organization'),
         ),
         # while new and old fields exist, copy the organization fields
         migrations.RunPython(migrate_ujt_organization, migrate_ujt_organization_backward),

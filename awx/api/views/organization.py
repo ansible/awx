@@ -21,6 +21,7 @@ from awx.main.models import (
     User,
     Team,
     InstanceGroup,
+    UnifiedJobTemplate
 )
 from awx.api.generics import (
     ListCreateAPIView,
@@ -43,6 +44,7 @@ from awx.api.serializers import (
     NotificationTemplateSerializer,
     WorkflowJobTemplateSerializer,
     InstanceGroupSerializer,
+    UnifiedJobTemplateSerializer
 )
 from awx.api.views.mixin import (
     RelatedJobsPreventDeleteMixin,
@@ -130,8 +132,8 @@ class OrganizationAdminsList(BaseUsersList):
 
 class OrganizationProjectsList(SubListCreateAttachDetachAPIView):
 
-    model = Project
-    serializer_class = ProjectSerializer
+    model = UnifiedJobTemplate
+    serializer_class = UnifiedJobTemplateSerializer
     parent_model = Organization
     relationship = 'projects'
     parent_key = 'organization'

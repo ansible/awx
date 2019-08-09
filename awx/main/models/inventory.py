@@ -556,7 +556,7 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
     def _get_related_jobs(self):
         return UnifiedJob.objects.non_polymorphic().filter(
             Q(Job___inventory=self) |
-            Q(InventoryUpdate___inventory_source__inventory=self) |
+            Q(InventoryUpdate__inventory=self) |
             Q(AdHocCommand___inventory=self)
         )
 

@@ -160,7 +160,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         'Organization',
         blank=True,
         null=True,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         related_name='%(class)ss',
         help_text=_('The organization used to determine access to this template.'),
     )
@@ -691,7 +691,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         'Organization',
         blank=True,
         null=True,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         related_name='%(class)ss',
         help_text=_('The organization used to determine access to this unified job.'),
     )

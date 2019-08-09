@@ -105,11 +105,10 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin, CustomVi
     RelatedJobsMixin
     '''
     def _get_related_jobs(self):
-        project_ids = self.projects.all().values_list('id')
         return UnifiedJob.objects.non_polymorphic().filter(
-            Q(Job___project__in=project_ids) |
-            Q(ProjectUpdate___project__in=project_ids) |
-            Q(InventoryUpdate___inventory_source__inventory__organization=self)
+            Q(Job___organization=self) |
+            Q(ProjectUpdate___organization=self) |
+            Q(InventoryUpdate___organization=self)
         )
 
 

@@ -70,50 +70,6 @@ UNIFIED_ORG_LOOKUPS = {
 }
 
 
-def _migrate_unified_organization_iterator(apps, unified_cls_name, backward=False):
-    """Slow method to do operation
-    """
-    UnifiedClass = apps.get_model('main', unified_cls_name)
-    ContentType = apps.get_model('contenttypes', 'ContentType')
-    changed_ct = 0
-    unified_ct_mapping = {}
-    for cls_name in UNIFIED_ORG_LOOKUPS:
-        unified_ct_mapping[ContentType.objects.get(model=cls_name).id] = cls_name
-
-    for obj in UnifiedClass.objects.iterator():
-        if obj.polymorphic_ctype_id not in unified_ct_mapping:
-            logger.debug('No organization for {}-{}'.format(obj.name, obj.pk))
-            continue
-        cls_name = unified_ct_mapping[obj.polymorphic_ctype_id]
-        source_field = UNIFIED_ORG_LOOKUPS[cls_name]
-        # polymorphic does not work the same in migrations, get the subclass object
-        rel_obj = getattr(obj, cls_name)
-        if source_field is not None:
-            rel_obj = getattr(rel_obj, source_field)
-        if backward:
-            if obj.tmp_organization_id is None:
-                continue
-        else:
-            if rel_obj is None or rel_obj.organization_id is None:
-                logger.debug('No organization for {} {}-{}'.format(cls_name, obj.name, obj.pk))
-                continue
-
-        if backward:
-            rel_obj.organization_id = obj.tmp_organization_id
-            logger.info(rel_obj)
-            logger.info(cls_name)
-            rel_obj.save(update_fields=['organization_id'])
-        else:
-            obj.tmp_organization_id = rel_obj.organization_id
-            obj.save(update_fields=['tmp_organization_id'])
-        changed_ct += 1
-        logger.debug('Migrated {} {}-{} organization field, org pk={}'.format(
-            cls_name, obj.name, obj.pk, obj.tmp_organization_id
-        ))
-
-    logger.info('Migrated organization field for {} {}s'.format(changed_ct, unified_cls_name))
-
-
 def implicit_org_subquery(UnifiedClass, cls, backward=False):
     """Returns a subquery that returns the so-called organization for objects
     in the class in question, before migration to the explicit unified org field.
