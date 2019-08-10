@@ -658,11 +658,8 @@ def ad_hoc_command_factory(inventory, machine_credential, admin):
 
 
 @pytest.fixture
-def job_template(organization):
-    jt = JobTemplate(name='test-job_template', organization=organization)
-    jt.save()
-
-    return jt
+def job_template():
+    return JobTemplate.objects.create(name='test-job_template')
 
 
 @pytest.fixture
