@@ -443,8 +443,8 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
     '''
     def _get_related_jobs(self):
         return UnifiedJob.objects.non_polymorphic().filter(
-            models.Q(Job__project=self) |
-            models.Q(ProjectUpdate__project=self)
+            models.Q(job__project=self) |
+            models.Q(projectupdate__project=self)
         )
 
     def delete(self, *args, **kwargs):
