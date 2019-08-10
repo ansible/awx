@@ -527,7 +527,7 @@ class TaskManager():
             if task.timeout == 0:
                 continue
             if (now - task.created) >= approval_timeout_seconds:
-                logger.info("The approval node {} ({}) has expired after {} seconds.".format(task.name, task.pk, task.timeout))
+                logger.warn("The approval node {} ({}) has expired after {} seconds.".format(task.name, task.pk, task.timeout))
                 task.timed_out = True
                 task.status = 'failed'
                 task.job_explanation = _("This approval node has timed out.")

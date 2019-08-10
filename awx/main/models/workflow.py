@@ -685,7 +685,7 @@ class WorkflowApproval(UnifiedJob):
         self.status = 'successful'
         self.save()
         changes = model_to_dict(self, model_serializer_mapping())
-        changes['status']=['pending', 'successful']
+        changes['status'] = ['pending', 'successful']
         activity_entry = ActivityStream(
             operation='update',
             object1='workflow_approval',
@@ -702,7 +702,7 @@ class WorkflowApproval(UnifiedJob):
         self.status = 'failed'
         self.save()
         changes = model_to_dict(self, model_serializer_mapping())
-        changes['status']=['pending', 'failed']
+        changes['status'] = ['pending', 'failed']
         activity_entry = ActivityStream(
             operation='update',
             object1='workflow_approval',
