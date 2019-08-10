@@ -29,42 +29,6 @@ class Migration(migrations.Migration):
         ),
         # while new and old fields exist, copy the organization fields
         migrations.RunPython(migrate_ujt_organization, migrate_ujt_organization_backward),
-        # temporarily null parents of project / workflow models
-        migrations.AlterField(
-            model_name='workflowjobtemplate',
-            name='admin_role',
-            field=awx.main.fields.ImplicitRoleField(editable=False, null='True', on_delete=django.db.models.deletion.CASCADE, parent_role=[], related_name='+', to='main.Role'),
-        ),
-        migrations.AlterField(
-            model_name='workflowjobtemplate',
-            name='execute_role',
-            field=awx.main.fields.ImplicitRoleField(editable=False, null='True', on_delete=django.db.models.deletion.CASCADE, parent_role=[], related_name='+', to='main.Role'),
-        ),
-        migrations.AlterField(
-            model_name='workflowjobtemplate',
-            name='read_role',
-            field=awx.main.fields.ImplicitRoleField(editable=False, null='True', on_delete=django.db.models.deletion.CASCADE, parent_role=[], related_name='+', to='main.Role'),
-        ),  # end workflow, begin project fields
-        migrations.AlterField(
-            model_name='project',
-            name='admin_role',
-            field=awx.main.fields.ImplicitRoleField(editable=False, null='True', on_delete=django.db.models.deletion.CASCADE, parent_role=[], related_name='+', to='main.Role'),
-        ),
-        migrations.AlterField(
-            model_name='project',
-            name='update_role',
-            field=awx.main.fields.ImplicitRoleField(editable=False, null='True', on_delete=django.db.models.deletion.CASCADE, parent_role=[], related_name='+', to='main.Role'),
-        ),
-        migrations.AlterField(
-            model_name='project',
-            name='read_role',
-            field=awx.main.fields.ImplicitRoleField(editable=False, null='True', on_delete=django.db.models.deletion.CASCADE, parent_role=[], related_name='+', to='main.Role'),
-        ),
-        migrations.AlterField(
-            model_name='project',
-            name='use_role',
-            field=awx.main.fields.ImplicitRoleField(editable=False, null='True', on_delete=django.db.models.deletion.CASCADE, parent_role=[], related_name='+', to='main.Role'),
-        ),
         # with data saved, remove old fields
         migrations.RemoveField(
             model_name='project',
@@ -85,8 +49,6 @@ class Migration(migrations.Migration):
             old_name='tmp_organization',
             new_name='organization',
         ),
-        # with the organization field back in place, we can safely declare
-        # the current role parentage state
         # parentage of job template roles has genuinely changed at this point
         migrations.AlterField(
             model_name='jobtemplate',
@@ -102,43 +64,6 @@ class Migration(migrations.Migration):
             model_name='jobtemplate',
             name='read_role',
             field=awx.main.fields.ImplicitRoleField(editable=False, null='True', on_delete=django.db.models.deletion.CASCADE, parent_role=['organization.auditor_role', 'execute_role', 'admin_role'], related_name='+', to='main.Role'),
-        ),
-        # these roles have not changed, this is a restorative operation
-        # to put back in organization references after the move
-        migrations.AlterField(
-            model_name='project',
-            name='admin_role',
-            field=awx.main.fields.ImplicitRoleField(editable=False, null='True', on_delete=django.db.models.deletion.CASCADE, parent_role=['organization.project_admin_role', 'singleton:system_administrator'], related_name='+', to='main.Role'),
-        ),
-        migrations.AlterField(
-            model_name='project',
-            name='read_role',
-            field=awx.main.fields.ImplicitRoleField(editable=False, null='True', on_delete=django.db.models.deletion.CASCADE, parent_role=['organization.auditor_role', 'singleton:system_auditor', 'use_role', 'update_role'], related_name='+', to='main.Role'),
-        ),
-        migrations.AlterField(
-            model_name='project',
-            name='update_role',
-            field=awx.main.fields.ImplicitRoleField(editable=False, null='True', on_delete=django.db.models.deletion.CASCADE, parent_role='admin_role', related_name='+', to='main.Role'),
-        ),
-        migrations.AlterField(
-            model_name='project',
-            name='use_role',
-            field=awx.main.fields.ImplicitRoleField(editable=False, null='True', on_delete=django.db.models.deletion.CASCADE, parent_role='admin_role', related_name='+', to='main.Role'),
-        ),
-        migrations.AlterField(
-            model_name='workflowjobtemplate',
-            name='admin_role',
-            field=awx.main.fields.ImplicitRoleField(editable=False, null='True', on_delete=django.db.models.deletion.CASCADE, parent_role=['singleton:system_administrator', 'organization.workflow_admin_role'], related_name='+', to='main.Role'),
-        ),
-        migrations.AlterField(
-            model_name='workflowjobtemplate',
-            name='execute_role',
-            field=awx.main.fields.ImplicitRoleField(editable=False, null='True', on_delete=django.db.models.deletion.CASCADE, parent_role=['admin_role', 'organization.execute_role'], related_name='+', to='main.Role'),
-        ),
-        migrations.AlterField(
-            model_name='workflowjobtemplate',
-            name='read_role',
-            field=awx.main.fields.ImplicitRoleField(editable=False, null='True', on_delete=django.db.models.deletion.CASCADE, parent_role=['singleton:system_auditor', 'organization.auditor_role', 'execute_role', 'admin_role'], related_name='+', to='main.Role'),
         ),
         # Re-compute the role parents and ancestors caching
         # this may be a no-op because field post_save hooks from migrate_jt_organization

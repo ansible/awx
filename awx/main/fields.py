@@ -270,20 +270,18 @@ class ImplicitRoleField(models.ForeignKey):
             field_names = [field_names]
 
         for field_name in field_names:
-            # Handle the OR syntax for role parents
-            if type(field_name) == tuple:
-                continue
-
-            if type(field_name) == bytes:
-                field_name = field_name.decode('utf-8')
 
             if field_name.startswith('singleton:'):
                 continue
 
             field_name, sep, field_attr = field_name.partition('.')
-            field = getattr(cls, field_name)
+            # Non existent fields will occur if ever a parent model is
+            # moved inside a migration, needed for job_template_organization_field
+            # migration in particular
+            # consistency is assured by unit test awx.main.tests.functional
+            field = getattr(cls, field_name, None)
 
-            if type(field) is ReverseManyToOneDescriptor or \
+            if field and type(field) is ReverseManyToOneDescriptor or \
                type(field) is ManyToManyDescriptor:
 
                 if '.' in field_attr:
