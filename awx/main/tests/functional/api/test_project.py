@@ -70,7 +70,7 @@ def test_no_changing_overwrite_behavior_if_used(post, patch, organization, admin
         user=admin_user,
         expect=400
     )
-    assert 'job templates already specify a branch for this project' in str(r2.data['allow_override'])
+    assert 'job templates depend on branch override behavior for this project' in str(r2.data['allow_override'])
     assert 'ids: 2' in str(r2.data['allow_override'])
     assert Project.objects.get(pk=r1.data['id']).allow_override is True
 

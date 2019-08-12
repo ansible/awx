@@ -1393,13 +1393,15 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
         if 'allow_override' in attrs and self.instance:
             # case where user is turning off this project setting
             if self.instance.allow_override and not attrs['allow_override']:
-                used_by = (
-                    set(JobTemplate.objects.filter(project=self.instance, scm_branch__isnull=False).values_list('pk', flat=True)) |
-                    set(JobTemplate.objects.filter(project=self.instance, ask_scm_branch_on_launch=True).values_list('pk', flat=True))
+                used_by = set(
+                    JobTemplate.objects.filter(
+                        models.Q(project=self.instance),
+                        models.Q(ask_scm_branch_on_launch=True) | ~models.Q(scm_branch="")
+                    ).values_list('pk', flat=True)
                 )
                 if used_by:
                     raise serializers.ValidationError({
-                        'allow_override': _('One or more job templates already specify a branch for this project (ids: {}).').format(
+                        'allow_override': _('One or more job templates depend on branch override behavior for this project (ids: {}).').format(
                             ' '.join([str(pk) for pk in used_by])
                         )})
 
