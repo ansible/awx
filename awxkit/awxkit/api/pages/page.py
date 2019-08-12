@@ -172,7 +172,7 @@ class Page(object):
         resp.status_code = 200
         return cls(r=resp)
 
-    def page_identity(self, response, request_json=None, ignore_json_errors=False):
+    def page_identity(self, response, request_json=None):
         """Takes a `requests.Response` and
         returns a new __item_class__ instance if the request method is not a get, or returns
            a __class__ instance if the request path is different than the caller's `endpoint`.
@@ -191,7 +191,7 @@ class Page(object):
             data = response.json()
         except ValueError as e:  # If there was no json to parse
             data = dict()
-            if (response.text and not ignore_json_errors) or response.status_code not in (200, 202, 204):
+            if response.text or response.status_code not in (200, 202, 204):
                 text = response.text
                 if len(text) > 1024:
                     text = text[:1024] + '... <<< Truncated >>> ...'
