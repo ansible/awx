@@ -253,7 +253,7 @@ def test_inherited_instance_group_membership(instance_group_factory, default_ins
     j.inventory = inventory
     ig_org = instance_group_factory("basicA", [default_instance_group.instances.first()])
     ig_inv = instance_group_factory("basicB", [default_instance_group.instances.first()])
-    j.project.organization.instance_groups.add(ig_org)
+    j.organization.instance_groups.add(ig_org)
     j.inventory.instance_groups.add(ig_inv)
     assert ig_org in j.preferred_instance_groups
     assert ig_inv in j.preferred_instance_groups
