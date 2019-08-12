@@ -90,7 +90,7 @@
         helm repo update --tiller-namespace={{ tiller_namespace | default('kube-system') }}
         echo {{ pg_values | quote }} | helm upgrade {{ postgresql_service_name }} --install \
           --namespace {{ kubernetes_namespace }} \
-          --version="5.3.13" \
+          --version="6.2.1" \
           --tiller-namespace={{ tiller_namespace | default('kube-system') }} \
           --values - \
           stable/postgresql
@@ -103,7 +103,7 @@
 
 - name: Set postgresql hostname to helm package service (Kubernetes)
   set_fact:
-    pg_hostname: "{{ postgresql_service_name }}-postgresql"
+    pg_hostname: "{{ postgresql_service_name }}"
   when:
     - pg_hostname is not defined or pg_hostname == ''
     - kubernetes_context is defined
