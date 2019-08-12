@@ -10,6 +10,13 @@ except ImportError:  # for pip <= 9.0.3
 requirements = [str(r.req) for r in parse_requirements('requirements.txt', session=False)]
 
 
+def get_version():
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    version_file = os.path.join(current_dir, 'VERSION')
+    with open(version_file, 'r') as file:
+        return file.read().strip()
+
+
 class CleanCommand(Command):
     description = "Custom clean command that forcefully removes dist/build directories"
     user_options = []
@@ -50,10 +57,9 @@ class CleanCommand(Command):
                     os.remove(rm)
 
 
-version = '0.1.0'
 setup(
     name='awxkit',
-    version=version,
+    version=get_version(),
     description='awx cli client',
     packages=find_packages(exclude=['test']),
     cmdclass={
