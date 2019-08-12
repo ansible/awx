@@ -2,15 +2,54 @@ from hashlib import sha1
 import hmac
 
 from django.utils.encoding import force_bytes
-from rest_framework.exceptions import PermissionDenied
+from django.views.decorators.csrf import csrf_exempt
 
-from awx.api.generics import APIView
+from rest_framework import status
+from rest_framework.exceptions import PermissionDenied
+from rest_framework.response import Response
+
+from awx.api import serializers
+from awx.api.generics import APIView, GenericAPIView
 from awx.main.models import JobTemplate, WorkflowJobTemplate
+
+
+class WebhookKeyView(GenericAPIView):
+    serializer_class = serializers.EmptySerializer
+
+    @property
+    def model(self):
+        qs_models = {
+            'job_templates': JobTemplate,
+            'workflow_job_templates': WorkflowJobTemplate,
+        }
+        model = qs_models.get(self.kwargs['model_kwarg'])
+        if model is None:
+            raise PermissionDenied
+
+        return model
+
+    def get_queryset(self):
+        return self.request.user.get_queryset(self.model)
+
+    def get(self, request, *args, **kwargs):
+        obj = self.get_object()
+
+        return Response({'webhook_key': obj.webhook_key})
+
+    def post(self, request, *args, **kwargs):
+        obj = self.get_object()
+        obj.rotate_webhook_key()
+
+        return Response({'webhook_key': obj.webhook_key}, status=status.HTTP_201_CREATED)
 
 
 class WebhookReceiverBase(APIView):
     lookup_url_kwarg = None
     lookup_field = 'pk'
+
+    @csrf_exempt
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
 
     def get_queryset(self):
         qs_models = {

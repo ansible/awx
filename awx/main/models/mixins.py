@@ -12,6 +12,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.query import QuerySet
+from django.utils.crypto import get_random_string
 from django.utils.translation import ugettext_lazy as _
 
 # AWX
@@ -511,3 +512,7 @@ class WebhookMixin(models.Model):
         on_delete=models.SET_NULL,
         related_name='%(class)ss'
     )
+
+    def rotate_webhook_key(self):
+        self.webhook_key = get_random_string(length=50)
+        self.save(update_fields=['webhook_key'])

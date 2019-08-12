@@ -151,6 +151,7 @@ from awx.api.views.root import ( # noqa
     ApiV2SubscriptionView,
 )
 from awx.api.views.webhooks import ( # noqa
+    WebhookKeyView,
     GithubWebhookReceiver,
     GitlabWebhookReceiver,
     BitbucketWebhookReceiver,
