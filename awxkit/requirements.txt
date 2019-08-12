@@ -1,7 +1,6 @@
 PyYAML>=5.1
 cryptography
 flake8
-prometheus-client
 python-dateutil
 requests
 termcolor
