@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import { Link } from 'react-router-dom';
 import { bool, instanceOf } from 'prop-types';
 import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
@@ -42,8 +43,8 @@ function ContentError({ error, children, isNotFound, i18n }) {
           ? i18n._(t`The page you requested could not be found.`)
           : i18n._(
               t`There was an error loading this content. Please reload the page.`
-            )}
-        {children}
+            )}{' '}
+        {children || <Link to="/home">{i18n._(t`Back to Dashboard.`)}</Link>}
       </EmptyStateBody>
       {error && <ErrorDetail error={error} />}
     </EmptyState>
