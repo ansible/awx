@@ -90,7 +90,7 @@
         helm repo update --tiller-namespace={{ tiller_namespace | default('kube-system') }}
         echo {{ pg_values | quote }} | helm upgrade {{ postgresql_service_name }} --install \
           --namespace {{ kubernetes_namespace }} \
-          --version="5.3.9" \
+          --version="6.2.1" \
           --tiller-namespace={{ tiller_namespace | default('kube-system') }} \
           --values - \
           stable/postgresql
