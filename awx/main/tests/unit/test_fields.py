@@ -4,6 +4,10 @@ import pytest
 from django.core.exceptions import ValidationError
 from django.apps import apps
 from django.db.models.fields.related import ForeignKey
+from django.db.models.fields.related_descriptors import (
+    ReverseManyToOneDescriptor,
+    ForwardManyToOneDescriptor
+)
 
 from rest_framework.serializers import ValidationError as DRFValidationError
 
@@ -217,7 +221,6 @@ def test_implicit_role_field_parents():
                 field_names = [field_names]
 
             for field_name in field_names:
-                print('   {}'.format(field_name))
                 # this type of specification appears to have been considered
                 # at some point, but does not exist in the app and would
                 # need support and tests built out for it
@@ -229,12 +232,18 @@ def test_implicit_role_field_parents():
                     continue
                 # separate out parent role syntax
                 field_name, sep, field_attr = field_name.partition('.')
-                print((field_name, sep, field_attr))
                 # now make primary assertion, that specified paths exist
                 assert hasattr(cls, field_name)
 
                 # inspect in greater depth
                 second_field = cls._meta.get_field(field_name)
+                second_field_descriptor = getattr(cls, field_name)
+                # all supported linkage types
+                assert isinstance(second_field_descriptor, (
+                    ReverseManyToOneDescriptor,  # not currently used
+                    ImplicitRoleDescriptor,
+                    ForwardManyToOneDescriptor
+                ))
                 # only these links are supported
                 if field_attr:
                     assert type(second_field) is ForeignKey
