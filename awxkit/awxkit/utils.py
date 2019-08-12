@@ -251,7 +251,7 @@ def gen_utf_char():
     is_char = False
     b = 'b'
     while not is_char:
-        b = random.randint(32, 0x110000)
+        b = random.randint(32, 0x10ffff)
         is_char = chr(b).isprintable()
     return chr(b)
 
