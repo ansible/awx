@@ -242,7 +242,7 @@ class TemplatesList extends Component {
                         </DropdownItem>,
                       ]}
                     />
-                  )
+                  ),
                 ]}
               />
             )}
