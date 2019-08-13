@@ -53,6 +53,7 @@ SOCIAL_AUTH_ORGANIZATION_MAP_PLACEHOLDER = collections.OrderedDict([
     ])),
     ('Test Org', collections.OrderedDict([
         ('admins', ['admin@example.com']),
+        ('auditors', ['auditor@example.com']),
         ('users', True),
     ])),
     ('Test Org 2', collections.OrderedDict([
@@ -379,6 +380,7 @@ def _register_ldap(append=None):
         placeholder=collections.OrderedDict([
             ('Test Org', collections.OrderedDict([
                 ('admins', 'CN=Domain Admins,CN=Users,DC=example,DC=com'),
+                ('auditors', 'CN=Domain Auditors,CN=Users,DC=example,DC=com'),
                 ('users', ['CN=Domain Users,CN=Users,DC=example,DC=com']),
                 ('remove_users', True),
                 ('remove_admins', True),
@@ -1170,8 +1172,10 @@ register(
     placeholder=collections.OrderedDict([
         ('saml_attr', 'organization'),
         ('saml_admin_attr', 'organization_admin'),
+        ('saml_auditor_attr', 'organization_auditor'),
         ('remove', True),
         ('remove_admins', True),
+        ('remove_auditors', True),
     ]),
 )
 
