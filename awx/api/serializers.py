@@ -647,9 +647,6 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
         model = UnifiedJobTemplate
         fields = ('*', 'last_job_run', 'last_job_failed',
                   'next_job_run', 'status')
-        extra_kwargs = {
-            'organization': {'allow_null': False},
-        }
 
     def get_related(self, obj):
         res = super(UnifiedJobTemplateSerializer, self).get_related(obj)
@@ -698,6 +695,17 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
             return serializer.to_representation(obj)
         else:
             return super(UnifiedJobTemplateSerializer, self).to_representation(obj)
+
+    def validate(self, attrs):
+        # Do not allow setting template organization to null
+        # otherwise be as non-restrictive as possible for PATCH or PUT, even with orphans
+        # does not correspond with any REST framework field construct
+        if self.instance is None and attrs.get('organization', None) is None:
+            raise serializers.ValidationError({'organization': _('Organization required for new object.')})
+        if self.instance and self.instance.organization_id and attrs.get('organization', 'blank') is None:
+            raise serializers.ValidationError({'organization': _('Organization can not be set to null.')})
+
+        return super(UnifiedJobTemplateSerializer, self).validate(attrs)
 
 
 class UnifiedJobSerializer(BaseSerializer):

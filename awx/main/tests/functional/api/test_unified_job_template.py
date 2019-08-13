@@ -41,13 +41,26 @@ class TestUnifiedOrganization:
 
     def test_organization_required_on_creation(self, model, admin_user, post):
         cls = getattr(models, model)
+        data = self.data_for_model(model)
         r = post(
             url=reverse('api:{}_list'.format(get_type_for_model(cls))),
-            data=self.data_for_model(model),
+            data=data,
             user=admin_user,
             expect=400
         )
         assert 'organization' in r.data
+        assert 'required for new object' in r.data['organization'][0]
+        # Surprising behavior - not providing the key can often give
+        # different behavior from giving it as null on create
+        data.pop('organization')
+        r = post(
+            url=reverse('api:{}_list'.format(get_type_for_model(cls))),
+            data=data,
+            user=admin_user,
+            expect=400
+        )
+        assert 'organization' in r.data
+        assert 'required' in r.data['organization'][0]
 
     def test_organization_blank_on_edit_of_orphan(self, model, admin_user, patch):
         cls = getattr(models, model)
