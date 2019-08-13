@@ -353,7 +353,7 @@ function projectsListController (
     };
 
     function buildTooltips (project) {
-        project.statusIcon = getStatusIcon(project);
+        project.statusIcon = getJobStatusIcon(project);
         project.statusTip = getStatusTooltip(project);
         project.scm_update_tooltip = vm.strings.get('update.GET_LATEST');
         project.scm_update_disabled = false;
@@ -408,7 +408,7 @@ function projectsListController (
         };
     }
 
-    function getStatusIcon (project) {
+    function getJobStatusIcon (project) {
         let icon = 'none';
         switch (project.status) {
             case 'n/a':
