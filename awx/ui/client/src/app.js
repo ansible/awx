@@ -198,6 +198,10 @@ angular
                 document.title = `Ansible ${$rootScope.BRAND_NAME} ${title}`;
             });
 
+            $rootScope.$on('ws-approval', () => {
+                fetchApprovalsCount();
+            });
+
             function activateTab() {
                 // Make the correct tab active
                 var base = $location.path().replace(/^\//, '').split('/')[0];
@@ -208,6 +212,20 @@ angular
                     //base.replace(/\_/g, ' ');
                     base = (base === 'job_events' || base === 'job_host_summaries') ? 'jobs' : base;
                 }
+            }
+
+            function fetchApprovalsCount() {
+                Rest.setUrl(`${GetBasePath('workflow_approvals')}?status=pending&page_size=1`);
+                Rest.get()
+                    .then(({data}) => {
+                        $rootScope.pendingApprovalCount = data.count;
+                    })
+                    .catch(({data, status}) => {
+                        ProcessErrors({}, data, status, null, {
+                            hdr: i18n._('Error!'),
+                            msg: i18n._('Failed to get workflow jobs pending approval. GET returned status: ') + status
+                        });
+                    });
             }
 
             if ($rootScope.removeConfigReady) {
@@ -387,18 +405,7 @@ angular
                                 }
                             });
                         });
-
-                        Rest.setUrl(`${GetBasePath('workflow_approvals')}?status=pending&page_size=1`);
-                        Rest.get()
-                            .then(({data}) => {
-                                $rootScope.pendingApprovalCount = data.count;
-                            })
-                            .catch(({data, status}) => {
-                                ProcessErrors({}, data, status, null, {
-                                    hdr: i18n._('Error!'),
-                                    msg: i18n._('Failed to get workflow jobs pending approval. GET returned status: ') + status
-                                });
-                            });
+                        fetchApprovalsCount();
                     }
                 }
 

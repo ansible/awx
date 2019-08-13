@@ -8,7 +8,7 @@
   z-index: 1041;
   background-color: rgba(0, 0, 0, 0.3);
 
-  &-drawer {
+  &--drawer {
     position: absolute;
     right: 0;
     top: 0;
@@ -19,13 +19,13 @@
     overflow-y: scroll;
   }
 
-  &-header {
+  &--header {
     display: flex;
     width: 100%;
     margin-bottom: 20px;
   }
 
-  &-title {
+  &--title {
     flex: 1 0 auto;
     color: @default-interface-txt;
     font-size: 14px;
@@ -33,7 +33,7 @@
     width: calc(82%);
   }
 
-  &-actionRow {
+  &--actionRow {
     display: flex;
     justify-content: flex-end;
     width: 100%;
@@ -44,7 +44,7 @@
     }
   }
 
-  &-exit {
+  &--exit {
     justify-content: flex-end;
     display: flex;
 
@@ -60,5 +60,9 @@
       color: @default-icon;
       opacity: 1;
     }
+  }
+
+  &--expires {
+    color: @default-err;
   }
 }

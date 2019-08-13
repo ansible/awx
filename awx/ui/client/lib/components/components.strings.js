@@ -126,7 +126,9 @@ function ComponentsStrings (BaseString) {
         DENY: t.s('DENY'),
         CONTINUE: t.s('Continue workflow job?'),
         NOTIFICATIONS: t.s('NOTIFICATIONS'),
-        WORKFLOW_TEMPLATE: t.s('Workflow Template')
+        WORKFLOW_TEMPLATE: t.s('Workflow Template'),
+        EXPIRES: t.s('Expires:'),
+        EXPIRES_NEVER: t.s('Expires: Never')
     };
 }
 

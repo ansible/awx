@@ -110,5 +110,5 @@
             <ng-transclude></ng-transclude>
         </div>
     </div>
-    <at-approvals-drawer ng-if="vm.showApprovals" close-approvals="vm.closeApprovals()"></at-approvals-drawer>
+    <at-approvals-drawer ng-if="vm.isLoggedIn && vm.showApprovals" close-approvals="vm.closeApprovals()"></at-approvals-drawer>
 </div>

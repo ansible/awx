@@ -175,12 +175,7 @@ let lists = [{
     },
     data: {
         activityStream: true,
-        activityStreamTarget: 'organization',
-        socket: {
-            "groups": {
-                "jobs": ["status_changed"]
-            }
-        },
+        activityStreamTarget: 'organization'
     },
     ncyBreadcrumb: {
         parent: "organizations.edit",

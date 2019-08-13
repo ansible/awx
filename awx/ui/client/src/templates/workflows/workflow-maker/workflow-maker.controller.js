@@ -608,10 +608,23 @@ export default ['$scope', 'TemplatesService',
                 }
             } else if ($scope.nodeConfig.mode === "edit") {
                 if (selectedTemplate) {
-                    nodeRef[$scope.nodeConfig.nodeId].fullUnifiedJobTemplateObject = selectedTemplate;
-                    nodeRef[$scope.nodeConfig.nodeId].unifiedJobTemplate = selectedTemplate;
-                    nodeRef[$scope.nodeConfig.nodeId].promptData = _.cloneDeep(promptData);
-                    nodeRef[$scope.nodeConfig.nodeId].isEdited = true;
+                    if (isPauseNode) {
+                        // If it's a _new_ pause node then we'll want to create the new ujt
+                        // If it's an existing pause node then we'll want to update the ujt
+                        nodeRef[$scope.nodeConfig.nodeId].unifiedJobTemplate = {
+                            name: selectedTemplate.name,
+                            description: selectedTemplate.description,
+                            timeout: selectedTemplate.timeout,
+                            unified_job_type: "workflow_approval"
+                        };
+                        nodeRef[$scope.nodeConfig.nodeId].isEdited = true;
+                    } else {
+                        nodeRef[$scope.nodeConfig.nodeId].fullUnifiedJobTemplateObject = selectedTemplate;
+                        nodeRef[$scope.nodeConfig.nodeId].unifiedJobTemplate = selectedTemplate;
+                        nodeRef[$scope.nodeConfig.nodeId].promptData = _.cloneDeep(promptData);
+                        nodeRef[$scope.nodeConfig.nodeId].isEdited = true;
+                    }
+
                     $scope.graphState.nodeBeingEdited = null;
 
                     $scope.graphState.arrayOfLinksForChart.map( (link) => {
@@ -622,16 +635,6 @@ export default ['$scope', 'TemplatesService',
                             link.source.unifiedJobTemplate = selectedTemplate;
                         }
                     });
-                } else if (isPauseNode) {
-                    // If it's a _new_ pause node then we'll want to create the new ujt
-                    // If it's an existing pause node then we'll want to update the ujt
-                    nodeRef[$scope.nodeConfig.nodeId].unifiedJobTemplate = {
-                        name: selectedTemplate.name,
-                        description: selectedTemplate.description,
-                        timeout: selectedTemplate.timeout,
-                        unified_job_type: "workflow_approval"
-                    };
-                    nodeRef[$scope.nodeConfig.nodeId].isEdited = true;
                 }
             }
 

@@ -1,7 +1,7 @@
 <div class="at-ApprovalsDrawer">
-    <div class="at-ApprovalsDrawer-drawer" ng-if="vm.listLoaded">
-        <div class="at-ApprovalsDrawer-header">
-            <div class="at-ApprovalsDrawer-title">
+    <div class="at-ApprovalsDrawer--drawer" ng-if="vm.listLoaded">
+        <div class="at-ApprovalsDrawer--header">
+            <div class="at-ApprovalsDrawer--title">
                 <span>
                     {{:: vm.strings.get('approvals.NOTIFICATIONS') }}
                 </span>
@@ -9,7 +9,7 @@
                     {{vm.count}}
                 </span>
             </div>
-            <div class="at-ApprovalsDrawer-exit">
+            <div class="at-ApprovalsDrawer--exit">
                 <button class="close" ng-click="closeApprovals()">
                 <i class="fa fa-times-circle"></i>
                 </button>
@@ -39,19 +39,20 @@
                         <at-row-item
                             value-bind-html="{{ approval.created | longDate }}">
                         </at-row-item>
-                        <!-- todo: clean this up if it becomes a real thing-->
+                        <!-- todo: translate strings -->
                         <at-row-item
-                            style="color: red;"
-                            value-bind-html="Expires: Never">
+                            ng-if="approval.approval_expiration"
+                            class="at-ApprovalsDrawer--expires"
+                            value-bind-html="{{:: vm.strings.get('approvals.EXPIRES') }} {{ approval.approval_expiration | longDate }}">
                         </at-row-item>
-                        <!-- todo: hook this up when timeout is active-->
-                        <!-- <at-row-item
-                            style="color: red;"
-                            value-bind-html="Expires {{ approval.created | longDate }}">
-                        </at-row-item> -->
+                        <at-row-item
+                            ng-if="!approval.approval_expiration"
+                            class="at-ApprovalsDrawer--expires"
+                            value-bind-html="{{:: vm.strings.get('approvals.EXPIRES_NEVER') }}">
+                        </at-row-item>
                     </div>
-                    <div class="at-Row-container--wrapped">
-                        <div class="at-ApprovalsDrawer-actionRow">
+                    <div class="at-Row-container--wrapped" ng-if="approval.can_approve_or_deny">
+                        <div class="at-ApprovalsDrawer--actionRow">
                             <div>{{:: vm.strings.get('approvals.CONTINUE') }}</div>
                             <button class="btn at-Button--success"
                                 ng-click="vm.approve(approval)"

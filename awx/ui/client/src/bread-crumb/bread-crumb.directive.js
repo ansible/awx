@@ -75,11 +75,22 @@ export default
                                 stateGoParams.target = streamConfig.activityStreamTarget;
                                 let isTemplateTarget = _.includes(['template', 'job_template', 'workflow_job_template'], streamConfig.activityStreamTarget);
                                 stateGoParams.activity_search = {
-                                    or__object1__in: isTemplateTarget ? 'job_template,workflow_job_template' : streamConfig.activityStreamTarget,
-                                    or__object2__in: isTemplateTarget ? 'job_template,workflow_job_template' : streamConfig.activityStreamTarget,
+                                    or__object1__in: streamConfig.activityStreamTarget,
+                                    or__object2__in: streamConfig.activityStreamTarget,
                                     order_by: '-timestamp',
                                     page_size: '20',
                                 };
+
+                                if (isTemplateTarget) {
+                                    stateGoParams.activity_search.or__object1__in = 'job_template,workflow_job_template';
+                                    stateGoParams.activity_search.or__object2__in = 'job_template,workflow_job_template';
+                                }
+
+                                if (streamConfig.activityStreamTarget === 'job') {
+                                    stateGoParams.activity_search.or__object1__in = 'job,workflow_approval';
+                                    stateGoParams.activity_search.or__object2__in = 'job,workflow_approval';
+                                }
+
                                 if (streamConfig.activityStreamTarget && streamConfig.activityStreamId && !streamConfig.noActivityStreamID) {
                                     stateGoParams.activity_search[streamConfig.activityStreamTarget] = $state.params[streamConfig.activityStreamId];
                                 }
