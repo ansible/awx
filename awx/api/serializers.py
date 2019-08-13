@@ -1387,7 +1387,6 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
         def get_field_from_model_or_attrs(fd):
             return attrs.get(fd, self.instance and getattr(self.instance, fd) or None)
 
-
         if 'allow_override' in attrs and self.instance:
             # case where user is turning off this project setting
             if self.instance.allow_override and not attrs['allow_override']:
@@ -1403,7 +1402,6 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
                             ' '.join([str(pk) for pk in used_by])
                         )})
 
-        view = self.context.get('view', None)
         if get_field_from_model_or_attrs('scm_type') == '':
             for fd in ('scm_update_on_launch', 'scm_delete_on_update', 'scm_clean'):
                 if get_field_from_model_or_attrs(fd):

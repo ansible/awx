@@ -41,7 +41,6 @@ from awx.api.serializers import (
     ActivityStreamSerializer,
     RoleSerializer,
     NotificationTemplateSerializer,
-    WorkflowJobTemplateSerializer,
     InstanceGroupSerializer,
     ProjectSerializer, JobTemplateSerializer, WorkflowJobTemplateSerializer
 )
