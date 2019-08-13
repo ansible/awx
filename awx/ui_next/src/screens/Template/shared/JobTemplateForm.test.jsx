@@ -1,5 +1,5 @@
 import React from 'react';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
 import { sleep } from '@testUtils/testUtils';
 import JobTemplateForm, { _JobTemplateForm } from './JobTemplateForm';
 import { LabelsAPI } from '@api';
@@ -35,7 +35,7 @@ describe('<JobTemplateForm />', () => {
     jest.clearAllMocks();
   });
 
-  test('initially renders successfully', () => {
+  test('initially renders successfully', async done => {
     const wrapper = mountWithContexts(
       <JobTemplateForm
         template={mockData}
@@ -43,12 +43,14 @@ describe('<JobTemplateForm />', () => {
         handleCancel={jest.fn()}
       />
     );
+    await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
     const component = wrapper.find('ChipGroup');
     expect(LabelsAPI.read).toHaveBeenCalled();
     expect(component.find('span#pf-random-id-1').text()).toEqual('Sushi');
+    done();
   });
 
-  test('should update form values on input changes', async () => {
+  test('should update form values on input changes', async done => {
     const wrapper = mountWithContexts(
       <JobTemplateForm
         template={mockData}
@@ -56,7 +58,7 @@ describe('<JobTemplateForm />', () => {
         handleCancel={jest.fn()}
       />
     );
-
+    await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
     const form = wrapper.find('Formik');
     wrapper.find('input#template-name').simulate('change', {
       target: { value: 'new foo', name: 'name' },
@@ -83,9 +85,10 @@ describe('<JobTemplateForm />', () => {
       target: { value: 'new baz type', name: 'playbook' },
     });
     expect(form.state('values').playbook).toEqual('new baz type');
+    done();
   });
 
-  test('should call handleSubmit when Submit button is clicked', async () => {
+  test('should call handleSubmit when Submit button is clicked', async done => {
     const handleSubmit = jest.fn();
     const wrapper = mountWithContexts(
       <JobTemplateForm
@@ -94,14 +97,15 @@ describe('<JobTemplateForm />', () => {
         handleCancel={jest.fn()}
       />
     );
-
+    await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
     expect(handleSubmit).not.toHaveBeenCalled();
     wrapper.find('button[aria-label="Save"]').simulate('click');
     await sleep(1);
     expect(handleSubmit).toBeCalled();
+    done();
   });
 
-  test('should call handleCancel when Cancel button is clicked', () => {
+  test('should call handleCancel when Cancel button is clicked', async done => {
     const handleCancel = jest.fn();
     const wrapper = mountWithContexts(
       <JobTemplateForm
@@ -110,12 +114,14 @@ describe('<JobTemplateForm />', () => {
         handleCancel={handleCancel}
       />
     );
+    await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
     expect(handleCancel).not.toHaveBeenCalled();
     wrapper.find('button[aria-label="Cancel"]').prop('onClick')();
     expect(handleCancel).toBeCalled();
+    done();
   });
 
-  test('handleNewLabel should arrange new labels properly', async () => {
+  test('handleNewLabel should arrange new labels properly', async done => {
     const handleNewLabel = jest.spyOn(
       _JobTemplateForm.prototype,
       'handleNewLabel'
@@ -128,6 +134,7 @@ describe('<JobTemplateForm />', () => {
         handleCancel={jest.fn()}
       />
     );
+    await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
     const multiSelect = wrapper.find('MultiSelect');
     const component = wrapper.find('JobTemplateForm');
 
@@ -141,8 +148,9 @@ describe('<JobTemplateForm />', () => {
       { name: 'Foo', organization: 1 },
       { associate: true, id: 2, name: 'Bar' },
     ]);
+    done();
   });
-  test('disassociateLabel should arrange new labels properly', async () => {
+  test('disassociateLabel should arrange new labels properly', async done => {
     const wrapper = mountWithContexts(
       <JobTemplateForm
         template={mockData}
@@ -150,6 +158,7 @@ describe('<JobTemplateForm />', () => {
         handleCancel={jest.fn()}
       />
     );
+    await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
     const component = wrapper.find('JobTemplateForm');
     // This asserts that the user generated a label or clicked
     // on a label option, and then changed their mind and
@@ -162,5 +171,6 @@ describe('<JobTemplateForm />', () => {
     component.instance().removeLabel({ name: 'Sushi', id: 1 });
     expect(component.state().newLabels.length).toBe(0);
     expect(component.state().removedLabels.length).toBe(1);
+    done();
   });
 });
