@@ -146,7 +146,7 @@ class TestOrphanJobTemplate:
 
 @pytest.mark.django_db
 @pytest.mark.job_permissions
-def test_job_template_creator_access(project, rando, post):
+def test_job_template_creator_access(project, organization, rando, post):
 
     project.admin_role.members.add(rando)
     with mock.patch(
@@ -158,6 +158,7 @@ def test_job_template_creator_access(project, rando, post):
             ask_inventory_on_launch=True,
             ask_credential_on_launch=True,
             project=project.pk,
+            organization=organization.id,
             playbook='helloworld.yml'
         ), rando)
 

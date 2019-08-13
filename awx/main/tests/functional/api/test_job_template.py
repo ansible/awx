@@ -36,6 +36,7 @@ def test_create(post, project, machine_credential, inventory, alice, grant_proje
         'project': project.id,
         'inventory': inventory.id,
         'playbook': 'helloworld.yml',
+        'organization': project.organization_id
     }, alice)
     assert r.status_code == expect
 
