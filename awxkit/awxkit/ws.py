@@ -7,8 +7,6 @@ import json
 import ssl
 import urllib.parse
 
-import websocket
-
 from awxkit.config import config
 
 
@@ -53,6 +51,9 @@ class WSClient(object):
     # Subscription group types
 
     def __init__(self, token=None, hostname='', port=443, secure=True, session_id=None, csrftoken=None):
+        # delay this import, because this is an optional dependency
+        import websocket
+
         if not hostname:
             result = urllib.parse.urlparse(config.base_url)
             secure = result.scheme == 'https'

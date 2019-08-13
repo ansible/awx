@@ -1,7 +1,7 @@
-from toposort import CircularDependencyError
 import pytest
 
 from awxkit.utils import filter_by_class
+from awxkit.utils.toposort import CircularDependencyError
 from awxkit.api.mixins import has_create
 
 

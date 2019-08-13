@@ -68,6 +68,10 @@ setup(
     include_package_data=True,
     install_requires=requirements,
     python_requires=">= 3.5",
+    extras_require={
+        'formatting': ['jq', 'tabulate'],
+        'websockets': ['websocket-client>0.54.0'],
+    },
     entry_points={
         'console_scripts': [
             'akit=awxkit.scripts.basic_session:load_interactive',

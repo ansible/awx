@@ -1,9 +1,8 @@
 from collections import defaultdict
 import inspect
 
-from toposort import toposort
-
 from awxkit.utils import get_class_if_instance, class_name_to_kw_arg, is_proper_subclass, super_dir_set
+from awxkit.utils.toposort import toposort
 
 
 # HasCreate dependency resolution and creation utilities
