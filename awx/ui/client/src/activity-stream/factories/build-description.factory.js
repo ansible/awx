@@ -124,9 +124,9 @@ export default function BuildDescription(BuildAnchor, $log, i18n) {
                              break;
                          // expected outcome: "operation <object1>"
                          case 'update':
-                             if (activity.object1 === 'workflow_approval'
-                                && _.has(activity, 'changes.status')
-                                && activity.changes.status.length === 2
+                             if (activity.object1 === 'workflow_approval' &&
+                                _.has(activity, 'changes.status') &&
+                                activity.changes.status.length === 2
                             ) {
                                 let operationText = '';
                                 if (activity.changes.status[1] === 'successful') {

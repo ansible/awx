@@ -94,7 +94,7 @@ export default function BuildAnchor($log, $filter) {
                      url += `applications/${obj.id}`;
                      break;
                  case 'workflow_approval':
-                     url += `workflows/${activity.summary_fields.workflow_job[0].id}`
+                     url += `workflows/${activity.summary_fields.workflow_job[0].id}`;
                      name = activity.summary_fields.workflow_job[0].name;
                      break;
                  default:

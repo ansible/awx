@@ -115,7 +115,7 @@ export default ['$scope','Wait', '$timeout', 'i18n',
                     $scope.graphData.jobStatus = value.data;
                 })
                 .catch(function({data, status}) {
-                    processErrors(null, data, status,  null, { hdr: i18n._('Error!'), msg: i18n._(`Failed to get dashboard graph data: ${response.status}`)});
+                    ProcessErrors(null, data, status,  null, { hdr: i18n._('Error!'), msg: i18n._(`Failed to get dashboard graph data: ${status}`)});
                 });
             }
 

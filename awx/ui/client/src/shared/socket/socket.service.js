@@ -97,9 +97,9 @@ export default
 
                 var data = JSON.parse(e.data), str = "";
 
-                if (data.group_name === 'jobs'
-                    && 'type' in data
-                    && data.type === 'workflow_approval'
+                if (data.group_name === 'jobs' &&
+                    'type' in data &&
+                     data.type === 'workflow_approval'
                 ) {
                     $rootScope.$broadcast('ws-approval');
                 }
