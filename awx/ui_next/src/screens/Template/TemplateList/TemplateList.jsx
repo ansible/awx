@@ -215,7 +215,7 @@ class TemplatesList extends Component {
                     itemsToDelete={selected}
                     itemName={i18n._(t`Template`)}
                   />,
-                  canAdd ? (
+                  canAdd && (
                     <Dropdown
                       key="add"
                       isPlain
@@ -242,7 +242,7 @@ class TemplatesList extends Component {
                         </DropdownItem>,
                       ]}
                     />
-                  ) : null,
+                  )
                 ]}
               />
             )}
@@ -257,7 +257,7 @@ class TemplatesList extends Component {
               />
             )}
             emptyStateControls={
-              canAdd ? (
+              canAdd && (
                 <Dropdown
                   key="add"
                   isPlain
@@ -282,7 +282,7 @@ class TemplatesList extends Component {
                     </DropdownItem>,
                   ]}
                 />
-              ) : null
+              )
             }
           />
         </Card>
