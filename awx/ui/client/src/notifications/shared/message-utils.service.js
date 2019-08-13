@@ -12,7 +12,7 @@ const emptyDefaults = {
         message: '',
         body: '',
     },
-}
+};
 
 export default [function() {
     return {
@@ -87,7 +87,11 @@ export default [function() {
             $scope.customize_messages = isCustomized;
         },
 
-        updateDefaultsOnScope: function($scope, oldDefaults = emptyDefaults, newDefaults) {
+        updateDefaultsOnScope: function(
+            $scope,
+            oldDefaults = emptyDefaults,
+            newDefaults = emptyDefaults
+        ) {
             if ($scope.started_message === oldDefaults.started.message) {
                 $scope.started_message = newDefaults.started.message;
             }
