@@ -17,6 +17,11 @@ class JobTemplateEdit extends Component {
       error: '',
     };
 
+    const {
+      template: { id, type },
+    } = props;
+    this.detailsUrl = `/templates/${type}/${id}/details`;
+
     this.handleCancel = this.handleCancel.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.submitLabels = this.submitLabels.bind(this);
@@ -31,7 +36,7 @@ class JobTemplateEdit extends Component {
     try {
       await JobTemplatesAPI.update(id, { ...values });
       await Promise.all([this.submitLabels(newLabels, removedLabels)]);
-      history.push(`/templates/${type}/${id}/details`);
+      history.push(this.detailsUrl);
     } catch (error) {
       this.setState({ error });
     }
@@ -60,11 +65,8 @@ class JobTemplateEdit extends Component {
   }
 
   handleCancel() {
-    const {
-      template: { id, type },
-      history,
-    } = this.props;
-    history.push(`/templates/${type}/${id}/details`);
+    const { history } = this.props;
+    history.push(this.detailsUrl);
   }
 
   render() {
@@ -73,10 +75,7 @@ class JobTemplateEdit extends Component {
     const canEdit = template.summary_fields.user_capabilities.edit;
 
     if (!canEdit) {
-      const {
-        template: { id, type },
-      } = this.props;
-      return <Redirect to={`/templates/${type}/${id}/details`} />;
+      return <Redirect to={this.detailsUrl} />;
     }
 
     return (
