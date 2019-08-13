@@ -56,9 +56,9 @@ UNIFIED_ORG_LOOKUPS = {
     'project': None,
     # Workflow JTs also had an explicit organization in their subclass table
     'workflowjobtemplate': None,
-    # Jobs inherited project from job templates as a convience field
+    # Jobs inherited project from job templates as a convenience field
     'job': 'project',
-    # Inventory Sources had an convience field of inventory
+    # Inventory Sources had an convenience field of inventory
     'inventoryupdate': 'inventory',
     # Project Updates did not have a direct organization field, obtained it from project
     'projectupdate': 'project',
@@ -106,6 +106,7 @@ def _migrate_unified_organization(apps, unified_cls_name, backward=False):
     variable tmp_organization on the unified model
     (optimized method)
     """
+    start = time()
     UnifiedClass = apps.get_model('main', unified_cls_name)
     ContentType = apps.get_model('contenttypes', 'ContentType')
 
@@ -128,6 +129,7 @@ def _migrate_unified_organization(apps, unified_cls_name, backward=False):
             r = UnifiedClass.objects.order_by().filter(polymorphic_ctype=this_ct).update(tmp_organization=sub_qs)
         if r:
             logger.info('Organization migration on {} affected {} rows.'.format(cls_name, r))
+    logger.info('Unified organization migration completed in %f seconds' % (time() - start))
 
 
 def migrate_ujt_organization(apps, schema_editor):
@@ -177,6 +179,7 @@ def rebuild_role_parentage(apps, schema_editor):
     seen_models = set()
     updated_ct = 0
     model_ct = 0
+    noop_ct = 0
     Role = apps.get_model('main', "Role")
     for role in Role.objects.iterator():
         if not role.object_id:
@@ -200,11 +203,14 @@ def rebuild_role_parentage(apps, schema_editor):
             model_ct += 1
             logger.debug('Updated parents of {} roles of {}'.format(updated, content_object))
         else:
-            logger.debug('No changes to role parents of {}'.format(content_object))
+            noop_ct += 1
         updated_ct += updated
+
+    logger.debug('No changes to role parents for {} objects'.format(noop_ct))
+    if updated_ct:
+        logger.info('Updated parentage for {} roles of {} resources'.format(updated_ct, model_ct))
 
     logger.info('Rebuild parentage completed in %f seconds' % (time() - start))
 
     if updated_ct:
-        logger.info('Updated parentage for {} roles of {} resources'.format(updated_ct, model_ct))
         rebuild_role_hierarchy(apps, schema_editor)
