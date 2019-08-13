@@ -32,7 +32,7 @@ export default ['Rest', 'Wait', 'NotificationsFormObject',
                         $state.go("^");
                         Alert('Permission Error', 'You do not have permission to add a notification template.', 'alert-info');
                     }
-                    defaultMessages = data.actions.POST.messages.default;
+                    defaultMessages = data.actions.GET.messages;
                     MessageUtils.setMessagesOnScope($scope, null, defaultMessages);
                 });
             // apply form definition's default field values
@@ -168,8 +168,13 @@ export default ['Rest', 'Wait', 'NotificationsFormObject',
         $scope.toggleForm = function(key) {
             $scope[key] = !$scope[key];
         };
-        $scope.$watch('notification_type', (value) => {
-            if (value) {
+        $scope.$watch('notification_type', (newValue, oldValue = {}) => {
+            if (newValue) {
+                MessageUtils.updateDefaultsOnScope(
+                  $scope,
+                  defaultMessages[oldValue.value],
+                  defaultMessages[newValue.value]
+                );
                 $scope.$broadcast('reset-code-mirror', {
                     customize_messages: $scope.customize_messages,
                 });

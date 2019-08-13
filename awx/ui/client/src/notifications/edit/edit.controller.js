@@ -41,7 +41,7 @@ export default ['Rest', 'Wait',
             Rest.setUrl(GetBasePath('notification_templates'));
             Rest.options()
                 .then(({data}) => {
-                    defaultMessages = data.actions.GET.messages.default;
+                    defaultMessages = data.actions.GET.messages;
                 });
 
             GetChoices({
@@ -257,8 +257,13 @@ export default ['Rest', 'Wait',
         $scope.toggleForm = function(key) {
             $scope[key] = !$scope[key];
         };
-        $scope.$watch('notification_type', (value) => {
-            if (value) {
+        $scope.$watch('notification_type', (newValue, oldValue = {}) => {
+            if (newValue) {
+                MessageUtils.updateDefaultsOnScope(
+                  $scope,
+                  defaultMessages[oldValue.value],
+                  defaultMessages[newValue.value]
+                );
                 $scope.$broadcast('reset-code-mirror', {
                     customize_messages: $scope.customize_messages,
                 });
