@@ -30,7 +30,8 @@ def organization_resource_creator(organization, user):
         i_proj = 0
         i_inv = 0
         for i in range(job_templates):
-            project = organization.projects.all()[i_proj]
+            project = Project.objects.filter(organization=organization)[i_proj]
+            # project = organization.projects.all()[i_proj]
             inventory = organization.inventories.all()[i_inv]
             project.jobtemplates.create(name="test-jt %s" % i,
                                         description="test-job-template-desc",
@@ -39,7 +40,7 @@ def organization_resource_creator(organization, user):
                                         organization=organization)
             i_proj += 1
             i_inv += 1
-            if i_proj >= organization.projects.count():
+            if i_proj >= Project.objects.filter(organization=organization).count():
                 i_proj = 0
             if i_inv >= organization.inventories.count():
                 i_inv = 0
@@ -185,11 +186,12 @@ def test_scan_JT_counted(resourced_organization, user, get):
 @pytest.mark.django_db
 def test_JT_not_double_counted(resourced_organization, user, get):
     admin_user = user('admin', True)
+    proj = Project.objects.filter(organization=resourced_organization).all()[0]
     # Add a run job template to the org
-    resourced_organization.projects.all()[0].jobtemplates.create(
+    proj.jobtemplates.create(
         job_type='run',
         inventory=resourced_organization.inventories.all()[0],
-        project=resourced_organization.projects.all()[0],
+        project=proj,
         name='double-linked-job-template',
         organization=resourced_organization)
     counts_dict = COUNTS_PRIMES
