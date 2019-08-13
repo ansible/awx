@@ -74,12 +74,11 @@ class JobTemplateForm extends Component {
     this.loadLabels(QSConfig);
   }
 
-  // The function below assumes that the user has no more than 400
-  // labels. For the vast majority of users this will be more thans
-  // enough.This can be updated to allow more than 400 labels if we
-  // decide it is necessary.
-
   async loadLabels(QueryConfig) {
+    // This function assumes that the user has no more than 400
+    // labels. For the vast majority of users this will be more thans
+    // enough.This can be updated to allow more than 400 labels if we
+    // decide it is necessary.
     this.setState({ contentError: null, hasContentLoading: true });
     let loadedLabels;
     try {
