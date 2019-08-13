@@ -183,7 +183,7 @@ def rebuild_role_parentage(apps, schema_editor):
     Role = apps.get_model('main', "Role")
     for role in Role.objects.iterator():
         if not role.object_id:
-            logger.debug('Skipping singleton or orphaned role {}'.format(role.pk))
+            noop_ct += 1
             continue
         model_tuple = (role.content_type_id, role.object_id)
         if model_tuple in seen_models:
@@ -206,7 +206,7 @@ def rebuild_role_parentage(apps, schema_editor):
             noop_ct += 1
         updated_ct += updated
 
-    logger.debug('No changes to role parents for {} objects'.format(noop_ct))
+    logger.debug('No changes to role parents for {} roles'.format(noop_ct))
     if updated_ct:
         logger.info('Updated parentage for {} roles of {} resources'.format(updated_ct, model_ct))
 

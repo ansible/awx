@@ -696,6 +696,11 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
         else:
             return super(UnifiedJobTemplateSerializer, self).to_representation(obj)
 
+    def validate_organization(self, value):
+        if value is None:
+            raise serializers.ValidationError(_('This field is required.'))
+        return value
+
 
 class UnifiedJobSerializer(BaseSerializer):
     show_capabilities = ['start', 'delete']
