@@ -5,8 +5,8 @@
   "main": "index.jsx",
   "scripts": {
     "start": "webpack-dev-server --config ./webpack.config.js --mode development",
-    "test": "jest --coverage",
-    "test-watch": "jest --watch",
+    "test": "TZ='UTC' jest --coverage",
+    "test-watch": "TZ='UTC' jest --watch",
     "lint": "eslint --ext .js --ext .jsx .",
     "add-locale": "lingui add-locale",
     "extract-strings": "lingui extract",
@@ -61,15 +61,19 @@
     "@patternfly/react-core": "^3.16.14",
     "@patternfly/react-icons": "^3.7.5",
     "@patternfly/react-tokens": "^2.3.3",
+    "ansi-to-html": "^0.6.11",
     "axios": "^0.18.0",
     "codemirror": "^5.47.0",
     "formik": "^1.5.1",
+    "has-ansi": "^3.0.0",
+    "html-entities": "^1.2.1",
     "js-yaml": "^3.13.1",
     "prop-types": "^15.6.2",
     "react": "^16.4.1",
     "react-codemirror2": "^6.0.0",
     "react-dom": "^16.4.1",
     "react-router-dom": "^4.3.1",
+    "react-virtualized": "^9.21.1",
     "styled-components": "^4.2.0"
   }
 }
