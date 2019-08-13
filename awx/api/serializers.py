@@ -2857,6 +2857,8 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
         ))
         if obj.host_config_key:
             res['callback'] = self.reverse('api:job_template_callback', kwargs={'pk': obj.pk})
+        if obj.organization_id:
+            res['organization'] = self.reverse('api:organization_detail',   kwargs={'pk': obj.organization.pk})
         return res
 
     def validate(self, attrs):
