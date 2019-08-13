@@ -62,6 +62,25 @@ class TestUnifiedOrganization:
         obj.refresh_from_db()
         assert obj.name == 'foooooo'
 
+    def test_organization_blank_on_edit_of_orphan_as_nonsuperuser(self, model, rando, patch):
+        """Test case reflects historical bug where ordinary users got weird error
+        message when editing an orphaned project
+        """
+        cls = getattr(models, model)
+        data = self.data_for_model(model, orm_style=True)
+        obj = cls.objects.create(**data)
+        if model == 'JobTemplate':
+            obj.project.admin_role.members.add(rando)
+        obj.admin_role.members.add(rando)
+        patch(
+            url=obj.get_absolute_url(),
+            data={'name': 'foooooo'},
+            user=rando,
+            expect=200
+        )
+        obj.refresh_from_db()
+        assert obj.name == 'foooooo'
+
     def test_organization_blank_on_edit_of_normal(self, model, admin_user, patch, organization):
         cls = getattr(models, model)
         data = self.data_for_model(model, orm_style=True)

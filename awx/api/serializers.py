@@ -647,6 +647,9 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
         model = UnifiedJobTemplate
         fields = ('*', 'last_job_run', 'last_job_failed',
                   'next_job_run', 'status')
+        extra_kwargs = {
+            'organization': {'allow_null': False},
+        }
 
     def get_related(self, obj):
         res = super(UnifiedJobTemplateSerializer, self).get_related(obj)
@@ -695,11 +698,6 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
             return serializer.to_representation(obj)
         else:
             return super(UnifiedJobTemplateSerializer, self).to_representation(obj)
-
-    def validate_organization(self, value):
-        if value is None:
-            raise serializers.ValidationError(_('This field is required.'))
-        return value
 
 
 class UnifiedJobSerializer(BaseSerializer):
@@ -1389,11 +1387,6 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
         def get_field_from_model_or_attrs(fd):
             return attrs.get(fd, self.instance and getattr(self.instance, fd) or None)
 
-        organization = None
-        if 'organization' in attrs:
-            organization = attrs['organization']
-        elif self.instance:
-            organization = self.instance.organization
 
         if 'allow_override' in attrs and self.instance:
             # case where user is turning off this project setting
@@ -1411,10 +1404,7 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
                         )})
 
         view = self.context.get('view', None)
-        if not organization and not view.request.user.is_superuser:
-            # Only allow super users to create orgless projects
-            raise serializers.ValidationError(_('Organization is missing'))
-        elif get_field_from_model_or_attrs('scm_type') == '':
+        if get_field_from_model_or_attrs('scm_type') == '':
             for fd in ('scm_update_on_launch', 'scm_delete_on_update', 'scm_clean'):
                 if get_field_from_model_or_attrs(fd):
                     raise serializers.ValidationError({fd: _('Update options must be set to false for manual projects.')})
