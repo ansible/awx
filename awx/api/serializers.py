@@ -697,13 +697,14 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
             return super(UnifiedJobTemplateSerializer, self).to_representation(obj)
 
     def validate(self, attrs):
-        # Do not allow setting template organization to null
-        # otherwise be as non-restrictive as possible for PATCH or PUT, even with orphans
-        # does not correspond with any REST framework field construct
-        if self.instance is None and attrs.get('organization', None) is None:
-            raise serializers.ValidationError({'organization': _('Organization required for new object.')})
-        if self.instance and self.instance.organization_id and attrs.get('organization', 'blank') is None:
-            raise serializers.ValidationError({'organization': _('Organization can not be set to null.')})
+        if 'organization' in self.fields:
+            # Do not allow setting template organization to null
+            # otherwise be as non-restrictive as possible for PATCH or PUT, even with orphans
+            # does not correspond with any REST framework field construct
+            if self.instance is None and attrs.get('organization', None) is None:
+                raise serializers.ValidationError({'organization': _('Organization required for new object.')})
+            if self.instance and self.instance.organization_id and attrs.get('organization', 'blank') is None:
+                raise serializers.ValidationError({'organization': _('Organization can not be set to null.')})
 
         return super(UnifiedJobTemplateSerializer, self).validate(attrs)
 
@@ -2858,7 +2859,7 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
         if obj.host_config_key:
             res['callback'] = self.reverse('api:job_template_callback', kwargs={'pk': obj.pk})
         if obj.organization_id:
-            res['organization'] = self.reverse('api:organization_detail',   kwargs={'pk': obj.organization.pk})
+            res['organization'] = self.reverse('api:organization_detail',   kwargs={'pk': obj.organization_id})
         return res
 
     def validate(self, attrs):
