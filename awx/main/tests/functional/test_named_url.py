@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import pytest
 
 from django.core.exceptions import ImproperlyConfigured
@@ -63,6 +64,20 @@ def test_job_template(get, admin_user):
     url = reverse('api:job_template_detail', kwargs={'pk': test_jt.pk})
     response = get(url, user=admin_user, expect=200)
     assert response.data['related']['named_url'].endswith('/test_jt++test_org/')
+
+
+@pytest.mark.django_db
+def test_job_template_old_way(get, admin_user, mocker):
+    test_org = Organization.objects.create(name='test_org')
+    test_jt = JobTemplate.objects.create(name='test_jt ♥', organization=test_org)
+    url = reverse('api:job_template_detail', kwargs={'pk': test_jt.pk})
+
+    response = get(url, user=admin_user, expect=200)
+    new_url = response.data['related']['named_url']
+    old_url = '/'.join([url.rsplit('/', 2)[0], test_jt.name, ''])
+
+    assert URLModificationMiddleware._convert_named_url(new_url) == url
+    assert URLModificationMiddleware._convert_named_url(old_url) == url
 
 
 @pytest.mark.django_db
