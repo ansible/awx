@@ -717,3 +717,7 @@ class WorkflowApproval(UnifiedJob):
     @property
     def workflow_job_template(self):
         return self.unified_job_node.workflow_job.unified_job_template
+
+    @property
+    def workflow_job(self):
+        return self.unified_job_node.workflow_job
