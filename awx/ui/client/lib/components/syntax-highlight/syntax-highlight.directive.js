@@ -35,6 +35,9 @@ function atSyntaxHighlightController ($scope, AngularCodeMirror) {
                 scrollbarStyle: null,
             }
         });
+        if (document.querySelector(`.ng-hide #${$scope.name}_codemirror`)) {
+            return;
+        }
         codeMirror.showTextArea({
             scope: $scope,
             model: varName,
