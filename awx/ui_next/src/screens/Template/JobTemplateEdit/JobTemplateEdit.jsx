@@ -19,6 +19,7 @@ class JobTemplateEdit extends Component {
 
     this.handleCancel = this.handleCancel.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.submitLabels = this.submitLabels.bind(this);
   }
 
   async handleSubmit(values, newLabels = [], removedLabels = []) {
@@ -27,26 +28,35 @@ class JobTemplateEdit extends Component {
       history,
     } = this.props;
 
-    const disassociatedLabels = removedLabels.forEach(removedLabel =>
-      JobTemplatesAPI.disassociateLabel(id, removedLabel)
-    );
-    const associatedLabels = newLabels
-      .filter(newLabel => !newLabel.organization)
-      .forEach(newLabel => JobTemplatesAPI.associateLabel(id, newLabel));
-    const generatedLabels = newLabels
-      .filter(newLabel => newLabel.organization)
-      .forEach(newLabel => JobTemplatesAPI.generateLabel(id, newLabel));
     try {
-      await Promise.all([
-        JobTemplatesAPI.update(id, { ...values }),
-        disassociatedLabels,
-        associatedLabels,
-        generatedLabels,
-      ]);
+      await JobTemplatesAPI.update(id, { ...values });
+      await Promise.all([this.submitLabels(newLabels, removedLabels)]);
       history.push(`/templates/${type}/${id}/details`);
     } catch (error) {
       this.setState({ error });
     }
+  }
+
+  async submitLabels(newLabels, removedLabels) {
+    const {
+      template: { id },
+    } = this.props;
+    const disassociationPromises = removedLabels.map(label =>
+      JobTemplatesAPI.disassociateLabel(id, label)
+    );
+    const associationPromises = newLabels
+      .filter(label => !label.organization)
+      .map(label => JobTemplatesAPI.associateLabel(id, label));
+    const creationPromises = newLabels
+      .filter(label => label.organization)
+      .map(label => JobTemplatesAPI.generateLabel(id, label));
+
+    const results = await Promise.all([
+      ...disassociationPromises,
+      ...associationPromises,
+      ...creationPromises,
+    ]);
+    return results;
   }
 
   handleCancel() {

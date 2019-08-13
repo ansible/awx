@@ -29,7 +29,7 @@ describe('<JobTemplateEdit />', () => {
     mountWithContexts(<JobTemplateEdit template={mockData} />);
   });
 
-  test('handleSubmit should call api update', () => {
+  test('handleSubmit should call api update', async (done) => {
     const wrapper = mountWithContexts(<JobTemplateEdit template={mockData} />);
     const updatedTemplateData = {
       name: 'new name',
@@ -47,7 +47,7 @@ describe('<JobTemplateEdit />', () => {
       { disassociate: true, id: 2 },
     ];
 
-    wrapper.find('JobTemplateForm').prop('handleSubmit')(
+    await wrapper.find('JobTemplateForm').prop('handleSubmit')(
       updatedTemplateData,
       newLabels,
       removedLabels
@@ -56,6 +56,7 @@ describe('<JobTemplateEdit />', () => {
     expect(JobTemplatesAPI.disassociateLabel).toHaveBeenCalledTimes(2);
     expect(JobTemplatesAPI.associateLabel).toHaveBeenCalledTimes(2);
     expect(JobTemplatesAPI.generateLabel).toHaveBeenCalledTimes(2);
+    done();
   });
 
   test('should navigate to job template detail when cancel is clicked', () => {
