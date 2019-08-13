@@ -51,16 +51,18 @@ def test_job_template_access_use_level(jt_linked, rando):
     access = JobTemplateAccess(rando)
     jt_linked.project.use_role.members.add(rando)
     jt_linked.inventory.use_role.members.add(rando)
-    ssh_cred.use_role.members.add(rando)
-    vault_cred.use_role.members.add(rando)
-
+    jt_linked.organization.job_template_admin_role.members.add(rando)
     proj_pk = jt_linked.project.pk
-    assert access.can_add(dict(inventory=jt_linked.inventory.pk, project=proj_pk))
-    assert access.can_add(dict(credential=ssh_cred.pk, project=proj_pk))
-    assert access.can_add(dict(vault_credential=vault_cred.pk, project=proj_pk))
+    org_pk = jt_linked.organization_id
+
+    assert access.can_change(jt_linked, {'job_type': 'check', 'project': proj_pk})
+    assert access.can_change(jt_linked, {'job_type': 'check', 'inventory': None})
 
     for cred in jt_linked.credentials.all():
-        assert not access.can_unattach(jt_linked, cred, 'credentials', {})
+        assert access.can_unattach(jt_linked, cred, 'credentials', {})
+
+    assert access.can_add(dict(inventory=jt_linked.inventory.pk, project=proj_pk, organization=org_pk))
+    assert access.can_add(dict(project=proj_pk, organization=org_pk))
 
 
 @pytest.mark.django_db
@@ -75,14 +77,15 @@ def test_job_template_access_admin(role_names, jt_linked, rando):
 
     # Appoint this user as admin of the organization
     jt_linked.organization.admin_role.members.add(rando)
+    org_pk = jt_linked.organization.id
 
     # Assign organization permission in the same way the create view does
     organization = jt_linked.inventory.organization
     ssh_cred.admin_role.parents.add(organization.admin_role)
 
     proj_pk = jt_linked.project.pk
-    assert access.can_add(dict(inventory=jt_linked.inventory.pk, project=proj_pk))
-    assert access.can_add(dict(credential=ssh_cred.pk, project=proj_pk))
+    assert access.can_add(dict(inventory=jt_linked.inventory.pk, project=proj_pk, organization=org_pk))
+    assert access.can_add(dict(credential=ssh_cred.pk, project=proj_pk, organization=org_pk))
 
     for cred in jt_linked.credentials.all():
         assert access.can_unattach(jt_linked, cred, 'credentials', {})
@@ -147,26 +150,45 @@ class TestOrphanJobTemplate:
 @pytest.mark.django_db
 @pytest.mark.job_permissions
 def test_job_template_creator_access(project, organization, rando, post):
+    project.use_role.members.add(rando)
+    organization.job_template_admin_role.members.add(rando)
+    response = post(url=reverse('api:job_template_list'), data=dict(
+        name='newly-created-jt',
+        ask_inventory_on_launch=True,
+        project=project.pk,
+        organization=organization.id,
+        playbook='helloworld.yml'
+    ), user=rando, expect=201)
 
-    project.admin_role.members.add(rando)
-    with mock.patch(
-            'awx.main.models.projects.ProjectOptions.playbooks',
-            new_callable=mock.PropertyMock(return_value=['helloworld.yml'])):
-        response = post(reverse('api:job_template_list'), dict(
-            name='newly-created-jt',
-            job_type='run',
-            ask_inventory_on_launch=True,
-            ask_credential_on_launch=True,
-            project=project.pk,
-            organization=organization.id,
-            playbook='helloworld.yml'
-        ), rando)
-
-    assert response.status_code == 201
     jt_pk = response.data['id']
     jt_obj = JobTemplate.objects.get(pk=jt_pk)
     # Creating a JT should place the creator in the admin role
-    assert rando in jt_obj.admin_role
+    assert rando in jt_obj.admin_role.members.all()
+
+
+@pytest.mark.django_db
+@pytest.mark.job_permissions
+@pytest.mark.parametrize('lacking', ['project', 'inventory', 'organization'])
+def test_job_template_insufficient_creator_permissions(lacking, project, inventory, organization, rando, post):
+    if lacking != 'project':
+        project.use_role.members.add(rando)
+    else:
+        project.read_role.members.add(rando)
+    if lacking != 'organization':
+        organization.job_template_admin_role.members.add(rando)
+    else:
+        organization.member_role.members.add(rando)
+    if lacking != 'inventory':
+        inventory.use_role.members.add(rando)
+    else:
+        inventory.read_role.members.add(rando)
+    response = post(url=reverse('api:job_template_list'), data=dict(
+        name='newly-created-jt',
+        inventory=inventory.id,
+        project=project.pk,
+        organization=organization.id,
+        playbook='helloworld.yml'
+    ), user=rando, expect=403)
 
 
 @pytest.mark.django_db

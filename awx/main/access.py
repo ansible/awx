@@ -1450,9 +1450,7 @@ class JobTemplateAccess(NotificationAttachMixin, BaseAccess):
         Users who are able to create deploy jobs can also run normal and check (dry run) jobs.
         '''
         if not data:  # So the browseable API will work
-            return (
-                Project.accessible_objects(self.user, 'use_role').exists() or
-                Inventory.accessible_objects(self.user, 'use_role').exists())
+            return Organization.accessible_objects(self.user, 'job_template_admin_role').exists()
 
         # if reference_obj is provided, determine if it can be copied
         reference_obj = data.get('reference_obj', None)
@@ -1481,6 +1479,10 @@ class JobTemplateAccess(NotificationAttachMixin, BaseAccess):
         if inventory:
             if self.user not in inventory.use_role:
                 return False
+
+        organization = get_value(Organization, 'organization')
+        if (not organization) or (self.user not in organization.job_template_admin_role):
+            return False
 
         project = get_value(Project, 'project')
         # If the user has admin access to the project (as an org admin), should
@@ -1522,19 +1524,29 @@ class JobTemplateAccess(NotificationAttachMixin, BaseAccess):
         data_for_change = data
         if self.user not in obj.admin_role and not self.user.is_superuser:
             return False
-        if data is not None:
-            data = dict(data)
+        if data is None:
+            return True
 
-            if self.changes_are_non_sensitive(obj, data):
-                if 'survey_enabled' in data and obj.survey_enabled != data['survey_enabled'] and data['survey_enabled']:
-                    self.check_license(feature='surveys')
-                return True
+        # standard type of check for organization - cannot change the value
+        # unless posessing the respective job_template_admin_role, otherwise non-blocking
+        if not self.check_related('organization', Organization, data, obj=obj, role_field='job_template_admin_role'):
+            return False
 
-            for required_field in ('inventory', 'project'):
-                required_obj = getattr(obj, required_field, None)
-                if required_field not in data_for_change and required_obj is not None:
-                    data_for_change[required_field] = required_obj.pk
-        return self.can_read(obj) and (self.can_add(data_for_change) if data is not None else True)
+        data = dict(data)
+
+        if 'survey_enabled' in data and obj.survey_enabled != data['survey_enabled'] and data['survey_enabled']:
+            self.check_license(feature='surveys')
+
+        if self.changes_are_non_sensitive(obj, data):
+            return True
+
+        for required_field, cls in (('inventory', Inventory), ('project', Project)):
+            is_mandatory = True
+            if not getattr(obj, '{}_id'.format(required_field)):
+                is_mandatory = False
+            if not self.check_related(required_field, cls, data, obj=obj, role_field='use_role', mandatory=is_mandatory):
+                return False
+        return True
 
     def changes_are_non_sensitive(self, obj, data):
         '''

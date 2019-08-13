@@ -640,7 +640,7 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
     _capabilities_prefetch = [
         'admin', 'execute',
         {'copy': ['jobtemplate.project.use', 'jobtemplate.inventory.use',
-                  'workflowjobtemplate.organization.workflow_admin']}
+                  'organization.workflow_admin']}
     ]
 
     class Meta:
