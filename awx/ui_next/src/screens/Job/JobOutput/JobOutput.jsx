@@ -66,6 +66,7 @@ class JobOutput extends Component {
       defaultHeight: 25,
     });
 
+    this._isMounted = false;
     this.loadJobEvents = this.loadJobEvents.bind(this);
     this.rowRenderer = this.rowRenderer.bind(this);
     this.handleScrollFirst = this.handleScrollFirst.bind(this);
@@ -79,6 +80,7 @@ class JobOutput extends Component {
   }
 
   componentDidMount() {
+    this._isMounted = true;
     this.loadJobEvents();
   }
 
@@ -100,14 +102,19 @@ class JobOutput extends Component {
     }
   }
 
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
   async loadJobEvents() {
     const { job } = this.props;
 
     const loadRange = range(1, 50);
-    this.setState(({ currentlyLoading }) => ({
-      hasContentLoading: true,
-      currentlyLoading: currentlyLoading.concat(loadRange),
-    }));
+    this._isMounted &&
+      this.setState(({ currentlyLoading }) => ({
+        hasContentLoading: true,
+        currentlyLoading: currentlyLoading.concat(loadRange),
+      }));
     try {
       const {
         data: { results: newResults = [], count },
@@ -115,19 +122,23 @@ class JobOutput extends Component {
         page_size: 50,
         order_by: 'start_line',
       });
-      this.setState(({ results }) => {
-        newResults.forEach(jobEvent => {
-          results[jobEvent.counter] = jobEvent;
+      this._isMounted &&
+        this.setState(({ results }) => {
+          newResults.forEach(jobEvent => {
+            results[jobEvent.counter] = jobEvent;
+          });
+          return { results, remoteRowCount: count + 1 };
         });
-        return { results, remoteRowCount: count + 1 };
-      });
     } catch (err) {
       this.setState({ contentError: err });
     } finally {
-      this.setState(({ currentlyLoading }) => ({
-        hasContentLoading: false,
-        currentlyLoading: currentlyLoading.filter(n => !loadRange.includes(n)),
-      }));
+      this._isMounted &&
+        this.setState(({ currentlyLoading }) => ({
+          hasContentLoading: false,
+          currentlyLoading: currentlyLoading.filter(
+            n => !loadRange.includes(n)
+          ),
+        }));
     }
   }
 
@@ -170,9 +181,10 @@ class JobOutput extends Component {
     const { job } = this.props;
 
     const loadRange = range(startIndex, stopIndex);
-    this.setState(({ currentlyLoading }) => ({
-      currentlyLoading: currentlyLoading.concat(loadRange),
-    }));
+    this._isMounted &&
+      this.setState(({ currentlyLoading }) => ({
+        currentlyLoading: currentlyLoading.concat(loadRange),
+      }));
     const params = {
       counter__gte: startIndex,
       counter__lte: stopIndex,
@@ -180,17 +192,18 @@ class JobOutput extends Component {
     };
 
     return JobsAPI.readEvents(job.id, job.type, params).then(response => {
-      this.setState(({ results, currentlyLoading }) => {
-        response.data.results.forEach(jobEvent => {
-          results[jobEvent.counter] = jobEvent;
+      this._isMounted &&
+        this.setState(({ results, currentlyLoading }) => {
+          response.data.results.forEach(jobEvent => {
+            results[jobEvent.counter] = jobEvent;
+          });
+          return {
+            results,
+            currentlyLoading: currentlyLoading.filter(
+              n => !loadRange.includes(n)
+            ),
+          };
         });
-        return {
-          results,
-          currentlyLoading: currentlyLoading.filter(
-            n => !loadRange.includes(n)
-          ),
-        };
-      });
     });
   }
 

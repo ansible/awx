@@ -1,8 +1,13 @@
 import Ansi from 'ansi-to-html';
 import hasAnsi from 'has-ansi';
 import Entities from 'html-entities';
-import styled from 'styled-components';
 import React from 'react';
+import {
+  JobEventLine,
+  JobEventLineToggle,
+  JobEventLineNumber,
+  JobEventLineText,
+} from './shared';
 
 const EVENT_START_TASK = 'playbook_on_task_start';
 const EVENT_START_PLAY = 'playbook_on_play_start';
@@ -31,65 +36,6 @@ const ansi = new Ansi({
   },
 });
 const entities = new Entities.AllHtmlEntities();
-
-const JobEventWrapper = styled.div``;
-const JobEventLine = styled.div`
-  display: flex;
-
-  &:hover {
-    background-color: white;
-  }
-
-  &:hover div {
-    background-color: white;
-  }
-
-  &--hidden {
-    display: none;
-  }
-  ${({ isFirst }) => (isFirst ? 'padding-top: 10px;' : '')}
-`;
-const JobEventLineToggle = styled.div`
-  background-color: #ebebeb;
-  color: #646972;
-  display: flex;
-  flex: 0 0 30px;
-  font-size: 18px;
-  justify-content: center;
-  line-height: 12px;
-
-  & > i {
-    cursor: pointer;
-  }
-
-  user-select: none;
-`;
-const JobEventLineNumber = styled.div`
-  color: #161b1f;
-  background-color: #ebebeb;
-  flex: 0 0 45px;
-  text-align: right;
-  vertical-align: top;
-  padding-right: 5px;
-  border-right: 1px solid #d7d7d7;
-  user-select: none;
-`;
-const JobEventLineText = styled.div`
-  padding: 0 15px;
-  white-space: pre-wrap;
-  word-break: break-all;
-  word-wrap: break-word;
-
-  .time {
-    font-size: 14px;
-    font-weight: 600;
-    user-select: none;
-    background-color: #ebebeb;
-    border-radius: 12px;
-    padding: 2px 10px;
-    margin-left: 15px;
-  }
-`;
 
 function getTimestamp({ created }) {
   const date = new Date(created);
@@ -127,9 +73,17 @@ function getLineTextHtml({ created, event, start_line, stdout }) {
   });
 }
 
-function JobEvent({ counter, created, event, stdout, start_line, ...rest }) {
+function JobEvent({
+  counter,
+  created,
+  event,
+  stdout,
+  start_line,
+  style,
+  type,
+}) {
   return !stdout ? null : (
-    <JobEventWrapper {...rest}>
+    <div style={style} type={type}>
       {getLineTextHtml({ created, event, start_line, stdout }).map(
         ({ lineNumber, html }) =>
           lineNumber >= 0 && (
@@ -148,7 +102,7 @@ function JobEvent({ counter, created, event, stdout, start_line, ...rest }) {
             </JobEventLine>
           )
       )}
-    </JobEventWrapper>
+    </div>
   );
 }
 

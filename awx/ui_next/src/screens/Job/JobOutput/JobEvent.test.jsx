@@ -21,7 +21,7 @@ const mockRunnerOnOkEvent = {
   stdout: '\u001b[0;32mok: [localhost]\u001b[0m',
 };
 const selectors = {
-  lineText: 'JobEvent__JobEventLineText',
+  lineText: 'JobEventLineText',
 };
 
 describe('<JobEvent />', () => {
