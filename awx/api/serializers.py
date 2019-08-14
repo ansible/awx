@@ -3659,6 +3659,12 @@ class WorkflowJobNodeSerializer(LaunchConfigurationBaseSerializer):
             res['workflow_job'] = self.reverse('api:workflow_job_detail', kwargs={'pk': obj.workflow_job.pk})
         return res
 
+    def get_summary_fields(self, obj):
+        summary_fields = super(WorkflowJobNodeSerializer, self).get_summary_fields(obj)
+        if isinstance(obj.job, WorkflowApproval):
+            summary_fields['job']['timed_out'] = obj.job.timed_out
+        return summary_fields
+
 
 class WorkflowJobNodeListSerializer(WorkflowJobNodeSerializer):
     pass

@@ -3026,11 +3026,12 @@ class WorkflowJobTemplateNodeCreateApproval(RetrieveAPIView):
         return Response(data={'id':approval_template.pk}, status=status.HTTP_200_OK)
 
     def check_permissions(self, request):
+        obj = self.get_object().workflow_job_template
         if request.method == 'POST':
-            if request.user not in self.get_object().workflow_job_template.admin_role:
+            if not request.user.can_access(models.WorkflowJobTemplate, 'change', obj, request.data):
                 self.permission_denied(request)
         else:
-            if request.user not in self.get_object().workflow_job_template.read_role:
+            if not request.user.can_access(models.WorkflowJobTemplate, 'read', obj):
                 self.permission_denied(request)
 
 
@@ -4486,6 +4487,7 @@ class WorkflowApprovalDeny(RetrieveAPIView):
             return Response("This workflow step has already been approved or denied.", status=status.HTTP_400_BAD_REQUEST)
         obj.deny(request)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 # Placeholder code for approval notification support
 class WorkflowApprovalNotificationsList(SubListAPIView):

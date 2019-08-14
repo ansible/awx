@@ -2790,9 +2790,6 @@ class WorkflowApprovalAccess(BaseAccess):
     model = WorkflowApproval
     prefetch_related = ('created_by', 'modified_by',)
 
-    def can_read(self, obj):
-        return True
-
     def can_use(self, obj):
         return True
 
