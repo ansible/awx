@@ -20,6 +20,7 @@ The standard pattern applies to fields
  - `limit`
  - `diff_mode`
  - `verbosity`
+ - `scm_branch`
 
 ##### Non-Standard Cases
 

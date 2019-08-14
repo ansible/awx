@@ -68,6 +68,7 @@ function canLaunchWithoutPrompt () {
         !launchData.ask_skip_tags_on_launch &&
         !launchData.ask_variables_on_launch &&
         !launchData.ask_diff_mode_on_launch &&
+        !launchData.ask_scm_branch_on_launch &&
         !launchData.survey_enabled &&
         launchData.variables_needed_to_start.length === 0
     );

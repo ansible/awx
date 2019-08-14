@@ -329,6 +329,16 @@ register(
 )
 
 register(
+    'AWX_COLLECTIONS_ENABLED',
+    field_class=fields.BooleanField,
+    default=True,
+    label=_('Enable Collection(s) Download'),
+    help_text=_('Allows collections to be dynamically downloaded from a requirements.yml file for SCM projects.'),
+    category=_('Jobs'),
+    category_slug='jobs',
+)
+
+register(
     'STDOUT_MAX_BYTES_DISPLAY',
     field_class=fields.IntegerField,
     min_value=0,

@@ -96,6 +96,13 @@ class JobOptions(BaseModel):
         default='',
         blank=True,
     )
+    scm_branch = models.CharField(
+        max_length=1024,
+        default='',
+        blank=True,
+        help_text=_('Branch to use in job run. Project default used if blank. '
+                    'Only allowed if project allow_override field is set to true.'),
+    )
     forks = models.PositiveIntegerField(
         blank=True,
         default=0,
@@ -233,6 +240,11 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         blank=True,
         default=False,
         allows_field='credentials'
+    )
+    ask_scm_branch_on_launch = AskForField(
+        blank=True,
+        default=False,
+        allows_field='scm_branch'
     )
     job_slice_count = models.PositiveIntegerField(
         blank=True,
@@ -387,7 +399,21 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
                 # no-op case: Fields the same as template's value
                 # counted as neither accepted or ignored
                 continue
+            elif field_name == 'scm_branch' and old_value == '' and self.project and new_value == self.project.scm_branch:
+                # special case of "not provided" for branches
+                # job template does not provide branch, runs with default branch
+                continue
             elif getattr(self, ask_field_name):
+                # Special case where prompts can be rejected based on project setting
+                if field_name == 'scm_branch':
+                    if not self.project:
+                        rejected_data[field_name] = new_value
+                        errors_dict[field_name] = _('Project is missing.')
+                        continue
+                    if kwargs['scm_branch'] != self.project.scm_branch and not self.project.allow_override:
+                        rejected_data[field_name] = new_value
+                        errors_dict[field_name] = _('Project does not allow override of branch.')
+                        continue
                 # accepted prompt
                 prompted_data[field_name] = new_value
             else:
@@ -396,7 +422,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
                 # Not considered an error for manual launch, to support old
                 # behavior of putting them in ignored_fields and launching anyway
                 if 'prompts' not in exclude_errors:
-                    errors_dict[field_name] = _('Field is not configured to prompt on launch.').format(field_name=field_name)
+                    errors_dict[field_name] = _('Field is not configured to prompt on launch.')
 
         if ('prompts' not in exclude_errors and
                 (not getattr(self, 'ask_credential_on_launch', False)) and

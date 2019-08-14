@@ -128,9 +128,14 @@ export default
                             job_launch_data.extra_credentials.push(extraCredential.id);
                         });
                     }
+
                     if(scope.ask_diff_mode_on_launch && _.has(scope, 'other_prompt_data.diff_mode')){
                         job_launch_data.diff_mode = scope.other_prompt_data.diff_mode;
                     }
+
+                    if(scope.ask_scm_branch_on_launch && _.has(scope, 'other_prompt_data.scm_branch')){
+                        job_launch_data.scm_branch = scope.other_prompt_data.scm_branch;
+                    }         
 
                     if(!Empty(scope.relaunchHostType)) {
                         job_launch_data.hosts = scope.relaunchHostType;

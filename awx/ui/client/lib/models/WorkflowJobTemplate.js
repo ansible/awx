@@ -59,6 +59,7 @@ function canLaunchWithoutPrompt () {
         !launchData.ask_inventory_on_launch &&
         !launchData.ask_variables_on_launch &&
         !launchData.survey_enabled &&
+        !launchData.ask_scm_branch_on_launch &&
         launchData.variables_needed_to_start.length === 0
     );
 }

@@ -40,6 +40,8 @@ djangorestframework-yaml==1.0.3
 djangorestframework==3.9.4
 
 future==0.16.0            # via django-radius
+gitdb2==2.0.5             # via gitpython
+gitpython==2.1.11
 hyperlink==19.0.0         # via twisted
 idna==2.8                 # via hyperlink, requests, twisted
 incremental==17.5.0       # via twisted
@@ -100,6 +102,7 @@ service-identity==18.1.0  # via twisted
 simplejson==3.16.0        # via uwsgitop
 six==1.12.0               # via ansible-runner, asgi-amqp, asgiref, autobahn, automat, cryptography, django-extensions, irc, isodate, jaraco.classes, jaraco.collections, jaraco.itertools, jaraco.logging, jaraco.stream, pygerduty, pyhamcrest, pyopenssl, pyrad, python-dateutil, python-memcached, slackclient, social-auth-app-django, social-auth-core, tacacs-plus, tempora, twilio, txaio, websocket-client
 slackclient==1.1.2
+smmap2==2.0.5             # via gitdb2
 social-auth-app-django==2.1.0
 social-auth-core==3.0.0
 sqlparse==0.3.0           # via django

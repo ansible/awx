@@ -182,40 +182,51 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                 }
             } else if (form) { //if no error code is detected it begins to loop through to see where the api threw an error
                 fieldErrors = false;
-                for (field in form.fields) {
-                    if (data[field] && form.fields[field].tab) {
+
+                const addApiErrors = (field, fld) => {
+                    if (data[fld] && field.tab) {
                         // If the form is part of a tab group, activate the tab
-                        $('#' + form.name + "_tabs a[href=\"#" + form.fields[field].tab + '"]').tab('show');
+                        $('#' + form.name + "_tabs a[href=\"#" + field.tab + '"]').tab('show');
                     }
-                    if (form.fields[field].realName) {
-                        if (data[form.fields[field].realName]) {
-                            scope[field + '_api_error'] = data[form.fields[field].realName][0];
+                    if (field.realName) {
+                        if (field.realName) {
+                            scope[fld + '_api_error'] = data[field.realName][0];
                             //scope[form.name + '_form'][form.fields[field].realName].$setValidity('apiError', false);
-                            $('[name="' + form.fields[field].realName + '"]').addClass('ng-invalid');
-                            $('html, body').animate({scrollTop: $('[name="' + form.fields[field].realName + '"]').offset().top}, 0);
+                            $('[name="' + field.realName + '"]').addClass('ng-invalid');
+                            $('html, body').animate({scrollTop: $('[name="' + field.realName + '"]').offset().top}, 0);
                             fieldErrors = true;
                         }
                     }
-                    if (form.fields[field].sourceModel) {
-                        if (data[field]) {
-                            scope[form.fields[field].sourceModel + '_' + form.fields[field].sourceField + '_api_error'] =
-                                data[field][0];
+                    if (field.sourceModel) {
+                        if (data[fld]) {
+                            scope[field.sourceModel + '_' + field.sourceField + '_api_error'] =
+                                data[fld][0];
                             //scope[form.name + '_form'][form.fields[field].sourceModel + '_' + form.fields[field].sourceField].$setValidity('apiError', false);
-                            $('[name="' + form.fields[field].sourceModel + '_' + form.fields[field].sourceField + '"]').addClass('ng-invalid');
-                            $('[name="' + form.fields[field].sourceModel + '_' + form.fields[field].sourceField + '"]').ScrollTo({ "onlyIfOutside": true, "offsetTop": 100 });
+                            $('[name="' + field.sourceModel + '_' + field.sourceField + '"]').addClass('ng-invalid');
+                            $('[name="' + field.sourceModel + '_' + field.sourceField + '"]').ScrollTo({ "onlyIfOutside": true, "offsetTop": 100 });
                             fieldErrors = true;
                         }
                     } else {
-                        if (data[field]) {
-                            scope[field + '_api_error'] = data[field][0];
-                            $('[name="' + field + '"]').addClass('ng-invalid');
-                            $('label[for="' + field + '"] span').addClass('error-color');
-                            $('html, body').animate({scrollTop: $('[name="' + field + '"]').offset().top}, 0);
+                        if (data[fld]) {
+                            scope[fld + '_api_error'] = data[fld][0];
+                            $('[name="' + fld + '"]').addClass('ng-invalid');
+                            $('label[for="' + fld + '"] span').addClass('error-color');
+                            $('html, body').animate({scrollTop: $('[name="' + fld + '"]').offset().top}, 0);
                             fieldErrors = true;
-                            if(form.fields[field].codeMirror){
-                                $(`#cm-${field}-container .CodeMirror`).addClass('error-border');
+                            if(field.codeMirror){
+                                $(`#cm-${fld}-container .CodeMirror`).addClass('error-border');
                             }
                         }
+                    }
+                };
+
+                for (field in form.fields) {
+                    if (form.fields[field].type === "checkbox_group") {
+                        form.fields[field].fields.forEach(fld => {
+                            addApiErrors(fld, fld.name);
+                        });
+                    } else {
+                        addApiErrors(form.fields[field], field);
                     }
                 }
                 if (defaultMsg) {

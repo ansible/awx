@@ -16,6 +16,20 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
 
         let promptWatcher, credentialsWatcher, surveyQuestionWatcher, listPromises = [];
 
+        const shouldShowPromptButton = (launchConf) => launchConf.survey_enabled ||
+            launchConf.ask_inventory_on_launch ||
+            launchConf.ask_credential_on_launch ||
+            launchConf.ask_verbosity_on_launch ||
+            launchConf.ask_job_type_on_launch ||
+            launchConf.ask_limit_on_launch ||
+            launchConf.ask_tags_on_launch ||
+            launchConf.ask_skip_tags_on_launch ||
+            launchConf.ask_diff_mode_on_launch ||
+            launchConf.credential_needed_to_start ||
+            launchConf.ask_variables_on_launch ||
+            launchConf.ask_scm_branch_on_launch ||
+            launchConf.variables_needed_to_start.length !== 0;
+
         $scope.strings = TemplatesStrings;
         $scope.editNodeHelpMessage = null;
 
@@ -198,18 +212,7 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
                     $scope.promptData = _.cloneDeep($scope.nodeConfig.node.promptData);
                     const launchConf = $scope.promptData.launchConf;
 
-                    if (!launchConf.survey_enabled &&
-                        !launchConf.ask_inventory_on_launch &&
-                        !launchConf.ask_credential_on_launch &&
-                        !launchConf.ask_verbosity_on_launch &&
-                        !launchConf.ask_job_type_on_launch &&
-                        !launchConf.ask_limit_on_launch &&
-                        !launchConf.ask_tags_on_launch &&
-                        !launchConf.ask_skip_tags_on_launch &&
-                        !launchConf.ask_diff_mode_on_launch &&
-                        !launchConf.credential_needed_to_start &&
-                        !launchConf.ask_variables_on_launch &&
-                        launchConf.variables_needed_to_start.length === 0) {
+                    if (!shouldShowPromptButton(launchConf)) {
                             $scope.showPromptButton = false;
                             $scope.promptModalMissingReqFields = false;
                     } else {
@@ -305,18 +308,7 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
 
                             $scope.credentialRequiresPassword = credentialRequiresPassword;
 
-                            if (!launchConf.survey_enabled &&
-                                !launchConf.ask_inventory_on_launch &&
-                                !launchConf.ask_credential_on_launch &&
-                                !launchConf.ask_verbosity_on_launch &&
-                                !launchConf.ask_job_type_on_launch &&
-                                !launchConf.ask_limit_on_launch &&
-                                !launchConf.ask_tags_on_launch &&
-                                !launchConf.ask_skip_tags_on_launch &&
-                                !launchConf.ask_diff_mode_on_launch &&
-                                !launchConf.credential_needed_to_start &&
-                                !launchConf.ask_variables_on_launch &&
-                                launchConf.variables_needed_to_start.length === 0) {
+                            if (!shouldShowPromptButton(launchConf)) {
                                     $scope.showPromptButton = false;
                                     $scope.promptModalMissingReqFields = false;
                                     $scope.nodeFormDataLoaded = true;
@@ -491,18 +483,7 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
                         $scope.selectedTemplateInvalid = selectedTemplateInvalid;
                         $scope.selectedTemplate = angular.copy(selectedTemplate);
 
-                        if (!launchConf.survey_enabled &&
-                            !launchConf.ask_inventory_on_launch &&
-                            !launchConf.ask_credential_on_launch &&
-                            !launchConf.ask_verbosity_on_launch &&
-                            !launchConf.ask_job_type_on_launch &&
-                            !launchConf.ask_limit_on_launch &&
-                            !launchConf.ask_tags_on_launch &&
-                            !launchConf.ask_skip_tags_on_launch &&
-                            !launchConf.ask_diff_mode_on_launch &&
-                            !launchConf.credential_needed_to_start &&
-                            !launchConf.ask_variables_on_launch &&
-                            launchConf.variables_needed_to_start.length === 0) {
+                        if (!shouldShowPromptButton(launchConf)) {
                                 $scope.showPromptButton = false;
                                 $scope.promptModalMissingReqFields = false;
                         } else {

@@ -517,6 +517,25 @@ def test_job_launch_JT_with_credentials(machine_credential, credential, net_cred
 
 
 @pytest.mark.django_db
+def test_job_branch_rejected_and_accepted(deploy_jobtemplate):
+    deploy_jobtemplate.ask_scm_branch_on_launch = True
+    deploy_jobtemplate.save()
+    prompted_fields, ignored_fields, errors = deploy_jobtemplate._accept_or_ignore_job_kwargs(
+        scm_branch='foobar'
+    )
+    assert 'scm_branch' in ignored_fields
+    assert 'does not allow override of branch' in errors['scm_branch']
+
+    deploy_jobtemplate.project.allow_override = True
+    deploy_jobtemplate.project.save()
+    prompted_fields, ignored_fields, errors = deploy_jobtemplate._accept_or_ignore_job_kwargs(
+        scm_branch='foobar'
+    )
+    assert not ignored_fields
+    assert prompted_fields['scm_branch'] == 'foobar'
+
+
+@pytest.mark.django_db
 @pytest.mark.job_runtime_vars
 def test_job_launch_unprompted_vars_with_survey(mocker, survey_spec_factory, job_template_prompts, post, admin_user):
     job_template = job_template_prompts(False)

@@ -2,6 +2,9 @@ FROM centos:7
 
 ARG UID=0
 
+# Add ansible-devel so that we get collections!
+ADD tools/docker-compose/ansible_nightly.repo /etc/yum.repos.d/ansible_nightly.repo
+
 RUN yum -y update && yum -y install epel-release && yum -y install https://centos7.iuscommunity.org/ius-release.rpm
 
 # sync with installer/roles/image_build/templates/Dockerfile.j2

@@ -22,6 +22,7 @@ django-split-settings==0.3.0
 django-taggit==0.22.2
 djangorestframework==3.9.4
 djangorestframework-yaml==1.0.3
+GitPython==2.1.11
 irc==16.2
 jinja2==2.10.1
 jsonschema==2.6.0

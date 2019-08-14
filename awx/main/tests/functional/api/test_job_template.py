@@ -505,3 +505,37 @@ def test_callback_disallowed_null_inventory(project):
     with pytest.raises(ValidationError) as exc:
         serializer.validate({'host_config_key': 'asdfbasecfeee'})
     assert 'Cannot enable provisioning callback without an inventory set' in str(exc)
+
+
+@pytest.mark.django_db
+def test_job_template_branch_error(project, inventory, post, admin_user):
+    r = post(
+        url=reverse('api:job_template_list'),
+        data={
+            "name": "fooo",
+            "inventory": inventory.pk,
+            "project": project.pk,
+            "playbook": "helloworld.yml",
+            "scm_branch": "foobar"
+        },
+        user=admin_user,
+        expect=400
+    )
+    assert 'Project does not allow overriding branch' in str(r.data['scm_branch'])
+
+
+@pytest.mark.django_db
+def test_job_template_branch_prompt_error(project, inventory, post, admin_user):
+    r = post(
+        url=reverse('api:job_template_list'),
+        data={
+            "name": "fooo",
+            "inventory": inventory.pk,
+            "project": project.pk,
+            "playbook": "helloworld.yml",
+            "ask_scm_branch_on_launch": True
+        },
+        user=admin_user,
+        expect=400
+    )
+    assert 'Project does not allow overriding branch' in str(r.data['ask_scm_branch_on_launch'])

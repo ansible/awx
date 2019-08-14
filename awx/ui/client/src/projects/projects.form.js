@@ -125,6 +125,24 @@ export default ['i18n', 'NotificationsList', 'TemplateList',
                 type: 'text',
                 ngShow: "scm_type && scm_type.value !== 'manual' && scm_type.value !== 'insights'",
                 ngDisabled: '!(project_obj.summary_fields.user_capabilities.edit || canAdd)',
+                awPopOver: '<p>' + i18n._("Branch to checkout.  In addition to branches, you can input tags, commit hashes, and arbitrary refs.  Some commit hashes and refs may not be availble unless you also provide a custom refspec.") + '</p>',
+                dataTitle: i18n._('SCM Branch'),
+                subForm: 'sourceSubForm',
+            },
+            scm_refspec: {
+                labelBind: "scmRefspecLabel",
+                type: 'text',
+                ngShow: "scm_type && scm_type.value === 'git'",
+                ngDisabled: '!(project_obj.summary_fields.user_capabilities.edit || canAdd)',
+                awPopOver: '<p>' + i18n._('A refspec to fetch (passed to the Ansible git module).  This parameter allows access to references via the branch field not otherwise available.') + '</p>' +
+                    '<p>' + i18n._('NOTE: This field assumes the remote name is "origin".') + '</p>' +
+                    '<p>' + i18n._('Examples include:') + '</p>' +
+                    '</p><ul class=\"no-bullets\"><li>refs/*:refs/remotes/origin/*</li>' +
+                    '<li>refs/pull/62/head:refs/remotes/origin/pull/62/head</li></ul>' +
+                    '<p>' + i18n._('The first fetches all references.  The second fetches the Github pull request number 62, in this example the branch needs to be `pull/62/head`.') +
+                    '</p>' +
+                    '<p>' + i18n._('For more information, refer to the') + '<a target="_blank" href="https://docs.ansible.com/ansible-tower/latest/html/userguide/projects.html#manage-playbooks-using-source-control"> ' + i18n._('Ansible Tower Documentation') + '</a>.</p>',
+                dataTitle: i18n._('SCM Refspec'),
                 subForm: 'sourceSubForm',
             },
             credential: {
@@ -183,6 +201,18 @@ export default ['i18n', 'NotificationsList', 'TemplateList',
                     dataPlacement: 'right',
                     labelClass: 'checkbox-options stack-inline',
                     ngDisabled: '!(project_obj.summary_fields.user_capabilities.edit || canAdd)'
+                },
+                {
+                    name: 'allow_override',
+                    label: i18n._('Allow branch override'),
+                    type: 'checkbox',
+                    awPopOver: '<p>' + i18n._('Allow changing the SCM branch or revision in a job template that uses this project.') + '</p>',
+                    dataTitle: i18n._('Allow branch override'),
+                    dataContainer: 'body',
+                    dataPlacement: 'right',
+                    labelClass: 'checkbox-options stack-inline',
+                    ngDisabled: '!(project_obj.summary_fields.user_capabilities.edit || canAdd)',
+                    ngShow: "scm_type && scm_type.value !== 'insights'",
                 }]
             },
             scm_update_cache_timeout: {

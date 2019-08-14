@@ -20,6 +20,8 @@ from distutils.dir_util import copy_tree
 from distutils.version import LooseVersion as Version
 import yaml
 import fcntl
+from pathlib import Path
+from uuid import uuid4
 try:
     import psutil
 except Exception:
@@ -40,6 +42,10 @@ from django.core.exceptions import ObjectDoesNotExist
 
 # Django-CRUM
 from crum import impersonate
+
+# GitPython
+import git
+from gitdb.exc import BadName as BadGitName
 
 # Runner
 import ansible_runner
@@ -67,7 +73,7 @@ from awx.main.utils import (get_ssh_version, update_scm_url,
                             ignore_inventory_computed_fields,
                             ignore_inventory_group_removal, extract_ansible_vars, schedule_task_manager,
                             get_awx_version)
-from awx.main.utils.common import _get_ansible_version, get_custom_venv_choices
+from awx.main.utils.common import get_ansible_version, _get_ansible_version, get_custom_venv_choices
 from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja
 from awx.main.utils.reload import stop_local_services
 from awx.main.utils.pglock import advisory_lock
@@ -694,8 +700,10 @@ class BaseTask(object):
     model = None
     event_model = None
     abstract = True
-    cleanup_paths = []
     proot_show_paths = []
+
+    def __init__(self):
+        self.cleanup_paths = []
 
     def update_model(self, pk, _attempt=0, **updates):
         """Reload the model instance from the database and update the
@@ -769,9 +777,11 @@ class BaseTask(object):
         os.chmod(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
         if settings.AWX_CLEANUP_PATHS:
             self.cleanup_paths.append(path)
-        # Ansible Runner requires that this directory exists.
-        # Specifically, when using process isolation
-        os.mkdir(os.path.join(path, 'project'))
+        runner_project_folder = os.path.join(path, 'project')
+        if not os.path.exists(runner_project_folder):
+            # Ansible Runner requires that this directory exists.
+            # Specifically, when using process isolation
+            os.mkdir(runner_project_folder)
         return path
 
     def build_private_data_files(self, instance, private_data_dir):
@@ -860,7 +870,10 @@ class BaseTask(object):
         '''
         process_isolation_params = dict()
         if self.should_use_proot(instance):
-            show_paths = self.proot_show_paths + [private_data_dir, cwd] + \
+            local_paths = [private_data_dir]
+            if cwd != private_data_dir and Path(private_data_dir) not in Path(cwd).parents:
+                local_paths.append(cwd)
+            show_paths = self.proot_show_paths + local_paths + \
                 settings.AWX_PROOT_SHOW_PATHS
 
             # Help the user out by including the collections path inside the bubblewrap environment
@@ -1030,7 +1043,7 @@ class BaseTask(object):
             expect_passwords[k] = passwords.get(v, '') or ''
         return expect_passwords
 
-    def pre_run_hook(self, instance):
+    def pre_run_hook(self, instance, private_data_dir):
         '''
         Hook for any steps to run before the job/task starts
         '''
@@ -1157,7 +1170,8 @@ class BaseTask(object):
         try:
             isolated = self.instance.is_isolated()
             self.instance.send_notification_templates("running")
-            self.pre_run_hook(self.instance)
+            private_data_dir = self.build_private_data_dir(self.instance)
+            self.pre_run_hook(self.instance, private_data_dir)
             if self.instance.cancel_flag:
                 self.instance = self.update_model(self.instance.pk, status='canceled')
             if self.instance.status != 'running':
@@ -1173,7 +1187,6 @@ class BaseTask(object):
             # store a record of the venv used at runtime
             if hasattr(self.instance, 'custom_virtualenv'):
                 self.update_model(pk, custom_virtualenv=getattr(self.instance, 'ansible_virtualenv_path', settings.ANSIBLE_VENV_PATH))
-            private_data_dir = self.build_private_data_dir(self.instance)
 
             # Fetch "cached" fact data from prior runs and put on the disk
             # where ansible expects to find it
@@ -1256,9 +1269,6 @@ class BaseTask(object):
                     module_args = ansible_runner.utils.args2cmdline(
                         params.get('module_args'),
                     )
-                else:
-                    # otherwise, it's a playbook, so copy the project dir
-                    copy_tree(cwd, os.path.join(private_data_dir, 'project'))
                 shutil.move(
                     params.pop('inventory'),
                     os.path.join(private_data_dir, 'inventory')
@@ -1464,6 +1474,15 @@ class RunJob(BaseTask):
             if authorize:
                 env['ANSIBLE_NET_AUTH_PASS'] = network_cred.get_input('authorize_password', default='')
 
+        for env_key, folder in (
+                ('ANSIBLE_COLLECTIONS_PATHS', 'requirements_collections'),
+                ('ANSIBLE_ROLES_PATH', 'requirements_roles')):
+            paths = []
+            if env_key in env:
+                paths.append(env[env_key])
+            paths.append(os.path.join(private_data_dir, folder))
+            env[env_key] = os.pathsep.join(paths)
+
         return env
 
     def build_args(self, job, private_data_dir, passwords):
@@ -1532,15 +1551,10 @@ class RunJob(BaseTask):
         return args
 
     def build_cwd(self, job, private_data_dir):
-        cwd = job.project.get_project_path()
-        if not cwd:
-            root = settings.PROJECTS_ROOT
-            raise RuntimeError('project local_path %s cannot be found in %s' %
-                               (job.project.local_path, root))
-        return cwd
+        return os.path.join(private_data_dir, 'project')
 
     def build_playbook_path_relative_to_cwd(self, job, private_data_dir):
-        return os.path.join(job.playbook)
+        return job.playbook
 
     def build_extra_vars_file(self, job, private_data_dir):
         # Define special extra_vars for AWX, combine with job.extra_vars.
@@ -1587,39 +1601,86 @@ class RunJob(BaseTask):
         '''
         return getattr(settings, 'AWX_PROOT_ENABLED', False)
 
-    def pre_run_hook(self, job):
+    def pre_run_hook(self, job, private_data_dir):
         if job.inventory is None:
             error = _('Job could not start because it does not have a valid inventory.')
             self.update_model(job.pk, status='failed', job_explanation=error)
             raise RuntimeError(error)
-        if job.project and job.project.scm_type:
+        elif job.project is None:
+            error = _('Job could not start because it does not have a valid project.')
+            self.update_model(job.pk, status='failed', job_explanation=error)
+            raise RuntimeError(error)
+        elif job.project.status in ('error', 'failed'):
+            msg = _(
+                'The project revision for this job template is unknown due to a failed update.'
+            )
+            job = self.update_model(job.pk, status='failed', job_explanation=msg)
+            raise RuntimeError(msg)
+
+        project_path = job.project.get_project_path(check_if_exists=False)
+        job_revision = job.project.scm_revision
+        needs_sync = True
+        if not job.project.scm_type:
+            # manual projects are not synced, user has responsibility for that
+            needs_sync = False
+        elif not os.path.exists(project_path):
+            logger.debug('Performing fresh clone of {} on this instance.'.format(job.project))
+        elif not job.project.scm_revision:
+            logger.debug('Revision not known for {}, will sync with remote'.format(job.project))
+        elif job.project.scm_type == 'git':
+            git_repo = git.Repo(project_path)
+            try:
+                desired_revision = job.project.scm_revision
+                if job.scm_branch and job.scm_branch != job.project.scm_branch:
+                    desired_revision = job.scm_branch  # could be commit or not, but will try as commit
+                current_revision = git_repo.head.commit.hexsha
+                if desired_revision == current_revision:
+                    job_revision = desired_revision
+                    logger.info('Skipping project sync for {} because commit is locally available'.format(job.log_format))
+                    needs_sync = False
+            except (ValueError, BadGitName):
+                logger.debug('Needed commit for {} not in local source tree, will sync with remote'.format(job.log_format))
+        # Galaxy requirements are not supported for manual projects
+        if not needs_sync and job.project.scm_type:
+            # see if we need a sync because of presence of roles
+            galaxy_req_path = os.path.join(project_path, 'roles', 'requirements.yml')
+            if os.path.exists(galaxy_req_path):
+                logger.debug('Running project sync for {} because of galaxy role requirements.'.format(job.log_format))
+                needs_sync = True
+
+            galaxy_collections_req_path = os.path.join(project_path, 'collections', 'requirements.yml')
+            if os.path.exists(galaxy_collections_req_path):
+                logger.debug('Running project sync for {} because of galaxy collections requirements.'.format(job.log_format))
+                needs_sync = True
+
+        if needs_sync:
             pu_ig = job.instance_group
             pu_en = job.execution_node
             if job.is_isolated() is True:
                 pu_ig = pu_ig.controller
                 pu_en = settings.CLUSTER_HOST_ID
-            if job.project.status in ('error', 'failed'):
-                msg = _(
-                    'The project revision for this job template is unknown due to a failed update.'
-                )
-                job = self.update_model(job.pk, status='failed', job_explanation=msg)
-                raise RuntimeError(msg)
-            local_project_sync = job.project.create_project_update(
-                _eager_fields=dict(
-                    launch_type="sync",
-                    job_type='run',
-                    status='running',
-                    instance_group = pu_ig,
-                    execution_node=pu_en,
-                    celery_task_id=job.celery_task_id))
+            sync_metafields = dict(
+                launch_type="sync",
+                job_type='run',
+                status='running',
+                instance_group = pu_ig,
+                execution_node=pu_en,
+                celery_task_id=job.celery_task_id
+            )
+            if job.scm_branch and job.scm_branch != job.project.scm_branch:
+                sync_metafields['scm_branch'] = job.scm_branch
+            local_project_sync = job.project.create_project_update(_eager_fields=sync_metafields)
             # save the associated job before calling run() so that a
             # cancel() call on the job can cancel the project update
             job = self.update_model(job.pk, project_update=local_project_sync)
 
             project_update_task = local_project_sync._get_task_class()
             try:
-                project_update_task().run(local_project_sync.id)
-                job = self.update_model(job.pk, scm_revision=job.project.scm_revision)
+                # the job private_data_dir is passed so sync can download roles and collections there
+                sync_task = project_update_task(job_private_data_dir=private_data_dir)
+                sync_task.run(local_project_sync.id)
+                local_project_sync.refresh_from_db()
+                job = self.update_model(job.pk, scm_revision=local_project_sync.scm_revision)
             except Exception:
                 local_project_sync.refresh_from_db()
                 if local_project_sync.status != 'canceled':
@@ -1627,6 +1688,38 @@ class RunJob(BaseTask):
                                             job_explanation=('Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' %
                                                              ('project_update', local_project_sync.name, local_project_sync.id)))
                     raise
+                job.refresh_from_db()
+                if job.cancel_flag:
+                    return
+        else:
+            # Case where a local sync is not needed, meaning that local tree is
+            # up-to-date with project, job is running project current version
+            if job_revision:
+                job = self.update_model(job.pk, scm_revision=job_revision)
+
+        # copy the project directory
+        runner_project_folder = os.path.join(private_data_dir, 'project')
+        if job.project.scm_type == 'git':
+            git_repo = git.Repo(project_path)
+            if not os.path.exists(runner_project_folder):
+                os.mkdir(runner_project_folder)
+            tmp_branch_name = 'awx_internal/{}'.format(uuid4())
+            # always clone based on specific job revision
+            if not job.scm_revision:
+                raise RuntimeError('Unexpectedly could not determine a revision to run from project.')
+            source_branch = git_repo.create_head(tmp_branch_name, job.scm_revision)
+            # git clone must take file:// syntax for source repo or else options like depth will be ignored
+            source_as_uri = Path(project_path).as_uri()
+            git.Repo.clone_from(
+                source_as_uri, runner_project_folder, branch=source_branch,
+                depth=1, single_branch=True,  # shallow, do not copy full history
+                recursive=True  # include submodules
+            )
+            # force option is necessary because remote refs are not counted, although no information is lost
+            git_repo.delete_head(tmp_branch_name, force=True)
+        else:
+            copy_tree(project_path, runner_project_folder)
+
         if job.inventory.kind == 'smart':
             # cache smart inventory memberships so that the host_filter query is not
             # ran inside of the event saving code
@@ -1663,7 +1756,24 @@ class RunProjectUpdate(BaseTask):
 
     @property
     def proot_show_paths(self):
-        return [settings.PROJECTS_ROOT]
+        show_paths = [settings.PROJECTS_ROOT]
+        if self.job_private_data_dir:
+            show_paths.append(self.job_private_data_dir)
+        return show_paths
+
+    def __init__(self, *args, job_private_data_dir=None, **kwargs):
+        super(RunProjectUpdate, self).__init__(*args, **kwargs)
+        self.playbook_new_revision = None
+        self.original_branch = None
+        self.job_private_data_dir = job_private_data_dir
+
+    def event_handler(self, event_data):
+        super(RunProjectUpdate, self).event_handler(event_data)
+        returned_data = event_data.get('event_data', {})
+        if returned_data.get('task_action', '') == 'set_fact':
+            returned_facts = returned_data.get('res', {}).get('ansible_facts', {})
+            if 'scm_version' in returned_facts:
+                self.playbook_new_revision = returned_facts['scm_version']
 
     def build_private_data(self, project_update, private_data_dir):
         '''
@@ -1678,14 +1788,17 @@ class RunProjectUpdate(BaseTask):
             }
         }
         '''
-        handle, self.revision_path = tempfile.mkstemp(dir=settings.PROJECTS_ROOT)
-        if settings.AWX_CLEANUP_PATHS:
-            self.cleanup_paths.append(self.revision_path)
         private_data = {'credentials': {}}
         if project_update.credential:
             credential = project_update.credential
             if credential.has_input('ssh_key_data'):
                 private_data['credentials'][credential] = credential.get_input('ssh_key_data', default='')
+
+        # Create dir where collections will live for the job run
+        if project_update.job_type != 'check' and getattr(self, 'job_private_data_dir'):
+            for folder_name in ('requirements_collections', 'requirements_roles'):
+                folder_path = os.path.join(self.job_private_data_dir, folder_name)
+                os.mkdir(folder_path, stat.S_IREAD | stat.S_IWRITE | stat.S_IEXEC)
         return private_data
 
     def build_passwords(self, project_update, runtime_passwords):
@@ -1781,10 +1894,21 @@ class RunProjectUpdate(BaseTask):
         scm_url, extra_vars_new = self._build_scm_url_extra_vars(project_update)
         extra_vars.update(extra_vars_new)
 
-        if project_update.project.scm_revision and project_update.job_type == 'run':
+        scm_branch = project_update.scm_branch
+        branch_override = bool(project_update.scm_branch != project_update.project.scm_branch)
+        if project_update.job_type == 'run' and scm_branch and (not branch_override):
             scm_branch = project_update.project.scm_revision
+        elif not scm_branch:
+            scm_branch = {'hg': 'tip'}.get(project_update.scm_type, 'HEAD')
+        if project_update.job_type == 'check':
+            roles_enabled = False
+            collections_enabled = False
         else:
-            scm_branch = project_update.scm_branch or {'hg': 'tip'}.get(project_update.scm_type, 'HEAD')
+            roles_enabled = getattr(settings, 'AWX_ROLES_ENABLED', True)
+            collections_enabled = getattr(settings, 'AWX_COLLECTIONS_ENABLED', True)
+            # collections were introduced in Ansible version 2.8
+            if Version(get_ansible_version()) <= Version('2.8'):
+                collections_enabled = False
         extra_vars.update({
             'project_path': project_update.get_project_path(check_if_exists=False),
             'insights_url': settings.INSIGHTS_URL_BASE,
@@ -1796,17 +1920,24 @@ class RunProjectUpdate(BaseTask):
             'scm_clean': project_update.scm_clean,
             'scm_delete_on_update': project_update.scm_delete_on_update if project_update.job_type == 'check' else False,
             'scm_full_checkout': True if project_update.job_type == 'run' else False,
-            'scm_revision_output': self.revision_path,
-            'scm_revision': project_update.project.scm_revision,
-            'roles_enabled': getattr(settings, 'AWX_ROLES_ENABLED', True)
+            'roles_enabled': roles_enabled,
+            'collections_enabled': collections_enabled,
         })
+        if project_update.job_type != 'check' and self.job_private_data_dir:
+            extra_vars['collections_destination'] = os.path.join(self.job_private_data_dir, 'requirements_collections')
+            extra_vars['roles_destination'] = os.path.join(self.job_private_data_dir, 'requirements_roles')
+        # apply custom refspec from user for PR refs and the like
+        if project_update.scm_refspec:
+            extra_vars['scm_refspec'] = project_update.scm_refspec
+        elif project_update.project.allow_override:
+            # If branch is override-able, do extra fetch for all branches
+            extra_vars['scm_refspec'] = 'refs/heads/*:refs/remotes/origin/*'
         self._write_extra_vars_file(private_data_dir, extra_vars)
 
     def build_cwd(self, project_update, private_data_dir):
         return self.get_path_to('..', 'playbooks')
 
     def build_playbook_path_relative_to_cwd(self, project_update, private_data_dir):
-        self.build_cwd(project_update, private_data_dir)
         return os.path.join('project_update.yml')
 
     def get_password_prompts(self, passwords={}):
@@ -1920,25 +2051,42 @@ class RunProjectUpdate(BaseTask):
                 '{} spent {} waiting to acquire lock for local source tree '
                 'for path {}.'.format(instance.log_format, waiting_time, lock_path))
 
-    def pre_run_hook(self, instance):
+    def pre_run_hook(self, instance, private_data_dir):
         # re-create root project folder if a natural disaster has destroyed it
         if not os.path.exists(settings.PROJECTS_ROOT):
             os.mkdir(settings.PROJECTS_ROOT)
         self.acquire_lock(instance)
+        self.original_branch = None
+        if (instance.scm_type == 'git' and instance.job_type == 'run' and instance.project and
+                instance.scm_branch != instance.project.scm_branch):
+            project_path = instance.project.get_project_path(check_if_exists=False)
+            if os.path.exists(project_path):
+                git_repo = git.Repo(project_path)
+                self.original_branch = git_repo.active_branch
 
     def post_run_hook(self, instance, status):
+        if self.original_branch:
+            # for git project syncs, non-default branches can be problems
+            # restore to branch the repo was on before this run
+            try:
+                self.original_branch.checkout()
+            except Exception:
+                # this could have failed due to dirty tree, but difficult to predict all cases
+                logger.exception('Failed to restore project repo to prior state after {}'.format(instance.log_format))
         self.release_lock(instance)
         p = instance.project
+        if self.playbook_new_revision:
+            instance.scm_revision = self.playbook_new_revision
+            instance.save(update_fields=['scm_revision'])
         if instance.job_type == 'check' and status not in ('failed', 'canceled',):
-            fd = open(self.revision_path, 'r')
-            lines = fd.readlines()
-            if lines:
-                p.scm_revision = lines[0].strip()
+            if self.playbook_new_revision:
+                p.scm_revision = self.playbook_new_revision
             else:
-                logger.info("{} Could not find scm revision in check".format(instance.log_format))
+                if status == 'successful':
+                    logger.error("{} Could not find scm revision in check".format(instance.log_format))
             p.playbook_files = p.playbooks
             p.inventory_files = p.inventories
-            p.save()
+            p.save(update_fields=['scm_revision', 'playbook_files', 'inventory_files'])
 
         # Update any inventories that depend on this project
         dependent_inventory_sources = p.scm_inventory_sources.filter(update_on_project_update=True)
@@ -2159,11 +2307,12 @@ class RunInventoryUpdate(BaseTask):
         # All credentials not used by inventory source injector
         return inventory_update.get_extra_credentials()
 
-    def pre_run_hook(self, inventory_update):
+    def pre_run_hook(self, inventory_update, private_data_dir):
         source_project = None
         if inventory_update.inventory_source:
             source_project = inventory_update.inventory_source.source_project
         if (inventory_update.source=='scm' and inventory_update.launch_type!='scm' and source_project):
+            # In project sync, pulling galaxy roles is not needed
             local_project_sync = source_project.create_project_update(
                 _eager_fields=dict(
                     launch_type="sync",

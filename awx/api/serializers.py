@@ -1285,8 +1285,8 @@ class OrganizationSerializer(BaseSerializer):
 class ProjectOptionsSerializer(BaseSerializer):
 
     class Meta:
-        fields = ('*', 'local_path', 'scm_type', 'scm_url', 'scm_branch',
-                  'scm_clean', 'scm_delete_on_update', 'credential', 'timeout',)
+        fields = ('*', 'local_path', 'scm_type', 'scm_url', 'scm_branch', 'scm_refspec',
+                  'scm_clean', 'scm_delete_on_update', 'credential', 'timeout', 'scm_revision')
 
     def get_related(self, obj):
         res = super(ProjectOptionsSerializer, self).get_related(obj)
@@ -1311,6 +1311,8 @@ class ProjectOptionsSerializer(BaseSerializer):
             attrs.pop('local_path', None)
         if 'local_path' in attrs and attrs['local_path'] not in valid_local_paths:
             errors['local_path'] = _('This path is already being used by another manual project.')
+        if attrs.get('scm_refspec') and scm_type != 'git':
+            errors['scm_refspec'] = _('SCM refspec can only be used with git projects.')
 
         if errors:
             raise serializers.ValidationError(errors)
@@ -1338,7 +1340,7 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
     class Meta:
         model = Project
         fields = ('*', 'organization', 'scm_update_on_launch',
-                  'scm_update_cache_timeout', 'scm_revision', 'custom_virtualenv',) + \
+                  'scm_update_cache_timeout', 'allow_override', 'custom_virtualenv',) + \
                  ('last_update_failed', 'last_updated')  # Backwards compatibility
 
     def get_related(self, obj):
@@ -1387,6 +1389,21 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
             organization = attrs['organization']
         elif self.instance:
             organization = self.instance.organization
+
+        if 'allow_override' in attrs and self.instance:
+            # case where user is turning off this project setting
+            if self.instance.allow_override and not attrs['allow_override']:
+                used_by = set(
+                    JobTemplate.objects.filter(
+                        models.Q(project=self.instance),
+                        models.Q(ask_scm_branch_on_launch=True) | ~models.Q(scm_branch="")
+                    ).values_list('pk', flat=True)
+                )
+                if used_by:
+                    raise serializers.ValidationError({
+                        'allow_override': _('One or more job templates depend on branch override behavior for this project (ids: {}).').format(
+                            ' '.join([str(pk) for pk in used_by])
+                        )})
 
         view = self.context.get('view', None)
         if not organization and not view.request.user.is_superuser:
@@ -2701,7 +2718,7 @@ class LabelsListMixin(object):
 class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
 
     class Meta:
-        fields = ('*', 'job_type', 'inventory', 'project', 'playbook',
+        fields = ('*', 'job_type', 'inventory', 'project', 'playbook', 'scm_branch',
                   'forks', 'limit', 'verbosity', 'extra_vars', 'job_tags',
                   'force_handlers', 'skip_tags', 'start_at_task', 'timeout',
                   'use_fact_cache',)
@@ -2748,16 +2765,28 @@ class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
 
     def validate(self, attrs):
         if 'project' in self.fields and 'playbook' in self.fields:
-            project = attrs.get('project', self.instance and self.instance.project or None)
+            project = attrs.get('project', self.instance.project if self.instance else None)
             playbook = attrs.get('playbook', self.instance and self.instance.playbook or '')
+            scm_branch = attrs.get('scm_branch', self.instance.scm_branch if self.instance else None)
+            ask_scm_branch_on_launch = attrs.get(
+                'ask_scm_branch_on_launch', self.instance.ask_scm_branch_on_launch if self.instance else None)
             if not project:
                 raise serializers.ValidationError({'project': _('This field is required.')})
-            if project and project.scm_type and playbook and force_text(playbook) not in project.playbook_files:
-                raise serializers.ValidationError({'playbook': _('Playbook not found for project.')})
-            if project and not project.scm_type and playbook and force_text(playbook) not in project.playbooks:
+            playbook_not_found = bool(
+                (
+                    project and project.scm_type and (not project.allow_override) and
+                    playbook and force_text(playbook) not in project.playbook_files
+                ) or
+                (project and not project.scm_type and playbook and force_text(playbook) not in project.playbooks)  # manual
+            )
+            if playbook_not_found:
                 raise serializers.ValidationError({'playbook': _('Playbook not found for project.')})
             if project and not playbook:
                 raise serializers.ValidationError({'playbook': _('Must select playbook for project.')})
+            if scm_branch and not project.allow_override:
+                raise serializers.ValidationError({'scm_branch': _('Project does not allow overriding branch.')})
+            if ask_scm_branch_on_launch and not project.allow_override:
+                raise serializers.ValidationError({'ask_scm_branch_on_launch': _('Project does not allow overriding branch.')})
 
         ret = super(JobOptionsSerializer, self).validate(attrs)
         return ret
@@ -2799,7 +2828,8 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
 
     class Meta:
         model = JobTemplate
-        fields = ('*', 'host_config_key', 'ask_diff_mode_on_launch', 'ask_variables_on_launch', 'ask_limit_on_launch', 'ask_tags_on_launch',
+        fields = ('*', 'host_config_key', 'ask_scm_branch_on_launch', 'ask_diff_mode_on_launch', 'ask_variables_on_launch',
+                  'ask_limit_on_launch', 'ask_tags_on_launch',
                   'ask_skip_tags_on_launch', 'ask_job_type_on_launch', 'ask_verbosity_on_launch', 'ask_inventory_on_launch',
                   'ask_credential_on_launch', 'survey_enabled', 'become_enabled', 'diff_mode',
                   'allow_simultaneous', 'custom_virtualenv', 'job_slice_count')
@@ -3365,6 +3395,7 @@ class WorkflowJobCancelSerializer(WorkflowJobSerializer):
 
 
 class LaunchConfigurationBaseSerializer(BaseSerializer):
+    scm_branch = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
     job_type = serializers.ChoiceField(allow_blank=True, allow_null=True, required=False, default=None,
                                        choices=NEW_JOB_TYPE_CHOICES)
     job_tags = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
@@ -3377,7 +3408,7 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
 
     class Meta:
         fields = ('*', 'extra_data', 'inventory', # Saved launch-time config fields
-                  'job_type', 'job_tags', 'skip_tags', 'limit', 'skip_tags', 'diff_mode', 'verbosity')
+                  'scm_branch', 'job_type', 'job_tags', 'skip_tags', 'limit', 'skip_tags', 'diff_mode', 'verbosity')
 
     def get_related(self, obj):
         res = super(LaunchConfigurationBaseSerializer, self).get_related(obj)
@@ -3960,6 +3991,7 @@ class JobLaunchSerializer(BaseSerializer):
         required=False, write_only=True
     )
     credential_passwords = VerbatimField(required=False, write_only=True)
+    scm_branch = serializers.CharField(required=False, write_only=True, allow_blank=True)
     diff_mode = serializers.BooleanField(required=False, write_only=True)
     job_tags = serializers.CharField(required=False, write_only=True, allow_blank=True)
     job_type = serializers.ChoiceField(required=False, choices=NEW_JOB_TYPE_CHOICES, write_only=True)
@@ -3970,13 +4002,15 @@ class JobLaunchSerializer(BaseSerializer):
     class Meta:
         model = JobTemplate
         fields = ('can_start_without_user_input', 'passwords_needed_to_start',
-                  'extra_vars', 'inventory', 'limit', 'job_tags', 'skip_tags', 'job_type', 'verbosity', 'diff_mode',
-                  'credentials', 'credential_passwords', 'ask_variables_on_launch', 'ask_tags_on_launch',
+                  'extra_vars', 'inventory', 'scm_branch', 'limit', 'job_tags', 'skip_tags', 'job_type', 'verbosity', 'diff_mode',
+                  'credentials', 'credential_passwords',
+                  'ask_scm_branch_on_launch', 'ask_variables_on_launch', 'ask_tags_on_launch',
                   'ask_diff_mode_on_launch', 'ask_skip_tags_on_launch', 'ask_job_type_on_launch', 'ask_limit_on_launch',
                   'ask_verbosity_on_launch', 'ask_inventory_on_launch', 'ask_credential_on_launch',
                   'survey_enabled', 'variables_needed_to_start', 'credential_needed_to_start',
                   'inventory_needed_to_start', 'job_template_data', 'defaults', 'verbosity')
         read_only_fields = (
+            'ask_scm_branch_on_launch',
             'ask_diff_mode_on_launch', 'ask_variables_on_launch', 'ask_limit_on_launch', 'ask_tags_on_launch',
             'ask_skip_tags_on_launch', 'ask_job_type_on_launch', 'ask_verbosity_on_launch',
             'ask_inventory_on_launch', 'ask_credential_on_launch',)
