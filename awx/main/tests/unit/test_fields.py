@@ -246,11 +246,12 @@ def test_implicit_role_field_parents():
                 ))
                 # only these links are supported
                 if field_attr:
-                    assert type(second_field) is ForeignKey
-                    rel_model = cls._meta.get_field(field_name).related_model
-                    third_field = getattr(rel_model, field_attr)
-                    # expecting for related_model.foo_role, test role field type
-                    assert isinstance(third_field, ImplicitRoleDescriptor)
+                    if isinstance(second_field_descriptor, ReverseManyToOneDescriptor):
+                        assert type(second_field) is ForeignKey
+                        rel_model = cls._meta.get_field(field_name).related_model
+                        third_field = getattr(rel_model, field_attr)
+                        # expecting for related_model.foo_role, test role field type
+                        assert isinstance(third_field, ImplicitRoleDescriptor)
                 else:
                     # expecting simple format of foo_role
                     assert type(second_field) is ImplicitRoleField

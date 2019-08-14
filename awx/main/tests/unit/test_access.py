@@ -210,15 +210,18 @@ def test_jt_add_scan_job_check(job_template_with_ids, user_unit):
     inventory = job_template_with_ids.inventory
     project.use_role = Role()
     inventory.use_role = Role()
-    organization = Organization(name='test-org')
+    organization = Organization(name='test-org', id=1, pk=1)
     inventory.organization = organization
     organization.admin_role = Role()
+    organization.job_template_admin_role = Role()
 
     def mock_get_object(Class, **kwargs):
         if Class == Project:
             return project
         elif Class == Inventory:
             return inventory
+        elif Class == Organization:
+            return organization
         else:
             raise Exception('Item requested has not been mocked')
 
@@ -228,6 +231,7 @@ def test_jt_add_scan_job_check(job_template_with_ids, user_unit):
             assert access.can_add({
                 'project': project.pk,
                 'inventory': inventory.pk,
+                'organization': organization.pk,
                 'job_type': 'scan'
             })
 
