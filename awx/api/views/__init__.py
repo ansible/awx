@@ -3025,6 +3025,14 @@ class WorkflowJobTemplateNodeCreateApproval(RetrieveAPIView):
         approval_template = obj.create_approval_template(**serializer.validated_data)
         return Response(data={'id':approval_template.pk}, status=status.HTTP_200_OK)
 
+    def check_permissions(self, request):
+        if request.method == 'POST':
+            if request.user not in self.get_object().workflow_job_template.admin_role:
+                self.permission_denied(request)
+        else:
+            if request.user not in self.get_object().workflow_job_template.read_role:
+                self.permission_denied(request)
+
 
 class WorkflowJobTemplateNodeSuccessNodesList(WorkflowJobTemplateNodeChildrenBaseList):
     relationship = 'success_nodes'
