@@ -68,6 +68,12 @@ class NotificationTemplate(CommonModelNameNotUnique):
 
     notification_configuration = JSONField(blank=False)
 
+    messages = JSONField(
+        null=True,
+        blank=True,
+        default=dict,
+        help_text=_('Optional custom messages for notification template.'))
+
     def get_absolute_url(self, request=None):
         return reverse('api:notification_template_detail', kwargs={'pk': self.pk}, request=request)
 

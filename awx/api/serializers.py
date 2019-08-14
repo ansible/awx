@@ -4125,7 +4125,8 @@ class NotificationTemplateSerializer(BaseSerializer):
 
     class Meta:
         model = NotificationTemplate
-        fields = ('*', 'organization', 'notification_type', 'notification_configuration')
+        fields = ('*', 'organization', 'notification_type', 'notification_configuration', 'messages')
+
 
     type_map = {"string": (str,),
                 "int": (int,),
