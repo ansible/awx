@@ -381,10 +381,14 @@ export default
                     } else if (scope.type.type === 'password') {
                         data.default = scope.default_password;
                     } else if (scope.type.type === 'multiselect') {
-                          data.default = scope.default_multiselect;
-                    } else if (scope.type.type === 'float') {
+                        data.default = scope.default_multiselect;
+                    } else if (scope.type.type === 'float' &&
+                        scope.default_float !== '' &&
+                        scope.default_float !== null) {
                         data.default = scope.default_float;
-                    } else if (scope.type.type === 'integer') {
+                    } else if (scope.type.type === 'integer' &&
+                        scope.default_int !== '' &&
+                        scope.default_int !== null) {
                         data.default = scope.default_int;
                     } else {
                         data.default = "";
