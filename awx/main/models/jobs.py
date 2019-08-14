@@ -684,7 +684,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
                                           failures=h.failures,
                                           ok=h.ok,
                                           processed=h.processed,
-                                          skipped=h.skipped)
+                                          skipped=h.skipped)  # TODO: update with rescued, ignored (see https://github.com/ansible/awx/issues/4394)
         data.update(dict(inventory=self.inventory.name if self.inventory else None,
                          project=self.project.name if self.project else None,
                          playbook=self.playbook,
