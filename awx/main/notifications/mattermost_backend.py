@@ -19,6 +19,11 @@ class MattermostBackend(AWXBaseEmailBackend):
     recipient_parameter = "mattermost_url"
     sender_parameter = None
 
+    DEFAULT_SUBJECT = "{{ job_friendly_name }} #{{ job.id }} '{{ job.name }}' {{ job.status }}: {{ url }}"
+    default_messages = {"started": {"message": DEFAULT_SUBJECT},
+                        "success": {"message": DEFAULT_SUBJECT},
+                        "error": {"message": DEFAULT_SUBJECT}}
+
     def __init__(self, mattermost_no_verify_ssl=False, mattermost_channel=None, mattermost_username=None,
                  mattermost_icon_url=None, fail_silently=False, **kwargs):
         super(MattermostBackend, self).__init__(fail_silently=fail_silently)

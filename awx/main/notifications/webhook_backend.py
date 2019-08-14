@@ -23,6 +23,11 @@ class WebhookBackend(AWXBaseEmailBackend):
     recipient_parameter = "url"
     sender_parameter = None
 
+    DEFAULT_BODY = "{{ job_summary_dict }}"
+    default_messages = {"started": {"body": DEFAULT_BODY},
+                        "success": {"body": DEFAULT_BODY},
+                        "error": {"body": DEFAULT_BODY}}
+
     def __init__(self, http_method, headers, disable_ssl_verification=False, fail_silently=False, username=None, password=None, **kwargs):
         self.http_method = http_method
         self.disable_ssl_verification = disable_ssl_verification

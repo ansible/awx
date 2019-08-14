@@ -19,6 +19,12 @@ class CustomEmailBackend(EmailBackend):
                        "sender": {"label": "Sender Email", "type": "string"},
                        "recipients": {"label": "Recipient List", "type": "list"},
                        "timeout": {"label": "Timeout", "type": "int", "default": 30}}
+
+    DEFAULT_SUBJECT = "{{ job_friendly_name }} #{{ job.id }} '{{ job.name }}' {{ job.status }}: {{ url }}"
+    DEFAULT_BODY = smart_text(_("{{ job_friendly_name }} #{{ job.id }} had status {{ job.status }}, view details at {{ url }}\n\n{{ job_summary_dict }}"))
+    default_messages = {"started": {"message": DEFAULT_SUBJECT, "body": DEFAULT_BODY},
+                        "success": {"message": DEFAULT_SUBJECT, "body": DEFAULT_BODY},
+                        "error": {"message": DEFAULT_SUBJECT, "body": DEFAULT_BODY}}
     recipient_parameter = "recipients"
     sender_parameter = "sender"
 
