@@ -22,4 +22,14 @@ class Migration(migrations.Migration):
                                             null=True,
                                             blank=True),
         ),
+        migrations.AlterField(
+            model_name='notification',
+            name='notification_type',
+            field=models.CharField(choices=[('email', 'Email'), ('grafana', 'Grafana'), ('hipchat', 'HipChat'), ('irc', 'IRC'), ('mattermost', 'Mattermost'), ('pagerduty', 'Pagerduty'), ('rocketchat', 'Rocket.Chat'), ('slack', 'Slack'), ('twilio', 'Twilio'), ('webhook', 'Webhook')], max_length=32),
+        ),
+        migrations.AlterField(
+            model_name='notificationtemplate',
+            name='notification_type',
+            field=models.CharField(choices=[('email', 'Email'), ('grafana', 'Grafana'), ('hipchat', 'HipChat'), ('irc', 'IRC'), ('mattermost', 'Mattermost'), ('pagerduty', 'Pagerduty'), ('rocketchat', 'Rocket.Chat'), ('slack', 'Slack'), ('twilio', 'Twilio'), ('webhook', 'Webhook')], max_length=32),
+        ),
     ]
