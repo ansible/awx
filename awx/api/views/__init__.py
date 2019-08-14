@@ -4487,8 +4487,7 @@ class WorkflowApprovalDeny(RetrieveAPIView):
         obj.deny(request)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-
-
+# Placeholder code for approval notification support
 class WorkflowApprovalNotificationsList(SubListAPIView):
 
     model = models.Notification

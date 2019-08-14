@@ -684,6 +684,7 @@ class WorkflowApproval(UnifiedJob):
         from awx.main.signals import model_serializer_mapping  # circular import
         self.status = 'successful'
         self.save()
+        self.websocket_emit_status(self.status)
         changes = model_to_dict(self, model_serializer_mapping())
         changes['status'] = ['pending', 'successful']
         activity_entry = ActivityStream(
@@ -701,6 +702,7 @@ class WorkflowApproval(UnifiedJob):
         from awx.main.signals import model_serializer_mapping  # circular import
         self.status = 'failed'
         self.save()
+        self.websocket_emit_status(self.status)
         changes = model_to_dict(self, model_serializer_mapping())
         changes['status'] = ['pending', 'failed']
         activity_entry = ActivityStream(

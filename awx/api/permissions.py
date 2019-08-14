@@ -249,4 +249,3 @@ class InstanceGroupTowerPermission(ModelAccessPermission):
         if request.method == 'DELETE' and obj.name == "tower":
             return False
         return super(InstanceGroupTowerPermission, self).has_object_permission(request, view, obj)
-
