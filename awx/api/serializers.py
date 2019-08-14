@@ -4160,6 +4160,43 @@ class NotificationTemplateSerializer(BaseSerializer):
         d['recent_notifications'] = self._recent_notifications(obj)
         return d
 
+    def validate_messages(self, messages):
+        if messages is None:
+            return None
+
+        error_list = []
+        collected_messages = []
+
+        # Validate structure / content types
+        if not isinstance(messages, dict):
+            error_list.append(_("Expected dict for 'messages' field, found {}".format(type(messages))))
+        else:
+            for event in messages:
+                if event not in ['started', 'success', 'error']:
+                    error_list.append(_("Event '{}' invalid, must be one of 'started', 'success', or 'error'").format(event))
+                    continue
+                event_messages = messages[event]
+                if event_messages is None:
+                    continue
+                if not isinstance(event_messages, dict):
+                    error_list.append(_("Expected dict for event '{}', found {}").format(event, type(event_messages)))
+                    continue
+                for message_type in event_messages:
+                    if message_type not in ['message', 'body']:
+                        error_list.append(_("Message type '{}' invalid, must be either 'message' or 'body'").format(message_type))
+                        continue
+                    message = event_messages[message_type]
+                    if message is None:
+                        continue
+                    if not isinstance(message, str):
+                        error_list.append(_("Expected string for '{}', found {}, ").format(message_type, type(message)))
+                        continue
+                    if message_type == 'message':
+                        if '\n' in message:
+                            error_list.append(_("Messages cannot contain newlines (found newline in {} event)".format(event)))
+                            continue
+                    collected_messages.append(message)
+
     def validate(self, attrs):
         from awx.api.views import NotificationTemplateDetail
 

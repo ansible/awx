@@ -84,6 +84,26 @@ class NotificationTemplate(CommonModelNameNotUnique):
     def save(self, *args, **kwargs):
         new_instance = not bool(self.pk)
         update_fields = kwargs.get('update_fields', [])
+
+        # preserve existing notification messages if not overwritten by new messages
+        if not new_instance:
+            old_nt = NotificationTemplate.objects.get(pk=self.id)
+            old_messages = old_nt.messages
+            new_messages = self.messages
+
+            if old_messages is not None:
+                for event in ['started', 'success', 'error']:
+                    if not new_messages.get(event, {}) and old_messages.get(event, {}):
+                        new_messages[event] = old_messages[event]
+                        continue
+                    if new_messages.get(event, {}) and old_messages.get(event, {}):
+                        old_event_msgs = old_messages[event]
+                        new_event_msgs = new_messages[event]
+                        for msg_type in ['message', 'body']:
+                            if msg_type not in new_event_msgs and old_event_msgs.get(msg_type, None):
+                                new_event_msgs[msg_type] = old_event_msgs[msg_type]
+                    new_messages.setdefault(event, None)
+
         for field in filter(lambda x: self.notification_class.init_parameters[x]['type'] == "password",
                             self.notification_class.init_parameters):
             if self.notification_configuration[field].startswith("$encrypted$"):
