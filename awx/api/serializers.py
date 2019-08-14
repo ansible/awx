@@ -4224,10 +4224,19 @@ class NotificationTemplateSerializer(BaseSerializer):
 
 class NotificationSerializer(BaseSerializer):
 
+    body = serializers.SerializerMethodField(
+        help_text=_('Notification body')
+    )
+
     class Meta:
         model = Notification
         fields = ('*', '-name', '-description', 'notification_template', 'error', 'status', 'notifications_sent',
-                  'notification_type', 'recipients', 'subject')
+                  'notification_type', 'recipients', 'subject', 'body')
+
+    def get_body(self, obj):
+        if obj.notification_type == 'webhook' and 'body' in obj.body:
+            return obj.body['body']
+        return obj.body
 
     def get_related(self, obj):
         res = super(NotificationSerializer, self).get_related(obj)
@@ -4235,6 +4244,15 @@ class NotificationSerializer(BaseSerializer):
             notification_template = self.reverse('api:notification_template_detail', kwargs={'pk': obj.notification_template.pk}),
         ))
         return res
+
+    def to_representation(self, obj):
+        ret = super(NotificationSerializer, self).to_representation(obj)
+
+        if obj.notification_type == 'webhook':
+            ret.pop('subject')
+        if obj.notification_type not in ('email', 'webhook', 'pagerduty'):
+            ret.pop('body')
+        return ret
 
 
 class LabelSerializer(BaseSerializer):
