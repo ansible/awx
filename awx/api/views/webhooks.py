@@ -23,13 +23,18 @@ class WebhookKeyView(GenericAPIView):
             'workflow_job_templates': WorkflowJobTemplate,
         }
         model = qs_models.get(self.kwargs['model_kwarg'])
-        if model is None:
-            raise PermissionDenied
-
         return model
 
     def get_queryset(self):
-        return self.request.user.get_queryset(self.model)
+        model = self.model
+        if model:
+            return self.request.user.get_queryset(model)
+        # Provide a fallback do-nothing queryset so that get_object() has something to work with.
+        return JobTemplate.objects.none()
+
+    def check_object_permissions(self, request, obj):
+        if not request.user.can_access(self.model, 'admin', obj, request.data):
+            raise PermissionDenied
 
     def get(self, request, *args, **kwargs):
         obj = self.get_object()
