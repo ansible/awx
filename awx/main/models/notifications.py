@@ -2,7 +2,9 @@
 # All Rights Reserved.
 
 from copy import deepcopy
+import datetime
 import logging
+import json
 
 from django.db import models
 from django.conf import settings
@@ -10,6 +12,8 @@ from django.core.mail.message import EmailMessage
 from django.db import connection
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import smart_str, force_text
+from jinja2 import sandbox
+from jinja2.exceptions import TemplateSyntaxError, UndefinedError, SecurityError
 
 # AWX
 from awx.api.versioning import reverse
@@ -73,6 +77,36 @@ class NotificationTemplate(CommonModelNameNotUnique):
         blank=True,
         default=dict,
         help_text=_('Optional custom messages for notification template.'))
+
+    def has_message(self, condition):
+        potential_template = self.messages.get(condition, {})
+        if potential_template == {}:
+            return False
+        if potential_template.get('message', {}) == {}:
+            return False
+        return True
+
+    def get_message(self, condition):
+        return self.messages.get(condition, {})
+
+    def build_notification_message(self, event_type, context):
+        env = sandbox.ImmutableSandboxedEnvironment()
+        templates = self.get_message(event_type)
+        msg_template = templates.get('message', {})
+
+        try:
+            notification_subject = env.from_string(msg_template).render(**context)
+        except (TemplateSyntaxError, UndefinedError, SecurityError):
+            notification_subject = ''
+
+
+        msg_body = templates.get('body', {})
+        try:
+            notification_body = env.from_string(msg_body).render(**context)
+        except (TemplateSyntaxError, UndefinedError, SecurityError):
+            notification_body = ''
+
+        return (notification_subject, notification_body)
 
     def get_absolute_url(self, request=None):
         return reverse('api:notification_template_detail', kwargs={'pk': self.pk}, request=request)
@@ -227,6 +261,9 @@ class Notification(CreatedModifiedModel):
 
 
 class JobNotificationMixin(object):
+    STATUS_TO_TEMPLATE_TYPE = {'succeeded': 'success',
+                               'running': 'started',
+                               'failed': 'error'}
     # Tree of fields that can be safely referenced in a notification message
     JOB_FIELDS_WHITELIST = ['id', 'type', 'url', 'created', 'modified', 'name', 'description', 'job_type', 'playbook',
                             'forks', 'limit', 'verbosity', 'job_tags', 'force_handlers', 'skip_tags', 'start_at_task',
@@ -383,50 +420,65 @@ class JobNotificationMixin(object):
     def get_notification_friendly_name(self):
         raise RuntimeError("Define me")
 
-    def _build_notification_message(self, status_str):
+    def notification_data(self):
+        raise RuntimeError("Define me")
+
+    def build_notification_message(self, nt, status):
+        env = sandbox.ImmutableSandboxedEnvironment()
+
+        from awx.api.serializers import UnifiedJobSerializer
+        job_serialization = UnifiedJobSerializer(self).to_representation(self)
+        context = self.context(job_serialization)
+
+        msg_template = body_template = None
+
+        if nt.messages:
+            templates = nt.messages.get(self.STATUS_TO_TEMPLATE_TYPE[status], {}) or {}
+            msg_template = templates.get('message', {})
+            body_template = templates.get('body', {})
+
+        if msg_template:
+            try:
+                notification_subject = env.from_string(msg_template).render(**context)
+            except (TemplateSyntaxError, UndefinedError, SecurityError):
+                notification_subject = ''
+        else:
+            notification_subject = u"{} #{} '{}' {}: {}".format(self.get_notification_friendly_name(),
+                                                                self.id,
+                                                                self.name,
+                                                                status,
+                                                                self.get_ui_url())
         notification_body = self.notification_data()
-        notification_subject = u"{} #{} '{}' {}: {}".format(self.get_notification_friendly_name(),
-                                                            self.id,
-                                                            self.name,
-                                                            status_str,
-                                                            notification_body['url'])
         notification_body['friendly_name'] = self.get_notification_friendly_name()
+        if body_template:
+            try:
+                notification_body['body'] = env.from_string(body_template).render(**context)
+            except (TemplateSyntaxError, UndefinedError, SecurityError):
+                notification_body['body'] = ''
+
         return (notification_subject, notification_body)
 
-    def build_notification_succeeded_message(self):
-        return self._build_notification_message('succeeded')
-
-    def build_notification_failed_message(self):
-        return self._build_notification_message('failed')
-
-    def build_notification_running_message(self):
-        return self._build_notification_message('running')
-
-    def send_notification_templates(self, status_str):
+    def send_notification_templates(self, status):
         from awx.main.tasks import send_notifications  # avoid circular import
-        if status_str not in ['succeeded', 'failed', 'running']:
-            raise ValueError(_("status_str must be either running, succeeded or failed"))
+        if status not in ['running', 'succeeded', 'failed']:
+            raise ValueError(_("status must be either running, succeeded or failed"))
+
         try:
             notification_templates = self.get_notification_templates()
         except Exception:
             logger.warn("No notification template defined for emitting notification")
-            notification_templates = None
-        if notification_templates:
-            if status_str == 'succeeded':
-                notification_template_type = 'success'
-            elif status_str == 'running':
-                notification_template_type = 'started'
-            else:
-                notification_template_type = 'error'
-            all_notification_templates = set(notification_templates.get(notification_template_type, []))
-            if len(all_notification_templates):
-                try:
-                    (notification_subject, notification_body) = getattr(self, 'build_notification_%s_message' % status_str)()
-                except AttributeError:
-                    raise NotImplementedError("build_notification_%s_message() does not exist" % status_str)
+            return
 
-                def send_it():
-                    send_notifications.delay([n.generate_notification(notification_subject, notification_body).id
-                                              for n in all_notification_templates],
-                                             job_id=self.id)
-                connection.on_commit(send_it)
+        if not notification_templates:
+            return
+
+        for nt in set(notification_templates.get(self.STATUS_TO_TEMPLATE_TYPE[status], [])):
+            try:
+                (notification_subject, notification_body) = self.build_notification_message(nt, status)
+            except AttributeError:
+                raise NotImplementedError("build_notification_message() does not exist" % status)
+
+            def send_it():
+                send_notifications.delay([nt.generate_notification(notification_subject, notification_body).id],
+                                         job_id=self.id)
+            connection.on_commit(send_it)

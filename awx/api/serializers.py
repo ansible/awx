@@ -13,6 +13,10 @@ from datetime import timedelta
 from oauthlib import oauth2
 from oauthlib.common import generate_token
 
+# Jinja
+from jinja2 import sandbox, StrictUndefined
+from jinja2.exceptions import TemplateSyntaxError, UndefinedError, SecurityError
+
 # Django
 from django.conf import settings
 from django.contrib.auth import update_session_auth_hash
@@ -46,16 +50,16 @@ from awx.main.constants import (
     CENSOR_VALUE,
 )
 from awx.main.models import (
-    ActivityStream, AdHocCommand, AdHocCommandEvent, Credential, CredentialInputSource,
-    CredentialType, CustomInventoryScript, Group, Host, Instance,
-    InstanceGroup, Inventory, InventorySource, InventoryUpdate,
-    InventoryUpdateEvent, Job, JobEvent, JobHostSummary, JobLaunchConfig,
-    JobTemplate, Label, Notification, NotificationTemplate,
-    OAuth2AccessToken, OAuth2Application, Organization, Project,
-    ProjectUpdate, ProjectUpdateEvent, RefreshToken, Role, Schedule,
-    SystemJob, SystemJobEvent, SystemJobTemplate, Team, UnifiedJob,
-    UnifiedJobTemplate, WorkflowJob, WorkflowJobNode,
-    WorkflowJobTemplate, WorkflowJobTemplateNode, StdoutMaxBytesExceeded
+    ActivityStream, AdHocCommand, AdHocCommandEvent, Credential,
+    CredentialInputSource, CredentialType, CustomInventoryScript,
+    Group, Host, Instance, InstanceGroup, Inventory, InventorySource,
+    InventoryUpdate, InventoryUpdateEvent, Job, JobEvent, JobHostSummary,
+    JobLaunchConfig, JobNotificationMixin, JobTemplate, Label, Notification,
+    NotificationTemplate, OAuth2AccessToken, OAuth2Application, Organization,
+    Project, ProjectUpdate, ProjectUpdateEvent, RefreshToken, Role, Schedule,
+    StdoutMaxBytesExceeded, SystemJob, SystemJobEvent, SystemJobTemplate,
+    Team, UnifiedJob, UnifiedJobTemplate, WorkflowJob, WorkflowJobNode,
+    WorkflowJobTemplate, WorkflowJobTemplateNode
 )
 from awx.main.models.base import VERBOSITY_CHOICES, NEW_JOB_TYPE_CHOICES
 from awx.main.models.rbac import (
@@ -4196,6 +4200,37 @@ class NotificationTemplateSerializer(BaseSerializer):
                             error_list.append(_("Messages cannot contain newlines (found newline in {} event)".format(event)))
                             continue
                     collected_messages.append(message)
+
+        # Subclass to return name of undefined field
+        class DescriptiveUndefined(StrictUndefined):
+            # The parent class prevents _accessing attributes_ of an object
+            # but will render undefined objects with 'Undefined'. This
+            # prevents their use entirely.
+            __repr__ = __str__ = StrictUndefined._fail_with_undefined_error
+
+            def __init__(self, *args, **kwargs):
+                super(DescriptiveUndefined, self).__init__(*args, **kwargs)
+                # When an undefined field is encountered, return the name
+                # of the undefined field in the exception message
+                # (StrictUndefined refers to the explicitly set exception
+                # message as the 'hint')
+                self._undefined_hint = self._undefined_name
+
+        # Ensure messages can be rendered
+        for msg in collected_messages:
+            env = sandbox.ImmutableSandboxedEnvironment(undefined=DescriptiveUndefined)
+            try:
+                env.from_string(msg).render(JobNotificationMixin.context_stub())
+            except TemplateSyntaxError as exc:
+                error_list.append(_("Unable to render message '{}': {}".format(msg, exc.message)))
+            except UndefinedError as exc:
+                error_list.append(_("Field '{}' unavailable".format(exc.message)))
+            except SecurityError as exc:
+                error_list.append(_("Security error due to field '{}'".format(exc.message)))
+        if error_list:
+            raise serializers.ValidationError(error_list)
+
+        return messages
 
     def validate(self, attrs):
         from awx.api.views import NotificationTemplateDetail
