@@ -309,7 +309,7 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
 
             # Now use in-memory maps to build up group info.
             all_group_names = []
-            for group in self.groups.only('name', 'id', 'variables'):
+            for group in self.groups.only('name', 'id', 'variables', 'inventory_id'):
                 group_info = dict()
                 if group.id in group_hosts_map:
                     group_info['hosts'] = group_hosts_map[group.id]
