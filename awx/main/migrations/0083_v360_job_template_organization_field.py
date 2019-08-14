@@ -64,7 +64,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='jobtemplate',
             name='read_role',
-            field=awx.main.fields.ImplicitRoleField(editable=False, null='True', on_delete=django.db.models.deletion.CASCADE, parent_role=['organization.auditor_role', 'execute_role', 'admin_role'], related_name='+', to='main.Role'),
+            field=awx.main.fields.ImplicitRoleField(editable=False, null='True', on_delete=django.db.models.deletion.CASCADE, parent_role=['organization.auditor_role', 'inventory.organization.auditor_role', 'execute_role', 'admin_role'], related_name='+', to='main.Role'),
         ),
         # Re-compute the role parents and ancestors caching
         # this may be a no-op because field post_save hooks from migrate_jt_organization

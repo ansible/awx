@@ -25,6 +25,29 @@ def test_job_template_access_superuser(check_license, user, deploy_jobtemplate):
 
 
 @pytest.mark.django_db
+class TestImplicitAccess:
+    def test_org_execute(self, jt_linked, rando):
+        assert rando not in jt_linked.execute_role
+        jt_linked.organization.execute_role.members.add(rando)
+        assert rando in jt_linked.execute_role
+
+    def test_org_admin(self, jt_linked, rando):
+        assert rando not in jt_linked.execute_role
+        jt_linked.organization.job_template_admin_role.members.add(rando)
+        assert rando in jt_linked.execute_role
+
+    def test_org_auditor(self, jt_linked, rando):
+        assert rando not in jt_linked.read_role
+        jt_linked.organization.auditor_role.members.add(rando)
+        assert rando in jt_linked.read_role
+
+    def test_deprecated_inventory_read(self, jt_linked, rando):
+        assert rando not in jt_linked.read_role
+        jt_linked.inventory.organization.execute_role.members.add(rando)
+        assert rando in jt_linked.read_role
+
+
+@pytest.mark.django_db
 def test_job_template_access_read_level(jt_linked, rando):
     ssh_cred = jt_linked.machine_credential
     vault_cred = jt_linked.vault_credentials[0]
@@ -45,9 +68,6 @@ def test_job_template_access_read_level(jt_linked, rando):
 
 @pytest.mark.django_db
 def test_job_template_access_use_level(jt_linked, rando):
-    ssh_cred = jt_linked.machine_credential
-    vault_cred = jt_linked.vault_credentials[0]
-
     access = JobTemplateAccess(rando)
     jt_linked.project.use_role.members.add(rando)
     jt_linked.inventory.use_role.members.add(rando)
@@ -182,7 +202,7 @@ def test_job_template_insufficient_creator_permissions(lacking, project, invento
         inventory.use_role.members.add(rando)
     else:
         inventory.read_role.members.add(rando)
-    response = post(url=reverse('api:job_template_list'), data=dict(
+    post(url=reverse('api:job_template_list'), data=dict(
         name='newly-created-jt',
         inventory=inventory.id,
         project=project.pk,

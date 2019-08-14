@@ -256,7 +256,6 @@ def connect_computed_field_signals():
 
 connect_computed_field_signals()
 
-post_save.connect(save_related_job_templates, sender=Project)
 post_save.connect(save_related_job_templates, sender=Inventory)
 post_save.connect(emit_job_event_detail, sender=JobEvent)
 post_save.connect(emit_ad_hoc_command_event_detail, sender=AdHocCommandEvent)

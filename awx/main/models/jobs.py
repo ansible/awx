@@ -260,7 +260,11 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         parent_role=['admin_role', 'organization.execute_role'],
     )
     read_role = ImplicitRoleField(
-        parent_role=['organization.auditor_role', 'execute_role', 'admin_role'],
+        parent_role=[
+            'organization.auditor_role',
+            'inventory.organization.auditor_role',  # partial support for old inheritance via inventory
+            'execute_role', 'admin_role'
+        ],
     )
 
 

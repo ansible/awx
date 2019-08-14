@@ -30,6 +30,7 @@ def test_create(post, project, machine_credential, inventory, alice, grant_proje
         project.use_role.members.add(alice)
     if grant_inventory:
         inventory.use_role.members.add(alice)
+    project.organization.job_template_admin_role.members.add(alice)
 
     r = post(reverse('api:job_template_list'), {
         'name': 'Some name',

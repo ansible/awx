@@ -1521,7 +1521,6 @@ class JobTemplateAccess(NotificationAttachMixin, BaseAccess):
         return self.user in obj.execute_role
 
     def can_change(self, obj, data):
-        data_for_change = data
         if self.user not in obj.admin_role and not self.user.is_superuser:
             return False
         if data is None:
