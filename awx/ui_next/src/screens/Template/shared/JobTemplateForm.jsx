@@ -41,6 +41,8 @@ class JobTemplateForm extends Component {
       name: '',
       description: '',
       job_type: 'run',
+      inventory: undefined,
+      project: undefined,
       playbook: '',
       summary_fields: {
         inventory: null,
