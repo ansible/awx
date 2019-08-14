@@ -75,6 +75,19 @@ def test_org_credential_access_admin(role_name, alice, org_credential):
 
 
 @pytest.mark.django_db
+def test_org_and_user_credential_access(alice, organization):
+    """Address specific bug where any user could make an org credential
+    in another org without any permissions to that org
+    """
+    # Owner is both user and org, but org permission should still be checked
+    assert not CredentialAccess(alice).can_add({
+        'name': 'New credential.',
+        'user': alice.pk,
+        'organization': organization.pk
+    })
+
+
+@pytest.mark.django_db
 def test_org_credential_access_member(alice, org_credential):
     org_credential.admin_role.members.add(alice)
 

@@ -1168,15 +1168,20 @@ class CredentialAccess(BaseAccess):
             return True
         if data and data.get('user', None):
             user_obj = get_object_from_data('user', User, data)
-            return bool(self.user == user_obj or UserAccess(self.user).can_admin(user_obj, None, check_setting=False))
+            if not bool(self.user == user_obj or UserAccess(self.user).can_admin(user_obj, None, check_setting=False)):
+                return False
         if data and data.get('team', None):
             team_obj = get_object_from_data('team', Team, data)
-            return check_user_access(self.user, Team, 'change', team_obj, None)
+            if not check_user_access(self.user, Team, 'change', team_obj, None):
+                return False
         if data and data.get('organization', None):
             organization_obj = get_object_from_data('organization', Organization, data)
-            return any([check_user_access(self.user, Organization, 'change', organization_obj, None),
-                        self.user in organization_obj.credential_admin_role])
-        return False
+            if not any([check_user_access(self.user, Organization, 'change', organization_obj, None),
+                        self.user in organization_obj.credential_admin_role]):
+                return False
+        if not any(data.get(key, None) for key in ('user', 'team', 'organization')):
+            return False  # you have to provide 1 owner field
+        return True
 
     @check_superuser
     def can_use(self, obj):
