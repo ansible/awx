@@ -227,6 +227,156 @@ class Notification(CreatedModifiedModel):
 
 
 class JobNotificationMixin(object):
+    # Tree of fields that can be safely referenced in a notification message
+    JOB_FIELDS_WHITELIST = ['id', 'type', 'url', 'created', 'modified', 'name', 'description', 'job_type', 'playbook',
+                            'forks', 'limit', 'verbosity', 'job_tags', 'force_handlers', 'skip_tags', 'start_at_task',
+                            'timeout', 'use_fact_cache', 'launch_type', 'status', 'failed', 'started', 'finished',
+                            'elapsed', 'job_explanation', 'execution_node', 'controller_node', 'allow_simultaneous',
+                            'scm_revision', 'diff_mode', 'job_slice_number', 'job_slice_count', 'custom_virtualenv',
+                            {'host_status_counts': ['skipped', 'ok', 'changed', 'failures', 'dark']},
+                            {'playbook_counts': ['play_count', 'task_count']},
+                            {'summary_fields': [{'inventory': ['id', 'name', 'description', 'has_active_failures',
+                                                               'total_hosts', 'hosts_with_active_failures', 'total_groups',
+                                                               'groups_with_active_failures', 'has_inventory_sources',
+                                                               'total_inventory_sources', 'inventory_sources_with_failures',
+                                                               'organization_id', 'kind']},
+                                                {'project': ['id', 'name', 'description', 'status', 'scm_type']},
+                                                {'project_update': ['id', 'name', 'description', 'status', 'failed']},
+                                                {'job_template': ['id', 'name', 'description']},
+                                                {'unified_job_template': ['id', 'name', 'description', 'unified_job_type']},
+                                                {'instance_group': ['name', 'id']},
+                                                {'created_by': ['id', 'username', 'first_name', 'last_name']},
+                                                {'labels': ['count', 'results']},
+                                                {'source_workflow_job': ['description', 'elapsed', 'failed', 'id', 'name', 'status']}]}]
+
+    @classmethod
+    def context_stub(cls):
+        """Returns a stub context that can be used for validating notification messages.
+        Context has the same structure as the context that will actually be used to render
+        a notification message."""
+        context = {'job': {'allow_simultaneous': False,
+                           'controller_node': 'foo_controller',
+                           'created': datetime.datetime(2018, 11, 13, 6, 4, 0, 0, tzinfo=datetime.timezone.utc),
+                           'custom_virtualenv': 'my_venv',
+                           'description': 'Sample job description',
+                           'diff_mode': False,
+                           'elapsed': 0.403018,
+                           'execution_node': 'awx',
+                           'failed': False,
+                           'finished': False,
+                           'force_handlers': False,
+                           'forks': 0,
+                           'host_status_counts': {'skipped': 1, 'ok': 5, 'changed': 3, 'failures': 0, 'dark': 0},
+                           'id': 42,
+                           'job_explanation': 'Sample job explanation',
+                           'job_slice_count': 1,
+                           'job_slice_number': 0,
+                           'job_tags': '',
+                           'job_type': 'run',
+                           'launch_type': 'workflow',
+                           'limit': 'bar_limit',
+                           'modified': datetime.datetime(2018, 12, 13, 6, 4, 0, 0, tzinfo=datetime.timezone.utc),
+                           'name': 'Stub JobTemplate',
+                           'playbook_counts': {'play_count': 5, 'task_count': 10},
+                           'playbook': 'ping.yml',
+                           'scm_revision': '',
+                           'skip_tags': '',
+                           'start_at_task': '',
+                           'started': '2019-07-29T17:38:14.137461Z',
+                           'status': 'running',
+                           'summary_fields': {'created_by': {'first_name': '',
+                                                             'id': 1,
+                                                             'last_name': '',
+                                                             'username': 'admin'},
+                                              'instance_group': {'id': 1, 'name': 'tower'},
+                                              'inventory': {'description': 'Sample inventory description',
+                                                            'groups_with_active_failures': 0,
+                                                            'has_active_failures': False,
+                                                            'has_inventory_sources': False,
+                                                            'hosts_with_active_failures': 0,
+                                                            'id': 17,
+                                                            'inventory_sources_with_failures': 0,
+                                                            'kind': '',
+                                                            'name': 'Stub Inventory',
+                                                            'organization_id': 121,
+                                                            'total_groups': 0,
+                                                            'total_hosts': 1,
+                                                            'total_inventory_sources': 0},
+                                              'job_template': {'description': 'Sample job template description',
+                                                               'id': 39,
+                                                               'name': 'Stub JobTemplate'},
+                                              'labels': {'count': 0, 'results': []},
+                                              'project': {'description': 'Sample project description',
+                                                          'id': 38,
+                                                          'name': 'Stub project',
+                                                          'scm_type': 'git',
+                                                          'status': 'successful'},
+                                              'project_update': {'id': 5, 'name': 'Stub Project Update', 'description': 'Project Update',
+                                                                 'status': 'running', 'failed': False},
+                                              'unified_job_template': {'description': 'Sample unified job template description',
+                                                                       'id': 39,
+                                                                       'name': 'Stub Job Template',
+                                                                       'unified_job_type': 'job'},
+                                              'source_workflow_job': {'description': 'Sample workflow job description',
+                                                                      'elapsed': 0.000,
+                                                                      'failed': False,
+                                                                      'id': 88,
+                                                                      'name': 'Stub WorkflowJobTemplate',
+                                                                      'status': 'running'}},
+                           'timeout': 0,
+                           'type': 'job',
+                           'url': '/api/v2/jobs/13/',
+                           'use_fact_cache': False,
+                           'verbosity': 0},
+                   'job_friendly_name': 'Job',
+                   'url': 'https://towerhost/#/jobs/playbook/1010',
+                   'job_summary_dict': """{'url': 'https://towerhost/$/jobs/playbook/13',
+ 'traceback': '',
+ 'status': 'running',
+ 'started': '2019-08-07T21:46:38.362630+00:00',
+ 'project': 'Stub project',
+ 'playbook': 'ping.yml',
+ 'name': 'Stub Job Template',
+ 'limit': '',
+ 'inventory': 'Stub Inventory',
+ 'id': 42,
+ 'hosts': {},
+ 'friendly_name': 'Job',
+ 'finished': False,
+ 'credential': 'Stub credential',
+ 'created_by': 'admin'}"""}
+
+        return context
+
+    def context(self, serialized_job):
+        """Returns a context that can be used for rendering notification messages.
+        Context contains whitelisted content retrieved from a serialized job object
+        (see JobNotificationMixin.JOB_FIELDS_WHITELIST), the job's friendly name,
+        and a url to the job run."""
+        context = {'job': {},
+                   'job_friendly_name': self.get_notification_friendly_name(),
+                   'url': self.get_ui_url(),
+                   'job_summary_dict': json.dumps(self.notification_data(), indent=4)}
+
+        def build_context(node, fields, whitelisted_fields):
+            for safe_field in whitelisted_fields:
+                if type(safe_field) is dict:
+                    field, whitelist_subnode = safe_field.copy().popitem()
+                    # ensure content present in job serialization
+                    if field not in fields:
+                        continue
+                    subnode = fields[field]
+                    node[field] = {}
+                    build_context(node[field], subnode, whitelist_subnode)
+                else:
+                    # ensure content present in job serialization
+                    if safe_field not in fields:
+                        continue
+                    node[safe_field] = fields[safe_field]
+        build_context(context['job'], serialized_job, self.JOB_FIELDS_WHITELIST)
+
+        return context
+
     def get_notification_templates(self):
         raise RuntimeError("Define me")
 
