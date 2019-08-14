@@ -11,7 +11,7 @@ from awx.main.migrations._rbac import rebuild_role_parentage, migrate_ujt_organi
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0082_v360_webhook_http_method'),
+        ('main', '0083_v360_job_branch_overrirde'),
     ]
 
     operations = [
