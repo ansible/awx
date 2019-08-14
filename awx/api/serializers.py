@@ -4246,6 +4246,7 @@ class NotificationTemplateSerializer(BaseSerializer):
         notification_class = NotificationTemplate.CLASS_FOR_NOTIFICATION_TYPE[notification_type]
         missing_fields = []
         incorrect_type_fields = []
+        password_fields_to_forward = []
         error_list = []
         if 'notification_configuration' not in attrs:
             return attrs
@@ -4270,7 +4271,7 @@ class NotificationTemplateSerializer(BaseSerializer):
                 error_list.append(_("No values specified for field '{}'").format(field))
                 continue
             if field_type == "password" and field_val == "$encrypted$" and object_actual is not None:
-                attrs['notification_configuration'][field] = object_actual.notification_configuration[field]
+                password_fields_to_forward.append(field)
             if field == "http_method" and field_val.lower() not in ['put', 'post']:
                 error_list.append(_("HTTP method must be either 'POST' or 'PUT'."))
         if missing_fields:
@@ -4281,6 +4282,13 @@ class NotificationTemplateSerializer(BaseSerializer):
                                                                                                     type_field_error[1]))
         if error_list:
             raise serializers.ValidationError(error_list)
+
+        # Only pull the exisitng encrypted passwords from the existing objects
+        # to assign to the attribute and forward on the call stack IF AND ONLY IF
+        # we know an error will not be raised in the validation phase.
+        # Otherwise, the encrypted password will be exposed.
+        for field in password_fields_to_forward:
+            attrs['notification_configuration'][field] = object_actual.notification_configuration[field]
         return super(NotificationTemplateSerializer, self).validate(attrs)
 
 
