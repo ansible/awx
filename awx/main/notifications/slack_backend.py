@@ -55,7 +55,7 @@ class SlackBackend(AWXBaseEmailBackend):
                     if ret['ok']:
                         sent_messages += 1
                     else:
-                        raise RuntimeError("Slack Notification unable to send {}: {}".format(r, m.subject))
+                        raise RuntimeError("Slack Notification unable to send {}: {} ({})".format(r, m.subject, ret['error']))
             except Exception as e:
                 logger.error(smart_text(_("Exception sending messages: {}").format(e)))
                 if not self.fail_silently:
