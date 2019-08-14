@@ -16,7 +16,9 @@ notification_types = (
     'slack',
     'twilio',
     'webhook',
-    'mattermost')
+    'mattermost',
+    'grafana',
+    'rocketchat')
 
 
 class NotificationTemplate(HasCopy, HasCreate, base.Base):
@@ -110,6 +112,14 @@ class NotificationTemplate(HasCopy, HasCreate, base.Base):
                     'mattermost_icon_url',
                     'mattermost_no_verify_ssl')
                 cred = services.mattermost
+            elif notification_type == 'grafana':
+                fields = ('grafana_url',
+                          'grafana_key')
+                cred = services.grafana
+            elif notification_type == 'rocketchat':
+                fields = ('rocketchat_url',
+                          'rocketchat_no_verify_ssl')
+                cred = services.rocketchat
             else:
                 raise ValueError(
                     'Unknown notification_type {0}'.format(notification_type))
