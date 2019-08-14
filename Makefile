@@ -569,8 +569,8 @@ setup-bundle-build:
 	mkdir -p $@
 
 docker-auth:
-	if [ "$(IMAGE_REPOSITORY_AUTH)" ]; then \
-		docker login -u oauth2accesstoken -p "$(IMAGE_REPOSITORY_AUTH)" $(IMAGE_REPOSITORY_BASE); \
+	@if [ "$(IMAGE_REPOSITORY_AUTH)" ]; then \
+		echo "$(IMAGE_REPOSITORY_AUTH)" | docker login -u oauth2accesstoken --password-stdin $(IMAGE_REPOSITORY_BASE); \
 	fi;
 
 # Docker isolated rampart
