@@ -1,7 +1,7 @@
 import React from 'react';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
 import JobTemplateAdd from './JobTemplateAdd';
-import { JobTemplatesAPI } from '../../../api';
+import { JobTemplatesAPI, LabelsAPI } from '@api';
 
 jest.mock('@api');
 
@@ -20,6 +20,10 @@ describe('<JobTemplateAdd />', () => {
     },
   };
 
+  beforeEach(() => {
+    LabelsAPI.read.mockResolvedValue({ data: { results: [] } });
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -29,8 +33,9 @@ describe('<JobTemplateAdd />', () => {
     expect(wrapper.find('JobTemplateForm').length).toBe(1);
   });
 
-  test('should render Job Template Form with default values', () => {
+  test('should render Job Template Form with default values', async done => {
     const wrapper = mountWithContexts(<JobTemplateAdd />);
+    await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
     expect(wrapper.find('input#template-description').text()).toBe(
       defaultProps.description
     );
@@ -47,6 +52,7 @@ describe('<JobTemplateAdd />', () => {
           <option>Check</option>,
         ])
     ).toEqual(true);
+
     expect(wrapper.find('input#template-name').text()).toBe(defaultProps.name);
     expect(wrapper.find('input#template-playbook').text()).toBe(
       defaultProps.playbook
@@ -54,6 +60,7 @@ describe('<JobTemplateAdd />', () => {
     expect(wrapper.find('input#template-project').text()).toBe(
       defaultProps.project
     );
+    done();
   });
 
   test('handleSubmit should post to api', async done => {
@@ -72,7 +79,8 @@ describe('<JobTemplateAdd />', () => {
       },
     });
     const wrapper = mountWithContexts(<JobTemplateAdd />);
-    await wrapper.find('JobTemplateForm').prop('handleSubmit')(jobTemplateData);
+    await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
+    wrapper.find('JobTemplateForm').prop('handleSubmit')(jobTemplateData);
     expect(JobTemplatesAPI.create).toHaveBeenCalledWith(jobTemplateData);
     done();
   });
@@ -107,15 +115,16 @@ describe('<JobTemplateAdd />', () => {
     done();
   });
 
-  test('should navigate to templates list when cancel is clicked', () => {
+  test('should navigate to templates list when cancel is clicked', async done => {
     const history = {
       push: jest.fn(),
     };
     const wrapper = mountWithContexts(<JobTemplateAdd />, {
       context: { router: { history } },
     });
-
+    await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
     wrapper.find('button[aria-label="Cancel"]').prop('onClick')();
     expect(history.push).toHaveBeenCalledWith('/templates');
+    done();
   });
 });

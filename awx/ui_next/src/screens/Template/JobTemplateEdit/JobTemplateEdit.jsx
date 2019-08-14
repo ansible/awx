@@ -1,9 +1,12 @@
+/* eslint react/no-unused-state: 0 */
 import React, { Component } from 'react';
 import { withRouter, Redirect } from 'react-router-dom';
 import { CardBody } from '@patternfly/react-core';
-import JobTemplateForm from '../shared/JobTemplateForm';
+import ContentError from '@components/ContentError';
+import ContentLoading from '@components/ContentLoading';
 import { JobTemplatesAPI } from '@api';
 import { JobTemplate } from '@types';
+import JobTemplateForm from '../shared/JobTemplateForm';
 
 class JobTemplateEdit extends Component {
   static propTypes = {
@@ -14,59 +17,133 @@ class JobTemplateEdit extends Component {
     super(props);
 
     this.state = {
-      error: '',
+      hasContentLoading: true,
+      contentError: null,
+      formSubmitError: null,
+      relatedCredentials: [],
     };
+
+    const {
+      template: { id, type },
+    } = props;
+    this.detailsUrl = `/templates/${type}/${id}/details`;
 
     this.handleCancel = this.handleCancel.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.loadRelatedCredentials = this.loadRelatedCredentials.bind(this);
+    this.submitLabels = this.submitLabels.bind(this);
+  }
+
+  componentDidMount() {
+    this.loadRelated();
+  }
+
+  async loadRelated() {
+    this.setState({ contentError: null, hasContentLoading: true });
+    try {
+      const [
+        relatedCredentials,
+        // relatedProjectPlaybooks,
+      ] = await Promise.all([
+        this.loadRelatedCredentials(),
+        // this.loadRelatedProjectPlaybooks(),
+      ]);
+      this.setState({
+        relatedCredentials,
+      });
+    } catch (contentError) {
+      this.setState({ contentError });
+    } finally {
+      this.setState({ hasContentLoading: false });
+    }
+  }
+
+  async loadRelatedCredentials() {
+    const {
+      template: { id },
+    } = this.props;
+    const params = {
+      page: 1,
+      page_size: 200,
+      order_by: 'name',
+    };
+    try {
+      const {
+        data: { results: credentials = [] },
+      } = await JobTemplatesAPI.readCredentials(id, params);
+      return credentials;
+    } catch (err) {
+      if (err.status !== 403) throw err;
+
+      this.setState({ hasRelatedCredentialAccess: false });
+      const {
+        template: {
+          summary_fields: { credentials = [] },
+        },
+      } = this.props;
+
+      return credentials;
+    }
   }
 
   async handleSubmit(values, newLabels = [], removedLabels = []) {
     const {
-      template: { id, type },
+      template: { id },
       history,
     } = this.props;
 
-    const disassociatedLabels = removedLabels.forEach(removedLabel =>
-      JobTemplatesAPI.disassociateLabel(id, removedLabel)
-    );
-    const associatedLabels = newLabels
-      .filter(newLabel => !newLabel.organization)
-      .forEach(newLabel => JobTemplatesAPI.associateLabel(id, newLabel));
-    const generatedLabels = newLabels
-      .filter(newLabel => newLabel.organization)
-      .forEach(newLabel => JobTemplatesAPI.generateLabel(id, newLabel));
+    this.setState({ formSubmitError: null });
     try {
-      await Promise.all([
-        JobTemplatesAPI.update(id, { ...values }),
-        disassociatedLabels,
-        associatedLabels,
-        generatedLabels,
-      ]);
-      history.push(`/templates/${type}/${id}/details`);
-    } catch (error) {
-      this.setState({ error });
+      await JobTemplatesAPI.update(id, { ...values });
+      await Promise.all([this.submitLabels(newLabels, removedLabels)]);
+      history.push(this.detailsUrl);
+    } catch (formSubmitError) {
+      this.setState({ formSubmitError });
     }
   }
 
-  handleCancel() {
+  async submitLabels(newLabels, removedLabels) {
     const {
-      template: { id, type },
-      history,
+      template: { id },
     } = this.props;
-    history.push(`/templates/${type}/${id}/details`);
+    const disassociationPromises = removedLabels.map(label =>
+      JobTemplatesAPI.disassociateLabel(id, label)
+    );
+    const associationPromises = newLabels
+      .filter(label => !label.organization)
+      .map(label => JobTemplatesAPI.associateLabel(id, label));
+    const creationPromises = newLabels
+      .filter(label => label.organization)
+      .map(label => JobTemplatesAPI.generateLabel(id, label));
+
+    const results = await Promise.all([
+      ...disassociationPromises,
+      ...associationPromises,
+      ...creationPromises,
+    ]);
+    return results;
+  }
+
+  handleCancel() {
+    const { history } = this.props;
+    history.push(this.detailsUrl);
   }
 
   render() {
     const { template } = this.props;
-    const { error } = this.state;
+    const { contentError, formSubmitError, hasContentLoading } = this.state;
     const canEdit = template.summary_fields.user_capabilities.edit;
 
+    if (hasContentLoading) {
+      return <ContentLoading />;
+    }
+
+    if (contentError) {
+      return <ContentError error={contentError} />;
+    }
+
     if (!canEdit) {
-      const {
-        template: { id, type },
-      } = this.props;
-      return <Redirect to={`/templates/${type}/${id}/details`} />;
+      return <Redirect to={this.detailsUrl} />;
     }
 
     return (
@@ -76,7 +153,7 @@ class JobTemplateEdit extends Component {
           handleCancel={this.handleCancel}
           handleSubmit={this.handleSubmit}
         />
-        {error ? <div> error </div> : null}
+        {formSubmitError ? <div> error </div> : null}
       </CardBody>
     );
   }

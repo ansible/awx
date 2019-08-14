@@ -10,6 +10,7 @@ class JobTemplates extends InstanceGroupsMixin(Base) {
     this.readLaunch = this.readLaunch.bind(this);
     this.associateLabel = this.associateLabel.bind(this);
     this.disassociateLabel = this.disassociateLabel.bind(this);
+    this.readCredentials = this.readCredentials.bind(this);
     this.generateLabel = this.generateLabel.bind(this);
   }
 
@@ -31,6 +32,10 @@ class JobTemplates extends InstanceGroupsMixin(Base) {
 
   generateLabel(orgId, label) {
     return this.http.post(`${this.baseUrl}${orgId}/labels/`, label);
+  }
+
+  readCredentials(id, params) {
+    return this.http.get(`${this.baseUrl}${id}/credentials/`, { params });
   }
 }
 

@@ -6,8 +6,8 @@ import { FormGroup, Tooltip } from '@patternfly/react-core';
 import { QuestionCircleIcon } from '@patternfly/react-icons';
 
 import { InventoriesAPI } from '@api';
+import { Inventory } from '@types';
 import Lookup from '@components/Lookup';
-import { Inventory } from '../../../types';
 
 const getInventories = async params => InventoriesAPI.read(params);
 

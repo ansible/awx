@@ -4,15 +4,10 @@ import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Formik, Field } from 'formik';
-import {
-  Form,
-  FormGroup,
-  Tooltip,
-  PageSection,
-  Card,
-} from '@patternfly/react-core';
+import { Form, FormGroup, Tooltip, Card } from '@patternfly/react-core';
 import { QuestionCircleIcon as PFQuestionCircleIcon } from '@patternfly/react-icons';
 import ContentError from '@components/ContentError';
+import ContentLoading from '@components/ContentLoading';
 import AnsibleSelect from '@components/AnsibleSelect';
 import MultiSelect from '@components/MultiSelect';
 import FormActionGroup from '@components/FormActionGroup';
@@ -44,9 +39,7 @@ class JobTemplateForm extends Component {
     template: {
       name: '',
       description: '',
-      inventory: '',
       job_type: 'run',
-      project: '',
       playbook: '',
       summary_fields: {
         inventory: null,
@@ -74,12 +67,11 @@ class JobTemplateForm extends Component {
     this.loadLabels(QSConfig);
   }
 
-  // The function below assumes that the user has no more than 400
-  // labels. For the vast majority of users this will be more thans
-  // enough.This can be updated to allow more than 400 labels if we
-  // decide it is necessary.
-
   async loadLabels(QueryConfig) {
+    // This function assumes that the user has no more than 400
+    // labels. For the vast majority of users this will be more thans
+    // enough.This can be updated to allow more than 400 labels if we
+    // decide it is necessary.
     this.setState({ contentError: null, hasContentLoading: true });
     let loadedLabels;
     try {
@@ -181,23 +173,30 @@ class JobTemplateForm extends Component {
       },
     ];
 
-    if (!hasContentLoading && contentError) {
+    if (hasContentLoading) {
       return (
-        <PageSection>
-          <Card className="awx-c-card">
-            <ContentError error={contentError} />
-          </Card>
-        </PageSection>
+        <Card className="awx-c-card">
+          <ContentLoading />
+        </Card>
       );
     }
+
+    if (contentError) {
+      return (
+        <Card className="awx-c-card">
+          <ContentError error={contentError} />
+        </Card>
+      );
+    }
+
     return (
       <Formik
         initialValues={{
           name: template.name,
           description: template.description,
           job_type: template.job_type,
-          inventory: template.inventory,
-          project: template.project,
+          inventory: template.inventory || '',
+          project: template.project || '',
           playbook: template.playbook,
           labels: template.summary_fields.labels.results,
         }}
