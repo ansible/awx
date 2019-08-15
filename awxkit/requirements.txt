@@ -1,2 +1,2 @@
-PyYAML>=5.1
+PyYAML
 requests

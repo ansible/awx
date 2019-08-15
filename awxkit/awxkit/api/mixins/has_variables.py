@@ -7,4 +7,4 @@ class HasVariables(object):
 
     @property
     def variables(self):
-        return PseudoNamespace(yaml.load(self.json.variables, Loader=yaml.FullLoader))
+        return PseudoNamespace(yaml.safe_load(self.json.variables))
