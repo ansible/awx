@@ -8,7 +8,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0082_v360_webhook_http_method'),
+        ('main', '0083_v360_job_branch_overrirde'),
     ]
 
     operations = [
