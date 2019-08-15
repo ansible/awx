@@ -3,6 +3,8 @@ import os
 import pkg_resources
 import sys
 
+from requests.exceptions import RequestException
+
 from .custom import handle_custom_actions
 from .format import (add_authentication_arguments,
                      add_output_formatting_arguments,
@@ -112,7 +114,17 @@ class CLI(object):
         # ...otherwise, set up a awxkit connection because we're
         # likely about to do some requests to /api/v2/
         self.root = api.Api()
-        self.fetch_version_root()
+        try:
+            self.fetch_version_root()
+        except RequestException:
+            # If we can't reach the API root (this usually means that the
+            # hostname is wrong, or the credentials are wrong)
+            if self.help:
+                # ...but the user specified -h...
+                known, unknown = self.parser.parse_known_args(self.argv)
+                if len(unknown) == 1 and os.path.basename(unknown[0]) == 'awx':
+                    return
+            raise
 
     def fetch_version_root(self):
         self.v2 = self.root.get().available_versions.v2.get()
