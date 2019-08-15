@@ -1,4 +1,3 @@
 PyYAML>=5.1
 python-dateutil
 requests
-termcolor

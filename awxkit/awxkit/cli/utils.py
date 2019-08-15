@@ -1,8 +1,7 @@
 from argparse import ArgumentParser
-import threading
+import os
 import sys
-
-import termcolor
+import threading
 
 _color = threading.local()
 _color.enabled = True
@@ -62,15 +61,31 @@ def disable_color():
     _color.enabled = False
 
 
-def colored(value, color):
-    if _color.enabled:
-        return termcolor.colored(value, color)
-    else:
-        return value
+COLORS = dict(
+    list(
+        zip(
+            [
+                'grey', 'red', 'green', 'yellow', 'blue', 'magenta', 'cyan',
+                'white',
+            ],
+            list(range(30, 38))
+        )
+    )
+)
 
 
-def cprint(value, color, **kwargs):
+def colored(text, color=None):
+    '''Colorize text w/ ANSI color sequences'''
+    if _color.enabled and os.getenv('ANSI_COLORS_DISABLED') is None:
+        fmt_str = '\033[%dm%s'
+        if color is not None:
+            text = fmt_str % (COLORS[color], text)
+        text += '\033[0m'
+    return text
+
+
+def cprint(text, color, **kwargs):
     if _color.enabled:
-        termcolor.cprint(value, color, **kwargs)
+        print(colored(text, color), **kwargs)
     else:
-        print(value, **kwargs)
+        print(text, **kwargs)
