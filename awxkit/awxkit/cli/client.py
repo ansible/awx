@@ -2,6 +2,7 @@ import logging
 import os
 import pkg_resources
 import sys
+from argparse import ArgumentParser
 
 from .custom import handle_custom_actions
 from .format import (add_authentication_arguments,
@@ -264,7 +265,7 @@ class CLI(object):
         self.parser = HelpfulArgumentParser(add_help=False)
         self.parser.add_argument(
             '--help',
-            action='store_true',
+            action='help',
             help='prints usage information for the awx tool',
         )
         self.parser.add_argument(
