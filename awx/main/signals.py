@@ -430,7 +430,7 @@ def model_serializer_mapping():
         models.Label: serializers.LabelSerializer,
         models.WorkflowJobTemplate: serializers.WorkflowJobTemplateWithSpecSerializer,
         models.WorkflowJobTemplateNode: serializers.WorkflowJobTemplateNodeSerializer,
-        models.WorkflowApproval: serializers.WorkflowApprovalSerializer,
+        models.WorkflowApproval: serializers.WorkflowApprovalActivityStreamSerializer,
         models.WorkflowApprovalTemplate: serializers.WorkflowApprovalTemplateSerializer,
         models.WorkflowJob: serializers.WorkflowJobSerializer,
         models.OAuth2AccessToken: serializers.OAuth2TokenSerializer,

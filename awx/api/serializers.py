@@ -3441,6 +3441,17 @@ class WorkflowApprovalSerializer(UnifiedJobSerializer):
         return res
 
 
+class WorkflowApprovalActivityStreamSerializer(WorkflowApprovalSerializer):
+    """
+    timed_out and status are usually read-only fields
+    However, when we generate an activity stream record, we *want* to record
+    these types of changes.  This serializer allows us to do so.
+    """
+    status = serializers.ChoiceField(choices=JobTemplate.JOB_TEMPLATE_STATUS_CHOICES)
+    timed_out = serializers.BooleanField()
+
+
+
 class WorkflowApprovalListSerializer(WorkflowApprovalSerializer, UnifiedJobListSerializer):
 
     class Meta:

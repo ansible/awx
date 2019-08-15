@@ -681,38 +681,16 @@ class WorkflowApproval(UnifiedJob):
         return 'workflow_approval_template'
 
     def approve(self, request=None):
-        from awx.main.signals import model_serializer_mapping  # circular import
         self.status = 'successful'
         self.save()
         self.websocket_emit_status(self.status)
-        changes = model_to_dict(self, model_serializer_mapping())
-        changes['status'] = ['pending', 'successful']
-        activity_entry = ActivityStream(
-            operation='update',
-            object1='workflow_approval',
-            actor=request.user,
-            changes=json.dumps(changes),
-        )
-        activity_entry.save()
-        getattr(activity_entry, 'workflow_approval').add(self.pk)
         schedule_task_manager()
         return reverse('api:workflow_approval_approve', kwargs={'pk': self.pk}, request=request)
 
     def deny(self, request=None):
-        from awx.main.signals import model_serializer_mapping  # circular import
         self.status = 'failed'
         self.save()
         self.websocket_emit_status(self.status)
-        changes = model_to_dict(self, model_serializer_mapping())
-        changes['status'] = ['pending', 'failed']
-        activity_entry = ActivityStream(
-            operation='update',
-            object1='workflow_approval',
-            actor=request.user,
-            changes=json.dumps(changes),
-        )
-        activity_entry.save()
-        getattr(activity_entry, 'workflow_approval').add(self.pk)
         schedule_task_manager()
         return reverse('api:workflow_approval_deny', kwargs={'pk': self.pk}, request=request)
 

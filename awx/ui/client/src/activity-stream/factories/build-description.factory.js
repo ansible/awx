@@ -132,7 +132,13 @@ export default function BuildDescription(BuildAnchor, $log, i18n) {
                                 if (activity.changes.status[1] === 'successful') {
                                     operationText = i18n._('approved');
                                 } else if (activity.changes.status[1] === 'failed') {
-                                    operationText = i18n._('denied');
+                                    if (activity.changes.timed_out && activity.changes.timed_out[1] === true) {
+                                        operationText = i18n._('timed out');
+                                    } else {
+                                        operationText = i18n._('denied');
+                                    }
+                                } else {
+                                    operationText = i18n._('updated');
                                 }
                                 activity.description = `${operationText} ${activity.object1} ${BuildAnchor(activity.summary_fields[activity.object1][0], activity.object1, activity)}`;
                              } else {
