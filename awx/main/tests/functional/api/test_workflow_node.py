@@ -129,6 +129,12 @@ class TestNodeCredentials:
     under the "credentials" key - WFJT nodes have a many-to-many relationship
     corresponding to this, and it must follow rules consistent with other prompts
     '''
+    @pytest.fixture
+    def job_template_ask(self, job_template):
+        job_template.ask_credential_on_launch = True
+        job_template.save()
+        return job_template
+
     def test_not_allows_non_job_models(self, post, admin_user, workflow_job_template,
                                        project, machine_credential):
         node = WorkflowJobTemplateNode.objects.create(
@@ -146,21 +152,6 @@ class TestNodeCredentials:
         )
         assert 'cannot accept credentials on launch' in str(r.data['msg'])
 
-
-@pytest.mark.django_db
-class TestOldCredentialField:
-    '''
-    The field `credential` on JTs & WFJT nodes is deprecated, but still supported
-
-    TODO: remove tests when JT vault_credential / credential / other stuff
-    is removed
-    '''
-    @pytest.fixture
-    def job_template_ask(self, job_template):
-        job_template.ask_credential_on_launch = True
-        job_template.save()
-        return job_template
-
     def test_credential_accepted_create(self, workflow_job_template, post, admin_user,
                                         job_template_ask, machine_credential):
         r = post(
@@ -168,16 +159,16 @@ class TestOldCredentialField:
                 'api:workflow_job_template_workflow_nodes_list',
                 kwargs = {'pk': workflow_job_template.pk}
             ),
-            data = {'credential': machine_credential.pk, 'unified_job_template': job_template_ask.pk},
+            data = {'unified_job_template': job_template_ask.pk},
             user = admin_user,
             expect = 201
         )
-        assert r.data['credential'] == machine_credential.pk
         node = WorkflowJobTemplateNode.objects.get(pk=r.data['id'])
+        post(url=r.data['related']['credentials'], data={'id': machine_credential.pk}, user=admin_user, expect=204)
         assert list(node.credentials.all()) == [machine_credential]
 
     @pytest.mark.parametrize('role,code', [
-        ['use_role', 201],
+        ['use_role', 204],
         ['read_role', 403]
     ])
     def test_credential_rbac(self, role, code, workflow_job_template, post, rando,
@@ -186,39 +177,41 @@ class TestOldCredentialField:
         role_obj.members.add(rando)
         job_template_ask.execute_role.members.add(rando)
         workflow_job_template.admin_role.members.add(rando)
-        post(
+        r = post(
             reverse(
                 'api:workflow_job_template_workflow_nodes_list',
                 kwargs = {'pk': workflow_job_template.pk}
             ),
-            data = {'credential': machine_credential.pk, 'unified_job_template': job_template_ask.pk},
+            data = {'unified_job_template': job_template_ask.pk},
             user = rando,
-            expect = code
+            expect = 201
         )
+        creds_url = r.data['related']['credentials']
+        post(url=creds_url, data={'id': machine_credential.pk}, user=rando, expect=code)
 
-    def test_credential_add_remove(self, node, patch, machine_credential, admin_user):
+    def test_credential_add_remove(self, node, get, post, machine_credential, admin_user):
         node.unified_job_template.ask_credential_on_launch = True
         node.unified_job_template.save()
         url = node.get_absolute_url()
-        patch(
-            url,
-            data = {'credential': machine_credential.pk},
+        r = get(url=url, user=admin_user, expect=200)
+        post(
+            url = r.data['related']['credentials'],
+            data = {'id': machine_credential.pk},
             user = admin_user,
-            expect = 200
+            expect = 204
         )
         node.refresh_from_db()
-        assert node.credential == machine_credential.pk
 
-        patch(
-            url,
-            data = {'credential': None},
+        post(
+            url = r.data['related']['credentials'],
+            data = {'id': machine_credential.pk, 'disassociate': True},
             user = admin_user,
-            expect = 200
+            expect = 204
         )
         node.refresh_from_db()
         assert list(node.credentials.values_list('pk', flat=True)) == []
 
-    def test_credential_replace(self, node, patch, credentialtype_ssh, admin_user):
+    def test_credential_replace(self, node, get, post, credentialtype_ssh, admin_user):
         node.unified_job_template.ask_credential_on_launch = True
         node.unified_job_template.save()
         cred1 = Credential.objects.create(
@@ -230,12 +223,14 @@ class TestOldCredentialField:
             name='machine-cred2',
             inputs={'username': 'test_user', 'password': 'pas4word'})
         node.credentials.add(cred1)
-        assert node.credential == cred1.pk
         url = node.get_absolute_url()
-        patch(
-            url,
-            data = {'credential': cred2.pk},
-            user = admin_user,
-            expect = 200
-        )
-        assert node.credential == cred2.pk
+        r = get(url=url, user=admin_user, expect=200)
+        creds_url = r.data['related']['credentials']
+        # cannot do it this way
+        r2 = post(url=creds_url, data={'id': cred2.pk}, user=admin_user, expect=400)
+        assert 'This launch configuration already provides a Machine credential' in r2.data['msg']
+        # guess I will remove that existing one
+        post(url=creds_url, data={'id': cred1.pk, 'disassociate': True}, user=admin_user, expect=204)
+        # okay, now I will add the new one
+        post(url=creds_url, data={'id': cred2.pk}, user=admin_user, expect=204)
+        assert list(node.credentials.values_list('id', flat=True)) == [cred2.pk]
