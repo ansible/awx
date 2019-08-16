@@ -6,6 +6,7 @@ import Jobs from './models/Jobs';
 import Labels from './models/Labels';
 import Me from './models/Me';
 import Organizations from './models/Organizations';
+import Projects from './models/Projects';
 import Root from './models/Root';
 import Teams from './models/Teams';
 import UnifiedJobTemplates from './models/UnifiedJobTemplates';
@@ -21,6 +22,7 @@ const JobsAPI = new Jobs();
 const LabelsAPI = new Labels();
 const MeAPI = new Me();
 const OrganizationsAPI = new Organizations();
+const ProjectsAPI = new Projects();
 const RootAPI = new Root();
 const TeamsAPI = new Teams();
 const UnifiedJobTemplatesAPI = new UnifiedJobTemplates();
@@ -37,6 +39,7 @@ export {
   LabelsAPI,
   MeAPI,
   OrganizationsAPI,
+  ProjectsAPI,
   RootAPI,
   TeamsAPI,
   UnifiedJobTemplatesAPI,
