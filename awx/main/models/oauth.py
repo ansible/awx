@@ -98,8 +98,7 @@ class OAuth2AccessToken(AbstractAccessToken):
         related_name="%(app_label)s_%(class)s",
         help_text=_('The user representing the token owner')
     )
-    description = models.CharField(
-        max_length=200,
+    description = models.TextField(
         default='',
         blank=True,
     )
