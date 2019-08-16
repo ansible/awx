@@ -12,7 +12,7 @@ file_pattern_cache = {}
 file_path_cache = {}
 
 
-class Loader(yaml.FullLoader):
+class Loader(yaml.SafeLoader):
 
     def __init__(self, stream):
         self._root = os.path.split(stream.name)[0]

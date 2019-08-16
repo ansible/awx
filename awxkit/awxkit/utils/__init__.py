@@ -184,8 +184,7 @@ def load_credentials(filename=None):
 
     if os.path.isfile(path):
         with open(path) as credentials_fh:
-            credentials_dict = yaml.load(
-                credentials_fh, Loader=yaml.FullLoader)
+            credentials_dict = yaml.safe_load(credentials_fh)
             return credentials_dict
     else:
         msg = 'Unable to load credentials file at %s' % path
@@ -200,7 +199,7 @@ def load_projects(filename=None):
 
     if os.path.isfile(path):
         with open(path) as projects_fh:
-            projects_dict = yaml.load(projects_fh, Loader=yaml.FullLoader)
+            projects_dict = yaml.safe_load(projects_fh)
             return projects_dict
     else:
         msg = 'Unable to load projects file at %s' % path
@@ -329,7 +328,7 @@ def to_bool(obj):
 
 def load_json_or_yaml(obj):
     try:
-        return yaml.load(obj, Loader=yaml.FullLoader)
+        return yaml.safe_load(obj)
     except AttributeError:
         raise TypeError("Provide valid YAML/JSON.")
 

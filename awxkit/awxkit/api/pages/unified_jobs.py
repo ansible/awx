@@ -114,16 +114,16 @@ class UnifiedJob(HasStatus, base.Base):
         """
         def attempt_yaml_load(arg):
             try:
-                return yaml.load(arg, Loader=yaml.FullLoader)
+                return yaml.safe_load(arg)
             except (yaml.parser.ParserError, yaml.scanner.ScannerError):
                 return str(arg)
 
         args = []
         if not self.json.job_args:
             return ""
-        for arg in yaml.load(self.json.job_args, Loader=yaml.FullLoader):
+        for arg in yaml.safe_load(self.json.job_args):
             try:
-                args.append(yaml.load(arg, Loader=yaml.FullLoader))
+                args.append(yaml.safe_load(arg))
             except (yaml.parser.ParserError, yaml.scanner.ScannerError):
                 if arg[0] == '@':  # extra var file reference
                     args.append(attempt_yaml_load(arg))
