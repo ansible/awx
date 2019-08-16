@@ -547,13 +547,14 @@ def test_callback_disallowed_null_inventory(project):
 
 
 @pytest.mark.django_db
-def test_job_template_branch_error(project, inventory, post, admin_user):
+def test_job_template_branch_error(project, inventory, organization, post, admin_user):
     r = post(
         url=reverse('api:job_template_list'),
         data={
             "name": "fooo",
             "inventory": inventory.pk,
             "project": project.pk,
+            "organization": organization.pk,
             "playbook": "helloworld.yml",
             "scm_branch": "foobar"
         },
@@ -564,13 +565,14 @@ def test_job_template_branch_error(project, inventory, post, admin_user):
 
 
 @pytest.mark.django_db
-def test_job_template_branch_prompt_error(project, inventory, post, admin_user):
+def test_job_template_branch_prompt_error(project, inventory, post, organization, admin_user):
     r = post(
         url=reverse('api:job_template_list'),
         data={
             "name": "fooo",
             "inventory": inventory.pk,
             "project": project.pk,
+            "organization": organization.pk,
             "playbook": "helloworld.yml",
             "ask_scm_branch_on_launch": True
         },
