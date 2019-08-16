@@ -10,7 +10,7 @@ export default ['Rest', 'Wait',
     'notification_template',
     '$scope', '$state', 'GetChoices', 'CreateSelect2', 'Empty',
     'NotificationsTypeChange', 'ParseTypeChange', 'i18n',
-    'MessageUtils',
+    'MessageUtils', '$filter',
     function(
         Rest, Wait,
         NotificationsFormObject, ProcessErrors, GetBasePath,
@@ -18,7 +18,7 @@ export default ['Rest', 'Wait',
         notification_template,
         $scope, $state, GetChoices, CreateSelect2, Empty,
         NotificationsTypeChange, ParseTypeChange, i18n,
-        MessageUtils
+        MessageUtils, $filter
     ) {
         var generator = GenerateForm,
             id = notification_template.id,
@@ -350,10 +350,14 @@ export default ['Rest', 'Wait',
                     $state.go('notifications', {}, { reload: true });
                     Wait('stop');
                 })
-                .catch(({data, status}) => {
+                .catch(({ data, status }) => {
+                    let description = 'PUT returned status: ' + status;
+                    if (data && data.messages && data.messages.length > 0) {
+                        description = _.uniq(data.messages).join(', ');
+                    }
                     ProcessErrors($scope, data, status, form, {
                         hdr: 'Error!',
-                        msg: 'Failed to add new notification template. POST returned status: ' + status
+                        msg: $filter('sanitize')('Failed to update notifier. ' + description + '.')
                     });
                 });
         };

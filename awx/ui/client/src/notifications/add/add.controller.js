@@ -7,13 +7,13 @@
 export default ['Rest', 'Wait', 'NotificationsFormObject',
     'ProcessErrors', 'GetBasePath', 'Alert',
     'GenerateForm', '$scope', '$state', 'CreateSelect2', 'GetChoices',
-    'NotificationsTypeChange', 'ParseTypeChange', 'i18n', 'MessageUtils',
+    'NotificationsTypeChange', 'ParseTypeChange', 'i18n', 'MessageUtils', '$filter',
     function(
         Rest, Wait, NotificationsFormObject,
         ProcessErrors, GetBasePath, Alert,
         GenerateForm, $scope, $state, CreateSelect2, GetChoices,
         NotificationsTypeChange, ParseTypeChange, i18n,
-        MessageUtils
+        MessageUtils, $filter
     ) {
 
         var generator = GenerateForm,
@@ -267,10 +267,14 @@ export default ['Rest', 'Wait', 'NotificationsFormObject',
                     $state.go('notifications', {}, { reload: true });
                     Wait('stop');
                 })
-                .catch(({data, status}) => {
+                .catch(({ data, status }) => {
+                    let description = 'POST returned status: ' + status;
+                    if (data && data.messages && data.messages.length > 0) {
+                        description = _.uniq(data.messages).join(', ');
+                    }
                     ProcessErrors($scope, data, status, form, {
                         hdr: 'Error!',
-                        msg: 'Failed to add new notifier. POST returned status: ' + status
+                        msg: $filter('sanitize')('Failed to add new notifier. ' + description + '.')
                     });
                 });
         };
