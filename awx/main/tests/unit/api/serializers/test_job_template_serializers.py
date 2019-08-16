@@ -50,6 +50,7 @@ class TestJobTemplateSerializerGetRelated():
         'schedules',
         'activity_stream',
         'launch',
+        'webhook_key',
         'notification_templates_started',
         'notification_templates_success',
         'notification_templates_error',

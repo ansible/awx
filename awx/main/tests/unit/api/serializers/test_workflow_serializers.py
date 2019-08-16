@@ -32,6 +32,7 @@ class TestWorkflowJobTemplateSerializerGetRelated():
         'workflow_jobs',
         'launch',
         'workflow_nodes',
+        'webhook_key',
     ])
     def test_get_related(self, mocker, test_get_related, workflow_job_template, related_resource_name):
         test_get_related(WorkflowJobTemplateSerializer,
