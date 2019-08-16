@@ -2,7 +2,6 @@
 # All Rights Reserved.
 
 # Python
-import json
 import logging
 
 # Django
@@ -32,11 +31,10 @@ from awx.main.models.mixins import (
     RelatedJobsMixin,
 )
 from awx.main.models.jobs import LaunchTimeConfigBase, LaunchTimeConfig, JobTemplate
-from awx.main.models.activity_stream import ActivityStream
 from awx.main.models.credential import Credential
 from awx.main.redact import REPLACE_STR
 from awx.main.fields import JSONField
-from awx.main.utils import model_to_dict, schedule_task_manager
+from awx.main.utils import schedule_task_manager
 
 
 from copy import copy

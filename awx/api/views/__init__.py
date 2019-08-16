@@ -3018,12 +3018,16 @@ class WorkflowJobTemplateNodeCreateApproval(RetrieveAPIView):
     serializer_class = serializers.WorkflowJobTemplateNodeCreateApprovalSerializer
 
     def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+        obj = self.get_object()
+        serializer = self.get_serializer(instance=obj, data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        obj = self.get_object()
         approval_template = obj.create_approval_template(**serializer.validated_data)
-        return Response(data={'id':approval_template.pk}, status=status.HTTP_200_OK)
+        data = serializers.WorkflowApprovalTemplateSerializer(
+            approval_template,
+            context=self.get_serializer_context()
+        ).data
+        return Response(data, status=status.HTTP_200_OK)
 
     def check_permissions(self, request):
         obj = self.get_object().workflow_job_template
@@ -4487,13 +4491,3 @@ class WorkflowApprovalDeny(RetrieveAPIView):
             return Response("This workflow step has already been approved or denied.", status=status.HTTP_400_BAD_REQUEST)
         obj.deny(request)
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-# Placeholder code for approval notification support
-class WorkflowApprovalNotificationsList(SubListAPIView):
-
-    model = models.Notification
-    serializer_class = serializers.NotificationSerializer
-    parent_model = models.WorkflowApproval
-    relationship = 'notifications'
-    search_fields = ('subject', 'notification_type', 'body',)

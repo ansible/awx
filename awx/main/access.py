@@ -134,7 +134,7 @@ def check_user_access_with_errors(user, model_class, action, *args, **kwargs):
     access_instance = access_class(user, save_messages=True)
     access_method = getattr(access_instance, 'can_%s' % action, None)
     result = access_method(*args, **kwargs)
-    logger.error('%s.%s %r returned %r', access_instance.__class__.__name__,
+    logger.debug('%s.%s %r returned %r', access_instance.__class__.__name__,
                  access_method.__name__, args, result)
     return (result, access_instance.messages)
 
@@ -2781,10 +2781,15 @@ class RoleAccess(BaseAccess):
 
 class WorkflowApprovalAccess(BaseAccess):
     '''
-    I can approve workflows when:
-     - I'm authenticated
-    I can create when:
-     - I'm a superuser:
+    A user can create an approval template if they are a superuser, an org admin
+    of the org connected to the workflow, or if they are assigned as admins to
+    the workflow.
+
+    A user can approve a workflow when they are:
+    - a superuser
+    - a workflow admin
+    - an organization admin
+    - any user who has explicitly been assigned the "approver" role
     '''
 
     model = WorkflowApproval
@@ -2810,10 +2815,15 @@ class WorkflowApprovalAccess(BaseAccess):
 
 class WorkflowApprovalTemplateAccess(BaseAccess):
     '''
-    I can create approval nodes when:
-     -
-    I can approve workflows when:
-     -
+    A user can create an approval template if they are a superuser, an org admin
+    of the org connected to the workflow, or if they are assigned as admins to
+    the workflow.
+
+    A user can approve a workflow when they are:
+    - a superuser
+    - a workflow admin
+    - an organization admin
+    - any user who has explicitly been assigned the "approver" role
     '''
 
     model = WorkflowApprovalTemplate
@@ -2821,11 +2831,6 @@ class WorkflowApprovalTemplateAccess(BaseAccess):
 
     @check_superuser
     def can_add(self, data):
-        '''
-        A user can create an approval template if they are a superuser, an org admin
-        of the org connected to the workflow, or if they are assigned as admins to
-        the workflow.
-        '''
         if data is None:  # Hide direct creation in API browser
             return False
         else:
