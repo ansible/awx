@@ -57,9 +57,7 @@ describe('<JobTemplateAdd />', () => {
     expect(wrapper.find('input#template-playbook').text()).toBe(
       defaultProps.playbook
     );
-    expect(wrapper.find('input#template-project').text()).toBe(
-      defaultProps.project
-    );
+    expect(wrapper.find('ProjectLookup').prop('value')).toBe(null);
     done();
   });
 

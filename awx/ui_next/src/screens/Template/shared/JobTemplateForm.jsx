@@ -17,6 +17,7 @@ import { required } from '@util/validators';
 import styled from 'styled-components';
 import { JobTemplate } from '@types';
 import InventoriesLookup from './InventoriesLookup';
+import ProjectLookup from './ProjectLookup';
 import { LabelsAPI } from '@api';
 
 const QuestionCircleIcon = styled(PFQuestionCircleIcon)`
@@ -56,6 +57,7 @@ class JobTemplateForm extends Component {
       loadedLabels: [],
       newLabels: [],
       removedLabels: [],
+      project: props.template.summary_fields.project,
       inventory: props.template.summary_fields.inventory,
     };
     this.handleNewLabel = this.handleNewLabel.bind(this);
@@ -153,6 +155,7 @@ class JobTemplateForm extends Component {
       contentError,
       hasContentLoading,
       inventory,
+      project,
       newLabels,
       removedLabels,
     } = this.state;
@@ -258,15 +261,21 @@ class JobTemplateForm extends Component {
                   />
                 )}
               />
-              <FormField
-                id="template-project"
+              <Field
                 name="project"
-                type="number"
-                label={i18n._(t`Project`)}
-                tooltip={i18n._(t`Select the project containing the playbook
-                you want this job to execute.`)}
-                isRequired
                 validate={required(null, i18n)}
+                render={({ form }) => (
+                  <ProjectLookup
+                    value={project}
+                    tooltip={i18n._(t`Select the project containing the playbook
+                    you want this job to execute.`)}
+                    onChange={value => {
+                      form.setFieldValue('project', value.id);
+                      this.setState({ project: value });
+                    }}
+                    required
+                  />
+                )}
               />
               <FormField
                 id="template-playbook"

@@ -22,6 +22,10 @@ describe('<JobTemplateForm />', () => {
         name: 'foo',
         organization_id: 1,
       },
+      project: {
+        id: 3,
+        name: 'qux',
+      },
       labels: { results: [{ name: 'Sushi', id: 1 }, { name: 'Major', id: 2 }] },
     },
   };
@@ -44,9 +48,13 @@ describe('<JobTemplateForm />', () => {
       />
     );
     await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
-    const component = wrapper.find('ChipGroup');
     expect(LabelsAPI.read).toHaveBeenCalled();
-    expect(component.find('span#pf-random-id-1').text()).toEqual('Sushi');
+    expect(
+      wrapper
+        .find('FormGroup[fieldId="template-labels"] MultiSelect Chip')
+        .first()
+        .text()
+    ).toEqual('Sushi');
     done();
   });
 
@@ -77,8 +85,9 @@ describe('<JobTemplateForm />', () => {
       name: 'inventory',
     });
     expect(form.state('values').inventory).toEqual(3);
-    wrapper.find('input#template-project').simulate('change', {
-      target: { value: 4, name: 'project' },
+    wrapper.find('ProjectLookup').prop('onChange')({
+      id: 4,
+      name: 'project',
     });
     expect(form.state('values').project).toEqual(4);
     wrapper.find('input#template-playbook').simulate('change', {
