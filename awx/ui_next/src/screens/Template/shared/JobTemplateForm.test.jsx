@@ -158,7 +158,7 @@ describe('<JobTemplateForm />', () => {
       _JobTemplateForm.prototype,
       'handleNewLabel'
     );
-    const event = { key: 'Tab' };
+    const event = { key: 'Enter', preventDefault: () => {} };
     const wrapper = mountWithContexts(
       <JobTemplateForm
         template={mockData}

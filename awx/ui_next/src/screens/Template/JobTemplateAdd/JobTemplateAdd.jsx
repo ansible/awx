@@ -19,10 +19,13 @@ function JobTemplateAdd({ history, i18n }) {
   const handleSubmit = async values => {
     setError(null);
     try {
-      const { data } = await JobTemplatesAPI.create(values);
-      history.push(`/templates/${data.type}/${data.id}/details`);
-    } catch (err) {
-      setError(err);
+      const {
+        data: { id, type },
+      } = await JobTemplatesAPI.create(values);
+      await Promise.all([submitLabels(id, newLabels, removedLabels)]);
+      history.push(`/templates/${type}/${id}/details`);
+    } catch (error) {
+      setFormSubmitError(error);
     }
   };
 
