@@ -10,11 +10,13 @@ from rest_framework.response import Response
 
 from awx.api import serializers
 from awx.api.generics import APIView, GenericAPIView
+from awx.api.permissions import WebhookKeyPermission
 from awx.main.models import JobTemplate, WorkflowJobTemplate
 
 
 class WebhookKeyView(GenericAPIView):
     serializer_class = serializers.EmptySerializer
+    permission_classes = (WebhookKeyPermission,)
 
     @property
     def model(self):
@@ -31,10 +33,6 @@ class WebhookKeyView(GenericAPIView):
             return self.request.user.get_queryset(model)
         # Provide a fallback do-nothing queryset so that get_object() has something to work with.
         return JobTemplate.objects.none()
-
-    def check_object_permissions(self, request, obj):
-        if not request.user.can_access(self.model, 'admin', obj, request.data):
-            raise PermissionDenied
 
     def get(self, request, *args, **kwargs):
         obj = self.get_object()
