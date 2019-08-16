@@ -3,6 +3,7 @@
 
 from django.conf.urls import include, url
 
+from awx.main.models import WorkflowJobTemplate
 from awx.api.views import (
     WorkflowJobTemplateList,
     WorkflowJobTemplateDetail,
@@ -44,7 +45,7 @@ urls = [
     url(r'^(?P<pk>[0-9]+)/access_list/$', WorkflowJobTemplateAccessList.as_view(), name='workflow_job_template_access_list'),
     url(r'^(?P<pk>[0-9]+)/object_roles/$', WorkflowJobTemplateObjectRolesList.as_view(), name='workflow_job_template_object_roles_list'),
     url(r'^(?P<pk>[0-9]+)/labels/$', WorkflowJobTemplateLabelList.as_view(), name='workflow_job_template_label_list'),
-    url(r'^(?P<pk>[0-9]+)/', include('awx.api.urls.webhooks'), {'model_kwarg': 'workflow_job_templates'}),
+    url(r'^(?P<pk>[0-9]+)/', include('awx.api.urls.webhooks'), {'model_kwarg': 'workflow_job_templates', 'model': WorkflowJobTemplate}),
 ]
 
 __all__ = ['urls']
