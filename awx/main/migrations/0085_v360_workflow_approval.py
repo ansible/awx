@@ -8,7 +8,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0083_v360_job_branch_overrirde'),
+        ('main', '0084_v360_token_description'),
     ]
 
     operations = [
