@@ -82,6 +82,11 @@ export default
 
                 $scope.$watch('project', function (newValue, oldValue) {
                     if (newValue !== oldValue) {
+                        if (oldValue) {
+                            $scope.scm_branch = null;
+                            $scope.ask_scm_branch_on_launch = false;
+                        }
+                        
                         var url;
                         if ($scope.playbook) {
                             $scope.playbook_options = [$scope.playbook];
