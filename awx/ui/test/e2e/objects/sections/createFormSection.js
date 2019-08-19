@@ -86,9 +86,16 @@ function checkAllFieldsDisabled () {
     selectors.forEach(selector => {
         client.elements('css selector', selector, inputs => {
             inputs.value.map(o => o.ELEMENT).forEach(id => {
-                client.elementIdAttribute(id, 'disabled', ({ value }) => {
-                    client.assert.equal(value, 'true');
-                });
+                if (selector.includes('atSwitch')) {
+                    client.elementIdAttribute(id, 'class', ({ value }) => {
+                        const isDisabled = value && value.includes('atSwitch-disabled');
+                        client.assert.equal(isDisabled, true);
+                    });
+                } else {
+                    client.elementIdAttribute(id, 'disabled', ({ value }) => {
+                        client.assert.equal(value, 'true');
+                    });
+                }
             });
         });
     });
