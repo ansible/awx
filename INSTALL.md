@@ -72,7 +72,7 @@ Before you can run a deployment, you'll need the following installed in your loc
 
 The system that runs the AWX service will need to satisfy the following requirements
 
-- At leasts 4GB of memory
+- At least 4GB of memory
 - At least 2 cpu cores
 - At least 20GB of space
 - Running Docker, Openshift, or Kubernetes
