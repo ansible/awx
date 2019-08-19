@@ -2356,7 +2356,15 @@ class ResourceAccessListElementSerializer(UserSerializer):
             else:
                 # Singleton roles should not be managed from this view, as per copy/edit rework spec
                 role_dict['user_capabilities'] = {'unattach': False}
-            return { 'role': role_dict, 'descendant_roles': get_roles_on_resource(obj, role)}
+            ret = { 'role': role_dict, 'descendant_roles': get_roles_on_resource(obj, role)}
+
+            if not role.singleton_name and not any(role_field in role.role_field for role_field in ret['descendant_roles']):
+                # prevents showing contradictory information in UI: discrepancy between the name of role owned and the
+                # resource permission that role grants, for instance, auditor grants read
+                ret['role']['name'] += ' -> {}'.format(
+                    ','.join(role_field.split('_')[0].title() for role_field in ret['descendant_roles'])
+                )
+            return ret
 
         def format_team_role_perm(naive_team_role, permissive_role_ids):
             ret = []
