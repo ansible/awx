@@ -1,7 +1,10 @@
 import argparse
 import json
 import unittest
-from io import StringIO
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 import pytest
 from requests import Response

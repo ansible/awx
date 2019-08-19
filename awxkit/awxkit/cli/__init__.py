@@ -6,6 +6,7 @@ import yaml
 from requests.exceptions import ConnectionError, SSLError
 
 from .client import CLI
+from awxkit.utils import to_str
 from awxkit.exceptions import Unauthorized, Common
 from awxkit.cli.utils import cprint
 
@@ -46,7 +47,14 @@ def run(stdout=sys.stdout, stderr=sys.stderr, argv=[]):
         if cli.get_config('format') == 'json':
             json.dump(e.msg, sys.stdout)
         elif cli.get_config('format') == 'yaml':
-            sys.stdout.write(yaml.dump(e.msg))
+            sys.stdout.write(to_str(
+                yaml.safe_dump(
+                    e.msg,
+                    default_flow_style=False,
+                    encoding='utf-8',
+                    allow_unicode=True
+                )
+            ))
         sys.exit(1)
     except Exception as e:
         if cli.verbose:

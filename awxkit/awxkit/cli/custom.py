@@ -1,3 +1,5 @@
+from six import with_metaclass
+
 from .stdout import monitor, monitor_workflow
 from .utils import CustomRegistryMeta, color_enabled
 
@@ -17,7 +19,7 @@ class CustomActionRegistryMeta(CustomRegistryMeta):
         return ' '.join([self.resource, self.action])
 
 
-class CustomAction(object, metaclass=CustomActionRegistryMeta):
+class CustomAction(with_metaclass(CustomActionRegistryMeta)):
     """Base class for defining a custom action for a resource."""
 
     def __init__(self, page):

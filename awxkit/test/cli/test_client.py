@@ -50,8 +50,14 @@ def test_list_resources(capfd, resource):
     cli.parse_args(['awx {}'.format(resource)])
     cli.connect()
 
-    cli.parse_resource()
-    out, err = capfd.readouterr()
+    try:
+        cli.parse_resource()
+        out, err = capfd.readouterr()
+    except SystemExit:
+        # python2 argparse raises SystemExit for invalid/missing required args,
+        # py3 doesn't
+        _, out = capfd.readouterr()
+
     assert "usage:" in out
     for snippet in (
         '--conf.host https://example.awx.org]',
