@@ -92,7 +92,7 @@ def test_org_counts_detail_member(resourced_organization, user, get):
         'job_templates': 0,
         'projects': 0,
         'inventories': 0,
-        'teams': 0
+        'teams': COUNTS_PRIMES['teams']  # Changed so that all users in org can see teams
     }
 
 
@@ -123,7 +123,7 @@ def test_org_counts_list_member(resourced_organization, user, get):
         'job_templates': 0,
         'projects': 0,
         'inventories': 0,
-        'teams': 0
+        'teams': COUNTS_PRIMES['teams']  # Changed so that all users in org can see teams
     }
 
 

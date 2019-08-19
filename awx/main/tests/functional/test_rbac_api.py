@@ -53,7 +53,7 @@ def test_get_roles_list_user(organization, inventory, team, get, user):
     assert custom_role.id in role_hash
 
     assert inventory.admin_role.id not in role_hash
-    assert team.member_role.id not in role_hash
+    assert team.member_role.id in role_hash
 
 
 @pytest.mark.django_db
@@ -144,7 +144,7 @@ def test_user_view_other_user_roles(organization, inventory, team, get, alice, b
     assert custom_role.id not in role_hash # doesn't show up in the user roles list, not an explicit grant
     assert Role.singleton(ROLE_SINGLETON_SYSTEM_ADMINISTRATOR).id not in role_hash
     assert inventory.admin_role.id not in role_hash
-    assert team.member_role.id not in role_hash # alice can't see this
+    assert team.member_role.id in role_hash # alice can see teams because she is an org member
 
     # again but this time alice is part of the team, and should be able to see the team role
     team.member_role.members.add(alice)
