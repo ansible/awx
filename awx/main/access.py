@@ -2781,7 +2781,7 @@ class RoleAccess(BaseAccess):
 
 class WorkflowApprovalAccess(BaseAccess):
     '''
-    A user can create an workflow approval if they are a superuser, an org admin
+    A user can create a workflow approval if they are a superuser, an org admin
     of the org connected to the workflow, or if they are assigned as admins to
     the workflow.
 
@@ -2817,7 +2817,7 @@ class WorkflowApprovalAccess(BaseAccess):
 
 class WorkflowApprovalTemplateAccess(BaseAccess):
     '''
-    A user can create an approval template if they are a superuser, an org admin
+    A user can create a workflow approval if they are a superuser, an org admin
     of the org connected to the workflow, or if they are assigned as admins to
     the workflow.
 
