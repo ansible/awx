@@ -3,7 +3,6 @@
 
 from django.conf.urls import include, url
 
-from awx.main.models import JobTemplate
 from awx.api.views import (
     JobTemplateList,
     JobTemplateDetail,
@@ -46,7 +45,7 @@ urls = [
     url(r'^(?P<pk>[0-9]+)/object_roles/$', JobTemplateObjectRolesList.as_view(), name='job_template_object_roles_list'),
     url(r'^(?P<pk>[0-9]+)/labels/$', JobTemplateLabelList.as_view(), name='job_template_label_list'),
     url(r'^(?P<pk>[0-9]+)/copy/$', JobTemplateCopy.as_view(), name='job_template_copy'),
-    url(r'^(?P<pk>[0-9]+)/', include('awx.api.urls.webhooks'), {'model_kwarg': 'job_templates', 'model': JobTemplate}),
+    url(r'^(?P<pk>[0-9]+)/', include('awx.api.urls.webhooks'), {'model_kwarg': 'job_templates'}),
 ]
 
 __all__ = ['urls']

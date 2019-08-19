@@ -11,6 +11,7 @@ from rest_framework.response import Response
 from awx.api import serializers
 from awx.api.generics import APIView, GenericAPIView
 from awx.api.permissions import WebhookKeyPermission
+from awx.main.models import JobTemplate, WorkflowJobTemplate
 
 # NOTE: The model class attribute for these views must be added
 # dynamically when including urls/webhooks.py
@@ -19,6 +20,15 @@ from awx.api.permissions import WebhookKeyPermission
 class WebhookKeyView(GenericAPIView):
     serializer_class = serializers.EmptySerializer
     permission_classes = (WebhookKeyPermission,)
+
+    def get_queryset(self):
+        qs_models = {
+            'job_templates': JobTemplate,
+            'workflow_job_templates': WorkflowJobTemplate,
+        }
+        self.model = qs_models.get(self.kwargs['model_kwarg'])
+
+        return super().get_queryset()
 
     def get(self, request, *args, **kwargs):
         obj = self.get_object()
@@ -41,7 +51,15 @@ class WebhookReceiverBase(APIView):
         return super().dispatch(*args, **kwargs)
 
     def get_queryset(self):
-        return self.model.objects.filter(webhook_service=self.service)
+        qs_models = {
+            'job_templates': JobTemplate,
+            'workflow_job_templates': WorkflowJobTemplate,
+        }
+        model = qs_models.get(self.kwargs['model_kwarg'])
+        if model is None:
+            raise PermissionDenied
+
+        return model.objects.filter(webhook_service=self.service)
 
     def get_object(self):
         queryset = self.get_queryset()
