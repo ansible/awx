@@ -489,7 +489,8 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
             $scope.approvalNodeState = {
                 name: null,
                 description: null,
-                timeout: 0
+                timeoutMinutes: 0,
+                timeoutSeconds: 0
             };
             $scope.nodeFormDataLoaded = false;
             $scope.wf_maker_template_queryset = {
@@ -552,10 +553,14 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
                             $scope.activeTab = "approval";
                             select2ifyDropdowns();
 
+                            const timeoutMinutes = Math.floor($scope.nodeConfig.node.unifiedJobTemplate.timeout / 60);
+                            const timeoutSeconds = $scope.nodeConfig.node.unifiedJobTemplate.timeout - timeoutMinutes * 60;
+
                             $scope.approvalNodeState = {
                                 name: $scope.nodeConfig.node.unifiedJobTemplate.name,
                                 description: $scope.nodeConfig.node.unifiedJobTemplate.description,
-                                timeout: $scope.nodeConfig.node.unifiedJobTemplate.timeout
+                                timeoutMinutes,
+                                timeoutSeconds
                             };
 
                             $scope.nodeFormDataLoaded = true;
@@ -616,10 +621,12 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
             };
 
             if ($scope.activeTab === "approval") {
+                const timeout = $scope.approvalNodeState.timeoutMinutes * 60 + $scope.approvalNodeState.timeoutSeconds;
+
                 nodeFormData.selectedTemplate = {
                     name: $scope.approvalNodeState.name,
                     description: $scope.approvalNodeState.description,
-                    timeout: $scope.approvalNodeState.timeout,
+                    timeout,
                     unified_job_type: "workflow_approval"
                 };
             } else if($scope.activeTab === "templates") {
@@ -649,7 +656,7 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
             } else if($scope.activeTab === "inventory_syncs") {
                 return !$scope.inventoryNodeState.selectedTemplate;
             } else if ($scope.activeTab === "approval") {
-                return !($scope.approvalNodeState.name && $scope.approvalNodeState.name !== "") || $scope.workflow_approval.pauseTimeout.$error.min;
+                return !($scope.approvalNodeState.name && $scope.approvalNodeState.name !== "") || $scope.workflow_approval.pauseTimeoutMinutes.$error.min || $scope.workflow_approval.pauseTimeoutSeconds.$error.min;
             }
         };
 
@@ -660,7 +667,8 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
                 $scope.approvalNodeState = {
                     name: null,
                     description: null,
-                    timeout: 0
+                    timeoutMinutes: 0,
+                    timeoutSeconds: 0
                 };
                 $scope.editNodeHelpMessage = getEditNodeHelpMessage(selectedTemplate, $scope.workflowJobTemplateObj);
 

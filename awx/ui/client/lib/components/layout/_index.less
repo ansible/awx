@@ -82,21 +82,29 @@
             }
         }
 
-        .at-Layout-topNavApprovals {
+        .at-Layout-Approvals {
             display: flex;
             align-items: center;
             justify-content: center;
             height: 100%;
+        }
 
-            div {
-                margin-left: 10px;
-                padding: 5px;
-                border-radius: 3px;
-                background-color: @at-red-bright;
-                color: @at-white;
-                height: 15px;
-                font-size: 10px;
-            }
+        .at-Layout-ApprovalsBadge {
+            margin-left: 10px;
+            padding: 5px;
+            border-radius: 3px;
+            background-color: @at-gray-646972;
+            color: @at-white;
+            height: 16px;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: default;
+            display: flex;
+            align-items: center;
+        }
+
+        .at-Layout-ApprovalsBadgeActive {
+            background-color: @at-red-bright;
         }
     }
 

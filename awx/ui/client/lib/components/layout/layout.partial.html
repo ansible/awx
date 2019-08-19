@@ -15,9 +15,9 @@
             </a>
         </at-top-nav-item>
         <at-top-nav-item ng-click="vm.openApprovals()">
-            <div class="at-Layout-topNavApprovals">
+            <div class="at-Layout-Approvals">
                 <i class="fa fa-bell" alt="{{ vm.getString('NOTIFICATIONS') }}"></i>
-                <div>{{vm.approvalsCount}}</div>
+                <span class="at-Layout-ApprovalsBadge" ng-class="{'at-Layout-ApprovalsBadgeActive': vm.approvalsCount && vm.approvalsCount > 0}">{{vm.approvalsCount}}</span>
             </div>
         </at-top-nav-item>
         <at-top-nav-item>

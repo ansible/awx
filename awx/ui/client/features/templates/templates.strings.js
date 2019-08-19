@@ -149,7 +149,8 @@ function TemplatesStrings (BaseString) {
         CANCEL: t.s('CANCEL'),
         SAVE_AND_EXIT: t.s('SAVE & EXIT'),
         APPROVAL: t.s('Approval'),
-        TIMEOUT_POPOVER: t.s('The amount of time (in seconds) to wait before this approval step is automatically denied. Defaults to 0 for no timeout.')
+        TIMEOUT_POPOVER: t.s('The amount of time to wait before this approval step is automatically denied. Defaults to 0 for no timeout.'),
+        TIMED_OUT: t.s('APPROVAL TIMED OUT')
     };
 }
 

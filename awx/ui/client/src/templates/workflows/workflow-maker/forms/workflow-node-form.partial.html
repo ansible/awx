@@ -133,15 +133,22 @@
                 </label>
             </div>
             <div class="form-group Form-formGroup Form-formGroup--singleColumn">
-                <label for="pauseTimeout" class="Form-inputLabelContainer">
+                <label class="Form-inputLabelContainer">
                     <span class="Form-inputLabel" translate>Timeout</span>
                     <a id="workflow-maker-timeout-popover" href="" aw-pop-over="{{:: strings.get('workflow_maker.TIMEOUT_POPOVER') }}" data-placement="top" data-container="body" over-title="{{:: strings.get('workflow_maker.TIMEOUT') }}" class="help-link">
                         <i class="fa fa-question-circle"></i>
                     </a>
                 </label>
                 <div>
-                    <input type="number" value="0" min=0 aw-min="0" ng-model="approvalNodeState.timeout" name="pauseTimeout" id="workflow_job_template_pauseTimeout" aw-spinner="pauseTimeout" integer />
-                    <div class="error" id="workflow_job_template_pauseTimeout-minmax-error" ng-show="workflow_approval.pauseTimeout.$error.min" translate>Please enter a number greater than or equal to 0.</div>
+                    <span class="WorkflowMaker-timeoutInput">
+                        <input type="number" value="0" min=0 aw-min="0" ng-model="approvalNodeState.timeoutMinutes" name="pauseTimeoutMinutes" id="workflow_job_template_pauseTimeoutMinutes" aw-spinner="pauseTimeoutMinutes" integer />
+                    </span>
+                    <span class="WorkflowMaker-timeoutLabel" translate>min</span>
+                    <span class="WorkflowMaker-timeoutInput WorkflowMaker-timeoutSeconds">
+                        <input class="WorkflowMaker-timeoutInput" type="number" value="0" min=0 aw-min="0" ng-model="approvalNodeState.timeoutSeconds" name="pauseTimeoutSeconds" id="workflow_job_template_pauseTimeoutSeconds" aw-spinner="pauseTimeoutSeconds" integer />
+                    </span>
+                    <span class="WorkflowMaker-timeoutLabel" translate>sec</span>
+                    <div class="error" id="workflow_job_template_pauseTimeout-minmax-error" ng-show="workflow_approval.pauseTimeoutMinutes.$error.min || workflow_approval.pauseTimeoutSeconds.$error.min" translate>Please enter a number greater than or equal to 0.</div>
                 </div>
             </div>
         </form>

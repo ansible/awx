@@ -832,6 +832,9 @@ export default ['moment', '$timeout', '$window', '$filter', 'TemplatesStrings',
                     baseSvg.selectAll(".WorkflowChart-deletedText")
                         .style("display", (d) => { return d.unifiedJobTemplate || d.id === scope.graphState.nodeBeingAdded ? "none" : null; });
 
+                    baseSvg.selectAll(".WorkflowChart-timedOutText")
+                        .style("display", (d) => { return d.job && d.job.timed_out ? null : "none"; });
+
                     baseSvg.selectAll(".WorkflowChart-activeNode")
                         .style("display", (d) => { return d.id === scope.graphState.nodeBeingEdited ? null : "none"; });
 
@@ -939,6 +942,15 @@ export default ['moment', '$timeout', '$window', '$filter', 'TemplatesStrings',
                                 .attr("class", "WorkflowChart-defaultText WorkflowChart-deletedText")
                                 .html(`<span>${TemplatesStrings.get('workflow_maker.DELETED')}</span>`)
                                 .style("display", (d) => { return d.unifiedJobTemplate || d.id === scope.graphState.nodeBeingAdded ? "none" : null; });
+
+                            thisNode.append("foreignObject")
+                                .attr("x", 0)
+                                .attr("y", 22)
+                                .attr("dy", ".35em")
+                                .attr("text-anchor", "middle")
+                                .attr("class", "WorkflowChart-defaultText WorkflowChart-timedOutText")
+                                .html(`<span>${TemplatesStrings.get('workflow_maker.TIMED_OUT')}</span>`)
+                                .style("display", (d) => { return d.job && d.job.timed_out ? null : "none"; });
 
                             thisNode.append("circle")
                                 .attr("cy", nodeH)
