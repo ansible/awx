@@ -118,8 +118,8 @@ SUMMARIZABLE_FK_FIELDS = {
     'project_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed',),
     'credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'credential_type_id'),
     'job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'elapsed', 'type'),
-    'job_template': DEFAULT_SUMMARY_FIELDS,
-    'workflow_job_template': DEFAULT_SUMMARY_FIELDS,
+    'job_template': DEFAULT_SUMMARY_FIELDS + ('webhook_credential',),
+    'workflow_job_template': DEFAULT_SUMMARY_FIELDS + ('webhook_credential',),
     'workflow_job': DEFAULT_SUMMARY_FIELDS,
     'workflow_approval_template': DEFAULT_SUMMARY_FIELDS + ('timeout',),
     'workflow_approval': DEFAULT_SUMMARY_FIELDS + ('timeout',),
@@ -2844,7 +2844,7 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
             'ask_skip_tags_on_launch', 'ask_job_type_on_launch', 'ask_verbosity_on_launch',
             'ask_inventory_on_launch', 'ask_credential_on_launch', 'survey_enabled',
             'become_enabled', 'diff_mode', 'allow_simultaneous', 'custom_virtualenv',
-            'job_slice_count'
+            'job_slice_count', 'webhook_service', 'webhook_credential',
         )
 
     def get_related(self, obj):
@@ -3324,9 +3324,12 @@ class WorkflowJobTemplateSerializer(JobTemplateMixin, LabelsListMixin, UnifiedJo
 
     class Meta:
         model = WorkflowJobTemplate
-        fields = ('*', 'extra_vars', 'organization', 'survey_enabled', 'allow_simultaneous',
-                  'ask_variables_on_launch', 'inventory', 'limit', 'scm_branch',
-                  'ask_inventory_on_launch', 'ask_scm_branch_on_launch', 'ask_limit_on_launch',)
+        fields = (
+            '*', 'extra_vars', 'organization', 'survey_enabled', 'allow_simultaneous',
+            'ask_variables_on_launch', 'inventory', 'limit', 'scm_branch',
+            'ask_inventory_on_launch', 'ask_scm_branch_on_launch', 'ask_limit_on_launch',
+            'webhook_service', 'webhook_credential',
+        )
 
     def get_related(self, obj):
         res = super(WorkflowJobTemplateSerializer, self).get_related(obj)
