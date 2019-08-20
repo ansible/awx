@@ -28,7 +28,11 @@ function PromptService (Empty, $filter)  {
         if(hasCurrentExtraVars && hasDefaultExtraVars) {
             extraVars = jsyaml.safeDump(_.merge(jsyaml.safeLoad(params.launchConf.defaults.extra_vars), params.currentValues.extra_data));
         } else if(hasCurrentExtraVars) {
-            extraVars = jsyaml.safeDump(params.currentValues.extra_data);
+            if (typeof params.currentValues.extra_data === 'object') {
+                extraVars = jsyaml.safeDump(params.currentValues.extra_data);
+            } else if (typeof params.currentValues.extra_data === 'string') {
+                extraVars = params.currentValues.extra_data;
+            }
         } else if(hasDefaultExtraVars) {
             extraVars = params.launchConf.defaults.extra_vars;
         }
