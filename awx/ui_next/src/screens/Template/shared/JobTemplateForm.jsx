@@ -13,6 +13,7 @@ import MultiSelect from '@components/MultiSelect';
 import FormActionGroup from '@components/FormActionGroup';
 import FormField from '@components/FormField';
 import FormRow from '@components/FormRow';
+import CollapsibleSection from '@components/CollapsibleSection';
 import { required } from '@util/validators';
 import styled from 'styled-components';
 import { JobTemplate } from '@types';
@@ -415,6 +416,9 @@ class JobTemplateForm extends Component {
             />
           </FormGroup>
         </FormRow>
+        <CollapsibleSection label="Advanced">
+          Advanced inputs here
+        </CollapsibleSection>
         <FormActionGroup onCancel={handleCancel} onSubmit={handleSubmit} />
       </Form>
     );
