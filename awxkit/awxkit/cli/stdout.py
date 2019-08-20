@@ -1,8 +1,12 @@
+# -*- coding: utf-8 -*-
+from __future__ import print_function
+
 import sys
 
 import time
 
 from .utils import cprint, color_enabled, STATUS_COLORS
+from awxkit.utils import to_str
 
 
 def monitor_workflow(response, session, print_stdout=True, timeout=None,
@@ -25,6 +29,7 @@ def monitor_workflow(response, session, print_stdout=True, timeout=None,
                 sys.stdout.write('\x1b[2K')
 
         for result in results:
+            result['name'] = to_str(result['name'])
             if print_stdout:
                 print(' ↳ {id} - {name} '.format(**result), end='')
                 status = result['status']
@@ -39,7 +44,7 @@ def monitor_workflow(response, session, print_stdout=True, timeout=None,
         cprint('------Starting Standard Out Stream------', 'red')
 
     if print_stdout:
-        print('Launching {}...'.format(get().json.name))
+        print('Launching {}...'.format(to_str(get().json.name)))
 
     started = time.time()
     seen = set()
@@ -84,7 +89,7 @@ def monitor(response, session, print_stdout=True, timeout=None, interval=.25):
                 # skip it for now and wait until the prior lines arrive and are
                 # printed
                 continue
-            stdout = result.get('stdout')
+            stdout = to_str(result.get('stdout'))
             if stdout and print_stdout:
                 print(stdout)
             next_line = result['end_line']

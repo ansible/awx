@@ -1,11 +1,12 @@
-from queue import Queue, Empty
 import time
 import threading
 import logging
 import atexit
 import json
 import ssl
-import urllib.parse
+
+from six.moves.queue import Queue, Empty
+from six.moves.urllib.parse import urlparse
 
 from awxkit.config import config
 
@@ -55,7 +56,7 @@ class WSClient(object):
         import websocket
 
         if not hostname:
-            result = urllib.parse.urlparse(config.base_url)
+            result = urlparse(config.base_url)
             secure = result.scheme == 'https'
             port = result.port
             if port is None:

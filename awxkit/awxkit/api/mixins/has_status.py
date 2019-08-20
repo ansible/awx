@@ -1,6 +1,8 @@
 from datetime import datetime
 import json
 
+import six
+
 from awxkit.utils import poll_until
 
 
@@ -43,7 +45,7 @@ class HasStatus(object):
         return self.wait_until_status(self.started_statuses, interval=interval, timeout=timeout)
 
     def assert_status(self, status_list, msg=None):
-        if isinstance(status_list, str):
+        if isinstance(status_list, six.text_type):
             status_list = [status_list]
         if self.status in status_list:
             # include corner cases in is_successful logic

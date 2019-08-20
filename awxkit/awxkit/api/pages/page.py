@@ -1,10 +1,11 @@
-import http.client
 import inspect
 import logging
 import json
 import re
 
 from requests import Response
+import six
+from six.moves import http_client as http
 
 from awxkit.utils import (
     PseudoNamespace,
@@ -12,7 +13,8 @@ from awxkit.utils import (
     are_same_endpoint,
     super_dir_set,
     suppress,
-    is_list_or_tuple
+    is_list_or_tuple,
+    to_str
 )
 from awxkit.api.client import Connection
 from awxkit.api.registry import URLRegistry
@@ -167,7 +169,11 @@ class Page(object):
     @classmethod
     def from_json(cls, raw):
         resp = Response()
-        resp._content = bytes(json.dumps(raw), 'utf-8')
+        data = json.dumps(raw)
+        if six.PY3:
+            resp._content = bytes(data, 'utf-8')
+        else:
+            resp._content = data
         resp.encoding = 'utf-8'
         resp.status_code = 200
         return cls(r=resp)
@@ -199,16 +205,16 @@ class Page(object):
                     "Unable to parse JSON response ({0.status_code}): {1} - '{2}'".format(response, e, text))
 
         exc_str = "%s (%s) received" % (
-            http.client.responses[response.status_code], response.status_code)
+            http.responses[response.status_code], response.status_code)
 
         exception = exception_from_status_code(response.status_code)
         if exception:
             raise exception(exc_str, data)
 
         if response.status_code in (
-                http.client.OK,
-                http.client.CREATED,
-                http.client.ACCEPTED):
+                http.OK,
+                http.CREATED,
+                http.ACCEPTED):
 
             # Not all JSON responses include a URL.  Grab it from the request
             # object, if needed.
@@ -235,7 +241,7 @@ class Page(object):
                 r=response,
                 ds=ds)
 
-        elif response.status_code == http.client.FORBIDDEN:
+        elif response.status_code == http.FORBIDDEN:
             if is_license_invalid(response):
                 raise exc.LicenseInvalid(exc_str, data)
             elif is_license_exceeded(response):
@@ -243,7 +249,7 @@ class Page(object):
             else:
                 raise exc.Forbidden(exc_str, data)
 
-        elif response.status_code == http.client.BAD_REQUEST:
+        elif response.status_code == http.BAD_REQUEST:
             if is_license_invalid(response):
                 raise exc.LicenseInvalid(exc_str, data)
             if is_duplicate_error(response):
@@ -314,14 +320,14 @@ class Page(object):
         return page_cls(self.connection, endpoint=endpoint).get(**kw)
 
 
-_exception_map = {http.client.NO_CONTENT: exc.NoContent,
-                  http.client.NOT_FOUND: exc.NotFound,
-                  http.client.INTERNAL_SERVER_ERROR: exc.InternalServerError,
-                  http.client.BAD_GATEWAY: exc.BadGateway,
-                  http.client.METHOD_NOT_ALLOWED: exc.MethodNotAllowed,
-                  http.client.UNAUTHORIZED: exc.Unauthorized,
-                  http.client.PAYMENT_REQUIRED: exc.PaymentRequired,
-                  http.client.CONFLICT: exc.Conflict}
+_exception_map = {http.NO_CONTENT: exc.NoContent,
+                  http.NOT_FOUND: exc.NotFound,
+                  http.INTERNAL_SERVER_ERROR: exc.InternalServerError,
+                  http.BAD_GATEWAY: exc.BadGateway,
+                  http.METHOD_NOT_ALLOWED: exc.MethodNotAllowed,
+                  http.UNAUTHORIZED: exc.Unauthorized,
+                  http.PAYMENT_REQUIRED: exc.PaymentRequired,
+                  http.CONFLICT: exc.Conflict}
 
 
 def exception_from_status_code(status_code):
@@ -376,10 +382,10 @@ class PageList(object):
 class TentativePage(str):
 
     def __new__(cls, endpoint, connection):
-        return super(TentativePage, cls).__new__(cls, endpoint)
+        return super(TentativePage, cls).__new__(cls, to_str(endpoint))
 
     def __init__(self, endpoint, connection):
-        self.endpoint = endpoint
+        self.endpoint = to_str(endpoint)
         self.connection = connection
 
     def _create(self):

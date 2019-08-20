@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
+import sys
 
-from unittest import mock
+try:
+    from unittest import mock
+except ImportError:
+    import mock
 import pytest
+import six
 
 from awxkit import utils
 from awxkit import exceptions as exc
@@ -73,11 +78,19 @@ def test_load_invalid_json_or_yaml(inp):
 
 
 @pytest.mark.parametrize('non_ascii', [True, False])
+@pytest.mark.skipif(
+    sys.version_info < (3, 6),
+    reason='this is only intended to be used in py3, not the CLI'
+)
 def test_random_titles_are_unicode(non_ascii):
-    assert isinstance(utils.random_title(non_ascii=non_ascii), str)
+    assert isinstance(utils.random_title(non_ascii=non_ascii), six.text_type)
 
 
 @pytest.mark.parametrize('non_ascii', [True, False])
+@pytest.mark.skipif(
+    sys.version_info < (3, 6),
+    reason='this is only intended to be used in py3, not the CLI'
+)
 def test_random_titles_generates_correct_characters(non_ascii):
     title = utils.random_title(non_ascii=non_ascii)
     if non_ascii:

@@ -1,5 +1,7 @@
 import os
 
+from six import PY3, with_metaclass
+
 from awxkit import api, config
 from awxkit.api.pages import Page
 from awxkit.cli.format import format_response, add_authentication_arguments
@@ -40,7 +42,7 @@ DEPRECATED_RESOURCES_REVERSE = dict(
 )
 
 
-class CustomCommand(object, metaclass=CustomRegistryMeta):
+class CustomCommand(with_metaclass(CustomRegistryMeta)):
     """Base class for implementing custom commands.
 
     Custom commands represent static code which should run - they are
@@ -121,15 +123,28 @@ def parse_resource(client, skip_deprecated=False):
             if k in ('dashboard',):
                 # the Dashboard API is deprecated and not supported
                 continue
-            aliases = []
-            if not skip_deprecated:
+
+            # argparse aliases are *only* supported in Python3 (not 2.7)
+            kwargs = {}
+            if not skip_deprecated and PY3:
                 if k in DEPRECATED_RESOURCES:
-                    aliases = [DEPRECATED_RESOURCES[k]]
+                    kwargs['aliases'] = [DEPRECATED_RESOURCES[k]]
             client.subparsers[k] = subparsers.add_parser(
-                k, help='', aliases=aliases
+                k, help='', **kwargs
             )
 
-    resource = client.parser.parse_known_args()[0].resource
+    try:
+        resource = client.parser.parse_known_args()[0].resource
+    except SystemExit:
+        if PY3:
+            raise
+        else:
+            # Unfortunately, argparse behavior between py2 and py3
+            # changed in a notable way when required subparsers
+            # have invalid (or missing) arguments specified
+            # see: https://github.com/python/cpython/commit/f97c59aaba2d93e48cbc6d25f7ff9f9c87f8d0b2
+            # In py2, this raises a SystemExit; which we want to _ignore_
+            resource = None
     if resource in DEPRECATED_RESOURCES.values():
         client.argv[
             client.argv.index(resource)

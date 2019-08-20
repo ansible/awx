@@ -1,6 +1,7 @@
 import json
 from distutils.util import strtobool
 
+import six
 import yaml
 
 from awxkit.cli.utils import colored
@@ -79,7 +80,7 @@ def add_output_formatting_arguments(parser, env):
 def format_response(response, fmt='json', filter='.', changed=False):
     if response is None:
         return  # HTTP 204
-    if isinstance(response, str):
+    if isinstance(response, six.text_type):
         return response
 
     if 'results' in response.__dict__:
@@ -113,7 +114,7 @@ def format_jq(output, fmt):
     results = []
     for x in jq.jq(fmt).transform(output, multiple_output=True):
         if x not in (None, ''):
-            if isinstance(x, str):
+            if isinstance(x, six.text_type):
                 results.append(x)
             else:
                 results.append(json.dumps(x))
@@ -126,9 +127,11 @@ def format_json(output, fmt):
 
 def format_yaml(output, fmt):
     output = json.loads(json.dumps(output))
-    return yaml.dump(
+    return yaml.safe_dump(
         output,
-        default_flow_style=False
+        default_flow_style=False,
+        encoding='utf-8',
+        allow_unicode=True
     )
 
 
