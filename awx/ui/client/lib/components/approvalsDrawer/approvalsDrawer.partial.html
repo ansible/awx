@@ -30,13 +30,13 @@
                         <div class="at-Row-container">
                             <at-row-item
                                 header-value="{{ approval.summary_fields.source_workflow_job.name }}"
-                                header-state="workflowResults({pid: {{approval.summary_fields.source_workflow_job.id}}})">
+                                header-state="workflowResults({id: {{approval.summary_fields.source_workflow_job.id}}})">
                             </at-row-item>
                         </div>
                     </div>
                     <div class="at-Row-container--wrapped">
                         <at-row-item
-                            value-bind-html="<b>Pause Node</b>">
+                            value-bind-html="<b>{{:: vm.strings.get('approvals.APPROVAL') }}</b>">
                         </at-row-item>
                         <at-row-item
                             value-bind-html="{{ approval.name }}">

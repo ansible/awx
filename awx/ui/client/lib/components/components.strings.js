@@ -121,6 +121,7 @@ function ComponentsStrings (BaseString) {
     };
 
     ns.approvals = {
+        APPROVAL: t.s('APPROVAL'),
         NONE: t.s('There are no jobs awaiting approval'),
         APPROVE: t.s('APPROVE'),
         DENY: t.s('DENY'),

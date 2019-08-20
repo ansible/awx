@@ -835,6 +835,12 @@ export default ['moment', '$timeout', '$window', '$filter', 'TemplatesStrings',
                     baseSvg.selectAll(".WorkflowChart-timedOutText")
                         .style("display", (d) => { return d.job && d.job.timed_out ? null : "none"; });
 
+                    baseSvg.selectAll(".WorkflowChart-deniedText")
+                        .style("display", (d) => { return d.job && d.job.type === "workflow_approval" && d.job.status === "failed" && !d.job.timed_out ? null : "none"; });
+
+                    baseSvg.selectAll(".WorkflowChart-approvedText")
+                        .style("display", (d) => { return d.job && d.job.type === "workflow_approval" && d.job.status === "successful" && !d.job.timed_out ? null : "none"; });
+
                     baseSvg.selectAll(".WorkflowChart-activeNode")
                         .style("display", (d) => { return d.id === scope.graphState.nodeBeingEdited ? null : "none"; });
 
@@ -950,7 +956,25 @@ export default ['moment', '$timeout', '$window', '$filter', 'TemplatesStrings',
                                 .attr("text-anchor", "middle")
                                 .attr("class", "WorkflowChart-defaultText WorkflowChart-timedOutText")
                                 .html(`<span>${TemplatesStrings.get('workflow_maker.TIMED_OUT')}</span>`)
-                                .style("display", (d) => { return d.job && d.job.timed_out ? null : "none"; });
+                                .style("display", (d) => { return d.job && d.job.type === "workflow_approval" && d.job.timed_out ? null : "none"; });
+
+                            thisNode.append("foreignObject")
+                                .attr("x", 0)
+                                .attr("y", 22)
+                                .attr("dy", ".35em")
+                                .attr("text-anchor", "middle")
+                                .attr("class", "WorkflowChart-defaultText WorkflowChart-deniedText")
+                                .html(`<span>${TemplatesStrings.get('workflow_maker.DENIED')}</span>`)
+                                .style("display", (d) => { return d.job && d.job.type === "workflow_approval" && d.job.status === "failed" && !d.job.timed_out ? null : "none"; });
+
+                            thisNode.append("foreignObject")
+                                .attr("x", 0)
+                                .attr("y", 22)
+                                .attr("dy", ".35em")
+                                .attr("text-anchor", "middle")
+                                .attr("class", "WorkflowChart-defaultText WorkflowChart-approvedText")
+                                .html(`<span>${TemplatesStrings.get('workflow_maker.APPROVED')}</span>`)
+                                .style("display", (d) => { return d.job && d.job.type === "workflow_approval" && d.job.status === "successful" && !d.job.timed_out ? null : "none"; });
 
                             thisNode.append("circle")
                                 .attr("cy", nodeH)
