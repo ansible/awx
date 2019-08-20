@@ -59,7 +59,7 @@ def test_no_changing_overwrite_behavior_if_used(post, patch, organization, admin
         user=admin_user,
         expect=201
     )
-    JobTemplate.objects.create(
+    jt = JobTemplate.objects.create(
         name='provides branch', project_id=r1.data['id'],
         playbook='helloworld.yml',
         scm_branch='foobar'
@@ -70,9 +70,10 @@ def test_no_changing_overwrite_behavior_if_used(post, patch, organization, admin
         user=admin_user,
         expect=400
     )
+    p = Project.objects.get(pk=r1.data['id'])
     assert 'job templates depend on branch override behavior for this project' in str(r2.data['allow_override'])
-    assert 'ids: 2' in str(r2.data['allow_override'])
-    assert Project.objects.get(pk=r1.data['id']).allow_override is True
+    assert 'ids: {}'.format(jt.id) in str(r2.data['allow_override'])
+    assert p.allow_override is True
 
 
 @pytest.mark.django_db
