@@ -2334,6 +2334,12 @@ class gce(PluginFileInjector):
     ini_env_reference = 'GCE_INI_PATH'
     base_injector = 'managed'
 
+    def get_plugin_env(self, *args, **kwargs):
+        ret = super(gce, self).get_plugin_env(*args, **kwargs)
+        # We need native jinja2 types so that ip addresses can give JSON null value
+        ret['ANSIBLE_JINJA2_NATIVE'] = str(True)
+        return ret
+
     def get_script_env(self, inventory_update, private_data_dir, private_data_files):
         env = super(gce, self).get_script_env(inventory_update, private_data_dir, private_data_files)
         cred = inventory_update.get_cloud_credential()
@@ -2354,7 +2360,7 @@ class gce(PluginFileInjector):
             'gce_name': 'name',
             'gce_network': 'networkInterfaces[0].network.name',
             'gce_private_ip': 'networkInterfaces[0].networkIP',
-            'gce_public_ip': 'networkInterfaces[0].accessConfigs[0].natIP',
+            'gce_public_ip': 'networkInterfaces[0].accessConfigs[0].natIP | default(None)',
             'gce_status': 'status',
             'gce_subnetwork': 'networkInterfaces[0].subnetwork.name',
             'gce_tags': 'tags.get("items", [])',
@@ -2364,7 +2370,7 @@ class gce(PluginFileInjector):
             'gce_image': 'image',
             # We need this as long as hostnames is non-default, otherwise hosts
             # will not be addressed correctly, was returned in script
-            'ansible_ssh_host': 'networkInterfaces[0].accessConfigs[0].natIP'
+            'ansible_ssh_host': 'networkInterfaces[0].accessConfigs[0].natIP | default(networkInterfaces[0].networkIP)'
         }
 
     def inventory_as_dict(self, inventory_update, private_data_dir):
