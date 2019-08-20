@@ -11,7 +11,11 @@ fi
 [ -e "${TOWER_CONFIG}" ] && . "${TOWER_CONFIG}"
 
 service_action() {
-    SERVICES=$TOWER_SERVICES
+    if [[ "$1" == "stop" ]]; then
+        SERVICES=$TOWER_SERVICES_STOP
+    else
+        SERVICES=$TOWER_SERVICES_START
+    fi
 
     for svc in ${SERVICES}; do
 
