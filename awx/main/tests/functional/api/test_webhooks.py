@@ -25,8 +25,7 @@ def test_get_webhook_key_jt(organization_factory, job_template_factory, get, use
         getattr(grant_obj, '{}_role'.format(user_role.split()[1])).members.add(user)
 
     url = reverse('api:webhook_key', kwargs={'model_kwarg': 'job_templates', 'pk': jt.pk})
-    response = get(url, user=user)
-    assert response.status_code == expect
+    response = get(url, user=user, expect=expect)
     if expect < 400:
         assert response.data == {'webhook_key': ''}
 
@@ -52,8 +51,7 @@ def test_get_webhook_key_wfjt(organization_factory, workflow_job_template_factor
         getattr(grant_obj, '{}_role'.format(user_role.split()[1])).members.add(user)
 
     url = reverse('api:webhook_key', kwargs={'model_kwarg': 'workflow_job_templates', 'pk': wfjt.pk})
-    response = get(url, user=user)
-    assert response.status_code == expect
+    response = get(url, user=user, expect=expect)
     if expect < 400:
         assert response.data == {'webhook_key': ''}
 
@@ -80,8 +78,7 @@ def test_post_webhook_key_jt(organization_factory, job_template_factory, post, u
         getattr(grant_obj, '{}_role'.format(user_role.split()[1])).members.add(user)
 
     url = reverse('api:webhook_key', kwargs={'model_kwarg': 'job_templates', 'pk': jt.pk})
-    response = post(url, {}, user=user)
-    assert response.status_code == expect
+    response = post(url, {}, user=user, expect=expect)
     if expect < 400:
         assert bool(response.data.get('webhook_key'))
 
@@ -107,7 +104,6 @@ def test_post_webhook_key_wfjt(organization_factory, workflow_job_template_facto
         getattr(grant_obj, '{}_role'.format(user_role.split()[1])).members.add(user)
 
     url = reverse('api:webhook_key', kwargs={'model_kwarg': 'workflow_job_templates', 'pk': wfjt.pk})
-    response = post(url, {}, user=user)
-    assert response.status_code == expect
+    response = post(url, {}, user=user, expect=expect)
     if expect < 400:
         assert bool(response.data.get('webhook_key'))
