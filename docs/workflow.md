@@ -149,7 +149,7 @@ The resulting state of the workflow job run above would be 'successful'. Althoug
 * Verify that a subtree of execution will never start if its root node is successfully canceled.
 * Verify that cancelling a workflow job that is cancellable will consequently cancel any of its cancellable spawned jobs and thus interrupts the whole workflow execution.
 * Verify that during a workflow job run, deleting its spawned jobs are prohibited.
-* Verify that at the beginning of each spawned job run, its prompted fields will be populated by the wrapping workflow job node with corrected values. For example, `credential` field of workflow job node goes to `credential` field of spawned job.
+* Verify that at the beginning of each spawned job run, its prompted fields will be populated by the wrapping workflow job node with corrected values. For example, related `credentials` of workflow job node go to `credentials` of spawned job.
 * Verify that notification templates can be successfully (dis)associated with a workflow job template. Later when its spawned workflow jobs finish running, verify that the correct type of notifications will be sent according to the job status.
 * Verify that a workflow job can be successfully relaunched.
 

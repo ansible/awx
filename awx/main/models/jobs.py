@@ -920,27 +920,6 @@ class LaunchTimeConfigBase(BaseModel):
     def display_extra_data(self):
         return self.display_extra_vars()
 
-    @property
-    def _credential(self):
-        '''
-        Only used for workflow nodes to support backward compatibility.
-        '''
-        try:
-            return [cred for cred in self.credentials.all() if cred.credential_type.kind == 'ssh'][0]
-        except IndexError:
-            return None
-
-    @property
-    def credential(self):
-        '''
-        Returns an integer so it can be used as IntegerField in serializer
-        '''
-        cred = self._credential
-        if cred is not None:
-            return cred.pk
-        else:
-            return None
-
 
 class LaunchTimeConfig(LaunchTimeConfigBase):
     '''

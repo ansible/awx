@@ -1319,12 +1319,6 @@ class ProjectOptionsSerializer(BaseSerializer):
 
         return super(ProjectOptionsSerializer, self).validate(attrs)
 
-    def to_representation(self, obj):
-        ret = super(ProjectOptionsSerializer, self).to_representation(obj)
-        if obj is not None and 'credential' in ret and not obj.credential:
-            ret['credential'] = None
-        return ret
-
 
 class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
 
@@ -3440,12 +3434,6 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
             ret['extra_data'] = obj.display_extra_vars()
         return ret
 
-    def get_summary_fields(self, obj):
-        summary_fields = super(LaunchConfigurationBaseSerializer, self).get_summary_fields(obj)
-        # Credential would be an empty dictionary in this case
-        summary_fields.pop('credential', None)
-        return summary_fields
-
     def validate(self, attrs):
         db_extra_data = {}
         if self.instance:
@@ -3527,7 +3515,6 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
 
 
 class WorkflowJobTemplateNodeSerializer(LaunchConfigurationBaseSerializer):
-    credential = DeprecatedCredentialField()
     success_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     failure_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     always_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
@@ -3535,7 +3522,7 @@ class WorkflowJobTemplateNodeSerializer(LaunchConfigurationBaseSerializer):
 
     class Meta:
         model = WorkflowJobTemplateNode
-        fields = ('*', 'credential', 'workflow_job_template', '-name', '-description', 'id', 'url', 'related',
+        fields = ('*', 'workflow_job_template', '-name', '-description', 'id', 'url', 'related',
                   'unified_job_template', 'success_nodes', 'failure_nodes', 'always_nodes',)
 
     def get_related(self, obj):
@@ -3551,14 +3538,6 @@ class WorkflowJobTemplateNodeSerializer(LaunchConfigurationBaseSerializer):
             pass
         return res
 
-    def build_field(self, field_name, info, model_class, nested_depth):
-        # have to special-case the field so that DRF will not automagically make it
-        # read-only because it's a property on the model.
-        if field_name == 'credential':
-            return self.build_standard_field(field_name,
-                                             self.credential)
-        return super(WorkflowJobTemplateNodeSerializer, self).build_field(field_name, info, model_class, nested_depth)
-
     def build_relational_field(self, field_name, relation_info):
         field_class, field_kwargs = super(WorkflowJobTemplateNodeSerializer, self).build_relational_field(field_name, relation_info)
         # workflow_job_template is read-only unless creating a new node.
@@ -3567,65 +3546,15 @@ class WorkflowJobTemplateNodeSerializer(LaunchConfigurationBaseSerializer):
             field_kwargs.pop('queryset', None)
         return field_class, field_kwargs
 
-    def validate(self, attrs):
-        deprecated_fields = {}
-        if 'credential' in attrs:  # TODO: remove when v2 API is deprecated
-            deprecated_fields['credential'] = attrs.pop('credential')
-        view = self.context.get('view')
-        attrs = super(WorkflowJobTemplateNodeSerializer, self).validate(attrs)
-        ujt_obj = None
-        if 'unified_job_template' in attrs:
-            ujt_obj = attrs['unified_job_template']
-        elif self.instance:
-            ujt_obj = self.instance.unified_job_template
-        if 'credential' in deprecated_fields:  # TODO: remove when v2 API is deprecated
-            cred = deprecated_fields['credential']
-            attrs['credential'] = cred
-            if cred is not None:
-                if not ujt_obj.ask_credential_on_launch:
-                    raise serializers.ValidationError({"credential": _(
-                        "Related template is not configured to accept credentials on launch.")})
-                cred = Credential.objects.get(pk=cred)
-                view = self.context.get('view', None)
-                if (not view) or (not view.request) or (view.request.user not in cred.use_role):
-                    raise PermissionDenied()
-        return attrs
-
-    def create(self, validated_data):  # TODO: remove when v2 API is deprecated
-        deprecated_fields = {}
-        if 'credential' in validated_data:
-            deprecated_fields['credential'] = validated_data.pop('credential')
-        obj = super(WorkflowJobTemplateNodeSerializer, self).create(validated_data)
-        if 'credential' in deprecated_fields:
-            if deprecated_fields['credential']:
-                obj.credentials.add(deprecated_fields['credential'])
-        return obj
-
-    def update(self, obj, validated_data):  # TODO: remove when v2 API is deprecated
-        deprecated_fields = {}
-        if 'credential' in validated_data:
-            deprecated_fields['credential'] = validated_data.pop('credential')
-        obj = super(WorkflowJobTemplateNodeSerializer, self).update(obj, validated_data)
-        if 'credential' in deprecated_fields:
-            existing = obj.credentials.filter(credential_type__kind='ssh')
-            new_cred = deprecated_fields['credential']
-            if new_cred not in existing:
-                for cred in existing:
-                    obj.credentials.remove(cred)
-                if new_cred:
-                    obj.credentials.add(new_cred)
-        return obj
-
 
 class WorkflowJobNodeSerializer(LaunchConfigurationBaseSerializer):
-    credential = DeprecatedCredentialField()
     success_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     failure_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     always_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
 
     class Meta:
         model = WorkflowJobNode
-        fields = ('*', 'credential', 'job', 'workflow_job', '-name', '-description', 'id', 'url', 'related',
+        fields = ('*', 'job', 'workflow_job', '-name', '-description', 'id', 'url', 'related',
                   'unified_job_template', 'success_nodes', 'failure_nodes', 'always_nodes',
                   'do_not_run',)
 
