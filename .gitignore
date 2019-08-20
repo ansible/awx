@@ -125,6 +125,7 @@ local/
 requirements/vendor
 .i18n_built
 .idea/*
+*credentials*.y*ml*
 
 # AWX python libs populated by requirements.txt
 awx/lib/.deps_built
