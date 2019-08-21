@@ -11,6 +11,7 @@ from awxkit.cli.utils import CustomRegistryMeta, cprint
 CONTROL_RESOURCES = ['ping', 'config', 'me', 'metrics']
 
 DEPRECATED_RESOURCES = {
+    'ad_hoc_commands': 'ad_hoc',
     'applications': 'application',
     'credentials': 'credential',
     'credential_types': 'credential_type',
