@@ -26,10 +26,23 @@ function PromptService (Empty, $filter)  {
               hasDefaultExtraVars = _.get(params, 'launchConf.defaults.extra_vars');
 
         if(hasCurrentExtraVars && hasDefaultExtraVars) {
-            extraVars = jsyaml.safeDump(_.merge(jsyaml.safeLoad(params.launchConf.defaults.extra_vars), params.currentValues.extra_data));
+            let currentExtraVars = {};
+            let defaultExtraVars = {};
+            if (typeof params.currentValues.extra_data === 'object') {
+                currentExtraVars = params.currentValues.extra_data;
+            } else if (typeof params.currentValues.extra_data === 'string') {
+                currentExtraVars = jsyaml.safeDump(params.currentValues.extra_data);
+            }
+
+            if (typeof params.launchConf.defaults.extra_vars === 'object') {
+                defaultExtraVars = params.launchConf.defaults.extra_vars;
+            } else if (typeof params.launchConf.defaults.extra_vars === 'string') {
+                defaultExtraVars = jsyaml.safeLoad(params.launchConf.defaults.extra_vars);
+            }
+            extraVars = '---\n' + jsyaml.safeDump(_.merge(defaultExtraVars, currentExtraVars));
         } else if(hasCurrentExtraVars) {
             if (typeof params.currentValues.extra_data === 'object') {
-                extraVars = jsyaml.safeDump(params.currentValues.extra_data);
+                extraVars = '---\n' + jsyaml.safeDump(params.currentValues.extra_data);
             } else if (typeof params.currentValues.extra_data === 'string') {
                 extraVars = params.currentValues.extra_data;
             }
