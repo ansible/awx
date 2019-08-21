@@ -128,7 +128,7 @@ class NotificationTemplate(CommonModelNameNotUnique):
             old_messages = old_nt.messages
             new_messages = self.messages
 
-            if old_messages is not None:
+            if old_messages is not None and new_messages is not None:
                 for event in ['started', 'success', 'error']:
                     if not new_messages.get(event, {}) and old_messages.get(event, {}):
                         new_messages[event] = old_messages[event]
