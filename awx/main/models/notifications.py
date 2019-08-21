@@ -73,10 +73,7 @@ class NotificationTemplate(CommonModelNameNotUnique):
     notification_configuration = JSONField(blank=False)
 
     def default_messages():
-        DEFAULT_MSG = "{{ job_friendly_name }} #{{ job.id }} '{{ job.name }}' {{ job.status }}: {{ url }}"
-        return {'started': { 'message': DEFAULT_MSG, 'body': ''},
-                'success': { 'message': DEFAULT_MSG, 'body': ''},
-                'error': { 'message': DEFAULT_MSG, 'body': ''}}
+        return {'started': None, 'success': None, 'error': None}
 
     messages = JSONField(
         null=True,
