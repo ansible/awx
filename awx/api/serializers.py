@@ -4881,6 +4881,7 @@ class ActivityStreamSerializer(BaseSerializer):
     def _summarize_parent_ujt(self, obj, fk, summary_fields):
         summary_keys = {'job': 'job_template',
                         'workflow_job_template_node': 'workflow_job_template',
+                        'workflow_approval_template': 'workflow_job_template',
                         'workflow_approval': 'workflow_job',
                         'schedule': 'unified_job_template'}
         if fk not in summary_keys:

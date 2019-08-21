@@ -640,6 +640,10 @@ class WorkflowApprovalTemplate(UnifiedJobTemplate):
     def get_absolute_url(self, request=None):
         return reverse('api:workflow_approval_template_detail', kwargs={'pk': self.pk}, request=request)
 
+    @property
+    def workflow_job_template(self):
+        return self.workflowjobtemplatenodes.first().workflow_job_template
+
 
 class WorkflowApproval(UnifiedJob):
     class Meta:

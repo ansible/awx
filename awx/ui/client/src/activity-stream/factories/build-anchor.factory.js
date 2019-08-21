@@ -97,6 +97,10 @@ export default function BuildAnchor($log, $filter) {
                      url += `workflows/${activity.summary_fields.workflow_job[0].id}`;
                      name = activity.summary_fields.workflow_job[0].name + ' | ' + activity.summary_fields.workflow_approval[0].name;
                      break;
+                 case 'workflow_approval_template':
+                     url += `templates/workflow_job_template/${activity.summary_fields.workflow_job_template[0].id}/workflow-maker`;
+                     name = activity.summary_fields.workflow_job_template[0].name + ' | ' + activity.summary_fields.workflow_approval_template[0].name;
+                     break;
                  default:
                      url += resource + 's/' + obj.id + '/';
              }
