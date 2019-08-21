@@ -20,9 +20,8 @@ class WorkflowJobTemplateNode(HasCreate, base.Base):
 
         update_payload(payload, optional_fields, kwargs)
 
-        for resource in ('credential', 'inventory'):
-            if resource in kwargs:
-                payload[resource] = kwargs[resource].id
+        if 'inventory' in kwargs:
+            payload['inventory'] = kwargs['inventory'].id
 
         return payload
 
