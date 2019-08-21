@@ -688,16 +688,18 @@ class CredentialInputField(JSONSchemaField):
                 model_instance.inputs['ssh_key_data'] = model_instance.__class__.objects.get(
                     pk=model_instance.pk
                 ).inputs.get('ssh_key_data')
-
+            
             if model_instance.has_encrypted_ssh_key_data and not value.get('ssh_key_unlock'):
                 errors['ssh_key_unlock'] = [_('must be set when SSH key is encrypted.')]
+            
             if all([
                 model_instance.inputs.get('ssh_key_data'),
                 value.get('ssh_key_unlock'),
-                not model_instance.has_encrypted_ssh_key_data
+                not model_instance.has_encrypted_ssh_key_data,
+                'ssh_key_data' not in errors
             ]):
                 errors['ssh_key_unlock'] = [_('should not be set when SSH key is not encrypted.')]
-
+        
         if errors:
             raise serializers.ValidationError({
                 'inputs': errors
