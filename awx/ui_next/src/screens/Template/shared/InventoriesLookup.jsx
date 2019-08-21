@@ -27,6 +27,7 @@ class InventoriesLookup extends React.Component {
             )}
           </Fragment>
         }
+        isRequired={required}
         fieldId="inventories-lookup"
       >
         <Lookup

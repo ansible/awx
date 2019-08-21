@@ -4,7 +4,7 @@ import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { withFormik, Field } from 'formik';
-import { Form, FormGroup, Tooltip, Card } from '@patternfly/react-core';
+import { Form, FormGroup, Tooltip, Card, Switch } from '@patternfly/react-core';
 import { QuestionCircleIcon as PFQuestionCircleIcon } from '@patternfly/react-icons';
 import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
@@ -256,6 +256,14 @@ class JobTemplateForm extends Component {
         ]
       );
 
+      const verbosityOptions = [
+        { value: '0', key: '0', label: i18n._(t`0 (Normal)`) },
+        { value: '1', key: '1', label: i18n._(t`1 (Verbose)`) },
+        { value: '2', key: '2', label: i18n._(t`2 (More Verbose)`) },
+        { value: '3', key: '3', label: i18n._(t`3 (Debug)`) },
+        { value: '4', key: '4', label: i18n._(t`4 (Connection Debug)`) },
+      ];
+
     if (hasContentLoading) {
       return (
         <Card className="awx-c-card">
@@ -271,7 +279,6 @@ class JobTemplateForm extends Component {
         </Card>
       );
     }
-
     return (
       <Form autoComplete="off" onSubmit={handleSubmit}>
         <FormRow>
@@ -417,7 +424,101 @@ class JobTemplateForm extends Component {
           </FormGroup>
         </FormRow>
         <CollapsibleSection label="Advanced">
-          Advanced inputs here
+          <FormRow>
+            <FormField
+              id="template-forks"
+              name="forks"
+              type="number"
+              label={i18n._(t`Forks`)}
+              tooltip={
+                <span>
+                  {i18n._(t`The number of parallel or simultaneous
+              processes to use while executing the playbook. An empty value,
+              or a value less than 1 will use the Ansible default which is
+              usually 5. The default number of forks can be overwritten
+              with a change to`)}{' '}
+                  <code>ansible.cfg</code>.{' '}
+                  {i18n._(t`Refer to the Ansible documentation for details
+                  about the configuration file.`)}
+                </span>
+              }
+            />
+            <FormField
+              id="template-limit"
+              name="limit"
+              type="text"
+              label={i18n._(t`Limit`)}
+              tooltip={i18n._(t`Provide a host pattern to further constrain
+              the list of hosts that will be managed or affected by the
+              playbook. Multiple patterns are allowed. Refer to Ansible
+              documentation for more information and examples on patterns.`)}
+            />
+            <Field
+              name="verbosity"
+              render={({ field }) => (
+                <FormGroup
+                  fieldId="template-verbosity"
+                  label={i18n._(t`Verbosity`)}
+                >
+                  <Tooltip
+                    position="right"
+                    content={i18n._(t`Control the level of output ansible will
+                    produce as the playbook executes.`)}
+                  >
+                    <QuestionCircleIcon />
+                  </Tooltip>
+                  <AnsibleSelect data={verbosityOptions} {...field} />
+                </FormGroup>
+              )}
+            />
+            <FormField
+              id="template-job-slicing"
+              name="job_slice_count"
+              type="number"
+              label={i18n._(t`Job Slicing`)}
+              tooltip={i18n._(t`Divide the work done by this job template
+                into the specified number of job slices, each running the
+                same tasks against a portion of the inventory.`)}
+            />
+            <FormField
+              id="template-timeout"
+              name="timeout"
+              type="number"
+              label={i18n._(t`Timeout`)}
+              tooltip={i18n._(t`The amount of time (in seconds) to run
+                before the task is canceled. Defaults to 0 for no job
+                timeout.`)}
+            />
+            <Field
+              name="diff_mode"
+              render={({ field, form }) => (
+                <FormGroup
+                  fieldId="template-show-changes"
+                  label={i18n._(t`Show Changes`)}
+                >
+                  <Tooltip
+                    position="right"
+                    content={i18n._(t`If enabled, show the changes made by
+                      Ansible tasks, where supported. This is equivalent
+                      to Ansible&#x2019s --diff mode.`)}
+                  >
+                    <QuestionCircleIcon />
+                  </Tooltip>
+                  <div>
+                    <Switch
+                      id="template-show-changes"
+                      label={i18n._(t`On`)}
+                      labelOff={i18n._(t`Off`)}
+                      isChecked={field.value}
+                      onChange={checked =>
+                        form.setFieldValue(field.name, checked)
+                      }
+                    />
+                  </div>
+                </FormGroup>
+              )}
+            />
+          </FormRow>
         </CollapsibleSection>
         <FormActionGroup onCancel={handleCancel} onSubmit={handleSubmit} />
       </Form>
@@ -433,8 +534,14 @@ const FormikApp = withFormik({
       description = '',
       job_type = 'run',
       inventory = '',
-      playbook = '',
       project = '',
+      playbook = '',
+      forks,
+      limit,
+      verbosity,
+      job_slicing,
+      timeout,
+      diff_mode
       summary_fields = { labels: { results: [] } },
     } = { ...template };
 
@@ -446,6 +553,12 @@ const FormikApp = withFormik({
       project: project || '',
       playbook: playbook || '',
       labels: summary_fields.labels.results,
+      forks: forks || '',
+      limit: limit || '',
+      verbosity: verbosity || '0',
+      job_slice_count: job_slicing || '',
+      timout: timeout || '',
+      diff_mode: diff_mode || false,
     };
   },
   handleSubmit: (values, bag) => bag.props.handleSubmit(values),
