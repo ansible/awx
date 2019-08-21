@@ -484,7 +484,11 @@ class JobNotificationMixin(object):
             except AttributeError:
                 raise NotImplementedError("build_notification_message() does not exist" % status)
 
-            def send_it():
-                send_notifications.delay([nt.generate_notification(notification_subject, notification_body).id],
-                                         job_id=self.id)
-            connection.on_commit(send_it)
+            # Use kwargs to force late-binding
+            # https://stackoverflow.com/a/3431699/10669572
+            def send_it(local_nt=nt, local_subject=notification_subject, local_body=notification_body):
+                def _func():
+                    send_notifications.delay([local_nt.generate_notification(local_subject, local_body).id],
+                                             job_id=self.id)
+                return _func
+            connection.on_commit(send_it())
