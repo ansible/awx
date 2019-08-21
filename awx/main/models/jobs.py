@@ -670,7 +670,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         data = super(Job, self).notification_data()
         all_hosts = {}
         # NOTE: Probably related to job event slowness, remove at some point -matburt
-        if block:
+        if block and self.status != 'running':
             summaries = self.job_host_summaries.all()
             while block > 0 and not len(summaries):
                 time.sleep(1)
