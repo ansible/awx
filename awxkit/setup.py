@@ -69,7 +69,7 @@ setup(
     install_requires=requirements,
     python_requires=">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*",
     extras_require={
-        'formatting': ['jq', 'tabulate'],
+        'formatting': ['jq'],
         'websockets': ['websocket-client>0.54.0'],
     },
     entry_points={

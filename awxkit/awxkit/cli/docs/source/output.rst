@@ -20,16 +20,14 @@ To print results in YAML, specify ``-f yaml``:
 Human-Readable (Tabular) Formatting
 -----------------------------------
 
-|prog| provides *optional* support for printing results in a human-readable
-tabular format, but it requires an additional Python software dependency,
-``tabulate``.
-
-To use ``-f human``, you must install the optional dependency via ``pip install tabulate``.
+|prog| also provides support for printing results in a human-readable
+ASCII table format:
 
 .. code:: bash
 
     awx jobs list -f human
     awx jobs list -f human --filter name,created,status
+    awx jobs list -f human --filter *
 
 
 Custom Formatting with jq
