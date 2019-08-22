@@ -55,7 +55,7 @@ def test_node_rejects_unprompted_fields(inventory, project, workflow_job_templat
         ask_limit_on_launch = False
     )
     url = reverse('api:workflow_job_template_workflow_nodes_list',
-                  kwargs={'pk': workflow_job_template.pk, 'version': 'v2'})
+                  kwargs={'pk': workflow_job_template.pk})
     r = post(url, {'unified_job_template': job_template.pk, 'limit': 'webservers'},
              user=admin_user, expect=400)
     assert 'limit' in r.data
@@ -71,7 +71,7 @@ def test_node_accepts_prompted_fields(inventory, project, workflow_job_template,
         ask_limit_on_launch = True
     )
     url = reverse('api:workflow_job_template_workflow_nodes_list',
-                  kwargs={'pk': workflow_job_template.pk, 'version': 'v2'})
+                  kwargs={'pk': workflow_job_template.pk})
     post(url, {'unified_job_template': job_template.pk, 'limit': 'webservers'},
          user=admin_user, expect=201)
 
