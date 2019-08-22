@@ -15,9 +15,8 @@ import FormRow from '@components/FormRow';
 import FormField from '@components/FormField';
 import FormActionGroup from '@components/FormActionGroup/FormActionGroup';
 import AnsibleSelect from '@components/AnsibleSelect';
+import { InstanceGroupsLookup } from '@components/Lookup/';
 import { required, minMaxValue } from '@util/validators';
-
-import InstanceGroupsLookup from './InstanceGroupsLookup';
 
 class OrganizationForm extends Component {
   constructor(props) {
