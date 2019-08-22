@@ -873,7 +873,7 @@ function(SettingsUtils, i18n, $rootScope) {
             id_to_close = "";
 
         if (element[0].id) {
-            template = '<div id="' + element[0].id + '_popover_container" class="popover" role="tooltip"><div class="arrow"></div><h3 id="' + element[0].id + '_popover_title" class="popover-header" translate></h3><div id="' + element[0].id + '_popover_content" class="popover-body" translate></div></div>';
+            template = '<div id="' + element[0].id + '_popover_container" class="popover" role="tooltip"><div class="arrow"></div><span id="' + element[0].id + '_popover_container"><h3 id="' + element[0].id + '_popover_title" class="popover-header" translate></h3><div id="' + element[0].id + '_popover_content" class="popover-body" translate></div></span></div>';
         }
 
         scope.triggerPopover = function(e) {
@@ -911,6 +911,7 @@ function(SettingsUtils, i18n, $rootScope) {
 
         function bindPopoverDismiss() {
             $('body').one('click.popover' + id_to_close, function(e) {
+                debugger;
                 if ($(e.target).parents(id_to_close).length === 0) {
                     // case: you clicked to open the popover and then you
                     //  clicked outside of it...hide it.
