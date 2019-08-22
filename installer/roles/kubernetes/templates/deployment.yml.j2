@@ -5,8 +5,8 @@ metadata:
   name: awx
   namespace: {{ kubernetes_namespace }}
 
-{% if rbac is defined and rbac == 'true' %}
-{% if awx_psp_create is defined and awx_psp_create == 'true' %}
+{% if rbac is defined and rbac | bool %}
+{% if awx_psp_create is defined and awx_psp_create | bool %}
 ---
 apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
@@ -228,7 +228,7 @@ spec:
         - name: {{ kubernetes_deployment_name }}-web
           image: "{{ kubernetes_web_image }}:{{ kubernetes_web_version }}"
           imagePullPolicy: Always
-{% if web_security_context is defined and web_security_context == 'true' %}
+{% if web_security_context is defined and web_security_context | bool %}
           securityContext:
             privileged: false
 {% if web_sc_user is defined %}
@@ -280,7 +280,7 @@ spec:
               cpu: "{{ web_cpu_limit }}m"
 {% endif %}
         - name: {{ kubernetes_deployment_name }}-celery
-{% if task_security_context is defined and task_security_context == 'true' %}
+{% if task_security_context is defined and task_security_context | bool %}
           securityContext:
 {% if task_sc_user is defined %}
             runAsUser: {{ task_sc_user }}
@@ -384,7 +384,7 @@ spec:
 {% if rabbitmq_cpu_limit is defined %}
               cpu: "{{ rabbitmq_cpu_limit }}m"
 {% endif %}
-{% if rabbitmq_security_context is defined and rabbitmq_security_context == 'true' %}
+{% if rabbitmq_security_context is defined and rabbitmq_security_context | bool %}
           securityContext:
             privileged: false
 {% if rabbitmq_sc_user is defined %}
@@ -400,7 +400,7 @@ spec:
         - name: {{ kubernetes_deployment_name }}-memcached
           image: "{{ kubernetes_memcached_image }}:{{ kubernetes_memcached_version }}"
           imagePullPolicy: Always
-{% if memcached_security_context is defined and memcached_security_context == 'true' %}
+{% if memcached_security_context is defined and memcached_security_context | bool %}
           securityContext:
             privileged: false
 {% if memcached_sc_user is defined %}

@@ -3,21 +3,21 @@ dockerhub_version: "{{ lookup('file', playbook_dir + '/../VERSION') }}"
 create_preload_data: True
 
 rbac: false
-awx_psp_create: 'false'
+awx_psp_create: false
 awx_psp_name: 'awx'
-awx_privileged: 'true'
+awx_privileged: true
 
-web_security_context: 'false'
+web_security_context: false
 web_sc_user: 1001
 
-task_security_context: 'true'
+task_security_context: true
 
-rabbitmq_security_context: 'false'
+rabbitmq_security_context: false
 rabbitmq_sc_user: 101
 rabbitmq_sc_group: 101
-rabbitmq_sc_non_root: 'true'
+rabbitmq_sc_non_root: true
 
-memcached_security_context: 'false'
+memcached_security_context: false
 memcached_sc_user: 1001
 
 admin_user: 'admin'
