@@ -658,7 +658,7 @@ def delete_approval_node_type_change(sender, instance, **kwargs):
         old.unified_job_template.delete()
 
 
-@receiver(post_delete, sender=WorkflowApprovalTemplate)
+@receiver(pre_delete, sender=WorkflowApprovalTemplate)
 def deny_orphaned_approvals(sender, instance, **kwargs):
     for approval in WorkflowApproval.objects.filter(workflow_approval_template=instance, status='pending'):
         approval.deny()

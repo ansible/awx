@@ -7,10 +7,12 @@ from awx.main.models.activity_stream import ActivityStream
 from awx.main.models.jobs import JobTemplate
 from awx.main.models.workflow import (
     WorkflowApprovalTemplate,
+    WorkflowJob,
     WorkflowJobTemplate,
     WorkflowJobTemplateNode,
 )
 from awx.main.models.credential import Credential
+from awx.main.scheduler import TaskManager
 
 
 @pytest.fixture
@@ -83,18 +85,19 @@ class TestApprovalNodes():
         assert approval_node.unified_job_template.timeout==0
 
     def test_approval_node_creation_failure(self, post, approval_node, admin_user):
+        # This test leaves off a required param to assert that user will get a 400.
         url = reverse('api:workflow_job_template_node_create_approval',
                       kwargs={'pk': approval_node.pk, 'version': 'v2'})
-        post(url, {'name': '', 'description': 'Approval Node', 'timeout': 0},
-             user=admin_user, expect=400)
-        # Leave off a required param to assert that you get a 400
+        r = post(url, {'name': '', 'description': 'Approval Node', 'timeout': 0},
+                 user=admin_user, expect=400)
         approval_node = WorkflowJobTemplateNode.objects.get(pk=approval_node.pk)
         assert isinstance(approval_node.unified_job_template, WorkflowApprovalTemplate) is False
+        assert {'name': ['This field may not be blank.']} == json.loads(r.content)
 
     @pytest.mark.parametrize("is_admin, is_org_admin, status", [
-        [True, False, 200],
-        [False, False, 403],
-        [False, True, 200],
+        [True, False, 200], # if they're a WFJT admin, they get a 200
+        [False, False, 403], # if they're not a WFJT *nor* org admin, they get a 403
+        [False, True, 200], # if they're an organization admin, they get a 200
     ])
     def test_approval_node_creation_rbac(self, post, approval_node, alice, is_admin, is_org_admin, status):
         url = reverse('api:workflow_job_template_node_create_approval',
@@ -107,7 +110,7 @@ class TestApprovalNodes():
              user=alice, expect=status)
 
     @pytest.mark.django_db
-    def test_approval_node_exists(self, post, approval_node, admin_user, get):
+    def test_approval_node_exists(self, post, admin_user, get):
         workflow_job_template = WorkflowJobTemplate.objects.create()
         approval_node = WorkflowJobTemplateNode.objects.create(
             workflow_job_template=workflow_job_template
@@ -132,11 +135,41 @@ class TestApprovalNodes():
 
         qs2 = ActivityStream.objects.filter(organization__isnull=True)
         assert qs2.count() == 5
-        assert qs2[0].operation == 'create'
-        assert qs2[1].operation == 'create'
-        assert qs2[2].operation == 'create'
-        assert qs2[3].operation == 'create'
-        assert qs2[4].operation == 'update'
+        assert list(qs2.values_list('operation', 'object1')) == [('create', 'user'),
+                                                                 ('create', 'workflow_job_template'),
+                                                                 ('create', 'workflow_job_template_node'),
+                                                                 ('create', 'workflow_approval_template'),
+                                                                 ('update', 'workflow_job_template_node'),
+                                                                 ]
+
+    @pytest.mark.django_db
+    def test_approval_node_actions(self, post, admin_user, job_template):
+        # This test ensures that a user (with permissions to do so) can approve/deny
+        # workflow approvals.  Also asserts that trying to approve/deny approvals
+        # that have already been dealt with will throw an error.
+        wfjt = WorkflowJobTemplate.objects.create(name='foobar')
+        node = wfjt.workflow_nodes.create(unified_job_template=job_template)
+        url = reverse('api:workflow_job_template_node_create_approval',
+                      kwargs={'pk': node.pk, 'version': 'v2'})
+        post(url, {'name': 'Approve/Deny Test', 'description': '', 'timeout': 0},
+             user=admin_user, expect=200)
+        post(reverse('api:workflow_job_template_launch', kwargs={'pk': wfjt.pk}),
+             user=admin_user, expect=201)
+        wf_job = WorkflowJob.objects.first()
+        TaskManager().schedule()
+        TaskManager().schedule()
+        wfj_node = wf_job.workflow_nodes.first()
+        approval = wfj_node.job
+        assert approval.name == 'Approve/Deny Test'
+        post(reverse('api:workflow_approval_approve', kwargs={'pk': approval.pk}),
+             user=admin_user, expect=204)
+        # Test that there is an activity stream entry that was created for the "approve" action.
+        qs = ActivityStream.objects.order_by('-timestamp').first()
+        assert qs.object1 == 'workflow_approval'
+        assert qs.changes == '{"status": ["pending", "successful"]}'
+        assert qs.operation == 'update'
+        post(reverse('api:workflow_approval_approve', kwargs={'pk': approval.pk}),
+             user=admin_user, expect=403)
 
     def test_approval_node_cleanup(self, post, approval_node, admin_user, get):
         workflow_job_template = WorkflowJobTemplate.objects.create()
@@ -148,8 +181,47 @@ class TestApprovalNodes():
 
         post(url, {'name': 'URL Test', 'description': 'An approval', 'timeout': 0},
              user=admin_user)
+        assert WorkflowApprovalTemplate.objects.count() == 1
         workflow_job_template.delete()
+        assert WorkflowApprovalTemplate.objects.count() == 0
         get(url, admin_user, expect=404)
+
+    def test_changed_approval_deletion(self, post, approval_node, admin_user, workflow_job_template, job_template):
+        # This test verifies that when an approval node changes into something else
+        # (in this case, a job template), then the previously-set WorkflowApprovalTemplate
+        # is automatically deleted.
+        workflow_job_template = WorkflowJobTemplate.objects.create()
+        approval_node = WorkflowJobTemplateNode.objects.create(
+            workflow_job_template=workflow_job_template
+        )
+        url = reverse('api:workflow_job_template_node_create_approval',
+                      kwargs={'pk': approval_node.pk, 'version': 'v2'})
+        post(url, {'name': 'URL Test', 'description': 'An approval', 'timeout': 0},
+             user=admin_user)
+        assert WorkflowApprovalTemplate.objects.count() == 1
+        approval_node.unified_job_template = job_template
+        approval_node.save()
+        assert WorkflowApprovalTemplate.objects.count() == 0
+
+    def test_deleted_approval_denial(self, post, approval_node, admin_user, workflow_job_template):
+        # Verifying that when a WorkflowApprovalTemplate is deleted, any/all of
+        # its pending approvals are auto-denied (vs left in 'pending' state).
+        workflow_job_template = WorkflowJobTemplate.objects.create()
+        approval_node = WorkflowJobTemplateNode.objects.create(
+            workflow_job_template=workflow_job_template
+        )
+        url = reverse('api:workflow_job_template_node_create_approval',
+                      kwargs={'pk': approval_node.pk, 'version': 'v2'})
+        post(url, {'name': 'URL Test', 'description': 'An approval', 'timeout': 0},
+             user=admin_user)
+        assert WorkflowApprovalTemplate.objects.count() == 1
+        approval_template = WorkflowApprovalTemplate.objects.first()
+        approval = approval_template.create_unified_job()
+        approval.status = 'pending'
+        approval.save()
+        approval_template.delete()
+        approval.refresh_from_db()
+        assert approval.status == 'failed'
 
 
 @pytest.mark.django_db
