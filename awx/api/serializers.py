@@ -4227,6 +4227,28 @@ class NotificationTemplateSerializer(BaseSerializer):
                 error_list.append(_("Field '{}' unavailable".format(exc.message)))
             except SecurityError as exc:
                 error_list.append(_("Security error due to field '{}'".format(exc.message)))
+
+        # Ensure that if a webhook body was provided, that it can be rendered as a dictionary
+        notification_type = ''
+        if self.instance:
+            notification_type = getattr(self.instance, 'notification_type', '')
+        else:
+            notification_type = self.initial_data.get('notification_type', '')
+
+        if notification_type == 'webhook':
+            for event in messages:
+                if not messages[event]:
+                    continue
+                body = messages[event].get('body', {})
+                if body:
+                    try:
+                        potential_body = json.loads(body)
+                        if not isinstance(potential_body, dict):
+                            error_list.append(_("Webhook body for '{}' should be a json dictionary. Found type '{}'."
+                                                .format(event, type(potential_body).__name__)))
+                    except json.JSONDecodeError as exc:
+                        error_list.append(_("Webhook body for '{}' is not a valid json dictionary ({}).".format(event, exc)))
+
         if error_list:
             raise serializers.ValidationError(error_list)
 
