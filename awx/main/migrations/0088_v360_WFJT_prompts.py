@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0084_v360_token_description'),
+        ('main', '0087_v360_update_credential_injector_help_text'),
     ]
 
     operations = [

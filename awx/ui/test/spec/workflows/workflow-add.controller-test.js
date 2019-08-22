@@ -151,6 +151,8 @@ describe('Controller: WorkflowAdd', () => {
                 allow_simultaneous: undefined,
                 ask_inventory_on_launch: false,
                 ask_variables_on_launch: false,
+                ask_limit_on_launch: false,
+                ask_scm_branch_on_launch: false,
                 extra_vars: undefined
             });
         });
