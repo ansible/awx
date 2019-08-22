@@ -1,1 +1,1 @@
-from .core import register, gather, ship  # noqa
+from .core import register, gather, ship, table_version  # noqa

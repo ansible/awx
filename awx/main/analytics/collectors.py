@@ -12,14 +12,14 @@ from awx.main.utils import (get_awx_version, get_ansible_version,
                             get_custom_venv_choices, camelcase_to_underscore)
 from awx.main import models
 from django.contrib.sessions.models import Session
-from awx.main.analytics import register
+from awx.main.analytics import register, table_version
 
 '''
 This module is used to define metrics collected by awx.main.analytics.gather()
 Each function is decorated with a key name, and should return a data
 structure that can be serialized to JSON
 
-@register('something')
+@register('something', '1.0')
 def something(since):
     # the generated archive will contain a `something.json` w/ this JSON
     return {'some': 'json'}
@@ -31,7 +31,7 @@ data _since_ the last report date - i.e., new data in the last 24 hours)
 '''
 
 
-@register('config')
+@register('config', '1.0')
 def config(since):
     license_info = get_license(show_key=False)
     install_type = 'traditional'
@@ -62,7 +62,7 @@ def config(since):
     }
 
 
-@register('counts')
+@register('counts', '1.0')
 def counts(since):
     counts = {}
     for cls in (models.Organization, models.Team, models.User,
@@ -97,7 +97,7 @@ def counts(since):
     return counts
 
     
-@register('org_counts')
+@register('org_counts', '1.0')
 def org_counts(since):
     counts = {}
     for org in models.Organization.objects.annotate(num_users=Count('member_role__members', distinct=True), 
@@ -109,7 +109,7 @@ def org_counts(since):
     return counts
     
     
-@register('cred_type_counts')
+@register('cred_type_counts', '1.0')
 def cred_type_counts(since):
     counts = {}
     for cred_type in models.CredentialType.objects.annotate(num_credentials=Count(
@@ -121,7 +121,7 @@ def cred_type_counts(since):
     return counts
     
     
-@register('inventory_counts')
+@register('inventory_counts', '1.0')
 def inventory_counts(since):
     counts = {}
     for inv in models.Inventory.objects.filter(kind='').annotate(num_sources=Count('inventory_sources', distinct=True), 
@@ -141,7 +141,7 @@ def inventory_counts(since):
     return counts
 
 
-@register('projects_by_scm_type')
+@register('projects_by_scm_type', '1.0')
 def projects_by_scm_type(since):
     counts = dict(
         (t[0] or 'manual', 0)
@@ -160,7 +160,7 @@ def _get_isolated_datetime(last_check):
     return last_check
 
 
-@register('instance_info')
+@register('instance_info', '1.0')
 def instance_info(since, include_hostnames=False):
     info = {}
     instances = models.Instance.objects.values_list('hostname').values(
@@ -182,7 +182,7 @@ def instance_info(since, include_hostnames=False):
     return info
 
 
-@register('job_counts')
+@register('job_counts', '1.0')
 def job_counts(since):
     counts = {}
     counts['total_jobs'] = models.UnifiedJob.objects.exclude(launch_type='sync').count()
@@ -192,7 +192,7 @@ def job_counts(since):
     return counts
     
     
-@register('job_instance_counts')
+@register('job_instance_counts', '1.0')
 def job_instance_counts(since):
     counts = {}
     job_types = models.UnifiedJob.objects.exclude(launch_type='sync').values_list(
@@ -207,7 +207,19 @@ def job_instance_counts(since):
     return counts
 
 
+@register('query_info', '1.0')
+def query_info(since, collection_type):
+    query_info = {}
+    query_info['last_run'] = str(since)
+    query_info['current_time'] = str(now())
+    query_info['collection_type'] = collection_type
+    return query_info
+
+
 # Copies Job Events from db to a .csv to be shipped
+@table_version('events_table.csv', '1.0')
+@table_version('unified_jobs_table.csv', '1.0')
+@table_version('unified_job_template_table.csv', '1.0')
 def copy_tables(since, full_path):
     def _copy_table(table, query, path):
         file_path = os.path.join(path, table + '_table.csv')
@@ -282,4 +294,3 @@ def copy_tables(since, full_path):
                                  ORDER BY main_unifiedjobtemplate.id ASC) TO STDOUT WITH CSV HEADER'''.format(since.strftime("'%Y-%m-%d %H:%M:%S'"))    
     _copy_table(table='unified_job_template', query=unified_job_template_query, path=full_path)
     return
-
