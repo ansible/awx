@@ -1,6 +1,7 @@
 import pytest
 
 from awx.api.versioning import reverse
+from awx.main.models.mixins import WebhookMixin
 
 
 @pytest.mark.django_db
@@ -107,3 +108,41 @@ def test_post_webhook_key_wfjt(organization_factory, workflow_job_template_facto
     response = post(url, {}, user=user, expect=expect)
     if expect < 400:
         assert bool(response.data.get('webhook_key'))
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "service", [s for s, _ in WebhookMixin.SERVICES]
+)
+def test_set_webhook_service(organization_factory, job_template_factory, patch, service):
+    objs = organization_factory("org", superusers=['admin'])
+    jt = job_template_factory("jt", organization=objs.organization,
+                              inventory='test_inv', project='test_proj').job_template
+    admin = objs.superusers.admin
+    assert (jt.webhook_service, jt.webhook_key) == ('', '')
+
+    url = reverse('api:job_template_detail', kwargs={'pk': jt.pk})
+    patch(url, {'webhook_service': service}, user=admin, expect=200)
+    jt.refresh_from_db()
+
+    assert jt.webhook_service == service
+    assert jt.webhook_key != ''
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "service", [s for s, _ in WebhookMixin.SERVICES]
+)
+def test_unset_webhook_service(organization_factory, job_template_factory, patch, service):
+    objs = organization_factory("org", superusers=['admin'])
+    jt = job_template_factory("jt", organization=objs.organization, webhook_service=service,
+                              inventory='test_inv', project='test_proj').job_template
+    admin = objs.superusers.admin
+    assert jt.webhook_service == service
+    assert jt.webhook_key != ''
+
+    url = reverse('api:job_template_detail', kwargs={'pk': jt.pk})
+    patch(url, {'webhook_service': ''}, user=admin, expect=200)
+    jt.refresh_from_db()
+
+    assert (jt.webhook_service, jt.webhook_key) == ('', '')

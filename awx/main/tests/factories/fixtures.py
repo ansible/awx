@@ -154,12 +154,12 @@ def mk_job_template(name, job_type='run',
                     organization=None, inventory=None,
                     credential=None, network_credential=None,
                     cloud_credential=None, persisted=True, extra_vars='',
-                    project=None, spec=None):
+                    project=None, spec=None, webhook_service=''):
     if extra_vars:
         extra_vars = json.dumps(extra_vars)
 
     jt = JobTemplate(name=name, job_type=job_type, extra_vars=extra_vars,
-                     playbook='helloworld.yml')
+                     webhook_service=webhook_service, playbook='helloworld.yml')
 
     jt.inventory = inventory
     if jt.inventory is None:
@@ -200,11 +200,13 @@ def mk_workflow_job(status='new', workflow_job_template=None, extra_vars={},
     return job
 
 
-def mk_workflow_job_template(name, extra_vars='', spec=None, organization=None, persisted=True):
+def mk_workflow_job_template(name, extra_vars='', spec=None, organization=None, persisted=True,
+                             webhook_service=''):
     if extra_vars:
         extra_vars = json.dumps(extra_vars)
 
-    wfjt = WorkflowJobTemplate(name=name, extra_vars=extra_vars, organization=organization)
+    wfjt = WorkflowJobTemplate(name=name, extra_vars=extra_vars, organization=organization,
+                               webhook_service=webhook_service)
 
     wfjt.survey_spec = spec
     if wfjt.survey_spec:

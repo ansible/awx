@@ -515,4 +515,17 @@ class WebhookMixin(models.Model):
 
     def rotate_webhook_key(self):
         self.webhook_key = get_random_string(length=50)
-        self.save(update_fields=['webhook_key'])
+
+    def save(self, *args, **kwargs):
+        update_fields = kwargs.get('update_fields')
+
+        if not self.pk or self._values_have_edits({'webhook_service': self.webhook_service}):
+            if self.webhook_service:
+                self.rotate_webhook_key()
+            else:
+                self.webhook_key = ''
+
+            if update_fields and 'webhook_service' in update_fields:
+                update_fields.append('webhook_key')
+
+        super().save(*args, **kwargs)

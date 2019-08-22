@@ -38,6 +38,7 @@ class WebhookKeyView(GenericAPIView):
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         obj.rotate_webhook_key()
+        obj.save(update_fields=['webhook_key'])
 
         return Response({'webhook_key': obj.webhook_key}, status=status.HTTP_201_CREATED)
 
