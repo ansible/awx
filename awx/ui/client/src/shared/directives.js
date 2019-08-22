@@ -911,7 +911,6 @@ function(SettingsUtils, i18n, $rootScope) {
 
         function bindPopoverDismiss() {
             $('body').one('click.popover' + id_to_close, function(e) {
-                debugger;
                 if ($(e.target).parents(id_to_close).length === 0) {
                     // case: you clicked to open the popover and then you
                     //  clicked outside of it...hide it.
