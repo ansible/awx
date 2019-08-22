@@ -74,7 +74,6 @@ class ResourceOptionsParser(object):
 
             kwargs = {
                 'help': help_text,
-                'required': required,
                 'type': {
                     'string': str,
                     'field': int,
@@ -96,10 +95,13 @@ class ResourceOptionsParser(object):
                     kwargs['type'] = int
                 kwargs['choices'] = [str(choice) for choice in kwargs['choices']]
             elif param['type'] in meta_map:
-                kwargs['metavar'] = meta_map[param['type']]
+                if required:
+                    kwargs['metavar'] = ' '.join([k, meta_map[param['type']]])
+                else:
+                    kwargs['metavar'] = meta_map[param['type']]
 
             self.parser.choices[method].add_argument(
-                '--{}'.format(k),
+                k if required else '--{}'.format(k),
                 **kwargs
             )
 
