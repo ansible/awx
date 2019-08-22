@@ -691,10 +691,12 @@ class CredentialInputField(JSONSchemaField):
 
             if model_instance.has_encrypted_ssh_key_data and not value.get('ssh_key_unlock'):
                 errors['ssh_key_unlock'] = [_('must be set when SSH key is encrypted.')]
+            
             if all([
                 model_instance.inputs.get('ssh_key_data'),
                 value.get('ssh_key_unlock'),
-                not model_instance.has_encrypted_ssh_key_data
+                not model_instance.has_encrypted_ssh_key_data,
+                'ssh_key_data' not in errors
             ]):
                 errors['ssh_key_unlock'] = [_('should not be set when SSH key is not encrypted.')]
 

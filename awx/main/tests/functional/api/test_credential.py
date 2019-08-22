@@ -1360,6 +1360,42 @@ def test_ssh_unlock_with_prior_value(put, organization, admin, credentialtype_ss
     assert decrypt_field(cred, 'ssh_key_unlock') == 'new-unlock'
 
 
+@pytest.mark.django_db
+@pytest.mark.parametrize('version, params', [
+    ['v2', {
+        'name': 'Best credential ever',
+        'credential_type': 1,
+        'inputs': {
+            'username': 'oscar',
+            'ssh_key_data': 'invalid-key',
+            'ssh_key_unlock': 'unchecked-unlock',
+        }
+    }]
+])
+def test_ssh_bad_key_unlock_not_checked(put, organization, admin, credentialtype_ssh, version, params):
+    cred = Credential(
+        credential_type=credentialtype_ssh,
+        name='Best credential ever',
+        organization=organization,
+        inputs={
+            'username': u'oscar',
+            'ssh_key_data': 'invalid-key',
+            'ssh_key_unlock': 'unchecked-unlock',
+        }
+    )
+    cred.save()
+
+    params['organization'] = organization.id
+    response = put(
+        reverse('api:credential_detail', kwargs={'version': version, 'pk': cred.pk}),
+        params,
+        admin
+    )
+    assert response.status_code == 400
+    assert response.data['inputs']['ssh_key_data'] == ['Invalid certificate or key: invalid-key...']
+    assert 'ssh_key_unlock' not in response.data['inputs']
+
+
 #
 # test secret encryption/decryption
 #
