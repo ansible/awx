@@ -51,7 +51,7 @@ def test_pagination_cap_page_size(get, admin, inventory):
 
     def host_list_url(params):
         request_qs = '?' + urlencode(params)
-        return reverse('api:host_list', kwargs={'version': 'v2'}) + request_qs
+        return reverse('api:host_list') + request_qs
 
     with patch('awx.api.pagination.Pagination.max_page_size', 5):
         resp = get(host_list_url({'page': '2', 'page_size': '10'}), user=admin)

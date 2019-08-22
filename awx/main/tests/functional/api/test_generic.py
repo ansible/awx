@@ -70,7 +70,7 @@ class TestDeleteViews:
         delete(
             reverse(
                 'api:inventory_source_hosts_list',
-                kwargs={'version': 'v2', 'pk': inventory_source.pk}
+                kwargs={'pk': inventory_source.pk}
             ), user=rando, expect=403
         )
 
@@ -80,7 +80,7 @@ class TestDeleteViews:
         delete(
             reverse(
                 'api:inventory_source_hosts_list',
-                kwargs={'version': 'v2', 'pk': inventory_source.pk}
+                kwargs={'pk': inventory_source.pk}
             ), user=rando, expect=204
         )
         assert inventory_source.hosts.count() == 0

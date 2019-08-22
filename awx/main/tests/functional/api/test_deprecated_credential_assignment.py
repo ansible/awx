@@ -32,7 +32,7 @@ def test_extra_credentials_filtering(get, job_template, admin,
     job_template.credentials.add(credential)
     url = reverse(
         'api:job_template_extra_credentials_list',
-        kwargs={'version': 'v2', 'pk': job_template.pk}
+        kwargs={'pk': job_template.pk}
     )
     resp = get(url, admin, expect=200)
     assert resp.data['count'] == 1
@@ -45,7 +45,7 @@ def test_extra_credentials_requires_cloud_or_net(get, post, job_template, admin,
                                                  net_credential):
     url = reverse(
         'api:job_template_extra_credentials_list',
-        kwargs={'version': 'v2', 'pk': job_template.pk}
+        kwargs={'pk': job_template.pk}
     )
 
     for cred in (machine_credential, vault_credential):
@@ -63,7 +63,7 @@ def test_extra_credentials_requires_cloud_or_net(get, post, job_template, admin,
 def test_prevent_multiple_machine_creds(get, post, job_template, admin, machine_credential):
     url = reverse(
         'api:job_template_credentials_list',
-        kwargs={'version': 'v2', 'pk': job_template.pk}
+        kwargs={'pk': job_template.pk}
     )
 
     def _new_cred(name):
@@ -120,7 +120,7 @@ def test_extra_credentials_unique_by_kind(get, post, job_template, admin,
                                           credentialtype_aws):
     url = reverse(
         'api:job_template_extra_credentials_list',
-        kwargs={'version': 'v2', 'pk': job_template.pk}
+        kwargs={'pk': job_template.pk}
     )
 
     def _new_cred(name):

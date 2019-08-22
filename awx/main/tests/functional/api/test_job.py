@@ -31,7 +31,7 @@ def test_extra_credentials(get, organization_factory, job_template_factory, cred
     jt.save()
     job = jt.create_unified_job()
 
-    url = reverse('api:job_extra_credentials_list', kwargs={'version': 'v2', 'pk': job.pk})
+    url = reverse('api:job_extra_credentials_list', kwargs={'pk': job.pk})
     response = get(url, user=objs.superusers.admin)
     assert response.data.get('count') == 1
 
@@ -225,19 +225,19 @@ def test_disallowed_http_update_methods(put, patch, post, inventory, project, ad
     )
     job = jt.create_unified_job()
     post(
-        url=reverse('api:job_detail', kwargs={'pk': job.pk, 'version': 'v2'}),
+        url=reverse('api:job_detail', kwargs={'pk': job.pk}),
         data={},
         user=admin_user,
         expect=405
     )
     put(
-        url=reverse('api:job_detail', kwargs={'pk': job.pk, 'version': 'v2'}),
+        url=reverse('api:job_detail', kwargs={'pk': job.pk}),
         data={},
         user=admin_user,
         expect=405
     )
     patch(
-        url=reverse('api:job_detail', kwargs={'pk': job.pk, 'version': 'v2'}),
+        url=reverse('api:job_detail', kwargs={'pk': job.pk}),
         data={},
         user=admin_user,
         expect=405
