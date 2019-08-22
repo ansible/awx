@@ -110,33 +110,13 @@ class TestOptions(unittest.TestCase):
                 },
             }
         })
-        options = ResourceOptionsParser(page, self.parser)
-        options.build_query_arguments('create', 'POST')
-        assert 'create' in self.parser.choices
-
-        out = StringIO()
-        self.parser.choices['create'].print_help(out)
-        assert '--username TEXT  [REQUIRED] Please specify a username' in out.getvalue()
-
-    def test_creation_required_argument(self):
-        page = OptionsPage.from_json({
-            'actions': {
-                'POST': {
-                    'username': {
-                        'type': 'string',
-                        'help_text': 'Please specify a username',
-                        'required': True
-                    }
-                },
-            }
-        })
         options = ResourceOptionsParser(page, 'users', self.parser)
         options.build_query_arguments('create', 'POST')
         assert 'create' in self.parser.choices
 
         out = StringIO()
         self.parser.choices['create'].print_help(out)
-        assert '--username TEXT  [REQUIRED] Please specify a username' in out.getvalue()
+        assert '--username TEXT  Please specify a username'
 
     def test_integer_argument(self):
         page = OptionsPage.from_json({

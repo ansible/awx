@@ -54,14 +54,22 @@ class ResourceOptionsParser(object):
                 add_output_formatting_arguments(parser, {})
 
     def build_query_arguments(self, method, http_method):
+        required_group = None
+        if filter(
+            lambda param: param.get('required', False) is True,
+            self.options.get(http_method, {}).values()
+        ):
+            if method in self.parser.choices:
+                required_group = self.parser.choices[method].add_argument_group('required arguments')
+                # put the required group first (before the optional args group)
+                self.parser.choices[method]._action_groups.reverse()
+
         for k, param in self.options.get(http_method, {}).items():
             required = (
                 method == 'create' and
                 param.get('required', False) is True
             )
             help_text = param.get('help_text', '')
-            if required:
-                help_text = '[REQUIRED] {}'.format(help_text)
 
             if method == 'list':
                 help_text = 'only list {} with the specified {}'.format(
@@ -98,10 +106,16 @@ class ResourceOptionsParser(object):
             elif param['type'] in meta_map:
                 kwargs['metavar'] = meta_map[param['type']]
 
-            self.parser.choices[method].add_argument(
-                '--{}'.format(k),
-                **kwargs
-            )
+            if required:
+                required_group.add_argument(
+                    '--{}'.format(k),
+                    **kwargs
+                )
+            else:
+                self.parser.choices[method].add_argument(
+                    '--{}'.format(k),
+                    **kwargs
+                )
 
     def handle_custom_actions(self):
         for _, action in CustomAction.registry.items():
