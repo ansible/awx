@@ -699,7 +699,7 @@ class CredentialInputField(JSONSchemaField):
                 'ssh_key_data' not in errors
             ]):
                 errors['ssh_key_unlock'] = [_('should not be set when SSH key is not encrypted.')]
-        
+
         if errors:
             raise serializers.ValidationError({
                 'inputs': errors
