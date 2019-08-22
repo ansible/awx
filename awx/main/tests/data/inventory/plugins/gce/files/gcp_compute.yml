@@ -1,6 +1,6 @@
 auth_kind: serviceaccount
 compose:
-  ansible_ssh_host: networkInterfaces[0].accessConfigs[0].natIP
+  ansible_ssh_host: networkInterfaces[0].accessConfigs[0].natIP | default(networkInterfaces[0].networkIP)
   gce_description: description if description else None
   gce_id: id
   gce_image: image
@@ -9,7 +9,7 @@ compose:
   gce_name: name
   gce_network: networkInterfaces[0].network.name
   gce_private_ip: networkInterfaces[0].networkIP
-  gce_public_ip: networkInterfaces[0].accessConfigs[0].natIP
+  gce_public_ip: networkInterfaces[0].accessConfigs[0].natIP | default(None)
   gce_status: status
   gce_subnetwork: networkInterfaces[0].subnetwork.name
   gce_tags: tags.get("items", [])
