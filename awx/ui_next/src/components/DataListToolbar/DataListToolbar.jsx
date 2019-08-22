@@ -46,18 +46,28 @@ const ToolbarGroup = styled(PFToolbarGroup)`
 
 const ColumnLeft = styled.div`
   display: flex;
-  flex-grow: 1;
+  flex-basis: ${props => (props.fillWidth ? 'auto' : '100%')};
+  flex-grow: ${props => (props.fillWidth ? '1' : '0')};
   justify-content: flex-start;
   align-items: center;
   padding: 10px 0 8px 0;
+
+  @media screen and (min-width: 980px) {
+    flex-basis: ${props => (props.fillWidth ? 'auto' : '50%')};
+  }
 `;
 
 const ColumnRight = styled.div`
-  flex-grow: 0;
   display: flex;
+  flex-basis: ${props => (props.fillWidth ? 'auto' : '100%')};
+  flex-grow: 0;
   justify-content: flex-start;
   align-items: center;
-  padding: 10px 0 8px 0;
+  padding: 8px 0 10px 0;
+
+  @media screen and (min-width: 980px) {
+    flex-basis: ${props => (props.fillWidth ? 'auto' : '50%')};
+  }
 `;
 
 const AdditionalControlsWrapper = styled.div`
@@ -94,7 +104,7 @@ class DataListToolbar extends React.Component {
     return (
       <AWXToolbar>
         <Toolbar css={fillWidth ? 'margin-right: 0; margin-left: 0' : ''}>
-          <ColumnLeft>
+          <ColumnLeft fillWidth={fillWidth}>
             {showSelectAll && (
               <Fragment>
                 <ToolbarItem>
@@ -117,7 +127,7 @@ class DataListToolbar extends React.Component {
             </ToolbarItem>
             <VerticalSeparator />
           </ColumnLeft>
-          <ColumnRight>
+          <ColumnRight fillWidth={fillWidth}>
             <ToolbarItem>
               <Sort
                 columns={columns}

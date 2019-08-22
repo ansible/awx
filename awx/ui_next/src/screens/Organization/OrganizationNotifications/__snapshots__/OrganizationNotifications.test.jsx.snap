@@ -478,18 +478,27 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                 _css=""
                                                 className="pf-l-toolbar DataListToolbar__Toolbar-ajzso8-1 sc-htpNat dnOsXG"
                                               >
-                                                <DataListToolbar__ColumnLeft>
+                                                <DataListToolbar__ColumnLeft
+                                                  fillWidth={false}
+                                                >
                                                   <StyledComponent
+                                                    fillWidth={false}
                                                     forwardedComponent={
                                                       Object {
                                                         "$$typeof": Symbol(react.forward_ref),
                                                         "attrs": Array [],
                                                         "componentStyle": ComponentStyle {
                                                           "componentId": "DataListToolbar__ColumnLeft-ajzso8-3",
-                                                          "isStatic": true,
-                                                          "lastClassName": "bpkKMr",
+                                                          "isStatic": false,
+                                                          "lastClassName": "bPvPpR",
                                                           "rules": Array [
-                                                            "display:flex;flex-grow:1;justify-content:flex-start;align-items:center;padding:10px 0 8px 0;",
+                                                            "display:flex;flex-basis:",
+                                                            [Function],
+                                                            ";flex-grow:",
+                                                            [Function],
+                                                            ";justify-content:flex-start;align-items:center;padding:10px 0 8px 0;@media screen and (min-width:980px){flex-basis:",
+                                                            [Function],
+                                                            ";}",
                                                           ],
                                                         },
                                                         "displayName": "DataListToolbar__ColumnLeft",
@@ -505,7 +514,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                     forwardedRef={null}
                                                   >
                                                     <div
-                                                      className="DataListToolbar__ColumnLeft-ajzso8-3 bpkKMr"
+                                                      className="DataListToolbar__ColumnLeft-ajzso8-3 bPvPpR"
                                                     >
                                                       <Styled(ToolbarItem)>
                                                         <StyledComponent
@@ -931,18 +940,25 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                     </div>
                                                   </StyledComponent>
                                                 </DataListToolbar__ColumnLeft>
-                                                <DataListToolbar__ColumnRight>
+                                                <DataListToolbar__ColumnRight
+                                                  fillWidth={false}
+                                                >
                                                   <StyledComponent
+                                                    fillWidth={false}
                                                     forwardedComponent={
                                                       Object {
                                                         "$$typeof": Symbol(react.forward_ref),
                                                         "attrs": Array [],
                                                         "componentStyle": ComponentStyle {
                                                           "componentId": "DataListToolbar__ColumnRight-ajzso8-4",
-                                                          "isStatic": true,
-                                                          "lastClassName": "aHlzn",
+                                                          "isStatic": false,
+                                                          "lastClassName": "gTMHVz",
                                                           "rules": Array [
-                                                            "flex-grow:0;display:flex;justify-content:flex-start;align-items:center;padding:10px 0 8px 0;",
+                                                            "display:flex;flex-basis:",
+                                                            [Function],
+                                                            ";flex-grow:0;justify-content:flex-start;align-items:center;padding:8px 0 10px 0;@media screen and (min-width:980px){flex-basis:",
+                                                            [Function],
+                                                            ";}",
                                                           ],
                                                         },
                                                         "displayName": "DataListToolbar__ColumnRight",
@@ -958,7 +974,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                     forwardedRef={null}
                                                   >
                                                     <div
-                                                      className="DataListToolbar__ColumnRight-ajzso8-4 aHlzn"
+                                                      className="DataListToolbar__ColumnRight-ajzso8-4 gTMHVz"
                                                     >
                                                       <ToolbarItem
                                                         className={null}
