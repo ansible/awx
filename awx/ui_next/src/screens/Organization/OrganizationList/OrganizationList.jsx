@@ -7,6 +7,7 @@ import { Card, PageSection, PageSectionVariants } from '@patternfly/react-core';
 import { OrganizationsAPI } from '@api';
 import AlertModal from '@components/AlertModal';
 import DataListToolbar from '@components/DataListToolbar';
+import ErrorDetail from '@components/ErrorDetail';
 import PaginatedDataList, {
   ToolbarAddButton,
   ToolbarDeleteButton,
@@ -28,7 +29,7 @@ class OrganizationsList extends Component {
     this.state = {
       hasContentLoading: true,
       contentError: null,
-      hasDeletionError: false,
+      deletionError: null,
       organizations: [],
       selected: [],
       itemCount: 0,
@@ -71,17 +72,17 @@ class OrganizationsList extends Component {
   }
 
   handleDeleteErrorClose() {
-    this.setState({ hasDeletionError: false });
+    this.setState({ deletionError: null });
   }
 
   async handleOrgDelete() {
     const { selected } = this.state;
 
-    this.setState({ hasContentLoading: true, hasDeletionError: false });
+    this.setState({ hasContentLoading: true });
     try {
       await Promise.all(selected.map(org => OrganizationsAPI.destroy(org.id)));
     } catch (err) {
-      this.setState({ hasDeletionError: true });
+      this.setState({ deletionError: err });
     } finally {
       await this.loadOrganizations();
     }
@@ -134,7 +135,7 @@ class OrganizationsList extends Component {
       itemCount,
       contentError,
       hasContentLoading,
-      hasDeletionError,
+      deletionError,
       selected,
       organizations,
     } = this.state;
@@ -212,12 +213,13 @@ class OrganizationsList extends Component {
           </Card>
         </PageSection>
         <AlertModal
-          isOpen={hasDeletionError}
+          isOpen={deletionError}
           variant="danger"
           title={i18n._(t`Error!`)}
           onClose={this.handleDeleteErrorClose}
         >
           {i18n._(t`Failed to delete one or more organizations.`)}
+          <ErrorDetail error={deletionError} />
         </AlertModal>
       </Fragment>
     );

@@ -4,9 +4,18 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Card, PageSection, PageSectionVariants } from '@patternfly/react-core';
 
-import { UnifiedJobsAPI } from '@api';
+import {
+  AdHocCommandsAPI,
+  InventoryUpdatesAPI,
+  JobsAPI,
+  ProjectUpdatesAPI,
+  SystemJobsAPI,
+  UnifiedJobsAPI,
+  WorkflowJobsAPI,
+} from '@api';
 import AlertModal from '@components/AlertModal';
 import DatalistToolbar from '@components/DataListToolbar';
+import ErrorDetail from '@components/ErrorDetail';
 import PaginatedDataList, {
   ToolbarDeleteButton,
 } from '@components/PaginatedDataList';
@@ -27,8 +36,8 @@ class JobList extends Component {
 
     this.state = {
       hasContentLoading: true,
+      deletionError: null,
       contentError: null,
-      deletionError: false,
       selected: [],
       jobs: [],
       itemCount: 0,
@@ -36,7 +45,7 @@ class JobList extends Component {
     this.loadJobs = this.loadJobs.bind(this);
     this.handleSelectAll = this.handleSelectAll.bind(this);
     this.handleSelect = this.handleSelect.bind(this);
-    this.handleDelete = this.handleDelete.bind(this);
+    this.handleJobDelete = this.handleJobDelete.bind(this);
     this.handleDeleteErrorClose = this.handleDeleteErrorClose.bind(this);
   }
 
@@ -52,7 +61,7 @@ class JobList extends Component {
   }
 
   handleDeleteErrorClose() {
-    this.setState({ deletionError: false });
+    this.setState({ deletionError: null });
   }
 
   handleSelectAll(isSelected) {
@@ -70,13 +79,41 @@ class JobList extends Component {
     }
   }
 
-  async handleDelete() {
-    const { selected } = this.state;
-    this.setState({ hasContentLoading: true, deletionError: false });
+  async handleJobDelete() {
+    const { selected, itemCount } = this.state;
+    this.setState({ hasContentLoading: true });
     try {
-      await Promise.all(selected.map(({ id }) => UnifiedJobsAPI.destroy(id)));
+      await Promise.all(
+        selected.map(({ type, id }) => {
+          let deletePromise;
+          switch (type) {
+            case 'job':
+              deletePromise = JobsAPI.destroy(id);
+              break;
+            case 'ad_hoc_command':
+              deletePromise = AdHocCommandsAPI.destroy(id);
+              break;
+            case 'system_job':
+              deletePromise = SystemJobsAPI.destroy(id);
+              break;
+            case 'project_update':
+              deletePromise = ProjectUpdatesAPI.destroy(id);
+              break;
+            case 'inventory_update':
+              deletePromise = InventoryUpdatesAPI.destroy(id);
+              break;
+            case 'workflow_job':
+              deletePromise = WorkflowJobsAPI.destroy(id);
+              break;
+            default:
+              break;
+          }
+          return deletePromise;
+        })
+      );
+      this.setState({ itemCount: itemCount - selected.length });
     } catch (err) {
-      this.setState({ deletionError: true });
+      this.setState({ deletionError: err });
     } finally {
       await this.loadJobs();
     }
@@ -150,7 +187,7 @@ class JobList extends Component {
                 additionalControls={[
                   <ToolbarDeleteButton
                     key="delete"
-                    onDelete={this.handleDelete}
+                    onDelete={this.handleJobDelete}
                     itemsToDelete={selected}
                     itemName={itemName}
                   />,
@@ -176,6 +213,7 @@ class JobList extends Component {
           onClose={this.handleDeleteErrorClose}
         >
           {i18n._(t`Failed to delete one or more jobs.`)}
+          <ErrorDetail error={deletionError} />
         </AlertModal>
       </PageSection>
     );

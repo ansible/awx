@@ -15,6 +15,7 @@ import {
 import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '@api';
 import AlertModal from '@components/AlertModal';
 import DatalistToolbar from '@components/DataListToolbar';
+import ErrorDetail from '@components/ErrorDetail';
 import PaginatedDataList, {
   ToolbarDeleteButton,
   ToolbarAddButton,
@@ -39,7 +40,7 @@ class TemplatesList extends Component {
     this.state = {
       hasContentLoading: true,
       contentError: null,
-      hasDeletionError: false,
+      deletionError: null,
       selected: [],
       templates: [],
       itemCount: 0,
@@ -66,7 +67,7 @@ class TemplatesList extends Component {
   }
 
   handleDeleteErrorClose() {
-    this.setState({ hasDeletionError: false });
+    this.setState({ deletionError: null });
   }
 
   handleSelectAll(isSelected) {
@@ -92,7 +93,7 @@ class TemplatesList extends Component {
   async handleTemplateDelete() {
     const { selected, itemCount } = this.state;
 
-    this.setState({ hasContentLoading: true, hasDeletionError: false });
+    this.setState({ hasContentLoading: true });
     try {
       await Promise.all(
         selected.map(({ type, id }) => {
@@ -107,7 +108,7 @@ class TemplatesList extends Component {
       );
       this.setState({ itemCount: itemCount - selected.length });
     } catch (err) {
-      this.setState({ hasDeletionError: true });
+      this.setState({ deletionError: err });
     } finally {
       await this.loadTemplates();
     }
@@ -159,7 +160,7 @@ class TemplatesList extends Component {
     const {
       contentError,
       hasContentLoading,
-      hasDeletionError,
+      deletionError,
       templates,
       itemCount,
       selected,
@@ -287,12 +288,13 @@ class TemplatesList extends Component {
           />
         </Card>
         <AlertModal
-          isOpen={hasDeletionError}
+          isOpen={deletionError}
           variant="danger"
           title={i18n._(t`Error!`)}
           onClose={this.handleDeleteErrorClose}
         >
           {i18n._(t`Failed to delete one or more template.`)}
+          <ErrorDetail error={deletionError} />
         </AlertModal>
       </PageSection>
     );
