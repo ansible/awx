@@ -199,7 +199,7 @@ describe('<TemplatesList />', () => {
     expect(WorkflowJobTemplatesAPI.destroy).toHaveBeenCalledTimes(1);
   });
 
-  test('error is shown when template not successfully deleted from api', async () => {
+  test('error is shown when template not successfully deleted from api', async done => {
     JobTemplatesAPI.destroy.mockRejectedValue(
       new Error({
         response: {
@@ -225,5 +225,7 @@ describe('<TemplatesList />', () => {
       'Modal',
       el => el.props().isOpen === true && el.props().title === 'Error!'
     );
+
+    done();
   });
 });
