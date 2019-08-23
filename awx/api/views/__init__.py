@@ -3016,6 +3016,7 @@ class WorkflowJobTemplateNodeCreateApproval(RetrieveAPIView):
 
     model = models.WorkflowJobTemplateNode
     serializer_class = serializers.WorkflowJobTemplateNodeCreateApprovalSerializer
+    permission_classes = []
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
