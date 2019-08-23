@@ -4,13 +4,13 @@ Basic Usage
 Installation
 ------------
 
-The awx CLI is available as part of the ``awxkit`` package on PyPI.
-
-The preferred way to install is through pip:
+The preferred way to install the AWX CLI is through pip:
 
 .. code:: bash
 
-    pip install awxkit
+    pip install "https://github.com/ansible/awx/archive/$VERSION.tar.gz#egg=awxkit&subdirectory=awxkit"
+
+...where ``$VERSION`` is the version of AWX you're running.  To see a list of all available releases, visit: https://github.com/ansible/awx/releases
 
 
 Synopsis
