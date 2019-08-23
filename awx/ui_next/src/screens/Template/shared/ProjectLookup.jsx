@@ -17,12 +17,23 @@ const loadProjects = async params => ProjectsAPI.read(params);
 
 class ProjectLookup extends React.Component {
   render() {
-    const { value, tooltip, onChange, required, i18n } = this.props;
+    const {
+      helperTextInvalid,
+      i18n,
+      isValid,
+      onChange,
+      required,
+      tooltip,
+      value,
+      onBlur,
+    } = this.props;
 
     return (
       <FormGroup
-        fieldId="project-lookup"
+        fieldId="project"
+        helperTextInvalid={helperTextInvalid}
         isRequired={required}
+        isValid={isValid}
         label={i18n._(t`Project`)}
       >
         {tooltip && (
@@ -31,10 +42,11 @@ class ProjectLookup extends React.Component {
           </Tooltip>
         )}
         <Lookup
-          id="project-lookup"
+          id="project"
           lookupHeader={i18n._(t`Projects`)}
           name="project"
           value={value}
+          onBlur={onBlur}
           onLookupSave={onChange}
           getItems={loadProjects}
           required={required}
@@ -47,15 +59,21 @@ class ProjectLookup extends React.Component {
 
 ProjectLookup.propTypes = {
   value: Project,
-  tooltip: string,
+  helperTextInvalid: string,
+  isValid: bool,
+  onBlur: func,
   onChange: func.isRequired,
   required: bool,
+  tooltip: string,
 };
 
 ProjectLookup.defaultProps = {
-  value: null,
-  tooltip: '',
+  helperTextInvalid: '',
+  isValid: true,
   required: false,
+  tooltip: '',
+  value: null,
+  onBlur: () => {},
 };
 
 export default withI18n()(ProjectLookup);

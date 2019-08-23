@@ -19,6 +19,7 @@ describe('<AnsibleSelect />', () => {
   test('initially renders succesfully', async () => {
     mountWithContexts(
       <AnsibleSelect
+        id="bar"
         value="foo"
         name="bar"
         onChange={() => {}}
@@ -31,6 +32,7 @@ describe('<AnsibleSelect />', () => {
     const spy = jest.spyOn(_AnsibleSelect.prototype, 'onSelectChange');
     const wrapper = mountWithContexts(
       <AnsibleSelect
+        id="bar"
         value="foo"
         name="bar"
         onChange={() => {}}
@@ -45,6 +47,7 @@ describe('<AnsibleSelect />', () => {
   test('Returns correct select options', () => {
     const wrapper = mountWithContexts(
       <AnsibleSelect
+        id="bar"
         value="foo"
         name="bar"
         onChange={() => {}}

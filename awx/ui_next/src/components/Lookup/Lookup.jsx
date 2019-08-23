@@ -186,6 +186,7 @@ class Lookup extends React.Component {
       columns,
       multiple,
       name,
+      onBlur,
       required,
       i18n,
     } = this.props;
@@ -209,7 +210,7 @@ class Lookup extends React.Component {
 
     return (
       <Fragment>
-        <InputGroup>
+        <InputGroup onBlur={onBlur}>
           <Button
             aria-label="Search"
             id={id}

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Formik, Field } from 'formik';
+import { withFormik, Field } from 'formik';
 import { Form, FormGroup, Tooltip, Card } from '@patternfly/react-core';
 import { QuestionCircleIcon as PFQuestionCircleIcon } from '@patternfly/react-icons';
 import ContentError from '@components/ContentError';
@@ -18,7 +18,7 @@ import styled from 'styled-components';
 import { JobTemplate } from '@types';
 import InventoriesLookup from './InventoriesLookup';
 import ProjectLookup from './ProjectLookup';
-import { LabelsAPI } from '@api';
+import { LabelsAPI, ProjectsAPI } from '@api';
 
 const QuestionCircleIcon = styled(PFQuestionCircleIcon)`
   margin-left: 10px;
@@ -47,6 +47,7 @@ class JobTemplateForm extends Component {
       summary_fields: {
         inventory: null,
         labels: { results: [] },
+        project: null,
       },
     },
   };
@@ -61,14 +62,21 @@ class JobTemplateForm extends Component {
       removedLabels: [],
       project: props.template.summary_fields.project,
       inventory: props.template.summary_fields.inventory,
+      relatedProjectPlaybooks: props.relatedProjectPlaybooks,
     };
     this.handleNewLabel = this.handleNewLabel.bind(this);
     this.loadLabels = this.loadLabels.bind(this);
     this.removeLabel = this.removeLabel.bind(this);
+    this.handleProjectValidation = this.handleProjectValidation.bind(this);
+    this.loadRelatedProjectPlaybooks = this.loadRelatedProjectPlaybooks.bind(
+      this
+    );
   }
 
-  componentDidMount() {
-    this.loadLabels(QSConfig);
+  async componentDidMount() {
+    const { validateField } = this.props;
+    await this.loadLabels(QSConfig);
+    validateField('project');
   }
 
   async loadLabels(QueryConfig) {
@@ -101,7 +109,7 @@ class JobTemplateForm extends Component {
 
   handleNewLabel(label) {
     const { newLabels } = this.state;
-    const { template } = this.props;
+    const { template, setFieldValue } = this.props;
     const isIncluded = newLabels.some(newLabel => newLabel.name === label.name);
     if (isIncluded) {
       const filteredLabels = newLabels.filter(
@@ -109,6 +117,13 @@ class JobTemplateForm extends Component {
       );
       this.setState({ newLabels: filteredLabels });
     } else if (typeof label === 'string') {
+      setFieldValue('newLabels', [
+        ...newLabels,
+        {
+          name: label,
+          organization: template.summary_fields.inventory.organization_id,
+        },
+      ]);
       this.setState({
         newLabels: [
           ...newLabels,
@@ -119,6 +134,10 @@ class JobTemplateForm extends Component {
         ],
       });
     } else {
+      setFieldValue('newLabels', [
+        ...newLabels,
+        { name: label.name, associate: true, id: label.id },
+      ]);
       this.setState({
         newLabels: [
           ...newLabels,
@@ -130,13 +149,20 @@ class JobTemplateForm extends Component {
 
   removeLabel(label) {
     const { removedLabels, newLabels } = this.state;
-    const { template } = this.props;
+    const { template, setFieldValue } = this.props;
 
     const isAssociatedLabel = template.summary_fields.labels.results.some(
       tempLabel => tempLabel.id === label.id
     );
 
     if (isAssociatedLabel) {
+      setFieldValue(
+        'removedLabels',
+        removedLabels.concat({
+          disassociate: true,
+          id: label.id,
+        })
+      );
       this.setState({
         removedLabels: removedLabels.concat({
           disassociate: true,
@@ -147,8 +173,32 @@ class JobTemplateForm extends Component {
       const filteredLabels = newLabels.filter(
         newLabel => newLabel.name !== label.name
       );
+      setFieldValue('newLabels', filteredLabels);
       this.setState({ newLabels: filteredLabels });
     }
+  }
+
+  async loadRelatedProjectPlaybooks(project) {
+    try {
+      const { data: playbooks = [] } = await ProjectsAPI.readPlaybooks(project);
+      this.setState({ relatedProjectPlaybooks: playbooks });
+    } catch (contentError) {
+      this.setState({ contentError });
+    }
+  }
+
+  handleProjectValidation() {
+    const { i18n, touched } = this.props;
+    const { project } = this.state;
+    return () => {
+      if (!project && touched.project) {
+        return i18n._(t`Select a value for this field`);
+      }
+      if (project && project.status === 'never updated') {
+        return i18n._(t`This project needs to be updated`);
+      }
+      return undefined;
+    };
   }
 
   render() {
@@ -158,10 +208,15 @@ class JobTemplateForm extends Component {
       hasContentLoading,
       inventory,
       project,
-      newLabels,
-      removedLabels,
+      relatedProjectPlaybooks = [],
     } = this.state;
-    const { handleCancel, handleSubmit, i18n, template } = this.props;
+    const {
+      handleCancel,
+      handleSubmit,
+      handleBlur,
+      i18n,
+      template,
+    } = this.props;
     const jobTypeOptions = [
       {
         value: '',
@@ -177,6 +232,28 @@ class JobTemplateForm extends Component {
         isDisabled: false,
       },
     ];
+    const playbookOptions = relatedProjectPlaybooks
+      .map(playbook => {
+        return {
+          value: playbook,
+          key: playbook,
+          label: playbook,
+          isDisabled: false,
+        };
+      })
+      .reduce(
+        (arr, playbook) => {
+          return arr.concat(playbook);
+        },
+        [
+          {
+            value: '',
+            key: '',
+            label: i18n._(t`Choose a playbook`),
+            isDisabled: false,
+          },
+        ]
+      );
 
     if (hasContentLoading) {
       return (
@@ -195,129 +272,180 @@ class JobTemplateForm extends Component {
     }
 
     return (
-      <Formik
-        initialValues={{
-          name: template.name,
-          description: template.description,
-          job_type: template.job_type,
-          inventory: template.inventory || '',
-          project: template.project || '',
-          playbook: template.playbook,
-          labels: template.summary_fields.labels.results,
-        }}
-        onSubmit={values => {
-          handleSubmit(values, newLabels, removedLabels);
-        }}
-        render={formik => (
-          <Form autoComplete="off" onSubmit={formik.handleSubmit}>
-            <FormRow>
-              <FormField
-                id="template-name"
-                name="name"
-                type="text"
-                label={i18n._(t`Name`)}
-                validate={required(null, i18n)}
-                isRequired
-              />
-              <FormField
-                id="template-description"
-                name="description"
-                type="text"
-                label={i18n._(t`Description`)}
-              />
-              <Field
-                name="job_type"
-                validate={required(null, i18n)}
-                render={({ field }) => (
-                  <FormGroup
-                    fieldId="template-job-type"
-                    isRequired
-                    label={i18n._(t`Job Type`)}
-                  >
-                    <Tooltip
-                      position="right"
-                      content={i18n._(t`For job templates, select run to execute
-                      the playbook. Select check to only check playbook syntax,
-                      test environment setup, and report problems without
-                      executing the playbook.`)}
-                    >
-                      <QuestionCircleIcon />
-                    </Tooltip>
-                    <AnsibleSelect data={jobTypeOptions} {...field} />
-                  </FormGroup>
-                )}
-              />
-              <Field
-                name="inventory"
-                validate={required(null, i18n)}
-                render={({ form }) => (
-                  <InventoriesLookup
-                    value={inventory}
-                    tooltip={i18n._(t`Select the inventory containing the hosts
-                      you want this job to manage.`)}
-                    onChange={value => {
-                      form.setFieldValue('inventory', value.id);
-                      this.setState({ inventory: value });
-                    }}
-                    required
-                  />
-                )}
-              />
-              <Field
-                name="project"
-                validate={required(null, i18n)}
-                render={({ form }) => (
-                  <ProjectLookup
-                    value={project}
-                    tooltip={i18n._(t`Select the project containing the playbook
-                    you want this job to execute.`)}
-                    onChange={value => {
-                      form.setFieldValue('project', value.id);
-                      this.setState({ project: value });
-                    }}
-                    required
-                  />
-                )}
-              />
-              <FormField
-                id="template-playbook"
-                name="playbook"
-                type="text"
-                label={i18n._(t`Playbook`)}
-                tooltip={i18n._(
-                  t`Select the playbook to be executed by this job.`
-                )}
-                isRequired
-                validate={required(null, i18n)}
-              />
-            </FormRow>
-            <FormRow>
-              <FormGroup label={i18n._(t`Labels`)} fieldId="template-labels">
-                <Tooltip
-                  position="right"
-                  content={i18n._(
-                    t`Optional labels that describe this job template, such as 'dev' or 'test'. Labels can be used to group and filter job templates and completed jobs.`
-                  )}
+      <Form autoComplete="off" onSubmit={handleSubmit}>
+        <FormRow>
+          <FormField
+            id="template-name"
+            name="name"
+            type="text"
+            label={i18n._(t`Name`)}
+            validate={required(null, i18n)}
+            isRequired
+          />
+          <FormField
+            id="template-description"
+            name="description"
+            type="text"
+            label={i18n._(t`Description`)}
+          />
+          <Field
+            name="job_type"
+            validate={required(null, i18n)}
+            onBlur={handleBlur}
+            render={({ form, field }) => {
+              const isValid =
+                form && (!form.touched[field.name] || !form.errors[field.name]);
+              return (
+                <FormGroup
+                  fieldId="template-job-type"
+                  helperTextInvalid={form.errors.job_type}
+                  isRequired
+                  isValid={isValid}
+                  label={i18n._(t`Job Type`)}
                 >
-                  <QuestionCircleIcon />
-                </Tooltip>
-                <MultiSelect
-                  onAddNewItem={this.handleNewLabel}
-                  onRemoveItem={this.removeLabel}
-                  associatedItems={template.summary_fields.labels.results}
-                  options={loadedLabels}
+                  <Tooltip
+                    position="right"
+                    content={i18n._(t`For job templates, select run to execute
+                  the playbook. Select check to only check playbook syntax,
+                  test environment setup, and report problems without
+                  executing the playbook.`)}
+                  >
+                    <QuestionCircleIcon />
+                  </Tooltip>
+                  <AnsibleSelect
+                    isValid={isValid}
+                    id="job_type"
+                    data={jobTypeOptions}
+                    {...field}
+                  />
+                </FormGroup>
+              );
+            }}
+          />
+          <Field
+            name="inventory"
+            validate={required(null, i18n)}
+            render={({ form }) => (
+              <InventoriesLookup
+                value={inventory}
+                tooltip={i18n._(t`Select the inventory containing the hosts
+                  you want this job to manage.`)}
+                onChange={value => {
+                  form.setFieldValue('inventory', value.id);
+                  this.setState({ inventory: value });
+                }}
+                required
+              />
+            )}
+          />
+          <Field
+            name="project"
+            validate={this.handleProjectValidation()}
+            render={({ form }) => {
+              const isValid = form && !form.errors.project;
+              return (
+                <ProjectLookup
+                  helperTextInvalid={form.errors.project}
+                  isValid={isValid}
+                  value={project}
+                  onBlur={handleBlur}
+                  tooltip={i18n._(t`Select the project containing the playbook
+                  you want this job to execute.`)}
+                  onChange={value => {
+                    this.loadRelatedProjectPlaybooks(value.id);
+                    form.setFieldValue('project', value.id);
+                    form.setFieldTouched('project');
+                    this.setState({ project: value });
+                  }}
+                  required
                 />
-              </FormGroup>
-            </FormRow>
-            <FormActionGroup
-              onCancel={handleCancel}
-              onSubmit={formik.handleSubmit}
+              );
+            }}
+          />
+          <Field
+            name="playbook"
+            validate={required(i18n._(t`Select a value for this field`), i18n)}
+            onBlur={handleBlur}
+            render={({ field, form }) => {
+              const isValid =
+                form && (!form.touched[field.name] || !form.errors[field.name]);
+              return (
+                <FormGroup
+                  fieldId="template-playbook"
+                  helperTextInvalid={form.errors.playbook}
+                  isRequired
+                  isValid={isValid}
+                  label={i18n._(t`Playbook`)}
+                >
+                  <Tooltip
+                    position="right"
+                    content={i18n._(
+                      t`Select the playbook to be executed by this job.`
+                    )}
+                  >
+                    <QuestionCircleIcon />
+                  </Tooltip>
+                  <AnsibleSelect
+                    id="playbook"
+                    data={playbookOptions}
+                    isValid={isValid}
+                    form={form}
+                    {...field}
+                  />
+                </FormGroup>
+              );
+            }}
+          />
+        </FormRow>
+        <FormRow>
+          <FormGroup label={i18n._(t`Labels`)} fieldId="template-labels">
+            <Tooltip
+              position="right"
+              content={i18n._(
+                t`Optional labels that describe this job template, such as 'dev' or 'test'. Labels can be used to group and filter job templates and completed jobs.`
+              )}
+            >
+              <QuestionCircleIcon />
+            </Tooltip>
+            <MultiSelect
+              onAddNewItem={this.handleNewLabel}
+              onRemoveItem={this.removeLabel}
+              associatedItems={template.summary_fields.labels.results}
+              options={loadedLabels}
             />
-          </Form>
-        )}
-      />
+          </FormGroup>
+        </FormRow>
+        <FormActionGroup onCancel={handleCancel} onSubmit={handleSubmit} />
+      </Form>
     );
   }
 }
+
+const FormikApp = withFormik({
+  mapPropsToValues(props) {
+    const { template = {} } = props;
+    const {
+      name = '',
+      description = '',
+      job_type = '',
+      inventory = '',
+      playbook = '',
+      project = '',
+      summary_fields = { labels: { results: [] } },
+    } = { ...template };
+
+    return {
+      name: name || '',
+      description: description || '',
+      job_type: job_type || '',
+      inventory: inventory || '',
+      project: project || '',
+      playbook: playbook || '',
+      labels: summary_fields.labels.results,
+    };
+  },
+  handleSubmit: (values, bag) => bag.props.handleSubmit(values),
+})(JobTemplateForm);
+
 export { JobTemplateForm as _JobTemplateForm };
-export default withI18n()(withRouter(JobTemplateForm));
+export default withI18n()(withRouter(FormikApp));

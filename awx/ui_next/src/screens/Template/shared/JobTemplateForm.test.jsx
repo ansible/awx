@@ -1,6 +1,7 @@
 import React from 'react';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
 import { sleep } from '@testUtils/testUtils';
+import { shallow } from 'enzyme';
 import JobTemplateForm, { _JobTemplateForm } from './JobTemplateForm';
 import { LabelsAPI } from '@api';
 
@@ -41,12 +42,15 @@ describe('<JobTemplateForm />', () => {
 
   test('initially renders successfully', async done => {
     const wrapper = mountWithContexts(
-      <JobTemplateForm
-        template={mockData}
-        handleSubmit={jest.fn()}
-        handleCancel={jest.fn()}
-      />
+      shallow(
+        <JobTemplateForm
+          template={mockData}
+          handleSubmit={jest.fn()}
+          handleCancel={jest.fn()}
+        />
+      ).get(0)
     );
+
     await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
     expect(LabelsAPI.read).toHaveBeenCalled();
     expect(
@@ -60,11 +64,13 @@ describe('<JobTemplateForm />', () => {
 
   test('should update form values on input changes', async done => {
     const wrapper = mountWithContexts(
-      <JobTemplateForm
-        template={mockData}
-        handleSubmit={jest.fn()}
-        handleCancel={jest.fn()}
-      />
+      shallow(
+        <JobTemplateForm
+          template={mockData}
+          handleSubmit={jest.fn()}
+          handleCancel={jest.fn()}
+        />
+      ).get(0)
     );
     await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
     const form = wrapper.find('Formik');
@@ -90,7 +96,7 @@ describe('<JobTemplateForm />', () => {
       name: 'project',
     });
     expect(form.state('values').project).toEqual(4);
-    wrapper.find('input#template-playbook').simulate('change', {
+    wrapper.find('AnsibleSelect[name="playbook"]').simulate('change', {
       target: { value: 'new baz type', name: 'playbook' },
     });
     expect(form.state('values').playbook).toEqual('new baz type');
