@@ -58,11 +58,18 @@ export default ['i18n', function(i18n) {
                 type: 'text',
                 reset: 'ANSIBLE_FACT_CACHE_TIMEOUT',
             },
+            PROJECT_UPDATE_VVV: {
+                type: 'toggleSwitch',
+            },
             AWX_ROLES_ENABLED: {
                 type: 'toggleSwitch',
             },
             AWX_COLLECTIONS_ENABLED: {
                 type: 'toggleSwitch',
+            },
+            PRIVATE_GALAXY_URL: {
+                type: 'text',
+                reset: 'PRIVATE_GALAXY_URL',
             },
             AWX_TASK_ENV: {
                 type: 'textarea',

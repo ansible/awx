@@ -609,6 +609,9 @@ AWX_REBUILD_SMART_MEMBERSHIP = False
 # By default, allow arbitrary Jinja templating in extra_vars defined on a Job Template
 ALLOW_JINJA_IN_EXTRA_VARS = 'template'
 
+# Run project updates with extra verbosity
+PROJECT_UPDATE_VVV = False
+
 # Enable dynamically pulling roles from a requirement.yml file
 # when updating SCM projects
 # Note: This setting may be overridden by database settings.
@@ -618,6 +621,12 @@ AWX_ROLES_ENABLED = True
 # when updating SCM projects
 # Note: This setting may be overridden by database settings.
 AWX_COLLECTIONS_ENABLED = True
+
+# Settings for private galaxy server, should be set in the UI
+PRIVATE_GALAXY_URL = None
+PRIVATE_GALAXY_USERNAME = None
+PRIVATE_GALAXY_TOKEN = None
+PRIVATE_GALAXY_PASSWORD = None
 
 # Enable bubblewrap support for running jobs (playbook runs only).
 # Note: This setting may be overridden by database settings.

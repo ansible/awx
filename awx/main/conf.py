@@ -411,6 +411,15 @@ register(
 )
 
 register(
+    'PROJECT_UPDATE_VVV',
+    field_class=fields.BooleanField,
+    label=_('Run Project Updates With Higher Verbosity'),
+    help_text=_('Adds the CLI -vvv flag to ansible-playbook runs of project_update.yml used for project updates.'),
+    category=_('Jobs'),
+    category_slug='jobs',
+)
+
+register(
     'AWX_ROLES_ENABLED',
     field_class=fields.BooleanField,
     default=True,
@@ -428,6 +437,52 @@ register(
     help_text=_('Allows collections to be dynamically downloaded from a requirements.yml file for SCM projects.'),
     category=_('Jobs'),
     category_slug='jobs',
+)
+
+register(
+    'PRIVATE_GALAXY_URL',
+    field_class=fields.URLField,
+    label=_('Private Galaxy Server Host'),
+    help_text=_('For using a private galaxy server at higher precedence than the public Ansible Galaxy. '
+                'The URL of the galaxy instance to connect to, this is required if using a private galaxy server.'),
+    category=_('Jobs'),
+    category_slug='jobs',
+)
+
+register(
+    'PRIVATE_GALAXY_USERNAME',
+    field_class=fields.CharField,
+    label=_('Private Galaxy Server Username'),
+    help_text=_('For using a private galaxy server at higher precedence than the public Ansible Galaxy. '
+                'The username to use for basic authentication against the Galaxy instance, '
+                'this is mutually exclusive with PRIVATE_GALAXY_TOKEN.'),
+    category=_('Jobs'),
+    category_slug='jobs',
+    depends_on=['PRIVATE_GALAXY_URL']
+)
+
+register(
+    'PRIVATE_GALAXY_PASSWORD',
+    field_class=fields.CharField,
+    label=_('Private Galaxy Server Password'),
+    help_text=_('For using a private galaxy server at higher precedence than the public Ansible Galaxy. '
+                'The password to use for basic authentication against the Galaxy instance, '
+                'this is mutually exclusive with PRIVATE_GALAXY_TOKEN.'),
+    category=_('Jobs'),
+    category_slug='jobs',
+    depends_on=['PRIVATE_GALAXY_URL']
+)
+
+register(
+    'PRIVATE_GALAXY_TOKEN',
+    field_class=fields.CharField,
+    label=_('Private Galaxy Server Token'),
+    help_text=_('For using a private galaxy server at higher precedence than the public Ansible Galaxy. '
+                'The username to use for basic authentication against the Galaxy instance, '
+                'this is mutually exclusive with corresponding username and password settings.'),
+    category=_('Jobs'),
+    category_slug='jobs',
+    depends_on=['PRIVATE_GALAXY_URL']
 )
 
 register(
