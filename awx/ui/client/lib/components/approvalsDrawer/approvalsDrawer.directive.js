@@ -18,7 +18,6 @@ function AtApprovalsDrawerController (strings, Rest, GetBasePath, $rootScope) {
     };
     vm.emptyListReason = vm.strings.get('approvals.NONE');
 
-    // This will probably need to be expanded
     vm.toolbarSortOptions = [
         toolbarSortDefault,
         { label: `${vm.strings.get('sort.CREATED_DESCENDING')}`, value: '-created' }

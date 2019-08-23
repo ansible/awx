@@ -32,7 +32,7 @@ export default
             timeout: null,
 
             getSessionTime: function () {
-                if(Store('sessionTime')){
+                if(Store('sessionTime') && Store('sessionTime')[$rootScope.current_user.id]){
                     return Store('sessionTime')[$rootScope.current_user.id].time;
                 }
                 else {

@@ -132,23 +132,23 @@ export default ['$log', '$cookies', '$rootScope', 'ProcessErrors',
                     $rootScope.user_is_system_auditor = data.results[0].is_system_auditor;
                     scope.$emit('AuthorizationGetLicense');
                 });
+
+                Rest.setUrl(`${GetBasePath('workflow_approvals')}?status=pending&page_size=1`);
+                Rest.get()
+                    .then(({data}) => {
+                        $rootScope.pendingApprovalCount = data.count;
+                    })
+                    .catch(({data, status}) => {
+                        ProcessErrors({}, data, status, null, {
+                            hdr: i18n._('Error!'),
+                            msg: i18n._('Failed to get workflow jobs pending approval. GET returned status: ') + status
+                        });
+                    });
             })
             .catch(({data, status}) => {
                 Authorization.logout().then( () => {
                     Wait('stop');
                     Alert('Error', 'Failed to access user information. GET returned status: ' + status, 'alert-danger', loginAgain);
-                });
-            });
-
-        Rest.setUrl(`${GetBasePath('workflow_approvals')}?status=pending&page_size=1`);
-        Rest.get()
-            .then(({data}) => {
-                $rootScope.pendingApprovalCount = data.count;
-            })
-            .catch(({data, status}) => {
-                ProcessErrors({}, data, status, null, {
-                    hdr: i18n._('Error!'),
-                    msg: i18n._('Failed to get workflow jobs pending approval. GET returned status: ') + status
                 });
             });
     });
