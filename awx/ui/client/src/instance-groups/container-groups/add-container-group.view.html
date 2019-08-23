@@ -1,0 +1,22 @@
+<div ui-view="credentials"></div>
+<at-panel>
+  <at-panel-heading title="{{:: vm.panelTitle }}"></at-panel-heading>
+  <at-panel-body>
+    <at-form state="vm.form" autocomplete="off">
+      <at-input-text col="4" tab="1" state="vm.form.name"></at-input-text>
+      <at-input-lookup col="4" tab="3" state="vm.form.credential" id="containter_groups_credential"></at-input-lookup>
+      <at-code-mirror
+        col="4" tab="3"
+        class="form-group Form-formGroup--fullWidth containerGroups-codeMirror"
+        variables="vm.form.extraVars.value"
+        label="{{ vm.form.extraVars.label }}"
+        name="{{ vm.form.extraVars.name }}"
+      >
+      </at-code-mirror>
+      <at-action-group col="12" pos="right">
+        <at-form-action type="cancel" to="instanceGroups"></at-form-action>
+        <at-form-action type="save"></at-form-action>
+      </at-action-group>
+    </at-form>
+  </at-panel-body>
+</at-panel>
