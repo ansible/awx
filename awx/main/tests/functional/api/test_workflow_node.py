@@ -152,7 +152,7 @@ class TestApprovalNodes():
         node = wfjt.workflow_nodes.create(unified_job_template=job_template)
         url = reverse('api:workflow_job_template_node_create_approval',
                       kwargs={'pk': node.pk, 'version': 'v2'})
-        post(url, {'name': 'Approve/Deny Test1', 'description': '', 'timeout': 0},
+        post(url, {'name': 'Approve Test', 'description': '', 'timeout': 0},
              user=admin_user, expect=200)
         post(reverse('api:workflow_job_template_launch', kwargs={'pk': wfjt.pk}),
              user=admin_user, expect=201)
@@ -161,7 +161,7 @@ class TestApprovalNodes():
         TaskManager().schedule()
         wfj_node = wf_job.workflow_nodes.first()
         approval = wfj_node.job
-        assert approval.name == 'Approve/Deny Test1'
+        assert approval.name == 'Approve Test'
         post(reverse('api:workflow_approval_approve', kwargs={'pk': approval.pk}),
              user=admin_user, expect=204)
         # Test that there is an activity stream entry that was created for the "approve" action.
@@ -171,7 +171,7 @@ class TestApprovalNodes():
         assert WorkflowApproval.objects.get(pk=approval.pk).status == 'successful'
         assert qs.operation == 'update'
         post(reverse('api:workflow_approval_approve', kwargs={'pk': approval.pk}),
-             user=admin_user, expect=403)
+             user=admin_user, expect=400)
 
     @pytest.mark.django_db
     def test_approval_node_deny(self, post, admin_user, job_template):
@@ -182,7 +182,7 @@ class TestApprovalNodes():
         node = wfjt.workflow_nodes.create(unified_job_template=job_template)
         url = reverse('api:workflow_job_template_node_create_approval',
                       kwargs={'pk': node.pk, 'version': 'v2'})
-        post(url, {'name': 'Approve/Deny Test2', 'description': '', 'timeout': 0},
+        post(url, {'name': 'Deny Test', 'description': '', 'timeout': 0},
              user=admin_user, expect=200)
         post(reverse('api:workflow_job_template_launch', kwargs={'pk': wfjt.pk}),
              user=admin_user, expect=201)
@@ -191,7 +191,7 @@ class TestApprovalNodes():
         TaskManager().schedule()
         wfj_node = wf_job.workflow_nodes.first()
         approval = wfj_node.job
-        assert approval.name == 'Approve/Deny Test2'
+        assert approval.name == 'Deny Test'
         post(reverse('api:workflow_approval_deny', kwargs={'pk': approval.pk}),
              user=admin_user, expect=204)
         # Test that there is an activity stream entry that was created for the "deny" action.
@@ -201,7 +201,7 @@ class TestApprovalNodes():
         assert WorkflowApproval.objects.get(pk=approval.pk).status == 'failed'
         assert qs.operation == 'update'
         post(reverse('api:workflow_approval_deny', kwargs={'pk': approval.pk}),
-             user=admin_user, expect=403)
+             user=admin_user, expect=400)
 
     def test_approval_node_cleanup(self, post, approval_node, admin_user, get):
         workflow_job_template = WorkflowJobTemplate.objects.create()

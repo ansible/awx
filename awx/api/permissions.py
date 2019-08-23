@@ -198,8 +198,8 @@ class TaskPermission(ModelAccessPermission):
 
 class WorkflowApprovalPermission(ModelAccessPermission):
     '''
-    Permission check used by workflow approval and deny views
-    to determine who can has access to approve and deny paused workflow nodes
+    Permission check used by workflow `approval` and `deny` views to determine
+    who has access to approve and deny paused workflow nodes
     '''
 
     def check_post_permissions(self, request, view, obj=None):

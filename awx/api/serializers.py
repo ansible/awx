@@ -3473,15 +3473,6 @@ class WorkflowApprovalTemplateSerializer(UnifiedJobTemplateSerializer):
         return res
 
 
-class WorkflowJobTemplateApprovalSerializer(UnifiedJobTemplateSerializer):
-    class Meta:
-        model = WorkflowApprovalTemplate
-        fields = ('*',)
-
-    def post(self, obj):
-        return  # POST only!!!
-
-
 class LaunchConfigurationBaseSerializer(BaseSerializer):
     scm_branch = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
     job_type = serializers.ChoiceField(allow_blank=True, allow_null=True, required=False, default=None,

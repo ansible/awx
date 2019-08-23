@@ -527,10 +527,11 @@ class TaskManager():
             if task.timeout == 0:
                 continue
             if (now - task.created) >= approval_timeout_seconds:
-                logger.warn("The approval node {} ({}) has expired after {} seconds.".format(task.name, task.pk, task.timeout))
+                timeout_message = "The approval node {} ({}) has expired after {} seconds.".format(task.name, task.pk, task.timeout)
+                logger.warn(timeout_message)
                 task.timed_out = True
                 task.status = 'failed'
-                task.job_explanation = _("This approval node has timed out.")
+                task.job_explanation = _(timeout_message)
                 task.save(update_fields=['status', 'job_explanation', 'timed_out'])
 
     def calculate_capacity_consumed(self, tasks):

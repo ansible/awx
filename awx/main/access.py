@@ -2809,8 +2809,6 @@ class WorkflowApprovalAccess(BaseAccess):
                 self.user, 'read_role'))
 
     def can_approve_or_deny(self, obj):
-        if obj.status != 'pending':
-            return False
         if self.user in obj.workflow_job_template.approval_role or self.user.is_superuser:
             return True
 
