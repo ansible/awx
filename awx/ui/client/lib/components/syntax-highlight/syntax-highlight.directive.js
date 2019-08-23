@@ -16,6 +16,11 @@ function atSyntaxHighlightController ($scope, AngularCodeMirror) {
 
         $scope.$watch(varName, () => {
             $scope.value = $scope[varName];
+            if ($scope.oneLine && $scope.value && $scope.value.includes('\n')) {
+                $scope.hasNewlineError = true;
+            } else {
+                $scope.hasNewlineError = false;
+            }
         });
     }
 
@@ -84,6 +89,7 @@ function atCodeMirrorTextarea () {
             init: '=',
             default: '@',
             rows: '@',
+            oneLine: '@',
             mode: '@',
         }
     };

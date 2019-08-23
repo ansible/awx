@@ -1369,6 +1369,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += `value="${fld}" `;
                         html += `default="${field.default || ''}" `;
                         html += `rows="${field.rows || 6}" `;
+                        html += `one-line="${field.oneLine || ''}"`;
                         html += `mode="${field.mode}" `;
                         html += `ng-disabled="${field.ngDisabled}" `;
                         html += '></at-syntax-highlight>';

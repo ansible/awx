@@ -29,4 +29,5 @@
         class="form-control Form-textArea"
         id="{{ vm.name }}_codemirror">
     </textarea>
+    <div class="error" ng-show="hasNewlineError">New lines are not supported in this field</div>
 </div>

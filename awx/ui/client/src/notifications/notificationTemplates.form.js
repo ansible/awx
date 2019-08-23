@@ -610,6 +610,7 @@ export default ['i18n', function(i18n) {
                 default: '',
                 ngShow: "customize_messages && notification_type.value != 'webhook'",
                 rows: 2,
+                oneLine: 'true',
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
             },
             started_body: {
@@ -632,6 +633,7 @@ export default ['i18n', function(i18n) {
                 default: '',
                 ngShow: "customize_messages && notification_type.value != 'webhook'",
                 rows: 2,
+                oneLine: 'true',
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
             },
             success_body: {
@@ -654,6 +656,7 @@ export default ['i18n', function(i18n) {
                 default: '',
                 ngShow: "customize_messages && notification_type.value != 'webhook'",
                 rows: 2,
+                oneLine: 'true',
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
             },
             error_body: {
