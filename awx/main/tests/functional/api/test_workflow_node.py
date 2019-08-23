@@ -194,7 +194,7 @@ class TestApprovalNodes():
         assert approval.name == 'Approve/Deny Test2'
         post(reverse('api:workflow_approval_deny', kwargs={'pk': approval.pk}),
              user=admin_user, expect=204)
-        # Test that there is an activity stream entry that was created for the "approve" action.
+        # Test that there is an activity stream entry that was created for the "deny" action.
         qs = ActivityStream.objects.order_by('-timestamp').first()
         assert qs.object1 == 'workflow_approval'
         assert qs.changes == '{"status": ["pending", "failed"]}'
