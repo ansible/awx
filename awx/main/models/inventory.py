@@ -2049,14 +2049,17 @@ class azure_rm(PluginFileInjector):
             'computer_name': 'name',
             'type': 'resource_type',
             'private_ip': 'private_ipv4_addresses[0] if private_ipv4_addresses else None',
-            'public_ip': 'public_ipv4_addresses[0] if public_ipv4_addresses else None',
-            'public_ip_name': 'public_ip_name if public_ip_name is defined else None',
-            'public_ip_id': 'public_ip_id if public_ip_id is defined else None',
             'tags': 'tags if tags else None'
         }
         # Special functionality from script
         if source_vars.get('use_private_ip', False):
             ret['hostvar_expressions']['ansible_host'] = 'private_ipv4_addresses[0]'
+        else:
+            ret['hostvar_expressions'] = {
+                'public_ip': 'public_ipv4_addresses[0] if public_ipv4_addresses else None',
+                'public_ip_name': 'public_ip_name if public_ip_name is defined else None',
+                'public_ip_id': 'public_ip_id if public_ip_id is defined else None'
+            }
         # end compatibility content
 
         if inventory_update.source_regions and 'all' not in inventory_update.source_regions:
