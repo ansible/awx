@@ -328,12 +328,18 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
 
                                             let processed = PromptService.processSurveyQuestions({
                                                 surveyQuestions: surveyQuestionRes.data.spec,
-                                                extra_data: _.cloneDeep($scope.nodeConfig.node.originalNodeObject.extra_data)
+                                                extra_data: jsyaml.safeLoad(prompts.variables.value)
                                             });
 
                                             $scope.missingSurveyValue = processed.missingSurveyValue;
 
                                             $scope.extraVars = (processed.extra_data === '' || _.isEmpty(processed.extra_data)) ? '---' : '---\n' + jsyaml.safeDump(processed.extra_data);
+
+                                            // PromptService.processSurveyQuestions will strip the survey answers out of the extra
+                                            // vars so we should update the prompt value
+                                            prompts.variables = {
+                                                value: $scope.extraVars
+                                            };
 
                                             $scope.nodeConfig.node.promptData = $scope.promptData = {
                                                 launchConf: launchConf,

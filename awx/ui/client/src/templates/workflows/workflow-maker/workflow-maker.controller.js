@@ -100,12 +100,15 @@ export default ['$scope', 'TemplatesService',
                 }
 
                 if (_.has(node, 'promptData.extraVars')) {
+                    const formVars = node.promptData.extraVars;
+                    const formVarsJSON = typeof formVars === 'string' ? jsyaml.safeLoad(formVars) : formVars;
                     if (_.get(node, 'promptData.launchConf.defaults.extra_vars')) {
-                        const defaultVars = jsyaml.safeLoad(node.promptData.launchConf.defaults.extra_vars);
+                        const defaultVars = node.promptData.launchConf.defaults.extra_vars;
+                        const defaultVarsJSON = typeof defaultVars === 'string' ? jsyaml.safeLoad(defaultVars) : defaultVars;
 
                         // Only include extra vars that differ from the template default vars
-                        _.forOwn(node.promptData.extraVars, (value, key) => {
-                            if (!defaultVars[key] || defaultVars[key] !== value) {
+                        _.forOwn(formVarsJSON, (value, key) => {
+                            if (!defaultVarsJSON[key] || defaultVarsJSON[key] !== value) {
                                 sendableNodeData.extra_data[key] = value;
                             }
                         });
@@ -113,8 +116,8 @@ export default ['$scope', 'TemplatesService',
                             delete sendableNodeData.extra_data;
                         }
                     } else {
-                        if (_.has(node, 'promptData.extraVars') && !_.isEmpty(node.promptData.extraVars)) {
-                            sendableNodeData.extra_data = node.promptData.extraVars;
+                        if (_.has(node, 'promptData.extraVars') && !_.isEmpty(formVarsJSON)) {
+                            sendableNodeData.extra_data = formVarsJSON;
                         }
                     }
                 }
