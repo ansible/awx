@@ -5,17 +5,17 @@ import os
 import os.path
 import tempfile
 import shutil
-import subprocess
+import requests
 
 from django.conf import settings
-from django.utils.encoding import smart_str
 from django.utils.timezone import now, timedelta
 from rest_framework.exceptions import PermissionDenied
 
 from awx.conf.license import get_license
-from awx.main.models import Job
+from awx.main.models import Job, Credential
 from awx.main.access import access_registry
 from awx.main.models.ha import TowerAnalyticsState
+from awx.main.utils import decrypt_field
 
 
 __all__ = ['register', 'gather', 'ship', 'table_version']
@@ -146,30 +146,23 @@ def gather(dest=None, module=None, collection_type='scheduled'):
 
 def ship(path):
     """
-    Ship gathered metrics via the Insights agent
+    Ship gathered metrics via the Insights API
     """
     try:
-        agent = 'insights-client'
-        if shutil.which(agent) is None:
-            logger.error('could not find {} on PATH'.format(agent))
-            return
         logger.debug('shipping analytics file: {}'.format(path))
-        try:
-            cmd = [
-                agent, '--payload', path, '--content-type', settings.INSIGHTS_AGENT_MIME
-            ]
-            output = smart_str(subprocess.check_output(cmd, timeout=60 * 5))
-            logger.debug(output)
-            # reset the `last_run` when data is shipped
-            run_now = now()
-            state = TowerAnalyticsState.get_solo()
-            state.last_run = run_now
-            state.save()
-
-        except subprocess.CalledProcessError:
-            logger.exception('{} failure:'.format(cmd))
-        except subprocess.TimeoutExpired:
-            logger.exception('{} timeout:'.format(cmd))
+        url = settings.INSIGHTS_URL_BASE + '/api/ingress/v1/upload'
+        with open(path, 'rb') as f:
+            files = {'file': (os.path.basename(path), f, settings.INSIGHTS_AGENT_MIME)}
+            creds = Credential.objects.get(name=settings.INSIGHTS_URL_BASE)
+            response = requests.post(url, files=files, auth=(creds.inputs['username'],
+                                                             decrypt_field(creds, 'password')))
+            if response.status_code != 202:
+                logger.exception('Upload failure status {} text {}'.format(response.status_code,
+                                                                           response.text))
+        run_now = now()
+        state = TowerAnalyticsState.get_solo()
+        state.last_run = run_now
+        state.save()
     finally:
         # cleanup tar.gz
         os.remove(path)
