@@ -164,6 +164,7 @@ class OrganizationForm extends Component {
                           label={i18n._(t`Ansible Environment`)}
                         >
                           <AnsibleSelect
+                            id="org-custom-virtualenv"
                             data={[
                               defaultVenv,
                               ...custom_virtualenvs

@@ -4,7 +4,7 @@ import { withRouter, Redirect } from 'react-router-dom';
 import { CardBody } from '@patternfly/react-core';
 import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
-import { JobTemplatesAPI } from '@api';
+import { JobTemplatesAPI, ProjectsAPI } from '@api';
 import { JobTemplate } from '@types';
 import JobTemplateForm from '../shared/JobTemplateForm';
 
@@ -21,6 +21,7 @@ class JobTemplateEdit extends Component {
       contentError: null,
       formSubmitError: null,
       relatedCredentials: [],
+      relatedProjectPlaybooks: [],
     };
 
     const {
@@ -31,6 +32,9 @@ class JobTemplateEdit extends Component {
     this.handleCancel = this.handleCancel.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.loadRelatedCredentials = this.loadRelatedCredentials.bind(this);
+    this.loadRelatedProjectPlaybooks = this.loadRelatedProjectPlaybooks.bind(
+      this
+    );
     this.submitLabels = this.submitLabels.bind(this);
   }
 
@@ -41,15 +45,13 @@ class JobTemplateEdit extends Component {
   async loadRelated() {
     this.setState({ contentError: null, hasContentLoading: true });
     try {
-      const [
-        relatedCredentials,
-        // relatedProjectPlaybooks,
-      ] = await Promise.all([
+      const [relatedCredentials, relatedProjectPlaybooks] = await Promise.all([
         this.loadRelatedCredentials(),
-        // this.loadRelatedProjectPlaybooks(),
+        this.loadRelatedProjectPlaybooks(),
       ]);
       this.setState({
         relatedCredentials,
+        relatedProjectPlaybooks,
       });
     } catch (contentError) {
       this.setState({ contentError });
@@ -86,15 +88,31 @@ class JobTemplateEdit extends Component {
     }
   }
 
-  async handleSubmit(values, newLabels = [], removedLabels = []) {
+  async loadRelatedProjectPlaybooks() {
+    const {
+      template: { project },
+    } = this.props;
+    try {
+      const { data: playbooks = [] } = await ProjectsAPI.readPlaybooks(project);
+      this.setState({ relatedProjectPlaybooks: playbooks });
+      return playbooks;
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  async handleSubmit(values) {
     const {
       template: { id },
       history,
     } = this.props;
+    const { newLabels, removedLabels } = values;
+    delete values.newLabels;
+    delete values.removedLabels;
 
     this.setState({ formSubmitError: null });
     try {
-      await JobTemplatesAPI.update(id, { ...values });
+      await JobTemplatesAPI.update(id, values);
       await Promise.all([this.submitLabels(newLabels, removedLabels)]);
       history.push(this.detailsUrl);
     } catch (formSubmitError) {
@@ -102,7 +120,7 @@ class JobTemplateEdit extends Component {
     }
   }
 
-  async submitLabels(newLabels, removedLabels) {
+  async submitLabels(newLabels = [], removedLabels = []) {
     const {
       template: { id },
     } = this.props;
@@ -131,7 +149,12 @@ class JobTemplateEdit extends Component {
 
   render() {
     const { template } = this.props;
-    const { contentError, formSubmitError, hasContentLoading } = this.state;
+    const {
+      contentError,
+      formSubmitError,
+      hasContentLoading,
+      relatedProjectPlaybooks,
+    } = this.state;
     const canEdit = template.summary_fields.user_capabilities.edit;
 
     if (hasContentLoading) {
@@ -152,6 +175,7 @@ class JobTemplateEdit extends Component {
           template={template}
           handleCancel={this.handleCancel}
           handleSubmit={this.handleSubmit}
+          relatedProjectPlaybooks={relatedProjectPlaybooks}
         />
         {formSubmitError ? <div> error </div> : null}
       </CardBody>

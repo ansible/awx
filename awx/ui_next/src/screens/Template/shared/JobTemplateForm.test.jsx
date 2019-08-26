@@ -47,6 +47,7 @@ describe('<JobTemplateForm />', () => {
         handleCancel={jest.fn()}
       />
     );
+
     await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
     expect(LabelsAPI.read).toHaveBeenCalled();
     expect(
@@ -66,6 +67,7 @@ describe('<JobTemplateForm />', () => {
         handleCancel={jest.fn()}
       />
     );
+
     await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
     const form = wrapper.find('Formik');
     wrapper.find('input#template-name').simulate('change', {
@@ -90,7 +92,7 @@ describe('<JobTemplateForm />', () => {
       name: 'project',
     });
     expect(form.state('values').project).toEqual(4);
-    wrapper.find('input#template-playbook').simulate('change', {
+    wrapper.find('AnsibleSelect[name="playbook"]').simulate('change', {
       target: { value: 'new baz type', name: 'playbook' },
     });
     expect(form.state('values').playbook).toEqual('new baz type');
@@ -127,6 +129,27 @@ describe('<JobTemplateForm />', () => {
     expect(handleCancel).not.toHaveBeenCalled();
     wrapper.find('button[aria-label="Cancel"]').prop('onClick')();
     expect(handleCancel).toBeCalled();
+    done();
+  });
+
+  test('should call loadRelatedProjectPlaybooks when project value changes', async done => {
+    const loadRelatedProjectPlaybooks = jest.spyOn(
+      _JobTemplateForm.prototype,
+      'loadRelatedProjectPlaybooks'
+    );
+    const wrapper = mountWithContexts(
+      <JobTemplateForm
+        template={mockData}
+        handleSubmit={jest.fn()}
+        handleCancel={jest.fn()}
+      />
+    );
+    await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
+    wrapper.find('ProjectLookup').prop('onChange')({
+      id: 10,
+      name: 'project',
+    });
+    expect(loadRelatedProjectPlaybooks).toHaveBeenCalledWith(10);
     done();
   });
 
