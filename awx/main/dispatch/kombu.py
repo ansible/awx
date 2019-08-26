@@ -4,6 +4,7 @@ from kombu.connection import Connection as KombuConnection
 from kombu.transport import pyamqp
 
 import logging
+import ssl
 
 logger = logging.getLogger('awx.main.dispatch')
 
@@ -39,4 +40,15 @@ class Connection(KombuConnection):
         class _Transport(pyamqp.Transport):
             Connection = _Connection
 
-        self.transport_cls = _Transport
+        class _SSLTransport(pyamqp.SSLTransport):
+            def __init__(self, *args, **kwargs):
+                super(_SSLTransport, self).__init__(*args, **kwargs)
+                self.client.ssl = {
+                    'cert_reqs': ssl.CERT_REQUIRED if settings.AMQPS_VERIFY_CERTS else ssl.CERT_NONE,
+                    'ca_certs': settings.AMQPS_CA_BUNDLE,
+                }
+
+        if settings.BROKER_URL[:5].lower() == 'amqps':
+            self.transport_cls = _SSLTransport
+        else:
+            self.transport_cls = _Transport

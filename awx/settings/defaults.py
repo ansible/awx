@@ -484,6 +484,9 @@ ASGI_AMQP = {
     'MODEL': 'awx.main.models.channels.ChannelGroup',
 }
 
+AMQPS_VERIFY_CERTS = True
+AMQPS_CA_BUNDLE = '/etc/pki/tls/certs/ca-bundle.crt'
+
 # Django Caching Configuration
 CACHES = {
     'default': {
