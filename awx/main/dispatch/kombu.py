@@ -48,7 +48,7 @@ class Connection(KombuConnection):
                     'ca_certs': settings.AMQPS_CA_BUNDLE,
                 }
 
-        if settings.BROKER_URL[:5].lower() == 'amqps':
+        if settings.BROKER_URL.lower().startswith('amqps'):
             self.transport_cls = _SSLTransport
         else:
             self.transport_cls = _Transport
