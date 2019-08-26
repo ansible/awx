@@ -140,7 +140,7 @@ def format_human(output, fmt):
     lines = []
     if fmt == '.':
         fmt = 'id,name'
-    column_names = fmt.split(',')
+    column_names = [col.strip() for col in fmt.split(',')]
     if 'count' in output:
         output = output['results']
     else:
@@ -163,6 +163,8 @@ def format_human(output, fmt):
         try:
             return locale.format("%.*f", (0, int(v)), True)
         except (ValueError, TypeError):
+            if not isinstance(v, six.text_type):
+                return str(v)
             return v
 
     # calculate the max width of each column
