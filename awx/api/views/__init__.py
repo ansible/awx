@@ -3287,7 +3287,7 @@ class WorkflowJobTemplateActivityStreamList(SubListAPIView):
                          Q(workflow_job_template_node__workflow_job_template=parent)).distinct()
 
 
-class WorkflowJobList(ListCreateAPIView):
+class WorkflowJobList(ListAPIView):
 
     model = models.WorkflowJob
     serializer_class = serializers.WorkflowJobListSerializer
