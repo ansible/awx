@@ -88,12 +88,14 @@ class ResourceOptionsParser(object):
                     'field': int,
                     'integer': int,
                     'boolean': strtobool,
+                    'field': int,  # foreign key
                 }.get(param['type'], str),
             }
             meta_map = {
                 'string': 'TEXT',
                 'integer': 'INTEGER',
                 'boolean': 'BOOLEAN',
+                'field': 'ID',  # foreign key
             }
             if param.get('choices', []):
                 kwargs['choices'] = [c[0] for c in param['choices']]
@@ -105,6 +107,20 @@ class ResourceOptionsParser(object):
                 kwargs['choices'] = [str(choice) for choice in kwargs['choices']]
             elif param['type'] in meta_map:
                 kwargs['metavar'] = meta_map[param['type']]
+
+                if param['type'] == 'field':
+                    kwargs['help'] = 'the ID of the associated  {}'.format(k)
+
+            # SPECIAL CUSTOM LOGIC GOES HERE :'(
+            # There are certain requirements that aren't captured well by our
+            # HTTP OPTIONS due to $reasons
+            # This is where custom handling for those goes.
+            if self.resource == 'users' and method == 'create' and k == 'password':
+                kwargs['required'] = required = True
+            if self.resource == 'ad_hoc_commands' and method == 'create' and k in ('inventory', 'credential'):
+                kwargs['required'] = required = True
+            if self.resource == 'job_templates' and method == 'create' and k in ('project', 'playbook'):
+                kwargs['required'] = required = True
 
             if required:
                 required_group.add_argument(
