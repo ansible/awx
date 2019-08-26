@@ -4212,7 +4212,7 @@ class NotificationTemplateSerializer(BaseSerializer):
         if error_list:
             raise serializers.ValidationError(error_list)
 
-        # Only pull the exisitng encrypted passwords from the existing objects
+        # Only pull the existing encrypted passwords from the existing objects
         # to assign to the attribute and forward on the call stack IF AND ONLY IF
         # we know an error will not be raised in the validation phase.
         # Otherwise, the encrypted password will be exposed.
