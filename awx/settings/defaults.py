@@ -627,6 +627,8 @@ PRIVATE_GALAXY_URL = None
 PRIVATE_GALAXY_USERNAME = None
 PRIVATE_GALAXY_TOKEN = None
 PRIVATE_GALAXY_PASSWORD = None
+# Public Galaxy URL, not configurable outside of file-based settings
+PUBLIC_GALAXY_URL = 'https://galaxy.ansible.com'
 
 # Enable bubblewrap support for running jobs (playbook runs only).
 # Note: This setting may be overridden by database settings.

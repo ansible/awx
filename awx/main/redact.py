@@ -1,6 +1,8 @@
 import re
 import urllib.parse as urlparse
 
+from django.conf import settings
+
 REPLACE_STR = '$encrypted$'
 
 
@@ -10,14 +12,22 @@ class UriCleaner(object):
 
     @staticmethod
     def remove_sensitive(cleartext):
+        if settings.PRIVATE_GALAXY_URL:
+            exclude_list = (settings.PUBLIC_GALAXY_URL, settings.PRIVATE_GALAXY_URL)
+        else:
+            exclude_list = (settings.PUBLIC_GALAXY_URL)
         redactedtext = cleartext
         text_index = 0
         while True:
             match = UriCleaner.SENSITIVE_URI_PATTERN.search(redactedtext, text_index)
             if not match:
                 break
+            uri_str = match.group(1)
+            # Do not redact items from the exclude list
+            if any(uri_str.startswith(exclude_uri) for exclude_uri in exclude_list):
+                text_index = match.start() + len(UriCleaner.REPLACE_STR)
+                continue
             try:
-                uri_str = match.group(1)
                 # May raise a ValueError if invalid URI for one reason or another
                 o = urlparse.urlsplit(uri_str)
 
@@ -52,6 +62,7 @@ class UriCleaner(object):
                 redactedtext = t
                 if text_index >= len(redactedtext):
                     text_index = len(redactedtext) - 1
+                print('URL string old: {} new: {}'.format(uri_str_old, uri_str))
             except ValueError:
                 # Invalid URI, redact the whole URI to be safe
                 redactedtext = redactedtext[:match.start()] + UriCleaner.REPLACE_STR + redactedtext[match.end():]
