@@ -72,6 +72,10 @@ class ResourceOptionsParser(object):
             help_text = param.get('help_text', '')
 
             if method == 'list':
+                if k == 'id':
+                    # don't allow `awx <resource> list` to filter on `--id`
+                    # it's weird, and that's what awx <resource> get is for
+                    continue
                 help_text = 'only list {} with the specified {}'.format(
                     self.resource,
                     k
