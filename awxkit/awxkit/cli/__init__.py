@@ -52,6 +52,7 @@ def run(stdout=sys.stdout, stderr=sys.stderr, argv=[]):
             print(traceback.format_exc(), sys.stderr)
         if cli.get_config('format') == 'json':
             json.dump(e.msg, sys.stdout)
+            print('')
         elif cli.get_config('format') == 'yaml':
             sys.stdout.write(to_str(
                 yaml.safe_dump(
