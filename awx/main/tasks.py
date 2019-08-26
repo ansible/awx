@@ -1883,11 +1883,11 @@ class RunProjectUpdate(BaseTask):
         env['TMP'] = settings.AWX_PROOT_BASE_PATH
         env['PROJECT_UPDATE_ID'] = str(project_update.pk)
         env['ANSIBLE_CALLBACK_PLUGINS'] = self.get_path_to('..', 'plugins', 'callback')
+        # If private galaxy URL is non-blank, that means this feature is enabled
         private_galaxy_url = settings.PRIVATE_GALAXY_URL
         if private_galaxy_url:
             # set up the fallback server, which is the normal Ansible Galaxy
             env['ANSIBLE_GALAXY_SERVER_GALAXY_URL'] = 'https://galaxy.ansible.com'
-            env['ANSIBLE_GALAXY_SERVER_PRIVATE_GALAXY_URL'] = private_galaxy_url
             for key in ('url', 'username', 'password', 'token'):
                 setting_name = 'PRIVATE_GALAXY_{}'.format(key.upper())
                 value = getattr(settings, setting_name)

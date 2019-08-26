@@ -623,10 +623,10 @@ AWX_ROLES_ENABLED = True
 AWX_COLLECTIONS_ENABLED = True
 
 # Settings for private galaxy server, should be set in the UI
-PRIVATE_GALAXY_URL = None
-PRIVATE_GALAXY_USERNAME = None
-PRIVATE_GALAXY_TOKEN = None
-PRIVATE_GALAXY_PASSWORD = None
+PRIVATE_GALAXY_URL = ''
+PRIVATE_GALAXY_USERNAME = ''
+PRIVATE_GALAXY_TOKEN = ''
+PRIVATE_GALAXY_PASSWORD = ''
 # Public Galaxy URL, not configurable outside of file-based settings
 PUBLIC_GALAXY_URL = 'https://galaxy.ansible.com'
 

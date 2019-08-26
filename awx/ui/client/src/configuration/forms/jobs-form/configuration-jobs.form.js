@@ -71,6 +71,20 @@ export default ['i18n', function(i18n) {
                 type: 'text',
                 reset: 'PRIVATE_GALAXY_URL',
             },
+            PRIVATE_GALAXY_USERNAME: {
+                type: 'text',
+                reset: 'PRIVATE_GALAXY_USERNAME',
+            },
+            PRIVATE_GALAXY_PASSWORD: {
+                type: 'sensitive',
+                hasShowInputButton: true,
+                reset: 'PRIVATE_GALAXY_PASSWORD',
+            },
+            PRIVATE_GALAXY_TOKEN: {
+                type: 'sensitive',
+                hasShowInputButton: true,
+                reset: 'PRIVATE_GALAXY_TOKEN',
+            },
             AWX_TASK_ENV: {
                 type: 'textarea',
                 reset: 'AWX_TASK_ENV',
