@@ -152,6 +152,9 @@ class CLI(object):
                 # control resources are special endpoints that you can only
                 # do an HTTP GET to, and which return plain JSON metadata
                 # examples are `/api/v2/ping/`, `/api/v2/config/`, etc...
+                if self.help:
+                    self.subparsers[self.resource].print_help()
+                    raise SystemExit()
                 self.method = 'get'
                 response = getattr(resource, self.method)()
             else:
