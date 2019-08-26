@@ -1990,6 +1990,9 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
         fields = ('*', 'name', 'inventory', 'update_on_launch', 'update_cache_timeout',
                   'source_project', 'update_on_project_update') + \
                  ('last_update_failed', 'last_updated') # Backwards compatibility.
+        extra_kwargs = {
+            'inventory': {'required': True}
+        }
 
     def get_related(self, obj):
         res = super(InventorySourceSerializer, self).get_related(obj)
