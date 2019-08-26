@@ -3975,7 +3975,7 @@ class AdHocCommandNotificationsList(SubListAPIView):
     search_fields = ('subject', 'notification_type', 'body',)
 
 
-class SystemJobList(ListCreateAPIView):
+class SystemJobList(ListAPIView):
 
     model = models.SystemJob
     serializer_class = serializers.SystemJobListSerializer
