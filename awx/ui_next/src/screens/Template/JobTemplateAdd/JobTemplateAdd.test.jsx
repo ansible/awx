@@ -1,5 +1,6 @@
 import React from 'react';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import { sleep } from '@testUtils/testUtils';
 import JobTemplateAdd from './JobTemplateAdd';
 import { JobTemplatesAPI, LabelsAPI } from '@api';
 
@@ -54,8 +55,8 @@ describe('<JobTemplateAdd />', () => {
     ).toEqual(true);
 
     expect(wrapper.find('input#template-name').text()).toBe(defaultProps.name);
-    expect(wrapper.find('input#template-playbook').text()).toBe(
-      defaultProps.playbook
+    expect(wrapper.find('AnsibleSelect[name="playbook"]').text()).toBe(
+      'Choose a playbook'
     );
     expect(wrapper.find('ProjectLookup').prop('value')).toBe(null);
     done();
@@ -78,7 +79,18 @@ describe('<JobTemplateAdd />', () => {
     });
     const wrapper = mountWithContexts(<JobTemplateAdd />);
     await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
-    wrapper.find('JobTemplateForm').prop('handleSubmit')(jobTemplateData);
+    const formik = wrapper.find('Formik').instance();
+    const changeState = new Promise(resolve => {
+      formik.setState(
+        {
+          values: jobTemplateData,
+        },
+        () => resolve()
+      );
+    });
+    await changeState;
+    wrapper.find('form').simulate('submit');
+    await sleep(1);
     expect(JobTemplatesAPI.create).toHaveBeenCalledWith(jobTemplateData);
     done();
   });
@@ -107,6 +119,7 @@ describe('<JobTemplateAdd />', () => {
     });
 
     await wrapper.find('JobTemplateForm').prop('handleSubmit')(jobTemplateData);
+    await sleep(0);
     expect(history.push).toHaveBeenCalledWith(
       '/templates/job_template/1/details'
     );

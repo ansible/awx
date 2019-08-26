@@ -427,7 +427,7 @@ const FormikApp = withFormik({
     const {
       name = '',
       description = '',
-      job_type = '',
+      job_type = 'run',
       inventory = '',
       playbook = '',
       project = '',

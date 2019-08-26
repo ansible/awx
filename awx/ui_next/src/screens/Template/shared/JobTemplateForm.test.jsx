@@ -1,7 +1,6 @@
 import React from 'react';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
 import { sleep } from '@testUtils/testUtils';
-import { shallow } from 'enzyme';
 import JobTemplateForm, { _JobTemplateForm } from './JobTemplateForm';
 import { LabelsAPI } from '@api';
 
@@ -42,13 +41,11 @@ describe('<JobTemplateForm />', () => {
 
   test('initially renders successfully', async done => {
     const wrapper = mountWithContexts(
-      shallow(
-        <JobTemplateForm
-          template={mockData}
-          handleSubmit={jest.fn()}
-          handleCancel={jest.fn()}
-        />
-      ).get(0)
+      <JobTemplateForm
+        template={mockData}
+        handleSubmit={jest.fn()}
+        handleCancel={jest.fn()}
+      />
     );
 
     await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
@@ -64,14 +61,13 @@ describe('<JobTemplateForm />', () => {
 
   test('should update form values on input changes', async done => {
     const wrapper = mountWithContexts(
-      shallow(
-        <JobTemplateForm
-          template={mockData}
-          handleSubmit={jest.fn()}
-          handleCancel={jest.fn()}
-        />
-      ).get(0)
+      <JobTemplateForm
+        template={mockData}
+        handleSubmit={jest.fn()}
+        handleCancel={jest.fn()}
+      />
     );
+
     await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
     const form = wrapper.find('Formik');
     wrapper.find('input#template-name').simulate('change', {
@@ -133,6 +129,27 @@ describe('<JobTemplateForm />', () => {
     expect(handleCancel).not.toHaveBeenCalled();
     wrapper.find('button[aria-label="Cancel"]').prop('onClick')();
     expect(handleCancel).toBeCalled();
+    done();
+  });
+
+  test('should call loadRelatedProjectPlaybooks when project value changes', async done => {
+    const loadRelatedProjectPlaybooks = jest.spyOn(
+      _JobTemplateForm.prototype,
+      'loadRelatedProjectPlaybooks'
+    );
+    const wrapper = mountWithContexts(
+      <JobTemplateForm
+        template={mockData}
+        handleSubmit={jest.fn()}
+        handleCancel={jest.fn()}
+      />
+    );
+    await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
+    wrapper.find('ProjectLookup').prop('onChange')({
+      id: 10,
+      name: 'project',
+    });
+    expect(loadRelatedProjectPlaybooks).toHaveBeenCalledWith(10);
     done();
   });
 

@@ -106,13 +106,14 @@ class JobTemplateEdit extends Component {
       template: { id },
       history,
     } = this.props;
+    const { newLabels, removedLabels } = values;
+    delete values.newLabels;
+    delete values.removedLabels;
 
     this.setState({ formSubmitError: null });
     try {
-      await JobTemplatesAPI.update(id, { ...values });
-      await Promise.all([
-        this.submitLabels(values.newLabels, values.removedLabels),
-      ]);
+      await JobTemplatesAPI.update(id, values);
+      await Promise.all([this.submitLabels(newLabels, removedLabels)]);
       history.push(this.detailsUrl);
     } catch (formSubmitError) {
       this.setState({ formSubmitError });

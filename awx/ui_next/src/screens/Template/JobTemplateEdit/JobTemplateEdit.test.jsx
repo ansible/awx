@@ -1,6 +1,7 @@
 import React from 'react';
-import { JobTemplatesAPI, LabelsAPI } from '@api';
+import { sleep } from '@testUtils/testUtils';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import { JobTemplatesAPI, LabelsAPI, ProjectsAPI } from '@api';
 import JobTemplateEdit from './JobTemplateEdit';
 
 jest.mock('@api');
@@ -74,8 +75,28 @@ const mockRelatedCredentials = {
   ],
 };
 
+const mockRelatedProjectPlaybooks = [
+  'check.yml',
+  'debug-50.yml',
+  'debug.yml',
+  'debug2.yml',
+  'debug_extra_vars.yml',
+  'dynamic_inventory.yml',
+  'environ_test.yml',
+  'fail_unless.yml',
+  'pass_unless.yml',
+  'pause.yml',
+  'ping-20.yml',
+  'ping.yml',
+  'setfact_50.yml',
+  'vault.yml',
+];
+
 JobTemplatesAPI.readCredentials.mockResolvedValue({
   data: mockRelatedCredentials,
+});
+ProjectsAPI.readPlaybooks.mockResolvedValue({
+  data: mockRelatedProjectPlaybooks,
 });
 LabelsAPI.read.mockResolvedValue({ data: { results: [] } });
 
@@ -101,20 +122,38 @@ describe('<JobTemplateEdit />', () => {
     const newLabels = [
       { associate: true, id: 3 },
       { associate: true, id: 3 },
-      { name: 'Mapel', organization: 1 },
+      { name: 'Maple', organization: 1 },
       { name: 'Tree', organization: 1 },
     ];
     const removedLabels = [
       { disassociate: true, id: 1 },
       { disassociate: true, id: 2 },
     ];
+    JobTemplatesAPI.update.mockResolvedValue({
+      data: { ...updatedTemplateData },
+    });
+    const formik = wrapper.find('Formik').instance();
+    const changeState = new Promise(resolve => {
+      formik.setState(
+        {
+          values: {
+            ...mockJobTemplate,
+            ...updatedTemplateData,
+            newLabels,
+            removedLabels,
+          },
+        },
+        () => resolve()
+      );
+    });
+    await changeState;
+    wrapper.find('button[aria-label="Save"]').simulate('click');
+    await sleep(0);
 
-    await wrapper.find('JobTemplateForm').prop('handleSubmit')(
-      updatedTemplateData,
-      newLabels,
-      removedLabels
-    );
-    expect(JobTemplatesAPI.update).toHaveBeenCalledWith(1, updatedTemplateData);
+    expect(JobTemplatesAPI.update).toHaveBeenCalledWith(1, {
+      ...mockJobTemplate,
+      ...updatedTemplateData,
+    });
     expect(JobTemplatesAPI.disassociateLabel).toHaveBeenCalledTimes(2);
     expect(JobTemplatesAPI.associateLabel).toHaveBeenCalledTimes(2);
     expect(JobTemplatesAPI.generateLabel).toHaveBeenCalledTimes(2);
