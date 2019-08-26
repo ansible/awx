@@ -3636,6 +3636,12 @@ class WorkflowJobTemplateNodeSerializer(LaunchConfigurationBaseSerializer):
             field_kwargs.pop('queryset', None)
         return field_class, field_kwargs
 
+    def get_summary_fields(self, obj):
+        summary_fields = super(WorkflowJobTemplateNodeSerializer, self).get_summary_fields(obj)
+        if isinstance(obj.unified_job_template, WorkflowApprovalTemplate):
+            summary_fields['unified_job_template']['timeout'] = obj.unified_job_template.timeout
+        return summary_fields
+
 
 class WorkflowJobNodeSerializer(LaunchConfigurationBaseSerializer):
     success_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
