@@ -1,3 +1,7 @@
+import argparse
+import json
+import yaml
+
 from distutils.util import strtobool
 
 from .custom import CustomAction
@@ -84,6 +88,18 @@ class ResourceOptionsParser(object):
             if method == 'list' and param.get('filterable') is False:
                 continue
 
+            def json_or_yaml(v):
+                try:
+                    return json.loads(v)
+                except Exception:
+                    try:
+                        return yaml.safe_load(v)
+                    except Exception:
+                        raise argparse.ArgumentTypeError("{} is not valid JSON or YAML".format(v))
+
+            def jsonstr(v):
+                return json.dumps(json_or_yaml(v))
+
             kwargs = {
                 'help': help_text,
                 'required': required,
@@ -92,14 +108,16 @@ class ResourceOptionsParser(object):
                     'field': int,
                     'integer': int,
                     'boolean': strtobool,
-                    'field': int,  # foreign key
+                    'id': int,  # foreign key
+                    'json': json_or_yaml,
                 }.get(param['type'], str),
             }
             meta_map = {
                 'string': 'TEXT',
                 'integer': 'INTEGER',
                 'boolean': 'BOOLEAN',
-                'field': 'ID',  # foreign key
+                'id': 'ID',  # foreign key
+                'json': 'JSON/YAML',
             }
             if param.get('choices', []):
                 kwargs['choices'] = [c[0] for c in param['choices']]
@@ -112,7 +130,7 @@ class ResourceOptionsParser(object):
             elif param['type'] in meta_map:
                 kwargs['metavar'] = meta_map[param['type']]
 
-                if param['type'] == 'field':
+                if param['type'] == 'id' and not kwargs.get('help'):
                     kwargs['help'] = 'the ID of the associated  {}'.format(k)
 
             # SPECIAL CUSTOM LOGIC GOES HERE :'(
@@ -125,6 +143,15 @@ class ResourceOptionsParser(object):
                 kwargs['required'] = required = True
             if self.resource == 'job_templates' and method == 'create' and k in ('project', 'playbook'):
                 kwargs['required'] = required = True
+
+            # unlike *other* actual JSON fields in the API, inventory and JT
+            # variables *actually* want json.dumps() strings (ugh)
+            # see: https://github.com/ansible/awx/issues/2371
+            if (
+                (self.resource in ('job_templates', 'workflow_job_templates') and k == 'extra_vars') or
+                (self.resource in ('inventory', 'groups', 'hosts') and k == 'variables')
+            ):
+                kwargs['type'] = jsonstr
 
             if required:
                 required_group.add_argument(

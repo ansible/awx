@@ -27,7 +27,7 @@ from rest_framework.exceptions import ParseError
 from awx.api.versioning import reverse
 from awx.main.models.base import (
     BaseModel, CreatedModifiedModel,
-    prevent_search,
+    prevent_search, accepts_json,
     JOB_TYPE_CHOICES, VERBOSITY_CHOICES,
     VarsDictProperty
 )
@@ -116,10 +116,10 @@ class JobOptions(BaseModel):
         blank=True,
         default=0,
     )
-    extra_vars = prevent_search(models.TextField(
+    extra_vars = prevent_search(accepts_json(models.TextField(
         blank=True,
         default='',
-    ))
+    )))
     job_tags = models.CharField(
         max_length=1024,
         blank=True,

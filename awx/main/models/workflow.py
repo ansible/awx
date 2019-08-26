@@ -13,7 +13,8 @@ from django.core.exceptions import ObjectDoesNotExist
 
 # AWX
 from awx.api.versioning import reverse
-from awx.main.models import prevent_search, UnifiedJobTemplate, UnifiedJob
+from awx.main.models import (prevent_search, accepts_json, UnifiedJobTemplate,
+                             UnifiedJob)
 from awx.main.models.notifications import (
     NotificationTemplate,
     JobNotificationMixin
@@ -291,10 +292,10 @@ class WorkflowJobOptions(BaseModel):
     class Meta:
         abstract = True
 
-    extra_vars = prevent_search(models.TextField(
+    extra_vars = accepts_json(prevent_search(models.TextField(
         blank=True,
         default='',
-    ))
+    )))
     allow_simultaneous = models.BooleanField(
         default=False
     )
