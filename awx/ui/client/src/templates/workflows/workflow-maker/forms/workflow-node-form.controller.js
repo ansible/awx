@@ -353,7 +353,7 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
                                                 value: $scope.extraVars
                                             };
 
-                                            $scope.nodeConfig.node.promptData = $scope.promptData = {
+                                            $scope.nodeConfig.node.promptData = $scope.jobNodeState.promptData = {
                                                 launchConf: launchConf,
                                                 launchOptions: launchOptions,
                                                 prompts: prompts,
