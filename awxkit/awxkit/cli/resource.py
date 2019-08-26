@@ -68,6 +68,10 @@ class Login(CustomCommand):
     name = 'login'
     help_text = 'authenticate and retrieve an OAuth2 token'
 
+    def print_help(self, parser):
+        add_authentication_arguments(parser, os.environ)
+        parser.print_help()
+
     def handle(self, client, parser):
         auth = parser.add_argument_group('OAuth2.0 Options')
         auth.add_argument('--conf.client_id', metavar='TEXT')
@@ -75,6 +79,9 @@ class Login(CustomCommand):
         auth.add_argument(
             '--conf.scope', choices=['read', 'write'], default='write'
         )
+        if client.help:
+            self.print_help(parser)
+            raise SystemExit()
         parsed = parser.parse_known_args()[0]
         kwargs = {
             'client_id': getattr(parsed, 'conf.client_id', None),
@@ -84,8 +91,7 @@ class Login(CustomCommand):
         try:
             token = api.Api().get_oauth2_token(**kwargs)
         except Exception as e:
-            add_authentication_arguments(parser, os.environ)
-            parser.print_help()
+            self.print_help(parser)
             cprint(
                 'Error retrieving an OAuth2.0 token ({}).'.format(e.__class__),
                 'red'
@@ -99,6 +105,9 @@ class Config(CustomCommand):
     help_text = 'print current configuration values'
 
     def handle(self, client, parser):
+        if client.help:
+            parser.print_help()
+            raise SystemExit()
         return {
             'base_url': config.base_url,
             'token': client.get_config('token'),
