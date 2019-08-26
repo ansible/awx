@@ -255,7 +255,7 @@ OLD_INPUT_NAMES = (
 
 def credential_type_for_kind(params):
     credential_type_res = tower_cli.get_resource('credential_type')
-    kind = params.pop('kind')
+    kind = params.get('kind')
     arguments = {'managed_by_tower': True}
     if kind == 'ssh':
         if params.get('vault_password'):
