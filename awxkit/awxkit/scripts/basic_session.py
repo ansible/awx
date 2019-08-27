@@ -60,13 +60,17 @@ def main():
         if akit_args.credential_file != utils.not_provided:
             config.credentials = utils.load_credentials(
                 akit_args.credential_file)
+        else:
+            config.credentials = utils.PseudoNamespace({
+                'default': {
+                    'username': os.getenv('AWXKIT_USER', 'admin'),
+                    'password': os.getenv('AWXKIT_USER_PASSWORD', 'password')
+                }
+            })
 
         if akit_args.project_file != utils.not_provided:
             config.project_urls = utils.load_projects(
                 akit_args.project_file)
-        else:
-            config.credentials = utils.PseudoNamespace({'default': {'username': os.getenv(
-                'AWXKIT_USER', 'admin'), 'password': os.getenv('AWXKIT_USER_PASSWORD', 'password')}})
 
         global root
         root = api.Api()
