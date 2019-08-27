@@ -20,6 +20,12 @@ class PagerDutyBackend(AWXBaseEmailBackend):
     recipient_parameter = "service_key"
     sender_parameter = "client_name"
 
+    DEFAULT_SUBJECT = "{{ job_friendly_name }} #{{ job.id }} '{{ job.name }}' {{ job.status }}: {{ url }}"
+    DEFAULT_BODY = "{{ job_summary_dict }}"
+    default_messages = {"started": { "message": DEFAULT_SUBJECT, "body": DEFAULT_BODY},
+                        "success": { "message": DEFAULT_SUBJECT, "body": DEFAULT_BODY},
+                        "error": { "message": DEFAULT_SUBJECT, "body": DEFAULT_BODY}}
+
     def __init__(self, subdomain, token, fail_silently=False, **kwargs):
         super(PagerDutyBackend, self).__init__(fail_silently=fail_silently)
         self.subdomain = subdomain

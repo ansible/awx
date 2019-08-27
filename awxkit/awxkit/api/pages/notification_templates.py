@@ -16,7 +16,9 @@ notification_types = (
     'slack',
     'twilio',
     'webhook',
-    'mattermost')
+    'mattermost',
+    'grafana',
+    'rocketchat')
 
 
 class NotificationTemplate(HasCopy, HasCreate, base.Base):
@@ -48,7 +50,7 @@ class NotificationTemplate(HasCopy, HasCreate, base.Base):
         except (exc.MethodNotAllowed):
             pass
 
-    def payload(self, organization, notification_type='slack', **kwargs):
+    def payload(self, organization, notification_type='slack', messages=not_provided, **kwargs):
         payload = PseudoNamespace(
             name=kwargs.get('name') or 'NotificationTemplate ({0}) - {1}' .format(
                 notification_type,
@@ -56,6 +58,8 @@ class NotificationTemplate(HasCopy, HasCreate, base.Base):
             description=kwargs.get('description') or random_title(10),
             organization=organization.id,
             notification_type=notification_type)
+        if messages != not_provided:
+            payload['messages'] = messages
 
         notification_configuration = kwargs.get(
             'notification_configuration', {})
@@ -108,6 +112,14 @@ class NotificationTemplate(HasCopy, HasCreate, base.Base):
                     'mattermost_icon_url',
                     'mattermost_no_verify_ssl')
                 cred = services.mattermost
+            elif notification_type == 'grafana':
+                fields = ('grafana_url',
+                          'grafana_key')
+                cred = services.grafana
+            elif notification_type == 'rocketchat':
+                fields = ('rocketchat_url',
+                          'rocketchat_no_verify_ssl')
+                cred = services.rocketchat
             else:
                 raise ValueError(
                     'Unknown notification_type {0}'.format(notification_type))
@@ -129,6 +141,7 @@ class NotificationTemplate(HasCopy, HasCreate, base.Base):
             description='',
             notification_type='slack',
             organization=Organization,
+            messages=not_provided,
             **kwargs):
         if notification_type not in notification_types:
             raise ValueError(
@@ -140,6 +153,7 @@ class NotificationTemplate(HasCopy, HasCreate, base.Base):
             notification_type=notification_type,
             name=name,
             description=description,
+            messages=messages,
             **kwargs)
         payload.ds = DSAdapter(self.__class__.__name__, self._dependency_store)
         return payload
@@ -150,12 +164,14 @@ class NotificationTemplate(HasCopy, HasCreate, base.Base):
             description='',
             notification_type='slack',
             organization=Organization,
+            messages=not_provided,
             **kwargs):
         payload = self.create_payload(
             name=name,
             description=description,
             notification_type=notification_type,
             organization=organization,
+            messages=messages,
             **kwargs)
         return self.update_identity(
             NotificationTemplates(

@@ -72,3 +72,4 @@ require('ng-toast');
 require('lr-infinite-scroll');
 require('codemirror/mode/yaml/yaml');
 require('codemirror/mode/javascript/javascript');
+require('codemirror/mode/jinja2/jinja2');

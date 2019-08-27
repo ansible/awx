@@ -19,6 +19,11 @@ class RocketChatBackend(AWXBaseEmailBackend):
     recipient_parameter = "rocketchat_url"
     sender_parameter = None
 
+    DEFAULT_SUBJECT = "{{ job_friendly_name }} #{{ job.id }} '{{ job.name }}' {{ job.status }}: {{ url }}"
+    default_messages = {"started": {"message": DEFAULT_SUBJECT},
+                        "success": {"message": DEFAULT_SUBJECT},
+                        "error": {"message": DEFAULT_SUBJECT}}
+
     def __init__(self, rocketchat_no_verify_ssl=False, rocketchat_username=None, rocketchat_icon_url=None, fail_silently=False, **kwargs):
         super(RocketChatBackend, self).__init__(fail_silently=fail_silently)
         self.rocketchat_no_verify_ssl = rocketchat_no_verify_ssl

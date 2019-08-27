@@ -42,6 +42,8 @@ def test_basic_parameterization(get, post, user, organization):
     assert 'notification_configuration' in response.data
     assert 'url' in response.data['notification_configuration']
     assert 'headers' in response.data['notification_configuration']
+    assert 'messages' in response.data
+    assert response.data['messages'] == {'started': None, 'success': None, 'error': None}
 
 
 @pytest.mark.django_db

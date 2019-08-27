@@ -670,7 +670,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         data = super(Job, self).notification_data()
         all_hosts = {}
         # NOTE: Probably related to job event slowness, remove at some point -matburt
-        if block:
+        if block and self.status != 'running':
             summaries = self.job_host_summaries.all()
             while block > 0 and not len(summaries):
                 time.sleep(1)
@@ -684,7 +684,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
                                           failures=h.failures,
                                           ok=h.ok,
                                           processed=h.processed,
-                                          skipped=h.skipped)
+                                          skipped=h.skipped)  # TODO: update with rescued, ignored (see https://github.com/ansible/awx/issues/4394)
         data.update(dict(inventory=self.inventory.name if self.inventory else None,
                          project=self.project.name if self.project else None,
                          playbook=self.playbook,

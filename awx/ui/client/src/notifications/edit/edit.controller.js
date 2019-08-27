@@ -10,19 +10,22 @@ export default ['Rest', 'Wait',
     'notification_template',
     '$scope', '$state', 'GetChoices', 'CreateSelect2', 'Empty',
     'NotificationsTypeChange', 'ParseTypeChange', 'i18n',
+    'MessageUtils', '$filter',
     function(
         Rest, Wait,
         NotificationsFormObject, ProcessErrors, GetBasePath,
         GenerateForm,
         notification_template,
         $scope, $state, GetChoices, CreateSelect2, Empty,
-        NotificationsTypeChange, ParseTypeChange, i18n
+        NotificationsTypeChange, ParseTypeChange, i18n,
+        MessageUtils, $filter
     ) {
         var generator = GenerateForm,
             id = notification_template.id,
             form = NotificationsFormObject,
             master = {},
-            url = GetBasePath('notification_templates');
+            url = GetBasePath('notification_templates'),
+            defaultMessages = {};
 
         init();
 
@@ -34,6 +37,12 @@ export default ['Rest', 'Wait',
                     $scope.canAdd = false;
                 }
             });
+
+            Rest.setUrl(GetBasePath('notification_templates'));
+            Rest.options()
+                .then(({data}) => {
+                    defaultMessages = data.actions.GET.messages;
+                });
 
             GetChoices({
                 scope: $scope,
@@ -165,6 +174,9 @@ export default ['Rest', 'Wait',
                         field_id: 'notification_template_headers',
                         readOnly: !$scope.notification_template.summary_fields.user_capabilities.edit
                     });
+
+                    MessageUtils.setMessagesOnScope($scope, data.messages, defaultMessages);
+
                     Wait('stop');
                 })
                 .catch(({data, status}) => {
@@ -174,8 +186,6 @@ export default ['Rest', 'Wait',
                     });
                 });
         });
-
-
 
         $scope.$watch('headers', function validate_headers(str) {
             try {
@@ -237,6 +247,29 @@ export default ['Rest', 'Wait',
             });
         };
 
+        $scope.$watch('customize_messages', (value) => {
+            if (value) {
+                $scope.$broadcast('reset-code-mirror', {
+                    customize_messages: $scope.customize_messages,
+                });
+            }
+        });
+        $scope.toggleForm = function(key) {
+            $scope[key] = !$scope[key];
+        };
+        $scope.$watch('notification_type', (newValue, oldValue = {}) => {
+            if (newValue) {
+                MessageUtils.updateDefaultsOnScope(
+                  $scope,
+                  defaultMessages[oldValue.value],
+                  defaultMessages[newValue.value]
+                );
+                $scope.$broadcast('reset-code-mirror', {
+                    customize_messages: $scope.customize_messages,
+                });
+            }
+        });
+
         $scope.emailOptionsChange = function () {
             if ($scope.email_options === 'use_ssl') {
                 if ($scope.use_ssl) {
@@ -269,6 +302,7 @@ export default ['Rest', 'Wait',
                 "name": $scope.name,
                 "description": $scope.description,
                 "organization": $scope.organization,
+                "messages": MessageUtils.getMessagesObj($scope, defaultMessages),
                 "notification_type": v,
                 "notification_configuration": {}
             };
@@ -316,10 +350,14 @@ export default ['Rest', 'Wait',
                     $state.go('notifications', {}, { reload: true });
                     Wait('stop');
                 })
-                .catch(({data, status}) => {
+                .catch(({ data, status }) => {
+                    let description = 'PUT returned status: ' + status;
+                    if (data && data.messages && data.messages.length > 0) {
+                        description = _.uniq(data.messages).join(', ');
+                    }
                     ProcessErrors($scope, data, status, form, {
                         hdr: 'Error!',
-                        msg: 'Failed to add new notification template. POST returned status: ' + status
+                        msg: $filter('sanitize')('Failed to update notifier. ' + description + '.')
                     });
                 });
         };

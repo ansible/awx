@@ -7,21 +7,24 @@
 export default ['Rest', 'Wait', 'NotificationsFormObject',
     'ProcessErrors', 'GetBasePath', 'Alert',
     'GenerateForm', '$scope', '$state', 'CreateSelect2', 'GetChoices',
-    'NotificationsTypeChange', 'ParseTypeChange', 'i18n',
+    'NotificationsTypeChange', 'ParseTypeChange', 'i18n', 'MessageUtils', '$filter',
     function(
         Rest, Wait, NotificationsFormObject,
         ProcessErrors, GetBasePath, Alert,
         GenerateForm, $scope, $state, CreateSelect2, GetChoices,
-        NotificationsTypeChange, ParseTypeChange, i18n
+        NotificationsTypeChange, ParseTypeChange, i18n,
+        MessageUtils, $filter
     ) {
 
         var generator = GenerateForm,
             form = NotificationsFormObject,
-            url = GetBasePath('notification_templates');
+            url = GetBasePath('notification_templates'),
+            defaultMessages = {};
 
         init();
 
         function init() {
+            $scope.customize_messages = false;
             Rest.setUrl(GetBasePath('notification_templates'));
             Rest.options()
                 .then(({data}) => {
@@ -29,6 +32,8 @@ export default ['Rest', 'Wait', 'NotificationsFormObject',
                         $state.go("^");
                         Alert('Permission Error', 'You do not have permission to add a notification template.', 'alert-info');
                     }
+                    defaultMessages = data.actions.GET.messages;
+                    MessageUtils.setMessagesOnScope($scope, null, defaultMessages);
                 });
             // apply form definition's default field values
             GenerateForm.applyDefaults(form, $scope);
@@ -153,6 +158,29 @@ export default ['Rest', 'Wait', 'NotificationsFormObject',
             });
         };
 
+        $scope.$watch('customize_messages', (value) => {
+            if (value) {
+                $scope.$broadcast('reset-code-mirror', {
+                    customize_messages: $scope.customize_messages,
+                });
+            }
+        });
+        $scope.toggleForm = function(key) {
+            $scope[key] = !$scope[key];
+        };
+        $scope.$watch('notification_type', (newValue, oldValue = {}) => {
+            if (newValue) {
+                MessageUtils.updateDefaultsOnScope(
+                  $scope,
+                  defaultMessages[oldValue.value],
+                  defaultMessages[newValue.value]
+                );
+                $scope.$broadcast('reset-code-mirror', {
+                    customize_messages: $scope.customize_messages,
+                });
+            }
+        });
+
         $scope.emailOptionsChange = function () {
             if ($scope.email_options === 'use_ssl') {
                 if ($scope.use_ssl) {
@@ -186,6 +214,7 @@ export default ['Rest', 'Wait', 'NotificationsFormObject',
                 "name": $scope.name,
                 "description": $scope.description,
                 "organization": $scope.organization,
+                "messages": MessageUtils.getMessagesObj($scope, defaultMessages),
                 "notification_type": v,
                 "notification_configuration": {}
             };
@@ -238,10 +267,14 @@ export default ['Rest', 'Wait', 'NotificationsFormObject',
                     $state.go('notifications', {}, { reload: true });
                     Wait('stop');
                 })
-                .catch(({data, status}) => {
+                .catch(({ data, status }) => {
+                    let description = 'POST returned status: ' + status;
+                    if (data && data.messages && data.messages.length > 0) {
+                        description = _.uniq(data.messages).join(', ');
+                    }
                     ProcessErrors($scope, data, status, form, {
                         hdr: 'Error!',
-                        msg: 'Failed to add new notifier. POST returned status: ' + status
+                        msg: $filter('sanitize')('Failed to add new notifier. ' + description + '.')
                     });
                 });
         };

@@ -697,7 +697,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                     html += `<div id='${form.name}_${fld}_group' class='form-group Form-formGroup `;
                     html += (field.disabled) ? `Form-formGroup--disabled ` : ``;
-                    html += (field.type === "checkbox") ? "Form-formGroup--checkbox" : "";
+                    html += (field.type === "checkbox") ? "Form-formGroup--checkbox " : "";
                     html += (field['class']) ? (field['class']) : "";
                     html += "'";
                     html += (field.ngShow) ? this.attr(field, 'ngShow') : "";
@@ -1357,6 +1357,22 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += `variables="${field.variables}" `;
                         html += `ng-disabled="${field.ngDisabled}" `;
                         html += '></at-code-mirror>';
+                    }
+
+                    if (field.type === 'syntax_highlight') {
+                        html += '<at-syntax-highlight ';
+                        html += `id="${form.name}_${fld}" `;
+                        html += `class="${field.class}" `;
+                        html += `label="${field.label}" `;
+                        html += `tooltip="${field.awPopOver || ''}" `;
+                        html += `name="${fld}" `;
+                        html += `value="${fld}" `;
+                        html += `default="${field.default || ''}" `;
+                        html += `rows="${field.rows || 6}" `;
+                        html += `one-line="${field.oneLine || ''}"`;
+                        html += `mode="${field.mode}" `;
+                        html += `ng-disabled="${field.ngDisabled}" `;
+                        html += '></at-syntax-highlight>';
                     }
 
                     if (field.type === 'custom') {

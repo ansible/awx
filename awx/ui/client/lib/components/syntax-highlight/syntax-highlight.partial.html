@@ -1,0 +1,33 @@
+<div>
+    <div class="atCodeMirror-label">
+        <div class="atCodeMirror-labelLeftSide">
+            <span class="atCodeMirror-labelText" ng-class="labelClass">
+                {{  label || vm.strings.get('code_mirror.label.VARIABLES') }}
+            </span>
+            <a
+              id=""
+              href=""
+              aw-pop-over="{{ tooltip || vm.strings.get('code_mirror.tooltip.TOOLTIP') }}"
+              data-placement="{{ tooltipPlacement || 'top' }}"
+              data-container="body"
+              over-title="{{ label || vm.strings.get('code_mirror.label.VARIABLES') }}"
+              class="help-link"
+              data-original-title="{{ label || vm.strings.get('code_mirror.label.VARIABLES') }}"
+              title="{{ label || vm.strings.get('code_mirror.label.VARIABLES') }}"
+              tabindex="-1"
+              ng-if="!!tooltip"
+            >
+                <i class="fa fa-question-circle"></i>
+            </a>
+        </div>
+    </div>
+    <textarea
+        ng-disabled="disabled"
+        rows="{{ vm.rows }}"
+        ng-model="codeMirrorValue"
+        name="{{ vm.name }}_codemirror"
+        class="form-control Form-textArea"
+        id="{{ vm.name }}_codemirror">
+    </textarea>
+    <div class="error" ng-show="hasNewlineError">New lines are not supported in this field</div>
+</div>

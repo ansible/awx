@@ -13,6 +13,10 @@ from datetime import timedelta
 from oauthlib import oauth2
 from oauthlib.common import generate_token
 
+# Jinja
+from jinja2 import sandbox, StrictUndefined
+from jinja2.exceptions import TemplateSyntaxError, UndefinedError, SecurityError
+
 # Django
 from django.conf import settings
 from django.contrib.auth import update_session_auth_hash
@@ -46,16 +50,16 @@ from awx.main.constants import (
     CENSOR_VALUE,
 )
 from awx.main.models import (
-    ActivityStream, AdHocCommand, AdHocCommandEvent, Credential, CredentialInputSource,
-    CredentialType, CustomInventoryScript, Group, Host, Instance,
-    InstanceGroup, Inventory, InventorySource, InventoryUpdate,
-    InventoryUpdateEvent, Job, JobEvent, JobHostSummary, JobLaunchConfig,
-    JobTemplate, Label, Notification, NotificationTemplate,
-    OAuth2AccessToken, OAuth2Application, Organization, Project,
-    ProjectUpdate, ProjectUpdateEvent, RefreshToken, Role, Schedule,
-    SystemJob, SystemJobEvent, SystemJobTemplate, Team, UnifiedJob,
-    UnifiedJobTemplate, WorkflowJob, WorkflowJobNode,
-    WorkflowJobTemplate, WorkflowJobTemplateNode, StdoutMaxBytesExceeded
+    ActivityStream, AdHocCommand, AdHocCommandEvent, Credential,
+    CredentialInputSource, CredentialType, CustomInventoryScript,
+    Group, Host, Instance, InstanceGroup, Inventory, InventorySource,
+    InventoryUpdate, InventoryUpdateEvent, Job, JobEvent, JobHostSummary,
+    JobLaunchConfig, JobNotificationMixin, JobTemplate, Label, Notification,
+    NotificationTemplate, OAuth2AccessToken, OAuth2Application, Organization,
+    Project, ProjectUpdate, ProjectUpdateEvent, RefreshToken, Role, Schedule,
+    StdoutMaxBytesExceeded, SystemJob, SystemJobEvent, SystemJobTemplate,
+    Team, UnifiedJob, UnifiedJobTemplate, WorkflowJob, WorkflowJobNode,
+    WorkflowJobTemplate, WorkflowJobTemplateNode
 )
 from awx.main.models.base import VERBOSITY_CHOICES, NEW_JOB_TYPE_CHOICES
 from awx.main.models.rbac import (
@@ -4128,7 +4132,8 @@ class NotificationTemplateSerializer(BaseSerializer):
 
     class Meta:
         model = NotificationTemplate
-        fields = ('*', 'organization', 'notification_type', 'notification_configuration')
+        fields = ('*', 'organization', 'notification_type', 'notification_configuration', 'messages')
+
 
     type_map = {"string": (str,),
                 "int": (int,),
@@ -4161,6 +4166,96 @@ class NotificationTemplateSerializer(BaseSerializer):
         d = super(NotificationTemplateSerializer, self).get_summary_fields(obj)
         d['recent_notifications'] = self._recent_notifications(obj)
         return d
+
+    def validate_messages(self, messages):
+        if messages is None:
+            return None
+
+        error_list = []
+        collected_messages = []
+
+        # Validate structure / content types
+        if not isinstance(messages, dict):
+            error_list.append(_("Expected dict for 'messages' field, found {}".format(type(messages))))
+        else:
+            for event in messages:
+                if event not in ['started', 'success', 'error']:
+                    error_list.append(_("Event '{}' invalid, must be one of 'started', 'success', or 'error'").format(event))
+                    continue
+                event_messages = messages[event]
+                if event_messages is None:
+                    continue
+                if not isinstance(event_messages, dict):
+                    error_list.append(_("Expected dict for event '{}', found {}").format(event, type(event_messages)))
+                    continue
+                for message_type in event_messages:
+                    if message_type not in ['message', 'body']:
+                        error_list.append(_("Message type '{}' invalid, must be either 'message' or 'body'").format(message_type))
+                        continue
+                    message = event_messages[message_type]
+                    if message is None:
+                        continue
+                    if not isinstance(message, str):
+                        error_list.append(_("Expected string for '{}', found {}, ").format(message_type, type(message)))
+                        continue
+                    if message_type == 'message':
+                        if '\n' in message:
+                            error_list.append(_("Messages cannot contain newlines (found newline in {} event)".format(event)))
+                            continue
+                    collected_messages.append(message)
+
+        # Subclass to return name of undefined field
+        class DescriptiveUndefined(StrictUndefined):
+            # The parent class prevents _accessing attributes_ of an object
+            # but will render undefined objects with 'Undefined'. This
+            # prevents their use entirely.
+            __repr__ = __str__ = StrictUndefined._fail_with_undefined_error
+
+            def __init__(self, *args, **kwargs):
+                super(DescriptiveUndefined, self).__init__(*args, **kwargs)
+                # When an undefined field is encountered, return the name
+                # of the undefined field in the exception message
+                # (StrictUndefined refers to the explicitly set exception
+                # message as the 'hint')
+                self._undefined_hint = self._undefined_name
+
+        # Ensure messages can be rendered
+        for msg in collected_messages:
+            env = sandbox.ImmutableSandboxedEnvironment(undefined=DescriptiveUndefined)
+            try:
+                env.from_string(msg).render(JobNotificationMixin.context_stub())
+            except TemplateSyntaxError as exc:
+                error_list.append(_("Unable to render message '{}': {}".format(msg, exc.message)))
+            except UndefinedError as exc:
+                error_list.append(_("Field '{}' unavailable".format(exc.message)))
+            except SecurityError as exc:
+                error_list.append(_("Security error due to field '{}'".format(exc.message)))
+
+        # Ensure that if a webhook body was provided, that it can be rendered as a dictionary
+        notification_type = ''
+        if self.instance:
+            notification_type = getattr(self.instance, 'notification_type', '')
+        else:
+            notification_type = self.initial_data.get('notification_type', '')
+
+        if notification_type == 'webhook':
+            for event in messages:
+                if not messages[event]:
+                    continue
+                body = messages[event].get('body', {})
+                if body:
+                    try:
+                        potential_body = json.loads(body)
+                        if not isinstance(potential_body, dict):
+                            error_list.append(_("Webhook body for '{}' should be a json dictionary. Found type '{}'."
+                                                .format(event, type(potential_body).__name__)))
+                    except json.JSONDecodeError as exc:
+                        error_list.append(_("Webhook body for '{}' is not a valid json dictionary ({}).".format(event, exc)))
+
+        if error_list:
+            raise serializers.ValidationError(error_list)
+
+        return messages
 
     def validate(self, attrs):
         from awx.api.views import NotificationTemplateDetail
@@ -4226,10 +4321,19 @@ class NotificationTemplateSerializer(BaseSerializer):
 
 class NotificationSerializer(BaseSerializer):
 
+    body = serializers.SerializerMethodField(
+        help_text=_('Notification body')
+    )
+
     class Meta:
         model = Notification
         fields = ('*', '-name', '-description', 'notification_template', 'error', 'status', 'notifications_sent',
-                  'notification_type', 'recipients', 'subject')
+                  'notification_type', 'recipients', 'subject', 'body')
+
+    def get_body(self, obj):
+        if obj.notification_type == 'webhook' and 'body' in obj.body:
+            return obj.body['body']
+        return obj.body
 
     def get_related(self, obj):
         res = super(NotificationSerializer, self).get_related(obj)
@@ -4237,6 +4341,15 @@ class NotificationSerializer(BaseSerializer):
             notification_template = self.reverse('api:notification_template_detail', kwargs={'pk': obj.notification_template.pk}),
         ))
         return res
+
+    def to_representation(self, obj):
+        ret = super(NotificationSerializer, self).to_representation(obj)
+
+        if obj.notification_type == 'webhook':
+            ret.pop('subject')
+        if obj.notification_type not in ('email', 'webhook', 'pagerduty'):
+            ret.pop('body')
+        return ret
 
 
 class LabelSerializer(BaseSerializer):
