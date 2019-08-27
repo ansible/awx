@@ -34,7 +34,7 @@ module.exports = {
         client
             .navigateTo(`${AWX_E2E_URL}/#/projects/${data.project.id}`, false)
             .waitForAngular()
-            .waitForElementVisible('#project_allow_override_chbox_3')
+            .waitForElementVisible('#project_allow_override_chbox_3:enabled')
             .click('#project_allow_override_chbox_3')
             .click('#project_save_btn')
             .waitForElementPresent('#project_form[class*=ng-pristine]')
@@ -52,17 +52,18 @@ module.exports = {
                 ['assert_on_this_branch.yml', client.Keys.ENTER]
             )
             .waitForElementPresent('#job_template_form[class*=ng-dirty]')
-            .pause(1000)
+            .waitForElementPresent('#job_template_save_btn:enabled')
             .click('#job_template_save_btn')
             .waitForSpinny()
             .waitForElementPresent('#job_template_form[class*=ng-pristine]')
+            .waitForElementPresent('#job_template_controls .at-LaunchTemplate button:enabled')
             .click('#job_template_controls .at-LaunchTemplate button')
             .waitForElementVisible('[ng-if="vm.scmBranch"]');
         client.expect.element('[ng-if="vm.scmBranch"] .JobResults-resultRowText')
             .text.to.equal('empty_branch');
         client.expect.element('[ng-if="vm.playbook"] .JobResults-resultRowText')
             .text.to.equal('assert_on_this_branch.yml');
-        client.waitForElementVisible('span .icon-job-successful', 30000);
+        client.waitForElementVisible('span .icon-job-successful', 60000);
     },
     after: client => {
         client.end();
