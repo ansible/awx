@@ -86,7 +86,7 @@ class MultiSelect extends Component {
         this.handleSelection(e, option);
       }
     } else {
-      this.setState({ isExpanded: false });
+      this.setState({ input: '', isExpanded: false });
     }
   }
 
@@ -105,17 +105,30 @@ class MultiSelect extends Component {
   handleAddItem(event) {
     const { input, chipItems } = this.state;
     const { onAddNewItem } = this.props;
-    const newChip = { name: input, id: Math.random() };
-    if (event.key !== 'Tab') {
+    const isIncluded = chipItems.some(chipItem => chipItem.name === input);
+
+    if (!input) {
       return;
     }
-    this.setState({
-      chipItems: chipItems.concat(newChip),
-      isExpanded: false,
-      input: '',
-    });
 
-    onAddNewItem(input);
+    if (isIncluded) {
+      // This event.preventDefault prevents the form from submitting
+      // if the user tries to create 2 chips of the same name
+      event.preventDefault();
+      this.setState({ input: '', isExpanded: false });
+      return;
+    }
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      this.setState({
+        chipItems: chipItems.concat({ name: input, id: input }),
+        isExpanded: false,
+        input: '',
+      });
+      onAddNewItem(input);
+    } else if (event.key === 'Tab') {
+      this.setState({ input: '' });
+    }
   }
 
   handleInputChange(e) {

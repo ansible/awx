@@ -40,10 +40,10 @@ describe('<MultiSelect />', () => {
     const component = wrapper.find('MultiSelect');
     component
       .find('input[aria-label="labels"]')
-      .simulate('keydown', { key: 'Tab' });
+      .simulate('keydown', { key: 'Enter' });
     component.update();
     await sleep(1);
-    expect(component.state().chipItems.length).toBe(3);
+    expect(component.state().chipItems.length).toBe(2);
   });
   test('handleAddItem adds a chip only when Tab is pressed', () => {
     const onAddNewItem = jest.fn();
@@ -57,7 +57,7 @@ describe('<MultiSelect />', () => {
     );
     const event = {
       preventDefault: () => {},
-      key: 'Tab',
+      key: 'Enter',
     };
     const component = wrapper.find('MultiSelect');
 
