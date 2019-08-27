@@ -77,7 +77,7 @@ A user can _view_ approvals if they:
 
 **Other Workflow Approval Node Features**
 
-A timeout can be set for each approval node. This field defaults to `0` for no expiration.
+A timeout (in minutes and seconds) can be set for each approval node. These fields default to `0` for no expiration.
 
 
 ### DAG Formation and Restrictions
