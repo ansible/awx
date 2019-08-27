@@ -1,17 +1,22 @@
 from hashlib import sha1
 import hmac
+import logging
 
 from django.utils.encoding import force_bytes
 from django.views.decorators.csrf import csrf_exempt
 
 from rest_framework import status
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from awx.api import serializers
 from awx.api.generics import APIView, GenericAPIView
 from awx.api.permissions import WebhookKeyPermission
 from awx.main.models import JobTemplate, WorkflowJobTemplate
+
+
+logger = logging.getLogger('awx.api.views.webhooks')
 
 
 class WebhookKeyView(GenericAPIView):
@@ -44,9 +49,7 @@ class WebhookReceiverBase(APIView):
     lookup_url_kwarg = None
     lookup_field = 'pk'
 
-    @csrf_exempt
-    def dispatch(self, *args, **kwargs):
-        return super().dispatch(*args, **kwargs)
+    permission_classes = (AllowAny,)
 
     def get_queryset(self):
         qs_models = {
@@ -83,13 +86,21 @@ class WebhookReceiverBase(APIView):
         if not obj.webhook_key:
             raise PermissionDenied
 
-        mac = hmac.new(force_bytes(obj.webhook_key), msg=force_bytes(self.request.body), digestmod=sha1)
+        mac = hmac.new(force_bytes(obj.webhook_key), msg=force_bytes(self.request.read()), digestmod=sha1)
         if not hmac.compare_digest(force_bytes(mac.hexdigest()), self.get_signature()):
             raise PermissionDenied
 
+    @csrf_exempt
     def post(self, request, *args, **kwargs):
+        logger.error(
+            "**************************************\n"
+            "{}\n"
+            "{}\n".format(request.headers, request.data)
+        )
         obj = self.get_object()
         self.check_signature(obj)
+
+        return Response(status=status.HTTP_202_ACCEPTED)
 
 
 class GithubWebhookReceiver(WebhookReceiverBase):
