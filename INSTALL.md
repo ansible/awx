@@ -452,6 +452,8 @@ Before starting the build process, review the [inventory](./installer/inventory)
 
 > Optionally, provide the path to a file that contains a certificate and its private key.
 
+> If also using `ssl_certificate_key` (see below), you can set this to the path to a file that contains only the certificate.
+
 *ssl_certificate_key*
 
 > Optionally, provide the path to a file that contains the certificate's private key.
