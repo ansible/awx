@@ -14,10 +14,14 @@ import JobTemplateForm from '../shared/JobTemplateForm';
 import { JobTemplatesAPI } from '@api';
 
 function JobTemplateAdd({ history, i18n }) {
-  const [error, setError] = useState(null);
+  const [formSubmitError, setFormSubmitError] = useState(null);
 
-  const handleSubmit = async values => {
-    setError(null);
+  async function handleSubmit(values) {
+    const { newLabels, removedLabels } = values;
+    delete values.newLabels;
+    delete values.removedLabels;
+
+    setFormSubmitError(null);
     try {
       const {
         data: { id, type },
@@ -27,11 +31,30 @@ function JobTemplateAdd({ history, i18n }) {
     } catch (error) {
       setFormSubmitError(error);
     }
-  };
+  }
 
-  const handleCancel = () => {
+  async function submitLabels(id, newLabels = [], removedLabels = []) {
+    const disassociationPromises = removedLabels.map(label =>
+      JobTemplatesAPI.disassociateLabel(id, label)
+    );
+    const associationPromises = newLabels
+      .filter(label => !label.organization)
+      .map(label => JobTemplatesAPI.associateLabel(id, label));
+    const creationPromises = newLabels
+      .filter(label => label.organization)
+      .map(label => JobTemplatesAPI.generateLabel(id, label));
+
+    const results = await Promise.all([
+      ...disassociationPromises,
+      ...associationPromises,
+      ...creationPromises,
+    ]);
+    return results;
+  }
+
+  function handleCancel() {
     history.push(`/templates`);
-  };
+  }
 
   return (
     <PageSection>
@@ -47,7 +70,7 @@ function JobTemplateAdd({ history, i18n }) {
             handleSubmit={handleSubmit}
           />
         </CardBody>
-        {error ? <div>error</div> : ''}
+        {formSubmitError ? <div>formSubmitError</div> : ''}
       </Card>
     </PageSection>
   );
