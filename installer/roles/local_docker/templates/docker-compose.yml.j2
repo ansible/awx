@@ -33,7 +33,7 @@ services:
       - "{{ ssl_certificate +':/etc/nginx/awxweb.pem:ro' }}"
     {% endif %}
     {% if ssl_certificate_key is defined %}
-      - "{{ ssl_certificate_key +':/etc/nginx/awxweb_key.pem:ro' }}"
+      - "{{ ssl_certificate_key +':/etc/nginx/awxweb.key:ro' }}"
     {% endif %}
     {% if (awx_container_search_domains is defined) and (',' in awx_container_search_domains) %}
     {% set awx_container_search_domains_list = awx_container_search_domains.split(',') %}

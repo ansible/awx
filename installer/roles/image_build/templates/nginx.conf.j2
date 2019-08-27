@@ -52,7 +52,7 @@ http {
 
         ssl_certificate /etc/nginx/awxweb.pem;
         {% if ssl_certificate_key is defined %}
-        ssl_certificate_key /etc/nginx/awxweb_key.pem;
+        ssl_certificate_key /etc/nginx/awxweb.key;
         {% else %}
         ssl_certificate_key /etc/nginx/awxweb.pem;
         {% endif %}
