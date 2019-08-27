@@ -45,7 +45,7 @@ from awx.main.models.base import (
     CommonModelNameNotUnique,
     VarsDictProperty,
     CLOUD_INVENTORY_SOURCES,
-    prevent_search
+    prevent_search, accepts_json
 )
 from awx.main.models.events import InventoryUpdateEvent
 from awx.main.models.unified_jobs import UnifiedJob, UnifiedJobTemplate
@@ -93,11 +93,11 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
         on_delete=models.SET_NULL,
         null=True,
     )
-    variables = models.TextField(
+    variables = accepts_json(models.TextField(
         blank=True,
         default='',
         help_text=_('Inventory variables in JSON or YAML format.'),
-    )
+    ))
     has_active_failures = models.BooleanField(
         default=False,
         editable=False,
@@ -608,11 +608,11 @@ class Host(CommonModelNameNotUnique, RelatedJobsMixin):
         default='',
         help_text=_('The value used by the remote inventory source to uniquely identify the host'),
     )
-    variables = models.TextField(
+    variables = accepts_json(models.TextField(
         blank=True,
         default='',
         help_text=_('Host variables in JSON or YAML format.'),
-    )
+    ))
     last_job = models.ForeignKey(
         'Job',
         related_name='hosts_as_last_job+',
@@ -796,11 +796,11 @@ class Group(CommonModelNameNotUnique, RelatedJobsMixin):
         related_name='children',
         blank=True,
     )
-    variables = models.TextField(
+    variables = accepts_json(models.TextField(
         blank=True,
         default='',
         help_text=_('Group variables in JSON or YAML format.'),
-    )
+    ))
     hosts = models.ManyToManyField(
         'Host',
         related_name='groups',

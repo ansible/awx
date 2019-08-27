@@ -4,6 +4,7 @@
 # Tower
 from awx.api.versioning import reverse
 from awx.main.fields import JSONField
+from awx.main.models.base import accepts_json
 
 # Django
 from django.db import models
@@ -34,7 +35,7 @@ class ActivityStream(models.Model):
     actor = models.ForeignKey('auth.User', null=True, on_delete=models.SET_NULL, related_name='activity_stream')
     operation = models.CharField(max_length=13, choices=OPERATION_CHOICES)
     timestamp = models.DateTimeField(auto_now_add=True)
-    changes = models.TextField(blank=True)
+    changes = accepts_json(models.TextField(blank=True))
     deleted_actor = JSONField(null=True)
     action_node = models.CharField(
         blank=True,

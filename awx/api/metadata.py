@@ -5,6 +5,8 @@ from collections import OrderedDict
 
 # Django
 from django.core.exceptions import PermissionDenied
+from django.db.models.fields import PositiveIntegerField, BooleanField
+from django.db.models.fields.related import ForeignKey
 from django.http import Http404
 from django.utils.encoding import force_text, smart_text
 from django.utils.translation import ugettext_lazy as _
@@ -14,9 +16,11 @@ from rest_framework import exceptions
 from rest_framework import metadata
 from rest_framework import serializers
 from rest_framework.relations import RelatedField, ManyRelatedField
+from rest_framework.fields import JSONField as DRFJSONField
 from rest_framework.request import clone_request
 
 # AWX
+from awx.main.fields import JSONField
 from awx.main.models import InventorySource, NotificationTemplate
 
 
@@ -68,6 +72,8 @@ class Metadata(metadata.SimpleMetadata):
             else:
                 for model_field in serializer.Meta.model._meta.fields:
                     if field.field_name == model_field.name:
+                        if getattr(model_field, '__accepts_json__', None):
+                            field_info['type'] = 'json'
                         field_info['filterable'] = True
                         break
                 else:
@@ -126,14 +132,36 @@ class Metadata(metadata.SimpleMetadata):
 
 
         # Update type of fields returned...
+        model_field = None
+        if serializer and hasattr(serializer, 'Meta') and hasattr(serializer.Meta, 'model'):
+            try:
+                model_field = serializer.Meta.model._meta.get_field(field.field_name)
+            except Exception:
+                pass
         if field.field_name == 'type':
             field_info['type'] = 'choice'
-        elif field.field_name == 'url':
+        elif field.field_name in ('url', 'custom_virtualenv', 'token'):
             field_info['type'] = 'string'
         elif field.field_name in ('related', 'summary_fields'):
             field_info['type'] = 'object'
+        elif isinstance(field, PositiveIntegerField):
+            field_info['type'] = 'integer'
         elif field.field_name in ('created', 'modified'):
             field_info['type'] = 'datetime'
+        elif (
+            RelatedField in field.__class__.__bases__ or
+            isinstance(model_field, ForeignKey)
+        ):
+            field_info['type'] = 'id'
+        elif (
+            isinstance(field, JSONField) or
+            isinstance(model_field, JSONField) or
+            isinstance(field, DRFJSONField) or
+            isinstance(getattr(field, 'model_field', None), JSONField)
+        ):
+            field_info['type'] = 'json'
+        elif isinstance(model_field, BooleanField):
+            field_info['type'] = 'boolean'
 
         return field_info
 
