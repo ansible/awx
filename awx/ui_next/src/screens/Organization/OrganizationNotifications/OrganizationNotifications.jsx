@@ -33,6 +33,7 @@ class OrganizationNotifications extends Component {
       toggleLoading: false,
       itemCount: 0,
       notifications: [],
+      startedTemplateIds: [],
       successTemplateIds: [],
       errorTemplateIds: [],
       typeLabels: null,
@@ -85,9 +86,11 @@ class OrganizationNotifications extends Component {
       }
 
       const [
+        { data: startedTemplates },
         { data: successTemplates },
         { data: errorTemplates },
       ] = await Promise.all([
+        OrganizationsAPI.readNotificationTemplatesStarted(id, idMatchParams),
         OrganizationsAPI.readNotificationTemplatesSuccess(id, idMatchParams),
         OrganizationsAPI.readNotificationTemplatesError(id, idMatchParams),
       ]);
@@ -95,7 +98,8 @@ class OrganizationNotifications extends Component {
       const stateToUpdate = {
         itemCount,
         notifications,
-        successTemplateIds: successTemplates.results.map(s => s.id),
+        startedTemplateIds: startedTemplates.results.map(st => st.id),
+        successTemplateIds: successTemplates.results.map(su => su.id),
         errorTemplateIds: errorTemplates.results.map(e => e.id),
       };
 
@@ -130,8 +134,10 @@ class OrganizationNotifications extends Component {
     let stateArrayName;
     if (status === 'success') {
       stateArrayName = 'successTemplateIds';
-    } else {
+    } else if (status === 'error') {
       stateArrayName = 'errorTemplateIds';
+    } else if (status === 'started') {
+      stateArrayName = 'startedTemplateIds';
     }
 
     let stateUpdateFunction;
@@ -185,6 +191,7 @@ class OrganizationNotifications extends Component {
       toggleLoading,
       itemCount,
       notifications,
+      startedTemplateIds,
       successTemplateIds,
       errorTemplateIds,
       typeLabels,
@@ -208,6 +215,7 @@ class OrganizationNotifications extends Component {
               canToggleNotifications={canToggleNotifications && !toggleLoading}
               toggleNotification={this.handleNotificationToggle}
               errorTurnedOn={errorTemplateIds.includes(notification.id)}
+              startedTurnedOn={startedTemplateIds.includes(notification.id)}
               successTurnedOn={successTemplateIds.includes(notification.id)}
               typeLabels={typeLabels}
             />

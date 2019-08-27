@@ -147,7 +147,7 @@ class OrganizationsList extends Component {
 
     return (
       <Fragment>
-        <PageSection variant={medium}>
+        <PageSection>
           <Card>
             <PaginatedDataList
               contentError={contentError}

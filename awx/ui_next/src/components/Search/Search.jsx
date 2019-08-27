@@ -55,6 +55,7 @@ const NoOptionDropdown = styled.div`
   align-self: stretch;
   border: 1px solid grey;
   padding: 3px 7px;
+  white-space: nowrap;
 `;
 
 const InputFormGroup = styled(FormGroup)`
@@ -161,6 +162,8 @@ class Search extends React.Component {
                 {i18n._(t`Search value text input`)}
               </span>
             }
+            style={{ width: '100%' }}
+            suppressClassNameWarning
           >
             <TextInput
               type="search"

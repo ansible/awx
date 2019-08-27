@@ -22,32 +22,13 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
       Array [
         <Button
           aria-label="Confirm delete"
-          className=""
-          component="button"
-          isActive={false}
-          isBlock={false}
-          isDisabled={false}
-          isFocus={false}
-          isHover={false}
-          isInline={false}
           onClick={[Function]}
-          type="button"
           variant="danger"
         >
           Delete
         </Button>,
         <Button
-          aria-label={null}
-          className=""
-          component="button"
-          isActive={false}
-          isBlock={false}
-          isDisabled={false}
-          isFocus={false}
-          isHover={false}
-          isInline={false}
           onClick={[Function]}
-          type="button"
           variant="secondary"
         >
           Cancel
@@ -64,32 +45,13 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
         Array [
           <Button
             aria-label="Confirm delete"
-            className=""
-            component="button"
-            isActive={false}
-            isBlock={false}
-            isDisabled={false}
-            isFocus={false}
-            isHover={false}
-            isInline={false}
             onClick={[Function]}
-            type="button"
             variant="danger"
           >
             Delete
           </Button>,
           <Button
-            aria-label={null}
-            className=""
-            component="button"
-            isActive={false}
-            isBlock={false}
-            isDisabled={false}
-            isFocus={false}
-            isHover={false}
-            isInline={false}
             onClick={[Function]}
-            type="button"
             variant="secondary"
           >
             Cancel
@@ -103,8 +65,8 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
       isOpen={true}
       isSmall={false}
       onClose={[Function]}
+      showClose={true}
       title="Remove {0} Access"
-      width={null}
     >
       <Portal
         containerInfo={
@@ -142,13 +104,13 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                       />
                     </svg>
                   </button>
-                  <h3
+                  <h1
                     class="pf-c-title pf-m-2xl"
                   >
                      
                     Remove {0} Access
                      
-                  </h3>
+                  </h1>
                   <div
                     class="pf-c-modal-box__body"
                     id="pf-modal-0"
@@ -176,7 +138,6 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                   <div
                     class="pf-c-modal-box__footer"
                   >
-                     
                     <button
                       aria-label="Confirm delete"
                       class="pf-c-button pf-m-danger"
@@ -190,7 +151,6 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                     >
                       Cancel
                     </button>
-                     
                   </div>
                 </div>
               </div>
@@ -203,32 +163,13 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
             Array [
               <Button
                 aria-label="Confirm delete"
-                className=""
-                component="button"
-                isActive={false}
-                isBlock={false}
-                isDisabled={false}
-                isFocus={false}
-                isHover={false}
-                isInline={false}
                 onClick={[Function]}
-                type="button"
                 variant="danger"
               >
                 Delete
               </Button>,
               <Button
-                aria-label={null}
-                className=""
-                component="button"
-                isActive={false}
-                isBlock={false}
-                isDisabled={false}
-                isFocus={false}
-                isHover={false}
-                isInline={false}
                 onClick={[Function]}
-                type="button"
                 variant="secondary"
               >
                 Cancel
@@ -243,12 +184,10 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
           isOpen={true}
           isSmall={false}
           onClose={[Function]}
+          showClose={true}
           title="Remove {0} Access"
-          width={null}
         >
-          <Backdrop
-            className=""
-          >
+          <Backdrop>
             <div
               className="pf-c-backdrop"
             >
@@ -272,11 +211,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                     id="pf-modal-0"
                     isLarge={false}
                     isSmall={false}
-                    style={
-                      Object {
-                        "width": null,
-                      }
-                    }
+                    style={Object {}}
                     title="Remove {0} Access"
                   >
                     <div
@@ -285,28 +220,15 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                       aria-modal="true"
                       className="pf-c-modal-box awx-c-modal at-c-alertModal at-c-alertModal--danger"
                       role="dialog"
-                      style={
-                        Object {
-                          "width": null,
-                        }
-                      }
+                      style={Object {}}
                     >
                       <ModalBoxCloseButton
-                        className=""
                         onClose={[Function]}
                       >
                         <Button
                           aria-label="Close"
                           className=""
-                          component="button"
-                          isActive={false}
-                          isBlock={false}
-                          isDisabled={false}
-                          isFocus={false}
-                          isHover={false}
-                          isInline={false}
                           onClick={[Function]}
-                          type="button"
                           variant="plain"
                         >
                           <button
@@ -320,6 +242,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                           >
                             <TimesIcon
                               color="currentColor"
+                              noVerticalAlign={false}
                               size="sm"
                               title={null}
                             >
@@ -347,25 +270,23 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                         </Button>
                       </ModalBoxCloseButton>
                       <ModalBoxHeader
-                        className=""
                         hideTitle={false}
                       >
                         <Title
                           className=""
-                          headingLevel="h3"
+                          headingLevel="h1"
                           size="2xl"
                         >
-                          <h3
+                          <h1
                             className="pf-c-title pf-m-2xl"
                           >
                              
                             Remove {0} Access
                              
-                          </h3>
+                          </h1>
                         </Title>
                       </ModalBoxHeader>
                       <ModalBoxBody
-                        className=""
                         id="pf-modal-0"
                       >
                         <div
@@ -379,6 +300,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                           <ExclamationCircleIcon
                             className="at-c-alertModal__icon"
                             color="currentColor"
+                            noVerticalAlign={false}
                             size="sm"
                             title={null}
                           >
@@ -405,26 +327,14 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                           </ExclamationCircleIcon>
                         </div>
                       </ModalBoxBody>
-                      <ModalBoxFooter
-                        className=""
-                      >
+                      <ModalBoxFooter>
                         <div
                           className="pf-c-modal-box__footer"
                         >
-                           
                           <Button
                             aria-label="Confirm delete"
-                            className=""
-                            component="button"
-                            isActive={false}
-                            isBlock={false}
-                            isDisabled={false}
-                            isFocus={false}
-                            isHover={false}
-                            isInline={false}
                             key="delete"
                             onClick={[Function]}
-                            type="button"
                             variant="danger"
                           >
                             <button
@@ -440,18 +350,8 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                             </button>
                           </Button>
                           <Button
-                            aria-label={null}
-                            className=""
-                            component="button"
-                            isActive={false}
-                            isBlock={false}
-                            isDisabled={false}
-                            isFocus={false}
-                            isHover={false}
-                            isInline={false}
                             key="cancel"
                             onClick={[Function]}
-                            type="button"
                             variant="secondary"
                           >
                             <button
@@ -466,7 +366,6 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                               Cancel
                             </button>
                           </Button>
-                           
                         </div>
                       </ModalBoxFooter>
                     </div>

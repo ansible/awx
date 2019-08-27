@@ -173,7 +173,7 @@ class TemplatesList extends Component {
     const isAllSelected = selected.length === templates.length;
     const { medium } = PageSectionVariants;
     return (
-      <PageSection variant={medium}>
+      <PageSection>
         <Card>
           <PaginatedDataList
             contentError={contentError}

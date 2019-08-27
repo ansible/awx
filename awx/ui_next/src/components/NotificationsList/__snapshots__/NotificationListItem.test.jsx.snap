@@ -23,8 +23,6 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
 >
   <DataListItem
     aria-labelledby="items-list-item-9000"
-    className=""
-    isExpanded={false}
     key="9000"
   >
     <li
@@ -32,7 +30,6 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
       className="pf-c-data-list__item"
     >
       <DataListItemRow
-        className=""
         key=".0"
         rowid="items-list-item-9000"
       >
@@ -40,7 +37,6 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
           className="pf-c-data-list__item-row"
         >
           <DataListItemCells
-            className=""
             dataListCells={
               Array [
                 <ForwardRef>
@@ -65,11 +61,20 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                   righthalf="true"
                 >
                   <ForwardRef
+                    aria-label="Toggle notification start"
+                    id="notification-9000-started-toggle"
+                    isDisabled={false}
+                    label="Start"
+                    labelOff="Start"
+                    onChange={[Function]}
+                  />
+                  <ForwardRef
                     aria-label="Toggle notification success"
                     id="notification-9000-success-toggle"
                     isChecked={false}
                     isDisabled={false}
-                    label="Successful"
+                    label="Success"
+                    labelOff="Success"
                     onChange={[Function]}
                   />
                   <ForwardRef
@@ -78,6 +83,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                     isChecked={false}
                     isDisabled={false}
                     label="Failure"
+                    labelOff="Failure"
                     onChange={[Function]}
                   />
                 </ForwardRef>,
@@ -124,11 +130,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                   forwardedRef={null}
                 >
                   <DataListCell
-                    alignRight={false}
                     className="NotificationListItem__DataListCell-j7c411-0 kIdLtz"
-                    isFilled={true}
-                    isIcon={false}
-                    width={1}
                   >
                     <div
                       className="pf-c-data-list__cell NotificationListItem__DataListCell-j7c411-0 kIdLtz"
@@ -231,11 +233,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                   forwardedRef={null}
                 >
                   <DataListCell
-                    alignRight={false}
                     className="NotificationListItem__DataListCell-j7c411-0 kIdLtz"
-                    isFilled={true}
-                    isIcon={false}
-                    width={1}
                   >
                     <div
                       className="pf-c-data-list__cell NotificationListItem__DataListCell-j7c411-0 kIdLtz"
@@ -282,23 +280,137 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                   righthalf="true"
                 >
                   <DataListCell
-                    alignRight={false}
                     className="NotificationListItem__DataListCell-j7c411-0 hoXOpW"
-                    isFilled={true}
-                    isIcon={false}
                     righthalf="true"
-                    width={1}
                   >
                     <div
                       className="pf-c-data-list__cell NotificationListItem__DataListCell-j7c411-0 hoXOpW"
                       righthalf="true"
                     >
                       <NotificationListItem__Switch
+                        aria-label="Toggle notification start"
+                        id="notification-9000-started-toggle"
+                        isDisabled={false}
+                        label="Start"
+                        labelOff="Start"
+                        onChange={[Function]}
+                      >
+                        <StyledComponent
+                          aria-label="Toggle notification start"
+                          forwardedComponent={
+                            Object {
+                              "$$typeof": Symbol(react.forward_ref),
+                              "attrs": Array [],
+                              "componentStyle": ComponentStyle {
+                                "componentId": "NotificationListItem__Switch-j7c411-1",
+                                "isStatic": true,
+                                "lastClassName": "ceuHGn",
+                                "rules": Array [
+                                  "display:flex;flex-wrap:no-wrap;",
+                                ],
+                              },
+                              "displayName": "NotificationListItem__Switch",
+                              "foldedComponentIds": Array [],
+                              "render": [Function],
+                              "styledComponentId": "NotificationListItem__Switch-j7c411-1",
+                              "target": [Function],
+                              "toString": [Function],
+                              "warnTooManyClasses": [Function],
+                              "withComponent": [Function],
+                            }
+                          }
+                          forwardedRef={null}
+                          id="notification-9000-started-toggle"
+                          isDisabled={false}
+                          label="Start"
+                          labelOff="Start"
+                          onChange={[Function]}
+                        >
+                          <Component
+                            aria-label="Toggle notification start"
+                            className="NotificationListItem__Switch-j7c411-1 ceuHGn"
+                            id="notification-9000-started-toggle"
+                            isDisabled={false}
+                            label="Start"
+                            labelOff="Start"
+                            onChange={[Function]}
+                          >
+                            <ComponentWithOuia
+                              component={[Function]}
+                              componentProps={
+                                Object {
+                                  "aria-label": "Toggle notification start",
+                                  "className": "NotificationListItem__Switch-j7c411-1 ceuHGn",
+                                  "id": "notification-9000-started-toggle",
+                                  "isChecked": undefined,
+                                  "isDisabled": false,
+                                  "label": "Start",
+                                  "labelOff": "Start",
+                                  "onChange": [Function],
+                                }
+                              }
+                              consumerContext={null}
+                            >
+                              <Switch
+                                aria-label="Toggle notification start"
+                                className="NotificationListItem__Switch-j7c411-1 ceuHGn"
+                                id="notification-9000-started-toggle"
+                                isChecked={true}
+                                isDisabled={false}
+                                label="Start"
+                                labelOff="Start"
+                                onChange={[Function]}
+                                ouiaContext={
+                                  Object {
+                                    "isOuia": false,
+                                    "ouiaId": null,
+                                  }
+                                }
+                              >
+                                <label
+                                  className="pf-c-switch NotificationListItem__Switch-j7c411-1 ceuHGn"
+                                  htmlFor="notification-9000-started-toggle"
+                                >
+                                  <input
+                                    aria-label="Toggle notification start"
+                                    aria-labelledby={null}
+                                    checked={true}
+                                    className="pf-c-switch__input"
+                                    disabled={false}
+                                    id="notification-9000-started-toggle"
+                                    onChange={[Function]}
+                                    type="checkbox"
+                                  />
+                                  <span
+                                    className="pf-c-switch__toggle"
+                                  />
+                                  <span
+                                    aria-hidden="true"
+                                    className="pf-c-switch__label pf-m-on"
+                                    id={null}
+                                  >
+                                    Start
+                                  </span>
+                                  <span
+                                    aria-hidden="true"
+                                    className="pf-c-switch__label pf-m-off"
+                                    id={null}
+                                  >
+                                    Start
+                                  </span>
+                                </label>
+                              </Switch>
+                            </ComponentWithOuia>
+                          </Component>
+                        </StyledComponent>
+                      </NotificationListItem__Switch>
+                      <NotificationListItem__Switch
                         aria-label="Toggle notification success"
                         id="notification-9000-success-toggle"
                         isChecked={false}
                         isDisabled={false}
-                        label="Successful"
+                        label="Success"
+                        labelOff="Success"
                         onChange={[Function]}
                       >
                         <StyledComponent
@@ -329,48 +441,87 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                           id="notification-9000-success-toggle"
                           isChecked={false}
                           isDisabled={false}
-                          label="Successful"
+                          label="Success"
+                          labelOff="Success"
                           onChange={[Function]}
                         >
-                          <Switch
+                          <Component
                             aria-label="Toggle notification success"
                             className="NotificationListItem__Switch-j7c411-1 ceuHGn"
                             id="notification-9000-success-toggle"
                             isChecked={false}
                             isDisabled={false}
-                            label="Successful"
+                            label="Success"
+                            labelOff="Success"
                             onChange={[Function]}
                           >
-                            <label
-                              className="pf-c-switch NotificationListItem__Switch-j7c411-1 ceuHGn"
-                              htmlFor="notification-9000-success-toggle"
+                            <ComponentWithOuia
+                              component={[Function]}
+                              componentProps={
+                                Object {
+                                  "aria-label": "Toggle notification success",
+                                  "className": "NotificationListItem__Switch-j7c411-1 ceuHGn",
+                                  "id": "notification-9000-success-toggle",
+                                  "isChecked": false,
+                                  "isDisabled": false,
+                                  "label": "Success",
+                                  "labelOff": "Success",
+                                  "onChange": [Function],
+                                }
+                              }
+                              consumerContext={null}
                             >
-                              <input
+                              <Switch
                                 aria-label="Toggle notification success"
-                                checked={false}
-                                className="pf-c-switch__input"
-                                disabled={false}
+                                className="NotificationListItem__Switch-j7c411-1 ceuHGn"
                                 id="notification-9000-success-toggle"
+                                isChecked={false}
+                                isDisabled={false}
+                                label="Success"
+                                labelOff="Success"
                                 onChange={[Function]}
-                                type="checkbox"
-                              />
-                              <span
-                                className="pf-c-switch__toggle"
-                              />
-                              <span
-                                aria-hidden="true"
-                                className="pf-c-switch__label pf-m-on"
+                                ouiaContext={
+                                  Object {
+                                    "isOuia": false,
+                                    "ouiaId": null,
+                                  }
+                                }
                               >
-                                Successful
-                              </span>
-                              <span
-                                aria-hidden="true"
-                                className="pf-c-switch__label pf-m-off"
-                              >
-                                Successful
-                              </span>
-                            </label>
-                          </Switch>
+                                <label
+                                  className="pf-c-switch NotificationListItem__Switch-j7c411-1 ceuHGn"
+                                  htmlFor="notification-9000-success-toggle"
+                                >
+                                  <input
+                                    aria-label="Toggle notification success"
+                                    aria-labelledby={null}
+                                    checked={false}
+                                    className="pf-c-switch__input"
+                                    disabled={false}
+                                    id="notification-9000-success-toggle"
+                                    onChange={[Function]}
+                                    type="checkbox"
+                                  />
+                                  <span
+                                    className="pf-c-switch__toggle"
+                                  />
+                                  <span
+                                    aria-hidden="true"
+                                    className="pf-c-switch__label pf-m-on"
+                                    id={null}
+                                  >
+                                    Success
+                                  </span>
+                                  <span
+                                    aria-hidden="true"
+                                    className="pf-c-switch__label pf-m-off"
+                                    id={null}
+                                  >
+                                    Success
+                                  </span>
+                                </label>
+                              </Switch>
+                            </ComponentWithOuia>
+                          </Component>
                         </StyledComponent>
                       </NotificationListItem__Switch>
                       <NotificationListItem__Switch
@@ -379,6 +530,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                         isChecked={false}
                         isDisabled={false}
                         label="Failure"
+                        labelOff="Failure"
                         onChange={[Function]}
                       >
                         <StyledComponent
@@ -410,47 +562,86 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                           isChecked={false}
                           isDisabled={false}
                           label="Failure"
+                          labelOff="Failure"
                           onChange={[Function]}
                         >
-                          <Switch
+                          <Component
                             aria-label="Toggle notification failure"
                             className="NotificationListItem__Switch-j7c411-1 ceuHGn"
                             id="notification-9000-error-toggle"
                             isChecked={false}
                             isDisabled={false}
                             label="Failure"
+                            labelOff="Failure"
                             onChange={[Function]}
                           >
-                            <label
-                              className="pf-c-switch NotificationListItem__Switch-j7c411-1 ceuHGn"
-                              htmlFor="notification-9000-error-toggle"
+                            <ComponentWithOuia
+                              component={[Function]}
+                              componentProps={
+                                Object {
+                                  "aria-label": "Toggle notification failure",
+                                  "className": "NotificationListItem__Switch-j7c411-1 ceuHGn",
+                                  "id": "notification-9000-error-toggle",
+                                  "isChecked": false,
+                                  "isDisabled": false,
+                                  "label": "Failure",
+                                  "labelOff": "Failure",
+                                  "onChange": [Function],
+                                }
+                              }
+                              consumerContext={null}
                             >
-                              <input
+                              <Switch
                                 aria-label="Toggle notification failure"
-                                checked={false}
-                                className="pf-c-switch__input"
-                                disabled={false}
+                                className="NotificationListItem__Switch-j7c411-1 ceuHGn"
                                 id="notification-9000-error-toggle"
+                                isChecked={false}
+                                isDisabled={false}
+                                label="Failure"
+                                labelOff="Failure"
                                 onChange={[Function]}
-                                type="checkbox"
-                              />
-                              <span
-                                className="pf-c-switch__toggle"
-                              />
-                              <span
-                                aria-hidden="true"
-                                className="pf-c-switch__label pf-m-on"
+                                ouiaContext={
+                                  Object {
+                                    "isOuia": false,
+                                    "ouiaId": null,
+                                  }
+                                }
                               >
-                                Failure
-                              </span>
-                              <span
-                                aria-hidden="true"
-                                className="pf-c-switch__label pf-m-off"
-                              >
-                                Failure
-                              </span>
-                            </label>
-                          </Switch>
+                                <label
+                                  className="pf-c-switch NotificationListItem__Switch-j7c411-1 ceuHGn"
+                                  htmlFor="notification-9000-error-toggle"
+                                >
+                                  <input
+                                    aria-label="Toggle notification failure"
+                                    aria-labelledby={null}
+                                    checked={false}
+                                    className="pf-c-switch__input"
+                                    disabled={false}
+                                    id="notification-9000-error-toggle"
+                                    onChange={[Function]}
+                                    type="checkbox"
+                                  />
+                                  <span
+                                    className="pf-c-switch__toggle"
+                                  />
+                                  <span
+                                    aria-hidden="true"
+                                    className="pf-c-switch__label pf-m-on"
+                                    id={null}
+                                  >
+                                    Failure
+                                  </span>
+                                  <span
+                                    aria-hidden="true"
+                                    className="pf-c-switch__label pf-m-off"
+                                    id={null}
+                                  >
+                                    Failure
+                                  </span>
+                                </label>
+                              </Switch>
+                            </ComponentWithOuia>
+                          </Component>
                         </StyledComponent>
                       </NotificationListItem__Switch>
                     </div>

@@ -30,6 +30,12 @@ const Tabs = styled(PFTabs)`
     border-width: var(--pf-c-tabs__item--BorderWidth) 0
       var(--pf-c-tabs__item--BorderWidth) 0;
   }
+
+  // The above pseudo element is being applied to the tab items as well
+  // I couldn't figure out how to only apply it to .pf-c-tabs
+  .pf-c-tabs__item::before {
+    content: none;
+  }
 `;
 
 function RoutedTabs(props) {
@@ -54,7 +60,6 @@ function RoutedTabs(props) {
     <Tabs activeKey={getActiveTabId()} onSelect={handleTabSelect}>
       {tabsArray.map(tab => (
         <Tab
-          className={`${tab.name}`}
           aria-label={`${tab.name}`}
           eventKey={tab.id}
           key={tab.id}

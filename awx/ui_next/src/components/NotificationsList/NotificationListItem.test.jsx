@@ -58,7 +58,45 @@ describe('<NotificationListItem canToggleNotifications />', () => {
     expect(typeCell.text()).toBe('Slack');
   });
 
-  test('handles success click when toggle is on', () => {
+  test('handles start click when toggle is on', () => {
+    wrapper = mountWithContexts(
+      <NotificationListItem
+        notification={mockNotif}
+        startedTurnedOn
+        toggleNotification={toggleNotification}
+        detailUrl="/foo"
+        canToggleNotifications
+        typeLabels={typeLabels}
+      />
+    );
+    wrapper
+      .find('Switch')
+      .first()
+      .find('input')
+      .simulate('change');
+    expect(toggleNotification).toHaveBeenCalledWith(9000, true, 'started');
+  });
+
+  test('handles start click when toggle is off', () => {
+    wrapper = mountWithContexts(
+      <NotificationListItem
+        notification={mockNotif}
+        startedTurnedOn={false}
+        toggleNotification={toggleNotification}
+        detailUrl="/foo"
+        canToggleNotifications
+        typeLabels={typeLabels}
+      />
+    );
+    wrapper
+      .find('Switch')
+      .first()
+      .find('input')
+      .simulate('change');
+    expect(toggleNotification).toHaveBeenCalledWith(9000, false, 'started');
+  });
+
+  test('handles error click when toggle is on', () => {
     wrapper = mountWithContexts(
       <NotificationListItem
         notification={mockNotif}
@@ -71,13 +109,13 @@ describe('<NotificationListItem canToggleNotifications />', () => {
     );
     wrapper
       .find('Switch')
-      .first()
+      .at(1)
       .find('input')
       .simulate('change');
     expect(toggleNotification).toHaveBeenCalledWith(9000, true, 'success');
   });
 
-  test('handles success click when toggle is off', () => {
+  test('handles error click when toggle is off', () => {
     wrapper = mountWithContexts(
       <NotificationListItem
         notification={mockNotif}
@@ -90,7 +128,7 @@ describe('<NotificationListItem canToggleNotifications />', () => {
     );
     wrapper
       .find('Switch')
-      .first()
+      .at(1)
       .find('input')
       .simulate('change');
     expect(toggleNotification).toHaveBeenCalledWith(9000, false, 'success');
@@ -109,7 +147,7 @@ describe('<NotificationListItem canToggleNotifications />', () => {
     );
     wrapper
       .find('Switch')
-      .at(1)
+      .at(2)
       .find('input')
       .simulate('change');
     expect(toggleNotification).toHaveBeenCalledWith(9000, true, 'error');
@@ -128,7 +166,7 @@ describe('<NotificationListItem canToggleNotifications />', () => {
     );
     wrapper
       .find('Switch')
-      .at(1)
+      .at(2)
       .find('input')
       .simulate('change');
     expect(toggleNotification).toHaveBeenCalledWith(9000, false, 'error');

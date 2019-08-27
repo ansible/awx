@@ -34,6 +34,7 @@ function NotificationListItem(props) {
     canToggleNotifications,
     notification,
     detailUrl,
+    startedTurnedOn,
     successTurnedOn,
     errorTurnedOn,
     toggleNotification,
@@ -66,8 +67,24 @@ function NotificationListItem(props) {
             </DataListCell>,
             <DataListCell righthalf="true" key="toggles">
               <Switch
+                id={`notification-${notification.id}-started-toggle`}
+                label={i18n._(t`Start`)}
+                labelOff={i18n._(t`Start`)}
+                isChecked={startedTurnedOn}
+                isDisabled={!canToggleNotifications}
+                onChange={() =>
+                  toggleNotification(
+                    notification.id,
+                    startedTurnedOn,
+                    'started'
+                  )
+                }
+                aria-label={i18n._(t`Toggle notification start`)}
+              />
+              <Switch
                 id={`notification-${notification.id}-success-toggle`}
-                label={i18n._(t`Successful`)}
+                label={i18n._(t`Success`)}
+                labelOff={i18n._(t`Success`)}
                 isChecked={successTurnedOn}
                 isDisabled={!canToggleNotifications}
                 onChange={() =>
@@ -82,6 +99,7 @@ function NotificationListItem(props) {
               <Switch
                 id={`notification-${notification.id}-error-toggle`}
                 label={i18n._(t`Failure`)}
+                labelOff={i18n._(t`Failure`)}
                 isChecked={errorTurnedOn}
                 isDisabled={!canToggleNotifications}
                 onChange={() =>
@@ -106,6 +124,7 @@ NotificationListItem.propTypes = {
   canToggleNotifications: bool.isRequired,
   detailUrl: string.isRequired,
   errorTurnedOn: bool,
+  startedTurnedOn: bool,
   successTurnedOn: bool,
   toggleNotification: func.isRequired,
   typeLabels: shape().isRequired,

@@ -10,14 +10,14 @@ import {
 class License extends Component {
   render() {
     const { i18n } = this.props;
-    const { light, medium } = PageSectionVariants;
+    const { light } = PageSectionVariants;
 
     return (
       <Fragment>
         <PageSection variant={light} className="pf-m-condensed">
           <Title size="2xl">{i18n._(t`License`)}</Title>
         </PageSection>
-        <PageSection variant={medium} />
+        <PageSection />
       </Fragment>
     );
   }

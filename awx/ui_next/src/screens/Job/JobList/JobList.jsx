@@ -154,7 +154,7 @@ class JobList extends Component {
     const isAllSelected = selected.length === jobs.length;
     const itemName = i18n._(t`Job`);
     return (
-      <PageSection variant={medium}>
+      <PageSection>
         <Card>
           <PaginatedDataList
             contentError={contentError}

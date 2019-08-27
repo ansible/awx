@@ -11,6 +11,13 @@ const NotificationsMixin = parent =>
       );
     }
 
+    readNotificationTemplatesStarted(id, params) {
+      return this.http.get(
+        `${this.baseUrl}${id}/notification_templates_started/`,
+        { params }
+      );
+    }
+
     readNotificationTemplatesSuccess(id, params) {
       return this.http.get(
         `${this.baseUrl}${id}/notification_templates_success/`,
@@ -22,6 +29,20 @@ const NotificationsMixin = parent =>
       return this.http.get(
         `${this.baseUrl}${id}/notification_templates_error/`,
         { params }
+      );
+    }
+
+    associateNotificationTemplatesStarted(resourceId, notificationId) {
+      return this.http.post(
+        `${this.baseUrl}${resourceId}/notification_templates_started/`,
+        { id: notificationId }
+      );
+    }
+
+    disassociateNotificationTemplatesStarted(resourceId, notificationId) {
+      return this.http.post(
+        `${this.baseUrl}${resourceId}/notification_templates_started/`,
+        { id: notificationId, disassociate: true }
       );
     }
 
@@ -66,6 +87,13 @@ const NotificationsMixin = parent =>
       notificationId,
       notificationType
     ) {
+      if (notificationType === 'started') {
+        return this.associateNotificationTemplatesStarted(
+          resourceId,
+          notificationId
+        );
+      }
+
       if (notificationType === 'success') {
         return this.associateNotificationTemplatesSuccess(
           resourceId,
@@ -98,6 +126,13 @@ const NotificationsMixin = parent =>
       notificationId,
       notificationType
     ) {
+      if (notificationType === 'started') {
+        return this.disassociateNotificationTemplatesStarted(
+          resourceId,
+          notificationId
+        );
+      }
+
       if (notificationType === 'success') {
         return this.disassociateNotificationTemplatesSuccess(
           resourceId,
