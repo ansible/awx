@@ -762,4 +762,51 @@ def logging_validate(serializer, attrs):
     return attrs
 
 
+def galaxy_validate(serializer, attrs):
+    """Ansible Galaxy config options have mutual exclusivity rules, these rules
+    are enforced here on serializer validation so that users will not be able
+    to save settings which obviously break all project updates.
+    """
+    galaxy_fields = ('url', 'username', 'password', 'token')
+    if not any('PRIVATE_GALAXY_{}'.format(subfield.upper()) in attrs for subfield in galaxy_fields):
+        return attrs
+
+    def _new_value(field_name):
+        if field_name in attrs:
+            return attrs[field_name]
+        elif not serializer.instance:
+            return ''
+        return getattr(serializer.instance, field_name, '')
+
+    galaxy_data = {}
+    for subfield in galaxy_fields:
+        galaxy_data[subfield] = _new_value('PRIVATE_GALAXY_{}'.format(subfield.upper()))
+    errors = {}
+    print('galaxy data')
+    print(galaxy_data)
+    if not galaxy_data['url']:
+        for k, v in galaxy_data.items():
+            if v:
+                setting_name = 'PRIVATE_GALAXY_{}'.format(k.upper())
+                errors.setdefault(setting_name, [])
+                errors[setting_name].append(_(
+                    'Cannot provide field if PRIVATE_GALAXY_URL is not set.'
+                ))
+
+    if (galaxy_data['password'] or galaxy_data['username']) and galaxy_data['token']:
+        for k in ('password', 'username', 'token'):
+            setting_name = 'PRIVATE_GALAXY_{}'.format(k.upper())
+            if setting_name in attrs:
+                errors.setdefault(setting_name, [])
+                errors[setting_name].append(_(
+                    'Setting PRIVATE_GALAXY_TOKEN is mutually exclusive with '
+                    'PRIVATE_GALAXY_USERNAME and PRIVATE_GALAXY_PASSWORD.'
+                ))
+
+    if errors:
+        raise serializers.ValidationError(errors)
+    return attrs
+
+
 register_validate('logging', logging_validate)
+register_validate('jobs', galaxy_validate)
