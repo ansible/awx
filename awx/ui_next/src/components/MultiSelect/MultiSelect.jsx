@@ -45,9 +45,16 @@ class MultiSelect extends Component {
         name: PropTypes.string.isRequired,
       })
     ).isRequired,
-    onAddNewItem: PropTypes.func.isRequired,
-    onRemoveItem: PropTypes.func.isRequired,
+    onAddNewItem: PropTypes.func,
+    onRemoveItem: PropTypes.func,
+    onChange: PropTypes.func,
   };
+
+  static defaultProps = {
+    onAddNewItem: () => {},
+    onRemoveItem: () => {},
+    onChange: () => {},
+  }
 
   constructor(props) {
     super(props);
@@ -92,19 +99,21 @@ class MultiSelect extends Component {
 
   handleSelection(e, item) {
     const { chipItems } = this.state;
-    const { onAddNewItem } = this.props;
+    const { onAddNewItem, onChange } = this.props;
     e.preventDefault();
 
+    const items = chipItems.concat({ name: item.name, id: item.id });
     this.setState({
-      chipItems: chipItems.concat({ name: item.name, id: item.id }),
+      chipItems: items,
       isExpanded: false,
     });
     onAddNewItem(item);
+    onChange(items);
   }
 
   handleAddItem(event) {
     const { input, chipItems } = this.state;
-    const { onAddNewItem } = this.props;
+    const { onAddNewItem, onChange } = this.props;
     const isIncluded = chipItems.some(chipItem => chipItem.name === input);
 
     if (!input) {
@@ -120,12 +129,14 @@ class MultiSelect extends Component {
     }
     if (event.key === 'Enter') {
       event.preventDefault();
+      const items = chipItems.concat({ name: input, id: input });
       this.setState({
-        chipItems: chipItems.concat({ name: input, id: input }),
+        chipItems: items,
         isExpanded: false,
         input: '',
       });
       onAddNewItem(input);
+      onChange(items);
     } else if (event.key === 'Tab') {
       this.setState({ input: '' });
     }
@@ -136,12 +147,13 @@ class MultiSelect extends Component {
   }
 
   removeChip(e, item) {
-    const { onRemoveItem } = this.props;
+    const { onRemoveItem, onChange } = this.props;
     const { chipItems } = this.state;
     const chips = chipItems.filter(chip => chip.id !== item.id);
 
     this.setState({ chipItems: chips });
     onRemoveItem(item);
+    onChange(chips);
 
     e.preventDefault();
   }

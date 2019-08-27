@@ -501,6 +501,7 @@ class JobTemplateForm extends Component {
               id="template-job-slicing"
               name="job_slice_count"
               type="number"
+              min="1"
               label={i18n._(t`Job Slicing`)}
               tooltip={i18n._(t`Divide the work done by this job template
                     into the specified number of job slices, each running the
@@ -551,6 +552,42 @@ class JobTemplateForm extends Component {
               t`Select the Instance Groups for this Organization to run on.`
             )}
           />
+          <FormGroup label={i18n._(t`Job Tags`)} fieldId="template-job-tags">
+            <Tooltip
+              position="right"
+              content={i18n._(t`Tags are useful when you have a large
+                    playbook, and you want to run a specific part of a play
+                    or task. Use commas to separate multiple tags. Refer to
+                    Ansible Tower documentation for details on the usage of
+                    tags.`)}
+            >
+              <QuestionCircleIcon />
+            </Tooltip>
+            <MultiSelect
+              onAddNewItem={this.handleNewLabel}
+              onRemoveItem={this.removeLabel}
+              associatedItems={template.job_tags.split(',')}
+              options={loadedLabels}
+            />
+          </FormGroup>
+          <FormGroup label={i18n._(t`Skip Tags`)} fieldId="template-skip-tags">
+            <Tooltip
+              position="right"
+              content={i18n._(t`Skip tags are useful when you have a
+                    large playbook, and you want to skip specific parts of a
+                    play or task. Use commas to separate multiple tags. Refer
+                    to Ansible Tower documentation for details on the usage
+                    of tags.`)}
+            >
+              <QuestionCircleIcon />
+            </Tooltip>
+            <MultiSelect
+              onAddNewItem={this.handleNewLabel}
+              onRemoveItem={this.removeLabel}
+              associatedItems={template.skip_tags.split(',')}
+              options={loadedLabels}
+            />
+          </FormGroup>
         </CollapsibleSection>
         <FormActionGroup onCancel={handleCancel} onSubmit={handleSubmit} />
       </Form>

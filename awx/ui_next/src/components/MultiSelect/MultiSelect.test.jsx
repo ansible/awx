@@ -28,6 +28,7 @@ describe('<MultiSelect />', () => {
     expect(getInitialChipItems).toBeCalled();
     expect(component.state().chipItems.length).toBe(2);
   });
+
   test('handleSelection add item to chipItems', async () => {
     const wrapper = mountWithContexts(
       <MultiSelect
@@ -45,12 +46,15 @@ describe('<MultiSelect />', () => {
     await sleep(1);
     expect(component.state().chipItems.length).toBe(2);
   });
+
   test('handleAddItem adds a chip only when Tab is pressed', () => {
     const onAddNewItem = jest.fn();
+    const onChange = jest.fn();
     const wrapper = mountWithContexts(
       <MultiSelect
         onAddNewItem={onAddNewItem}
         onRemoveItem={jest.fn()}
+        onChange={onChange}
         associatedItems={associatedItems}
         options={options}
       />
@@ -68,14 +72,18 @@ describe('<MultiSelect />', () => {
     expect(component.state().input.length).toBe(0);
     expect(component.state().isExpanded).toBe(false);
     expect(onAddNewItem).toBeCalled();
+    expect(onChange).toBeCalled();
   });
+
   test('removeChip removes chip properly', () => {
     const onRemoveItem = jest.fn();
+    const onChange = jest.fn();
 
     const wrapper = mountWithContexts(
       <MultiSelect
         onAddNewItem={jest.fn()}
         onRemoveItem={onRemoveItem}
+        onChange={onChange}
         associatedItems={associatedItems}
         options={options}
       />
@@ -89,5 +97,6 @@ describe('<MultiSelect />', () => {
       .removeChip(event, { name: 'Foo', id: 1, organization: 1 });
     expect(component.state().chipItems.length).toBe(1);
     expect(onRemoveItem).toBeCalled();
+    expect(onChange).toBeCalled();
   });
 });
