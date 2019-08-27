@@ -68,6 +68,9 @@ class JobTemplateForm extends Component {
     this.loadRelatedProjectPlaybooks = this.loadRelatedProjectPlaybooks.bind(
       this
     );
+    this.handleInstanceGroupsChange = this.handleInstanceGroupsChange.bind(
+      this
+    );
   }
 
   componentDidMount() {
@@ -116,6 +119,7 @@ class JobTemplateForm extends Component {
       return;
     }
     try {
+      console.log('loading...');
       const { data } = await JobTemplatesAPI.readInstanceGroups(template.id);
       console.log(data.results);
     } catch (err) {
@@ -217,6 +221,10 @@ class JobTemplateForm extends Component {
     };
   }
 
+  handleInstanceGroupsChange(relatedInstanceGroups) {
+    this.setState({ relatedInstanceGroups });
+  }
+
   render() {
     const {
       loadedLabels,
@@ -225,6 +233,9 @@ class JobTemplateForm extends Component {
       inventory,
       project,
       relatedProjectPlaybooks = [],
+      newLabels,
+      removedLabels,
+      relatedInstanceGroups,
     } = this.state;
     const {
       handleCancel,
@@ -271,13 +282,13 @@ class JobTemplateForm extends Component {
         ]
       );
 
-      const verbosityOptions = [
-        { value: '0', key: '0', label: i18n._(t`0 (Normal)`) },
-        { value: '1', key: '1', label: i18n._(t`1 (Verbose)`) },
-        { value: '2', key: '2', label: i18n._(t`2 (More Verbose)`) },
-        { value: '3', key: '3', label: i18n._(t`3 (Debug)`) },
-        { value: '4', key: '4', label: i18n._(t`4 (Connection Debug)`) },
-      ];
+    const verbosityOptions = [
+      { value: '0', key: '0', label: i18n._(t`0 (Normal)`) },
+      { value: '1', key: '1', label: i18n._(t`1 (Verbose)`) },
+      { value: '2', key: '2', label: i18n._(t`2 (More Verbose)`) },
+      { value: '3', key: '3', label: i18n._(t`3 (Debug)`) },
+      { value: '4', key: '4', label: i18n._(t`4 (Connection Debug)`) },
+    ];
 
     if (hasContentLoading) {
       return (
@@ -439,108 +450,107 @@ class JobTemplateForm extends Component {
           </FormGroup>
         </FormRow>
         <CollapsibleSection label="Advanced">
-              <FormRow>
-                <FormField
-                  id="template-forks"
-                  name="forks"
-                  type="number"
-                  label={i18n._(t`Forks`)}
-                  tooltip={
-                    <span>
-                      {i18n._(t`The number of parallel or simultaneous
+          <FormRow>
+            <FormField
+              id="template-forks"
+              name="forks"
+              type="number"
+              label={i18n._(t`Forks`)}
+              tooltip={
+                <span>
+                  {i18n._(t`The number of parallel or simultaneous
                   processes to use while executing the playbook. An empty value,
                   or a value less than 1 will use the Ansible default which is
                   usually 5. The default number of forks can be overwritten
                   with a change to`)}{' '}
-                      <code>ansible.cfg</code>.{' '}
-                      {i18n._(t`Refer to the Ansible documentation for details
+                  <code>ansible.cfg</code>.{' '}
+                  {i18n._(t`Refer to the Ansible documentation for details
                       about the configuration file.`)}
-                    </span>
-                  }
-                />
-                <FormField
-                  id="template-limit"
-                  name="limit"
-                  type="text"
-                  label={i18n._(t`Limit`)}
-                  tooltip={i18n._(t`Provide a host pattern to further constrain
+                </span>
+              }
+            />
+            <FormField
+              id="template-limit"
+              name="limit"
+              type="text"
+              label={i18n._(t`Limit`)}
+              tooltip={i18n._(t`Provide a host pattern to further constrain
                   the list of hosts that will be managed or affected by the
                   playbook. Multiple patterns are allowed. Refer to Ansible
                   documentation for more information and examples on patterns.`)}
-                />
-                <Field
-                  name="verbosity"
-                  render={({ field }) => (
-                    <FormGroup
-                      fieldId="template-verbosity"
-                      label={i18n._(t`Verbosity`)}
-                    >
-                      <Tooltip
-                        position="right"
-                        content={i18n._(t`Control the level of output ansible will
+            />
+            <Field
+              name="verbosity"
+              render={({ field }) => (
+                <FormGroup
+                  fieldId="template-verbosity"
+                  label={i18n._(t`Verbosity`)}
+                >
+                  <Tooltip
+                    position="right"
+                    content={i18n._(t`Control the level of output ansible will
                         produce as the playbook executes.`)}
-                      >
-                        <QuestionCircleIcon />
-                      </Tooltip>
-                      <AnsibleSelect data={verbosityOptions} {...field} />
-                    </FormGroup>
-                  )}
-                />
-                <FormField
-                  id="template-job-slicing"
-                  name="job_slice_count"
-                  type="number"
-                  label={i18n._(t`Job Slicing`)}
-                  tooltip={i18n._(t`Divide the work done by this job template
+                  >
+                    <QuestionCircleIcon />
+                  </Tooltip>
+                  <AnsibleSelect data={verbosityOptions} {...field} />
+                </FormGroup>
+              )}
+            />
+            <FormField
+              id="template-job-slicing"
+              name="job_slice_count"
+              type="number"
+              label={i18n._(t`Job Slicing`)}
+              tooltip={i18n._(t`Divide the work done by this job template
                     into the specified number of job slices, each running the
                     same tasks against a portion of the inventory.`)}
-                />
-                <FormField
-                  id="template-timeout"
-                  name="timeout"
-                  type="number"
-                  label={i18n._(t`Timeout`)}
-                  tooltip={i18n._(t`The amount of time (in seconds) to run
+            />
+            <FormField
+              id="template-timeout"
+              name="timeout"
+              type="number"
+              label={i18n._(t`Timeout`)}
+              tooltip={i18n._(t`The amount of time (in seconds) to run
                     before the task is canceled. Defaults to 0 for no job
                     timeout.`)}
-                />
-                <Field
-                  name="diff_mode"
-                  render={({ field, form }) => (
-                    <FormGroup
-                      fieldId="template-show-changes"
-                      label={i18n._(t`Show Changes`)}
-                    >
-                      <Tooltip
-                        position="right"
-                        content={i18n._(t`If enabled, show the changes made by
+            />
+            <Field
+              name="diff_mode"
+              render={({ field, form }) => (
+                <FormGroup
+                  fieldId="template-show-changes"
+                  label={i18n._(t`Show Changes`)}
+                >
+                  <Tooltip
+                    position="right"
+                    content={i18n._(t`If enabled, show the changes made by
                           Ansible tasks, where supported. This is equivalent
                           to Ansible&#x2019s --diff mode.`)}
-                      >
-                        <QuestionCircleIcon />
-                      </Tooltip>
-                      <div>
-                        <Switch
-                          id="template-show-changes"
-                          label={i18n._(t`On`)}
-                          labelOff={i18n._(t`Off`)}
-                          isChecked={field.value}
-                          onChange={checked =>
-                            form.setFieldValue(field.name, checked)
-                          }
-                        />
-                      </div>
-                    </FormGroup>
-                  )}
-                />
-              </FormRow>
-              {/* <InstanceGroupsLookup
-                value={instanceGroups}
-                onChange={this.handleInstanceGroupsChange}
-                tooltip={i18n._(
-                  t`Select the Instance Groups for this Organization to run on.`
-                )}
-              /> */}
+                  >
+                    <QuestionCircleIcon />
+                  </Tooltip>
+                  <div>
+                    <Switch
+                      id="template-show-changes"
+                      label={field.value ? i18n._(t`On`) : i18n._(t`Off`)}
+                      isChecked={field.value}
+                      onChange={checked =>
+                        form.setFieldValue(field.name, checked)
+                      }
+                    />
+                  </div>
+                </FormGroup>
+              )}
+            />
+          </FormRow>
+          <InstanceGroupsLookup
+            value={relatedInstanceGroups}
+            onChange={this.handleInstanceGroupsChange}
+            tooltip={i18n._(
+              t`Select the Instance Groups for this Organization to run on.`
+            )}
+          />
         </CollapsibleSection>
         <FormActionGroup onCancel={handleCancel} onSubmit={handleSubmit} />
       </Form>
