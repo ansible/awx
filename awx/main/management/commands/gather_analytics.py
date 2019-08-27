@@ -23,7 +23,7 @@ class Command(BaseCommand):
         self.logger.propagate = False
 
     def handle(self, *args, **options):
-        tgz = gather()
+        tgz = gather(collection_type='manual')
         self.init_logging()
         if tgz:
             self.logger.debug(tgz)

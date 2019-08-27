@@ -18,10 +18,12 @@ from awx.main.access import access_registry
 from awx.main.models.ha import TowerAnalyticsState
 
 
-__all__ = ['register', 'gather', 'ship']
+__all__ = ['register', 'gather', 'ship', 'table_version']
 
 
 logger = logging.getLogger('awx.main.analytics')
+
+manifest = dict()
 
 
 def _valid_license():
@@ -35,25 +37,37 @@ def _valid_license():
     return True
 
 
-def register(key):
+def register(key, version):
     """
     A decorator used to register a function as a metric collector.
 
     Decorated functions should return JSON-serializable objects.
 
-    @register('projects_by_scm_type')
+    @register('projects_by_scm_type', 1)
     def projects_by_scm_type():
         return {'git': 5, 'svn': 1, 'hg': 0}
     """
 
     def decorate(f):
         f.__awx_analytics_key__ = key
+        f.__awx_analytics_version__ = version
         return f
 
     return decorate
 
 
-def gather(dest=None, module=None):
+def table_version(file_name, version):
+
+    global manifest
+    manifest[file_name] = version
+
+    def decorate(f):
+        return f
+
+    return decorate
+
+
+def gather(dest=None, module=None, collection_type='scheduled'):
     """
     Gather all defined metrics and write them as JSON files in a .tgz
 
@@ -84,18 +98,33 @@ def gather(dest=None, module=None):
         from awx.main.analytics import collectors
         module = collectors
 
+
     dest = dest or tempfile.mkdtemp(prefix='awx_analytics')
     for name, func in inspect.getmembers(module):
         if inspect.isfunction(func) and hasattr(func, '__awx_analytics_key__'):
             key = func.__awx_analytics_key__
+            manifest['{}.json'.format(key)] = func.__awx_analytics_version__
             path = '{}.json'.format(os.path.join(dest, key))
             with open(path, 'w', encoding='utf-8') as f:
                 try:
-                    json.dump(func(last_run), f)
+                    if func.__name__ == 'query_info':
+                        json.dump(func(last_run, collection_type=collection_type), f)
+                    else:
+                        json.dump(func(last_run), f)
                 except Exception:
                     logger.exception("Could not generate metric {}.json".format(key))
                     f.close()
                     os.remove(f.name)
+    
+    path = os.path.join(dest, 'manifest.json')
+    with open(path, 'w', encoding='utf-8') as f:
+        try:
+            json.dump(manifest, f)
+        except Exception:
+            logger.exception("Could not generate manifest.json")
+            f.close()
+            os.remove(f.name)
+
     try:
         collectors.copy_tables(since=last_run, full_path=dest)
     except Exception:

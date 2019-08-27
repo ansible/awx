@@ -9,17 +9,17 @@ from django.conf import settings
 from awx.main.analytics import gather, register
 
 
-@register('example')
+@register('example', '1.0')
 def example(since):
     return {'awx': 123}
 
 
-@register('bad_json')
+@register('bad_json', '1.0')
 def bad_json(since):
     return set()
 
 
-@register('throws_error')
+@register('throws_error', '1.0')
 def throws_error(since):
     raise ValueError()
     
