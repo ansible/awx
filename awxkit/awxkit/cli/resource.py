@@ -16,7 +16,7 @@ DEPRECATED_RESOURCES = {
     'credentials': 'credential',
     'credential_types': 'credential_type',
     'groups': 'group',
-    'hosts': 'hosts',
+    'hosts': 'host',
     'instances': 'instance',
     'instance_groups': 'instance_group',
     'inventory_scripts': 'inventory_script',
