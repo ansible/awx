@@ -19,6 +19,7 @@ DEPRECATED_RESOURCES = {
     'hosts': 'host',
     'instances': 'instance',
     'instance_groups': 'instance_group',
+    'inventory': 'inventories',
     'inventory_scripts': 'inventory_script',
     'inventory_sources': 'inventory_source',
     'inventory_updates': 'inventory_update',
