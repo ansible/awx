@@ -28,10 +28,6 @@ if settings.SETTINGS_MODULE == 'awx.settings.development':
     try:
         import debug_toolbar
         urlpatterns += [
-            # for Django version 2.0
-            # path('__debug__/', include(debug_toolbar.urls)),
-
-            # TODO: this is the Django < 2.0 version, REMOVEME
             url(r'^__debug__/', include(debug_toolbar.urls))
         ]
     except ImportError:

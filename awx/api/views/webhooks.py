@@ -13,9 +13,6 @@ from awx.api.generics import APIView, GenericAPIView
 from awx.api.permissions import WebhookKeyPermission
 from awx.main.models import JobTemplate, WorkflowJobTemplate
 
-# NOTE: The model class attribute for these views must be added
-# dynamically when including urls/webhooks.py
-
 
 class WebhookKeyView(GenericAPIView):
     serializer_class = serializers.EmptySerializer
