@@ -61,6 +61,7 @@ postgres_data_dir=/tmp/pgdocker
 host_port=80
 host_port_ssl=443
 #ssl_certificate=
+#ssl_certificate_key=
 docker_compose_dir=/tmp/awxcompose
 
 # Required for Openshift when building the image on your own

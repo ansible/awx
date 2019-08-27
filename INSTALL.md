@@ -452,6 +452,14 @@ Before starting the build process, review the [inventory](./installer/inventory)
 
 > Optionally, provide the path to a file that contains a certificate and its private key.
 
+*ssl_certificate_key*
+
+> Optionally, provide the path to a file that contains the certificate's private key.
+
+> If this variable is defined, nginx will use this path for the certificate key and `ssl_certificate` for the certificate.
+
+> If this variable is **not** defined, nginx will use `ssl_certificate` for **both** the certificate and the key.
+
 *docker_compose_dir*
 
 > When using docker-compose, the `docker-compose.yml` file will be created there (default `/tmp/awxcompose`).
