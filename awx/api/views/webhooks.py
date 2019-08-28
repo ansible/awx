@@ -1,5 +1,6 @@
 from hashlib import sha1
 import hmac
+import json
 import logging
 
 from django.utils.encoding import force_bytes
@@ -60,7 +61,7 @@ class WebhookReceiverBase(APIView):
         if model is None:
             raise PermissionDenied
 
-        return model.objects.filter(webhook_service=self.service)
+        return model.objects.filter(webhook_service=self.service).exclude(webhook_key='')
 
     def get_object(self):
         queryset = self.get_queryset()
@@ -100,6 +101,14 @@ class WebhookReceiverBase(APIView):
         obj = self.get_object()
         self.check_signature(obj)
 
+        data = {
+            'tower_webhook_event_type': self.get_event_type(),
+            'tower_webhook_event_guid': self.get_event_guid(),
+            'tower_webhook_payload': request.data,
+        }
+        new_job = obj.create_unified_job(extra_vars=json.dumps(data))
+        new_job.signal_start()
+
         return Response(status=status.HTTP_202_ACCEPTED)
 
 
@@ -133,7 +142,7 @@ class GitlabWebhookReceiver(WebhookReceiverBase):
         return ''
 
     def get_signature(self):
-        return self.request.META.get('HTTP_X_GITLAB_TOKEN')
+        return force_bytes(self.request.META.get('HTTP_X_GITLAB_TOKEN'))
 
     def check_signature(self, obj):
         if not obj.webhook_key:
