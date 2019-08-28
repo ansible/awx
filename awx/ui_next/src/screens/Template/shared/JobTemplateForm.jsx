@@ -9,7 +9,7 @@ import { QuestionCircleIcon as PFQuestionCircleIcon } from '@patternfly/react-ic
 import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
 import AnsibleSelect from '@components/AnsibleSelect';
-import MultiSelect from '@components/MultiSelect';
+import MultiSelect, { TagMultiSelect } from '@components/MultiSelect';
 import FormActionGroup from '@components/FormActionGroup';
 import FormField from '@components/FormField';
 import FormRow from '@components/FormRow';
@@ -552,24 +552,32 @@ class JobTemplateForm extends Component {
               t`Select the Instance Groups for this Organization to run on.`
             )}
           />
-          <FormGroup label={i18n._(t`Job Tags`)} fieldId="template-job-tags">
-            <Tooltip
-              position="right"
-              content={i18n._(t`Tags are useful when you have a large
-                    playbook, and you want to run a specific part of a play
-                    or task. Use commas to separate multiple tags. Refer to
-                    Ansible Tower documentation for details on the usage of
-                    tags.`)}
-            >
-              <QuestionCircleIcon />
-            </Tooltip>
-            <MultiSelect
-              onAddNewItem={this.handleNewLabel}
-              onRemoveItem={this.removeLabel}
-              associatedItems={template.job_tags.split(',')}
-              options={loadedLabels}
-            />
-          </FormGroup>
+          <Field
+            name="job_tags"
+            render={({ field, form }) => {
+              return (
+                <FormGroup
+                  label={i18n._(t`Job Tags`)}
+                  fieldId="template-job-tags"
+                >
+                  <Tooltip
+                    position="right"
+                    content={i18n._(t`Tags are useful when you have a large
+                          playbook, and you want to run a specific part of a
+                          play or task. Use commas to separate multiple tags.
+                          Refer to Ansible Tower documentation for details on
+                          the usage of tags.`)}
+                  >
+                    <QuestionCircleIcon />
+                  </Tooltip>
+                  <TagMultiSelect
+                    onChange={value => form.setFieldValue(field.name, value)}
+                    value={field.value}
+                  />
+                </FormGroup>
+              );
+            }}
+          />
           <FormGroup label={i18n._(t`Skip Tags`)} fieldId="template-skip-tags">
             <Tooltip
               position="right"
@@ -611,6 +619,8 @@ const FormikApp = withFormik({
       job_slicing,
       timeout,
       diff_mode,
+      job_tags,
+      skip_tags,
       summary_fields = { labels: { results: [] } },
     } = { ...template };
 
@@ -628,6 +638,8 @@ const FormikApp = withFormik({
       job_slice_count: job_slicing || '',
       timout: timeout || '',
       diff_mode: diff_mode || false,
+      job_tags: job_tags || '',
+      skip_tags: skip_tags || '',
     };
   },
   handleSubmit: (values, bag) => bag.props.handleSubmit(values),

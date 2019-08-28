@@ -1,7 +1,7 @@
 import React from 'react';
+import { mount } from 'enzyme';
 import { sleep } from '@testUtils/testUtils';
-import MultiSelect, { _MultiSelect } from './MultiSelect';
-import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
+import MultiSelect from './MultiSelect';
 
 describe('<MultiSelect />', () => {
   const associatedItems = [
@@ -11,11 +11,7 @@ describe('<MultiSelect />', () => {
   const options = [{ name: 'Angry', id: 3 }, { name: 'Potato', id: 4 }];
 
   test('Initially render successfully', () => {
-    const getInitialChipItems = jest.spyOn(
-      _MultiSelect.prototype,
-      'getInitialChipItems'
-    );
-    const wrapper = mountWithContexts(
+    const wrapper = mount(
       <MultiSelect
         onAddNewItem={jest.fn()}
         onRemoveItem={jest.fn()}
@@ -25,12 +21,11 @@ describe('<MultiSelect />', () => {
     );
     const component = wrapper.find('MultiSelect');
 
-    expect(getInitialChipItems).toBeCalled();
     expect(component.state().chipItems.length).toBe(2);
   });
 
   test('handleSelection add item to chipItems', async () => {
-    const wrapper = mountWithContexts(
+    const wrapper = mount(
       <MultiSelect
         onAddNewItem={jest.fn()}
         onRemoveItem={jest.fn()}
@@ -50,7 +45,7 @@ describe('<MultiSelect />', () => {
   test('handleAddItem adds a chip only when Tab is pressed', () => {
     const onAddNewItem = jest.fn();
     const onChange = jest.fn();
-    const wrapper = mountWithContexts(
+    const wrapper = mount(
       <MultiSelect
         onAddNewItem={onAddNewItem}
         onRemoveItem={jest.fn()}
@@ -79,7 +74,7 @@ describe('<MultiSelect />', () => {
     const onRemoveItem = jest.fn();
     const onChange = jest.fn();
 
-    const wrapper = mountWithContexts(
+    const wrapper = mount(
       <MultiSelect
         onAddNewItem={jest.fn()}
         onRemoveItem={onRemoveItem}
