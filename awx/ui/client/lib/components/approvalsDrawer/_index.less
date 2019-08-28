@@ -1,0 +1,68 @@
+.at-ApprovalsDrawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  // z-index of the nav header is 1040
+  z-index: 1041;
+  background-color: rgba(0, 0, 0, 0.3);
+
+  &--drawer {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    width: 540px;
+    background-color: @default-bg;
+    padding: 20px;
+    overflow-y: scroll;
+  }
+
+  &--header {
+    display: flex;
+    width: 100%;
+    margin-bottom: 20px;
+  }
+
+  &--title {
+    flex: 1 0 auto;
+    color: @default-interface-txt;
+    font-size: 14px;
+    font-weight: bold;
+  }
+
+  &--actionRow {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    margin-top: 10px;
+    line-height: 30px;
+
+    button {
+      margin-left: 15px;
+    }
+  }
+
+  &--exit {
+    justify-content: flex-end;
+    display: flex;
+
+    button {
+      height: 20px;
+      font-size: 20px;
+      color: @d7grey;
+      line-height: 1;
+      opacity: 1;
+    }
+
+    button:hover{
+      color: @default-icon;
+      opacity: 1;
+    }
+  }
+
+  &--expires {
+    color: @default-err;
+  }
+}

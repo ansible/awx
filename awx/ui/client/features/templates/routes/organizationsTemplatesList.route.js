@@ -10,12 +10,7 @@ export default {
     name: 'organizations.job_templates',
     data: {
         activityStream: true,
-        activityStreamTarget: 'template',
-        socket: {
-            "groups": {
-                "jobs": ["status_changed"]
-            }
-        }
+        activityStreamTarget: 'template'
     },
     params: {
         template_search: {

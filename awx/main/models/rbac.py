@@ -48,6 +48,7 @@ role_names = {
     'read_role': _('Read'),
     'update_role': _('Update'),
     'use_role': _('Use'),
+    'approval_role': _('Approve'),
 }
 
 role_descriptions = {
@@ -70,6 +71,7 @@ role_descriptions = {
     'read_role': _('May view settings for the %s'),
     'update_role': _('May update the %s'),
     'use_role': _('Can use the %s in a job template'),
+    'approval_role': _('Can approve or deny a workflow approval node'),
 }
 
 

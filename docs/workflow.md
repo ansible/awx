@@ -54,6 +54,32 @@ In the event that spawning the workflow would result in recursion, the child wor
 will be marked as failed with a message explaining that recursion was detected.
 This is to prevent saturation of the task system with an infinite chain of workflows.
 
+#### Workflow Approval Nodes
+
+The workflow approval node feature enables users to add steps in a workflow in between nodes within workflows so that a user (as long as they have approval permissions, explained in further detail below) can give the "yes" or "no" to continue on to the next step in the workflow.
+
+**RBAC Setup for Workflow Approval Nodes**
+
+A user can _create_ a workflow approval if they are:
+- a Superuser
+- an Org Admin of the organization connected to the workflow
+- a Workflow Admin in the organization connected to the workflow
+- assigned as admins to a particular workflow
+
+A user can _approve_ a workflow when they are:
+- a Superuser
+- a Workflow Admin
+- an Organization Admin
+- any user who has explicitly been assigned the "approver" role
+
+A user can _view_ approvals if they:
+- have Read access to the associated Workflow Job Template
+
+**Other Workflow Approval Node Features**
+
+A timeout (in minutes and seconds) can be set for each approval node. These fields default to `0` for no expiration.
+
+
 ### DAG Formation and Restrictions
 The DAG structure of a workflow is enforced by associating workflow job template nodes via endpoints `/workflow_job_template_nodes/\d+/*_nodes/`, where `*` has options `success`, `failure` and `always`. There is one restriction that is enforced when setting up new connections and that is the cycle restriction, since it's a DAG.
 

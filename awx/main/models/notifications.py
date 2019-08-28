@@ -465,7 +465,6 @@ class JobNotificationMixin(object):
         from awx.main.tasks import send_notifications  # avoid circular import
         if status not in ['running', 'succeeded', 'failed']:
             raise ValueError(_("status must be either running, succeeded or failed"))
-
         try:
             notification_templates = self.get_notification_templates()
         except Exception:

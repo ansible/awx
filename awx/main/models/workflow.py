@@ -35,11 +35,14 @@ from awx.main.models.jobs import LaunchTimeConfigBase, LaunchTimeConfig, JobTemp
 from awx.main.models.credential import Credential
 from awx.main.redact import REPLACE_STR
 from awx.main.fields import JSONField
+from awx.main.utils import schedule_task_manager
+
 
 from copy import copy
 from urllib.parse import urljoin
 
-__all__ = ['WorkflowJobTemplate', 'WorkflowJob', 'WorkflowJobOptions', 'WorkflowJobNode', 'WorkflowJobTemplateNode',]
+__all__ = ['WorkflowJobTemplate', 'WorkflowJob', 'WorkflowJobOptions', 'WorkflowJobNode',
+           'WorkflowJobTemplateNode', 'WorkflowApprovalTemplate', 'WorkflowApproval']
 
 
 logger = logging.getLogger('awx.main.models.workflow')
@@ -71,7 +74,7 @@ class WorkflowNodeBase(CreatedModifiedModel, LaunchTimeConfig):
     unified_job_template = models.ForeignKey(
         'UnifiedJobTemplate',
         related_name='%(class)ss',
-        blank=False,
+        blank=True,
         null=True,
         default=None,
         on_delete=models.SET_NULL,
@@ -160,6 +163,13 @@ class WorkflowJobTemplateNode(WorkflowNodeBase):
         for cred in allowed_creds:
             new_node.credentials.add(cred)
         return new_node
+
+    def create_approval_template(self, **kwargs):
+        approval_template = WorkflowApprovalTemplate(**kwargs)
+        approval_template.save()
+        self.unified_job_template = approval_template
+        self.save()
+        return approval_template
 
 
 class WorkflowJobNode(WorkflowNodeBase):
@@ -385,7 +395,11 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
     ])
     read_role = ImplicitRoleField(parent_role=[
         'singleton:' + ROLE_SINGLETON_SYSTEM_AUDITOR,
-        'organization.auditor_role', 'execute_role', 'admin_role'
+        'organization.auditor_role', 'execute_role', 'admin_role',
+        'approval_role',
+    ])
+    approval_role = ImplicitRoleField(parent_role=[
+        'organization.approval_role', 'admin_role',
     ])
 
     @property
@@ -601,3 +615,92 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
         # WorkflowJobs don't _actually_ run anything in the dispatcher, so
         # there's no point in asking the dispatcher if it knows about this task
         return self.status == 'running'
+
+
+class WorkflowApprovalTemplate(UnifiedJobTemplate):
+
+    FIELDS_TO_PRESERVE_AT_COPY = ['description', 'timeout',]
+
+    class Meta:
+        app_label = 'main'
+
+    timeout = models.IntegerField(
+        blank=True,
+        default=0,
+        help_text=_("The amount of time (in seconds) before the approval node expires and fails."),
+    )
+
+    @classmethod
+    def _get_unified_job_class(cls):
+        return WorkflowApproval
+
+    @classmethod
+    def _get_unified_job_field_names(cls):
+        return ['name', 'description', 'timeout']
+
+    def get_absolute_url(self, request=None):
+        return reverse('api:workflow_approval_template_detail', kwargs={'pk': self.pk}, request=request)
+
+    @property
+    def workflow_job_template(self):
+        return self.workflowjobtemplatenodes.first().workflow_job_template
+
+
+class WorkflowApproval(UnifiedJob):
+    class Meta:
+        app_label = 'main'
+
+    workflow_approval_template = models.ForeignKey(
+        'WorkflowApprovalTemplate',
+        related_name='approvals',
+        blank=True,
+        null=True,
+        default=None,
+        on_delete=models.SET_NULL,
+    )
+    timeout = models.IntegerField(
+        blank=True,
+        default=0,
+        help_text=_("The amount of time (in seconds) before the approval node expires and fails."),
+    )
+    timed_out = models.BooleanField(
+        default=False,
+        help_text=_("Shows when an approval node (with a timeout assigned to it) has timed out.")
+    )
+
+
+    @classmethod
+    def _get_unified_job_template_class(cls):
+        return WorkflowApprovalTemplate
+
+    def get_absolute_url(self, request=None):
+        return reverse('api:workflow_approval_detail', kwargs={'pk': self.pk}, request=request)
+
+    @property
+    def event_class(self):
+        return None
+
+    def _get_parent_field_name(self):
+        return 'workflow_approval_template'
+
+    def approve(self, request=None):
+        self.status = 'successful'
+        self.save()
+        self.websocket_emit_status(self.status)
+        schedule_task_manager()
+        return reverse('api:workflow_approval_approve', kwargs={'pk': self.pk}, request=request)
+
+    def deny(self, request=None):
+        self.status = 'failed'
+        self.save()
+        self.websocket_emit_status(self.status)
+        schedule_task_manager()
+        return reverse('api:workflow_approval_deny', kwargs={'pk': self.pk}, request=request)
+
+    @property
+    def workflow_job_template(self):
+        return self.unified_job_node.workflow_job.unified_job_template
+
+    @property
+    def workflow_job(self):
+        return self.unified_job_node.workflow_job

@@ -124,6 +124,7 @@ class ApiVersionRootView(APIView):
         data['activity_stream'] = reverse('api:activity_stream_list', request=request)
         data['workflow_job_templates'] = reverse('api:workflow_job_template_list', request=request)
         data['workflow_jobs'] = reverse('api:workflow_job_list', request=request)
+        data['workflow_approvals'] = reverse('api:workflow_approval_list', request=request)
         data['workflow_job_template_nodes'] = reverse('api:workflow_job_template_node_list', request=request)
         data['workflow_job_nodes'] = reverse('api:workflow_job_node_list', request=request)
         return Response(data)

@@ -50,16 +50,16 @@ from awx.main.constants import (
     CENSOR_VALUE,
 )
 from awx.main.models import (
-    ActivityStream, AdHocCommand, AdHocCommandEvent, Credential,
-    CredentialInputSource, CredentialType, CustomInventoryScript,
-    Group, Host, Instance, InstanceGroup, Inventory, InventorySource,
-    InventoryUpdate, InventoryUpdateEvent, Job, JobEvent, JobHostSummary,
-    JobLaunchConfig, JobNotificationMixin, JobTemplate, Label, Notification,
-    NotificationTemplate, OAuth2AccessToken, OAuth2Application, Organization,
-    Project, ProjectUpdate, ProjectUpdateEvent, RefreshToken, Role, Schedule,
-    StdoutMaxBytesExceeded, SystemJob, SystemJobEvent, SystemJobTemplate,
-    Team, UnifiedJob, UnifiedJobTemplate, WorkflowJob, WorkflowJobNode,
-    WorkflowJobTemplate, WorkflowJobTemplateNode
+    ActivityStream, AdHocCommand, AdHocCommandEvent, Credential, CredentialInputSource,
+    CredentialType, CustomInventoryScript, Group, Host, Instance,
+    InstanceGroup, Inventory, InventorySource, InventoryUpdate,
+    InventoryUpdateEvent, Job, JobEvent, JobHostSummary, JobLaunchConfig,
+    JobNotificationMixin, JobTemplate, Label, Notification, NotificationTemplate,
+    OAuth2AccessToken, OAuth2Application, Organization, Project,
+    ProjectUpdate, ProjectUpdateEvent, RefreshToken, Role, Schedule,
+    SystemJob, SystemJobEvent, SystemJobTemplate, Team, UnifiedJob,
+    UnifiedJobTemplate, WorkflowApproval, WorkflowApprovalTemplate, WorkflowJob,
+    WorkflowJobNode, WorkflowJobTemplate, WorkflowJobTemplateNode, StdoutMaxBytesExceeded
 )
 from awx.main.models.base import VERBOSITY_CHOICES, NEW_JOB_TYPE_CHOICES
 from awx.main.models.rbac import (
@@ -121,6 +121,8 @@ SUMMARIZABLE_FK_FIELDS = {
     'job_template': DEFAULT_SUMMARY_FIELDS,
     'workflow_job_template': DEFAULT_SUMMARY_FIELDS,
     'workflow_job': DEFAULT_SUMMARY_FIELDS,
+    'workflow_approval_template': DEFAULT_SUMMARY_FIELDS + ('timeout',),
+    'workflow_approval': DEFAULT_SUMMARY_FIELDS + ('timeout',),
     'schedule': DEFAULT_SUMMARY_FIELDS + ('next_run',),
     'unified_job_template': DEFAULT_SUMMARY_FIELDS + ('unified_job_type',),
     'last_job': DEFAULT_SUMMARY_FIELDS + ('finished', 'status', 'failed', 'license_error'),
@@ -681,6 +683,8 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
                 serializer_class = SystemJobTemplateSerializer
             elif isinstance(obj, WorkflowJobTemplate):
                 serializer_class = WorkflowJobTemplateSerializer
+            elif isinstance(obj, WorkflowApprovalTemplate):
+                serializer_class = WorkflowApprovalTemplateSerializer
         return serializer_class
 
     def to_representation(self, obj):
@@ -782,6 +786,8 @@ class UnifiedJobSerializer(BaseSerializer):
                 serializer_class = SystemJobSerializer
             elif isinstance(obj, WorkflowJob):
                 serializer_class = WorkflowJobSerializer
+            elif isinstance(obj, WorkflowApproval):
+                serializer_class = WorkflowApprovalSerializer
         return serializer_class
 
     def to_representation(self, obj):
@@ -838,6 +844,8 @@ class UnifiedJobListSerializer(UnifiedJobSerializer):
                 serializer_class = SystemJobListSerializer
             elif isinstance(obj, WorkflowJob):
                 serializer_class = WorkflowJobListSerializer
+            elif isinstance(obj, WorkflowApproval):
+                serializer_class = WorkflowApprovalListSerializer
         return serializer_class
 
     def to_representation(self, obj):
@@ -3395,6 +3403,76 @@ class WorkflowJobCancelSerializer(WorkflowJobSerializer):
         fields = ('can_cancel',)
 
 
+class WorkflowApprovalViewSerializer(UnifiedJobSerializer):
+
+    class Meta:
+        model = WorkflowApproval
+        fields = []
+
+
+class WorkflowApprovalSerializer(UnifiedJobSerializer):
+
+    can_approve_or_deny = serializers.SerializerMethodField()
+    approval_expiration = serializers.SerializerMethodField()
+    timed_out = serializers.ReadOnlyField()
+
+    class Meta:
+        model = WorkflowApproval
+        fields = ('*', '-controller_node', '-execution_node', 'can_approve_or_deny', 'approval_expiration', 'timed_out',)
+
+    def get_approval_expiration(self, obj):
+        if obj.status != 'pending' or obj.timeout == 0:
+            return None
+        return obj.created + timedelta(seconds=obj.timeout)
+
+    def get_can_approve_or_deny(self, obj):
+        request = self.context.get('request', None)
+        allowed = request.user.can_access(WorkflowApproval, 'approve_or_deny', obj)
+        return allowed is True and obj.status == 'pending'
+
+    def get_related(self, obj):
+        res = super(WorkflowApprovalSerializer, self).get_related(obj)
+
+        if obj.workflow_approval_template:
+            res['workflow_approval_template'] = self.reverse('api:workflow_approval_template_detail',
+                                                             kwargs={'pk': obj.workflow_approval_template.pk})
+        res['approve'] = self.reverse('api:workflow_approval_approve', kwargs={'pk': obj.pk})
+        res['deny'] = self.reverse('api:workflow_approval_deny', kwargs={'pk': obj.pk})
+        return res
+
+
+class WorkflowApprovalActivityStreamSerializer(WorkflowApprovalSerializer):
+    """
+    timed_out and status are usually read-only fields
+    However, when we generate an activity stream record, we *want* to record
+    these types of changes.  This serializer allows us to do so.
+    """
+    status = serializers.ChoiceField(choices=JobTemplate.JOB_TEMPLATE_STATUS_CHOICES)
+    timed_out = serializers.BooleanField()
+
+
+
+class WorkflowApprovalListSerializer(WorkflowApprovalSerializer, UnifiedJobListSerializer):
+
+    class Meta:
+        fields = ('*', '-controller_node', '-execution_node', 'can_approve_or_deny', 'approval_expiration', 'timed_out',)
+
+
+class WorkflowApprovalTemplateSerializer(UnifiedJobTemplateSerializer):
+
+    class Meta:
+        model = WorkflowApprovalTemplate
+        fields = ('*', 'timeout', 'name',)
+
+    def get_related(self, obj):
+        res = super(WorkflowApprovalTemplateSerializer, self).get_related(obj)
+        if 'last_job' in res:
+            del res['last_job']
+
+        res.update(dict(jobs = self.reverse('api:workflow_approval_template_jobs_list', kwargs={'pk': obj.pk}),))
+        return res
+
+
 class LaunchConfigurationBaseSerializer(BaseSerializer):
     scm_branch = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
     job_type = serializers.ChoiceField(allow_blank=True, allow_null=True, required=False, default=None,
@@ -3453,6 +3531,10 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
             ujt = attrs['unified_job_template']
         elif self.instance:
             ujt = self.instance.unified_job_template
+        if ujt is None:
+            if 'workflow_job_template' in attrs:
+                return {'workflow_job_template': attrs['workflow_job_template']}
+            return {}
 
         # build additional field survey_passwords to track redacted variables
         password_dict = {}
@@ -3534,6 +3616,7 @@ class WorkflowJobTemplateNodeSerializer(LaunchConfigurationBaseSerializer):
 
     def get_related(self, obj):
         res = super(WorkflowJobTemplateNodeSerializer, self).get_related(obj)
+        res['create_approval_template'] = self.reverse('api:workflow_job_template_node_create_approval', kwargs={'pk': obj.pk})
         res['success_nodes'] = self.reverse('api:workflow_job_template_node_success_nodes_list', kwargs={'pk': obj.pk})
         res['failure_nodes'] = self.reverse('api:workflow_job_template_node_failure_nodes_list', kwargs={'pk': obj.pk})
         res['always_nodes'] = self.reverse('api:workflow_job_template_node_always_nodes_list', kwargs={'pk': obj.pk})
@@ -3552,6 +3635,12 @@ class WorkflowJobTemplateNodeSerializer(LaunchConfigurationBaseSerializer):
             field_kwargs['read_only'] = True
             field_kwargs.pop('queryset', None)
         return field_class, field_kwargs
+
+    def get_summary_fields(self, obj):
+        summary_fields = super(WorkflowJobTemplateNodeSerializer, self).get_summary_fields(obj)
+        if isinstance(obj.unified_job_template, WorkflowApprovalTemplate):
+            summary_fields['unified_job_template']['timeout'] = obj.unified_job_template.timeout
+        return summary_fields
 
 
 class WorkflowJobNodeSerializer(LaunchConfigurationBaseSerializer):
@@ -3578,6 +3667,12 @@ class WorkflowJobNodeSerializer(LaunchConfigurationBaseSerializer):
             res['workflow_job'] = self.reverse('api:workflow_job_detail', kwargs={'pk': obj.workflow_job.pk})
         return res
 
+    def get_summary_fields(self, obj):
+        summary_fields = super(WorkflowJobNodeSerializer, self).get_summary_fields(obj)
+        if isinstance(obj.job, WorkflowApproval):
+            summary_fields['job']['timed_out'] = obj.job.timed_out
+        return summary_fields
+
 
 class WorkflowJobNodeListSerializer(WorkflowJobNodeSerializer):
     pass
@@ -3601,6 +3696,16 @@ class WorkflowJobTemplateNodeDetailSerializer(WorkflowJobTemplateNodeSerializer)
             field_kwargs['read_only'] = True
             field_kwargs.pop('queryset', None)
         return field_class, field_kwargs
+
+
+class WorkflowJobTemplateNodeCreateApprovalSerializer(BaseSerializer):
+
+    class Meta:
+        model = WorkflowApprovalTemplate
+        fields = ('timeout', 'name', 'description',)
+
+    def to_representation(self, obj):
+        return {}
 
 
 class JobListSerializer(JobSerializer, UnifiedJobListSerializer):
@@ -4663,7 +4768,8 @@ class ActivityStreamSerializer(BaseSerializer):
             ('o_auth2_access_token', ('id', 'user_id', 'description', 'application_id', 'scope')),
             ('o_auth2_application', ('id', 'name', 'description')),
             ('credential_type', ('id', 'name', 'description', 'kind', 'managed_by_tower')),
-            ('ad_hoc_command', ('id', 'name', 'status', 'limit'))
+            ('ad_hoc_command', ('id', 'name', 'status', 'limit')),
+            ('workflow_approval', ('id', 'name', 'unified_job_id')),
         ]
         return field_list
 
@@ -4772,6 +4878,8 @@ class ActivityStreamSerializer(BaseSerializer):
     def _summarize_parent_ujt(self, obj, fk, summary_fields):
         summary_keys = {'job': 'job_template',
                         'workflow_job_template_node': 'workflow_job_template',
+                        'workflow_approval_template': 'workflow_job_template',
+                        'workflow_approval': 'workflow_job',
                         'schedule': 'unified_job_template'}
         if fk not in summary_keys:
             return

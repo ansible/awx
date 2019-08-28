@@ -91,7 +91,8 @@ from awx.main.redact import UriCleaner
 from awx.api.permissions import (
     JobTemplateCallbackPermission, TaskPermission, ProjectUpdatePermission,
     InventoryInventorySourcesUpdatePermission, UserPermission,
-    InstanceGroupTowerPermission, VariableDataPermission
+    InstanceGroupTowerPermission, VariableDataPermission,
+    WorkflowApprovalPermission
 )
 from awx.api import renderers
 from awx.api import serializers
@@ -837,8 +838,6 @@ class SystemJobEventsList(SubListAPIView):
     def finalize_response(self, request, response, *args, **kwargs):
         response['X-UI-Max-Events'] = settings.MAX_UI_JOB_EVENTS
         return super(SystemJobEventsList, self).finalize_response(request, response, *args, **kwargs)
-
-
 
 
 class ProjectUpdateCancel(RetrieveAPIView):
@@ -3013,6 +3012,34 @@ class WorkflowJobTemplateNodeChildrenBaseList(EnforceParentRelationshipMixin, Su
         return None
 
 
+class WorkflowJobTemplateNodeCreateApproval(RetrieveAPIView):
+
+    model = models.WorkflowJobTemplateNode
+    serializer_class = serializers.WorkflowJobTemplateNodeCreateApprovalSerializer
+    permission_classes = []
+
+    def post(self, request, *args, **kwargs):
+        obj = self.get_object()
+        serializer = self.get_serializer(instance=obj, data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        approval_template = obj.create_approval_template(**serializer.validated_data)
+        data = serializers.WorkflowApprovalTemplateSerializer(
+            approval_template,
+            context=self.get_serializer_context()
+        ).data
+        return Response(data, status=status.HTTP_200_OK)
+
+    def check_permissions(self, request):
+        obj = self.get_object().workflow_job_template
+        if request.method == 'POST':
+            if not request.user.can_access(models.WorkflowJobTemplate, 'change', obj, request.data):
+                self.permission_denied(request)
+        else:
+            if not request.user.can_access(models.WorkflowJobTemplate, 'read', obj):
+                self.permission_denied(request)
+
+
 class WorkflowJobTemplateNodeSuccessNodesList(WorkflowJobTemplateNodeChildrenBaseList):
     relationship = 'success_nodes'
 
@@ -4405,3 +4432,63 @@ for attr, value in list(locals().items()):
         name = camelcase_to_underscore(attr)
         view = value.as_view()
         setattr(this_module, name, view)
+
+
+class WorkflowApprovalTemplateDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
+
+    model = models.WorkflowApprovalTemplate
+    serializer_class = serializers.WorkflowApprovalTemplateSerializer
+
+
+class WorkflowApprovalTemplateJobsList(SubListAPIView):
+
+    model = models.WorkflowApproval
+    serializer_class = serializers.WorkflowApprovalListSerializer
+    parent_model = models.WorkflowApprovalTemplate
+    relationship = 'approvals'
+    parent_key = 'workflow_approval_template'
+
+
+class WorkflowApprovalList(ListCreateAPIView):
+
+    model = models.WorkflowApproval
+    serializer_class = serializers.WorkflowApprovalListSerializer
+
+    def get(self, request, *args, **kwargs):
+        return super(WorkflowApprovalList, self).get(request, *args, **kwargs)
+
+
+class WorkflowApprovalDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
+
+    model = models.WorkflowApproval
+    serializer_class = serializers.WorkflowApprovalSerializer
+
+
+class WorkflowApprovalApprove(RetrieveAPIView):
+    model = models.WorkflowApproval
+    serializer_class = serializers.WorkflowApprovalViewSerializer
+    permission_classes = (WorkflowApprovalPermission,)
+
+    def post(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if not request.user.can_access(models.WorkflowApproval, 'approve_or_deny', obj):
+            raise PermissionDenied(detail=_("User does not have permission to approve or deny this workflow."))
+        if obj.status != 'pending':
+            return Response({"error": _("This workflow step has already been approved or denied.")}, status=status.HTTP_400_BAD_REQUEST)
+        obj.approve(request)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class WorkflowApprovalDeny(RetrieveAPIView):
+    model = models.WorkflowApproval
+    serializer_class = serializers.WorkflowApprovalViewSerializer
+    permission_classes = (WorkflowApprovalPermission,)
+
+    def post(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if not request.user.can_access(models.WorkflowApproval, 'approve_or_deny', obj):
+            raise PermissionDenied(detail=_("User does not have permission to approve or deny this workflow."))
+        if obj.status != 'pending':
+            return Response({"error": _("This workflow step has already been approved or denied.")}, status=status.HTTP_400_BAD_REQUEST)
+        obj.deny(request)
+        return Response(status=status.HTTP_204_NO_CONTENT)

@@ -483,4 +483,3 @@ class RelatedJobsMixin(object):
             raise RuntimeError("Programmer error. Expected _get_active_jobs() to return a QuerySet.")
 
         return [dict(id=t[0], type=mapping[t[1]]) for t in jobs.values_list('id', 'polymorphic_ctype_id')]
-

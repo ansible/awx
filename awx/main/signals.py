@@ -34,8 +34,8 @@ from awx.main.models import (
     InventorySource, InventoryUpdateEvent, Job, JobEvent, JobHostSummary,
     JobTemplate, OAuth2AccessToken, Organization, Project, ProjectUpdateEvent,
     Role, SystemJob, SystemJobEvent, SystemJobTemplate, UnifiedJob,
-    UnifiedJobTemplate, User, UserSessionMembership,
-    ROLE_SINGLETON_SYSTEM_ADMINISTRATOR
+    UnifiedJobTemplate, User, UserSessionMembership, WorkflowJobTemplateNode,
+    WorkflowApproval, WorkflowApprovalTemplate, ROLE_SINGLETON_SYSTEM_ADMINISTRATOR
 )
 from awx.main.constants import CENSOR_VALUE
 from awx.main.utils import model_instance_diff, model_to_dict, camelcase_to_underscore, get_current_apps
@@ -355,6 +355,7 @@ def update_host_last_job_after_job_deleted(sender, **kwargs):
     for host in Host.objects.filter(pk__in=hosts_pks):
         _update_host_last_jhs(host)
 
+
 # Set via ActivityStreamRegistrar to record activity stream events
 
 
@@ -429,6 +430,8 @@ def model_serializer_mapping():
         models.Label: serializers.LabelSerializer,
         models.WorkflowJobTemplate: serializers.WorkflowJobTemplateWithSpecSerializer,
         models.WorkflowJobTemplateNode: serializers.WorkflowJobTemplateNodeSerializer,
+        models.WorkflowApproval: serializers.WorkflowApprovalActivityStreamSerializer,
+        models.WorkflowApprovalTemplate: serializers.WorkflowApprovalTemplateSerializer,
         models.WorkflowJob: serializers.WorkflowJobSerializer,
         models.OAuth2AccessToken: serializers.OAuth2TokenSerializer,
         models.OAuth2Application: serializers.OAuth2ApplicationSerializer,
@@ -635,6 +638,30 @@ def delete_inventory_for_org(sender, instance, **kwargs):
             inventory.schedule_deletion(user_id=getattr(user, 'id', None))
         except RuntimeError as e:
             logger.debug(e)
+
+
+@receiver(pre_delete, sender=WorkflowJobTemplateNode)
+def delete_approval_templates(sender, instance, **kwargs):
+    if type(instance.unified_job_template) is WorkflowApprovalTemplate:
+        instance.unified_job_template.delete()
+
+
+@receiver(pre_save, sender=WorkflowJobTemplateNode)
+def delete_approval_node_type_change(sender, instance, **kwargs):
+    try:
+        old = WorkflowJobTemplateNode.objects.get(id=instance.id)
+    except sender.DoesNotExist:
+        return
+    if old.unified_job_template == instance.unified_job_template:
+        return
+    if type(old.unified_job_template) is WorkflowApprovalTemplate:
+        old.unified_job_template.delete()
+
+
+@receiver(pre_delete, sender=WorkflowApprovalTemplate)
+def deny_orphaned_approvals(sender, instance, **kwargs):
+    for approval in WorkflowApproval.objects.filter(workflow_approval_template=instance, status='pending'):
+        approval.deny()
 
 
 @receiver(post_save, sender=Session)

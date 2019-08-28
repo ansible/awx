@@ -37,6 +37,7 @@ from awx.main.models import (
     ProjectUpdateEvent, Role, Schedule, SystemJob, SystemJobEvent,
     SystemJobTemplate, Team, UnifiedJob, UnifiedJobTemplate, WorkflowJob,
     WorkflowJobNode, WorkflowJobTemplate, WorkflowJobTemplateNode,
+    WorkflowApproval, WorkflowApprovalTemplate,
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR, ROLE_SINGLETON_SYSTEM_AUDITOR
 )
 from awx.main.models.mixins import ResourceMixin
@@ -2377,12 +2378,17 @@ class UnifiedJobTemplateAccess(BaseAccess):
         return self.model.objects.filter(
             Q(pk__in=self.model.accessible_pk_qs(self.user, 'read_role')) |
             Q(inventorysource__inventory__id__in=Inventory._accessible_pk_qs(
-                Inventory, self.user, 'read_role')))
+                Inventory, self.user, 'read_role'))
+        )
 
     def can_start(self, obj, validate_license=True):
         access_class = access_registry[obj.__class__]
         access_instance = access_class(self.user)
         return access_instance.can_start(obj, validate_license=validate_license)
+
+    def get_queryset(self):
+        return super(UnifiedJobTemplateAccess, self).get_queryset().filter(
+            workflowapprovaltemplate__isnull=True)
 
 
 class UnifiedJobAccess(BaseAccess):
@@ -2429,6 +2435,10 @@ class UnifiedJobAccess(BaseAccess):
             Q(job__project__organization__in=org_auditor_qs)
         )
         return qs
+
+    def get_queryset(self):
+        return super(UnifiedJobAccess, self).get_queryset().filter(
+            workflowapproval__isnull=True)
 
 
 class ScheduleAccess(BaseAccess):
@@ -2767,6 +2777,81 @@ class RoleAccess(BaseAccess):
     def can_delete(self, obj):
         # Unsupported for now
         return False
+
+
+class WorkflowApprovalAccess(BaseAccess):
+    '''
+    A user can create a workflow approval if they are a superuser, an org admin
+    of the org connected to the workflow, or if they are assigned as admins to
+    the workflow.
+
+    A user can approve a workflow when they are:
+    - a superuser
+    - a workflow admin
+    - an organization admin
+    - any user who has explicitly been assigned the "approver" role
+
+    A user can see approvals if they have read access to the associated WorkflowJobTemplate.
+    '''
+
+    model = WorkflowApproval
+    prefetch_related = ('created_by', 'modified_by',)
+
+    def can_use(self, obj):
+        return True
+
+    def can_start(self, obj, validate_license=True):
+        return True
+
+    def filtered_queryset(self):
+        return self.model.objects.filter(
+            unified_job_node__workflow_job__unified_job_template__in=WorkflowJobTemplate.accessible_pk_qs(
+                self.user, 'read_role'))
+
+    def can_approve_or_deny(self, obj):
+        if (
+            (obj.workflow_job_template and self.user in obj.workflow_job_template.approval_role) or
+            self.user.is_superuser
+        ):
+            return True
+
+
+class WorkflowApprovalTemplateAccess(BaseAccess):
+    '''
+    A user can create a workflow approval if they are a superuser, an org admin
+    of the org connected to the workflow, or if they are assigned as admins to
+    the workflow.
+
+    A user can approve a workflow when they are:
+    - a superuser
+    - a workflow admin
+    - an organization admin
+    - any user who has explicitly been assigned the "approver" role at the workflow or organization level
+
+    A user can see approval templates if they have read access to the associated WorkflowJobTemplate.
+    '''
+
+    model = WorkflowApprovalTemplate
+    prefetch_related = ('created_by', 'modified_by',)
+
+    @check_superuser
+    def can_add(self, data):
+        if data is None:  # Hide direct creation in API browser
+            return False
+        else:
+            return (self.check_related('workflow_approval_template', UnifiedJobTemplate, role_field='admin_role'))
+
+    def can_start(self, obj, validate_license=False):
+        # for copying WFJTs that contain approval nodes
+        if self.user.is_superuser:
+            return True
+
+        return self.user in obj.workflow_job_template.execute_role
+
+    def filtered_queryset(self):
+        return self.model.objects.filter(
+            workflowjobtemplatenodes__workflow_job_template__in=WorkflowJobTemplate.accessible_pk_qs(
+                self.user, 'read_role'))
 
 
 for cls in BaseAccess.__subclasses__():

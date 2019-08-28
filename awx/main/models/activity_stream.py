@@ -67,6 +67,8 @@ class ActivityStream(models.Model):
     workflow_job_node = models.ManyToManyField("WorkflowJobNode", blank=True)
     workflow_job_template = models.ManyToManyField("WorkflowJobTemplate", blank=True)
     workflow_job = models.ManyToManyField("WorkflowJob", blank=True)
+    workflow_approval_template = models.ManyToManyField("WorkflowApprovalTemplate", blank=True)
+    workflow_approval = models.ManyToManyField("WorkflowApproval", blank=True)
     unified_job_template = models.ManyToManyField("UnifiedJobTemplate", blank=True, related_name='activity_stream_as_unified_job_template+')
     unified_job = models.ManyToManyField("UnifiedJob", blank=True, related_name='activity_stream_as_unified_job+')
     ad_hoc_command = models.ManyToManyField("AdHocCommand", blank=True)

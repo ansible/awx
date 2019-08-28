@@ -56,7 +56,7 @@ from awx.main.models.notifications import (  # noqa
 from awx.main.models.label import Label # noqa
 from awx.main.models.workflow import (  # noqa
     WorkflowJob, WorkflowJobNode, WorkflowJobOptions, WorkflowJobTemplate,
-    WorkflowJobTemplateNode,
+    WorkflowJobTemplateNode, WorkflowApproval, WorkflowApprovalTemplate,
 )
 from awx.main.models.channels import ChannelGroup # noqa
 from awx.api.versioning import reverse
@@ -203,6 +203,8 @@ activity_stream_registrar.connect(User)
 activity_stream_registrar.connect(WorkflowJobTemplate)
 activity_stream_registrar.connect(WorkflowJobTemplateNode)
 activity_stream_registrar.connect(WorkflowJob)
+activity_stream_registrar.connect(WorkflowApproval)
+activity_stream_registrar.connect(WorkflowApprovalTemplate)
 activity_stream_registrar.connect(OAuth2Application)
 activity_stream_registrar.connect(OAuth2AccessToken)
 
@@ -213,4 +215,3 @@ prevent_search(RefreshToken._meta.get_field('token'))
 prevent_search(OAuth2Application._meta.get_field('client_secret'))
 prevent_search(OAuth2Application._meta.get_field('client_id'))
 prevent_search(Grant._meta.get_field('code'))
-

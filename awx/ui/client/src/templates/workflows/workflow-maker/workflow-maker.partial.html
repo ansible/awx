@@ -68,39 +68,7 @@
             <div class="WorkflowLegend-maker">
                 <div class="WorkflowLegend-maker--left">
                     <i ng-class="{{ keyClassList }}" class="fa fa-compass Key-menuIcon" ng-click="toggleKey()"></i>
-                    <ul ng-show="showKey" class="Key-list noselect">
-                        <li class="Key-listItem">
-                            <p class="Key-heading">{{strings.get('workflow_maker.KEY')}}</p>
-                        </li>
-                        <li class="Key-listItem">
-                            <div class="Key-icon Key-icon--success"></div>
-                            <p class="Key-listItemContent">{{strings.get('workflow_maker.ON_SUCCESS')}}</p>
-                        </li>
-                        <li class="Key-listItem">
-                            <div class="Key-icon Key-icon--fail"></div>
-                            <p class="Key-listItemContent">{{strings.get('workflow_maker.ON_FAILURE')}}</p>
-                        </li>
-                        <li class="Key-listItem">
-                            <div class="Key-icon Key-icon--always"></div>
-                            <p class="Key-listItemContent">{{strings.get('workflow_maker.ALWAYS')}}</p>
-                        </li>
-                        <li class="Key-listItem">
-                            <div class="Key-icon Key-icon--circle Key-icon--default">P</div>
-                            <p class="Key-listItemContent Key-listItemContent--circle">{{strings.get('workflow_maker.PROJECT_SYNC')}}</p>
-                        </li>
-                        <li class="Key-listItem">
-                            <div class="Key-icon Key-icon--circle Key-icon--default">I</div>
-                            <p class="Key-listItemContent Key-listItemContent--circle">{{strings.get('workflow_maker.INVENTORY_SYNC')}}</p>
-                        </li>
-                        <li class="Key-listItem">
-                            <div class="Key-icon Key-icon--circle Key-icon--default">W</div>
-                            <p class="Key-listItemContent Key-listItemContent--circle">{{strings.get('workflow_maker.WORKFLOW')}}</p>
-                        </li>
-                        <li class="Key-listItem">
-                            <div class="Key-icon Key-icon--circle Key-icon--warning">!</div>
-                            <p class="Key-listItemContent Key-listItemContent--circle">{{strings.get('workflow_maker.WARNING')}}</p>
-                        </li>
-                    </ul>
+                    <workflow-key ng-show="showKey"></workflow-key>
                 </div>
                 <div class="WorkflowLegend-maker--right">
                     <span class="WorkflowMaker-totalJobs">{{strings.get('workflow_maker.TOTAL_NODES')}}</span>
@@ -128,7 +96,7 @@
         </div>
         <div class="WorkflowMaker-contentRight">
             <span ng-if="formState.showNodeForm">
-                <workflow-node-form node-config="nodeConfig" workflow-job-template-obj="workflowJobTemplateObj" select="confirmNodeForm(selectedTemplate, promptData, edgeType)" cancel="cancelNodeForm()" read-only="!workflowJobTemplateObj.summary_fields.user_capabilities.edit"/>
+                <workflow-node-form node-config="nodeConfig" workflow-job-template-obj="workflowJobTemplateObj" select="confirmNodeForm(nodeFormData)" cancel="cancelNodeForm()" read-only="!workflowJobTemplateObj.summary_fields.user_capabilities.edit"/>
             </span>
             <span ng-if="formState.showLinkForm">
                 <workflow-link-form link-config="linkConfig" read-only="!workflowJobTemplateObj.summary_fields.user_capabilities.edit" select="confirmLinkForm(edgeType)" cancel="cancelLinkForm()" unlink="unlink()"/>

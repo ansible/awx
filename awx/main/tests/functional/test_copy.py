@@ -3,7 +3,9 @@ from unittest import mock
 
 from awx.api.versioning import reverse
 from awx.main.utils import decrypt_field
-from awx.main.models.workflow import WorkflowJobTemplateNode
+from awx.main.models.workflow import (
+    WorkflowJobTemplate, WorkflowJobTemplateNode, WorkflowApprovalTemplate
+)
 from awx.main.models.jobs import JobTemplate
 from awx.main.tasks import deep_copy_model_obj
 
@@ -173,6 +175,76 @@ def test_workflow_job_template_copy(workflow_job_template, post, get, admin, org
     assert copied_node_list[2] in copied_node_list[1].success_nodes.all()
     assert copied_node_list[3] in copied_node_list[0].failure_nodes.all()
     assert copied_node_list[4] in copied_node_list[3].failure_nodes.all()
+
+
+@pytest.mark.django_db
+def test_workflow_approval_node_copy(workflow_job_template, post, get, admin, organization):
+    workflow_job_template.organization = organization
+    workflow_job_template.save()
+    ajts = [
+        WorkflowApprovalTemplate.objects.create(
+            name='test-approval-{}'.format(i),
+            description='description-{}'.format(i),
+            timeout=30
+        )
+        for i in range(0, 5)
+    ]
+    nodes = [
+        WorkflowJobTemplateNode.objects.create(
+            workflow_job_template=workflow_job_template, unified_job_template=ajts[i]
+        ) for i in range(0, 5)
+    ]
+    nodes[0].success_nodes.add(nodes[1])
+    nodes[1].success_nodes.add(nodes[2])
+    nodes[0].failure_nodes.add(nodes[3])
+    nodes[3].failure_nodes.add(nodes[4])
+    assert WorkflowJobTemplate.objects.count() == 1
+    assert WorkflowJobTemplateNode.objects.count() == 5
+    assert WorkflowApprovalTemplate.objects.count() == 5
+
+    with mock.patch('awx.api.generics.trigger_delayed_deep_copy') as deep_copy_mock:
+        wfjt_copy_id = post(
+            reverse('api:workflow_job_template_copy', kwargs={'pk': workflow_job_template.pk}),
+            {'name': 'new wfjt name'}, admin, expect=201
+        ).data['id']
+        wfjt_copy = type(workflow_job_template).objects.get(pk=wfjt_copy_id)
+        args, kwargs = deep_copy_mock.call_args
+        deep_copy_model_obj(*args, **kwargs)
+    assert wfjt_copy.organization == organization
+    assert wfjt_copy.created_by == admin
+    assert wfjt_copy.name == 'new wfjt name'
+
+    assert WorkflowJobTemplate.objects.count() == 2
+    assert WorkflowJobTemplateNode.objects.count() == 10
+    assert WorkflowApprovalTemplate.objects.count() == 10
+    original_templates = [
+        x.unified_job_template for x in workflow_job_template.workflow_job_template_nodes.all()
+    ]
+    copied_templates = [
+        x.unified_job_template for x in wfjt_copy.workflow_job_template_nodes.all()
+    ]
+
+    # make sure shallow fields like `timeout` are copied properly
+    for i, t in enumerate(original_templates):
+        assert t.timeout == 30
+        assert t.description == 'description-{}'.format(i)
+
+    for i, t in enumerate(copied_templates):
+        assert t.timeout == 30
+        assert t.description == 'description-{}'.format(i)
+
+    # the Approval Template IDs on the *original* WFJT should not match *any*
+    # of the Approval Template IDs on the *copied* WFJT
+    assert not set([x.id for x in original_templates]).intersection(
+        set([x.id for x in copied_templates])
+    )
+
+    # if you remove the " copy" suffix from the copied template names, they
+    # should match the original templates
+    assert (
+        set([x.name for x in original_templates]) ==
+        set([x.name.replace(' copy', '') for x in copied_templates])
+    )
 
 
 @pytest.mark.django_db

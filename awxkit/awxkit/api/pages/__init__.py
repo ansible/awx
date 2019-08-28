@@ -32,6 +32,7 @@ from .workflow_job_templates import *  # NOQA
 from .workflow_job_template_nodes import *  # NOQA
 from .workflow_jobs import *  # NOQA
 from .workflow_job_nodes import *  # NOQA
+from .workflow_approvals import * # NOQA
 from .settings import *  # NOQA
 from .instances import *  # NOQA
 from .instance_groups import *  # NOQA

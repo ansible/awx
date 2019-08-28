@@ -81,6 +81,8 @@ class Resources(object):
     _inventory_update_events = r'inventory_updates/\d+/events/'
     _inventory_updates = 'inventory_updates/'
     _inventory_variable_data = r'inventories/\d+/variable_data/'
+    _workflow_approval = r'workflow_approvals/\d+/'
+    _workflow_approvals = 'workflow_approvals/'
     _job = r'jobs/\d+/'
     _job_cancel = r'jobs/\d+/cancel/'
     _job_create_schedule = r'jobs/\d+/create_schedule/'

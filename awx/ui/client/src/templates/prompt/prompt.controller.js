@@ -218,6 +218,7 @@ export default [ 'ProcessErrors', 'CredentialTypeModel', 'TemplatesStrings', '$f
                 if(vm.steps[step].tab) {
                     if(vm.steps[step].tab.order === currentTab.order) {
                         vm.steps[step].tab._active = false;
+                        vm.steps[step].tab._disabled = true;
                     } else if(vm.steps[step].tab.order === currentTab.order + 1) {
                         activeTab = currentTab;
                         vm.steps[step].tab._active = true;

@@ -164,7 +164,7 @@ def is_implicit_parent(parent_role, child_role):
         # The only singleton implicit parent is the system admin being
         # a parent of the system auditor role
         return bool(
-            child_role.singleton_name == ROLE_SINGLETON_SYSTEM_AUDITOR and 
+            child_role.singleton_name == ROLE_SINGLETON_SYSTEM_AUDITOR and
             parent_role.singleton_name == ROLE_SINGLETON_SYSTEM_ADMINISTRATOR
         )
     # Get the list of implicit parents that were defined at the class level.

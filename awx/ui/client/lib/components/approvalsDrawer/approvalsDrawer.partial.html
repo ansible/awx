@@ -1,0 +1,88 @@
+<div class="at-ApprovalsDrawer">
+    <div class="at-ApprovalsDrawer--drawer" ng-if="vm.listLoaded">
+        <div class="at-ApprovalsDrawer--header">
+            <div class="at-ApprovalsDrawer--title">
+                <span>
+                    {{:: vm.strings.get('approvals.NOTIFICATIONS') }}
+                </span>
+                <span class="at-Panel-headingTitleBadge">
+                    {{vm.count}}
+                </span>
+            </div>
+            <div class="at-ApprovalsDrawer--exit">
+                <button class="close" ng-click="closeApprovals()">
+                <i class="fa fa-times-circle"></i>
+                </button>
+            </div>
+        </div>
+        <at-list-toolbar
+            ng-if="vm.approvals.length > 0"
+            sort-only="true"
+            sort-value="vm.toolbarSortValue"
+            sort-options="vm.toolbarSortOptions"
+            on-sort="vm.onToolbarSort">
+        </at-list-toolbar>
+        <at-list results="vm.approvals" id="approvals_list" empty-list-reason="{{ vm.emptyListReason }}">
+            <at-row ng-repeat="approval in vm.approvals"
+                id="approval-row-{{ approval.id }}">
+                <div class="at-Row-items">
+                    <div class="at-Row-container">
+                        <div class="at-Row-container">
+                            <at-row-item
+                                header-value="{{ approval.summary_fields.source_workflow_job.name }}"
+                                header-state="workflowResults({id: {{approval.summary_fields.source_workflow_job.id}}})">
+                            </at-row-item>
+                        </div>
+                    </div>
+                    <div class="at-Row-container--wrapped">
+                        <at-row-item
+                            value-bind-html="<b>{{:: vm.strings.get('approvals.APPROVAL') }}</b>">
+                        </at-row-item>
+                        <at-row-item
+                            value-bind-html="{{ approval.name }}">
+                        </at-row-item>
+                    </div>
+                    <div class="at-Row-container--wrapped">
+                        <at-row-item
+                            value-bind-html="{{ approval.created | longDate }}">
+                        </at-row-item>
+                        <!-- todo: translate strings -->
+                        <at-row-item
+                            ng-if="approval.approval_expiration"
+                            class="at-ApprovalsDrawer--expires"
+                            value-bind-html="{{:: vm.strings.get('approvals.EXPIRES') }} {{ approval.approval_expiration | longDate }}">
+                        </at-row-item>
+                        <at-row-item
+                            ng-if="!approval.approval_expiration"
+                            class="at-ApprovalsDrawer--expires"
+                            value-bind-html="{{:: vm.strings.get('approvals.EXPIRES_NEVER') }}">
+                        </at-row-item>
+                    </div>
+                    <div class="at-Row-container--wrapped" ng-if="approval.can_approve_or_deny">
+                        <div class="at-ApprovalsDrawer--actionRow">
+                            <div>{{:: vm.strings.get('approvals.CONTINUE') }}</div>
+                            <button class="btn at-Button--success"
+                                ng-click="vm.approve(approval)"
+                                type="button">
+                                {{:: vm.strings.get('approvals.APPROVE') }}
+                            </button>
+                            <button class="btn at-Button--error"
+                                ng-click="vm.deny(approval)"
+                                type="button">
+                                {{:: vm.strings.get('approvals.DENY') }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </at-row>
+        </at-list>
+        <paginate
+            collection="vm.approvals"
+            dataset="vm.dataset"
+            iterator="template"
+            base-path="unified_job_templates"
+            query-set="vm.queryset"
+            hide-view-per-page="true">
+        </paginate>
+    </div>
+</div>
