@@ -125,6 +125,44 @@ register(
 )
 
 register(
+    'REDHAT_USERNAME',
+    field_class=fields.CharField,
+    default='',
+    allow_blank=True,
+    encrypted=False,
+    read_only=False,
+    label=_('Your Red hat customer username'),
+    help_text=_('Enter your Red Hat customer password to get a Tower License'),  # noqa
+    category=_('System'),
+    category_slug='system',
+)
+
+register(
+    'REDHAT_PASSWORD',
+    field_class=fields.CharField,
+    default='',
+    allow_blank=True,
+    encrypted=True,
+    read_only=False,
+    label=_('Your Red Hat customer password'),
+    help_text=_('Enter your Red Hat customer password to get a Tower License'),  # noqa
+    category=_('System'),
+    category_slug='system',
+)
+
+register(
+    'AUTOMATION_ANALYTICS_URL',
+    field_class=fields.URLField,
+    default='https://cloud.redhat.com',
+    schemes=('http', 'https'),
+    allow_plain_hostname=True,  # Allow hostname only without TLD.
+    label=_('Automation Analytics upload URL.'),
+    help_text=_('This setting is used to to configure data collection for the Automation Analytics dashboard.'),
+    category=_('System'),
+    category_slug='system',
+)
+
+register(
     'INSTALL_UUID',
     field_class=fields.CharField,
     label=_('Unique identifier for an AWX/Tower installation'),
