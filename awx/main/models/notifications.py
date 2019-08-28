@@ -485,6 +485,6 @@ class JobNotificationMixin(object):
             def send_it(local_nt=nt, local_subject=notification_subject, local_body=notification_body):
                 def _func():
                     send_notifications.delay([local_nt.generate_notification(local_subject, local_body).id],
-                                              job_id=self.id)
+                                             job_id=self.id)
                 return _func
             connection.on_commit(send_it())
