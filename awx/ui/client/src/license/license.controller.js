@@ -34,6 +34,8 @@ export default
 
         const reset = function() {
             document.getElementById('License-form').reset();
+            $scope.rhPassword = null;
+            $scope.rhUsername = null;
         };
 
         const init = function(config) {
@@ -87,7 +89,7 @@ export default
         // HTML5 spec doesn't provide a way to customize file input css
         // So we hide the default input, show our own, and simulate clicks to the hidden input
         $scope.fakeClick = function() {
-            if($scope.user_is_superuser) {
+            if($scope.user_is_superuser && (!$scope.rhUsername || $scope.rhUsername === '') && (!$scope.rhPassword || $scope.rhPassword === '')) {
                 $('#License-file').click();
             }
         };
@@ -96,44 +98,58 @@ export default
             $window.open('https://www.ansible.com/license', '_blank');
         };
 
-    		$scope.submit = function() {
-      			Wait('start');
-      			CheckLicense.post($scope.newLicense.file, $scope.newLicense.eula)
-                        .then((licenseInfo) => {
-        				    reset();
+        $scope.submit = function() {
+            Wait('start');
+            $scope.licenseError = false;
+            let payload = {};
+            if ($scope.newLicense.file) {
+                payload = $scope.newLicense.file;
+            } else if ($scope.rhUsername && $scope.rhPassword) {
+                payload = {
+                    rh_password: $scope.rhPassword,
+                    rh_username: $scope.rhUsername
+                };
+            }
+            CheckLicense.post(payload, $scope.newLicense.eula)
+                .then((licenseInfo) => {
+                    reset();
 
-                            ConfigService.delete();
-                            ConfigService.getConfig(licenseInfo)
-                                .then(function(config) {
+                    ConfigService.delete();
+                    ConfigService.getConfig(licenseInfo)
+                        .then(function(config) {
 
-                                    if ($rootScope.licenseMissing === true) {
-                                        if ($scope.newLicense.pendo) {
-                                            pendoService.updatePendoTrackingState('detailed');
-                                            pendoService.issuePendoIdentity();
-                                        } else {
-                                            pendoService.updatePendoTrackingState('off');
-                                        }
+                            if ($rootScope.licenseMissing === true) {
+                                if ($scope.newLicense.pendo) {
+                                    pendoService.updatePendoTrackingState('detailed');
+                                    pendoService.issuePendoIdentity();
+                                } else {
+                                    pendoService.updatePendoTrackingState('off');
+                                }
 
-                                        if ($scope.newLicense.insights) {
-                                            insightsEnablementService.updateInsightsTrackingState(true);
-                                        } else {
-                                            insightsEnablementService.updateInsightsTrackingState(false);
-                                        }
+                                if ($scope.newLicense.insights) {
+                                    insightsEnablementService.updateInsightsTrackingState(true);
+                                } else {
+                                    insightsEnablementService.updateInsightsTrackingState(false);
+                                }
 
-                                        $state.go('dashboard', {
-                                	          licenseMissing: false
-                                        });
-                                    } else {
-                                        init(config);
-                                        $scope.success = true;
-                                        $rootScope.licenseMissing = false;
-                                        // for animation purposes
-                                        const successTimeout = setTimeout(function() {
-                                	          $scope.success = false;
-                                	          clearTimeout(successTimeout);
-                                        }, 4000);
-                                    }
+                                $state.go('dashboard', {
+                                        licenseMissing: false
                                 });
+                            } else {
+                                init(config);
+                                $scope.success = true;
+                                $rootScope.licenseMissing = false;
+                                // for animation purposes
+                                const successTimeout = setTimeout(function() {
+                                        $scope.success = false;
+                                        clearTimeout(successTimeout);
+                                }, 4000);
+                            }
                         });
-    		};
+                }).catch(() => {
+                    Wait('stop');
+                    reset();
+                    $scope.licenseError = true;
+                });
+        };
 }];

@@ -26,6 +26,21 @@
 	display: block;
 	width: 100%;
 }
+.License-file--left {
+	display: flex;
+	flex:1;
+	overflow: hidden;
+}
+.License-file--middle {
+	display: flex;
+	flex: 0 0 auto;
+	padding: 0px 20px;
+	flex-direction: column;
+}
+.License-file--right {
+	display: flex;
+	flex:1;
+}
 .License-submit--success.ng-hide-add, .License-submit--success.ng-hide-remove {
   transition: all ease-in-out 0.5s;
 }
@@ -109,10 +124,12 @@
     }
 }
 
-.License-submit--success{
+.License-submit--success, .License-submit--failure{
+    line-height: 33px;
     margin: 0;
 }
 .License-file--container {
+	display: flex;
 	input[type=file] {
 	display: none;
 	}
@@ -147,4 +164,22 @@
 .License-analyticsCheckboxGroup {
 	padding: 10px 0;
 	font-weight: bold;
+}
+
+.License-separator {
+	display: flex;
+	flex: 1;
+	background: linear-gradient(#d7d7d7, #d7d7d7) no-repeat center/2px 100%;
+}
+
+.License-licenseStepHelp {
+	font-size: 12px;
+	font-style: italic;
+	margin-bottom: 10px;
+}
+
+.License-filePicker {
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow: hidden;
 }

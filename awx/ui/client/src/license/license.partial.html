@@ -94,19 +94,44 @@
 						2
 					</span>
 					<span class="License-helperText">
-						<translate>Choose your license file, agree to the End User License Agreement, and click submit.</translate>
+						<translate>Choose your license file or provide your Red Hat subscription credentials, agree to the End User License Agreement, and click submit.</translate>
 					</span>
 				</div>
 
 				<form id="License-form" name="uploadlicense">
 					<div class="License-subTitleText">
 						<span class="Form-requiredAsterisk">*</span>
-						<translate>License File</translate>
+						<translate>License</translate>
 					</div>
 					<div class="input-group License-file--container">
-						<span class="btn btn-primary" ng-click="fakeClick()" ng-disabled="!user_is_superuser" translate>Browse</span>
-                        <span class="License-fileName" ng-class="{'License-helperText' : fileName == 'No file selected.'}">{{fileName|translate}}</span>
-						<input id="License-file" class="form-control" type="file" file-on-change="getKey"/>
+						<div class="License-file--left">
+							<div class="d-block w-100">
+								<div class="License-helperText License-licenseStepHelp" translate>Upload a license file</div>
+								<div class="License-filePicker">
+									<span class="btn btn-primary" ng-click="fakeClick()" ng-disabled="!user_is_superuser || (rhUsername && rhUsername.length > 0) || (rhPassword && rhPassword.length > 0)" translate>Browse</span>
+									<span class="License-fileName" ng-class="{'License-helperText' : fileName == 'No file selected.'}">{{fileName|translate}}</span>
+									<input id="License-file" class="form-control" type="file" file-on-change="getKey"/>
+								</div>
+							</div>
+						</div>
+						<div class="License-file--middle License-helperText" translate>
+							<div class="License-separator"></div>
+							<div translate>OR</div>
+							<div class="License-separator"></div>
+						</div>
+						<div class="License-file--right">
+							<div class="d-block w-100">
+								<div class="License-helperText License-licenseStepHelp" translate>Provide your Red Hat subscription credentials</div>
+								<div>
+									<label class="LoginModal-label d-block" translate>USERNAME</label>
+									<input class="w-100" type="text" ng-model="rhUsername" ng-disabled="newLicense.file" />
+								</div>
+								<div>
+									<label class="LoginModal-label d-block" translate>PASSWORD</label>
+									<input class="w-100" type="password" ng-model="rhPassword" ng-disabled="newLicense.file" />
+									</div>
+							</div>
+						</div>
 					</div>
 					<div class="License-subTitleText">
 						<span class="Form-requiredAsterisk">*</span>
@@ -142,8 +167,9 @@
 						</div>
 					</div>
 					<div>
-						<button ng-click="submit()" class="btn btn-success pull-right" ng-disabled="newLicense.file.license_key == null || newLicense.eula == null || !user_is_superuser" translate>Submit</button>
+						<button ng-click="submit()" class="btn btn-success pull-right" ng-disabled="(!newLicense.file && (!rhUsername || !rhPassword)) || (newLicense.file && newLicense.file.license_key == null) || newLicense.eula == null || !user_is_superuser" translate>Submit</button>
 						<span ng-show="success == true" class="License-greenText License-submit--success pull-right" translate>Save successful!</span>
+						<span ng-show="licenseError == true" class="License-redText License-submit--failure pull-right" translate>Invalid License - Save unsuccessful</span>
 					</div>
 				</form>
 			</div>
