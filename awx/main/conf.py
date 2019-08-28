@@ -440,52 +440,56 @@ register(
 )
 
 register(
-    'PRIVATE_GALAXY_URL',
+    'PRIMARY_GALAXY_URL',
     field_class=fields.URLField,
     required=False,
     allow_blank=True,
-    label=_('Private Galaxy Server URL'),
-    help_text=_('For using a private galaxy server at higher precedence than the public Ansible Galaxy. '
-                'The URL of the galaxy instance to connect to, this is required if using a private galaxy server.'),
+    label=_('Primary Galaxy Server URL'),
+    help_text=_(
+        'For organizations that run their own Galaxy service, this gives the option to specify a '
+        'host as the primary galaxy server. Requirements will be downloaded from the primary if the '
+        'specific role or collection is available there. If the content is not avilable in the primary, '
+        'or if this field is left blank, it will default to galaxy.ansible.com.'
+    ),
     category=_('Jobs'),
     category_slug='jobs'
 )
 
 register(
-    'PRIVATE_GALAXY_USERNAME',
+    'PRIMARY_GALAXY_USERNAME',
     field_class=fields.CharField,
     required=False,
     allow_blank=True,
-    label=_('Private Galaxy Server Username'),
-    help_text=_('For using a private galaxy server at higher precedence than the public Ansible Galaxy. '
+    label=_('Primary Galaxy Server Username'),
+    help_text=_('For using a galaxy server at higher precedence than the public Ansible Galaxy. '
                 'The username to use for basic authentication against the Galaxy instance, '
-                'this is mutually exclusive with PRIVATE_GALAXY_TOKEN.'),
+                'this is mutually exclusive with PRIMARY_GALAXY_TOKEN.'),
     category=_('Jobs'),
     category_slug='jobs'
 )
 
 register(
-    'PRIVATE_GALAXY_PASSWORD',
+    'PRIMARY_GALAXY_PASSWORD',
     field_class=fields.CharField,
     encrypted=True,
     required=False,
     allow_blank=True,
-    label=_('Private Galaxy Server Password'),
-    help_text=_('For using a private galaxy server at higher precedence than the public Ansible Galaxy. '
+    label=_('Primary Galaxy Server Password'),
+    help_text=_('For using a galaxy server at higher precedence than the public Ansible Galaxy. '
                 'The password to use for basic authentication against the Galaxy instance, '
-                'this is mutually exclusive with PRIVATE_GALAXY_TOKEN.'),
+                'this is mutually exclusive with PRIMARY_GALAXY_TOKEN.'),
     category=_('Jobs'),
     category_slug='jobs'
 )
 
 register(
-    'PRIVATE_GALAXY_TOKEN',
+    'PRIMARY_GALAXY_TOKEN',
     field_class=fields.CharField,
     encrypted=True,
     required=False,
     allow_blank=True,
-    label=_('Private Galaxy Server Token'),
-    help_text=_('For using a private galaxy server at higher precedence than the public Ansible Galaxy. '
+    label=_('Primary Galaxy Server Token'),
+    help_text=_('For using a galaxy server at higher precedence than the public Ansible Galaxy. '
                 'The token to use for connecting with the Galaxy instance, '
                 'this is mutually exclusive with corresponding username and password settings.'),
     category=_('Jobs'),
@@ -767,8 +771,10 @@ def galaxy_validate(serializer, attrs):
     are enforced here on serializer validation so that users will not be able
     to save settings which obviously break all project updates.
     """
+    prefix = 'PRIMARY_GALAXY_'
+
     galaxy_fields = ('url', 'username', 'password', 'token')
-    if not any('PRIVATE_GALAXY_{}'.format(subfield.upper()) in attrs for subfield in galaxy_fields):
+    if not any('{}{}'.format(prefix, subfield.upper()) in attrs for subfield in galaxy_fields):
         return attrs
 
     def _new_value(field_name):
@@ -780,27 +786,25 @@ def galaxy_validate(serializer, attrs):
 
     galaxy_data = {}
     for subfield in galaxy_fields:
-        galaxy_data[subfield] = _new_value('PRIVATE_GALAXY_{}'.format(subfield.upper()))
+        galaxy_data[subfield] = _new_value('{}{}'.format(prefix, subfield.upper()))
     errors = {}
-    print('galaxy data')
-    print(galaxy_data)
     if not galaxy_data['url']:
         for k, v in galaxy_data.items():
             if v:
-                setting_name = 'PRIVATE_GALAXY_{}'.format(k.upper())
+                setting_name = '{}{}'.format(prefix, k.upper())
                 errors.setdefault(setting_name, [])
                 errors[setting_name].append(_(
-                    'Cannot provide field if PRIVATE_GALAXY_URL is not set.'
+                    'Cannot provide field if PRIMARY_GALAXY_URL is not set.'
                 ))
 
     if (galaxy_data['password'] or galaxy_data['username']) and galaxy_data['token']:
         for k in ('password', 'username', 'token'):
-            setting_name = 'PRIVATE_GALAXY_{}'.format(k.upper())
+            setting_name = '{}{}'.format(prefix, k.upper())
             if setting_name in attrs:
                 errors.setdefault(setting_name, [])
                 errors[setting_name].append(_(
-                    'Setting PRIVATE_GALAXY_TOKEN is mutually exclusive with '
-                    'PRIVATE_GALAXY_USERNAME and PRIVATE_GALAXY_PASSWORD.'
+                    'Setting PRIMARY_GALAXY_TOKEN is mutually exclusive with '
+                    'PRIMARY_GALAXY_USERNAME and PRIMARY_GALAXY_PASSWORD.'
                 ))
 
     if errors:

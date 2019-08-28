@@ -12,8 +12,8 @@ class UriCleaner(object):
 
     @staticmethod
     def remove_sensitive(cleartext):
-        if settings.PRIVATE_GALAXY_URL:
-            exclude_list = (settings.PUBLIC_GALAXY_URL, settings.PRIVATE_GALAXY_URL)
+        if settings.PRIMARY_GALAXY_URL:
+            exclude_list = (settings.PUBLIC_GALAXY_URL, settings.PRIMARY_GALAXY_URL)
         else:
             exclude_list = (settings.PUBLIC_GALAXY_URL,)
         redactedtext = cleartext

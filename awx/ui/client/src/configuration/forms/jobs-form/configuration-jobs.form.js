@@ -67,23 +67,23 @@ export default ['i18n', function(i18n) {
             AWX_COLLECTIONS_ENABLED: {
                 type: 'toggleSwitch',
             },
-            PRIVATE_GALAXY_URL: {
+            PRIMARY_GALAXY_URL: {
                 type: 'text',
-                reset: 'PRIVATE_GALAXY_URL',
+                reset: 'PRIMARY_GALAXY_URL',
             },
-            PRIVATE_GALAXY_USERNAME: {
+            PRIMARY_GALAXY_USERNAME: {
                 type: 'text',
-                reset: 'PRIVATE_GALAXY_USERNAME',
+                reset: 'PRIMARY_GALAXY_USERNAME',
             },
-            PRIVATE_GALAXY_PASSWORD: {
+            PRIMARY_GALAXY_PASSWORD: {
                 type: 'sensitive',
                 hasShowInputButton: true,
-                reset: 'PRIVATE_GALAXY_PASSWORD',
+                reset: 'PRIMARY_GALAXY_PASSWORD',
             },
-            PRIVATE_GALAXY_TOKEN: {
+            PRIMARY_GALAXY_TOKEN: {
                 type: 'sensitive',
                 hasShowInputButton: true,
-                reset: 'PRIVATE_GALAXY_TOKEN',
+                reset: 'PRIMARY_GALAXY_TOKEN',
             },
             AWX_TASK_ENV: {
                 type: 'textarea',

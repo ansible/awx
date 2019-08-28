@@ -1884,18 +1884,17 @@ class RunProjectUpdate(BaseTask):
         env['PROJECT_UPDATE_ID'] = str(project_update.pk)
         env['ANSIBLE_CALLBACK_PLUGINS'] = self.get_path_to('..', 'plugins', 'callback')
         # If private galaxy URL is non-blank, that means this feature is enabled
-        private_galaxy_url = settings.PRIVATE_GALAXY_URL
-        if private_galaxy_url:
+        if settings.PRIMARY_GALAXY_URL:
             # set up the fallback server, which is the normal Ansible Galaxy
-            env['ANSIBLE_GALAXY_SERVER_GALAXY_URL'] = 'https://galaxy.ansible.com'
+            env['ANSIBLE_GALAXY_SERVER_GALAXY_URL'] = settings.PUBLIC_GALAXY_URL
             for key in ('url', 'username', 'password', 'token'):
-                setting_name = 'PRIVATE_GALAXY_{}'.format(key.upper())
+                setting_name = 'PRIMARY_GALAXY_{}'.format(key.upper())
                 value = getattr(settings, setting_name)
                 if value:
-                    env_key = 'ANSIBLE_GALAXY_SERVER_PRIVATE_GALAXY_{}'.format(key.upper())
+                    env_key = 'ANSIBLE_GALAXY_SERVER_PRIMARY_GALAXY_{}'.format(key.upper())
                     env[env_key] = value
             # now set the precedence
-            env['ANSIBLE_GALAXY_SERVER_LIST'] = 'private_galaxy,galaxy'
+            env['ANSIBLE_GALAXY_SERVER_LIST'] = 'primary_galaxy,galaxy'
         return env
 
     def _build_scm_url_extra_vars(self, project_update):
