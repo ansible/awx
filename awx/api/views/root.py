@@ -17,6 +17,8 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 
+import requests
+
 from awx.api.generics import APIView
 from awx.main.ha import is_ha_environment
 from awx.main.utils import (
@@ -248,14 +250,39 @@ class ApiV2ConfigView(APIView):
             logger.info(smart_text(u"Invalid JSON submitted for license."),
                         extra=dict(actor=request.user.username))
             return Response({"error": _("Invalid JSON")}, status=status.HTTP_400_BAD_REQUEST)
+
         try:
             from awx.main.utils.common import get_licenser
             license_data = json.loads(data_actual)
+            if license_data.get('rh_password') == '$encrypted$':
+                license_data['rh_password'] = settings.REDHAT_PASSWORD
             license_data_validated = get_licenser(**license_data).validate()
-        except Exception:
-            logger.warning(smart_text(u"Invalid license submitted."),
-                           extra=dict(actor=request.user.username))
-            return Response({"error": _("Invalid License")}, status=status.HTTP_400_BAD_REQUEST)
+            if license_data_validated.get('valid_key') and 'license_key' not in license_data:
+                if license_data.get('rh_username') and license_data.get('rh_password'):
+                    settings.REDHAT_USERNAME = license_data['rh_username']
+                    settings.REDHAT_PASSWORD = license_data['rh_password']
+                license_data = {
+                    "eula_accepted": eula_accepted,
+                    "features": license_data_validated['features'],
+                    "license_type": license_data_validated['license_type'],
+                    "license_date": license_data_validated['license_date'],
+                    "license_key": license_data_validated['license_key'],
+                    "instance_count": license_data_validated['instance_count'],
+                }
+                if license_data_validated.get('trial'):
+                    license_data['trial'] = True
+        except Exception as exc:
+            msg = _("Invalid License")
+            if (
+                isinstance(exc, requests.exceptions.HTTPError) and
+                getattr(getattr(exc, 'response', None), 'status_code', None) == 401
+            ):
+                msg = _("The provided credentials are invalid (HTTP 401).")
+            if isinstance(exc, ValueError) and exc.args:
+                msg = exc.args[0]
+            logger.exception(smart_text(u"Invalid license submitted."),
+                             extra=dict(actor=request.user.username))
+            return Response({"error": msg}, status=status.HTTP_400_BAD_REQUEST)
 
         # If the license is valid, write it to the database.
         if license_data_validated['valid_key']:

@@ -317,10 +317,19 @@ class BaseAccess(object):
             validation_info['time_remaining'] = 99999999
             validation_info['grace_period_remaining'] = 99999999
 
+        report_violation = lambda message: logger.error(message)
+
+        if (
+            validation_info.get('trial', False) is True or
+            validation_info['instance_count'] == 10  # basic 10 license
+        ):
+            def report_violation(message):
+                raise PermissionDenied(message)
+
         if check_expiration and validation_info.get('time_remaining', None) is None:
             raise PermissionDenied(_("License is missing."))
-        if check_expiration and validation_info.get("grace_period_remaining") <= 0:
-            raise PermissionDenied(_("License has expired."))
+        elif check_expiration and validation_info.get("grace_period_remaining") <= 0:
+            report_violation(_("License has expired."))
 
         free_instances = validation_info.get('free_instances', 0)
         available_instances = validation_info.get('available_instances', 0)
@@ -328,11 +337,11 @@ class BaseAccess(object):
         if add_host_name:
             host_exists = Host.objects.filter(name=add_host_name).exists()
             if not host_exists and free_instances == 0:
-                raise PermissionDenied(_("License count of %s instances has been reached.") % available_instances)
+                report_violation(_("License count of %s instances has been reached.") % available_instances)
             elif not host_exists and free_instances < 0:
-                raise PermissionDenied(_("License count of %s instances has been exceeded.") % available_instances)
+                report_violation(_("License count of %s instances has been exceeded.") % available_instances)
         elif not add_host_name and free_instances < 0:
-            raise PermissionDenied(_("Host count exceeds available instances."))
+            report_violation(_("Host count exceeds available instances."))
 
     def check_org_host_limit(self, data, add_host_name=None):
         validation_info = get_licenser().validate()
