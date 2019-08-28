@@ -131,8 +131,8 @@ register(
     allow_blank=True,
     encrypted=False,
     read_only=False,
-    label=_('Your Red hat customer username'),
-    help_text=_('Enter your Red Hat customer password to get a Tower License'),  # noqa
+    label=_('Red Hat customer username'),
+    help_text=_('This username is used to retrieve license information and to send Automation Analytics'),  # noqa
     category=_('System'),
     category_slug='system',
 )
@@ -144,8 +144,8 @@ register(
     allow_blank=True,
     encrypted=True,
     read_only=False,
-    label=_('Your Red Hat customer password'),
-    help_text=_('Enter your Red Hat customer password to get a Tower License'),  # noqa
+    label=_('Red Hat customer password'),
+    help_text=_('This password is used to retrieve license information and to send Automation Analytics'),  # noqa
     category=_('System'),
     category_slug='system',
 )
@@ -157,7 +157,7 @@ register(
     schemes=('http', 'https'),
     allow_plain_hostname=True,  # Allow hostname only without TLD.
     label=_('Automation Analytics upload URL.'),
-    help_text=_('This setting is used to to configure data collection for the Automation Analytics dashboard.'),
+    help_text=_('This setting is used to to configure data collection for the Automation Analytics dashboard'),
     category=_('System'),
     category_slug='system',
 )
