@@ -835,10 +835,6 @@ class InventoryAccess(BaseAccess):
         return self.model.accessible_objects(self.user, 'read_role')
 
     @check_superuser
-    def can_read(self, obj):
-        return self.user in obj.read_role
-
-    @check_superuser
     def can_use(self, obj):
         return self.user in obj.use_role
 
@@ -907,9 +903,6 @@ class HostAccess(BaseAccess):
     def filtered_queryset(self):
         return self.model.objects.filter(inventory__in=Inventory.accessible_pk_qs(self.user, 'read_role'))
 
-    def can_read(self, obj):
-        return obj and self.user in obj.inventory.read_role
-
     def can_add(self, data):
         if not data:  # So the browseable API will work
             return Inventory.accessible_objects(self.user, 'admin_role').exists()
@@ -971,9 +964,6 @@ class GroupAccess(BaseAccess):
     def filtered_queryset(self):
         return Group.objects.filter(inventory__in=Inventory.accessible_pk_qs(self.user, 'read_role'))
 
-    def can_read(self, obj):
-        return obj and self.user in obj.inventory.read_role
-
     def can_add(self, data):
         if not data or 'inventory' not in data:
             return False
@@ -1016,12 +1006,6 @@ class InventorySourceAccess(NotificationAttachMixin, BaseAccess):
 
     def filtered_queryset(self):
         return self.model.objects.filter(inventory__in=Inventory.accessible_pk_qs(self.user, 'read_role'))
-
-    def can_read(self, obj):
-        if obj and obj.inventory:
-            return self.user.can_access(Inventory, 'read', obj.inventory)
-        else:
-            return False
 
     def can_add(self, data):
         if not data or 'inventory' not in data:
@@ -1115,9 +1099,6 @@ class CredentialTypeAccess(BaseAccess):
     model = CredentialType
     prefetch_related = ('created_by', 'modified_by',)
 
-    def can_read(self, obj):
-        return True
-
     def can_use(self, obj):
         return True
 
@@ -1158,10 +1139,6 @@ class CredentialAccess(BaseAccess):
 
     def filtered_queryset(self):
         return self.model.accessible_objects(self.user, 'read_role')
-
-    @check_superuser
-    def can_read(self, obj):
-        return self.user in obj.read_role
 
     @check_superuser
     def can_add(self, data):
@@ -1224,10 +1201,6 @@ class CredentialInputSourceAccess(BaseAccess):
     def filtered_queryset(self):
         return CredentialInputSource.objects.filter(
             target_credential__in=Credential.accessible_pk_qs(self.user, 'read_role'))
-
-    @check_superuser
-    def can_read(self, obj):
-        return self.user in obj.target_credential.read_role
 
     @check_superuser
     def can_add(self, data):
@@ -1978,10 +1951,6 @@ class WorkflowJobTemplateAccess(NotificationAttachMixin, BaseAccess):
         return self.model.accessible_objects(self.user, 'read_role')
 
     @check_superuser
-    def can_read(self, obj):
-        return self.user in obj.read_role
-
-    @check_superuser
     def can_add(self, data):
         '''
         a user can create a job template if they are a superuser, an org admin
@@ -2501,14 +2470,6 @@ class NotificationTemplateAccess(BaseAccess):
             Q(organization__in=self.user.auditor_of_organizations)
         ).distinct()
 
-    def can_read(self, obj):
-        if self.user.is_superuser or self.user.is_system_auditor:
-            return True
-        if obj.organization is not None:
-            if self.user in obj.organization.notification_admin_role or self.user in obj.organization.auditor_role:
-                return True
-        return False
-
     @check_superuser
     def can_add(self, data):
         if not data:
@@ -2548,9 +2509,6 @@ class NotificationAccess(BaseAccess):
             Q(notification_template__organization__in=self.user.auditor_of_organizations)
         ).distinct()
 
-    def can_read(self, obj):
-        return self.user.can_access(NotificationTemplate, 'read', obj.notification_template)
-
     def can_delete(self, obj):
         return self.user.can_access(NotificationTemplate, 'delete', obj.notification_template)
 
@@ -2564,10 +2522,6 @@ class LabelAccess(BaseAccess):
 
     def filtered_queryset(self):
         return self.model.objects.all()
-
-    @check_superuser
-    def can_read(self, obj):
-        return self.user in obj.organization.read_role
 
     @check_superuser
     def can_add(self, data):
@@ -2725,15 +2679,6 @@ class RoleAccess(BaseAccess):
             super_qs = Role.objects.filter(singleton_name__in=mandatories)
             result = result | super_qs
         return result
-
-    def can_read(self, obj):
-        if not obj:
-            return False
-        if self.user.is_superuser or self.user.is_system_auditor:
-            return True
-
-        return Role.filter_visible_roles(
-            self.user, Role.objects.filter(pk=obj.id)).exists()
 
     def can_add(self, obj, data):
         # Unsupported for now
