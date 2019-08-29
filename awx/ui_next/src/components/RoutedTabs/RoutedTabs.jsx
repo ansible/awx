@@ -19,7 +19,7 @@ const Tabs = styled(PFTabs)`
     }
   }
 
-  &::before {
+  &:not(.pf-c-tabs__item)::before {
     position: absolute;
     top: 0;
     right: 0;
@@ -29,12 +29,6 @@ const Tabs = styled(PFTabs)`
     border: solid var(--pf-c-tabs__item--BorderColor);
     border-width: var(--pf-c-tabs__item--BorderWidth) 0
       var(--pf-c-tabs__item--BorderWidth) 0;
-  }
-
-  // The above pseudo element is being applied to the tab items as well
-  // I couldn't figure out how to only apply it to .pf-c-tabs
-  .pf-c-tabs__item::before {
-    content: none;
   }
 `;
 
