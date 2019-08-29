@@ -135,7 +135,7 @@ SUMMARIZABLE_FK_FIELDS = {
     'source_script': ('name', 'description'),
     'role': ('id', 'role_field'),
     'notification_template': DEFAULT_SUMMARY_FIELDS,
-    'instance_group': {'id', 'name', 'controller_id'},
+    'instance_group': ('id', 'name', 'controller_id'),
     'insights_credential': DEFAULT_SUMMARY_FIELDS,
     'source_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'credential_type_id'),
     'target_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'credential_type_id'),
@@ -4717,7 +4717,7 @@ class InstanceGroupSerializer(BaseSerializer):
                   "percent_capacity_remaining", "jobs_running", "jobs_total",
                   "instances", "controller", "is_controller", "is_isolated", "credential",
                   "policy_instance_percentage", "policy_instance_minimum", "policy_instance_list",
-                  "pod_spec_override")
+                  "pod_spec_override", "summary_fields")
 
     def get_related(self, obj):
         res = super(InstanceGroupSerializer, self).get_related(obj)
