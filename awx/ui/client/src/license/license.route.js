@@ -17,30 +17,31 @@ export default {
 	ncyBreadcrumb: {
 		label: N_('LICENSE')
 	},
-    onEnter: ['$state', 'ConfigService', (state, configService) => {
-        return configService.getConfig()
-            .then(config => {
-                if (_.get(config, 'license_info.license_type') === 'open') {
-                    return state.go('setup');
-                }
-            });
-    }],
+	onEnter: ['$state', 'ConfigService', (state, configService) => {
+		return configService.getConfig()
+			.then(config => {
+				if (_.get(config, 'license_info.license_type') === 'open') {
+					return state.go('setup');
+				}
+			});
+	}],
 	resolve: {
 		features: ['CheckLicense', '$rootScope',
 			function(CheckLicense, $rootScope) {
 				if($rootScope.licenseMissing === undefined){
 					return CheckLicense.notify();
 				}
-
-		}],
+			}
+		],
 		config: ['ConfigService', 'CheckLicense', '$rootScope',
 			function(ConfigService, CheckLicense, $rootScope) {
 				ConfigService.delete();
-	            return ConfigService.getConfig()
-					.then(function(config){
-						$rootScope.licenseMissing = (CheckLicense.valid(config.license_info) === false) ? true : false;
-						return config;
-					});
-			}]
+				return ConfigService.getConfig()
+				.then(function(config){
+					$rootScope.licenseMissing = (CheckLicense.valid(config.license_info) === false) ? true : false;
+					return config;
+				});
+			}
+		]
 	},
 };

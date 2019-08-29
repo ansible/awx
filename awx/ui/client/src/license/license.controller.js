@@ -7,11 +7,10 @@
 import {N_} from "../i18n";
 
 export default
-    ['Wait', '$state', '$scope', '$rootScope',
-    'ProcessErrors', 'CheckLicense', 'moment','$window',
-    'ConfigService', 'pendoService', 'insightsEnablementService', 'i18n', 'config',
-    function(Wait, $state, $scope, $rootScope, ProcessErrors, CheckLicense, moment,
-    $window, ConfigService, pendoService, insightsEnablementService, i18n, config) {
+    ['Wait', '$state', '$scope', '$rootScope', 'ProcessErrors', 'CheckLicense', 'moment', 'Rest',
+    '$window', 'ConfigService', 'pendoService', 'insightsEnablementService', 'i18n', 'config', 'GetBasePath',
+    function(Wait, $state, $scope, $rootScope, ProcessErrors, CheckLicense, moment, Rest,
+    $window, ConfigService, pendoService, insightsEnablementService, i18n, config, GetBasePath) {
 
         const calcDaysRemaining = function(seconds) {
       	 		// calculate the number of days remaining on the license
@@ -34,11 +33,10 @@ export default
 
         const reset = function() {
             document.getElementById('License-form').reset();
-            $scope.rhPassword = null;
-            $scope.rhUsername = null;
+            $scope.rhCreds = {};
         };
 
-        const init = function(config) {
+        const initVars = (config) => {
             // license/license.partial.html compares fileName
             $scope.fileName = N_("No file selected.");
 
@@ -59,8 +57,29 @@ export default
                 pendo: true,
                 insights: true
             };
+
+            $scope.rhCreds = {};
         };
 
+        const init = (config) => {
+            Rest.setUrl(`${GetBasePath('settings')}system/`);
+            Rest.get()
+                .then(({data}) => {
+                    initVars(config);
+
+                    if (data.REDHAT_USERNAME && data.REDHAT_USERNAME !== "") {
+                        $scope.rhCreds.username = data.REDHAT_USERNAME;
+                    }
+
+                    if (data.REDHAT_PASSWORD && data.REDHAT_PASSWORD !== "") {
+                        $scope.rhCreds.password = data.REDHAT_PASSWORD;
+                        $scope.hasPasswordFromSettings = true;
+                    }
+                }).catch(() => {
+                    initVars(config);
+                });
+        };
+        
         init(config);
 
         $scope.getKey = function(event) {
@@ -89,7 +108,7 @@ export default
         // HTML5 spec doesn't provide a way to customize file input css
         // So we hide the default input, show our own, and simulate clicks to the hidden input
         $scope.fakeClick = function() {
-            if($scope.user_is_superuser && (!$scope.rhUsername || $scope.rhUsername === '') && (!$scope.rhPassword || $scope.rhPassword === '')) {
+            if($scope.user_is_superuser && (!$scope.rhCreds.username || $scope.rhCreds.username === '') && (!$scope.rhCreds.password || $scope.rhCreds.password === '')) {
                 $('#License-file').click();
             }
         };
@@ -104,10 +123,10 @@ export default
             let payload = {};
             if ($scope.newLicense.file) {
                 payload = $scope.newLicense.file;
-            } else if ($scope.rhUsername && $scope.rhPassword) {
+            } else if ($scope.rhCreds.username && $scope.rhCreds.password) {
                 payload = {
-                    rh_password: $scope.rhPassword,
-                    rh_username: $scope.rhUsername
+                    rh_password: $scope.rhCreds.password,
+                    rh_username: $scope.rhCreds.username
                 };
             }
             CheckLicense.post(payload, $scope.newLicense.eula)
