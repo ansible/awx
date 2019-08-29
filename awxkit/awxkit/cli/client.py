@@ -163,7 +163,9 @@ class CLI(object):
                 response,
                 fmt=self.get_config('format'),
                 filter=self.get_config('filter'),
-                changed=self.original_action in ('modify', 'create')
+                changed=self.original_action in (
+                    'modify', 'create', 'associate', 'disassociate'
+                )
             )
             if formatted:
                 print(utils.to_str(formatted), file=self.stdout)
