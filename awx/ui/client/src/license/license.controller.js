@@ -7,9 +7,9 @@
 import {N_} from "../i18n";
 
 export default
-    ['Wait', '$state', '$scope', '$rootScope', 'ProcessErrors', 'CheckLicense', 'moment', 'Rest',
+    ['Wait', '$state', '$scope', '$rootScope', 'ProcessErrors', 'CheckLicense', 'moment', 'Rest', '$timeout',
     '$window', 'ConfigService', 'pendoService', 'insightsEnablementService', 'i18n', 'config', 'GetBasePath',
-    function(Wait, $state, $scope, $rootScope, ProcessErrors, CheckLicense, moment, Rest,
+    function(Wait, $state, $scope, $rootScope, ProcessErrors, CheckLicense, moment, Rest, $timeout,
     $window, ConfigService, pendoService, insightsEnablementService, i18n, config, GetBasePath) {
 
         const calcDaysRemaining = function(seconds) {
@@ -73,7 +73,7 @@ export default
 
                     if (data.REDHAT_PASSWORD && data.REDHAT_PASSWORD !== "") {
                         $scope.rhCreds.password = data.REDHAT_PASSWORD;
-                        $scope.hasPasswordFromSettings = true;
+                        $scope.showPlaceholderPassword = true;
                     }
                 }).catch(() => {
                     initVars(config);
@@ -115,6 +115,17 @@ export default
 
         $scope.downloadLicense = function() {
             $window.open('https://www.ansible.com/license', '_blank');
+        };
+
+        $scope.replacePassword = () => {
+            if ($scope.user_is_superuser && !$scope.newLicense.file) {
+                $scope.showPlaceholderPassword = false;
+                $scope.rhCreds.password = "";
+                $timeout(() => {
+                    $('.tooltip').remove();
+                    $('#rh-password').focus();
+                });
+            }
         };
 
         $scope.submit = function() {

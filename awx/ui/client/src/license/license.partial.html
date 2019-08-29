@@ -128,17 +128,16 @@
 								</div>
 								<div>
 									<label class="License-label d-block" translate>PASSWORD</label>
-									<div class="input-group Form-mixedInputGroup" ng-if="hasPasswordFromSettings">
-										<span class="input-group-btn input-group-prepend">
-											<button aw-password-toggle id="rh_license_pass_show_input_button" class="btn btn-default show_input_button Form-passwordButton" type="button" ng-disabled="!user_is_superuser || newLicense.file" aw-tool-tip="Toggle the display of plaintext." aw-tip-placement="top">Hide</button>
+									<div class="input-group Form-mixedInputGroup" ng-if="showPlaceholderPassword">
+										<input class="form-control Form-textInput" type="text" value="ENCRYPTED" disabled />
+										<span class="input-group-btn input-group-append">
+											<button class="btn at-ButtonHollow--default at-Input-button" ng-disabled="!user_is_superuser || newLicense.file" ng-click="replacePassword()" aw-tool-tip="Replace" data-placement="top" data-original-title="Replace">
+												<i class="fa fa-undo"></i>
+											</button>
 										</span>
-										<input id="rh_license_pass" class="form-control Form-textInput" type="text" ng-model="rhCreds.password" ng-disabled="!user_is_superuser || newLicense.file" />
 									</div>
-									<div class="input-group Form-mixedInputGroup" ng-if="!hasPasswordFromSettings">
-										<span class="input-group-btn input-group-prepend">
-											<button aw-password-toggle id="rh_license_pass_show_input_button" class="btn btn-default show_input_button Form-passwordButton" type="button" ng-disabled="!user_is_superuser || newLicense.file" aw-tool-tip="Toggle the display of plaintext." aw-tip-placement="top">Show</button>
-										</span>
-										<input id="rh_license_pass" class="form-control Form-textInput" type="password" ng-model="rhCreds.password" ng-disabled="!user_is_superuser || newLicense.file" />
+									<div class="input-group" ng-if="!showPlaceholderPassword">
+										<input id="rh-password" class="form-control Form-textInput" type="password" ng-model="rhCreds.password" ng-disabled="!user_is_superuser || newLicense.file" />
 									</div>
 								</div>
 							</div>
