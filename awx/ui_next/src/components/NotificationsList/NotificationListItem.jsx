@@ -132,6 +132,7 @@ NotificationListItem.propTypes = {
 
 NotificationListItem.defaultProps = {
   errorTurnedOn: false,
+  startedTurnedOn: false,
   successTurnedOn: false,
 };
 

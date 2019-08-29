@@ -3771,6 +3771,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                 "items": "items",
                                 "itemsPerPage": "Items per page",
                                 "optionsToggle": "Select",
+                                "page": "page",
                                 "pages": "pages",
                                 "paginationTitle": "Pagination",
                                 "perPageSuffix": "per page",
@@ -3838,6 +3839,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                   "items": "items",
                                   "itemsPerPage": "Items per page",
                                   "optionsToggle": "Select",
+                                  "page": "page",
                                   "pages": "pages",
                                   "paginationTitle": "Pagination",
                                   "perPageSuffix": "per page",
@@ -3883,6 +3885,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                     "items": "items",
                                     "itemsPerPage": "Items per page",
                                     "optionsToggle": "Select",
+                                    "page": "page",
                                     "pages": "pages",
                                     "paginationTitle": "Pagination",
                                     "perPageSuffix": "per page",
@@ -4548,7 +4551,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                     onPreviousClick={[Function]}
                                     onSetPage={[Function]}
                                     page={1}
-                                    pagesTitle=""
+                                    pagesTitle="page"
                                     paginationTitle="Pagination"
                                     toFirstPage="Go to first page"
                                     toLastPage="Go to last page"
@@ -4667,7 +4670,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                           aria-hidden="true"
                                         >
                                           of 
-                                          1 
+                                          1 page
                                         </span>
                                       </div>
                                       <Button

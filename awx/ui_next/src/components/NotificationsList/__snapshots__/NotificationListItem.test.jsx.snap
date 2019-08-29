@@ -13,6 +13,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
       "notification_type": "slack",
     }
   }
+  startedTurnedOn={false}
   successTurnedOn={false}
   toggleNotification={[MockFunction]}
   typeLabels={
@@ -63,6 +64,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                   <ForwardRef
                     aria-label="Toggle notification start"
                     id="notification-9000-started-toggle"
+                    isChecked={false}
                     isDisabled={false}
                     label="Start"
                     labelOff="Start"
@@ -290,6 +292,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                       <NotificationListItem__Switch
                         aria-label="Toggle notification start"
                         id="notification-9000-started-toggle"
+                        isChecked={false}
                         isDisabled={false}
                         label="Start"
                         labelOff="Start"
@@ -321,6 +324,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                           }
                           forwardedRef={null}
                           id="notification-9000-started-toggle"
+                          isChecked={false}
                           isDisabled={false}
                           label="Start"
                           labelOff="Start"
@@ -330,6 +334,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                             aria-label="Toggle notification start"
                             className="NotificationListItem__Switch-j7c411-1 ceuHGn"
                             id="notification-9000-started-toggle"
+                            isChecked={false}
                             isDisabled={false}
                             label="Start"
                             labelOff="Start"
@@ -342,7 +347,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                                   "aria-label": "Toggle notification start",
                                   "className": "NotificationListItem__Switch-j7c411-1 ceuHGn",
                                   "id": "notification-9000-started-toggle",
-                                  "isChecked": undefined,
+                                  "isChecked": false,
                                   "isDisabled": false,
                                   "label": "Start",
                                   "labelOff": "Start",
@@ -355,7 +360,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                                 aria-label="Toggle notification start"
                                 className="NotificationListItem__Switch-j7c411-1 ceuHGn"
                                 id="notification-9000-started-toggle"
-                                isChecked={true}
+                                isChecked={false}
                                 isDisabled={false}
                                 label="Start"
                                 labelOff="Start"
@@ -374,7 +379,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                                   <input
                                     aria-label="Toggle notification start"
                                     aria-labelledby={null}
-                                    checked={true}
+                                    checked={false}
                                     className="pf-c-switch__input"
                                     disabled={false}
                                     id="notification-9000-started-toggle"
