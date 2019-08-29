@@ -15,7 +15,7 @@ class CheckboxCard extends Component {
         }}
       >
         <Checkbox
-          checked={isSelected}
+          isChecked={isSelected}
           onChange={onSelect}
           aria-label={name}
           id={`checkbox-card-${itemId}`}

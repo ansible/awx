@@ -24,6 +24,7 @@ export default props => (
       <AWXPagination
         titles={{
           items: i18n._(t`items`),
+          page: i18n._(t`page`),
           pages: i18n._(t`pages`),
           itemsPerPage: i18n._(t`Items per page`),
           perPageSuffix: i18n._(t`per page`),

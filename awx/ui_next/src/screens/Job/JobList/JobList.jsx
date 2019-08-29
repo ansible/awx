@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Card, PageSection, PageSectionVariants } from '@patternfly/react-core';
+import { Card, PageSection } from '@patternfly/react-core';
 
 import {
   AdHocCommandsAPI,
@@ -150,11 +150,10 @@ class JobList extends Component {
       selected,
     } = this.state;
     const { match, i18n } = this.props;
-    const { medium } = PageSectionVariants;
     const isAllSelected = selected.length === jobs.length;
     const itemName = i18n._(t`Job`);
     return (
-      <PageSection variant={medium}>
+      <PageSection>
         <Card>
           <PaginatedDataList
             contentError={contentError}

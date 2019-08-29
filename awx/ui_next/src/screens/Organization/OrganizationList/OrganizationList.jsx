@@ -2,7 +2,7 @@ import React, { Component, Fragment } from 'react';
 import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Card, PageSection, PageSectionVariants } from '@patternfly/react-core';
+import { Card, PageSection } from '@patternfly/react-core';
 
 import { OrganizationsAPI } from '@api';
 import AlertModal from '@components/AlertModal';
@@ -129,7 +129,6 @@ class OrganizationsList extends Component {
   }
 
   render() {
-    const { medium } = PageSectionVariants;
     const {
       actions,
       itemCount,
@@ -147,7 +146,7 @@ class OrganizationsList extends Component {
 
     return (
       <Fragment>
-        <PageSection variant={medium}>
+        <PageSection>
           <Card>
             <PaginatedDataList
               contentError={contentError}

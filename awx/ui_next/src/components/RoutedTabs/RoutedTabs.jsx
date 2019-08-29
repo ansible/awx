@@ -19,7 +19,7 @@ const Tabs = styled(PFTabs)`
     }
   }
 
-  &::before {
+  &:not(.pf-c-tabs__item)::before {
     position: absolute;
     top: 0;
     right: 0;
@@ -54,7 +54,6 @@ function RoutedTabs(props) {
     <Tabs activeKey={getActiveTabId()} onSelect={handleTabSelect}>
       {tabsArray.map(tab => (
         <Tab
-          className={`${tab.name}`}
           aria-label={`${tab.name}`}
           eventKey={tab.id}
           key={tab.id}

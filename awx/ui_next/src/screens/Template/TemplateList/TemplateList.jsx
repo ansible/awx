@@ -6,7 +6,6 @@ import { t } from '@lingui/macro';
 import {
   Card,
   PageSection,
-  PageSectionVariants,
   Dropdown,
   DropdownItem,
   DropdownPosition,
@@ -171,9 +170,8 @@ class TemplatesList extends Component {
     const canAdd =
       actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
     const isAllSelected = selected.length === templates.length;
-    const { medium } = PageSectionVariants;
     return (
-      <PageSection variant={medium}>
+      <PageSection>
         <Card>
           <PaginatedDataList
             contentError={contentError}
@@ -227,19 +225,15 @@ class TemplatesList extends Component {
                         <ToolbarAddButton onClick={this.handleAddToggle} />
                       }
                       dropdownItems={[
-                        <DropdownItem
-                          key="job"
-                          component={Link}
-                          to={`${match.url}/job_template/add`}
-                        >
-                          {i18n._(t`Job Template`)}
+                        <DropdownItem key="job">
+                          <Link to={`${match.url}/job_template/add/`}>
+                            {i18n._(t`Job Template`)}
+                          </Link>
                         </DropdownItem>,
-                        <DropdownItem
-                          key="workflow"
-                          component={Link}
-                          to={`${match.url}/add`}
-                        >
-                          {i18n._(t`Workflow Template`)}
+                        <DropdownItem key="workflow">
+                          <Link to={`${match.url}_workflow/add/`}>
+                            {i18n._(t`Workflow Template`)}
+                          </Link>
                         </DropdownItem>,
                       ]}
                     />
@@ -267,19 +261,15 @@ class TemplatesList extends Component {
                   onSelect={this.handleAddSelect}
                   toggle={<ToolbarAddButton onClick={this.handleAddToggle} />}
                   dropdownItems={[
-                    <DropdownItem
-                      key="job"
-                      component={Link}
-                      to={`${match.url}/job_template/add/`}
-                    >
-                      {i18n._(t`Job Template`)}
+                    <DropdownItem key="job">
+                      <Link to={`${match.url}/job_template/add/`}>
+                        {i18n._(t`Job Template`)}
+                      </Link>
                     </DropdownItem>,
-                    <DropdownItem
-                      key="workflow"
-                      component={Link}
-                      to={`${match.url}_workflow/add/`}
-                    >
-                      {i18n._(t`Workflow Template`)}
+                    <DropdownItem key="workflow">
+                      <Link to={`${match.url}_workflow/add/`}>
+                        {i18n._(t`Workflow Template`)}
+                      </Link>
                     </DropdownItem>,
                   ]}
                 />

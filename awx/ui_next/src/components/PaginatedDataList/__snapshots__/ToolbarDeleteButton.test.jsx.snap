@@ -9,30 +9,43 @@ exports[`<ToolbarDeleteButton /> should render button 1`] = `
 >
   <Tooltip
     appendTo={[Function]}
-    className={null}
+    aria="describedby"
+    boundary="window"
+    className=""
     content="Select a row to delete"
+    distance={15}
     enableFlip={true}
     entryDelay={500}
     exitDelay={500}
+    flipBehavior={
+      Array [
+        "top",
+        "right",
+        "bottom",
+        "left",
+        "top",
+        "right",
+        "bottom",
+      ]
+    }
+    isAppLauncher={false}
     maxWidth="18.75rem"
     position="top"
     trigger="mouseenter focus"
     zIndex={9999}
   >
-    <Tippy
+    <PopoverBase
       animateFill={false}
       appendTo={[Function]}
+      aria="describedby"
+      arrow={true}
+      boundary="window"
       content={
         <div
-          className="pf-c-tooltip"
+          className=""
           role="tooltip"
         >
-          <TooltipArrow
-            className={null}
-          />
-          <TooltipContent
-            className={null}
-          >
+          <TooltipContent>
             Select a row to delete
           </TooltipContent>
         </div>
@@ -45,6 +58,17 @@ exports[`<ToolbarDeleteButton /> should render button 1`] = `
       }
       distance={15}
       flip={true}
+      flipBehavior={
+        Array [
+          "top",
+          "right",
+          "bottom",
+          "left",
+          "top",
+          "right",
+          "bottom",
+        ]
+      }
       lazy={true}
       maxWidth="18.75rem"
       onCreate={[Function]}
@@ -62,7 +86,7 @@ exports[`<ToolbarDeleteButton /> should render button 1`] = `
           },
         }
       }
-      theme="pf-tippy"
+      theme="pf-tooltip"
       trigger="mouseenter focus"
       zIndex={9999}
     >
@@ -105,15 +129,8 @@ exports[`<ToolbarDeleteButton /> should render button 1`] = `
             <Button
               aria-label="Delete"
               className="ToolbarDeleteButton__DeleteButton-sc-1e3r0eg-0 bQjfFG"
-              component="button"
-              isActive={false}
-              isBlock={false}
               isDisabled={true}
-              isFocus={false}
-              isHover={false}
-              isInline={false}
               onClick={[Function]}
-              type="button"
               variant="plain"
             >
               <button
@@ -127,6 +144,7 @@ exports[`<ToolbarDeleteButton /> should render button 1`] = `
               >
                 <TrashAltIcon
                   color="currentColor"
+                  noVerticalAlign={false}
                   size="sm"
                   title={null}
                 >
@@ -159,12 +177,9 @@ exports[`<ToolbarDeleteButton /> should render button 1`] = `
         containerInfo={
           <div>
             <div
-              class="pf-c-tooltip"
+              class=""
               role="tooltip"
             >
-              <div
-                class="pf-c-tooltip__arrow"
-              />
               <div
                 class="pf-c-tooltip__content"
               >
@@ -175,19 +190,10 @@ exports[`<ToolbarDeleteButton /> should render button 1`] = `
         }
       >
         <div
-          className="pf-c-tooltip"
+          className=""
           role="tooltip"
         >
-          <TooltipArrow
-            className={null}
-          >
-            <div
-              className="pf-c-tooltip__arrow"
-            />
-          </TooltipArrow>
-          <TooltipContent
-            className={null}
-          >
+          <TooltipContent>
             <div
               className="pf-c-tooltip__content"
             >
@@ -196,7 +202,7 @@ exports[`<ToolbarDeleteButton /> should render button 1`] = `
           </TooltipContent>
         </div>
       </Portal>
-    </Tippy>
+    </PopoverBase>
   </Tooltip>
 </ToolbarDeleteButton>
 `;

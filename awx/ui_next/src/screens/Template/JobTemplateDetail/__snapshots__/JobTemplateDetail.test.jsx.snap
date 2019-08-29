@@ -169,21 +169,16 @@ exports[`<JobTemplateDetail /> initially renders succesfully 1`] = `
                 <ContentLoading
                   i18n={"/i18n/"}
                 >
-                  <EmptyState
-                    className=""
-                    variant="large"
-                  >
+                  <EmptyState>
                     <div
-                      className="pf-c-empty-state pf-m-lg"
+                      className="pf-c-empty-state styles.modifiers.lg"
                     >
-                      <EmptyStateBody
-                        className=""
-                      >
-                        <p
+                      <EmptyStateBody>
+                        <div
                           className="pf-c-empty-state__body"
                         >
                           Loading...
-                        </p>
+                        </div>
                       </EmptyStateBody>
                     </div>
                   </EmptyState>
