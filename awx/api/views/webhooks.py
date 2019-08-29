@@ -138,8 +138,10 @@ class GitlabWebhookReceiver(WebhookReceiverBase):
         return self.request.META.get('HTTP_X_GITLAB_EVENT')
 
     def get_event_guid(self):
-        # Gitlab does not provide a unique identifier on events.
-        return ''
+        # Gitlab does not provide a unique identifier on events, so construct one.
+        h = sha1()
+        h.update(force_bytes(self.request.read()))
+        return h.hexdigest()
 
     def get_signature(self):
         return force_bytes(self.request.META.get('HTTP_X_GITLAB_TOKEN'))
