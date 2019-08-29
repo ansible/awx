@@ -59,15 +59,6 @@ class ResourceOptionsParser(object):
 
     def build_query_arguments(self, method, http_method):
         required_group = None
-        if filter(
-            lambda param: param.get('required', False) is True,
-            self.options.get(http_method, {}).values()
-        ):
-            if method in self.parser.choices:
-                required_group = self.parser.choices[method].add_argument_group('required arguments')
-                # put the required group first (before the optional args group)
-                self.parser.choices[method]._action_groups.reverse()
-
         for k, param in self.options.get(http_method, {}).items():
             required = (
                 method == 'create' and
@@ -154,6 +145,10 @@ class ResourceOptionsParser(object):
                 kwargs['type'] = jsonstr
 
             if required:
+                if required_group is None:
+                    required_group = self.parser.choices[method].add_argument_group('required arguments')
+                    # put the required group first (before the optional args group)
+                    self.parser.choices[method]._action_groups.reverse()
                 required_group.add_argument(
                     '--{}'.format(k),
                     **kwargs
