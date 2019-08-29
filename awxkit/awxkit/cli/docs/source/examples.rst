@@ -44,17 +44,10 @@ the output of) a playbook from that repository:
         -f jq --filter '.id')
     awx job_templates launch $TEMPLATE_ID --monitor
 
-Importing an SSH Key
---------------------
-
-DOCUMENT ME
-
-Creating a Job Template with Extra Vars
+Updating a Job Template with Extra Vars
 ---------------------------------------
 
-DOCUMENT ME
+.. code:: bash
 
-Granting Membership to a Team or Organization
----------------------------------------------
-
-DOCUMENT ME
+    awx job_templates modify 1 --extra_vars "@vars.yml"
+    awx job_templates modify 1 --extra_vars "@vars.json"
