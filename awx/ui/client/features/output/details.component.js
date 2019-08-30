@@ -871,7 +871,8 @@ function JobDetailsController (
             instanceGroup,
             environment,
             artifacts,
-            executionNode
+            executionNode,
+            resultTraceback
         }) => {
             vm.started = getStartDetails(started);
             vm.finished = getFinishDetails(finished);
@@ -883,6 +884,7 @@ function JobDetailsController (
             vm.artifacts = getArtifactsDetails(artifacts);
             vm.executionNode = getExecutionNodeDetails(executionNode);
             vm.inventoryScm = getInventoryScmDetails(inventoryScm.id, inventoryScm.status);
+            vm.resultTraceback = getResultTracebackDetails(resultTraceback);
             vm.scmRevision = getSCMRevisionDetails(scmRevision);
             vm.instanceGroup = getInstanceGroupDetails(instanceGroup);
             vm.status = getStatusDetails(status);
