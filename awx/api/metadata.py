@@ -20,7 +20,7 @@ from rest_framework.fields import JSONField as DRFJSONField
 from rest_framework.request import clone_request
 
 # AWX
-from awx.main.fields import JSONField
+from awx.main.fields import JSONField, ImplicitRoleField
 from awx.main.models import InventorySource, NotificationTemplate
 
 
@@ -251,6 +251,16 @@ class Metadata(metadata.SimpleMetadata):
         # Add related search fields if available from the view.
         if getattr(view, 'related_search_fields', None):
             metadata['related_search_fields'] = view.related_search_fields
+
+        # include role names in metadata
+        roles = []
+        model = getattr(view, 'model', None)
+        if model:
+            for field in model._meta.get_fields():
+                if type(field) is ImplicitRoleField:
+                    roles.append(field.name)
+        if len(roles) > 0:
+            metadata['object_roles'] = roles
 
         from rest_framework import generics
         if isinstance(view, generics.ListAPIView) and hasattr(view, 'paginator'):
