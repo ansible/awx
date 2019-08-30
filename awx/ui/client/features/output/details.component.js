@@ -442,8 +442,8 @@ function getJobExplanationDetails () {
     return { label, less, more, showMore, hasMoreToShow };
 }
 
-function getResultTracebackDetails () {
-    const traceback = resource.model.get('result_traceback');
+function getResultTracebackDetails (resultTraceback) {
+    const traceback = resultTraceback || resource.model.get('result_traceback');
 
     if (!traceback) {
         return null;
