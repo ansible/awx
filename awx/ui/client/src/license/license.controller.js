@@ -181,7 +181,6 @@ export default
                         });
                 }).catch((data) => {
                     Wait('stop');
-                    reset();
                     $scope.licenseError = data.error;
                 });
         };
