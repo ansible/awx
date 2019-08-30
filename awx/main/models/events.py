@@ -614,13 +614,22 @@ class BaseCommandEvent(CreatedModifiedModel):
             kwargs.pop('created', None)
 
         sanitize_event_keys(kwargs, cls.VALID_KEYS)
-        return cls.objects.create(**kwargs)
+        event = cls.objects.create(**kwargs)
+        if isinstance(event, AdHocCommandEvent):
+            analytics_logger.info(
+                'Event data saved.',
+                extra=dict(python_objects=dict(job_event=event))
+            )
+        return event
 
     def get_event_display(self):
         '''
         Needed for __unicode__
         '''
         return self.event
+
+    def get_event_display2(self):
+        return self.get_event_display()
 
     def get_host_status_counts(self):
         return create_host_status_counts(getattr(self, 'event_data', {}))
