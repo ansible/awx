@@ -303,6 +303,12 @@ function JobStatusService (moment, message) {
         this.statsEvent = data;
     };
 
+    this.setResultTraceback = traceback => {
+        if (!traceback) return;
+
+        this.state.resultTraceback = traceback;
+    };
+
     this.setHostStatusCounts = counts => {
         counts = counts || {};
 
@@ -341,6 +347,7 @@ function JobStatusService (moment, message) {
                 this.setEnvironment(model.get('custom_virtualenv'));
                 this.setArtifacts(model.get('artifacts'));
                 this.setExecutionNode(model.get('execution_node'));
+                this.setResultTraceback(model.get('result_traceback'));
 
                 this.initHostStatusCounts({ model });
                 this.initPlaybookCounts({ model });
