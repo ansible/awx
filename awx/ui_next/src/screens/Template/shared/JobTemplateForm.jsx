@@ -4,14 +4,21 @@ import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { withFormik, Field } from 'formik';
-import { Form, FormGroup, Tooltip, Card, Switch } from '@patternfly/react-core';
+import {
+  Form,
+  FormGroup,
+  Tooltip,
+  Card,
+  Switch,
+  Checkbox,
+} from '@patternfly/react-core';
 import { QuestionCircleIcon as PFQuestionCircleIcon } from '@patternfly/react-icons';
 import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
 import AnsibleSelect from '@components/AnsibleSelect';
 import MultiSelect, { TagMultiSelect } from '@components/MultiSelect';
 import FormActionGroup from '@components/FormActionGroup';
-import FormField from '@components/FormField';
+import FormField, { CheckboxField } from '@components/FormField';
 import FormRow from '@components/FormRow';
 import CollapsibleSection from '@components/CollapsibleSection';
 import { required } from '@util/validators';
@@ -23,6 +30,17 @@ import { JobTemplatesAPI, LabelsAPI, ProjectsAPI } from '@api';
 
 const QuestionCircleIcon = styled(PFQuestionCircleIcon)`
   margin-left: 10px;
+`;
+
+const GridFormGroup = styled(FormGroup)`
+  & > label {
+    grid-column: 1 / -1;
+  }
+
+  && {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
 `;
 
 class JobTemplateForm extends Component {
@@ -60,6 +78,7 @@ class JobTemplateForm extends Component {
       inventory: props.template.summary_fields.inventory,
       relatedProjectPlaybooks: props.relatedProjectPlaybooks,
       relatedInstanceGroups: [],
+      allowCallbacks: !!props.template.host_config_key,
     };
     this.handleNewLabel = this.handleNewLabel.bind(this);
     this.loadLabels = this.loadLabels.bind(this);
@@ -119,9 +138,10 @@ class JobTemplateForm extends Component {
       return;
     }
     try {
-      console.log('loading...');
       const { data } = await JobTemplatesAPI.readInstanceGroups(template.id);
-      console.log(data.results);
+      this.setState({
+        relatedInstanceGroups: data.results,
+      });
     } catch (err) {
       this.setState({ contentError: err });
     }
@@ -236,6 +256,7 @@ class JobTemplateForm extends Component {
       newLabels,
       removedLabels,
       relatedInstanceGroups,
+      allowCallbacks,
     } = this.state;
     const {
       handleCancel,
@@ -554,47 +575,110 @@ class JobTemplateForm extends Component {
           />
           <Field
             name="job_tags"
-            render={({ field, form }) => {
-              return (
-                <FormGroup
-                  label={i18n._(t`Job Tags`)}
-                  fieldId="template-job-tags"
-                >
-                  <Tooltip
-                    position="right"
-                    content={i18n._(t`Tags are useful when you have a large
+            render={({ field, form }) => (
+              <FormGroup
+                label={i18n._(t`Job Tags`)}
+                fieldId="template-job-tags"
+              >
+                <Tooltip
+                  position="right"
+                  content={i18n._(t`Tags are useful when you have a large
                           playbook, and you want to run a specific part of a
                           play or task. Use commas to separate multiple tags.
                           Refer to Ansible Tower documentation for details on
                           the usage of tags.`)}
-                  >
-                    <QuestionCircleIcon />
-                  </Tooltip>
-                  <TagMultiSelect
-                    onChange={value => form.setFieldValue(field.name, value)}
-                    value={field.value}
-                  />
-                </FormGroup>
-              );
-            }}
+                >
+                  <QuestionCircleIcon />
+                </Tooltip>
+                <TagMultiSelect
+                  value={field.value}
+                  onChange={value => form.setFieldValue(field.name, value)}
+                />
+              </FormGroup>
+            )}
           />
-          <FormGroup label={i18n._(t`Skip Tags`)} fieldId="template-skip-tags">
-            <Tooltip
-              position="right"
-              content={i18n._(t`Skip tags are useful when you have a
+          <Field
+            name="skip_tags"
+            render={({ field, form }) => (
+              <FormGroup
+                label={i18n._(t`Skip Tags`)}
+                fieldId="template-skip-tags"
+              >
+                <Tooltip
+                  position="right"
+                  content={i18n._(t`Skip tags are useful when you have a
                     large playbook, and you want to skip specific parts of a
                     play or task. Use commas to separate multiple tags. Refer
                     to Ansible Tower documentation for details on the usage
                     of tags.`)}
-            >
-              <QuestionCircleIcon />
-            </Tooltip>
-            <MultiSelect
-              onAddNewItem={this.handleNewLabel}
-              onRemoveItem={this.removeLabel}
-              associatedItems={template.skip_tags.split(',')}
-              options={loadedLabels}
+                >
+                  <QuestionCircleIcon />
+                </Tooltip>
+                <TagMultiSelect
+                  value={field.value}
+                  onChange={value => form.setFieldValue(field.name, value)}
+                />
+              </FormGroup>
+            )}
+          />
+          <GridFormGroup isInline label={i18n._(t`Options`)}>
+            <CheckboxField
+              id="option-privilege-escalation"
+              name="become_enabled"
+              label={i18n._(t`Privilege Escalation`)}
+              tooltip={i18n._(
+                t`If enabled, run this playbook as an administrator.`
+              )}
             />
+            <Checkbox
+              aria-label={i18n._(t`Provisioning Callbacks`)}
+              label={
+                <span>
+                  {i18n._(t`Provisioning Callbacks`)}
+                  &nbsp;
+                  <Tooltip
+                    position="right"
+                    content={i18n._(
+                      t`Enables creation of a provisioning callback URL. Using
+                          the URL a host can contact {{BRAND_NAME}} and request a
+                          configuration update using this job template.`
+                    )}
+                  >
+                    <QuestionCircleIcon />
+                  </Tooltip>
+                </span>
+              }
+              id="option-callbacks"
+              checked={allowCallbacks}
+              onChange={checked => {
+                this.setState({ allowCallbacks: checked });
+              }}
+            />
+            <CheckboxField
+              id="option-concurrent"
+              name="allow_simultaneous"
+              label={i18n._(t`Concurrent Jobs`)}
+              tooltip={i18n._(
+                t`If enabled, simultaneous runs of this job template will
+                    be allowed.`
+              )}
+            />
+            <CheckboxField
+              id="option-fact-cache"
+              name="use_fact_cache"
+              label={i18n._(t`Fact Cache`)}
+              tooltip={i18n._(
+                t`If enabled, use cached facts if available and store
+                    discovered facts in the cache.`
+              )}
+            />
+          </GridFormGroup>
+          <FormGroup
+            css={`
+              ${allowCallbacks ? '' : 'display: none'}
+            `}
+          >
+            HERE
           </FormGroup>
         </CollapsibleSection>
         <FormActionGroup onCancel={handleCancel} onSubmit={handleSubmit} />
@@ -621,6 +705,10 @@ const FormikApp = withFormik({
       diff_mode,
       job_tags,
       skip_tags,
+      become_enabled,
+      allow_callbacks,
+      allow_simultaneous,
+      use_fact_cache,
       summary_fields = { labels: { results: [] } },
     } = { ...template };
 
@@ -640,6 +728,10 @@ const FormikApp = withFormik({
       diff_mode: diff_mode || false,
       job_tags: job_tags || '',
       skip_tags: skip_tags || '',
+      become_enabled: become_enabled || false,
+      allow_callbacks: allow_callbacks || false,
+      allow_simultaneous: allow_simultaneous || false,
+      use_fact_cache: use_fact_cache || false,
     };
   },
   handleSubmit: (values, bag) => bag.props.handleSubmit(values),

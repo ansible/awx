@@ -7,12 +7,16 @@ function arrayToString(tags) {
 }
 
 function stringToArray(value) {
-  return value.split(',').map(v => ({
-    id: v,
-    name: v,
+  return value.split(',').filter(val => !!val).map(val => ({
+    id: val,
+    name: val,
   }));
 }
 
+/*
+ * Adapter providing a simplified API to a MultiSelect. The value
+ * is a comma-separated string.
+ */
 function TagMultiSelect ({ onChange, value }) {
   const [options, setOptions] = useState(stringToArray(value));
 
