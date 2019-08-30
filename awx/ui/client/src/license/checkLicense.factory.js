@@ -25,8 +25,8 @@ export default
 						.then((response) =>{
 							return response.data;
 						})
-						.catch(() => {
-							return $q.reject();
+						.catch(({data}) => {
+							return $q.reject(data);
 						});
 				},
 

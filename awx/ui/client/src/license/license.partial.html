@@ -167,19 +167,23 @@
 						</span>
 						<div class="License-analyticsCheckboxGroup">
 							<div class="License-analyticsCheckbox checkbox">
-									<input type="checkbox" ng-model="newLicense.pendo" ng-disabled="!user_is_superuser" required>
+									<input type="checkbox" ng-model="newLicense.pendo" ng-disabled="!user_is_superuser">
 									<translate>User analytics: This data is used to enhance future releases of the Tower Software and help streamline customer experience and success.</translate>
 							</div>
 							<div class="License-analyticsCheckbox checkbox">
-									<input type="checkbox" ng-model="newLicense.insights" ng-disabled="!user_is_superuser" required>
+									<input type="checkbox" ng-model="newLicense.insights" ng-disabled="!user_is_superuser">
 									<translate>Automation analytics: This data is used to enhance future releases of the Tower Software and to provide Automation Insights to Tower subscribers.</translate>
 							</div>
 						</div>
 					</div>
-					<div>
-						<button ng-click="submit()" class="btn btn-success pull-right" ng-disabled="(!newLicense.file && (!rhCreds.username || !rhCreds.password)) || (newLicense.file && newLicense.file.license_key == null) || newLicense.eula == null || !user_is_superuser" translate>Submit</button>
-						<span ng-show="success == true" class="License-greenText License-submit--success pull-right" translate>Save successful!</span>
-						<span ng-show="licenseError == true" class="License-redText License-submit--failure pull-right" translate>Invalid License - Save unsuccessful</span>
+					<div style="display: flex;flex-direction: row;align-content:flex-end;">
+						<div style="flex: 1">
+							<span ng-show="success == true" class="License-greenText License-submit--success pull-right" translate>Save successful!</span>
+							<span ng-show="licenseError" class="License-redText License-submit--failure pull-right" translate>Save unsuccessful - {{licenseError}}</span>
+						</div>
+						<div>
+							<button ng-click="submit()" class="btn btn-success pull-right" ng-disabled="(!newLicense.file && (!rhCreds.username || !rhCreds.password)) || (newLicense.file && newLicense.file.license_key == null) || newLicense.eula == null || !user_is_superuser" translate>Submit</button>
+						</div>
 					</div>
 				</form>
 			</div>

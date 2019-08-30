@@ -33,7 +33,10 @@ export default
 
         const reset = function() {
             document.getElementById('License-form').reset();
-            $scope.rhCreds = {};
+            $scope.newLicense.eula = undefined;
+            if (!$scope.licenseError) {
+                $scope.rhCreds = {};
+            }
         };
 
         const initVars = (config) => {
@@ -176,10 +179,10 @@ export default
                                 }, 4000);
                             }
                         });
-                }).catch(() => {
+                }).catch((data) => {
                     Wait('stop');
                     reset();
-                    $scope.licenseError = true;
+                    $scope.licenseError = data.error;
                 });
         };
 }];
