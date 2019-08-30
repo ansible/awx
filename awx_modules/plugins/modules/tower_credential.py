@@ -190,7 +190,7 @@ EXAMPLES = '''
 import os
 
 from ansible.module_utils._text import to_text
-from ansible.module_utils.ansible_tower import TowerModule, tower_auth_config, tower_check_mode
+from ..module_utils.ansible_tower import TowerModule, tower_auth_config, tower_check_mode
 
 try:
     import tower_cli

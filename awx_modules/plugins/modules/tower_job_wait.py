@@ -82,7 +82,7 @@ status:
 '''
 
 
-from ansible.module_utils.ansible_tower import TowerModule, tower_auth_config, tower_check_mode
+from ..module_utils.ansible_tower import TowerModule, tower_auth_config, tower_check_mode
 from ansible.module_utils.six.moves import cStringIO as StringIO
 
 
@@ -125,7 +125,7 @@ def main():
         job_id = params.get('job_id')
         try:
             result = job.monitor(job_id, **params)
-        except exc.Timeout as excinfo:
+        except exc.Timeout:
             result = job.status(job_id)
             result['id'] = job_id
             json_output['msg'] = 'Timeout waiting for job to finish.'

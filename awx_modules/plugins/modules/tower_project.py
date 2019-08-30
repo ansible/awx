@@ -110,7 +110,7 @@ EXAMPLES = '''
     tower_config_file: "~/tower_cli.cfg"
 '''
 
-from ansible.module_utils.ansible_tower import TowerModule, tower_auth_config, tower_check_mode
+from ..module_utils.ansible_tower import TowerModule, tower_auth_config, tower_check_mode
 
 try:
     import tower_cli
@@ -171,7 +171,7 @@ def main():
                 try:
                     org_res = tower_cli.get_resource('organization')
                     org = org_res.get(name=organization)
-                except (exc.NotFound) as excinfo:
+                except exc.NotFound:
                     module.fail_json(msg='Failed to update project, organization not found: {0}'.format(organization), changed=False)
 
                 if scm_credential:
@@ -179,11 +179,11 @@ def main():
                         cred_res = tower_cli.get_resource('credential')
                         try:
                             cred = cred_res.get(name=scm_credential)
-                        except (tower_cli.exceptions.MultipleResults) as multi_res_excinfo:
+                        except tower_cli.exceptions.MultipleResults:
                             module.warn('Multiple credentials found for {0}, falling back looking in project organization'.format(scm_credential))
                             cred = cred_res.get(name=scm_credential, organization=org['id'])
                         scm_credential = cred['id']
-                    except (exc.NotFound) as excinfo:
+                    except exc.NotFound:
                         module.fail_json(msg='Failed to update project, credential not found: {0}'.format(scm_credential), changed=False)
 
                 if (scm_update_cache_timeout is not None) and (scm_update_on_launch is not True):

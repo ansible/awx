@@ -76,7 +76,7 @@ import os
 import sys
 
 from ansible.module_utils.six.moves import StringIO
-from ansible.module_utils.ansible_tower import TowerModule, tower_auth_config, HAS_TOWER_CLI
+from ..module_utils.ansible_tower import TowerModule, tower_auth_config, HAS_TOWER_CLI
 
 from tempfile import mkstemp
 
@@ -138,7 +138,7 @@ def main():
             sys.stdout = captured_stdout = StringIO()
             try:
                 sender.send(files, prevent, password_management)
-            except TypeError as e:
+            except TypeError:
                 # Newer versions of TowerCLI require 4 parameters
                 sender.send(files, prevent, [], password_management)
 

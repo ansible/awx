@@ -93,8 +93,7 @@ EXAMPLES = '''
 RETURN = ''' # '''
 
 
-from ansible.module_utils.basic import AnsibleModule
-from ansible.module_utils.ansible_tower import (
+from ..module_utils.ansible_tower import (
     TowerModule,
     tower_auth_config,
     tower_check_mode

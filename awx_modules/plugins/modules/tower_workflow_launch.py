@@ -75,7 +75,7 @@ EXAMPLES = '''
   register: workflow_task_info
 '''
 
-from ansible.module_utils.ansible_tower import TowerModule, tower_auth_config
+from ..module_utils.ansible_tower import TowerModule, tower_auth_config
 
 try:
     import tower_cli

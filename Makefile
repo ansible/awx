@@ -18,6 +18,7 @@ COMPOSE_TAG ?= $(GIT_BRANCH)
 COMPOSE_HOST ?= $(shell hostname)
 
 VENV_BASE ?= /venv
+MODULES_VENV ?= /awx_devel/awx_modules_test_venv
 SCL_PREFIX ?=
 CELERY_SCHEDULE_FILE ?= /var/lib/awx/beat.db
 
@@ -373,7 +374,30 @@ test:
 	fi; \
 	PYTHONDONTWRITEBYTECODE=1 py.test -p no:cacheprovider -n auto $(TEST_DIRS)
 	cd awxkit && $(VENV_BASE)/awx/bin/tox -re py2,py3
+	make test_modules_all
 	awx-manage check_migrations --dry-run --check  -n 'vNNN_missing_migration_file'
+
+prepare_modules_venv:
+	cd /awx_devel
+	rm -rf $(MODULES_VENV)
+	mkdir $(MODULES_VENV)
+	ln -s /usr/lib/python2.7/site-packages/ansible $(MODULES_VENV)/ansible
+	$(VENV_BASE)/awx/bin/pip install --target=$(MODULES_VENV) git+https://github.com/ansible/tower-cli.git
+
+MODULES_TEST_DIRS ?= awx_modules/test/awx
+
+test_modules:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/awx/bin/activate; \
+	fi; \
+	PYTHONPATH=$(MODULES_VENV):/awx_devel/awx_modules:$PYTHONPATH py.test $(MODULES_TEST_DIRS)
+
+flake8_modules:
+	flake8 awx_modules/  # Different settings, in main exclude list
+
+prepare_test_modules: prepare_modules_venv test_modules  # deprecated
+
+test_modules_all: prepare_modules_venv test_modules flake8_modules
 
 test_unit:
 	@if [ "$(VENV_BASE)" ]; then \
