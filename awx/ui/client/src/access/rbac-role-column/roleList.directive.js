@@ -26,13 +26,10 @@ export default
                                 //
                                 // If the user has indirect admin access, they are system admin, org admin,
                                 // or a <resource_type>_admin. Return the role name directly.
-                                if (i.descendant_roles.includes('admin_role')) {
+                                // Similarly, if they are an auditor, return that instead of a read role.
+                                if (i.descendant_roles.includes('admin_role') || i.role.name.includes('Auditor')) {
                                     i.role.explicit = false;
-                                    return i.role;
-                                }
-                                // Return other specific roles that grant read access
-                                if (i.role.name.includes('Auditor')) {
-                                    i.role.explicit = false;
+                                    i.role.parent_role_name = i.role.name;
                                     return i.role;
                                 }
                                 // Handle more complex cases
@@ -45,6 +42,7 @@ export default
                                 let indirect_roles = [];
                                 i.descendant_roles.forEach((descendant_role) => {
                                     let r = _.cloneDeep(i.role);
+                                    r.parent_role_name = r.name;
                                     r.name = descendant_role.replace('_role','');
                                     r.explicit = false;
                                     // Do not include the read role unless it is the only descendant role.
