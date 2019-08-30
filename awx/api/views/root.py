@@ -171,6 +171,45 @@ class ApiV2PingView(APIView):
         return Response(response)
 
 
+class ApiV2SubscriptionView(APIView):
+
+    permission_classes = (IsAuthenticated,)
+    name = _('Configuration')
+    swagger_topic = 'System Configuration'
+
+    def check_permissions(self, request):
+        super(ApiV2SubscriptionView, self).check_permissions(request)
+        if not request.user.is_superuser and request.method.lower() not in {'options', 'head'}:
+            self.permission_denied(request)  # Raises PermissionDenied exception.
+
+    def post(self, request):
+        from awx.main.utils.common import get_licenser
+        data = request.data.copy()
+        if data.get('rh_password') == '$encrypted$':
+            data['rh_password'] = settings.REDHAT_PASSWORD
+        try:
+            user, pw = data.get('rh_username'), data.get('rh_password')
+            validated = get_licenser().validate_rh(user, pw)
+            if user:
+                settings.REDHAT_USERNAME = data['rh_username']
+            if pw:
+                settings.REDHAT_PASSWORD = data['rh_password']
+        except Exception as exc:
+            msg = _("Invalid License")
+            if (
+                isinstance(exc, requests.exceptions.HTTPError) and
+                getattr(getattr(exc, 'response', None), 'status_code', None) == 401
+            ):
+                msg = _("The provided credentials are invalid (HTTP 401).")
+            if isinstance(exc, ValueError) and exc.args:
+                msg = exc.args[0]
+            logger.exception(smart_text(u"Invalid license submitted."),
+                             extra=dict(actor=request.user.username))
+            return Response({"error": msg}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(validated)
+
+
 class ApiV2ConfigView(APIView):
 
     permission_classes = (IsAuthenticated,)
@@ -250,39 +289,14 @@ class ApiV2ConfigView(APIView):
             logger.info(smart_text(u"Invalid JSON submitted for license."),
                         extra=dict(actor=request.user.username))
             return Response({"error": _("Invalid JSON")}, status=status.HTTP_400_BAD_REQUEST)
-
         try:
             from awx.main.utils.common import get_licenser
             license_data = json.loads(data_actual)
-            if license_data.get('rh_password') == '$encrypted$':
-                license_data['rh_password'] = settings.REDHAT_PASSWORD
             license_data_validated = get_licenser(**license_data).validate()
-            if license_data_validated.get('valid_key') and 'license_key' not in license_data:
-                if license_data.get('rh_username') and license_data.get('rh_password'):
-                    settings.REDHAT_USERNAME = license_data['rh_username']
-                    settings.REDHAT_PASSWORD = license_data['rh_password']
-                license_data = {
-                    "eula_accepted": eula_accepted,
-                    "features": license_data_validated['features'],
-                    "license_type": license_data_validated['license_type'],
-                    "license_date": license_data_validated['license_date'],
-                    "license_key": license_data_validated['license_key'],
-                    "instance_count": license_data_validated['instance_count'],
-                }
-                if license_data_validated.get('trial'):
-                    license_data['trial'] = True
-        except Exception as exc:
-            msg = _("Invalid License")
-            if (
-                isinstance(exc, requests.exceptions.HTTPError) and
-                getattr(getattr(exc, 'response', None), 'status_code', None) == 401
-            ):
-                msg = _("The provided credentials are invalid (HTTP 401).")
-            if isinstance(exc, ValueError) and exc.args:
-                msg = exc.args[0]
-            logger.exception(smart_text(u"Invalid license submitted."),
-                             extra=dict(actor=request.user.username))
-            return Response({"error": msg}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception:
+            logger.warning(smart_text(u"Invalid license submitted."),
+                           extra=dict(actor=request.user.username))
+            return Response({"error": _("Invalid License")}, status=status.HTTP_400_BAD_REQUEST)
 
         # If the license is valid, write it to the database.
         if license_data_validated['valid_key']:
