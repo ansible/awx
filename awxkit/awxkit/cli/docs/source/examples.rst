@@ -32,17 +32,15 @@ the output of) a playbook from that repository:
 
 .. code:: bash
 
-    export TOWER_COLOR=f
-    INVENTORY_ID=$(awx inventory list --name 'Demo Inventory' -f jq --filter '.results[0].id')
-    PROJECT_ID=$(awx projects create --wait \
+    awx projects create --wait \
         --organization 1 --name='Example Project' \
         --scm_type git --scm_url 'https://github.com/ansible/ansible-tower-samples' \
-        -f jq --filter '.id')
-    TEMPLATE_ID=$(awx job_templates create \
-        --name='Example Job Template' --project $PROJECT_ID \
-        --playbook hello_world.yml --inventory $INVENTORY_ID \
-        -f jq --filter '.id')
-    awx job_templates launch $TEMPLATE_ID --monitor
+        -f human
+    awx job_templates create \
+        --name='Example Job Template' --project 'Example Project' \
+        --playbook hello_world.yml --inventory 'Demo Inventory' \
+        -f human
+    awx job_templates launch 'Example Job Template' --monitor -f human
 
 Updating a Job Template with Extra Vars
 ---------------------------------------
@@ -51,3 +49,13 @@ Updating a Job Template with Extra Vars
 
     awx job_templates modify 1 --extra_vars "@vars.yml"
     awx job_templates modify 1 --extra_vars "@vars.json"
+
+Importing an SSH Key
+--------------------
+
+.. code:: bash
+
+    awx credentials create --credential_type 'Machine' \
+        --name 'My SSH Key' --user 'alice' \
+        --inputs "{'username': 'server-login', 'ssh_key_data': '@~/.ssh/id_rsa`}"
+

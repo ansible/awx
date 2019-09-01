@@ -201,7 +201,7 @@ class Page(object):
                 text = response.text
                 if len(text) > 1024:
                     text = text[:1024] + '... <<< Truncated >>> ...'
-                log.warning(
+                log.debug(
                     "Unable to parse JSON response ({0.status_code}): {1} - '{2}'".format(response, e, text))
 
         exc_str = "%s (%s) received" % (

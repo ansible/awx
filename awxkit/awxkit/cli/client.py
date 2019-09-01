@@ -199,7 +199,7 @@ class CLI(object):
         subparsers.required = True
 
         # parse the action from OPTIONS
-        parser = ResourceOptionsParser(page, self.resource, subparsers)
+        parser = ResourceOptionsParser(self.v2, page, self.resource, subparsers)
         if from_sphinx:
             # Our Sphinx plugin runs `parse_action` for *every* available
             # resource + action in the API so that it can generate usage

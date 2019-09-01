@@ -42,7 +42,7 @@ class TestOptions(unittest.TestCase):
                 'POST': {},
             }
         })
-        ResourceOptionsParser(page, 'users', self.parser)
+        ResourceOptionsParser(None, page, 'users', self.parser)
         assert 'list' in self.parser.choices
 
     def test_list_filtering(self):
@@ -54,7 +54,7 @@ class TestOptions(unittest.TestCase):
                 },
             }
         })
-        options = ResourceOptionsParser(page, 'users', self.parser)
+        options = ResourceOptionsParser(None, page, 'users', self.parser)
         options.build_query_arguments('list', 'POST')
         assert 'list' in self.parser.choices
 
@@ -71,7 +71,7 @@ class TestOptions(unittest.TestCase):
                 },
             }
         })
-        options = ResourceOptionsParser(page, 'users', self.parser)
+        options = ResourceOptionsParser(None, page, 'users', self.parser)
         options.build_query_arguments('list', 'POST')
         assert 'list' in self.parser.choices
 
@@ -90,7 +90,7 @@ class TestOptions(unittest.TestCase):
                 },
             }
         })
-        options = ResourceOptionsParser(page, 'users', self.parser)
+        options = ResourceOptionsParser(None, page, 'users', self.parser)
         options.build_query_arguments('create', 'POST')
         assert 'create' in self.parser.choices
 
@@ -110,7 +110,7 @@ class TestOptions(unittest.TestCase):
                 },
             }
         })
-        options = ResourceOptionsParser(page, 'users', self.parser)
+        options = ResourceOptionsParser(None, page, 'users', self.parser)
         options.build_query_arguments('create', 'POST')
         assert 'create' in self.parser.choices
 
@@ -126,7 +126,7 @@ class TestOptions(unittest.TestCase):
                 },
             }
         })
-        options = ResourceOptionsParser(page, 'job_templates', self.parser)
+        options = ResourceOptionsParser(None, page, 'job_templates', self.parser)
         options.build_query_arguments('create', 'POST')
         assert 'create' in self.parser.choices
 
@@ -142,7 +142,7 @@ class TestOptions(unittest.TestCase):
                 },
             }
         })
-        options = ResourceOptionsParser(page, 'users', self.parser)
+        options = ResourceOptionsParser(None, page, 'users', self.parser)
         options.build_query_arguments('create', 'POST')
         assert 'create' in self.parser.choices
 
@@ -168,7 +168,7 @@ class TestOptions(unittest.TestCase):
                 },
             }
         })
-        options = ResourceOptionsParser(page, 'users', self.parser)
+        options = ResourceOptionsParser(None, page, 'users', self.parser)
         options.build_query_arguments('create', 'POST')
         assert 'create' in self.parser.choices
 
@@ -181,12 +181,13 @@ class TestOptions(unittest.TestCase):
             page = OptionsPage.from_json({
                 'actions': {'GET': {}, 'POST': {}}
             })
-            ResourceOptionsParser(page, 'users', self.parser)
+            ResourceOptionsParser(None, page, 'users', self.parser)
             assert method in self.parser.choices
 
             out = StringIO()
             self.parser.choices[method].print_help(out)
             assert 'positional arguments:\n  id' in out.getvalue()
+
 
 class TestSettingsOptions(unittest.TestCase):
 
@@ -203,7 +204,7 @@ class TestSettingsOptions(unittest.TestCase):
             }
         })
         page.endpoint = '/settings/all/'
-        ResourceOptionsParser(page, 'settings', self.parser)
+        ResourceOptionsParser(None, page, 'settings', self.parser)
         assert 'list' in self.parser.choices
         assert 'modify' in self.parser.choices
 
