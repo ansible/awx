@@ -1,4 +1,6 @@
 import subprocess
+import yaml
+import base64
 
 from unittest import mock # noqa
 import pytest
@@ -49,5 +51,6 @@ def test_kubectl_ssl_verification(containerized_job):
     cred.inputs['ssl_ca_cert'] = cert.stdout
     cred.save()
     pm = PodManager(containerized_job)
-    tempfile = pm.kube_api.api_client.configuration.ssl_ca_cert
-    assert cert.stdout == open(tempfile).read().encode()
+    config = yaml.load(open(pm.kube_config), Loader=yaml.FullLoader)
+    ca_data = config['clusters'][0]['cluster']['certificate-authority-data']
+    assert cert.stdout == base64.b64decode(ca_data.encode())

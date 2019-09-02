@@ -31,7 +31,7 @@ def set_pythonpath(venv_libdir, env):
 
 class IsolatedManager(object):
 
-    def __init__(self, cancelled_callback=None, check_callback=None):
+    def __init__(self, cancelled_callback=None, check_callback=None, pod_manager=None):
         """
         :param cancelled_callback:  a callable - which returns `True` or `False`
                                     - signifying if the job has been prematurely
@@ -43,12 +43,16 @@ class IsolatedManager(object):
         self.started_at = None
         self.captured_command_artifact = False
         self.instance = None
+        self.pod_manager = pod_manager
 
     def build_inventory(self, hosts):
         if self.instance and self.instance.is_containerized:
             inventory = {'all': {'hosts': {}}}
             for host in hosts:
-                inventory['all']['hosts'][host] = self.kubectl_or_oc_vars()
+                inventory['all']['hosts'][host] = {
+                    "ansible_connection": "kubectl",
+                    "ansible_kubectl_config": self.pod_manager.kube_config
+                }
         else:
             inventory = '\n'.join([
                 '{} ansible_ssh_user={}'.format(host, settings.AWX_ISOLATED_USERNAME)
@@ -56,36 +60,6 @@ class IsolatedManager(object):
             ])
 
         return inventory
-
-    def kubectl_or_oc_vars(self):
-        extravars = {}
-
-        credential = self.instance.instance_group.credential
-
-        extravars['ansible_connection'] = 'kubectl'
-        extravars['ansible_kubectl_host'] = credential.get_input('host')
-        extravars['ansible_kubectl_namespace'] = 'awx'
-
-        if credential.kind == 'kubernetes_bearer_token':
-            extravars['ansible_kubectl_token'] = credential.get_input('bearer_token')
-
-        if credential.get_input('verify_ssl'):
-            ca_cert_data = credential.get_input('ssl_ca_cert')
-            fd, path = tempfile.mkstemp(dir=self.private_data_dir)
-            with open(path, 'wb') as temp:
-                temp.write(ca_cert_data.encode())
-                temp.flush()
-                # There seems to be a bug in the kubectl connection plugin
-                # where it just doesnt respect the ansible_kubectl_ca_cert var.
-                # This is a workaround.
-                extravars['ansible_kubectl_ca_cert'] = temp.name
-                extravars['ansible_kubectl_extra_args'] = f"--certificate-authority={temp.name}"
-        else:
-            extravars['ansible_kubectl_extra_args'] = '--insecure-skip-tls-verify'
-            extravars['ansible_kubectl_verify_ssl'] = False
-
-        return extravars
-
 
     def build_runner_params(self, hosts, verbosity=1):
         env = dict(os.environ.items())

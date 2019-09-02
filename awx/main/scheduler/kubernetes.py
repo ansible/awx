@@ -1,15 +1,13 @@
 import time
+import yaml
+import tempfile
+from base64 import b64encode
 
 from django.conf import settings
-from kubernetes.client import Configuration as kubeconfig
-from kubernetes.client import CoreV1Api as v1_kube_api
-from kubernetes.client import ApiClient as kube_api_client
+from kubernetes import client, config
 from django.utils.functional import cached_property
 
 from awx.main.utils.common import parse_yaml_or_json
-from awx.main.utils import (
-    create_temporary_fifo,
-)
 
 
 class PodManager(object):

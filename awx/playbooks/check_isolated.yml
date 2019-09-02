@@ -40,10 +40,7 @@
         rsync_opts:
           - "--rsh=$RSH"
       environment:
-        RSH: >-
-          oc rsh --token={{ ansible_kubectl_token }}
-          --server={{ ansible_kubectl_host }}
-          --insecure-skip-tls-verify=true -n awx
+        RSH: "oc rsh --config={{ ansible_kubectl_config }}"
       delegate_to: localhost
       when: ansible_kubectl_config is defined
 
@@ -56,12 +53,9 @@
         rsync_opts:
           - "--rsh=$RSH"
       environment:
-        RSH: >-
-          oc rsh --token={{ ansible_kubectl_token }}
-          --server={{ ansible_kubectl_host }}
-          --insecure-skip-tls-verify=true -n awx
+        RSH: "oc rsh --config={{ ansible_kubectl_config }}"
       delegate_to: localhost
-      when: ansible_kubectl_host is defined
+      when: ansible_kubectl_config is defined
 
     - name: Fail if previous check determined that process is not alive.
       fail:
