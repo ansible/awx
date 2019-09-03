@@ -71,7 +71,9 @@ function InstanceGroupsStrings(BaseString) {
         LOOK_UP_TITLE: t.s('Add Credential'),
         CREDENTIAL_PLACEHOLDER: t.s('SELECT A CREDENTIAL'),
         POD_SPEC_LABEL: t.s('Pod Spec Override'),
-        BADGE_TEXT: t.s('Container Group')
+        BADGE_TEXT: t.s('Container Group'),
+        POD_SPEC_TOGGLE: t.s('Customize Pod Spec')
+
     };
 }
 

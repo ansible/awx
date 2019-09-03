@@ -27,7 +27,7 @@ import service from './instance-groups.service';
 
 import InstanceGroupsStrings from './instance-groups.strings';
 
-import instanceGroupJobsRoute from '~features/jobs/routes/instanceGroupJobs.route.js';
+import {instanceGroupJobsRoute, containerGroupJobsRoute} from '~features/jobs/routes/instanceGroupJobs.route.js';
 import instanceJobsRoute from '~features/jobs/routes/instanceJobs.route.js';
 
 
@@ -247,12 +247,9 @@ function InstanceGroupsRun($stateExtender, strings) {
         }
     });
 
-
-
-
     $stateExtender.addState({
         name: 'instanceGroups.editContainerGroup',
-        url: '/container_group/edit/:instance_group_id',
+        url: '/container_group/:instance_group_id',
         views: {
             'editContainerGroup@instanceGroups': {
                 templateUrl: AddContainerGroup,
@@ -326,8 +323,91 @@ function InstanceGroupsRun($stateExtender, strings) {
         }
     });
 
+    $stateExtender.addState({
+        name: 'instanceGroups.containerGroupInstances',
+        url: '/container_group/:instance_group_id/instances',
+        searchPrefix: 'instance',
+        ncyBreadcrumb: {
+            parent: 'instanceGroups.editContainerGroup',
+            label: strings.get('state.INSTANCES_BREADCRUMB_LABEL')
+        },
+        params: {
+            instance_search: {
+                value: {
+                    order_by: 'hostname',
+                    page_size: '10'
+                },
+                dynamic: true
+            }
+        },
+        views: {
+            'containerGroupInstances@instanceGroups': {
+                templateUrl: InstancesTemplate,
+                controller: 'InstanceListController',
+                controllerAs: 'vm'
+            }
+        },
+        resolve: {
+            resolvedModels: InstanceGroupsResolve,
+            Dataset: ['GetBasePath', 'QuerySet', '$stateParams',
+                function (GetBasePath, qs, $stateParams) {
+                    let instancesPath = `${GetBasePath('instance_groups')}${$stateParams.instance_group_id}/instances`;
+                    return qs.search(instancesPath, $stateParams[`instance_search`]);
+                }
+            ],
+        }
+    });
 
+    $stateExtender.addState({
+        name: 'instanceGroups.containerGroupInstances.modal',
+        abstract: true,
+        ncyBreadcrumb: {
+            skip: true,
+        },
+        views: {
+            "modal": {
+                template: `<div class="Modal-backdrop"></div>
+                <div class="Modal-holder" ui-view="modal" autoscroll="false"></div>`,
+            }
+        }
+    });
 
+    $stateExtender.addState({
+        name: 'instanceGroups.containerGroupInstances.modal.add',
+        url: '/add',
+        ncyBreadcrumb: {
+            skip: true,
+        },
+        searchPrefix: 'add_instance',
+        params: {
+            add_instance_search: {
+                value: {
+                    page_size: '10',
+                    order_by: 'hostname'
+                },
+                dynamic: true
+            }
+        },
+        views: {
+            "modal": {
+                templateUrl: InstanceModalTemplate,
+                controller: InstanceModalController,
+                controllerAs: 'vm'
+            }
+        },
+        resolve: {
+            resolvedModels: InstanceGroupsResolve,
+            Dataset: ['GetBasePath', 'QuerySet', '$stateParams',
+                function (GetBasePath, qs, $stateParams) {
+                    let path = `${GetBasePath('instances')}`;
+                    return qs.search(path, $stateParams[`add_instance_search`]);
+                }
+            ],
+            routeData: [function () {
+                return "instanceGroups.containerGroupInstances";
+            }]
+        }
+    });
 
 
     $stateExtender.addState({
@@ -397,7 +477,7 @@ function InstanceGroupsRun($stateExtender, strings) {
                     let path = `${GetBasePath('instance_groups')}${$stateParams.instance_group_id}/instances`;
                     return qs.search(path, $stateParams[`instance_search`]);
                 }
-            ]
+            ],
         }
     });
 
@@ -445,12 +525,16 @@ function InstanceGroupsRun($stateExtender, strings) {
                     let path = `${GetBasePath('instances')}`;
                     return qs.search(path, $stateParams[`add_instance_search`]);
                 }
-            ]
+            ],
+            routeData: [function () {
+                return "instanceGroups.instances";
+            }]
         }
     });
 
     $stateExtender.addState(instanceJobsRoute);
     $stateExtender.addState(instanceGroupJobsRoute);
+    $stateExtender.addState(containerGroupJobsRoute);
 }
 
 InstanceGroupsRun.$inject = [

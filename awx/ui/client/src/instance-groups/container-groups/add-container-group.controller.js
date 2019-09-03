@@ -27,8 +27,15 @@ function AddContainerGroupController(ToJSON, $scope, $state, models, strings, i1
   vm.form.extraVars = {
     label: strings.get('container.POD_SPEC_LABEL'),
     value: DataSet.data.actions.POST.pod_spec_override.default,
-    name: 'extraVars'
+    name: 'extraVars',
+    toggleLabel: strings.get('container.POD_SPEC_TOGGLE'),
   };
+
+  vm.tab = {
+    details: { _active: true },
+    instances: {_disabled: true },
+    jobs: {_disabled: true }
+};
 
   $scope.variables = vm.form.extraVars.value;
   $scope.name = vm.form.extraVars.name;
@@ -41,10 +48,22 @@ function AddContainerGroupController(ToJSON, $scope, $state, models, strings, i1
       }
   });
   vm.form.save = (data) => {
-    data.pod_spec_override = vm.form.extraVars.value;
+    data.pod_spec_override = null;
+    if (vm.form.extraVars.isOpen) {
+      data.pod_spec_override = vm.form.extraVars.value;
+    }
     return instanceGroup.request('post', { data: data }).then((res) => {
       $state.go('instanceGroups.editContainerGroup', { instance_group_id: res.data.id }, { reload: true });
     });
+  };
+  vm.form.extraVars.isOpen = false;
+  vm.toggle = () => {
+    if (vm.form.extraVars.isOpen === true) {
+      vm.form.extraVars.isOpen = false;
+    } else {
+      vm.form.extraVars.isOpen = true;
+    }
+    return vm.form.extraVars.isOpen;
   };
 }
 
