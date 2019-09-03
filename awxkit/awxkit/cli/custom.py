@@ -2,6 +2,7 @@ from six import with_metaclass
 
 from .stdout import monitor, monitor_workflow
 from .utils import CustomRegistryMeta, color_enabled
+from awxkit.exceptions import NoContent
 
 
 def handle_custom_actions(resource, action, page):
@@ -180,6 +181,111 @@ class InventoryUpdateStdout(HasStdout, CustomAction):
 
 class AdhocCommandStdout(HasStdout, CustomAction):
     resource = 'ad_hoc_commands'
+
+
+class AssociationMixin(object):
+
+    action = 'associate'
+
+    def add_arguments(self, parser):
+        parser.choices[self.action].add_argument('id', type=int, help='')
+        group = parser.choices[self.action].add_mutually_exclusive_group(required=True)
+        for param, endpoint in self.targets.items():
+            field, model_name = endpoint
+            if not model_name:
+                model_name = param
+            help_text = 'The ID of the {} to {}'.format(model_name, self.action)
+            group.add_argument('--{}'.format(param), metavar='', type=int, help=help_text)
+
+    def perform(self, **kwargs):
+        for k, v in kwargs.items():
+            endpoint, _ = self.targets[k]
+            try:
+                self.page.get().related[endpoint].post(
+                    {'id': v, self.action: True}
+                )
+            except NoContent:
+                # we expect to enter this block because these endpoints return
+                # HTTP 204 on success
+                pass
+            return self.page.get().related[endpoint].get()
+
+
+class NotificationAssociateMixin(AssociationMixin):
+    targets = {
+        'start_notification': [
+            'notification_templates_started',
+            'notification_template'
+        ],
+        'success_notification': [
+            'notification_templates_success',
+            'notification_template'
+        ],
+        'failure_notification': [
+            'notification_templates_error',
+            'notification_template'
+        ],
+    }
+
+
+class JobTemplateNotificationAssociation(NotificationAssociateMixin, CustomAction):
+    resource = 'job_templates'
+    action = 'associate'
+    targets = NotificationAssociateMixin.targets.copy()
+
+
+class JobTemplateNotificationDisAssociation(NotificationAssociateMixin, CustomAction):
+    resource = 'job_templates'
+    action = 'disassociate'
+    targets = NotificationAssociateMixin.targets.copy()
+
+
+JobTemplateNotificationAssociation.targets.update({
+    'credential': ['credentials', None],
+})
+JobTemplateNotificationDisAssociation.targets.update({
+    'credential': ['credentials', None],
+})
+
+
+class WorkflowJobTemplateNotificationAssociation(NotificationAssociateMixin, CustomAction):
+    resource = 'workflow_job_templates'
+    action = 'associate'
+
+
+class WorkflowJobTemplateNotificationDisAssociation(NotificationAssociateMixin, CustomAction):
+    resource = 'workflow_job_templates'
+    action = 'disassociate'
+
+
+class ProjectNotificationAssociation(NotificationAssociateMixin, CustomAction):
+    resource = 'projects'
+    action = 'associate'
+
+
+class ProjectNotificationDisAssociation(NotificationAssociateMixin, CustomAction):
+    resource = 'projects'
+    action = 'disassociate'
+
+
+class InventorySourceNotificationAssociation(NotificationAssociateMixin, CustomAction):
+    resource = 'inventory_sources'
+    action = 'associate'
+
+
+class InventorySourceNotificationDisAssociation(NotificationAssociateMixin, CustomAction):
+    resource = 'inventory_sources'
+    action = 'disassociate'
+
+
+class OrganizationNotificationAssociation(NotificationAssociateMixin, CustomAction):
+    resource = 'organizations'
+    action = 'associate'
+
+
+class OrganizationNotificationDisAssociation(NotificationAssociateMixin, CustomAction):
+    resource = 'organizations'
+    action = 'disassociate'
 
 
 class SettingsList(CustomAction):
