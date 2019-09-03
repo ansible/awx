@@ -157,23 +157,6 @@ class JobTemplateForm extends Component {
         newLabel => newLabel.name !== label
       );
       this.setState({ newLabels: filteredLabels });
-    } else if (typeof label === 'string') {
-      setFieldValue('newLabels', [
-        ...newLabels,
-        {
-          name: label,
-          organization: template.summary_fields.inventory.organization_id,
-        },
-      ]);
-      this.setState({
-        newLabels: [
-          ...newLabels,
-          {
-            name: label,
-            organization: template.summary_fields.inventory.organization_id,
-          },
-        ],
-      });
     } else {
       setFieldValue('newLabels', [
         ...newLabels,
@@ -182,7 +165,12 @@ class JobTemplateForm extends Component {
       this.setState({
         newLabels: [
           ...newLabels,
-          { name: label.name, associate: true, id: label.id },
+          {
+            name: label.name,
+            associate: true,
+            id: label.id,
+            organization: template.summary_fields.inventory.organization_id,
+          },
         ],
       });
     }
@@ -311,6 +299,12 @@ class JobTemplateForm extends Component {
       { value: '3', key: '3', label: i18n._(t`3 (Debug)`) },
       { value: '4', key: '4', label: i18n._(t`4 (Connection Debug)`) },
     ];
+    let callbackUrl;
+    if (template && template.related) {
+      const { origin } = document.location;
+      const path = template.related.callback || `${template.url}callback`;
+      callbackUrl = `${origin}${path}`;
+    }
 
     if (hasContentLoading) {
       return (
@@ -477,6 +471,7 @@ class JobTemplateForm extends Component {
               id="template-forks"
               name="forks"
               type="number"
+              min="0"
               label={i18n._(t`Forks`)}
               tooltip={
                 <span>
@@ -568,6 +563,7 @@ class JobTemplateForm extends Component {
             />
           </FormRow>
           <InstanceGroupsLookup
+            css="margin-top: 20px"
             value={relatedInstanceGroups}
             onChange={this.handleInstanceGroupsChange}
             tooltip={i18n._(
@@ -579,6 +575,7 @@ class JobTemplateForm extends Component {
             render={({ field, form }) => (
               <FormGroup
                 label={i18n._(t`Job Tags`)}
+                css="margin-top: 20px"
                 fieldId="template-job-tags"
               >
                 <Tooltip
@@ -603,6 +600,7 @@ class JobTemplateForm extends Component {
             render={({ field, form }) => (
               <FormGroup
                 label={i18n._(t`Skip Tags`)}
+                css="margin-top: 20px"
                 fieldId="template-skip-tags"
               >
                 <Tooltip
@@ -622,7 +620,12 @@ class JobTemplateForm extends Component {
               </FormGroup>
             )}
           />
-          <GridFormGroup isInline label={i18n._(t`Options`)}>
+          <GridFormGroup
+            fieldId="template-option-checkboxes"
+            isInline
+            label={i18n._(t`Options`)}
+            css="margin-top: 20px"
+          >
             <CheckboxField
               id="option-privilege-escalation"
               name="become_enabled"
@@ -641,7 +644,7 @@ class JobTemplateForm extends Component {
                     position="right"
                     content={i18n._(
                       t`Enables creation of a provisioning callback URL. Using
-                          the URL a host can contact {{BRAND_NAME}} and request a
+                          the URL a host can contact BRAND_NAME and request a
                           configuration update using this job template.`
                     )}
                   >
@@ -677,19 +680,22 @@ class JobTemplateForm extends Component {
           <div
             css={`
               ${allowCallbacks ? '' : 'display: none'}
+              margin-top: 20px;
             `}
           >
             <FormRow>
-              <FormGroup
-                label={i18n._(t`Provisioning Callback URL`)}
-                fieldId="template-callback-url"
-              >
-                <TextInput
-                  id="template-callback-url"
-                  isDisabled
-                  value={`${document.location.origin}${template.related.callback}`}
-                />
-              </FormGroup>
+              {callbackUrl && (
+                <FormGroup
+                  label={i18n._(t`Provisioning Callback URL`)}
+                  fieldId="template-callback-url"
+                >
+                  <TextInput
+                    id="template-callback-url"
+                    isDisabled
+                    value={callbackUrl}
+                  />
+                </FormGroup>
+              )}
               <FormField
                 id="template-host-config-key"
                 name="host_config_key"

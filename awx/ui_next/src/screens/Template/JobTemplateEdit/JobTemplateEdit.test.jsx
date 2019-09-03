@@ -92,6 +92,32 @@ const mockRelatedProjectPlaybooks = [
   'vault.yml',
 ];
 
+const mockInstanceGroups = [
+  {
+    id: 1,
+    type: 'instance_group',
+    url: '/api/v2/instance_groups/1/',
+    related: {
+      jobs: '/api/v2/instance_groups/1/jobs/',
+      instances: '/api/v2/instance_groups/1/instances/',
+    },
+    name: 'tower',
+    capacity: 59,
+    committed_capacity: 0,
+    consumed_capacity: 0,
+    percent_capacity_remaining: 100.0,
+    jobs_running: 0,
+    jobs_total: 3,
+    instances: 1,
+    controller: null,
+    is_controller: false,
+    is_isolated: false,
+    policy_instance_percentage: 100,
+    policy_instance_minimum: 0,
+    policy_instance_list: [],
+  },
+];
+
 JobTemplatesAPI.readCredentials.mockResolvedValue({
   data: mockRelatedCredentials,
 });
@@ -101,12 +127,25 @@ ProjectsAPI.readPlaybooks.mockResolvedValue({
 LabelsAPI.read.mockResolvedValue({ data: { results: [] } });
 
 describe('<JobTemplateEdit />', () => {
-  test('initially renders successfully', async done => {
+  beforeEach(() => {
+    LabelsAPI.read.mockResolvedValue({ data: { results: [] } });
+    JobTemplatesAPI.readCredentials.mockResolvedValue({
+      data: mockRelatedCredentials,
+    });
+    JobTemplatesAPI.readInstanceGroups.mockReturnValue({
+      data: { results: mockInstanceGroups },
+    });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('initially renders successfully', async () => {
     const wrapper = mountWithContexts(
       <JobTemplateEdit template={mockJobTemplate} />
     );
     await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
-    done();
   });
 
   test('handleSubmit should call api update', async done => {

@@ -12,10 +12,11 @@ const getInstanceGroups = async params => InstanceGroupsAPI.read(params);
 
 class InstanceGroupsLookup extends React.Component {
   render() {
-    const { value, tooltip, onChange, i18n } = this.props;
+    const { value, tooltip, onChange, className, i18n } = this.props;
 
     return (
       <FormGroup
+        className={className}
         label={
           <Fragment>
             {i18n._(t`Instance Groups`)}{' '}

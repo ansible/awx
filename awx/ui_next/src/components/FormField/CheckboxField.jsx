@@ -16,6 +16,7 @@ function CheckboxField({ id, name, label, tooltip, validate, ...rest }) {
       validate={validate}
       render={({ field }) => (
         <Checkbox
+          aria-label={label}
           label={
             <span>
               {label}
