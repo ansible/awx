@@ -543,12 +543,16 @@ function getInstanceGroupDetails () {
         return null;
     }
 
-    const label = strings.get('labels.INSTANCE_GROUP');
     const value = $filter('sanitize')(instanceGroup.name);
-    const link = `/#/instance_groups/${instanceGroup.id}`;
+
+    let label = strings.get('labels.INSTANCE_GROUP');
+    let link = `/#/instance_groups/${instanceGroup.id}`;
+    if (instanceGroup.is_containerized) {
+        label = strings.get('labels.CONTAINER_GROUP');
+        link = `/#/instance_groups/container_group/edit/${instanceGroup.id}`;
+    }
 
     let isolated = null;
-
     if (instanceGroup.is_isolated) {
         isolated = strings.get('details.ISOLATED');
     }

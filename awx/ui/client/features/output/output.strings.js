@@ -60,6 +60,7 @@ function OutputStrings (BaseString) {
         FORKS: t.s('Forks'),
         HOST_LIMIT_ERROR: t.s('Host Limit Error'),
         INSTANCE_GROUP: t.s('Instance Group'),
+        CONTAINER_GROUP: t.s('Container Group'),
         INVENTORY: t.s('Inventory'),
         INVENTORY_SCM: t.s('Source Project'),
         JOB_EXPLANATION: t.s('Explanation'),
