@@ -11,6 +11,7 @@ import {
   Card,
   Switch,
   Checkbox,
+  TextInput,
 } from '@patternfly/react-core';
 import { QuestionCircleIcon as PFQuestionCircleIcon } from '@patternfly/react-icons';
 import ContentError from '@components/ContentError';
@@ -673,13 +674,30 @@ class JobTemplateForm extends Component {
               )}
             />
           </GridFormGroup>
-          <FormGroup
+          <div
             css={`
               ${allowCallbacks ? '' : 'display: none'}
             `}
           >
-            HERE
-          </FormGroup>
+            <FormRow>
+              <FormGroup
+                label={i18n._(t`Provisioning Callback URL`)}
+                fieldId="template-callback-url"
+              >
+                <TextInput
+                  id="template-callback-url"
+                  isDisabled
+                  value={`${document.location.origin}${template.related.callback}`}
+                />
+              </FormGroup>
+              <FormField
+                id="template-host-config-key"
+                name="host_config_key"
+                label={i18n._(t`Host Config Key`)}
+                validate={allowCallbacks ? required(null, i18n) : null}
+              />
+            </FormRow>
+          </div>
         </CollapsibleSection>
         <FormActionGroup onCancel={handleCancel} onSubmit={handleSubmit} />
       </Form>
