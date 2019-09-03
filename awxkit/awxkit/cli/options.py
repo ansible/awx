@@ -80,6 +80,8 @@ class ResourceOptionsParser(object):
                 continue
 
             def json_or_yaml(v):
+                if v.startswith('@'):
+                    v = open(v[1:]).read()
                 try:
                     return json.loads(v)
                 except Exception:
@@ -123,6 +125,15 @@ class ResourceOptionsParser(object):
 
                 if param['type'] == 'id' and not kwargs.get('help'):
                     kwargs['help'] = 'the ID of the associated  {}'.format(k)
+
+                if param['type'] == 'json' and method != 'list':
+                    help_parts = []
+                    if kwargs.get('help'):
+                        help_parts.append(kwargs['help'])
+                    else:
+                        help_parts.append('a JSON or YAML string.')
+                    help_parts.append('You can optionally specify a file path e.g., @path/to/file.yml')
+                    kwargs['help'] = ' '.join(help_parts)
 
             # SPECIAL CUSTOM LOGIC GOES HERE :'(
             # There are certain requirements that aren't captured well by our
