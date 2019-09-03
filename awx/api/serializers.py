@@ -4730,6 +4730,11 @@ class InstanceGroupSerializer(BaseSerializer):
                     'Isolated groups have a designated controller group.'),
         read_only=True
     )
+    is_containerized = serializers.BooleanField(
+        help_text=_('Indicates whether instances in this group are containerized.'
+                    'Containerized groups have a designated Openshift or Kubernetes cluster.'),
+        read_only=True
+    )
     # NOTE: help_text is duplicated from field definitions, no obvious way of
     # both defining field details here and also getting the field's help_text
     policy_instance_percentage = serializers.IntegerField(
@@ -4755,7 +4760,7 @@ class InstanceGroupSerializer(BaseSerializer):
         fields = ("id", "type", "url", "related", "name", "created", "modified",
                   "capacity", "committed_capacity", "consumed_capacity",
                   "percent_capacity_remaining", "jobs_running", "jobs_total",
-                  "instances", "controller", "is_controller", "is_isolated", "credential",
+                  "instances", "controller", "is_controller", "is_isolated", "is_containerized", "credential",
                   "policy_instance_percentage", "policy_instance_minimum", "policy_instance_list",
                   "pod_spec_override", "summary_fields")
 
