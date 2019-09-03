@@ -1,3 +1,5 @@
+import functools
+
 from six import with_metaclass
 
 from .stdout import monitor, monitor_workflow
@@ -45,8 +47,15 @@ class CustomAction(with_metaclass(CustomActionRegistryMeta)):
 class Launchable(object):
 
     def add_arguments(self, parser, with_pk=True):
+        from .options import pk_or_name
         if with_pk:
-            parser.choices[self.action].add_argument('id', type=int, help='')
+            parser.choices[self.action].add_argument(
+                'id',
+                type=functools.partial(
+                    pk_or_name, None, self.resource, page=self.page
+                ),
+                help=''
+            )
         parser.choices[self.action].add_argument(
             '--monitor', action='store_true',
             help='If set, prints stdout of the launched job until it finishes.'
@@ -155,7 +164,14 @@ class HasStdout(object):
     action = 'stdout'
 
     def add_arguments(self, parser):
-        parser.choices['stdout'].add_argument('id', type=int, help='')
+        from .options import pk_or_name
+        parser.choices['stdout'].add_argument(
+            'id',
+            type=functools.partial(
+                pk_or_name, None, self.resource, page=self.page
+            ),
+            help=''
+        )
 
     def perform(self):
         fmt = 'txt_download'

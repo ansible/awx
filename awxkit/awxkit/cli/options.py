@@ -1,23 +1,72 @@
 import argparse
+import functools
 import json
+import os
+import re
 import yaml
 
 from distutils.util import strtobool
 
 from .custom import CustomAction
 from .format import add_output_formatting_arguments
+from .resource import DEPRECATED_RESOURCES_REVERSE
+
+
+def pk_or_name(v2, model_name, value, page=None):
+    if isinstance(value, int):
+        return value
+
+    if re.match(r'^[\d]+$', value):
+        return int(value)
+
+    identity = 'name'
+
+    if not page:
+        if not hasattr(v2, model_name):
+            if model_name in DEPRECATED_RESOURCES_REVERSE:
+                model_name = DEPRECATED_RESOURCES_REVERSE[model_name]
+
+        if model_name == 'users':
+            identity = 'username'
+        elif model_name == 'instances':
+            model_name = 'hostname'
+
+        if hasattr(v2, model_name):
+            page = getattr(v2, model_name)
+
+    if page:
+        results = page.get(**{identity: value})
+        if results.count == 1:
+            return int(results.results[0].id)
+        if results.count > 1:
+            raise argparse.ArgumentTypeError(
+                'Multiple {0} exist with that {1}. '
+                'To look up an ID, run:\n'
+                'awx {0} list --{1} "{2}" -f human'.format(
+                    model_name, identity, value
+                )
+            )
+        raise argparse.ArgumentTypeError(
+            'Could not find any {0} with that {1}.'.format(
+                model_name, identity
+            )
+        )
+
+    return value
 
 
 class ResourceOptionsParser(object):
 
-    def __init__(self, page, resource, parser):
+    def __init__(self, v2, page, resource, parser):
         """Used to submit an OPTIONS request to the appropriate endpoint
         and apply the appropriate argparse arguments
 
+        :param v2: a awxkit.api.pages.page.TentativePage instance
         :param page: a awxkit.api.pages.page.TentativePage instance
         :param resource: a string containing the resource (e.g., jobs)
         :param parser: an argparse.ArgumentParser object to append new args to
         """
+        self.v2 = v2
         self.page = page
         self.resource = resource
         self.parser = parser
@@ -53,7 +102,11 @@ class ResourceOptionsParser(object):
     def build_detail_actions(self):
         for method in ('get', 'modify', 'delete'):
             parser = self.parser.add_parser(method, help='')
-            self.parser.choices[method].add_argument('id', type=int, help='')
+            self.parser.choices[method].add_argument(
+                'id',
+                type=functools.partial(pk_or_name, self.v2, self.resource),
+                help='the ID (or unique name) of the resource'
+            )
             if method == 'get':
                 add_output_formatting_arguments(parser, {})
 
@@ -81,14 +134,24 @@ class ResourceOptionsParser(object):
 
             def json_or_yaml(v):
                 if v.startswith('@'):
-                    v = open(v[1:]).read()
+                    v = open(os.path.expanduser(v[1:])).read()
                 try:
-                    return json.loads(v)
+                    parsed = json.loads(v)
                 except Exception:
                     try:
-                        return yaml.safe_load(v)
+                        parsed = yaml.safe_load(v)
                     except Exception:
                         raise argparse.ArgumentTypeError("{} is not valid JSON or YAML".format(v))
+
+                for k, v in parsed.items():
+                    # add support for file reading at top-level JSON keys
+                    # (to make things like SSH key data easier to work with)
+                    if v.startswith('@'):
+                        path = os.path.expanduser(v[1:])
+                        if os.path.exists(path):
+                            parsed[k] = open(path).read()
+
+                return parsed
 
             def jsonstr(v):
                 return json.dumps(json_or_yaml(v))
@@ -101,7 +164,7 @@ class ResourceOptionsParser(object):
                     'field': int,
                     'integer': int,
                     'boolean': strtobool,
-                    'id': int,  # foreign key
+                    'id': functools.partial(pk_or_name, self.v2, k),
                     'json': json_or_yaml,
                 }.get(param['type'], str),
             }

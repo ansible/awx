@@ -62,6 +62,9 @@ def run(stdout=sys.stdout, stderr=sys.stderr, argv=[]):
                     allow_unicode=True
                 )
             ))
+        elif cli.get_config('format') == 'human':
+            sys.stdout.write(e.__class__.__name__)
+            print('')
         sys.exit(1)
     except Exception as e:
         if cli.verbose:
