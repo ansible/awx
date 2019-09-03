@@ -15,7 +15,7 @@ function EditContainerGroupController($rootScope, $scope, $state, models, string
 
   $rootScope.breadcrumb.instance_group_name = instanceGroup.get('name');
 
-  vm.mode = 'add';
+  vm.mode = 'edit';
   vm.strings = strings;
   vm.panelTitle = EditContainerGroupDataset.data.name;
   vm.lookUpTitle = strings.get('container.LOOK_UP_TITLE');
@@ -33,18 +33,35 @@ function EditContainerGroupController($rootScope, $scope, $state, models, string
   vm.form.credential._displayValue = EditContainerGroupDataset.data.summary_fields.credential.name;
   vm.form.credential.required = true;
   vm.form.credential._value = EditContainerGroupDataset.data.summary_fields.credential.id;
-  vm.podSpec = {
-    type: 'textarea',
-    id: 'pod_spec'
-  };
 
-  vm.podSpec.label = strings.get('container.POD_SPEC_LABEL');
+  vm.tab = {
+    details: {
+            _active: true,
+            _go: 'instanceGroups.editContainerGroup',
+            _params: { instance_group_id: instanceGroup.get('id') }
+    },
+    instances: {
+        _go: 'instanceGroups.containerGroupInstances',
+        _params: { instance_group_id: instanceGroup.get('id') }
+    },
+    jobs: {
+        _go: 'instanceGroups.containerGroupJobs',
+        _params: { instance_group_id: instanceGroup.get('id') }
+    }
+};
 
   vm.form.extraVars = {
     label: strings.get('container.POD_SPEC_LABEL'),
     value: EditContainerGroupDataset.data.pod_spec_override,
-    name: 'extraVars'
+    name: 'extraVars',
+    toggleLabel: strings.get('container.POD_SPEC_TOGGLE')
   };
+
+  if (vm.form.extraVars.value) {
+    vm.form.extraVars.isOpen = true;
+  } else {
+    vm.form.extraVars.isOpen = false;
+  }
 
   $scope.$watch('credential', () => {
     if ($scope.credential) {
@@ -52,11 +69,23 @@ function EditContainerGroupController($rootScope, $scope, $state, models, string
       }
   });
   vm.form.save = (data) => {
-    data.pod_spec_override = vm.form.extraVars.value;
+    if (vm.form.extraVars.value === '---') {
+      data.pod_spec_override = null;
+    } else {
+      data.pod_spec_override = vm.form.extraVars.value;
+    }
     return instanceGroup.request('put', { data: data }).then((res) => {
       $state.go('instanceGroups.editContainerGroup', { instance_group_id: res.data.id }, { reload: true });
     } );
+  };
 
+  vm.toggle = () => {
+    if (vm.form.extraVars.isOpen === true) {
+      vm.form.extraVars.isOpen = false;
+    } else {
+      vm.form.extraVars.isOpen = true;
+    }
+    return vm.form.extraVars.isOpen;
   };
 }
 

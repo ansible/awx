@@ -1,18 +1,35 @@
 <div ui-view="credentials"></div>
 <at-panel>
   <at-panel-heading title="{{:: vm.panelTitle }}"></at-panel-heading>
+  <at-tab-group>
+      <at-tab state="vm.tab.details">{{:: vm.strings.get('tab.DETAILS') }}</at-tab>
+      <at-tab state="vm.tab.instances">{{:: vm.strings.get('tab.INSTANCES') }}</at-tab>
+      <at-tab state="vm.tab.jobs">{{:: vm.strings.get('tab.JOBS') }}</at-tab>
+  </at-tab-group>
   <at-panel-body>
     <at-form state="vm.form" autocomplete="off">
       <at-input-text col="4" tab="1" state="vm.form.name"></at-input-text>
       <at-input-lookup col="4" tab="3" state="vm.form.credential" id="containter_groups_credential"></at-input-lookup>
+      <div class="at-Row-toggle Form-formGroup--fullWidth ">
+        <label class="Form-inputLabelContainer" for="vm.form.extraVars.isOpen">
+            <span class="Form-inputLabel" translate>
+                {{ vm.form.extraVars.toggleLabel }}
+            </span>
+        </label>
+        <div ng-class="{'ContainerGroups-codeMirror': vm.form.extraVars.isOpen }">
+          <at-switch on-toggle="vm.toggle(instance)" switch-on="vm.form.extraVars.isOpen"
+          switch-disabled="vm.rowAction.toggle._disabled"></at-switch>
+        </div>
       <at-code-mirror
+        ng-if="vm.form.extraVars.isOpen"
         col="4" tab="3"
-        class="form-group Form-formGroup--fullWidth containerGroups-codeMirror"
+        class="Form-formGroup--fullWidth"
         variables="vm.form.extraVars.value"
         label="{{ vm.form.extraVars.label }}"
         name="{{ vm.form.extraVars.name }}"
       >
       </at-code-mirror>
+    </div>
       <at-action-group col="12" pos="right">
         <at-form-action type="cancel" to="instanceGroups"></at-form-action>
         <at-form-action type="save"></at-form-action>
