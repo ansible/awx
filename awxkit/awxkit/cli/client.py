@@ -12,7 +12,7 @@ from .custom import handle_custom_actions
 from .format import (add_authentication_arguments,
                      add_output_formatting_arguments,
                      FORMATTERS, format_response)
-from .options import ResourceOptionsParser
+from .options import ResourceOptionsParser, UNIQUENESS_RULES
 from .resource import parse_resource, is_control_resource
 from awxkit import api, config, utils, exceptions, WSClient  # noqa
 from awxkit.cli.utils import HelpfulArgumentParser, cprint, disable_color
@@ -159,10 +159,34 @@ class CLI(object):
                 response = getattr(resource, self.method)()
             else:
                 response = self.parse_action(resource)
+
+            _filter = self.get_config('filter')
+
+            # human format for metrics, settings is special
+            if (
+                self.resource in ('metrics', 'settings') and
+                self.get_config('format') == 'human'
+            ):
+                response.json = {
+                    'count': len(response.json),
+                    'results': [
+                        {'key': k, 'value': v}
+                        for k, v in response.json.items()
+                    ]
+                }
+                _filter = 'key, value'
+
+            if (
+                self.get_config('format') == 'human' and
+                _filter == '.' and
+                self.resource in UNIQUENESS_RULES
+            ):
+                _filter = UNIQUENESS_RULES[self.resource]
+
             formatted = format_response(
                 response,
                 fmt=self.get_config('format'),
-                filter=self.get_config('filter'),
+                filter=_filter,
                 changed=self.original_action in (
                     'modify', 'create', 'associate', 'disassociate'
                 )
