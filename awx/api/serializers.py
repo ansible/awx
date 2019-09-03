@@ -118,8 +118,8 @@ SUMMARIZABLE_FK_FIELDS = {
     'project_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed',),
     'credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'credential_type_id'),
     'job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'elapsed', 'type'),
-    'job_template': DEFAULT_SUMMARY_FIELDS + ('webhook_credential',),
-    'workflow_job_template': DEFAULT_SUMMARY_FIELDS + ('webhook_credential',),
+    'job_template': DEFAULT_SUMMARY_FIELDS,
+    'workflow_job_template': DEFAULT_SUMMARY_FIELDS,
     'workflow_job': DEFAULT_SUMMARY_FIELDS,
     'workflow_approval_template': DEFAULT_SUMMARY_FIELDS + ('timeout',),
     'workflow_approval': DEFAULT_SUMMARY_FIELDS + ('timeout',),
@@ -139,6 +139,7 @@ SUMMARIZABLE_FK_FIELDS = {
     'insights_credential': DEFAULT_SUMMARY_FIELDS,
     'source_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'credential_type_id'),
     'target_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'credential_type_id'),
+    'webhook_credential': DEFAULT_SUMMARY_FIELDS,
 }
 
 
