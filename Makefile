@@ -59,7 +59,7 @@ UI_RELEASE_FLAG_FILE = awx/ui/.release_built
 I18N_FLAG_FILE = .i18n_built
 
 .PHONY: awx-link clean clean-tmp clean-venv requirements requirements_dev \
-	develop refresh adduser migrate dbchange dbshell runserver \
+	develop refresh adduser migrate dbchange runserver \
 	receiver test test_unit test_coverage coverage_html \
 	dev_build release_build release_clean sdist \
 	ui-docker-machine ui-docker ui-release ui-devel \
@@ -245,10 +245,6 @@ migrate:
 # Run after making changes to the models to create a new migration.
 dbchange:
 	$(MANAGEMENT_COMMAND) makemigrations
-
-# access database shell, asks for password
-dbshell:
-	sudo -u postgres psql -d awx-dev
 
 server_noattach:
 	tmux new-session -d -s awx 'exec make uwsgi'
