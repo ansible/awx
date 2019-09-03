@@ -135,7 +135,7 @@ SUMMARIZABLE_FK_FIELDS = {
     'source_script': ('name', 'description'),
     'role': ('id', 'role_field'),
     'notification_template': DEFAULT_SUMMARY_FIELDS,
-    'instance_group': ('id', 'name', 'controller_id'),
+    'instance_group': ('id', 'name', 'controller_id', 'is_containerized'),
     'insights_credential': DEFAULT_SUMMARY_FIELDS,
     'source_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'credential_type_id'),
     'target_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'credential_type_id'),
