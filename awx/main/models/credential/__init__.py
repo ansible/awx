@@ -322,6 +322,7 @@ class CredentialType(CommonModelNameNotUnique):
         ('net', _('Network')),
         ('scm', _('Source Control')),
         ('cloud', _('Cloud')),
+        ('token', _('Personal Access Token')),
         ('insights', _('Insights')),
         ('external', _('External')),
     )
@@ -966,6 +967,54 @@ ManagedCredentialType(
         }],
         'required': ['subscription'],
     }
+)
+
+ManagedCredentialType(
+    namespace='github_token',
+    kind='token',
+    name=ugettext_noop('Github Personal Access Token'),
+    managed_by_tower=True,
+    inputs={
+        'fields': [{
+            'id': 'token',
+            'label': ugettext_noop('Token'),
+            'type': 'string',
+            'secret': True,
+        }],
+        'required': ['token'],
+    },
+)
+
+ManagedCredentialType(
+    namespace='gitlab_token',
+    kind='token',
+    name=ugettext_noop('Gitlab Personal Access Token'),
+    managed_by_tower=True,
+    inputs={
+        'fields': [{
+            'id': 'token',
+            'label': ugettext_noop('Token'),
+            'type': 'string',
+            'secret': True,
+        }],
+        'required': ['token'],
+    },
+)
+
+ManagedCredentialType(
+    namespace='bitbucket_token',
+    kind='token',
+    name=ugettext_noop('Bitbucket Personal Access Token'),
+    managed_by_tower=True,
+    inputs={
+        'fields': [{
+            'id': 'token',
+            'label': ugettext_noop('Token'),
+            'type': 'string',
+            'secret': True,
+        }],
+        'required': ['token'],
+    },
 )
 
 ManagedCredentialType(
