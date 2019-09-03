@@ -1,10 +1,18 @@
 function EditContainerGroupController($rootScope, $scope, $state, models, strings, i18n, EditContainerGroupDataset) {
-
   const vm = this || {};
   const {
     instanceGroup,
     credential
   } = models;
+
+  if (!instanceGroup.get('is_containerized')) {
+      return $state.go(
+          'instanceGroups.edit',
+          { instance_group_id: instanceGroup.get('id') },
+          { reload: true }
+      );
+  }
+
   $rootScope.breadcrumb.instance_group_name = instanceGroup.get('name');
 
   vm.mode = 'add';
