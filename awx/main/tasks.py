@@ -1472,8 +1472,8 @@ class RunJob(BaseTask):
             if env_key in env:
                 for path in env[env_key].split(':'):
                     if path not in paths:
-                        paths.append(env[env_key])
-            paths.append(os.path.join(private_data_dir, folder))
+                        paths = [env[env_key]] + paths
+            paths = [os.path.join(private_data_dir, folder)] + paths
             env[env_key] = os.pathsep.join(paths)
 
         return env
