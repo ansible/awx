@@ -343,6 +343,7 @@
                     // be provided to the related credentials endpoint by the template save success handler.
                     delete data.credential;
                     delete data.vault_credential;
+                    delete data.webhook_url;
 
                     data.extra_vars = ToJSON($scope.parseType, $scope.extra_vars, true);
 

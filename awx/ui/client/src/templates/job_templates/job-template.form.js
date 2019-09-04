@@ -406,6 +406,19 @@ function(NotificationsList, i18n) {
                     dataPlacement: 'right',
                     dataContainer: "body",
                 },
+                webhook_url: {
+                    label: i18n._('Webhook URL'),
+                    type: 'text',
+                    readonly: true,
+                    //ngShow: "allow_webhooks && allow_webhooks !== 'false'",
+                    column: 2,
+                    awPopOver: "webhook_url_help",
+                    awPopOverWatch: "webhook_url_help",
+                    dataPlacement: 'top',
+                    dataTitle: i18n._('Webhook URL'),
+                    dataContainer: "body",
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
+                },
                 extra_vars: {
                     label: i18n._('Extra Variables'),
                     type: 'textarea',

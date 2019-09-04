@@ -64,6 +64,7 @@ export default
                 $scope.webhook_service_options = null;
                 $scope.playbook = null;
                 $scope.webhook_service = null;
+                $scope.webhook_url = '';
                 $scope.mode = 'edit';
                 $scope.parseType = 'yaml';
                 $scope.showJobType = false;
@@ -74,6 +75,7 @@ export default
                 $scope.skip_tag_options = [];
                 const virtualEnvs = ConfigData.custom_virtualenvs || [];
                 $scope.custom_virtualenvs_options = virtualEnvs;
+                $scope.webhook_url_help = i18n._('Webhook services can launch jobs with this job template by making a POST request to this URL.');
 
                 SurveyControllerInit({
                     scope: $scope,
@@ -179,7 +181,21 @@ export default
 
                 // watch for changes to 'verbosity', ensure we keep our select2 in sync when it changes.
                 $scope.$watch('verbosity', sync_verbosity_select2);
-                $scope.$watch('webhook_service', sync_webhook_service_select2);
+                $scope.$watch('webhook_service', (newValue) => {
+                    if (newValue) {
+                        // TODO: We'll need the host from the server.
+                        const baseURL = window.location.origin;
+                        if (typeof newValue === 'string') {
+                            $scope.webhook_url = `${baseURL}${jobTemplateData.url}${newValue}`;
+                            $scope.webhook_service = { value: newValue };
+                        } else {
+                            $scope.webhook_url = `${baseURL}${jobTemplateData.url}${newValue.value}`;
+                        }
+                    } else {
+                        $scope.webhook_url = '';
+                    }
+                    sync_webhook_service_select2();
+                });
             }
 
             callback = function() {
@@ -759,6 +775,7 @@ export default
 
                     data.job_tags = (Array.isArray($scope.job_tags)) ? _.uniq($scope.job_tags).join() : "";
                     data.skip_tags = (Array.isArray($scope.skip_tags)) ?  _.uniq($scope.skip_tags).join() : "";
+                    delete data.webhook_url;
 
                     Rest.setUrl(defaultUrl + $state.params.job_template_id);
                     Rest.patch(data)
