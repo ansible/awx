@@ -18,6 +18,7 @@ data:
     SYSTEM_TASK_ABS_MEM = {{ ((task_mem_request|int * 1024) / 100)|int }}
 
     INSIGHTS_URL_BASE = "{{ insights_url_base }}"
+    INSIGHTS_AGENT_MIME = "application/vnd.redhat.tower.analytics+tgz"
 
     #Autoprovisioning should replace this
     CLUSTER_HOST_ID = socket.gethostname()
@@ -62,6 +63,7 @@ data:
     LOGGING['loggers']['rbac_migrations']['handlers'] = ['console']
     LOGGING['loggers']['awx.isolated.manager.playbooks']['handlers'] = ['console']
     LOGGING['handlers']['callback_receiver'] = {'class': 'logging.NullHandler'}
+    LOGGING['handlers']['fact_receiver'] = {'class': 'logging.NullHandler'}
     LOGGING['handlers']['task_system'] = {'class': 'logging.NullHandler'}
     LOGGING['handlers']['tower_warnings'] = {'class': 'logging.NullHandler'}
     LOGGING['handlers']['rbac_migrations'] = {'class': 'logging.NullHandler'}

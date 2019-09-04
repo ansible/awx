@@ -30,7 +30,7 @@ rabbitmq_cpu_request: 500
 memcached_mem_request: 1
 memcached_cpu_request: 500
 
-kubernetes_rabbitmq_version: "3.7.4"
+kubernetes_rabbitmq_version: "3.7.15"
 kubernetes_rabbitmq_image: "ansible/awx_rabbitmq"
 
 kubernetes_memcached_version: "latest"
@@ -44,6 +44,8 @@ kubernetes_deployment_name: awx
 kubernetes_deployment_replica_size: 1
 
 postgress_activate_wait: 60
+
+restore_backup_file: "./tower-openshift-backup-latest.tar.gz"
 
 insights_url_base: "https://example.org"
 

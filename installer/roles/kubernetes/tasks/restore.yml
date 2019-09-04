@@ -21,7 +21,7 @@
 
 - name: Unarchive Tower backup
   unarchive:
-    src: tower-openshift-backup-latest.tar.gz
+    src: "{{ restore_backup_file }}"
     dest: "{{ playbook_dir }}/tower-openshift-restore"
     extra_opts: [--strip-components=1]
 
