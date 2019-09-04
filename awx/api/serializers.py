@@ -2827,6 +2827,23 @@ class JobTemplateMixin(object):
         d['recent_jobs'] = self._recent_jobs(obj)
         return d
 
+    def validate(self, attrs):
+        webhook_service = attrs.get('webhook_service', getattr(self.instance, 'webhook_service', None))
+        webhook_credential = attrs.get('webhook_credential', getattr(self.instance, 'webhook_credential', None))
+
+        if webhook_credential and webhook_credential.credential_type.kind != 'token':
+            raise serializers.ValidationError({
+                'webhook_credential': _("Must be a Personal Access Token."),
+            })
+
+        if webhook_service and webhook_credential:
+            if webhook_credential.kind != '{}_token'.format(webhook_service):
+                raise serializers.ValidationError({
+                    'webhook_credential': _("Must match the selected webhook service."),
+                })
+
+        return super().validate(attrs)
+
 
 class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobOptionsSerializer):
     show_capabilities = ['start', 'schedule', 'copy', 'edit', 'delete']
@@ -2893,7 +2910,6 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
 
     def validate_extra_vars(self, value):
         return vars_validate_or_raise(value)
-
 
     def get_summary_fields(self, obj):
         summary_fields = super(JobTemplateSerializer, self).get_summary_fields(obj)
