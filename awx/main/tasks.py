@@ -1465,12 +1465,14 @@ class RunJob(BaseTask):
             if authorize:
                 env['ANSIBLE_NET_AUTH_PASS'] = network_cred.get_input('authorize_password', default='')
 
-        for env_key, folder in (
-                ('ANSIBLE_COLLECTIONS_PATHS', 'requirements_collections'),
-                ('ANSIBLE_ROLES_PATH', 'requirements_roles')):
-            paths = []
+        for env_key, folder, default in (
+                ('ANSIBLE_COLLECTIONS_PATHS', 'requirements_collections', '~/.ansible/collections:/usr/share/ansible/collections'),
+                ('ANSIBLE_ROLES_PATH', 'requirements_roles', '~/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles')):
+            paths = default.split(':')
             if env_key in env:
-                paths.append(env[env_key])
+                for path in env[env_key].split(':'):
+                    if path not in paths:
+                        paths.append(env[env_key])
             paths.append(os.path.join(private_data_dir, folder))
             env[env_key] = os.pathsep.join(paths)
 
