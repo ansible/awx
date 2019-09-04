@@ -1261,6 +1261,7 @@ class OrganizationSerializer(BaseSerializer):
             notification_templates_started = self.reverse('api:organization_notification_templates_started_list', kwargs={'pk': obj.pk}),
             notification_templates_success = self.reverse('api:organization_notification_templates_success_list', kwargs={'pk': obj.pk}),
             notification_templates_error = self.reverse('api:organization_notification_templates_error_list', kwargs={'pk': obj.pk}),
+            notification_templates_approvals = self.reverse('api:organization_notification_templates_approvals_list', kwargs={'pk': obj.pk}),
             object_roles = self.reverse('api:organization_object_roles_list', kwargs={'pk': obj.pk}),
             access_list = self.reverse('api:organization_access_list', kwargs={'pk': obj.pk}),
             instance_groups = self.reverse('api:organization_instance_groups_list', kwargs={'pk': obj.pk}),
@@ -3335,6 +3336,7 @@ class WorkflowJobTemplateSerializer(JobTemplateMixin, LabelsListMixin, UnifiedJo
             notification_templates_started = self.reverse('api:workflow_job_template_notification_templates_started_list', kwargs={'pk': obj.pk}),
             notification_templates_success = self.reverse('api:workflow_job_template_notification_templates_success_list', kwargs={'pk': obj.pk}),
             notification_templates_error = self.reverse('api:workflow_job_template_notification_templates_error_list', kwargs={'pk': obj.pk}),
+            notification_templates_approvals = self.reverse('api:workflow_job_template_notification_templates_approvals_list', kwargs={'pk': obj.pk}),
             access_list = self.reverse('api:workflow_job_template_access_list', kwargs={'pk': obj.pk}),
             object_roles = self.reverse('api:workflow_job_template_object_roles_list', kwargs={'pk': obj.pk}),
             survey_spec = self.reverse('api:workflow_job_template_survey_spec', kwargs={'pk': obj.pk}),
@@ -3490,7 +3492,11 @@ class WorkflowApprovalTemplateSerializer(UnifiedJobTemplateSerializer):
         if 'last_job' in res:
             del res['last_job']
 
-        res.update(dict(jobs = self.reverse('api:workflow_approval_template_jobs_list', kwargs={'pk': obj.pk}),))
+        # Placeholder...
+        res.update(dict(
+            jobs = self.reverse('api:workflow_approval_template_jobs_list', kwargs={'pk': obj.pk}),
+            approval_notifications = self.reverse('api:workflow_approval_template_notification_list', kwargs={'pk': obj.pk}),
+        ))
         return res
 
 

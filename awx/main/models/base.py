@@ -392,6 +392,13 @@ class NotificationFieldsModel(BaseModel):
         related_name='%(class)s_notification_templates_for_started'
     )
 
+    # Placeholder, unsure if this is required...
+    notification_templates_approvals = models.ManyToManyField(
+        "NotificationTemplate",
+        blank=True,
+        related_name='%(class)s_notification_templates_for_approvals'
+    )
+
 
 def prevent_search(relation):
     """

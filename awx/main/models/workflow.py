@@ -196,7 +196,7 @@ class WorkflowJobNode(WorkflowNodeBase):
     )
     do_not_run = models.BooleanField(
         default=False,
-        help_text=_("Indidcates that a job will not be created when True. Workflow runtime "
+        help_text=_("Indicates that a job will not be created when True. Workflow runtime "
                     "semantics will mark this True if the node is in a path that will "
                     "decidedly not be ran. A value of False means the node may not run."),
     )
@@ -441,9 +441,12 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
                                               .filter(unifiedjobtemplate_notification_templates_for_started__in=[self]))
         success_notification_templates = list(base_notification_templates
                                               .filter(unifiedjobtemplate_notification_templates_for_success__in=[self]))
+        approval_notification_templates = list(base_notification_templates
+                                               .filter(unifiedjobtemplate_notification_templates_for_approvals__in=[self]))
         return dict(error=list(error_notification_templates),
                     started=list(started_notification_templates),
-                    success=list(success_notification_templates))
+                    success=list(success_notification_templates),
+                    approvals=list(approval_notification_templates))
 
     def create_unified_job(self, **kwargs):
         workflow_job = super(WorkflowJobTemplate, self).create_unified_job(**kwargs)
@@ -645,11 +648,45 @@ class WorkflowApprovalTemplate(UnifiedJobTemplate):
         return reverse('api:workflow_approval_template_detail', kwargs={'pk': self.pk}, request=request)
 
     @property
+    def notification_templates(self):
+        base_notification_templates = NotificationTemplate.objects.all()
+        error_notification_templates = list(base_notification_templates
+                                            .filter(unifiedjobtemplate_notification_templates_for_errors__in=[self]))
+        started_notification_templates = list(base_notification_templates
+                                              .filter(unifiedjobtemplate_notification_templates_for_started__in=[self]))
+        success_notification_templates = list(base_notification_templates
+                                              .filter(unifiedjobtemplate_notification_templates_for_success__in=[self]))
+        return dict(error=list(error_notification_templates),
+                    started=list(started_notification_templates),
+                    success=list(success_notification_templates))
+
+        # base_notification_templates = NotificationTemplate.objects.all()
+        # approval_notification_templates = list(base_notification_templates
+        #                                        .filter(unifiedjobtemplate_notification_templates_for_errors__in=[self]),
+        #                                        base_notification_templates
+        #                                        .filter(unifiedjobtemplate_notification_templates_for_started__in=[self]),
+        #                                        base_notification_templates
+        #                                        .filter(unifiedjobtemplate_notification_templates_for_success__in=[self]))
+        # return dict(approval=list(approval_notification_templates))
+# Placeholder...  Approval nodes don't have orgs!
+        # if self.project is not None and self.project.organization is None:
+        #     error_notification_templates = set(error_notification_templates + list(base_notification_templates.filter(
+        #         organization_notification_templates_for_errors=self.project.organization)))
+        #     started_notification_templates = set(started_notification_templates + list(base_notification_templates.filter(
+        #         organization_notification_templates_for_started=self.project.organization)))
+        #     success_notification_templates = set(success_notification_templates + list(base_notification_templates.filter(
+        #         organization_notification_templates_for_success=self.project.organization)))
+        # return dict(error=list(error_notification_templates),
+        #             approval_notification_templates=list(needs_approval_notification_templates),
+        #             success=list(success_notification_templates))
+
+
+    @property
     def workflow_job_template(self):
         return self.workflowjobtemplatenodes.first().workflow_job_template
 
 
-class WorkflowApproval(UnifiedJob):
+class WorkflowApproval(UnifiedJob, JobNotificationMixin):
     class Meta:
         app_label = 'main'
 
@@ -699,6 +736,21 @@ class WorkflowApproval(UnifiedJob):
         self.websocket_emit_status(self.status)
         schedule_task_manager()
         return reverse('api:workflow_approval_deny', kwargs={'pk': self.pk}, request=request)
+
+    # Placeholder...
+    def approval_notification_data(self):
+        result = super(WorkflowApproval, self).approval_notification_data()
+        str_arr = ['Approval summary:', '']
+        for node in self.workflow_job_nodes.all().select_related('job'):
+            if node.job is None:
+                node_job_description = 'no job.'
+            else:
+                node_job_description = ('job #{0}, "{1}", which finished with status {2}.'
+                                        .format(node.job.id, node.job.name, node.job.status))
+            str_arr.append("- node #{0} spawns {1}".format(node.id, node_job_description))
+        result['body'] = '\n'.join(str_arr)
+        return result
+
 
     @property
     def workflow_job_template(self):

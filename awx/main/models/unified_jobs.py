@@ -1217,6 +1217,10 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
                     status=self.status,
                     traceback=self.result_traceback)
 
+    # Placeholder...
+    # def approval_notification_data(self):
+        # for approval in WorkflowApproval.objects.filter(workflow_approval_template=instance, status='pending'):
+
     def pre_start(self, **kwargs):
         if not self.can_start:
             self.job_explanation = u'%s is not in a startable state: %s, expecting one of %s' % (self._meta.verbose_name, self.status, str(('new', 'waiting')))

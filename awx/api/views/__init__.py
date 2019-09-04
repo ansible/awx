@@ -119,6 +119,7 @@ from awx.api.views.organization import ( # noqa
     OrganizationNotificationTemplatesErrorList,
     OrganizationNotificationTemplatesStartedList,
     OrganizationNotificationTemplatesSuccessList,
+    OrganizationNotificationTemplatesApprovalList,
     OrganizationInstanceGroupsList,
     OrganizationAccessList,
     OrganizationObjectRolesList,
@@ -3288,6 +3289,11 @@ class WorkflowJobTemplateNotificationTemplatesSuccessList(WorkflowJobTemplateNot
     relationship = 'notification_templates_success'
 
 
+class WorkflowJobTemplateNotificationTemplatesApprovalList(WorkflowJobTemplateNotificationTemplatesAnyList):
+
+    relationship = 'approval_notifications'
+
+
 class WorkflowJobTemplateAccessList(ResourceAccessList):
 
     model = models.User # needs to be User for AccessLists's
@@ -4456,6 +4462,18 @@ class WorkflowApprovalTemplateJobsList(SubListAPIView):
     parent_model = models.WorkflowApprovalTemplate
     relationship = 'approvals'
     parent_key = 'workflow_approval_template'
+
+
+class WorkflowApprovalTemplateNotificationTemplatesList(SubListCreateAttachDetachAPIView):
+
+    model = models.NotificationTemplate
+    serializer_class = serializers.NotificationTemplateSerializer
+    parent_model = models.WorkflowApprovalTemplate
+
+
+class WorkflowApprovalNotificationTemplatesList(WorkflowApprovalTemplateNotificationTemplatesList):
+
+    relationship = 'approval_notifications'
 
 
 class WorkflowApprovalList(ListCreateAPIView):
