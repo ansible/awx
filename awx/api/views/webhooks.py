@@ -14,7 +14,7 @@ from rest_framework.response import Response
 from awx.api import serializers
 from awx.api.generics import APIView, GenericAPIView
 from awx.api.permissions import WebhookKeyPermission
-from awx.main.models import JobTemplate, WorkflowJobTemplate
+from awx.main.models import Job, JobTemplate, WorkflowJob, WorkflowJobTemplate
 
 
 logger = logging.getLogger('awx.api.views.webhooks')
@@ -93,20 +93,36 @@ class WebhookReceiverBase(APIView):
 
     @csrf_exempt
     def post(self, request, *args, **kwargs):
-        logger.error(
-            "**************************************\n"
-            "{}\n"
-            "{}\n".format(request.headers, request.data)
+        logger.debug(
+            "headers: {}\n"
+            "data: {}\n".format(request.headers, request.data)
         )
         obj = self.get_object()
         self.check_signature(obj)
 
+        event_type = self.get_event_type()
+        event_guid = self.get_event_guid()
+
+        kwargs = {
+            'webhook_service': obj.webhook_service,
+            'webhook_guid': event_guid,
+        }
+        if WorkflowJob.objects.filter(**kwargs).exists() or Job.objects.filter(**kwargs).exists():
+            # Short circuit if this webhook has already been received and acted upon.
+            logger.debug("Webhook previously received, returning without action.")
+            return Response(status=status.HTTP_202_ACCEPTED)
+
         data = {
-            'tower_webhook_event_type': self.get_event_type(),
-            'tower_webhook_event_guid': self.get_event_guid(),
+            'tower_webhook_event_type': event_type,
+            'tower_webhook_event_guid': event_guid,
             'tower_webhook_payload': request.data,
         }
-        new_job = obj.create_unified_job(extra_vars=json.dumps(data))
+        new_job = obj.create_unified_job(
+            webhook_service=obj.webhook_service,
+            webhook_credential=obj.webhook_credential,
+            webhook_guid=event_guid,
+            extra_vars=json.dumps(data)
+        )
         new_job.signal_start()
 
         return Response(status=status.HTTP_202_ACCEPTED)
