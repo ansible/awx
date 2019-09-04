@@ -39,6 +39,7 @@
             $scope.can_edit = true;
             $scope.allow_callbacks = false;
             $scope.playbook_options = [];
+            $scope.webhook_service_options = [];
             $scope.mode = "add";
             $scope.parseType = 'yaml';
             $scope.credentialNotPresent = false;
@@ -131,6 +132,14 @@
                         multiple: false,
                         opts: $scope.custom_virtualenvs_options
                     });
+                    CreateSelect2({
+                        element:'#webhook-service-select',
+                        addNew: false,
+                        multiple: false,
+                        scope: $scope,
+                        options: 'webhook_service_options',
+                        model: 'webhook_service'
+                    });
                 }
             });
 
@@ -151,7 +160,13 @@
                 variable: 'job_type_options',
                 callback: 'choicesReadyVerbosity'
             });
-
+            GetChoices({
+                scope: $scope,
+                url: defaultUrl,
+                field: 'webhook_service',
+                variable: 'webhook_service_options',
+                callback: 'choicesReadyVerbosity'
+            });
             $scope.labelOptions = availableLabels
                 .map((i) => ({label: i.name, value: i.id}));
             $scope.$emit("choicesReadyVerbosity");

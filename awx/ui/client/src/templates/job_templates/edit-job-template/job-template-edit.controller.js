@@ -61,7 +61,9 @@ export default
                 $scope.sufficientRoleForNotifToggle = isNotificationAdmin;
                 $scope.sufficientRoleForNotif =  isNotificationAdmin || $scope.user_is_system_auditor;
                 $scope.playbook_options = null;
+                $scope.webhook_service_options = null;
                 $scope.playbook = null;
+                $scope.webhook_service = null;
                 $scope.mode = 'edit';
                 $scope.parseType = 'yaml';
                 $scope.showJobType = false;
@@ -177,6 +179,7 @@ export default
 
                 // watch for changes to 'verbosity', ensure we keep our select2 in sync when it changes.
                 $scope.$watch('verbosity', sync_verbosity_select2);
+                $scope.$watch('webhook_service', sync_webhook_service_select2);
             }
 
             callback = function() {
@@ -202,7 +205,19 @@ export default
                 }));
             }
 
+            function sync_webhook_service_select2() {
+                select2LoadDefer.push(CreateSelect2({
+                    element:'#webhook-service-select',
+                    addNew: false,
+                    multiple: false,
+                    scope: $scope,
+                    options: 'webhook_service_options',
+                    model: 'webhook_service'
+                }));   
+            }
+
             function jobTemplateLoadFinished(){
+                //$scope.webhook_service = jobTemplateData.webhook_service;
                 select2LoadDefer.push(CreateSelect2({
                     element:'#job_template_job_type',
                     multiple: false
@@ -224,6 +239,14 @@ export default
                     element: '#job_template_custom_virtualenv',
                     multiple: false,
                     opts: $scope.custom_virtualenvs_options
+                }));
+                select2LoadDefer.push(CreateSelect2({
+                    element:'#webhook-service-select',
+                    addNew: false,
+                    multiple: false,
+                    scope: $scope,
+                    options: 'webhook_service_options',
+                    model: 'webhook_service'
                 }));
 
                 if (!launchHasBeenEnabled) {
@@ -495,6 +518,14 @@ export default
                 url: defaultUrl,
                 field: 'job_type',
                 variable: 'job_type_options',
+                callback: 'choicesReady'
+            });
+
+            GetChoices({
+                scope: $scope,
+                url: defaultUrl,
+                field: 'webhook_service',
+                variable: 'webhook_service_options',
                 callback: 'choicesReady'
             });
 

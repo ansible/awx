@@ -391,6 +391,21 @@ function(NotificationsList, i18n) {
                         alwaysShowAsterisk: true
                     }
                 },
+                webhook_service: {
+                    label: i18n._('Webhook Service'),
+                    type:'select',
+                    defaultText: i18n._('Choose a Webhook Service'),
+                    ngOptions: 'svc.label for svc in webhook_service_options track by svc.value',
+                    ngShow: true,
+                    ngDisabled: "!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate) || !canGetAllRelatedResources",
+                    id: 'webhook-service-select',
+                    required: false,
+                    column: 1,
+                    awPopOver: "<p>" + i18n._("Select a webhook service.") + "</p>",
+                    dataTitle: i18n._('Webhook Service'),
+                    dataPlacement: 'right',
+                    dataContainer: "body",
+                },
                 extra_vars: {
                     label: i18n._('Extra Variables'),
                     type: 'textarea',
