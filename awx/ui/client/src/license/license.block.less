@@ -183,10 +183,13 @@
 	overflow: hidden;
 }
 
+.License-rhCredField {
+	margin-bottom: 10px;
+}
+
 .License-label {
 	color: @field-label;
 	font-weight: 400;
-	margin-top: 10px;
 }
 
 .License-action {
@@ -197,4 +200,91 @@
 
 .License-actionError {
 	flex: 1;
+}
+
+.License-subSelectorModal {
+	height: 100%;
+	width: 100%;
+	position: fixed;
+	top: 0;
+	left: 0;
+	background: rgba(0, 0, 0, 0.3);
+	z-index: 1040;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.License-modal {
+	width: 750px;
+}
+
+.License-modalBody {
+	border: 1px solid @b7grey;
+	max-height: 550px;
+	overflow: scroll;
+	border-radius: 4px;
+}
+
+.License-modalRow {
+	display: flex;
+	padding: 10px;
+}
+
+.License-modalRow:not(:last-of-type) {
+	border-bottom: 1px solid @b7grey;
+}
+
+.License-modalRowRadio {
+	flex: 0 0 40px;
+	display: flex;
+	align-items: center;
+}
+
+.License-trialTag {
+	font-weight: 100;
+	background-color: #ebebeb;
+	border-radius: 5px;
+	color: #606060;
+	font-size: 10px;
+	margin-right: 10px;
+	padding: 3px 9px;
+	line-height: 14px;
+	word-break: keep-all;
+	display: inline-flex;
+}
+
+.License-introText {
+	margin-bottom: 10px;
+}
+
+.License-getLicensesButton {
+	display: flex;
+	justify-content: flex-end;
+	margin-bottom: 20px;
+}
+
+.License-checkboxLabel {
+	margin-left: 5px;
+	font-weight: normal;
+}
+
+.License-modalRowDetails {
+	flex: 1;
+}
+
+.License-modalRowDetailsLabel {
+	font-weight: normal;
+	width: 100%;
+}
+
+.License-modalRowDetailsRow {
+	margin-bottom: 10px;
+}
+
+.License-modalRowDetails--50 {
+	display: flex;
+	flex-basis: 50%;
+	align-items: center;
+	line-height: 21px;
 }

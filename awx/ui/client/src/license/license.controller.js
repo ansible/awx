@@ -32,11 +32,9 @@ export default
         };
 
         const reset = function() {
-            document.getElementById('License-form').reset();
             $scope.newLicense.eula = undefined;
-            if (!$scope.licenseError) {
-                $scope.rhCreds = {};
-            }
+            $scope.rhCreds = {};
+            $scope.selectedLicense = {};
         };
 
         const initVars = (config) => {
@@ -56,6 +54,7 @@ export default
             $scope.time.expiresOn = calcExpiresOn($scope.license.license_info.license_date);
             $scope.valid = CheckLicense.valid($scope.license.license_info);
             $scope.compliant = $scope.license.license_info.compliant;
+            $scope.selectedLicense = {};
             $scope.newLicense = {
                 pendo: true,
                 insights: true
@@ -131,18 +130,60 @@ export default
             }
         };
 
+        $scope.lookupLicenses = () => {
+            if ($scope.rhCreds.username && $scope.rhCreds.password) {
+                Wait('start');
+                ConfigService.getSubscriptions($scope.rhCreds.username, $scope.rhCreds.password)
+                    .then(({data}) => {
+                        Wait('stop');
+                        if (data && data.length > 0) {
+                            $scope.rhLicenses = data;
+                            if ($scope.selectedLicense.fullLicense) {
+                                $scope.selectedLicense.modalKey = $scope.selectedLicense.fullLicense.license_key;
+                            }
+                            $scope.showLicenseModal = true;
+                        } else {
+                            ProcessErrors($scope, data, status, null, {
+                                hdr: i18n._('No Licenses Found'),
+                                msg: i18n._('We were unable to locate licenses associated with this account')
+                            });
+                        }
+                    })
+                    .catch(({data, status}) => {
+                        Wait('stop');
+                        ProcessErrors($scope, data, status, null, {
+                            hdr: i18n._('Error Fetching Licenses')
+                        });
+                    });
+            }
+        };
+
+        $scope.confirmLicenseSelection = () => {
+            $scope.showLicenseModal = false;
+            $scope.selectedLicense.fullLicense = $scope.rhLicenses.find((license) => {
+                return license.license_key === $scope.selectedLicense.modalKey;
+            });
+            $scope.selectedLicense.modalKey = undefined;
+        };
+
+        $scope.cancelLicenseLookup = () => {
+            $scope.showLicenseModal = false;
+            $scope.selectedLicense.modalKey = undefined;
+        };
+
         $scope.submit = function() {
             Wait('start');
-            $scope.licenseError = false;
             let payload = {};
             if ($scope.newLicense.file) {
                 payload = $scope.newLicense.file;
-            } else if ($scope.rhCreds.username && $scope.rhCreds.password) {
-                payload = {
-                    rh_password: $scope.rhCreds.password,
-                    rh_username: $scope.rhCreds.username
-                };
+            } else if ($scope.selectedLicense.fullLicense) {
+                payload = $scope.selectedLicense.fullLicense;
+                if ($scope.rhCreds.username && $scope.rhCreds.password) {
+                    payload.rh_password = $scope.rhCreds.password;
+                    payload.rh_username = $scope.rhCreds.username;
+                }
             }
+            
             CheckLicense.post(payload, $scope.newLicense.eula)
                 .then((licenseInfo) => {
                     reset();
@@ -179,9 +220,11 @@ export default
                                 }, 4000);
                             }
                         });
-                }).catch((data) => {
+                }).catch(({data, status}) => {
                     Wait('stop');
-                    $scope.licenseError = data.error;
+                    ProcessErrors($scope, data, status, null, {
+                        hdr: i18n._('Error Applying License')
+                    });
                 });
         };
 }];
