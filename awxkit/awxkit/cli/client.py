@@ -170,9 +170,9 @@ class CLI(object):
             if formatted:
                 print(utils.to_str(formatted), file=self.stdout)
         else:
-            self.parser.print_help()
-
-            if six.PY2 and not self.help:
+            if six.PY3:
+                self.parser.print_help()
+            elif six.PY2 and not self.help:
                 # Unfortunately, argparse behavior between py2 and py3
                 # changed in a notable way when required subparsers
                 # have invalid (or missing) arguments specified

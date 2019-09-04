@@ -137,9 +137,10 @@ def parse_resource(client, skip_deprecated=False):
 
             # argparse aliases are *only* supported in Python3 (not 2.7)
             kwargs = {}
-            if not skip_deprecated and PY3:
+            if not skip_deprecated:
                 if k in DEPRECATED_RESOURCES:
                     kwargs['aliases'] = [DEPRECATED_RESOURCES[k]]
+
             client.subparsers[k] = subparsers.add_parser(
                 k, help='', **kwargs
             )
