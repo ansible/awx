@@ -4,6 +4,7 @@ from six import with_metaclass
 
 from .stdout import monitor, monitor_workflow
 from .utils import CustomRegistryMeta, color_enabled
+from awxkit import api
 from awxkit.exceptions import NoContent
 
 
@@ -204,14 +205,45 @@ class AssociationMixin(object):
     action = 'associate'
 
     def add_arguments(self, parser):
-        parser.choices[self.action].add_argument('id', type=int, help='')
+        from .options import pk_or_name
+        parser.choices[self.action].add_argument(
+            'id',
+            type=functools.partial(
+                pk_or_name, None, self.resource, page=self.page
+            ),
+            help=''
+        )
         group = parser.choices[self.action].add_mutually_exclusive_group(required=True)
         for param, endpoint in self.targets.items():
             field, model_name = endpoint
             if not model_name:
                 model_name = param
-            help_text = 'The ID of the {} to {}'.format(model_name, self.action)
-            group.add_argument('--{}'.format(param), metavar='', type=int, help=help_text)
+            help_text = 'The ID (or name) of the {} to {}'.format(model_name, self.action)
+
+            class related_page(object):
+
+                def __init__(self, connection, resource):
+                    self.conn = connection
+                    self.resource = {
+                        'start_notification': 'notification_templates',
+                        'success_notification': 'notification_templates',
+                        'failure_notification': 'notification_templates',
+                        'credential': 'credentials',
+                    }[resource]
+
+                def get(self, **kwargs):
+                    v2 = api.Api(connection=self.conn).get().current_version.get()
+                    return getattr(v2, self.resource).get(**kwargs)
+
+            group.add_argument(
+                '--{}'.format(param),
+                metavar='',
+                type=functools.partial(
+                    pk_or_name, None, param,
+                    page=related_page(self.page.connection, param)
+                ),
+                help=help_text
+            )
 
     def perform(self, **kwargs):
         for k, v in kwargs.items():
