@@ -33,6 +33,7 @@ from awx.main.models.mixins import (
     SurveyJobMixin,
     RelatedJobsMixin,
     WebhookMixin,
+    WebhookTemplateMixin,
 )
 from awx.main.models.jobs import LaunchTimeConfigBase, LaunchTimeConfig, JobTemplate
 from awx.main.models.credential import Credential
@@ -359,7 +360,7 @@ class WorkflowJobOptions(LaunchTimeConfigBase):
         return new_workflow_job
 
 
-class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTemplateMixin, ResourceMixin, RelatedJobsMixin, WebhookMixin):
+class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTemplateMixin, ResourceMixin, RelatedJobsMixin, WebhookTemplateMixin):
 
     SOFT_UNIQUE_TOGETHER = [('polymorphic_ctype', 'name', 'organization')]
     FIELDS_TO_PRESERVE_AT_COPY = [
@@ -531,7 +532,7 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
         return WorkflowJob.objects.filter(workflow_job_template=self)
 
 
-class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificationMixin):
+class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificationMixin, WebhookMixin):
     class Meta:
         app_label = 'main'
         ordering = ('id',)

@@ -486,7 +486,7 @@ class RelatedJobsMixin(object):
         return [dict(id=t[0], type=mapping[t[1]]) for t in jobs.values_list('id', 'polymorphic_ctype_id')]
 
 
-class WebhookMixin(models.Model):
+class WebhookTemplateMixin(models.Model):
     class Meta:
         abstract = True
 
@@ -529,3 +529,27 @@ class WebhookMixin(models.Model):
                 update_fields.append('webhook_key')
 
         super().save(*args, **kwargs)
+
+
+class WebhookMixin(models.Model):
+    class Meta:
+        abstract = True
+
+    SERVICES = WebhookTemplateMixin.SERVICES
+
+    webhook_service = models.CharField(
+        max_length=16,
+        choices=SERVICES,
+        blank=True
+    )
+    webhook_credential = models.ForeignKey(
+        'Credential',
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name='%(class)ss'
+    )
+    webhook_guid = models.CharField(
+        blank=True,
+        max_length=128
+    )

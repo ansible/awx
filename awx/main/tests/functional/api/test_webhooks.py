@@ -1,7 +1,7 @@
 import pytest
 
 from awx.api.versioning import reverse
-from awx.main.models.mixins import WebhookMixin
+from awx.main.models.mixins import WebhookTemplateMixin
 from awx.main.models.credential import Credential, CredentialType
 
 
@@ -113,7 +113,7 @@ def test_post_webhook_key_wfjt(organization_factory, workflow_job_template_facto
 
 @pytest.mark.django_db
 @pytest.mark.parametrize(
-    "service", [s for s, _ in WebhookMixin.SERVICES]
+    "service", [s for s, _ in WebhookTemplateMixin.SERVICES]
 )
 def test_set_webhook_service(organization_factory, job_template_factory, patch, service):
     objs = organization_factory("org", superusers=['admin'])
@@ -132,7 +132,7 @@ def test_set_webhook_service(organization_factory, job_template_factory, patch, 
 
 @pytest.mark.django_db
 @pytest.mark.parametrize(
-    "service", [s for s, _ in WebhookMixin.SERVICES]
+    "service", [s for s, _ in WebhookTemplateMixin.SERVICES]
 )
 def test_unset_webhook_service(organization_factory, job_template_factory, patch, service):
     objs = organization_factory("org", superusers=['admin'])
@@ -151,7 +151,7 @@ def test_unset_webhook_service(organization_factory, job_template_factory, patch
 
 @pytest.mark.django_db
 @pytest.mark.parametrize(
-    "service", [s for s, _ in WebhookMixin.SERVICES]
+    "service", [s for s, _ in WebhookTemplateMixin.SERVICES]
 )
 def test_set_webhook_credential(organization_factory, job_template_factory, patch, service):
     objs = organization_factory("org", superusers=['admin'])
@@ -177,7 +177,9 @@ def test_set_webhook_credential(organization_factory, job_template_factory, patc
 
 @pytest.mark.django_db
 @pytest.mark.parametrize(
-    "service,token", [(s, WebhookMixin.SERVICES[i - 1][0]) for i, (s, _) in enumerate(WebhookMixin.SERVICES)]
+    "service,token", [
+        (s, WebhookTemplateMixin.SERVICES[i - 1][0]) for i, (s, _) in enumerate(WebhookTemplateMixin.SERVICES)
+    ]
 )
 def test_set_wrong_service_webhook_credential(organization_factory, job_template_factory, patch, service, token):
     objs = organization_factory("org", superusers=['admin'])
