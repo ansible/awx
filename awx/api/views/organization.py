@@ -197,7 +197,7 @@ class OrganizationNotificationTemplatesSuccessList(OrganizationNotificationTempl
 
 class OrganizationNotificationTemplatesApprovalList(OrganizationNotificationTemplatesAnyList):
 
-    relationship = 'approval_notifications'
+    relationship = 'notification_templates_approvals'
 
 
 class OrganizationInstanceGroupsList(SubListAttachDetachAPIView):

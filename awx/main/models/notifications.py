@@ -463,7 +463,6 @@ class JobNotificationMixin(object):
 
     def send_notification_templates(self, status):
         from awx.main.tasks import send_notifications  # avoid circular import
-        # Placeholder... Adding "pending" status here for approvals.
         if status not in ['pending', 'running', 'succeeded', 'failed']:
             raise ValueError(_("status must be either pending, running, succeeded or failed"))
         try:
