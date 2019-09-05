@@ -4464,18 +4464,6 @@ class WorkflowApprovalTemplateJobsList(SubListAPIView):
     parent_key = 'workflow_approval_template'
 
 
-class WorkflowApprovalTemplateNotificationTemplatesList(SubListCreateAttachDetachAPIView):
-
-    model = models.NotificationTemplate
-    serializer_class = serializers.NotificationTemplateSerializer
-    parent_model = models.WorkflowApprovalTemplate
-
-
-class WorkflowApprovalNotificationTemplatesList(WorkflowApprovalTemplateNotificationTemplatesList):
-
-    relationship = 'notification_templates_approvals'
-
-
 class WorkflowApprovalList(ListCreateAPIView):
 
     model = models.WorkflowApproval

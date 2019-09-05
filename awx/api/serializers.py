@@ -3492,10 +3492,8 @@ class WorkflowApprovalTemplateSerializer(UnifiedJobTemplateSerializer):
         if 'last_job' in res:
             del res['last_job']
 
-        # Placeholder...
         res.update(dict(
             jobs = self.reverse('api:workflow_approval_template_jobs_list', kwargs={'pk': obj.pk}),
-            approval_notification_templates = self.reverse('api:workflow_approval_template_notification_list', kwargs={'pk': obj.pk}),
         ))
         return res
 
