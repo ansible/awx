@@ -419,6 +419,23 @@ function(NotificationsList, i18n) {
                     dataContainer: "body",
                     ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                 },
+                webhook_credential: {
+                    label: i18n._('Webhook Credential'),
+                    type: 'custom',
+                    control: `
+                        <webhook-credential-input
+                            is-field-disabled="!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate) || !(webhookCredential.modalBaseParams.credential_type__namespace)"
+                            tag-name="webhookCredential.name"
+                            on-lookup-click="handleWebhookCredentialLookupClick"
+                            on-tag-delete="handleWebhookCredentialTagDelete"
+                        </webhook-credential-input>`,
+                    awPopOver: "<p>" + i18n._("Select the credential to use with the webhook service.") + "</p>",
+                    dataTitle: i18n._('Webhook Credential'),
+                    dataPlacement: 'right',
+                    dataContainer: "body",
+                    ngDisabled: 'canAddJobTemplate',
+                    required: false,
+                },
                 extra_vars: {
                     label: i18n._('Extra Variables'),
                     type: 'textarea',

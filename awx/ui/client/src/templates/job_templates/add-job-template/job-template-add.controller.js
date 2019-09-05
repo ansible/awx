@@ -10,14 +10,14 @@
         'ProcessErrors', 'GetBasePath', 'hashSetup', 'ParseTypeChange', 'Wait',
         'Empty', 'ToJSON', 'CallbackHelpInit', 'GetChoices', '$state', 'availableLabels',
         'CreateSelect2', '$q', 'i18n', 'Inventory', 'Project', 'InstanceGroupsService',
-        'MultiCredentialService', 'ConfigData', 'resolvedModels',
+        'MultiCredentialService', 'ConfigData', 'resolvedModels', '$compile',
          function(
              $filter, $scope,
              $stateParams, JobTemplateForm, GenerateForm, Rest, Alert,
              ProcessErrors, GetBasePath, hashSetup, ParseTypeChange, Wait,
              Empty, ToJSON, CallbackHelpInit, GetChoices,
              $state, availableLabels, CreateSelect2, $q, i18n, Inventory, Project, InstanceGroupsService,
-             MultiCredentialService, ConfigData, resolvedModels
+             MultiCredentialService, ConfigData, resolvedModels, $compile
          ) {
 
             // Inject dynamic view
@@ -44,6 +44,113 @@
             $scope.parseType = 'yaml';
             $scope.credentialNotPresent = false;
             $scope.canGetAllRelatedResources = true;
+
+            //
+            // webhook credential - all handlers, dynamic state, etc. live here
+            //
+
+            $scope.webhookCredential = {
+                id: null,
+                name: null,
+                isModalOpen: false,
+                isModalReady: false,
+                modalTitle: i18n._('Select Webhook Credential'),
+                modalBaseParams: {
+                    order_by: 'name',
+                    page_size: 5,
+                    credential_type__namespace: null,
+                },
+                modalSelectedId: null,
+                modalSelectedName: null,
+            };
+
+            $scope.handleWebhookCredentialLookupClick = () => {
+                $scope.webhookCredential.modalSelectedId = $scope.webhookCredential.id;
+                $scope.webhookCredential.isModalOpen = true;
+            };
+
+            $scope.handleWebhookCredentialTagDelete = () => {
+                $scope.webhookCredential.id = null;
+                $scope.webhookCredential.name = null;
+            };
+
+            $scope.handleWebhookCredentialModalClose = () => {
+                $scope.webhookCredential.isModalOpen = false;
+                $scope.webhookCredential.isModalReady = false;
+            };
+
+            $scope.handleWebhookCredentialModalReady = () => {
+                $scope.webhookCredential.isModalReady = true;
+            };
+
+            $scope.handleWebhookCredentialModalItemSelect = (item) => {
+                $scope.webhookCredential.modalSelectedId = item.id;
+                $scope.webhookCredential.modalSelectedName = item.name;
+            };
+
+            $scope.handleWebhookCredentialModalCancel = () => {
+                $scope.webhookCredential.isModalOpen = false;
+                $scope.webhookCredential.isModalReady = false;
+                $scope.webhookCredential.modalSelectedId = null;
+                $scope.webhookCredential.modalSelectedName = null;
+
+            };
+
+            $scope.handleWebhookCredentialSelect = () => {
+                $scope.webhookCredential.isModalOpen = false;
+                $scope.webhookCredential.isModalReady = false;
+                $scope.webhookCredential.id = $scope.webhookCredential.modalSelectedId;
+                $scope.webhookCredential.name = $scope.webhookCredential.modalSelectedName;
+                $scope.webhookCredential.modalSelectedId = null;
+                $scope.webhookCredential.modalSelectedName = null;
+            };
+
+            $('#content-container').append($compile(`
+                <at-dialog
+                    title="webhookCredential.modalTitle"
+                    on-close="handleWebhookCredentialModalClose"
+                    ng-if="webhookCredential.isModalOpen"
+                    ng-show="webhookCredential.isModalOpen && webhookCredential.isModalReady"
+                >
+                    <at-lookup-list
+                        ng-show="webhookCredential.isModalOpen && webhookCredential.isModalReady"
+                        resource-name="credential"
+                        base-params="webhookCredential.modalBaseParams"
+                        selected-id="webhookCredential.modalSelectedId"
+                        on-ready="handleWebhookCredentialModalReady"
+                        on-item-select="handleWebhookCredentialModalItemSelect"
+                    />
+                    <at-action-group col="12" pos="right">
+                        <at-action-button
+                            variant="tertiary"
+                            ng-click="handleWebhookCredentialModalCancel()"
+                        >
+                            ${i18n._('CANCEL')}
+                        </at-action-button>
+                        <at-action-button
+                            variant="primary"
+                            ng-click="handleWebhookCredentialSelect()"
+                        >
+                            ${i18n._('SELECT')}
+                        </at-action-button>
+                    </at-action-group>
+                </at-dialog>`)($scope));
+
+            $scope.$watch('webhook_service', (newValue, oldValue) => {
+                const newServiceValue = newValue && typeof newValue === 'object' ? newValue.value : newValue;
+                const oldServiceValue = oldValue && typeof oldValue === 'object' ? oldValue.value : oldValue;
+                if (newServiceValue !== oldServiceValue || newServiceValue === newValue) {
+                    $scope.webhook_service = { value: newServiceValue };
+                    sync_webhook_service_select2();
+                    $scope.webhookCredential.modalBaseParams.credential_type__namespace = newServiceValue ?
+                        `${newServiceValue}_token`
+                        : null;
+                    if (newServiceValue !== newValue || newValue === null) {
+                        $scope.webhookCredential.id = null;
+                        $scope.webhookCredential.name = null;
+                    }
+                }
+            });
 
             hashSetup({
                 scope: $scope,
@@ -179,6 +286,17 @@
                     scope: $scope,
                     options: 'playbook_options',
                     model: 'playbook'
+                });
+            }
+
+            function sync_webhook_service_select2() {
+                CreateSelect2({
+                    element:'#webhook-service-select',
+                    addNew: false,
+                    multiple: false,
+                    scope: $scope,
+                    options: 'webhook_service_options',
+                    model: 'webhook_service'
                 });
             }
 
@@ -344,6 +462,10 @@
                     delete data.credential;
                     delete data.vault_credential;
                     delete data.webhook_url;
+                    data.webhook_credential = $scope.webhookCredential.id;
+                    if (!data.webhook_credential) {
+                        data.webhook_service = null;
+                    }
 
                     data.extra_vars = ToJSON($scope.parseType, $scope.extra_vars, true);
 
