@@ -876,10 +876,6 @@ class BaseTask(object):
             show_paths = self.proot_show_paths + local_paths + \
                 settings.AWX_PROOT_SHOW_PATHS
 
-            # Help the user out by including the collections path inside the bubblewrap environment
-            if getattr(settings, 'AWX_ANSIBLE_COLLECTIONS_PATHS', []):
-                show_paths.extend(settings.AWX_ANSIBLE_COLLECTIONS_PATHS)
-
             pi_path = settings.AWX_PROOT_BASE_PATH
             if not self.instance.is_isolated():
                 pi_path = tempfile.mkdtemp(
@@ -966,11 +962,6 @@ class BaseTask(object):
         if self.should_use_proot(instance):
             env['PROOT_TMP_DIR'] = settings.AWX_PROOT_BASE_PATH
         env['AWX_PRIVATE_DATA_DIR'] = private_data_dir
-
-        if 'ANSIBLE_COLLECTIONS_PATHS' in env:
-            env['ANSIBLE_COLLECTIONS_PATHS'] += os.pathsep + os.pathsep.join(settings.AWX_ANSIBLE_COLLECTIONS_PATHS)
-        else:
-            env['ANSIBLE_COLLECTIONS_PATHS'] = os.pathsep.join(settings.AWX_ANSIBLE_COLLECTIONS_PATHS)
         return env
 
     def should_use_proot(self, instance):
@@ -1474,13 +1465,15 @@ class RunJob(BaseTask):
             if authorize:
                 env['ANSIBLE_NET_AUTH_PASS'] = network_cred.get_input('authorize_password', default='')
 
-        for env_key, folder in (
-                ('ANSIBLE_COLLECTIONS_PATHS', 'requirements_collections'),
-                ('ANSIBLE_ROLES_PATH', 'requirements_roles')):
-            paths = []
+        for env_key, folder, default in (
+                ('ANSIBLE_COLLECTIONS_PATHS', 'requirements_collections', '~/.ansible/collections:/usr/share/ansible/collections'),
+                ('ANSIBLE_ROLES_PATH', 'requirements_roles', '~/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles')):
+            paths = default.split(':')
             if env_key in env:
-                paths.append(env[env_key])
-            paths.append(os.path.join(private_data_dir, folder))
+                for path in env[env_key].split(':'):
+                    if path not in paths:
+                        paths = [env[env_key]] + paths
+            paths = [os.path.join(private_data_dir, folder)] + paths
             env[env_key] = os.pathsep.join(paths)
 
         return env
