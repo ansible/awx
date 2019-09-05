@@ -2873,6 +2873,11 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
             activity_stream=self.reverse('api:job_template_activity_stream_list', kwargs={'pk': obj.pk}),
             launch=self.reverse('api:job_template_launch', kwargs={'pk': obj.pk}),
             webhook_key=self.reverse('api:webhook_key', kwargs={'model_kwarg': 'job_templates', 'pk': obj.pk}),
+            webhook_receiver=(
+                self.reverse('api:webhook_receiver_{}'.format(obj.webhook_service),
+                             kwargs={'model_kwarg': 'job_templates', 'pk': obj.pk})
+                if obj.webhook_service else ''
+            ),
             notification_templates_started=self.reverse('api:job_template_notification_templates_started_list', kwargs={'pk': obj.pk}),
             notification_templates_success=self.reverse('api:job_template_notification_templates_success_list', kwargs={'pk': obj.pk}),
             notification_templates_error=self.reverse('api:job_template_notification_templates_error_list', kwargs={'pk': obj.pk}),
@@ -3355,6 +3360,11 @@ class WorkflowJobTemplateSerializer(JobTemplateMixin, LabelsListMixin, UnifiedJo
             schedules = self.reverse('api:workflow_job_template_schedules_list', kwargs={'pk': obj.pk}),
             launch = self.reverse('api:workflow_job_template_launch', kwargs={'pk': obj.pk}),
             webhook_key=self.reverse('api:webhook_key', kwargs={'model_kwarg': 'workflow_job_templates', 'pk': obj.pk}),
+            webhook_receiver=(
+                self.reverse('api:webhook_receiver_{}'.format(obj.webhook_service),
+                             kwargs={'model_kwarg': 'job_templates', 'pk': obj.pk})
+                if obj.webhook_service else ''
+            ),
             workflow_nodes = self.reverse('api:workflow_job_template_workflow_nodes_list', kwargs={'pk': obj.pk}),
             labels = self.reverse('api:workflow_job_template_label_list', kwargs={'pk': obj.pk}),
             activity_stream = self.reverse('api:workflow_job_template_activity_stream_list', kwargs={'pk': obj.pk}),
