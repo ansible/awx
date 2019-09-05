@@ -142,7 +142,8 @@ class JobTemplateForm extends Component {
     try {
       const { data } = await JobTemplatesAPI.readInstanceGroups(template.id);
       this.setState({
-        relatedInstanceGroups: data.results,
+        initialInstanceGroups: data.results,
+        relatedInstanceGroups: [...data.results],
       });
     } catch (err) {
       this.setState({ contentError: err });
@@ -232,6 +233,26 @@ class JobTemplateForm extends Component {
   }
 
   handleInstanceGroupsChange(relatedInstanceGroups) {
+    const { setFieldValue } = this.props;
+    const { initialInstanceGroups } = this.state;
+    let added = [];
+    const removed = [];
+    if (initialInstanceGroups) {
+      initialInstanceGroups.forEach(group => {
+        if (!relatedInstanceGroups.find(g => g.id === group.id)) {
+          removed.push(group);
+        }
+      });
+      relatedInstanceGroups.forEach(group => {
+        if (!initialInstanceGroups.find(g => g.id === group.id)) {
+          added.push(group);
+        }
+      });
+    } else {
+      added = relatedInstanceGroups;
+    }
+    setFieldValue('addedInstanceGroups', added);
+    setFieldValue('removedInstanceGroups', removed);
     this.setState({ relatedInstanceGroups });
   }
 
