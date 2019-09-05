@@ -699,7 +699,10 @@ class WorkflowApproval(UnifiedJob):
 
     @property
     def workflow_job_template(self):
-        return self.unified_job_node.workflow_job.unified_job_template
+        try:
+            return self.unified_job_node.workflow_job.unified_job_template
+        except ObjectDoesNotExist:
+            return None
 
     @property
     def workflow_job(self):
