@@ -19,7 +19,7 @@ export default
         'initSurvey', '$state', 'CreateSelect2', 'isNotificationAdmin',
         'ToggleNotification','$q', 'InstanceGroupsService', 'InstanceGroupsData',
         'MultiCredentialService', 'availableLabels', 'projectGetPermissionDenied',
-        'inventoryGetPermissionDenied', 'jobTemplateData', 'ParseVariableString', 'ConfigData', '$compile',
+        'inventoryGetPermissionDenied', 'jobTemplateData', 'ParseVariableString', 'ConfigData', '$compile', 'webhookKey',
         function(
             $filter, $scope,
             $stateParams, JobTemplateForm, GenerateForm, Rest, Alert,
@@ -29,7 +29,7 @@ export default
             SurveyControllerInit, $state, CreateSelect2, isNotificationAdmin,
             ToggleNotification, $q, InstanceGroupsService, InstanceGroupsData,
             MultiCredentialService, availableLabels, projectGetPermissionDenied,
-            inventoryGetPermissionDenied, jobTemplateData, ParseVariableString, ConfigData, $compile
+            inventoryGetPermissionDenied, jobTemplateData, ParseVariableString, ConfigData, $compile, webhookKey
         ) {
 
             $scope.$watch('job_template_obj.summary_fields.user_capabilities.edit', function(val) {
@@ -80,7 +80,7 @@ export default
                 //
                 // webhook credential - all handlers, dynamic state, etc. live here
                 //
-
+                $scope.webhook_key = webhookKey;
                 $scope.webhookCredential = {
                     id: _.get(jobTemplateData, ['summary_fields', 'webhook_credential', 'id']),
                     name: _.get(jobTemplateData, ['summary_fields', 'webhook_credential', 'name']),
@@ -704,6 +704,13 @@ export default
                     });
 
 
+                let webhookKeyPromise = Promise.resolve();
+                if ($scope.webhook_key !== webhookKey) {
+                    Rest.setUrl(jobTemplateData.related.webhook_key);
+                    webhookKeyPromise = Rest.post({ webhook_key: $scope.webhook_key });
+                }
+
+
                 var orgDefer = $q.defer();
                 var associationDefer = $q.defer();
                 var associatedLabelsDefer = $q.defer();
@@ -776,6 +783,7 @@ export default
                         for (var i = 0; i < toPost.length; i++) {
                             defers.push(Rest.post(toPost[i]));
                         }
+                        defers.push(webhookKeyPromise);
                         $q.all(defers)
                             .then(function() {
                                 Wait('stop');
@@ -884,6 +892,7 @@ export default
                     if (!data.webhook_credential) {
                         data.webhook_service = null;
                     }
+                    delete data.webhook_key;
 
                     Rest.setUrl(defaultUrl + $state.params.job_template_id);
                     Rest.patch(data)
