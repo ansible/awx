@@ -1,7 +1,6 @@
 from awxkit.api.pages import base
 from awxkit.api.resources import resources
-from awxkit.utils import poll_until, seconds_since_date_string, suppress
-from awxkit.exceptions import WaitUntilTimeout
+from awxkit.utils import poll_until, seconds_since_date_string
 from . import page
 
 
@@ -11,8 +10,7 @@ class WorkflowJobNode(base.Base):
         """Waits until node's job exists"""
         adjusted_timeout = timeout - seconds_since_date_string(self.created)
 
-        with suppress(WaitUntilTimeout):
-            poll_until(self.job_exists, interval=interval, timeout=adjusted_timeout, **kw)
+        poll_until(self.job_exists, interval=interval, timeout=adjusted_timeout, **kw)
 
         return self
 
