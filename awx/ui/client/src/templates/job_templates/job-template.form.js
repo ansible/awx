@@ -339,6 +339,17 @@ function(NotificationsList, i18n) {
                         dataContainer: "body",
                         ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                     }, {
+                        name: 'enable_webhooks',
+                        label: i18n._('Enable Webhook'),
+                        type: 'checkbox',
+                        ngChange: "toggleCallback('webhook_key')",
+                        column: 2,
+                        awPopOver: "<p>" + i18n._("Enabled webhook for this job template.") + "</p>",
+                        dataPlacement: 'right',
+                        dataTitle: i18n._('Enable Webhook'),
+                        dataContainer: "body",
+                        ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
+                    }, {
                         name: 'allow_simultaneous',
                         label: i18n._('Enable Concurrent Jobs'),
                         type: 'checkbox',
@@ -396,7 +407,7 @@ function(NotificationsList, i18n) {
                     type:'select',
                     defaultText: i18n._('Choose a Webhook Service'),
                     ngOptions: 'svc.label for svc in webhook_service_options track by svc.value',
-                    ngShow: true,
+                    ngShow: "enable_webhooks  && enable_webhooks !== 'false'",
                     ngDisabled: "!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate) || !canGetAllRelatedResources",
                     id: 'webhook-service-select',
                     required: false,
@@ -409,8 +420,7 @@ function(NotificationsList, i18n) {
                 webhook_url: {
                     label: i18n._('Webhook URL'),
                     type: 'text',
-                    readonly: true,
-                    //ngShow: "allow_webhooks && allow_webhooks !== 'false'",
+                    ngShow: "enable_webhooks  && enable_webhooks !== 'false'",
                     column: 2,
                     awPopOver: "webhook_url_help",
                     awPopOverWatch: "webhook_url_help",
@@ -419,9 +429,27 @@ function(NotificationsList, i18n) {
                     dataContainer: "body",
                     ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                 },
+                webhook_key: {
+                    label: i18n._('Webhook Key'),
+                    type: 'text',
+                    ngShow: "enable_webhooks  && enable_webhooks !== 'false'",
+                    genHash: true,
+                    column: 2,
+                    awPopOver: "webhook_key_help",
+                    awPopOverWatch: "webhook_key_help",
+                    dataPlacement: 'right',
+                    dataTitle: i18n._("Webhook Config Key"),
+                    dataContainer: "body",
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)',
+                    awRequiredWhen: {
+                        reqExpression: 'enable_webhooks',
+                        alwaysShowAsterisk: true
+                    }
+                },
                 webhook_credential: {
                     label: i18n._('Webhook Credential'),
                     type: 'custom',
+                    ngShow: "enable_webhooks  && enable_webhooks !== 'false'",
                     control: `
                         <webhook-credential-input
                             is-field-disabled="!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate) || !(webhookCredential.modalBaseParams.credential_type__namespace)"

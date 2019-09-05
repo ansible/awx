@@ -430,6 +430,14 @@ export default
                     default_val: dft
                 });
 
+                const defaultWebhookKey = ($scope.webhook_key === "" || $scope.webhook_key === null) ? false : true;
+                hashSetup({
+                    scope: $scope,
+                    master: master,
+                    check_field: 'enable_webhooks',
+                    default_val: defaultWebhookKey
+                });
+
                 ParseTypeChange({
                     scope: $scope,
                     field_id: 'extra_vars',
