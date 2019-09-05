@@ -7,10 +7,10 @@
 import {N_} from "../i18n";
 
 export default
-    ['Wait', '$state', '$scope', '$rootScope', 'ProcessErrors', 'CheckLicense', 'moment', 'Rest', '$timeout',
-    '$window', 'ConfigService', 'pendoService', 'insightsEnablementService', 'i18n', 'config', 'GetBasePath',
-    function(Wait, $state, $scope, $rootScope, ProcessErrors, CheckLicense, moment, Rest, $timeout,
-    $window, ConfigService, pendoService, insightsEnablementService, i18n, config, GetBasePath) {
+    ['Wait', '$state', '$scope', '$rootScope', 'ProcessErrors', 'CheckLicense', 'moment', '$timeout', 'Rest',
+    '$window', 'ConfigService', 'pendoService', 'insightsEnablementService', 'i18n', 'config', 'rhCreds', 'GetBasePath',
+    function(Wait, $state, $scope, $rootScope, ProcessErrors, CheckLicense, moment, $timeout, Rest,
+    $window, ConfigService, pendoService, insightsEnablementService, i18n, config, rhCreds, GetBasePath) {
 
         const calcDaysRemaining = function(seconds) {
       	 		// calculate the number of days remaining on the license
@@ -61,9 +61,18 @@ export default
             };
 
             $scope.rhCreds = {};
+
+            if (rhCreds.REDHAT_USERNAME && rhCreds.REDHAT_USERNAME !== "") {
+                $scope.rhCreds.username = rhCreds.REDHAT_USERNAME;
+            }
+
+            if (rhCreds.REDHAT_PASSWORD && rhCreds.REDHAT_PASSWORD !== "") {
+                $scope.rhCreds.password = rhCreds.REDHAT_PASSWORD;
+                $scope.showPlaceholderPassword = true;
+            }
         };
 
-        const init = (config) => {
+        const updateRHCreds = (config) => {
             Rest.setUrl(`${GetBasePath('settings')}system/`);
             Rest.get()
                 .then(({data}) => {
@@ -82,7 +91,7 @@ export default
                 });
         };
         
-        init(config);
+        initVars(config);
 
         $scope.getKey = function(event) {
             // Mimic HTML5 spec, show filename
@@ -210,7 +219,7 @@ export default
                                         licenseMissing: false
                                 });
                             } else {
-                                init(config);
+                                updateRHCreds(config);
                                 $scope.success = true;
                                 $rootScope.licenseMissing = false;
                                 // for animation purposes

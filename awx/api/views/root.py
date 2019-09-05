@@ -201,7 +201,7 @@ class ApiV2SubscriptionView(APIView):
                 getattr(getattr(exc, 'response', None), 'status_code', None) == 401
             ):
                 msg = _("The provided credentials are invalid (HTTP 401).")
-            if isinstance(exc, ValueError) and exc.args:
+            if isinstance(exc, (ValueError, OSError)) and exc.args:
                 msg = exc.args[0]
             logger.exception(smart_text(u"Invalid license submitted."),
                              extra=dict(actor=request.user.username))
