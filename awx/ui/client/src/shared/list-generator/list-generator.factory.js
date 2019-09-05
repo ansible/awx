@@ -546,7 +546,9 @@ export default ['$compile', 'Attr', 'Icon',
                 for (fld in list.fields) {
                     if (options.mode !== 'lookup' || (options.mode === 'lookup' && (fld === 'name' || _.has(list.fields[fld], 'includeModal')))){
                         let customClass = list.fields[fld].columnClass || '';
+                        const ngIf = list.fields[fld].ngIf ? `ng-if="${list.fields[fld].ngIf}"` : '';
                         html += `<div
+                            ${ngIf}
                             base-path="${list.basePath || list.name}"
                             collection="${list.name}"
                             dataset="${list.iterator}_dataset"

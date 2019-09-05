@@ -35,6 +35,19 @@ export default ['i18n', 'templateUrl', function(i18n, templateUrl){
                 excludeModal: true,
                 columnClass: 'd-none d-sm-flex col-md-4 col-sm-3'
             },
+            notification_templates_approvals: {
+                label: i18n._('Approval'),
+                columnClass: 'd-none d-md-flex justify-content-start col-md-1',
+                flag: 'notification_templates_approvals',
+                type: "toggle",
+                ngClick: "toggleNotification($event, notification.id, 'notification_templates_approvals')",
+                ngDisabled: "!sufficientRoleForNotifToggle",
+                awToolTip: "{{ schedule.play_tip }}",
+                dataTipWatch: "schedule.play_tip",
+                dataPlacement: "right",
+                nosort: true,
+                ngIf: "showApprovalColumn"
+            },
             notification_templates_started: {
                 label: i18n._("Start"),
                 flag: 'notification_templates_started',
