@@ -14,52 +14,57 @@ class InstanceGroupsLookup extends React.Component {
   render() {
     const { value, tooltip, onChange, className, i18n } = this.props;
 
+    /*
+      Wrapping <div> added to workaround PF bug:
+      https://github.com/patternfly/patternfly-react/issues/2855
+    */
     return (
-      <FormGroup
-        className={className}
-        label={
-          <Fragment>
-            {i18n._(t`Instance Groups`)}{' '}
-            {tooltip && (
-              <Tooltip position="right" content={tooltip}>
-                <QuestionCircleIcon />
-              </Tooltip>
-            )}
-          </Fragment>
-        }
-        fieldId="org-instance-groups"
-      >
-        <Lookup
-          id="org-instance-groups"
-          lookupHeader={i18n._(t`Instance Groups`)}
-          name="instanceGroups"
-          value={value}
-          onLookupSave={onChange}
-          getItems={getInstanceGroups}
-          multiple
-          columns={[
-            {
-              name: i18n._(t`Name`),
-              key: 'name',
-              isSortable: true,
-              isSearchable: true,
-            },
-            {
-              name: i18n._(t`Modified`),
-              key: 'modified',
-              isSortable: false,
-              isNumeric: true,
-            },
-            {
-              name: i18n._(t`Created`),
-              key: 'created',
-              isSortable: false,
-              isNumeric: true,
-            },
-          ]}
-          sortedColumnKey="name"
-        />
-      </FormGroup>
+      <div className={className}>
+        <FormGroup
+          label={
+            <Fragment>
+              {i18n._(t`Instance Groups`)}{' '}
+              {tooltip && (
+                <Tooltip position="right" content={tooltip}>
+                  <QuestionCircleIcon />
+                </Tooltip>
+              )}
+            </Fragment>
+          }
+          fieldId="org-instance-groups"
+        >
+          <Lookup
+            id="org-instance-groups"
+            lookupHeader={i18n._(t`Instance Groups`)}
+            name="instanceGroups"
+            value={value}
+            onLookupSave={onChange}
+            getItems={getInstanceGroups}
+            multiple
+            columns={[
+              {
+                name: i18n._(t`Name`),
+                key: 'name',
+                isSortable: true,
+                isSearchable: true,
+              },
+              {
+                name: i18n._(t`Modified`),
+                key: 'modified',
+                isSortable: false,
+                isNumeric: true,
+              },
+              {
+                name: i18n._(t`Created`),
+                key: 'created',
+                isSortable: false,
+                isNumeric: true,
+              },
+            ]}
+            sortedColumnKey="name"
+          />
+        </FormGroup>
+      </div>
     );
   }
 }

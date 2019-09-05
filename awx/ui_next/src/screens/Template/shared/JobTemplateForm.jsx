@@ -85,6 +85,7 @@ class JobTemplateForm extends Component {
     this.loadLabels = this.loadLabels.bind(this);
     this.removeLabel = this.removeLabel.bind(this);
     this.handleProjectValidation = this.handleProjectValidation.bind(this);
+    this.loadRelatedInstanceGroups = this.loadRelatedInstanceGroups.bind(this);
     this.loadRelatedProjectPlaybooks = this.loadRelatedProjectPlaybooks.bind(
       this
     );
@@ -95,11 +96,11 @@ class JobTemplateForm extends Component {
 
   componentDidMount() {
     const { validateField } = this.props;
-    validateField('project');
     this.setState({ contentError: null, hasContentLoading: true });
     Promise.all([this.loadLabels(), this.loadRelatedInstanceGroups()]).then(
       () => {
         this.setState({ hasContentLoading: false });
+        validateField('project');
       }
     );
   }
@@ -242,8 +243,6 @@ class JobTemplateForm extends Component {
       inventory,
       project,
       relatedProjectPlaybooks = [],
-      newLabels,
-      removedLabels,
       relatedInstanceGroups,
       allowCallbacks,
     } = this.state;
@@ -343,8 +342,7 @@ class JobTemplateForm extends Component {
             validate={required(null, i18n)}
             onBlur={handleBlur}
             render={({ form, field }) => {
-              const isValid =
-                form && (!form.touched[field.name] || !form.errors[field.name]);
+              const isValid = !form.touched.job_type || !form.errors.job_type;
               return (
                 <FormGroup
                   fieldId="template-job-type"
@@ -364,7 +362,7 @@ class JobTemplateForm extends Component {
                   </Tooltip>
                   <AnsibleSelect
                     isValid={isValid}
-                    id="job_type"
+                    id="template-job-type"
                     data={jobTypeOptions}
                     {...field}
                   />
@@ -391,34 +389,29 @@ class JobTemplateForm extends Component {
           <Field
             name="project"
             validate={this.handleProjectValidation()}
-            render={({ form }) => {
-              const isValid = form && !form.errors.project;
-              return (
-                <ProjectLookup
-                  helperTextInvalid={form.errors.project}
-                  isValid={isValid}
-                  value={project}
-                  onBlur={handleBlur}
-                  tooltip={i18n._(t`Select the project containing the playbook
+            render={({ form }) => (
+              <ProjectLookup
+                helperTextInvalid={form.errors.project}
+                isValid={!form.errors.project}
+                value={project}
+                onBlur={handleBlur}
+                tooltip={i18n._(t`Select the project containing the playbook
                   you want this job to execute.`)}
-                  onChange={value => {
-                    this.loadRelatedProjectPlaybooks(value.id);
-                    form.setFieldValue('project', value.id);
-                    form.setFieldTouched('project');
-                    this.setState({ project: value });
-                  }}
-                  required
-                />
-              );
-            }}
+                onChange={value => {
+                  this.loadRelatedProjectPlaybooks(value.id);
+                  form.setFieldValue('project', value.id);
+                  this.setState({ project: value });
+                }}
+                required
+              />
+            )}
           />
           <Field
             name="playbook"
             validate={required(i18n._(t`Select a value for this field`), i18n)}
             onBlur={handleBlur}
             render={({ field, form }) => {
-              const isValid =
-                form && (!form.touched[field.name] || !form.errors[field.name]);
+              const isValid = !form.touched.playbook || !form.errors.playbook;
               return (
                 <FormGroup
                   fieldId="template-playbook"
@@ -436,7 +429,7 @@ class JobTemplateForm extends Component {
                     <QuestionCircleIcon />
                   </Tooltip>
                   <AnsibleSelect
-                    id="playbook"
+                    id="template-playbook"
                     data={playbookOptions}
                     isValid={isValid}
                     form={form}
@@ -510,7 +503,11 @@ class JobTemplateForm extends Component {
                   >
                     <QuestionCircleIcon />
                   </Tooltip>
-                  <AnsibleSelect data={verbosityOptions} {...field} />
+                  <AnsibleSelect
+                    id="template-verbosity"
+                    data={verbosityOptions}
+                    {...field}
+                  />
                 </FormGroup>
               )}
             />
@@ -528,6 +525,7 @@ class JobTemplateForm extends Component {
               id="template-timeout"
               name="timeout"
               type="number"
+              min="0"
               label={i18n._(t`Timeout`)}
               tooltip={i18n._(t`The amount of time (in seconds) to run
                     before the task is canceled. Defaults to 0 for no job
@@ -653,7 +651,7 @@ class JobTemplateForm extends Component {
                 </span>
               }
               id="option-callbacks"
-              checked={allowCallbacks}
+              isChecked={allowCallbacks}
               onChange={checked => {
                 this.setState({ allowCallbacks: checked });
               }}
@@ -724,7 +722,7 @@ const FormikApp = withFormik({
       forks,
       limit,
       verbosity,
-      job_slicing,
+      job_slice_count,
       timeout,
       diff_mode,
       job_tags,
@@ -733,6 +731,7 @@ const FormikApp = withFormik({
       allow_callbacks,
       allow_simultaneous,
       use_fact_cache,
+      host_config_key,
       summary_fields = { labels: { results: [] } },
     } = { ...template };
 
@@ -744,11 +743,11 @@ const FormikApp = withFormik({
       project: project || '',
       playbook: playbook || '',
       labels: summary_fields.labels.results,
-      forks: forks || '',
+      forks: forks || 0,
       limit: limit || '',
       verbosity: verbosity || '0',
-      job_slice_count: job_slicing || '',
-      timout: timeout || '',
+      job_slice_count: job_slice_count || 1,
+      timeout: timeout || 0,
       diff_mode: diff_mode || false,
       job_tags: job_tags || '',
       skip_tags: skip_tags || '',
@@ -756,6 +755,7 @@ const FormikApp = withFormik({
       allow_callbacks: allow_callbacks || false,
       allow_simultaneous: allow_simultaneous || false,
       use_fact_cache: use_fact_cache || false,
+      host_config_key: host_config_key || '',
     };
   },
   handleSubmit: (values, bag) => bag.props.handleSubmit(values),

@@ -5,9 +5,7 @@ import styled from 'styled-components';
 const Container = styled.div`
   margin: 15px 0;
   transition: all 0.2s ease-out;
-  ${props => !props.isExpanded && `
-    overflow: hidden;
-  `}
+  ${props => !props.isExpanded && `overflow: hidden;`}
 `;
 
 function ExpandingContainer({ isExpanded, children }) {

@@ -7,37 +7,42 @@ function arrayToString(tags) {
 }
 
 function stringToArray(value) {
-  return value.split(',').filter(val => !!val).map(val => ({
-    id: val,
-    name: val,
-  }));
+  return value
+    .split(',')
+    .filter(val => !!val)
+    .map(val => ({
+      id: val,
+      name: val,
+    }));
 }
 
 /*
  * Adapter providing a simplified API to a MultiSelect. The value
  * is a comma-separated string.
  */
-function TagMultiSelect ({ onChange, value }) {
+function TagMultiSelect({ onChange, value }) {
   const [options, setOptions] = useState(stringToArray(value));
 
   return (
     <MultiSelect
-      onChange={val => { onChange(arrayToString(val)) }}
-      onAddNewItem={(newItem) => {
+      onChange={val => {
+        onChange(arrayToString(val));
+      }}
+      onAddNewItem={newItem => {
         if (!options.find(o => o.name === newItem.name)) {
           setOptions(options.concat(newItem));
         }
       }}
       associatedItems={stringToArray(value)}
       options={options}
-      createNewItem={(name) => ({ id: name, name })}
+      createNewItem={name => ({ id: name, name })}
     />
-  )
+  );
 }
 
 TagMultiSelect.propTypes = {
   onChange: func.isRequired,
   value: string.isRequired,
-}
+};
 
 export default TagMultiSelect;

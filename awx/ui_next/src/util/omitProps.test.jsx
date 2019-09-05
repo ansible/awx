@@ -32,4 +32,4 @@ describe('omitProps', () => {
     expect(div.prop('foo')).toEqual(undefined);
     expect(div.prop('bar')).toEqual('two');
   });
-})
+});

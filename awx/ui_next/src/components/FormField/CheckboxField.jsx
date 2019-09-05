@@ -30,7 +30,7 @@ function CheckboxField({ id, name, label, tooltip, validate, ...rest }) {
           }
           id={id}
           {...rest}
-          checked={field.value}
+          isChecked={field.value}
           {...field}
           onChange={(value, event) => {
             field.onChange(event);

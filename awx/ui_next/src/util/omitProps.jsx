@@ -10,7 +10,7 @@ export default function omitProps(Component, ...omit) {
     const clean = { ...props };
     omit.forEach(key => {
       delete clean[key];
-    })
+    });
     return <Component {...clean} />;
-  }
+  };
 }
