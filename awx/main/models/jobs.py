@@ -896,22 +896,6 @@ class LaunchTimeConfigBase(BaseModel):
                     data[prompt_name] = prompt_val
         return data
 
-    def display_extra_vars(self):
-        '''
-        Hides fields marked as passwords in survey.
-        '''
-        if hasattr(self, 'survey_passwords') and self.survey_passwords:
-            extra_vars = parse_yaml_or_json(self.extra_vars).copy()
-            for key, value in self.survey_passwords.items():
-                if key in extra_vars:
-                    extra_vars[key] = value
-            return extra_vars
-        else:
-            return self.extra_vars
-
-    def display_extra_data(self):
-        return self.display_extra_vars()
-
 
 for field_name in JobTemplate.get_ask_mapping().keys():
     if field_name == 'extra_vars':
@@ -953,6 +937,22 @@ class LaunchTimeConfig(LaunchTimeConfigBase):
     @extra_vars.setter
     def extra_vars(self, extra_vars):
         self.extra_data = extra_vars
+
+    def display_extra_vars(self):
+        '''
+        Hides fields marked as passwords in survey.
+        '''
+        if hasattr(self, 'survey_passwords') and self.survey_passwords:
+            extra_vars = parse_yaml_or_json(self.extra_vars).copy()
+            for key, value in self.survey_passwords.items():
+                if key in extra_vars:
+                    extra_vars[key] = value
+            return extra_vars
+        else:
+            return self.extra_vars
+
+    def display_extra_data(self):
+        return self.display_extra_vars()
 
 
 class JobLaunchConfig(LaunchTimeConfig):
