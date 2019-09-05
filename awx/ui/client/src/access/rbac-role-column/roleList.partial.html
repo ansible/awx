@@ -18,7 +18,16 @@
     <div class="RoleList-tag"
         ng-class="{'RoleList-tag--deletable': entry.explicit && entry.user_capabilities.unattach,
             'RoleList-tag--team': entry.team_id}"
-        ng-if="!entry.team_id">
+        ng-if="!entry.team_id && (entry.explicit || !entry.resource_type)">
         <span class="RoleList-name">{{ entry.name }}</span>
+    </div>
+
+    <div class="RoleList-tag"
+        ng-class="{'RoleList-tag--deletable': entry.explicit && entry.user_capabilities.unattach,
+            'RoleList-tag--team': entry.team_id}"
+        aw-tool-tip='<div>Via {{ entry.parent_role_name | sanitize }} role on {{ entry.resource_type | sanitize }} {{entry.resource_name | sanitize}}</div>' aw-tip-placement='bottom'
+        ng-if="!entry.team_id && !entry.explicit && entry.resource_type">
+        <span class="RoleList-name">{{ entry.name }}</span>
+        <i class="fa fa-sitemap"></i>
     </div>
 </div>
