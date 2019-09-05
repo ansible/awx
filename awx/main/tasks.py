@@ -1888,8 +1888,8 @@ class RunProjectUpdate(BaseTask):
         extra_vars.update(extra_vars_new)
 
         scm_branch = project_update.scm_branch
-        branch_override = bool(project_update.scm_branch != project_update.project.scm_branch)
-        if project_update.job_type == 'run' and scm_branch and (not branch_override):
+        branch_override = bool(scm_branch and project_update.scm_branch != project_update.project.scm_branch)
+        if project_update.job_type == 'run' and (not branch_override):
             scm_branch = project_update.project.scm_revision
         elif not scm_branch:
             scm_branch = {'hg': 'tip'}.get(project_update.scm_type, 'HEAD')
