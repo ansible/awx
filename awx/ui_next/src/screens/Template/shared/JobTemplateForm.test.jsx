@@ -2,7 +2,7 @@ import React from 'react';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
 import { sleep } from '@testUtils/testUtils';
 import JobTemplateForm, { _JobTemplateForm } from './JobTemplateForm';
-import { LabelsAPI } from '@api';
+import { LabelsAPI, JobTemplatesAPI } from '@api';
 
 jest.mock('@api');
 
@@ -29,9 +29,37 @@ describe('<JobTemplateForm />', () => {
       labels: { results: [{ name: 'Sushi', id: 1 }, { name: 'Major', id: 2 }] },
     },
   };
+  const mockInstanceGroups = [
+    {
+      id: 1,
+      type: 'instance_group',
+      url: '/api/v2/instance_groups/1/',
+      related: {
+        jobs: '/api/v2/instance_groups/1/jobs/',
+        instances: '/api/v2/instance_groups/1/instances/',
+      },
+      name: 'tower',
+      capacity: 59,
+      committed_capacity: 0,
+      consumed_capacity: 0,
+      percent_capacity_remaining: 100.0,
+      jobs_running: 0,
+      jobs_total: 3,
+      instances: 1,
+      controller: null,
+      is_controller: false,
+      is_isolated: false,
+      policy_instance_percentage: 100,
+      policy_instance_minimum: 0,
+      policy_instance_list: [],
+    },
+  ];
   beforeEach(() => {
     LabelsAPI.read.mockReturnValue({
       data: mockData.summary_fields.labels,
+    });
+    JobTemplatesAPI.readInstanceGroups.mockReturnValue({
+      data: { results: mockInstanceGroups },
     });
   });
 
@@ -39,7 +67,7 @@ describe('<JobTemplateForm />', () => {
     jest.clearAllMocks();
   });
 
-  test('initially renders successfully', async done => {
+  test('should render labels MultiSelect', async () => {
     const wrapper = mountWithContexts(
       <JobTemplateForm
         template={mockData}
@@ -47,19 +75,18 @@ describe('<JobTemplateForm />', () => {
         handleCancel={jest.fn()}
       />
     );
-
-    await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
+    await waitForElement(wrapper, 'Form', el => el.length === 0);
     expect(LabelsAPI.read).toHaveBeenCalled();
+    expect(JobTemplatesAPI.readInstanceGroups).toHaveBeenCalled();
+    wrapper.update();
     expect(
       wrapper
-        .find('FormGroup[fieldId="template-labels"] MultiSelect Chip')
-        .first()
-        .text()
-    ).toEqual('Sushi');
-    done();
+        .find('FormGroup[fieldId="template-labels"] MultiSelect')
+        .prop('associatedItems')
+    ).toEqual(mockData.summary_fields.labels.results);
   });
 
-  test('should update form values on input changes', async done => {
+  test('should update form values on input changes', async () => {
     const wrapper = mountWithContexts(
       <JobTemplateForm
         template={mockData}
@@ -96,10 +123,9 @@ describe('<JobTemplateForm />', () => {
       target: { value: 'new baz type', name: 'playbook' },
     });
     expect(form.state('values').playbook).toEqual('new baz type');
-    done();
   });
 
-  test('should call handleSubmit when Submit button is clicked', async done => {
+  test('should call handleSubmit when Submit button is clicked', async () => {
     const handleSubmit = jest.fn();
     const wrapper = mountWithContexts(
       <JobTemplateForm
@@ -113,10 +139,9 @@ describe('<JobTemplateForm />', () => {
     wrapper.find('button[aria-label="Save"]').simulate('click');
     await sleep(1);
     expect(handleSubmit).toBeCalled();
-    done();
   });
 
-  test('should call handleCancel when Cancel button is clicked', async done => {
+  test('should call handleCancel when Cancel button is clicked', async () => {
     const handleCancel = jest.fn();
     const wrapper = mountWithContexts(
       <JobTemplateForm
@@ -129,10 +154,9 @@ describe('<JobTemplateForm />', () => {
     expect(handleCancel).not.toHaveBeenCalled();
     wrapper.find('button[aria-label="Cancel"]').prop('onClick')();
     expect(handleCancel).toBeCalled();
-    done();
   });
 
-  test('should call loadRelatedProjectPlaybooks when project value changes', async done => {
+  test('should call loadRelatedProjectPlaybooks when project value changes', async () => {
     const loadRelatedProjectPlaybooks = jest.spyOn(
       _JobTemplateForm.prototype,
       'loadRelatedProjectPlaybooks'
@@ -150,14 +174,9 @@ describe('<JobTemplateForm />', () => {
       name: 'project',
     });
     expect(loadRelatedProjectPlaybooks).toHaveBeenCalledWith(10);
-    done();
   });
 
-  test('handleNewLabel should arrange new labels properly', async done => {
-    const handleNewLabel = jest.spyOn(
-      _JobTemplateForm.prototype,
-      'handleNewLabel'
-    );
+  test('handleNewLabel should arrange new labels properly', async () => {
     const event = { key: 'Enter', preventDefault: () => {} };
     const wrapper = mountWithContexts(
       <JobTemplateForm
@@ -167,22 +186,25 @@ describe('<JobTemplateForm />', () => {
       />
     );
     await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
-    const multiSelect = wrapper.find('MultiSelect');
+    const multiSelect = wrapper.find(
+      'FormGroup[fieldId="template-labels"] MultiSelect'
+    );
     const component = wrapper.find('JobTemplateForm');
 
     wrapper.setState({ newLabels: [], loadedLabels: [], removedLabels: [] });
     multiSelect.setState({ input: 'Foo' });
-    component.find('input[aria-label="labels"]').prop('onKeyDown')(event);
-    expect(handleNewLabel).toHaveBeenCalledWith('Foo');
+    component
+      .find('FormGroup[fieldId="template-labels"] input[aria-label="labels"]')
+      .prop('onKeyDown')(event);
 
     component.instance().handleNewLabel({ name: 'Bar', id: 2 });
-    expect(component.state().newLabels).toEqual([
-      { name: 'Foo', organization: 1 },
-      { associate: true, id: 2, name: 'Bar' },
-    ]);
-    done();
+    const newLabels = component.state('newLabels');
+    expect(newLabels).toHaveLength(2);
+    expect(newLabels[0].name).toEqual('Foo');
+    expect(newLabels[0].organization).toEqual(1);
   });
-  test('disassociateLabel should arrange new labels properly', async done => {
+
+  test('disassociateLabel should arrange new labels properly', async () => {
     const wrapper = mountWithContexts(
       <JobTemplateForm
         template={mockData}
@@ -203,6 +225,5 @@ describe('<JobTemplateForm />', () => {
     component.instance().removeLabel({ name: 'Sushi', id: 1 });
     expect(component.state().newLabels.length).toBe(0);
     expect(component.state().removedLabels.length).toBe(1);
-    done();
   });
 });

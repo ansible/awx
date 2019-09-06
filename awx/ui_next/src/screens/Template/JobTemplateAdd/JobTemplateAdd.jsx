@@ -17,23 +17,30 @@ function JobTemplateAdd({ history, i18n }) {
   const [formSubmitError, setFormSubmitError] = useState(null);
 
   async function handleSubmit(values) {
-    const { newLabels, removedLabels } = values;
-    delete values.newLabels;
-    delete values.removedLabels;
+    const {
+      newLabels,
+      removedLabels,
+      addedInstanceGroups,
+      removedInstanceGroups,
+      ...remainingValues
+    } = values;
 
     setFormSubmitError(null);
     try {
       const {
         data: { id, type },
-      } = await JobTemplatesAPI.create(values);
-      await Promise.all([submitLabels(id, newLabels, removedLabels)]);
+      } = await JobTemplatesAPI.create(remainingValues);
+      await Promise.all([
+        submitLabels(id, newLabels, removedLabels),
+        submitInstanceGroups(id, addedInstanceGroups, removedInstanceGroups),
+      ]);
       history.push(`/templates/${type}/${id}/details`);
     } catch (error) {
       setFormSubmitError(error);
     }
   }
 
-  async function submitLabels(id, newLabels = [], removedLabels = []) {
+  function submitLabels(id, newLabels = [], removedLabels = []) {
     const disassociationPromises = removedLabels.map(label =>
       JobTemplatesAPI.disassociateLabel(id, label)
     );
@@ -44,12 +51,18 @@ function JobTemplateAdd({ history, i18n }) {
       .filter(label => label.organization)
       .map(label => JobTemplatesAPI.generateLabel(id, label));
 
-    const results = await Promise.all([
+    return Promise.all([
       ...disassociationPromises,
       ...associationPromises,
       ...creationPromises,
     ]);
-    return results;
+  }
+
+  function submitInstanceGroups(templateId, addedGroups = []) {
+    const associatePromises = addedGroups.map(group =>
+      JobTemplatesAPI.associateInstanceGroup(templateId, group.id)
+    );
+    return Promise.all(associatePromises);
   }
 
   function handleCancel() {

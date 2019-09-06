@@ -102,18 +102,22 @@ class JobTemplateEdit extends Component {
   }
 
   async handleSubmit(values) {
+    const { template, history } = this.props;
     const {
-      template: { id },
-      history,
-    } = this.props;
-    const { newLabels, removedLabels } = values;
-    delete values.newLabels;
-    delete values.removedLabels;
+      newLabels,
+      removedLabels,
+      addedInstanceGroups,
+      removedInstanceGroups,
+      ...remainingValues
+    } = values;
 
     this.setState({ formSubmitError: null });
     try {
-      await JobTemplatesAPI.update(id, values);
-      await Promise.all([this.submitLabels(newLabels, removedLabels)]);
+      await JobTemplatesAPI.update(template.id, remainingValues);
+      await Promise.all([
+        this.submitLabels(newLabels, removedLabels),
+        this.submitInstanceGroups(addedInstanceGroups, removedInstanceGroups),
+      ]);
       history.push(this.detailsUrl);
     } catch (formSubmitError) {
       this.setState({ formSubmitError });
@@ -121,18 +125,16 @@ class JobTemplateEdit extends Component {
   }
 
   async submitLabels(newLabels = [], removedLabels = []) {
-    const {
-      template: { id },
-    } = this.props;
+    const { template } = this.props;
     const disassociationPromises = removedLabels.map(label =>
-      JobTemplatesAPI.disassociateLabel(id, label)
+      JobTemplatesAPI.disassociateLabel(template.id, label)
     );
     const associationPromises = newLabels
       .filter(label => !label.organization)
-      .map(label => JobTemplatesAPI.associateLabel(id, label));
+      .map(label => JobTemplatesAPI.associateLabel(template.id, label));
     const creationPromises = newLabels
       .filter(label => label.organization)
-      .map(label => JobTemplatesAPI.generateLabel(id, label));
+      .map(label => JobTemplatesAPI.generateLabel(template.id, label));
 
     const results = await Promise.all([
       ...disassociationPromises,
@@ -140,6 +142,17 @@ class JobTemplateEdit extends Component {
       ...creationPromises,
     ]);
     return results;
+  }
+
+  async submitInstanceGroups(addedGroups, removedGroups) {
+    const { template } = this.props;
+    const associatePromises = addedGroups.map(group =>
+      JobTemplatesAPI.associateInstanceGroup(template.id, group.id)
+    );
+    const disassociatePromises = removedGroups.map(group =>
+      JobTemplatesAPI.disassociateInstanceGroup(template.id, group.id)
+    );
+    return Promise.all([...associatePromises, ...disassociatePromises]);
   }
 
   handleCancel() {

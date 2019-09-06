@@ -1,7 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import PropTypes from 'prop-types';
-import { withI18n } from '@lingui/react';
-import { withRouter } from 'react-router-dom';
+import { shape, number, string, func, arrayOf, oneOfType } from 'prop-types';
 import { Chip, ChipGroup } from '@components/Chip';
 import {
   Dropdown as PFDropdown,
@@ -15,11 +13,13 @@ const InputGroup = styled.div`
   border: 1px solid black;
   margin-top: 2px;
 `;
+
 const TextInput = styled(PFTextInput)`
   border: none;
   width: 100%;
   padding-left: 8px;
 `;
+
 const Dropdown = styled(PFDropdown)`
   width: 100%;
   .pf-c-dropdown__toggle.pf-m-plain {
@@ -38,15 +38,27 @@ const Dropdown = styled(PFDropdown)`
   }
 `;
 
+const Item = shape({
+  id: oneOfType([number, string]).isRequired,
+  name: string.isRequired,
+});
+
 class MultiSelect extends Component {
   static propTypes = {
-    associatedItems: PropTypes.arrayOf(
-      PropTypes.shape({
-        name: PropTypes.string.isRequired,
-      })
-    ).isRequired,
-    onAddNewItem: PropTypes.func.isRequired,
-    onRemoveItem: PropTypes.func.isRequired,
+    associatedItems: arrayOf(Item).isRequired,
+    options: arrayOf(Item),
+    onAddNewItem: func,
+    onRemoveItem: func,
+    onChange: func,
+    createNewItem: func,
+  };
+
+  static defaultProps = {
+    onAddNewItem: () => {},
+    onRemoveItem: () => {},
+    onChange: () => {},
+    options: [],
+    createNewItem: null,
   };
 
   constructor(props) {
@@ -61,6 +73,7 @@ class MultiSelect extends Component {
     this.handleSelection = this.handleSelection.bind(this);
     this.removeChip = this.removeChip.bind(this);
     this.handleClick = this.handleClick.bind(this);
+    this.createNewItem = this.createNewItem.bind(this);
   }
 
   componentDidMount() {
@@ -73,11 +86,7 @@ class MultiSelect extends Component {
 
   getInitialChipItems() {
     const { associatedItems } = this.props;
-    return associatedItems.map(item => ({
-      name: item.name,
-      id: item.id,
-      organization: item.organization,
-    }));
+    return associatedItems.map(item => ({ ...item }));
   }
 
   handleClick(e, option) {
@@ -92,19 +101,33 @@ class MultiSelect extends Component {
 
   handleSelection(e, item) {
     const { chipItems } = this.state;
-    const { onAddNewItem } = this.props;
+    const { onAddNewItem, onChange } = this.props;
     e.preventDefault();
 
+    const items = chipItems.concat({ name: item.name, id: item.id });
     this.setState({
-      chipItems: chipItems.concat({ name: item.name, id: item.id }),
+      chipItems: items,
       isExpanded: false,
     });
     onAddNewItem(item);
+    onChange(items);
+  }
+
+  createNewItem(name) {
+    const { createNewItem } = this.props;
+    if (createNewItem) {
+      return createNewItem(name);
+    }
+    return {
+      id: Math.random(),
+      name,
+    };
   }
 
   handleAddItem(event) {
     const { input, chipItems } = this.state;
-    const { onAddNewItem } = this.props;
+    const { options, onAddNewItem, onChange } = this.props;
+    const match = options.find(item => item.name === input);
     const isIncluded = chipItems.some(chipItem => chipItem.name === input);
 
     if (!input) {
@@ -118,30 +141,35 @@ class MultiSelect extends Component {
       this.setState({ input: '', isExpanded: false });
       return;
     }
-    if (event.key === 'Enter') {
+    const isNewItem = !match || !chipItems.find(item => item.id === match.id);
+    if (event.key === 'Enter' && isNewItem) {
       event.preventDefault();
+      const items = chipItems.concat({ name: input, id: input });
+      const newItem = match || this.createNewItem(input);
       this.setState({
-        chipItems: chipItems.concat({ name: input, id: input }),
+        chipItems: items,
         isExpanded: false,
         input: '',
       });
-      onAddNewItem(input);
-    } else if (event.key === 'Tab') {
-      this.setState({ input: '' });
+      onAddNewItem(newItem);
+      onChange(items);
+    } else if (!isNewItem || event.key === 'Tab') {
+      this.setState({ isExpanded: false, input: '' });
     }
   }
 
-  handleInputChange(e) {
-    this.setState({ input: e, isExpanded: true });
+  handleInputChange(value) {
+    this.setState({ input: value, isExpanded: true });
   }
 
   removeChip(e, item) {
-    const { onRemoveItem } = this.props;
+    const { onRemoveItem, onChange } = this.props;
     const { chipItems } = this.state;
     const chips = chipItems.filter(chip => chip.id !== item.id);
 
     this.setState({ chipItems: chips });
     onRemoveItem(item);
+    onChange(chips);
 
     e.preventDefault();
   }
@@ -214,5 +242,4 @@ class MultiSelect extends Component {
     );
   }
 }
-export { MultiSelect as _MultiSelect };
-export default withI18n()(withRouter(MultiSelect));
+export default MultiSelect;

@@ -1,5 +1,13 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+import {
+  arrayOf,
+  oneOfType,
+  func,
+  number,
+  string,
+  shape,
+  bool,
+} from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { FormSelect, FormSelectOption } from '@patternfly/react-core';
@@ -48,12 +56,12 @@ AnsibleSelect.defaultProps = {
 };
 
 AnsibleSelect.propTypes = {
-  data: PropTypes.arrayOf(PropTypes.object),
-  id: PropTypes.string.isRequired,
-  isValid: PropTypes.bool,
-  onBlur: PropTypes.func,
-  onChange: PropTypes.func.isRequired,
-  value: PropTypes.string.isRequired,
+  data: arrayOf(shape()),
+  id: string.isRequired,
+  isValid: bool,
+  onBlur: func,
+  onChange: func.isRequired,
+  value: oneOfType([string, number]).isRequired,
 };
 
 export { AnsibleSelect as _AnsibleSelect };

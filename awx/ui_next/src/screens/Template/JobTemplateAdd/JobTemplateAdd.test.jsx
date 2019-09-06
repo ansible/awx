@@ -6,6 +6,27 @@ import { JobTemplatesAPI, LabelsAPI } from '@api';
 
 jest.mock('@api');
 
+const jobTemplateData = {
+  name: 'Foo',
+  description: 'Baz',
+  job_type: 'run',
+  inventory: 1,
+  project: 2,
+  playbook: 'Bar',
+  forks: 0,
+  limit: '',
+  verbosity: '0',
+  job_slice_count: 1,
+  timeout: 0,
+  job_tags: '',
+  skip_tags: '',
+  diff_mode: false,
+  allow_callbacks: false,
+  allow_simultaneous: false,
+  use_fact_cache: false,
+  host_config_key: '',
+};
+
 describe('<JobTemplateAdd />', () => {
   const defaultProps = {
     description: '',
@@ -63,14 +84,6 @@ describe('<JobTemplateAdd />', () => {
   });
 
   test('handleSubmit should post to api', async done => {
-    const jobTemplateData = {
-      description: 'Baz',
-      inventory: 1,
-      job_type: 'run',
-      name: 'Foo',
-      playbook: 'Bar',
-      project: 2,
-    };
     JobTemplatesAPI.create.mockResolvedValueOnce({
       data: {
         id: 1,
@@ -99,14 +112,6 @@ describe('<JobTemplateAdd />', () => {
     const history = {
       push: jest.fn(),
     };
-    const jobTemplateData = {
-      description: 'Baz',
-      inventory: 1,
-      job_type: 'run',
-      name: 'Foo',
-      playbook: 'Bar',
-      project: 2,
-    };
     JobTemplatesAPI.create.mockResolvedValueOnce({
       data: {
         id: 1,
@@ -118,7 +123,9 @@ describe('<JobTemplateAdd />', () => {
       context: { router: { history } },
     });
 
-    await wrapper.find('JobTemplateForm').prop('handleSubmit')(jobTemplateData);
+    await wrapper.find('JobTemplateForm').invoke('handleSubmit')(
+      jobTemplateData
+    );
     await sleep(0);
     expect(history.push).toHaveBeenCalledWith(
       '/templates/job_template/1/details'
@@ -134,7 +141,7 @@ describe('<JobTemplateAdd />', () => {
       context: { router: { history } },
     });
     await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
-    wrapper.find('button[aria-label="Cancel"]').prop('onClick')();
+    wrapper.find('button[aria-label="Cancel"]').invoke('onClick')();
     expect(history.push).toHaveBeenCalledWith('/templates');
     done();
   });
