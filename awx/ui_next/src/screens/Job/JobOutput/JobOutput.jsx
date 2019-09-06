@@ -16,6 +16,7 @@ import ContentLoading from '@components/ContentLoading';
 import JobEvent from './JobEvent';
 import JobEventSkeleton from './JobEventSkeleton';
 import MenuControls from './MenuControls';
+import HostEventModal from './HostEventModal';
 
 const OutputHeader = styled.div`
   font-weight: var(--pf-global--FontWeight--bold);
@@ -59,6 +60,8 @@ class JobOutput extends Component {
       results: {},
       currentlyLoading: [],
       remoteRowCount: 0,
+      isHostModalOpen: false,
+      hostEvent: {},
     };
 
     this.cache = new CellMeasurerCache({
@@ -69,6 +72,8 @@ class JobOutput extends Component {
     this._isMounted = false;
     this.loadJobEvents = this.loadJobEvents.bind(this);
     this.rowRenderer = this.rowRenderer.bind(this);
+    this.handleHostEventClick = this.handleHostEventClick.bind(this);
+    this.handleHostModalClose = this.handleHostModalClose.bind(this);
     this.handleScrollFirst = this.handleScrollFirst.bind(this);
     this.handleScrollLast = this.handleScrollLast.bind(this);
     this.handleScrollNext = this.handleScrollNext.bind(this);
@@ -150,8 +155,39 @@ class JobOutput extends Component {
     return currentlyLoading.includes(index);
   }
 
+  handleHostEventClick(hostEvent) {
+    this.setState({
+      isHostModalOpen: true,
+      hostEvent,
+    });
+  }
+
+  handleHostModalClose() {
+    this.setState({
+      isHostModalOpen: false,
+    });
+  }
+
   rowRenderer({ index, parent, key, style }) {
     const { results } = this.state;
+
+    const isHostEvent = jobEvent => {
+      const { event, event_data, host, type } = jobEvent;
+      let isHost;
+      if (typeof host === 'number' || (event_data && event_data.res)) {
+        isHost = true;
+      } else if (
+        type === 'project_update_event' &&
+        event !== 'runner_on_skipped' &&
+        event_data.host
+      ) {
+        isHost = true;
+      } else {
+        isHost = false;
+      }
+      return isHost;
+    };
+
     return (
       <CellMeasurer
         key={key}
@@ -161,7 +197,13 @@ class JobOutput extends Component {
         columnIndex={0}
       >
         {results[index] ? (
-          <JobEvent className="row" style={style} {...results[index]} />
+          <JobEvent
+            isClickable={isHostEvent(results[index])}
+            onJobEventClick={() => this.handleHostEventClick(results[index])}
+            className="row"
+            style={style}
+            {...results[index]}
+          />
         ) : (
           <JobEventSkeleton
             className="row"
@@ -242,7 +284,13 @@ class JobOutput extends Component {
 
   render() {
     const { job } = this.props;
-    const { hasContentLoading, contentError, remoteRowCount } = this.state;
+    const {
+      contentError,
+      hasContentLoading,
+      hostEvent,
+      isHostModalOpen,
+      remoteRowCount,
+    } = this.state;
 
     if (hasContentLoading) {
       return <ContentLoading />;
@@ -254,6 +302,13 @@ class JobOutput extends Component {
 
     return (
       <CardBody>
+        {isHostModalOpen && (
+          <HostEventModal
+            handleClose={this.handleHostModalClose}
+            isOpen={isHostModalOpen}
+            hostEvent={hostEvent}
+          />
+        )}
         <OutputHeader>{job.name}</OutputHeader>
         <OutputToolbar>
           <MenuControls

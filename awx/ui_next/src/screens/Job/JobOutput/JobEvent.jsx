@@ -77,6 +77,8 @@ function JobEvent({
   counter,
   created,
   event,
+  isClickable,
+  onJobEventClick,
   stdout,
   start_line,
   style,
@@ -88,8 +90,10 @@ function JobEvent({
         ({ lineNumber, html }) =>
           lineNumber >= 0 && (
             <JobEventLine
+              onClick={isClickable ? onJobEventClick : undefined}
               key={`${counter}-${lineNumber}`}
               isFirst={lineNumber === 0}
+              isClickable={isClickable}
             >
               <JobEventLineToggle />
               <JobEventLineNumber>{lineNumber}</JobEventLineNumber>
