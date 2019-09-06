@@ -89,7 +89,9 @@ class ActionModule(ActionBase):
                 playbook_url = '{}/api/remediations/v1/remediations/{}/playbook'.format(
                     insights_url, item['id'])
                 res = session.get(playbook_url, timeout=120)
-                if res.status_code != 200:
+                if res.status_code == 204:
+                    continue
+                elif res.status_code != 200:
                     result['failed'] = True
                     result['msg'] = (
                         'Expected {} to return a status code of 200 but returned status '
