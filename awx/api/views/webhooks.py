@@ -51,6 +51,7 @@ class WebhookReceiverBase(APIView):
     lookup_field = 'pk'
 
     permission_classes = (AllowAny,)
+    authentication_classes = ()
 
     def get_queryset(self):
         qs_models = {
@@ -95,6 +96,9 @@ class WebhookReceiverBase(APIView):
 
     @csrf_exempt
     def post(self, request, *args, **kwargs):
+        # Ensure that the full contents of the request are captured for multiple uses.
+        request.body
+
         logger.debug(
             "headers: {}\n"
             "data: {}\n".format(request.headers, request.data)
