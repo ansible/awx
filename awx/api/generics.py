@@ -164,6 +164,9 @@ class APIView(views.APIView):
                 if custom_header.startswith('HTTP_'):
                     request.environ.pop(custom_header, None)
 
+        # WTF, FIXME
+        request.body
+
         drf_request = super(APIView, self).initialize_request(request, *args, **kwargs)
         request.drf_request = drf_request
         try:

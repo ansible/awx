@@ -87,7 +87,9 @@ class WebhookReceiverBase(APIView):
         if not obj.webhook_key:
             raise PermissionDenied
 
-        mac = hmac.new(force_bytes(obj.webhook_key), msg=force_bytes(self.request.read()), digestmod=sha1)
+        mac = hmac.new(force_bytes(obj.webhook_key), msg=force_bytes(self.request.body), digestmod=sha1)
+        logger.debug("header signature: %s", self.get_signature())
+        logger.debug("calculated signature: %s", force_bytes(mac.hexdigest()))
         if not hmac.compare_digest(force_bytes(mac.hexdigest()), self.get_signature()):
             raise PermissionDenied
 
@@ -112,16 +114,17 @@ class WebhookReceiverBase(APIView):
             logger.debug("Webhook previously received, returning without action.")
             return Response(status=status.HTTP_202_ACCEPTED)
 
-        data = {
-            'tower_webhook_event_type': event_type,
-            'tower_webhook_event_guid': event_guid,
-            'tower_webhook_payload': request.data,
-        }
         new_job = obj.create_unified_job(
-            webhook_service=obj.webhook_service,
-            webhook_credential=obj.webhook_credential,
-            webhook_guid=event_guid,
-            extra_vars=json.dumps(data)
+            _eager_fields={
+                'webhook_service': obj.webhook_service,
+                'webhook_credential': obj.webhook_credential,
+                'webhook_guid': event_guid,
+            },
+            extra_vars=json.dumps({
+                'tower_webhook_event_type': event_type,
+                'tower_webhook_event_guid': event_guid,
+                'tower_webhook_payload': request.data,
+            })
         )
         new_job.signal_start()
 
@@ -156,7 +159,7 @@ class GitlabWebhookReceiver(WebhookReceiverBase):
     def get_event_guid(self):
         # Gitlab does not provide a unique identifier on events, so construct one.
         h = sha1()
-        h.update(force_bytes(self.request.read()))
+        h.update(force_bytes(self.request.body))
         return h.hexdigest()
 
     def get_signature(self):
