@@ -179,7 +179,7 @@ function HostEventModal({ handleClose, hostEvent, isOpen, i18n }) {
               hasErrors={false}
             />
           ) : (
-            <ContentEmpty title={i18n._(t`No JSON Found`)} />
+            <ContentEmpty title={i18n._(t`No JSON Available`)} />
           )}
         </Tab>
         <Tab eventKey={2} title={i18n._(t`Standard Out`)}>
@@ -193,7 +193,7 @@ function HostEventModal({ handleClose, hostEvent, isOpen, i18n }) {
               hasErrors={false}
             />
           ) : (
-            <ContentEmpty title={i18n._(t`No Standard Out Found`)} />
+            <ContentEmpty title={i18n._(t`No Standard Out Available`)} />
           )}
         </Tab>
         <Tab eventKey={3} title={i18n._(t`Standard Error`)}>
@@ -207,7 +207,7 @@ function HostEventModal({ handleClose, hostEvent, isOpen, i18n }) {
               rows={20}
             />
           ) : (
-            <ContentEmpty title={i18n._(t`No Standard Error Found`)} />
+            <ContentEmpty title={i18n._(t`No Standard Error Available`)} />
           )}
         </Tab>
       </Tabs>
