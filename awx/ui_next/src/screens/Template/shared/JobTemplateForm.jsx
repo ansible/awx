@@ -64,6 +64,7 @@ class JobTemplateForm extends Component {
         labels: { results: [] },
         project: null,
       },
+      isNew: true,
     },
   };
 
@@ -341,6 +342,7 @@ class JobTemplateForm extends Component {
         </Card>
       );
     }
+    const AdvancedFieldsWrapper = template.isNew ? CollapsibleSection : 'div';
     return (
       <Form autoComplete="off" onSubmit={handleSubmit}>
         <FormRow>
@@ -479,7 +481,7 @@ class JobTemplateForm extends Component {
             />
           </FormGroup>
         </FormRow>
-        <CollapsibleSection label="Advanced">
+        <AdvancedFieldsWrapper label="Advanced">
           <FormRow>
             <FormField
               id="template-forks"
@@ -723,7 +725,7 @@ class JobTemplateForm extends Component {
               />
             </FormRow>
           </div>
-        </CollapsibleSection>
+        </AdvancedFieldsWrapper>
         <FormActionGroup onCancel={handleCancel} onSubmit={handleSubmit} />
       </Form>
     );
