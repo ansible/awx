@@ -177,7 +177,7 @@ describe('<JobTemplateForm />', () => {
   });
 
   test('handleNewLabel should arrange new labels properly', async () => {
-    const event = { key: 'Enter' };
+    const event = { key: 'Enter', preventDefault: () => {} };
     const wrapper = mountWithContexts(
       <JobTemplateForm
         template={mockData}

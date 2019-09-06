@@ -62,7 +62,7 @@ describe('<JobTemplateAdd />', () => {
     done();
   });
 
-  test('handleSubmit should post to api', async done => {
+  test.only('handleSubmit should post to api', async done => {
     const jobTemplateData = {
       description: 'Baz',
       inventory: 1,
@@ -70,6 +70,9 @@ describe('<JobTemplateAdd />', () => {
       name: 'Foo',
       playbook: 'Bar',
       project: 2,
+      verbosity: '0',
+      job_tags: '',
+      skip_tags: '',
     };
     JobTemplatesAPI.create.mockResolvedValueOnce({
       data: {
@@ -106,6 +109,9 @@ describe('<JobTemplateAdd />', () => {
       name: 'Foo',
       playbook: 'Bar',
       project: 2,
+      verbosity: '0',
+      job_tags: '',
+      skip_tags: '',
     };
     JobTemplatesAPI.create.mockResolvedValueOnce({
       data: {
@@ -118,7 +124,7 @@ describe('<JobTemplateAdd />', () => {
       context: { router: { history } },
     });
 
-    await wrapper.find('JobTemplateForm').prop('handleSubmit')(jobTemplateData);
+    await wrapper.find('JobTemplateForm').invoke('handleSubmit')(jobTemplateData);
     await sleep(0);
     expect(history.push).toHaveBeenCalledWith(
       '/templates/job_template/1/details'
@@ -134,7 +140,7 @@ describe('<JobTemplateAdd />', () => {
       context: { router: { history } },
     });
     await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
-    wrapper.find('button[aria-label="Cancel"]').prop('onClick')();
+    wrapper.find('button[aria-label="Cancel"]').invoke('onClick')();
     expect(history.push).toHaveBeenCalledWith('/templates');
     done();
   });

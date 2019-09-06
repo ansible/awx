@@ -58,7 +58,7 @@ function JobTemplateAdd({ history, i18n }) {
     ]);
   }
 
-  function submitInstanceGroups(templateId, addedGroups) {
+  function submitInstanceGroups(templateId, addedGroups = []) {
     const associatePromises = addedGroups.map(group =>
       JobTemplatesAPI.associateInstanceGroup(templateId, group.id)
     );

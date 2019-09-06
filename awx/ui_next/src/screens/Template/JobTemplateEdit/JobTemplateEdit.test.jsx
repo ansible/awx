@@ -15,6 +15,8 @@ const mockJobTemplate = {
   project: 3,
   playbook: 'Baz',
   type: 'job_template',
+  job_tags: '',
+  skip_tags: '',
   summary_fields: {
     user_capabilities: {
       edit: true,
