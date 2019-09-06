@@ -15,8 +15,18 @@ const mockJobTemplate = {
   project: 3,
   playbook: 'Baz',
   type: 'job_template',
+  forks: 0,
+  limit: '',
+  verbosity: '0',
+  job_slice_count: 1,
+  timeout: 0,
   job_tags: '',
   skip_tags: '',
+  diff_mode: false,
+  allow_callbacks: false,
+  allow_simultaneous: false,
+  use_fact_cache: false,
+  host_config_key: '',
   summary_fields: {
     user_capabilities: {
       edit: true,

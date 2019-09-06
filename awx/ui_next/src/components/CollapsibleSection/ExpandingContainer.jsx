@@ -16,7 +16,7 @@ function ExpandingContainer({ isExpanded, children }) {
     ref.current.addEventListener('transitionend', () => {
       setHideOverflow(!isExpanded);
     });
-  })
+  });
   useEffect(() => {
     setContentHeight(ref.current.scrollHeight);
   });

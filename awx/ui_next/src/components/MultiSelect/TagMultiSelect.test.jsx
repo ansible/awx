@@ -18,17 +18,18 @@ describe('<TagMultiSelect />', () => {
     expect(wrapper.find('MultiSelect').prop('options')).toEqual([]);
   });
 
-  // NOTE: this test throws a warning which *should* be go away once we upgrade
-  // to React 16.8 (https://github.com/airbnb/enzyme/blob/master/docs/api/ReactWrapper/invoke.md)
   it('should trigger onChange', () => {
     const onChange = jest.fn();
     const wrapper = mount(
       <TagMultiSelect value="foo,bar" onChange={onChange} />
     );
 
-    const input = wrapper.find('TextInput');
-    input.invoke('onChange')('baz');
-    input.invoke('onKeyDown')({ key: 'Tab' });
+    const select = wrapper.find('MultiSelect');
+    select.invoke('onChange')([
+      { name: 'foo' },
+      { name: 'bar' },
+      { name: 'baz' },
+    ]);
     expect(onChange).toHaveBeenCalledWith('foo,bar,baz');
   });
 });
