@@ -112,7 +112,8 @@ class WebhookReceiverBase(APIView):
         if WorkflowJob.objects.filter(**kwargs).exists() or Job.objects.filter(**kwargs).exists():
             # Short circuit if this webhook has already been received and acted upon.
             logger.debug("Webhook previously received, returning without action.")
-            return Response(status=status.HTTP_202_ACCEPTED)
+            return Response({'message': "Webhook previously received, aborting."},
+                            status=status.HTTP_202_ACCEPTED)
 
         new_job = obj.create_unified_job(
             _eager_fields={
@@ -128,7 +129,7 @@ class WebhookReceiverBase(APIView):
         )
         new_job.signal_start()
 
-        return Response(status=status.HTTP_202_ACCEPTED)
+        return Response({'message': "Job queued."}, status=status.HTTP_202_ACCEPTED)
 
 
 class GithubWebhookReceiver(WebhookReceiverBase):
