@@ -2956,9 +2956,11 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
 
     class Meta:
         model = Job
-        fields = ('*', 'job_template', 'passwords_needed_to_start',
-                  'allow_simultaneous', 'artifacts', 'scm_revision',
-                  'instance_group', 'diff_mode', 'job_slice_number', 'job_slice_count')
+        fields = (
+            '*', 'job_template', 'passwords_needed_to_start', 'allow_simultaneous',
+            'artifacts', 'scm_revision', 'instance_group', 'diff_mode', 'job_slice_number',
+            'job_slice_count', 'webhook_service', 'webhook_credential', 'webhook_guid',
+        )
 
     def get_related(self, obj):
         res = super(JobSerializer, self).get_related(obj)
@@ -3417,10 +3419,11 @@ class WorkflowJobSerializer(LabelsListMixin, UnifiedJobSerializer):
 
     class Meta:
         model = WorkflowJob
-        fields = ('*', 'workflow_job_template', 'extra_vars', 'allow_simultaneous',
-                  'job_template', 'is_sliced_job',
-                  '-execution_node', '-event_processing_finished', '-controller_node',
-                  'inventory', 'limit', 'scm_branch',)
+        fields = (
+            '*', 'workflow_job_template', 'extra_vars', 'allow_simultaneous', 'job_template',
+            'is_sliced_job', '-execution_node', '-event_processing_finished', '-controller_node',
+            'inventory', 'limit', 'scm_branch', 'webhook_service', 'webhook_credential', 'webhook_guid',
+        )
 
     def get_related(self, obj):
         res = super(WorkflowJobSerializer, self).get_related(obj)
