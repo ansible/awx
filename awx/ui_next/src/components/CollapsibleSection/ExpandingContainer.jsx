@@ -4,13 +4,19 @@ import styled from 'styled-components';
 
 const Container = styled.div`
   margin: 15px 0;
-  transition: all 0.2s ease-out;
-  ${props => !props.isExpanded && `overflow: hidden;`}
+  transition: height 0.2s ease-out;
+  ${props => props.hideOverflow && `overflow: hidden;`}
 `;
 
 function ExpandingContainer({ isExpanded, children }) {
   const [contentHeight, setContentHeight] = useState(0);
+  const [hideOverflow, setHideOverflow] = useState(!isExpanded);
   const ref = useRef(null);
+  useEffect(() => {
+    ref.current.addEventListener('transitionend', () => {
+      setHideOverflow(!isExpanded);
+    });
+  })
   useEffect(() => {
     setContentHeight(ref.current.scrollHeight);
   });
@@ -21,7 +27,7 @@ function ExpandingContainer({ isExpanded, children }) {
       css={`
         height: ${height}px;
       `}
-      isExpanded={isExpanded}
+      hideOverflow={!isExpanded || hideOverflow}
     >
       {children}
     </Container>
