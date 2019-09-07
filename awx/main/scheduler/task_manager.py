@@ -533,7 +533,7 @@ class TaskManager():
                 logger.warn(timeout_message)
                 task.timed_out = True
                 task.status = 'failed'
-                self.send_approval_notification(task.status)
+                task.send_approval_notification('timed_out')
                 task.websocket_emit_status(task.status)
                 task.job_explanation = timeout_message
                 task.save(update_fields=['status', 'job_explanation', 'timed_out'])

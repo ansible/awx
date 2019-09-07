@@ -577,13 +577,6 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
         for node in self.workflow_job_nodes.all().select_related('job'):
             if node.job is None:
                 node_job_description = 'no job.'
-            elif type(node.unified_job_template) is WorkflowApprovalTemplate:
-                if node.job.status == 'pending':
-                    node_job_description = 'APPROVE THIS!!!'
-                if node.job.status == 'successful':
-                    node_job_description = 'THIS GOT APPROVED!!!'
-                if node.job.status == 'failed':
-                    node_job_description = 'DENIED!!!'
             else:
                 node_job_description = ('job #{0}, "{1}", which finished with status {2}.'
                                         .format(node.job.id, node.job.name, node.job.status))
@@ -699,7 +692,7 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
     def approve(self, request=None):
         self.status = 'successful'
         self.save()
-        self.send_approval_notification(self.status)
+        self.send_approval_notification('approved')
         self.websocket_emit_status(self.status)
         schedule_task_manager()
         return reverse('api:workflow_approval_approve', kwargs={'pk': self.pk}, request=request)
@@ -707,7 +700,7 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
     def deny(self, request=None):
         self.status = 'failed'
         self.save()
-        self.send_approval_notification(self.status)
+        self.send_approval_notification('denied')
         self.websocket_emit_status(self.status)
         schedule_task_manager()
         return reverse('api:workflow_approval_deny', kwargs={'pk': self.pk}, request=request)
@@ -720,7 +713,10 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
     def send_approval_notification(self, status):
         from awx.main.tasks import send_notifications  # avoid circular import
         for nt in self.workflow_job_template.notification_templates["approvals"]:
-            (notification_subject, notification_body) = self.workflow_job.build_notification_message(nt, status)
+            try:
+                (notification_subject, notification_body) = self.build_notification_message(nt, status)
+            except AttributeError:
+                raise NotImplementedError("build_notification_message() does not exist" % status)
 
             def send_it(local_nt=nt, local_subject=notification_subject, local_body=notification_body):
                 def _func():
@@ -728,6 +724,26 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
                                              job_id=self.id)
                 return _func
             connection.on_commit(send_it())
+
+    def build_notification_message(self, nt, status):
+        subject = []
+        subject.append(('{}, Job Number {}').format(self.workflow_approval_template.name,
+                                                    self.id))
+        if status == 'running':
+            subject.append('Please approve or deny this node.')
+        if status == 'approved':
+            subject.append('This approval node was approved.')
+        if status == 'timed_out':
+            subject.append('This approval node has timed out.')
+        elif status == 'denied':
+            subject.append('This approval node was denied.')
+        body = self.notification_data()
+        body['body'] = subject
+
+        return subject, body
+
+    # def get_notification_templates(self):
+    #     return self.workflow_job_template.notification_templates
 
     @property
     def workflow_job_template(self):
