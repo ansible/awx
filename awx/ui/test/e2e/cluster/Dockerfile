@@ -15,6 +15,11 @@ WORKDIR /awx
 
 COPY awx/ui/package.json awx/ui/package.json
 
+ARG NPM_REGISTRY=https://registry.npmjs.org
+ENV NPM_REGISTRY=${NPM_REGISTRY}
+
+RUN npm config set registry ${NPM_REGISTRY}
+
 RUN npm --prefix=awx/ui install
 
 COPY awx/ui/test/e2e awx/ui/test/e2e
