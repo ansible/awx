@@ -76,24 +76,28 @@ export default
                 const virtualEnvs = ConfigData.custom_virtualenvs || [];
                 $scope.custom_virtualenvs_options = virtualEnvs;
                 $scope.webhook_url_help = i18n._('Webhook services can launch jobs with this job template by making a POST request to this URL.');
+                $scope.webhook_key_help = i18n._('Webhook services can use this as a shared secret.');
+
+                $scope.currentlySavedWebhookKey = webhookKey;
+                $scope.webhook_key = webhookKey;
 
                 //
                 // webhook credential - all handlers, dynamic state, etc. live here
                 //
-                $scope.webhook_key = webhookKey;
+
                 $scope.webhookCredential = {
                     id: _.get(jobTemplateData, ['summary_fields', 'webhook_credential', 'id']),
                     name: _.get(jobTemplateData, ['summary_fields', 'webhook_credential', 'name']),
                     isModalOpen: false,
                     isModalReady: false,
-                    modalTitle: i18n._('Select Webhook Credential'),
+                    modalSelectedId: null,
+                    modalSelectedName: null,
                     modalBaseParams: {
                         order_by: 'name',
                         page_size: 5,
                         credential_type__namespace: `${jobTemplateData.webhook_service}_token`,
                     },
-                    modalSelectedId: null,
-                    modalSelectedName: null,
+                    modalTitle: i18n._('Select Webhook Credential'),
                 };
 
                 $scope.handleWebhookCredentialLookupClick = () => {
@@ -125,7 +129,6 @@ export default
                     $scope.webhookCredential.isModalReady = false;
                     $scope.webhookCredential.modalSelectedId = null;
                     $scope.webhookCredential.modalSelectedName = null;
-
                 };
 
                 $scope.handleWebhookCredentialSelect = () => {
@@ -135,6 +138,23 @@ export default
                     $scope.webhookCredential.name = $scope.webhookCredential.modalSelectedName;
                     $scope.webhookCredential.modalSelectedId = null;
                     $scope.webhookCredential.modalSelectedName = null;
+                };
+
+                $scope.handleWebhookKeyButtonClick = () => {
+                    Rest.setUrl(jobTemplateData.related.webhook_key);
+                    Wait('start');
+                    Rest.post({})
+                        .then(({ data }) => {
+                            $scope.currentlySavedWebhookKey = data.webhook_key;
+                            $scope.webhook_key = data.webhook_key;
+                        })
+                        .catch(({ data }) => {
+                            const errorMsg = `Failed to generate new webhook key. POST returned status: ${status}`;
+                            ProcessErrors($scope, data, status, form, { hdr: 'Error!', msg: errorMsg });
+                        })
+                        .finally(() => {
+                            Wait('stop');
+                        });
                 };
 
                 $('#content-container').append($compile(`
@@ -184,6 +204,13 @@ export default
                         if (newServiceValue !== newValue || newValue === null) {
                             $scope.webhookCredential.id = null;
                             $scope.webhookCredential.name = null;
+                        }
+                        if (newServiceValue !== newValue) {
+                            if (newServiceValue === jobTemplateData.webhook_service) {
+                                $scope.webhook_key = $scope.currentlySavedWebhookKey;
+                            } else {
+                                $scope.webhook_key = i18n._('A NEW WEBHOOK KEY WILL BE GENERATED ON SAVE');
+                            }
                         }
                     }
                 });
@@ -430,13 +457,14 @@ export default
                     default_val: dft
                 });
 
-                const defaultWebhookKey = ($scope.webhook_key === "" || $scope.webhook_key === null) ? false : true;
-                hashSetup({
-                    scope: $scope,
-                    master: master,
-                    check_field: 'enable_webhooks',
-                    default_val: defaultWebhookKey
-                });
+                // set initial vals for webhook checkbox
+                if (jobTemplateData.webhook_service) {
+                    $scope.enable_webhook = true;
+                    master.enable_webhook = true;
+                } else {
+                    $scope.enable_webhook = false;
+                    master.enable_webhook = false;
+                }
 
                 ParseTypeChange({
                     scope: $scope,
@@ -703,14 +731,6 @@ export default
                         });
                     });
 
-
-                let webhookKeyPromise = Promise.resolve();
-                if ($scope.webhook_key !== webhookKey) {
-                    Rest.setUrl(jobTemplateData.related.webhook_key);
-                    webhookKeyPromise = Rest.post({ webhook_key: $scope.webhook_key });
-                }
-
-
                 var orgDefer = $q.defer();
                 var associationDefer = $q.defer();
                 var associatedLabelsDefer = $q.defer();
@@ -783,7 +803,6 @@ export default
                         for (var i = 0; i < toPost.length; i++) {
                             defers.push(Rest.post(toPost[i]));
                         }
-                        defers.push(webhookKeyPromise);
                         $q.all(defers)
                             .then(function() {
                                 Wait('stop');
@@ -888,11 +907,18 @@ export default
                     data.skip_tags = (Array.isArray($scope.skip_tags)) ?  _.uniq($scope.skip_tags).join() : "";
 
                     delete data.webhook_url;
-                    data.webhook_credential = $scope.webhookCredential.id;
-                    if (!data.webhook_credential) {
-                        data.webhook_service = null;
-                    }
                     delete data.webhook_key;
+                    delete data.enable_webhook;
+                    data.webhook_credential = $scope.webhookCredential.id;
+
+                    if (!data.webhook_service) {
+                        data.webhook_credential = null;
+                    }
+
+                    if (!$scope.enable_webhook) {
+                        data.webhook_service = '';
+                        data.webhook_credential = null;
+                    }
 
                     Rest.setUrl(defaultUrl + $state.params.job_template_id);
                     Rest.patch(data)

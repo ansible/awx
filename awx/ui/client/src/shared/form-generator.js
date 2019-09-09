@@ -794,9 +794,21 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         }
 
                         if (field.genHash) {
-                            html += "<span class=\"input-group-btn input-group-prepend\"><button type=\"button\" class=\"btn Form-lookupButton\" ng-click=\"genHash('" + fld + "')\" " +
-                                "aw-tool-tip=\"Generate " + field.label + "\" data-placement=\"top\" id=\"" + this.form.name + "_" + fld + "_gen_btn\">" +
-                                "<i class=\"fa fa-magic\"></i></button></span>\n</div>\n";
+                            const defaultGenHashButtonTemplate = `
+                                <span class="input-group-btn input-group-prepend">
+                                    <button
+                                        type="button"
+                                        class="btn Form-lookupButton"
+                                        ng-click="genHash('${fld}')"
+                                        aw-tool-tip="Generate ${field.label}"
+                                        data-placement="top"
+                                        id="${this.form.name}_${fld}_gen_btn"
+                                    >
+                                        <i class="fa fa-refresh" />
+                                    </button>
+                                </span>`;
+                            const genHashButtonTemplate = _.get(field, 'genHashButtonTemplate', defaultGenHashButtonTemplate);
+                            html += `${genHashButtonTemplate}\n</div>\n`;
                         }
 
                         // Add error messages

@@ -44,6 +44,7 @@
             $scope.parseType = 'yaml';
             $scope.credentialNotPresent = false;
             $scope.canGetAllRelatedResources = true;
+            $scope.webhook_key_help = i18n._('Webhook services can use this as a shared secret.');
 
             //
             // webhook credential - all handlers, dynamic state, etc. live here
@@ -105,6 +106,8 @@
                 $scope.webhookCredential.modalSelectedName = null;
             };
 
+            $scope.handleWebhookKeyButtonClick = () => {};
+
             $('#content-container').append($compile(`
                 <at-dialog
                     title="webhookCredential.modalTitle"
@@ -159,6 +162,9 @@
                 default_val: false
             });
             CallbackHelpInit({ scope: $scope });
+            // set initial vals for webhook checkbox
+            $scope.enable_webhook = false;
+            master.enable_webhook = false;
 
             $scope.surveyTooltip = i18n._('Please save before adding a survey to this job template.');
 
@@ -462,6 +468,7 @@
                     delete data.credential;
                     delete data.vault_credential;
                     delete data.webhook_url;
+                    delete data.webhook_key;
                     data.webhook_credential = $scope.webhookCredential.id;
                     if (!data.webhook_credential) {
                         data.webhook_service = null;
