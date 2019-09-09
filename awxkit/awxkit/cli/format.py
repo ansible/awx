@@ -165,6 +165,8 @@ def format_human(output, fmt):
         except (ValueError, TypeError):
             if isinstance(v, (list, dict)):
                 return json.dumps(v)
+            if v is None:
+                return ''
             return v
 
     # calculate the max width of each column
