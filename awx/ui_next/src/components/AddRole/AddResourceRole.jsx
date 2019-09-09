@@ -44,7 +44,7 @@ class AddResourceRole extends React.Component {
 
     if (selectedIndex > -1) {
       selectedResourceRows.splice(selectedIndex, 1);
-      let stateToUpdate = { selectedResourceRows };
+      const stateToUpdate = { selectedResourceRows };
       if (selectedResourceRows.length === 0) {
         stateToUpdate.maxEnabledStep = currentStepId;
       }
