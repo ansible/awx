@@ -195,6 +195,7 @@ export default
                         $scope.webhook_url = `${$scope.callback_server_path}${jobTemplateData.url}${newServiceValue}`;
                     } else {
                         $scope.webhook_url = '';
+                        $scope.webhook_key = '';
                     }
                     if (newServiceValue !== oldServiceValue || newServiceValue === newValue) {
                         $scope.webhook_service = { value: newServiceValue };
@@ -355,7 +356,6 @@ export default
             }
 
             function jobTemplateLoadFinished(){
-                //$scope.webhook_service = jobTemplateData.webhook_service;
                 select2LoadDefer.push(CreateSelect2({
                     element:'#job_template_job_type',
                     multiple: false

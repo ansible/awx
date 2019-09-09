@@ -162,8 +162,92 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n) {
                         dataTitle: i18n._('Enable Concurrent Jobs'),
                         dataContainer: "body",
                         ngDisabled: '!(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddOrEdit)'
+                    }, {
+                        name: 'enable_webhook',
+                        label: i18n._('Webhooks'),
+                        type: 'checkbox',
+                        column: 2,
+                        awPopOver: "<p>" + i18n._("Enabled webhook for this workflow job template.") + "</p>",
+                        dataPlacement: 'right',
+                        dataTitle: i18n._('Enable Webhook'),
+                        dataContainer: "body",
+                        ngDisabled: '!(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddOrEdit)'
                     }]
-                }
+                },
+                webhook_service: {
+                    label: i18n._('Webhook Service'),
+                    type:'select',
+                    defaultText: i18n._('Choose a Webhook Service'),
+                    ngOptions: 'svc.label for svc in webhook_service_options track by svc.value',
+                    ngShow: "enable_webhook  && enable_webhook !== 'false'",
+                    ngDisabled: "!(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddOrEdit)",
+                    id: 'webhook-service-select',
+                    column: 1,
+                    awPopOver: "<p>" + i18n._("Select a webhook service.") + "</p>",
+                    dataTitle: i18n._('Webhook Service'),
+                    dataPlacement: 'right',
+                    dataContainer: "body",
+                },
+                webhook_url: {
+                    label: i18n._('Webhook URL'),
+                    type: 'text',
+                    ngShow: "workflow_job_template_obj && enable_webhook && enable_webhook !== 'false'",
+                    awPopOver: "webhook_url_help",
+                    awPopOverWatch: "webhook_url_help",
+                    dataPlacement: 'top',
+                    dataTitle: i18n._('Webhook URL'),
+                    dataContainer: "body",
+                    readonly: true
+                },
+                webhook_key: {
+                    label: i18n._('Webhook Key'),
+                    type: 'text',
+                    ngShow: "enable_webhook && enable_webhook !== 'false'",
+                    genHash: true,
+                    genHashButtonTemplate: `
+                        <span
+                            ng-if="workflow_job_template_obj && webhook_service.value && currentlySavedWebhookKey === webhook_key"
+                            class="input-group-btn input-group-prepend"
+                        >
+                            <button
+                                type="button"
+                                class="btn Form-lookupButton"
+                                ng-click="handleWebhookKeyButtonClick()"
+                                aw-tool-tip="${i18n._('Rotate Webhook Key')}"
+                                data-placement="top"
+                                id="workflow_job_template_webhook_key_gen_btn"
+                            >
+                                <i class="fa fa-refresh" />
+                            </button>
+                        </span>
+                    `,
+                    genHashButtonClickHandlerName: "handleWebhookKeyButtonClick",
+                    awPopOver: "webhook_key_help",
+                    awPopOverWatch: "webhook_key_help",
+                    dataPlacement: 'right',
+                    dataTitle: i18n._("Webhook Key"),
+                    dataContainer: "body",
+                    readonly: true,
+                    required: false,
+                },
+                webhook_credential: {
+                    label: i18n._('Webhook Credential'),
+                    type: 'custom',
+                    ngShow: "enable_webhook  && enable_webhook !== 'false'",
+                    control: `
+                        <webhook-credential-input
+                            is-field-disabled="!(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddOrEdit) || !(webhookCredential.modalBaseParams.credential_type__namespace)"
+                            tag-name="webhookCredential.name"
+                            on-lookup-click="handleWebhookCredentialLookupClick"
+                            on-tag-delete="handleWebhookCredentialTagDelete"
+                        </webhook-credential-input>`,
+                    awPopOver: "<p>" + i18n._("Select the credential to use with the webhook service.") + "</p>",
+                    dataTitle: i18n._('Webhook Credential'),
+                    dataPlacement: 'right',
+                    dataContainer: "body",
+                    ngDisabled: '!webhook_service.value',
+                    required: false,
+                },
             },
 
             buttons: { //for now always generates <button> tags

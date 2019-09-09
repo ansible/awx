@@ -433,7 +433,7 @@ function(NotificationsList, i18n) {
                     genHash: true,
                     genHashButtonTemplate: `
                         <span
-                            ng-if="job_template_obj && currentlySavedWebhookKey === webhook_key"
+                            ng-if="job_template_obj && webhook_service.value && currentlySavedWebhookKey === webhook_key"
                             class="input-group-btn input-group-prepend"
                         >
                             <button
@@ -472,7 +472,7 @@ function(NotificationsList, i18n) {
                     dataTitle: i18n._('Webhook Credential'),
                     dataPlacement: 'right',
                     dataContainer: "body",
-                    ngDisabled: '!(webhook_key || webhook_key.value)',
+                    ngDisabled: '!(webhook_service || webhook_service.value)',
                     required: false,
                 },
                 extra_vars: {

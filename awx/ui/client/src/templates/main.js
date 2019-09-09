@@ -471,7 +471,21 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                                                 msg: i18n._('Failed to get organizations for which this user is a notification administrator. GET returned ') + status
                                             });
                                     });
-                            }]
+                            }],
+                            webhookKey: ['Rest', 'ProcessErrors', 'workflowJobTemplateData', 'i18n',
+                                function(Rest, ProcessErrors, workflowJobTemplateData, i18n) {
+                                    Rest.setUrl(workflowJobTemplateData.related.webhook_key);
+                                    return Rest.get()
+                                        .then(({ data = {} }) => {
+                                            return data.webhook_key || '';
+                                        })
+                                        .catch(({data, status}) => {
+                                            ProcessErrors(null, data, status, null, {
+                                                hdr: i18n._('Error!'),
+                                                msg: i18n._('Failed to get webhook key GET returned ') + status
+                                            });
+                                    });
+                            }],
                         }
                     }
                 });
