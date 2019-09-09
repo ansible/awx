@@ -41,6 +41,10 @@ def pk_or_name(v2, model_name, value, page=None):
             page = getattr(v2, model_name)
 
     if page:
+        if model_name == 'users':
+            identity = 'username'
+        elif model_name == 'instances':
+            model_name = 'hostname'
         results = page.get(**{identity: value})
         if results.count == 1:
             return int(results.results[0].id)

@@ -350,6 +350,141 @@ class SettingsList(CustomAction):
         return self.page.get()
 
 
+class RoleMixin(object):
+
+    has_roles = [
+        ['organizations', 'organization'],
+        ['projects', 'project'],
+        ['inventories', 'inventory'],
+        ['inventory_scripts', 'inventory_script'],
+        ['teams', 'team'],
+        ['credentials', 'credential'],
+        ['job_templates', 'job_template'],
+        ['workflow_job_templates', 'workflow_job_template'],
+    ]
+    roles = {}  # this is calculated once
+
+    def add_arguments(self, parser):
+        from .options import pk_or_name
+
+        if not RoleMixin.roles:
+            for resource, flag in self.has_roles:
+                options = self.page.__class__(
+                    self.page.endpoint.replace(self.resource, resource),
+                    self.page.connection
+                ).options()
+                RoleMixin.roles[flag] = [
+                    role.replace('_role', '')
+                    for role in options.json.get('object_roles', [])
+                ]
+
+        possible_roles = set()
+        for v in RoleMixin.roles.values():
+            possible_roles.update(v)
+
+        resource_group = parser.choices[self.action].add_mutually_exclusive_group(
+            required=True
+        )
+        parser.choices[self.action].add_argument(
+            'id',
+            type=functools.partial(
+                pk_or_name, None, self.resource, page=self.page
+            ),
+            help='The ID (or name) of the {} to {} access to/from'.format(
+                self.resource, self.action
+            )
+        )
+        for _type in RoleMixin.roles.keys():
+            if _type == 'team' and self.resource == 'team':
+                # don't add a team to a team
+                continue
+
+            class related_page(object):
+
+                def __init__(self, connection, resource):
+                    self.conn = connection
+                    if resource == 'inventories':
+                        resource = 'inventory'  # d'oh, this is special
+                    self.resource = resource
+
+                def get(self, **kwargs):
+                    v2 = api.Api(connection=self.conn).get().current_version.get()
+                    return getattr(v2, self.resource).get(**kwargs)
+
+            resource_group.add_argument(
+                '--{}'.format(_type),
+                type=functools.partial(
+                    pk_or_name, None, _type,
+                    page=related_page(
+                        self.page.connection,
+                        dict((v, k) for k, v in self.has_roles)[_type]
+                    )
+                ),
+                metavar='ID',
+                help='The ID (or name) of the target {}'.format(_type),
+            )
+        parser.choices[self.action].add_argument(
+            '--role', type=str, choices=possible_roles, required=True,
+            help='The name of the role to {}'.format(self.action)
+        )
+
+    def perform(self, **kwargs):
+        for resource, flag in self.has_roles:
+            if flag in kwargs:
+                role = kwargs['role']
+                if role not in RoleMixin.roles[flag]:
+                    options = ', '.join(RoleMixin.roles[flag])
+                    raise ValueError(
+                        "invalid choice: '{}' must be one of {}".format(
+                            role, options
+                        )
+                    )
+                value = kwargs[flag]
+                target = '/api/v2/{}/{}'.format(resource, value)
+                detail = self.page.__class__(
+                    target,
+                    self.page.connection
+                ).get()
+                object_roles = detail['summary_fields']['object_roles']
+                actual_role = object_roles[role + '_role']
+                params = {'id': actual_role['id']}
+                if self.action == 'grant':
+                    params['associate'] = True
+                if self.action == 'revoke':
+                    params['disassociate'] = True
+
+                try:
+                    self.page.get().related.roles.post(params)
+                except NoContent:
+                    # we expect to enter this block because these endpoints return
+                    # HTTP 204 on success
+                    pass
+
+
+class UserGrant(RoleMixin, CustomAction):
+
+    resource = 'users'
+    action = 'grant'
+
+
+class UserRevoke(RoleMixin, CustomAction):
+
+    resource = 'users'
+    action = 'revoke'
+
+
+class TeamGrant(RoleMixin, CustomAction):
+
+    resource = 'teams'
+    action = 'grant'
+
+
+class TeamRevoke(RoleMixin, CustomAction):
+
+    resource = 'teams'
+    action = 'revoke'
+
+
 class SettingsModify(CustomAction):
     action = 'modify'
     resource = 'settings'

@@ -181,7 +181,7 @@ class TestOptions(unittest.TestCase):
             page = OptionsPage.from_json({
                 'actions': {'GET': {}, 'POST': {}}
             })
-            ResourceOptionsParser(None, page, 'users', self.parser)
+            ResourceOptionsParser(None, page, 'jobs', self.parser)
             assert method in self.parser.choices
 
             out = StringIO()
