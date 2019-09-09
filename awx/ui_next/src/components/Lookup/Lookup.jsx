@@ -248,6 +248,7 @@ class Lookup extends React.Component {
             items={results}
             itemCount={count}
             itemName={lookupHeader}
+            itemNamePlural={lookupHeader}
             qsConfig={this.qsConfig}
             toolbarColumns={columns}
             renderItem={item => (
