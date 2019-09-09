@@ -52,12 +52,12 @@ function EditContainerGroupController($rootScope, $scope, $state, models, string
 
   vm.form.extraVars = {
     label: strings.get('container.POD_SPEC_LABEL'),
-    value: EditContainerGroupDataset.data.pod_spec_override,
+    value: EditContainerGroupDataset.data.pod_spec_override || instanceGroup.model.OPTIONS.actions.PUT.pod_spec_override.default,
     name: 'extraVars',
     toggleLabel: strings.get('container.POD_SPEC_TOGGLE')
   };
 
-  if (vm.form.extraVars.value) {
+  if (EditContainerGroupDataset.data.pod_spec_override) {
     vm.form.extraVars.isOpen = true;
   } else {
     vm.form.extraVars.isOpen = false;
@@ -69,7 +69,7 @@ function EditContainerGroupController($rootScope, $scope, $state, models, string
       }
   });
   vm.form.save = (data) => {
-    if (vm.form.extraVars.value === '---') {
+    if (!vm.form.extraVars.isOpen) {
       data.pod_spec_override = null;
     } else {
       data.pod_spec_override = vm.form.extraVars.value;
