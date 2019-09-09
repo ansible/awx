@@ -13,6 +13,12 @@ from awxkit.api.pages import Page
 from awxkit.cli.options import ResourceOptionsParser
 
 
+class ResourceOptionsParser(ResourceOptionsParser):
+
+    def get_allowed_options(self):
+        self.allowed_options = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
+
+
 class OptionsPage(Page):
 
     def options(self):

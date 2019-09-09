@@ -83,6 +83,7 @@ class ResourceOptionsParser(object):
         self.options = getattr(
             self.page.options().json, 'actions', {'GET': {}}
         )
+        self.get_allowed_options()
         if self.resource != 'settings':
             # /api/v2/settings is a special resource that doesn't have
             # traditional list/detail endpoints
@@ -90,6 +91,11 @@ class ResourceOptionsParser(object):
             self.build_detail_actions()
 
         self.handle_custom_actions()
+
+    def get_allowed_options(self):
+        self.allowed_options = self.page.connection.options(
+            self.page.endpoint + '1'
+        ).headers['Allow'].split(', ')
 
     def build_list_actions(self):
         action_map = {
@@ -110,7 +116,12 @@ class ResourceOptionsParser(object):
                 add_output_formatting_arguments(parser, {})
 
     def build_detail_actions(self):
-        for method in ('get', 'modify', 'delete'):
+        allowed = ['get']
+        if 'PUT' in self.allowed_options:
+            allowed.append('modify')
+        if 'DELETE' in self.allowed_options:
+            allowed.append('delete')
+        for method in allowed:
             parser = self.parser.add_parser(method, help='')
             self.parser.choices[method].add_argument(
                 'id',

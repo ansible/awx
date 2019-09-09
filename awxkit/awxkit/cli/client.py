@@ -244,10 +244,11 @@ class CLI(object):
         # parse any action arguments
         if self.resource != 'settings':
             for method in ('list', 'modify', 'create'):
-                parser.build_query_arguments(
-                    method,
-                    'GET' if method == 'list' else 'POST'
-                )
+                if method in parser.parser.choices:
+                    parser.build_query_arguments(
+                        method,
+                        'GET' if method == 'list' else 'POST'
+                    )
         if from_sphinx:
             parsed, extra = self.parser.parse_known_args(self.argv)
         else:
