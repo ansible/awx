@@ -168,10 +168,23 @@ def parse_resource(client, skip_deprecated=False):
         command = CustomCommand.registry[resource]()
         response = command.handle(client, parser)
         if response:
+            _filter = client.get_config('filter')
+            if (
+                resource == 'config' and
+                client.get_config('format') == 'human'
+            ):
+                response = {
+                    'count': len(response),
+                    'results': [
+                        {'key': k, 'value': v}
+                        for k, v in response.items()
+                    ]
+                }
+                _filter = 'key, value'
             formatted = format_response(
                 Page.from_json(response),
                 fmt=client.get_config('format'),
-                filter=client.get_config('filter'),
+                filter=_filter
             )
             print(formatted)
         raise SystemExit()
