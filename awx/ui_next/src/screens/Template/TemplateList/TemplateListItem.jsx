@@ -4,7 +4,6 @@ import {
   DataListItem,
   DataListItemRow,
   DataListItemCells,
-  DataListCheck,
   Tooltip,
   Button as PFButton,
 } from '@patternfly/react-core';
@@ -14,6 +13,7 @@ import { RocketIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
 
 import DataListCell from '@components/DataListCell';
+import DataListCheck from '@components/DataListCheck';
 import LaunchButton from '@components/LaunchButton';
 import VerticalSeparator from '@components/VerticalSeparator';
 import { Sparkline } from '@components/Sparkline';

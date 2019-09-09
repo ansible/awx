@@ -8,6 +8,7 @@ import {
   DropdownPosition,
   DropdownToggle,
   DropdownItem,
+  Tooltip,
 } from '@patternfly/react-core';
 import {
   SortAlphaDownIcon,
@@ -46,6 +47,21 @@ const IconWrapper = styled.span`
   > svg {
     font-size: 18px;
   }
+`;
+
+const SortButton = styled(Button)`
+  padding: 5px 8px;
+  margin-top: 3px;
+
+  &:hover {
+    background-color: #0166cc;
+    color: white;
+  }
+`;
+
+const SortBy = styled.span`
+  margin-right: 15px;
+  font-size: var(--pf-global--FontSize--md);
 `;
 
 class Sort extends React.Component {
@@ -112,33 +128,40 @@ class Sort extends React.Component {
     return (
       <React.Fragment>
         {sortDropdownItems.length > 1 && (
-          <Dropdown
-            style={{ marginRight: '20px' }}
-            onToggle={this.handleDropdownToggle}
-            onSelect={this.handleDropdownSelect}
-            direction={up}
-            isOpen={isSortDropdownOpen}
-            toggle={
-              <DropdownToggle
-                id="awx-sort"
-                onToggle={this.handleDropdownToggle}
-              >
-                {sortedColumnName}
-              </DropdownToggle>
-            }
-            dropdownItems={sortDropdownItems}
-          />
+          <React.Fragment>
+            <SortBy>{i18n._(t`Sort By`)}</SortBy>
+            <Dropdown
+              style={{ marginRight: '10px' }}
+              onToggle={this.handleDropdownToggle}
+              onSelect={this.handleDropdownSelect}
+              direction={up}
+              isOpen={isSortDropdownOpen}
+              toggle={
+                <DropdownToggle
+                  id="awx-sort"
+                  onToggle={this.handleDropdownToggle}
+                >
+                  {sortedColumnName}
+                </DropdownToggle>
+              }
+              dropdownItems={sortDropdownItems}
+            />
+          </React.Fragment>
         )}
-        <Button
-          onClick={this.handleSort}
-          variant="plain"
-          aria-label={i18n._(t`Sort`)}
-          css="padding: 0;"
+        <Tooltip
+          content={<div>{i18n._(t`Reverse Sort Order`)}</div>}
+          position="top"
         >
-          <IconWrapper>
-            <SortIcon />
-          </IconWrapper>
-        </Button>
+          <SortButton
+            onClick={this.handleSort}
+            variant="plain"
+            aria-label={i18n._(t`Sort`)}
+          >
+            <IconWrapper>
+              <SortIcon style={{ verticalAlign: '-0.225em' }} />
+            </IconWrapper>
+          </SortButton>
+        </Tooltip>
       </React.Fragment>
     );
   }

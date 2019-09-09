@@ -14,7 +14,7 @@ import {
   Button,
   ButtonVariant,
   InputGroup as PFInputGroup,
-  Modal as PFModal,
+  Modal,
 } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -27,6 +27,13 @@ import SelectedList from '../SelectedList';
 import { ChipGroup, Chip } from '../Chip';
 import { getQSConfig, parseQueryString } from '../../util/qs';
 
+const SearchButton = styled(Button)`
+  ::after {
+    border: var(--pf-c-button--BorderWidth) solid
+      var(--pf-global--BorderColor--200);
+  }
+`;
+
 const InputGroup = styled(PFInputGroup)`
   ${props =>
     props.multiple &&
@@ -36,8 +43,9 @@ const InputGroup = styled(PFInputGroup)`
   `}
 `;
 
-const Modal = styled(PFModal)`
-  --pf-c-modal-box--body--MinHeight: 460px;
+const ChipHolder = styled.div`
+  --pf-c-form-control--BorderTopColor: var(--pf-global--BorderColor--200);
+  --pf-c-form-control--BorderRightColor: var(--pf-global--BorderColor--200);
 `;
 
 class Lookup extends React.Component {
@@ -211,15 +219,15 @@ class Lookup extends React.Component {
     return (
       <Fragment>
         <InputGroup onBlur={onBlur}>
-          <Button
+          <SearchButton
             aria-label="Search"
             id={id}
             onClick={this.handleModalToggle}
             variant={ButtonVariant.tertiary}
           >
             <SearchIcon />
-          </Button>
-          <div className="pf-c-form-control">{chips}</div>
+          </SearchButton>
+          <ChipHolder className="pf-c-form-control">{chips}</ChipHolder>
         </InputGroup>
         <Modal
           className="awx-c-modal"

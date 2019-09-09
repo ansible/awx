@@ -19,6 +19,10 @@ const Tabs = styled(PFTabs)`
     }
   }
 
+  .pf-c-tabs__item.pf-m-current .pf-c-tabs__button {
+    font-weight: bold;
+  }
+
   &:not(.pf-c-tabs__item)::before {
     position: absolute;
     top: 0;
