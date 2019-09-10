@@ -55,8 +55,8 @@ export default {
     }],
     resolve: {
         rhCreds: ['Rest', 'GetBasePath', function(Rest, GetBasePath) {
-			Rest.setUrl(`${GetBasePath('settings')}system/`);
-			return Rest.get()
+            Rest.setUrl(`${GetBasePath('settings')}system/`);
+            return Rest.get()
                 .then(({data}) => {
                     const rhCreds = {};
                     if (data.REDHAT_USERNAME && data.REDHAT_USERNAME !== "") {
@@ -71,6 +71,6 @@ export default {
                 }).catch(() => {
                         return {};
                 });
-		}]
+        }]
     }
 };
