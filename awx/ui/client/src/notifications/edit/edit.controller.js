@@ -189,7 +189,7 @@ export default ['Rest', 'Wait',
 
         $scope.$watch('headers', function validate_headers(str) {
             try {
-                let headers = JSON.parse(str);
+                const headers = typeof str === 'string' ? JSON.parse(str) : str;
                 if (_.isObject(headers) && !_.isArray(headers)) {
                     let valid = true;
                     for (let k in headers) {
