@@ -442,6 +442,16 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
                                               .filter(unifiedjobtemplate_notification_templates_for_success__in=[self]))
         approval_notification_templates = list(base_notification_templates
                                                .filter(unifiedjobtemplate_notification_templates_for_approvals__in=[self]))
+        # Get Organization NotificationTemplates
+        if self.organization is not None:
+            error_notification_templates = set(error_notification_templates + list(base_notification_templates.filter(
+                organization_notification_templates_for_errors=self.organization)))
+            started_notification_templates = set(started_notification_templates + list(base_notification_templates.filter(
+                organization_notification_templates_for_started=self.organization)))
+            success_notification_templates = set(success_notification_templates + list(base_notification_templates.filter(
+                organization_notification_templates_for_success=self.organization)))
+            approval_notification_templates = set(approval_notification_templates + list(base_notification_templates.filter(
+                organization_notification_templates_for_approvals=self.organization)))
         return dict(error=list(error_notification_templates),
                     started=list(started_notification_templates),
                     success=list(success_notification_templates),
@@ -731,7 +741,7 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
         workflow_url = urljoin(settings.TOWER_URL_BASE, '/#/workflows/{}'.format(self.workflow_job.id))
         subject.append(('The approval node "{}"').format(self.workflow_approval_template.name))
         if status == 'running':
-            subject.append((' is running. You can approve or deny this node at: {}').format(workflow_url))
+            subject.append((' is running. This node can be approved or denied at: {}').format(workflow_url))
         if status == 'approved':
             subject.append((' was approved. {}').format(workflow_url))
         if status == 'timed_out':
