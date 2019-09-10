@@ -7,6 +7,7 @@ import {
 } from '@patternfly/react-core';
 import CodeMirrorInput from '@components/CodeMirrorInput';
 import ContentEmpty from '@components/ContentEmpty';
+import PropTypes from 'prop-types';
 import { DetailList, Detail } from '@components/DetailList';
 import { HostStatusIcon } from '@components/Sparkline';
 import { withI18n } from '@lingui/react';
@@ -28,9 +29,10 @@ const Modal = styled(PFModal)`
 
 const HostNameDetailValue = styled.div`
   align-items: center;
-  display: inline-grid;
-  grid-gap: 10px;
-  grid-template-columns: min-content auto;
+  display: inline-flex;
+  > div {
+    margin-right: 10px;
+  }
 `;
 
 const Tabs = styled(PFTabs)`
@@ -58,100 +60,107 @@ const Tabs = styled(PFTabs)`
   }
 `;
 
-function HostEventModal({ handleClose, hostEvent, isOpen, i18n }) {
+const processEventStatus = event => {
+  let status = null;
+  if (event.event === 'runner_on_unreachable') {
+    status = 'unreachable';
+  }
+  // equiv to 'runner_on_error' && 'runner_on_failed'
+  if (event.failed) {
+    status = 'failed';
+  }
+  if (
+    event.event === 'runner_on_ok' ||
+    event.event === 'runner_on_async_ok' ||
+    event.event === 'runner_item_on_ok'
+  ) {
+    status = 'ok';
+  }
+  // catch the 'changed' case after 'ok', because both can be true
+  if (event.changed) {
+    status = 'changed';
+  }
+  if (event.event === 'runner_on_skipped') {
+    status = 'skipped';
+  }
+  return status;
+};
+
+const processCodeMirrorValue = value => {
+  let codeMirrorValue;
+  if (value === undefined) {
+    codeMirrorValue = false;
+  } else if (value === '') {
+    codeMirrorValue = ' ';
+  } else if (typeof value === 'string') {
+    codeMirrorValue = entities.encode(value);
+  } else {
+    codeMirrorValue = value;
+  }
+  return codeMirrorValue;
+};
+
+const processStdOutValue = hostEvent => {
+  const { taskAction, res } = hostEvent.event_data;
+  let stdOut;
+  if (taskAction === 'debug' && res.result && res.result.stdout) {
+    stdOut = res.result.stdout;
+  } else if (
+    taskAction === 'yum' &&
+    res.results &&
+    Array.isArray(res.results)
+  ) {
+    [stdOut] = res.results;
+  } else {
+    stdOut = res.stdout;
+  }
+  return stdOut;
+};
+
+function HostEventModal({ onClose, hostEvent = {}, isOpen = false, i18n }) {
   const [hostStatus, setHostStatus] = useState(null);
   const [activeTabKey, setActiveTabKey] = useState(0);
 
   useEffect(() => {
-    processEventStatus(hostEvent);
+    setHostStatus(processEventStatus(hostEvent));
   }, []);
 
   const handleTabClick = (event, tabIndex) => {
     setActiveTabKey(tabIndex);
   };
 
-  function processEventStatus(event) {
-    let status = null;
-    if (event.event === 'runner_on_unreachable') {
-      status = 'unreachable';
-    }
-    // equiv to 'runner_on_error' && 'runner_on_failed'
-    if (event.failed) {
-      status = 'failed';
-    }
-    // catch the 'changed' case before 'ok', because both can be true
-    if (event.changed) {
-      status = 'changed';
-    }
-    if (
-      event.event === 'runner_on_ok' ||
-      event.event === 'runner_on_async_ok' ||
-      event.event === 'runner_item_on_ok'
-    ) {
-      status = 'ok';
-    }
-    if (event.event === 'runner_on_skipped') {
-      status = 'skipped';
-    }
-    setHostStatus(status);
-  }
-
-  function processStdOutValue() {
-    const { res } = hostEvent.event_data;
-    let stdOut;
-    if (taskAction === 'debug' && res.result && res.result.stdout) {
-      stdOut = processCodeMirrorValue(res.result.stdout);
-    } else if (
-      taskAction === 'yum' &&
-      res.results &&
-      Array.isArray(res.results)
-    ) {
-      stdOut = processCodeMirrorValue(res.results[0]);
-    } else {
-      stdOut = processCodeMirrorValue(res.stdout);
-    }
-    return stdOut;
-  }
-
-  const processCodeMirrorValue = value => {
-    let codeMirrorValue;
-    if (value === undefined) {
-      codeMirrorValue = false;
-    } else if (value === '') {
-      codeMirrorValue = ' ';
-    } else if (typeof value === 'string') {
-      codeMirrorValue = entities.encode(value);
-    } else {
-      codeMirrorValue = value;
-    }
-    return codeMirrorValue;
-  };
-
-  const taskAction = hostEvent.event_data.task_action;
-  const JSONObj = processCodeMirrorValue(hostEvent.event_data.res);
-  const StdErr = processCodeMirrorValue(hostEvent.event_data.res.stderr);
-  const StdOut = processStdOutValue();
+  const jsonObj = processCodeMirrorValue(hostEvent.event_data.res);
+  const stdErr = processCodeMirrorValue(hostEvent.event_data.res.stderr);
+  const stdOut = processCodeMirrorValue(processStdOutValue(hostEvent));
 
   return (
     <Modal
       isLarge
       isOpen={isOpen}
-      onClose={handleClose}
+      onClose={onClose}
       title={i18n._(t`Host Details`)}
       actions={[
-        <Button key="cancel" variant="secondary" onClick={handleClose}>
+        <Button key="cancel" variant="secondary" onClick={onClose}>
           {i18n._(t`Close`)}
         </Button>,
       ]}
     >
-      <Tabs activeKey={activeTabKey} onSelect={handleTabClick}>
-        <Tab eventKey={0} title={i18n._(t`Details`)}>
+      <Tabs
+        aria-label={i18n._(t`Tabs`)}
+        activeKey={activeTabKey}
+        onSelect={handleTabClick}
+      >
+        <Tab
+          aria-label={i18n._(t`Details tab`)}
+          eventKey={0}
+          title={i18n._(t`Details`)}
+        >
           <DetailList style={{ alignItems: 'center' }} gutter="sm">
             <Detail
               label={i18n._(t`Host Name`)}
               value={
                 <HostNameDetailValue>
-                  {hostStatus && <HostStatusIcon status={hostStatus} />}
+                  {hostStatus ? <HostStatusIcon status={hostStatus} /> : null}
                   {hostEvent.host_name}
                 </HostNameDetailValue>
               }
@@ -160,7 +169,9 @@ function HostEventModal({ handleClose, hostEvent, isOpen, i18n }) {
             <Detail label={i18n._(t`Task`)} value={hostEvent.task} />
             <Detail
               label={i18n._(t`Module`)}
-              value={taskAction || i18n._(t`No result found`)}
+              value={
+                hostEvent.event_data.task_action || i18n._(t`No result found`)
+              }
             />
             <Detail
               label={i18n._(t`Command`)}
@@ -168,12 +179,16 @@ function HostEventModal({ handleClose, hostEvent, isOpen, i18n }) {
             />
           </DetailList>
         </Tab>
-        <Tab eventKey={1} title={i18n._(t`JSON`)}>
-          {activeTabKey === 1 && JSONObj ? (
+        <Tab
+          eventKey={1}
+          title={i18n._(t`JSON`)}
+          aria-label={i18n._(t`JSON tab`)}
+        >
+          {activeTabKey === 1 && jsonObj ? (
             <CodeMirrorInput
               mode="javascript"
               readOnly
-              value={JSON.stringify(JSONObj, null, 2)}
+              value={JSON.stringify(jsonObj, null, 2)}
               onChange={() => {}}
               rows={20}
               hasErrors={false}
@@ -182,12 +197,16 @@ function HostEventModal({ handleClose, hostEvent, isOpen, i18n }) {
             <ContentEmpty title={i18n._(t`No JSON Available`)} />
           )}
         </Tab>
-        <Tab eventKey={2} title={i18n._(t`Standard Out`)}>
-          {activeTabKey === 2 && StdOut ? (
+        <Tab
+          eventKey={2}
+          title={i18n._(t`Standard Out`)}
+          aria-label={i18n._(t`Standard out tab`)}
+        >
+          {activeTabKey === 2 && stdOut ? (
             <CodeMirrorInput
               mode="javascript"
               readOnly
-              value={StdOut}
+              value={stdOut}
               onChange={() => {}}
               rows={20}
               hasErrors={false}
@@ -196,13 +215,17 @@ function HostEventModal({ handleClose, hostEvent, isOpen, i18n }) {
             <ContentEmpty title={i18n._(t`No Standard Out Available`)} />
           )}
         </Tab>
-        <Tab eventKey={3} title={i18n._(t`Standard Error`)}>
-          {activeTabKey === 3 && StdErr ? (
+        <Tab
+          eventKey={3}
+          title={i18n._(t`Standard Error`)}
+          aria-label={i18n._(t`Standard error tab`)}
+        >
+          {activeTabKey === 3 && stdErr ? (
             <CodeMirrorInput
               mode="javascript"
               readOnly
               onChange={() => {}}
-              value={StdErr}
+              value={stdErr}
               hasErrors={false}
               rows={20}
             />
@@ -216,3 +239,14 @@ function HostEventModal({ handleClose, hostEvent, isOpen, i18n }) {
 }
 
 export default withI18n()(HostEventModal);
+
+HostEventModal.propTypes = {
+  onClose: PropTypes.func.isRequired,
+  hostEvent: PropTypes.shape({}),
+  isOpen: PropTypes.bool,
+};
+
+HostEventModal.defaultProps = {
+  hostEvent: null,
+  isOpen: false,
+};

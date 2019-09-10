@@ -304,7 +304,7 @@ class JobOutput extends Component {
       <CardBody>
         {isHostModalOpen && (
           <HostEventModal
-            handleClose={this.handleHostModalClose}
+            onClose={this.handleHostModalClose}
             isOpen={isHostModalOpen}
             hostEvent={hostEvent}
           />
