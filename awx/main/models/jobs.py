@@ -39,7 +39,7 @@ from awx.main.models.notifications import (
     NotificationTemplate,
     JobNotificationMixin,
 )
-from awx.main.utils import parse_yaml_or_json, getattr_dne, NullablePromptPsuedoField
+from awx.main.utils import parse_yaml_or_json, getattr_dne, NullablePromptPseudoField
 from awx.main.fields import ImplicitRoleField, JSONField, AskForField
 from awx.main.models.mixins import (
     ResourceMixin,
@@ -903,7 +903,7 @@ for field_name in JobTemplate.get_ask_mapping().keys():
     try:
         LaunchTimeConfigBase._meta.get_field(field_name)
     except FieldDoesNotExist:
-        setattr(LaunchTimeConfigBase, field_name, NullablePromptPsuedoField(field_name))
+        setattr(LaunchTimeConfigBase, field_name, NullablePromptPseudoField(field_name))
 
 
 class LaunchTimeConfig(LaunchTimeConfigBase):

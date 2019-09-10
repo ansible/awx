@@ -47,7 +47,7 @@ __all__ = ['get_object_or_400', 'camelcase_to_underscore', 'underscore_to_camelc
            'get_current_apps', 'set_current_apps',
            'extract_ansible_vars', 'get_search_fields', 'get_system_task_capacity', 'get_cpu_capacity', 'get_mem_capacity',
            'wrap_args_with_proot', 'build_proot_temp_dir', 'check_proot_installed', 'model_to_dict',
-           'NullablePromptPsuedoField', 'model_instance_diff', 'parse_yaml_or_json', 'RequireDebugTrueOrTest',
+           'NullablePromptPseudoField', 'model_instance_diff', 'parse_yaml_or_json', 'RequireDebugTrueOrTest',
            'has_model_field_prefetched', 'set_environ', 'IllegalArgumentError', 'get_custom_venv_choices', 'get_external_account',
            'task_manager_bulk_reschedule', 'schedule_task_manager', 'classproperty', 'create_temporary_fifo']
 
@@ -448,9 +448,9 @@ class CharPromptDescriptor:
         self.field = field
 
 
-class NullablePromptPsuedoField:
+class NullablePromptPseudoField:
     """
-    Interface for psuedo-property stored in `char_prompts` dict
+    Interface for pseudo-property stored in `char_prompts` dict
     Used in LaunchTimeConfig and submodels, defined here to avoid circular imports
     """
     def __init__(self, field_name):

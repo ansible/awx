@@ -3357,7 +3357,7 @@ class WorkflowJobTemplateSerializer(JobTemplateMixin, LabelsListMixin, UnifiedJo
                 setattr(mock_obj, field_name, attrs[field_name])
                 attrs.pop(field_name)
 
-        # Model `.save` needs the container dict, not the psuedo fields
+        # Model `.save` needs the container dict, not the pseudo fields
         if mock_obj.char_prompts:
             attrs['char_prompts'] = mock_obj.char_prompts
 
@@ -3617,7 +3617,7 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
         if errors:
             raise serializers.ValidationError(errors)
 
-        # Model `.save` needs the container dict, not the psuedo fields
+        # Model `.save` needs the container dict, not the pseudo fields
         if mock_obj.char_prompts:
             attrs['char_prompts'] = mock_obj.char_prompts
 
