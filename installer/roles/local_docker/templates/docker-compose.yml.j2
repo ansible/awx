@@ -128,16 +128,15 @@ services:
 
   {% if pg_hostname is not defined %}
   postgres:
-    image: centos/postgresql-10-centos7
+    image: postgres:10
     container_name: awx_postgres
     restart: unless-stopped
     volumes:
-      - {{ postgres_data_dir }}:/var/lib/postgresql/data:Z
+      - {{ postgres_data_dir }}/10/data/:/var/lib/postgresql/data/pgdata:Z
     environment:
       POSTGRES_USER: {{ pg_username }}
       POSTGRES_PASSWORD: {{ pg_password }}
       POSTGRES_DB: {{ pg_database }}
-      POSTGRESQL_ADMIN_PASSWORD: 'postgrespass'    # TODO: Remove This
       PGDATA: /var/lib/postgresql/data/pgdata
       http_proxy: {{ http_proxy | default('') }}
       https_proxy: {{ https_proxy | default('') }}
