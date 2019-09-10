@@ -98,6 +98,10 @@ describe('Controller: WorkflowAdd', () => {
             .respond(200, '');
 
         $httpBackend
+            .when('OPTIONS', '/')
+            .respond(200, '');
+
+        $httpBackend
             .whenGET(/\/static\/*/)
             .respond(200, {});
 
