@@ -508,7 +508,7 @@ def copy_model_by_class(obj1, Class2, fields, kwargs):
                 create_kwargs.setdefault('char_prompts', {})
                 create_kwargs['char_prompts'][field_name] = new_val
         elif isinstance(descriptor, ManyToManyDescriptor):
-            continue  # not coppied in this method
+            continue  # not copied in this method
         elif field_name in kwargs:
             if field_name == 'extra_vars' and isinstance(kwargs[field_name], dict):
                 create_kwargs[field_name] = json.dumps(kwargs['extra_vars'])
