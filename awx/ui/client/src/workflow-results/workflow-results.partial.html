@@ -177,7 +177,7 @@
 
                     <!-- CREATED BY DETAIL -->
                     <div class="WorkflowResults-resultRow"
-                        ng-show="workflow.summary_fields.created_by.username">
+                        ng-show="workflow.summary_fields.created_by.username && !launched_by_webhook_link">
                         <label class="WorkflowResults-resultRowLabel">
                             {{ strings.labels.LAUNCHED_BY }}
                         </label>
@@ -192,7 +192,7 @@
 
                     <!-- SCHEDULED BY DETAIL -->
                     <div class="WorkflowResults-resultRow toggle-show"
-                        ng-show="workflow.summary_fields.schedule.name">
+                        ng-show="workflow.summary_fields.schedule.name && !launched_by_webhook_link">
                         <label
                             class="WorkflowResults-resultRowLabel">
                             {{ strings.labels.LAUNCHED_BY }}

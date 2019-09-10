@@ -266,15 +266,7 @@ function getLaunchedByDetails () {
     let tooltip;
     let value;
 
-    if (createdBy) {
-        tooltip = strings.get('tooltips.USER');
-        link = `/#/users/${createdBy.id}`;
-        value = $filter('sanitize')(createdBy.username);
-    } else if (relatedSchedule && jobTemplate) {
-        tooltip = strings.get('tooltips.SCHEDULE');
-        link = `/#/templates/job_template/${jobTemplate.id}/schedules/${schedule.id}`;
-        value = $filter('sanitize')(schedule.name);
-    } else if (webhookGUID && jobTemplate) {
+    if (webhookGUID && jobTemplate) {
         tooltip = strings.get('tooltips.WEBHOOK_JOB_TEMPLATE');
         link = `/#/templates/job_template/${jobTemplate.id}`;
         value = strings.get('details.WEBHOOK');
@@ -282,6 +274,14 @@ function getLaunchedByDetails () {
         tooltip = strings.get('tooltips.WEBHOOK_WORKFLOW_JOB_TEMPLATE');
         link = `/#/templates/workflow_job_template/${workflowJobTemplate.id}`;
         value = strings.get('details.WEBHOOK');
+    } else if (createdBy) {
+        tooltip = strings.get('tooltips.USER');
+        link = `/#/users/${createdBy.id}`;
+        value = $filter('sanitize')(createdBy.username);
+    } else if (relatedSchedule && jobTemplate) {
+        tooltip = strings.get('tooltips.SCHEDULE');
+        link = `/#/templates/job_template/${jobTemplate.id}/schedules/${schedule.id}`;
+        value = $filter('sanitize')(schedule.name);
     } else {
         tooltip = null;
         link = null;
