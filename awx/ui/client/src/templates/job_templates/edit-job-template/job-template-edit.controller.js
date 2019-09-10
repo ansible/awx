@@ -192,7 +192,7 @@ export default
                     const newServiceValue = newValue && typeof newValue === 'object' ? newValue.value : newValue;
                     const oldServiceValue = oldValue && typeof oldValue === 'object' ? oldValue.value : oldValue;
                     if (newServiceValue) {
-                        $scope.webhook_url = `${$scope.callback_server_path}${jobTemplateData.url}${newServiceValue}`;
+                        $scope.webhook_url = `${$scope.callback_server_path}${jobTemplateData.url}${newServiceValue}/`;
                     } else {
                         $scope.webhook_url = '';
                         $scope.webhook_key = '';

@@ -200,7 +200,7 @@ export default [
             const newServiceValue = newValue && typeof newValue === 'object' ? newValue.value : newValue;
             const oldServiceValue = oldValue && typeof oldValue === 'object' ? oldValue.value : oldValue;
             if (newServiceValue) {
-                $scope.webhook_url = `${$scope.baseURL}${workflowJobTemplateData.url}${newServiceValue}`;
+                $scope.webhook_url = `${$scope.baseURL}${workflowJobTemplateData.url}${newServiceValue}/`;
                 $scope.enable_webhook = true;
             } else {
                 $scope.webhook_url = '';
