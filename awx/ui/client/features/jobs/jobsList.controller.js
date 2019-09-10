@@ -158,6 +158,14 @@ function ListJobsController (
         return null;
     };
 
+    vm.getWebhookDetails = (job) => {
+        if (!job.webhook_guid) {
+            return null;
+        }
+
+        return strings.get('list.ROW_ITEM_LABEL_WEBHOOK');
+    };
+
     vm.getTranslatedStatusString = (status) => {
         switch (status) {
             case 'new':
