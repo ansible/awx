@@ -53,6 +53,8 @@ class WebhookReceiverBase(APIView):
     permission_classes = (AllowAny,)
     authentication_classes = ()
 
+    event_keys = {}
+
     def get_queryset(self):
         qs_models = {
             'job_templates': JobTemplate,
@@ -81,6 +83,19 @@ class WebhookReceiverBase(APIView):
     def get_event_guid(self):
         raise NotImplementedError
 
+    def get_event_ref(self):
+        key = self.event_keys.get(self.get_event_type(), '')
+        value = self.request.data
+        for element in key.split('.'):
+            try:
+                if element.isdigit():
+                    value = value[int(element)]
+                else:
+                    value = (value or {}).get(element)
+            except Exception:
+                value = None
+        return value
+
     def get_signature(self):
         raise NotImplementedError
 
@@ -108,6 +123,7 @@ class WebhookReceiverBase(APIView):
 
         event_type = self.get_event_type()
         event_guid = self.get_event_guid()
+        event_ref = self.get_event_ref()
 
         kwargs = {
             'webhook_service': obj.webhook_service,
@@ -119,18 +135,23 @@ class WebhookReceiverBase(APIView):
             return Response({'message': "Webhook previously received, aborting."},
                             status=status.HTTP_202_ACCEPTED)
 
-        new_job = obj.create_unified_job(
-            _eager_fields={
+        kwargs = {
+            '_eager_fields': {
                 'webhook_service': obj.webhook_service,
                 'webhook_credential': obj.webhook_credential,
                 'webhook_guid': event_guid,
             },
-            extra_vars=json.dumps({
+            'extra_vars': json.dumps({
                 'tower_webhook_event_type': event_type,
                 'tower_webhook_event_guid': event_guid,
+                'tower_webhook_event_ref': event_ref,
                 'tower_webhook_payload': request.data,
             })
-        )
+        }
+        # if event_ref:
+        #     kwargs['scm_branch'] = event_ref
+
+        new_job = obj.create_unified_job(**kwargs)
         new_job.signal_start()
 
         return Response({'message': "Job queued."}, status=status.HTTP_202_ACCEPTED)
@@ -138,6 +159,17 @@ class WebhookReceiverBase(APIView):
 
 class GithubWebhookReceiver(WebhookReceiverBase):
     service = 'github'
+
+    event_keys = {
+        'pull_request': 'pull_request.head.sha',
+        'pull_request_review': 'pull_request.head.sha',
+        'pull_request_review_comment': 'pull_request.head.sha',
+        'push': 'head_commit',
+        'release': 'release.tag_name',
+        'commit_comment': 'comment.commit_id',
+        'create': 'ref',
+        'page_build': 'build.commit',
+    }
 
     def get_event_type(self):
         return self.request.META.get('HTTP_X_GITHUB_EVENT')
@@ -157,6 +189,12 @@ class GithubWebhookReceiver(WebhookReceiverBase):
 
 class GitlabWebhookReceiver(WebhookReceiverBase):
     service = 'gitlab'
+
+    event_keys = {
+        'Push Hook': 'checkout_sha',
+        'Tag Push Hook': 'checkout_sha',
+        'Merge Request Hook': 'last_commit.id',
+    }
 
     def get_event_type(self):
         return self.request.META.get('HTTP_X_GITLAB_EVENT')
@@ -183,6 +221,39 @@ class GitlabWebhookReceiver(WebhookReceiverBase):
 
 class BitbucketWebhookReceiver(WebhookReceiverBase):
     service = 'bitbucket'
+
+    event_keys = {
+        # Bitbucket Server
+        'repo:refs_changed': 'changes.0.toHash',
+        'repo:comment:added': 'commit',
+        'repo:comment:edited': 'commit',
+        'repo:comment:deleted': 'commit',
+        'pr:opened': 'pullRequest.fromRef.latestCommit',
+        'pr:modified': 'pullRequest.fromRef.latestCommit',
+        'pr:reviewer:updated': 'pullRequest.fromRef.latestCommit',
+        'pr:reviewer:approved': 'pullRequest.fromRef.latestCommit',
+        'pr:reviewer:unapproved': 'pullRequest.fromRef.latestCommit',
+        'pr:reviewer:needs_work': 'pullRequest.fromRef.latestCommit',
+        'pr:merged': 'pullRequest.fromRef.latestCommit',
+        'pr:declined': 'pullRequest.fromRef.latestCommit',
+        'pr:deleted': 'pullRequest.fromRef.latestCommit',
+        'pr:comment:added': 'pullRequest.fromRef.latestCommit',
+        'pr:comment:edited': 'pullRequest.fromRef.latestCommit',
+        'pr:comment:deleted': 'pullRequest.fromRef.latestCommit',
+
+        # Bitbucket Cloud, aka bitbucket.org
+        'repo:push': 'push.changes.0.new.target.hash',
+        'repo:commit_comment_created': 'commit.hash',
+        'pullrequest:created': 'pullrequest.source.commit',
+        'pullrequest:updated': 'pullrequest.source.commit',
+        'pullrequest:approved': 'pullrequest.source.commit',
+        'pullrequest:unapproved': 'pullrequest.source.commit',
+        'pullrequest:fulfilled': 'pullrequest.source.commit',
+        'pullrequest:rejected': 'pullrequest.source.commit',
+        'pullrequest:comment_created': 'pullrequest.source.commit',
+        'pullrequest:comment_updated': 'pullrequest.source.commit',
+        'pullrequest:comment_deleted': 'pullrequest.source.commit',
+    }
 
     def get_event_type(self):
         return self.request.META.get('HTTP_X_EVENT_KEY')
