@@ -23,7 +23,7 @@ describe('Sparkline', () => {
       },
     ];
     const wrapper = mountWithContexts(<Sparkline jobs={jobs} />);
-    expect(wrapper.find('JobStatusIcon')).toHaveLength(2);
+    expect(wrapper.find('StatusIcon')).toHaveLength(2);
     expect(wrapper.find('Tooltip')).toHaveLength(2);
     expect(wrapper.find('Link')).toHaveLength(2);
   });

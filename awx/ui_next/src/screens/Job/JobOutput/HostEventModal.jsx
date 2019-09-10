@@ -9,7 +9,7 @@ import CodeMirrorInput from '@components/CodeMirrorInput';
 import ContentEmpty from '@components/ContentEmpty';
 import PropTypes from 'prop-types';
 import { DetailList, Detail } from '@components/DetailList';
-import { HostStatusIcon } from '@components/Sparkline';
+import { StatusIcon } from '@components/Sparkline';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
@@ -76,7 +76,7 @@ const processEventStatus = event => {
   ) {
     status = 'ok';
   }
-  // catch the 'changed' case after 'ok', because both can be true
+  // if 'ok' and 'changed' are both true, show 'changed'
   if (event.changed) {
     status = 'changed';
   }
@@ -160,7 +160,7 @@ function HostEventModal({ onClose, hostEvent = {}, isOpen = false, i18n }) {
               label={i18n._(t`Host Name`)}
               value={
                 <HostNameDetailValue>
-                  {hostStatus ? <HostStatusIcon status={hostStatus} /> : null}
+                  {hostStatus ? <StatusIcon status={hostStatus} /> : null}
                   {hostEvent.host_name}
                 </HostNameDetailValue>
               }
