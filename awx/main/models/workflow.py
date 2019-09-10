@@ -3,6 +3,8 @@
 
 # Python
 import logging
+from copy import copy
+from urllib.parse import urljoin
 
 # Django
 from django.db import connection, models
@@ -37,9 +39,6 @@ from awx.main.redact import REPLACE_STR
 from awx.main.fields import JSONField
 from awx.main.utils import schedule_task_manager
 
-
-from copy import copy
-from urllib.parse import urljoin
 
 __all__ = ['WorkflowJobTemplate', 'WorkflowJob', 'WorkflowJobOptions', 'WorkflowJobNode',
            'WorkflowJobTemplateNode', 'WorkflowApprovalTemplate', 'WorkflowApproval']
@@ -712,6 +711,8 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
 
     def send_approval_notification(self, status):
         from awx.main.tasks import send_notifications  # avoid circular import
+        if self.workflow_job_template is None:
+            return
         for nt in self.workflow_job_template.notification_templates["approvals"]:
             try:
                 (notification_subject, notification_body) = self.build_notification_message(nt, status)
@@ -727,23 +728,21 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
 
     def build_notification_message(self, nt, status):
         subject = []
-        subject.append(('{}, Job Number {}').format(self.workflow_approval_template.name,
-                                                    self.id))
+        workflow_url = urljoin(settings.TOWER_URL_BASE, '/#/workflows/{}'.format(self.workflow_job.id))
+        subject.append(('The approval node "{}"').format(self.workflow_approval_template.name))
         if status == 'running':
-            subject.append('Please approve or deny this node.')
+            subject.append((' is running. You can approve or deny this node at: {}').format(workflow_url))
         if status == 'approved':
-            subject.append('This approval node was approved.')
+            subject.append((' was approved. {}').format(workflow_url))
         if status == 'timed_out':
-            subject.append('This approval node has timed out.')
+            subject.append((' has timed out. {}').format(workflow_url))
         elif status == 'denied':
-            subject.append('This approval node was denied.')
+            subject.append((' was denied. {}').format(workflow_url))
+        subject = " ".join(subject)
         body = self.notification_data()
         body['body'] = subject
 
         return subject, body
-
-    # def get_notification_templates(self):
-    #     return self.workflow_job_template.notification_templates
 
     @property
     def workflow_job_template(self):
