@@ -84,7 +84,7 @@ const containerGroupJobsRoute = {
         }
     },
     views: {
-        'instanceGroupsJobsContainer@instanceGroups': {
+        'containerGroupJobs@instanceGroups': {
             templateUrl: listContainerTemplate,
             controller: listContainerController,
             controllerAs: 'vm'
@@ -108,9 +108,8 @@ const containerGroupJobsRoute = {
         Dataset: [
             '$stateParams',
             'Wait',
-            'GetBasePath',
             'QuerySet',
-            ($stateParams, Wait, GetBasePath, qs) => {
+            ($stateParams, Wait, qs) => {
                 const groupId = $stateParams.instance_group_id;
 
                 const searchParam = $stateParams.job_search;
