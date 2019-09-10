@@ -27,7 +27,7 @@ describe('<ExpandCollapse />', () => {
   test('renders non-default param tags based on location history', () => {
     const history = createMemoryHistory({
       initialEntries: [
-        '/foo?item.page=1&item.page_size=2&item.foo=bar&item.baz=bust',
+        '/foo?item.page=1&item.page_size=2&item.name__icontains=bar&item.job_type__icontains=project',
       ],
     });
     const wrapper = mountWithContexts(
@@ -42,6 +42,10 @@ describe('<ExpandCollapse />', () => {
     );
     const chips = wrapper.find('.pf-c-chip.searchTagChip');
     expect(chips.length).toBe(2);
+    const chipLabels = wrapper.find('.pf-c-chip__text b');
+    expect(chipLabels.length).toBe(2);
+    expect(chipLabels.at(0).text()).toEqual('Name:');
+    expect(chipLabels.at(1).text()).toEqual('Job Type:');
     wrapper.unmount();
   });
 });

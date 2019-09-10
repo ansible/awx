@@ -45,28 +45,36 @@ const FilterTags = ({
     qsConfig
   );
   nonDefaultParams.forEach(key => {
+    const label = key
+      .replace('__icontains', '')
+      .split('_')
+      .map(word => `${word.charAt(0).toUpperCase()}${word.slice(1)}`)
+      .join(' ');
+
     if (Array.isArray(queryParams[key])) {
-      queryParams[key].forEach(val => queryParamsArr.push({ key, value: val }));
+      queryParams[key].forEach(val =>
+        queryParamsArr.push({ key, value: val, label })
+      );
     } else {
-      queryParamsArr.push({ key, value: queryParams[key] });
+      queryParamsArr.push({ key, value: queryParams[key], label });
     }
   });
 
   return (
     queryParamsArr.length > 0 && (
       <FilterTagsRow>
-        <ResultCount>{`${itemCount} results`}</ResultCount>
+        <ResultCount>{i18n._(t`${itemCount} results`)}</ResultCount>
         <VerticalSeparator />
         <FilterLabel>{i18n._(t`Active Filters:`)}</FilterLabel>
         <ChipGroup>
-          {queryParamsArr.map(({ key, value }) => (
+          {queryParamsArr.map(({ key, label, value }) => (
             <Chip
               className="searchTagChip"
               key={`${key}__${value}`}
               isReadOnly={false}
               onClick={() => onRemove(key, value)}
             >
-              {value}
+              <b>{label}:</b>&nbsp;{value}
             </Chip>
           ))}
           <div className="pf-c-chip pf-m-overflow">
