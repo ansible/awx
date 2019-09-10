@@ -11,7 +11,6 @@ function InstanceGroupJobsContainerController ($scope, strings, $state) {
                     _go: 'instanceGroups.edit'
                 },
                 instances: {
-
                     _go: 'instanceGroups.instances'
                 },
                 jobs: {
@@ -27,7 +26,6 @@ function InstanceGroupJobsContainerController ($scope, strings, $state) {
                     _go: 'instanceGroups.editContainerGroup'
                 },
                 instances: {
-
                     _go: 'instanceGroups.containerGroupInstances'
                 },
                 jobs: {
