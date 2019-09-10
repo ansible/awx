@@ -7,12 +7,12 @@ import {
   DataListItem,
   DataListItemRow,
   DataListItemCells,
-  DataListCheck,
 } from '@patternfly/react-core';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
 import DataListCell from '@components/DataListCell';
+import DataListCheck from '@components/DataListCheck';
 import VerticalSeparator from '@components/VerticalSeparator';
 import { Organization } from '@types';
 

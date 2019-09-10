@@ -19,11 +19,17 @@ import styled from 'styled-components';
 const TextInput = styled(PFTextInput)`
   min-height: 0px;
   height: 30px;
+  --pf-c-form-control--BorderTopColor: var(--pf-global--BorderColor--200);
+  --pf-c-form-control--BorderLeftColor: var(--pf-global--BorderColor--200);
 `;
 
 const Button = styled(PFButton)`
   width: 34px;
   padding: 0px;
+  ::after {
+    border: var(--pf-c-button--BorderWidth) solid
+      var(--pf-global--BorderColor--200);
+  }
 `;
 
 const Dropdown = styled(PFDropdown)`
@@ -35,6 +41,10 @@ const Dropdown = styled(PFDropdown)`
       height: 30px;
       padding: 0 10px;
       margin: 0px;
+
+      ::before {
+        border-color: var(--pf-global--BorderColor--200);
+      }
 
       > span {
         /* text element */
@@ -53,7 +63,7 @@ const Dropdown = styled(PFDropdown)`
 
 const NoOptionDropdown = styled.div`
   align-self: stretch;
-  border: 1px solid grey;
+  border: 1px solid var(--pf-global--BorderColor--200);
   padding: 3px 7px;
   white-space: nowrap;
 `;

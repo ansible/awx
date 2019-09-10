@@ -4,9 +4,9 @@ import {
   DataListItem,
   DataListItemRow,
   DataListItemCells,
-  DataListCheck,
 } from '@patternfly/react-core';
 import DataListCell from '@components/DataListCell';
+import DataListCheck from '@components/DataListCheck';
 import VerticalSeparator from '@components/VerticalSeparator';
 import { toTitleCase } from '@util/strings';
 import { JOB_TYPE_URL_SEGMENTS } from '../../../constants';

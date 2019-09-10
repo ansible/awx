@@ -123,7 +123,8 @@ describe('<TemplatesList />', () => {
       el => el.state('hasContentLoading') === false
     );
     await wrapper
-      .find('DataListCheck#select-jobTemplate-1')
+      .find('input#select-jobTemplate-1')
+      .closest('DataListCheck')
       .props()
       .onChange();
     expect(handleSelect).toBeCalled();

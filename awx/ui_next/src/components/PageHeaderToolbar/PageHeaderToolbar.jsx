@@ -92,7 +92,7 @@ class PageHeaderToolbar extends Component {
               />
             </ToolbarItem>
           </Tooltip>
-          <Tooltip position="left" content={<div>User</div>}>
+          <Tooltip position="left" content={<div>{i18n._(t`User`)}</div>}>
             <ToolbarItem>
               <Dropdown
                 isPlain

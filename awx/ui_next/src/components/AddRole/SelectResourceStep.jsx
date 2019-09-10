@@ -83,6 +83,11 @@ class SelectResourceStep extends React.Component {
         {isLoading && <div>{i18n._(t`Loading...`)}</div>}
         {isInitialized && (
           <Fragment>
+            <div>
+              {i18n._(
+                t`Choose the resources that will be receiving new roles.  You'll be able to select the roles to apply in the next step.  Note that the resources chosen here will receive all roles chosen in the next step.`
+              )}
+            </div>
             {selectedResourceRows.length > 0 && (
               <SelectedList
                 displayKey={displayKey}
@@ -108,9 +113,7 @@ class SelectResourceStep extends React.Component {
                   onSelect={() => onRowClick(item)}
                 />
               )}
-              renderToolbar={props => (
-                <DataListToolbar {...props} alignToolbarLeft />
-              )}
+              renderToolbar={props => <DataListToolbar {...props} fillWidth />}
               showPageSizeOptions={false}
             />
           </Fragment>

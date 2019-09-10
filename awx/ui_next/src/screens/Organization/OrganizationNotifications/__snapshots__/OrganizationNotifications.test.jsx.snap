@@ -466,9 +466,9 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                 "$$typeof": Symbol(react.forward_ref),
                                                 "attrs": Array [],
                                                 "componentStyle": ComponentStyle {
-                                                  "componentId": "sc-htpNat",
+                                                  "componentId": "sc-bwzfXH",
                                                   "isStatic": false,
-                                                  "lastClassName": "dnOsXG",
+                                                  "lastClassName": "fPRqXT",
                                                   "rules": Array [
                                                     "flex-grow:1;margin-left:20px;margin-right:20px;",
                                                     [Function],
@@ -479,7 +479,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                   "DataListToolbar__Toolbar-ajzso8-1",
                                                 ],
                                                 "render": [Function],
-                                                "styledComponentId": "sc-htpNat",
+                                                "styledComponentId": "sc-bwzfXH",
                                                 "target": [Function],
                                                 "toString": [Function],
                                                 "warnTooManyClasses": [Function],
@@ -490,11 +490,11 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                           >
                                             <Toolbar
                                               _css=""
-                                              className="DataListToolbar__Toolbar-ajzso8-1 sc-htpNat dnOsXG"
+                                              className="DataListToolbar__Toolbar-ajzso8-1 sc-bwzfXH fPRqXT"
                                             >
                                               <div
                                                 _css=""
-                                                className="pf-l-toolbar DataListToolbar__Toolbar-ajzso8-1 sc-htpNat dnOsXG"
+                                                className="pf-l-toolbar DataListToolbar__Toolbar-ajzso8-1 sc-bwzfXH fPRqXT"
                                               >
                                                 <DataListToolbar__ColumnLeft
                                                   fillWidth={false}
@@ -541,9 +541,9 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                               "$$typeof": Symbol(react.forward_ref),
                                                               "attrs": Array [],
                                                               "componentStyle": ComponentStyle {
-                                                                "componentId": "sc-bxivhb",
+                                                                "componentId": "sc-htpNat",
                                                                 "isStatic": true,
-                                                                "lastClassName": "gYEJOJ",
+                                                                "lastClassName": "dqEVhr",
                                                                 "rules": Array [
                                                                   "flex-grow: 1;",
                                                                 ],
@@ -551,7 +551,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                               "displayName": "Styled(ToolbarItem)",
                                                               "foldedComponentIds": Array [],
                                                               "render": [Function],
-                                                              "styledComponentId": "sc-bxivhb",
+                                                              "styledComponentId": "sc-htpNat",
                                                               "target": [Function],
                                                               "toString": [Function],
                                                               "warnTooManyClasses": [Function],
@@ -561,10 +561,10 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                           forwardedRef={null}
                                                         >
                                                           <ToolbarItem
-                                                            className="sc-bxivhb gYEJOJ"
+                                                            className="sc-htpNat dqEVhr"
                                                           >
                                                             <div
-                                                              className="pf-l-toolbar__item sc-bxivhb gYEJOJ"
+                                                              className="pf-l-toolbar__item sc-htpNat dqEVhr"
                                                             >
                                                               <WithI18n
                                                                 columns={
@@ -643,9 +643,9 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                                                   "componentStyle": ComponentStyle {
                                                                                     "componentId": "Search__NoOptionDropdown-sc-1dwuww3-3",
                                                                                     "isStatic": true,
-                                                                                    "lastClassName": "gMeiYd",
+                                                                                    "lastClassName": "iMdtNX",
                                                                                     "rules": Array [
-                                                                                      "align-self:stretch;border:1px solid grey;padding:3px 7px;white-space:nowrap;",
+                                                                                      "align-self:stretch;border:1px solid var(--pf-global--BorderColor--200);padding:3px 7px;white-space:nowrap;",
                                                                                     ],
                                                                                   },
                                                                                   "displayName": "Search__NoOptionDropdown",
@@ -661,7 +661,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                                               forwardedRef={null}
                                                                             >
                                                                               <div
-                                                                                className="Search__NoOptionDropdown-sc-1dwuww3-3 gMeiYd"
+                                                                                className="Search__NoOptionDropdown-sc-1dwuww3-3 iMdtNX"
                                                                               >
                                                                                 Name
                                                                               </div>
@@ -780,9 +780,9 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                                                           "componentStyle": ComponentStyle {
                                                                                             "componentId": "Search__TextInput-sc-1dwuww3-0",
                                                                                             "isStatic": true,
-                                                                                            "lastClassName": "EgkYH",
+                                                                                            "lastClassName": "kyQbZs",
                                                                                             "rules": Array [
-                                                                                              "min-height:0px;height:30px;",
+                                                                                              "min-height:0px;height:30px;--pf-c-form-control--BorderTopColor:var(--pf-global--BorderColor--200);--pf-c-form-control--BorderLeftColor:var(--pf-global--BorderColor--200);",
                                                                                             ],
                                                                                           },
                                                                                           "displayName": "Search__TextInput",
@@ -807,7 +807,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                                                     >
                                                                                       <TextInput
                                                                                         aria-label="Search text input"
-                                                                                        className="Search__TextInput-sc-1dwuww3-0 EgkYH"
+                                                                                        className="Search__TextInput-sc-1dwuww3-0 kyQbZs"
                                                                                         isDisabled={false}
                                                                                         isReadOnly={false}
                                                                                         isRequired={false}
@@ -824,7 +824,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                                                         <input
                                                                                           aria-invalid={false}
                                                                                           aria-label="Search text input"
-                                                                                          className="pf-c-form-control Search__TextInput-sc-1dwuww3-0 EgkYH"
+                                                                                          className="pf-c-form-control Search__TextInput-sc-1dwuww3-0 kyQbZs"
                                                                                           disabled={false}
                                                                                           onChange={[Function]}
                                                                                           readOnly={false}
@@ -859,9 +859,9 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                                                   "componentStyle": ComponentStyle {
                                                                                     "componentId": "Search__Button-sc-1dwuww3-1",
                                                                                     "isStatic": true,
-                                                                                    "lastClassName": "jtZPEu",
+                                                                                    "lastClassName": "bLlonv",
                                                                                     "rules": Array [
-                                                                                      "width:34px;padding:0px;",
+                                                                                      "width:34px;padding:0px;::after{border:var(--pf-c-button--BorderWidth) solid var(--pf-global--BorderColor--200);}",
                                                                                     ],
                                                                                   },
                                                                                   "displayName": "Search__Button",
@@ -881,7 +881,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                                             >
                                                                               <Button
                                                                                 aria-label="Search submit button"
-                                                                                className="Search__Button-sc-1dwuww3-1 jtZPEu"
+                                                                                className="Search__Button-sc-1dwuww3-1 bLlonv"
                                                                                 onClick={[Function]}
                                                                                 type="submit"
                                                                                 variant="tertiary"
@@ -889,7 +889,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                                                 <button
                                                                                   aria-disabled={null}
                                                                                   aria-label="Search submit button"
-                                                                                  className="pf-c-button pf-m-tertiary Search__Button-sc-1dwuww3-1 jtZPEu"
+                                                                                  className="pf-c-button pf-m-tertiary Search__Button-sc-1dwuww3-1 bLlonv"
                                                                                   disabled={false}
                                                                                   onClick={[Function]}
                                                                                   tabIndex={null}
@@ -1072,6 +1072,39 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                                 sortOrder="ascending"
                                                                 sortedColumnKey="name"
                                                               >
+                                                                <Sort__SortBy>
+                                                                  <StyledComponent
+                                                                    forwardedComponent={
+                                                                      Object {
+                                                                        "$$typeof": Symbol(react.forward_ref),
+                                                                        "attrs": Array [],
+                                                                        "componentStyle": ComponentStyle {
+                                                                          "componentId": "Sort__SortBy-sc-21g5aw-3",
+                                                                          "isStatic": true,
+                                                                          "lastClassName": "kxjfOq",
+                                                                          "rules": Array [
+                                                                            "margin-right:15px;font-size:var(--pf-global--FontSize--md);",
+                                                                          ],
+                                                                        },
+                                                                        "displayName": "Sort__SortBy",
+                                                                        "foldedComponentIds": Array [],
+                                                                        "render": [Function],
+                                                                        "styledComponentId": "Sort__SortBy-sc-21g5aw-3",
+                                                                        "target": "span",
+                                                                        "toString": [Function],
+                                                                        "warnTooManyClasses": [Function],
+                                                                        "withComponent": [Function],
+                                                                      }
+                                                                    }
+                                                                    forwardedRef={null}
+                                                                  >
+                                                                    <span
+                                                                      className="Sort__SortBy-sc-21g5aw-3 kxjfOq"
+                                                                    >
+                                                                      Sort By
+                                                                    </span>
+                                                                  </StyledComponent>
+                                                                </Sort__SortBy>
                                                                 <Sort__Dropdown
                                                                   dropdownItems={
                                                                     Array [
@@ -1092,7 +1125,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                                   onToggle={[Function]}
                                                                   style={
                                                                     Object {
-                                                                      "marginRight": "20px",
+                                                                      "marginRight": "10px",
                                                                     }
                                                                   }
                                                                   toggle={
@@ -1147,7 +1180,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                                     onToggle={[Function]}
                                                                     style={
                                                                       Object {
-                                                                        "marginRight": "20px",
+                                                                        "marginRight": "10px",
                                                                       }
                                                                     }
                                                                     toggle={
@@ -1180,7 +1213,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                                       onToggle={[Function]}
                                                                       style={
                                                                         Object {
-                                                                          "marginRight": "20px",
+                                                                          "marginRight": "10px",
                                                                         }
                                                                       }
                                                                       toggle={
@@ -1217,7 +1250,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                                         position="left"
                                                                         style={
                                                                           Object {
-                                                                            "marginRight": "20px",
+                                                                            "marginRight": "10px",
                                                                           }
                                                                         }
                                                                         toggle={
@@ -1234,7 +1267,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                                           onToggle={[Function]}
                                                                           style={
                                                                             Object {
-                                                                              "marginRight": "20px",
+                                                                              "marginRight": "10px",
                                                                             }
                                                                           }
                                                                         >
@@ -1250,7 +1283,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                                               Object {
                                                                                 "current": <div
                                                                                   class="pf-c-dropdown Sort__Dropdown-sc-21g5aw-0 kdSQuN"
-                                                                                  style="margin-right: 20px;"
+                                                                                  style="margin-right: 10px;"
                                                                                 >
                                                                                   <button
                                                                                     aria-expanded="false"
@@ -1301,7 +1334,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                                                 Object {
                                                                                   "current": <div
                                                                                     class="pf-c-dropdown Sort__Dropdown-sc-21g5aw-0 kdSQuN"
-                                                                                    style="margin-right: 20px;"
+                                                                                    style="margin-right: 10px;"
                                                                                   >
                                                                                     <button
                                                                                       aria-expanded="false"
@@ -1386,116 +1419,245 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                                     </Dropdown>
                                                                   </StyledComponent>
                                                                 </Sort__Dropdown>
-                                                                <Styled(Button)
-                                                                  aria-label="Sort"
-                                                                  onClick={[Function]}
-                                                                  variant="plain"
+                                                                <Tooltip
+                                                                  appendTo={[Function]}
+                                                                  aria="describedby"
+                                                                  boundary="window"
+                                                                  className=""
+                                                                  content={
+                                                                    <div>
+                                                                      Reverse Sort Order
+                                                                    </div>
+                                                                  }
+                                                                  distance={15}
+                                                                  enableFlip={true}
+                                                                  entryDelay={500}
+                                                                  exitDelay={500}
+                                                                  flipBehavior={
+                                                                    Array [
+                                                                      "top",
+                                                                      "right",
+                                                                      "bottom",
+                                                                      "left",
+                                                                      "top",
+                                                                      "right",
+                                                                      "bottom",
+                                                                    ]
+                                                                  }
+                                                                  isAppLauncher={false}
+                                                                  maxWidth="18.75rem"
+                                                                  position="top"
+                                                                  trigger="mouseenter focus"
+                                                                  zIndex={9999}
                                                                 >
-                                                                  <StyledComponent
-                                                                    aria-label="Sort"
-                                                                    forwardedComponent={
+                                                                  <PopoverBase
+                                                                    animateFill={false}
+                                                                    appendTo={[Function]}
+                                                                    aria="describedby"
+                                                                    arrow={true}
+                                                                    boundary="window"
+                                                                    content={
+                                                                      <div
+                                                                        className=""
+                                                                        role="tooltip"
+                                                                      >
+                                                                        <TooltipContent>
+                                                                          <div>
+                                                                            Reverse Sort Order
+                                                                          </div>
+                                                                        </TooltipContent>
+                                                                      </div>
+                                                                    }
+                                                                    delay={
+                                                                      Array [
+                                                                        500,
+                                                                        500,
+                                                                      ]
+                                                                    }
+                                                                    distance={15}
+                                                                    flip={true}
+                                                                    flipBehavior={
+                                                                      Array [
+                                                                        "top",
+                                                                        "right",
+                                                                        "bottom",
+                                                                        "left",
+                                                                        "top",
+                                                                        "right",
+                                                                        "bottom",
+                                                                      ]
+                                                                    }
+                                                                    lazy={true}
+                                                                    maxWidth="18.75rem"
+                                                                    onCreate={[Function]}
+                                                                    performance={true}
+                                                                    placement="top"
+                                                                    popperOptions={
                                                                       Object {
-                                                                        "$$typeof": Symbol(react.forward_ref),
-                                                                        "attrs": Array [],
-                                                                        "componentStyle": ComponentStyle {
-                                                                          "componentId": "sc-bwzfXH",
-                                                                          "isStatic": true,
-                                                                          "lastClassName": "iNPUwu",
-                                                                          "rules": Array [
-                                                                            "padding: 0;",
-                                                                          ],
+                                                                        "modifiers": Object {
+                                                                          "hide": Object {
+                                                                            "enabled": true,
+                                                                          },
+                                                                          "preventOverflow": Object {
+                                                                            "enabled": true,
+                                                                          },
                                                                         },
-                                                                        "displayName": "Styled(Button)",
-                                                                        "foldedComponentIds": Array [],
-                                                                        "render": [Function],
-                                                                        "styledComponentId": "sc-bwzfXH",
-                                                                        "target": [Function],
-                                                                        "toString": [Function],
-                                                                        "warnTooManyClasses": [Function],
-                                                                        "withComponent": [Function],
                                                                       }
                                                                     }
-                                                                    forwardedRef={null}
-                                                                    onClick={[Function]}
-                                                                    variant="plain"
+                                                                    theme="pf-tooltip"
+                                                                    trigger="mouseenter focus"
+                                                                    zIndex={9999}
                                                                   >
-                                                                    <Button
+                                                                    <Sort__SortButton
                                                                       aria-label="Sort"
-                                                                      className="sc-bwzfXH iNPUwu"
                                                                       onClick={[Function]}
                                                                       variant="plain"
                                                                     >
-                                                                      <button
-                                                                        aria-disabled={null}
+                                                                      <StyledComponent
                                                                         aria-label="Sort"
-                                                                        className="pf-c-button pf-m-plain sc-bwzfXH iNPUwu"
-                                                                        disabled={false}
+                                                                        forwardedComponent={
+                                                                          Object {
+                                                                            "$$typeof": Symbol(react.forward_ref),
+                                                                            "attrs": Array [],
+                                                                            "componentStyle": ComponentStyle {
+                                                                              "componentId": "Sort__SortButton-sc-21g5aw-2",
+                                                                              "isStatic": true,
+                                                                              "lastClassName": "FZjfT",
+                                                                              "rules": Array [
+                                                                                "padding:5px 8px;margin-top:3px;&:hover{background-color:#0166cc;color:white;}",
+                                                                              ],
+                                                                            },
+                                                                            "displayName": "Sort__SortButton",
+                                                                            "foldedComponentIds": Array [],
+                                                                            "render": [Function],
+                                                                            "styledComponentId": "Sort__SortButton-sc-21g5aw-2",
+                                                                            "target": [Function],
+                                                                            "toString": [Function],
+                                                                            "warnTooManyClasses": [Function],
+                                                                            "withComponent": [Function],
+                                                                          }
+                                                                        }
+                                                                        forwardedRef={null}
                                                                         onClick={[Function]}
-                                                                        tabIndex={null}
-                                                                        type="button"
+                                                                        variant="plain"
                                                                       >
-                                                                        <Sort__IconWrapper>
-                                                                          <StyledComponent
-                                                                            forwardedComponent={
-                                                                              Object {
-                                                                                "$$typeof": Symbol(react.forward_ref),
-                                                                                "attrs": Array [],
-                                                                                "componentStyle": ComponentStyle {
-                                                                                  "componentId": "Sort__IconWrapper-sc-21g5aw-1",
-                                                                                  "isStatic": true,
-                                                                                  "lastClassName": "fTwElO",
-                                                                                  "rules": Array [
-                                                                                    "> svg{font-size:18px;}",
-                                                                                  ],
-                                                                                },
-                                                                                "displayName": "Sort__IconWrapper",
-                                                                                "foldedComponentIds": Array [],
-                                                                                "render": [Function],
-                                                                                "styledComponentId": "Sort__IconWrapper-sc-21g5aw-1",
-                                                                                "target": "span",
-                                                                                "toString": [Function],
-                                                                                "warnTooManyClasses": [Function],
-                                                                                "withComponent": [Function],
-                                                                              }
-                                                                            }
-                                                                            forwardedRef={null}
+                                                                        <Button
+                                                                          aria-label="Sort"
+                                                                          className="Sort__SortButton-sc-21g5aw-2 FZjfT"
+                                                                          onClick={[Function]}
+                                                                          variant="plain"
+                                                                        >
+                                                                          <button
+                                                                            aria-disabled={null}
+                                                                            aria-label="Sort"
+                                                                            className="pf-c-button pf-m-plain Sort__SortButton-sc-21g5aw-2 FZjfT"
+                                                                            disabled={false}
+                                                                            onClick={[Function]}
+                                                                            tabIndex={null}
+                                                                            type="button"
                                                                           >
-                                                                            <span
-                                                                              className="Sort__IconWrapper-sc-21g5aw-1 fTwElO"
-                                                                            >
-                                                                              <SortAlphaUpIcon
-                                                                                color="currentColor"
-                                                                                noVerticalAlign={false}
-                                                                                size="sm"
-                                                                                title={null}
-                                                                              >
-                                                                                <svg
-                                                                                  aria-hidden={true}
-                                                                                  aria-labelledby={null}
-                                                                                  fill="currentColor"
-                                                                                  height="1em"
-                                                                                  role="img"
-                                                                                  style={
-                                                                                    Object {
-                                                                                      "verticalAlign": "-0.125em",
-                                                                                    }
+                                                                            <Sort__IconWrapper>
+                                                                              <StyledComponent
+                                                                                forwardedComponent={
+                                                                                  Object {
+                                                                                    "$$typeof": Symbol(react.forward_ref),
+                                                                                    "attrs": Array [],
+                                                                                    "componentStyle": ComponentStyle {
+                                                                                      "componentId": "Sort__IconWrapper-sc-21g5aw-1",
+                                                                                      "isStatic": true,
+                                                                                      "lastClassName": "fTwElO",
+                                                                                      "rules": Array [
+                                                                                        "> svg{font-size:18px;}",
+                                                                                      ],
+                                                                                    },
+                                                                                    "displayName": "Sort__IconWrapper",
+                                                                                    "foldedComponentIds": Array [],
+                                                                                    "render": [Function],
+                                                                                    "styledComponentId": "Sort__IconWrapper-sc-21g5aw-1",
+                                                                                    "target": "span",
+                                                                                    "toString": [Function],
+                                                                                    "warnTooManyClasses": [Function],
+                                                                                    "withComponent": [Function],
                                                                                   }
-                                                                                  viewBox="0 0 448 512"
-                                                                                  width="1em"
+                                                                                }
+                                                                                forwardedRef={null}
+                                                                              >
+                                                                                <span
+                                                                                  className="Sort__IconWrapper-sc-21g5aw-1 fTwElO"
                                                                                 >
-                                                                                  <path
-                                                                                    d="M107.3 36.7c-6.2-6.2-16.4-6.2-22.6 0l-80 80c-10 10-2.9 27.3 11.3 27.3h48v320c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V144h48c14.2 0 21.4-17.2 11.3-27.3zm293.4 390.4h-61.1c.7-1 1.5-2 2.3-3.1l67.5-95.7c1.4-2 2.2-4.4 2.2-6.9V300c0-6.6-5.4-12-12-12H274.5c-6.6 0-12 5.4-12 12v28.9c0 6.6 5.4 12 12 12H331c-.7 1-1.5 2-2.3 3.1l-67.2 95.2c-1.4 2-2.2 4.4-2.2 6.9V468c0 6.6 5.4 12 12 12h129.4c6.6 0 12-5.4 12-12v-28.9c0-6.7-5.4-12-12-12zm23.5-219l-57.1-168c-1.7-4.9-6.2-8.1-11.4-8.1h-39.6c-5.1 0-9.7 3.3-11.4 8.1l-57.1 168c-2.6 7.8 3.1 15.9 11.4 15.9h35.7c5.4 0 10.1-3.5 11.5-8.7l8.1-28.2h42.9l8.3 28.3A12 12 0 0 0 377 224h35.7c8.4 0 14.2-8.1 11.5-15.9zm-95-71.5l6.8-22.9 6.6 22.9z"
-                                                                                    transform=""
-                                                                                  />
-                                                                                </svg>
-                                                                              </SortAlphaUpIcon>
-                                                                            </span>
-                                                                          </StyledComponent>
-                                                                        </Sort__IconWrapper>
-                                                                      </button>
-                                                                    </Button>
-                                                                  </StyledComponent>
-                                                                </Styled(Button)>
+                                                                                  <SortAlphaUpIcon
+                                                                                    color="currentColor"
+                                                                                    noVerticalAlign={false}
+                                                                                    size="sm"
+                                                                                    style={
+                                                                                      Object {
+                                                                                        "verticalAlign": "-0.225em",
+                                                                                      }
+                                                                                    }
+                                                                                    title={null}
+                                                                                  >
+                                                                                    <svg
+                                                                                      aria-hidden={true}
+                                                                                      aria-labelledby={null}
+                                                                                      fill="currentColor"
+                                                                                      height="1em"
+                                                                                      role="img"
+                                                                                      style={
+                                                                                        Object {
+                                                                                          "verticalAlign": "-0.225em",
+                                                                                        }
+                                                                                      }
+                                                                                      viewBox="0 0 448 512"
+                                                                                      width="1em"
+                                                                                    >
+                                                                                      <path
+                                                                                        d="M107.3 36.7c-6.2-6.2-16.4-6.2-22.6 0l-80 80c-10 10-2.9 27.3 11.3 27.3h48v320c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V144h48c14.2 0 21.4-17.2 11.3-27.3zm293.4 390.4h-61.1c.7-1 1.5-2 2.3-3.1l67.5-95.7c1.4-2 2.2-4.4 2.2-6.9V300c0-6.6-5.4-12-12-12H274.5c-6.6 0-12 5.4-12 12v28.9c0 6.6 5.4 12 12 12H331c-.7 1-1.5 2-2.3 3.1l-67.2 95.2c-1.4 2-2.2 4.4-2.2 6.9V468c0 6.6 5.4 12 12 12h129.4c6.6 0 12-5.4 12-12v-28.9c0-6.7-5.4-12-12-12zm23.5-219l-57.1-168c-1.7-4.9-6.2-8.1-11.4-8.1h-39.6c-5.1 0-9.7 3.3-11.4 8.1l-57.1 168c-2.6 7.8 3.1 15.9 11.4 15.9h35.7c5.4 0 10.1-3.5 11.5-8.7l8.1-28.2h42.9l8.3 28.3A12 12 0 0 0 377 224h35.7c8.4 0 14.2-8.1 11.5-15.9zm-95-71.5l6.8-22.9 6.6 22.9z"
+                                                                                        transform=""
+                                                                                      />
+                                                                                    </svg>
+                                                                                  </SortAlphaUpIcon>
+                                                                                </span>
+                                                                              </StyledComponent>
+                                                                            </Sort__IconWrapper>
+                                                                          </button>
+                                                                        </Button>
+                                                                      </StyledComponent>
+                                                                    </Sort__SortButton>
+                                                                    <Portal
+                                                                      containerInfo={
+                                                                        <div>
+                                                                          <div
+                                                                            class=""
+                                                                            role="tooltip"
+                                                                          >
+                                                                            <div
+                                                                              class="pf-c-tooltip__content"
+                                                                            >
+                                                                              <div>
+                                                                                Reverse Sort Order
+                                                                              </div>
+                                                                            </div>
+                                                                          </div>
+                                                                        </div>
+                                                                      }
+                                                                    >
+                                                                      <div
+                                                                        className=""
+                                                                        role="tooltip"
+                                                                      >
+                                                                        <TooltipContent>
+                                                                          <div
+                                                                            className="pf-c-tooltip__content"
+                                                                          >
+                                                                            <div>
+                                                                              Reverse Sort Order
+                                                                            </div>
+                                                                          </div>
+                                                                        </TooltipContent>
+                                                                      </div>
+                                                                    </Portal>
+                                                                  </PopoverBase>
+                                                                </Tooltip>
                                                               </Sort>
                                                             </I18n>
                                                           </WithI18n>

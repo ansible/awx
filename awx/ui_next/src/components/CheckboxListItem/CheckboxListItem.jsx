@@ -4,9 +4,9 @@ import {
   DataListItem,
   DataListItemRow,
   DataListItemCells,
-  DataListCheck,
   DataListCell,
 } from '@patternfly/react-core';
+import DataListCheck from '@components/DataListCheck';
 import DataListRadio from '@components/DataListRadio';
 import VerticalSeparator from '../VerticalSeparator';
 
