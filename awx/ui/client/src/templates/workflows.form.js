@@ -167,7 +167,7 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n) {
                         label: i18n._('Webhooks'),
                         type: 'checkbox',
                         column: 2,
-                        awPopOver: "<p>" + i18n._("Enabled webhook for this workflow job template.") + "</p>",
+                        awPopOver: "<p>" + i18n._("Enable webhooks for this workflow job template.") + "</p>",
                         dataPlacement: 'right',
                         dataTitle: i18n._('Enable Webhook'),
                         dataContainer: "body",

@@ -251,10 +251,12 @@ function getHostLimitErrorDetails () {
 function getLaunchedByDetails () {
     const createdBy = resource.model.get('summary_fields.created_by');
     const jobTemplate = resource.model.get('summary_fields.job_template');
+    const workflowJobTemplate = resource.model.get('summary_fields.workflow_job_template');
     const relatedSchedule = resource.model.get('related.schedule');
     const schedule = resource.model.get('summary_fields.schedule');
+    const webhookGUID = resource.model.get('webhook_guid');
 
-    if (!createdBy && !schedule) {
+    if (!createdBy && !schedule && !webhookGUID) {
         return null;
     }
 
@@ -272,6 +274,14 @@ function getLaunchedByDetails () {
         tooltip = strings.get('tooltips.SCHEDULE');
         link = `/#/templates/job_template/${jobTemplate.id}/schedules/${schedule.id}`;
         value = $filter('sanitize')(schedule.name);
+    } else if (webhookGUID && jobTemplate) {
+        tooltip = strings.get('tooltips.WEBHOOK_JOB_TEMPLATE');
+        link = `/#/templates/job_template/${jobTemplate.id}`;
+        value = strings.get('details.WEBHOOK');
+    } else if (webhookGUID && workflowJobTemplate) {
+        tooltip = strings.get('tooltips.WEBHOOK_WORKFLOW_JOB_TEMPLATE');
+        link = `/#/templates/workflow_job_template/${workflowJobTemplate.id}`;
+        value = strings.get('details.WEBHOOK');
     } else {
         tooltip = null;
         link = null;

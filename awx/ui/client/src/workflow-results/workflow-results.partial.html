@@ -206,6 +206,23 @@
                         </div>
                     </div>
 
+
+                    <!-- LAUNCHED BY WEBHOOK DETAIL -->
+                    <div class="WorkflowResults-resultRow toggle-show"
+                        ng-show="launched_by_webhook_link">
+                        <label
+                            class="WorkflowResults-resultRowLabel">
+                            {{ strings.labels.LAUNCHED_BY }}
+                        </label>
+                        <div class="WorkflowResults-resultRowText">
+                            <a href="{{ launched_by_webhook_link }}"
+                                aw-tool-tip="{{ strings.tooltips.WEBHOOK_WORKFLOW_JOB_TEMPLATE }}"
+                                data-placement="top">
+                                {{ strings.details.WEBHOOK }}
+                            </a>
+                        </div>
+                    </div>
+
                   <!-- SLIIIIIICE -->
                   <div class="WorkflowResults-resultRow"
                       ng-show="workflow.summary_fields.job_template.name">
