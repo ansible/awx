@@ -52,7 +52,9 @@ const FilterTags = ({
       .join(' ');
 
     if (Array.isArray(queryParams[key])) {
-      queryParams[key].forEach(val => queryParamsArr.push({ key, value: val, label }));
+      queryParams[key].forEach(val =>
+        queryParamsArr.push({ key, value: val, label })
+      );
     } else {
       queryParamsArr.push({ key, value: queryParams[key], label });
     }
