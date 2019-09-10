@@ -149,15 +149,17 @@ class Job extends Component {
               <Route
                 key="not-found"
                 path="*"
-                render={() => (
-                  <ContentError isNotFound>
-                    <Link
-                      to={`/jobs/${match.params.type}/${match.params.id}/details`}
-                    >
-                      {i18n._(`View Job Details`)}
-                    </Link>
-                  </ContentError>
-                )}
+                render={() =>
+                  !hasContentLoading && (
+                    <ContentError isNotFound>
+                      <Link
+                        to={`/jobs/${match.params.type}/${match.params.id}/details`}
+                      >
+                        {i18n._(`View Job Details`)}
+                      </Link>
+                    </ContentError>
+                  )
+                }
               />,
             ]}
           </Switch>

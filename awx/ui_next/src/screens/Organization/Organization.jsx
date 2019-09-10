@@ -238,15 +238,17 @@ class Organization extends Component {
             <Route
               key="not-found"
               path="*"
-              render={() => (
-                <ContentError isNotFound>
-                  {match.params.id && (
-                    <Link to={`/organizations/${match.params.id}/details`}>
-                      {i18n._(`View Organization Details`)}
-                    </Link>
-                  )}
-                </ContentError>
-              )}
+              render={() =>
+                !hasContentLoading && (
+                  <ContentError isNotFound>
+                    {match.params.id && (
+                      <Link to={`/organizations/${match.params.id}/details`}>
+                        {i18n._(`View Organization Details`)}
+                      </Link>
+                    )}
+                  </ContentError>
+                )
+              }
             />
             ,
           </Switch>

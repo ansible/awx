@@ -119,17 +119,19 @@ class Template extends Component {
               <Route
                 key="not-found"
                 path="*"
-                render={() => (
-                  <ContentError isNotFound>
-                    {match.params.id && (
-                      <Link
-                        to={`/templates/${match.params.templateType}/${match.params.id}/details`}
-                      >
-                        {i18n._(`View Template Details`)}
-                      </Link>
-                    )}
-                  </ContentError>
-                )}
+                render={() =>
+                  !hasContentLoading && (
+                    <ContentError isNotFound>
+                      {match.params.id && (
+                        <Link
+                          to={`/templates/${match.params.templateType}/${match.params.id}/details`}
+                        >
+                          {i18n._(`View Template Details`)}
+                        </Link>
+                      )}
+                    </ContentError>
+                  )
+                }
               />,
             ]}
           </Switch>
