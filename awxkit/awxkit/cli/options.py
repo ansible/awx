@@ -14,9 +14,9 @@ from .resource import DEPRECATED_RESOURCES_REVERSE
 
 
 UNIQUENESS_RULES = {
-    'me': 'id, username',
-    'users': 'id, username',
-    'instances': 'id, hostname',
+    'me': ('id', 'username'),
+    'users': ('id', 'username'),
+    'instances': ('id', 'hostname'),
 }
 
 
@@ -34,17 +34,13 @@ def pk_or_name(v2, model_name, value, page=None):
             if model_name in DEPRECATED_RESOURCES_REVERSE:
                 model_name = DEPRECATED_RESOURCES_REVERSE[model_name]
 
-        if model_name in UNIQUENESS_RULES:
-            identity = UNIQUENESS_RULES[model_name][-1]
-
         if hasattr(v2, model_name):
             page = getattr(v2, model_name)
 
+    if model_name in UNIQUENESS_RULES:
+        identity = UNIQUENESS_RULES[model_name][-1]
+
     if page:
-        if model_name == 'users':
-            identity = 'username'
-        elif model_name == 'instances':
-            model_name = 'hostname'
         results = page.get(**{identity: value})
         if results.count == 1:
             return int(results.results[0].id)
