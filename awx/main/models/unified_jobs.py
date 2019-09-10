@@ -559,11 +559,17 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         related_name='%(class)s_unified_jobs',
         on_delete=polymorphic.SET_NULL,
     )
+    created = models.DateTimeField(
+        default=None,
+        editable=False,
+        db_index=True,  # add an index, this is a commonly queried field
+    )
     launch_type = models.CharField(
         max_length=20,
         choices=LAUNCH_TYPE_CHOICES,
         default='manual',
         editable=False,
+        db_index=True
     )
     schedule = models.ForeignKey( # Which schedule entry was responsible for starting this job.
         'Schedule',
@@ -621,6 +627,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         default=None,
         editable=False,
         help_text=_("The date and time the job finished execution."),
+        db_index=True,
     )
     elapsed = models.DecimalField(
         max_digits=12,

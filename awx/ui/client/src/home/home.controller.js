@@ -85,7 +85,7 @@ export default ['$scope','Wait', '$timeout', 'i18n',
                 ProcessErrors($scope, data, status, null, { hdr: i18n._('Error!'), msg: i18n._(`Failed to get dashboard host graph data: ${status}`) });
             });
 
-            Rest.setUrl(GetBasePath("unified_jobs") + "?order_by=-finished&page_size=5&finished__isnull=false&type=workflow_job,job");
+            Rest.setUrl(GetBasePath("unified_jobs") + "?order_by=-finished&page_size=5&finished__isnull=false&type=workflow_job,job&count_disabled=1");
             Rest.setHeader({'X-WS-Session-Quiet': true});
             Rest.get()
             .then(({data}) => {
@@ -95,7 +95,7 @@ export default ['$scope','Wait', '$timeout', 'i18n',
                 ProcessErrors($scope, data, status, null, { hdr: i18n._('Error!'), msg: i18n._(`Failed to get dashboard jobs list: ${status}`) });
             });
 
-            Rest.setUrl(GetBasePath("unified_job_templates") + "?order_by=-last_job_run&page_size=5&last_job_run__isnull=false&type=workflow_job_template,job_template");
+            Rest.setUrl(GetBasePath("unified_job_templates") + "?order_by=-last_job_run&page_size=5&last_job_run__isnull=false&type=workflow_job_template,job_template&count_disabled=1");
             Rest.get()
             .then(({data}) => {
                 $scope.dashboardJobTemplatesListData = data.results;
@@ -140,7 +140,7 @@ export default ['$scope','Wait', '$timeout', 'i18n',
         .catch(({data, status}) => {
             ProcessErrors($scope, data, status, null, { hdr: i18n._('Error!'), msg: i18n._(`Failed to get dashboard: ${status}`) });
         });
-        Rest.setUrl(GetBasePath("unified_jobs") + "?order_by=-finished&page_size=5&finished__isnull=false&type=workflow_job,job");
+        Rest.setUrl(GetBasePath("unified_jobs") + "?order_by=-finished&page_size=5&finished__isnull=false&type=workflow_job,job&count_disabled=1");
         Rest.setHeader({'X-WS-Session-Quiet': true});
         Rest.get()
         .then(({data}) => {
