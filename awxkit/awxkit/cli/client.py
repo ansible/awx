@@ -181,7 +181,7 @@ class CLI(object):
                 _filter == '.' and
                 self.resource in UNIQUENESS_RULES
             ):
-                _filter = UNIQUENESS_RULES[self.resource]
+                _filter = ', '.join(UNIQUENESS_RULES[self.resource])
 
             formatted = format_response(
                 response,
