@@ -94,6 +94,8 @@ class WebhookReceiverBase(APIView):
                     value = (value or {}).get(element)
             except Exception:
                 value = None
+        if value == '0000000000000000000000000000000000000000':  # a deleted ref
+            value = None
         return value
 
     def get_signature(self):
@@ -164,7 +166,7 @@ class GithubWebhookReceiver(WebhookReceiverBase):
         'pull_request': 'pull_request.head.sha',
         'pull_request_review': 'pull_request.head.sha',
         'pull_request_review_comment': 'pull_request.head.sha',
-        'push': 'head_commit',
+        'push': 'after',
         'release': 'release.tag_name',
         'commit_comment': 'comment.commit_id',
         'create': 'ref',
