@@ -149,6 +149,8 @@ describe('Controller: WorkflowAdd', () => {
                 labels: undefined,
                 variables: undefined,
                 allow_simultaneous: undefined,
+                webhook_service: '',
+                webhook_credential: null,
                 ask_inventory_on_launch: false,
                 ask_variables_on_launch: false,
                 ask_limit_on_launch: false,
