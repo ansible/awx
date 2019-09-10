@@ -20,6 +20,13 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
         scheduler,
         job_type;
 
+    /*
+     * Normally if "ask_*" checkboxes are checked in a job template settings,
+     * shouldShowPromptButton() returns True to show the "PROMPT" button.
+     * However, extra_vars("ask_variables_on_launch") does not use this and
+     * displays a separate text area within the add/edit page for input.
+     * We exclude "ask_variables_on_launch" from shouldShowPromptButton() here.
+     */
     const shouldShowPromptButton = (launchConf) => launchConf.survey_enabled ||
         launchConf.ask_inventory_on_launch ||
         launchConf.ask_credential_on_launch ||
@@ -30,7 +37,6 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
         launchConf.ask_skip_tags_on_launch ||
         launchConf.ask_diff_mode_on_launch ||
         launchConf.credential_needed_to_start ||
-        launchConf.ask_variables_on_launch ||
         launchConf.ask_scm_branch_on_launch ||
         launchConf.variables_needed_to_start.length !== 0;
 
