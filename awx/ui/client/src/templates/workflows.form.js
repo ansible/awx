@@ -93,7 +93,7 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n) {
                     label: i18n._('Limit'),
                     type: 'text',
                     column: 1,
-                    awPopOver: "<p>" + i18n._("Select a limit for the workflow. This limit is applied to all job template nodes that prompt for a limit.") + "</p>",
+                    awPopOver: "<p>" + i18n._("Provide a host pattern to further constrain the list of hosts that will be managed or affected by the workflow. This limit is applied to all job template nodes that prompt for a limit. Refer to Ansible documentation for more information and examples on patterns.") + "</p>",
                     dataTitle: i18n._('Limit'),
                     dataPlacement: 'right',
                     dataContainer: "body",
