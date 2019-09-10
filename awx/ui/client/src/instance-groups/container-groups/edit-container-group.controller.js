@@ -57,7 +57,9 @@ function EditContainerGroupController($rootScope, $scope, $state, models, string
     toggleLabel: strings.get('container.POD_SPEC_TOGGLE')
   };
 
-  if (EditContainerGroupDataset.data.pod_spec_override) {
+  const podSpecValue = EditContainerGroupDataset.data.pod_spec_override.trim();
+  const defaultPodSpecValue = instanceGroup.model.OPTIONS.actions.PUT.pod_spec_override.default.trim();
+  if (podSpecValue && podSpecValue !== defaultPodSpecValue) {
     vm.form.extraVars.isOpen = true;
   } else {
     vm.form.extraVars.isOpen = false;
