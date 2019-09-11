@@ -387,6 +387,12 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
         blank=True,
         default=False,
     )
+    notification_templates_approvals = models.ManyToManyField(
+        "NotificationTemplate",
+        blank=True,
+        related_name='%(class)s_notification_templates_for_approvals'
+    )
+
     admin_role = ImplicitRoleField(parent_role=[
         'singleton:' + ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
         'organization.workflow_admin_role'
@@ -441,15 +447,9 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
         success_notification_templates = list(base_notification_templates
                                               .filter(unifiedjobtemplate_notification_templates_for_success__in=[self]))
         approval_notification_templates = list(base_notification_templates
-                                               .filter(unifiedjobtemplate_notification_templates_for_approvals__in=[self]))
+                                               .filter(workflowjobtemplate_notification_templates_for_approvals__in=[self]))
         # Get Organization NotificationTemplates
         if self.organization is not None:
-            error_notification_templates = set(error_notification_templates + list(base_notification_templates.filter(
-                organization_notification_templates_for_errors=self.organization)))
-            started_notification_templates = set(started_notification_templates + list(base_notification_templates.filter(
-                organization_notification_templates_for_started=self.organization)))
-            success_notification_templates = set(success_notification_templates + list(base_notification_templates.filter(
-                organization_notification_templates_for_success=self.organization)))
             approval_notification_templates = set(approval_notification_templates + list(base_notification_templates.filter(
                 organization_notification_templates_for_approvals=self.organization)))
         return dict(error=list(error_notification_templates),
@@ -726,9 +726,11 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
         for nt in self.workflow_job_template.notification_templates["approvals"]:
             try:
                 (notification_subject, notification_body) = self.build_notification_message(nt, status)
-            except AttributeError:
-                raise NotImplementedError("build_notification_message() does not exist" % status)
+            except Exception:
+                logger.debug("build_notification_message() does not exist")
 
+            # Use kwargs to force late-binding
+            # https://stackoverflow.com/a/3431699/10669572
             def send_it(local_nt=nt, local_subject=notification_subject, local_body=notification_body):
                 def _func():
                     send_notifications.delay([local_nt.generate_notification(local_subject, local_body).id],

@@ -51,6 +51,11 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin, CustomVi
         default=0,
         help_text=_('Maximum number of hosts allowed to be managed by this organization.'),
     )
+    notification_templates_approvals = models.ManyToManyField(
+        "NotificationTemplate",
+        blank=True,
+        related_name='%(class)s_notification_templates_for_approvals'
+    )
 
     admin_role = ImplicitRoleField(
         parent_role='singleton:' + ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
