@@ -39,3 +39,4 @@ services:
       AWX_E2E_CLUSTER_HOST: hub
       AWX_E2E_CLUSTER_PORT: 4444
       DBUS_SESSION_BUS_ADDRESS: /dev/null
+      NPMRC_FILE: ${NPMRC_FILE}
