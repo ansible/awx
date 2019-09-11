@@ -330,7 +330,7 @@ export default ['Rest', 'Wait',
                 const isUsernameIncluded = (
                   $scope.notification_type.value === 'email' ||
                   $scope.notification_type.value === 'webhook'
-                )
+                );
                 if (i === "username" && isUsernameIncluded &&
                   (value === null || value === undefined)) {
                     $scope[i] = "";
