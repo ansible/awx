@@ -1,5 +1,8 @@
 FROM centos:7
 
+ARG NPMRC_FILE=awx/ui/.npmrc
+ENV NPMRC_FILE=${NPMRC_FILE}
+
 RUN yum -y update && yum -y install epel-release && yum -y install https://centos7.iuscommunity.org/ius-release.rpm
 
 RUN yum install -y \
@@ -15,12 +18,9 @@ WORKDIR /awx
 
 COPY awx/ui/package.json awx/ui/package.json
 
-ARG NPM_REGISTRY=https://registry.npmjs.org
-ENV NPM_REGISTRY=${NPM_REGISTRY}
+COPY ${NPMRC_FILE} awx/ui/.npmrc
 
-RUN npm config set registry ${NPM_REGISTRY}
-
-RUN npm --prefix=awx/ui install
+RUN npm --prefix=awx/ui config list && npm --prefix=awx/ui install
 
 COPY awx/ui/test/e2e awx/ui/test/e2e
 
