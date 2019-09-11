@@ -67,8 +67,8 @@ function HostEventService (
             obj.status = 'failed';
         }
         if (event.event === 'runner_on_ok' || event.event === 'runner_on_async_ok') {
-          obj.class = 'HostEvent-status--ok';
-          obj.status = 'ok';
+            obj.class = 'HostEvent-status--ok';
+            obj.status = 'ok';
         }
         // if both 'changed' and 'ok' are true, show 'changed' status
         if (event.changed) {

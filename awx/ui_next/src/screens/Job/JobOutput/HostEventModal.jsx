@@ -19,6 +19,8 @@ const entities = new Entities.AllHtmlEntities();
 
 const Modal = styled(PFModal)`
   --pf-c-modal-box__footer--MarginTop: 0;
+  align-self: flex-start;
+  margin-top: 200px;
   .pf-c-modal-box__body {
     overflow-y: hidden;
   }
