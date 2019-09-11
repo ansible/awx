@@ -195,7 +195,7 @@ class GitlabWebhookReceiver(WebhookReceiverBase):
     event_keys = {
         'Push Hook': 'checkout_sha',
         'Tag Push Hook': 'checkout_sha',
-        'Merge Request Hook': 'last_commit.id',
+        'Merge Request Hook': 'object_attributes.last_commit.id',
     }
 
     def get_event_type(self):
