@@ -310,7 +310,9 @@ export default ['Rest', 'Wait',
             function processValue(value, i, field) {
                 if (field.type === 'textarea') {
                     if (field.name === 'headers') {
-                        $scope[i] = JSON.parse($scope[i]);
+                        if (typeof $scope[i] === 'string') {
+                            $scope[i] = JSON.parse($scope[i]);
+                        }
                     }
                     else if (field.name === 'annotation_tags' && $scope.notification_type.value === "grafana" && value === null) {
                         $scope[i] = null;
@@ -325,7 +327,12 @@ export default ['Rest', 'Wait',
                 if (field.type === 'number') {
                     $scope[i] = Number($scope[i]);
                 }
-                if (i === "username" && $scope.notification_type.value === "email" && (value === null || value === undefined)) {
+                const isUsernameIncluded = (
+                  $scope.notification_type.value === 'email' ||
+                  $scope.notification_type.value === 'webhook'
+                )
+                if (i === "username" && isUsernameIncluded &&
+                  (value === null || value === undefined)) {
                     $scope[i] = "";
                 }
                 if (field.type === 'sensitive' && (value === null || value === undefined)) {

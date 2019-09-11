@@ -222,7 +222,9 @@ export default ['Rest', 'Wait', 'NotificationsFormObject',
             function processValue(value, i, field) {
                 if (field.type === 'textarea') {
                     if (field.name === 'headers') {
-                        $scope[i] = JSON.parse($scope[i]);
+                        if (typeof $scope[i] === 'string') {
+                            $scope[i] = JSON.parse($scope[i]);
+                        }
                     }
                     else if (field.name === 'annotation_tags' && $scope.notification_type.value === "grafana" && value === null) {
                         $scope[i] = null;
