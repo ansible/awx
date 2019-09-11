@@ -16,6 +16,18 @@ const Wrapper = styled.div`
   height: 14px;
 `;
 
+const WhiteTop = styled.div`
+  border: 1px solid #b7b7b7;
+  border-bottom: 0;
+  background: #ffffff;
+`;
+
+const WhiteBottom = styled.div`
+  border: 1px solid #b7b7b7;
+  border-top: 0;
+  background: #ffffff;
+`;
+
 const RunningJob = styled(Wrapper)`
   background-color: #5cb85c;
   padding-right: 0px;
@@ -39,24 +51,29 @@ const FinishedJob = styled(Wrapper)`
 const SuccessfulTop = styled.div`
   background-color: #5cb85c;
 `;
+const SuccessfulBottom = styled(WhiteBottom)``;
 
-const SuccessfulBottom = styled.div`
-  border: 1px solid #b7b7b7;
-  border-top: 0;
-  background: #ffffff;
-`;
-
-const FailedTop = styled.div`
-  border: 1px solid #b7b7b7;
-  border-bottom: 0;
-  background: #ffffff;
-`;
-
+const FailedTop = styled(WhiteTop)``;
 const FailedBottom = styled.div`
   background-color: #d9534f;
 `;
 
-const JobStatusIcon = ({ status, ...props }) => {
+const UnreachableTop = styled(WhiteTop)``;
+const UnreachableBottom = styled.div`
+  background-color: #ff0000;
+`;
+
+const ChangedTop = styled(WhiteTop)``;
+const ChangedBottom = styled.div`
+  background-color: #ff9900;
+`;
+
+const SkippedTop = styled(WhiteTop)``;
+const SkippedBottom = styled.div`
+  background-color: #2dbaba;
+`;
+
+const StatusIcon = ({ status, ...props }) => {
   return (
     <div {...props}>
       {status === 'running' && <RunningJob />}
@@ -69,18 +86,36 @@ const JobStatusIcon = ({ status, ...props }) => {
           <FailedBottom />
         </FinishedJob>
       )}
-      {status === 'successful' && (
+      {(status === 'successful' || status === 'ok') && (
         <FinishedJob>
           <SuccessfulTop />
           <SuccessfulBottom />
+        </FinishedJob>
+      )}
+      {status === 'changed' && (
+        <FinishedJob>
+          <ChangedTop />
+          <ChangedBottom />
+        </FinishedJob>
+      )}
+      {status === 'skipped' && (
+        <FinishedJob>
+          <SkippedTop />
+          <SkippedBottom />
+        </FinishedJob>
+      )}
+      {status === 'unreachable' && (
+        <FinishedJob>
+          <UnreachableTop />
+          <UnreachableBottom />
         </FinishedJob>
       )}
     </div>
   );
 };
 
-JobStatusIcon.propTypes = {
+StatusIcon.propTypes = {
   status: string.isRequired,
 };
 
-export default JobStatusIcon;
+export default StatusIcon;

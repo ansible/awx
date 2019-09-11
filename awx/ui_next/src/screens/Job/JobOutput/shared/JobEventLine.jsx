@@ -5,6 +5,7 @@ export default styled.div`
 
   &:hover {
     background-color: white;
+    cursor: ${props => (props.isClickable ? 'pointer' : 'default')};
   }
 
   &:hover div {
