@@ -2,7 +2,7 @@ Credential Plugins
 ==================
 
 By default, sensitive credential values (such as SSH passwords, SSH private
-keys, API tokens for cloud services) in AWX are stored in the AWX database
+keys, API tokens for cloud services, etc.) in AWX are stored in the AWX database
 after being encrypted with a symmetric encryption cipher utilizing AES-256 in
 CBC mode alongside a SHA-256 HMAC.
 
@@ -19,9 +19,9 @@ When configuring AWX to pull a secret from a third party system, there are
 generally three steps.
 
 Here is an example of creating an (1) AWX Machine Credential with
-a static username, `example-user` and (2) an externally sourced secret from
+a static username, `example-user` and (2) an externally-sourced secret from
 HashiCorp Vault Key/Value system which will populate the (3) password field on
-the Machine Credential.
+the Machine Credential:
 
 1.  Create the Machine Credential with a static username, `example-user`.
 
@@ -29,13 +29,13 @@ the Machine Credential.
     secret management system (in this example, specifying a URL and an
     OAuth2.0 token _to access_ HashiCorp Vault)
 
-3.  _Link_ the `password` field for the Machine credential to the external
-    system by specifying the source (in this example, the HashiCorp credential)
+3.  _Link_ the `password` field for the Machine cCredential to the external
+    system by specifying the source (in this example, the HashiCorp Credential)
     and metadata about the path (e.g., `/some/path/to/my/password/`).
 
 Note that you can perform these lookups on *any* field for any non-external
 credential, including those with custom credential types. You could just as
-easily create an AWS credential and use lookups to retrieve the Access Key and
+easily create an AWS Credential and use lookups to retrieve the Access Key and
 Secret Key from an external secret management system. External credentials
 cannot have lookups applied to their fields.
 
@@ -150,10 +150,10 @@ HashiCorp Vault KV
 AWX supports retrieving secret values from HashiCorp Vault KV
 (https://www.vaultproject.io/api/secret/kv/)
 
-The following example illustrates how to configure a Machine credential to pull
-its password from an HashiCorp Vault:
+The following example illustrates how to configure a Machine Credential to pull
+its password from a HashiCorp Vault:
 
-1.  Look up the ID of the Machine and HashiCorp Vault Secret Lookup credential
+1.  Look up the ID of the Machine and HashiCorp Vault Secret Lookup Credential
     types (in this example, `1` and `15`):
 
 ```shell
@@ -182,7 +182,7 @@ HTTP/1.1 200 OK
             ...
 ```
 
-2.  Create a Machine and a HashiCorp Vault credential:
+2.  Create a Machine and a HashiCorp Vault Credential:
 
 ```shell
 ~ curl -sik "https://awx.example.org/api/v2/credentials/" \
@@ -214,7 +214,7 @@ HTTP/1.1 201 Created
     ...
 ```
 
-3.  Link the Machine credential to the HashiCorp Vault credential:
+3.  Link the Machine Credential to the HashiCorp Vault Credential:
 
 ```shell
 ~ curl -sik "https://awx.example.org/api/v2/credentials/1/input_sources/" \
@@ -232,10 +232,10 @@ HashiCorp Vault SSH Secrets Engine
 AWX supports signing public keys via HashiCorp Vault's SSH Secrets Engine
 (https://www.vaultproject.io/api/secret/ssh/)
 
-The following example illustrates how to configure a Machine credential to sign
+The following example illustrates how to configure a Machine Credential to sign
 a public key using HashiCorp Vault:
 
-1.  Look up the ID of the Machine and HashiCorp Vault Signed SSH credential
+1.  Look up the ID of the Machine and HashiCorp Vault Signed SSH Credential
     types (in this example, `1` and `16`):
 
 ```shell
@@ -263,7 +263,7 @@ HTTP/1.1 200 OK
             "name": "HashiCorp Vault Signed SSH",
 ```
 
-2.  Create a Machine and a HashiCorp Vault credential:
+2.  Create a Machine and a HashiCorp Vault Credential:
 
 ```shell
 ~ curl -sik "https://awx.example.org/api/v2/credentials/" \
@@ -295,7 +295,7 @@ HTTP/1.1 201 Created
     ...
 ```
 
-3.  Link the Machine credential to the HashiCorp Vault credential:
+3.  Link the Machine Credential to the HashiCorp Vault Credential:
 
 ```shell
 ~ curl -sik "https://awx.example.org/api/v2/credentials/1/input_sources/" \
@@ -306,7 +306,7 @@ HTTP/1.1 201 Created
 HTTP/1.1 201 Created
 ```
 
-4. Associate the Machine credential with a Job Template.  When the Job Template
+4. Associate the Machine Credential with a Job Template.  When the Job Template
    is run, AWX will use the provided HashiCorp URL and token to sign the
    unsigned public key data using the HashiCorp Vault SSH Secrets API.
    AWX will generate an `id_rsa` and `id_rsa-cert.pub` on the fly and

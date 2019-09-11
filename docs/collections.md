@@ -1,19 +1,18 @@
 ## Collections
 
-AWX supports using Ansible collections.
-This section will give ways to use collections in job runs.
+AWX supports the use of Ansible Collections. This section will give ways to use Collections in job runs.
 
 ### Project Collections Requirements
 
-If you specify a collections requirements file in SCM at `collections/requirements.yml`,
-then AWX will install collections in that file in the implicit project sync
+If you specify a Collections requirements file in SCM at `collections/requirements.yml`,
+then AWX will install Collections in that file in the implicit project sync
 before a job run. The invocation is:
 
 ```
 ansible-galaxy collection install -r requirements.yml -p <job tmp location>
 ```
 
-Example of tmp directory where job is running:
+Example of `tmp` directory where job is running:
 
 ```
 ├── project
