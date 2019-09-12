@@ -245,13 +245,6 @@ class DashboardView(APIView):
                                    'total': hg_projects.count(),
                                    'failed': hg_failed_projects.count()}
 
-        user_jobs = get_user_queryset(request.user, models.Job)
-        user_failed_jobs = user_jobs.filter(failed=True)
-        data['jobs'] = {'url': reverse('api:job_list', request=request),
-                        'failure_url': reverse('api:job_list', request=request) + "?failed=True",
-                        'total': user_jobs.count(),
-                        'failed': user_failed_jobs.count()}
-
         user_list = get_user_queryset(request.user, models.User)
         team_list = get_user_queryset(request.user, models.Team)
         credential_list = get_user_queryset(request.user, models.Credential)
