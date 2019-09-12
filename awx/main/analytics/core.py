@@ -5,10 +5,9 @@ import os
 import os.path
 import tempfile
 import shutil
-import subprocess
+import requests
 
 from django.conf import settings
-from django.utils.encoding import smart_str
 from django.utils.timezone import now, timedelta
 from rest_framework.exceptions import PermissionDenied
 
@@ -85,13 +84,12 @@ def gather(dest=None, module=None, collection_type='scheduled'):
     if last_run < max_interval or not last_run:
         last_run = max_interval
 
-
     if _valid_license() is False:
         logger.exception("Invalid License provided, or No License Provided")
         return "Error: Invalid License provided, or No License Provided"
-    
+
     if not settings.INSIGHTS_TRACKING_STATE:
-        logger.error("Insights analytics not enabled")
+        logger.error("Automation Analytics not enabled")
         return
 
     if module is None:
@@ -146,30 +144,39 @@ def gather(dest=None, module=None, collection_type='scheduled'):
 
 def ship(path):
     """
-    Ship gathered metrics via the Insights agent
+    Ship gathered metrics to the Insights API
     """
+    if not path:
+        logger.error('Automation Analytics TAR not found')
+        return
+    if "Error:" in str(path):
+        return
     try:
-        agent = 'insights-client'
-        if shutil.which(agent) is None:
-            logger.error('could not find {} on PATH'.format(agent))
-            return
         logger.debug('shipping analytics file: {}'.format(path))
-        try:
-            cmd = [
-                agent, '--payload', path, '--content-type', settings.INSIGHTS_AGENT_MIME
-            ]
-            output = smart_str(subprocess.check_output(cmd, timeout=60 * 5))
-            logger.debug(output)
-            # reset the `last_run` when data is shipped
-            run_now = now()
-            state = TowerAnalyticsState.get_solo()
-            state.last_run = run_now
-            state.save()
-
-        except subprocess.CalledProcessError:
-            logger.exception('{} failure:'.format(cmd))
-        except subprocess.TimeoutExpired:
-            logger.exception('{} timeout:'.format(cmd))
+        url = getattr(settings, 'AUTOMATION_ANALYTICS_URL', None)
+        if not url:
+            logger.error('AUTOMATION_ANALYTICS_URL is not set')
+            return
+        rh_user = getattr(settings, 'REDHAT_USERNAME', None)
+        rh_password = getattr(settings, 'REDHAT_PASSWORD', None)
+        if not rh_user:
+            return logger.error('REDHAT_USERNAME is not set')
+        if not rh_password:
+            return logger.error('REDHAT_PASSWORD is not set')
+        with open(path, 'rb') as f:
+            files = {'file': (os.path.basename(path), f, settings.INSIGHTS_AGENT_MIME)}
+            response = requests.post(url, 
+                                     files=files,
+                                     verify=True, 
+                                     auth=(rh_user, rh_password),
+                                     timeout=(31, 31))
+            if response.status_code != 202:
+                return logger.exception('Upload failed with status {}, {}'.format(response.status_code,
+                                                                                  response.text))
+        run_now = now()
+        state = TowerAnalyticsState.get_solo()
+        state.last_run = run_now
+        state.save()
     finally:
         # cleanup tar.gz
         os.remove(path)

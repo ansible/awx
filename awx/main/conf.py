@@ -153,7 +153,7 @@ register(
 register(
     'AUTOMATION_ANALYTICS_URL',
     field_class=fields.URLField,
-    default='https://cloud.redhat.com',
+    default='https://example.com',
     schemes=('http', 'https'),
     allow_plain_hostname=True,  # Allow hostname only without TLD.
     label=_('Automation Analytics upload URL.'),
