@@ -905,6 +905,31 @@ class BaseTask(object):
                 process_isolation_params['process_isolation_ro_paths'].append(instance.ansible_virtualenv_path)
         return process_isolation_params
 
+    def build_params_resource_profiling(self, instance, private_data_dir):
+        resource_profiling_params = {}
+        if self.should_use_resource_profiling(instance):
+            cpu_poll_interval = settings.AWX_RESOURCE_PROFILING_CPU_POLL_INTERVAL
+            mem_poll_interval = settings.AWX_RESOURCE_PROFILING_MEMORY_POLL_INTERVAL
+            pid_poll_interval = settings.AWX_RESOURCE_PROFILING_PID_POLL_INTERVAL
+
+            results_dir = os.path.join(private_data_dir, 'artifacts/playbook_profiling')
+            if not os.path.isdir(results_dir):
+                os.makedirs(results_dir, stat.S_IREAD | stat.S_IWRITE | stat.S_IEXEC)
+
+            logger.debug('Collected the following resource profiling intervals: cpu: {} mem: {} pid: {}'
+                         .format(cpu_poll_interval, mem_poll_interval, pid_poll_interval))
+
+            resource_profiling_params.update({'resource_profiling': True,
+                                              'resource_profiling_base_cgroup': 'ansible-runner',
+                                              'resource_profiling_cpu_poll_interval': cpu_poll_interval,
+                                              'resource_profiling_memory_poll_interval': mem_poll_interval,
+                                              'resource_profiling_pid_poll_interval': pid_poll_interval,
+                                              'resource_profiling_results_dir': results_dir})
+        else:
+            logger.debug('Resource profiling not enabled for task')
+
+        return resource_profiling_params
+
     def _write_extra_vars_file(self, private_data_dir, vars, safe_dict={}):
         env_path = os.path.join(private_data_dir, 'env')
         try:
@@ -964,6 +989,12 @@ class BaseTask(object):
             env['PROOT_TMP_DIR'] = settings.AWX_PROOT_BASE_PATH
         env['AWX_PRIVATE_DATA_DIR'] = private_data_dir
         return env
+
+    def should_use_resource_profiling(self, job):
+        '''
+        Return whether this task should use resource profiling
+        '''
+        return False
 
     def should_use_proot(self, instance):
         '''
@@ -1049,6 +1080,12 @@ class BaseTask(object):
         '''
         Hook for any steps to run after job/task is marked as complete.
         '''
+        job_profiling_dir = os.path.join(private_data_dir, 'artifacts/playbook_profiling')
+        awx_profiling_dir = '/var/log/tower/playbook_profiling/'
+        if not os.path.exists(awx_profiling_dir):
+            os.mkdir(awx_profiling_dir)
+        if os.path.isdir(job_profiling_dir):
+            shutil.copytree(job_profiling_dir, os.path.join(awx_profiling_dir, str(instance.pk)))
 
     def event_handler(self, event_data):
         #
@@ -1201,6 +1238,8 @@ class BaseTask(object):
             self.build_extra_vars_file(self.instance, private_data_dir)
             args = self.build_args(self.instance, private_data_dir, passwords)
             cwd = self.build_cwd(self.instance, private_data_dir)
+            resource_profiling_params = self.build_params_resource_profiling(self.instance,
+                                                                             private_data_dir)
             process_isolation_params = self.build_params_process_isolation(self.instance,
                                                                            private_data_dir,
                                                                            cwd)
@@ -1240,6 +1279,7 @@ class BaseTask(object):
                     'pexpect_timeout': getattr(settings, 'PEXPECT_TIMEOUT', 5),
                     'suppress_ansible_output': True,
                     **process_isolation_params,
+                    **resource_profiling_params,
                 },
             }
 
@@ -1595,6 +1635,12 @@ class RunJob(BaseTask):
                 vault_id = k.split('.', 1)[1]
                 d[r'Vault password \({}\):\s*?$'.format(vault_id)] = k
         return d
+
+    def should_use_resource_profiling(self, job):
+        '''
+        Return whether this task should use resource profiling
+        '''
+        return settings.AWX_RESOURCE_PROFILING_ENABLED
 
     def should_use_proot(self, job):
         '''
