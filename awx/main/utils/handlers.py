@@ -361,6 +361,10 @@ class AWXProxyHandler(logging.Handler):
     def disable(cls):
         cls.thread_local.enabled = False
 
+    @classmethod
+    def enable(cls):
+        cls.thread_local.enabled = True
+
 
 AWXProxyHandler.thread_local.enabled = True
 

@@ -5,6 +5,7 @@ import sys
 import traceback
 
 
+from awx.main.utils.handlers import AWXProxyHandler
 from awx.main.tasks import dispatch_startup, inform_cluster_of_shutdown
 
 from .base import BaseWorker
@@ -80,6 +81,7 @@ class TaskWorker(BaseWorker):
             'task': u'awx.main.tasks.RunProjectUpdate'
         }
         '''
+        AWXProxyHandler.enable()
         result = None
         try:
             result = self.run_callable(body)
