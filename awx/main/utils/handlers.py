@@ -6,7 +6,6 @@ import logging
 import json
 import requests
 import time
-import threading
 import socket
 import select
 from urllib import parse as urlparse
@@ -287,8 +286,6 @@ class AWXProxyHandler(logging.Handler):
     Parameters match same parameters in the actualized handler classes.
     '''
 
-    thread_local = threading.local()
-
     def __init__(self, **kwargs):
         # TODO: process 'level' kwarg
         super(AWXProxyHandler, self).__init__(**kwargs)
@@ -325,9 +322,8 @@ class AWXProxyHandler(logging.Handler):
         return self._handler
 
     def emit(self, record):
-        if AWXProxyHandler.thread_local.enabled:
-            actual_handler = self.get_handler()
-            return actual_handler.emit(record)
+        actual_handler = self.get_handler()
+        return actual_handler.emit(record)
 
     def perform_test(self, custom_settings):
         """
@@ -356,13 +352,6 @@ class AWXProxyHandler(logging.Handler):
                         )
             except RequestException as e:
                 raise LoggingConnectivityException(str(e))
-
-    @classmethod
-    def disable(cls):
-        cls.thread_local.enabled = False
-
-
-AWXProxyHandler.thread_local.enabled = True
 
 
 ColorHandler = logging.StreamHandler
