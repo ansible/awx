@@ -80,6 +80,7 @@ credential_type_name_to_config_kind_map = {
     'ansible tower': 'tower',
     'google compute engine': 'gce',
     'insights': 'insights',
+    'openshift or kubernetes api bearer token': 'kubernetes',
     'microsoft azure classic (deprecated)': 'azure_classic',
     'microsoft azure resource manager': 'azure_rm',
     'network': 'net',
