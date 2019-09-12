@@ -10,11 +10,11 @@ message: |-
     Database Name: ${POSTGRESQL_DATABASE}
    Connection URL: postgresql://${DATABASE_SERVICE_NAME}:5432/
 
-  For more information about using this template, including OpenShift considerations, see https://github.com/sclorg/postgresql-container/blob/master/9.5.
+  For more information about using this template, including OpenShift considerations, see https://github.com/sclorg/postgresql-container/.
 metadata:
   annotations:
     description: |-
-      PostgreSQL database service, with persistent storage. For more information about using this template, including OpenShift considerations, see https://github.com/sclorg/postgresql-container/blob/master/9.5.
+      PostgreSQL database service, with persistent storage. For more information about using this template, including OpenShift considerations, see https://github.com/sclorg/postgresql-container/.
 
       NOTE: Scaling to more than one replica is not supported. You must have persistent volumes available in your cluster to use this template.
     iconClass: icon-postgresql
@@ -104,7 +104,7 @@ objects:
                 name: ${DATABASE_SERVICE_NAME}
           - name: POSTGRESQL_MAX_CONNECTIONS
             value: ${POSTGRESQL_MAX_CONNECTIONS}
-          image: registry.access.redhat.com/rhscl/postgresql-96-rhel7
+          image: registry.access.redhat.com/rhscl/postgresql-10-rhel7
           imagePullPolicy: IfNotPresent
           livenessProbe:
             initialDelaySeconds: 30

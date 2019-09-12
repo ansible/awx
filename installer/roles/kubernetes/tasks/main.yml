@@ -67,9 +67,9 @@
           -e POSTGRESQL_MAX_CONNECTIONS={{ pg_max_connections|default(1024) }} \
           -e POSTGRESQL_USER={{ pg_username }} \
           -e POSTGRESQL_PASSWORD={{ pg_password | quote }} \
-          -e POSTGRESQL_ADMIN_PASSWORD={{ pg_password | quote }} \
+          -e POSTGRESQL_ADMIN_PASSWORD={{ pg_admin_password | quote }} \
           -e POSTGRESQL_DATABASE={{ pg_database }} \
-          -e POSTGRESQL_VERSION=9.6 \
+          -e POSTGRESQL_VERSION=10 \
           -n {{ kubernetes_namespace }}
       register: openshift_pg_activate
       no_log: yes

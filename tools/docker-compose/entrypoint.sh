@@ -11,4 +11,4 @@ EOF
   rm /tmp/passwd
 fi
 
-exec $@
+exec scl enable rh-postgresql10 "$@"

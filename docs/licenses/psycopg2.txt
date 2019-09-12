@@ -1,5 +1,5 @@
 psycopg2 and the LGPL
-=====================
+---------------------
 
 psycopg2 is free software: you can redistribute it and/or modify it
 under the terms of the GNU Lesser General Public License as published
@@ -25,19 +25,14 @@ statement from all source files in the program, then also delete it here.
 
 You should have received a copy of the GNU Lesser General Public License
 along with psycopg2 (see the doc/ directory.)
-If not, see <http://www.gnu.org/licenses/>.
+If not, see <https://www.gnu.org/licenses/>.
 
 
 Alternative licenses
-====================
+--------------------
 
-If you prefer you can use the Zope Database Adapter ZPsycopgDA (i.e.,
-every file inside the ZPsycopgDA directory) user the ZPL license as
-published on the Zope web site, http://www.zope.org/Resources/ZPL.
-
-Also, the following BSD-like license applies (at your option) to the
-files following the pattern psycopg/adapter*.{h,c} and
-psycopg/microprotocol*.{h,c}:
+The following BSD-like license applies (at your option) to the files following
+the pattern ``psycopg/adapter*.{h,c}`` and ``psycopg/microprotocol*.{h,c}``:
 
  Permission is granted to anyone to use this software for any purpose,
  including commercial applications, and to alter it and redistribute it
@@ -52,3 +47,4 @@ psycopg/microprotocol*.{h,c}:
     be misrepresented as being the original software.
 
  3. This notice may not be removed or altered from any source distribution.
+ 

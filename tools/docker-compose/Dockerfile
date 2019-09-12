@@ -5,7 +5,11 @@ ARG UID=0
 # Add ansible-devel so that we get collections!
 ADD tools/docker-compose/ansible_nightly.repo /etc/yum.repos.d/ansible_nightly.repo
 
-RUN yum -y update && yum -y install epel-release && yum -y install https://centos7.iuscommunity.org/ius-release.rpm
+# add rhscl repo for rh-postgresql-devel
+RUN yum -y install centos-release-scl 
+RUN yum-config-manager --enable rhel-server-rhscl-7-rpms
+
+RUN yum -y update && yum -y install epel-release && yum -y install https://centos7.iuscommunity.org/ius-release.rpm 
 
 # sync with installer/roles/image_build/templates/Dockerfile.j2
 RUN yum -y install acl \
@@ -50,8 +54,10 @@ RUN yum -y install acl \
   openldap-devel \
   openssh-server \
   patch \
-  postgresql-contrib \
-  postgresql-devel \
+  rh-postgresql10-postgresql-devel \
+  rh-postgresql10-postgresql-server-syspaths \
+  scl-utils-build \
+  scl-utils \
   python-devel \
   python-pip \
   python-psutil \
@@ -84,6 +90,9 @@ RUN yum install -y https://github.com/krallin/tini/releases/download/v0.18.0/tin
 RUN /usr/bin/ssh-keygen -q -t rsa -N "" -f /root/.ssh/id_rsa
 RUN mkdir -p /data/db
 
+# symlink python interpreter
+RUN ln -s /awx_devel/tools/scripts/awx-python /usr/bin/awx-python
+
 ADD tools/docker-compose/awx.egg-link /tmp/awx.egg-link
 ADD tools/docker-compose/awx-manage /usr/local/bin/awx-manage
 ADD tools/docker-compose/awx.egg-info /tmp/awx.egg-info
@@ -105,7 +114,7 @@ ADD requirements/requirements.txt \
   requirements/requirements_tower_uninstall.txt \
   /tmp/requirements/
 RUN mkdir -p /venv && chmod g+w /venv
-RUN cd /tmp && VENV_BASE="/venv" make requirements_dev
+RUN scl enable rh-postgresql10 """cd /tmp && VENV_BASE="/venv" make requirements_dev"""
 
 # Use the distro provided npm to bootstrap our required version of node
 RUN npm install -g n
@@ -127,7 +136,7 @@ RUN yum -y remove cyrus-sasl-devel \
   libxml2-devel \
   libxslt-devel \
   openldap-devel \
-  postgresql-devel \
+  rh-postgresql10-postgresql-devel \
   python-devel \
   python36-devel \
   nodejs \
@@ -137,6 +146,9 @@ RUN yum -y remove cyrus-sasl-devel \
 RUN yum -y clean all
 
 RUN rm -rf /root/.cache
+
+# makes postgres available for data migrations when upgrading
+RUN export PATH=/usr/pgsql-10/bin:$PATH
 
 RUN localedef -c -i en_US -f UTF-8 en_US.UTF-8
 ENV LANG en_US.UTF-8
