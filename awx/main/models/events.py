@@ -83,6 +83,7 @@ class BasePlaybookEvent(CreatedModifiedModel):
     #       - runner_on*
     #     - playbook_on_task_start (once for each task within a play)
     #       - runner_on_failed
+    #       - runner_on_start
     #       - runner_on_ok
     #       - runner_on_error (not used for v2)
     #       - runner_on_skipped
@@ -102,6 +103,7 @@ class BasePlaybookEvent(CreatedModifiedModel):
     EVENT_TYPES = [
         # (level, event, verbose name, failed)
         (3, 'runner_on_failed', _('Host Failed'), True),
+        (3, 'runner_on_start', _('Host Started'), False),
         (3, 'runner_on_ok', _('Host OK'), False),
         (3, 'runner_on_error', _('Host Failure'), True),
         (3, 'runner_on_skipped', _('Host Skipped'), False),
