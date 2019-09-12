@@ -1391,8 +1391,8 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
                 r['{}_workflow_job_id'.format(name)] = wj.pk
                 r['{}_workflow_job_name'.format(name)] = wj.name
                 if schedule:
-                    r['{}_parent_job_schedule_id'.format(name)] = wj.schedule.pk
-                    r['{}_parent_job_schedule_name'.format(name)] = wj.schedule.name
+                    r['{}_parent_job_schedule_id'.format(name)] = schedule.pk
+                    r['{}_parent_job_schedule_name'.format(name)] = schedule.name
 
         if not created_by:
             schedule = getattr_dne(self, 'schedule')
