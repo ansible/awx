@@ -186,7 +186,7 @@ class Lookup extends React.Component {
     const { history } = this.props;
     const parts = history.location.search.replace(/^\?/, '').split('&');
     const ns = this.qsConfig.namespace;
-    const otherParts = parts.filter(param => !param.startsWith(`${ns}.`))
+    const otherParts = parts.filter(param => !param.startsWith(`${ns}.`));
     history.push(`${history.location.pathname}?${otherParts.join('&')}`);
   }
 

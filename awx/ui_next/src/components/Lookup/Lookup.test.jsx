@@ -359,4 +359,33 @@ describe('<Lookup />', () => {
     expect(getItems).toHaveBeenCalledTimes(2);
     done();
   });
+
+  test('should clear its query params when closed', async () => {
+    mockData = [{ name: 'foo', id: 1, isChecked: false }];
+    const history = createMemoryHistory({
+      initialEntries: ['/organizations/add?inventory.name=foo&bar=baz'],
+    });
+    wrapper = mountWithContexts(
+      <_Lookup
+        multiple
+        name="foo"
+        lookupHeader="Foo Bar"
+        onLookupSave={() => {}}
+        value={mockData}
+        columns={mockColumns}
+        sortedColumnKey="name"
+        getItems={() => {}}
+        location={{ history }}
+        history={history}
+        qsNamespace="inventory"
+        i18n={{ _: val => val.toString() }}
+      />
+    );
+    wrapper
+      .find('InputGroup Button')
+      .at(0)
+      .invoke('onClick')();
+    wrapper.find('Modal').invoke('onClose')();
+    expect(history.location.search).toEqual('?bar=baz');
+  });
 });
