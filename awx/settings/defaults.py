@@ -1127,6 +1127,7 @@ LOGGING = {
         },
         'awx.main.dispatch': {
             'handlers': ['dispatcher'],
+            'propagate': False,
         },
         'awx.isolated.manager.playbooks': {
             'handlers': ['management_playbooks'],
