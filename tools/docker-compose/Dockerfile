@@ -34,6 +34,7 @@ RUN yum -y install acl \
   libselinux-python \
   libstdc++.so.6 \
   libtool-ltdl-devel \
+  libcgroup-tools \
   libXcomposite \
   libXcursor \
   libXdamage \
