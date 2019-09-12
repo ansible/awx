@@ -1,8 +1,6 @@
 /* Websocket tests. These tests verify that items like the sparkline (colored box rows which
  * display job status) and other status icons update correctly as the jobs progress.
  */
-import uuid from 'uuid';
-
 import {
     getInventorySource,
     getOrganization,
@@ -15,8 +13,7 @@ import {
 import {
     AWX_E2E_URL,
     AWX_E2E_TIMEOUT_ASYNC,
-    AWX_E2E_TIMEOUT_LONG,
-    AWX_E2E_TIMEOUT_SHORT,
+    AWX_E2E_TIMEOUT_LONG
 } from '../settings';
 
 let data;
@@ -62,9 +59,8 @@ module.exports = {
             .useCss()
             .navigateTo(`${AWX_E2E_URL}/#/home`, false);
         getJob('test-websockets', 'debug.yml', 'test-websockets-successful', false);
-
         client.useXpath().expect.element(`${sparklineIcon}[1]${running}`)
-            .to.be.visible.before(AWX_E2E_TIMEOUT_ASYNC);
+            .to.be.present.before(AWX_E2E_TIMEOUT_ASYNC);
         client.useXpath().expect.element(`${successfulJt}${sparklineIcon}[1]${success}`)
             .to.be.present.before(AWX_E2E_TIMEOUT_ASYNC);
     },
@@ -74,9 +70,8 @@ module.exports = {
             .useCss()
             .navigateTo(`${AWX_E2E_URL}/#/home`, false);
         getJob('test-websockets', 'fail_unless.yml', 'test-websockets-failed', false);
-
         client.useXpath().expect.element(`${sparklineIcon}[1]${running}`)
-            .to.be.visible.before(AWX_E2E_TIMEOUT_ASYNC);
+            .to.be.present.before(AWX_E2E_TIMEOUT_ASYNC);
         client.useXpath().expect.element(`${failedJt}${sparklineIcon}[1]${fail}`)
             .to.be.present.before(AWX_E2E_TIMEOUT_ASYNC);
     },
@@ -95,9 +90,9 @@ module.exports = {
         getUpdatedProject('test-websockets'); // occasionally 1st update is too quick
 
         client.expect.element('i.icon-job-running')
-            .to.be.visible.before(AWX_E2E_TIMEOUT_ASYNC);
+            .to.be.present.before(AWX_E2E_TIMEOUT_ASYNC);
         client.expect.element('i.icon-job-success')
-            .to.be.visible.before(AWX_E2E_TIMEOUT_ASYNC);
+            .to.be.present.before(AWX_E2E_TIMEOUT_ASYNC);
     },
 
     'Test successful job within an organization view': client => {
@@ -152,7 +147,7 @@ module.exports = {
         client.expect.element('i.icon-job-running')
             .to.be.visible.before(AWX_E2E_TIMEOUT_ASYNC);
         client.expect.element('i.icon-job-success')
-            .to.be.visible.before(AWX_E2E_TIMEOUT_ASYNC);
+            .to.be.present.before(AWX_E2E_TIMEOUT_ASYNC);
     },
     'Test job slicing sparkline behavior': client => {
         client.navigateTo(`${AWX_E2E_URL}/#/home`, false);
