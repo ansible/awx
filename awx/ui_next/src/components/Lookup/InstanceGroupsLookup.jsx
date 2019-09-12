@@ -40,6 +40,7 @@ class InstanceGroupsLookup extends React.Component {
             value={value}
             onLookupSave={onChange}
             getItems={getInstanceGroups}
+            qsNamespace="instance-group"
             multiple
             columns={[
               {
