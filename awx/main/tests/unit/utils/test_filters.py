@@ -79,8 +79,8 @@ class mockHost:
 @mock.patch('awx.main.utils.filters.get_model', return_value=mockHost())
 class TestSmartFilterQueryFromString():
     @mock.patch(
-        'awx.api.filters.get_field_from_path',
-        lambda model, path: (model, path)  # disable field filtering, because a__b isn't a real Host field
+        'awx.api.filters.get_fields_from_path',
+        lambda model, path: ([model], path)  # disable field filtering, because a__b isn't a real Host field
     )
     @pytest.mark.parametrize("filter_string,q_expected", [
         ('facts__facts__blank=""', Q(**{u"facts__facts__blank": u""})),
