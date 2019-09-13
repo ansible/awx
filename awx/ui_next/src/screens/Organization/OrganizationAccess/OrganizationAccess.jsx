@@ -190,6 +190,7 @@ class OrganizationAccess extends React.Component {
           renderToolbar={props => (
             <DataListToolbar
               {...props}
+              qsConfig={QS_CONFIG}
               additionalControls={
                 canEdit
                   ? [

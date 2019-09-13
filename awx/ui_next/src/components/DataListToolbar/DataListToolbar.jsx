@@ -15,6 +15,8 @@ import Search from '../Search';
 import Sort from '../Sort';
 import VerticalSeparator from '../VerticalSeparator';
 
+import { QSConfig } from '@types';
+
 const AWXToolbar = styled.div`
   --awx-toolbar--BackgroundColor: var(--pf-global--BackgroundColor--light-100);
   --awx-toolbar--BorderColor: #ebebeb;
@@ -98,6 +100,7 @@ class DataListToolbar extends React.Component {
       sortedColumnKey,
       additionalControls,
       i18n,
+      qsConfig,
     } = this.props;
 
     const showExpandCollapse = onCompact && onExpand;
@@ -120,6 +123,7 @@ class DataListToolbar extends React.Component {
             )}
             <ToolbarItem css="flex-grow: 1;">
               <Search
+                qsConfig={qsConfig}
                 columns={columns}
                 onSearch={onSearch}
                 sortedColumnKey={sortedColumnKey}
@@ -160,6 +164,7 @@ class DataListToolbar extends React.Component {
 }
 
 DataListToolbar.propTypes = {
+  qsConfig: QSConfig.isRequired,
   columns: PropTypes.arrayOf(PropTypes.object).isRequired,
   showSelectAll: PropTypes.bool,
   isAllSelected: PropTypes.bool,

@@ -183,6 +183,7 @@ class JobList extends Component {
                 showExpandCollapse
                 isAllSelected={isAllSelected}
                 onSelectAll={this.handleSelectAll}
+                qsConfig={QS_CONFIG}
                 additionalControls={[
                   <ToolbarDeleteButton
                     key="delete"
