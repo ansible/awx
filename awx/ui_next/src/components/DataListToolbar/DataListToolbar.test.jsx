@@ -5,6 +5,13 @@ import DataListToolbar from './DataListToolbar';
 describe('<DataListToolbar />', () => {
   let toolbar;
 
+  const QS_CONFIG = {
+    namespace: 'organization',
+    dateFields: [ 'modified', 'created' ],
+    defaultParams: { page: 1, page_size: 5, order_by: 'name' },
+    integerFields: ['page', 'page_size'],
+  };
+
   afterEach(() => {
     if (toolbar) {
       toolbar.unmount();
@@ -28,6 +35,7 @@ describe('<DataListToolbar />', () => {
 
     toolbar = mountWithContexts(
       <DataListToolbar
+        qsConfig={QS_CONFIG}
         isAllSelected={false}
         showExpandCollapse
         sortedColumnKey="name"
@@ -77,6 +85,7 @@ describe('<DataListToolbar />', () => {
 
     toolbar = mountWithContexts(
       <DataListToolbar
+        qsConfig={QS_CONFIG}
         sortedColumnKey="foo"
         sortOrder="ascending"
         columns={multipleColumns}
@@ -151,6 +160,7 @@ describe('<DataListToolbar />', () => {
 
     toolbar = mountWithContexts(
       <DataListToolbar
+        qsConfig={QS_CONFIG}
         sortedColumnKey="id"
         sortOrder="descending"
         columns={numericColumns}
@@ -173,6 +183,7 @@ describe('<DataListToolbar />', () => {
 
     toolbar = mountWithContexts(
       <DataListToolbar
+        qsConfig={QS_CONFIG}
         sortedColumnKey="name"
         sortOrder="descending"
         columns={alphaColumns}
@@ -184,6 +195,7 @@ describe('<DataListToolbar />', () => {
 
     toolbar = mountWithContexts(
       <DataListToolbar
+        qsConfig={QS_CONFIG}
         sortedColumnKey="name"
         sortOrder="ascending"
         columns={alphaColumns}
@@ -204,6 +216,7 @@ describe('<DataListToolbar />', () => {
 
     toolbar = mountWithContexts(
       <DataListToolbar
+        qsConfig={QS_CONFIG}
         columns={columns}
         onSearch={onSearch}
         onSort={onSort}

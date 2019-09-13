@@ -114,14 +114,15 @@ class Search extends React.Component {
     const { searchKey, searchValue } = this.state;
     const { onSearch, qsConfig } = this.props;
 
-    const isNonStringField = key => qsConfig
-      .integerFields
-      .filter(field => field === key).length || qsConfig.dateFields
-      .filter(field => field === key).length;
+    const isNonStringField = key =>
+      qsConfig.integerFields.filter(field => field === key).length ||
+      qsConfig.dateFields.filter(field => field === key).length;
 
     // TODO: this will probably become more sophisticated, where date
     // fields and string fields are passed to a formatter
-    const actualSearchKey = isNonStringField(searchKey) ? searchKey : `${searchKey}__icontains`;
+    const actualSearchKey = isNonStringField(searchKey)
+      ? searchKey
+      : `${searchKey}__icontains`;
 
     onSearch(actualSearchKey, searchValue);
 

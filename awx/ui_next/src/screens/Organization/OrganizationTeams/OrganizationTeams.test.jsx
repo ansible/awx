@@ -65,6 +65,7 @@ describe('<OrganizationTeams />', () => {
     expect(list.prop('itemCount')).toEqual(listData.data.count);
     expect(list.prop('qsConfig')).toEqual({
       namespace: 'team',
+      dateFields: [ 'modified', 'created' ],
       defaultParams: {
         page: 1,
         page_size: 5,
