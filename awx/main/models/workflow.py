@@ -719,15 +719,15 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
         self.send_approval_notification('running')
         return can_start
 
-    def send_approval_notification(self, status):
+    def send_approval_notification(self, approval_status):
         from awx.main.tasks import send_notifications  # avoid circular import
         if self.workflow_job_template is None:
             return
         for nt in self.workflow_job_template.notification_templates["approvals"]:
             try:
-                (notification_subject, notification_body) = self.build_notification_message(nt, status)
+                (notification_subject, notification_body) = self.build_approval_notification_message(nt, approval_status)
             except Exception:
-                logger.debug("build_notification_message() does not exist")
+                raise NotImplementedError("build_approval_notification_message() does not exist")
 
             # Use kwargs to force late-binding
             # https://stackoverflow.com/a/3431699/10669572
@@ -738,17 +738,17 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
                 return _func
             connection.on_commit(send_it())
 
-    def build_notification_message(self, nt, status):
+    def build_approval_notification_message(self, nt, approval_status):
         subject = []
         workflow_url = urljoin(settings.TOWER_URL_BASE, '/#/workflows/{}'.format(self.workflow_job.id))
         subject.append(('The approval node "{}"').format(self.workflow_approval_template.name))
-        if status == 'running':
+        if approval_status == 'running':
             subject.append((' is running. This node can be approved or denied at: {}').format(workflow_url))
-        if status == 'approved':
+        if approval_status == 'approved':
             subject.append((' was approved. {}').format(workflow_url))
-        if status == 'timed_out':
+        if approval_status == 'timed_out':
             subject.append((' has timed out. {}').format(workflow_url))
-        elif status == 'denied':
+        elif approval_status == 'denied':
             subject.append((' was denied. {}').format(workflow_url))
         subject = " ".join(subject)
         body = self.notification_data()
