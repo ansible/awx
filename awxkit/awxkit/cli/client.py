@@ -130,7 +130,14 @@ class CLI(object):
             raise
 
     def fetch_version_root(self):
-        self.v2 = self.root.get().available_versions.v2.get()
+        try:
+            self.v2 = self.root.get().available_versions.v2.get()
+        except AttributeError:
+            raise RuntimeError(
+                'An error occurred while fetching {}/api/'.format(
+                    self.get_config('host')
+                )
+            )
 
     def parse_resource(self, skip_deprecated=False):
         """Attempt to parse the <resource> (e.g., jobs) specified on the CLI
