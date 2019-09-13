@@ -62,7 +62,7 @@ export default [
         }
 
         $scope.openWorkflowMaker = function() {
-            $state.go('.workflowMaker');
+            $state.go('templates.editWorkflowJobTemplate.workflowMaker');
         };
 
         $scope.formSave = function () {
