@@ -38,6 +38,7 @@ class InventoriesLookup extends React.Component {
           onLookupSave={onChange}
           getItems={getInventories}
           required={required}
+          qsNamespace="inventory"
           columns={[
             { name: i18n._(t`Name`), key: 'name', isSortable: true },
             {

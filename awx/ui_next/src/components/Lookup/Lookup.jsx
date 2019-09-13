@@ -64,7 +64,7 @@ class Lookup extends React.Component {
       count: 0,
       error: null,
     };
-    this.qsConfig = getQSConfig('lookup', {
+    this.qsConfig = getQSConfig(props.qsNamespace, {
       page: 1,
       page_size: 5,
       order_by: props.sortedColumnKey,
@@ -73,6 +73,7 @@ class Lookup extends React.Component {
     this.toggleSelected = this.toggleSelected.bind(this);
     this.saveModal = this.saveModal.bind(this);
     this.getData = this.getData.bind(this);
+    this.clearQSParams = this.clearQSParams.bind(this);
   }
 
   componentDidMount() {
@@ -163,6 +164,8 @@ class Lookup extends React.Component {
         lookupSelectedItems = multiple ? [...value] : [value];
       }
       this.setState({ lookupSelectedItems });
+    } else {
+      this.clearQSParams();
     }
     this.setState(prevState => ({
       isModalOpen: !prevState.isModalOpen,
@@ -177,6 +180,14 @@ class Lookup extends React.Component {
       : lookupSelectedItems[0] || null;
     onLookupSave(value, name);
     this.handleModalToggle();
+  }
+
+  clearQSParams() {
+    const { history } = this.props;
+    const parts = history.location.search.replace(/^\?/, '').split('&');
+    const ns = this.qsConfig.namespace;
+    const otherParts = parts.filter(param => !param.startsWith(`${ns}.`));
+    history.push(`${history.location.pathname}?${otherParts.join('&')}`);
   }
 
   render() {
@@ -303,6 +314,7 @@ Lookup.propTypes = {
   sortedColumnKey: string.isRequired,
   multiple: bool,
   required: bool,
+  qsNamespace: string,
 };
 
 Lookup.defaultProps = {
@@ -312,6 +324,7 @@ Lookup.defaultProps = {
   value: null,
   multiple: false,
   required: false,
+  qsNamespace: 'lookup',
 };
 
 export { Lookup as _Lookup };

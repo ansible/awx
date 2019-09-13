@@ -51,6 +51,7 @@ class ProjectLookup extends React.Component {
           getItems={loadProjects}
           required={required}
           sortedColumnKey="name"
+          qsNamespace="project"
         />
       </FormGroup>
     );
