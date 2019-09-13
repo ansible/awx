@@ -48,11 +48,15 @@
 					{{time.remaining}}
 					</div>
 				</div>
-				<div class="License-field">
+				<div class="License-field" ng-show='license.license_info.available_instances < 9999999'>
 					<div class="License-field--label" translate>Hosts Available</div>
 					<div class="License-field--content">
 					{{license.license_info.available_instances}}
 					</div>
+				</div>
+				<div class="License-field" ng-show='license.license_info.available_instances >= 9999999'>
+					<div class="License-field--label" translate>Hosts Available</div>
+					<div class="License-field--content" translate>Unlimited</div>
 				</div>
 				<div class="License-field">
 					<div class="License-field--label" translate>Hosts Used</div>
@@ -60,7 +64,7 @@
 					{{license.license_info.current_instances}}
 					</div>
 				</div>
-				<div class="License-field License-greenText">
+				<div class="License-field License-greenText" ng-show='license.license_info.available_instances < 9999999'>
 					<div class="License-field--label" translate>Hosts Remaining</div>
 					<div class="License-field--content">
 					{{license.license_info.free_instances}}
