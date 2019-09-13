@@ -147,6 +147,7 @@ from awx.api.views.root import ( # noqa
     ApiV2RootView,
     ApiV2PingView,
     ApiV2ConfigView,
+    ApiV2SubscriptionView,
 )
 
 

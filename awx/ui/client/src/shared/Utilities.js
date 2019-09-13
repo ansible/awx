@@ -238,9 +238,9 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                     msg = "";
                     _.forOwn(data, function(value, key) {
                         if (Array.isArray(data[key])) {
-                            msg += `${key}: ${data[key][0]}`;
+                            msg += `${key.toUpperCase()}: ${data[key][0]}`;
                         } else {
-                            msg += `${key} : ${value} `;
+                            msg += `${key.toUpperCase()}: ${value} `;
                         }
                     });
                     Alert(defaultMsg.hdr, msg);
