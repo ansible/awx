@@ -324,7 +324,10 @@ class BasePlaybookEvent(CreatedModifiedModel):
             kwargs.pop('created', None)
 
         sanitize_event_keys(kwargs, cls.VALID_KEYS)
+        workflow_job_id = kwargs.pop('workflow_job_id', None)
         job_event = cls.objects.create(**kwargs)
+        if workflow_job_id:
+            setattr(job_event, 'workflow_job_id', workflow_job_id)
         analytics_logger.info('Event data saved.', extra=dict(python_objects=dict(job_event=job_event)))
         return job_event
 
@@ -396,7 +399,7 @@ class JobEvent(BasePlaybookEvent):
     An event/message logged from the callback when running a job.
     '''
 
-    VALID_KEYS = BasePlaybookEvent.VALID_KEYS + ['job_id']
+    VALID_KEYS = BasePlaybookEvent.VALID_KEYS + ['job_id', 'workflow_job_id']
 
     class Meta:
         app_label = 'main'
@@ -530,7 +533,7 @@ class JobEvent(BasePlaybookEvent):
 
 class ProjectUpdateEvent(BasePlaybookEvent):
 
-    VALID_KEYS = BasePlaybookEvent.VALID_KEYS + ['project_update_id']
+    VALID_KEYS = BasePlaybookEvent.VALID_KEYS + ['project_update_id', 'workflow_job_id']
 
     class Meta:
         app_label = 'main'
@@ -639,7 +642,7 @@ class BaseCommandEvent(CreatedModifiedModel):
 
 class AdHocCommandEvent(BaseCommandEvent):
 
-    VALID_KEYS = BaseCommandEvent.VALID_KEYS + ['ad_hoc_command_id', 'event']
+    VALID_KEYS = BaseCommandEvent.VALID_KEYS + ['ad_hoc_command_id', 'event', 'workflow_job_id']
 
     class Meta:
         app_label = 'main'
@@ -747,7 +750,7 @@ class AdHocCommandEvent(BaseCommandEvent):
 
 class InventoryUpdateEvent(BaseCommandEvent):
 
-    VALID_KEYS = BaseCommandEvent.VALID_KEYS + ['inventory_update_id']
+    VALID_KEYS = BaseCommandEvent.VALID_KEYS + ['inventory_update_id', 'workflow_job_id']
 
     class Meta:
         app_label = 'main'

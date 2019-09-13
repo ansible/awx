@@ -704,6 +704,7 @@ class BaseTask(object):
 
     def __init__(self):
         self.cleanup_paths = []
+        self.parent_workflow_job_id = None
 
     def update_model(self, pk, _attempt=0, **updates):
         """Reload the model instance from the database and update the
@@ -1069,6 +1070,8 @@ class BaseTask(object):
         if event_data.get(self.event_data_key, None):
             if self.event_data_key != 'job_id':
                 event_data.pop('parent_uuid', None)
+        if self.parent_workflow_job_id:
+            event_data['workflow_job_id'] = self.parent_workflow_job_id
         should_write_event = False
         event_data.setdefault(self.event_data_key, self.instance.id)
         self.dispatcher.dispatch(event_data)
@@ -1157,6 +1160,11 @@ class BaseTask(object):
         self.safe_cred_env = {}
         private_data_dir = None
         isolated_manager_instance = None
+
+        # store a reference to the parent workflow job (if any) so we can include
+        # it in event data JSON
+        if self.instance.spawned_by_workflow:
+            self.parent_workflow_job_id = self.instance.get_workflow_job().id
 
         try:
             isolated = self.instance.is_isolated()

@@ -184,6 +184,8 @@ class LogstashFormatter(LogstashFormatterBase):
                     data_for_log[key] = 'Exception `{}` producing field'.format(e)
 
             data_for_log['event_display'] = job_event.get_event_display2()
+            if hasattr(job_event, 'workflow_job_id'):
+                data_for_log['workflow_job_id'] = job_event.workflow_job_id
 
         elif kind == 'system_tracking':
             data.pop('ansible_python_version', None)
