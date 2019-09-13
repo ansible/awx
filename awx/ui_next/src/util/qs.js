@@ -166,6 +166,8 @@ export function getQSConfig(
 ) {
   if (!namespace) {
     throw new Error('a QS namespace is required');
+  } else if (Object.keys(defaultParams).filter(key => key !== 'page' || key !== 'page_size' || key !== 'order_by').length > 0) {
+    throw new Error('Only page, page_size, and order_by allowed as default params for QS.')
   }
   return {
     namespace,
