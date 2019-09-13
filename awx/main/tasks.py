@@ -1697,29 +1697,11 @@ class RunJob(BaseTask):
             # up-to-date with project, job is running project current version
             if job_revision:
                 job = self.update_model(job.pk, scm_revision=job_revision)
-
-        # copy the project directory
-        runner_project_folder = os.path.join(private_data_dir, 'project')
-        if job.project.scm_type == 'git':
-            git_repo = git.Repo(project_path)
-            if not os.path.exists(runner_project_folder):
-                os.mkdir(runner_project_folder)
-            tmp_branch_name = 'awx_internal/{}'.format(uuid4())
-            # always clone based on specific job revision
-            if not job.scm_revision:
-                raise RuntimeError('Unexpectedly could not determine a revision to run from project.')
-            source_branch = git_repo.create_head(tmp_branch_name, job.scm_revision)
-            # git clone must take file:// syntax for source repo or else options like depth will be ignored
-            source_as_uri = Path(project_path).as_uri()
-            git.Repo.clone_from(
-                source_as_uri, runner_project_folder, branch=source_branch,
-                depth=1, single_branch=True,  # shallow, do not copy full history
-                recursive=True  # include submodules
+            # Project update does not copy the folder, so copy here
+            RunProjectUpdate.make_local_copy(
+                project_path, os.path.join(private_data_dir, 'project'),
+                job.project.scm_type, job_revision
             )
-            # force option is necessary because remote refs are not counted, although no information is lost
-            git_repo.delete_head(tmp_branch_name, force=True)
-        else:
-            copy_tree(project_path, runner_project_folder)
 
         if job.inventory.kind == 'smart':
             # cache smart inventory memberships so that the host_filter query is not
@@ -2065,15 +2047,51 @@ class RunProjectUpdate(BaseTask):
                 git_repo = git.Repo(project_path)
                 self.original_branch = git_repo.active_branch
 
+    @staticmethod
+    def make_local_copy(project_path, destination_folder, scm_type, scm_revision):
+        if scm_type == 'git':
+            git_repo = git.Repo(project_path)
+            if not os.path.exists(destination_folder):
+                os.mkdir(destination_folder, stat.S_IREAD | stat.S_IWRITE | stat.S_IEXEC)
+            tmp_branch_name = 'awx_internal/{}'.format(uuid4())
+            # always clone based on specific job revision
+            if not scm_revision:
+                raise RuntimeError('Unexpectedly could not determine a revision to run from project.')
+            source_branch = git_repo.create_head(tmp_branch_name, scm_revision)
+            # git clone must take file:// syntax for source repo or else options like depth will be ignored
+            source_as_uri = Path(project_path).as_uri()
+            git.Repo.clone_from(
+                source_as_uri, destination_folder, branch=source_branch,
+                depth=1, single_branch=True,  # shallow, do not copy full history
+            )
+            # submodules copied in loop because shallow copies from local HEADs are ideal
+            # and no git clone submodule options are compatible with minimum requirements
+            for submodule in git_repo.submodules:
+                subrepo_path = os.path.abspath(os.path.join(project_path, submodule.path))
+                subrepo_destination_folder = os.path.abspath(os.path.join(destination_folder, submodule.path))
+                subrepo_uri = Path(subrepo_path).as_uri()
+                git.Repo.clone_from(subrepo_uri, subrepo_destination_folder, depth=1, single_branch=True)
+            # force option is necessary because remote refs are not counted, although no information is lost
+            git_repo.delete_head(tmp_branch_name, force=True)
+        else:
+            copy_tree(project_path, destination_folder)
+
     def post_run_hook(self, instance, status):
-        if self.original_branch:
-            # for git project syncs, non-default branches can be problems
-            # restore to branch the repo was on before this run
-            try:
-                self.original_branch.checkout()
-            except Exception:
-                # this could have failed due to dirty tree, but difficult to predict all cases
-                logger.exception('Failed to restore project repo to prior state after {}'.format(instance.log_format))
+        if self.job_private_data_dir:
+            # copy project folder before resetting to default branch
+            # because some git-tree-specific resources (like submodules) might matter
+            self.make_local_copy(
+                instance.get_project_path(check_if_exists=False), os.path.join(self.job_private_data_dir, 'project'),
+                instance.scm_type, self.playbook_new_revision
+            )
+            if self.original_branch:
+                # for git project syncs, non-default branches can be problems
+                # restore to branch the repo was on before this run
+                try:
+                    self.original_branch.checkout()
+                except Exception:
+                    # this could have failed due to dirty tree, but difficult to predict all cases
+                    logger.exception('Failed to restore project repo to prior state after {}'.format(instance.log_format))
         self.release_lock(instance)
         p = instance.project
         if self.playbook_new_revision:
