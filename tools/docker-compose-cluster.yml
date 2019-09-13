@@ -46,12 +46,13 @@ services:
       RABBITMQ_PASS: guest
       RABBITMQ_VHOST: /
       SDB_HOST: 0.0.0.0
-      SDB_PORT: 6899
+      SDB_PORT: 7899
       AWX_GROUP_QUEUES: bravo,tower
     volumes:
       - "../:/awx_devel"
     ports:
-      - "6899-6999:6899-6999"
+      - "6899:6899"
+      - "7899-7999:7899-7999"
   awx_3:
     user: ${CURRENT_UID}
     container_name: tools_awx_3_1
