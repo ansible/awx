@@ -235,6 +235,7 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
                 }
             });
     } else if ($state.current.name === 'templates.editWorkflowJobTemplate.schedules.add'){
+        $scope.parseType = 'yaml';
         let workflowJobTemplate = new WorkflowJobTemplate();
 
         $q.all([workflowJobTemplate.optionsLaunch(ParentObject.id), workflowJobTemplate.getLaunch(ParentObject.id)])
@@ -246,6 +247,20 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
                         $scope.promptModalMissingReqFields = $scope.missingSurveyValue ? true : false;
                     });
                 };
+
+                if (launchConf.ask_variables_on_launch) {
+                    $scope.noVars = false;
+                    $scope.extraVars = ParentObject.extra_vars === '' ? '---' : ParentObject.extra_vars;
+
+                    ParseTypeChange({
+                        scope: $scope,
+                        variable: 'extraVars',
+                        parse_variable: 'parseType',
+                        field_id: 'SchedulerForm-extraVars'
+                    });
+                } else {
+                    $scope.noVars = true;
+                }
 
                 if (!shouldShowPromptButton(launchConf)) {
                     $scope.showPromptButton = false;
