@@ -3111,6 +3111,17 @@ class WorkflowJobTemplateCopy(CopyAPIView):
             data.update(messages)
         return Response(data)
 
+    def _build_create_dict(self, obj):
+        """Special processing of fields managed by char_prompts
+        """
+        r = super(WorkflowJobTemplateCopy, self)._build_create_dict(obj)
+        field_names = set(f.name for f in obj._meta.get_fields())
+        for field_name, ask_field_name in obj.get_ask_mapping().items():
+            if field_name in r and field_name not in field_names:
+                r.setdefault('char_prompts', {})
+                r['char_prompts'][field_name] = r.pop(field_name)
+        return r
+
     @staticmethod
     def deep_copy_permission_check_func(user, new_objs):
         for obj in new_objs:
@@ -3139,7 +3150,6 @@ class WorkflowJobTemplateLabelList(JobTemplateLabelList):
 
 class WorkflowJobTemplateLaunch(RetrieveAPIView):
 
-
     model = models.WorkflowJobTemplate
     obj_permission_type = 'start'
     serializer_class = serializers.WorkflowJobLaunchSerializer
@@ -3156,10 +3166,15 @@ class WorkflowJobTemplateLaunch(RetrieveAPIView):
                 extra_vars.setdefault(v, u'')
             if extra_vars:
                 data['extra_vars'] = extra_vars
-            if obj.ask_inventory_on_launch:
-                data['inventory'] = obj.inventory_id
-            else:
-                data.pop('inventory', None)
+            modified_ask_mapping = models.WorkflowJobTemplate.get_ask_mapping()
+            modified_ask_mapping.pop('extra_vars')
+            for field_name, ask_field_name in obj.get_ask_mapping().items():
+                if not getattr(obj, ask_field_name):
+                    data.pop(field_name, None)
+                elif field_name == 'inventory':
+                    data[field_name] = getattrd(obj, "%s.%s" % (field_name, 'id'), None)
+                else:
+                    data[field_name] = getattr(obj, field_name)
         return data
 
     def post(self, request, *args, **kwargs):

@@ -34,7 +34,12 @@ class WorkflowJobTemplate(HasCopy, HasCreate, HasNotifications, HasSurvey, Unifi
         payload = PseudoNamespace(name=kwargs.get('name') or 'WorkflowJobTemplate - {}'.format(random_title()),
                                   description=kwargs.get('description') or random_title(10))
 
-        optional_fields = ("allow_simultaneous", "ask_variables_on_launch", "survey_enabled")
+        optional_fields = (
+            "allow_simultaneous",
+            "ask_variables_on_launch", "ask_inventory_on_launch", "ask_scm_branch_on_launch", "ask_limit_on_launch",
+            "limit", "scm_branch",
+            "survey_enabled"
+        )
         update_payload(payload, optional_fields, kwargs)
 
         extra_vars = kwargs.get('extra_vars', not_provided)
@@ -48,8 +53,6 @@ class WorkflowJobTemplate(HasCopy, HasCreate, HasNotifications, HasSurvey, Unifi
 
         if kwargs.get('inventory'):
             payload.inventory = kwargs.get('inventory').id
-        if kwargs.get('ask_inventory_on_launch'):
-            payload.ask_inventory_on_launch = kwargs.get('ask_inventory_on_launch')
 
         return payload
 

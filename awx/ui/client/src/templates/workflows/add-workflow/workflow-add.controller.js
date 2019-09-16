@@ -70,9 +70,11 @@ export default [
                          data[fld] = $scope[fld];
                      }
                  }
-                 
+
                  data.ask_inventory_on_launch = Boolean($scope.ask_inventory_on_launch);
                  data.ask_variables_on_launch = Boolean($scope.ask_variables_on_launch);
+                 data.ask_limit_on_launch = Boolean($scope.ask_limit_on_launch);
+                 data.ask_scm_branch_on_launch = Boolean($scope.ask_scm_branch_on_launch);
 
                  data.extra_vars = ToJSON($scope.parseType,
                      $scope.variables, true);

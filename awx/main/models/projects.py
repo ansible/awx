@@ -329,7 +329,7 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
     @classmethod
     def _get_unified_job_field_names(cls):
         return set(f.name for f in ProjectOptions._meta.fields) | set(
-            ['name', 'description', 'schedule']
+            ['name', 'description']
         )
 
     def save(self, *args, **kwargs):

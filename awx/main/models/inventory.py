@@ -1501,7 +1501,7 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, CustomVirtualE
     @classmethod
     def _get_unified_job_field_names(cls):
         return set(f.name for f in InventorySourceOptions._meta.fields) | set(
-            ['name', 'description', 'schedule', 'credentials', 'inventory']
+            ['name', 'description', 'credentials', 'inventory']
         )
 
     def save(self, *args, **kwargs):

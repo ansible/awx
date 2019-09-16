@@ -39,7 +39,7 @@ from awx.main.models.notifications import (
     NotificationTemplate,
     JobNotificationMixin,
 )
-from awx.main.utils import parse_yaml_or_json, getattr_dne
+from awx.main.utils import parse_yaml_or_json, getattr_dne, NullablePromptPseudoField
 from awx.main.fields import ImplicitRoleField, JSONField, AskForField
 from awx.main.models.mixins import (
     ResourceMixin,
@@ -271,7 +271,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
     @classmethod
     def _get_unified_job_field_names(cls):
         return set(f.name for f in JobOptions._meta.fields) | set(
-            ['name', 'description', 'schedule', 'survey_passwords', 'labels', 'credentials',
+            ['name', 'description', 'survey_passwords', 'labels', 'credentials',
              'job_slice_number', 'job_slice_count']
         )
 
@@ -839,25 +839,6 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
                 host.save()
 
 
-# Add on aliases for the non-related-model fields
-class NullablePromptPsuedoField(object):
-    """
-    Interface for psuedo-property stored in `char_prompts` dict
-    Used in LaunchTimeConfig and submodels
-    """
-    def __init__(self, field_name):
-        self.field_name = field_name
-
-    def __get__(self, instance, type=None):
-        return instance.char_prompts.get(self.field_name, None)
-
-    def __set__(self, instance, value):
-        if value in (None, {}):
-            instance.char_prompts.pop(self.field_name, None)
-        else:
-            instance.char_prompts[self.field_name] = value
-
-
 class LaunchTimeConfigBase(BaseModel):
     '''
     Needed as separate class from LaunchTimeConfig because some models
@@ -878,6 +859,7 @@ class LaunchTimeConfigBase(BaseModel):
         null=True,
         default=None,
         on_delete=models.SET_NULL,
+        help_text=_('Inventory applied as a prompt, assuming job template prompts for inventory')
     )
     # All standard fields are stored in this dictionary field
     # This is a solution to the nullable CharField problem, specific to prompting
@@ -914,21 +896,14 @@ class LaunchTimeConfigBase(BaseModel):
                     data[prompt_name] = prompt_val
         return data
 
-    def display_extra_vars(self):
-        '''
-        Hides fields marked as passwords in survey.
-        '''
-        if self.survey_passwords:
-            extra_vars = parse_yaml_or_json(self.extra_vars).copy()
-            for key, value in self.survey_passwords.items():
-                if key in extra_vars:
-                    extra_vars[key] = value
-            return extra_vars
-        else:
-            return self.extra_vars
 
-    def display_extra_data(self):
-        return self.display_extra_vars()
+for field_name in JobTemplate.get_ask_mapping().keys():
+    if field_name == 'extra_vars':
+        continue
+    try:
+        LaunchTimeConfigBase._meta.get_field(field_name)
+    except FieldDoesNotExist:
+        setattr(LaunchTimeConfigBase, field_name, NullablePromptPseudoField(field_name))
 
 
 class LaunchTimeConfig(LaunchTimeConfigBase):
@@ -963,14 +938,21 @@ class LaunchTimeConfig(LaunchTimeConfigBase):
     def extra_vars(self, extra_vars):
         self.extra_data = extra_vars
 
+    def display_extra_vars(self):
+        '''
+        Hides fields marked as passwords in survey.
+        '''
+        if hasattr(self, 'survey_passwords') and self.survey_passwords:
+            extra_vars = parse_yaml_or_json(self.extra_vars).copy()
+            for key, value in self.survey_passwords.items():
+                if key in extra_vars:
+                    extra_vars[key] = value
+            return extra_vars
+        else:
+            return self.extra_vars
 
-for field_name in JobTemplate.get_ask_mapping().keys():
-    if field_name == 'extra_vars':
-        continue
-    try:
-        LaunchTimeConfig._meta.get_field(field_name)
-    except FieldDoesNotExist:
-        setattr(LaunchTimeConfig, field_name, NullablePromptPsuedoField(field_name))
+    def display_extra_data(self):
+        return self.display_extra_vars()
 
 
 class JobLaunchConfig(LaunchTimeConfig):
