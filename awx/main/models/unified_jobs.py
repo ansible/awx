@@ -42,9 +42,9 @@ from awx.main.utils import (
     camelcase_to_underscore, get_model_for_type,
     encrypt_dict, decrypt_field, _inventory_updates,
     copy_model_by_class, copy_m2m_relationships,
-    get_type_for_model, parse_yaml_or_json, getattr_dne
+    get_type_for_model, parse_yaml_or_json, getattr_dne,
+    polymorphic, schedule_task_manager
 )
-from awx.main.utils import polymorphic, schedule_task_manager
 from awx.main.constants import ACTIVE_STATES, CAN_CANCEL
 from awx.main.redact import UriCleaner, REPLACE_STR
 from awx.main.consumers import emit_channel_notification
@@ -1386,9 +1386,13 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
 
         wj = self.get_workflow_job()
         if wj:
+            schedule = getattr_dne(wj, 'schedule')
             for name in ('awx', 'tower'):
                 r['{}_workflow_job_id'.format(name)] = wj.pk
                 r['{}_workflow_job_name'.format(name)] = wj.name
+                if schedule:
+                    r['{}_parent_job_schedule_id'.format(name)] = schedule.pk
+                    r['{}_parent_job_schedule_name'.format(name)] = schedule.name
 
         if not created_by:
             schedule = getattr_dne(self, 'schedule')
