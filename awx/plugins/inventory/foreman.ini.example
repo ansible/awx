@@ -122,6 +122,7 @@ url = http://localhost:3000/
 user = foreman
 password = secret
 ssl_verify = True
+use_reports_api = True
 
 # Retrieve only hosts from the organization "Web Engineering".
 # host_filters = organization="Web Engineering"
@@ -129,6 +130,26 @@ ssl_verify = True
 # Retrieve only hosts from the organization "Web Engineering" that are
 # also in the host collection "Apache Servers".
 # host_filters = organization="Web Engineering" and host_collection="Apache Servers"
+
+
+# Foreman Inventory report related configuration options. Additional options that also configure report data are want_host_collections and want_facts.
+# All these default to True.
+
+[report]
+#want_organization = True
+#want_location = True
+#want_IPv4 = True
+#want_host_group = True
+#want_subnet = True
+#want_smart_proxies = True
+#want_content_facet_attributes = True
+
+# Upon receiving a request to return inventory report, Foreman schedules a report generation job.
+# The script then polls the report_data endpoint repeatedly to check if the job is complete and retrieves data  
+# poll_interval allows to define the polling interval between 2 calls to the report_data endpoint while polling.
+# Defaults to 10 seconds
+
+# poll_interval = 30
 
 [ansible]
 group_patterns = ["{app}-{tier}-{color}",

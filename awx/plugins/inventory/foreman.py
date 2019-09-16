@@ -34,7 +34,7 @@ import copy
 import os
 import re
 import sys
-from time import time
+from time import time, sleep
 from collections import defaultdict
 from distutils.version import LooseVersion, StrictVersion
 
@@ -91,6 +91,52 @@ class ForemanInventory(object):
         except (ConfigParser.NoOptionError, ConfigParser.NoSectionError) as e:
             print("Error parsing configuration: %s" % e, file=sys.stderr)
             return False
+
+        # Inventory Report Related
+        try:
+            self.foreman_use_reports_api = config.getboolean('foreman', 'use_reports_api')
+        except (ConfigParser.NoOptionError, ConfigParser.NoSectionError):
+            self.foreman_use_reports_api = True
+
+        try:
+            self.want_organization = config.getboolean('report', 'want_organization')
+        except (ConfigParser.NoOptionError, ConfigParser.NoSectionError):
+            self.want_organization = True
+
+        try:
+            self.want_location = config.getboolean('report', 'want_location')
+        except (ConfigParser.NoOptionError, ConfigParser.NoSectionError):
+            self.want_location = True
+
+        try:
+            self.want_IPv4 = config.getboolean('report', 'want_IPv4')
+        except (ConfigParser.NoOptionError, ConfigParser.NoSectionError):
+            self.want_IPv4 = True
+
+        try:
+            self.want_host_group = config.getboolean('report', 'want_host_group')
+        except (ConfigParser.NoOptionError, ConfigParser.NoSectionError):
+            self.want_host_group = True
+
+        try:
+            self.want_subnet = config.getboolean('report', 'want_subnet')
+        except (ConfigParser.NoOptionError, ConfigParser.NoSectionError):
+            self.want_subnet = True
+
+        try:
+            self.want_smart_proxies = config.getboolean('report', 'want_smart_proxies')
+        except (ConfigParser.NoOptionError, ConfigParser.NoSectionError):
+            self.want_smart_proxies = True
+
+        try:
+            self.want_content_facet_attributes = config.getboolean('report', 'want_content_facet_attributes')
+        except (ConfigParser.NoOptionError, ConfigParser.NoSectionError):
+            self.want_content_facet_attributes = True
+
+        try:
+            self.poll_interval = config.getint('report', 'poll_interval')
+        except (ConfigParser.NoOptionError, ConfigParser.NoSectionError):
+            self.poll_interval = 10
 
         # Ansible related
         try:
@@ -203,6 +249,44 @@ class ForemanInventory(object):
                 break
         return results
 
+    def _use_inventory_report(self):
+         url = "%s/api/v2/status" % self.foreman_url
+         result = self._get_json(url)
+         foreman_version = LooseVersion(result.get('version')) >= LooseVersion('1.24.0')
+         return foreman_version and self.foreman_use_reports_api
+
+    def _fetch_params(self):
+        options, params = ("no", "yes") , dict()
+        params["Organization"] = options[self.want_organization]
+        params["Location"] = options[self.want_location]
+        params["IPv4"] = options[self.want_IPv4]
+        params["Facts"] = options[self.want_facts]
+        params["Host Group"] = options[self.want_host_group]
+        params["Host Collections"] = options[self.want_hostcollections]
+        params["Subnet"] = options[self.want_subnet]
+        params["Smart Proxies"] = options[self.want_smart_proxies]
+        params["Content Attributes"] = options[self.want_content_facet_attributes]
+        return params
+
+    def _post_request(self):
+        url = "%s/ansible/api/v2/ansible_inventories/schedule" % self.foreman_url
+        session = self._get_session()
+        params = {'input_values': self._fetch_params()}
+        ret = session.post(url, json=params)
+        url = "{0}/api/v2/report_templates/153-Ansible%20Inventory/report_data/{1}".format(self.foreman_url, ret.json().get('job_id'))
+        response = session.get(url)
+        while response:
+            if response.status_code != 204:
+                break
+            else:
+                sleep(self.poll_interval)
+                response = session.get(url)
+        
+        if not(response):
+            raise Exception("Error receiving inventory report from foreman. Please check foreman logs!")
+        else:
+            return response.json()
+
     def _get_hosts(self):
         url = "%s/api/v2/hosts" % self.foreman_url
 
@@ -275,6 +359,91 @@ class ForemanInventory(object):
         return re.sub(regex, "_", word.replace(" ", ""))
 
     def update_cache(self, scan_only_new_hosts=False):
+        """Make calls to foreman and save the output in a cache"""
+        use_inventory_report = self._use_inventory_report()
+        if use_inventory_report:
+            self._update_cache_inventory(scan_only_new_hosts)
+        else:
+            self._update_cache_host_api(scan_only_new_hosts)
+
+    def _update_cache_inventory(self, scan_only_new_hosts):
+        self.groups = dict()
+        self.hosts = dict()
+        inventory_report_response = self._post_request()
+        host_data = json.loads(inventory_report_response)
+        for host in host_data:
+            if not(host) or (host["Name"] in self.cache.keys() and scan_only_new_hosts):
+                continue
+            dns_name = host['Name']
+
+            host_params = host.get('all_parameters', {})
+            fact_list = host.get('Facts', {})
+            content_facet_attributes = host.get('Content Attributes', {}) or {}
+            
+            # Create ansible groups for hostgroup
+            group = 'hostgroup'
+            val = host.get('%s_title' % group) or host.get('%s_name' % group)
+            if val:
+                safe_key = self.to_safe('%s%s_%s' % (
+                    to_text(self.group_prefix),
+                    group,
+                    to_text(val).lower()
+                ))
+                self.inventory[safe_key].append(dns_name)
+
+            # Create ansible groups for environment, location and organization
+            for group in ['environment', 'Location', 'Organization']:
+                val = host.get('%s' % group)
+                if val:
+                    safe_key = self.to_safe('%s%s_%s' % (
+                        to_text(self.group_prefix),
+                        group,
+                        to_text(val).lower()
+                    ))
+                    self.inventory[safe_key].append(dns_name)
+
+            for group in ['lifecycle_environment', 'content_view']:
+                val = content_facet_attributes.get('%s_name' % group)
+                if val:
+                    safe_key = self.to_safe('%s%s_%s' % (
+                        to_text(self.group_prefix),
+                        group,
+                        to_text(val).lower()
+                    ))
+                    self.inventory[safe_key].append(dns_name)
+
+            params = self._resolve_params(host_params)
+
+            # Ansible groups by parameters in host groups and Foreman host
+            # attributes.
+            groupby = {k: self.to_safe(to_text(v)) for k, v in params.items()}
+
+            # The name of the ansible groups is given by group_patterns:
+            for pattern in self.group_patterns:
+                try:
+                    key = pattern.format(**groupby)
+                    self.inventory[key].append(dns_name)
+                except KeyError:
+                    pass  # Host not part of this group
+
+            if self.want_hostcollections:
+                hostcollections = host.get('Host Collections')
+
+                if hostcollections:
+                    # Create Ansible groups for host collections
+                    for hostcollection in hostcollections:
+                        safe_key = self.to_safe('%shostcollection_%s' % (self.group_prefix, hostcollection.lower()))
+                        self.inventory[safe_key].append(dns_name)
+
+                self.hostcollections[dns_name] = hostcollections
+
+            self.cache[dns_name] = host
+            self.params[dns_name] = params
+            self.facts[dns_name] = fact_list
+            self.inventory['all'].append(dns_name)
+        self._write_cache()
+
+    def _update_cache_host_api(self, scan_only_new_hosts):
         """Make calls to foreman and save the output in a cache"""
 
         self.groups = dict()
