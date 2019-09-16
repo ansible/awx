@@ -44,13 +44,8 @@ services:
 
   # Postgres Database Container
   postgres:
-    image: centos/postgresql-10-centos7
+    image: postgres:10
     container_name: tools_postgres_1
-    environment:
-      POSTGRESQL_USER: awx
-      POSTGRESQL_PASSWORD: awxpass
-      POSTGRESQL_DATABASE: awx
-      POSTGRESQL_ADMIN_PASSWORD: postgrespass
     ports:
         - "5432:5432"
   memcached:
