@@ -90,7 +90,10 @@ function resolveResource (
     Events.init(`${API_ROOT}${related}`, params);
 
     Wait('start');
-    const promise = Promise.all([new Resource(['get', 'options'], [id, id]), Events.fetch()])
+    const statsEventPromise = Events.getStatsEvent();
+    const jobDetailsPromise = Promise.all([new Resource(['get', 'options'], [id, id]), Events.fetch()]);
+
+    const resourcePromise = jobDetailsPromise
         .then(([model, events]) => ({
             id,
             type,
@@ -101,14 +104,15 @@ function resolveResource (
                 status: `${WS_PREFIX}-${name}`,
                 summary: `${WS_PREFIX}-${name}-summary`,
             },
+            statsEventPromise, // intentionally resolve *after* page load
         }));
 
     if (!handleErrors) {
-        return promise
+        return resourcePromise
             .finally(() => Wait('stop'));
     }
 
-    return promise
+    return resourcePromise
         .catch(({ data, status }) => {
             qs.error(data, status);
 

@@ -1,5 +1,6 @@
 import {
     API_MAX_PAGE_SIZE,
+    EVENT_STATS_PLAY,
     OUTPUT_ORDER_BY,
     OUTPUT_PAGE_SIZE,
 } from './constants';
@@ -127,6 +128,15 @@ function JobEventsApiService ($http, $q) {
                 return results;
             });
     };
+
+    this.getStatsEvent = () => $http.get(this.endpoint, { params: { event: EVENT_STATS_PLAY } })
+        .then(({ data }) => {
+            const { results, count } = data;
+            if (count === 1) {
+                return results.pop();
+            }
+            return null;
+        });
 
     this.getLastPageNumber = () => Math.ceil(this.state.count / OUTPUT_PAGE_SIZE);
     this.getMaxCounter = () => this.state.maxCounter;

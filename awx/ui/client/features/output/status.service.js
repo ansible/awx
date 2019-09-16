@@ -15,8 +15,9 @@ function JobStatusService (moment, message) {
     this.dispatch = () => message.dispatch('status', this.state);
     this.subscribe = listener => message.subscribe('status', listener);
 
-    this.init = ({ model }) => {
+    this.init = ({ model, events, statsEventPromise }) => {
         this.model = model;
+        this.jobEvents = events;
         this.created = model.get('created');
         this.job = model.get('id');
         this.jobType = model.get('type');
@@ -53,21 +54,20 @@ function JobStatusService (moment, message) {
             }
         };
 
-        this.initHostStatusCounts({ model });
         this.initPlaybookCounts({ model });
+        statsEventPromise
+            .then(statsEvent => {
+                if (statsEvent) {
+                    this.setStatsEvent(statsEvent);
+                    this.updateStats();
+                } else {
+                    const hostStatusCounts = this.createHostStatusCounts(this.state.status);
+                    this.setHostStatusCounts(hostStatusCounts);
+                }
 
-        this.updateRunningState();
-        this.dispatch();
-    };
-
-    this.initHostStatusCounts = ({ model }) => {
-        if (model.has('host_status_counts')) {
-            this.setHostStatusCounts(model.get('host_status_counts'));
-        } else {
-            const hostStatusCounts = this.createHostStatusCounts(this.state.status);
-
-            this.setHostStatusCounts(hostStatusCounts);
-        }
+                this.updateRunningState();
+                this.dispatch();
+            });
     };
 
     this.initPlaybookCounts = ({ model }) => {
@@ -336,10 +336,15 @@ function JobStatusService (moment, message) {
     };
 
     this.sync = () => {
-        const { model } = this;
+        const { model, jobEvents } = this;
 
-        return model.http.get({ resource: model.get('id') })
-            .then(() => {
+        const syncPromises = [
+            jobEvents.getStatsEvent(),
+            model.http.get({ resource: model.get('id') }),
+        ];
+
+        return Promise.all(syncPromises)
+            .then(([statsEvent]) => {
                 this.setFinished(model.get('finished'));
                 this.setElapsed(model.get('elapsed'));
                 this.setStarted(model.get('started'));
@@ -349,9 +354,15 @@ function JobStatusService (moment, message) {
                 this.setExecutionNode(model.get('execution_node'));
                 this.setResultTraceback(model.get('result_traceback'));
 
-                this.initHostStatusCounts({ model });
                 this.initPlaybookCounts({ model });
 
+                if (statsEvent) {
+                    this.setStatsEvent(statsEvent);
+                    this.updateStats();
+                } else {
+                    const hostStatusCounts = this.createHostStatusCounts(this.state.status);
+                    this.setHostStatusCounts(hostStatusCounts);
+                }
                 this.dispatch();
             });
     };
