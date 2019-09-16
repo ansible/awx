@@ -65,7 +65,7 @@ export default ['i18n', function(i18n) {
 
         fieldActions: {
 
-            columnClass: 'col-xl-3 col-lg-3 col-md-4 col-sm-5',
+            columnClass: 'col-xl-3 col-lg-3 col-md-2 col-sm-5',
             "edit": {
                 mode: "all",
                 ngClick: "editSchedule(schedule)",
