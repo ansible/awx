@@ -183,9 +183,6 @@
   "diff_mode": false,
   "job_slice_number": 0,
   "job_slice_count": 1,
-  "host_status_counts": {
-      "ok": 1
-  },
   "playbook_counts": {
       "play_count": 1,
       "task_count": 1

@@ -23,8 +23,6 @@ class TestJobNotificationMixin(object):
                                  'finished': bool,
                                  'force_handlers': bool,
                                  'forks': int,
-                                 'host_status_counts': {'skipped': int, 'ok': int, 'changed': int,
-                                                        'failures': int, 'dark': int},
                                  'id': int,
                                  'job_explanation': str,
                                  'job_slice_count': int,

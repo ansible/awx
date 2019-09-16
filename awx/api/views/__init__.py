@@ -3881,7 +3881,7 @@ class HostAdHocCommandsList(AdHocCommandList, SubListCreateAPIView):
 class AdHocCommandDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
 
     model = models.AdHocCommand
-    serializer_class = serializers.AdHocCommandDetailSerializer
+    serializer_class = serializers.AdHocCommandSerializer
 
 
 class AdHocCommandCancel(RetrieveAPIView):

@@ -1,22 +1,17 @@
 # Python
-from collections import namedtuple
 import pytest
 from unittest import mock
 import json
 
 # AWX
 from awx.api.serializers import (
-    JobDetailSerializer,
     JobSerializer,
     JobOptionsSerializer,
-    ProjectUpdateDetailSerializer,
 )
 
 from awx.main.models import (
     Label,
     Job,
-    JobEvent,
-    ProjectUpdateEvent,
 )
 
 
@@ -107,87 +102,3 @@ class TestJobOptionsSerializerGetSummaryFields():
 
     def test_labels_exists(self, test_get_summary_fields, job_template):
         test_get_summary_fields(JobOptionsSerializer, job_template, 'labels')
-
-
-class TestJobDetailSerializerGetHostStatusCountFields(object):
-
-    def test_hosts_are_counted_once(self, job, mocker):
-        mock_event = JobEvent(**{
-            'event': 'playbook_on_stats',
-            'event_data': {
-                'skipped': {
-                    'localhost': 2,
-                    'fiz': 1,
-                },
-                'ok': {
-                    'localhost': 1,
-                    'foo': 2,
-                },
-                'changed': {
-                    'localhost': 1,
-                    'bar': 3,
-                },
-                'dark': {
-                    'localhost': 2,
-                    'fiz': 2,
-                }
-            }
-        })
-
-        mock_qs = namedtuple('mock_qs', ['get'])(mocker.MagicMock(return_value=mock_event))
-        job.job_events.only = mocker.MagicMock(return_value=mock_qs)
-
-        serializer = JobDetailSerializer()
-        host_status_counts = serializer.get_host_status_counts(job)
-
-        assert host_status_counts == {'ok': 1, 'changed': 1, 'dark': 2}
-
-    def test_host_status_counts_is_empty_dict_without_stats_event(self, job):
-        job.job_events = JobEvent.objects.none()
-
-        serializer = JobDetailSerializer()
-        host_status_counts = serializer.get_host_status_counts(job)
-
-        assert host_status_counts == {}
-
-
-class TestProjectUpdateDetailSerializerGetHostStatusCountFields(object):
-
-    def test_hosts_are_counted_once(self, project_update, mocker):
-        mock_event = ProjectUpdateEvent(**{
-            'event': 'playbook_on_stats',
-            'event_data': {
-                'skipped': {
-                    'localhost': 2,
-                    'fiz': 1,
-                },
-                'ok': {
-                    'localhost': 1,
-                    'foo': 2,
-                },
-                'changed': {
-                    'localhost': 1,
-                    'bar': 3,
-                },
-                'dark': {
-                    'localhost': 2,
-                    'fiz': 2,
-                }
-            }
-        })
-
-        mock_qs = namedtuple('mock_qs', ['get'])(mocker.MagicMock(return_value=mock_event))
-        project_update.project_update_events.only = mocker.MagicMock(return_value=mock_qs)
-
-        serializer = ProjectUpdateDetailSerializer()
-        host_status_counts = serializer.get_host_status_counts(project_update)
-
-        assert host_status_counts == {'ok': 1, 'changed': 1, 'dark': 2}
-
-    def test_host_status_counts_is_empty_dict_without_stats_event(self, project_update):
-        project_update.project_update_events = ProjectUpdateEvent.objects.none()
-
-        serializer = ProjectUpdateDetailSerializer()
-        host_status_counts = serializer.get_host_status_counts(project_update)
-
-        assert host_status_counts == {}
