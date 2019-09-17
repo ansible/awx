@@ -85,9 +85,7 @@ class ToolbarDeleteButton extends React.Component {
       return (
         <div>
           {i18n._(
-            t`You do not have permission to delete the following ${pluralize(
-              itemName
-            )}: ${itemsUnableToDelete}`
+            t`You do not have permission to delete the following ${itemName}: ${itemsUnableToDelete}`
           )}
         </div>
       );
@@ -125,11 +123,7 @@ class ToolbarDeleteButton extends React.Component {
         {isModalOpen && (
           <AlertModal
             variant="danger"
-            title={
-              itemsToDelete === 1
-                ? i18n._(t`Delete ${itemName}`)
-                : i18n._(t`Delete ${pluralize(itemName)}`)
-            }
+            title={itemName}
             isOpen={isModalOpen}
             onClose={this.handleCancelDelete}
             actions={[

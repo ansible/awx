@@ -17,7 +17,7 @@ import {
   parseQueryString,
   addParams,
 } from '@util/qs';
-import { pluralize, ucFirst } from '@util/strings';
+import { ucFirst } from '@util/strings';
 
 import { QSConfig } from '@types';
 
@@ -64,7 +64,6 @@ class PaginatedDataList extends React.Component {
       renderItem,
       toolbarColumns,
       itemName,
-      itemNamePlural,
       showPageSizeOptions,
       location,
       i18n,
@@ -82,10 +81,8 @@ class PaginatedDataList extends React.Component {
         ];
     const queryParams = parseQueryString(qsConfig, location.search);
 
-    const itemDisplayName = ucFirst(pluralize(itemName));
-    const itemDisplayNamePlural = ucFirst(
-      itemNamePlural || pluralize(itemName)
-    );
+    const itemDisplayName = ucFirst(itemName);
+    const itemDisplayNamePlural = ucFirst(itemName);
 
     const dataListLabel = i18n._(t`${itemDisplayName} List`);
     const emptyContentMessage = i18n._(
@@ -164,7 +161,6 @@ PaginatedDataList.propTypes = {
   items: PropTypes.arrayOf(Item).isRequired,
   itemCount: PropTypes.number.isRequired,
   itemName: PropTypes.string,
-  itemNamePlural: PropTypes.string,
   qsConfig: QSConfig.isRequired,
   renderItem: PropTypes.func,
   toolbarColumns: arrayOf(
@@ -185,7 +181,6 @@ PaginatedDataList.defaultProps = {
   contentError: null,
   toolbarColumns: [],
   itemName: 'item',
-  itemNamePlural: '',
   showPageSizeOptions: true,
   renderItem: item => <PaginatedDataListItem key={item.id} item={item} />,
   renderToolbar: props => <DataListToolbar {...props} />,

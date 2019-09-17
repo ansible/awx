@@ -42,7 +42,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
               contentError={null}
               hasContentLoading={false}
               itemCount={2}
-              itemName="notification"
+              itemName="Notifications"
               items={
                 Array [
                   Object {
@@ -116,7 +116,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                   hasContentLoading={false}
                   i18n={"/i18n/"}
                   itemCount={2}
-                  itemName="notification"
+                  itemName="Notifications"
                   items={
                     Array [
                       Object {
@@ -188,8 +188,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                       history={"/history/"}
                       i18n={"/i18n/"}
                       itemCount={2}
-                      itemName="notification"
-                      itemNamePlural=""
+                      itemName="Notifications"
                       items={
                         Array [
                           Object {

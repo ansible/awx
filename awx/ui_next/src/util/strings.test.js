@@ -1,20 +1,6 @@
-import { pluralize, getArticle, ucFirst, toTitleCase } from './strings';
+import { getArticle, ucFirst, toTitleCase } from './strings';
 
 describe('string utils', () => {
-  describe('pluralize', () => {
-    test('should add an "s"', () => {
-      expect(pluralize('team')).toEqual('teams');
-    });
-
-    test('should add an "es"', () => {
-      expect(pluralize('class')).toEqual('classes');
-    });
-
-    test('should handle word ending in y', () => {
-      expect(pluralize('inventory')).toEqual('inventories');
-    });
-  });
-
   describe('getArticle', () => {
     test('should return "a"', () => {
       expect(getArticle('team')).toEqual('a');

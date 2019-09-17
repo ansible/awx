@@ -37,7 +37,7 @@ exports[`<OrganizationAccess /> initially renders succesfully 1`] = `
     error={null}
     hasContentLoading={true}
     itemCount={0}
-    itemName="role"
+    itemName="Roles"
     items={Array []}
     qsConfig={
       Object {
@@ -91,7 +91,7 @@ exports[`<OrganizationAccess /> initially renders succesfully 1`] = `
         hasContentLoading={true}
         i18n={"/i18n/"}
         itemCount={0}
-        itemName="role"
+        itemName="Roles"
         items={Array []}
         qsConfig={
           Object {
@@ -144,8 +144,7 @@ exports[`<OrganizationAccess /> initially renders succesfully 1`] = `
             history={"/history/"}
             i18n={"/i18n/"}
             itemCount={0}
-            itemName="role"
-            itemNamePlural=""
+            itemName="Roles"
             items={Array []}
             location={
               Object {
