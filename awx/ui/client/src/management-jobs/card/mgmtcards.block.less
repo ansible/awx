@@ -11,7 +11,11 @@
     align-items: baseline;
     margin-top: 20px;
     margin-right: 20px;
-    width: 32%;
+    width: ~"calc(33.3% - 14px)";
+}
+
+.MgmtCards-card:nth-child(3n) {
+    margin-right: 0px;
 }
 
 .MgmtCards-card--selected {
@@ -91,6 +95,14 @@
 @media (min-width: 840px) and (max-width: 1240px) {
     .MgmtCards-card {
         width: ~"calc(50% - 10px)";
+    }
+
+    .MgmtCards-card:nth-child(2n) {
+        margin-right: 0px;
+    }
+
+    .MgmtCards-card:nth-child(3n) {
+        margin-right: 20px;
     }
  }
 
