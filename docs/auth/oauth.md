@@ -1,14 +1,14 @@
 ## Introduction
-Starting from Tower 3.3, OAuth 2 will be used as the new means of token-based authentication. Users
-will be able to manage OAuth 2 tokens as well as applications, a server-side representation of API
-clients used to generate tokens. With OAuth 2, a user can authenticate by passing a token as part of
+Starting from Tower 3.3, OAuth2 will be used as the new means of token-based authentication. Users
+will be able to manage OAuth2 tokens as well as applications, a server-side representation of API
+clients used to generate tokens. With OAuth2, a user can authenticate by passing a token as part of
 the HTTP authentication header. The token can be scoped to have more restrictive permissions on top of
 the base RBAC permissions of the user.  Refer to [RFC 6749](https://tools.ietf.org/html/rfc6749) for
-more details of OAuth 2 specification.
+more details of OAuth2 specification.
 
 ## Basic Usage
 
-To get started using OAuth 2 tokens for accessing the browsable API using OAuth 2, this document will walk through the steps of acquiring a token and using it.  
+To get started using OAuth2 tokens for accessing the browsable API using OAuth2, this document will walk through the steps of acquiring a token and using it.  
 
 1. Make an application with `authorization_grant_type` set to 'password'. HTTP POST the following to the `/api/v2/applications/`  endpoint (supplying your own `organization-id`):
 ```
@@ -51,18 +51,18 @@ curl -H "Authorization: Bearer <token-value>" -X DELETE https://<awx>/api/v2/tok
 
 ## More Information
 
-#### Managing OAuth 2 Applications and Tokens
+#### Managing OAuth2 Applications and Tokens
 
-Applications and tokens can be managed as a top-level resource at `/api/<version>/applications` and
-`/api/<version>/tokens`. These resources can also be accessed respective to the user at
-`/api/<version>/users/N/<resource>`.  Applications can be created by making a POST to either `api/<version>/applications`
-or `/api/<version>/users/N/applications`.  
+Applications and tokens can be managed as a top-level resource at `/api/v2/applications` and
+`/api/v2/tokens`. These resources can also be accessed respective to the user at
+`/api/v2/users/N/<resource>`.  Applications can be created by making a POST to either `api/v2/applications`
+or `/api/v2/users/N/applications`.  
 
-Each OAuth 2 application represents a specific API client on the server side. For an API client to use the API via an application token,
+Each OAuth2 application represents a specific API client on the server side. For an API client to use the API via an application token,
 it must first have an application and issue an access token.  
 
 Individual applications will be accessible via their primary keys:
-`/api/<version>/applications/<pk>/`. Here is a typical application:
+`/api/v2/applications/<pk>/`. Here is a typical application:
 ```
 {
     "id": 1,
@@ -105,8 +105,8 @@ Individual applications will be accessible via their primary keys:
 ```
 In the above example, `user` is the primary key of the user associated to this application and `name` is
  a human-readable identifier for the application. The other fields, like `client_id` and
-`redirect_uris`, are mainly used for OAuth 2 authorization, which will be covered later in the 'Using
-OAuth 2 Token System' section.
+`redirect_uris`, are mainly used for OAuth2 authorization, which will be covered later in the 'Using
+OAuth2 Token System' section.
 
 Fields `client_id` and `client_secret` are immutable identifiers of applications, and will be
 generated during creation; Fields `user` and `authorization_grant_type`, on the other hand, are
@@ -127,7 +127,7 @@ token scope; or POSTing to `/api/v2/applications/<pk>/tokens/` by providing only
 the parent application will be automatically linked.
 
 Individual tokens will be accessible via their primary keys at
-`/api/<version>/tokens/<pk>/`. Here is a typical token:
+`/api/v2/tokens/<pk>/`. Here is a typical token:
 ```
 {
     "id": 4,
@@ -162,7 +162,7 @@ Individual tokens will be accessible via their primary keys at
     "scope": "read"
 },
 ```
-For an OAuth 2 token, the only fully mutable fields are `scope` and `description`. The `application`
+For an OAuth2 token, the only fully mutable fields are `scope` and `description`. The `application`
 field is *immutable on update*, and all other fields are totally immutable, and will be auto-populated
 during creation.
 * `user` - this field corresponds to the user the token is created for
@@ -181,8 +181,8 @@ endpoint.  Personal access tokens can be identified by the `application` field b
 - Other normal users will only be able to see and manipulate their own tokens.
 > Note: Users can only see the token or refresh-token _value_ at the time of creation ONLY.  
 
-#### Using OAuth 2 Token System for Personal Access Tokens (PAT)
-The most common usage of OAuth 2 is authenticating users. The `token` field of a token is used
+#### Using OAuth2 Token System for Personal Access Tokens (PAT)
+The most common usage of OAuth2 is authenticating users. The `token` field of a token is used
 as part of the HTTP authentication header, in the format `Authorization: Bearer <token field value>`.  This _Bearer_
 token can be obtained by doing a curl to the `/api/o/token/` endpoint. For example:  
 ```
@@ -195,17 +195,17 @@ Here is an example of using that PAT to access an API endpoint using `curl`:
 curl -H "Authorization: Bearer kqHqxfpHGRRBXLNCOXxT5Zt3tpJogn" http://<awx>/api/v2/credentials/
 ```
 
-According to OAuth 2 specification, users should be able to acquire, revoke and refresh an access
+According to OAuth2 specification, users should be able to acquire, revoke and refresh an access
 token. In AWX the equivalent, and easiest, way of doing that is creating a token, deleting
 a token, and deleting a token quickly followed by creating a new one.
 
 The specification also provides standard ways of doing this. RFC 6749 elaborates
-on those topics, but in summary, an OAuth 2 token is officially acquired via authorization using
+on those topics, but in summary, an OAuth2 token is officially acquired via authorization using
 authorization information provided by applications (special application fields mentioned above).
 There are dedicated endpoints for authorization and acquiring tokens. The `token` endpoint
 is also responsible for token refresh, and token revoke can be done by the dedicated token revoke endpoint.
 
-In AWX, our OAuth 2 system is built on top of
+In AWX, our OAuth2 system is built on top of
 [Django Oauth Toolkit](https://django-oauth-toolkit.readthedocs.io/en/latest/), which provides full
 support on standard authorization, token revoke and refresh. AWX implements them and puts related
 endpoints under `/api/o/` endpoint. Detailed examples on the most typical usage of those endpoints
@@ -215,9 +215,9 @@ are available as description text of `/api/o/`. See below for information on App
 
 #### Token Scope Mask Over RBAC System
 
-The scope of an OAuth 2 token is a space-separated string composed of keywords like 'read' and 'write'.
+The scope of an OAuth2 token is a space-separated string composed of keywords like 'read' and 'write'.
 These keywords are configurable and used to specify permission level of the authenticated API client.
-For the initial OAuth 2 implementation, we use the most simple scope configuration, where the only
+For the initial OAuth2 implementation, we use the most simple scope configuration, where the only
 valid scope keywords are 'read' and 'write'.
 
 Read and write scopes provide a mask layer over the RBAC permission system of AWX. In specific, a
@@ -226,7 +226,7 @@ scope gives the authenticated user only read permissions the RBAC system provide
 
 For example, if a user has admin permission to a job template, he/she can both see and modify, launch
 and delete the job template if authenticated via session or basic auth. On the other hand, if the user
-is authenticated using OAuth 2 token, and the related token scope is 'read', the user can only see but
+is authenticated using OAuth2 token, and the related token scope is 'read', the user can only see but
 not manipulate or launch the job template, despite being an admin. If the token scope is
 'write' or 'read write', she can take full advantage of the job template as its admin.  Note that 'write'
 implies 'read' as well.  
@@ -234,10 +234,10 @@ implies 'read' as well.
 
 ## Application Functions
 
-This page lists OAuth 2 utility endpoints used for authorization, token refresh and revoke.
+This page lists OAuth2 utility endpoints used for authorization, token refresh and revoke.
 Note endpoints other than `/api/o/authorize/` are not meant to be used in browsers and do not
 support HTTP GET. The endpoints here strictly follow
-[RFC specs for OAuth 2](https://tools.ietf.org/html/rfc6749), so please use that for detailed
+[RFC specs for OAuth2](https://tools.ietf.org/html/rfc6749), so please use that for detailed
 reference. Below are some examples to demonstrate the typical usage of these endpoints in
 AWX context (note that the AWX net location defaults to `http://localhost:8013` in these examples).
 
@@ -392,10 +392,10 @@ at `/api/v2/tokens/`.
 
 ## Acceptance Criteria
 
-* All CRUD operations for OAuth 2 applications and tokens should function as described.
-* RBAC rules applied to OAuth 2 applications and tokens should behave as described.
+* All CRUD operations for OAuth2 applications and tokens should function as described.
+* RBAC rules applied to OAuth2 applications and tokens should behave as described.
 * A default application should be auto-created for each new user.
-* Incoming requests using unexpired OAuth 2 token correctly in authentication header should be able
+* Incoming requests using unexpired OAuth2 token correctly in authentication header should be able
   to successfully authenticate themselves.
 * Token scope mask over RBAC should work as described.
 * Tower configuration setting `OAUTH2_PROVIDER` should be configurable and function as described.

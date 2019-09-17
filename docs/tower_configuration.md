@@ -3,7 +3,7 @@ Tower configuration gives Tower users the ability to adjust multiple runtime par
 ## Usage manual
 
 #### To Use:
-The REST endpoint for CRUD operations against Tower configurations can be found at `/api/<version #>/settings/`. GETing to that endpoint will return a list of available Tower configuration categories and their URLs, such as `"system": "/api/<version #>/settings/system/"`. The URL given to each category is the endpoint for CRUD operations against individual settings under that category.
+The REST endpoint for CRUD operations against Tower configurations can be found at `/api/v2/settings/`. GETing to that endpoint will return a list of available Tower configuration categories and their URLs, such as `"system": "/api/v2/settings/system/"`. The URL given to each category is the endpoint for CRUD operations against individual settings under that category.
 
 Here is a typical Tower configuration category GET response:
 ```
