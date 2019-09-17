@@ -136,5 +136,6 @@ use_dev_supervisor.txt
 .idea/*
 
 # Ansible module tests
-awx_modules_test_venv/
-awx-awx-*.tar.gz
+awx_collection_test_venv/
+awx_modules/*.tar.gz
+awx_modules/galaxy.yml

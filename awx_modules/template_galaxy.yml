@@ -1,0 +1,11 @@
+- hosts: localhost
+  gather_facts: false
+  connection: local
+  vars:
+    package_name: awx
+    namespace_name: awx
+    package_version: 0.0.1
+
+  tasks:
+  - name: Template the galaxy.yml file
+    template: src={{ playbook_dir }}/galaxy.yml.j2 dest={{ playbook_dir }}/galaxy.yml
