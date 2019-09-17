@@ -11,6 +11,7 @@ import awx
 # Django
 from django.utils import six
 from django.utils.translation import ugettext_lazy as _
+from django.core.validators import URLValidator, _lazy_re_compile
 
 # Django Auth LDAP
 import django_auth_ldap.config
@@ -233,12 +234,34 @@ class AuthenticationBackendsField(fields.StringListField):
 
 class LDAPServerURIField(fields.URLField):
 
+    tld_re = (
+        r'\.'                                              # dot
+        r'(?!-)'                                           # can't start with a dash
+        r'(?:[a-z' + URLValidator.ul + r'0-9' + '-]{2,63}' # domain label
+        r'|xn--[a-z0-9]{1,59})'                            # or punycode label
+        r'(?<!-)'                                          # can't end with a dash
+        r'\.?'                                             # may have a trailing dot
+    )
+
+    host_re = '(' + URLValidator.hostname_re + URLValidator.domain_re + tld_re + '|localhost)'
+
+    regex = _lazy_re_compile(
+        r'^(?:[a-z0-9\.\-\+]*)://'  # scheme is validated separately
+        r'(?:[^\s:@/]+(?::[^\s:@/]*)?@)?'  # user:pass authentication
+        r'(?:' + URLValidator.ipv4_re + '|' + URLValidator.ipv6_re + '|' + host_re + ')'
+        r'(?::\d{2,5})?'  # port
+        r'(?:[/?#][^\s]*)?'  # resource path
+        r'\Z', re.IGNORECASE)
+
     def __init__(self, **kwargs):
+
         kwargs.setdefault('schemes', ('ldap', 'ldaps'))
         kwargs.setdefault('allow_plain_hostname', True)
+        kwargs.setdefault('regex', LDAPServerURIField.regex)
         super(LDAPServerURIField, self).__init__(**kwargs)
 
     def run_validators(self, value):
+
         for url in filter(None, re.split(r'[, ]', (value or ''))):
             super(LDAPServerURIField, self).run_validators(url)
         return value
