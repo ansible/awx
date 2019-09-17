@@ -573,9 +573,35 @@ class WebhookMixin(models.Model):
             'github': 'Authorization',
             'gitlab': 'PRIVATE-TOKEN',
         }
+        service_statuses = {
+            'github': {
+                'new': 'pending',
+                'successful': 'success',
+                'failed': 'failure',
+                'canceled': 'failure',
+                'error': 'error',
+            },
+            'gitlab': {
+                'new': 'pending',
+                'running': 'running',
+                'successful': 'success',
+                'failed': 'failed',
+                'error': 'failed',
+                'canceled': 'canceled',
+            },
+        }
+
+        statuses = service_statuses[self.webhook_service]
+        if status not in statuses:
+            logger.debug("Skipping webhook job status change: '{}'".format(status))
+            return
         try:
+            data = {
+                'state': statuses[status],
+                'context': 'tower',
+            }
             headers = {service_header[self.webhook_service]: self.webhook_credential.get_input('token')}
-            response = requests.post(status_api, headers=headers)
+            response = requests.post(status_api, data=data, headers=headers)
         except Exception:
             logger.exception("Posting webhook status caused an error.")
             return
