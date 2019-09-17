@@ -384,7 +384,7 @@ prepare_collection_venv:
 	ln -s /usr/lib/python2.7/site-packages/ansible $(COLLECTION_VENV)/ansible
 	$(VENV_BASE)/awx/bin/pip install --target=$(COLLECTION_VENV) git+https://github.com/ansible/tower-cli.git
 
-COLLECTION_TEST_DIRS ?= awx_modules/test/awx
+COLLECTION_TEST_DIRS ?= awx_collection/test/awx
 COLLECTION_PACKAGE_NAME ?= awx
 COLLECTION_NAMESPACE_NAME ?= awx
 
@@ -392,18 +392,18 @@ test_collection:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	PYTHONPATH=$(COLLECTION_VENV):/awx_devel/awx_modules:$PYTHONPATH py.test $(COLLECTION_TEST_DIRS)
+	PYTHONPATH=$(COLLECTION_VENV):/awx_devel/awx_collection:$PYTHONPATH py.test $(COLLECTION_TEST_DIRS)
 
 flake8_collection:
-	flake8 awx_modules/  # Different settings, in main exclude list
+	flake8 awx_collection/  # Different settings, in main exclude list
 
 prepare_test_collection: prepare_collection_venv test_collection  # deprecated
 
 test_collection_all: prepare_collection_venv test_collection flake8_collection
 
 build_collection:
-	ansible-playbook -i localhost, awx_modules/template_galaxy.yml -e package_name=$(COLLECTION_PACKAGE_NAME) -e namespace_name=$(COLLECTION_NAMESPACE_NAME) -e package_version=$(VERSION)
-	ansible-galaxy collection build awx_modules --output-path=awx_modules
+	ansible-playbook -i localhost, awx_collection/template_galaxy.yml -e package_name=$(COLLECTION_PACKAGE_NAME) -e namespace_name=$(COLLECTION_NAMESPACE_NAME) -e package_version=$(VERSION)
+	ansible-galaxy collection build awx_collection --output-path=awx_collection
 
 test_unit:
 	@if [ "$(VENV_BASE)" ]; then \

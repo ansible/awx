@@ -25,7 +25,7 @@ to be the python in that virtual environment.
 ## Running Tests
 
 Tests to verify compatibility with the most recent AWX code are
-in `awx_modules/test/awx`. These tests require that python packages
+in `awx_collection/test/awx`. These tests require that python packages
 are available for all of `awx`, `ansible`, `tower_cli`, and the collection
 itself.
 
@@ -34,7 +34,7 @@ in the `awx_collection_test_venv` folder so that `make test_collection` can
 be ran to actually run the tests. A single test can be ran via:
 
 ```
-make test_collection MODULE_TEST_DIRS=awx_modules/test/awx/test_organization.py
+make test_collection MODULE_TEST_DIRS=awx_collection/test/awx/test_organization.py
 ```
 
 ## Building
