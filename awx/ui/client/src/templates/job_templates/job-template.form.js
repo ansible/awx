@@ -340,7 +340,7 @@ function(NotificationsList, i18n) {
                         ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                     }, {
                         name: 'enable_webhook',
-                        label: i18n._('Webhooks'),
+                        label: i18n._('Enable Webhook'),
                         type: 'checkbox',
                         column: 2,
                         awPopOver: "<p>" + i18n._("Enable webhook for this job template.") + "</p>",
