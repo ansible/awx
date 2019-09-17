@@ -91,13 +91,8 @@ services:
       - CLUSTERED=true
       - CLUSTER_WITH=rabbitmq_1
   postgres:
-    image: centos/postgresql-10-centos7
+    image: postgres:10
     container_name: tools_postgres_1
-    environment:
-      POSTGRESQL_USER: awx
-      POSTGRESQL_PASSWORD: awxpass
-      POSTGRESQL_DATABASE: awx
-      POSTGRESQL_ADMIN_PASSWORD: postgrespass
   memcached:
     image: memcached:alpine
     container_name: tools_memcached_1
