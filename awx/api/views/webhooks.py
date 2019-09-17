@@ -2,6 +2,7 @@ from hashlib import sha1
 import hmac
 import json
 import logging
+import urllib.parse
 
 from django.utils.encoding import force_bytes
 from django.views.decorators.csrf import csrf_exempt
@@ -53,7 +54,7 @@ class WebhookReceiverBase(APIView):
     permission_classes = (AllowAny,)
     authentication_classes = ()
 
-    event_keys = {}
+    ref_keys = {}
 
     def get_queryset(self):
         qs_models = {
@@ -83,8 +84,11 @@ class WebhookReceiverBase(APIView):
     def get_event_guid(self):
         raise NotImplementedError
 
+    def get_event_status_api(self):
+        raise NotImplementedError
+
     def get_event_ref(self):
-        key = self.event_keys.get(self.get_event_type(), '')
+        key = self.ref_keys.get(self.get_event_type(), '')
         value = self.request.data
         for element in key.split('.'):
             try:
@@ -126,6 +130,7 @@ class WebhookReceiverBase(APIView):
         event_type = self.get_event_type()
         event_guid = self.get_event_guid()
         event_ref = self.get_event_ref()
+        status_api = self.get_event_status_api()
 
         kwargs = {
             'webhook_service': obj.webhook_service,
@@ -147,11 +152,10 @@ class WebhookReceiverBase(APIView):
                 'tower_webhook_event_type': event_type,
                 'tower_webhook_event_guid': event_guid,
                 'tower_webhook_event_ref': event_ref,
+                'tower_webhook_status_api': status_api,
                 'tower_webhook_payload': request.data,
             })
         }
-        # if event_ref:
-        #     kwargs['scm_branch'] = event_ref
 
         new_job = obj.create_unified_job(**kwargs)
         new_job.signal_start()
@@ -162,7 +166,7 @@ class WebhookReceiverBase(APIView):
 class GithubWebhookReceiver(WebhookReceiverBase):
     service = 'github'
 
-    event_keys = {
+    ref_keys = {
         'pull_request': 'pull_request.head.sha',
         'pull_request_review': 'pull_request.head.sha',
         'pull_request_review_comment': 'pull_request.head.sha',
@@ -179,6 +183,11 @@ class GithubWebhookReceiver(WebhookReceiverBase):
     def get_event_guid(self):
         return self.request.META.get('HTTP_X_GITHUB_DELIVERY')
 
+    def get_event_status_api(self):
+        if self.get_event_type() != 'pull_request':
+            return
+        return self.request.data.get('pull_request', {}).get('statuses_url')
+
     def get_signature(self):
         header_sig = self.request.META.get('HTTP_X_HUB_SIGNATURE')
         if not header_sig:
@@ -192,7 +201,7 @@ class GithubWebhookReceiver(WebhookReceiverBase):
 class GitlabWebhookReceiver(WebhookReceiverBase):
     service = 'gitlab'
 
-    event_keys = {
+    ref_keys = {
         'Push Hook': 'checkout_sha',
         'Tag Push Hook': 'checkout_sha',
         'Merge Request Hook': 'object_attributes.last_commit.id',
@@ -206,6 +215,18 @@ class GitlabWebhookReceiver(WebhookReceiverBase):
         h = sha1()
         h.update(force_bytes(self.request.body))
         return h.hexdigest()
+
+    def get_event_status_api(self):
+        if self.get_event_type() != 'Merge Request Hook':
+            return
+        project = self.request.data.get('project', {})
+        repo_url = project.get('web_url')
+        if not repo_url:
+            return
+        parsed = urllib.parse.urlparse(repo_url)
+
+        return "{}://{}/projects/{}/repository/commits/{}/statuses".format(
+            parsed.scheme, parsed.netloc, project['id'], self.get_event_ref())
 
     def get_signature(self):
         return force_bytes(self.request.META.get('HTTP_X_GITLAB_TOKEN'))
@@ -224,7 +245,7 @@ class GitlabWebhookReceiver(WebhookReceiverBase):
 class BitbucketWebhookReceiver(WebhookReceiverBase):
     service = 'bitbucket'
 
-    event_keys = {
+    ref_keys = {
         # Bitbucket Server
         'repo:refs_changed': 'changes.0.toHash',
         'repo:comment:added': 'commit',

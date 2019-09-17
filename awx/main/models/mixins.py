@@ -1,8 +1,10 @@
 # Python
-import os
-import json
 from copy import copy, deepcopy
+import json
+import logging
+import os
 
+import requests
 
 # Django
 from django.apps import apps
@@ -25,6 +27,9 @@ from awx.main.utils.encryption import decrypt_value, get_encryption_key, is_encr
 from awx.main.utils.polymorphic import build_polymorphic_ctypes_map
 from awx.main.fields import JSONField, AskForField
 from awx.main.constants import ACTIVE_STATES
+
+
+logger = logging.getLogger('awx.main.models.mixins')
 
 
 __all__ = ['ResourceMixin', 'SurveyJobTemplateMixin', 'SurveyJobMixin',
@@ -553,3 +558,29 @@ class WebhookMixin(models.Model):
         blank=True,
         max_length=128
     )
+
+    def update_scm_status(self, status):
+        if not self.webhook_credential:
+            logger.debug("No credential configured to post back webhook status, skipping.")
+            return
+
+        status_api = self.extra_vars_dict.get('tower_webhook_status_api')
+        if not status_api:
+            logger.debug("Webhook event did not have a status API endpoint associated, skipping.")
+            return
+
+        service_header = {
+            'github': 'Authorization',
+            'gitlab': 'PRIVATE-TOKEN',
+        }
+        try:
+            headers = {service_header[self.webhook_service]: self.webhook_credential.get_input('token')}
+            response = requests.post(status_api, headers=headers)
+        except Exception:
+            logger.exception("Posting webhook status caused an error.")
+            return
+
+        if response.status_code < 400:
+            logger.debug("Webhook status update sent.")
+        else:
+            logger.debug("Posting webhook status failed, code: {}".format(response.status_code))
