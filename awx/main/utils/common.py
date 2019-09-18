@@ -1058,6 +1058,7 @@ def get_external_account(user):
         account_type = "enterprise"
     return account_type
 
+
 def get_existing_yaml_files(dirname, filename):
     '''
     Check either filename.yml or filename.yaml exists.
@@ -1071,6 +1072,7 @@ def get_existing_yaml_files(dirname, filename):
         if os.path.exists(path):
             result.append(path)
     return result
+
 
 class classproperty:
 
