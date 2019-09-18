@@ -743,7 +743,7 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
         workflow_url = urljoin(settings.TOWER_URL_BASE, '/#/workflows/{}'.format(self.workflow_job.id))
         subject.append(('The approval node "{}"').format(self.workflow_approval_template.name))
         if approval_status == 'running':
-            subject.append((' is running. This node can be approved or denied at: {}').format(workflow_url))
+            subject.append((' needs review. This node can be viewed at: {}').format(workflow_url))
         if approval_status == 'approved':
             subject.append((' was approved. {}').format(workflow_url))
         if approval_status == 'timed_out':
