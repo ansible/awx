@@ -462,8 +462,6 @@ class JobNotificationMixin(object):
         return (notification_subject, notification_body)
 
     def send_notification_templates(self, status):
-        self.update_webhook_status(status)
-
         from awx.main.tasks import send_notifications  # avoid circular import
         if status not in ['running', 'succeeded', 'failed']:
             raise ValueError(_("status must be either running, succeeded or failed"))

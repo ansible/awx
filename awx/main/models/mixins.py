@@ -570,19 +570,19 @@ class WebhookMixin(models.Model):
             return
 
         service_header = {
-            'github': 'Authorization',
-            'gitlab': 'PRIVATE-TOKEN',
+            'github': ('Authorization', 'token {}'),
+            'gitlab': ('PRIVATE-TOKEN', '{}'),
         }
         service_statuses = {
             'github': {
-                'new': 'pending',
+                'pending': 'pending',
                 'successful': 'success',
                 'failed': 'failure',
                 'canceled': 'failure',  # Github doesn't have a 'canceled' status :(
                 'error': 'error',
             },
             'gitlab': {
-                'new': 'pending',
+                'pending': 'pending',
                 'running': 'running',
                 'successful': 'success',
                 'failed': 'failed',
@@ -601,8 +601,9 @@ class WebhookMixin(models.Model):
                 'state': statuses[status],
                 'context': 'ansible/awx' if license_type == 'open' else 'ansible/tower',
             }
-            headers = {service_header[self.webhook_service]: self.webhook_credential.get_input('token')}
-            response = requests.post(status_api, data=data, headers=headers)
+            k, v = service_header[self.webhook_service]
+            headers = {k: v.format(self.webhook_credential.get_input('token'))}
+            response = requests.post(status_api, data=json.dumps(data), headers=headers)
         except Exception:
             logger.exception("Posting webhook status caused an error.")
             return
@@ -610,4 +611,5 @@ class WebhookMixin(models.Model):
         if response.status_code < 400:
             logger.debug("Webhook status update sent.")
         else:
-            logger.debug("Posting webhook status failed, code: {}".format(response.status_code))
+            logger.error("Posting webhook status failed, code: {}".format(response.status_code))
+            logger.error(response.text)

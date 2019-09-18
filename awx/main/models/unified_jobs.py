@@ -1206,6 +1206,8 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
 
     def websocket_emit_status(self, status):
         connection.on_commit(lambda: self._websocket_emit_status(status))
+        if hasattr(self, 'update_webhook_status'):
+            connection.on_commit(lambda: self.update_webhook_status(status))
 
     def notification_data(self):
         return dict(id=self.id,
@@ -1422,6 +1424,3 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
 
     def is_isolated(self):
         return bool(self.controller_node)
-
-    def update_webhook_status(self, status):
-        return
