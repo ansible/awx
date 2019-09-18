@@ -38,7 +38,7 @@ options:
     timeout:
       description:
         - Maximum time in seconds to wait for a job to finish.
-extends_documentation_fragment: tower
+extends_documentation_fragment: awx.awx.auth
 '''
 
 EXAMPLES = '''

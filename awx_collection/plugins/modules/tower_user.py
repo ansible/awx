@@ -59,7 +59,7 @@ options:
 requirements:
   - ansible-tower-cli >= 3.2.0
 
-extends_documentation_fragment: tower
+extends_documentation_fragment: awx.awx.auth
 '''
 
 

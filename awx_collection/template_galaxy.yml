@@ -7,5 +7,22 @@
     package_version: 0.0.1
 
   tasks:
+  - name: Do file content replacements for non-default namespace or package name
+    block:
+    - name: Find all module files
+      find:
+        paths: "{{ playbook_dir }}/plugins/modules"
+        patterns: "*.py"
+      register: module_files
+
+    - name: Change files to support desired namespace and package names
+      replace:
+        path: "{{ item.path }}"
+        regexp: '^extends_documentation_fragment: awx.awx.auth$'
+        replace: 'extends_documentation_fragment: {{ namespace_name }}.{{ package_name }}.auth'
+      with_items: "{{ module_files.files }}"
+    when:
+      - (package_name != 'awx') or (namespace_name != 'awx')
+
   - name: Template the galaxy.yml file
     template: src={{ playbook_dir }}/galaxy.yml.j2 dest={{ playbook_dir }}/galaxy.yml

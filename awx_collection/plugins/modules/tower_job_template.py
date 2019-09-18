@@ -176,7 +176,7 @@ options:
         - Desired state of the resource.
       default: "present"
       choices: ["present", "absent"]
-extends_documentation_fragment: tower
+extends_documentation_fragment: awx.awx.auth
 notes:
   - JSON for survey_spec can be found in Tower API Documentation. See
     U(https://docs.ansible.com/ansible-tower/latest/html/towerapi/api_ref.html#/Job_Templates/Job_Templates_job_templates_survey_spec_create)

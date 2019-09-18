@@ -1,11 +1,11 @@
 # AWX Ansible Collection
 
-This Ansible collection allow for easy interaction with an AWX or Ansible Tower
+This Ansible collection allows for easy interaction with an AWX or Ansible Tower
 server in Ansible playbooks.
 
 The previous home for this collection was in https://github.com/ansible/ansible
 inside the folder `lib/ansible/modules/web_infrastructure/ansible_tower`
-as well as other places for the inventory plugin, module utils, and
+as well as other folders for the inventory plugin, module utils, and
 doc fragment.
 
 ## Running

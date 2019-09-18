@@ -77,7 +77,7 @@ options:
         - Desired state of the resource.
       default: "present"
       choices: ["present", "absent"]
-extends_documentation_fragment: tower
+extends_documentation_fragment: awx.awx.auth
 '''
 
 

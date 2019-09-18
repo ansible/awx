@@ -54,7 +54,7 @@ options:
         - Disable launching jobs from job template.
       type: bool
       default: 'no'
-extends_documentation_fragment: tower
+extends_documentation_fragment: awx.awx.auth
 '''
 
 EXAMPLES = '''

@@ -374,11 +374,9 @@ test:
 	fi; \
 	PYTHONDONTWRITEBYTECODE=1 py.test -p no:cacheprovider -n auto $(TEST_DIRS)
 	cd awxkit && $(VENV_BASE)/awx/bin/tox -re py2,py3
-	make test_collection_all
 	awx-manage check_migrations --dry-run --check  -n 'vNNN_missing_migration_file'
 
 prepare_collection_venv:
-	cd /awx_devel
 	rm -rf $(COLLECTION_VENV)
 	mkdir $(COLLECTION_VENV)
 	ln -s /usr/lib/python2.7/site-packages/ansible $(COLLECTION_VENV)/ansible
@@ -396,8 +394,6 @@ test_collection:
 
 flake8_collection:
 	flake8 awx_collection/  # Different settings, in main exclude list
-
-prepare_test_collection: prepare_collection_venv test_collection  # deprecated
 
 test_collection_all: prepare_collection_venv test_collection flake8_collection
 

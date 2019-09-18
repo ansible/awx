@@ -31,7 +31,7 @@ options:
       description:
         - Value to be modified for given setting.
       required: True
-extends_documentation_fragment: tower
+extends_documentation_fragment: awx.awx.auth
 '''
 
 RETURN = ''' # '''

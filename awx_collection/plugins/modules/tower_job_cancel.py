@@ -32,7 +32,7 @@ options:
         - Fail loudly if the I(job_id) does not reference a running job.
       default: False
       type: bool
-extends_documentation_fragment: tower
+extends_documentation_fragment: awx.awx.auth
 '''
 
 EXAMPLES = '''

@@ -64,7 +64,7 @@ options:
       required: False
       type: bool
       aliases: [ tower_verify_ssl ]
-extends_documentation_fragment: tower
+extends_documentation_fragment: awx.awx.auth
 '''
 
 

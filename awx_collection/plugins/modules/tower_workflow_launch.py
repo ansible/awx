@@ -41,7 +41,7 @@ options:
 
 requirements:
   - "python >= 2.6"
-extends_documentation_fragment: tower
+extends_documentation_fragment: awx.awx.auth
 '''
 
 RETURN = '''
