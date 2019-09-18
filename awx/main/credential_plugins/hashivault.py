@@ -102,6 +102,8 @@ def kv_backend(**kwargs):
         request_kwargs['verify'] = create_temporary_fifo(cacert.encode())
 
     sess = requests.Session()
+    sess.headers['Authorization'] = 'Bearer {}'.format(token)
+    # Compatability header for older installs of Hashicorp Vault
     sess.headers['X-Vault-Token'] = token
 
     if api_version == 'v2':
@@ -157,6 +159,8 @@ def ssh_backend(**kwargs):
         request_kwargs['json']['valid_principals'] = kwargs['valid_principals']
 
     sess = requests.Session()
+    sess.headers['Authorization'] = 'Bearer {}'.format(token)
+    # Compatability header for older installs of Hashicorp Vault
     sess.headers['X-Vault-Token'] = token
     # https://www.vaultproject.io/api/secret/ssh/index.html#sign-ssh-key
     request_url = '/'.join([url, secret_path, 'sign', role]).rstrip('/')
