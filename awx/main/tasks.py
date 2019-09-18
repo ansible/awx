@@ -1764,13 +1764,13 @@ class RunJob(BaseTask):
         # Galaxy requirements are not supported for manual projects
         if not sync_needs and job.project.scm_type:
             # see if we need a sync because of presence of roles
-            galaxy_req_path = os.path.join(project_path, 'roles', 'requirements.yml')
-            if os.path.exists(galaxy_req_path):
+            role_req_prefix = os.path.join(project_path, 'roles', 'requirements')
+            if os.path.isfile(role_req_prefix + '.yml') or os.path.isfile(role_req_prefix + '.yaml'):
                 logger.debug('Running project sync for {} because of galaxy role requirements.'.format(job.log_format))
                 sync_needs.append('install_roles')
 
-            galaxy_collections_req_path = os.path.join(project_path, 'collections', 'requirements.yml')
-            if os.path.exists(galaxy_collections_req_path):
+            collections_req_prefix = os.path.join(project_path, 'collections', 'requirements')
+            if os.path.isfile(collections_req_prefix + '.yml') or os.path.isfile(collections_req_prefix + '.yaml'):
                 logger.debug('Running project sync for {} because of galaxy collections requirements.'.format(job.log_format))
                 sync_needs.append('install_collections')
 

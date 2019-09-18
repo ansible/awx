@@ -127,43 +127,50 @@
   gather_facts: false
   connection: local
   name: Install content with ansible-galaxy command if necessary
+  vars:
+    yaml_exts:
+      - {ext: .yml}
+      - {ext: .yaml}
   tasks:
 
     - block:
-        - name: detect requirements.yml
-          stat:
-            path: '{{project_path|quote}}/roles/requirements.yml'
+        - name: detect requirements.(yml/yaml)
+          stat: path={{project_path|quote}}/roles/requirements{{ item.ext }}
+          with_items: "{{ yaml_exts }}"
           register: doesRequirementsExist
 
-        - name: fetch galaxy roles from requirements.yml
-          command: ansible-galaxy install -r requirements.yml -p {{roles_destination|quote}}{{ ' -' + 'v' * ansible_verbosity if ansible_verbosity else '' }}
+        - name: fetch galaxy roles from requirements.(yml/yaml)
+          command: ansible-galaxy install -r requirements{{ item.item.ext }} -p {{roles_destination|quote}}{{ ' -' + 'v' * ansible_verbosity if ansible_verbosity else '' }}
           args:
             chdir: "{{project_path|quote}}/roles"
           register: galaxy_result
-          when: doesRequirementsExist.stat.exists
+          with_items: "{{ doesRequirementsExist.results }}"
+          when: item.stat.exists
           changed_when: "'was installed successfully' in galaxy_result.stdout"
           environment:
-            ANSIBLE_FORCE_COLOR: false
+            ANSIBLE_FORCE_COLOR: False
 
       when: roles_enabled|bool
       tags:
         - install_roles
 
     - block:
-        - name: detect collections/requirements.yml
-          stat:
-            path: '{{project_path|quote}}/collections/requirements.yml'
+        - name: detect collections/requirements.(yml/yaml)
+          stat: 
+            path: {{project_path|quote}}/collections/requirements{{ item.ext }}
+          with_items: "{{ yaml_exts }}"
           register: doesCollectionRequirementsExist
 
-        - name: fetch galaxy collections from collections/requirements.yml
-          command: ansible-galaxy collection install -r requirements.yml -p {{collections_destination|quote}}{{ ' -' + 'v' * ansible_verbosity if ansible_verbosity else '' }}
+        - name: fetch galaxy collections from collections/requirements.(yml/yaml)
+          command: ansible-galaxy collection install -r requirements{{ item.item.ext }} -p {{collections_destination|quote}}{{ ' -' + 'v' * ansible_verbosity if ansible_verbosity else '' }}
           args:
             chdir: "{{project_path|quote}}/collections"
           register: galaxy_collection_result
-          when: doesCollectionRequirementsExist.stat.exists
+          with_items: "{{ doesCollectionRequirementsExist.results }}"
+          when: item.stat.exists
           changed_when: "'Installing ' in galaxy_collection_result.stdout"
           environment:
-            ANSIBLE_FORCE_COLOR: false
+            ANSIBLE_FORCE_COLOR: False
             ANSIBLE_COLLECTIONS_PATHS: "{{ collections_destination }}"
 
       when:
