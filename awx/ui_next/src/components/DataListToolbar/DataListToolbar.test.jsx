@@ -7,7 +7,7 @@ describe('<DataListToolbar />', () => {
 
   const QS_CONFIG = {
     namespace: 'organization',
-    dateFields: [ 'modified', 'created' ],
+    dateFields: ['modified', 'created'],
     defaultParams: { page: 1, page_size: 5, order_by: 'name' },
     integerFields: ['page', 'page_size'],
   };

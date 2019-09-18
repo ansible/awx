@@ -7,7 +7,7 @@ describe('<Search />', () => {
 
   const QS_CONFIG = {
     namespace: 'organization',
-    dateFields: [ 'modified', 'created' ],
+    dateFields: ['modified', 'created'],
     defaultParams: { page: 1, page_size: 5, order_by: 'name' },
     integerFields: ['page', 'page_size'],
   };
@@ -29,7 +29,12 @@ describe('<Search />', () => {
     const onSearch = jest.fn();
 
     search = mountWithContexts(
-      <Search qsConfig={QS_CONFIG} sortedColumnKey="name" columns={columns} onSearch={onSearch} />
+      <Search
+        qsConfig={QS_CONFIG}
+        sortedColumnKey="name"
+        columns={columns}
+        onSearch={onSearch}
+      />
     );
 
     search.find(searchTextInput).instance().value = 'test-321';
@@ -46,7 +51,12 @@ describe('<Search />', () => {
     ];
     const onSearch = jest.fn();
     const wrapper = mountWithContexts(
-      <Search qsConfig={QS_CONFIG} sortedColumnKey="name" columns={columns} onSearch={onSearch} />
+      <Search
+        qsConfig={QS_CONFIG}
+        sortedColumnKey="name"
+        columns={columns}
+        onSearch={onSearch}
+      />
     ).find('Search');
     expect(wrapper.state('isSearchDropdownOpen')).toEqual(false);
     wrapper.instance().handleDropdownToggle(true);
@@ -65,7 +75,12 @@ describe('<Search />', () => {
     ];
     const onSearch = jest.fn();
     const wrapper = mountWithContexts(
-      <Search qsConfig={QS_CONFIG} sortedColumnKey="name" columns={columns} onSearch={onSearch} />
+      <Search
+        qsConfig={QS_CONFIG}
+        sortedColumnKey="name"
+        columns={columns}
+        onSearch={onSearch}
+      />
     ).find('Search');
     expect(wrapper.state('searchKey')).toEqual('name');
     wrapper
