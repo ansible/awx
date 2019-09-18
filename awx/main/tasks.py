@@ -73,7 +73,12 @@ from awx.main.utils import (get_ssh_version, update_scm_url,
                             ignore_inventory_computed_fields,
                             ignore_inventory_group_removal, extract_ansible_vars, schedule_task_manager,
                             get_awx_version)
-from awx.main.utils.common import get_ansible_version, _get_ansible_version, get_custom_venv_choices
+from awx.main.utils.common import (
+    get_ansible_version,
+    _get_ansible_version,
+    get_custom_venv_choices,
+    get_existing_yaml_files
+)
 from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja
 from awx.main.utils.reload import stop_local_services
 from awx.main.utils.pglock import advisory_lock
@@ -1644,13 +1649,13 @@ class RunJob(BaseTask):
         # Galaxy requirements are not supported for manual projects
         if not needs_sync and job.project.scm_type:
             # see if we need a sync because of presence of roles
-            galaxy_req_path = os.path.join(project_path, 'roles', 'requirements.yml')
-            if os.path.exists(galaxy_req_path):
+            galaxy_req_dir = os.path.join(project_path, 'roles')
+            if len(get_existing_yaml_files(galaxy_req_dir, 'requirements')) > 0:
                 logger.debug('Running project sync for {} because of galaxy role requirements.'.format(job.log_format))
                 needs_sync = True
 
-            galaxy_collections_req_path = os.path.join(project_path, 'collections', 'requirements.yml')
-            if os.path.exists(galaxy_collections_req_path):
+            galaxy_collections_req_dir = os.path.join(project_path, 'collections')
+            if len(get_existing_yaml_files(galaxy_collections_req_dir, 'requirements')) > 0:
                 logger.debug('Running project sync for {} because of galaxy collections requirements.'.format(job.log_format))
                 needs_sync = True
 

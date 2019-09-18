@@ -49,7 +49,7 @@ __all__ = ['get_object_or_400', 'camelcase_to_underscore', 'underscore_to_camelc
            'wrap_args_with_proot', 'build_proot_temp_dir', 'check_proot_installed', 'model_to_dict',
            'NullablePromptPseudoField', 'model_instance_diff', 'parse_yaml_or_json', 'RequireDebugTrueOrTest',
            'has_model_field_prefetched', 'set_environ', 'IllegalArgumentError', 'get_custom_venv_choices', 'get_external_account',
-           'task_manager_bulk_reschedule', 'schedule_task_manager', 'classproperty', 'create_temporary_fifo']
+           'task_manager_bulk_reschedule', 'schedule_task_manager', 'classproperty', 'create_temporary_fifo', 'get_existing_yaml_files']
 
 
 def get_object_or_400(klass, *args, **kwargs):
@@ -1058,6 +1058,19 @@ def get_external_account(user):
         account_type = "enterprise"
     return account_type
 
+def get_existing_yaml_files(dirname, filename):
+    '''
+    Check either filename.yml or filename.yaml exists.
+    Return path of existing files as an array.
+    Return an empty array if neither exists.
+    '''
+    result = []
+    path_prefix = os.path.join(dirname, filename)
+    for ext in ['.yml', '.yaml']:
+        path = path_prefix + ext
+        if os.path.exists(path):
+            result.append(path)
+    return result
 
 class classproperty:
 
