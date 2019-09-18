@@ -1423,5 +1423,5 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
     def is_isolated(self):
         return bool(self.controller_node)
 
-    def update_scm_status(self, status):
+    def update_webhook_status(self, status):
         return

@@ -22,7 +22,7 @@ from awx.main.models.base import prevent_search
 from awx.main.models.rbac import (
     Role, RoleAncestorEntry, get_roles_on_resource
 )
-from awx.main.utils import parse_yaml_or_json, get_custom_venv_choices
+from awx.main.utils import parse_yaml_or_json, get_custom_venv_choices, get_licenser
 from awx.main.utils.encryption import decrypt_value, get_encryption_key, is_encrypted
 from awx.main.utils.polymorphic import build_polymorphic_ctypes_map
 from awx.main.fields import JSONField, AskForField
@@ -559,7 +559,7 @@ class WebhookMixin(models.Model):
         max_length=128
     )
 
-    def update_scm_status(self, status):
+    def update_webhook_status(self, status):
         if not self.webhook_credential:
             logger.debug("No credential configured to post back webhook status, skipping.")
             return
@@ -578,7 +578,7 @@ class WebhookMixin(models.Model):
                 'new': 'pending',
                 'successful': 'success',
                 'failed': 'failure',
-                'canceled': 'failure',
+                'canceled': 'failure',  # Github doesn't have a 'canceled' status :(
                 'error': 'error',
             },
             'gitlab': {
@@ -586,7 +586,7 @@ class WebhookMixin(models.Model):
                 'running': 'running',
                 'successful': 'success',
                 'failed': 'failed',
-                'error': 'failed',
+                'error': 'failed',  # Gitlab doesn't have an 'error' status distinct from 'failed' :(
                 'canceled': 'canceled',
             },
         }
@@ -596,9 +596,10 @@ class WebhookMixin(models.Model):
             logger.debug("Skipping webhook job status change: '{}'".format(status))
             return
         try:
+            license_type = get_licenser().validate().get('license_type')
             data = {
                 'state': statuses[status],
-                'context': 'tower',
+                'context': 'ansible/awx' if license_type == 'open' else 'ansible/tower',
             }
             headers = {service_header[self.webhook_service]: self.webhook_credential.get_input('token')}
             response = requests.post(status_api, data=data, headers=headers)
