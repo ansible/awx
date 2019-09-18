@@ -178,7 +178,7 @@ class TemplatesList extends Component {
             hasContentLoading={hasContentLoading}
             items={templates}
             itemCount={itemCount}
-            itemName={itemCount === 1 ? i18n._(t`Template`): i18n._(t`Templates`)}
+            itemName={itemCount === 1 ? 'Template' : 'Templates'}
             qsConfig={QS_CONFIG}
             toolbarColumns={[
               {
@@ -213,7 +213,7 @@ class TemplatesList extends Component {
                     key="delete"
                     onDelete={this.handleTemplateDelete}
                     itemsToDelete={selected}
-                    itemName={selected.length === 1 ? i18n._(t`Template`): i18n._(t`Templates`)}
+                    itemName={selected.length === 1 ? 'Template' : 'Templates'}
                   />,
                   canAdd && (
                     <Dropdown

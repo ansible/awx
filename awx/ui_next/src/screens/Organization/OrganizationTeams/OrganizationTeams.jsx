@@ -1,8 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
-import { t } from '@lingui/macro';
-import { withI18n } from '@lingui/react';
 
 import { OrganizationsAPI } from '@api';
 import PaginatedDataList from '@components/PaginatedDataList';
@@ -61,14 +59,13 @@ class OrganizationTeams extends React.Component {
 
   render() {
     const { contentError, hasContentLoading, teams, itemCount } = this.state;
-    const { i18n } = this.props;
     return (
       <PaginatedDataList
         contentError={contentError}
         hasContentLoading={hasContentLoading}
         items={teams}
         itemCount={itemCount}
-        itemName={itemCount.length === 1 ? i18n._(t`Notification`): i18n._(t`Notifications`)}
+        itemName={itemCount.length === 1 ? 'Notification' : 'Notifications'}
         qsConfig={QS_CONFIG}
       />
     );
@@ -80,4 +77,4 @@ OrganizationTeams.propTypes = {
 };
 
 export { OrganizationTeams as _OrganizationTeams };
-export default withI18n()(withRouter(OrganizationTeams));
+export default withRouter(OrganizationTeams);

@@ -153,7 +153,7 @@ class OrganizationsList extends Component {
               hasContentLoading={hasContentLoading}
               items={organizations}
               itemCount={itemCount}
-              itemName={itemCount === 1 ? i18n._(t`Organization`): i18n._(t`Organizations`)}
+              itemName={itemCount === 1 ? 'Organization' : 'Organizations'}
               qsConfig={QS_CONFIG}
               toolbarColumns={[
                 {

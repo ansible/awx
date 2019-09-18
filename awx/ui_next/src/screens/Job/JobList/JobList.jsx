@@ -151,7 +151,6 @@ class JobList extends Component {
     } = this.state;
     const { match, i18n } = this.props;
     const isAllSelected = selected.length === jobs.length;
-    // const itemName = i18n._(t`Job`);
     return (
       <PageSection>
         <Card>
@@ -160,7 +159,7 @@ class JobList extends Component {
             hasContentLoading={hasContentLoading}
             items={jobs}
             itemCount={itemCount}
-            itemName={itemCount === 1 ? i18n._(t`Job`): i18n._(t`Jobs`)}
+            itemName={itemCount === 1 ? 'Job' : 'Jobs'}
             qsConfig={QS_CONFIG}
             toolbarColumns={[
               {
@@ -189,7 +188,7 @@ class JobList extends Component {
                     key="delete"
                     onDelete={this.handleJobDelete}
                     itemsToDelete={selected}
-                    itemName={selected.length === 1 ? i18n._(t`Job`): i18n._(t`Jobs`)}
+                    itemName={selected.length === 1 ? 'Job' : 'Jobs' }
                   />,
                 ]}
               />

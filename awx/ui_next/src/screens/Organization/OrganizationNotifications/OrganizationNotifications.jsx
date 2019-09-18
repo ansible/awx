@@ -204,7 +204,7 @@ class OrganizationNotifications extends Component {
           hasContentLoading={hasContentLoading}
           items={notifications}
           itemCount={itemCount}
-          itemName={itemCount.length === 1 ? i18n._(t`Notification`): i18n._(t`Notifications`)}
+          itemName={itemCount.length === 1 ? 'Notification' : 'Notifications'}
           qsConfig={QS_CONFIG}
           toolbarColumns={COLUMNS}
           renderItem={notification => (

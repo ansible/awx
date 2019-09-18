@@ -81,14 +81,11 @@ class PaginatedDataList extends React.Component {
         ];
     const queryParams = parseQueryString(qsConfig, location.search);
 
-    const itemDisplayName = ucFirst(itemName);
-    const itemDisplayNamePlural = ucFirst(itemName);
-
-    const dataListLabel = i18n._(t`${itemDisplayName} List`);
+    const dataListLabel = i18n._(t`${itemName} List`);
     const emptyContentMessage = i18n._(
-      t`Please add ${itemDisplayNamePlural} to populate this list `
+      t`Please add ${itemName} to populate this list `
     );
-    const emptyContentTitle = i18n._(t`No ${itemDisplayNamePlural} Found `);
+    const emptyContentTitle = i18n._(t`No ${itemName} Found `);
 
     let Content;
     if (hasContentLoading && items.length <= 0) {
