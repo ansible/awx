@@ -5,6 +5,9 @@ import {
   getQSConfig,
   addParams,
   removeParams,
+  _paramStringToArray,
+  _stringToObject,
+  _addDefaultsToObject,
 } from './qs';
 
 describe('qs (qs.js)', () => {
@@ -81,6 +84,7 @@ describe('qs (qs.js)', () => {
         dateFields: ['modified', 'created'],
         defaultParams: { page: 1, page_size: 5, order_by: 'name' },
         integerFields: ['page', 'page_size'],
+        dateFields: ['modified', 'created'],
       });
     });
 
@@ -98,6 +102,7 @@ describe('qs (qs.js)', () => {
         dateFields: ['modified', 'created'],
         defaultParams: { page: 1, page_size: 15 },
         integerFields: ['page', 'page_size'],
+        dateFields: ['modified', 'created'],
       });
     });
   });
@@ -105,11 +110,11 @@ describe('qs (qs.js)', () => {
   describe('parseQueryString', () => {
     test('should get query params', () => {
       const config = {
-        namespace: null,
+        namespace: 'item',
         defaultParams: { page: 1, page_size: 15 },
         integerFields: ['page', 'page_size'],
       };
-      const query = '?baz=bar&page=3';
+      const query = '?item.baz=bar&item.page=3';
       expect(parseQueryString(config, query)).toEqual({
         baz: 'bar',
         page: 3,
@@ -132,11 +137,11 @@ describe('qs (qs.js)', () => {
 
     test('should get query params with correct integer fields', () => {
       const config = {
-        namespace: null,
+        namespace: 'item',
         defaultParams: {},
         integerFields: ['page', 'foo'],
       };
-      const query = '?foo=4&bar=5';
+      const query = '?item.foo=4&item.bar=5';
       expect(parseQueryString(config, query)).toEqual({
         foo: 4,
         bar: '5',
@@ -145,13 +150,25 @@ describe('qs (qs.js)', () => {
 
     test('should decode parsed params', () => {
       const config = {
-        namespace: null,
+        namespace: 'item',
         defaultParams: {},
         integerFields: ['page'],
       };
-      const query = '?foo=bar%20baz';
+      const query = '?item.foo=bar%20baz';
       expect(parseQueryString(config, query)).toEqual({
         foo: 'bar baz',
+      });
+    });
+
+    test('should decode param keys', () => {
+      const config = {
+        namespace: 'item',
+        defaultParams: {},
+        integerFields: ['page'],
+      };
+      const query = '?item.foo%20bar=baz';
+      expect(parseQueryString(config, query)).toEqual({
+        'foo bar': 'baz',
       });
     });
 
@@ -199,11 +216,11 @@ describe('qs (qs.js)', () => {
 
     test('should add duplicate non-default params as array', () => {
       const config = {
-        namespace: null,
+        namespace: 'item',
         defaultParams: { page: 1, page_size: 15 },
         integerFields: ['page', 'page_size'],
       };
-      const query = '?baz=bar&baz=boo&page=3';
+      const query = '?item.baz=bar&item.baz=boo&item.page=3';
       expect(parseQueryString(config, query)).toEqual({
         baz: ['bar', 'boo'],
         page: 3,
@@ -550,4 +567,79 @@ describe('qs (qs.js)', () => {
       });
     });
   });
+
+  describe('_stringToObject', () => {
+    it('should convert to object', () => {
+      const config = { namespace: 'unit' };
+      expect(_stringToObject(config, '?unit.foo=bar&unit.baz=bam')).toEqual({
+        foo: 'bar',
+        baz: 'bam',
+      });
+    });
+
+    it('should convert duplicated keys to array', () => {
+      const config = { namespace: 'unit' };
+      expect(_stringToObject(config, '?unit.foo=bar&unit.foo=bam')).toEqual({
+        foo: ['bar', 'bam'],
+      });
+    });
+
+    it('should omit keys from other namespaces', () => {
+      const config = { namespace: 'unit' };
+      expect(
+        _stringToObject(config, '?unit.foo=bar&other.bar=bam&one=two')
+      ).toEqual({
+        foo: 'bar',
+      });
+    });
+
+    it('should convert numbers to correct type', () => {
+      const config = {
+        namespace: 'unit',
+        integerFields: ['page'],
+      };
+      expect(_stringToObject(config, '?unit.page=3')).toEqual({
+        page: 3,
+      });
+    });
+  });
+
+  describe('_addDefaultsToObject', () => {
+    it('should add missing default values', () => {
+      const config = {
+        defaultParams: { page: 1, page_size: 5, order_by: 'name' },
+      }
+      expect(_addDefaultsToObject(config, {})).toEqual({
+        page: 1,
+        page_size: 5,
+        order_by: 'name',
+      });
+    });
+
+    it('should not override existing params', () => {
+      const config = {
+        defaultParams: { page: 1, page_size: 5, order_by: 'name' },
+      }
+      const params = {
+        page: 2,
+        order_by: 'date_created',
+      }
+      expect(_addDefaultsToObject(config, params)).toEqual({
+        page: 2,
+        page_size: 5,
+        order_by: 'date_created',
+      });
+    });
+
+    it('should handle missing defaultParams', () => {
+      const params = {
+        page: 2,
+        order_by: 'date_created',
+      }
+      expect(_addDefaultsToObject({}, params)).toEqual({
+        page: 2,
+        order_by: 'date_created',
+      });
+    })
+  })
 });
