@@ -46,6 +46,8 @@ const InputGroup = styled(PFInputGroup)`
 const ChipHolder = styled.div`
   --pf-c-form-control--BorderTopColor: var(--pf-global--BorderColor--200);
   --pf-c-form-control--BorderRightColor: var(--pf-global--BorderColor--200);
+  border-top-right-radius: 3px;
+  border-bottom-right-radius: 3px
 `;
 
 class Lookup extends React.Component {

@@ -44,6 +44,8 @@ const Dropdown = styled(PFDropdown)`
 
       ::before {
         border-color: var(--pf-global--BorderColor--200);
+        border-top-left-radius: 3px;
+        border-bottom-left-radius: 3px;
       }
 
       > span {
@@ -64,6 +66,8 @@ const Dropdown = styled(PFDropdown)`
 const NoOptionDropdown = styled.div`
   align-self: stretch;
   border: 1px solid var(--pf-global--BorderColor--200);
+  border-top-left-radius: 3px;
+  border-bottom-left-radius: 3px;
   padding: 3px 7px;
   white-space: nowrap;
 `;

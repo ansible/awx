@@ -16,6 +16,7 @@ import ErrorDetail from '@components/ErrorDetail';
 
 const EmptyState = styled(PFEmptyState)`
   width: var(--pf-c-empty-state--m-lg--MaxWidth);
+  max-width: 100%;
 `;
 
 async function logout() {

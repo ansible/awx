@@ -1,13 +1,18 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import { string, func, bool } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { FormGroup, Tooltip } from '@patternfly/react-core';
-import { QuestionCircleIcon } from '@patternfly/react-icons';
+import { QuestionCircleIcon as PFQuestionCircleIcon} from '@patternfly/react-icons';
+import styled from 'styled-components';
 
 import { InventoriesAPI } from '@api';
 import { Inventory } from '@types';
 import Lookup from '@components/Lookup';
+
+const QuestionCircleIcon = styled(PFQuestionCircleIcon)`
+  margin-left: 10px;
+`;
 
 const getInventories = async params => InventoriesAPI.read(params);
 
@@ -17,19 +22,15 @@ class InventoryLookup extends React.Component {
 
     return (
       <FormGroup
-        label={
-          <Fragment>
-            {i18n._(t`Inventory`)}{' '}
-            {tooltip && (
-              <Tooltip position="right" content={tooltip}>
-                <QuestionCircleIcon />
-              </Tooltip>
-            )}
-          </Fragment>
-        }
+        label={i18n._(t`Inventory`)}
         isRequired={required}
         fieldId="inventory-lookup"
       >
+        {tooltip && (
+          <Tooltip position="right" content={tooltip}>
+            <QuestionCircleIcon />
+          </Tooltip>
+        )}
         <Lookup
           id="inventory-lookup"
           lookupHeader={i18n._(t`Inventory`)}
