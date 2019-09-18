@@ -28,7 +28,6 @@ export function getQSConfig(
  * @param {string} url query string
  * @return {object} query param object
  */
-// TODO: rename to parseNamespacedQueryString?
 export function parseQueryString(config, queryString) {
   if (!queryString) {
     return config.defaultParams;
@@ -51,17 +50,18 @@ export const encodeQueryString = params => {
     .sort()
     .filter(key => params[key] !== null)
     .map(key => [key, params[key]])
-    .map(([key, value]) => {
-      // if value is array, should return more than one key value pair
-      if (Array.isArray(value)) {
-        return value
-          .map(val => `${encodeURIComponent(key)}=${encodeURIComponent(val)}`)
-          .join('&');
-      }
-      return `${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
-    })
+    .map(([key, value]) => encodeValue(key, value))
     .join('&');
 };
+
+function encodeValue(key, value) {
+  if (Array.isArray(value)) {
+    return value
+      .map(val => `${encodeURIComponent(key)}=${encodeURIComponent(val)}`)
+      .join('&');
+  }
+  return `${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
+}
 
 /**
  * Convert query param object to url query string, adding namespace and removing defaults
@@ -93,22 +93,15 @@ export const encodeNonDefaultQueryString = (config, params) => {
     .map(key => {
       return [key, namespacedParams[key]];
     })
-    .map(([key, value]) => {
-      // if value is array, should return more than one key value pair
-      if (Array.isArray(value)) {
-        return value
-          .map(val => `${encodeURIComponent(key)}=${encodeURIComponent(val)}`)
-          .join('&');
-      }
-      return `${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
-    })
+    .map(([key, value]) => encodeValue(key, value))
     .join('&');
 };
 
 /**
- * Merges existing params of search string with new ones and returns the updated list of params
+ * Merges existing params of query string with new ones and returns the
+ * updated list of params
  * @param {object} qs config object (used for getting defaults, current query params etc.)
- * @param {object} object with params from existing search
+ * @param {object} object with params from existing query
  * @param {object} object with new params to add
  * @return {object} query param object
  */
@@ -181,7 +174,7 @@ const stringToObject = (config, qs) => {
     .split('&')
     .map(s => s.split('='))
     .forEach(([nsKey, rawValue]) => {
-      if (!nsKey || !nsKey.startsWith(`${config.namespace}.`)) {
+      if (!nsKey || !namespaceMatches(config.namespace, nsKey)) {
         return;
       }
       const key = decodeURIComponent(nsKey.substr(config.namespace.length + 1));
@@ -198,14 +191,6 @@ const stringToObject = (config, qs) => {
 };
 export { stringToObject as _stringToObject };
 
-function addDefaultsToObject(config, params) {
-  return {
-    ...config.defaultParams,
-    ...params,
-  };
-}
-export { addDefaultsToObject as _addDefaultsToObject };
-
 function parseValue(config, key, rawValue) {
   if (config.integerFields && config.integerFields.some(v => v === key)) {
     return parseInt(rawValue, 10);
@@ -213,6 +198,14 @@ function parseValue(config, key, rawValue) {
   // TODO: parse date fields
   return decodeURIComponent(rawValue);
 }
+
+function addDefaultsToObject(config, params) {
+  return {
+    ...config.defaultParams,
+    ...params,
+  };
+}
+export { addDefaultsToObject as _addDefaultsToObject };
 
 /**
  * helper function used to convert from
@@ -288,7 +281,7 @@ const paramValueIsEqual = (one, two) => {
   let isEqual = false;
 
   if (Array.isArray(one) && Array.isArray(two)) {
-    isEqual = one.filter(val => two.indexOf(val) > -1).length === 0;
+    isEqual = one.filter(val => two.indexOf(val) > -1).length === one.length;
   } else if (
     (typeof one === 'string' && typeof two === 'string') ||
     (typeof one === 'number' && typeof two === 'number')

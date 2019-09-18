@@ -5,7 +5,6 @@ import {
   getQSConfig,
   addParams,
   removeParams,
-  _paramStringToArray,
   _stringToObject,
   _addDefaultsToObject,
 } from './qs';
@@ -37,6 +36,13 @@ describe('qs (qs.js)', () => {
         page: null,
       };
       expect(encodeQueryString(vals)).toEqual('order_by=name');
+    });
+
+    test('should encode array params', () => {
+      const vals = {
+        foo: ['one', 'two', 'three'],
+      };
+      expect(encodeQueryString(vals)).toEqual('foo=one&foo=two&foo=three');
     });
   });
 
@@ -75,6 +81,18 @@ describe('qs (qs.js)', () => {
       };
       expect(encodeNonDefaultQueryString(config, vals)).toEqual('order_by=foo');
     });
+
+    test('should compare array values', () => {
+      const vals = {
+        foo: ['one', 'two'],
+      };
+      const conf = {
+        defaultParams: {
+          foo: ['one', 'two'],
+        }
+      };
+      expect(encodeNonDefaultQueryString(conf, vals)).toEqual('');
+    })
   });
 
   describe('getQSConfig', () => {
@@ -241,6 +259,16 @@ describe('qs (qs.js)', () => {
         page_size: 15,
       });
     });
+
+    test('should parse long arrays', () => {
+      const config = {
+        namespace: 'item',
+      };
+      const query = '?item.baz=one&item.baz=two&item.baz=three';
+      expect(parseQueryString(config, query)).toEqual({
+        baz: ['one', 'two', 'three'],
+      });
+    });
   });
 
   describe('addParams', () => {
@@ -300,6 +328,22 @@ describe('qs (qs.js)', () => {
       const newParams = { baz: 'bust', pat: 'pal' };
       expect(addParams(config, oldParams, newParams)).toEqual({
         baz: ['bar', 'bang', 'bust'],
+        pat: 'pal',
+        page: 3,
+        page_size: 15,
+      });
+    });
+
+    test('should convert param to array when merging', () => {
+      const config = {
+        namespace: null,
+        defaultParams: { page: 1, page_size: 15 },
+        integerFields: ['page', 'page_size'],
+      };
+      const oldParams = { baz: 'bar', page: 3, page_size: 15 };
+      const newParams = { baz: 'bust', pat: 'pal' };
+      expect(addParams(config, oldParams, newParams)).toEqual({
+        baz: ['bar', 'bust'],
         pat: 'pal',
         page: 3,
         page_size: 15,
@@ -569,7 +613,7 @@ describe('qs (qs.js)', () => {
   });
 
   describe('_stringToObject', () => {
-    it('should convert to object', () => {
+    test('should convert to object', () => {
       const config = { namespace: 'unit' };
       expect(_stringToObject(config, '?unit.foo=bar&unit.baz=bam')).toEqual({
         foo: 'bar',
@@ -577,14 +621,14 @@ describe('qs (qs.js)', () => {
       });
     });
 
-    it('should convert duplicated keys to array', () => {
+    test('should convert duplicated keys to array', () => {
       const config = { namespace: 'unit' };
       expect(_stringToObject(config, '?unit.foo=bar&unit.foo=bam')).toEqual({
         foo: ['bar', 'bam'],
       });
     });
 
-    it('should omit keys from other namespaces', () => {
+    test('should omit keys from other namespaces', () => {
       const config = { namespace: 'unit' };
       expect(
         _stringToObject(config, '?unit.foo=bar&other.bar=bam&one=two')
@@ -593,7 +637,7 @@ describe('qs (qs.js)', () => {
       });
     });
 
-    it('should convert numbers to correct type', () => {
+    test('should convert numbers to correct type', () => {
       const config = {
         namespace: 'unit',
         integerFields: ['page'],
@@ -605,7 +649,7 @@ describe('qs (qs.js)', () => {
   });
 
   describe('_addDefaultsToObject', () => {
-    it('should add missing default values', () => {
+    test('should add missing default values', () => {
       const config = {
         defaultParams: { page: 1, page_size: 5, order_by: 'name' },
       }
@@ -616,7 +660,7 @@ describe('qs (qs.js)', () => {
       });
     });
 
-    it('should not override existing params', () => {
+    test('should not override existing params', () => {
       const config = {
         defaultParams: { page: 1, page_size: 5, order_by: 'name' },
       }
@@ -631,7 +675,7 @@ describe('qs (qs.js)', () => {
       });
     });
 
-    it('should handle missing defaultParams', () => {
+    test('should handle missing defaultParams', () => {
       const params = {
         page: 2,
         order_by: 'date_created',
