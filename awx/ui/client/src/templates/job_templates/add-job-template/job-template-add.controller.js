@@ -470,9 +470,6 @@
                     delete data.webhook_url;
                     delete data.webhook_key;
                     data.webhook_credential = $scope.webhookCredential.id;
-                    if (!data.webhook_credential) {
-                        data.webhook_service = null;
-                    }
 
                     data.extra_vars = ToJSON($scope.parseType, $scope.extra_vars, true);
 
