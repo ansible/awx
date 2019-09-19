@@ -8,6 +8,7 @@ from awx.sso.fields import (
     SAMLOrgAttrField,
     SAMLTeamAttrField,
     LDAPGroupTypeParamsField,
+    LDAPServerURIField
 )
 
 
@@ -114,3 +115,23 @@ class TestLDAPGroupTypeParamsField():
         with pytest.raises(ValidationError) as e:
             field.to_internal_value(data)
         assert e.value.detail == expected
+
+
+class TestLDAPServerURIField():
+
+    valid_URIs = [
+        r'ldap://servername.so3:444',
+        r'ldaps://servername3.s300:344'
+    ]
+
+    invalid_URIs = [
+        r'lpads://servername.-so3:444'
+    ]
+
+    def test_run_validators(self):
+        field = LDAPServerURIField()
+        for valid_uri in TestLDAPServerURIField.valid_URIs:
+            assert field.run_validators(valid_uri) == valid_uri
+        for invalid_uri in TestLDAPServerURIField.invalid_URIs:
+            with pytest.raises(ValidationError):
+                field.run_validators(invalid_uri)
