@@ -65,7 +65,7 @@ class OrganizationTeams extends React.Component {
         hasContentLoading={hasContentLoading}
         items={teams}
         itemCount={itemCount}
-        itemName={itemCount.length === 1 ? 'Notification' : 'Notifications'}
+        pluralizedItemName="Notifications"
         qsConfig={QS_CONFIG}
       />
     );

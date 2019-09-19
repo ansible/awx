@@ -42,7 +42,6 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
               contentError={null}
               hasContentLoading={false}
               itemCount={2}
-              itemName="Notifications"
               items={
                 Array [
                   Object {
@@ -65,6 +64,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                   },
                 ]
               }
+              pluralizedItemName="Notifications"
               qsConfig={
                 Object {
                   "dateFields": Array [
@@ -116,7 +116,6 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                   hasContentLoading={false}
                   i18n={"/i18n/"}
                   itemCount={2}
-                  itemName="Notifications"
                   items={
                     Array [
                       Object {
@@ -139,6 +138,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                       },
                     ]
                   }
+                  pluralizedItemName="Notifications"
                   qsConfig={
                     Object {
                       "dateFields": Array [
@@ -188,7 +188,6 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                       history={"/history/"}
                       i18n={"/i18n/"}
                       itemCount={2}
-                      itemName="Notifications"
                       items={
                         Array [
                           Object {
@@ -227,6 +226,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                           "url": "",
                         }
                       }
+                      pluralizedItemName="Notifications"
                       qsConfig={
                         Object {
                           "dateFields": Array [
@@ -1827,10 +1827,10 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                         </Route>
                       </withRouter(ListHeader)>
                       <DataList
-                        aria-label="{itemDisplayName} List"
+                        aria-label="{pluralizedItemName} List"
                       >
                         <ul
-                          aria-label="{itemDisplayName} List"
+                          aria-label="{pluralizedItemName} List"
                           className="pf-c-data-list"
                         >
                           <WithI18n

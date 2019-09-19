@@ -6,7 +6,6 @@ import styled from 'styled-components';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import AlertModal from '../AlertModal';
-import { pluralize } from '../../util/strings';
 
 const DeleteButton = styled(Button)`
   padding: 5px 8px;
@@ -41,11 +40,11 @@ class ToolbarDeleteButton extends React.Component {
   static propTypes = {
     onDelete: func.isRequired,
     itemsToDelete: arrayOf(ItemToDelete).isRequired,
-    itemName: string,
+    pluralizedItemName: string,
   };
 
   static defaultProps = {
-    itemName: 'item',
+    pluralizedItemName: 'Items',
   };
 
   constructor(props) {
@@ -75,7 +74,7 @@ class ToolbarDeleteButton extends React.Component {
   }
 
   renderTooltip() {
-    const { itemsToDelete, itemName, i18n } = this.props;
+    const { itemsToDelete, pluralizedItemName, i18n } = this.props;
 
     const itemsUnableToDelete = itemsToDelete
       .filter(cannotDelete)
@@ -85,7 +84,7 @@ class ToolbarDeleteButton extends React.Component {
       return (
         <div>
           {i18n._(
-            t`You do not have permission to delete the following ${itemName}: ${itemsUnableToDelete}`
+            t`You do not have permission to delete the following ${pluralizedItemName}: ${itemsUnableToDelete}`
           )}
         </div>
       );
@@ -97,7 +96,7 @@ class ToolbarDeleteButton extends React.Component {
   }
 
   render() {
-    const { itemsToDelete, itemName, i18n } = this.props;
+    const { itemsToDelete, pluralizedItemName, i18n } = this.props;
     const { isModalOpen } = this.state;
 
     const isDisabled =
@@ -123,7 +122,7 @@ class ToolbarDeleteButton extends React.Component {
         {isModalOpen && (
           <AlertModal
             variant="danger"
-            title={itemName}
+            title={pluralizedItemName}
             isOpen={isModalOpen}
             onClose={this.handleCancelDelete}
             actions={[

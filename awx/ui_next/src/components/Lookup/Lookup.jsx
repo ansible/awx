@@ -212,7 +212,7 @@ class Lookup extends React.Component {
       i18n,
     } = this.props;
 
-    const header = lookupHeader || i18n._(t`items`);
+    const header = lookupHeader || i18n._(t`Items`);
     const canDelete = !required || (multiple && value.length > 1);
 
     const chips = value ? (
@@ -268,7 +268,7 @@ class Lookup extends React.Component {
           <PaginatedDataList
             items={results}
             itemCount={count}
-            itemName={lookupHeader}
+            pluralizedItemName={lookupHeader}
             qsConfig={this.qsConfig}
             toolbarColumns={columns}
             renderItem={item => (

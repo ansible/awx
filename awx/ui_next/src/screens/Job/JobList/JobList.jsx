@@ -159,7 +159,7 @@ class JobList extends Component {
             hasContentLoading={hasContentLoading}
             items={jobs}
             itemCount={itemCount}
-            itemName={itemCount === 1 ? 'Job' : 'Jobs'}
+            pluralizedItemName="Jobs"
             qsConfig={QS_CONFIG}
             toolbarColumns={[
               {
@@ -188,7 +188,7 @@ class JobList extends Component {
                     key="delete"
                     onDelete={this.handleJobDelete}
                     itemsToDelete={selected}
-                    itemName={selected.length === 1 ? 'Job' : 'Jobs' }
+                    pluralizedItemName="Jobs"
                   />,
                 ]}
               />

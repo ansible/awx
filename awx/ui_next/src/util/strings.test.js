@@ -1,4 +1,4 @@
-import { getArticle, ucFirst, toTitleCase } from './strings';
+import { getArticle, toTitleCase } from './strings';
 
 describe('string utils', () => {
   describe('getArticle', () => {
@@ -13,12 +13,6 @@ describe('string utils', () => {
       expect(getArticle('interest')).toEqual('an');
       expect(getArticle('ogre')).toEqual('an');
       expect(getArticle('umbrella')).toEqual('an');
-    });
-  });
-
-  describe('ucFirst', () => {
-    test('should capitalize first character', () => {
-      expect(ucFirst('team')).toEqual('Team');
     });
   });
 
