@@ -15,7 +15,7 @@ import DataListToolbar from '@components/DataListToolbar';
 import {
   encodeNonDefaultQueryString,
   parseQueryString,
-  addParams,
+  replaceParams,
 } from '@util/qs';
 import { pluralize, ucFirst } from '@util/strings';
 
@@ -34,16 +34,14 @@ class PaginatedDataList extends React.Component {
     const { history, qsConfig } = this.props;
     const { search } = history.location;
     const oldParams = parseQueryString(qsConfig, search);
-    this.pushHistoryState(addParams(qsConfig, oldParams, { page: pageNumber }));
+    this.pushHistoryState(replaceParams(oldParams, { page: pageNumber }));
   }
 
   handleSetPageSize(event, pageSize) {
     const { history, qsConfig } = this.props;
     const { search } = history.location;
     const oldParams = parseQueryString(qsConfig, search);
-    this.pushHistoryState(
-      addParams(qsConfig, oldParams, { page_size: pageSize })
-    );
+    this.pushHistoryState(replaceParams(oldParams, { page_size: pageSize }));
   }
 
   pushHistoryState(params) {

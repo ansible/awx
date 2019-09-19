@@ -7,7 +7,8 @@ import {
   removeParams,
   _stringToObject,
   _addDefaultsToObject,
-  _mergeParams,
+  mergeParams,
+  replaceParams,
 } from './qs';
 
 describe('qs (qs.js)', () => {
@@ -91,7 +92,7 @@ describe('qs (qs.js)', () => {
       const params = {
         page: 1,
         foo: 'bar',
-      }
+      };
       expect(encodeNonDefaultQueryString(conf, params)).toEqual('item.foo=bar');
     });
 
@@ -283,179 +284,6 @@ describe('qs (qs.js)', () => {
       const query = '?item.baz=one&item.baz=two&item.baz=three';
       expect(parseQueryString(config, query)).toEqual({
         baz: ['one', 'two', 'three'],
-      });
-    });
-  });
-
-  describe('addParams', () => {
-    test('should add query params', () => {
-      const config = {
-        namespace: null,
-        defaultParams: { page: 1, page_size: 15 },
-        integerFields: ['page', 'page_size'],
-      };
-      const oldParams = { baz: 'bar', page: 3, page_size: 15 };
-      const newParams = { bag: 'boom' };
-      expect(addParams(config, oldParams, newParams)).toEqual({
-        baz: 'bar',
-        bag: 'boom',
-        page: 3,
-        page_size: 15,
-      });
-    });
-
-    test('should add query params with duplicates', () => {
-      const config = {
-        namespace: null,
-        defaultParams: { page: 1, page_size: 15 },
-        integerFields: ['page', 'page_size'],
-      };
-      const oldParams = { baz: ['bar', 'bang'], page: 3, page_size: 15 };
-      const newParams = { baz: 'boom' };
-      expect(addParams(config, oldParams, newParams)).toEqual({
-        baz: ['bar', 'bang', 'boom'],
-        page: 3,
-        page_size: 15,
-      });
-    });
-
-    test('should replace query params that have defaults', () => {
-      const config = {
-        namespace: null,
-        defaultParams: { page: 1, page_size: 15 },
-        integerFields: ['page', 'page_size'],
-      };
-      const oldParams = { baz: ['bar', 'bang'], page: 3, page_size: 15 };
-      const newParams = { page: 5 };
-      expect(addParams(config, oldParams, newParams)).toEqual({
-        baz: ['bar', 'bang'],
-        page: 5,
-        page_size: 15,
-      });
-    });
-
-    test('should replace query params that match defaults', () => {
-      const config = {
-        namespace: null,
-        defaultParams: { page: 1, page_size: 15 },
-        integerFields: ['page', 'page_size'],
-      };
-      const oldParams = { baz: ['bar', 'bang'], page: 3, page_size: 15 };
-      const newParams = { page_size: 5 };
-      expect(addParams(config, oldParams, newParams)).toEqual({
-        baz: ['bar', 'bang'],
-        page: 3,
-        page_size: 5,
-      });
-    });
-
-    test('should add multiple params', () => {
-      const config = {
-        namespace: null,
-        defaultParams: { page: 1, page_size: 15 },
-        integerFields: ['page', 'page_size'],
-      };
-      const oldParams = { baz: ['bar', 'bang'], page: 3, page_size: 15 };
-      const newParams = { baz: 'bust', pat: 'pal' };
-      expect(addParams(config, oldParams, newParams)).toEqual({
-        baz: ['bar', 'bang', 'bust'],
-        pat: 'pal',
-        page: 3,
-        page_size: 15,
-      });
-    });
-
-    test('should convert param to array when merging', () => {
-      const config = {
-        namespace: null,
-        defaultParams: { page: 1, page_size: 15 },
-        integerFields: ['page', 'page_size'],
-      };
-      const oldParams = { baz: 'bar', page: 3, page_size: 15 };
-      const newParams = { baz: 'bust', pat: 'pal' };
-      expect(addParams(config, oldParams, newParams)).toEqual({
-        baz: ['bar', 'bust'],
-        pat: 'pal',
-        page: 3,
-        page_size: 15,
-      });
-    });
-
-    test('should add namespaced query params', () => {
-      const config = {
-        namespace: 'item',
-        defaultParams: { page: 1, page_size: 15 },
-        integerFields: ['page', 'page_size'],
-      };
-      const oldParams = { baz: 'bar', page: 3, page_size: 15 };
-      const newParams = { bag: 'boom' };
-      expect(addParams(config, oldParams, newParams)).toEqual({
-        baz: 'bar',
-        bag: 'boom',
-        page: 3,
-        page_size: 15,
-      });
-    });
-
-    test('should not include other namespaced query params when adding', () => {
-      const config = {
-        namespace: 'item',
-        defaultParams: { page: 1, page_size: 15 },
-        integerFields: ['page', 'page_size'],
-      };
-      const oldParams = { baz: 'bar', page: 1, page_size: 15 };
-      const newParams = { bag: 'boom' };
-      expect(addParams(config, oldParams, newParams)).toEqual({
-        baz: 'bar',
-        bag: 'boom',
-        page: 1,
-        page_size: 15,
-      });
-    });
-
-    test('should add namespaced query params with duplicates', () => {
-      const config = {
-        namespace: 'item',
-        defaultParams: { page: 1, page_size: 15 },
-        integerFields: ['page', 'page_size'],
-      };
-      const oldParams = { baz: ['bar', 'bang'], page: 3, page_size: 15 };
-      const newParams = { baz: 'boom' };
-      expect(addParams(config, oldParams, newParams)).toEqual({
-        baz: ['bar', 'bang', 'boom'],
-        page: 3,
-        page_size: 15,
-      });
-    });
-
-    test('should replace namespaced query params that are defaults', () => {
-      const config = {
-        namespace: 'item',
-        defaultParams: { page: 1, page_size: 15 },
-        integerFields: ['page', 'page_size'],
-      };
-      const oldParams = { baz: ['bar', 'bang'], page: 3, page_size: 15 };
-      const newParams = { page: 5 };
-      expect(addParams(config, oldParams, newParams)).toEqual({
-        baz: ['bar', 'bang'],
-        page: 5,
-        page_size: 15,
-      });
-    });
-
-    test('should add multiple namespaced params', () => {
-      const config = {
-        namespace: 'item',
-        defaultParams: { page: 1, page_size: 15 },
-        integerFields: ['page', 'page_size'],
-      };
-      const oldParams = { baz: ['bar', 'bang'], page: 3, page_size: 15 };
-      const newParams = { baz: 'bust', pat: 'pal' };
-      expect(addParams(config, oldParams, newParams)).toEqual({
-        baz: ['bar', 'bang', 'bust'],
-        pat: 'pal',
-        page: 3,
-        page_size: 15,
       });
     });
   });
@@ -726,7 +554,7 @@ describe('qs (qs.js)', () => {
       const newParams = {
         foo: 'two',
       };
-      expect(_mergeParams(oldParams, newParams)).toEqual({
+      expect(mergeParams(oldParams, newParams)).toEqual({
         foo: ['one', 'two'],
       });
     });
@@ -734,27 +562,136 @@ describe('qs (qs.js)', () => {
     it('should retain unaltered params', () => {
       const oldParams = {
         foo: 'one',
-        bar: 'baz'
+        bar: 'baz',
       };
       const newParams = {
         foo: 'two',
       };
-      expect(_mergeParams(oldParams, newParams)).toEqual({
+      expect(mergeParams(oldParams, newParams)).toEqual({
         foo: ['one', 'two'],
         bar: 'baz',
       });
     });
 
-    it('should merge objects', () => {
+    it('should gather params from both objects', () => {
       const oldParams = {
         one: 'one',
       };
       const newParams = {
         two: 'two',
       };
-      expect(_mergeParams(oldParams, newParams)).toEqual({
+      expect(mergeParams(oldParams, newParams)).toEqual({
         one: 'one',
         two: 'two',
+      });
+    });
+
+    it('should append to array', () => {
+      const oldParams = {
+        foo: ['one', 'two'],
+      };
+      const newParams = {
+        foo: 'three',
+      };
+      expect(mergeParams(oldParams, newParams)).toEqual({
+        foo: ['one', 'two', 'three'],
+      });
+    });
+
+    it('should append array to existing value', () => {
+      const oldParams = {
+        foo: 'one',
+      };
+      const newParams = {
+        foo: ['two', 'three'],
+      };
+      expect(mergeParams(oldParams, newParams)).toEqual({
+        foo: ['one', 'two', 'three'],
+      });
+    });
+
+    it('should merge two arrays', () => {
+      const oldParams = {
+        foo: ['one', 'two'],
+      };
+      const newParams = {
+        foo: ['three', 'four'],
+      };
+      expect(mergeParams(oldParams, newParams)).toEqual({
+        foo: ['one', 'two', 'three', 'four'],
+      });
+    });
+
+    it('should prevent exact duplicates', () => {
+      const oldParams = { foo: 'one' };
+      const newParams = { foo: 'one' };
+      expect(mergeParams(oldParams, newParams)).toEqual({ foo: 'one' });
+    });
+
+    it('should prevent exact duplicates in arrays', () => {
+      const oldParams = { foo: ['one', 'three'] };
+      const newParams = { foo: ['one', 'two'] };
+      expect(mergeParams(oldParams, newParams)).toEqual({
+        foo: ['one', 'three', 'two'],
+      });
+    });
+
+    it('should add multiple params', () => {
+      const oldParams = { baz: ['bar', 'bang'], page: 3, page_size: 15 };
+      const newParams = { baz: 'bust', pat: 'pal' };
+      expect(mergeParams(oldParams, newParams)).toEqual({
+        baz: ['bar', 'bang', 'bust'],
+        pat: 'pal',
+        page: 3,
+        page_size: 15,
+      });
+    })
+  });
+
+  describe('replaceParams', () => {
+    it('should collect params into one object', () => {
+      const oldParams = { foo: 'one' };
+      const newParams = { bar: 'two' };
+      expect(replaceParams(oldParams, newParams)).toEqual({
+        foo: 'one',
+        bar: 'two',
+      });
+    });
+
+    it('should retain unaltered params', () => {
+      const oldParams = {
+        foo: 'one',
+        bar: 'baz',
+      };
+      const newParams = { foo: 'two' };
+      expect(replaceParams(oldParams, newParams)).toEqual({
+        foo: 'two',
+        bar: 'baz',
+      });
+    });
+
+    it('should override old values with new ones', () => {
+      const oldParams = {
+        foo: 'one',
+        bar: 'three',
+      };
+      const newParams = {
+        foo: 'two',
+        baz: 'four',
+      };
+      expect(replaceParams(oldParams, newParams)).toEqual({
+        foo: 'two',
+        bar: 'three',
+        baz: 'four',
+      });
+    });
+
+    it('should handle exact duplicates', () => {
+      const oldParams = { foo: 'one' };
+      const newParams = { foo: 'one', bar: 'two' };
+      expect(replaceParams(oldParams, newParams)).toEqual({
+        foo: 'one',
+        bar: 'two',
       });
     });
   });

@@ -98,51 +98,6 @@ export const encodeNonDefaultQueryString = (config, params) => {
 };
 
 /**
- * Merges existing params of query string with new ones and returns the
- * updated list of params
- * @param {object} qs config object (used for getting defaults, current query params etc.)
- * @param {object} object with params from existing query
- * @param {object} object with new params to add
- * @return {object} query param object
- */
-export function addParams(config, oldParams, paramsToAdd) {
-  // const oldParamsMinusDefaults = getNonDefaultParams(oldParams, config.defaultParams);
-  // const merged = mergeParams(oldParamsMinusDefaults, paramsToAdd);
-  // console.log(oldParamsMinusDefaults, merged);
-  //
-  // return {
-  //   ...config.defaultParams,
-  //   ...merged,
-  //   ...getRemainingNewParams(merged, paramsToAdd),
-  // };
-
-  const namespacedOldParams = namespaceParams(config.namespace, oldParams);
-  const namespacedParamsToAdd = namespaceParams(config.namespace, paramsToAdd);
-  const namespacedDefaultParams = namespaceParams(
-    config.namespace,
-    config.defaultParams
-  );
-
-  const namespacedOldParamsNotDefaults = getNonDefaultParams(
-    namespacedOldParams,
-    namespacedDefaultParams
-  );
-  const namespacedMergedParams = mergeParams(
-    namespacedOldParamsNotDefaults,
-    namespacedParamsToAdd
-  );
-
-  // return updated params.
-  // If newParams includes updates to the defaults, they will be replaced,
-  // not concatenated.
-  return denamespaceParams(config.namespace, {
-    ...getDefaultParams(namespacedOldParams, namespacedDefaultParams),
-    ...namespacedMergedParams,
-    ...getRemainingNewParams(namespacedMergedParams, namespacedParamsToAdd),
-  });
-}
-
-/**
  * Removes params from the search string and returns the updated list of params
  * @param {object} qs config object (used for getting defaults, current query params etc.)
  * @param {object} object with params from existing search
@@ -199,7 +154,7 @@ function parseValue(config, key, rawValue) {
   if (config.integerFields && config.integerFields.some(v => v === key)) {
     return parseInt(rawValue, 10);
   }
-  // TODO: parse date fields
+  // TODO: parse dateFields into date format?
   return decodeURIComponent(rawValue);
 }
 
@@ -247,23 +202,6 @@ const namespaceParams = (namespace, params = {}) => {
 };
 
 /**
- * helper function to remove namespace from params object
- * @param {string} namespace to remove from params
- * @param {object} params object to append namespace to
- * @return {object} params object with non-namespaced keys
- */
-const denamespaceParams = (namespace, params = {}) => {
-  if (!namespace) return params;
-
-  const denamespaced = {};
-  Object.keys(params).forEach(key => {
-    denamespaced[key.substr(namespace.length + 1)] = params[key];
-  });
-
-  return denamespaced;
-};
-
-/**
  * helper function to check the namespace of a param is what you expec
  * @param {string} namespace to append to params
  * @param {object} params object to append namespace to
@@ -297,46 +235,16 @@ const paramValueIsEqual = (one, two) => {
 };
 
 /**
- * helper function to get params that are defaults
- * @param {object} namespaced params object
- * @param {object} namespaced params object of default params
- * @return {object} namespaced params object of only defaults
- */
-const getDefaultParams = (params, defaults) =>
-  arrayToObject(
-    Object.keys(params)
-      .filter(key => Object.keys(defaults).indexOf(key) > -1)
-      .map(key => [key, params[key]])
-  );
-
-/**
- * helper function to get params that are not defaults
- * @param {object} namespaced params object
- * @param {object} namespaced params object of default params
- * @return {object} namespaced params object of non-defaults
- */
-const getNonDefaultParams = (params, defaults) =>
-  arrayToObject(
-    Object.keys(params)
-      .filter(key => Object.keys(defaults).indexOf(key) === -1)
-      .map(key => [key, params[key]])
-  );
-
-/**
- * helper function to merge old and new params together
- * @param {object} namespaced params object old params with defaults filtered out
+ * Merge old and new params together, joining values into arrays where necessary
+ * @param {object} namespaced params object of old params
  * @param {object} namespaced params object of new params
  * @return {object} merged namespaced params object
  */
-// TODO: BUG? newParam that doesn't exist in oldParams isn't added(?)
-const mergeParams = (oldParams, newParams) => {
-  const merged = arrayToObject(
-    Object.keys(oldParams).map(key => {
-      const oldVal = oldParams[key];
-      const newVal = newParams[key];
-      return [key, mergeParam(oldVal, newVal)];
-    })
-  );
+export function mergeParams(oldParams, newParams) {
+  const merged = {};
+  Object.keys(oldParams).forEach(key => {
+    merged[key] = mergeParam(oldParams[key], newParams[key]);
+  });
   Object.keys(newParams).forEach(key => {
     if (!merged[key]) {
       merged[key] = newParams[key];
@@ -344,7 +252,6 @@ const mergeParams = (oldParams, newParams) => {
   });
   return merged;
 }
-export { mergeParams as _mergeParams };
 
 function mergeParam(oldVal, newVal) {
   if (!newVal) {
@@ -353,22 +260,33 @@ function mergeParam(oldVal, newVal) {
   if (!oldVal) {
     return newVal;
   }
+  let merged;
   if (Array.isArray(oldVal)) {
-    oldVal.push(newVal);
-    return oldVal;
+    merged = oldVal.concat(newVal);
+  } else {
+    merged = ([oldVal]).concat(newVal);
   }
-  return [oldVal, newVal];
+  return dedupeArray(merged);
+}
+
+function dedupeArray(arr) {
+  const deduped = [...new Set(arr)];
+  if (deduped.length === 1) {
+    return deduped[0];
+  }
+  return deduped;
 }
 
 /**
- * helper function to get new params that are not in merged params
- * @param {object} namespaced params object of merged params
+ * Join old and new params together, replacing old values with new ones where
+ * necessary
+ * @param {object} namespaced params object of old params
  * @param {object} namespaced params object of new params
- * @return {object} remaining new namespaced params object
+ * @return {object} joined namespaced params object
  */
-const getRemainingNewParams = (mergedParams, newParams) =>
-  arrayToObject(
-    Object.keys(newParams)
-      .filter(key => Object.keys(mergedParams).indexOf(key) === -1)
-      .map(key => [key, newParams[key]])
-  );
+export function replaceParams(oldParams, newParams) {
+  return {
+    ...oldParams,
+    ...newParams,
+  };
+}

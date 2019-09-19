@@ -9,7 +9,8 @@ import FilterTags from '@components/FilterTags';
 import {
   encodeNonDefaultQueryString,
   parseQueryString,
-  addParams,
+  mergeParams,
+  replaceParams,
   removeParams,
 } from '@util/qs';
 import { QSConfig } from '@types';
@@ -48,7 +49,7 @@ class ListHeader extends React.Component {
     const { history, qsConfig } = this.props;
     const { search } = history.location;
     const oldParams = parseQueryString(qsConfig, search);
-    this.pushHistoryState(addParams(qsConfig, oldParams, { [key]: value }));
+    this.pushHistoryState(mergeParams(oldParams, { [key]: value }));
   }
 
   handleRemove(key, value) {
@@ -67,7 +68,7 @@ class ListHeader extends React.Component {
     const { search } = history.location;
     const oldParams = parseQueryString(qsConfig, search);
     this.pushHistoryState(
-      addParams(qsConfig, oldParams, {
+      replaceParams(oldParams, {
         order_by: order === 'ascending' ? key : `-${key}`,
         page: null,
       })
