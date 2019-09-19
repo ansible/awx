@@ -489,8 +489,11 @@ class SubListAPIView(ParentMixin, ListAPIView):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
         qs = self.request.user.get_queryset(self.model).distinct()
-        sublist_qs = getattrd(parent, self.relationship).distinct()
+        sublist_qs = self.get_sublist_queryset(parent)
         return qs & sublist_qs
+
+    def get_sublist_queryset(self, parent):
+        return getattrd(parent, self.relationship).distinct()
 
 
 class DestroyAPIView(generics.DestroyAPIView):

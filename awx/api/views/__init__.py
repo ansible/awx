@@ -3379,6 +3379,11 @@ class WorkflowJobNotificationsList(SubListAPIView):
     relationship = 'notifications'
     search_fields = ('subject', 'notification_type', 'body',)
 
+    def get_sublist_queryset(self, parent):
+        return self.model.objects.filter(Q(unifiedjob_notifications=parent) |
+                                         Q(unifiedjob_notifications__unified_job_node__workflow_job=parent,
+                                         unifiedjob_notifications__workflowapproval__isnull=False)).distinct()
+
 
 class WorkflowJobActivityStreamList(SubListAPIView):
 
