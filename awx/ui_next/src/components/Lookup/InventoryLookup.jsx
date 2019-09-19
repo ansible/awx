@@ -11,7 +11,7 @@ import Lookup from '@components/Lookup';
 
 const getInventories = async params => InventoriesAPI.read(params);
 
-class InventoriesLookup extends React.Component {
+class InventoryLookup extends React.Component {
   render() {
     const { value, tooltip, onChange, required, i18n } = this.props;
 
@@ -19,7 +19,7 @@ class InventoriesLookup extends React.Component {
       <FormGroup
         label={
           <Fragment>
-            {i18n._(t`Inventories`)}{' '}
+            {i18n._(t`Inventory`)}{' '}
             {tooltip && (
               <Tooltip position="right" content={tooltip}>
                 <QuestionCircleIcon />
@@ -28,12 +28,12 @@ class InventoriesLookup extends React.Component {
           </Fragment>
         }
         isRequired={required}
-        fieldId="inventories-lookup"
+        fieldId="inventory-lookup"
       >
         <Lookup
-          id="inventories-lookup"
-          lookupHeader={i18n._(t`Inventories`)}
-          name="inventories"
+          id="inventory-lookup"
+          lookupHeader={i18n._(t`Inventory`)}
+          name="inventory"
           value={value}
           onLookupSave={onChange}
           getItems={getInventories}
@@ -61,17 +61,17 @@ class InventoriesLookup extends React.Component {
   }
 }
 
-InventoriesLookup.propTypes = {
+InventoryLookup.propTypes = {
   value: Inventory,
   tooltip: string,
   onChange: func.isRequired,
   required: bool,
 };
 
-InventoriesLookup.defaultProps = {
+InventoryLookup.defaultProps = {
   value: null,
   tooltip: '',
   required: false,
 };
 
-export default withI18n()(InventoriesLookup);
+export default withI18n()(InventoryLookup);

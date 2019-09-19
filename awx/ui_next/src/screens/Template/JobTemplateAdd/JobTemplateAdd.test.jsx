@@ -61,7 +61,7 @@ describe('<JobTemplateAdd />', () => {
     expect(wrapper.find('input#template-description').text()).toBe(
       defaultProps.description
     );
-    expect(wrapper.find('InventoriesLookup').prop('value')).toBe(null);
+    expect(wrapper.find('InventoryLookup').prop('value')).toBe(null);
     expect(wrapper.find('AnsibleSelect[name="job_type"]').props().value).toBe(
       defaultProps.job_type
     );
