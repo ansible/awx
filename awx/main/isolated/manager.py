@@ -6,6 +6,7 @@ import stat
 import tempfile
 import time
 import logging
+import re
 
 from django.conf import settings
 import ansible_runner
@@ -274,6 +275,8 @@ class IsolatedManager(object):
         # only attempt to consume events if any were rsynced back
         if os.path.exists(events_path):
             for event in set(os.listdir(events_path)) - self.handled_events:
+                if not re.match("^[0-9]+-.+json$", event):
+                    continue
                 path = os.path.join(events_path, event)
                 if os.path.exists(path):
                     try:
@@ -289,7 +292,7 @@ class IsolatedManager(object):
                         # practice
                         # in this scenario, just ignore this event and try it
                         # again on the next sync
-                        pass
+                        continue
                     event_data.setdefault(self.event_data_key, self.instance.id)
                     dispatcher.dispatch(event_data)
                     self.handled_events.add(event)
