@@ -3,7 +3,6 @@ import {
   encodeNonDefaultQueryString,
   parseQueryString,
   getQSConfig,
-  addParams,
   removeParams,
   _stringToObject,
   _addDefaultsToObject,
@@ -286,6 +285,19 @@ describe('qs (qs.js)', () => {
         baz: ['one', 'two', 'three'],
       });
     });
+
+    test('should handle non-namespaced params', () => {
+      const config = {
+        namespace: null,
+        defaultParams: { page: 1, page_size: 15 },
+        integerFields: ['page', 'page_size'],
+      };
+      const query = '?item.baz=bar&page=3';
+      expect(parseQueryString(config, query)).toEqual({
+        page: 3,
+        page_size: 15,
+      });
+    });
   });
 
   describe('removeParams', () => {
@@ -296,8 +308,8 @@ describe('qs (qs.js)', () => {
         integerFields: ['page', 'page_size'],
       };
       const oldParams = { baz: 'bar', page: 3, bag: 'boom', page_size: 15 };
-      const newParams = { bag: 'boom' };
-      expect(removeParams(config, oldParams, newParams)).toEqual({
+      const toRemove = { bag: 'boom' };
+      expect(removeParams(config, oldParams, toRemove)).toEqual({
         baz: 'bar',
         page: 3,
         page_size: 15,
@@ -311,8 +323,8 @@ describe('qs (qs.js)', () => {
         integerFields: ['page', 'page_size'],
       };
       const oldParams = { baz: ['bar', 'bang'], page: 3, page_size: 15 };
-      const newParams = { baz: 'bar' };
-      expect(removeParams(config, oldParams, newParams)).toEqual({
+      const toRemove = { baz: 'bar' };
+      expect(removeParams(config, oldParams, toRemove)).toEqual({
         baz: 'bang',
         page: 3,
         page_size: 15,
@@ -330,9 +342,28 @@ describe('qs (qs.js)', () => {
         page: 3,
         page_size: 15,
       };
-      const newParams = { baz: 'bar' };
-      expect(removeParams(config, oldParams, newParams)).toEqual({
+      const toRemove = { baz: 'bar' };
+      expect(removeParams(config, oldParams, toRemove)).toEqual({
         baz: ['bang', 'bust'],
+        page: 3,
+        page_size: 15,
+      });
+    });
+
+    test('should remove multiple values from query params (array -> smaller array)', () => {
+      const config = {
+        namespace: null,
+        defaultParams: { page: 1, page_size: 15 },
+        integerFields: ['page', 'page_size'],
+      };
+      const oldParams = {
+        baz: ['bar', 'bang', 'bust'],
+        page: 3,
+        page_size: 15,
+      };
+      const toRemove = { baz: ['bang', 'bar'] };
+      expect(removeParams(config, oldParams, toRemove)).toEqual({
+        baz: 'bust',
         page: 3,
         page_size: 15,
       });
@@ -345,8 +376,8 @@ describe('qs (qs.js)', () => {
         integerFields: ['page', 'page_size'],
       };
       const oldParams = { baz: ['bar', 'bang'], page: 3, page_size: 15 };
-      const newParams = { page: 3 };
-      expect(removeParams(config, oldParams, newParams)).toEqual({
+      const toRemove = { page: 3 };
+      expect(removeParams(config, oldParams, toRemove)).toEqual({
         baz: ['bar', 'bang'],
         page: 1,
         page_size: 15,
@@ -365,8 +396,8 @@ describe('qs (qs.js)', () => {
         page: 3,
         page_size: 15,
       };
-      const newParams = { baz: 'bust', pat: 'pal' };
-      expect(removeParams(config, oldParams, newParams)).toEqual({
+      const toRemove = { baz: 'bust', pat: 'pal' };
+      expect(removeParams(config, oldParams, toRemove)).toEqual({
         baz: ['bar', 'bang'],
         page: 3,
         page_size: 15,
@@ -380,8 +411,8 @@ describe('qs (qs.js)', () => {
         integerFields: ['page', 'page_size'],
       };
       const oldParams = { baz: 'bar', page: 3, page_size: 15 };
-      const newParams = { baz: 'bar' };
-      expect(removeParams(config, oldParams, newParams)).toEqual({
+      const toRemove = { baz: 'bar' };
+      expect(removeParams(config, oldParams, toRemove)).toEqual({
         page: 3,
         page_size: 15,
       });
@@ -394,8 +425,8 @@ describe('qs (qs.js)', () => {
         integerFields: ['page', 'page_size'],
       };
       const oldParams = { baz: 'bar', page: 1, page_size: 15 };
-      const newParams = { baz: 'bar' };
-      expect(removeParams(config, oldParams, newParams)).toEqual({
+      const toRemove = { baz: 'bar' };
+      expect(removeParams(config, oldParams, toRemove)).toEqual({
         page: 1,
         page_size: 15,
       });
@@ -408,8 +439,8 @@ describe('qs (qs.js)', () => {
         integerFields: ['page', 'page_size'],
       };
       const oldParams = { baz: ['bar', 'bang'], page: 3, page_size: 15 };
-      const newParams = { baz: 'bar' };
-      expect(removeParams(config, oldParams, newParams)).toEqual({
+      const toRemove = { baz: 'bar' };
+      expect(removeParams(config, oldParams, toRemove)).toEqual({
         baz: 'bang',
         page: 3,
         page_size: 15,
@@ -427,8 +458,8 @@ describe('qs (qs.js)', () => {
         page: 3,
         page_size: 15,
       };
-      const newParams = { baz: 'bar' };
-      expect(removeParams(config, oldParams, newParams)).toEqual({
+      const toRemove = { baz: 'bar' };
+      expect(removeParams(config, oldParams, toRemove)).toEqual({
         baz: ['bang', 'bust'],
         page: 3,
         page_size: 15,
@@ -442,10 +473,30 @@ describe('qs (qs.js)', () => {
         integerFields: ['page', 'page_size'],
       };
       const oldParams = { baz: ['bar', 'bang'], page: 3, page_size: 15 };
-      const newParams = { page: 3 };
-      expect(removeParams(config, oldParams, newParams)).toEqual({
+      const toRemove = { page: 3 };
+      expect(removeParams(config, oldParams, toRemove)).toEqual({
         baz: ['bar', 'bang'],
         page: 1,
+        page_size: 15,
+      });
+    });
+
+    test('should retain long array values', () => {
+      const config = {
+        namespace: 'item',
+        defaultParams: { page: 1, page_size: 15 },
+        integerFields: ['page', 'page_size'],
+      };
+      const oldParams = {
+        baz: ['one', 'two', 'three'],
+        page: 3,
+        bag: 'boom',
+        page_size: 15,
+      };
+      const toRemove = { bag: 'boom' };
+      expect(removeParams(config, oldParams, toRemove)).toEqual({
+        baz: ['one', 'two', 'three'],
+        page: 3,
         page_size: 15,
       });
     });
@@ -462,8 +513,8 @@ describe('qs (qs.js)', () => {
         page: 3,
         page_size: 15,
       };
-      const newParams = { baz: 'bust', pat: 'pal' };
-      expect(removeParams(config, oldParams, newParams)).toEqual({
+      const toRemove = { baz: 'bust', pat: 'pal' };
+      expect(removeParams(config, oldParams, toRemove)).toEqual({
         baz: ['bar', 'bang'],
         page: 3,
         page_size: 15,
@@ -645,7 +696,7 @@ describe('qs (qs.js)', () => {
         page: 3,
         page_size: 15,
       });
-    })
+    });
   });
 
   describe('replaceParams', () => {

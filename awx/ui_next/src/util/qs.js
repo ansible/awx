@@ -36,6 +36,53 @@ export function parseQueryString(config, queryString) {
   return addDefaultsToObject(config, params);
 }
 
+function stringToObject(config, qs) {
+  const params = {};
+  qs.replace(/^\?/, '')
+    .split('&')
+    .map(s => s.split('='))
+    .forEach(([nsKey, rawValue]) => {
+      if (!nsKey || !namespaceMatches(config.namespace, nsKey)) {
+        return;
+      }
+      const key = config.namespace
+        ? decodeURIComponent(nsKey.substr(config.namespace.length + 1))
+        : decodeURIComponent(nsKey);
+      const value = parseValue(config, key, rawValue);
+      params[key] = mergeParam(params[key], value);
+    });
+  return params;
+};
+export { stringToObject as _stringToObject };
+
+/**
+ * helper function to check the namespace of a param is what you expec
+ * @param {string} namespace to append to params
+ * @param {object} params object to append namespace to
+ * @return {object} params object with namespaced keys
+ */
+const namespaceMatches = (namespace, fieldname) => {
+  if (!namespace) return !fieldname.includes('.');
+
+  return fieldname.startsWith(`${namespace}.`);
+};
+
+function parseValue(config, key, rawValue) {
+  if (config.integerFields && config.integerFields.some(v => v === key)) {
+    return parseInt(rawValue, 10);
+  }
+  // TODO: parse dateFields into date format?
+  return decodeURIComponent(rawValue);
+}
+
+function addDefaultsToObject(config, params) {
+  return {
+    ...config.defaultParams,
+    ...params,
+  };
+}
+export { addDefaultsToObject as _addDefaultsToObject };
+
 /**
  * Convert query param object to url query string
  * Used to encode params for interacting with the api
@@ -98,99 +145,12 @@ export const encodeNonDefaultQueryString = (config, params) => {
 };
 
 /**
- * Removes params from the search string and returns the updated list of params
- * @param {object} qs config object (used for getting defaults, current query params etc.)
- * @param {object} object with params from existing search
- * @param {object} object with new params to remove
- * @return {object} query param object
- */
-export function removeParams(config, oldParams, paramsToRemove) {
-  const paramsEntries = [];
-  Object.entries(oldParams).forEach(([key, value]) => {
-    if (Array.isArray(value)) {
-      value.forEach(val => {
-        paramsEntries.push([key, val]);
-      });
-    } else {
-      paramsEntries.push([key, value]);
-    }
-  });
-  const paramsToRemoveEntries = Object.entries(paramsToRemove);
-  const remainingEntries = paramsEntries.filter(
-    ([key, value]) =>
-      paramsToRemoveEntries.filter(
-        ([newKey, newValue]) => key === newKey && value === newValue
-      ).length === 0
-  );
-  const remainingObject = arrayToObject(remainingEntries);
-  const defaultEntriesLeftover = Object.entries(config.defaultParams).filter(
-    ([key]) => !remainingObject[key]
-  );
-  const finalParamsEntries = remainingEntries;
-  defaultEntriesLeftover.forEach(value => {
-    finalParamsEntries.push(value);
-  });
-  return arrayToObject(finalParamsEntries);
-}
-
-const stringToObject = (config, qs) => {
-  const params = {};
-  qs.replace(/^\?/, '')
-    .split('&')
-    .map(s => s.split('='))
-    .forEach(([nsKey, rawValue]) => {
-      if (!nsKey || !namespaceMatches(config.namespace, nsKey)) {
-        return;
-      }
-      const key = decodeURIComponent(nsKey.substr(config.namespace.length + 1));
-      const value = parseValue(config, key, rawValue);
-      params[key] = mergeParam(params[key], value);
-    });
-  return params;
-};
-export { stringToObject as _stringToObject };
-
-function parseValue(config, key, rawValue) {
-  if (config.integerFields && config.integerFields.some(v => v === key)) {
-    return parseInt(rawValue, 10);
-  }
-  // TODO: parse dateFields into date format?
-  return decodeURIComponent(rawValue);
-}
-
-function addDefaultsToObject(config, params) {
-  return {
-    ...config.defaultParams,
-    ...params,
-  };
-}
-export { addDefaultsToObject as _addDefaultsToObject };
-
-/**
- * helper function used to convert from
- * Object.entries format ([ [ key, value ], ... ]) to object
- * @param {array} array in the format [ [ key, value ], ...]
- * @return {object} object in the forms { key: value, ... }
- */
-const arrayToObject = entriesArr =>
-  entriesArr.reduce((acc, [key, value]) => {
-    if (acc[key] && Array.isArray(acc[key])) {
-      acc[key].push(value);
-    } else if (acc[key]) {
-      acc[key] = [acc[key], value];
-    } else {
-      acc[key] = value;
-    }
-    return acc;
-  }, {});
-
-/**
  * helper function to namespace params object
  * @param {string} namespace to append to params
  * @param {object} params object to append namespace to
  * @return {object} params object with namespaced keys
  */
-const namespaceParams = (namespace, params = {}) => {
+const namespaceParams = (namespace, params) => {
   if (!namespace) return params;
 
   const namespaced = {};
@@ -198,19 +158,7 @@ const namespaceParams = (namespace, params = {}) => {
     namespaced[`${namespace}.${key}`] = params[key];
   });
 
-  return namespaced || {};
-};
-
-/**
- * helper function to check the namespace of a param is what you expec
- * @param {string} namespace to append to params
- * @param {object} params object to append namespace to
- * @return {object} params object with namespaced keys
- */
-const namespaceMatches = (namespace, fieldname) => {
-  if (!namespace) return !fieldname.includes('.');
-
-  return fieldname.startsWith(`${namespace}.`);
+  return namespaced;
 };
 
 /**
@@ -233,6 +181,45 @@ const paramValueIsEqual = (one, two) => {
 
   return isEqual;
 };
+
+/**
+ * Removes params from the search string and returns the updated list of params
+ * @param {object} qs config object (used for getting defaults, current query params etc.)
+ * @param {object} object with params from existing search
+ * @param {object} object with new params to remove
+ * @return {object} query param object
+ */
+export function removeParams(config, oldParams, paramsToRemove) {
+  const updated = {
+    ...config.defaultParams,
+  };
+  Object.keys(oldParams).forEach(key => {
+    const value = removeParam(oldParams[key], paramsToRemove[key]);
+    if (value) {
+      updated[key] = value;
+    }
+  });
+  return updated;
+}
+
+function removeParam(oldVal, deleteVal) {
+  if (oldVal === deleteVal) {
+    return null;
+  }
+  if (Array.isArray(deleteVal)) {
+    return deleteVal.reduce(removeParam, oldVal);
+  }
+  if (Array.isArray(oldVal)) {
+    const index = oldVal.indexOf(deleteVal);
+    if (index > -1) {
+      oldVal.splice(index, 1);
+    }
+    if (oldVal.length === 1) {
+      return oldVal[0];
+    }
+  }
+  return oldVal;
+}
 
 /**
  * Merge old and new params together, joining values into arrays where necessary
@@ -264,7 +251,7 @@ function mergeParam(oldVal, newVal) {
   if (Array.isArray(oldVal)) {
     merged = oldVal.concat(newVal);
   } else {
-    merged = ([oldVal]).concat(newVal);
+    merged = [oldVal].concat(newVal);
   }
   return dedupeArray(merged);
 }
