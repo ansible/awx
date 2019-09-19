@@ -120,7 +120,7 @@ class Search extends React.Component {
 
     // TODO: this will probably become more sophisticated, where date
     // fields and string fields are passed to a formatter
-    const actualSearchKey = isNonStringField(searchKey)
+    const actualSearchKey = isNonStringField
       ? searchKey
       : `${searchKey}__icontains`;
 
