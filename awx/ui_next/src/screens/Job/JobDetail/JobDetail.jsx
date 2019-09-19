@@ -1,18 +1,27 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { CardBody, Button } from '@patternfly/react-core';
 import styled from 'styled-components';
+
+import AlertModal from '@components/AlertModal';
 import { DetailList, Detail } from '@components/DetailList';
 import { ChipGroup, Chip, CredentialChip } from '@components/Chip';
 import { VariablesInput as _VariablesInput } from '@components/CodeMirrorInput';
+import ErrorDetail from '@components/ErrorDetail';
 import { toTitleCase } from '@util/strings';
 import { Job } from '../../../types';
+import { JobsAPI, ProjectUpdatesAPI } from '@api';
+import { JOB_TYPE_URL_SEGMENTS } from '../../../constants';
 
 const ActionButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
+  margin-top: 20px;
+  & > :not(:first-child) {
+    margin-left: 20px;
+  }
 `;
 
 const VariablesInput = styled(_VariablesInput)`
@@ -29,7 +38,7 @@ const VERBOSITY = {
   4: '4 (Connection Debug)',
 };
 
-function JobDetail({ job, i18n }) {
+function JobDetail({ job, i18n, history }) {
   const {
     job_template: jobTemplate,
     project,
@@ -38,7 +47,22 @@ function JobDetail({ job, i18n }) {
     credentials,
     labels,
   } = job.summary_fields;
+  const [isDeleteModalOpen, setDeleteModal] = useState(false);
+  const [errorMsg, setErrorMsg] = useState();
 
+  const deleteJob = async () => {
+    try {
+      if (job.type === 'job') {
+        await JobsAPI.destroy(job.id);
+      } else {
+        await ProjectUpdatesAPI.destroy(job.id);
+      }
+      history.push('/jobs');
+    } catch (err) {
+      setErrorMsg(err);
+      setDeleteModal(false);
+    }
+  };
   return (
     <CardBody>
       <DetailList>
@@ -146,6 +170,13 @@ function JobDetail({ job, i18n }) {
       )}
       <ActionButtonWrapper>
         <Button
+          variant="danger"
+          aria-label="delete"
+          onClick={() => setDeleteModal(true)}
+        >
+          {i18n._(t`Delete`)}
+        </Button>
+        <Button
           variant="secondary"
           aria-label="close"
           component={Link}
@@ -154,6 +185,41 @@ function JobDetail({ job, i18n }) {
           {i18n._(t`Close`)}
         </Button>
       </ActionButtonWrapper>
+      {isDeleteModalOpen && (
+        <AlertModal
+          isOpen={isDeleteModalOpen}
+          title={i18n._(t`Delete Job`)}
+          variant="danger"
+          onClose={() => setDeleteModal(false)}
+        >
+          {i18n._(t`Are you sure you want to delete:`)}
+          <br />
+          <strong>{job.name}</strong>
+          <ActionButtonWrapper>
+            <Button
+              variant="secondary"
+              aria-label="close"
+              component={Link}
+              to={`/jobs/${JOB_TYPE_URL_SEGMENTS[job.type]}/${job.id}`}
+            >
+              {i18n._(t`Cancel`)}
+            </Button>
+            <Button variant="danger" aria-label="delete" onClick={deleteJob}>
+              {i18n._(t`Delete`)}
+            </Button>
+          </ActionButtonWrapper>
+        </AlertModal>
+      )}
+      {errorMsg && (
+        <AlertModal
+          isOpen={errorMsg}
+          variant="danger"
+          onClose={() => setErrorMsg()}
+          title={i18n._(t`Job Delete Error`)}
+        >
+          <ErrorDetail error={errorMsg} />
+        </AlertModal>
+      )}
     </CardBody>
   );
 }

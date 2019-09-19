@@ -1,6 +1,10 @@
 import React from 'react';
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { sleep } from '@testUtils/testUtils';
 import JobDetail from './JobDetail';
+import { JobsAPI, ProjectUpdatesAPI } from '@api';
+
+jest.mock('@api');
 
 describe('<JobDetail />', () => {
   let job;
@@ -56,5 +60,58 @@ describe('<JobDetail />', () => {
     expect(credentialChip.prop('credential')).toEqual(
       job.summary_fields.credentials[0]
     );
+  });
+  test('should properly delete job', () => {
+    job = {
+      name: 'Rage',
+      id: 1,
+      type: 'job',
+      summary_fields: {
+        job_template: { name: 'Spud' },
+      },
+    };
+    const wrapper = mountWithContexts(<JobDetail job={job} />);
+    wrapper
+      .find('button')
+      .at(0)
+      .invoke('onClick')();
+    const modal = wrapper.find('Modal');
+    expect(modal.length).toBe(1);
+    modal.find('button[aria-label="delete"]').invoke('onClick')();
+    expect(JobsAPI.destroy).toHaveBeenCalledTimes(1);
+  });
+
+  test('should display error modal when a job does not delete properly', async () => {
+    job = {
+      name: 'Angry',
+      id: 'a',
+      type: 'project_updates',
+      summary_fields: {
+        job_template: { name: 'Peanut' },
+      },
+    };
+    const wrapper = mountWithContexts(<JobDetail job={job} />);
+    wrapper
+      .find('button')
+      .at(0)
+      .invoke('onClick')();
+    const modal = wrapper.find('Modal');
+    ProjectUpdatesAPI.destroy.mockRejectedValue(
+      new Error({
+        response: {
+          config: {
+            method: 'delete',
+            url: '/api/v2/project_updates/1',
+          },
+          data: 'An error occurred',
+          status: 404,
+        },
+      })
+    );
+    modal.find('button[aria-label="delete"]').invoke('onClick')();
+    await sleep(1);
+    wrapper.update();
+    const errorModal = wrapper.find('ErrorDetail__Expandable');
+    expect(errorModal.length).toBe(1);
   });
 });
