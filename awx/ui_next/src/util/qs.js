@@ -64,8 +64,8 @@ function encodeValue(key, value) {
 }
 
 /**
- * Convert query param object to url query string, adding namespace and removing defaults
- * Used to put into url bar after ui route
+ * Convert query param object to url query string, adding namespace and
+ * removing defaults. Used to put into url bar after ui route
  * @param {object} qs config object for namespacing params, filtering defaults
  * @param {object} query param object
  * @return {string} url query string
@@ -106,6 +106,16 @@ export const encodeNonDefaultQueryString = (config, params) => {
  * @return {object} query param object
  */
 export function addParams(config, oldParams, paramsToAdd) {
+  // const oldParamsMinusDefaults = getNonDefaultParams(oldParams, config.defaultParams);
+  // const merged = mergeParams(oldParamsMinusDefaults, paramsToAdd);
+  // console.log(oldParamsMinusDefaults, merged);
+  //
+  // return {
+  //   ...config.defaultParams,
+  //   ...merged,
+  //   ...getRemainingNewParams(merged, paramsToAdd),
+  // };
+
   const namespacedOldParams = namespaceParams(config.namespace, oldParams);
   const namespacedParamsToAdd = namespaceParams(config.namespace, paramsToAdd);
   const namespacedDefaultParams = namespaceParams(
@@ -117,7 +127,7 @@ export function addParams(config, oldParams, paramsToAdd) {
     namespacedOldParams,
     namespacedDefaultParams
   );
-  const namespacedMergedParams = getMergedParams(
+  const namespacedMergedParams = mergeParams(
     namespacedOldParamsNotDefaults,
     namespacedParamsToAdd
   );
@@ -179,13 +189,7 @@ const stringToObject = (config, qs) => {
       }
       const key = decodeURIComponent(nsKey.substr(config.namespace.length + 1));
       const value = parseValue(config, key, rawValue);
-      if (!params[key]) {
-        params[key] = value;
-      } else if (Array.isArray(params[key])) {
-        params[key].push(value);
-      } else {
-        params[key] = [params[key], value];
-      }
+      params[key] = mergeParam(params[key], value);
     });
   return params;
 };
@@ -324,21 +328,37 @@ const getNonDefaultParams = (params, defaults) =>
  * @param {object} namespaced params object of new params
  * @return {object} merged namespaced params object
  */
-const getMergedParams = (oldParams, newParams) =>
-  arrayToObject(
+// TODO: BUG? newParam that doesn't exist in oldParams isn't added(?)
+const mergeParams = (oldParams, newParams) => {
+  const merged = arrayToObject(
     Object.keys(oldParams).map(key => {
-      let oldVal = oldParams[key];
+      const oldVal = oldParams[key];
       const newVal = newParams[key];
-      if (newVal) {
-        if (Array.isArray(oldVal)) {
-          oldVal.push(newVal);
-        } else {
-          oldVal = [oldVal, newVal];
-        }
-      }
-      return [key, oldVal];
+      return [key, mergeParam(oldVal, newVal)];
     })
   );
+  Object.keys(newParams).forEach(key => {
+    if (!merged[key]) {
+      merged[key] = newParams[key];
+    }
+  });
+  return merged;
+}
+export { mergeParams as _mergeParams };
+
+function mergeParam(oldVal, newVal) {
+  if (!newVal) {
+    return oldVal;
+  }
+  if (!oldVal) {
+    return newVal;
+  }
+  if (Array.isArray(oldVal)) {
+    oldVal.push(newVal);
+    return oldVal;
+  }
+  return [oldVal, newVal];
+}
 
 /**
  * helper function to get new params that are not in merged params

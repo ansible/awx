@@ -7,6 +7,7 @@ import {
   removeParams,
   _stringToObject,
   _addDefaultsToObject,
+  _mergeParams,
 } from './qs';
 
 describe('qs (qs.js)', () => {
@@ -53,7 +54,7 @@ describe('qs (qs.js)', () => {
       integerFields: ['page'],
     };
 
-    test('encodeNonDefaultQueryString returns the expected queryString', () => {
+    test('should return the expected queryString', () => {
       [
         [null, ''],
         [{}, ''],
@@ -74,7 +75,7 @@ describe('qs (qs.js)', () => {
       });
     });
 
-    test('encodeNonDefaultQueryString omits null values', () => {
+    test('should omit null values', () => {
       const vals = {
         order_by: 'foo',
         page: null,
@@ -82,17 +83,32 @@ describe('qs (qs.js)', () => {
       expect(encodeNonDefaultQueryString(config, vals)).toEqual('order_by=foo');
     });
 
-    test('should compare array values', () => {
+    test('should namespace encoded params', () => {
+      const conf = {
+        namespace: 'item',
+        defaultParams: { page: 1 },
+      };
+      const params = {
+        page: 1,
+        foo: 'bar',
+      }
+      expect(encodeNonDefaultQueryString(conf, params)).toEqual('item.foo=bar');
+    });
+
+    test('should handle array values', () => {
       const vals = {
         foo: ['one', 'two'],
+        bar: ['alpha', 'beta'],
       };
       const conf = {
         defaultParams: {
           foo: ['one', 'two'],
-        }
+        },
       };
-      expect(encodeNonDefaultQueryString(conf, vals)).toEqual('');
-    })
+      expect(encodeNonDefaultQueryString(conf, vals)).toEqual(
+        'bar=alpha&bar=beta'
+      );
+    });
   });
 
   describe('getQSConfig', () => {
@@ -303,7 +319,7 @@ describe('qs (qs.js)', () => {
       });
     });
 
-    test('should replace query params that are defaults', () => {
+    test('should replace query params that have defaults', () => {
       const config = {
         namespace: null,
         defaultParams: { page: 1, page_size: 15 },
@@ -315,6 +331,21 @@ describe('qs (qs.js)', () => {
         baz: ['bar', 'bang'],
         page: 5,
         page_size: 15,
+      });
+    });
+
+    test('should replace query params that match defaults', () => {
+      const config = {
+        namespace: null,
+        defaultParams: { page: 1, page_size: 15 },
+        integerFields: ['page', 'page_size'],
+      };
+      const oldParams = { baz: ['bar', 'bang'], page: 3, page_size: 15 };
+      const newParams = { page_size: 5 };
+      expect(addParams(config, oldParams, newParams)).toEqual({
+        baz: ['bar', 'bang'],
+        page: 3,
+        page_size: 5,
       });
     });
 
@@ -652,7 +683,7 @@ describe('qs (qs.js)', () => {
     test('should add missing default values', () => {
       const config = {
         defaultParams: { page: 1, page_size: 5, order_by: 'name' },
-      }
+      };
       expect(_addDefaultsToObject(config, {})).toEqual({
         page: 1,
         page_size: 5,
@@ -663,11 +694,11 @@ describe('qs (qs.js)', () => {
     test('should not override existing params', () => {
       const config = {
         defaultParams: { page: 1, page_size: 5, order_by: 'name' },
-      }
+      };
       const params = {
         page: 2,
         order_by: 'date_created',
-      }
+      };
       expect(_addDefaultsToObject(config, params)).toEqual({
         page: 2,
         page_size: 5,
@@ -679,11 +710,52 @@ describe('qs (qs.js)', () => {
       const params = {
         page: 2,
         order_by: 'date_created',
-      }
+      };
       expect(_addDefaultsToObject({}, params)).toEqual({
         page: 2,
         order_by: 'date_created',
       });
-    })
-  })
+    });
+  });
+
+  describe('mergeParams', () => {
+    it('should merge param into an array', () => {
+      const oldParams = {
+        foo: 'one',
+      };
+      const newParams = {
+        foo: 'two',
+      };
+      expect(_mergeParams(oldParams, newParams)).toEqual({
+        foo: ['one', 'two'],
+      });
+    });
+
+    it('should retain unaltered params', () => {
+      const oldParams = {
+        foo: 'one',
+        bar: 'baz'
+      };
+      const newParams = {
+        foo: 'two',
+      };
+      expect(_mergeParams(oldParams, newParams)).toEqual({
+        foo: ['one', 'two'],
+        bar: 'baz',
+      });
+    });
+
+    it('should merge objects', () => {
+      const oldParams = {
+        one: 'one',
+      };
+      const newParams = {
+        two: 'two',
+      };
+      expect(_mergeParams(oldParams, newParams)).toEqual({
+        one: 'one',
+        two: 'two',
+      });
+    });
+  });
 });
