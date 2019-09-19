@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='job',
             name='webhook_service',
-            field=models.CharField(blank=True, choices=[('github', 'Github'), ('gitlab', 'Gitlab'), ('bitbucket', 'Bitbucket')], max_length=16),
+            field=models.CharField(blank=True, choices=[('github', 'Github'), ('gitlab', 'Gitlab')], max_length=16),
         ),
         migrations.AddField(
             model_name='workflowjob',
@@ -39,6 +39,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='workflowjob',
             name='webhook_service',
-            field=models.CharField(blank=True, choices=[('github', 'Github'), ('gitlab', 'Gitlab'), ('bitbucket', 'Bitbucket')], max_length=16),
+            field=models.CharField(blank=True, choices=[('github', 'Github'), ('gitlab', 'Gitlab')], max_length=16),
         ),
     ]

@@ -498,7 +498,6 @@ class WebhookTemplateMixin(models.Model):
     SERVICES = [
         ('github', "Github"),
         ('gitlab', "Gitlab"),
-        ('bitbucket', "Bitbucket"),
     ]
 
     webhook_service = models.CharField(
