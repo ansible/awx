@@ -52,7 +52,7 @@ function stringToObject(config, qs) {
       params[key] = mergeParam(params[key], value);
     });
   return params;
-};
+}
 export { stringToObject as _stringToObject };
 
 /**
@@ -120,28 +120,10 @@ function encodeValue(key, value) {
 export const encodeNonDefaultQueryString = (config, params) => {
   if (!params) return '';
 
-  const namespacedParams = namespaceParams(config.namespace, params);
-  const namespacedDefaults = namespaceParams(
-    config.namespace,
-    config.defaultParams
+  const paramsWithoutDefaults = removeParams({}, params, config.defaultParams);
+  return encodeQueryString(
+    namespaceParams(config.namespace, paramsWithoutDefaults)
   );
-  const namespacedDefaultKeys = Object.keys(namespacedDefaults);
-  const namespacedParamsWithoutDefaultsKeys = Object.keys(
-    namespacedParams
-  ).filter(
-    key =>
-      namespacedDefaultKeys.indexOf(key) === -1 ||
-      !paramValueIsEqual(namespacedParams[key], namespacedDefaults[key])
-  );
-
-  return namespacedParamsWithoutDefaultsKeys
-    .sort()
-    .filter(key => namespacedParams[key] !== null)
-    .map(key => {
-      return [key, namespacedParams[key]];
-    })
-    .map(([key, value]) => encodeValue(key, value))
-    .join('&');
 };
 
 /**
@@ -159,27 +141,6 @@ const namespaceParams = (namespace, params) => {
   });
 
   return namespaced;
-};
-
-/**
- * helper function to check the value of a param is equal to another
- * @param {string or number or array} param value one
- * @param {string or number or array} params value two
- * @return {boolean} true if values are equal
- */
-const paramValueIsEqual = (one, two) => {
-  let isEqual = false;
-
-  if (Array.isArray(one) && Array.isArray(two)) {
-    isEqual = one.filter(val => two.indexOf(val) > -1).length === one.length;
-  } else if (
-    (typeof one === 'string' && typeof two === 'string') ||
-    (typeof one === 'number' && typeof two === 'number')
-  ) {
-    isEqual = one === two;
-  }
-
-  return isEqual;
 };
 
 /**
