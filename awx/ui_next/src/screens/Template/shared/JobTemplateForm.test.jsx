@@ -109,7 +109,7 @@ describe('<JobTemplateForm />', () => {
       target: { value: 'new job type', name: 'job_type' },
     });
     expect(form.state('values').job_type).toEqual('new job type');
-    wrapper.find('InventoriesLookup').prop('onChange')({
+    wrapper.find('InventoryLookup').prop('onChange')({
       id: 3,
       name: 'inventory',
     });

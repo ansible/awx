@@ -25,7 +25,7 @@ import CollapsibleSection from '@components/CollapsibleSection';
 import { required } from '@util/validators';
 import styled from 'styled-components';
 import { JobTemplate } from '@types';
-import { InventoriesLookup, InstanceGroupsLookup } from '@components/Lookup';
+import { InventoryLookup, InstanceGroupsLookup } from '@components/Lookup';
 import ProjectLookup from './ProjectLookup';
 import { JobTemplatesAPI, LabelsAPI, ProjectsAPI } from '@api';
 
@@ -397,7 +397,7 @@ class JobTemplateForm extends Component {
             name="inventory"
             validate={required(null, i18n)}
             render={({ form }) => (
-              <InventoriesLookup
+              <InventoryLookup
                 value={inventory}
                 tooltip={i18n._(t`Select the inventory containing the hosts
                   you want this job to manage.`)}
