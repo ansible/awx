@@ -1,12 +1,17 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { FormGroup, Tooltip } from '@patternfly/react-core';
-import { QuestionCircleIcon } from '@patternfly/react-icons';
+import { QuestionCircleIcon as PFQuestionCircleIcon } from '@patternfly/react-icons';
+import styled from 'styled-components';
 
 import { InstanceGroupsAPI } from '@api';
 import Lookup from '@components/Lookup';
+
+const QuestionCircleIcon = styled(PFQuestionCircleIcon)`
+  margin-left: 10px;
+`;
 
 const getInstanceGroups = async params => InstanceGroupsAPI.read(params);
 
@@ -21,18 +26,14 @@ class InstanceGroupsLookup extends React.Component {
     return (
       <div className={className}>
         <FormGroup
-          label={
-            <Fragment>
-              {i18n._(t`Instance Groups`)}{' '}
-              {tooltip && (
-                <Tooltip position="right" content={tooltip}>
-                  <QuestionCircleIcon />
-                </Tooltip>
-              )}
-            </Fragment>
-          }
+          label={i18n._(t`Instance Groups`)}
           fieldId="org-instance-groups"
         >
+          {tooltip && (
+            <Tooltip position="right" content={tooltip}>
+              <QuestionCircleIcon />
+            </Tooltip>
+          )}
           <Lookup
             id="org-instance-groups"
             lookupHeader={i18n._(t`Instance Groups`)}

@@ -643,9 +643,9 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                                                   "componentStyle": ComponentStyle {
                                                                                     "componentId": "Search__NoOptionDropdown-sc-1dwuww3-3",
                                                                                     "isStatic": true,
-                                                                                    "lastClassName": "iMdtNX",
+                                                                                    "lastClassName": "cbKaoS",
                                                                                     "rules": Array [
-                                                                                      "align-self:stretch;border:1px solid var(--pf-global--BorderColor--200);padding:3px 7px;white-space:nowrap;",
+                                                                                      "align-self:stretch;border:1px solid var(--pf-global--BorderColor--200);border-top-left-radius:3px;border-bottom-left-radius:3px;padding:3px 7px;white-space:nowrap;",
                                                                                     ],
                                                                                   },
                                                                                   "displayName": "Search__NoOptionDropdown",
@@ -661,7 +661,7 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                                               forwardedRef={null}
                                                                             >
                                                                               <div
-                                                                                className="Search__NoOptionDropdown-sc-1dwuww3-3 iMdtNX"
+                                                                                className="Search__NoOptionDropdown-sc-1dwuww3-3 cbKaoS"
                                                                               >
                                                                                 Name
                                                                               </div>
