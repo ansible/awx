@@ -468,7 +468,7 @@ function(NotificationsList, i18n) {
                             on-lookup-click="handleWebhookCredentialLookupClick"
                             on-tag-delete="handleWebhookCredentialTagDelete"
                         </webhook-credential-input>`,
-                    awPopOver: "<p>" + i18n._("Select the credential to use with the webhook service.") + "</p>",
+                    awPopOver: "<p>" + i18n._("Optionally, select the credential to use to send status updates back to the webhook service") + "</p>",
                     dataTitle: i18n._('Webhook Credential'),
                     dataPlacement: 'right',
                     dataContainer: "body",
