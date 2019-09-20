@@ -1,4 +1,5 @@
 import Base from '../Base';
+import RelaunchMixin from '../mixins/Relaunch.mixin';
 
 const BASE_URLS = {
   playbook: '/jobs/',
@@ -9,7 +10,7 @@ const BASE_URLS = {
   workflow: '/workflow_jobs/',
 };
 
-class Jobs extends Base {
+class Jobs extends RelaunchMixin(Base) {
   constructor(http) {
     super(http);
     this.baseUrl = '/api/v2/jobs/';

@@ -13,13 +13,19 @@ describe('LaunchButton', () => {
       can_start_without_user_input: true,
     },
   });
-  const children = handleLaunch => (
-    <button type="submit" onClick={handleLaunch} />
+
+  const children = ({ handleLaunch }) => (
+    <button type="submit" onClick={() => handleLaunch()} />
   );
+
+  const resource = {
+    id: 1,
+    type: 'job_template',
+  };
 
   test('renders the expected content', () => {
     const wrapper = mountWithContexts(
-      <LaunchButton templateId={1}>{children}</LaunchButton>
+      <LaunchButton resource={resource}>{children}</LaunchButton>
     );
     expect(wrapper).toHaveLength(1);
   });
@@ -33,7 +39,7 @@ describe('LaunchButton', () => {
       },
     });
     const wrapper = mountWithContexts(
-      <LaunchButton templateId={1}>{children}</LaunchButton>,
+      <LaunchButton resource={resource}>{children}</LaunchButton>,
       {
         context: {
           router: { history },
@@ -62,7 +68,7 @@ describe('LaunchButton', () => {
       })
     );
     const wrapper = mountWithContexts(
-      <LaunchButton templateId={1}>{children}</LaunchButton>
+      <LaunchButton resource={resource}>{children}</LaunchButton>
     );
     const button = wrapper.find('button');
     button.prop('onClick')();
