@@ -56,7 +56,7 @@ function stringToObject(config, qs) {
 export { stringToObject as _stringToObject };
 
 /**
- * helper function to check the namespace of a param is what you expec
+ * helper function to check the namespace of a param is what you expect
  * @param {string} namespace to append to params
  * @param {object} params object to append namespace to
  * @return {object} params object with namespaced keys

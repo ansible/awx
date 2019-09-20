@@ -115,7 +115,6 @@ describe('qs (qs.js)', () => {
     test('should get default QS config object', () => {
       expect(getQSConfig('organization')).toEqual({
         namespace: 'organization',
-        dateFields: ['modified', 'created'],
         defaultParams: { page: 1, page_size: 5, order_by: 'name' },
         integerFields: ['page', 'page_size'],
         dateFields: ['modified', 'created'],
@@ -133,7 +132,6 @@ describe('qs (qs.js)', () => {
       };
       expect(getQSConfig('inventory', defaults)).toEqual({
         namespace: 'inventory',
-        dateFields: ['modified', 'created'],
         defaultParams: { page: 1, page_size: 15 },
         integerFields: ['page', 'page_size'],
         dateFields: ['modified', 'created'],
@@ -637,7 +635,7 @@ describe('qs (qs.js)', () => {
       });
     });
 
-    it('should append to array', () => {
+    it('should append value to existing array', () => {
       const oldParams = {
         foo: ['one', 'two'],
       };
