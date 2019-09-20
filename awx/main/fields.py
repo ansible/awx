@@ -652,6 +652,9 @@ class CredentialInputField(JSONSchemaField):
                 )
                 if match:
                     label, extraneous = match.groups()
+                    # bail if the dependency is for a dynamic source
+                    if label in model_instance.dynamic_input_fields:
+                        break
                     if error.schema['properties'].get(label):
                         label = error.schema['properties'][label]['label']
                     errors[extraneous] = [
