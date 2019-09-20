@@ -483,6 +483,9 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                                             return data.webhook_key || '';
                                         })
                                         .catch(({data, status}) => {
+                                            if (status === 403) {
+                                                return;
+                                            }
                                             ProcessErrors(null, data, status, null, {
                                                 hdr: i18n._('Error!'),
                                                 msg: i18n._('Failed to get webhook key GET returned ') + status
