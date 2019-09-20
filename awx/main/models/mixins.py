@@ -601,7 +601,10 @@ class WebhookMixin(models.Model):
                 'context': 'ansible/awx' if license_type == 'open' else 'ansible/tower',
             }
             k, v = service_header[self.webhook_service]
-            headers = {k: v.format(self.webhook_credential.get_input('token'))}
+            headers = {
+                k: v.format(self.webhook_credential.get_input('token')),
+                'Content-Type': 'application/json'
+            }
             response = requests.post(status_api, data=json.dumps(data), headers=headers)
         except Exception:
             logger.exception("Posting webhook status caused an error.")
@@ -610,5 +613,8 @@ class WebhookMixin(models.Model):
         if response.status_code < 400:
             logger.debug("Webhook status update sent.")
         else:
-            logger.error("Posting webhook status failed, code: {}".format(response.status_code))
-            logger.error(response.text)
+            logger.error(
+                "Posting webhook status failed, code: {}\n"
+                "{}\n"
+                "Payload sent: {}".format(response.status_code, response.text, json.dumps(data))
+            )

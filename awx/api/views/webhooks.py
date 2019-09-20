@@ -225,7 +225,7 @@ class GitlabWebhookReceiver(WebhookReceiverBase):
             return
         parsed = urllib.parse.urlparse(repo_url)
 
-        return "{}://{}/projects/{}/repository/commits/{}/statuses".format(
+        return "{}://{}/api/v4/projects/{}/statuses/{}".format(
             parsed.scheme, parsed.netloc, project['id'], self.get_event_ref())
 
     def get_signature(self):
