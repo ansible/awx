@@ -40,3 +40,9 @@ class Settings(page.PageList, Setting):
 
 
 page.register_page(resources.settings, Settings)
+
+class SettingsLogging(base.Base):
+
+    pass
+
+page.register_page(resources.settings_logging, SettingsLogging)
