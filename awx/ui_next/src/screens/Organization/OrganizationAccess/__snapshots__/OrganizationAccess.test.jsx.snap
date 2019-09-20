@@ -41,6 +41,10 @@ exports[`<OrganizationAccess /> initially renders succesfully 1`] = `
     items={Array []}
     qsConfig={
       Object {
+        "dateFields": Array [
+          "modified",
+          "created",
+        ],
         "defaultParams": Object {
           "order_by": "first_name",
           "page": 1,
@@ -91,6 +95,10 @@ exports[`<OrganizationAccess /> initially renders succesfully 1`] = `
         items={Array []}
         qsConfig={
           Object {
+            "dateFields": Array [
+              "modified",
+              "created",
+            ],
             "defaultParams": Object {
               "order_by": "first_name",
               "page": 1,
@@ -157,6 +165,10 @@ exports[`<OrganizationAccess /> initially renders succesfully 1`] = `
             }
             qsConfig={
               Object {
+                "dateFields": Array [
+                  "modified",
+                  "created",
+                ],
                 "defaultParams": Object {
                   "order_by": "first_name",
                   "page": 1,
@@ -221,6 +233,10 @@ exports[`<OrganizationAccess /> initially renders succesfully 1`] = `
               itemCount={0}
               qsConfig={
                 Object {
+                  "dateFields": Array [
+                    "modified",
+                    "created",
+                  ],
                   "defaultParams": Object {
                     "order_by": "first_name",
                     "page": 1,
@@ -278,6 +294,10 @@ exports[`<OrganizationAccess /> initially renders succesfully 1`] = `
                   }
                   qsConfig={
                     Object {
+                      "dateFields": Array [
+                        "modified",
+                        "created",
+                      ],
                       "defaultParams": Object {
                         "order_by": "first_name",
                         "page": 1,
@@ -329,6 +349,10 @@ exports[`<OrganizationAccess /> initially renders succesfully 1`] = `
                     onRemoveAll={[Function]}
                     qsConfig={
                       Object {
+                        "dateFields": Array [
+                          "modified",
+                          "created",
+                        ],
                         "defaultParams": Object {
                           "order_by": "first_name",
                           "page": 1,
@@ -353,6 +377,10 @@ exports[`<OrganizationAccess /> initially renders succesfully 1`] = `
                         onRemoveAll={[Function]}
                         qsConfig={
                           Object {
+                            "dateFields": Array [
+                              "modified",
+                              "created",
+                            ],
                             "defaultParams": Object {
                               "order_by": "first_name",
                               "page": 1,
@@ -391,6 +419,10 @@ exports[`<OrganizationAccess /> initially renders succesfully 1`] = `
                             onRemoveAll={[Function]}
                             qsConfig={
                               Object {
+                                "dateFields": Array [
+                                  "modified",
+                                  "created",
+                                ],
                                 "defaultParams": Object {
                                   "order_by": "first_name",
                                   "page": 1,

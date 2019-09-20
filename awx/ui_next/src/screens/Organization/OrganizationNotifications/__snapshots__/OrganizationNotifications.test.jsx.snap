@@ -67,6 +67,10 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
               }
               qsConfig={
                 Object {
+                  "dateFields": Array [
+                    "modified",
+                    "created",
+                  ],
                   "defaultParams": Object {
                     "order_by": "name",
                     "page": 1,
@@ -137,6 +141,10 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                   }
                   qsConfig={
                     Object {
+                      "dateFields": Array [
+                        "modified",
+                        "created",
+                      ],
                       "defaultParams": Object {
                         "order_by": "name",
                         "page": 1,
@@ -222,6 +230,10 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                       }
                       qsConfig={
                         Object {
+                          "dateFields": Array [
+                            "modified",
+                            "created",
+                          ],
                           "defaultParams": Object {
                             "order_by": "name",
                             "page": 1,
@@ -286,6 +298,10 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                         itemCount={2}
                         qsConfig={
                           Object {
+                            "dateFields": Array [
+                              "modified",
+                              "created",
+                            ],
                             "defaultParams": Object {
                               "order_by": "name",
                               "page": 1,
@@ -344,6 +360,10 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                             }
                             qsConfig={
                               Object {
+                                "dateFields": Array [
+                                  "modified",
+                                  "created",
+                                ],
                                 "defaultParams": Object {
                                   "order_by": "name",
                                   "page": 1,
@@ -1713,6 +1733,10 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                               onRemoveAll={[Function]}
                               qsConfig={
                                 Object {
+                                  "dateFields": Array [
+                                    "modified",
+                                    "created",
+                                  ],
                                   "defaultParams": Object {
                                     "order_by": "name",
                                     "page": 1,
@@ -1737,6 +1761,10 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                   onRemoveAll={[Function]}
                                   qsConfig={
                                     Object {
+                                      "dateFields": Array [
+                                        "modified",
+                                        "created",
+                                      ],
                                       "defaultParams": Object {
                                         "order_by": "name",
                                         "page": 1,
@@ -1775,6 +1803,10 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                       onRemoveAll={[Function]}
                                       qsConfig={
                                         Object {
+                                          "dateFields": Array [
+                                            "modified",
+                                            "created",
+                                          ],
                                           "defaultParams": Object {
                                             "order_by": "name",
                                             "page": 1,

@@ -161,7 +161,8 @@ export const encodeNonDefaultQueryString = (config, params) => {
 export function getQSConfig(
   namespace,
   defaultParams = { page: 1, page_size: 5, order_by: 'name' },
-  integerFields = ['page', 'page_size']
+  integerFields = ['page', 'page_size'],
+  dateFields = ['modified', 'created']
 ) {
   if (!namespace) {
     throw new Error('a QS namespace is required');
@@ -170,6 +171,7 @@ export function getQSConfig(
     namespace,
     defaultParams,
     integerFields,
+    dateFields,
   };
 }
 
