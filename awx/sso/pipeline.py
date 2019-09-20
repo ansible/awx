@@ -158,9 +158,9 @@ def update_user_orgs_by_saml_attr(backend, details, user=None, *args, **kwargs):
     remove_admins = bool(org_map.get('remove_admins', True))
     remove_auditors = bool(org_map.get('remove_auditors', True))
 
-    attr_values = kwargs.get('response', {}).get('attributes', {}).get(org_map['saml_attr'], [])
-    attr_admin_values = kwargs.get('response', {}).get('attributes', {}).get(org_map['saml_admin_attr'], [])
-    attr_auditor_values = kwargs.get('response', {}).get('attributes', {}).get(org_map['saml_auditor_attr'], [])
+    attr_values = kwargs.get('response', {}).get('attributes', {}).get(org_map.get('saml_attr'), [])
+    attr_admin_values = kwargs.get('response', {}).get('attributes', {}).get(org_map.get('saml_admin_attr'), [])
+    attr_auditor_values = kwargs.get('response', {}).get('attributes', {}).get(org_map.get('saml_auditor_attr'), [])
 
     _update_org_from_attr(user, "member_role", attr_values, remove, False)
     _update_org_from_attr(user, "admin_role", attr_admin_values, False, remove_admins)
