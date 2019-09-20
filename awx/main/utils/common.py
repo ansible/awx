@@ -581,6 +581,7 @@ def prefetch_page_capabilities(model, page, prefetch_list, user):
         6: {'edit': False, 'start': False}
     }
     Each capability is produced for all items in the page in a single query
+
     Examples of prefetch language:
     prefetch_list = ['admin', 'execute']
       --> prefetch the admin (edit) and execute (start) permissions for
@@ -834,6 +835,7 @@ def ignore_inventory_group_removal():
 def set_environ(**environ):
     '''
     Temporarily set the process environment variables.
+
     >>> with set_environ(FOO='BAR'):
     ...   assert os.environ['FOO'] == 'BAR'
     '''
