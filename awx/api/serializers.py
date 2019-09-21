@@ -3364,7 +3364,7 @@ class WorkflowJobTemplateSerializer(JobTemplateMixin, LabelsListMixin, UnifiedJo
             webhook_key=self.reverse('api:webhook_key', kwargs={'model_kwarg': 'workflow_job_templates', 'pk': obj.pk}),
             webhook_receiver=(
                 self.reverse('api:webhook_receiver_{}'.format(obj.webhook_service),
-                             kwargs={'model_kwarg': 'job_templates', 'pk': obj.pk})
+                             kwargs={'model_kwarg': 'workflow_job_templates', 'pk': obj.pk})
                 if obj.webhook_service else ''
             ),
             workflow_nodes = self.reverse('api:workflow_job_template_workflow_nodes_list', kwargs={'pk': obj.pk}),
