@@ -18,12 +18,13 @@ logger = logging.getLogger('awx.isolated.manager')
 playbook_logger = logging.getLogger('awx.isolated.manager.playbooks')
 
 
-def set_pythonpath(venv_libdir, env):
+def set_pythonpath(venv_libdir, private_libdir, env):
     env.pop('PYTHONPATH', None)  # default to none if no python_ver matches
     for version in os.listdir(venv_libdir):
         if fnmatch.fnmatch(version, 'python[23].*'):
             if os.path.isdir(os.path.join(venv_libdir, version)):
                 env['PYTHONPATH'] = os.path.join(venv_libdir, version, "site-packages") + ":"
+                env['PYTHONPATH'] += os.path.join(private_libdir, version, "site-packages") + ":"
                 break
 
 

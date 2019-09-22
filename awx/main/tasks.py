@@ -924,10 +924,11 @@ class BaseTask(object):
         os.chmod(path, stat.S_IRUSR)
         return path
 
-    def add_ansible_venv(self, venv_path, env, isolated=False):
+    def add_ansible_venv(self, venv_path, private_data_dir, env, isolated=False):
         env['VIRTUAL_ENV'] = venv_path
         env['PATH'] = os.path.join(venv_path, "bin") + ":" + env['PATH']
         venv_libdir = os.path.join(venv_path, "lib")
+        private_libdir = os.path.join(private_data_dir, "requirements_pip", "lib")
 
         if not isolated and (
             not os.path.exists(venv_libdir) or
@@ -937,7 +938,7 @@ class BaseTask(object):
                 'Invalid virtual environment selected: {}'.format(venv_path)
             ))
 
-        isolated_manager.set_pythonpath(venv_libdir, env)
+        isolated_manager.set_pythonpath(venv_libdir, private_libdir, env)
 
     def add_awx_venv(self, env):
         env['VIRTUAL_ENV'] = settings.AWX_VENV_PATH
@@ -1406,8 +1407,8 @@ class RunJob(BaseTask):
 
         return passwords
 
-    def add_ansible_venv(self, venv_path, env, isolated=False):
-        super(RunJob, self).add_ansible_venv(venv_path, env, isolated=isolated)
+    def add_ansible_venv(self, venv_path, private_data_dir, env, isolated=False):
+        super(RunJob, self).add_ansible_venv(venv_path, private_data_dir, env, isolated=isolated)
         # Add awx/lib to PYTHONPATH.
         env['PYTHONPATH'] = env.get('PYTHONPATH', '') + self.get_path_to('..', 'lib') + ':'
 
@@ -1426,7 +1427,7 @@ class RunJob(BaseTask):
                                             private_data_files=private_data_files)
         if private_data_files is None:
             private_data_files = {}
-        self.add_ansible_venv(job.ansible_virtualenv_path, env, isolated=isolated)
+        self.add_ansible_venv(job.ansible_virtualenv_path, private_data_dir, env, isolated=isolated)
         # Set environment variables needed for inventory and job event
         # callbacks to work.
         env['JOB_ID'] = str(job.pk)
@@ -1649,6 +1650,11 @@ class RunJob(BaseTask):
                 logger.debug('Running project sync for {} because of galaxy role requirements.'.format(job.log_format))
                 needs_sync = True
 
+            pip_req_path = os.path.join(project_path, 'pip-requirements.txt')
+            if os.path.isfile(pip_req_path):
+                logger.debug('Running project sync for {} because of pip requirements.'.format(job.log_format))
+                needs_sync = True
+
             galaxy_collections_req_path = os.path.join(project_path, 'collections', 'requirements.yml')
             if os.path.exists(galaxy_collections_req_path):
                 logger.debug('Running project sync for {} because of galaxy collections requirements.'.format(job.log_format))
@@ -1821,7 +1827,7 @@ class RunProjectUpdate(BaseTask):
         env = super(RunProjectUpdate, self).build_env(project_update, private_data_dir,
                                                       isolated=isolated,
                                                       private_data_files=private_data_files)
-        self.add_ansible_venv(settings.ANSIBLE_VENV_PATH, env)
+        self.add_ansible_venv(settings.ANSIBLE_VENV_PATH, private_data_dir, env)
         env['ANSIBLE_RETRY_FILES_ENABLED'] = str(False)
         env['ANSIBLE_ASK_PASS'] = str(False)
         env['ANSIBLE_BECOME_ASK_PASS'] = str(False)
@@ -1904,9 +1910,11 @@ class RunProjectUpdate(BaseTask):
         if project_update.job_type == 'check':
             roles_enabled = False
             collections_enabled = False
+            pip_enabled = False
         else:
             roles_enabled = getattr(settings, 'AWX_ROLES_ENABLED', True)
             collections_enabled = getattr(settings, 'AWX_COLLECTIONS_ENABLED', True)
+            pip_enabled = getattr(settings, 'AWX_PIP_ENABLED', True)
             # collections were introduced in Ansible version 2.8
             if Version(get_ansible_version()) <= Version('2.8'):
                 collections_enabled = False
@@ -1923,10 +1931,12 @@ class RunProjectUpdate(BaseTask):
             'scm_full_checkout': True if project_update.job_type == 'run' else False,
             'roles_enabled': roles_enabled,
             'collections_enabled': collections_enabled,
+            'pip_enabled': pip_enabled,
         })
         if project_update.job_type != 'check' and self.job_private_data_dir:
             extra_vars['collections_destination'] = os.path.join(self.job_private_data_dir, 'requirements_collections')
             extra_vars['roles_destination'] = os.path.join(self.job_private_data_dir, 'requirements_roles')
+            extra_vars['pip_destination'] = os.path.join(self.job_private_data_dir, 'requirements_pip')
         # apply custom refspec from user for PR refs and the like
         if project_update.scm_refspec:
             extra_vars['scm_refspec'] = project_update.scm_refspec
@@ -2400,7 +2410,7 @@ class RunAdHocCommand(BaseTask):
         env = super(RunAdHocCommand, self).build_env(ad_hoc_command, private_data_dir,
                                                      isolated=isolated,
                                                      private_data_files=private_data_files)
-        self.add_ansible_venv(settings.ANSIBLE_VENV_PATH, env)
+        self.add_ansible_venv(settings.ANSIBLE_VENV_PATH, private_data_dir, env)
         # Set environment variables needed for inventory and ad hoc event
         # callbacks to work.
         env['AD_HOC_COMMAND_ID'] = str(ad_hoc_command.pk)

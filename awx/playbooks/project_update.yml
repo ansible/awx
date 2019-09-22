@@ -121,6 +121,24 @@
   tasks:
 
     - block:
+      - name: detect pip-requirements.txt
+        stat: path={{project_path|quote}}/pip-requirements.txt
+        register: doesPipRequirementsExist
+
+      - name: fetch python packages from pip-requirements.txt
+        command: pip install -I -r pip-requirements.txt --install-option="--prefix={{pip_destination}}"
+        args:
+          chdir: "{{project_path|quote}}"
+        register: pip_result
+        when: doesPipRequirementsExist.stat.exists
+        changed_when: "'was installed successfully' in pip_result.stdout"
+        environment:
+          ANSIBLE_FORCE_COLOR: False
+
+      when: pip_enabled|bool
+      delegate_to: localhost
+
+    - block:
       - name: detect requirements.yml
         stat: path={{project_path|quote}}/roles/requirements.yml
         register: doesRequirementsExist
