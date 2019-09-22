@@ -126,12 +126,12 @@
         register: doesPipRequirementsExist
 
       - name: fetch python packages from pip-requirements.txt
-        command: pip install -I -r pip-requirements.txt --install-option="--prefix={{pip_destination}}"
-        args:
-          chdir: "{{project_path|quote}}"
+        pip:
+          requirements: "{{project_path|quote}}/pip-requirements.txt"
+          extra_args: "-I --install-option='--prefix={{pip_destination|quote}}'"
         register: pip_result
         when: doesPipRequirementsExist.stat.exists
-        changed_when: "'was installed successfully' in pip_result.stdout"
+        changed_when: "'Successfully installed' in pip_result.stdout"
         environment:
           ANSIBLE_FORCE_COLOR: False
 
