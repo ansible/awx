@@ -12,7 +12,9 @@ describe('<Sort />', () => {
   });
 
   test('it triggers the expected callbacks', () => {
-    const columns = [{ name: 'Name', key: 'name', isSortable: true }];
+    const columns = [
+      { name: 'Name', key: 'name', isSortable: true, isSearchable: true },
+    ];
 
     const sortBtn = 'button[aria-label="Sort"]';
 

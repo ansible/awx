@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Route, withRouter, Switch, Redirect } from 'react-router-dom';
+import { Route, withRouter, Switch, Redirect, Link } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
@@ -15,7 +15,7 @@ import RoutedTabs from '@components/RoutedTabs';
 
 import JobDetail from './JobDetail';
 import JobOutput from './JobOutput';
-import { JOB_TYPE_URL_SEGMENTS } from './constants';
+import { JOB_TYPE_URL_SEGMENTS } from '../../constants';
 
 class Job extends Component {
   constructor(props) {
@@ -99,7 +99,14 @@ class Job extends Component {
       return (
         <PageSection>
           <Card className="awx-c-card">
-            <ContentError error={contentError} />
+            <ContentError error={contentError}>
+              {contentError.response.status === 404 && (
+                <span>
+                  {i18n._(`The page you requested could not be found.`)}{' '}
+                  <Link to="/jobs">{i18n._(`View all Jobs.`)}</Link>
+                </span>
+              )}
+            </ContentError>
           </Card>
         </PageSection>
       );
@@ -138,6 +145,21 @@ class Job extends Component {
                 key="output"
                 path="/jobs/:type/:id/output"
                 render={() => <JobOutput type={match.params.type} job={job} />}
+              />,
+              <Route
+                key="not-found"
+                path="*"
+                render={() =>
+                  !hasContentLoading && (
+                    <ContentError isNotFound>
+                      <Link
+                        to={`/jobs/${match.params.type}/${match.params.id}/details`}
+                      >
+                        {i18n._(`View Job Details`)}
+                      </Link>
+                    </ContentError>
+                  )
+                }
               />,
             ]}
           </Switch>

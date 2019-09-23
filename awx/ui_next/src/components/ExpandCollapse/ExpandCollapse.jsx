@@ -29,6 +29,8 @@ const ToolbarItem = styled(PFToolbarItem)`
   }
 `;
 
+// TODO: Recommend renaming this component to avoid confusion
+// with ExpandingContainer
 class ExpandCollapse extends React.Component {
   render() {
     const { isCompact, onCompact, onExpand, i18n } = this.props;

@@ -27,7 +27,7 @@ from rest_framework.exceptions import ParseError
 from awx.api.versioning import reverse
 from awx.main.models.base import (
     BaseModel, CreatedModifiedModel,
-    prevent_search,
+    prevent_search, accepts_json,
     JOB_TYPE_CHOICES, VERBOSITY_CHOICES,
     VarsDictProperty
 )
@@ -39,7 +39,7 @@ from awx.main.models.notifications import (
     NotificationTemplate,
     JobNotificationMixin,
 )
-from awx.main.utils import parse_yaml_or_json, getattr_dne
+from awx.main.utils import parse_yaml_or_json, getattr_dne, NullablePromptPseudoField
 from awx.main.fields import ImplicitRoleField, JSONField, AskForField
 from awx.main.models.mixins import (
     ResourceMixin,
@@ -96,6 +96,13 @@ class JobOptions(BaseModel):
         default='',
         blank=True,
     )
+    scm_branch = models.CharField(
+        max_length=1024,
+        default='',
+        blank=True,
+        help_text=_('Branch to use in job run. Project default used if blank. '
+                    'Only allowed if project allow_override field is set to true.'),
+    )
     forks = models.PositiveIntegerField(
         blank=True,
         default=0,
@@ -109,10 +116,10 @@ class JobOptions(BaseModel):
         blank=True,
         default=0,
     )
-    extra_vars = prevent_search(models.TextField(
+    extra_vars = prevent_search(accepts_json(models.TextField(
         blank=True,
         default='',
-    ))
+    )))
     job_tags = models.CharField(
         max_length=1024,
         blank=True,
@@ -234,6 +241,11 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         default=False,
         allows_field='credentials'
     )
+    ask_scm_branch_on_launch = AskForField(
+        blank=True,
+        default=False,
+        allows_field='scm_branch'
+    )
     job_slice_count = models.PositiveIntegerField(
         blank=True,
         default=1,
@@ -259,7 +271,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
     @classmethod
     def _get_unified_job_field_names(cls):
         return set(f.name for f in JobOptions._meta.fields) | set(
-            ['name', 'description', 'schedule', 'survey_passwords', 'labels', 'credentials',
+            ['name', 'description', 'survey_passwords', 'labels', 'credentials',
              'job_slice_number', 'job_slice_count']
         )
 
@@ -387,7 +399,21 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
                 # no-op case: Fields the same as template's value
                 # counted as neither accepted or ignored
                 continue
+            elif field_name == 'scm_branch' and old_value == '' and self.project and new_value == self.project.scm_branch:
+                # special case of "not provided" for branches
+                # job template does not provide branch, runs with default branch
+                continue
             elif getattr(self, ask_field_name):
+                # Special case where prompts can be rejected based on project setting
+                if field_name == 'scm_branch':
+                    if not self.project:
+                        rejected_data[field_name] = new_value
+                        errors_dict[field_name] = _('Project is missing.')
+                        continue
+                    if kwargs['scm_branch'] != self.project.scm_branch and not self.project.allow_override:
+                        rejected_data[field_name] = new_value
+                        errors_dict[field_name] = _('Project does not allow override of branch.')
+                        continue
                 # accepted prompt
                 prompted_data[field_name] = new_value
             else:
@@ -396,7 +422,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
                 # Not considered an error for manual launch, to support old
                 # behavior of putting them in ignored_fields and launching anyway
                 if 'prompts' not in exclude_errors:
-                    errors_dict[field_name] = _('Field is not configured to prompt on launch.').format(field_name=field_name)
+                    errors_dict[field_name] = _('Field is not configured to prompt on launch.')
 
         if ('prompts' not in exclude_errors and
                 (not getattr(self, 'ask_credential_on_launch', False)) and
@@ -640,11 +666,19 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
     def processed_hosts(self):
         return self._get_hosts(job_host_summaries__processed__gt=0)
 
+    @property
+    def ignored_hosts(self):
+        return self._get_hosts(job_host_summaries__ignored__gt=0)
+
+    @property
+    def rescued_hosts(self):
+        return self._get_hosts(job_host_summaries__rescued__gt=0)
+
     def notification_data(self, block=5):
         data = super(Job, self).notification_data()
         all_hosts = {}
         # NOTE: Probably related to job event slowness, remove at some point -matburt
-        if block:
+        if block and self.status != 'running':
             summaries = self.job_host_summaries.all()
             while block > 0 and not len(summaries):
                 time.sleep(1)
@@ -658,7 +692,9 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
                                           failures=h.failures,
                                           ok=h.ok,
                                           processed=h.processed,
-                                          skipped=h.skipped)
+                                          skipped=h.skipped,
+                                          rescued=h.rescued,
+                                          ignored=h.ignored)
         data.update(dict(inventory=self.inventory.name if self.inventory else None,
                          project=self.project.name if self.project else None,
                          playbook=self.playbook,
@@ -803,25 +839,6 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
                 host.save()
 
 
-# Add on aliases for the non-related-model fields
-class NullablePromptPsuedoField(object):
-    """
-    Interface for psuedo-property stored in `char_prompts` dict
-    Used in LaunchTimeConfig and submodels
-    """
-    def __init__(self, field_name):
-        self.field_name = field_name
-
-    def __get__(self, instance, type=None):
-        return instance.char_prompts.get(self.field_name, None)
-
-    def __set__(self, instance, value):
-        if value in (None, {}):
-            instance.char_prompts.pop(self.field_name, None)
-        else:
-            instance.char_prompts[self.field_name] = value
-
-
 class LaunchTimeConfigBase(BaseModel):
     '''
     Needed as separate class from LaunchTimeConfig because some models
@@ -842,6 +859,7 @@ class LaunchTimeConfigBase(BaseModel):
         null=True,
         default=None,
         on_delete=models.SET_NULL,
+        help_text=_('Inventory applied as a prompt, assuming job template prompts for inventory')
     )
     # All standard fields are stored in this dictionary field
     # This is a solution to the nullable CharField problem, specific to prompting
@@ -878,42 +896,14 @@ class LaunchTimeConfigBase(BaseModel):
                     data[prompt_name] = prompt_val
         return data
 
-    def display_extra_vars(self):
-        '''
-        Hides fields marked as passwords in survey.
-        '''
-        if self.survey_passwords:
-            extra_vars = parse_yaml_or_json(self.extra_vars).copy()
-            for key, value in self.survey_passwords.items():
-                if key in extra_vars:
-                    extra_vars[key] = value
-            return extra_vars
-        else:
-            return self.extra_vars
 
-    def display_extra_data(self):
-        return self.display_extra_vars()
-
-    @property
-    def _credential(self):
-        '''
-        Only used for workflow nodes to support backward compatibility.
-        '''
-        try:
-            return [cred for cred in self.credentials.all() if cred.credential_type.kind == 'ssh'][0]
-        except IndexError:
-            return None
-
-    @property
-    def credential(self):
-        '''
-        Returns an integer so it can be used as IntegerField in serializer
-        '''
-        cred = self._credential
-        if cred is not None:
-            return cred.pk
-        else:
-            return None
+for field_name in JobTemplate.get_ask_mapping().keys():
+    if field_name == 'extra_vars':
+        continue
+    try:
+        LaunchTimeConfigBase._meta.get_field(field_name)
+    except FieldDoesNotExist:
+        setattr(LaunchTimeConfigBase, field_name, NullablePromptPseudoField(field_name))
 
 
 class LaunchTimeConfig(LaunchTimeConfigBase):
@@ -948,14 +938,21 @@ class LaunchTimeConfig(LaunchTimeConfigBase):
     def extra_vars(self, extra_vars):
         self.extra_data = extra_vars
 
+    def display_extra_vars(self):
+        '''
+        Hides fields marked as passwords in survey.
+        '''
+        if hasattr(self, 'survey_passwords') and self.survey_passwords:
+            extra_vars = parse_yaml_or_json(self.extra_vars).copy()
+            for key, value in self.survey_passwords.items():
+                if key in extra_vars:
+                    extra_vars[key] = value
+            return extra_vars
+        else:
+            return self.extra_vars
 
-for field_name in JobTemplate.get_ask_mapping().keys():
-    if field_name == 'extra_vars':
-        continue
-    try:
-        LaunchTimeConfig._meta.get_field(field_name)
-    except FieldDoesNotExist:
-        setattr(LaunchTimeConfig, field_name, NullablePromptPsuedoField(field_name))
+    def display_extra_data(self):
+        return self.display_extra_vars()
 
 
 class JobLaunchConfig(LaunchTimeConfig):

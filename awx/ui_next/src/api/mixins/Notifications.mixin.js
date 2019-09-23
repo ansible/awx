@@ -4,23 +4,45 @@ const NotificationsMixin = parent =>
       return this.http.options(`${this.baseUrl}${id}/notification_templates/`);
     }
 
-    readNotificationTemplates(id, params = {}) {
-      return this.http.get(`${this.baseUrl}${id}/notification_templates/`, {
-        params,
-      });
+    readNotificationTemplates(id, params) {
+      return this.http.get(
+        `${this.baseUrl}${id}/notification_templates/`,
+        params
+      );
     }
 
-    readNotificationTemplatesSuccess(id, params = {}) {
+    readNotificationTemplatesStarted(id, params) {
+      return this.http.get(
+        `${this.baseUrl}${id}/notification_templates_started/`,
+        { params }
+      );
+    }
+
+    readNotificationTemplatesSuccess(id, params) {
       return this.http.get(
         `${this.baseUrl}${id}/notification_templates_success/`,
         { params }
       );
     }
 
-    readNotificationTemplatesError(id, params = {}) {
+    readNotificationTemplatesError(id, params) {
       return this.http.get(
         `${this.baseUrl}${id}/notification_templates_error/`,
         { params }
+      );
+    }
+
+    associateNotificationTemplatesStarted(resourceId, notificationId) {
+      return this.http.post(
+        `${this.baseUrl}${resourceId}/notification_templates_started/`,
+        { id: notificationId }
+      );
+    }
+
+    disassociateNotificationTemplatesStarted(resourceId, notificationId) {
+      return this.http.post(
+        `${this.baseUrl}${resourceId}/notification_templates_started/`,
+        { id: notificationId, disassociate: true }
       );
     }
 
@@ -53,44 +75,72 @@ const NotificationsMixin = parent =>
     }
 
     /**
-     * This is a helper method meant to simplify setting the "on" or "off" status of
+     * This is a helper method meant to simplify setting the "on" status of
      * a related notification.
      *
      * @param[resourceId] - id of the base resource
      * @param[notificationId] - id of the notification
      * @param[notificationType] - the type of notification, options are "success" and "error"
-     * @param[associationState] - Boolean for associating or disassociating,
-     *                            options are true or false
      */
-    // eslint-disable-next-line max-len
-    updateNotificationTemplateAssociation(
+    associateNotificationTemplate(
       resourceId,
       notificationId,
-      notificationType,
-      associationState
+      notificationType
     ) {
-      if (notificationType === 'success' && associationState === true) {
+      if (notificationType === 'started') {
+        return this.associateNotificationTemplatesStarted(
+          resourceId,
+          notificationId
+        );
+      }
+
+      if (notificationType === 'success') {
         return this.associateNotificationTemplatesSuccess(
           resourceId,
           notificationId
         );
       }
 
-      if (notificationType === 'success' && associationState === false) {
-        return this.disassociateNotificationTemplatesSuccess(
-          resourceId,
-          notificationId
-        );
-      }
-
-      if (notificationType === 'error' && associationState === true) {
+      if (notificationType === 'error') {
         return this.associateNotificationTemplatesError(
           resourceId,
           notificationId
         );
       }
 
-      if (notificationType === 'error' && associationState === false) {
+      throw new Error(
+        `Unsupported notificationType for association: ${notificationType}`
+      );
+    }
+
+    /**
+     * This is a helper method meant to simplify setting the "off" status of
+     * a related notification.
+     *
+     * @param[resourceId] - id of the base resource
+     * @param[notificationId] - id of the notification
+     * @param[notificationType] - the type of notification, options are "success" and "error"
+     */
+    disassociateNotificationTemplate(
+      resourceId,
+      notificationId,
+      notificationType
+    ) {
+      if (notificationType === 'started') {
+        return this.disassociateNotificationTemplatesStarted(
+          resourceId,
+          notificationId
+        );
+      }
+
+      if (notificationType === 'success') {
+        return this.disassociateNotificationTemplatesSuccess(
+          resourceId,
+          notificationId
+        );
+      }
+
+      if (notificationType === 'error') {
         return this.disassociateNotificationTemplatesError(
           resourceId,
           notificationId
@@ -98,7 +148,7 @@ const NotificationsMixin = parent =>
       }
 
       throw new Error(
-        `Unsupported notificationType, associationState combination: ${notificationType}, ${associationState}`
+        `Unsupported notificationType for disassociation: ${notificationType}`
       );
     }
   };

@@ -5,7 +5,12 @@ USER root
 ADD ansible.repo /etc/yum.repos.d/ansible.repo
 ADD RPM-GPG-KEY-ansible-release /etc/pki/rpm-gpg/RPM-GPG-KEY-ansible-release
 
-RUN yum -y update && yum -y install epel-release
+
+# add rhscl repo for rh-postgresql-devel
+RUN yum -y install centos-release-scl 
+RUN yum-config-manager --enable rhel-server-rhscl-7-rpms
+
+RUN yum -y update && yum -y install epel-release && yum -y install https://centos7.iuscommunity.org/ius-release.rpm 
 
 # sync with tools/docker-compose/Dockerfile
 RUN yum -y install acl \
@@ -16,7 +21,8 @@ RUN yum -y install acl \
   cyrus-sasl-devel \
   gcc \
   gcc-c++ \
-  git \
+  git2u \
+  git2u-core \
   krb5-devel \
   krb5-libs \
   krb5-workstation \
@@ -34,7 +40,10 @@ RUN yum -y install acl \
   nodejs \
   openldap-devel \
   openssh-server \
-  postgresql-devel \
+  rh-postgresql10-postgresql-devel \
+  rh-postgresql10-postgresql-server-syspaths \
+  scl-utils-build \
+  scl-utils \
   python-devel \
   python-pip \
   python-psutil \
@@ -62,6 +71,8 @@ RUN chmod +x /tini
 RUN python3 -m ensurepip && pip3 install virtualenv
 RUN pip install supervisor
 
+RUN find / -name pg_config
+
 ADD Makefile /tmp/Makefile
 RUN mkdir /tmp/requirements
 ADD requirements/requirements_ansible.txt \
@@ -81,12 +92,15 @@ RUN yum -y remove cyrus-sasl-devel \
   libxml2-devel \
   libxslt-devel \
   openldap-devel \
-  postgresql-devel \
+  rh-postgresql10-postgresql-devel \
   python-devel \
   python36-devel \
   nodejs \
   xmlsec1-devel \
   xmlsec1-openssl-devel
+
+# makes postgres available for data migrations when upgrading
+RUN export PATH=/usr/pgsql-10/bin:$PATH
 
 RUN yum -y clean all
 RUN rm -rf /root/.cache

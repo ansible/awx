@@ -9,6 +9,7 @@ describe('CheckboxListItem', () => {
       <CheckboxListItem
         itemId={1}
         name="Buzz"
+        label="Buzz"
         isSelected={false}
         onSelect={() => {}}
       />

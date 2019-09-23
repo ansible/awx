@@ -38,6 +38,7 @@ describe('<ToolbarDeleteButton />', () => {
       <ToolbarDeleteButton onDelete={onDelete} itemsToDelete={[itemA]} />
     );
     wrapper.find('ToolbarDeleteButton').setState({ isModalOpen: true });
+    wrapper.update();
     wrapper.find('button.pf-m-danger').simulate('click');
     expect(onDelete).toHaveBeenCalled();
     expect(wrapper.find('ToolbarDeleteButton').state('isModalOpen')).toBe(

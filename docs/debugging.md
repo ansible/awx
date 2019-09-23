@@ -70,10 +70,10 @@ a telnet session:
 
         def run(self, pk, **kwargs):
             # This will set a breakpoint and open an interactive Python
-            # debugger exposed on a random port between 6899-6999.  The chosen
+            # debugger exposed on a random port between 7899-7999.  The chosen
             # port will be reported as a warning in the Tower logs, e.g.,
             #
-            # [2017-01-30 22:26:04,366: WARNING/Worker-11] Remote Debugger:6900: Please telnet into 0.0.0.0 6900.
+            # [2017-01-30 22:26:04,366: WARNING/Worker-11] Remote Debugger:7900: Please telnet into 0.0.0.0 7900.
             #
             # You can access it from your host machine using telnet:
             #

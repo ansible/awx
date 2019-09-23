@@ -152,6 +152,7 @@ describe('<_AddResourceRole />', () => {
       selectedResourceRows: [],
       selectedRoleRows: [],
       currentStepId: 1,
+      maxEnabledStep: 1,
     });
     wrapper.instance().handleResourceSelect('teams');
     expect(wrapper.state()).toEqual({
@@ -159,6 +160,7 @@ describe('<_AddResourceRole />', () => {
       selectedResourceRows: [],
       selectedRoleRows: [],
       currentStepId: 1,
+      maxEnabledStep: 1,
     });
   });
   test('handleWizardSave makes correct api calls, calls onSave when done', async () => {

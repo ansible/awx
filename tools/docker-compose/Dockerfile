@@ -2,7 +2,12 @@ FROM centos:7
 
 ARG UID=0
 
-RUN yum -y update && yum -y install epel-release
+# Add ansible-devel so that we get collections!
+ADD tools/docker-compose/ansible_nightly.repo /etc/yum.repos.d/ansible_nightly.repo
+
+RUN yum -y update && yum -y install epel-release && \
+    yum -y install https://centos7.iuscommunity.org/ius-release.rpm \
+    yum install https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
 
 # sync with installer/roles/image_build/templates/Dockerfile.j2
 RUN yum -y install acl \
@@ -17,7 +22,8 @@ RUN yum -y install acl \
   gcc \
   gcc-c++ \
   GConf2 \
-  git \
+  git2u \
+  git2u-core \
   gtk3 \
   ipa-gothic-fonts \
   krb5-devel \
@@ -45,8 +51,10 @@ RUN yum -y install acl \
   nodejs \
   openldap-devel \
   openssh-server \
-  postgresql-contrib \
-  postgresql-devel \
+  patch \
+  postgresql10 \
+  postgresql10-contrib \
+  postgresql10-devel \
   python-devel \
   python-pip \
   python-psutil \
@@ -73,6 +81,8 @@ RUN yum -y install acl \
   xorg-x11-fonts-Type1 \
   xorg-x11-utils \
   yum-utils
+
+ENV PATH="/usr/pgsql-10/bin:${PATH}"
 
 RUN yum install -y https://github.com/krallin/tini/releases/download/v0.18.0/tini_0.18.0.rpm
 
@@ -122,7 +132,7 @@ RUN yum -y remove cyrus-sasl-devel \
   libxml2-devel \
   libxslt-devel \
   openldap-devel \
-  postgresql-devel \
+  postgresql10-devel \
   python-devel \
   python36-devel \
   nodejs \
@@ -147,6 +157,7 @@ ADD tools/docker-compose/bootstrap_development.sh /bootstrap_development.sh
 EXPOSE 8043 8013 8080 22
 
 ADD tools/docker-compose/entrypoint.sh /
+ADD tools/scripts/awx-python /usr/bin/awx-python
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["/bin/bash"]
 
@@ -157,5 +168,7 @@ RUN for dir in /var/lib/awx/ /var/log/tower/ /projects /.ansible /var/log/nginx 
 RUN for file in /etc/passwd /etc/supervisord.conf \
   /venv/awx/lib/python3.6/site-packages/awx.egg-link /var/run/nginx.pid; \
   do touch $file; chmod -R g+rwx $file; chgrp -R root $file; done
+
+ENV HOME /var/lib/awx
 
 ENV PATH=/usr/local/n/versions/node/10.15.0/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin

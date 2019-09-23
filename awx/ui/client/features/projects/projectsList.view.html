@@ -81,6 +81,10 @@
                         <at-truncate string="{{ project.scm_revision }}" maxLength="7"></at-truncate>
                     </div>
                     <at-row-item
+                        label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_DESCRIPTION')}}"
+                        value="{{ project.description | sanitize }}">
+                    </at-row-item>
+                    <at-row-item
                         label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_ORGANIZATION')}}"
                         value="{{ project.summary_fields.organization.name }}"
                         value-link="/#/organizations/{{ project.organization }}">

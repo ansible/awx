@@ -46,7 +46,7 @@ def test_extra_credential_creation(get, post, organization_factory, job_template
     jt = job_template_factory("jt", organization=objs.organization,
                               inventory='test_inv', project='test_proj').job_template
 
-    url = reverse('api:job_template_extra_credentials_list', kwargs={'version': 'v2', 'pk': jt.pk})
+    url = reverse('api:job_template_extra_credentials_list', kwargs={'pk': jt.pk})
     response = post(url, {
         'name': 'My Cred',
         'credential_type': credentialtype_aws.pk,
@@ -68,7 +68,7 @@ def test_invalid_credential_kind_xfail(get, post, organization_factory, job_temp
     jt = job_template_factory("jt", organization=objs.organization,
                               inventory='test_inv', project='test_proj').job_template
 
-    url = reverse('api:job_template_credentials_list', kwargs={'version': 'v2', 'pk': jt.pk})
+    url = reverse('api:job_template_credentials_list', kwargs={'pk': jt.pk})
     cred_type = CredentialType.defaults[kind]()
     cred_type.save()
     response = post(url, {
@@ -88,7 +88,7 @@ def test_extra_credential_unique_type_xfail(get, post, organization_factory, job
     jt = job_template_factory("jt", organization=objs.organization,
                               inventory='test_inv', project='test_proj').job_template
 
-    url = reverse('api:job_template_extra_credentials_list', kwargs={'version': 'v2', 'pk': jt.pk})
+    url = reverse('api:job_template_extra_credentials_list', kwargs={'pk': jt.pk})
     response = post(url, {
         'name': 'My Cred',
         'credential_type': credentialtype_aws.pk,
@@ -124,7 +124,7 @@ def test_attach_extra_credential(get, post, organization_factory, job_template_f
     jt = job_template_factory("jt", organization=objs.organization,
                               inventory='test_inv', project='test_proj').job_template
 
-    url = reverse('api:job_template_extra_credentials_list', kwargs={'version': 'v2', 'pk': jt.pk})
+    url = reverse('api:job_template_extra_credentials_list', kwargs={'pk': jt.pk})
     response = post(url, {
         'associate': True,
         'id': credential.id,
@@ -143,7 +143,7 @@ def test_detach_extra_credential(get, post, organization_factory, job_template_f
     jt.credentials.add(credential)
     jt.save()
 
-    url = reverse('api:job_template_extra_credentials_list', kwargs={'version': 'v2', 'pk': jt.pk})
+    url = reverse('api:job_template_extra_credentials_list', kwargs={'pk': jt.pk})
     response = post(url, {
         'disassociate': True,
         'id': credential.id,
@@ -161,7 +161,7 @@ def test_attach_extra_credential_wrong_kind_xfail(get, post, organization_factor
     jt = job_template_factory("jt", organization=objs.organization,
                               inventory='test_inv', project='test_proj').job_template
 
-    url = reverse('api:job_template_extra_credentials_list', kwargs={'version': 'v2', 'pk': jt.pk})
+    url = reverse('api:job_template_extra_credentials_list', kwargs={'pk': jt.pk})
     response = post(url, {
         'associate': True,
         'id': machine_credential.id,
@@ -505,3 +505,37 @@ def test_callback_disallowed_null_inventory(project):
     with pytest.raises(ValidationError) as exc:
         serializer.validate({'host_config_key': 'asdfbasecfeee'})
     assert 'Cannot enable provisioning callback without an inventory set' in str(exc)
+
+
+@pytest.mark.django_db
+def test_job_template_branch_error(project, inventory, post, admin_user):
+    r = post(
+        url=reverse('api:job_template_list'),
+        data={
+            "name": "fooo",
+            "inventory": inventory.pk,
+            "project": project.pk,
+            "playbook": "helloworld.yml",
+            "scm_branch": "foobar"
+        },
+        user=admin_user,
+        expect=400
+    )
+    assert 'Project does not allow overriding branch' in str(r.data['scm_branch'])
+
+
+@pytest.mark.django_db
+def test_job_template_branch_prompt_error(project, inventory, post, admin_user):
+    r = post(
+        url=reverse('api:job_template_list'),
+        data={
+            "name": "fooo",
+            "inventory": inventory.pk,
+            "project": project.pk,
+            "playbook": "helloworld.yml",
+            "ask_scm_branch_on_launch": True
+        },
+        user=admin_user,
+        expect=400
+    )
+    assert 'Project does not allow overriding branch' in str(r.data['ask_scm_branch_on_launch'])

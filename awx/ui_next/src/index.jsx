@@ -32,6 +32,7 @@ import License from '@screens/License';
 import Teams from '@screens/Team';
 import Templates from '@screens/Template';
 import Users from '@screens/User';
+import NotFound from '@screens/NotFound';
 
 import App from './App';
 import RootProvider from './RootProvider';
@@ -224,8 +225,8 @@ export function main(render) {
                           ],
                         },
                       ]}
-                      render={({ routeGroups }) =>
-                        routeGroups
+                      render={({ routeGroups }) => {
+                        const routeList = routeGroups
                           .reduce(
                             (allRoutes, { routes }) => allRoutes.concat(routes),
                             []
@@ -238,8 +239,16 @@ export function main(render) {
                                 <PageComponent match={match} />
                               )}
                             />
-                          ))
-                      }
+                          ));
+                        routeList.push(
+                          <Route
+                            key="not-found"
+                            path="*"
+                            component={NotFound}
+                          />
+                        );
+                        return <Switch>{routeList}</Switch>;
+                      }}
                     />
                   )}
                 />

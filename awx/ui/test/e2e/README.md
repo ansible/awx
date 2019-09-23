@@ -76,3 +76,7 @@ Once running, you can connect to nodes over vnc at `vnc://localhost:5900` and `v
 - On macOS, safari has a built-in vnc client and you should be able to use these urls directly.
 - On linux, you'll need to have your favorite vnc client ready (like `tigervnc`). Depending on the vnc client you use, you may need to visit `localhost:5900` and input the password `secret` separately.
 - For the chrome and firefox nodes, the development container instance of awx is mapped to hostname `awx` (https://awx:8043)
+
+#### Known Issues
+- ```2019-07-30 13:35:47.883 chromedriver[66032:1305791] pid(66032)/euid(501) is calling TIS/TSM in non-main thread environment, ERROR : This is NOT allowed. Please call TIS/TSM in main thread!!!```
+ Specific to MacOS High Sierra. More here: https://github.com/processing/processing/issues/5462

@@ -128,6 +128,7 @@ export default ['$scope', '$location', '$stateParams', 'GenerateForm',
                 $scope.pathRequired = ($scope.scm_type.value === 'manual') ? true : false;
                 $scope.scmRequired = ($scope.scm_type.value !== 'manual') ? true : false;
                 $scope.scmBranchLabel = i18n._('SCM Branch');
+                $scope.scmRefspecLabel = i18n._('SCM Refspec');
                 // Dynamically update popover values
                 if ($scope.scm_type.value) {
                     if(($scope.lookupType === 'insights_credential' && $scope.scm_type.value !== 'insights') || ($scope.lookupType === 'scm_credential' && $scope.scm_type.value === 'insights')) {

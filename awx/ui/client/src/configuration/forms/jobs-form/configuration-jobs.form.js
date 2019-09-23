@@ -61,6 +61,9 @@ export default ['i18n', function(i18n) {
             AWX_ROLES_ENABLED: {
                 type: 'toggleSwitch',
             },
+            AWX_COLLECTIONS_ENABLED: {
+                type: 'toggleSwitch',
+            },
             AWX_TASK_ENV: {
                 type: 'textarea',
                 reset: 'AWX_TASK_ENV',

@@ -124,7 +124,26 @@ export default function BuildDescription(BuildAnchor, $log, i18n) {
                              break;
                          // expected outcome: "operation <object1>"
                          case 'update':
-                             activity.description += activity.object1 + BuildAnchor(activity.summary_fields[activity.object1][0], activity.object1, activity);
+                             if (activity.object1 === 'workflow_approval' &&
+                                _.has(activity, 'changes.status') &&
+                                activity.changes.status.length === 2
+                            ) {
+                                let operationText = '';
+                                if (activity.changes.status[1] === 'successful') {
+                                    operationText = i18n._('approved');
+                                } else if (activity.changes.status[1] === 'failed') {
+                                    if (activity.changes.timed_out && activity.changes.timed_out[1] === true) {
+                                        operationText = i18n._('timed out');
+                                    } else {
+                                        operationText = i18n._('denied');
+                                    }
+                                } else {
+                                    operationText = i18n._('updated');
+                                }
+                                activity.description = `${operationText} ${activity.object1} ${BuildAnchor(activity.summary_fields[activity.object1][0], activity.object1, activity)}`;
+                             } else {
+                                activity.description += activity.object1 + BuildAnchor(activity.summary_fields[activity.object1][0], activity.object1, activity);
+                             }
                              break;
                          case 'create':
                              activity.description += activity.object1 + BuildAnchor(activity.changes, activity.object1, activity);

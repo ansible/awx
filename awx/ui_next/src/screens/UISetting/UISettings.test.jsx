@@ -24,8 +24,6 @@ describe('<UISettings />', () => {
     expect(pageSections.length).toBe(2);
     expect(title.length).toBe(1);
     expect(title.props().size).toBe('2xl');
-    pageSections.forEach(section => {
-      expect(section.props().variant).toBeDefined();
-    });
+    expect(pageSections.first().props().variant).toBe('light');
   });
 });

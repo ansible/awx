@@ -343,6 +343,28 @@ function getProjectUpdateDetails (updateId) {
     return { link, tooltip };
 }
 
+function getSCMBranchDetails (scmBranch) {
+    const label = strings.get('labels.SCM_BRANCH');
+    const value = scmBranch || resource.model.get('scm_branch');
+
+    if (!value) {
+        return null;
+    }
+
+    return { label, value };
+}
+
+function getSCMRefspecDetails (scmRefspec) {
+    const label = strings.get('labels.SCM_REFSPEC');
+    const value = scmRefspec || resource.model.get('scm_refspec');
+
+    if (!value) {
+        return null;
+    }
+
+    return { label, value };
+}
+
 function getInventoryScmDetails (updateId, updateStatus) {
     const projectId = resource.model.get('summary_fields.source_project.id');
     const projectName = resource.model.get('summary_fields.source_project.name');
@@ -420,8 +442,8 @@ function getJobExplanationDetails () {
     return { label, less, more, showMore, hasMoreToShow };
 }
 
-function getResultTracebackDetails () {
-    const traceback = resource.model.get('result_traceback');
+function getResultTracebackDetails (resultTraceback) {
+    const traceback = resultTraceback || resource.model.get('result_traceback');
 
     if (!traceback) {
         return null;
@@ -800,6 +822,8 @@ function JobDetailsController (
         vm.project = getProjectDetails();
         vm.projectUpdate = getProjectUpdateDetails();
         vm.projectStatus = getProjectStatusDetails();
+        vm.scmBranch = getSCMBranchDetails();
+        vm.scmRefspec = getSCMRefspecDetails();
         vm.scmRevision = getSCMRevisionDetails();
         vm.inventoryScm = getInventoryScmDetails();
         vm.playbook = getPlaybookDetails();
@@ -840,21 +864,27 @@ function JobDetailsController (
             started,
             finished,
             scm,
+            scmBranch,
+            scmRefspec,
             inventoryScm,
             scmRevision,
             instanceGroup,
             environment,
             artifacts,
-            executionNode
+            executionNode,
+            resultTraceback
         }) => {
             vm.started = getStartDetails(started);
             vm.finished = getFinishDetails(finished);
             vm.projectUpdate = getProjectUpdateDetails(scm.id);
             vm.projectStatus = getProjectStatusDetails(scm.status);
+            vm.scmBranch = getSCMBranchDetails(scmBranch);
+            vm.scmRefspec = getSCMRefspecDetails(scmRefspec);
             vm.environment = getEnvironmentDetails(environment);
             vm.artifacts = getArtifactsDetails(artifacts);
             vm.executionNode = getExecutionNodeDetails(executionNode);
             vm.inventoryScm = getInventoryScmDetails(inventoryScm.id, inventoryScm.status);
+            vm.resultTraceback = getResultTracebackDetails(resultTraceback);
             vm.scmRevision = getSCMRevisionDetails(scmRevision);
             vm.instanceGroup = getInstanceGroupDetails(instanceGroup);
             vm.status = getStatusDetails(status);

@@ -1,8 +1,13 @@
 import axios from 'axios';
 
+import { encodeQueryString } from '@util/qs';
+
 const defaultHttp = axios.create({
   xsrfCookieName: 'csrftoken',
   xsrfHeaderName: 'X-CSRFToken',
+  paramsSerializer(params) {
+    return encodeQueryString(params);
+  },
 });
 
 class Base {
@@ -19,8 +24,10 @@ class Base {
     return this.http.delete(`${this.baseUrl}${id}/`);
   }
 
-  read(params = {}) {
-    return this.http.get(this.baseUrl, { params });
+  read(params) {
+    return this.http.get(this.baseUrl, {
+      params,
+    });
   }
 
   readDetail(id) {

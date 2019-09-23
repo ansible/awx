@@ -1,7 +1,16 @@
+// TODO: switch to using Lingui i18n for pluralization
 export function pluralize(str) {
-  return str[str.length - 1] === 's' ? `${str}es` : `${str}s`;
+  const lastChar = str[str.length - 1];
+  if (lastChar === 's') {
+    return `${str}es`;
+  }
+  if (lastChar === 'y') {
+    return `${str.substr(0, str.length - 1)}ies`;
+  }
+  return `${str}s`;
 }
 
+// TODO: switch to using Lingui i18n for articles
 export function getArticle(str) {
   const first = str[0];
   if ('aeiou'.includes(first)) {

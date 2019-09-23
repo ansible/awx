@@ -52,7 +52,7 @@
         </div>
         <div ng-click="refresh()">
             <i class="fa fa-refresh InsightsNav-refresh"
-                aw-tool-tip="Refresh Insights" data-placement="left" data-original-title="" title=""
+                aw-tool-tip="{{ strings.get('tooltips.REFRESH_INSIGHTS') }}" data-placement="left" data-original-title="" title=""
                 ng-hide="!insights_credential">
             </i>
         </div>
@@ -87,7 +87,7 @@
 </div>
 
 <div class="buttons Form-buttons">
-    <button type="button" class="btn btn-sm Form-primaryButton" ng-click="viewDataInInsights()"> <i class="fa fa-sign-out"></i> VIEW DATA IN INSIGHTS</button>
-    <button type="button" class="btn btn-sm Form-primaryButton" ng-click="remediateInventory(inventory.id, insights_credential)" ng-hide="reports.length === 0 || !insights_credential || !canRemediate"> REMEDIATE INVENTORY</button>
-    <button type="button" class="btn btn-sm Form-cancelButton Insights-cancelButton" ng-click="formCancel()"> Close</button>
+    <button type="button" class="btn btn-sm Form-primaryButton" ng-click="viewDataInInsights()"> <i class="fa fa-sign-out"></i> <translate>VIEW DATA IN INSIGHTS</translate></button>
+    <button type="button" class="btn btn-sm Form-primaryButton" ng-click="remediateInventory(inventory.id, insights_credential)" ng-hide="reports.length === 0 || !insights_credential || !canRemediate"> <translate>REMEDIATE INVENTORY</translate></button>
+    <button type="button" class="btn btn-sm Form-cancelButton Insights-cancelButton" ng-click="formCancel()"> <translate>Close</translate></button>
 </div>

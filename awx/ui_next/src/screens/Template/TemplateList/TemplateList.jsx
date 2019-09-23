@@ -1,21 +1,25 @@
 import React, { Component } from 'react';
-import { withRouter } from 'react-router-dom';
+import { withRouter, Link } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
-import { t } from '@lingui/macro';
-import { Card, PageSection, PageSectionVariants } from '@patternfly/react-core';
 
+import { t } from '@lingui/macro';
 import {
-  JobTemplatesAPI,
-  UnifiedJobTemplatesAPI,
-  WorkflowJobTemplatesAPI,
-} from '@api';
+  Card,
+  PageSection,
+  Dropdown,
+  DropdownItem,
+  DropdownPosition,
+} from '@patternfly/react-core';
+
+import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '@api';
 import AlertModal from '@components/AlertModal';
 import DatalistToolbar from '@components/DataListToolbar';
 import ErrorDetail from '@components/ErrorDetail';
 import PaginatedDataList, {
   ToolbarDeleteButton,
+  ToolbarAddButton,
 } from '@components/PaginatedDataList';
-import { getQSConfig, parseNamespacedQueryString } from '@util/qs';
+import { getQSConfig, parseQueryString } from '@util/qs';
 
 import TemplateListItem from './TemplateListItem';
 
@@ -39,12 +43,15 @@ class TemplatesList extends Component {
       selected: [],
       templates: [],
       itemCount: 0,
+      isAddOpen: false,
     };
+
     this.loadTemplates = this.loadTemplates.bind(this);
     this.handleSelectAll = this.handleSelectAll.bind(this);
     this.handleSelect = this.handleSelect.bind(this);
     this.handleTemplateDelete = this.handleTemplateDelete.bind(this);
     this.handleDeleteErrorClose = this.handleDeleteErrorClose.bind(this);
+    this.handleAddToggle = this.handleAddToggle.bind(this);
   }
 
   componentDidMount() {
@@ -77,6 +84,11 @@ class TemplatesList extends Component {
     }
   }
 
+  handleAddToggle() {
+    const { isAddOpen } = this.state;
+    this.setState({ isAddOpen: !isAddOpen });
+  }
+
   async handleTemplateDelete() {
     const { selected, itemCount } = this.state;
 
@@ -103,14 +115,35 @@ class TemplatesList extends Component {
 
   async loadTemplates() {
     const { location } = this.props;
-    const params = parseNamespacedQueryString(QS_CONFIG, location.search);
+    const { actions: cachedActions } = this.state;
+    const params = parseQueryString(QS_CONFIG, location.search);
+
+    let optionsPromise;
+    if (cachedActions) {
+      optionsPromise = Promise.resolve({ data: { actions: cachedActions } });
+    } else {
+      optionsPromise = JobTemplatesAPI.readOptions();
+    }
+
+    const promises = Promise.all([
+      JobTemplatesAPI.read(params),
+      optionsPromise,
+    ]);
 
     this.setState({ contentError: null, hasContentLoading: true });
+
     try {
-      const {
-        data: { count, results },
-      } = await UnifiedJobTemplatesAPI.read(params);
+      const [
+        {
+          data: { count, results },
+        },
+        {
+          data: { actions },
+        },
+      ] = await promises;
+
       this.setState({
+        actions,
         itemCount: count,
         templates: results,
         selected: [],
@@ -130,22 +163,30 @@ class TemplatesList extends Component {
       templates,
       itemCount,
       selected,
+      isAddOpen,
+      actions,
     } = this.state;
     const { match, i18n } = this.props;
+    const canAdd =
+      actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
     const isAllSelected = selected.length === templates.length;
-    const { medium } = PageSectionVariants;
     return (
-      <PageSection variant={medium}>
+      <PageSection>
         <Card>
           <PaginatedDataList
-            error={contentError}
+            contentError={contentError}
             hasContentLoading={hasContentLoading}
             items={templates}
             itemCount={itemCount}
             itemName={i18n._(t`Template`)}
             qsConfig={QS_CONFIG}
             toolbarColumns={[
-              { name: i18n._(t`Name`), key: 'name', isSortable: true },
+              {
+                name: i18n._(t`Name`),
+                key: 'name',
+                isSortable: true,
+                isSearchable: true,
+              },
               {
                 name: i18n._(t`Modified`),
                 key: 'modified',
@@ -166,6 +207,7 @@ class TemplatesList extends Component {
                 showExpandCollapse
                 isAllSelected={isAllSelected}
                 onSelectAll={this.handleSelectAll}
+                qsConfig={QS_CONFIG}
                 additionalControls={[
                   <ToolbarDeleteButton
                     key="delete"
@@ -173,6 +215,30 @@ class TemplatesList extends Component {
                     itemsToDelete={selected}
                     itemName={i18n._(t`Template`)}
                   />,
+                  canAdd && (
+                    <Dropdown
+                      key="add"
+                      isPlain
+                      isOpen={isAddOpen}
+                      position={DropdownPosition.right}
+                      onSelect={this.handleAddSelect}
+                      toggle={
+                        <ToolbarAddButton onClick={this.handleAddToggle} />
+                      }
+                      dropdownItems={[
+                        <DropdownItem key="job">
+                          <Link to={`${match.url}/job_template/add/`}>
+                            {i18n._(t`Job Template`)}
+                          </Link>
+                        </DropdownItem>,
+                        <DropdownItem key="workflow">
+                          <Link to={`${match.url}_workflow/add/`}>
+                            {i18n._(t`Workflow Template`)}
+                          </Link>
+                        </DropdownItem>,
+                      ]}
+                    />
+                  ),
                 ]}
               />
             )}
@@ -186,6 +252,30 @@ class TemplatesList extends Component {
                 isSelected={selected.some(row => row.id === template.id)}
               />
             )}
+            emptyStateControls={
+              canAdd && (
+                <Dropdown
+                  key="add"
+                  isPlain
+                  isOpen={isAddOpen}
+                  position={DropdownPosition.right}
+                  onSelect={this.handleAddSelect}
+                  toggle={<ToolbarAddButton onClick={this.handleAddToggle} />}
+                  dropdownItems={[
+                    <DropdownItem key="job">
+                      <Link to={`${match.url}/job_template/add/`}>
+                        {i18n._(t`Job Template`)}
+                      </Link>
+                    </DropdownItem>,
+                    <DropdownItem key="workflow">
+                      <Link to={`${match.url}_workflow/add/`}>
+                        {i18n._(t`Workflow Template`)}
+                      </Link>
+                    </DropdownItem>,
+                  ]}
+                />
+              )
+            }
           />
         </Card>
         <AlertModal

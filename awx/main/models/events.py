@@ -83,6 +83,7 @@ class BasePlaybookEvent(CreatedModifiedModel):
     #       - runner_on*
     #     - playbook_on_task_start (once for each task within a play)
     #       - runner_on_failed
+    #       - runner_on_start
     #       - runner_on_ok
     #       - runner_on_error (not used for v2)
     #       - runner_on_skipped
@@ -102,6 +103,7 @@ class BasePlaybookEvent(CreatedModifiedModel):
     EVENT_TYPES = [
         # (level, event, verbose name, failed)
         (3, 'runner_on_failed', _('Host Failed'), True),
+        (3, 'runner_on_start', _('Host Started'), False),
         (3, 'runner_on_ok', _('Host OK'), False),
         (3, 'runner_on_error', _('Host Failure'), True),
         (3, 'runner_on_skipped', _('Host Skipped'), False),
@@ -322,7 +324,10 @@ class BasePlaybookEvent(CreatedModifiedModel):
             kwargs.pop('created', None)
 
         sanitize_event_keys(kwargs, cls.VALID_KEYS)
+        workflow_job_id = kwargs.pop('workflow_job_id', None)
         job_event = cls.objects.create(**kwargs)
+        if workflow_job_id:
+            setattr(job_event, 'workflow_job_id', workflow_job_id)
         analytics_logger.info('Event data saved.', extra=dict(python_objects=dict(job_event=job_event)))
         return job_event
 
@@ -394,7 +399,7 @@ class JobEvent(BasePlaybookEvent):
     An event/message logged from the callback when running a job.
     '''
 
-    VALID_KEYS = BasePlaybookEvent.VALID_KEYS + ['job_id']
+    VALID_KEYS = BasePlaybookEvent.VALID_KEYS + ['job_id', 'workflow_job_id']
 
     class Meta:
         app_label = 'main'
@@ -528,7 +533,7 @@ class JobEvent(BasePlaybookEvent):
 
 class ProjectUpdateEvent(BasePlaybookEvent):
 
-    VALID_KEYS = BasePlaybookEvent.VALID_KEYS + ['project_update_id']
+    VALID_KEYS = BasePlaybookEvent.VALID_KEYS + ['project_update_id', 'workflow_job_id']
 
     class Meta:
         app_label = 'main'
@@ -614,7 +619,13 @@ class BaseCommandEvent(CreatedModifiedModel):
             kwargs.pop('created', None)
 
         sanitize_event_keys(kwargs, cls.VALID_KEYS)
-        return cls.objects.create(**kwargs)
+        event = cls.objects.create(**kwargs)
+        if isinstance(event, AdHocCommandEvent):
+            analytics_logger.info(
+                'Event data saved.',
+                extra=dict(python_objects=dict(job_event=event))
+            )
+        return event
 
     def get_event_display(self):
         '''
@@ -622,13 +633,16 @@ class BaseCommandEvent(CreatedModifiedModel):
         '''
         return self.event
 
+    def get_event_display2(self):
+        return self.get_event_display()
+
     def get_host_status_counts(self):
         return create_host_status_counts(getattr(self, 'event_data', {}))
 
 
 class AdHocCommandEvent(BaseCommandEvent):
 
-    VALID_KEYS = BaseCommandEvent.VALID_KEYS + ['ad_hoc_command_id', 'event']
+    VALID_KEYS = BaseCommandEvent.VALID_KEYS + ['ad_hoc_command_id', 'event', 'workflow_job_id']
 
     class Meta:
         app_label = 'main'
@@ -736,7 +750,7 @@ class AdHocCommandEvent(BaseCommandEvent):
 
 class InventoryUpdateEvent(BaseCommandEvent):
 
-    VALID_KEYS = BaseCommandEvent.VALID_KEYS + ['inventory_update_id']
+    VALID_KEYS = BaseCommandEvent.VALID_KEYS + ['inventory_update_id', 'workflow_job_id']
 
     class Meta:
         app_label = 'main'

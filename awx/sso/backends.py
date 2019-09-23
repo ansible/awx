@@ -369,6 +369,10 @@ def on_populate_user(sender, **kwargs):
         remove_admins = bool(org_opts.get('remove_admins', remove))
         _update_m2m_from_groups(user, ldap_user, org.admin_role.members, admins_opts,
                                 remove_admins)
+        auditors_opts = org_opts.get('auditors', None)
+        remove_auditors = bool(org_opts.get('remove_auditors', remove))
+        _update_m2m_from_groups(user, ldap_user, org.auditor_role.members, auditors_opts,
+                                remove_auditors)
         users_opts = org_opts.get('users', None)
         remove_users = bool(org_opts.get('remove_users', remove))
         _update_m2m_from_groups(user, ldap_user, org.member_role.members, users_opts,

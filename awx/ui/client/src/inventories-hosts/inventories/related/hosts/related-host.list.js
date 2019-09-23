@@ -22,7 +22,7 @@ export default ['i18n', function(i18n) {
             {
                 field: 'toggleHost',
                 content: {
-                    ngDisabled: '!host.summary_fields.user_capabilities.edit || host.has_inventory_sources',
+                    ngDisabled: '!host.summary_fields.user_capabilities.edit',
                     label: '',
                     type: "toggle",
                     ngClick: "toggleHost($event, host)",
@@ -30,8 +30,8 @@ export default ['i18n', function(i18n) {
                         i18n._("Indicates if a host is available and should be included in running jobs.") +
                         "</p><p>" +
                         i18n._("For hosts that are part of an external" +
-                               " inventory, this flag cannot be changed. It will be" +
-                               " set by the inventory sync process.") +
+                               " inventory, this may be" +
+                               " reset by the inventory sync process.") +
                         "</p>",
                     dataPlacement: "right",
                     nosort: true,

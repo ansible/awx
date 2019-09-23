@@ -41,6 +41,10 @@ exports[`<OrganizationAccess /> initially renders succesfully 1`] = `
     items={Array []}
     qsConfig={
       Object {
+        "dateFields": Array [
+          "modified",
+          "created",
+        ],
         "defaultParams": Object {
           "order_by": "first_name",
           "page": 1,
@@ -58,16 +62,19 @@ exports[`<OrganizationAccess /> initially renders succesfully 1`] = `
     toolbarColumns={
       Array [
         Object {
+          "isSearchable": true,
           "isSortable": true,
           "key": "first_name",
-          "name": "Name",
+          "name": "First Name",
         },
         Object {
+          "isSearchable": true,
           "isSortable": true,
           "key": "username",
           "name": "Username",
         },
         Object {
+          "isSearchable": true,
           "isSortable": true,
           "key": "last_name",
           "name": "Last Name",
@@ -88,6 +95,10 @@ exports[`<OrganizationAccess /> initially renders succesfully 1`] = `
         items={Array []}
         qsConfig={
           Object {
+            "dateFields": Array [
+              "modified",
+              "created",
+            ],
             "defaultParams": Object {
               "order_by": "first_name",
               "page": 1,
@@ -105,16 +116,19 @@ exports[`<OrganizationAccess /> initially renders succesfully 1`] = `
         toolbarColumns={
           Array [
             Object {
+              "isSearchable": true,
               "isSortable": true,
               "key": "first_name",
-              "name": "Name",
+              "name": "First Name",
             },
             Object {
+              "isSearchable": true,
               "isSortable": true,
               "key": "username",
               "name": "Username",
             },
             Object {
+              "isSearchable": true,
               "isSortable": true,
               "key": "last_name",
               "name": "Last Name",
@@ -151,6 +165,10 @@ exports[`<OrganizationAccess /> initially renders succesfully 1`] = `
             }
             qsConfig={
               Object {
+                "dateFields": Array [
+                  "modified",
+                  "created",
+                ],
                 "defaultParams": Object {
                   "order_by": "first_name",
                   "page": 1,
@@ -169,16 +187,19 @@ exports[`<OrganizationAccess /> initially renders succesfully 1`] = `
             toolbarColumns={
               Array [
                 Object {
+                  "isSearchable": true,
                   "isSortable": true,
                   "key": "first_name",
-                  "name": "Name",
+                  "name": "First Name",
                 },
                 Object {
+                  "isSearchable": true,
                   "isSortable": true,
                   "key": "username",
                   "name": "Username",
                 },
                 Object {
+                  "isSearchable": true,
                   "isSortable": true,
                   "key": "last_name",
                   "name": "Last Name",
@@ -186,6 +207,242 @@ exports[`<OrganizationAccess /> initially renders succesfully 1`] = `
               ]
             }
           >
+            <withRouter(ListHeader)
+              columns={
+                Array [
+                  Object {
+                    "isSearchable": true,
+                    "isSortable": true,
+                    "key": "first_name",
+                    "name": "First Name",
+                  },
+                  Object {
+                    "isSearchable": true,
+                    "isSortable": true,
+                    "key": "username",
+                    "name": "Username",
+                  },
+                  Object {
+                    "isSearchable": true,
+                    "isSortable": true,
+                    "key": "last_name",
+                    "name": "Last Name",
+                  },
+                ]
+              }
+              itemCount={0}
+              qsConfig={
+                Object {
+                  "dateFields": Array [
+                    "modified",
+                    "created",
+                  ],
+                  "defaultParams": Object {
+                    "order_by": "first_name",
+                    "page": 1,
+                    "page_size": 5,
+                  },
+                  "integerFields": Array [
+                    "page",
+                    "page_size",
+                  ],
+                  "namespace": "access",
+                }
+              }
+            >
+              <Route>
+                <ListHeader
+                  columns={
+                    Array [
+                      Object {
+                        "isSearchable": true,
+                        "isSortable": true,
+                        "key": "first_name",
+                        "name": "First Name",
+                      },
+                      Object {
+                        "isSearchable": true,
+                        "isSortable": true,
+                        "key": "username",
+                        "name": "Username",
+                      },
+                      Object {
+                        "isSearchable": true,
+                        "isSortable": true,
+                        "key": "last_name",
+                        "name": "Last Name",
+                      },
+                    ]
+                  }
+                  history={"/history/"}
+                  itemCount={0}
+                  location={
+                    Object {
+                      "hash": "",
+                      "pathname": "",
+                      "search": "",
+                      "state": "",
+                    }
+                  }
+                  match={
+                    Object {
+                      "isExact": false,
+                      "params": Object {},
+                      "path": "",
+                      "url": "",
+                    }
+                  }
+                  qsConfig={
+                    Object {
+                      "dateFields": Array [
+                        "modified",
+                        "created",
+                      ],
+                      "defaultParams": Object {
+                        "order_by": "first_name",
+                        "page": 1,
+                        "page_size": 5,
+                      },
+                      "integerFields": Array [
+                        "page",
+                        "page_size",
+                      ],
+                      "namespace": "access",
+                    }
+                  }
+                  renderToolbar={[Function]}
+                >
+                  <ListHeader__EmptyStateControlsWrapper>
+                    <StyledComponent
+                      forwardedComponent={
+                        Object {
+                          "$$typeof": Symbol(react.forward_ref),
+                          "attrs": Array [],
+                          "componentStyle": ComponentStyle {
+                            "componentId": "ListHeader__EmptyStateControlsWrapper-sc-1gm7wbv-0",
+                            "isStatic": true,
+                            "lastClassName": "bXVfpW",
+                            "rules": Array [
+                              "display:flex;margin-top:20px;margin-right:20px;margin-bottom:20px;justify-content:flex-end;& >:not(:first-child){margin-left:20px;}",
+                            ],
+                          },
+                          "displayName": "ListHeader__EmptyStateControlsWrapper",
+                          "foldedComponentIds": Array [],
+                          "render": [Function],
+                          "styledComponentId": "ListHeader__EmptyStateControlsWrapper-sc-1gm7wbv-0",
+                          "target": "div",
+                          "toString": [Function],
+                          "warnTooManyClasses": [Function],
+                          "withComponent": [Function],
+                        }
+                      }
+                      forwardedRef={null}
+                    >
+                      <div
+                        className="ListHeader__EmptyStateControlsWrapper-sc-1gm7wbv-0 bXVfpW"
+                      />
+                    </StyledComponent>
+                  </ListHeader__EmptyStateControlsWrapper>
+                  <WithI18n
+                    itemCount={0}
+                    onRemove={[Function]}
+                    onRemoveAll={[Function]}
+                    qsConfig={
+                      Object {
+                        "dateFields": Array [
+                          "modified",
+                          "created",
+                        ],
+                        "defaultParams": Object {
+                          "order_by": "first_name",
+                          "page": 1,
+                          "page_size": 5,
+                        },
+                        "integerFields": Array [
+                          "page",
+                          "page_size",
+                        ],
+                        "namespace": "access",
+                      }
+                    }
+                  >
+                    <I18n
+                      update={true}
+                      withHash={true}
+                    >
+                      <withRouter(FilterTags)
+                        i18n={"/i18n/"}
+                        itemCount={0}
+                        onRemove={[Function]}
+                        onRemoveAll={[Function]}
+                        qsConfig={
+                          Object {
+                            "dateFields": Array [
+                              "modified",
+                              "created",
+                            ],
+                            "defaultParams": Object {
+                              "order_by": "first_name",
+                              "page": 1,
+                              "page_size": 5,
+                            },
+                            "integerFields": Array [
+                              "page",
+                              "page_size",
+                            ],
+                            "namespace": "access",
+                          }
+                        }
+                      >
+                        <Route>
+                          <FilterTags
+                            history={"/history/"}
+                            i18n={"/i18n/"}
+                            itemCount={0}
+                            location={
+                              Object {
+                                "hash": "",
+                                "pathname": "",
+                                "search": "",
+                                "state": "",
+                              }
+                            }
+                            match={
+                              Object {
+                                "isExact": false,
+                                "params": Object {},
+                                "path": "",
+                                "url": "",
+                              }
+                            }
+                            onRemove={[Function]}
+                            onRemoveAll={[Function]}
+                            qsConfig={
+                              Object {
+                                "dateFields": Array [
+                                  "modified",
+                                  "created",
+                                ],
+                                "defaultParams": Object {
+                                  "order_by": "first_name",
+                                  "page": 1,
+                                  "page_size": 5,
+                                },
+                                "integerFields": Array [
+                                  "page",
+                                  "page_size",
+                                ],
+                                "namespace": "access",
+                              }
+                            }
+                          />
+                        </Route>
+                      </withRouter(FilterTags)>
+                    </I18n>
+                  </WithI18n>
+                </ListHeader>
+              </Route>
+            </withRouter(ListHeader)>
             <WithI18n>
               <I18n
                 update={true}
@@ -194,21 +451,16 @@ exports[`<OrganizationAccess /> initially renders succesfully 1`] = `
                 <ContentLoading
                   i18n={"/i18n/"}
                 >
-                  <EmptyState
-                    className=""
-                    variant="large"
-                  >
+                  <EmptyState>
                     <div
-                      className="pf-c-empty-state pf-m-lg"
+                      className="pf-c-empty-state styles.modifiers.lg"
                     >
-                      <EmptyStateBody
-                        className=""
-                      >
-                        <p
+                      <EmptyStateBody>
+                        <div
                           className="pf-c-empty-state__body"
                         >
                           Loading...
-                        </p>
+                        </div>
                       </EmptyStateBody>
                     </div>
                   </EmptyState>
@@ -221,7 +473,7 @@ exports[`<OrganizationAccess /> initially renders succesfully 1`] = `
     </I18n>
   </WithI18n>
   <_default
-    isOpen={null}
+    isOpen={false}
     onClose={[Function]}
     title="Error!"
     variant="danger"
@@ -235,8 +487,8 @@ exports[`<OrganizationAccess /> initially renders succesfully 1`] = `
       isOpen={false}
       isSmall={false}
       onClose={[Function]}
+      showClose={true}
       title="Error!"
-      width={null}
     >
       <Portal
         containerInfo={<div />}
@@ -251,8 +503,8 @@ exports[`<OrganizationAccess /> initially renders succesfully 1`] = `
           isOpen={false}
           isSmall={false}
           onClose={[Function]}
+          showClose={true}
           title="Error!"
-          width={null}
         />
       </Portal>
     </Modal>

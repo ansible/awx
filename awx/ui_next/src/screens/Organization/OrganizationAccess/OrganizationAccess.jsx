@@ -7,15 +7,10 @@ import { OrganizationsAPI, TeamsAPI, UsersAPI } from '@api';
 import AddResourceRole from '@components/AddRole/AddResourceRole';
 import AlertModal from '@components/AlertModal';
 import DataListToolbar from '@components/DataListToolbar';
-import ErrorDetail from '@components/ErrorDetail';
 import PaginatedDataList, {
   ToolbarAddButton,
 } from '@components/PaginatedDataList';
-import {
-  getQSConfig,
-  encodeQueryString,
-  parseNamespacedQueryString,
-} from '@util/qs';
+import { getQSConfig, encodeQueryString, parseQueryString } from '@util/qs';
 import { Organization } from '@types';
 
 import DeleteRoleConfirmationModal from './DeleteRoleConfirmationModal';
@@ -38,7 +33,7 @@ class OrganizationAccess extends React.Component {
       accessRecords: [],
       contentError: null,
       hasContentLoading: true,
-      deletionError: null,
+      hasDeletionError: false,
       deletionRecord: null,
       deletionRole: null,
       isAddModalOpen: false,
@@ -61,14 +56,8 @@ class OrganizationAccess extends React.Component {
   componentDidUpdate(prevProps) {
     const { location } = this.props;
 
-    const prevParams = parseNamespacedQueryString(
-      QS_CONFIG,
-      prevProps.location.search
-    );
-    const currentParams = parseNamespacedQueryString(
-      QS_CONFIG,
-      location.search
-    );
+    const prevParams = parseQueryString(QS_CONFIG, prevProps.location.search);
+    const currentParams = parseQueryString(QS_CONFIG, location.search);
 
     if (encodeQueryString(currentParams) !== encodeQueryString(prevParams)) {
       this.loadAccessList();
@@ -77,7 +66,7 @@ class OrganizationAccess extends React.Component {
 
   async loadAccessList() {
     const { organization, location } = this.props;
-    const params = parseNamespacedQueryString(QS_CONFIG, location.search);
+    const params = parseQueryString(QS_CONFIG, location.search);
 
     this.setState({ contentError: null, hasContentLoading: true });
     try {
@@ -102,7 +91,7 @@ class OrganizationAccess extends React.Component {
 
   handleDeleteErrorClose() {
     this.setState({
-      deletionError: null,
+      hasDeletionError: false,
       deletionRecord: null,
       deletionRole: null,
     });
@@ -132,10 +121,10 @@ class OrganizationAccess extends React.Component {
         deletionRole: null,
         deletionRecord: null,
       });
-    } catch (err) {
+    } catch (error) {
       this.setState({
         hasContentLoading: false,
-        deletionError: err,
+        hasDeletionError: true,
       });
     }
   }
@@ -161,13 +150,13 @@ class OrganizationAccess extends React.Component {
       hasContentLoading,
       deletionRole,
       deletionRecord,
-      deletionError,
+      hasDeletionError,
       itemCount,
       isAddModalOpen,
     } = this.state;
     const canEdit = organization.summary_fields.user_capabilities.edit;
     const isDeleteModalOpen =
-      !hasContentLoading && !deletionError && deletionRole;
+      !hasContentLoading && !hasDeletionError && deletionRole;
 
     return (
       <Fragment>
@@ -179,13 +168,29 @@ class OrganizationAccess extends React.Component {
           itemName="role"
           qsConfig={QS_CONFIG}
           toolbarColumns={[
-            { name: i18n._(t`Name`), key: 'first_name', isSortable: true },
-            { name: i18n._(t`Username`), key: 'username', isSortable: true },
-            { name: i18n._(t`Last Name`), key: 'last_name', isSortable: true },
+            {
+              name: i18n._(t`First Name`),
+              key: 'first_name',
+              isSortable: true,
+              isSearchable: true,
+            },
+            {
+              name: i18n._(t`Username`),
+              key: 'username',
+              isSortable: true,
+              isSearchable: true,
+            },
+            {
+              name: i18n._(t`Last Name`),
+              key: 'last_name',
+              isSortable: true,
+              isSearchable: true,
+            },
           ]}
           renderToolbar={props => (
             <DataListToolbar
               {...props}
+              qsConfig={QS_CONFIG}
               additionalControls={
                 canEdit
                   ? [
@@ -222,13 +227,12 @@ class OrganizationAccess extends React.Component {
           />
         )}
         <AlertModal
-          isOpen={deletionError}
+          isOpen={hasDeletionError}
           variant="danger"
           title={i18n._(t`Error!`)}
           onClose={this.handleDeleteErrorClose}
         >
           {i18n._(t`Failed to delete role`)}
-          <ErrorDetail error={deletionError} />
         </AlertModal>
       </Fragment>
     );

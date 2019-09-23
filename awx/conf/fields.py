@@ -121,11 +121,14 @@ class URLField(CharField):
 
     def __init__(self, **kwargs):
         schemes = kwargs.pop('schemes', None)
+        regex = kwargs.pop('regex', None)
         self.allow_plain_hostname = kwargs.pop('allow_plain_hostname', False)
         super(URLField, self).__init__(**kwargs)
         validator_kwargs = dict(message=_('Enter a valid URL'))
         if schemes is not None:
             validator_kwargs['schemes'] = schemes
+        if regex is not None:
+            validator_kwargs['regex'] = regex
         self.validators.append(URLValidator(**validator_kwargs))
 
     def to_representation(self, value):

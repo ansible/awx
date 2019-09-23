@@ -42,6 +42,8 @@ def test_basic_parameterization(get, post, user, organization):
     assert 'notification_configuration' in response.data
     assert 'url' in response.data['notification_configuration']
     assert 'headers' in response.data['notification_configuration']
+    assert 'messages' in response.data
+    assert response.data['messages'] == {'started': None, 'success': None, 'error': None}
 
 
 @pytest.mark.django_db
@@ -92,7 +94,7 @@ def test_inherited_notification_templates(get, post, user, organization, project
     isrc.save()
     jt = JobTemplate.objects.create(name='test', inventory=i, project=project, playbook='debug.yml')
     jt.save()
-    
+
 
 @pytest.mark.django_db
 def test_notification_template_simple_patch(patch, notification_template, admin):
@@ -124,7 +126,7 @@ def test_custom_environment_injection(post, user, organization):
                          organization=organization.id,
                          notification_type="webhook",
                          notification_configuration=dict(url="https://example.org", disable_ssl_verification=False,
-                                                         headers={"Test": "Header"})),
+                                                         http_method="POST", headers={"Test": "Header"})),
                     u)
     assert response.status_code == 201
     template = NotificationTemplate.objects.get(pk=response.data['id'])

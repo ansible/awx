@@ -15,9 +15,6 @@ deliver a large amount of information in a predictable structured format,
 following the same structure as one would expect if obtaining the data
 from the API. These data loggers are the following.
 
- - awx.analytics.job_status
-     - Summaries of status changes for jobs, project updates, inventory
-       updates, and others
  - awx.analytics.job_events
      - Data returned from the Ansible callback module
  - awx.analytics.activity_stream

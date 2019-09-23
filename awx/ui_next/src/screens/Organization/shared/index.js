@@ -1,2 +1,2 @@
-export { default as InstanceGroupsLookup } from './InstanceGroupsLookup';
+/* eslint-disable-next-line import/prefer-default-export */
 export { default as OrganizationForm } from './OrganizationForm';

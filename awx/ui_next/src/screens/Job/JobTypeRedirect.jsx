@@ -1,7 +1,12 @@
 import React, { Component } from 'react';
-import { Redirect } from 'react-router-dom';
+import { Redirect, Link } from 'react-router-dom';
+import { PageSection, Card } from '@patternfly/react-core';
+import { withI18n } from '@lingui/react';
 import { UnifiedJobsAPI } from '@api';
-import { JOB_TYPE_URL_SEGMENTS } from './constants';
+import ContentError from '@components/ContentError';
+import { JOB_TYPE_URL_SEGMENTS } from '../../constants';
+
+const NOT_FOUND = 'not found';
 
 class JobTypeRedirect extends Component {
   static defaultProps = {
@@ -12,8 +17,9 @@ class JobTypeRedirect extends Component {
     super(props);
 
     this.state = {
-      hasError: false,
+      error: null,
       job: null,
+      isLoading: true,
     };
     this.loadJob = this.loadJob.bind(this);
   }
@@ -24,24 +30,44 @@ class JobTypeRedirect extends Component {
 
   async loadJob() {
     const { id } = this.props;
+    this.setState({ isLoading: true });
     try {
       const { data } = await UnifiedJobsAPI.read({ id });
+      const job = data.results[0];
       this.setState({
-        job: data.results[0],
+        job,
+        isLoading: false,
+        error: job ? null : NOT_FOUND,
       });
-    } catch (err) {
-      this.setState({ hasError: true });
+    } catch (error) {
+      this.setState({
+        error,
+        isLoading: false,
+      });
     }
   }
 
   render() {
-    const { path, view } = this.props;
-    const { hasError, job } = this.state;
+    const { path, view, i18n } = this.props;
+    const { error, job, isLoading } = this.state;
 
-    if (hasError) {
-      return <div>Error</div>;
+    if (error) {
+      return (
+        <PageSection>
+          <Card className="awx-c-card">
+            {error === NOT_FOUND ? (
+              <ContentError isNotFound>
+                <Link to="/jobs">{i18n._(`View all Jobs`)}</Link>
+              </ContentError>
+            ) : (
+              <ContentError error={error} />
+            )}
+          </Card>
+        </PageSection>
+      );
     }
-    if (!job) {
+    if (isLoading) {
+      // TODO show loading state
       return <div>Loading...</div>;
     }
     const type = JOB_TYPE_URL_SEGMENTS[job.type];
@@ -49,4 +75,4 @@ class JobTypeRedirect extends Component {
   }
 }
 
-export default JobTypeRedirect;
+export default withI18n()(JobTypeRedirect);

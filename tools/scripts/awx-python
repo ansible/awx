@@ -1,7 +1,6 @@
-#!/bin/bash
-
+#!/usr/bin/env bash
 # Enable needed Software Collections, if installed
-for scl in rh-python36; do
+for scl in rh-python36 rh-postgresql10; do
   if [ -f /etc/scl/prefixes/$scl ]; then
     if [ -f `cat /etc/scl/prefixes/$scl`/$scl/enable ]; then
       . `cat /etc/scl/prefixes/$scl`/$scl/enable
@@ -10,9 +9,11 @@ for scl in rh-python36; do
 done
 
 # Enable Tower virtualenv
-if [ -f /var/lib/awx/venv/awx/bin/activate ]; then
-  . /var/lib/awx/venv/awx/bin/activate
-fi
+for venv_path in /var/lib/awx/venv/awx /venv/awx; do
+  if [ -f $venv_path/bin/activate ]; then
+    . $venv_path/bin/activate
+  fi
+done
 
 # Run the requested Python command, using the interpreter from the path
 exec python3 "$@"

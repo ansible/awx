@@ -8,7 +8,7 @@ A workflow has an associated tree-graph that is composed of multiple nodes. Each
 ### Workflow Create-Read-Update-Delete (CRUD)
 Like other job resources, workflow jobs are created from workflow job templates. The API exposes common fields similar to job templates, including labels, schedules, notification templates, extra variables and survey specifications. Other than that, in the API, the related workflow graph nodes can be gotten to via the related workflow_nodes field.
 
-The CRUD operations against a workflow job template and its corresponding workflow jobs are almost identical to those of normal job templates and related jobs. However, from an RBAC perspective, CRUD on workflow job templates/jobs are limited to super users.
+The CRUD operations against a workflow job template and its corresponding workflow jobs are almost identical to those of normal job templates and related jobs.
 
 By default, organization administrators have full control over all workflow job templates under the same organization, and they share these abilities with users who have the `workflow_admin_role` in that organization. Permissions can be further delegated to other users via the workflow job template roles.
 
@@ -20,7 +20,12 @@ Workflow job template nodes are listed and created under endpoint `/workflow_job
 #### Workflow Launch Configuration
 
 Workflow job templates can contain launch configuration items. So far, these only include
-`extra_vars` and `inventory`, and the `extra_vars` may have specifications via
+ - `extra_vars`
+ - `inventory`
+ - `limit`
+ - `scm_branch`
+
+The `extra_vars` field may have specifications via
 a survey, in the same way that job templates work.
 
 Workflow nodes may also contain the launch-time configuration for the job it will spawn.
@@ -53,6 +58,32 @@ Branching into success / failed pathways is decided based on the status of the c
 In the event that spawning the workflow would result in recursion, the child workflow
 will be marked as failed with a message explaining that recursion was detected.
 This is to prevent saturation of the task system with an infinite chain of workflows.
+
+#### Workflow Approval Nodes
+
+The workflow approval node feature enables users to add steps in a workflow in between nodes within workflows so that a user (as long as they have approval permissions, explained in further detail below) can give the "yes" or "no" to continue on to the next step in the workflow.
+
+**RBAC Setup for Workflow Approval Nodes**
+
+A user can _create_ a workflow approval if they are:
+- a Superuser
+- an Org Admin of the organization connected to the workflow
+- a Workflow Admin in the organization connected to the workflow
+- assigned as admins to a particular workflow
+
+A user can _approve_ a workflow when they are:
+- a Superuser
+- a Workflow Admin
+- an Organization Admin
+- any user who has explicitly been assigned the "approver" role
+
+A user can _view_ approvals if they:
+- have Read access to the associated Workflow Job Template
+
+**Other Workflow Approval Node Features**
+
+A timeout (in minutes and seconds) can be set for each approval node. These fields default to `0` for no expiration.
+
 
 ### DAG Formation and Restrictions
 The DAG structure of a workflow is enforced by associating workflow job template nodes via endpoints `/workflow_job_template_nodes/\d+/*_nodes/`, where `*` has options `success`, `failure` and `always`. There is one restriction that is enforced when setting up new connections and that is the cycle restriction, since it's a DAG.
@@ -149,7 +180,7 @@ The resulting state of the workflow job run above would be 'successful'. Althoug
 * Verify that a subtree of execution will never start if its root node is successfully canceled.
 * Verify that cancelling a workflow job that is cancellable will consequently cancel any of its cancellable spawned jobs and thus interrupts the whole workflow execution.
 * Verify that during a workflow job run, deleting its spawned jobs are prohibited.
-* Verify that at the beginning of each spawned job run, its prompted fields will be populated by the wrapping workflow job node with corrected values. For example, `credential` field of workflow job node goes to `credential` field of spawned job.
+* Verify that at the beginning of each spawned job run, its prompted fields will be populated by the wrapping workflow job node with corrected values. For example, related `credentials` of workflow job node go to `credentials` of spawned job.
 * Verify that notification templates can be successfully (dis)associated with a workflow job template. Later when its spawned workflow jobs finish running, verify that the correct type of notifications will be sent according to the job status.
 * Verify that a workflow job can be successfully relaunched.
 

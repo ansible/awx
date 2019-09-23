@@ -18,19 +18,17 @@ function JobStatusGraph($window, adjustGraphSize, templateUrl, i18n, moment, gra
             return {
                 restrict: 'E',
                 scope: {
-                    data: '='
+                    data: '=',
+                    period: '=',
+                    jobType: '=',
+                    status: '='
                 },
                 templateUrl: templateUrl('home/dashboard/graphs/job-status/job_status_graph'),
                 link: link
             };
 
             function link(scope, element) {
-                var job_type,
-                    job_status_chart = nv.models.lineChart();
-
-                scope.period="month";
-                scope.jobType="all";
-                scope.status="both";
+                var job_status_chart = nv.models.lineChart();
 
                 scope.$watchCollection('data', function(value) {
                     if (value) {
@@ -129,8 +127,6 @@ function JobStatusGraph($window, adjustGraphSize, templateUrl, i18n, moment, gra
 
                     // when the Period drop down filter is used, create a new graph based on the
                     $('.n').off('click').on("click", function(){
-                        period = this.getAttribute("id");
-
                         $('#period-dropdown-display')
                             .html(`
                                 <span>${this.text}</span>
@@ -139,13 +135,11 @@ function JobStatusGraph($window, adjustGraphSize, templateUrl, i18n, moment, gra
 
                         scope.$parent.isFailed = true;
                         scope.$parent.isSuccessful = true;
-                        recreateGraph(period, job_type);
+                        recreateGraph(this.getAttribute("id"), scope.jobType, scope.status);
                     });
 
                     //On click, update with new data
                     $('.m').off('click').on("click", function(){
-                        job_type = this.getAttribute("id");
-
                         $('#type-dropdown-display')
                             .html(`
                                 <span>${this.text}</span>
@@ -154,19 +148,17 @@ function JobStatusGraph($window, adjustGraphSize, templateUrl, i18n, moment, gra
 
                         scope.$parent.isFailed = true;
                         scope.$parent.isSuccessful = true;
-                        recreateGraph(period, job_type);
+                        recreateGraph(scope.period, this.getAttribute("id"), scope.status);
                     });
 
                     $('.o').off('click').on('click', function() {
-                        var job_status = this.getAttribute('id');
-
                         $('#status-dropdown-display')
                             .html(`
                                 <span>${this.text}</span>
                                 <i class="fa fa-angle-down DashboardGraphs-filterIcon"></i>
                             `);
 
-                        recreateGraph(scope.period, scope.jobType, job_status);
+                        recreateGraph(scope.period, scope.jobType, this.getAttribute("id"));
                     });
 
                     adjustGraphSize(job_status_chart, element);

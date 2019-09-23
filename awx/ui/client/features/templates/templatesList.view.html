@@ -88,6 +88,10 @@
                 </div>
                 <div class="at-Row-container--wrapped">
                     <at-row-item
+                        label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_DESCRIPTION') }}"
+                        value="{{ template.description | sanitize }}">
+                    </at-row-item>
+                    <at-row-item
                         label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_INVENTORY') }}"
                         value="{{ template.summary_fields.inventory.name }}"
                         value-link="/#/inventories/{{template.summary_fields.inventory.kind === 'smart' ? 'smart' : 'inventory'}}/{{ template.summary_fields.inventory.id }}">

@@ -33,12 +33,12 @@ function(i18n) {
                         i18n._("Indicates if a host is available and should be included in running jobs.") +
                         "</p><p>" +
                         i18n._("For hosts that are part of an external" +
-                               " inventory, this flag cannot be changed. It will be" +
-                               " set by the inventory sync process.") +
+                               " inventory, this may be" +
+                               " reset by the inventory sync process.") +
                         "</p>",
                     dataTitle: i18n._('Host Enabled'),
                     dataPlacement: "right",
-                    ngDisabled: '!host.summary_fields.user_capabilities.edit || host.has_inventory_sources || isSmartInvHost'
+                    ngDisabled: '!host.summary_fields.user_capabilities.edit || isSmartInvHost'
                 }
             },
             fields: {

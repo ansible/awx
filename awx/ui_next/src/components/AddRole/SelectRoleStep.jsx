@@ -22,6 +22,11 @@ class RolesStep extends React.Component {
     return (
       <Fragment>
         <div>
+          {i18n._(
+            t`Choose roles to apply to the selected resources.  Note that all selected roles will be applied to all selected resources.`
+          )}
+        </div>
+        <div>
           {selectedResourceRows.length > 0 && (
             <SelectedList
               displayKey={selectedListKey}

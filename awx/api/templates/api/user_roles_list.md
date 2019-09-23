@@ -1,6 +1,6 @@
+{% ifmeth GET %}
 # List Roles for a User:
 
-{% ifmeth GET %}
 Make a GET request to this resource to retrieve a list of roles associated with the selected user.
 
 {% include "api/_list_common.md" %}

@@ -58,6 +58,8 @@ function canLaunchWithoutPrompt () {
         launchData.can_start_without_user_input &&
         !launchData.ask_inventory_on_launch &&
         !launchData.ask_variables_on_launch &&
+        !launchData.ask_limit_on_launch &&
+        !launchData.ask_scm_branch_on_launch &&
         !launchData.survey_enabled &&
         launchData.variables_needed_to_start.length === 0
     );

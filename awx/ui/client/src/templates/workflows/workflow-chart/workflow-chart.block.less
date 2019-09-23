@@ -117,6 +117,7 @@
 
 .WorkflowChart-nodeTypeLetter {
     fill: @default-bg;
+    font-size: 10px;
 }
 
 .WorkflowChart-nodeStatus--running {
@@ -142,9 +143,12 @@
 }
 
 .WorkflowChart-deletedText {
-    width: 90px;
+    width: 180px;
+    height: 14px;
     color: @default-interface-txt;
+    text-align: center;
 }
+
 .WorkflowChart-activeNode {
     fill: @default-link;
 }
@@ -159,7 +163,25 @@
 }
 
 .WorkflowChart-nameText {
+    width: 180px;
+    height: 20px;
+    line-height: 18px;
     font-size: 10px;
+    text-align: center;
+}
+
+.WorkflowChart-timedOutText, .WorkflowChart-deniedText {
+    width: 180px;
+    height: 14px;
+    color: @default-err;
+    text-align: center;
+}
+
+.WorkflowChart-approvedText {
+    width: 180px;
+    height: 14px;
+    color: @default-succ;
+    text-align: center;
 }
 
 .WorkflowChart-tooltip {

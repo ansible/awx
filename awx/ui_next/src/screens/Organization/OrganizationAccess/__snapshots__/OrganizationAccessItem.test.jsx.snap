@@ -34,8 +34,6 @@ exports[`<OrganizationAccessItem /> initially renders succesfully 1`] = `
 >
   <DataListItem
     aria-labelledby="access-list-item"
-    className=""
-    isExpanded={false}
     key="2"
   >
     <li
@@ -43,7 +41,6 @@ exports[`<OrganizationAccessItem /> initially renders succesfully 1`] = `
       className="pf-c-data-list__item"
     >
       <DataListItemRow
-        className=""
         key=".0"
         rowid="access-list-item"
       >
@@ -53,18 +50,9 @@ exports[`<OrganizationAccessItem /> initially renders succesfully 1`] = `
           <OrganizationAccessItem__DataListItemCells
             dataListCells={
               Array [
-                <DataListCell
-                  alignRight={false}
-                  className=""
-                  isFilled={true}
-                  isIcon={false}
-                  width={1}
-                >
-                  <TextContent
-                    className=""
-                  >
+                <DataListCell>
+                  <TextContent>
                     <Text
-                      className=""
                       component="h6"
                     >
                       <ForwardRef
@@ -88,13 +76,7 @@ exports[`<OrganizationAccessItem /> initially renders succesfully 1`] = `
                     />
                   </ForwardRef>
                 </DataListCell>,
-                <DataListCell
-                  alignRight={false}
-                  className=""
-                  isFilled={true}
-                  isIcon={false}
-                  width={1}
-                >
+                <DataListCell>
                   <ForwardRef
                     stacked={true}
                   >
@@ -122,18 +104,9 @@ exports[`<OrganizationAccessItem /> initially renders succesfully 1`] = `
             <StyledComponent
               dataListCells={
                 Array [
-                  <DataListCell
-                    alignRight={false}
-                    className=""
-                    isFilled={true}
-                    isIcon={false}
-                    width={1}
-                  >
-                    <TextContent
-                      className=""
-                    >
+                  <DataListCell>
+                    <TextContent>
                       <Text
-                        className=""
                         component="h6"
                       >
                         <ForwardRef
@@ -157,13 +130,7 @@ exports[`<OrganizationAccessItem /> initially renders succesfully 1`] = `
                       />
                     </ForwardRef>
                   </DataListCell>,
-                  <DataListCell
-                    alignRight={false}
-                    className=""
-                    isFilled={true}
-                    isIcon={false}
-                    width={1}
-                  >
+                  <DataListCell>
                     <ForwardRef
                       stacked={true}
                     >
@@ -214,18 +181,9 @@ exports[`<OrganizationAccessItem /> initially renders succesfully 1`] = `
                 className="OrganizationAccessItem__DataListItemCells-sc-1b9e0ad-0 QeteT"
                 dataListCells={
                   Array [
-                    <DataListCell
-                      alignRight={false}
-                      className=""
-                      isFilled={true}
-                      isIcon={false}
-                      width={1}
-                    >
-                      <TextContent
-                        className=""
-                      >
+                    <DataListCell>
+                      <TextContent>
                         <Text
-                          className=""
                           component="h6"
                         >
                           <ForwardRef
@@ -249,13 +207,7 @@ exports[`<OrganizationAccessItem /> initially renders succesfully 1`] = `
                         />
                       </ForwardRef>
                     </DataListCell>,
-                    <DataListCell
-                      alignRight={false}
-                      className=""
-                      isFilled={true}
-                      isIcon={false}
-                      width={1}
-                    >
+                    <DataListCell>
                       <ForwardRef
                         stacked={true}
                       >
@@ -283,24 +235,16 @@ exports[`<OrganizationAccessItem /> initially renders succesfully 1`] = `
                   className="pf-c-data-list__item-content OrganizationAccessItem__DataListItemCells-sc-1b9e0ad-0 QeteT"
                 >
                   <DataListCell
-                    alignRight={false}
-                    className=""
-                    isFilled={true}
-                    isIcon={false}
                     key="name"
-                    width={1}
                   >
                     <div
                       className="pf-c-data-list__cell"
                     >
-                      <TextContent
-                        className=""
-                      >
+                      <TextContent>
                         <div
                           className="pf-c-content"
                         >
                           <Text
-                            className=""
                             component="h6"
                           >
                             <h6
@@ -524,12 +468,7 @@ exports[`<OrganizationAccessItem /> initially renders succesfully 1`] = `
                     </div>
                   </DataListCell>
                   <DataListCell
-                    alignRight={false}
-                    className=""
-                    isFilled={true}
-                    isIcon={false}
                     key="roles"
-                    width={1}
                   >
                     <div
                       className="pf-c-data-list__cell"
@@ -695,9 +634,9 @@ exports[`<OrganizationAccessItem /> initially renders succesfully 1`] = `
                                                     "componentStyle": ComponentStyle {
                                                       "componentId": "ChipGroup-sc-10zu8t0-0",
                                                       "isStatic": true,
-                                                      "lastClassName": "vIGxT",
+                                                      "lastClassName": "ldAQsx",
                                                       "rules": Array [
-                                                        "--pf-c-chip-group--c-chip--MarginRight:10px;--pf-c-chip-group--c-chip--MarginBottom:10px;",
+                                                        "--pf-c-chip-group--c-chip--MarginRight:10px;--pf-c-chip-group--c-chip--MarginBottom:10px;> .pf-c-chip.pf-m-overflow button{padding:3px 8px;}",
                                                       ],
                                                     },
                                                     "displayName": "ChipGroup",
@@ -713,11 +652,11 @@ exports[`<OrganizationAccessItem /> initially renders succesfully 1`] = `
                                                 forwardedRef={null}
                                               >
                                                 <ChipGroup
-                                                  className="ChipGroup-sc-10zu8t0-0 vIGxT"
+                                                  className="ChipGroup-sc-10zu8t0-0 ldAQsx"
                                                   showOverflowAfter={null}
                                                 >
                                                   <ul
-                                                    className="pf-c-chip-group ChipGroup-sc-10zu8t0-0 vIGxT"
+                                                    className="pf-c-chip-group ChipGroup-sc-10zu8t0-0 ldAQsx"
                                                   >
                                                     <Chip
                                                       component="li"
@@ -778,7 +717,6 @@ exports[`<OrganizationAccessItem /> initially renders succesfully 1`] = `
                                                               <ChipButton
                                                                 aria-labelledby="remove_pf-random-id-0 pf-random-id-0"
                                                                 ariaLabel="close"
-                                                                className=""
                                                                 id="remove_pf-random-id-0"
                                                                 onClick={[Function]}
                                                               >
@@ -786,16 +724,8 @@ exports[`<OrganizationAccessItem /> initially renders succesfully 1`] = `
                                                                   aria-label="close"
                                                                   aria-labelledby="remove_pf-random-id-0 pf-random-id-0"
                                                                   className=""
-                                                                  component="button"
                                                                   id="remove_pf-random-id-0"
-                                                                  isActive={false}
-                                                                  isBlock={false}
-                                                                  isDisabled={false}
-                                                                  isFocus={false}
-                                                                  isHover={false}
-                                                                  isInline={false}
                                                                   onClick={[Function]}
-                                                                  type="button"
                                                                   variant="plain"
                                                                 >
                                                                   <button
@@ -812,6 +742,7 @@ exports[`<OrganizationAccessItem /> initially renders succesfully 1`] = `
                                                                     <TimesCircleIcon
                                                                       aria-hidden="true"
                                                                       color="currentColor"
+                                                                      noVerticalAlign={false}
                                                                       size="sm"
                                                                       title={null}
                                                                     >

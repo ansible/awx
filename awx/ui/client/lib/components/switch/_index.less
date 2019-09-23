@@ -1,0 +1,85 @@
+.atSwitch-listTableCell {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  justify-content: flex-end;
+  padding-right: 0px;
+}
+
+.atSwitch-outer {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 26px;
+  cursor: pointer;
+
+  .fa {
+      display: none;
+  }
+}
+
+.atSwitch-on {
+  .atSwitch-slider {
+      background-color: @default-link;
+  }
+
+  .atSwitch-slider:before {
+      -webkit-transform: translateX(16px);
+      -ms-transform: translateX(16px);
+      transform: translateX(16px);
+  }
+
+  .fa {
+      display: block;
+      position: absolute;
+      top: 7px;
+      left: 4px;
+      color: @default-bg;
+      font-size: 12px;
+  }
+}
+
+.atSwitch-disabled {
+  cursor: not-allowed;
+
+  .atSwitch-inner {
+      pointer-events: none;
+  }
+  
+  .atSwitch-slider {
+      background-color: @default-icon;
+  }
+
+  .atSwitch-slider:before {
+      background-color: @d2grey;
+  }
+
+  .fa {
+      color: @d2grey;
+  }
+}
+
+.atSwitch-slider {
+  position: absolute;
+  border-radius: 34px;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: @d2grey;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.atSwitch-slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 4px;
+  bottom: 5px;
+  background-color: @default-bg;
+  -webkit-transition: .4s;
+  transition: .4s;
+  border-radius: 50%;
+}

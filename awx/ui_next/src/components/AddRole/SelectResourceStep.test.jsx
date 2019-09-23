@@ -6,7 +6,9 @@ import { sleep } from '../../../testUtils/testUtils';
 import SelectResourceStep from './SelectResourceStep';
 
 describe('<SelectResourceStep />', () => {
-  const columns = [{ name: 'Username', key: 'username', isSortable: true }];
+  const columns = [
+    { name: 'Username', key: 'username', isSortable: true, isSearchable: true },
+  ];
   afterEach(() => {
     jest.restoreAllMocks();
   });

@@ -5,7 +5,6 @@ import { Route, withRouter, Switch } from 'react-router-dom';
 
 import { Config } from '@contexts/Config';
 import Breadcrumbs from '@components/Breadcrumbs/Breadcrumbs';
-
 import { TemplateList } from './TemplateList';
 import Template from './Template';
 import JobTemplateAdd from './JobTemplateAdd';

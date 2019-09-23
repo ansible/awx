@@ -59,14 +59,14 @@ UI_RELEASE_FLAG_FILE = awx/ui/.release_built
 I18N_FLAG_FILE = .i18n_built
 
 .PHONY: awx-link clean clean-tmp clean-venv requirements requirements_dev \
-	develop refresh adduser migrate dbchange dbshell runserver \
+	develop refresh adduser migrate dbchange runserver \
 	receiver test test_unit test_coverage coverage_html \
 	dev_build release_build release_clean sdist \
 	ui-docker-machine ui-docker ui-release ui-devel \
 	ui-test ui-deps ui-test-ci VERSION
 
 # remove ui build artifacts
-clean-ui:
+clean-ui: clean-languages
 	rm -rf awx/ui/static/
 	rm -rf awx/ui/node_modules/
 	rm -rf awx/ui/test/unit/reports/
@@ -93,6 +93,10 @@ clean-schema:
 	rm -rf swagger.json
 	rm -rf schema.json
 	rm -rf reference-schema.json
+
+clean-languages:
+	rm -f $(I18N_FLAG_FILE)
+	find . -type f -regex ".*\.mo$$" -delete
 
 # Remove temporary build files, compiled Python files.
 clean: clean-ui clean-dist
@@ -242,10 +246,6 @@ migrate:
 dbchange:
 	$(MANAGEMENT_COMMAND) makemigrations
 
-# access database shell, asks for password
-dbshell:
-	sudo -u postgres psql -d awx-dev
-
 server_noattach:
 	tmux new-session -d -s awx 'exec make uwsgi'
 	tmux rename-window 'AWX'
@@ -372,6 +372,7 @@ test:
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	PYTHONDONTWRITEBYTECODE=1 py.test -p no:cacheprovider -n auto $(TEST_DIRS)
+	cd awxkit && $(VENV_BASE)/awx/bin/tox -re py2,py3
 	awx-manage check_migrations --dry-run --check  -n 'vNNN_missing_migration_file'
 
 test_unit:
@@ -564,8 +565,8 @@ setup-bundle-build:
 	mkdir -p $@
 
 docker-auth:
-	if [ "$(IMAGE_REPOSITORY_AUTH)" ]; then \
-		docker login -u oauth2accesstoken -p "$(IMAGE_REPOSITORY_AUTH)" $(IMAGE_REPOSITORY_BASE); \
+	@if [ "$(IMAGE_REPOSITORY_AUTH)" ]; then \
+		echo "$(IMAGE_REPOSITORY_AUTH)" | docker login -u oauth2accesstoken --password-stdin $(IMAGE_REPOSITORY_BASE); \
 	fi;
 
 # Docker isolated rampart
@@ -647,7 +648,7 @@ clean-elk:
 	docker rm tools_kibana_1
 
 psql-container:
-	docker run -it --net tools_default --rm postgres:9.6 sh -c 'exec psql -h "postgres" -p "5432" -U postgres'
+	docker run -it --net tools_default --rm postgres:10 sh -c 'exec psql -h "postgres" -p "5432" -U postgres'
 
 VERSION:
 	@echo "awx: $(VERSION)"

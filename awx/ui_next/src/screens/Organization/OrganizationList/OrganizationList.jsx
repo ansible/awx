@@ -2,7 +2,7 @@ import React, { Component, Fragment } from 'react';
 import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Card, PageSection, PageSectionVariants } from '@patternfly/react-core';
+import { Card, PageSection } from '@patternfly/react-core';
 
 import { OrganizationsAPI } from '@api';
 import AlertModal from '@components/AlertModal';
@@ -12,7 +12,7 @@ import PaginatedDataList, {
   ToolbarAddButton,
   ToolbarDeleteButton,
 } from '@components/PaginatedDataList';
-import { getQSConfig, parseNamespacedQueryString } from '@util/qs';
+import { getQSConfig, parseQueryString } from '@util/qs';
 
 import OrganizationListItem from './OrganizationListItem';
 
@@ -76,12 +76,11 @@ class OrganizationsList extends Component {
   }
 
   async handleOrgDelete() {
-    const { selected, itemCount } = this.state;
+    const { selected } = this.state;
 
     this.setState({ hasContentLoading: true });
     try {
       await Promise.all(selected.map(org => OrganizationsAPI.destroy(org.id)));
-      this.setState({ itemCount: itemCount - selected.length });
     } catch (err) {
       this.setState({ deletionError: err });
     } finally {
@@ -92,7 +91,7 @@ class OrganizationsList extends Component {
   async loadOrganizations() {
     const { location } = this.props;
     const { actions: cachedActions } = this.state;
-    const params = parseNamespacedQueryString(QS_CONFIG, location.search);
+    const params = parseQueryString(QS_CONFIG, location.search);
 
     let optionsPromise;
     if (cachedActions) {
@@ -130,7 +129,6 @@ class OrganizationsList extends Component {
   }
 
   render() {
-    const { medium } = PageSectionVariants;
     const {
       actions,
       itemCount,
@@ -148,7 +146,7 @@ class OrganizationsList extends Component {
 
     return (
       <Fragment>
-        <PageSection variant={medium}>
+        <PageSection>
           <Card>
             <PaginatedDataList
               contentError={contentError}
@@ -158,7 +156,12 @@ class OrganizationsList extends Component {
               itemName="organization"
               qsConfig={QS_CONFIG}
               toolbarColumns={[
-                { name: i18n._(t`Name`), key: 'name', isSortable: true },
+                {
+                  name: i18n._(t`Name`),
+                  key: 'name',
+                  isSortable: true,
+                  isSearchable: true,
+                },
                 {
                   name: i18n._(t`Modified`),
                   key: 'modified',
@@ -178,6 +181,7 @@ class OrganizationsList extends Component {
                   showSelectAll
                   isAllSelected={isAllSelected}
                   onSelectAll={this.handleSelectAll}
+                  qsConfig={QS_CONFIG}
                   additionalControls={[
                     <ToolbarDeleteButton
                       key="delete"

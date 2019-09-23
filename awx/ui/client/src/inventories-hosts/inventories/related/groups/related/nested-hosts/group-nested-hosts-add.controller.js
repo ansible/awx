@@ -5,9 +5,9 @@
  *************************************************/
 
 export default ['$state', '$stateParams', '$scope', 'RelatedHostsFormDefinition', 'ParseTypeChange',
-                'GenerateForm', 'HostsService', 'rbacUiControlService', 'GetBasePath', 'ToJSON', 'canAdd', 'GroupsService',
+                'GenerateForm', 'HostsService', 'ToJSON', 'canAdd', 'GroupsService',
                 function($state, $stateParams, $scope, RelatedHostsFormDefinition, ParseTypeChange,
-                         GenerateForm, HostsService, rbacUiControlService, GetBasePath, ToJSON, canAdd, GroupsService) {
+                         GenerateForm, HostsService, ToJSON, canAdd, GroupsService) {
 
         init();
 
@@ -29,9 +29,6 @@ export default ['$state', '$stateParams', '$scope', 'RelatedHostsFormDefinition'
             $state.go('^');
         };
         $scope.toggleHostEnabled = function() {
-            if ($scope.host.has_inventory_sources){
-                return;
-            }
             $scope.host.enabled = !$scope.host.enabled;
         };
         $scope.formSave = function(){

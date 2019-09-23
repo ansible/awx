@@ -256,7 +256,7 @@ class TestExtraVarSanitation(TestJobExecution):
 
     def test_vars_unsafe_by_default(self, job, private_data_dir):
         job.created_by = User(pk=123, username='angry-spud')
-        job.inventory = Inventory(pk=123, name='example-inv') 
+        job.inventory = Inventory(pk=123, name='example-inv')
 
         task = tasks.RunJob()
         task.build_extra_vars_file(job, private_data_dir)
@@ -361,15 +361,16 @@ class TestExtraVarSanitation(TestJobExecution):
 class TestGenericRun():
 
     def test_generic_failure(self, patch_Job):
-        job = Job(status='running', inventory=Inventory())
+        job = Job(status='running', inventory=Inventory(), project=Project())
         job.websocket_emit_status = mock.Mock()
 
         task = tasks.RunJob()
         task.update_model = mock.Mock(return_value=job)
         task.build_private_data_files = mock.Mock(side_effect=OSError())
 
-        with pytest.raises(Exception):
-            task.run(1)
+        with mock.patch('awx.main.tasks.copy_tree'):
+            with pytest.raises(Exception):
+                task.run(1)
 
         update_model_call = task.update_model.call_args[1]
         assert 'OSError' in update_model_call['result_traceback']
@@ -386,8 +387,9 @@ class TestGenericRun():
         task.update_model = mock.Mock(wraps=update_model_wrapper)
         task.build_private_data_files = mock.Mock()
 
-        with pytest.raises(Exception):
-            task.run(1)
+        with mock.patch('awx.main.tasks.copy_tree'):
+            with pytest.raises(Exception):
+                task.run(1)
 
         for c in [
             mock.call(1, status='running', start_args=''),
@@ -434,6 +436,7 @@ class TestGenericRun():
         job = Job(project=Project(), inventory=Inventory())
         task = tasks.RunJob()
         task.should_use_proot = lambda instance: True
+        task.instance = job
 
         private_data_dir = '/foo'
         cwd = '/bar'
@@ -441,20 +444,15 @@ class TestGenericRun():
         settings.AWX_PROOT_HIDE_PATHS = ['/AWX_PROOT_HIDE_PATHS1', '/AWX_PROOT_HIDE_PATHS2']
         settings.ANSIBLE_VENV_PATH = '/ANSIBLE_VENV_PATH'
         settings.AWX_VENV_PATH = '/AWX_VENV_PATH'
-        settings.AWX_ANSIBLE_COLLECTIONS_PATHS = ['/AWX_COLLECTION_PATH1', '/AWX_COLLECTION_PATH2']
 
         process_isolation_params = task.build_params_process_isolation(job, private_data_dir, cwd)
         assert True is process_isolation_params['process_isolation']
-        assert settings.AWX_PROOT_BASE_PATH == process_isolation_params['process_isolation_path'], \
+        assert process_isolation_params['process_isolation_path'].startswith(settings.AWX_PROOT_BASE_PATH), \
             "Directory where a temp directory will be created for the remapping to take place"
         assert private_data_dir in process_isolation_params['process_isolation_show_paths'], \
             "The per-job private data dir should be in the list of directories the user can see."
         assert cwd in process_isolation_params['process_isolation_show_paths'], \
             "The current working directory should be in the list of directories the user can see."
-        assert '/AWX_COLLECTION_PATH1' in process_isolation_params['process_isolation_show_paths'], \
-            "AWX global collection directory 1 of 2 should get added to the list of directories the user can see."
-        assert '/AWX_COLLECTION_PATH2' in process_isolation_params['process_isolation_show_paths'], \
-            "AWX global collection directory 2 of 2 should get added to the list of directories the user can see."
 
         for p in [settings.AWX_PROOT_BASE_PATH,
                   '/etc/tower',
@@ -513,17 +511,6 @@ class TestGenericRun():
         with mock.patch('awx.main.tasks.settings.AWX_TASK_ENV', {'FOO': 'BAR'}):
             env = task.build_env(job, private_data_dir)
         assert env['FOO'] == 'BAR'
-
-    def test_awx_task_env_respects_ansible_collections_paths(self, patch_Job, private_data_dir):
-        job = Job(project=Project(), inventory=Inventory())
-
-        task = tasks.RunJob()
-        task._write_extra_vars_file = mock.Mock()
-
-        with mock.patch('awx.main.tasks.settings.AWX_ANSIBLE_COLLECTIONS_PATHS', ['/AWX_COLLECTION_PATH']):
-            with mock.patch('awx.main.tasks.settings.AWX_TASK_ENV', {'ANSIBLE_COLLECTIONS_PATHS': '/MY_COLLECTION1:/MY_COLLECTION2'}):
-                env = task.build_env(job, private_data_dir)
-        assert env['ANSIBLE_COLLECTIONS_PATHS'] == '/MY_COLLECTION1:/MY_COLLECTION2:/AWX_COLLECTION_PATH'
 
     def test_valid_custom_virtualenv(self, patch_Job, private_data_dir):
         job = Job(project=Project(), inventory=Inventory())
@@ -1701,6 +1688,7 @@ class TestProjectUpdateCredentials(TestJobExecution):
     def test_process_isolation_exposes_projects_root(self, private_data_dir, project_update):
         task = tasks.RunProjectUpdate()
         task.revision_path = 'foobar'
+        task.instance = project_update
         ssh = CredentialType.defaults['ssh']()
         project_update.scm_type = 'git'
         project_update.credential = Credential(
@@ -1717,8 +1705,6 @@ class TestProjectUpdateCredentials(TestJobExecution):
 
         call_args, _ = task._write_extra_vars_file.call_args_list[0]
         _, extra_vars = call_args
-
-        assert extra_vars["scm_revision_output"] == 'foobar'
 
     def test_username_and_password_auth(self, project_update, scm_type):
         task = tasks.RunProjectUpdate()

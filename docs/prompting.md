@@ -20,8 +20,9 @@ The standard pattern applies to fields
  - `limit`
  - `diff_mode`
  - `verbosity`
+ - `scm_branch`
 
-##### Non-Standard Cases (Credentials Changing in Tower 3.3)
+##### Non-Standard Cases
 
  - `ask_variables_on_launch` allows unrestricted use of
    - `extra_vars`
@@ -30,9 +31,7 @@ The standard pattern applies to fields
  - Enabled survey allows restricted use of
    - `extra_vars`, only for variables in survey (with qualifiers)
  - `ask_credential_on_launch` allows use of
-   - `credential`
-   - `vault_credential` / `extra_credentials` / `credentials`
-     (version-dependent, see notes below)
+   - `credentials`
  - `ask_inventory_on_launch` allows use of
    - `inventory`
 
@@ -42,16 +41,12 @@ spec to exist and `survey_enabled` to be true). On the other hand,
 if `ask_variables_on_launch` is true, users can provide any variables in
 extra_vars.
 
-_(supported, but deprecated)_ Prompting enablement for several types of
-credentials is controlled by a single
-field. On launch, multiple types of credentials can be provided in their respective fields
-inside of `credential`, `vault_credential`, and `extra_credentials`. Providing
-credentials that require password input from the user on launch is
-allowed, and the password must be provided along-side the credential, of course.
-
-If the job is being spawned using a saved launch configuration,
-all credential types are managed by a many-to-many relationship
-called `credentials` relative to the launch configuration object.
+Prompting enablement for all types of credentials is controlled by `ask_credential_on_launch`.
+Clients can manually provide a list of credentials of any type, but only 1 of _each_ type, in
+`credentials` on a POST to the launch endpoint.
+If the job is being spawned by a saved launch configuration (such as a schedule),
+credentials are managed by the many-to-many relationship `credentials` relative
+to the launch configuration object.
 The credentials in this relationship will either add to the job template's
 credential list, or replace a credential in the job template's list if it
 is the same type.
@@ -64,14 +59,14 @@ actions in the API.
  - POST to `/api/v2/job_templates/N/launch/`
    - can accept all prompt-able fields
  - POST to `/api/v2/workflow_job_templates/N/launch/`
-   - can accept extra_vars and inventory
+   - can accept certain fields, see `workflow.md`
  - POST to `/api/v2/system_job_templates/N/launch/`
    - can accept certain fields, with no user configuration
 
 When launching manually, certain restrictions apply to the use of credentials
- - if providing any of `credential`, `vault_credential`, and `extra_credentials`
-   this becomes the "legacy" method, and imposes additional restrictions on
-   relaunch, and is mutually exclusive with the use of `credentials` field
+ - if providing deprecated `extra_credentials` this becomes the "legacy" method,
+   and imposes additional restrictions on relaunch,
+   and is mutually exclusive with the use of `credentials` field
  - if providing `credentials`, existing credentials on the job template may
    only be removed if replaced by another credential of the same type
    this is so that relaunch will use the up-to-date credential on the template
@@ -179,7 +174,7 @@ job. If a user creates a node that would do this, a 400 response will be returne
 
 Workflow JTs are different than other cases, because they do not have a
 template directly linked, so their prompts are a form of action-at-a-distance.
-When the node's prompts are gathered, any prompts from the workflow job
+When the node's prompts are gathered to spawn its job, any prompts from the workflow job
 will take precedence over the node's value.
 
 As a special exception, `extra_vars` from a workflow will not obey JT survey
@@ -187,8 +182,7 @@ and prompting rules, both both historical and ease-of-understanding reasons.
 This behavior may change in the future.
 
 Other than that exception, JT prompting rules are still adhered to when
-a job is spawned, although so far this only applies to the workflow job's
-`inventory` field.
+a job is spawned.
 
 #### Job Relaunch and Re-scheduling
 

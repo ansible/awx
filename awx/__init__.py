@@ -40,7 +40,7 @@ if HAS_DJANGO is True:
     # but will support the `usedforsecurity` keyword on RHEL and Centos systems.
 
     # Keep an eye on https://code.djangoproject.com/ticket/28401
-    target_version = '2.2.2'
+    target_version = '2.2.4'
     if django.__version__ != target_version:
         raise RuntimeError(
             "Django version other than {target} detected: {current}. "

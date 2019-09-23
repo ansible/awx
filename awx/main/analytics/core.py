@@ -5,10 +5,9 @@ import os
 import os.path
 import tempfile
 import shutil
-import subprocess
+import requests
 
 from django.conf import settings
-from django.utils.encoding import smart_str
 from django.utils.timezone import now, timedelta
 from rest_framework.exceptions import PermissionDenied
 
@@ -18,10 +17,12 @@ from awx.main.access import access_registry
 from awx.main.models.ha import TowerAnalyticsState
 
 
-__all__ = ['register', 'gather', 'ship']
+__all__ = ['register', 'gather', 'ship', 'table_version']
 
 
 logger = logging.getLogger('awx.main.analytics')
+
+manifest = dict()
 
 
 def _valid_license():
@@ -35,25 +36,37 @@ def _valid_license():
     return True
 
 
-def register(key):
+def register(key, version):
     """
     A decorator used to register a function as a metric collector.
 
     Decorated functions should return JSON-serializable objects.
 
-    @register('projects_by_scm_type')
+    @register('projects_by_scm_type', 1)
     def projects_by_scm_type():
         return {'git': 5, 'svn': 1, 'hg': 0}
     """
 
     def decorate(f):
         f.__awx_analytics_key__ = key
+        f.__awx_analytics_version__ = version
         return f
 
     return decorate
 
 
-def gather(dest=None, module=None):
+def table_version(file_name, version):
+
+    global manifest
+    manifest[file_name] = version
+
+    def decorate(f):
+        return f
+
+    return decorate
+
+
+def gather(dest=None, module=None, collection_type='scheduled'):
     """
     Gather all defined metrics and write them as JSON files in a .tgz
 
@@ -71,31 +84,45 @@ def gather(dest=None, module=None):
     if last_run < max_interval or not last_run:
         last_run = max_interval
 
-
     if _valid_license() is False:
         logger.exception("Invalid License provided, or No License Provided")
         return "Error: Invalid License provided, or No License Provided"
-    
+
     if not settings.INSIGHTS_TRACKING_STATE:
-        logger.error("Insights analytics not enabled")
+        logger.error("Automation Analytics not enabled")
         return
 
     if module is None:
         from awx.main.analytics import collectors
         module = collectors
 
+
     dest = dest or tempfile.mkdtemp(prefix='awx_analytics')
     for name, func in inspect.getmembers(module):
         if inspect.isfunction(func) and hasattr(func, '__awx_analytics_key__'):
             key = func.__awx_analytics_key__
+            manifest['{}.json'.format(key)] = func.__awx_analytics_version__
             path = '{}.json'.format(os.path.join(dest, key))
             with open(path, 'w', encoding='utf-8') as f:
                 try:
-                    json.dump(func(last_run), f)
+                    if func.__name__ == 'query_info':
+                        json.dump(func(last_run, collection_type=collection_type), f)
+                    else:
+                        json.dump(func(last_run), f)
                 except Exception:
                     logger.exception("Could not generate metric {}.json".format(key))
                     f.close()
                     os.remove(f.name)
+    
+    path = os.path.join(dest, 'manifest.json')
+    with open(path, 'w', encoding='utf-8') as f:
+        try:
+            json.dump(manifest, f)
+        except Exception:
+            logger.exception("Could not generate manifest.json")
+            f.close()
+            os.remove(f.name)
+
     try:
         collectors.copy_tables(since=last_run, full_path=dest)
     except Exception:
@@ -117,30 +144,39 @@ def gather(dest=None, module=None):
 
 def ship(path):
     """
-    Ship gathered metrics via the Insights agent
+    Ship gathered metrics to the Insights API
     """
+    if not path:
+        logger.error('Automation Analytics TAR not found')
+        return
+    if "Error:" in str(path):
+        return
     try:
-        agent = 'insights-client'
-        if shutil.which(agent) is None:
-            logger.error('could not find {} on PATH'.format(agent))
-            return
         logger.debug('shipping analytics file: {}'.format(path))
-        try:
-            cmd = [
-                agent, '--payload', path, '--content-type', settings.INSIGHTS_AGENT_MIME
-            ]
-            output = smart_str(subprocess.check_output(cmd, timeout=60 * 5))
-            logger.debug(output)
-            # reset the `last_run` when data is shipped
-            run_now = now()
-            state = TowerAnalyticsState.get_solo()
-            state.last_run = run_now
-            state.save()
-
-        except subprocess.CalledProcessError:
-            logger.exception('{} failure:'.format(cmd))
-        except subprocess.TimeoutExpired:
-            logger.exception('{} timeout:'.format(cmd))
+        url = getattr(settings, 'AUTOMATION_ANALYTICS_URL', None)
+        if not url:
+            logger.error('AUTOMATION_ANALYTICS_URL is not set')
+            return
+        rh_user = getattr(settings, 'REDHAT_USERNAME', None)
+        rh_password = getattr(settings, 'REDHAT_PASSWORD', None)
+        if not rh_user:
+            return logger.error('REDHAT_USERNAME is not set')
+        if not rh_password:
+            return logger.error('REDHAT_PASSWORD is not set')
+        with open(path, 'rb') as f:
+            files = {'file': (os.path.basename(path), f, settings.INSIGHTS_AGENT_MIME)}
+            response = requests.post(url, 
+                                     files=files,
+                                     verify=True, 
+                                     auth=(rh_user, rh_password),
+                                     timeout=(31, 31))
+            if response.status_code != 202:
+                return logger.exception('Upload failed with status {}, {}'.format(response.status_code,
+                                                                                  response.text))
+        run_now = now()
+        state = TowerAnalyticsState.get_solo()
+        state.last_run = run_now
+        state.save()
     finally:
         # cleanup tar.gz
         os.remove(path)

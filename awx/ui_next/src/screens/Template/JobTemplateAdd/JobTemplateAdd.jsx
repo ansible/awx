@@ -14,21 +14,60 @@ import JobTemplateForm from '../shared/JobTemplateForm';
 import { JobTemplatesAPI } from '@api';
 
 function JobTemplateAdd({ history, i18n }) {
-  const [error, setError] = useState(null);
+  const [formSubmitError, setFormSubmitError] = useState(null);
 
-  const handleSubmit = async values => {
-    setError(null);
+  async function handleSubmit(values) {
+    const {
+      newLabels,
+      removedLabels,
+      addedInstanceGroups,
+      removedInstanceGroups,
+      ...remainingValues
+    } = values;
+
+    setFormSubmitError(null);
     try {
-      const { data } = await JobTemplatesAPI.create(values);
-      history.push(`/templates/${data.type}/${data.id}/details`);
-    } catch (err) {
-      setError(err);
+      const {
+        data: { id, type },
+      } = await JobTemplatesAPI.create(remainingValues);
+      await Promise.all([
+        submitLabels(id, newLabels, removedLabels),
+        submitInstanceGroups(id, addedInstanceGroups, removedInstanceGroups),
+      ]);
+      history.push(`/templates/${type}/${id}/details`);
+    } catch (error) {
+      setFormSubmitError(error);
     }
-  };
+  }
 
-  const handleCancel = () => {
+  function submitLabels(id, newLabels = [], removedLabels = []) {
+    const disassociationPromises = removedLabels.map(label =>
+      JobTemplatesAPI.disassociateLabel(id, label)
+    );
+    const associationPromises = newLabels
+      .filter(label => !label.organization)
+      .map(label => JobTemplatesAPI.associateLabel(id, label));
+    const creationPromises = newLabels
+      .filter(label => label.organization)
+      .map(label => JobTemplatesAPI.generateLabel(id, label));
+
+    return Promise.all([
+      ...disassociationPromises,
+      ...associationPromises,
+      ...creationPromises,
+    ]);
+  }
+
+  function submitInstanceGroups(templateId, addedGroups = []) {
+    const associatePromises = addedGroups.map(group =>
+      JobTemplatesAPI.associateInstanceGroup(templateId, group.id)
+    );
+    return Promise.all(associatePromises);
+  }
+
+  function handleCancel() {
     history.push(`/templates`);
-  };
+  }
 
   return (
     <PageSection>
@@ -44,7 +83,7 @@ function JobTemplateAdd({ history, i18n }) {
             handleSubmit={handleSubmit}
           />
         </CardBody>
-        {error ? <div>error</div> : ''}
+        {formSubmitError ? <div>formSubmitError</div> : ''}
       </Card>
     </PageSection>
   );

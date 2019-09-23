@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Switch, Route, withRouter, Redirect } from 'react-router-dom';
+import { Switch, Route, withRouter, Redirect, Link } from 'react-router-dom';
 import {
   Card,
   CardHeader as PFCardHeader,
@@ -168,7 +168,16 @@ class Organization extends Component {
       return (
         <PageSection>
           <Card className="awx-c-card">
-            <ContentError error={contentError} />
+            <ContentError error={contentError}>
+              {contentError.response.status === 404 && (
+                <span>
+                  {i18n._(`Organization not found.`)}{' '}
+                  <Link to="/organizations">
+                    {i18n._(`View all Organizations.`)}
+                  </Link>
+                </span>
+              )}
+            </ContentError>
           </Card>
         </PageSection>
       );
@@ -226,6 +235,22 @@ class Organization extends Component {
                 )}
               />
             )}
+            <Route
+              key="not-found"
+              path="*"
+              render={() =>
+                !hasContentLoading && (
+                  <ContentError isNotFound>
+                    {match.params.id && (
+                      <Link to={`/organizations/${match.params.id}/details`}>
+                        {i18n._(`View Organization Details`)}
+                      </Link>
+                    )}
+                  </ContentError>
+                )
+              }
+            />
+            ,
           </Switch>
         </Card>
       </PageSection>

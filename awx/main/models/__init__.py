@@ -7,7 +7,8 @@ from django.db.models.signals import pre_delete  # noqa
 
 # AWX
 from awx.main.models.base import (  # noqa
-    BaseModel, PrimordialModel, prevent_search, CLOUD_INVENTORY_SOURCES, VERBOSITY_CHOICES
+    BaseModel, PrimordialModel, prevent_search, accepts_json,
+    CLOUD_INVENTORY_SOURCES, VERBOSITY_CHOICES
 )
 from awx.main.models.unified_jobs import (  # noqa
     UnifiedJob, UnifiedJobTemplate, StdoutMaxBytesExceeded
@@ -48,11 +49,14 @@ from awx.main.models.mixins import (  # noqa
     TaskManagerJobMixin, TaskManagerProjectUpdateMixin,
     TaskManagerUnifiedJobMixin,
 )
-from awx.main.models.notifications import Notification, NotificationTemplate # noqa
+from awx.main.models.notifications import (  # noqa
+    Notification, NotificationTemplate,
+    JobNotificationMixin
+)
 from awx.main.models.label import Label # noqa
 from awx.main.models.workflow import (  # noqa
     WorkflowJob, WorkflowJobNode, WorkflowJobOptions, WorkflowJobTemplate,
-    WorkflowJobTemplateNode,
+    WorkflowJobTemplateNode, WorkflowApproval, WorkflowApprovalTemplate,
 )
 from awx.main.models.channels import ChannelGroup # noqa
 from awx.api.versioning import reverse
@@ -122,18 +126,22 @@ def user_is_system_auditor(user):
 
 @user_is_system_auditor.setter
 def user_is_system_auditor(user, tf):
-    if user.id:
-        if tf:
-            role = Role.singleton('system_auditor')
-            # must check if member to not duplicate activity stream
-            if user not in role.members.all():
-                role.members.add(user)
-            user._is_system_auditor = True
-        else:
-            role = Role.singleton('system_auditor')
-            if user in role.members.all():
-                role.members.remove(user)
-            user._is_system_auditor = False
+    if not user.id:
+        # If the user doesn't have a primary key yet (i.e., this is the *first*
+        # time they've logged in, and we've just created the new User in this
+        # request), we need one to set up the system auditor role
+        user.save()
+    if tf:
+        role = Role.singleton('system_auditor')
+        # must check if member to not duplicate activity stream
+        if user not in role.members.all():
+            role.members.add(user)
+        user._is_system_auditor = True
+    else:
+        role = Role.singleton('system_auditor')
+        if user in role.members.all():
+            role.members.remove(user)
+        user._is_system_auditor = False
 
 
 User.add_to_class('is_system_auditor', user_is_system_auditor)
@@ -195,6 +203,8 @@ activity_stream_registrar.connect(User)
 activity_stream_registrar.connect(WorkflowJobTemplate)
 activity_stream_registrar.connect(WorkflowJobTemplateNode)
 activity_stream_registrar.connect(WorkflowJob)
+activity_stream_registrar.connect(WorkflowApproval)
+activity_stream_registrar.connect(WorkflowApprovalTemplate)
 activity_stream_registrar.connect(OAuth2Application)
 activity_stream_registrar.connect(OAuth2AccessToken)
 
@@ -205,4 +215,3 @@ prevent_search(RefreshToken._meta.get_field('token'))
 prevent_search(OAuth2Application._meta.get_field('client_secret'))
 prevent_search(OAuth2Application._meta.get_field('client_id'))
 prevent_search(Grant._meta.get_field('code'))
-

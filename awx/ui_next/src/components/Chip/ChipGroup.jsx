@@ -20,8 +20,8 @@ const ChipGroup = ({ children, className, showOverflowAfter, ...props }) => {
 
   return (
     <ul className={`pf-c-chip-group ${className}`} {...props}>
-      {mappedChildren.slice(0, numToShow)}
-      {showOverflowToggle && (
+      {!showOverflowAfter ? mappedChildren : mappedChildren.slice(0, numToShow)}
+      {showOverflowAfter && showOverflowToggle && (
         <Chip isOverflowChip onClick={toggleIsOpen} component="li">
           {isExpanded ? expandedText : collapsedText}
         </Chip>
@@ -39,4 +39,8 @@ ChipGroup.defaultProps = {
 export default styled(ChipGroup)`
   --pf-c-chip-group--c-chip--MarginRight: 10px;
   --pf-c-chip-group--c-chip--MarginBottom: 10px;
+
+  > .pf-c-chip.pf-m-overflow button {
+    padding: 3px 8px;
+  }
 `;

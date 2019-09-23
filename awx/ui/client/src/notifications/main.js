@@ -15,6 +15,7 @@ import notificationsList from './notifications.list';
 import toggleNotification from './shared/toggle-notification.factory';
 import notificationsListInit from './shared/notification-list-init.factory';
 import typeChange from './shared/type-change.service';
+import messageUtils from './shared/message-utils.service';
 import { N_ } from '../i18n';
 
 export default
@@ -29,6 +30,7 @@ angular.module('notifications', [
     .factory('ToggleNotification', toggleNotification)
     .factory('NotificationsListInit', notificationsListInit)
     .service('NotificationsTypeChange', typeChange)
+    .service('MessageUtils', messageUtils)
     .config(['$stateProvider', 'stateDefinitionsProvider',
         function($stateProvider, stateDefinitionsProvider) {
             let stateDefinitions = stateDefinitionsProvider.$get();
@@ -68,8 +70,12 @@ angular.module('notifications', [
                                     var url = getBasePath('notification_templates') + notificationTemplateId + '/';
                                     rest.setUrl(url);
                                     return rest.get()
-                                        .then(function(data) {
-                                            return data.data;
+                                        .then(function(res) {
+                                            if (_.get(res, ['data', 'notification_type'] === 'webhook') &&
+                                                _.get(res, ['data', 'notification_configuration', 'http_method'])) {
+                                                res.data.notification_configuration.http_method = res.data.notification_configuration.http_method.toUpperCase();
+                                            }
+                                            return res.data;
                                         }).catch(function(response) {
                                             ProcessErrors(null, response.data, response.status, null, {
                                                 hdr: 'Error!',

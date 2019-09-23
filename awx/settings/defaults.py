@@ -604,6 +604,11 @@ ALLOW_JINJA_IN_EXTRA_VARS = 'template'
 # Note: This setting may be overridden by database settings.
 AWX_ROLES_ENABLED = True
 
+# Enable dynamically pulling collections from a requirement.yml file
+# when updating SCM projects
+# Note: This setting may be overridden by database settings.
+AWX_COLLECTIONS_ENABLED = True
+
 # Enable bubblewrap support for running jobs (playbook runs only).
 # Note: This setting may be overridden by database settings.
 AWX_PROOT_ENABLED = True
@@ -618,9 +623,6 @@ AWX_PROOT_HIDE_PATHS = []
 # Additional paths to show for jobs using bubbelwrap.
 # Note: This setting may be overridden by database settings.
 AWX_PROOT_SHOW_PATHS = []
-
-# Number of jobs to show as part of the job template history
-AWX_JOB_TEMPLATE_HISTORY = 10
 
 # The directory in which Tower will create new temporary directories for job
 # execution and isolation (such as credential files and custom
@@ -1186,9 +1188,6 @@ AWX_REQUEST_PROFILE = False
 
 # Delete temporary directories created to store playbook run-time
 AWX_CLEANUP_PATHS = True
-
-# Expose collections to Ansible playbooks
-AWX_ANSIBLE_COLLECTIONS_PATHS = ['/var/lib/awx/collections']
 
 MIDDLEWARE = [
     'awx.main.middleware.TimingMiddleware',

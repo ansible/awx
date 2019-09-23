@@ -45,6 +45,8 @@ function JobStatusService (moment, message) {
                 id: model.get('summary_fields.project_update.id'),
                 status: model.get('summary_fields.project_update.status')
             },
+            scmBranch: model.get('scm_branch'),
+            scmRefspec: model.get('scm_refspec'),
             inventoryScm: {
                 id: model.get('source_project_update'),
                 status: model.get('summary_fields.inventory_source.status')
@@ -301,6 +303,12 @@ function JobStatusService (moment, message) {
         this.statsEvent = data;
     };
 
+    this.setResultTraceback = traceback => {
+        if (!traceback) return;
+
+        this.state.resultTraceback = traceback;
+    };
+
     this.setHostStatusCounts = counts => {
         counts = counts || {};
 
@@ -339,6 +347,7 @@ function JobStatusService (moment, message) {
                 this.setEnvironment(model.get('custom_virtualenv'));
                 this.setArtifacts(model.get('artifacts'));
                 this.setExecutionNode(model.get('execution_node'));
+                this.setResultTraceback(model.get('result_traceback'));
 
                 this.initHostStatusCounts({ model });
                 this.initPlaybookCounts({ model });

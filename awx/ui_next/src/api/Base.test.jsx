@@ -41,15 +41,22 @@ describe('Base', () => {
   });
 
   test('read calls http method with expected data', async done => {
-    const defaultParams = {};
     const testParams = { foo: 'bar' };
+    const testParamsDuplicates = { foo: ['bar', 'baz'] };
 
     await BaseAPI.read(testParams);
     await BaseAPI.read();
+    await BaseAPI.read(testParamsDuplicates);
 
-    expect(mockHttp.get).toHaveBeenCalledTimes(2);
-    expect(mockHttp.get.mock.calls[0][1]).toEqual({ params: testParams });
-    expect(mockHttp.get.mock.calls[1][1]).toEqual({ params: defaultParams });
+    expect(mockHttp.get).toHaveBeenCalledTimes(3);
+    expect(mockHttp.get.mock.calls[0][0]).toEqual(`${mockBaseURL}`);
+    expect(mockHttp.get.mock.calls[0][1]).toEqual({ params: { foo: 'bar' } });
+    expect(mockHttp.get.mock.calls[1][0]).toEqual(`${mockBaseURL}`);
+    expect(mockHttp.get.mock.calls[1][1]).toEqual({ params: undefined });
+    expect(mockHttp.get.mock.calls[2][0]).toEqual(`${mockBaseURL}`);
+    expect(mockHttp.get.mock.calls[2][1]).toEqual({
+      params: { foo: ['bar', 'baz'] },
+    });
     done();
   });
 

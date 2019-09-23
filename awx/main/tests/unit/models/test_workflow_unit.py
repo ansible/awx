@@ -3,7 +3,7 @@ import pytest
 from awx.main.models.jobs import JobTemplate
 from awx.main.models import Inventory, CredentialType, Credential, Project
 from awx.main.models.workflow import (
-    WorkflowJobTemplate, WorkflowJobTemplateNode, WorkflowJobOptions,
+    WorkflowJobTemplate, WorkflowJobTemplateNode,
     WorkflowJob, WorkflowJobNode
 )
 from unittest import mock
@@ -33,11 +33,11 @@ class TestWorkflowJobInheritNodesMixin():
         def test__create_workflow_job_nodes(self, mocker, job_template_nodes):
             workflow_job_node_create = mocker.patch('awx.main.models.WorkflowJobTemplateNode.create_workflow_job_node')
 
-            mixin = WorkflowJobOptions()
-            mixin._create_workflow_nodes(job_template_nodes)
+            workflow_job = WorkflowJob()
+            workflow_job._create_workflow_nodes(job_template_nodes)
 
             for job_template_node in job_template_nodes:
-                workflow_job_node_create.assert_any_call(workflow_job=mixin)
+                workflow_job_node_create.assert_any_call(workflow_job=workflow_job)
 
     class TestMapWorkflowJobNodes():
         @pytest.fixture
@@ -236,4 +236,4 @@ class TestWorkflowJobNodeJobKWARGS:
 
 
 def test_get_ask_mapping_integrity():
-    assert list(WorkflowJobTemplate.get_ask_mapping().keys()) == ['extra_vars', 'inventory']
+    assert list(WorkflowJobTemplate.get_ask_mapping().keys()) == ['extra_vars', 'inventory', 'limit', 'scm_branch']

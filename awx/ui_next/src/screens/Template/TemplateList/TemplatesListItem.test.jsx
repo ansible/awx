@@ -8,6 +8,7 @@ describe('<TemplatesListItem />', () => {
   test('launch button shown to users with start capabilities', () => {
     const wrapper = mountWithContexts(
       <TemplatesListItem
+        isSelected={false}
         template={{
           id: 1,
           name: 'Template 1',
@@ -26,6 +27,7 @@ describe('<TemplatesListItem />', () => {
   test('launch button hidden from users without start capabilities', () => {
     const wrapper = mountWithContexts(
       <TemplatesListItem
+        isSelected={false}
         template={{
           id: 1,
           name: 'Template 1',

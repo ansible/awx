@@ -420,6 +420,18 @@ spec:
 {% if memcached_cpu_limit is defined %}
               cpu: "{{ memcached_cpu_limit }}m"
 {% endif %}
+{% if tolerations is defined %}
+      tolerations:
+{{ tolerations | to_nice_yaml(indent=2) | indent(width=8, indentfirst=True) }}
+{% endif %}
+{% if node_selector is defined %}
+      nodeSelector:
+{{ node_selector | to_nice_yaml(indent=2) | indent(width=8, indentfirst=True) }}
+{% endif %}
+{% if affinity is defined %}
+      affinity:
+{{ affinity | to_nice_yaml(indent=2) | indent(width=8, indentfirst=True) }}
+{% endif %}
       volumes:
 {% if ca_trust_dir is defined %}
         - name: {{ kubernetes_deployment_name }}-ca-trust-dir

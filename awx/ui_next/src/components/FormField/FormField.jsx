@@ -57,7 +57,7 @@ FormField.propTypes = {
   type: PropTypes.string,
   validate: PropTypes.func,
   isRequired: PropTypes.bool,
-  tooltip: PropTypes.string,
+  tooltip: PropTypes.node,
 };
 
 FormField.defaultProps = {

@@ -76,6 +76,12 @@ describe('<TemplatesList />', () => {
         results: mockTemplates,
       },
     });
+
+    UnifiedJobTemplatesAPI.readOptions.mockResolvedValue({
+      data: {
+        actions: [],
+      },
+    });
   });
 
   afterEach(() => {
@@ -116,8 +122,9 @@ describe('<TemplatesList />', () => {
       'TemplatesList',
       el => el.state('hasContentLoading') === false
     );
-    wrapper
-      .find('DataListCheck#select-jobTemplate-1')
+    await wrapper
+      .find('input#select-jobTemplate-1')
+      .closest('DataListCheck')
       .props()
       .onChange();
     expect(handleSelect).toBeCalled();
@@ -193,7 +200,7 @@ describe('<TemplatesList />', () => {
     expect(WorkflowJobTemplatesAPI.destroy).toHaveBeenCalledTimes(1);
   });
 
-  test('error is shown when template not successfully deleted from api', async () => {
+  test('error is shown when template not successfully deleted from api', async done => {
     JobTemplatesAPI.destroy.mockRejectedValue(
       new Error({
         response: {
@@ -219,5 +226,7 @@ describe('<TemplatesList />', () => {
       'Modal',
       el => el.props().isOpen === true && el.props().title === 'Error!'
     );
+
+    done();
   });
 });

@@ -106,9 +106,8 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
     inputs = CredentialInputField(
         blank=True,
         default=dict,
-        help_text=_('Enter inputs using either JSON or YAML syntax. Use the '
-                    'radio button to toggle between the two. Refer to the '
-                    'Ansible Tower documentation for example syntax.')
+        help_text=_('Enter inputs using either JSON or YAML syntax. '
+                    'Refer to the Ansible Tower documentation for example syntax.')
     )
     admin_role = ImplicitRoleField(
         parent_role=[
@@ -344,16 +343,14 @@ class CredentialType(CommonModelNameNotUnique):
     inputs = CredentialTypeInputField(
         blank=True,
         default=dict,
-        help_text=_('Enter inputs using either JSON or YAML syntax. Use the '
-                    'radio button to toggle between the two. Refer to the '
-                    'Ansible Tower documentation for example syntax.')
+        help_text=_('Enter inputs using either JSON or YAML syntax. '
+                    'Refer to the Ansible Tower documentation for example syntax.')
     )
     injectors = CredentialTypeInjectorField(
         blank=True,
         default=dict,
-        help_text=_('Enter injectors using either JSON or YAML syntax. Use the '
-                    'radio button to toggle between the two. Refer to the '
-                    'Ansible Tower documentation for example syntax.')
+        help_text=_('Enter injectors using either JSON or YAML syntax. '
+                    'Refer to the Ansible Tower documentation for example syntax.')
     )
 
     @classmethod

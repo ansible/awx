@@ -119,6 +119,18 @@ function ComponentsStrings (BaseString) {
         EXPANDED: t.s('Expanded'),
         SORT_BY: t.s('SORT BY')
     };
+
+    ns.approvals = {
+        APPROVAL: t.s('APPROVAL'),
+        NONE: t.s('There are no jobs awaiting approval'),
+        APPROVE: t.s('APPROVE'),
+        DENY: t.s('DENY'),
+        CONTINUE: t.s('Continue workflow job?'),
+        NOTIFICATIONS: t.s('NOTIFICATIONS'),
+        WORKFLOW_TEMPLATE: t.s('Workflow Template'),
+        EXPIRES: t.s('Expires:'),
+        EXPIRES_NEVER: t.s('Expires: Never')
+    };
 }
 
 ComponentsStrings.$inject = ['BaseStringService'];

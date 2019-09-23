@@ -8,11 +8,11 @@ class Organizations extends InstanceGroupsMixin(NotificationsMixin(Base)) {
     this.baseUrl = '/api/v2/organizations/';
   }
 
-  readAccessList(id, params = {}) {
+  readAccessList(id, params) {
     return this.http.get(`${this.baseUrl}${id}/access_list/`, { params });
   }
 
-  readTeams(id, params = {}) {
+  readTeams(id, params) {
     return this.http.get(`${this.baseUrl}${id}/teams/`, { params });
   }
 }

@@ -103,15 +103,34 @@ function(NotificationsList, i18n) {
                     ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate) || !canGetAllRelatedResources',
                     awLookupWhen: 'canGetAllRelatedResources'
                 },
+                scm_branch: {
+                    label: i18n._('SCM Branch'),
+                    type: 'text',
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)',
+                    ngShow: 'allow_branch_override',
+                    column: 1,
+                    awPopOver: "<p>" + i18n._("Branch to use in job run. Project default used if blank.") + "</p>",
+                    dataTitle: i18n._('Project'),
+                    subCheckbox: {
+                        variable: 'ask_scm_branch_on_launch',
+                        text: i18n._('Prompt on launch'),
+                        ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
+                    },
+                    dataPlacement: 'right',
+                    dataContainer: "body"
+                },
                 playbook: {
                     label: i18n._('Playbook'),
                     type:'select',
+                    defaultText: i18n._('Choose a playbook'),
                     ngOptions: 'book for book in playbook_options track by book',
+                    ngShow: 'allow_playbook_selection',
                     ngDisabled: "!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate) || !canGetAllRelatedResources",
                     id: 'playbook-select',
                     required: true,
                     column: 1,
-                    awPopOver: "<p>" + i18n._("Select the playbook to be executed by this job.") + "</p>",
+                    awPopOver: "<p>" + i18n._("Select the playbook to be executed by this job." +
+                        "You can select from the dropdown or enter a file within the input.") + "</p>",
                     dataTitle: i18n._('Playbook'),
                     dataPlacement: 'right',
                     dataContainer: "body",

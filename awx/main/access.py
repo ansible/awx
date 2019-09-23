@@ -37,6 +37,7 @@ from awx.main.models import (
     ProjectUpdateEvent, Role, Schedule, SystemJob, SystemJobEvent,
     SystemJobTemplate, Team, UnifiedJob, UnifiedJobTemplate, WorkflowJob,
     WorkflowJobNode, WorkflowJobTemplate, WorkflowJobTemplateNode,
+    WorkflowApproval, WorkflowApprovalTemplate,
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR, ROLE_SINGLETON_SYSTEM_AUDITOR
 )
 from awx.main.models.mixins import ResourceMixin
@@ -316,10 +317,19 @@ class BaseAccess(object):
             validation_info['time_remaining'] = 99999999
             validation_info['grace_period_remaining'] = 99999999
 
+        report_violation = lambda message: logger.error(message)
+
+        if (
+            validation_info.get('trial', False) is True or
+            validation_info['instance_count'] == 10  # basic 10 license
+        ):
+            def report_violation(message):
+                raise PermissionDenied(message)
+
         if check_expiration and validation_info.get('time_remaining', None) is None:
             raise PermissionDenied(_("License is missing."))
-        if check_expiration and validation_info.get("grace_period_remaining") <= 0:
-            raise PermissionDenied(_("License has expired."))
+        elif check_expiration and validation_info.get("grace_period_remaining") <= 0:
+            report_violation(_("License has expired."))
 
         free_instances = validation_info.get('free_instances', 0)
         available_instances = validation_info.get('available_instances', 0)
@@ -327,11 +337,11 @@ class BaseAccess(object):
         if add_host_name:
             host_exists = Host.objects.filter(name=add_host_name).exists()
             if not host_exists and free_instances == 0:
-                raise PermissionDenied(_("License count of %s instances has been reached.") % available_instances)
+                report_violation(_("License count of %s instances has been reached.") % available_instances)
             elif not host_exists and free_instances < 0:
-                raise PermissionDenied(_("License count of %s instances has been exceeded.") % available_instances)
+                report_violation(_("License count of %s instances has been exceeded.") % available_instances)
         elif not add_host_name and free_instances < 0:
-            raise PermissionDenied(_("Host count exceeds available instances."))
+            report_violation(_("Host count exceeds available instances."))
 
     def check_org_host_limit(self, data, add_host_name=None):
         validation_info = get_licenser().validate()
@@ -538,7 +548,7 @@ class InstanceGroupAccess(BaseAccess):
 
     def filtered_queryset(self):
         return InstanceGroup.objects.filter(
-            organization__in=Organization.accessible_pk_qs(self.user, 'admin_role'))
+            organization__in=Organization.accessible_pk_qs(self.user, 'admin_role')).distinct()
 
     def can_add(self, data):
         return self.user.is_superuser
@@ -834,10 +844,6 @@ class InventoryAccess(BaseAccess):
         return self.model.accessible_objects(self.user, 'read_role')
 
     @check_superuser
-    def can_read(self, obj):
-        return self.user in obj.read_role
-
-    @check_superuser
     def can_use(self, obj):
         return self.user in obj.use_role
 
@@ -906,9 +912,6 @@ class HostAccess(BaseAccess):
     def filtered_queryset(self):
         return self.model.objects.filter(inventory__in=Inventory.accessible_pk_qs(self.user, 'read_role'))
 
-    def can_read(self, obj):
-        return obj and self.user in obj.inventory.read_role
-
     def can_add(self, data):
         if not data:  # So the browseable API will work
             return Inventory.accessible_objects(self.user, 'admin_role').exists()
@@ -970,9 +973,6 @@ class GroupAccess(BaseAccess):
     def filtered_queryset(self):
         return Group.objects.filter(inventory__in=Inventory.accessible_pk_qs(self.user, 'read_role'))
 
-    def can_read(self, obj):
-        return obj and self.user in obj.inventory.read_role
-
     def can_add(self, data):
         if not data or 'inventory' not in data:
             return False
@@ -1015,12 +1015,6 @@ class InventorySourceAccess(NotificationAttachMixin, BaseAccess):
 
     def filtered_queryset(self):
         return self.model.objects.filter(inventory__in=Inventory.accessible_pk_qs(self.user, 'read_role'))
-
-    def can_read(self, obj):
-        if obj and obj.inventory:
-            return self.user.can_access(Inventory, 'read', obj.inventory)
-        else:
-            return False
 
     def can_add(self, data):
         if not data or 'inventory' not in data:
@@ -1114,9 +1108,6 @@ class CredentialTypeAccess(BaseAccess):
     model = CredentialType
     prefetch_related = ('created_by', 'modified_by',)
 
-    def can_read(self, obj):
-        return True
-
     def can_use(self, obj):
         return True
 
@@ -1159,24 +1150,25 @@ class CredentialAccess(BaseAccess):
         return self.model.accessible_objects(self.user, 'read_role')
 
     @check_superuser
-    def can_read(self, obj):
-        return self.user in obj.read_role
-
-    @check_superuser
     def can_add(self, data):
         if not data:  # So the browseable API will work
             return True
         if data and data.get('user', None):
             user_obj = get_object_from_data('user', User, data)
-            return bool(self.user == user_obj or UserAccess(self.user).can_admin(user_obj, None, check_setting=False))
+            if not bool(self.user == user_obj or UserAccess(self.user).can_admin(user_obj, None, check_setting=False)):
+                return False
         if data and data.get('team', None):
             team_obj = get_object_from_data('team', Team, data)
-            return check_user_access(self.user, Team, 'change', team_obj, None)
+            if not check_user_access(self.user, Team, 'change', team_obj, None):
+                return False
         if data and data.get('organization', None):
             organization_obj = get_object_from_data('organization', Organization, data)
-            return any([check_user_access(self.user, Organization, 'change', organization_obj, None),
-                        self.user in organization_obj.credential_admin_role])
-        return False
+            if not any([check_user_access(self.user, Organization, 'change', organization_obj, None),
+                        self.user in organization_obj.credential_admin_role]):
+                return False
+        if not any(data.get(key, None) for key in ('user', 'team', 'organization')):
+            return False  # you have to provide 1 owner field
+        return True
 
     @check_superuser
     def can_use(self, obj):
@@ -1218,10 +1210,6 @@ class CredentialInputSourceAccess(BaseAccess):
     def filtered_queryset(self):
         return CredentialInputSource.objects.filter(
             target_credential__in=Credential.accessible_pk_qs(self.user, 'read_role'))
-
-    @check_superuser
-    def can_read(self, obj):
-        return self.user in obj.target_credential.read_role
 
     @check_superuser
     def can_add(self, data):
@@ -1972,10 +1960,6 @@ class WorkflowJobTemplateAccess(NotificationAttachMixin, BaseAccess):
         return self.model.accessible_objects(self.user, 'read_role')
 
     @check_superuser
-    def can_read(self, obj):
-        return self.user in obj.read_role
-
-    @check_superuser
     def can_add(self, data):
         '''
         a user can create a job template if they are a superuser, an org admin
@@ -2372,12 +2356,17 @@ class UnifiedJobTemplateAccess(BaseAccess):
         return self.model.objects.filter(
             Q(pk__in=self.model.accessible_pk_qs(self.user, 'read_role')) |
             Q(inventorysource__inventory__id__in=Inventory._accessible_pk_qs(
-                Inventory, self.user, 'read_role')))
+                Inventory, self.user, 'read_role'))
+        )
 
     def can_start(self, obj, validate_license=True):
         access_class = access_registry[obj.__class__]
         access_instance = access_class(self.user)
         return access_instance.can_start(obj, validate_license=validate_license)
+
+    def get_queryset(self):
+        return super(UnifiedJobTemplateAccess, self).get_queryset().filter(
+            workflowapprovaltemplate__isnull=True)
 
 
 class UnifiedJobAccess(BaseAccess):
@@ -2424,6 +2413,10 @@ class UnifiedJobAccess(BaseAccess):
             Q(job__project__organization__in=org_auditor_qs)
         )
         return qs
+
+    def get_queryset(self):
+        return super(UnifiedJobAccess, self).get_queryset().filter(
+            workflowapproval__isnull=True)
 
 
 class ScheduleAccess(BaseAccess):
@@ -2486,14 +2479,6 @@ class NotificationTemplateAccess(BaseAccess):
             Q(organization__in=self.user.auditor_of_organizations)
         ).distinct()
 
-    def can_read(self, obj):
-        if self.user.is_superuser or self.user.is_system_auditor:
-            return True
-        if obj.organization is not None:
-            if self.user in obj.organization.notification_admin_role or self.user in obj.organization.auditor_role:
-                return True
-        return False
-
     @check_superuser
     def can_add(self, data):
         if not data:
@@ -2533,9 +2518,6 @@ class NotificationAccess(BaseAccess):
             Q(notification_template__organization__in=self.user.auditor_of_organizations)
         ).distinct()
 
-    def can_read(self, obj):
-        return self.user.can_access(NotificationTemplate, 'read', obj.notification_template)
-
     def can_delete(self, obj):
         return self.user.can_access(NotificationTemplate, 'delete', obj.notification_template)
 
@@ -2549,10 +2531,6 @@ class LabelAccess(BaseAccess):
 
     def filtered_queryset(self):
         return self.model.objects.all()
-
-    @check_superuser
-    def can_read(self, obj):
-        return self.user in obj.organization.read_role
 
     @check_superuser
     def can_add(self, data):
@@ -2711,15 +2689,6 @@ class RoleAccess(BaseAccess):
             result = result | super_qs
         return result
 
-    def can_read(self, obj):
-        if not obj:
-            return False
-        if self.user.is_superuser or self.user.is_system_auditor:
-            return True
-
-        return Role.filter_visible_roles(
-            self.user, Role.objects.filter(pk=obj.id)).exists()
-
     def can_add(self, obj, data):
         # Unsupported for now
         return False
@@ -2762,6 +2731,81 @@ class RoleAccess(BaseAccess):
     def can_delete(self, obj):
         # Unsupported for now
         return False
+
+
+class WorkflowApprovalAccess(BaseAccess):
+    '''
+    A user can create a workflow approval if they are a superuser, an org admin
+    of the org connected to the workflow, or if they are assigned as admins to
+    the workflow.
+
+    A user can approve a workflow when they are:
+    - a superuser
+    - a workflow admin
+    - an organization admin
+    - any user who has explicitly been assigned the "approver" role
+
+    A user can see approvals if they have read access to the associated WorkflowJobTemplate.
+    '''
+
+    model = WorkflowApproval
+    prefetch_related = ('created_by', 'modified_by',)
+
+    def can_use(self, obj):
+        return True
+
+    def can_start(self, obj, validate_license=True):
+        return True
+
+    def filtered_queryset(self):
+        return self.model.objects.filter(
+            unified_job_node__workflow_job__unified_job_template__in=WorkflowJobTemplate.accessible_pk_qs(
+                self.user, 'read_role'))
+
+    def can_approve_or_deny(self, obj):
+        if (
+            (obj.workflow_job_template and self.user in obj.workflow_job_template.approval_role) or
+            self.user.is_superuser
+        ):
+            return True
+
+
+class WorkflowApprovalTemplateAccess(BaseAccess):
+    '''
+    A user can create a workflow approval if they are a superuser, an org admin
+    of the org connected to the workflow, or if they are assigned as admins to
+    the workflow.
+
+    A user can approve a workflow when they are:
+    - a superuser
+    - a workflow admin
+    - an organization admin
+    - any user who has explicitly been assigned the "approver" role at the workflow or organization level
+
+    A user can see approval templates if they have read access to the associated WorkflowJobTemplate.
+    '''
+
+    model = WorkflowApprovalTemplate
+    prefetch_related = ('created_by', 'modified_by',)
+
+    @check_superuser
+    def can_add(self, data):
+        if data is None:  # Hide direct creation in API browser
+            return False
+        else:
+            return (self.check_related('workflow_approval_template', UnifiedJobTemplate, role_field='admin_role'))
+
+    def can_start(self, obj, validate_license=False):
+        # for copying WFJTs that contain approval nodes
+        if self.user.is_superuser:
+            return True
+
+        return self.user in obj.workflow_job_template.execute_role
+
+    def filtered_queryset(self):
+        return self.model.objects.filter(
+            workflowjobtemplatenodes__workflow_job_template__in=WorkflowJobTemplate.accessible_pk_qs(
+                self.user, 'read_role'))
 
 
 for cls in BaseAccess.__subclasses__():

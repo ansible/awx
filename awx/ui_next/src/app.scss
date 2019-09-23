@@ -97,7 +97,7 @@
   width: 600px;
 
   .pf-c-modal-box__body {
-    overflow: visible;
+    overflow: auto;
   }
 
   .pf-c-modal-box__footer > .pf-c-button:not(:last-child) {
@@ -154,11 +154,6 @@
 // note that these should be given a consistent prefix
 // and bem style, as well as moved into component-based scss files
 //
-
-.awx-lookup .pf-c-form-control {
-  --pf-c-form-control--Height: 90px;
-  overflow-y: auto;
-}
 
 .at-c-listCardBody {
   --pf-c-card__footer--PaddingX: 0;
