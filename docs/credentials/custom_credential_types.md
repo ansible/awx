@@ -27,7 +27,7 @@ Important Changes
   By utilizing these custom ``Credential Types``, customers have the ability to
   define custom "Cloud" and "Network" ``Credential Types`` which
   modify environment variables, extra vars, and generate file-based
-  credentials (such as file-based certificates or .ini files) at
+  credentials (such as file-based certificates or `.ini` files) at
   `ansible-playbook` runtime.
 
 * Multiple ``Credentials`` can now be assigned to a ``Job Template`` as long as
@@ -136,9 +136,10 @@ ordered fields for that type:
             "multiline": false               # if true, the field should be rendered
                                              # as multi-line for input entry
                                              # (only applicable to `type=string`)
+
             "default": "default value"       # optional, can be used to provide a
-                                             # default value if the field is left empty
-                                             # when creating a credential of this type
+                                             # default value if the field is left empty;
+                                             # when creating a credential of this type,
                                              # credential forms will use this value
                                              # as a prefill when making credentials of
                                              # this type
@@ -164,7 +165,7 @@ When `type=string`, fields can optionally specify multiple choice options:
 Defining Custom Credential Type Injectors
 -----------------------------------------
 A ``Credential Type`` can inject ``Credential`` values through the use
-of the Jinja templating language (which should be familiar to users of Ansible):
+of the [Jinja templating language](https://jinja.palletsprojects.com/en/2.10.x/) (which should be familiar to users of Ansible):
 
     "injectors": {
         "env": {
@@ -175,7 +176,7 @@ of the Jinja templating language (which should be familiar to users of Ansible):
         }
     }
 
-``Credential Types`` can also generate temporary files to support .ini files or
+``Credential Types`` can also generate temporary files to support `.ini` files or
 certificate/key data:
 
     "injectors": {
@@ -274,7 +275,7 @@ Additional Criteria
 
 Acceptance Criteria
 -------------------
-When verifying acceptance we should ensure the following statements are true:
+When verifying acceptance, the following statements should be true:
 
 * `Credential` injection for playbook runs, SCM updates, inventory updates, and
   ad-hoc runs should continue to function as they did prior to Tower 3.2 for the
@@ -290,15 +291,15 @@ When verifying acceptance we should ensure the following statements are true:
 * Users should not be able to use the syntax for injecting single and
   multiple files in the same custom credential.
 * The default `Credential Types` included with Tower in 3.2 should be
-  non-editable/readonly and cannot be deleted by any user.
+  non-editable/read-only and unable to be deleted by any user.
 * Stored `Credential` values for _all_ types should be consistent before and
-  after Tower 3.2 migration/upgrade.
+  after a Tower 3.2 migration/upgrade.
 * `Job Templates` should be able to specify multiple extra `Credentials` as
   defined in the constraints in this document.
 * Custom inventory sources should be able to specify a cloud/network
   `Credential` and they should properly update the environment (environment
   variables, extra vars, written files) when an inventory source update runs.
 * If a `Credential Type` is being used by one or more `Credentials`, the fields
-  defined in its ``inputs`` should be read-only.
-* `Credential Types` should support activity stream history for basic object
+  defined in its `inputs` should be read-only.
+* `Credential Types` should support Activity Stream history for basic object
   modification.

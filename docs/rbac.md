@@ -7,13 +7,13 @@ The intended audience of this document is the Ansible Tower developer.
 
 ### RBAC - System Basics
 
-There are three main concepts to be familiar with, Roles, Resources, and Users.
+There are three main concepts to be familiar with: Roles, Resources, and Users.
 Users can be members of a role, which gives them certain access to any
 resources associated with that role, or any resources associated with "descendent"
 roles.
 
 For example, if I have an organization named "MyCompany" and I want to allow
-two people, "Alice", and "Bob", access to manage all the settings associated
+two people, "Alice", and "Bob", access to manage all of the settings associated
 with that organization, I'd make them both members of the organization's `admin_role`.
 
 It is often the case that you have many Roles in a system, and you want some
@@ -21,9 +21,9 @@ roles to include all of the capabilities of other roles. For example, you may
 want a System Administrator to have access to everything that an Organization
 Administrator has access to, who has everything that a Project Administrator
 has access to, and so on. We refer to this concept as the 'Role Hierarchy', and
-is represented by allowing Roles to have "Parent Roles". Any permission that a
-Role has is implicitly granted to any parent roles (or parents of those
-parents, and so on). Of course Roles can have more than one parent, and
+is represented by allowing roles to have "Parent Roles". Any permission that a
+role has is implicitly granted to any parent roles (or parents of those
+parents, and so on). Of course roles can have more than one parent, and
 capabilities are implicitly granted to all parents. (Technically speaking, this
 forms a directional acyclic graph instead of a strict hierarchy, but the
 concept should remain intuitive.)
@@ -34,10 +34,10 @@ concept should remain intuitive.)
 ### Implementation Overview
 
 The RBAC system allows you to create and layer roles for controlling access to resources. Any Django Model can
-be made into a resource in the RBAC system by using the `ResourceMixin`. Once a model is accessible as a resource you can
+be made into a resource in the RBAC system by using the `ResourceMixin`. Once a model is accessible as a resource, you can
 extend the model definition to have specific roles using the `ImplicitRoleField`. Within the declaration of
 this role field you can also specify any parents the role may have, and the RBAC system will take care of
-all the appropriate ancestral binding that takes place behind the scenes to ensure that the model you've declared
+all of the appropriate ancestral binding that takes place behind the scenes to ensure that the model you've declared
 is kept up to date as the relations in your model change.
 
 ### Roles
@@ -52,7 +52,7 @@ what roles are checked when accessing a resource.
      | -- AdminRole
            |-- parent = ResourceA.AdminRole
 
-When a user attempts to access ResourceB we will check for their access using the set of all unique roles, including the parents.
+When a user attempts to access ResourceB, we will check for their access using the set of all unique roles, including the parents.
 
     ResourceA.AdminRole, ResourceB.AdminRole
 
@@ -60,7 +60,7 @@ This would provide any members of the above roles with access to ResourceB.
 
 #### Singleton Role
 
-There is a special case _Singleton Role_ that you can create. This type of role is for system wide roles.
+There is a special case _Singleton Role_ that you can create. This type of role is for system-wide roles.
 
 ### Models
 
@@ -72,7 +72,7 @@ The RBAC system defines a few new models. These models represent the underlying 
 
 ##### `visible_roles(cls, user)`
 
-`visible_roles` is a class method that will lookup all of the `Role` instances a user can "see". This includes any roles the user is a direct decendent of as well as any ancestor roles.
+`visible_roles` is a class method that will look up all of the `Role` instances a user can "see". This includes any roles the user is a direct descendent of as well as any ancestor roles.
 
 ##### `singleton(cls, name)`
 
@@ -137,7 +137,7 @@ By mixing in the `ResourceMixin` to your model, you are turning your model in to
 
 ## Usage
 
-After exploring the _Overview_ the usage of the RBAC implementation in your code should feel unobtrusive and natural.
+After exploring the _Overview_, the usage of the RBAC implementation in your code should feel unobtrusive and natural.
 
 ```python
     # make your model a Resource
@@ -150,7 +150,7 @@ After exploring the _Overview_ the usage of the RBAC implementation in your code
     )
 ```
 
-Now that your model is a resource and has a `Role` defined, you can begin to access the helper methods provided to you by the `ResourceMixin` for checking a users access to your resource. Here is the output of a Python REPL session.
+Now that your model is a resource and has a `Role` defined, you can begin to access the helper methods provided to you by the `ResourceMixin` for checking a user's access to your resource. Here is the output of a Python REPL session:
 
 ```python
     # we've created some documents and a user

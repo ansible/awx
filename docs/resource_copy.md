@@ -1,27 +1,29 @@
-Starting from Tower 3.3 and API v2, user are able to copy some existing resource objects to quickly
-create new resource objects via POSTing to corresponding `/copy/` endpoint. A new `CopyAPIView` class
+Starting from Tower 3.3 and API V2, users are able to copy some existing resource objects to quickly
+create new resource objects via POSTing to the corresponding `/copy/` endpoint. A new `CopyAPIView` class
 is introduced as the base view class for `/copy/` endpoints. It mimics the process of manually fetching
 fields from the existing object to create a new object, plus the ability to automatically detect sub
 structures of existing objects and make a background task-based deep copy when necessary.
 
+
 ## Usage
-If an AWX resource is copiable, all of its object detail API views will have a related URL field
-`"copy"`, which has form `/api/<version>/<resource name>/<object pk>/copy/`. GET to this endpoint
+
+If an AWX resource is able to be copied, all of its object detail API views will have a related URL field
+`"copy"`, which has the form `/api/v2/<resource name>/<object pk>/copy/`. A GET to this endpoint
 will return `can_copy`, which is a boolean indicating whether the current user can execute a copy
-operation; POST to this endpoint actually copies the resource object. One field `name` is required
-which will later be used as the name of the created copy. Upon success, 201 will be returned, along
+operation; POSTing to this endpoint actually copies the resource object. One field, `name`, is required;
+this will later be used as the name of the created copy. Upon success, a 201 will be returned, along
 with the created copy.
 
-For some resources like credential, the copy process is not time-consuming, thus the entire copy
-process will take place in the request-response cycle, and the created object copy is returned as
+For some resources like credentials, the copy process is not time-consuming, thus the entire copy
+process will take place in the request-response cycle, and the created object copy is returned as a
 POST response.
 
-For some other resources like inventory, the copy process can take longer, depending on the number
-of sub-objects to copy (will explain later). Thus, although the created copy will be returned, the
+For some other resources like inventories, the copy process can take longer, depending on the number
+of sub-objects to copy (this will be explained later in this document). Thus, although the created copy will be returned, the
 copy process is not finished yet. All sub-objects (like all hosts and groups of an inventory) will
-not be created until after the background copy task is finished in success.
+not be created until after the background copy task is finished successfully.
 
-Currently the available list of copiable resources are:
+Currently, the available list of copiable resources are:
 
 - job templates
 - projects
@@ -31,20 +33,22 @@ Currently the available list of copiable resources are:
 - notifications
 - inventory scripts
 
-For most of the resources above, only the object to be copied itself will be copied; For some resources
+For most of the resources above, only the object to be copied itself will be copied; for some resources
 like inventories, however, sub resources belonging to the resource will also be copied to maintain the
-full functionality of the copied new resource. In specific:
+full functionality of the copied new resource. Specifically:
 
-- When an inventory is copied, all its hosts, groups and inventory sources are copied.
-- When a workflow job template is copied, all its workflow job template nodes are copied.
+- When an inventory is copied, all of its hosts, groups and inventory sources are copied.
+- When a workflow job template is copied, all of its workflow job template nodes are copied.
 
-## How to add a copy end-point for a resource
+
+## How to Add a Copy Endpoint for a Resource
+
 The copy behavior of different resources largely follow the same pattern, therefore a unified way of
-enabling copy capability for resources is available for developers:
+enabling copy capability for resources is available for developers.
 
-Firstly, create a `/copy/` url endpoint for the target resource.
+First, create a `/copy/` URL endpoint for the target resource.
 
-Secondly, create a view class as handler to `/copy/` endpoint. This view class should be subclassed
+Second, create a view class as handler to the `/copy/` endpoint. This view class should be subclassed
 from `awx.api.generics.CopyAPIView`. Here is an example:
 ```python
 class JobTemplateCopy(CopyAPIView):
@@ -52,12 +56,13 @@ class JobTemplateCopy(CopyAPIView):
     model = JobTemplate
     copy_return_serializer_class = JobTemplateSerializer
 ```
+
 Note the above example declares a custom class attribute `copy_return_serializer_class`. This attribute
 is used by `CopyAPIView` to render the created copy in POST response, so in most cases the value should
-be the same as `serializer_class` of corresponding resource detail view, like here the value is the
+be the same as `serializer_class` of corresponding resource detail view; for example, here the value is the
 `serializer_class` of `JobTemplateDetail`.
 
-Thirdly, for the underlying model of the resource, Add 2 macros, `FIELDS_TO_PRESERVE_AT_COPY` and
+Third, for the underlying model of the resource, add two macros, `FIELDS_TO_PRESERVE_AT_COPY` and
 `FIELDS_TO_DISCARD_AT_COPY`, as needed. Here is an example:
 ```python
 class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, ResourceMixin):
@@ -91,10 +96,10 @@ Lastly, unit test copy behavior of the new endpoint in `/awx/main/tests/function
 update docs (like this doc).
 
 Fields in `FIELDS_TO_PRESERVE_AT_COPY` must be solid model fields, while fields in
-`FIELDS_TO_DISCARD_AT_COPY` do not need to be. Note there are hidden fields not visible from model
+`FIELDS_TO_DISCARD_AT_COPY` do not need to be. Note that there are hidden fields not visible from the model
 definition, namely reverse relationships and fields inherited from super classes or mix-ins. A help
 script `tools/scripts/list_fields.py` is available to inspect a model and list details of all its
-available fields.
+available fields:
 ```
 # In shell_plus
 >>> from list_fields import pretty_print_model_fields
@@ -103,10 +108,10 @@ available fields.
 
 `CopyAPIView` will automatically detect sub objects of an object, and do a deep copy of all sub objects
 as a background task. There are sometimes permission issues with sub object copy. For example,
-when copying nodes of a workflow job template, there are cases where the user performing copy has no use
-permission of related credential and inventory of some nodes, and it is desired those fields will be
-`None`. In order to do that, developer should provide a static method `deep_copy_permission_check_func`
-under corresponding specific copy view. Like
+when copying nodes of a workflow job template, there are cases where the user performing copy has no use for
+permission of related credential and inventory of some nodes, and those fields should be
+`None`. In order to do that, the developer should provide a static method `deep_copy_permission_check_func`
+under corresponding specific copy view:
 ```python
 class WorkflowJobTemplateCopy(WorkflowsEnforcementMixin, CopyAPIView):
 
@@ -122,45 +127,46 @@ class WorkflowJobTemplateCopy(WorkflowsEnforcementMixin, CopyAPIView):
     # Other code
 ```
 Static method `deep_copy_permission_check_func` must have and only have two arguments: `user`, the
-user performing the copy; `new_objs`, a list of all sub objects of the created copy. Sub objects in
-`new_objs` are initially populated disregarding any permission constraints, developer shall check
-`user`'s permission against these new sub objects and react like unlink related objects or sending
-warning logs. `deep_copy_permission_check_func` should not return anything.
+user performing the copy, and `new_objs`, a list of all sub objects of the created copy. Sub objects in
+`new_objs` are initially populated disregarding any permission constraints; the developer shall check
+`user`'s permission against these new sub objects and unlink related objects or send
+warning logs as necessary. `deep_copy_permission_check_func` should not return anything.
 
 Lastly, macro `REENCRYPTION_BLACKLIST_AT_COPY` is available as part of a model definition. It is a
-list of field names which will escape re-encryption during copy. For example, `extra_data` field
+list of field names which will escape re-encryption during copy. For example, the `extra_data` field
 of workflow job template nodes.
 
+
 ## Acceptance Criteria
+
 * Credentials should be able to copy themselves. The behavior of copying credential A shall be exactly
-  the same as creating a credential B with all needed fields for creation coming from credential A.
+  the same as creating a credential B with all necessary fields for creation coming from credential A.
 * Inventories should be able to copy themselves. The behavior of copying inventory A shall be exactly
-  the same as creating an inventory B with all needed fields for creation coming from inventory A. Other
+  the same as creating an inventory B with all necessary fields for creation coming from inventory A. Other
   than that, inventory B should inherit A's `instance_groups`, and have exactly the same host and group
   structures as A.
 * Inventory scripts should be able to copy themselves. The behavior of copying inventory script A
-  shall be exactly the same as creating an inventory script B with all needed fields for creation
+  shall be exactly the same as creating an inventory script B with all necessary fields for creation
   coming from inventory script A.
 * Job templates should be able to copy themselves. The behavior of copying job template A
-  shall be exactly the same as creating a job template B with all needed fields for creation
+  shall be exactly the same as creating a job template B with all necessary fields for creation
   coming from job template A. Other than that, job template B should inherit A's `labels`,
   `instance_groups`, `credentials` and `survey_spec`.
 * Notification templates should be able to copy themselves. The behavior of copying notification
-  template A shall be exactly the same as creating a notification template B with all needed fields
+  template A shall be exactly the same as creating a notification template B with all necessary fields
   for creation coming from notification template A.
 * Projects should be able to copy themselves. The behavior of copying project A shall be the
-  same as creating a project B with all needed fields for creation coming from project A, except for
+  same as creating a project B with all necessary fields for creation coming from project A, except for
   `local_path`, which will be populated by triggered project update. Other than that, project B
   should inherit A's `labels`, `instance_groups` and `credentials`.
 * Workflow Job templates should be able to copy themselves. The behavior of copying workflow job
-  template A shall be exactly the same as creating a workflow job template B with all needed fields
+  template A shall be exactly the same as creating a workflow job template B with all necessary fields
   for creation coming from workflow job template A. Other than that, workflow job template B should
   inherit A's `labels`, `instance_groups`, `credentials` and `survey_spec`, and have exactly the
   same workflow job template node structure as A.
-* In all copy processes, `name` field of the created copy of the original object should be able to
-  customize in the POST body.
+* In all copy processes, the `name` field of the created copy of the original object should be customizable in the POST body.
 * The permission for a user to make a copy for an existing resource object should be the same as the
   permission for a user to create a brand new resource object using fields from the existing object.
 * The RBAC behavior of original workflow job template `/copy/` should be pertained. That is, if the
-  user has no necessary permission to the related project and credential of a workflow job template
+  user has no permission to access the related project and credential of a workflow job template
   node, the copied workflow job template node should have those fields empty.

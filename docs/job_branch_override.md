@@ -1,22 +1,22 @@
 ## Job Branch Override
 
-Background: Projects specify the branch, tag, or reference to use from source control
+_Background:_ Projects specify the branch, tag, or reference to use from source control
 in the `scm_branch` field.
 
 This "Branch Override" feature allows project admins to delegate branch selection to
-admins of job templates that use that project (requiring only project
-`use_role`). Admins of job templates can further
-delegate that ability to users executing the job template
-(requiring only job template `execute_role`) by enabling
-`ask_scm_branch_on_launch` on the job template.
+admins of Job Templates that use that project (requiring only project
+`use_role`). Admins of Job Templates can further
+delegate that ability to users executing the Job Template
+(requiring only Job Template `execute_role`) by enabling
+`ask_scm_branch_on_launch` on the Job Template.
 
 ### Source Tree Copy Behavior
 
-Background: Every job run has its own private data directory.
+_Background:_ Every job run has its own private data directory.
 This folder is temporary, cleaned up at the end of the job run.
 
 This directory contains a copy of the project source tree for the given
-`scm_branch` the job is running.
+`scm_branch` while the job is running.
 
 A new shallow copy is made for every job run.
 Jobs are free to make changes to the project folder and make use of those
@@ -26,24 +26,25 @@ changes while it is still running.
 
 With the introduction of this feature, the function of `scm_clean` is watered
 down. It will still be possible to enable this function, and it will be
-passed through as a parameter to the playbook as a tool for trouble shooting.
-Two notable cases that lose support are documented here.
+passed through as a parameter to the playbook as a tool for troubleshooting.
+Two notable cases that lose support are documented below:
 
 1) Setting `scm_clean` to `true` will no longer persist changes between job runs.
 
-That means that jobs that rely on content which is not committed to source
+This means that jobs that rely on content which is not committed to source
 control may fail now.
 
 2) Because it is a shallow copy, this folder will not contain the full
 git history for git project types.
 
+
 ### Project Revision Concerns
 
-Background of how normal project updates work:
+_Background:_
 The revision of the default branch (specified as `scm_branch` of the project)
 is stored when updated, and jobs using that project will employ this revision.
 
-Providing a non-default `scm_branch` in a job comes with some restrictions
+Providing a non-default `scm_branch` in a job comes with some restrictions,
 which are unlike the normal update behavior.
 If `scm_branch` is a branch identifier (not a commit hash or tag), then
 the newest revision is pulled from the source control remote immediately
@@ -60,8 +61,9 @@ project default branch.
 The `scm_branch` field is not validated, so the project must update
 to assure it is valid.
 If `scm_branch` is provided or prompted for, the `playbook` field of
-job templates will not be validated, and users will have to launch
-the job template in order to verify presence of the expected playbook.
+Job Templates will not be validated, and users will have to launch
+the Job Template in order to verify presence of the expected playbook.
+
 
 ### Git Refspec
 
@@ -99,7 +101,7 @@ no matter what is used for `scm_refspec`.
 
 The `scm_refspec` will affect which `scm_branch` fields can be used as overrides.
 For example, you could set up a project that allows branch override with the
-1st or 2nd refspec example, then use this in a job template
-that prompts for `scm_branch`, then a client could launch the job template when
+first or second refspec example, then use this in a Job Template
+that prompts for `scm_branch`, then a client could launch the Job Template when
 a new pull request is created, providing the branch `pull/N/head`,
-then the job template would run against the provided github pull request reference.
+then the Job Template would run against the provided GitHub pull request reference.

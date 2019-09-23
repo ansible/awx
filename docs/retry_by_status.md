@@ -1,7 +1,7 @@
 # Relaunch on Hosts with Status
 
-This feature allows the user to relaunch a job, targeting only hosts marked
-as failed in the original job.
+This feature allows the user to relaunch a job, targeting only the hosts marked
+as "failed" in the original job.
 
 ### Definition of "failed"
 
@@ -10,27 +10,27 @@ is different from "hosts with failed tasks". Unreachable hosts can have
 no failed tasks. This means that the count of "failed hosts" can be different
 from the failed count, given in the summary at the end of a playbook.
 
-This definition corresponds to Ansible .retry files.
+This definition corresponds to Ansible `.retry` files.
 
 ### API Design of Relaunch
 
 #### Basic Relaunch
 
-POST to `/api/v2/jobs/N/relaunch/` without any request data should relaunch
+POSTs to `/api/v2/jobs/N/relaunch/` without any request data should relaunch
 the job with the same `limit` value that the original job used, which
 may be an empty string.
 
-This is implicitly the "all" option below.
+This is implicitly the "all" option, mentioned below.
 
 #### Relaunch by Status
 
 Providing request data containing `{"hosts": "failed"}` should change
 the `limit` of the relaunched job to target failed hosts from the previous
 job. Hosts will be provided as a comma-separated list in the limit. Formally,
-these are options
+these are options:
 
  - all: relaunch without changing the job limit
- - failed: relaunch against all hos
+ - failed: relaunch against all hosts
 
 ### Relaunch Endpoint
 
@@ -60,12 +60,12 @@ then the request will be rejected. For example, if a GET yielded:
 }
 ```
 
-Then a POST of `{"hosts": "failed"}` should return a descriptive response
+...then a POST of `{"hosts": "failed"}` should return a descriptive response
 with a 400-level status code.
 
 # Acceptance Criteria
 
-Scenario: user launches a job against host "foobar", and the run fails
+Scenario: User launches a job against host "foobar", and the run fails
 against this host. User changes name of host to "foo", and relaunches job
 against failed hosts. The `limit` of the relaunched job should reference
 "foo" and not "foobar".
@@ -79,9 +79,9 @@ relaunch the same way that relaunching has previously worked.
 If a playbook provisions a host, this feature should behave reasonably
 when relaunching against a status that includes these hosts.
 
-Feature should work even if hosts have tricky characters in their names,
+This feature should work even if hosts have tricky characters in their names,
 like commas.
 
-Also need to consider case where a task `meta: clear_host_errors` is present
-inside a playbook, and that the retry subset behavior is the same as Ansible
+One may also need to consider cases where a task `meta: clear_host_errors` is present
+inside a playbook; the retry subset behavior is the same as Ansible's
 for this case.
