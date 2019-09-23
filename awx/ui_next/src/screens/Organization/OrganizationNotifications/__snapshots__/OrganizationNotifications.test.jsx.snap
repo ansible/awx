@@ -383,6 +383,24 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                               }
                               onSearch={[Function]}
                               onSort={[Function]}
+                              qsConfig={
+                                Object {
+                                  "dateFields": Array [
+                                    "modified",
+                                    "created",
+                                  ],
+                                  "defaultParams": Object {
+                                    "order_by": "name",
+                                    "page": 1,
+                                    "page_size": 5,
+                                  },
+                                  "integerFields": Array [
+                                    "page",
+                                    "page_size",
+                                  ],
+                                  "namespace": "notification",
+                                }
+                              }
                               sortOrder="ascending"
                               sortedColumnKey="name"
                             >
@@ -423,6 +441,24 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                   onSearch={[Function]}
                                   onSelectAll={null}
                                   onSort={[Function]}
+                                  qsConfig={
+                                    Object {
+                                      "dateFields": Array [
+                                        "modified",
+                                        "created",
+                                      ],
+                                      "defaultParams": Object {
+                                        "order_by": "name",
+                                        "page": 1,
+                                        "page_size": 5,
+                                      },
+                                      "integerFields": Array [
+                                        "page",
+                                        "page_size",
+                                      ],
+                                      "namespace": "notification",
+                                    }
+                                  }
                                   showSelectAll={false}
                                   sortOrder="ascending"
                                   sortedColumnKey="name"
@@ -590,6 +626,24 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                                   ]
                                                                 }
                                                                 onSearch={[Function]}
+                                                                qsConfig={
+                                                                  Object {
+                                                                    "dateFields": Array [
+                                                                      "modified",
+                                                                      "created",
+                                                                    ],
+                                                                    "defaultParams": Object {
+                                                                      "order_by": "name",
+                                                                      "page": 1,
+                                                                      "page_size": 5,
+                                                                    },
+                                                                    "integerFields": Array [
+                                                                      "page",
+                                                                      "page_size",
+                                                                    ],
+                                                                    "namespace": "notification",
+                                                                  }
+                                                                }
                                                                 sortedColumnKey="name"
                                                               >
                                                                 <I18n
@@ -621,6 +675,24 @@ exports[`<OrganizationNotifications /> initially renders succesfully 1`] = `
                                                                     }
                                                                     i18n={"/i18n/"}
                                                                     onSearch={[Function]}
+                                                                    qsConfig={
+                                                                      Object {
+                                                                        "dateFields": Array [
+                                                                          "modified",
+                                                                          "created",
+                                                                        ],
+                                                                        "defaultParams": Object {
+                                                                          "order_by": "name",
+                                                                          "page": 1,
+                                                                          "page_size": 5,
+                                                                        },
+                                                                        "integerFields": Array [
+                                                                          "page",
+                                                                          "page_size",
+                                                                        ],
+                                                                        "namespace": "notification",
+                                                                      }
+                                                                    }
                                                                     sortedColumnKey="name"
                                                                   >
                                                                     <Form

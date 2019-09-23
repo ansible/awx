@@ -112,6 +112,7 @@ class ListHeader extends React.Component {
               columns,
               onSearch: this.handleSearch,
               onSort: this.handleSort,
+              qsConfig,
             })}
             <FilterTags
               itemCount={itemCount}

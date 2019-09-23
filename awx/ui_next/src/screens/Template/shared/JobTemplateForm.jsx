@@ -7,19 +7,17 @@ import { withFormik, Field } from 'formik';
 import {
   Form,
   FormGroup,
-  Tooltip,
   Card,
   Switch,
   Checkbox,
   TextInput,
 } from '@patternfly/react-core';
-import { QuestionCircleIcon as PFQuestionCircleIcon } from '@patternfly/react-icons';
 import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
 import AnsibleSelect from '@components/AnsibleSelect';
 import MultiSelect, { TagMultiSelect } from '@components/MultiSelect';
 import FormActionGroup from '@components/FormActionGroup';
-import FormField, { CheckboxField } from '@components/FormField';
+import FormField, { CheckboxField, FieldTooltip } from '@components/FormField';
 import FormRow from '@components/FormRow';
 import CollapsibleSection from '@components/CollapsibleSection';
 import { required } from '@util/validators';
@@ -28,10 +26,6 @@ import { JobTemplate } from '@types';
 import { InventoryLookup, InstanceGroupsLookup } from '@components/Lookup';
 import ProjectLookup from './ProjectLookup';
 import { JobTemplatesAPI, LabelsAPI, ProjectsAPI } from '@api';
-
-const QuestionCircleIcon = styled(PFQuestionCircleIcon)`
-  margin-left: 10px;
-`;
 
 const GridFormGroup = styled(FormGroup)`
   & > label {
@@ -374,15 +368,12 @@ class JobTemplateForm extends Component {
                   isValid={isValid}
                   label={i18n._(t`Job Type`)}
                 >
-                  <Tooltip
-                    position="right"
+                  <FieldTooltip
                     content={i18n._(t`For job templates, select run to execute
-                  the playbook. Select check to only check playbook syntax,
-                  test environment setup, and report problems without
-                  executing the playbook.`)}
-                  >
-                    <QuestionCircleIcon />
-                  </Tooltip>
+                      the playbook. Select check to only check playbook syntax,
+                      test environment setup, and report problems without
+                      executing the playbook.`)}
+                  />
                   <AnsibleSelect
                     isValid={isValid}
                     id="template-job-type"
@@ -443,14 +434,11 @@ class JobTemplateForm extends Component {
                   isValid={isValid}
                   label={i18n._(t`Playbook`)}
                 >
-                  <Tooltip
-                    position="right"
+                  <FieldTooltip
                     content={i18n._(
                       t`Select the playbook to be executed by this job.`
                     )}
-                  >
-                    <QuestionCircleIcon />
-                  </Tooltip>
+                  />
                   <AnsibleSelect
                     id="template-playbook"
                     data={playbookOptions}
@@ -465,14 +453,11 @@ class JobTemplateForm extends Component {
         </FormRow>
         <FormRow>
           <FormGroup label={i18n._(t`Labels`)} fieldId="template-labels">
-            <Tooltip
-              position="right"
+            <FieldTooltip
               content={i18n._(
                 t`Optional labels that describe this job template, such as 'dev' or 'test'. Labels can be used to group and filter job templates and completed jobs.`
               )}
-            >
-              <QuestionCircleIcon />
-            </Tooltip>
+            />
             <MultiSelect
               onAddNewItem={this.handleNewLabel}
               onRemoveItem={this.removeLabel}
@@ -519,13 +504,10 @@ class JobTemplateForm extends Component {
                   fieldId="template-verbosity"
                   label={i18n._(t`Verbosity`)}
                 >
-                  <Tooltip
-                    position="right"
+                  <FieldTooltip
                     content={i18n._(t`Control the level of output ansible will
-                        produce as the playbook executes.`)}
-                  >
-                    <QuestionCircleIcon />
-                  </Tooltip>
+                      produce as the playbook executes.`)}
+                  />
                   <AnsibleSelect
                     id="template-verbosity"
                     data={verbosityOptions}
@@ -561,14 +543,11 @@ class JobTemplateForm extends Component {
                   fieldId="template-show-changes"
                   label={i18n._(t`Show Changes`)}
                 >
-                  <Tooltip
-                    position="right"
+                  <FieldTooltip
                     content={i18n._(t`If enabled, show the changes made by
-                          Ansible tasks, where supported. This is equivalent
-                          to Ansible&#x2019s --diff mode.`)}
-                  >
-                    <QuestionCircleIcon />
-                  </Tooltip>
+                      Ansible tasks, where supported. This is equivalent
+                      to Ansible&#x2019s --diff mode.`)}
+                  />
                   <div>
                     <Switch
                       id="template-show-changes"
@@ -599,16 +578,13 @@ class JobTemplateForm extends Component {
                 css="margin-top: 20px"
                 fieldId="template-job-tags"
               >
-                <Tooltip
-                  position="right"
+                <FieldTooltip
                   content={i18n._(t`Tags are useful when you have a large
-                          playbook, and you want to run a specific part of a
-                          play or task. Use commas to separate multiple tags.
-                          Refer to Ansible Tower documentation for details on
-                          the usage of tags.`)}
-                >
-                  <QuestionCircleIcon />
-                </Tooltip>
+                    playbook, and you want to run a specific part of a
+                    play or task. Use commas to separate multiple tags.
+                    Refer to Ansible Tower documentation for details on
+                    the usage of tags.`)}
+                />
                 <TagMultiSelect
                   value={field.value}
                   onChange={value => form.setFieldValue(field.name, value)}
@@ -624,16 +600,13 @@ class JobTemplateForm extends Component {
                 css="margin-top: 20px"
                 fieldId="template-skip-tags"
               >
-                <Tooltip
-                  position="right"
+                <FieldTooltip
                   content={i18n._(t`Skip tags are useful when you have a
                     large playbook, and you want to skip specific parts of a
                     play or task. Use commas to separate multiple tags. Refer
                     to Ansible Tower documentation for details on the usage
                     of tags.`)}
-                >
-                  <QuestionCircleIcon />
-                </Tooltip>
+                />
                 <TagMultiSelect
                   value={field.value}
                   onChange={value => form.setFieldValue(field.name, value)}
@@ -661,16 +634,13 @@ class JobTemplateForm extends Component {
                 <span>
                   {i18n._(t`Provisioning Callbacks`)}
                   &nbsp;
-                  <Tooltip
-                    position="right"
+                  <FieldTooltip
                     content={i18n._(
                       t`Enables creation of a provisioning callback URL. Using
-                          the URL a host can contact BRAND_NAME and request a
-                          configuration update using this job template.`
+                      the URL a host can contact BRAND_NAME and request a
+                      configuration update using this job template.`
                     )}
-                  >
-                    <QuestionCircleIcon />
-                  </Tooltip>
+                  />
                 </span>
               }
               id="option-callbacks"
@@ -735,50 +705,29 @@ class JobTemplateForm extends Component {
 const FormikApp = withFormik({
   mapPropsToValues(props) {
     const { template = {} } = props;
-    const {
-      name = '',
-      description = '',
-      job_type = 'run',
-      inventory = '',
-      project = '',
-      playbook = '',
-      forks,
-      limit,
-      verbosity,
-      job_slice_count,
-      timeout,
-      diff_mode,
-      job_tags,
-      skip_tags,
-      become_enabled,
-      allow_callbacks,
-      allow_simultaneous,
-      use_fact_cache,
-      host_config_key,
-      summary_fields = { labels: { results: [] } },
-    } = { ...template };
+    const { summary_fields = { labels: { results: [] } } } = template;
 
     return {
-      name: name || '',
-      description: description || '',
-      job_type: job_type || '',
-      inventory: inventory || '',
-      project: project || '',
-      playbook: playbook || '',
+      name: template.name || '',
+      description: template.description || '',
+      job_type: template.job_type || 'run',
+      inventory: template.inventory || '',
+      project: template.project || '',
+      playbook: template.playbook || '',
       labels: summary_fields.labels.results,
-      forks: forks || 0,
-      limit: limit || '',
-      verbosity: verbosity || '0',
-      job_slice_count: job_slice_count || 1,
-      timeout: timeout || 0,
-      diff_mode: diff_mode || false,
-      job_tags: job_tags || '',
-      skip_tags: skip_tags || '',
-      become_enabled: become_enabled || false,
-      allow_callbacks: allow_callbacks || false,
-      allow_simultaneous: allow_simultaneous || false,
-      use_fact_cache: use_fact_cache || false,
-      host_config_key: host_config_key || '',
+      forks: template.forks || 0,
+      limit: template.limit || '',
+      verbosity: template.verbosity || '0',
+      job_slice_count: template.job_slice_count || 1,
+      timeout: template.timeout || 0,
+      diff_mode: template.diff_mode || false,
+      job_tags: template.job_tags || '',
+      skip_tags: template.skip_tags || '',
+      become_enabled: template.become_enabled || false,
+      allow_callbacks: template.allow_callbacks || false,
+      allow_simultaneous: template.allow_simultaneous || false,
+      use_fact_cache: template.use_fact_cache || false,
+      host_config_key: template.host_config_key || '',
     };
   },
   handleSubmit: (values, bag) => bag.props.handleSubmit(values),
