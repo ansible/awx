@@ -46,7 +46,7 @@ A Job Template is a definition and set of parameters for running
 
 AWX stores sensitive credential data which can be attached to `ansible-playbook`
 processes that it runs.  This data can be oriented towards SSH connection
-authentication (usernames, passwords, SSH keys and pass phrases),
+authentication (usernames, passwords, SSH keys and passphrases),
 Ansible-specific prompts (such as Vault passwords), or environmental
 authentication values which various Ansible modules depend on (such as setting
 `AWS_ACCESS_KEY_ID` in an environment variable, or specifying

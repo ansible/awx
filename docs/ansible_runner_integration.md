@@ -1,6 +1,6 @@
 ## Ansible Runner Integration Overview
 
-Much of the code in AWX around Ansible and `ansible-playbook` invocation has been removed and put into the project `ansible-runner`. AWX now calls out to `ansible-runner` to invoke Ansible and `ansible-playbook`.
+Much of the code in AWX around ansible and `ansible-playbook` invocation has been removed and put into the project `ansible-runner`. AWX now calls out to `ansible-runner` to invoke ansible and `ansible-playbook`.
 
 ### Lifecycle
 

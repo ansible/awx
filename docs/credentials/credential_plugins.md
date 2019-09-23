@@ -29,7 +29,7 @@ the Machine Credential:
     secret management system (in this example, specifying a URL and an
     OAuth2.0 token _to access_ HashiCorp Vault)
 
-3.  _Link_ the `password` field for the Machine cCredential to the external
+3.  _Link_ the `password` field for the Machine Credential to the external
     system by specifying the source (in this example, the HashiCorp Credential)
     and metadata about the path (e.g., `/some/path/to/my/password/`).
 
