@@ -128,7 +128,7 @@
       - name: fetch python packages from pip-requirements.txt
         pip:
           requirements: "{{project_path|quote}}/pip-requirements.txt"
-          extra_args: "-I --install-option='--prefix={{pip_destination|quote}}'"
+          extra_args: "-I --install-option='--prefix={{private_venv|quote}}'"
         register: pip_result
         when: doesPipRequirementsExist.stat.exists
         changed_when: "'Successfully installed' in pip_result.stdout"
