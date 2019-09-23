@@ -350,8 +350,8 @@ register(
     'INSIGHTS_TRACKING_STATE',
     field_class=fields.BooleanField,
     default=False,
-    label=_('Gather data for Automation Insights'),
-    help_text=_('Enables Tower to gather data on automation and send it to Red Hat Insights.'),
+    label=_('Gather data for Automation Analytics'),
+    help_text=_('Enables Tower to gather data on automation and send it to Red Hat.'),
     category=_('System'),
     category_slug='system',
 )
