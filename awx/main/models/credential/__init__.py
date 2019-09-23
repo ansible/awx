@@ -151,7 +151,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
     @property
     def has_encrypted_ssh_key_data(self):
         try:
-            ssh_key_data = decrypt_field(self, 'ssh_key_data')
+            ssh_key_data = self.get_input('ssh_key_data')
         except AttributeError:
             return False
 
@@ -633,9 +633,6 @@ ManagedCredentialType(
             'secret': True,
             'ask_at_runtime': True
         }],
-        'dependencies': {
-            'ssh_key_unlock': ['ssh_key_data'],
-        }
     }
 )
 
@@ -667,9 +664,6 @@ ManagedCredentialType(
             'type': 'string',
             'secret': True
         }],
-        'dependencies': {
-            'ssh_key_unlock': ['ssh_key_data'],
-        }
     }
 )
 
@@ -738,7 +732,6 @@ ManagedCredentialType(
             'secret': True,
         }],
         'dependencies': {
-            'ssh_key_unlock': ['ssh_key_data'],
             'authorize_password': ['authorize'],
         },
         'required': ['username'],
