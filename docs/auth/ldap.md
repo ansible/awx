@@ -12,7 +12,7 @@ The default set of configuration fields take the form `AUTH_LDAP_<field name>`. 
 
 ## Test Environment Setup
 
-Please see `README.md` of this repository: https://github.com/jangsutsr/deploy_ldap.git.
+Please see `README.md` of this repository: https://github.com/ansible/deploy_ldap
 
 
 # Basic Setup for FreeIPA
