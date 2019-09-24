@@ -12,7 +12,14 @@ import { VariablesInput as _VariablesInput } from '@components/CodeMirrorInput';
 import ErrorDetail from '@components/ErrorDetail';
 import { toTitleCase } from '@util/strings';
 import { Job } from '../../../types';
-import { JobsAPI, ProjectUpdatesAPI } from '@api';
+import {
+  JobsAPI,
+  ProjectUpdatesAPI,
+  SystemJobsAPI,
+  WorkflowJobsAPI,
+  InventoriesAPI,
+  AdHocCommandsAPI,
+} from '@api';
 import { JOB_TYPE_URL_SEGMENTS } from '../../../constants';
 
 const ActionButtonWrapper = styled.div`
@@ -47,20 +54,34 @@ function JobDetail({ job, i18n, history }) {
     credentials,
     labels,
   } = job.summary_fields;
-  const [isDeleteModalOpen, setDeleteModal] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [errorMsg, setErrorMsg] = useState();
 
   const deleteJob = async () => {
     try {
-      if (job.type === 'job') {
-        await JobsAPI.destroy(job.id);
-      } else {
-        await ProjectUpdatesAPI.destroy(job.id);
+      switch (job.type) {
+        case 'project_update':
+          await ProjectUpdatesAPI.destroy(job.id);
+          break;
+        case 'system_job':
+          await SystemJobsAPI.destroy(job.id);
+          break;
+        case 'workflow_job':
+          await WorkflowJobsAPI.destroy(job.id);
+          break;
+        case 'ad_hoc_command':
+          await AdHocCommandsAPI.destroy(job.id);
+          break;
+        case 'inventory_update':
+          await InventoriesAPI.destroy(job.id);
+          break;
+        default:
+          await JobsAPI.destroy(job.id);
       }
       history.push('/jobs');
     } catch (err) {
       setErrorMsg(err);
-      setDeleteModal(false);
+      setIsDeleteModalOpen(false);
     }
   };
   return (
@@ -171,8 +192,8 @@ function JobDetail({ job, i18n, history }) {
       <ActionButtonWrapper>
         <Button
           variant="danger"
-          aria-label="delete"
-          onClick={() => setDeleteModal(true)}
+          aria-label={i18n._(t`Delete`)}
+          onClick={() => setIsDeleteModalOpen(true)}
         >
           {i18n._(t`Delete`)}
         </Button>
@@ -190,7 +211,7 @@ function JobDetail({ job, i18n, history }) {
           isOpen={isDeleteModalOpen}
           title={i18n._(t`Delete Job`)}
           variant="danger"
-          onClose={() => setDeleteModal(false)}
+          onClose={() => setIsDeleteModalOpen(false)}
         >
           {i18n._(t`Are you sure you want to delete:`)}
           <br />
@@ -198,13 +219,17 @@ function JobDetail({ job, i18n, history }) {
           <ActionButtonWrapper>
             <Button
               variant="secondary"
-              aria-label="close"
+              aria-label={i18n._(t`Close`)}
               component={Link}
               to={`/jobs/${JOB_TYPE_URL_SEGMENTS[job.type]}/${job.id}`}
             >
               {i18n._(t`Cancel`)}
             </Button>
-            <Button variant="danger" aria-label="delete" onClick={deleteJob}>
+            <Button
+              variant="danger"
+              aria-label={i18n._(t`Delete`)}
+              onClick={deleteJob}
+            >
               {i18n._(t`Delete`)}
             </Button>
           </ActionButtonWrapper>
