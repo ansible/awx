@@ -4,64 +4,74 @@ import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import { sleep } from '@testUtils/testUtils';
 import JobDetail from './JobDetail';
 import { JobsAPI, ProjectUpdatesAPI } from '@api';
+import mockJobData from '../shared/data.job.json';
 
 jest.mock('@api');
 
 describe('<JobDetail />', () => {
-  let job;
-
-  beforeEach(() => {
-    job = {
-      name: 'Foo',
-      summary_fields: {},
-    };
-  });
-
   test('initially renders succesfully', () => {
-    mountWithContexts(<JobDetail job={job} />);
+    mountWithContexts(<JobDetail job={mockJobData} />);
   });
 
   test('should display a Close button', () => {
-    const wrapper = mountWithContexts(<JobDetail job={job} />);
+    const wrapper = mountWithContexts(<JobDetail job={mockJobData} />);
 
     expect(wrapper.find('Button[aria-label="close"]').length).toBe(1);
     wrapper.unmount();
   });
 
   test('should display details', () => {
-    job.status = 'Successful';
-    job.started = '2019-07-02T17:35:22.753817Z';
-    job.finished = '2019-07-02T17:35:34.910800Z';
+    const wrapper = mountWithContexts(<JobDetail job={mockJobData} />);
 
-    const wrapper = mountWithContexts(<JobDetail job={job} />);
-    const details = wrapper.find('Detail');
-
-    function assertDetail(detail, label, value) {
-      expect(detail.prop('label')).toEqual(label);
-      expect(detail.prop('value')).toEqual(value);
+    function assertDetail(label, value) {
+      expect(wrapper.find(`Detail[label="${label}"] dt`).text()).toBe(label);
+      expect(wrapper.find(`Detail[label="${label}"] dd`).text()).toBe(value);
     }
 
-    assertDetail(details.at(0), 'Status', 'Successful');
-    assertDetail(details.at(1), 'Started', job.started);
-    assertDetail(details.at(2), 'Finished', job.finished);
+    assertDetail('Status', 'Successful');
+    assertDetail('Started', mockJobData.started);
+    assertDetail('Finished', mockJobData.finished);
+    assertDetail('Template', mockJobData.summary_fields.job_template.name);
+    assertDetail('Job Type', 'Run');
+    assertDetail('Launched By', mockJobData.summary_fields.created_by.username);
+    assertDetail('Inventory', mockJobData.summary_fields.inventory.name);
+    assertDetail('Project', mockJobData.summary_fields.project.name);
+    assertDetail('Revision', mockJobData.scm_revision);
+    assertDetail('Playbook', mockJobData.playbook);
+    assertDetail('Verbosity', '0 (Normal)');
+    assertDetail('Environment', mockJobData.custom_virtualenv);
+    assertDetail('Execution Node', mockJobData.execution_node);
+    assertDetail(
+      'Instance Group',
+      mockJobData.summary_fields.instance_group.name
+    );
+    assertDetail('Job Slice', '0/1');
+    assertDetail('Credentials', 'SSH: Demo Credential');
   });
 
   test('should display credentials', () => {
-    job.summary_fields.credentials = [
-      {
-        id: 1,
-        name: 'Foo',
-        cloud: false,
-        kind: 'ssh',
-      },
-    ];
-    const wrapper = mountWithContexts(<JobDetail job={job} />);
+    const wrapper = mountWithContexts(<JobDetail job={mockJobData} />);
     const credentialChip = wrapper.find('CredentialChip');
 
     expect(credentialChip.prop('credential')).toEqual(
-      job.summary_fields.credentials[0]
+      mockJobData.summary_fields.credentials[0]
     );
   });
+
+  test('should display successful job status icon', () => {
+    const wrapper = mountWithContexts(<JobDetail job={mockJobData} />);
+    const statusDetail = wrapper.find('Detail[label="Status"]');
+    expect(statusDetail.find('StatusIcon__SuccessfulTop')).toHaveLength(1);
+    expect(statusDetail.find('StatusIcon__SuccessfulBottom')).toHaveLength(1);
+  });
+
+  test('should display successful project status icon', () => {
+    const wrapper = mountWithContexts(<JobDetail job={mockJobData} />);
+    const statusDetail = wrapper.find('Detail[label="Project"]');
+    expect(statusDetail.find('StatusIcon__SuccessfulTop')).toHaveLength(1);
+    expect(statusDetail.find('StatusIcon__SuccessfulBottom')).toHaveLength(1);
+  });
+
   test('should properly delete job', async () => {
     job = {
       name: 'Rage',
