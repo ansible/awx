@@ -3,9 +3,9 @@
 exports[`<ToolbarDeleteButton /> should render button 1`] = `
 <ToolbarDeleteButton
   i18n={"/i18n/"}
-  itemName="item"
   itemsToDelete={Array []}
   onDelete={[Function]}
+  pluralizedItemName="Items"
 >
   <Tooltip
     appendTo={[Function]}

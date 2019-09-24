@@ -17,7 +17,6 @@ import {
   parseQueryString,
   replaceParams,
 } from '@util/qs';
-import { pluralize, ucFirst } from '@util/strings';
 
 import { QSConfig } from '@types';
 
@@ -61,8 +60,7 @@ class PaginatedDataList extends React.Component {
       qsConfig,
       renderItem,
       toolbarColumns,
-      itemName,
-      itemNamePlural,
+      pluralizedItemName,
       showPageSizeOptions,
       location,
       i18n,
@@ -80,16 +78,11 @@ class PaginatedDataList extends React.Component {
         ];
     const queryParams = parseQueryString(qsConfig, location.search);
 
-    const itemDisplayName = ucFirst(pluralize(itemName));
-    const itemDisplayNamePlural = ucFirst(
-      itemNamePlural || pluralize(itemName)
-    );
-
-    const dataListLabel = i18n._(t`${itemDisplayName} List`);
+    const dataListLabel = i18n._(t`${pluralizedItemName} List`);
     const emptyContentMessage = i18n._(
-      t`Please add ${itemDisplayNamePlural} to populate this list `
+      t`Please add ${pluralizedItemName} to populate this list `
     );
-    const emptyContentTitle = i18n._(t`No ${itemDisplayNamePlural} Found `);
+    const emptyContentTitle = i18n._(t`No ${pluralizedItemName} Found `);
 
     let Content;
     if (hasContentLoading && items.length <= 0) {
@@ -161,8 +154,7 @@ const Item = PropTypes.shape({
 PaginatedDataList.propTypes = {
   items: PropTypes.arrayOf(Item).isRequired,
   itemCount: PropTypes.number.isRequired,
-  itemName: PropTypes.string,
-  itemNamePlural: PropTypes.string,
+  pluralizedItemName: PropTypes.string,
   qsConfig: QSConfig.isRequired,
   renderItem: PropTypes.func,
   toolbarColumns: arrayOf(
@@ -182,8 +174,7 @@ PaginatedDataList.defaultProps = {
   hasContentLoading: false,
   contentError: null,
   toolbarColumns: [],
-  itemName: 'item',
-  itemNamePlural: '',
+  pluralizedItemName: 'Items',
   showPageSizeOptions: true,
   renderItem: item => <PaginatedDataListItem key={item.id} item={item} />,
   renderToolbar: props => <DataListToolbar {...props} />,

@@ -153,7 +153,7 @@ class OrganizationsList extends Component {
               hasContentLoading={hasContentLoading}
               items={organizations}
               itemCount={itemCount}
-              itemName="organization"
+              pluralizedItemName="Organizations"
               qsConfig={QS_CONFIG}
               toolbarColumns={[
                 {
@@ -187,7 +187,7 @@ class OrganizationsList extends Component {
                       key="delete"
                       onDelete={this.handleOrgDelete}
                       itemsToDelete={selected}
-                      itemName="Organization"
+                      pluralizedItemName="Organizations"
                     />,
                     canAdd ? (
                       <ToolbarAddButton key="add" linkTo={`${match.url}/add`} />

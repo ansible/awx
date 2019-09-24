@@ -212,7 +212,6 @@ class AddResourceRole extends React.Component {
                 selectedLabel={i18n._(t`Selected`)}
                 selectedResourceRows={selectedResourceRows}
                 sortedColumnKey="username"
-                itemName="user"
               />
             )}
             {selectedResource === 'teams' && (
@@ -222,7 +221,6 @@ class AddResourceRole extends React.Component {
                 onSearch={readTeams}
                 selectedLabel={i18n._(t`Selected`)}
                 selectedResourceRows={selectedResourceRows}
-                itemName="team"
               />
             )}
           </Fragment>

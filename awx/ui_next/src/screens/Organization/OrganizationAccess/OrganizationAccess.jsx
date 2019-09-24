@@ -165,7 +165,7 @@ class OrganizationAccess extends React.Component {
           hasContentLoading={hasContentLoading}
           items={accessRecords}
           itemCount={itemCount}
-          itemName="role"
+          pluralizedItemName="Roles"
           qsConfig={QS_CONFIG}
           toolbarColumns={[
             {

@@ -204,7 +204,7 @@ class OrganizationNotifications extends Component {
           hasContentLoading={hasContentLoading}
           items={notifications}
           itemCount={itemCount}
-          itemName="notification"
+          pluralizedItemName="Notifications"
           qsConfig={QS_CONFIG}
           toolbarColumns={COLUMNS}
           renderItem={notification => (
