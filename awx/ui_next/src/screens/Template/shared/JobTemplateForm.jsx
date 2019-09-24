@@ -23,9 +23,13 @@ import CollapsibleSection from '@components/CollapsibleSection';
 import { required } from '@util/validators';
 import styled from 'styled-components';
 import { JobTemplate } from '@types';
-import { InventoryLookup, InstanceGroupsLookup } from '@components/Lookup';
-import ProjectLookup from './ProjectLookup';
+import {
+  InventoryLookup,
+  InstanceGroupsLookup,
+  ProjectLookup,
+} from '@components/Lookup';
 import { JobTemplatesAPI, LabelsAPI, ProjectsAPI } from '@api';
+import PlaybookSelect from './PlaybookSelect';
 
 const GridFormGroup = styled(FormGroup)`
   & > label {
@@ -72,7 +76,6 @@ class JobTemplateForm extends Component {
       removedLabels: [],
       project: props.template.summary_fields.project,
       inventory: props.template.summary_fields.inventory,
-      relatedProjectPlaybooks: props.relatedProjectPlaybooks,
       relatedInstanceGroups: [],
       allowCallbacks: !!props.template.host_config_key,
     };
@@ -81,9 +84,6 @@ class JobTemplateForm extends Component {
     this.removeLabel = this.removeLabel.bind(this);
     this.handleProjectValidation = this.handleProjectValidation.bind(this);
     this.loadRelatedInstanceGroups = this.loadRelatedInstanceGroups.bind(this);
-    this.loadRelatedProjectPlaybooks = this.loadRelatedProjectPlaybooks.bind(
-      this
-    );
     this.handleInstanceGroupsChange = this.handleInstanceGroupsChange.bind(
       this
     );
@@ -204,15 +204,6 @@ class JobTemplateForm extends Component {
     }
   }
 
-  async loadRelatedProjectPlaybooks(project) {
-    try {
-      const { data: playbooks = [] } = await ProjectsAPI.readPlaybooks(project);
-      this.setState({ relatedProjectPlaybooks: playbooks });
-    } catch (contentError) {
-      this.setState({ contentError });
-    }
-  }
-
   handleProjectValidation() {
     const { i18n, touched } = this.props;
     const { project } = this.state;
@@ -258,7 +249,6 @@ class JobTemplateForm extends Component {
       hasContentLoading,
       inventory,
       project,
-      relatedProjectPlaybooks = [],
       relatedInstanceGroups,
       allowCallbacks,
     } = this.state;
@@ -284,28 +274,6 @@ class JobTemplateForm extends Component {
         isDisabled: false,
       },
     ];
-    const playbookOptions = relatedProjectPlaybooks
-      .map(playbook => {
-        return {
-          value: playbook,
-          key: playbook,
-          label: playbook,
-          isDisabled: false,
-        };
-      })
-      .reduce(
-        (arr, playbook) => {
-          return arr.concat(playbook);
-        },
-        [
-          {
-            value: '',
-            key: '',
-            label: i18n._(t`Choose a playbook`),
-            isDisabled: false,
-          },
-        ]
-      );
 
     const verbosityOptions = [
       { value: '0', key: '0', label: i18n._(t`0 (Normal)`) },
@@ -412,7 +380,6 @@ class JobTemplateForm extends Component {
                 tooltip={i18n._(t`Select the project containing the playbook
                   you want this job to execute.`)}
                 onChange={value => {
-                  this.loadRelatedProjectPlaybooks(value.id);
                   form.setFieldValue('project', value.id);
                   this.setState({ project: value });
                 }}
@@ -439,13 +406,8 @@ class JobTemplateForm extends Component {
                       t`Select the playbook to be executed by this job.`
                     )}
                   />
-                  <AnsibleSelect
-                    id="template-playbook"
-                    data={playbookOptions}
-                    isValid={isValid}
-                    form={form}
-                    {...field}
-                  />
+                  <PlaybookSelect projectId={form.values.project}
+                   isValid={isValid} form={form} field={field} />
                 </FormGroup>
               );
             }}
