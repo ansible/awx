@@ -530,7 +530,7 @@ class WebhookTemplateMixin(models.Model):
                 self.webhook_key = ''
 
             if update_fields and 'webhook_service' in update_fields:
-                update_fields.append('webhook_key')
+                update_fields.add('webhook_key')
 
         super().save(*args, **kwargs)
 

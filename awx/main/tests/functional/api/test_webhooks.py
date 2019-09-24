@@ -202,3 +202,59 @@ def test_set_wrong_service_webhook_credential(organization_factory, job_template
     assert jt.webhook_key != ''
     assert jt.webhook_credential is None
     assert response.data == {'webhook_credential': ["Must match the selected webhook service."]}
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "service", [s for s, _ in WebhookTemplateMixin.SERVICES]
+)
+def test_set_webhook_credential_without_service(organization_factory, job_template_factory, patch, service):
+    objs = organization_factory("org", superusers=['admin'])
+    jt = job_template_factory("jt", organization=objs.organization,
+                              inventory='test_inv', project='test_proj').job_template
+    admin = objs.superusers.admin
+    assert jt.webhook_service == ''
+    assert jt.webhook_key == ''
+
+    cred_type = CredentialType.defaults['{}_token'.format(service)]()
+    cred_type.save()
+    cred = Credential.objects.create(credential_type=cred_type, name='test-cred',
+                                     inputs={'token': 'secret'})
+
+    url = reverse('api:job_template_detail', kwargs={'pk': jt.pk})
+    response = patch(url, {'webhook_credential': cred.pk}, user=admin, expect=400)
+    jt.refresh_from_db()
+
+    assert jt.webhook_service == ''
+    assert jt.webhook_key == ''
+    assert jt.webhook_credential is None
+    assert response.data == {'webhook_credential': ["Must match the selected webhook service."]}
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "service", [s for s, _ in WebhookTemplateMixin.SERVICES]
+)
+def test_unset_webhook_service_with_credential(organization_factory, job_template_factory, patch, service):
+    objs = organization_factory("org", superusers=['admin'])
+    jt = job_template_factory("jt", organization=objs.organization, webhook_service=service,
+                              inventory='test_inv', project='test_proj').job_template
+    admin = objs.superusers.admin
+    assert jt.webhook_service == service
+    assert jt.webhook_key != ''
+
+    cred_type = CredentialType.defaults['{}_token'.format(service)]()
+    cred_type.save()
+    cred = Credential.objects.create(credential_type=cred_type, name='test-cred',
+                                     inputs={'token': 'secret'})
+    jt.webhook_credential = cred
+    jt.save()
+
+    url = reverse('api:job_template_detail', kwargs={'pk': jt.pk})
+    response = patch(url, {'webhook_service': ''}, user=admin, expect=400)
+    jt.refresh_from_db()
+
+    assert jt.webhook_service == service
+    assert jt.webhook_key != ''
+    assert jt.webhook_credential == cred
+    assert response.data == {'webhook_credential': ["Must match the selected webhook service."]}
