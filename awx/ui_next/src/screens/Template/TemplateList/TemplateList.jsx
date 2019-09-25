@@ -239,12 +239,12 @@ class TemplatesList extends Component {
                         onSelect={this.handleAddSelect}
                         toggle={<ToolbarAddButton onClick={() => {}} />}
                         dropdownItems={[
-                          <DropdownItem key="job" isPlain>
+                          <DropdownItem isHovered={false} key="job">
                             <Link to={`${match.url}/job_template/add/`}>
                               {i18n._(t`Job Template`)}
                             </Link>
                           </DropdownItem>,
-                          <DropdownItem key="workflow" isPlain>
+                          <DropdownItem key="workflow">
                             <Link to={`${match.url}_workflow/add/`}>
                               {i18n._(t`Workflow Template`)}
                             </Link>
