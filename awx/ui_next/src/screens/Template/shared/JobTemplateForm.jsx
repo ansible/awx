@@ -15,7 +15,7 @@ import {
 import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
 import AnsibleSelect from '@components/AnsibleSelect';
-import MultiSelect, { TagMultiSelect } from '@components/MultiSelect';
+import { TagMultiSelect } from '@components/MultiSelect';
 import FormActionGroup from '@components/FormActionGroup';
 import FormField, { CheckboxField, FieldTooltip } from '@components/FormField';
 import FormRow from '@components/FormRow';
@@ -28,7 +28,8 @@ import {
   InstanceGroupsLookup,
   ProjectLookup,
 } from '@components/Lookup';
-import { JobTemplatesAPI, LabelsAPI, ProjectsAPI } from '@api';
+import { JobTemplatesAPI } from '@api';
+import LabelSelect from './LabelSelect';
 import PlaybookSelect from './PlaybookSelect';
 
 const GridFormGroup = styled(FormGroup)`
@@ -71,17 +72,11 @@ class JobTemplateForm extends Component {
     this.state = {
       hasContentLoading: true,
       contentError: false,
-      loadedLabels: [],
-      newLabels: [],
-      removedLabels: [],
       project: props.template.summary_fields.project,
       inventory: props.template.summary_fields.inventory,
       relatedInstanceGroups: [],
       allowCallbacks: !!props.template.host_config_key,
     };
-    this.handleNewLabel = this.handleNewLabel.bind(this);
-    this.loadLabels = this.loadLabels.bind(this);
-    this.removeLabel = this.removeLabel.bind(this);
     this.handleProjectValidation = this.handleProjectValidation.bind(this);
     this.loadRelatedInstanceGroups = this.loadRelatedInstanceGroups.bind(this);
     this.handleInstanceGroupsChange = this.handleInstanceGroupsChange.bind(
@@ -92,41 +87,13 @@ class JobTemplateForm extends Component {
   componentDidMount() {
     const { validateField } = this.props;
     this.setState({ contentError: null, hasContentLoading: true });
-    Promise.all([this.loadLabels(), this.loadRelatedInstanceGroups()]).then(
+    // TODO: determine whene LabelSelect has finished loading labels?
+    Promise.all([this.loadRelatedInstanceGroups()]).then(
       () => {
         this.setState({ hasContentLoading: false });
         validateField('project');
       }
     );
-  }
-
-  async loadLabels() {
-    // This function assumes that the user has no more than 400
-    // labels. For the vast majority of users this will be more thans
-    // enough. This can be updated to allow more than 400 labels if we
-    // decide it is necessary.
-    let loadedLabels;
-    try {
-      const { data } = await LabelsAPI.read({
-        page: 1,
-        page_size: 200,
-        order_by: 'name',
-      });
-      loadedLabels = [...data.results];
-      if (data.next && data.next.includes('page=2')) {
-        const {
-          data: { results },
-        } = await LabelsAPI.read({
-          page: 2,
-          page_size: 200,
-          order_by: 'name',
-        });
-        loadedLabels = loadedLabels.concat(results);
-      }
-      this.setState({ loadedLabels });
-    } catch (err) {
-      this.setState({ contentError: err });
-    }
   }
 
   async loadRelatedInstanceGroups() {
@@ -142,65 +109,6 @@ class JobTemplateForm extends Component {
       });
     } catch (err) {
       this.setState({ contentError: err });
-    }
-  }
-
-  handleNewLabel(label) {
-    const { newLabels } = this.state;
-    const { template, setFieldValue } = this.props;
-    const isIncluded = newLabels.some(newLabel => newLabel.name === label.name);
-    if (isIncluded) {
-      const filteredLabels = newLabels.filter(
-        newLabel => newLabel.name !== label
-      );
-      this.setState({ newLabels: filteredLabels });
-    } else {
-      setFieldValue('newLabels', [
-        ...newLabels,
-        { name: label.name, associate: true, id: label.id },
-      ]);
-      this.setState({
-        newLabels: [
-          ...newLabels,
-          {
-            name: label.name,
-            associate: true,
-            id: label.id,
-            organization: template.summary_fields.inventory.organization_id,
-          },
-        ],
-      });
-    }
-  }
-
-  removeLabel(label) {
-    const { removedLabels, newLabels } = this.state;
-    const { template, setFieldValue } = this.props;
-
-    const isAssociatedLabel = template.summary_fields.labels.results.some(
-      tempLabel => tempLabel.id === label.id
-    );
-
-    if (isAssociatedLabel) {
-      setFieldValue(
-        'removedLabels',
-        removedLabels.concat({
-          disassociate: true,
-          id: label.id,
-        })
-      );
-      this.setState({
-        removedLabels: removedLabels.concat({
-          disassociate: true,
-          id: label.id,
-        }),
-      });
-    } else {
-      const filteredLabels = newLabels.filter(
-        newLabel => newLabel.name !== label.name
-      );
-      setFieldValue('newLabels', filteredLabels);
-      this.setState({ newLabels: filteredLabels });
     }
   }
 
@@ -244,7 +152,7 @@ class JobTemplateForm extends Component {
 
   render() {
     const {
-      loadedLabels,
+      // loadedLabels,
       contentError,
       hasContentLoading,
       inventory,
@@ -256,6 +164,7 @@ class JobTemplateForm extends Component {
       handleCancel,
       handleSubmit,
       handleBlur,
+      setFieldValue,
       i18n,
       template,
     } = this.props;
@@ -406,8 +315,13 @@ class JobTemplateForm extends Component {
                       t`Select the playbook to be executed by this job.`
                     )}
                   />
-                  <PlaybookSelect projectId={form.values.project}
-                   isValid={isValid} form={form} field={field} />
+                  <PlaybookSelect
+                    projectId={form.values.project}
+                    isValid={isValid}
+                    form={form}
+                    field={field}
+                    onError={err => this.setState({ contentError: err })}
+                  />
                 </FormGroup>
               );
             }}
@@ -416,15 +330,19 @@ class JobTemplateForm extends Component {
         <FormRow>
           <FormGroup label={i18n._(t`Labels`)} fieldId="template-labels">
             <FieldTooltip
-              content={i18n._(
-                t`Optional labels that describe this job template, such as 'dev' or 'test'. Labels can be used to group and filter job templates and completed jobs.`
-              )}
+              content={i18n._(t`Optional labels that describe this job template,
+                such as 'dev' or 'test'. Labels can be used to group and filter
+                job templates and completed jobs.`)}
             />
-            <MultiSelect
-              onAddNewItem={this.handleNewLabel}
-              onRemoveItem={this.removeLabel}
-              associatedItems={template.summary_fields.labels.results}
-              options={loadedLabels}
+            <LabelSelect
+              initialValues={template.summary_fields.labels.results}
+              onNewLabelsChange={newLabels => {
+                setFieldValue('newLabels', newLabels);
+              }}
+              onRemovedLabelsChange={removedLabels => {
+                setFieldValue('removedLabels', removedLabels);
+              }}
+              onError={err => this.setState({ contentError: err })}
             />
           </FormGroup>
         </FormRow>
@@ -485,8 +403,8 @@ class JobTemplateForm extends Component {
               min="1"
               label={i18n._(t`Job Slicing`)}
               tooltip={i18n._(t`Divide the work done by this job template
-                    into the specified number of job slices, each running the
-                    same tasks against a portion of the inventory.`)}
+                into the specified number of job slices, each running the
+                same tasks against a portion of the inventory.`)}
             />
             <FormField
               id="template-timeout"
@@ -495,8 +413,8 @@ class JobTemplateForm extends Component {
               min="0"
               label={i18n._(t`Timeout`)}
               tooltip={i18n._(t`The amount of time (in seconds) to run
-                    before the task is canceled. Defaults to 0 for no job
-                    timeout.`)}
+                before the task is canceled. Defaults to 0 for no job
+                timeout.`)}
             />
             <Field
               name="diff_mode"
@@ -528,9 +446,8 @@ class JobTemplateForm extends Component {
             css="margin-top: 20px"
             value={relatedInstanceGroups}
             onChange={this.handleInstanceGroupsChange}
-            tooltip={i18n._(
-              t`Select the Instance Groups for this Organization to run on.`
-            )}
+            tooltip={i18n._(t`Select the Instance Groups for this Organization
+              to run on.`)}
           />
           <Field
             name="job_tags"
@@ -586,9 +503,8 @@ class JobTemplateForm extends Component {
               id="option-privilege-escalation"
               name="become_enabled"
               label={i18n._(t`Privilege Escalation`)}
-              tooltip={i18n._(
-                t`If enabled, run this playbook as an administrator.`
-              )}
+              tooltip={i18n._(t`If enabled, run this playbook as an
+                administrator.`)}
             />
             <Checkbox
               aria-label={i18n._(t`Provisioning Callbacks`)}
@@ -597,11 +513,10 @@ class JobTemplateForm extends Component {
                   {i18n._(t`Provisioning Callbacks`)}
                   &nbsp;
                   <FieldTooltip
-                    content={i18n._(
-                      t`Enables creation of a provisioning callback URL. Using
-                      the URL a host can contact BRAND_NAME and request a
-                      configuration update using this job template.`
-                    )}
+                    content={i18n._(t`Enables creation of a provisioning
+                      callback URL. Using the URL a host can contact BRAND_NAME
+                      and request a configuration update using this job
+                      template.`)}
                   />
                 </span>
               }
@@ -615,19 +530,15 @@ class JobTemplateForm extends Component {
               id="option-concurrent"
               name="allow_simultaneous"
               label={i18n._(t`Concurrent Jobs`)}
-              tooltip={i18n._(
-                t`If enabled, simultaneous runs of this job template will
-                    be allowed.`
-              )}
+              tooltip={i18n._(t`If enabled, simultaneous runs of this job
+                template will be allowed.`)}
             />
             <CheckboxField
               id="option-fact-cache"
               name="use_fact_cache"
               label={i18n._(t`Fact Cache`)}
-              tooltip={i18n._(
-                t`If enabled, use cached facts if available and store
-                    discovered facts in the cache.`
-              )}
+              tooltip={i18n._(t`If enabled, use cached facts if available
+                and store discovered facts in the cache.`)}
             />
           </GridFormGroup>
           <div
@@ -690,6 +601,10 @@ const FormikApp = withFormik({
       allow_simultaneous: template.allow_simultaneous || false,
       use_fact_cache: template.use_fact_cache || false,
       host_config_key: template.host_config_key || '',
+      addedInstanceGroups: [],
+      removedInstanceGroups: [],
+      newLabels: [],
+      removedLabels: [],
     };
   },
   handleSubmit: (values, bag) => bag.props.handleSubmit(values),

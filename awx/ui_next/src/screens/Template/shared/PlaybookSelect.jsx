@@ -8,6 +8,9 @@ import { ProjectsAPI } from '@api';
 function PlaybookSelect({ projectId, isValid, form, field, onError, i18n }) {
   const [options, setOptions] = useState([]);
   useEffect(() => {
+    if (!projectId) {
+      return;
+    }
     (async () => {
       try {
         const { data } = await ProjectsAPI.readPlaybooks(projectId);
