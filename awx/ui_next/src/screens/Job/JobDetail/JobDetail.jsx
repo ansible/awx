@@ -41,7 +41,7 @@ const VariablesInput = styled(_VariablesInput)`
 const StatusDetailValue = styled.div`
   align-items: center;
   display: inline-flex;
-  > div {
+  .at-c-statusIcon {
     margin-right: 10px;
   }
 `;
@@ -155,13 +155,11 @@ function JobDetail({ job, i18n, history }) {
         <Detail
           label={i18n._(t`Launched By`)}
           value={
-            <>
-              {launchedByLink ? (
-                <Link to={`${launchedByLink}`}>{launchedByValue}</Link>
-              ) : (
-                launchedByValue
-              )}
-            </>
+            launchedByLink ? (
+              <Link to={`${launchedByLink}`}>{launchedByValue}</Link>
+            ) : (
+              launchedByValue
+            )
           }
         />
         {inventory && (

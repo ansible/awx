@@ -32,7 +32,7 @@ const Modal = styled(PFModal)`
 const HostNameDetailValue = styled.div`
   align-items: center;
   display: inline-flex;
-  > div {
+  .at-c-statusIcon {
     margin-right: 10px;
   }
 `;

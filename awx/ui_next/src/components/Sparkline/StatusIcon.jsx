@@ -75,11 +75,12 @@ const SkippedBottom = styled.div`
 
 const StatusIcon = ({ status, ...props }) => {
   return (
-    <div {...props}>
+    <div className="at-c-statusIcon" {...props}>
       {status === 'running' && <RunningJob />}
-      {(status === 'new' || status === 'pending' || status === 'waiting') && (
-        <WaitingJob />
-      )}
+      {(status === 'new' ||
+        status === 'pending' ||
+        status === 'waiting' ||
+        status === 'never updated') && <WaitingJob />}
       {(status === 'failed' || status === 'error' || status === 'canceled') && (
         <FinishedJob>
           <FailedTop />
