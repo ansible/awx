@@ -152,7 +152,6 @@ class JobTemplateForm extends Component {
 
   render() {
     const {
-      // loadedLabels,
       contentError,
       hasContentLoading,
       inventory,

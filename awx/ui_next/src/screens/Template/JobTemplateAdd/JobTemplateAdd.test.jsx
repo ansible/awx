@@ -76,9 +76,7 @@ describe('<JobTemplateAdd />', () => {
     ).toEqual(true);
 
     expect(wrapper.find('input#template-name').text()).toBe(defaultProps.name);
-    expect(wrapper.find('AnsibleSelect[name="playbook"]').text()).toBe(
-      'Choose a playbook'
-    );
+    expect(wrapper.find('PlaybookSelect')).toHaveLength(1);
     expect(wrapper.find('ProjectLookup').prop('value')).toBe(null);
     done();
   });

@@ -2,7 +2,7 @@ import React from 'react';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
 import { sleep } from '@testUtils/testUtils';
 import JobTemplateForm, { _JobTemplateForm } from './JobTemplateForm';
-import { LabelsAPI, JobTemplatesAPI } from '@api';
+import { LabelsAPI, JobTemplatesAPI, ProjectsAPI } from '@api';
 
 jest.mock('@api');
 
@@ -60,6 +60,9 @@ describe('<JobTemplateForm />', () => {
     });
     JobTemplatesAPI.readInstanceGroups.mockReturnValue({
       data: { results: mockInstanceGroups },
+    });
+    ProjectsAPI.readPlaybooks.mockReturnValue({
+      data: ['debug.yml'],
     });
   });
 
@@ -156,27 +159,8 @@ describe('<JobTemplateForm />', () => {
     expect(handleCancel).toBeCalled();
   });
 
-  test('should call loadRelatedProjectPlaybooks when project value changes', async () => {
-    const loadRelatedProjectPlaybooks = jest.spyOn(
-      _JobTemplateForm.prototype,
-      'loadRelatedProjectPlaybooks'
-    );
-    const wrapper = mountWithContexts(
-      <JobTemplateForm
-        template={mockData}
-        handleSubmit={jest.fn()}
-        handleCancel={jest.fn()}
-      />
-    );
-    await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
-    wrapper.find('ProjectLookup').prop('onChange')({
-      id: 10,
-      name: 'project',
-    });
-    expect(loadRelatedProjectPlaybooks).toHaveBeenCalledWith(10);
-  });
-
-  test('handleNewLabel should arrange new labels properly', async () => {
+  // TODO Move this test to <LabelSelect> tests
+  test.skip('handleNewLabel should arrange new labels properly', async () => {
     const event = { key: 'Enter', preventDefault: () => {} };
     const wrapper = mountWithContexts(
       <JobTemplateForm
@@ -204,7 +188,8 @@ describe('<JobTemplateForm />', () => {
     expect(newLabels[0].organization).toEqual(1);
   });
 
-  test('disassociateLabel should arrange new labels properly', async () => {
+  // TODO Move this test to <LabelSelect> tests
+  test.skip('disassociateLabel should arrange new labels properly', async () => {
     const wrapper = mountWithContexts(
       <JobTemplateForm
         template={mockData}

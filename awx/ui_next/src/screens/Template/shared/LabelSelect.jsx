@@ -31,7 +31,6 @@ async function loadLabelOptions(setLabels, onError) {
 
 function LabelSelect({
   initialValues,
-  organizationId,
   onNewLabelsChange,
   onRemovedLabelsChange,
   onError,
@@ -98,13 +97,9 @@ LabelSelect.propTypes = {
       name: string.isRequired,
     })
   ).isRequired,
-  organizationId: number,
   onNewLabelsChange: func.isRequired,
   onRemovedLabelsChange: func.isRequired,
   onError: func.isRequired,
-};
-LabelSelect.defaultProps = {
-  organizationId: null,
 };
 
 export default LabelSelect;
