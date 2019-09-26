@@ -82,7 +82,7 @@ ADD requirements/requirements_ansible.txt \
     requirements/requirements_tower_uninstall.txt \
     requirements/requirements_git.txt \
     /tmp/requirements/
-RUN cd /tmp && VENV_BASE="/var/lib/awx/venv" make requirements
+RUN scl enable rh-postgresql10 'cd /tmp && VENV_BASE="/var/lib/awx/venv" make requirements'
 
 RUN yum -y remove cyrus-sasl-devel \
   gcc \
