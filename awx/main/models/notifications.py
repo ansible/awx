@@ -17,7 +17,7 @@ from jinja2.exceptions import TemplateSyntaxError, UndefinedError, SecurityError
 
 # AWX
 from awx.api.versioning import reverse
-from awx.main.models.base import CommonModelNameNotUnique, CreatedModifiedModel
+from awx.main.models.base import CommonModelNameNotUnique, CreatedModifiedModel, prevent_search
 from awx.main.utils import encrypt_field, decrypt_field, set_environ
 from awx.main.notifications.email_backend import CustomEmailBackend
 from awx.main.notifications.slack_backend import SlackBackend
@@ -70,7 +70,7 @@ class NotificationTemplate(CommonModelNameNotUnique):
         choices=NOTIFICATION_TYPE_CHOICES,
     )
 
-    notification_configuration = JSONField(blank=False)
+    notification_configuration = prevent_search(JSONField(blank=False))
 
     def default_messages():
         return {'started': None, 'success': None, 'error': None}

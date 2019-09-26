@@ -127,3 +127,11 @@ def test_post_wfjt_running_notification(get, post, admin, notification_template,
     response = get(url, admin)
     assert response.status_code == 200
     assert len(response.data['results']) == 1
+
+
+@pytest.mark.django_db
+def test_search_on_notification_configuration_is_prevented(get, admin):
+    url = reverse('api:notification_template_list')
+    response = get(url, {'notification_configuration__regex': 'ABCDEF'}, admin)
+    assert response.status_code == 403
+    assert response.data == {"detail": "Filtering on notification_configuration is not allowed."}
