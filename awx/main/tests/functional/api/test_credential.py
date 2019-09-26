@@ -496,9 +496,6 @@ def test_falsey_field_data(get, post, organization, admin, field_value):
 
 @pytest.mark.django_db
 @pytest.mark.parametrize('kind, extraneous', [
-    ['ssh', 'ssh_key_unlock'],
-    ['scm', 'ssh_key_unlock'],
-    ['net', 'ssh_key_unlock'],
     ['net', 'authorize_password'],
 ])
 def test_field_dependencies(get, post, organization, admin, kind, extraneous):
