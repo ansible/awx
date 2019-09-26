@@ -144,6 +144,7 @@ class WebhookReceiverBase(APIView):
 
         kwargs = {
             '_eager_fields': {
+                'launch_type': 'webhook',
                 'webhook_service': obj.webhook_service,
                 'webhook_credential': obj.webhook_credential,
                 'webhook_guid': event_guid,

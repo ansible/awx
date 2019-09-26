@@ -532,6 +532,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         ('scheduled', _('Scheduled')),      # Job was started from a schedule.
         ('dependency', _('Dependency')),    # Job was started as a dependency of another job.
         ('workflow', _('Workflow')),        # Job was started from a workflow job.
+        ('webhook', _('Webhook')),          # Job was started from a webhook event.
         ('sync', _('Sync')),                # Job was started from a project sync.
         ('scm', _('SCM Update'))            # Job was created as an Inventory SCM sync.
     ]
