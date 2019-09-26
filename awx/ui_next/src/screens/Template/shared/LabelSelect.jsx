@@ -30,63 +30,26 @@ async function loadLabelOptions(setLabels, onError) {
 }
 
 function LabelSelect({
-  initialValues,
-  onNewLabelsChange,
-  onRemovedLabelsChange,
+  initialValues, // todo: change to value, controlled ?
+  onChange,
   onError,
 }) {
   const [options, setOptions] = useState([]);
   // TODO: move newLabels into a prop?
-  const [newLabels, setNewLabels] = useState([]);
-  const [removedLabels, setRemovedLabels] = useState([]);
   useEffect(() => {
     loadLabelOptions(setOptions, onError);
   }, []);
 
-  const handleNewLabel = label => {
-    const isIncluded = newLabels.some(l => l.name === label.name);
-    if (isIncluded) {
-      const filteredLabels = newLabels.filter(
-        newLabel => newLabel.name !== label
-      );
-      setNewLabels(filteredLabels);
-    } else {
-      const updatedNewLabels = newLabels.concat({
-        name: label.name,
-        associate: true,
-        id: label.id,
-        // TODO: can this be null? what happens if inventory > org id changes?
-        // organization: organizationId,
-      });
-      setNewLabels(updatedNewLabels);
-      onNewLabelsChange(updatedNewLabels);
-    }
-  };
-
-  const handleRemoveLabel = label => {
-    const isAssociatedLabel = initialValues.some(
-      l => l.id === label.id
-    );
-    if (isAssociatedLabel) {
-      const updatedRemovedLabels = removedLabels.concat({
-        id: label.id,
-        disassociate: true,
-      });
-      setRemovedLabels(updatedRemovedLabels);
-      onRemovedLabelsChange(updatedRemovedLabels);
-    } else {
-      const filteredLabels = newLabels.filter(l => l.name !== label.name);
-      setNewLabels(filteredLabels);
-      onNewLabelsChange(filteredLabels);
-    }
-  };
-
   return (
     <MultiSelect
-      onAddNewItem={handleNewLabel}
-      onRemoveItem={handleRemoveLabel}
+      onChange={onChange}
       associatedItems={initialValues}
       options={options}
+      createNewItem={name => ({
+        id: name,
+        name,
+        isNew: true,
+      })}
     />
   );
 }
@@ -97,8 +60,6 @@ LabelSelect.propTypes = {
       name: string.isRequired,
     })
   ).isRequired,
-  onNewLabelsChange: func.isRequired,
-  onRemovedLabelsChange: func.isRequired,
   onError: func.isRequired,
 };
 

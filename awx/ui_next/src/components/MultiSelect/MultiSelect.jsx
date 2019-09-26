@@ -144,8 +144,8 @@ class MultiSelect extends Component {
     const isNewItem = !match || !chipItems.find(item => item.id === match.id);
     if (event.key === 'Enter' && isNewItem) {
       event.preventDefault();
-      const items = chipItems.concat({ name: input, id: input });
       const newItem = match || this.createNewItem(input);
+      const items = chipItems.concat(newItem);
       this.setState({
         chipItems: items,
         isExpanded: false,

@@ -87,13 +87,11 @@ class JobTemplateForm extends Component {
   componentDidMount() {
     const { validateField } = this.props;
     this.setState({ contentError: null, hasContentLoading: true });
-    // TODO: determine whene LabelSelect has finished loading labels?
-    Promise.all([this.loadRelatedInstanceGroups()]).then(
-      () => {
-        this.setState({ hasContentLoading: false });
-        validateField('project');
-      }
-    );
+    // TODO: determine whene LabelSelect has finished loading labels
+    Promise.all([this.loadRelatedInstanceGroups()]).then(() => {
+      this.setState({ hasContentLoading: false });
+      validateField('project');
+    });
   }
 
   async loadRelatedInstanceGroups() {
@@ -270,6 +268,7 @@ class JobTemplateForm extends Component {
                   you want this job to manage.`)}
                 onChange={value => {
                   form.setFieldValue('inventory', value.id);
+                  form.setFieldValue('organizationId', value.organization);
                   this.setState({ inventory: value });
                 }}
                 required
@@ -335,12 +334,7 @@ class JobTemplateForm extends Component {
             />
             <LabelSelect
               initialValues={template.summary_fields.labels.results}
-              onNewLabelsChange={newLabels => {
-                setFieldValue('newLabels', newLabels);
-              }}
-              onRemovedLabelsChange={removedLabels => {
-                setFieldValue('removedLabels', removedLabels);
-              }}
+              onChange={labels => setFieldValue('labels', labels)}
               onError={err => this.setState({ contentError: err })}
             />
           </FormGroup>
@@ -577,7 +571,10 @@ class JobTemplateForm extends Component {
 const FormikApp = withFormik({
   mapPropsToValues(props) {
     const { template = {} } = props;
-    const { summary_fields = { labels: { results: [] } } } = template;
+    const { summary_fields = {
+      labels: { results: [] },
+      inventory: { organization: null },
+    } } = template;
 
     return {
       name: template.name || '',
@@ -600,13 +597,12 @@ const FormikApp = withFormik({
       allow_simultaneous: template.allow_simultaneous || false,
       use_fact_cache: template.use_fact_cache || false,
       host_config_key: template.host_config_key || '',
+      organizationId: summary_fields.inventory.organization_id || null,
       addedInstanceGroups: [],
       removedInstanceGroups: [],
-      newLabels: [],
-      removedLabels: [],
     };
   },
-  handleSubmit: (values, bag) => bag.props.handleSubmit(values),
+  handleSubmit: (values, { props }) => props.handleSubmit(values),
 })(JobTemplateForm);
 
 export { JobTemplateForm as _JobTemplateForm };

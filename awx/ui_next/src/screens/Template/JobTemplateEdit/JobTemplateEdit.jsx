@@ -6,6 +6,7 @@ import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
 import { JobTemplatesAPI, ProjectsAPI } from '@api';
 import { JobTemplate } from '@types';
+import { getAddedAndRemoved } from '@util/lists';
 import JobTemplateForm from '../shared/JobTemplateForm';
 
 class JobTemplateEdit extends Component {
@@ -104,8 +105,8 @@ class JobTemplateEdit extends Component {
   async handleSubmit(values) {
     const { template, history } = this.props;
     const {
-      newLabels,
-      removedLabels,
+      labels,
+      organizationId,
       addedInstanceGroups,
       removedInstanceGroups,
       ...remainingValues
@@ -115,7 +116,7 @@ class JobTemplateEdit extends Component {
     try {
       await JobTemplatesAPI.update(template.id, remainingValues);
       await Promise.all([
-        this.submitLabels(newLabels, removedLabels),
+        this.submitLabels(labels, organizationId),
         this.submitInstanceGroups(addedInstanceGroups, removedInstanceGroups),
       ]);
       history.push(this.detailsUrl);
@@ -124,17 +125,23 @@ class JobTemplateEdit extends Component {
     }
   }
 
-  async submitLabels(newLabels = [], removedLabels = []) {
+  async submitLabels(labels = [], organizationId) {
     const { template } = this.props;
-    const disassociationPromises = removedLabels.map(label =>
+    const { added, removed } = getAddedAndRemoved(
+      template.summary_fields.labels.results,
+      labels
+    );
+    const disassociationPromises = removed.map(label =>
       JobTemplatesAPI.disassociateLabel(template.id, label)
     );
-    const associationPromises = newLabels
-      .filter(label => !label.organization)
+    const associationPromises = added
+      .filter(label => !label.isNew)
       .map(label => JobTemplatesAPI.associateLabel(template.id, label));
-    const creationPromises = newLabels
-      .filter(label => label.organization)
-      .map(label => JobTemplatesAPI.generateLabel(template.id, label));
+    const creationPromises = added
+      .filter(label => label.isNew)
+      .map(label =>
+        JobTemplatesAPI.generateLabel(template.id, label, organizationId)
+      );
 
     const results = await Promise.all([
       ...disassociationPromises,

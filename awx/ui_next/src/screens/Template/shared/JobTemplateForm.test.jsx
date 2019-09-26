@@ -1,7 +1,7 @@
 import React from 'react';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
 import { sleep } from '@testUtils/testUtils';
-import JobTemplateForm, { _JobTemplateForm } from './JobTemplateForm';
+import JobTemplateForm from './JobTemplateForm';
 import { LabelsAPI, JobTemplatesAPI, ProjectsAPI } from '@api';
 
 jest.mock('@api');
