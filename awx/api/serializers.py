@@ -2831,15 +2831,15 @@ class JobTemplateMixin(object):
         webhook_service = attrs.get('webhook_service', getattr(self.instance, 'webhook_service', None))
         webhook_credential = attrs.get('webhook_credential', getattr(self.instance, 'webhook_credential', None))
 
-        if webhook_credential and webhook_credential.credential_type.kind != 'token':
-            raise serializers.ValidationError({
-                'webhook_credential': _("Must be a Personal Access Token."),
-            })
-
         if webhook_credential:
+            if not webhook_credential.credential_type.namespace.endswith('_token'):
+                raise serializers.ValidationError({
+                    'webhook_credential': _("Must be a Personal Access Token."),
+                })
+
             msg = {'webhook_credential': _("Must match the selected webhook service.")}
             if webhook_service:
-                if webhook_credential.kind != '{}_token'.format(webhook_service):
+                if webhook_credential.credential_type.namespace != '{}_token'.format(webhook_service):
                     raise serializers.ValidationError(msg)
             else:
                 raise serializers.ValidationError(msg)
