@@ -10,6 +10,7 @@ import { DetailList, Detail } from '@components/DetailList';
 import { ChipGroup, Chip, CredentialChip } from '@components/Chip';
 import { VariablesInput as _VariablesInput } from '@components/CodeMirrorInput';
 import ErrorDetail from '@components/ErrorDetail';
+import { StatusIcon } from '@components/Sparkline';
 import { toTitleCase } from '@util/strings';
 import { Job } from '../../../types';
 import {
@@ -37,6 +38,14 @@ const VariablesInput = styled(_VariablesInput)`
   }
 `;
 
+const StatusDetailValue = styled.div`
+  align-items: center;
+  display: inline-flex;
+  .at-c-statusIcon {
+    margin-right: 10px;
+  }
+`;
+
 const VERBOSITY = {
   0: '0 (Normal)',
   1: '1 (Verbose)',
@@ -45,17 +54,49 @@ const VERBOSITY = {
   4: '4 (Connection Debug)',
 };
 
+const getLaunchedByDetails = ({ summary_fields = {}, related = {} }) => {
+  const {
+    created_by: createdBy,
+    job_template: jobTemplate,
+    schedule,
+  } = summary_fields;
+  const { schedule: relatedSchedule } = related;
+
+  if (!createdBy && !schedule) {
+    return null;
+  }
+
+  let link;
+  let value;
+
+  if (createdBy) {
+    link = `/users/${createdBy.id}`;
+    value = createdBy.username;
+  } else if (relatedSchedule && jobTemplate) {
+    link = `/templates/job_template/${jobTemplate.id}/schedules/${schedule.id}`;
+    value = schedule.name;
+  } else {
+    link = null;
+    value = schedule.name;
+  }
+
+  return { link, value };
+};
+
 function JobDetail({ job, i18n, history }) {
   const {
-    job_template: jobTemplate,
-    project,
-    inventory,
-    instance_group: instanceGroup,
     credentials,
+    instance_group: instanceGroup,
+    inventory,
+    job_template: jobTemplate,
     labels,
+    project,
   } = job.summary_fields;
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [errorMsg, setErrorMsg] = useState();
+
+  const { value: launchedByValue, link: launchedByLink } =
+    getLaunchedByDetails(job) || {};
 
   const deleteJob = async () => {
     try {
@@ -84,11 +125,20 @@ function JobDetail({ job, i18n, history }) {
       setIsDeleteModalOpen(false);
     }
   };
+
   return (
     <CardBody>
       <DetailList>
-        {/* TODO: add status icon? */}
-        <Detail label={i18n._(t`Status`)} value={toTitleCase(job.status)} />
+        {/* TODO: hookup status to websockets */}
+        <Detail
+          label={i18n._(t`Status`)}
+          value={
+            <StatusDetailValue>
+              {job.status && <StatusIcon status={job.status} />}
+              {toTitleCase(job.status)}
+            </StatusDetailValue>
+          }
+        />
         <Detail label={i18n._(t`Started`)} value={job.started} />
         <Detail label={i18n._(t`Finished`)} value={job.finished} />
         {jobTemplate && (
@@ -102,6 +152,16 @@ function JobDetail({ job, i18n, history }) {
           />
         )}
         <Detail label={i18n._(t`Job Type`)} value={toTitleCase(job.job_type)} />
+        <Detail
+          label={i18n._(t`Launched By`)}
+          value={
+            launchedByLink ? (
+              <Link to={`${launchedByLink}`}>{launchedByValue}</Link>
+            ) : (
+              launchedByValue
+            )
+          }
+        />
         {inventory && (
           <Detail
             label={i18n._(t`Inventory`)}
@@ -110,19 +170,23 @@ function JobDetail({ job, i18n, history }) {
             }
           />
         )}
-        {/* TODO: show project status icon */}
         {project && (
           <Detail
             label={i18n._(t`Project`)}
-            value={<Link to={`/projects/${project.id}`}>{project.name}</Link>}
+            value={
+              <StatusDetailValue>
+                {project.status && <StatusIcon status={project.status} />}
+                <Link to={`/projects/${project.id}`}>{project.name}</Link>
+              </StatusDetailValue>
+            }
           />
         )}
         <Detail label={i18n._(t`Revision`)} value={job.scm_revision} />
-        <Detail label={i18n._(t`Playbook`)} value={null} />
+        <Detail label={i18n._(t`Playbook`)} value={job.playbook} />
         <Detail label={i18n._(t`Limit`)} value={job.limit} />
         <Detail label={i18n._(t`Verbosity`)} value={VERBOSITY[job.verbosity]} />
-        <Detail label={i18n._(t`Environment`)} value={null} />
-        <Detail label={i18n._(t`Execution Node`)} value={job.exucution_node} />
+        <Detail label={i18n._(t`Environment`)} value={job.custom_virtualenv} />
+        <Detail label={i18n._(t`Execution Node`)} value={job.execution_node} />
         {instanceGroup && (
           <Detail
             label={i18n._(t`Instance Group`)}

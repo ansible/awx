@@ -2,7 +2,7 @@ import React from 'react';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
 import JobOutput from './JobOutput';
 import { JobsAPI } from '@api';
-import mockJobData from './data.job.json';
+import mockJobData from '../shared/data.job.json';
 import mockJobEventsData from './data.job_events.json';
 
 jest.mock('@api');
