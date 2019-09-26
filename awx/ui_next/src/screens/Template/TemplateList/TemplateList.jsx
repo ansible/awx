@@ -60,9 +60,14 @@ class TemplatesList extends Component {
 
   componentDidUpdate(prevProps) {
     const { location } = this.props;
+
     if (location !== prevProps.location) {
       this.loadTemplates();
     }
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('click', this.handleAddToggle, false);
   }
 
   handleDeleteErrorClose() {
@@ -84,9 +89,19 @@ class TemplatesList extends Component {
     }
   }
 
-  handleAddToggle() {
+  handleAddToggle(e) {
     const { isAddOpen } = this.state;
-    this.setState({ isAddOpen: !isAddOpen });
+    document.addEventListener('click', this.handleAddToggle, false);
+
+    if (this.node && this.node.contains(e.target) && isAddOpen) {
+      document.removeEventListener('click', this.handleAddToggle, false);
+      this.setState({ isAddOpen: false });
+    } else if (this.node && this.node.contains(e.target) && !isAddOpen) {
+      this.setState({ isAddOpen: true });
+    } else {
+      this.setState({ isAddOpen: false });
+      document.removeEventListener('click', this.handleAddToggle, false);
+    }
   }
 
   async handleTemplateDelete() {
@@ -216,28 +231,33 @@ class TemplatesList extends Component {
                     pluralizedItemName="Templates"
                   />,
                   canAdd && (
-                    <Dropdown
+                    <div
+                      ref={node => {
+                        this.node = node;
+                      }}
                       key="add"
-                      isPlain
-                      isOpen={isAddOpen}
-                      position={DropdownPosition.right}
-                      onSelect={this.handleAddSelect}
-                      toggle={
-                        <ToolbarAddButton onClick={this.handleAddToggle} />
-                      }
-                      dropdownItems={[
-                        <DropdownItem key="job">
-                          <Link to={`${match.url}/job_template/add/`}>
-                            {i18n._(t`Job Template`)}
-                          </Link>
-                        </DropdownItem>,
-                        <DropdownItem key="workflow">
-                          <Link to={`${match.url}_workflow/add/`}>
-                            {i18n._(t`Workflow Template`)}
-                          </Link>
-                        </DropdownItem>,
-                      ]}
-                    />
+                    >
+                      <Dropdown
+                        isPlain
+                        isOpen={isAddOpen}
+                        position={DropdownPosition.right}
+                        toggle={
+                          <ToolbarAddButton onClick={this.handleAddToggle} />
+                        }
+                        dropdownItems={[
+                          <DropdownItem key="job">
+                            <Link to={`${match.url}/job_template/add/`}>
+                              {i18n._(t`Job Template`)}
+                            </Link>
+                          </DropdownItem>,
+                          <DropdownItem key="workflow">
+                            <Link to={`${match.url}_workflow/add/`}>
+                              {i18n._(t`Workflow Template`)}
+                            </Link>
+                          </DropdownItem>,
+                        ]}
+                      />
+                    </div>
                   ),
                 ]}
               />
@@ -254,26 +274,31 @@ class TemplatesList extends Component {
             )}
             emptyStateControls={
               canAdd && (
-                <Dropdown
+                <div
+                  ref={node => {
+                    this.node = node;
+                  }}
                   key="add"
-                  isPlain
-                  isOpen={isAddOpen}
-                  position={DropdownPosition.right}
-                  onSelect={this.handleAddSelect}
-                  toggle={<ToolbarAddButton onClick={this.handleAddToggle} />}
-                  dropdownItems={[
-                    <DropdownItem key="job">
-                      <Link to={`${match.url}/job_template/add/`}>
-                        {i18n._(t`Job Template`)}
-                      </Link>
-                    </DropdownItem>,
-                    <DropdownItem key="workflow">
-                      <Link to={`${match.url}_workflow/add/`}>
-                        {i18n._(t`Workflow Template`)}
-                      </Link>
-                    </DropdownItem>,
-                  ]}
-                />
+                >
+                  <Dropdown
+                    isPlain
+                    isOpen={isAddOpen}
+                    position={DropdownPosition.right}
+                    toggle={<ToolbarAddButton onClick={this.handleAddToggle} />}
+                    dropdownItems={[
+                      <DropdownItem key="job">
+                        <Link to={`${match.url}/job_template/add/`}>
+                          {i18n._(t`Job Template`)}
+                        </Link>
+                      </DropdownItem>,
+                      <DropdownItem key="workflow">
+                        <Link to={`${match.url}_workflow/add/`}>
+                          {i18n._(t`Workflow Template`)}
+                        </Link>
+                      </DropdownItem>,
+                    ]}
+                  />
+                </div>
               )
             }
           />

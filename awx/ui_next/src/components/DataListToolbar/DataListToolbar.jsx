@@ -112,7 +112,7 @@ class DataListToolbar extends React.Component {
               <Fragment>
                 <ToolbarItem>
                   <Checkbox
-                    checked={isAllSelected}
+                    isChecked={isAllSelected}
                     onChange={onSelectAll}
                     aria-label={i18n._(t`Select all`)}
                     id="select-all"
