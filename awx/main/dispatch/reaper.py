@@ -33,7 +33,26 @@ def reap(instance=None, status='failed', excluded_uuids=[]):
     '''
     Reap all jobs in waiting|running for this instance.
     '''
-    me = instance or Instance.objects.me()
+    me = instance
+    if me is None:
+        try:
+            me = Instance.objects.me()
+        except RuntimeError:
+            # see: https://github.com/ansible/awx/issues/4294
+            # Getting into this block is uncommon, but it can happen when:
+            # 1. A node misses heartbeats and is deprovisioned (generally, in
+            #    an OpenShift or k8s cluster).  In this scenario, the
+            #    `Instance` record is actually *deleted* from the database.
+            # 2. The node (or a new pod) regains connectivity, and the dispatcher
+            #    process starts/restarts.
+            # 3. The dispatcher receives an initial heartbeat message, which runs
+            #    cleanup code, yielding this .reap() function call.
+            #
+            # The simplest thing to do when entering this block is to simply do
+            # nothing and wait for the first successful heartbeat to succeed
+            # (and for the reaper to run again on the _next_ heartbeat).
+            logger.warn("instance hasn't registered yet; skipping task reaper")
+            return
     now = tz_now()
     workflow_ctype_id = ContentType.objects.get_for_model(WorkflowJob).id
     jobs = UnifiedJob.objects.filter(
