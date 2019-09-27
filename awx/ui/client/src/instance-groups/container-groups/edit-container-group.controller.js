@@ -57,9 +57,42 @@ function EditContainerGroupController($rootScope, $scope, $state, models, string
     toggleLabel: strings.get('container.POD_SPEC_TOGGLE')
   };
 
-  const podSpecValue = EditContainerGroupDataset.data.pod_spec_override.trim();
-  const defaultPodSpecValue = instanceGroup.model.OPTIONS.actions.PUT.pod_spec_override.default.trim();
-  if (podSpecValue && podSpecValue !== defaultPodSpecValue) {
+  function sanitizeVars (str) {
+    // Quick function to test if the host vars are a json-object-string,
+    // by testing if they can be converted to a JSON object w/o error.
+    function IsJsonString (varStr) {
+      try {
+        JSON.parse(varStr);
+      } catch (e) {
+        return false;
+      }
+      return true;
+    }
+
+    if (typeof str === 'undefined') {
+      return '---';
+    }
+    if (typeof str !== 'string') {
+      const yamlStr = jsyaml.safeDump(str);
+      // jsyaml.safeDump doesn't process an empty object correctly
+      if (yamlStr === '{}\n') {
+        return '---';
+      }
+      return yamlStr;
+    }
+    if (str === '' || str === '{}') {
+      return '---';
+    } else if (IsJsonString(str)) {
+      str = JSON.parse(str);
+      return jsyaml.safeDump(str);
+    }
+    return str;
+  }
+
+  const podSpecValue = sanitizeVars(EditContainerGroupDataset.data.pod_spec_override);
+  const defaultPodSpecValue = sanitizeVars(instanceGroup.model.OPTIONS.actions.PUT.pod_spec_override.default);
+
+  if (podSpecValue && podSpecValue.trim() !== defaultPodSpecValue.trim()) {
     vm.form.extraVars.isOpen = true;
   } else {
     vm.form.extraVars.isOpen = false;

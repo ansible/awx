@@ -2,7 +2,6 @@
 # All Rights Reserved.
 
 from collections import OrderedDict
-import yaml
 
 # Django
 from django.core.exceptions import PermissionDenied
@@ -203,7 +202,7 @@ class Metadata(metadata.SimpleMetadata):
                     continue
 
                 if field == "pod_spec_override":
-                    meta['default'] = yaml.dump(PodManager().pod_definition)
+                    meta['default'] = PodManager().pod_definition
 
                 # Add type choices if available from the serializer.
                 if field == 'type' and hasattr(serializer, 'get_type_choices'):
