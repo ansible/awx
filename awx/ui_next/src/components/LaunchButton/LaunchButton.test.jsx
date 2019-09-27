@@ -1,5 +1,5 @@
 import React from 'react';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import { sleep } from '@testUtils/testUtils';
 
 import LaunchButton from './LaunchButton';
@@ -70,20 +70,15 @@ describe('LaunchButton', () => {
     const wrapper = mountWithContexts(
       <LaunchButton resource={resource}>{children}</LaunchButton>
     );
-    const button = wrapper.find('button');
-    button.prop('onClick')();
-    await waitForElement(
-      wrapper,
-      'Modal.at-c-alertModal--danger',
-      el => el.props().isOpen === true && el.props().title === 'Error!'
-    );
-    const modalCloseButton = wrapper.find('ModalBoxCloseButton');
-    modalCloseButton.simulate('click');
-    await waitForElement(
-      wrapper,
-      'Modal.at-c-alertModal--danger',
-      el => el.props().isOpen === false
-    );
+    expect(wrapper.find('Modal').length).toBe(0);
+    wrapper.find('button').prop('onClick')();
+    await sleep(0);
+    wrapper.update();
+    expect(wrapper.find('Modal').length).toBe(1);
+    wrapper.find('ModalBoxCloseButton').simulate('click');
+    await sleep(0);
+    wrapper.update();
+    expect(wrapper.find('Modal').length).toBe(0);
     done();
   });
 });
