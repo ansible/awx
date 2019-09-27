@@ -503,18 +503,21 @@ class WebhookTemplateMixin(models.Model):
     webhook_service = models.CharField(
         max_length=16,
         choices=SERVICES,
-        blank=True
+        blank=True,
+        help_text=_('Service that webhook requests will be accepted from')
     )
     webhook_key = prevent_search(models.CharField(
         max_length=64,
-        blank=True
+        blank=True,
+        help_text=_('Shared secret that the webhook service will use to sign requests')
     ))
     webhook_credential = models.ForeignKey(
         'Credential',
         blank=True,
         null=True,
         on_delete=models.SET_NULL,
-        related_name='%(class)ss'
+        related_name='%(class)ss',
+        help_text=_('Personal Access Token for posting back the status to the service API')
     )
 
     def rotate_webhook_key(self):
@@ -544,18 +547,21 @@ class WebhookMixin(models.Model):
     webhook_service = models.CharField(
         max_length=16,
         choices=SERVICES,
-        blank=True
+        blank=True,
+        help_text=_('Service that webhook requests will be accepted from')
     )
     webhook_credential = models.ForeignKey(
         'Credential',
         blank=True,
         null=True,
         on_delete=models.SET_NULL,
-        related_name='%(class)ss'
+        related_name='%(class)ss',
+        help_text=_('Personal Access Token for posting back the status to the service API')
     )
     webhook_guid = models.CharField(
         blank=True,
-        max_length=128
+        max_length=128,
+        help_text=_('Unique identifier of the event that triggered this webhook')
     )
 
     def update_webhook_status(self, status):

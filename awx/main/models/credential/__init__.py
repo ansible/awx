@@ -980,6 +980,7 @@ ManagedCredentialType(
             'label': ugettext_noop('Token'),
             'type': 'string',
             'secret': True,
+            'help_text': ugettext_noop('This token needs to come from your profile settings in Github')
         }],
         'required': ['token'],
     },
@@ -996,6 +997,7 @@ ManagedCredentialType(
             'label': ugettext_noop('Token'),
             'type': 'string',
             'secret': True,
+            'help_text': ugettext_noop('This token needs to come from your profile settings in Gitlab')
         }],
         'required': ['token'],
     },
