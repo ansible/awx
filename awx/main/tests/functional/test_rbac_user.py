@@ -150,3 +150,9 @@ def test_org_admin_edit_sys_auditor(org_admin, alice, organization):
     organization.member_role.members.add(alice)
     access = UserAccess(org_admin)
     assert not access.can_change(obj=alice, data=dict(is_system_auditor='true'))
+
+
+@pytest.mark.django_db
+def test_org_admin_can_delete_user(org_admin, alice):
+    access = UserAccess(org_admin)
+    assert access.can_delete(alice)
