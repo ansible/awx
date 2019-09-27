@@ -558,6 +558,7 @@ export default ['$compile', 'Attr', 'Icon',
                             column-no-sort="${list.fields[fld].nosort}"
                             column-label="${list.fields[fld].label}"
                             column-custom-class="${customClass}"
+                            ng-class="${list.fields[fld].columnNgClass || `{'list-header-noSort': ${list.fields[fld].nosort ? true : false}}`}"
                             query-set="${list.iterator}_queryset">
                         </div>`;
                     }
