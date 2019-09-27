@@ -663,6 +663,8 @@ class UserAccess(BaseAccess):
             return False
         if self.user.is_superuser:
             return True
+        if self.can_admin(obj, None):
+            return True
         return False
 
     def can_attach(self, obj, sub_obj, relationship, *args, **kwargs):
