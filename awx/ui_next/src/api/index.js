@@ -2,6 +2,7 @@ import AdHocCommands from './models/AdHocCommands';
 import Config from './models/Config';
 import InstanceGroups from './models/InstanceGroups';
 import Inventories from './models/Inventories';
+import InventorySources from './models/InventorySources';
 import InventoryUpdates from './models/InventoryUpdates';
 import JobTemplates from './models/JobTemplates';
 import Jobs from './models/Jobs';
@@ -23,6 +24,7 @@ const AdHocCommandsAPI = new AdHocCommands();
 const ConfigAPI = new Config();
 const InstanceGroupsAPI = new InstanceGroups();
 const InventoriesAPI = new Inventories();
+const InventorySourcesAPI = new InventorySources();
 const InventoryUpdatesAPI = new InventoryUpdates();
 const JobTemplatesAPI = new JobTemplates();
 const JobsAPI = new Jobs();
@@ -45,6 +47,7 @@ export {
   ConfigAPI,
   InstanceGroupsAPI,
   InventoriesAPI,
+  InventorySourcesAPI,
   InventoryUpdatesAPI,
   JobTemplatesAPI,
   JobsAPI,

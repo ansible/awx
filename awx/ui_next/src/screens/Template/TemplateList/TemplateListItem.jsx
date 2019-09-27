@@ -63,12 +63,8 @@ class TemplateListItem extends Component {
               <DataListCell lastcolumn="true" key="launch">
                 {canLaunch && template.type === 'job_template' && (
                   <Tooltip content={i18n._(t`Launch`)} position="top">
-                    <LaunchButton
-                      component={Link}
-                      to="/templates"
-                      templateId={template.id}
-                    >
-                      {handleLaunch => (
+                    <LaunchButton resource={template}>
+                      {({ handleLaunch }) => (
                         <StyledButton variant="plain" onClick={handleLaunch}>
                           <RocketIcon />
                         </StyledButton>

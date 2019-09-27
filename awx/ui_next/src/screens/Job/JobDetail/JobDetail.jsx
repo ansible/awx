@@ -10,6 +10,7 @@ import { DetailList, Detail } from '@components/DetailList';
 import { ChipGroup, Chip, CredentialChip } from '@components/Chip';
 import { VariablesInput as _VariablesInput } from '@components/CodeMirrorInput';
 import ErrorDetail from '@components/ErrorDetail';
+import LaunchButton from '@components/LaunchButton';
 import { StatusIcon } from '@components/Sparkline';
 import { toTitleCase } from '@util/strings';
 import { Job } from '../../../types';
@@ -254,6 +255,16 @@ function JobDetail({ job, i18n, history }) {
         />
       )}
       <ActionButtonWrapper>
+        {job.type !== 'system_job' &&
+          job.summary_fields.user_capabilities.start && (
+            <LaunchButton resource={job} aria-label={i18n._(t`Relaunch`)}>
+              {({ handleRelaunch }) => (
+                <Button type="submit" onClick={handleRelaunch}>
+                  {i18n._(t`Relaunch`)}
+                </Button>
+              )}
+            </LaunchButton>
+          )}
         <Button
           variant="danger"
           aria-label={i18n._(t`Delete`)}

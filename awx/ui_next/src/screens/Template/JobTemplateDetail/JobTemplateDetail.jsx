@@ -280,14 +280,8 @@ class JobTemplateDetail extends Component {
               </Button>
             )}
             {canLaunch && (
-              <LaunchButton
-                variant="secondary"
-                component={Link}
-                to="/templates"
-                templateId={template.id}
-                aria-label={i18n._(t`Launch`)}
-              >
-                {handleLaunch => (
+              <LaunchButton resource={template} aria-label={i18n._(t`Launch`)}>
+                {({ handleLaunch }) => (
                   <Button
                     variant="secondary"
                     type="submit"
