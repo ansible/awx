@@ -3,6 +3,7 @@ from copy import copy, deepcopy
 import json
 import logging
 import os
+from urllib.parse import urljoin
 
 import requests
 
@@ -605,6 +606,7 @@ class WebhookMixin(models.Model):
             data = {
                 'state': statuses[status],
                 'context': 'ansible/awx' if license_type == 'open' else 'ansible/tower',
+                'target_url': urljoin(settings.TOWER_URL_BASE, self.get_absolute_url()),
             }
             k, v = service_header[self.webhook_service]
             headers = {
