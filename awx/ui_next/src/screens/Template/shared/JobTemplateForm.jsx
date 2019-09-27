@@ -326,18 +326,23 @@ class JobTemplateForm extends Component {
           />
         </FormRow>
         <FormRow>
-          <FormGroup label={i18n._(t`Labels`)} fieldId="template-labels">
-            <FieldTooltip
-              content={i18n._(t`Optional labels that describe this job template,
-                such as 'dev' or 'test'. Labels can be used to group and filter
-                job templates and completed jobs.`)}
-            />
-            <LabelSelect
-              initialValues={template.summary_fields.labels.results}
-              onChange={labels => setFieldValue('labels', labels)}
-              onError={err => this.setState({ contentError: err })}
-            />
-          </FormGroup>
+          <Field
+            name="labels"
+            render={({ field }) => (
+              <FormGroup label={i18n._(t`Labels`)} fieldId="template-labels">
+                <FieldTooltip
+                  content={i18n._(t`Optional labels that describe this job template,
+                    such as 'dev' or 'test'. Labels can be used to group and filter
+                    job templates and completed jobs.`)}
+                  />
+                  <LabelSelect
+                    value={field.value}
+                    onChange={labels => setFieldValue('labels', labels)}
+                    onError={err => this.setState({ contentError: err })}
+                  />
+                </FormGroup>
+            )}
+          />
         </FormRow>
         <AdvancedFieldsWrapper label="Advanced">
           <FormRow>

@@ -29,13 +29,8 @@ async function loadLabelOptions(setLabels, onError) {
   }
 }
 
-function LabelSelect({
-  initialValues, // todo: change to value, controlled ?
-  onChange,
-  onError,
-}) {
+function LabelSelect({ value, onChange, onError }) {
   const [options, setOptions] = useState([]);
-  // TODO: move newLabels into a prop?
   useEffect(() => {
     loadLabelOptions(setOptions, onError);
   }, []);
@@ -43,7 +38,7 @@ function LabelSelect({
   return (
     <MultiSelect
       onChange={onChange}
-      associatedItems={initialValues}
+      value={value}
       options={options}
       createNewItem={name => ({
         id: name,
@@ -54,7 +49,7 @@ function LabelSelect({
   );
 }
 LabelSelect.propTypes = {
-  initialValues: arrayOf(
+  value: arrayOf(
     shape({
       id: number.isRequired,
       name: string.isRequired,
