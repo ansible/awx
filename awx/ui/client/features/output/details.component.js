@@ -254,9 +254,9 @@ function getLaunchedByDetails () {
     const workflowJobTemplate = resource.model.get('summary_fields.workflow_job_template');
     const relatedSchedule = resource.model.get('related.schedule');
     const schedule = resource.model.get('summary_fields.schedule');
-    const webhookGUID = resource.model.get('webhook_guid');
+    const launchType = resource.model.get('launch_type');
 
-    if (!createdBy && !schedule && !webhookGUID) {
+    if (!createdBy && !schedule && !launchType) {
         return null;
     }
 
@@ -266,11 +266,11 @@ function getLaunchedByDetails () {
     let tooltip;
     let value;
 
-    if (webhookGUID && jobTemplate) {
+    if (launchType === 'webhook' && jobTemplate) {
         tooltip = strings.get('tooltips.WEBHOOK_JOB_TEMPLATE');
         link = `/#/templates/job_template/${jobTemplate.id}`;
         value = strings.get('details.WEBHOOK');
-    } else if (webhookGUID && workflowJobTemplate) {
+    } else if (launchType === 'webhook' && workflowJobTemplate) {
         tooltip = strings.get('tooltips.WEBHOOK_WORKFLOW_JOB_TEMPLATE');
         link = `/#/templates/workflow_job_template/${workflowJobTemplate.id}`;
         value = strings.get('details.WEBHOOK');

@@ -38,7 +38,7 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
             $scope.network_credential_link = getLink('network_credential');
 
             $scope.launched_by_webhook_link = null;
-            if ($scope.workflow.webhook_guid) {
+            if ($scope.workflow.launch_type === 'webhook') {
                 $scope.launched_by_webhook_link = $scope.workflow_template_link;
             }
 

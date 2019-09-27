@@ -159,7 +159,7 @@ function ListJobsController (
     };
 
     vm.getWebhookDetails = (job) => {
-        if (!job.webhook_guid) {
+        if (job.launch_type !== 'webhook') {
             return null;
         }
 
