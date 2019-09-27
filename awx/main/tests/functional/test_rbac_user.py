@@ -153,6 +153,21 @@ def test_org_admin_edit_sys_auditor(org_admin, alice, organization):
 
 
 @pytest.mark.django_db
-def test_org_admin_can_delete_user(org_admin, alice):
+def test_org_admin_can_delete_orphan(org_admin, alice):
     access = UserAccess(org_admin)
     assert access.can_delete(alice)
+
+
+@pytest.mark.django_db
+def test_org_admin_can_delete_group_member(org_admin, org_member):
+    access = UserAccess(org_admin)
+    assert access.can_delete(org_member)
+
+
+@pytest.mark.django_db
+def test_org_admin_cannot_delete_member_attached_to_other_group(org_admin, org_member):
+    other_org = Organization.objects.create(name="other-org", description="other-org-desc")
+    access = UserAccess(org_admin)
+    other_org.member_role.members.add(org_member)
+    assert not access.can_delete(org_member)
+    
