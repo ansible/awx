@@ -661,9 +661,7 @@ class UserAccess(BaseAccess):
         if obj.is_superuser and super_users.count() == 1:
             # cannot delete the last active superuser
             return False
-        if self.user.is_superuser:
-            return True
-        if self.can_admin(obj, None):
+        if self.can_admin(obj, None, allow_orphans=True):
             return True
         return False
 
