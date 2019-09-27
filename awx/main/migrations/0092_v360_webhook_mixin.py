@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='jobtemplate',
             name='webhook_service',
-            field=models.CharField(blank=True, choices=[('github', 'Github'), ('gitlab', 'Gitlab')], help_text='Service that webhook requests will be accepted from', max_length=16),
+            field=models.CharField(blank=True, choices=[('github', 'GitHub'), ('gitlab', 'GitLab')], help_text='Service that webhook requests will be accepted from', max_length=16),
         ),
         migrations.AddField(
             model_name='workflowjobtemplate',
@@ -39,7 +39,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='workflowjobtemplate',
             name='webhook_service',
-            field=models.CharField(blank=True, choices=[('github', 'Github'), ('gitlab', 'Gitlab')], help_text='Service that webhook requests will be accepted from', max_length=16),
+            field=models.CharField(blank=True, choices=[('github', 'GitHub'), ('gitlab', 'GitLab')], help_text='Service that webhook requests will be accepted from', max_length=16),
         ),
         migrations.AlterField(
             model_name='unifiedjob',

@@ -8,4 +8,5 @@ webhook events.  The response will include the following fields:
   webhook configuration of the service this template will be receiving
   webhook events from (string, read-only)
 
-Make an empty POST request to this resource to cycle in a new `webhook_key`.
+Make an empty POST request to this resource to generate a new
+replacement `webhook_key`.

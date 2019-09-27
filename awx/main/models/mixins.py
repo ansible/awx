@@ -496,8 +496,8 @@ class WebhookTemplateMixin(models.Model):
         abstract = True
 
     SERVICES = [
-        ('github', "Github"),
-        ('gitlab', "Gitlab"),
+        ('github', "GitHub"),
+        ('gitlab', "GitLab"),
     ]
 
     webhook_service = models.CharField(
@@ -583,7 +583,7 @@ class WebhookMixin(models.Model):
                 'pending': 'pending',
                 'successful': 'success',
                 'failed': 'failure',
-                'canceled': 'failure',  # Github doesn't have a 'canceled' status :(
+                'canceled': 'failure',  # GitHub doesn't have a 'canceled' status :(
                 'error': 'error',
             },
             'gitlab': {
@@ -591,7 +591,7 @@ class WebhookMixin(models.Model):
                 'running': 'running',
                 'successful': 'success',
                 'failed': 'failed',
-                'error': 'failed',  # Gitlab doesn't have an 'error' status distinct from 'failed' :(
+                'error': 'failed',  # GitLab doesn't have an 'error' status distinct from 'failed' :(
                 'canceled': 'canceled',
             },
         }
@@ -611,7 +611,7 @@ class WebhookMixin(models.Model):
                 k: v.format(self.webhook_credential.get_input('token')),
                 'Content-Type': 'application/json'
             }
-            response = requests.post(status_api, data=json.dumps(data), headers=headers)
+            response = requests.post(status_api, data=json.dumps(data), headers=headers, timeout=30)
         except Exception:
             logger.exception("Posting webhook status caused an error.")
             return

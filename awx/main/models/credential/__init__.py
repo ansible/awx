@@ -972,7 +972,7 @@ ManagedCredentialType(
 ManagedCredentialType(
     namespace='github_token',
     kind='token',
-    name=ugettext_noop('Github Personal Access Token'),
+    name=ugettext_noop('GitHub Personal Access Token'),
     managed_by_tower=True,
     inputs={
         'fields': [{
@@ -980,7 +980,7 @@ ManagedCredentialType(
             'label': ugettext_noop('Token'),
             'type': 'string',
             'secret': True,
-            'help_text': ugettext_noop('This token needs to come from your profile settings in Github')
+            'help_text': ugettext_noop('This token needs to come from your profile settings in GitHub')
         }],
         'required': ['token'],
     },
@@ -989,7 +989,7 @@ ManagedCredentialType(
 ManagedCredentialType(
     namespace='gitlab_token',
     kind='token',
-    name=ugettext_noop('Gitlab Personal Access Token'),
+    name=ugettext_noop('GitLab Personal Access Token'),
     managed_by_tower=True,
     inputs={
         'fields': [{
@@ -997,7 +997,7 @@ ManagedCredentialType(
             'label': ugettext_noop('Token'),
             'type': 'string',
             'secret': True,
-            'help_text': ugettext_noop('This token needs to come from your profile settings in Gitlab')
+            'help_text': ugettext_noop('This token needs to come from your profile settings in GitLab')
         }],
         'required': ['token'],
     },

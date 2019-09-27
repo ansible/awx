@@ -5,6 +5,7 @@ import logging
 import urllib.parse
 
 from django.utils.encoding import force_bytes
+from django.utils.translation import ugettext_lazy as _
 from django.views.decorators.csrf import csrf_exempt
 
 from rest_framework import status
@@ -139,7 +140,7 @@ class WebhookReceiverBase(APIView):
         if WorkflowJob.objects.filter(**kwargs).exists() or Job.objects.filter(**kwargs).exists():
             # Short circuit if this webhook has already been received and acted upon.
             logger.debug("Webhook previously received, returning without action.")
-            return Response({'message': "Webhook previously received, aborting."},
+            return Response({'message': _("Webhook previously received, aborting.")},
                             status=status.HTTP_202_ACCEPTED)
 
         kwargs = {
@@ -192,9 +193,11 @@ class GithubWebhookReceiver(WebhookReceiverBase):
     def get_signature(self):
         header_sig = self.request.META.get('HTTP_X_HUB_SIGNATURE')
         if not header_sig:
+            logger.debug("Expected signature missing from header key HTTP_X_HUB_SIGNATURE")
             raise PermissionDenied
         hash_alg, signature = header_sig.split('=')
         if hash_alg != 'sha1':
+            logger.debug("Unsupported signature type, expected: sha1, received: {}".format(hash_alg))
             raise PermissionDenied
         return force_bytes(signature)
 
@@ -212,7 +215,7 @@ class GitlabWebhookReceiver(WebhookReceiverBase):
         return self.request.META.get('HTTP_X_GITLAB_EVENT')
 
     def get_event_guid(self):
-        # Gitlab does not provide a unique identifier on events, so construct one.
+        # GitLab does not provide a unique identifier on events, so construct one.
         h = sha1()
         h.update(force_bytes(self.request.body))
         return h.hexdigest()
@@ -230,13 +233,13 @@ class GitlabWebhookReceiver(WebhookReceiverBase):
             parsed.scheme, parsed.netloc, project['id'], self.get_event_ref())
 
     def get_signature(self):
-        return force_bytes(self.request.META.get('HTTP_X_GITLAB_TOKEN'))
+        return force_bytes(self.request.META.get('HTTP_X_GITLAB_TOKEN') or '')
 
     def check_signature(self, obj):
         if not obj.webhook_key:
             raise PermissionDenied
 
-        # Gitlab only returns the secret token, not an hmac hash.  Use
+        # GitLab only returns the secret token, not an hmac hash.  Use
         # the hmac `compare_digest` helper function to prevent timing
         # analysis by attackers.
         if not hmac.compare_digest(force_bytes(obj.webhook_key), self.get_signature()):
