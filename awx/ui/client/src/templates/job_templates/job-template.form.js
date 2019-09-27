@@ -137,7 +137,7 @@ function(NotificationsList, i18n) {
                     includePlaybookNotFoundError: true
                 },
                 credential: {
-                    label: i18n._('Credential'),
+                    label: i18n._('Credentials'),
                     type: 'custom',
                     control: `
                         <multi-credential
