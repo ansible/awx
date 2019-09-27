@@ -71,6 +71,7 @@ RUN chmod +x /tini
 RUN python3 -m ensurepip && pip3 install virtualenv
 RUN pip install supervisor
 
+RUN ln -sf /opt/rh/rh-postgresql10/root/usr/lib64/libpq.so.rh-postgresql10-5 /usr/lib64
 RUN find / -name pg_config
 
 ADD Makefile /tmp/Makefile
