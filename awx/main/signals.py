@@ -20,6 +20,7 @@ from django.db.models.signals import (
 )
 from django.dispatch import receiver
 from django.contrib.auth import SESSION_KEY
+from django.contrib.auth.models import User
 from django.contrib.sessions.models import Session
 from django.utils import timezone
 
@@ -684,7 +685,8 @@ def save_user_session_membership(sender, **kwargs):
         return
     if UserSessionMembership.objects.filter(user=user_id, session=session).exists():
         return
-    UserSessionMembership(user_id=user_id, session=session, created=timezone.now()).save()
+    if User.objects.filter(id=int(user_id)).exists():
+        UserSessionMembership(user_id=user_id, session=session, created=timezone.now()).save()
     expired = UserSessionMembership.get_memberships_over_limit(user_id)
     for membership in expired:
         Session.objects.filter(session_key__in=[membership.session_id]).delete()
