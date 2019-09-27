@@ -113,25 +113,29 @@ class LaunchButton extends React.Component {
           handleLaunch: this.handleLaunch,
           handleRelaunch: this.handleRelaunch,
         })}
-        <AlertModal
-          isOpen={launchError}
-          variant="danger"
-          title={i18n._(t`Error!`)}
-          onClose={this.handleLaunchErrorClose}
-        >
-          {i18n._(t`Failed to launch job.`)}
-          <ErrorDetail error={launchError} />
-        </AlertModal>
-        <AlertModal
-          isOpen={promptError}
-          variant="info"
-          title={i18n._(t`Attention!`)}
-          onClose={this.handlePromptErrorClose}
-        >
-          {i18n._(
-            t`Launching jobs with promptable fields is not supported at this time.`
-          )}
-        </AlertModal>
+        {launchError && (
+          <AlertModal
+            isOpen={launchError}
+            variant="danger"
+            title={i18n._(t`Error!`)}
+            onClose={this.handleLaunchErrorClose}
+          >
+            {i18n._(t`Failed to launch job.`)}
+            <ErrorDetail error={launchError} />
+          </AlertModal>
+        )}
+        {promptError && (
+          <AlertModal
+            isOpen={promptError}
+            variant="info"
+            title={i18n._(t`Attention!`)}
+            onClose={this.handlePromptErrorClose}
+          >
+            {i18n._(
+              t`Launching jobs with promptable fields is not supported at this time.`
+            )}
+          </AlertModal>
+        )}
       </Fragment>
     );
   }
