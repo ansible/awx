@@ -131,7 +131,6 @@
           extra_args: "-I --install-option='--prefix={{private_venv|quote}}'"
         register: pip_result
         when: doesPipRequirementsExist.stat.exists
-        changed_when: "'Successfully installed' in pip_result.stdout"
         environment:
           ANSIBLE_FORCE_COLOR: False
 
