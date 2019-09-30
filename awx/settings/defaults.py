@@ -403,6 +403,11 @@ EMAIL_HOST_USER = ''
 EMAIL_HOST_PASSWORD = ''
 EMAIL_USE_TLS = False
 
+# Default to skipping isolated host key checking (the initial connection will
+# hang on an interactive "The authenticity of host example.org can't be
+# established" message)
+AWX_ISOLATED_HOST_KEY_CHECKING = False
+
 # The number of seconds to sleep between status checks for jobs running on isolated nodes
 AWX_ISOLATED_CHECK_INTERVAL = 30
 

@@ -299,6 +299,16 @@ register(
 )
 
 register(
+    'AWX_ISOLATED_HOST_KEY_CHECKING',
+    field_class=fields.BooleanField,
+    label=_('Isolated host key checking'),
+    help_text=_('When set to True, AWX will enforce strict host key checking for communication with isolated nodes.'),
+    category=_('Jobs'),
+    category_slug='jobs',
+    default=False
+)
+
+register(
     'AWX_ISOLATED_KEY_GENERATION',
     field_class=fields.BooleanField,
     default=True,
