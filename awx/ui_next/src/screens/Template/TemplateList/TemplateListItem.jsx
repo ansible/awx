@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import {
   DataListItem,
   DataListItemRow,
-  DataListItemCells,
+  DataListItemCells as PFDataListItemCells,
   Tooltip,
   Button as PFButton,
 } from '@patternfly/react-core';
@@ -27,6 +27,32 @@ const StyledButton = styled(PFButton)`
     color: white;
   }
 `;
+const DataListItemCells = styled(PFDataListItemCells)`
+  display: flex;
+  @media screen and (max-width: 768px) {
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+`;
+
+const LeftDataListCell = styled(DataListCell)`
+  @media screen and (max-width: 768px) {
+    && {
+      padding-bottom: 16px;
+      flex: 1 1 100%;
+    }
+  }
+`;
+const RightDataListCell = styled(DataListCell)`
+  @media screen and (max-width: 768px) {
+    && {
+      padding-top: 0px;
+      flex: 0 0 33%;
+      padding-right: 20px
+    }
+  }
+`;
+
 class TemplateListItem extends Component {
   render() {
     const { i18n, template, isSelected, onSelect } = this.props;
@@ -46,21 +72,22 @@ class TemplateListItem extends Component {
           />
           <DataListItemCells
             dataListCells={[
-              <DataListCell key="divider">
+              <LeftDataListCell key="divider">
                 <VerticalSeparator />
                 <span>
                   <Link to={`/templates/${template.type}/${template.id}`}>
                     <b>{template.name}</b>
                   </Link>
                 </span>
-              </DataListCell>,
-              <DataListCell key="type">
+              </LeftDataListCell>,
+              <RightDataListCell
+                css="padding-left: 40px;" righthalf="true" key="type">
                 {toTitleCase(template.type)}
-              </DataListCell>,
-              <DataListCell key="sparkline">
+              </RightDataListCell>,
+              <RightDataListCell css="flex: 1;" righthalf="true" key="sparkline">
                 <Sparkline jobs={template.summary_fields.recent_jobs} />
-              </DataListCell>,
-              <DataListCell lastcolumn="true" key="launch">
+              </RightDataListCell>,
+              <RightDataListCell css="max-width: 40px;" righthalf="true" lastcolumn="true" key="launch">
                 {canLaunch && template.type === 'job_template' && (
                   <Tooltip content={i18n._(t`Launch`)} position="top">
                     <LaunchButton
@@ -76,7 +103,7 @@ class TemplateListItem extends Component {
                     </LaunchButton>
                   </Tooltip>
                 )}
-              </DataListCell>,
+              </RightDataListCell>,
             ]}
           />
         </DataListItemRow>
