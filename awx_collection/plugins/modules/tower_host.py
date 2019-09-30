@@ -27,13 +27,16 @@ options:
       description:
         - The name to use for the host.
       required: True
+      type: str
     description:
       description:
         - The description to use for the host.
+      type: str
     inventory:
       description:
         - Inventory the host should be made a member of.
       required: True
+      type: str
     enabled:
       description:
         - If the host should be enabled.
@@ -42,11 +45,13 @@ options:
     variables:
       description:
         - Variables to use for the host. Use C(@) for a file.
+      type: str
     state:
       description:
         - Desired state of the resource.
       choices: ["present", "absent"]
       default: "present"
+      type: str
 extends_documentation_fragment: awx.awx.auth
 '''
 

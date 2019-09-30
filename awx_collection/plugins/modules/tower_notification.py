@@ -27,35 +27,43 @@ options:
       description:
         - The name of the notification.
       required: True
+      type: str
     description:
       description:
         - The description of the notification.
       required: False
+      type: str
     organization:
       description:
         - The organization the notification belongs to.
       required: False
+      type: str
     notification_type:
       description:
         - The type of notification to be sent.
       required: True
       choices: ["email", "slack", "twilio", "pagerduty", "hipchat", "webhook", "irc"]
+      type: str
     notification_configuration:
       description:
         - The notification configuration file. Note providing this field would disable all notification-configuration-related fields.
       required: False
+      type: str
     username:
       description:
         - The mail server username. Required if I(notification_type=email).
       required: False
+      type: str
     sender:
       description:
         - The sender email address. Required if I(notification_type=email).
       required: False
+      type: str
     recipients:
       description:
         - The recipients email addresses. Required if I(notification_type=email).
       required: False
+      type: list
     use_tls:
       description:
         - The TLS trigger. Required if I(notification_type=email).
@@ -65,6 +73,7 @@ options:
       description:
         - The mail server host. Required if I(notification_type=email).
       required: False
+      type: str
     use_ssl:
       description:
         - The SSL trigger. Required if I(notification_type=email) or if I(notification_type=irc).
@@ -74,10 +83,12 @@ options:
       description:
         - The mail server password. Required if I(notification_type=email) or if I(notification_type=irc).
       required: False
+      type: str
     port:
       description:
         - The mail server port. Required if I(notification_type=email) or if I(notification_type=irc).
       required: False
+      type: int
     channels:
       description:
         - The destination Slack channels. Required if I(notification_type=slack).
@@ -87,47 +98,58 @@ options:
       description:
         - The access token. Required if I(notification_type=slack), if I(notification_type=pagerduty) or if I(notification_type=hipchat).
       required: False
+      type: str
     account_token:
       description:
         - The Twillio account token. Required if I(notification_type=twillio).
       required: False
+      type: str
     from_number:
       description:
         - The source phone number. Required if I(notification_type=twillio).
       required: False
+      type: str
     to_numbers:
       description:
         - The destination phone numbers. Required if I(notification_type=twillio).
       required: False
+      type: list
     account_sid:
       description:
         - The Twillio account SID. Required if I(notification_type=twillio).
       required: False
+      type: str
     subdomain:
       description:
         - The PagerDuty subdomain. Required if I(notification_type=pagerduty).
       required: False
+      type: str
     service_key:
       description:
         - The PagerDuty service/integration API key. Required if I(notification_type=pagerduty).
       required: False
+      type: str
     client_name:
       description:
         - The PagerDuty client identifier. Required if I(notification_type=pagerduty).
       required: False
+      type: str
     message_from:
       description:
         - The label to be shown with the notification. Required if I(notification_type=hipchat).
       required: False
+      type: str
     api_url:
       description:
         - The HipChat API URL. Required if I(notification_type=hipchat).
       required: False
+      type: str
     color:
       description:
         - The notification color. Required if I(notification_type=hipchat).
       required: False
       choices: ["yellow", "green", "red", "purple", "gray", "random"]
+      type: str
     rooms:
       description:
         - HipChat rooms to send the notification to. Required if I(notification_type=hipchat).
@@ -142,18 +164,22 @@ options:
       description:
         - The target URL. Required if I(notification_type=webhook).
       required: False
+      type: str
     headers:
       description:
         - The HTTP headers as JSON string. Required if I(notification_type=webhook).
       required: False
+      type: dict
     server:
       description:
         - The IRC server address. Required if I(notification_type=irc).
       required: False
+      type: str
     nickname:
       description:
         - The IRC nickname. Required if I(notification_type=irc).
       required: False
+      type: str
     targets:
       description:
         - The destination channels or users. Required if I(notification_type=irc).
@@ -164,6 +190,7 @@ options:
         - Desired state of the resource.
       default: "present"
       choices: ["present", "absent"]
+      type: str
 extends_documentation_fragment: awx.awx.auth
 '''
 

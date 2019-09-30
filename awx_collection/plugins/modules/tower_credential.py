@@ -130,7 +130,8 @@ options:
     become_method:
       description:
         - Become method to use for privilege escalation.
-      choices: ["None", "sudo", "su", "pbrun", "pfexec", "pmrun"]
+        - Some examples are "None", "sudo", "su", "pbrun"
+        - Due to become plugins, these can be arbitrary
       type: str
     become_username:
       description:

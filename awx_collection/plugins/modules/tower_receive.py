@@ -32,46 +32,57 @@ options:
       description:
         - List of organization names to export
       default: []
+      type: list
     user:
       description:
         - List of user names to export
       default: []
+      type: list
     team:
       description:
         - List of team names to export
       default: []
+      type: list
     credential_type:
       description:
         - List of credential type names to export
       default: []
+      type: list
     credential:
       description:
         - List of credential names to export
       default: []
+      type: list
     notification_template:
       description:
         - List of notification template names to export
       default: []
+      type: list
     inventory_script:
       description:
         - List of inventory script names to export
       default: []
+      type: list
     inventory:
       description:
         - List of inventory names to export
       default: []
+      type: list
     project:
       description:
         - List of project names to export
       default: []
+      type: list
     job_template:
       description:
         - List of job template names to export
       default: []
+      type: list
     workflow:
       description:
         - List of workflow names to export
       default: []
+      type: list
 
 requirements:
   - "ansible-tower-cli >= 3.3.0"

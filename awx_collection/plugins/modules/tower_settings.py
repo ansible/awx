@@ -27,10 +27,12 @@ options:
       description:
         - Name of setting to modify
       required: True
+      type: str
     value:
       description:
         - Value to be modified for given setting.
       required: True
+      type: str
 extends_documentation_fragment: awx.awx.auth
 '''
 
