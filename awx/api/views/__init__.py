@@ -119,6 +119,7 @@ from awx.api.views.organization import ( # noqa
     OrganizationNotificationTemplatesErrorList,
     OrganizationNotificationTemplatesStartedList,
     OrganizationNotificationTemplatesSuccessList,
+    OrganizationNotificationTemplatesApprovalList,
     OrganizationInstanceGroupsList,
     OrganizationAccessList,
     OrganizationObjectRolesList,
@@ -3288,6 +3289,11 @@ class WorkflowJobTemplateNotificationTemplatesSuccessList(WorkflowJobTemplateNot
     relationship = 'notification_templates_success'
 
 
+class WorkflowJobTemplateNotificationTemplatesApprovalList(WorkflowJobTemplateNotificationTemplatesAnyList):
+
+    relationship = 'notification_templates_approvals'
+
+
 class WorkflowJobTemplateAccessList(ResourceAccessList):
 
     model = models.User # needs to be User for AccessLists's
@@ -3372,6 +3378,11 @@ class WorkflowJobNotificationsList(SubListAPIView):
     parent_model = models.WorkflowJob
     relationship = 'notifications'
     search_fields = ('subject', 'notification_type', 'body',)
+
+    def get_sublist_queryset(self, parent):
+        return self.model.objects.filter(Q(unifiedjob_notifications=parent) |
+                                         Q(unifiedjob_notifications__unified_job_node__workflow_job=parent,
+                                         unifiedjob_notifications__workflowapproval__isnull=False)).distinct()
 
 
 class WorkflowJobActivityStreamList(SubListAPIView):

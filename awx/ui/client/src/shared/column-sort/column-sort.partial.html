@@ -1,4 +1,4 @@
-<div id="{{columnIterator}}-{{columnField}}-header" class="List-tableHeader list-header {{columnCustomClass}}" ng-click="columnNoSort !== 'true' && toggleColumnOrderBy()" ng-class="{'list-header-noSort' : columnNoSort === 'true'}" >
+<div id="{{columnIterator}}-{{columnField}}-header" class="List-tableHeader list-header {{columnCustomClass}}" ng-click="columnNoSort !== 'true' && toggleColumnOrderBy()" >
     {{columnLabel | translate}}
     <i ng-if="columnNoSort !== 'true'" class="fa columnSortIcon" ng-class="orderByIcon()">
 </div>

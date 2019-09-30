@@ -323,7 +323,7 @@ def send_notifications(notification_list, job_id=None):
             notification.status = "successful"
             notification.notifications_sent = sent
         except Exception as e:
-            logger.error("Send Notification Failed {}".format(e))
+            logger.exception("Send Notification Failed {}".format(e))
             notification.status = "failed"
             notification.error = smart_str(e)
             update_fields.append('error')
