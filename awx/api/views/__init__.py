@@ -2568,10 +2568,34 @@ class JobTemplateSurveySpec(GenericAPIView):
                         return Response(dict(error=_(
                             "The {min_or_max} limit in survey question {idx} expected to be integer."
                         ).format(min_or_max=key, **context)))
-            if qtype in ['multiplechoice', 'multiselect'] and 'choices' not in survey_item:
-                return Response(dict(error=_(
-                    "Survey question {idx} of type {survey_item[type]} must specify choices.".format(**context)
-                )))
+            # if it's a multiselect or multiple choice, it must have coices listed
+            # choices and defualts must come in as strings seperated by /n characters.
+            if qtype == 'multiselect' or qtype == 'multiplechoice':
+                if 'choices' in survey_item:
+                    if isinstance(survey_item['choices'], str):
+                        survey_item['choices'] = '\n'.join(choice for choice in survey_item['choices'].splitlines() if choice.strip() != '')
+                else:
+                    return Response(dict(error=_(
+                        "Survey question {idx} of type {survey_item[type]} must specify choices.".format(**context)
+                    )))
+                # If there is a default string split it out removing extra /n characters.
+                # Note: There can still be extra newline characters added in the API, these are sanitized out using .strip()
+                if 'default' in survey_item:
+                    if isinstance(survey_item['default'], str):
+                        survey_item['default'] = '\n'.join(choice for choice in survey_item['default'].splitlines() if choice.strip() != '')
+                        list_of_defaults = survey_item['default'].splitlines()
+                    else:
+                        list_of_defaults = survey_item['default']
+                    if qtype == 'multiplechoice':
+                        # Multiplechoice types should only have 1 default.
+                        if len(list_of_defaults) > 1:
+                            return Response(dict(error=_(
+                                "Multiple Choice (Single Select) can only have one default value.".format(**context)
+                            )))
+                    if any(item not in survey_item['choices'] for item in list_of_defaults):
+                        return Response(dict(error=_(
+                            "Default choice must be answered from the choices listed.".format(**context)
+                        )))
 
             # Process encryption substitution
             if ("default" in survey_item and isinstance(survey_item['default'], str) and

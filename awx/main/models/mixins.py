@@ -253,7 +253,7 @@ class SurveyJobTemplateMixin(models.Model):
                 else:
                     choice_list = copy(survey_element['choices'])
                     if isinstance(choice_list, str):
-                        choice_list = choice_list.split('\n')
+                        choice_list = [choice for choice in choice_list.splitlines() if choice.strip() != '']
                     for val in data[survey_element['variable']]:
                         if val not in choice_list:
                             errors.append("Value %s for '%s' expected to be one of %s." % (val, survey_element['variable'],
@@ -261,7 +261,7 @@ class SurveyJobTemplateMixin(models.Model):
         elif survey_element['type'] == 'multiplechoice':
             choice_list = copy(survey_element['choices'])
             if isinstance(choice_list, str):
-                choice_list = choice_list.split('\n')
+                choice_list = [choice for choice in choice_list.splitlines() if choice.strip() != '']
             if survey_element['variable'] in data:
                 if data[survey_element['variable']] not in choice_list:
                     errors.append("Value %s for '%s' expected to be one of %s." % (data[survey_element['variable']],
