@@ -134,7 +134,7 @@ class WebhookReceiverBase(APIView):
         status_api = self.get_event_status_api()
 
         kwargs = {
-            ('job_template_id' if isinstance(obj, JobTemplate) else 'workflow_job_template_id'): obj.id,
+            'unified_job_template_id': obj.id,
             'webhook_service': obj.webhook_service,
             'webhook_guid': event_guid,
         }
