@@ -57,11 +57,11 @@ dockerhub_base=ansible
 # Common Docker parameters
 awx_task_hostname=awx
 awx_web_hostname=awxweb
-postgres_data_dir=/tmp/pgdocker
+postgres_data_dir=/var/lib/pgdocker
 host_port=80
 host_port_ssl=443
 #ssl_certificate=
-docker_compose_dir=/tmp/awxcompose
+docker_compose_dir=/var/lib/awxcompose
 
 # Required for Openshift when building the image on your own
 # Optional for Openshift if using Dockerhub or another prebuilt registry
