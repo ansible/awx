@@ -27,15 +27,22 @@ options:
       description:
         - Name to use for the team.
       required: True
+      type: str
+    description:
+      description:
+        - The description to use for the team.
+      type: str
     organization:
       description:
         - Organization the team should be made a member of.
       required: True
+      type: str
     state:
       description:
         - Desired state of the resource.
       choices: ["present", "absent"]
       default: "present"
+      type: str
 extends_documentation_fragment: awx.awx.auth
 '''
 

@@ -27,19 +27,24 @@ options:
       description:
         - The username of the user.
       required: True
+      type: str
     first_name:
       description:
         - First name of the user.
+      type: str
     last_name:
       description:
         - Last name of the user.
+      type: str
     email:
       description:
         - Email address of the user.
       required: True
+      type: str
     password:
       description:
         - Password of the user.
+      type: str
     superuser:
       description:
         - User is a system wide administrator.
@@ -55,6 +60,7 @@ options:
         - Desired state of the resource.
       default: "present"
       choices: ["present", "absent"]
+      type: str
 
 requirements:
   - ansible-tower-cli >= 3.2.0
