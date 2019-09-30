@@ -33,6 +33,7 @@ class Command(BaseCommand):
             ]):
                 ssh_key = settings.AWX_ISOLATED_PRIVATE_KEY
             env = dict(os.environ.items())
+            env['ANSIBLE_HOST_KEY_CHECKING'] = str(settings.AWX_ISOLATED_HOST_KEY_CHECKING)
             set_pythonpath(os.path.join(settings.ANSIBLE_VENV_PATH, 'lib'), env)
             res = ansible_runner.interface.run(
                 private_data_dir=path,

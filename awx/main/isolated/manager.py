@@ -44,7 +44,7 @@ class IsolatedManager(object):
     def build_runner_params(self, hosts, verbosity=1):
         env = dict(os.environ.items())
         env['ANSIBLE_RETRY_FILES_ENABLED'] = 'False'
-        env['ANSIBLE_HOST_KEY_CHECKING'] = 'False'
+        env['ANSIBLE_HOST_KEY_CHECKING'] = str(settings.AWX_ISOLATED_HOST_KEY_CHECKING)
         env['ANSIBLE_LIBRARY'] = os.path.join(os.path.dirname(awx.__file__), 'plugins', 'isolated')
         set_pythonpath(os.path.join(settings.ANSIBLE_VENV_PATH, 'lib'), env)
 
