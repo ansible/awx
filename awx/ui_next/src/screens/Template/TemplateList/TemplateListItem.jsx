@@ -48,7 +48,7 @@ const RightDataListCell = styled(DataListCell)`
     && {
       padding-top: 0px;
       flex: 0 0 33%;
-      padding-right: 20px
+      padding-right: 20px;
     }
   }
 `;
@@ -81,13 +81,25 @@ class TemplateListItem extends Component {
                 </span>
               </LeftDataListCell>,
               <RightDataListCell
-                css="padding-left: 40px;" righthalf="true" key="type">
+                css="padding-left: 40px;"
+                righthalf="true"
+                key="type"
+              >
                 {toTitleCase(template.type)}
               </RightDataListCell>,
-              <RightDataListCell css="flex: 1;" righthalf="true" key="sparkline">
+              <RightDataListCell
+                css="flex: 1;"
+                righthalf="true"
+                key="sparkline"
+              >
                 <Sparkline jobs={template.summary_fields.recent_jobs} />
               </RightDataListCell>,
-              <RightDataListCell css="max-width: 40px;" righthalf="true" lastcolumn="true" key="launch">
+              <RightDataListCell
+                css="max-width: 40px;"
+                righthalf="true"
+                lastcolumn="true"
+                key="launch"
+              >
                 {canLaunch && template.type === 'job_template' && (
                   <Tooltip content={i18n._(t`Launch`)} position="top">
                     <LaunchButton
