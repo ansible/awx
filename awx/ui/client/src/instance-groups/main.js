@@ -199,6 +199,7 @@ function InstanceGroupsRun($stateExtender, strings) {
         params: {
             credential_search: {
                 value: {
+                    credential_type__kind: 'kubernetes',
                     order_by: 'name',
                     page_size: 5,
                 },
@@ -228,12 +229,11 @@ function InstanceGroupsRun($stateExtender, strings) {
         resolve: {
             ListDefinition: ['CredentialList', list => list],
             Dataset: ['ListDefinition', 'QuerySet', '$stateParams', 'GetBasePath', (list, qs, $stateParams, GetBasePath) => {
-                const params = {
-                    credential_type__kind: 'kubernetes',
-                };
+
+
                 const searchPath = GetBasePath('credentials');
                 return qs.search(
-                    searchPath, params,
+                    searchPath,
                     $stateParams[`${list.iterator}_search`]
                 );
             }]
@@ -257,6 +257,7 @@ function InstanceGroupsRun($stateExtender, strings) {
                 controllerAs: 'vm'
             }
         },
+
         resolve: {
             resolvedModels: InstanceGroupsResolve,
             EditContainerGroupDataset: ['GetBasePath', 'QuerySet', '$stateParams',
@@ -278,6 +279,7 @@ function InstanceGroupsRun($stateExtender, strings) {
         params: {
             credential_search: {
                 value: {
+                    credential_type__kind: 'kubernetes',
                     order_by: 'name',
                     page_size: 5,
                 },
@@ -304,12 +306,9 @@ function InstanceGroupsRun($stateExtender, strings) {
         resolve: {
             ListDefinition: ['CredentialList', list => list],
             Dataset: ['ListDefinition', 'QuerySet', '$stateParams', 'GetBasePath', (list, qs, $stateParams, GetBasePath) => {
-                const params = {
-                    credential_type__kind: 'kubernetes',
-                };
                 const searchPath = GetBasePath('credentials');
                 return qs.search(
-                    searchPath, params,
+                    searchPath,
                     $stateParams[`${list.iterator}_search`]
                 );
             }]
