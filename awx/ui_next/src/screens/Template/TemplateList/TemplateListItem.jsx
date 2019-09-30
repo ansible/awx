@@ -5,28 +5,19 @@ import {
   DataListItemRow,
   DataListItemCells as PFDataListItemCells,
   Tooltip,
-  Button as PFButton,
 } from '@patternfly/react-core';
 import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
 import { RocketIcon } from '@patternfly/react-icons';
-import styled from 'styled-components';
 
 import DataListCell from '@components/DataListCell';
 import DataListCheck from '@components/DataListCheck';
 import LaunchButton from '@components/LaunchButton';
+import ListActionButton from '@components/ListActionButton';
 import VerticalSeparator from '@components/VerticalSeparator';
 import { Sparkline } from '@components/Sparkline';
 import { toTitleCase } from '@util/strings';
 
-const StyledButton = styled(PFButton)`
-  padding: 5px 8px;
-  border: none;
-  &:hover {
-    background-color: #0066cc;
-    color: white;
-  }
-`;
 const DataListItemCells = styled(PFDataListItemCells)`
   display: flex;
   @media screen and (max-width: 768px) {
@@ -101,12 +92,15 @@ class TemplateListItem extends Component {
                 key="launch"
               >
                 {canLaunch && template.type === 'job_template' && (
-                  <Tooltip content={i18n._(t`Launch`)} position="top">
+                  <Tooltip content={i18n._(t`Launch Template`)} position="top">
                     <LaunchButton resource={template}>
                       {({ handleLaunch }) => (
-                        <StyledButton variant="plain" onClick={handleLaunch}>
+                        <ListActionButton
+                          variant="plain"
+                          onClick={handleLaunch}
+                        >
                           <RocketIcon />
-                        </StyledButton>
+                        </ListActionButton>
                       )}
                     </LaunchButton>
                   </Tooltip>
