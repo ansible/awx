@@ -17,7 +17,7 @@ The preferred mechanism for authenticating with AWX and |RHAT| is by generating 
         TOWER_PASSWORD=secret \
         awx login
 
-As a convenience, the ``awx login`` command prints a shell-formatted token
+As a convenience, the ``awx login -h human`` command prints a shell-formatted token
 value:
 
 .. code:: bash
@@ -30,7 +30,7 @@ specify your username and password each time:
 .. code:: bash
 
     export TOWER_HOST=https://awx.example.org
-    $(TOWER_USERNAME=alice TOWER_PASSWORD=secret awx login)
+    $(TOWER_USERNAME=alice TOWER_PASSWORD=secret awx login -h)
     awx config
 
 Working with OAuth2.0 Applications
