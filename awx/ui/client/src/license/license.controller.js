@@ -229,9 +229,8 @@ export default
                                 }, 4000);
                             }
                         });
-                }).catch(({data, status}) => {
-                    Wait('stop');
-                    ProcessErrors($scope, data, status, null, {
+                }).catch((err) => {
+                    ProcessErrors($scope, err, null, null, {
                         hdr: i18n._('Error Applying License')
                     });
                 });
