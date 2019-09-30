@@ -92,7 +92,7 @@ function EditContainerGroupController($rootScope, $scope, $state, models, string
   const podSpecValue = sanitizeVars(EditContainerGroupDataset.data.pod_spec_override);
   const defaultPodSpecValue = sanitizeVars(instanceGroup.model.OPTIONS.actions.PUT.pod_spec_override.default);
 
-  if (podSpecValue && podSpecValue.trim() !== defaultPodSpecValue.trim()) {
+  if ((podSpecValue !== '---') && podSpecValue && podSpecValue.trim() !== defaultPodSpecValue.trim()) {
     vm.form.extraVars.isOpen = true;
   } else {
     vm.form.extraVars.isOpen = false;

@@ -559,7 +559,7 @@ function getInstanceGroupDetails () {
     let link = `/#/instance_groups/${instanceGroup.id}`;
     if (instanceGroup.is_containerized) {
         label = strings.get('labels.CONTAINER_GROUP');
-        link = `/#/instance_groups/container_group/edit/${instanceGroup.id}`;
+        link = `/#/instance_groups/container_group/${instanceGroup.id}`;
     }
 
     let isolated = null;
