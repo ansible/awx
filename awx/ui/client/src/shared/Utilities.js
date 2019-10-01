@@ -89,9 +89,11 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
             scope.disableButtons2 = (disableButtons) ? true : false;
 
             $('#alert-modal2').on('hidden.bs.modal', function() {
+                $(document).unbind('keydown');
                 if (action) {
                     action();
                 }
+                $('#alert-modal2').off();
             });
             $('#alert-modal2').on('shown.bs.modal', function() {
                 $('#alert2_ok_btn').focus();
@@ -117,10 +119,12 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
             });
 
             $('#alert-modal').on('hidden.bs.modal', function() {
+                $(document).unbind('keydown');
                 if (action) {
                     action();
                 }
                 $('.modal-backdrop').remove();
+                $('#alert-modal').off();
             });
             $('#alert-modal').on('shown.bs.modal', function() {
                 $('#alert_ok_btn').focus();
