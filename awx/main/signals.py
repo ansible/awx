@@ -684,16 +684,18 @@ def save_user_session_membership(sender, **kwargs):
         return
     if UserSessionMembership.objects.filter(user=user_id, session=session).exists():
         return
-    UserSessionMembership(user_id=user_id, session=session, created=timezone.now()).save()
-    expired = UserSessionMembership.get_memberships_over_limit(user_id)
-    for membership in expired:
-        Session.objects.filter(session_key__in=[membership.session_id]).delete()
-        membership.delete()
-    if len(expired):
-        consumers.emit_channel_notification(
-            'control-limit_reached_{}'.format(user_id),
-            dict(group_name='control', reason='limit_reached')
-        )
+    # check if user_id from session has an id match in User before saving
+    if User.objects.filter(id=int(user_id)).exists():
+        UserSessionMembership(user_id=user_id, session=session, created=timezone.now()).save()
+        expired = UserSessionMembership.get_memberships_over_limit(user_id)
+        for membership in expired:
+            Session.objects.filter(session_key__in=[membership.session_id]).delete()
+            membership.delete()
+        if len(expired):
+            consumers.emit_channel_notification(
+                'control-limit_reached_{}'.format(user_id),
+                dict(group_name='control', reason='limit_reached')
+            )
 
 
 @receiver(post_save, sender=OAuth2AccessToken)
