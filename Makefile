@@ -383,8 +383,8 @@ prepare_collection_venv:
 	$(VENV_BASE)/awx/bin/pip install --target=$(COLLECTION_VENV) git+https://github.com/ansible/tower-cli.git
 
 COLLECTION_TEST_DIRS ?= awx_collection/test/awx
-COLLECTION_PACKAGE_NAME ?= awx
-COLLECTION_NAMESPACE_NAME ?= awx
+COLLECTION_PACKAGE ?= awx
+COLLECTION_NAMESPACE ?= awx
 
 test_collection:
 	@if [ "$(VENV_BASE)" ]; then \
@@ -398,7 +398,7 @@ flake8_collection:
 test_collection_all: prepare_collection_venv test_collection flake8_collection
 
 build_collection:
-	ansible-playbook -i localhost, awx_collection/template_galaxy.yml -e package_name=$(COLLECTION_PACKAGE_NAME) -e namespace_name=$(COLLECTION_NAMESPACE_NAME) -e package_version=$(VERSION)
+	ansible-playbook -i localhost, awx_collection/template_galaxy.yml -e collection_package=$(COLLECTION_PACKAGE) -e namespace_name=$(COLLECTION_NAMESPACE) -e package_version=$(VERSION)
 	ansible-galaxy collection build awx_collection --output-path=awx_collection
 
 test_unit:

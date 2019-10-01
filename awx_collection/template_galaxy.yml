@@ -2,9 +2,9 @@
   gather_facts: false
   connection: local
   vars:
-    package_name: awx
-    namespace_name: awx
-    package_version: 0.0.1
+    collection_package: awx
+    collection_namespace: awx
+    collection_version: 0.0.1  # not for updating, pass in extra_vars
 
   tasks:
   - name: Do file content replacements for non-default namespace or package name
@@ -19,10 +19,10 @@
       replace:
         path: "{{ item.path }}"
         regexp: '^extends_documentation_fragment: awx.awx.auth$'
-        replace: 'extends_documentation_fragment: {{ namespace_name }}.{{ package_name }}.auth'
+        replace: 'extends_documentation_fragment: {{ collection_namespace }}.{{ collection_package }}.auth'
       with_items: "{{ module_files.files }}"
     when:
-      - (package_name != 'awx') or (namespace_name != 'awx')
+      - (collection_package != 'awx') or (collection_namespace != 'awx')
 
   - name: Template the galaxy.yml file
     template: src={{ playbook_dir }}/galaxy.yml.j2 dest={{ playbook_dir }}/galaxy.yml
