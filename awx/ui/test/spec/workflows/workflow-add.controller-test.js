@@ -144,11 +144,15 @@ describe('Controller: WorkflowAdd', () => {
                 description: "This is a test description",
                 organization: undefined,
                 inventory: undefined,
+                limit: undefined,
+                scm_branch: undefined,
                 labels: undefined,
                 variables: undefined,
                 allow_simultaneous: undefined,
                 ask_inventory_on_launch: false,
                 ask_variables_on_launch: false,
+                ask_limit_on_launch: false,
+                ask_scm_branch_on_launch: false,
                 extra_vars: undefined
             });
         });

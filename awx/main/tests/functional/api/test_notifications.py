@@ -127,3 +127,53 @@ def test_post_wfjt_running_notification(get, post, admin, notification_template,
     response = get(url, admin)
     assert response.status_code == 200
     assert len(response.data['results']) == 1
+
+
+@pytest.mark.django_db
+def test_search_on_notification_configuration_is_prevented(get, admin):
+    url = reverse('api:notification_template_list')
+    response = get(url, {'notification_configuration__regex': 'ABCDEF'}, admin)
+    assert response.status_code == 403
+    assert response.data == {"detail": "Filtering on notification_configuration is not allowed."}
+
+
+@pytest.mark.django_db
+def test_get_wfjt_approval_notification(get, admin, workflow_job_template):
+    url = reverse('api:workflow_job_template_notification_templates_approvals_list', kwargs={'pk': workflow_job_template.pk})
+    response = get(url, admin)
+    assert response.status_code == 200
+    assert len(response.data['results']) == 0
+
+
+@pytest.mark.django_db
+def test_post_wfjt_approval_notification(get, post, admin, notification_template, workflow_job_template):
+    url = reverse('api:workflow_job_template_notification_templates_approvals_list', kwargs={'pk': workflow_job_template.pk})
+    response = post(url,
+                    dict(id=notification_template.id,
+                         associate=True),
+                    admin)
+    assert response.status_code == 204
+    response = get(url, admin)
+    assert response.status_code == 200
+    assert len(response.data['results']) == 1
+
+
+@pytest.mark.django_db
+def test_get_org_approval_notification(get, admin, organization):
+    url = reverse('api:organization_notification_templates_approvals_list', kwargs={'pk': organization.pk})
+    response = get(url, admin)
+    assert response.status_code == 200
+    assert len(response.data['results']) == 0
+
+
+@pytest.mark.django_db
+def test_post_org_approval_notification(get, post, admin, notification_template, organization):
+    url = reverse('api:organization_notification_templates_approvals_list', kwargs={'pk': organization.pk})
+    response = post(url,
+                    dict(id=notification_template.id,
+                         associate=True),
+                    admin)
+    assert response.status_code == 204
+    response = get(url, admin)
+    assert response.status_code == 200
+    assert len(response.data['results']) == 1

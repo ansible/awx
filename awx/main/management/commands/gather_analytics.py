@@ -12,7 +12,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('--ship', dest='ship', action='store_true',
-                            help='Enable to ship metrics via insights-client')
+                            help='Enable to ship metrics to the Red Hat Cloud')
 
     def init_logging(self):
         self.logger = logging.getLogger('awx.main.analytics')
@@ -23,7 +23,7 @@ class Command(BaseCommand):
         self.logger.propagate = False
 
     def handle(self, *args, **options):
-        tgz = gather()
+        tgz = gather(collection_type='manual')
         self.init_logging()
         if tgz:
             self.logger.debug(tgz)

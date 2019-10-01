@@ -22,7 +22,7 @@ export default ['i18n', function(i18n) {
             {
                 field: 'toggleHost',
                 content: {
-                    ngDisabled: '!host.summary_fields.user_capabilities.edit || host.has_inventory_sources',
+                    ngDisabled: '!host.summary_fields.user_capabilities.edit',
                     label: '',
                     type: "toggle",
                     ngClick: "toggleHost($event, host)",
@@ -30,8 +30,8 @@ export default ['i18n', function(i18n) {
                         i18n._("Indicates if a host is available and should be included in running jobs.") +
                         "</p><p>" +
                         i18n._("For hosts that are part of an external" +
-                               " inventory, this flag cannot be changed. It will be" +
-                               " set by the inventory sync process.") +
+                               " inventory, this may be" +
+                               " reset by the inventory sync process.") +
                         "</p>",
                     dataPlacement: "right",
                     nosort: true,
@@ -64,23 +64,31 @@ export default ['i18n', function(i18n) {
                 label: i18n._('Hosts'),
                 uiSref: ".edit({inventory_id: host.inventory_id,host_id: host.id})",
                 ngClass: "{ 'host-disabled-label': !host.enabled }",
-                columnClass: 'col-lg-5 col-md-4 col-sm-8 col-xs-7',
+                columnClass: 'col-lg-3 col-md-3 col-sm-3 col-xs-7',
                 dataHostId: "{{ host.id }}",
                 dataType: "host",
-                class: 'InventoryManage-breakWord'
+            },
+            description: {
+                label: i18n._('Description'),
+                columnClass: 'd-none d-lg-flex col-lg-3',
+                template: `
+                    <div class="d-inline-block text-truncate">
+                        {{ host.description }}
+                    </div>
+                `
             },
             groups: {
                 label: i18n._("Related Groups"),
                 type: 'related_groups',
                 nosort: true,
                 showDelete: true,
-                columnClass: 'd-none d-md-flex List-tableCell col-lg-5 col-md-4'
+                columnClass: 'd-none d-lg-flex List-tableCell col-lg-3'
             }
         },
 
         fieldActions: {
 
-            columnClass: 'col-lg-2 col-sm-4 col-xs-5 text-right',
+            columnClass: 'col-lg-3 col-md-6 col-sm-4 col-xs-5 text-right',
             edit: {
                 ngClick: "editHost(host)",
                 icon: 'icon-edit',

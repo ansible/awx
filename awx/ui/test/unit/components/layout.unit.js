@@ -46,7 +46,7 @@ describe('Components | Layout', () => {
             $httpBackend.when('GET', /admin_of_organizations/)
                 .respond(mockOrgAdminResponse);
 
-            $httpBackend.when('GET', /roles\/\?role_field=notification_admin_role/)
+            $httpBackend.when('GET', /organizations\/\?role_level=notification_admin_role/)
                 .respond(mockNotificationAdminResponse);
         });
 

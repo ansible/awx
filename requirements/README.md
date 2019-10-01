@@ -1,36 +1,17 @@
-The requirements.txt and requirements_ansible.txt files are generated from requirements.in and requirements_ansible.in, respectively, using `pip-tools` `pip-compile`. The following commands should do this if ran inside the tools_awx container.
+The `requirements.txt` and `requirements_ansible.txt` files are generated from `requirements.in` and `requirements_ansible.in`, respectively, using `pip-tools` `pip-compile`.
 
-Run these commands from the root of the awx repo. This will produce python 3 requirements files.
+Run `./updater.sh` command from inside `./requirements` directory of the awx repository.
 
-```
-python3 -m venv /buildit
-source /buildit/bin/activate
-pip install pip-tools
-pip install pip --upgrade
+Make sure you have `patch, awk, python3, python2, python3-venv, python2-virtualenv, pip2, pip3` installed.
 
-pip-compile -U -r --allow-unsafe --output-file requirements/requirements.txt requirements/requirements.in
-pip-compile -U -r --allow-unsafe --output-file requirements/requirements_ansible_py3.txt requirements/requirements_ansible.in
-```
+This script will:
 
-Remove the `docutils` line from `requirements/requirements.txt`.
+  - Update `requirements.txt` based on `requirements.in`
+  - Update/generate `requirements_ansible.txt` based on `requirements_ansible.in`
+    - including an automated patch that adds `python_version < "3"` for Python 2 backward compatibility
+  - Removes the `docutils` dependency line from `requirements.txt` and `requirements_ansible.txt`
 
-The Ansible venv requirements file needs to start with the python 2 version
-as a base. Then we can run the tool again to get the python 3 version.
-Consult the output of the `diff` command and add a conditional switch in those cases.
-
-```
-virtualenv -p python2 /buildit_py2
-source /buildit_py2/bin/activate
-pip install pip-tools
-pip install pip --upgrade
-
-pip-compile -U -r --allow-unsafe --output-file requirements/requirements_ansible.txt requirements/requirements_ansible.in
-diff requirements/requirements_ansible_py3.txt requirements/requirements_ansible.txt
-rm requirements/requirements_ansible_py3.txt
-```
-
-Python 3 exceptions should be added to relevant `requirements_ansible.txt` lines
-after version numbers with the syntax of `; python_version < '3'`.
+You can also upgrade (`pip-compile --upgrade`) the dependencies by running `./updater.sh upgrade`.
 
 ## Licenses and Source Files
 

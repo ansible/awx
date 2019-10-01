@@ -30,7 +30,7 @@ SQUASHED_30 = {
         migrations.AddField(
             model_name='job',
             name='survey_passwords',
-            field=jsonfield.fields.JSONField(default={}, editable=False, blank=True),
+            field=jsonfield.fields.JSONField(default=dict, editable=False, blank=True),
         ),
     ],
     '0031_v302_migrate_survey_passwords': [

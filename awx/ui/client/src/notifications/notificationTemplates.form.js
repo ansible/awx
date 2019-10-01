@@ -63,7 +63,7 @@ export default ['i18n', function(i18n) {
             username: {
                 label: i18n._('Username'),
                 type: 'text',
-                ngShow: "notification_type.value == 'email' ",
+                ngShow: "notification_type.value == 'email' || notification_type.value == 'webhook' ",
                 subForm: 'typeSubForm',
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
@@ -75,7 +75,7 @@ export default ['i18n', function(i18n) {
                     reqExpression: "password_required" ,
                     init: "false"
                 },
-                ngShow: "notification_type.value == 'email' || notification_type.value == 'irc' ",
+                ngShow: "notification_type.value == 'email' || notification_type.value == 'irc' || notification_type.value == 'webhook' ",
                 subForm: 'typeSubForm',
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
@@ -423,6 +423,21 @@ export default ['i18n', function(i18n) {
                 subForm: 'typeSubForm',
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
+            http_method: {
+                label: i18n._('HTTP Method'),
+                dataTitle: i18n._('HTTP Method'),
+                type: 'select',
+                ngOptions: 'choice.id as choice.name for choice in httpMethodChoices',
+                default: 'POST',
+                awPopOver: i18n._('Specify an HTTP method for the webhook. Acceptable choices are: POST or PUT'),
+                awRequiredWhen: {
+                    reqExpression: "webhook_required",
+                    init: "false"
+                },
+                ngShow: "notification_type.value == 'webhook' ",
+                subForm: 'typeSubForm',
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
+            },
             mattermost_url: {
                 label: i18n._('Target URL'),
                 type: 'text',
@@ -550,12 +565,12 @@ export default ['i18n', function(i18n) {
                     value: 'use_tls',
                     label: i18n._('Use TLS'),
                     ngShow: "notification_type.value == 'email' ",
-                    labelClass: 'NotificationsForm-radioButtons'
+                    labelClass: 'Form-inputLabel'
                 }, {
                     value: 'use_ssl',
                     label: i18n._('Use SSL'),
                     ngShow: "notification_type.value == 'email'",
-                    labelClass: 'NotificationsForm-radioButtons'
+                    labelClass: 'Form-inputLabel'
                 }]
             },
             hex_color: {
@@ -566,7 +581,96 @@ export default ['i18n', function(i18n) {
                 ngShow: "notification_type.value == 'slack' ",
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
                 awPopOver: i18n._('Specify a notification color. Acceptable colors are hex color code (example: #3af or #789abc) .')
-            }
+            },
+            customize_messages: {
+              label: i18n._('Customize messages…'),
+              type: 'toggleSwitch',
+              toggleSource: 'customize_messages',
+              class: 'Form-formGroup--fullWidth',
+              ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
+            },
+            custom_message_description: {
+                type: 'alertblock',
+                ngShow: "customize_messages",
+                alertTxt: i18n._('Use custom messages to change the content of notifications ' +
+                    'sent when a job starts, succeeds, or fails. Use curly braces to access ' +
+                    'information about the job: <code ng-non-bindable>{{ job_friendly_name }}</code>, ' +
+                    '<code ng-non-bindable>{{ url }}</code>, or attributes of the job such as ' +
+                    '<code ng-non-bindable>{{ job.status }}</code>. You may apply a number of possible ' +
+                    'variables in the message. Refer to the ' +
+                    '<a href="https://docs.ansible.com/ansible-tower/latest/html/userguide/notifications.html#create-a-notification-template" ' +
+                    'target="_blank">Ansible Tower documentation</a> for more details.'),
+                closeable: false
+            },
+            started_message: {
+                label: i18n._('Start Message'),
+                class: 'Form-formGroup--fullWidth',
+                type: 'syntax_highlight',
+                mode: 'jinja2',
+                default: '',
+                ngShow: "customize_messages && notification_type.value != 'webhook'",
+                rows: 2,
+                oneLine: 'true',
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
+            },
+            started_body: {
+                label: i18n._('Start Message Body'),
+                class: 'Form-formGroup--fullWidth',
+                type: 'syntax_highlight',
+                mode: 'jinja2',
+                default: '',
+                ngShow: "customize_messages && " +
+                  "(notification_type.value == 'email' " +
+                  "|| notification_type.value == 'pagerduty' " +
+                  "|| notification_type.value == 'webhook')",
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
+            },
+            success_message: {
+                label: i18n._('Success Message'),
+                class: 'Form-formGroup--fullWidth',
+                type: 'syntax_highlight',
+                mode: 'jinja2',
+                default: '',
+                ngShow: "customize_messages && notification_type.value != 'webhook'",
+                rows: 2,
+                oneLine: 'true',
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
+            },
+            success_body: {
+                label: i18n._('Success Message Body'),
+                class: 'Form-formGroup--fullWidth',
+                type: 'syntax_highlight',
+                mode: 'jinja2',
+                default: '',
+                ngShow: "customize_messages && " +
+                  "(notification_type.value == 'email' " +
+                  "|| notification_type.value == 'pagerduty' " +
+                  "|| notification_type.value == 'webhook')",
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
+            },
+            error_message: {
+                label: i18n._('Error Message'),
+                class: 'Form-formGroup--fullWidth',
+                type: 'syntax_highlight',
+                mode: 'jinja2',
+                default: '',
+                ngShow: "customize_messages && notification_type.value != 'webhook'",
+                rows: 2,
+                oneLine: 'true',
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
+            },
+            error_body: {
+                label: i18n._('Error Message Body'),
+                class: 'Form-formGroup--fullWidth',
+                type: 'syntax_highlight',
+                mode: 'jinja2',
+                default: '',
+                ngShow: "customize_messages && " +
+                  "(notification_type.value == 'email' " +
+                  "|| notification_type.value == 'pagerduty' " +
+                  "|| notification_type.value == 'webhook')",
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
+            },
         },
 
         buttons: { //for now always generates <button> tags

@@ -115,6 +115,9 @@ function atRelaunchCtrl (
                                 },
                                 diffMode: {
                                     value: populatedJob.diff_mode
+                                },
+                                scmBranch: {
+                                    value: populatedJob.scm_branch
                                 }
                             },
                             triggerModalOpen: true

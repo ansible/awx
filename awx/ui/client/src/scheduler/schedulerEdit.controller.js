@@ -10,6 +10,27 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
 
     let schedule, scheduler, scheduleCredentials = [];
 
+    /*
+     * Normally if "ask_*" checkboxes are checked in a job template settings,
+     * shouldShowPromptButton() returns True to show the "PROMPT" button.
+     * However, extra_vars("ask_variables_on_launch") does not use this and
+     * displays a separate text area within the add/edit page for input.
+     * We exclude "ask_variables_on_launch" from shouldShowPromptButton() here.
+     */
+    const shouldShowPromptButton = (launchConf) => launchConf.survey_enabled ||
+        launchConf.ask_inventory_on_launch ||
+        launchConf.ask_credential_on_launch ||
+        launchConf.ask_verbosity_on_launch ||
+        launchConf.ask_job_type_on_launch ||
+        launchConf.ask_limit_on_launch ||
+        launchConf.ask_tags_on_launch ||
+        launchConf.ask_skip_tags_on_launch ||
+        launchConf.ask_diff_mode_on_launch ||
+        launchConf.credential_needed_to_start ||
+        launchConf.ask_scm_branch_on_launch ||
+        launchConf.passwords_needed_to_start.length !== 0 ||
+        launchConf.variables_needed_to_start.length !== 0;
+
     $scope.preventCredsWithPasswords = true;
 
     // initial end @ midnight values
@@ -239,21 +260,20 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
             $scope.schedulerPurgeDays = Number(schedule.extra_data.days);
         }
 
+        const codeMirrorExtraVars = () => {
+            ParseTypeChange({
+                scope: $scope,
+                variable: 'extraVars',
+                parse_variable: 'parseType',
+                field_id: 'SchedulerForm-extraVars'
+            });
+        };
+
         if ($state.current.name === 'templates.editJobTemplate.schedules.edit' || $scope.parentObject.type === 'job_template'){
 
             let jobTemplate = new JobTemplate();
 
-            const codeMirrorExtraVars = () => {
-                ParseTypeChange({
-                    scope: $scope,
-                    variable: 'extraVars',
-                    parse_variable: 'parseType',
-                    field_id: 'SchedulerForm-extraVars'
-                });
-            };
-
             Rest.setUrl(scheduleResolve.related.credentials);
-
             $q.all([jobTemplate.optionsLaunch(ParentObject.id), jobTemplate.getLaunch(ParentObject.id), Rest.get()])
                 .then((responses) => {
                     let launchOptions = responses[0].data,
@@ -322,24 +342,14 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
                     prompts.credentials.value = defaultCredsWithoutOverrides.concat(scheduleCredentials);
 
                     // the extra vars codemirror is ONLY shown if the
-                    // schedule is for a JT and the JT has
                     // ask_variables_on_launch = true
-                    $scope.noVars = !launchConf.ask_variables_on_launch;
+                    if (launchConf.ask_variables_on_launch) {
+                        $scope.noVars = false;
+                    } else {
+                        $scope.noVars = true;
+                    }
 
-                    if (!launchConf.survey_enabled &&
-                        !launchConf.ask_inventory_on_launch &&
-                        !launchConf.ask_credential_on_launch &&
-                        !launchConf.ask_verbosity_on_launch &&
-                        !launchConf.ask_job_type_on_launch &&
-                        !launchConf.ask_limit_on_launch &&
-                        !launchConf.ask_tags_on_launch &&
-                        !launchConf.ask_skip_tags_on_launch &&
-                        !launchConf.ask_diff_mode_on_launch &&
-                        !launchConf.survey_enabled &&
-                        !launchConf.credential_needed_to_start &&
-                        !launchConf.inventory_needed_to_start &&
-                        launchConf.passwords_needed_to_start.length === 0 &&
-                        launchConf.variables_needed_to_start.length === 0) {
+                    if (!shouldShowPromptButton(launchConf)) {
                             $scope.showPromptButton = false;
 
                             if (launchConf.ask_variables_on_launch) {
@@ -424,20 +434,16 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
                         currentValues: scheduleResolve
                     });
 
-                   if (!launchConf.survey_enabled &&
-                        !launchConf.ask_inventory_on_launch &&
-                        !launchConf.ask_credential_on_launch &&
-                        !launchConf.ask_verbosity_on_launch &&
-                        !launchConf.ask_job_type_on_launch &&
-                        !launchConf.ask_limit_on_launch &&
-                        !launchConf.ask_tags_on_launch &&
-                        !launchConf.ask_skip_tags_on_launch &&
-                        !launchConf.ask_diff_mode_on_launch &&
-                        !launchConf.survey_enabled &&
-                        !launchConf.credential_needed_to_start &&
-                        !launchConf.inventory_needed_to_start &&
-                        launchConf.passwords_needed_to_start.length === 0 &&
-                        launchConf.variables_needed_to_start.length === 0) {
+                    // the extra vars codemirror is ONLY shown if the
+                    // ask_variables_on_launch = true
+                    if (launchConf.ask_variables_on_launch) {
+                        $scope.noVars = false;
+                        codeMirrorExtraVars();
+                    } else {
+                        $scope.noVars = true;
+                    }
+
+                   if (!shouldShowPromptButton(launchConf)) {
                         $scope.showPromptButton = false;
                     } else {
                         $scope.showPromptButton = true;

@@ -51,6 +51,11 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin, CustomVi
         default=0,
         help_text=_('Maximum number of hosts allowed to be managed by this organization.'),
     )
+    notification_templates_approvals = models.ManyToManyField(
+        "NotificationTemplate",
+        blank=True,
+        related_name='%(class)s_notification_templates_for_approvals'
+    )
 
     admin_role = ImplicitRoleField(
         parent_role='singleton:' + ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
@@ -87,7 +92,10 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin, CustomVi
                      'execute_role', 'project_admin_role',
                      'inventory_admin_role', 'workflow_admin_role',
                      'notification_admin_role', 'credential_admin_role',
-                     'job_template_admin_role',],
+                     'job_template_admin_role', 'approval_role',],
+    )
+    approval_role = ImplicitRoleField(
+        parent_role='admin_role',
     )
 
 

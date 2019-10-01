@@ -53,4 +53,24 @@ export default {
                 }
             });
     }],
+    resolve: {
+        rhCreds: ['Rest', 'GetBasePath', function(Rest, GetBasePath) {
+            Rest.setUrl(`${GetBasePath('settings')}system/`);
+            return Rest.get()
+                .then(({data}) => {
+                    const rhCreds = {};
+                    if (data.REDHAT_USERNAME && data.REDHAT_USERNAME !== "") {
+                        rhCreds.REDHAT_USERNAME = data.REDHAT_USERNAME;
+                    }
+
+                    if (data.REDHAT_PASSWORD && data.REDHAT_PASSWORD !== "") {
+                        rhCreds.REDHAT_PASSWORD = data.REDHAT_PASSWORD;
+                    }
+                    
+                    return rhCreds;
+                }).catch(() => {
+                        return {};
+                });
+        }]
+    }
 };

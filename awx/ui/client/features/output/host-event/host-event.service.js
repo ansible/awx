@@ -66,14 +66,14 @@ function HostEventService (
             obj.class = 'HostEvent-status--failed';
             obj.status = 'failed';
         }
-        // catch the changed case before ok, because both can be true
-        if (event.changed) {
-            obj.class = 'HostEvent-status--changed';
-            obj.status = 'changed';
-        }
         if (event.event === 'runner_on_ok' || event.event === 'runner_on_async_ok') {
             obj.class = 'HostEvent-status--ok';
             obj.status = 'ok';
+        }
+        // if both 'changed' and 'ok' are true, show 'changed' status
+        if (event.changed) {
+            obj.class = 'HostEvent-status--changed';
+            obj.status = 'changed';
         }
         if (event.event === 'runner_on_skipped') {
             obj.class = 'HostEvent-status--skipped';

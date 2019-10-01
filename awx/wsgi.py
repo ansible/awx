@@ -40,12 +40,5 @@ if social_django.__version__ != '2.1.0':
             still works".format(social_django.__version__))
 
 
-if not django.__version__.startswith('1.'):
-    raise RuntimeError("Django version other than 1.XX detected {}. \
-            Inherit from WSGIHandler to support short-circuit Django Middleware. \
-            This is known to work for Django 1.XX and may not work with other, \
-            even minor, versions.".format(django.__version__))
-
-
 # Return the default Django WSGI application.
 application = get_wsgi_application()

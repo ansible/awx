@@ -100,7 +100,7 @@ class SurveyJobTemplateMixin(models.Model):
     )
     survey_spec = prevent_search(JSONField(
         blank=True,
-        default={},
+        default=dict,
     ))
     ask_variables_on_launch = AskForField(
         blank=True,
@@ -360,7 +360,7 @@ class SurveyJobMixin(models.Model):
 
     survey_passwords = prevent_search(JSONField(
         blank=True,
-        default={},
+        default=dict,
         editable=False,
     ))
 
@@ -483,4 +483,3 @@ class RelatedJobsMixin(object):
             raise RuntimeError("Programmer error. Expected _get_active_jobs() to return a QuerySet.")
 
         return [dict(id=t[0], type=mapping[t[1]]) for t in jobs.values_list('id', 'polymorphic_ctype_id')]
-

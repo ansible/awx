@@ -10,6 +10,7 @@ from django.core.management.base import BaseCommand
 from django.db import connection as django_connection, connections
 from kombu import Exchange, Queue
 
+from awx.main.utils.handlers import AWXProxyHandler
 from awx.main.dispatch import get_local_queuename, reaper
 from awx.main.dispatch.control import Control
 from awx.main.dispatch.kombu import Connection
@@ -121,6 +122,12 @@ class Command(BaseCommand):
 
         reaper.reap()
         consumer = None
+
+        # don't ship external logs inside the dispatcher's parent process
+        # this exists to work around a race condition + deadlock bug on fork
+        # in cpython itself:
+        # https://bugs.python.org/issue37429
+        AWXProxyHandler.disable()
         with Connection(settings.BROKER_URL) as conn:
             try:
                 bcast = 'tower_broadcast_all'

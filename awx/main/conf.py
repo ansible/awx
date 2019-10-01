@@ -125,6 +125,44 @@ register(
 )
 
 register(
+    'REDHAT_USERNAME',
+    field_class=fields.CharField,
+    default='',
+    allow_blank=True,
+    encrypted=False,
+    read_only=False,
+    label=_('Red Hat customer username'),
+    help_text=_('This username is used to retrieve license information and to send Automation Analytics'),  # noqa
+    category=_('System'),
+    category_slug='system',
+)
+
+register(
+    'REDHAT_PASSWORD',
+    field_class=fields.CharField,
+    default='',
+    allow_blank=True,
+    encrypted=True,
+    read_only=False,
+    label=_('Red Hat customer password'),
+    help_text=_('This password is used to retrieve license information and to send Automation Analytics'),  # noqa
+    category=_('System'),
+    category_slug='system',
+)
+
+register(
+    'AUTOMATION_ANALYTICS_URL',
+    field_class=fields.URLField,
+    default='https://example.com',
+    schemes=('http', 'https'),
+    allow_plain_hostname=True,  # Allow hostname only without TLD.
+    label=_('Automation Analytics upload URL.'),
+    help_text=_('This setting is used to to configure data collection for the Automation Analytics dashboard'),
+    category=_('System'),
+    category_slug='system',
+)
+
+register(
     'INSTALL_UUID',
     field_class=fields.CharField,
     label=_('Unique identifier for an AWX/Tower installation'),
@@ -261,6 +299,16 @@ register(
 )
 
 register(
+    'AWX_ISOLATED_HOST_KEY_CHECKING',
+    field_class=fields.BooleanField,
+    label=_('Isolated host key checking'),
+    help_text=_('When set to True, AWX will enforce strict host key checking for communication with isolated nodes.'),
+    category=_('Jobs'),
+    category_slug='jobs',
+    default=False
+)
+
+register(
     'AWX_ISOLATED_KEY_GENERATION',
     field_class=fields.BooleanField,
     default=True,
@@ -312,8 +360,8 @@ register(
     'INSIGHTS_TRACKING_STATE',
     field_class=fields.BooleanField,
     default=False,
-    label=_('Gather data for Automation Insights'),
-    help_text=_('Enables Tower to gather data on automation and send it to Red Hat Insights.'),
+    label=_('Gather data for Automation Analytics'),
+    help_text=_('Enables Tower to gather data on automation and send it to Red Hat.'),
     category=_('System'),
     category_slug='system',
 )
@@ -324,6 +372,16 @@ register(
     default=True,
     label=_('Enable Role Download'),
     help_text=_('Allows roles to be dynamically downloaded from a requirements.yml file for SCM projects.'),
+    category=_('Jobs'),
+    category_slug='jobs',
+)
+
+register(
+    'AWX_COLLECTIONS_ENABLED',
+    field_class=fields.BooleanField,
+    default=True,
+    label=_('Enable Collection(s) Download'),
+    help_text=_('Allows collections to be dynamically downloaded from a requirements.yml file for SCM projects.'),
     category=_('Jobs'),
     category_slug='jobs',
 )

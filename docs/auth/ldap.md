@@ -1,18 +1,21 @@
 # LDAP
-The Lightweight Directory Access Protocol (LDAP) is an open, vendor-neutral, industry standard application protocol for accessing and maintaining distributed directory information services over an Internet Protocol (IP) network. Directory services play an important role in developing intranet and Internet applications by allowing the sharing of information about users, systems, networks, services, and applications throughout the network.
+The Lightweight Directory Access Protocol (LDAP) is an open, vendor-neutral, industry-standard application protocol for accessing and maintaining distributed directory information services over an Internet Protocol (IP) network. Directory services play an important role in developing intranet and Internet applications by allowing the sharing of information about users, systems, networks, services, and applications throughout the network.
+
 
 # Configure LDAP Authentication
-Please see the Tower documentation as well as Ansible blog posts for basic LDAP configuration.
+
+Please see the [Tower documentation](https://docs.ansible.com/ansible-tower/latest/html/administration/ldap_auth.html) as well as [Ansible blog post](https://www.ansible.com/blog/getting-started-ldap-authentication-in-ansible-tower) for basic LDAP configuration.
 
 LDAP Authentication provides duplicate sets of configuration fields for authentication with up to six different LDAP servers.
-The default set of configuration fields take the form `AUTH_LDAP_<field name>`. Configuration fields for additional ldap servers are numbered `AUTH_LDAP_<n>_<field name>`.
-
-## Test environment setup
-
-Please see README.md of this repository: https://github.com/jangsutsr/deploy_ldap.git.
+The default set of configuration fields take the form `AUTH_LDAP_<field name>`. Configuration fields for additional LDAP servers are numbered `AUTH_LDAP_<n>_<field name>`.
 
 
-# Basic setup for FreeIPA
+## Test Environment Setup
+
+Please see `README.md` of this repository: https://github.com/ansible/deploy_ldap
+
+
+# Basic Setup for FreeIPA
 
 LDAP Server URI (append if you have multiple LDAPs)    
 `ldaps://{{serverip1}}:636`

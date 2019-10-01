@@ -1,5 +1,3 @@
-import pytest
-
 from django.test import TransactionTestCase
 
 from awx.main.models import (
@@ -8,7 +6,6 @@ from awx.main.models import (
 )
 
 
-@pytest.mark.django_db
 class TestCapacityMapping(TransactionTestCase):
 
     def sample_cluster(self):

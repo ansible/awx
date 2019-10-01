@@ -33,6 +33,18 @@ spec:
 {% if management_cpu_limit is defined %}
           cpu: "{{ management_cpu_limit }}m"
 {% endif %}
+{% if tolerations is defined %}
+  tolerations:
+{{ tolerations | to_nice_yaml(indent=2) | indent(width=4, indentfirst=True) }}
+{% endif %}
+{% if node_selector is defined %}
+  nodeSelector:
+{{ node_selector | to_nice_yaml(indent=2) | indent(width=4, indentfirst=True) }}
+{% endif %}
+{% if affinity is defined %}
+  affinity:
+{{ affinity | to_nice_yaml(indent=2) | indent(width=4, indentfirst=True) }}
+{% endif %}
   volumes:
     - name: {{ kubernetes_deployment_name }}-application-config
       configMap:

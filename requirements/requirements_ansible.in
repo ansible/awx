@@ -1,7 +1,8 @@
 # GCE
 apache-libcloud==2.5.0
+google-auth==1.6.2    # needed for gce inventory imports
 # Azure
-# azure deps from https://github.com/ansible/ansible/blob/stable-2.8/packaging/requirements/requirements-azure.txt
+# azure deps from https://github.com/ansible/ansible/blob/stable-2.9/packaging/requirements/requirements-azure.txt
 packaging
 azure-cli-core==2.0.35
 azure-cli-nspkg==3.0.2
@@ -37,22 +38,21 @@ azure-mgmt-cosmosdb==0.5.2
 azure-mgmt-hdinsight==0.1.0
 azure-mgmt-devtestlabs==3.0.0
 azure-mgmt-loganalytics==0.2.0
+azure-mgmt-automation==0.1.1
+azure-mgmt-iothub==0.7.0
 # AWS
 boto==2.47.0    # last which does not break ec2 scripts
-boto3==1.6.2
-google-auth==1.6.2    # needed for gce inventory imports
+boto3==1.9.223
 jinja2==2.10.1  # required for native jinja2 types for inventory compat mode
 # netconf for network modules
 ncclient==0.6.3
 # netaddr filter
 netaddr
 # oVirt/RHV
-ovirt-engine-sdk-python==4.2.4    # minimum set inside Ansible facts module requirements
+ovirt-engine-sdk-python==4.3.0    # minimum set inside Ansible facts module requirements
 pycurl==7.43.0.1    # higher versions will not install without SSL backend specified
 # AWX usage
-pexpect==4.6.0    # same as AWX requirement
 psutil==5.4.3    # same as AWX requirement
-ptyprocess==0.5.2 # via pexpect, but needs to be pinned. Read the blame.
 setuptools==36.0.1
 pip==9.0.1
 # VMware
@@ -63,4 +63,4 @@ pywinrm[kerberos]==0.3.0
 requests
 requests-credssp==1.0.2   # For windows authentication awx/issues/1144
 # OpenStack
-openstacksdk==0.23.0
+openstacksdk==0.31.1

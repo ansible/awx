@@ -85,7 +85,7 @@
       shell: "oc apply -f /tmp/volumeclaim.yml && rm -rf /tmp/volumeclaim.yml"
 
     - name: Deploy and Activate Postgres
-      shell: "oc new-app --template=postgresql-persistent -e MEMORY_LIMIT={{ pg_memory_limit|default('512') }}Mi -e NAMESPACE=openshift -e DATABASE_SERVICE_NAME=postgresql  -e POSTGRESQL_USER={{ pg_username|default('awx') }} -e POSTGRESQL_PASSWORD={{ pg_password|default('awx') }} -e POSTGRESQL_DATABASE={{ pg_database|default('awx') }} -e VOLUME_CAPACITY={{ pg_volume_capacity|default('5')}}Gi -e POSTGRESQL_VERSION=9.5 -n {{ awx_dev_project }}"
+      shell: "oc new-app --template=postgresql-persistent -e MEMORY_LIMIT={{ pg_memory_limit|default('512') }}Mi -e NAMESPACE=openshift -e DATABASE_SERVICE_NAME=postgresql  -e POSTGRESQL_USER={{ pg_username|default('awx') }} -e POSTGRESQL_PASSWORD={{ pg_password|default('awx') }} -e POSTGRESQL_DATABASE={{ pg_database|default('awx') }} -e VOLUME_CAPACITY={{ pg_volume_capacity|default('5')}}Gi -e POSTGRESQL_VERSION=10 -n {{ awx_dev_project }}"
       when: postgres_svc_details is defined and postgres_svc_details.rc != 0
       register: openshift_pg_activate
 

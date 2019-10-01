@@ -22,7 +22,7 @@ def test_label_get_queryset_su(label, user):
 @pytest.mark.django_db
 def test_label_access(label, user):
     access = LabelAccess(user('user', False))
-    assert not access.can_read(label)
+    assert access.can_read(label)
 
 
 @pytest.mark.django_db

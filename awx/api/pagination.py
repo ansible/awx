@@ -3,14 +3,28 @@
 
 # Django REST Framework
 from django.conf import settings
+from django.core.paginator import Paginator as DjangoPaginator
 from rest_framework import pagination
+from rest_framework.response import Response
 from rest_framework.utils.urls import replace_query_param
+
+
+class DisabledPaginator(DjangoPaginator):
+
+    @property
+    def num_pages(self):
+        return 1
+
+    @property
+    def count(self):
+        return 200
 
 
 class Pagination(pagination.PageNumberPagination):
 
     page_size_query_param = 'page_size'
     max_page_size = settings.MAX_PAGE_SIZE
+    count_disabled = False
 
     def get_next_link(self):
         if not self.page.has_next():
@@ -39,3 +53,17 @@ class Pagination(pagination.PageNumberPagination):
                                  for pl in context['page_links']]
 
         return context
+
+    def paginate_queryset(self, queryset, request, **kwargs):
+        self.count_disabled = 'count_disabled' in request.query_params
+        try:
+            if self.count_disabled:
+                self.django_paginator_class = DisabledPaginator
+            return super(Pagination, self).paginate_queryset(queryset, request, **kwargs)
+        finally:
+            self.django_paginator_class = DjangoPaginator
+
+    def get_paginated_response(self, data):
+        if self.count_disabled:
+            return Response({'results': data})
+        return super(Pagination, self).get_paginated_response(data)

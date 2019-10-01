@@ -57,5 +57,5 @@ def test_really_long_event_fields(field):
         })
         manager.create.assert_called_with(**{
             'job_id': 123,
-            'event_data': {field: 'X' * 1021 + '...'}
+            'event_data': {field: 'X' * 1023 + '…'}
         })

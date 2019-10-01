@@ -29,6 +29,8 @@ services:
     build:
       context: ../../../../../
       dockerfile: awx/ui/test/e2e/cluster/Dockerfile
+      args:
+        NPMRC_FILE: ${NPMRC_FILE}
     depends_on:
       - chrome
     links:

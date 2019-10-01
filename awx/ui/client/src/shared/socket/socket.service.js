@@ -96,6 +96,14 @@ export default
                 $log.debug('Received From Server: ' + e.data);
 
                 var data = JSON.parse(e.data), str = "";
+
+                if (data.group_name === 'jobs' &&
+                    'type' in data &&
+                     data.type === 'workflow_approval'
+                ) {
+                    $rootScope.$broadcast('ws-approval');
+                }
+
                 if(!window.liveUpdates && data.group_name !== "control" && $state.current.name !== "output"){
                     $log.debug('Message from server dropped: ' + e.data);
                     needsRefreshAfterBlur = true;
@@ -254,21 +262,23 @@ export default
                 // requires a subscribe or an unsubscribe
                 var self = this;
                 return socketPromise.promise.then(function(){
-                    if(!state.data || !state.data.socket){
-                        _.merge(state.data, {socket: {groups: {}}});
-                        self.unsubscribe(state);
+                    if (_.get(state, 'data.socket.groups.jobs')) {
+                        if (!state.data.socket.groups.jobs.includes("status_changed")) {
+                            state.data.socket.groups.jobs.push("status_changed");
+                        }
                     }
-                    else{
-                        ["job_events", "ad_hoc_command_events", "workflow_events",
+                    else if(!state.data || !state.data.socket){
+                        _.merge(state.data, {socket: {groups: {jobs: ["status_changed"]}}});
+                    }
+                    ["job_events", "ad_hoc_command_events", "workflow_events",
                          "project_update_events", "inventory_update_events",
                          "system_job_events"
-                        ].forEach(function(group) {
-                            if(state.data && state.data.socket && state.data.socket.groups.hasOwnProperty(group)){
-                                state.data.socket.groups[group] = [id];
-                            }
-                        });
-                        self.subscribe(state);
-                    }
+                    ].forEach(function(group) {
+                        if(state.data && state.data.socket && state.data.socket.groups.hasOwnProperty(group)){
+                            state.data.socket.groups[group] = [id];
+                        }
+                    });
+                    self.subscribe(state);
                     return true;
                 });
             }

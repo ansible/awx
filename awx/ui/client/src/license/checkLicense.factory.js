@@ -5,29 +5,29 @@
  *************************************************/
 
 export default
-	['$state', '$rootScope', 'Rest', 'GetBasePath', 'ProcessErrors',
-		'ConfigService',
-	function($state, $rootScope, Rest, GetBasePath, ProcessErrors,
-		ConfigService){
+	['$state', '$rootScope', 'Rest', 'GetBasePath',
+		'ConfigService', '$q',
+	function($state, $rootScope, Rest, GetBasePath,
+		ConfigService, $q){
 			return {
 				get: function() {
 					var config = ConfigService.get();
 					return config.license_info;
 				},
 
-				post: function(license, eula){
+				post: function(payload, eula){
 					var defaultUrl = GetBasePath('config');
 					Rest.setUrl(defaultUrl);
-					var data = license;
+					var data = payload;
 					data.eula_accepted = eula;
+
 					return Rest.post(JSON.stringify(data))
 						.then((response) =>{
 							return response.data;
 						})
-						.catch(({res, status}) => {
-	                        ProcessErrors($rootScope, res, status, null, {hdr: 'Error!',
-	                        msg: 'Call to '+ defaultUrl + ' failed. Return status: '+ status});
-	                    });
+						.catch(({data}) => {
+							return $q.reject(data);
+						});
 				},
 
 				valid: function(license) {

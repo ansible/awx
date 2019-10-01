@@ -6,6 +6,7 @@ function ProjectsStrings (BaseString) {
 
     ns.list = {
         PANEL_TITLE: t.s('PROJECTS'),
+        ROW_ITEM_LABEL_DESCRIPTION: t.s('DESCRIPTION'),
         ROW_ITEM_LABEL_REVISION: t.s('REVISION'),
         ROW_ITEM_LABEL_ORGANIZATION: t.s('ORGANIZATION'),
         ROW_ITEM_LABEL_MODIFIED: t.s('LAST MODIFIED'),

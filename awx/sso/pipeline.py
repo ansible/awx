@@ -50,7 +50,7 @@ def prevent_inactive_login(backend, details, user=None, *args, **kwargs):
         raise AuthInactive(backend)
 
 
-def _update_m2m_from_expression(user, rel, expr, remove=True):
+def _update_m2m_from_expression(user, related, expr, remove=True):
     '''
     Helper function to update m2m relationship based on user matching one or
     more expressions.
@@ -73,12 +73,12 @@ def _update_m2m_from_expression(user, rel, expr, remove=True):
                 if ex.match(user.username) or ex.match(user.email):
                     should_add = True
     if should_add:
-        rel.add(user)
+        related.add(user)
     elif remove:
-        rel.remove(user)
+        related.remove(user)
 
 
-def _update_org_from_attr(user, rel, attr, remove, remove_admins):
+def _update_org_from_attr(user, related, attr, remove, remove_admins):
     from awx.main.models import Organization
 
     org_ids = []
@@ -87,7 +87,7 @@ def _update_org_from_attr(user, rel, attr, remove, remove_admins):
         org = Organization.objects.get_or_create(name=org_name)[0]
 
         org_ids.append(org.id)
-        getattr(org, rel).members.add(user)
+        getattr(org, related).members.add(user)
 
     if remove:
         [o.member_role.members.remove(user) for o in
@@ -151,17 +151,20 @@ def update_user_orgs_by_saml_attr(backend, details, user=None, *args, **kwargs):
         return
     from django.conf import settings
     org_map = settings.SOCIAL_AUTH_SAML_ORGANIZATION_ATTR
-    if org_map.get('saml_attr') is None and org_map.get('saml_admin_attr') is None:
+    if org_map.get('saml_attr') is None and org_map.get('saml_admin_attr') is None and org_map.get('saml_auditor_attr') is None:
         return
 
     remove = bool(org_map.get('remove', True))
     remove_admins = bool(org_map.get('remove_admins', True))
+    remove_auditors = bool(org_map.get('remove_auditors', True))
 
-    attr_values = kwargs.get('response', {}).get('attributes', {}).get(org_map['saml_attr'], [])
-    attr_admin_values = kwargs.get('response', {}).get('attributes', {}).get(org_map['saml_admin_attr'], [])
+    attr_values = kwargs.get('response', {}).get('attributes', {}).get(org_map.get('saml_attr'), [])
+    attr_admin_values = kwargs.get('response', {}).get('attributes', {}).get(org_map.get('saml_admin_attr'), [])
+    attr_auditor_values = kwargs.get('response', {}).get('attributes', {}).get(org_map.get('saml_auditor_attr'), [])
 
     _update_org_from_attr(user, "member_role", attr_values, remove, False)
     _update_org_from_attr(user, "admin_role", attr_admin_values, False, remove_admins)
+    _update_org_from_attr(user, "auditor_role", attr_auditor_values, False, remove_auditors)
 
 
 def update_user_teams_by_saml_attr(backend, details, user=None, *args, **kwargs):

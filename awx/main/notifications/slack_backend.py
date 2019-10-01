@@ -19,6 +19,11 @@ class SlackBackend(AWXBaseEmailBackend):
     recipient_parameter = "channels"
     sender_parameter = None
 
+    DEFAULT_SUBJECT = "{{ job_friendly_name }} #{{ job.id }} '{{ job.name }}' {{ job.status }}: {{ url }}"
+    default_messages = {"started": {"message": DEFAULT_SUBJECT},
+                        "success": {"message": DEFAULT_SUBJECT},
+                        "error": {"message": DEFAULT_SUBJECT}}
+
     def __init__(self, token, hex_color="", fail_silently=False, **kwargs):
         super(SlackBackend, self).__init__(fail_silently=fail_silently)
         self.token = token
@@ -50,7 +55,7 @@ class SlackBackend(AWXBaseEmailBackend):
                     if ret['ok']:
                         sent_messages += 1
                     else:
-                        raise RuntimeError("Slack Notification unable to send {}: {}".format(r, m.subject))
+                        raise RuntimeError("Slack Notification unable to send {}: {} ({})".format(r, m.subject, ret['error']))
             except Exception as e:
                 logger.error(smart_text(_("Exception sending messages: {}").format(e)))
                 if not self.fail_silently:

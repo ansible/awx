@@ -61,12 +61,18 @@ export default ['i18n', function(i18n) {
             AWX_ROLES_ENABLED: {
                 type: 'toggleSwitch',
             },
+            AWX_COLLECTIONS_ENABLED: {
+                type: 'toggleSwitch',
+            },
             AWX_TASK_ENV: {
                 type: 'textarea',
                 reset: 'AWX_TASK_ENV',
                 rows: 6,
                 codeMirror: true,
                 class: 'Form-textAreaLabel Form-formGroup--fullWidth'
+            },
+            AWX_ISOLATED_HOST_KEY_CHECKING: {
+                type: 'toggleSwitch',
             },
             AWX_ISOLATED_CHECK_INTERVAL: {
                 type: 'text',

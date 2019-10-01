@@ -14,6 +14,7 @@ from awx.api.views import (
     ApiV2RootView,
     ApiV2PingView,
     ApiV2ConfigView,
+    ApiV2SubscriptionView,
     AuthView,
     UserMeList,
     DashboardView,
@@ -71,6 +72,8 @@ from .instance import urls as instance_urls
 from .instance_group import urls as instance_group_urls
 from .oauth2 import urls as oauth2_urls
 from .oauth2_root import urls as oauth2_root_urls
+from .workflow_approval_template import urls as workflow_approval_template_urls
+from .workflow_approval import urls as workflow_approval_urls
 
 
 v2_urls = [
@@ -92,6 +95,7 @@ v2_urls = [
     url(r'^metrics/$', MetricsView.as_view(), name='metrics_view'),
     url(r'^ping/$', ApiV2PingView.as_view(), name='api_v2_ping_view'),
     url(r'^config/$', ApiV2ConfigView.as_view(), name='api_v2_config_view'),
+    url(r'^config/subscriptions/$', ApiV2SubscriptionView.as_view(), name='api_v2_subscription_view'),
     url(r'^auth/$', AuthView.as_view()),
     url(r'^me/$', UserMeList.as_view(), name='user_me_list'),
     url(r'^dashboard/$', DashboardView.as_view(), name='dashboard_view'),
@@ -131,7 +135,10 @@ v2_urls = [
     url(r'^unified_job_templates/$', UnifiedJobTemplateList.as_view(), name='unified_job_template_list'),
     url(r'^unified_jobs/$', UnifiedJobList.as_view(), name='unified_job_list'),
     url(r'^activity_stream/', include(activity_stream_urls)),
+    url(r'^workflow_approval_templates/', include(workflow_approval_template_urls)),
+    url(r'^workflow_approvals/', include(workflow_approval_urls)),
 ]
+
 
 app_name = 'api'
 urlpatterns = [

@@ -7,7 +7,6 @@ from awx.main.access import UserAccess, RoleAccess, TeamAccess
 from awx.main.models import User, Organization, Inventory
 
 
-@pytest.mark.django_db
 class TestSysAuditorTransactional(TransactionTestCase):
     def rando(self):
         return User.objects.create(username='rando', password='rando', email='rando@com.com')

@@ -25,9 +25,8 @@ import hashlib
 
 try:
     import django
-    from django.utils.encoding import force_bytes
-    from django.db.backends.base.schema import BaseDatabaseSchemaEditor
     from django.db.backends.base import schema
+    from django.db.backends.utils import names_digest
     HAS_DJANGO = True
 except ImportError:
     HAS_DJANGO = False
@@ -37,30 +36,33 @@ if HAS_DJANGO is True:
     # This line exists to make sure we don't regress on FIPS support if we
     # upgrade Django; if you're upgrading Django and see this error,
     # update the version check below, and confirm that FIPS still works.
-    if django.__version__ != '1.11.20':
-        raise RuntimeError("Django version other than 1.11.20 detected {}. \
-                Subclassing BaseDatabaseSchemaEditor is known to work for Django 1.11.20 \
-                and may not work in newer Django versions.".format(django.__version__))
+    # If operating in a FIPS environment, `hashlib.md5()` will raise a `ValueError`,
+    # but will support the `usedforsecurity` keyword on RHEL and Centos systems.
 
+    # Keep an eye on https://code.djangoproject.com/ticket/28401
+    target_version = '2.2.4'
+    if django.__version__ != target_version:
+        raise RuntimeError(
+            "Django version other than {target} detected: {current}. "
+            "Overriding `names_digest` is known to work for Django {target} "
+            "and may not work in other Django versions.".format(target=target_version,
+                                                                current=django.__version__)
+        )
 
-    class FipsBaseDatabaseSchemaEditor(BaseDatabaseSchemaEditor):
-
-        @classmethod
-        def _digest(cls, *args):
+    try:
+        names_digest('foo', 'bar', 'baz', length=8)
+    except ValueError:
+        def names_digest(*args, length):
             """
-            Generates a 32-bit digest of a set of arguments that can be used to
-            shorten identifying names.
+            Generate a 32-bit digest of a set of arguments that can be used to shorten
+            identifying names.  Support for use in FIPS environments.
             """
-            try:
-                h = hashlib.md5()
-            except ValueError:
-                h = hashlib.md5(usedforsecurity=False)
+            h = hashlib.md5(usedforsecurity=False)
             for arg in args:
-                h.update(force_bytes(arg))
-            return h.hexdigest()[:8]
+                h.update(arg.encode())
+            return h.hexdigest()[:length]
 
-
-    schema.BaseDatabaseSchemaEditor = FipsBaseDatabaseSchemaEditor
+        schema.names_digest = names_digest
 
 
 def find_commands(management_dir):

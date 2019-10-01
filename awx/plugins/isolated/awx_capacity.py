@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
 
+from ansible.module_utils._text import to_text
 from ansible.module_utils.basic import AnsibleModule
 
 import subprocess
@@ -48,13 +49,16 @@ def main():
     module = AnsibleModule(
         argument_spec = dict()
     )
+
+    ar = module.get_bin_path('ansible-runner', required=True)
+
     try:
         version = subprocess.check_output(
-            ['ansible-runner', '--version'],
+            [ar, '--version'],
             stderr=subprocess.STDOUT
         ).strip()
     except subprocess.CalledProcessError as e:
-        module.fail_json(msg=str(e))
+        module.fail_json(msg=to_text(e))
         return
     # NOTE: Duplicated with awx.main.utils.common capacity utilities
     cpu, capacity_cpu = get_cpu_capacity()

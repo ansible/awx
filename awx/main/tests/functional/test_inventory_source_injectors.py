@@ -129,6 +129,7 @@ def read_content(private_data_dir, raw_env, inventory_update):
     return a dictionary `content` with file contents, keyed off environment variable
         that references the file
     """
+    # build dict env as a mapping of environment variables to file names
     # Filter out environment variables which come from runtime environment
     env = {}
     exclude_keys = set(('PATH', 'INVENTORY_SOURCE_ID', 'INVENTORY_UPDATE_ID'))
@@ -142,71 +143,74 @@ def read_content(private_data_dir, raw_env, inventory_update):
             env[k] = v
     inverse_env = {}
     for key, value in env.items():
-        inverse_env[value] = key
+        inverse_env.setdefault(value, []).append(key)
 
     cache_file_regex = re.compile(r'/tmp/awx_{0}_[a-zA-Z0-9_]+/{1}_cache[a-zA-Z0-9_]+'.format(
         inventory_update.id, inventory_update.source)
     )
     private_key_regex = re.compile(r'-----BEGIN ENCRYPTED PRIVATE KEY-----.*-----END ENCRYPTED PRIVATE KEY-----')
 
+    # read directory content
+    # build a mapping of the file paths to aliases which will be constant accross runs
     dir_contents = {}
-    references = {}
-    for filename in os.listdir(private_data_dir):
+    referenced_paths = set()
+    file_aliases = {}
+    filename_list = sorted(os.listdir(private_data_dir), key=lambda fn: inverse_env.get(os.path.join(private_data_dir, fn), [fn])[0])
+    for filename in filename_list:
         if filename in ('args', 'project'):
             continue  # Ansible runner
         abs_file_path = os.path.join(private_data_dir, filename)
+        file_aliases[abs_file_path] = filename
         if abs_file_path in inverse_env:
-            env_key = inverse_env[abs_file_path]
-            references[abs_file_path] = env_key
-            env[env_key] = '{{ file_reference }}'
+            referenced_paths.add(abs_file_path)
+            alias = 'file_reference'
+            for i in range(10):
+                if alias not in file_aliases.values():
+                    break
+                alias = 'file_reference_{}'.format(i)
+            else:
+                raise RuntimeError('Test not able to cope with >10 references by env vars. '
+                                   'Something probably went very wrong.')
+            file_aliases[abs_file_path] = alias
+            for env_key in inverse_env[abs_file_path]:
+                env[env_key] = '{{{{ {} }}}}'.format(alias)
         try:
             with open(abs_file_path, 'r') as f:
                 dir_contents[abs_file_path] = f.read()
             # Declare a reference to inventory plugin file if it exists
             if abs_file_path.endswith('.yml') and 'plugin: ' in dir_contents[abs_file_path]:
-                references[abs_file_path] = filename  # plugin filenames are universal
+                referenced_paths.add(abs_file_path)  # used as inventory file
+            elif cache_file_regex.match(abs_file_path):
+                file_aliases[abs_file_path] = 'cache_file'
         except IsADirectoryError:
             dir_contents[abs_file_path] = '<directory>'
+            if cache_file_regex.match(abs_file_path):
+                file_aliases[abs_file_path] = 'cache_dir'
 
-    # Declare cross-file references, also use special keywords if it is the cache
-    cache_referenced = False
-    cache_present = False
+    # Substitute in aliases for cross-file references
     for abs_file_path, file_content in dir_contents.copy().items():
         if cache_file_regex.match(file_content):
-            cache_referenced = True
+            if 'cache_dir' not in file_aliases.values() and 'cache_file' not in file_aliases in file_aliases.values():
+                raise AssertionError(
+                    'A cache file was referenced but never created, files:\n{}'.format(
+                        json.dumps(dir_contents, indent=4)))
+        # if another files path appears in this file, replace it with its alias
         for target_path in dir_contents.keys():
+            other_alias = file_aliases[target_path]
             if target_path in file_content:
-                if target_path in references:
-                    raise AssertionError(
-                        'File {} is referenced by env var or other file as well as file {}:\n{}\n{}'.format(
-                            target_path, abs_file_path, json.dumps(env, indent=4), json.dumps(dir_contents, indent=4)))
-                else:
-                    if cache_file_regex.match(target_path):
-                        cache_present = True
-                        if os.path.isdir(target_path):
-                            keyword = 'cache_dir'
-                        else:
-                            keyword = 'cache_file'
-                        references[target_path] = keyword
-                        new_file_content = cache_file_regex.sub('{{ ' + keyword + ' }}', file_content)
-                    else:
-                        references[target_path] = 'file_reference'
-                        new_file_content = file_content.replace(target_path, '{{ file_reference }}')
-                    dir_contents[abs_file_path] = new_file_content
-    if cache_referenced and not cache_present:
-        raise AssertionError(
-            'A cache file was referenced but never created, files:\n{}'.format(
-                json.dumps(dir_contents, indent=4)))
+                referenced_paths.add(target_path)
+                dir_contents[abs_file_path] = file_content.replace(target_path, '{{ ' + other_alias + ' }}')
 
+    # build dict content which is the directory contents keyed off the file aliases
     content = {}
     for abs_file_path, file_content in dir_contents.items():
-        if abs_file_path not in references:
+        # assert that all files laid down are used
+        if abs_file_path not in referenced_paths:
             raise AssertionError(
                 "File {} is not referenced. References and files:\n{}\n{}".format(
-                    abs_file_path, json.dumps(references, indent=4), json.dumps(dir_contents, indent=4)))
-        reference_key = references[abs_file_path]
+                    abs_file_path, json.dumps(env, indent=4), json.dumps(dir_contents, indent=4)))
         file_content = private_key_regex.sub('{{private_key}}', file_content)
-        content[reference_key] = file_content
+        content[file_aliases[abs_file_path]] = file_content
 
     return (env, content)
 
@@ -223,7 +227,7 @@ def create_reference_data(source_dir, env, content):
                 f.write(content)
     if env:
         with open(os.path.join(source_dir, 'env.json'), 'w') as f:
-            f.write(json.dumps(env, indent=4))
+            json.dump(env, f, indent=4, sort_keys=True)
 
 
 @pytest.mark.django_db
@@ -283,7 +287,7 @@ def test_inventory_update_injected_content(this_kind, script_or_plugin, inventor
             for f_name in expected_file_list:
                 with open(os.path.join(files_dir, f_name), 'r') as f:
                     ref_content = f.read()
-                    assert ref_content == content[f_name]
+                    assert ref_content == content[f_name], f_name
             try:
                 with open(os.path.join(source_dir, 'env.json'), 'r') as f:
                     ref_env_text = f.read()

@@ -105,10 +105,9 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
     )
     inputs = CredentialInputField(
         blank=True,
-        default={},
-        help_text=_('Enter inputs using either JSON or YAML syntax. Use the '
-                    'radio button to toggle between the two. Refer to the '
-                    'Ansible Tower documentation for example syntax.')
+        default=dict,
+        help_text=_('Enter inputs using either JSON or YAML syntax. '
+                    'Refer to the Ansible Tower documentation for example syntax.')
     )
     admin_role = ImplicitRoleField(
         parent_role=[
@@ -152,7 +151,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
     @property
     def has_encrypted_ssh_key_data(self):
         try:
-            ssh_key_data = decrypt_field(self, 'ssh_key_data')
+            ssh_key_data = self.get_input('ssh_key_data')
         except AttributeError:
             return False
 
@@ -343,17 +342,15 @@ class CredentialType(CommonModelNameNotUnique):
     )
     inputs = CredentialTypeInputField(
         blank=True,
-        default={},
-        help_text=_('Enter inputs using either JSON or YAML syntax. Use the '
-                    'radio button to toggle between the two. Refer to the '
-                    'Ansible Tower documentation for example syntax.')
+        default=dict,
+        help_text=_('Enter inputs using either JSON or YAML syntax. '
+                    'Refer to the Ansible Tower documentation for example syntax.')
     )
     injectors = CredentialTypeInjectorField(
         blank=True,
-        default={},
-        help_text=_('Enter injectors using either JSON or YAML syntax. Use the '
-                    'radio button to toggle between the two. Refer to the '
-                    'Ansible Tower documentation for example syntax.')
+        default=dict,
+        help_text=_('Enter injectors using either JSON or YAML syntax. '
+                    'Refer to the Ansible Tower documentation for example syntax.')
     )
 
     @classmethod
@@ -636,9 +633,6 @@ ManagedCredentialType(
             'secret': True,
             'ask_at_runtime': True
         }],
-        'dependencies': {
-            'ssh_key_unlock': ['ssh_key_data'],
-        }
     }
 )
 
@@ -670,9 +664,6 @@ ManagedCredentialType(
             'type': 'string',
             'secret': True
         }],
-        'dependencies': {
-            'ssh_key_unlock': ['ssh_key_data'],
-        }
     }
 )
 
@@ -741,7 +732,6 @@ ManagedCredentialType(
             'secret': True,
         }],
         'dependencies': {
-            'ssh_key_unlock': ['ssh_key_data'],
             'authorize_password': ['authorize'],
         },
         'required': ['username'],
@@ -1117,7 +1107,7 @@ class CredentialInputSource(PrimordialModel):
     )
     metadata = DynamicCredentialInputField(
         blank=True,
-        default={}
+        default=dict
     )
 
     def clean_target_credential(self):

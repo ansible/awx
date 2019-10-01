@@ -34,7 +34,8 @@ from rest_framework.negotiation import DefaultContentNegotiation
 # AWX
 from awx.api.filters import FieldLookupBackend
 from awx.main.models import (
-    UnifiedJob, UnifiedJobTemplate, User, Role, Credential
+    UnifiedJob, UnifiedJobTemplate, User, Role, Credential,
+    WorkflowJobTemplateNode, WorkflowApprovalTemplate
 )
 from awx.main.access import access_registry
 from awx.main.utils import (
@@ -401,21 +402,21 @@ class ListAPIView(generics.ListAPIView, GenericAPIView):
                 continue
             if getattr(field, 'related_model', None):
                 fields.add('{}__search'.format(field.name))
-        for rel in self.model._meta.related_objects:
-            name = rel.related_name
-            if isinstance(rel, OneToOneRel) and self.model._meta.verbose_name.startswith('unified'):
+        for related in self.model._meta.related_objects:
+            name = related.related_name
+            if isinstance(related, OneToOneRel) and self.model._meta.verbose_name.startswith('unified'):
                 # Add underscores for polymorphic subclasses for user utility
-                name = rel.related_model._meta.verbose_name.replace(" ", "_")
+                name = related.related_model._meta.verbose_name.replace(" ", "_")
             if skip_related_name(name) or name.endswith('+'):
                 continue
             fields.add('{}__search'.format(name))
-        m2m_rel = []
-        m2m_rel += self.model._meta.local_many_to_many
+        m2m_related = []
+        m2m_related += self.model._meta.local_many_to_many
         if issubclass(self.model, UnifiedJobTemplate) and self.model != UnifiedJobTemplate:
-            m2m_rel += UnifiedJobTemplate._meta.local_many_to_many
+            m2m_related += UnifiedJobTemplate._meta.local_many_to_many
         if issubclass(self.model, UnifiedJob) and self.model != UnifiedJob:
-            m2m_rel += UnifiedJob._meta.local_many_to_many
-        for relationship in m2m_rel:
+            m2m_related += UnifiedJob._meta.local_many_to_many
+        for relationship in m2m_related:
             if skip_related_name(relationship.name):
                 continue
             if relationship.related_model._meta.app_label != 'main':
@@ -488,8 +489,11 @@ class SubListAPIView(ParentMixin, ListAPIView):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
         qs = self.request.user.get_queryset(self.model).distinct()
-        sublist_qs = getattrd(parent, self.relationship).distinct()
+        sublist_qs = self.get_sublist_queryset(parent)
         return qs & sublist_qs
+
+    def get_sublist_queryset(self, parent):
+        return getattrd(parent, self.relationship).distinct()
 
 
 class DestroyAPIView(generics.DestroyAPIView):
@@ -882,6 +886,21 @@ class CopyAPIView(GenericAPIView):
                 create_kwargs[field.name] = CopyAPIView._decrypt_model_field_if_needed(
                     obj, field.name, field_val
                 )
+
+        # WorkflowJobTemplateNodes that represent an approval are *special*;
+        # when we copy them, we actually want to *copy* the UJT they point at
+        # rather than share the template reference between nodes in disparate
+        # workflows
+        if (
+            isinstance(obj, WorkflowJobTemplateNode) and
+            isinstance(getattr(obj, 'unified_job_template'), WorkflowApprovalTemplate)
+        ):
+            new_approval_template, sub_objs = CopyAPIView.copy_model_obj(
+                None, None, WorkflowApprovalTemplate,
+                obj.unified_job_template, creater
+            )
+            create_kwargs['unified_job_template'] = new_approval_template
+
         new_obj = model.objects.create(**create_kwargs)
         logger.debug('Deep copy: Created new object {}({})'.format(
             new_obj, model

@@ -6250,10 +6250,6 @@ msgstr "Actualización faltante. Haga clic para obtener más información."
 msgid "Update on Launch"
 msgstr "Actualizar al ejecutar"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:388
-msgid "Update on Project Change"
-msgstr "Actualizar en el cambio de proyecto"
-
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:394
 msgid "Update on Project Update"
 msgstr "Actualizar en la actualización del proyecto"

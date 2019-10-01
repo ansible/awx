@@ -26,6 +26,12 @@ dockerhub_base=ansible
 # pg_cpu_limit=1000
 # pg_mem_limit=2
 
+# Kubernetes Ingress Annotations
+# You can use the variables below to pass annotations to Kubernetes Ingress
+# The example below shows an annotation to be used with Traefik but other Ingress controllers are also supported.
+#kubernetes_ingress_hostname=awx.example.org
+#kubernetes_ingress_annotations={'kubernetes.io/ingress.class': 'traefik', 'traefik.ingress.kubernetes.io/redirect-entry-point': 'https'}
+
 # Kubernetes and Openshift Install Resource Requests
 # These are the request and limit values for a pod's container for task/web/rabbitmq/memcached/management.
 # The total amount of requested resources for a pod is the sum of all
@@ -80,6 +86,7 @@ pg_username=awx
 # pg_password should be random 10 character alphanumeric string, when postgresql is running on kubernetes
 # NB: it's a limitation of the "official" postgres helm chart
 pg_password=awxpass
+pg_admin_password=postgrespass
 pg_database=awx
 pg_port=5432
 #pg_sslmode=require

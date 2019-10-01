@@ -262,33 +262,45 @@ export default
 
                 if(scope.type.type==="text"){
                     if(scope.default && scope.default.trim() !== ""){
-                        if(scope.default.trim().length < scope.text_min && scope.text_min !== "" ){
-                            scope.minTextError = true;
+                        if(scope.default.trim().length < scope.text_min &&
+                           scope.text_min !== "" &&
+                           scope.text_min !== null ){
+                               scope.minTextError = true;
                         }
-                        if(scope.text_max <  scope.default.trim().length && scope.text_max !== "" ){
-                            scope.maxTextError = true;
+                        if(scope.text_max < scope.default.trim().length &&
+                           scope.text_max !== "" &&
+                           scope.text_max !== null ){
+                               scope.maxTextError = true;
                         }
                     }
                 }
 
                 if(scope.type.type==="textarea"){
                     if(scope.default_textarea && scope.default_textarea.trim() !== ""){
-                        if(scope.default_textarea.trim().length < scope.textarea_min && scope.textarea_min !== "" ){
-                            scope.minTextError = true;
+                        if(scope.default_textarea.trim().length < scope.textarea_min &&
+                           scope.textarea_min !== "" &&
+                           scope.textarea_min !== null ){
+                               scope.minTextError = true;
                         }
-                        if(scope.textarea_max <  scope.default_textarea.trim().length && scope.textarea_max !== "" ){
-                            scope.maxTextError = true;
+                        if(scope.textarea_max <  scope.default_textarea.trim().length &&
+                           scope.textarea_max !== "" &&
+                           scope.textarea_max !== null ){
+                               scope.maxTextError = true;
                         }
                     }
                 }
 
                 if(scope.type.type==="password"){
                     if(scope.default_password && scope.default_password.trim() !== ""){
-                        if(scope.default_password.trim().length < scope.password_min && scope.password_min !== "" ){
-                            scope.minTextError = true;
+                        if(scope.default_password.trim().length < scope.password_min &&
+                           scope.password_min !== "" &&
+                           scope.password_min !== null ){
+                               scope.minTextError = true;
                         }
-                        if(scope.password_max <  scope.default_password.trim().length && scope.password_max !== "" ){
-                            scope.maxTextError = true;
+                        if(scope.password_max <  scope.default_password.trim().length &&
+                           scope.password_max !== "" &&
+                           scope.password_max !== null ){
+                               scope.maxTextError = true;
                         }
                     }
                 }
@@ -381,10 +393,14 @@ export default
                     } else if (scope.type.type === 'password') {
                         data.default = scope.default_password;
                     } else if (scope.type.type === 'multiselect') {
-                          data.default = scope.default_multiselect;
-                    } else if (scope.type.type === 'float') {
+                        data.default = scope.default_multiselect;
+                    } else if (scope.type.type === 'float' &&
+                        scope.default_float !== '' &&
+                        scope.default_float !== null) {
                         data.default = scope.default_float;
-                    } else if (scope.type.type === 'integer') {
+                    } else if (scope.type.type === 'integer' &&
+                        scope.default_int !== '' &&
+                        scope.default_int !== null) {
                         data.default = scope.default_int;
                     } else {
                         data.default = "";

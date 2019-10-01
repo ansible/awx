@@ -10,9 +10,12 @@ rabbitmq_port: "5672"
 rabbitmq_user: "guest"
 rabbitmq_password: "guest"
 
-postgresql_version: "9.6"
+postgresql_version: "10"
 postgresql_image: "postgres:{{postgresql_version}}"
 
+
+memcached_image: "memcached"
+memcached_version: "alpine"
 memcached_host: "memcached"
 memcached_port: "11211"
 

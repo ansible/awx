@@ -12,14 +12,14 @@ from awx.main.utils import (get_awx_version, get_ansible_version,
                             get_custom_venv_choices, camelcase_to_underscore)
 from awx.main import models
 from django.contrib.sessions.models import Session
-from awx.main.analytics import register
+from awx.main.analytics import register, table_version
 
 '''
 This module is used to define metrics collected by awx.main.analytics.gather()
 Each function is decorated with a key name, and should return a data
 structure that can be serialized to JSON
 
-@register('something')
+@register('something', '1.0')
 def something(since):
     # the generated archive will contain a `something.json` w/ this JSON
     return {'some': 'json'}
@@ -31,7 +31,7 @@ data _since_ the last report date - i.e., new data in the last 24 hours)
 '''
 
 
-@register('config')
+@register('config', '1.0')
 def config(since):
     license_info = get_license(show_key=False)
     install_type = 'traditional'
@@ -62,7 +62,7 @@ def config(since):
     }
 
 
-@register('counts')
+@register('counts', '1.0')
 def counts(since):
     counts = {}
     for cls in (models.Organization, models.Team, models.User,
@@ -93,10 +93,11 @@ def counts(since):
     counts['active_user_sessions'] = active_user_sessions
     counts['active_anonymous_sessions'] = active_anonymous_sessions
     counts['running_jobs'] = models.UnifiedJob.objects.exclude(launch_type='sync').filter(status__in=('running', 'waiting',)).count()
+    counts['pending_jobs'] = models.UnifiedJob.objects.exclude(launch_type='sync').filter(status__in=('pending',)).count()
     return counts
 
     
-@register('org_counts')
+@register('org_counts', '1.0')
 def org_counts(since):
     counts = {}
     for org in models.Organization.objects.annotate(num_users=Count('member_role__members', distinct=True), 
@@ -108,7 +109,7 @@ def org_counts(since):
     return counts
     
     
-@register('cred_type_counts')
+@register('cred_type_counts', '1.0')
 def cred_type_counts(since):
     counts = {}
     for cred_type in models.CredentialType.objects.annotate(num_credentials=Count(
@@ -120,7 +121,7 @@ def cred_type_counts(since):
     return counts
     
     
-@register('inventory_counts')
+@register('inventory_counts', '1.0')
 def inventory_counts(since):
     counts = {}
     for inv in models.Inventory.objects.filter(kind='').annotate(num_sources=Count('inventory_sources', distinct=True), 
@@ -140,7 +141,7 @@ def inventory_counts(since):
     return counts
 
 
-@register('projects_by_scm_type')
+@register('projects_by_scm_type', '1.0')
 def projects_by_scm_type(since):
     counts = dict(
         (t[0] or 'manual', 0)
@@ -153,8 +154,14 @@ def projects_by_scm_type(since):
     return counts
 
 
-@register('instance_info')
-def instance_info(since):
+def _get_isolated_datetime(last_check):
+    if last_check:
+        return last_check.isoformat()
+    return last_check
+
+
+@register('instance_info', '1.0')
+def instance_info(since, include_hostnames=False):
     info = {}
     instances = models.Instance.objects.values_list('hostname').values(
         'uuid', 'version', 'capacity', 'cpu', 'memory', 'managed_by_policy', 'hostname', 'last_isolated_check', 'enabled')
@@ -166,14 +173,16 @@ def instance_info(since):
             'cpu': instance['cpu'],
             'memory': instance['memory'],
             'managed_by_policy': instance['managed_by_policy'],
-            'last_isolated_check': instance['last_isolated_check'],
+            'last_isolated_check': _get_isolated_datetime(instance['last_isolated_check']),
             'enabled': instance['enabled']
         }
+        if include_hostnames is True:
+            instance_info['hostname'] = instance['hostname']
         info[instance['uuid']] = instance_info
     return info
 
 
-@register('job_counts')
+@register('job_counts', '1.0')
 def job_counts(since):
     counts = {}
     counts['total_jobs'] = models.UnifiedJob.objects.exclude(launch_type='sync').count()
@@ -183,7 +192,7 @@ def job_counts(since):
     return counts
     
     
-@register('job_instance_counts')
+@register('job_instance_counts', '1.0')
 def job_instance_counts(since):
     counts = {}
     job_types = models.UnifiedJob.objects.exclude(launch_type='sync').values_list(
@@ -198,7 +207,19 @@ def job_instance_counts(since):
     return counts
 
 
+@register('query_info', '1.0')
+def query_info(since, collection_type):
+    query_info = {}
+    query_info['last_run'] = str(since)
+    query_info['current_time'] = str(now())
+    query_info['collection_type'] = collection_type
+    return query_info
+
+
 # Copies Job Events from db to a .csv to be shipped
+@table_version('events_table.csv', '1.0')
+@table_version('unified_jobs_table.csv', '1.0')
+@table_version('unified_job_template_table.csv', '1.0')
 def copy_tables(since, full_path):
     def _copy_table(table, query, path):
         file_path = os.path.join(path, table + '_table.csv')
@@ -227,10 +248,12 @@ def copy_tables(since, full_path):
                               WHERE main_jobevent.created > {}
                               ORDER BY main_jobevent.id ASC) TO STDOUT WITH CSV HEADER'''.format(since.strftime("'%Y-%m-%d %H:%M:%S'"))
     _copy_table(table='events', query=events_query, path=full_path)
-    
-    unified_job_query = '''COPY (SELECT main_unifiedjob.id, 
+
+    unified_job_query = '''COPY (SELECT main_unifiedjob.id,
                                  main_unifiedjob.polymorphic_ctype_id,
                                  django_content_type.model,
+                                 main_project.organization_id,
+                                 main_organization.name as organization_name,
                                  main_unifiedjob.created,  
                                  main_unifiedjob.name,  
                                  main_unifiedjob.unified_job_template_id, 
@@ -246,13 +269,16 @@ def copy_tables(since, full_path):
                                  main_unifiedjob.elapsed, 
                                  main_unifiedjob.job_explanation, 
                                  main_unifiedjob.instance_group_id
-                                 FROM main_unifiedjob, django_content_type
-                                 WHERE main_unifiedjob.created > {} AND 
-                                 main_unifiedjob.polymorphic_ctype_id = django_content_type.id AND 
-                                 main_unifiedjob.launch_type != 'sync'
+                                 FROM main_unifiedjob
+                                 JOIN main_job ON main_unifiedjob.id = main_job.unifiedjob_ptr_id
+                                 JOIN django_content_type ON main_unifiedjob.polymorphic_ctype_id = django_content_type.id
+                                 JOIN main_project ON main_project.unifiedjobtemplate_ptr_id = main_job.project_id
+                                 JOIN main_organization ON main_organization.id = main_project.organization_id
+                                 WHERE main_unifiedjob.created > {} 
+                                 AND main_unifiedjob.launch_type != 'sync'
                                  ORDER BY main_unifiedjob.id ASC) TO STDOUT WITH CSV HEADER'''.format(since.strftime("'%Y-%m-%d %H:%M:%S'"))    
     _copy_table(table='unified_jobs', query=unified_job_query, path=full_path)
-    
+
     unified_job_template_query = '''COPY (SELECT main_unifiedjobtemplate.id, 
                                  main_unifiedjobtemplate.polymorphic_ctype_id,
                                  django_content_type.model,
@@ -273,4 +299,3 @@ def copy_tables(since, full_path):
                                  ORDER BY main_unifiedjobtemplate.id ASC) TO STDOUT WITH CSV HEADER'''.format(since.strftime("'%Y-%m-%d %H:%M:%S'"))    
     _copy_table(table='unified_job_template', query=unified_job_template_query, path=full_path)
     return
-

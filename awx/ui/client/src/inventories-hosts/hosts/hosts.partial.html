@@ -43,18 +43,16 @@
                         <div></div>
                         <div></div>
                         <div class="d-flex h-100">
-                            <div class="List-tableHeader" base-path="hosts" collection="hosts" dataset="host_dataset" column-sort="" column-field="name" column-iterator="host" column-no-sort="undefined" column-label="Name" column-custom-class="col-lg-4" query-set="host_queryset"></div>
-                            <div class="List-tableHeader" base-path="hosts" collection="hosts" dataset="host_dataset" column-sort="" column-field="inventory" column-iterator="host" column-no-sort="undefined" column-label="Inventory" column-custom-class="d-none d-sm-flex col-sm-4 ellipsis" query-set="host_queryset"></div>
-                            <div class="List-tableHeader List-tableHeader--actions actions-column col-lg-4 text-right" translate>Actions</div>
+                            <div class="List-tableHeader" base-path="hosts" collection="hosts" dataset="host_dataset" column-sort="" column-field="name" column-iterator="host" column-no-sort="undefined" column-label="Name" column-custom-class="col-lg-3 col-md-4" query-set="host_queryset"></div>
+                            <div class="List-tableHeader" base-path="hosts" collection="hosts" dataset="host_dataset" column-sort="" column-field="description" column-iterator="host" column-no-sort="undefined" column-label="Description" column-custom-class="d-none d-lg-flex col-lg-3" query-set="host_queryset"></div>
+                            <div class="List-tableHeader" base-path="hosts" collection="hosts" dataset="host_dataset" column-sort="" column-field="inventory" column-iterator="host" column-no-sort="undefined" column-label="Inventory" column-custom-class="col-lg-3 col-md-4" query-set="host_queryset"></div>
+                            <div class="List-tableHeader List-tableHeader--actions actions-column col-lg-3 text-right" translate>Actions</div>
                         </div>
                     </div>
                     <div class="List-staticColumnLayout--hosts List-tableRow" ng-repeat="host in hosts track by host.id">
                             <div></div>
                             <div class="List-tableCell toggleHost-column List-staticColumn--toggle">
-                                <div class="ScheduleToggle" ng-class="{'is-on': host.enabled, 'ScheduleToggle--disabled': host.has_inventory_sources}" aw-tool-tip="{{strings.get('hostList.DISABLED_TOGGLE_TOOLTIP')}}" data-placement="right" data-tip-watch="undefined">
-                                    <button type="button" ng-disabled="host.has_inventory_sources" ng-show="host.enabled" class="ScheduleToggle-switch is-on" ng-click="toggleHost($event, host)" translate>ON</button>
-                                    <button type="button" ng-disabled="host.has_inventory_sources" ng-show="!host.enabled" class="ScheduleToggle-switch" ng-click="toggleHost($event, host)" translate>OFF</button>
-                                </div>
+                                <at-switch on-toggle="toggleHost($event, host)" switch-on="host.enabled" switch-disabled="!host.summary_fields.user_capabilities.edit" tooltip="strings.get('hostList.DISABLED_TOGGLE_TOOLTIP')" tooltip-placement="right"></at-switch>
                             </div>
                             <div class="List-tableCell active_failures-column status-column List-staticColumn--smallStatus">
                                 <div class="host-name">
@@ -63,18 +61,23 @@
                                     </a>
                                 </div>
                             </div>
-                            <div class="d-flex h-100">
-                                <div class="List-tableCell name-column InventoryManage-breakWord col-lg-4">
+                            <div class="d-flex h-100" style="min-width: 0;">
+                                <div class="List-tableCell name-column col-lg-3 col-md-4">
                                     <div class="host-name">
-                                        <a ui-sref="hosts.edit({host_id:host.id})">{{host.name }}</a>
+                                        <a ui-sref="hosts.edit({host_id:host.id})">{{ host.name }}</a>
                                     </div>
                                 </div>
-                                <div class="List-tableCell inventory_name-column col-lg-4 elllipsis">
-                                    <div class="host-name">
-                                        <a href="#/inventories/inventory/{{host.inventory}}">{{host.inventory_name}}</a>
+                                <div class="List-tableCell description-column d-none d-lg-flex col-lg-3">
+                                    <div class="d-inline-block text-truncate">
+                                        {{ host.description }}
                                     </div>
                                 </div>
-                                <div class="List-actionsContainer col-lg-4">
+                                <div class="List-tableCell inventory_name-column col-lg-3 col-md-4">
+                                    <div class="host-name d-inline-block text-truncate">
+                                        <a href="#/inventories/inventory/{{host.inventory}}">{{ host.inventory_name }}</a>
+                                    </div>
+                                </div>
+                                <div class="List-actionsContainer col-md-3 col-sm-4">
                                     <div class="List-actionButtonCell List-tableCell">
                                         <button id="insights-action" class="List-actionButton " ng-class="{'List-actionButton--selected' : $stateParams['host_id'] == host.id && $state.is('hosts.edit.insights')}" data-placement="top" ng-click="goToInsights(host.id)" aw-tool-tip="{{strings.get('inventory.VIEW_INSIGHTS')}}" data-tip-watch="strings.get('inventory.VIEW_INSIGHTS')" ng-show="host.insights_system_id && host.summary_fields.inventory.hasOwnProperty('insights_credential_id')">
                                             <i class="fa fa-info"></i>

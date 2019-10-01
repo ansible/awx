@@ -1,0 +1,5 @@
+{
+   "localeDir": "build/locales/",
+   "srcPathDirs": ["src/"],
+   "format": "po"
+}

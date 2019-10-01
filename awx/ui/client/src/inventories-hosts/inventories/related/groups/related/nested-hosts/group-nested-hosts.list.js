@@ -23,7 +23,7 @@ export default ['i18n', function(i18n) {
             {
                 field: 'toggleHost',
                 content: {
-                    ngDisabled: '!nested_host.summary_fields.user_capabilities.edit || nested_host.has_inventory_sources',
+                    ngDisabled: '!nested_host.summary_fields.user_capabilities.edit',
                     label: '',
                     columnClass: 'List-staticColumn--toggle',
                     type: "toggle",
@@ -32,8 +32,8 @@ export default ['i18n', function(i18n) {
                         i18n._("Indicates if a host is available and should be included in running jobs.") +
                         "</p><p>" +
                         i18n._("For hosts that are part of an external" +
-                               " inventory, this flag cannot be changed. It will be" +
-                               " set by the inventory sync process.") +
+                               " inventory, this flag may be" +
+                               " reset by the inventory sync process.") +
                         "</p>",
                     dataPlacement: "right",
                     nosort: true,
@@ -66,16 +66,24 @@ export default ['i18n', function(i18n) {
                 label: i18n._('Hosts'),
                 uiSref: "inventories.edit.hosts.edit({host_id: nested_host.id})",
                 ngClass: "{ 'host-disabled-label': !nested_host.enabled }",
-                columnClass: 'col-lg-6 col-md-8 col-sm-8 col-xs-7',
+                columnClass: 'col-lg-4 col-md-8 col-sm-8 col-xs-7',
                 dataHostId: "{{ nested_host.id }}",
                 dataType: "nested_host",
-                class: 'InventoryManage-breakWord'
-            }
+            },
+            description: {
+                label: i18n._('Description'),
+                columnClass: 'd-none d-lg-flex col-lg-4',
+                template: `
+                    <div class="d-inline-block text-truncate">
+                        {{ nested_host.description }}
+                    </div>
+                `
+            },
         },
 
         fieldActions: {
 
-            columnClass: 'col-lg-6 col-md-4 col-sm-4 col-xs-5 text-right',
+            columnClass: 'col-lg-4 col-md-4 col-sm-4 col-xs-5 text-right',
             edit: {
                 ngClick: "editHost(nested_host.id)",
                 icon: 'icon-edit',

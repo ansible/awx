@@ -40,7 +40,6 @@
                 key: true,
                 uiSref: "inventories.edit.groups.edit({group_id:group.id})",
                 columnClass: 'col-lg-10 col-md-10 col-sm-10 col-xs-10',
-                class: 'InventoryManage-breakWord',
             }
         },
 

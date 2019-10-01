@@ -28,10 +28,7 @@ def gce(cred, env, private_data_dir):
     if 'INVENTORY_UPDATE_ID' not in env:
         env['GCE_EMAIL'] = username
         env['GCE_PROJECT'] = project
-    else:
-        # gcp_compute inventory plugin requires token_uri
-        # although it probably should not, since gce_modules do not
-        json_cred['token_uri'] = 'https://oauth2.googleapis.com/token'
+    json_cred['token_uri'] = 'https://oauth2.googleapis.com/token'
 
     handle, path = tempfile.mkstemp(dir=private_data_dir)
     f = os.fdopen(handle, 'w')
@@ -39,6 +36,14 @@ def gce(cred, env, private_data_dir):
     f.close()
     os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
     env['GCE_CREDENTIALS_FILE_PATH'] = path
+    env['GCP_SERVICE_ACCOUNT_FILE'] = path
+
+    # Handle env variables for new module types.
+    # This includes gcp_compute inventory plugin and
+    # all new gcp_* modules.
+    env['GCP_AUTH_KIND'] = 'serviceaccount'
+    env['GCP_PROJECT'] = project
+    env['GCP_ENV_TYPE'] = 'tower'
     return path
 
 

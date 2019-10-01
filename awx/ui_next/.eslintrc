@@ -1,0 +1,61 @@
+{
+  "parser": "babel-eslint",
+  "parserOptions": {
+    "ecmaVersion": 6,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true,
+      "modules": true
+    }
+  },
+  "extends": ["airbnb", "prettier", "prettier/react"],
+  "settings": {
+    "import/resolver": {
+      "webpack": {
+        "config": "webpack.config.js"
+      }
+    },
+    "react": {
+      "version": "16.5.2"
+    }
+  },
+  "env": {
+    "browser": true,
+    "node": true,
+    "jest": true
+  },
+  "globals": {
+    "window": true
+  },
+  "rules": {
+    "camelcase": "off",
+    "arrow-parens": "off",
+    "comma-dangle": "off",
+    "//": "https://github.com/benmosher/eslint-plugin-import/issues/479#issuecomment-252500896",
+    "import/no-extraneous-dependencies": "off",
+    "max-len": [
+      "error",
+      {
+        "code": 100,
+        "ignoreStrings": true,
+        "ignoreTemplateLiterals": true
+      }
+    ],
+    "no-continue": "off",
+    "no-debugger": "off",
+    "no-mixed-operators": "off",
+    "no-param-reassign": "off",
+    "no-plusplus": "off",
+    "no-underscore-dangle": "off",
+    "no-use-before-define": "off",
+    "no-multiple-empty-lines": ["error", { "max": 1 }],
+    "object-curly-newline": "off",
+    "no-trailing-spaces": ["error"],
+    "no-unused-expressions": ["error", { "allowShortCircuit": true }],
+    "react/prefer-stateless-function": "off",
+    "react/prop-types": "off",
+    "react/sort-comp": ["error", {}],
+    "jsx-a11y/label-has-for": "off",
+    "jsx-a11y/label-has-associated-control": "off"
+  }
+}

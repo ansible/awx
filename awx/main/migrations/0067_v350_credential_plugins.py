@@ -34,7 +34,7 @@ class Migration(migrations.Migration):
                 ('modified', models.DateTimeField(default=None, editable=False)),
                 ('description', models.TextField(blank=True, default='')),
                 ('input_field_name', models.CharField(max_length=1024)),
-                ('metadata', awx.main.fields.DynamicCredentialInputField(blank=True, default={})),
+                ('metadata', awx.main.fields.DynamicCredentialInputField(blank=True, default=dict)),
                 ('created_by', models.ForeignKey(default=None, editable=False, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name="{'class': 'credentialinputsource', 'model_name': 'credentialinputsource', 'app_label': 'main'}(class)s_created+", to=settings.AUTH_USER_MODEL)),
                 ('modified_by', models.ForeignKey(default=None, editable=False, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name="{'class': 'credentialinputsource', 'model_name': 'credentialinputsource', 'app_label': 'main'}(class)s_modified+", to=settings.AUTH_USER_MODEL)),
                 ('source_credential', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='target_input_sources', to='main.Credential')),

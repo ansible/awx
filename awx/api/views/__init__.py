@@ -91,7 +91,8 @@ from awx.main.redact import UriCleaner
 from awx.api.permissions import (
     JobTemplateCallbackPermission, TaskPermission, ProjectUpdatePermission,
     InventoryInventorySourcesUpdatePermission, UserPermission,
-    InstanceGroupTowerPermission, VariableDataPermission
+    InstanceGroupTowerPermission, VariableDataPermission,
+    WorkflowApprovalPermission
 )
 from awx.api import renderers
 from awx.api import serializers
@@ -118,6 +119,7 @@ from awx.api.views.organization import ( # noqa
     OrganizationNotificationTemplatesErrorList,
     OrganizationNotificationTemplatesStartedList,
     OrganizationNotificationTemplatesSuccessList,
+    OrganizationNotificationTemplatesApprovalList,
     OrganizationInstanceGroupsList,
     OrganizationAccessList,
     OrganizationObjectRolesList,
@@ -146,6 +148,7 @@ from awx.api.views.root import ( # noqa
     ApiV2RootView,
     ApiV2PingView,
     ApiV2ConfigView,
+    ApiV2SubscriptionView,
 )
 
 
@@ -243,13 +246,6 @@ class DashboardView(APIView):
                                    'failures_url': reverse('api:project_list', request=request) + "?scm_type=hg&last_job_failed=True",
                                    'total': hg_projects.count(),
                                    'failed': hg_failed_projects.count()}
-
-        user_jobs = get_user_queryset(request.user, models.Job)
-        user_failed_jobs = user_jobs.filter(failed=True)
-        data['jobs'] = {'url': reverse('api:job_list', request=request),
-                        'failure_url': reverse('api:job_list', request=request) + "?failed=True",
-                        'total': user_jobs.count(),
-                        'failed': user_failed_jobs.count()}
 
         user_list = get_user_queryset(request.user, models.User)
         team_list = get_user_queryset(request.user, models.Team)
@@ -837,8 +833,6 @@ class SystemJobEventsList(SubListAPIView):
     def finalize_response(self, request, response, *args, **kwargs):
         response['X-UI-Max-Events'] = settings.MAX_UI_JOB_EVENTS
         return super(SystemJobEventsList, self).finalize_response(request, response, *args, **kwargs)
-
-
 
 
 class ProjectUpdateCancel(RetrieveAPIView):
@@ -2997,7 +2991,7 @@ class WorkflowJobTemplateNodeChildrenBaseList(EnforceParentRelationshipMixin, Su
         relationships = ['success_nodes', 'failure_nodes', 'always_nodes']
         relationships.remove(self.relationship)
         qs = functools.reduce(lambda x, y: (x | y),
-                              (Q(**{'{}__in'.format(rel): [sub.id]}) for rel in relationships))
+                              (Q(**{'{}__in'.format(r): [sub.id]}) for r in relationships))
 
         if models.WorkflowJobTemplateNode.objects.filter(Q(pk=parent.id) & qs).exists():
             return {"Error": _("Relationship not allowed.")}
@@ -3011,6 +3005,34 @@ class WorkflowJobTemplateNodeChildrenBaseList(EnforceParentRelationshipMixin, Su
             return {"Error": _("Cycle detected.")}
         parent_node_type_relationship.remove(sub)
         return None
+
+
+class WorkflowJobTemplateNodeCreateApproval(RetrieveAPIView):
+
+    model = models.WorkflowJobTemplateNode
+    serializer_class = serializers.WorkflowJobTemplateNodeCreateApprovalSerializer
+    permission_classes = []
+
+    def post(self, request, *args, **kwargs):
+        obj = self.get_object()
+        serializer = self.get_serializer(instance=obj, data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        approval_template = obj.create_approval_template(**serializer.validated_data)
+        data = serializers.WorkflowApprovalTemplateSerializer(
+            approval_template,
+            context=self.get_serializer_context()
+        ).data
+        return Response(data, status=status.HTTP_200_OK)
+
+    def check_permissions(self, request):
+        obj = self.get_object().workflow_job_template
+        if request.method == 'POST':
+            if not request.user.can_access(models.WorkflowJobTemplate, 'change', obj, request.data):
+                self.permission_denied(request)
+        else:
+            if not request.user.can_access(models.WorkflowJobTemplate, 'read', obj):
+                self.permission_denied(request)
 
 
 class WorkflowJobTemplateNodeSuccessNodesList(WorkflowJobTemplateNodeChildrenBaseList):
@@ -3090,6 +3112,17 @@ class WorkflowJobTemplateCopy(CopyAPIView):
             data.update(messages)
         return Response(data)
 
+    def _build_create_dict(self, obj):
+        """Special processing of fields managed by char_prompts
+        """
+        r = super(WorkflowJobTemplateCopy, self)._build_create_dict(obj)
+        field_names = set(f.name for f in obj._meta.get_fields())
+        for field_name, ask_field_name in obj.get_ask_mapping().items():
+            if field_name in r and field_name not in field_names:
+                r.setdefault('char_prompts', {})
+                r['char_prompts'][field_name] = r.pop(field_name)
+        return r
+
     @staticmethod
     def deep_copy_permission_check_func(user, new_objs):
         for obj in new_objs:
@@ -3118,7 +3151,6 @@ class WorkflowJobTemplateLabelList(JobTemplateLabelList):
 
 class WorkflowJobTemplateLaunch(RetrieveAPIView):
 
-
     model = models.WorkflowJobTemplate
     obj_permission_type = 'start'
     serializer_class = serializers.WorkflowJobLaunchSerializer
@@ -3135,10 +3167,15 @@ class WorkflowJobTemplateLaunch(RetrieveAPIView):
                 extra_vars.setdefault(v, u'')
             if extra_vars:
                 data['extra_vars'] = extra_vars
-            if obj.ask_inventory_on_launch:
-                data['inventory'] = obj.inventory_id
-            else:
-                data.pop('inventory', None)
+            modified_ask_mapping = models.WorkflowJobTemplate.get_ask_mapping()
+            modified_ask_mapping.pop('extra_vars')
+            for field_name, ask_field_name in obj.get_ask_mapping().items():
+                if not getattr(obj, ask_field_name):
+                    data.pop(field_name, None)
+                elif field_name == 'inventory':
+                    data[field_name] = getattrd(obj, "%s.%s" % (field_name, 'id'), None)
+                else:
+                    data[field_name] = getattr(obj, field_name)
         return data
 
     def post(self, request, *args, **kwargs):
@@ -3252,6 +3289,11 @@ class WorkflowJobTemplateNotificationTemplatesSuccessList(WorkflowJobTemplateNot
     relationship = 'notification_templates_success'
 
 
+class WorkflowJobTemplateNotificationTemplatesApprovalList(WorkflowJobTemplateNotificationTemplatesAnyList):
+
+    relationship = 'notification_templates_approvals'
+
+
 class WorkflowJobTemplateAccessList(ResourceAccessList):
 
     model = models.User # needs to be User for AccessLists's
@@ -3287,7 +3329,7 @@ class WorkflowJobTemplateActivityStreamList(SubListAPIView):
                          Q(workflow_job_template_node__workflow_job_template=parent)).distinct()
 
 
-class WorkflowJobList(ListCreateAPIView):
+class WorkflowJobList(ListAPIView):
 
     model = models.WorkflowJob
     serializer_class = serializers.WorkflowJobListSerializer
@@ -3336,6 +3378,11 @@ class WorkflowJobNotificationsList(SubListAPIView):
     parent_model = models.WorkflowJob
     relationship = 'notifications'
     search_fields = ('subject', 'notification_type', 'body',)
+
+    def get_sublist_queryset(self, parent):
+        return self.model.objects.filter(Q(unifiedjob_notifications=parent) |
+                                         Q(unifiedjob_notifications__unified_job_node__workflow_job=parent,
+                                         unifiedjob_notifications__workflowapproval__isnull=False)).distinct()
 
 
 class WorkflowJobActivityStreamList(SubListAPIView):
@@ -3975,7 +4022,7 @@ class AdHocCommandNotificationsList(SubListAPIView):
     search_fields = ('subject', 'notification_type', 'body',)
 
 
-class SystemJobList(ListCreateAPIView):
+class SystemJobList(ListAPIView):
 
     model = models.SystemJob
     serializer_class = serializers.SystemJobListSerializer
@@ -4405,3 +4452,63 @@ for attr, value in list(locals().items()):
         name = camelcase_to_underscore(attr)
         view = value.as_view()
         setattr(this_module, name, view)
+
+
+class WorkflowApprovalTemplateDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
+
+    model = models.WorkflowApprovalTemplate
+    serializer_class = serializers.WorkflowApprovalTemplateSerializer
+
+
+class WorkflowApprovalTemplateJobsList(SubListAPIView):
+
+    model = models.WorkflowApproval
+    serializer_class = serializers.WorkflowApprovalListSerializer
+    parent_model = models.WorkflowApprovalTemplate
+    relationship = 'approvals'
+    parent_key = 'workflow_approval_template'
+
+
+class WorkflowApprovalList(ListCreateAPIView):
+
+    model = models.WorkflowApproval
+    serializer_class = serializers.WorkflowApprovalListSerializer
+
+    def get(self, request, *args, **kwargs):
+        return super(WorkflowApprovalList, self).get(request, *args, **kwargs)
+
+
+class WorkflowApprovalDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
+
+    model = models.WorkflowApproval
+    serializer_class = serializers.WorkflowApprovalSerializer
+
+
+class WorkflowApprovalApprove(RetrieveAPIView):
+    model = models.WorkflowApproval
+    serializer_class = serializers.WorkflowApprovalViewSerializer
+    permission_classes = (WorkflowApprovalPermission,)
+
+    def post(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if not request.user.can_access(models.WorkflowApproval, 'approve_or_deny', obj):
+            raise PermissionDenied(detail=_("User does not have permission to approve or deny this workflow."))
+        if obj.status != 'pending':
+            return Response({"error": _("This workflow step has already been approved or denied.")}, status=status.HTTP_400_BAD_REQUEST)
+        obj.approve(request)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class WorkflowApprovalDeny(RetrieveAPIView):
+    model = models.WorkflowApproval
+    serializer_class = serializers.WorkflowApprovalViewSerializer
+    permission_classes = (WorkflowApprovalPermission,)
+
+    def post(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if not request.user.can_access(models.WorkflowApproval, 'approve_or_deny', obj):
+            raise PermissionDenied(detail=_("User does not have permission to approve or deny this workflow."))
+        if obj.status != 'pending':
+            return Response({"error": _("This workflow step has already been approved or denied.")}, status=status.HTTP_400_BAD_REQUEST)
+        obj.deny(request)
+        return Response(status=status.HTTP_204_NO_CONTENT)

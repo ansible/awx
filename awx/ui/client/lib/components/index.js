@@ -2,6 +2,7 @@ import atLibServices from '~services';
 
 import actionGroup from '~components/action/action-group.directive';
 import actionButton from '~components/action/action-button.directive';
+import approvalsDrawer from '~components/approvalsDrawer/approvalsDrawer.directive';
 import dialog from '~components/dialog/dialog.component';
 import divider from '~components/utility/divider.directive';
 import dynamicSelect from '~components/input/dynamic-select.directive';
@@ -42,8 +43,10 @@ import toolbar from '~components/list/list-toolbar.directive';
 import topNavItem from '~components/layout/top-nav-item.directive';
 import truncate from '~components/truncate/truncate.directive';
 import atCodeMirror from '~components/code-mirror';
+import atSyntaxHighlight from '~components/syntax-highlight';
 import card from '~components/cards/card.directive';
 import cardGroup from '~components/cards/group.directive';
+import atSwitch from '~components/switch/switch.directive';
 
 import BaseInputController from '~components/input/base.controller';
 import ComponentsStrings from '~components/components.strings';
@@ -53,10 +56,12 @@ const MODULE_NAME = 'at.lib.components';
 angular
     .module(MODULE_NAME, [
         atLibServices,
-        atCodeMirror
+        atCodeMirror,
+        atSyntaxHighlight,
     ])
     .directive('atActionGroup', actionGroup)
     .directive('atActionButton', actionButton)
+    .directive('atApprovalsDrawer', approvalsDrawer)
     .component('atDialog', dialog)
     .directive('atDivider', divider)
     .directive('atDynamicSelect', dynamicSelect)
@@ -98,6 +103,7 @@ angular
     .directive('atTruncate', truncate)
     .directive('atCard', card)
     .directive('atCardGroup', cardGroup)
+    .directive('atSwitch', atSwitch)
     .service('BaseInputController', BaseInputController)
     .service('ComponentsStrings', ComponentsStrings);
 

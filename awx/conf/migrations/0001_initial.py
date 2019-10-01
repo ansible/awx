@@ -21,7 +21,8 @@ class Migration(migrations.Migration):
                 ('modified', models.DateTimeField(default=None, editable=False)),
                 ('key', models.CharField(max_length=255)),
                 ('value', jsonfield.fields.JSONField(null=True)),
-                ('user', models.ForeignKey(related_name='settings', default=None, editable=False, to=settings.AUTH_USER_MODEL, null=True)),
+                ('user', models.ForeignKey(related_name='settings', default=None, editable=False,
+                                           to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)),
             ],
             options={
                 'abstract': False,

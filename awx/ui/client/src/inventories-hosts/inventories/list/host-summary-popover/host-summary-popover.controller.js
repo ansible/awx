@@ -1,5 +1,5 @@
-export default [ '$scope', 'Empty', 'Wait', 'GetBasePath', 'Rest', 'ProcessErrors', '$state',
-    function($scope, Empty, Wait, GetBasePath, Rest, ProcessErrors, $state) {
+export default [ '$scope', 'Empty', 'Wait', 'GetBasePath', 'Rest', 'ProcessErrors',
+    function($scope, Empty, Wait, GetBasePath, Rest, ProcessErrors) {
 
         $scope.gatherRecentJobs = function(event) {
             if (!Empty($scope.inventory.id)) {
@@ -25,16 +25,5 @@ export default [ '$scope', 'Empty', 'Wait', 'GetBasePath', 'Rest', 'ProcessError
                 }
             }
         };
-
-        $scope.viewJob = function(jobId, type) {
-            let outputType = 'playbook';
-
-            if (type === 'workflow_job') {
-                $state.go('workflowResults', { id: jobId}, { reload: true });
-            } else {
-                $state.go('output', { id: jobId, type: outputType });
-            }
-        };
-
     }
 ];

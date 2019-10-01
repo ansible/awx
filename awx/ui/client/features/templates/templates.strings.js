@@ -13,6 +13,7 @@ function TemplatesStrings (BaseString) {
         ADD_DD_JT_LABEL: t.s('Job Template'),
         ADD_DD_WF_LABEL: t.s('Workflow Template'),
         OPEN_WORKFLOW_VISUALIZER: t.s('Click here to open the workflow visualizer'),
+        ROW_ITEM_LABEL_DESCRIPTION: t.s('Description'),
         ROW_ITEM_LABEL_ACTIVITY: t.s('Activity'),
         ROW_ITEM_LABEL_INVENTORY: t.s('Inventory'),
         ROW_ITEM_LABEL_PROJECT: t.s('Project'),
@@ -65,6 +66,8 @@ function TemplatesStrings (BaseString) {
         VALID_INTEGER: t.s('Please enter an answer that is a valid integer.'),
         VALID_DECIMAL: t.s('Please enter an answer that is a decimal number.'),
         PLAYBOOK_RUN: t.s('Playbook Run'),
+        SCM_BRANCH: t.s('SCM Branch'),
+        SCM_BRANCH_HELP: t.s('Branch to use in job run. Project default used if blank.'),
         CHECK: t.s('Check'),
         NO_CREDS_MATCHING_TYPE: t.s('No Credentials Matching This Type Have Been Created'),
         CREDENTIAL_TYPE_MISSING: typeLabel => t.s('This job template has a default {{typeLabel}} credential which must be included or replaced before proceeding.', { typeLabel })
@@ -107,14 +110,17 @@ function TemplatesStrings (BaseString) {
         ON_SUCCESS: t.s('On Success'),
         ON_FAILURE: t.s('On Failure'),
         ALWAYS: t.s('Always'),
+        PAUSE: t.s('Wait For Approval'),
+        JOB_TEMPLATE: t.s('Job Template'),
         PROJECT_SYNC: t.s('Project Sync'),
         INVENTORY_SYNC: t.s('Inventory Sync'),
         WORKFLOW: t.s('Workflow'),
+        TEMPLATE: t.s('Template'),
         WARNING: t.s('Warning'),
         TOTAL_NODES: t.s('TOTAL NODES'),
         ADD_A_NODE: t.s('ADD A NODE'),
         EDIT_TEMPLATE: t.s('EDIT TEMPLATE'),
-        JOBS: t.s('JOBS'),
+        JOBS: t.s('Jobs'),
         PLEASE_CLICK_THE_START_BUTTON: t.s('Please click the start button to build your workflow.'),
         PLEASE_HOVER_OVER_A_TEMPLATE: t.s('Please hover over a template for additional options.'),
         EDIT_LINK_TOOLTIP: t.s('Click to edit link'),
@@ -141,7 +147,13 @@ function TemplatesStrings (BaseString) {
         UNSAVED_CHANGES_PROMPT_TEXT: t.s('Are you sure you want to exit the Workflow Creator without saving your changes?'),
         EXIT: t.s('EXIT'),
         CANCEL: t.s('CANCEL'),
-        SAVE_AND_EXIT: t.s('SAVE & EXIT')
+        SAVE_AND_EXIT: t.s('SAVE & EXIT'),
+        APPROVAL: t.s('Approval'),
+        TIMEOUT_POPOVER: t.s('The amount of time to wait before this approval step is automatically denied. Defaults to 0 for no timeout.'),
+        TIMED_OUT: t.s('APPROVAL TIMED OUT'),
+        TIMEOUT: t.s('Timeout'),
+        APPROVED: t.s('APPROVED'),
+        DENIED: t.s('DENIED')
     };
 }
 

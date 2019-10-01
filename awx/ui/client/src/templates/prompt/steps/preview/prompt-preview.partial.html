@@ -20,6 +20,10 @@
         <div class="Prompt-previewRowTitle">{{:: vm.strings.get('prompt.INVENTORY') }}</div>
         <div class="Prompt-previewRowValue" ng-bind="promptData.prompts.inventory.value.name"></div>
     </div>
+    <div class="Prompt-previewRow--flex" ng-if="promptData.prompts.scmBranch.value">
+        <div class="Prompt-previewRowTitle">{{:: vm.strings.get('prompt.SCM_BRANCH') }}</div>
+        <div class="Prompt-previewRowValue" ng-bind="promptData.prompts.scmBranch.value"></div>
+    </div>
     <div class="Prompt-previewRow--flex" ng-if="promptData.prompts.limit.value">
         <div class="Prompt-previewRowTitle">{{:: vm.strings.get('prompt.LIMIT') }}</div>
         <div class="Prompt-previewRowValue" ng-bind="promptData.prompts.limit.value"></div>

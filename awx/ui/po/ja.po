@@ -5963,10 +5963,6 @@ msgstr "更新がありません。クリックして詳細を確認してくだ
 msgid "Update on Launch"
 msgstr "起動時の更新"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:388
-msgid "Update on Project Change"
-msgstr "プロジェクト変更時の更新"
-
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:394
 msgid "Update on Project Update"
 msgstr "プロジェクト更新時の更新"

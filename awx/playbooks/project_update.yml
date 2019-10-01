@@ -11,9 +11,9 @@
 # scm_username: username (only for svn/insights)
 # scm_password: password (only for svn/insights)
 # scm_accept_hostkey: true/false (only for git, set automatically)
-# scm_revision: current revision in tower
-# scm_revision_output: where to store gathered revision (temporary file)
+# scm_refspec: a refspec to fetch in addition to obtaining version
 # roles_enabled: Allow us to pull roles from a requirements.yml file
+# roles_destination: Path to save roles from galaxy to
 # awx_version: Current running version of the awx or tower as a string
 # awx_license_type: "open" for AWX; else presume Tower
 
@@ -29,27 +29,12 @@
       delegate_to: localhost
 
     - block:
-      - name: check repo using git
-        git:
-          dest: "{{project_path|quote}}"
-          repo: "{{scm_url}}"
-          version: "{{scm_branch|quote}}"
-          force: "{{scm_clean}}"
-          update: false
-          clone: false
-        register: repo_check
-        when: scm_full_checkout|default('')
-        ignore_errors: true
-
-      - name: break if already checked out
-        meta: end_play
-        when: scm_full_checkout|default('') and repo_check is succeeded and repo_check.before == scm_branch
-
       - name: update project using git
         git:
           dest: "{{project_path|quote}}"
           repo: "{{scm_url}}"
           version: "{{scm_branch|quote}}"
+          refspec: "{{scm_refspec|default(omit)}}"
           force: "{{scm_clean}}"
           accept_hostkey: "{{scm_accept_hostkey|default(omit)}}"
         register: git_result
@@ -131,13 +116,6 @@
       debug: msg="Repository Version {{ scm_version }}"
       when: scm_version is defined
 
-    - name: Write Repository Version
-      copy:
-        dest: "{{ scm_revision_output }}"
-        content: "{{ scm_version }}"
-      when: scm_version is defined and scm_revision_output is defined
-      delegate_to: localhost
-
 - hosts: all
   gather_facts: false
   tasks:
@@ -148,18 +126,32 @@
         register: doesRequirementsExist
 
       - name: fetch galaxy roles from requirements.yml
-        command: ansible-galaxy install -r requirements.yml -p {{project_path|quote}}/roles/
+        command: ansible-galaxy install -r requirements.yml -p {{roles_destination|quote}}{{ ' -' + 'v' * ansible_verbosity if ansible_verbosity else '' }}
         args:
           chdir: "{{project_path|quote}}/roles"
         register: galaxy_result
-        when: doesRequirementsExist.stat.exists and (scm_version is undefined or (git_result is defined and git_result['before'] == git_result['after']))
+        when: doesRequirementsExist.stat.exists
         changed_when: "'was installed successfully' in galaxy_result.stdout"
-
-      - name: fetch galaxy roles from requirements.yml (forced update)
-        command: ansible-galaxy install -r requirements.yml -p {{project_path|quote}}/roles/ --force
-        args:
-          chdir: "{{project_path|quote}}/roles"
-        when: doesRequirementsExist.stat.exists and galaxy_result is skipped
+        environment:
+          ANSIBLE_FORCE_COLOR: False
 
       when: roles_enabled|bool
+      delegate_to: localhost
+
+    - block:
+      - name: detect collections/requirements.yml
+        stat: path={{project_path|quote}}/collections/requirements.yml
+        register: doesCollectionRequirementsExist
+
+      - name: fetch galaxy collections from collections/requirements.yml
+        command: ansible-galaxy collection install -r requirements.yml -p {{collections_destination|quote}}{{ ' -' + 'v' * ansible_verbosity if ansible_verbosity else '' }}
+        args:
+          chdir: "{{project_path|quote}}/collections"
+        register: galaxy_collection_result
+        when: doesCollectionRequirementsExist.stat.exists
+        changed_when: "'Installing ' in galaxy_collection_result.stdout"
+        environment:
+          ANSIBLE_FORCE_COLOR: False
+
+      when: collections_enabled|bool
       delegate_to: localhost

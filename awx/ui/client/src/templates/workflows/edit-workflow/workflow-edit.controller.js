@@ -54,6 +54,8 @@ export default [
         $scope.parseType = 'yaml';
         $scope.includeWorkflowMaker = false;
         $scope.ask_inventory_on_launch = workflowJobTemplateData.ask_inventory_on_launch;
+        $scope.ask_limit_on_launch = workflowJobTemplateData.ask_limit_on_launch;
+        $scope.ask_scm_branch_on_launch = workflowJobTemplateData.ask_scm_branch_on_launch;
         $scope.ask_variables_on_launch = (workflowJobTemplateData.ask_variables_on_launch) ? true : false;
 
         if (Inventory){
@@ -62,7 +64,7 @@ export default [
         }
 
         $scope.openWorkflowMaker = function() {
-            $state.go('.workflowMaker');
+            $state.go('templates.editWorkflowJobTemplate.workflowMaker');
         };
 
         $scope.formSave = function () {
@@ -91,6 +93,8 @@ export default [
                 }
 
                 data.ask_inventory_on_launch = Boolean($scope.ask_inventory_on_launch);
+                data.ask_limit_on_launch = Boolean($scope.ask_limit_on_launch);
+                data.ask_scm_branch_on_launch = Boolean($scope.ask_scm_branch_on_launch);
                 data.ask_variables_on_launch = Boolean($scope.ask_variables_on_launch);
 
                 data.extra_vars = ToJSON($scope.parseType,

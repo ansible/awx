@@ -8,8 +8,11 @@ from awx.sso.backends import _get_or_set_enterprise_user
 
 @pytest.mark.django_db
 def test_fetch_user_if_exist(existing_tacacsplus_user):
-    new_user = _get_or_set_enterprise_user("foo", "password", "tacacs+")
-    assert new_user == existing_tacacsplus_user
+    with mock.patch('awx.sso.backends.logger') as mocked_logger:
+        new_user = _get_or_set_enterprise_user("foo", "password", "tacacs+")
+        mocked_logger.debug.assert_not_called()
+        mocked_logger.warn.assert_not_called()
+        assert new_user == existing_tacacsplus_user
 
 
 @pytest.mark.django_db

@@ -6216,10 +6216,6 @@ msgstr "Update ontbreekt. Klik voor meer informatie"
 msgid "Update on Launch"
 msgstr "Update bij opstarten"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:388
-msgid "Update on Project Change"
-msgstr "Update voor projectwijziging"
-
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:394
 msgid "Update on Project Update"
 msgstr "Update voor projectupdate"

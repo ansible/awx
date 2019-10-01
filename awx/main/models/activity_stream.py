@@ -4,6 +4,7 @@
 # Tower
 from awx.api.versioning import reverse
 from awx.main.fields import JSONField
+from awx.main.models.base import accepts_json
 
 # Django
 from django.db import models
@@ -34,7 +35,7 @@ class ActivityStream(models.Model):
     actor = models.ForeignKey('auth.User', null=True, on_delete=models.SET_NULL, related_name='activity_stream')
     operation = models.CharField(max_length=13, choices=OPERATION_CHOICES)
     timestamp = models.DateTimeField(auto_now_add=True)
-    changes = models.TextField(blank=True)
+    changes = accepts_json(models.TextField(blank=True))
     deleted_actor = JSONField(null=True)
     action_node = models.CharField(
         blank=True,
@@ -66,6 +67,8 @@ class ActivityStream(models.Model):
     workflow_job_node = models.ManyToManyField("WorkflowJobNode", blank=True)
     workflow_job_template = models.ManyToManyField("WorkflowJobTemplate", blank=True)
     workflow_job = models.ManyToManyField("WorkflowJob", blank=True)
+    workflow_approval_template = models.ManyToManyField("WorkflowApprovalTemplate", blank=True)
+    workflow_approval = models.ManyToManyField("WorkflowApproval", blank=True)
     unified_job_template = models.ManyToManyField("UnifiedJobTemplate", blank=True, related_name='activity_stream_as_unified_job_template+')
     unified_job = models.ManyToManyField("UnifiedJob", blank=True, related_name='activity_stream_as_unified_job+')
     ad_hoc_command = models.ManyToManyField("AdHocCommand", blank=True)

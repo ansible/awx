@@ -256,6 +256,7 @@ class TestExtraVarSanitation(TestJobExecution):
 
     def test_vars_unsafe_by_default(self, job, private_data_dir):
         job.created_by = User(pk=123, username='angry-spud')
+        job.inventory = Inventory(pk=123, name='example-inv')
 
         task = tasks.RunJob()
         task.build_extra_vars_file(job, private_data_dir)
@@ -268,13 +269,14 @@ class TestExtraVarSanitation(TestJobExecution):
                        'awx_user_name', 'tower_job_launch_type',
                        'awx_project_revision',
                        'tower_project_revision', 'tower_user_name',
-                       'awx_job_launch_type']:
+                       'awx_job_launch_type',
+                       'awx_inventory_name', 'tower_inventory_name']:
             assert hasattr(extra_vars[unsafe], '__UNSAFE__')
 
         # ensure that non-strings are marked as safe
         for safe in ['awx_job_template_id', 'awx_job_id', 'awx_user_id',
                      'tower_user_id', 'tower_job_template_id',
-                     'tower_job_id']:
+                     'tower_job_id', 'awx_inventory_id', 'tower_inventory_id']:
             assert not hasattr(extra_vars[safe], '__UNSAFE__')
 
 
@@ -359,15 +361,16 @@ class TestExtraVarSanitation(TestJobExecution):
 class TestGenericRun():
 
     def test_generic_failure(self, patch_Job):
-        job = Job(status='running', inventory=Inventory())
+        job = Job(status='running', inventory=Inventory(), project=Project())
         job.websocket_emit_status = mock.Mock()
 
         task = tasks.RunJob()
         task.update_model = mock.Mock(return_value=job)
         task.build_private_data_files = mock.Mock(side_effect=OSError())
 
-        with pytest.raises(Exception):
-            task.run(1)
+        with mock.patch('awx.main.tasks.copy_tree'):
+            with pytest.raises(Exception):
+                task.run(1)
 
         update_model_call = task.update_model.call_args[1]
         assert 'OSError' in update_model_call['result_traceback']
@@ -384,8 +387,9 @@ class TestGenericRun():
         task.update_model = mock.Mock(wraps=update_model_wrapper)
         task.build_private_data_files = mock.Mock()
 
-        with pytest.raises(Exception):
-            task.run(1)
+        with mock.patch('awx.main.tasks.copy_tree'):
+            with pytest.raises(Exception):
+                task.run(1)
 
         for c in [
             mock.call(1, status='running', start_args=''),
@@ -432,6 +436,7 @@ class TestGenericRun():
         job = Job(project=Project(), inventory=Inventory())
         task = tasks.RunJob()
         task.should_use_proot = lambda instance: True
+        task.instance = job
 
         private_data_dir = '/foo'
         cwd = '/bar'
@@ -442,7 +447,7 @@ class TestGenericRun():
 
         process_isolation_params = task.build_params_process_isolation(job, private_data_dir, cwd)
         assert True is process_isolation_params['process_isolation']
-        assert settings.AWX_PROOT_BASE_PATH == process_isolation_params['process_isolation_path'], \
+        assert process_isolation_params['process_isolation_path'].startswith(settings.AWX_PROOT_BASE_PATH), \
             "Directory where a temp directory will be created for the remapping to take place"
         assert private_data_dir in process_isolation_params['process_isolation_show_paths'], \
             "The per-job private data dir should be in the list of directories the user can see."
@@ -1683,6 +1688,7 @@ class TestProjectUpdateCredentials(TestJobExecution):
     def test_process_isolation_exposes_projects_root(self, private_data_dir, project_update):
         task = tasks.RunProjectUpdate()
         task.revision_path = 'foobar'
+        task.instance = project_update
         ssh = CredentialType.defaults['ssh']()
         project_update.scm_type = 'git'
         project_update.credential = Credential(
@@ -1699,8 +1705,6 @@ class TestProjectUpdateCredentials(TestJobExecution):
 
         call_args, _ = task._write_extra_vars_file.call_args_list[0]
         _, extra_vars = call_args
-
-        assert extra_vars["scm_revision_output"] == 'foobar'
 
     def test_username_and_password_auth(self, project_update, scm_type):
         task = tasks.RunProjectUpdate()

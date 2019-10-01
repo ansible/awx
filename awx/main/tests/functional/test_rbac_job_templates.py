@@ -106,7 +106,7 @@ def test_job_template_extra_credentials_prompts_access(
     jt.credentials.add(machine_credential)
     jt.execute_role.members.add(rando)
     r = post(
-        reverse('api:job_template_launch', kwargs={'version': 'v2', 'pk': jt.id}),
+        reverse('api:job_template_launch', kwargs={'pk': jt.id}),
         {'credentials': [machine_credential.pk, vault_credential.pk]}, rando
     )
     assert r.status_code == 403

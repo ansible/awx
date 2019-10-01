@@ -67,9 +67,9 @@
           -e POSTGRESQL_MAX_CONNECTIONS={{ pg_max_connections|default(1024) }} \
           -e POSTGRESQL_USER={{ pg_username }} \
           -e POSTGRESQL_PASSWORD={{ pg_password | quote }} \
-          -e POSTGRESQL_ADMIN_PASSWORD={{ pg_password | quote }} \
+          -e POSTGRESQL_ADMIN_PASSWORD={{ pg_admin_password | quote }} \
           -e POSTGRESQL_DATABASE={{ pg_database }} \
-          -e POSTGRESQL_VERSION=9.6 \
+          -e POSTGRESQL_VERSION=10 \
           -n {{ kubernetes_namespace }}
       register: openshift_pg_activate
       no_log: yes
@@ -78,31 +78,32 @@
     - postgres_svc_details is defined and postgres_svc_details.rc != 0
     - openshift_host is defined
 
-- name: Deploy and Activate Postgres (Kubernetes)
-  shell: |
-    helm repo update --tiller-namespace={{ tiller_namespace | default('kube-system') }}
-    helm upgrade {{ postgresql_service_name }} --install \
-      --namespace {{ kubernetes_namespace }} \
-      --set postgresqlUsername={{ pg_username }} \
-      --set postgresqlPassword={{ pg_password | quote }} \
-      --set postgresqlDatabase={{ pg_database }} \
-      --set persistence.size={{ pg_volume_capacity|default('5')}}Gi \
-      --version="2.0.0" \
-      --tiller-namespace={{ tiller_namespace | default('kube-system') }} \
-      {{ '--set persistence.storageClass='+pg_persistence_storageClass if pg_persistence_storageClass is defined else ' ' }} \
-      {{ '--set resources.limits.cpu='+(pg_cpu_limit | string)+'m' if pg_cpu_limit is defined else ' ' }} \
-      {{ '--set resources.limits.memory='+(pg_mem_limit | string)+'Gi' if pg_mem_limit is defined else ' ' }} \
-      stable/postgresql
+- name: Deploy PostgreSQL (Kubernetes)
+  block:
+    - name: Template PostgreSQL Deployment (Kubernetes)
+      set_fact:
+        pg_values: "{{ lookup('template', 'postgresql-values.yml.j2') }}"
+      no_log: yes
+
+    - name: Deploy and Activate Postgres (Kubernetes)
+      shell: |
+        helm repo update --tiller-namespace={{ tiller_namespace | default('kube-system') }}
+        echo {{ pg_values | quote }} | helm upgrade {{ postgresql_service_name }} --install \
+          --namespace {{ kubernetes_namespace }} \
+          --version="6.2.1" \
+          --tiller-namespace={{ tiller_namespace | default('kube-system') }} \
+          --values - \
+          stable/postgresql
+      register: kubernetes_pg_activate
+      no_log: yes
   when:
     - pg_hostname is not defined or pg_hostname == ''
     - postgres_svc_details is defined and postgres_svc_details.rc != 0
     - kubernetes_context is defined
-  register: kubernetes_pg_activate
-  no_log: yes
 
 - name: Set postgresql hostname to helm package service (Kubernetes)
   set_fact:
-    pg_hostname: "{{ postgresql_service_name }}-postgresql"
+    pg_hostname: "{{ postgresql_service_name }}"
   when:
     - pg_hostname is not defined or pg_hostname == ''
     - kubernetes_context is defined

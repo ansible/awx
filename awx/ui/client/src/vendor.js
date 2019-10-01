@@ -33,6 +33,7 @@ $.fn.btn = btn;
 
 // Whitelist table elements so they can be used in popovers
 $.fn.popover.Constructor.Default.whiteList.table = [];
+$.fn.popover.Constructor.Default.whiteList.th = [];
 $.fn.popover.Constructor.Default.whiteList.tr = [];
 $.fn.popover.Constructor.Default.whiteList.td = [];
 $.fn.popover.Constructor.Default.whiteList.tbody = [];
@@ -71,3 +72,4 @@ require('ng-toast');
 require('lr-infinite-scroll');
 require('codemirror/mode/yaml/yaml');
 require('codemirror/mode/javascript/javascript');
+require('codemirror/mode/jinja2/jinja2');

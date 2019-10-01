@@ -94,9 +94,12 @@
         <div class="DashboardGraphs-graphContainer" auto-size-module
             graph-type="jobsStatus"
             ng-class="{'is-selected': jobStatusSelected }">
-            <job-status-graph class="DashboardGraphs-graph
-                DashboardGraphs-graph--jobStatusGraph"
-                data="graphData.jobStatus" period="month" job-type="all">
+            <job-status-graph 
+                class="DashboardGraphs-graph DashboardGraphs-graph--jobStatusGraph"
+                data="graphData.jobStatus"
+                period="graphData.period"
+                job-type="graphData.jobType"
+                status="graphData.status">
             </job-status-graph>
         </div>
     </div>

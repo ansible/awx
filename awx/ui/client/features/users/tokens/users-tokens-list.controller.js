@@ -120,7 +120,7 @@ function ListTokensController (
                 .then(() => {
                     let reloadListStateParams = null;
 
-                    if ($scope.tokens.length === 1 && $state.params.token_search &&
+                    if ($scope.vm.tokens.length === 1 && $state.params.token_search &&
                     !_.isEmpty($state.params.token_search.page) &&
                     $state.params.token_search.page !== '1') {
                         const page = `${(parseInt(reloadListStateParams

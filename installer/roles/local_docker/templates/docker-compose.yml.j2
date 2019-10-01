@@ -118,7 +118,7 @@ services:
       no_proxy: {{ no_proxy | default('') }}
 
   memcached:
-    image: memcached:alpine
+    image: "{{ memcached_image }}:{{ memcached_version }}"
     container_name: awx_memcached
     restart: unless-stopped
     environment:
@@ -128,14 +128,14 @@ services:
 
   {% if pg_hostname is not defined %}
   postgres:
-    image: postgres:9.6
+    image: postgres:10
     container_name: awx_postgres
     restart: unless-stopped
     volumes:
-      - {{ postgres_data_dir }}:/var/lib/postgresql/data:Z
+      - {{ postgres_data_dir }}/10/data/:/var/lib/postgresql/data/pgdata:Z
     environment:
       POSTGRES_USER: {{ pg_username }}
-      POSTGRES_PASSWORD: {{ pg_password | quote }}
+      POSTGRES_PASSWORD: {{ pg_password }}
       POSTGRES_DB: {{ pg_database }}
       PGDATA: /var/lib/postgresql/data/pgdata
       http_proxy: {{ http_proxy | default('') }}

@@ -186,11 +186,8 @@ class TestResourceAccessList:
 
     def mock_request(self):
         return mock.MagicMock(
-            user=mock.MagicMock(
-                is_anonymous=mock.MagicMock(return_value=False),
-                is_superuser=False
-            ), method='GET')
-
+            user=mock.MagicMock(is_anonymous=False, is_superuser=False),
+            method='GET')
 
     def mock_view(self, parent=None):
         view = ResourceAccessList()
@@ -200,14 +197,12 @@ class TestResourceAccessList:
             view.get_parent_object = lambda: parent
         return view
 
-
     def test_parent_access_check_failed(self, mocker, mock_organization):
         mock_access = mocker.MagicMock(__name__='for logger', return_value=False)
         with mocker.patch('awx.main.access.BaseAccess.can_read', mock_access):
             with pytest.raises(PermissionDenied):
                 self.mock_view(parent=mock_organization).check_permissions(self.mock_request())
             mock_access.assert_called_once_with(mock_organization)
-
 
     def test_parent_access_check_worked(self, mocker, mock_organization):
         mock_access = mocker.MagicMock(__name__='for logger', return_value=True)

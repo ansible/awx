@@ -73,7 +73,7 @@ class ActivityStreamMiddleware(threading.local, MiddlewareMixin):
         super().__init__(get_response)
 
     def process_request(self, request):
-        if hasattr(request, 'user') and hasattr(request.user, 'is_authenticated') and request.user.is_authenticated():
+        if hasattr(request, 'user') and request.user.is_authenticated:
             user = request.user
         else:
             user = None

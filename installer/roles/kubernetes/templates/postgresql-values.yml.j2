@@ -1,0 +1,33 @@
+postgresqlUsername: {{ pg_username }}
+postgresqlPassword: {{ pg_password }}
+postgresqlDatabase: {{ pg_database }}
+persistence:
+  size: {{ pg_volume_capacity|default('5') }}Gi
+{% if pg_persistence_storageClass is defined %}
+  storageClass: {{ pg_persistence_storageClass }}
+{% endif %}
+{% if pg_cpu_limit is defined or pg_mem_limit is defined %}
+resources:
+  limits:
+{% if pg_cpu_limit is defined %}
+    cpu: {{ pg_cpu_limit | string }}m
+{% endif %}
+{% if pg_mem_limit is defined %}
+    memory: {{ pg_mem_limit | string }}Gi
+{% endif %}
+{% endif %}
+{% if tolerations is defined or node_selector is defined or affinity is defined %}
+master:
+{% if tolerations is defined %}
+  tolerations:
+{{ tolerations | to_nice_yaml(indent=2) | indent(width=4, indentfirst=True) }}
+{% endif %}
+{% if node_selector is defined %}
+  nodeSelector:
+{{ node_selector | to_nice_yaml(indent=2) | indent(width=4, indentfirst=True) }}
+{% endif %}
+{% if affinity is defined %}
+  affinity:
+{{ affinity | to_nice_yaml(indent=2) | indent(width=4, indentfirst=True) }}
+{% endif %}
+{% endif %}

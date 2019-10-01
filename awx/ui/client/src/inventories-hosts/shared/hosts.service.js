@@ -34,6 +34,15 @@
                     .catch(this.error.bind(this))
                     .finally(Wait('stop'));
             },
+            patch: function(id, data){
+                Wait('start');
+                this.url = GetBasePath('hosts') + id;
+                Rest.setUrl(this.url);
+                return Rest.patch(data)
+                    .then(this.success.bind(this))
+                    .catch(this.error.bind(this))
+                    .finally(Wait('stop'));
+            },
             post: function(host){
                 Wait('start');
                 this.url = GetBasePath('hosts');

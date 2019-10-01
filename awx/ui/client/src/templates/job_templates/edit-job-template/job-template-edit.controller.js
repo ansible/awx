@@ -82,6 +82,11 @@ export default
 
                 $scope.$watch('project', function (newValue, oldValue) {
                     if (newValue !== oldValue) {
+                        if (oldValue) {
+                            $scope.scm_branch = null;
+                            $scope.ask_scm_branch_on_launch = false;
+                        }
+                        
                         var url;
                         if ($scope.playbook) {
                             $scope.playbook_options = [$scope.playbook];
@@ -104,7 +109,11 @@ export default
                                             playbookNotFound = false;
                                         }
                                     }
+                                    if ($scope.playbook && $scope.playbook_options.indexOf($scope.playbook) === -1) {
+                                        $scope.playbook_options.push($scope.playbook);
+                                    }
                                     $scope.playbookNotFound = playbookNotFound;
+                                    $scope.allow_playbook_selection = true;
                                     sync_playbook_select2();
                                     if ($scope.playbook) {
                                         jobTemplateLoadFinished();
@@ -125,6 +134,7 @@ export default
                             Rest.setUrl(GetBasePath('projects') + $scope.project + '/');
                             promises.push(Rest.get()
                                 .then(({data}) => {
+                                    $scope.allow_branch_override = data.allow_override;
                                     var msg;
                                     switch (data.status) {
                                     case 'failed':
@@ -177,7 +187,11 @@ export default
             function sync_playbook_select2() {
                 select2LoadDefer.push(CreateSelect2({
                     element:'#playbook-select',
-                    multiple: false
+                    addNew: true,
+                    multiple: false,
+                    scope: $scope,
+                    options: 'playbook_options',
+                    model: 'playbook'
                 }));
             }
 
@@ -191,11 +205,6 @@ export default
             function jobTemplateLoadFinished(){
                 select2LoadDefer.push(CreateSelect2({
                     element:'#job_template_job_type',
-                    multiple: false
-                }));
-
-                select2LoadDefer.push(CreateSelect2({
-                    element:'#playbook-select',
                     multiple: false
                 }));
 
@@ -376,6 +385,9 @@ export default
 
                 $scope.ask_diff_mode_on_launch = (jobTemplateData.ask_diff_mode_on_launch) ? true : false;
                 master.ask_diff_mode_on_launch = $scope.ask_diff_mode_on_launch;
+
+                $scope.ask_scm_branch_on_launch = (jobTemplateData.ask_scm_branch_on_launch) ? true : false;
+                master.ask_scm_branch_on_launch = $scope.ask_scm_branch_on_launch;
 
                 $scope.job_tag_options = (jobTemplateData.job_tags) ? jobTemplateData.job_tags.split(',')
                     .map((i) => ({name: i, label: i, value: i})) : [];
@@ -652,8 +664,9 @@ export default
                             for(var i=0; i<form.fields[fld].fields.length; i++) {
                                 data[form.fields[fld].fields[i].name] = $scope[form.fields[fld].fields[i].name];
                             }
-                        }
-                        else {
+                        } else if (fld === 'scm_branch' && $scope.allow_branch_override) {
+                            data[fld] = $scope[fld];
+                        } else {
                             if (fld !== 'extra_vars' &&
                                 fld !== 'survey' &&
                                 fld !== 'forks') {
@@ -664,6 +677,7 @@ export default
 
                     data.forks = $scope.forks || 0;
                     data.ask_diff_mode_on_launch = $scope.ask_diff_mode_on_launch ? $scope.ask_diff_mode_on_launch : false;
+                    data.ask_scm_branch_on_launch = $scope.ask_scm_branch_on_launch && $scope.allow_branch_override ? $scope.ask_scm_branch_on_launch : false;
                     data.ask_tags_on_launch = $scope.ask_tags_on_launch ? $scope.ask_tags_on_launch : false;
                     data.ask_skip_tags_on_launch = $scope.ask_skip_tags_on_launch ? $scope.ask_skip_tags_on_launch : false;
                     data.ask_limit_on_launch = $scope.ask_limit_on_launch ? $scope.ask_limit_on_launch : false;

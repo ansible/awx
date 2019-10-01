@@ -12,11 +12,10 @@ function atModalLink (scope, el, attrs, controllers) {
     });
 }
 
-function AtModalController ($timeout, eventService, strings) {
+function AtModalController (strings) {
     const vm = this;
 
     let overlay;
-    let listeners;
 
     vm.strings = strings;
 
@@ -33,18 +32,12 @@ function AtModalController ($timeout, eventService, strings) {
         vm.modal.title = title;
         vm.modal.message = message;
 
-        listeners = eventService.addListeners([
-            [overlay, 'click', vm.clickToHide]
-        ]);
-
         overlay.style.display = 'block';
         overlay.style.opacity = 1;
     };
 
     vm.hide = () => {
         overlay.style.opacity = 0;
-
-        eventService.remove(listeners);
 
         setTimeout(() => {
             overlay.style.display = 'none';
@@ -63,8 +56,6 @@ function AtModalController ($timeout, eventService, strings) {
 }
 
 AtModalController.$inject = [
-    '$timeout',
-    'EventService',
     'ComponentsStrings'
 ];
 

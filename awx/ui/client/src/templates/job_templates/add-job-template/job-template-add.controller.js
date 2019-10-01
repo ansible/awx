@@ -104,7 +104,11 @@
                     });
                     CreateSelect2({
                         element:'#playbook-select',
-                        multiple: false
+                        addNew: true,
+                        multiple: false,
+                        scope: $scope,
+                        options: 'playbook_options',
+                        model: 'playbook'
                     });
                     CreateSelect2({
                         element:'#job_template_verbosity',
@@ -155,7 +159,11 @@
             function sync_playbook_select2() {
                 CreateSelect2({
                     element:'#playbook-select',
-                    multiple: false
+                    addNew: true,
+                    multiple: false,
+                    scope: $scope,
+                    options: 'playbook_options',
+                    model: 'playbook'
                 });
             }
 
@@ -177,6 +185,9 @@
                                 for (i = 0; i < data.length; i++) {
                                     opts.push(data[i]);
                                 }
+                                if ($scope.playbook && opts.indexOf($scope.playbook) === -1) {
+                                    opts.push($scope.playbook);
+                                }
                                 $scope.playbook_options = opts;
                                 sync_playbook_select2();
                                 Wait('stop');
@@ -195,10 +206,14 @@
 
             // Detect and alert user to potential SCM status issues
             checkSCMStatus = function (oldValue, newValue) {
-                if (oldValue !== newValue && !Empty($scope.project)) {
+                if ((oldValue !== newValue || (oldValue === undefined && newValue === undefined)) && !Empty($scope.project)) {
                     Rest.setUrl(GetBasePath('projects') + $scope.project + '/');
                     Rest.get()
                         .then(({data}) => {
+                            $scope.allow_branch_override = data.allow_override;
+                            $scope.allow_playbook_selection = true;
+                            selectPlaybook('force_load');
+
                             var msg;
                             switch (data.status) {
                             case 'failed':
@@ -219,6 +234,8 @@
                             ProcessErrors($scope, data, status, form, { hdr: 'Error!',
                                 msg: 'Failed to get project ' + $scope.project + '. GET returned status: ' + status });
                         });
+                } else {
+                    $scope.allow_playbook_selection = false;
                 }
             };
 
@@ -295,6 +312,7 @@
                     }
                     data.forks = $scope.forks || 0;
                     data.ask_diff_mode_on_launch = $scope.ask_diff_mode_on_launch ? $scope.ask_diff_mode_on_launch : false;
+                    data.ask_scm_branch_on_launch = $scope.ask_scm_branch_on_launch ? $scope.ask_scm_branch_on_launch : false;
                     data.ask_tags_on_launch = $scope.ask_tags_on_launch ? $scope.ask_tags_on_launch : false;
                     data.ask_skip_tags_on_launch = $scope.ask_skip_tags_on_launch ? $scope.ask_skip_tags_on_launch : false;
                     data.ask_limit_on_launch = $scope.ask_limit_on_launch ? $scope.ask_limit_on_launch : false;

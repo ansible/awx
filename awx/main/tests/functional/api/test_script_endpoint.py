@@ -11,7 +11,7 @@ def test_empty_inventory(post, get, admin_user, organization, group_factory):
                           kind='',
                           organization=organization)
     inventory.save()
-    resp = get(reverse('api:inventory_script_view', kwargs={'version': 'v2', 'pk': inventory.pk}), admin_user)
+    resp = get(reverse('api:inventory_script_view', kwargs={'pk': inventory.pk}), admin_user)
     jdata = json.loads(resp.content)
     jdata.pop('all')
 
@@ -27,7 +27,7 @@ def test_ungrouped_hosts(post, get, admin_user, organization, group_factory):
     inventory.save()
     Host.objects.create(name='first_host', inventory=inventory)
     Host.objects.create(name='second_host', inventory=inventory)
-    resp = get(reverse('api:inventory_script_view', kwargs={'version': 'v2', 'pk': inventory.pk}), admin_user)
+    resp = get(reverse('api:inventory_script_view', kwargs={'pk': inventory.pk}), admin_user)
     jdata = json.loads(resp.content)
     assert inventory.hosts.count() == 2
     assert len(jdata['all']['hosts']) == 2

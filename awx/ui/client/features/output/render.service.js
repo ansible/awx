@@ -35,7 +35,7 @@ const hasAnsi = input => re.test(input);
 
 let $scope;
 
-function JobRenderService ($q, $compile, $sce, $window, strings) {
+function JobRenderService ($q, $compile, $sce, $window) {
     this.init = (_$scope_, { toggles }) => {
         $scope = _$scope_;
         this.setScope();
@@ -132,7 +132,7 @@ function JobRenderService ($q, $compile, $sce, $window, strings) {
             return { html: '', count: 0 };
         }
 
-        const html = this.buildRowHTML(this.records[uuid], null, null, event);
+        const html = this.buildRowHTML(this.records[uuid]);
         const count = 1;
 
         return { html, count };
@@ -193,7 +193,7 @@ function JobRenderService ($q, $compile, $sce, $window, strings) {
             return { html: '', count: 0 };
         }
 
-        const html = this.buildRowHTML(this.records[uuid], null, null, event);
+        const html = this.buildRowHTML(this.records[uuid]);
         const count = 1;
 
         return { html, count };
@@ -226,10 +226,10 @@ function JobRenderService ($q, $compile, $sce, $window, strings) {
             const line = lines[i];
             const isLastLine = i === lines.length - 1;
 
-            let row = this.buildRowHTML(record, ln, line, event);
+            let row = this.buildRowHTML(record, ln, line);
 
             if (record && record.isTruncated && isLastLine) {
-                row += this.buildRowHTML(record, null, null, event);
+                row += this.buildRowHTML(record);
                 count++;
             }
 
@@ -350,14 +350,14 @@ function JobRenderService ($q, $compile, $sce, $window, strings) {
         return list;
     };
 
-    this.buildRowHTML = (record, ln, content, event) => {
+    this.buildRowHTML = (record, ln, content) => {
         let id = '';
         let icon = '';
         let timestamp = '';
         let tdToggle = '';
         let tdEvent = '';
         let classList = '';
-        let directives = `aw-tool-tip="${this.createToolTip(event, record)}" aw-tip-placement="top"`;
+        let directives = '';
 
         if (record.isMissing) {
             return `<div id="${record.uuid}" class="at-Stdout-row">
@@ -413,9 +413,9 @@ function JobRenderService ($q, $compile, $sce, $window, strings) {
 
         if (record && record.isClickable) {
             classList += ' at-Stdout-row--clickable';
-            directives += ` ng-click="vm.showHostDetails('${record.id}', '${record.uuid}')"
-            `;
+            directives = `ng-click="vm.showHostDetails('${record.id}', '${record.uuid}')"`;
         }
+
         return `
             <div id="${id}" class="at-Stdout-row ${classList}" ${directives}>
                 ${tdToggle}
@@ -424,16 +424,6 @@ function JobRenderService ($q, $compile, $sce, $window, strings) {
                 <div class="at-Stdout-time">${timestamp}</div>
             </div>
         `;
-    };
-
-    this.createToolTip = (event, record) => {
-        const status = strings.get('tooltips.HOST_STATUS');
-        const eventID = strings.get('tooltips.EVENT_ID');
-        const clickForDetails = strings.get('tooltips.DETAILS');
-
-        return record.isClickable
-            ? `${status} ${event.event_display}<br />${eventID} ${event.id}<br />${clickForDetails}`
-            : `${status} ${event.event_display}<br />${eventID} ${event.id}`;
     };
 
     this.getTimestamp = created => {
@@ -629,6 +619,6 @@ function JobRenderService ($q, $compile, $sce, $window, strings) {
     this.getCapacity = () => OUTPUT_EVENT_LIMIT - (this.getTailCounter() - this.getHeadCounter());
 }
 
-JobRenderService.$inject = ['$q', '$compile', '$sce', '$window', 'OutputStrings'];
+JobRenderService.$inject = ['$q', '$compile', '$sce', '$window'];
 
 export default JobRenderService;

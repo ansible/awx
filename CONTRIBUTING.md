@@ -134,6 +134,8 @@ Run the following to build the AWX UI:
 ```bash
 (host) $ make ui-devel
 ```
+See [the ui development documentation](awx/ui/README.md) for more information on using the frontend development, build, and test tooling.
+
 ### Running the environment
 
 #### Start the containers
@@ -154,8 +156,8 @@ If you start a second terminal session, you can take a look at the running conta
 
 $ docker ps
 CONTAINER ID        IMAGE                                              COMMAND                  CREATED             STATUS              PORTS                                                                                                                                      NAMES
-aa4a75d6d77b        gcr.io/ansible-tower-engineering/awx_devel:devel   "/tini -- /bin/sh ..."   23 seconds ago      Up 15 seconds       0.0.0.0:5555->5555/tcp, 0.0.0.0:6899-6999->6899-6999/tcp, 0.0.0.0:8013->8013/tcp, 0.0.0.0:8043->8043/tcp, 22/tcp, 0.0.0.0:8080->8080/tcp   tools_awx_1
-e4c0afeb548c        postgres:9.6                                       "docker-entrypoint..."   26 seconds ago      Up 23 seconds       5432/tcp                                                                                                                                   tools_postgres_1
+aa4a75d6d77b        gcr.io/ansible-tower-engineering/awx_devel:devel   "/tini -- /bin/sh ..."   23 seconds ago      Up 15 seconds       0.0.0.0:5555->5555/tcp, 0.0.0.0:7899-7999->7899-7999/tcp, 0.0.0.0:8013->8013/tcp, 0.0.0.0:8043->8043/tcp, 22/tcp, 0.0.0.0:8080->8080/tcp   tools_awx_1
+e4c0afeb548c        postgres:10                                       "docker-entrypoint..."   26 seconds ago      Up 23 seconds       5432/tcp                                                                                                                                   tools_postgres_1
 0089699d5afd        tools_logstash                                     "/docker-entrypoin..."   26 seconds ago      Up 25 seconds                                                                                                                                                  tools_logstash_1
 4d4ff0ced266        memcached:alpine                                   "docker-entrypoint..."   26 seconds ago      Up 25 seconds       0.0.0.0:11211->11211/tcp                                                                                                                   tools_memcached_1
 92842acd64cd        rabbitmq:3-management                              "docker-entrypoint..."   26 seconds ago      Up 24 seconds       4369/tcp, 5671-5672/tcp, 15671/tcp, 25672/tcp, 0.0.0.0:15672->15672/tcp                                                                    tools_rabbitmq_1

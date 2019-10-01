@@ -18,7 +18,7 @@ const jtDetails = createFormSection({
             '#job_template_form .Form-textArea',
             '#job_template_form input[type="checkbox"]',
             '#job_template_form .ui-spinner-input',
-            '#job_template_form .ScheduleToggle-switch'
+            '#job_template_form .atSwitch-inner'
         ]
     },
     labels: {
@@ -38,7 +38,7 @@ const wfjtDetails = createFormSection({
             '#workflow_job_template_form .Form-textArea',
             '#workflow_job_template_form input[type="checkbox"]',
             '#workflow_job_template_form .ui-spinner-input',
-            '#workflow_job_template_form .ScheduleToggle-switch'
+            '#workflow_job_template_form .atSwitch-inner'
         ]
     },
     labels: {

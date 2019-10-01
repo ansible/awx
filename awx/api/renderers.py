@@ -2,6 +2,7 @@
 # All Rights Reserved.
 
 from django.utils.safestring import SafeText
+from prometheus_client.parser import text_string_to_metric_families
 
 # Django REST Framework
 from rest_framework import renderers
@@ -103,3 +104,21 @@ class AnsiTextRenderer(PlainTextRenderer):
 class AnsiDownloadRenderer(PlainTextRenderer):
 
     format = "ansi_download"
+
+
+class PrometheusJSONRenderer(renderers.JSONRenderer):
+
+    def render(self, data, accepted_media_type=None, renderer_context=None):
+        if isinstance(data, dict):
+            # HTTP errors are {'detail': ErrorDetail(string='...', code=...)}
+            return super(PrometheusJSONRenderer, self).render(
+                data, accepted_media_type, renderer_context
+            )
+        parsed_metrics = text_string_to_metric_families(data)
+        data = {}
+        for family in parsed_metrics:
+            for sample in family.samples:
+                data[sample[0]] = {"labels": sample[1], "value": sample[2]}
+        return super(PrometheusJSONRenderer, self).render(
+            data, accepted_media_type, renderer_context
+        )

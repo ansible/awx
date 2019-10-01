@@ -10,19 +10,22 @@ export default ['Rest', 'Wait',
     'notification_template',
     '$scope', '$state', 'GetChoices', 'CreateSelect2', 'Empty',
     'NotificationsTypeChange', 'ParseTypeChange', 'i18n',
+    'MessageUtils', '$filter',
     function(
         Rest, Wait,
         NotificationsFormObject, ProcessErrors, GetBasePath,
         GenerateForm,
         notification_template,
         $scope, $state, GetChoices, CreateSelect2, Empty,
-        NotificationsTypeChange, ParseTypeChange, i18n
+        NotificationsTypeChange, ParseTypeChange, i18n,
+        MessageUtils, $filter
     ) {
         var generator = GenerateForm,
             id = notification_template.id,
             form = NotificationsFormObject,
             master = {},
-            url = GetBasePath('notification_templates');
+            url = GetBasePath('notification_templates'),
+            defaultMessages = {};
 
         init();
 
@@ -34,6 +37,12 @@ export default ['Rest', 'Wait',
                     $scope.canAdd = false;
                 }
             });
+
+            Rest.setUrl(GetBasePath('notification_templates'));
+            Rest.options()
+                .then(({data}) => {
+                    defaultMessages = data.actions.GET.messages;
+                });
 
             GetChoices({
                 scope: $scope,
@@ -138,6 +147,16 @@ export default ['Rest', 'Wait',
                         element: '#notification_template_color',
                         multiple: false
                     });
+
+                    $scope.httpMethodChoices = [
+                        {'id': 'POST', 'name': i18n._('POST')},
+                        {'id': 'PUT', 'name': i18n._('PUT')},
+                    ];
+                    CreateSelect2({
+                        element: '#notification_template_http_method',
+                        multiple: false,
+                    });
+
                     NotificationsTypeChange.getDetailFields($scope.notification_type.value).forEach(function(field) {
                         $scope[field[0]] = field[1];
                     });
@@ -155,6 +174,9 @@ export default ['Rest', 'Wait',
                         field_id: 'notification_template_headers',
                         readOnly: !$scope.notification_template.summary_fields.user_capabilities.edit
                     });
+
+                    MessageUtils.setMessagesOnScope($scope, data.messages, defaultMessages);
+
                     Wait('stop');
                 })
                 .catch(({data, status}) => {
@@ -165,11 +187,9 @@ export default ['Rest', 'Wait',
                 });
         });
 
-
-
         $scope.$watch('headers', function validate_headers(str) {
             try {
-                let headers = JSON.parse(str);
+                const headers = typeof str === 'string' ? JSON.parse(str) : str;
                 if (_.isObject(headers) && !_.isArray(headers)) {
                     let valid = true;
                     for (let k in headers) {
@@ -227,6 +247,29 @@ export default ['Rest', 'Wait',
             });
         };
 
+        $scope.$watch('customize_messages', (value) => {
+            if (value) {
+                $scope.$broadcast('reset-code-mirror', {
+                    customize_messages: $scope.customize_messages,
+                });
+            }
+        });
+        $scope.toggleForm = function(key) {
+            $scope[key] = !$scope[key];
+        };
+        $scope.$watch('notification_type', (newValue, oldValue = {}) => {
+            if (newValue) {
+                MessageUtils.updateDefaultsOnScope(
+                  $scope,
+                  defaultMessages[oldValue.value],
+                  defaultMessages[newValue.value]
+                );
+                $scope.$broadcast('reset-code-mirror', {
+                    customize_messages: $scope.customize_messages,
+                });
+            }
+        });
+
         $scope.emailOptionsChange = function () {
             if ($scope.email_options === 'use_ssl') {
                 if ($scope.use_ssl) {
@@ -259,6 +302,7 @@ export default ['Rest', 'Wait',
                 "name": $scope.name,
                 "description": $scope.description,
                 "organization": $scope.organization,
+                "messages": MessageUtils.getMessagesObj($scope, defaultMessages),
                 "notification_type": v,
                 "notification_configuration": {}
             };
@@ -266,7 +310,9 @@ export default ['Rest', 'Wait',
             function processValue(value, i, field) {
                 if (field.type === 'textarea') {
                     if (field.name === 'headers') {
-                        $scope[i] = JSON.parse($scope[i]);
+                        if (typeof $scope[i] === 'string') {
+                            $scope[i] = JSON.parse($scope[i]);
+                        }
                     }
                     else if (field.name === 'annotation_tags' && $scope.notification_type.value === "grafana" && value === null) {
                         $scope[i] = null;
@@ -281,7 +327,12 @@ export default ['Rest', 'Wait',
                 if (field.type === 'number') {
                     $scope[i] = Number($scope[i]);
                 }
-                if (i === "username" && $scope.notification_type.value === "email" && (value === null || value === undefined)) {
+                const isUsernameIncluded = (
+                  $scope.notification_type.value === 'email' ||
+                  $scope.notification_type.value === 'webhook'
+                );
+                if (i === "username" && isUsernameIncluded &&
+                  (value === null || value === undefined)) {
                     $scope[i] = "";
                 }
                 if (field.type === 'sensitive' && (value === null || value === undefined)) {
@@ -306,10 +357,14 @@ export default ['Rest', 'Wait',
                     $state.go('notifications', {}, { reload: true });
                     Wait('stop');
                 })
-                .catch(({data, status}) => {
+                .catch(({ data, status }) => {
+                    let description = 'PUT returned status: ' + status;
+                    if (data && data.messages && data.messages.length > 0) {
+                        description = _.uniq(data.messages).join(', ');
+                    }
                     ProcessErrors($scope, data, status, form, {
                         hdr: 'Error!',
-                        msg: 'Failed to add new notification template. POST returned status: ' + status
+                        msg: $filter('sanitize')('Failed to update notifier. ' + description + '.')
                     });
                 });
         };

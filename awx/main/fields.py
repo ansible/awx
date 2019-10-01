@@ -11,8 +11,9 @@ from jinja2 import Environment, StrictUndefined
 from jinja2.exceptions import UndefinedError, TemplateSyntaxError
 
 # Django
-import django
+from django.contrib.postgres.fields import JSONField as upstream_JSONBField
 from django.core import exceptions as django_exceptions
+from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models.signals import (
     post_save,
     post_delete,
@@ -37,7 +38,6 @@ import jsonschema.exceptions
 
 # Django-JSONField
 from jsonfield import JSONField as upstream_JSONField
-from jsonbfield.fields import JSONField as upstream_JSONBField
 
 # DRF
 from rest_framework import serializers
@@ -76,10 +76,10 @@ class JSONField(upstream_JSONField):
     def db_type(self, connection):
         return 'text'
 
-    def from_db_value(self, value, expression, connection, context):
+    def from_db_value(self, value, expression, connection):
         if value in {'', None} and not self.null:
             return {}
-        return super(JSONField, self).from_db_value(value, expression, connection, context)
+        return super(JSONField, self).from_db_value(value, expression, connection)
 
 
 class JSONBField(upstream_JSONBField):
@@ -91,12 +91,12 @@ class JSONBField(upstream_JSONBField):
     def get_db_prep_value(self, value, connection, prepared=False):
         if connection.vendor == 'sqlite':
             # sqlite (which we use for tests) does not support jsonb;
-            return json.dumps(value)
+            return json.dumps(value, cls=DjangoJSONEncoder)
         return super(JSONBField, self).get_db_prep_value(
             value, connection, prepared
         )
 
-    def from_db_value(self, value, expression, connection, context):
+    def from_db_value(self, value, expression, connection):
         # Work around a bug in django-jsonfield
         # https://bitbucket.org/schinckel/django-jsonfield/issues/57/cannot-use-in-the-same-project-as-djangos
         if isinstance(value, str):
@@ -112,14 +112,9 @@ class AutoSingleRelatedObjectDescriptor(ReverseOneToOneDescriptor):
 
     def __get__(self, instance, instance_type=None):
         try:
-            return super(AutoSingleRelatedObjectDescriptor,
-                         self).__get__(instance, instance_type)
+            return super(AutoSingleRelatedObjectDescriptor, self).__get__(instance, instance_type)
         except self.related.related_model.DoesNotExist:
             obj = self.related.related_model(**{self.related.field.name: instance})
-            if self.related.field.rel.parent_link:
-                raise NotImplementedError('not supported with polymorphic!')
-                for f in instance._meta.local_fields:
-                    setattr(obj, f.name, getattr(instance, f.name))
             obj.save()
             return obj
 
@@ -169,7 +164,7 @@ def is_implicit_parent(parent_role, child_role):
         # The only singleton implicit parent is the system admin being
         # a parent of the system auditor role
         return bool(
-            child_role.singleton_name == ROLE_SINGLETON_SYSTEM_AUDITOR and 
+            child_role.singleton_name == ROLE_SINGLETON_SYSTEM_AUDITOR and
             parent_role.singleton_name == ROLE_SINGLETON_SYSTEM_ADMINISTRATOR
         )
     # Get the list of implicit parents that were defined at the class level.
@@ -453,21 +448,6 @@ class JSONSchemaField(JSONBField):
                 params={'value': value},
             )
 
-    def get_db_prep_value(self, value, connection, prepared=False):
-        if connection.vendor == 'sqlite':
-            # sqlite (which we use for tests) does not support jsonb;
-            return json.dumps(value)
-        return super(JSONSchemaField, self).get_db_prep_value(
-            value, connection, prepared
-        )
-
-    def from_db_value(self, value, expression, connection, context):
-        # Work around a bug in django-jsonfield
-        # https://bitbucket.org/schinckel/django-jsonfield/issues/57/cannot-use-in-the-same-project-as-djangos
-        if isinstance(value, str):
-            return json.loads(value)
-        return value
-
 
 @JSONSchemaField.format_checker.checks('vault_id')
 def format_vault_id(value):
@@ -711,10 +691,12 @@ class CredentialInputField(JSONSchemaField):
 
             if model_instance.has_encrypted_ssh_key_data and not value.get('ssh_key_unlock'):
                 errors['ssh_key_unlock'] = [_('must be set when SSH key is encrypted.')]
+            
             if all([
                 model_instance.inputs.get('ssh_key_data'),
                 value.get('ssh_key_unlock'),
-                not model_instance.has_encrypted_ssh_key_data
+                not model_instance.has_encrypted_ssh_key_data,
+                'ssh_key_data' not in errors
             ]):
                 errors['ssh_key_unlock'] = [_('should not be set when SSH key is not encrypted.')]
 
@@ -986,7 +968,7 @@ class OAuth2ClientSecretField(models.CharField):
             encrypt_value(value), connection, prepared
         )
 
-    def from_db_value(self, value, expression, connection, context):
+    def from_db_value(self, value, expression, connection):
         if value and value.startswith('$encrypted$'):
             return decrypt_value(get_encryption_key('value', pk=None), value)
         return value
@@ -1021,38 +1003,6 @@ class OrderedManyToManyDescriptor(ManyToManyDescriptor):
                     return super(OrderedManyRelatedManager, self).get_queryset().order_by(
                         '%s__position' % self.through._meta.model_name
                     )
-
-                def add(self, *objs):
-                    # Django < 2 doesn't support this method on
-                    # ManyToManyFields w/ an intermediary model
-                    # We should be able to remove this code snippet when we
-                    # upgrade Django.
-                    # see: https://github.com/django/django/blob/stable/1.11.x/django/db/models/fields/related_descriptors.py#L926
-                    if not django.__version__.startswith('1.'):
-                        raise RuntimeError(
-                            'This method is no longer necessary in Django>=2'
-                        )
-                    try:
-                        self.through._meta.auto_created = True
-                        super(OrderedManyRelatedManager, self).add(*objs)
-                    finally:
-                        self.through._meta.auto_created = False
-
-                def remove(self, *objs):
-                    # Django < 2 doesn't support this method on
-                    # ManyToManyFields w/ an intermediary model
-                    # We should be able to remove this code snippet when we
-                    # upgrade Django.
-                    # see: https://github.com/django/django/blob/stable/1.11.x/django/db/models/fields/related_descriptors.py#L944
-                    if not django.__version__.startswith('1.'):
-                        raise RuntimeError(
-                            'This method is no longer necessary in Django>=2'
-                        )
-                    try:
-                        self.through._meta.auto_created = True
-                        super(OrderedManyRelatedManager, self).remove(*objs)
-                    finally:
-                        self.through._meta.auto_created = False
 
             return OrderedManyRelatedManager
 

@@ -17,6 +17,8 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 
+import requests
+
 from awx.api.generics import APIView
 from awx.main.ha import is_ha_environment
 from awx.main.utils import (
@@ -124,6 +126,7 @@ class ApiVersionRootView(APIView):
         data['activity_stream'] = reverse('api:activity_stream_list', request=request)
         data['workflow_job_templates'] = reverse('api:workflow_job_template_list', request=request)
         data['workflow_jobs'] = reverse('api:workflow_job_list', request=request)
+        data['workflow_approvals'] = reverse('api:workflow_approval_list', request=request)
         data['workflow_job_template_nodes'] = reverse('api:workflow_job_template_node_list', request=request)
         data['workflow_job_nodes'] = reverse('api:workflow_job_node_list', request=request)
         return Response(data)
@@ -166,6 +169,45 @@ class ApiV2PingView(APIView):
                                                     capacity=instance_group.capacity,
                                                     instances=[x.hostname for x in instance_group.instances.all()]))
         return Response(response)
+
+
+class ApiV2SubscriptionView(APIView):
+
+    permission_classes = (IsAuthenticated,)
+    name = _('Configuration')
+    swagger_topic = 'System Configuration'
+
+    def check_permissions(self, request):
+        super(ApiV2SubscriptionView, self).check_permissions(request)
+        if not request.user.is_superuser and request.method.lower() not in {'options', 'head'}:
+            self.permission_denied(request)  # Raises PermissionDenied exception.
+
+    def post(self, request):
+        from awx.main.utils.common import get_licenser
+        data = request.data.copy()
+        if data.get('rh_password') == '$encrypted$':
+            data['rh_password'] = settings.REDHAT_PASSWORD
+        try:
+            user, pw = data.get('rh_username'), data.get('rh_password')
+            validated = get_licenser().validate_rh(user, pw)
+            if user:
+                settings.REDHAT_USERNAME = data['rh_username']
+            if pw:
+                settings.REDHAT_PASSWORD = data['rh_password']
+        except Exception as exc:
+            msg = _("Invalid License")
+            if (
+                isinstance(exc, requests.exceptions.HTTPError) and
+                getattr(getattr(exc, 'response', None), 'status_code', None) == 401
+            ):
+                msg = _("The provided credentials are invalid (HTTP 401).")
+            if isinstance(exc, (ValueError, OSError)) and exc.args:
+                msg = exc.args[0]
+            logger.exception(smart_text(u"Invalid license submitted."),
+                             extra=dict(actor=request.user.username))
+            return Response({"error": msg}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(validated)
 
 
 class ApiV2ConfigView(APIView):

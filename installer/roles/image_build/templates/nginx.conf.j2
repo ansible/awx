@@ -11,6 +11,7 @@ events {
 http {
     include       /etc/nginx/mime.types;
     default_type  application/octet-stream;
+    server_tokens off;
 
     log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
                       '$status $body_bytes_sent "$http_referer" '
@@ -61,6 +62,8 @@ http {
 
         # HSTS (ngx_http_headers_module is required) (15768000 seconds = 6 months)
         add_header Strict-Transport-Security max-age=15768000;
+        add_header Content-Security-Policy "default-src 'self'; connect-src 'self' ws: wss:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' *.pendo.io; img-src 'self' *.pendo.io data:; report-uri /csp-violation/";
+        add_header X-Content-Security-Policy "default-src 'self'; connect-src 'self' ws: wss:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' *.pendo.io; img-src 'self' *.pendo.io data:; report-uri /csp-violation/";
 
         # Protect against click-jacking https://www.owasp.org/index.php/Testing_for_Clickjacking_(OTG-CLIENT-009)
         add_header X-Frame-Options "DENY";

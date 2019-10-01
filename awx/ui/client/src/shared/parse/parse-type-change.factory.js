@@ -1,6 +1,7 @@
 import 'codemirror/lib/codemirror.js';
 import 'codemirror/mode/javascript/javascript.js';
 import 'codemirror/mode/yaml/yaml.js';
+import 'codemirror/mode/jinja2/jinja2.js';
 import 'codemirror/addon/lint/lint.js';
 import 'angular-codemirror/lib/yaml-lint.js';
 import 'codemirror/addon/edit/closebrackets.js';

@@ -46,12 +46,12 @@ services:
       RABBITMQ_PASS: guest
       RABBITMQ_VHOST: /
       SDB_HOST: 0.0.0.0
-      SDB_PORT: 6899
+      SDB_PORT: 7899
       AWX_GROUP_QUEUES: bravo,tower
     volumes:
       - "../:/awx_devel"
     ports:
-      - "6899-6999:6899-6999"
+      - "7899-7999:7899-7999"
   awx_3:
     user: ${CURRENT_UID}
     container_name: tools_awx_3_1
@@ -65,12 +65,12 @@ services:
       RABBITMQ_PASS: guest
       RABBITMQ_VHOST: /
       SDB_HOST: 0.0.0.0
-      SDB_PORT: 7899
+      SDB_PORT: 8899
       AWX_GROUP_QUEUES: charlie,tower
     volumes:
       - "../:/awx_devel"
     ports:
-      - "7899-7999:7899-7999"
+      - "8899-8999:8899-8999"
   rabbitmq_1:
     image: ${DEV_DOCKER_TAG_BASE}/rabbit_cluster_node:latest
     hostname: rabbitmq_1
@@ -90,7 +90,7 @@ services:
       - CLUSTERED=true
       - CLUSTER_WITH=rabbitmq_1
   postgres:
-    image: postgres:9.6
+    image: postgres:10
     container_name: tools_postgres_1
   memcached:
     image: memcached:alpine

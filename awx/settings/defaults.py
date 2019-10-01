@@ -403,6 +403,11 @@ EMAIL_HOST_USER = ''
 EMAIL_HOST_PASSWORD = ''
 EMAIL_USE_TLS = False
 
+# Default to skipping isolated host key checking (the initial connection will
+# hang on an interactive "The authenticity of host example.org can't be
+# established" message)
+AWX_ISOLATED_HOST_KEY_CHECKING = False
+
 # The number of seconds to sleep between status checks for jobs running on isolated nodes
 AWX_ISOLATED_CHECK_INTERVAL = 30
 
@@ -604,6 +609,11 @@ ALLOW_JINJA_IN_EXTRA_VARS = 'template'
 # Note: This setting may be overridden by database settings.
 AWX_ROLES_ENABLED = True
 
+# Enable dynamically pulling collections from a requirement.yml file
+# when updating SCM projects
+# Note: This setting may be overridden by database settings.
+AWX_COLLECTIONS_ENABLED = True
+
 # Enable bubblewrap support for running jobs (playbook runs only).
 # Note: This setting may be overridden by database settings.
 AWX_PROOT_ENABLED = True
@@ -618,9 +628,6 @@ AWX_PROOT_HIDE_PATHS = []
 # Additional paths to show for jobs using bubbelwrap.
 # Note: This setting may be overridden by database settings.
 AWX_PROOT_SHOW_PATHS = []
-
-# Number of jobs to show as part of the job template history
-AWX_JOB_TEMPLATE_HISTORY = 10
 
 # The directory in which Tower will create new temporary directories for job
 # execution and isolation (such as credential files and custom
@@ -1093,6 +1100,14 @@ LOGGING = {
             'handlers': ['console'],
         },
         'django.request': {
+            'handlers': ['console', 'file', 'tower_warnings'],
+            'level': 'WARNING',
+        },
+        'celery': {  # for celerybeat connection warnings
+            'handlers': ['console', 'file', 'tower_warnings'],
+            'level': 'WARNING',
+        },
+        'kombu': {
             'handlers': ['console', 'file', 'tower_warnings'],
             'level': 'WARNING',
         },

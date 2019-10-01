@@ -9,7 +9,8 @@ from awx.main.models import (
     Job,
     User,
     Project,
-    JobTemplate
+    JobTemplate,
+    Inventory
 )
 
 
@@ -81,11 +82,13 @@ class TestMetaVars:
 
     def test_job_metavars(self):
         maker = User(username='joe', pk=47, id=47)
+        inv = Inventory(name='example-inv', id=45)
         assert Job(
             name='fake-job',
             pk=42, id=42,
             launch_type='manual',
-            created_by=maker
+            created_by=maker,
+            inventory=inv
         ).awx_meta_vars() == {
             'tower_job_id': 42,
             'awx_job_id': 42,
@@ -100,7 +103,11 @@ class TestMetaVars:
             'awx_user_last_name': '',
             'tower_user_last_name': '',
             'awx_user_id': 47,
-            'tower_user_id': 47
+            'tower_user_id': 47,
+            'tower_inventory_id': 45,
+            'awx_inventory_id': 45,
+            'tower_inventory_name': 'example-inv',
+            'awx_inventory_name': 'example-inv'
         }
 
     def test_project_update_metavars(self):

@@ -457,4 +457,4 @@ def test_duplicate_name_within_template(job_template):
     with pytest.raises(IntegrityError) as ierror:
         s2.save()
 
-    assert str(ierror.value) == "columns unified_job_template_id, name are not unique"
+    assert str(ierror.value) == "UNIQUE constraint failed: main_schedule.unified_job_template_id, main_schedule.name"

@@ -85,9 +85,9 @@ hostC rabbitmq_host=10.1.0.3
   - `rabbitmq_use_long_names` - RabbitMQ is pretty sensitive to what each instance is named. We are flexible enough to allow FQDNs (_host01.example.com_), short names (`host01`), or IP addresses (192.168.5.73). Depending on what is used to identify each host in the `inventory` file, this value may need to be changed. For FQDNs and IP addresses, this value needs to be `true`. For short names it should be `false`
   - `rabbitmq_enable_manager` - Setting this to `true` will expose the RabbitMQ management web console on each instance.
 
-The most important field to point out for variability is `rabbitmq_use_long_name`. This cannot be detected and no reasonable default is provided for it, so it's important to point out when it needs to be changed. If instances are provisioned to where they reference other instances internally and not on external addresses then `rabbitmq_use_long_name` semantics should follow the internal addressing (aka `rabbitmq_host`).
+The most important field to point out for variability is `rabbitmq_use_long_name`. This cannot be detected and no reasonable default is provided for it, so it's important to point out when it needs to be changed. If instances are provisioned to where they reference other instances internally and not on external addresses, then `rabbitmq_use_long_name` semantics should follow the internal addressing (*i.e.*, `rabbitmq_host`).
 
-Other than `rabbitmq_use_long_name` the defaults are pretty reasonable:
+Other than `rabbitmq_use_long_name`, the defaults are pretty reasonable:
 ```
 rabbitmq_port=5672
 rabbitmq_vhost=tower
@@ -105,9 +105,9 @@ Recommendations and constraints:
  - Do not name any instance the same as a group name.
 
 
-### Security Isolated Rampart Groups
+### Security-Isolated Rampart Groups
 
-In Tower versions 3.2+ customers may optionally define isolated groups inside of security-restricted networking zones from which to run jobs and ad hoc commands. Instances in these groups will _not_ have a full install of Tower, but will have a minimal set of utilities used to run jobs. Isolated groups must be specified in the inventory file prefixed with `isolated_group_`. An example inventory file is shown below:
+In Tower versions 3.2+, customers may optionally define isolated groups inside of security-restricted networking zones from which to run jobs and ad hoc commands. Instances in these groups will _not_ have a full install of Tower, but will have a minimal set of utilities used to run jobs. Isolated groups must be specified in the inventory file prefixed with `isolated_group_`. An example inventory file is shown below:
 
 ```
 [tower]
@@ -154,18 +154,18 @@ Recommendations for system configuration with isolated groups:
 
 Isolated Instance Authentication
 --------------------------------
-By default - at installation time - a randomized RSA key is generated and distributed as an authorized key to all "isolated" instances.  The private half of the key is encrypted and stored within Tower, and is used to authenticat from "controller" instances to "isolated" instances when jobs are run.
+At installation time, by default, a randomized RSA key is generated and distributed as an authorized key to all "isolated" instances.  The private half of the key is encrypted and stored within Tower, and is used to authenticate from "controller" instances to "isolated" instances when jobs are run.
 
-For users who wish to manage SSH authentication from controlling instances to isolated instances via some system _outside_ of Tower (such as externally-managed passwordless SSH keys), this behavior can be disabled by unsetting two Tower API settings values:
+For users who wish to manage SSH authentication from controlling instances to isolated instances via some system _outside_ of Tower (such as externally-managed, password-less SSH keys), this behavior can be disabled by unsetting two Tower API settings values:
 
 `HTTP PATCH /api/v2/settings/jobs/ {'AWX_ISOLATED_PRIVATE_KEY': '', 'AWX_ISOLATED_PUBLIC_KEY': ''}`
 
 
 ### Provisioning and Deprovisioning Instances and Groups
 
-* **Provisioning** - Provisioning Instances after installation is supported by updating the `inventory` file and re-running the setup playbook. It's important that this file contain all passwords and information used when installing the cluster or other instances may be reconfigured (this could be intentional).
+* **Provisioning** - Provisioning Instances after installation is supported by updating the `inventory` file and re-running the setup playbook. It's important that this file contain all passwords and information used when installing the cluster, or other instances may be reconfigured (this can be done intentionally).
 
-* **Deprovisioning** - Tower does not automatically de-provision instances since it cannot distinguish between an instance that was taken offline intentionally or due to failure. Instead the procedure for deprovisioning an instance is to shut it down (or stop the `ansible-tower-service`) and run the Tower deprovision command:
+* **Deprovisioning** - Tower does not automatically de-provision instances since it cannot distinguish between an instance that was taken offline intentionally or due to failure. Instead, the procedure for de-provisioning an instance is to shut it down (or stop the `ansible-tower-service`) and run the Tower de-provision command:
 
 ```
 $ awx-manage deprovision_instance --hostname=<hostname>
@@ -179,7 +179,7 @@ $ awx-manage unregister_queue --queuename=<name>
 
 ### Configuring Instances and Instance Groups from the API
 
-Instance Groups can be created by posting to `/api/v2/instance_groups` as a System Admin.
+Instance Groups can be created by posting to `/api/v2/instance_groups` as a System Administrator.
 
 Once created, `Instances` can be associated with an Instance Group with:
 
@@ -205,12 +205,13 @@ Instance Group Policies are controlled by three optional fields on an `Instance 
 
 * `Instances` that are assigned directly to `Instance Groups` by posting to `/api/v2/instance_groups/x/instances` or `/api/v2/instances/x/instance_groups` are automatically added to the `policy_instance_list`. This means they are subject to the normal caveats for `policy_instance_list` and must be manually managed.
 
-* `policy_instance_percentage` and `policy_instance_minimum` work together. For example, if you have a `policy_instance_percentage` of 50% and a `policy_instance_minimum` of 2 and you start 6 `Instances`, 3 of them would be assigned to the `Instance Group`. If you reduce the number of `Instances` to 2 then both of them would be assigned to the `Instance Group` to satisfy `policy_instance_minimum`. In this way, you can set a lower bound on the amount of available resources.
+* `policy_instance_percentage` and `policy_instance_minimum` work together. For example, if you have a `policy_instance_percentage` of 50% and a `policy_instance_minimum` of 2 and you start 6 `Instances`, 3 of them would be assigned to the `Instance Group`. If you reduce the number of `Instances` to 2, then both of them would be assigned to the `Instance Group` to satisfy `policy_instance_minimum`. In this way, you can set a lower bound on the amount of available resources.
 
 * Policies don't actively prevent `Instances` from being associated with multiple `Instance Groups` but this can effectively be achieved by making the percentages sum to 100. If you have 4 `Instance Groups`, assign each a percentage value of 25 and the `Instances` will be distributed among them with no overlap.
 
 
 ### Manually Pinning Instances to Specific Groups
+
 If you have a special `Instance` which needs to be _exclusively_ assigned to a specific `Instance Group` but don't want it to automatically join _other_ groups via "percentage" or "minimum" policies:
 
 1. Add the `Instance` to one or more `Instance Group`s' `policy_instance_list`.
@@ -243,6 +244,7 @@ Tower itself reports as much status as it can via the API at `/api/v2/ping` in o
 A more detailed view of Instances and Instance Groups, including running jobs and membership
 information can be seen at `/api/v2/instances/` and `/api/v2/instance_groups`.
 
+
 ### Instance Services and Failure Behavior
 
 Each Tower instance is made up of several different services working collaboratively:
@@ -253,14 +255,14 @@ Each Tower instance is made up of several different services working collaborati
 * **RabbitMQ** - A Message Broker, this is used as a signaling mechanism for Celery as well as any event data propagated to the application.
 * **Memcached** - A local caching service for the instance it lives on.
 
-Tower is configured in such a way that if any of these services or their components fail, then all services are restarted. If these fail sufficiently often in a short span of time, then the entire instance will be placed offline in an automated fashion in order to allow remediation without causing unexpected behavior.
+Tower is configured in such a way that if any of these services or their components fail, then all services are restarted. If these fail sufficiently (often in a short span of time), then the entire instance will be placed offline in an automated fashion in order to allow remediation without causing unexpected behavior.
 
 
 ### Job Runtime Behavior
 
 Ideally a regular user of Tower should not notice any semantic difference to the way jobs are run and reported. Behind the scenes it is worth pointing out the differences in how the system behaves.
 
-When a job is submitted from the API interface it gets pushed into the Celery queue on RabbitMQ. A single RabbitMQ instance is the responsible master for individual queues, but each Tower instance will connect to and receive jobs from that queue using a Fair scheduling algorithm. Any instance on the cluster is just as likely to receive the work and execute the task. If an instance fails while executing jobs, then the work is marked as permanently failed.
+When a job is submitted from the API interface, it gets pushed into the Dispatcher queue on RabbitMQ. A single RabbitMQ instance is the responsible master for individual queues, but each Tower instance will connect to and receive jobs from that queue using a fair-share scheduling algorithm. Any instance on the cluster is just as likely to receive the work and execute the task. If an instance fails while executing jobs, then the work is marked as permanently failed.
 
 If a cluster is divided into separate Instance Groups, then the behavior is similar to the cluster as a whole. If two instances are assigned to a group then either one is just as likely to receive a job as any other in the same group.
 
@@ -268,61 +270,58 @@ As Tower instances are brought online, it effectively expands the work capacity 
 
 It's important to note that not all instances are required to be provisioned with an equal capacity.
 
-Project updates behave differently than they did before. Previously they were ordinary jobs that ran on a single instance. It's now important that they run successfully on any instance that could potentially run a job. Projects will now sync themselves to the correct version on the instance immediately prior to running the job.
+If an Instance Group is configured but all instances in that group are offline or unavailable, any jobs that are launched targeting only that group will be stuck in a waiting state until instances become available. Fallback or backup resources should be provisioned to handle any work that might encounter this scenario.
+
+#### Project Synchronization Behavior
+
+Project updates behave differently than they did before. Previously they were ordinary jobs that ran on a single instance. It's now important that they run successfully on any instance that could potentially run a job. Projects will sync themselves to the correct version on the instance immediately prior to running the job. If the needed revision is already locally checked out and Galaxy or Collections updates are not needed, then a sync may not be performed.
 
 When the sync happens, it is recorded in the database as a project update with a `launch_type` of "sync" and a `job_type` of "run". Project syncs will not change the status or version of the project; instead, they will update the source tree _only_ on the instance where they run. The only exception to this behavior is when the project is in the "never updated" state (meaning that no project updates of any type have been run), in which case a sync should fill in the project's initial revision and status, and subsequent syncs should not make such changes.
 
-If an Instance Group is configured but all instances in that group are offline or unavailable, any jobs that are launched targeting only that group will be stuck in a waiting state until instances become available. Fallback or backup resources should be provisioned to handle any work that might encounter this scenario.
-
-
-#### Controlling where a particular job runs
+#### Controlling Where a Particular Job Runs
 
 By default, a job will be submitted to the `tower` queue, meaning that it can be picked up by any of the workers.
 
 
-##### How to restrict the instances a job will run on
+##### How to Restrict the Instances a Job Will Run On
 
-If any of the job template, inventory,
-or organization has instance groups associated with them, a job run from that job template will not be eligible for the default behavior. That means that if all of the instance associated with these three resources are out of capacity, the job will remain in the `pending` state until capacity frees up.
+If the Job Template, Inventory, or Organization have instance groups associated with them, a job run from that Job Template will not be eligible for the default behavior. This means that if all of the instance associated with these three resources are out of capacity, the job will remain in the `pending` state until capacity frees up.
 
 
-##### How to set up a preferred instance group
+##### How to Set Up a Preferred Instance Group
 
-The order of preference in determining which instance group to which the job gets submitted is as follows:
+The order of preference in determining which instance group the job gets submitted to is as follows:
 
 1. Job Template
 2. Inventory
 3. Organization (by way of Inventory)
 
-To expand further: If instance groups are associated with the job template and all of them are at capacity, then the job will be submitted to instance groups specified on inventory, and then organization.
+To expand further: If instance groups are associated with the Job Template and all of them are at capacity, then the job will be submitted to instance groups specified on Inventory, and then Organization.
 
 The global `tower` group can still be associated with a resource, just like any of the custom instance groups defined in the playbook. This can be used to specify a preferred instance group on the job template or inventory, but still allow the job to be submitted to any instance if those are out of capacity.
 
 
 #### Instance Enable / Disable
 
-In order to support temporarily taking an `Instance` offline there is a boolean property `enabled` defined on each instance.
+In order to support temporarily taking an `Instance` offline, there is a boolean property `enabled` defined on each instance.
 
-When this property is disabled no jobs will be assigned to that `Instance`. Existing jobs will finish but no new work will be
-assigned.
+When this property is disabled, no jobs will be assigned to that `Instance`. Existing jobs will finish but no new work will be assigned.
 
 ## Acceptance Criteria
 
-When verifying acceptance we should ensure the following statements are true
+When verifying acceptance, we should ensure that the following statements are true:
 
 * Tower should install as a standalone Instance
 * Tower should install in a Clustered fashion
-* Instance should, optionally, be able to be grouped arbitrarily into different Instance Groups
-* Capacity should be tracked at the group level and capacity impact should make sense relative to what instance a job is
-  running on and what groups that instance is a member of.
+* Instances should, optionally, be able to be grouped arbitrarily into different Instance Groups
+* Capacity should be tracked at the group level and capacity impact should make sense relative to what instance a job is running on and what groups that instance is a member of
 * Provisioning should be supported via the setup playbook
 * De-provisioning should be supported via a management command
 * All jobs, inventory updates, and project updates should run successfully
-* Jobs should be able to run on hosts which it is targeted. If assigned implicitly or directly to groups then it should
-  only run on instances in those Instance Groups.
+* Jobs should be able to run on hosts for which they are targeted; if assigned implicitly or directly to groups, then they should only run on instances in those Instance Groups
 * Project updates should manifest their data on the host that will run the job immediately prior to the job running
 * Tower should be able to reasonably survive the removal of all instances in the cluster
-* Tower should behave in a predictable fashiong during network partitioning
+* Tower should behave in a predictable fashion during network partitioning
 
 ## Testing Considerations
 
@@ -330,39 +329,30 @@ When verifying acceptance we should ensure the following statements are true
 * Basic playbook testing to verify routing differences, including:
   - Basic FQDN
   - Short-name name resolution
-  - ip addresses
-  - /etc/hosts static routing information
-* We should test behavior of large and small clusters. I would envision small clusters as 2 - 3 instances and large
-  clusters as 10 - 15 instances
-* Failure testing should involve killing single instances and killing multiple instances while the cluster is performing work.
-  Job failures during the time period should be predictable and not catastrophic.
-* Instance downtime testing should also include recoverability testing. Killing single services and ensuring the system can
-  return itself to a working state
-* Persistent failure should be tested by killing single services in such a way that the cluster instance cannot be recovered
-  and ensuring that the instance is properly taken offline
-* Network partitioning failures will be important also. In order to test this
+  - IP addresses
+  - `/etc/hosts` static routing information
+* We should test behavior of large and small clusters; small clusters usually consist of 2 - 3 instances and large clusters have 10 - 15 instances.
+* Failure testing should involve killing single instances and killing multiple instances while the cluster is performing work. Job failures during the time period should be predictable and not catastrophic.
+* Instance downtime testing should also include recoverability testing (killing single services and ensuring the system can return itself to a working state).
+* Persistent failure should be tested by killing single services in such a way that the cluster instance cannot be recovered and ensuring that the instance is properly taken offline.
+* Network partitioning failures will also be important. In order to test this:
   - Disallow a single instance from communicating with the other instances but allow it to communicate with the database
-  - Break the link between instances such that it forms 2 or more groups where groupA and groupB can't communicate but all instances
-    can communicate with the database.
-* Crucially when network partitioning is resolved all instances should recover into a consistent state
-* Upgrade Testing, verify behavior before and after are the same for the end user.
-* Project Updates should be thoroughly tested for all scm types (git, svn, hg) and for manual projects.
+  - Break the link between instances such that it forms two or more groups where Group A and Group B can't communicate but all instances can communicate with the database.
+* Crucially, when network partitioning is resolved, all instances should recover into a consistent state.
+* Upgrade Testing - verify behavior before and after are the same for the end user.
+* Project Updates should be thoroughly tested for all SCM types (`git`, `svn`, `hg`) and for manual projects.
 * Setting up instance groups in two scenarios:
   a) instances are shared between groups
   b) instances are isolated to particular groups
-  Organizations, Inventories, and Job Templates should be variously assigned to one or many groups and jobs should execute
-  in those groups in preferential order as resources are available.
+  Organizations, Inventories, and Job Templates should be variously assigned to one or many groups and jobs should execute in those groups in preferential order as resources are available.
 
 ## Performance Testing
 
-Performance testing should be twofold.
+Performance testing should be twofold:
 
-* Large volume of simultaneous jobs.
-* Jobs that generate a large amount of output.
+* A large volume of simultaneous jobs
+* Jobs that generate a large amount of output
 
-These should also be benchmarked against the same playbooks using the 3.0.X Tower release and a stable Ansible version.
-For a large volume playbook I might recommend a customer provided one that we've seen recently:
+These should also be benchmarked against the same playbooks using the 3.0.X Tower release and a stable Ansible version. For a large volume playbook (*e.g.*, against 100+ hosts), something like the following is recommended:
 
 https://gist.github.com/michelleperz/fe3a0eb4eda888221229730e34b28b89
-
-Against 100+ hosts.

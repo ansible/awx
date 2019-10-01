@@ -25,6 +25,10 @@ function AtLayoutController ($scope, $http, strings, ProcessErrors, $transitions
         }
     });
 
+    $scope.$watch('$root.pendingApprovalCount', () => {
+        vm.approvalsCount = _.get($scope, '$root.pendingApprovalCount') || 0;
+    });
+
     $scope.$watch('$root.socketStatus', (newStatus) => {
         vm.socketState = newStatus;
         vm.socketIconClass = `icon-socket-${vm.socketState}`;
@@ -40,6 +44,14 @@ function AtLayoutController ($scope, $http, strings, ProcessErrors, $transitions
         } catch (err) {
             return strings.get(string);
         }
+    };
+
+    vm.openApprovals = () => {
+        vm.showApprovals = true;
+    };
+
+    vm.closeApprovals = () => {
+        vm.showApprovals = false;
     };
 
     function checkOrgAdmin () {
@@ -61,8 +73,8 @@ function AtLayoutController ($scope, $http, strings, ProcessErrors, $transitions
     }
 
     function checkNotificationAdmin () {
-        const usersPath = `/api/v2/users/${vm.currentUserId}/roles/?role_field=notification_admin_role`;
-        $http.get(usersPath)
+        const notifAdminOrgsPath = 'api/v2/organizations/?role_level=notification_admin_role';
+        $http.get(notifAdminOrgsPath)
             .then(({ data }) => {
                 if (data.count > 0) {
                     vm.isNotificationAdmin = true;
@@ -73,7 +85,7 @@ function AtLayoutController ($scope, $http, strings, ProcessErrors, $transitions
             .catch(({ data, status }) => {
                 ProcessErrors(null, data, status, null, {
                     hdr: strings.get('error.HEADER'),
-                    msg: strings.get('error.CALL', { path: usersPath, action: 'GET', status })
+                    msg: strings.get('error.CALL', { path: notifAdminOrgsPath, action: 'GET', status })
                 });
             });
     }

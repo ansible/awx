@@ -96,7 +96,7 @@ export default ['i18n', function(i18n){
                             '</div>'+
                             '<div class="col-sm-6">'+
                                 '<label for="text_max"><span class="Form-inputLabel">' + i18n._('Maximum Length') + '</span></label><input id="text_max" name="text_max" ng-model="text_max" aw-min="text_min || 0" min=0 aw-spinner="text_max" integer>'+
-                                '<div class="error" ng-show="survey_question_form.text_max.$error.integer || survey_question_form.text_max.$error.number">' + i18n._('The maximum length you entered is not a valid number.  Please enter a whole nnumber.') + '</div>'+
+                                '<div class="error" ng-show="survey_question_form.text_max.$error.integer || survey_question_form.text_max.$error.number">' + i18n._('The maximum length you entered is not a valid number.  Please enter a whole number.') + '</div>'+
                                 '<div class="error" ng-show="survey_question_form.text_max.$error.awMin">' + i18n._('The maximum length is too low.  Please enter a number larger than the minimum length you set.') + '</div>'+
                             '</div>'+
                         '</div>',

@@ -14,6 +14,12 @@
                 <span>{{ $parent.layoutVm.currentUsername }}</span>
             </a>
         </at-top-nav-item>
+        <at-top-nav-item ng-click="vm.openApprovals()">
+            <div class="at-Layout-Approvals">
+                <i class="fa fa-bell" alt="{{ vm.getString('NOTIFICATIONS') }}"></i>
+                <span class="at-Layout-ApprovalsBadge" ng-class="{'at-Layout-ApprovalsBadgeActive': vm.approvalsCount && vm.approvalsCount > 0}">{{vm.approvalsCount}}</span>
+            </div>
+        </at-top-nav-item>
         <at-top-nav-item>
             <a ui-sref="about">
                 <i class="fa fa-info-circle" alt="{{ vm.getString('ABOUT') }}"></i>
@@ -104,4 +110,5 @@
             <ng-transclude></ng-transclude>
         </div>
     </div>
+    <at-approvals-drawer ng-if="vm.isLoggedIn && vm.showApprovals" close-approvals="vm.closeApprovals()"></at-approvals-drawer>
 </div>

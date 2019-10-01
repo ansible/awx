@@ -4,12 +4,15 @@ default_host_filters: []
 exclude_host_filters:
 - resource_group not in ['foo_resources', 'bar_resources']
 - location not in ['southcentralus', 'westus']
+fail_on_template_errors: false
 hostvar_expressions:
   ansible_host: private_ipv4_addresses[0]
   computer_name: name
-  private_ip: private_ipv4_addresses[0]
+  private_ip: private_ipv4_addresses[0] if private_ipv4_addresses else None
   provisioning_state: provisioning_state | title
-  public_ip: public_ipv4_addresses[0]
+  public_ip: public_ipv4_addresses[0] if public_ipv4_addresses else None
+  public_ip_id: public_ip_id if public_ip_id is defined else None
+  public_ip_name: public_ip_name if public_ip_name is defined else None
   tags: tags if tags else None
   type: resource_type
 keyed_groups:

@@ -112,6 +112,7 @@ export default
                     $rootScope.login_username = null;
                     $rootScope.login_password = null;
                     $rootScope.userLoggedOut = true;
+                    $rootScope.pendingApprovalCount = 0;
                     if ($rootScope.sessionTimer) {
                         $rootScope.sessionTimer.clearTimers();
                     }

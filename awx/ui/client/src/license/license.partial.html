@@ -8,7 +8,7 @@
 					<div class="License-field--label" translate>License</div>
 					<div class="License-field--content">
 					<span class="License-greenText" ng-show='compliant'><i class="fa fa-circle License-greenText"></i><translate>Valid License</translate></span>
-					<span class="License-redText" ng-show='!compliant'><i class="fa fa-circle License-redText"></i><translate>Invalid License</translate></span>
+					<span class="License-redText" ng-show='compliant !== undefined && !compliant'><i class="fa fa-circle License-redText"></i><translate>Invalid License</translate></span>
 					</div>
 				</div>
 				<div class="License-field">
@@ -48,11 +48,15 @@
 					{{time.remaining}}
 					</div>
 				</div>
-				<div class="License-field">
+				<div class="License-field" ng-show='license.license_info.available_instances < 9999999'>
 					<div class="License-field--label" translate>Hosts Available</div>
 					<div class="License-field--content">
 					{{license.license_info.available_instances}}
 					</div>
+				</div>
+				<div class="License-field" ng-show='license.license_info.available_instances >= 9999999'>
+					<div class="License-field--label" translate>Hosts Available</div>
+					<div class="License-field--content" translate>Unlimited</div>
 				</div>
 				<div class="License-field">
 					<div class="License-field--label" translate>Hosts Used</div>
@@ -60,7 +64,7 @@
 					{{license.license_info.current_instances}}
 					</div>
 				</div>
-				<div class="License-field License-greenText">
+				<div class="License-field License-greenText" ng-show='license.license_info.available_instances < 9999999'>
 					<div class="License-field--label" translate>Hosts Remaining</div>
 					<div class="License-field--content">
 					{{license.license_info.free_instances}}
@@ -75,78 +79,193 @@
 		<div class="card at-Panel">
 			<div class="List-titleText">{{title}}</div>
 			<div class="License-body">
-				<div class="License-helperText" ng-if="licenseMissing" translate>Welcome to Ansible Tower! Please complete the steps below to acquire a license.</div>
-				<div class="AddPermissions-directions" ng-if="licenseMissing">
-					<span class="AddPermissions-directionNumber">
-						1
-					</span>
-					<span class="License-helperText">
-						<translate>Please click the button below to visit Ansible's website to get a Tower license key.</translate>
-					</span>
+				<div class="License-helperText License-introText" ng-if="licenseMissing" translate>Welcome to Ansible Tower! Please complete the steps below to acquire a license.</div>
+				<div class="input-group License-file--container">
+					<div class="License-file--left">
+						<div class="d-block w-100">
+							<div class="AddPermissions-directions" ng-if="licenseMissing">
+								<span class="AddPermissions-directionNumber">
+									1
+								</span>
+								<span class="License-helperText">
+									<translate>Please click the button below to visit Ansible's website to get a Tower license key.</translate>
+								</span>
+							</div>
+			
+								<button class="License-downloadLicenseButton btn btn-primary" ng-if="licenseMissing" ng-click="downloadLicense()">
+									<translate>Request License</translate>
+								</button>
+			
+							<div class="AddPermissions-directions">
+								<span class="AddPermissions-directionNumber" ng-if="licenseMissing">
+									2
+								</span>
+								<span class="License-helperText">
+									<translate>Choose your license file, agree to the End User License Agreement, and click submit.</translate>
+								</span>
+							</div>
+							<div class="License-subTitleText">
+								<span class="Form-requiredAsterisk">*</span>
+								<translate>License</translate>
+							</div>
+							<div class="License-helperText License-licenseStepHelp" translate>Upload a license file</div>
+							<div class="License-filePicker">
+								<span class="btn btn-primary" ng-click="fakeClick()" ng-disabled="!user_is_superuser || (rhCreds.username && rhCreds.username.length > 0) || (rhCreds.password && rhCreds.password.length > 0)" translate>Browse</span>
+								<span class="License-fileName" ng-class="{'License-helperText' : fileName == 'No file selected.'}">{{fileName|translate}}</span>
+								<input id="License-file" class="form-control" type="file" file-on-change="getKey"/>
+							</div>
+						</div>
+					</div>
+					<div class="License-file--middle License-helperText" translate>
+						<div class="License-separator"></div>
+						<div translate>OR</div>
+						<div class="License-separator"></div>
+					</div>
+					<div class="License-file--right">
+						<div class="d-block w-100">
+							<div class="AddPermissions-directions">
+								<span class="License-helperText">
+									<translate>Provide your Red Hat customer credentials and you can choose from a list of your available licenses.  The credentials you use will be stored for future use in retrieving renewal or expanded licenses. You can update or remove them in SETTINGS > SYSTEM.</translate>
+								</span>
+							</div>
+							<div class="License-rhCredField">
+								<label class="License-label d-block" translate>USERNAME</label>
+								<input class="form-control Form-textInput" type="text" ng-model="rhCreds.username" ng-disabled="!user_is_superuser || newLicense.file" />
+							</div>
+							<div class="License-rhCredField">
+								<label class="License-label d-block" translate>PASSWORD</label>
+								<div class="input-group Form-mixedInputGroup" ng-if="showPlaceholderPassword">
+									<input class="form-control Form-textInput" type="text" value="ENCRYPTED" disabled />
+									<span class="input-group-btn input-group-append">
+										<button class="btn at-ButtonHollow--default at-Input-button" ng-disabled="!user_is_superuser || newLicense.file" ng-click="replacePassword()" aw-tool-tip="Replace" data-placement="top" data-original-title="Replace">
+											<i class="fa fa-undo"></i>
+										</button>
+									</span>
+								</div>
+								<div class="input-group" ng-if="!showPlaceholderPassword">
+									<input id="rh-password" class="form-control Form-textInput" type="password" ng-model="rhCreds.password" ng-disabled="!user_is_superuser || newLicense.file" />
+								</div>
+							</div>
+							<div class="License-getLicensesButton">
+								<span ng-click="lookupLicenses()" class="btn btn-primary" ng-disabled="!rhCreds.username || !rhCreds.password" translate>GET LICENSES</button>
+							</div>
+							<div ng-if="selectedLicense.fullLicense">
+								<div class="at-RowItem-label" translate>
+										Selected
+								</div>
+								{{selectedLicense.fullLicense.subscription_name}}	
+							</div>
+						</div>
+					</div>
 				</div>
-
-					<button class="License-downloadLicenseButton btn btn-primary" ng-if="licenseMissing" ng-click="downloadLicense()">
-						<translate>Request License</translate>
-					</button>
-
-				<div class="AddPermissions-directions">
-					<span class="AddPermissions-directionNumber" ng-if="licenseMissing">
-						2
-					</span>
-					<span class="License-helperText">
-						<translate>Choose your license file, agree to the End User License Agreement, and click submit.</translate>
-					</span>
+				<div class="License-subTitleText">
+					<span class="Form-requiredAsterisk">*</span>
+					<translate>End User License Agreement</translate>
 				</div>
-
-				<form id="License-form" name="uploadlicense">
-					<div class="License-subTitleText">
-						<span class="Form-requiredAsterisk">*</span>
-						<translate>License File</translate>
+				<div id="eula_notice"
+					class="License-eulaNotice">{{ license.eula }}</div>
+				<div class="form-group License-detailsGroup">
+					<div class="License-analyticsCheckbox checkbox">
+						<label class="License-details--label">
+							<input type="checkbox" ng-model="newLicense.eula" ng-disabled="!user_is_superuser" required>
+							<span class="License-checkboxLabel" translate><b>I agree to the End User License Agreement</b></span>
+						</label>
 					</div>
-					<div class="input-group License-file--container">
-						<span class="btn btn-primary" ng-click="fakeClick()" ng-disabled="!user_is_superuser" translate>Browse</span>
-                        <span class="License-fileName" ng-class="{'License-helperText' : fileName == 'No file selected.'}">{{fileName|translate}}</span>
-						<input id="License-file" class="form-control" type="file" file-on-change="getKey"/>
-					</div>
-					<div class="License-subTitleText">
-						<span class="Form-requiredAsterisk">*</span>
-						<translate>End User License Agreement</translate>
-					</div>
-					<div id="eula_notice"
-						class="License-eulaNotice">{{ license.eula }}</div>
-					<div class="form-group License-detailsGroup">
+				</div>
+				<div class="License-subTitleText" ng-if="licenseMissing">
+					<translate>Tracking and Analytics</translate>
+				</div>
+				<div class="form-group License-detailsGroup" ng-if="licenseMissing">
+					<span class="License-helperText">
+						<translate>
+							By default, Tower collects and transmits analytics data on Tower usage to Red Hat.  There are two categories of data collected by Tower. For more information, see <a target="_blank" href="http://docs.ansible.com/ansible-tower/latest/html/installandreference/user-data.html#index-0">this Tower documentation page</a>. Uncheck the following boxes to disable this feature.</translate>
+					</span>
+					<div class="License-analyticsCheckboxGroup">
 						<div class="License-analyticsCheckbox checkbox">
-							<label class="License-details--label">
-								<input type="checkbox" ng-model="newLicense.eula" ng-disabled="!user_is_superuser" required>
-								<translate>I agree to the End User License Agreement</translate>
-							</label>
+								<label class="License-details--label">
+									<input type="checkbox" ng-model="newLicense.pendo" ng-disabled="!user_is_superuser">
+									<span class="License-checkboxLabel" translate><b>User analytics</b>: This data is used to enhance future releases of the Tower Software and help streamline customer experience and success.</span>
+								</label>
+						</div>
+						<div class="License-analyticsCheckbox checkbox">
+								<label class="License-details--label">
+									<input id="license-insights" type="checkbox" ng-model="newLicense.insights" ng-disabled="!user_is_superuser">
+									<span class="License-checkboxLabel" translate><b>Automation analytics</b>: This data is used to enhance future releases of the Tower Software and to provide Automation Analytics to Tower subscribers.</span>
+								</label>
 						</div>
 					</div>
-					<div class="License-subTitleText" ng-if="licenseMissing">
-						<translate>Tracking and Analytics</translate>
-					</div>
-					<div class="form-group License-detailsGroup" ng-if="licenseMissing">
-						<span class="License-helperText">
-							<translate>
-								By default, Tower collects and transmits analytics data on Tower usage to Red Hat.  There are two categories of data collected by Tower. For more information, see <a target="_blank" href="http://docs.ansible.com/ansible-tower/latest/html/installandreference/user-data.html#index-0">this Tower documentation page</a>. Uncheck the following boxes to disable this feature.</translate>
-						</span>
-						<div class="License-analyticsCheckboxGroup">
-							<div class="License-analyticsCheckbox checkbox">
-									<input type="checkbox" ng-model="newLicense.pendo" ng-disabled="!user_is_superuser" required>
-									<translate>User analytics: This data is used to enhance future releases of the Tower Software and help streamline customer experience and success.</translate>
-							</div>
-							<div class="License-analyticsCheckbox checkbox">
-									<input type="checkbox" ng-model="newLicense.insights" ng-disabled="!user_is_superuser" required>
-									<translate>Automation analytics: This data is used to enhance future releases of the Tower Software and to provide Automation Insights to Tower subscribers.</translate>
-							</div>
-						</div>
-					</div>
-					<div>
-						<button ng-click="submit()" class="btn btn-success pull-right" ng-disabled="newLicense.file.license_key == null || newLicense.eula == null || !user_is_superuser" translate>Submit</button>
+				</div>
+				<div class="License-action">
+					<div class="License-actionError">
 						<span ng-show="success == true" class="License-greenText License-submit--success pull-right" translate>Save successful!</span>
 					</div>
-				</form>
+					<div>
+						<button ng-click="submit()" class="btn btn-success pull-right" ng-disabled="(!newLicense.file && !selectedLicense.fullLicense) || (newLicense.file && newLicense.file.license_key == null) || newLicense.eula == null || !user_is_superuser" translate>Submit</button>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>
+</div>
+<div class="License-subSelectorModal" ng-show="showLicenseModal">
+		<div class="modal-dialog License-modal">
+				<div class="Modal-content modal-content">
+						<div class="Modal-header">
+								<div class="Modal-title" translate>
+										Select a license
+								</div>
+								<div class="Modal-exitHolder">
+										<button class="close Modal-exit" ng-click="cancelLicenseLookup()">
+												<i class="fa fa-times-circle"></i>
+										</button>
+								</div>
+						</div>
+						<div class="Modal-body ng-binding">
+							<div class="License-modalBody">
+								<form>
+									<div class="License-modalRow" ng-repeat="license in rhLicenses track by license.license_key">
+										<div class="License-modalRowRadio">
+											<input type="radio" id="license-{{license.license_key}}" ng-model="selectedLicense.modalKey" value="{{license.license_key}}" />
+										</div>
+										<div class="License-modalRowDetails">
+											<label for="license-{{license.license_key}}" class="License-modalRowDetailsLabel">
+												<div class="License-modalRowDetailsRow">
+													<div class="License-trialTag" ng-if="license.trial" translate>
+														Trial
+													</div>
+													<b>{{license.subscription_name}}</b>
+												</div>
+												<div class="d-flex">
+													<div class="License-modalRowDetails--50">
+														<div class="at-RowItem-label" translate>
+																Managed Nodes
+														</div>
+														{{license.instance_count}}	
+													</div>
+													<div class="License-modalRowDetails--50">
+														<div class="at-RowItem-label" translate>
+																Expires
+														</div>
+														{{license.license_date | formatEpoch}}	
+													</div>
+												</div>
+											</label>
+										</div>
+									</div>
+								</form>
+							</div>
+						</div>
+						<div class="Modal-footer">
+								<button ng-click="cancelLicenseLookup()" class="btn Modal-footerButton Modal-defaultButton">CANCEL</button>
+								<button
+										ng-click="confirmLicenseSelection()"
+										class="btn Modal-footerButton btn-success"
+										ng-disabled="!selectedLicense.modalKey"
+										translate
+								>
+										SELECT
+						</button>
+						</div>
+				</div>
+		</div>
 </div>

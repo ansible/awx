@@ -58,6 +58,11 @@ export default
                     deferred.reject('Config not found.');
                 }
                 return deferred.promise;
+            },
+
+            getSubscriptions: function(username, password) {
+                Rest.setUrl(`${GetBasePath('config')}subscriptions`);
+                return Rest.post({ rh_username: username, rh_password: password} );
             }
         };
    }

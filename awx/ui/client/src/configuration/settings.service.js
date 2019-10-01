@@ -46,7 +46,7 @@ export default ['GetBasePath', '$q', 'Rest', 'i18n',
                         };
                         var getActions = appendOauth2ProviderKeys(data.actions.GET);
                         var getKeys = _.keys(getActions);
-                        var putActions = appendOauth2ProviderKeys(data.actions.PUT);
+                        var putActions = data.actions.PUT ? appendOauth2ProviderKeys(data.actions.PUT) : {};
 
                         _.each(getKeys, function(key) {
                             if(putActions && putActions[key]) {

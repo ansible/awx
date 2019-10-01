@@ -28,6 +28,9 @@ awx/ui/build_test
 awx/ui/client/languages
 awx/ui/templates/ui/index.html
 awx/ui/templates/ui/installing.html
+awx/ui_next/node_modules/
+awx/ui_next/coverage/
+awx/ui_next/build/locales/_build
 /tower-license
 /tower-license/**
 tools/prometheus/data
@@ -122,6 +125,7 @@ local/
 requirements/vendor
 .i18n_built
 .idea/*
+*credentials*.y*ml*
 
 # AWX python libs populated by requirements.txt
 awx/lib/.deps_built

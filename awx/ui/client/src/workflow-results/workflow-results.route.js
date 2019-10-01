@@ -15,13 +15,6 @@ export default {
         parent: 'jobs',
         label: '{{ workflow.id }} - {{ workflow.name }}'
     },
-    data: {
-        socket: {
-            "groups":{
-                "jobs": ["status_changed"]
-            }
-        }
-    },
     templateUrl: templateUrl('workflow-results/workflow-results'),
     controller: workflowResultsController,
     resolve: {

@@ -1,6 +1,8 @@
 
 # Python
 import pytest
+from unittest import mock
+import json
 
 # AWX
 from awx.main.models.workflow import (
@@ -20,7 +22,6 @@ from django.test import TransactionTestCase
 from django.core.exceptions import ValidationError
 
 
-@pytest.mark.django_db
 class TestWorkflowDAGFunctional(TransactionTestCase):
     def workflow_job(self, states=['new', 'new', 'new', 'new', 'new']):
         """
@@ -249,7 +250,6 @@ class TestWorkflowJobTemplate:
         test_view = WorkflowJobTemplateNodeSuccessNodesList()
         nodes = wfjt.workflow_job_template_nodes.all()
         # test cycle validation
-        print(nodes[0].success_nodes.get(id=nodes[1].id).failure_nodes.get(id=nodes[2].id))
         assert test_view.is_valid_relation(nodes[2], nodes[0]) == {'Error': 'Cycle detected.'}
 
     def test_always_success_failure_creation(self, wfjt, admin, get):
@@ -269,6 +269,103 @@ class TestWorkflowJobTemplate:
             wfjt2.validate_unique()
         wfjt2 = WorkflowJobTemplate(name='foo', organization=None)
         wfjt2.validate_unique()
+
+
+@pytest.mark.django_db
+class TestWorkflowJobTemplatePrompts:
+    """These are tests for prompts that live on the workflow job template model
+    not the node, prompts apply for entire workflow
+    """
+    @pytest.fixture
+    def wfjt_prompts(self):
+        return WorkflowJobTemplate.objects.create(
+            ask_inventory_on_launch=True,
+            ask_variables_on_launch=True,
+            ask_limit_on_launch=True,
+            ask_scm_branch_on_launch=True
+        )
+
+    @pytest.fixture
+    def prompts_data(self, inventory):
+        return dict(
+            inventory=inventory,
+            extra_vars={'foo': 'bar'},
+            limit='webservers',
+            scm_branch='release-3.3'
+        )
+
+    def test_apply_workflow_job_prompts(self, workflow_job_template, wfjt_prompts, prompts_data, inventory):
+        # null or empty fields used
+        workflow_job = workflow_job_template.create_unified_job()
+        assert workflow_job.limit is None
+        assert workflow_job.inventory is None
+        assert workflow_job.scm_branch is None
+
+        # fields from prompts used
+        workflow_job = workflow_job_template.create_unified_job(**prompts_data)
+        assert json.loads(workflow_job.extra_vars) == {'foo': 'bar'}
+        assert workflow_job.limit == 'webservers'
+        assert workflow_job.inventory == inventory
+        assert workflow_job.scm_branch == 'release-3.3'
+
+        # non-null fields from WFJT used
+        workflow_job_template.inventory = inventory
+        workflow_job_template.limit = 'fooo'
+        workflow_job_template.scm_branch = 'bar'
+        workflow_job = workflow_job_template.create_unified_job()
+        assert workflow_job.limit == 'fooo'
+        assert workflow_job.inventory == inventory
+        assert workflow_job.scm_branch == 'bar'
+
+
+    @pytest.mark.django_db
+    def test_process_workflow_job_prompts(self, inventory, workflow_job_template, wfjt_prompts, prompts_data):
+        accepted, rejected, errors = workflow_job_template._accept_or_ignore_job_kwargs(**prompts_data)
+        assert accepted == {}
+        assert rejected == prompts_data
+        assert errors
+        accepted, rejected, errors = wfjt_prompts._accept_or_ignore_job_kwargs(**prompts_data)
+        assert accepted == prompts_data
+        assert rejected == {}
+        assert not errors
+
+
+    @pytest.mark.django_db
+    def test_set_all_the_prompts(self, post, organization, inventory, org_admin):
+        r = post(
+            url = reverse('api:workflow_job_template_list'),
+            data = dict(
+                name='My new workflow',
+                organization=organization.id,
+                inventory=inventory.id,
+                limit='foooo',
+                ask_limit_on_launch=True,
+                scm_branch='bar',
+                ask_scm_branch_on_launch=True
+            ),
+            user = org_admin,
+            expect = 201
+        )
+        wfjt = WorkflowJobTemplate.objects.get(id=r.data['id'])
+        assert wfjt.char_prompts == {
+            'limit': 'foooo', 'scm_branch': 'bar'
+        }
+        assert wfjt.ask_scm_branch_on_launch is True
+        assert wfjt.ask_limit_on_launch is True
+
+        launch_url = r.data['related']['launch']
+        with mock.patch('awx.main.queue.CallbackQueueDispatcher.dispatch', lambda self, obj: None):
+            r = post(
+                url = launch_url,
+                data = dict(
+                    scm_branch = 'prompt_branch',
+                    limit = 'prompt_limit'
+                ),
+                user = org_admin,
+                expect=201
+            )
+        assert r.data['limit'] == 'prompt_limit'
+        assert r.data['scm_branch'] == 'prompt_branch'
 
 
 @pytest.mark.django_db

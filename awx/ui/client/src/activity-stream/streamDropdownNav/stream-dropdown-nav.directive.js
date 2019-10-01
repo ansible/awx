@@ -50,11 +50,22 @@ export default ['templateUrl', 'i18n', function(templateUrl, i18n) {
                 }
                 else {
                     let search =  {
-                        or__object1__in: $scope.streamTarget && $scope.streamTarget === 'template' ? 'job_template,workflow_job_template' : $scope.streamTarget,
-                        or__object2__in: $scope.streamTarget && $scope.streamTarget === 'template' ? 'job_template,workflow_job_template' : $scope.streamTarget,
+                        or__object1__in: $scope.streamTarget,
+                        or__object2__in: $scope.streamTarget,
                         page_size: '20',
                         order_by: '-timestamp'
                     };
+
+                    if ($scope.streamTarget && $scope.streamTarget === 'template') {
+                        search.or__object1__in = 'job_template,workflow_job_template';
+                        search.or__object2__in = 'job_template,workflow_job_template';
+                    }
+
+                    if ($scope.streamTarget && $scope.streamTarget === 'job') {
+                        search.or__object1__in = 'job,workflow_approval';
+                        search.or__object2__in = 'job,workflow_approval';
+                    }
+
                     // Attach the taget to the query parameters
                     $state.go('activityStream', {target: $scope.streamTarget, id: null, activity_search: search});
                 }

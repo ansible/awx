@@ -59,20 +59,23 @@ UI_RELEASE_FLAG_FILE = awx/ui/.release_built
 I18N_FLAG_FILE = .i18n_built
 
 .PHONY: awx-link clean clean-tmp clean-venv requirements requirements_dev \
-	develop refresh adduser migrate dbchange dbshell runserver \
+	develop refresh adduser migrate dbchange runserver \
 	receiver test test_unit test_coverage coverage_html \
 	dev_build release_build release_clean sdist \
 	ui-docker-machine ui-docker ui-release ui-devel \
 	ui-test ui-deps ui-test-ci VERSION
 
 # remove ui build artifacts
-clean-ui:
+clean-ui: clean-languages
 	rm -rf awx/ui/static/
 	rm -rf awx/ui/node_modules/
 	rm -rf awx/ui/test/unit/reports/
 	rm -rf awx/ui/test/spec/reports/
 	rm -rf awx/ui/test/e2e/reports/
 	rm -rf awx/ui/client/languages/
+	rm -rf awx/ui_next/node_modules/
+	rm -rf awx/ui_next/coverage/
+	rm -rf awx/ui_next/build/locales/_build/
 	rm -f $(UI_DEPS_FLAG_FILE)
 	rm -f $(UI_RELEASE_DEPS_FLAG_FILE)
 	rm -f $(UI_RELEASE_FLAG_FILE)
@@ -91,6 +94,10 @@ clean-schema:
 	rm -rf schema.json
 	rm -rf reference-schema.json
 
+clean-languages:
+	rm -f $(I18N_FLAG_FILE)
+	find . -type f -regex ".*\.mo$$" -delete
+
 # Remove temporary build files, compiled Python files.
 clean: clean-ui clean-dist
 	rm -rf awx/public
@@ -98,7 +105,7 @@ clean: clean-ui clean-dist
 	rm -rf awx/job_status
 	rm -rf awx/job_output
 	rm -rf reports
-	rm -f awx/awx_test.sqlite3
+	rm -f awx/awx_test.sqlite3*
 	rm -rf requirements/vendor
 	rm -rf tmp
 	rm -rf $(I18N_FLAG_FILE)
@@ -124,8 +131,8 @@ virtualenv_ansible:
 		if [ ! -d "$(VENV_BASE)/ansible" ]; then \
 			virtualenv -p python --system-site-packages $(VENV_BASE)/ansible && \
 			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --ignore-installed six packaging appdirs && \
-			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --ignore-installed setuptools==41.0.1 && \
-			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --ignore-installed pip==19.1.1; \
+			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --ignore-installed setuptools==36.0.1 && \
+			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --ignore-installed pip==9.0.1; \
 		fi; \
 	fi
 
@@ -238,10 +245,6 @@ migrate:
 # Run after making changes to the models to create a new migration.
 dbchange:
 	$(MANAGEMENT_COMMAND) makemigrations
-
-# access database shell, asks for password
-dbshell:
-	sudo -u postgres psql -d awx-dev
 
 server_noattach:
 	tmux new-session -d -s awx 'exec make uwsgi'
@@ -369,6 +372,7 @@ test:
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	PYTHONDONTWRITEBYTECODE=1 py.test -p no:cacheprovider -n auto $(TEST_DIRS)
+	cd awxkit && $(VENV_BASE)/awx/bin/tox -re py2,py3
 	awx-manage check_migrations --dry-run --check  -n 'vNNN_missing_migration_file'
 
 test_unit:
@@ -515,6 +519,21 @@ jshint: $(UI_DEPS_FLAG_FILE)
 # END UI TASKS
 # --------------------------------------
 
+# UI NEXT TASKS
+# --------------------------------------
+
+ui-next-lint:
+	$(NPM_BIN) --prefix awx/ui_next install
+	$(NPM_BIN) run --prefix awx/ui_next lint
+	$(NPM_BIN) run --prefix awx/ui_next prettier-check
+
+ui-next-test:
+	$(NPM_BIN) --prefix awx/ui_next install
+	$(NPM_BIN) run --prefix awx/ui_next test
+
+# END UI NEXT TASKS
+# --------------------------------------
+
 # Build a pip-installable package into dist/ with a timestamped version number.
 dev_build:
 	$(PYTHON) setup.py dev_build
@@ -546,8 +565,8 @@ setup-bundle-build:
 	mkdir -p $@
 
 docker-auth:
-	if [ "$(IMAGE_REPOSITORY_AUTH)" ]; then \
-		docker login -u oauth2accesstoken -p "$(IMAGE_REPOSITORY_AUTH)" $(IMAGE_REPOSITORY_BASE); \
+	@if [ "$(IMAGE_REPOSITORY_AUTH)" ]; then \
+		echo "$(IMAGE_REPOSITORY_AUTH)" | docker login -u oauth2accesstoken --password-stdin $(IMAGE_REPOSITORY_BASE); \
 	fi;
 
 # Docker isolated rampart
@@ -629,7 +648,7 @@ clean-elk:
 	docker rm tools_kibana_1
 
 psql-container:
-	docker run -it --net tools_default --rm postgres:9.6 sh -c 'exec psql -h "postgres" -p "5432" -U postgres'
+	docker run -it --net tools_default --rm postgres:10 sh -c 'exec psql -h "postgres" -p "5432" -U postgres'
 
 VERSION:
 	@echo "awx: $(VERSION)"

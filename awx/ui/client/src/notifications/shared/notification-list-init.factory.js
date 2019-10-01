@@ -22,6 +22,10 @@ export default ['Wait', 'GetBasePath', 'ProcessErrors', 'Rest', 'GetChoices',
             url = params.url,
             id = params.id;
 
+        if ($state.includes('templates.editWorkflowJobTemplate') || $state.includes('organizations.edit')) {
+            scope.showApprovalColumn = true;
+        }
+
         scope.addNotificationTemplate = function() {
             var org_id;
             if($stateParams.hasOwnProperty('project_id')){
@@ -49,7 +53,11 @@ export default ['Wait', 'GetBasePath', 'ProcessErrors', 'Rest', 'GetChoices',
             scope.relatednotificationsRemove();
         }
         scope.relatednotificationsRemove = scope.$on('relatednotifications', function () {
-                var columns = ['/notification_templates_success/', '/notification_templates_error/'];
+                var columns = ['/notification_templates_started/', '/notification_templates_success/', '/notification_templates_error/'];
+
+                if ($state.includes('templates.editWorkflowJobTemplate') || $state.includes('organizations.edit')) {
+                    columns.push('/notification_templates_approvals');
+                }
 
                 GetChoices({
                     scope: scope,
@@ -64,7 +72,18 @@ export default ['Wait', 'GetBasePath', 'ProcessErrors', 'Rest', 'GetChoices',
                     Rest.setUrl(notifier_url);
                     Rest.get()
                         .then(function(response) {
-                            var type = (response.config.url.indexOf('success')>0) ? "notification_templates_success" : "notification_templates_error";
+                            let type;
+
+                            if (response.config.url.indexOf('started') > 0) {
+                                type = "notification_templates_started";
+                            } else if (response.config.url.indexOf('success') > 0) {
+                                type = "notification_templates_success";
+                            } else if (response.config.url.indexOf('error') > 0) {
+                                type = "notification_templates_error";
+                            } else if (response.config.url.indexOf('approvals') > 0) {
+                                type = "notification_templates_approvals";
+                            }
+
                             if (response.data.results) {
                                     _.forEach(response.data.results, function(result){
                                         _.forEach(scope.notifications, function(notification){

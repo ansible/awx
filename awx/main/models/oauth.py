@@ -3,7 +3,7 @@ import re
 
 # Django
 from django.core.validators import RegexValidator
-from django.db import models
+from django.db import models, connection
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
@@ -98,8 +98,7 @@ class OAuth2AccessToken(AbstractAccessToken):
         related_name="%(app_label)s_%(class)s",
         help_text=_('The user representing the token owner')
     )
-    description = models.CharField(
-        max_length=200,
+    description = models.TextField(
         default='',
         blank=True,
     )
@@ -122,7 +121,7 @@ class OAuth2AccessToken(AbstractAccessToken):
         valid = super(OAuth2AccessToken, self).is_valid(scopes)
         if valid:
             self.last_used = now()
-            self.save(update_fields=['last_used'])
+            connection.on_commit(lambda: self.save(update_fields=['last_used']))
         return valid
 
     def save(self, *args, **kwargs):

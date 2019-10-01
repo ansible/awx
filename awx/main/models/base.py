@@ -408,3 +408,14 @@ def prevent_search(relation):
     """
     setattr(relation, '__prevent_search__', True)
     return relation
+
+
+def accepts_json(relation):
+    """
+    Used to mark a model field as allowing JSON e.g,. JobTemplate.extra_vars
+    This is *mostly* used as a way to provide type hints for certain fields
+    so that HTTP OPTIONS reports the type data we need for the CLI to allow
+    JSON/YAML input.
+    """
+    setattr(relation, '__accepts_json__', True)
+    return relation

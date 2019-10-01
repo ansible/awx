@@ -6,7 +6,8 @@ describe('Controller: LicenseController', () => {
         LicenseController,
         ConfigService,
         ProcessErrors,
-        config;
+        config,
+        rhCreds;
 
     beforeEach(angular.mock.module('awApp'));
     beforeEach(angular.mock.module('license', ($provide) => {
@@ -22,23 +23,31 @@ describe('Controller: LicenseController', () => {
             version: '3.1.0-devel'
         };
 
+        rhCreds = {
+            password: '$encrypted$',
+            username: 'foo',
+        }
+
         ProcessErrors = jasmine.createSpy('ProcessErrors');
 
         $provide.value('ConfigService', ConfigService);
         $provide.value('ProcessErrors', ProcessErrors);
         $provide.value('config', config);
+        $provide.value('rhCreds', rhCreds);
     }));
 
-    beforeEach(angular.mock.inject( ($rootScope, $controller, _ConfigService_, _ProcessErrors_, _config_) => {
+    beforeEach(angular.mock.inject( ($rootScope, $controller, _ConfigService_, _ProcessErrors_, _config_, _rhCreds_) => {
         scope = $rootScope.$new();
         ConfigService = _ConfigService_;
         ProcessErrors = _ProcessErrors_;
         config = _config_;
+        rhCreds = _rhCreds_;
         LicenseController = $controller('licenseController', {
             $scope: scope,
             ConfigService: ConfigService,
             ProcessErrors: ProcessErrors,
-            config: config
+            config: config,
+            rhCreds: rhCreds
         });
     }));
 

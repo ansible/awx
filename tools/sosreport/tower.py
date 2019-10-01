@@ -7,6 +7,7 @@ SOSREPORT_TOWER_COMMANDS = [
     "awx-manage --version", # tower version
     "awx-manage list_instances", # tower cluster configuration
     "awx-manage run_dispatcher --status", # tower dispatch worker status
+    "awx-manage check_license --data", # tower license status
     "supervisorctl status",   # tower process status
     "/var/lib/awx/venv/awx/bin/pip freeze",        # pip package list
     "/var/lib/awx/venv/awx/bin/pip freeze -l",     # pip package list without globally-installed packages

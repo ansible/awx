@@ -10,12 +10,7 @@ export default {
     params: { licenseMissing: null },
     data: {
         activityStream: true,
-        refreshButton: true,
-        socket: {
-            "groups": {
-                "jobs": ["status_changed"]
-            }
-        },
+        refreshButton: true
     },
     ncyBreadcrumb: {
         label: N_("DASHBOARD")

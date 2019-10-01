@@ -6,10 +6,7 @@ from awx.api.versioning import reverse
 
 @pytest.mark.django_db
 def test_associate_credential_input_source(get, post, delete, admin, vault_credential, external_credential):
-    list_url = reverse(
-        'api:credential_input_source_list',
-        kwargs={'version': 'v2'}
-    )
+    list_url = reverse('api:credential_input_source_list')
 
     # attach
     params = {
@@ -35,7 +32,7 @@ def test_associate_credential_input_source(get, post, delete, admin, vault_crede
     response = delete(
         reverse(
             'api:credential_input_source_detail',
-            kwargs={'version': 'v2', 'pk': detail.data['id']}
+            kwargs={'pk': detail.data['id']}
         ),
         admin
     )
@@ -55,10 +52,7 @@ def test_associate_credential_input_source(get, post, delete, admin, vault_crede
     {'extraneous': 'foo'},  # invalid parameter
 ])
 def test_associate_credential_input_source_with_invalid_metadata(get, post, admin, vault_credential, external_credential, metadata):
-    list_url = reverse(
-        'api:credential_input_source_list',
-        kwargs={'version': 'v2'},
-    )
+    list_url = reverse('api:credential_input_source_list')
 
     params = {
         'target_credential': vault_credential.pk,
@@ -81,7 +75,6 @@ def test_create_from_list(get, post, admin, vault_credential, external_credentia
     }
     assert post(reverse(
         'api:credential_input_source_list',
-        kwargs={'version': 'v2'}
     ), params, admin).status_code == 201
     assert CredentialInputSource.objects.count() == 1
 
@@ -90,7 +83,6 @@ def test_create_from_list(get, post, admin, vault_credential, external_credentia
 def test_create_credential_input_source_with_external_target_returns_400(post, admin, external_credential, other_external_credential):
     list_url = reverse(
         'api:credential_input_source_list',
-        kwargs={'version': 'v2'}
     )
     params = {
         'target_credential': other_external_credential.pk,
@@ -107,7 +99,6 @@ def test_create_credential_input_source_with_external_target_returns_400(post, a
 def test_input_source_rbac_associate(get, post, delete, alice, vault_credential, external_credential):
     list_url = reverse(
         'api:credential_input_source_list',
-        kwargs={'version': 'v2'}
     )
     params = {
         'target_credential': vault_credential.pk,
@@ -142,7 +133,7 @@ def test_input_source_rbac_associate(get, post, delete, alice, vault_credential,
     # alice can't admin the target (so she can't remove the input source)
     delete_url = reverse(
         'api:credential_input_source_detail',
-        kwargs={'version': 'v2', 'pk': detail.data['id']}
+        kwargs={'pk': detail.data['id']}
     )
     response = delete(delete_url, alice)
     assert response.status_code == 403
@@ -159,7 +150,7 @@ def test_input_source_detail_rbac(get, post, patch, delete, admin, alice,
                                   other_external_credential):
     sublist_url = reverse(
         'api:credential_input_source_sublist',
-        kwargs={'version': 'v2', 'pk': vault_credential.pk}
+        kwargs={'pk': vault_credential.pk}
     )
     params = {
         'source_credential': external_credential.pk,
@@ -213,10 +204,7 @@ def test_input_source_detail_rbac(get, post, patch, delete, admin, alice,
 def test_input_source_create_rbac(get, post, patch, delete, alice,
                                   vault_credential, external_credential,
                                   other_external_credential):
-    list_url = reverse(
-        'api:credential_input_source_list',
-        kwargs={'version': 'v2'}
-    )
+    list_url = reverse('api:credential_input_source_list')
     params = {
         'target_credential': vault_credential.pk,
         'source_credential': external_credential.pk,
@@ -248,10 +236,7 @@ def test_input_source_rbac_swap_target_credential(get, post, put, patch, admin, 
     # you have to have admin role on the *original* credential (so you can
     # remove the relationship) *and* on the *new* credential (so you can apply the
     # new relationship)
-    list_url = reverse(
-        'api:credential_input_source_list',
-        kwargs={'version': 'v2'}
-    )
+    list_url = reverse('api:credential_input_source_list')
     params = {
         'target_credential': vault_credential.pk,
         'source_credential': external_credential.pk,
@@ -292,10 +277,7 @@ def test_input_source_rbac_change_metadata(get, post, put, patch, admin, alice,
                                            machine_credential, external_credential):
     # To change an input source, a user must have admin permissions on the
     # target credential and use permissions on the source credential.
-    list_url = reverse(
-        'api:credential_input_source_list',
-        kwargs={'version': 'v2'}
-    )
+    list_url = reverse('api:credential_input_source_list')
     params = {
         'target_credential': machine_credential.pk,
         'source_credential': external_credential.pk,
@@ -328,10 +310,7 @@ def test_input_source_rbac_change_metadata(get, post, put, patch, admin, alice,
 
 @pytest.mark.django_db
 def test_create_credential_input_source_with_non_external_source_returns_400(post, admin, credential, vault_credential):
-    list_url = reverse(
-        'api:credential_input_source_list',
-        kwargs={'version': 'v2'}
-    )
+    list_url = reverse('api:credential_input_source_list')
     params = {
         'target_credential': vault_credential.pk,
         'source_credential': credential.pk,
@@ -344,10 +323,7 @@ def test_create_credential_input_source_with_non_external_source_returns_400(pos
 
 @pytest.mark.django_db
 def test_create_credential_input_source_with_undefined_input_returns_400(post, admin, vault_credential, external_credential):
-    list_url = reverse(
-        'api:credential_input_source_list',
-        kwargs={'version': 'v2'}
-    )
+    list_url = reverse('api:credential_input_source_list')
     params = {
         'target_credential': vault_credential.pk,
         'source_credential': external_credential.pk,
@@ -361,10 +337,7 @@ def test_create_credential_input_source_with_undefined_input_returns_400(post, a
 
 @pytest.mark.django_db
 def test_create_credential_input_source_with_already_used_input_returns_400(post, admin, vault_credential, external_credential, other_external_credential):
-    list_url = reverse(
-        'api:credential_input_source_list',
-        kwargs={'version': 'v2'}
-    )
+    list_url = reverse('api:credential_input_source_list')
     all_params = [{
         'target_credential': vault_credential.pk,
         'source_credential': external_credential.pk,

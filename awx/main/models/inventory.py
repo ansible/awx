@@ -45,7 +45,7 @@ from awx.main.models.base import (
     CommonModelNameNotUnique,
     VarsDictProperty,
     CLOUD_INVENTORY_SOURCES,
-    prevent_search
+    prevent_search, accepts_json
 )
 from awx.main.models.events import InventoryUpdateEvent
 from awx.main.models.unified_jobs import UnifiedJob, UnifiedJobTemplate
@@ -93,11 +93,11 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
         on_delete=models.SET_NULL,
         null=True,
     )
-    variables = models.TextField(
+    variables = accepts_json(models.TextField(
         blank=True,
         default='',
         help_text=_('Inventory variables in JSON or YAML format.'),
-    )
+    ))
     has_active_failures = models.BooleanField(
         default=False,
         editable=False,
@@ -309,7 +309,7 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
 
             # Now use in-memory maps to build up group info.
             all_group_names = []
-            for group in self.groups.only('name', 'id', 'variables'):
+            for group in self.groups.only('name', 'id', 'variables', 'inventory_id'):
                 group_info = dict()
                 if group.id in group_hosts_map:
                     group_info['hosts'] = group_hosts_map[group.id]
@@ -608,11 +608,11 @@ class Host(CommonModelNameNotUnique, RelatedJobsMixin):
         default='',
         help_text=_('The value used by the remote inventory source to uniquely identify the host'),
     )
-    variables = models.TextField(
+    variables = accepts_json(models.TextField(
         blank=True,
         default='',
         help_text=_('Host variables in JSON or YAML format.'),
-    )
+    ))
     last_job = models.ForeignKey(
         'Job',
         related_name='hosts_as_last_job+',
@@ -650,7 +650,7 @@ class Host(CommonModelNameNotUnique, RelatedJobsMixin):
     )
     ansible_facts = JSONBField(
         blank=True,
-        default={},
+        default=dict,
         help_text=_('Arbitrary JSON structure of most recent ansible_facts, per-host.'),
     )
     ansible_facts_modified = models.DateTimeField(
@@ -796,11 +796,11 @@ class Group(CommonModelNameNotUnique, RelatedJobsMixin):
         related_name='children',
         blank=True,
     )
-    variables = models.TextField(
+    variables = accepts_json(models.TextField(
         blank=True,
         default='',
         help_text=_('Group variables in JSON or YAML format.'),
-    )
+    ))
     hosts = models.ManyToManyField(
         'Host',
         related_name='groups',
@@ -1501,7 +1501,7 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, CustomVirtualE
     @classmethod
     def _get_unified_job_field_names(cls):
         return set(f.name for f in InventorySourceOptions._meta.fields) | set(
-            ['name', 'description', 'schedule', 'credentials', 'inventory']
+            ['name', 'description', 'credentials', 'inventory']
         )
 
     def save(self, *args, **kwargs):
@@ -1991,6 +1991,8 @@ class azure_rm(PluginFileInjector):
 
         source_vars = inventory_update.source_vars_dict
 
+        ret['fail_on_template_errors'] = False
+
         group_by_hostvar = {
             'location': {'prefix': '', 'separator': '', 'key': 'location'},
             'tag': {'prefix': '', 'separator': '', 'key': 'tags.keys() | list if tags else []'},
@@ -2046,8 +2048,10 @@ class azure_rm(PluginFileInjector):
             'provisioning_state': 'provisioning_state | title',
             'computer_name': 'name',
             'type': 'resource_type',
-            'private_ip': 'private_ipv4_addresses[0]',
-            'public_ip': 'public_ipv4_addresses[0]',
+            'private_ip': 'private_ipv4_addresses[0] if private_ipv4_addresses else None',
+            'public_ip': 'public_ipv4_addresses[0] if public_ipv4_addresses else None',
+            'public_ip_name': 'public_ip_name if public_ip_name is defined else None',
+            'public_ip_id': 'public_ip_id if public_ip_id is defined else None',
             'tags': 'tags if tags else None'
         }
         # Special functionality from script
@@ -2330,6 +2334,12 @@ class gce(PluginFileInjector):
     ini_env_reference = 'GCE_INI_PATH'
     base_injector = 'managed'
 
+    def get_plugin_env(self, *args, **kwargs):
+        ret = super(gce, self).get_plugin_env(*args, **kwargs)
+        # We need native jinja2 types so that ip addresses can give JSON null value
+        ret['ANSIBLE_JINJA2_NATIVE'] = str(True)
+        return ret
+
     def get_script_env(self, inventory_update, private_data_dir, private_data_files):
         env = super(gce, self).get_script_env(inventory_update, private_data_dir, private_data_files)
         cred = inventory_update.get_cloud_credential()
@@ -2350,7 +2360,7 @@ class gce(PluginFileInjector):
             'gce_name': 'name',
             'gce_network': 'networkInterfaces[0].network.name',
             'gce_private_ip': 'networkInterfaces[0].networkIP',
-            'gce_public_ip': 'networkInterfaces[0].accessConfigs[0].natIP',
+            'gce_public_ip': 'networkInterfaces[0].accessConfigs[0].natIP | default(None)',
             'gce_status': 'status',
             'gce_subnetwork': 'networkInterfaces[0].subnetwork.name',
             'gce_tags': 'tags.get("items", [])',
@@ -2360,7 +2370,7 @@ class gce(PluginFileInjector):
             'gce_image': 'image',
             # We need this as long as hostnames is non-default, otherwise hosts
             # will not be addressed correctly, was returned in script
-            'ansible_ssh_host': 'networkInterfaces[0].accessConfigs[0].natIP'
+            'ansible_ssh_host': 'networkInterfaces[0].accessConfigs[0].natIP | default(networkInterfaces[0].networkIP)'
         }
 
     def inventory_as_dict(self, inventory_update, private_data_dir):

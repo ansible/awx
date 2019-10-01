@@ -10,7 +10,7 @@ from django.contrib.contenttypes.models import ContentType
 # AWX
 from awx.main.models import (
     UnifiedJobTemplate, Job, JobTemplate, WorkflowJobTemplate,
-    Project, WorkflowJob, Schedule,
+    WorkflowApprovalTemplate, Project, WorkflowJob, Schedule,
     Credential
 )
 
@@ -20,7 +20,9 @@ def test_subclass_types(rando):
     assert set(UnifiedJobTemplate._submodels_with_roles()) == set([
         ContentType.objects.get_for_model(JobTemplate).id,
         ContentType.objects.get_for_model(Project).id,
-        ContentType.objects.get_for_model(WorkflowJobTemplate).id
+        ContentType.objects.get_for_model(WorkflowJobTemplate).id,
+        ContentType.objects.get_for_model(WorkflowApprovalTemplate).id
+
     ])
 
 
@@ -144,6 +146,39 @@ class TestMetaVars:
         data = job.awx_meta_vars()
         assert data['awx_schedule_id'] == schedule.pk
         assert 'awx_user_name' not in data
+
+    def test_scheduled_workflow_job_node_metavars(self, workflow_job_template):
+        schedule = Schedule.objects.create(
+            name='job-schedule',
+            rrule='DTSTART:20171129T155939z\nFREQ=MONTHLY',
+            unified_job_template=workflow_job_template
+        )
+
+        workflow_job = WorkflowJob.objects.create(
+            name='workflow-job',
+            workflow_job_template=workflow_job_template,
+            schedule=schedule
+        )
+
+        job = Job.objects.create(
+            launch_type='workflow'
+        )
+        workflow_job.workflow_nodes.create(job=job)
+        assert job.awx_meta_vars() == {
+            'awx_job_id': job.id,
+            'tower_job_id': job.id,
+            'awx_job_launch_type': 'workflow',
+            'tower_job_launch_type': 'workflow',
+            'awx_workflow_job_name': 'workflow-job',
+            'tower_workflow_job_name': 'workflow-job',
+            'awx_workflow_job_id': workflow_job.id,
+            'tower_workflow_job_id': workflow_job.id,
+            'awx_parent_job_schedule_id': schedule.id,
+            'tower_parent_job_schedule_id': schedule.id,
+            'awx_parent_job_schedule_name': 'job-schedule',
+            'tower_parent_job_schedule_name': 'job-schedule',
+            
+        }
 
 
 @pytest.mark.django_db

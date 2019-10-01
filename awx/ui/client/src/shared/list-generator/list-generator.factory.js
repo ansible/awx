@@ -363,7 +363,7 @@ export default ['$compile', 'Attr', 'Icon',
                     innerTable += `</div>`;
                 }
 
-                innerTable += `<div class='d-flex h-100'>`;
+                innerTable += `<div class='d-flex h-100' style='min-width: 0;'>`;
 
                 if (list.index) {
                     innerTable += "<div class=\"d-none d-sm-flex index-column List-tableCell\">{{ $index + ((" + list.iterator + "_page - 1) * " + list.iterator + "_page_size) + 1 }}.</div>\n";
@@ -546,7 +546,9 @@ export default ['$compile', 'Attr', 'Icon',
                 for (fld in list.fields) {
                     if (options.mode !== 'lookup' || (options.mode === 'lookup' && (fld === 'name' || _.has(list.fields[fld], 'includeModal')))){
                         let customClass = list.fields[fld].columnClass || '';
+                        const ngIf = list.fields[fld].ngIf ? `ng-if="${list.fields[fld].ngIf}"` : '';
                         html += `<div
+                            ${ngIf}
                             base-path="${list.basePath || list.name}"
                             collection="${list.name}"
                             dataset="${list.iterator}_dataset"
@@ -556,6 +558,7 @@ export default ['$compile', 'Attr', 'Icon',
                             column-no-sort="${list.fields[fld].nosort}"
                             column-label="${list.fields[fld].label}"
                             column-custom-class="${customClass}"
+                            ng-class="${list.fields[fld].columnNgClass || `{'list-header-noSort': ${list.fields[fld].nosort ? true : false}}`}"
                             query-set="${list.iterator}_queryset">
                         </div>`;
                     }
