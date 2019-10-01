@@ -210,7 +210,9 @@ class MultiSelect extends Component {
               {value.map(item => (
                 <Chip
                   key={item.id}
-                  onClick={() => { this.removeItem(item); }}
+                  onClick={() => {
+                    this.removeItem(item);
+                  }}
                 >
                   {item.name}
                 </Chip>

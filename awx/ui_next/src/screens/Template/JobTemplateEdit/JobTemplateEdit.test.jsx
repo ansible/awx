@@ -178,7 +178,7 @@ describe('<JobTemplateEdit />', () => {
       { id: 4, name: 'Bar', isNew: true },
       { id: 5, name: 'Maple' },
       { id: 6, name: 'Tree' },
-    ]
+    ];
     JobTemplatesAPI.update.mockResolvedValue({
       data: { ...updatedTemplateData },
     });

@@ -63,9 +63,15 @@ describe('<MultiSelect />', () => {
     wrapper.update();
     const event = {
       preventDefault: () => {},
-      target: wrapper.find('DropdownItem').at(1).getDOMNode(),
+      target: wrapper
+        .find('DropdownItem')
+        .at(1)
+        .getDOMNode(),
     };
-    wrapper.find('DropdownItem').at(1).invoke('onClick')(event);
+    wrapper
+      .find('DropdownItem')
+      .at(1)
+      .invoke('onClick')(event);
 
     expect(onAddNewItem).toHaveBeenCalledWith(options[1]);
     const newVal = onChange.mock.calls[0][0];
@@ -86,7 +92,10 @@ describe('<MultiSelect />', () => {
       />
     );
 
-    wrapper.find('Chip').at(1).invoke('onClick')();
+    wrapper
+      .find('Chip')
+      .at(1)
+      .invoke('onClick')();
 
     expect(onRemoveItem).toHaveBeenCalledWith(value[1]);
     const newVal = onChange.mock.calls[0][0];

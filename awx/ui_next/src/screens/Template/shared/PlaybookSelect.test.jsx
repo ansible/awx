@@ -14,7 +14,7 @@ describe('<PlaybookSelect />', () => {
 
   afterEach(() => {
     jest.resetAllMocks();
-  })
+  });
 
   test('should reload playbooks when project value changes', () => {
     const wrapper = mountWithContexts(

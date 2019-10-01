@@ -1,15 +1,12 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { LabelsAPI } from '@api';
-import { sleep} from '@testUtils/testUtils';
+import { sleep } from '@testUtils/testUtils';
 import LabelSelect from './LabelSelect';
 
 jest.mock('@api');
 
-const options = [
-  { id: 1, name: 'one' },
-  { id: 2, name: 'two' },
-];
+const options = [{ id: 1, name: 'one' }, { id: 2, name: 'two' }];
 
 describe('<LabelSelect />', () => {
   afterEach(() => {
@@ -47,7 +44,7 @@ describe('<LabelSelect />', () => {
     expect(LabelsAPI.read).toHaveBeenCalledTimes(2);
     expect(wrapper.find('MultiSelect').prop('options')).toEqual([
       ...options,
-      ...options
+      ...options,
     ]);
   });
 });

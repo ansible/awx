@@ -1,5 +1,5 @@
 /* eslint-disable import/prefer-default-export */
-export function getAddedAndRemoved (original, current) {
+export function getAddedAndRemoved(original, current) {
   original = original || [];
   current = current || [];
   const added = [];

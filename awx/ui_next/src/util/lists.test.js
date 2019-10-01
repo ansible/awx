@@ -1,4 +1,4 @@
-import {getAddedAndRemoved} from './lists';
+import { getAddedAndRemoved } from './lists';
 
 const one = { id: 1 };
 const two = { id: 2 };
