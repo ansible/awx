@@ -36,6 +36,9 @@ describe('View: Split Jobs List', () => {
                 if (str === 'list.SLICE_JOB') {
                     return 'Slice Job';
                 }
+                if (str === 'list.ROW_ITEM_LABEL_WEBHOOK') {
+                    return 'Webhook';
+                }
                 return '';
             }
         };
@@ -96,40 +99,51 @@ describe('View: Split Jobs List', () => {
         it('is created successfully', () => {
             expect(JobList).toBeDefined();
         });
-        it('has method "getSplitJobDetails"', () => {
-            expect(JobList.getSliceJobDetails).toBeDefined();
+        it('has method "getSecondaryTagLabel"', () => {
+            expect(JobList.getSecondaryTagLabel).toBeDefined();
         });
-        it('returns a string', () => {
+        it('returns the expected string when slice data is available', () => {
             const data = {
                 job_slice_number: 1,
-                job_slice_count: 2
+                job_slice_count: 2,
+                launch_type: 'manual',
             };
-            const result = JobList.getSliceJobDetails(data);
+            const result = JobList.getSecondaryTagLabel(data);
             expect(result).toEqual('Slice Job 1/2');
         });
-        it('returns null when data is null', () => {
+        it('returns null when slice data is null', () => {
             const data = {
                 job_slice_number: null,
-                job_slice_count: null
+                job_slice_count: null,
+                launch_type: 'manual',
             };
-            const result = JobList.getSliceJobDetails(data);
+            const result = JobList.getSecondaryTagLabel(data);
             expect(result).toBeNull();
         });
-        it('returns null when data is undefined', () => {
+        it('returns null when slice data is undefined', () => {
             const data = {
                 job_slice_number: undefined,
-                job_slice_count: undefined
+                job_slice_count: undefined,
+                launch_type: 'manual',
             };
-            const result = JobList.getSliceJobDetails(data);
+            const result = JobList.getSecondaryTagLabel(data);
             expect(result).toBeNull();
         });
-        it('returns null when job is not a sliced job', () => {
+        it('returns null when job is not a sliced or webhook job', () => {
             const data = {
                 job_slice_number: null,
-                job_slice_count: 1
+                job_slice_count: 1,
+                launch_type: 'manual',
             };
-            const result = JobList.getSliceJobDetails(data);
+            const result = JobList.getSecondaryTagLabel(data);
             expect(result).toBeNull();
+        });
+        it('returns the expected string for webhook jobs', () => {
+            const data = {
+                launch_type: 'webhook',
+            };
+            const result = JobList.getSecondaryTagLabel(data);
+            expect(result).toEqual('Webhook');
         });
     });
 });
