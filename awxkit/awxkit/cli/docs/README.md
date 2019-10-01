@@ -28,7 +28,7 @@ Building the Documentation
 --------------------------
 To build the docs, spin up a real AWX server, `pip install sphinx sphinxcontrib-autoprogram`, and run:
 
-    cd $AWX_FOLDER
+    cd $AWX_FOLDER # folder where the ansible/awx repository has been cloned to
     cd awxkit/awxkit/cli/docs
     TOWER_HOST=https://awx.example.org TOWER_USERNAME=example TOWER_PASSWORD=secret make clean html
     cd build/html/ && python -m http.server
