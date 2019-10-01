@@ -74,6 +74,7 @@
                                     </div>
                                 </div>
                         </div>
+                        <div class="instanceGroupsList-details">
                         <div class="at-Row-links">
                             <at-row-item
                                 ng-if="!instance_group.credential"
@@ -84,6 +85,7 @@
                                 badge="true">
                             </at-row-item>
                             <at-row-item
+                                ng-class="{'at-Row-links-noCredential': !instance_group.credential}"
                                 label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_RUNNING_JOBS') }}"
                                 label-state="instanceGroups.jobs({instance_group_id: {{ instance_group.id }}, job_search: {status__in: ['running,waiting']}})"
                                 value="{{ instance_group.jobs_running }}"
@@ -100,8 +102,9 @@
                         </div>
                         <div class="at-Row-actions" >
                             <capacity-bar ng-show="!instance_group.credential" label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_USED_CAPACITY') }}" capacity="instance_group.consumed_capacity" total-capacity="instance_group.capacity"></capacity-bar>
-                            <at-row-action icon="fa-trash" ng-click="vm.deleteInstanceGroup(instance_group)" ng-if="vm.rowAction.trash(instance_group)">
+                            <at-row-action ng-class="{'at-Row-actions-noCredential': !instance_group.credential}" icon="fa-trash" ng-click="vm.deleteInstanceGroup(instance_group)" ng-if="vm.rowAction.trash(instance_group)">
                             </at-row-action>
+                        </div>
                         </div>
                     </div>
                 </div>

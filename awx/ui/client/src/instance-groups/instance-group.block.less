@@ -1,7 +1,17 @@
 .InstanceGroups {
     .at-Row-actions{
-        width: 700px;
-        justify-content: flex-end;
+        justify-content: flex-start;
+        width: 300px;
+       & > capacity-bar:only-child{
+            margin-left: 0px;
+            margin-top: 5px
+        }
+    }
+    .at-RowAction{
+        margin: 0;
+    }
+    .at-Row-links{
+        justify-content: flex-start;
     }
 
     .BreadCrumb-menuLinkImage:hover {
@@ -86,9 +96,36 @@
     .ContainerGroups-codeMirror{
         margin-bottom: 10px;
     }
+
+    .at-Row-container{
+    flex-wrap: wrap;
+    }
+
+    @media screen and (max-width: 1060px) and (min-width: 769px){
+        .at-Row-links {
+            justify-content: flex-start;
+            flex-wrap: wrap;
+        }
+    }
+
+    @media screen and (min-width: 1061px){
+        .at-Row-actions{
+            justify-content: flex-end;
+            & > capacity-bar:only-child {
+                margin-right: 30px;
+            }
+        }
+        .instanceGroupsList-details{
+            display: flex;
+        }
+        .at-Row-links {
+            justify-content: flex-end;
+            display: flex;
+            width: 445px;
+        }
+    }
 }
-.at-Row-links {
-justify-content: flex-end;
-display: flex;
-flex-grow: 1;
-}
+
+
+
+
