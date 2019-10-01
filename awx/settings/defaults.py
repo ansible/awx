@@ -1103,6 +1103,10 @@ LOGGING = {
             'handlers': ['console', 'file', 'tower_warnings'],
             'level': 'WARNING',
         },
+        'celery': {  # for celerybeat connection warnings
+            'handlers': ['console', 'file', 'tower_warnings'],
+            'level': 'WARNING',
+        },
         'kombu': {
             'handlers': ['console', 'file', 'tower_warnings'],
             'level': 'WARNING',
