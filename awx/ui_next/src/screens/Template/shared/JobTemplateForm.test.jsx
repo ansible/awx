@@ -70,7 +70,7 @@ describe('<JobTemplateForm />', () => {
     jest.clearAllMocks();
   });
 
-  test('should render labels MultiSelect', async () => {
+  test('should render LabelsSelect', async () => {
     const wrapper = mountWithContexts(
       <JobTemplateForm
         template={mockData}
@@ -82,11 +82,11 @@ describe('<JobTemplateForm />', () => {
     expect(LabelsAPI.read).toHaveBeenCalled();
     expect(JobTemplatesAPI.readInstanceGroups).toHaveBeenCalled();
     wrapper.update();
-    expect(
-      wrapper
-        .find('FormGroup[fieldId="template-labels"] MultiSelect')
-        .prop('associatedItems')
-    ).toEqual(mockData.summary_fields.labels.results);
+    const select = wrapper.find('LabelSelect');
+    expect(select).toHaveLength(1);
+    expect(select.prop('value')).toEqual(
+      mockData.summary_fields.labels.results
+    );
   });
 
   test('should update form values on input changes', async () => {

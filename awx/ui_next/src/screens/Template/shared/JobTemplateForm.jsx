@@ -588,7 +588,7 @@ const FormikApp = withFormik({
       inventory: template.inventory || '',
       project: template.project || '',
       playbook: template.playbook || '',
-      labels: summary_fields.labels.results,
+      labels: summary_fields.labels.results || [],
       forks: template.forks || 0,
       limit: template.limit || '',
       verbosity: template.verbosity || '0',

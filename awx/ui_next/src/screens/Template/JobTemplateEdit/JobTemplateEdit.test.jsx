@@ -34,6 +34,9 @@ const mockJobTemplate = {
     labels: {
       results: [{ name: 'Sushi', id: 1 }, { name: 'Major', id: 2 }],
     },
+    inventory: {
+      organization_id: 1,
+    },
   },
 };
 
@@ -170,16 +173,12 @@ describe('<JobTemplateEdit />', () => {
       description: 'new description',
       job_type: 'check',
     };
-    const newLabels = [
-      { associate: true, id: 3 },
-      { associate: true, id: 3 },
-      { name: 'Maple', organization: 1 },
-      { name: 'Tree', organization: 1 },
-    ];
-    const removedLabels = [
-      { disassociate: true, id: 1 },
-      { disassociate: true, id: 2 },
-    ];
+    const labels = [
+      { id: 3, name: 'Foo', isNew: true },
+      { id: 4, name: 'Bar', isNew: true },
+      { id: 5, name: 'Maple' },
+      { id: 6, name: 'Tree' },
+    ]
     JobTemplatesAPI.update.mockResolvedValue({
       data: { ...updatedTemplateData },
     });
@@ -190,8 +189,7 @@ describe('<JobTemplateEdit />', () => {
           values: {
             ...mockJobTemplate,
             ...updatedTemplateData,
-            newLabels,
-            removedLabels,
+            labels,
           },
         },
         () => resolve()

@@ -27,6 +27,8 @@ const jobTemplateData = {
   host_config_key: '',
 };
 
+// TODO: Needs React/React-router upgrade to remove `act()` warnings
+// See https://github.com/ansible/awx/issues/4817
 describe('<JobTemplateAdd />', () => {
   const defaultProps = {
     description: '',
@@ -94,7 +96,10 @@ describe('<JobTemplateAdd />', () => {
     const changeState = new Promise(resolve => {
       formik.setState(
         {
-          values: jobTemplateData,
+          values: {
+            ...jobTemplateData,
+            labels: [],
+          }
         },
         () => resolve()
       );
