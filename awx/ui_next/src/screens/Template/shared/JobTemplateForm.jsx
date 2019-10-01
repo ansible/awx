@@ -74,20 +74,16 @@ class JobTemplateForm extends Component {
       contentError: false,
       project: props.template.summary_fields.project,
       inventory: props.template.summary_fields.inventory,
-      relatedInstanceGroups: [],
       allowCallbacks: !!props.template.host_config_key,
     };
     this.handleProjectValidation = this.handleProjectValidation.bind(this);
     this.loadRelatedInstanceGroups = this.loadRelatedInstanceGroups.bind(this);
-    this.handleInstanceGroupsChange = this.handleInstanceGroupsChange.bind(
-      this
-    );
   }
 
   componentDidMount() {
     const { validateField } = this.props;
     this.setState({ contentError: null, hasContentLoading: true });
-    // TODO: determine whene LabelSelect has finished loading labels
+    // TODO: determine when LabelSelect has finished loading labels
     Promise.all([this.loadRelatedInstanceGroups()]).then(() => {
       this.setState({ hasContentLoading: false });
       validateField('project');
@@ -95,16 +91,14 @@ class JobTemplateForm extends Component {
   }
 
   async loadRelatedInstanceGroups() {
-    const { template } = this.props;
+    const { setFieldValue, template } = this.props;
     if (!template.id) {
       return;
     }
     try {
       const { data } = await JobTemplatesAPI.readInstanceGroups(template.id);
-      this.setState({
-        initialInstanceGroups: data.results,
-        relatedInstanceGroups: [...data.results],
-      });
+      setFieldValue('initialInstanceGroups', data.results);
+      setFieldValue('instanceGroups', [...data.results]);
     } catch (err) {
       this.setState({ contentError: err });
     }
@@ -124,37 +118,12 @@ class JobTemplateForm extends Component {
     };
   }
 
-  handleInstanceGroupsChange(relatedInstanceGroups) {
-    const { setFieldValue } = this.props;
-    const { initialInstanceGroups } = this.state;
-    let added = [];
-    const removed = [];
-    if (initialInstanceGroups) {
-      initialInstanceGroups.forEach(group => {
-        if (!relatedInstanceGroups.find(g => g.id === group.id)) {
-          removed.push(group);
-        }
-      });
-      relatedInstanceGroups.forEach(group => {
-        if (!initialInstanceGroups.find(g => g.id === group.id)) {
-          added.push(group);
-        }
-      });
-    } else {
-      added = relatedInstanceGroups;
-    }
-    setFieldValue('addedInstanceGroups', added);
-    setFieldValue('removedInstanceGroups', removed);
-    this.setState({ relatedInstanceGroups });
-  }
-
   render() {
     const {
       contentError,
       hasContentLoading,
       inventory,
       project,
-      relatedInstanceGroups,
       allowCallbacks,
     } = this.state;
     const {
@@ -334,13 +303,13 @@ class JobTemplateForm extends Component {
                   content={i18n._(t`Optional labels that describe this job template,
                     such as 'dev' or 'test'. Labels can be used to group and filter
                     job templates and completed jobs.`)}
-                  />
-                  <LabelSelect
-                    value={field.value}
-                    onChange={labels => setFieldValue('labels', labels)}
-                    onError={err => this.setState({ contentError: err })}
-                  />
-                </FormGroup>
+                />
+                <LabelSelect
+                  value={field.value}
+                  onChange={labels => setFieldValue('labels', labels)}
+                  onError={err => this.setState({ contentError: err })}
+                />
+              </FormGroup>
             )}
           />
         </FormRow>
@@ -440,12 +409,17 @@ class JobTemplateForm extends Component {
               )}
             />
           </FormRow>
-          <InstanceGroupsLookup
-            css="margin-top: 20px"
-            value={relatedInstanceGroups}
-            onChange={this.handleInstanceGroupsChange}
-            tooltip={i18n._(t`Select the Instance Groups for this Organization
-              to run on.`)}
+          <Field
+            name="instanceGroups"
+            render={({ field, form }) => (
+              <InstanceGroupsLookup
+                css="margin-top: 20px"
+                value={field.value}
+                onChange={value => form.setFieldValue(field.name, value)}
+                tooltip={i18n._(t`Select the Instance Groups for this Organization
+                  to run on.`)}
+              />
+            )}
           />
           <Field
             name="job_tags"
@@ -576,10 +550,12 @@ class JobTemplateForm extends Component {
 const FormikApp = withFormik({
   mapPropsToValues(props) {
     const { template = {} } = props;
-    const { summary_fields = {
-      labels: { results: [] },
-      inventory: { organization: null },
-    } } = template;
+    const {
+      summary_fields = {
+        labels: { results: [] },
+        inventory: { organization: null },
+      },
+    } = template;
 
     return {
       name: template.name || '',
@@ -603,8 +579,8 @@ const FormikApp = withFormik({
       use_fact_cache: template.use_fact_cache || false,
       host_config_key: template.host_config_key || '',
       organizationId: summary_fields.inventory.organization_id || null,
-      addedInstanceGroups: [],
-      removedInstanceGroups: [],
+      initialInstanceGroups: [],
+      instanceGroups: [],
     };
   },
   handleSubmit: (values, { props }) => props.handleSubmit(values),

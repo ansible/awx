@@ -107,8 +107,8 @@ class JobTemplateEdit extends Component {
     const {
       labels,
       organizationId,
-      addedInstanceGroups,
-      removedInstanceGroups,
+      instanceGroups,
+      initialInstanceGroups,
       ...remainingValues
     } = values;
 
@@ -117,7 +117,7 @@ class JobTemplateEdit extends Component {
       await JobTemplatesAPI.update(template.id, remainingValues);
       await Promise.all([
         this.submitLabels(labels, organizationId),
-        this.submitInstanceGroups(addedInstanceGroups, removedInstanceGroups),
+        this.submitInstanceGroups(instanceGroups, initialInstanceGroups),
       ]);
       history.push(this.detailsUrl);
     } catch (formSubmitError) {
@@ -151,12 +151,13 @@ class JobTemplateEdit extends Component {
     return results;
   }
 
-  async submitInstanceGroups(addedGroups, removedGroups) {
+  async submitInstanceGroups(groups, initialGroups) {
     const { template } = this.props;
-    const associatePromises = addedGroups.map(group =>
+    const { added, removed } = getAddedAndRemoved(initialGroups, groups);
+    const associatePromises = added.map(group =>
       JobTemplatesAPI.associateInstanceGroup(template.id, group.id)
     );
-    const disassociatePromises = removedGroups.map(group =>
+    const disassociatePromises = removed.map(group =>
       JobTemplatesAPI.disassociateInstanceGroup(template.id, group.id)
     );
     return Promise.all([...associatePromises, ...disassociatePromises]);

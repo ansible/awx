@@ -20,8 +20,8 @@ function JobTemplateAdd({ history, i18n }) {
     const {
       labels,
       organizationId,
-      addedInstanceGroups,
-      removedInstanceGroups,
+      instanceGroups,
+      initialInstanceGroups,
       ...remainingValues
     } = values;
 
@@ -32,7 +32,7 @@ function JobTemplateAdd({ history, i18n }) {
       } = await JobTemplatesAPI.create(remainingValues);
       await Promise.all([
         submitLabels(id, labels, organizationId),
-        submitInstanceGroups(id, addedInstanceGroups, removedInstanceGroups),
+        submitInstanceGroups(id, instanceGroups),
       ]);
       history.push(`/templates/${type}/${id}/details`);
     } catch (error) {
