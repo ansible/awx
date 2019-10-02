@@ -1,8 +1,16 @@
 ---
-- name: Create {{ docker_compose_dir }} directory
-  file:
-    path: "{{ docker_compose_dir }}"
-    state: directory
+- name: Create {{ docker_compose_dir }} directory 
+  block: 
+    - file: 
+        path: "{{ docker_compose_dir }}"
+        state: directory
+  rescue:
+    - include_vars:
+        file: installpathsalternatives.yml
+    - file: 
+        path: "{{ docker_compose_dir }}"
+        state: directory
+    - debug: "msg='could not write to directory given in inventory - moving to home directory instead'"
 
 - name: Create Docker Compose Configuration
   template:
