@@ -379,7 +379,7 @@ register(
 register(
     'AWX_PIP_ENABLED',
     field_class=fields.BooleanField,
-    default=True,
+    default=False,
     label=_('Enable Pip Requirements Install'),
     help_text=_('Allows python packages to be dynamically installed from a pip-requirements.txt file for SCM projects.'),
     category=_('Jobs'),
