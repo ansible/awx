@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { func, arrayOf, number, shape, string } from 'prop-types';
+import { func, arrayOf, number, shape, string, oneOfType } from 'prop-types';
 import MultiSelect from '@components/MultiSelect';
 import { LabelsAPI } from '@api';
 
@@ -51,7 +51,7 @@ function LabelSelect({ value, onChange, onError }) {
 LabelSelect.propTypes = {
   value: arrayOf(
     shape({
-      id: number.isRequired,
+      id: oneOfType([number, string]).isRequired,
       name: string.isRequired,
     })
   ).isRequired,
