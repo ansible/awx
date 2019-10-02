@@ -11,7 +11,7 @@ AWX/|RHAT| host, and that your authentication credentials are correct, run:
 
     awx config
 
-.. note:: for help configurating authentication settings with the awx CLI, see :ref:`authentication`.
+.. note:: For help configuring authentication settings with the awx CLI, see :ref:`authentication`.
 
 Printing the History of a Particular Job
 ----------------------------------------
