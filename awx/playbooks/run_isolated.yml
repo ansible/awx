@@ -26,7 +26,7 @@
       when: key.stat.exists
 
     - name: spawn the playbook
-      command: "ansible-runner start {{src}} -p {{playbook}} -i {{ident}}"
+      command: "ansible-runner start {{src}} -p '{{playbook}}' -i {{ident}}"
       when: playbook is defined
 
     - name: spawn the adhoc command
