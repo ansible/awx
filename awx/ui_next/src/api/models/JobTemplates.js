@@ -27,11 +27,17 @@ class JobTemplates extends InstanceGroupsMixin(Base) {
   }
 
   disassociateLabel(id, label) {
-    return this.http.post(`${this.baseUrl}${id}/labels/`, label);
+    return this.http.post(`${this.baseUrl}${id}/labels/`, {
+      id: label.id,
+      disassociate: true,
+    });
   }
 
-  generateLabel(orgId, label) {
-    return this.http.post(`${this.baseUrl}${orgId}/labels/`, label);
+  generateLabel(id, label, orgId) {
+    return this.http.post(`${this.baseUrl}${id}/labels/`, {
+      name: label.name,
+      organization: orgId,
+    });
   }
 
   readCredentials(id, params) {

@@ -2,16 +2,11 @@ import React from 'react';
 import { string, func, bool } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { FormGroup, Tooltip } from '@patternfly/react-core';
-import { QuestionCircleIcon as PFQuestionCircleIcon } from '@patternfly/react-icons';
+import { FormGroup } from '@patternfly/react-core';
 import { ProjectsAPI } from '@api';
 import { Project } from '@types';
 import Lookup from '@components/Lookup';
-import styled from 'styled-components';
-
-const QuestionCircleIcon = styled(PFQuestionCircleIcon)`
-  margin-left: 10px;
-`;
+import { FieldTooltip } from '@components/FormField';
 
 const loadProjects = async params => ProjectsAPI.read(params);
 
@@ -36,11 +31,7 @@ class ProjectLookup extends React.Component {
         isValid={isValid}
         label={i18n._(t`Project`)}
       >
-        {tooltip && (
-          <Tooltip position="right" content={tooltip}>
-            <QuestionCircleIcon />
-          </Tooltip>
-        )}
+        {tooltip && <FieldTooltip content={tooltip} />}
         <Lookup
           id="project"
           lookupHeader={i18n._(t`Project`)}

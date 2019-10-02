@@ -1,8 +1,8 @@
 import React from 'react';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
 import { sleep } from '@testUtils/testUtils';
-import JobTemplateForm, { _JobTemplateForm } from './JobTemplateForm';
-import { LabelsAPI, JobTemplatesAPI } from '@api';
+import JobTemplateForm from './JobTemplateForm';
+import { LabelsAPI, JobTemplatesAPI, ProjectsAPI } from '@api';
 
 jest.mock('@api');
 
@@ -61,13 +61,16 @@ describe('<JobTemplateForm />', () => {
     JobTemplatesAPI.readInstanceGroups.mockReturnValue({
       data: { results: mockInstanceGroups },
     });
+    ProjectsAPI.readPlaybooks.mockReturnValue({
+      data: ['debug.yml'],
+    });
   });
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  test('should render labels MultiSelect', async () => {
+  test('should render LabelsSelect', async () => {
     const wrapper = mountWithContexts(
       <JobTemplateForm
         template={mockData}
@@ -79,11 +82,11 @@ describe('<JobTemplateForm />', () => {
     expect(LabelsAPI.read).toHaveBeenCalled();
     expect(JobTemplatesAPI.readInstanceGroups).toHaveBeenCalled();
     wrapper.update();
-    expect(
-      wrapper
-        .find('FormGroup[fieldId="template-labels"] MultiSelect')
-        .prop('associatedItems')
-    ).toEqual(mockData.summary_fields.labels.results);
+    const select = wrapper.find('LabelSelect');
+    expect(select).toHaveLength(1);
+    expect(select.prop('value')).toEqual(
+      mockData.summary_fields.labels.results
+    );
   });
 
   test('should update form values on input changes', async () => {
@@ -154,76 +157,5 @@ describe('<JobTemplateForm />', () => {
     expect(handleCancel).not.toHaveBeenCalled();
     wrapper.find('button[aria-label="Cancel"]').prop('onClick')();
     expect(handleCancel).toBeCalled();
-  });
-
-  test('should call loadRelatedProjectPlaybooks when project value changes', async () => {
-    const loadRelatedProjectPlaybooks = jest.spyOn(
-      _JobTemplateForm.prototype,
-      'loadRelatedProjectPlaybooks'
-    );
-    const wrapper = mountWithContexts(
-      <JobTemplateForm
-        template={mockData}
-        handleSubmit={jest.fn()}
-        handleCancel={jest.fn()}
-      />
-    );
-    await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
-    wrapper.find('ProjectLookup').prop('onChange')({
-      id: 10,
-      name: 'project',
-    });
-    expect(loadRelatedProjectPlaybooks).toHaveBeenCalledWith(10);
-  });
-
-  test('handleNewLabel should arrange new labels properly', async () => {
-    const event = { key: 'Enter', preventDefault: () => {} };
-    const wrapper = mountWithContexts(
-      <JobTemplateForm
-        template={mockData}
-        handleSubmit={jest.fn()}
-        handleCancel={jest.fn()}
-      />
-    );
-    await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
-    const multiSelect = wrapper.find(
-      'FormGroup[fieldId="template-labels"] MultiSelect'
-    );
-    const component = wrapper.find('JobTemplateForm');
-
-    wrapper.setState({ newLabels: [], loadedLabels: [], removedLabels: [] });
-    multiSelect.setState({ input: 'Foo' });
-    component
-      .find('FormGroup[fieldId="template-labels"] input[aria-label="labels"]')
-      .prop('onKeyDown')(event);
-
-    component.instance().handleNewLabel({ name: 'Bar', id: 2 });
-    const newLabels = component.state('newLabels');
-    expect(newLabels).toHaveLength(2);
-    expect(newLabels[0].name).toEqual('Foo');
-    expect(newLabels[0].organization).toEqual(1);
-  });
-
-  test('disassociateLabel should arrange new labels properly', async () => {
-    const wrapper = mountWithContexts(
-      <JobTemplateForm
-        template={mockData}
-        handleSubmit={jest.fn()}
-        handleCancel={jest.fn()}
-      />
-    );
-    await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
-    const component = wrapper.find('JobTemplateForm');
-    // This asserts that the user generated a label or clicked
-    // on a label option, and then changed their mind and
-    // removed the label.
-    component.instance().removeLabel({ name: 'Alex', id: 17 });
-    expect(component.state().newLabels.length).toBe(0);
-    expect(component.state().removedLabels.length).toBe(0);
-    // This asserts that the user removed a label that was associated
-    // with the template when the template loaded.
-    component.instance().removeLabel({ name: 'Sushi', id: 1 });
-    expect(component.state().newLabels.length).toBe(0);
-    expect(component.state().removedLabels.length).toBe(1);
   });
 });

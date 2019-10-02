@@ -693,7 +693,7 @@ exports[`<OrganizationAccessItem /> initially renders succesfully 1`] = `
                                                         isReadOnly={false}
                                                         onClick={[Function]}
                                                       >
-                                                        <Chip
+                                                        <PFChip
                                                           className="Chip-sc-1rzr8oo-0 dgUGLg"
                                                           closeBtnAriaLabel="close"
                                                           component="li"
@@ -771,7 +771,7 @@ exports[`<OrganizationAccessItem /> initially renders succesfully 1`] = `
                                                               </ChipButton>
                                                             </li>
                                                           </GenerateId>
-                                                        </Chip>
+                                                        </PFChip>
                                                       </StyledComponent>
                                                     </Chip>
                                                   </ul>

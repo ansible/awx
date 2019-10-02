@@ -27,6 +27,8 @@ const jobTemplateData = {
   host_config_key: '',
 };
 
+// TODO: Needs React/React-router upgrade to remove `act()` warnings
+// See https://github.com/ansible/awx/issues/4817
 describe('<JobTemplateAdd />', () => {
   const defaultProps = {
     description: '',
@@ -55,7 +57,7 @@ describe('<JobTemplateAdd />', () => {
     expect(wrapper.find('JobTemplateForm').length).toBe(1);
   });
 
-  test('should render Job Template Form with default values', async done => {
+  test('should render Job Template Form with default values', async () => {
     const wrapper = mountWithContexts(<JobTemplateAdd />);
     await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
     expect(wrapper.find('input#template-description').text()).toBe(
@@ -76,14 +78,11 @@ describe('<JobTemplateAdd />', () => {
     ).toEqual(true);
 
     expect(wrapper.find('input#template-name').text()).toBe(defaultProps.name);
-    expect(wrapper.find('AnsibleSelect[name="playbook"]').text()).toBe(
-      'Choose a playbook'
-    );
+    expect(wrapper.find('PlaybookSelect')).toHaveLength(1);
     expect(wrapper.find('ProjectLookup').prop('value')).toBe(null);
-    done();
   });
 
-  test('handleSubmit should post to api', async done => {
+  test('handleSubmit should post to api', async () => {
     JobTemplatesAPI.create.mockResolvedValueOnce({
       data: {
         id: 1,
@@ -96,7 +95,10 @@ describe('<JobTemplateAdd />', () => {
     const changeState = new Promise(resolve => {
       formik.setState(
         {
-          values: jobTemplateData,
+          values: {
+            ...jobTemplateData,
+            labels: [],
+          },
         },
         () => resolve()
       );
@@ -105,10 +107,9 @@ describe('<JobTemplateAdd />', () => {
     wrapper.find('form').simulate('submit');
     await sleep(1);
     expect(JobTemplatesAPI.create).toHaveBeenCalledWith(jobTemplateData);
-    done();
   });
 
-  test('should navigate to job template detail after form submission', async done => {
+  test('should navigate to job template detail after form submission', async () => {
     const history = {
       push: jest.fn(),
     };
@@ -130,10 +131,9 @@ describe('<JobTemplateAdd />', () => {
     expect(history.push).toHaveBeenCalledWith(
       '/templates/job_template/1/details'
     );
-    done();
   });
 
-  test('should navigate to templates list when cancel is clicked', async done => {
+  test('should navigate to templates list when cancel is clicked', async () => {
     const history = {
       push: jest.fn(),
     };
@@ -143,6 +143,5 @@ describe('<JobTemplateAdd />', () => {
     await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
     wrapper.find('button[aria-label="Cancel"]').invoke('onClick')();
     expect(history.push).toHaveBeenCalledWith('/templates');
-    done();
   });
 });
