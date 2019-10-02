@@ -165,8 +165,7 @@ class ResourceOptionsParser(object):
                     # (to make things like SSH key data easier to work with)
                     if isinstance(v, six.text_type) and v.startswith('@'):
                         path = os.path.expanduser(v[1:])
-                        if os.path.exists(path):
-                            parsed[k] = open(path).read()
+                        parsed[k] = open(path).read()
 
                 return parsed
 

@@ -57,5 +57,5 @@ Importing an SSH Key
 
     awx credentials create --credential_type 'Machine' \
         --name 'My SSH Key' --user 'alice' \
-        --inputs "{'username': 'server-login', 'ssh_key_data': '@~/.ssh/id_rsa`}"
+        --inputs '{"username": "server-login", "ssh_key_data": "@~/.ssh/id_rsa"}'
 
