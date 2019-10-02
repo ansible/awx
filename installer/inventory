@@ -57,11 +57,13 @@ dockerhub_base=ansible
 # Common Docker parameters
 awx_task_hostname=awx
 awx_web_hostname=awxweb
-postgres_data_dir=/tmp/pgdocker
+# Fallback directory defined in installpathsalternatives.yml (e.g. due to missing write permissions)
+postgres_data_dir=/opt/awxpgdocker
 host_port=80
 host_port_ssl=443
 #ssl_certificate=
-docker_compose_dir=/tmp/awxcompose
+# Fallback directory defined in installpathsalternatives.yml (e.g. due to missing write permissions)
+docker_compose_dir=/opt/awxcompose
 
 # Required for Openshift when building the image on your own
 # Optional for Openshift if using Dockerhub or another prebuilt registry
