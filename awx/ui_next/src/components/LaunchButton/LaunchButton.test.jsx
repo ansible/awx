@@ -1,4 +1,5 @@
 import React from 'react';
+import { createMemoryHistory } from 'history';
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import { sleep } from '@testUtils/testUtils';
 
@@ -29,10 +30,11 @@ describe('LaunchButton', () => {
     );
     expect(wrapper).toHaveLength(1);
   });
-  test('redirects to job after successful launch', async done => {
-    const history = {
-      push: jest.fn(),
-    };
+
+  test('should redirect to job after successful launch', async () => {
+    const history = createMemoryHistory({
+      initialEntries: ['/jobs/9000'],
+    });
     JobTemplatesAPI.launch.mockResolvedValue({
       data: {
         id: 9000,
@@ -51,10 +53,10 @@ describe('LaunchButton', () => {
     expect(JobTemplatesAPI.readLaunch).toHaveBeenCalledWith(1);
     await sleep(0);
     expect(JobTemplatesAPI.launch).toHaveBeenCalledWith(1);
-    expect(history.push).toHaveBeenCalledWith('/jobs/9000');
-    done();
+    expect(history.location.pathname).toEqual('/jobs/9000');
   });
-  test('displays error modal after unsuccessful launch', async done => {
+
+  test('displays error modal after unsuccessful launch', async () => {
     JobTemplatesAPI.launch.mockRejectedValue(
       new Error({
         response: {
@@ -79,6 +81,5 @@ describe('LaunchButton', () => {
     await sleep(0);
     wrapper.update();
     expect(wrapper.find('Modal').length).toBe(0);
-    done();
   });
 });

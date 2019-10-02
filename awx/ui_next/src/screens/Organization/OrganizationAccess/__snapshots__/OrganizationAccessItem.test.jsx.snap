@@ -273,9 +273,27 @@ exports[`<OrganizationAccessItem /> initially renders succesfully 1`] = `
                                       },
                                       "displayName": "Styled(Link)",
                                       "foldedComponentIds": Array [],
+                                      "propTypes": Object {
+                                        "innerRef": [Function],
+                                        "onClick": [Function],
+                                        "replace": [Function],
+                                        "target": [Function],
+                                        "to": [Function],
+                                      },
                                       "render": [Function],
                                       "styledComponentId": "sc-bdVaJa",
-                                      "target": [Function],
+                                      "target": Object {
+                                        "$$typeof": Symbol(react.forward_ref),
+                                        "displayName": "Link",
+                                        "propTypes": Object {
+                                          "innerRef": [Function],
+                                          "onClick": [Function],
+                                          "replace": [Function],
+                                          "target": [Function],
+                                          "to": [Function],
+                                        },
+                                        "render": [Function],
+                                      },
                                       "toString": [Function],
                                       "warnTooManyClasses": [Function],
                                       "withComponent": [Function],
@@ -290,19 +308,25 @@ exports[`<OrganizationAccessItem /> initially renders succesfully 1`] = `
                                 >
                                   <Link
                                     className="sc-bdVaJa fqQVUT"
-                                    replace={false}
                                     to={
                                       Object {
                                         "pathname": "/bar",
                                       }
                                     }
                                   >
-                                    <a
+                                    <LinkAnchor
                                       className="sc-bdVaJa fqQVUT"
-                                      onClick={[Function]}
+                                      href="/bar"
+                                      navigate={[Function]}
                                     >
-                                      jane
-                                    </a>
+                                      <a
+                                        className="sc-bdVaJa fqQVUT"
+                                        href="/bar"
+                                        onClick={[Function]}
+                                      >
+                                        jane
+                                      </a>
+                                    </LinkAnchor>
                                   </Link>
                                 </StyledComponent>
                               </Styled(Link)>
