@@ -38,7 +38,7 @@ options:
       required: True
       type: str
     organization:
-      descripton:
+      description:
         - Organization the inventory belongs to.
       reguired: True
     source:
@@ -306,7 +306,7 @@ def main():
 
             try:
                 inventory_res = tower_cli.get_resource('inventory')
-                params['inventory'] = inventory_res.get(name=inventory,organization=org['id'])['id']
+                params['inventory'] = inventory_res.get(name=inventory, organization=org['id'])['id']
             except (exc.NotFound) as excinfo:
                 module.fail_json(
                     msg='Failed to update inventory source, '
