@@ -18,6 +18,7 @@ COMPOSE_TAG ?= $(GIT_BRANCH)
 COMPOSE_HOST ?= $(shell hostname)
 
 VENV_BASE ?= /venv
+COLLECTION_VENV ?= /awx_devel/awx_collection_test_venv
 SCL_PREFIX ?=
 CELERY_SCHEDULE_FILE ?= /var/lib/awx/beat.db
 
@@ -374,6 +375,31 @@ test:
 	PYTHONDONTWRITEBYTECODE=1 py.test -p no:cacheprovider -n auto $(TEST_DIRS)
 	cd awxkit && $(VENV_BASE)/awx/bin/tox -re py2,py3
 	awx-manage check_migrations --dry-run --check  -n 'vNNN_missing_migration_file'
+
+prepare_collection_venv:
+	rm -rf $(COLLECTION_VENV)
+	mkdir $(COLLECTION_VENV)
+	ln -s /usr/lib/python2.7/site-packages/ansible $(COLLECTION_VENV)/ansible
+	$(VENV_BASE)/awx/bin/pip install --target=$(COLLECTION_VENV) git+https://github.com/ansible/tower-cli.git
+
+COLLECTION_TEST_DIRS ?= awx_collection/test/awx
+COLLECTION_PACKAGE ?= awx
+COLLECTION_NAMESPACE ?= awx
+
+test_collection:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/awx/bin/activate; \
+	fi; \
+	PYTHONPATH=$(COLLECTION_VENV):/awx_devel/awx_collection:$PYTHONPATH py.test $(COLLECTION_TEST_DIRS)
+
+flake8_collection:
+	flake8 awx_collection/  # Different settings, in main exclude list
+
+test_collection_all: prepare_collection_venv test_collection flake8_collection
+
+build_collection:
+	ansible-playbook -i localhost, awx_collection/template_galaxy.yml -e collection_package=$(COLLECTION_PACKAGE) -e namespace_name=$(COLLECTION_NAMESPACE) -e package_version=$(VERSION)
+	ansible-galaxy collection build awx_collection --output-path=awx_collection
 
 test_unit:
 	@if [ "$(VENV_BASE)" ]; then \
