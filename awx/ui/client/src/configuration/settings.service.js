@@ -39,6 +39,10 @@ export default ['GetBasePath', '$q', 'Rest', 'i18n',
                                     i18n._('The duration (in seconds) access tokens remain valid since their creation.'),
                                     i18n._('Access Token Expiration'),
                                     'OAUTH2_PROVIDER');
+                                unnestOauth2ProviderKey('REFRESH_TOKEN_EXPIRE_SECONDS',
+                                    i18n._('The duration (in seconds) refresh tokens remain valid after the expiration of their associated access token.'),
+                                    i18n._('Refresh Token Expiration'),
+                                    'OAUTH2_PROVIDER');
                                 unnestOauth2ProviderKey('AUTHORIZATION_CODE_EXPIRE_SECONDS',
                                     i18n._('The duration (in seconds) authorization codes remain valid since their creation.'),
                                     i18n._('Authorization Code Expiration'),

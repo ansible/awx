@@ -47,6 +47,10 @@ export default ['i18n', function(i18n) {
                 type: 'text',
                 reset: 'ACCESS_TOKEN_EXPIRE_SECONDS'
             },
+            REFRESH_TOKEN_EXPIRE_SECONDS: {
+                type: 'text',
+                reset: 'REFRESH_TOKEN_EXPIRE_SECONDS'
+            },
             AUTHORIZATION_CODE_EXPIRE_SECONDS: {
                 type: 'text',
                 reset: 'AUTHORIZATION_CODE_EXPIRE_SECONDS'
