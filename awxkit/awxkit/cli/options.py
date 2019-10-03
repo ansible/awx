@@ -40,6 +40,11 @@ def pk_or_name(v2, model_name, value, page=None):
     if model_name in UNIQUENESS_RULES:
         identity = UNIQUENESS_RULES[model_name][-1]
 
+    # certain related fields follow a pattern of <foo>_<model> e.g.,
+    # insights_credential, target_credential etc...
+    if not page and '_' in model_name:
+        return pk_or_name(v2, model_name.split('_')[-1], value, page)
+
     if page:
         results = page.get(**{identity: value})
         if results.count == 1:
