@@ -37,7 +37,7 @@ function TemplatesStrings (BaseString) {
         REVERT: t.s('REVERT'),
         CREDENTIAL_TYPE: t.s('Credential Type'),
         CREDENTIAL_PASSWORD_WARNING: t.s('Credentials that require passwords on launch are not permitted for template schedules and workflow nodes.  The following credentials must be removed or replaced to proceed:'),
-        PASSWORDS_REQUIRED_HELP: t.s('Launching this job requires the passwords listed below. Enter and confirm each password before continuing.'),
+        PASSWORDS_REQUIRED_HELP: t.s('Launching this job requires the passwords listed below. Enter each password before continuing.'),
         PLEASE_ENTER_PASSWORD: t.s('Please enter a password.'),
         credential_passwords: {
             SSH_PASSWORD: t.s('SSH Password'),
