@@ -106,9 +106,9 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                       "$$typeof": Symbol(react.forward_ref),
                       "attrs": Array [],
                       "componentStyle": ComponentStyle {
-                        "componentId": "NotificationListItem__DataListCell-j7c411-0",
+                        "componentId": "NotificationListItem__DataListCell-w674ng-0",
                         "isStatic": false,
-                        "lastClassName": "hoXOpW",
+                        "lastClassName": "dXsFLF",
                         "rules": Array [
                           "display:flex;justify-content:",
                           [Function],
@@ -122,7 +122,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                       "displayName": "NotificationListItem__DataListCell",
                       "foldedComponentIds": Array [],
                       "render": [Function],
-                      "styledComponentId": "NotificationListItem__DataListCell-j7c411-0",
+                      "styledComponentId": "NotificationListItem__DataListCell-w674ng-0",
                       "target": [Function],
                       "toString": [Function],
                       "warnTooManyClasses": [Function],
@@ -132,10 +132,10 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                   forwardedRef={null}
                 >
                   <DataListCell
-                    className="NotificationListItem__DataListCell-j7c411-0 kIdLtz"
+                    className="NotificationListItem__DataListCell-w674ng-0 faYgxF"
                   >
                     <div
-                      className="pf-c-data-list__cell NotificationListItem__DataListCell-j7c411-0 kIdLtz"
+                      className="pf-c-data-list__cell NotificationListItem__DataListCell-w674ng-0 faYgxF"
                     >
                       <Styled(Link)
                         to={
@@ -209,9 +209,9 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                       "$$typeof": Symbol(react.forward_ref),
                       "attrs": Array [],
                       "componentStyle": ComponentStyle {
-                        "componentId": "NotificationListItem__DataListCell-j7c411-0",
+                        "componentId": "NotificationListItem__DataListCell-w674ng-0",
                         "isStatic": false,
-                        "lastClassName": "hoXOpW",
+                        "lastClassName": "dXsFLF",
                         "rules": Array [
                           "display:flex;justify-content:",
                           [Function],
@@ -225,7 +225,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                       "displayName": "NotificationListItem__DataListCell",
                       "foldedComponentIds": Array [],
                       "render": [Function],
-                      "styledComponentId": "NotificationListItem__DataListCell-j7c411-0",
+                      "styledComponentId": "NotificationListItem__DataListCell-w674ng-0",
                       "target": [Function],
                       "toString": [Function],
                       "warnTooManyClasses": [Function],
@@ -235,10 +235,10 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                   forwardedRef={null}
                 >
                   <DataListCell
-                    className="NotificationListItem__DataListCell-j7c411-0 kIdLtz"
+                    className="NotificationListItem__DataListCell-w674ng-0 faYgxF"
                   >
                     <div
-                      className="pf-c-data-list__cell NotificationListItem__DataListCell-j7c411-0 kIdLtz"
+                      className="pf-c-data-list__cell NotificationListItem__DataListCell-w674ng-0 faYgxF"
                     >
                       Slack
                     </div>
@@ -255,9 +255,9 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                       "$$typeof": Symbol(react.forward_ref),
                       "attrs": Array [],
                       "componentStyle": ComponentStyle {
-                        "componentId": "NotificationListItem__DataListCell-j7c411-0",
+                        "componentId": "NotificationListItem__DataListCell-w674ng-0",
                         "isStatic": false,
-                        "lastClassName": "hoXOpW",
+                        "lastClassName": "dXsFLF",
                         "rules": Array [
                           "display:flex;justify-content:",
                           [Function],
@@ -271,7 +271,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                       "displayName": "NotificationListItem__DataListCell",
                       "foldedComponentIds": Array [],
                       "render": [Function],
-                      "styledComponentId": "NotificationListItem__DataListCell-j7c411-0",
+                      "styledComponentId": "NotificationListItem__DataListCell-w674ng-0",
                       "target": [Function],
                       "toString": [Function],
                       "warnTooManyClasses": [Function],
@@ -282,11 +282,11 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                   righthalf="true"
                 >
                   <DataListCell
-                    className="NotificationListItem__DataListCell-j7c411-0 hoXOpW"
+                    className="NotificationListItem__DataListCell-w674ng-0 dXsFLF"
                     righthalf="true"
                   >
                     <div
-                      className="pf-c-data-list__cell NotificationListItem__DataListCell-j7c411-0 hoXOpW"
+                      className="pf-c-data-list__cell NotificationListItem__DataListCell-w674ng-0 dXsFLF"
                       righthalf="true"
                     >
                       <NotificationListItem__Switch
@@ -305,9 +305,9 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                               "$$typeof": Symbol(react.forward_ref),
                               "attrs": Array [],
                               "componentStyle": ComponentStyle {
-                                "componentId": "NotificationListItem__Switch-j7c411-1",
+                                "componentId": "NotificationListItem__Switch-w674ng-1",
                                 "isStatic": true,
-                                "lastClassName": "ceuHGn",
+                                "lastClassName": "hbNxaH",
                                 "rules": Array [
                                   "display:flex;flex-wrap:no-wrap;",
                                 ],
@@ -315,7 +315,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                               "displayName": "NotificationListItem__Switch",
                               "foldedComponentIds": Array [],
                               "render": [Function],
-                              "styledComponentId": "NotificationListItem__Switch-j7c411-1",
+                              "styledComponentId": "NotificationListItem__Switch-w674ng-1",
                               "target": [Function],
                               "toString": [Function],
                               "warnTooManyClasses": [Function],
@@ -332,7 +332,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                         >
                           <Component
                             aria-label="Toggle notification start"
-                            className="NotificationListItem__Switch-j7c411-1 ceuHGn"
+                            className="NotificationListItem__Switch-w674ng-1 hbNxaH"
                             id="notification-9000-started-toggle"
                             isChecked={false}
                             isDisabled={false}
@@ -345,7 +345,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                               componentProps={
                                 Object {
                                   "aria-label": "Toggle notification start",
-                                  "className": "NotificationListItem__Switch-j7c411-1 ceuHGn",
+                                  "className": "NotificationListItem__Switch-w674ng-1 hbNxaH",
                                   "id": "notification-9000-started-toggle",
                                   "isChecked": false,
                                   "isDisabled": false,
@@ -358,7 +358,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                             >
                               <Switch
                                 aria-label="Toggle notification start"
-                                className="NotificationListItem__Switch-j7c411-1 ceuHGn"
+                                className="NotificationListItem__Switch-w674ng-1 hbNxaH"
                                 id="notification-9000-started-toggle"
                                 isChecked={false}
                                 isDisabled={false}
@@ -373,7 +373,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                                 }
                               >
                                 <label
-                                  className="pf-c-switch NotificationListItem__Switch-j7c411-1 ceuHGn"
+                                  className="pf-c-switch NotificationListItem__Switch-w674ng-1 hbNxaH"
                                   htmlFor="notification-9000-started-toggle"
                                 >
                                   <input
@@ -425,9 +425,9 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                               "$$typeof": Symbol(react.forward_ref),
                               "attrs": Array [],
                               "componentStyle": ComponentStyle {
-                                "componentId": "NotificationListItem__Switch-j7c411-1",
+                                "componentId": "NotificationListItem__Switch-w674ng-1",
                                 "isStatic": true,
-                                "lastClassName": "ceuHGn",
+                                "lastClassName": "hbNxaH",
                                 "rules": Array [
                                   "display:flex;flex-wrap:no-wrap;",
                                 ],
@@ -435,7 +435,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                               "displayName": "NotificationListItem__Switch",
                               "foldedComponentIds": Array [],
                               "render": [Function],
-                              "styledComponentId": "NotificationListItem__Switch-j7c411-1",
+                              "styledComponentId": "NotificationListItem__Switch-w674ng-1",
                               "target": [Function],
                               "toString": [Function],
                               "warnTooManyClasses": [Function],
@@ -452,7 +452,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                         >
                           <Component
                             aria-label="Toggle notification success"
-                            className="NotificationListItem__Switch-j7c411-1 ceuHGn"
+                            className="NotificationListItem__Switch-w674ng-1 hbNxaH"
                             id="notification-9000-success-toggle"
                             isChecked={false}
                             isDisabled={false}
@@ -465,7 +465,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                               componentProps={
                                 Object {
                                   "aria-label": "Toggle notification success",
-                                  "className": "NotificationListItem__Switch-j7c411-1 ceuHGn",
+                                  "className": "NotificationListItem__Switch-w674ng-1 hbNxaH",
                                   "id": "notification-9000-success-toggle",
                                   "isChecked": false,
                                   "isDisabled": false,
@@ -478,7 +478,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                             >
                               <Switch
                                 aria-label="Toggle notification success"
-                                className="NotificationListItem__Switch-j7c411-1 ceuHGn"
+                                className="NotificationListItem__Switch-w674ng-1 hbNxaH"
                                 id="notification-9000-success-toggle"
                                 isChecked={false}
                                 isDisabled={false}
@@ -493,7 +493,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                                 }
                               >
                                 <label
-                                  className="pf-c-switch NotificationListItem__Switch-j7c411-1 ceuHGn"
+                                  className="pf-c-switch NotificationListItem__Switch-w674ng-1 hbNxaH"
                                   htmlFor="notification-9000-success-toggle"
                                 >
                                   <input
@@ -545,9 +545,9 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                               "$$typeof": Symbol(react.forward_ref),
                               "attrs": Array [],
                               "componentStyle": ComponentStyle {
-                                "componentId": "NotificationListItem__Switch-j7c411-1",
+                                "componentId": "NotificationListItem__Switch-w674ng-1",
                                 "isStatic": true,
-                                "lastClassName": "ceuHGn",
+                                "lastClassName": "hbNxaH",
                                 "rules": Array [
                                   "display:flex;flex-wrap:no-wrap;",
                                 ],
@@ -555,7 +555,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                               "displayName": "NotificationListItem__Switch",
                               "foldedComponentIds": Array [],
                               "render": [Function],
-                              "styledComponentId": "NotificationListItem__Switch-j7c411-1",
+                              "styledComponentId": "NotificationListItem__Switch-w674ng-1",
                               "target": [Function],
                               "toString": [Function],
                               "warnTooManyClasses": [Function],
@@ -572,7 +572,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                         >
                           <Component
                             aria-label="Toggle notification failure"
-                            className="NotificationListItem__Switch-j7c411-1 ceuHGn"
+                            className="NotificationListItem__Switch-w674ng-1 hbNxaH"
                             id="notification-9000-error-toggle"
                             isChecked={false}
                             isDisabled={false}
@@ -585,7 +585,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                               componentProps={
                                 Object {
                                   "aria-label": "Toggle notification failure",
-                                  "className": "NotificationListItem__Switch-j7c411-1 ceuHGn",
+                                  "className": "NotificationListItem__Switch-w674ng-1 hbNxaH",
                                   "id": "notification-9000-error-toggle",
                                   "isChecked": false,
                                   "isDisabled": false,
@@ -598,7 +598,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                             >
                               <Switch
                                 aria-label="Toggle notification failure"
-                                className="NotificationListItem__Switch-j7c411-1 ceuHGn"
+                                className="NotificationListItem__Switch-w674ng-1 hbNxaH"
                                 id="notification-9000-error-toggle"
                                 isChecked={false}
                                 isDisabled={false}
@@ -613,7 +613,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                                 }
                               >
                                 <label
-                                  className="pf-c-switch NotificationListItem__Switch-j7c411-1 ceuHGn"
+                                  className="pf-c-switch NotificationListItem__Switch-w674ng-1 hbNxaH"
                                   htmlFor="notification-9000-error-toggle"
                                 >
                                   <input

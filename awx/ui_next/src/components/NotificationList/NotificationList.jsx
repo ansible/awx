@@ -4,12 +4,13 @@ import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
-import { OrganizationsAPI } from '@api';
 import AlertModal from '@components/AlertModal';
 import ErrorDetail from '@components/ErrorDetail';
-import NotificationListItem from '@components/NotificationsList/NotificationListItem';
+import NotificationListItem from '@components/NotificationList/NotificationListItem';
 import PaginatedDataList from '@components/PaginatedDataList';
 import { getQSConfig, parseQueryString } from '@util/qs';
+
+import { NotificationTemplatesAPI } from '@api';
 
 const QS_CONFIG = getQSConfig('notification', {
   page: 1,
@@ -23,7 +24,7 @@ const COLUMNS = [
   { key: 'created', name: 'Created', isSortable: true, isNumeric: true },
 ];
 
-class OrganizationNotifications extends Component {
+class NotificationList extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -57,26 +58,23 @@ class OrganizationNotifications extends Component {
   }
 
   async loadNotifications() {
-    const { id, location } = this.props;
+    const { id, location, apiModel } = this.props;
     const { typeLabels } = this.state;
     const params = parseQueryString(QS_CONFIG, location.search);
 
-    const promises = [OrganizationsAPI.readNotificationTemplates(id, params)];
+    const promises = [NotificationTemplatesAPI.read(params)];
 
     if (!typeLabels) {
-      promises.push(OrganizationsAPI.readOptionsNotificationTemplates(id));
+      promises.push(NotificationTemplatesAPI.readOptions());
     }
 
     this.setState({ contentError: null, hasContentLoading: true });
     try {
       const {
         data: { count: itemCount = 0, results: notifications = [] },
-      } = await OrganizationsAPI.readNotificationTemplates(id, params);
+      } = await NotificationTemplatesAPI.read(params);
 
-      const optionsResponse = await OrganizationsAPI.readOptionsNotificationTemplates(
-        id,
-        params
-      );
+      const optionsResponse = await NotificationTemplatesAPI.readOptions();
 
       let idMatchParams;
       if (notifications.length > 0) {
@@ -90,9 +88,9 @@ class OrganizationNotifications extends Component {
         { data: successTemplates },
         { data: errorTemplates },
       ] = await Promise.all([
-        OrganizationsAPI.readNotificationTemplatesStarted(id, idMatchParams),
-        OrganizationsAPI.readNotificationTemplatesSuccess(id, idMatchParams),
-        OrganizationsAPI.readNotificationTemplatesError(id, idMatchParams),
+        apiModel.readNotificationTemplatesStarted(id, idMatchParams),
+        apiModel.readNotificationTemplatesSuccess(id, idMatchParams),
+        apiModel.readNotificationTemplatesError(id, idMatchParams),
       ]);
 
       const stateToUpdate = {
@@ -129,7 +127,7 @@ class OrganizationNotifications extends Component {
   }
 
   async handleNotificationToggle(notificationId, isCurrentlyOn, status) {
-    const { id } = this.props;
+    const { id, apiModel } = this.props;
 
     let stateArrayName;
     if (status === 'success') {
@@ -158,13 +156,13 @@ class OrganizationNotifications extends Component {
     this.setState({ toggleLoading: true });
     try {
       if (isCurrentlyOn) {
-        await OrganizationsAPI.disassociateNotificationTemplate(
+        await apiModel.disassociateNotificationTemplate(
           id,
           notificationId,
           status
         );
       } else {
-        await OrganizationsAPI.associateNotificationTemplate(
+        await apiModel.associateNotificationTemplate(
           id,
           notificationId,
           status
@@ -204,7 +202,7 @@ class OrganizationNotifications extends Component {
           hasContentLoading={hasContentLoading}
           items={notifications}
           itemCount={itemCount}
-          pluralizedItemName="Notifications"
+          pluralizedItemName={i18n._(t`Notifications`)}
           qsConfig={QS_CONFIG}
           toolbarColumns={COLUMNS}
           renderItem={notification => (
@@ -235,7 +233,7 @@ class OrganizationNotifications extends Component {
   }
 }
 
-OrganizationNotifications.propTypes = {
+NotificationList.propTypes = {
   id: number.isRequired,
   canToggleNotifications: bool.isRequired,
   location: shape({
@@ -243,5 +241,5 @@ OrganizationNotifications.propTypes = {
   }).isRequired,
 };
 
-export { OrganizationNotifications as _OrganizationNotifications };
-export default withI18n()(withRouter(OrganizationNotifications));
+export { NotificationList as _NotificationList };
+export default withI18n()(withRouter(NotificationList));
