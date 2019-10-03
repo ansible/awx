@@ -830,15 +830,19 @@ export default ['moment', '$timeout', '$window', '$filter', 'TemplatesStrings',
                         });
 
                     baseSvg.selectAll(".WorkflowChart-deletedText")
+                        .attr("y", (d) => { return scope.mode === 'details' && d.job && d.job.type === "workflow_approval" && (d.job.timed_out || d.job.status === "failed" || d.job.status === "successful") ? 29 : 22; })
                         .style("display", (d) => { return d.unifiedJobTemplate || d.id === scope.graphState.nodeBeingAdded ? "none" : null; });
 
                     baseSvg.selectAll(".WorkflowChart-timedOutText")
+                        .attr("y", (d) => { return scope.mode === 'details' && !d.unifiedJobTemplate ? 15 : 22; })
                         .style("display", (d) => { return d.job && d.job.timed_out ? null : "none"; });
 
                     baseSvg.selectAll(".WorkflowChart-deniedText")
+                        .attr("y", (d) => { return scope.mode === 'details' && !d.unifiedJobTemplate ? 15 : 22; })
                         .style("display", (d) => { return d.job && d.job.type === "workflow_approval" && d.job.status === "failed" && !d.job.timed_out ? null : "none"; });
 
                     baseSvg.selectAll(".WorkflowChart-approvedText")
+                        .attr("y", (d) => { return scope.mode === 'details' && !d.unifiedJobTemplate ? 15 : 22; })
                         .style("display", (d) => { return d.job && d.job.type === "workflow_approval" && d.job.status === "successful" && !d.job.timed_out ? null : "none"; });
 
                     baseSvg.selectAll(".WorkflowChart-activeNode")
@@ -942,7 +946,7 @@ export default ['moment', '$timeout', '$window', '$filter', 'TemplatesStrings',
 
                             thisNode.append("foreignObject")
                                 .attr("x", 0)
-                                .attr("y", 22)
+                                .attr("y", (d) => { return scope.mode === 'details' && d.job && d.job.type === "workflow_approval" && (d.job.timed_out || d.job.status === "failed" || d.job.status === "successful") ? 29 : 22; })
                                 .attr("dy", ".35em")
                                 .attr("text-anchor", "middle")
                                 .attr("class", "WorkflowChart-defaultText WorkflowChart-deletedText")
@@ -951,7 +955,7 @@ export default ['moment', '$timeout', '$window', '$filter', 'TemplatesStrings',
 
                             thisNode.append("foreignObject")
                                 .attr("x", 0)
-                                .attr("y", 22)
+                                .attr("y", (d) => { return scope.mode === 'details' && !d.unifiedJobTemplate ? 15 : 22; })
                                 .attr("dy", ".35em")
                                 .attr("text-anchor", "middle")
                                 .attr("class", "WorkflowChart-defaultText WorkflowChart-timedOutText")
@@ -960,7 +964,7 @@ export default ['moment', '$timeout', '$window', '$filter', 'TemplatesStrings',
 
                             thisNode.append("foreignObject")
                                 .attr("x", 0)
-                                .attr("y", 22)
+                                .attr("y", (d) => { return scope.mode === 'details' && !d.unifiedJobTemplate ? 15 : 22; })
                                 .attr("dy", ".35em")
                                 .attr("text-anchor", "middle")
                                 .attr("class", "WorkflowChart-defaultText WorkflowChart-deniedText")
@@ -969,7 +973,7 @@ export default ['moment', '$timeout', '$window', '$filter', 'TemplatesStrings',
 
                             thisNode.append("foreignObject")
                                 .attr("x", 0)
-                                .attr("y", 22)
+                                .attr("y", (d) => { return scope.mode === 'details' && !d.unifiedJobTemplate ? 15 : 22; })
                                 .attr("dy", ".35em")
                                 .attr("text-anchor", "middle")
                                 .attr("class", "WorkflowChart-defaultText WorkflowChart-approvedText")
