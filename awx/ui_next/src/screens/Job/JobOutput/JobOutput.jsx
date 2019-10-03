@@ -112,7 +112,7 @@ class JobOutput extends Component {
   }
 
   async loadJobEvents() {
-    const { job } = this.props;
+    const { job, type } = this.props;
 
     const loadRange = range(1, 50);
     this._isMounted &&
@@ -123,7 +123,7 @@ class JobOutput extends Component {
     try {
       const {
         data: { results: newResults = [], count },
-      } = await JobsAPI.readEvents(job.id, job.type, {
+      } = await JobsAPI.readEvents(job.id, type, {
         page_size: 50,
         order_by: 'start_line',
       });
@@ -220,7 +220,7 @@ class JobOutput extends Component {
     if (startIndex === 0 && stopIndex === 0) {
       return Promise.resolve(null);
     }
-    const { job } = this.props;
+    const { job, type } = this.props;
 
     const loadRange = range(startIndex, stopIndex);
     this._isMounted &&
@@ -233,7 +233,7 @@ class JobOutput extends Component {
       order_by: 'start_line',
     };
 
-    return JobsAPI.readEvents(job.id, job.type, params).then(response => {
+    return JobsAPI.readEvents(job.id, type, params).then(response => {
       this._isMounted &&
         this.setState(({ results, currentlyLoading }) => {
           response.data.results.forEach(jobEvent => {
