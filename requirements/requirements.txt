@@ -1,6 +1,6 @@
 adal==1.2.1               # via msrestazure
 amqp==2.4.2               # via kombu
-ansible-runner==1.4.0
+ansible-runner==1.4.1
 appdirs==1.4.2
 argparse==1.4.0           # via uwsgitop
 asgi-amqp==1.1.3
