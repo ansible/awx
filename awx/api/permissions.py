@@ -249,3 +249,8 @@ class InstanceGroupTowerPermission(ModelAccessPermission):
         if request.method == 'DELETE' and obj.name == "tower":
             return False
         return super(InstanceGroupTowerPermission, self).has_object_permission(request, view, obj)
+
+
+class WebhookKeyPermission(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return request.user.can_access(view.model, 'admin', obj, request.data)

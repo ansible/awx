@@ -150,6 +150,11 @@ from awx.api.views.root import ( # noqa
     ApiV2ConfigView,
     ApiV2SubscriptionView,
 )
+from awx.api.views.webhooks import ( # noqa
+    WebhookKeyView,
+    GithubWebhookReceiver,
+    GitlabWebhookReceiver,
+)
 
 
 logger = logging.getLogger('awx.api.views')

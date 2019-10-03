@@ -86,6 +86,8 @@ class JobTemplate(
             'vault_credential',
             'verbosity',
             'job_slice_count',
+            'webhook_service',
+            'webhook_credential',
             'scm_branch')
 
         update_payload(payload, optional_fields, kwargs)
@@ -102,6 +104,15 @@ class JobTemplate(
             payload.update(inventory=kwargs.get('inventory').id)
         if kwargs.get('credential'):
             payload.update(credential=kwargs.get('credential').id)
+        if kwargs.get('webhook_credential'):
+            webhook_cred = kwargs.get('webhook_credential')
+            if isinstance(webhook_cred, int):
+                payload.update(webhook_credential=int(webhook_cred))
+            elif hasattr(webhook_cred, 'id'):
+                payload.update(webhook_credential=webhook_cred.id)
+            else:
+                raise AttributeError("Webhook credential must either be integer of pkid or Credential object")
+
         return payload
 
     def add_label(self, label):

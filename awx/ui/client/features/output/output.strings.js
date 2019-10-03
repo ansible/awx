@@ -38,6 +38,8 @@ function OutputStrings (BaseString) {
         MENU_UP: t.s('Get previous page'),
         MENU_LAST: t.s('Go to last page of available output'),
         MENU_FOLLOWING: t.s('Currently following output as it arrives. Click to unfollow'),
+        WEBHOOK_JOB_TEMPLATE: t.s('View the webhook configuration on the job template.'),
+        WEBHOOK_WORKFLOW_JOB_TEMPLATE: t.s('View the webhook configuration on the workflow job template.'),
     };
 
     ns.details = {
@@ -48,6 +50,7 @@ function OutputStrings (BaseString) {
         SHOW_LESS: t.s('Show Less'),
         SHOW_MORE: t.s('Show More'),
         UNKNOWN: t.s('Finished'),
+        WEBHOOK: t.s('Webhook'),
     };
 
     ns.labels = {

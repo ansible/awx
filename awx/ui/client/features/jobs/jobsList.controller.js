@@ -142,19 +142,13 @@ function ListJobsController (
             return { icon, link, value };
         });
 
-    vm.getSliceJobDetails = (job) => {
-        if (!job.job_slice_count) {
-            return null;
-        }
-
-        if (job.job_slice_count === 1) {
-            return null;
-        }
-
-        if (job.job_slice_number && job.job_slice_count) {
+    vm.getSecondaryTagLabel = (job) => {
+        if (job.job_slice_number && job.job_slice_count && job.job_slice_count > 1) {
             return `${strings.get('list.SLICE_JOB')} ${job.job_slice_number}/${job.job_slice_count}`;
         }
-
+        if (job.launch_type === 'webhook') {
+            return strings.get('list.ROW_ITEM_LABEL_WEBHOOK');
+        }
         return null;
     };
 

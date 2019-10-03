@@ -197,7 +197,7 @@ def create_survey_spec(variables=None, default_type='integer', required=True, mi
 #
 
 
-def create_job_template(name, roles=None, persisted=True, **kwargs):
+def create_job_template(name, roles=None, persisted=True, webhook_service='', **kwargs):
     Objects = generate_objects(["job_template", "jobs",
                                 "organization",
                                 "inventory",
@@ -252,11 +252,10 @@ def create_job_template(name, roles=None, persisted=True, **kwargs):
     else:
         spec = None
 
-    jt = mk_job_template(name, project=proj,
-                         inventory=inv, credential=cred,
+    jt = mk_job_template(name, project=proj, inventory=inv, credential=cred,
                          network_credential=net_cred, cloud_credential=cloud_cred,
                          job_type=job_type, spec=spec, extra_vars=extra_vars,
-                         persisted=persisted)
+                         persisted=persisted, webhook_service=webhook_service)
 
     if 'jobs' in kwargs:
         for i in kwargs['jobs']:
@@ -401,7 +400,7 @@ def generate_workflow_job_template_nodes(workflow_job_template,
 
 
 # TODO: Implement survey and jobs
-def create_workflow_job_template(name, organization=None, persisted=True, **kwargs):
+def create_workflow_job_template(name, organization=None, persisted=True, webhook_service='', **kwargs):
     Objects = generate_objects(["workflow_job_template",
                                 "workflow_job_template_nodes",
                                 "survey",], kwargs)
@@ -418,7 +417,8 @@ def create_workflow_job_template(name, organization=None, persisted=True, **kwar
                                     organization=organization,
                                     spec=spec,
                                     extra_vars=extra_vars,
-                                    persisted=persisted)
+                                    persisted=persisted,
+                                    webhook_service=webhook_service)
 
 
 

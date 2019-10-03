@@ -19,7 +19,7 @@ export default
         'initSurvey', '$state', 'CreateSelect2', 'isNotificationAdmin',
         'ToggleNotification','$q', 'InstanceGroupsService', 'InstanceGroupsData',
         'MultiCredentialService', 'availableLabels', 'projectGetPermissionDenied',
-        'inventoryGetPermissionDenied', 'jobTemplateData', 'ParseVariableString', 'ConfigData',
+        'inventoryGetPermissionDenied', 'jobTemplateData', 'ParseVariableString', 'ConfigData', '$compile', 'webhookKey',
         function(
             $filter, $scope,
             $stateParams, JobTemplateForm, GenerateForm, Rest, Alert,
@@ -29,7 +29,7 @@ export default
             SurveyControllerInit, $state, CreateSelect2, isNotificationAdmin,
             ToggleNotification, $q, InstanceGroupsService, InstanceGroupsData,
             MultiCredentialService, availableLabels, projectGetPermissionDenied,
-            inventoryGetPermissionDenied, jobTemplateData, ParseVariableString, ConfigData
+            inventoryGetPermissionDenied, jobTemplateData, ParseVariableString, ConfigData, $compile, webhookKey
         ) {
 
             $scope.$watch('job_template_obj.summary_fields.user_capabilities.edit', function(val) {
@@ -61,7 +61,10 @@ export default
                 $scope.sufficientRoleForNotifToggle = isNotificationAdmin;
                 $scope.sufficientRoleForNotif =  isNotificationAdmin || $scope.user_is_system_auditor;
                 $scope.playbook_options = null;
+                $scope.webhook_service_options = null;
                 $scope.playbook = null;
+                $scope.webhook_service = jobTemplateData.webhook_service;
+                $scope.webhook_url = '';
                 $scope.mode = 'edit';
                 $scope.parseType = 'yaml';
                 $scope.showJobType = false;
@@ -72,6 +75,148 @@ export default
                 $scope.skip_tag_options = [];
                 const virtualEnvs = ConfigData.custom_virtualenvs || [];
                 $scope.custom_virtualenvs_options = virtualEnvs;
+                $scope.webhook_url_help = i18n._('Webhook services can launch jobs with this job template by making a POST request to this URL.');
+                $scope.webhook_key_help = i18n._('Webhook services can use this as a shared secret.');
+
+                $scope.currentlySavedWebhookKey = webhookKey;
+                $scope.webhook_key = webhookKey;
+
+                //
+                // webhook credential - all handlers, dynamic state, etc. live here
+                //
+
+                $scope.webhookCredential = {
+                    id: _.get(jobTemplateData, ['summary_fields', 'webhook_credential', 'id']),
+                    name: _.get(jobTemplateData, ['summary_fields', 'webhook_credential', 'name']),
+                    isModalOpen: false,
+                    isModalReady: false,
+                    modalSelectedId: null,
+                    modalSelectedName: null,
+                    modalBaseParams: {
+                        order_by: 'name',
+                        page_size: 5,
+                        credential_type__namespace: `${jobTemplateData.webhook_service}_token`,
+                    },
+                    modalTitle: i18n._('Select Webhook Credential'),
+                };
+
+                $scope.handleWebhookCredentialLookupClick = () => {
+                    $scope.webhookCredential.modalSelectedId = $scope.webhookCredential.id;
+                    $scope.webhookCredential.isModalOpen = true;
+                };
+
+                $scope.handleWebhookCredentialTagDelete = () => {
+                    $scope.webhookCredential.id = null;
+                    $scope.webhookCredential.name = null;
+                };
+
+                $scope.handleWebhookCredentialModalClose = () => {
+                    $scope.webhookCredential.isModalOpen = false;
+                    $scope.webhookCredential.isModalReady = false;
+                };
+
+                $scope.handleWebhookCredentialModalReady = () => {
+                    $scope.webhookCredential.isModalReady = true;
+                };
+
+                $scope.handleWebhookCredentialModalItemSelect = (item) => {
+                    $scope.webhookCredential.modalSelectedId = item.id;
+                    $scope.webhookCredential.modalSelectedName = item.name;
+                };
+
+                $scope.handleWebhookCredentialModalCancel = () => {
+                    $scope.webhookCredential.isModalOpen = false;
+                    $scope.webhookCredential.isModalReady = false;
+                    $scope.webhookCredential.modalSelectedId = null;
+                    $scope.webhookCredential.modalSelectedName = null;
+                };
+
+                $scope.handleWebhookCredentialSelect = () => {
+                    $scope.webhookCredential.isModalOpen = false;
+                    $scope.webhookCredential.isModalReady = false;
+                    $scope.webhookCredential.id = $scope.webhookCredential.modalSelectedId;
+                    $scope.webhookCredential.name = $scope.webhookCredential.modalSelectedName;
+                    $scope.webhookCredential.modalSelectedId = null;
+                    $scope.webhookCredential.modalSelectedName = null;
+                };
+
+                $scope.handleWebhookKeyButtonClick = () => {
+                    Rest.setUrl(jobTemplateData.related.webhook_key);
+                    Wait('start');
+                    Rest.post({})
+                        .then(({ data }) => {
+                            $scope.currentlySavedWebhookKey = data.webhook_key;
+                            $scope.webhook_key = data.webhook_key;
+                        })
+                        .catch(({ data }) => {
+                            const errorMsg = `Failed to generate new webhook key. POST returned status: ${status}`;
+                            ProcessErrors($scope, data, status, form, { hdr: 'Error!', msg: errorMsg });
+                        })
+                        .finally(() => {
+                            Wait('stop');
+                        });
+                };
+
+                $('#content-container').append($compile(`
+                    <at-dialog
+                        title="webhookCredential.modalTitle"
+                        on-close="handleWebhookCredentialModalClose"
+                        ng-if="webhookCredential.isModalOpen"
+                        ng-show="webhookCredential.isModalOpen && webhookCredential.isModalReady"
+                    >
+                        <at-lookup-list
+                            ng-show="webhookCredential.isModalOpen && webhookCredential.isModalReady"
+                            resource-name="credential"
+                            base-params="webhookCredential.modalBaseParams"
+                            selected-id="webhookCredential.modalSelectedId"
+                            on-ready="handleWebhookCredentialModalReady"
+                            on-item-select="handleWebhookCredentialModalItemSelect"
+                        />
+                        <at-action-group col="12" pos="right">
+                            <at-action-button
+                                variant="tertiary"
+                                ng-click="handleWebhookCredentialModalCancel()"
+                            >
+                                ${i18n._('CANCEL')}
+                            </at-action-button>
+                            <at-action-button
+                                variant="primary"
+                                ng-click="handleWebhookCredentialSelect()"
+                            >
+                                ${i18n._('SELECT')}
+                            </at-action-button>
+                        </at-action-group>
+                    </at-dialog>`)($scope));
+
+                $scope.$watch('webhook_service', (newValue, oldValue) => {
+                    const newServiceValue = newValue && typeof newValue === 'object' ? newValue.value : newValue;
+                    const oldServiceValue = oldValue && typeof oldValue === 'object' ? oldValue.value : oldValue;
+                    if (newServiceValue) {
+                        $scope.webhook_url = `${$scope.callback_server_path}${jobTemplateData.url}${newServiceValue}/`;
+                    } else {
+                        $scope.webhook_url = '';
+                        $scope.webhook_key = '';
+                    }
+                    if (newServiceValue !== oldServiceValue || newServiceValue === newValue) {
+                        $scope.webhook_service = { value: newServiceValue };
+                        sync_webhook_service_select2();
+                        $scope.webhookCredential.modalBaseParams.credential_type__namespace = newServiceValue ?
+                            `${newServiceValue}_token` : null;
+                        if (newServiceValue !== newValue || newValue === null) {
+                            $scope.webhookCredential.id = null;
+                            $scope.webhookCredential.name = null;
+                        }
+                        if (newServiceValue !== newValue) {
+                            if (newServiceValue === jobTemplateData.webhook_service) {
+                                $scope.webhook_key = $scope.currentlySavedWebhookKey;
+                            } else {
+                                $scope.webhook_key = i18n._('A NEW WEBHOOK KEY WILL BE GENERATED ON SAVE');
+                            }
+                        }
+                    }
+                });
+
+                $scope.$watch('verbosity', sync_verbosity_select2);
 
                 SurveyControllerInit({
                     scope: $scope,
@@ -174,9 +319,6 @@ export default
                         }
                     }
                 });
-
-                // watch for changes to 'verbosity', ensure we keep our select2 in sync when it changes.
-                $scope.$watch('verbosity', sync_verbosity_select2);
             }
 
             callback = function() {
@@ -202,6 +344,17 @@ export default
                 }));
             }
 
+            function sync_webhook_service_select2() {
+                select2LoadDefer.push(CreateSelect2({
+                    element:'#webhook-service-select',
+                    addNew: false,
+                    multiple: false,
+                    scope: $scope,
+                    options: 'webhook_service_options',
+                    model: 'webhook_service'
+                }));
+            }
+
             function jobTemplateLoadFinished(){
                 select2LoadDefer.push(CreateSelect2({
                     element:'#job_template_job_type',
@@ -224,6 +377,14 @@ export default
                     element: '#job_template_custom_virtualenv',
                     multiple: false,
                     opts: $scope.custom_virtualenvs_options
+                }));
+                select2LoadDefer.push(CreateSelect2({
+                    element:'#webhook-service-select',
+                    addNew: false,
+                    multiple: false,
+                    scope: $scope,
+                    options: 'webhook_service_options',
+                    model: 'webhook_service'
                 }));
 
                 if (!launchHasBeenEnabled) {
@@ -295,6 +456,15 @@ export default
                     check_field: 'allow_callbacks',
                     default_val: dft
                 });
+
+                // set initial vals for webhook checkbox
+                if (jobTemplateData.webhook_service) {
+                    $scope.enable_webhook = true;
+                    master.enable_webhook = true;
+                } else {
+                    $scope.enable_webhook = false;
+                    master.enable_webhook = false;
+                }
 
                 ParseTypeChange({
                     scope: $scope,
@@ -498,6 +668,14 @@ export default
                 callback: 'choicesReady'
             });
 
+            GetChoices({
+                scope: $scope,
+                url: defaultUrl,
+                field: 'webhook_service',
+                variable: 'webhook_service_options',
+                callback: 'choicesReady'
+            });
+
             $scope.labelOptions = availableLabels
                 .map((i) => ({label: i.name, value: i.id}));
 
@@ -552,7 +730,6 @@ export default
                             msg: 'Failed to update instance groups. POST returned status: ' + status
                         });
                     });
-
 
                 var orgDefer = $q.defer();
                 var associationDefer = $q.defer();
@@ -728,6 +905,20 @@ export default
 
                     data.job_tags = (Array.isArray($scope.job_tags)) ? _.uniq($scope.job_tags).join() : "";
                     data.skip_tags = (Array.isArray($scope.skip_tags)) ?  _.uniq($scope.skip_tags).join() : "";
+
+                    delete data.webhook_url;
+                    delete data.webhook_key;
+                    delete data.enable_webhook;
+                    data.webhook_credential = $scope.webhookCredential.id;
+
+                    if (!data.webhook_service) {
+                        data.webhook_credential = null;
+                    }
+
+                    if (!$scope.enable_webhook) {
+                        data.webhook_service = '';
+                        data.webhook_credential = null;
+                    }
 
                     Rest.setUrl(defaultUrl + $state.params.job_template_id);
                     Rest.patch(data)

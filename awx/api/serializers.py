@@ -139,6 +139,7 @@ SUMMARIZABLE_FK_FIELDS = {
     'insights_credential': DEFAULT_SUMMARY_FIELDS,
     'source_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'credential_type_id'),
     'target_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'credential_type_id'),
+    'webhook_credential': DEFAULT_SUMMARY_FIELDS,
 }
 
 
@@ -2826,6 +2827,25 @@ class JobTemplateMixin(object):
         d['recent_jobs'] = self._recent_jobs(obj)
         return d
 
+    def validate(self, attrs):
+        webhook_service = attrs.get('webhook_service', getattr(self.instance, 'webhook_service', None))
+        webhook_credential = attrs.get('webhook_credential', getattr(self.instance, 'webhook_credential', None))
+
+        if webhook_credential:
+            if webhook_credential.credential_type.kind != 'token':
+                raise serializers.ValidationError({
+                    'webhook_credential': _("Must be a Personal Access Token."),
+                })
+
+            msg = {'webhook_credential': _("Must match the selected webhook service.")}
+            if webhook_service:
+                if webhook_credential.credential_type.namespace != '{}_token'.format(webhook_service):
+                    raise serializers.ValidationError(msg)
+            else:
+                raise serializers.ValidationError(msg)
+
+        return super().validate(attrs)
+
 
 class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobOptionsSerializer):
     show_capabilities = ['start', 'schedule', 'copy', 'edit', 'delete']
@@ -2838,30 +2858,39 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
 
     class Meta:
         model = JobTemplate
-        fields = ('*', 'host_config_key', 'ask_scm_branch_on_launch', 'ask_diff_mode_on_launch', 'ask_variables_on_launch',
-                  'ask_limit_on_launch', 'ask_tags_on_launch',
-                  'ask_skip_tags_on_launch', 'ask_job_type_on_launch', 'ask_verbosity_on_launch', 'ask_inventory_on_launch',
-                  'ask_credential_on_launch', 'survey_enabled', 'become_enabled', 'diff_mode',
-                  'allow_simultaneous', 'custom_virtualenv', 'job_slice_count')
+        fields = (
+            '*', 'host_config_key', 'ask_scm_branch_on_launch', 'ask_diff_mode_on_launch',
+            'ask_variables_on_launch', 'ask_limit_on_launch', 'ask_tags_on_launch',
+            'ask_skip_tags_on_launch', 'ask_job_type_on_launch', 'ask_verbosity_on_launch',
+            'ask_inventory_on_launch', 'ask_credential_on_launch', 'survey_enabled',
+            'become_enabled', 'diff_mode', 'allow_simultaneous', 'custom_virtualenv',
+            'job_slice_count', 'webhook_service', 'webhook_credential',
+        )
 
     def get_related(self, obj):
         res = super(JobTemplateSerializer, self).get_related(obj)
-        res.update(dict(
-            jobs = self.reverse('api:job_template_jobs_list', kwargs={'pk': obj.pk}),
-            schedules = self.reverse('api:job_template_schedules_list', kwargs={'pk': obj.pk}),
-            activity_stream = self.reverse('api:job_template_activity_stream_list', kwargs={'pk': obj.pk}),
-            launch = self.reverse('api:job_template_launch', kwargs={'pk': obj.pk}),
-            notification_templates_started = self.reverse('api:job_template_notification_templates_started_list', kwargs={'pk': obj.pk}),
-            notification_templates_success = self.reverse('api:job_template_notification_templates_success_list', kwargs={'pk': obj.pk}),
-            notification_templates_error = self.reverse('api:job_template_notification_templates_error_list', kwargs={'pk': obj.pk}),
-            access_list = self.reverse('api:job_template_access_list',      kwargs={'pk': obj.pk}),
-            survey_spec = self.reverse('api:job_template_survey_spec', kwargs={'pk': obj.pk}),
-            labels = self.reverse('api:job_template_label_list', kwargs={'pk': obj.pk}),
-            object_roles = self.reverse('api:job_template_object_roles_list', kwargs={'pk': obj.pk}),
-            instance_groups = self.reverse('api:job_template_instance_groups_list', kwargs={'pk': obj.pk}),
-            slice_workflow_jobs = self.reverse('api:job_template_slice_workflow_jobs_list', kwargs={'pk': obj.pk}),
-            copy = self.reverse('api:job_template_copy', kwargs={'pk': obj.pk}),
-        ))
+        res.update(
+            jobs=self.reverse('api:job_template_jobs_list', kwargs={'pk': obj.pk}),
+            schedules=self.reverse('api:job_template_schedules_list', kwargs={'pk': obj.pk}),
+            activity_stream=self.reverse('api:job_template_activity_stream_list', kwargs={'pk': obj.pk}),
+            launch=self.reverse('api:job_template_launch', kwargs={'pk': obj.pk}),
+            webhook_key=self.reverse('api:webhook_key', kwargs={'model_kwarg': 'job_templates', 'pk': obj.pk}),
+            webhook_receiver=(
+                self.reverse('api:webhook_receiver_{}'.format(obj.webhook_service),
+                             kwargs={'model_kwarg': 'job_templates', 'pk': obj.pk})
+                if obj.webhook_service else ''
+            ),
+            notification_templates_started=self.reverse('api:job_template_notification_templates_started_list', kwargs={'pk': obj.pk}),
+            notification_templates_success=self.reverse('api:job_template_notification_templates_success_list', kwargs={'pk': obj.pk}),
+            notification_templates_error=self.reverse('api:job_template_notification_templates_error_list', kwargs={'pk': obj.pk}),
+            access_list=self.reverse('api:job_template_access_list',      kwargs={'pk': obj.pk}),
+            survey_spec=self.reverse('api:job_template_survey_spec', kwargs={'pk': obj.pk}),
+            labels=self.reverse('api:job_template_label_list', kwargs={'pk': obj.pk}),
+            object_roles=self.reverse('api:job_template_object_roles_list', kwargs={'pk': obj.pk}),
+            instance_groups=self.reverse('api:job_template_instance_groups_list', kwargs={'pk': obj.pk}),
+            slice_workflow_jobs=self.reverse('api:job_template_slice_workflow_jobs_list', kwargs={'pk': obj.pk}),
+            copy=self.reverse('api:job_template_copy', kwargs={'pk': obj.pk}),
+        )
         if obj.host_config_key:
             res['callback'] = self.reverse('api:job_template_callback', kwargs={'pk': obj.pk})
         return res
@@ -2888,7 +2917,6 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
 
     def validate_extra_vars(self, value):
         return vars_validate_or_raise(value)
-
 
     def get_summary_fields(self, obj):
         summary_fields = super(JobTemplateSerializer, self).get_summary_fields(obj)
@@ -2930,9 +2958,11 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
 
     class Meta:
         model = Job
-        fields = ('*', 'job_template', 'passwords_needed_to_start',
-                  'allow_simultaneous', 'artifacts', 'scm_revision',
-                  'instance_group', 'diff_mode', 'job_slice_number', 'job_slice_count')
+        fields = (
+            '*', 'job_template', 'passwords_needed_to_start', 'allow_simultaneous',
+            'artifacts', 'scm_revision', 'instance_group', 'diff_mode', 'job_slice_number',
+            'job_slice_count', 'webhook_service', 'webhook_credential', 'webhook_guid',
+        )
 
     def get_related(self, obj):
         res = super(JobSerializer, self).get_related(obj)
@@ -3320,16 +3350,25 @@ class WorkflowJobTemplateSerializer(JobTemplateMixin, LabelsListMixin, UnifiedJo
 
     class Meta:
         model = WorkflowJobTemplate
-        fields = ('*', 'extra_vars', 'organization', 'survey_enabled', 'allow_simultaneous',
-                  'ask_variables_on_launch', 'inventory', 'limit', 'scm_branch',
-                  'ask_inventory_on_launch', 'ask_scm_branch_on_launch', 'ask_limit_on_launch',)
+        fields = (
+            '*', 'extra_vars', 'organization', 'survey_enabled', 'allow_simultaneous',
+            'ask_variables_on_launch', 'inventory', 'limit', 'scm_branch',
+            'ask_inventory_on_launch', 'ask_scm_branch_on_launch', 'ask_limit_on_launch',
+            'webhook_service', 'webhook_credential',
+        )
 
     def get_related(self, obj):
         res = super(WorkflowJobTemplateSerializer, self).get_related(obj)
-        res.update(dict(
+        res.update(
             workflow_jobs = self.reverse('api:workflow_job_template_jobs_list', kwargs={'pk': obj.pk}),
             schedules = self.reverse('api:workflow_job_template_schedules_list', kwargs={'pk': obj.pk}),
             launch = self.reverse('api:workflow_job_template_launch', kwargs={'pk': obj.pk}),
+            webhook_key=self.reverse('api:webhook_key', kwargs={'model_kwarg': 'workflow_job_templates', 'pk': obj.pk}),
+            webhook_receiver=(
+                self.reverse('api:webhook_receiver_{}'.format(obj.webhook_service),
+                             kwargs={'model_kwarg': 'workflow_job_templates', 'pk': obj.pk})
+                if obj.webhook_service else ''
+            ),
             workflow_nodes = self.reverse('api:workflow_job_template_workflow_nodes_list', kwargs={'pk': obj.pk}),
             labels = self.reverse('api:workflow_job_template_label_list', kwargs={'pk': obj.pk}),
             activity_stream = self.reverse('api:workflow_job_template_activity_stream_list', kwargs={'pk': obj.pk}),
@@ -3341,7 +3380,7 @@ class WorkflowJobTemplateSerializer(JobTemplateMixin, LabelsListMixin, UnifiedJo
             object_roles = self.reverse('api:workflow_job_template_object_roles_list', kwargs={'pk': obj.pk}),
             survey_spec = self.reverse('api:workflow_job_template_survey_spec', kwargs={'pk': obj.pk}),
             copy = self.reverse('api:workflow_job_template_copy', kwargs={'pk': obj.pk}),
-        ))
+        )
         if obj.organization:
             res['organization'] = self.reverse('api:organization_detail',   kwargs={'pk': obj.organization.pk})
         return res
@@ -3382,10 +3421,11 @@ class WorkflowJobSerializer(LabelsListMixin, UnifiedJobSerializer):
 
     class Meta:
         model = WorkflowJob
-        fields = ('*', 'workflow_job_template', 'extra_vars', 'allow_simultaneous',
-                  'job_template', 'is_sliced_job',
-                  '-execution_node', '-event_processing_finished', '-controller_node',
-                  'inventory', 'limit', 'scm_branch',)
+        fields = (
+            '*', 'workflow_job_template', 'extra_vars', 'allow_simultaneous', 'job_template',
+            'is_sliced_job', '-execution_node', '-event_processing_finished', '-controller_node',
+            'inventory', 'limit', 'scm_branch', 'webhook_service', 'webhook_credential', 'webhook_guid',
+        )
 
     def get_related(self, obj):
         res = super(WorkflowJobSerializer, self).get_related(obj)
