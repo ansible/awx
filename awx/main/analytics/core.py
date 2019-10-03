@@ -80,7 +80,7 @@ def gather(dest=None, module=None, collection_type='scheduled'):
     last_run = state.last_run
     logger.debug("Last analytics run was: {}".format(last_run))
     
-    max_interval = now() - timedelta(days=7)
+    max_interval = now() - timedelta(weeks=4)
     if last_run < max_interval or not last_run:
         last_run = max_interval
 
