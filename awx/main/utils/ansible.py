@@ -6,6 +6,7 @@ import codecs
 import re
 import os
 from itertools import islice
+from configparser import ConfigParser
 
 # Django
 from django.utils.encoding import smart_str
@@ -97,3 +98,17 @@ def could_be_inventory(project_path, dir_path, filename):
     except IOError:
         return None
     return inventory_rel_path
+
+
+def read_ansible_config(project_path, variables_of_interest):
+    fnames = ['/etc/ansible/ansible.cfg']
+    if project_path:
+        fnames.insert(0, os.path.join(project_path, 'ansible.cfg'))
+    parser = ConfigParser()
+    parser.read(fnames)
+    values = {}
+    if 'defaults' in parser:
+        for var in variables_of_interest:
+            if var in parser['defaults']:
+                values[var] = parser['defaults'][var]
+    return values

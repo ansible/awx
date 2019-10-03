@@ -73,6 +73,7 @@ from awx.main.utils import (get_ssh_version, update_scm_url,
                             ignore_inventory_computed_fields,
                             ignore_inventory_group_removal, extract_ansible_vars, schedule_task_manager,
                             get_awx_version)
+from awx.main.utils.ansible import read_ansible_config
 from awx.main.utils.common import get_ansible_version, _get_ansible_version, get_custom_venv_choices
 from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja
 from awx.main.utils.reload import stop_local_services
@@ -1529,14 +1530,22 @@ class RunJob(BaseTask):
             if authorize:
                 env['ANSIBLE_NET_AUTH_PASS'] = network_cred.get_input('authorize_password', default='')
 
-        for env_key, folder, default in (
-                ('ANSIBLE_COLLECTIONS_PATHS', 'requirements_collections', '~/.ansible/collections:/usr/share/ansible/collections'),
-                ('ANSIBLE_ROLES_PATH', 'requirements_roles', '~/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles')):
+        path_vars = (
+            ('ANSIBLE_COLLECTIONS_PATHS', 'collections_path', 'requirements_collections', '~/.ansible/collections:/usr/share/ansible/collections'),
+            ('ANSIBLE_ROLES_PATH', 'roles_path', 'requirements_roles', '~/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles'))
+
+        config_values = read_ansible_config(job.project.get_project_path(), list(map(lambda x: x[1], path_vars)))
+
+        for env_key, config_setting, folder, default in path_vars:
             paths = default.split(':')
             if env_key in env:
                 for path in env[env_key].split(':'):
                     if path not in paths:
                         paths = [env[env_key]] + paths
+            elif config_setting in config_values:
+                for path in config_values[config_setting].split(':'):
+                    if path not in paths:
+                        paths = [config_values[config_setting]] + paths
             paths = [os.path.join(private_data_dir, folder)] + paths
             env[env_key] = os.pathsep.join(paths)
 
