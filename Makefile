@@ -399,6 +399,14 @@ flake8_collection:
 
 test_collection_all: prepare_collection_venv test_collection flake8_collection
 
+test_collection_sanity:
+	rm -rf sanity
+	mkdir -p sanity/ansible_collections/awx
+	cp -Ra awx_collection sanity/ansible_collections/awx/awx  # symlinks do not work
+	cd sanity/ansible_collections/awx/awx && ansible-playbook -i localhost, make_imports_absolute.yml  # hack because sanity tests do not fully work
+	cd sanity/ansible_collections/awx/awx && git init && git add . # requires both this file structure and a git repo, so there you go
+	cd sanity/ansible_collections/awx/awx && ansible-test sanity --test validate-modules
+
 build_collection:
 	ansible-playbook -i localhost, awx_collection/template_galaxy.yml -e collection_package=$(COLLECTION_PACKAGE) -e namespace_name=$(COLLECTION_NAMESPACE) -e package_version=$(VERSION)
 	ansible-galaxy collection build awx_collection --output-path=awx_collection
