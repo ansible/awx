@@ -37,6 +37,9 @@ class Templates extends Component {
       [`/templates/${template.type}/${template.id}/edit`]: i18n._(
         t`Edit Details`
       ),
+      [`/templates/${template.type}/${template.id}/notifications`]: i18n._(
+        t`Notifications`
+      ),
     };
     this.setState({ breadcrumbConfig });
   };
