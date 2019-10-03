@@ -45,7 +45,7 @@ describe.only('<Project />', () => {
       '.pf-c-tabs__item',
       el => el.length === 5
     );
-    expect(tabs.last().text()).toEqual('Notifications');
+    expect(tabs.at(2).text()).toEqual('Notifications');
     done();
   });
 
