@@ -85,7 +85,6 @@
                                 badge="true">
                             </at-row-item>
                             <at-row-item
-                                ng-class="{'at-Row-links-noCredential': !instance_group.credential}"
                                 label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_RUNNING_JOBS') }}"
                                 label-state="instanceGroups.jobs({instance_group_id: {{ instance_group.id }}, job_search: {status__in: ['running,waiting']}})"
                                 value="{{ instance_group.jobs_running }}"
