@@ -311,7 +311,21 @@ class CLI(object):
             return
 
         if self.original_action == 'create':
-            return page.post(parsed)
+            try:
+                return page.post(parsed)
+            except exceptions.Duplicate:
+                if parsed.get('ignore_existing') is True:
+                    _filter = UNIQUENESS_RULES.get(self.resource, ['name'])[-1]
+                    resp = page.get(**{_filter: parsed[_filter]})
+                    results = getattr(resp, 'results', [])
+                    if len(results) == 1:
+                        self.original_action = 'get'
+                        return results[0]
+                    else:
+                        raise RuntimeError(
+                            "Expected exactly 1 result but received {}".format(len(results))
+                        )
+                raise
 
         return getattr(page, self.method)(**parsed)
 

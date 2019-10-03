@@ -111,6 +111,15 @@ class ResourceOptionsParser(object):
                 )
                 add_output_formatting_arguments(parser, {})
 
+            if method == 'create':
+                parser.add_argument(
+                    '--ignore-existing', action='store_true',
+                    help=(
+                        'if a resource with the specified name already exists'
+                        'just return it instead of attempting creation'
+                    )
+                )
+
     def build_detail_actions(self):
         allowed = ['get']
         if 'PUT' in self.allowed_options:
