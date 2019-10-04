@@ -70,12 +70,10 @@ class JobTemplateDetail extends Component {
         job_slice_count,
         job_tags,
         job_type,
-        inventory,
         name,
         limit,
         modified,
         playbook,
-        project,
         skip_tags,
         timeout,
         summary_fields,
@@ -106,6 +104,32 @@ class JobTemplateDetail extends Component {
 
     const renderOptionsField =
       become_enabled || host_config_key || allow_simultaneous || use_fact_cache;
+
+    let createdBy = '';
+    if (created) {
+      if (summary_fields.created_by && summary_fields.created_by.username) {
+        createdBy = i18n._(
+          t`${formatDateString(created)} by ${
+            summary_fields.created_by.username
+          }`
+        );
+      } else {
+        createdBy = formatDateString(created);
+      }
+    }
+
+    let modifiedBy = '';
+    if (modified) {
+      if (summary_fields.modified_by && summary_fields.modified_by.username) {
+        modifiedBy = i18n._(
+          t`${formatDateString(modified)} by ${
+            summary_fields.modified_by.username
+          }`
+        );
+      } else {
+        modifiedBy = formatDateString(modified);
+      }
+    }
 
     const renderOptions = (
       <TextList component={TextListVariants.ul}>
@@ -147,13 +171,13 @@ class JobTemplateDetail extends Component {
             <Detail label={i18n._(t`Name`)} value={name} />
             <Detail label={i18n._(t`Description`)} value={description} />
             <Detail label={i18n._(t`Job Type`)} value={job_type} />
-            {inventory && (
+            {summary_fields.inventory && (
               <Detail
                 label={i18n._(t`Inventory`)}
                 value={summary_fields.inventory.name}
               />
             )}
-            {project && (
+            {summary_fields.project && (
               <Detail
                 label={i18n._(t`Project`)}
                 value={summary_fields.project.name}
@@ -167,18 +191,18 @@ class JobTemplateDetail extends Component {
               value={verbosityDetails[0].details}
             />
             <Detail label={i18n._(t`Timeout`)} value={timeout || '0'} />
-            <Detail
-              label={i18n._(t`Created`)}
-              value={`${formatDateString(created)} by ${
-                summary_fields.created_by.username
-              }`} // TODO: link to user in users
-            />
-            <Detail
-              label={i18n._(t`Last Modified`)}
-              value={`${formatDateString(modified)} by ${
-                summary_fields.modified_by.username
-              }`} // TODO: link to user in users
-            />
+            {createdBy && (
+              <Detail
+                label={i18n._(t`Created`)}
+                value={createdBy} // TODO: link to user in users
+              />
+            )}
+            {modifiedBy && (
+              <Detail
+                label={i18n._(t`Last Modified`)}
+                value={modifiedBy} // TODO: link to user in users
+              />
+            )}
             <Detail
               label={i18n._(t`Show Changes`)}
               value={diff_mode ? 'On' : 'Off'}
