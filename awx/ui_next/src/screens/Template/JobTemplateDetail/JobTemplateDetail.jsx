@@ -17,6 +17,7 @@ import LaunchButton from '@components/LaunchButton';
 import ContentLoading from '@components/ContentLoading';
 import { ChipGroup, Chip, CredentialChip } from '@components/Chip';
 import { DetailList, Detail } from '@components/DetailList';
+import { formatDateString } from '@util/dates';
 import { JobTemplatesAPI } from '@api';
 
 const ButtonGroup = styled.div`
@@ -168,11 +169,15 @@ class JobTemplateDetail extends Component {
             <Detail label={i18n._(t`Timeout`)} value={timeout || '0'} />
             <Detail
               label={i18n._(t`Created`)}
-              value={`${created} by ${summary_fields.created_by.username}`} // TODO: link to user in users
+              value={`${formatDateString(created)} by ${
+                summary_fields.created_by.username
+              }`} // TODO: link to user in users
             />
             <Detail
               label={i18n._(t`Last Modified`)}
-              value={`${modified} by ${summary_fields.modified_by.username}`} // TODO: link to user in users
+              value={`${formatDateString(modified)} by ${
+                summary_fields.modified_by.username
+              }`} // TODO: link to user in users
             />
             <Detail
               label={i18n._(t`Show Changes`)}
