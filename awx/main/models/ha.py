@@ -59,7 +59,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         null=True,
         editable=False,
     )
-    version = models.CharField(max_length=24, blank=True)
+    version = models.CharField(max_length=120, blank=True)
     capacity = models.PositiveIntegerField(
         default=100,
         editable=False,
