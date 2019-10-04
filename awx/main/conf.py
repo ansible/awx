@@ -497,6 +497,18 @@ register(
 )
 
 register(
+    'PRIMARY_GALAXY_AUTH_URL',
+    field_class=fields.CharField,
+    required=False,
+    allow_blank=True,
+    label=_('Primary Galaxy Authentication URL'),
+    help_text=_('For using a galaxy server at higher precedence than the public Ansible Galaxy. '
+                'The token_endpoint of a Keycloak server.'),
+    category=_('Jobs'),
+    category_slug='jobs'
+)
+
+register(
     'STDOUT_MAX_BYTES_DISPLAY',
     field_class=fields.IntegerField,
     min_value=0,
@@ -773,8 +785,8 @@ def galaxy_validate(serializer, attrs):
     """
     prefix = 'PRIMARY_GALAXY_'
 
-    galaxy_fields = ('url', 'username', 'password', 'token')
-    if not any('{}{}'.format(prefix, subfield.upper()) in attrs for subfield in galaxy_fields):
+    from awx.main.constants import GALAXY_SERVER_FIELDS
+    if not any('{}{}'.format(prefix, subfield.upper()) in attrs for subfield in GALAXY_SERVER_FIELDS):
         return attrs
 
     def _new_value(field_name):
@@ -785,7 +797,7 @@ def galaxy_validate(serializer, attrs):
         return getattr(serializer.instance, field_name, '')
 
     galaxy_data = {}
-    for subfield in galaxy_fields:
+    for subfield in GALAXY_SERVER_FIELDS:
         galaxy_data[subfield] = _new_value('{}{}'.format(prefix, subfield.upper()))
     errors = {}
     if not galaxy_data['url']:
@@ -797,8 +809,8 @@ def galaxy_validate(serializer, attrs):
                     'Cannot provide field if PRIMARY_GALAXY_URL is not set.'
                 ))
 
-    if (galaxy_data['password'] or galaxy_data['username']) and galaxy_data['token']:
-        for k in ('password', 'username', 'token'):
+    if (galaxy_data['password'] or galaxy_data['username']) and (galaxy_data['token'] or galaxy_data['auth_url']):
+        for k in ('password', 'username', 'token', 'auth_url'):
             setting_name = '{}{}'.format(prefix, k.upper())
             if setting_name in attrs:
                 errors.setdefault(setting_name, [])

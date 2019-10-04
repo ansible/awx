@@ -85,6 +85,10 @@ export default ['i18n', function(i18n) {
                 hasShowInputButton: true,
                 reset: 'PRIMARY_GALAXY_TOKEN',
             },
+            PRIMARY_GALAXY_AUTH_URL: {
+                type: 'text',
+                reset: 'PRIMARY_GALAXY_AUTH_URL',
+            },
             AWX_TASK_ENV: {
                 type: 'textarea',
                 reset: 'AWX_TASK_ENV',

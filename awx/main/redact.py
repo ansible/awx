@@ -13,9 +13,9 @@ class UriCleaner(object):
     @staticmethod
     def remove_sensitive(cleartext):
         if settings.PRIMARY_GALAXY_URL:
-            exclude_list = (settings.PUBLIC_GALAXY_URL, settings.PRIMARY_GALAXY_URL)
+            exclude_list = [settings.PRIMARY_GALAXY_URL] + [server['url'] for server in settings.FALLBACK_GALAXY_SERVERS]
         else:
-            exclude_list = (settings.PUBLIC_GALAXY_URL,)
+            exclude_list = [server['url'] for server in settings.FALLBACK_GALAXY_SERVERS]
         redactedtext = cleartext
         text_index = 0
         while True:

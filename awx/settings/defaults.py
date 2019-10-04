@@ -622,13 +622,22 @@ AWX_ROLES_ENABLED = True
 # Note: This setting may be overridden by database settings.
 AWX_COLLECTIONS_ENABLED = True
 
-# Settings for private galaxy server, should be set in the UI
+# Settings for primary galaxy server, should be set in the UI
 PRIMARY_GALAXY_URL = ''
 PRIMARY_GALAXY_USERNAME = ''
 PRIMARY_GALAXY_TOKEN = ''
 PRIMARY_GALAXY_PASSWORD = ''
-# Public Galaxy URL, not configurable outside of file-based settings
-PUBLIC_GALAXY_URL = 'https://galaxy.ansible.com'
+PRIMARY_GALAXY_AUTH_URL = ''
+# Settings for the fallback galaxy server(s), normally this is the
+# actual Ansible Galaxy site.
+# server options: 'id', 'url', 'username', 'password', 'token', 'auth_url'
+# To not use any fallback servers set this to []
+FALLBACK_GALAXY_SERVERS = [
+    {
+        'id': 'galaxy',
+        'url': 'https://galaxy.ansible.com'
+    }
+]
 
 # Enable bubblewrap support for running jobs (playbook runs only).
 # Note: This setting may be overridden by database settings.
