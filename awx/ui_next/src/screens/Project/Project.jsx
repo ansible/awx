@@ -127,30 +127,31 @@ class Project extends Component {
       (me.is_system_auditor || isAuditorOfThisOrg || isAdminOfThisOrg);
 
     const tabsArray = [
-      { name: i18n._(t`Details`), link: `${match.url}/details`, id: 0 },
-      { name: i18n._(t`Access`), link: `${match.url}/access`, id: 1 },
+      { name: i18n._(t`Details`), link: `${match.url}/details` },
+      { name: i18n._(t`Access`), link: `${match.url}/access` },
     ];
 
     if (canSeeNotificationsTab) {
       tabsArray.push({
         name: i18n._(t`Notifications`),
         link: `${match.url}/notifications`,
-        id: 2,
       });
     }
 
     tabsArray.push(
       {
         name: i18n._(t`Job Templates`),
-        link: '/job_templates',
-        id: canSeeNotificationsTab ? 3 : 2,
+        link: `${match.url}/job_templates`,
       },
       {
         name: i18n._(t`Schedules`),
-        link: '/schedules',
-        id: canSeeNotificationsTab ? 4 : 3,
+        link: `${match.url}/schedules`,
       }
     );
+
+    tabsArray.forEach((tab, n) => {
+      tab.id = n;
+    });
 
     const CardHeader = styled(PFCardHeader)`
       --pf-c-card--first-child--PaddingTop: 0;

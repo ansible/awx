@@ -18,7 +18,7 @@ import ProjectListItem from './ProjectListItem';
 
 const QS_CONFIG = getQSConfig('project', {
   page: 1,
-  page_size: 5,
+  page_size: 20,
   order_by: 'name',
 });
 
@@ -38,7 +38,7 @@ class ProjectsList extends Component {
 
     this.handleSelectAll = this.handleSelectAll.bind(this);
     this.handleSelect = this.handleSelect.bind(this);
-    this.handleOrgDelete = this.handleOrgDelete.bind(this);
+    this.handleProjectDelete = this.handleProjectDelete.bind(this);
     this.handleDeleteErrorClose = this.handleDeleteErrorClose.bind(this);
     this.loadProjects = this.loadProjects.bind(this);
   }
@@ -75,12 +75,14 @@ class ProjectsList extends Component {
     this.setState({ deletionError: null });
   }
 
-  async handleOrgDelete() {
+  async handleProjectDelete() {
     const { selected } = this.state;
 
     this.setState({ hasContentLoading: true });
     try {
-      await Promise.all(selected.map(org => ProjectsAPI.destroy(org.id)));
+      await Promise.all(
+        selected.map(project => ProjectsAPI.destroy(project.id))
+      );
     } catch (err) {
       this.setState({ deletionError: err });
     } finally {
@@ -150,7 +152,7 @@ class ProjectsList extends Component {
               hasContentLoading={hasContentLoading}
               items={projects}
               itemCount={itemCount}
-              pluralizedItemName="Projects"
+              pluralizedItemName={i18n._(t`Projects`)}
               qsConfig={QS_CONFIG}
               toolbarColumns={[
                 {
@@ -182,9 +184,9 @@ class ProjectsList extends Component {
                   additionalControls={[
                     <ToolbarDeleteButton
                       key="delete"
-                      onDelete={this.handleOrgDelete}
+                      onDelete={this.handleProjectDelete}
                       itemsToDelete={selected}
-                      pluralizedItemName="Projects"
+                      pluralizedItemName={i18n._(t`Projects`)}
                     />,
                     canAdd ? (
                       <ToolbarAddButton key="add" linkTo={`${match.url}/add`} />

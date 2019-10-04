@@ -18,7 +18,7 @@ import OrganizationListItem from './OrganizationListItem';
 
 const QS_CONFIG = getQSConfig('organization', {
   page: 1,
-  page_size: 5,
+  page_size: 20,
   order_by: 'name',
 });
 
