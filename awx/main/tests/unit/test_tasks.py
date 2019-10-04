@@ -469,6 +469,36 @@ class TestGenericRun():
         assert '/AWX_VENV_PATH' in process_isolation_params['process_isolation_ro_paths']
         assert 2 == len(process_isolation_params['process_isolation_ro_paths'])
 
+
+    @mock.patch('os.makedirs')
+    def test_build_params_resource_profiling(self, os_makedirs):
+        job = Job(project=Project(), inventory=Inventory())
+        task = tasks.RunJob()
+        task.should_use_resource_profiling = lambda job: True
+        task.instance = job
+
+        resource_profiling_params = task.build_params_resource_profiling(task.instance, '/fake_private_data_dir')
+        assert resource_profiling_params['resource_profiling'] is True
+        assert resource_profiling_params['resource_profiling_base_cgroup'] == 'ansible-runner'
+        assert resource_profiling_params['resource_profiling_cpu_poll_interval'] == '0.25'
+        assert resource_profiling_params['resource_profiling_memory_poll_interval'] == '0.25'
+        assert resource_profiling_params['resource_profiling_pid_poll_interval'] == '0.25'
+        assert resource_profiling_params['resource_profiling_results_dir'] == '/fake_private_data_dir/artifacts/playbook_profiling'
+
+
+    @pytest.mark.parametrize("scenario, profiling_enabled", [
+                             ('global_setting', True),
+                             ('default', False)])
+    def test_should_use_resource_profiling(self, scenario, profiling_enabled, settings):
+        job = Job(project=Project(), inventory=Inventory())
+        task = tasks.RunJob()
+        task.instance = job
+
+        if scenario == 'global_setting':
+            settings.AWX_RESOURCE_PROFILING_ENABLED = True
+
+        assert task.should_use_resource_profiling(task.instance) == profiling_enabled
+
     def test_created_by_extra_vars(self):
         job = Job(created_by=User(pk=123, username='angry-spud'))
 

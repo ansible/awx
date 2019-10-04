@@ -85,6 +85,9 @@ export default ['i18n', function(i18n) {
             AWX_ISOLATED_CONNECTION_TIMEOUT: {
                 type: 'text',
                 reset: 'AWX_ISOLATED_CONNECTION_TIMEOUT'
+            },
+            AWX_RESOURCE_PROFILING_ENABLED: {
+                type: 'toggleSwitch',
             }
         },
         buttons: {
