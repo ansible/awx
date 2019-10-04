@@ -1,4 +1,4 @@
-function InstanceModalController ($scope, $state, Dataset, models, strings, ProcessErrors, Wait) {
+function InstanceModalController ($scope, $state, Dataset, models, strings, ProcessErrors, Wait, routeData) {
     const { instanceGroup } = models;
     const vm = this || {};
     let relatedInstanceIds = [];
@@ -116,11 +116,11 @@ function InstanceModalController ($scope, $state, Dataset, models, strings, Proc
     };
 
     vm.onSaveSuccess = () => {
-        $state.go('instanceGroups.instances', {}, {reload: 'instanceGroups.instances'});
+        $state.go(`${routeData}`, {}, {reload: `${routeData}`});
     };
 
     vm.dismiss = () => {
-        $state.go('instanceGroups.instances');
+        $state.go(`${routeData}`);
     };
 
     vm.toggleRow = (row) => {
@@ -163,7 +163,8 @@ InstanceModalController.$inject = [
     'resolvedModels',
     'InstanceGroupsStrings',
     'ProcessErrors',
-    'Wait'
+    'Wait',
+    'routeData'
 ];
 
 export default InstanceModalController;

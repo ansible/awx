@@ -11,7 +11,9 @@ from django.conf import settings
 import ansible_runner
 
 import awx
-from awx.main.utils import get_system_task_capacity
+from awx.main.utils import (
+    get_system_task_capacity
+)
 from awx.main.queue import CallbackQueueDispatcher
 
 logger = logging.getLogger('awx.isolated.manager')
@@ -29,7 +31,7 @@ def set_pythonpath(venv_libdir, env):
 
 class IsolatedManager(object):
 
-    def __init__(self, cancelled_callback=None, check_callback=None):
+    def __init__(self, cancelled_callback=None, check_callback=None, pod_manager=None):
         """
         :param cancelled_callback:  a callable - which returns `True` or `False`
                                     - signifying if the job has been prematurely
@@ -40,6 +42,24 @@ class IsolatedManager(object):
         self.idle_timeout = max(60, 2 * settings.AWX_ISOLATED_CONNECTION_TIMEOUT)
         self.started_at = None
         self.captured_command_artifact = False
+        self.instance = None
+        self.pod_manager = pod_manager
+
+    def build_inventory(self, hosts):
+        if self.instance and self.instance.is_containerized:
+            inventory = {'all': {'hosts': {}}}
+            for host in hosts:
+                inventory['all']['hosts'][host] = {
+                    "ansible_connection": "kubectl",
+                    "ansible_kubectl_config": self.pod_manager.kube_config
+                }
+        else:
+            inventory = '\n'.join([
+                '{} ansible_ssh_user={}'.format(host, settings.AWX_ISOLATED_USERNAME)
+                for host in hosts
+            ])
+
+        return inventory
 
     def build_runner_params(self, hosts, verbosity=1):
         env = dict(os.environ.items())
@@ -69,17 +89,12 @@ class IsolatedManager(object):
             else:
                 playbook_logger.info(runner_obj.stdout.read())
 
-        inventory = '\n'.join([
-            '{} ansible_ssh_user={}'.format(host, settings.AWX_ISOLATED_USERNAME)
-            for host in hosts
-        ])
-
         return {
             'project_dir': os.path.abspath(os.path.join(
                 os.path.dirname(awx.__file__),
                 'playbooks'
             )),
-            'inventory': inventory,
+            'inventory': self.build_inventory(hosts),
             'envvars': env,
             'finished_callback': finished_callback,
             'verbosity': verbosity,
@@ -153,6 +168,11 @@ class IsolatedManager(object):
         runner_obj = self.run_management_playbook('run_isolated.yml',
                                                   self.private_data_dir,
                                                   extravars=extravars)
+
+        if runner_obj.status == 'failed':
+            self.instance.result_traceback = runner_obj.stdout.read()
+            self.instance.save(update_fields=['result_traceback'])
+
         return runner_obj.status, runner_obj.rc
 
     def check(self, interval=None):
@@ -175,6 +195,7 @@ class IsolatedManager(object):
         rc = None
         last_check = time.time()
         dispatcher = CallbackQueueDispatcher()
+
         while status == 'failed':
             canceled = self.cancelled_callback() if self.cancelled_callback else False
             if not canceled and time.time() - last_check < interval:
@@ -279,7 +300,6 @@ class IsolatedManager(object):
 
 
     def cleanup(self):
-        # If the job failed for any reason, make a last-ditch effort at cleanup
         extravars = {
             'private_data_dir': self.private_data_dir,
             'cleanup_dirs': [
@@ -393,6 +413,7 @@ class IsolatedManager(object):
             [instance.execution_node],
             verbosity=min(5, self.instance.verbosity)
         )
+
         status, rc = self.dispatch(playbook, module, module_args)
         if status == 'successful':
             status, rc = self.check()

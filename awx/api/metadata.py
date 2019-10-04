@@ -22,6 +22,7 @@ from rest_framework.request import clone_request
 # AWX
 from awx.main.fields import JSONField, ImplicitRoleField
 from awx.main.models import InventorySource, NotificationTemplate
+from awx.main.scheduler.kubernetes import PodManager
 
 
 class Metadata(metadata.SimpleMetadata):
@@ -199,6 +200,9 @@ class Metadata(metadata.SimpleMetadata):
             for field, meta in list(actions[method].items()):
                 if not isinstance(meta, dict):
                     continue
+
+                if field == "pod_spec_override":
+                    meta['default'] = PodManager().pod_definition
 
                 # Add type choices if available from the serializer.
                 if field == 'type' and hasattr(serializer, 'get_type_choices'):

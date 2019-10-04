@@ -116,7 +116,7 @@ SUMMARIZABLE_FK_FIELDS = {
     'project': DEFAULT_SUMMARY_FIELDS + ('status', 'scm_type'),
     'source_project': DEFAULT_SUMMARY_FIELDS + ('status', 'scm_type'),
     'project_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed',),
-    'credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'credential_type_id'),
+    'credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'kubernetes', 'credential_type_id'),
     'job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'elapsed', 'type'),
     'job_template': DEFAULT_SUMMARY_FIELDS,
     'workflow_job_template': DEFAULT_SUMMARY_FIELDS,
@@ -135,7 +135,7 @@ SUMMARIZABLE_FK_FIELDS = {
     'source_script': ('name', 'description'),
     'role': ('id', 'role_field'),
     'notification_template': DEFAULT_SUMMARY_FIELDS,
-    'instance_group': {'id', 'name', 'controller_id'},
+    'instance_group': ('id', 'name', 'controller_id', 'is_containerized'),
     'insights_credential': DEFAULT_SUMMARY_FIELDS,
     'source_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'credential_type_id'),
     'target_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'credential_type_id'),
@@ -2515,7 +2515,7 @@ class CredentialSerializer(BaseSerializer):
 
     class Meta:
         model = Credential
-        fields = ('*', 'organization', 'credential_type', 'inputs', 'kind', 'cloud')
+        fields = ('*', 'organization', 'credential_type', 'inputs', 'kind', 'cloud', 'kubernetes')
         extra_kwargs = {
             'credential_type': {
                 'label': _('Credential Type'),
@@ -4730,6 +4730,11 @@ class InstanceGroupSerializer(BaseSerializer):
                     'Isolated groups have a designated controller group.'),
         read_only=True
     )
+    is_containerized = serializers.BooleanField(
+        help_text=_('Indicates whether instances in this group are containerized.'
+                    'Containerized groups have a designated Openshift or Kubernetes cluster.'),
+        read_only=True
+    )
     # NOTE: help_text is duplicated from field definitions, no obvious way of
     # both defining field details here and also getting the field's help_text
     policy_instance_percentage = serializers.IntegerField(
@@ -4755,8 +4760,9 @@ class InstanceGroupSerializer(BaseSerializer):
         fields = ("id", "type", "url", "related", "name", "created", "modified",
                   "capacity", "committed_capacity", "consumed_capacity",
                   "percent_capacity_remaining", "jobs_running", "jobs_total",
-                  "instances", "controller", "is_controller", "is_isolated",
-                  "policy_instance_percentage", "policy_instance_minimum", "policy_instance_list")
+                  "instances", "controller", "is_controller", "is_isolated", "is_containerized", "credential",
+                  "policy_instance_percentage", "policy_instance_minimum", "policy_instance_list",
+                  "pod_spec_override", "summary_fields")
 
     def get_related(self, obj):
         res = super(InstanceGroupSerializer, self).get_related(obj)
@@ -4764,6 +4770,9 @@ class InstanceGroupSerializer(BaseSerializer):
         res['instances'] = self.reverse('api:instance_group_instance_list', kwargs={'pk': obj.pk})
         if obj.controller_id:
             res['controller'] = self.reverse('api:instance_group_detail', kwargs={'pk': obj.controller_id})
+        if obj.credential:
+            res['credential'] = self.reverse('api:credential_detail', kwargs={'pk': obj.credential_id})
+
         return res
 
     def validate_policy_instance_list(self, value):
@@ -4781,6 +4790,11 @@ class InstanceGroupSerializer(BaseSerializer):
     def validate_name(self, value):
         if self.instance and self.instance.name == 'tower' and value != 'tower':
             raise serializers.ValidationError(_('tower instance group name may not be changed.'))
+        return value
+
+    def validate_credential(self, value):
+        if value and not value.kubernetes:
+            raise serializers.ValidationError(_('Only Kubernetes credentials can be associated with an Instance Group'))
         return value
 
     def get_capacity_dict(self):

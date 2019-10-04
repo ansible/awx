@@ -135,6 +135,10 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
     def cloud(self):
         return self.credential_type.kind == 'cloud'
 
+    @property
+    def kubernetes(self):
+        return self.credential_type.kind == 'kubernetes'
+
     def get_absolute_url(self, request=None):
         return reverse('api:credential_detail', kwargs={'pk': self.pk}, request=request)
 
@@ -325,6 +329,7 @@ class CredentialType(CommonModelNameNotUnique):
         ('token', _('Personal Access Token')),
         ('insights', _('Insights')),
         ('external', _('External')),
+        ('kubernetes', _('Kubernetes')),
     )
 
     kind = models.CharField(
@@ -1115,6 +1120,38 @@ ManagedCredentialType(
             'TOWER_VERIFY_SSL': '{{verify_ssl}}'
         }
     },
+)
+
+
+ManagedCredentialType(
+    namespace='kubernetes_bearer_token',
+    kind='kubernetes',
+    name=ugettext_noop('OpenShift or Kubernetes API Bearer Token'),
+    inputs={
+        'fields': [{
+            'id': 'host',
+            'label': ugettext_noop('OpenShift or Kubernetes API Endpoint'),
+            'type': 'string',
+            'help_text': ugettext_noop('The OpenShift or Kubernetes API Endpoint to authenticate with.')
+        },{
+            'id': 'bearer_token',
+            'label': ugettext_noop('API authentication bearer token.'),
+            'type': 'string',
+            'secret': True,
+        },{
+            'id': 'verify_ssl',
+            'label': ugettext_noop('Verify SSL'),
+            'type': 'boolean',
+            'default': True,
+        },{
+            'id': 'ssl_ca_cert',
+            'label': ugettext_noop('Certificate Authority data'),
+            'type': 'string',
+            'secret': True,
+            'multiline': True,
+        }],
+        'required': ['host', 'bearer_token'],
+    }
 )
 
 

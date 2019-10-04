@@ -1,13 +1,16 @@
-function InstanceGroupsStrings (BaseString) {
+function InstanceGroupsStrings(BaseString) {
     BaseString.call(this, 'instanceGroups');
 
-    const { t } = this;
+    const {
+        t
+    } = this;
     const ns = this.instanceGroups;
 
     ns.state = {
         INSTANCE_GROUPS_BREADCRUMB_LABEL: t.s('INSTANCE GROUPS'),
         INSTANCES_BREADCRUMB_LABEL: t.s('INSTANCES'),
-        ADD_BREADCRUMB_LABEL: t.s('CREATE INSTANCE GROUP')
+        ADD_BREADCRUMB_LABEL: t.s('CREATE INSTANCE GROUP'),
+        ADD_CONTAINER_GROUP_BREADCRUMB_LABEL: t.s('CREATE CONTAINER GROUP')
     };
 
     ns.list = {
@@ -33,7 +36,8 @@ function InstanceGroupsStrings (BaseString) {
     };
 
     ns.instance = {
-        PANEL_TITLE: t.s('SELECT INSTANCE')
+        PANEL_TITLE: t.s('SELECT INSTANCE'),
+        BADGE_TEXT: t.s('Instance Group')
     };
 
     ns.capacityBar = {
@@ -61,6 +65,15 @@ function InstanceGroupsStrings (BaseString) {
 
     ns.alert = {
         MISSING_PARAMETER: t.s('Instance Group parameter is missing.'),
+    };
+    ns.container = {
+        PANEL_TITLE: t.s('Add Container Group'),
+        LOOK_UP_TITLE: t.s('Add Credential'),
+        CREDENTIAL_PLACEHOLDER: t.s('SELECT A CREDENTIAL'),
+        POD_SPEC_LABEL: t.s('Pod Spec Override'),
+        BADGE_TEXT: t.s('Container Group'),
+        POD_SPEC_TOGGLE: t.s('Customize Pod Spec')
+
     };
 }
 
