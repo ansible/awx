@@ -7,25 +7,15 @@ import {
   DataListItemRow,
   DataListItemCells,
   Tooltip,
-  Button as PFButton,
 } from '@patternfly/react-core';
 import { RocketIcon } from '@patternfly/react-icons';
-import styled from 'styled-components';
 import DataListCell from '@components/DataListCell';
 import DataListCheck from '@components/DataListCheck';
 import LaunchButton from '@components/LaunchButton';
+import ListActionButton from '@components/ListActionButton';
 import VerticalSeparator from '@components/VerticalSeparator';
 import { toTitleCase } from '@util/strings';
 import { JOB_TYPE_URL_SEGMENTS } from '../../../constants';
-
-const StyledButton = styled(PFButton)`
-  padding: 5px 8px;
-  border: none;
-  &:hover {
-    background-color: #0066cc;
-    color: white;
-  }
-`;
 
 class JobListItem extends Component {
   render() {
@@ -60,15 +50,15 @@ class JobListItem extends Component {
               <DataListCell lastcolumn="true" key="relaunch">
                 {job.type !== 'system_job' &&
                   job.summary_fields.user_capabilities.start && (
-                    <Tooltip content={i18n._(t`Relaunch`)} position="top">
+                    <Tooltip content={i18n._(t`Relaunch Job`)} position="top">
                       <LaunchButton resource={job}>
                         {({ handleRelaunch }) => (
-                          <StyledButton
+                          <ListActionButton
                             variant="plain"
                             onClick={handleRelaunch}
                           >
                             <RocketIcon />
-                          </StyledButton>
+                          </ListActionButton>
                         )}
                       </LaunchButton>
                     </Tooltip>

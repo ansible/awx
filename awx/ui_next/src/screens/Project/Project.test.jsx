@@ -1,11 +1,12 @@
 import React from 'react';
 
-import { OrganizationsAPI } from '@api';
+import { OrganizationsAPI, ProjectsAPI } from '@api';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
 
 import mockOrganization from '@util/data.organization.json';
+import mockDetails from './data.project.json';
 
-import Organization from './Organization';
+import Project from './Project';
 
 jest.mock('@api');
 
@@ -14,52 +15,42 @@ const mockMe = {
   is_system_auditor: false,
 };
 
-async function getOrganizations(params) {
-  let results = [];
-  if (params && params.role_level) {
-    if (params.role_level === 'admin_role') {
-      results = [mockOrganization];
-    }
-    if (params.role_level === 'auditor_role') {
-      results = [mockOrganization];
-    }
-    if (params.role_level === 'notification_admin_role') {
-      results = [mockOrganization];
-    }
-  }
+async function getOrganizations() {
   return {
-    count: results.length,
+    count: 1,
     next: null,
     previous: null,
-    data: { results },
+    data: {
+      results: [mockOrganization],
+    },
   };
 }
 
-describe.only('<Organization />', () => {
+describe.only('<Project />', () => {
   test('initially renders succesfully', () => {
-    OrganizationsAPI.readDetail.mockResolvedValue({ data: mockOrganization });
+    ProjectsAPI.readDetail.mockResolvedValue({ data: mockDetails });
     OrganizationsAPI.read.mockImplementation(getOrganizations);
-    mountWithContexts(<Organization setBreadcrumb={() => {}} me={mockMe} />);
+    mountWithContexts(<Project setBreadcrumb={() => {}} me={mockMe} />);
   });
 
   test('notifications tab shown for admins', async done => {
-    OrganizationsAPI.readDetail.mockResolvedValue({ data: mockOrganization });
+    ProjectsAPI.readDetail.mockResolvedValue({ data: mockDetails });
     OrganizationsAPI.read.mockImplementation(getOrganizations);
 
     const wrapper = mountWithContexts(
-      <Organization setBreadcrumb={() => {}} me={mockMe} />
+      <Project setBreadcrumb={() => {}} me={mockMe} />
     );
     const tabs = await waitForElement(
       wrapper,
       '.pf-c-tabs__item',
-      el => el.length === 4
+      el => el.length === 5
     );
-    expect(tabs.last().text()).toEqual('Notifications');
+    expect(tabs.at(2).text()).toEqual('Notifications');
     done();
   });
 
   test('notifications tab hidden with reduced permissions', async done => {
-    OrganizationsAPI.readDetail.mockResolvedValue({ data: mockOrganization });
+    ProjectsAPI.readDetail.mockResolvedValue({ data: mockDetails });
     OrganizationsAPI.read.mockResolvedValue({
       count: 0,
       next: null,
@@ -68,12 +59,12 @@ describe.only('<Organization />', () => {
     });
 
     const wrapper = mountWithContexts(
-      <Organization setBreadcrumb={() => {}} me={mockMe} />
+      <Project setBreadcrumb={() => {}} me={mockMe} />
     );
     const tabs = await waitForElement(
       wrapper,
       '.pf-c-tabs__item',
-      el => el.length === 3
+      el => el.length === 4
     );
     tabs.forEach(tab => expect(tab.text()).not.toEqual('Notifications'));
     done();

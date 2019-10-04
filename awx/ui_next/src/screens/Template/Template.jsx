@@ -89,15 +89,14 @@ class Template extends Component {
     const canSeeNotificationsTab = me.is_system_auditor || isNotifAdmin;
 
     const tabsArray = [
-      { name: i18n._(t`Details`), link: `${match.url}/details`, id: 0 },
-      { name: i18n._(t`Access`), link: '/home', id: 1 },
+      { name: i18n._(t`Details`), link: `${match.url}/details` },
+      { name: i18n._(t`Access`), link: '/home' },
     ];
 
     if (canSeeNotificationsTab) {
       tabsArray.push({
         name: i18n._(t`Notifications`),
         link: `${match.url}/notifications`,
-        id: 2,
       });
     }
 
@@ -105,19 +104,20 @@ class Template extends Component {
       {
         name: i18n._(t`Schedules`),
         link: '/home',
-        id: canSeeNotificationsTab ? 3 : 2,
       },
       {
         name: i18n._(t`Completed Jobs`),
         link: '/home',
-        id: canSeeNotificationsTab ? 4 : 3,
       },
       {
         name: i18n._(t`Survey`),
         link: '/home',
-        id: canSeeNotificationsTab ? 5 : 4,
       }
     );
+
+    tabsArray.forEach((tab, n) => {
+      tab.id = n;
+    });
 
     let cardHeader = hasContentLoading ? null : (
       <CardHeader style={{ padding: 0 }}>

@@ -27,7 +27,7 @@ import TemplateListItem from './TemplateListItem';
 // workflow_job_template so the params sent to the API match what the api expects.
 const QS_CONFIG = getQSConfig('template', {
   page: 1,
-  page_size: 5,
+  page_size: 20,
   order_by: 'name',
   type: 'job_template,workflow_job_template',
 });

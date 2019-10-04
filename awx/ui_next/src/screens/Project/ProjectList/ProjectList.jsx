@@ -4,7 +4,7 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
 
-import { OrganizationsAPI } from '@api';
+import { ProjectsAPI } from '@api';
 import AlertModal from '@components/AlertModal';
 import DataListToolbar from '@components/DataListToolbar';
 import ErrorDetail from '@components/ErrorDetail';
@@ -14,15 +14,15 @@ import PaginatedDataList, {
 } from '@components/PaginatedDataList';
 import { getQSConfig, parseQueryString } from '@util/qs';
 
-import OrganizationListItem from './OrganizationListItem';
+import ProjectListItem from './ProjectListItem';
 
-const QS_CONFIG = getQSConfig('organization', {
+const QS_CONFIG = getQSConfig('project', {
   page: 1,
   page_size: 20,
   order_by: 'name',
 });
 
-class OrganizationsList extends Component {
+class ProjectsList extends Component {
   constructor(props) {
     super(props);
 
@@ -30,7 +30,7 @@ class OrganizationsList extends Component {
       hasContentLoading: true,
       contentError: null,
       deletionError: null,
-      organizations: [],
+      projects: [],
       selected: [],
       itemCount: 0,
       actions: null,
@@ -38,26 +38,26 @@ class OrganizationsList extends Component {
 
     this.handleSelectAll = this.handleSelectAll.bind(this);
     this.handleSelect = this.handleSelect.bind(this);
-    this.handleOrgDelete = this.handleOrgDelete.bind(this);
+    this.handleProjectDelete = this.handleProjectDelete.bind(this);
     this.handleDeleteErrorClose = this.handleDeleteErrorClose.bind(this);
-    this.loadOrganizations = this.loadOrganizations.bind(this);
+    this.loadProjects = this.loadProjects.bind(this);
   }
 
   componentDidMount() {
-    this.loadOrganizations();
+    this.loadProjects();
   }
 
   componentDidUpdate(prevProps) {
     const { location } = this.props;
     if (location !== prevProps.location) {
-      this.loadOrganizations();
+      this.loadProjects();
     }
   }
 
   handleSelectAll(isSelected) {
-    const { organizations } = this.state;
+    const { projects } = this.state;
 
-    const selected = isSelected ? [...organizations] : [];
+    const selected = isSelected ? [...projects] : [];
     this.setState({ selected });
   }
 
@@ -75,20 +75,22 @@ class OrganizationsList extends Component {
     this.setState({ deletionError: null });
   }
 
-  async handleOrgDelete() {
+  async handleProjectDelete() {
     const { selected } = this.state;
 
     this.setState({ hasContentLoading: true });
     try {
-      await Promise.all(selected.map(org => OrganizationsAPI.destroy(org.id)));
+      await Promise.all(
+        selected.map(project => ProjectsAPI.destroy(project.id))
+      );
     } catch (err) {
       this.setState({ deletionError: err });
     } finally {
-      await this.loadOrganizations();
+      await this.loadProjects();
     }
   }
 
-  async loadOrganizations() {
+  async loadProjects() {
     const { location } = this.props;
     const { actions: cachedActions } = this.state;
     const params = parseQueryString(QS_CONFIG, location.search);
@@ -97,13 +99,10 @@ class OrganizationsList extends Component {
     if (cachedActions) {
       optionsPromise = Promise.resolve({ data: { actions: cachedActions } });
     } else {
-      optionsPromise = OrganizationsAPI.readOptions();
+      optionsPromise = ProjectsAPI.readOptions();
     }
 
-    const promises = Promise.all([
-      OrganizationsAPI.read(params),
-      optionsPromise,
-    ]);
+    const promises = Promise.all([ProjectsAPI.read(params), optionsPromise]);
 
     this.setState({ contentError: null, hasContentLoading: true });
     try {
@@ -118,7 +117,7 @@ class OrganizationsList extends Component {
       this.setState({
         actions,
         itemCount: count,
-        organizations: results,
+        projects: results,
         selected: [],
       });
     } catch (err) {
@@ -136,13 +135,13 @@ class OrganizationsList extends Component {
       hasContentLoading,
       deletionError,
       selected,
-      organizations,
+      projects,
     } = this.state;
     const { match, i18n } = this.props;
 
     const canAdd =
       actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
-    const isAllSelected = selected.length === organizations.length;
+    const isAllSelected = selected.length === projects.length;
 
     return (
       <Fragment>
@@ -151,9 +150,9 @@ class OrganizationsList extends Component {
             <PaginatedDataList
               contentError={contentError}
               hasContentLoading={hasContentLoading}
-              items={organizations}
+              items={projects}
               itemCount={itemCount}
-              pluralizedItemName="Organizations"
+              pluralizedItemName={i18n._(t`Projects`)}
               qsConfig={QS_CONFIG}
               toolbarColumns={[
                 {
@@ -185,9 +184,9 @@ class OrganizationsList extends Component {
                   additionalControls={[
                     <ToolbarDeleteButton
                       key="delete"
-                      onDelete={this.handleOrgDelete}
+                      onDelete={this.handleProjectDelete}
                       itemsToDelete={selected}
-                      pluralizedItemName="Organizations"
+                      pluralizedItemName={i18n._(t`Projects`)}
                     />,
                     canAdd ? (
                       <ToolbarAddButton key="add" linkTo={`${match.url}/add`} />
@@ -196,9 +195,9 @@ class OrganizationsList extends Component {
                 />
               )}
               renderItem={o => (
-                <OrganizationListItem
+                <ProjectListItem
                   key={o.id}
-                  organization={o}
+                  project={o}
                   detailUrl={`${match.url}/${o.id}`}
                   isSelected={selected.some(row => row.id === o.id)}
                   onSelect={() => this.handleSelect(o)}
@@ -218,7 +217,7 @@ class OrganizationsList extends Component {
           title={i18n._(t`Error!`)}
           onClose={this.handleDeleteErrorClose}
         >
-          {i18n._(t`Failed to delete one or more organizations.`)}
+          {i18n._(t`Failed to delete one or more projects.`)}
           <ErrorDetail error={deletionError} />
         </AlertModal>
       </Fragment>
@@ -226,5 +225,5 @@ class OrganizationsList extends Component {
   }
 }
 
-export { OrganizationsList as _OrganizationsList };
-export default withI18n()(withRouter(OrganizationsList));
+export { ProjectsList as _ProjectsList };
+export default withI18n()(withRouter(ProjectsList));
