@@ -1,7 +1,8 @@
 import Base from '../Base';
+import NotificationsMixin from '../mixins/Notifications.mixin';
 import InstanceGroupsMixin from '../mixins/InstanceGroups.mixin';
 
-class JobTemplates extends InstanceGroupsMixin(Base) {
+class JobTemplates extends InstanceGroupsMixin(NotificationsMixin(Base)) {
   constructor(http) {
     super(http);
     this.baseUrl = '/api/v2/job_templates/';

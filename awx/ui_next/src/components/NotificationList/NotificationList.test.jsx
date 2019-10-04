@@ -1,13 +1,15 @@
 import React from 'react';
-import { OrganizationsAPI } from '@api';
+
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import { sleep } from '@testUtils/testUtils';
 
-import OrganizationNotifications from './OrganizationNotifications';
+import { NotificationTemplatesAPI } from '@api';
+
+import NotificationList from './NotificationList';
 
 jest.mock('@api');
 
-describe('<OrganizationNotifications />', () => {
+describe('<NotificationList />', () => {
   const data = {
     count: 2,
     results: [
@@ -32,7 +34,19 @@ describe('<OrganizationNotifications />', () => {
     ],
   };
 
-  OrganizationsAPI.readOptionsNotificationTemplates.mockReturnValue({
+  const MockModel = jest.fn().mockImplementation(() => {
+    return {
+      readNotificationTemplatesSuccess: jest.fn(),
+      readNotificationTemplatesError: jest.fn(),
+      readNotificationTemplatesStarted: jest.fn(),
+      associateNotificationTemplate: jest.fn(),
+      disassociateNotificationTemplate: jest.fn(),
+    };
+  });
+
+  const MockModelAPI = new MockModel();
+
+  NotificationTemplatesAPI.readOptions.mockReturnValue({
     data: {
       actions: {
         GET: {
@@ -45,14 +59,14 @@ describe('<OrganizationNotifications />', () => {
   });
 
   beforeEach(() => {
-    OrganizationsAPI.readNotificationTemplates.mockReturnValue({ data });
-    OrganizationsAPI.readNotificationTemplatesSuccess.mockReturnValue({
+    NotificationTemplatesAPI.read.mockReturnValue({ data });
+    MockModelAPI.readNotificationTemplatesSuccess.mockReturnValue({
       data: { results: [{ id: 1 }] },
     });
-    OrganizationsAPI.readNotificationTemplatesError.mockReturnValue({
+    MockModelAPI.readNotificationTemplatesError.mockReturnValue({
       data: { results: [{ id: 2 }] },
     });
-    OrganizationsAPI.readNotificationTemplatesStarted.mockReturnValue({
+    MockModelAPI.readNotificationTemplatesStarted.mockReturnValue({
       data: { results: [{ id: 3 }] },
     });
   });
@@ -63,7 +77,7 @@ describe('<OrganizationNotifications />', () => {
 
   test('initially renders succesfully', async () => {
     const wrapper = mountWithContexts(
-      <OrganizationNotifications id={1} canToggleNotifications />
+      <NotificationList id={1} canToggleNotifications apiModel={MockModelAPI} />
     );
     await sleep(0);
     wrapper.update();
@@ -72,15 +86,15 @@ describe('<OrganizationNotifications />', () => {
 
   test('should render list fetched of items', async () => {
     const wrapper = mountWithContexts(
-      <OrganizationNotifications id={1} canToggleNotifications />
+      <NotificationList id={1} canToggleNotifications apiModel={MockModelAPI} />
     );
     await sleep(0);
     wrapper.update();
 
-    expect(OrganizationsAPI.readNotificationTemplates).toHaveBeenCalled();
-    expect(
-      wrapper.find('OrganizationNotifications').state('notifications')
-    ).toEqual(data.results);
+    expect(NotificationTemplatesAPI.read).toHaveBeenCalled();
+    expect(wrapper.find('NotificationList').state('notifications')).toEqual(
+      data.results
+    );
     const items = wrapper.find('NotificationListItem');
     expect(items).toHaveLength(3);
     expect(items.at(0).prop('successTurnedOn')).toEqual(true);
@@ -96,13 +110,13 @@ describe('<OrganizationNotifications />', () => {
 
   test('should enable success notification', async () => {
     const wrapper = mountWithContexts(
-      <OrganizationNotifications id={1} canToggleNotifications />
+      <NotificationList id={1} canToggleNotifications apiModel={MockModelAPI} />
     );
     await sleep(0);
     wrapper.update();
 
     expect(
-      wrapper.find('OrganizationNotifications').state('successTemplateIds')
+      wrapper.find('NotificationList').state('successTemplateIds')
     ).toEqual([1]);
     const items = wrapper.find('NotificationListItem');
     items
@@ -110,7 +124,7 @@ describe('<OrganizationNotifications />', () => {
       .find('Switch')
       .at(1)
       .prop('onChange')();
-    expect(OrganizationsAPI.associateNotificationTemplate).toHaveBeenCalledWith(
+    expect(MockModelAPI.associateNotificationTemplate).toHaveBeenCalledWith(
       1,
       2,
       'success'
@@ -118,47 +132,48 @@ describe('<OrganizationNotifications />', () => {
     await sleep(0);
     wrapper.update();
     expect(
-      wrapper.find('OrganizationNotifications').state('successTemplateIds')
+      wrapper.find('NotificationList').state('successTemplateIds')
     ).toEqual([1, 2]);
   });
 
   test('should enable error notification', async () => {
     const wrapper = mountWithContexts(
-      <OrganizationNotifications id={1} canToggleNotifications />
+      <NotificationList id={1} canToggleNotifications apiModel={MockModelAPI} />
     );
     await sleep(0);
     wrapper.update();
 
-    expect(
-      wrapper.find('OrganizationNotifications').state('errorTemplateIds')
-    ).toEqual([2]);
+    expect(wrapper.find('NotificationList').state('errorTemplateIds')).toEqual([
+      2,
+    ]);
     const items = wrapper.find('NotificationListItem');
     items
       .at(0)
       .find('Switch')
       .at(2)
       .prop('onChange')();
-    expect(OrganizationsAPI.associateNotificationTemplate).toHaveBeenCalledWith(
+    expect(MockModelAPI.associateNotificationTemplate).toHaveBeenCalledWith(
       1,
       1,
       'error'
     );
     await sleep(0);
     wrapper.update();
-    expect(
-      wrapper.find('OrganizationNotifications').state('errorTemplateIds')
-    ).toEqual([2, 1]);
+    expect(wrapper.find('NotificationList').state('errorTemplateIds')).toEqual([
+      2,
+      1,
+    ]);
   });
 
   test('should enable start notification', async () => {
     const wrapper = mountWithContexts(
-      <OrganizationNotifications id={1} canToggleNotifications />
+      <NotificationList id={1} canToggleNotifications apiModel={MockModelAPI} />
     );
     await sleep(0);
     wrapper.update();
 
     expect(
-      wrapper.find('OrganizationNotifications').state('startedTemplateIds')
+      wrapper.find('NotificationList').state('startedTemplateIds')
     ).toEqual([3]);
     const items = wrapper.find('NotificationListItem');
     items
@@ -166,7 +181,7 @@ describe('<OrganizationNotifications />', () => {
       .find('Switch')
       .at(0)
       .prop('onChange')();
-    expect(OrganizationsAPI.associateNotificationTemplate).toHaveBeenCalledWith(
+    expect(MockModelAPI.associateNotificationTemplate).toHaveBeenCalledWith(
       1,
       1,
       'started'
@@ -174,19 +189,19 @@ describe('<OrganizationNotifications />', () => {
     await sleep(0);
     wrapper.update();
     expect(
-      wrapper.find('OrganizationNotifications').state('startedTemplateIds')
+      wrapper.find('NotificationList').state('startedTemplateIds')
     ).toEqual([3, 1]);
   });
 
   test('should disable success notification', async () => {
     const wrapper = mountWithContexts(
-      <OrganizationNotifications id={1} canToggleNotifications />
+      <NotificationList id={1} canToggleNotifications apiModel={MockModelAPI} />
     );
     await sleep(0);
     wrapper.update();
 
     expect(
-      wrapper.find('OrganizationNotifications').state('successTemplateIds')
+      wrapper.find('NotificationList').state('successTemplateIds')
     ).toEqual([1]);
     const items = wrapper.find('NotificationListItem');
     items
@@ -194,51 +209,55 @@ describe('<OrganizationNotifications />', () => {
       .find('Switch')
       .at(1)
       .prop('onChange')();
-    expect(
-      OrganizationsAPI.disassociateNotificationTemplate
-    ).toHaveBeenCalledWith(1, 1, 'success');
+    expect(MockModelAPI.disassociateNotificationTemplate).toHaveBeenCalledWith(
+      1,
+      1,
+      'success'
+    );
     await sleep(0);
     wrapper.update();
     expect(
-      wrapper.find('OrganizationNotifications').state('successTemplateIds')
+      wrapper.find('NotificationList').state('successTemplateIds')
     ).toEqual([]);
   });
 
   test('should disable error notification', async () => {
     const wrapper = mountWithContexts(
-      <OrganizationNotifications id={1} canToggleNotifications />
+      <NotificationList id={1} canToggleNotifications apiModel={MockModelAPI} />
     );
     await sleep(0);
     wrapper.update();
 
-    expect(
-      wrapper.find('OrganizationNotifications').state('errorTemplateIds')
-    ).toEqual([2]);
+    expect(wrapper.find('NotificationList').state('errorTemplateIds')).toEqual([
+      2,
+    ]);
     const items = wrapper.find('NotificationListItem');
     items
       .at(1)
       .find('Switch')
       .at(2)
       .prop('onChange')();
-    expect(
-      OrganizationsAPI.disassociateNotificationTemplate
-    ).toHaveBeenCalledWith(1, 2, 'error');
+    expect(MockModelAPI.disassociateNotificationTemplate).toHaveBeenCalledWith(
+      1,
+      2,
+      'error'
+    );
     await sleep(0);
     wrapper.update();
-    expect(
-      wrapper.find('OrganizationNotifications').state('errorTemplateIds')
-    ).toEqual([]);
+    expect(wrapper.find('NotificationList').state('errorTemplateIds')).toEqual(
+      []
+    );
   });
 
   test('should disable start notification', async () => {
     const wrapper = mountWithContexts(
-      <OrganizationNotifications id={1} canToggleNotifications />
+      <NotificationList id={1} canToggleNotifications apiModel={MockModelAPI} />
     );
     await sleep(0);
     wrapper.update();
 
     expect(
-      wrapper.find('OrganizationNotifications').state('startedTemplateIds')
+      wrapper.find('NotificationList').state('startedTemplateIds')
     ).toEqual([3]);
     const items = wrapper.find('NotificationListItem');
     items
@@ -246,13 +265,15 @@ describe('<OrganizationNotifications />', () => {
       .find('Switch')
       .at(0)
       .prop('onChange')();
-    expect(
-      OrganizationsAPI.disassociateNotificationTemplate
-    ).toHaveBeenCalledWith(1, 3, 'started');
+    expect(MockModelAPI.disassociateNotificationTemplate).toHaveBeenCalledWith(
+      1,
+      3,
+      'started'
+    );
     await sleep(0);
     wrapper.update();
     expect(
-      wrapper.find('OrganizationNotifications').state('startedTemplateIds')
+      wrapper.find('NotificationList').state('startedTemplateIds')
     ).toEqual([]);
   });
 });

@@ -11,10 +11,10 @@ import styled from 'styled-components';
 import CardCloseButton from '@components/CardCloseButton';
 import RoutedTabs from '@components/RoutedTabs';
 import ContentError from '@components/ContentError';
+import NotificationList from '@components/NotificationList/NotificationList';
 import { OrganizationAccess } from './OrganizationAccess';
 import OrganizationDetail from './OrganizationDetail';
 import OrganizationEdit from './OrganizationEdit';
-import OrganizationNotifications from './OrganizationNotifications';
 import OrganizationTeams from './OrganizationTeams';
 import { OrganizationsAPI } from '@api';
 
@@ -228,9 +228,10 @@ class Organization extends Component {
               <Route
                 path="/organizations/:id/notifications"
                 render={() => (
-                  <OrganizationNotifications
+                  <NotificationList
                     id={Number(match.params.id)}
                     canToggleNotifications={canToggleNotifications}
+                    apiModel={OrganizationsAPI}
                   />
                 )}
               />
