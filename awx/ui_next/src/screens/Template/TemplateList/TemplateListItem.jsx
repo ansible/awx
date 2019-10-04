@@ -18,6 +18,8 @@ import VerticalSeparator from '@components/VerticalSeparator';
 import { Sparkline } from '@components/Sparkline';
 import { toTitleCase } from '@util/strings';
 
+import styled from 'styled-components';
+
 const DataListItemCells = styled(PFDataListItemCells)`
   display: flex;
   @media screen and (max-width: 768px) {
