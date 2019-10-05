@@ -26,9 +26,6 @@ class PodManager(object):
                                             namespace=self.namespace,
                                             _request_timeout=settings.AWX_CONTAINER_GROUP_DEFAULT_LAUNCH_TIMEOUT)
 
-        # We don't do any fancy timeout logic here because it is handled
-        # at a higher level in the job spawning process. See
-        # settings.AWX_ISOLATED_LAUNCH_TIMEOUT and settings.AWX_ISOLATED_CONNECTION_TIMEOUT
         while True:
             pod = self.kube_api.read_namespaced_pod(name=self.pod_name,
                                                     namespace=self.namespace,
