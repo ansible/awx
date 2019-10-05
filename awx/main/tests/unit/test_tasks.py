@@ -366,6 +366,7 @@ class TestGenericRun():
 
         task = tasks.RunJob()
         task.update_model = mock.Mock(return_value=job)
+        task.model.objects.get = mock.Mock(return_value=job)
         task.build_private_data_files = mock.Mock(side_effect=OSError())
 
         with mock.patch('awx.main.tasks.copy_tree'):
@@ -385,6 +386,7 @@ class TestGenericRun():
 
         task = tasks.RunJob()
         task.update_model = mock.Mock(wraps=update_model_wrapper)
+        task.model.objects.get = mock.Mock(return_value=job)
         task.build_private_data_files = mock.Mock()
 
         with mock.patch('awx.main.tasks.copy_tree'):
@@ -546,6 +548,7 @@ class TestAdhocRun(TestJobExecution):
 
         task = tasks.RunAdHocCommand()
         task.update_model = mock.Mock(wraps=adhoc_update_model_wrapper)
+        task.model.objects.get = mock.Mock(return_value=adhoc_job)
         task.build_inventory = mock.Mock()
 
         with pytest.raises(Exception):
