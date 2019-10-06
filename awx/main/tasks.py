@@ -1405,13 +1405,15 @@ class BaseTask(object):
             if isinstance(exc, ApiException) and exc.status == 403:
                 try:
                     if 'exceeded quota' in json.loads(exc.body)['message']:
-                        # If the k8s cluster does not have capacity, we move the job back into
-                        # pending and immediately reschedule the task manager.
+                        # If the k8s cluster does not have capacity, we move the
+                        # job back into pending and wait until the next run of
+                        # the task manager. This does not exactly play well with
+                        # our current instance group precendence logic, since it
+                        # will just sit here forever if kubernetes returns this
+                        # error.
                         logger.warn(exc.body)
                         logger.warn(f"Could not launch pod for {log_name}. Exceeded quota.")
-                        time.sleep(10)
                         self.update_model(task.pk, status='pending')
-                        schedule_task_manager()
                         return
                 except Exception:
                     logger.exception(f"Unable to handle response from Kubernetes API for {log_name}.")
@@ -1420,7 +1422,6 @@ class BaseTask(object):
             self.update_model(task.pk, status='error', result_traceback=exc.body)
             return
 
-        logger.debug(f"Pod online. Starting {log_name}.")
         self.update_model(task.pk, execution_node=pod_manager.pod_name)
         return pod_manager
 
@@ -1833,7 +1834,10 @@ class RunJob(BaseTask):
 
         if job.is_containerized:
             from awx.main.scheduler.kubernetes import PodManager # prevent circular import
-            PodManager(job).delete()
+            pm = PodManager(job)
+            logger.debug(f"Deleting pod {pm.pod_name}")
+            pm.delete()
+
 
         try:
             inventory = job.inventory
