@@ -25,10 +25,10 @@ class IrcBackend(AWXBaseEmailBackend):
     recipient_parameter = "targets"
     sender_parameter = None
 
-    DEFAULT_SUBJECT = "{{ job_friendly_name }} #{{ job.id }} '{{ job.name }}' {{ job.status }}: {{ url }}"
-    default_messages = {"started": {"message": DEFAULT_SUBJECT},
-                        "success": {"message": DEFAULT_SUBJECT},
-                        "error": {"message": DEFAULT_SUBJECT}}
+    DEFAULT_MSG = "{{ job_friendly_name }} #{{ job.id }} '{{ job.name }}' {{ job.status }}: {{ url }}"
+    default_messages = {"started": {"message": DEFAULT_MSG},
+                        "success": {"message": DEFAULT_MSG},
+                        "error": {"message": DEFAULT_MSG}}
 
     def __init__(self, server, port, nickname, password, use_ssl, fail_silently=False, **kwargs):
         super(IrcBackend, self).__init__(fail_silently=fail_silently)

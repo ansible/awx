@@ -21,10 +21,10 @@ class GrafanaBackend(AWXBaseEmailBackend):
     recipient_parameter = "grafana_url"
     sender_parameter = None
 
-    DEFAULT_SUBJECT = "{{ job_friendly_name }} #{{ job.id }} '{{ job.name }}' {{ job.status }}: {{ url }}"
-    default_messages = {"started": {"message": DEFAULT_SUBJECT},
-                        "success": {"message": DEFAULT_SUBJECT},
-                        "error": {"message": DEFAULT_SUBJECT}}
+    DEFAULT_MSG = "{{ job_friendly_name }} #{{ job.id }} '{{ job.name }}' {{ job.status }}: {{ url }}"
+    default_messages = {"started": {"message": DEFAULT_MSG},
+                        "success": {"message": DEFAULT_MSG},
+                        "error": {"message": DEFAULT_MSG}}
 
     def __init__(self, grafana_key,dashboardId=None, panelId=None, annotation_tags=None, grafana_no_verify_ssl=False, isRegion=True,
                  fail_silently=False, **kwargs):

@@ -144,5 +144,3 @@ class TestJobNotificationMixin(object):
 
         context_stub = JobNotificationMixin.context_stub()
         check_structure_and_completeness(TestJobNotificationMixin.CONTEXT_STRUCTURE, context_stub)
-
-

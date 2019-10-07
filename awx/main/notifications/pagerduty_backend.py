@@ -1,6 +1,7 @@
 # Copyright (c) 2016 Ansible, Inc.
 # All Rights Reserved.
 
+import json
 import logging
 import pygerduty
 
@@ -20,11 +21,11 @@ class PagerDutyBackend(AWXBaseEmailBackend):
     recipient_parameter = "service_key"
     sender_parameter = "client_name"
 
-    DEFAULT_SUBJECT = "{{ job_friendly_name }} #{{ job.id }} '{{ job.name }}' {{ job.status }}: {{ url }}"
+    DEFAULT_MSG = "{{ job_friendly_name }} #{{ job.id }} '{{ job.name }}' {{ job.status }}: {{ url }}"
     DEFAULT_BODY = "{{ job_summary_dict }}"
-    default_messages = {"started": { "message": DEFAULT_SUBJECT, "body": DEFAULT_BODY},
-                        "success": { "message": DEFAULT_SUBJECT, "body": DEFAULT_BODY},
-                        "error": { "message": DEFAULT_SUBJECT, "body": DEFAULT_BODY}}
+    default_messages = {"started": { "message": DEFAULT_MSG, "body": DEFAULT_BODY},
+                        "success": { "message": DEFAULT_MSG, "body": DEFAULT_BODY},
+                        "error": { "message": DEFAULT_MSG, "body": DEFAULT_BODY}}
 
     def __init__(self, subdomain, token, fail_silently=False, **kwargs):
         super(PagerDutyBackend, self).__init__(fail_silently=fail_silently)
@@ -32,6 +33,16 @@ class PagerDutyBackend(AWXBaseEmailBackend):
         self.token = token
 
     def format_body(self, body):
+        # cast to dict if possible  # TODO: is it true that this can be a dict or str?
+        try:
+            potential_body = json.loads(body)
+            if isinstance(potential_body, dict):
+                body = potential_body
+        except json.JSONDecodeError:
+            pass
+
+        # but it's okay if this is also just a string
+
         return body
 
     def send_messages(self, messages):
