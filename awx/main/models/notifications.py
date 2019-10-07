@@ -150,12 +150,12 @@ class NotificationTemplate(CommonModelNameNotUnique):
     def recipients(self):
         return self.notification_configuration[self.notification_class.recipient_parameter]
 
-    def generate_notification(self, subject, message):
+    def generate_notification(self, msg, body):
         notification = Notification(notification_template=self,
                                     notification_type=self.notification_type,
                                     recipients=smart_str(self.recipients),
-                                    subject=subject,
-                                    body=message)
+                                    subject=msg,
+                                    body=body)
         notification.save()
         return notification
 
@@ -415,32 +415,32 @@ class JobNotificationMixin(object):
         context = self.context(job_serialization)
 
         msg_template = body_template = None
+        msg = body = ''
 
+        # Use custom template if available
         if nt.messages:
             templates = nt.messages.get(self.STATUS_TO_TEMPLATE_TYPE[status], {}) or {}
-            msg_template = templates.get('message', {})
-            body_template = templates.get('body', {})
+            msg_template = templates.get('message', None)
+            body_template = templates.get('body', None)
+        # If custom template not provided, look up default template
+        if not msg_template:
+            msg_template = getattr(nt.notification_class, 'DEFAULT_MSG', None)
+        if not body_template:
+            body_template = getattr(nt.notification_class, 'DEFAULT_BODY', None)
 
         if msg_template:
             try:
-                notification_subject = env.from_string(msg_template).render(**context)
+                msg = env.from_string(msg_template).render(**context)
             except (TemplateSyntaxError, UndefinedError, SecurityError):
-                notification_subject = ''
-        else:
-            notification_subject = u"{} #{} '{}' {}: {}".format(self.get_notification_friendly_name(),
-                                                                self.id,
-                                                                self.name,
-                                                                status,
-                                                                self.get_ui_url())
-        notification_body = self.notification_data()
-        notification_body['friendly_name'] = self.get_notification_friendly_name()
+                msg = ''
+
         if body_template:
             try:
-                notification_body['body'] = env.from_string(body_template).render(**context)
+                body = env.from_string(body_template).render(**context)
             except (TemplateSyntaxError, UndefinedError, SecurityError):
-                notification_body['body'] = ''
+                body = ''
 
-        return (notification_subject, notification_body)
+        return (msg, body)
 
     def send_notification_templates(self, status):
         from awx.main.tasks import send_notifications  # avoid circular import
@@ -456,16 +456,13 @@ class JobNotificationMixin(object):
             return
 
         for nt in set(notification_templates.get(self.STATUS_TO_TEMPLATE_TYPE[status], [])):
-            try:
-                (notification_subject, notification_body) = self.build_notification_message(nt, status)
-            except AttributeError:
-                raise NotImplementedError("build_notification_message() does not exist" % status)
+            (msg, body) = self.build_notification_message(nt, status)
 
             # Use kwargs to force late-binding
             # https://stackoverflow.com/a/3431699/10669572
-            def send_it(local_nt=nt, local_subject=notification_subject, local_body=notification_body):
+            def send_it(local_nt=nt, local_msg=msg, local_body=body):
                 def _func():
-                    send_notifications.delay([local_nt.generate_notification(local_subject, local_body).id],
+                    send_notifications.delay([local_nt.generate_notification(local_msg, local_body).id],
                                              job_id=self.id)
                 return _func
             connection.on_commit(send_it())
