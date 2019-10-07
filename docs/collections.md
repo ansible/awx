@@ -5,14 +5,14 @@ AWX supports the use of Ansible Collections. This section will give ways to use 
 ### Project Collections Requirements
 
 If you specify a Collections requirements file in SCM at `collections/requirements.yml`,
-then AWX will install Collections in that file in the implicit project sync
-before a job run. The invocation is:
+then AWX will install Collections from that file in the implicit project sync
+before a job run. The invocation looks like:
 
 ```
-ansible-galaxy collection install -r requirements.yml -p <job tmp location>
+ansible-galaxy collection install -r requirements.yml -p <job tmp location>/requirements_collections
 ```
 
-Example of `tmp` directory where job is running:
+Example of the resultant `tmp` directory where job is running:
 
 ```
 ├── project
@@ -69,7 +69,7 @@ This is done via the setting `PRIMARY_GALAXY_URL` and similar
 
 If the `PRIMARY_GALAXY_URL` setting is not blank, then the server list is defined
 to be `primary_galaxy,galaxy`. The `primary_galaxy` server definition uses the URL
-from those settings, as well as username, password, and/or token if applicable.
+from those settings, as well as username, password, and/or token and auth_url if applicable.
 the `galaxy` server definition uses public Galaxy (`https://galaxy.ansible.com`)
 with no authentication.
 
