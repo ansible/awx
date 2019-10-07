@@ -13,7 +13,8 @@ import ErrorDetail from '@components/ErrorDetail';
 import LaunchButton from '@components/LaunchButton';
 import { StatusIcon } from '@components/Sparkline';
 import { toTitleCase } from '@util/strings';
-import { Job } from '../../../types';
+import { formatDateString } from '@util/dates';
+import { Job } from '@types';
 import {
   JobsAPI,
   ProjectUpdatesAPI,
@@ -140,8 +141,14 @@ function JobDetail({ job, i18n, history }) {
             </StatusDetailValue>
           }
         />
-        <Detail label={i18n._(t`Started`)} value={job.started} />
-        <Detail label={i18n._(t`Finished`)} value={job.finished} />
+        <Detail
+          label={i18n._(t`Started`)}
+          value={formatDateString(job.started)}
+        />
+        <Detail
+          label={i18n._(t`Finished`)}
+          value={formatDateString(job.finished)}
+        />
         {jobTemplate && (
           <Detail
             label={i18n._(t`Template`)}

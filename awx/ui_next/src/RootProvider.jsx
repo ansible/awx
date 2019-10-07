@@ -3,23 +3,16 @@ import { I18nProvider } from '@lingui/react';
 
 import { HashRouter } from 'react-router-dom';
 
+import { getLanguageWithoutRegionCode } from '@util/language';
 import ja from '../build/locales/ja/messages';
 import en from '../build/locales/en/messages';
-
-export function getLanguage(nav) {
-  const language =
-    (nav.languages && nav.languages[0]) || nav.language || nav.userLanguage;
-  const languageWithoutRegionCode = language.toLowerCase().split(/[_-]+/)[0];
-
-  return languageWithoutRegionCode;
-}
 
 class RootProvider extends Component {
   render() {
     const { children } = this.props;
 
     const catalogs = { en, ja };
-    const language = getLanguage(navigator);
+    const language = getLanguageWithoutRegionCode(navigator);
 
     return (
       <HashRouter>

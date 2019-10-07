@@ -15,6 +15,7 @@ import LaunchButton from '@components/LaunchButton';
 import ListActionButton from '@components/ListActionButton';
 import VerticalSeparator from '@components/VerticalSeparator';
 import { toTitleCase } from '@util/strings';
+import { formatDateString } from '@util/dates';
 import { JOB_TYPE_URL_SEGMENTS } from '../../../constants';
 
 class JobListItem extends Component {
@@ -46,7 +47,9 @@ class JobListItem extends Component {
                 </span>
               </DataListCell>,
               <DataListCell key="type">{toTitleCase(job.type)}</DataListCell>,
-              <DataListCell key="finished">{job.finished}</DataListCell>,
+              <DataListCell key="finished">
+                {formatDateString(job.finished)}
+              </DataListCell>,
               <DataListCell lastcolumn="true" key="relaunch">
                 {job.type !== 'system_job' &&
                   job.summary_fields.user_capabilities.start && (

@@ -13,8 +13,8 @@ describe('<OrganizationDetail />', () => {
     description: 'Bar',
     custom_virtualenv: 'Fizz',
     max_hosts: '0',
-    created: 'Bat',
-    modified: 'Boo',
+    created: '2015-07-07T17:21:26.429745Z',
+    modified: '2019-08-11T19:47:37.980466Z',
     summary_fields: {
       user_capabilities: {
         edit: true,
@@ -63,8 +63,8 @@ describe('<OrganizationDetail />', () => {
       { label: 'Name', value: 'Foo' },
       { label: 'Description', value: 'Bar' },
       { label: 'Ansible Environment', value: 'Fizz' },
-      { label: 'Created', value: 'Bat' },
-      { label: 'Last Modified', value: 'Boo' },
+      { label: 'Created', value: '7/7/2015, 5:21:26 PM' },
+      { label: 'Last Modified', value: '8/11/2019, 7:47:37 PM' },
       { label: 'Max Hosts', value: '0' },
     ];
     // eslint-disable-next-line no-restricted-syntax

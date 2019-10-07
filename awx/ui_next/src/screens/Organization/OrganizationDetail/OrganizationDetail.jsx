@@ -10,6 +10,7 @@ import { DetailList, Detail } from '@components/DetailList';
 import { ChipGroup, Chip } from '@components/Chip';
 import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
+import { formatDateString } from '@util/dates';
 
 const CardBody = styled(PFCardBody)`
   padding-top: 20px;
@@ -53,7 +54,6 @@ class OrganizationDetail extends Component {
 
   render() {
     const { hasContentLoading, contentError, instanceGroups } = this.state;
-
     const {
       organization: {
         name,
@@ -86,8 +86,14 @@ class OrganizationDetail extends Component {
             label={i18n._(t`Ansible Environment`)}
             value={custom_virtualenv}
           />
-          <Detail label={i18n._(t`Created`)} value={created} />
-          <Detail label={i18n._(t`Last Modified`)} value={modified} />
+          <Detail
+            label={i18n._(t`Created`)}
+            value={formatDateString(created)}
+          />
+          <Detail
+            label={i18n._(t`Last Modified`)}
+            value={formatDateString(modified)}
+          />
           {instanceGroups && instanceGroups.length > 0 && (
             <Detail
               fullWidth
