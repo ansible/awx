@@ -544,6 +544,12 @@ jshint: $(UI_DEPS_FLAG_FILE)
 	$(NPM_BIN) run --prefix awx/ui jshint
 	$(NPM_BIN) run --prefix awx/ui lint
 
+ui-zuul-lint-and-test: $(UI_DEPS_FLAG_FILE)
+	$(NPM_BIN) run --prefix awx/ui jshint
+	$(NPM_BIN) run --prefix awx/ui lint
+	$(NPM_BIN) --prefix awx/ui run test:ci
+	$(NPM_BIN) --prefix awx/ui run unit
+
 # END UI TASKS
 # --------------------------------------
 
@@ -557,6 +563,12 @@ ui-next-lint:
 
 ui-next-test:
 	$(NPM_BIN) --prefix awx/ui_next install
+	$(NPM_BIN) run --prefix awx/ui_next test
+
+ui-next-zuul-lint-and-test:
+	$(NPM_BIN) --prefix awx/ui_next install
+	$(NPM_BIN) run --prefix awx/ui_next lint
+	$(NPM_BIN) run --prefix awx/ui_next prettier-check
 	$(NPM_BIN) run --prefix awx/ui_next test
 
 # END UI NEXT TASKS
