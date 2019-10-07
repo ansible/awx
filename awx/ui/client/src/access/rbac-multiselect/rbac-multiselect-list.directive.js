@@ -106,7 +106,7 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
                         last_name: list.fields.last_name
                     };
                     delete list.fields.username.ngClick;
-                    list.fields.username.ngHref = "#/users/{{user.id}}";
+                    list.fields.username.ngHref = "#/users/{{" + list.iterator + ".id}}";
                     list.fields.username.columnClass = 'col-sm-4 col-xs-11';
                     list.fields.first_name.columnClass = 'd-none d-sm-flex col-sm-4';
                     list.fields.last_name.columnClass = 'd-none d-sm-flex col-sm-4';
