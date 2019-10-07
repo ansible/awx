@@ -21,10 +21,10 @@ class TwilioBackend(AWXBaseEmailBackend):
     recipient_parameter = "to_numbers"
     sender_parameter = "from_number"
 
-    DEFAULT_SUBJECT = "{{ job_friendly_name }} #{{ job.id }} '{{ job.name }}' {{ job.status }}: {{ url }}"
-    default_messages = {"started": {"message": DEFAULT_SUBJECT},
-                        "success": {"message": DEFAULT_SUBJECT},
-                        "error": {"message": DEFAULT_SUBJECT}}
+    DEFAULT_MSG = "{{ job_friendly_name }} #{{ job.id }} '{{ job.name }}' {{ job.status }}: {{ url }}"
+    default_messages = {"started": {"message": DEFAULT_MSG},
+                        "success": {"message": DEFAULT_MSG},
+                        "error": {"message": DEFAULT_MSG}}
 
     def __init__(self, account_sid, account_token, fail_silently=False, **kwargs):
         super(TwilioBackend, self).__init__(fail_silently=fail_silently)

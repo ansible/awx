@@ -38,15 +38,13 @@ class WebhookBackend(AWXBaseEmailBackend):
         super(WebhookBackend, self).__init__(fail_silently=fail_silently)
 
     def format_body(self, body):
-        # If `body` has body field, attempt to use this as the main body,
-        # otherwise, leave it as a sub-field
-        if isinstance(body, dict) and 'body' in body and isinstance(body['body'], str):
-            try:
-                potential_body = json.loads(body['body'])
-                if isinstance(potential_body, dict):
-                    body = potential_body
-            except json.JSONDecodeError:
-                pass
+        # expect body to be a string representing a dict
+        try:
+            potential_body = json.loads(body)
+            if isinstance(potential_body, dict):
+                body = potential_body
+        except json.JSONDecodeError:
+            body = {}
         return body
 
     def send_messages(self, messages):
