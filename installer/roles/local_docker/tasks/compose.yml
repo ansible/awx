@@ -12,6 +12,7 @@
   with_items:
     - environment.sh
     - credentials.py
+    - nginx.conf
     - docker-compose.yml
   register: awx_compose_config
 

@@ -1,0 +1,118 @@
+#user awx;
+
+worker_processes  1;
+
+pid        /tmp/nginx.pid;
+
+events {
+    worker_connections  1024;
+}
+
+http {
+    include       /etc/nginx/mime.types;
+    default_type  application/octet-stream;
+    server_tokens off;
+
+    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                      '$status $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent" "$http_x_forwarded_for"';
+
+    access_log /dev/stdout main;
+
+    map $http_upgrade $connection_upgrade {
+        default upgrade;
+        ''      close;
+    }
+
+    sendfile        on;
+    #tcp_nopush     on;
+    #gzip  on;
+
+    upstream uwsgi {
+        server 127.0.0.1:8050;
+        }
+
+    upstream daphne {
+        server 127.0.0.1:8051;
+    }
+
+    {% if ssl_certificate is defined %}
+    server {
+        listen 8052 default_server;
+        server_name _;
+
+        # Redirect all HTTP links to the matching HTTPS page
+        return 301 https://$host$request_uri;
+    }
+    {%endif %}
+
+    server {
+        {% if ssl_certificate is defined %}
+        listen 8053 ssl;
+
+        ssl_certificate /etc/nginx/awxweb.pem;
+        ssl_certificate_key /etc/nginx/awxweb.pem;
+        {% else %}
+        listen 8052 default_server;
+        {% endif %}
+
+        # If you have a domain name, this is where to add it
+        server_name _;
+        keepalive_timeout 65;
+
+        # HSTS (ngx_http_headers_module is required) (15768000 seconds = 6 months)
+        add_header Strict-Transport-Security max-age=15768000;
+        add_header Content-Security-Policy "default-src 'self'; connect-src 'self' ws: wss:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' *.pendo.io; img-src 'self' *.pendo.io data:; report-uri /csp-violation/";
+        add_header X-Content-Security-Policy "default-src 'self'; connect-src 'self' ws: wss:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' *.pendo.io; img-src 'self' *.pendo.io data:; report-uri /csp-violation/";
+
+        # Protect against click-jacking https://www.owasp.org/index.php/Testing_for_Clickjacking_(OTG-CLIENT-009)
+        add_header X-Frame-Options "DENY";
+
+        location /nginx_status {
+          stub_status on;
+          access_log off;
+          allow 127.0.0.1;
+          deny all;
+        }
+
+        location /static/ {
+            alias /var/lib/awx/public/static/;
+        }
+
+        location /favicon.ico { alias /var/lib/awx/public/static/favicon.ico; }
+
+        location /websocket {
+            # Pass request to the upstream alias
+            proxy_pass http://daphne;
+            # Require http version 1.1 to allow for upgrade requests
+            proxy_http_version 1.1;
+            # We want proxy_buffering off for proxying to websockets.
+            proxy_buffering off;
+            # http://en.wikipedia.org/wiki/X-Forwarded-For
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            # enable this if you use HTTPS:
+            proxy_set_header X-Forwarded-Proto https;
+            # pass the Host: header from the client for the sake of redirects
+            proxy_set_header Host $http_host;
+            # We've set the Host header, so we don't need Nginx to muddle
+            # about with redirects
+            proxy_redirect off;
+            # Depending on the request value, set the Upgrade and
+            # connection headers
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection $connection_upgrade;
+        }
+
+        location / {
+            # Add trailing / if missing
+            rewrite ^(.*)$http_host(.*[^/])$ $1$http_host$2/ permanent;
+            uwsgi_read_timeout 120s;
+            uwsgi_pass uwsgi;
+            include /etc/nginx/uwsgi_params;
+            {%- if extra_nginx_include is defined %}
+            include {{ extra_nginx_include }};
+            {%- endif %}
+            proxy_set_header X-Forwarded-Port 443;
+        }
+    }
+}

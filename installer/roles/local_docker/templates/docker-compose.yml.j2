@@ -31,6 +31,7 @@ services:
     {% endif %}
     {% if ssl_certificate is defined %}
       - "{{ ssl_certificate +':/etc/nginx/awxweb.pem:ro' }}"
+      - "{{ docker_compose_dir }}/nginx.conf:/etc/nginx/nginx.conf"
     {% endif %}
     {% if (awx_container_search_domains is defined) and (',' in awx_container_search_domains) %}
     {% set awx_container_search_domains_list = awx_container_search_domains.split(',') %}
