@@ -20,12 +20,12 @@ class Jobs extends RelaunchMixin(Base) {
     return this.http.get(`/api/v2${BASE_URLS[type]}${id}/`);
   }
 
-  readEvents(id, jobType = 'job', params = {}) {
+  readEvents(id, type = 'playbook', params = {}) {
     let endpoint;
-    if (jobType === 'job') {
-      endpoint = `${this.baseUrl}${id}/job_events/`;
+    if (type === 'playbook') {
+      endpoint = `/api/v2${BASE_URLS[type]}${id}/job_events/`;
     } else {
-      endpoint = `${this.baseUrl}${id}/events/`;
+      endpoint = `/api/v2${BASE_URLS[type]}${id}/events/`;
     }
     return this.http.get(endpoint, { params });
   }
