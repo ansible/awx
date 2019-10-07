@@ -92,25 +92,6 @@ class NotificationTemplate(CommonModelNameNotUnique):
     def get_message(self, condition):
         return self.messages.get(condition, {})
 
-    def build_notification_message(self, event_type, context):
-        env = sandbox.ImmutableSandboxedEnvironment()
-        templates = self.get_message(event_type)
-        msg_template = templates.get('message', {})
-
-        try:
-            notification_subject = env.from_string(msg_template).render(**context)
-        except (TemplateSyntaxError, UndefinedError, SecurityError):
-            notification_subject = ''
-
-
-        msg_body = templates.get('body', {})
-        try:
-            notification_body = env.from_string(msg_body).render(**context)
-        except (TemplateSyntaxError, UndefinedError, SecurityError):
-            notification_body = ''
-
-        return (notification_subject, notification_body)
-
     def get_absolute_url(self, request=None):
         return reverse('api:notification_template_detail', kwargs={'pk': self.pk}, request=request)
 
