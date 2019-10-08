@@ -1,4 +1,5 @@
 import React from 'react';
+import { createMemoryHistory } from 'history';
 import { sleep } from '@testUtils/testUtils';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
 import { JobTemplatesAPI, LabelsAPI, ProjectsAPI } from '@api';
@@ -163,7 +164,7 @@ describe('<JobTemplateEdit />', () => {
     await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
   });
 
-  test('handleSubmit should call api update', async done => {
+  test('handleSubmit should call api update', async () => {
     const wrapper = mountWithContexts(
       <JobTemplateEdit template={mockJobTemplate} />
     );
@@ -206,11 +207,10 @@ describe('<JobTemplateEdit />', () => {
     expect(JobTemplatesAPI.disassociateLabel).toHaveBeenCalledTimes(2);
     expect(JobTemplatesAPI.associateLabel).toHaveBeenCalledTimes(2);
     expect(JobTemplatesAPI.generateLabel).toHaveBeenCalledTimes(2);
-    done();
   });
 
-  test('should navigate to job template detail when cancel is clicked', async done => {
-    const history = { push: jest.fn() };
+  test('should navigate to job template detail when cancel is clicked', async () => {
+    const history = createMemoryHistory({});
     const wrapper = mountWithContexts(
       <JobTemplateEdit template={mockJobTemplate} />,
       { context: { router: { history } } }
@@ -220,11 +220,9 @@ describe('<JobTemplateEdit />', () => {
       'button[aria-label="Cancel"]',
       e => e.length === 1
     );
-    expect(history.push).not.toHaveBeenCalled();
     cancelButton.prop('onClick')();
-    expect(history.push).toHaveBeenCalledWith(
+    expect(history.location.pathname).toEqual(
       '/templates/job_template/1/details'
     );
-    done();
   });
 });

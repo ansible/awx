@@ -1,8 +1,7 @@
 import React from 'react';
-
+import { createMemoryHistory } from 'history';
 import { OrganizationsAPI } from '@api';
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
-
 import OrganizationEdit from './OrganizationEdit';
 
 jest.mock('@api');
@@ -65,17 +64,14 @@ describe('<OrganizationEdit />', () => {
   });
 
   test('should navigate to organization detail when cancel is clicked', () => {
-    const history = {
-      push: jest.fn(),
-    };
+    const history = createMemoryHistory({});
     const wrapper = mountWithContexts(
       <OrganizationEdit organization={mockData} />,
       { context: { router: { history } } }
     );
 
-    expect(history.push).not.toHaveBeenCalled();
     wrapper.find('button[aria-label="Cancel"]').prop('onClick')();
 
-    expect(history.push).toHaveBeenCalledWith('/organizations/1/details');
+    expect(history.location.pathname).toEqual('/organizations/1/details');
   });
 });

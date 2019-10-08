@@ -1,4 +1,5 @@
 import React from 'react';
+import { createMemoryHistory } from 'history';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
 import { sleep } from '@testUtils/testUtils';
 import JobTemplateAdd from './JobTemplateAdd';
@@ -110,9 +111,7 @@ describe('<JobTemplateAdd />', () => {
   });
 
   test('should navigate to job template detail after form submission', async () => {
-    const history = {
-      push: jest.fn(),
-    };
+    const history = createMemoryHistory({});
     JobTemplatesAPI.create.mockResolvedValueOnce({
       data: {
         id: 1,
@@ -128,20 +127,18 @@ describe('<JobTemplateAdd />', () => {
       jobTemplateData
     );
     await sleep(0);
-    expect(history.push).toHaveBeenCalledWith(
+    expect(history.location.pathname).toEqual(
       '/templates/job_template/1/details'
     );
   });
 
   test('should navigate to templates list when cancel is clicked', async () => {
-    const history = {
-      push: jest.fn(),
-    };
+    const history = createMemoryHistory({});
     const wrapper = mountWithContexts(<JobTemplateAdd />, {
       context: { router: { history } },
     });
     await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
     wrapper.find('button[aria-label="Cancel"]').invoke('onClick')();
-    expect(history.push).toHaveBeenCalledWith('/templates');
+    expect(history.location.pathname).toEqual('/templates');
   });
 });

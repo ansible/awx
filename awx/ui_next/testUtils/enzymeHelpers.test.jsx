@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { createMemoryHistory } from 'history';
 import { Link } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -21,7 +22,7 @@ describe('mountWithContexts', () => {
       const Child = withI18n()(({ i18n }) => (
         <div>{i18n._(t`Text content`)}</div>
       ));
-      const Parent = () => (<Child />);
+      const Parent = () => <Child />;
       const wrapper = mountWithContexts(<Parent />);
       expect(wrapper.find('Parent')).toMatchSnapshot();
     });
@@ -41,23 +42,17 @@ describe('mountWithContexts', () => {
     it('should mount and render with stubbed context', () => {
       const context = {
         router: {
-          history: {
-            push: jest.fn(),
-            replace: jest.fn(),
-            createHref: jest.fn(),
-          },
+          history: createMemoryHistory({}),
           route: {
             location: {},
-            match: {}
-          }
-        }
+            match: {},
+          },
+        },
       };
       const wrapper = mountWithContexts(
-        (
-          <div>
-            <Link to="/">home</Link>
-          </div>
-        ),
+        <div>
+          <Link to="/">home</Link>
+        </div>,
         { context }
       );
 
@@ -66,7 +61,7 @@ describe('mountWithContexts', () => {
       link.simulate('click', { button: 0 });
       wrapper.update();
 
-      expect(context.router.history.push).toHaveBeenCalledWith('/');
+      expect(context.router.history.location.pathname).toEqual('/');
     });
   });
 
@@ -101,10 +96,7 @@ describe('mountWithContexts', () => {
           )}
         </Config>
       );
-      const wrapper = mountWithContexts(
-        <Foo />,
-        { context: { config } }
-      );
+      const wrapper = mountWithContexts(<Foo />, { context: { config } });
       expect(wrapper.find('Foo')).toMatchSnapshot();
     });
   });
@@ -115,26 +107,26 @@ describe('mountWithContexts', () => {
  * after a short amount of time.
  */
 class TestAsyncComponent extends Component {
-  constructor (props) {
+  constructor(props) {
     super(props);
     this.state = { displayElement: false };
   }
 
-  componentDidMount () {
+  componentDidMount() {
     setTimeout(() => this.setState({ displayElement: true }), 500);
   }
 
-  render () {
+  render() {
     const { displayElement } = this.state;
     if (displayElement) {
-      return (<div id="test-async-component" />);
+      return <div id="test-async-component" />;
     }
     return null;
   }
 }
 
 describe('waitForElement', () => {
-  it('waits for the element and returns it', async (done) => {
+  it('waits for the element and returns it', async done => {
     const selector = '#test-async-component';
     const wrapper = mountWithContexts(<TestAsyncComponent />);
     expect(wrapper.exists(selector)).toEqual(false);
@@ -145,7 +137,7 @@ describe('waitForElement', () => {
     done();
   });
 
-  it('eventually throws an error for elements that don\'t exist', async (done) => {
+  it("eventually throws an error for elements that don't exist", async done => {
     const wrapper = mountWithContexts(<div />);
 
     let error;
@@ -154,7 +146,11 @@ describe('waitForElement', () => {
     } catch (err) {
       error = err;
     } finally {
-      expect(error).toEqual(new Error('Expected condition for <#does-not-exist> not met: el => el.length === 1'));
+      expect(error).toEqual(
+        new Error(
+          'Expected condition for <#does-not-exist> not met: el => el.length === 1'
+        )
+      );
       done();
     }
   });
