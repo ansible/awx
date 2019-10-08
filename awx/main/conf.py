@@ -816,7 +816,7 @@ def galaxy_validate(serializer, attrs):
                 # new auth is applied, so check if compatible with version
                 from awx.main.utils import get_ansible_version
                 current_version = get_ansible_version()
-                min_version = '2.9'
+                min_version = '2.10'
                 if Version(current_version) < Version(min_version):
                     errors.setdefault(setting_name, [])
                     errors[setting_name].append(_(
