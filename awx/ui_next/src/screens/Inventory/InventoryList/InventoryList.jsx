@@ -303,7 +303,7 @@ class InventoriesList extends Component {
           title={i18n._(t`Error!`)}
           onClose={this.handleDeleteErrorClose}
         >
-          {i18n._(t`Failed to delete one or more inventory.`)}
+          {i18n._(t`Failed to delete one or more inventories.`)}
           <ErrorDetail error={deletionError} />
         </AlertModal>
       </PageSection>

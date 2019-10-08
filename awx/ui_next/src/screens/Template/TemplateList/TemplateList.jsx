@@ -309,7 +309,7 @@ class TemplatesList extends Component {
           title={i18n._(t`Error!`)}
           onClose={this.handleDeleteErrorClose}
         >
-          {i18n._(t`Failed to delete one or more template.`)}
+          {i18n._(t`Failed to delete one or more templates.`)}
           <ErrorDetail error={deletionError} />
         </AlertModal>
       </PageSection>
