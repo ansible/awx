@@ -69,9 +69,9 @@
     "html-entities": "^1.2.1",
     "js-yaml": "^3.13.1",
     "prop-types": "^15.6.2",
-    "react": "^16.10.1",
+    "react": "^16.10.2",
     "react-codemirror2": "^6.0.0",
-    "react-dom": "^16.10.1",
+    "react-dom": "^16.10.2",
     "react-router-dom": "^5.1.2",
     "react-virtualized": "^9.21.1",
     "styled-components": "^4.2.0"
