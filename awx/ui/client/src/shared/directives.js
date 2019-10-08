@@ -1059,18 +1059,22 @@ function(SettingsUtils, i18n, $rootScope) {
                     up: "Form-numberInputButton fa fa-angle-up"
                 },
                 spin: function(e, u) {
-                    ctrl.$setViewValue(u.value);
-                    ctrl.$setValidity('required', true);
-                    ctrl.$setValidity('min', true);
-                    ctrl.$setValidity('max', true);
-                    ctrl.$dirty = true;
-                    ctrl.$render();
-                    if (scope.job_template_form) {
-                        // need a way to find the parent form and mark it dirty
-                        scope.job_template_form.$dirty = true;
-                    }
-                    if (!scope.$$phase) {
-                        scope.$digest();
+                    if (e.originalEvent && e.originalEvent.type === 'mousewheel') {
+                        e.preventDefault();
+                    } else {
+                        ctrl.$setViewValue(u.value);
+                        ctrl.$setValidity('required', true);
+                        ctrl.$setValidity('min', true);
+                        ctrl.$setValidity('max', true);
+                        ctrl.$dirty = true;
+                        ctrl.$render();
+                        if (scope.job_template_form) {
+                            // need a way to find the parent form and mark it dirty
+                            scope.job_template_form.$dirty = true;
+                        }
+                        if (!scope.$$phase) {
+                            scope.$digest();
+                        }
                     }
                 }
             };
