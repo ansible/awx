@@ -73,7 +73,10 @@ describe('<OrganizationsList />', () => {
     OrganizationsAPI.readOptions = () =>
       Promise.resolve({
         data: {
-          actions: [],
+          actions: {
+            GET: {},
+            POST: {},
+          },
         },
       });
   });
@@ -174,6 +177,46 @@ describe('<OrganizationsList />', () => {
       'Modal',
       el => el.props().isOpen === true && el.props().title === 'Error!'
     );
+    done();
+  });
+
+  test('Add button shown for users without ability to POST', async done => {
+    wrapper = mountWithContexts(<OrganizationsList />);
+    await waitForElement(
+      wrapper,
+      'OrganizationsList',
+      el => el.state('hasContentLoading') === true
+    );
+    await waitForElement(
+      wrapper,
+      'OrganizationsList',
+      el => el.state('hasContentLoading') === false
+    );
+    expect(wrapper.find('ToolbarAddButton').length).toBe(1);
+    done();
+  });
+
+  test('Add button hidden for users without ability to POST', async done => {
+    OrganizationsAPI.readOptions = () =>
+      Promise.resolve({
+        data: {
+          actions: {
+            GET: {},
+          },
+        },
+      });
+    wrapper = mountWithContexts(<OrganizationsList />);
+    await waitForElement(
+      wrapper,
+      'OrganizationsList',
+      el => el.state('hasContentLoading') === true
+    );
+    await waitForElement(
+      wrapper,
+      'OrganizationsList',
+      el => el.state('hasContentLoading') === false
+    );
+    expect(wrapper.find('ToolbarAddButton').length).toBe(0);
     done();
   });
 });

@@ -71,7 +71,10 @@ describe('<ProjectsList />', () => {
 
     ProjectsAPI.readOptions.mockResolvedValue({
       data: {
-        actions: [],
+        actions: {
+          GET: {},
+          POST: {},
+        },
       },
     });
   });
@@ -217,6 +220,45 @@ describe('<ProjectsList />', () => {
       el => el.props().isOpen === true && el.props().title === 'Error!'
     );
 
+    done();
+  });
+
+  test('Add button shown for users without ability to POST', async done => {
+    const wrapper = mountWithContexts(<ProjectsList />);
+    await waitForElement(
+      wrapper,
+      'ProjectsList',
+      el => el.state('hasContentLoading') === true
+    );
+    await waitForElement(
+      wrapper,
+      'ProjectsList',
+      el => el.state('hasContentLoading') === false
+    );
+    expect(wrapper.find('ToolbarAddButton').length).toBe(1);
+    done();
+  });
+
+  test('Add button hidden for users without ability to POST', async done => {
+    ProjectsAPI.readOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {},
+        },
+      },
+    });
+    const wrapper = mountWithContexts(<ProjectsList />);
+    await waitForElement(
+      wrapper,
+      'ProjectsList',
+      el => el.state('hasContentLoading') === true
+    );
+    await waitForElement(
+      wrapper,
+      'ProjectsList',
+      el => el.state('hasContentLoading') === false
+    );
+    expect(wrapper.find('ToolbarAddButton').length).toBe(0);
     done();
   });
 });

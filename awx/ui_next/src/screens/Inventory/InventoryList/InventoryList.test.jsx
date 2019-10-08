@@ -128,7 +128,10 @@ describe('<InventoriesList />', () => {
 
     InventoriesAPI.readOptions.mockResolvedValue({
       data: {
-        actions: [],
+        actions: {
+          GET: {},
+          POST: {},
+        },
       },
     });
   });
@@ -278,6 +281,45 @@ describe('<InventoriesList />', () => {
       el => el.props().isOpen === true && el.props().title === 'Error!'
     );
 
+    done();
+  });
+
+  test('Add button shown for users without ability to POST', async done => {
+    const wrapper = mountWithContexts(<InventoriesList />);
+    await waitForElement(
+      wrapper,
+      'InventoriesList',
+      el => el.state('hasContentLoading') === true
+    );
+    await waitForElement(
+      wrapper,
+      'InventoriesList',
+      el => el.state('hasContentLoading') === false
+    );
+    expect(wrapper.find('ToolbarAddButton').length).toBe(1);
+    done();
+  });
+
+  test('Add button hidden for users without ability to POST', async done => {
+    InventoriesAPI.readOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {},
+        },
+      },
+    });
+    const wrapper = mountWithContexts(<InventoriesList />);
+    await waitForElement(
+      wrapper,
+      'InventoriesList',
+      el => el.state('hasContentLoading') === true
+    );
+    await waitForElement(
+      wrapper,
+      'InventoriesList',
+      el => el.state('hasContentLoading') === false
+    );
+    expect(wrapper.find('ToolbarAddButton').length).toBe(0);
     done();
   });
 });
