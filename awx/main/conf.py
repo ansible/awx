@@ -2,6 +2,7 @@
 import json
 import logging
 import os
+from distutils.version import LooseVersion as Version
 
 # Django
 from django.utils.translation import ugettext_lazy as _
@@ -789,12 +790,12 @@ def galaxy_validate(serializer, attrs):
     if not any('{}{}'.format(prefix, subfield.upper()) in attrs for subfield in GALAXY_SERVER_FIELDS):
         return attrs
 
-    def _new_value(field_name):
-        if field_name in attrs:
-            return attrs[field_name]
+    def _new_value(setting_name):
+        if setting_name in attrs:
+            return attrs[setting_name]
         elif not serializer.instance:
             return ''
-        return getattr(serializer.instance, field_name, '')
+        return getattr(serializer.instance, setting_name, '')
 
     galaxy_data = {}
     for subfield in GALAXY_SERVER_FIELDS:
@@ -808,16 +809,40 @@ def galaxy_validate(serializer, attrs):
                 errors[setting_name].append(_(
                     'Cannot provide field if PRIMARY_GALAXY_URL is not set.'
                 ))
-
+    for k in GALAXY_SERVER_FIELDS:
+        if galaxy_data[k]:
+            setting_name = '{}{}'.format(prefix, k.upper())
+            if (not serializer.instance) or (not getattr(serializer.instance, setting_name, '')):
+                # new auth is applied, so check if compatible with version
+                from awx.main.utils import get_ansible_version
+                current_version = get_ansible_version()
+                min_version = '2.9'
+                if Version(current_version) < Version(min_version):
+                    errors.setdefault(setting_name, [])
+                    errors[setting_name].append(_(
+                        'Galaxy server settings are not available until Ansible {min_version}, '
+                        'you are running {current_version}.'
+                    ).format(min_version=min_version, current_version=current_version))
     if (galaxy_data['password'] or galaxy_data['username']) and (galaxy_data['token'] or galaxy_data['auth_url']):
         for k in ('password', 'username', 'token', 'auth_url'):
             setting_name = '{}{}'.format(prefix, k.upper())
             if setting_name in attrs:
                 errors.setdefault(setting_name, [])
                 errors[setting_name].append(_(
-                    'Setting PRIMARY_GALAXY_TOKEN is mutually exclusive with '
-                    'PRIMARY_GALAXY_USERNAME and PRIMARY_GALAXY_PASSWORD.'
+                    'Setting Galaxy token and authentication URL is mutually exclusive with username and password.'
                 ))
+    if bool(galaxy_data['username']) != bool(galaxy_data['password']):
+        msg = _('If authenticating via username and password, both must be provided.')
+        for k in ('username', 'password'):
+            setting_name = '{}{}'.format(prefix, k.upper())
+            errors.setdefault(setting_name, [])
+            errors[setting_name].append(msg)
+    if bool(galaxy_data['token']) != bool(galaxy_data['auth_url']):
+        msg = _('If authenticating via token, both token and authentication URL must be provided.')
+        for k in ('token', 'auth_url'):
+            setting_name = '{}{}'.format(prefix, k.upper())
+            errors.setdefault(setting_name, [])
+            errors[setting_name].append(msg)
 
     if errors:
         raise serializers.ValidationError(errors)
