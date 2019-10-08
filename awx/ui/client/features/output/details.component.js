@@ -563,7 +563,7 @@ function getInstanceGroupDetails () {
     }
 
     let isolated = null;
-    if (instanceGroup.is_isolated) {
+    if (instanceGroup.controller_id) {
         isolated = strings.get('details.ISOLATED');
     }
 
