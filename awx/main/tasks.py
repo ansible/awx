@@ -1379,7 +1379,7 @@ class BaseTask(object):
                     logger.exception(f"Unable to handle response from Kubernetes API for {log_name}.")
 
             logger.exception(f"Error when launching pod for {log_name}")
-            self.update_model(task.pk, status='error', result_traceback=exc.body)
+            self.update_model(task.pk, status='error', result_traceback=traceback.format_exc())
             return
 
         self.update_model(task.pk, execution_node=pod_manager.pod_name)
