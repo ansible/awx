@@ -1,7 +1,7 @@
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { mount } from 'enzyme';
 import { LabelsAPI } from '@api';
-import { sleep } from '@testUtils/testUtils';
 import LabelSelect from './LabelSelect';
 
 jest.mock('@api');
@@ -17,8 +17,10 @@ describe('<LabelSelect />', () => {
     LabelsAPI.read.mockReturnValue({
       data: { results: options },
     });
-    const wrapper = mount(<LabelSelect value={[]} />);
-    await sleep(1);
+    let wrapper;
+    await act(async () => {
+      wrapper = mount(<LabelSelect value={[]} onError={() => {}} />);
+    });
     wrapper.update();
 
     expect(LabelsAPI.read).toHaveBeenCalledTimes(1);
@@ -37,8 +39,10 @@ describe('<LabelSelect />', () => {
         results: options,
       },
     });
-    const wrapper = mount(<LabelSelect value={[]} />);
-    await sleep(1);
+    let wrapper;
+    await act(async () => {
+      wrapper = mount(<LabelSelect value={[]} onError={() => {}}/>);
+    });
     wrapper.update();
 
     expect(LabelsAPI.read).toHaveBeenCalledTimes(2);
