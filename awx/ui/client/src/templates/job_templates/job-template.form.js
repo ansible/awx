@@ -328,14 +328,14 @@ function(NotificationsList, i18n) {
                         ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                     }, {
                         name: 'allow_callbacks',
-                        label: i18n._('Allow Provisioning Callbacks'),
+                        label: i18n._('Enable Provisioning Callbacks'),
                         type: 'checkbox',
                         ngChange: "toggleCallback('host_config_key')",
                         column: 2,
                         awPopOver: "<p>" + i18n._("Enables creation of a provisioning callback URL. Using the URL a host can contact {{BRAND_NAME}} and request a configuration update " +
                             "using this job template.") + "</p>",
                         dataPlacement: 'right',
-                        dataTitle: i18n._('Allow Provisioning Callbacks'),
+                        dataTitle: i18n._('Enable Provisioning Callbacks'),
                         dataContainer: "body",
                         ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                     }, {
@@ -360,12 +360,12 @@ function(NotificationsList, i18n) {
                         ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                     }, {
                         name: 'use_fact_cache',
-                        label: i18n._('Use Fact Cache'),
+                        label: i18n._('Enable Fact Cache'),
                         type: 'checkbox',
                         column: 2,
                         awPopOver: "<p>" + i18n._("If enabled, use cached facts if available and store discovered facts in the cache.") + "</p>",
                         dataPlacement: 'right',
-                        dataTitle: i18n._('Use Fact Cache'),
+                        dataTitle: i18n._('Enable Fact Cache'),
                         dataContainer: "body",
                         ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                     }]
