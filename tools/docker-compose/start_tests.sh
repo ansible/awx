@@ -1,11 +1,19 @@
 #!/bin/bash
 set +x
 
-cd /awx_devel
-make clean
-cp -R /tmp/awx.egg-info /awx_devel/ || true
-sed -i "s/placeholder/$(cat /awx_devel/VERSION)/" /awx_devel/awx.egg-info/PKG-INFO
-cp /tmp/awx.egg-link /venv/awx/lib/python3.6/site-packages/awx.egg-link
+PR_BRANCH=$(git branch | grep \* | cut -d ' ' -f2)
 
-cp awx/settings/local_settings.py.docker_compose awx/settings/local_settings.py
-make "${1:-test}"
+CHANGED_UI_NEXT_FILES=$(git diff --name-only ${PR_BRANCH} devel | grep awx\/ui_next)
+CHANGED_UI_FILES=$(git diff --name-only ${PR_BRANCH} devel | grep awx\/ui | grep -v next)
+
+echo $CHANGED_UI_FILES
+if [ -n "$CHANGED_UI_FILES" ]
+then
+  make ui-zuul-lint-and-test
+fi
+
+echo $CHANGED_UI_NEXT_FILES
+if [ -n "$CHANGED_UI_NEXT_FILES" ]
+then
+  make ui-next-zuul-lint-and-test
+fi
