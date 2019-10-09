@@ -609,6 +609,9 @@ AWX_REBUILD_SMART_MEMBERSHIP = False
 # By default, allow arbitrary Jinja templating in extra_vars defined on a Job Template
 ALLOW_JINJA_IN_EXTRA_VARS = 'template'
 
+# Run project updates with extra verbosity
+PROJECT_UPDATE_VVV = False
+
 # Enable dynamically pulling roles from a requirement.yml file
 # when updating SCM projects
 # Note: This setting may be overridden by database settings.
@@ -618,6 +621,23 @@ AWX_ROLES_ENABLED = True
 # when updating SCM projects
 # Note: This setting may be overridden by database settings.
 AWX_COLLECTIONS_ENABLED = True
+
+# Settings for primary galaxy server, should be set in the UI
+PRIMARY_GALAXY_URL = ''
+PRIMARY_GALAXY_USERNAME = ''
+PRIMARY_GALAXY_TOKEN = ''
+PRIMARY_GALAXY_PASSWORD = ''
+PRIMARY_GALAXY_AUTH_URL = ''
+# Settings for the fallback galaxy server(s), normally this is the
+# actual Ansible Galaxy site.
+# server options: 'id', 'url', 'username', 'password', 'token', 'auth_url'
+# To not use any fallback servers set this to []
+FALLBACK_GALAXY_SERVERS = [
+    {
+        'id': 'galaxy',
+        'url': 'https://galaxy.ansible.com'
+    }
+]
 
 # Enable bubblewrap support for running jobs (playbook runs only).
 # Note: This setting may be overridden by database settings.

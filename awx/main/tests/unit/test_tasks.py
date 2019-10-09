@@ -130,6 +130,8 @@ def test_send_notifications_list(mock_notifications_filter, mock_job_get, mocker
     ('VMWARE_PASSWORD', 'SECRET'),
     ('API_SECRET', 'SECRET'),
     ('CALLBACK_CONNECTION', 'amqp://tower:password@localhost:5672/tower'),
+    ('ANSIBLE_GALAXY_SERVER_PRIMARY_GALAXY_PASSWORD', 'SECRET'),
+    ('ANSIBLE_GALAXY_SERVER_PRIMARY_GALAXY_TOKEN', 'SECRET'),
 ])
 def test_safe_env_filtering(key, value):
     assert build_safe_env({key: value})[key] == tasks.HIDDEN_PASSWORD

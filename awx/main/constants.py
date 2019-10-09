@@ -51,3 +51,7 @@ LOGGER_BLACKLIST = (
     # loggers that may be called getting logging settings
     'awx.conf'
 )
+
+# these correspond to both AWX and Ansible settings to keep naming consistent
+# for instance, settings.PRIMARY_GALAXY_AUTH_URL vs env var ANSIBLE_GALAXY_SERVER_FOO_AUTH_URL
+GALAXY_SERVER_FIELDS = ('url', 'username', 'password', 'token', 'auth_url')

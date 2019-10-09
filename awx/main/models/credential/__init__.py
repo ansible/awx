@@ -64,7 +64,7 @@ def build_safe_env(env):
     for k, v in safe_env.items():
         if k == 'AWS_ACCESS_KEY_ID':
             continue
-        elif k.startswith('ANSIBLE_') and not k.startswith('ANSIBLE_NET'):
+        elif k.startswith('ANSIBLE_') and not k.startswith('ANSIBLE_NET') and not k.startswith('ANSIBLE_GALAXY_SERVER'):
             continue
         elif hidden_re.search(k):
             safe_env[k] = HIDDEN_PASSWORD
