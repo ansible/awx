@@ -499,6 +499,28 @@ class TestGenericRun():
 
         assert task.should_use_resource_profiling(task.instance) == profiling_enabled
 
+    @mock.patch('subprocess.run')
+    @pytest.mark.parametrize("scenario, profiling_enabled", [
+                             ('cgexec_successful', True),
+                             ('cgexec_fails', False)])
+    def test_should_use_resource_profiling_cgexec_check(self, subprocess_run, scenario,
+                                                        profiling_enabled, mocker):
+        import subprocess
+        mock_completed_process = mocker.MagicMock()
+        mock_completed_process.returncode = 0 if scenario == 'cgexec_successful' else 1
+        subprocess_run.return_value = mock_completed_process
+
+        job = Job(project=Project(), inventory=Inventory())
+        task = tasks.RunJob()
+        task.instance = job
+
+        settings.AWX_RESOURCE_PROFILING_ENABLED = True
+
+        assert task.should_use_resource_profiling(task.instance) == profiling_enabled
+        assert subprocess_run.called_once_with('cgexec -g cpuacct,memory,pids:ansible-runner true',
+                                               shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+
     def test_created_by_extra_vars(self):
         job = Job(created_by=User(pk=123, username='angry-spud'))
 

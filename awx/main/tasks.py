@@ -13,6 +13,7 @@ import logging
 import os
 import shutil
 import stat
+import subprocess
 import tempfile
 import time
 import traceback
@@ -1656,7 +1657,18 @@ class RunJob(BaseTask):
         '''
         Return whether this task should use resource profiling
         '''
-        return settings.AWX_RESOURCE_PROFILING_ENABLED
+        if not settings.AWX_RESOURCE_PROFILING_ENABLED:
+            return False
+
+        # Confirm can execute process in ansible-runner cgroup
+        cmd = 'cgexec -g cpuacct,memory,pids:ansible-runner true'
+        res = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if res.returncode != 0:
+            logger.warning("Cannot enable resource profiling for job. '{}' returned '{}' ({})"
+                           .format(cmd, res.stderr.decode("utf-8"), str(res.returncode)))
+            return False
+
+        return True
 
     def should_use_proot(self, job):
         '''
