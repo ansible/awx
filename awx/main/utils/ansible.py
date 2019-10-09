@@ -5,11 +5,14 @@
 import codecs
 import re
 import os
+import logging
 from itertools import islice
 from configparser import ConfigParser
 
 # Django
 from django.utils.encoding import smart_str
+
+logger = logging.getLogger('awx.main.utils.ansible')
 
 
 __all__ = ['skip_directory', 'could_be_playbook', 'could_be_inventory']
@@ -104,11 +107,14 @@ def read_ansible_config(project_path, variables_of_interest):
     fnames = ['/etc/ansible/ansible.cfg']
     if project_path:
         fnames.insert(0, os.path.join(project_path, 'ansible.cfg'))
-    parser = ConfigParser()
-    parser.read(fnames)
     values = {}
-    if 'defaults' in parser:
-        for var in variables_of_interest:
-            if var in parser['defaults']:
-                values[var] = parser['defaults'][var]
+    try:
+        parser = ConfigParser()
+        parser.read(fnames)
+        if 'defaults' in parser:
+            for var in variables_of_interest:
+                if var in parser['defaults']:
+                    values[var] = parser['defaults'][var]
+    except Exception as e:
+        logger.warn('Failed to read ansible configuration(s) {}: {}'.format(fnames, e))
     return values
