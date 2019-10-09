@@ -2279,6 +2279,17 @@ class RunInventoryUpdate(BaseTask):
                     env[str(env_k)] = str(inventory_update.source_vars_dict[env_k])
         elif inventory_update.source == 'file':
             raise NotImplementedError('Cannot update file sources through the task system.')
+
+        for env_key, folder, default in (
+                ('ANSIBLE_COLLECTIONS_PATHS', 'requirements_collections', '~/.ansible/collections:/usr/share/ansible/collections'),):
+            paths = default.split(':')
+            if env_key in env:
+                for path in env[env_key].split(':'):
+                    if path not in paths:
+                        paths = [env[env_key]] + paths
+            paths = [os.path.join(private_data_dir, folder)] + paths
+            env[env_key] = os.pathsep.join(paths)
+
         return env
 
     def write_args_file(self, private_data_dir, args):
@@ -2398,7 +2409,7 @@ class RunInventoryUpdate(BaseTask):
         '''
         src = inventory_update.source
         if src == 'scm' and inventory_update.source_project_update:
-            return inventory_update.source_project_update.get_project_path(check_if_exists=False)
+            return os.path.join(private_data_dir, 'project')
         if src in CLOUD_PROVIDERS:
             injector = None
             if src in InventorySource.injectors:
@@ -2434,8 +2445,10 @@ class RunInventoryUpdate(BaseTask):
 
             project_update_task = local_project_sync._get_task_class()
             try:
-                project_update_task().run(local_project_sync.id)
-                inventory_update.inventory_source.scm_last_revision = local_project_sync.project.scm_revision
+                sync_task = project_update_task(job_private_data_dir=private_data_dir)
+                sync_task.run(local_project_sync.id)
+                local_project_sync.refresh_from_db()
+                inventory_update.inventory_source.scm_last_revision = local_project_sync.scm_revision
                 inventory_update.inventory_source.save(update_fields=['scm_last_revision'])
             except Exception:
                 inventory_update = self.update_model(

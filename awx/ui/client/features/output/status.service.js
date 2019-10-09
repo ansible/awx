@@ -49,7 +49,7 @@ function JobStatusService (moment, message) {
             scmRefspec: model.get('scm_refspec'),
             inventoryScm: {
                 id: model.get('source_project_update'),
-                status: model.get('summary_fields.inventory_source.status')
+                status: model.get('summary_fields.source_project.status')
             }
         };
 
