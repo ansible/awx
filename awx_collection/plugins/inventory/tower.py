@@ -77,7 +77,7 @@ EXAMPLES = '''
 
 # Example for using tower_inventory.yml file
 
-plugin: tower
+plugin: awx.awx.tower
 host: your_ansible_tower_server_network_address
 username: your_ansible_tower_username
 password: your_ansible_tower_password
@@ -116,7 +116,7 @@ except ImportError:
 
 
 class InventoryModule(BaseInventoryPlugin):
-    NAME = 'tower'
+    NAME = 'awx.awx.tower'  # REPLACE
     # Stays backward compatible with tower inventory script.
     # If the user supplies '@tower_inventory' as path, the plugin will read from environment variables.
     no_config_file_supplied = False
