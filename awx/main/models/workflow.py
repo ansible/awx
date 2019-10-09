@@ -452,6 +452,12 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
                                                .filter(workflowjobtemplate_notification_templates_for_approvals__in=[self]))
         # Get Organization NotificationTemplates
         if self.organization is not None:
+            error_notification_templates = set(error_notification_templates + list(base_notification_templates.filter(
+                organization_notification_templates_for_errors=self.organization)))
+            started_notification_templates = set(started_notification_templates + list(base_notification_templates.filter(
+                organization_notification_templates_for_started=self.organization)))
+            success_notification_templates = set(success_notification_templates + list(base_notification_templates.filter(
+                organization_notification_templates_for_success=self.organization)))
             approval_notification_templates = set(approval_notification_templates + list(base_notification_templates.filter(
                 organization_notification_templates_for_approvals=self.organization)))
         return dict(error=list(error_notification_templates),
@@ -696,6 +702,9 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
     @property
     def event_class(self):
         return None
+
+    def get_ui_url(self):
+        return urljoin(settings.TOWER_URL_BASE, '/#/workflows/{}'.format(self.workflow_job.id))
 
     def _get_parent_field_name(self):
         return 'workflow_approval_template'
