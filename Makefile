@@ -400,7 +400,7 @@ flake8_collection:
 test_collection_all: prepare_collection_venv test_collection flake8_collection
 
 build_collection:
-	ansible-playbook -i localhost, awx_collection/template_galaxy.yml -e collection_package=$(COLLECTION_PACKAGE) -e namespace_name=$(COLLECTION_NAMESPACE) -e package_version=$(VERSION)
+	ansible-playbook -i localhost, awx_collection/template_galaxy.yml -e collection_package=$(COLLECTION_PACKAGE) -e collection_namespace=$(COLLECTION_NAMESPACE) -e collection_version=$(VERSION)
 	ansible-galaxy collection build awx_collection --output-path=awx_collection
 
 test_unit:
