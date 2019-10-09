@@ -1,11 +1,9 @@
 import React from 'react';
-
+import { createMemoryHistory } from 'history';
 import { OrganizationsAPI, ProjectsAPI } from '@api';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
-
 import mockOrganization from '@util/data.organization.json';
 import mockDetails from './data.project.json';
-
 import Project from './Project';
 
 jest.mock('@api');
@@ -67,6 +65,32 @@ describe.only('<Project />', () => {
       el => el.length === 4
     );
     tabs.forEach(tab => expect(tab.text()).not.toEqual('Notifications'));
+    done();
+  });
+
+  test('should show content error when user attempts to navigate to erroneous route', async done => {
+    const history = createMemoryHistory({
+      initialEntries: ['/projects/1/foobar'],
+    });
+    const wrapper = mountWithContexts(
+      <Project setBreadcrumb={() => {}} me={mockMe} />,
+      {
+        context: {
+          router: {
+            history,
+            route: {
+              location: history.location,
+              match: {
+                params: { id: 1 },
+                url: '/projects/1/foobar',
+                path: '/project/1/foobar',
+              },
+            },
+          },
+        },
+      }
+    );
+    await waitForElement(wrapper, 'ContentError', el => el.length === 1);
     done();
   });
 });

@@ -1,8 +1,8 @@
 import React from 'react';
+import { createMemoryHistory } from 'history';
 import { JobTemplatesAPI, OrganizationsAPI } from '@api';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
 import Template, { _Template } from './Template';
-
 import mockJobTemplateData from './shared/data.job_template.json';
 
 jest.mock('@api');
@@ -85,6 +85,32 @@ describe('<Template />', () => {
       el => el.length === 5
     );
     tabs.forEach(tab => expect(tab.text()).not.toEqual('Notifications'));
+    done();
+  });
+
+  test('should show content error when user attempts to navigate to erroneous route', async done => {
+    const history = createMemoryHistory({
+      initialEntries: ['/templates/job_template/1/foobar'],
+    });
+    const wrapper = mountWithContexts(
+      <Template setBreadcrumb={() => {}} me={mockMe} />,
+      {
+        context: {
+          router: {
+            history,
+            route: {
+              location: history.location,
+              match: {
+                params: { id: 1 },
+                url: '/templates/job_template/1/foobar',
+                path: '/templates/job_template/1/foobar',
+              },
+            },
+          },
+        },
+      }
+    );
+    await waitForElement(wrapper, 'ContentError', el => el.length === 1);
     done();
   });
 });

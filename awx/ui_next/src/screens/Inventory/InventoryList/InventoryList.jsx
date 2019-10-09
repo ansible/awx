@@ -11,7 +11,7 @@ import {
   DropdownPosition,
 } from '@patternfly/react-core';
 
-import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '@api';
+import { InventoriesAPI } from '@api';
 import AlertModal from '@components/AlertModal';
 import DatalistToolbar from '@components/DataListToolbar';
 import ErrorDetail from '@components/ErrorDetail';
@@ -21,18 +21,17 @@ import PaginatedDataList, {
 } from '@components/PaginatedDataList';
 import { getQSConfig, parseQueryString } from '@util/qs';
 
-import TemplateListItem from './TemplateListItem';
+import InventoryListItem from './InventoryListItem';
 
-// The type value in const QS_CONFIG below does not have a space between job_template and
-// workflow_job_template so the params sent to the API match what the api expects.
-const QS_CONFIG = getQSConfig('template', {
+// The type value in const QS_CONFIG below does not have a space between job_inventory and
+// workflow_job_inventory so the params sent to the API match what the api expects.
+const QS_CONFIG = getQSConfig('inventory', {
   page: 1,
   page_size: 20,
   order_by: 'name',
-  type: 'job_template,workflow_job_template',
 });
 
-class TemplatesList extends Component {
+class InventoriesList extends Component {
   constructor(props) {
     super(props);
 
@@ -41,28 +40,28 @@ class TemplatesList extends Component {
       contentError: null,
       deletionError: null,
       selected: [],
-      templates: [],
+      inventories: [],
       itemCount: 0,
       isAddOpen: false,
     };
 
-    this.loadTemplates = this.loadTemplates.bind(this);
+    this.loadInventories = this.loadInventories.bind(this);
     this.handleSelectAll = this.handleSelectAll.bind(this);
     this.handleSelect = this.handleSelect.bind(this);
-    this.handleTemplateDelete = this.handleTemplateDelete.bind(this);
+    this.handleInventoryDelete = this.handleInventoryDelete.bind(this);
     this.handleDeleteErrorClose = this.handleDeleteErrorClose.bind(this);
     this.handleAddToggle = this.handleAddToggle.bind(this);
   }
 
   componentDidMount() {
-    this.loadTemplates();
+    this.loadInventories();
   }
 
   componentDidUpdate(prevProps) {
     const { location } = this.props;
 
     if (location !== prevProps.location) {
-      this.loadTemplates();
+      this.loadInventories();
     }
   }
 
@@ -75,17 +74,17 @@ class TemplatesList extends Component {
   }
 
   handleSelectAll(isSelected) {
-    const { templates } = this.state;
-    const selected = isSelected ? [...templates] : [];
+    const { inventories } = this.state;
+    const selected = isSelected ? [...inventories] : [];
     this.setState({ selected });
   }
 
-  handleSelect(template) {
+  handleSelect(inventory) {
     const { selected } = this.state;
-    if (selected.some(s => s.id === template.id)) {
-      this.setState({ selected: selected.filter(s => s.id !== template.id) });
+    if (selected.some(s => s.id === inventory.id)) {
+      this.setState({ selected: selected.filter(s => s.id !== inventory.id) });
     } else {
-      this.setState({ selected: selected.concat(template) });
+      this.setState({ selected: selected.concat(inventory) });
     }
   }
 
@@ -104,31 +103,25 @@ class TemplatesList extends Component {
     }
   }
 
-  async handleTemplateDelete() {
+  async handleInventoryDelete() {
     const { selected, itemCount } = this.state;
 
     this.setState({ hasContentLoading: true });
     try {
       await Promise.all(
-        selected.map(({ type, id }) => {
-          let deletePromise;
-          if (type === 'job_template') {
-            deletePromise = JobTemplatesAPI.destroy(id);
-          } else if (type === 'workflow_job_template') {
-            deletePromise = WorkflowJobTemplatesAPI.destroy(id);
-          }
-          return deletePromise;
+        selected.map(({ id }) => {
+          return InventoriesAPI.destroy(id);
         })
       );
       this.setState({ itemCount: itemCount - selected.length });
     } catch (err) {
       this.setState({ deletionError: err });
     } finally {
-      await this.loadTemplates();
+      await this.loadInventories();
     }
   }
 
-  async loadTemplates() {
+  async loadInventories() {
     const { location } = this.props;
     const { actions: cachedActions } = this.state;
     const params = parseQueryString(QS_CONFIG, location.search);
@@ -137,13 +130,10 @@ class TemplatesList extends Component {
     if (cachedActions) {
       optionsPromise = Promise.resolve({ data: { actions: cachedActions } });
     } else {
-      optionsPromise = JobTemplatesAPI.readOptions();
+      optionsPromise = InventoriesAPI.readOptions();
     }
 
-    const promises = Promise.all([
-      JobTemplatesAPI.read(params),
-      optionsPromise,
-    ]);
+    const promises = Promise.all([InventoriesAPI.read(params), optionsPromise]);
 
     this.setState({ contentError: null, hasContentLoading: true });
 
@@ -160,7 +150,7 @@ class TemplatesList extends Component {
       this.setState({
         actions,
         itemCount: count,
-        templates: results,
+        inventories: results,
         selected: [],
       });
     } catch (err) {
@@ -175,7 +165,7 @@ class TemplatesList extends Component {
       contentError,
       hasContentLoading,
       deletionError,
-      templates,
+      inventories,
       itemCount,
       selected,
       isAddOpen,
@@ -184,16 +174,16 @@ class TemplatesList extends Component {
     const { match, i18n } = this.props;
     const canAdd =
       actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
-    const isAllSelected = selected.length === templates.length;
+    const isAllSelected = selected.length === inventories.length;
     return (
       <PageSection>
         <Card>
           <PaginatedDataList
             contentError={contentError}
             hasContentLoading={hasContentLoading}
-            items={templates}
+            items={inventories}
             itemCount={itemCount}
-            pluralizedItemName="Templates"
+            pluralizedItemName={i18n._(t`Inventories`)}
             qsConfig={QS_CONFIG}
             toolbarColumns={[
               {
@@ -226,9 +216,9 @@ class TemplatesList extends Component {
                 additionalControls={[
                   <ToolbarDeleteButton
                     key="delete"
-                    onDelete={this.handleTemplateDelete}
+                    onDelete={this.handleInventoryDelete}
                     itemsToDelete={selected}
-                    pluralizedItemName="Templates"
+                    pluralizedItemName="Inventories"
                   />,
                   canAdd && (
                     <div
@@ -245,14 +235,14 @@ class TemplatesList extends Component {
                           <ToolbarAddButton onClick={this.handleAddToggle} />
                         }
                         dropdownItems={[
-                          <DropdownItem key="job">
-                            <Link to={`${match.url}/job_template/add/`}>
-                              {i18n._(t`Job Template`)}
+                          <DropdownItem key="inventory">
+                            <Link to={`${match.url}/inventory/add/`}>
+                              {i18n._(t`Inventory`)}
                             </Link>
                           </DropdownItem>,
-                          <DropdownItem key="workflow">
-                            <Link to={`${match.url}_workflow/add/`}>
-                              {i18n._(t`Workflow Template`)}
+                          <DropdownItem key="smart_inventory">
+                            <Link to={`${match.url}/smart_inventory/add/`}>
+                              {i18n._(t`Smart Inventory`)}
                             </Link>
                           </DropdownItem>,
                         ]}
@@ -262,14 +252,18 @@ class TemplatesList extends Component {
                 ]}
               />
             )}
-            renderItem={template => (
-              <TemplateListItem
-                key={template.id}
-                value={template.name}
-                template={template}
-                detailUrl={`${match.url}/${template.type}/${template.id}`}
-                onSelect={() => this.handleSelect(template)}
-                isSelected={selected.some(row => row.id === template.id)}
+            renderItem={inventory => (
+              <InventoryListItem
+                key={inventory.id}
+                value={inventory.name}
+                inventory={inventory}
+                detailUrl={
+                  inventory.kind === 'smart'
+                    ? `${match.url}/smart_inventory/${inventory.id}`
+                    : `${match.url}/inventory/${inventory.id}`
+                }
+                onSelect={() => this.handleSelect(inventory)}
+                isSelected={selected.some(row => row.id === inventory.id)}
               />
             )}
             emptyStateControls={
@@ -286,14 +280,14 @@ class TemplatesList extends Component {
                     position={DropdownPosition.right}
                     toggle={<ToolbarAddButton onClick={this.handleAddToggle} />}
                     dropdownItems={[
-                      <DropdownItem key="job">
-                        <Link to={`${match.url}/job_template/add/`}>
-                          {i18n._(t`Job Template`)}
+                      <DropdownItem key="inventory">
+                        <Link to={`${match.url}/inventory/add/`}>
+                          {i18n._(t`Inventory`)}
                         </Link>
                       </DropdownItem>,
-                      <DropdownItem key="workflow">
-                        <Link to={`${match.url}_workflow/add/`}>
-                          {i18n._(t`Workflow Template`)}
+                      <DropdownItem key="smart_inventory">
+                        <Link to={`${match.url}/smart_inventory/add/`}>
+                          {i18n._(t`Smart Inventory`)}
                         </Link>
                       </DropdownItem>,
                     ]}
@@ -309,7 +303,7 @@ class TemplatesList extends Component {
           title={i18n._(t`Error!`)}
           onClose={this.handleDeleteErrorClose}
         >
-          {i18n._(t`Failed to delete one or more templates.`)}
+          {i18n._(t`Failed to delete one or more inventories.`)}
           <ErrorDetail error={deletionError} />
         </AlertModal>
       </PageSection>
@@ -317,5 +311,5 @@ class TemplatesList extends Component {
   }
 }
 
-export { TemplatesList as _TemplatesList };
-export default withI18n()(withRouter(TemplatesList));
+export { InventoriesList as _InventoriesList };
+export default withI18n()(withRouter(InventoriesList));
