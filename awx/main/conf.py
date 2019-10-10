@@ -749,6 +749,16 @@ register(
     category=_('Logging'),
     category_slug='logging',
 )
+register(
+    'LOG_AGGREGATOR_AUDIT',
+    field_class=fields.BooleanField,
+    allow_null=True,
+    default=False,
+    label=_('Enabled external log aggregation auditing'),
+    help_text=_('When enabled, all external logs emitted by Tower will also be written to /var/log/tower/external.log'),
+    category=_('Logging'),
+    category_slug='logging',
+)
 
 
 register(

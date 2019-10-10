@@ -1226,6 +1226,8 @@ LOGGING = {
         },
     }
 }
+LOG_AGGREGATOR_AUDIT = False
+
 # Apply coloring to messages logged to the console
 COLOR_LOGS = False
 
