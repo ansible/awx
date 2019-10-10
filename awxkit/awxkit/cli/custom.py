@@ -225,6 +225,7 @@ class AssociationMixin(object):
                 def __init__(self, connection, resource):
                     self.conn = connection
                     self.resource = {
+                        'approval_notification': 'notification_templates',
                         'start_notification': 'notification_templates',
                         'success_notification': 'notification_templates',
                         'failure_notification': 'notification_templates',
@@ -299,11 +300,27 @@ JobTemplateNotificationDisAssociation.targets.update({
 class WorkflowJobTemplateNotificationAssociation(NotificationAssociateMixin, CustomAction):
     resource = 'workflow_job_templates'
     action = 'associate'
+    targets = dict(
+        **NotificationAssociateMixin.targets,
+        **{'approval_notification': [
+                'notification_templates_approvals',
+                'notification_template'
+            ]
+        },
+    )
 
 
 class WorkflowJobTemplateNotificationDisAssociation(NotificationAssociateMixin, CustomAction):
     resource = 'workflow_job_templates'
     action = 'disassociate'
+    targets = dict(
+        **NotificationAssociateMixin.targets,
+        **{'approval_notification': [
+                'notification_templates_approvals',
+                'notification_template'
+            ]
+        },
+    )
 
 
 class ProjectNotificationAssociation(NotificationAssociateMixin, CustomAction):
@@ -329,11 +346,27 @@ class InventorySourceNotificationDisAssociation(NotificationAssociateMixin, Cust
 class OrganizationNotificationAssociation(NotificationAssociateMixin, CustomAction):
     resource = 'organizations'
     action = 'associate'
+    targets = dict(
+        **NotificationAssociateMixin.targets,
+        **{'approval_notification': [
+                'notification_templates_approvals',
+                'notification_template'
+            ]
+        },
+    )
 
 
 class OrganizationNotificationDisAssociation(NotificationAssociateMixin, CustomAction):
     resource = 'organizations'
     action = 'disassociate'
+    targets = dict(
+        **NotificationAssociateMixin.targets,
+        **{'approval_notification': [
+                'notification_templates_approvals',
+                'notification_template'
+            ]
+        },
+    )
 
 
 class SettingsList(CustomAction):
