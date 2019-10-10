@@ -15,18 +15,19 @@ class Control(object):
     services = ('dispatcher', 'callback_receiver')
     result = None
 
-    def __init__(self, service, host=None):
+    def __init__(self, service, queuename=None, routing_key=None):
         if service not in self.services:
             raise RuntimeError('{} must be in {}'.format(service, self.services))
         self.service = service
-        self.queuename = host or get_local_queuename()
-        self.queue = Queue(self.queuename, Exchange(self.queuename), routing_key=self.queuename)
+        self.queuename = queuename or get_local_queuename()
+        self.routing_key = routing_key or self.queuename
+        self.queue = Queue(self.queuename, Exchange(self.queuename), routing_key=self.routing_key)
 
     def publish(self, msg, conn, **kwargs):
         producer = Producer(
             exchange=self.queue.exchange,
             channel=conn,
-            routing_key=self.queuename
+            routing_key=self.routing_key
         )
         producer.publish(msg, expiration=5, **kwargs)
 
