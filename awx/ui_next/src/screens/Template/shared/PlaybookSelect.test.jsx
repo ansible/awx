@@ -25,7 +25,7 @@ describe('<PlaybookSelect />', () => {
           projectId={1}
           isValid
           form={{}}
-          field={{onChange: () => {}, value: ''}}
+          field={{ onChange: () => {}, value: '' }}
           onError={() => {}}
         />
       );

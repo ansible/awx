@@ -41,7 +41,7 @@ describe('<LabelSelect />', () => {
     });
     let wrapper;
     await act(async () => {
-      wrapper = mount(<LabelSelect value={[]} onError={() => {}}/>);
+      wrapper = mount(<LabelSelect value={[]} onError={() => {}} />);
     });
     wrapper.update();
 
