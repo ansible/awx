@@ -137,6 +137,13 @@ class Command(BaseCommand):
                 ]
                 queues.append(
                     Queue(
+                        get_local_queuename(),
+                        Exchange(get_local_queuename()),
+                        routing_key='dispatcher-{}-control'.format(get_local_queuename())
+                    )
+                )
+                queues.append(
+                    Queue(
                         construct_bcast_queue_name(bcast),
                         exchange=Exchange(bcast, type='fanout'),
                         routing_key=bcast,

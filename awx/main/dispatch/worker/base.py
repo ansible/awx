@@ -56,8 +56,19 @@ class AWXConsumer(ConsumerMixin):
 
     @property
     def listening_on(self):
+        def qname(q):
+            name = q.name
+            if q.routing_key != name:
+                name = ':'.join([name, q.routing_key])
+            return name
+
+        def qtype(q):
+            if q.exchange.type != 'direct':
+                return ' [{}]'.format(q.exchange.type)
+            return ''
+
         return 'listening on {}'.format([
-            '{} [{}]'.format(q.name, q.exchange.type) for q in self.queues
+            '{}{}'.format(qname(q), qtype(q)) for q in self.queues
         ])
 
     def control(self, body, message):
