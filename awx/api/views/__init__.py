@@ -3774,6 +3774,11 @@ class JobEventDetail(RetrieveAPIView):
     model = models.JobEvent
     serializer_class = serializers.JobEventSerializer
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update(no_truncate=True)
+        return context
+
 
 class JobEventChildrenList(SubListAPIView):
 
@@ -4007,6 +4012,11 @@ class AdHocCommandEventDetail(RetrieveAPIView):
 
     model = models.AdHocCommandEvent
     serializer_class = serializers.AdHocCommandEventSerializer
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update(no_truncate=True)
+        return context
 
 
 class BaseAdHocCommandEventsList(SubListAPIView):

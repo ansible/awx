@@ -3852,11 +3852,11 @@ class JobEventSerializer(BaseSerializer):
 
     def to_representation(self, obj):
         data = super(JobEventSerializer, self).to_representation(obj)
-        # Show full stdout for event detail view, truncate only for list view.
-        if hasattr(self.context.get('view', None), 'retrieve'):
-            return data
         # Show full stdout for playbook_on_* events.
         if obj and obj.event.startswith('playbook_on'):
+            return data
+        # If the view logic says to not trunctate (request was to the detail view or a param was used)
+        if self.context.get('no_truncate', False):
             return data
         max_bytes = settings.EVENT_STDOUT_MAX_BYTES_DISPLAY
         if 'stdout' in data:
@@ -3957,8 +3957,8 @@ class AdHocCommandEventSerializer(BaseSerializer):
 
     def to_representation(self, obj):
         data = super(AdHocCommandEventSerializer, self).to_representation(obj)
-        # Show full stdout for event detail view, truncate only for list view.
-        if hasattr(self.context.get('view', None), 'retrieve'):
+        # If the view logic says to not trunctate (request was to the detail view or a param was used)
+        if self.context.get('no_truncate', False):
             return data
         max_bytes = settings.EVENT_STDOUT_MAX_BYTES_DISPLAY
         if 'stdout' in data:
