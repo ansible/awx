@@ -63,9 +63,9 @@ function ProjectDetail({ project, i18n }) {
   let createdBy = '';
   if (created) {
     if (summary_fields.created_by && summary_fields.created_by.username) {
-      createdBy = `${formatDateString(created)} ${i18n._(t`by`)} ${
-        summary_fields.created_by.username
-      }`;
+      createdBy = i18n._(
+        t`${formatDateString(created)} by ${summary_fields.created_by.username}`
+      );
     } else {
       createdBy = formatDateString(created);
     }
@@ -74,9 +74,11 @@ function ProjectDetail({ project, i18n }) {
   let modifiedBy = '';
   if (modified) {
     if (summary_fields.modified_by && summary_fields.modified_by.username) {
-      modifiedBy = `${formatDateString(modified)} ${i18n._(t`by`)} ${
-        summary_fields.modified_by.username
-      }`;
+      modifiedBy = i18n._(
+        t`${formatDateString(modified)} by ${
+          summary_fields.modified_by.username
+        }`
+      );
     } else {
       modifiedBy = formatDateString(modified);
     }
