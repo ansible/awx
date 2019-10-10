@@ -69,8 +69,8 @@ class Job extends Component {
     }
 
     const tabsArray = [
-      { name: i18n._(t`Details`), link: `${match.url}/details`, id: 0 },
-      { name: i18n._(t`Output`), link: `${match.url}/output`, id: 1 },
+      { name: i18n._(t`Output`), link: `${match.url}/output`, id: 0 },
+      { name: i18n._(t`Details`), link: `${match.url}/details`, id: 1 },
     ];
 
     const CardHeader = styled(PFCardHeader)`
@@ -132,7 +132,7 @@ class Job extends Component {
           <Switch>
             <Redirect
               from="/jobs/:type/:id"
-              to="/jobs/:type/:id/details"
+              to="/jobs/:type/:id/output"
               exact
             />
             {job && [

@@ -52,7 +52,7 @@ class LaunchButton extends React.Component {
       );
       if (launchConfig.can_start_without_user_input) {
         const { data: job } = await JobTemplatesAPI.launch(resource.id);
-        history.push(`/jobs/${job.id}/details`);
+        history.push(`/jobs/${job.id}`);
       } else {
         this.setState({ promptError: true });
       }
@@ -95,7 +95,7 @@ class LaunchButton extends React.Component {
         relaunchConfig.passwords_needed_to_start.length === 0
       ) {
         const { data: job } = await relaunch;
-        history.push(`/jobs/${job.id}/details`);
+        history.push(`/jobs/${job.id}`);
       } else {
         this.setState({ promptError: true });
       }

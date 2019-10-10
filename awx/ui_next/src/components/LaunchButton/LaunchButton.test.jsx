@@ -29,7 +29,7 @@ describe('LaunchButton', () => {
     );
     expect(wrapper).toHaveLength(1);
   });
-  test('redirects to details after successful launch', async done => {
+  test('redirects to job after successful launch', async done => {
     const history = {
       push: jest.fn(),
     };
@@ -51,7 +51,7 @@ describe('LaunchButton', () => {
     expect(JobTemplatesAPI.readLaunch).toHaveBeenCalledWith(1);
     await sleep(0);
     expect(JobTemplatesAPI.launch).toHaveBeenCalledWith(1);
-    expect(history.push).toHaveBeenCalledWith('/jobs/9000/details');
+    expect(history.push).toHaveBeenCalledWith('/jobs/9000');
     done();
   });
   test('displays error modal after unsuccessful launch', async done => {
