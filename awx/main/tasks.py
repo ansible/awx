@@ -40,6 +40,9 @@ from django.utils.translation import ugettext_lazy as _
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
 
+# Kubernetes
+from kubernetes.client.rest import ApiException
+
 # Django-CRUM
 from crum import impersonate
 
@@ -1183,6 +1186,18 @@ class BaseTask(object):
         '''
         Run the job/task and capture its output.
         '''
+        self.instance = self.model.objects.get(pk=pk)
+        containerized = self.instance.is_containerized
+        pod_manager = None
+        if containerized:
+            # Here we are trying to launch a pod before transitioning the job into a running
+            # state. For some scenarios (like waiting for resources to become available) we do this
+            # rather than marking the job as error or failed. This is not always desirable. Cases
+            # such as invalid authentication should surface as an error.
+            pod_manager = self.deploy_container_group_pod(self.instance)
+            if not pod_manager:
+                return
+
         # self.instance because of the update_model pattern and when it's used in callback handlers
         self.instance = self.update_model(pk, status='running',
                                           start_args='')  # blank field to remove encrypted passwords
@@ -1208,7 +1223,6 @@ class BaseTask(object):
 
         try:
             isolated = self.instance.is_isolated()
-            containerized = self.instance.is_containerized
             self.instance.send_notification_templates("running")
             private_data_dir = self.build_private_data_dir(self.instance)
             self.pre_run_hook(self.instance, private_data_dir)
@@ -1287,6 +1301,10 @@ class BaseTask(object):
                 },
             }
 
+            if containerized:
+                # We don't want HOME passed through to container groups.
+                params['envvars'].pop('HOME')
+
             if isinstance(self.instance, AdHocCommand):
                 params['module'] = self.build_module_name(self.instance)
                 params['module_args'] = self.build_module_args(self.instance)
@@ -1316,16 +1334,6 @@ class BaseTask(object):
                     params.pop('inventory'),
                     os.path.join(private_data_dir, 'inventory')
                 )
-                pod_manager = None
-                if containerized:
-                    from awx.main.scheduler.kubernetes import PodManager # Avoid circular import
-                    params['envvars'].pop('HOME')
-                    pod_manager = PodManager(self.instance)
-                    self.cleanup_paths.append(pod_manager.kube_config)
-                    pod_manager.deploy()
-                    self.instance.execution_node = pod_manager.pod_name
-                    self.instance.save(update_fields=['execution_node'])
-
 
                 ansible_runner.utils.dump_artifacts(params)
                 isolated_manager_instance = isolated_manager.IsolatedManager(
@@ -1383,6 +1391,42 @@ class BaseTask(object):
                 raise AwxTaskError.TaskCancel(self.instance, rc)
             else:
                 raise AwxTaskError.TaskError(self.instance, rc)
+
+
+    def deploy_container_group_pod(self, task):
+        from awx.main.scheduler.kubernetes import PodManager # Avoid circular import
+        pod_manager = PodManager(self.instance)
+        self.cleanup_paths.append(pod_manager.kube_config)
+        try:
+            log_name = task.log_format
+            logger.debug(f"Launching pod for {log_name}.")
+            pod_manager.deploy()
+        except (ApiException, Exception) as exc:
+            if isinstance(exc, ApiException) and exc.status == 403:
+                try:
+                    if 'exceeded quota' in json.loads(exc.body)['message']:
+                        # If the k8s cluster does not have capacity, we move the
+                        # job back into pending and wait until the next run of
+                        # the task manager. This does not exactly play well with
+                        # our current instance group precendence logic, since it
+                        # will just sit here forever if kubernetes returns this
+                        # error.
+                        logger.warn(exc.body)
+                        logger.warn(f"Could not launch pod for {log_name}. Exceeded quota.")
+                        self.update_model(task.pk, status='pending')
+                        return
+                except Exception:
+                    logger.exception(f"Unable to handle response from Kubernetes API for {log_name}.")
+
+            logger.exception(f"Error when launching pod for {log_name}")
+            self.update_model(task.pk, status='error', result_traceback=traceback.format_exc())
+            return
+
+        self.update_model(task.pk, execution_node=pod_manager.pod_name)
+        return pod_manager
+
+        
+
 
 
 @task()
@@ -1790,7 +1834,10 @@ class RunJob(BaseTask):
 
         if job.is_containerized:
             from awx.main.scheduler.kubernetes import PodManager # prevent circular import
-            PodManager(job).delete()
+            pm = PodManager(job)
+            logger.debug(f"Deleting pod {pm.pod_name}")
+            pm.delete()
+
 
         try:
             inventory = job.inventory

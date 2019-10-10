@@ -3,6 +3,7 @@ import stat
 import time
 import yaml
 import tempfile
+import logging
 from base64 import b64encode
 
 from django.conf import settings
@@ -10,6 +11,8 @@ from kubernetes import client, config
 from django.utils.functional import cached_property
 
 from awx.main.utils.common import parse_yaml_or_json
+
+logger = logging.getLogger('awx.main.scheduler')
 
 
 class PodManager(object):
@@ -21,32 +24,33 @@ class PodManager(object):
         if not self.credential.kubernetes:
             raise RuntimeError('Pod deployment cannot occur without a Kubernetes credential')
 
-
         self.kube_api.create_namespaced_pod(body=self.pod_definition,
                                             namespace=self.namespace,
-                                            _request_timeout=settings.AWX_CONTAINER_GROUP_DEFAULT_LAUNCH_TIMEOUT)
+                                            _request_timeout=settings.AWX_CONTAINER_GROUP_K8S_API_TIMEOUT)
 
-        # We don't do any fancy timeout logic here because it is handled
-        # at a higher level in the job spawning process. See
-        # settings.AWX_ISOLATED_LAUNCH_TIMEOUT and settings.AWX_ISOLATED_CONNECTION_TIMEOUT
-        while True:
+        num_retries = settings.AWX_CONTAINER_GROUP_POD_LAUNCH_RETRIES
+        for retry_attempt in range(num_retries - 1):
+            logger.debug(f"Checking for pod {self.pod_name}. Attempt {retry_attempt + 1} of {num_retries}")
             pod = self.kube_api.read_namespaced_pod(name=self.pod_name,
                                                     namespace=self.namespace,
-                                                    _request_timeout=settings.AWX_CONTAINER_GROUP_DEFAULT_LAUNCH_TIMEOUT)
+                                                    _request_timeout=settings.AWX_CONTAINER_GROUP_K8S_API_TIMEOUT)
             if pod.status.phase != 'Pending':
                 break
-            time.sleep(1)
+            else:
+                logger.debug(f"Pod {self.pod_name} is Pending.")
+                time.sleep(settings.AWX_CONTAINER_GROUP_POD_LAUNCH_RETRY_DELAY)
+                continue
 
         if pod.status.phase == 'Running':
+            logger.debug(f"Pod {self.pod_name} is online.")
             return pod
         else:
-            raise RuntimeError(f"Unhandled Pod phase: {pod.status.phase}")
-
+            logger.warn(f"Pod {self.pod_name} did not start. Status is {pod.status.phase}.")
 
     def delete(self):
         return self.kube_api.delete_namespaced_pod(name=self.pod_name,
                                                    namespace=self.namespace,
-                                                   _request_timeout=settings.AWX_CONTAINER_GROUP_DEFAULT_LAUNCH_TIMEOUT)
+                                                   _request_timeout=settings.AWX_CONTAINER_GROUP_K8S_API_TIMEOUT)
 
     @property
     def namespace(self):
