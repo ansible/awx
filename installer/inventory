@@ -31,6 +31,7 @@ dockerhub_base=ansible
 # The example below shows an annotation to be used with Traefik but other Ingress controllers are also supported.
 #kubernetes_ingress_hostname=awx.example.org
 #kubernetes_ingress_annotations={'kubernetes.io/ingress.class': 'traefik', 'traefik.ingress.kubernetes.io/redirect-entry-point': 'https'}
+#kubernetes_ingress_tls_secret=awx-cert
 
 # Kubernetes and Openshift Install Resource Requests
 # These are the request and limit values for a pod's container for task/web/rabbitmq/memcached/management.
