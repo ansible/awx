@@ -52,6 +52,11 @@
     height: calc(~"100vh - 80px");
 }
 
+textarea[disabled] + div .CodeMirror-code{
+    background-color: #ebebeb;
+    cursor: not-allowed;
+}
+
 
 @media screen and (min-width: 768px){
 	.NetworkingExtraVars .modal-dialog{
