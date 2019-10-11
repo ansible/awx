@@ -356,6 +356,7 @@ OrganizationNotificationDisAssociation.targets.update({
     'approval_notification': ['notification_templates_approvals', 'notification_template'],
 })
 
+
 class SettingsList(CustomAction):
     action = 'list'
     resource = 'settings'
