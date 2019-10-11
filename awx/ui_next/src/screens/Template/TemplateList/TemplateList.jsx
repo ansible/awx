@@ -184,7 +184,8 @@ class TemplatesList extends Component {
     const { match, i18n } = this.props;
     const canAdd =
       actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
-    const isAllSelected = selected.length === templates.length;
+    const isAllSelected =
+      selected.length === templates.length && selected.length > 0;
     return (
       <PageSection>
         <Card>

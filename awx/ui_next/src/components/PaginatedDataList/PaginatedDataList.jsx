@@ -99,47 +99,36 @@ class PaginatedDataList extends React.Component {
       );
     }
 
-    if (items.length <= 0) {
-      return (
-        <Fragment>
-          <ListHeader
-            emptyStateControls={emptyStateControls}
-            itemCount={itemCount}
-            columns={columns}
-            qsConfig={qsConfig}
-          />
-          {Content}
-        </Fragment>
-      );
-    }
-
     return (
       <Fragment>
         <ListHeader
           itemCount={itemCount}
           renderToolbar={renderToolbar}
+          emptyStateControls={emptyStateControls}
           columns={columns}
           qsConfig={qsConfig}
         />
         {Content}
-        <Pagination
-          variant="bottom"
-          itemCount={itemCount}
-          page={queryParams.page || 1}
-          perPage={queryParams.page_size}
-          perPageOptions={
-            showPageSizeOptions
-              ? [
-                  { title: '5', value: 5 },
-                  { title: '10', value: 10 },
-                  { title: '20', value: 20 },
-                  { title: '50', value: 50 },
-                ]
-              : []
-          }
-          onSetPage={this.handleSetPage}
-          onPerPageSelect={this.handleSetPageSize}
-        />
+        {items.length ? (
+          <Pagination
+            variant="bottom"
+            itemCount={itemCount}
+            page={queryParams.page || 1}
+            perPage={queryParams.page_size}
+            perPageOptions={
+              showPageSizeOptions
+                ? [
+                    { title: '5', value: 5 },
+                    { title: '10', value: 10 },
+                    { title: '20', value: 20 },
+                    { title: '50', value: 50 },
+                  ]
+                : []
+            }
+            onSetPage={this.handleSetPage}
+            onPerPageSelect={this.handleSetPageSize}
+          />
+        ) : null}
       </Fragment>
     );
   }
