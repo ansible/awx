@@ -300,27 +300,21 @@ JobTemplateNotificationDisAssociation.targets.update({
 class WorkflowJobTemplateNotificationAssociation(NotificationAssociateMixin, CustomAction):
     resource = 'workflow_job_templates'
     action = 'associate'
-    targets = dict(
-        **NotificationAssociateMixin.targets,
-        **{'approval_notification': [
-                'notification_templates_approvals',
-                'notification_template'
-            ]
-        },
-    )
+    targets = NotificationAssociateMixin.targets.copy()
 
 
 class WorkflowJobTemplateNotificationDisAssociation(NotificationAssociateMixin, CustomAction):
     resource = 'workflow_job_templates'
     action = 'disassociate'
-    targets = dict(
-        **NotificationAssociateMixin.targets,
-        **{'approval_notification': [
-                'notification_templates_approvals',
-                'notification_template'
-            ]
-        },
-    )
+    targets = NotificationAssociateMixin.targets.copy()
+
+
+WorkflowJobTemplateNotificationAssociation.targets.update({
+    'approval_notification': ['notification_templates_approvals', 'notification_template'],
+})
+WorkflowJobTemplateNotificationDisAssociation.targets.update({
+    'approval_notification': ['notification_templates_approvals', 'notification_template'],
+})
 
 
 class ProjectNotificationAssociation(NotificationAssociateMixin, CustomAction):
@@ -346,28 +340,21 @@ class InventorySourceNotificationDisAssociation(NotificationAssociateMixin, Cust
 class OrganizationNotificationAssociation(NotificationAssociateMixin, CustomAction):
     resource = 'organizations'
     action = 'associate'
-    targets = dict(
-        **NotificationAssociateMixin.targets,
-        **{'approval_notification': [
-                'notification_templates_approvals',
-                'notification_template'
-            ]
-        },
-    )
+    targets = NotificationAssociateMixin.targets.copy()
 
 
 class OrganizationNotificationDisAssociation(NotificationAssociateMixin, CustomAction):
     resource = 'organizations'
     action = 'disassociate'
-    targets = dict(
-        **NotificationAssociateMixin.targets,
-        **{'approval_notification': [
-                'notification_templates_approvals',
-                'notification_template'
-            ]
-        },
-    )
+    targets = NotificationAssociateMixin.targets.copy()
 
+
+OrganizationNotificationAssociation.targets.update({
+    'approval_notification': ['notification_templates_approvals', 'notification_template'],
+})
+OrganizationNotificationDisAssociation.targets.update({
+    'approval_notification': ['notification_templates_approvals', 'notification_template'],
+})
 
 class SettingsList(CustomAction):
     action = 'list'
