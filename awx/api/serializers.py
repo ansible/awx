@@ -140,6 +140,7 @@ SUMMARIZABLE_FK_FIELDS = {
     'source_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'credential_type_id'),
     'target_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'credential_type_id'),
     'webhook_credential': DEFAULT_SUMMARY_FIELDS,
+    'approved_or_denied_by': ('id', 'username', 'first_name', 'last_name'),
 }
 
 
@@ -3501,6 +3502,8 @@ class WorkflowApprovalSerializer(UnifiedJobSerializer):
                                                              kwargs={'pk': obj.workflow_approval_template.pk})
         res['approve'] = self.reverse('api:workflow_approval_approve', kwargs={'pk': obj.pk})
         res['deny'] = self.reverse('api:workflow_approval_deny', kwargs={'pk': obj.pk})
+        if obj.approved_or_denied_by:
+            res['approved_or_denied_by'] = self.reverse('api:user_detail', kwargs={'pk': obj.approved_or_denied_by.pk})
         return res
 
 
