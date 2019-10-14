@@ -150,7 +150,8 @@ class JobList extends Component {
       selected,
     } = this.state;
     const { match, i18n } = this.props;
-    const isAllSelected = selected.length === jobs.length;
+    const isAllSelected =
+      selected.length === jobs.length && selected.length > 0;
     return (
       <PageSection>
         <Card>

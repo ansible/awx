@@ -46,16 +46,14 @@ class ListHeader extends React.Component {
   }
 
   handleSearch(key, value) {
-    const { history, qsConfig } = this.props;
-    const { search } = history.location;
-    const oldParams = parseQueryString(qsConfig, search);
+    const { location, qsConfig } = this.props;
+    const oldParams = parseQueryString(qsConfig, location.search);
     this.pushHistoryState(mergeParams(oldParams, { [key]: value }));
   }
 
   handleRemove(key, value) {
-    const { history, qsConfig } = this.props;
-    const { search } = history.location;
-    const oldParams = parseQueryString(qsConfig, search);
+    const { location, qsConfig } = this.props;
+    const oldParams = parseQueryString(qsConfig, location.search);
     this.pushHistoryState(removeParams(qsConfig, oldParams, { [key]: value }));
   }
 
@@ -64,9 +62,8 @@ class ListHeader extends React.Component {
   }
 
   handleSort(key, order) {
-    const { history, qsConfig } = this.props;
-    const { search } = history.location;
-    const oldParams = parseQueryString(qsConfig, search);
+    const { location, qsConfig } = this.props;
+    const oldParams = parseQueryString(qsConfig, location.search);
     this.pushHistoryState(
       replaceParams(oldParams, {
         order_by: order === 'ascending' ? key : `-${key}`,
@@ -89,11 +86,14 @@ class ListHeader extends React.Component {
       columns,
       renderToolbar,
       qsConfig,
+      location,
     } = this.props;
     const [orderBy, sortOrder] = this.getSortOrder();
+    const params = parseQueryString(qsConfig, location.search);
+    const isEmpty = itemCount === 0 && Object.keys(params).length === 0;
     return (
       <Fragment>
-        {itemCount === 0 ? (
+        {isEmpty ? (
           <Fragment>
             <EmptyStateControlsWrapper>
               {emptyStateControls}

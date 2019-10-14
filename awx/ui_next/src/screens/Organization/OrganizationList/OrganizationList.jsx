@@ -142,7 +142,8 @@ class OrganizationsList extends Component {
 
     const canAdd =
       actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
-    const isAllSelected = selected.length === organizations.length;
+    const isAllSelected =
+      selected.length === organizations.length && selected.length > 0;
 
     return (
       <Fragment>
