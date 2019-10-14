@@ -20,16 +20,18 @@ function AtTabController ($state) {
         group.register(scope);
     };
 
-    vm.go = () => {
+    vm.handleClick = () => {
         if (scope.state._disabled || scope.state._active) {
             return;
         }
-
         if (scope.state._go) {
             $state.go(scope.state._go, scope.state._params, { reload: true });
-        } else {
-            group.clearActive();
-            scope.state._active = true;
+            return;
+        }
+        group.clearActive();
+        scope.state._active = true;
+        if (scope.state._onClickActivate) {
+            scope.state._onClickActivate();
         }
     };
 }
