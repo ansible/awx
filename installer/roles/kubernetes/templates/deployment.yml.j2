@@ -272,7 +272,7 @@ spec:
               command:
               - /bin/ash
               - -c
-              - "wget -O - --header \"Authorization: Basic {{ ( rabbitmq_user + ':' + rabbitmq_password ) | b64encode }}\"  http://localhost:15672/api/healthchecks/node | grep -qF \"{\"status\":\"ok\"}\""
+              - "wget -O - --header \"Authorization: Basic {{ ( rabbitmq_user + ':' + rabbitmq_password ) | b64encode }}\"  http://localhost:15672/api/healthchecks/node | grep -qF \"{\\\"status\\\":\\\"ok\\\"}\""
             initialDelaySeconds: 30
             timeoutSeconds: 10
           readinessProbe:
@@ -280,7 +280,7 @@ spec:
               command:
               - /bin/ash
               - -c
-              - "wget -O - --header \"Authorization: Basic {{ ( rabbitmq_user + ':' + rabbitmq_password ) | b64encode }}\"  http://localhost:15672/api/healthchecks/node | grep -qF \"{\"status\":\"ok\"}\""
+              - "wget -O - --header \"Authorization: Basic {{ ( rabbitmq_user + ':' + rabbitmq_password ) | b64encode }}\"  http://localhost:15672/api/healthchecks/node | grep -qF \"{\\\"status\\\":\\\"ok\\\"}\""
             initialDelaySeconds: 10
             timeoutSeconds: 10
           env:
