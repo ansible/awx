@@ -4,6 +4,7 @@ import {
   number,
   string,
   bool,
+  objectOf,
   oneOf,
   oneOfType,
 } from 'prop-types';
@@ -71,11 +72,6 @@ export const JobTemplate = shape({
   project: number,
 });
 
-export const Project = shape({
-  id: number.isRequired,
-  name: string.isRequired,
-});
-
 export const Inventory = shape({
   id: number.isRequired,
   name: string,
@@ -107,6 +103,51 @@ export const Credential = shape({
   name: string.isRequired,
   cloud: bool,
   kind: string,
+});
+
+export const Project = shape({
+  id: number.isRequired,
+  type: oneOf(['project']),
+  url: string,
+  related: shape(),
+  summary_fields: shape({
+    organization: Organization,
+    credential: Credential,
+    last_job: shape({}),
+    last_update: shape({}),
+    created_by: shape({}),
+    modified_by: shape({}),
+    object_roles: shape({}),
+    user_capabilities: objectOf(bool),
+  }),
+  created: string,
+  name: string.isRequired,
+  description: string,
+  scm_type: oneOf(['', 'git', 'hg', 'svn', 'insights']),
+  scm_url: string,
+  scm_branch: string,
+  scm_refspec: string,
+  scm_clean: bool,
+  scm_delete_on_update: bool,
+  credential: number,
+  status: oneOf([
+    'new',
+    'pending',
+    'waiting',
+    'running',
+    'successful',
+    'failed',
+    'error',
+    'canceled',
+    'never updated',
+    'ok',
+    'missing',
+  ]),
+  organization: number,
+  scm_update_on_launch: bool,
+  scm_update_cache_timeout: number,
+  allow_override: bool,
+  custom_virtualenv: string,
 });
 
 export const Job = shape({
