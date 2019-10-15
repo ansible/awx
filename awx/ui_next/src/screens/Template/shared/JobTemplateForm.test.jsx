@@ -82,7 +82,6 @@ describe('<JobTemplateForm />', () => {
         />
       );
     });
-    // await waitForElement(wrapper, 'Form', el => el.length === 0);
     expect(LabelsAPI.read).toHaveBeenCalled();
     expect(JobTemplatesAPI.readInstanceGroups).toHaveBeenCalled();
     wrapper.update();
