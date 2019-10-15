@@ -4801,6 +4801,18 @@ class InstanceGroupSerializer(BaseSerializer):
                 raise serializers.ValidationError(_('Isolated instances may not be added or removed from instances groups via the API.'))
             if self.instance and self.instance.controller_id is not None:
                 raise serializers.ValidationError(_('Isolated instance group membership may not be managed via the API.'))
+        if self.instance.is_containerized:
+                raise serializers.ValidationError(_('Containerized instances may not be managed via the API'))
+        return value
+
+    def validate_policy_instance_percentage(self, value):
+        if value and self.instance.is_containerized:
+            raise serializers.ValidationError(_('Containerized instances may not be managed via the API'))
+        return value
+
+    def validate_policy_instance_minimum(self, value):
+        if value and self.instance.is_containerized:
+            raise serializers.ValidationError(_('Containerized instances may not be managed via the API'))
         return value
 
     def validate_name(self, value):

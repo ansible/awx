@@ -46,7 +46,7 @@ from awx.main.utils import (
     decrypt_field
 )
 from awx.main.utils.db import get_all_field_names
-from awx.api.serializers import ResourceAccessListElementSerializer, CopySerializer, UserSerializer
+from awx.api.serializers import ResourceAccessListElementSerializer, CopySerializer, UserSerializer, InstanceGroupSerializer
 from awx.api.versioning import URLPathVersioning
 from awx.api.metadata import SublistAttachDetatchMetadata, Metadata
 
@@ -317,6 +317,13 @@ class GenericAPIView(generics.GenericAPIView, APIView):
             for name, field in list(serializer.fields.items()):
                 if getattr(field, 'read_only', None):
                     del serializer.fields[name]
+                # Additionally, remove the following fields if an instance group is containerized.
+                if name == 'is_containerized':
+                    import sdb
+                    sdb.set_trace()
+                    del serializer.fields['policy_instance_percentage']
+                    del serializer.fields['policy_instance_minimum']
+                    del serializer.fields['policy_instance_list']
             serializer._data = self.update_raw_data(serializer.data)
         return serializer
 
