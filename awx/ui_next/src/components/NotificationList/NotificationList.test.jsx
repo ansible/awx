@@ -81,7 +81,9 @@ describe('<NotificationList />', () => {
     );
     await sleep(0);
     wrapper.update();
-    expect(wrapper).toMatchSnapshot();
+    const dataList = wrapper.find('PaginatedDataList');
+    expect(dataList).toHaveLength(1);
+    expect(dataList.prop('items')).toEqual(data.results);
   });
 
   test('should render list fetched of items', async () => {

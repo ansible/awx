@@ -1,4 +1,5 @@
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
 import { sleep } from '@testUtils/testUtils';
 import JobTemplateForm from './JobTemplateForm';
@@ -71,14 +72,16 @@ describe('<JobTemplateForm />', () => {
   });
 
   test('should render LabelsSelect', async () => {
-    const wrapper = mountWithContexts(
-      <JobTemplateForm
-        template={mockData}
-        handleSubmit={jest.fn()}
-        handleCancel={jest.fn()}
-      />
-    );
-    await waitForElement(wrapper, 'Form', el => el.length === 0);
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <JobTemplateForm
+          template={mockData}
+          handleSubmit={jest.fn()}
+          handleCancel={jest.fn()}
+        />
+      );
+    });
     expect(LabelsAPI.read).toHaveBeenCalled();
     expect(JobTemplatesAPI.readInstanceGroups).toHaveBeenCalled();
     wrapper.update();
@@ -90,13 +93,16 @@ describe('<JobTemplateForm />', () => {
   });
 
   test('should update form values on input changes', async () => {
-    const wrapper = mountWithContexts(
-      <JobTemplateForm
-        template={mockData}
-        handleSubmit={jest.fn()}
-        handleCancel={jest.fn()}
-      />
-    );
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <JobTemplateForm
+          template={mockData}
+          handleSubmit={jest.fn()}
+          handleCancel={jest.fn()}
+        />
+      );
+    });
 
     await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
     const form = wrapper.find('Formik');
@@ -112,14 +118,16 @@ describe('<JobTemplateForm />', () => {
       target: { value: 'new job type', name: 'job_type' },
     });
     expect(form.state('values').job_type).toEqual('new job type');
-    wrapper.find('InventoryLookup').prop('onChange')({
+    wrapper.find('InventoryLookup').invoke('onChange')({
       id: 3,
       name: 'inventory',
     });
     expect(form.state('values').inventory).toEqual(3);
-    wrapper.find('ProjectLookup').prop('onChange')({
-      id: 4,
-      name: 'project',
+    await act(async () => {
+      wrapper.find('ProjectLookup').invoke('onChange')({
+        id: 4,
+        name: 'project',
+      });
     });
     expect(form.state('values').project).toEqual(4);
     wrapper.find('AnsibleSelect[name="playbook"]').simulate('change', {
@@ -130,13 +138,16 @@ describe('<JobTemplateForm />', () => {
 
   test('should call handleSubmit when Submit button is clicked', async () => {
     const handleSubmit = jest.fn();
-    const wrapper = mountWithContexts(
-      <JobTemplateForm
-        template={mockData}
-        handleSubmit={handleSubmit}
-        handleCancel={jest.fn()}
-      />
-    );
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <JobTemplateForm
+          template={mockData}
+          handleSubmit={handleSubmit}
+          handleCancel={jest.fn()}
+        />
+      );
+    });
     await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
     expect(handleSubmit).not.toHaveBeenCalled();
     wrapper.find('button[aria-label="Save"]').simulate('click');
@@ -146,16 +157,19 @@ describe('<JobTemplateForm />', () => {
 
   test('should call handleCancel when Cancel button is clicked', async () => {
     const handleCancel = jest.fn();
-    const wrapper = mountWithContexts(
-      <JobTemplateForm
-        template={mockData}
-        handleSubmit={jest.fn()}
-        handleCancel={handleCancel}
-      />
-    );
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <JobTemplateForm
+          template={mockData}
+          handleSubmit={jest.fn()}
+          handleCancel={handleCancel}
+        />
+      );
+    });
     await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
     expect(handleCancel).not.toHaveBeenCalled();
-    wrapper.find('button[aria-label="Cancel"]').prop('onClick')();
+    wrapper.find('button[aria-label="Cancel"]').invoke('onClick')();
     expect(handleCancel).toBeCalled();
   });
 });

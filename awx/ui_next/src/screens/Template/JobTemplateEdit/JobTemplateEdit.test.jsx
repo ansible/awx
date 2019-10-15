@@ -1,4 +1,6 @@
 import React from 'react';
+import { act } from 'react-dom/test-utils';
+import { createMemoryHistory } from 'history';
 import { sleep } from '@testUtils/testUtils';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
 import { JobTemplatesAPI, LabelsAPI, ProjectsAPI } from '@api';
@@ -35,6 +37,7 @@ const mockJobTemplate = {
       results: [{ name: 'Sushi', id: 1 }, { name: 'Major', id: 2 }],
     },
     inventory: {
+      id: 2,
       organization_id: 1,
     },
   },
@@ -157,16 +160,22 @@ describe('<JobTemplateEdit />', () => {
   });
 
   test('initially renders successfully', async () => {
-    const wrapper = mountWithContexts(
-      <JobTemplateEdit template={mockJobTemplate} />
-    );
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <JobTemplateEdit template={mockJobTemplate} />
+      );
+    });
     await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
   });
 
-  test('handleSubmit should call api update', async done => {
-    const wrapper = mountWithContexts(
-      <JobTemplateEdit template={mockJobTemplate} />
-    );
+  test('handleSubmit should call api update', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <JobTemplateEdit template={mockJobTemplate} />
+      );
+    });
     await waitForElement(wrapper, 'JobTemplateForm', e => e.length === 1);
     const updatedTemplateData = {
       name: 'new name',
@@ -184,16 +193,13 @@ describe('<JobTemplateEdit />', () => {
     });
     const formik = wrapper.find('Formik').instance();
     const changeState = new Promise(resolve => {
-      formik.setState(
-        {
-          values: {
-            ...mockJobTemplate,
-            ...updatedTemplateData,
-            labels,
-          },
-        },
-        () => resolve()
-      );
+      const values = {
+        ...mockJobTemplate,
+        ...updatedTemplateData,
+        labels,
+        instanceGroups: [],
+      };
+      formik.setState({ values }, () => resolve());
     });
     await changeState;
     wrapper.find('button[aria-label="Save"]').simulate('click');
@@ -206,25 +212,25 @@ describe('<JobTemplateEdit />', () => {
     expect(JobTemplatesAPI.disassociateLabel).toHaveBeenCalledTimes(2);
     expect(JobTemplatesAPI.associateLabel).toHaveBeenCalledTimes(2);
     expect(JobTemplatesAPI.generateLabel).toHaveBeenCalledTimes(2);
-    done();
   });
 
-  test('should navigate to job template detail when cancel is clicked', async done => {
-    const history = { push: jest.fn() };
-    const wrapper = mountWithContexts(
-      <JobTemplateEdit template={mockJobTemplate} />,
-      { context: { router: { history } } }
-    );
+  test('should navigate to job template detail when cancel is clicked', async () => {
+    const history = createMemoryHistory({});
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <JobTemplateEdit template={mockJobTemplate} />,
+        { context: { router: { history } } }
+      );
+    });
     const cancelButton = await waitForElement(
       wrapper,
       'button[aria-label="Cancel"]',
       e => e.length === 1
     );
-    expect(history.push).not.toHaveBeenCalled();
     cancelButton.prop('onClick')();
-    expect(history.push).toHaveBeenCalledWith(
+    expect(history.location.pathname).toEqual(
       '/templates/job_template/1/details'
     );
-    done();
   });
 });

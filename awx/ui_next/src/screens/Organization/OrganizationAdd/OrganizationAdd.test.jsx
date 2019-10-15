@@ -1,10 +1,9 @@
 import React from 'react';
-
+import { createMemoryHistory } from 'history';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
-
 import OrganizationAdd from './OrganizationAdd';
 import { OrganizationsAPI } from '../../../api';
 
@@ -27,33 +26,25 @@ describe('<OrganizationAdd />', () => {
   });
 
   test('should navigate to organizations list when cancel is clicked', () => {
-    const history = {
-      push: jest.fn(),
-    };
+    const history = createMemoryHistory({});
     const wrapper = mountWithContexts(<OrganizationAdd />, {
       context: { router: { history } },
     });
-    expect(history.push).not.toHaveBeenCalled();
     wrapper.find('button[aria-label="Cancel"]').prop('onClick')();
-    expect(history.push).toHaveBeenCalledWith('/organizations');
+    expect(history.location.pathname).toEqual('/organizations');
   });
 
   test('should navigate to organizations list when close (x) is clicked', () => {
-    const history = {
-      push: jest.fn(),
-    };
+    const history = createMemoryHistory({});
     const wrapper = mountWithContexts(<OrganizationAdd />, {
       context: { router: { history } },
     });
-    expect(history.push).not.toHaveBeenCalled();
     wrapper.find('button[aria-label="Close"]').prop('onClick')();
-    expect(history.push).toHaveBeenCalledWith('/organizations');
+    expect(history.location.pathname).toEqual('/organizations');
   });
 
-  test('successful form submission should trigger redirect', async done => {
-    const history = {
-      push: jest.fn(),
-    };
+  test('successful form submission should trigger redirect', async () => {
+    const history = createMemoryHistory({});
     const orgData = {
       name: 'new name',
       description: 'new description',
@@ -77,11 +68,10 @@ describe('<OrganizationAdd />', () => {
       [3],
       []
     );
-    expect(history.push).toHaveBeenCalledWith('/organizations/5');
-    done();
+    expect(history.location.pathname).toEqual('/organizations/5');
   });
 
-  test('handleSubmit should post instance groups', async done => {
+  test('handleSubmit should post instance groups', async () => {
     const orgData = {
       name: 'new name',
       description: 'new description',
@@ -104,7 +94,6 @@ describe('<OrganizationAdd />', () => {
       []
     );
     expect(OrganizationsAPI.associateInstanceGroup).toHaveBeenCalledWith(5, 3);
-    done();
   });
 
   test('AnsibleSelect component renders if there are virtual environments', () => {

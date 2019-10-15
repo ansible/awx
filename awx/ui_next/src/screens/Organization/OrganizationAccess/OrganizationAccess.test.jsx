@@ -85,7 +85,7 @@ describe('<OrganizationAccess />', () => {
     const wrapper = mountWithContexts(
       <OrganizationAccess organization={organization} />
     );
-    expect(wrapper.find('OrganizationAccess')).toMatchSnapshot();
+    expect(wrapper.find('PaginatedDataList')).toHaveLength(1);
   });
 
   test('should fetch and display access records on mount', async done => {

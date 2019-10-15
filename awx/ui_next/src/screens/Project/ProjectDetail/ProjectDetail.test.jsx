@@ -1,4 +1,5 @@
 import React from 'react';
+import { createMemoryHistory } from 'history';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
 import ProjectDetail from './ProjectDetail';
 
@@ -175,46 +176,26 @@ describe('<ProjectDetail />', () => {
   });
 
   test('edit button should navigate to project edit', () => {
-    const context = {
-      router: {
-        history: {
-          push: jest.fn(),
-          replace: jest.fn(),
-          createHref: jest.fn(),
-        },
-      },
-    };
+    const history = createMemoryHistory();
     const wrapper = mountWithContexts(<ProjectDetail project={mockProject} />, {
-      context,
+      context: { router: { history } },
     });
     expect(wrapper.find('Button[aria-label="edit"]').length).toBe(1);
-    expect(context.router.history.push).not.toHaveBeenCalled();
     wrapper
       .find('Button[aria-label="edit"] Link')
       .simulate('click', { button: 0 });
-    expect(context.router.history.push).toHaveBeenCalledWith(
-      '/projects/1/edit'
-    );
+    expect(history.location.pathname).toEqual('/projects/1/edit');
   });
 
   test('close button should navigate to projects list', () => {
-    const context = {
-      router: {
-        history: {
-          push: jest.fn(),
-          replace: jest.fn(),
-          createHref: jest.fn(),
-        },
-      },
-    };
+    const history = createMemoryHistory();
     const wrapper = mountWithContexts(<ProjectDetail project={mockProject} />, {
-      context,
+      context: { router: { history } },
     });
     expect(wrapper.find('Button[aria-label="close"]').length).toBe(1);
-    expect(context.router.history.push).not.toHaveBeenCalled();
     wrapper
       .find('Button[aria-label="close"] Link')
       .simulate('click', { button: 0 });
-    expect(context.router.history.push).toHaveBeenCalledWith('/projects');
+    expect(history.location.pathname).toEqual('/projects');
   });
 });

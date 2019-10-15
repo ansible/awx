@@ -1,4 +1,5 @@
 import React, { Component, Fragment } from 'react';
+import { withRouter } from 'react-router-dom';
 import { global_breakpoint_md } from '@patternfly/react-tokens';
 import {
   Nav,
@@ -66,8 +67,9 @@ class App extends Component {
 
   // eslint-disable-next-line class-methods-use-this
   async handleLogout() {
+    const { history } = this.props;
     await RootAPI.logout();
-    window.location.replace('/#/login');
+    history.replace('/login');
   }
 
   handleAboutOpen() {
@@ -193,4 +195,4 @@ class App extends Component {
 }
 
 export { App as _App };
-export default withI18n()(App);
+export default withI18n()(withRouter(App));

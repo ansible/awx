@@ -159,9 +159,27 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                               },
                               "displayName": "Styled(Link)",
                               "foldedComponentIds": Array [],
+                              "propTypes": Object {
+                                "innerRef": [Function],
+                                "onClick": [Function],
+                                "replace": [Function],
+                                "target": [Function],
+                                "to": [Function],
+                              },
                               "render": [Function],
                               "styledComponentId": "sc-bdVaJa",
-                              "target": [Function],
+                              "target": Object {
+                                "$$typeof": Symbol(react.forward_ref),
+                                "displayName": "Link",
+                                "propTypes": Object {
+                                  "innerRef": [Function],
+                                  "onClick": [Function],
+                                  "replace": [Function],
+                                  "target": [Function],
+                                  "to": [Function],
+                                },
+                                "render": [Function],
+                              },
                               "toString": [Function],
                               "warnTooManyClasses": [Function],
                               "withComponent": [Function],
@@ -176,23 +194,29 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                         >
                           <Link
                             className="sc-bdVaJa eBseNd"
-                            replace={false}
                             to={
                               Object {
                                 "pathname": "/foo",
                               }
                             }
                           >
-                            <a
+                            <LinkAnchor
                               className="sc-bdVaJa eBseNd"
-                              onClick={[Function]}
+                              href="/foo"
+                              navigate={[Function]}
                             >
-                              <b
-                                id="items-list-item-9000"
+                              <a
+                                className="sc-bdVaJa eBseNd"
+                                href="/foo"
+                                onClick={[Function]}
                               >
-                                Foo
-                              </b>
-                            </a>
+                                <b
+                                  id="items-list-item-9000"
+                                >
+                                  Foo
+                                </b>
+                              </a>
+                            </LinkAnchor>
                           </Link>
                         </StyledComponent>
                       </Styled(Link)>

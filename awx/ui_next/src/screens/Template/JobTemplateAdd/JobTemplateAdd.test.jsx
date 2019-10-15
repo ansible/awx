@@ -1,4 +1,6 @@
 import React from 'react';
+import { act } from 'react-dom/test-utils';
+import { createMemoryHistory } from 'history';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
 import { sleep } from '@testUtils/testUtils';
 import JobTemplateAdd from './JobTemplateAdd';
@@ -27,8 +29,6 @@ const jobTemplateData = {
   host_config_key: '',
 };
 
-// TODO: Needs React/React-router upgrade to remove `act()` warnings
-// See https://github.com/ansible/awx/issues/4817
 describe('<JobTemplateAdd />', () => {
   const defaultProps = {
     description: '',
@@ -52,13 +52,19 @@ describe('<JobTemplateAdd />', () => {
     jest.clearAllMocks();
   });
 
-  test('should render Job Template Form', () => {
-    const wrapper = mountWithContexts(<JobTemplateAdd />);
+  test('should render Job Template Form', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<JobTemplateAdd />);
+    });
     expect(wrapper.find('JobTemplateForm').length).toBe(1);
   });
 
   test('should render Job Template Form with default values', async () => {
-    const wrapper = mountWithContexts(<JobTemplateAdd />);
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<JobTemplateAdd />);
+    });
     await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
     expect(wrapper.find('input#template-description').text()).toBe(
       defaultProps.description
@@ -89,7 +95,10 @@ describe('<JobTemplateAdd />', () => {
         ...jobTemplateData,
       },
     });
-    const wrapper = mountWithContexts(<JobTemplateAdd />);
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<JobTemplateAdd />);
+    });
     await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
     const formik = wrapper.find('Formik').instance();
     const changeState = new Promise(resolve => {
@@ -98,6 +107,7 @@ describe('<JobTemplateAdd />', () => {
           values: {
             ...jobTemplateData,
             labels: [],
+            instanceGroups: [],
           },
         },
         () => resolve()
@@ -110,9 +120,7 @@ describe('<JobTemplateAdd />', () => {
   });
 
   test('should navigate to job template detail after form submission', async () => {
-    const history = {
-      push: jest.fn(),
-    };
+    const history = createMemoryHistory({});
     JobTemplatesAPI.create.mockResolvedValueOnce({
       data: {
         id: 1,
@@ -120,28 +128,57 @@ describe('<JobTemplateAdd />', () => {
         ...jobTemplateData,
       },
     });
-    const wrapper = mountWithContexts(<JobTemplateAdd />, {
-      context: { router: { history } },
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<JobTemplateAdd />, {
+        context: { router: { history } },
+      });
     });
 
+    const updatedTemplateData = {
+      name: 'new name',
+      description: 'new description',
+      job_type: 'check',
+    };
+    const labels = [
+      { id: 3, name: 'Foo', isNew: true },
+      { id: 4, name: 'Bar', isNew: true },
+      { id: 5, name: 'Maple' },
+      { id: 6, name: 'Tree' },
+    ];
+    JobTemplatesAPI.update.mockResolvedValue({
+      data: { ...updatedTemplateData },
+    });
+    const formik = wrapper.find('Formik').instance();
+    const changeState = new Promise(resolve => {
+      const values = {
+        ...jobTemplateData,
+        ...updatedTemplateData,
+        labels,
+        instanceGroups: [],
+      };
+      formik.setState({ values }, () => resolve());
+    });
+    await changeState;
     await wrapper.find('JobTemplateForm').invoke('handleSubmit')(
       jobTemplateData
     );
     await sleep(0);
-    expect(history.push).toHaveBeenCalledWith(
+    expect(history.location.pathname).toEqual(
       '/templates/job_template/1/details'
     );
   });
 
   test('should navigate to templates list when cancel is clicked', async () => {
-    const history = {
-      push: jest.fn(),
-    };
-    const wrapper = mountWithContexts(<JobTemplateAdd />, {
-      context: { router: { history } },
+    const history = createMemoryHistory({});
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<JobTemplateAdd />, {
+        context: { router: { history } },
+      });
     });
     await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
     wrapper.find('button[aria-label="Cancel"]').invoke('onClick')();
-    expect(history.push).toHaveBeenCalledWith('/templates');
+    expect(history.location.pathname).toEqual('/templates');
   });
 });
