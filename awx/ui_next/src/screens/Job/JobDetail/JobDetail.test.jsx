@@ -82,12 +82,8 @@ describe('<JobDetail />', () => {
     modal.find('button[aria-label="Delete"]').simulate('click');
     expect(JobsAPI.destroy).toHaveBeenCalledTimes(1);
   });
-  /*
-  The test below is skipped until react can be upgraded to at least 16.9.0.  An upgrade to
-  react - router will likely be necessary also.
-  See: https://github.com/ansible/awx/issues/4817
-  */
-  test.skip('should display error modal when a job does not delete properly', async () => {
+
+  test('should display error modal when a job does not delete properly', async () => {
     ProjectUpdatesAPI.destroy.mockRejectedValue(
       new Error({
         response: {
@@ -102,13 +98,11 @@ describe('<JobDetail />', () => {
     );
     const wrapper = mountWithContexts(<JobDetail job={mockJobData} />);
 
-    wrapper
-      .find('button')
-      .at(0)
-      .simulate('click');
+    wrapper.find('button[aria-label="Delete"]').simulate('click');
     const modal = wrapper.find('Modal');
+    expect(modal.length).toBe(1);
     await act(async () => {
-      await modal.find('Button[variant="danger"]').prop('onClick')();
+      modal.find('button[aria-label="Delete"]').simulate('click');
     });
     wrapper.update();
 
