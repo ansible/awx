@@ -116,5 +116,5 @@ def read_ansible_config(project_path, variables_of_interest):
                 if var in parser['defaults']:
                     values[var] = parser['defaults'][var]
     except Exception as e:
-        logger.warn('Failed to read ansible configuration(s) {}: {}'.format(fnames, e))
+        logger.exception('Failed to read ansible configuration(s) {}'.format(fnames))
     return values
