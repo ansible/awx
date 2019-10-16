@@ -68,6 +68,8 @@ def pk_or_name(v2, model_name, value, page=None):
 
 class ResourceOptionsParser(object):
 
+    deprecated = False
+
     def __init__(self, v2, page, resource, parser):
         """Used to submit an OPTIONS request to the appropriate endpoint
         and apply the appropriate argparse arguments
@@ -94,9 +96,13 @@ class ResourceOptionsParser(object):
         self.handle_custom_actions()
 
     def get_allowed_options(self):
-        self.allowed_options = self.page.connection.options(
+        options = self.page.connection.options(
             self.page.endpoint + '1/'
-        ).headers.get('Allow', '').split(', ')
+        )
+        warning = options.headers.get('Warning', '')
+        if '299' in warning and 'deprecated' in warning:
+            self.deprecated = True
+        self.allowed_options = options.headers.get('Allow', '').split(', ')
 
     def build_list_actions(self):
         action_map = {
