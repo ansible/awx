@@ -7,12 +7,14 @@ import requests
 
 from django.utils.encoding import smart_text
 from django.utils.translation import ugettext_lazy as _
+
 from awx.main.notifications.base import AWXBaseEmailBackend
+from awx.main.notifications.custom_notification_base import CustomNotificationBase
 
 logger = logging.getLogger('awx.main.notifications.hipchat_backend')
 
 
-class HipChatBackend(AWXBaseEmailBackend):
+class HipChatBackend(AWXBaseEmailBackend, CustomNotificationBase):
 
     init_parameters = {"token": {"label": "Token", "type": "password"},
                        "rooms": {"label": "Destination Rooms", "type": "list"},
@@ -22,11 +24,6 @@ class HipChatBackend(AWXBaseEmailBackend):
                        "message_from": {"label": "Label to be shown with notification", "type": "string"}}
     recipient_parameter = "rooms"
     sender_parameter = "message_from"
-
-    DEFAULT_MSG = "{{ job_friendly_name }} #{{ job.id }} '{{ job.name }}' {{ job.status }}: {{ url }}"
-    default_messages = {"started": {"message": DEFAULT_MSG},
-                        "success": {"message": DEFAULT_MSG},
-                        "error": {"message": DEFAULT_MSG}}
 
     def __init__(self, token, color, api_url, notify, fail_silently=False, **kwargs):
         super(HipChatBackend, self).__init__(fail_silently=fail_silently)

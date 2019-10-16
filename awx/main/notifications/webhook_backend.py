@@ -7,13 +7,15 @@ import requests
 
 from django.utils.encoding import smart_text
 from django.utils.translation import ugettext_lazy as _
+
 from awx.main.notifications.base import AWXBaseEmailBackend
 from awx.main.utils import get_awx_version
+from awx.main.notifications.custom_notification_base import CustomNotificationBase
 
 logger = logging.getLogger('awx.main.notifications.webhook_backend')
 
 
-class WebhookBackend(AWXBaseEmailBackend):
+class WebhookBackend(AWXBaseEmailBackend, CustomNotificationBase):
 
     init_parameters = {"url": {"label": "Target URL", "type": "string"},
                        "http_method": {"label": "HTTP Method", "type": "string", "default": "POST"},
