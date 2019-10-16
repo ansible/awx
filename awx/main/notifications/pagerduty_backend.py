@@ -7,12 +7,15 @@ import pygerduty
 
 from django.utils.encoding import smart_text
 from django.utils.translation import ugettext_lazy as _
+
 from awx.main.notifications.base import AWXBaseEmailBackend
+from awx.main.notifications.custom_notification_base import CustomNotificationBase
+from CustomNotificationBase import DEFAULT_MSG
 
 logger = logging.getLogger('awx.main.notifications.pagerduty_backend')
 
 
-class PagerDutyBackend(AWXBaseEmailBackend):
+class PagerDutyBackend(AWXBaseEmailBackend, CustomNotificationBase):
 
     init_parameters = {"subdomain": {"label": "Pagerduty subdomain", "type": "string"},
                        "token": {"label": "API Token", "type": "password"},
@@ -21,7 +24,6 @@ class PagerDutyBackend(AWXBaseEmailBackend):
     recipient_parameter = "service_key"
     sender_parameter = "client_name"
 
-    DEFAULT_MSG = "{{ job_friendly_name }} #{{ job.id }} '{{ job.name }}' {{ job.status }}: {{ url }}"
     DEFAULT_BODY = "{{ job_summary_dict }}"
     default_messages = {"started": { "message": DEFAULT_MSG, "body": DEFAULT_BODY},
                         "success": { "message": DEFAULT_MSG, "body": DEFAULT_BODY},
