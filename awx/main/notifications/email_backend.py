@@ -4,7 +4,9 @@
 from django.core.mail.backends.smtp import EmailBackend
 
 from awx.main.notifications.custom_notification_base import CustomNotificationBase
-from CustomNotificationBase import DEFAULT_MSG, DEFAULT_BODY
+
+DEFAULT_MSG = CustomNotificationBase.DEFAULT_MSG
+DEFAULT_BODY = CustomNotificationBase.DEFAULT_BODY
 
 
 class CustomEmailBackend(EmailBackend, CustomNotificationBase):
@@ -23,7 +25,11 @@ class CustomEmailBackend(EmailBackend, CustomNotificationBase):
 
     default_messages = {"started": {"message": DEFAULT_MSG, "body": DEFAULT_BODY},
                         "success": {"message": DEFAULT_MSG, "body": DEFAULT_BODY},
-                        "error": {"message": DEFAULT_MSG, "body": DEFAULT_BODY}}
+                        "error": {"message": DEFAULT_MSG, "body": DEFAULT_BODY},
+                        "workflow_approval": {"running": {"message": DEFAULT_MSG, "body": DEFAULT_BODY},
+                                              "approved": {"message": DEFAULT_MSG, "body": DEFAULT_BODY},
+                                              "timed_out": {"message": DEFAULT_MSG, "body": DEFAULT_BODY},
+                                              "denied": {"message": DEFAULT_MSG, "body": DEFAULT_BODY}}}
 
     def format_body(self, body):
         # leave body unchanged (expect a string)
