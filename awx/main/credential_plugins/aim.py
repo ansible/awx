@@ -101,7 +101,7 @@ def aim_backend(**kwargs):
 
 
 aim_plugin = CredentialPlugin(
-    'CyberArk AIM Secret Lookup',
+    'CyberArk AIM Central Credential Provider Lookup',
     inputs=aim_inputs,
     backend=aim_backend
 )
