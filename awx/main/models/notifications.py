@@ -73,7 +73,7 @@ class NotificationTemplate(CommonModelNameNotUnique):
     notification_configuration = prevent_search(JSONField(blank=False))
 
     def default_messages():
-        return {'started': None, 'success': None, 'error': None}
+        return {'started': None, 'success': None, 'error': None, 'workflow_approval': None}
 
     messages = JSONField(
         null=True,
@@ -109,18 +109,33 @@ class NotificationTemplate(CommonModelNameNotUnique):
             old_messages = old_nt.messages
             new_messages = self.messages
 
+            def merge_messages(local_old_messages, local_new_messages, local_event):
+                if local_new_messages.get(local_event, {}) and local_old_messages.get(local_event, {}):
+                    local_old_event_msgs = local_old_messages[local_event]
+                    local_new_event_msgs = local_new_messages[local_event]
+                    for msg_type in ['message', 'body']:
+                        if msg_type not in local_new_event_msgs and local_old_event_msgs.get(msg_type, None):
+                            local_new_event_msgs[msg_type] = local_old_event_msgs[msg_type]
             if old_messages is not None and new_messages is not None:
-                for event in ['started', 'success', 'error']:
+                for event in ('started', 'success', 'error', 'workflow_approval'):
                     if not new_messages.get(event, {}) and old_messages.get(event, {}):
                         new_messages[event] = old_messages[event]
                         continue
-                    if new_messages.get(event, {}) and old_messages.get(event, {}):
-                        old_event_msgs = old_messages[event]
-                        new_event_msgs = new_messages[event]
-                        for msg_type in ['message', 'body']:
-                            if msg_type not in new_event_msgs and old_event_msgs.get(msg_type, None):
-                                new_event_msgs[msg_type] = old_event_msgs[msg_type]
+
+                    if event == 'workflow_approval' and old_messages.get('workflow_approval', None):
+                        new_messages.setdefault('workflow_approval', {})
+                        for subevent in ('running', 'approved', 'timed_out', 'denied'):
+                            old_wfa_messages = old_messages['workflow_approval']
+                            new_wfa_messages = new_messages['workflow_approval']
+                            if not new_wfa_messages.get(subevent, {}) and old_wfa_messages.get(subevent, {}):
+                                new_wfa_messages[subevent] = old_wfa_messages[subevent]
+                                continue
+                            if old_wfa_messages:
+                                merge_messages(old_wfa_messages, new_wfa_messages, subevent)
+                    else:
+                        merge_messages(old_messages, new_messages, event)
                     new_messages.setdefault(event, None)
+
 
         for field in filter(lambda x: self.notification_class.init_parameters[x]['type'] == "password",
                             self.notification_class.init_parameters):
@@ -370,8 +385,8 @@ class JobNotificationMixin(object):
         return context
 
     def context(self, serialized_job):
-        """Returns a context that can be used for rendering notification messages.
-        Context contains whitelisted content retrieved from a serialized job object
+        """Returns a dictionary that can be used for rendering notification messages.
+        The context will contain whitelisted content retrieved from a serialized job object
         (see JobNotificationMixin.JOB_FIELDS_WHITELIST), the job's friendly name,
         and a url to the job run."""
         context = {'job': {},
@@ -419,14 +434,15 @@ class JobNotificationMixin(object):
 
         # Use custom template if available
         if nt.messages:
-            templates = nt.messages.get(self.STATUS_TO_TEMPLATE_TYPE[status], {}) or {}
-            msg_template = templates.get('message', None)
-            body_template = templates.get('body', None)
+            template = nt.messages.get(self.STATUS_TO_TEMPLATE_TYPE[status], {}) or {}
+            msg_template = template.get('message', None)
+            body_template = template.get('body', None)
         # If custom template not provided, look up default template
+        default_template = nt.notification_class.default_messages[self.STATUS_TO_TEMPLATE_TYPE[status]]
         if not msg_template:
-            msg_template = getattr(nt.notification_class, 'DEFAULT_MSG', None)
+            msg_template = default_template.get('message', None)
         if not body_template:
-            body_template = getattr(nt.notification_class, 'DEFAULT_BODY', None)
+            body_template = default_template.get('body', None)
 
         if msg_template:
             try:
