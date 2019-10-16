@@ -4,7 +4,10 @@ function EditContainerGroupController($rootScope, $scope, $state, models, string
     instanceGroup,
     credential
   } = models;
-  const canEdit = instanceGroup.model.OPTIONS.actions.PUT;
+  let canEdit = false;
+  if (instanceGroup.has('options', 'actions.PUT')) {
+    canEdit = instanceGroup.model.OPTIONS.actions.PUT;
+}
   if (!instanceGroup.get('is_containerized')) {
       return $state.go(
           'instanceGroups.edit',
