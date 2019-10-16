@@ -755,7 +755,7 @@ register(
     allow_null=True,
     default=False,
     label=_('Enabled external log aggregation auditing'),
-    help_text=_('When enabled, all external logs emitted by Tower will also be written to /var/log/tower/external.log'),
+    help_text=_('When enabled, all external logs emitted by Tower will also be written to /var/log/tower/external.log.  This is an experimental setting intended to be used for debugging external log aggregation issues (and may be subject to change in the future).'),  # noqa
     category=_('Logging'),
     category_slug='logging',
 )

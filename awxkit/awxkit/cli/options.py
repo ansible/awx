@@ -95,7 +95,7 @@ class ResourceOptionsParser(object):
 
     def get_allowed_options(self):
         self.allowed_options = self.page.connection.options(
-            self.page.endpoint + '1'
+            self.page.endpoint + '1/'
         ).headers.get('Allow', '').split(', ')
 
     def build_list_actions(self):

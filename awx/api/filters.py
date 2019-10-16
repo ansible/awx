@@ -126,7 +126,7 @@ class FieldLookupBackend(BaseFilterBackend):
     '''
 
     RESERVED_NAMES = ('page', 'page_size', 'format', 'order', 'order_by',
-                      'search', 'type', 'host_filter', 'count_disabled',)
+                      'search', 'type', 'host_filter', 'count_disabled', 'no_truncate')
 
     SUPPORTED_LOOKUPS = ('exact', 'iexact', 'contains', 'icontains',
                          'startswith', 'istartswith', 'endswith', 'iendswith',

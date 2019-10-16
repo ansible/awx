@@ -22,7 +22,7 @@
                     read-only-prompts="vm.readOnlyPrompts">
                 </prompt-credential>
             </div>
-            <div ng-if="vm.steps.other_prompts.includeStep" ng-show="vm.steps.other_prompts.tab._active" id="prompt_other_prompts_step">
+            <div ng-if="vm.steps.other_prompts.includeStep && vm.steps.other_prompts.tab._active" id="prompt_other_prompts_step">
                 <prompt-other-prompts
                     prompt-data="vm.promptDataClone"
                     other-prompts-form="vm.forms.otherPrompts"

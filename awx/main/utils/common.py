@@ -38,18 +38,22 @@ from django.apps import apps
 
 logger = logging.getLogger('awx.main.utils')
 
-__all__ = ['get_object_or_400', 'camelcase_to_underscore', 'underscore_to_camelcase', 'memoize', 'memoize_delete',
-           'get_ansible_version', 'get_ssh_version', 'get_licenser', 'get_awx_version', 'update_scm_url',
-           'get_type_for_model', 'get_model_for_type', 'copy_model_by_class', 'region_sorting',
-           'copy_m2m_relationships', 'prefetch_page_capabilities', 'to_python_boolean',
-           'ignore_inventory_computed_fields', 'ignore_inventory_group_removal',
-           '_inventory_updates', 'get_pk_from_dict', 'getattrd', 'getattr_dne', 'NoDefaultProvided',
-           'get_current_apps', 'set_current_apps',
-           'extract_ansible_vars', 'get_search_fields', 'get_system_task_capacity', 'get_cpu_capacity', 'get_mem_capacity',
-           'wrap_args_with_proot', 'build_proot_temp_dir', 'check_proot_installed', 'model_to_dict',
-           'NullablePromptPseudoField', 'model_instance_diff', 'parse_yaml_or_json', 'RequireDebugTrueOrTest',
-           'has_model_field_prefetched', 'set_environ', 'IllegalArgumentError', 'get_custom_venv_choices', 'get_external_account',
-           'task_manager_bulk_reschedule', 'schedule_task_manager', 'classproperty', 'create_temporary_fifo']
+__all__ = [
+    'get_object_or_400', 'camelcase_to_underscore', 'underscore_to_camelcase', 'memoize',
+    'memoize_delete', 'get_ansible_version', 'get_ssh_version', 'get_licenser',
+    'get_awx_version', 'update_scm_url', 'get_type_for_model', 'get_model_for_type',
+    'copy_model_by_class', 'region_sorting', 'copy_m2m_relationships',
+    'prefetch_page_capabilities', 'to_python_boolean', 'ignore_inventory_computed_fields',
+    'ignore_inventory_group_removal', '_inventory_updates', 'get_pk_from_dict', 'getattrd',
+    'getattr_dne', 'NoDefaultProvided', 'get_current_apps', 'set_current_apps',
+    'extract_ansible_vars', 'get_search_fields', 'get_system_task_capacity',
+    'get_cpu_capacity', 'get_mem_capacity', 'wrap_args_with_proot', 'build_proot_temp_dir',
+    'check_proot_installed', 'model_to_dict', 'NullablePromptPseudoField',
+    'model_instance_diff', 'parse_yaml_or_json', 'RequireDebugTrueOrTest',
+    'has_model_field_prefetched', 'set_environ', 'IllegalArgumentError',
+    'get_custom_venv_choices', 'get_external_account', 'task_manager_bulk_reschedule',
+    'schedule_task_manager', 'classproperty', 'create_temporary_fifo', 'truncate_stdout',
+]
 
 
 def get_object_or_400(klass, *args, **kwargs):
@@ -1088,3 +1092,19 @@ def create_temporary_fifo(data):
     ).start()
     return path
 
+
+def truncate_stdout(stdout, size):
+    from awx.main.constants import ANSI_SGR_PATTERN
+
+    if size <= 0 or len(stdout) <= size:
+        return stdout
+
+    stdout = stdout[:(size - 1)] + u'\u2026'
+    set_count, reset_count = 0, 0
+    for m in ANSI_SGR_PATTERN.finditer(stdout):
+        if m.group() == u'\u001b[0m':
+            reset_count += 1
+        else:
+            set_count += 1
+
+    return stdout + u'\u001b[0m' * (set_count - reset_count)

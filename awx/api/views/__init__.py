@@ -3768,11 +3768,22 @@ class JobEventList(ListAPIView):
     serializer_class = serializers.JobEventSerializer
     search_fields = ('stdout',)
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        if self.request.query_params.get('no_truncate'):
+            context.update(no_truncate=True)
+        return context
+
 
 class JobEventDetail(RetrieveAPIView):
 
     model = models.JobEvent
     serializer_class = serializers.JobEventSerializer
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update(no_truncate=True)
+        return context
 
 
 class JobEventChildrenList(SubListAPIView):
@@ -4002,11 +4013,22 @@ class AdHocCommandEventList(ListAPIView):
     serializer_class = serializers.AdHocCommandEventSerializer
     search_fields = ('stdout',)
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        if self.request.query_params.get('no_truncate'):
+            context.update(no_truncate=True)
+        return context
+
 
 class AdHocCommandEventDetail(RetrieveAPIView):
 
     model = models.AdHocCommandEvent
     serializer_class = serializers.AdHocCommandEventSerializer
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update(no_truncate=True)
+        return context
 
 
 class BaseAdHocCommandEventsList(SubListAPIView):

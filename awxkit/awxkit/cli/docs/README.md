@@ -1,7 +1,7 @@
 AWX Command Line Interface
 ==========================
 
-awx is the official command-line client for AWX.  It:
+`awx` is the official command-line client for AWX.  It:
 
 * Uses naming and structure consistent with the AWX HTTP API
 * Provides consistent output formats with optional machine-parsable formats

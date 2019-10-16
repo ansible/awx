@@ -45,7 +45,6 @@ from polymorphic.models import PolymorphicModel
 from awx.main.access import get_user_capabilities
 from awx.main.constants import (
     SCHEDULEABLE_PROVIDERS,
-    ANSI_SGR_PATTERN,
     ACTIVE_STATES,
     CENSOR_VALUE,
 )
@@ -70,7 +69,8 @@ from awx.main.utils import (
     get_type_for_model, get_model_for_type,
     camelcase_to_underscore, getattrd, parse_yaml_or_json,
     has_model_field_prefetched, extract_ansible_vars, encrypt_dict,
-    prefetch_page_capabilities, get_external_account)
+    prefetch_page_capabilities, get_external_account, truncate_stdout,
+)
 from awx.main.utils.filters import SmartFilter
 from awx.main.redact import UriCleaner, REPLACE_STR
 
@@ -140,6 +140,7 @@ SUMMARIZABLE_FK_FIELDS = {
     'source_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'credential_type_id'),
     'target_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'credential_type_id'),
     'webhook_credential': DEFAULT_SUMMARY_FIELDS,
+    'approved_or_denied_by': ('id', 'username', 'first_name', 'last_name'),
 }
 
 
@@ -3501,6 +3502,8 @@ class WorkflowApprovalSerializer(UnifiedJobSerializer):
                                                              kwargs={'pk': obj.workflow_approval_template.pk})
         res['approve'] = self.reverse('api:workflow_approval_approve', kwargs={'pk': obj.pk})
         res['deny'] = self.reverse('api:workflow_approval_deny', kwargs={'pk': obj.pk})
+        if obj.approved_or_denied_by:
+            res['approved_or_denied_by'] = self.reverse('api:user_detail', kwargs={'pk': obj.approved_or_denied_by.pk})
         return res
 
 
@@ -3851,25 +3854,17 @@ class JobEventSerializer(BaseSerializer):
         return d
 
     def to_representation(self, obj):
-        ret = super(JobEventSerializer, self).to_representation(obj)
-        # Show full stdout for event detail view, truncate only for list view.
-        if hasattr(self.context.get('view', None), 'retrieve'):
-            return ret
+        data = super(JobEventSerializer, self).to_representation(obj)
         # Show full stdout for playbook_on_* events.
         if obj and obj.event.startswith('playbook_on'):
-            return ret
+            return data
+        # If the view logic says to not trunctate (request was to the detail view or a param was used)
+        if self.context.get('no_truncate', False):
+            return data
         max_bytes = settings.EVENT_STDOUT_MAX_BYTES_DISPLAY
-        if max_bytes > 0 and 'stdout' in ret and len(ret['stdout']) >= max_bytes:
-            ret['stdout'] = ret['stdout'][:(max_bytes - 1)] + u'\u2026'
-            set_count = 0
-            reset_count = 0
-            for m in ANSI_SGR_PATTERN.finditer(ret['stdout']):
-                if m.string[m.start():m.end()] == u'\u001b[0m':
-                    reset_count += 1
-                else:
-                    set_count += 1
-            ret['stdout'] += u'\u001b[0m' * (set_count - reset_count)
-        return ret
+        if 'stdout' in data:
+            data['stdout'] = truncate_stdout(data['stdout'], max_bytes)
+        return data
 
 
 class JobEventWebSocketSerializer(JobEventSerializer):
@@ -3964,22 +3959,14 @@ class AdHocCommandEventSerializer(BaseSerializer):
         return res
 
     def to_representation(self, obj):
-        ret = super(AdHocCommandEventSerializer, self).to_representation(obj)
-        # Show full stdout for event detail view, truncate only for list view.
-        if hasattr(self.context.get('view', None), 'retrieve'):
-            return ret
+        data = super(AdHocCommandEventSerializer, self).to_representation(obj)
+        # If the view logic says to not trunctate (request was to the detail view or a param was used)
+        if self.context.get('no_truncate', False):
+            return data
         max_bytes = settings.EVENT_STDOUT_MAX_BYTES_DISPLAY
-        if max_bytes > 0 and 'stdout' in ret and len(ret['stdout']) >= max_bytes:
-            ret['stdout'] = ret['stdout'][:(max_bytes - 1)] + u'\u2026'
-            set_count = 0
-            reset_count = 0
-            for m in ANSI_SGR_PATTERN.finditer(ret['stdout']):
-                if m.string[m.start():m.end()] == u'\u001b[0m':
-                    reset_count += 1
-                else:
-                    set_count += 1
-            ret['stdout'] += u'\u001b[0m' * (set_count - reset_count)
-        return ret
+        if 'stdout' in data:
+            data['stdout'] = truncate_stdout(data['stdout'], max_bytes)
+        return data
 
 
 class AdHocCommandEventWebSocketSerializer(AdHocCommandEventSerializer):
