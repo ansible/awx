@@ -629,15 +629,17 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
 
     @property
     def task_impact(self):
-        # NOTE: We sorta have to assume the host count matches and that forks default to 5
-        from awx.main.models.inventory import Host
         if self.launch_type == 'callback':
             count_hosts = 2
         else:
-            count_hosts = Host.objects.filter(inventory__jobs__pk=self.pk).count()
-            if self.job_slice_count > 1:
-                # Integer division intentional
-                count_hosts = (count_hosts + self.job_slice_count - self.job_slice_number) // self.job_slice_count
+            # If for some reason we can't count the hosts then lets assume the impact as forks
+            if self.inventory is not None:
+                count_hosts = self.inventory.hosts.count()
+                if self.job_slice_count > 1:
+                    # Integer division intentional
+                    count_hosts = (count_hosts + self.job_slice_count - self.job_slice_number) // self.job_slice_count
+            else:
+                count_hosts = 5 if self.forks == 0 else self.forks
         return min(count_hosts, 5 if self.forks == 0 else self.forks) + 1
 
     @property
