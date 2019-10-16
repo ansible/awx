@@ -167,7 +167,7 @@ def ship(path):
             files = {'file': (os.path.basename(path), f, settings.INSIGHTS_AGENT_MIME)}
             response = requests.post(url, 
                                      files=files,
-                                     verify=True, 
+                                     verify="/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem",
                                      auth=(rh_user, rh_password),
                                      timeout=(31, 31))
             if response.status_code != 202:
