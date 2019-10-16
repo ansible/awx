@@ -189,6 +189,36 @@ export default [ 'ProcessErrors', 'CredentialTypeModel', 'TemplatesStrings', '$f
                         modal.show($filter('sanitize')(vm.promptDataClone.templateName));
                         vm.promptData.triggerModalOpen = false;
 
+                        vm._savedPromptData = {
+                            1: _.cloneDeep(vm.promptDataClone)
+                        };
+                        Object.keys(vm.steps).forEach(step => {
+                            if (!vm.steps[step].tab) {
+                                return;
+                            }
+                            vm.steps[step].tab._onClickActivate = () => {
+                                if (vm._savedPromptData[vm.steps[step].tab.order]) {
+                                    vm.promptDataClone = vm._savedPromptData[vm.steps[step].tab.order];  
+                                }
+                                Object.keys(vm.steps).forEach(tabStep => {
+                                    if (!vm.steps[tabStep].tab) {
+                                        return;
+                                    }
+                                    if (vm.steps[tabStep].tab.order < vm.steps[step].tab.order) {
+                                        vm.steps[tabStep].tab._disabled = false;
+                                        vm.steps[tabStep].tab._active = false;
+                                    } else if (vm.steps[tabStep].tab.order === vm.steps[step].tab.order) {
+                                        vm.steps[tabStep].tab._disabled = false;
+                                        vm.steps[tabStep].tab._active = true;
+                                    } else {
+                                        vm.steps[tabStep].tab._disabled = true;
+                                        vm.steps[tabStep].tab._active = false;
+                                    }
+                                });
+                                scope.$broadcast('promptTabChange', { step });
+                            };
+                        });
+
                         modal.onClose = () => {
                             scope.$emit('launchModalOpen', false);
                         };
@@ -214,19 +244,39 @@ export default [ 'ProcessErrors', 'CredentialTypeModel', 'TemplatesStrings', '$f
                     return;
                 }
             }
+
+            let nextStep;
             Object.keys(vm.steps).forEach(step => {
-                if(vm.steps[step].tab) {
-                    if(vm.steps[step].tab.order === currentTab.order) {
-                        vm.steps[step].tab._active = false;
-                        vm.steps[step].tab._disabled = true;
-                    } else if(vm.steps[step].tab.order === currentTab.order + 1) {
-                        activeTab = currentTab;
-                        vm.steps[step].tab._active = true;
-                        vm.steps[step].tab._disabled = false;
-                        scope.$broadcast('promptTabChange', { step });
-                    }
+                if (!vm.steps[step].tab) {
+                    return;
+                }
+                if (vm.steps[step].tab.order === currentTab.order + 1) {
+                    nextStep = step;
                 }
             });
+
+            if (!nextStep) {
+                return;
+            }
+
+            // Save the current promptData state in case we need to revert
+            vm._savedPromptData[currentTab.order] = _.cloneDeep(vm.promptDataClone);
+            Object.keys(vm.steps).forEach(tabStep => {
+                if (!vm.steps[tabStep].tab) {
+                    return;
+                }
+                if (vm.steps[tabStep].tab.order < vm.steps[nextStep].tab.order) {
+                    vm.steps[tabStep].tab._disabled = false;
+                    vm.steps[tabStep].tab._active = false;
+                } else if (vm.steps[tabStep].tab.order === vm.steps[nextStep].tab.order) {
+                    vm.steps[tabStep].tab._disabled = false;
+                    vm.steps[tabStep].tab._active = true;
+                } else {
+                    vm.steps[tabStep].tab._disabled = true;
+                    vm.steps[tabStep].tab._active = false;
+                }
+            });
+            scope.$broadcast('promptTabChange', { step: nextStep });
         };
 
         vm.keypress = (event) => {

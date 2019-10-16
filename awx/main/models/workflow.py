@@ -13,6 +13,9 @@ from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ObjectDoesNotExist
 #from django import settings as tower_settings
 
+# Django-CRUM
+from crum import get_current_user
+
 # AWX
 from awx.api.versioning import reverse
 from awx.main.models import (prevent_search, accepts_json, UnifiedJobTemplate,
@@ -690,6 +693,14 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
         default=False,
         help_text=_("Shows when an approval node (with a timeout assigned to it) has timed out.")
     )
+    approved_or_denied_by = models.ForeignKey(
+        'auth.User',
+        related_name='%s(class)s_approved+',
+        default=None,
+        null=True,
+        editable=False,
+        on_delete=models.SET_NULL,
+    )
 
 
     @classmethod
@@ -711,6 +722,7 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
 
     def approve(self, request=None):
         self.status = 'successful'
+        self.approved_or_denied_by = get_current_user()
         self.save()
         self.send_approval_notification('approved')
         self.websocket_emit_status(self.status)
@@ -719,6 +731,7 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
 
     def deny(self, request=None):
         self.status = 'failed'
+        self.approved_or_denied_by = get_current_user()
         self.save()
         self.send_approval_notification('denied')
         self.websocket_emit_status(self.status)

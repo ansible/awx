@@ -119,10 +119,11 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
                 tzinfo = r._dtstart.tzinfo
                 if tzinfo is utc:
                     return 'UTC'
-                fname = tzinfo._filename
-                for zone in all_zones:
-                    if fname.endswith(zone):
-                        return zone
+                fname = getattr(tzinfo, '_filename', None)
+                if fname:
+                    for zone in all_zones:
+                        if fname.endswith(zone):
+                            return zone
         logger.warn('Could not detect valid zoneinfo for {}'.format(self.rrule))
         return ''
 
