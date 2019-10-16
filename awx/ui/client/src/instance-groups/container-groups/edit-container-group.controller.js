@@ -4,7 +4,10 @@ function EditContainerGroupController($rootScope, $scope, $state, models, string
     instanceGroup,
     credential
   } = models;
-
+  let canEdit = false;
+  if (instanceGroup.has('options', 'actions.PUT')) {
+    canEdit = instanceGroup.model.OPTIONS.actions.PUT;
+}
   if (!instanceGroup.get('is_containerized')) {
       return $state.go(
           'instanceGroups.edit',
@@ -21,6 +24,8 @@ function EditContainerGroupController($rootScope, $scope, $state, models, string
   vm.lookUpTitle = strings.get('container.LOOK_UP_TITLE');
 
   vm.form = instanceGroup.createFormSchema('post');
+  vm.switchDisabled = false;
+  vm.form.disabled = !instanceGroup.has('options', 'actions.PUT');
   vm.form.name.required = true;
   vm.form.credential = {
     type: 'field',
@@ -48,14 +53,23 @@ function EditContainerGroupController($rootScope, $scope, $state, models, string
         _go: 'instanceGroups.containerGroupJobs',
         _params: { instance_group_id: instanceGroup.get('id') }
     }
-};
-
-  vm.form.extraVars = {
-    label: strings.get('container.POD_SPEC_LABEL'),
-    value: EditContainerGroupDataset.data.pod_spec_override || instanceGroup.model.OPTIONS.actions.PUT.pod_spec_override.default,
-    name: 'extraVars',
-    toggleLabel: strings.get('container.POD_SPEC_TOGGLE')
   };
+  if (!canEdit) {
+    vm.form.extraVars = {
+      label: strings.get('container.POD_SPEC_LABEL'),
+      value: EditContainerGroupDataset.data.pod_spec_override || "---",
+      name: 'extraVars',
+      disabled: true
+    };
+    vm.switchDisabled = true;
+  } else {
+    vm.form.extraVars = {
+      label: strings.get('container.POD_SPEC_LABEL'),
+      value: EditContainerGroupDataset.data.pod_spec_override || instanceGroup.model.OPTIONS.actions.PUT.pod_spec_override.default,
+      name: 'extraVars',
+      toggleLabel: strings.get('container.POD_SPEC_TOGGLE')
+    };
+  }
 
   function sanitizeVars (str) {
     // Quick function to test if the host vars are a json-object-string,
@@ -90,7 +104,7 @@ function EditContainerGroupController($rootScope, $scope, $state, models, string
   }
 
   const podSpecValue = sanitizeVars(EditContainerGroupDataset.data.pod_spec_override);
-  const defaultPodSpecValue = sanitizeVars(instanceGroup.model.OPTIONS.actions.PUT.pod_spec_override.default);
+  const defaultPodSpecValue = canEdit ? sanitizeVars(instanceGroup.model.OPTIONS.actions.PUT.pod_spec_override.default) : '---';
 
   if ((podSpecValue !== '---') && podSpecValue && podSpecValue.trim() !== defaultPodSpecValue.trim()) {
     vm.form.extraVars.isOpen = true;
