@@ -73,7 +73,7 @@ def monitor_workflow(response, session, print_stdout=True, timeout=None,
 
 def monitor(response, session, print_stdout=True, timeout=None, interval=.25):
     get = response.url.get
-    payload = {'order_by': 'start_line'}
+    payload = {'order_by': 'start_line', 'no_truncate': True}
     if response.type == 'job':
         events = response.related.job_events.get
     else:
