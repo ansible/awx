@@ -70,11 +70,15 @@ class InventoryUpdateEventsList(SubListAPIView):
 
 class InventoryScriptList(ListCreateAPIView):
 
+    deprecated = True
+
     model = CustomInventoryScript
     serializer_class = CustomInventoryScriptSerializer
 
 
 class InventoryScriptDetail(RetrieveUpdateDestroyAPIView):
+
+    deprecated = True
 
     model = CustomInventoryScript
     serializer_class = CustomInventoryScriptSerializer
@@ -92,6 +96,8 @@ class InventoryScriptDetail(RetrieveUpdateDestroyAPIView):
 
 class InventoryScriptObjectRolesList(SubListAPIView):
 
+    deprecated = True
+
     model = Role
     serializer_class = RoleSerializer
     parent_model = CustomInventoryScript
@@ -104,6 +110,8 @@ class InventoryScriptObjectRolesList(SubListAPIView):
 
 
 class InventoryScriptCopy(CopyAPIView):
+
+    deprecated = True
 
     model = CustomInventoryScript
     copy_return_serializer_class = CustomInventoryScriptSerializer
