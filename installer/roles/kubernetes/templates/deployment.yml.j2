@@ -273,12 +273,15 @@ spec:
               - /usr/bin/python
               - -c
               - |
-                import httplib
+                try:
+                  from http.client import HTTPConnection
+                except ImportError:
+                  from httplib import HTTPConnection
                 import sys
                 import os
                 import base64
                 authsecret = base64.b64encode(os.getenv('RABBITMQ_USER') + ':' + os.getenv('RABBITMQ_PASSWORD'))
-                conn=httplib.HTTPConnection('localhost:15672')
+                conn=HTTPConnection('localhost:15672')
                 conn.request('GET', '/api/healthchecks/node', headers={'Authorization': 'Basic %s' % authsecret})
                 r1 = conn.getresponse()
                 if r1.status != 200:
@@ -297,12 +300,15 @@ spec:
               - /usr/bin/python
               - -c
               - |
-                import httplib
+                try:
+                  from http.client import HTTPConnection
+                except ImportError:
+                  from httplib import HTTPConnection
                 import sys
                 import os
                 import base64
                 authsecret = base64.b64encode(os.getenv('RABBITMQ_USER') + ':' + os.getenv('RABBITMQ_PASSWORD'))
-                conn=httplib.HTTPConnection('localhost:15672')
+                conn=HTTPConnection('localhost:15672')
                 conn.request('GET', '/api/healthchecks/node', headers={'Authorization': 'Basic %s' % authsecret})
                 r1 = conn.getresponse()
                 if r1.status != 200:
