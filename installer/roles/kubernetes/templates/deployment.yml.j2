@@ -275,8 +275,11 @@ spec:
               - |
                 import httplib
                 import sys
+                import os
+                import base64
+                authsecret = base64.b64encode(os.getenv('RABBITMQ_USER') + ':' + os.getenv('RABBITMQ_PASSWORD'))
                 conn=httplib.HTTPConnection('localhost:15672')
-                conn.request('GET', '/api/healthchecks/node', headers={'Authorization': 'Basic {{ ( rabbitmq_user + ':' + rabbitmq_password ) | b64encode }}' })
+                conn.request('GET', '/api/healthchecks/node', headers={'Authorization': 'Basic %s' % authsecret})
                 r1 = conn.getresponse()
                 if r1.status != 200:
                   sys.stderr.write('Received http error %i\n' % (r1.status))
@@ -296,8 +299,11 @@ spec:
               - |
                 import httplib
                 import sys
+                import os
+                import base64
+                authsecret = base64.b64encode(os.getenv('RABBITMQ_USER') + ':' + os.getenv('RABBITMQ_PASSWORD'))
                 conn=httplib.HTTPConnection('localhost:15672')
-                conn.request('GET', '/api/healthchecks/node', headers={'Authorization': 'Basic {{ ( rabbitmq_user + ':' + rabbitmq_password ) | b64encode }}' })
+                conn.request('GET', '/api/healthchecks/node', headers={'Authorization': 'Basic %s' % authsecret})
                 r1 = conn.getresponse()
                 if r1.status != 200:
                   sys.stderr.write('Received http error %i\n' % (r1.status))
@@ -325,6 +331,13 @@ spec:
                   key: rabbitmq_erlang_cookie
             - name: K8S_SERVICE_NAME
               value: "rabbitmq"
+            - name: RABBITMQ_USER
+              value: {{ rabbitmq_user }}
+            - name: RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ kubernetes_deployment_name }}-secrets"
+                  key: rabbitmq_password
           volumeMounts:
             - name: rabbitmq-config
               mountPath: /etc/rabbitmq
