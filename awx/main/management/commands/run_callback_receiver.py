@@ -5,6 +5,8 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 from kombu import Exchange, Queue
 
+from awx.main.dispatch import get_local_queuename
+from awx.main.dispatch.control import Control
 from awx.main.dispatch.kombu import Connection
 from awx.main.dispatch.worker import AWXConsumer, CallbackBrokerWorker
 
@@ -17,7 +19,20 @@ class Command(BaseCommand):
     '''
     help = 'Launch the job callback receiver'
 
+    def add_arguments(self, parser):
+        parser.add_argument('--status', dest='status', action='store_true',
+                            help='print the internal state of any running callback receiver')
+
     def handle(self, *arg, **options):
+        control_routing_key = 'callback_receiver-{}-control'.format(get_local_queuename())
+        if options.get('status'):
+            print(Control(
+                'callback_receiver',
+                queuename=settings.CALLBACK_QUEUE,
+                routing_key=control_routing_key
+            ).status())
+            return
+
         with Connection(settings.BROKER_URL) as conn:
             consumer = None
             try:
@@ -29,8 +44,9 @@ class Command(BaseCommand):
                         Queue(
                             settings.CALLBACK_QUEUE,
                             Exchange(settings.CALLBACK_QUEUE, type='direct'),
-                            routing_key=settings.CALLBACK_QUEUE
+                            routing_key=key
                         )
+                        for key in [settings.CALLBACK_QUEUE, control_routing_key]
                     ]
                 )
                 consumer.run()

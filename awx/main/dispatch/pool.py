@@ -280,6 +280,11 @@ class WorkerPool(object):
             logger.exception('could not kill {}'.format(worker.pid))
 
 
+    def cleanup(self):
+        for worker in self.workers:
+            worker.calculate_managed_tasks()
+
+
 class AutoscalePool(WorkerPool):
     '''
     An extended pool implementation that automatically scales workers up and
