@@ -103,6 +103,18 @@ def could_be_inventory(project_path, dir_path, filename):
     return inventory_rel_path
 
 
+def unique_folders(paths):
+    """Give a list of relative paths in a project
+    (which could be directories or files)
+    returns a set of folder paths
+    """
+    dirs = set()
+    for path in paths:
+        dir = os.path.dirname(path)
+        dirs.add(dir)
+    return dirs
+
+
 def read_ansible_config(project_path, variables_of_interest):
     fnames = ['/etc/ansible/ansible.cfg']
     if project_path:

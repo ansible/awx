@@ -1426,7 +1426,7 @@ class BaseTask(object):
         self.update_model(task.pk, execution_node=pod_manager.pod_name)
         return pod_manager
 
-        
+
 
 
 
@@ -2328,6 +2328,19 @@ class RunInventoryUpdate(BaseTask):
                 env['ANSIBLE_INVENTORY_ENABLED'] = 'auto'
             else:
                 env['ANSIBLE_INVENTORY_ENABLED'] = 'script'
+
+        if inventory_update.source == 'scm' and inventory_update.source_project:
+            base_dir = os.path.join(private_data_dir, 'project')
+            playbook_dirs = unique_folders([''] + inventory_update.source_project.playbook_files)
+            plugin_dirs = set()
+            for dir in playbook_dirs:
+                if os.path.exists(os.path.join(base_dir, dir, 'inventory_plugins')):
+                    plugin_dirs.add(os.path.join(base_dir, dir))
+            if plugin_dirs:
+                env['ANSIBLE_INVENTORY_PLUGINS'] = ':'.join(
+                    plugin_dirs +
+                    ['~/.ansible/plugins/inventory', '/usr/share/ansible/plugins/inventory']
+                )
 
         if inventory_update.source in ['scm', 'custom']:
             for env_k in inventory_update.source_vars_dict:
