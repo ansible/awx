@@ -392,7 +392,8 @@ function last () {
         return lastPage();
     }
 
-    return lastRange();
+    return lastRange()
+        .then(() => previousRange());
 }
 
 function next () {
