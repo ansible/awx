@@ -351,8 +351,9 @@ register(
     'AWX_RESOURCE_PROFILING_ENABLED',
     field_class=fields.BooleanField,
     default=False,
-    label=_('Enable resource profiling on all tower jobs'),
-    help_text=_('If set, resource profiling data will be collected on all jobs.'),  # noqa
+    label=_('Enable detailed resource profiling on all playbook runs'),
+    help_text=_('If set, detailed resource profiling data will be collected on all jobs. '
+                'This data can be gathered with `sosreport`.'),  # noqa
     category=_('Jobs'),
     category_slug='jobs',
 )
@@ -362,7 +363,8 @@ register(
     field_class=FloatField,
     default='0.25',
     label=_('Interval (in seconds) between polls for cpu usage.'),
-    help_text=_('Interval (in seconds) between polls for cpu usage.'),
+    help_text=_('Interval (in seconds) between polls for cpu usage. '
+                'Setting this lower than the default will affect playbook performance.'),
     category=_('Jobs'),
     category_slug='jobs',
     required=False,
@@ -373,7 +375,8 @@ register(
     field_class=FloatField,
     default='0.25',
     label=_('Interval (in seconds) between polls for memory usage.'),
-    help_text=_('Interval (in seconds) between polls for memory usage.'),
+    help_text=_('Interval (in seconds) between polls for memory usage. '
+                'Setting this lower than the default will affect playbook performance.'),
     category=_('Jobs'),
     category_slug='jobs',
     required=False,
@@ -384,7 +387,8 @@ register(
     field_class=FloatField,
     default='0.25',
     label=_('Interval (in seconds) between polls for PID count.'),
-    help_text=_('Interval (in seconds) between polls for PID count.'),
+    help_text=_('Interval (in seconds) between polls for PID count. '
+                'Setting this lower than the default will affect playbook performance.'),
     category=_('Jobs'),
     category_slug='jobs',
     required=False,
