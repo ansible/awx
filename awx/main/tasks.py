@@ -1094,6 +1094,13 @@ class BaseTask(object):
         if os.path.isdir(job_profiling_dir):
             shutil.copytree(job_profiling_dir, os.path.join(awx_profiling_dir, str(instance.pk)))
 
+        if instance.is_containerized:
+            from awx.main.scheduler.kubernetes import PodManager # prevent circular import
+            pm = PodManager(instance)
+            logger.debug(f"Deleting pod {pm.pod_name}")
+            pm.delete()
+
+
     def event_handler(self, event_data):
         #
         # ⚠️  D-D-D-DANGER ZONE ⚠️
@@ -1840,13 +1847,6 @@ class RunJob(BaseTask):
             )
         if isolated_manager_instance and not job.is_containerized:
             isolated_manager_instance.cleanup()
-
-        if job.is_containerized:
-            from awx.main.scheduler.kubernetes import PodManager # prevent circular import
-            pm = PodManager(job)
-            logger.debug(f"Deleting pod {pm.pod_name}")
-            pm.delete()
-
 
         try:
             inventory = job.inventory
