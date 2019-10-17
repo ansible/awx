@@ -12,13 +12,23 @@ const getInventories = async params => InventoriesAPI.read(params);
 
 class InventoryLookup extends React.Component {
   render() {
-    const { value, tooltip, onChange, required, i18n } = this.props;
+    const {
+      value,
+      tooltip,
+      onChange,
+      required,
+      isValid,
+      helperTextInvalid,
+      i18n,
+    } = this.props;
 
     return (
       <FormGroup
         label={i18n._(t`Inventory`)}
         isRequired={required}
         fieldId="inventory-lookup"
+        isValid={isValid}
+        helperTextInvalid={helperTextInvalid}
       >
         {tooltip && <FieldTooltip content={tooltip} />}
         <Lookup

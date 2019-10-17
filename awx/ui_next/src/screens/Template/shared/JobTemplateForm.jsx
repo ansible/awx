@@ -240,6 +240,8 @@ class JobTemplateForm extends Component {
                   form.setFieldValue('organizationId', value.organization);
                   this.setState({ inventory: value });
                 }}
+                isValid={!form.errors.inventory}
+                helperTextInvalid={form.errors.inventory}
                 required
               />
             )}
