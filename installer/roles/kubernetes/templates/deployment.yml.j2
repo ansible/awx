@@ -270,7 +270,7 @@ spec:
           livenessProbe:
             exec:
               command:
-              - /bin/ash
+              - /bin/sh
               - -c
               - "wget -O - --header \"Authorization: Basic {{ ( rabbitmq_user + ':' + rabbitmq_password ) | b64encode }}\"  http://localhost:15672/api/healthchecks/node | grep -qF \"{\\\"status\\\":\\\"ok\\\"}\""
             initialDelaySeconds: 30
@@ -278,7 +278,7 @@ spec:
           readinessProbe:
             exec:
               command:
-              - /bin/ash
+              - /bin/sh
               - -c
               - "wget -O - --header \"Authorization: Basic {{ ( rabbitmq_user + ':' + rabbitmq_password ) | b64encode }}\"  http://localhost:15672/api/healthchecks/node | grep -qF \"{\\\"status\\\":\\\"ok\\\"}\""
             initialDelaySeconds: 10
