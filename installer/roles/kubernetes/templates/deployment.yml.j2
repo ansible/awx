@@ -270,17 +270,43 @@ spec:
           livenessProbe:
             exec:
               command:
-              - /bin/sh
+              - /usr/bin/python
               - -c
-              - "wget -O - --header \"Authorization: Basic {{ ( rabbitmq_user + ':' + rabbitmq_password ) | b64encode }}\"  http://localhost:15672/api/healthchecks/node | grep -qF \"{\\\"status\\\":\\\"ok\\\"}\""
+              - |
+                import httplib
+                import sys
+                conn=httplib.HTTPConnection('localhost:15672')
+                conn.request('GET', '/api/healthchecks/node', headers={'Authorization': 'Basic {{ ( rabbitmq_user + ':' + rabbitmq_password ) | b64encode }}' })
+                r1 = conn.getresponse()
+                if r1.status != 200:
+                  sys.stderr.write('Received http error %i\n' % (r1.status))
+                  sys.exit(1)
+                body = r1.read()
+                if body != '{"status":"ok"}':
+                  sys.stderr.write('Received body: %s' % body)
+                  sys.exit(2)
+                sys.exit(0)
             initialDelaySeconds: 30
             timeoutSeconds: 10
           readinessProbe:
             exec:
               command:
-              - /bin/sh
+              - /usr/bin/python
               - -c
-              - "wget -O - --header \"Authorization: Basic {{ ( rabbitmq_user + ':' + rabbitmq_password ) | b64encode }}\"  http://localhost:15672/api/healthchecks/node | grep -qF \"{\\\"status\\\":\\\"ok\\\"}\""
+              - |
+                import httplib
+                import sys
+                conn=httplib.HTTPConnection('localhost:15672')
+                conn.request('GET', '/api/healthchecks/node', headers={'Authorization': 'Basic {{ ( rabbitmq_user + ':' + rabbitmq_password ) | b64encode }}' })
+                r1 = conn.getresponse()
+                if r1.status != 200:
+                  sys.stderr.write('Received http error %i\n' % (r1.status))
+                  sys.exit(1)
+                body = r1.read()
+                if body != '{"status":"ok"}':
+                  sys.stderr.write('Received body: %s' % body)
+                  sys.exit(2)
+                sys.exit(0)
             initialDelaySeconds: 10
             timeoutSeconds: 10
           env:
