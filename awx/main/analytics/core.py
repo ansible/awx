@@ -88,8 +88,8 @@ def gather(dest=None, module=None, collection_type='scheduled'):
         logger.exception("Invalid License provided, or No License Provided")
         return "Error: Invalid License provided, or No License Provided"
 
-    if not settings.INSIGHTS_TRACKING_STATE:
-        logger.error("Automation Analytics not enabled")
+    if collection_type != 'dry-run' and not settings.INSIGHTS_TRACKING_STATE:
+        logger.error("Automation Analytics not enabled. Use --dry-run to gather locally without sending.")
         return
 
     if module is None:
