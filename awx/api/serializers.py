@@ -4406,6 +4406,8 @@ class NotificationTemplateSerializer(BaseSerializer):
             for event in messages:
                 if not messages[event]:
                     continue
+                if not isinstance(messages[event], dict):
+                    continue
                 body = messages[event].get('body', {})
                 if body:
                     try:
