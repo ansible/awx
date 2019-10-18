@@ -213,6 +213,18 @@ function JobRenderService ($q, $compile, $sce, $window) {
         const record = this.createRecord(event, lines);
 
         if (lines.length === 1 && lines[0] === '') {
+            // Some events, mainly runner_on_start events, have an actual line count of 1
+            // (stdout = '') and a claimed line count of 0 (end_line - start_line = 0).
+            // Since a zero-length string has an actual line count of 1, they'll still get
+            // rendered as blank lines unless we intercept them and add some special
+            // handling to remove them.
+            //
+            // Although we're not going to render the blank line, the actual line count of
+            // the zero-length stdout string, which is 1, has already been recorded at this
+            // point so we must also go back and set the event's recorded line length to 0
+            // in order to avoid deleting too many lines when we need to pop or shift a
+            // page that contains this event off of the view.
+            this.records[record.uuid].lineCount = 0;
             return { html: '', count: 0 };
         }
 
