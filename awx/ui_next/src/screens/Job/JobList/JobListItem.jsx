@@ -49,7 +49,9 @@ class JobListItem extends Component {
                   <Link
                     to={`/jobs/${JOB_TYPE_URL_SEGMENTS[job.type]}/${job.id}`}
                   >
-                    <b>{job.name}</b>
+                    <b>
+                      {job.id} &mdash; {job.name}
+                    </b>
                   </Link>
                 </span>
               </DataListCell>,
