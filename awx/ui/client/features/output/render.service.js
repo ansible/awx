@@ -473,7 +473,7 @@ function JobRenderService ($q, $compile, $sce, $window) {
     this.shift = lines => {
         // We multiply by two here under the assumption that one element and one text node
         // is generated for each line of output.
-        const count = 2 * lines;
+        const count = (2 * lines) + 1;
         const elements = this.el.contents().slice(0, count);
 
         return this.remove(elements);
@@ -482,7 +482,7 @@ function JobRenderService ($q, $compile, $sce, $window) {
     this.pop = lines => {
         // We multiply by two here under the assumption that one element and one text node
         // is generated for each line of output.
-        const count = 2 * lines;
+        const count = (2 * lines) + 1;
         const elements = this.el.contents().slice(-count);
 
         return this.remove(elements);
@@ -558,7 +558,7 @@ function JobRenderService ($q, $compile, $sce, $window) {
         }
 
         const max = this.state.tail;
-        const min = max - count;
+        const min = max - count + 1;
 
         let lines = 0;
 
@@ -589,7 +589,7 @@ function JobRenderService ($q, $compile, $sce, $window) {
         }
 
         const min = this.state.head;
-        const max = min + count;
+        const max = min + count - 1;
 
         let lines = 0;
 
