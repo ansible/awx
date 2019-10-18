@@ -50,7 +50,8 @@ function JobStatusService (moment, message) {
             inventoryScm: {
                 id: model.get('source_project_update'),
                 status: model.get('summary_fields.inventory_source.status')
-            }
+            },
+            event_processing_finished: model.get('event_processing_finished'),
         };
 
         this.initHostStatusCounts({ model });
@@ -309,6 +310,10 @@ function JobStatusService (moment, message) {
         this.state.resultTraceback = traceback;
     };
 
+    this.setEventProcessingFinished = val => {
+        this.state.event_processing_finished = val;
+    };
+
     this.setHostStatusCounts = counts => {
         counts = counts || {};
 
@@ -348,6 +353,7 @@ function JobStatusService (moment, message) {
                 this.setArtifacts(model.get('artifacts'));
                 this.setExecutionNode(model.get('execution_node'));
                 this.setResultTraceback(model.get('result_traceback'));
+                this.setEventProcessingFinished(model.get('event_processing_finished'));
 
                 this.initHostStatusCounts({ model });
                 this.initPlaybookCounts({ model });
