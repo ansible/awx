@@ -229,7 +229,7 @@ class JobTemplateForm extends Component {
           />
           <Field
             name="inventory"
-            validate={required(null, i18n)}
+            validate={required(i18n._(t`Select a value for this field`), i18n)}
             render={({ form }) => (
               <InventoryLookup
                 value={inventory}
