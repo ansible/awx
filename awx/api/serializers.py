@@ -4514,8 +4514,18 @@ class NotificationSerializer(BaseSerializer):
                   'notification_type', 'recipients', 'subject', 'body')
 
     def get_body(self, obj):
-        if obj.notification_type == 'webhook' and 'body' in obj.body:
-            return obj.body['body']
+        if obj.notification_type in ('webhook', 'pagerduty'):
+            if isinstance(obj.body, dict):
+                if 'body' in obj.body:
+                    return obj.body['body']
+            elif isinstance(obj.body, str):
+                # attempt to load json string
+                try:
+                    potential_body = json.loads(obj.body)
+                    if isinstance(potential_body, dict) and 'body' in potential_body:
+                        return potential_body['body']
+                except json.JSONDecodeError:
+                    pass
         return obj.body
 
     def get_related(self, obj):
