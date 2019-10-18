@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
+import styled from 'styled-components';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
@@ -14,9 +15,14 @@ import DataListCheck from '@components/DataListCheck';
 import LaunchButton from '@components/LaunchButton';
 import ListActionButton from '@components/ListActionButton';
 import VerticalSeparator from '@components/VerticalSeparator';
+import { StatusIcon } from '@components/Sparkline';
 import { toTitleCase } from '@util/strings';
 import { formatDateString } from '@util/dates';
 import { JOB_TYPE_URL_SEGMENTS } from '../../../constants';
+
+const PaddedIcon = styled(StatusIcon)`
+  margin-right: 20px;
+`;
 
 class JobListItem extends Component {
   render() {
@@ -38,11 +44,14 @@ class JobListItem extends Component {
             dataListCells={[
               <DataListCell key="divider">
                 <VerticalSeparator />
+                {job.status && <PaddedIcon status={job.status} />}
                 <span>
                   <Link
                     to={`/jobs/${JOB_TYPE_URL_SEGMENTS[job.type]}/${job.id}`}
                   >
-                    <b>{job.name}</b>
+                    <b>
+                      {job.id} &mdash; {job.name}
+                    </b>
                   </Link>
                 </span>
               </DataListCell>,
