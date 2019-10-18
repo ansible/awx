@@ -5,7 +5,15 @@ import { t } from '@lingui/macro';
 import AnsibleSelect from '@components/AnsibleSelect';
 import { ProjectsAPI } from '@api';
 
-function PlaybookSelect({ projectId, isValid, form, field, onError, i18n }) {
+function PlaybookSelect({
+  projectId,
+  isValid,
+  form,
+  field,
+  onBlur,
+  onError,
+  i18n,
+}) {
   const [options, setOptions] = useState([]);
   useEffect(() => {
     if (!projectId) {
@@ -40,6 +48,7 @@ function PlaybookSelect({ projectId, isValid, form, field, onError, i18n }) {
       isValid={isValid}
       form={form}
       {...field}
+      onBlur={onBlur}
     />
   );
 }

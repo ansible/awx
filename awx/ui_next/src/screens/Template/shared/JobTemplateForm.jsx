@@ -229,18 +229,23 @@ class JobTemplateForm extends Component {
           />
           <Field
             name="inventory"
-            validate={required(null, i18n)}
+            validate={required(i18n._(t`Select a value for this field`), i18n)}
             render={({ form }) => (
               <InventoryLookup
                 value={inventory}
+                onBlur={() => form.setFieldTouched('inventory')}
                 tooltip={i18n._(t`Select the inventory containing the hosts
                   you want this job to manage.`)}
+                isValid={!form.touched.inventory || !form.errors.inventory}
+                helperTextInvalid={form.errors.inventory}
                 onChange={value => {
                   form.setFieldValue('inventory', value.id);
                   form.setFieldValue('organizationId', value.organization);
                   this.setState({ inventory: value });
                 }}
                 required
+                touched={form.touched.inventory}
+                error={form.errors.inventory}
               />
             )}
           />
@@ -249,12 +254,12 @@ class JobTemplateForm extends Component {
             validate={this.handleProjectValidation()}
             render={({ form }) => (
               <ProjectLookup
-                helperTextInvalid={form.errors.project}
-                isValid={!form.errors.project}
                 value={project}
-                onBlur={handleBlur}
+                onBlur={() => form.setFieldTouched('project')}
                 tooltip={i18n._(t`Select the project containing the playbook
                   you want this job to execute.`)}
+                isValid={!form.touched.project || !form.errors.project}
+                helperTextInvalid={form.errors.project}
                 onChange={value => {
                   form.setFieldValue('project', value.id);
                   this.setState({ project: value });
@@ -287,6 +292,7 @@ class JobTemplateForm extends Component {
                     isValid={isValid}
                     form={form}
                     field={field}
+                    onBlur={() => form.setFieldTouched('playbook')}
                     onError={err => this.setState({ contentError: err })}
                   />
                 </FormGroup>
