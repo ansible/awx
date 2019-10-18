@@ -116,7 +116,6 @@ COPY {{ awx_sdist_file }} /tmp/{{ awx_sdist_file }}
 RUN OFFICIAL=yes /var/lib/awx/venv/awx/bin/pip install /tmp/{{ awx_sdist_file }}
 
 ADD settings.py /etc/tower/settings.py
-ADD nginx.conf /etc/nginx/nginx.conf
 ADD supervisor.conf /supervisor.conf
 ADD supervisor_task.conf /supervisor_task.conf
 ADD launch_awx.sh /usr/bin/launch_awx.sh

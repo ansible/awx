@@ -13,6 +13,7 @@
     - environment.sh
     - credentials.py
     - docker-compose.yml
+    - nginx.conf
   register: awx_compose_config
 
 - name: Render SECRET_KEY file
