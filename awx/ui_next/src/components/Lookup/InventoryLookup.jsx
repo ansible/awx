@@ -16,6 +16,7 @@ class InventoryLookup extends React.Component {
       value,
       tooltip,
       onChange,
+      onBlur,
       required,
       isValid,
       helperTextInvalid,
@@ -37,6 +38,7 @@ class InventoryLookup extends React.Component {
           name="inventory"
           value={value}
           onLookupSave={onChange}
+          onBlur={onBlur}
           getItems={getInventories}
           required={required}
           qsNamespace="inventory"
