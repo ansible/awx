@@ -270,55 +270,13 @@ spec:
           livenessProbe:
             exec:
               command:
-              - /usr/bin/python
-              - -c
-              - |
-                try:
-                  from http.client import HTTPConnection
-                except ImportError:
-                  from httplib import HTTPConnection
-                import sys
-                import os
-                import base64
-                authsecret = base64.b64encode(os.getenv('RABBITMQ_USER') + ':' + os.getenv('RABBITMQ_PASSWORD'))
-                conn=HTTPConnection('localhost:15672')
-                conn.request('GET', '/api/healthchecks/node', headers={'Authorization': 'Basic %s' % authsecret})
-                r1 = conn.getresponse()
-                if r1.status != 200:
-                  sys.stderr.write('Received http error %i\n' % (r1.status))
-                  sys.exit(1)
-                body = r1.read()
-                if body != '{"status":"ok"}':
-                  sys.stderr.write('Received body: %s' % body)
-                  sys.exit(2)
-                sys.exit(0)
+              - /usr/local/bin/healthchecks/rabbit_health_node.py
             initialDelaySeconds: 30
             timeoutSeconds: 10
           readinessProbe:
             exec:
               command:
-              - /usr/bin/python
-              - -c
-              - |
-                try:
-                  from http.client import HTTPConnection
-                except ImportError:
-                  from httplib import HTTPConnection
-                import sys
-                import os
-                import base64
-                authsecret = base64.b64encode(os.getenv('RABBITMQ_USER') + ':' + os.getenv('RABBITMQ_PASSWORD'))
-                conn=HTTPConnection('localhost:15672')
-                conn.request('GET', '/api/healthchecks/node', headers={'Authorization': 'Basic %s' % authsecret})
-                r1 = conn.getresponse()
-                if r1.status != 200:
-                  sys.stderr.write('Received http error %i\n' % (r1.status))
-                  sys.exit(1)
-                body = r1.read()
-                if body != '{"status":"ok"}':
-                  sys.stderr.write('Received body: %s' % body)
-                  sys.exit(2)
-                sys.exit(0)
+              - /usr/local/bin/healthchecks/rabbit_health_node.py
             initialDelaySeconds: 10
             timeoutSeconds: 10
           env:
@@ -347,6 +305,8 @@ spec:
           volumeMounts:
             - name: rabbitmq-config
               mountPath: /etc/rabbitmq
+            - name: rabbitmq-healthchecks
+              mountPath: /usr/local/bin/healthchecks
           resources:
             requests:
               memory: "{{ rabbitmq_mem_request }}Gi"
@@ -438,6 +398,41 @@ spec:
               path: enabled_plugins
             - key: rabbitmq_definitions.json
               path: rabbitmq_definitions.json
+        - name: rabbitmq-healthchecks
+          configMap:
+            name: {{ kubernetes_deployment_name }}-healthchecks
+            items:
+            - key: rabbit_health_node.py
+              path: rabbit_health_node.py
+            defaultMode: 0755
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ kubernetes_deployment_name }}-healthchecks
+  namespace: {{ kubernetes_namespace }}
+data:
+  rabbit_health_node.py: |
+    #!/usr/bin/env python
+    try:
+      from http.client import HTTPConnection
+    except ImportError:
+      from httplib import HTTPConnection
+    import sys
+    import os
+    import base64
+    authsecret = base64.b64encode(os.getenv('RABBITMQ_USER') + ':' + os.getenv('RABBITMQ_PASSWORD'))
+    conn=HTTPConnection('localhost:15672')
+    conn.request('GET', '/api/healthchecks/node', headers={'Authorization': 'Basic %s' % authsecret})
+    r1 = conn.getresponse()
+    if r1.status != 200:
+      sys.stderr.write('Received http error %i\n' % (r1.status))
+      sys.exit(1)
+    body = r1.read()
+    if body != '{"status":"ok"}':
+      sys.stderr.write('Received body: %s' % body)
+      sys.exit(2)
+    sys.exit(0)
 ---
 apiVersion: v1
 kind: Service
