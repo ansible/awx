@@ -459,6 +459,25 @@ def cluster_node_heartbeat():
 
 
 @task(queue=get_local_queuename)
+def awx_k8s_reaper():
+    from awx.main.scheduler.kubernetes import PodManager # prevent circular import
+    for group in InstanceGroup.objects.filter(credential__isnull=False).iterator():
+        if group.is_containerized:
+            logger.debug("Checking for orphaned k8s pods for {}.".format(group))
+            for job in UnifiedJob.objects.filter(
+                pk__in=list(PodManager.list_active_jobs(group))
+            ).exclude(status__in=ACTIVE_STATES):
+                logger.debug('{} is no longer active, reaping orphaned k8s pod'.format(job.log_format))
+                try:
+                    PodManager(job).delete()
+                except Exception:
+                    logger.exception("Failed to delete orphaned pod {} from {}".format(
+                        job.log_format, group
+                    ))
+
+
+
+@task(queue=get_local_queuename)
 def awx_isolated_heartbeat():
     local_hostname = settings.CLUSTER_HOST_ID
     logger.debug("Controlling node checking for any isolated management tasks.")
