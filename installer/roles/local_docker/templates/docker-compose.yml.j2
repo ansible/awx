@@ -26,6 +26,9 @@ services:
     {% if project_data_dir is defined %}
       - "{{ project_data_dir +':/var/lib/awx/projects:rw' }}"
     {% endif %}
+    {% if custom_venv_dir is defined %}
+      - "{{ custom_venv_dir +':'+ custom_venv_dir +':rw' }}"
+    {% endif %}
     {% if ca_trust_dir is defined %}
       - "{{ ca_trust_dir +':/etc/pki/ca-trust/source/anchors:ro' }}"
     {% endif %}
@@ -74,6 +77,9 @@ services:
       - "{{ docker_compose_dir }}/credentials.py:/etc/tower/conf.d/credentials.py"
     {% if project_data_dir is defined %}
       - "{{ project_data_dir +':/var/lib/awx/projects:rw' }}"
+    {% endif %}
+    {% if custom_venv_dir is defined %}
+      - "{{ custom_venv_dir +':'+ custom_venv_dir +':rw' }}"
     {% endif %}
     {% if ca_trust_dir is defined %}
       - "{{ ca_trust_dir +':/etc/pki/ca-trust/source/anchors:ro' }}"

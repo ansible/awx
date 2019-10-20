@@ -456,6 +456,10 @@ Before starting the build process, review the [inventory](./installer/inventory)
 
 > When using docker-compose, the `docker-compose.yml` file will be created there (default `/tmp/awxcompose`).
 
+*custom_venv_dir*
+
+> Adds the custom venv environments from the local host to be passed into the containers at install.
+
 *ca_trust_dir*
 
 > If you're using a non trusted CA, provide a path where the untrusted Certs are stored on your Host.
