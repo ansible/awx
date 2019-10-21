@@ -107,43 +107,43 @@ export default [function() {
                 $scope.error_body = messages.error.body;
             }
             if (messages.workflow_approval) {
-                if (messages.workflow_approval.approved
-                    && messages.workflow_approval.approved.message) {
+                if (messages.workflow_approval.approved &&
+                    messages.workflow_approval.approved.message) {
                     isCustomized = true;
                     $scope.approved_message = messages.workflow_approval.approved.message;
                 }
-                if (messages.workflow_approval.approved
-                    && messages.workflow_approval.approved.body) {
+                if (messages.workflow_approval.approved &&
+                    messages.workflow_approval.approved.body) {
                     isCustomized = true;
                     $scope.approved_body = messages.workflow_approval.approved.body;
                 }
-                if (messages.workflow_approval.denied
-                    && messages.workflow_approval.denied.message) {
+                if (messages.workflow_approval.denied &&
+                    messages.workflow_approval.denied.message) {
                     isCustomized = true;
                     $scope.denied_message = messages.workflow_approval.denied.message;
                 }
-                if (messages.workflow_approval.denied
-                    && messages.workflow_approval.denied.body) {
+                if (messages.workflow_approval.denied &&
+                    messages.workflow_approval.denied.body) {
                     isCustomized = true;
                     $scope.denied_body = messages.workflow_approval.denied.body;
                 }
-                if (messages.workflow_approval.running
-                    && messages.workflow_approval.running.message) {
+                if (messages.workflow_approval.running &&
+                    messages.workflow_approval.running.message) {
                     isCustomized = true;
                     $scope.running_message = messages.workflow_approval.running.message;
                 }
-                if (messages.workflow_approval.running
-                    && messages.workflow_approval.running.body) {
+                if (messages.workflow_approval.running &&
+                    messages.workflow_approval.running.body) {
                     isCustomized = true;
                     $scope.running_body = messages.workflow_approval.running.body;
                 }
-                if (messages.workflow_approval.timed_out
-                    && messages.workflow_approval.timed_out.message) {
+                if (messages.workflow_approval.timed_out &&
+                    messages.workflow_approval.timed_out.message) {
                     isCustomized = true;
                     $scope.timed_out_message = messages.workflow_approval.timed_out.message;
                 }
-                if (messages.workflow_approval.timed_out
-                    && messages.workflow_approval.timed_out.body) {
+                if (messages.workflow_approval.timed_out &&
+                    messages.workflow_approval.timed_out.body) {
                     isCustomized = true;
                     $scope.timed_out_body = messages.workflow_approval.timed_out.body;
                 }
