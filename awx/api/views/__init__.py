@@ -4313,8 +4313,15 @@ class NotificationTemplateTest(GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
-        notification = obj.generate_notification("Tower Notification Test {} {}".format(obj.id, settings.TOWER_URL_BASE),
-                                                 {"body": "Ansible Tower Test Notification {} {}".format(obj.id, settings.TOWER_URL_BASE)})
+        msg = "Tower Notification Test {} {}".format(obj.id, settings.TOWER_URL_BASE)
+        if obj.notification_type in ('email', 'pagerduty'):
+            body = "Ansible Tower Test Notification {} {}".format(obj.id, settings.TOWER_URL_BASE)
+        elif obj.notification_type == 'webhook':
+            body = '{{"body": "Ansible Tower Test Notification {} {}"}}'.format(obj.id, settings.TOWER_URL_BASE)
+        else:
+            body = {"body": "Ansible Tower Test Notification {} {}".format(obj.id, settings.TOWER_URL_BASE)}
+        notification = obj.generate_notification(msg, body)
+
         if not notification:
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
         else:
