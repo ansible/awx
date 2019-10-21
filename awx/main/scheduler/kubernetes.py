@@ -1,3 +1,4 @@
+import collections
 import os
 import stat
 import time
@@ -47,6 +48,27 @@ class PodManager(object):
         else:
             logger.warn(f"Pod {self.pod_name} did not start. Status is {pod.status.phase}.")
 
+    @classmethod
+    def list_active_jobs(self, instance_group):
+        task = collections.namedtuple('Task', 'id instance_group')(
+            id='',
+            instance_group=instance_group
+        )
+        pm = PodManager(task)
+        try:
+            for pod in pm.kube_api.list_namespaced_pod(
+                pm.namespace,
+                label_selector='ansible-awx={}'.format(settings.INSTALL_UUID)
+            ).to_dict().get('items', []):
+                job = pod['metadata'].get('labels', {}).get('ansible-awx-job-id')
+                if job:
+                    try:
+                        yield int(job)
+                    except ValueError:
+                        pass
+        except Exception:
+            logger.exception('Failed to list pods for container group {}'.format(instance_group))
+
     def delete(self):
         return self.kube_api.delete_namespaced_pod(name=self.pod_name,
                                                    namespace=self.namespace,
@@ -71,7 +93,7 @@ class PodManager(object):
 
     @property
     def pod_name(self):
-        return f"job-{self.task.id}"
+        return f"awx-job-{self.task.id}"
 
     @property
     def pod_definition(self):
@@ -102,6 +124,10 @@ class PodManager(object):
 
         if self.task:
             pod_spec['metadata']['name'] = self.pod_name
+            pod_spec['metadata']['labels'] = {
+                'ansible-awx': settings.INSTALL_UUID,
+                'ansible-awx-job-id': str(self.task.id)
+            }
             pod_spec['spec']['containers'][0]['name'] = self.pod_name
 
         return pod_spec

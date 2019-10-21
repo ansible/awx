@@ -88,8 +88,8 @@ def gather(dest=None, module=None, collection_type='scheduled'):
         logger.exception("Invalid License provided, or No License Provided")
         return "Error: Invalid License provided, or No License Provided"
 
-    if not settings.INSIGHTS_TRACKING_STATE:
-        logger.error("Automation Analytics not enabled")
+    if collection_type != 'dry-run' and not settings.INSIGHTS_TRACKING_STATE:
+        logger.error("Automation Analytics not enabled. Use --dry-run to gather locally without sending.")
         return
 
     if module is None:
@@ -167,7 +167,7 @@ def ship(path):
             files = {'file': (os.path.basename(path), f, settings.INSIGHTS_AGENT_MIME)}
             response = requests.post(url, 
                                      files=files,
-                                     verify=True, 
+                                     verify="/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem",
                                      auth=(rh_user, rh_password),
                                      timeout=(31, 31))
             if response.status_code != 202:

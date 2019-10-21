@@ -172,6 +172,7 @@ class IsolatedManager(object):
         if runner_obj.status == 'failed':
             self.instance.result_traceback = runner_obj.stdout.read()
             self.instance.save(update_fields=['result_traceback'])
+            return 'error', runner_obj.rc
 
         return runner_obj.status, runner_obj.rc
 

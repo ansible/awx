@@ -253,6 +253,18 @@ class TaskManager():
                              task.log_format, task.execution_node, controller_node))
             elif rampart_group.is_containerized:
                 task.instance_group = rampart_group
+                if not task.supports_isolation():
+                    # project updates and inventory updates don't *actually* run in pods,
+                    # so just pick *any* non-isolated, non-containerized host and use it
+                    for group in InstanceGroup.objects.all():
+                        if group.is_containerized or group.controller_id:
+                            continue
+                        match = group.find_largest_idle_instance()
+                        if match:
+                            task.execution_node = match.hostname
+                            logger.debug('Submitting containerized {} to queue {}.'.format(
+                                         task.log_format, task.execution_node))
+                            break
             else:
                 task.instance_group = rampart_group
                 if instance is not None:

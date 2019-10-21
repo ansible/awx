@@ -60,27 +60,27 @@ export default [function() {
                 return;
             }
             let isCustomized = false;
-            if (messages.started.message) {
+            if (messages.started && messages.started.message) {
                 isCustomized = true;
                 $scope.started_message = messages.started.message;
             }
-            if (messages.started.body) {
+            if (messages.started && messages.started.body) {
                 isCustomized = true;
                 $scope.started_body = messages.started.body;
             }
-            if (messages.success.message) {
+            if (messages.success && messages.success.message) {
                 isCustomized = true;
                 $scope.success_message = messages.success.message;
             }
-            if (messages.success.body) {
+            if (messages.success && messages.success.body) {
                 isCustomized = true;
                 $scope.success_body = messages.success.body;
             }
-            if (messages.error.message) {
+            if (messages.error && messages.error.message) {
                 isCustomized = true;
                 $scope.error_message = messages.error.message;
             }
-            if (messages.error.body) {
+            if (messages.error && messages.error.body) {
                 isCustomized = true;
                 $scope.error_body = messages.error.body;
             }

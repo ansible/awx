@@ -479,6 +479,11 @@ CELERYBEAT_SCHEDULE = {
         'schedule': timedelta(seconds=20),
         'options': {'expires': 20}
     },
+    'k8s_reaper': {
+        'task': 'awx.main.tasks.awx_k8s_reaper',
+        'schedule': timedelta(seconds=60),
+        'options': {'expires': 50,}
+    },
     # 'isolated_heartbeat': set up at the end of production.py and development.py
 }
 AWX_INCONSISTENT_TASK_INTERVAL = 60 * 3
