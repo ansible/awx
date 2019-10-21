@@ -1959,9 +1959,15 @@ class RunProjectUpdate(BaseTask):
         env['PROJECT_UPDATE_ID'] = str(project_update.pk)
         env['ANSIBLE_CALLBACK_PLUGINS'] = self.get_path_to('..', 'plugins', 'callback')
         env['ANSIBLE_GALAXY_IGNORE'] = True
-        # Set up the fallback server, which is the normal Ansible Galaxy by default
-        galaxy_servers = list(settings.FALLBACK_GALAXY_SERVERS)
-        # If private galaxy URL is non-blank, that means this feature is enabled
+        # Set up the public Galaxy server, if enabled
+        if settings.PUBLIC_GALAXY_ENABLED:
+            galaxy_servers = [settings.PUBLIC_GALAXY_SERVER]
+        else:
+            galaxy_servers = []
+        # Set up fallback Galaxy servers, if configured
+        if settings.FALLBACK_GALAXY_SERVERS:
+            galaxy_servers = settings.FALLBACK_GALAXY_SERVERS + galaxy_servers
+        # Set up the primary Galaxy server, if configured
         if settings.PRIMARY_GALAXY_URL:
             galaxy_servers = [{'id': 'primary_galaxy'}] + galaxy_servers
             for key in GALAXY_SERVER_FIELDS:
