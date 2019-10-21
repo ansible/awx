@@ -295,18 +295,18 @@ class AWXProxyHandler(logging.Handler):
         self._handler = None
         self._old_kwargs = {}
         if settings.LOG_AGGREGATOR_AUDIT:
-          self._auditor = logging.handlers.RotatingFileHandler(
-              filename='/var/log/tower/external.log',
-              maxBytes=1024 * 1024 * 50, # 50 MB
-              backupCount=5,
-          )
+            self._auditor = logging.handlers.RotatingFileHandler(
+                filename='/var/log/tower/external.log',
+                maxBytes=1024 * 1024 * 50, # 50 MB
+                backupCount=5,
+            )
 
-          class WritableLogstashFormatter(LogstashFormatter):
-              @classmethod
-              def serialize(cls, message):
-                  return json.dumps(message)
+            class WritableLogstashFormatter(LogstashFormatter):
+                @classmethod
+                def serialize(cls, message):
+                    return json.dumps(message)
 
-          self._auditor.setFormatter(WritableLogstashFormatter())
+            self._auditor.setFormatter(WritableLogstashFormatter())
 
     def get_handler_class(self, protocol):
         return HANDLER_MAPPING.get(protocol, AWXNullHandler)
