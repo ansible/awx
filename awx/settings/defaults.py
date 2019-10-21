@@ -635,16 +635,18 @@ PRIMARY_GALAXY_USERNAME = ''
 PRIMARY_GALAXY_TOKEN = ''
 PRIMARY_GALAXY_PASSWORD = ''
 PRIMARY_GALAXY_AUTH_URL = ''
-# Settings for the fallback galaxy server(s), normally this is the
-# actual Ansible Galaxy site.
-# server options: 'id', 'url', 'username', 'password', 'token', 'auth_url'
-# To not use any fallback servers set this to []
-FALLBACK_GALAXY_SERVERS = [
-    {
-        'id': 'galaxy',
-        'url': 'https://galaxy.ansible.com'
-    }
-]
+
+# Settings for the public galaxy server(s).
+PUBLIC_GALAXY_ENABLED = True
+PUBLIC_GALAXY_SERVER = {
+    'id': 'galaxy',
+    'url': 'https://galaxy.ansible.com'
+}
+
+# List of dicts of fallback (additional) Galaxy servers.  If configured, these
+# will be higher precedence than public Galaxy, but lower than primary Galaxy.
+# Available options: 'id', 'url', 'username', 'password', 'token', 'auth_url'
+FALLBACK_GALAXY_SERVERS = []
 
 # Enable bubblewrap support for running jobs (playbook runs only).
 # Note: This setting may be overridden by database settings.

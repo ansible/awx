@@ -514,6 +514,16 @@ register(
 )
 
 register(
+    'PUBLIC_GALAXY_ENABLED',
+    field_class=fields.BooleanField,
+    default=True,
+    label=_('Allow Access to Public Galaxy'),
+    help_text=_('Allow or deny access to the public Ansible Galaxy during project updates.'),
+    category=_('Jobs'),
+    category_slug='jobs'
+)
+
+register(
     'STDOUT_MAX_BYTES_DISPLAY',
     field_class=fields.IntegerField,
     min_value=0,
