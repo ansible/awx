@@ -252,19 +252,25 @@ class TaskManager():
                 logger.debug('Submitting isolated {} to queue {} controlled by {}.'.format(
                              task.log_format, task.execution_node, controller_node))
             elif rampart_group.is_containerized:
+                # find one real, non-containerized instance with capacity to
+                # act as the controller for k8s API interaction
+                match = None
+                for group in InstanceGroup.objects.all():
+                    if group.is_containerized or group.controller_id:
+                        continue
+                    match = group.find_largest_idle_instance()
+                    if match:
+                        break
                 task.instance_group = rampart_group
-                if not task.supports_isolation():
+                if task.supports_isolation():
+                    task.controller_node = match.hostname
+                else:
                     # project updates and inventory updates don't *actually* run in pods,
                     # so just pick *any* non-isolated, non-containerized host and use it
-                    for group in InstanceGroup.objects.all():
-                        if group.is_containerized or group.controller_id:
-                            continue
-                        match = group.find_largest_idle_instance()
-                        if match:
-                            task.execution_node = match.hostname
-                            logger.debug('Submitting containerized {} to queue {}.'.format(
-                                         task.log_format, task.execution_node))
-                            break
+                    # as the execution node
+                    task.execution_node = match.hostname
+                    logger.debug('Submitting containerized {} to queue {}.'.format(
+                                 task.log_format, task.execution_node))
             else:
                 task.instance_group = rampart_group
                 if instance is not None:
