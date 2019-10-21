@@ -671,6 +671,98 @@ export default ['i18n', function(i18n) {
                   "|| notification_type.value == 'webhook')",
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
             },
+            approved_message: {
+                label: i18n._('Workflow Approved Message'),
+                class: 'Form-formGroup--fullWidth',
+                type: 'syntax_highlight',
+                mode: 'jinja2',
+                default: '',
+                ngShow: "customize_messages && notification_type.value != 'webhook'",
+                rows: 2,
+                oneLine: 'true',
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
+            },
+            approved_body: {
+                label: i18n._('Workflow Approved Message Body'),
+                class: 'Form-formGroup--fullWidth',
+                type: 'syntax_highlight',
+                mode: 'jinja2',
+                default: '',
+                ngShow: "customize_messages && " +
+                  "(notification_type.value == 'email' " +
+                  "|| notification_type.value == 'pagerduty' " +
+                  "|| notification_type.value == 'webhook')",
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
+            },
+            denied_message: {
+                label: i18n._('Workflow Denied Message'),
+                class: 'Form-formGroup--fullWidth',
+                type: 'syntax_highlight',
+                mode: 'jinja2',
+                default: '',
+                ngShow: "customize_messages && notification_type.value != 'webhook'",
+                rows: 2,
+                oneLine: 'true',
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
+            },
+            denied_body: {
+                label: i18n._('Workflow Denied Message Body'),
+                class: 'Form-formGroup--fullWidth',
+                type: 'syntax_highlight',
+                mode: 'jinja2',
+                default: '',
+                ngShow: "customize_messages && " +
+                  "(notification_type.value == 'email' " +
+                  "|| notification_type.value == 'pagerduty' " +
+                  "|| notification_type.value == 'webhook')",
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
+            },
+            running_message: {
+                label: i18n._('Workflow Running Message'),
+                class: 'Form-formGroup--fullWidth',
+                type: 'syntax_highlight',
+                mode: 'jinja2',
+                default: '',
+                ngShow: "customize_messages && notification_type.value != 'webhook'",
+                rows: 2,
+                oneLine: 'true',
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
+            },
+            running_body: {
+                label: i18n._('Workflow Running Message Body'),
+                class: 'Form-formGroup--fullWidth',
+                type: 'syntax_highlight',
+                mode: 'jinja2',
+                default: '',
+                ngShow: "customize_messages && " +
+                  "(notification_type.value == 'email' " +
+                  "|| notification_type.value == 'pagerduty' " +
+                  "|| notification_type.value == 'webhook')",
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
+            },
+            timed_out_message: {
+                label: i18n._('Workflow Timed Out Message'),
+                class: 'Form-formGroup--fullWidth',
+                type: 'syntax_highlight',
+                mode: 'jinja2',
+                default: '',
+                ngShow: "customize_messages && notification_type.value != 'webhook'",
+                rows: 2,
+                oneLine: 'true',
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
+            },
+            timed_out_body: {
+                label: i18n._('Workflow Timed Out Message Body'),
+                class: 'Form-formGroup--fullWidth',
+                type: 'syntax_highlight',
+                mode: 'jinja2',
+                default: '',
+                ngShow: "customize_messages && " +
+                  "(notification_type.value == 'email' " +
+                  "|| notification_type.value == 'pagerduty' " +
+                  "|| notification_type.value == 'webhook')",
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
+            },
         },
 
         buttons: { //for now always generates <button> tags
