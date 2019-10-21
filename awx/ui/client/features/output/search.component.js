@@ -1,3 +1,4 @@
+/* eslint camelcase: 0 */
 import {
     OUTPUT_SEARCH_DOCLINK,
     OUTPUT_SEARCH_FIELDS,
@@ -17,7 +18,7 @@ function toggleSearchKey () {
 }
 
 function getCurrentQueryset () {
-    const { job_event_search } = $state.params; // eslint-disable-line camelcase
+    const { job_event_search } = $state.params;
 
     return qs.decodeArr(job_event_search);
 }
@@ -114,12 +115,13 @@ function JobSearchController (_$state_, _qs_, _strings_, { subscribe }) {
         vm.key = false;
         vm.rejected = false;
         vm.disabled = true;
-        vm.running = false;
+        vm.isJobActive = false;
         vm.tags = getSearchTags(getCurrentQueryset());
 
-        unsubscribe = subscribe(({ running }) => {
-            vm.disabled = running;
-            vm.running = running;
+        unsubscribe = subscribe(({ running, event_processing_finished }) => {
+            const isJobActive = running || !event_processing_finished;
+            vm.disabled = isJobActive;
+            vm.isJobActive = isJobActive;
         });
     };
 
