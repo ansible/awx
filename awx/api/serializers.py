@@ -4522,8 +4522,8 @@ class NotificationSerializer(BaseSerializer):
                 # attempt to load json string
                 try:
                     potential_body = json.loads(obj.body)
-                    if isinstance(potential_body, dict) and 'body' in potential_body:
-                        return potential_body['body']
+                    if isinstance(potential_body, dict):
+                        return potential_body
                 except json.JSONDecodeError:
                     pass
         return obj.body
