@@ -366,10 +366,6 @@ def get_allowed_fields(obj, serializer_mapping):
     field_blacklist = ACTIVITY_STREAM_FIELD_EXCLUSIONS.get(obj._meta.model_name, [])
     if field_blacklist:
         allowed_fields = [f for f in allowed_fields if f not in field_blacklist]
-    # raise Exception(_("please render this"))
-    # if obj.__class__.__name__ == 'InstanceGroup' and obj.is_containerized:
-    #     container_group_blacklist = ["policy_instance_percentage", "policy_instance_minimum", "policy_instance_list"]
-    #     allowed_fields = [f for f in allowed_fields if f not in container_group_blacklist]
     return allowed_fields
 
 

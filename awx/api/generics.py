@@ -318,12 +318,11 @@ class GenericAPIView(generics.GenericAPIView, APIView):
                 if getattr(field, 'read_only', None):
                     del serializer.fields[name]
                 # Additionally, remove the following fields if an instance group is containerized.
-                if name == 'is_containerized':
-                    import sdb
-                    sdb.set_trace()
-                    del serializer.fields['policy_instance_percentage']
-                    del serializer.fields['policy_instance_minimum']
-                    del serializer.fields['policy_instance_list']
+                if name == 'is_containerized' and type(serializer) == InstanceGroupSerializer:
+                    if serializer.instance is not None and serializer.instance.is_containerized:
+                        del serializer.fields['policy_instance_percentage']
+                        del serializer.fields['policy_instance_minimum']
+                        del serializer.fields['policy_instance_list']
             serializer._data = self.update_raw_data(serializer.data)
         return serializer
 
