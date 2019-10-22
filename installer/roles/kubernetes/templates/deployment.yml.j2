@@ -61,6 +61,20 @@ data:
       queue_master_locator=min-masters
       ## enable guest user
       loopback_users.guest = false
+{% if rabbitmq_use_ssl|default(False)|bool %}
+      ssl_options.cacertfile=/etc/pki/rabbitmq/ca.crt
+      ssl_options.certfile=/etc/pki/rabbitmq/server-combined.pem
+      ssl_options.verify=verify_peer
+{% endif %}
+  rabbitmq-env.conf: |
+      NODENAME=${RABBITMQ_NODENAME}
+      USE_LONGNAME=true
+{% if rabbitmq_use_ssl|default(False)|bool %}
+      ERL_SSL_PATH=$(erl -eval 'io:format("~p", [code:lib_dir(ssl, ebin)]),halt().' -noshell)
+      SSL_ADDITIONAL_ERL_ARGS="-pa '$ERL_SSL_PATH' -proto_dist inet_tls -ssl_dist_opt server_certfile /etc/pki/rabbitmq/server-combined.pem -ssl_dist_opt server_secure_renegotiate true client_secure_renegotiate true"
+      SERVER_ADDITIONAL_ERL_ARGS="$SERVER_ADDITIONAL_ERL_ARGS $SSL_ADDITIONAL_ERL_ARGS"
+      CTL_ERL_ARGS="$SSL_ADDITIONAL_ERL_ARGS"
+{% endif %}
 
 {% if kubernetes_context is defined %}
 ---
@@ -156,7 +170,7 @@ spec:
               {{ custom_venvs_path }}/{{ custom_venv.name }}/bin/pip install -U \
                 {% for module in custom_venv.python_modules %}{{ module }} {% endfor %} &&
 {% endif %}
-              deactivate && 
+              deactivate &&
 {% endfor %}
               :
           volumeMounts:
@@ -307,6 +321,10 @@ spec:
               mountPath: /etc/rabbitmq
             - name: rabbitmq-healthchecks
               mountPath: /usr/local/bin/healthchecks
+{% if rabbitmq_use_ssl|default(False)|bool %}
+            - name: "{{ kubernetes_deployment_name }}-rabbitmq-certs-vol"
+              mountPath: /etc/pki/rabbitmq
+{% endif %}
           resources:
             requests:
               memory: "{{ rabbitmq_mem_request }}Gi"
@@ -362,7 +380,7 @@ spec:
             type: Directory
 {% endif %}
 {% if custom_venvs is defined %}
-        - name: custom-venvs 
+        - name: custom-venvs
           emptyDir: {}
 {% endif %}
         - name: {{ kubernetes_deployment_name }}-application-config
@@ -398,6 +416,23 @@ spec:
               path: enabled_plugins
             - key: rabbitmq_definitions.json
               path: rabbitmq_definitions.json
+            - key: rabbitmq-env.conf
+              path: rabbitmq-env.conf
+
+{% if rabbitmq_use_ssl|default(False)|bool %}
+        - name: "{{ kubernetes_deployment_name }}-rabbitmq-certs-vol"
+          secret:
+            secretName: "{{ kubernetes_deployment_name }}-rabbitmq-certs"
+            items:
+              - key: rabbitmq_ssl_cert
+                path: 'server.crt'
+              - key: rabbitmq_ssl_key
+                path: 'server.key'
+              - key: rabbitmq_ssl_cacert
+                path: 'ca.crt'
+              - key: rabbitmq_ssl_combined
+                path: 'server-combined.pem'
+{% endif %}
         - name: rabbitmq-healthchecks
           configMap:
             name: {{ kubernetes_deployment_name }}-healthchecks
