@@ -27,6 +27,7 @@ function EditContainerGroupController($rootScope, $scope, $state, models, string
   vm.switchDisabled = false;
   vm.form.disabled = !instanceGroup.has('options', 'actions.PUT');
   vm.form.name.required = true;
+  delete vm.form.name.help_text;
   vm.form.credential = {
     type: 'field',
     label: i18n._('Credential'),
@@ -38,6 +39,7 @@ function EditContainerGroupController($rootScope, $scope, $state, models, string
   vm.form.credential._displayValue = EditContainerGroupDataset.data.summary_fields.credential.name;
   vm.form.credential.required = true;
   vm.form.credential._value = EditContainerGroupDataset.data.summary_fields.credential.id;
+  vm.form.credential.help_text = strings.get('container.CREDENTIAL_HELP_TEXT');
 
   vm.tab = {
     details: {
@@ -59,7 +61,8 @@ function EditContainerGroupController($rootScope, $scope, $state, models, string
       label: strings.get('container.POD_SPEC_LABEL'),
       value: EditContainerGroupDataset.data.pod_spec_override || "---",
       name: 'extraVars',
-      disabled: true
+      disabled: true,
+      tooltip: strings.get('container.EXTRA_VARS_HELP_TEXT')
     };
     vm.switchDisabled = true;
   } else {
@@ -67,7 +70,8 @@ function EditContainerGroupController($rootScope, $scope, $state, models, string
       label: strings.get('container.POD_SPEC_LABEL'),
       value: EditContainerGroupDataset.data.pod_spec_override || instanceGroup.model.OPTIONS.actions.PUT.pod_spec_override.default,
       name: 'extraVars',
-      toggleLabel: strings.get('container.POD_SPEC_TOGGLE')
+      toggleLabel: strings.get('container.POD_SPEC_TOGGLE'),
+      tooltip: strings.get('container.EXTRA_VARS_HELP_TEXT')
     };
   }
 
