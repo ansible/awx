@@ -50,7 +50,7 @@
   shell: |
     {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} exec ansible-tower-management -- \
       bash -c "PGPASSWORD={{ pg_password | quote }} \
-        pg_dump --clean --create \
+        scl enable rh-postgresql10 -- pg_dump --clean --create \
           --host='{{ pg_hostname | default('postgresql') }}' \
           --port={{ pg_port | default('5432') }} \
           --username='{{ pg_username }}' \

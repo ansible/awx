@@ -21,7 +21,7 @@
 
 - name: Unarchive Tower backup
   unarchive:
-    src: tower-openshift-backup-latest.tar.gz
+    src: "{{ restore_backup_file }}"
     dest: "{{ playbook_dir }}/tower-openshift-restore"
     extra_opts: [--strip-components=1]
 
@@ -76,7 +76,7 @@
   shell: |
     {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
       exec -i ansible-tower-management -- bash -c "PGPASSWORD={{ pg_password | quote }} \
-        psql \
+        scl enable rh-postgresql10 -- psql \
         --host={{ pg_hostname | default('postgresql') }} \
         --port={{ pg_port | default('5432') }} \
         --username=postgres \
@@ -88,7 +88,7 @@
   shell: |
     {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
       exec -i ansible-tower-management -- bash -c "PGPASSWORD={{ pg_password | quote }} \
-        psql \
+        scl enable rh-postgresql10 -- psql \
         --host={{ pg_hostname | default('postgresql') }} \
         --port={{ pg_port | default('5432') }} \
         --username={{ pg_username }} \
@@ -99,7 +99,7 @@
   shell: |
     {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
       exec -i ansible-tower-management -- bash -c "PGPASSWORD={{ pg_password | quote }} \
-        psql \
+        scl enable rh-postgresql10 -- psql \
         --host={{ pg_hostname | default('postgresql') }} \
         --port={{ pg_port | default('5432') }} \
         --username=postgres \
