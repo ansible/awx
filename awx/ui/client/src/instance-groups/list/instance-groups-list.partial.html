@@ -41,10 +41,11 @@
         </at-list-toolbar>
         <at-list results="instance_groups">
             <at-row ng-repeat="instance_group in instance_groups"
-                ng-class="{'at-Row--active': (instance_group.id === vm.activeId)}" >
-                <div class="at-Row-items">
-                    <div class="at-Row-container">
-                        <div class="at-Row-content">
+                ng-class="{'at-Row--active': (instance_group.id === vm.activeId)}"
+                class="at-Row--instanceGroups">
+                <div class="at-Row-itemGroup">
+                    <div class="at-Row-items at-Row-items--instanceGroups">
+                        <div class="at-Row-itemHeaderGroup">
                             <at-row-item
                                 ng-if="!instance_group.credential"
                                 header-value="{{ instance_group.name }}"
@@ -67,23 +68,14 @@
                                 </div>
                             </div>
                             <div class="at-RowItem--labels" ng-if="!instance_group.credential">
-                                    <div class="LabelList-tagContainer">
-                                        <div class="LabelList-tag" ng-class="{'LabelList-tag--deletable' : (showDelete && template.summary_fields.user_capabilities.edit)}">
-                                            <span class="LabelList-name">{{vm.strings.get('instance.BADGE_TEXT') }}</span>
-                                        </div>
+                                <div class="LabelList-tagContainer">
+                                    <div class="LabelList-tag" ng-class="{'LabelList-tag--deletable' : (showDelete && template.summary_fields.user_capabilities.edit)}">
+                                        <span class="LabelList-name">{{vm.strings.get('instance.BADGE_TEXT') }}</span>
                                     </div>
                                 </div>
+                            </div>
                         </div>
-                        <div class="instanceGroupsList-details">
-                        <div class="at-Row-links">
-                            <at-row-item
-                                ng-if="!instance_group.credential"
-                                label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_INSTANCES') }}"
-                                label-state="instanceGroups.instances({instance_group_id: {{ instance_group.id }}})"
-                                value="{{ instance_group.instances }}"
-                                inline="true"
-                                badge="true">
-                            </at-row-item>
+                        <div class="at-Row-nonHeaderItems">
                             <at-row-item
                                 label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_RUNNING_JOBS') }}"
                                 label-state="instanceGroups.jobs({instance_group_id: {{ instance_group.id }}, job_search: {status__in: ['running,waiting']}})"
@@ -98,14 +90,38 @@
                                 inline="true"
                                 badge="true">
                             </at-row-item>
-                        </div>
-                        <div class="at-Row-actions" >
-                            <capacity-bar ng-show="!instance_group.credential" label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_USED_CAPACITY') }}" capacity="instance_group.consumed_capacity" total-capacity="instance_group.capacity"></capacity-bar>
-                            <at-row-action icon="fa-trash" ng-click="vm.deleteInstanceGroup(instance_group)" ng-if="vm.rowAction.trash(instance_group)">
-                            </at-row-action>
-                        </div>
+                            <at-row-item
+                                ng-if="!instance_group.credential"
+                                label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_INSTANCES') }}"
+                                label-state="instanceGroups.instances({instance_group_id: {{ instance_group.id }}})"
+                                value="{{ instance_group.instances }}"
+                                inline="true"
+                                badge="true">
+                            </at-row-item>
+                            <div
+                                ng-if="instance_group.credential"
+                                class="at-Row--instanceSpacer">
+                            </div>
                         </div>
                     </div>
+                    <div class="at-Row-items--capacity" ng-if="!instance_group.credential">
+                        <capacity-bar
+                            label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_USED_CAPACITY') }}"
+                            capacity="instance_group.consumed_capacity"
+                            total-capacity="instance_group.capacity">
+                        </capacity-bar>
+                    </div>
+                    <div
+                        ng-if="instance_group.credential"
+                        class="at-Row--capacitySpacer">
+                    </div>
+                </div>
+                <div class="at-Row-actions" >
+                    <at-row-action
+                        icon="fa-trash"
+                        ng-click="vm.deleteInstanceGroup(instance_group)"
+                        ng-if="vm.rowAction.trash(instance_group)">
+                    </at-row-action>
                 </div>
             </at-row>
         </at-list>
