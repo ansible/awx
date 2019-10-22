@@ -6,6 +6,7 @@ import stat
 import tempfile
 import time
 import logging
+import yaml
 
 from django.conf import settings
 import ansible_runner
@@ -48,10 +49,17 @@ class IsolatedManager(object):
     def build_inventory(self, hosts):
         if self.instance and self.instance.is_containerized:
             inventory = {'all': {'hosts': {}}}
+            fd, path = tempfile.mkstemp(
+                prefix='.kubeconfig', dir=self.private_data_dir
+            )
+            with open(path, 'wb') as temp:
+                temp.write(yaml.dump(self.pod_manager.kube_config).encode())
+                temp.flush()
+                os.chmod(temp.name, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
             for host in hosts:
                 inventory['all']['hosts'][host] = {
                     "ansible_connection": "kubectl",
-                    "ansible_kubectl_config": self.pod_manager.kube_config
+                    "ansible_kubectl_config": path,
                 }
         else:
             inventory = '\n'.join([
@@ -143,6 +151,8 @@ class IsolatedManager(object):
             '- /artifacts/job_events/*-partial.json.tmp',
             # don't rsync the ssh_key FIFO
             '- /env/ssh_key',
+            # don't rsync kube config files
+            '- .kubeconfig*'
         ]
 
         for filename, data in (

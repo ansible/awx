@@ -1423,7 +1423,6 @@ class BaseTask(object):
     def deploy_container_group_pod(self, task):
         from awx.main.scheduler.kubernetes import PodManager # Avoid circular import
         pod_manager = PodManager(self.instance)
-        self.cleanup_paths.append(pod_manager.kube_config)
         try:
             log_name = task.log_format
             logger.debug(f"Launching pod for {log_name}.")

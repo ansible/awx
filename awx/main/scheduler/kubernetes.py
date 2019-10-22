@@ -1,9 +1,5 @@
 import collections
-import os
-import stat
 import time
-import yaml
-import tempfile
 import logging
 from base64 import b64encode
 
@@ -88,8 +84,17 @@ class PodManager(object):
 
     @cached_property
     def kube_api(self):
-        my_client = config.new_client_from_config(config_file=self.kube_config)
-        return client.CoreV1Api(api_client=my_client)
+        # this feels a little janky, but it's what k8s' own code does
+        # internally when it reads kube config files from disk:
+        # https://github.com/kubernetes-client/python-base/blob/0b208334ef0247aad9afcaae8003954423b61a0d/config/kube_config.py#L643
+        loader = config.kube_config.KubeConfigLoader(
+            config_dict=self.kube_config
+        )
+        cfg = type.__call__(client.Configuration)
+        loader.load_and_set(cfg)
+        return client.CoreV1Api(api_client=client.ApiClient(
+            configuration=cfg
+        ))
 
     @property
     def pod_name(self):
@@ -174,10 +179,4 @@ def generate_tmp_kube_config(credential, namespace):
         ).decode() # decode the base64 data into a str
     else:
         config["clusters"][0]["cluster"]["insecure-skip-tls-verify"] = True
-
-    fd, path = tempfile.mkstemp(prefix='kubeconfig')
-    with open(path, 'wb') as temp:
-        temp.write(yaml.dump(config).encode())
-        temp.flush()
-        os.chmod(temp.name, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
-    return path
+    return config
