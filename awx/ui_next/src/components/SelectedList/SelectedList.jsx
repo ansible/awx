@@ -27,34 +27,34 @@ class SelectedList extends Component {
       onRemove,
       displayKey,
       isReadOnly,
-      isCredentialList
+      isCredentialList,
     } = this.props;
-    const chips = isCredentialList ?  selected.map(item => (
-      <CredentialChip
-        key={item.id}
-        isReadOnly={isReadOnly}
-        onClick={() => onRemove(item)}
-        credential={item}
-      >
-        {item[displayKey]}
-      </CredentialChip>
-    )) : selected.map(item => (
-      <Chip
-        key={item.id}
-        isReadOnly={isReadOnly}
-        onClick={() => onRemove(item)}
-      >
-        {item[displayKey]}
-      </Chip>
-    ))
+    const chips = isCredentialList
+      ? selected.map(item => (
+          <CredentialChip
+            key={item.id}
+            isReadOnly={isReadOnly}
+            onClick={() => onRemove(item)}
+            credential={item}
+          >
+            {item[displayKey]}
+          </CredentialChip>
+        ))
+      : selected.map(item => (
+          <Chip
+            key={item.id}
+            isReadOnly={isReadOnly}
+            onClick={() => onRemove(item)}
+          >
+            {item[displayKey]}
+          </Chip>
+        ));
     return (
       <Split>
         <SplitLabelItem>{label}</SplitLabelItem>
         <VerticalSeparator />
         <SplitItem>
-          <ChipGroup showOverflowAfter={showOverflowAfter}>
-           {chips}
-          </ChipGroup>
+          <ChipGroup showOverflowAfter={showOverflowAfter}>{chips}</ChipGroup>
         </SplitItem>
       </Split>
     );

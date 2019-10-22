@@ -46,11 +46,16 @@ class JobTemplates extends InstanceGroupsMixin(NotificationsMixin(Base)) {
   }
 
   associateCredentials(id, credential) {
-    return this.http.post(`${this.baseUrl}${id}/credentials/`, { id: credential });
+    return this.http.post(`${this.baseUrl}${id}/credentials/`, {
+      id: credential,
+    });
   }
 
   disassociateCredentials(id, credential) {
-    return this.http.post(`${this.baseUrl}${id}/credentials/`, { id: credential, disassociate: true  });
+    return this.http.post(`${this.baseUrl}${id}/credentials/`, {
+      id: credential,
+      disassociate: true,
+    });
   }
 }
 

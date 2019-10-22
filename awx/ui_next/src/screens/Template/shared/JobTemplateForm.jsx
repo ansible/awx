@@ -27,7 +27,7 @@ import {
   InventoryLookup,
   InstanceGroupsLookup,
   ProjectLookup,
-  CredentialsLookup
+  CredentialsLookup,
 } from '@components/Lookup';
 import { JobTemplatesAPI } from '@api';
 import LabelSelect from './LabelSelect';
@@ -86,8 +86,7 @@ class JobTemplateForm extends Component {
     const { validateField } = this.props;
     this.setState({ contentError: null, hasContentLoading: true });
     // TODO: determine when LabelSelect has finished loading labels
-    Promise.all([this.loadRelatedInstanceGroups(),
-    ]).then(() => {
+    Promise.all([this.loadRelatedInstanceGroups()]).then(() => {
       this.setState({ hasContentLoading: false });
       validateField('project');
     });
@@ -329,8 +328,10 @@ class JobTemplateForm extends Component {
               <CredentialsLookup
                 onError={err => this.setState({ contentError: err })}
                 credentials={template.summary_fields.credentials}
-                onChange={value => (form.setFieldValue('credentials', value))}
-                tooltip={i18n._(t`Select credentials that allow Tower to access the nodes this job will be ran against. You can only select one credential of each type. For machine credentials (SSH), checking "Prompt on launch" without selecting credentials will require you to select a machine credential at run time. If you select credentials and check "Prompt on launch", the selected credential(s) become the defaults that can be updated at run time.`)}
+                onChange={value => form.setFieldValue('credentials', value)}
+                tooltip={i18n._(
+                  t`Select credentials that allow Tower to access the nodes this job will be ran against. You can only select one credential of each type. For machine credentials (SSH), checking "Prompt on launch" without selecting credentials will require you to select a machine credential at run time. If you select credentials and check "Prompt on launch", the selected credential(s) become the defaults that can be updated at run time.`
+                )}
               />
             )}
           />
@@ -604,7 +605,7 @@ const FormikApp = withFormik({
       initialInstanceGroups: [],
       instanceGroups: [],
       initialCredentials: summary_fields.credentials || [],
-      credentials: []
+      credentials: [],
     };
   },
   handleSubmit: (values, { props }) => props.handleSubmit(values),

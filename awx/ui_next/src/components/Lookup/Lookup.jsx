@@ -21,9 +21,9 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
 
-import AnsibleSelect from '../AnsibleSelect'
+import AnsibleSelect from '../AnsibleSelect';
 import PaginatedDataList from '../PaginatedDataList';
-import VerticalSeperator from '../VerticalSeparator'
+import VerticalSeperator from '../VerticalSeparator';
 import DataListToolbar from '../DataListToolbar';
 import CheckboxListItem from '../CheckboxListItem';
 import SelectedList from '../SelectedList';
@@ -68,13 +68,13 @@ class Lookup extends React.Component {
       results: [],
       count: 0,
       error: null,
-      isDropdownOpen: false
+      isDropdownOpen: false,
     };
-      this.qsConfig = getQSConfig(props.qsNamespace, {
-        page: 1,
-        page_size: 5,
-        order_by: props.sortedColumnKey,
-      });
+    this.qsConfig = getQSConfig(props.qsNamespace, {
+      page: 1,
+      page_size: 5,
+      order_by: props.sortedColumnKey,
+    });
     this.handleModalToggle = this.handleModalToggle.bind(this);
     this.toggleSelected = this.toggleSelected.bind(this);
     this.saveModal = this.saveModal.bind(this);
@@ -84,8 +84,7 @@ class Lookup extends React.Component {
   }
 
   componentDidMount() {
-    const {onLoadCredentialTypes} = this.props
-    ;
+    const { onLoadCredentialTypes } = this.props;
     if (onLoadCredentialTypes) {
       Promise.all([onLoadCredentialTypes(), this.getData()]);
     } else {
@@ -95,21 +94,23 @@ class Lookup extends React.Component {
 
   componentDidUpdate(prevProps) {
     const { location, selectedCategory } = this.props;
-    if ((location !== prevProps.location) ||
-      (prevProps.selectedCategory !== selectedCategory)) {
+    if (
+      location !== prevProps.location ||
+      prevProps.selectedCategory !== selectedCategory
+    ) {
       this.getData();
     }
   }
 
   toggleDropdown() {
     const { isDropdownOpen } = this.state;
-    this.setState({isDropdownOpen: !isDropdownOpen})
+    this.setState({ isDropdownOpen: !isDropdownOpen });
   }
 
   assertCorrectValueType() {
     const { multiple, value, selectCategoryOptions } = this.props;
     if (selectCategoryOptions) {
-      return
+      return;
     }
     if (!multiple && Array.isArray(value)) {
       throw new Error(
@@ -130,30 +131,37 @@ class Lookup extends React.Component {
 
     this.setState({ error: false });
     try {
-        const { data } = await getItems(queryParams);
+      const { data } = await getItems(queryParams);
       const { results, count } = data;
 
-        this.setState({
-          results,
-          count,
-        });
+      this.setState({
+        results,
+        count,
+      });
     } catch (err) {
       this.setState({ error: true });
     }
   }
 
   toggleSelected(row) {
-    const { name, onLookupSave, multiple, onToggleItem, selectCategoryOptions } = this.props;
     const {
-      lookupSelectedItems: updatedSelectedItems, isModalOpen
+      name,
+      onLookupSave,
+      multiple,
+      onToggleItem,
+      selectCategoryOptions,
+    } = this.props;
+    const {
+      lookupSelectedItems: updatedSelectedItems,
+      isModalOpen,
     } = this.state;
 
     const selectedIndex = updatedSelectedItems.findIndex(
       selectedRow => selectedRow.id === row.id
-      );
+    );
     if (multiple) {
       if (selectCategoryOptions) {
-        onToggleItem(row, isModalOpen)
+        onToggleItem(row, isModalOpen);
       }
       if (selectedIndex > -1) {
         updatedSelectedItems.splice(selectedIndex, 1);
@@ -171,8 +179,8 @@ class Lookup extends React.Component {
     // This handles the case where the user removes chips from the lookup input
     // while the modal is closed
     if (!isModalOpen) {
-      onLookupSave(updatedSelectedItems, name)
-    };
+      onLookupSave(updatedSelectedItems, name);
+    }
   }
 
   handleModalToggle() {
@@ -190,7 +198,7 @@ class Lookup extends React.Component {
     } else {
       this.clearQSParams();
       if (selectCategory) {
-        selectCategory(null, "Machine");
+        selectCategory(null, 'Machine');
       }
     }
     this.setState(prevState => ({
@@ -201,11 +209,12 @@ class Lookup extends React.Component {
   saveModal() {
     const { onLookupSave, name, multiple } = this.props;
     const { lookupSelectedItems } = this.state;
-    const value = multiple ? lookupSelectedItems : lookupSelectedItems[0] || null;
+    const value = multiple
+      ? lookupSelectedItems
+      : lookupSelectedItems[0] || null;
 
-      this.handleModalToggle();
-      onLookupSave(value, name);
-
+    this.handleModalToggle();
+    onLookupSave(value, name);
   }
 
   clearQSParams() {
@@ -237,12 +246,12 @@ class Lookup extends React.Component {
       required,
       i18n,
       selectCategoryOptions,
-      selectedCategory
+      selectedCategory,
     } = this.props;
     const header = lookupHeader || i18n._(t`Items`);
     const canDelete = !required || (multiple && value.length > 1);
     const chips = () => {
-      return (selectCategoryOptions && selectCategoryOptions.length > 0) ? (
+      return selectCategoryOptions && selectCategoryOptions.length > 0 ? (
         <ChipGroup>
           {(multiple ? value : [value]).map(chip => (
             <CredentialChip
@@ -265,8 +274,8 @@ class Lookup extends React.Component {
             </Chip>
           ))}
         </ChipGroup>
-      )
-    }
+      );
+    };
     return (
       <Fragment>
         <InputGroup onBlur={onBlur}>
@@ -305,11 +314,19 @@ class Lookup extends React.Component {
             </Button>,
           ]}
         >
-          {(selectCategoryOptions && selectCategoryOptions.length > 0) && (
+          {selectCategoryOptions && selectCategoryOptions.length > 0 && (
             <ToolbarItem css=" display: flex; align-items: center;">
               <span css="flex: 0 0 25%;">Selected Category</span>
               <VerticalSeperator />
-              <AnsibleSelect css="flex: 1 1 75%;" id="credentialsLookUp-select" label="Selected Category" data={selectCategoryOptions} value={selectedCategory.label} onChange={selectCategory} form={form}/>
+              <AnsibleSelect
+                css="flex: 1 1 75%;"
+                id="credentialsLookUp-select"
+                label="Selected Category"
+                data={selectCategoryOptions}
+                value={selectedCategory.label}
+                onChange={selectCategory}
+                form={form}
+              />
             </ToolbarItem>
           )}
           <PaginatedDataList
@@ -324,10 +341,18 @@ class Lookup extends React.Component {
                 itemId={item.id}
                 name={multiple ? item.name : name}
                 label={item.name}
-                isSelected={selectCategoryOptions ? value.some(i => i.id === item.id)
-                  : lookupSelectedItems.some(i => i.id === item.id)}
+                isSelected={
+                  selectCategoryOptions
+                    ? value.some(i => i.id === item.id)
+                    : lookupSelectedItems.some(i => i.id === item.id)
+                }
                 onSelect={() => this.toggleSelected(item)}
-                isRadio={!multiple || ((selectCategoryOptions && selectCategoryOptions.length) && selectedCategory.value !== "Vault")}
+                isRadio={
+                  !multiple ||
+                  (selectCategoryOptions &&
+                    selectCategoryOptions.length &&
+                    selectedCategory.value !== 'Vault')
+                }
               />
             )}
             renderToolbar={props => <DataListToolbar {...props} fillWidth />}
@@ -340,7 +365,9 @@ class Lookup extends React.Component {
               showOverflowAfter={5}
               onRemove={this.toggleSelected}
               isReadOnly={!canDelete}
-              isCredentialList={selectCategoryOptions && selectCategoryOptions.length > 0}
+              isCredentialList={
+                selectCategoryOptions && selectCategoryOptions.length > 0
+              }
             />
           )}
           {error ? <div>error</div> : ''}

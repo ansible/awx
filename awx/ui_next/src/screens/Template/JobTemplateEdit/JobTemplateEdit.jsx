@@ -120,7 +120,7 @@ class JobTemplateEdit extends Component {
       await Promise.all([
         this.submitLabels(labels, organizationId),
         this.submitInstanceGroups(instanceGroups, initialInstanceGroups),
-        this.submitCredentials(credentials)
+        this.submitCredentials(credentials),
       ]);
       history.push(this.detailsUrl);
     } catch (formSubmitError) {
@@ -163,7 +163,7 @@ class JobTemplateEdit extends Component {
     const associatePromises = await added.map(group =>
       JobTemplatesAPI.associateInstanceGroup(template.id, group.id)
     );
-    return Promise.all([...disassociatePromises, ...associatePromises, ]);
+    return Promise.all([...disassociatePromises, ...associatePromises]);
   }
 
   async submitCredentials(newCredentials) {
@@ -178,9 +178,9 @@ class JobTemplateEdit extends Component {
     const disassociatePromise = await Promise.all(disassociateCredentials);
     const associateCredentials = added.map(cred =>
       JobTemplatesAPI.associateCredentials(template.id, cred.id)
-    )
-    const associatePromise = Promise.all(associateCredentials)
-    return Promise.all([disassociatePromise, associatePromise])
+    );
+    const associatePromise = Promise.all(associateCredentials);
+    return Promise.all([disassociatePromise, associatePromise]);
   }
 
   handleCancel() {
