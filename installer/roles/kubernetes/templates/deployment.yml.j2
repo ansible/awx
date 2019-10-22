@@ -426,7 +426,7 @@ data:
     conn.request('GET', '/api/healthchecks/node', headers={'Authorization': 'Basic %s' % authsecret})
     r1 = conn.getresponse()
     if r1.status != 200:
-      sys.stderr.write('Received http error %i\n' % (r1.status))
+      sys.stderr.write('Received http error %i\\n' % (r1.status))
       sys.exit(1)
     body = r1.read()
     if body != '{"status":"ok"}':
