@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Split as PFSplit, SplitItem } from '@patternfly/react-core';
 import styled from 'styled-components';
-import { ChipGroup, Chip } from '../Chip';
+import { ChipGroup, Chip, CredentialChip } from '../Chip';
 import VerticalSeparator from '../VerticalSeparator';
 
 const Split = styled(PFSplit)`
@@ -27,22 +27,33 @@ class SelectedList extends Component {
       onRemove,
       displayKey,
       isReadOnly,
+      isCredentialList
     } = this.props;
+    const chips = isCredentialList ?  selected.map(item => (
+      <CredentialChip
+        key={item.id}
+        isReadOnly={isReadOnly}
+        onClick={() => onRemove(item)}
+        credential={item}
+      >
+        {item[displayKey]}
+      </CredentialChip>
+    )) : selected.map(item => (
+      <Chip
+        key={item.id}
+        isReadOnly={isReadOnly}
+        onClick={() => onRemove(item)}
+      >
+        {item[displayKey]}
+      </Chip>
+    ))
     return (
       <Split>
         <SplitLabelItem>{label}</SplitLabelItem>
         <VerticalSeparator />
         <SplitItem>
           <ChipGroup showOverflowAfter={showOverflowAfter}>
-            {selected.map(item => (
-              <Chip
-                key={item.id}
-                isReadOnly={isReadOnly}
-                onClick={() => onRemove(item)}
-              >
-                {item[displayKey]}
-              </Chip>
-            ))}
+           {chips}
           </ChipGroup>
         </SplitItem>
       </Split>

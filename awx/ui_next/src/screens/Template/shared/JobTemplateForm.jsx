@@ -27,6 +27,7 @@ import {
   InventoryLookup,
   InstanceGroupsLookup,
   ProjectLookup,
+  CredentialsLookup
 } from '@components/Lookup';
 import { JobTemplatesAPI } from '@api';
 import LabelSelect from './LabelSelect';
@@ -62,6 +63,7 @@ class JobTemplateForm extends Component {
         inventory: null,
         labels: { results: [] },
         project: null,
+        credentials: [],
       },
       isNew: true,
     },
@@ -84,7 +86,8 @@ class JobTemplateForm extends Component {
     const { validateField } = this.props;
     this.setState({ contentError: null, hasContentLoading: true });
     // TODO: determine when LabelSelect has finished loading labels
-    Promise.all([this.loadRelatedInstanceGroups()]).then(() => {
+    Promise.all([this.loadRelatedInstanceGroups(),
+    ]).then(() => {
       this.setState({ hasContentLoading: false });
       validateField('project');
     });
@@ -149,7 +152,6 @@ class JobTemplateForm extends Component {
         isDisabled: false,
       },
     ];
-
     const verbosityOptions = [
       { value: '0', key: '0', label: i18n._(t`0 (Normal)`) },
       { value: '1', key: '1', label: i18n._(t`1 (Verbose)`) },
@@ -316,6 +318,20 @@ class JobTemplateForm extends Component {
                   onError={err => this.setState({ contentError: err })}
                 />
               </FormGroup>
+            )}
+          />
+        </FormRow>
+        <FormRow>
+          <Field
+            name="credentials"
+            fieldId="template-credentials"
+            render={({ form }) => (
+              <CredentialsLookup
+                onError={err => this.setState({ contentError: err })}
+                credentials={template.summary_fields.credentials}
+                onChange={value => (form.setFieldValue('credentials', value))}
+                tooltip={i18n._(t`Select credentials that allow Tower to access the nodes this job will be ran against. You can only select one credential of each type. For machine credentials (SSH), checking "Prompt on launch" without selecting credentials will require you to select a machine credential at run time. If you select credentials and check "Prompt on launch", the selected credential(s) become the defaults that can be updated at run time.`)}
+              />
             )}
           />
         </FormRow>
@@ -587,6 +603,8 @@ const FormikApp = withFormik({
       organizationId: summary_fields.inventory.organization_id || null,
       initialInstanceGroups: [],
       instanceGroups: [],
+      initialCredentials: summary_fields.credentials || [],
+      credentials: []
     };
   },
   handleSubmit: (values, { props }) => props.handleSubmit(values),

@@ -109,6 +109,8 @@ class JobTemplateEdit extends Component {
       organizationId,
       instanceGroups,
       initialInstanceGroups,
+      credentials,
+      initialCredentials,
       ...remainingValues
     } = values;
 
@@ -118,6 +120,7 @@ class JobTemplateEdit extends Component {
       await Promise.all([
         this.submitLabels(labels, organizationId),
         this.submitInstanceGroups(instanceGroups, initialInstanceGroups),
+        this.submitCredentials(credentials)
       ]);
       history.push(this.detailsUrl);
     } catch (formSubmitError) {
@@ -154,13 +157,30 @@ class JobTemplateEdit extends Component {
   async submitInstanceGroups(groups, initialGroups) {
     const { template } = this.props;
     const { added, removed } = getAddedAndRemoved(initialGroups, groups);
-    const associatePromises = added.map(group =>
-      JobTemplatesAPI.associateInstanceGroup(template.id, group.id)
-    );
-    const disassociatePromises = removed.map(group =>
+    const disassociatePromises = await removed.map(group =>
       JobTemplatesAPI.disassociateInstanceGroup(template.id, group.id)
     );
-    return Promise.all([...associatePromises, ...disassociatePromises]);
+    const associatePromises = await added.map(group =>
+      JobTemplatesAPI.associateInstanceGroup(template.id, group.id)
+    );
+    return Promise.all([...disassociatePromises, ...associatePromises, ]);
+  }
+
+  async submitCredentials(newCredentials) {
+    const { template } = this.props;
+    const { added, removed } = getAddedAndRemoved(
+      template.summary_fields.credentials,
+      newCredentials
+    );
+    const disassociateCredentials = removed.map(cred =>
+      JobTemplatesAPI.disassociateCredentials(template.id, cred.id)
+    );
+    const disassociatePromise = await Promise.all(disassociateCredentials);
+    const associateCredentials = added.map(cred =>
+      JobTemplatesAPI.associateCredentials(template.id, cred.id)
+    )
+    const associatePromise = Promise.all(associateCredentials)
+    return Promise.all([disassociatePromise, associatePromise])
   }
 
   handleCancel() {

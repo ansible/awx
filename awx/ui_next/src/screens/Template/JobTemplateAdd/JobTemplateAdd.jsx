@@ -22,6 +22,7 @@ function JobTemplateAdd({ history, i18n }) {
       organizationId,
       instanceGroups,
       initialInstanceGroups,
+      credentials,
       ...remainingValues
     } = values;
 
@@ -33,6 +34,7 @@ function JobTemplateAdd({ history, i18n }) {
       await Promise.all([
         submitLabels(id, labels, organizationId),
         submitInstanceGroups(id, instanceGroups),
+        submitCredentials(id, credentials)
       ]);
       history.push(`/templates/${type}/${id}/details`);
     } catch (error) {
@@ -58,6 +60,13 @@ function JobTemplateAdd({ history, i18n }) {
       JobTemplatesAPI.associateInstanceGroup(templateId, group.id)
     );
     return Promise.all(associatePromises);
+  }
+
+  function submitCredentials(templateId, credentials = []) {
+    const associateCredentials = credentials.map(cred =>
+      JobTemplatesAPI.associateCredentials(templateId, cred.id)
+    )
+    return Promise.all(associateCredentials)
   }
 
   function handleCancel() {
