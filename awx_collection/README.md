@@ -34,7 +34,7 @@ in the `awx_collection_test_venv` folder so that `make test_collection` can
 be ran to actually run the tests. A single test can be ran via:
 
 ```
-make test_collection MODULE_TEST_DIRS=awx_collection/test/awx/test_organization.py
+make test_collection COLLECTION_TEST_DIRS=awx_collection/test/awx/test_organization.py
 ```
 
 ## Building
