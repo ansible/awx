@@ -1,6 +1,5 @@
 from hashlib import sha1
 import hmac
-import json
 import logging
 import urllib.parse
 
@@ -151,13 +150,13 @@ class WebhookReceiverBase(APIView):
                 'webhook_credential': obj.webhook_credential,
                 'webhook_guid': event_guid,
             },
-            'extra_vars': json.dumps({
+            'extra_vars': {
                 'tower_webhook_event_type': event_type,
                 'tower_webhook_event_guid': event_guid,
                 'tower_webhook_event_ref': event_ref,
                 'tower_webhook_status_api': status_api,
                 'tower_webhook_payload': request.data,
-            })
+            }
         }
 
         new_job = obj.create_unified_job(**kwargs)
