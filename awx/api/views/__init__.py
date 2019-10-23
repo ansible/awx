@@ -2136,12 +2136,21 @@ class InventorySourceHostsList(HostRelatedSearchMixin, SubListDestroyAPIView):
     def perform_list_destroy(self, instance_list):
         inv_source = self.get_parent_object()
         with ignore_inventory_computed_fields():
-            # Activity stream doesn't record disassociation here anyway
-            # no signals-related reason to not bulk-delete
-            models.Host.groups.through.objects.filter(
-                host__inventory_sources=inv_source
-            ).delete()
-            r = super(InventorySourceHostsList, self).perform_list_destroy(instance_list)
+            if not settings.ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC:
+                from awx.main.signals import disable_activity_stream
+                with disable_activity_stream():
+                    # job host summary deletion necessary to avoid deadlock
+                    models.JobHostSummary.objects.filter(host__inventory_sources=inv_source).update(host=None)
+                    models.Host.objects.filter(inventory_sources=inv_source).delete()
+                    r = super(InventorySourceHostsList, self).perform_list_destroy([])
+            else:
+                # Advance delete of group-host memberships to prevent deadlock
+                # Activity stream doesn't record disassociation here anyway
+                # no signals-related reason to not bulk-delete
+                models.Host.groups.through.objects.filter(
+                    host__inventory_sources=inv_source
+                ).delete()
+                r = super(InventorySourceHostsList, self).perform_list_destroy(instance_list)
         update_inventory_computed_fields.delay(inv_source.inventory_id, True)
         return r
 
@@ -2157,11 +2166,18 @@ class InventorySourceGroupsList(SubListDestroyAPIView):
     def perform_list_destroy(self, instance_list):
         inv_source = self.get_parent_object()
         with ignore_inventory_computed_fields():
-            # Same arguments for bulk delete as with host list
-            models.Group.hosts.through.objects.filter(
-                group__inventory_sources=inv_source
-            ).delete()
-            r = super(InventorySourceGroupsList, self).perform_list_destroy(instance_list)
+            if not settings.ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC:
+                from awx.main.signals import disable_activity_stream
+                with disable_activity_stream():
+                    models.Group.objects.filter(inventory_sources=inv_source).delete()
+                    r = super(InventorySourceGroupsList, self).perform_list_destroy([])
+            else:
+                # Advance delete of group-host memberships to prevent deadlock
+                # Same arguments for bulk delete as with host list
+                models.Group.hosts.through.objects.filter(
+                    group__inventory_sources=inv_source
+                ).delete()
+                r = super(InventorySourceGroupsList, self).perform_list_destroy(instance_list)
         update_inventory_computed_fields.delay(inv_source.inventory_id, True)
         return r
 
