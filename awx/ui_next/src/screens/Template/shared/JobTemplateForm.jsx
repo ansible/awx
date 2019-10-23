@@ -77,9 +77,11 @@ class JobTemplateForm extends Component {
       project: props.template.summary_fields.project,
       inventory: props.template.summary_fields.inventory,
       allowCallbacks: !!props.template.host_config_key,
+      credentials: props.template.summary_fields.credentials,
     };
     this.handleProjectValidation = this.handleProjectValidation.bind(this);
     this.loadRelatedInstanceGroups = this.loadRelatedInstanceGroups.bind(this);
+    this.toggleCredentialSelection = this.toggleCredentialSelection.bind(this);
   }
 
   componentDidMount() {
@@ -106,6 +108,31 @@ class JobTemplateForm extends Component {
     }
   }
 
+  toggleCredentialSelection(newCredential) {
+    const { credentials: credentialsToUpdate } = this.state;
+    const { setFieldValue } = this.props;
+
+    let newCredentialsList;
+    const isSelectedCredentialInState =
+      credentialsToUpdate.filter(cred => cred.id === newCredential.id).length >
+      0;
+
+    if (isSelectedCredentialInState) {
+      newCredentialsList = credentialsToUpdate.filter(
+        cred => cred.id !== newCredential.id
+      );
+    } else {
+      newCredentialsList = credentialsToUpdate.filter(
+        credential =>
+          credential.kind === 'vault' || credential.kind !== newCredential.kind
+      );
+      newCredentialsList = [...newCredentialsList, newCredential];
+    }
+
+    setFieldValue('credentials', newCredentialsList);
+    this.setState({ credentials: newCredentialsList });
+  }
+
   handleProjectValidation() {
     const { i18n, touched } = this.props;
     const { project } = this.state;
@@ -127,6 +154,7 @@ class JobTemplateForm extends Component {
       inventory,
       project,
       allowCallbacks,
+      credentials,
     } = this.state;
     const {
       handleCancel,
@@ -324,11 +352,11 @@ class JobTemplateForm extends Component {
           <Field
             name="credentials"
             fieldId="template-credentials"
-            render={({ form }) => (
+            render={() => (
               <CredentialsLookup
+                credentials={credentials}
+                onChange={this.toggleCredentialSelection}
                 onError={err => this.setState({ contentError: err })}
-                credentials={template.summary_fields.credentials}
-                onChange={value => form.setFieldValue('credentials', value)}
                 tooltip={i18n._(
                   t`Select credentials that allow Tower to access the nodes this job will be ran against. You can only select one credential of each type. For machine credentials (SSH), checking "Prompt on launch" without selecting credentials will require you to select a machine credential at run time. If you select credentials and check "Prompt on launch", the selected credential(s) become the defaults that can be updated at run time.`
                 )}
@@ -604,8 +632,7 @@ const FormikApp = withFormik({
       organizationId: summary_fields.inventory.organization_id || null,
       initialInstanceGroups: [],
       instanceGroups: [],
-      initialCredentials: summary_fields.credentials || [],
-      credentials: [],
+      credentials: summary_fields.credentials || [],
     };
   },
   handleSubmit: (values, { props }) => props.handleSubmit(values),

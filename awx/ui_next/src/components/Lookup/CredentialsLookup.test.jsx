@@ -1,6 +1,6 @@
 import React from 'react';
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
-import CredentialsLookup, { _CredentialsLookup } from './CredentialsLookup';
+import CredentialsLookup from './CredentialsLookup';
 import { CredentialsAPI, CredentialTypesAPI } from '@api';
 
 jest.mock('@api');
@@ -9,6 +9,7 @@ describe('<CredentialsLookup />', () => {
   let wrapper;
   let lookup;
   let credLookup;
+  let onChange;
 
   const credentials = [
     { id: 1, kind: 'cloud', name: 'Foo', url: 'www.google.com' },
@@ -42,12 +43,12 @@ describe('<CredentialsLookup />', () => {
         count: 3,
       },
     });
-
+    onChange = jest.fn();
     wrapper = mountWithContexts(
       <CredentialsLookup
         onError={() => {}}
         credentials={credentials}
-        onChange={() => {}}
+        onChange={onChange}
         tooltip="This is credentials look up"
       />
     );
@@ -62,17 +63,22 @@ describe('<CredentialsLookup />', () => {
 
   test('CredentialsLookup renders properly', () => {
     expect(wrapper.find('CredentialsLookup')).toHaveLength(1);
+    expect(CredentialTypesAPI.read).toHaveBeenCalled();
   });
-  test('Removes credential from directly from input', () => {
-    const chip = wrapper.find('PFChip').at(0);
-    expect(chip).toHaveLength(1);
-    chip.find('ChipButton').invoke('onClick')();
-    expect(wrapper.find('PFChip')).toHaveLength(1);
+
+  test('onChange is called when you click to remove a credential from input', () => {
+    const chip = wrapper.find('PFChip');
+    const button = chip.at(1).find('Button');
+    expect(chip).toHaveLength(2);
+    button.prop('onClick')();
+    expect(onChange).toBeCalledTimes(1);
   });
-  test('can change credential types', async () => {
+
+  test('can change credential types', () => {
     lookup.prop('selectCategory')({}, 'Vault');
     expect(credLookup.state('selectedCredentialType')).toEqual({
       id: 500,
+      key: 500,
       kind: 'vault',
       type: 'buzz',
       value: 'Vault',
@@ -80,24 +86,5 @@ describe('<CredentialsLookup />', () => {
       isDisabled: false,
     });
     expect(CredentialsAPI.read).toHaveBeenCalled();
-  });
-  test('Toggle credentials properly adds credentials', async () => {
-    function callOnToggle(item, index) {
-      lookup.prop('onToggleItem')(item);
-      expect(credLookup.state('credentials')[index].name).toEqual(
-        `${item.name}`
-      );
-    }
-    callOnToggle({ name: 'Gatsby', id: 8, kind: 'Machine' }, 2);
-    callOnToggle({ name: 'Party', id: 9, kind: 'Machine' }, 2);
-    callOnToggle({ name: 'Animal', id: 10, kind: 'Ansible' }, 3);
-
-    lookup.prop('onToggleItem')({
-      id: 1,
-      kind: 'cloud',
-      name: 'Foo',
-      url: 'www.google.com',
-    });
-    expect(credLookup.state('credentials').length).toBe(3);
   });
 });

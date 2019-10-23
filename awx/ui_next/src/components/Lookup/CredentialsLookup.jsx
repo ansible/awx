@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withI18n } from '@lingui/react';
-import { withRouter } from 'react-router-dom';
 import { t } from '@lingui/macro';
 import { FormGroup, Tooltip } from '@patternfly/react-core';
 import { QuestionCircleIcon as PFQuestionCircleIcon } from '@patternfly/react-icons';
@@ -19,29 +18,16 @@ class CredentialsLookup extends React.Component {
     super(props);
 
     this.state = {
-      credentials: props.credentials,
       selectedCredentialType: { label: 'Machine', id: 1, kind: 'ssh' },
       credentialTypes: [],
     };
-
-    this.handleCredentialTypeSelect = this.handleCredentialTypeSelect.bind(
-      this
-    );
-    this.loadCredentials = this.loadCredentials.bind(this);
     this.loadCredentialTypes = this.loadCredentialTypes.bind(this);
-    this.toggleCredential = this.toggleCredential.bind(this);
+    this.handleCredentialTypeSelect = this.handleCredentialTypeSelect.bind(this);
+    this.loadCredentials = this.loadCredentials.bind(this);
   }
 
   componentDidMount() {
-    this.loadCredentials({ page: 1, page_size: 5, order_by: 'name' });
     this.loadCredentialTypes();
-  }
-
-  componentDidUpdate(prevState) {
-    const { selectedType } = this.state;
-    if (prevState.selectedType !== selectedType) {
-      Promise.all([this.loadCredentials()]);
-    }
   }
 
   async loadCredentialTypes() {
@@ -57,6 +43,7 @@ class CredentialsLookup extends React.Component {
             // require different field values.
             cred = {
               id: cred.id,
+              key: cred.id,
               kind: cred.kind,
               type: cred.namespace,
               value: cred.name,
@@ -85,43 +72,9 @@ class CredentialsLookup extends React.Component {
     this.setState({ selectedCredentialType: selectedType[0] });
   }
 
-  toggleCredential(item) {
-    const { credentials: stateToUpdate, selectedCredentialType } = this.state;
-    const { onChange } = this.props;
-    const index = stateToUpdate.findIndex(
-      credential => credential.id === item.id
-    );
-    if (index > -1) {
-      const newCredentialsList = stateToUpdate.filter(
-        cred => cred.id !== item.id
-      );
-      this.setState({ credentials: newCredentialsList });
-      onChange(newCredentialsList);
-      return;
-    }
-
-    const credentialTypeOccupied = stateToUpdate.some(
-      cred => cred.kind === item.kind
-    );
-    if (selectedCredentialType.value === 'Vault' || !credentialTypeOccupied) {
-      item.credentialType = selectedCredentialType;
-      this.setState({ credentials: [...stateToUpdate, item] });
-      onChange([...stateToUpdate, item]);
-    } else {
-      const credsList = [...stateToUpdate];
-      const occupyingCredIndex = stateToUpdate.findIndex(
-        occupyingCred => occupyingCred.kind === item.kind
-      );
-      credsList.splice(occupyingCredIndex, 1, item);
-      this.setState({ credentials: credsList });
-      onChange(credsList);
-    }
-  }
-
   render() {
-    const { tooltip, i18n } = this.props;
-    const { credentials, selectedCredentialType, credentialTypes } = this.state;
-
+    const { selectedCredentialType, credentialTypes } = this.state;
+    const { tooltip, i18n, credentials, onChange } = this.props;
     return (
       <FormGroup label={i18n._(t`Credentials`)} fieldId="org-credentials">
         {tooltip && (
@@ -134,7 +87,7 @@ class CredentialsLookup extends React.Component {
             selectCategoryOptions={credentialTypes}
             selectCategory={this.handleCredentialTypeSelect}
             selectedCategory={selectedCredentialType}
-            onToggleItem={this.toggleCredential}
+            onToggleItem={onChange}
             onloadCategories={this.loadCredentialTypes}
             id="org-credentials"
             lookupHeader={i18n._(t`Credentials`)}
@@ -162,7 +115,6 @@ class CredentialsLookup extends React.Component {
 
 CredentialsLookup.propTypes = {
   tooltip: PropTypes.string,
-  onChange: PropTypes.func.isRequired,
 };
 
 CredentialsLookup.defaultProps = {
@@ -170,4 +122,4 @@ CredentialsLookup.defaultProps = {
 };
 export { CredentialsLookup as _CredentialsLookup };
 
-export default withI18n()(withRouter(CredentialsLookup));
+export default withI18n()(CredentialsLookup);

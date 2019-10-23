@@ -84,12 +84,7 @@ class Lookup extends React.Component {
   }
 
   componentDidMount() {
-    const { onLoadCredentialTypes } = this.props;
-    if (onLoadCredentialTypes) {
-      Promise.all([onLoadCredentialTypes(), this.getData()]);
-    } else {
-      this.getData();
-    }
+      Promise.all([this.getData()]);
   }
 
   componentDidUpdate(prevProps) {

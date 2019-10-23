@@ -110,7 +110,6 @@ class JobTemplateEdit extends Component {
       instanceGroups,
       initialInstanceGroups,
       credentials,
-      initialCredentials,
       ...remainingValues
     } = values;
 
