@@ -4,7 +4,7 @@
 
 class CustomNotificationBase(object):
     DEFAULT_MSG = "{{ job_friendly_name }} #{{ job.id }} '{{ job.name }}' {{ job.status }}: {{ url }}"
-    DEFAULT_BODY = "{{ job_friendly_name }} #{{ job.id }} had status {{ job.status }}, view details at {{ url }}\n\n{{ job_summary_dict }}"
+    DEFAULT_BODY = "{{ job_friendly_name }} #{{ job.id }} had status {{ job.status }}, view details at {{ url }}\n\n{{ job_metadata }}"
 
     default_messages = {"started": {"message": DEFAULT_MSG, "body": None},
                         "success": {"message": DEFAULT_MSG, "body": None},

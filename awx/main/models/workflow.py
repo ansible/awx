@@ -805,7 +805,7 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
         return {'approval_status': approval_status,
                 'approval_node_name': self.workflow_approval_template.name,
                 'workflow_url': workflow_url,
-                'job_summary_dict': json.dumps(self.notification_data(), indent=4)}
+                'job_metadata': json.dumps(self.notification_data(), indent=4)}
 
     @property
     def workflow_job_template(self):

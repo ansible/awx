@@ -26,7 +26,7 @@ class PagerDutyBackend(AWXBaseEmailBackend, CustomNotificationBase):
     recipient_parameter = "service_key"
     sender_parameter = "client_name"
 
-    DEFAULT_BODY = "{{ job_summary_dict }}"
+    DEFAULT_BODY = "{{ job_metadata }}"
     default_messages = {"started": {"message": DEFAULT_MSG, "body": DEFAULT_BODY},
                         "success": {"message": DEFAULT_MSG, "body": DEFAULT_BODY},
                         "error": {"message": DEFAULT_MSG, "body": DEFAULT_BODY},

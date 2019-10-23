@@ -26,7 +26,7 @@ class WebhookBackend(AWXBaseEmailBackend, CustomNotificationBase):
     recipient_parameter = "url"
     sender_parameter = None
 
-    DEFAULT_BODY = "{{ job_summary_dict }}"
+    DEFAULT_BODY = "{{ job_metadata }}"
     default_messages = {"started": {"body": DEFAULT_BODY},
                         "success": {"body": DEFAULT_BODY},
                         "error": {"body": DEFAULT_BODY},

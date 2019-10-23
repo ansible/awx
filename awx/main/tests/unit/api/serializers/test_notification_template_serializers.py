@@ -26,7 +26,7 @@ class TestNotificationTemplateSerializer():
                               {'started': {'message': '{{ job.id }}', 'body': '{{ job.status }}'},
                                'success': {'message': None, 'body': '{{ job_friendly_name }}'},
                                'error': {'message': '{{ url }}', 'body': None}},
-                              {'started': {'body': '{{ job_summary_dict }}'}},
+                              {'started': {'body': '{{ job_metadata }}'}},
                               {'started': {'body': '{{ job.summary_fields.inventory.total_hosts }}'}},
                               {'started': {'body': u'Iñtërnâtiônàlizætiøn'}}
                               ])
