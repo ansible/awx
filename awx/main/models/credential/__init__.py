@@ -86,6 +86,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         unique_together = (('organization', 'name', 'credential_type'))
 
     PASSWORD_FIELDS = ['inputs']
+    FIELDS_TO_PRESERVE_AT_COPY = ['input_sources']
 
     credential_type = models.ForeignKey(
         'CredentialType',
@@ -1161,6 +1162,8 @@ class CredentialInputSource(PrimordialModel):
         app_label = 'main'
         unique_together = (('target_credential', 'input_field_name'),)
         ordering = ('target_credential', 'source_credential', 'input_field_name',)
+
+    FIELDS_TO_PRESERVE_AT_COPY = ['source_credential', 'metadata', 'input_field_name']
 
     target_credential = models.ForeignKey(
         'Credential',
