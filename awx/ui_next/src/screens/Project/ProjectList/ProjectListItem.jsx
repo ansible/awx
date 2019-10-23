@@ -12,6 +12,7 @@ import { Link as _Link } from 'react-router-dom';
 import { SyncIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
 
+import ClipboardCopyButton from '@components/ClipboardCopyButton';
 import DataListCell from '@components/DataListCell';
 import DataListCheck from '@components/DataListCheck';
 import ListActionButton from '@components/ListActionButton';
@@ -101,6 +102,14 @@ class ProjectListItem extends React.Component {
               </DataListCell>,
               <DataListCell key="type">
                 {project.scm_type.toUpperCase()}
+              </DataListCell>,
+              <DataListCell key="revision">
+                {project.scm_revision.substring(0, 7)}
+                <ClipboardCopyButton
+                  stringToCopy={project.scm_revision}
+                  hoverTip={i18n._(t`Copy full revision to clipboard.`)}
+                  clickTip={i18n._(t`Successfully copied to clipboard!`)}
+                />
               </DataListCell>,
               <DataListCell lastcolumn="true" key="action">
                 {project.summary_fields.user_capabilities.start && (
