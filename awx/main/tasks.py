@@ -1451,7 +1451,7 @@ class BaseTask(object):
         self.update_model(task.pk, execution_node=pod_manager.pod_name)
         return pod_manager
 
-        
+
 
 
 
@@ -2359,6 +2359,27 @@ class RunInventoryUpdate(BaseTask):
                     env[str(env_k)] = str(inventory_update.source_vars_dict[env_k])
         elif inventory_update.source == 'file':
             raise NotImplementedError('Cannot update file sources through the task system.')
+
+        if inventory_update.source == 'scm' and inventory_update.source_project_update:
+            env_key = 'ANSIBLE_COLLECTIONS_PATHS'
+            config_setting = 'collections_paths'
+            folder = 'requirements_collections'
+            default = '~/.ansible/collections:/usr/share/ansible/collections'
+
+            config_values = read_ansible_config(os.path.join(private_data_dir, 'project'), [config_setting])
+
+            paths = default.split(':')
+            if env_key in env:
+                for path in env[env_key].split(':'):
+                    if path not in paths:
+                        paths = [env[env_key]] + paths
+            elif config_setting in config_values:
+                for path in config_values[config_setting].split(':'):
+                    if path not in paths:
+                        paths = [config_values[config_setting]] + paths
+            paths = [os.path.join(private_data_dir, folder)] + paths
+            env[env_key] = os.pathsep.join(paths)
+
         return env
 
     def write_args_file(self, private_data_dir, args):
@@ -2457,7 +2478,7 @@ class RunInventoryUpdate(BaseTask):
                 # Use the vendored script path
                 inventory_path = self.get_path_to('..', 'plugins', 'inventory', injector.script_name)
         elif src == 'scm':
-            inventory_path = inventory_update.get_actual_source_path()
+            inventory_path = os.path.join(private_data_dir, 'project', inventory_update.source_path)
         elif src == 'custom':
             handle, inventory_path = tempfile.mkstemp(dir=private_data_dir)
             f = os.fdopen(handle, 'w')
@@ -2478,7 +2499,7 @@ class RunInventoryUpdate(BaseTask):
         '''
         src = inventory_update.source
         if src == 'scm' and inventory_update.source_project_update:
-            return inventory_update.source_project_update.get_project_path(check_if_exists=False)
+            return os.path.join(private_data_dir, 'project')
         if src in CLOUD_PROVIDERS:
             injector = None
             if src in InventorySource.injectors:
@@ -2514,8 +2535,10 @@ class RunInventoryUpdate(BaseTask):
 
             project_update_task = local_project_sync._get_task_class()
             try:
-                project_update_task().run(local_project_sync.id)
-                inventory_update.inventory_source.scm_last_revision = local_project_sync.project.scm_revision
+                sync_task = project_update_task(job_private_data_dir=private_data_dir)
+                sync_task.run(local_project_sync.id)
+                local_project_sync.refresh_from_db()
+                inventory_update.inventory_source.scm_last_revision = local_project_sync.scm_revision
                 inventory_update.inventory_source.save(update_fields=['scm_last_revision'])
             except Exception:
                 inventory_update = self.update_model(
@@ -2523,6 +2546,13 @@ class RunInventoryUpdate(BaseTask):
                     job_explanation=('Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' %
                                      ('project_update', local_project_sync.name, local_project_sync.id)))
                 raise
+        elif inventory_update.source == 'scm' and inventory_update.launch_type == 'scm' and source_project:
+            # This follows update, not sync, so make copy here
+            project_path = source_project.get_project_path(check_if_exists=False)
+            RunProjectUpdate.make_local_copy(
+                project_path, os.path.join(private_data_dir, 'project'),
+                source_project.scm_type, source_project.scm_revision
+            )
 
 
 @task()
