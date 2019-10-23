@@ -574,7 +574,7 @@ class SubListCreateAPIView(SubListAPIView, ListCreateAPIView):
                             status=status.HTTP_400_BAD_REQUEST)
 
         # Verify we have permission to add the object as given.
-        if not request.user.can_access(self.model, 'add', serializer.initial_data):
+        if not request.user.can_access(self.model, 'add', serializer.validated_data):
             raise PermissionDenied()
 
         # save the object through the serializer, reload and returned the saved
