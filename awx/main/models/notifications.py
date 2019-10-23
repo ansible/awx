@@ -366,7 +366,7 @@ class JobNotificationMixin(object):
                            'verbosity': 0},
                    'job_friendly_name': 'Job',
                    'url': 'https://towerhost/#/jobs/playbook/1010',
-                   'job_summary_dict': """{'url': 'https://towerhost/$/jobs/playbook/13',
+                   'job_metadata': """{'url': 'https://towerhost/$/jobs/playbook/13',
  'traceback': '',
  'status': 'running',
  'started': '2019-08-07T21:46:38.362630+00:00',
@@ -392,7 +392,7 @@ class JobNotificationMixin(object):
         context = {'job': {},
                    'job_friendly_name': self.get_notification_friendly_name(),
                    'url': self.get_ui_url(),
-                   'job_summary_dict': json.dumps(self.notification_data(), indent=4)}
+                   'job_metadata': json.dumps(self.notification_data(), indent=4)}
 
         def build_context(node, fields, whitelisted_fields):
             for safe_field in whitelisted_fields:
