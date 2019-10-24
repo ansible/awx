@@ -321,14 +321,6 @@ class JobTemplateDetail extends Component {
                 )}
               </LaunchButton>
             )}
-            <Button
-              variant="secondary"
-              component={Link}
-              to="/templates"
-              aria-label={i18n._(t`Close`)}
-            >
-              {i18n._(t`Close`)}
-            </Button>
           </ButtonGroup>
         </CardBody>
       )

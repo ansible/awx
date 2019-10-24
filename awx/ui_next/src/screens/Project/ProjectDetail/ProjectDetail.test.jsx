@@ -186,16 +186,4 @@ describe('<ProjectDetail />', () => {
       .simulate('click', { button: 0 });
     expect(history.location.pathname).toEqual('/projects/1/edit');
   });
-
-  test('close button should navigate to projects list', () => {
-    const history = createMemoryHistory();
-    const wrapper = mountWithContexts(<ProjectDetail project={mockProject} />, {
-      context: { router: { history } },
-    });
-    expect(wrapper.find('Button[aria-label="close"]').length).toBe(1);
-    wrapper
-      .find('Button[aria-label="close"] Link')
-      .simulate('click', { button: 0 });
-    expect(history.location.pathname).toEqual('/projects');
-  });
 });
