@@ -174,13 +174,27 @@ class JobTemplateDetail extends Component {
             {summary_fields.inventory && (
               <Detail
                 label={i18n._(t`Inventory`)}
-                value={summary_fields.inventory.name}
+                value={
+                  <Link
+                    to={`/inventories/${
+                      summary_fields.inventory.kind === 'smart'
+                        ? 'smart_inventory'
+                        : 'inventory'
+                    }/${summary_fields.inventory.id}/details`}
+                  >
+                    {summary_fields.inventory.name}
+                  </Link>
+                }
               />
             )}
             {summary_fields.project && (
               <Detail
                 label={i18n._(t`Project`)}
-                value={summary_fields.project.name}
+                value={
+                  <Link to={`/projects/${summary_fields.project.id}/details`}>
+                    {summary_fields.project.name}
+                  </Link>
+                }
               />
             )}
             <Detail label={i18n._(t`Playbook`)} value={playbook} />
