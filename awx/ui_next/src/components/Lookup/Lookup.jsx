@@ -84,7 +84,7 @@ class Lookup extends React.Component {
   }
 
   componentDidMount() {
-      Promise.all([this.getData()]);
+    Promise.all([this.getData()]);
   }
 
   componentDidUpdate(prevProps) {

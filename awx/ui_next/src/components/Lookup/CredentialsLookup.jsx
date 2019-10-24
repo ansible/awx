@@ -22,7 +22,9 @@ class CredentialsLookup extends React.Component {
       credentialTypes: [],
     };
     this.loadCredentialTypes = this.loadCredentialTypes.bind(this);
-    this.handleCredentialTypeSelect = this.handleCredentialTypeSelect.bind(this);
+    this.handleCredentialTypeSelect = this.handleCredentialTypeSelect.bind(
+      this
+    );
     this.loadCredentials = this.loadCredentials.bind(this);
   }
 
