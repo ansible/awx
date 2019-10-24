@@ -383,6 +383,13 @@ class InstanceGroupDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAP
     serializer_class = serializers.InstanceGroupSerializer
     permission_classes = (InstanceGroupTowerPermission,)
 
+    def update_raw_data(self, data):
+        if self.get_object().is_containerized:
+            data.pop('policy_instance_percentage', None)
+            data.pop('policy_instance_minimum', None)
+            data.pop('policy_instance_list', None)
+        return super(InstanceGroupDetail, self).update_raw_data(data)
+
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         if instance.controller is not None:
