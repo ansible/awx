@@ -102,7 +102,7 @@ class LogstashFormatterBase(logging.Formatter):
 
     @classmethod
     def serialize(cls, message):
-        return bytes(json.dumps(message), 'utf-8')
+        return str(message)
 
 
 class LogstashFormatter(LogstashFormatterBase):

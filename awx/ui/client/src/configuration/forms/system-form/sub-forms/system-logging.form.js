@@ -78,7 +78,7 @@
                  ngClick: 'vm.testLogging()',
                  label: i18n._('Test'),
                  class: 'btn-primary',
-                 ngDisabled: 'configuration_logging_template_form.$invalid'
+                 ngDisabled: 'configuration_logging_template_form.$pending'
              },
              cancel: {
                  ngClick: 'vm.formCancel()',

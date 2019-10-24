@@ -130,6 +130,10 @@ RUN cd /usr/local/bin && \
     curl -L https://github.com/openshift/origin/releases/download/v3.9.0/openshift-origin-client-tools-v3.9.0-191fece-linux-64bit.tar.gz | \
     tar -xz --strip-components=1 --wildcards --no-anchored 'oc'
 
+ADD tools/docker-compose/rsyslog.repo /etc/yum.repos.d/
+RUN yum install -y rsyslog-omhttp
+RUN echo '$IncludeConfig /var/lib/awx/rsyslog.conf' >> /etc/rsyslog.conf
+
 ADD tools/docker-compose/google-cloud-sdk.repo /etc/yum.repos.d/
 RUN yum install -y kubectl
 

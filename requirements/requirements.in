@@ -41,7 +41,6 @@ python3-saml==1.4.0
 social-auth-core==3.0.0
 social-auth-app-django==2.1.0
 requests==2.21.0
-requests-futures==0.9.7
 slackclient==1.1.2
 tacacs_plus==1.0
 twilio==6.10.4

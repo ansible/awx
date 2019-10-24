@@ -1057,8 +1057,9 @@ LOGGING = {
             'formatter': 'simple',
         },
         'external_logger': {
-            'class': 'awx.main.utils.handlers.AWXProxyHandler',
+            'class': 'logging.handlers.SysLogHandler',
             'formatter': 'json',
+            'address': ('localhost', 51414),
             'filters': ['external_log_enabled', 'dynamic_level_filter'],
         },
         'mail_admins': {
