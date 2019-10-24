@@ -43,4 +43,42 @@ describe('<TemplatesListItem />', () => {
     );
     expect(wrapper.find('LaunchButton').exists()).toBeFalsy();
   });
+  test('edit button shown to users with edit capabilities', () => {
+    const wrapper = mountWithContexts(
+      <TemplatesListItem
+        isSelected={false}
+        template={{
+          id: 1,
+          name: 'Template 1',
+          url: '/templates/job_template/1',
+          type: 'job_template',
+          summary_fields: {
+            user_capabilities: {
+              edit: true,
+            },
+          },
+        }}
+      />
+    );
+    expect(wrapper.find('PencilAltIcon').exists()).toBeTruthy();
+  });
+  test('edit button hidden from users without edit capabilities', () => {
+    const wrapper = mountWithContexts(
+      <TemplatesListItem
+        isSelected={false}
+        template={{
+          id: 1,
+          name: 'Template 1',
+          url: '/templates/job_template/1',
+          type: 'job_template',
+          summary_fields: {
+            user_capabilities: {
+              edit: false,
+            },
+          },
+        }}
+      />
+    );
+    expect(wrapper.find('PencilAltIcon').exists()).toBeFalsy();
+  });
 });

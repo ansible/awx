@@ -8,10 +8,10 @@ import {
   Tooltip,
 } from '@patternfly/react-core';
 import { t } from '@lingui/macro';
-import { Link as _Link } from 'react-router-dom';
-import { SyncIcon } from '@patternfly/react-icons';
-import styled from 'styled-components';
+import { Link } from 'react-router-dom';
+import { PencilAltIcon, SyncIcon } from '@patternfly/react-icons';
 
+import ActionButtonCell from '@components/ActionButtonCell';
 import DataListCell from '@components/DataListCell';
 import DataListCheck from '@components/DataListCheck';
 import ListActionButton from '@components/ListActionButton';
@@ -19,12 +19,6 @@ import ProjectSyncButton from '../shared/ProjectSyncButton';
 import { StatusIcon } from '@components/Sparkline';
 import VerticalSeparator from '@components/VerticalSeparator';
 import { Project } from '@types';
-
-/* eslint-disable react/jsx-pascal-case */
-const Link = styled(props => <_Link {...props} />)`
-  margin-right: 10px;
-`;
-/* eslint-enable react/jsx-pascal-case */
 
 class ProjectListItem extends React.Component {
   static propTypes = {
@@ -60,6 +54,11 @@ class ProjectListItem extends React.Component {
     );
   };
 
+  handleEditClick = project => {
+    const { history } = this.props;
+    history.push(`/projects/${project.id}/edit`);
+  };
+
   render() {
     const { project, isSelected, onSelect, detailUrl, i18n } = this.props;
     const labelId = `check-action-${project.id}`;
@@ -93,28 +92,68 @@ class ProjectListItem extends React.Component {
                     </Link>
                   </Tooltip>
                 )}
-                <span id={labelId}>
-                  <Link to={`${detailUrl}`}>
-                    <b>{project.name}</b>
-                  </Link>
-                </span>
+                <Link
+                  id={labelId}
+                  to={`${detailUrl}`}
+                  style={{ marginLeft: '10px' }}
+                >
+                  <b>{project.name}</b>
+                </Link>
               </DataListCell>,
               <DataListCell key="type">
                 {project.scm_type.toUpperCase()}
               </DataListCell>,
-              <DataListCell lastcolumn="true" key="action">
-                {project.summary_fields.user_capabilities.start && (
-                  <Tooltip content={i18n._(t`Sync Project`)} position="top">
-                    <ProjectSyncButton projectId={project.id}>
-                      {handleSync => (
-                        <ListActionButton variant="plain" onClick={handleSync}>
-                          <SyncIcon />
-                        </ListActionButton>
-                      )}
-                    </ProjectSyncButton>
-                  </Tooltip>
-                )}
-              </DataListCell>,
+              <ActionButtonCell
+                lastcolumn="true"
+                key="action"
+                actions={[
+                  {
+                    key: 'sync',
+                    content: (
+                      <Fragment>
+                        {project.summary_fields.user_capabilities.start && (
+                          <Tooltip
+                            content={i18n._(t`Sync Project`)}
+                            position="top"
+                          >
+                            <ProjectSyncButton projectId={project.id}>
+                              {handleSync => (
+                                <ListActionButton
+                                  variant="plain"
+                                  onClick={handleSync}
+                                >
+                                  <SyncIcon />
+                                </ListActionButton>
+                              )}
+                            </ProjectSyncButton>
+                          </Tooltip>
+                        )}
+                      </Fragment>
+                    ),
+                  },
+                  {
+                    key: 'edit',
+                    content: (
+                      <Fragment>
+                        {project.summary_fields.user_capabilities.edit && (
+                          <Tooltip
+                            content={i18n._(t`Edit Project`)}
+                            position="top"
+                          >
+                            <ListActionButton
+                              variant="plain"
+                              component={Link}
+                              to={`/projects/${project.id}/edit`}
+                            >
+                              <PencilAltIcon />
+                            </ListActionButton>
+                          </Tooltip>
+                        )}
+                      </Fragment>
+                    ),
+                  },
+                ]}
+              />,
             ]}
           />
         </DataListItemRow>

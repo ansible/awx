@@ -57,4 +57,56 @@ describe('<ProjectsListItem />', () => {
     );
     expect(wrapper.find('ProjectSyncButton').exists()).toBeFalsy();
   });
+  test('edit button shown to users with edit capabilities', () => {
+    const wrapper = mountWithContexts(
+      <ProjectsListItem
+        isSelected={false}
+        detailUrl="/project/1"
+        onSelect={() => {}}
+        project={{
+          id: 1,
+          name: 'Project 1',
+          url: '/api/v2/projects/1',
+          type: 'project',
+          scm_type: 'git',
+          summary_fields: {
+            last_job: {
+              id: 9000,
+              status: 'successful',
+            },
+            user_capabilities: {
+              edit: true,
+            },
+          },
+        }}
+      />
+    );
+    expect(wrapper.find('PencilAltIcon').exists()).toBeTruthy();
+  });
+  test('edit button hidden from users without edit capabilities', () => {
+    const wrapper = mountWithContexts(
+      <ProjectsListItem
+        isSelected={false}
+        detailUrl="/project/1"
+        onSelect={() => {}}
+        project={{
+          id: 1,
+          name: 'Project 1',
+          url: '/api/v2/projects/1',
+          type: 'project',
+          scm_type: 'git',
+          summary_fields: {
+            last_job: {
+              id: 9000,
+              status: 'successful',
+            },
+            user_capabilities: {
+              edit: false,
+            },
+          },
+        }}
+      />
+    );
+    expect(wrapper.find('PencilAltIcon').exists()).toBeFalsy();
+  });
 });

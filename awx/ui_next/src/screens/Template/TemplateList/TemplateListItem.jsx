@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { Link } from 'react-router-dom';
 import {
   DataListItem,
@@ -8,8 +8,9 @@ import {
 } from '@patternfly/react-core';
 import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
-import { RocketIcon } from '@patternfly/react-icons';
+import { PencilAltIcon, RocketIcon } from '@patternfly/react-icons';
 
+import ActionButtonCell from '@components/ActionButtonCell';
 import DataListCell from '@components/DataListCell';
 import DataListCheck from '@components/DataListCheck';
 import LaunchButton from '@components/LaunchButton';
@@ -19,6 +20,16 @@ import { Sparkline } from '@components/Sparkline';
 import { toTitleCase } from '@util/strings';
 
 import styled from 'styled-components';
+
+const rightStyle = `
+@media screen and (max-width: 768px) {
+  && {
+    padding-top: 0px;
+    flex: 0 0 33%;
+    padding-right: 20px;
+  }
+}
+`;
 
 const DataListItemCells = styled(PFDataListItemCells)`
   display: flex;
@@ -37,13 +48,10 @@ const LeftDataListCell = styled(DataListCell)`
   }
 `;
 const RightDataListCell = styled(DataListCell)`
-  @media screen and (max-width: 768px) {
-    && {
-      padding-top: 0px;
-      flex: 0 0 33%;
-      padding-right: 20px;
-    }
-  }
+  ${rightStyle}
+`;
+const RightActionButtonCell = styled(ActionButtonCell)`
+  ${rightStyle}
 `;
 
 class TemplateListItem extends Component {
@@ -87,27 +95,59 @@ class TemplateListItem extends Component {
               >
                 <Sparkline jobs={template.summary_fields.recent_jobs} />
               </RightDataListCell>,
-              <RightDataListCell
-                css="max-width: 40px;"
+              <RightActionButtonCell
+                css="max-width: 80px;"
                 righthalf="true"
                 lastcolumn="true"
                 key="launch"
-              >
-                {canLaunch && template.type === 'job_template' && (
-                  <Tooltip content={i18n._(t`Launch Template`)} position="top">
-                    <LaunchButton resource={template}>
-                      {({ handleLaunch }) => (
-                        <ListActionButton
-                          variant="plain"
-                          onClick={handleLaunch}
-                        >
-                          <RocketIcon />
-                        </ListActionButton>
-                      )}
-                    </LaunchButton>
-                  </Tooltip>
-                )}
-              </RightDataListCell>,
+                actions={[
+                  {
+                    key: 'launch',
+                    content: (
+                      <Fragment>
+                        {canLaunch && template.type === 'job_template' && (
+                          <Tooltip
+                            content={i18n._(t`Launch Template`)}
+                            position="top"
+                          >
+                            <LaunchButton resource={template}>
+                              {({ handleLaunch }) => (
+                                <ListActionButton
+                                  variant="plain"
+                                  onClick={handleLaunch}
+                                >
+                                  <RocketIcon />
+                                </ListActionButton>
+                              )}
+                            </LaunchButton>
+                          </Tooltip>
+                        )}
+                      </Fragment>
+                    ),
+                  },
+                  {
+                    key: 'edit',
+                    content: (
+                      <Fragment>
+                        {template.summary_fields.user_capabilities.edit && (
+                          <Tooltip
+                            content={i18n._(t`Edit Template`)}
+                            position="top"
+                          >
+                            <ListActionButton
+                              variant="plain"
+                              component={Link}
+                              to={`/templates/${template.type}/${template.id}/edit`}
+                            >
+                              <PencilAltIcon />
+                            </ListActionButton>
+                          </Tooltip>
+                        )}
+                      </Fragment>
+                    ),
+                  },
+                ]}
+              />,
             ]}
           />
         </DataListItemRow>
