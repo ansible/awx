@@ -3,6 +3,7 @@
 
 # Python
 import collections
+import logging
 import sys
 
 # Django
@@ -26,7 +27,6 @@ from awx.api.generics import (
 from awx.api.permissions import IsSuperUser
 from awx.api.versioning import reverse
 from awx.main.utils import camelcase_to_underscore
-from awx.main.utils.handlers import AWXProxyHandler, LoggingConnectivityException
 from awx.main.tasks import handle_setting_changes
 from awx.conf.models import Setting
 from awx.conf.serializers import SettingCategorySerializer, SettingSingletonSerializer
@@ -161,40 +161,8 @@ class SettingLoggingTest(GenericAPIView):
     filter_backends = []
 
     def post(self, request, *args, **kwargs):
-        defaults = dict()
-        for key in settings_registry.get_registered_settings(category_slug='logging'):
-            try:
-                defaults[key] = settings_registry.get_setting_field(key).get_default()
-            except serializers.SkipField:
-                defaults[key] = None
-        obj = type('Settings', (object,), defaults)()
-        serializer = self.get_serializer(obj, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        # Special validation specific to logging test.
-        errors = {}
-        for key in ['LOG_AGGREGATOR_TYPE', 'LOG_AGGREGATOR_HOST']:
-            if not request.data.get(key, ''):
-                errors[key] = 'This field is required.'
-        if errors:
-            raise ValidationError(errors)
-
-        if request.data.get('LOG_AGGREGATOR_PASSWORD', '').startswith('$encrypted$'):
-            serializer.validated_data['LOG_AGGREGATOR_PASSWORD'] = getattr(
-                settings, 'LOG_AGGREGATOR_PASSWORD', ''
-            )
-
-        try:
-            class MockSettings:
-                pass
-            mock_settings = MockSettings()
-            for k, v in serializer.validated_data.items():
-                setattr(mock_settings, k, v)
-            AWXProxyHandler().perform_test(custom_settings=mock_settings)
-            if mock_settings.LOG_AGGREGATOR_PROTOCOL.upper() == 'UDP':
-                return Response(status=status.HTTP_201_CREATED)
-        except LoggingConnectivityException as e:
-            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        return Response(status=status.HTTP_200_OK)
+        logging.getLogger('awx').info('AWX Connection Test')
+        return Response(status=status.HTTP_202_ACCEPTED)
 
 
 # Create view functions for all of the class-based views to simplify inclusion
