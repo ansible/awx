@@ -4811,7 +4811,7 @@ class InstanceGroupSerializer(BaseSerializer):
         return value
 
     def validate_policy_instance_minimum(self, value):
-        if value and self.instance self.instance.is_containerized:
+        if value and self.instance and self.instance.is_containerized:
             raise serializers.ValidationError(_('Containerized instances may not be managed via the API'))
         return value
 
