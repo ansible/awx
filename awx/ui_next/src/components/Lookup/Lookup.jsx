@@ -68,7 +68,6 @@ class Lookup extends React.Component {
       results: [],
       count: 0,
       error: null,
-      isDropdownOpen: false,
     };
     this.qsConfig = getQSConfig(props.qsNamespace, {
       page: 1,
@@ -80,11 +79,10 @@ class Lookup extends React.Component {
     this.saveModal = this.saveModal.bind(this);
     this.getData = this.getData.bind(this);
     this.clearQSParams = this.clearQSParams.bind(this);
-    this.toggleDropdown = this.toggleDropdown.bind(this);
   }
 
   componentDidMount() {
-    Promise.all([this.getData()]);
+    this.getData();
   }
 
   componentDidUpdate(prevProps) {
@@ -95,11 +93,6 @@ class Lookup extends React.Component {
     ) {
       this.getData();
     }
-  }
-
-  toggleDropdown() {
-    const { isDropdownOpen } = this.state;
-    this.setState({ isDropdownOpen: !isDropdownOpen });
   }
 
   assertCorrectValueType() {
@@ -315,7 +308,7 @@ class Lookup extends React.Component {
               <VerticalSeperator />
               <AnsibleSelect
                 css="flex: 1 1 75%;"
-                id="credentialsLookUp-select"
+                id="multiCredentialsLookUp-select"
                 label="Selected Category"
                 data={selectCategoryOptions}
                 value={selectedCategory.label}

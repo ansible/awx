@@ -3,13 +3,7 @@ import { act } from 'react-dom/test-utils';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
 import { sleep } from '@testUtils/testUtils';
 import JobTemplateForm from './JobTemplateForm';
-import {
-  LabelsAPI,
-  JobTemplatesAPI,
-  ProjectsAPI,
-  CredentialTypesAPI,
-  CredentialsAPI,
-} from '@api';
+import { LabelsAPI, JobTemplatesAPI, ProjectsAPI, CredentialsAPI } from '@api';
 
 jest.mock('@api');
 
@@ -199,45 +193,5 @@ describe('<JobTemplateForm />', () => {
     expect(handleCancel).not.toHaveBeenCalled();
     wrapper.find('button[aria-label="Cancel"]').invoke('onClick')();
     expect(handleCancel).toBeCalled();
-  });
-  test('toggleCredentialSelection should handle credential selection properly', async () => {
-    let wrapper;
-    await act(async () => {
-      wrapper = mountWithContexts(
-        <JobTemplateForm
-          template={mockData}
-          handleSubmit={jest.fn()}
-          handleCancel={jest.fn()}
-        />
-      );
-    });
-
-    function callToggleCredSelection(credential, formState) {
-      JobTempForm.instance().toggleCredentialSelection(credential);
-
-      expect(form.state('values').credentials).toEqual(formState);
-    }
-    const form = wrapper.find('Formik');
-    const JobTempForm = wrapper.find('JobTemplateForm');
-
-    callToggleCredSelection(
-      { id: 3, kind: 'vault', name: 'Vault Credential' },
-      [
-        { id: 1, kind: 'cloud', name: 'Foo' },
-        { id: 2, kind: 'ssh', name: 'Bar' },
-        { id: 3, kind: 'vault', name: 'Vault Credential' },
-      ]
-    );
-    callToggleCredSelection({ id: 4, kind: 'ssh', name: 'New Bar' }, [
-      { id: 1, kind: 'cloud', name: 'Foo' },
-      { id: 3, kind: 'vault', name: 'Vault Credential' },
-      { id: 4, kind: 'ssh', name: 'New Bar' },
-    ]);
-    callToggleCredSelection({ id: 5, kind: 'vault', name: 'New Vault' }, [
-      { id: 1, kind: 'cloud', name: 'Foo' },
-      { id: 3, kind: 'vault', name: 'Vault Credential' },
-      { id: 4, kind: 'ssh', name: 'New Bar' },
-      { id: 5, kind: 'vault', name: 'New Vault' },
-    ]);
   });
 });

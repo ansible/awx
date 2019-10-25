@@ -1,11 +1,12 @@
 import React from 'react';
+
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
-import CredentialsLookup from './CredentialsLookup';
+import MultiCredentialsLookup from './MultiCredentialsLookup';
 import { CredentialsAPI, CredentialTypesAPI } from '@api';
 
 jest.mock('@api');
 
-describe('<CredentialsLookup />', () => {
+describe('<MultiCredentialsLookup />', () => {
   let wrapper;
   let lookup;
   let credLookup;
@@ -14,6 +15,8 @@ describe('<CredentialsLookup />', () => {
   const credentials = [
     { id: 1, kind: 'cloud', name: 'Foo', url: 'www.google.com' },
     { id: 2, kind: 'ssh', name: 'Alex', url: 'www.google.com' },
+    { name: 'Gatsby', id: 21, kind: 'vault' },
+    { name: 'Gatsby', id: 8, kind: 'Machine' },
   ];
   beforeEach(() => {
     CredentialTypesAPI.read.mockResolvedValue({
@@ -45,7 +48,7 @@ describe('<CredentialsLookup />', () => {
     });
     onChange = jest.fn();
     wrapper = mountWithContexts(
-      <CredentialsLookup
+      <MultiCredentialsLookup
         onError={() => {}}
         credentials={credentials}
         onChange={onChange}
@@ -53,7 +56,7 @@ describe('<CredentialsLookup />', () => {
       />
     );
     lookup = wrapper.find('Lookup');
-    credLookup = wrapper.find('CredentialsLookup');
+    credLookup = wrapper.find('MultiCredentialsLookup');
   });
 
   afterEach(() => {
@@ -61,17 +64,21 @@ describe('<CredentialsLookup />', () => {
     wrapper.unmount();
   });
 
-  test('CredentialsLookup renders properly', () => {
-    expect(wrapper.find('CredentialsLookup')).toHaveLength(1);
+  test('MultiCredentialsLookup renders properly', () => {
+    expect(wrapper.find('MultiCredentialsLookup')).toHaveLength(1);
     expect(CredentialTypesAPI.read).toHaveBeenCalled();
   });
 
-  test('onChange is called when you click to remove a credential from input', () => {
+  test('onChange is called when you click to remove a credential from input', async () => {
     const chip = wrapper.find('PFChip');
     const button = chip.at(1).find('Button');
-    expect(chip).toHaveLength(2);
+    expect(chip).toHaveLength(4);
     button.prop('onClick')();
-    expect(onChange).toBeCalledTimes(1);
+    expect(onChange).toBeCalledWith([
+      { id: 1, kind: 'cloud', name: 'Foo', url: 'www.google.com' },
+      { id: 21, kind: 'vault', name: 'Gatsby' },
+      { id: 8, kind: 'Machine', name: 'Gatsby' },
+    ]);
   });
 
   test('can change credential types', () => {
@@ -86,5 +93,21 @@ describe('<CredentialsLookup />', () => {
       isDisabled: false,
     });
     expect(CredentialsAPI.read).toHaveBeenCalled();
+  });
+  test('Toggle credentials only adds 1 credential per credential type except vault(see below)', () => {
+    lookup.prop('onToggleItem')({ name: 'Party', id: 9, kind: 'Machine' });
+    expect(onChange).toBeCalledWith([
+      { id: 1, kind: 'cloud', name: 'Foo', url: 'www.google.com' },
+      { id: 2, kind: 'ssh', name: 'Alex', url: 'www.google.com' },
+      { id: 21, kind: 'vault', name: 'Gatsby' },
+      { id: 9, kind: 'Machine', name: 'Party' },
+    ]);
+  });
+  test('Toggle credentials only adds 1 credential per credential type', () => {
+    lookup.prop('onToggleItem')({ name: 'Party', id: 22, kind: 'vault' });
+    expect(onChange).toBeCalledWith([
+      ...credentials,
+      { name: 'Party', id: 22, kind: 'vault' },
+    ]);
   });
 });
