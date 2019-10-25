@@ -140,10 +140,22 @@ class MultiCredentialsLookup extends React.Component {
 
 MultiCredentialsLookup.propTypes = {
   tooltip: PropTypes.string,
+  credentials: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number,
+      name: PropTypes.string,
+      description: PropTypes.string,
+      kind: PropTypes.string,
+      clound: PropTypes.bool,
+    })
+  ),
+  onChange: PropTypes.func.isRequired,
+  onError: PropTypes.func.isRequired,
 };
 
 MultiCredentialsLookup.defaultProps = {
   tooltip: '',
+  credentials: [],
 };
 export { MultiCredentialsLookup as _MultiCredentialsLookup };
 
