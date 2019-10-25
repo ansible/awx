@@ -117,7 +117,7 @@
   shell: |
     POD=$({{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
       get pods -l=name=postgresql --field-selector status.phase=Running -o jsonpath="{.items[0].metadata.name}")
-    oc exec -ti $POD -n {{ kubernetes_namespace }} -- bash -c "psql -tAc 'select version()'"
+    {{ kubectl_or_oc }} exec -ti $POD -n {{ kubernetes_namespace }} -- bash -c "psql -U {{ pg_username }} -tAc 'select version()'"
   register: pg_version
 
 - name: Upgrade Postgres if necessary
