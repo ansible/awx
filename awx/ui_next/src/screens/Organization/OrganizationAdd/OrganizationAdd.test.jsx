@@ -1,13 +1,10 @@
 import React from 'react';
 import { createMemoryHistory } from 'history';
-import {
-  mountWithContexts,
-  waitForElement,
-} from '../../../../testUtils/enzymeHelpers';
+import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
 import OrganizationAdd from './OrganizationAdd';
-import { OrganizationsAPI } from '../../../api';
+import { OrganizationsAPI } from '@api';
 
-jest.mock('../../../api');
+jest.mock('@api');
 
 describe('<OrganizationAdd />', () => {
   test('handleSubmit should post to api', () => {

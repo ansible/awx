@@ -204,3 +204,9 @@ export const Host = shape({
   last_job: number,
   last_job_host_summary: number,
 });
+
+export const Team = shape({
+  id: number.isRequired,
+  name: string.isRequired,
+  organization: number,
+});
