@@ -11,7 +11,7 @@ pytest==3.6.0
 pytest-cov
 pytest-django
 pytest-pythonpath
-pytest-mock
+pytest-mock==1.11.1
 pytest-timeout
 pytest-xdist<1.28.0
 tox  # for awxkit
