@@ -3,7 +3,7 @@ import { act } from 'react-dom/test-utils';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
 import { sleep } from '@testUtils/testUtils';
 import JobTemplateForm from './JobTemplateForm';
-import { LabelsAPI, JobTemplatesAPI, ProjectsAPI } from '@api';
+import { LabelsAPI, JobTemplatesAPI, ProjectsAPI, CredentialsAPI } from '@api';
 
 jest.mock('@api');
 
@@ -28,6 +28,10 @@ describe('<JobTemplateForm />', () => {
         name: 'qux',
       },
       labels: { results: [{ name: 'Sushi', id: 1 }, { name: 'Major', id: 2 }] },
+      credentials: [
+        { id: 1, kind: 'cloud', name: 'Foo' },
+        { id: 2, kind: 'ssh', name: 'Bar' },
+      ],
     },
   };
   const mockInstanceGroups = [
@@ -55,9 +59,20 @@ describe('<JobTemplateForm />', () => {
       policy_instance_list: [],
     },
   ];
+  const mockCredentials = [
+    { id: 1, kind: 'cloud', name: 'Cred 1', url: 'www.google.com' },
+    { id: 2, kind: 'ssh', name: 'Cred 2', url: 'www.google.com' },
+    { id: 3, kind: 'Ansible', name: 'Cred 3', url: 'www.google.com' },
+    { id: 4, kind: 'Machine', name: 'Cred 4', url: 'www.google.com' },
+    { id: 5, kind: 'Machine', name: 'Cred 5', url: 'www.google.com' },
+  ];
+
   beforeEach(() => {
     LabelsAPI.read.mockReturnValue({
       data: mockData.summary_fields.labels,
+    });
+    CredentialsAPI.read.mockReturnValue({
+      data: { results: mockCredentials },
     });
     JobTemplatesAPI.readInstanceGroups.mockReturnValue({
       data: { results: mockInstanceGroups },
@@ -134,6 +149,13 @@ describe('<JobTemplateForm />', () => {
       target: { value: 'new baz type', name: 'playbook' },
     });
     expect(form.state('values').playbook).toEqual('new baz type');
+    wrapper
+      .find('CredentialChip')
+      .at(0)
+      .prop('onClick')();
+    expect(form.state('values').credentials).toEqual([
+      { id: 2, kind: 'ssh', name: 'Bar' },
+    ]);
   });
 
   test('should call handleSubmit when Submit button is clicked', async () => {

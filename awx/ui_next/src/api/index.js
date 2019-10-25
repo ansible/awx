@@ -1,5 +1,7 @@
 import AdHocCommands from './models/AdHocCommands';
 import Config from './models/Config';
+import CredentialTypes from './models/CredentialTypes';
+import Credentials from './models/Credentials';
 import InstanceGroups from './models/InstanceGroups';
 import Inventories from './models/Inventories';
 import InventorySources from './models/InventorySources';
@@ -23,6 +25,8 @@ import WorkflowJobTemplates from './models/WorkflowJobTemplates';
 
 const AdHocCommandsAPI = new AdHocCommands();
 const ConfigAPI = new Config();
+const CredentialsAPI = new Credentials();
+const CredentialTypesAPI = new CredentialTypes();
 const InstanceGroupsAPI = new InstanceGroups();
 const InventoriesAPI = new Inventories();
 const InventorySourcesAPI = new InventorySources();
@@ -47,6 +51,8 @@ const WorkflowJobTemplatesAPI = new WorkflowJobTemplates();
 export {
   AdHocCommandsAPI,
   ConfigAPI,
+  CredentialsAPI,
+  CredentialTypesAPI,
   InstanceGroupsAPI,
   InventoriesAPI,
   InventorySourcesAPI,

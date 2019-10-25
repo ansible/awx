@@ -40,6 +40,10 @@ const mockJobTemplate = {
       id: 2,
       organization_id: 1,
     },
+    credentials: [
+      { id: 1, kind: 'cloud', name: 'Foo' },
+      { id: 2, kind: 'ssh', name: 'Bar' },
+    ],
   },
 };
 
