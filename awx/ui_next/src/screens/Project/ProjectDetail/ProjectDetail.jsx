@@ -137,14 +137,6 @@ function ProjectDetail({ project, i18n }) {
               {i18n._(t`Edit`)}
             </Button>
           )}
-        <Button
-          variant="secondary"
-          aria-label={i18n._(t`close`)}
-          component={Link}
-          to="/projects"
-        >
-          {i18n._(t`Close`)}
-        </Button>
       </ActionButtonWrapper>
     </CardBody>
   );
