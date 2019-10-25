@@ -28,10 +28,12 @@ options:
       description:
         - The name of the credential type.
       required: True
+      type: str
     description:
       description:
         - The description of the credential type to give more detail about it.
       required: False
+      type: str
     kind:
       description:
         - >-
@@ -40,24 +42,28 @@ options:
           for more information.
       choices: [ 'ssh', 'vault', 'net', 'scm', 'cloud', 'insights' ]
       required: False
+      type: str
     inputs:
       description:
         - >-
           Enter inputs using either JSON or YAML syntax. Refer to the Ansible
           Tower documentation for example syntax.
       required: False
+      type: dict
     injectors:
       description:
         - >-
           Enter injectors using either JSON or YAML syntax. Refer to the
           Ansible Tower documentation for example syntax.
       required: False
+      type: dict
     state:
       description:
         - Desired state of the resource.
       required: False
       default: "present"
       choices: ["present", "absent"]
+      type: str
     validate_certs:
       description:
         - Tower option to avoid certificates check.

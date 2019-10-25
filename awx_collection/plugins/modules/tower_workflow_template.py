@@ -40,26 +40,32 @@ options:
     description:
       description:
         - The description to use for the workflow.
+      type: str
     extra_vars:
       description:
         - Extra variables used by Ansible in YAML or key=value format.
+      type: str
     inventory:
       description:
         - Name of the inventory to use for the job template.
       version_added: "2.9"
+      type: str
     name:
       description:
         - The name to use for the workflow.
       required: True
+      type: str
     organization:
       description:
         - The organization the workflow is linked to.
+      type: str
     schema:
       description:
         - >
           The schema is a JSON- or YAML-formatted string defining the
           hierarchy structure that connects the nodes. Refer to Tower
           documentation for more information.
+      type: str
     survey_enabled:
       description:
         - Setting that variable will prompt the user for job type on the
@@ -68,11 +74,13 @@ options:
     survey:
       description:
         - The definition of the survey associated to the workflow.
+      type: str
     state:
       description:
         - Desired state of the resource.
       default: "present"
       choices: ["present", "absent"]
+      type: str
 extends_documentation_fragment: awx.awx.auth
 '''
 

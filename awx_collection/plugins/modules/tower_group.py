@@ -27,38 +27,50 @@ options:
       description:
         - The name to use for the group.
       required: True
+      type: str
     description:
       description:
         - The description to use for the group.
+      type: str
     inventory:
       description:
         - Inventory the group should be made a member of.
       required: True
+      type: str
     variables:
       description:
         - Variables to use for the group, use C(@) for a file.
+      type: str
     credential:
       description:
         - Credential to use for the group.
+      type: str
     source:
       description:
         - The source to use for this group.
       choices: ["manual", "file", "ec2", "rax", "vmware", "gce", "azure", "azure_rm", "openstack", "satellite6" , "cloudforms", "custom"]
+      default: manual
+      type: str
     source_regions:
       description:
         - Regions for cloud provider.
+      type: str
     source_vars:
       description:
         - Override variables from source with variables from this field.
+      type: str
     instance_filters:
       description:
         - Comma-separated list of filter expressions for matching hosts.
+      type: str
     group_by:
       description:
         - Limit groups automatically created from inventory source.
+      type: str
     source_script:
       description:
         - Inventory script to be used when group type is C(custom).
+      type: str
     overwrite:
       description:
         - Delete child groups and hosts not found in source.
@@ -67,6 +79,7 @@ options:
     overwrite_vars:
       description:
         - Override vars in child groups and hosts with those from external source.
+      type: bool
     update_on_launch:
       description:
         - Refresh inventory data from its source each time a job is run.
@@ -77,6 +90,7 @@ options:
         - Desired state of the resource.
       default: "present"
       choices: ["present", "absent"]
+      type: str
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -120,7 +134,7 @@ def main():
         group_by=dict(),
         source_script=dict(),
         overwrite=dict(type='bool', default=False),
-        overwrite_vars=dict(),
+        overwrite_vars=dict(type='bool', default=False),
         update_on_launch=dict(type='bool', default=False),
         state=dict(choices=['present', 'absent'], default='present'),
     )

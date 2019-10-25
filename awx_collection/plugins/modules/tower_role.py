@@ -26,38 +26,48 @@ options:
     user:
       description:
         - User that receives the permissions specified by the role.
+      type: str
     team:
       description:
         - Team that receives the permissions specified by the role.
+      type: str
     role:
       description:
         - The role type to grant/revoke.
       required: True
       choices: ["admin", "read", "member", "execute", "adhoc", "update", "use", "auditor", "project_admin", "inventory_admin", "credential_admin",
                 "workflow_admin", "notification_admin", "job_template_admin"]
+      type: str
     target_team:
       description:
         - Team that the role acts on.
+      type: str
     inventory:
       description:
         - Inventory the role acts on.
+      type: str
     job_template:
       description:
         - The job template the role acts on.
+      type: str
     credential:
       description:
         - Credential the role acts on.
+      type: str
     organization:
       description:
         - Organization the role acts on.
+      type: str
     project:
       description:
         - Project the role acts on.
+      type: str
     state:
       description:
         - Desired state of the resource.
       default: "present"
       choices: ["present", "absent"]
+      type: str
 extends_documentation_fragment: awx.awx.auth
 '''
 

@@ -27,15 +27,18 @@ options:
       description:
         - Name to use for the label.
       required: True
+      type: str
     organization:
       description:
         - Organization the label should be applied to.
       required: True
+      type: str
     state:
       description:
         - Desired state of the resource.
       default: "present"
       choices: ["present", "absent"]
+      type: str
 extends_documentation_fragment: awx.awx.auth
 '''
 

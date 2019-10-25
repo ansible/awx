@@ -27,9 +27,11 @@ options:
       description:
         - Only list jobs with this status.
       choices: ['pending', 'waiting', 'running', 'error', 'failed', 'canceled', 'successful']
+      type: str
     page:
       description:
         - Page number of the results to fetch.
+      type: int
     all_pages:
       description:
         - Fetch all the pages and return a single result.
@@ -38,6 +40,7 @@ options:
     query:
       description:
         - Query used to further filter the list of jobs. C({"foo":"bar"}) will be passed at C(?foo=bar)
+      type: dict
 extends_documentation_fragment: awx.awx.auth
 '''
 
