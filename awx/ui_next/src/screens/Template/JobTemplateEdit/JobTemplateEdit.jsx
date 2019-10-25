@@ -179,11 +179,19 @@ class JobTemplateEdit extends Component {
     const canEdit = template.summary_fields.user_capabilities.edit;
 
     if (hasContentLoading) {
-      return <ContentLoading />;
+      return (
+        <CardBody>
+          <ContentLoading />
+        </CardBody>
+      );
     }
 
     if (contentError) {
-      return <ContentError error={contentError} />;
+      return (
+        <CardBody>
+          <ContentError error={contentError} />
+        </CardBody>
+      );
     }
 
     if (!canEdit) {

@@ -7,7 +7,6 @@ import { withFormik, Field } from 'formik';
 import {
   Form,
   FormGroup,
-  Card,
   Switch,
   Checkbox,
   TextInput,
@@ -165,19 +164,11 @@ class JobTemplateForm extends Component {
     }
 
     if (hasContentLoading) {
-      return (
-        <Card className="awx-c-card">
-          <ContentLoading />
-        </Card>
-      );
+      return <ContentLoading />;
     }
 
     if (contentError) {
-      return (
-        <Card className="awx-c-card">
-          <ContentError error={contentError} />
-        </Card>
-      );
+      return <ContentError error={contentError} />;
     }
     const AdvancedFieldsWrapper = template.isNew ? CollapsibleSection : 'div';
     return (
