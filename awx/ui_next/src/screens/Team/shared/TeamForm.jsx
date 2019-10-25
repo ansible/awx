@@ -50,7 +50,7 @@ class TeamForm extends Component {
           <Form autoComplete="off" onSubmit={formik.handleSubmit}>
             <FormRow>
               <FormField
-                id="org-name"
+                id="team-name"
                 name="name"
                 type="text"
                 label={i18n._(t`Name`)}
@@ -58,7 +58,7 @@ class TeamForm extends Component {
                 isRequired
               />
               <FormField
-                id="org-description"
+                id="team-description"
                 name="description"
                 type="text"
                 label={i18n._(t`Description`)}

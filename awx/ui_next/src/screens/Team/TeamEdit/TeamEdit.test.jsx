@@ -22,13 +22,13 @@ describe('<TeamEdit />', () => {
   test('handleSubmit should call api update', () => {
     const wrapper = mountWithContexts(<TeamEdit team={mockData} />);
 
-    const updatedOrgData = {
+    const updatedTeamData = {
       name: 'new name',
       description: 'new description',
     };
-    wrapper.find('TeamForm').prop('handleSubmit')(updatedOrgData);
+    wrapper.find('TeamForm').prop('handleSubmit')(updatedTeamData);
 
-    expect(TeamsAPI.update).toHaveBeenCalledWith(1, updatedOrgData);
+    expect(TeamsAPI.update).toHaveBeenCalledWith(1, updatedTeamData);
   });
 
   test('should navigate to team detail when cancel is clicked', () => {

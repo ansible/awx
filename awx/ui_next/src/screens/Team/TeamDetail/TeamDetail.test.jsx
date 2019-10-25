@@ -54,9 +54,9 @@ describe('<TeamDetail />', () => {
   });
 
   test('should hide edit button for users without edit permission', async done => {
-    const readOnlyOrg = { ...mockTeam };
-    readOnlyOrg.summary_fields.user_capabilities.edit = false;
-    const wrapper = mountWithContexts(<TeamDetail team={readOnlyOrg} />);
+    const readOnlyTeam = { ...mockTeam };
+    readOnlyTeam.summary_fields.user_capabilities.edit = false;
+    const wrapper = mountWithContexts(<TeamDetail team={readOnlyTeam} />);
     await waitForElement(wrapper, 'TeamDetail');
     expect(wrapper.find('TeamDetail Button').length).toBe(0);
     done();

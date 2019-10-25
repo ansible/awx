@@ -9,12 +9,12 @@ jest.mock('@api');
 describe('<TeamAdd />', () => {
   test('handleSubmit should post to api', () => {
     const wrapper = mountWithContexts(<TeamAdd />);
-    const updatedOrgData = {
+    const updatedTeamData = {
       name: 'new name',
       description: 'new description',
     };
-    wrapper.find('TeamForm').prop('handleSubmit')(updatedOrgData);
-    expect(TeamsAPI.create).toHaveBeenCalledWith(updatedOrgData);
+    wrapper.find('TeamForm').prop('handleSubmit')(updatedTeamData);
+    expect(TeamsAPI.create).toHaveBeenCalledWith(updatedTeamData);
   });
 
   test('should navigate to teams list when cancel is clicked', () => {
