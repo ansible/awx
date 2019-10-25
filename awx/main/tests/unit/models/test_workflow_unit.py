@@ -234,6 +234,14 @@ class TestWorkflowJobNodeJobKWARGS:
         job_node_no_prompts.unified_job_template = project_unit
         assert job_node_no_prompts.get_job_kwargs() == self.kwargs_base
 
+    def test_extra_vars_node_prompts(self, wfjt_node_no_prompts):
+        wfjt_node_no_prompts.extra_vars = {'foo': 'bar'}
+        assert wfjt_node_no_prompts.prompts_dict() == {'extra_vars': {'foo': 'bar'}}
+
+    def test_string_extra_vars_node_prompts(self, wfjt_node_no_prompts):
+        wfjt_node_no_prompts.extra_vars = '{"foo": "bar"}'
+        assert wfjt_node_no_prompts.prompts_dict() == {'extra_vars': {'foo': 'bar'}}
+
 
 def test_get_ask_mapping_integrity():
     assert list(WorkflowJobTemplate.get_ask_mapping().keys()) == ['extra_vars', 'inventory', 'limit', 'scm_branch']
