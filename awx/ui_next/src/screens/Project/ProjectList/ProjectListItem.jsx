@@ -105,11 +105,13 @@ class ProjectListItem extends React.Component {
               </DataListCell>,
               <DataListCell key="revision">
                 {project.scm_revision.substring(0, 7)}
-                <ClipboardCopyButton
-                  stringToCopy={project.scm_revision}
-                  hoverTip={i18n._(t`Copy full revision to clipboard.`)}
-                  clickTip={i18n._(t`Successfully copied to clipboard!`)}
-                />
+                {project.scm_revision ? (
+                  <ClipboardCopyButton
+                    stringToCopy={project.scm_revision}
+                    hoverTip={i18n._(t`Copy full revision to clipboard.`)}
+                    clickTip={i18n._(t`Successfully copied to clipboard!`)}
+                  />
+                ) : null}
               </DataListCell>,
               <DataListCell lastcolumn="true" key="action">
                 {project.summary_fields.user_capabilities.start && (
