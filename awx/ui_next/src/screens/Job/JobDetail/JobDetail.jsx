@@ -279,14 +279,6 @@ function JobDetail({ job, i18n, history }) {
         >
           {i18n._(t`Delete`)}
         </Button>
-        <Button
-          variant="secondary"
-          aria-label="close"
-          component={Link}
-          to="/jobs"
-        >
-          {i18n._(t`Close`)}
-        </Button>
       </ActionButtonWrapper>
       {isDeleteModalOpen && (
         <AlertModal
