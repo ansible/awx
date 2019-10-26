@@ -50,6 +50,7 @@ class SlackBackend(AWXBaseEmailBackend):
                     else:
                         ret = connection.api_call("chat.postMessage",
                                                   channel=r,
+                                                  as_user=True,
                                                   text=m.subject)
                     logger.debug(ret)
                     if ret['ok']:
