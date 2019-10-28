@@ -88,6 +88,7 @@ describe('<ProjectDetail />', () => {
     assertDetail('SCM Type', mockProject.scm_type);
     assertDetail('SCM URL', mockProject.scm_url);
     assertDetail('SCM Branch', mockProject.scm_branch);
+    assertDetail('SCM Refspec', mockProject.scm_refspec);
     assertDetail(
       'SCM Credential',
       `Scm: ${mockProject.summary_fields.credential.name}`

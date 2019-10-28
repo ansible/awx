@@ -101,7 +101,7 @@ class MultiCredentialsLookup extends React.Component {
     const { selectedCredentialType, credentialTypes } = this.state;
     const { tooltip, i18n, credentials } = this.props;
     return (
-      <FormGroup label={i18n._(t`Credentials`)} fieldId="org-credentials">
+      <FormGroup label={i18n._(t`Credentials`)} fieldId="multiCredential">
         {tooltip && (
           <Tooltip position="right" content={tooltip}>
             <QuestionCircleIcon />
@@ -114,7 +114,7 @@ class MultiCredentialsLookup extends React.Component {
             selectedCategory={selectedCredentialType}
             onToggleItem={this.toggleCredentialSelection}
             onloadCategories={this.loadCredentialTypes}
-            id="org-credentials"
+            id="multiCredential"
             lookupHeader={i18n._(t`Credentials`)}
             name="credentials"
             value={credentials}
