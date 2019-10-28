@@ -71,6 +71,7 @@ describe('<ProjectsListItem />', () => {
           url: '/api/v2/projects/1',
           type: 'project',
           scm_type: 'git',
+          scm_revision: '7788f7erga0jijodfgsjisiodf98sdga9hg9a98gaf',
           summary_fields: {
             last_job: {
               id: 9000,
@@ -97,6 +98,7 @@ describe('<ProjectsListItem />', () => {
           url: '/api/v2/projects/1',
           type: 'project',
           scm_type: 'git',
+          scm_revision: '7788f7erga0jijodfgsjisiodf98sdga9hg9a98gaf',
           summary_fields: {
             last_job: {
               id: 9000,
