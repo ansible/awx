@@ -32,7 +32,6 @@ def test_create_job_template(run_module, admin_user, project, inventory):
 
 
 @pytest.mark.django_db
-@pytest.mark.xfail(reason='Known limitation and needs to be fixed.')
 def test_create_job_template_with_old_machine_cred(run_module, admin_user, project, inventory, machine_credential):
 
     module_args = {
