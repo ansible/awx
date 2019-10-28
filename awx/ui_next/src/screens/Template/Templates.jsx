@@ -40,6 +40,9 @@ class Templates extends Component {
       [`/templates/${template.type}/${template.id}/notifications`]: i18n._(
         t`Notifications`
       ),
+      [`/templates/${template.type}/${template.id}/access`]: i18n._(
+        t`Access`
+      ),
     };
     this.setState({ breadcrumbConfig });
   };
