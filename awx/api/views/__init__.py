@@ -102,7 +102,7 @@ from awx.main.scheduler.dag_workflow import WorkflowDAG
 from awx.api.views.mixin import (
     ControlledByScmMixin, InstanceGroupMembershipMixin,
     OrganizationCountsMixin, RelatedJobsPreventDeleteMixin,
-    UnifiedJobDeletionMixin,
+    UnifiedJobDeletionMixin, NoTruncateMixin,
 )
 from awx.api.views.organization import ( # noqa
     OrganizationList,
@@ -3785,17 +3785,11 @@ class JobHostSummaryDetail(RetrieveAPIView):
     serializer_class = serializers.JobHostSummarySerializer
 
 
-class JobEventList(ListAPIView):
+class JobEventList(NoTruncateMixin, ListAPIView):
 
     model = models.JobEvent
     serializer_class = serializers.JobEventSerializer
     search_fields = ('stdout',)
-
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        if self.request.query_params.get('no_truncate'):
-            context.update(no_truncate=True)
-        return context
 
 
 class JobEventDetail(RetrieveAPIView):
@@ -3809,7 +3803,7 @@ class JobEventDetail(RetrieveAPIView):
         return context
 
 
-class JobEventChildrenList(SubListAPIView):
+class JobEventChildrenList(NoTruncateMixin, SubListAPIView):
 
     model = models.JobEvent
     serializer_class = serializers.JobEventSerializer
@@ -3834,7 +3828,7 @@ class JobEventHostsList(HostRelatedSearchMixin, SubListAPIView):
     name = _('Job Event Hosts List')
 
 
-class BaseJobEventsList(SubListAPIView):
+class BaseJobEventsList(NoTruncateMixin, SubListAPIView):
 
     model = models.JobEvent
     serializer_class = serializers.JobEventSerializer
@@ -4030,17 +4024,11 @@ class AdHocCommandRelaunch(GenericAPIView):
             return Response(data, status=status.HTTP_201_CREATED, headers=headers)
 
 
-class AdHocCommandEventList(ListAPIView):
+class AdHocCommandEventList(NoTruncateMixin, ListAPIView):
 
     model = models.AdHocCommandEvent
     serializer_class = serializers.AdHocCommandEventSerializer
     search_fields = ('stdout',)
-
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        if self.request.query_params.get('no_truncate'):
-            context.update(no_truncate=True)
-        return context
 
 
 class AdHocCommandEventDetail(RetrieveAPIView):
@@ -4054,7 +4042,7 @@ class AdHocCommandEventDetail(RetrieveAPIView):
         return context
 
 
-class BaseAdHocCommandEventsList(SubListAPIView):
+class BaseAdHocCommandEventsList(NoTruncateMixin, SubListAPIView):
 
     model = models.AdHocCommandEvent
     serializer_class = serializers.AdHocCommandEventSerializer
