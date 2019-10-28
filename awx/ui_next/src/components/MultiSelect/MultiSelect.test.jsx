@@ -92,10 +92,9 @@ describe('<MultiSelect />', () => {
       />
     );
 
-    wrapper
-      .find('Chip')
-      .at(1)
-      .invoke('onClick')();
+    const chips = wrapper.find('PFChip');
+    expect(chips).toHaveLength(2);
+    chips.at(1).invoke('onClick')();
 
     expect(onRemoveItem).toHaveBeenCalledWith(value[1]);
     const newVal = onChange.mock.calls[0][0];

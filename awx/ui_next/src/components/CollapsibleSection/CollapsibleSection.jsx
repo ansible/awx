@@ -6,6 +6,9 @@ import { AngleRightIcon } from '@patternfly/react-icons';
 import omitProps from '@util/omitProps';
 import ExpandingContainer from './ExpandingContainer';
 
+// Make button findable by tests
+Button.displayName = 'Button';
+
 const Toggle = styled.div`
   display: flex;
 
