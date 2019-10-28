@@ -8,6 +8,8 @@ from unittest.mock import PropertyMock
 
 # Django
 from django.urls import resolve
+from django.http import Http404
+from django.core.handlers.exception import response_for_exception
 from django.contrib.auth.models import User
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.backends.sqlite3.base import SQLiteCursorWrapper
@@ -581,8 +583,12 @@ def _request(verb):
         if 'format' not in kwargs and 'content_type' not in kwargs:
             kwargs['format'] = 'json'
 
-        view, view_args, view_kwargs = resolve(urllib.parse.urlparse(url)[2])
         request = getattr(APIRequestFactory(), verb)(url, **kwargs)
+        request_error = None
+        try:
+            view, view_args, view_kwargs = resolve(urllib.parse.urlparse(url)[2])
+        except Http404 as e:
+            request_error = e
         if isinstance(kwargs.get('cookies', None), dict):
             for key, value in kwargs['cookies'].items():
                 request.COOKIES[key] = value
@@ -591,7 +597,10 @@ def _request(verb):
         if user:
             force_authenticate(request, user=user)
 
-        response = view(request, *view_args, **view_kwargs)
+        if not request_error:
+            response = view(request, *view_args, **view_kwargs)
+        else:
+            response = response_for_exception(request, request_error)
         if middleware:
             middleware.process_response(request, response)
         if expect:
