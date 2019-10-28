@@ -69,7 +69,7 @@ CHANNEL_LAYERS = {
 
 # Absolute filesystem path to the directory to host projects (with playbooks).
 # This directory should NOT be web-accessible.
-PROJECTS_ROOT = '/projects/'
+PROJECTS_ROOT = '/var/lib/awx/projects/'
 
 # Absolute filesystem path to the directory for job status stdout
 # This directory should not be web-accessible
