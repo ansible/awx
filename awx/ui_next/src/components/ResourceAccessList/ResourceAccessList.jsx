@@ -3,7 +3,7 @@ import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
-import { OrganizationsAPI, TeamsAPI, UsersAPI } from '@api';
+import { TeamsAPI, UsersAPI } from '@api';
 import AddResourceRole from '@components/AddRole/AddResourceRole';
 import AlertModal from '@components/AlertModal';
 import DataListToolbar from '@components/DataListToolbar';
@@ -11,10 +11,9 @@ import PaginatedDataList, {
   ToolbarAddButton,
 } from '@components/PaginatedDataList';
 import { getQSConfig, encodeQueryString, parseQueryString } from '@util/qs';
-import { Organization } from '@types';
 
 import DeleteRoleConfirmationModal from './DeleteRoleConfirmationModal';
-import OrganizationAccessItem from './OrganizationAccessItem';
+import ResourceAccessListItem from './ResourceAccessListItem';
 
 const QS_CONFIG = getQSConfig('access', {
   page: 1,
@@ -22,11 +21,7 @@ const QS_CONFIG = getQSConfig('access', {
   order_by: 'first_name',
 });
 
-class OrganizationAccess extends React.Component {
-  static propTypes = {
-    organization: Organization.isRequired,
-  };
-
+class ResourceAccessList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -65,14 +60,14 @@ class OrganizationAccess extends React.Component {
   }
 
   async loadAccessList() {
-    const { organization, location } = this.props;
+    const { apiModel, resource, location } = this.props;
     const params = parseQueryString(QS_CONFIG, location.search);
 
     this.setState({ contentError: null, hasContentLoading: true });
     try {
       const {
         data: { results: accessRecords = [], count: itemCount = 0 },
-      } = await OrganizationsAPI.readAccessList(organization.id, params);
+      } = await apiModel.readAccessList(resource.id, params);
       this.setState({ itemCount, accessRecords });
     } catch (err) {
       this.setState({ contentError: err });
@@ -143,7 +138,7 @@ class OrganizationAccess extends React.Component {
   }
 
   render() {
-    const { organization, i18n } = this.props;
+    const { resource, i18n } = this.props;
     const {
       accessRecords,
       contentError,
@@ -154,7 +149,7 @@ class OrganizationAccess extends React.Component {
       itemCount,
       isAddModalOpen,
     } = this.state;
-    const canEdit = organization.summary_fields.user_capabilities.edit;
+    const canEdit = resource.summary_fields.user_capabilities.edit;
     const isDeleteModalOpen =
       !hasContentLoading && !hasDeletionError && deletionRole;
 
@@ -204,7 +199,7 @@ class OrganizationAccess extends React.Component {
             />
           )}
           renderItem={accessRecord => (
-            <OrganizationAccessItem
+            <ResourceAccessListItem
               key={accessRecord.id}
               accessRecord={accessRecord}
               onRoleDelete={this.handleDeleteOpen}
@@ -215,7 +210,7 @@ class OrganizationAccess extends React.Component {
           <AddResourceRole
             onClose={this.handleAddClose}
             onSave={this.handleAddSuccess}
-            roles={organization.summary_fields.object_roles}
+            roles={resource.summary_fields.object_roles}
           />
         )}
         {isDeleteModalOpen && (
@@ -239,5 +234,5 @@ class OrganizationAccess extends React.Component {
   }
 }
 
-export { OrganizationAccess as _OrganizationAccess };
-export default withI18n()(withRouter(OrganizationAccess));
+export { ResourceAccessList as _ResourceAccessList };
+export default withI18n()(withRouter(ResourceAccessList));

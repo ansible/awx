@@ -2,7 +2,7 @@ import React from 'react';
 
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
 
-import OrganizationAccessItem from './OrganizationAccessItem';
+import ResourceAccessListItem from './ResourceAccessListItem';
 
 const accessRecord = {
   id: 2,
@@ -28,14 +28,14 @@ const accessRecord = {
   },
 };
 
-describe('<OrganizationAccessItem />', () => {
+describe('<ResourceAccessListItem />', () => {
   test('initially renders succesfully', () => {
     const wrapper = mountWithContexts(
-      <OrganizationAccessItem
+      <ResourceAccessListItem
         accessRecord={accessRecord}
         onRoleDelete={() => {}}
       />
     );
-    expect(wrapper.find('OrganizationAccessItem')).toMatchSnapshot();
+    expect(wrapper.find('ResourceAccessListItem')).toMatchSnapshot();
   });
 });

@@ -22,7 +22,7 @@ const DataListItemCells = styled(PFDataListItemCells)`
   align-items: start;
 `;
 
-class OrganizationAccessItem extends React.Component {
+class ResourceAccessListItem extends React.Component {
   static propTypes = {
     accessRecord: AccessRecord.isRequired,
     onRoleDelete: func.isRequired,
@@ -132,4 +132,4 @@ class OrganizationAccessItem extends React.Component {
   }
 }
 
-export default withI18n()(OrganizationAccessItem);
+export default withI18n()(ResourceAccessListItem);

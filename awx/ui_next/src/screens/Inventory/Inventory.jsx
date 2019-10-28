@@ -6,12 +6,12 @@ import { Switch, Route, Redirect, withRouter, Link } from 'react-router-dom';
 import CardCloseButton from '@components/CardCloseButton';
 import ContentError from '@components/ContentError';
 import RoutedTabs from '@components/RoutedTabs';
+import { ResourceAccessList } from '@components/ResourceAccessList';
 import InventoryDetail from './InventoryDetail';
-import InventoryAccess from './InventoryAccess';
 import InventoryHosts from './InventoryHosts';
 import InventoryGroups from './InventoryGroups';
-import InventorySources from './InventorySources';
 import InventoryCompletedJobs from './InventoryCompletedJobs';
+import InventorySources from './InventorySources';
 import { InventoriesAPI } from '@api';
 import InventoryEdit from './InventoryEdit';
 
@@ -137,7 +137,12 @@ class Inventory extends Component {
               <Route
                 key="access"
                 path="/inventories/inventory/:id/access"
-                render={() => <InventoryAccess inventory={inventory} />}
+                render={() => (
+                  <ResourceAccessList
+                    resource={inventory}
+                    apiModel={InventoriesAPI}
+                  />
+                )}
               />,
               <Route
                 key="groups"

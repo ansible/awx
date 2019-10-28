@@ -6,8 +6,8 @@ import { Switch, Route, Redirect, withRouter, Link } from 'react-router-dom';
 import CardCloseButton from '@components/CardCloseButton';
 import ContentError from '@components/ContentError';
 import RoutedTabs from '@components/RoutedTabs';
+import { ResourceAccessList } from '@components/ResourceAccessList';
 import SmartInventoryDetail from './SmartInventoryDetail';
-import SmartInventoryAccess from './SmartInventoryAccess';
 import SmartInventoryHosts from './SmartInventoryHosts';
 import SmartInventoryCompletedJobs from './SmartInventoryCompletedJobs';
 import { InventoriesAPI } from '@api';
@@ -132,7 +132,12 @@ class SmartInventory extends Component {
               <Route
                 key="access"
                 path="/inventories/smart_inventory/:id/access"
-                render={() => <SmartInventoryAccess inventory={inventory} />}
+                render={() => (
+                  <ResourceAccessList
+                    resource={inventory}
+                    apiModel={InventoriesAPI}
+                  />
+                )}
               />,
               <Route
                 key="hosts"
