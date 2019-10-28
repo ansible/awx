@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Button,
   Modal as PFModal,
   Tab,
   Tabs as PFTabs,
@@ -141,11 +140,6 @@ function HostEventModal({ onClose, hostEvent = {}, isOpen = false, i18n }) {
       isOpen={isOpen}
       onClose={onClose}
       title={i18n._(t`Host Details`)}
-      actions={[
-        <Button key="cancel" variant="secondary" onClick={onClose}>
-          {i18n._(t`Close`)}
-        </Button>,
-      ]}
     >
       <Tabs
         aria-label={i18n._(t`Tabs`)}
