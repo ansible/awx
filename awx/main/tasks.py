@@ -1602,7 +1602,8 @@ class RunJob(BaseTask):
 
         path_vars = (
             ('ANSIBLE_COLLECTIONS_PATHS', 'collections_paths', 'requirements_collections', '~/.ansible/collections:/usr/share/ansible/collections'),
-            ('ANSIBLE_ROLES_PATH', 'roles_path', 'requirements_roles', '~/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles'))
+            ('ANSIBLE_ROLES_PATH', 'roles_path', 'requirements_roles', '~/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles'),
+            ('ANSIBLE_LOOKUP_PLUGINS', 'lookup_plugins', 'requirements_roles', '~/.ansible/plugins/lookup:/usr/share/ansible/plugins/lookup'))
 
         config_values = read_ansible_config(job.project.get_project_path(), list(map(lambda x: x[1], path_vars)))
 
