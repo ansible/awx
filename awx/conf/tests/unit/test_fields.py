@@ -1,7 +1,7 @@
 import pytest
 
 from rest_framework.fields import ValidationError
-from awx.conf.fields import StringListBooleanField, StringListPathField, ListTuplesField
+from awx.conf.fields import StringListBooleanField, StringListPathField, ListTuplesField, URLField
 
 
 class TestStringListBooleanField():
@@ -62,7 +62,7 @@ class TestListTuplesField():
     FIELD_VALUES = [
         ([('a', 'b'), ('abc', '123')], [("a", "b"), ("abc", "123")]),
     ]
-    
+
     FIELD_VALUES_INVALID = [
         ("abc", type("abc")),
         ([('a', 'b', 'c'), ('abc', '123', '456')], type(('a',))),
@@ -130,3 +130,25 @@ class TestStringListPathField():
             field.to_internal_value([value])
         assert e.value.detail[0] == "{} is not a valid path choice.".format(value)
 
+
+class TestURLField():
+    regex = "^https://www.example.org$"
+
+    @pytest.mark.parametrize("url,schemes,regex, allow_numbers_in_top_level_domain, expect_no_error",[
+        ("ldap://www.example.org42", "ldap", None, True, True),
+        ("https://www.example.org42", "https", None, False, False),
+        ("https://www.example.org", None,  regex, None, True),
+        ("https://www.example3.org", None, regex, None, False),
+        ("ftp://www.example.org", "https", None, None, False)
+    ])
+    def test_urls(self, url, schemes, regex, allow_numbers_in_top_level_domain, expect_no_error):
+        kwargs = {}
+        kwargs.setdefault("allow_numbers_in_top_level_domain", allow_numbers_in_top_level_domain)
+        kwargs.setdefault("schemes", schemes)
+        kwargs.setdefault("regex", regex)
+        field = URLField(**kwargs)
+        if expect_no_error:
+            field.run_validators(url)
+        else:
+            with pytest.raises(ValidationError):
+                field.run_validators(url)
