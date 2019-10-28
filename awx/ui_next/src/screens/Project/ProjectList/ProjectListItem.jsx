@@ -11,10 +11,6 @@ import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 import { PencilAltIcon, SyncIcon } from '@patternfly/react-icons';
 
-import { Link as _Link } from 'react-router-dom';
-import { SyncIcon } from '@patternfly/react-icons';
-import styled from 'styled-components';
-
 import ActionButtonCell from '@components/ActionButtonCell';
 import ClipboardCopyButton from '@components/ClipboardCopyButton';
 import DataListCell from '@components/DataListCell';
@@ -57,11 +53,6 @@ class ProjectListItem extends React.Component {
         )}
       </Fragment>
     );
-  };
-
-  handleEditClick = project => {
-    const { history } = this.props;
-    history.push(`/projects/${project.id}/edit`);
   };
 
   render() {
