@@ -11,11 +11,11 @@ import styled from 'styled-components';
 import CardCloseButton from '@components/CardCloseButton';
 import RoutedTabs from '@components/RoutedTabs';
 import ContentError from '@components/ContentError';
+import NotificationList from '@components/NotificationList';
 import ProjectAccess from './ProjectAccess';
 import ProjectDetail from './ProjectDetail';
 import ProjectEdit from './ProjectEdit';
 import ProjectJobTemplates from './ProjectJobTemplates';
-import ProjectNotifications from './ProjectNotifications';
 import ProjectSchedules from './ProjectSchedules';
 import { OrganizationsAPI, ProjectsAPI } from '@api';
 
@@ -229,9 +229,10 @@ class Project extends Component {
               <Route
                 path="/projects/:id/notifications"
                 render={() => (
-                  <ProjectNotifications
+                  <NotificationList
                     id={Number(match.params.id)}
                     canToggleNotifications={canToggleNotifications}
+                    apiModel={ProjectsAPI}
                   />
                 )}
               />
