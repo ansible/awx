@@ -272,13 +272,15 @@ function JobDetail({ job, i18n, history }) {
               )}
             </LaunchButton>
           )}
-        <Button
-          variant="danger"
-          aria-label={i18n._(t`Delete`)}
-          onClick={() => setIsDeleteModalOpen(true)}
-        >
-          {i18n._(t`Delete`)}
-        </Button>
+        {job.summary_fields.user_capabilities.delete && (
+          <Button
+            variant="danger"
+            aria-label={i18n._(t`Delete`)}
+            onClick={() => setIsDeleteModalOpen(true)}
+          >
+            {i18n._(t`Delete`)}
+          </Button>
+        )}
       </ActionButtonWrapper>
       {isDeleteModalOpen && (
         <AlertModal
@@ -299,6 +301,7 @@ function JobDetail({ job, i18n, history }) {
             >
               {i18n._(t`Cancel`)}
             </Button>
+
             <Button
               variant="danger"
               aria-label={i18n._(t`Delete`)}
