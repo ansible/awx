@@ -900,6 +900,9 @@ class LaunchTimeConfigBase(BaseModel):
                         data[prompt_name] = self.display_extra_vars()
                     else:
                         data[prompt_name] = self.extra_vars
+                    # Depending on model, field type may save and return as string
+                    if isinstance(data[prompt_name], str):
+                        data[prompt_name] = parse_yaml_or_json(data[prompt_name])
                 if self.survey_passwords and not display:
                     data['survey_passwords'] = self.survey_passwords
             else:
