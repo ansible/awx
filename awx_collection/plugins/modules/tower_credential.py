@@ -53,9 +53,23 @@ options:
       description:
         - Type of credential being added.
         - The ssh choice refers to a Tower Machine credential.
-      required: True
+      required: False
       type: str
       choices: ["ssh", "vault", "net", "scm", "aws", "vmware", "satellite6", "cloudforms", "gce", "azure_rm", "openstack", "rhv", "insights", "tower"]
+    credential_type:
+      description:
+        - Name of credential type.
+      required: False
+      version_added: "2.10"
+      type: str
+    inputs:
+      description:
+        - >-
+          Credential inputs where the keys are var names used in templating.
+          Refer to the Ansible Tower documentation for example syntax.
+      required: False
+      version_added: "2.9"
+      type: dict
     host:
       description:
         - Host for this credential.
@@ -116,7 +130,8 @@ options:
     become_method:
       description:
         - Become method to use for privilege escalation.
-      choices: ["None", "sudo", "su", "pbrun", "pfexec", "pmrun"]
+        - Some examples are "None", "sudo", "su", "pbrun"
+        - Due to become plugins, these can be arbitrary
       type: str
     become_username:
       description:
@@ -185,6 +200,15 @@ EXAMPLES = '''
     tower_host: https://localhost
   run_once: true
   delegate_to: localhost
+
+- name: Add Credential with Custom Credential Type
+  tower_credential:
+    name: Workshop Credential
+    credential_type: MyCloudCredential
+    organization: Default
+    tower_username: admin
+    tower_password: ansible
+    tower_host: https://localhost
 '''
 
 import os
@@ -219,7 +243,17 @@ KIND_CHOICES = {
 }
 
 
-def credential_type_for_v1_kind(params, module):
+OLD_INPUT_NAMES = (
+    'authorize', 'authorize_password', 'client',
+    'security_token', 'secret', 'tenant', 'subscription',
+    'domain', 'become_method', 'become_username',
+    'become_password', 'vault_password', 'project', 'host',
+    'username', 'password', 'ssh_key_data', 'vault_id',
+    'ssh_key_unlock'
+)
+
+
+def credential_type_for_kind(params):
     credential_type_res = tower_cli.get_resource('credential_type')
     kind = params.pop('kind')
     arguments = {'managed_by_tower': True}
@@ -244,8 +278,9 @@ def main():
         name=dict(required=True),
         user=dict(),
         team=dict(),
-        kind=dict(required=True,
-                  choices=KIND_CHOICES.keys()),
+        kind=dict(choices=KIND_CHOICES.keys()),
+        credential_type=dict(),
+        inputs=dict(type='dict'),
         host=dict(),
         username=dict(),
         password=dict(no_log=True),
@@ -270,7 +305,14 @@ def main():
         vault_id=dict(),
     )
 
-    module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
+    mutually_exclusive = [
+        ('kind', 'credential_type')
+    ]
+    for input_name in OLD_INPUT_NAMES:
+        mutually_exclusive.append(('inputs', input_name))
+
+    module = TowerModule(argument_spec=argument_spec, supports_check_mode=True,
+                         mutually_exclusive=mutually_exclusive)
 
     name = module.params.get('name')
     organization = module.params.get('organization')
@@ -298,10 +340,26 @@ def main():
                 # /api/v1/ backwards compat
                 # older versions of tower-cli don't *have* a credential_type
                 # resource
-                params['kind'] = module.params['kind']
+                params['kind'] = module.params.get('kind')
             else:
-                credential_type = credential_type_for_v1_kind(module.params, module)
-                params['credential_type'] = credential_type['id']
+                if module.params.get('credential_type'):
+                    credential_type_res = tower_cli.get_resource('credential_type')
+                    try:
+                        credential_type = credential_type_res.get(name=module.params['credential_type'])
+                    except (exc.NotFound) as excinfo:
+                        module.fail_json(msg=(
+                            'Failed to update credential, credential_type not found: {0}'
+                        ).format(excinfo), changed=False)
+                    params['credential_type'] = credential_type['id']
+
+                    if module.params.get('inputs'):
+                        params['inputs'] = module.params.get('inputs')
+
+                elif module.params.get('kind'):
+                    credential_type = credential_type_for_kind(module.params)
+                    params['credential_type'] = credential_type['id']
+                else:
+                    module.fail_json(msg='must either specify credential_type or kind', changed=False)
 
             if module.params.get('description'):
                 params['description'] = module.params.get('description')
@@ -333,12 +391,7 @@ def main():
             if module.params.get('vault_id', None) and module.params.get('kind') != 'vault':
                 module.fail_json(msg="Parameter 'vault_id' is only valid if parameter 'kind' is specified as 'vault'")
 
-            for key in ('authorize', 'authorize_password', 'client',
-                        'security_token', 'secret', 'tenant', 'subscription',
-                        'domain', 'become_method', 'become_username',
-                        'become_password', 'vault_password', 'project', 'host',
-                        'username', 'password', 'ssh_key_data', 'vault_id',
-                        'ssh_key_unlock'):
+            for key in OLD_INPUT_NAMES:
                 if 'kind' in params:
                     params[key] = module.params.get(key)
                 elif module.params.get(key):

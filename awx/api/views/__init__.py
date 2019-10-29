@@ -102,7 +102,7 @@ from awx.main.scheduler.dag_workflow import WorkflowDAG
 from awx.api.views.mixin import (
     ControlledByScmMixin, InstanceGroupMembershipMixin,
     OrganizationCountsMixin, RelatedJobsPreventDeleteMixin,
-    UnifiedJobDeletionMixin,
+    UnifiedJobDeletionMixin, NoTruncateMixin,
 )
 from awx.api.views.organization import ( # noqa
     OrganizationList,
@@ -382,6 +382,13 @@ class InstanceGroupDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAP
     model = models.InstanceGroup
     serializer_class = serializers.InstanceGroupSerializer
     permission_classes = (InstanceGroupTowerPermission,)
+
+    def update_raw_data(self, data):
+        if self.get_object().is_containerized:
+            data.pop('policy_instance_percentage', None)
+            data.pop('policy_instance_minimum', None)
+            data.pop('policy_instance_list', None)
+        return super(InstanceGroupDetail, self).update_raw_data(data)
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -2136,12 +2143,21 @@ class InventorySourceHostsList(HostRelatedSearchMixin, SubListDestroyAPIView):
     def perform_list_destroy(self, instance_list):
         inv_source = self.get_parent_object()
         with ignore_inventory_computed_fields():
-            # Activity stream doesn't record disassociation here anyway
-            # no signals-related reason to not bulk-delete
-            models.Host.groups.through.objects.filter(
-                host__inventory_sources=inv_source
-            ).delete()
-            r = super(InventorySourceHostsList, self).perform_list_destroy(instance_list)
+            if not settings.ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC:
+                from awx.main.signals import disable_activity_stream
+                with disable_activity_stream():
+                    # job host summary deletion necessary to avoid deadlock
+                    models.JobHostSummary.objects.filter(host__inventory_sources=inv_source).update(host=None)
+                    models.Host.objects.filter(inventory_sources=inv_source).delete()
+                    r = super(InventorySourceHostsList, self).perform_list_destroy([])
+            else:
+                # Advance delete of group-host memberships to prevent deadlock
+                # Activity stream doesn't record disassociation here anyway
+                # no signals-related reason to not bulk-delete
+                models.Host.groups.through.objects.filter(
+                    host__inventory_sources=inv_source
+                ).delete()
+                r = super(InventorySourceHostsList, self).perform_list_destroy(instance_list)
         update_inventory_computed_fields.delay(inv_source.inventory_id, True)
         return r
 
@@ -2157,11 +2173,18 @@ class InventorySourceGroupsList(SubListDestroyAPIView):
     def perform_list_destroy(self, instance_list):
         inv_source = self.get_parent_object()
         with ignore_inventory_computed_fields():
-            # Same arguments for bulk delete as with host list
-            models.Group.hosts.through.objects.filter(
-                group__inventory_sources=inv_source
-            ).delete()
-            r = super(InventorySourceGroupsList, self).perform_list_destroy(instance_list)
+            if not settings.ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC:
+                from awx.main.signals import disable_activity_stream
+                with disable_activity_stream():
+                    models.Group.objects.filter(inventory_sources=inv_source).delete()
+                    r = super(InventorySourceGroupsList, self).perform_list_destroy([])
+            else:
+                # Advance delete of group-host memberships to prevent deadlock
+                # Same arguments for bulk delete as with host list
+                models.Group.hosts.through.objects.filter(
+                    group__inventory_sources=inv_source
+                ).delete()
+                r = super(InventorySourceGroupsList, self).perform_list_destroy(instance_list)
         update_inventory_computed_fields.delay(inv_source.inventory_id, True)
         return r
 
@@ -3762,17 +3785,11 @@ class JobHostSummaryDetail(RetrieveAPIView):
     serializer_class = serializers.JobHostSummarySerializer
 
 
-class JobEventList(ListAPIView):
+class JobEventList(NoTruncateMixin, ListAPIView):
 
     model = models.JobEvent
     serializer_class = serializers.JobEventSerializer
     search_fields = ('stdout',)
-
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        if self.request.query_params.get('no_truncate'):
-            context.update(no_truncate=True)
-        return context
 
 
 class JobEventDetail(RetrieveAPIView):
@@ -3786,7 +3803,7 @@ class JobEventDetail(RetrieveAPIView):
         return context
 
 
-class JobEventChildrenList(SubListAPIView):
+class JobEventChildrenList(NoTruncateMixin, SubListAPIView):
 
     model = models.JobEvent
     serializer_class = serializers.JobEventSerializer
@@ -3811,7 +3828,7 @@ class JobEventHostsList(HostRelatedSearchMixin, SubListAPIView):
     name = _('Job Event Hosts List')
 
 
-class BaseJobEventsList(SubListAPIView):
+class BaseJobEventsList(NoTruncateMixin, SubListAPIView):
 
     model = models.JobEvent
     serializer_class = serializers.JobEventSerializer
@@ -4007,17 +4024,11 @@ class AdHocCommandRelaunch(GenericAPIView):
             return Response(data, status=status.HTTP_201_CREATED, headers=headers)
 
 
-class AdHocCommandEventList(ListAPIView):
+class AdHocCommandEventList(NoTruncateMixin, ListAPIView):
 
     model = models.AdHocCommandEvent
     serializer_class = serializers.AdHocCommandEventSerializer
     search_fields = ('stdout',)
-
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        if self.request.query_params.get('no_truncate'):
-            context.update(no_truncate=True)
-        return context
 
 
 class AdHocCommandEventDetail(RetrieveAPIView):
@@ -4031,7 +4042,7 @@ class AdHocCommandEventDetail(RetrieveAPIView):
         return context
 
 
-class BaseAdHocCommandEventsList(SubListAPIView):
+class BaseAdHocCommandEventsList(NoTruncateMixin, SubListAPIView):
 
     model = models.AdHocCommandEvent
     serializer_class = serializers.AdHocCommandEventSerializer
@@ -4297,8 +4308,15 @@ class NotificationTemplateTest(GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
-        notification = obj.generate_notification("Tower Notification Test {} {}".format(obj.id, settings.TOWER_URL_BASE),
-                                                 {"body": "Ansible Tower Test Notification {} {}".format(obj.id, settings.TOWER_URL_BASE)})
+        msg = "Tower Notification Test {} {}".format(obj.id, settings.TOWER_URL_BASE)
+        if obj.notification_type in ('email', 'pagerduty'):
+            body = "Ansible Tower Test Notification {} {}".format(obj.id, settings.TOWER_URL_BASE)
+        elif obj.notification_type == 'webhook':
+            body = '{{"body": "Ansible Tower Test Notification {} {}"}}'.format(obj.id, settings.TOWER_URL_BASE)
+        else:
+            body = {"body": "Ansible Tower Test Notification {} {}".format(obj.id, settings.TOWER_URL_BASE)}
+        notification = obj.generate_notification(msg, body)
+
         if not notification:
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
         else:

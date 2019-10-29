@@ -27,14 +27,17 @@ options:
       description:
         - Name to use for the organization.
       required: True
+      type: str
     description:
       description:
         - The description to use for the organization.
+      type: str
     state:
       description:
         - Desired state of the resource.
       default: "present"
       choices: ["present", "absent"]
+      type: str
 extends_documentation_fragment: awx.awx.auth
 '''
 

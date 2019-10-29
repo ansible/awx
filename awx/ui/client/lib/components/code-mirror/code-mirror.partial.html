@@ -15,7 +15,9 @@
                 title="{{ label || vm.strings.get('code_mirror.label.VARIABLES') }}"
                 tabindex="-1"
                 ng-if="tooltip">
-                 <i class="fa fa-question-circle"></i>
+                <span class="at-Popover-icon" ng-class="{ 'at-Popover-icon--defaultCursor': popover.on === 'mouseenter' && !popover.click }">
+                    <i class="fa  fa-question-circle"></i>
+                </span>
              </a>
              <div class="atCodeMirror-toggleContainer FormToggle-container">
                  <div id="{{ name }}_parse_type" class="btn-group">

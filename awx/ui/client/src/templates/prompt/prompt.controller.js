@@ -233,6 +233,38 @@ export default [ 'ProcessErrors', 'CredentialTypeModel', 'TemplatesStrings', '$f
             }, true);
         };
 
+        function getSelectedTags(tagId) {
+            const selectedTags = [];
+            const choiceElements = $(tagId).siblings(".select2").first()
+                .find(".select2-selection__choice");
+            choiceElements.each((index, option) => {
+                selectedTags.push({
+                    value: option.title,
+                    name: option.title,
+                    label: option.title
+                });
+            });
+            return selectedTags;
+        }
+
+        function consolidateTags (tags, otherTags) {
+            const seen = [];
+            const consolidated = [];
+            tags.forEach(tag => {
+                if (!seen.includes(tag.value)) {
+                    seen.push(tag.value);
+                    consolidated.push(tag);
+                }
+            });
+            otherTags.forEach(tag => {
+                if (!seen.includes(tag.value)) {
+                    seen.push(tag.value);
+                    consolidated.push(tag);
+                }
+            });
+            return consolidated;
+        }
+
         vm.next = (currentTab) => {
             if(_.has(vm, 'steps.other_prompts.tab._active') && vm.steps.other_prompts.tab._active === true){
                 try {
@@ -242,6 +274,22 @@ export default [ 'ProcessErrors', 'CredentialTypeModel', 'TemplatesStrings', '$f
                 } catch (err) {
                     event.preventDefault();
                     return;
+                }
+
+                // The current tag input state lives somewhere in the associated select2
+                // widgetry and isn't directly tied to the vm, so extract the tag values
+                // and update the vm to keep it in sync.
+                if (vm.promptDataClone.launchConf.ask_tags_on_launch) {
+                    vm.promptDataClone.prompts.tags.value = consolidateTags(
+                        angular.copy(vm.promptDataClone.prompts.tags.value),
+                        getSelectedTags("#job_launch_job_tags")
+                    );
+                }
+                if (vm.promptDataClone.launchConf.ask_skip_tags_on_launch) {
+                    vm.promptDataClone.prompts.skipTags.value = consolidateTags(
+                        angular.copy(vm.promptDataClone.prompts.skipTags.value),
+                        getSelectedTags("#job_launch_skip_tags")
+                    );
                 }
             }
 

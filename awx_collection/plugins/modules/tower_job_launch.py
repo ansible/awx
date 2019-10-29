@@ -27,33 +27,32 @@ options:
       description:
         - Name of the job template to use.
       required: True
-    job_explanation:
-      description:
-        - Job explanation field.
+      type: str
     job_type:
       description:
         - Job_type to use for the job, only used if prompt for job_type is set.
       choices: ["run", "check", "scan"]
+      type: str
     inventory:
       description:
         - Inventory to use for the job, only used if prompt for inventory is set.
+      type: str
     credential:
       description:
         - Credential to use for job, only used if prompt for credential is set.
+      type: str
     extra_vars:
       description:
         - Extra_vars to use for the job_template. Prepend C(@) if a file.
+      type: list
     limit:
       description:
         - Limit to use for the I(job_template).
+      type: str
     tags:
       description:
         - Specific tags to use for from playbook.
-    use_job_endpoint:
-      description:
-        - Disable launching jobs from job template.
-      type: bool
-      default: 'no'
+      type: list
 extends_documentation_fragment: awx.awx.auth
 '''
 

@@ -89,6 +89,9 @@ export default ['i18n', function(i18n) {
                 type: 'text',
                 reset: 'PRIMARY_GALAXY_AUTH_URL',
             },
+            PUBLIC_GALAXY_ENABLED: {
+                type: 'toggleSwitch',
+            },
             AWX_TASK_ENV: {
                 type: 'textarea',
                 reset: 'AWX_TASK_ENV',

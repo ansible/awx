@@ -2,6 +2,7 @@
 # All Rights Reserved.
 
 # Python
+import json
 import logging
 from copy import copy
 from urllib.parse import urljoin
@@ -15,6 +16,9 @@ from django.core.exceptions import ObjectDoesNotExist
 
 # Django-CRUM
 from crum import get_current_user
+
+from jinja2 import sandbox
+from jinja2.exceptions import TemplateSyntaxError, UndefinedError, SecurityError
 
 # AWX
 from awx.api.versioning import reverse
@@ -763,22 +767,45 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
             connection.on_commit(send_it())
 
     def build_approval_notification_message(self, nt, approval_status):
-        subject = []
-        workflow_url = urljoin(settings.TOWER_URL_BASE, '/#/workflows/{}'.format(self.workflow_job.id))
-        subject.append(('The approval node "{}"').format(self.workflow_approval_template.name))
-        if approval_status == 'running':
-            subject.append(('needs review. This node can be viewed at: {}').format(workflow_url))
-        if approval_status == 'approved':
-            subject.append(('was approved. {}').format(workflow_url))
-        if approval_status == 'timed_out':
-            subject.append(('has timed out. {}').format(workflow_url))
-        elif approval_status == 'denied':
-            subject.append(('was denied. {}').format(workflow_url))
-        subject = " ".join(subject)
-        body = self.notification_data()
-        body['body'] = subject
+        env = sandbox.ImmutableSandboxedEnvironment()
 
-        return subject, body
+        context = self.context(approval_status)
+
+        msg_template = body_template = None
+        msg = body = ''
+
+        # Use custom template if available
+        if nt.messages and nt.messages.get('workflow_approval', None):
+            template = nt.messages['workflow_approval'].get(approval_status, {})
+            msg_template = template.get('message', None)
+            body_template = template.get('body', None)
+        # If custom template not provided, look up default template
+        default_template = nt.notification_class.default_messages['workflow_approval'][approval_status]
+        if not msg_template:
+            msg_template = default_template.get('message', None)
+        if not body_template:
+            body_template = default_template.get('body', None)
+
+        if msg_template:
+            try:
+                msg = env.from_string(msg_template).render(**context)
+            except (TemplateSyntaxError, UndefinedError, SecurityError):
+                msg = ''
+
+        if body_template:
+            try:
+                body = env.from_string(body_template).render(**context)
+            except (TemplateSyntaxError, UndefinedError, SecurityError):
+                body = ''
+
+        return (msg, body)
+
+    def context(self, approval_status):
+        workflow_url = urljoin(settings.TOWER_URL_BASE, '/#/workflows/{}'.format(self.workflow_job.id))
+        return {'approval_status': approval_status,
+                'approval_node_name': self.workflow_approval_template.name,
+                'workflow_url': workflow_url,
+                'job_metadata': json.dumps(self.notification_data(), indent=4)}
 
     @property
     def workflow_job_template(self):

@@ -8,6 +8,17 @@ inside the folder `lib/ansible/modules/web_infrastructure/ansible_tower`
 as well as other folders for the inventory plugin, module utils, and
 doc fragment.
 
+## Release and Upgrade Notes
+
+The release 7.0.0 of the `awx.awx` collection is intended to be identical
+to the content prior to the migration, aside from changes necessary to
+have it function as a collection.
+
+The following notes are changes that may require changes to playbooks.
+
+ - Specifying `inputs` or `injectors` as strings in the
+   `tower_credential_type` module is no longer supported. Provide as dictionaries instead.
+
 ## Running
 
 To use this collection, the "old" tower-cli needs to be installed
@@ -29,12 +40,31 @@ in `awx_collection/test/awx`. These tests require that python packages
 are available for all of `awx`, `ansible`, `tower_cli`, and the collection
 itself.
 
+### Inside Development Container
+
 The target `make prepare_collection_venv` will prepare some requirements
 in the `awx_collection_test_venv` folder so that `make test_collection` can
 be ran to actually run the tests. A single test can be ran via:
 
 ```
-make test_collection MODULE_TEST_DIRS=awx_collection/test/awx/test_organization.py
+make test_collection COLLECTION_TEST_DIRS=awx_collection/test/awx/test_organization.py
+```
+
+### Manually
+
+As a faster alternative if you do not want to use the container, or
+run against Ansible or tower-cli source, it is possible to set up a
+working environment yourself.
+
+```
+mkvirtualenv my_new_venv
+# may need to replace psycopg2 with psycopg2-binary in requirements/requirements.txt
+pip install -r requirements/requirements.txt -r requirements/requirements_dev.txt -r requirements/requirements_git.txt
+make clean-api
+pip install -e <path to your Ansible>
+pip install -e <path to your tower-cli>
+pip install -e .
+PYTHONPATH=awx_collection:$PYTHONPATH py.test awx_collection/test/awx/
 ```
 
 ## Building

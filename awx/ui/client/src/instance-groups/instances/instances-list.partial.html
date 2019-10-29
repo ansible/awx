@@ -43,35 +43,45 @@
         </at-list-toolbar>
         <at-list results='vm.instances'>
             <at-row ng-repeat="instance in vm.instances"
-                ng-class="{'at-Row--active': (instance.id === vm.activeId)}">
+                ng-class="{'at-Row--active': (instance.id === vm.activeId)}"
+                class="at-Row--instances">
                 <div class="at-Row-toggle">
                     <at-switch on-toggle="vm.toggle(instance)" switch-on="instance.enabled" switch-disabled="vm.rowAction.toggle._disabled"></at-switch>
                 </div>
-
-                <div class="at-Row-items at-Row-items--instances">
-                    <at-row-item
-                        header-value="{{ instance.hostname }}"
-                        header-tag="{{ instance.managed_by_policy ? '' : vm.strings.get('list.MANUAL') }}">
-                    </at-row-item>
-                    <at-row-item
-                        label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_RUNNING_JOBS') }}"
-                        label-state="instanceGroups.instanceJobs({instance_group_id: {{vm.instance_group_id}}, instance_id: {{instance.id}}, job_search: {status__in: ['running,waiting']}})"
-                        value="{{ instance.jobs_running }}"
-                        inline="true"
-                        badge="true">
-                    </at-row-item>
-                    <at-row-item
-                        label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_TOTAL_JOBS') }}"
-                        label-state="instanceGroups.instanceJobs({instance_group_id: {{vm.instance_group_id}}, instance_id: {{instance.id}}})"
-                        value="{{ instance.jobs_total }}"
-                        inline="true"
-                        badge="true">
-                    </at-row-item>
-                </div>
-
-                <div class="at-Row-actions">
-                    <capacity-adjuster state="instance" disabled="{{vm.rowAction.capacity_adjustment._disabled}}"></capacity-adjuster>
-                    <capacity-bar label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_USED_CAPACITY') }}" capacity="instance.consumed_capacity" total-capacity="instance.capacity"></capacity-bar>
+                <div class="at-Row-itemGroup">
+                    <div class="at-Row-items at-Row-items--instances">
+                        <at-row-item
+                            header-value="{{ instance.hostname }}"
+                            header-tag="{{ instance.managed_by_policy ? '' : vm.strings.get('list.MANUAL') }}">
+                        </at-row-item>
+                        <div class="at-Row-nonHeaderItems">
+                            <at-row-item
+                                label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_RUNNING_JOBS') }}"
+                                label-state="instanceGroups.instanceJobs({instance_group_id: {{vm.instance_group_id}}, instance_id: {{instance.id}}, job_search: {status__in: ['running,waiting']}})"
+                                value="{{ instance.jobs_running }}"
+                                inline="true"
+                                badge="true">
+                            </at-row-item>
+                            <at-row-item
+                                label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_TOTAL_JOBS') }}"
+                                label-state="instanceGroups.instanceJobs({instance_group_id: {{vm.instance_group_id}}, instance_id: {{instance.id}}})"
+                                value="{{ instance.jobs_total }}"
+                                inline="true"
+                                badge="true">
+                            </at-row-item>
+                        </div>
+                    </div>
+                    <div class="at-Row-items--capacity">
+                        <capacity-adjuster
+                            state="instance"
+                            disabled="{{vm.rowAction.capacity_adjustment._disabled}}">
+                        </capacity-adjuster>
+                        <capacity-bar
+                            label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_USED_CAPACITY') }}"
+                            capacity="instance.consumed_capacity"
+                            total-capacity="instance.capacity">
+                        </capacity-bar>
+                    </div>
                 </div>
             </at-row>
         </at-list>

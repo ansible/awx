@@ -27,50 +27,63 @@ options:
       description:
         - Name to use for the job template.
       required: True
+      type: str
     description:
       description:
         - Description to use for the job template.
+      type: str
     job_type:
       description:
         - The job type to use for the job template.
       required: True
       choices: ["run", "check", "scan"]
+      type: str
     inventory:
       description:
         - Name of the inventory to use for the job template.
+      type: str
     project:
       description:
         - Name of the project to use for the job template.
       required: True
+      type: str
     playbook:
       description:
         - Path to the playbook to use for the job template within the project provided.
       required: True
+      type: str
     credential:
       description:
         - Name of the credential to use for the job template.
       version_added: 2.7
+      type: str
     vault_credential:
       description:
         - Name of the vault credential to use for the job template.
       version_added: 2.7
+      type: str
     forks:
       description:
         - The number of parallel or simultaneous processes to use while executing the playbook.
+      type: int
     limit:
       description:
         - A host pattern to further constrain the list of hosts managed or affected by the playbook
+      type: str
     verbosity:
       description:
         - Control the output level Ansible produces as the playbook runs. 0 - Normal, 1 - Verbose, 2 - More Verbose, 3 - Debug, 4 - Connection Debug.
       choices: [0, 1, 2, 3, 4]
       default: 0
+      type: int
     extra_vars_path:
       description:
         - Path to the C(extra_vars) YAML file.
+      type: path
     job_tags:
       description:
         - Comma separated list of the tags to use for the job template.
+      type: str
     force_handlers_enabled:
       description:
         - Enable forcing playbook handlers to run even if a task fails.
@@ -80,10 +93,12 @@ options:
     skip_tags:
       description:
         - Comma separated list of the tags to skip for the job template.
+      type: str
     start_at_task:
       description:
         - Start the playbook at the task matching this name.
       version_added: 2.7
+      type: str
     diff_mode_enabled:
       description:
         - Enable diff mode for the job template.
@@ -99,6 +114,7 @@ options:
     host_config_key:
       description:
         - Allow provisioning callbacks using this host config key.
+      type: str
     ask_diff_mode:
       description:
         - Prompt user to enable diff mode (show changes) to files when supported by modules.
@@ -171,11 +187,16 @@ options:
       version_added: 2.7
       type: bool
       default: 'no'
+    timeout:
+      description:
+        - Maximum time in seconds to wait for a job to finish (server-side).
+      type: int
     state:
       description:
         - Desired state of the resource.
       default: "present"
       choices: ["present", "absent"]
+      type: str
 extends_documentation_fragment: awx.awx.auth
 notes:
   - JSON for survey_spec can be found in Tower API Documentation. See

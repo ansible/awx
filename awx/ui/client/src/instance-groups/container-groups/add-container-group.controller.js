@@ -12,6 +12,7 @@ function AddContainerGroupController(ToJSON, $scope, $state, models, strings, i1
 
   vm.form = instanceGroup.createFormSchema('post');
   vm.form.name.required = true;
+  delete vm.form.name.help_text;
 
   vm.form.credential = {
     type: 'field',
@@ -22,6 +23,7 @@ function AddContainerGroupController(ToJSON, $scope, $state, models, strings, i1
   vm.form.credential._route = "instanceGroups.addContainerGroup.credentials";
   vm.form.credential._model = credential;
   vm.form.credential._placeholder = strings.get('container.CREDENTIAL_PLACEHOLDER');
+  vm.form.credential.help_text = strings.get('container.CREDENTIAL_HELP_TEXT');
   vm.form.credential.required = true;
 
   vm.form.extraVars = {
@@ -29,6 +31,7 @@ function AddContainerGroupController(ToJSON, $scope, $state, models, strings, i1
     value: DataSet.data.actions.POST.pod_spec_override.default,
     name: 'extraVars',
     toggleLabel: strings.get('container.POD_SPEC_TOGGLE'),
+    tooltip: strings.get('container.EXTRA_VARS_HELP_TEXT')
   };
 
   vm.tab = {
