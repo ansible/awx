@@ -8,8 +8,9 @@ import {
 } from '@patternfly/react-core';
 import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
-import { RocketIcon } from '@patternfly/react-icons';
+import { PencilAltIcon, RocketIcon } from '@patternfly/react-icons';
 
+import ActionButtonCell from '@components/ActionButtonCell';
 import DataListCell from '@components/DataListCell';
 import DataListCheck from '@components/DataListCheck';
 import LaunchButton from '@components/LaunchButton';
@@ -19,6 +20,16 @@ import { Sparkline } from '@components/Sparkline';
 import { toTitleCase } from '@util/strings';
 
 import styled from 'styled-components';
+
+const rightStyle = `
+@media screen and (max-width: 768px) {
+  && {
+    padding-top: 0px;
+    flex: 0 0 33%;
+    padding-right: 20px;
+  }
+}
+`;
 
 const DataListItemCells = styled(PFDataListItemCells)`
   display: flex;
@@ -37,13 +48,10 @@ const LeftDataListCell = styled(DataListCell)`
   }
 `;
 const RightDataListCell = styled(DataListCell)`
-  @media screen and (max-width: 768px) {
-    && {
-      padding-top: 0px;
-      flex: 0 0 33%;
-      padding-right: 20px;
-    }
-  }
+  ${rightStyle}
+`;
+const RightActionButtonCell = styled(ActionButtonCell)`
+  ${rightStyle}
 `;
 
 class TemplateListItem extends Component {
@@ -87,8 +95,8 @@ class TemplateListItem extends Component {
               >
                 <Sparkline jobs={template.summary_fields.recent_jobs} />
               </RightDataListCell>,
-              <RightDataListCell
-                css="max-width: 40px;"
+              <RightActionButtonCell
+                css="max-width: 80px;"
                 righthalf="true"
                 lastcolumn="true"
                 key="launch"
@@ -107,7 +115,18 @@ class TemplateListItem extends Component {
                     </LaunchButton>
                   </Tooltip>
                 )}
-              </RightDataListCell>,
+                {template.summary_fields.user_capabilities.edit && (
+                  <Tooltip content={i18n._(t`Edit Template`)} position="top">
+                    <ListActionButton
+                      variant="plain"
+                      component={Link}
+                      to={`/templates/${template.type}/${template.id}/edit`}
+                    >
+                      <PencilAltIcon />
+                    </ListActionButton>
+                  </Tooltip>
+                )}
+              </RightActionButtonCell>,
             ]}
           />
         </DataListItemRow>

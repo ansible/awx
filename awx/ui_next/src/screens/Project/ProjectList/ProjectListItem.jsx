@@ -8,10 +8,10 @@ import {
   Tooltip,
 } from '@patternfly/react-core';
 import { t } from '@lingui/macro';
-import { Link as _Link } from 'react-router-dom';
-import { SyncIcon } from '@patternfly/react-icons';
-import styled from 'styled-components';
+import { Link } from 'react-router-dom';
+import { PencilAltIcon, SyncIcon } from '@patternfly/react-icons';
 
+import ActionButtonCell from '@components/ActionButtonCell';
 import ClipboardCopyButton from '@components/ClipboardCopyButton';
 import DataListCell from '@components/DataListCell';
 import DataListCheck from '@components/DataListCheck';
@@ -20,12 +20,6 @@ import ProjectSyncButton from '../shared/ProjectSyncButton';
 import { StatusIcon } from '@components/Sparkline';
 import VerticalSeparator from '@components/VerticalSeparator';
 import { Project } from '@types';
-
-/* eslint-disable react/jsx-pascal-case */
-const Link = styled(props => <_Link {...props} />)`
-  margin-right: 10px;
-`;
-/* eslint-enable react/jsx-pascal-case */
 
 class ProjectListItem extends React.Component {
   static propTypes = {
@@ -94,11 +88,13 @@ class ProjectListItem extends React.Component {
                     </Link>
                   </Tooltip>
                 )}
-                <span id={labelId}>
-                  <Link to={`${detailUrl}`}>
-                    <b>{project.name}</b>
-                  </Link>
-                </span>
+                <Link
+                  id={labelId}
+                  to={`${detailUrl}`}
+                  style={{ marginLeft: '10px' }}
+                >
+                  <b>{project.name}</b>
+                </Link>
               </DataListCell>,
               <DataListCell key="type">
                 {project.scm_type.toUpperCase()}
@@ -113,7 +109,7 @@ class ProjectListItem extends React.Component {
                   />
                 ) : null}
               </DataListCell>,
-              <DataListCell lastcolumn="true" key="action">
+              <ActionButtonCell lastcolumn="true" key="action">
                 {project.summary_fields.user_capabilities.start && (
                   <Tooltip content={i18n._(t`Sync Project`)} position="top">
                     <ProjectSyncButton projectId={project.id}>
@@ -125,7 +121,18 @@ class ProjectListItem extends React.Component {
                     </ProjectSyncButton>
                   </Tooltip>
                 )}
-              </DataListCell>,
+                {project.summary_fields.user_capabilities.edit && (
+                  <Tooltip content={i18n._(t`Edit Project`)} position="top">
+                    <ListActionButton
+                      variant="plain"
+                      component={Link}
+                      to={`/projects/${project.id}/edit`}
+                    >
+                      <PencilAltIcon />
+                    </ListActionButton>
+                  </Tooltip>
+                )}
+              </ActionButtonCell>,
             ]}
           />
         </DataListItemRow>
