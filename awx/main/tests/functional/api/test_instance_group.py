@@ -46,6 +46,14 @@ def isolated_instance_group(instance_group, instance):
 
 
 @pytest.fixture
+def containerized_instance_group(instance_group, kube_credential):
+    ig = InstanceGroup(name="container")
+    ig.credential = kube_credential
+    ig.save()
+    return ig
+
+
+@pytest.fixture
 def create_job_factory(job_factory, instance_group):
     def fn(status='running'):
         j = job_factory()
@@ -240,3 +248,29 @@ def test_instance_group_order_persistence(get, post, admin, source_model):
         resp = get(url, admin)
         assert resp.data['count'] == total
         assert [ig['name'] for ig in resp.data['results']] == [ig.name for ig in before]
+
+
+@pytest.mark.django_db
+def test_instance_group_update_fields(patch, instance, instance_group, admin, containerized_instance_group):
+    # policy_instance_ variables can only be updated in instance groups that are NOT containerized
+    # instance group (not containerized)
+    ig_url = reverse("api:instance_group_detail", kwargs={'pk': instance_group.pk})
+    assert not instance_group.is_containerized
+    assert not containerized_instance_group.is_isolated
+    resp = patch(ig_url, {'policy_instance_percentage':15}, admin, expect=200)
+    assert 15 == resp.data['policy_instance_percentage']
+    resp = patch(ig_url, {'policy_instance_minimum':15}, admin, expect=200)
+    assert 15 == resp.data['policy_instance_minimum']
+    resp = patch(ig_url, {'policy_instance_list':[instance.hostname]}, admin)
+    assert [instance.hostname] == resp.data['policy_instance_list']
+
+    # containerized instance group
+    cg_url = reverse("api:instance_group_detail", kwargs={'pk': containerized_instance_group.pk})
+    assert containerized_instance_group.is_containerized
+    assert not containerized_instance_group.is_isolated
+    resp = patch(cg_url, {'policy_instance_percentage':15}, admin, expect=400)
+    assert [u"Containerized instances may not be managed via the API"] == resp.data['policy_instance_percentage']
+    resp = patch(cg_url, {'policy_instance_minimum':15}, admin, expect=400)
+    assert [u"Containerized instances may not be managed via the API"] == resp.data['policy_instance_minimum']
+    resp = patch(cg_url, {'policy_instance_list':[instance.hostname]}, admin)
+    assert [u"Containerized instances may not be managed via the API"] == resp.data['policy_instance_list']
