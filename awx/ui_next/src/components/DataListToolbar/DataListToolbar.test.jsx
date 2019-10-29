@@ -103,9 +103,10 @@ describe('<DataListToolbar />', () => {
     let searchDropdownItems = toolbar.find(searchDropdownMenuItems).children();
     expect(searchDropdownItems.length).toBe(1);
     const mockedSortEvent = { target: { innerText: 'Bar' } };
-    sortDropdownItems.at(0).simulate('click', mockedSortEvent);
+    searchDropdownItems.at(0).simulate('click', mockedSortEvent);
     toolbar = mountWithContexts(
       <DataListToolbar
+        qsConfig={QS_CONFIG}
         sortedColumnKey="foo"
         sortOrder="descending"
         columns={multipleColumns}
@@ -170,6 +171,7 @@ describe('<DataListToolbar />', () => {
 
     toolbar = mountWithContexts(
       <DataListToolbar
+        qsConfig={QS_CONFIG}
         sortedColumnKey="id"
         sortOrder="ascending"
         columns={numericColumns}
@@ -236,6 +238,7 @@ describe('<DataListToolbar />', () => {
 
     toolbar = mountWithContexts(
       <DataListToolbar
+        qsConfig={QS_CONFIG}
         isAllSelected
         showExpandCollapse
         sortedColumnKey="name"
