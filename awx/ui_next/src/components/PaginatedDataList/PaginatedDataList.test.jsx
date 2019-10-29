@@ -14,7 +14,7 @@ const mockData = [
 const qsConfig = {
   namespace: 'item',
   defaultParams: { page: 1, page_size: 5, order_by: 'name' },
-  integerFields: [],
+  integerFields: ['page', 'page_size'],
 };
 
 describe('<PaginatedDataList />', () => {
