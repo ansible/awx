@@ -1,6 +1,6 @@
 import React from 'react';
 import { withI18n } from '@lingui/react';
-import { bool, func, number, string } from 'prop-types';
+import { bool, func, number, string, oneOfType } from 'prop-types';
 import { CredentialsAPI } from '@api';
 import { Credential } from '@types';
 import { mergeParams } from '@util/qs';
@@ -46,7 +46,7 @@ function CredentialLookup({
 }
 
 CredentialLookup.propTypes = {
-  credentialTypeId: number.isRequired,
+  credentialTypeId: oneOfType([number, string]).isRequired,
   helperTextInvalid: string,
   isValid: bool,
   label: string.isRequired,

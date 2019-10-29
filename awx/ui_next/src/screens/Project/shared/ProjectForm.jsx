@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { withRouter, Link } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
@@ -11,11 +11,14 @@ import {
   Title as _Title,
 } from '@patternfly/react-core';
 import AnsibleSelect from '@components/AnsibleSelect';
+import ContentError from '@components/ContentError';
+import ContentLoading from '@components/ContentLoading';
 import FormActionGroup from '@components/FormActionGroup/FormActionGroup';
 import FormField, { CheckboxField, FieldTooltip } from '@components/FormField';
 import FormRow from '@components/FormRow';
 import OrganizationLookup from '@components/Lookup/OrganizationLookup';
 import CredentialLookup from '@components/Lookup/CredentialLookup';
+import { CredentialTypesAPI, ProjectsAPI } from '@api';
 import { required } from '@util/validators';
 import styled from 'styled-components';
 
@@ -41,9 +44,54 @@ const Title = styled(_Title)`
 
 function ProjectForm(props) {
   const { values, handleCancel, handleSubmit, i18n } = props;
+  const [contentError, setContentError] = useState(null);
+  const [hasContentLoading, setHasContentLoading] = useState(true);
   const [organization, setOrganization] = useState(null);
-  const [scmCredential, setScmCredential] = useState(null);
-  const [insightsCredential, setInsightsCredential] = useState(null);
+  const [scmTypeOptions, setScmTypeOptions] = useState(null);
+  const [scmCredential, setScmCredential] = useState({
+    typeId: null,
+    value: null,
+  });
+  const [insightsCredential, setInsightsCredential] = useState({
+    typeId: null,
+    value: null,
+  });
+
+  useEffect(() => {
+    async function fetchCredTypeId(params) {
+      try {
+        const {
+          data: {
+            results: [credential],
+          },
+        } = await CredentialTypesAPI.read(params);
+        return credential.id;
+      } catch (error) {
+        setContentError(error);
+        return null;
+      }
+    }
+
+    async function fetchData() {
+      const insightsTypeId = await fetchCredTypeId({ name: 'Insights' });
+      const scmTypeId = await fetchCredTypeId({ kind: 'scm' });
+      const {
+        data: {
+          actions: {
+            GET: {
+              scm_type: { choices },
+            },
+          },
+        },
+      } = await ProjectsAPI.readOptions();
+      setInsightsCredential({ typeId: insightsTypeId });
+      setScmCredential({ typeId: scmTypeId });
+      setScmTypeOptions(choices);
+      setHasContentLoading(false);
+    }
+
+    fetchData();
+  }, []);
 
   const resetScmTypeFields = (value, form) => {
     if (form.initialValues.scm_type === value) {
@@ -66,36 +114,6 @@ function ProjectForm(props) {
       form.setFieldTouched(field, false);
     });
   };
-
-  const scmTypeOptions = [
-    {
-      value: '',
-      key: '',
-      label: i18n._(t`Choose a SCM Type`),
-      isDisabled: true,
-    },
-    { value: 'manual', key: 'manual', label: i18n._(t`Manual`) },
-    {
-      value: 'git',
-      key: 'git',
-      label: i18n._(t`Git`),
-    },
-    {
-      value: 'hg',
-      key: 'hg',
-      label: i18n._(t`Mercurial`),
-    },
-    {
-      value: 'svn',
-      key: 'svn',
-      label: i18n._(t`Subversion`),
-    },
-    {
-      value: 'insights',
-      key: 'insights',
-      label: i18n._(t`Red Hat Insights`),
-    },
-  ];
 
   const gitScmTooltip = (
     <span>
@@ -153,6 +171,14 @@ function ProjectForm(props) {
     svn: i18n._(t`Revision #`),
   };
 
+  if (hasContentLoading) {
+    return <ContentLoading />;
+  }
+
+  if (contentError) {
+    return <ContentError error={contentError} />;
+  }
+
   return (
     <Form autoComplete="off" onSubmit={handleSubmit}>
       <FormRow>
@@ -173,23 +199,19 @@ function ProjectForm(props) {
         <Field
           name="organization"
           validate={required(i18n._(t`Select a value for this field`), i18n)}
-          render={({ form }) => {
-            return (
-              <OrganizationLookup
-                helperTextInvalid={form.errors.organization}
-                isValid={
-                  !form.touched.organization || !form.errors.organization
-                }
-                onBlur={() => form.setFieldTouched('organization')}
-                onChange={value => {
-                  form.setFieldValue('organization', value.id);
-                  setOrganization(value);
-                }}
-                value={organization}
-                required
-              />
-            );
-          }}
+          render={({ form }) => (
+            <OrganizationLookup
+              helperTextInvalid={form.errors.organization}
+              isValid={!form.touched.organization || !form.errors.organization}
+              onBlur={() => form.setFieldTouched('organization')}
+              onChange={value => {
+                form.setFieldValue('organization', value.id);
+                setOrganization(value);
+              }}
+              value={organization}
+              required
+            />
+          )}
         />
         <Field
           name="scm_type"
@@ -205,7 +227,24 @@ function ProjectForm(props) {
               <AnsibleSelect
                 {...field}
                 id="scm_type"
-                data={scmTypeOptions}
+                data={[
+                  {
+                    value: '',
+                    key: '',
+                    label: i18n._(t`Choose an SCM Type`),
+                    isDisabled: true,
+                  },
+                  ...scmTypeOptions.map(option => {
+                    if (option[1] === 'Manual') {
+                      option[0] = 'manual';
+                    }
+                    return {
+                      label: option[1],
+                      value: option[0],
+                      key: option[0],
+                    };
+                  }),
+                ]}
                 onChange={(event, value) => {
                   form.setFieldValue('scm_type', value);
                   resetScmTypeFields(value, form);
@@ -291,12 +330,15 @@ function ProjectForm(props) {
                 name="credential"
                 render={({ form }) => (
                   <CredentialLookup
-                    credentialTypeId={2}
+                    credentialTypeId={scmCredential.typeId}
                     label={i18n._(t`SCM Credential`)}
-                    value={scmCredential}
-                    onChange={value => {
-                      form.setFieldValue('credential', value.id);
-                      setScmCredential(value);
+                    value={scmCredential.value}
+                    onChange={credential => {
+                      form.setFieldValue('credential', credential.id);
+                      setScmCredential({
+                        ...scmCredential,
+                        value: credential,
+                      });
                     }}
                   />
                 )}
@@ -311,18 +353,21 @@ function ProjectForm(props) {
                 )}
                 render={({ form }) => (
                   <CredentialLookup
-                    credentialTypeId={14}
+                    credentialTypeId={insightsCredential.typeId}
                     label={i18n._(t`Insights Credential`)}
                     helperTextInvalid={form.errors.credential}
                     isValid={
                       !form.touched.credential || !form.errors.credential
                     }
                     onBlur={() => form.setFieldTouched('credential')}
-                    onChange={value => {
-                      form.setFieldValue('credential', value.id);
-                      setInsightsCredential(value);
+                    onChange={credential => {
+                      form.setFieldValue('credential', credential.id);
+                      setInsightsCredential({
+                        ...insightsCredential,
+                        value: credential,
+                      });
                     }}
-                    value={insightsCredential}
+                    value={insightsCredential.value}
                     required
                   />
                 )}

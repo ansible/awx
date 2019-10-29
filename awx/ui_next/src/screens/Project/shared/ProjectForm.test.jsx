@@ -3,6 +3,7 @@ import { act } from 'react-dom/test-utils';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
 import { sleep } from '@testUtils/testUtils';
 import ProjectForm from './ProjectForm';
+import { CredentialTypesAPI, ProjectsAPI } from '@api';
 
 jest.mock('@api');
 
@@ -22,27 +23,88 @@ describe('<ProjectAdd />', () => {
     custom_virtualenv: '/venv/custom-env',
   };
 
-  beforeEach(() => {
-    const config = {
-      custom_virtualenvs: ['venv/foo', 'venv/bar'],
-    };
-    wrapper = mountWithContexts(
-      <ProjectForm handleSubmit={jest.fn()} handleCancel={jest.fn()} />,
-      {
-        context: { config },
-      }
+  const projectOptionsResolve = {
+    data: {
+      actions: {
+        GET: {
+          scm_type: {
+            choices: [
+              ['', 'Manual'],
+              ['git', 'Git'],
+              ['hg', 'Mercurial'],
+              ['svn', 'Subversion'],
+              ['insights', 'Red Hat Insights'],
+            ],
+          },
+        },
+      },
+    },
+  };
+
+  const scmCredentialResolve = {
+    data: {
+      results: [
+        {
+          id: 4,
+          name: 'Source Control',
+          kind: 'scm',
+        },
+      ],
+    },
+  };
+
+  const insightsCredentialResolve = {
+    data: {
+      results: [
+        {
+          id: 5,
+          name: 'Insights',
+          kind: 'insights',
+        },
+      ],
+    },
+  };
+
+  beforeEach(async () => {
+    await ProjectsAPI.readOptions.mockImplementation(
+      () => projectOptionsResolve
+    );
+    await CredentialTypesAPI.read.mockImplementationOnce(
+      () => scmCredentialResolve
+    );
+    await CredentialTypesAPI.read.mockImplementationOnce(
+      () => insightsCredentialResolve
     );
   });
 
   afterEach(() => {
+    wrapper.unmount();
     jest.clearAllMocks();
   });
 
-  test('initially renders successfully', () => {
+  test('initially renders successfully', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <ProjectForm handleSubmit={jest.fn()} handleCancel={jest.fn()} />
+      );
+    });
+
     expect(wrapper.find('ProjectForm').length).toBe(1);
   });
 
-  test('new form displays primary form fields', () => {
+  test('new form displays primary form fields', async () => {
+    const config = {
+      custom_virtualenvs: ['venv/foo', 'venv/bar'],
+    };
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <ProjectForm handleSubmit={jest.fn()} handleCancel={jest.fn()} />,
+        {
+          context: { config },
+        }
+      );
+    });
+    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     expect(wrapper.find('FormGroup[label="Name"]').length).toBe(1);
     expect(wrapper.find('FormGroup[label="Description"]').length).toBe(1);
     expect(wrapper.find('FormGroup[label="Organization"]').length).toBe(1);
@@ -54,6 +116,12 @@ describe('<ProjectAdd />', () => {
   });
 
   test('should display scm subform when scm type select has a value', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <ProjectForm handleSubmit={jest.fn()} handleCancel={jest.fn()} />
+      );
+    });
+    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     const formik = wrapper.find('Formik').instance();
     const changeState = new Promise(resolve => {
       formik.setState(
@@ -87,6 +155,7 @@ describe('<ProjectAdd />', () => {
         />
       );
     });
+    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     const form = wrapper.find('Formik');
     act(() => {
       wrapper.find('OrganizationLookup').invoke('onBlur')();
@@ -107,6 +176,12 @@ describe('<ProjectAdd />', () => {
   });
 
   test('should display insights credential lookup when scm type is "Insights"', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <ProjectForm handleSubmit={jest.fn()} handleCancel={jest.fn()} />
+      );
+    });
+    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     const formik = wrapper.find('Formik').instance();
     const changeState = new Promise(resolve => {
       formik.setState(
@@ -144,6 +219,8 @@ describe('<ProjectAdd />', () => {
         />
       );
     });
+    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+
     const scmTypeSelect = wrapper.find(
       'FormGroup[label="SCM Type"] FormSelect'
     );
@@ -183,7 +260,7 @@ describe('<ProjectAdd />', () => {
         />
       );
     });
-    await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     expect(handleSubmit).not.toHaveBeenCalled();
     wrapper.find('button[aria-label="Save"]').simulate('click');
     await sleep(1);
@@ -201,9 +278,20 @@ describe('<ProjectAdd />', () => {
         />
       );
     });
-    await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     expect(handleCancel).not.toHaveBeenCalled();
     wrapper.find('button[aria-label="Cancel"]').invoke('onClick')();
     expect(handleCancel).toBeCalled();
+  });
+
+  test('should display ContentError on throw', async () => {
+    CredentialTypesAPI.read = () => Promise.reject(new Error());
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <ProjectForm handleSubmit={jest.fn()} handleCancel={jest.fn()} />
+      );
+    });
+    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    expect(wrapper.find('ContentError').length).toBe(1);
   });
 });
