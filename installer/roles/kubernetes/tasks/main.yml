@@ -116,7 +116,7 @@
 - name: Check if Postgres 9.6 is being used
   shell: |
     POD=$({{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
-      get pods -l=name=postgresql --field-selector status.phase=Running -o jsonpath="{.items[0].metadata.name}")
+      get pods -l=app=postgres --field-selector status.phase=Running -o jsonpath="{.items[0].metadata.name}")
     {{ kubectl_or_oc }} exec -ti $POD -n {{ kubernetes_namespace }} -- bash -c "psql -U {{ pg_username }} -tAc 'select version()'"
   register: pg_version
 
@@ -150,7 +150,7 @@
     - name: Wait for Postgres to finish upgrading
       shell: |
         POD=$({{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
-          get pods -l=name=postgresql -o jsonpath="{.items[0].metadata.name}")
+          get pods -l=app=postgres -o jsonpath="{.items[0].metadata.name}")
         {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} logs $POD | grep 'Upgrade DONE'
       register: pg_upgrade_logs
       retries: 360
