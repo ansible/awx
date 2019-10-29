@@ -1,9 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Modal as PFModal,
-  Tab,
-  Tabs as PFTabs,
-} from '@patternfly/react-core';
+import { Modal as PFModal, Tab, Tabs as PFTabs } from '@patternfly/react-core';
 import CodeMirrorInput from '@components/CodeMirrorInput';
 import ContentEmpty from '@components/ContentEmpty';
 import PropTypes from 'prop-types';
