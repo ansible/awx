@@ -7,20 +7,52 @@ from awx.main.models import Credential, CredentialType, Organization
 def test_create_machine_credential(run_module, admin_user):
     Organization.objects.create(name='test-org')
     # create the ssh credential type
-    CredentialType.defaults['ssh']().save()
+    ct = CredentialType.defaults['ssh']()
+    ct.save()
     # Example from docs
     result = run_module('tower_credential', dict(
-        name='Team Name',
-        description='Team Description',
+        name='Test Machine Credential',
         organization='test-org',
         kind='ssh',
         state='present'
     ), admin_user)
+    assert result.get('changed'), result
 
-    cred = Credential.objects.get(name='Team Name')
+    cred = Credential.objects.get(name='Test Machine Credential')
+    assert cred.credential_type == ct
     result.pop('invocation')
     assert result == {
-        "credential": "Team Name",
+        "credential": "Test Machine Credential",
+        "state": "present",
+        "id": cred.pk,
+        "changed": True
+    }
+
+
+@pytest.mark.django_db
+def test_create_vault_credential(run_module, admin_user):
+    # https://github.com/ansible/ansible/issues/61324
+    Organization.objects.create(name='test-org')
+    ct = CredentialType.defaults['vault']()
+    ct.save()
+
+    result = run_module('tower_credential', dict(
+        name='Test Vault Credential',
+        organization='test-org',
+        kind='vault',
+        vault_id='bar',
+        vault_password='foobar',
+        state='present'
+    ), admin_user)
+    assert result.get('changed'), result
+
+    cred = Credential.objects.get(name='Test Vault Credential')
+    assert cred.credential_type == ct
+    assert 'vault_id' in cred.inputs
+    assert 'vault_password' in cred.inputs
+    result.pop('invocation')
+    assert result == {
+        "credential": "Test Vault Credential",
         "state": "present",
         "id": cred.pk,
         "changed": True
@@ -39,6 +71,7 @@ def test_create_custom_credential_type(run_module, admin_user):
         state='present',
         validate_certs='false'
     ), admin_user)
+    assert result.get('changed'), result
 
     ct = CredentialType.objects.get(name='Nexus')
     result.pop('invocation')
