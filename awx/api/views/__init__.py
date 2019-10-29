@@ -575,6 +575,7 @@ class TeamUsersList(BaseUsersList):
     serializer_class = serializers.UserSerializer
     parent_model = models.Team
     relationship = 'member_role.members'
+    ordering = ('username',)
 
 
 class TeamRolesList(SubListAttachDetachAPIView):
@@ -911,6 +912,7 @@ class UserList(ListCreateAPIView):
     model = models.User
     serializer_class = serializers.UserSerializer
     permission_classes = (UserPermission,)
+    ordering = ('username',)
 
 
 class UserMeList(ListAPIView):
@@ -918,6 +920,7 @@ class UserMeList(ListAPIView):
     model = models.User
     serializer_class = serializers.UserSerializer
     name = _('Me')
+    ordering = ('username',)
 
     def get_queryset(self):
         return self.model.objects.filter(pk=self.request.user.pk)
@@ -1261,6 +1264,7 @@ class CredentialOwnerUsersList(SubListAPIView):
     serializer_class = serializers.UserSerializer
     parent_model = models.Credential
     relationship = 'admin_role.members'
+    ordering = ('username',)
 
 
 class CredentialOwnerTeamsList(SubListAPIView):
