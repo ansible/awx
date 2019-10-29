@@ -158,7 +158,7 @@ def main():
         scm_update_on_launch=dict(type='bool', default=False),
         scm_update_cache_timeout=dict(type='int'),
         job_timeout=dict(type='int', default=0),
-        custom_virtualenv=dict(type='str', required=False, default=''),
+        custom_virtualenv=dict(type='str', required=False),
         local_path=dict(),
         state=dict(choices=['present', 'absent'], default='present'),
         wait=dict(type='bool', default=True),

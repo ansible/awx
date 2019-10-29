@@ -81,7 +81,7 @@ def main():
     argument_spec = dict(
         name=dict(required=True),
         description=dict(),
-        custom_virtualenv=dict(type='str', required=False, default=''),
+        custom_virtualenv=dict(type='str', required=False),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 

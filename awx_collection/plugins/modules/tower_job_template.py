@@ -306,7 +306,7 @@ def main():
         playbook=dict(required=True),
         credential=dict(default=''),
         vault_credential=dict(default=''),
-        custom_virtualenv=dict(type='str', required=False, default=''),
+        custom_virtualenv=dict(type='str', required=False),
         forks=dict(type='int'),
         limit=dict(default=''),
         verbosity=dict(type='int', choices=[0, 1, 2, 3, 4], default=0),
