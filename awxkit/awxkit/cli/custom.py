@@ -41,13 +41,13 @@ class CustomAction(with_metaclass(CustomActionRegistryMeta)):
     def perform(self):
         raise NotImplementedError()
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser, resource_options_parser):
         pass
 
 
 class Launchable(object):
 
-    def add_arguments(self, parser, with_pk=True):
+    def add_arguments(self, parser, resource_options_parser, with_pk=True):
         from .options import pk_or_name
         if with_pk:
             parser.choices[self.action].add_argument(
@@ -70,6 +70,14 @@ class Launchable(object):
             help='If set, waits until the launched job finishes.'
         )
 
+        launch_time_options = self.page.connection.options(
+            self.page.endpoint + '1/{}/'.format(self.action)
+        )
+        if launch_time_options.ok:
+            launch_time_options = launch_time_options.json()['actions']['POST']
+            resource_options_parser.options['LAUNCH'] = launch_time_options
+            resource_options_parser.build_query_arguments(self.action, 'LAUNCH')
+
     def monitor(self, response, **kwargs):
         mon = monitor_workflow if response.type == 'workflow_job' else monitor
         if kwargs.get('monitor') or kwargs.get('wait'):
@@ -84,8 +92,13 @@ class Launchable(object):
         return response
 
     def perform(self, **kwargs):
-        response = self.page.get().related.get(self.action).post()
-        self.monitor(response, **kwargs)
+        monitor_kwargs = {
+            'monitor': kwargs.pop('monitor', False),
+            'wait': kwargs.pop('wait', False),
+            'timeout': kwargs.pop('timeout', False),
+        }
+        response = self.page.get().related.get(self.action).post(kwargs)
+        self.monitor(response, **monitor_kwargs)
         return response
 
 
@@ -103,7 +116,7 @@ class ProjectCreate(CustomAction):
     action = 'create'
     resource = 'projects'
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser, resource_options_parser):
         parser.choices[self.action].add_argument(
             '--monitor', action='store_true',
             help=('If set, prints stdout of the project update until '
@@ -139,8 +152,10 @@ class AdhocCommandLaunch(Launchable, CustomAction):
     action = 'create'
     resource = 'ad_hoc_commands'
 
-    def add_arguments(self, parser):
-        Launchable.add_arguments(self, parser, with_pk=False)
+    def add_arguments(self, parser, resource_options_parser):
+        Launchable.add_arguments(
+            self, parser, resource_options_parser, with_pk=False
+        )
 
     def perform(self, **kwargs):
         monitor_kwargs = {
@@ -164,7 +179,7 @@ class HasStdout(object):
 
     action = 'stdout'
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser, resource_options_parser):
         from .options import pk_or_name
         parser.choices['stdout'].add_argument(
             'id',
@@ -204,7 +219,7 @@ class AssociationMixin(object):
 
     action = 'associate'
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser, resource_options_parser):
         from .options import pk_or_name
         parser.choices[self.action].add_argument(
             'id',
@@ -361,7 +376,7 @@ class SettingsList(CustomAction):
     action = 'list'
     resource = 'settings'
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser, resource_options_parser):
         parser.choices['list'].add_argument(
             '--slug', help='optional setting category/slug', default='all'
         )
@@ -385,7 +400,7 @@ class RoleMixin(object):
     ]
     roles = {}  # this is calculated once
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser, resource_options_parser):
         from .options import pk_or_name
 
         if not RoleMixin.roles:
@@ -510,7 +525,7 @@ class SettingsModify(CustomAction):
     action = 'modify'
     resource = 'settings'
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser, resource_options_parser):
         options = self.page.__class__(
             self.page.endpoint + 'all/', self.page.connection
         ).options()

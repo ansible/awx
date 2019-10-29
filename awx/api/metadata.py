@@ -158,9 +158,16 @@ class Metadata(metadata.SimpleMetadata):
             isinstance(field, JSONField) or
             isinstance(model_field, JSONField) or
             isinstance(field, DRFJSONField) or
-            isinstance(getattr(field, 'model_field', None), JSONField)
+            isinstance(getattr(field, 'model_field', None), JSONField) or
+            field.field_name == 'credential_passwords'
         ):
             field_info['type'] = 'json'
+        elif (
+            isinstance(field, ManyRelatedField) and
+            field.field_name == 'credentials'
+            # launch-time credentials
+        ):
+            field_info['type'] = 'list_of_ids'
         elif isinstance(model_field, BooleanField):
             field_info['type'] = 'boolean'
 

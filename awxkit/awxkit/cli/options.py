@@ -20,6 +20,13 @@ UNIQUENESS_RULES = {
 }
 
 
+def pk_or_name_list(v2, model_name, value, page=None):
+    return [
+        pk_or_name(v2, model_name, v.strip(), page=page)
+        for v in value.split(',')
+    ]
+
+
 def pk_or_name(v2, model_name, value, page=None):
     if isinstance(value, int):
         return value
@@ -193,6 +200,7 @@ class ResourceOptionsParser(object):
                     'boolean': strtobool,
                     'id': functools.partial(pk_or_name, self.v2, k),
                     'json': json_or_yaml,
+                    'list_of_ids': functools.partial(pk_or_name_list, self.v2, k),
                 }.get(param['type'], str),
             }
             meta_map = {
@@ -200,6 +208,7 @@ class ResourceOptionsParser(object):
                 'integer': 'INTEGER',
                 'boolean': 'BOOLEAN',
                 'id': 'ID',  # foreign key
+                'list_of_ids': '[ID, ID, ...]',
                 'json': 'JSON/YAML',
             }
             if param.get('choices', []):
@@ -209,12 +218,16 @@ class ResourceOptionsParser(object):
                 # explicitly tell us in OPTIONS all the time)
                 if isinstance(kwargs['choices'][0], int):
                     kwargs['type'] = int
-                kwargs['choices'] = [str(choice) for choice in kwargs['choices']]
+                else:
+                    kwargs['choices'] = [str(choice) for choice in kwargs['choices']]
             elif param['type'] in meta_map:
                 kwargs['metavar'] = meta_map[param['type']]
 
                 if param['type'] == 'id' and not kwargs.get('help'):
                     kwargs['help'] = 'the ID of the associated  {}'.format(k)
+
+                if param['type'] == 'list_of_ids':
+                    kwargs['help'] = 'a list of comma-delimited {} to associate (IDs or unique names)'.format(k)
 
                 if param['type'] == 'json' and method != 'list':
                     help_parts = []
@@ -266,4 +279,4 @@ class ResourceOptionsParser(object):
                 continue
             if action.action not in self.parser.choices:
                 self.parser.add_parser(action.action, help='')
-            action(self.page).add_arguments(self.parser)
+            action(self.page).add_arguments(self.parser, self)
