@@ -196,7 +196,7 @@ requirements_awx_dev:
 
 requirements: requirements_ansible requirements_awx
 
-requirements_dev: requirements requirements_awx_dev requirements_ansible_dev
+requirements_dev: requirements_awx requirements_ansible_py3 requirements_awx_dev requirements_ansible_dev
 
 requirements_test: requirements
 
