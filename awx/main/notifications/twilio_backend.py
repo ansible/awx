@@ -7,12 +7,14 @@ from twilio.rest import Client
 
 from django.utils.encoding import smart_text
 from django.utils.translation import ugettext_lazy as _
+
 from awx.main.notifications.base import AWXBaseEmailBackend
+from awx.main.notifications.custom_notification_base import CustomNotificationBase
 
 logger = logging.getLogger('awx.main.notifications.twilio_backend')
 
 
-class TwilioBackend(AWXBaseEmailBackend):
+class TwilioBackend(AWXBaseEmailBackend, CustomNotificationBase):
 
     init_parameters = {"account_sid": {"label": "Account SID", "type": "string"},
                        "account_token": {"label": "Account Token", "type": "password"},
@@ -20,11 +22,6 @@ class TwilioBackend(AWXBaseEmailBackend):
                        "to_numbers": {"label": "Destination SMS Numbers", "type": "list"}}
     recipient_parameter = "to_numbers"
     sender_parameter = "from_number"
-
-    DEFAULT_SUBJECT = "{{ job_friendly_name }} #{{ job.id }} '{{ job.name }}' {{ job.status }}: {{ url }}"
-    default_messages = {"started": {"message": DEFAULT_SUBJECT},
-                        "success": {"message": DEFAULT_SUBJECT},
-                        "error": {"message": DEFAULT_SUBJECT}}
 
     def __init__(self, account_sid, account_token, fail_silently=False, **kwargs):
         super(TwilioBackend, self).__init__(fail_silently=fail_silently)

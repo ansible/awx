@@ -27,13 +27,16 @@ options:
       description:
         - The name to use for the inventory source.
       required: True
+      type: str
     description:
       description:
         - The description to use for the inventory source.
+      type: str
     inventory:
       description:
         - The inventory the source is linked to.
       required: True
+      type: str
     source:
       description:
         - Types of inventory source.
@@ -52,9 +55,11 @@ options:
         - tower
         - custom
       required: True
+      type: str
     credential:
       description:
         - Credential to use to retrieve the inventory from.
+      type: str
     source_vars:
       description:
         - >-
@@ -62,15 +67,19 @@ options:
           file. For example with Openstack, specifying *private: false* would
           change the output of the openstack.py script. It has to be YAML or
           JSON.
+      type: str
     timeout:
       description:
         - Number in seconds after which the Tower API methods will time out.
+      type: int
     source_project:
       description:
         - Use a *project* as a source for the *inventory*.
+      type: str
     source_path:
       description:
         - Path to the file to use as a source in the selected *project*.
+      type: str
     update_on_project_update:
       description:
         - >-
@@ -83,23 +92,27 @@ options:
           List of regions for your cloud provider. You can include multiple all
           regions. Only Hosts associated with the selected regions will be
           updated. Refer to Ansible Tower documentation for more detail.
+      type: str
     instance_filters:
       description:
         - >-
           Provide a comma-separated list of filter expressions. Hosts are
           imported when all of the filters match. Refer to Ansible Tower
           documentation for more detail.
+      type: str
     group_by:
       description:
         - >-
           Specify which groups to create automatically. Group names will be
           created similar to the options selected. If blank, all groups above
           are created. Refer to Ansible Tower documentation for more detail.
+      type: str
     source_script:
       description:
         - >-
           The source custom script to use to build the inventory. It needs to
           exist.
+      type: str
     overwrite:
       description:
         - >-
@@ -133,16 +146,13 @@ options:
           job runs and callbacks the task system will evaluate the timestamp of
           the latest sync. If it is older than Cache Timeout, it is not
           considered current, and a new inventory sync will be performed.
+      type: int
     state:
       description:
         - Desired state of the resource.
       default: "present"
       choices: ["present", "absent"]
-    validate_certs:
-      description:
-        - Tower option to avoid certificates check.
-      type: bool
-      aliases: [ tower_verify_ssl ]
+      type: str
 extends_documentation_fragment: awx.awx.auth
 '''
 

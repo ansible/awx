@@ -98,8 +98,8 @@ class TowerModule(AnsibleModule):
         )
         args.update(argument_spec)
 
-        mutually_exclusive = kwargs.get('mutually_exclusive', [])
-        kwargs['mutually_exclusive'] = mutually_exclusive.extend((
+        kwargs.setdefault('mutually_exclusive', [])
+        kwargs['mutually_exclusive'].extend((
             ('tower_config_file', 'tower_host'),
             ('tower_config_file', 'tower_username'),
             ('tower_config_file', 'tower_password'),

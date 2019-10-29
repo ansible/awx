@@ -24,10 +24,12 @@ options:
       description:
         - The name of the workflow template to run.
       required: True
+      type: str
     extra_vars:
       description:
         - Any extra vars required to launch the job.
       required: False
+      type: str
     wait:
       description:
         - Wait for the workflow to complete.
@@ -38,6 +40,7 @@ options:
       description:
         - If waiting for the workflow to complete this will abort after this
           amount of seconds
+      type: int
 
 requirements:
   - "python >= 2.6"

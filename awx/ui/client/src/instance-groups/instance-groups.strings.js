@@ -72,8 +72,9 @@ function InstanceGroupsStrings(BaseString) {
         CREDENTIAL_PLACEHOLDER: t.s('SELECT A CREDENTIAL'),
         POD_SPEC_LABEL: t.s('Pod Spec Override'),
         BADGE_TEXT: t.s('Container Group'),
-        POD_SPEC_TOGGLE: t.s('Customize Pod Spec')
-
+        POD_SPEC_TOGGLE: t.s('Customize Pod Spec'),
+        CREDENTIAL_HELP_TEXT: t.s('Credential to authenticate with Kubernetes or OpenShift.  Must be of type \"Kubernetes/OpenShift API Bearer Token\”.'),
+        EXTRA_VARS_HELP_TEXT: t.s('Field for passing a custom Kubernetes or OpenShift Pod specification.')
     };
 }
 

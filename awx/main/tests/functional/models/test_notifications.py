@@ -87,7 +87,7 @@ class TestJobNotificationMixin(object):
                                  'use_fact_cache': bool,
                                  'verbosity': int},
                          'job_friendly_name': str,
-                         'job_summary_dict': str,
+                         'job_metadata': str,
                          'url': str}
 
 
@@ -144,5 +144,3 @@ class TestJobNotificationMixin(object):
 
         context_stub = JobNotificationMixin.context_stub()
         check_structure_and_completeness(TestJobNotificationMixin.CONTEXT_STRUCTURE, context_stub)
-
-

@@ -282,10 +282,12 @@ function getLaunchedByDetails () {
         tooltip = strings.get('tooltips.SCHEDULE');
         link = `/#/templates/job_template/${jobTemplate.id}/schedules/${schedule.id}`;
         value = $filter('sanitize')(schedule.name);
-    } else {
+    } else if (schedule) {
         tooltip = null;
         link = null;
         value = $filter('sanitize')(schedule.name);
+    } else {
+        return null;
     }
 
     return { label, link, tooltip, value };

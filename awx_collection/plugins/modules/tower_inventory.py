@@ -27,31 +27,38 @@ options:
       description:
         - The name to use for the inventory.
       required: True
+      type: str
     description:
       description:
         - The description to use for the inventory.
+      type: str
     organization:
       description:
         - Organization the inventory belongs to.
       required: True
+      type: str
     variables:
       description:
         - Inventory variables. Use C(@) to get from file.
+      type: str
     kind:
       description:
         - The kind field. Cannot be modified after created.
       default: ""
       choices: ["", "smart"]
       version_added: "2.7"
+      type: str
     host_filter:
       description:
         -  The host_filter field. Only useful when C(kind=smart).
       version_added: "2.7"
+      type: str
     state:
       description:
         - Desired state of the resource.
       default: "present"
       choices: ["present", "absent"]
+      type: str
 extends_documentation_fragment: awx.awx.auth
 '''
 

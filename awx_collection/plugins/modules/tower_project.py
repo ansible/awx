@@ -27,26 +27,33 @@ options:
       description:
         - Name to use for the project.
       required: True
+      type: str
     description:
       description:
         - Description to use for the project.
+      type: str
     scm_type:
       description:
         - Type of SCM resource.
       choices: ["manual", "git", "hg", "svn"]
       default: "manual"
+      type: str
     scm_url:
       description:
         - URL of SCM resource.
+      type: str
     local_path:
       description:
         - The server playbook directory for manual projects.
+      type: str
     scm_branch:
       description:
         - The branch to use for the SCM resource.
+      type: str
     scm_credential:
       description:
         - Name of the credential to use with this SCM resource.
+      type: str
     scm_clean:
       description:
         - Remove local modifications before updating.
@@ -68,23 +75,28 @@ options:
         - Cache Timeout to cache prior project syncs for a certain number of seconds.
             Only valid if scm_update_on_launch is to True, otherwise ignored.
       default: 0
+      type: int
     job_timeout:
       version_added: "2.8"
       description:
         - The amount of time (in seconds) to run before the SCM Update is canceled. A value of 0 means no timeout.
       default: 0
+      type: int
     custom_virtualenv:
       version_added: "2.8"
       description:
         - Local absolute file path containing a custom Python virtualenv to use
+      type: str
     organization:
       description:
         - Primary key of organization for project.
+      type: str
     state:
       description:
         - Desired state of the resource.
       default: "present"
       choices: ["present", "absent"]
+      type: str
 extends_documentation_fragment: awx.awx.auth
 '''
 

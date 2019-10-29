@@ -28,16 +28,19 @@ options:
         - The assets to import.
         - This can be the output of tower_receive or loaded from a file
       required: False
+      type: str
     files:
       description:
         - List of files to import.
       required: False
       default: []
+      type: list
     prevent:
       description:
         - A list of asset types to prevent import for
       required: false
       default: []
+      type: list
     password_management:
       description:
         - The password management option to use.
@@ -45,6 +48,7 @@ options:
       required: false
       default: 'default'
       choices: ["default", "random"]
+      type: str
 
 notes:
   - One of assets or files needs to be passed in

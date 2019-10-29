@@ -1,8 +1,8 @@
 <div ui-view="credentials"></div>
-<a class="containerGroups-messageBar-link" href="https://docs.ansible.com/ansible-tower/latest/html/administration/external_execution_envs.html#container-group-considerations" target="_blank" style="color: white">
+<a class="containerGroups-messageBar-link" href="https://docs.ansible.com/ansible-tower/latest/html/administration/external_execution_envs.html#container-groups" target="_blank" style="color: white">
   <div class="Section-messageBar">
       <i class="Section-messageBar-warning fa fa-warning"></i>
-      <span class="Section-messageBar-text">This feature is tech preview, and is subject to change in a future release. Click here for documentation.</span>
+      <span class="Section-messageBar-text">This feature is currently in tech preview and is subject to change in a future release.  Click here for documentation.</span>
   </div>
 </a>
 <at-panel>
@@ -34,6 +34,7 @@
         variables="vm.form.extraVars.value"
         label="{{ vm.form.extraVars.label }}"
         name="{{ vm.form.extraVars.name }}"
+        tooltip="{{ vm.form.extraVars.tooltip }}"
       >
       </at-code-mirror>
     </div>

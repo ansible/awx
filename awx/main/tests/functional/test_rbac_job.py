@@ -19,6 +19,8 @@ from awx.main.models import (
     Credential
 )
 
+from rest_framework.exceptions import PermissionDenied
+
 from crum import impersonate
 
 
@@ -252,7 +254,8 @@ class TestJobRelaunchAccess:
 
         assert 'job_var' in job.launch_config.extra_data
         assert bob.can_access(Job, 'start', job, validate_license=False)
-        assert not alice.can_access(Job, 'start', job, validate_license=False)
+        with pytest.raises(PermissionDenied):
+            alice.can_access(Job, 'start', job, validate_license=False)
 
 
 @pytest.mark.django_db

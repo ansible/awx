@@ -270,3 +270,11 @@ class ControlledByScmMixin(object):
         obj = super(ControlledByScmMixin, self).get_parent_object()
         self._reset_inv_src_rev(obj)
         return obj
+
+
+class NoTruncateMixin(object):
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        if self.request.query_params.get('no_truncate'):
+            context.update(no_truncate=True)
+        return context

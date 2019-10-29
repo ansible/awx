@@ -117,3 +117,10 @@ def test_handle_content_type(post, admin):
          admin,
          content_type='text/html',
          expect=415)
+
+
+@pytest.mark.django_db
+def test_basic_not_found(get, admin_user):
+    root_url = reverse('api:api_v2_root_view')
+    r = get(root_url + 'fooooooo', user=admin_user, expect=404)
+    assert r.data.get('detail') == 'The requested resource could not be found.'

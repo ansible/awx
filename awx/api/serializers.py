@@ -4338,13 +4338,30 @@ class NotificationTemplateSerializer(BaseSerializer):
         error_list = []
         collected_messages = []
 
+        def check_messages(messages):
+            for message_type in messages:
+                if message_type not in ('message', 'body'):
+                    error_list.append(_("Message type '{}' invalid, must be either 'message' or 'body'").format(message_type))
+                    continue
+                message = messages[message_type]
+                if message is None:
+                    continue
+                if not isinstance(message, str):
+                    error_list.append(_("Expected string for '{}', found {}, ").format(message_type, type(message)))
+                    continue
+                if message_type == 'message':
+                    if '\n' in message:
+                        error_list.append(_("Messages cannot contain newlines (found newline in {} event)".format(event)))
+                        continue
+                collected_messages.append(message)
+
         # Validate structure / content types
         if not isinstance(messages, dict):
             error_list.append(_("Expected dict for 'messages' field, found {}".format(type(messages))))
         else:
             for event in messages:
-                if event not in ['started', 'success', 'error']:
-                    error_list.append(_("Event '{}' invalid, must be one of 'started', 'success', or 'error'").format(event))
+                if event not in ('started', 'success', 'error', 'workflow_approval'):
+                    error_list.append(_("Event '{}' invalid, must be one of 'started', 'success', 'error', or 'workflow_approval'").format(event))
                     continue
                 event_messages = messages[event]
                 if event_messages is None:
@@ -4352,21 +4369,21 @@ class NotificationTemplateSerializer(BaseSerializer):
                 if not isinstance(event_messages, dict):
                     error_list.append(_("Expected dict for event '{}', found {}").format(event, type(event_messages)))
                     continue
-                for message_type in event_messages:
-                    if message_type not in ['message', 'body']:
-                        error_list.append(_("Message type '{}' invalid, must be either 'message' or 'body'").format(message_type))
-                        continue
-                    message = event_messages[message_type]
-                    if message is None:
-                        continue
-                    if not isinstance(message, str):
-                        error_list.append(_("Expected string for '{}', found {}, ").format(message_type, type(message)))
-                        continue
-                    if message_type == 'message':
-                        if '\n' in message:
-                            error_list.append(_("Messages cannot contain newlines (found newline in {} event)".format(event)))
+                if event == 'workflow_approval':
+                    for subevent in event_messages:
+                        if subevent not in ('running', 'approved', 'timed_out', 'denied'):
+                            error_list.append(_("Workflow Approval event '{}' invalid, must be one of "
+                                                "'running', 'approved', 'timed_out', or 'denied'").format(subevent))
                             continue
-                    collected_messages.append(message)
+                        subevent_messages = event_messages[subevent]
+                        if subevent_messages is None:
+                            continue
+                        if not isinstance(subevent_messages, dict):
+                            error_list.append(_("Expected dict for workflow approval event '{}', found {}").format(subevent, type(subevent_messages)))
+                            continue
+                        check_messages(subevent_messages)
+                else:
+                    check_messages(event_messages)
 
         # Subclass to return name of undefined field
         class DescriptiveUndefined(StrictUndefined):
@@ -4497,8 +4514,18 @@ class NotificationSerializer(BaseSerializer):
                   'notification_type', 'recipients', 'subject', 'body')
 
     def get_body(self, obj):
-        if obj.notification_type == 'webhook' and 'body' in obj.body:
-            return obj.body['body']
+        if obj.notification_type in ('webhook', 'pagerduty'):
+            if isinstance(obj.body, dict):
+                if 'body' in obj.body:
+                    return obj.body['body']
+            elif isinstance(obj.body, str):
+                # attempt to load json string
+                try:
+                    potential_body = json.loads(obj.body)
+                    if isinstance(potential_body, dict):
+                        return potential_body
+                except json.JSONDecodeError:
+                    pass
         return obj.body
 
     def get_related(self, obj):
@@ -4774,6 +4801,18 @@ class InstanceGroupSerializer(BaseSerializer):
                 raise serializers.ValidationError(_('Isolated instances may not be added or removed from instances groups via the API.'))
             if self.instance and self.instance.controller_id is not None:
                 raise serializers.ValidationError(_('Isolated instance group membership may not be managed via the API.'))
+        if value and self.instance and self.instance.is_containerized:
+            raise serializers.ValidationError(_('Containerized instances may not be managed via the API'))
+        return value
+
+    def validate_policy_instance_percentage(self, value):
+        if value and self.instance and self.instance.is_containerized:
+            raise serializers.ValidationError(_('Containerized instances may not be managed via the API'))
+        return value
+
+    def validate_policy_instance_minimum(self, value):
+        if value and self.instance and self.instance.is_containerized:
+            raise serializers.ValidationError(_('Containerized instances may not be managed via the API'))
         return value
 
     def validate_name(self, value):

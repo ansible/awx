@@ -27,6 +27,7 @@ options:
       description:
         - ID of the job to cancel
       required: True
+      type: int
     fail_if_not_running:
       description:
         - Fail loudly if the I(job_id) does not reference a running job.

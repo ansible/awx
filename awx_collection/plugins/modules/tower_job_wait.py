@@ -27,17 +27,21 @@ options:
       description:
         - ID of the job to monitor.
       required: True
+      type: int
     min_interval:
       description:
         - Minimum interval in seconds, to request an update from Tower.
       default: 1
+      type: float
     max_interval:
       description:
         - Maximum interval in seconds, to request an update from Tower.
       default: 30
+      type: float
     timeout:
       description:
         - Maximum time in seconds to wait for a job to finish.
+      type: int
 extends_documentation_fragment: awx.awx.auth
 '''
 

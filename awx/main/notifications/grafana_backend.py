@@ -8,23 +8,20 @@ import dateutil.parser as dp
 
 from django.utils.encoding import smart_text
 from django.utils.translation import ugettext_lazy as _
+
 from awx.main.notifications.base import AWXBaseEmailBackend
+from awx.main.notifications.custom_notification_base import CustomNotificationBase
 
 
 logger = logging.getLogger('awx.main.notifications.grafana_backend')
 
 
-class GrafanaBackend(AWXBaseEmailBackend):
+class GrafanaBackend(AWXBaseEmailBackend, CustomNotificationBase):
 
     init_parameters = {"grafana_url": {"label": "Grafana URL", "type": "string"},
                        "grafana_key": {"label": "Grafana API Key", "type": "password"}}
     recipient_parameter = "grafana_url"
     sender_parameter = None
-
-    DEFAULT_SUBJECT = "{{ job_friendly_name }} #{{ job.id }} '{{ job.name }}' {{ job.status }}: {{ url }}"
-    default_messages = {"started": {"message": DEFAULT_SUBJECT},
-                        "success": {"message": DEFAULT_SUBJECT},
-                        "error": {"message": DEFAULT_SUBJECT}}
 
     def __init__(self, grafana_key,dashboardId=None, panelId=None, annotation_tags=None, grafana_no_verify_ssl=False, isRegion=True,
                  fail_silently=False, **kwargs):

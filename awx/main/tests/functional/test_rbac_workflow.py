@@ -7,6 +7,8 @@ from awx.main.access import (
     # WorkflowJobNodeAccess
 )
 
+from rest_framework.exceptions import PermissionDenied
+
 from awx.main.models import InventorySource, JobLaunchConfig
 
 
@@ -169,7 +171,8 @@ class TestWorkflowJobAccess:
         wfjt.ask_inventory_on_launch = True
         wfjt.save()
         JobLaunchConfig.objects.create(job=workflow_job, inventory=inventory)
-        assert not WorkflowJobAccess(rando).can_start(workflow_job)
+        with pytest.raises(PermissionDenied):
+            WorkflowJobAccess(rando).can_start(workflow_job)
         inventory.use_role.members.add(rando)
         assert WorkflowJobAccess(rando).can_start(workflow_job)
 

@@ -1,135 +1,100 @@
-.InstanceGroups {
-    .at-Row-actions{
-        justify-content: flex-start;
-        width: 300px;
-       & > capacity-bar:only-child{
-            margin-left: 0px;
-            margin-top: 5px
-        }
-    }
-    .at-RowAction{
-        margin: 0;
-    }
-    .at-Row-links{
-        justify-content: flex-start;
+.at-Row--instances {
+    .at-Row-content {
+        flex-wrap: nowrap;
     }
 
-    .BreadCrumb-menuLinkImage:hover {
-        color: @default-link;
+    .at-Row-toggle {
+        align-self: auto;
+        flex: initial;
     }
 
-    .List-details {
-        align-self: flex-end;
-        color: @default-interface-txt;
+    .at-Row-itemGroup {
         display: flex;
-        flex: 0 0 auto;
-        font-size: 12px;
-        margin-right:20px;
-        text-transform: uppercase;
+        flex: 1;
+        flex-wrap: wrap;
     }
 
-    .Capacity-details {
+    .at-Row-items--instances {
         display: flex;
-        margin-right: 20px;
+        flex-wrap: wrap;
         align-items: center;
-
-        .Capacity-details--label {
-            color: @default-interface-txt;
-            margin: 0 10px 0 0;
-            width: 100px;
-        }
+        align-content: center;
+        flex: 1;
     }
 
-    .RunningJobs-details {
-        align-items: center;
-        display: flex;
-
-        .RunningJobs-details--label {
-            margin: 0 10px 0 0;
-        }
+    .at-RowItem--isHeader {
+        min-width: 250px;
     }
 
-    .List-tableCell--capacityColumn {
+    .at-Row-items--capacity {
         display: flex;
-        height: 40px;
+        flex-wrap: wrap;
         align-items: center;
     }
 
-    .List-noItems {
-        margin-top: 20px;
-    }
-
-    .List-tableRow .List-titleBadge {
-            margin: 0 0 0 5px;
-    }
-
-    .Panel-docsLink {
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 7px;
-        background: @at-white;
-        border-radius: @at-border-radius;
-        height: 30px;
-        width: 30px;
-        margin: 0 20px 0 auto;
-
-        i {
-            font-size: @at-font-size-icon;
-            color: @at-gray-646972;
-        }
-    }
-
-    .Panel-docsLink:hover {
-        background-color: @at-blue;
-
-        i {
-            color: @at-white;
-        }
-    }
-    .at-Row-toggle{
-        margin-top: 20px;
-        padding-left: 15px;
-    }
-
-    .ContainerGroups-codeMirror{
-        margin-bottom: 10px;
-    }
-
-    .at-Row-container{
-    flex-wrap: wrap;
-    }
-
-    .containerGroups-messageBar-link:hover{
-        text-decoration: underline;
-    }
-
-    @media screen and (max-width: 1060px) and (min-width: 769px){
-        .at-Row-links {
-            justify-content: flex-start;
-            flex-wrap: wrap;
-        }
-    }
-
-    @media screen and (min-width: 1061px){
-        .at-Row-actions{
-            justify-content: flex-end;
-            & > capacity-bar:only-child {
-                margin-right: 30px;
-            }
-        }
-        .instanceGroupsList-details{
-            display: flex;
-        }
-        .at-Row-links {
-            justify-content: flex-end;
-            display: flex;
-            width: 445px;
-        }
+    .CapacityAdjuster {
+        padding-bottom: 15px;
     }
 }
 
+.at-Row--instanceGroups {
+    .at-Row-content {
+        flex-wrap: nowrap;
+    }
 
+    .at-Row-itemGroup {
+        display: flex;
+        flex: 1;
+        flex-wrap: wrap;
+    }
 
+    .at-Row-items--instanceGroups {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        flex: 1;
+        max-width: 100%;
+    }
 
+    .at-Row-itemHeaderGroup {
+        min-width: 320px;
+        display: flex;
+    }
+
+    .at-Row-items--capacity {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-right: 5px;
+        min-width: 215px;
+    }
+
+    .at-Row--instanceSpacer {
+        width: 140px;
+    }
+
+    .at-Row--capacitySpacer {
+        flex: .6;
+    }
+
+    .at-Row-actions {
+        min-width: 50px;
+    }
+}
+
+@media screen and (max-width: 1260px) {
+    .at-Row--instances .at-Row-items--capacity {
+        flex: 1
+    }
+
+    .at-Row--instances .CapacityAdjuster {
+        padding-bottom: 5px;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .at-Row--instanceGroups .at-Row-itemHeaderGroup,
+    .at-Row--instanceGroups .at-Row-itemGroup {
+        max-width: 270px;
+    }
+}
