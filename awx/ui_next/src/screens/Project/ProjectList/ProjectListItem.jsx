@@ -91,7 +91,7 @@ class ProjectListItem extends React.Component {
                 <Link
                   id={labelId}
                   to={`${detailUrl}`}
-                  style={{ marginLeft: '10px' }}
+                  css={{ marginLeft: '10px' }}
                 >
                   <b>{project.name}</b>
                 </Link>

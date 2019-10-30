@@ -243,7 +243,7 @@ describe('<ProjectAdd />', () => {
     });
     wrapper.update();
     await act(async () => {
-      scmTypeSelect.props().onChange('git', { target: { name: 'insights' } });
+      scmTypeSelect.props().onChange('svn', { target: { name: 'Subversion' } });
     });
     wrapper.update();
     expect(formik.state.values.scm_url).toEqual('');
