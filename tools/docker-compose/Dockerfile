@@ -36,6 +36,7 @@ RUN dnf -y update && \
   python3-devel \
   python3-libselinux \
   python3-pip \
+  python3-psycopg2 \
   python3-setuptools \
   rsync \
   subversion \
