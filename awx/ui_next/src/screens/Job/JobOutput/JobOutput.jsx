@@ -42,6 +42,42 @@ const OutputFooter = styled.div`
   flex: 1;
 `;
 
+let ws;
+function connectJobSocket({ type, id }, onMessage) {
+  ws = new WebSocket(`wss://${window.location.host}/websocket/`);
+
+  ws.onopen = function() {
+    const xrftoken = `; ${document.cookie}`
+      .split('; csrftoken=')
+      .pop()
+      .split(';')
+      .shift();
+    const eventGroup = `${type}_events`;
+    ws.send(
+      JSON.stringify({
+        xrftoken,
+        groups: { jobs: ['summary', 'status_changed'], [eventGroup]: [id] },
+      })
+    );
+  };
+
+  ws.onmessage = function(e) {
+    onMessage(JSON.parse(e.data));
+  };
+
+  ws.onclose = function(e) {
+    console.log('Socket closed. Reconnecting...', e);
+    setTimeout(function() {
+      connectJobSocket({ type, id }, onMessage);
+    }, 1000);
+  };
+
+  ws.onerror = function(err) {
+    console.error('Socket error: ', err, 'Disconnecting...');
+    ws.close();
+  };
+}
+
 function range(low, high) {
   const numbers = [];
   for (let n = low; n <= high; n++) {
@@ -64,6 +100,7 @@ class JobOutput extends Component {
       hostEvent: {},
     };
 
+    this.jobSocketCounter = 0;
     this.cache = new CellMeasurerCache({
       fixedWidth: true,
       defaultHeight: 25,
@@ -82,11 +119,22 @@ class JobOutput extends Component {
     this.isRowLoaded = this.isRowLoaded.bind(this);
     this.loadMoreRows = this.loadMoreRows.bind(this);
     this.scrollToRow = this.scrollToRow.bind(this);
+    this.monitorJobSocketCounter = this.monitorJobSocketCounter.bind(this);
   }
 
   componentDidMount() {
+    const { job } = this.props;
     this._isMounted = true;
     this.loadJobEvents();
+
+    connectJobSocket(job, data => {
+      if (data.counter && data.counter > this.jobSocketCounter) {
+        this.jobSocketCounter = data.counter;
+      } else if (data.final_counter && data.unified_job_id === job.id) {
+        this.jobSocketCounter = data.final_counter;
+      }
+    });
+    this.interval = setInterval(() => this.monitorJobSocketCounter(), 5000);
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -108,7 +156,19 @@ class JobOutput extends Component {
   }
 
   componentWillUnmount() {
+    if (ws) {
+      ws.close();
+    }
+    clearInterval(this.interval);
     this._isMounted = false;
+  }
+
+  monitorJobSocketCounter() {
+    const { remoteRowCount } = this.state;
+    if (this.jobSocketCounter >= remoteRowCount) {
+      this._isMounted &&
+        this.setState({ remoteRowCount: this.jobSocketCounter + 1 });
+    }
   }
 
   async loadJobEvents() {
