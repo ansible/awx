@@ -11,37 +11,18 @@ RUN dnf -y update && \
   dnf module -y enable 'postgresql:10' && \
   dnf config-manager --set-enabled PowerTools && \
   dnf -y install acl \
-  alsa-lib \
   ansible \
-  atk \
   bubblewrap \
-  cups-libs \
   curl \
-  cyrus-sasl \
-  cyrus-sasl-devel \
   gcc \
   gcc-c++ \
-  GConf2 \
-  git \
-  gtk3 \
-  krb5-devel \
-  krb5-libs \
+  git-core \
   krb5-workstation \
   libcurl-devel \
   libffi-devel \
   libstdc++.so.6 \
   libtool-ltdl-devel \
   libcgroup-tools \
-  libXcomposite \
-  libXcursor \
-  libXdamage \
-  libXext \
-  libXi \
-  libxml2-devel \
-  libXrandr \
-  libXScrnSaver \
-  libxslt-devel \
-  libXtst \
   make \
   mercurial \
   nginx \
@@ -55,10 +36,6 @@ RUN dnf -y update && \
   python3-devel \
   python3-libselinux \
   python3-pip \
-  python3-psutil \
-  python3-psycopg2 \
-  python3-setuptools \
-  python3-devel \
   python3-setuptools \
   rsync \
   subversion \
@@ -66,18 +43,19 @@ RUN dnf -y update && \
   swig \
   tmux \
   unzip \
-  vim \
+  vim-minimal \
   xmlsec1 \
   xmlsec1-devel \
   xmlsec1-openssl \
   xmlsec1-openssl-devel \
-  xorg-x11-fonts-100dpi \
-  xorg-x11-fonts-75dpi \
-  xorg-x11-fonts-cyrillic \
-  xorg-x11-fonts-misc \
-  xorg-x11-fonts-Type1 \
-  xorg-x11-utils \
-  dnf-utils
+  dnf-utils && \
+
+# UI tests only, do not put in installer/roles/image_build/templates/Dockerfile.j2
+  dnf -y install \
+  gtk3 \
+  alsa-lib \
+  libX11-xcb \
+  libXScrnSaver
 
 ENV PATH="/usr/pgsql-10/bin:${PATH}"
 
@@ -121,20 +99,10 @@ RUN cd /usr/local/bin && \
 ADD tools/docker-compose/google-cloud-sdk.repo /etc/yum.repos.d/
 RUN dnf install -y kubectl
 
-RUN dnf -y remove cyrus-sasl-devel \
+RUN dnf -y remove *-devel \
   gcc \
   gcc-c++ \
-  krb5-devel \
-  libtool-ltdl-devel \
-  libxml2-devel \
-  libxslt-devel \
-  openldap-devel \
-  postgresql10-devel \
-  python-devel \
-  python36-devel \
-  nodejs \
-  xmlsec1-devel \
-  xmlsec1-openssl-devel
+  nodejs
 
 RUN dnf -y clean all
 
