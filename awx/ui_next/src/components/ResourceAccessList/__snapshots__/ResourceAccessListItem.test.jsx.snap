@@ -72,6 +72,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                     <Detail
                       fullWidth={false}
                       label="Name"
+                      missingValue={false}
                       value="jane brown"
                     />
                   </ForwardRef>
@@ -83,6 +84,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                     <Detail
                       fullWidth={false}
                       label="Team Roles"
+                      missingValue={false}
                       value={
                         <ForwardRef>
                           <ForwardRef
@@ -126,6 +128,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                       <Detail
                         fullWidth={false}
                         label="Name"
+                        missingValue={false}
                         value="jane brown"
                       />
                     </ForwardRef>
@@ -137,6 +140,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                       <Detail
                         fullWidth={false}
                         label="Team Roles"
+                        missingValue={false}
                         value={
                           <ForwardRef>
                             <ForwardRef
@@ -203,6 +207,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                         <Detail
                           fullWidth={false}
                           label="Name"
+                          missingValue={false}
                           value="jane brown"
                         />
                       </ForwardRef>
@@ -214,6 +219,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                         <Detail
                           fullWidth={false}
                           label="Team Roles"
+                          missingValue={false}
                           value={
                             <ForwardRef>
                               <ForwardRef
@@ -379,6 +385,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                 <Detail
                                   fullWidth={false}
                                   label="Name"
+                                  missingValue={false}
                                   value="jane brown"
                                 >
                                   <Detail__DetailName
@@ -435,6 +442,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                   <Detail__DetailValue
                                     component="dd"
                                     fullWidth={false}
+                                    missingValue={false}
                                   >
                                     <StyledComponent
                                       component="dd"
@@ -445,9 +453,11 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                           "componentStyle": ComponentStyle {
                                             "componentId": "Detail__DetailValue-sc-16ypsyv-1",
                                             "isStatic": false,
-                                            "lastClassName": "yHlYM",
+                                            "lastClassName": "kCDjmZ",
                                             "rules": Array [
                                               "word-break:break-all;",
+                                              [Function],
+                                              " ",
                                               [Function],
                                             ],
                                           },
@@ -463,18 +473,20 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                       }
                                       forwardedRef={null}
                                       fullWidth={false}
+                                      missingValue={false}
                                     >
                                       <Component
-                                        className="Detail__DetailValue-sc-16ypsyv-1 yHlYM"
+                                        className="Detail__DetailValue-sc-16ypsyv-1 kCDjmZ"
                                         component="dd"
                                         fullWidth={false}
+                                        missingValue={false}
                                       >
                                         <TextListItem
-                                          className="Detail__DetailValue-sc-16ypsyv-1 yHlYM"
+                                          className="Detail__DetailValue-sc-16ypsyv-1 kCDjmZ"
                                           component="dd"
                                         >
                                           <dd
-                                            className="Detail__DetailValue-sc-16ypsyv-1 yHlYM"
+                                            className="Detail__DetailValue-sc-16ypsyv-1 kCDjmZ"
                                             data-pf-content={true}
                                           >
                                             jane brown
@@ -542,6 +554,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                 <Detail
                                   fullWidth={false}
                                   label="Team Roles"
+                                  missingValue={false}
                                   value={
                                     <ForwardRef>
                                       <ForwardRef
@@ -607,6 +620,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                   <Detail__DetailValue
                                     component="dd"
                                     fullWidth={false}
+                                    missingValue={false}
                                   >
                                     <StyledComponent
                                       component="dd"
@@ -617,9 +631,11 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                           "componentStyle": ComponentStyle {
                                             "componentId": "Detail__DetailValue-sc-16ypsyv-1",
                                             "isStatic": false,
-                                            "lastClassName": "yHlYM",
+                                            "lastClassName": "kCDjmZ",
                                             "rules": Array [
                                               "word-break:break-all;",
+                                              [Function],
+                                              " ",
                                               [Function],
                                             ],
                                           },
@@ -635,18 +651,20 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                       }
                                       forwardedRef={null}
                                       fullWidth={false}
+                                      missingValue={false}
                                     >
                                       <Component
-                                        className="Detail__DetailValue-sc-16ypsyv-1 yHlYM"
+                                        className="Detail__DetailValue-sc-16ypsyv-1 kCDjmZ"
                                         component="dd"
                                         fullWidth={false}
+                                        missingValue={false}
                                       >
                                         <TextListItem
-                                          className="Detail__DetailValue-sc-16ypsyv-1 yHlYM"
+                                          className="Detail__DetailValue-sc-16ypsyv-1 kCDjmZ"
                                           component="dd"
                                         >
                                           <dd
-                                            className="Detail__DetailValue-sc-16ypsyv-1 yHlYM"
+                                            className="Detail__DetailValue-sc-16ypsyv-1 kCDjmZ"
                                             data-pf-content={true}
                                           >
                                             <ChipGroup>
