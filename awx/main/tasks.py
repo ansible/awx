@@ -22,10 +22,6 @@ import yaml
 import fcntl
 from pathlib import Path
 from uuid import uuid4
-try:
-    import psutil
-except Exception:
-    psutil = None
 import urllib.parse as urlparse
 
 # Django
