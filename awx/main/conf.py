@@ -55,15 +55,6 @@ register(
 )
 
 register(
-    'TOWER_ADMIN_ALERTS',
-    field_class=fields.BooleanField,
-    label=_('Enable Administrator Alerts'),
-    help_text=_('Email Admin users for system events that may require attention.'),
-    category=_('System'),
-    category_slug='system',
-)
-
-register(
     'TOWER_URL_BASE',
     field_class=fields.URLField,
     schemes=('http', 'https'),

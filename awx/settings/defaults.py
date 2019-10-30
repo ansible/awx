@@ -49,12 +49,6 @@ else:
 DEBUG = True
 SQL_DEBUG = DEBUG
 
-ADMINS = (
-    # ('Your Name', 'your_email@domain.com'),
-)
-
-MANAGERS = ADMINS
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -382,34 +376,6 @@ AUTH_BASIC_ENABLED = True
 # If set, serve only minified JS for UI.
 USE_MINIFIED_JS = False
 
-# Email address that error messages come from.
-SERVER_EMAIL = 'root@localhost'
-
-# Default email address to use for various automated correspondence from
-# the site managers.
-DEFAULT_FROM_EMAIL = 'tower@localhost'
-
-# Subject-line prefix for email messages send with django.core.mail.mail_admins
-# or ...mail_managers.  Make sure to include the trailing space.
-EMAIL_SUBJECT_PREFIX = '[Tower] '
-
-# The email backend to use. For possible shortcuts see django.core.mail.
-# The default is to use the SMTP backend.
-# Third-party backends can be specified by providing a Python path
-# to a module that defines an EmailBackend class.
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-
-# Host for sending email.
-EMAIL_HOST = 'localhost'
-
-# Port for sending email.
-EMAIL_PORT = 25
-
-# Optional SMTP authentication information for EMAIL_HOST.
-EMAIL_HOST_USER = ''
-EMAIL_HOST_PASSWORD = ''
-EMAIL_USE_TLS = False
-
 # Default to skipping isolated host key checking (the initial connection will
 # hang on an interactive "The authenticity of host example.org can't be
 # established" message)
@@ -456,10 +422,6 @@ CELERYBEAT_SCHEDULE = {
         'task': 'awx.main.tasks.awx_periodic_scheduler',
         'schedule': timedelta(seconds=30),
         'options': {'expires': 20,}
-    },
-    'admin_checks': {
-        'task': 'awx.main.tasks.run_administrative_checks',
-        'schedule': timedelta(days=30)
     },
     'cluster_heartbeat': {
         'task': 'awx.main.tasks.cluster_node_heartbeat',
@@ -981,9 +943,6 @@ ORG_ADMINS_CAN_SEE_ALL_USERS = True
 MANAGE_ORGANIZATION_AUTH = True
 
 # Note: This setting may be overridden by database settings.
-TOWER_ADMIN_ALERTS = True
-
-# Note: This setting may be overridden by database settings.
 TOWER_URL_BASE = "https://towerhost"
 
 INSIGHTS_URL_BASE = "https://example.org"
@@ -1062,11 +1021,6 @@ LOGGING = {
             'class': 'awx.main.utils.handlers.AWXProxyHandler',
             'formatter': 'json',
             'filters': ['external_log_enabled', 'dynamic_level_filter'],
-        },
-        'mail_admins': {
-            'level': 'ERROR',
-            'filters': ['require_debug_false'],
-            'class': 'django.utils.log.AdminEmailHandler',
         },
         'tower_warnings': {
             # don't define a level here, it's set by settings.LOG_AGGREGATOR_LEVEL
