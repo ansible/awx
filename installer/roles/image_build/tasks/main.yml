@@ -130,6 +130,13 @@
     mode: '0700'
   delegate_to: localhost
 
+- name: Stage google-cloud-sdk.repo
+  copy:
+    src: google-cloud-sdk.repo
+    dest: "{{ docker_base_path }}/google-cloud-sdk.repo"
+    mode: '0700'
+  delegate_to: localhost
+
 - name: Stage supervisor.conf
   copy:
     src: supervisor.conf

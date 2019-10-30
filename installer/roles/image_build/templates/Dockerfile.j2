@@ -125,6 +125,14 @@ RUN chmod +rx /usr/bin/launch_awx.sh && \
     chmod +rx /usr/bin/launch_awx_task.sh && \
     chmod +rx /usr/bin/config-watcher
 
+# Install OpenShift CLI
+RUN cd /usr/local/bin && \
+    curl -L https://github.com/openshift/origin/releases/download/v3.9.0/openshift-origin-client-tools-v3.9.0-191fece-linux-64bit.tar.gz | \
+    tar -xz --strip-components=1 --wildcards --no-anchored 'oc'
+
+ADD google-cloud-sdk.repo /etc/yum.repos.d/
+RUN yum install -y kubectl
+
 RUN find /var/lib/awx -not -path '/var/lib/awx/venv*' | xargs chgrp root
 RUN find /var/lib/awx -not -path '/var/lib/awx/venv*' | xargs chmod g+w
 
