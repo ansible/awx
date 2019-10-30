@@ -128,17 +128,17 @@ class TestOptions(unittest.TestCase):
         page = OptionsPage.from_json({
             'actions': {
                 'POST': {
-                    'limit': {'type': 'integer'}
+                    'max_hosts': {'type': 'integer'}
                 },
             }
         })
-        options = ResourceOptionsParser(None, page, 'job_templates', self.parser)
+        options = ResourceOptionsParser(None, page, 'organizations', self.parser)
         options.build_query_arguments('create', 'POST')
         assert 'create' in self.parser.choices
 
         out = StringIO()
         self.parser.choices['create'].print_help(out)
-        assert '--limit INTEGER' in out.getvalue()
+        assert '--max_hosts INTEGER' in out.getvalue()
 
     def test_boolean_argument(self):
         page = OptionsPage.from_json({
