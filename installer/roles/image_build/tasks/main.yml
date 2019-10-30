@@ -173,18 +173,6 @@
     dest: "{{ docker_base_path }}/Makefile"
   delegate_to: localhost
 
-- name: Stage ansible repo
-  copy:
-    src: 'ansible.repo'
-    dest: '{{ docker_base_path }}/ansible.repo'
-  delegate_to: localhost
-
-- name: Stage ansible repo key
-  copy:
-    src: 'RPM-GPG-KEY-ansible-release'
-    dest: '{{ docker_base_path }}/RPM-GPG-KEY-ansible-release'
-  delegate_to: localhost
-
 - name: Build base web image
   docker_image:
     build:
