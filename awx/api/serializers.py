@@ -1701,6 +1701,7 @@ class HostSerializer(BaseSerializerWithVariables):
             'name': j.job.job_template.name if j.job.job_template is not None else "",
             'status': j.job.status,
             'finished': j.job.finished,
+            'type': j.job.get_real_instance_class()._meta.verbose_name.replace(' ', '_')
         } for j in obj.job_host_summaries.select_related('job__job_template').order_by('-created')[:5]])
         return d
 
