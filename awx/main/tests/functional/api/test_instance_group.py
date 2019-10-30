@@ -269,8 +269,8 @@ def test_instance_group_update_fields(patch, instance, instance_group, admin, co
     assert containerized_instance_group.is_containerized
     assert not containerized_instance_group.is_isolated
     resp = patch(cg_url, {'policy_instance_percentage':15}, admin, expect=400)
-    assert [u"Containerized instances may not be managed via the API"] == resp.data['policy_instance_percentage']
+    assert ["Containerized instances may not be managed via the API"] == resp.data['policy_instance_percentage']
     resp = patch(cg_url, {'policy_instance_minimum':15}, admin, expect=400)
-    assert [u"Containerized instances may not be managed via the API"] == resp.data['policy_instance_minimum']
+    assert ["Containerized instances may not be managed via the API"] == resp.data['policy_instance_minimum']
     resp = patch(cg_url, {'policy_instance_list':[instance.hostname]}, admin)
-    assert [u"Containerized instances may not be managed via the API"] == resp.data['policy_instance_list']
+    assert ["Containerized instances may not be managed via the API"] == resp.data['policy_instance_list']
