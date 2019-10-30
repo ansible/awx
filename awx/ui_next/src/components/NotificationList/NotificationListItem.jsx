@@ -27,6 +27,8 @@ const DataListCell = styled(PFDataListCell)`
 const Switch = styled(PFSwitch)`
   display: flex;
   flex-wrap: no-wrap;
+  /* workaround PF bug; used in calculating switch width: */
+  --pf-c-switch__toggle-icon--Offset: 0.125rem;
 `;
 
 function NotificationListItem(props) {
