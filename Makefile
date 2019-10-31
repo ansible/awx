@@ -18,7 +18,6 @@ COMPOSE_TAG ?= $(GIT_BRANCH)
 COMPOSE_HOST ?= $(shell hostname)
 
 VENV_BASE ?= /venv
-COLLECTION_VENV ?= /awx_devel/awx_collection_test_venv
 SCL_PREFIX ?=
 CELERY_SCHEDULE_FILE ?= /var/lib/awx/beat.db
 
@@ -379,10 +378,9 @@ test:
 	awx-manage check_migrations --dry-run --check  -n 'vNNN_missing_migration_file'
 
 prepare_collection_venv:
-	rm -rf $(COLLECTION_VENV)
-	mkdir $(COLLECTION_VENV)
-	ln -s /usr/lib/python2.7/site-packages/ansible $(COLLECTION_VENV)/ansible
-	$(VENV_BASE)/awx/bin/pip install --target=$(COLLECTION_VENV) git+https://github.com/ansible/tower-cli.git
+	rm -rf /awx_devel/awx_collection/tower_cli
+	$(VENV_BASE)/awx/bin/pip install --target=/awx_devel/awx_collection --no-deps click
+	$(VENV_BASE)/awx/bin/pip install --target=/awx_devel/awx_collection --no-deps git+https://github.com/ansible/tower-cli.git
 
 COLLECTION_TEST_DIRS ?= awx_collection/test/awx
 COLLECTION_PACKAGE ?= awx
@@ -392,7 +390,7 @@ test_collection:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	PYTHONPATH=$(COLLECTION_VENV):/awx_devel/awx_collection:$PYTHONPATH py.test $(COLLECTION_TEST_DIRS)
+	PYTHONPATH=/awx_devel/awx_collection:$PYTHONPATH py.test $(COLLECTION_TEST_DIRS)
 
 flake8_collection:
 	flake8 awx_collection/  # Different settings, in main exclude list

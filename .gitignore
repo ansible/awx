@@ -135,8 +135,11 @@ use_dev_supervisor.txt
 
 
 # Ansible module tests
-/awx_collection_test_venv/
+/awx_collection/tower_cli/
+/awx_collection/click/
 /awx_collection/*.tar.gz
+/awx_collection/*.egg-info/
+/awx_collection/*.dist-info/
 /awx_collection/galaxy.yml
 /sanity/
 
