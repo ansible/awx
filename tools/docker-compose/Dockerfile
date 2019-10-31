@@ -71,6 +71,7 @@ ADD tools/docker-compose/awx.egg-info /tmp/awx.egg-info
 
 RUN openssl req -nodes -newkey rsa:2048 -keyout /etc/nginx/nginx.key -out /etc/nginx/nginx.csr -subj "/C=US/ST=North Carolina/L=Durham/O=Ansible/OU=AWX Development/CN=awx.localhost"
 RUN openssl x509 -req -days 365 -in /etc/nginx/nginx.csr -signkey /etc/nginx/nginx.key -out /etc/nginx/nginx.crt
+RUN chmod 640 /etc/nginx/nginx.{csr,key,crt}
 
 RUN python3 -m ensurepip && pip3 install virtualenv flake8
 RUN pip3 install supervisor
