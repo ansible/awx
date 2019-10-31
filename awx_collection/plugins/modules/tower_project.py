@@ -145,7 +145,7 @@ def main():
         scm_clean=dict(type='bool', default=False),
         scm_delete_on_update=dict(type='bool', default=False),
         scm_update_on_launch=dict(type='bool', default=False),
-        scm_update_cache_timeout=dict(type='int', default=0),
+        scm_update_cache_timeout=dict(type='int'),
         job_timeout=dict(type='int', default=0),
         custom_virtualenv=dict(),
         local_path=dict(),
