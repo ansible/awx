@@ -30,7 +30,6 @@ from django.db import transaction, DatabaseError, IntegrityError
 from django.db.models.fields.related import ForeignKey
 from django.utils.timezone import now, timedelta
 from django.utils.encoding import smart_str
-from django.core.mail import send_mail
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _
 from django.core.cache import cache
@@ -68,7 +67,6 @@ from awx.main.isolated import manager as isolated_manager
 from awx.main.dispatch.publish import task
 from awx.main.dispatch import get_local_queuename, reaper
 from awx.main.utils import (get_ssh_version, update_scm_url,
-                            get_licenser,
                             ignore_inventory_computed_fields,
                             ignore_inventory_group_removal, extract_ansible_vars, schedule_task_manager,
                             get_awx_version)
@@ -88,7 +86,7 @@ from rest_framework.exceptions import PermissionDenied
 __all__ = ['RunJob', 'RunSystemJob', 'RunProjectUpdate', 'RunInventoryUpdate',
            'RunAdHocCommand', 'handle_work_error', 'handle_work_success', 'apply_cluster_membership_policies',
            'update_inventory_computed_fields', 'update_host_smart_inventory_memberships',
-           'send_notifications', 'run_administrative_checks', 'purge_old_stdout_files']
+           'send_notifications', 'purge_old_stdout_files']
 
 HIDDEN_PASSWORD = '**********'
 
@@ -350,28 +348,6 @@ def gather_analytics():
     finally:
         if os.path.exists(tgz):
             os.remove(tgz)
-
-
-@task()
-def run_administrative_checks():
-    logger.warn("Running administrative checks.")
-    if not settings.TOWER_ADMIN_ALERTS:
-        return
-    validation_info = get_licenser().validate()
-    if validation_info['license_type'] != 'open' and validation_info.get('instance_count', 0) < 1:
-        return
-    used_percentage = float(validation_info.get('current_instances', 0)) / float(validation_info.get('instance_count', 100))
-    tower_admin_emails = User.objects.filter(is_superuser=True).values_list('email', flat=True)
-    if (used_percentage * 100) > 90:
-        send_mail("Ansible Tower host usage over 90%",
-                  _("Ansible Tower host usage over 90%"),
-                  tower_admin_emails,
-                  fail_silently=True)
-    if validation_info.get('date_warning', False):
-        send_mail("Ansible Tower license will expire soon",
-                  _("Ansible Tower license will expire soon"),
-                  tower_admin_emails,
-                  fail_silently=True)
 
 
 @task(queue=get_local_queuename)

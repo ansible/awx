@@ -15,9 +15,6 @@ export default ['i18n', function(i18n) {
                 type: 'text',
                 reset: 'TOWER_URL_BASE',
             },
-            TOWER_ADMIN_ALERTS: {
-                type: 'toggleSwitch',
-            },
             ORG_ADMINS_CAN_SEE_ALL_USERS: {
                 type: 'toggleSwitch',
             },
