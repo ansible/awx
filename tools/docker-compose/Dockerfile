@@ -49,10 +49,10 @@ RUN dnf -y update && \
   xmlsec1-devel \
   xmlsec1-openssl \
   xmlsec1-openssl-devel \
-  dnf-utils && \
+  dnf-utils
 
 # UI tests only, do not put in installer/roles/image_build/templates/Dockerfile.j2
-  dnf -y install \
+RUN dnf -y install \
   gtk3 \
   alsa-lib \
   libX11-xcb \
