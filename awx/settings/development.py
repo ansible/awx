@@ -52,6 +52,9 @@ COLOR_LOGS = True
 # Pipe management playbook output to console
 LOGGING['loggers']['awx.isolated.manager.playbooks']['propagate'] = True  # noqa
 
+# celery is annoyingly loud when docker containers start
+LOGGING['loggers'].pop('celery', None)  # noqa
+
 ALLOWED_HOSTS = ['*']
 
 mimetypes.add_type("image/svg+xml", ".svg", True)
