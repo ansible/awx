@@ -8,8 +8,6 @@ import { Project } from '@types';
 import Lookup from '@components/Lookup';
 import { FieldTooltip } from '@components/FormField';
 
-const loadProjects = async params => ProjectsAPI.read(params);
-
 class ProjectLookup extends React.Component {
   render() {
     const {
@@ -22,6 +20,15 @@ class ProjectLookup extends React.Component {
       value,
       onBlur,
     } = this.props;
+
+    const loadProjects = async params => {
+      const response = await ProjectsAPI.read(params);
+      const { results, count } = response.data;
+      if (count === 1) {
+        onChange(results[0], 'project');
+      }
+      return response;
+    };
 
     return (
       <FormGroup
