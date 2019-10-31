@@ -40,7 +40,7 @@ options:
     organization:
       description:
         - Organization the inventory belongs to.
-      reguired: True
+      type: str
     source:
       description:
         - Types of inventory source.
@@ -229,7 +229,7 @@ def main():
         overwrite_vars=dict(type='bool', required=False),
         update_on_launch=dict(type='bool', required=False),
         update_cache_timeout=dict(type='int', required=False),
-        organization=dict(required=True),
+        organization=dict(type='str'),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
@@ -255,21 +255,25 @@ def main():
             if module.params.get('description'):
                 params['description'] = module.params.get('description')
 
-            try:
-                org_res = tower_cli.get_resource('organization')
-                org = org_res.get(name=organization)
-            except (exc.NotFound) as excinfo:
-                module.fail_json(
-                    msg='Failed to get organization,'
-                    'organization not found: {0}'.format(excinfo),
-                    changed=False
-                )
+            if organization:
+                try:
+                    org_res = tower_cli.get_resource('organization')
+                    org = org_res.get(name=organization)
+                except (exc.NotFound) as excinfo:
+                    module.fail_json(
+                        msg='Failed to get organization,'
+                        'organization not found: {0}'.format(excinfo),
+                        changed=False
+                    )
+                org_id = org['id']
+            else:
+                org_id = None  # interpreted as not provided
 
             if module.params.get('credential'):
                 credential_res = tower_cli.get_resource('credential')
                 try:
                     credential = credential_res.get(
-                        name=module.params.get('credential'), organization=org['id'])
+                        name=module.params.get('credential'), organization=org_id)
                     params['credential'] = credential['id']
                 except (exc.NotFound) as excinfo:
                     module.fail_json(
@@ -282,7 +286,7 @@ def main():
                 source_project_res = tower_cli.get_resource('project')
                 try:
                     source_project = source_project_res.get(
-                        name=module.params.get('source_project'), organization=org['id'])
+                        name=module.params.get('source_project'), organization=org_id)
                     params['source_project'] = source_project['id']
                 except (exc.NotFound) as excinfo:
                     module.fail_json(
@@ -295,7 +299,7 @@ def main():
                 source_script_res = tower_cli.get_resource('inventory_script')
                 try:
                     script = source_script_res.get(
-                        name=module.params.get('source_script'), organization=org['id'])
+                        name=module.params.get('source_script'), organization=org_id)
                     params['source_script'] = script['id']
                 except (exc.NotFound) as excinfo:
                     module.fail_json(
@@ -306,7 +310,7 @@ def main():
 
             try:
                 inventory_res = tower_cli.get_resource('inventory')
-                params['inventory'] = inventory_res.get(name=inventory, organization=org['id'])['id']
+                params['inventory'] = inventory_res.get(name=inventory, organization=org_id)['id']
             except (exc.NotFound) as excinfo:
                 module.fail_json(
                     msg='Failed to update inventory source, '
