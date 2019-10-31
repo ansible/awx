@@ -12,6 +12,7 @@ class JobTemplates extends InstanceGroupsMixin(NotificationsMixin(Base)) {
     this.associateLabel = this.associateLabel.bind(this);
     this.disassociateLabel = this.disassociateLabel.bind(this);
     this.readCredentials = this.readCredentials.bind(this);
+    this.readAccessList = this.readAccessList.bind(this);
     this.generateLabel = this.generateLabel.bind(this);
   }
 
@@ -56,6 +57,10 @@ class JobTemplates extends InstanceGroupsMixin(NotificationsMixin(Base)) {
       id: credentialId,
       disassociate: true,
     });
+  }
+
+  readAccessList(id, params) {
+    return this.http.get(`${this.baseUrl}${id}/access_list/`, { params });
   }
 }
 

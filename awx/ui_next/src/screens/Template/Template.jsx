@@ -7,6 +7,7 @@ import CardCloseButton from '@components/CardCloseButton';
 import ContentError from '@components/ContentError';
 import NotificationList from '@components/NotificationList';
 import RoutedTabs from '@components/RoutedTabs';
+import { ResourceAccessList } from '@components/ResourceAccessList';
 import JobTemplateDetail from './JobTemplateDetail';
 import { JobTemplatesAPI, OrganizationsAPI } from '@api';
 import JobTemplateEdit from './JobTemplateEdit';
@@ -90,7 +91,7 @@ class Template extends Component {
 
     const tabsArray = [
       { name: i18n._(t`Details`), link: `${match.url}/details` },
-      { name: i18n._(t`Access`), link: '/home' },
+      { name: i18n._(t`Access`), link: `${match.url}/access` },
     ];
 
     if (canSeeNotificationsTab) {
@@ -175,6 +176,18 @@ class Template extends Component {
                 key="edit"
                 path="/templates/:templateType/:id/edit"
                 render={() => <JobTemplateEdit template={template} />}
+              />
+            )}
+            {template && (
+              <Route
+                key="access"
+                path="/templates/:templateType/:id/access"
+                render={() => (
+                  <ResourceAccessList
+                    resource={template}
+                    apiModel={JobTemplatesAPI}
+                  />
+                )}
               />
             )}
             {canSeeNotificationsTab && (

@@ -7,9 +7,14 @@ class Projects extends LaunchUpdateMixin(NotificationsMixin(Base)) {
     super(http);
     this.baseUrl = '/api/v2/projects/';
 
+    this.readAccessList = this.readAccessList.bind(this);
     this.readPlaybooks = this.readPlaybooks.bind(this);
     this.readSync = this.readSync.bind(this);
     this.sync = this.sync.bind(this);
+  }
+
+  readAccessList(id, params) {
+    return this.http.get(`${this.baseUrl}${id}/access_list/`, { params });
   }
 
   readPlaybooks(id) {

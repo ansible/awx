@@ -110,7 +110,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                     Are you sure you want to remove {0} access from {1}?  Doing so affects all members of the team.
                     <br />
                     <br />
-                    If you {0} want to remove access for this particular user, please remove them from the team.
+                    If you only want to remove access for this particular user, please remove them from the team.
                     <svg
                       aria-hidden="true"
                       class="at-c-alertModal__icon"
@@ -211,7 +211,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                     Are you sure you want to remove {0} access from {1}?  Doing so affects all members of the team.
                     <br />
                     <br />
-                    If you {0} want to remove access for this particular user, please remove them from the team.
+                    If you only want to remove access for this particular user, please remove them from the team.
                     <svg
                       aria-hidden="true"
                       class="at-c-alertModal__icon"
@@ -422,7 +422,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                           Are you sure you want to remove {0} access from {1}?  Doing so affects all members of the team.
                           <br />
                           <br />
-                          If you {0} want to remove access for this particular user, please remove them from the team.
+                          If you only want to remove access for this particular user, please remove them from the team.
                           <ExclamationCircleIcon
                             className="at-c-alertModal__icon"
                             color="currentColor"

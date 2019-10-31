@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`<OrganizationAccessItem /> initially renders succesfully 1`] = `
-<OrganizationAccessItem
+exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
+<ResourceAccessListItem
   accessRecord={
     Object {
       "first_name": "jane",
@@ -47,7 +47,7 @@ exports[`<OrganizationAccessItem /> initially renders succesfully 1`] = `
         <div
           className="pf-c-data-list__item-row"
         >
-          <OrganizationAccessItem__DataListItemCells
+          <ResourceAccessListItem__DataListItemCells
             dataListCells={
               Array [
                 <DataListCell>
@@ -157,17 +157,17 @@ exports[`<OrganizationAccessItem /> initially renders succesfully 1`] = `
                   "$$typeof": Symbol(react.forward_ref),
                   "attrs": Array [],
                   "componentStyle": ComponentStyle {
-                    "componentId": "OrganizationAccessItem__DataListItemCells-sc-1b9e0ad-0",
+                    "componentId": "ResourceAccessListItem__DataListItemCells-a3r9sq-0",
                     "isStatic": true,
-                    "lastClassName": "QeteT",
+                    "lastClassName": "WzRoT",
                     "rules": Array [
                       "align-items:start;",
                     ],
                   },
-                  "displayName": "OrganizationAccessItem__DataListItemCells",
+                  "displayName": "ResourceAccessListItem__DataListItemCells",
                   "foldedComponentIds": Array [],
                   "render": [Function],
-                  "styledComponentId": "OrganizationAccessItem__DataListItemCells-sc-1b9e0ad-0",
+                  "styledComponentId": "ResourceAccessListItem__DataListItemCells-a3r9sq-0",
                   "target": [Function],
                   "toString": [Function],
                   "warnTooManyClasses": [Function],
@@ -178,7 +178,7 @@ exports[`<OrganizationAccessItem /> initially renders succesfully 1`] = `
               rowid="access-list-item"
             >
               <DataListItemCells
-                className="OrganizationAccessItem__DataListItemCells-sc-1b9e0ad-0 QeteT"
+                className="ResourceAccessListItem__DataListItemCells-a3r9sq-0 WzRoT"
                 dataListCells={
                   Array [
                     <DataListCell>
@@ -232,7 +232,7 @@ exports[`<OrganizationAccessItem /> initially renders succesfully 1`] = `
                 rowid="access-list-item"
               >
                 <div
-                  className="pf-c-data-list__item-content OrganizationAccessItem__DataListItemCells-sc-1b9e0ad-0 QeteT"
+                  className="pf-c-data-list__item-content ResourceAccessListItem__DataListItemCells-a3r9sq-0 WzRoT"
                 >
                   <DataListCell
                     key="name"
@@ -887,10 +887,10 @@ exports[`<OrganizationAccessItem /> initially renders succesfully 1`] = `
                 </div>
               </DataListItemCells>
             </StyledComponent>
-          </OrganizationAccessItem__DataListItemCells>
+          </ResourceAccessListItem__DataListItemCells>
         </div>
       </DataListItemRow>
     </li>
   </DataListItem>
-</OrganizationAccessItem>
+</ResourceAccessListItem>
 `;

@@ -12,7 +12,7 @@ import CardCloseButton from '@components/CardCloseButton';
 import RoutedTabs from '@components/RoutedTabs';
 import ContentError from '@components/ContentError';
 import NotificationList from '@components/NotificationList';
-import ProjectAccess from './ProjectAccess';
+import { ResourceAccessList } from '@components/ResourceAccessList';
 import ProjectDetail from './ProjectDetail';
 import ProjectEdit from './ProjectEdit';
 import ProjectJobTemplates from './ProjectJobTemplates';
@@ -222,7 +222,12 @@ class Project extends Component {
             {project && (
               <Route
                 path="/projects/:id/access"
-                render={() => <ProjectAccess project={project} />}
+                render={() => (
+                  <ResourceAccessList
+                    resource={project}
+                    apiModel={ProjectsAPI}
+                  />
+                )}
               />
             )}
             {canSeeNotificationsTab && (

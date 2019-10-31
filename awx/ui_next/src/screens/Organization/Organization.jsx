@@ -12,7 +12,7 @@ import CardCloseButton from '@components/CardCloseButton';
 import RoutedTabs from '@components/RoutedTabs';
 import ContentError from '@components/ContentError';
 import NotificationList from '@components/NotificationList/NotificationList';
-import { OrganizationAccess } from './OrganizationAccess';
+import { ResourceAccessList } from '@components/ResourceAccessList';
 import OrganizationDetail from './OrganizationDetail';
 import OrganizationEdit from './OrganizationEdit';
 import OrganizationTeams from './OrganizationTeams';
@@ -216,7 +216,10 @@ class Organization extends Component {
               <Route
                 path="/organizations/:id/access"
                 render={() => (
-                  <OrganizationAccess organization={organization} />
+                  <ResourceAccessList
+                    resource={organization}
+                    apiModel={OrganizationsAPI}
+                  />
                 )}
               />
             )}

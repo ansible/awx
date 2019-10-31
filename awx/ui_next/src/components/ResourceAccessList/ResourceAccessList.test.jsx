@@ -5,11 +5,11 @@ import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
 
 import { OrganizationsAPI, TeamsAPI, UsersAPI } from '@api';
 
-import OrganizationAccess from './OrganizationAccess';
+import ResourceAccessList from './ResourceAccessList';
 
 jest.mock('@api');
 
-describe('<OrganizationAccess />', () => {
+describe('<ResourceAccessList />', () => {
   const organization = {
     id: 1,
     name: 'Default',
@@ -83,33 +83,33 @@ describe('<OrganizationAccess />', () => {
 
   test('initially renders succesfully', () => {
     const wrapper = mountWithContexts(
-      <OrganizationAccess organization={organization} />
+      <ResourceAccessList resource={organization} apiModel={OrganizationsAPI} />
     );
     expect(wrapper.find('PaginatedDataList')).toHaveLength(1);
   });
 
   test('should fetch and display access records on mount', async done => {
     const wrapper = mountWithContexts(
-      <OrganizationAccess organization={organization} />
+      <ResourceAccessList resource={organization} apiModel={OrganizationsAPI} />
     );
     await waitForElement(
       wrapper,
-      'OrganizationAccessItem',
+      'ResourceAccessListItem',
       el => el.length === 2
     );
     expect(wrapper.find('PaginatedDataList').prop('items')).toEqual(
       data.results
     );
-    expect(wrapper.find('OrganizationAccess').state('hasContentLoading')).toBe(
+    expect(wrapper.find('ResourceAccessList').state('hasContentLoading')).toBe(
       false
     );
-    expect(wrapper.find('OrganizationAccess').state('contentError')).toBe(null);
+    expect(wrapper.find('ResourceAccessList').state('contentError')).toBe(null);
     done();
   });
 
   test('should open confirmation dialog when deleting role', async done => {
     const wrapper = mountWithContexts(
-      <OrganizationAccess organization={organization} />
+      <ResourceAccessList resource={organization} apiModel={OrganizationsAPI} />
     );
     await sleep(0);
     wrapper.update();
@@ -118,7 +118,7 @@ describe('<OrganizationAccess />', () => {
     button.prop('onClick')();
     wrapper.update();
 
-    const component = wrapper.find('OrganizationAccess');
+    const component = wrapper.find('ResourceAccessList');
     expect(component.state('deletionRole')).toEqual(
       data.results[0].summary_fields.direct_access[0].role
     );
@@ -129,7 +129,7 @@ describe('<OrganizationAccess />', () => {
 
   it('should close dialog when cancel button clicked', async done => {
     const wrapper = mountWithContexts(
-      <OrganizationAccess organization={organization} />
+      <ResourceAccessList resource={organization} apiModel={OrganizationsAPI} />
     );
     await sleep(0);
     wrapper.update();
@@ -138,7 +138,7 @@ describe('<OrganizationAccess />', () => {
     wrapper.update();
 
     wrapper.find('DeleteRoleConfirmationModal').prop('onCancel')();
-    const component = wrapper.find('OrganizationAccess');
+    const component = wrapper.find('ResourceAccessList');
     expect(component.state('deletionRole')).toBeNull();
     expect(component.state('deletionRecord')).toBeNull();
     expect(TeamsAPI.disassociateRole).not.toHaveBeenCalled();
@@ -148,7 +148,7 @@ describe('<OrganizationAccess />', () => {
 
   it('should delete user role', async done => {
     const wrapper = mountWithContexts(
-      <OrganizationAccess organization={organization} />
+      <ResourceAccessList resource={organization} apiModel={OrganizationsAPI} />
     );
     const button = await waitForElement(
       wrapper,
@@ -170,7 +170,7 @@ describe('<OrganizationAccess />', () => {
 
     await sleep(0);
     wrapper.update();
-    const component = wrapper.find('OrganizationAccess');
+    const component = wrapper.find('ResourceAccessList');
     expect(component.state('deletionRole')).toBeNull();
     expect(component.state('deletionRecord')).toBeNull();
     expect(TeamsAPI.disassociateRole).not.toHaveBeenCalled();
@@ -181,7 +181,7 @@ describe('<OrganizationAccess />', () => {
 
   it('should delete team role', async done => {
     const wrapper = mountWithContexts(
-      <OrganizationAccess organization={organization} />
+      <ResourceAccessList resource={organization} apiModel={OrganizationsAPI} />
     );
     const button = await waitForElement(
       wrapper,
@@ -203,7 +203,7 @@ describe('<OrganizationAccess />', () => {
 
     await sleep(0);
     wrapper.update();
-    const component = wrapper.find('OrganizationAccess');
+    const component = wrapper.find('ResourceAccessList');
     expect(component.state('deletionRole')).toBeNull();
     expect(component.state('deletionRecord')).toBeNull();
     expect(TeamsAPI.disassociateRole).toHaveBeenCalledWith(5, 3);

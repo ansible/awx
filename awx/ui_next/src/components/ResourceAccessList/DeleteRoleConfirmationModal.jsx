@@ -39,7 +39,7 @@ class DeleteRoleConfirmationModal extends React.Component {
           <Button
             key="delete"
             variant="danger"
-            aria-label="Confirm delete"
+            aria-label={i18n._(t`Confirm delete`)}
             onClick={onConfirm}
           >
             {i18n._(t`Delete`)}
@@ -57,11 +57,7 @@ class DeleteRoleConfirmationModal extends React.Component {
             <br />
             <br />
             {i18n._(
-              t`If you ${(
-                <b>
-                  <i>only</i>
-                </b>
-              )} want to remove access for this particular user, please remove them from the team.`
+              t`If you only want to remove access for this particular user, please remove them from the team.`
             )}
           </Fragment>
         ) : (
