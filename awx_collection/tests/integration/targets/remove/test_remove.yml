@@ -1,0 +1,44 @@
+- hosts: localhost
+  gather_facts: no
+  tasks:
+  - awx.awx.tower_job_template:
+      name: demo
+      playbook: awx_collection/tests/integration/targets/zen/test_job_run.yml
+      project: demo
+      state: absent
+
+  - awx.awx.tower_credential:
+      name: demo_custom
+      credential_type: single_env_var
+      organization: demo
+      state: absent
+
+  - awx.awx.tower_credential:
+      name: demo_vault
+      credential_type: Vault
+      state: absent
+      organization: demo
+
+  - awx.awx.tower_credential_type:
+      name: single_env_var
+      kind: cloud
+      state: absent
+
+  - awx.awx.tower_project:
+      name: demo
+      organization: demo
+      state: absent
+
+  - awx.awx.tower_host:
+      name: demo
+      inventory: demo
+      state: absent
+
+  - awx.awx.tower_inventory:
+      name: demo
+      organization: demo
+      state: absent
+
+  - awx.awx.tower_organization:
+      name: demo
+      state: absent

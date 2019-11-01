@@ -401,6 +401,7 @@ prepare_collection_venv:
 	$(VENV_BASE)/awx/bin/pip install --target=$(COLLECTION_VENV) git+https://github.com/ansible/tower-cli.git
 
 COLLECTION_TEST_DIRS ?= awx_collection/test/awx
+COLLECTION_INTEGRATION_TARGET ?= demo
 COLLECTION_PACKAGE ?= awx
 COLLECTION_NAMESPACE ?= awx
 
@@ -421,6 +422,13 @@ test_collection_sanity:
 	cp -Ra awx_collection sanity/ansible_collections/awx/awx  # symlinks do not work
 	cd sanity/ansible_collections/awx/awx && git init && git add . # requires both this file structure and a git repo, so there you go
 	cd sanity/ansible_collections/awx/awx && ansible-test sanity
+
+test_collection_integration:
+	rm -rf sanity
+	mkdir -p sanity/ansible_collections/awx
+	cp -Ra awx_collection sanity/ansible_collections/awx/awx
+	cd sanity/ansible_collections/awx/awx && git init && git add .
+	cd sanity/ansible_collections/awx/awx && ansible-test integration $(COLLECTION_INTEGRATION_TARGET)
 
 build_collection:
 	ansible-playbook -i localhost, awx_collection/template_galaxy.yml -e collection_package=$(COLLECTION_PACKAGE) -e collection_namespace=$(COLLECTION_NAMESPACE) -e collection_version=$(VERSION)

@@ -1,0 +1,56 @@
+- hosts: localhost
+  gather_facts: no
+  tasks:
+  - awx.awx.tower_organization:
+      name: demo
+
+  - awx.awx.tower_inventory:
+      name: demo
+      organization: demo
+
+  - awx.awx.tower_host:
+      name: demo
+      variables: "ansible_connection: local"
+      inventory: demo
+
+  - awx.awx.tower_project:
+      name: demo
+      organization: demo
+      scm_type: git
+      scm_url: https://github.com/ansible/awx.git
+
+  - awx.awx.tower_credential_type:
+      name: single_env_var
+      kind: cloud
+      inputs:
+        fields:
+          - id: env_value
+            label: Value to set this environment variable to
+            default: foo
+      injectors:
+        env:
+          TEST_ENV_VAR: !unsafe "{{ env_value }}"
+
+  - awx.awx.tower_credential:
+      name: demo_vault
+      credential_type: Vault
+      organization: demo
+      inputs:
+        vault_id: awx
+        vault_password: foobar  # also see ../zen/password_file
+
+  - awx.awx.tower_credential:
+      name: demo_custom
+      credential_type: single_env_var
+      organization: demo
+      inputs:
+        env_value: "use of custom input is confirmed"
+
+  - awx.awx.tower_job_template:
+      name: demo
+      project: demo
+      inventory: demo
+      playbook: awx_collection/tests/integration/targets/zen/test_job_run.yml
+      credentials:
+        - demo_vault
+        - demo_custom
