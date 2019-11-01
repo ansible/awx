@@ -1,98 +1,91 @@
-import React, { Component } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-
-import { withRouter } from 'react-router-dom';
-import { Formik } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-
+import { Formik, Field } from 'formik';
 import { Form } from '@patternfly/react-core';
-
-import FormRow from '@components/FormRow';
-import FormField from '@components/FormField';
 import FormActionGroup from '@components/FormActionGroup/FormActionGroup';
+import FormField from '@components/FormField';
+import FormRow from '@components/FormRow';
+import OrganizationLookup from '@components/Lookup/OrganizationLookup';
 import { required } from '@util/validators';
 
-class TeamForm extends Component {
-  constructor(props) {
-    super(props);
+function TeamForm(props) {
+  const { team, handleCancel, handleSubmit, i18n } = props;
+  const [organization, setOrganization] = useState(
+    team.summary_fields ? team.summary_fields.organization : null
+  );
 
-    this.handleSubmit = this.handleSubmit.bind(this);
-
-    this.state = {
-      formIsValid: true,
-    };
-  }
-
-  isEditingNewTeam() {
-    const { team } = this.props;
-    return !team.id;
-  }
-
-  handleSubmit(values) {
-    const { handleSubmit } = this.props;
-
-    handleSubmit(values);
-  }
-
-  render() {
-    const { team, handleCancel, i18n } = this.props;
-    const { formIsValid, error } = this.state;
-
-    return (
-      <Formik
-        initialValues={{
-          name: team.name,
-          description: team.description,
-        }}
-        onSubmit={this.handleSubmit}
-        render={formik => (
-          <Form autoComplete="off" onSubmit={formik.handleSubmit}>
-            <FormRow>
-              <FormField
-                id="team-name"
-                name="name"
-                type="text"
-                label={i18n._(t`Name`)}
-                validate={required(null, i18n)}
-                isRequired
-              />
-              <FormField
-                id="team-description"
-                name="description"
-                type="text"
-                label={i18n._(t`Description`)}
-              />
-            </FormRow>
-            <FormActionGroup
-              onCancel={handleCancel}
-              onSubmit={formik.handleSubmit}
-              submitDisabled={!formIsValid}
+  return (
+    <Formik
+      initialValues={{
+        description: team.description || '',
+        name: team.name || '',
+        organization: team.organization || '',
+      }}
+      onSubmit={handleSubmit}
+      render={formik => (
+        <Form
+          autoComplete="off"
+          onSubmit={formik.handleSubmit}
+          css="padding: 0 24px"
+        >
+          <FormRow>
+            <FormField
+              id="team-name"
+              label={i18n._(t`Name`)}
+              name="name"
+              type="text"
+              validate={required(null, i18n)}
+              isRequired
             />
-            {error ? <div>error</div> : null}
-          </Form>
-        )}
-      />
-    );
-  }
+            <FormField
+              id="team-description"
+              label={i18n._(t`Description`)}
+              name="description"
+              type="text"
+            />
+            <Field
+              name="organization"
+              validate={required(
+                i18n._(t`Select a value for this field`),
+                i18n
+              )}
+              render={({ form }) => (
+                <OrganizationLookup
+                  helperTextInvalid={form.errors.organization}
+                  isValid={
+                    !form.touched.organization || !form.errors.organization
+                  }
+                  onBlur={() => form.setFieldTouched('organization')}
+                  onChange={value => {
+                    form.setFieldValue('organization', value.id);
+                    setOrganization(value);
+                  }}
+                  value={organization}
+                  required
+                />
+              )}
+            />
+          </FormRow>
+          <FormActionGroup
+            onCancel={handleCancel}
+            onSubmit={formik.handleSubmit}
+          />
+        </Form>
+      )}
+    />
+  );
 }
 
-FormField.propTypes = {
-  label: PropTypes.oneOfType([PropTypes.object, PropTypes.string]).isRequired,
-};
-
 TeamForm.propTypes = {
-  team: PropTypes.shape(),
-  handleSubmit: PropTypes.func.isRequired,
   handleCancel: PropTypes.func.isRequired,
+  handleSubmit: PropTypes.func.isRequired,
+  team: PropTypes.shape({}),
 };
 
 TeamForm.defaultProps = {
-  team: {
-    name: '',
-    description: '',
-  },
+  team: {},
 };
 
-export { TeamForm as _TeamForm };
-export default withI18n()(withRouter(TeamForm));
+export default withI18n()(TeamForm);

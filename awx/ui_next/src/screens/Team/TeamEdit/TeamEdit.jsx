@@ -13,7 +13,6 @@ class TeamEdit extends Component {
     super(props);
 
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.submitInstanceGroups = this.submitInstanceGroups.bind(this);
     this.handleCancel = this.handleCancel.bind(this);
     this.handleSuccess = this.handleSuccess.bind(this);
 
@@ -22,11 +21,10 @@ class TeamEdit extends Component {
     };
   }
 
-  async handleSubmit(values, groupsToAssociate, groupsToDisassociate) {
+  async handleSubmit(values) {
     const { team } = this.props;
     try {
       await TeamsAPI.update(team.id, values);
-      await this.submitInstanceGroups(groupsToAssociate, groupsToDisassociate);
       this.handleSuccess();
     } catch (err) {
       this.setState({ error: err });
@@ -47,24 +45,6 @@ class TeamEdit extends Component {
       history,
     } = this.props;
     history.push(`/teams/${id}/details`);
-  }
-
-  async submitInstanceGroups(groupsToAssociate, groupsToDisassociate) {
-    const { team } = this.props;
-    try {
-      await Promise.all(
-        groupsToAssociate.map(id =>
-          TeamsAPI.associateInstanceGroup(team.id, id)
-        )
-      );
-      await Promise.all(
-        groupsToDisassociate.map(id =>
-          TeamsAPI.disassociateInstanceGroup(team.id, id)
-        )
-      );
-    } catch (err) {
-      this.setState({ error: err });
-    }
   }
 
   render() {

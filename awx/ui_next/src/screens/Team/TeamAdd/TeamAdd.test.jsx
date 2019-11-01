@@ -12,6 +12,7 @@ describe('<TeamAdd />', () => {
     const updatedTeamData = {
       name: 'new name',
       description: 'new description',
+      organization: 1,
     };
     wrapper.find('TeamForm').prop('handleSubmit')(updatedTeamData);
     expect(TeamsAPI.create).toHaveBeenCalledWith(updatedTeamData);
@@ -40,11 +41,18 @@ describe('<TeamAdd />', () => {
     const teamData = {
       name: 'new name',
       description: 'new description',
+      organization: 1,
     };
     TeamsAPI.create.mockResolvedValueOnce({
       data: {
         id: 5,
         ...teamData,
+        summary_fields: {
+          organization: {
+            id: 1,
+            name: 'Default',
+          },
+        },
       },
     });
     const wrapper = mountWithContexts(<TeamAdd />, {
