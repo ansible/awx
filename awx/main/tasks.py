@@ -1938,7 +1938,8 @@ class RunProjectUpdate(BaseTask):
         env['TMP'] = settings.AWX_PROOT_BASE_PATH
         env['PROJECT_UPDATE_ID'] = str(project_update.pk)
         env['ANSIBLE_CALLBACK_PLUGINS'] = self.get_path_to('..', 'plugins', 'callback')
-        env['ANSIBLE_GALAXY_IGNORE'] = True
+        if settings.GALAXY_IGNORE_CERTS:
+            env['ANSIBLE_GALAXY_IGNORE'] = True
         # Set up the public Galaxy server, if enabled
         if settings.PUBLIC_GALAXY_ENABLED:
             galaxy_servers = [settings.PUBLIC_GALAXY_SERVER]

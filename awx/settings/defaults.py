@@ -605,6 +605,9 @@ PUBLIC_GALAXY_SERVER = {
     'url': 'https://galaxy.ansible.com'
 }
 
+# Applies to any galaxy server
+GALAXY_IGNORE_CERTS = False
+
 # List of dicts of fallback (additional) Galaxy servers.  If configured, these
 # will be higher precedence than public Galaxy, but lower than primary Galaxy.
 # Available options: 'id', 'url', 'username', 'password', 'token', 'auth_url'
