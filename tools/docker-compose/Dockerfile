@@ -112,7 +112,7 @@ RUN rm -rf /root/.cache
 
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
-ENV LC_ALL en_US.UTF-8
+ENV LC_ALL C.utf8
 
 ADD tools/docker-compose/nginx.conf /etc/nginx/nginx.conf
 ADD tools/docker-compose/nginx.vh.default.conf /etc/nginx/conf.d/nginx.vh.default.conf
