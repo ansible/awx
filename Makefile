@@ -381,7 +381,6 @@ test:
 prepare_collection_venv:
 	rm -rf $(COLLECTION_VENV)
 	mkdir $(COLLECTION_VENV)
-	ln -s /usr/lib/python2.7/site-packages/ansible $(COLLECTION_VENV)/ansible
 	$(VENV_BASE)/awx/bin/pip install --target=$(COLLECTION_VENV) git+https://github.com/ansible/tower-cli.git
 
 COLLECTION_TEST_DIRS ?= awx_collection/test/awx
