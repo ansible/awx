@@ -30,6 +30,7 @@ function ProjectDetail({ project, i18n }) {
     scm_branch,
     scm_clean,
     scm_delete_on_update,
+    scm_refspec,
     scm_type,
     scm_update_on_launch,
     scm_update_cache_timeout,
@@ -98,6 +99,7 @@ function ProjectDetail({ project, i18n }) {
         <Detail label={i18n._(t`SCM Type`)} value={scm_type} />
         <Detail label={i18n._(t`SCM URL`)} value={scm_url} />
         <Detail label={i18n._(t`SCM Branch`)} value={scm_branch} />
+        <Detail label={i18n._(t`SCM Refspec`)} value={scm_refspec} />
         {summary_fields.credential && (
           <Detail
             label={i18n._(t`SCM Credential`)}
