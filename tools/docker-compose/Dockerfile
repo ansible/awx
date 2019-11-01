@@ -17,6 +17,7 @@ RUN dnf -y update && \
   gcc \
   gcc-c++ \
   git-core \
+  glibc-langpack-en \
   krb5-workstation \
   libcurl-devel \
   libffi-devel \
