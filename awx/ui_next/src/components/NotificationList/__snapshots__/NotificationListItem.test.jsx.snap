@@ -331,9 +331,9 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                               "componentStyle": ComponentStyle {
                                 "componentId": "NotificationListItem__Switch-w674ng-1",
                                 "isStatic": true,
-                                "lastClassName": "hbNxaH",
+                                "lastClassName": "hfzRow",
                                 "rules": Array [
-                                  "display:flex;flex-wrap:no-wrap;",
+                                  "display:flex;flex-wrap:no-wrap;--pf-c-switch__toggle-icon--Offset:0.125rem;",
                                 ],
                               },
                               "displayName": "NotificationListItem__Switch",
@@ -356,7 +356,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                         >
                           <Component
                             aria-label="Toggle notification start"
-                            className="NotificationListItem__Switch-w674ng-1 hbNxaH"
+                            className="NotificationListItem__Switch-w674ng-1 hfzRow"
                             id="notification-9000-started-toggle"
                             isChecked={false}
                             isDisabled={false}
@@ -369,7 +369,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                               componentProps={
                                 Object {
                                   "aria-label": "Toggle notification start",
-                                  "className": "NotificationListItem__Switch-w674ng-1 hbNxaH",
+                                  "className": "NotificationListItem__Switch-w674ng-1 hfzRow",
                                   "id": "notification-9000-started-toggle",
                                   "isChecked": false,
                                   "isDisabled": false,
@@ -382,7 +382,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                             >
                               <Switch
                                 aria-label="Toggle notification start"
-                                className="NotificationListItem__Switch-w674ng-1 hbNxaH"
+                                className="NotificationListItem__Switch-w674ng-1 hfzRow"
                                 id="notification-9000-started-toggle"
                                 isChecked={false}
                                 isDisabled={false}
@@ -397,7 +397,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                                 }
                               >
                                 <label
-                                  className="pf-c-switch NotificationListItem__Switch-w674ng-1 hbNxaH"
+                                  className="pf-c-switch NotificationListItem__Switch-w674ng-1 hfzRow"
                                   htmlFor="notification-9000-started-toggle"
                                 >
                                   <input
@@ -451,9 +451,9 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                               "componentStyle": ComponentStyle {
                                 "componentId": "NotificationListItem__Switch-w674ng-1",
                                 "isStatic": true,
-                                "lastClassName": "hbNxaH",
+                                "lastClassName": "hfzRow",
                                 "rules": Array [
-                                  "display:flex;flex-wrap:no-wrap;",
+                                  "display:flex;flex-wrap:no-wrap;--pf-c-switch__toggle-icon--Offset:0.125rem;",
                                 ],
                               },
                               "displayName": "NotificationListItem__Switch",
@@ -476,7 +476,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                         >
                           <Component
                             aria-label="Toggle notification success"
-                            className="NotificationListItem__Switch-w674ng-1 hbNxaH"
+                            className="NotificationListItem__Switch-w674ng-1 hfzRow"
                             id="notification-9000-success-toggle"
                             isChecked={false}
                             isDisabled={false}
@@ -489,7 +489,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                               componentProps={
                                 Object {
                                   "aria-label": "Toggle notification success",
-                                  "className": "NotificationListItem__Switch-w674ng-1 hbNxaH",
+                                  "className": "NotificationListItem__Switch-w674ng-1 hfzRow",
                                   "id": "notification-9000-success-toggle",
                                   "isChecked": false,
                                   "isDisabled": false,
@@ -502,7 +502,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                             >
                               <Switch
                                 aria-label="Toggle notification success"
-                                className="NotificationListItem__Switch-w674ng-1 hbNxaH"
+                                className="NotificationListItem__Switch-w674ng-1 hfzRow"
                                 id="notification-9000-success-toggle"
                                 isChecked={false}
                                 isDisabled={false}
@@ -517,7 +517,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                                 }
                               >
                                 <label
-                                  className="pf-c-switch NotificationListItem__Switch-w674ng-1 hbNxaH"
+                                  className="pf-c-switch NotificationListItem__Switch-w674ng-1 hfzRow"
                                   htmlFor="notification-9000-success-toggle"
                                 >
                                   <input
@@ -571,9 +571,9 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                               "componentStyle": ComponentStyle {
                                 "componentId": "NotificationListItem__Switch-w674ng-1",
                                 "isStatic": true,
-                                "lastClassName": "hbNxaH",
+                                "lastClassName": "hfzRow",
                                 "rules": Array [
-                                  "display:flex;flex-wrap:no-wrap;",
+                                  "display:flex;flex-wrap:no-wrap;--pf-c-switch__toggle-icon--Offset:0.125rem;",
                                 ],
                               },
                               "displayName": "NotificationListItem__Switch",
@@ -596,7 +596,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                         >
                           <Component
                             aria-label="Toggle notification failure"
-                            className="NotificationListItem__Switch-w674ng-1 hbNxaH"
+                            className="NotificationListItem__Switch-w674ng-1 hfzRow"
                             id="notification-9000-error-toggle"
                             isChecked={false}
                             isDisabled={false}
@@ -609,7 +609,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                               componentProps={
                                 Object {
                                   "aria-label": "Toggle notification failure",
-                                  "className": "NotificationListItem__Switch-w674ng-1 hbNxaH",
+                                  "className": "NotificationListItem__Switch-w674ng-1 hfzRow",
                                   "id": "notification-9000-error-toggle",
                                   "isChecked": false,
                                   "isDisabled": false,
@@ -622,7 +622,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                             >
                               <Switch
                                 aria-label="Toggle notification failure"
-                                className="NotificationListItem__Switch-w674ng-1 hbNxaH"
+                                className="NotificationListItem__Switch-w674ng-1 hfzRow"
                                 id="notification-9000-error-toggle"
                                 isChecked={false}
                                 isDisabled={false}
@@ -637,7 +637,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                                 }
                               >
                                 <label
-                                  className="pf-c-switch NotificationListItem__Switch-w674ng-1 hbNxaH"
+                                  className="pf-c-switch NotificationListItem__Switch-w674ng-1 hfzRow"
                                   htmlFor="notification-9000-error-toggle"
                                 >
                                   <input

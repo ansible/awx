@@ -1,15 +1,8 @@
 import React, { Component } from 'react';
-import { withRouter, Link } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
-
 import { t } from '@lingui/macro';
-import {
-  Card,
-  PageSection,
-  Dropdown,
-  DropdownItem,
-  DropdownPosition,
-} from '@patternfly/react-core';
+import { Card, PageSection } from '@patternfly/react-core';
 
 import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '@api';
 import AlertModal from '@components/AlertModal';
@@ -17,11 +10,11 @@ import DatalistToolbar from '@components/DataListToolbar';
 import ErrorDetail from '@components/ErrorDetail';
 import PaginatedDataList, {
   ToolbarDeleteButton,
-  ToolbarAddButton,
 } from '@components/PaginatedDataList';
 import { getQSConfig, parseQueryString } from '@util/qs';
 
 import TemplateListItem from './TemplateListItem';
+import TemplateAddButton from './TemplateAddButton';
 
 // The type value in const QS_CONFIG below does not have a space between job_template and
 // workflow_job_template so the params sent to the API match what the api expects.
@@ -43,7 +36,6 @@ class TemplatesList extends Component {
       selected: [],
       templates: [],
       itemCount: 0,
-      isAddOpen: false,
     };
 
     this.loadTemplates = this.loadTemplates.bind(this);
@@ -51,7 +43,6 @@ class TemplatesList extends Component {
     this.handleSelect = this.handleSelect.bind(this);
     this.handleTemplateDelete = this.handleTemplateDelete.bind(this);
     this.handleDeleteErrorClose = this.handleDeleteErrorClose.bind(this);
-    this.handleAddToggle = this.handleAddToggle.bind(this);
   }
 
   componentDidMount() {
@@ -86,21 +77,6 @@ class TemplatesList extends Component {
       this.setState({ selected: selected.filter(s => s.id !== template.id) });
     } else {
       this.setState({ selected: selected.concat(template) });
-    }
-  }
-
-  handleAddToggle(e) {
-    const { isAddOpen } = this.state;
-    document.addEventListener('click', this.handleAddToggle, false);
-
-    if (this.node && this.node.contains(e.target) && isAddOpen) {
-      document.removeEventListener('click', this.handleAddToggle, false);
-      this.setState({ isAddOpen: false });
-    } else if (this.node && this.node.contains(e.target) && !isAddOpen) {
-      this.setState({ isAddOpen: true });
-    } else {
-      this.setState({ isAddOpen: false });
-      document.removeEventListener('click', this.handleAddToggle, false);
     }
   }
 
@@ -178,7 +154,6 @@ class TemplatesList extends Component {
       templates,
       itemCount,
       selected,
-      isAddOpen,
       actions,
     } = this.state;
     const { match, i18n } = this.props;
@@ -231,35 +206,7 @@ class TemplatesList extends Component {
                     itemsToDelete={selected}
                     pluralizedItemName="Templates"
                   />,
-                  canAdd && (
-                    <div
-                      ref={node => {
-                        this.node = node;
-                      }}
-                      key="add"
-                    >
-                      <Dropdown
-                        isPlain
-                        isOpen={isAddOpen}
-                        position={DropdownPosition.right}
-                        toggle={
-                          <ToolbarAddButton onClick={this.handleAddToggle} />
-                        }
-                        dropdownItems={[
-                          <DropdownItem key="job">
-                            <Link to={`${match.url}/job_template/add/`}>
-                              {i18n._(t`Job Template`)}
-                            </Link>
-                          </DropdownItem>,
-                          <DropdownItem key="workflow">
-                            <Link to={`${match.url}_workflow/add/`}>
-                              {i18n._(t`Workflow Template`)}
-                            </Link>
-                          </DropdownItem>,
-                        ]}
-                      />
-                    </div>
-                  ),
+                  canAdd && <TemplateAddButton key="add" />,
                 ]}
               />
             )}
@@ -273,35 +220,7 @@ class TemplatesList extends Component {
                 isSelected={selected.some(row => row.id === template.id)}
               />
             )}
-            emptyStateControls={
-              canAdd && (
-                <div
-                  ref={node => {
-                    this.node = node;
-                  }}
-                  key="add"
-                >
-                  <Dropdown
-                    isPlain
-                    isOpen={isAddOpen}
-                    position={DropdownPosition.right}
-                    toggle={<ToolbarAddButton onClick={this.handleAddToggle} />}
-                    dropdownItems={[
-                      <DropdownItem key="job">
-                        <Link to={`${match.url}/job_template/add/`}>
-                          {i18n._(t`Job Template`)}
-                        </Link>
-                      </DropdownItem>,
-                      <DropdownItem key="workflow">
-                        <Link to={`${match.url}_workflow/add/`}>
-                          {i18n._(t`Workflow Template`)}
-                        </Link>
-                      </DropdownItem>,
-                    ]}
-                  />
-                </div>
-              )
-            }
+            emptyStateControls={canAdd && <TemplateAddButton />}
           />
         </Card>
         <AlertModal
