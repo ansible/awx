@@ -71,7 +71,7 @@ from awx.main.utils import (get_ssh_version, update_scm_url,
                             ignore_inventory_group_removal, extract_ansible_vars, schedule_task_manager,
                             get_awx_version)
 from awx.main.utils.ansible import read_ansible_config
-from awx.main.utils.common import get_ansible_version, _get_ansible_version, get_custom_venv_choices
+from awx.main.utils.common import _get_ansible_version, get_custom_venv_choices
 from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja
 from awx.main.utils.reload import stop_local_services
 from awx.main.utils.pglock import advisory_lock
@@ -1734,14 +1734,16 @@ class RunJob(BaseTask):
 
         project_path = job.project.get_project_path(check_if_exists=False)
         job_revision = job.project.scm_revision
-        needs_sync = True
+        sync_needs = []
+        all_sync_needs = ['update_{}'.format(job.project.scm_type), 'install_roles', 'install_collections']
         if not job.project.scm_type:
-            # manual projects are not synced, user has responsibility for that
-            needs_sync = False
+            pass # manual projects are not synced, user has responsibility for that
         elif not os.path.exists(project_path):
             logger.debug('Performing fresh clone of {} on this instance.'.format(job.project))
+            sync_needs = all_sync_needs
         elif not job.project.scm_revision:
             logger.debug('Revision not known for {}, will sync with remote'.format(job.project))
+            sync_needs = all_sync_needs
         elif job.project.scm_type == 'git':
             git_repo = git.Repo(project_path)
             try:
@@ -1752,23 +1754,27 @@ class RunJob(BaseTask):
                 if desired_revision == current_revision:
                     job_revision = desired_revision
                     logger.info('Skipping project sync for {} because commit is locally available'.format(job.log_format))
-                    needs_sync = False
+                else:
+                    sync_needs = all_sync_needs
             except (ValueError, BadGitName):
                 logger.debug('Needed commit for {} not in local source tree, will sync with remote'.format(job.log_format))
+                sync_needs = all_sync_needs
+        else:
+            sync_needs = all_sync_needs
         # Galaxy requirements are not supported for manual projects
-        if not needs_sync and job.project.scm_type:
+        if not sync_needs and job.project.scm_type:
             # see if we need a sync because of presence of roles
             galaxy_req_path = os.path.join(project_path, 'roles', 'requirements.yml')
             if os.path.exists(galaxy_req_path):
                 logger.debug('Running project sync for {} because of galaxy role requirements.'.format(job.log_format))
-                needs_sync = True
+                sync_needs.append('install_roles')
 
             galaxy_collections_req_path = os.path.join(project_path, 'collections', 'requirements.yml')
             if os.path.exists(galaxy_collections_req_path):
                 logger.debug('Running project sync for {} because of galaxy collections requirements.'.format(job.log_format))
-                needs_sync = True
+                sync_needs.append('install_collections')
 
-        if needs_sync:
+        if sync_needs:
             pu_ig = job.instance_group
             pu_en = job.execution_node
             if job.is_isolated() is True:
@@ -1778,6 +1784,7 @@ class RunJob(BaseTask):
             sync_metafields = dict(
                 launch_type="sync",
                 job_type='run',
+                job_tags=','.join(sync_needs),
                 status='running',
                 instance_group = pu_ig,
                 execution_node=pu_en,
@@ -1785,6 +1792,8 @@ class RunJob(BaseTask):
             )
             if job.scm_branch and job.scm_branch != job.project.scm_branch:
                 sync_metafields['scm_branch'] = job.scm_branch
+            if 'update_' not in sync_metafields['job_tags']:
+                sync_metafields['scm_revision'] = job_revision
             local_project_sync = job.project.create_project_update(_eager_fields=sync_metafields)
             # save the associated job before calling run() so that a
             # cancel() call on the job can cancel the project update
@@ -2008,8 +2017,8 @@ class RunProjectUpdate(BaseTask):
         args = []
         if getattr(settings, 'PROJECT_UPDATE_VVV', False):
             args.append('-vvv')
-        else:
-            args.append('-v')
+        if project_update.job_tags:
+            args.extend(['-t', project_update.job_tags])
         return args
 
     def build_extra_vars_file(self, project_update, private_data_dir):
@@ -2023,28 +2032,16 @@ class RunProjectUpdate(BaseTask):
             scm_branch = project_update.project.scm_revision
         elif not scm_branch:
             scm_branch = {'hg': 'tip'}.get(project_update.scm_type, 'HEAD')
-        if project_update.job_type == 'check':
-            roles_enabled = False
-            collections_enabled = False
-        else:
-            roles_enabled = getattr(settings, 'AWX_ROLES_ENABLED', True)
-            collections_enabled = getattr(settings, 'AWX_COLLECTIONS_ENABLED', True)
-            # collections were introduced in Ansible version 2.8
-            if Version(get_ansible_version()) <= Version('2.8'):
-                collections_enabled = False
         extra_vars.update({
             'project_path': project_update.get_project_path(check_if_exists=False),
             'insights_url': settings.INSIGHTS_URL_BASE,
             'awx_license_type': get_license(show_key=False).get('license_type', 'UNLICENSED'),
             'awx_version': get_awx_version(),
-            'scm_type': project_update.scm_type,
             'scm_url': scm_url,
             'scm_branch': scm_branch,
             'scm_clean': project_update.scm_clean,
-            'scm_delete_on_update': project_update.scm_delete_on_update if project_update.job_type == 'check' else False,
-            'scm_full_checkout': True if project_update.job_type == 'run' else False,
-            'roles_enabled': roles_enabled,
-            'collections_enabled': collections_enabled,
+            'roles_enabled': settings.AWX_ROLES_ENABLED,
+            'collections_enabled': settings.AWX_COLLECTIONS_ENABLED,
         })
         if project_update.job_type != 'check' and self.job_private_data_dir:
             extra_vars['collections_destination'] = os.path.join(self.job_private_data_dir, 'requirements_collections')
@@ -2217,12 +2214,15 @@ class RunProjectUpdate(BaseTask):
             copy_tree(project_path, destination_folder)
 
     def post_run_hook(self, instance, status):
+        if self.playbook_new_revision:
+            instance.scm_revision = self.playbook_new_revision
+            instance.save(update_fields=['scm_revision'])
         if self.job_private_data_dir:
             # copy project folder before resetting to default branch
             # because some git-tree-specific resources (like submodules) might matter
             self.make_local_copy(
                 instance.get_project_path(check_if_exists=False), os.path.join(self.job_private_data_dir, 'project'),
-                instance.scm_type, self.playbook_new_revision
+                instance.scm_type, instance.scm_revision
             )
             if self.original_branch:
                 # for git project syncs, non-default branches can be problems
@@ -2234,9 +2234,6 @@ class RunProjectUpdate(BaseTask):
                     logger.exception('Failed to restore project repo to prior state after {}'.format(instance.log_format))
         self.release_lock(instance)
         p = instance.project
-        if self.playbook_new_revision:
-            instance.scm_revision = self.playbook_new_revision
-            instance.save(update_fields=['scm_revision'])
         if instance.job_type == 'check' and status not in ('failed', 'canceled',):
             if self.playbook_new_revision:
                 p.scm_revision = self.playbook_new_revision
@@ -2497,6 +2494,7 @@ class RunInventoryUpdate(BaseTask):
                 _eager_fields=dict(
                     launch_type="sync",
                     job_type='run',
+                    job_tags='update_{},install_collections'.format(source_project.scm_type),  # roles are never valid for inventory
                     status='running',
                     execution_node=inventory_update.execution_node,
                     instance_group = inventory_update.instance_group,

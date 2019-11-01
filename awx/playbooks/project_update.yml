@@ -1,32 +1,33 @@
 ---
 # The following variables will be set by the runner of this playbook:
 # project_path: PROJECTS_DIR/_local_path_
-# scm_type: git|hg|svn|insights
 # scm_url: https://server/repo
 # insights_url: Insights service URL (from configuration)
 # scm_branch: branch/tag/revision (HEAD if unset)
 # scm_clean: true/false
-# scm_delete_on_update: true/false
-# scm_full_checkout: true (if for a job template run), false (if retrieving revision)
 # scm_username: username (only for svn/insights)
 # scm_password: password (only for svn/insights)
 # scm_accept_hostkey: true/false (only for git, set automatically)
 # scm_refspec: a refspec to fetch in addition to obtaining version
-# roles_enabled: Allow us to pull roles from a requirements.yml file
+# roles_enabled: Value of the global setting to enable roles downloading
+# collections_enabled: Value of the global setting to enable collections downloading
 # roles_destination: Path to save roles from galaxy to
+# collections_destination: Path to save collections from galaxy to
 # awx_version: Current running version of the awx or tower as a string
 # awx_license_type: "open" for AWX; else presume Tower
 
-- hosts: all
+- hosts: localhost
   gather_facts: false
+  connection: local
+  name: Update source tree if necessary
   tasks:
 
     - name: delete project directory before update
       file:
         path: "{{project_path|quote}}"
         state: absent
-      when: scm_delete_on_update|default('')
-      delegate_to: localhost
+      tags:
+        - delete
 
     - block:
       - name: update project using git
@@ -43,8 +44,8 @@
         set_fact:
           scm_version: "{{ git_result['after'] }}"
         when: "'after' in git_result"
-      when: scm_type == 'git'
-      delegate_to: localhost
+      tags:
+        - update_git
 
     - block:
       - name: update project using hg
@@ -63,8 +64,8 @@
       - name: parse hg version string properly
         set_fact:
           scm_version: "{{scm_version|regex_replace('^([A-Za-z0-9]+).*$', '\\1')}}"
-      when: scm_type == 'hg'
-      delegate_to: localhost
+      tags:
+        - update_hg
 
     - block:
       - name: update project using svn
@@ -87,8 +88,8 @@
       - name: parse subversion version string properly
         set_fact:
           scm_version: "{{scm_version|regex_replace('^.*Revision: ([0-9]+).*$', '\\1')}}"
-      when: scm_type == 'svn'
-      delegate_to: localhost
+      tags:
+        - update_svn
 
     - block:
       - name: Ensure the project directory is present
@@ -110,16 +111,21 @@
         set_fact:
           scm_version: "{{results.version}}"
         when: results is defined
-      when: scm_type == 'insights'
-      delegate_to: localhost
-
+      tags:
+        - update_insights
 
     - name: Repository Version
       debug: msg="Repository Version {{ scm_version }}"
-      when: scm_version is defined
+      tags:
+        - update_git
+        - update_hg
+        - update_svn
+        - update_insights
 
-- hosts: all
+- hosts: localhost
   gather_facts: false
+  connection: local
+  name: Install content with ansible-galaxy command if necessary
   tasks:
 
     - block:
@@ -138,7 +144,8 @@
           ANSIBLE_FORCE_COLOR: False
 
       when: roles_enabled|bool
-      delegate_to: localhost
+      tags:
+        - install_roles
 
     - block:
       - name: detect collections/requirements.yml
@@ -156,5 +163,8 @@
           ANSIBLE_FORCE_COLOR: False
           ANSIBLE_COLLECTIONS_PATHS: "{{ collections_destination }}"
 
-      when: collections_enabled|bool
-      delegate_to: localhost
+      when:
+        - "ansible_version.full is version_compare('2.8', '>=')"
+        - collections_enabled|bool
+      tags:
+        - install_collections
