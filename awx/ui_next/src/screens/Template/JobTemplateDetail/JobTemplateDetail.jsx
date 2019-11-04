@@ -28,6 +28,12 @@ const ButtonGroup = styled.div`
     margin-left: 20px;
   }
 `;
+
+const MissingDetail = styled(Detail)`
+  dd& {
+    color: red;
+  }
+`;
 class JobTemplateDetail extends Component {
   constructor(props) {
     super(props);
@@ -158,12 +164,13 @@ class JobTemplateDetail extends Component {
     );
 
     const renderMissingDataDetail = value => (
-      <Detail missingValue label={value} value={i18n._(t`Deleted`)} />
+
+        <MissingDetail label={value} value={i18n._(t`Deleted`)} />
     );
 
     const inventoryValue = (kind, id) => {
       const inventorykind =
-        kind === 'smart' ? (kind = 'smary_inventory') : (kind = 'inventory');
+        kind === 'smart' ? (kind = 'smart_inventory') : (kind = 'inventory');
 
       return ask_inventory_on_launch ? (
         <Fragment>
