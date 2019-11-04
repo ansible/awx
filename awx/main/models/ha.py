@@ -294,8 +294,8 @@ def on_instance_group_saved(sender, instance, created=False, raw=False, **kwargs
     if created or instance.has_policy_changes():
         if not instance.is_containerized:
             schedule_policy_task()
-        if created or instance.is_containerized:
-            instance.set_default_policy_fields()
+    elif created or instance.is_containerized:
+        instance.set_default_policy_fields()
 
 
 @receiver(post_save, sender=Instance)
