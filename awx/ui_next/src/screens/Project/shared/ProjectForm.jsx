@@ -122,16 +122,23 @@ function ProjectForm({ project, ...props }) {
     scm_update_cache_timeout: 0,
   };
 
+  /* Save current scm subform field values to state */
   const saveSubFormState = form => {
-    const updatedScmFormFields = { ...scmFormFields };
+    const currentScmFormFields = { ...scmFormFields };
 
-    Object.keys(updatedScmFormFields).forEach(label => {
-      updatedScmFormFields[label] = form.values[label];
+    Object.keys(currentScmFormFields).forEach(label => {
+      currentScmFormFields[label] = form.values[label];
     });
 
-    setScmSubFormState(updatedScmFormFields);
+    setScmSubFormState(currentScmFormFields);
   };
 
+  /**
+   * If scm type is !== the initial scm type value,
+   * reset scm subform field values to defaults.
+   * If scm type is === the initial scm type value,
+   * reset scm subform field values to scmSubFormState.
+   */
   const resetScmTypeFields = (value, form) => {
     if (form.values.scm_type === form.initialValues.scm_type) {
       saveSubFormState(form);
