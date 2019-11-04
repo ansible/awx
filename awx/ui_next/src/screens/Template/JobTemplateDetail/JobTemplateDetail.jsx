@@ -164,8 +164,7 @@ class JobTemplateDetail extends Component {
     );
 
     const renderMissingDataDetail = value => (
-
-        <MissingDetail label={value} value={i18n._(t`Deleted`)} />
+      <MissingDetail label={value} value={i18n._(t`Deleted`)} />
     );
 
     const inventoryValue = (kind, id) => {
