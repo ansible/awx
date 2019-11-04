@@ -11,8 +11,8 @@ import {
 
 const GitSubForm = ({
   i18n,
-  scmCredential,
-  setScmCredential,
+  credential,
+  onCredentialSelection,
   scmUpdateOnLaunch,
 }) => (
   <>
@@ -74,8 +74,8 @@ const GitSubForm = ({
       }
     />
     <ScmCredentialFormField
-      setScmCredential={setScmCredential}
-      scmCredential={scmCredential}
+      credential={credential}
+      onCredentialSelection={onCredentialSelection}
     />
     <ScmTypeOptions scmUpdateOnLaunch={scmUpdateOnLaunch} />
   </>

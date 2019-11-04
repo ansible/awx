@@ -10,8 +10,8 @@ import {
 
 const HgSubForm = ({
   i18n,
-  scmCredential,
-  setScmCredential,
+  credential,
+  onCredentialSelection,
   scmUpdateOnLaunch,
 }) => (
   <>
@@ -34,8 +34,8 @@ const HgSubForm = ({
     />
     <BranchFormField i18n={i18n} label={i18n._(t`SCM Branch/Tag/Revision`)} />
     <ScmCredentialFormField
-      setScmCredential={setScmCredential}
-      scmCredential={scmCredential}
+      credential={credential}
+      onCredentialSelection={onCredentialSelection}
     />
     <ScmTypeOptions scmUpdateOnLaunch={scmUpdateOnLaunch} />
   </>
