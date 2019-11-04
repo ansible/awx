@@ -116,6 +116,9 @@ RUN for dir in /home/awx /var/log/tower /var/log/nginx /var/lib/nginx; \
 RUN for file in /etc/passwd /var/run/nginx.pid; \
   do touch $file; chmod -R g+rwx $file; chgrp -R root $file; done
 
+# https://github.com/ansible/awx/issues/5224
+RUN chmod u+s /usr/bin/bwrap
+
 VOLUME /var/lib/nginx
 RUN ln -sf /dev/stdout /var/log/nginx/access.log \
     && ln -sf /dev/stderr /var/log/nginx/error.log
