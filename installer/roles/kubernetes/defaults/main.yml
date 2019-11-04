@@ -55,3 +55,4 @@ custom_venvs_python: "python2"
 ca_trust_bundle: "/etc/pki/tls/certs/ca-bundle.crt"
 rabbitmq_use_ssl: False
 
+container_groups_image: "ansible/ansible-runner"
