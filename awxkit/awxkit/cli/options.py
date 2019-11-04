@@ -3,6 +3,7 @@ import functools
 import json
 import os
 import re
+import sys
 import yaml
 
 from distutils.util import strtobool
@@ -216,7 +217,8 @@ class ResourceOptionsParser(object):
                 # if there are choices, try to guess at the type (we can't
                 # just assume it's a list of str, but the API doesn't actually
                 # explicitly tell us in OPTIONS all the time)
-                if isinstance(kwargs['choices'][0], int):
+                sphinx = 'sphinx-build' in ' '.join(sys.argv)
+                if isinstance(kwargs['choices'][0], int) and not sphinx:
                     kwargs['type'] = int
                 else:
                     kwargs['choices'] = [str(choice) for choice in kwargs['choices']]
