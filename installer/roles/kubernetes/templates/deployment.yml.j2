@@ -203,6 +203,11 @@ spec:
               subPath: settings.py
               readOnly: true
 
+            - name: {{ kubernetes_deployment_name }}-nginx-config
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+              readOnly: true
+
             - name: "{{ kubernetes_deployment_name }}-application-credentials"
               mountPath: "/etc/tower/conf.d/"
               readOnly: true
@@ -389,6 +394,13 @@ spec:
             items:
               - key: {{ kubernetes_deployment_name }}_settings
                 path: settings.py
+
+        - name: {{ kubernetes_deployment_name }}-nginx-config
+          configMap:
+            name: {{ kubernetes_deployment_name }}-config
+            items:
+              - key: {{ kubernetes_deployment_name }}_nginx_conf
+                path: nginx.conf
 
         - name: "{{ kubernetes_deployment_name }}-application-credentials"
           secret:
