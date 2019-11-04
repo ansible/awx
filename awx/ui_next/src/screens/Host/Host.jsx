@@ -18,6 +18,13 @@ import HostGroups from './HostGroups';
 import HostCompletedJobs from './HostCompletedJobs';
 import { HostsAPI } from '@api';
 
+const CardHeader = styled(PFCardHeader)`
+  --pf-c-card--first-child--PaddingTop: 0;
+  --pf-c-card--child--PaddingLeft: 0;
+  --pf-c-card--child--PaddingRight: 0;
+  position: relative;
+`;
+
 class Host extends Component {
   constructor(props) {
     super(props);
@@ -80,13 +87,6 @@ class Host extends Component {
         id: 3,
       },
     ];
-
-    const CardHeader = styled(PFCardHeader)`
-      --pf-c-card--first-child--PaddingTop: 0;
-      --pf-c-card--child--PaddingLeft: 0;
-      --pf-c-card--child--PaddingRight: 0;
-      position: relative;
-    `;
 
     let cardHeader = (
       <CardHeader style={{ padding: 0 }}>

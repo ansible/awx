@@ -17,6 +17,13 @@ import JobDetail from './JobDetail';
 import JobOutput from './JobOutput';
 import { JOB_TYPE_URL_SEGMENTS } from '../../constants';
 
+const CardHeader = styled(PFCardHeader)`
+  --pf-c-card--first-child--PaddingTop: 0;
+  --pf-c-card--child--PaddingLeft: 0;
+  --pf-c-card--child--PaddingRight: 0;
+  position: relative;
+`;
+
 class Job extends Component {
   constructor(props) {
     super(props);
@@ -72,13 +79,6 @@ class Job extends Component {
       { name: i18n._(t`Output`), link: `${match.url}/output`, id: 0 },
       { name: i18n._(t`Details`), link: `${match.url}/details`, id: 1 },
     ];
-
-    const CardHeader = styled(PFCardHeader)`
-      --pf-c-card--first-child--PaddingTop: 0;
-      --pf-c-card--child--PaddingLeft: 0;
-      --pf-c-card--child--PaddingRight: 0;
-      position: relative;
-    `;
 
     let cardHeader = (
       <CardHeader>

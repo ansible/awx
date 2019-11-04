@@ -19,6 +19,13 @@ import ProjectJobTemplates from './ProjectJobTemplates';
 import ProjectSchedules from './ProjectSchedules';
 import { OrganizationsAPI, ProjectsAPI } from '@api';
 
+const CardHeader = styled(PFCardHeader)`
+  --pf-c-card--first-child--PaddingTop: 0;
+  --pf-c-card--child--PaddingLeft: 0;
+  --pf-c-card--child--PaddingRight: 0;
+  position: relative;
+`;
+
 class Project extends Component {
   constructor(props) {
     super(props);
@@ -152,13 +159,6 @@ class Project extends Component {
     tabsArray.forEach((tab, n) => {
       tab.id = n;
     });
-
-    const CardHeader = styled(PFCardHeader)`
-      --pf-c-card--first-child--PaddingTop: 0;
-      --pf-c-card--child--PaddingLeft: 0;
-      --pf-c-card--child--PaddingRight: 0;
-      position: relative;
-    `;
 
     let cardHeader = (
       <CardHeader style={{ padding: 0 }}>

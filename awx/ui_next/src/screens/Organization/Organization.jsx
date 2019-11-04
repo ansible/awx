@@ -18,6 +18,13 @@ import OrganizationEdit from './OrganizationEdit';
 import OrganizationTeams from './OrganizationTeams';
 import { OrganizationsAPI } from '@api';
 
+const CardHeader = styled(PFCardHeader)`
+  --pf-c-card--first-child--PaddingTop: 0;
+  --pf-c-card--child--PaddingLeft: 0;
+  --pf-c-card--child--PaddingRight: 0;
+  position: relative;
+`;
+
 class Organization extends Component {
   constructor(props) {
     super(props);
@@ -132,13 +139,6 @@ class Organization extends Component {
         id: 3,
       });
     }
-
-    const CardHeader = styled(PFCardHeader)`
-      --pf-c-card--first-child--PaddingTop: 0;
-      --pf-c-card--child--PaddingLeft: 0;
-      --pf-c-card--child--PaddingRight: 0;
-      position: relative;
-    `;
 
     let cardHeader = (
       <CardHeader style={{ padding: 0 }}>

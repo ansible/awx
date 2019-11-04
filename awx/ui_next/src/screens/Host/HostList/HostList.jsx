@@ -42,6 +42,7 @@ class HostsList extends Component {
     this.handleSelect = this.handleSelect.bind(this);
     this.handleHostDelete = this.handleHostDelete.bind(this);
     this.handleDeleteErrorClose = this.handleDeleteErrorClose.bind(this);
+    this.loadActions = this.loadActions.bind(this);
     this.loadHosts = this.loadHosts.bind(this);
     this.handleHostToggle = this.handleHostToggle.bind(this);
     this.handleHostToggleErrorClose = this.handleHostToggleErrorClose.bind(
@@ -117,11 +118,8 @@ class HostsList extends Component {
     }
   }
 
-  async loadHosts() {
-    const { location } = this.props;
+  async loadActions() {
     const { actions: cachedActions } = this.state;
-    const params = parseQueryString(QS_CONFIG, location.search);
-
     let optionsPromise;
     if (cachedActions) {
       optionsPromise = Promise.resolve({ data: { actions: cachedActions } });
@@ -129,7 +127,14 @@ class HostsList extends Component {
       optionsPromise = HostsAPI.readOptions();
     }
 
-    const promises = Promise.all([HostsAPI.read(params), optionsPromise]);
+    return optionsPromise;
+  }
+
+  async loadHosts() {
+    const { location } = this.props;
+    const params = parseQueryString(QS_CONFIG, location.search);
+
+    const promises = Promise.all([HostsAPI.read(params), this.loadActions()]);
 
     this.setState({ contentError: null, hasContentLoading: true });
     try {
