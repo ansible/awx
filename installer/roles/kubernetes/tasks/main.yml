@@ -113,58 +113,61 @@
     seconds: "{{ postgress_activate_wait }}"
   when: openshift_pg_activate.changed or kubernetes_pg_activate.changed
 
-- name: Check if Postgres 9.6 is being used
-  shell: |
-    POD=$({{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
-      get pods -l=name=postgresql --field-selector status.phase=Running -o jsonpath="{.items[0].metadata.name}")
-    {{ kubectl_or_oc }} exec -ti $POD -n {{ kubernetes_namespace }} -- bash -c "psql -U {{ pg_username }} -tAc 'select version()'"
-  register: pg_version
-
-- name: Upgrade Postgres if necessary
+- name: Check postgres version and upgrade Postgres if necessary
   block:
-    - name: Set new pg image
-      shell: |
-        IMAGE=registry.access.redhat.com/rhscl/postgresql-10-rhel7
-        {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} set image dc/postgresql postgresql=$IMAGE
-
-    - name: Wait for change to take affect
-      pause:
-        seconds: 5
-
-    - name: Set env var for pg upgrade
-      shell: |
-        {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} set env dc/postgresql POSTGRESQL_UPGRADE=copy
-
-    - name: Wait for change to take affect
-      pause:
-        seconds: 5
-
-    - name: Set env var for new pg version
-      shell: |
-        {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} set env dc/postgresql POSTGRESQL_VERSION=10
-
-    - name: Wait for Postgres to redeploy
-      pause:
-        seconds: "{{ postgress_activate_wait }}"
-
-    - name: Wait for Postgres to finish upgrading
+    - name: Check if Postgres 9.6 is being used
       shell: |
         POD=$({{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
-          get pods -l=name=postgresql -o jsonpath="{.items[0].metadata.name}")
-        {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} logs $POD | grep 'Upgrade DONE'
-      register: pg_upgrade_logs
-      retries: 360
-      delay: 10
-      until: pg_upgrade_logs is success
+          get pods -l=name=postgresql --field-selector status.phase=Running -o jsonpath="{.items[0].metadata.name}")
+        oc exec $POD -n {{ kubernetes_namespace }} -- bash -c "psql -tAc 'select version()'"
+      register: pg_version
+    - name: Upgrade postgres if necessary
+      block:
+        - name: Set new pg image
+          shell: |
+            IMAGE=registry.access.redhat.com/rhscl/postgresql-10-rhel7
+            {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} set image dc/postgresql postgresql=$IMAGE
 
-    - name: Unset upgrade env var
-      shell: |
-        {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} set env dc/postgresql POSTGRESQL_UPGRADE-
+        - name: Wait for change to take affect
+          pause:
+            seconds: 5
 
-    - name: Wait for Postgres to redeploy
-      pause:
-        seconds: "{{ postgress_activate_wait }}"
-  when: "pg_version is success and '9.6' in pg_version.stdout"
+        - name: Set env var for pg upgrade
+          shell: |
+            {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} set env dc/postgresql POSTGRESQL_UPGRADE=copy
+
+        - name: Wait for change to take affect
+          pause:
+            seconds: 5
+
+        - name: Set env var for new pg version
+          shell: |
+            {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} set env dc/postgresql POSTGRESQL_VERSION=10
+
+        - name: Wait for Postgres to redeploy
+          pause:
+            seconds: "{{ postgress_activate_wait }}"
+
+        - name: Wait for Postgres to finish upgrading
+          shell: |
+            POD=$({{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
+              get pods -l=name=postgresql -o jsonpath="{.items[0].metadata.name}")
+            {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} logs $POD | grep 'Upgrade DONE'
+          register: pg_upgrade_logs
+          retries: 360
+          delay: 10
+          until: pg_upgrade_logs is success
+
+        - name: Unset upgrade env var
+          shell: |
+            {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} set env dc/postgresql POSTGRESQL_UPGRADE-
+
+        - name: Wait for Postgres to redeploy
+          pause:
+            seconds: "{{ postgress_activate_wait }}"
+      when: "pg_version is success and '9.6' in pg_version.stdout"
+  when:
+    - pg_hostname is not defined or pg_hostname == ''
 
 - name: Set image names if using custom registry
   block:
