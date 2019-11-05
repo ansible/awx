@@ -67,6 +67,14 @@ describe('<JobTemplateForm />', () => {
     { id: 5, kind: 'Machine', name: 'Cred 5', url: 'www.google.com' },
   ];
 
+  beforeAll(() => {
+    jest.setTimeout(5000 * 4);
+  });
+
+  afterAll(() => {
+    jest.setTimeout(5000);
+  });
+
   beforeEach(() => {
     LabelsAPI.read.mockReturnValue({
       data: mockData.summary_fields.labels,
