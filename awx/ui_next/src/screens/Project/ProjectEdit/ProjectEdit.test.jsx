@@ -2,14 +2,15 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
-import ProjectAdd from './ProjectAdd';
+import ProjectEdit from './ProjectEdit';
 import { ProjectsAPI, CredentialTypesAPI } from '@api';
 
 jest.mock('@api');
 
-describe('<ProjectAdd />', () => {
+describe('<ProjectEdit />', () => {
   let wrapper;
   const projectData = {
+    id: 123,
     name: 'foo',
     description: 'bar',
     scm_type: 'git',
@@ -21,6 +22,13 @@ describe('<ProjectAdd />', () => {
     scm_update_cache_timeout: 3,
     allow_override: false,
     custom_virtualenv: '/venv/custom-env',
+    summary_fields: {
+      credential: {
+        id: 100,
+        credential_type_id: 5,
+        kind: 'insights',
+      },
+    },
   };
 
   const projectOptionsResolve = {
@@ -83,83 +91,63 @@ describe('<ProjectAdd />', () => {
 
   test('initially renders successfully', async () => {
     await act(async () => {
-      wrapper = mountWithContexts(<ProjectAdd />);
+      wrapper = mountWithContexts(<ProjectEdit project={projectData} />);
     });
     expect(wrapper.length).toBe(1);
   });
 
   test('handleSubmit should post to the api', async () => {
-    ProjectsAPI.create.mockResolvedValueOnce({
+    const history = createMemoryHistory();
+    ProjectsAPI.update.mockResolvedValueOnce({
       data: { ...projectData },
     });
     await act(async () => {
-      wrapper = mountWithContexts(<ProjectAdd />);
+      wrapper = mountWithContexts(<ProjectEdit project={projectData} />, {
+        context: { router: { history } },
+      });
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
-    const formik = wrapper.find('Formik').instance();
-    const changeState = new Promise(resolve => {
-      formik.setState(
-        {
-          values: {
-            ...projectData,
-          },
-        },
-        () => resolve()
-      );
-    });
-    await changeState;
     await act(async () => {
       wrapper.find('form').simulate('submit');
     });
     wrapper.update();
-    expect(ProjectsAPI.create).toHaveBeenCalledTimes(1);
+    expect(ProjectsAPI.update).toHaveBeenCalledTimes(1);
   });
 
   test('handleSubmit should throw an error', async () => {
-    ProjectsAPI.create.mockImplementation(() => Promise.reject(new Error()));
+    ProjectsAPI.update.mockImplementation(() => Promise.reject(new Error()));
     await act(async () => {
-      wrapper = mountWithContexts(<ProjectAdd />);
+      wrapper = mountWithContexts(<ProjectEdit project={projectData} />);
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
-    const formik = wrapper.find('Formik').instance();
-    const changeState = new Promise(resolve => {
-      formik.setState(
-        {
-          values: {
-            ...projectData,
-          },
-        },
-        () => resolve()
-      );
-    });
-    await changeState;
     await act(async () => {
       wrapper.find('form').simulate('submit');
     });
     wrapper.update();
-    expect(wrapper.find('ProjectAdd .formSubmitError').length).toBe(1);
+    expect(ProjectsAPI.update).toHaveBeenCalledTimes(1);
+    expect(wrapper.find('ProjectEdit .formSubmitError').length).toBe(1);
   });
 
-  test('CardHeader close button should navigate to projects list', async () => {
+  test('CardHeader close button should navigate to project details', async () => {
     const history = createMemoryHistory();
     await act(async () => {
-      wrapper = mountWithContexts(<ProjectAdd />, {
+      wrapper = mountWithContexts(<ProjectEdit project={projectData} />, {
         context: { router: { history } },
-      }).find('ProjectAdd CardHeader');
+      });
     });
     wrapper.find('CardCloseButton').simulate('click');
-    expect(history.location.pathname).toEqual('/projects');
+    expect(history.location.pathname).toEqual('/projects/123/details');
   });
 
-  test('CardBody cancel button should navigate to projects list', async () => {
+  test('CardBody cancel button should navigate to project details', async () => {
     const history = createMemoryHistory();
     await act(async () => {
-      wrapper = mountWithContexts(<ProjectAdd />, {
+      wrapper = mountWithContexts(<ProjectEdit project={projectData} />, {
         context: { router: { history } },
       });
     });
     await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
-    wrapper.find('ProjectAdd button[aria-label="Cancel"]').simulate('click');
-    expect(history.location.pathname).toEqual('/projects');
+    wrapper.find('ProjectEdit button[aria-label="Cancel"]').simulate('click');
+    expect(history.location.pathname).toEqual('/projects/123/details');
   });
 });

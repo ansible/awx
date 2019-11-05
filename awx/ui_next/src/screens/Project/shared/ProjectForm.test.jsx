@@ -21,6 +21,13 @@ describe('<ProjectAdd />', () => {
     scm_update_cache_timeout: 3,
     allow_override: false,
     custom_virtualenv: '/venv/custom-env',
+    summary_fields: {
+      credential: {
+        id: 100,
+        credential_type_id: 4,
+        kind: 'scm',
+      },
+    },
   };
 
   const projectOptionsResolve = {

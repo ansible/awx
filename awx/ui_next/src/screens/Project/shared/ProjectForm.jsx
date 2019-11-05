@@ -1,3 +1,4 @@
+/* eslint no-nested-ternary: 0 */
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { withI18n } from '@lingui/react';
@@ -30,52 +31,74 @@ const ScmTypeFormRow = styled(FormRow)`
   padding: 24px;
 `;
 
-function ProjectForm(props) {
-  const { project, handleCancel, handleSubmit, i18n } = props;
+const fetchCredentials = async credential => {
+  const [
+    {
+      data: {
+        results: [scmCredentialType],
+      },
+    },
+    {
+      data: {
+        results: [insightsCredentialType],
+      },
+    },
+  ] = await Promise.all([
+    CredentialTypesAPI.read({ kind: 'scm' }),
+    CredentialTypesAPI.read({ name: 'Insights' }),
+  ]);
+
+  if (!credential) {
+    return {
+      scm: { typeId: scmCredentialType.id },
+      insights: { typeId: insightsCredentialType.id },
+    };
+  }
+
+  const { credential_type_id } = credential;
+  return {
+    scm: {
+      typeId: scmCredentialType.id,
+      value: credential_type_id === scmCredentialType.id ? credential : null,
+    },
+    insights: {
+      typeId: insightsCredentialType.id,
+      value:
+        credential_type_id === insightsCredentialType.id ? credential : null,
+    },
+  };
+};
+
+function ProjectForm({ project, ...props }) {
+  const { i18n, handleCancel, handleSubmit } = props;
+  const { summary_fields = {} } = project;
   const [contentError, setContentError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [organization, setOrganization] = useState(null);
+  const [organization, setOrganization] = useState(
+    summary_fields.organization || null
+  );
+  const [scmSubFormState, setScmSubFormState] = useState(null);
   const [scmTypeOptions, setScmTypeOptions] = useState(null);
-  const [scmCredential, setScmCredential] = useState({
-    typeId: null,
-    value: null,
-  });
-  const [insightsCredential, setInsightsCredential] = useState({
-    typeId: null,
-    value: null,
+  const [credentials, setCredentials] = useState({
+    scm: { typeId: null, value: null },
+    insights: { typeId: null, value: null },
   });
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const [
-          {
-            data: {
-              results: [scmCredentialType],
-            },
-          },
-          {
-            data: {
-              results: [insightsCredentialType],
-            },
-          },
-          {
-            data: {
-              actions: {
-                GET: {
-                  scm_type: { choices },
-                },
+        const credentialResponse = fetchCredentials(summary_fields.credential);
+        const {
+          data: {
+            actions: {
+              GET: {
+                scm_type: { choices },
               },
             },
           },
-        ] = await Promise.all([
-          CredentialTypesAPI.read({ kind: 'scm' }),
-          CredentialTypesAPI.read({ name: 'Insights' }),
-          ProjectsAPI.readOptions(),
-        ]);
+        } = await ProjectsAPI.readOptions();
 
-        setScmCredential({ typeId: scmCredentialType.id });
-        setInsightsCredential({ typeId: insightsCredentialType.id });
+        setCredentials(await credentialResponse);
         setScmTypeOptions(choices);
       } catch (error) {
         setContentError(error);
@@ -87,22 +110,57 @@ function ProjectForm(props) {
     fetchData();
   }, []);
 
-  const resetScmTypeFields = form => {
-    const scmFormFields = [
-      'scm_url',
-      'scm_branch',
-      'scm_refspec',
-      'credential',
-      'scm_clean',
-      'scm_delete_on_update',
-      'scm_update_on_launch',
-      'allow_override',
-      'scm_update_cache_timeout',
-    ];
+  const scmFormFields = {
+    scm_url: '',
+    scm_branch: '',
+    scm_refspec: '',
+    credential: '',
+    scm_clean: false,
+    scm_delete_on_update: false,
+    scm_update_on_launch: false,
+    allow_override: false,
+    scm_update_cache_timeout: 0,
+  };
 
-    scmFormFields.forEach(field => {
-      form.setFieldValue(field, form.initialValues[field]);
-      form.setFieldTouched(field, false);
+  /* Save current scm subform field values to state */
+  const saveSubFormState = form => {
+    const currentScmFormFields = { ...scmFormFields };
+
+    Object.keys(currentScmFormFields).forEach(label => {
+      currentScmFormFields[label] = form.values[label];
+    });
+
+    setScmSubFormState(currentScmFormFields);
+  };
+
+  /**
+   * If scm type is !== the initial scm type value,
+   * reset scm subform field values to defaults.
+   * If scm type is === the initial scm type value,
+   * reset scm subform field values to scmSubFormState.
+   */
+  const resetScmTypeFields = (value, form) => {
+    if (form.values.scm_type === form.initialValues.scm_type) {
+      saveSubFormState(form);
+    }
+
+    Object.keys(scmFormFields).forEach(label => {
+      if (value === form.initialValues.scm_type) {
+        form.setFieldValue(label, scmSubFormState[label]);
+      } else {
+        form.setFieldValue(label, scmFormFields[label]);
+      }
+      form.setFieldTouched(label, false);
+    });
+  };
+
+  const handleCredentialSelection = (type, value) => {
+    setCredentials({
+      ...credentials,
+      [type]: {
+        ...credentials[type],
+        value,
+      },
     });
   };
 
@@ -127,7 +185,12 @@ function ProjectForm(props) {
         scm_clean: project.scm_clean || false,
         scm_delete_on_update: project.scm_delete_on_update || false,
         scm_refspec: project.scm_refspec || '',
-        scm_type: project.scm_type || '',
+        scm_type:
+          project.scm_type === ''
+            ? 'manual'
+            : project.scm_type === undefined
+            ? ''
+            : project.scm_type,
         scm_update_cache_timeout: project.scm_update_cache_timeout || 0,
         scm_update_on_launch: project.scm_update_on_launch || false,
         scm_url: project.scm_url || '',
@@ -213,7 +276,7 @@ function ProjectForm(props) {
                     ]}
                     onChange={(event, value) => {
                       form.setFieldValue('scm_type', value);
-                      resetScmTypeFields(form);
+                      resetScmTypeFields(value, form);
                     }}
                   />
                 </FormGroup>
@@ -226,29 +289,29 @@ function ProjectForm(props) {
                   {
                     git: (
                       <GitSubForm
-                        setScmCredential={setScmCredential}
-                        scmCredential={scmCredential}
+                        credential={credentials.scm}
+                        onCredentialSelection={handleCredentialSelection}
                         scmUpdateOnLaunch={formik.values.scm_update_on_launch}
                       />
                     ),
                     hg: (
                       <HgSubForm
-                        setScmCredential={setScmCredential}
-                        scmCredential={scmCredential}
+                        credential={credentials.scm}
+                        onCredentialSelection={handleCredentialSelection}
                         scmUpdateOnLaunch={formik.values.scm_update_on_launch}
                       />
                     ),
                     svn: (
                       <SvnSubForm
-                        setScmCredential={setScmCredential}
-                        scmCredential={scmCredential}
+                        credential={credentials.scm}
+                        onCredentialSelection={handleCredentialSelection}
                         scmUpdateOnLaunch={formik.values.scm_update_on_launch}
                       />
                     ),
                     insights: (
                       <InsightsSubForm
-                        setInsightsCredential={setInsightsCredential}
-                        insightsCredential={insightsCredential}
+                        credential={credentials.insights}
+                        onCredentialSelection={handleCredentialSelection}
                         scmUpdateOnLaunch={formik.values.scm_update_on_launch}
                       />
                     ),
