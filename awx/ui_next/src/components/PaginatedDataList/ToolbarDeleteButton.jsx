@@ -1,5 +1,13 @@
 import React, { Fragment } from 'react';
-import { func, bool, number, string, arrayOf, shape } from 'prop-types';
+import {
+  func,
+  bool,
+  number,
+  string,
+  arrayOf,
+  shape,
+  checkPropTypes,
+} from 'prop-types';
 import { Button, Tooltip } from '@patternfly/react-core';
 import { TrashAltIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
@@ -22,9 +30,40 @@ const DeleteButton = styled(Button)`
   }
 `;
 
+const requireNameOrUsername = props => {
+  const { name, username } = props;
+  if (!name && !username) {
+    return new Error(
+      `One of 'name' or 'username' is required by ItemToDelete component.`
+    );
+  }
+  if (name) {
+    checkPropTypes(
+      {
+        name: string,
+      },
+      { name: props.name },
+      'prop',
+      'ItemToDelete'
+    );
+  }
+  if (username) {
+    checkPropTypes(
+      {
+        username: string,
+      },
+      { username: props.username },
+      'prop',
+      'ItemToDelete'
+    );
+  }
+  return null;
+};
+
 const ItemToDelete = shape({
   id: number.isRequired,
-  name: string.isRequired,
+  name: requireNameOrUsername,
+  username: requireNameOrUsername,
   summary_fields: shape({
     user_capabilities: shape({
       delete: bool.isRequired,
@@ -148,7 +187,7 @@ class ToolbarDeleteButton extends React.Component {
             <br />
             {itemsToDelete.map(item => (
               <span key={item.id}>
-                <strong>{item.name}</strong>
+                <strong>{item.name || item.username}</strong>
                 <br />
               </span>
             ))}

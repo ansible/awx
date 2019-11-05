@@ -1,29 +1,33 @@
 import React from 'react';
+import { createMemoryHistory } from 'history';
 
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
 
 import Users from './Users';
 
 describe('<Users />', () => {
-  let pageWrapper;
-  let pageSections;
-  let title;
-
-  beforeEach(() => {
-    pageWrapper = mountWithContexts(<Users />);
-    pageSections = pageWrapper.find('PageSection');
-    title = pageWrapper.find('Title');
+  test('initially renders succesfully', () => {
+    mountWithContexts(<Users />);
   });
 
-  afterEach(() => {
-    pageWrapper.unmount();
-  });
+  test('should display a breadcrumb heading', () => {
+    const history = createMemoryHistory({
+      initialEntries: ['/users'],
+    });
+    const match = { path: '/users', url: '/users', isExact: true };
 
-  test('initially renders without crashing', () => {
-    expect(pageWrapper.length).toBe(1);
-    expect(pageSections.length).toBe(2);
-    expect(title.length).toBe(1);
-    expect(title.props().size).toBe('2xl');
-    expect(pageSections.first().props().variant).toBe('light');
+    const wrapper = mountWithContexts(<Users />, {
+      context: {
+        router: {
+          history,
+          route: {
+            location: history.location,
+            match,
+          },
+        },
+      },
+    });
+    expect(wrapper.find('BreadcrumbHeading').length).toBe(1);
+    wrapper.unmount();
   });
 });
