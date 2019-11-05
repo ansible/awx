@@ -99,7 +99,7 @@ python-radius==1.0
 python-string-utils==0.6.0  # via openshift
 python3-openid==3.1.0     # via social-auth-core
 python3-saml==1.4.0
-pytz==2019.1              # via celery, django, irc, tempora, twilio
+pytz==2019.3              # via celery, django, irc, tempora, twilio
 pyyaml==5.1               # via ansible-runner, djangorestframework-yaml, kubernetes
 requests-futures==0.9.7
 requests-oauthlib==1.2.0  # via kubernetes, msrest, social-auth-core
