@@ -1,3 +1,4 @@
+/* eslint no-nested-ternary: 0 */
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { withI18n } from '@lingui/react';
@@ -30,6 +31,44 @@ const ScmTypeFormRow = styled(FormRow)`
   padding: 24px;
 `;
 
+const fetchCredentials = async credential => {
+  const [
+    {
+      data: {
+        results: [scmCredentialType],
+      },
+    },
+    {
+      data: {
+        results: [insightsCredentialType],
+      },
+    },
+  ] = await Promise.all([
+    CredentialTypesAPI.read({ kind: 'scm' }),
+    CredentialTypesAPI.read({ name: 'Insights' }),
+  ]);
+
+  if (!credential) {
+    return {
+      scm: { typeId: scmCredentialType.id },
+      insights: { typeId: insightsCredentialType.id },
+    };
+  }
+
+  const { credential_type_id } = credential;
+  return {
+    scm: {
+      typeId: scmCredentialType.id,
+      value: credential_type_id === scmCredentialType.id ? credential : null,
+    },
+    insights: {
+      typeId: insightsCredentialType.id,
+      value:
+        credential_type_id === insightsCredentialType.id ? credential : null,
+    },
+  };
+};
+
 function ProjectForm({ project, ...props }) {
   const { i18n, handleCancel, handleSubmit } = props;
   const { summary_fields = {} } = project;
@@ -48,58 +87,19 @@ function ProjectForm({ project, ...props }) {
   useEffect(() => {
     async function fetchData() {
       try {
-        const [
-          {
-            data: {
-              results: [scmCredentialType],
-            },
-          },
-          {
-            data: {
-              results: [insightsCredentialType],
-            },
-          },
-          {
-            data: {
-              actions: {
-                GET: {
-                  scm_type: { choices },
-                },
+        const credentialResponse = fetchCredentials(summary_fields.credential);
+        const {
+          data: {
+            actions: {
+              GET: {
+                scm_type: { choices },
               },
             },
           },
-        ] = await Promise.all([
-          CredentialTypesAPI.read({ kind: 'scm' }),
-          CredentialTypesAPI.read({ name: 'Insights' }),
-          ProjectsAPI.readOptions(),
-        ]);
+        } = await ProjectsAPI.readOptions();
 
+        setCredentials(await credentialResponse);
         setScmTypeOptions(choices);
-
-        const { credential } = summary_fields;
-        if (!credential) {
-          setCredentials({
-            scm: { typeId: scmCredentialType.id },
-            insights: { typeId: insightsCredentialType.id },
-          });
-          return;
-        }
-
-        const { credential_type_id } = credential;
-        setCredentials({
-          scm: {
-            typeId: scmCredentialType.id,
-            value:
-              credential_type_id === scmCredentialType.id ? credential : null,
-          },
-          insights: {
-            typeId: insightsCredentialType.id,
-            value:
-              credential_type_id === insightsCredentialType.id
-                ? credential
-                : null,
-          },
-        });
       } catch (error) {
         setContentError(error);
       } finally {
@@ -185,7 +185,12 @@ function ProjectForm({ project, ...props }) {
         scm_clean: project.scm_clean || false,
         scm_delete_on_update: project.scm_delete_on_update || false,
         scm_refspec: project.scm_refspec || '',
-        scm_type: project.scm_type || '',
+        scm_type:
+          project.scm_type === ''
+            ? 'manual'
+            : project.scm_type === undefined
+            ? ''
+            : project.scm_type,
         scm_update_cache_timeout: project.scm_update_cache_timeout || 0,
         scm_update_on_launch: project.scm_update_on_launch || false,
         scm_url: project.scm_url || '',
