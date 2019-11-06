@@ -84,10 +84,13 @@ pg_username=awx
 # pg_password should be random 10 character alphanumeric string, when postgresql is running on kubernetes
 # NB: it's a limitation of the "official" postgres helm chart
 pg_password=awxpass
-pg_admin_password=postgrespass
 pg_database=awx
 pg_port=5432
 #pg_sslmode=require
+
+# The following variable is only required when using the provided
+# containerized postgres deployment on OpenShift
+# pg_admin_password=postgrespass
 
 # RabbitMQ Configuration
 rabbitmq_password=awxpass
