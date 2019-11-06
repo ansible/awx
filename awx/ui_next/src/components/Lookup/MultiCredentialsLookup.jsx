@@ -12,7 +12,25 @@ import Lookup from '@components/Lookup';
 const QuestionCircleIcon = styled(PFQuestionCircleIcon)`
   margin-left: 10px;
 `;
+function toggleCredentialSelection(credentialsToUpdate, newCredential) {
+  let newCredentialsList;
+  const isSelectedCredentialInState =
+    credentialsToUpdate.filter(cred => cred.id === newCredential.id).length >
+    0;
 
+  if (isSelectedCredentialInState) {
+    newCredentialsList = credentialsToUpdate.filter(
+      cred => cred.id !== newCredential.id
+    );
+  } else {
+    newCredentialsList = credentialsToUpdate.filter(
+      credential =>
+        credential.kind === 'vault' || credential.kind !== newCredential.kind
+    );
+    newCredentialsList = [...newCredentialsList, newCredential];
+  }
+  return newCredentialsList;
+}
 class MultiCredentialsLookup extends React.Component {
   constructor(props) {
     super(props);
@@ -26,7 +44,6 @@ class MultiCredentialsLookup extends React.Component {
       this
     );
     this.loadCredentials = this.loadCredentials.bind(this);
-    this.toggleCredentialSelection = this.toggleCredentialSelection.bind(this);
   }
 
   componentDidMount() {
@@ -69,27 +86,7 @@ class MultiCredentialsLookup extends React.Component {
     return CredentialsAPI.read(params);
   }
 
-  toggleCredentialSelection(newCredential) {
-    const { onChange, credentials: credentialsToUpdate } = this.props;
 
-    let newCredentialsList;
-    const isSelectedCredentialInState =
-      credentialsToUpdate.filter(cred => cred.id === newCredential.id).length >
-      0;
-
-    if (isSelectedCredentialInState) {
-      newCredentialsList = credentialsToUpdate.filter(
-        cred => cred.id !== newCredential.id
-      );
-    } else {
-      newCredentialsList = credentialsToUpdate.filter(
-        credential =>
-          credential.kind === 'vault' || credential.kind !== newCredential.kind
-      );
-      newCredentialsList = [...newCredentialsList, newCredential];
-    }
-    onChange(newCredentialsList);
-  }
 
   handleCredentialTypeSelect(value, type) {
     const { credentialTypes } = this.state;
@@ -99,7 +96,7 @@ class MultiCredentialsLookup extends React.Component {
 
   render() {
     const { selectedCredentialType, credentialTypes } = this.state;
-    const { tooltip, i18n, credentials } = this.props;
+    const { tooltip, i18n, credentials, onChange } = this.props;
     return (
       <FormGroup label={i18n._(t`Credentials`)} fieldId="multiCredential">
         {tooltip && (
@@ -112,14 +109,14 @@ class MultiCredentialsLookup extends React.Component {
             selectCategoryOptions={credentialTypes}
             selectCategory={this.handleCredentialTypeSelect}
             selectedCategory={selectedCredentialType}
-            onToggleItem={this.toggleCredentialSelection}
+            onToggleItem={toggleCredentialSelection}
             onloadCategories={this.loadCredentialTypes}
             id="multiCredential"
             lookupHeader={i18n._(t`Credentials`)}
             name="credentials"
             value={credentials}
             multiple
-            onLookupSave={() => {}}
+            onChange={onChange}
             getItems={this.loadCredentials}
             qsNamespace="credentials"
             columns={[

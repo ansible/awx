@@ -39,7 +39,7 @@ class InstanceGroupsLookup extends React.Component {
             lookupHeader={i18n._(t`Instance Groups`)}
             name="instanceGroups"
             value={value}
-            onLookupSave={onChange}
+            onChange={onChange}
             getItems={getInstanceGroups}
             qsNamespace="instance-group"
             multiple

@@ -37,7 +37,7 @@ class InventoryLookup extends React.Component {
           lookupHeader={i18n._(t`Inventory`)}
           name="inventory"
           value={value}
-          onLookupSave={onChange}
+          onChange={onChange}
           onBlur={onBlur}
           getItems={getInventories}
           required={required}

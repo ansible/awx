@@ -36,7 +36,7 @@ function CredentialLookup({
         name="credential"
         value={value}
         onBlur={onBlur}
-        onLookupSave={onChange}
+        onChange={onChange}
         getItems={getCredentials}
         required={required}
         sortedColumnKey="name"

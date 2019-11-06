@@ -32,7 +32,7 @@ function OrganizationLookup({
         name="organization"
         value={value}
         onBlur={onBlur}
-        onLookupSave={onChange}
+        onChange={onChange}
         getItems={getOrganizations}
         required={required}
         sortedColumnKey="name"
