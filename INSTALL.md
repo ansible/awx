@@ -57,7 +57,7 @@ To install the assets, clone the `awx-logos` repo so that it is next to your `aw
 
 Before you can run a deployment, you'll need the following installed in your local environment:
 
-- [Ansible](http://docs.ansible.com/ansible/latest/intro_installation.html) Requires Version 2.4+
+- [Ansible](http://docs.ansible.com/ansible/latest/intro_installation.html) Requires Version 2.8+
 - [Docker](https://docs.docker.com/engine/installation/)
     + A recent version
 - [docker](https://pypi.org/project/docker/) Python module
