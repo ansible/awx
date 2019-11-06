@@ -22,6 +22,9 @@ function ProjectEdit({ project, history, i18n }) {
   const [formSubmitError, setFormSubmitError] = useState(null);
 
   const handleSubmit = async values => {
+    if (values.scm_type === 'manual') {
+      values.scm_type = '';
+    }
     try {
       const {
         data: { id },

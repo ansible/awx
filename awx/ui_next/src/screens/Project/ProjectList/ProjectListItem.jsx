@@ -19,6 +19,7 @@ import ListActionButton from '@components/ListActionButton';
 import ProjectSyncButton from '../shared/ProjectSyncButton';
 import { StatusIcon } from '@components/Sparkline';
 import VerticalSeparator from '@components/VerticalSeparator';
+import { toTitleCase } from '@util/strings';
 import { Project } from '@types';
 
 class ProjectListItem extends React.Component {
@@ -97,7 +98,9 @@ class ProjectListItem extends React.Component {
                 </Link>
               </DataListCell>,
               <DataListCell key="type">
-                {project.scm_type.toUpperCase()}
+                {project.scm_type === ''
+                  ? i18n._(t`Manual`)
+                  : toTitleCase(project.scm_type)}
               </DataListCell>,
               <DataListCell key="revision">
                 {project.scm_revision.substring(0, 7)}

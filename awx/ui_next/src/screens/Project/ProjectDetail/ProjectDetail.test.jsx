@@ -85,7 +85,7 @@ describe('<ProjectDetail />', () => {
     assertDetail('Name', mockProject.name);
     assertDetail('Description', mockProject.description);
     assertDetail('Organization', mockProject.summary_fields.organization.name);
-    assertDetail('SCM Type', mockProject.scm_type);
+    assertDetail('SCM Type', 'Git');
     assertDetail('SCM URL', mockProject.scm_url);
     assertDetail('SCM Branch', mockProject.scm_branch);
     assertDetail('SCM Refspec', mockProject.scm_refspec);

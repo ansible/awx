@@ -22,6 +22,7 @@ import {
   SvnSubForm,
   InsightsSubForm,
   SubFormTitle,
+  ManualSubForm,
 } from './ProjectSubForms';
 
 const ScmTypeFormRow = styled(FormRow)`
@@ -173,199 +174,224 @@ function ProjectForm({ project, ...props }) {
   }
 
   return (
-    <Formik
-      initialValues={{
-        allow_override: project.allow_override || false,
-        credential: project.credential || '',
-        custom_virtualenv: project.custom_virtualenv || '',
-        description: project.description || '',
-        name: project.name || '',
-        organization: project.organization || '',
-        scm_branch: project.scm_branch || '',
-        scm_clean: project.scm_clean || false,
-        scm_delete_on_update: project.scm_delete_on_update || false,
-        scm_refspec: project.scm_refspec || '',
-        scm_type:
-          project.scm_type === ''
-            ? 'manual'
-            : project.scm_type === undefined
-            ? ''
-            : project.scm_type,
-        scm_update_cache_timeout: project.scm_update_cache_timeout || 0,
-        scm_update_on_launch: project.scm_update_on_launch || false,
-        scm_url: project.scm_url || '',
-      }}
-      onSubmit={handleSubmit}
-      render={formik => (
-        <Form
-          autoComplete="off"
-          onSubmit={formik.handleSubmit}
-          css="padding: 0 24px"
-        >
-          <FormRow>
-            <FormField
-              id="project-name"
-              label={i18n._(t`Name`)}
-              name="name"
-              type="text"
-              validate={required(null, i18n)}
-              isRequired
-            />
-            <FormField
-              id="project-description"
-              label={i18n._(t`Description`)}
-              name="description"
-              type="text"
-            />
-            <Field
-              name="organization"
-              validate={required(
-                i18n._(t`Select a value for this field`),
-                i18n
-              )}
-              render={({ form }) => (
-                <OrganizationLookup
-                  helperTextInvalid={form.errors.organization}
-                  isValid={
-                    !form.touched.organization || !form.errors.organization
-                  }
-                  onBlur={() => form.setFieldTouched('organization')}
-                  onChange={value => {
-                    form.setFieldValue('organization', value.id);
-                    setOrganization(value);
-                  }}
-                  value={organization}
-                  required
-                />
-              )}
-            />
-            <Field
-              name="scm_type"
-              validate={required(
-                i18n._(t`Select a value for this field`),
-                i18n
-              )}
-              render={({ field, form }) => (
-                <FormGroup
-                  fieldId="project-scm-type"
-                  helperTextInvalid={form.errors.scm_type}
+    <Config>
+      {({ project_base_dir, project_local_paths }) => (
+        <Formik
+          initialValues={{
+            allow_override: project.allow_override || false,
+            base_dir: project_base_dir || '',
+            credential: project.credential || '',
+            custom_virtualenv: project.custom_virtualenv || '',
+            description: project.description || '',
+            local_path: project.local_path || null,
+            name: project.name || '',
+            organization: project.organization || '',
+            scm_branch: project.scm_branch || '',
+            scm_clean: project.scm_clean || false,
+            scm_delete_on_update: project.scm_delete_on_update || false,
+            scm_refspec: project.scm_refspec || '',
+            scm_type:
+              project.scm_type === ''
+                ? 'manual'
+                : project.scm_type === undefined
+                ? ''
+                : project.scm_type,
+            scm_update_cache_timeout: project.scm_update_cache_timeout || 0,
+            scm_update_on_launch: project.scm_update_on_launch || false,
+            scm_url: project.scm_url || '',
+          }}
+          onSubmit={handleSubmit}
+          render={formik => (
+            <Form
+              autoComplete="off"
+              onSubmit={formik.handleSubmit}
+              css="padding: 0 24px"
+            >
+              <FormRow>
+                <FormField
+                  id="project-name"
+                  label={i18n._(t`Name`)}
+                  name="name"
+                  type="text"
+                  validate={required(null, i18n)}
                   isRequired
-                  isValid={!form.touched.scm_type || !form.errors.scm_type}
-                  label={i18n._(t`SCM Type`)}
-                >
-                  <AnsibleSelect
-                    {...field}
-                    id="scm_type"
-                    data={[
+                />
+                <FormField
+                  id="project-description"
+                  label={i18n._(t`Description`)}
+                  name="description"
+                  type="text"
+                />
+                <Field
+                  name="organization"
+                  validate={required(
+                    i18n._(t`Select a value for this field`),
+                    i18n
+                  )}
+                  render={({ form }) => (
+                    <OrganizationLookup
+                      helperTextInvalid={form.errors.organization}
+                      isValid={
+                        !form.touched.organization || !form.errors.organization
+                      }
+                      onBlur={() => form.setFieldTouched('organization')}
+                      onChange={value => {
+                        form.setFieldValue('organization', value.id);
+                        setOrganization(value);
+                      }}
+                      value={organization}
+                      required
+                    />
+                  )}
+                />
+                <Field
+                  name="scm_type"
+                  validate={required(
+                    i18n._(t`Select a value for this field`),
+                    i18n
+                  )}
+                  render={({ field, form }) => (
+                    <FormGroup
+                      fieldId="project-scm-type"
+                      helperTextInvalid={form.errors.scm_type}
+                      isRequired
+                      isValid={!form.touched.scm_type || !form.errors.scm_type}
+                      label={i18n._(t`SCM Type`)}
+                    >
+                      <AnsibleSelect
+                        {...field}
+                        id="scm_type"
+                        data={[
+                          {
+                            value: '',
+                            key: '',
+                            label: i18n._(t`Choose an SCM Type`),
+                            isDisabled: true,
+                          },
+                          ...scmTypeOptions.map(([value, label]) => {
+                            if (label === 'Manual') {
+                              value = 'manual';
+                            }
+                            return {
+                              label,
+                              value,
+                              key: value,
+                            };
+                          }),
+                        ]}
+                        onChange={(event, value) => {
+                          form.setFieldValue('scm_type', value);
+                          resetScmTypeFields(value, form);
+                        }}
+                      />
+                    </FormGroup>
+                  )}
+                />
+                {formik.values.scm_type !== '' && (
+                  <ScmTypeFormRow>
+                    <SubFormTitle size="md">
+                      {i18n._(t`Type Details`)}
+                    </SubFormTitle>
+                    {
                       {
-                        value: '',
-                        key: '',
-                        label: i18n._(t`Choose an SCM Type`),
-                        isDisabled: true,
-                      },
-                      ...scmTypeOptions.map(([value, label]) => {
-                        if (label === 'Manual') {
-                          value = 'manual';
-                        }
-                        return {
-                          label,
-                          value,
-                          key: value,
-                        };
-                      }),
-                    ]}
-                    onChange={(event, value) => {
-                      form.setFieldValue('scm_type', value);
-                      resetScmTypeFields(value, form);
-                    }}
-                  />
-                </FormGroup>
-              )}
-            />
-            {formik.values.scm_type !== '' && (
-              <ScmTypeFormRow>
-                <SubFormTitle size="md">{i18n._(t`Type Details`)}</SubFormTitle>
-                {
-                  {
-                    git: (
-                      <GitSubForm
-                        credential={credentials.scm}
-                        onCredentialSelection={handleCredentialSelection}
-                        scmUpdateOnLaunch={formik.values.scm_update_on_launch}
+                        manual: (
+                          <ManualSubForm
+                            localPath={formik.initialValues.local_path}
+                            project_base_dir={project_base_dir}
+                            project_local_paths={project_local_paths}
+                          />
+                        ),
+                        git: (
+                          <GitSubForm
+                            credential={credentials.scm}
+                            onCredentialSelection={handleCredentialSelection}
+                            scmUpdateOnLaunch={
+                              formik.values.scm_update_on_launch
+                            }
+                          />
+                        ),
+                        hg: (
+                          <HgSubForm
+                            credential={credentials.scm}
+                            onCredentialSelection={handleCredentialSelection}
+                            scmUpdateOnLaunch={
+                              formik.values.scm_update_on_launch
+                            }
+                          />
+                        ),
+                        svn: (
+                          <SvnSubForm
+                            credential={credentials.scm}
+                            onCredentialSelection={handleCredentialSelection}
+                            scmUpdateOnLaunch={
+                              formik.values.scm_update_on_launch
+                            }
+                          />
+                        ),
+                        insights: (
+                          <InsightsSubForm
+                            credential={credentials.insights}
+                            onCredentialSelection={handleCredentialSelection}
+                            scmUpdateOnLaunch={
+                              formik.values.scm_update_on_launch
+                            }
+                          />
+                        ),
+                      }[formik.values.scm_type]
+                    }
+                  </ScmTypeFormRow>
+                )}
+                <Config>
+                  {({ custom_virtualenvs }) =>
+                    custom_virtualenvs &&
+                    custom_virtualenvs.length > 1 && (
+                      <Field
+                        name="custom_virtualenv"
+                        render={({ field }) => (
+                          <FormGroup
+                            fieldId="project-custom-virtualenv"
+                            label={i18n._(t`Ansible Environment`)}
+                          >
+                            <FieldTooltip
+                              content={i18n._(t`Select the playbook to be executed by
+                              this job.`)}
+                            />
+                            <AnsibleSelect
+                              id="project-custom-virtualenv"
+                              data={[
+                                {
+                                  label: i18n._(
+                                    t`Use Default Ansible Environment`
+                                  ),
+                                  value: '/venv/ansible/',
+                                  key: 'default',
+                                },
+                                ...custom_virtualenvs
+                                  .filter(datum => datum !== '/venv/ansible/')
+                                  .map(datum => ({
+                                    label: datum,
+                                    value: datum,
+                                    key: datum,
+                                  })),
+                              ]}
+                              {...field}
+                            />
+                          </FormGroup>
+                        )}
                       />
-                    ),
-                    hg: (
-                      <HgSubForm
-                        credential={credentials.scm}
-                        onCredentialSelection={handleCredentialSelection}
-                        scmUpdateOnLaunch={formik.values.scm_update_on_launch}
-                      />
-                    ),
-                    svn: (
-                      <SvnSubForm
-                        credential={credentials.scm}
-                        onCredentialSelection={handleCredentialSelection}
-                        scmUpdateOnLaunch={formik.values.scm_update_on_launch}
-                      />
-                    ),
-                    insights: (
-                      <InsightsSubForm
-                        credential={credentials.insights}
-                        onCredentialSelection={handleCredentialSelection}
-                        scmUpdateOnLaunch={formik.values.scm_update_on_launch}
-                      />
-                    ),
-                  }[formik.values.scm_type]
-                }
-              </ScmTypeFormRow>
-            )}
-            <Config>
-              {({ custom_virtualenvs }) =>
-                custom_virtualenvs &&
-                custom_virtualenvs.length > 1 && (
-                  <Field
-                    name="custom_virtualenv"
-                    render={({ field }) => (
-                      <FormGroup
-                        fieldId="project-custom-virtualenv"
-                        label={i18n._(t`Ansible Environment`)}
-                      >
-                        <FieldTooltip
-                          content={i18n._(t`Select the playbook to be executed by
-                          this job.`)}
-                        />
-                        <AnsibleSelect
-                          id="project-custom-virtualenv"
-                          data={[
-                            {
-                              label: i18n._(t`Use Default Ansible Environment`),
-                              value: '/venv/ansible/',
-                              key: 'default',
-                            },
-                            ...custom_virtualenvs
-                              .filter(datum => datum !== '/venv/ansible/')
-                              .map(datum => ({
-                                label: datum,
-                                value: datum,
-                                key: datum,
-                              })),
-                          ]}
-                          {...field}
-                        />
-                      </FormGroup>
-                    )}
-                  />
-                )
-              }
-            </Config>
-          </FormRow>
-          <FormActionGroup
-            onCancel={handleCancel}
-            onSubmit={formik.handleSubmit}
-          />
-        </Form>
+                    )
+                  }
+                </Config>
+              </FormRow>
+              <FormActionGroup
+                onCancel={handleCancel}
+                onSubmit={formik.handleSubmit}
+              />
+            </Form>
+          )}
+        />
       )}
-    />
+    </Config>
   );
 }
 

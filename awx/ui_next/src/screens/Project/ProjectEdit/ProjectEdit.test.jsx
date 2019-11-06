@@ -17,6 +17,7 @@ describe('<ProjectEdit />', () => {
     scm_url: 'https://foo.bar',
     scm_clean: true,
     credential: 100,
+    local_path: '',
     organization: 2,
     scm_update_on_launch: true,
     scm_update_cache_timeout: 3,
@@ -115,9 +116,18 @@ describe('<ProjectEdit />', () => {
   });
 
   test('handleSubmit should throw an error', async () => {
+    const config = {
+      project_local_paths: [],
+      project_base_dir: 'foo/bar',
+    };
     ProjectsAPI.update.mockImplementation(() => Promise.reject(new Error()));
     await act(async () => {
-      wrapper = mountWithContexts(<ProjectEdit project={projectData} />);
+      wrapper = mountWithContexts(
+        <ProjectEdit project={{ ...projectData, scm_type: 'manual' }} />,
+        {
+          context: { config },
+        }
+      );
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     await act(async () => {

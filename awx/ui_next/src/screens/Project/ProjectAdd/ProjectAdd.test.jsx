@@ -16,6 +16,7 @@ describe('<ProjectAdd />', () => {
     scm_url: 'https://foo.bar',
     scm_clean: true,
     credential: 100,
+    local_path: '',
     organization: 2,
     scm_update_on_launch: true,
     scm_update_cache_timeout: 3,
@@ -116,9 +117,15 @@ describe('<ProjectAdd />', () => {
   });
 
   test('handleSubmit should throw an error', async () => {
+    const config = {
+      project_local_paths: ['foobar', 'qux'],
+      project_base_dir: 'dir/foo/bar',
+    };
     ProjectsAPI.create.mockImplementation(() => Promise.reject(new Error()));
     await act(async () => {
-      wrapper = mountWithContexts(<ProjectAdd />);
+      wrapper = mountWithContexts(<ProjectAdd />, {
+        context: { config },
+      });
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     const formik = wrapper.find('Formik').instance();
@@ -127,6 +134,7 @@ describe('<ProjectAdd />', () => {
         {
           values: {
             ...projectData,
+            scm_type: 'manual',
           },
         },
         () => resolve()
