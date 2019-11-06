@@ -26,7 +26,7 @@ function VariablesField({ id, name, label, readOnly }) {
           <Split gutter="sm">
             <SplitItem>
               <label htmlFor={id} className="pf-c-form__label">
-                {label}
+                <span className="pf-c-form__label-text">{label}</span>
               </label>
             </SplitItem>
             <SplitItem>

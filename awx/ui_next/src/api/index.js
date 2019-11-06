@@ -2,6 +2,7 @@ import AdHocCommands from './models/AdHocCommands';
 import Config from './models/Config';
 import CredentialTypes from './models/CredentialTypes';
 import Credentials from './models/Credentials';
+import Hosts from './models/Hosts';
 import InstanceGroups from './models/InstanceGroups';
 import Inventories from './models/Inventories';
 import InventorySources from './models/InventorySources';
@@ -27,6 +28,7 @@ const AdHocCommandsAPI = new AdHocCommands();
 const ConfigAPI = new Config();
 const CredentialsAPI = new Credentials();
 const CredentialTypesAPI = new CredentialTypes();
+const HostsAPI = new Hosts();
 const InstanceGroupsAPI = new InstanceGroups();
 const InventoriesAPI = new Inventories();
 const InventorySourcesAPI = new InventorySources();
@@ -53,6 +55,7 @@ export {
   ConfigAPI,
   CredentialsAPI,
   CredentialTypesAPI,
+  HostsAPI,
   InstanceGroupsAPI,
   InventoriesAPI,
   InventorySourcesAPI,
