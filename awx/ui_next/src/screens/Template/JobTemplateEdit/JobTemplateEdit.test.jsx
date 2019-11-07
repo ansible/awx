@@ -44,6 +44,10 @@ const mockJobTemplate = {
       { id: 1, kind: 'cloud', name: 'Foo' },
       { id: 2, kind: 'ssh', name: 'Bar' },
     ],
+    project: {
+      id: 15,
+      name: 'Boo',
+    },
   },
 };
 
@@ -236,5 +240,51 @@ describe('<JobTemplateEdit />', () => {
     expect(history.location.pathname).toEqual(
       '/templates/job_template/1/details'
     );
+  });
+  test('should not call ProjectsAPI.readPlaybooks if there is no project', async () => {
+    const history = createMemoryHistory({});
+    const noProjectTemplate = {
+      id: 1,
+      name: 'Foo',
+      description: 'Bar',
+      job_type: 'run',
+      inventory: 2,
+      playbook: 'Baz',
+      type: 'job_template',
+      forks: 0,
+      limit: '',
+      verbosity: '0',
+      job_slice_count: 1,
+      timeout: 0,
+      job_tags: '',
+      skip_tags: '',
+      diff_mode: false,
+      allow_callbacks: false,
+      allow_simultaneous: false,
+      use_fact_cache: false,
+      host_config_key: '',
+      summary_fields: {
+        user_capabilities: {
+          edit: true,
+        },
+        labels: {
+          results: [{ name: 'Sushi', id: 1 }, { name: 'Major', id: 2 }],
+        },
+        inventory: {
+          id: 2,
+          organization_id: 1,
+        },
+        credentials: [
+          { id: 1, kind: 'cloud', name: 'Foo' },
+          { id: 2, kind: 'ssh', name: 'Bar' },
+        ],
+      },
+    };
+    await act(async () =>
+      mountWithContexts(<JobTemplateEdit template={noProjectTemplate} />, {
+        context: { router: { history } },
+      })
+    );
+    expect(ProjectsAPI.readPlaybooks).not.toBeCalled();
   });
 });

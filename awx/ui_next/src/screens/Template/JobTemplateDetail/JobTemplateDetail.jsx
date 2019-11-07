@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { Link, withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import {
@@ -26,6 +26,12 @@ const ButtonGroup = styled.div`
   margin-top: 20px;
   & > :not(:first-child) {
     margin-left: 20px;
+  }
+`;
+
+const MissingDetail = styled(Detail)`
+  dd& {
+    color: red;
   }
 `;
 class JobTemplateDetail extends Component {
@@ -60,6 +66,7 @@ class JobTemplateDetail extends Component {
   render() {
     const {
       template: {
+        ask_inventory_on_launch,
         allow_simultaneous,
         become_enabled,
         created,
@@ -156,6 +163,28 @@ class JobTemplateDetail extends Component {
       </TextList>
     );
 
+    const renderMissingDataDetail = value => (
+      <MissingDetail label={value} value={i18n._(t`Deleted`)} />
+    );
+
+    const inventoryValue = (kind, id) => {
+      const inventorykind =
+        kind === 'smart' ? (kind = 'smart_inventory') : (kind = 'inventory');
+
+      return ask_inventory_on_launch ? (
+        <Fragment>
+          <Link to={`/inventories/${inventorykind}/${id}/details`}>
+            {summary_fields.inventory.name}
+          </Link>
+          <span> {i18n._(t`(Prompt on Launch)`)}</span>
+        </Fragment>
+      ) : (
+        <Link to={`/inventories/${inventorykind}/${id}/details`}>
+          {summary_fields.inventory.name}
+        </Link>
+      );
+    };
+
     if (contentError) {
       return <ContentError error={contentError} />;
     }
@@ -171,31 +200,32 @@ class JobTemplateDetail extends Component {
             <Detail label={i18n._(t`Name`)} value={name} />
             <Detail label={i18n._(t`Description`)} value={description} />
             <Detail label={i18n._(t`Job Type`)} value={job_type} />
-            {summary_fields.inventory && (
+
+            {summary_fields.inventory ? (
               <Detail
                 label={i18n._(t`Inventory`)}
-                value={
-                  <Link
-                    to={`/inventories/${
-                      summary_fields.inventory.kind === 'smart'
-                        ? 'smart_inventory'
-                        : 'inventory'
-                    }/${summary_fields.inventory.id}/details`}
-                  >
-                    {summary_fields.inventory.name}
-                  </Link>
-                }
+                value={inventoryValue(
+                  summary_fields.inventory.kind,
+                  summary_fields.inventory.id
+                )}
               />
+            ) : (
+              !ask_inventory_on_launch &&
+              renderMissingDataDetail(i18n._(t`Inventory`))
             )}
-            {summary_fields.project && (
+            {summary_fields.project ? (
               <Detail
                 label={i18n._(t`Project`)}
                 value={
                   <Link to={`/projects/${summary_fields.project.id}/details`}>
-                    {summary_fields.project.name}
+                    {summary_fields.project
+                      ? summary_fields.project.name
+                      : i18n._(t`Deleted`)}
                   </Link>
                 }
               />
+            ) : (
+              renderMissingDataDetail(i18n._(t`Project`))
             )}
             <Detail label={i18n._(t`Playbook`)} value={playbook} />
             <Detail label={i18n._(t`Forks`)} value={forks || '0'} />

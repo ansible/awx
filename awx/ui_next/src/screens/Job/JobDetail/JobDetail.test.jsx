@@ -9,13 +9,20 @@ import mockJobData from '../shared/data.job.json';
 jest.mock('@api');
 
 describe('<JobDetail />', () => {
+  let wrapper;
+  beforeEach(() => {
+    wrapper = mountWithContexts(<JobDetail job={mockJobData} />);
+  });
+  afterEach(() => {
+    wrapper.unmount();
+  });
   test('initially renders succesfully', () => {
-    mountWithContexts(<JobDetail job={mockJobData} />);
+    wrapper = mountWithContexts(<JobDetail job={mockJobData} />);
+
+    expect(wrapper.length).toBe(1);
   });
 
   test('should display details', () => {
-    const wrapper = mountWithContexts(<JobDetail job={mockJobData} />);
-
     function assertDetail(label, value) {
       expect(wrapper.find(`Detail[label="${label}"] dt`).text()).toBe(label);
       expect(wrapper.find(`Detail[label="${label}"] dd`).text()).toBe(value);
@@ -43,7 +50,6 @@ describe('<JobDetail />', () => {
   });
 
   test('should display credentials', () => {
-    const wrapper = mountWithContexts(<JobDetail job={mockJobData} />);
     const credentialChip = wrapper.find('CredentialChip');
 
     expect(credentialChip.prop('credential')).toEqual(
@@ -52,21 +58,18 @@ describe('<JobDetail />', () => {
   });
 
   test('should display successful job status icon', () => {
-    const wrapper = mountWithContexts(<JobDetail job={mockJobData} />);
     const statusDetail = wrapper.find('Detail[label="Status"]');
     expect(statusDetail.find('StatusIcon__SuccessfulTop')).toHaveLength(1);
     expect(statusDetail.find('StatusIcon__SuccessfulBottom')).toHaveLength(1);
   });
 
   test('should display successful project status icon', () => {
-    const wrapper = mountWithContexts(<JobDetail job={mockJobData} />);
     const statusDetail = wrapper.find('Detail[label="Project"]');
     expect(statusDetail.find('StatusIcon__SuccessfulTop')).toHaveLength(1);
     expect(statusDetail.find('StatusIcon__SuccessfulBottom')).toHaveLength(1);
   });
 
   test('should properly delete job', async () => {
-    const wrapper = mountWithContexts(<JobDetail job={mockJobData} />);
     wrapper.find('button[aria-label="Delete"]').simulate('click');
     await sleep(1);
     wrapper.update();
@@ -89,8 +92,6 @@ describe('<JobDetail />', () => {
         },
       })
     );
-    const wrapper = mountWithContexts(<JobDetail job={mockJobData} />);
-
     wrapper.find('button[aria-label="Delete"]').simulate('click');
     const modal = wrapper.find('Modal');
     expect(modal.length).toBe(1);
@@ -101,5 +102,24 @@ describe('<JobDetail />', () => {
 
     const errorModal = wrapper.find('ErrorDetail');
     expect(errorModal.length).toBe(1);
+  });
+
+  test('DELETED is shown for required Job resources that have been deleted', () => {
+    const newMockJobData = { ...mockJobData };
+    newMockJobData.summary_fields.inventory = null;
+    newMockJobData.summary_fields.project = null;
+    const newWrapper = mountWithContexts(
+      <JobDetail job={newMockJobData} />
+    ).find('JobDetail');
+    async function assertMissingDetail(label) {
+      expect(newWrapper.length).toBe(1);
+      await sleep(0);
+      expect(newWrapper.find(`Detail[label="${label}"] dt`).text()).toBe(label);
+      expect(newWrapper.find(`Detail[label="${label}"] dd`).text()).toBe(
+        'DELETED'
+      );
+    }
+    assertMissingDetail('Project');
+    assertMissingDetail('Inventory');
   });
 });

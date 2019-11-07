@@ -8,7 +8,11 @@ import {
 } from '@patternfly/react-core';
 import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
-import { PencilAltIcon, RocketIcon } from '@patternfly/react-icons';
+import {
+  ExclamationTriangleIcon,
+  PencilAltIcon,
+  RocketIcon,
+} from '@patternfly/react-icons';
 
 import ActionButtonCell from '@components/ActionButtonCell';
 import DataListCell from '@components/DataListCell';
@@ -58,7 +62,10 @@ class TemplateListItem extends Component {
   render() {
     const { i18n, template, isSelected, onSelect } = this.props;
     const canLaunch = template.summary_fields.user_capabilities.start;
-
+    const missingResourceIcon =
+      (!template.summary_fields.inventory &&
+        !template.ask_inventory_on_launch) ||
+      !template.summary_fields.project;
     return (
       <DataListItem
         aria-labelledby={`check-action-${template.id}`}
@@ -80,6 +87,16 @@ class TemplateListItem extends Component {
                     <b>{template.name}</b>
                   </Link>
                 </span>
+                {missingResourceIcon && (
+                  <Tooltip
+                    content={i18n._(
+                      t`Resources are missing from this template.`
+                    )}
+                    position="right"
+                  >
+                    <ExclamationTriangleIcon css="color: #c9190b; margin-left: 20px;" />
+                  </Tooltip>
+                )}
               </LeftDataListCell>,
               <RightDataListCell
                 css="padding-left: 40px;"
