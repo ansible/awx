@@ -16,10 +16,10 @@ import TeamEdit from './TeamEdit';
 import { TeamsAPI } from '@api';
 
 const CardHeader = styled(PFCardHeader)`
---pf-c-card--first-child--PaddingTop: 0;
---pf-c-card--child--PaddingLeft: 0;
---pf-c-card--child--PaddingRight: 0;
-position: relative;
+  --pf-c-card--first-child--PaddingTop: 0;
+  --pf-c-card--child--PaddingLeft: 0;
+  --pf-c-card--child--PaddingRight: 0;
+  position: relative;
 `;
 
 class Team extends Component {

@@ -77,14 +77,23 @@ describe('<TeamsList />', () => {
       'TeamsList',
       el => el.state('hasContentLoading') === false
     );
-    expect(wrapper.find('input[type="checkbox"]').findWhere(n => n.prop('checked') === true).length).toBe(0);
+    expect(
+      wrapper
+        .find('input[type="checkbox"]')
+        .findWhere(n => n.prop('checked') === true).length
+    ).toBe(0);
     wrapper
-      .find('TeamListItem').at(0)
+      .find('TeamListItem')
+      .at(0)
       .find('DataListCheck')
       .props()
       .onChange(true);
     wrapper.update();
-    expect(wrapper.find('input[type="checkbox"]').findWhere(n => n.prop('checked') === true).length).toBe(1);
+    expect(
+      wrapper
+        .find('input[type="checkbox"]')
+        .findWhere(n => n.prop('checked') === true).length
+    ).toBe(1);
   });
 
   test('Select all checkbox selects and unselects all rows', async () => {
@@ -94,19 +103,31 @@ describe('<TeamsList />', () => {
       'TeamsList',
       el => el.state('hasContentLoading') === false
     );
-    expect(wrapper.find('input[type="checkbox"]').findWhere(n => n.prop('checked') === true).length).toBe(0);
+    expect(
+      wrapper
+        .find('input[type="checkbox"]')
+        .findWhere(n => n.prop('checked') === true).length
+    ).toBe(0);
     wrapper
       .find('Checkbox#select-all')
       .props()
       .onChange(true);
     wrapper.update();
-    expect(wrapper.find('input[type="checkbox"]').findWhere(n => n.prop('checked') === true).length).toBe(4);
+    expect(
+      wrapper
+        .find('input[type="checkbox"]')
+        .findWhere(n => n.prop('checked') === true).length
+    ).toBe(4);
     wrapper
       .find('Checkbox#select-all')
       .props()
       .onChange(false);
     wrapper.update();
-    expect(wrapper.find('input[type="checkbox"]').findWhere(n => n.prop('checked') === true).length).toBe(0);
+    expect(
+      wrapper
+        .find('input[type="checkbox"]')
+        .findWhere(n => n.prop('checked') === true).length
+    ).toBe(0);
   });
 
   test('api is called to delete Teams for each team in selected.', () => {

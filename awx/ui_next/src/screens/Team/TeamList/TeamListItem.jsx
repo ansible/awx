@@ -42,10 +42,7 @@ class TeamListItem extends React.Component {
             dataListCells={[
               <DataListCell key="divider">
                 <VerticalSeparator />
-                <Link
-                  id={labelId}
-                  to={`${detailUrl}`}
-                >
+                <Link id={labelId} to={`${detailUrl}`}>
                   <b>{team.name}</b>
                 </Link>
               </DataListCell>,

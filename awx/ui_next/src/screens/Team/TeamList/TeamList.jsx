@@ -139,7 +139,8 @@ class TeamsList extends Component {
 
     const canAdd =
       actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
-    const isAllSelected = selected.length > 0 && selected.length === teams.length;
+    const isAllSelected =
+      selected.length > 0 && selected.length === teams.length;
 
     return (
       <Fragment>
