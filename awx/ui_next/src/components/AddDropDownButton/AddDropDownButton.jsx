@@ -1,11 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
-import { t } from '@lingui/macro';
 import { Dropdown, DropdownPosition } from '@patternfly/react-core';
 import { ToolbarAddButton } from '@components/PaginatedDataList';
 
-function TemplateAddButton({ match, i18n }) {
+function AddDropDownButton({ topUrl, bottomUrl, topLabel, bottomLabel }) {
   const [isOpen, setIsOpen] = useState(false);
   const element = useRef(null);
 
@@ -30,19 +29,15 @@ function TemplateAddButton({ match, i18n }) {
         position={DropdownPosition.right}
         toggle={<ToolbarAddButton onClick={() => setIsOpen(!isOpen)} />}
         dropdownItems={[
-          <Link
-            key="job"
-            className="pf-c-dropdown__menu-item"
-            to={`${match.url}/job_template/add/`}
-          >
-            {i18n._(t`Job Template`)}
+          <Link key="top" className="pf-c-dropdown__menu-item" to={`${topUrl}`}>
+            {`${topLabel}`}
           </Link>,
           <Link
-            key="workflow"
+            key="bottom"
             className="pf-c-dropdown__menu-item"
-            to={`${match.url}_workflow/add/`}
+            to={`${bottomUrl}`}
           >
-            {i18n._(t`Workflow Template`)}
+            {`${bottomLabel}`}
           </Link>,
         ]}
       />
@@ -50,5 +45,5 @@ function TemplateAddButton({ match, i18n }) {
   );
 }
 
-export { TemplateAddButton as _TemplateAddButton };
-export default withI18n()(withRouter(TemplateAddButton));
+export { AddDropDownButton as _AddDropDownButton };
+export default withI18n()(withRouter(AddDropDownButton));

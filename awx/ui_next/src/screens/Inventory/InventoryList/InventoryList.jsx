@@ -1,15 +1,9 @@
 import React, { Component } from 'react';
-import { withRouter, Link } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 
 import { t } from '@lingui/macro';
-import {
-  Card,
-  PageSection,
-  Dropdown,
-  DropdownItem,
-  DropdownPosition,
-} from '@patternfly/react-core';
+import { Card, PageSection } from '@patternfly/react-core';
 
 import { InventoriesAPI } from '@api';
 import AlertModal from '@components/AlertModal';
@@ -17,10 +11,10 @@ import DatalistToolbar from '@components/DataListToolbar';
 import ErrorDetail from '@components/ErrorDetail';
 import PaginatedDataList, {
   ToolbarDeleteButton,
-  ToolbarAddButton,
 } from '@components/PaginatedDataList';
-import { getQSConfig, parseQueryString } from '@util/qs';
 
+import { getQSConfig, parseQueryString } from '@util/qs';
+import AddDropDownButton from '@components/AddDropDownButton';
 import InventoryListItem from './InventoryListItem';
 
 // The type value in const QS_CONFIG below does not have a space between job_inventory and
@@ -65,10 +59,6 @@ class InventoriesList extends Component {
     }
   }
 
-  componentWillUnmount() {
-    document.removeEventListener('click', this.handleAddToggle, false);
-  }
-
   handleDeleteErrorClose() {
     this.setState({ deletionError: null });
   }
@@ -90,16 +80,13 @@ class InventoriesList extends Component {
 
   handleAddToggle(e) {
     const { isAddOpen } = this.state;
-    document.addEventListener('click', this.handleAddToggle, false);
 
     if (this.node && this.node.contains(e.target) && isAddOpen) {
-      document.removeEventListener('click', this.handleAddToggle, false);
       this.setState({ isAddOpen: false });
     } else if (this.node && this.node.contains(e.target) && !isAddOpen) {
       this.setState({ isAddOpen: true });
     } else {
       this.setState({ isAddOpen: false });
-      document.removeEventListener('click', this.handleAddToggle, false);
     }
   }
 
@@ -222,33 +209,13 @@ class InventoriesList extends Component {
                     pluralizedItemName="Inventories"
                   />,
                   canAdd && (
-                    <div
-                      ref={node => {
-                        this.node = node;
-                      }}
+                    <AddDropDownButton
                       key="add"
-                    >
-                      <Dropdown
-                        isPlain
-                        isOpen={isAddOpen}
-                        position={DropdownPosition.right}
-                        toggle={
-                          <ToolbarAddButton onClick={this.handleAddToggle} />
-                        }
-                        dropdownItems={[
-                          <DropdownItem key="inventory">
-                            <Link to={`${match.url}/inventory/add/`}>
-                              {i18n._(t`Inventory`)}
-                            </Link>
-                          </DropdownItem>,
-                          <DropdownItem key="smart_inventory">
-                            <Link to={`${match.url}/smart_inventory/add/`}>
-                              {i18n._(t`Smart Inventory`)}
-                            </Link>
-                          </DropdownItem>,
-                        ]}
-                      />
-                    </div>
+                      topUrl={`${match.url}/inventory/add/`}
+                      bottomdUrl={`${match.url}/smart_inventory/add/`}
+                      topLabel={i18n._(t`Inventory`)}
+                      bottomLabel={i18n._(t`Smart Inventory`)}
+                    />
                   ),
                 ]}
               />
@@ -269,31 +236,13 @@ class InventoriesList extends Component {
             )}
             emptyStateControls={
               canAdd && (
-                <div
-                  ref={node => {
-                    this.node = node;
-                  }}
+                <AddDropDownButton
                   key="add"
-                >
-                  <Dropdown
-                    isPlain
-                    isOpen={isAddOpen}
-                    position={DropdownPosition.right}
-                    toggle={<ToolbarAddButton onClick={this.handleAddToggle} />}
-                    dropdownItems={[
-                      <DropdownItem key="inventory">
-                        <Link to={`${match.url}/inventory/add/`}>
-                          {i18n._(t`Inventory`)}
-                        </Link>
-                      </DropdownItem>,
-                      <DropdownItem key="smart_inventory">
-                        <Link to={`${match.url}/smart_inventory/add/`}>
-                          {i18n._(t`Smart Inventory`)}
-                        </Link>
-                      </DropdownItem>,
-                    ]}
-                  />
-                </div>
+                  topUrl={`${match.url}/inventory/add/`}
+                  bottomUrl={`${match.url}/smart_inventory/add/`}
+                  topLabel={i18n._(t`Inventory`)}
+                  bottomLabel={i18n._(t`Smart Inventory`)}
+                />
               )
             }
           />
