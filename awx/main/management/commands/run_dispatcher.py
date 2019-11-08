@@ -11,7 +11,6 @@ from kombu import Exchange, Queue
 from awx.main.utils.handlers import AWXProxyHandler
 from awx.main.dispatch import get_local_queuename, reaper
 from awx.main.dispatch.control import Control
-from awx.main.dispatch.kombu import Connection
 from awx.main.dispatch.pool import AutoscalePool
 from awx.main.dispatch.worker import AWXConsumer, TaskWorker
 from awx.main.dispatch import periodic
@@ -63,7 +62,7 @@ class Command(BaseCommand):
         # in cpython itself:
         # https://bugs.python.org/issue37429
         AWXProxyHandler.disable()
-        with Connection(settings.BROKER_URL) as conn:
+        with Connection(settings.BROKER_URL, transport_options=settings.BROKER_TRANSPORT_OPTIONS) as conn:
             try:
                 bcast = 'tower_broadcast_all'
                 queues = [

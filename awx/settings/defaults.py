@@ -421,7 +421,8 @@ os.environ.setdefault('DJANGO_LIVE_TEST_SERVER_ADDRESS', 'localhost:9013-9199')
 
 BROKER_DURABILITY = True
 BROKER_POOL_LIMIT = None
-BROKER_URL = 'amqp://guest:guest@localhost:5672//'
+BROKER_URL = 'redis://localhost:6379;'
+BROKER_TRANSPORT_OPTIONS = {}
 CELERY_DEFAULT_QUEUE = 'awx_private_queue'
 CELERYBEAT_SCHEDULE = {
     'tower_scheduler': {
@@ -929,8 +930,6 @@ ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC = False
 # Internal API URL for use by inventory scripts and callback plugin.
 INTERNAL_API_URL = 'http://127.0.0.1:%s' % DEVSERVER_DEFAULT_PORT
 
-PERSISTENT_CALLBACK_MESSAGES = True
-USE_CALLBACK_QUEUE = True
 CALLBACK_QUEUE = "callback_tasks"
 
 SCHEDULER_QUEUE = "scheduler"
@@ -964,6 +963,17 @@ LOG_AGGREGATOR_LEVEL = 'INFO'
 # If you're encountering issues establishing websockets in clustered Tower,
 # raising this value can help
 CHANNEL_LAYER_RECEIVE_MAX_RETRY = 10
+
+ASGI_APPLICATION = "awx.main.routing.application"
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "awx.main.channels.RedisGroupBroadcastChannelLayer",
+        "CONFIG": {
+            "hosts": [("localhost", 6379)],
+        },
+    },
+}
 
 # Logging configuration.
 LOGGING = {
@@ -1239,3 +1249,17 @@ MIDDLEWARE = [
     'awx.main.middleware.URLModificationMiddleware',
     'awx.main.middleware.SessionTimeoutMiddleware',
 ]
+
+# Secret header value to exchange for websockets responsible for distributing websocket messages.
+# This needs to be kept secret and randomly generated
+BROADCAST_WEBSOCKETS_SECRET = ''
+
+# Port for broadcast websockets to connect to
+# Note: that the clients will follow redirect responses
+BROADCAST_WEBSOCKETS_PORT = 443
+
+# Whether or not broadcast websockets should check nginx certs when interconnecting
+BROADCAST_WEBSOCKETS_VERIFY_CERT = False
+
+# Connect to other AWX nodes using http or https
+BROADCAST_WEBSOCKETS_PROTOCOL = 'https'

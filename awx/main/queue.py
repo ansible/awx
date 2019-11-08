@@ -10,8 +10,7 @@ import os
 from django.conf import settings
 
 # Kombu
-from awx.main.dispatch.kombu import Connection
-from kombu import Exchange, Producer
+from kombu import Exchange, Producer, Connection
 from kombu.serialization import registry
 
 __all__ = ['CallbackQueueDispatcher']
@@ -41,6 +40,7 @@ class CallbackQueueDispatcher(object):
 
     def __init__(self):
         self.callback_connection = getattr(settings, 'BROKER_URL', None)
+        self.callback_connection_options = getattr(settings, 'BROKER_TRANSPORT_OPTIONS', {})
         self.connection_queue = getattr(settings, 'CALLBACK_QUEUE', '')
         self.connection = None
         self.exchange = None
@@ -57,7 +57,7 @@ class CallbackQueueDispatcher(object):
                 if self.connection_pid != active_pid:
                     self.connection = None
                 if self.connection is None:
-                    self.connection = Connection(self.callback_connection)
+                    self.connection = Connection(self.callback_connection, transport_options=self.callback_connection_options)
                     self.exchange = Exchange(self.connection_queue, type='direct')
 
                 producer = Producer(self.connection)
@@ -66,7 +66,7 @@ class CallbackQueueDispatcher(object):
                                  compression='bzip2',
                                  exchange=self.exchange,
                                  declare=[self.exchange],
-                                 delivery_mode="persistent" if settings.PERSISTENT_CALLBACK_MESSAGES else "transient",
+                                 delivery_mode="transient",
                                  routing_key=self.connection_queue)
                 return
             except Exception as e:

@@ -3,9 +3,8 @@
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
-from kombu import Exchange, Queue
+from kombu import Exchange, Queue, Connection
 
-from awx.main.dispatch.kombu import Connection
 from awx.main.dispatch.worker import AWXConsumer, CallbackBrokerWorker
 
 
@@ -18,7 +17,7 @@ class Command(BaseCommand):
     help = 'Launch the job callback receiver'
 
     def handle(self, *arg, **options):
-        with Connection(settings.BROKER_URL) as conn:
+        with Connection(settings.BROKER_URL, transport_options=settings.BROKER_TRANSPORT_OPTIONS) as conn:
             consumer = None
             try:
                 consumer = AWXConsumer(

@@ -11,10 +11,6 @@ services:
     environment:
       CURRENT_UID:
       OS:
-      RABBITMQ_HOST: rabbitmq
-      RABBITMQ_USER: guest
-      RABBITMQ_PASS: guest
-      RABBITMQ_VHOST: /
       SDB_HOST: 0.0.0.0
       SDB_PORT: 7899
       AWX_GROUP_QUEUES: tower
@@ -28,7 +24,7 @@ services:
     links:
       - postgres
       - memcached
-      - rabbitmq
+      - redis
     #   - sync
     # volumes_from:
     #   - sync
@@ -57,8 +53,9 @@ services:
     container_name: tools_memcached_1
     ports:
       - "11211:11211"
-  rabbitmq:
-    image: rabbitmq:3-management
-    container_name: tools_rabbitmq_1
+  redis:
+    image: redis:latest
+    container_name: tools_redis_1
     ports:
-      - "15672:15672"
+      - "6379:6379"
+

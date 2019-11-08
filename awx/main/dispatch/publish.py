@@ -4,9 +4,8 @@ import sys
 from uuid import uuid4
 
 from django.conf import settings
-from kombu import Exchange, Producer
+from kombu import Exchange, Producer, Connection, Queue, Consumer
 
-from awx.main.dispatch.kombu import Connection
 
 logger = logging.getLogger('awx.main.dispatch')
 
@@ -86,8 +85,13 @@ class task:
                 if callable(queue):
                     queue = queue()
                 if not settings.IS_TESTING(sys.argv):
-                    with Connection(settings.BROKER_URL) as conn:
+                    with Connection(settings.BROKER_URL, transport_options=settings.BROKER_TRANSPORT_OPTIONS) as conn:
                         exchange = Exchange(queue, type=exchange_type or 'direct')
+
+                        # HACK: With Redis as the broker declaring an exchange isn't enough to create the queue
+                        # Creating a Consumer _will_ create a queue so that publish will succeed. Note that we
+                        # don't call consume() on the consumer so we don't actually eat any messages
+                        Consumer(conn, queues=[Queue(queue, exchange, routing_key=queue)], accept=['json'])
                         producer = Producer(conn)
                         logger.debug('publish {}({}, queue={})'.format(
                             cls.name,

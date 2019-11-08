@@ -7,45 +7,50 @@ services:
       dockerfile: Dockerfile-haproxy
     container_name: tools_haproxy_1
     depends_on:
-      - "awx_1"
-      - "awx_2"
-      - "awx_3"
+      - "awx-1"
+      - "awx-2"
+      - "awx-3"
     ports:
       - "8013:8013"
       - "8043:8043"
       - "1936:1936"
       - "15672:15672"
-  awx_1:
+  awx-1:
     user: ${CURRENT_UID}
     container_name: tools_awx_1_1
     privileged: true
     image: ${DEV_DOCKER_TAG_BASE}/awx_devel:${TAG}
-    hostname: awx_1
+    hostname: awx-1
+    #entrypoint: ["bash"]
     environment:
       CURRENT_UID:
-      RABBITMQ_HOST: rabbitmq_1
-      RABBITMQ_USER: guest
-      RABBITMQ_PASS: guest
-      RABBITMQ_VHOST: /
+      # BROKER_URL will go away when we use postgres as our message broker
+      BROKER_URL: "redis://redis_1:63791"
+      REDIS_HOST: redis_1
+      REDIS_PORT: 63791
       SDB_HOST: 0.0.0.0
       SDB_PORT: 5899
       AWX_GROUP_QUEUES: alpha,tower
+    command: /start_development.sh
+    working_dir: "/awx_devel"
     volumes:
       - "../:/awx_devel"
     ports:
       - "5899-5999:5899-5999"
-  awx_2:
+  awx-2:
     user: ${CURRENT_UID}
     container_name: tools_awx_2_1
     privileged: true
     image: ${DEV_DOCKER_TAG_BASE}/awx_devel:${TAG}
-    hostname: awx_2
+    hostname: awx-2
+    command: /start_development.sh
+    working_dir: "/awx_devel"
     environment:
       CURRENT_UID:
-      RABBITMQ_HOST: rabbitmq_2
-      RABBITMQ_USER: guest
-      RABBITMQ_PASS: guest
-      RABBITMQ_VHOST: /
+      # BROKER_URL will go away when we use postgres as our message broker
+      BROKER_URL: "redis://redis_1:63791"
+      REDIS_HOST: redis_2
+      REDIS_PORT: 63792
       SDB_HOST: 0.0.0.0
       SDB_PORT: 7899
       AWX_GROUP_QUEUES: bravo,tower
@@ -53,18 +58,21 @@ services:
       - "../:/awx_devel"
     ports:
       - "7899-7999:7899-7999"
-  awx_3:
+  awx-3:
     user: ${CURRENT_UID}
     container_name: tools_awx_3_1
     privileged: true
     image: ${DEV_DOCKER_TAG_BASE}/awx_devel:${TAG}
-    hostname: awx_3
+    hostname: awx-3
+    entrypoint: ["bash"]
+    command: /start_development.sh
+    working_dir: "/awx_devel"
     environment:
       CURRENT_UID:
-      RABBITMQ_HOST: rabbitmq_3
-      RABBITMQ_USER: guest
-      RABBITMQ_PASS: guest
-      RABBITMQ_VHOST: /
+      # BROKER_URL will go away when we use postgres as our message broker
+      BROKER_URL: "redis://redis_1:63791"
+      REDIS_HOST: redis_3
+      REDIS_PORT: 63793
       SDB_HOST: 0.0.0.0
       SDB_PORT: 8899
       AWX_GROUP_QUEUES: charlie,tower
@@ -72,24 +80,33 @@ services:
       - "../:/awx_devel"
     ports:
       - "8899-8999:8899-8999"
-  rabbitmq_1:
-    image: ${DEV_DOCKER_TAG_BASE}/rabbit_cluster_node:latest
-    hostname: rabbitmq_1
-    container_name: tools_rabbitmq_1_1
-  rabbitmq_2:
-    image: ${DEV_DOCKER_TAG_BASE}/rabbit_cluster_node:latest
-    hostname: rabbitmq_2
-    container_name: tools_rabbitmq_2_1
-    environment:
-      - CLUSTERED=true
-      - CLUSTER_WITH=rabbitmq_1
-  rabbitmq_3:
-    image: ${DEV_DOCKER_TAG_BASE}/rabbit_cluster_node:latest
-    hostname: rabbitmq_3
-    container_name: tools_rabbitmq_3_1
-    environment:
-      - CLUSTERED=true
-      - CLUSTER_WITH=rabbitmq_1
+  redis_1:
+    image: redis:latest
+    hostname: redis_1
+    container_name: tools_redis_1_1
+    command: "redis-server /usr/local/etc/redis/redis.conf"
+    volumes:
+      - "./redis/redis_1.conf:/usr/local/etc/redis/redis.conf"
+    ports:
+      - "63791:63791"
+  redis_2:
+    image: redis:latest
+    hostname: redis_2
+    container_name: tools_redis_2_1
+    command: "redis-server /usr/local/etc/redis/redis.conf"
+    volumes:
+      - "./redis/redis_2.conf:/usr/local/etc/redis/redis.conf"
+    ports:
+      - "63792:63792"
+  redis_3:
+    image: redis:latest
+    hostname: redis_3
+    container_name: tools_redis_3_1
+    command: "redis-server /usr/local/etc/redis/redis.conf"
+    volumes:
+      - "./redis/redis_3.conf:/usr/local/etc/redis/redis.conf"
+    ports:
+      - "63793:63793"
   postgres:
     image: postgres:10
     container_name: tools_postgres_1

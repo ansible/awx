@@ -593,16 +593,6 @@ def deny_orphaned_approvals(sender, instance, **kwargs):
 @receiver(post_save, sender=Session)
 def save_user_session_membership(sender, **kwargs):
     session = kwargs.get('instance', None)
-    if pkg_resources.get_distribution('channels').version >= '2':
-        # If you get into this code block, it means we upgraded channels, but
-        # didn't make the settings.SESSIONS_PER_USER feature work
-        raise RuntimeError(
-            'save_user_session_membership must be updated for channels>=2: '
-            'http://channels.readthedocs.io/en/latest/one-to-two.html#requirements'
-        )
-    if 'runworker' in sys.argv:
-        # don't track user session membership for websocket per-channel sessions
-        return
     if not session:
         return
     user_id = session.get_decoded().get(SESSION_KEY, None)

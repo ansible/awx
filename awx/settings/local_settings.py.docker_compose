@@ -49,16 +49,18 @@ if "pytest" in sys.modules:
         }
     }
 
-# AMQP configuration.
-BROKER_URL = "amqp://{}:{}@{}/{}".format(os.environ.get("RABBITMQ_USER"),
-                                  os.environ.get("RABBITMQ_PASS"),
-                                  os.environ.get("RABBITMQ_HOST"),
-                                  urllib.parse.quote(os.environ.get("RABBITMQ_VHOST", "/"), safe=''))
+# Use Redis as the message bus for now
+# Default to "just works" for single tower docker
+BROKER_URL = os.environ.get('BROKER_URL', "redis://redis_1:6379")
 
 CHANNEL_LAYERS = {
-    'default': {'BACKEND': 'asgi_amqp.AMQPChannelLayer',
-                'ROUTING': 'awx.main.routing.channel_routing',
-                'CONFIG': {'url': BROKER_URL}}
+    "default": {
+        "BACKEND": "awx.main.channels.RedisGroupBroadcastChannelLayer",
+        "CONFIG": {
+            "hosts": [(os.environ.get('REDIS_HOST', 'redis_1'),
+                       int(os.environ.get('REDIS_PORT', 6379)))],
+        },
+    },
 }
 
 # Absolute filesystem path to the directory to host projects (with playbooks).
@@ -238,3 +240,8 @@ TEST_OPENSTACK_PROJECT = ''
 # Azure credentials.
 TEST_AZURE_USERNAME = ''
 TEST_AZURE_KEY_DATA = ''
+
+BROADCAST_WEBSOCKETS_SECRET = '🤖starscream🤖'
+BROADCAST_WEBSOCKETS_PORT = 8013
+BROADCAST_WEBSOCKETS_VERIFY_CERT = False
+BROADCAST_WEBSOCKETS_PROTOCOL = 'http'
