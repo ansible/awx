@@ -53,10 +53,7 @@ describe('<TeamsList />', () => {
   beforeEach(() => {
     TeamsAPI.read = () =>
       Promise.resolve({
-        data: {
-          count: 0,
-          results: [],
-        },
+        data: mockAPITeamsList.data,
       });
     TeamsAPI.readOptions = () =>
       Promise.resolve({
@@ -73,32 +70,43 @@ describe('<TeamsList />', () => {
     mountWithContexts(<TeamsList />);
   });
 
-  test('Puts 1 selected Team in state when handleSelect is called.', () => {
-    wrapper = mountWithContexts(<TeamsList />).find('TeamsList');
-
-    wrapper.setState({
-      teams: mockAPITeamsList.data.results,
-      itemCount: 3,
-      isInitialized: true,
-    });
+  test('Selects one team when row is checked', async () => {
+    wrapper = mountWithContexts(<TeamsList />);
+    await waitForElement(
+      wrapper,
+      'TeamsList',
+      el => el.state('hasContentLoading') === false
+    );
+    expect(wrapper.find('input[type="checkbox"]').findWhere(n => n.prop('checked') === true).length).toBe(0);
+    wrapper
+      .find('TeamListItem').at(0)
+      .find('DataListCheck')
+      .props()
+      .onChange(true);
     wrapper.update();
-    expect(wrapper.state('selected').length).toBe(0);
-    wrapper.instance().handleSelect(mockAPITeamsList.data.results.slice(0, 1));
-    expect(wrapper.state('selected').length).toBe(1);
+    expect(wrapper.find('input[type="checkbox"]').findWhere(n => n.prop('checked') === true).length).toBe(1);
   });
 
-  test('Puts all Teams in state when handleSelectAll is called.', () => {
+  test('Select all checkbox selects and unselects all rows', async () => {
     wrapper = mountWithContexts(<TeamsList />);
-    const list = wrapper.find('TeamsList');
-    list.setState({
-      teams: mockAPITeamsList.data.results,
-      itemCount: 3,
-      isInitialized: true,
-    });
-    expect(list.state('selected').length).toBe(0);
-    list.instance().handleSelectAll(true);
+    await waitForElement(
+      wrapper,
+      'TeamsList',
+      el => el.state('hasContentLoading') === false
+    );
+    expect(wrapper.find('input[type="checkbox"]').findWhere(n => n.prop('checked') === true).length).toBe(0);
+    wrapper
+      .find('Checkbox#select-all')
+      .props()
+      .onChange(true);
     wrapper.update();
-    expect(list.state('selected').length).toEqual(list.state('teams').length);
+    expect(wrapper.find('input[type="checkbox"]').findWhere(n => n.prop('checked') === true).length).toBe(4);
+    wrapper
+      .find('Checkbox#select-all')
+      .props()
+      .onChange(false);
+    wrapper.update();
+    expect(wrapper.find('input[type="checkbox"]').findWhere(n => n.prop('checked') === true).length).toBe(0);
   });
 
   test('api is called to delete Teams for each team in selected.', () => {

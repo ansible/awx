@@ -175,7 +175,7 @@ class HostsList extends Component {
 
     const canAdd =
       actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
-    const isAllSelected = selected.length === hosts.length;
+    const isAllSelected = selected.length > 0 && selected.length === hosts.length;
 
     return (
       <Fragment>

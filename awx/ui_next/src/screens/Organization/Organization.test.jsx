@@ -33,7 +33,7 @@ async function getOrganizations(params) {
   };
 }
 
-describe.only('<Organization />', () => {
+describe('<Organization />', () => {
   test('initially renders succesfully', () => {
     OrganizationsAPI.readDetail.mockResolvedValue({ data: mockOrganization });
     OrganizationsAPI.read.mockImplementation(getOrganizations);
@@ -77,7 +77,7 @@ describe.only('<Organization />', () => {
     done();
   });
 
-  test('should show content error when user attempts to navigate to erroneous route', async done => {
+  test('should show content error when user attempts to navigate to erroneous route', async () => {
     const history = createMemoryHistory({
       initialEntries: ['/organizations/1/foobar'],
     });
@@ -100,6 +100,5 @@ describe.only('<Organization />', () => {
       }
     );
     await waitForElement(wrapper, 'ContentError', el => el.length === 1);
-    done();
   });
 });

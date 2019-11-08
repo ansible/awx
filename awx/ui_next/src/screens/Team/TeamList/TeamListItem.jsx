@@ -45,7 +45,6 @@ class TeamListItem extends React.Component {
                 <Link
                   id={labelId}
                   to={`${detailUrl}`}
-                  style={{ marginRight: '10px' }}
                 >
                   <b>{team.name}</b>
                 </Link>

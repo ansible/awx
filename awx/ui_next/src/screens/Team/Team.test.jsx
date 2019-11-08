@@ -33,14 +33,14 @@ async function getTeams() {
   };
 }
 
-describe.only('<Team />', () => {
+describe('<Team />', () => {
   test('initially renders succesfully', () => {
     TeamsAPI.readDetail.mockResolvedValue({ data: mockTeam });
     TeamsAPI.read.mockImplementation(getTeams);
     mountWithContexts(<Team setBreadcrumb={() => {}} me={mockMe} />);
   });
 
-  test('should show content error when user attempts to navigate to erroneous route', async done => {
+  test('should show content error when user attempts to navigate to erroneous route', async () => {
     const history = createMemoryHistory({
       initialEntries: ['/teams/1/foobar'],
     });
@@ -63,6 +63,5 @@ describe.only('<Team />', () => {
       }
     );
     await waitForElement(wrapper, 'ContentError', el => el.length === 1);
-    done();
   });
 });

@@ -88,7 +88,7 @@ describe('<Template />', () => {
     done();
   });
 
-  test('should show content error when user attempts to navigate to erroneous route', async done => {
+  test('should show content error when user attempts to navigate to erroneous route', async () => {
     const history = createMemoryHistory({
       initialEntries: ['/templates/job_template/1/foobar'],
     });
@@ -111,6 +111,5 @@ describe('<Template />', () => {
       }
     );
     await waitForElement(wrapper, 'ContentError', el => el.length === 1);
-    done();
   });
 });

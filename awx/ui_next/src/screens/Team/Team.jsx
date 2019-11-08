@@ -15,6 +15,13 @@ import TeamDetail from './TeamDetail';
 import TeamEdit from './TeamEdit';
 import { TeamsAPI } from '@api';
 
+const CardHeader = styled(PFCardHeader)`
+--pf-c-card--first-child--PaddingTop: 0;
+--pf-c-card--child--PaddingLeft: 0;
+--pf-c-card--child--PaddingRight: 0;
+position: relative;
+`;
+
 class Team extends Component {
   constructor(props) {
     super(props);
@@ -72,13 +79,6 @@ class Team extends Component {
       { name: i18n._(t`Users`), link: `${match.url}/users`, id: 1 },
       { name: i18n._(t`Access`), link: `${match.url}/access`, id: 2 },
     ];
-
-    const CardHeader = styled(PFCardHeader)`
-      --pf-c-card--first-child--PaddingTop: 0;
-      --pf-c-card--child--PaddingLeft: 0;
-      --pf-c-card--child--PaddingRight: 0;
-      position: relative;
-    `;
 
     let cardHeader = (
       <CardHeader style={{ padding: 0 }}>

@@ -12,13 +12,13 @@ const mockMe = {
   is_system_auditor: false,
 };
 
-describe.only('<Host />', () => {
+describe('<Host />', () => {
   test('initially renders succesfully', () => {
     HostsAPI.readDetail.mockResolvedValue({ data: mockDetails });
     mountWithContexts(<Host setBreadcrumb={() => {}} me={mockMe} />);
   });
 
-  test('should show content error when user attempts to navigate to erroneous route', async done => {
+  test('should show content error when user attempts to navigate to erroneous route', async () => {
     const history = createMemoryHistory({
       initialEntries: ['/hosts/1/foobar'],
     });
@@ -41,6 +41,5 @@ describe.only('<Host />', () => {
       }
     );
     await waitForElement(wrapper, 'ContentError', el => el.length === 1);
-    done();
   });
 });
