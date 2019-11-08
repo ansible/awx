@@ -36,7 +36,6 @@ class InventoriesList extends Component {
       selected: [],
       inventories: [],
       itemCount: 0,
-      isAddOpen: false,
     };
 
     this.loadInventories = this.loadInventories.bind(this);
@@ -44,7 +43,6 @@ class InventoriesList extends Component {
     this.handleSelect = this.handleSelect.bind(this);
     this.handleInventoryDelete = this.handleInventoryDelete.bind(this);
     this.handleDeleteErrorClose = this.handleDeleteErrorClose.bind(this);
-    this.handleAddToggle = this.handleAddToggle.bind(this);
   }
 
   componentDidMount() {
@@ -75,18 +73,6 @@ class InventoriesList extends Component {
       this.setState({ selected: selected.filter(s => s.id !== inventory.id) });
     } else {
       this.setState({ selected: selected.concat(inventory) });
-    }
-  }
-
-  handleAddToggle(e) {
-    const { isAddOpen } = this.state;
-
-    if (this.node && this.node.contains(e.target) && isAddOpen) {
-      this.setState({ isAddOpen: false });
-    } else if (this.node && this.node.contains(e.target) && !isAddOpen) {
-      this.setState({ isAddOpen: true });
-    } else {
-      this.setState({ isAddOpen: false });
     }
   }
 
@@ -155,14 +141,29 @@ class InventoriesList extends Component {
       inventories,
       itemCount,
       selected,
-      isAddOpen,
       actions,
     } = this.state;
     const { match, i18n } = this.props;
     const canAdd =
       actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
-    const isAllSelected =
-      selected.length > 0 && selected.length === inventories.length;
+    const isAllSelected = selected.length === inventories.length;
+    const addButton = (
+      <AddDropDownButton
+        key="add"
+        dropdownItems={[
+          {
+            key: 'inventory',
+            label: i18n._(t`Inventory`),
+            url: `${match.url}/inventory/add/`,
+          },
+          {
+            key: 'smart-inventory',
+            label: i18n._(t`Smart Inventory`),
+            url: `${match.url}/smart_inventory/add/`,
+          },
+        ]}
+      />
+    );
     return (
       <PageSection>
         <Card>
@@ -208,15 +209,7 @@ class InventoriesList extends Component {
                     itemsToDelete={selected}
                     pluralizedItemName="Inventories"
                   />,
-                  canAdd && (
-                    <AddDropDownButton
-                      key="add"
-                      topUrl={`${match.url}/inventory/add/`}
-                      bottomdUrl={`${match.url}/smart_inventory/add/`}
-                      topLabel={i18n._(t`Inventory`)}
-                      bottomLabel={i18n._(t`Smart Inventory`)}
-                    />
-                  ),
+                  canAdd && addButton,
                 ]}
               />
             )}
@@ -234,17 +227,7 @@ class InventoriesList extends Component {
                 isSelected={selected.some(row => row.id === inventory.id)}
               />
             )}
-            emptyStateControls={
-              canAdd && (
-                <AddDropDownButton
-                  key="add"
-                  topUrl={`${match.url}/inventory/add/`}
-                  bottomUrl={`${match.url}/smart_inventory/add/`}
-                  topLabel={i18n._(t`Inventory`)}
-                  bottomLabel={i18n._(t`Smart Inventory`)}
-                />
-              )
-            }
+            emptyStateControls={canAdd && addButton}
           />
         </Card>
         <AlertModal

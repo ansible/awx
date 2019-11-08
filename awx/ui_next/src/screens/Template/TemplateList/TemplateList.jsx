@@ -161,6 +161,23 @@ class TemplatesList extends Component {
       actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
     const isAllSelected =
       selected.length === templates.length && selected.length > 0;
+    const addButton = (
+      <AddDropDownButton
+        key="add"
+        dropdownItems={[
+          {
+            key: 'template',
+            label: i18n._(t`Template`),
+            url: `${match.url}/template/add/`,
+          },
+          {
+            key: 'workflow_template',
+            label: i18n._(t`Workflow Template`),
+            url: `${match.url}/_workflow/add/`,
+          },
+        ]}
+      />
+    );
     return (
       <PageSection>
         <Card>
@@ -206,15 +223,7 @@ class TemplatesList extends Component {
                     itemsToDelete={selected}
                     pluralizedItemName="Templates"
                   />,
-                  canAdd && (
-                    <AddDropDownButton
-                      key="add"
-                      topUrl={`${match.url}/job_template/add/`}
-                      bottomUrl={`${match.url}_workflow/add/`}
-                      topLabel={i18n._(t`Job Template`)}
-                      bottomLabel={i18n._(t`Workflow Template`)}
-                    />
-                  ),
+                  canAdd && addButton,
                 ]}
               />
             )}
@@ -228,17 +237,7 @@ class TemplatesList extends Component {
                 isSelected={selected.some(row => row.id === template.id)}
               />
             )}
-            emptyStateControls={
-              canAdd && (
-                <AddDropDownButton
-                  key="add"
-                  topUrl={`${match.url}/job_template/add/`}
-                  bottomUrl={`${match.url}_workflow/add/`}
-                  topLabel={i18n._(t`Job Template`)}
-                  bottomLabel={i18n._(t`Workflow Template`)}
-                />
-              )
-            }
+            emptyStateControls={canAdd && addButton}
           />
         </Card>
         <AlertModal

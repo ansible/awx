@@ -1,4 +1,1 @@
-export {
-  default
-}
-from './AddDropDownButton'
+export { default } from './AddDropDownButton';
