@@ -1,9 +1,8 @@
 import React from 'react';
 import { createMemoryHistory } from 'history';
-import { HostsAPI } from '@api';
+import { TeamsAPI } from '@api';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
-import mockDetails from './data.host.json';
-import Host from './Host';
+import Team from './Team';
 
 jest.mock('@api');
 
@@ -12,18 +11,41 @@ const mockMe = {
   is_system_auditor: false,
 };
 
-describe('<Host />', () => {
+const mockTeam = {
+  id: 1,
+  name: 'Test Team',
+  summary_fields: {
+    organization: {
+      id: 1,
+      name: 'Default',
+    },
+  },
+};
+
+async function getTeams() {
+  return {
+    count: 1,
+    next: null,
+    previous: null,
+    data: {
+      results: [mockTeam],
+    },
+  };
+}
+
+describe('<Team />', () => {
   test('initially renders succesfully', () => {
-    HostsAPI.readDetail.mockResolvedValue({ data: mockDetails });
-    mountWithContexts(<Host setBreadcrumb={() => {}} me={mockMe} />);
+    TeamsAPI.readDetail.mockResolvedValue({ data: mockTeam });
+    TeamsAPI.read.mockImplementation(getTeams);
+    mountWithContexts(<Team setBreadcrumb={() => {}} me={mockMe} />);
   });
 
   test('should show content error when user attempts to navigate to erroneous route', async () => {
     const history = createMemoryHistory({
-      initialEntries: ['/hosts/1/foobar'],
+      initialEntries: ['/teams/1/foobar'],
     });
     const wrapper = mountWithContexts(
-      <Host setBreadcrumb={() => {}} me={mockMe} />,
+      <Team setBreadcrumb={() => {}} me={mockMe} />,
       {
         context: {
           router: {
@@ -32,8 +54,8 @@ describe('<Host />', () => {
               location: history.location,
               match: {
                 params: { id: 1 },
-                url: '/hosts/1/foobar',
-                path: '/host/1/foobar',
+                url: '/teams/1/foobar',
+                path: '/teams/1/foobar',
               },
             },
           },

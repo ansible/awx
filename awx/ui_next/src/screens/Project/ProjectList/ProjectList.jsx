@@ -141,7 +141,8 @@ class ProjectsList extends Component {
 
     const canAdd =
       actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
-    const isAllSelected = selected.length === projects.length;
+    const isAllSelected =
+      selected.length > 0 && selected.length === projects.length;
 
     return (
       <Fragment>

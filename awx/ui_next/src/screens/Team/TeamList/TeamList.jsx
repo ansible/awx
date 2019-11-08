@@ -4,7 +4,7 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
 
-import { HostsAPI } from '@api';
+import { TeamsAPI } from '@api';
 import AlertModal from '@components/AlertModal';
 import DataListToolbar from '@components/DataListToolbar';
 import ErrorDetail from '@components/ErrorDetail';
@@ -14,15 +14,15 @@ import PaginatedDataList, {
 } from '@components/PaginatedDataList';
 import { getQSConfig, parseQueryString } from '@util/qs';
 
-import HostListItem from './HostListItem';
+import TeamListItem from './TeamListItem';
 
-const QS_CONFIG = getQSConfig('host', {
+const QS_CONFIG = getQSConfig('team', {
   page: 1,
   page_size: 20,
   order_by: 'name',
 });
 
-class HostsList extends Component {
+class TeamsList extends Component {
   constructor(props) {
     super(props);
 
@@ -30,41 +30,34 @@ class HostsList extends Component {
       hasContentLoading: true,
       contentError: null,
       deletionError: null,
-      hosts: [],
+      teams: [],
       selected: [],
       itemCount: 0,
       actions: null,
-      toggleError: false,
-      toggleLoading: false,
     };
 
     this.handleSelectAll = this.handleSelectAll.bind(this);
     this.handleSelect = this.handleSelect.bind(this);
-    this.handleHostDelete = this.handleHostDelete.bind(this);
+    this.handleTeamDelete = this.handleTeamDelete.bind(this);
     this.handleDeleteErrorClose = this.handleDeleteErrorClose.bind(this);
-    this.loadActions = this.loadActions.bind(this);
-    this.loadHosts = this.loadHosts.bind(this);
-    this.handleHostToggle = this.handleHostToggle.bind(this);
-    this.handleHostToggleErrorClose = this.handleHostToggleErrorClose.bind(
-      this
-    );
+    this.loadTeams = this.loadTeams.bind(this);
   }
 
   componentDidMount() {
-    this.loadHosts();
+    this.loadTeams();
   }
 
   componentDidUpdate(prevProps) {
     const { location } = this.props;
     if (location !== prevProps.location) {
-      this.loadHosts();
+      this.loadTeams();
     }
   }
 
   handleSelectAll(isSelected) {
-    const { hosts } = this.state;
+    const { teams } = this.state;
 
-    const selected = isSelected ? [...hosts] : [];
+    const selected = isSelected ? [...teams] : [];
     this.setState({ selected });
   }
 
@@ -82,59 +75,32 @@ class HostsList extends Component {
     this.setState({ deletionError: null });
   }
 
-  handleHostToggleErrorClose() {
-    this.setState({ toggleError: false });
-  }
-
-  async handleHostDelete() {
+  async handleTeamDelete() {
     const { selected } = this.state;
 
     this.setState({ hasContentLoading: true });
     try {
-      await Promise.all(selected.map(host => HostsAPI.destroy(host.id)));
+      await Promise.all(selected.map(team => TeamsAPI.destroy(team.id)));
     } catch (err) {
       this.setState({ deletionError: err });
     } finally {
-      await this.loadHosts();
+      await this.loadTeams();
     }
   }
 
-  async handleHostToggle(hostToToggle) {
-    const { hosts } = this.state;
-    this.setState({ toggleLoading: true });
-    try {
-      const { data: updatedHost } = await HostsAPI.update(hostToToggle.id, {
-        enabled: !hostToToggle.enabled,
-      });
-      this.setState({
-        hosts: hosts.map(host =>
-          host.id === updatedHost.id ? updatedHost : host
-        ),
-      });
-    } catch (err) {
-      this.setState({ toggleError: true });
-    } finally {
-      this.setState({ toggleLoading: false });
-    }
-  }
-
-  async loadActions() {
+  async loadTeams() {
+    const { location } = this.props;
     const { actions: cachedActions } = this.state;
+    const params = parseQueryString(QS_CONFIG, location.search);
+
     let optionsPromise;
     if (cachedActions) {
       optionsPromise = Promise.resolve({ data: { actions: cachedActions } });
     } else {
-      optionsPromise = HostsAPI.readOptions();
+      optionsPromise = TeamsAPI.readOptions();
     }
 
-    return optionsPromise;
-  }
-
-  async loadHosts() {
-    const { location } = this.props;
-    const params = parseQueryString(QS_CONFIG, location.search);
-
-    const promises = Promise.all([HostsAPI.read(params), this.loadActions()]);
+    const promises = Promise.all([TeamsAPI.read(params), optionsPromise]);
 
     this.setState({ contentError: null, hasContentLoading: true });
     try {
@@ -149,7 +115,7 @@ class HostsList extends Component {
       this.setState({
         actions,
         itemCount: count,
-        hosts: results,
+        teams: results,
         selected: [],
       });
     } catch (err) {
@@ -167,16 +133,14 @@ class HostsList extends Component {
       hasContentLoading,
       deletionError,
       selected,
-      hosts,
-      toggleLoading,
-      toggleError,
+      teams,
     } = this.state;
     const { match, i18n } = this.props;
 
     const canAdd =
       actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
     const isAllSelected =
-      selected.length > 0 && selected.length === hosts.length;
+      selected.length > 0 && selected.length === teams.length;
 
     return (
       <Fragment>
@@ -185,9 +149,9 @@ class HostsList extends Component {
             <PaginatedDataList
               contentError={contentError}
               hasContentLoading={hasContentLoading}
-              items={hosts}
+              items={teams}
               itemCount={itemCount}
-              pluralizedItemName={i18n._(t`Hosts`)}
+              pluralizedItemName={i18n._(t`Teams`)}
               qsConfig={QS_CONFIG}
               toolbarColumns={[
                 {
@@ -219,9 +183,9 @@ class HostsList extends Component {
                   additionalControls={[
                     <ToolbarDeleteButton
                       key="delete"
-                      onDelete={this.handleHostDelete}
+                      onDelete={this.handleTeamDelete}
                       itemsToDelete={selected}
-                      pluralizedItemName={i18n._(t`Hosts`)}
+                      pluralizedItemName={i18n._(t`Teams`)}
                     />,
                     canAdd ? (
                       <ToolbarAddButton key="add" linkTo={`${match.url}/add`} />
@@ -230,14 +194,12 @@ class HostsList extends Component {
                 />
               )}
               renderItem={o => (
-                <HostListItem
+                <TeamListItem
                   key={o.id}
-                  host={o}
+                  team={o}
                   detailUrl={`${match.url}/${o.id}`}
                   isSelected={selected.some(row => row.id === o.id)}
                   onSelect={() => this.handleSelect(o)}
-                  toggleHost={this.handleHostToggle}
-                  toggleLoading={toggleLoading}
                 />
               )}
               emptyStateControls={
@@ -248,32 +210,19 @@ class HostsList extends Component {
             />
           </Card>
         </PageSection>
-        {toggleError && !toggleLoading && (
-          <AlertModal
-            variant="danger"
-            title={i18n._(t`Error!`)}
-            isOpen={toggleError && !toggleLoading}
-            onClose={this.handleHostToggleErrorClose}
-          >
-            {i18n._(t`Failed to toggle host.`)}
-            <ErrorDetail error={toggleError} />
-          </AlertModal>
-        )}
-        {deletionError && (
-          <AlertModal
-            isOpen={deletionError}
-            variant="danger"
-            title={i18n._(t`Error!`)}
-            onClose={this.handleDeleteErrorClose}
-          >
-            {i18n._(t`Failed to delete one or more hosts.`)}
-            <ErrorDetail error={deletionError} />
-          </AlertModal>
-        )}
+        <AlertModal
+          isOpen={deletionError}
+          variant="danger"
+          title={i18n._(t`Error!`)}
+          onClose={this.handleDeleteErrorClose}
+        >
+          {i18n._(t`Failed to delete one or more teams.`)}
+          <ErrorDetail error={deletionError} />
+        </AlertModal>
       </Fragment>
     );
   }
 }
 
-export { HostsList as _HostsList };
-export default withI18n()(withRouter(HostsList));
+export { TeamsList as _TeamsList };
+export default withI18n()(withRouter(TeamsList));

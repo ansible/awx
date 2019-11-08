@@ -174,7 +174,8 @@ class InventoriesList extends Component {
     const { match, i18n } = this.props;
     const canAdd =
       actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
-    const isAllSelected = selected.length === inventories.length;
+    const isAllSelected =
+      selected.length > 0 && selected.length === inventories.length;
     return (
       <PageSection>
         <Card>

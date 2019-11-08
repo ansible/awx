@@ -11,7 +11,7 @@ InventoriesAPI.readDetail.mockResolvedValue({
   data: mockInventory,
 });
 
-describe.only('<Inventory />', () => {
+describe('<Inventory />', () => {
   test('initially renders succesfully', async done => {
     const wrapper = mountWithContexts(
       <Inventory setBreadcrumb={() => {}} match={{ params: { id: 1 } }} />
@@ -29,7 +29,7 @@ describe.only('<Inventory />', () => {
     await waitForElement(wrapper, '.pf-c-tabs__item', el => el.length === 6);
     done();
   });
-  test('should show content error when user attempts to navigate to erroneous route', async done => {
+  test('should show content error when user attempts to navigate to erroneous route', async () => {
     const history = createMemoryHistory({
       initialEntries: ['/inventories/inventory/1/foobar'],
     });
@@ -49,6 +49,5 @@ describe.only('<Inventory />', () => {
       },
     });
     await waitForElement(wrapper, 'ContentError', el => el.length === 1);
-    done();
   });
 });

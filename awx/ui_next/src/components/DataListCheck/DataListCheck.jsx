@@ -1,6 +1,7 @@
 import { DataListCheck as PFDataListCheck } from '@patternfly/react-core';
 import styled from 'styled-components';
 
+PFDataListCheck.displayName = 'PFDataListCheck';
 export default styled(PFDataListCheck)`
   padding-top: 18px;
   @media screen and (min-width: 768px) {
