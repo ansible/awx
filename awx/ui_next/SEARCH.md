@@ -1,6 +1,31 @@
-# Search Iteration 1 Requirements:
+# Simple Search
 
-## DONE
+## UX Considerations
+
+Historically, the code that powers search in the AngularJS version of the AWX/Tower UI is very complex and prone to bugs.  In order to reduce that complexity, we've made some UX desicions to help make the code easier to maintain.
+
+**ALL query params namespaced and in url bar**
+
+This includes lists that aren't necessarily hyperlinked, like lookup lists.  The reason behind this is so we can treat the url bar as the source of truth for queries always.  Any params that have both a key AND value that is in the defaultParams section of the qs config are stripped out of the search string (see "Encoding for UI vs. API" for more info on this point)
+
+**Django fuzzy search (`?search=`) is not accessible outside of "advanced search"**
+
+In current smart search typing a term with no key utilizes `?search=` i.e. for "foo" tag, `?search=foo` is given.  `?search=` looks on a static list of field name "guesses" (such as name, description, etc.), as well as specific fields as defined for each endpoint (for example, the events endpoint looks for a "stdout" field as well).  Due to the fact a key will always be present on the left-hand of simple search, it doesn't make sense to use `?search=` as the default.
+
+We may allow passing of `?search=` through our future advanced search interface.  Some details that were gathered in planning phases about `?search=` that might be helpful in the future:
+- `?search=` tags are OR'd together (union is returned).
+- `?search=foo&name=bar` returns items that have a name field of bar (not case insensitive) AND some text field with foo on it
+- `?search=foo&search=bar&name=baz` returns (foo in name OR foo in description OR ...) AND (bar in name OR bar in description OR ...) AND (baz in name)
+- similarly `?related__search=` looks on the static list of "guesses" for models related to the endpoint.  The specific fields are not "searched" for `?related__search=`.
+- `?related__search=` not currently used in awx ui
+
+**A note on clicking a tag to putting it back into the search bar**
+
+This was brought up as a nice to have when we were discussing our initial implementation of search in the new application.  Since there isn't a way we would be able to know if the user created the tag from the simple or advanced search interface, we wouldn't know where to put it back.  This breaks our idea of using the query params as the exclusive source of truth, so we've decided against implementing it for now.
+
+## Tasklist
+
+### DONE
 
 - DONE update handleSearch to follow handleSort param
 - DONE update qsConfig columns to utilize isSearchable bool (just like isSortable bool)
@@ -24,93 +49,233 @@
 - DONE add search filter removal test for qs.
 - DONE remove button for search tags of duplicate keys are broken, fix that
 
-## TODO later on in 3.6: stuff to be finished for search iteration 1 (I'll card up an issue to tackle this. I plan on doing this after I finished the awx project branch work)
+### TODO pre-holiday break
+- Update COLUMNS to SORT_COLUMNS and SEARCH_COLUMNS
+- Update to using new PF Toolbar component (currently an experimental component)
+- Change the right-hand input based on the type of key selected on the left-hand side.  In addition to text input, for our MVP we will support:
+  - number input
+  - select input (multiple-choice configured from UI or Options)
+- Update the following lists to have the following keys:
 
-- currently handleSearch in Search.jsx always appends the `__icontains` post-fix to make the filtering ux expected work right. Once we start adding number-based params we will won't to change this behavior.
-- utilize new defaultSearchKey prop instead of relying on sort key
-- make access have username as the default key?
-- make default params only accept page, page_size and order_by
-- support custom order_by being typed in the url bar
-- fix up which keys are displayed in the various lists (note this will also require non-string widgetry to the right of the search key dropdown, for integers, dates, etc.)
-- fix any spacing issues like collision with action buttons and overall width of the search bar
+**Jobs list** (signed off earlier in chat)
+  - Name (which is also the name of the job template) - search is ?name=jt
+  - Job ID - search is ?id=13
+  - Label name - search is ?labels__name=foo
+  - Job type (dropdown on right with the different types) ?type = job
+  - Created by (username) - search is ?created_by__username=admin
+  - Status - search (dropdown on right with different statuses) is ?status=successful
 
-## Lists affected in 3.6 timeframe
+Instances of jobs list include:
+  - Jobs list
+  - Host completed jobs list
+  - JT completed jobs list
 
-We should update all places to use consistent handleSearch/handleSort with paginated data list pattern.  This shouldn't be too difficult to get hooked up, as the lists all inherit from PaginatedDataList, where search is hooked up.  We will need to make sure the queryset config for each list includes the searchable boolean on keys that will need to be searched for.
+**Organization list**
+  - Name - search is ?name=org
+  - ? Team name (of a team in the org) - search is ?teams__name=ansible
+  - ? Username (of a user in the org) - search is ?users__username=johndoe
 
-orgs stuff
-  - org list
-  - org add/edit instance groups lookup list
-  - org access list
-    - org user/teams list in wizard
-  - org teams list
-  - org notifications list
-jt stuff
-  - jt list
-  - jt add/edit inventory, project, credentials, instance groups lookups lists
-  - jt access list
-    - jt user/teams list in wizard
-  - jt notifications list
-  - jt schedules list
-  - jt completed jobs list
-jobs stuff
-  - jobs list
+Instances of orgs list include:
+  - Orgs list
+  - User orgs list
+  - Lookup on Project
+  - Lookup on Credential
+  - Lookup on Inventory
+  - User access add wizard list
+  - Team access add wizard list
 
-# Search code details
+**Instance Groups list**
+  - Name - search is ?name=ig
+  - ? is_containerized boolean choice (doesn't work right now in API but will soon) - search is ?is_containerized=true
+  - ? credential name - search is ?credentials__name=kubey
 
-## Search component
+Instance of instance groups list include:
+  - Lookup on Org
+  - Lookup on JT
+  - Lookup on Inventory
 
-Search is configured using the qsConfig in a similar way to sort. Columns are passed as an array, as defined in the screen where the list is located. You pass a bool isSearchable (an analog to isSortable) to mark that a certain key should show up in the left-hand dropdown of the search bar.
+**Users list**
+  - Username - search is ?username=johndoe
+  - First Name - search is ?first_name=John
+  - Last Name - search is ?last_name=Doe
+  - ? (if not superfluous, would not include on Team users list) Team Name - search is ?teams__name=team_of_john_does (note API issue: User has no field named "teams")
+  - ? (only for access or permissions list) Role Name - search is ?roles__name=Admin (note API issue: Role has no field "name")
+  - ? (if not superfluous, would not include on Organization users list) ORg Name - search is ?organizations__name=org_of_jhn_does
 
-If you don't pass any columns, a default of isSearchable true will be added to a name column, which is nearly universally shared throughout the models of awx.
+Instance of user lists include:
+  - User list
+  - Org user list
+  - Access list for Org, JT, Project, Credential, Inventory, User and Team
+  - Access list for JT
+  - Access list Project
+  - Access list for Credential
+  - Access list for Inventory
+  - Access list for User
+  - Access list for Team
+  - Team add users list
+  - Users list in access wizard (to add new roles for a particular list) for Org
+  - Users list in access wizard (to add new roles for a particular list) for JT
+  - Users list in access wizard (to add new roles for a particular list) for Project
+  - Users list in access wizard (to add new roles for a particular list) for Credential
+  - Users list in access wizard (to add new roles for a particular list) for Inventory
+
+**Teams list**
+  - Name - search is ?name=teamname
+  - ? Username (of a user in the team) - search is ?users__username=johndoe
+  - ? (if not superfluous, would not include on Organizations teams list) Org Name - search is ?organizations__name=org_of_john_does
+
+Instance of team lists include:
+  - Team list
+  - Org team list
+  - User team list
+  - Team list in access wizard (to add new roles for a particular list) for Org
+  - Team list in access wizard (to add new roles for a particular list) for JT
+  - Team list in access wizard (to add new roles for a particular list) for Project
+  - Team list in access wizard (to add new roles for a particular list) for Credential
+  - Team list in access wizard (to add new roles for a particular list) for Inventory
+
+**Credentials list**
+  - Name
+  - ? Type (dropdown on right with different types) 
+  - ? Created by (username)
+  - ? Modified by (username)
+
+Instance of credential lists include:
+  - Credential list
+  - Lookup for JT
+  - Lookup for Project
+  - User access add wizard list
+  - Team access add wizard list
+
+**Projects list**
+  - Name - search is ?name=proj
+  - ? Type (dropdown on right with different types) - search is scm_type=git
+  - ? SCM URL - search is ?scm_url=github.com/ansible/test-playbooks
+  - ? Created by (username) - search is ?created_by__username=admin
+  - ? Modified by (username) - search is ?modified_by__username=admin
+
+Instance of project lists include:
+  - Project list
+  - Lookup for JT
+  - User access add wizard list
+  - Team access add wizard list
+
+**Templates list**
+  - Name - search is ?name=cleanup
+  - ? Type (dropdown on right with different types) - search is ?type=playbook_run
+  - ? Playbook name - search is ?job_template__playbook=debug.yml
+  - ? Created by (username) - search is ?created_by__username=admin
+  - ? Modified by (username) - search is ?modified_by__username=admin
+
+Instance of template lists include:
+  - Template list
+  - Project Templates list
+
+**Inventories list**
+  - Name - search is ?name=inv
+  - ? Created by (username) - search is ?created_by__username=admin
+  - ? Modified by (username) - search is ?modified_by__username=admin
+
+Instance of inventory lists include:
+  - Inventory list
+  - Lookup for JT
+  - User access add wizard list
+  - Team access add wizard list
+
+**Groups list**
+  - Name - search is ?name=group_name
+  - ? Created by (username) - search is ?created_by__username=admin
+  - ? Modified by (username) - search is ?modified_by__username=admin
+
+Instance of group lists include:
+  - Group list
+
+**Hosts list**
+  - Name - search is ?name=hostname
+  - ? Created by (username) - search is ?created_by__username=admin
+  - ? Modified by (username) - search is ?modified_by__username=admin
+
+Instance of host lists include:
+  - Host list
+
+**Notifications list**
+  - Name - search is ?name=notification_template_name
+  - ? Type (dropdown on right with different types) - search is ?type=slack
+  - ? Created by (username) - search is ?created_by__username=admin
+  - ? Modified by (username) - search is ?modified_by__username=admin
+
+Instance of notification lists include:
+  - Org notification list
+  - JT notification list
+  - Project notification list
+
+### TODO backlog
+- Change the right-hand input based on the type of key selected on the left-hand side.  We will eventually want to support:
+  - lookup input (selection of particular resources, based on API list endpoints)
+  - date picker input
+- Update the following lists to have the following keys:
+  - Update all __name and __username related field search-based keys to be type-ahead lookup based searches
+
+## Code Details
+
+### Search component
 
 The component looks like this:
 
 ```
 <Search
-  qsConfig={qsConfig} // used to get namespace (when tags are modified 
-                      // they append namespace to query params)
-                      // also used to get "type" of fields (i.e. interger
-                      // fields should get number picker instead of text box)
+  qsConfig={qsConfig}
+  columns={columns}
+  onSearch={onSearch}
 />
 ```
 
-## ListHeader component
+**qsConfig** is used to get namespace so that multiple lists can be on the page.  When tags are modified they append namespace to query params.  The qsConfig is also used to get "type" of fields in order to correctly parse values as int or date as it is translating.
 
-DataListToolbar, EmptyListControls, and FilterTags components were created/moved to a new sub-component of PaginatedDataList, ListHeader. This allowed us to consolidate the logic between both lists with data (which need to show search, sort, any search tags currently active, and actions) as well as empty lists (which need to show search tags currently active so they can be removed, potentially getting you back to a "list-has-data" state, as well as a subset of options still valid (such as "add").
+**columns** are passed as an array, as defined in the screen where the list is located. You pass a bool `isDefault` to indicate that should be the key that shows up in the left-hand dropdown as default in the UI.  If you don't pass any columns, a default of `isDefault=true` will be added to a name column, which is nearly universally shared throughout the models of awx.
 
-search and sort are passed callbacks from functions defined in ListHeader. These will be the following.
+There is a type attribute that can be `'string'`, `'number'` or `'choice'` (and in the future, `'date'` and `'lookup'`), which will change the type of input on the right-hand side of the search bar.  For a key that has a set number of choices, you will pass a choices attribute, which is an array in the format choices: [{label: 'Foo', value: 'foo'}]
 
-```
-handleSort (sortedColumnKey, sortOrder) {
-  this.pushHistoryState({
-    order_by: sortOrder === 'ascending' ? sortedColumnKey : `-${sortedColumnKey}`,
-    page: null,
-  });
-}
+**onSearch** calls the `mergeParams` qs util in order to add new tags to the queryset.  mergeParams is used so that we can support duplicate keys (see mergeParams vs. replaceParams for more info).
 
-handleSearch (key, value, remove) {
-  this.pushHistoryState({
-    // ... use key and value to push a new value to the param
-    // if remove false you add a new tag w key value if remove true, 
-    // you are removing one
-  });
-}
-```
+### ListHeader component
 
-Similarly, there are handleRemove and handleRemoveAll functions. All of these functions act on the react-router history using the pushHistoryState function. This causes the query params in the url to update, which in turn triggers change handlers that will re-fetch data.
+`DataListToolbar`, `EmptyListControls`, and `FilterTags` components were created or moved to a new sub-component of `PaginatedDataList`, `ListHeader`. This allowed us to consolidate the logic between both lists with data (which need to show search, sort, any search tags currently active, and actions) as well as empty lists (which need to show search tags currently active so they can be removed, potentially getting you back to a "list-has-data" state, as well as a subset of options still valid, such as "add").
 
-## FilterTags component
+The ability to search and remove filters, as well as sort the list is handled through callbacks which are passed from functions defined in `ListHeader`. These are the following:
 
-Similar to the way the list grabs data based on changes to the react-router params, the FilterTags component updates when new params are added. This component is a fairly straight-forward map (only slightly complex, because it needed to do a nested map over any values with duplicate keys that were represented by an inner-array).
+- `handleSort(key, direction)` - use key and direction of sort to change the order_by value in the queryset
+- `handleSearch(key, value)` - use key and value to push a new value to the param
+- `handleRemove(key, value)` - use key and value to remove a value to the param
+- `handleRemoveAll()` - remove all non-default params
 
-Currently the filter tags do not display the key, though that data is available and they could very easily do so.
+All of these functions act on the react-router history using the `pushHistoryState` function. This causes the query params in the url to update, which in turn triggers change handlers that will re-fetch data for the lists.
 
-## QS Updates (and supporting duplicate keys)
+**a note on sort_columns and search_columns**
 
-The logic that was updated to handle search tags can be found in the qs.js util file.
+We have split out column configuration into separate search and sort column array props--these are passed to the search and sort columns.  Both accept an isDefault prop for one of the items in the array to be the default option selected when going to the page.  Sort column items can pass an isNumeric boolean in order to chnage the iconography of the sort UI element.  Search column items can pass type and if applicable choices, in order to configure the right-hand side of the search bar.
 
-From a UX perspective, we wanted to be able to support searching on the same key multiple times (i.e. searching for things like ?foo=bar&foo=baz). We do this by creating an array of all values. i.e.:
+### FilterTags component
+
+Similar to the way the list grabs data based on changes to the react-router params, the `FilterTags` component updates when new params are added. This component is a fairly straight-forward map (only slightly complex, because it needed to do a nested map over any values with duplicate keys that were represented by an inner-array).  Both key and value are displayed for the tag.
+
+### qs utility
+
+The qs (queryset) utility is used to make the search speak the language of the REST API.  The main functions of the utilities are to:
+- add, replace and remove filters
+- translate filters as url params (for linking and maintaining state), in-memory representation (as JS objects), and params that Django REST Framework understands.
+
+More info in the below sections:
+
+#### Encoding for UI vs. API
+
+For the UI url params, we want to only encode those params that aren't defaults, as the default behavior was defined through configuration and we don't need these in the url as a source of truth.  For the API, we need to pass these params so that they are taken into account when the response is built.
+
+#### mergeParams vs. replaceParams
+
+**mergeParams** is used to suppport putting values with the same key 
+
+From a UX perspective, we wanted to be able to support searching on the same key multiple times (i.e. searching for things like `?foo=bar&foo=baz`). We do this by creating an array of all values. i.e.:
 
 ```
 {
@@ -118,48 +283,21 @@ From a UX perspective, we wanted to be able to support searching on the same key
 }
 ```
 
-Changes to encodeQueryString and parseQueryString were made to convert between a single value string representation and multiple value array representations. Test cases were also added to qs.test.js.
+Concatenating terms in this way gives you the intersection of both terms (i.e. foo must be "bar" and "baz").  This is helpful for the most-common type of searching, substring (`__icontains`) searches.  This will increase filtering, allowing the user to drill-down into the list as terms are added.
 
-In addition, we needed to make sure any changes to the params that are not handled by search (page, page_size, and order_by) were updated by replacing the single value, rather than adding multiple values with the array representation. This additional piece of the specification was made in the newly created addParams and removeParams qs functions and a few test-cases were written to verify this.
+**replaceParams** is used to support sorting, setting page_size, etc.  These params only allow one choice, and we need to replace a particular key's value if one is passed.
 
-The api is coupled with the qs util through the paramsSerializer, due to the fact we need axios to support the array for duplicate key values object representation of the params to pass to the get request.  This is done where axios is configured in the Base.js file, so all requests and request types should support our array syntax for duplicate keys.
+#### Working with REST API
 
-# UX considerations
+The REST API is coupled with the qs util through the `paramsSerializer`, due to the fact we need axios to support the array for duplicate key values in the object representation of the params to pass to the get request.  This is done where axios is configured in the Base.js file, so all requests and request types should support our array syntax for duplicate keys automatically.
 
-**UX should be more tags always equates to more filtering.  (so "and" logic not "or")**
-
-Also, for simple search results should be returned that partially match value (i.e. use icontains prefix)
-
-**ALL query params namespaced and in url bar**
-
- - this includes lists that aren't necessarily hyperlinked, like lookup lists.
- - the reason behind this is so we can treat the url bar as the source of truth for queries always
- - currently /#/organizations/add?lookup.name=bar -> will eventually be something like /#/organizations/add?ig_lookup.name=bar
- - any params that have both a key AND value that is in the defaultParams section of the qs config should be stripped out of the search string
-
-**django fuzzy search (?search=) is not accessible outside of "advanced search"**
-
-  - How "search" query param works
-    - in current smart search typing a term with no key utilizes search= i.e. for "foo" tag, ?search=foo is given
-    - search= looks on a static list of field name "guesses" (such as name, description, etc.), as well as specific fields as defined for each endpoint (for example, the events endpoint looks for a "stdout" field as well)
-    - note that search= tags are OR'd together
-    - search=foo&name=bar returns items that have a name field of bar (not case insensitive) AND some text field with foo on it
-    - search=foo&search=bar&name=baz returns (foo in name OR foo in description OR ...) AND (bar in name OR bar in description OR ...) AND (baz in name)
-  - similarly ?related__search= looks on the static list of "guesses" for models related to the endpoint
-    - the specific fields are not "searched" for related__search
-    - related__search not currently used in awx ui
+# Advanced Search - this section is a mess, update eventually
 
 **a note on typing in a smart search query**
 
 In order to not support a special "language" or "syntax" for crafting the query like we have now (and is the cause of a large amount of bugs), we will not support the old way of typing in a filter like in the current implementation of search.
 
 Since all search bars are represented in the url, for users who want to input a string to filter results in a single step, typing directly in the url to achieve the filter is acceptable.
-
-**a note on clicking a tag to putting it back into the search bar**
-
-This was brought up as a nice to have when we were discussing features.  There isn't a way we would be able to know if the user created the tag from the smart search or simple search interface?  that info is not traceable using the query params as the exclusive source of truth
-
-We have decided to not try to tackle this up front with our advanced search implementation, and may go back to this based on user feedback at a later time.
 
 # Advanced search notes
 
