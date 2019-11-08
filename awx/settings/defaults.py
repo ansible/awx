@@ -964,6 +964,17 @@ LOG_AGGREGATOR_LEVEL = 'INFO'
 # raising this value can help
 CHANNEL_LAYER_RECEIVE_MAX_RETRY = 10
 
+ASGI_APPLICATION = "awx.main.routing.application"
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("localhost", 6379)],
+        },
+    },
+}
+
 # Logging configuration.
 LOGGING = {
     'version': 1,

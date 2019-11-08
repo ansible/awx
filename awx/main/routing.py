@@ -1,8 +1,27 @@
-from channels.routing import route
+from django.urls import re_path
+from django.conf.urls import url
+#from channels.auth import AuthMiddlewareStack
+from channels.routing import ProtocolTypeRouter, URLRouter
+from . import consumers
 
-
-channel_routing = [
-    route("websocket.connect", "awx.main.consumers.ws_connect", path=r'^/websocket/$'),
-    route("websocket.disconnect", "awx.main.consumers.ws_disconnect", path=r'^/websocket/$'),
-    route("websocket.receive", "awx.main.consumers.ws_receive", path=r'^/websocket/$'),
+websocket_urlpatterns = [
+    url(r'websocket/$', consumers.EventConsumer),
 ]
+
+application = ProtocolTypeRouter({
+    # (http->django views is added by default)
+    'websocket': URLRouter(
+        websocket_urlpatterns
+    ),
+})
+
+'''
+application = ProtocolTypeRouter({
+    # (http->django views is added by default)
+    'websocket': AuthMiddlewareStack(
+        URLRouter(
+            websocket_urlpatterns
+        )
+    ),
+})
+'''

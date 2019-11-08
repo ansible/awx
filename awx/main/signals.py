@@ -666,6 +666,7 @@ def deny_orphaned_approvals(sender, instance, **kwargs):
 
 @receiver(post_save, sender=Session)
 def save_user_session_membership(sender, **kwargs):
+    return
     session = kwargs.get('instance', None)
     if pkg_resources.get_distribution('channels').version >= '2':
         # If you get into this code block, it means we upgraded channels, but

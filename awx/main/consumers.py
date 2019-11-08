@@ -1,51 +1,87 @@
 import json
 import logging
 
-from channels import Group
-from channels.auth import channel_session_user_from_http, channel_session_user
+#from channels.auth import channel_session_user_from_http, channel_session_user
 
 from django.utils.encoding import smart_str
 from django.http.cookie import parse_cookie
 from django.core.serializers.json import DjangoJSONEncoder
+from channels.consumer import SyncConsumer
+from channels.generic.websocket import JsonWebsocketConsumer
+from channels.layers import get_channel_layer
+
+
+from asgiref.sync import async_to_sync
 
 
 logger = logging.getLogger('awx.main.consumers')
 XRF_KEY = '_auth_user_xrf'
 
 
-def discard_groups(message):
-    if 'groups' in message.channel_session:
-        for group in message.channel_session['groups']:
-            Group(group).discard(message.reply_channel)
+class EventConsumer(JsonWebsocketConsumer):
+    def connect(self):
+        self.accept()
+        self.send_json({"accept": True})
+        '''
+        headers = dict(message.content.get('headers', ''))
+        self.send({"accept": True})
+        message.content['method'] = 'FAKE'
+        # TODO: use new auth things
+        if True or message.user.is_authenticated:
+            self.send(
+                {"text": json.dumps({"accept": True, "user": message.user.id})}
+            )
+            self.accept()
+            # store the valid CSRF token from the cookie so we can compare it later
+            # on ws_receive
+            cookie_token = parse_cookie(
+                smart_str(headers.get(b'cookie'))
+            ).get('csrftoken')
+            if cookie_token:
+                message.channel_session[XRF_KEY] = cookie_token
+        else:
+            logger.error("Request user is not authenticated to use websocket.")
+            self.send({"close": True})
+            self.close()
+        '''
+
+    def disconnect(self, code):
+        pass
+
+    def receive_json(self, text_data):
+
+        data = text_data
+        if 'groups' in data:
+            groups = data['groups']
+            for group_name,v in groups.items():
+                if type(v) is list:
+                    for oid in v:
+                        name = '{}-{}'.format(group_name, oid)
+                        '''
+                        access_cls = consumer_access(group_name)
+                        if access_cls is not None:
+                            user_access = access_cls(user)
+                            if not user_access.get_queryset().filter(pk=oid).exists():
+                                self.send({"text": json.dumps(
+                                    {"error": "access denied to channel {0} for resource id {1}".format(group_name, oid)})})
+                                continue
+                        '''
+                        async_to_sync(self.channel_layer.group_add)(
+                            name,
+                            self.channel_name
+                        )
+                else:
+                    async_to_sync(self.channel_layer.group_add)(
+                        group_name,
+                        self.channel_name
+                    )
 
 
-@channel_session_user_from_http
-def ws_connect(message):
-    headers = dict(message.content.get('headers', ''))
-    message.reply_channel.send({"accept": True})
-    message.content['method'] = 'FAKE'
-    if message.user.is_authenticated:
-        message.reply_channel.send(
-            {"text": json.dumps({"accept": True, "user": message.user.id})}
-        )
-        # store the valid CSRF token from the cookie so we can compare it later
-        # on ws_receive
-        cookie_token = parse_cookie(
-            smart_str(headers.get(b'cookie'))
-        ).get('csrftoken')
-        if cookie_token:
-            message.channel_session[XRF_KEY] = cookie_token
-    else:
-        logger.error("Request user is not authenticated to use websocket.")
-        message.reply_channel.send({"close": True})
-    return None
+    def internal_message(self, event):
+        self.send(event['text'])
 
 
-@channel_session_user
-def ws_disconnect(message):
-    discard_groups(message)
-
-
+'''
 @channel_session_user
 def ws_receive(message):
     from awx.main.access import consumer_access
@@ -70,7 +106,6 @@ def ws_receive(message):
     if 'groups' in data:
         discard_groups(message)
         groups = data['groups']
-        current_groups = set(message.channel_session.pop('groups') if 'groups' in message.channel_session else [])
         for group_name,v in groups.items():
             if type(v) is list:
                 for oid in v:
@@ -82,16 +117,26 @@ def ws_receive(message):
                             message.reply_channel.send({"text": json.dumps(
                                 {"error": "access denied to channel {0} for resource id {1}".format(group_name, oid)})})
                             continue
-                    current_groups.add(name)
-                    Group(name).add(message.reply_channel)
+                    async_to_sync(self.channel_layer.group_add)(
+                        name,
+                        self.channel_name
+                    )
             else:
-                current_groups.add(group_name)
-                Group(group_name).add(message.reply_channel)
-        message.channel_session['groups'] = list(current_groups)
-
+                async_to_sync(self.channel_layer.group_add)(
+                    group_name,
+                    self.channel_name
+                )
+'''
 
 def emit_channel_notification(group, payload):
+    channel_layer = get_channel_layer()
     try:
-        Group(group).send({"text": json.dumps(payload, cls=DjangoJSONEncoder)})
+        async_to_sync(channel_layer.group_send)(
+            group,
+            {
+                "type": "internal.message",
+                "text": json.dumps(payload, cls=DjangoJSONEncoder)
+            },
+        )
     except ValueError:
         logger.error("Invalid payload emitting channel {} on topic: {}".format(group, payload))
