@@ -210,3 +210,22 @@ export const Team = shape({
   name: string.isRequired,
   organization: number,
 });
+
+export const User = shape({
+  id: number.isRequired,
+  type: oneOf(['user']),
+  url: string,
+  related: shape(),
+  summary_fields: shape({
+    user_capabilities: objectOf(bool),
+  }),
+  created: string,
+  username: string,
+  first_name: string,
+  last_name: string,
+  email: string.isRequired,
+  is_superuser: bool,
+  is_system_auditor: bool,
+  ldap_dn: string,
+  last_login: string,
+});

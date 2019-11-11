@@ -16,24 +16,24 @@ import DataListCell from '@components/DataListCell';
 import DataListCheck from '@components/DataListCheck';
 import ListActionButton from '@components/ListActionButton';
 import VerticalSeparator from '@components/VerticalSeparator';
-import { Team } from '@types';
+import { User } from '@types';
 
-class TeamListItem extends React.Component {
+class UserListItem extends React.Component {
   static propTypes = {
-    team: Team.isRequired,
+    user: User.isRequired,
     detailUrl: string.isRequired,
     isSelected: bool.isRequired,
     onSelect: func.isRequired,
   };
 
   render() {
-    const { team, isSelected, onSelect, detailUrl, i18n } = this.props;
-    const labelId = `check-action-${team.id}`;
+    const { user, isSelected, onSelect, detailUrl, i18n } = this.props;
+    const labelId = `check-action-${user.id}`;
     return (
-      <DataListItem key={team.id} aria-labelledby={labelId}>
+      <DataListItem key={user.id} aria-labelledby={labelId}>
         <DataListItemRow>
           <DataListCheck
-            id={`select-team-${team.id}`}
+            id={`select-user-${user.id}`}
             checked={isSelected}
             onChange={onSelect}
             aria-labelledby={labelId}
@@ -42,31 +42,33 @@ class TeamListItem extends React.Component {
             dataListCells={[
               <DataListCell key="divider">
                 <VerticalSeparator />
-                <Link id={labelId} to={`${detailUrl}`}>
-                  <b>{team.name}</b>
+                <Link to={`${detailUrl}`} id={labelId}>
+                  <b>{user.username}</b>
                 </Link>
               </DataListCell>,
-              <DataListCell key="organization">
-                {team.summary_fields.organization && (
+              <DataListCell key="first-name">
+                {user.first_name && (
                   <Fragment>
-                    <b css={{ marginRight: '20px' }}>
-                      {i18n._(t`Organization`)}
-                    </b>
-                    <Link
-                      to={`/organizations/${team.summary_fields.organization.id}/details`}
-                    >
-                      <b>{team.summary_fields.organization.name}</b>
-                    </Link>
+                    <b css={{ marginRight: '20px' }}>{i18n._(t`First Name`)}</b>
+                    {user.first_name}
+                  </Fragment>
+                )}
+              </DataListCell>,
+              <DataListCell key="last-name">
+                {user.last_name && (
+                  <Fragment>
+                    <b css={{ marginRight: '20px' }}>{i18n._(t`Last Name`)}</b>
+                    {user.last_name}
                   </Fragment>
                 )}
               </DataListCell>,
               <ActionButtonCell lastcolumn="true" key="action">
-                {team.summary_fields.user_capabilities.edit && (
-                  <Tooltip content={i18n._(t`Edit Team`)} position="top">
+                {user.summary_fields.user_capabilities.edit && (
+                  <Tooltip content={i18n._(t`Edit User`)} position="top">
                     <ListActionButton
                       variant="plain"
                       component={Link}
-                      to={`/teams/${team.id}/edit`}
+                      to={`/users/${user.id}/edit`}
                     >
                       <PencilAltIcon />
                     </ListActionButton>
@@ -80,4 +82,4 @@ class TeamListItem extends React.Component {
     );
   }
 }
-export default withI18n()(TeamListItem);
+export default withI18n()(UserListItem);

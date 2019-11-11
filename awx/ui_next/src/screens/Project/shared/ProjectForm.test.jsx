@@ -7,7 +7,7 @@ import { CredentialTypesAPI, ProjectsAPI } from '@api';
 
 jest.mock('@api');
 
-describe('<ProjectAdd />', () => {
+describe('<ProjectForm />', () => {
   let wrapper;
   const mockData = {
     name: 'foo',
