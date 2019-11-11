@@ -183,7 +183,7 @@ function ProjectForm({ project, ...props }) {
             credential: project.credential || '',
             custom_virtualenv: project.custom_virtualenv || '',
             description: project.description || '',
-            local_path: project.local_path || null,
+            local_path: project.local_path || '',
             name: project.name || '',
             organization: project.organization || '',
             scm_branch: project.scm_branch || '',

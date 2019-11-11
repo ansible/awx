@@ -128,23 +128,14 @@ describe('<ProjectAdd />', () => {
       });
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
-    const formik = wrapper.find('Formik').instance();
-    const changeState = new Promise(resolve => {
-      formik.setState(
-        {
-          values: {
-            ...projectData,
-            scm_type: 'manual',
-          },
-        },
-        () => resolve()
+    await act(async () => {
+      wrapper.find('ProjectForm').prop('handleSubmit')(
+        { ...projectData },
+        { scm_type: 'manual' }
       );
     });
-    await changeState;
-    await act(async () => {
-      wrapper.find('form').simulate('submit');
-    });
     wrapper.update();
+    expect(ProjectsAPI.create).toHaveBeenCalledTimes(1);
     expect(wrapper.find('ProjectAdd .formSubmitError').length).toBe(1);
   });
 

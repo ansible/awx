@@ -2,6 +2,7 @@ import React from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Field } from 'formik';
+import { required } from '@util/validators';
 import AnsibleSelect from '@components/AnsibleSelect';
 import FormField, { FieldTooltip } from '@components/FormField';
 import { FormGroup, Alert } from '@patternfly/react-core';
@@ -74,9 +75,13 @@ const ManualSubForm = ({
       {options.length !== 1 && (
         <Field
           name="local_path"
+          validate={required(i18n._(t`Select a value for this field`), i18n)}
           render={({ field, form }) => (
             <FormGroup
               fieldId="project-local-path"
+              helperTextInvalid={form.errors.local_path}
+              isRequired
+              isValid={!form.touched.local_path || !form.errors.local_path}
               label={i18n._(t`Playbook Directory`)}
             >
               <FieldTooltip
