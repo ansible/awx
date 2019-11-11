@@ -10,47 +10,50 @@ from channels.consumer import SyncConsumer
 from channels.generic.websocket import JsonWebsocketConsumer
 from channels.layers import get_channel_layer
 
+#from awx.main.middleware import XRFMiddlewareStack
+
 
 from asgiref.sync import async_to_sync
 
 
 logger = logging.getLogger('awx.main.consumers')
+#XRF_KEY = XRFMiddlewareStack.XRF_KEY
 XRF_KEY = '_auth_user_xrf'
 
 
 class EventConsumer(JsonWebsocketConsumer):
     def connect(self):
-        self.accept()
-        self.send_json({"accept": True})
-        '''
-        headers = dict(message.content.get('headers', ''))
-        self.send({"accept": True})
-        message.content['method'] = 'FAKE'
-        # TODO: use new auth things
-        if True or message.user.is_authenticated:
-            self.send(
-                {"text": json.dumps({"accept": True, "user": message.user.id})}
-            )
+        user = self.scope['user']
+        if user:
             self.accept()
+            self.send_json({"accept": True, "user": user.id})
             # store the valid CSRF token from the cookie so we can compare it later
             # on ws_receive
-            cookie_token = parse_cookie(
-                smart_str(headers.get(b'cookie'))
-            ).get('csrftoken')
+            cookie_token = self.scope['cookies'].get('csrftoken')
             if cookie_token:
-                message.channel_session[XRF_KEY] = cookie_token
+                self.scope['session'][XRF_KEY] = cookie_token
         else:
             logger.error("Request user is not authenticated to use websocket.")
+            self.accept()
             self.send({"close": True})
             self.close()
-        '''
 
     def disconnect(self, code):
         pass
 
-    def receive_json(self, text_data):
+    def receive_json(self, data):
+        user = self.scope['user']
+        xrftoken = data.get('xrftoken')
+        if (
+            not xrftoken or
+            XRF_KEY not in self.scope["session"] or
+            xrftoken != self.scope["session"][XRF_KEY]
+        ):
+            logger.error(
+            "access denied to channel, XRF mismatch for {}".format(user.username)
+            )
+            self.send_json({"error": "access denied to channel"})
 
-        data = text_data
         if 'groups' in data:
             groups = data['groups']
             for group_name,v in groups.items():
