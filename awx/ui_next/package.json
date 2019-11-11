@@ -43,6 +43,7 @@
     "eslint-plugin-import": "^2.14.0",
     "eslint-plugin-jsx-a11y": "^6.1.1",
     "eslint-plugin-react": "^7.11.1",
+    "eslint-plugin-react-hooks": "^2.2.0",
     "file-loader": "^2.0.0",
     "history": "^4.9.0",
     "jest": "^24.7.1",

@@ -33,7 +33,7 @@ function LabelSelect({ value, onChange, onError }) {
   const [options, setOptions] = useState([]);
   useEffect(() => {
     loadLabelOptions(setOptions, onError);
-  }, []);
+  }, [onError]);
 
   return (
     <MultiSelect
