@@ -120,7 +120,7 @@ function HostEventModal({ onClose, hostEvent = {}, isOpen = false, i18n }) {
 
   useEffect(() => {
     setHostStatus(processEventStatus(hostEvent));
-  }, []);
+  }, [setHostStatus, hostEvent]);
 
   const handleTabClick = (event, tabIndex) => {
     setActiveTabKey(tabIndex);

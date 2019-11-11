@@ -108,7 +108,7 @@ function ProjectForm({ project, ...props }) {
     }
 
     fetchData();
-  }, []);
+  }, [summary_fields.credential]);
 
   const scmFormFields = {
     scm_url: '',
