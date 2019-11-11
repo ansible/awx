@@ -26,12 +26,12 @@ first if absent:
 Now, we need to tell Tower to look into this directory for custom venvs. For that,
 we can add this directory to the `CUSTOM_VENV_PATHS` setting as:
 
-    $ HTTP PATCH /api/v2/settings/system {'CUSTOM_VENV_PATHS': ["/opt/my-envs/"]}
+    $ HTTP PATCH /api/v2/settings/system/ {'CUSTOM_VENV_PATHS': ["/opt/my-envs/"]}
 
 If we have venvs spanned over multiple directories, we can add all the paths and
 Tower will aggregate venvs from them:
 
-    $ HTTP PATCH /api/v2/settings/system {'CUSTOM_VENV_PATHS': ["/path/1/to/venv/",
+    $ HTTP PATCH /api/v2/settings/system/ {'CUSTOM_VENV_PATHS': ["/path/1/to/venv/",
                                                                 "/path/2/to/venv/",
                                                                 "/path/3/to/venv/"]}
 
@@ -146,7 +146,7 @@ Project, or Job Template level:
 
     Content-Type: application/json
     {
-        'custom_virtualenv': '/opt/my-envs/custom-venv'
+        'custom_virtualenv': '/opt/my-envs/custom-venv/'
     }
 
 An HTTP `GET` request to `/api/v2/config/` will provide a list of
@@ -154,8 +154,8 @@ detected installed virtualenvs:
 
     {
         "custom_virtualenvs": [
-            "/opt/my-envs/custom-venv",
-            "/opt/my-envs/my-other-custom-venv",
+            "/opt/my-envs/custom-venv/",
+            "/opt/my-envs/my-other-custom-venv/",
         ],
         ...
     }
