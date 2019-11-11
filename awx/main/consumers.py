@@ -42,6 +42,7 @@ class EventConsumer(JsonWebsocketConsumer):
         pass
 
     def receive_json(self, data):
+        from awx.main.access import consumer_access
         user = self.scope['user']
         xrftoken = data.get('xrftoken')
         if (
@@ -60,15 +61,13 @@ class EventConsumer(JsonWebsocketConsumer):
                 if type(v) is list:
                     for oid in v:
                         name = '{}-{}'.format(group_name, oid)
-                        '''
                         access_cls = consumer_access(group_name)
                         if access_cls is not None:
                             user_access = access_cls(user)
                             if not user_access.get_queryset().filter(pk=oid).exists():
-                                self.send({"text": json.dumps(
-                                    {"error": "access denied to channel {0} for resource id {1}".format(group_name, oid)})})
+                                self.send_json({"error": "access denied to channel {0} for resource id {1}".format(group_name, oid)})
                                 continue
-                        '''
+
                         async_to_sync(self.channel_layer.group_add)(
                             name,
                             self.channel_name
@@ -87,7 +86,6 @@ class EventConsumer(JsonWebsocketConsumer):
 '''
 @channel_session_user
 def ws_receive(message):
-    from awx.main.access import consumer_access
     user = message.user
     raw_data = message.content['text']
     data = json.loads(raw_data)
