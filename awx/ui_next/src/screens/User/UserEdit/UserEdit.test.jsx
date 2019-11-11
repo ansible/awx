@@ -16,7 +16,7 @@ describe('<UserEdit />', () => {
     first_name: 'System',
     last_name: 'Administrator',
     password: 'password',
-    useranization: 1,
+    organization: 1,
     is_superuser: true,
     is_system_auditor: false,
   };

@@ -23,14 +23,14 @@ async function getUsers() {
   };
 }
 
-describe.only('<User />', () => {
+describe('<User />', () => {
   test('initially renders succesfully', () => {
     UsersAPI.readDetail.mockResolvedValue({ data: mockDetails });
     UsersAPI.read.mockImplementation(getUsers);
     mountWithContexts(<User setBreadcrumb={() => {}} me={mockMe} />);
   });
 
-  test('notifications tab shown for admins', async done => {
+  test('notifications tab shown for admins', async () => {
     UsersAPI.readDetail.mockResolvedValue({ data: mockDetails });
     UsersAPI.read.mockImplementation(getUsers);
 
@@ -38,10 +38,9 @@ describe.only('<User />', () => {
       <User setBreadcrumb={() => {}} me={mockMe} />
     );
     await waitForElement(wrapper, '.pf-c-tabs__item', el => el.length === 5);
-    done();
   });
 
-  test('should show content error when user attempts to navigate to erroneous route', async done => {
+  test('should show content error when user attempts to navigate to erroneous route', async () => {
     const history = createMemoryHistory({
       initialEntries: ['/users/1/foobar'],
     });
@@ -64,6 +63,5 @@ describe.only('<User />', () => {
       }
     );
     await waitForElement(wrapper, 'ContentError', el => el.length === 1);
-    done();
   });
 });

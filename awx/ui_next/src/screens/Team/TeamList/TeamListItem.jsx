@@ -49,7 +49,7 @@ class TeamListItem extends React.Component {
               <DataListCell key="organization">
                 {team.summary_fields.organization && (
                   <Fragment>
-                    <b style={{ marginRight: '20px' }}>
+                    <b css={{ marginRight: '20px' }}>
                       {i18n._(t`Organization`)}
                     </b>
                     <Link

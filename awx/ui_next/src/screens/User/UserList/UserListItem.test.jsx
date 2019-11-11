@@ -7,9 +7,15 @@ import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import mockDetails from '../data.user.json';
 import UserListItem from './UserListItem';
 
-describe('<UserListItem />', () => {
-  test('initially renders succesfully', () => {
-    mountWithContexts(
+let wrapper;
+
+afterEach(() => {
+  wrapper.unmount();
+});
+
+describe('UserListItem with full permissions', () => {
+  beforeEach(() => {
+    wrapper = mountWithContexts(
       <I18nProvider>
         <MemoryRouter initialEntries={['/users']} initialIndex={0}>
           <UserListItem
@@ -21,24 +27,18 @@ describe('<UserListItem />', () => {
         </MemoryRouter>
       </I18nProvider>
     );
+  });
+  test('initially renders succesfully', () => {
+    expect(wrapper.length).toBe(1);
   });
   test('edit button shown to users with edit capabilities', () => {
-    const wrapper = mountWithContexts(
-      <I18nProvider>
-        <MemoryRouter initialEntries={['/users']} initialIndex={0}>
-          <UserListItem
-            user={mockDetails}
-            detailUrl="/user/1"
-            isSelected
-            onSelect={() => {}}
-          />
-        </MemoryRouter>
-      </I18nProvider>
-    );
     expect(wrapper.find('PencilAltIcon').exists()).toBeTruthy();
   });
+});
+
+describe('UserListItem without full permissions', () => {
   test('edit button hidden from users without edit capabilities', () => {
-    const wrapper = mountWithContexts(
+    wrapper = mountWithContexts(
       <I18nProvider>
         <MemoryRouter initialEntries={['/users']} initialIndex={0}>
           <UserListItem

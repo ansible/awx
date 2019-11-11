@@ -53,7 +53,7 @@ describe('<UserForm />', () => {
     expect(wrapper.find('FormGroup[label="Password"]').length).toBe(1);
     expect(wrapper.find('FormGroup[label="Confirm Password"]').length).toBe(1);
     expect(wrapper.find('FormGroup[label="Organization"]').length).toBe(1);
-    expect(wrapper.find('FormGroup[label="Job Type"]').length).toBe(1);
+    expect(wrapper.find('FormGroup[label="User Type"]').length).toBe(1);
   });
 
   test('edit form hides org field', async () => {

@@ -49,9 +49,7 @@ class UserListItem extends React.Component {
               <DataListCell key="first-name">
                 {user.first_name && (
                   <Fragment>
-                    <b style={{ marginRight: '20px' }}>
-                      {i18n._(t`First Name`)}
-                    </b>
+                    <b css={{ marginRight: '20px' }}>{i18n._(t`First Name`)}</b>
                     {user.first_name}
                   </Fragment>
                 )}
@@ -59,9 +57,7 @@ class UserListItem extends React.Component {
               <DataListCell key="last-name">
                 {user.last_name && (
                   <Fragment>
-                    <b style={{ marginRight: '20px' }}>
-                      {i18n._(t`Last Name`)}
-                    </b>
+                    <b css={{ marginRight: '20px' }}>{i18n._(t`Last Name`)}</b>
                     {user.last_name}
                   </Fragment>
                 )}

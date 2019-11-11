@@ -6,6 +6,8 @@ import UsersList, { _UsersList } from './UserList';
 
 jest.mock('@api');
 
+let wrapper;
+const loadUsers = jest.spyOn(_UsersList.prototype, 'loadUsers');
 const mockUsers = [
   {
     id: 1,
@@ -79,15 +81,22 @@ const mockUsers = [
   },
 ];
 
-describe('<UsersList />', () => {
-  beforeEach(() => {
-    UsersAPI.read.mockResolvedValue({
-      data: {
-        count: mockUsers.length,
-        results: mockUsers,
-      },
-    });
+beforeAll(() => {
+  UsersAPI.read.mockResolvedValue({
+    data: {
+      count: mockUsers.length,
+      results: mockUsers,
+    },
+  });
+});
 
+afterEach(() => {
+  jest.clearAllMocks();
+  wrapper.unmount();
+});
+
+describe('UsersList with full permissions', () => {
+  beforeAll(() => {
     UsersAPI.readOptions.mockResolvedValue({
       data: {
         actions: {
@@ -98,8 +107,8 @@ describe('<UsersList />', () => {
     });
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
+  beforeEach(() => {
+    wrapper = mountWithContexts(<UsersList />);
   });
 
   test('initially renders successfully', () => {
@@ -111,9 +120,7 @@ describe('<UsersList />', () => {
     );
   });
 
-  test('Users are retrieved from the api and the components finishes loading', async done => {
-    const loadUsers = jest.spyOn(_UsersList.prototype, 'loadUsers');
-    const wrapper = mountWithContexts(<UsersList />);
+  test('Users are retrieved from the api and the components finishes loading', async () => {
     await waitForElement(
       wrapper,
       'UsersList',
@@ -125,54 +132,67 @@ describe('<UsersList />', () => {
       'UsersList',
       el => el.state('hasContentLoading') === false
     );
-    done();
   });
 
-  test('handleSelect is called when a user list item is selected', async done => {
-    const handleSelect = jest.spyOn(_UsersList.prototype, 'handleSelect');
-    const wrapper = mountWithContexts(<UsersList />);
+  test('Selects one team when row is checked', async () => {
     await waitForElement(
       wrapper,
       'UsersList',
       el => el.state('hasContentLoading') === false
     );
-    await wrapper
-      .find('input#select-user-1')
-      .closest('DataListCheck')
+    expect(
+      wrapper
+        .find('input[type="checkbox"]')
+        .findWhere(n => n.prop('checked') === true).length
+    ).toBe(0);
+    wrapper
+      .find('UserListItem')
+      .at(0)
+      .find('DataListCheck')
       .props()
-      .onChange();
-    expect(handleSelect).toBeCalled();
-    await waitForElement(
-      wrapper,
-      'UsersList',
-      el => el.state('selected').length === 1
-    );
-    done();
+      .onChange(true);
+    wrapper.update();
+    expect(
+      wrapper
+        .find('input[type="checkbox"]')
+        .findWhere(n => n.prop('checked') === true).length
+    ).toBe(1);
   });
 
-  test('handleSelectAll is called when select all checkbox is clicked', async done => {
-    const handleSelectAll = jest.spyOn(_UsersList.prototype, 'handleSelectAll');
-    const wrapper = mountWithContexts(<UsersList />);
+  test('Select all checkbox selects and unselects all rows', async () => {
     await waitForElement(
       wrapper,
       'UsersList',
       el => el.state('hasContentLoading') === false
     );
+    expect(
+      wrapper
+        .find('input[type="checkbox"]')
+        .findWhere(n => n.prop('checked') === true).length
+    ).toBe(0);
     wrapper
       .find('Checkbox#select-all')
       .props()
       .onChange(true);
-    expect(handleSelectAll).toBeCalled();
-    await waitForElement(
-      wrapper,
-      'UsersList',
-      el => el.state('selected').length === 2
-    );
-    done();
+    wrapper.update();
+    expect(
+      wrapper
+        .find('input[type="checkbox"]')
+        .findWhere(n => n.prop('checked') === true).length
+    ).toBe(3);
+    wrapper
+      .find('Checkbox#select-all')
+      .props()
+      .onChange(false);
+    wrapper.update();
+    expect(
+      wrapper
+        .find('input[type="checkbox"]')
+        .findWhere(n => n.prop('checked') === true).length
+    ).toBe(0);
   });
 
-  test('delete button is disabled if user does not have delete capabilities on a selected user', async done => {
-    const wrapper = mountWithContexts(<UsersList />);
+  test('delete button is disabled if user does not have delete capabilities on a selected user', async () => {
     wrapper.find('UsersList').setState({
       users: mockUsers,
       itemCount: 2,
@@ -192,12 +212,10 @@ describe('<UsersList />', () => {
       'ToolbarDeleteButton * button',
       el => el.getDOMNode().disabled === true
     );
-    done();
   });
 
   test('api is called to delete users for each selected user.', () => {
     UsersAPI.destroy = jest.fn();
-    const wrapper = mountWithContexts(<UsersList />);
     wrapper.find('UsersList').setState({
       users: mockUsers,
       itemCount: 2,
@@ -209,7 +227,7 @@ describe('<UsersList />', () => {
     expect(UsersAPI.destroy).toHaveBeenCalledTimes(2);
   });
 
-  test('error is shown when user not successfully deleted from api', async done => {
+  test('error is shown when user not successfully deleted from api', async () => {
     UsersAPI.destroy.mockRejectedValue(
       new Error({
         response: {
@@ -221,7 +239,6 @@ describe('<UsersList />', () => {
         },
       })
     );
-    const wrapper = mountWithContexts(<UsersList />);
     wrapper.find('UsersList').setState({
       users: mockUsers,
       itemCount: 1,
@@ -235,12 +252,9 @@ describe('<UsersList />', () => {
       'Modal',
       el => el.props().isOpen === true && el.props().title === 'Error!'
     );
-
-    done();
   });
 
-  test('Add button shown for users without ability to POST', async done => {
-    const wrapper = mountWithContexts(<UsersList />);
+  test('Add button shown for users with ability to POST', async () => {
     await waitForElement(
       wrapper,
       'UsersList',
@@ -252,10 +266,11 @@ describe('<UsersList />', () => {
       el => el.state('hasContentLoading') === false
     );
     expect(wrapper.find('ToolbarAddButton').length).toBe(1);
-    done();
   });
+});
 
-  test('Add button hidden for users without ability to POST', async done => {
+describe('UsersList without full permissions', () => {
+  test('Add button hidden for users without ability to POST', async () => {
     UsersAPI.readOptions.mockResolvedValue({
       data: {
         actions: {
@@ -263,7 +278,8 @@ describe('<UsersList />', () => {
         },
       },
     });
-    const wrapper = mountWithContexts(<UsersList />);
+
+    wrapper = mountWithContexts(<UsersList />);
     await waitForElement(
       wrapper,
       'UsersList',
@@ -275,6 +291,5 @@ describe('<UsersList />', () => {
       el => el.state('hasContentLoading') === false
     );
     expect(wrapper.find('ToolbarAddButton').length).toBe(0);
-    done();
   });
 });

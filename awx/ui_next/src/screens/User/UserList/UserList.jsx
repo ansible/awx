@@ -161,10 +161,16 @@ class UsersList extends Component {
                   isSearchable: true,
                 },
                 {
-                  name: i18n._(t`Created`),
-                  key: 'created',
+                  name: i18n._(t`First Name`),
+                  key: 'first_name',
                   isSortable: true,
-                  isNumeric: true,
+                  isSearchable: true,
+                },
+                {
+                  name: i18n._(t`Last Name`),
+                  key: 'last_name',
+                  isSortable: true,
+                  isSearchable: true,
                 },
               ]}
               renderToolbar={props => (

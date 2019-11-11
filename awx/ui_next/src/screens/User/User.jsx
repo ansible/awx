@@ -18,6 +18,13 @@ import UserTeams from './UserTeams';
 import UserTokens from './UserTokens';
 import { UsersAPI } from '@api';
 
+const CardHeader = styled(PFCardHeader)`
+  --pf-c-card--first-child--PaddingTop: 0;
+  --pf-c-card--child--PaddingLeft: 0;
+  --pf-c-card--child--PaddingRight: 0;
+  position: relative;
+`;
+
 class User extends Component {
   constructor(props) {
     super(props);
@@ -81,13 +88,6 @@ class User extends Component {
       { name: i18n._(t`Access`), link: `${match.url}/access`, id: 3 },
       { name: i18n._(t`Tokens`), link: `${match.url}/tokens`, id: 4 },
     ];
-
-    const CardHeader = styled(PFCardHeader)`
-      --pf-c-card--first-child--PaddingTop: 0;
-      --pf-c-card--child--PaddingLeft: 0;
-      --pf-c-card--child--PaddingRight: 0;
-      position: relative;
-    `;
 
     let cardHeader = (
       <CardHeader style={{ padding: 0 }}>

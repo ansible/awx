@@ -73,19 +73,13 @@ PasswordField.propTypes = {
   id: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
-  type: PropTypes.string,
   validate: PropTypes.func,
   isRequired: PropTypes.bool,
-  tooltip: PropTypes.node,
-  tooltipMaxWidth: PropTypes.string,
 };
 
 PasswordField.defaultProps = {
-  type: 'text',
   validate: () => {},
   isRequired: false,
-  tooltip: null,
-  tooltipMaxWidth: '',
 };
 
 export default withI18n()(PasswordField);

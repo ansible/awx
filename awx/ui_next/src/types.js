@@ -176,7 +176,6 @@ export const Job = shape({
   artifacts: shape({}),
 });
 
-<<<<<<< HEAD
 export const Host = shape({
   id: number.isRequired,
   type: oneOf(['host']),

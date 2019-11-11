@@ -6,7 +6,7 @@ import { Formik, Field } from 'formik';
 import { Form, FormGroup } from '@patternfly/react-core';
 import AnsibleSelect from '@components/AnsibleSelect';
 import FormActionGroup from '@components/FormActionGroup/FormActionGroup';
-import FormField, { FieldTooltip, PasswordField } from '@components/FormField';
+import FormField, { PasswordField } from '@components/FormField';
 import FormRow from '@components/FormRow';
 import OrganizationLookup from '@components/Lookup/OrganizationLookup';
 import { required, requiredEmail } from '@util/validators';
@@ -169,9 +169,8 @@ function UserForm(props) {
                     helperTextInvalid={form.errors.user_type}
                     isRequired
                     isValid={isValid}
-                    label={i18n._(t`Job Type`)}
+                    label={i18n._(t`User Type`)}
                   >
-                    <FieldTooltip content={i18n._(t`Fill me in.`)} />
                     <AnsibleSelect
                       isValid={isValid}
                       id="user-type"
