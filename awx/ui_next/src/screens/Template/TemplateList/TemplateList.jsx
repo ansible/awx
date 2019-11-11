@@ -166,12 +166,10 @@ class TemplatesList extends Component {
         key="add"
         dropdownItems={[
           {
-            key: 'template',
             label: i18n._(t`Template`),
             url: `${match.url}/template/add/`,
           },
           {
-            key: 'workflow_template',
             label: i18n._(t`Workflow Template`),
             url: `${match.url}/_workflow/add/`,
           },

@@ -152,12 +152,10 @@ class InventoriesList extends Component {
         key="add"
         dropdownItems={[
           {
-            key: 'inventory',
             label: i18n._(t`Inventory`),
             url: `${match.url}/inventory/add/`,
           },
           {
-            key: 'smart-inventory',
             label: i18n._(t`Smart Inventory`),
             url: `${match.url}/smart_inventory/add/`,
           },

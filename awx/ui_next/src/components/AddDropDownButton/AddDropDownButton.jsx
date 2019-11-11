@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import PropTypes from 'prop-types';
 import { Dropdown, DropdownPosition } from '@patternfly/react-core';
 import { ToolbarAddButton } from '@components/PaginatedDataList';
 
@@ -30,7 +31,7 @@ function AddDropDownButton({ dropdownItems }) {
         dropdownItems={dropdownItems.map(item => (
           <Link
             className="pf-c-dropdown__menu-item"
-            key={item.key}
+            key={item.url}
             to={item.url}
           >
             {item.label}
@@ -40,6 +41,15 @@ function AddDropDownButton({ dropdownItems }) {
     </div>
   );
 }
+
+AddDropDownButton.propTypes = {
+  dropdownItems: PropTypes.arrayOf(
+    PropTypes.shape({
+      label: PropTypes.string.isRequired,
+      url: PropTypes.string.isRequired,
+    })
+  ).isRequired,
+};
 
 export { AddDropDownButton as _AddDropDownButton };
 export default AddDropDownButton;
