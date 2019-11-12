@@ -1472,7 +1472,7 @@ class ProjectUpdateSerializer(UnifiedJobSerializer, ProjectOptionsSerializer):
 
     class Meta:
         model = ProjectUpdate
-        fields = ('*', 'project', 'job_type', '-controller_node')
+        fields = ('*', 'project', 'job_type', 'job_tags', '-controller_node')
 
     def get_related(self, obj):
         res = super(ProjectUpdateSerializer, self).get_related(obj)
