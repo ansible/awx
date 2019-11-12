@@ -270,6 +270,11 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
                                       .filter(capacity__gt=0, enabled=True)
                                       .values_list('hostname', flat=True)))
 
+    def set_default_policy_fields(self):
+        self.policy_instance_list = []
+        self.policy_instance_minimum = 0
+        self.policy_instance_percentage = 0
+
 
 class TowerScheduleState(SingletonModel):
     schedule_last_run = models.DateTimeField(auto_now_add=True)
@@ -289,6 +294,8 @@ def on_instance_group_saved(sender, instance, created=False, raw=False, **kwargs
     if created or instance.has_policy_changes():
         if not instance.is_containerized:
             schedule_policy_task()
+    elif created or instance.is_containerized:
+        instance.set_default_policy_fields()
 
 
 @receiver(post_save, sender=Instance)

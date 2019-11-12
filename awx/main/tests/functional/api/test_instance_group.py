@@ -274,3 +274,21 @@ def test_instance_group_update_fields(patch, instance, instance_group, admin, co
     assert ["Containerized instances may not be managed via the API"] == resp.data['policy_instance_minimum']
     resp = patch(cg_url, {'policy_instance_list':[instance.hostname]}, admin)
     assert ["Containerized instances may not be managed via the API"] == resp.data['policy_instance_list']
+
+
+@pytest.mark.django_db
+def test_containerized_group_default_fields(instance_group, kube_credential):
+    ig = InstanceGroup(name="test_policy_field_defaults")
+    ig.policy_instance_list = [1]
+    ig.policy_instance_minimum = 5
+    ig.policy_instance_percentage = 5
+    ig.save()
+    assert ig.policy_instance_list == [1]
+    assert ig.policy_instance_minimum == 5
+    assert ig.policy_instance_percentage == 5
+    ig.credential = kube_credential
+    ig.save()
+    assert ig.policy_instance_list == []
+    assert ig.policy_instance_minimum == 0
+    assert ig.policy_instance_percentage == 0
+    
