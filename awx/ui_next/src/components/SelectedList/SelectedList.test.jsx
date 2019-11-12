@@ -19,7 +19,6 @@ describe('<SelectedList />', () => {
       <SelectedList
         label="Selectedeeee"
         selected={mockSelected}
-        showOverflowAfter={5}
         onRemove={() => {}}
       />
     );
@@ -27,16 +26,11 @@ describe('<SelectedList />', () => {
 
   test('showOverflow should set showOverflow on ChipGroup', () => {
     const wrapper = mount(
-      <SelectedList
-        label="Selected"
-        selected={[]}
-        showOverflowAfter={5}
-        onRemove={() => {}}
-      />
+      <SelectedList label="Selected" selected={[]} onRemove={() => {}} />
     );
     const chipGroup = wrapper.find(ChipGroup);
     expect(chipGroup).toHaveLength(1);
-    expect(chipGroup.prop('showOverflowAfter')).toEqual(5);
+    expect(chipGroup.prop('numChips')).toEqual(5);
   });
 
   test('Clicking remove on chip calls onRemove callback prop with correct params', () => {
@@ -51,7 +45,6 @@ describe('<SelectedList />', () => {
       <SelectedList
         label="Selected"
         selected={mockSelected}
-        showOverflowAfter={3}
         onRemove={onRemove}
       />
     );

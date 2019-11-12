@@ -110,7 +110,9 @@ class ResourceAccessListItem extends React.Component {
                     <Detail
                       label={i18n._(t`User Roles`)}
                       value={
-                        <ChipGroup>{userRoles.map(this.renderChip)}</ChipGroup>
+                        <ChipGroup numChips={5}>
+                          {userRoles.map(this.renderChip)}
+                        </ChipGroup>
                       }
                     />
                   )}
@@ -118,7 +120,9 @@ class ResourceAccessListItem extends React.Component {
                     <Detail
                       label={i18n._(t`Team Roles`)}
                       value={
-                        <ChipGroup>{teamRoles.map(this.renderChip)}</ChipGroup>
+                        <ChipGroup numChips={5}>
+                          {teamRoles.map(this.renderChip)}
+                        </ChipGroup>
                       }
                     />
                   )}

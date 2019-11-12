@@ -99,7 +99,7 @@ class OrganizationDetail extends Component {
               fullWidth
               label={i18n._(t`Instance Groups`)}
               value={
-                <ChipGroup showOverflowAfter={5}>
+                <ChipGroup numChips={5}>
                   {instanceGroups.map(ig => (
                     <Chip key={ig.id} isReadOnly>
                       {ig.name}

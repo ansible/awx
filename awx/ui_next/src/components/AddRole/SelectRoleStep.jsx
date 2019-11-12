@@ -33,7 +33,6 @@ class RolesStep extends React.Component {
               isReadOnly
               label={selectedListLabel || i18n._(t`Selected`)}
               selected={selectedResourceRows}
-              showOverflowAfter={5}
             />
           )}
         </div>

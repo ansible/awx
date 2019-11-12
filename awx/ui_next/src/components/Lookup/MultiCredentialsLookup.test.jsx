@@ -70,8 +70,8 @@ describe('<MultiCredentialsLookup />', () => {
   });
 
   test('onChange is called when you click to remove a credential from input', async () => {
-    const chip = wrapper.find('PFChip');
-    const button = chip.at(1).find('Button');
+    const chip = wrapper.find('PFChip').find({ isOverflowChip: false });
+    const button = chip.at(1).find('ChipButton');
     expect(chip).toHaveLength(4);
     button.prop('onClick')();
     expect(onChange).toBeCalledWith([

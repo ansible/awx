@@ -273,7 +273,7 @@ class JobTemplateDetail extends Component {
                   fullWidth
                   label={i18n._(t`Credentials`)}
                   value={
-                    <ChipGroup showOverflowAfter={5}>
+                    <ChipGroup numChips={5}>
                       {summary_fields.credentials.map(c => (
                         <CredentialChip key={c.id} credential={c} isReadOnly />
                       ))}
@@ -286,7 +286,7 @@ class JobTemplateDetail extends Component {
                 fullWidth
                 label={i18n._(t`Labels`)}
                 value={
-                  <ChipGroup showOverflowAfter={5}>
+                  <ChipGroup numChips={5}>
                     {summary_fields.labels.results.map(l => (
                       <Chip key={l.id} isReadOnly>
                         {l.name}
@@ -301,7 +301,7 @@ class JobTemplateDetail extends Component {
                 fullWidth
                 label={i18n._(t`Instance Groups`)}
                 value={
-                  <ChipGroup showOverflowAfter={5}>
+                  <ChipGroup numChips={5}>
                     {instanceGroups.map(ig => (
                       <Chip key={ig.id} isReadOnly>
                         {ig.name}
@@ -316,7 +316,7 @@ class JobTemplateDetail extends Component {
                 fullWidth
                 label={i18n._(t`Job tags`)}
                 value={
-                  <ChipGroup showOverflowAfter={5}>
+                  <ChipGroup numChips={5}>
                     {job_tags.split(',').map(jobTag => (
                       <Chip key={jobTag} isReadOnly>
                         {jobTag}
@@ -331,7 +331,7 @@ class JobTemplateDetail extends Component {
                 fullWidth
                 label={i18n._(t`Skip tags`)}
                 value={
-                  <ChipGroup showOverflowAfter={5}>
+                  <ChipGroup numChips={5}>
                     {skip_tags.split(',').map(skipTag => (
                       <Chip key={skipTag} isReadOnly>
                         {skipTag}

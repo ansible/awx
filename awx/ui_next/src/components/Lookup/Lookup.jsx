@@ -49,6 +49,7 @@ const InputGroup = styled(PFInputGroup)`
 const ChipHolder = styled.div`
   --pf-c-form-control--BorderTopColor: var(--pf-global--BorderColor--200);
   --pf-c-form-control--BorderRightColor: var(--pf-global--BorderColor--200);
+  --pf-c-form-control--Height: auto;
   border-top-right-radius: 3px;
   border-bottom-right-radius: 3px;
 `;
@@ -240,7 +241,7 @@ class Lookup extends React.Component {
     const canDelete = !required || (multiple && value.length > 1);
     const chips = () => {
       return selectCategoryOptions && selectCategoryOptions.length > 0 ? (
-        <ChipGroup>
+        <ChipGroup defaultIsOpen numChips={5}>
           {(multiple ? value : [value]).map(chip => (
             <CredentialChip
               key={chip.id}
@@ -251,7 +252,7 @@ class Lookup extends React.Component {
           ))}
         </ChipGroup>
       ) : (
-        <ChipGroup>
+        <ChipGroup defaultIsOpen numChips={5}>
           {(multiple ? value : [value]).map(chip => (
             <Chip
               key={chip.id}
@@ -350,7 +351,6 @@ class Lookup extends React.Component {
             <SelectedList
               label={i18n._(t`Selected`)}
               selected={selectCategoryOptions ? value : lookupSelectedItems}
-              showOverflowAfter={5}
               onRemove={this.toggleSelected}
               isReadOnly={!canDelete}
               isCredentialList={

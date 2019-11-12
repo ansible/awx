@@ -1,0 +1,40 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<ChipGroup /> renders the expected content 1`] = `
+<ChipGroup>
+  <StyledComponent
+    forwardedComponent={
+      Object {
+        "$$typeof": Symbol(react.forward_ref),
+        "attrs": Array [],
+        "componentStyle": ComponentStyle {
+          "componentId": "ChipGroup-sc-10zu8t0-0",
+          "isStatic": true,
+          "lastClassName": "bwbBYO",
+          "rules": Array [
+            "--pf-c-chip-group--c-chip--MarginRight:10px;--pf-c-chip-group--c-chip--MarginBottom:10px;> .pf-c-chip.pf-m-overflow .pf-c-button{--pf-c-button--PaddingTop:3px;--pf-c-button--PaddingBottom:3px;--pf-c-chip--m-overflow--c-button--PaddingLeft:8px;--pf-c-chip--m-overflow--c-button--PaddingRight:8px;}",
+          ],
+        },
+        "displayName": "ChipGroup",
+        "foldedComponentIds": Array [],
+        "render": [Function],
+        "styledComponentId": "ChipGroup-sc-10zu8t0-0",
+        "target": [Function],
+        "toString": [Function],
+        "warnTooManyClasses": [Function],
+        "withComponent": [Function],
+      }
+    }
+    forwardedRef={null}
+  >
+    <ChipGroup
+      className="ChipGroup-sc-10zu8t0-0 bwbBYO"
+      collapsedText="\${remaining} more"
+      defaultIsOpen={false}
+      expandedText="Show Less"
+      numChips={3}
+      withToolbar={false}
+    />
+  </StyledComponent>
+</ChipGroup>
+`;
