@@ -701,14 +701,18 @@ EC2_REGION_NAMES = {
     'eu-central-1': _('EU (Frankfurt)'),
     'eu-west-1': _('EU (Ireland)'),
     'eu-west-2': _('EU (London)'),
+    'eu-west-3': _('EU (Paris)'),
+    'eu-north-1': _('EU (Stockholm)'),
     'ap-southeast-1': _('Asia Pacific (Singapore)'),
     'ap-southeast-2': _('Asia Pacific (Sydney)'),
     'ap-northeast-1': _('Asia Pacific (Tokyo)'),
     'ap-northeast-2': _('Asia Pacific (Seoul)'),
+    'ap-east-1': _('Asia Pacific (Hong Kong)'),
     'ap-south-1': _('Asia Pacific (Mumbai)'),
     'sa-east-1': _('South America (Sao Paulo)'),
     'us-gov-west-1': _('US West (GovCloud)'),
     'cn-north-1': _('China (Beijing)'),
+    'me-south-1': _('Middle East (Bahrain)'),
 }
 
 EC2_REGIONS_BLACKLIST = [
