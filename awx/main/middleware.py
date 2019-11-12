@@ -13,18 +13,17 @@ import urllib.parse
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
-from django.db.migrations.executor import MigrationExecutor
-from django.db import IntegrityError, connection
+from django.db import IntegrityError
 from django.utils.functional import curry
 from django.shortcuts import get_object_or_404, redirect
 from django.apps import apps
-from django.core.cache import cache
 from django.utils.deprecation import MiddlewareMixin
 from django.utils.translation import ugettext_lazy as _
 from django.urls import reverse, resolve
 
 from awx.main.models import ActivityStream
 from awx.main.utils.named_url_graph import generate_graph, GraphNode
+from awx.main.utils.db import migration_in_progress_check_or_relase
 from awx.conf import fields, register
 
 
@@ -214,11 +213,7 @@ class URLModificationMiddleware(MiddlewareMixin):
 class MigrationRanCheckMiddleware(MiddlewareMixin):
 
     def process_request(self, request):
-        if cache.get('migration_in_progress', False):
-            executor = MigrationExecutor(connection)
-            plan = executor.migration_plan(executor.loader.graph.leaf_nodes())
-            if not bool(plan):
-                logger.info('Detected that migration finished, migration page taken down.')
-                cache.delete('migration_in_progress')
-            elif getattr(resolve(request.path), 'url_name', '') != 'migrations_notran':
-                return redirect(reverse("ui:migrations_notran"))
+        if migration_in_progress_check_or_relase():
+            if getattr(resolve(request.path), 'url_name', '') == 'migrations_notran':
+                return
+            return redirect(reverse("ui:migrations_notran"))
