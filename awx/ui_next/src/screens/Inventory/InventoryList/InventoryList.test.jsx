@@ -284,7 +284,7 @@ describe('<InventoriesList />', () => {
     done();
   });
 
-  test('Add button shown for users without ability to POST', async done => {
+  test('Add button shown for users with ability to POST', async done => {
     const wrapper = mountWithContexts(<InventoriesList />);
     await waitForElement(
       wrapper,

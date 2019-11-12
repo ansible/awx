@@ -13,8 +13,8 @@ import PaginatedDataList, {
 } from '@components/PaginatedDataList';
 import { getQSConfig, parseQueryString } from '@util/qs';
 
+import AddDropDownButton from '@components/AddDropDownButton';
 import TemplateListItem from './TemplateListItem';
-import TemplateAddButton from './TemplateAddButton';
 
 // The type value in const QS_CONFIG below does not have a space between job_template and
 // workflow_job_template so the params sent to the API match what the api expects.
@@ -161,6 +161,21 @@ class TemplatesList extends Component {
       actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
     const isAllSelected =
       selected.length === templates.length && selected.length > 0;
+    const addButton = (
+      <AddDropDownButton
+        key="add"
+        dropdownItems={[
+          {
+            label: i18n._(t`Template`),
+            url: `${match.url}/template/add/`,
+          },
+          {
+            label: i18n._(t`Workflow Template`),
+            url: `${match.url}/_workflow/add/`,
+          },
+        ]}
+      />
+    );
     return (
       <PageSection>
         <Card>
@@ -206,7 +221,7 @@ class TemplatesList extends Component {
                     itemsToDelete={selected}
                     pluralizedItemName="Templates"
                   />,
-                  canAdd && <TemplateAddButton key="add" />,
+                  canAdd && addButton,
                 ]}
               />
             )}
@@ -220,7 +235,7 @@ class TemplatesList extends Component {
                 isSelected={selected.some(row => row.id === template.id)}
               />
             )}
-            emptyStateControls={canAdd && <TemplateAddButton />}
+            emptyStateControls={canAdd && addButton}
           />
         </Card>
         <AlertModal

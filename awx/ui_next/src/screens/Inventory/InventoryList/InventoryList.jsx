@@ -1,15 +1,9 @@
 import React, { Component } from 'react';
-import { withRouter, Link } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 
 import { t } from '@lingui/macro';
-import {
-  Card,
-  PageSection,
-  Dropdown,
-  DropdownItem,
-  DropdownPosition,
-} from '@patternfly/react-core';
+import { Card, PageSection } from '@patternfly/react-core';
 
 import { InventoriesAPI } from '@api';
 import AlertModal from '@components/AlertModal';
@@ -17,10 +11,10 @@ import DatalistToolbar from '@components/DataListToolbar';
 import ErrorDetail from '@components/ErrorDetail';
 import PaginatedDataList, {
   ToolbarDeleteButton,
-  ToolbarAddButton,
 } from '@components/PaginatedDataList';
-import { getQSConfig, parseQueryString } from '@util/qs';
 
+import { getQSConfig, parseQueryString } from '@util/qs';
+import AddDropDownButton from '@components/AddDropDownButton';
 import InventoryListItem from './InventoryListItem';
 
 // The type value in const QS_CONFIG below does not have a space between job_inventory and
@@ -42,7 +36,6 @@ class InventoriesList extends Component {
       selected: [],
       inventories: [],
       itemCount: 0,
-      isAddOpen: false,
     };
 
     this.loadInventories = this.loadInventories.bind(this);
@@ -50,7 +43,6 @@ class InventoriesList extends Component {
     this.handleSelect = this.handleSelect.bind(this);
     this.handleInventoryDelete = this.handleInventoryDelete.bind(this);
     this.handleDeleteErrorClose = this.handleDeleteErrorClose.bind(this);
-    this.handleAddToggle = this.handleAddToggle.bind(this);
   }
 
   componentDidMount() {
@@ -63,10 +55,6 @@ class InventoriesList extends Component {
     if (location !== prevProps.location) {
       this.loadInventories();
     }
-  }
-
-  componentWillUnmount() {
-    document.removeEventListener('click', this.handleAddToggle, false);
   }
 
   handleDeleteErrorClose() {
@@ -85,21 +73,6 @@ class InventoriesList extends Component {
       this.setState({ selected: selected.filter(s => s.id !== inventory.id) });
     } else {
       this.setState({ selected: selected.concat(inventory) });
-    }
-  }
-
-  handleAddToggle(e) {
-    const { isAddOpen } = this.state;
-    document.addEventListener('click', this.handleAddToggle, false);
-
-    if (this.node && this.node.contains(e.target) && isAddOpen) {
-      document.removeEventListener('click', this.handleAddToggle, false);
-      this.setState({ isAddOpen: false });
-    } else if (this.node && this.node.contains(e.target) && !isAddOpen) {
-      this.setState({ isAddOpen: true });
-    } else {
-      this.setState({ isAddOpen: false });
-      document.removeEventListener('click', this.handleAddToggle, false);
     }
   }
 
@@ -168,14 +141,27 @@ class InventoriesList extends Component {
       inventories,
       itemCount,
       selected,
-      isAddOpen,
       actions,
     } = this.state;
     const { match, i18n } = this.props;
     const canAdd =
       actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
-    const isAllSelected =
-      selected.length > 0 && selected.length === inventories.length;
+    const isAllSelected = selected.length === inventories.length;
+    const addButton = (
+      <AddDropDownButton
+        key="add"
+        dropdownItems={[
+          {
+            label: i18n._(t`Inventory`),
+            url: `${match.url}/inventory/add/`,
+          },
+          {
+            label: i18n._(t`Smart Inventory`),
+            url: `${match.url}/smart_inventory/add/`,
+          },
+        ]}
+      />
+    );
     return (
       <PageSection>
         <Card>
@@ -221,35 +207,7 @@ class InventoriesList extends Component {
                     itemsToDelete={selected}
                     pluralizedItemName="Inventories"
                   />,
-                  canAdd && (
-                    <div
-                      ref={node => {
-                        this.node = node;
-                      }}
-                      key="add"
-                    >
-                      <Dropdown
-                        isPlain
-                        isOpen={isAddOpen}
-                        position={DropdownPosition.right}
-                        toggle={
-                          <ToolbarAddButton onClick={this.handleAddToggle} />
-                        }
-                        dropdownItems={[
-                          <DropdownItem key="inventory">
-                            <Link to={`${match.url}/inventory/add/`}>
-                              {i18n._(t`Inventory`)}
-                            </Link>
-                          </DropdownItem>,
-                          <DropdownItem key="smart_inventory">
-                            <Link to={`${match.url}/smart_inventory/add/`}>
-                              {i18n._(t`Smart Inventory`)}
-                            </Link>
-                          </DropdownItem>,
-                        ]}
-                      />
-                    </div>
-                  ),
+                  canAdd && addButton,
                 ]}
               />
             )}
@@ -267,35 +225,7 @@ class InventoriesList extends Component {
                 isSelected={selected.some(row => row.id === inventory.id)}
               />
             )}
-            emptyStateControls={
-              canAdd && (
-                <div
-                  ref={node => {
-                    this.node = node;
-                  }}
-                  key="add"
-                >
-                  <Dropdown
-                    isPlain
-                    isOpen={isAddOpen}
-                    position={DropdownPosition.right}
-                    toggle={<ToolbarAddButton onClick={this.handleAddToggle} />}
-                    dropdownItems={[
-                      <DropdownItem key="inventory">
-                        <Link to={`${match.url}/inventory/add/`}>
-                          {i18n._(t`Inventory`)}
-                        </Link>
-                      </DropdownItem>,
-                      <DropdownItem key="smart_inventory">
-                        <Link to={`${match.url}/smart_inventory/add/`}>
-                          {i18n._(t`Smart Inventory`)}
-                        </Link>
-                      </DropdownItem>,
-                    ]}
-                  />
-                </div>
-              )
-            }
+            emptyStateControls={canAdd && addButton}
           />
         </Card>
         <AlertModal
