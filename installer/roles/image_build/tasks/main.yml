@@ -124,8 +124,8 @@
   delegate_to: localhost
 
 - name: Stage launch_awx_task
-  copy:
-    src: launch_awx_task.sh
+  template:
+    src: launch_awx_task.sh.j2
     dest: "{{ docker_base_path }}/launch_awx_task.sh"
     mode: '0700'
   delegate_to: localhost
