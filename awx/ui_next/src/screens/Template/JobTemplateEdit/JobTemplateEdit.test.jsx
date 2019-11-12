@@ -200,17 +200,22 @@ describe('<JobTemplateEdit />', () => {
       data: { ...updatedTemplateData },
     });
     const formik = wrapper.find('Formik').instance();
-    const changeState = new Promise(resolve => {
-      const values = {
-        ...mockJobTemplate,
-        ...updatedTemplateData,
-        labels,
-        instanceGroups: [],
-      };
-      formik.setState({ values }, () => resolve());
-    });
+    const changeState = await act(
+      () =>
+        new Promise(resolve => {
+          const values = {
+            ...mockJobTemplate,
+            ...updatedTemplateData,
+            labels,
+            instanceGroups: [],
+          };
+          formik.setState({ values }, () => resolve());
+        })
+    );
     await changeState;
-    wrapper.find('button[aria-label="Save"]').simulate('click');
+    await act(async () => {
+      wrapper.find('button[aria-label="Save"]').simulate('click');
+    });
     await sleep(0);
 
     expect(JobTemplatesAPI.update).toHaveBeenCalledWith(1, {
@@ -236,7 +241,9 @@ describe('<JobTemplateEdit />', () => {
       'button[aria-label="Cancel"]',
       e => e.length === 1
     );
-    cancelButton.prop('onClick')();
+    await act(async () => {
+      cancelButton.prop('onClick')();
+    });
     expect(history.location.pathname).toEqual(
       '/templates/job_template/1/details'
     );

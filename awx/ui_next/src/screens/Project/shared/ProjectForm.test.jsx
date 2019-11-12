@@ -26,7 +26,7 @@ describe('<ProjectForm />', () => {
         id: 100,
         credential_type_id: 4,
         kind: 'scm',
-        name: 'alpha',
+        name: 'Foo',
       },
     },
   };
