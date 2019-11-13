@@ -32,6 +32,34 @@ spec:
 apiVersion: v1
 kind: ConfigMap
 metadata:
+  name: {{ kubernetes_deployment_name }}-launch
+  namespace: {{ kubernetes_namespace }}
+data:
+  rabbitmq: |
+    #!/bin/sh
+    
+    [[ -n "$DEBUG" ]] && set -x
+    set -e
+    
+    if [ `id -u` -ge 500 ]; then
+        echo "rabbitmq:x:`id -u`:`id -g`:,,,:${HOME}:/bin/ash" >> /tmp/passwd
+        cat /tmp/passwd > /etc/passwd
+        rm /tmp/passwd
+    fi
+    
+    echo "$RABBITMQ_ERLANG_COOKIE" > $HOME/.erlang.cookie
+    chmod 0600 $HOME/.erlang.cookie
+    
+    if [ "$RABBITMQ_NODENAME" ]; then
+        if [ -d "/var/lib/rabbitmq/mnesia/\${RABBITMQ_NODENAME}" ]; then rabbitmqctl force_boot; fi
+    fi
+    
+    docker-entrypoint.sh rabbitmq-server
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
   name: rabbitmq-config
   namespace: {{ kubernetes_namespace }}
 data:
@@ -330,6 +358,9 @@ spec:
             - name: "{{ kubernetes_deployment_name }}-rabbitmq-certs-vol"
               mountPath: /etc/pki/rabbitmq
 {% endif %}
+            - name: rabbitmq-launch
+              mountPath: "launch.sh"
+              subPath: launch.sh
           resources:
             requests:
               memory: "{{ rabbitmq_mem_request }}Gi"
@@ -452,6 +483,14 @@ spec:
             - key: rabbit_health_node.py
               path: rabbit_health_node.py
             defaultMode: 0755
+            
+        - name: rabbitmq-launch
+          configMap:
+            name: {{ kubernetes_deployment_name }}-launch
+            items:
+            - key: rabbitmq
+              path: 'launch.py'
+            defaultMode: 0755            
 ---
 apiVersion: v1
 kind: ConfigMap
