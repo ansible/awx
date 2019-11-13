@@ -359,7 +359,7 @@ spec:
               mountPath: /etc/pki/rabbitmq
 {% endif %}
             - name: rabbitmq-launch
-              mountPath: "launch.sh"
+              mountPath: "/launch.sh"
               subPath: launch.sh
           resources:
             requests:
@@ -489,7 +489,7 @@ spec:
             name: {{ kubernetes_deployment_name }}-launch
             items:
             - key: rabbitmq
-              path: 'launch.sh'
+              path: '/launch.sh'
             defaultMode: 0755            
 ---
 apiVersion: v1
