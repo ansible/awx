@@ -28,6 +28,7 @@ from awx.main.models.inventory import (
     Host
 )
 from awx.main.utils.mem_inventory import MemInventory, dict_to_mem_data
+from awx.main.utils.safe_yaml import sanitize_jinja
 
 # other AWX imports
 from awx.main.models.rbac import batch_role_ancestor_rebuilding
@@ -795,6 +796,10 @@ class Command(BaseCommand):
             if self.instance_id_var:
                 instance_id = self._get_instance_id(mem_host.variables)
                 host_attrs['instance_id'] = instance_id
+            try:
+                sanitize_jinja(mem_host_name)
+            except ValueError as e:
+                raise ValueError(str(e) + ': {}'.format(mem_host_name))
             db_host = self.inventory.hosts.update_or_create(name=mem_host_name, defaults=host_attrs)[0]
             if enabled is False:
                 logger.debug('Host "%s" added (disabled)', mem_host_name)
