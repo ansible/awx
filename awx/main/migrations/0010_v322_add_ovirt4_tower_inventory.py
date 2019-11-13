@@ -15,8 +15,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(migration_utils.set_current_apps_for_migrations),
-        migrations.RunPython(credentialtypes.create_rhv_tower_credtype),
         migrations.AlterField(
             model_name='inventorysource',
             name='source',
