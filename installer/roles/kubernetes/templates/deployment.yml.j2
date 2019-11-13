@@ -208,6 +208,23 @@ spec:
         - name: {{ kubernetes_deployment_name }}-rabbit
           image: "{{ kubernetes_rabbitmq_image }}:{{ kubernetes_rabbitmq_version }}"
           imagePullPolicy: Always
+          command:
+           - bash
+           - -ec
+           - |
+             [[ -n "$DEBUG" ]] && set -x
+             set -e
+
+              if [ `id -u` -ge 500 ]; then
+                 echo "rabbitmq:x:`id -u`:`id -g`:,,,:${HOME}:/bin/ash" >> /tmp/passwd
+                 cat /tmp/passwd > /etc/passwd
+                 rm /tmp/passwd
+             fi
+
+              echo "$RABBITMQ_ERLANG_COOKIE" > $HOME/.erlang.cookie
+             chmod 0600 $HOME/.erlang.cookie
+             if [ -d "/var/lib/rabbitmq/mnesia/${RABBITMQ_NODENAME}" ]; then rabbitmqctl force_boot; fi
+             exec rabbitmq-server
           ports:
             - name: http
               protocol: TCP
