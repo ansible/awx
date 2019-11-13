@@ -29,6 +29,7 @@ services:
       - postgres
       - memcached
       - rabbitmq
+      - redis
     #   - sync
     # volumes_from:
     #   - sync
@@ -60,3 +61,8 @@ services:
     container_name: tools_rabbitmq_1
     ports:
       - "15672:15672"
+  redis:
+    image: redis:latest
+    container_name: tools_redis_1
+    ports:
+      - "6379:6379"
