@@ -1,30 +1,13 @@
 import base64
 import hashlib
 
-from django.utils.encoding import smart_str
-
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.ciphers import Cipher
 from cryptography.hazmat.primitives.ciphers.algorithms import AES
 from cryptography.hazmat.primitives.ciphers.modes import ECB
 
-from awx.conf import settings_registry
 
-
-__all__ = ['replace_aesecb_fernet', 'get_encryption_key', 'encrypt_field',
-           'decrypt_value', 'decrypt_value', 'should_decrypt_field']
-
-
-def replace_aesecb_fernet(apps, schema_editor):
-    from awx.main.utils.encryption import encrypt_field
-    Setting = apps.get_model('conf', 'Setting')
-
-    for setting in Setting.objects.filter().order_by('pk'):
-        if settings_registry.is_setting_encrypted(setting.key):
-            if should_decrypt_field(setting.value):
-                setting.value = decrypt_field(setting, 'value')
-                setting.value = encrypt_field(setting, 'value')
-            setting.save()
+__all__ = ['get_encryption_key', 'decrypt_field']
 
 
 def get_encryption_key(field_name, pk=None):
@@ -76,38 +59,3 @@ def decrypt_field(instance, field_name, subfield=None):
     key = get_encryption_key(field_name, getattr(instance, 'pk', None))
 
     return decrypt_value(key, value)
-
-
-def encrypt_field(instance, field_name, ask=False, subfield=None, skip_utf8=False):
-    '''
-    Return content of the given instance and field name encrypted.
-    '''
-    value = getattr(instance, field_name)
-    if isinstance(value, dict) and subfield is not None:
-        value = value[subfield]
-    if not value or value.startswith('$encrypted$') or (ask and value == 'ASK'):
-        return value
-    if skip_utf8:
-        utf8 = False
-    else:
-        utf8 = type(value) == str
-    value = smart_str(value)
-    key = get_encryption_key(field_name, getattr(instance, 'pk', None))
-    encryptor = Cipher(AES(key), ECB(), default_backend()).encryptor()
-    block_size = 16
-    while len(value) % block_size != 0:
-        value += '\x00'
-    encrypted = encryptor.update(value) + encryptor.finalize()
-    b64data = base64.b64encode(encrypted)
-    tokens = ['$encrypted', 'AES', b64data]
-    if utf8:
-        # If the value to encrypt is utf-8, we need to add a marker so we
-        # know to decode the data when it's decrypted later
-        tokens.insert(1, 'UTF8')
-    return '$'.join(tokens)
-
-
-def should_decrypt_field(value):
-    if hasattr(value, 'startswith'):
-        return value.startswith('$encrypted$') and '$AESCBC$' not in value
-    return False

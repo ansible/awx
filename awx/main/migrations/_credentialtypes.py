@@ -1,6 +1,4 @@
-from awx.main import utils
 from awx.main.models import CredentialType
-from awx.main.utils.encryption import encrypt_field, decrypt_field
 from django.db.models import Q
 
 
@@ -61,16 +59,6 @@ def _disassociate_non_insights_projects(apps, cred):
     apps.get_model('main', 'Project').objects.filter(~Q(scm_type='insights') & Q(credential=cred)).update(credential=None)
 
 
-def migrate_to_v2_credentials(apps, schema_editor):
-    # TODO: remove once legacy/EOL'd Towers no longer support this upgrade path
-    pass
-
-
-def migrate_job_credentials(apps, schema_editor):
-    # TODO: remove once legacy/EOL'd Towers no longer support this upgrade path
-    pass
-
-
 def add_vault_id_field(apps, schema_editor):
     # this is no longer necessary; schemas are defined in code
     pass
@@ -81,17 +69,7 @@ def remove_vault_id_field(apps, schema_editor):
     pass
 
 
-def create_rhv_tower_credtype(apps, schema_editor):
-    # this is no longer necessary; schemas are defined in code
-    pass
-
-
 def add_tower_verify_field(apps, schema_editor):
-    # this is no longer necessary; schemas are defined in code
-    pass
-
-
-def add_azure_cloud_environment_field(apps, schema_editor):
     # this is no longer necessary; schemas are defined in code
     pass
 
