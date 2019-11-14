@@ -1,84 +1,114 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import React, { useState, useEffect } from 'react';
+import { arrayOf, string, func, object } from 'prop-types';
+import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { FormGroup, Tooltip } from '@patternfly/react-core';
 import { QuestionCircleIcon as PFQuestionCircleIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
-
 import { InstanceGroupsAPI } from '@api';
 import Lookup from '@components/Lookup';
+import { getQSConfig, parseQueryString } from '@util/qs';
 
 const QuestionCircleIcon = styled(PFQuestionCircleIcon)`
   margin-left: 10px;
 `;
 
-const getInstanceGroups = async params => InstanceGroupsAPI.read(params);
+const QS_CONFIG = getQSConfig('instance-groups', {
+  page: 1,
+  page_size: 5,
+  order_by: 'name',
+});
+// const getInstanceGroups = async params => InstanceGroupsAPI.read(params);
 
-class InstanceGroupsLookup extends React.Component {
-  render() {
-    const { value, tooltip, onChange, className, i18n } = this.props;
+function InstanceGroupsLookup({
+  value,
+  onChange,
+  tooltip,
+  className,
+  history,
+  i18n,
+}) {
+  const [instanceGroups, setInstanceGroups] = useState([]);
+  const [count, setCount] = useState(0);
+  const [error, setError] = useState(null);
 
-    /*
+  useEffect(() => {
+    (async () => {
+      const params = parseQueryString(QS_CONFIG, history.location.search);
+      try {
+        const { data } = await InstanceGroupsAPI.read(params);
+        setInstanceGroups(data.results);
+        setCount(data.count);
+      } catch (err) {
+        setError(err);
+      }
+    })();
+  }, [history.location]);
+
+  /*
       Wrapping <div> added to workaround PF bug:
       https://github.com/patternfly/patternfly-react/issues/2855
     */
-    return (
-      <div className={className}>
-        <FormGroup
-          label={i18n._(t`Instance Groups`)}
-          fieldId="org-instance-groups"
-        >
-          {tooltip && (
-            <Tooltip position="right" content={tooltip}>
-              <QuestionCircleIcon />
-            </Tooltip>
-          )}
-          <Lookup
-            id="org-instance-groups"
-            lookupHeader={i18n._(t`Instance Groups`)}
-            name="instanceGroups"
-            value={value}
-            onChange={onChange}
-            getItems={getInstanceGroups}
-            qsNamespace="instance-group"
-            multiple
-            columns={[
-              {
-                name: i18n._(t`Name`),
-                key: 'name',
-                isSortable: true,
-                isSearchable: true,
-              },
-              {
-                name: i18n._(t`Modified`),
-                key: 'modified',
-                isSortable: false,
-                isNumeric: true,
-              },
-              {
-                name: i18n._(t`Created`),
-                key: 'created',
-                isSortable: false,
-                isNumeric: true,
-              },
-            ]}
-            sortedColumnKey="name"
-          />
-        </FormGroup>
-      </div>
-    );
-  }
+  return (
+    <div className={className}>
+      <FormGroup
+        label={i18n._(t`Instance Groups`)}
+        fieldId="org-instance-groups"
+      >
+        {tooltip && (
+          <Tooltip position="right" content={tooltip}>
+            <QuestionCircleIcon />
+          </Tooltip>
+        )}
+        <Lookup
+          id="org-instance-groups"
+          lookupHeader={i18n._(t`Instance Groups`)}
+          name="instanceGroups"
+          value={value}
+          onChange={onChange}
+          items={instanceGroups}
+          count={count}
+          qsConfig={QS_CONFIG}
+          multiple
+          columns={[
+            {
+              name: i18n._(t`Name`),
+              key: 'name',
+              isSortable: true,
+              isSearchable: true,
+            },
+            {
+              name: i18n._(t`Modified`),
+              key: 'modified',
+              isSortable: false,
+              isNumeric: true,
+            },
+            {
+              name: i18n._(t`Created`),
+              key: 'created',
+              isSortable: false,
+              isNumeric: true,
+            },
+          ]}
+          sortedColumnKey="name"
+        />
+        {error ? <div>error {error.message}</div> : ''}
+      </FormGroup>
+    </div>
+  );
 }
 
 InstanceGroupsLookup.propTypes = {
-  value: PropTypes.arrayOf(PropTypes.object).isRequired,
-  tooltip: PropTypes.string,
-  onChange: PropTypes.func.isRequired,
+  value: arrayOf(object).isRequired,
+  tooltip: string,
+  onChange: func.isRequired,
+  className: string,
 };
 
 InstanceGroupsLookup.defaultProps = {
   tooltip: '',
+  className: '',
 };
 
-export default withI18n()(InstanceGroupsLookup);
+export default withI18n()(withRouter(InstanceGroupsLookup));

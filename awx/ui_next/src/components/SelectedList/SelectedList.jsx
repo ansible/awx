@@ -28,6 +28,7 @@ class SelectedList extends Component {
       isReadOnly,
       isCredentialList,
     } = this.props;
+    // TODO: replace isCredentialList with renderChip ?
     const chips = isCredentialList
       ? selected.map(item => (
           <CredentialChip
@@ -66,6 +67,7 @@ SelectedList.propTypes = {
   onRemove: PropTypes.func,
   selected: PropTypes.arrayOf(PropTypes.object).isRequired,
   isReadOnly: PropTypes.bool,
+  isCredentialList: PropTypes.bool,
 };
 
 SelectedList.defaultProps = {
@@ -73,6 +75,7 @@ SelectedList.defaultProps = {
   label: 'Selected',
   onRemove: () => null,
   isReadOnly: false,
+  isCredentialList: false,
 };
 
 export default SelectedList;

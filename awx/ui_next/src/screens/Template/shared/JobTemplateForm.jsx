@@ -317,7 +317,7 @@ class JobTemplateForm extends Component {
             fieldId="template-credentials"
             render={({ field }) => (
               <MultiCredentialsLookup
-                credentials={field.value}
+                value={field.value}
                 onChange={newCredentials =>
                   setFieldValue('credentials', newCredentials)
                 }

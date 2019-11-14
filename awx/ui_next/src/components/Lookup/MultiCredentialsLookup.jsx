@@ -1,22 +1,29 @@
 import React from 'react';
+import { withRouter } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { FormGroup, Tooltip } from '@patternfly/react-core';
 import { QuestionCircleIcon as PFQuestionCircleIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
-
 import { CredentialsAPI, CredentialTypesAPI } from '@api';
-import Lookup from '@components/Lookup';
+import CategoryLookup from '@components/Lookup/CategoryLookup';
+import { getQSConfig, parseQueryString } from '@util/qs';
 
 const QuestionCircleIcon = styled(PFQuestionCircleIcon)`
   margin-left: 10px;
 `;
+
+const QS_CONFIG = getQSConfig('credentials', {
+  page: 1,
+  page_size: 5,
+  order_by: 'name',
+});
+
 function toggleCredentialSelection(credentialsToUpdate, newCredential) {
   let newCredentialsList;
   const isSelectedCredentialInState =
-    credentialsToUpdate.filter(cred => cred.id === newCredential.id).length >
-    0;
+    credentialsToUpdate.filter(cred => cred.id === newCredential.id).length > 0;
 
   if (isSelectedCredentialInState) {
     newCredentialsList = credentialsToUpdate.filter(
@@ -31,6 +38,7 @@ function toggleCredentialSelection(credentialsToUpdate, newCredential) {
   }
   return newCredentialsList;
 }
+
 class MultiCredentialsLookup extends React.Component {
   constructor(props) {
     super(props);
@@ -48,6 +56,7 @@ class MultiCredentialsLookup extends React.Component {
 
   componentDidMount() {
     this.loadCredentialTypes();
+    this.loadCredentials();
   }
 
   async loadCredentialTypes() {
@@ -80,23 +89,38 @@ class MultiCredentialsLookup extends React.Component {
     }
   }
 
-  async loadCredentials(params) {
+  async loadCredentials() {
+    const { history, onError } = this.props;
     const { selectedCredentialType } = this.state;
+    const params = parseQueryString(QS_CONFIG, history.location.search);
     params.credential_type = selectedCredentialType.id || 1;
-    return CredentialsAPI.read(params);
+    try {
+      const { data } = await CredentialsAPI.read(params);
+      this.setState({
+        credentials: data.results,
+        count: data.count,
+      });
+    } catch (err) {
+      onError(err);
+    }
   }
-
-
 
   handleCredentialTypeSelect(value, type) {
     const { credentialTypes } = this.state;
     const selectedType = credentialTypes.filter(item => item.label === type);
-    this.setState({ selectedCredentialType: selectedType[0] });
+    this.setState({ selectedCredentialType: selectedType[0] }, () => {
+      this.loadCredentials();
+    });
   }
 
   render() {
-    const { selectedCredentialType, credentialTypes } = this.state;
-    const { tooltip, i18n, credentials, onChange } = this.props;
+    const {
+      selectedCredentialType,
+      credentialTypes,
+      credentials,
+      count,
+    } = this.state;
+    const { tooltip, i18n, value, onChange } = this.props;
     return (
       <FormGroup label={i18n._(t`Credentials`)} fieldId="multiCredential">
         {tooltip && (
@@ -105,7 +129,7 @@ class MultiCredentialsLookup extends React.Component {
           </Tooltip>
         )}
         {credentialTypes && (
-          <Lookup
+          <CategoryLookup
             selectCategoryOptions={credentialTypes}
             selectCategory={this.handleCredentialTypeSelect}
             selectedCategory={selectedCredentialType}
@@ -114,11 +138,12 @@ class MultiCredentialsLookup extends React.Component {
             id="multiCredential"
             lookupHeader={i18n._(t`Credentials`)}
             name="credentials"
-            value={credentials}
+            value={value}
             multiple
             onChange={onChange}
-            getItems={this.loadCredentials}
-            qsNamespace="credentials"
+            items={credentials}
+            count={count}
+            qsConfig={QS_CONFIG}
             columns={[
               {
                 name: i18n._(t`Name`),
@@ -127,7 +152,6 @@ class MultiCredentialsLookup extends React.Component {
                 isSearchable: true,
               },
             ]}
-            sortedColumnKey="name"
           />
         )}
       </FormGroup>
@@ -137,7 +161,7 @@ class MultiCredentialsLookup extends React.Component {
 
 MultiCredentialsLookup.propTypes = {
   tooltip: PropTypes.string,
-  credentials: PropTypes.arrayOf(
+  value: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.number,
       name: PropTypes.string,
@@ -152,8 +176,8 @@ MultiCredentialsLookup.propTypes = {
 
 MultiCredentialsLookup.defaultProps = {
   tooltip: '',
-  credentials: [],
+  value: [],
 };
 export { MultiCredentialsLookup as _MultiCredentialsLookup };
 
-export default withI18n()(MultiCredentialsLookup);
+export default withI18n()(withRouter(MultiCredentialsLookup));

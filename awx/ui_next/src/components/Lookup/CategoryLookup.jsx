@@ -15,16 +15,19 @@ import {
   ButtonVariant,
   InputGroup as PFInputGroup,
   Modal,
+  ToolbarItem,
 } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
 
+import AnsibleSelect from '../AnsibleSelect';
 import PaginatedDataList from '../PaginatedDataList';
+import VerticalSeperator from '../VerticalSeparator';
 import DataListToolbar from '../DataListToolbar';
 import CheckboxListItem from '../CheckboxListItem';
 import SelectedList from '../SelectedList';
-import { ChipGroup, Chip } from '../Chip';
+import { ChipGroup, Chip, CredentialChip } from '../Chip';
 import { QSConfig } from '@types';
 
 const SearchButton = styled(Button)`
@@ -46,12 +49,11 @@ const InputGroup = styled(PFInputGroup)`
 const ChipHolder = styled.div`
   --pf-c-form-control--BorderTopColor: var(--pf-global--BorderColor--200);
   --pf-c-form-control--BorderRightColor: var(--pf-global--BorderColor--200);
-  --pf-c-form-control--Height: auto;
   border-top-right-radius: 3px;
   border-bottom-right-radius: 3px;
 `;
 
-class Lookup extends React.Component {
+class CategoryLookup extends React.Component {
   constructor(props) {
     super(props);
 
@@ -63,6 +65,7 @@ class Lookup extends React.Component {
     this.state = {
       isModalOpen: false,
       selectedItems,
+      error: null,
     };
     this.handleModalToggle = this.handleModalToggle.bind(this);
     this.addItem = this.addItem.bind(this);
@@ -72,14 +75,19 @@ class Lookup extends React.Component {
   }
 
   assertCorrectValueType() {
-    const { multiple, value } = this.props;
+    const { multiple, value, selectCategoryOptions } = this.props;
+    if (selectCategoryOptions) {
+      return;
+    }
     if (!multiple && Array.isArray(value)) {
       throw new Error(
-        'Lookup value must not be an array unless `multiple` is set'
+        'CategoryLookup value must not be an array unless `multiple` is set'
       );
     }
     if (multiple && !Array.isArray(value)) {
-      throw new Error('Lookup value must be an array if `multiple` is set');
+      throw new Error(
+        'CategoryLookup value must be an array if `multiple` is set'
+      );
     }
   }
 
@@ -114,10 +122,10 @@ class Lookup extends React.Component {
     this.setState({ selectedItems: [...selectedItems, row] });
   }
 
-  // TODO: cleanup
+  // TODO: clean up
   handleModalToggle() {
     const { isModalOpen } = this.state;
-    const { value, multiple } = this.props;
+    const { value, multiple, selectCategory } = this.props;
     // Resets the selected items from parent state whenever modal is opened
     // This handles the case where the user closes/cancels the modal and
     // opens it again
@@ -129,17 +137,20 @@ class Lookup extends React.Component {
       this.setState({ selectedItems });
     } else {
       this.clearQSParams();
+      if (selectCategory) {
+        selectCategory(null, 'Machine');
+      }
     }
     this.setState(prevState => ({
       isModalOpen: !prevState.isModalOpen,
     }));
   }
 
-  removeItemAndSave(item) {
+  removeItemAndSave(row) {
     const { value, onChange, multiple } = this.props;
     if (multiple) {
-      onChange(value.filter(i => i.id !== item.id));
-    } else if (value.id === item.id) {
+      onChange(value.filter(item => item.id !== row.id));
+    } else if (value.id === row.id) {
       onChange(null);
     }
   }
@@ -162,23 +173,52 @@ class Lookup extends React.Component {
   }
 
   render() {
-    const { isModalOpen, selectedItems } = this.state;
+    const { isModalOpen, selectedItems, error } = this.state;
     const {
       id,
-      lookupHeader,
-      value,
       items,
       count,
+      lookupHeader,
+      value,
       columns,
       multiple,
       name,
       onBlur,
-      required,
       qsConfig,
+      required,
+      selectCategory,
+      selectCategoryOptions,
+      selectedCategory,
       i18n,
     } = this.props;
     const header = lookupHeader || i18n._(t`Items`);
     const canDelete = !required || (multiple && value.length > 1);
+    const chips = () => {
+      return selectCategoryOptions && selectCategoryOptions.length > 0 ? (
+        <ChipGroup>
+          {(multiple ? value : [value]).map(chip => (
+            <CredentialChip
+              key={chip.id}
+              onClick={() => this.removeItemAndSave(chip)}
+              isReadOnly={!canDelete}
+              credential={chip}
+            />
+          ))}
+        </ChipGroup>
+      ) : (
+        <ChipGroup>
+          {(multiple ? value : [value]).map(chip => (
+            <Chip
+              key={chip.id}
+              onClick={() => this.removeItemAndSave(chip)}
+              isReadOnly={!canDelete}
+            >
+              {chip.name}
+            </Chip>
+          ))}
+        </ChipGroup>
+      );
+    };
     return (
       <Fragment>
         <InputGroup onBlur={onBlur}>
@@ -191,17 +231,7 @@ class Lookup extends React.Component {
             <SearchIcon />
           </SearchButton>
           <ChipHolder className="pf-c-form-control">
-            <ChipGroup defaultIsOpen numChips={5}>
-              {(multiple ? value : [value]).map(chip => (
-                <Chip
-                  key={chip.id}
-                  onClick={() => this.removeItemAndSave(chip)}
-                  isReadOnly={!canDelete}
-                >
-                  {chip.name}
-                </Chip>
-              ))}
-            </ChipGroup>
+            {value ? chips(value) : null}
           </ChipHolder>
         </InputGroup>
         <Modal
@@ -227,6 +257,20 @@ class Lookup extends React.Component {
             </Button>,
           ]}
         >
+          {selectCategoryOptions && selectCategoryOptions.length > 0 && (
+            <ToolbarItem css=" display: flex; align-items: center;">
+              <span css="flex: 0 0 25%;">Selected Category</span>
+              <VerticalSeperator />
+              <AnsibleSelect
+                css="flex: 1 1 75%;"
+                id="multiCredentialsLookUp-select"
+                label="Selected Category"
+                data={selectCategoryOptions}
+                value={selectedCategory.label}
+                onChange={selectCategory}
+              />
+            </ToolbarItem>
+          )}
           {selectedItems.length > 0 && (
             <SelectedList
               label={i18n._(t`Selected`)}
@@ -234,6 +278,9 @@ class Lookup extends React.Component {
               showOverflowAfter={5}
               onRemove={this.removeItem}
               isReadOnly={!canDelete}
+              isCredentialList={
+                selectCategoryOptions && selectCategoryOptions.length > 0
+              }
             />
           )}
           <PaginatedDataList
@@ -250,12 +297,18 @@ class Lookup extends React.Component {
                 label={item.name}
                 isSelected={selectedItems.some(i => i.id === item.id)}
                 onSelect={() => this.addItem(item)}
-                isRadio={!multiple}
+                isRadio={
+                  !multiple ||
+                  (selectCategoryOptions &&
+                    selectCategoryOptions.length &&
+                    selectedCategory.value !== 'Vault')
+                }
               />
             )}
             renderToolbar={props => <DataListToolbar {...props} fillWidth />}
             showPageSizeOptions={false}
           />
+          {error ? <div>error: {error.message}</div> : ''}
         </Modal>
       </Fragment>
     );
@@ -266,10 +319,9 @@ const Item = shape({
   id: number.isRequired,
 });
 
-Lookup.propTypes = {
+CategoryLookup.propTypes = {
   id: string,
   items: arrayOf(shape({})).isRequired,
-  count: number.isRequired,
   // TODO: change to `header`
   lookupHeader: string,
   name: string,
@@ -278,9 +330,12 @@ Lookup.propTypes = {
   multiple: bool,
   required: bool,
   qsConfig: QSConfig.isRequired,
+  selectCategory: func.isRequired,
+  selectCategoryOptions: oneOfType(shape({})).isRequired,
+  selectedCategory: shape({}).isRequired,
 };
 
-Lookup.defaultProps = {
+CategoryLookup.defaultProps = {
   id: 'lookup-search',
   lookupHeader: null,
   name: null,
@@ -289,5 +344,5 @@ Lookup.defaultProps = {
   required: false,
 };
 
-export { Lookup as _Lookup };
-export default withI18n()(withRouter(Lookup));
+export { CategoryLookup as _CategoryLookup };
+export default withI18n()(withRouter(CategoryLookup));
