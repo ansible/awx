@@ -96,8 +96,7 @@ class DependencyGraph(object):
             self.data[self.INVENTORY_SOURCE_UPDATES].get(job.inventory_source_id, True)
 
     def can_job_run(self, job):
-        if self.data[self.PROJECT_UPDATES].get(job.project_id, True) is True and \
-                self.data[self.INVENTORY_UPDATES].get(job.inventory_id, True) is True:
+        if self.data[self.PROJECT_UPDATES].get(job.project_id, True) is True:
             if job.allow_simultaneous is False:
                 return self.data[self.JOB_TEMPLATE_JOBS].get(job.job_template_id, True)
             else:
