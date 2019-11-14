@@ -10,8 +10,7 @@ import os
 from django.conf import settings
 
 # Kombu
-from awx.main.dispatch.kombu import Connection
-from kombu import Exchange, Producer
+from kombu import Exchange, Producer, Connection
 from kombu.serialization import registry
 
 __all__ = ['CallbackQueueDispatcher']
@@ -57,7 +56,7 @@ class CallbackQueueDispatcher(object):
                 if self.connection_pid != active_pid:
                     self.connection = None
                 if self.connection is None:
-                    self.connection = Connection(self.callback_connection)
+                    self.connection = Connection(self.callback_connection, **settings.BROKER_TRANSPORT_OPTIONS)
                     self.exchange = Exchange(self.connection_queue, type='direct')
 
                 producer = Producer(self.connection)

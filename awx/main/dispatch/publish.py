@@ -4,9 +4,8 @@ import sys
 from uuid import uuid4
 
 from django.conf import settings
-from kombu import Exchange, Producer
+from kombu import Exchange, Producer, Connection
 
-from awx.main.dispatch.kombu import Connection
 
 logger = logging.getLogger('awx.main.dispatch')
 
@@ -86,7 +85,7 @@ class task:
                 if callable(queue):
                     queue = queue()
                 if not settings.IS_TESTING(sys.argv):
-                    with Connection(settings.BROKER_URL) as conn:
+                    with Connection(settings.BROKER_URL, **settings.BROKER_TRANSPORT_OPTIONS) as conn:
                         exchange = Exchange(queue, type=exchange_type or 'direct')
                         producer = Producer(conn)
                         logger.debug('publish {}({}, queue={})'.format(
