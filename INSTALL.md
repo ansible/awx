@@ -10,10 +10,10 @@ This document provides a guide for installing AWX.
     + [AWX branding](#awx-branding)
     + [Prerequisites](#prerequisites)
     + [System Requirements](#system-requirements)
-  * [Upgrading from previous versions](#upgrading-from-previous-versions)
     + [AWX Tunables](#awx-tunables)
     + [Choose a deployment platform](#choose-a-deployment-platform)
     + [Official vs Building Images](#official-vs-building-images)
+  * [Upgrading from previous versions](#upgrading-from-previous-versions)
   * [OpenShift](#openshift)
     + [Prerequisites](#prerequisites-1)
     + [Pre-install steps](#pre-install-steps)
@@ -41,6 +41,7 @@ This document provides a guide for installing AWX.
     + [Run the installer](#run-the-installer-2)
     + [Post-install](#post-install-2)
     + [Accessing AWX](#accessing-awx-2)
+
     
 ## Getting started
 
@@ -81,25 +82,6 @@ The system that runs the AWX service will need to satisfy the following requirem
 - Running Docker, Openshift, or Kubernetes
 - If you choose to use an external PostgreSQL database, please note that the minimum version is 9.6+.
 
-## Upgrading from previous versions
-
-Upgrading AWX involves rerunning the install playbook. Download a newer release from [https://github.com/ansible/awx/releases](https://github.com/ansible/awx/releases) and re-populate the inventory file with your customized variables.
-
-For convienance, you can create a file called `vars.yml`:
-
-```
-admin_password: 'adminpass'
-pg_password: 'pgpass'
-rabbitmq_password: 'rabbitpass'
-secret_key: 'mysupersecret'
-```
-
-And pass it to the installer:
-
-```
-$ ansible-playbook -i inventory install.yml -e @vars.yml
-```
-
 ### AWX Tunables
 
 **TODO** add tunable bits
@@ -135,6 +117,26 @@ If these variables are present then all deployments will use these hosted images
 *dockerhub_version*
 
 > Multiple versions are provided. `latest` always pulls the most recent. You may also select version numbers at different granularities: 1, 1.0, 1.0.1, 1.0.0.123
+
+
+## Upgrading from previous versions
+
+Upgrading AWX involves rerunning the install playbook. Download a newer release from [https://github.com/ansible/awx/releases](https://github.com/ansible/awx/releases) and re-populate the inventory file with your customized variables.
+
+For convienance, you can create a file called `vars.yml`:
+
+```
+admin_password: 'adminpass'
+pg_password: 'pgpass'
+rabbitmq_password: 'rabbitpass'
+secret_key: 'mysupersecret'
+```
+
+And pass it to the installer:
+
+```
+$ ansible-playbook -i inventory install.yml -e @vars.yml
+```
 
 ## OpenShift
 
