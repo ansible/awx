@@ -1,16 +1,17 @@
+from __future__ import absolute_import, division, print_function
+__metaclass__ = type
+
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.basic import env_fallback
 from ansible.module_utils.urls import Request, SSLValidationError, ConnectionError
-from ansible.module_utils.six.moves.urllib.parse import urlencode
+from ansible.module_utils.six.moves.urllib.parse import urlparse, urlencode
 
 from socket import gethostbyname
-from urllib.parse import urlparse, urlencode
-from urllib.error import HTTPError
-from http.cookiejar import CookieJar
-from six.moves.configparser import ConfigParser, NoOptionError, NoSectionError
+from ansible.module_utils.six.moves.urllib.error import HTTPError
+from ansible.module_utils.six.moves.http_cookiejar import CookieJar
+from ansible.module_utils.six.moves.configparser import ConfigParser, NoOptionError, NoSectionError
 import re
-import json
-from json import JSONDecodeError, loads, dumps
+from json import loads, dumps
 from os.path import isfile
 from os import access, R_OK
 
@@ -74,7 +75,7 @@ class TowerAPIModule(AnsibleModule):
         try:
             gethostbyname(hostname)
         except Exception as e:
-            self.fail_json(msg="Unable to resolve tower_host ({}): {0}".format(hostname, e))
+            self.fail_json(msg="Unable to resolve tower_host ({1}): {0}".format(hostname, e))
 
 
         self.session = Request(cookies=self.cookie_jar)
@@ -223,7 +224,8 @@ class TowerAPIModule(AnsibleModule):
                 page_data = he.read()
                 try:
                     return { 'status_code': he.code, 'json': loads(page_data) }
-                except JSONDecodeError:
+                # JSONDecodeError only available on Python 3.5+
+                except ValueError:
                     return { 'status_code': he.code, 'text': page_data }
             #    self.fail_json(msg='The Tower server claims it was sent a bad request.\n{0} {1}\nstatus code: {2}\n\nResponse: {3}'.format(method, self.url.path, he.code, he.read()))
             elif he.code == 204 and method == 'DELETE':

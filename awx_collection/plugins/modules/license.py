@@ -26,7 +26,7 @@ options:
       description:
         - The contents of the license file
       required: True
-extends_documentation_fragment: tower_api
+extends_documentation_fragment: awx.awx.auth
 '''
 
 RETURN = ''' # '''
@@ -37,23 +37,20 @@ EXAMPLES = '''
     data: "{{ lookup('file', '/tmp/my_tower.license') }}"
 '''
 
-from ansible.module_utils.tower_api import TowerAPIModule
-from json import loads, JSONDecodeError
+from ..module_utils.tower_api import TowerAPIModule
 
-    
+
 def main():
 
     module = TowerAPIModule(
-        argument_spec= dict(
-            data=dict(type=dict,required=True),
-            eula_accepted=dict(type=bool,required=True),
+        argument_spec=dict(
+            data=dict(type='dict', required=True),
+            eula_accepted=dict(type='bool', required=True),
         ),
         supports_check_mode=True
     )
 
-    json_output = {
-      'changed': False,
-    }
+    json_output = {'changed': False}
 
     if not module.params.get('eula_accepted'):
         module.fail_json(msg='You must accept the EULA by passing in the param eula_acepte as True')
@@ -68,7 +65,7 @@ def main():
             module.exit_json(**json_output)
         # We need to add in the EULA
         new_license['eula_accepted'] = True
-        result = module.post_endpoint('config', data=new_license)
+        module.post_endpoint('config', data=new_license)
 
     module.exit_json(**json_output)
 
