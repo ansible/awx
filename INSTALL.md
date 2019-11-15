@@ -4,41 +4,44 @@ This document provides a guide for installing AWX.
 
 ## Table of contents
 
-- [Getting started](#getting-started)
-  - [Clone the repo](#clone-the-repo)
-  - [AWX branding](#awx-branding)
-  - [Prerequisites](#prerequisites)
-  - [System Requirements](#system-requirements)
-  - [AWX Tunables](#awx-tunables)
-  - [Choose a deployment platform](#choose-a-deployment-platform)
-  - [Official vs Building Images](#official-vs-building-images)
-- [OpenShift](#openshift)
-  - [Prerequisites](#prerequisites-1)
-    - [Deploying to Minishift](#deploying-to-minishift)
-  - [Pre-build steps](#pre-build-steps)
-  - [PostgreSQL](#postgresql)
-  - [Start the build](#start-the-build)
-  - [Post build](#post-build)
-  - [Accessing AWX](#accessing-awx)
-- [Kubernetes](#kubernetes)
-  - [Prerequisites](#prerequisites-2)
-  - [Pre-build steps](#pre-build-steps-1)
-  - [Configuring Helm](#configuring-helm)
-  - [Start the build](#start-the-build-1)
-  - [Accessing AWX](#accessing-awx-1)
-  - [SSL Termination](#ssl-termination)
-- [Docker Compose](#docker-compose)
-  - [Prerequisites](#prerequisites-3)
-  - [Pre-build steps](#pre-build-steps-2)
-    - [Deploying to a remote host](#deploying-to-a-remote-host)
-    - [Inventory variables](#inventory-variables)
+- [Installing AWX](#installing-awx)
+  * [Getting started](#getting-started)
+    + [Clone the repo](#clone-the-repo)
+    + [AWX branding](#awx-branding)
+    + [Prerequisites](#prerequisites)
+    + [System Requirements](#system-requirements)
+  * [Upgrading from previous versions](#upgrading-from-previous-versions)
+    + [AWX Tunables](#awx-tunables)
+    + [Choose a deployment platform](#choose-a-deployment-platform)
+    + [Official vs Building Images](#official-vs-building-images)
+  * [OpenShift](#openshift)
+    + [Prerequisites](#prerequisites-1)
+    + [Pre-install steps](#pre-install-steps)
+      - [Deploying to Minishift](#deploying-to-minishift)
+      - [PostgreSQL](#postgresql)
+    + [Run the installer](#run-the-installer)
+    + [Post-install](#post-install)
+    + [Accessing AWX](#accessing-awx)
+  * [Kubernetes](#kubernetes)
+    + [Prerequisites](#prerequisites-2)
+    + [Pre-install steps](#pre-install-steps-1)
+    + [Configuring Helm](#configuring-helm)
+    + [Run the installer](#run-the-installer-1)
+    + [Post-install](#post-install-1)
+    + [Accessing AWX](#accessing-awx-1)
+    + [SSL Termination](#ssl-termination)
+  * [Docker-Compose](#docker-compose)
+    + [Prerequisites](#prerequisites-3)
+    + [Pre-install steps](#pre-install-steps-2)
+      - [Deploying to a remote host](#deploying-to-a-remote-host)
+      - [Inventory variables](#inventory-variables)
       - [Docker registry](#docker-registry)
-      - [PostgreSQL](#postgresql-1)
       - [Proxy settings](#proxy-settings)
-  - [Start the build](#start-the-build-2)
-  - [Post build](#post-build-2)
-  - [Accessing AWX](#accessing-awx-2)
-
+      - [PostgreSQL](#postgresql-1)
+    + [Run the installer](#run-the-installer-2)
+    + [Post-install](#post-install-2)
+    + [Accessing AWX](#accessing-awx-2)
+    
 ## Getting started
 
 ### Clone the repo
@@ -152,9 +155,9 @@ This can be tuned by overriding the variables found in [/installer/roles/kuberne
 
 For more detail on how resource requests are formed see: [https://docs.openshift.com/container-platform/latest/dev_guide/compute_resources.html#dev-compute-resources](https://docs.openshift.com/container-platform/latest/dev_guide/compute_resources.html#dev-compute-resources)
 
-### Pre-build steps
+### Pre-install steps
 
-Before starting the build process, review the [inventory](./installer/inventory) file, and uncomment and provide values for the following variables found in the `[all:vars]` section:
+Before starting the install, review the [inventory](./installer/inventory) file, and uncomment and provide values for the following variables found in the `[all:vars]` section:
 
 *openshift_host*
 
@@ -218,14 +221,14 @@ If you wish to use an external database, in the inventory file, set the value of
 
 ### Run the installer
 
-To start the build, you will pass two *extra* variables on the command line. The first is *openshift_password*, which is the password for the *openshift_user*, and the second is *docker_registry_password*, which is the password associated with *docker_registry_username*.
+To start the install, you will pass two *extra* variables on the command line. The first is *openshift_password*, which is the password for the *openshift_user*, and the second is *docker_registry_password*, which is the password associated with *docker_registry_username*.
 
 If you're using the OpenShift internal registry, then you'll pass an access token for the *docker_registry_password* value, rather than a password. The `oc whoami -t` command will generate the required token, as long as you're logged into the cluster via `oc cluster login`.
 
-To start the build and deployment, run the following (docker_registry_password is optional if using official images):
+Run the following command (docker_registry_password is optional if using official images):
 
 ```bash
-# Start the build and deployment
+# Start the install
 $ ansible-playbook -i inventory install.yml -e openshift_password=developer  -e docker_registry_password=$(oc whoami -t)
 ```
 
@@ -346,9 +349,9 @@ This can be tuned by overriding the variables found in [/installer/roles/kuberne
 
 For more detail on how resource requests are formed see: [https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/](https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/)
 
-### Pre-build steps
+### Pre-install steps
 
-Before starting the build process, review the [inventory](./installer/inventory) file, and uncomment and provide values for the following variables found in the `[all:vars]` section uncommenting when necessary. Make sure the openshift and standalone docker sections are commented out:
+Before starting the install process, review the [inventory](./installer/inventory) file, and uncomment and provide values for the following variables found in the `[all:vars]` section uncommenting when necessary. Make sure the openshift and standalone docker sections are commented out:
 
 *kubernetes_context*
 
@@ -424,7 +427,7 @@ Unlike Openshift's `Route` the Kubernetes `Ingress` doesn't yet handle SSL termi
     + This also installs the `docker` Python module, which is incompatible with `docker-py`. If you have previously installed `docker-py`, please uninstall it.
 - [Docker Compose](https://docs.docker.com/compose/install/).
 
-### Pre-build steps
+### Pre-install steps
 
 #### Deploying to a remote host
 
@@ -455,7 +458,7 @@ If you choose to use the official images then the remote host will be the one to
 
 #### Inventory variables
 
-Before starting the build process, review the [inventory](./installer/inventory) file, and uncomment and provide values for the following variables found in the `[all:vars]` section:
+Before starting the install process, review the [inventory](./installer/inventory) file, and uncomment and provide values for the following variables found in the `[all:vars]` section:
 
 *postgres_data_dir*
 
@@ -532,7 +535,7 @@ If you wish to use an external database, in the inventory file, set the value of
 
 ### Run the installer
 
-If you are not pushing images to a Docker registry, start the build by running the following:
+If you are not pushing images to a Docker registry, start the install by running the following:
 
 ```bash
 # Set the working directory to installer
