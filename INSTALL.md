@@ -123,7 +123,7 @@ If these variables are present then all deployments will use these hosted images
 
 Upgrading AWX involves rerunning the install playbook. Download a newer release from [https://github.com/ansible/awx/releases](https://github.com/ansible/awx/releases) and re-populate the inventory file with your customized variables.
 
-For convienance, you can create a file called `vars.yml`:
+For convenience, you can create a file called `vars.yml`:
 
 ```
 admin_password: 'adminpass'
