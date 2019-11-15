@@ -78,6 +78,25 @@ The system that runs the AWX service will need to satisfy the following requirem
 - Running Docker, Openshift, or Kubernetes
 - If you choose to use an external PostgreSQL database, please note that the minimum version is 9.6+.
 
+## Upgrading from previous versions
+
+Upgrading AWX involves rerunning the install playbook. Download a newer release from [https://github.com/ansible/awx/releases](https://github.com/ansible/awx/releases) and re-populate the inventory file with your customized variables.
+
+For convienance, you can create a file called `vars.yml`:
+
+```
+admin_password: 'adminpass'
+pg_password: 'pgpass'
+rabbitmq_password: 'rabbitpass'
+secret_key: 'mysupersecret'
+```
+
+And pass it to the installer:
+
+```
+$ ansible-playbook -i inventory install.yml -e @vars.yml
+```
+
 ### AWX Tunables
 
 **TODO** add tunable bits
