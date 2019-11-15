@@ -197,7 +197,7 @@ By default, AWX will deploy a PostgreSQL pod inside of your cluster. You will ne
 
 If you wish to use an external database, in the inventory file, set the value of `pg_hostname`, and update `pg_username`, `pg_password`, `pg_admin_password`, `pg_database`, and `pg_port` with the connection information. When setting `pg_hostname` the installer will assume you have configured the database in that location and will not launch the postgresql pod.
 
-### Start the build
+### Run the installer
 
 To start the build, you will pass two *extra* variables on the command line. The first is *openshift_password*, which is the password for the *openshift_user*, and the second is *docker_registry_password*, which is the password associated with *docker_registry_username*.
 
@@ -210,7 +210,7 @@ To start the build and deployment, run the following (docker_registry_password i
 $ ansible-playbook -i inventory install.yml -e openshift_password=developer  -e docker_registry_password=$(oc whoami -t)
 ```
 
-### Post build
+### Post-install
 
 After the playbook run completes, check the status of the deployment by running `oc get pods`:
 
@@ -349,7 +349,7 @@ If you want the AWX installer to manage creating the database pod (rather than i
 
 Newer Kubernetes clusters with RBAC enabled will need to make sure a service account is created, make sure to follow the instructions here [https://docs.helm.sh/using_helm/#role-based-access-control](https://docs.helm.sh/using_helm/#role-based-access-control)
 
-### Start the build
+### Run the installer
 
 After making changes to the `inventory` file use `ansible-playbook` to begin the install
 
@@ -357,7 +357,7 @@ After making changes to the `inventory` file use `ansible-playbook` to begin the
 $ ansible-playbook -i inventory install.yml
 ```
 
-### Post build
+### Post-install
 
 After the playbook run completes, check the status of the deployment by running `kubectl get pods --namespace awx` (replace awx with the namespace you used):
 
@@ -511,7 +511,7 @@ AWX requires access to a PostgreSQL database, and by default, one will be create
 
 If you wish to use an external database, in the inventory file, set the value of `pg_hostname`, and update `pg_username`, `pg_password`, `pg_admin_password`, `pg_database`, and `pg_port` with the connection information.
 
-### Start the build
+### Run the installer
 
 If you are not pushing images to a Docker registry, start the build by running the following:
 
@@ -533,7 +533,7 @@ $ cd installer
 $ ansible-playbook -i inventory -e docker_registry_password=password install.yml
 ```
 
-### Post build
+### Post-install
 
 After the playbook run completes, Docker will report up to 5 running containers. If you chose to use an existing PostgresSQL database, then it will report 4. You can view the running containers using the `docker ps` command, as follows:
 
