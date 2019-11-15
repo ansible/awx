@@ -3,6 +3,10 @@ conditional_groups:
 default_host_filters: []
 exclude_host_filters:
 - resource_group not in ['foo_resources', 'bar_resources']
+- '"Creator" not in tags.keys()'
+- tags["Creator"] != "jmarshall"
+- '"peanutbutter" not in tags.keys()'
+- tags["peanutbutter"] != "jelly"
 - location not in ['southcentralus', 'westus']
 fail_on_template_errors: false
 hostvar_expressions:

@@ -54,7 +54,8 @@ INI_TEST_VARS = {
     },
     'azure_rm': {
         'use_private_ip': True,
-        'resource_groups': 'foo_resources,bar_resources'
+        'resource_groups': 'foo_resources,bar_resources',
+        'tags': 'Creator:jmarshall, peanutbutter:jelly'
     },
     'satellite6': {
         'satellite6_group_patterns': 'foo_group_patterns',
