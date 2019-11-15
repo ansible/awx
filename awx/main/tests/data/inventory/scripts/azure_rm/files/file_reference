@@ -7,4 +7,5 @@ locations = southcentralus,westus
 base_source_var = value_of_var
 use_private_ip = True
 resource_groups = foo_resources,bar_resources
+tags = Creator:jmarshall, peanutbutter:jelly
 
