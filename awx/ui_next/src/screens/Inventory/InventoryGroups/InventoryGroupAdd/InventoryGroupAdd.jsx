@@ -1,0 +1,36 @@
+import React, { useState, useEffect } from 'react';
+import { withI18n } from '@lingui/react';
+import { withRouter } from 'react-router-dom';
+import { GroupsAPI } from '@api';
+
+import ContentError from '@components/ContentError';
+import InventoryGroupForm from '../InventoryGroupForm/InventoryGroupForm';
+
+function InventoryGroupsAdd({ history, inventory, setBreadcrumb }) {
+  useEffect(() => setBreadcrumb(inventory), [inventory, setBreadcrumb]);
+  const [error, setError] = useState(null);
+  const handleSubmit = async values => {
+    values.inventory = inventory.id;
+    try {
+      const { data } = await GroupsAPI.create(values);
+      history.push(`/inventories/inventory/${inventory.id}/groups/${data.id}`);
+    } catch (err) {
+      setError(err);
+    }
+  };
+  const handleCancel = () => {
+    history.push(`/inventories/inventory/${inventory.id}/groups`);
+  };
+  if (error) {
+    return <ContentError />;
+  }
+  return (
+    <InventoryGroupForm
+      error={error}
+      handleCancel={handleCancel}
+      handleSubmit={handleSubmit}
+    />
+  );
+}
+export default withI18n()(withRouter(InventoryGroupsAdd));
+export { InventoryGroupsAdd as _InventoryGroupsAdd };
