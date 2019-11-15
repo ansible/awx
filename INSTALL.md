@@ -629,14 +629,3 @@ Added instance awx to tower
 The AWX web server is accessible on the deployment host, using the *host_port* value set in the *inventory* file. The default URL is [http://localhost](http://localhost).
 
 You will prompted with a login dialog. The default administrator username is `admin`, and the password is `password`.
-
-### Maintenance using docker-compose
-
-After the installation, maintenance operations with docker-compose can be done by using the  `docker-compose.yml` file created at the location pointed by `docker_compose_dir`.
-
-Among the possible operations, you may:
-
-- Stop AWX : `docker-compose stop`
-- Upgrade AWX : `docker-compose pull && docker-compose up --force-recreate`
-
-See the [docker-compose documentation](https://docs.docker.com/compose/) for details.
