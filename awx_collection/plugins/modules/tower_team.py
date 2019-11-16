@@ -57,7 +57,7 @@ EXAMPLES = '''
     tower_config_file: "~/tower_cli.cfg"
 '''
 
-from ..module_utils.tower_api import TowerAPIModule
+from ..module_utils.tower_api import TowerModule
 
 
 def main():
@@ -71,7 +71,7 @@ def main():
     )
 
     # Create a module for ourselves
-    module = TowerAPIModule(argument_spec=argument_spec, supports_check_mode=True)
+    module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
 
     # Extract our parameters
     name = module.params.get('name')
@@ -104,7 +104,9 @@ def main():
         # if the state was present and we couldn't find a team we can build one, the module wikl handle exiting from this
         module.post_endpoint('teams', item_type='team', item_name=name, **{
             'data': {
-                'name': name, 'organization': org_id
+                'name': name,
+                'description': description,
+                'organization': org_id
             }
         })
     else:

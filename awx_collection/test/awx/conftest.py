@@ -47,7 +47,12 @@ def run_module(request):
         def new_request(self, method, url, **kwargs):
             kwargs_copy = kwargs.copy()
             if 'data' in kwargs:
+<<<<<<< HEAD
                 kwargs_copy['data'] = json.loads(kwargs['data'])
+=======
+                if not isinstance(kwargs['data'], dict):
+                    kwargs_copy['data'] = json.loads(kwargs['data'])
+>>>>>>> hook in tests fully and return value changes
             if 'params' in kwargs and method == 'GET':
                 # query params for GET are handled a bit differently by
                 # tower-cli and python requests as opposed to REST framework APIRequestFactory
@@ -79,6 +84,10 @@ def run_module(request):
 
             return resp
 
+        def new_open(self, method, url, **kwargs):
+            r = new_request(self, method, url, **kwargs)
+            return mock.MagicMock(read=mock.MagicMock(return_value=r._content), status=r.status_code)
+
         stdout_buffer = io.StringIO()
         # Requies specific PYTHONPATH, see docs
         # Note that a proper Ansiballz explosion of the modules will have an import path like:
@@ -96,13 +105,14 @@ def run_module(request):
 
         with mock.patch.object(resource_module.TowerModule, '_load_params', new=mock_load_params):
             # Call the test utility (like a mock server) instead of issuing HTTP requests
-            with mock.patch('tower_cli.api.Session.request', new=new_request):
-                # Ansible modules return data to the mothership over stdout
-                with redirect_stdout(stdout_buffer):
-                    try:
-                        resource_module.main()
-                    except SystemExit:
-                        pass  # A system exit indicates successful execution
+            with mock.patch('ansible.module_utils.urls.Request.open', new=new_open):
+                with mock.patch('tower_cli.api.Session.request', new=new_request):
+                    # Ansible modules return data to the mothership over stdout
+                    with redirect_stdout(stdout_buffer):
+                        try:
+                            resource_module.main()
+                        except SystemExit:
+                            pass  # A system exit indicates successful execution
 
         module_stdout = stdout_buffer.getvalue().strip()
         result = json.loads(module_stdout)

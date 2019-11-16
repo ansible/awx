@@ -16,7 +16,7 @@ from os.path import isfile
 from os import access, R_OK
 
 
-class TowerAPIModule(AnsibleModule):
+class TowerModule(AnsibleModule):
     url = None
     honorred_settings = ['host', 'username', 'password', 'verify_ssl', 'oauth_token']
     host = '127.0.0.1'
@@ -42,7 +42,7 @@ class TowerAPIModule(AnsibleModule):
         args.update(argument_spec)
         kwargs['supports_check_mode'] = True
 
-        super(TowerAPIModule, self).__init__(argument_spec=args, **kwargs)
+        super(TowerModule, self).__init__(argument_spec=args, **kwargs)
 
         # If we have a tower config, load it
         if self.params.get('tower_config_file'):
@@ -109,6 +109,7 @@ class TowerAPIModule(AnsibleModule):
         response = self.make_request('POST', endpoint, **kwargs)
         if response['status_code'] == 201:
             self.json_output['changed'] = True
+            self.json_output['id'] = response['json']['id']
             self.exit_json(**self.json_output)
         else:
             if 'json' in result and '__all__' in result['json']:
@@ -194,7 +195,7 @@ class TowerAPIModule(AnsibleModule):
             data = dumps(kwargs.get('data', {}))
 
         try:
-            response = self.session.open(method, self.url.geturl(), headers=headers, validate_certs=self.verify_ssl, follow_redirects=True, data=data, )
+            response = self.session.open(method, self.url.geturl(), headers=headers, validate_certs=self.verify_ssl, follow_redirects=True, data=data)
             self.url = self.url._replace(query=None)
         except(SSLValidationError) as ssl_err:
             self.fail_json(msg="Could not establish a secure connection to your host {0}.".format(self.url.netloc))
@@ -249,7 +250,7 @@ class TowerAPIModule(AnsibleModule):
             except(Exception) as e:
                 self.fail_json(msg="Failed to parse the response json: {0}".format(e))
 
-        return { 'status_code': response.status, 'json': response_json }
+        return {'status_code': response.status, 'json': response_json}
 
     def authenticate(self, **kwargs):
         if self.username and self.password:
@@ -302,13 +303,16 @@ class TowerAPIModule(AnsibleModule):
                     return response
                 elif response['status_code'] == 200:
                     existing_return['changed'] = True
+                    existing_return['id'] = response['json'].get('id')
                     self.exit_json(**existing_return)
                 elif 'json' in response and '__all__' in response['json']:
                     self.fail_json(msg=response['json']['__all__'])
                 else:
                     self.fail_json({ 'msg': "Unable to update object, see response", 'response': response })
 
-        # Since we made it here, we don't need to update
+        # Since we made it here, we don't need to update, status ok
+        existing_return['changed'] = False
+        existing_return['id'] = existing_item.get('id')
         self.exit_json(**existing_return)
 
     def logout(self):
