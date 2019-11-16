@@ -2456,12 +2456,18 @@ class CredentialTypeSerializer(BaseSerializer):
             raise PermissionDenied(
                 detail=_("Modifications not allowed for managed credential types")
             )
+
+        old_inputs = {}
+        if self.instance:
+            old_inputs = copy.deepcopy(self.instance.inputs)
+
+        ret = super(CredentialTypeSerializer, self).validate(attrs)
+
         if self.instance and self.instance.credentials.exists():
-            if 'inputs' in attrs and attrs['inputs'] != self.instance.inputs:
+            if 'inputs' in attrs and old_inputs != self.instance.inputs:
                 raise PermissionDenied(
                     detail= _("Modifications to inputs are not allowed for credential types that are in use")
                 )
-        ret = super(CredentialTypeSerializer, self).validate(attrs)
 
         if 'kind' in attrs and attrs['kind'] not in ('cloud', 'net'):
             raise serializers.ValidationError({
