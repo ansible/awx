@@ -37,12 +37,12 @@ EXAMPLES = '''
     data: "{{ lookup('file', '/tmp/my_tower.license') }}"
 '''
 
-from ..module_utils.tower_api import TowerAPIModule
+from ..module_utils.tower_api import TowerModule
 
 
 def main():
 
-    module = TowerAPIModule(
+    module = TowerModule(
         argument_spec=dict(
             data=dict(type='dict', required=True),
             eula_accepted=dict(type='bool', required=True),

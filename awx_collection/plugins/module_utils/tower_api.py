@@ -28,7 +28,7 @@ class TowerModule(AnsibleModule):
     session = None
     cookie_jar = CookieJar()
     authenticated = False
-    json_output = { 'changed': False }
+    json_output = {'changed': False}
 
     def __init__(self, argument_spec, **kwargs):
         args = dict(
@@ -52,14 +52,14 @@ class TowerModule(AnsibleModule):
         if self.params.get('tower_host'):
             self.host = self.params.get('tower_host')
         if self.params.get('tower_username'):
-             self.username = self.params.get('tower_username')
+            self.username = self.params.get('tower_username')
         if self.params.get('tower_password'):
-             self.password = self.params.get('tower_password')
-        if self.params.get('validate_certs') != None:
-             self.verify_ssl = self.params.get('validate_certs')
+            self.password = self.params.get('tower_password')
+        if self.params.get('validate_certs') is not None:
+            self.verify_ssl = self.params.get('validate_certs')
         if self.params.get('tower_oauthtoken'):
-             self.oauth_token = self.params.get('tower_oauthtoken')
-            
+            self.oauth_token = self.params.get('tower_oauthtoken')
+
         # Perform some basic validation
         if not re.match('^https{0,1}://', self.host):
             self.host = "https://{0}".format(self.host)
@@ -68,7 +68,7 @@ class TowerModule(AnsibleModule):
         try:
             self.url = urlparse(self.host)
         except Exception as e:
-            self.fail_json(msg="Unable to parse tower_host as a URL ({0})".format(self.host))
+            self.fail_json(msg="Unable to parse tower_host as a URL ({1}): {0}".format(self.host, e))
 
         # Try to resolve the hostname
         hostname = self.url.netloc.split(':')[0]
@@ -76,7 +76,6 @@ class TowerModule(AnsibleModule):
             gethostbyname(hostname)
         except Exception as e:
             self.fail_json(msg="Unable to resolve tower_host ({1}): {0}".format(hostname, e))
-
 
         self.session = Request(cookies=self.cookie_jar)
 
@@ -95,10 +94,10 @@ class TowerModule(AnsibleModule):
             try:
                 setattr(self, honorred_setting, config.get('general', honorred_setting))
             except (NoSectionError) as nse:
-                self.fail_json(msg="The specified config file does not contain a general section")
-            except (NoOptionError) as noe:
+                self.fail_json(msg="The specified config file does not contain a general section ({0})".format(nse))
+            except (NoOptionError):
                 pass
-      
+
     def get_endpoint(self, endpoint, *args, **kwargs):
         return self.make_request('GET', endpoint, **kwargs)
 
@@ -112,11 +111,10 @@ class TowerModule(AnsibleModule):
             self.json_output['id'] = response['json']['id']
             self.exit_json(**self.json_output)
         else:
-            if 'json' in result and '__all__' in result['json']:
-                self.fail_json(msg="Unable to create {0} {1}: {2}".format(item_type, item_name, result['json']['__all__'][0]))
+            if 'json' in response and '__all__' in response['json']:
+                self.fail_json(msg="Unable to create {0} {1}: {2}".format(item_type, item_name, response['json']['__all__'][0]))
             else:
-                self.fail_json(msg="Unable to create {0} {1}: {2}".format(item_type, item_name, result['status_code']))
-
+                self.fail_json(msg="Unable to create {0} {1}: {2}".format(item_type, item_name, response['status_code']))
 
     def delete_endpoint(self, endpoint, handle_return=True, item_type='item', item_name='', *args, **kwargs):
         response = self.make_request('DELETE', endpoint, **kwargs)
@@ -127,7 +125,6 @@ class TowerModule(AnsibleModule):
             self.exit_json(**self.json_output)
         else:
             self.fail_json(msg="Unable to delete {0} {1}: {2}".format(item_type, item_name, response['status_code']))
-
 
     def get_all_endpoint(self, endpoint, *args, **kwargs):
         raise Exception("This is not implemented")
@@ -142,14 +139,14 @@ class TowerModule(AnsibleModule):
 
         if response['json']['count'] == 0:
             return None
-        elif response['json']['count'] >1:
+        elif response['json']['count'] > 1:
             self.fail_json(msg="An unexpected number of items was returned from the API ({0})".format(response['json']['count']))
 
         return response['json']['results'][0]
 
     def resolve_name_to_id(self, endpoint, name_or_id):
         # Try to resolve the object by name
-        response = self.get_endpoint(endpoint, **{ 'data': { 'name': name_or_id } })
+        response = self.get_endpoint(endpoint, **{'data': {'name': name_or_id}})
         if response['json']['count'] == 1:
             return response['json']['results'][0]['id']
         elif response['json']['count'] == 0:
@@ -161,7 +158,7 @@ class TowerModule(AnsibleModule):
         # Incase someone is calling us directly; make sure we were given a method, lets not just assume a GET
         if not method:
             raise Exception("The HTTP method must be defined")
-  
+
         # Make sure we start with /api/vX
         if not endpoint.startswith("/"):
             endpoint = "/{0}".format(endpoint)
@@ -169,7 +166,7 @@ class TowerModule(AnsibleModule):
             endpoint = "/api/v2{0}".format(endpoint)
         if not endpoint.endswith('/'):
             endpoint = "{}/".format(endpoint)
-  
+
         # Extract the headers, this will be used in a couple of places
         headers = kwargs.get('headers', {})
 
@@ -184,7 +181,7 @@ class TowerModule(AnsibleModule):
         # Update the URL path with the endpoint
         self.url = self.url._replace(path=endpoint)
 
-        if method in ['POST','PUT','PATCH']:
+        if method in ['POST', 'PUT', 'PATCH']:
             headers.setdefault('Content-Type', 'application/json')
             kwargs['headers'] = headers
         elif kwargs.get('data'):
@@ -198,20 +195,21 @@ class TowerModule(AnsibleModule):
             response = self.session.open(method, self.url.geturl(), headers=headers, validate_certs=self.verify_ssl, follow_redirects=True, data=data)
             self.url = self.url._replace(query=None)
         except(SSLValidationError) as ssl_err:
-            self.fail_json(msg="Could not establish a secure connection to your host {0}.".format(self.url.netloc))
+            self.fail_json(msg="Could not establish a secure connection to your host ({1}): {0}.".format(self.url.netloc, ssl_err))
         except(ConnectionError) as con_err:
-            self.fail_json(msg="There was a network error of some kind trying to connect to your host {0}.".format(self.url.netloc))
+            self.fail_json(msg="There was a network error of some kind trying to connect to your host ({1}): {0}.".format(self.url.netloc, con_err))
         except(HTTPError) as he:
             # Sanity check: Did the server send back some kind of internal error?
             if he.code >= 500:
-                self.fail_json(msg='The host sent back a server error: {0}. Please check the logs and try again later'.format(self.url.path))
+                self.fail_json(msg='The host sent back a server error ({1}): {0}. Please check the logs and try again later'.format(self.url.path, he))
             # Sanity check: Did we fail to authenticate properly?  If so, fail out now; this is always a failure.
             elif he.code == 401:
                 self.fail_json(msg='Invalid Tower authentication credentials for {0} (HTTP 401).'.format(self.url.path))
             # Sanity check: Did we get a forbidden response, which means that the user isn't allowed to do this? Report that.
             elif he.code == 403:
                 self.fail_json(msg="You don't have permission to {1} to {0} (HTTP 403).".format(self.url.path, method))
-            # Sanity check: Did we get a 404 response?  Requests with primary keys will return a 404 if there is no response, and we want to consistently trap these.
+            # Sanity check: Did we get a 404 response?
+            # Requests with primary keys will return a 404 if there is no response, and we want to consistently trap these.
             elif he.code == 404:
                 self.fail_json(msg='The requested object could not be found at {0}.'.format(self.url.path))
             # Sanity check: Did we get a 405 response?
@@ -224,11 +222,12 @@ class TowerModule(AnsibleModule):
                 # We are going to return a 400 so the module can decide what to do with it
                 page_data = he.read()
                 try:
-                    return { 'status_code': he.code, 'json': loads(page_data) }
+                    return {'status_code': he.code, 'json': loads(page_data)}
                 # JSONDecodeError only available on Python 3.5+
                 except ValueError:
-                    return { 'status_code': he.code, 'text': page_data }
-            #    self.fail_json(msg='The Tower server claims it was sent a bad request.\n{0} {1}\nstatus code: {2}\n\nResponse: {3}'.format(method, self.url.path, he.code, he.read()))
+                    return {'status_code': he.code, 'text': page_data}
+                # self.fail_json(msg='The Tower server claims it was sent a bad request.\n{0} {1}\nstatus code: {2}\n\nResponse: {3}'.format(
+                #     method, self.url.path, he.code, he.read()))
             elif he.code == 204 and method == 'DELETE':
                 # a 204 is a normal response for a delete function
                 pass
@@ -236,7 +235,7 @@ class TowerModule(AnsibleModule):
                 self.fail_json(msg="Unexpected return code when calling {0}: {1}".format(self.url.geturl(), he))
         except(Exception) as e:
             self.fail_json(msg="There was an unknown error when trying to connect to {2}: {0} {1}".format(type(e).__name__, e, self.url.geturl()))
-  
+
         response_body = ''
         try:
             response_body = response.read()
@@ -265,17 +264,18 @@ class TowerModule(AnsibleModule):
             api_token_url = (self.url._replace(path='/api/v2/tokens/')).geturl()
 
             try:
-                response = self.session.open('POST', api_token_url,
-                               validate_certs=self.verify_ssl, follow_redirects=True,
-                               force_basic_auth=True, url_username=self.username, url_password=self.password,
-                               data=dumps(login_data), headers={ 'Content-Type': 'application/json' }
-                           )
+                response = self.session.open(
+                    'POST', api_token_url,
+                    validate_certs=self.verify_ssl, follow_redirects=True,
+                    force_basic_auth=True, url_username=self.username, url_password=self.password,
+                    data=dumps(login_data), headers={'Content-Type': 'application/json'}
+                )
             except(Exception) as e:
                 # Sanity check: Did the server send back some kind of internal error?
                 self.fail_json(msg='Failed to get token: {0}'.format(e))
 
             try:
-                response_json =  loads(response.read())
+                response_json = loads(response.read())
                 self.oauth_token_id = response_json['id']
                 self.oauth_token = response_json['token']
             except(Exception) as e:
@@ -289,16 +289,16 @@ class TowerModule(AnsibleModule):
         if self.check_mode:
             try:
                 result = self.get_endpoint('ping')
-                self.exit_json(**{changed: True, tower_version: '{0}'.format(result['json']['version'])})
+                self.exit_json(**{'changed': True, 'tower_version': '{0}'.format(result['json']['version'])})
             except(Exception) as excinfo:
                 self.fail_json(changed=False, msg='Failed check mode: {0}'.format(excinfo))
 
     def update_if_needed(self, existing_item, new_item, handle_response=True, **existing_return):
         for field in new_item:
             # If the two items don't match and we are not comparing '' to None
-            if existing_item.get(field, None) != new_item.get(field, None) and not (existing_item.get(field, None) == None and new_item.get(field, None) == ''):
-                #something dosent match so lets do it
-                response = self.patch_endpoint(existing_item['url'], **{ 'data': new_item })
+            if existing_item.get(field, None) != new_item.get(field, None) and not (existing_item.get(field, None) is None and new_item.get(field, None) == ''):
+                # something dosent match so lets do it
+                response = self.patch_endpoint(existing_item['url'], **{'data': new_item})
                 if not handle_response:
                     return response
                 elif response['status_code'] == 200:
@@ -308,7 +308,7 @@ class TowerModule(AnsibleModule):
                 elif 'json' in response and '__all__' in response['json']:
                     self.fail_json(msg=response['json']['__all__'])
                 else:
-                    self.fail_json({ 'msg': "Unable to update object, see response", 'response': response })
+                    self.fail_json({'msg': "Unable to update object, see response", 'response': response})
 
         # Since we made it here, we don't need to update, status ok
         existing_return['changed'] = False
@@ -318,7 +318,7 @@ class TowerModule(AnsibleModule):
     def logout(self):
         if self.oauth_token_id:
             try:
-                response = self.delete_endpoint('tokens/{0}/'.format(self.oauth_token_id), handle_return=False)
+                self.delete_endpoint('tokens/{0}/'.format(self.oauth_token_id), handle_return=False)
                 self.authenticated = False
             except Exception as e:
                 self.fail_json(msg="Failed to logut: {0}".format(e))
