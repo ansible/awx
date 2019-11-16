@@ -14,3 +14,8 @@ readme: README.md
 repository: https://github.com/ansible/awx
 tags: []
 version: {{ collection_version }}
+build_ignore:
+- setup.cfg
+- galaxy.yml.j2
+- template_galaxy.yml
+- '*.tar.gz'
