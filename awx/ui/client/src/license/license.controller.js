@@ -187,10 +187,6 @@ export default
                 payload = $scope.newLicense.file;
             } else if ($scope.selectedLicense.fullLicense) {
                 payload = $scope.selectedLicense.fullLicense;
-                if ($scope.rhCreds.username && $scope.rhCreds.password) {
-                    payload.rh_password = $scope.rhCreds.password;
-                    payload.rh_username = $scope.rhCreds.username;
-                }
             }
             
             CheckLicense.post(payload, $scope.newLicense.eula)
