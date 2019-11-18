@@ -49,5 +49,5 @@ tacacs_plus==1.0
 twilio==6.10.4
 uWSGI==2.0.17
 uwsgitop==0.10.0
-pip==9.0.1
-setuptools==36.0.1
+pip==18.1
+setuptools==40.6.3
