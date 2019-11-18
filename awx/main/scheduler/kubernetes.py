@@ -173,7 +173,7 @@ def generate_tmp_kube_config(credential, namespace):
         "current-context": host_input
     }
 
-    if credential.get_input('verify_ssl'):
+    if credential.get_input('verify_ssl') and 'ssl_ca_cert' in credential.inputs:
         config["clusters"][0]["cluster"]["certificate-authority-data"] = b64encode(
             credential.get_input('ssl_ca_cert').encode() # encode to bytes
         ).decode() # decode the base64 data into a str
