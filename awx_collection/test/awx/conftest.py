@@ -1,3 +1,6 @@
+from __future__ import (absolute_import, division, print_function)
+__metaclass__ = type
+
 import io
 import json
 import datetime
@@ -60,10 +63,10 @@ def run_module():
         # Note that a proper Ansiballz explosion of the modules will have an import path like:
         # ansible_collections.awx.awx.plugins.modules.{}
         # We should consider supporting that in the future
-        resource_module = importlib.import_module('plugins.modules.{}'.format(module_name))
+        resource_module = importlib.import_module('plugins.modules.{0}'.format(module_name))
 
         if not isinstance(module_params, dict):
-            raise RuntimeError('Module params must be dict, got {}'.format(type(module_params)))
+            raise RuntimeError('Module params must be dict, got {0}'.format(type(module_params)))
 
         # Ansible params can be passed as an invocation argument or over stdin
         # this short circuits within the AnsibleModule interface

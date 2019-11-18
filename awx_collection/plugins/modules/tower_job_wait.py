@@ -87,7 +87,9 @@ status:
 
 
 from ..module_utils.ansible_tower import TowerModule, tower_auth_config, tower_check_mode
+from ansible.module_utils.six import PY2
 from ansible.module_utils.six.moves import cStringIO as StringIO
+from codecs import getwriter
 
 
 try:
@@ -123,7 +125,10 @@ def main():
 
         # tower-cli gets very noisy when monitoring.
         # We pass in our our outfile to suppress the out during our monitor call.
-        outfile = StringIO()
+        if PY2:
+            outfile = getwriter('utf-8')(StringIO())
+        else:
+            outfile = StringIO()
         params['outfile'] = outfile
 
         job_id = params.get('job_id')
@@ -136,6 +141,12 @@ def main():
             json_output['timeout'] = True
         except exc.NotFound as excinfo:
             fail_json = dict(msg='Unable to wait, no job_id {0} found: {1}'.format(job_id, excinfo), changed=False)
+        except exc.JobFailure as excinfo:
+            fail_json = dict(msg='Job with id={0} failed, error: {1}'.format(job_id, excinfo))
+            fail_json['success'] = False
+            result = job.get(job_id)
+            for k in ('id', 'status', 'elapsed', 'started', 'finished'):
+                fail_json[k] = result.get(k)
         except (exc.ConnectionError, exc.BadRequest, exc.AuthError) as excinfo:
             fail_json = dict(msg='Unable to wait for job: {0}'.format(excinfo), changed=False)
 

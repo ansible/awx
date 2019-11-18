@@ -1,6 +1,9 @@
+from __future__ import (absolute_import, division, print_function)
+__metaclass__ = type
+
 import pytest
 
-from awx.main.models import JobTemplate
+from awx.main.models import JobTemplate, Job
 
 
 @pytest.mark.django_db
@@ -29,6 +32,27 @@ def test_create_job_template(run_module, admin_user, project, inventory):
 
     assert jt.project_id == project.id
     assert jt.inventory_id == inventory.id
+
+
+@pytest.mark.django_db
+def test_job_launch_with_prompting(run_module, admin_user, project, inventory, machine_credential):
+    JobTemplate.objects.create(
+        name='foo',
+        project=project,
+        playbook='helloworld.yml',
+        ask_inventory_on_launch=True,
+        ask_credential_on_launch=True
+    )
+    result = run_module('tower_job_launch', dict(
+        job_template='foo',
+        inventory=inventory.name,
+        credential=machine_credential.name
+    ), admin_user)
+    assert result.pop('changed', None), result
+
+    job = Job.objects.get(id=result['id'])
+    assert job.inventory == inventory
+    assert [cred.id for cred in job.credentials.all()] == [machine_credential.id]
 
 
 @pytest.mark.django_db
