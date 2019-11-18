@@ -1,6 +1,7 @@
 adal==1.2.1               # via msrestazure
 amqp==2.4.2               # via kombu
 ansible-runner==1.4.4
+ansiconv==1.0.0
 appdirs==1.4.2
 argparse==1.4.0           # via uwsgitop
 asgi-amqp==1.1.3
@@ -33,6 +34,7 @@ django-jsonfield==1.2.0
 django-oauth-toolkit==1.1.3
 django-pglocks==1.0.2
 django-polymorphic==2.0.2
+django-qsstats-magic==1.1.0
 django-radius==1.3.3
 django-solo==1.1.3
 django-split-settings==0.3.0
