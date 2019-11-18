@@ -20,10 +20,7 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
 
-import PaginatedDataList from '../PaginatedDataList';
-import DataListToolbar from '../DataListToolbar';
-import CheckboxListItem from '../CheckboxListItem';
-import SelectedList from '../SelectedList';
+import SelectList from './shared/SelectList';
 import { ChipGroup, Chip } from '../Chip';
 import { QSConfig } from '@types';
 
@@ -227,34 +224,17 @@ class Lookup extends React.Component {
             </Button>,
           ]}
         >
-          {selectedItems.length > 0 && (
-            <SelectedList
-              label={i18n._(t`Selected`)}
-              selected={selectedItems}
-              showOverflowAfter={5}
-              onRemove={this.removeItem}
-              isReadOnly={!canDelete}
-            />
-          )}
-          <PaginatedDataList
-            items={items}
-            itemCount={count}
-            pluralizedItemName={lookupHeader}
+          <SelectList
+            value={selectedItems}
+            onChange={newVal => this.setState({ selectedItems: newVal })}
+            options={items}
+            optionCount={count}
+            columns={columns}
+            multiple={multiple}
+            header={lookupHeader}
+            name={name}
             qsConfig={qsConfig}
-            toolbarColumns={columns}
-            renderItem={item => (
-              <CheckboxListItem
-                key={item.id}
-                itemId={item.id}
-                name={multiple ? item.name : name}
-                label={item.name}
-                isSelected={selectedItems.some(i => i.id === item.id)}
-                onSelect={() => this.addItem(item)}
-                isRadio={!multiple}
-              />
-            )}
-            renderToolbar={props => <DataListToolbar {...props} fillWidth />}
-            showPageSizeOptions={false}
+            readOnly={!canDelete}
           />
         </Modal>
       </Fragment>

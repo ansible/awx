@@ -27,7 +27,7 @@ import VerticalSeperator from '../VerticalSeparator';
 import DataListToolbar from '../DataListToolbar';
 import CheckboxListItem from '../CheckboxListItem';
 import SelectedList from '../SelectedList';
-import { ChipGroup, Chip, CredentialChip } from '../Chip';
+import { ChipGroup, CredentialChip } from '../Chip';
 import { QSConfig } from '@types';
 
 const SearchButton = styled(Button)`
@@ -57,7 +57,7 @@ class CategoryLookup extends React.Component {
   constructor(props) {
     super(props);
 
-    this.assertCorrectValueType();
+    // this.assertCorrectValueType();
     let selectedItems = [];
     if (props.value) {
       selectedItems = props.multiple ? [...props.value] : [props.value];
@@ -74,22 +74,22 @@ class CategoryLookup extends React.Component {
     this.clearQSParams = this.clearQSParams.bind(this);
   }
 
-  assertCorrectValueType() {
-    const { multiple, value, selectCategoryOptions } = this.props;
-    if (selectCategoryOptions) {
-      return;
-    }
-    if (!multiple && Array.isArray(value)) {
-      throw new Error(
-        'CategoryLookup value must not be an array unless `multiple` is set'
-      );
-    }
-    if (multiple && !Array.isArray(value)) {
-      throw new Error(
-        'CategoryLookup value must be an array if `multiple` is set'
-      );
-    }
-  }
+  // assertCorrectValueType() {
+  //   const { multiple, value, selectCategoryOptions } = this.props;
+  //   if (selectCategoryOptions) {
+  //     return;
+  //   }
+  //   if (!multiple && Array.isArray(value)) {
+  //     throw new Error(
+  //       'CategoryLookup value must not be an array unless `multiple` is set'
+  //     );
+  //   }
+  //   if (multiple && !Array.isArray(value)) {
+  //     throw new Error(
+  //       'CategoryLookup value must be an array if `multiple` is set'
+  //     );
+  //   }
+  // }
 
   removeItem(row) {
     const { selectedItems } = this.state;
@@ -193,32 +193,6 @@ class CategoryLookup extends React.Component {
     } = this.props;
     const header = lookupHeader || i18n._(t`Items`);
     const canDelete = !required || (multiple && value.length > 1);
-    const chips = () => {
-      return selectCategoryOptions && selectCategoryOptions.length > 0 ? (
-        <ChipGroup>
-          {(multiple ? value : [value]).map(chip => (
-            <CredentialChip
-              key={chip.id}
-              onClick={() => this.removeItemAndSave(chip)}
-              isReadOnly={!canDelete}
-              credential={chip}
-            />
-          ))}
-        </ChipGroup>
-      ) : (
-        <ChipGroup>
-          {(multiple ? value : [value]).map(chip => (
-            <Chip
-              key={chip.id}
-              onClick={() => this.removeItemAndSave(chip)}
-              isReadOnly={!canDelete}
-            >
-              {chip.name}
-            </Chip>
-          ))}
-        </ChipGroup>
-      );
-    };
     return (
       <Fragment>
         <InputGroup onBlur={onBlur}>
@@ -231,7 +205,16 @@ class CategoryLookup extends React.Component {
             <SearchIcon />
           </SearchButton>
           <ChipHolder className="pf-c-form-control">
-            {value ? chips(value) : null}
+            <ChipGroup>
+              {(multiple ? value : [value]).map(chip => (
+                <CredentialChip
+                  key={chip.id}
+                  onClick={() => this.removeItemAndSave(chip)}
+                  isReadOnly={!canDelete}
+                  credential={chip}
+                />
+              ))}
+            </ChipGroup>
           </ChipHolder>
         </InputGroup>
         <Modal

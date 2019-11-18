@@ -7,8 +7,8 @@ import { FormGroup, Tooltip } from '@patternfly/react-core';
 import { QuestionCircleIcon as PFQuestionCircleIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
 import { InstanceGroupsAPI } from '@api';
-import Lookup from '@components/Lookup';
 import { getQSConfig, parseQueryString } from '@util/qs';
+import Lookup from './NewLookup';
 
 const QuestionCircleIcon = styled(PFQuestionCircleIcon)`
   margin-left: 10px;
