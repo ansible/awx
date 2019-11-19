@@ -1,3 +1,5 @@
+
+import os
 import json
 import logging
 
@@ -10,6 +12,8 @@ from channels.layers import get_channel_layer
 
 from asgiref.sync import async_to_sync
 
+from awx.main.channels import wrap_broadcast_msg, BROADCAST_GROUP
+
 
 logger = logging.getLogger('awx.main.consumers')
 XRF_KEY = '_auth_user_xrf'
@@ -18,7 +22,15 @@ XRF_KEY = '_auth_user_xrf'
 class EventConsumer(JsonWebsocketConsumer):
     def connect(self):
         user = self.scope['user']
-        if user:
+        secret = None
+        for k, v in self.scope['headers']:
+            if k.decode("utf-8") == 'secret':
+                secret = v.decode("utf-8")
+                break
+        if secret:
+            self.accept()
+            async_to_sync(self.channel_layer.group_add)(BROADCAST_GROUP, self.channel_name)
+        elif user:
             self.accept()
             self.send_json({"accept": True, "user": user.id})
             # store the valid CSRF token from the cookie so we can compare it later
@@ -28,6 +40,8 @@ class EventConsumer(JsonWebsocketConsumer):
                 self.scope['session'][XRF_KEY] = cookie_token
         else:
             logger.error("Request user is not authenticated to use websocket.")
+            # TODO: Carry over from channels 1 implementation
+            # We should never .accept() the client and close without sending a close message
             self.accept()
             self.send({"close": True})
             self.close()
@@ -67,6 +81,10 @@ class EventConsumer(JsonWebsocketConsumer):
                             self.channel_name
                         )
                 else:
+                    if group_name == BROADCAST_GROUP:
+                        logger.warn("Non-priveleged client asked to join broadcast group!")
+                        return
+
                     async_to_sync(self.channel_layer.group_add)(
                         group_name,
                         self.channel_name
@@ -78,14 +96,26 @@ class EventConsumer(JsonWebsocketConsumer):
 
 
 def emit_channel_notification(group, payload):
-    channel_layer = get_channel_layer()
     try:
-        async_to_sync(channel_layer.group_send)(
-            group,
-            {
-                "type": "internal.message",
-                "text": json.dumps(payload, cls=DjangoJSONEncoder)
-            },
-        )
+        payload = json.dumps(payload, cls=DjangoJSONEncoder)
     except ValueError:
         logger.error("Invalid payload emitting channel {} on topic: {}".format(group, payload))
+        return
+
+    channel_layer = get_channel_layer()
+
+    async_to_sync(channel_layer.group_send)(
+        BROADCAST_GROUP,
+        {
+            "type": "internal.message",
+            "text": wrap_broadcast_msg(group, payload),
+        },
+    )
+
+    async_to_sync(channel_layer.group_send)(
+        group,
+        {
+            "type": "internal.message",
+            "text": payload
+        },
+    )

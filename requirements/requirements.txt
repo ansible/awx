@@ -130,6 +130,7 @@ uwsgi==2.0.17
 uwsgitop==0.10.0
 vine==1.3.0               # via amqp, celery
 websocket-client==0.56.0  # via kubernetes, slackclient
+websockets==8.1
 xmlsec==1.3.3             # via python3-saml
 zope.interface==4.6.0     # via twisted
 

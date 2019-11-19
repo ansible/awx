@@ -49,10 +49,21 @@ if "pytest" in sys.modules:
         }
     }
 
-# Redis Sentinel configuration.
-BROKER_URL = "sentinel://sentinel:26379"
-BROKER_TRANSPORT_OPTIONS = {'master_name': 'mymaster'}
+# Use Redis as the message bus for now
+# Default to "just works" for single tower docker
+BROKER_URL = os.environ.get('BROKER_URL', "redis://redis_1:6379")
 
+WEBSOCKETS_PORT = "8013"
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "awx.main.channels.RedisGroupBroadcastChannelLayer",
+        "CONFIG": {
+            "hosts": [(os.environ.get('REDIS_HOST', 'redis_1'),
+                       int(os.environ.get('REDIS_PORT', 6379)))],
+        },
+    },
+}
 
 # Absolute filesystem path to the directory to host projects (with playbooks).
 # This directory should NOT be web-accessible.

@@ -73,6 +73,7 @@ class Command(BaseCommand):
         sched_file = '/var/lib/awx/beat.db'
         app = Celery()
         app.conf.BROKER_URL = settings.BROKER_URL
+        app.conf.BROKER_TRANSPORT_OPTIONS = settings.BROKER_TRANSPORT_OPTIONS
         app.conf.CELERY_TASK_RESULT_EXPIRES = False
 
         # celery in py3 seems to have a bug where the celerybeat schedule
@@ -127,7 +128,7 @@ class Command(BaseCommand):
         # in cpython itself:
         # https://bugs.python.org/issue37429
         AWXProxyHandler.disable()
-        with Connection(settings.BROKER_URL, **settings.BROKER_TRANSPORT_OPTIONS) as conn:
+        with Connection(settings.BROKER_URL, transport_options=settings.BROKER_TRANSPORT_OPTIONS) as conn:
             try:
                 bcast = 'tower_broadcast_all'
                 queues = [

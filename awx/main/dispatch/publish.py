@@ -85,7 +85,7 @@ class task:
                 if callable(queue):
                     queue = queue()
                 if not settings.IS_TESTING(sys.argv):
-                    with Connection(settings.BROKER_URL, **settings.BROKER_TRANSPORT_OPTIONS) as conn:
+                    with Connection(settings.BROKER_URL, transport_options=settings.BROKER_TRANSPORT_OPTIONS) as conn:
                         exchange = Exchange(queue, type=exchange_type or 'direct')
                         producer = Producer(conn)
                         logger.debug('publish {}({}, queue={})'.format(

@@ -25,7 +25,6 @@ services:
       - postgres
       - memcached
       - redis
-      - sentinel
     #   - sync
     # volumes_from:
     #   - sync
@@ -55,13 +54,6 @@ services:
   redis:
     image: redis:latest
     container_name: tools_redis_1
-    #command: redis-server /usr/local/etc/redis/redis.conf
     ports:
       - "6379:6379"
-    #volumes:
-    #  - "./redis/redis.conf:/usr/local/etc/redis/redis.conf"
-  sentinel:
-    image: bitnami/redis-sentinel:latest
-    container_name: tools_sentinel_1
-    ports:
-      - "26379:26379"
+

@@ -415,8 +415,8 @@ os.environ.setdefault('DJANGO_LIVE_TEST_SERVER_ADDRESS', 'localhost:9013-9199')
 
 BROKER_DURABILITY = True
 BROKER_POOL_LIMIT = None
-BROKER_URL = 'sentinel://localhost:26379;'
-BROKER_TRANSPORT_OPTIONS = {'master_name': 'mymaster'}
+BROKER_URL = 'redis://localhost:6379;'
+BROKER_TRANSPORT_OPTIONS = {}
 CELERY_DEFAULT_QUEUE = 'awx_private_queue'
 CELERYBEAT_SCHEDULE = {
     'tower_scheduler': {
@@ -929,8 +929,6 @@ ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC = False
 # Internal API URL for use by inventory scripts and callback plugin.
 INTERNAL_API_URL = 'http://127.0.0.1:%s' % DEVSERVER_DEFAULT_PORT
 
-PERSISTENT_CALLBACK_MESSAGES = True
-USE_CALLBACK_QUEUE = True
 CALLBACK_QUEUE = "callback_tasks"
 
 SCHEDULER_QUEUE = "scheduler"
@@ -967,11 +965,13 @@ CHANNEL_LAYER_RECEIVE_MAX_RETRY = 10
 
 ASGI_APPLICATION = "awx.main.routing.application"
 
+WEBSOCKETS_PORT = "80"
+
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "BACKEND": "awx.main.channels.RedisGroupBroadcastChannelLayer",
         "CONFIG": {
-            "hosts": [("redis", 6379)],
+            "hosts": [("localhost", 6379)],
         },
     },
 }

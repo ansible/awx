@@ -39,7 +39,7 @@ class Control(object):
         logger.warn('checking {} {} for {}'.format(self.service, command, self.queuename))
         reply_queue = Queue(name="amq.rabbitmq.reply-to")
         self.result = None
-        with Connection(settings.BROKER_URL, **settings.BROKER_TRANSPORT_OPTIONS) as conn:
+        with Connection(settings.BROKER_URL, transport_options=settings.BROKER_TRANSPORT_OPTIONS) as conn:
             with Consumer(conn, reply_queue, callbacks=[self.process_message], no_ack=True):
                 self.publish({'control': command}, conn, reply_to='amq.rabbitmq.reply-to')
                 try:
@@ -50,7 +50,7 @@ class Control(object):
         return self.result
 
     def control(self, msg, **kwargs):
-        with Connection(settings.BROKER_URL, **settings.BROKER_TRANSPORT_OPTIONS) as conn:
+        with Connection(settings.BROKER_URL, transport_options=settings.BROKER_TRANSPORT_OPTIONS) as conn:
             self.publish(msg, conn)
 
     def process_message(self, body, message):
