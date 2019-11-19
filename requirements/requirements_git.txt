@@ -1,2 +1,0 @@
-git+https://github.com/ansible/ansiconv.git@tower_1.0.0#egg=ansiconv
-git+https://github.com/ansible/django-qsstats-magic.git@py3#egg=django-qsstats-magic

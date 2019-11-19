@@ -1,4 +1,5 @@
 ansible-runner==1.4.4
+ansiconv==1.0.0
 appdirs==1.4.2
 asgi-amqp==1.1.3
 azure-keyvault==1.1.0
@@ -16,6 +17,7 @@ django-jsonfield==1.2.0
 django-oauth-toolkit==1.1.3
 django-polymorphic==2.0.2
 django-pglocks==1.0.2
+django-qsstats-magic==1.1.0
 django-radius==1.3.3
 django-solo==1.1.3
 django-split-settings==0.3.0
