@@ -598,7 +598,7 @@ export default ['i18n', function(i18n) {
                     '<code ng-non-bindable>{{ url }}</code>, or attributes of the job such as ' +
                     '<code ng-non-bindable>{{ job.status }}</code>. You may apply a number of possible ' +
                     'variables in the message. Refer to the ' +
-                    '<a href="https://docs.ansible.com/ansible-tower/latest/html/userguide/notifications.html#create-a-notification-template" ' +
+                    '<a href="https://docs.ansible.com/ansible-tower/latest/html/userguide/notifications.html#create-custom-notifications" ' +
                     'target="_blank">Ansible Tower documentation</a> for more details.'),
                 closeable: false
             },

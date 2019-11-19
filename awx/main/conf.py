@@ -515,6 +515,17 @@ register(
 )
 
 register(
+    'GALAXY_IGNORE_CERTS',
+    field_class=fields.BooleanField,
+    default=False,
+    label=_('Ignore Ansible Galaxy SSL Certificate Verification'),
+    help_text=_('If set to true, certificate validation will not be done when'
+                'installing content from any Galaxy server.'),
+    category=_('Jobs'),
+    category_slug='jobs'
+)
+
+register(
     'STDOUT_MAX_BYTES_DISPLAY',
     field_class=fields.IntegerField,
     min_value=0,
