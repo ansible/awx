@@ -9,6 +9,7 @@ import RoutedTabs from '@components/RoutedTabs';
 import { ResourceAccessList } from '@components/ResourceAccessList';
 import InventoryDetail from './InventoryDetail';
 import InventoryHosts from './InventoryHosts';
+import InventoryHostAdd from './InventoryHostAdd';
 import InventoryGroups from './InventoryGroups';
 import InventoryCompletedJobs from './InventoryCompletedJobs';
 import InventorySources from './InventorySources';
@@ -84,7 +85,10 @@ class Inventory extends Component {
       </CardHeader>
     );
 
-    if (location.pathname.endsWith('edit')) {
+    if (
+      location.pathname.endsWith('edit') ||
+      location.pathname.endsWith('add')
+    ) {
       cardHeader = null;
     }
 
@@ -133,6 +137,11 @@ class Inventory extends Component {
                 key="edit"
                 path="/inventories/inventory/:id/edit"
                 render={() => <InventoryEdit inventory={inventory} />}
+              />,
+              <Route
+                key="host-add"
+                path="/inventories/inventory/:id/hosts/add"
+                render={() => <InventoryHostAdd />}
               />,
               <Route
                 key="access"

@@ -52,6 +52,9 @@ class Inventories extends Component {
         t`Completed Jobs`
       ),
       [`/inventories/${inventoryKind}/${inventory.id}/hosts`]: i18n._(t`Hosts`),
+      [`/inventories/${inventoryKind}/${inventory.id}/hosts/add`]: i18n._(
+        t`Create New Host`
+      ),
       [`/inventories/inventory/${inventory.id}/sources`]: i18n._(t`Sources`),
       [`/inventories/inventory/${inventory.id}/groups`]: i18n._(t`Groups`),
     };

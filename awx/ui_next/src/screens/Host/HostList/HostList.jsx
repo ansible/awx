@@ -35,7 +35,7 @@ class HostsList extends Component {
       itemCount: 0,
       actions: null,
       toggleError: false,
-      toggleLoading: false,
+      toggleLoading: null,
     };
 
     this.handleSelectAll = this.handleSelectAll.bind(this);
@@ -101,7 +101,7 @@ class HostsList extends Component {
 
   async handleHostToggle(hostToToggle) {
     const { hosts } = this.state;
-    this.setState({ toggleLoading: true });
+    this.setState({ toggleLoading: hostToToggle.id });
     try {
       const { data: updatedHost } = await HostsAPI.update(hostToToggle.id, {
         enabled: !hostToToggle.enabled,
@@ -114,7 +114,7 @@ class HostsList extends Component {
     } catch (err) {
       this.setState({ toggleError: true });
     } finally {
-      this.setState({ toggleLoading: false });
+      this.setState({ toggleLoading: null });
     }
   }
 
@@ -237,7 +237,7 @@ class HostsList extends Component {
                   isSelected={selected.some(row => row.id === o.id)}
                   onSelect={() => this.handleSelect(o)}
                   toggleHost={this.handleHostToggle}
-                  toggleLoading={toggleLoading}
+                  toggleLoading={toggleLoading === o.id}
                 />
               )}
               emptyStateControls={
