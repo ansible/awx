@@ -146,7 +146,7 @@ except ImportError:
 
 def main():
     argument_spec = dict(
-        name=dict(),
+        name=dict(required=True),
         description=dict(),
         organization=dict(),
         scm_type=dict(choices=['manual', 'git', 'hg', 'svn'], default='manual'),
