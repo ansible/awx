@@ -12,7 +12,8 @@ def test_create_project(run_module, admin_user, organization):
         name='foo',
         organization=organization.name,
         scm_type='git',
-        scm_url='https://foo.invalid'
+        scm_url='https://foo.invalid',
+        wait=False
     ), admin_user)
     assert result.pop('changed', None), result
 

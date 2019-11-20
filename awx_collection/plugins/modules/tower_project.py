@@ -97,6 +97,15 @@ options:
       default: "present"
       choices: ["present", "absent"]
       type: str
+    wait:
+      description:
+        - Provides option (True by default) to wait for completed project sync
+          before returning
+        - Can assure playbook files are populated so that job templates that rely
+          on the project may be successfully created
+
+      type: bool
+      default: True
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -150,6 +159,7 @@ def main():
         custom_virtualenv=dict(),
         local_path=dict(),
         state=dict(choices=['present', 'absent'], default='present'),
+        wait=dict(type='bool', default=True),
     )
 
     module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
@@ -171,6 +181,7 @@ def main():
     job_timeout = module.params.get('job_timeout')
     custom_virtualenv = module.params.get('custom_virtualenv')
     state = module.params.get('state')
+    wait = module.params.get('wait')
 
     json_output = {'project': name, 'state': state}
 
@@ -212,6 +223,8 @@ def main():
                                         custom_virtualenv=custom_virtualenv,
                                         create_on_missing=True)
                 json_output['id'] = result['id']
+                if wait:
+                    project.wait(pk=None, parent_pk=result['id'])
             elif state == 'absent':
                 result = project.delete(name=name)
         except (exc.ConnectionError, exc.BadRequest, exc.AuthError) as excinfo:
