@@ -81,7 +81,7 @@ describe('<InventoryHosts />', () => {
       },
     });
     await act(async () => {
-      wrapper = mountWithContexts(<InventoryHosts inventory={mockInventory} />);
+      wrapper = mountWithContexts(<InventoryHosts />);
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
   });

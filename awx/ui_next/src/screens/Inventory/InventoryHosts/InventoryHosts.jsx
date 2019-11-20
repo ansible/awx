@@ -20,7 +20,7 @@ const QS_CONFIG = getQSConfig('host', {
   order_by: 'name',
 });
 
-function InventoryHosts({ i18n, location, match, inventory }) {
+function InventoryHosts({ i18n, location, match }) {
   const [actions, setActions] = useState(null);
   const [contentError, setContentError] = useState(null);
   const [deletionError, setDeletionError] = useState(null);
@@ -47,7 +47,7 @@ function InventoryHosts({ i18n, location, match, inventory }) {
             data: { actions: optionActions },
           },
         ] = await Promise.all([
-          fetchHosts(inventory.id, location.search),
+          fetchHosts(match.params.id, location.search),
           InventoriesAPI.readOptions(),
         ]);
 
@@ -62,7 +62,7 @@ function InventoryHosts({ i18n, location, match, inventory }) {
     }
 
     fetchData();
-  }, [inventory, location]);
+  }, [match.params.id, location]);
 
   const handleSelectAll = isSelected => {
     setSelected(isSelected ? [...hosts] : []);
@@ -88,7 +88,7 @@ function InventoryHosts({ i18n, location, match, inventory }) {
       try {
         const {
           data: { count, results },
-        } = await fetchHosts(inventory.id, location.search);
+        } = await fetchHosts(match.params.id, location.search);
 
         setHosts(results);
         setHostCount(count);
