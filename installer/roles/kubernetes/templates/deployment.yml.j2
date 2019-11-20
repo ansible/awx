@@ -131,7 +131,7 @@ userNames:
 {% endif %}
 
 ---
-apiVersion: apps/v1beta1
+apiVersion: {{ kubernetes_statefulset_api_version }}
 kind: StatefulSet
 metadata:
   name: {{ kubernetes_deployment_name }}
@@ -139,6 +139,11 @@ metadata:
 spec:
   serviceName: {{ kubernetes_deployment_name }}
   replicas: 1
+{% if kubernetes_statefulset_api_version == "apps/v1" %}
+  selector:
+    matchLabels:
+      app: {{ kubernetes_deployment_name }}
+{% endif %}
   template:
     metadata:
       labels:
