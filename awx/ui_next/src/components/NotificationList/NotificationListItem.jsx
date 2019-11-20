@@ -4,12 +4,12 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 import {
-  Switch as PFSwitch,
   DataListItem,
   DataListItemRow,
   DataListItemCells,
   DataListCell as PFDataListCell,
 } from '@patternfly/react-core';
+import Switch from '@components/Switch';
 
 import styled from 'styled-components';
 
@@ -22,13 +22,6 @@ const DataListCell = styled(PFDataListCell)`
     justify-content: ${props => (props.righthalf ? 'flex-end' : 'inherit')};
     padding-bottom: 0;
   }
-`;
-
-const Switch = styled(PFSwitch)`
-  display: flex;
-  flex-wrap: no-wrap;
-  /* workaround PF bug; used in calculating switch width: */
-  --pf-c-switch__toggle-icon--Offset: 0.125rem;
 `;
 
 function NotificationListItem(props) {

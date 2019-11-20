@@ -89,8 +89,7 @@ describe('<NotificationListItem canToggleNotifications />', () => {
       />
     );
     wrapper
-      .find('Switch')
-      .first()
+      .find('Switch[aria-label="Toggle notification start"]')
       .find('input')
       .simulate('change');
     expect(toggleNotification).toHaveBeenCalledWith(9000, false, 'started');
@@ -108,8 +107,7 @@ describe('<NotificationListItem canToggleNotifications />', () => {
       />
     );
     wrapper
-      .find('Switch')
-      .at(1)
+      .find('Switch[aria-label="Toggle notification success"]')
       .find('input')
       .simulate('change');
     expect(toggleNotification).toHaveBeenCalledWith(9000, true, 'success');
@@ -127,8 +125,7 @@ describe('<NotificationListItem canToggleNotifications />', () => {
       />
     );
     wrapper
-      .find('Switch')
-      .at(1)
+      .find('Switch[aria-label="Toggle notification success"]')
       .find('input')
       .simulate('change');
     expect(toggleNotification).toHaveBeenCalledWith(9000, false, 'success');
@@ -146,8 +143,7 @@ describe('<NotificationListItem canToggleNotifications />', () => {
       />
     );
     wrapper
-      .find('Switch')
-      .at(2)
+      .find('Switch[aria-label="Toggle notification failure"]')
       .find('input')
       .simulate('change');
     expect(toggleNotification).toHaveBeenCalledWith(9000, true, 'error');
@@ -165,8 +161,7 @@ describe('<NotificationListItem canToggleNotifications />', () => {
       />
     );
     wrapper
-      .find('Switch')
-      .at(2)
+      .find('Switch[aria-label="Toggle notification failure"]')
       .find('input')
       .simulate('change');
     expect(toggleNotification).toHaveBeenCalledWith(9000, false, 'error');
