@@ -153,7 +153,8 @@ def test_summary_fields_recent_jobs(job_template, admin_user, get):
         'id': job.id,
         'status': 'failed',
         'finished': job.finished,
-        'type': 'job'
+        'canceled_on': None,
+        'type': 'job'      
     } for job in jobs[-10:][::-1]]
 
 
