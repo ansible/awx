@@ -42,7 +42,7 @@ options:
       type: str
     project:
       description:
-        - Project that should for this credential.
+        - Project that should use this credential.
       type: str
     organization:
       description:
