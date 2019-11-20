@@ -630,6 +630,13 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         help_text=_("The date and time the job finished execution."),
         db_index=True,
     )
+    canceled_on = models.DateTimeField(
+        null=True,
+        default=None,
+        editable=False,
+        help_text=_("The date and time the job was canceled."),
+        db_index=True,
+    )
     elapsed = models.DecimalField(
         max_digits=12,
         decimal_places=3,
@@ -834,6 +841,11 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
             if 'unified_job_template' not in update_fields:
                 update_fields.append('unified_job_template')
 
+        if self.cancel_flag and not self.canceled_on:
+        # Record the 'canceled' time. 
+            self.canceled_on = now()
+            if 'canceled_on' not in update_fields:
+                update_fields.append('canceled_on')
         # Okay; we're done. Perform the actual save.
         result = super(UnifiedJob, self).save(*args, **kwargs)
 
