@@ -125,7 +125,7 @@ SUMMARIZABLE_FK_FIELDS = {
     'workflow_approval': DEFAULT_SUMMARY_FIELDS + ('timeout',),
     'schedule': DEFAULT_SUMMARY_FIELDS + ('next_run',),
     'unified_job_template': DEFAULT_SUMMARY_FIELDS + ('unified_job_type',),
-    'last_job': DEFAULT_SUMMARY_FIELDS + ('finished', 'status', 'failed', 'license_error'),
+    'last_job': DEFAULT_SUMMARY_FIELDS + ('finished', 'status', 'failed', 'license_error', 'canceled'),
     'last_job_host_summary': DEFAULT_SUMMARY_FIELDS + ('failed',),
     'last_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'license_error'),
     'current_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'license_error'),
@@ -718,7 +718,7 @@ class UnifiedJobSerializer(BaseSerializer):
     class Meta:
         model = UnifiedJob
         fields = ('*', 'unified_job_template', 'launch_type', 'status',
-                  'failed', 'started', 'finished', 'elapsed', 'job_args',
+                  'failed', 'started', 'finished', 'canceled', 'elapsed', 'job_args',
                   'job_cwd', 'job_env', 'job_explanation',
                   'execution_node', 'controller_node',
                   'result_traceback', 'event_processing_finished')
@@ -2822,7 +2822,7 @@ class JobTemplateMixin(object):
         # .only('id', 'status', 'finished', 'polymorphic_ctype_id')
         optimized_qs = uj_qs.non_polymorphic()
         return [{
-            'id': x.id, 'status': x.status, 'finished': x.finished,
+            'id': x.id, 'status': x.status, 'finished': x.finished, 'canceled': x.canceled,
             # Make type consistent with API top-level key, for instance workflow_job
             'type': x.get_real_instance_class()._meta.verbose_name.replace(' ', '_')
         } for x in optimized_qs[:10]]

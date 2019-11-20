@@ -630,6 +630,13 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         help_text=_("The date and time the job finished execution."),
         db_index=True,
     )
+    canceled = models.DateTimeField(
+        null=True,
+        default=None,
+        editable=False,
+        help_text=_("The date and time the job was canceled."),
+        db_index=True,
+    )
     elapsed = models.DecimalField(
         max_digits=12,
         decimal_places=3,
@@ -810,11 +817,18 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
 
         # Sanity check: Has the job just completed? If so, mark down its
         # completion time, and record its output to the database.
+        #import sdb
+        #sdb.set_trace()
         if self.status in ('successful', 'failed', 'error', 'canceled') and not self.finished:
-            # Record the `finished` time.
+            # Record the `finished` time and if the job was canceled, set it to null.
             self.finished = now()
+            if self.status == 'canceled':
+                self.finished = None
+                self.canceled = now()
             if 'finished' not in update_fields:
                 update_fields.append('finished')
+            if 'canceled' not in update_fields:
+                update_fields.append('canceled')
 
         # If we have a start and finished time, and haven't already calculated
         # out the time that elapsed, do so.
