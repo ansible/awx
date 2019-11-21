@@ -95,6 +95,7 @@ class PageHeaderToolbar extends Component {
           <Tooltip position="left" content={<div>{i18n._(t`User`)}</div>}>
             <ToolbarItem>
               <Dropdown
+                id="toolbar-user-dropdown"
                 isPlain
                 isOpen={isUserOpen}
                 position={DropdownPosition.right}

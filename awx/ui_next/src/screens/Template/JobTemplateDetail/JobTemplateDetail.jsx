@@ -197,7 +197,11 @@ class JobTemplateDetail extends Component {
       isInitialized && (
         <CardBody css="padding-top: 20px;">
           <DetailList gutter="sm">
-            <Detail label={i18n._(t`Name`)} value={name} />
+            <Detail
+              label={i18n._(t`Name`)}
+              value={name}
+              dataCy="jt-detail-name"
+            />
             <Detail label={i18n._(t`Description`)} value={description} />
             <Detail label={i18n._(t`Job Type`)} value={job_type} />
 

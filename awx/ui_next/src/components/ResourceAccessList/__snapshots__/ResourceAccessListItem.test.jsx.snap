@@ -389,10 +389,12 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                 >
                                   <Detail__DetailName
                                     component="dt"
+                                    data-cy={null}
                                     fullWidth={false}
                                   >
                                     <StyledComponent
                                       component="dt"
+                                      data-cy={null}
                                       forwardedComponent={
                                         Object {
                                           "$$typeof": Symbol(react.forward_ref),
@@ -422,14 +424,17 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                       <Component
                                         className="Detail__DetailName-sc-16ypsyv-0 erdIBg"
                                         component="dt"
+                                        data-cy={null}
                                         fullWidth={false}
                                       >
                                         <TextListItem
                                           className="Detail__DetailName-sc-16ypsyv-0 erdIBg"
                                           component="dt"
+                                          data-cy={null}
                                         >
                                           <dt
                                             className="Detail__DetailName-sc-16ypsyv-0 erdIBg"
+                                            data-cy={null}
                                             data-pf-content={true}
                                           >
                                             Name
@@ -440,10 +445,12 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                   </Detail__DetailName>
                                   <Detail__DetailValue
                                     component="dd"
+                                    data-cy={null}
                                     fullWidth={false}
                                   >
                                     <StyledComponent
                                       component="dd"
+                                      data-cy={null}
                                       forwardedComponent={
                                         Object {
                                           "$$typeof": Symbol(react.forward_ref),
@@ -473,14 +480,17 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                       <Component
                                         className="Detail__DetailValue-sc-16ypsyv-1 yHlYM"
                                         component="dd"
+                                        data-cy={null}
                                         fullWidth={false}
                                       >
                                         <TextListItem
                                           className="Detail__DetailValue-sc-16ypsyv-1 yHlYM"
                                           component="dd"
+                                          data-cy={null}
                                         >
                                           <dd
                                             className="Detail__DetailValue-sc-16ypsyv-1 yHlYM"
+                                            data-cy={null}
                                             data-pf-content={true}
                                           >
                                             jane brown
@@ -563,10 +573,12 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                 >
                                   <Detail__DetailName
                                     component="dt"
+                                    data-cy={null}
                                     fullWidth={false}
                                   >
                                     <StyledComponent
                                       component="dt"
+                                      data-cy={null}
                                       forwardedComponent={
                                         Object {
                                           "$$typeof": Symbol(react.forward_ref),
@@ -596,14 +608,17 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                       <Component
                                         className="Detail__DetailName-sc-16ypsyv-0 erdIBg"
                                         component="dt"
+                                        data-cy={null}
                                         fullWidth={false}
                                       >
                                         <TextListItem
                                           className="Detail__DetailName-sc-16ypsyv-0 erdIBg"
                                           component="dt"
+                                          data-cy={null}
                                         >
                                           <dt
                                             className="Detail__DetailName-sc-16ypsyv-0 erdIBg"
+                                            data-cy={null}
                                             data-pf-content={true}
                                           >
                                             Team Roles
@@ -614,10 +629,12 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                   </Detail__DetailName>
                                   <Detail__DetailValue
                                     component="dd"
+                                    data-cy={null}
                                     fullWidth={false}
                                   >
                                     <StyledComponent
                                       component="dd"
+                                      data-cy={null}
                                       forwardedComponent={
                                         Object {
                                           "$$typeof": Symbol(react.forward_ref),
@@ -647,14 +664,17 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                       <Component
                                         className="Detail__DetailValue-sc-16ypsyv-1 yHlYM"
                                         component="dd"
+                                        data-cy={null}
                                         fullWidth={false}
                                       >
                                         <TextListItem
                                           className="Detail__DetailValue-sc-16ypsyv-1 yHlYM"
                                           component="dd"
+                                          data-cy={null}
                                         >
                                           <dd
                                             className="Detail__DetailValue-sc-16ypsyv-1 yHlYM"
+                                            data-cy={null}
                                             data-pf-content={true}
                                           >
                                             <ChipGroup
