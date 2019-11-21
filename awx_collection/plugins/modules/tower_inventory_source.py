@@ -72,6 +72,12 @@ options:
           change the output of the openstack.py script. It has to be YAML or
           JSON.
       type: str
+    custom_virtualenv:
+      version_added: "2.9"
+      description:
+        - Local absolute file path containing a custom Python virtualenv to use.
+      type: str
+      required: False
     timeout:
       description:
         - Number in seconds after which the Tower API methods will time out.
@@ -227,6 +233,7 @@ def main():
         source_script=dict(required=False),
         overwrite=dict(type='bool', required=False),
         overwrite_vars=dict(type='bool', required=False),
+        custom_virtualenv=dict(type='str', required=False),
         update_on_launch=dict(type='bool', required=False),
         update_cache_timeout=dict(type='int', required=False),
         organization=dict(type='str'),
@@ -318,7 +325,7 @@ def main():
                     changed=False
                 )
 
-            for key in ('source_vars', 'timeout', 'source_path',
+            for key in ('source_vars', 'custom_virtualenv', 'timeout', 'source_path',
                         'update_on_project_update', 'source_regions',
                         'instance_filters', 'group_by', 'overwrite',
                         'overwrite_vars', 'update_on_launch',

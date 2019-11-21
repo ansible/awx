@@ -191,6 +191,13 @@ options:
       description:
         - Maximum time in seconds to wait for a job to finish (server-side).
       type: int
+    custom_virtualenv:
+      version_added: "2.9"
+      description:
+        - Local absolute file path containing a custom Python virtualenv to use.
+      type: str
+      required: False
+      default: ''
     state:
       description:
         - Desired state of the resource.
@@ -218,6 +225,7 @@ EXAMPLES = '''
     tower_config_file: "~/tower_cli.cfg"
     survey_enabled: yes
     survey_spec: "{{ lookup('file', 'my_survey.json') }}"
+    custom_virtualenv: "/var/lib/awx/venv/custom-venv/"
 '''
 
 from ..module_utils.ansible_tower import TowerModule, tower_auth_config, tower_check_mode
@@ -298,6 +306,7 @@ def main():
         playbook=dict(required=True),
         credential=dict(default=''),
         vault_credential=dict(default=''),
+        custom_virtualenv=dict(type='str', required=False),
         forks=dict(type='int'),
         limit=dict(default=''),
         verbosity=dict(type='int', choices=[0, 1, 2, 3, 4], default=0),

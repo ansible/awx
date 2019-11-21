@@ -32,6 +32,13 @@ options:
       description:
         - The description to use for the organization.
       type: str
+    custom_virtualenv:
+      version_added: "2.9"
+      description:
+        - Local absolute file path containing a custom Python virtualenv to use.
+      type: str
+      required: False
+      default: ''
     state:
       description:
         - Desired state of the resource.
@@ -47,6 +54,14 @@ EXAMPLES = '''
   tower_organization:
     name: "Foo"
     description: "Foo bar organization"
+    state: present
+    tower_config_file: "~/tower_cli.cfg"
+
+- name: Create tower organization using 'foo-venv' as default Python virtualenv
+  tower_organization:
+    name: "Foo"
+    description: "Foo bar organization using foo-venv"
+    custom_virtualenv: "/var/lib/awx/venv/foo-venv/"
     state: present
     tower_config_file: "~/tower_cli.cfg"
 '''
@@ -66,6 +81,7 @@ def main():
     argument_spec = dict(
         name=dict(required=True),
         description=dict(),
+        custom_virtualenv=dict(type='str', required=False),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
@@ -73,6 +89,7 @@ def main():
 
     name = module.params.get('name')
     description = module.params.get('description')
+    custom_virtualenv = module.params.get('custom_virtualenv')
     state = module.params.get('state')
 
     json_output = {'organization': name, 'state': state}
@@ -83,7 +100,7 @@ def main():
         organization = tower_cli.get_resource('organization')
         try:
             if state == 'present':
-                result = organization.modify(name=name, description=description, create_on_missing=True)
+                result = organization.modify(name=name, description=description, custom_virtualenv=custom_virtualenv, create_on_missing=True)
                 json_output['id'] = result['id']
             elif state == 'absent':
                 result = organization.delete(name=name)
