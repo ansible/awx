@@ -48,6 +48,8 @@ postgress_activate_wait: 60
 restore_backup_file: "./tower-openshift-backup-latest.tar.gz"
 
 insights_url_base: "https://example.org"
+automation_analytics_url: "https://example.org"
+insights_agent_mime: "application/example"
 
 custom_venvs_path: "/opt/custom-venvs"
 custom_venvs_python: "python2"
