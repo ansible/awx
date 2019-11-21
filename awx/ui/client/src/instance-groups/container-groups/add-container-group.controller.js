@@ -10,6 +10,11 @@ function AddContainerGroupController(ToJSON, $scope, $state, models, strings, i1
   vm.panelTitle = strings.get('state.ADD_CONTAINER_GROUP_BREADCRUMB_LABEL');
   vm.lookUpTitle = strings.get('container.LOOK_UP_TITLE');
 
+  vm.docs = {
+    url: 'https://docs.ansible.com/ansible-tower/latest/html/administration/external_execution_envs.html#ag-container-groups',
+    help_text: vm.strings.get('tooltips.CG_DOCS_HELP_TEXT')
+  };
+
   vm.form = instanceGroup.createFormSchema('post');
   vm.form.name.required = true;
   delete vm.form.name.help_text;
