@@ -23,6 +23,11 @@ function EditContainerGroupController($rootScope, $scope, $state, models, string
   vm.panelTitle = EditContainerGroupDataset.data.name;
   vm.lookUpTitle = strings.get('container.LOOK_UP_TITLE');
 
+  vm.docs = {
+    url: 'https://docs.ansible.com/ansible-tower/latest/html/administration/external_execution_envs.html#ag-container-groups',
+    help_text: vm.strings.get('tooltips.CG_DOCS_HELP_TEXT')
+  };
+
   vm.form = instanceGroup.createFormSchema('post');
   vm.switchDisabled = false;
   vm.form.disabled = !instanceGroup.has('options', 'actions.PUT');

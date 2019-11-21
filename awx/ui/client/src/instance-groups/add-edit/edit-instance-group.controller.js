@@ -17,8 +17,8 @@ function EditController ($rootScope, $state, models, strings) {
     vm.panelTitle = instanceGroup.get('name');
 
     vm.docs = {
-        url: 'https://docs.ansible.com/ansible-tower/latest/html/administration/clustering.html',
-        help_text: vm.strings.get('tooltips.DOCS_HELP_TEXT')
+        url: 'https://docs.ansible.com/ansible-tower/latest/html/userguide/instance_groups.html',
+        help_text: vm.strings.get('tooltips.IG_DOCS_HELP_TEXT')
     };
 
     vm.tab = {
