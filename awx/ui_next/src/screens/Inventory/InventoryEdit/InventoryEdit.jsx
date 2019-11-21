@@ -14,7 +14,7 @@ import { getAddedAndRemoved } from '../../../util/lists';
 
 function InventoryEdit({ history, i18n, inventory }) {
   const [error, setError] = useState(null);
-  const [instanceGroups, setInstanceGroups] = useState(null);
+  const [associatedInstanceGroups, setInstanceGroups] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [credentialTypeId, setCredentialTypeId] = useState(null);
 
@@ -50,26 +50,31 @@ function InventoryEdit({ history, i18n, inventory }) {
   };
 
   const handleSubmit = async values => {
+    const {
+      instanceGroups,
+      insights_credential,
+      organization,
+      ...remainingValues
+    } = values;
     try {
-      if (values.instance_groups) {
+      await InventoriesAPI.update(inventory.id, {
+        insights_credential: insights_credential.id,
+        organization: organization.id,
+        ...remainingValues,
+      });
+      if (instanceGroups) {
         const { added, removed } = getAddedAndRemoved(
-          instanceGroups,
-          values.instance_groups
+          associatedInstanceGroups,
+          instanceGroups
         );
-        const update = InventoriesAPI.update(inventory.id, values);
+
         const associatePromises = added.map(async ig =>
           InventoriesAPI.associateInstanceGroup(inventory.id, ig.id)
         );
-        const disAssociatePromises = removed.map(async ig =>
+        const disassociatePromises = removed.map(async ig =>
           InventoriesAPI.disassociateInstanceGroup(inventory.id, ig.id)
         );
-        await Promise.all([
-          update,
-          ...associatePromises,
-          ...disAssociatePromises,
-        ]);
-      } else {
-        await InventoriesAPI.update(inventory.id, values);
+        await Promise.all([...associatePromises, ...disassociatePromises]);
       }
     } catch (err) {
       setError(err);
@@ -90,11 +95,11 @@ function InventoryEdit({ history, i18n, inventory }) {
     <>
       <CardHeader
         style={{
-          'padding-right': '10px',
-          'padding-top': '10px',
-          'padding-bottom': '0',
+          paddingRight: '10px',
+          paddingTop: '10px',
+          paddingBottom: '0',
+          textAlign: 'right',
         }}
-        className="at-u-textRight"
       >
         <Tooltip content={i18n._(t`Close`)} position="top">
           <CardCloseButton onClick={handleCancel} />
@@ -102,10 +107,10 @@ function InventoryEdit({ history, i18n, inventory }) {
       </CardHeader>
       <CardBody>
         <InventoryForm
-          handleCancel={handleCancel}
-          handleSubmit={handleSubmit}
+          onCancel={handleCancel}
+          onSubmit={handleSubmit}
           inventory={inventory}
-          instanceGroups={instanceGroups}
+          instanceGroups={associatedInstanceGroups}
           credentialTypeId={credentialTypeId}
         />
       </CardBody>

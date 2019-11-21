@@ -2,6 +2,7 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import { sleep } from '@testUtils/testUtils';
 
 import { InventoriesAPI, CredentialTypesAPI } from '@api';
 import InventoryEdit from './InventoryEdit';
@@ -59,15 +60,15 @@ CredentialTypesAPI.read.mockResolvedValue({
     ],
   },
 });
-
+const associatedInstanceGroups = [
+  {
+    id: 1,
+    name: 'Foo',
+  },
+];
 InventoriesAPI.readInstanceGroups.mockResolvedValue({
   data: {
-    results: [
-      {
-        id: 1,
-        name: 'Foo',
-      },
-    ],
+    results: associatedInstanceGroups,
   },
 });
 
@@ -89,24 +90,39 @@ describe('<InventoryEdit />', () => {
   test('initially renders successfully', async () => {
     expect(wrapper.find('InventoryEdit').length).toBe(1);
   });
+
   test('called InventoriesAPI.readInstanceGroups', async () => {
     expect(InventoriesAPI.readInstanceGroups).toBeCalledWith(1);
-    await waitForElement(wrapper, 'isLoading', el => el.length === 0);
   });
+
   test('handleCancel returns the user to the inventories list', async () => {
     await waitForElement(wrapper, 'isLoading', el => el.length === 0);
     wrapper.find('CardCloseButton').simulate('click');
     expect(history.location.pathname).toEqual('/inventories');
   });
+
   test('handleSubmit should post to the api', async () => {
     await waitForElement(wrapper, 'isLoading', el => el.length === 0);
-    wrapper.find('InventoryForm').prop('handleSubmit')({
+    const instanceGroups = [{ name: 'Bizz', id: 2 }, { name: 'Buzz', id: 3 }];
+    wrapper.find('InventoryForm').prop('onSubmit')({
       name: 'Foo',
-      id: 1,
-      organization: 2,
+      id: 13,
+      organization: { id: 1 },
+      insights_credential: { id: 13 },
+      instanceGroups,
     });
-    wrapper.update();
-
-    expect(InventoriesAPI.update).toHaveBeenCalledTimes(1);
+    await sleep(0);
+    instanceGroups.map(IG =>
+      expect(InventoriesAPI.associateInstanceGroup).toHaveBeenCalledWith(
+        1,
+        IG.id
+      )
+    );
+    associatedInstanceGroups.map(async aIG =>
+      expect(InventoriesAPI.disassociateInstanceGroup).toHaveBeenCalledWith(
+        1,
+        aIG.id
+      )
+    );
   });
 });

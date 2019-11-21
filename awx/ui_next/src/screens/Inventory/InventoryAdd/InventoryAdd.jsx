@@ -43,20 +43,29 @@ function InventoryAdd({ history, i18n }) {
   };
 
   const handleSubmit = async values => {
+    const {
+      instanceGroups,
+      organization,
+      insights_credential,
+      ...remainingValues
+    } = values;
     try {
-      let response;
-      if (values.instance_groups) {
-        response = await InventoriesAPI.create(values);
-        const associatePromises = values.instance_groups.map(async ig =>
-          InventoriesAPI.associateInstanceGroup(response.data.id, ig.id)
+      const {
+        data: { id: inventoryId },
+      } = await InventoriesAPI.create({
+        organization: organization.id,
+        insights_credential: insights_credential.id,
+        ...remainingValues,
+      });
+      if (instanceGroups) {
+        const associatePromises = instanceGroups.map(async ig =>
+          InventoriesAPI.associateInstanceGroup(inventoryId, ig.id)
         );
-        await Promise.all([response, ...associatePromises]);
-      } else {
-        response = await InventoriesAPI.create(values);
+        await Promise.all(associatePromises);
       }
       const url = history.location.pathname.search('smart')
-        ? `/inventories/smart_inventory/${response.data.id}/details`
-        : `/inventories/inventory/${response.data.id}/details`;
+        ? `/inventories/smart_inventory/${inventoryId}/details`
+        : `/inventories/inventory/${inventoryId}/details`;
 
       history.push(`${url}`);
     } catch (err) {
@@ -75,11 +84,11 @@ function InventoryAdd({ history, i18n }) {
       <Card>
         <CardHeader
           style={{
-            'padding-right': '10px',
-            'padding-top': '10px',
-            'padding-bottom': '0',
+            paddingRight: '10px',
+            paddingTop: '10px',
+            paddingBottom: '0',
+            textAlign: 'right',
           }}
-          className="at-u-textRight"
         >
           <Tooltip content={i18n._(t`Close`)} position="top">
             <CardCloseButton onClick={handleCancel} />
@@ -87,8 +96,8 @@ function InventoryAdd({ history, i18n }) {
         </CardHeader>
         <CardBody>
           <InventoryForm
-            handleCancel={handleCancel}
-            handleSubmit={handleSubmit}
+            onCancel={handleCancel}
+            onSubmit={handleSubmit}
             credentialTypeId={credentialTypeId}
           />
         </CardBody>

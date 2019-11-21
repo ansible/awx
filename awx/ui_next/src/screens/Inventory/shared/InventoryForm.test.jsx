@@ -1,6 +1,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { sleep } from '@testUtils/testUtils';
 
 import InventoryForm from './InventoryForm';
 
@@ -48,15 +49,18 @@ const inventory = {
 const instanceGroups = [{ name: 'Foo', id: 1 }, { name: 'Bar', id: 2 }];
 describe('<InventoryForm />', () => {
   let wrapper;
-  let handleCancel;
+  let onCancel;
+  let onSubmit;
   beforeEach(() => {
-    handleCancel = jest.fn();
+    onCancel = jest.fn();
+    onSubmit = jest.fn();
     wrapper = mountWithContexts(
       <InventoryForm
-        handleCancel={handleCancel}
-        handleSubmit={jest.fn()}
+        onCancel={onCancel}
+        onSubmit={onSubmit}
         inventory={inventory}
         instanceGroups={instanceGroups}
+        credentialTypeId={14}
       />
     );
   });
@@ -76,16 +80,23 @@ describe('<InventoryForm />', () => {
     );
     expect(wrapper.find('VariablesField[label="Variables"]').length).toBe(1);
   });
-  test('should update from values onChange', () => {
+  test('should update from values onChange', async () => {
     const form = wrapper.find('Formik');
     act(() => {
       wrapper.find('OrganizationLookup').invoke('onBlur')();
       wrapper.find('OrganizationLookup').invoke('onChange')({
-        id: 1,
+        id: 3,
         name: 'organization',
       });
     });
-    expect(form.state('values').organization).toEqual(1);
+    expect(form.state('values').organization).toEqual({
+      id: 3,
+      name: 'organization',
+    });
+    wrapper.find('input#inventory-name').simulate('change', {
+      target: { value: 'new Foo', name: 'name' },
+    });
+    expect(form.state('values').name).toEqual('new Foo');
     act(() => {
       wrapper.find('CredentialLookup').invoke('onBlur')();
       wrapper.find('CredentialLookup').invoke('onChange')({
@@ -93,12 +104,26 @@ describe('<InventoryForm />', () => {
         name: 'credential',
       });
     });
-    expect(form.state('values').insights_credential).toEqual(10);
+    expect(form.state('values').insights_credential).toEqual({
+      id: 10,
+      name: 'credential',
+    });
+
+    form.find('button[aria-label="Save"]').simulate('click');
+    await sleep(1);
+    expect(onSubmit).toHaveBeenCalledWith({
+      description: '',
+      insights_credential: { id: 10, name: 'credential' },
+      instanceGroups: [{ id: 1, name: 'Foo' }, { id: 2, name: 'Bar' }],
+      name: 'new Foo',
+      organization: { id: 3, name: 'organization' },
+      variables: '---',
+    });
   });
 
   test('should call handleCancel when Cancel button is clicked', async () => {
-    expect(handleCancel).not.toHaveBeenCalled();
+    expect(onCancel).not.toHaveBeenCalled();
     wrapper.find('button[aria-label="Cancel"]').invoke('onClick')();
-    expect(handleCancel).toBeCalled();
+    expect(onCancel).toBeCalled();
   });
 });
