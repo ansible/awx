@@ -136,9 +136,9 @@ virtualenv_ansible:
 		fi; \
 		if [ ! -d "$(VENV_BASE)/ansible" ]; then \
 			virtualenv -p python --system-site-packages $(VENV_BASE)/ansible && \
-			$(VENV_BASE)/ansible/bin/python -m pip install $(PIP_OPTIONS) --ignore-installed six packaging appdirs && \
-			$(VENV_BASE)/ansible/bin/python -m pip install $(PIP_OPTIONS) --ignore-installed setuptools==40.6.3 && \
-			$(VENV_BASE)/ansible/bin/python -m pip install $(PIP_OPTIONS) --ignore-installed pip==18.1; \
+			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --ignore-installed six packaging appdirs && \
+			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --ignore-installed setuptools==40.6.3 && \
+			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --ignore-installed pip==18.1; \
 		fi; \
 	fi
 
@@ -165,23 +165,23 @@ virtualenv_awx:
 
 requirements_ansible: virtualenv_ansible
 	if [[ "$(PIP_OPTIONS)" == *"--no-index"* ]]; then \
-	    cat requirements/requirements_ansible.txt requirements/requirements_ansible_local.txt | $(VENV_BASE)/ansible/bin/python -m pip install $(PIP_OPTIONS) --ignore-installed -r /dev/stdin ; \
+	    cat requirements/requirements_ansible.txt requirements/requirements_ansible_local.txt | $(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --ignore-installed -r /dev/stdin ; \
 	else \
-	    cat requirements/requirements_ansible.txt requirements/requirements_ansible_git.txt | $(VENV_BASE)/ansible/bin/python -m pip install $(PIP_OPTIONS) --no-binary $(SRC_ONLY_PKGS) --ignore-installed -r /dev/stdin ; \
+	    cat requirements/requirements_ansible.txt requirements/requirements_ansible_git.txt | $(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --no-binary $(SRC_ONLY_PKGS) --ignore-installed -r /dev/stdin ; \
 	fi
-	$(VENV_BASE)/ansible/bin/python -m pip uninstall --yes -r requirements/requirements_ansible_uninstall.txt
+	$(VENV_BASE)/ansible/bin/pip uninstall --yes -r requirements/requirements_ansible_uninstall.txt
 
 requirements_ansible_py3: virtualenv_ansible_py3
 	if [[ "$(PIP_OPTIONS)" == *"--no-index"* ]]; then \
-	    cat requirements/requirements_ansible.txt requirements/requirements_ansible_local.txt | $(VENV_BASE)/ansible/bin/python -m pip install $(PIP_OPTIONS) --ignore-installed -r /dev/stdin ; \
+	    cat requirements/requirements_ansible.txt requirements/requirements_ansible_local.txt | $(VENV_BASE)/ansible/bin/pip3 install $(PIP_OPTIONS) --ignore-installed -r /dev/stdin ; \
 	else \
-	    cat requirements/requirements_ansible.txt requirements/requirements_ansible_git.txt | $(VENV_BASE)/ansible/bin/python -m pip install $(PIP_OPTIONS) --no-binary $(SRC_ONLY_PKGS) --ignore-installed -r /dev/stdin ; \
+	    cat requirements/requirements_ansible.txt requirements/requirements_ansible_git.txt | $(VENV_BASE)/ansible/bin/pip3 install $(PIP_OPTIONS) --no-binary $(SRC_ONLY_PKGS) --ignore-installed -r /dev/stdin ; \
 	fi
-	$(VENV_BASE)/ansible/bin/python -m pip uninstall --yes -r requirements/requirements_ansible_uninstall.txt
+	$(VENV_BASE)/ansible/bin/pip3 uninstall --yes -r requirements/requirements_ansible_uninstall.txt
 
 requirements_ansible_dev:
 	if [ "$(VENV_BASE)" ]; then \
-		$(VENV_BASE)/ansible/bin/python -m pip install pytest mock; \
+		$(VENV_BASE)/ansible/bin/pip install pytest mock; \
 	fi
 
 # Install third-party requirements needed for AWX's environment.
