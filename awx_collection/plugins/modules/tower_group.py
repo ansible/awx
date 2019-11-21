@@ -49,7 +49,6 @@ options:
       description:
         - The source to use for this group.
       choices: ["manual", "file", "ec2", "rax", "vmware", "gce", "azure", "azure_rm", "openstack", "satellite6" , "cloudforms", "custom"]
-      default: manual
       type: str
     source_regions:
       description:
@@ -127,15 +126,15 @@ def main():
         credential=dict(),
         source=dict(choices=["manual", "file", "ec2", "rax", "vmware",
                              "gce", "azure", "azure_rm", "openstack",
-                             "satellite6", "cloudforms", "custom"], default="manual"),
+                             "satellite6", "cloudforms", "custom"]),
         source_regions=dict(),
         source_vars=dict(),
         instance_filters=dict(),
         group_by=dict(),
         source_script=dict(),
-        overwrite=dict(type='bool', default=False),
-        overwrite_vars=dict(type='bool', default=False),
-        update_on_launch=dict(type='bool', default=False),
+        overwrite=dict(type='bool'),
+        overwrite_vars=dict(type='bool'),
+        update_on_launch=dict(type='bool'),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
