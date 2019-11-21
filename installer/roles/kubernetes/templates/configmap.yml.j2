@@ -138,8 +138,8 @@ data:
     SYSTEM_TASK_ABS_MEM = {{ ((task_mem_request|int * 1024) / 100)|int }}
 
     INSIGHTS_URL_BASE = "{{ insights_url_base }}"
-    INSIGHTS_AGENT_MIME = "application/vnd.redhat.tower.analytics+tgz"
-    AUTOMATION_ANALYTICS_URL = 'https://cloud.redhat.com/api/ingress/v1/upload'
+    INSIGHTS_AGENT_MIME = "{{ insights_agent_mime }}"
+    AUTOMATION_ANALYTICS_URL = "{{ automation_analytics_url }}"
 
     #Autoprovisioning should replace this
     CLUSTER_HOST_ID = socket.gethostname()
