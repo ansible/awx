@@ -4,7 +4,11 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
 
-import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '@api';
+import {
+  JobTemplatesAPI,
+  UnifiedJobTemplatesAPI,
+  WorkflowJobTemplatesAPI,
+} from '@api';
 import AlertModal from '@components/AlertModal';
 import DatalistToolbar from '@components/DataListToolbar';
 import ErrorDetail from '@components/ErrorDetail';
@@ -113,11 +117,11 @@ class TemplatesList extends Component {
     if (cachedActions) {
       optionsPromise = Promise.resolve({ data: { actions: cachedActions } });
     } else {
-      optionsPromise = JobTemplatesAPI.readOptions();
+      optionsPromise = UnifiedJobTemplatesAPI.readOptions();
     }
 
     const promises = Promise.all([
-      JobTemplatesAPI.read(params),
+      UnifiedJobTemplatesAPI.read(params),
       optionsPromise,
     ]);
 

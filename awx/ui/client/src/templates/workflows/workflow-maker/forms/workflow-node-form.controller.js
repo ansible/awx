@@ -31,7 +31,7 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
             launchConf.variables_needed_to_start.length !== 0;
 
         $scope.strings = TemplatesStrings;
-        $scope.editNodeHelpMessage = null;
+        $scope.editWorkflowHelpMessage = null;
 
         $scope.templateList = WorkflowNodeFormService.templateListDefinition();
         $scope.inventorySourceList = WorkflowNodeFormService.inventorySourceListDefinition();
@@ -177,7 +177,7 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
             }
         };
 
-        const getEditNodeHelpMessage = (selectedTemplate, workflowJobTemplateObj) => {
+        const getEditWorkflowHelpMessage = (selectedTemplate, workflowJobTemplateObj) => {
             if (selectedTemplate) {
                 if (selectedTemplate.type === "workflow_job_template") {
                     if (workflowJobTemplateObj.inventory && selectedTemplate.ask_inventory_on_launch) {
@@ -215,7 +215,7 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
             const ujt = _.get($scope, 'nodeConfig.node.fullUnifiedJobTemplateObject');
             const templateType = _.get(ujt, 'type');
 
-            $scope.editNodeHelpMessage = getEditNodeHelpMessage(ujt, $scope.workflowJobTemplateObj);
+            $scope.editWorkflowHelpMessage = getEditWorkflowHelpMessage(ujt, $scope.workflowJobTemplateObj);
 
             if (!$scope.readOnly) {
                 let jobTemplate = templateType === "workflow_job_template" ? new WorkflowJobTemplate() : new JobTemplate();
@@ -670,7 +670,7 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
                     timeoutMinutes: 0,
                     timeoutSeconds: 0
                 };
-                $scope.editNodeHelpMessage = getEditNodeHelpMessage(selectedTemplate, $scope.workflowJobTemplateObj);
+                $scope.editWorkflowHelpMessage = getEditWorkflowHelpMessage(selectedTemplate, $scope.workflowJobTemplateObj);
 
                 if (selectedTemplate.type === "job_template" || selectedTemplate.type === "workflow_job_template") {
                     let jobTemplate = selectedTemplate.type === "workflow_job_template" ? new WorkflowJobTemplate() : new JobTemplate();

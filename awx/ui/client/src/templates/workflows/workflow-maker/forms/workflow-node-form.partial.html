@@ -279,7 +279,7 @@
             </div>
         </div>
     </div>
-    <div ng-show="editNodeHelpMessage && activeTab === 'templates'" class="WorkflowMaker-formHelp" ng-bind="editNodeHelpMessage"></div>
+    <div ng-show="editWorkflowHelpMessage && activeTab === 'templates'" class="WorkflowMaker-formHelp" ng-bind="editWorkflowHelpMessage"></div>
     <br />
     <div class="buttons Form-buttons" id="workflow_maker_controls">
         <button type="button" class="btn btn-sm Form-primaryButton Form-primaryButton--noMargin" id="workflow_maker_prompt_btn" ng-show="jobNodeState.showPromptButton && activeTab == 'templates' " ng-click="openPromptModal()"> {{:: strings.get('prompt.PROMPT') }}</button>
