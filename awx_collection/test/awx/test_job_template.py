@@ -80,3 +80,29 @@ def test_create_job_template_with_old_machine_cred(run_module, admin_user, proje
     }
 
     assert machine_credential.id in [cred.pk for cred in jt.credentials.all()]
+
+
+@pytest.mark.django_db
+def test_create_job_template_with_new_credentials(run_module, admin_user, project, inventory, machine_credential):
+    jt = JobTemplate.objects.create(
+        name='foo',
+        playbook='helloworld.yml',
+        inventory=inventory,
+        project=project
+    )
+    result = run_module('tower_job_template', dict(
+        name='foo',
+        playbook='helloworld.yml',
+        project=project.name,
+        credentials=[machine_credential.name]
+    ), admin_user)
+    assert result.pop('changed', None), result
+
+    result.pop('invocation')
+    assert result == {
+        "job_template": "foo",
+        "state": "present",
+        "id": jt.id
+    }
+
+    assert [machine_credential.id] == [cred.pk for cred in jt.credentials.all()]
