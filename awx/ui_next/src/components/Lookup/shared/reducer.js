@@ -1,3 +1,5 @@
+// import { useReducer, useEffect } from 'react';
+
 export default function reducer(state, action) {
   // console.log(action, state);
   switch (action.type) {
@@ -56,33 +58,13 @@ function toggleModal(state) {
 }
 
 function closeModal(state) {
-  // TODO clear QSParams & push history state?
-  // state.clearQSParams();
   return {
     ...state,
     isModalOpen: false,
   };
 }
-// clearQSParams() {
-//   const { qsConfig, history } = this.props;
-//   const parts = history.location.search.replace(/^\?/, '').split('&');
-//   const ns = qsConfig.namespace;
-//   const otherParts = parts.filter(param => !param.startsWith(`${ns}.`));
-//   history.push(`${history.location.pathname}?${otherParts.join('&')}`);
-// }
 
-export function initReducer({
-  id,
-  items,
-  count,
-  header,
-  name,
-  onChange,
-  value,
-  multiple = false,
-  required = false,
-  qsConfig,
-}) {
+export function initReducer({ value, multiple = false, required = false }) {
   assertCorrectValueType(value, multiple);
   let selectedItems = [];
   if (value) {
@@ -94,7 +76,6 @@ export function initReducer({
     multiple,
     isModalOpen: false,
     required,
-    onChange,
   };
 }
 
@@ -108,3 +89,18 @@ function assertCorrectValueType(value, multiple) {
     throw new Error('Lookup value must be an array if `multiple` is set');
   }
 }
+//
+// export function useLookup(config) {
+//   const { value, multiple, required, onChange, history } = config;
+//   const [state, dispatch] = useReducer(
+//     config.reducer || reducer,
+//     {
+//       value,
+//       multiple,
+//       required,
+//     },
+//     config.initReducer || initReducer
+//   );
+//
+//   return [state, dispatch];
+// }

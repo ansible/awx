@@ -21,7 +21,6 @@ import { t } from '@lingui/macro';
 import styled from 'styled-components';
 
 import reducer, { initReducer } from './shared/reducer';
-import SelectList from './shared/SelectList';
 import { ChipGroup, Chip } from '../Chip';
 import { QSConfig } from '@types';
 
@@ -51,20 +50,28 @@ const ChipHolder = styled.div`
 function Lookup(props) {
   const {
     id,
-    items,
-    count,
+    // items,
+    // count,
     header,
-    name,
+    // name,
     onChange,
     onBlur,
-    columns,
+    // columns,
     value,
     multiple,
     required,
     qsConfig,
+    renderItemChip,
+    renderSelectList,
+    history,
     i18n,
   } = props;
-  const [state, dispatch] = useReducer(reducer, props, initReducer);
+
+  const [state, dispatch] = useReducer(
+    reducer,
+    { value, multiple, required },
+    initReducer
+  );
 
   useEffect(() => {
     dispatch({ type: 'SET_MULTIPLE', value: multiple });
@@ -74,10 +81,18 @@ function Lookup(props) {
     dispatch({ type: 'SET_VALUE', value });
   }, [value]);
 
+  const clearQSParams = () => {
+    const parts = history.location.search.replace(/^\?/, '').split('&');
+    const ns = qsConfig.namespace;
+    const otherParts = parts.filter(param => !param.startsWith(`${ns}.`));
+    history.push(`${history.location.pathname}?${otherParts.join('&')}`);
+  };
+
   const save = () => {
     const { selectedItems } = state;
     const val = multiple ? selectedItems : selectedItems[0] || null;
     onChange(val);
+    clearQSParams();
     dispatch({ type: 'CLOSE_MODAL' });
   };
 
@@ -89,8 +104,12 @@ function Lookup(props) {
     }
   };
 
-  const { isModalOpen, selectedItems } = state;
+  const closeModal = () => {
+    clearQSParams();
+    dispatch({ type: 'CLOSE_MODAL' });
+  };
 
+  const { isModalOpen, selectedItems } = state;
   const canDelete = !required || (multiple && value.length > 1);
   return (
     <Fragment>
@@ -105,15 +124,13 @@ function Lookup(props) {
         </SearchButton>
         <ChipHolder className="pf-c-form-control">
           <ChipGroup>
-            {(multiple ? value : [value]).map(item => (
-              <Chip
-                key={item.id}
-                onClick={() => removeItem(item)}
-                isReadOnly={!canDelete}
-              >
-                {item.name}
-              </Chip>
-            ))}
+            {(multiple ? value : [value]).map(item =>
+              renderItemChip({
+                item,
+                removeItem,
+                canDelete,
+              })
+            )}
           </ChipGroup>
         </ChipHolder>
       </InputGroup>
@@ -121,7 +138,7 @@ function Lookup(props) {
         className="awx-c-modal"
         title={i18n._(t`Select ${header || i18n._(t`Items`)}`)}
         isOpen={isModalOpen}
-        onClose={() => dispatch({ type: 'TOGGLE_MODAL' })}
+        onClose={closeModal}
         actions={[
           <Button
             key="select"
@@ -133,27 +150,16 @@ function Lookup(props) {
           >
             {i18n._(t`Select`)}
           </Button>,
-          <Button
-            key="cancel"
-            variant="secondary"
-            onClick={() => dispatch({ type: 'TOGGLE_MODAL' })}
-          >
+          <Button key="cancel" variant="secondary" onClick={closeModal}>
             {i18n._(t`Cancel`)}
           </Button>,
         ]}
       >
-        <SelectList
-          value={selectedItems}
-          options={items}
-          optionCount={count}
-          columns={columns}
-          multiple={multiple}
-          header={header}
-          name={name}
-          qsConfig={qsConfig}
-          readOnly={!canDelete}
-          dispatch={dispatch}
-        />
+        {renderSelectList({
+          state,
+          dispatch,
+          canDelete,
+        })}
       </Modal>
     </Fragment>
   );
@@ -165,27 +171,38 @@ const Item = shape({
 
 Lookup.propTypes = {
   id: string,
-  items: arrayOf(shape({})).isRequired,
-  count: number.isRequired,
+  // items: arrayOf(shape({})).isRequired,
+  // count: number.isRequired,
   // TODO: change to `header`
   header: string,
-  name: string,
+  // name: string,
   onChange: func.isRequired,
   value: oneOfType([Item, arrayOf(Item)]),
   multiple: bool,
   required: bool,
   onBlur: func,
   qsConfig: QSConfig.isRequired,
+  renderItemChip: func,
+  renderSelectList: func.isRequired,
 };
 
 Lookup.defaultProps = {
   id: 'lookup-search',
   header: null,
-  name: null,
+  // name: null,
   value: null,
   multiple: false,
   required: false,
   onBlur: () => {},
+  renderItemChip: ({ item, removeItem, canDelete }) => (
+    <Chip
+      key={item.id}
+      onClick={() => removeItem(item)}
+      isReadOnly={!canDelete}
+    >
+      {item.name}
+    </Chip>
+  ),
 };
 
 export { Lookup as _Lookup };

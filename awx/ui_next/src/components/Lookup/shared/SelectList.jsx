@@ -26,7 +26,8 @@ function SelectList({
   name,
   qsConfig,
   readOnly,
-  dispatch,
+  selectItem,
+  deselectItem,
   i18n,
 }) {
   return (
@@ -36,7 +37,7 @@ function SelectList({
           label={i18n._(t`Selected`)}
           selected={value}
           showOverflowAfter={5}
-          onRemove={item => dispatch({ type: 'DESELECT_ITEM', item })}
+          onRemove={item => deselectItem(item)}
           isReadOnly={readOnly}
         />
       )}
@@ -53,8 +54,8 @@ function SelectList({
             name={multiple ? item.name : name}
             label={item.name}
             isSelected={value.some(i => i.id === item.id)}
-            onSelect={() => dispatch({ type: 'SELECT_ITEM', item })}
-            onDeselect={() => dispatch({ type: 'DESELECT_ITEM', item })}
+            onSelect={() => selectItem(item)}
+            onDeselect={() => deselectItem(item)}
             isRadio={!multiple}
           />
         )}
@@ -75,7 +76,8 @@ SelectList.propTypes = {
   columns: arrayOf(shape({})).isRequired,
   multiple: bool,
   qsConfig: QSConfig.isRequired,
-  dispatch: func.isRequired,
+  selectItem: func.isRequired,
+  deselectItem: func.isRequired,
 };
 SelectList.defaultProps = {
   multiple: false,
