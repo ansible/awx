@@ -40,7 +40,6 @@ class IsolatedManager(object):
         """
         self.cancelled_callback = cancelled_callback
         self.check_callback = check_callback
-        self.idle_timeout = max(60, 2 * settings.AWX_ISOLATED_CONNECTION_TIMEOUT)
         self.started_at = None
         self.captured_command_artifact = False
         self.instance = None
@@ -108,7 +107,6 @@ class IsolatedManager(object):
             'verbosity': verbosity,
             'cancel_callback': self.cancelled_callback,
             'settings': {
-                'idle_timeout': self.idle_timeout,
                 'job_timeout': settings.AWX_ISOLATED_LAUNCH_TIMEOUT,
                 'pexpect_timeout': getattr(settings, 'PEXPECT_TIMEOUT', 5),
                 'suppress_ansible_output': True,
@@ -118,7 +116,7 @@ class IsolatedManager(object):
     def path_to(self, *args):
         return os.path.join(self.private_data_dir, *args)
 
-    def run_management_playbook(self, playbook, private_data_dir, **kw):
+    def run_management_playbook(self, playbook, private_data_dir, idle_timeout=None, **kw):
         iso_dir = tempfile.mkdtemp(
             prefix=playbook,
             dir=private_data_dir
@@ -126,6 +124,8 @@ class IsolatedManager(object):
         params = self.runner_params.copy()
         params['playbook'] = playbook
         params['private_data_dir'] = iso_dir
+        if idle_timeout:
+            params['settings']['idle_timeout'] = idle_timeout
         params.update(**kw)
         if all([
             getattr(settings, 'AWX_ISOLATED_KEY_GENERATION', False) is True,
@@ -177,6 +177,7 @@ class IsolatedManager(object):
         logger.debug('Starting job {} on isolated host with `run_isolated.yml` playbook.'.format(self.instance.id))
         runner_obj = self.run_management_playbook('run_isolated.yml',
                                                   self.private_data_dir,
+                                                  idle_timeout=max(60, 2 * settings.AWX_ISOLATED_CONNECTION_TIMEOUT),
                                                   extravars=extravars)
 
         if runner_obj.status == 'failed':
