@@ -1179,18 +1179,19 @@ class SystemJobTemplate(UnifiedJobTemplate, SystemJobOptions):
             for key in unallowed_vars:
                 rejected[key] = data.pop(key)
 
-        if 'days' in data:
-            try:
-                if type(data['days']) is bool:
-                    raise ValueError
-                if float(data['days']) != int(data['days']):
-                    raise ValueError
-                days = int(data['days'])
-                if days < 0:
-                    raise ValueError
-            except ValueError:
-                errors_list.append(_("days must be a positive integer."))
-                rejected['days'] = data.pop('days')
+        if self.job_type in ('cleanup_jobs', 'cleanup_activitystream'):
+            if 'days' in data:
+                try:
+                    if isinstance(data['days'], (bool, type(None))):
+                        raise ValueError
+                    if float(data['days']) != int(data['days']):
+                        raise ValueError
+                    days = int(data['days'])
+                    if days < 0:
+                        raise ValueError
+                except ValueError:
+                    errors_list.append(_("days must be a positive integer."))
+                    rejected['days'] = data.pop('days')
 
         if errors_list:
             errors['extra_vars'] = errors_list
