@@ -4664,6 +4664,10 @@ class ScheduleSerializer(LaunchConfigurationBaseSerializer, SchedulePreviewSeria
 
     def get_summary_fields(self, obj):
         summary_fields = super(ScheduleSerializer, self).get_summary_fields(obj)
+
+        if isinstance(obj.unified_job_template, SystemJobTemplate):
+            summary_fields['unified_job_template']['job_type'] = obj.unified_job_template.job_type
+
         if 'inventory' in summary_fields:
             return summary_fields
 
