@@ -96,3 +96,8 @@ class WaitUntilTimeout(Common):
 class UnexpectedAWXState(Common):
 
     pass
+
+
+class IsMigrating(Common):
+
+    pass
