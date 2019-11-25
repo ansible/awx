@@ -36,11 +36,14 @@ from django.utils.encoding import smart_str
 from django.utils.text import slugify
 from django.apps import apps
 
+# AWX
+from awx.conf.license import get_license
+
 logger = logging.getLogger('awx.main.utils')
 
 __all__ = [
     'get_object_or_400', 'camelcase_to_underscore', 'underscore_to_camelcase', 'memoize',
-    'memoize_delete', 'get_ansible_version', 'get_ssh_version', 'get_licenser',
+    'memoize_delete', 'get_ansible_version', 'get_ssh_version', 'get_licenser', 'get_awx_http_client_headers',
     'get_awx_version', 'update_scm_url', 'get_type_for_model', 'get_model_for_type',
     'copy_model_by_class', 'region_sorting', 'copy_m2m_relationships',
     'prefetch_page_capabilities', 'to_python_boolean', 'ignore_inventory_computed_fields',
@@ -210,6 +213,19 @@ def get_awx_version():
         return pkg_resources.require('awx')[0].version
     except Exception:
         return __version__
+
+
+def get_awx_http_client_headers():
+    license = get_license(show_key=False).get('license_type', 'UNLICENSED')
+    headers = {
+        'Content-Type': 'application/json',
+        'User-Agent': '{} {} ({})'.format(
+            'AWX' if license == 'open' else 'Red Hat Ansible Tower',
+            get_awx_version(),
+            license
+        )
+    }
+    return headers
 
 
 class StubLicense(object):
