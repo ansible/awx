@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
 import { withRouter } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { withI18n } from '@lingui/react';
@@ -12,7 +12,6 @@ import VerticalSeperator from '@components/VerticalSeparator';
 import { getQSConfig, parseQueryString } from '@util/qs';
 import Lookup from './NewLookup';
 import SelectList from './shared/SelectList';
-import multiCredentialReducer from './shared/multiCredentialReducer';
 
 const QS_CONFIG = getQSConfig('credentials', {
   page: 1,
@@ -20,50 +19,10 @@ const QS_CONFIG = getQSConfig('credentials', {
   order_by: 'name',
 });
 
-// TODO: move into reducer
-function toggleCredentialSelection(credentialsToUpdate, newCredential) {
-  let newCredentialsList;
-  const isSelectedCredentialInState =
-    credentialsToUpdate.filter(cred => cred.id === newCredential.id).length > 0;
-
-  if (isSelectedCredentialInState) {
-    newCredentialsList = credentialsToUpdate.filter(
-      cred => cred.id !== newCredential.id
-    );
-  } else {
-    newCredentialsList = credentialsToUpdate.filter(
-      credential =>
-        credential.kind === 'vault' || credential.kind !== newCredential.kind
-    );
-    newCredentialsList = [...newCredentialsList, newCredential];
-  }
-  return newCredentialsList;
-}
-
 async function loadCredentialTypes() {
   const { data } = await CredentialTypesAPI.read();
   const acceptableTypes = ['machine', 'cloud', 'net', 'ssh', 'vault'];
-  const credentialTypes = [];
-  // TODO: cleanup
-  data.results.forEach(cred => {
-    acceptableTypes.forEach(aT => {
-      if (aT === cred.kind) {
-        // This object has several repeated values as some of it's children
-        // require different field values.
-        cred = {
-          id: cred.id,
-          key: cred.id,
-          kind: cred.kind,
-          type: cred.namespace,
-          value: cred.name,
-          label: cred.name,
-          isDisabled: false,
-        };
-        credentialTypes.push(cred);
-      }
-    });
-  });
-  return credentialTypes;
+  return data.results.filter(type => acceptableTypes.includes(type.kind));
 }
 
 async function loadCredentials(params, selectedCredentialTypeId) {
@@ -78,13 +37,16 @@ function MultiCredentialsLookup(props) {
   const [selectedType, setSelectedType] = useState(null);
   const [credentials, setCredentials] = useState([]);
   const [credentialsCount, setCredentialsCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     (async () => {
       try {
         const types = await loadCredentialTypes();
         setCredentialTypes(types);
-        setSelectedType(types[0]);
+        setSelectedType(
+          types.find(type => type.name === 'Machine') || types[0]
+        );
       } catch (err) {
         onError(err);
       }
@@ -98,10 +60,12 @@ function MultiCredentialsLookup(props) {
       }
       try {
         const params = parseQueryString(QS_CONFIG, history.location.search);
+        setIsLoading(true);
         const { results, count } = await loadCredentials(
           params,
           selectedType.id
         );
+        setIsLoading(false);
         setCredentials(results);
         setCredentialsCount(count);
       } catch (err) {
@@ -111,29 +75,29 @@ function MultiCredentialsLookup(props) {
   }, [selectedType]);
 
   const isMultiple = selectedType && selectedType.value === 'Vault';
+  const renderChip = ({ item, removeItem, canDelete }) => (
+    <CredentialChip
+      key={item.id}
+      onClick={() => removeItem(item)}
+      isReadOnly={!canDelete}
+      credential={item}
+    />
+  );
+
   return (
     <FormGroup label={i18n._(t`Credentials`)} fieldId="multiCredential">
       {tooltip && <FieldTooltip content={tooltip} />}
       <Lookup
-        reducer={multiCredentialReducer}
-        onToggleItem={toggleCredentialSelection}
         id="multiCredential"
         lookupHeader={i18n._(t`Credentials`)}
         value={value}
         multiple
         onChange={onChange}
         qsConfig={QS_CONFIG}
-        renderItemChip={({ item, removeItem, canDelete }) => (
-          <CredentialChip
-            key={item.id}
-            onClick={() => removeItem(item)}
-            isReadOnly={!canDelete}
-            credential={item}
-          />
-        )}
+        renderItemChip={renderChip}
         renderSelectList={({ state, dispatch, canDelete }) => {
           return (
-            <>
+            <Fragment>
               {credentialTypes && credentialTypes.length > 0 && (
                 <ToolbarItem css=" display: flex; align-items: center;">
                   <div css="flex: 0 0 25%;">{i18n._(t`Selected Category`)}</div>
@@ -142,11 +106,16 @@ function MultiCredentialsLookup(props) {
                     css="flex: 1 1 75%;"
                     id="multiCredentialsLookUp-select"
                     label={i18n._(t`Selected Category`)}
-                    data={credentialTypes}
-                    value={selectedType && selectedType.label}
-                    onChange={(e, label) => {
+                    data={credentialTypes.map(type => ({
+                      id: type.id,
+                      value: type.id,
+                      label: type.name,
+                      isDisabled: false,
+                    }))}
+                    value={selectedType && selectedType.id}
+                    onChange={(e, id) => {
                       setSelectedType(
-                        credentialTypes.find(o => o.label === label)
+                        credentialTypes.find(o => o.id === parseInt(id, 10))
                       );
                     }}
                   />
@@ -183,8 +152,9 @@ function MultiCredentialsLookup(props) {
                   });
                 }}
                 deselectItem={item => dispatch({ type: 'DESELECT_ITEM', item })}
+                renderItemChip={renderChip}
               />
-            </>
+            </Fragment>
           );
         }}
       />

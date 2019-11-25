@@ -36,18 +36,25 @@ class AnsibleSelect extends React.Component {
         aria-label={i18n._(t`Select Input`)}
         isValid={isValid}
       >
-        {data.map(datum => (
+        {data.map(option => (
           <FormSelectOption
-            key={datum.key}
-            value={datum.value}
-            label={datum.label}
-            isDisabled={datum.isDisabled}
+            key={option.id}
+            value={option.value}
+            label={option.label}
+            isDisabled={option.isDisabled}
           />
         ))}
       </FormSelect>
     );
   }
 }
+
+const Option = shape({
+  id: oneOfType([string, number]).isRequired,
+  value: oneOfType([string, number]).isRequired,
+  label: string.isRequired,
+  isDisabled: bool,
+});
 
 AnsibleSelect.defaultProps = {
   data: [],
@@ -56,7 +63,7 @@ AnsibleSelect.defaultProps = {
 };
 
 AnsibleSelect.propTypes = {
-  data: arrayOf(shape()),
+  data: arrayOf(Option),
   id: string.isRequired,
   isValid: bool,
   onBlur: func,

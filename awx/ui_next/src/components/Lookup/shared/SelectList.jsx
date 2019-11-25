@@ -28,6 +28,7 @@ function SelectList({
   readOnly,
   selectItem,
   deselectItem,
+  renderItemChip,
   i18n,
 }) {
   return (
@@ -39,6 +40,7 @@ function SelectList({
           showOverflowAfter={5}
           onRemove={item => deselectItem(item)}
           isReadOnly={readOnly}
+          renderItemChip={renderItemChip}
         />
       )}
       <PaginatedDataList
@@ -78,9 +80,11 @@ SelectList.propTypes = {
   qsConfig: QSConfig.isRequired,
   selectItem: func.isRequired,
   deselectItem: func.isRequired,
+  renderItemChip: func,
 };
 SelectList.defaultProps = {
   multiple: false,
+  renderItemChip: null,
 };
 
 export default withI18n()(SelectList);

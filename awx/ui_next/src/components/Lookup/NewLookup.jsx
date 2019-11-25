@@ -50,13 +50,9 @@ const ChipHolder = styled.div`
 function Lookup(props) {
   const {
     id,
-    // items,
-    // count,
     header,
-    // name,
     onChange,
     onBlur,
-    // columns,
     value,
     multiple,
     required,
