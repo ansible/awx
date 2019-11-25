@@ -165,12 +165,12 @@ function InventoryHosts({ i18n, location, match }) {
                 itemsToDelete={selected}
                 pluralizedItemName={i18n._(t`Hosts`)}
               />,
-              canAdd ? (
+              canAdd && (
                 <ToolbarAddButton
                   key="add"
                   linkTo={`/inventories/inventory/${match.params.id}/hosts/add`}
                 />
-              ) : null,
+              ),
             ]}
           />
         )}
@@ -186,12 +186,12 @@ function InventoryHosts({ i18n, location, match }) {
           />
         )}
         emptyStateControls={
-          canAdd ? (
+          canAdd && (
             <ToolbarAddButton
               key="add"
               linkTo={`/inventories/inventory/${match.params.id}/add`}
             />
-          ) : null
+          )
         }
       />
 
