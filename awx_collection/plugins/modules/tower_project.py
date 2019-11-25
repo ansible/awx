@@ -225,7 +225,7 @@ def main():
                                         custom_virtualenv=custom_virtualenv,
                                         create_on_missing=True)
                 json_output['id'] = result['id']
-                if wait:
+                if wait and scm_type != '':
                     project.wait(pk=None, parent_pk=result['id'])
             elif state == 'absent':
                 result = project.delete(name=name)
