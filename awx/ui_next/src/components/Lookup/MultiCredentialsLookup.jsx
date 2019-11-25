@@ -92,7 +92,6 @@ function MultiCredentialsLookup(props) {
   }, []);
 
   useEffect(() => {
-    console.log('useEffect', selectedType);
     (async () => {
       if (!selectedType) {
         return;
@@ -111,21 +110,7 @@ function MultiCredentialsLookup(props) {
     })();
   }, [selectedType]);
 
-  // handleCredentialTypeSelect(value, type) {
-  //   const { credentialTypes } = this.state;
-  //   const selectedType = credentialTypes.filter(item => item.label === type);
-  //   this.setState({ selectedCredentialType: selectedType[0] }, () => {
-  //     this.loadCredentials();
-  //   });
-  // }
-
-  // const {
-  //   selectedCredentialType,
-  //   credentialTypes,
-  //   credentials,
-  //   credentialsCount,
-  // } = state;
-
+  const isMultiple = selectedType && selectedType.value === 'Vault';
   return (
     <FormGroup label={i18n._(t`Credentials`)} fieldId="multiCredential">
       {tooltip && <FieldTooltip content={tooltip} />}
@@ -134,15 +119,10 @@ function MultiCredentialsLookup(props) {
         onToggleItem={toggleCredentialSelection}
         id="multiCredential"
         lookupHeader={i18n._(t`Credentials`)}
-        // name="credentials"
         value={value}
         multiple
         onChange={onChange}
-        // items={credentials}
-        // count={credentialsCount}
         qsConfig={QS_CONFIG}
-        // columns={}
-        // TODO bind removeItem
         renderItemChip={({ item, removeItem, canDelete }) => (
           <CredentialChip
             key={item.id}
@@ -184,13 +164,25 @@ function MultiCredentialsLookup(props) {
                     isSearchable: true,
                   },
                 ]}
-                multiple={selectedType && selectedType.value === 'Vault'}
+                multiple={isMultiple}
                 header={i18n._(t`Credentials`)}
                 name="credentials"
                 qsConfig={QS_CONFIG}
                 readOnly={!canDelete}
-                selectItem={() => {}}
-                deselectItem={() => {}}
+                selectItem={item => {
+                  if (isMultiple) {
+                    return dispatch({ type: 'SELECT_ITEM', item });
+                  }
+                  const selectedItems = state.selectedItems.filter(
+                    i => i.kind !== item.kind
+                  );
+                  selectedItems.push(item);
+                  return dispatch({
+                    type: 'SET_SELECTED_ITEMS',
+                    selectedItems,
+                  });
+                }}
+                deselectItem={item => dispatch({ type: 'DESELECT_ITEM', item })}
               />
             </>
           );

@@ -171,11 +171,7 @@ const Item = shape({
 
 Lookup.propTypes = {
   id: string,
-  // items: arrayOf(shape({})).isRequired,
-  // count: number.isRequired,
-  // TODO: change to `header`
   header: string,
-  // name: string,
   onChange: func.isRequired,
   value: oneOfType([Item, arrayOf(Item)]),
   multiple: bool,
@@ -189,7 +185,6 @@ Lookup.propTypes = {
 Lookup.defaultProps = {
   id: 'lookup-search',
   header: null,
-  // name: null,
   value: null,
   multiple: false,
   required: false,

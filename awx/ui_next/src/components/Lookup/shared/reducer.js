@@ -15,6 +15,8 @@ export default function reducer(state, action) {
       return { ...state, multiple: action.value };
     case 'SET_VALUE':
       return { ...state, value: action.value };
+    case 'SET_SELECTED_ITEMS':
+      return { ...state, selectedItems: action.selectedItems };
     default:
       throw new Error(`Unrecognized action type: ${action.type}`);
   }
