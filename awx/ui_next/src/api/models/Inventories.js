@@ -14,6 +14,10 @@ class Inventories extends InstanceGroupsMixin(Base) {
       params,
     });
   }
+
+  readHosts(id, params) {
+    return this.http.get(`${this.baseUrl}${id}/hosts/`, { params });
+  }
 }
 
 export default Inventories;

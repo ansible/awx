@@ -6,8 +6,8 @@ import { t } from '@lingui/macro';
 import { Config } from '@contexts/Config';
 import Breadcrumbs from '@components/Breadcrumbs/Breadcrumbs';
 
-import HostsList from './HostList/HostList';
-import HostAdd from './HostAdd/HostAdd';
+import HostList from './HostList';
+import HostAdd from './HostAdd';
 import Host from './Host';
 
 class Hosts extends Component {
@@ -69,7 +69,7 @@ class Hosts extends Component {
               </Config>
             )}
           />
-          <Route path={`${match.path}`} render={() => <HostsList />} />
+          <Route path={`${match.path}`} render={() => <HostList />} />
         </Switch>
       </Fragment>
     );

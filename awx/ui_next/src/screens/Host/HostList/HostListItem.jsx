@@ -6,7 +6,6 @@ import {
   DataListItem,
   DataListItemRow,
   DataListItemCells,
-  Switch as PFSwitch,
   Tooltip,
 } from '@patternfly/react-core';
 import { Link } from 'react-router-dom';
@@ -17,17 +16,9 @@ import DataListCell from '@components/DataListCell';
 import DataListCheck from '@components/DataListCheck';
 import ListActionButton from '@components/ListActionButton';
 import { Sparkline } from '@components/Sparkline';
+import Switch from '@components/Switch';
 import VerticalSeparator from '@components/VerticalSeparator';
 import { Host } from '@types';
-
-import styled from 'styled-components';
-
-const Switch = styled(PFSwitch)`
-  display: flex;
-  flex-wrap: no-wrap;
-  /* workaround PF bug; used in calculating switch width: */
-  --pf-c-switch__toggle-icon--Offset: 0.125rem;
-`;
 
 class HostListItem extends React.Component {
   static propTypes = {
