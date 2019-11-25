@@ -25,10 +25,13 @@ const DetailValue = styled(({ fullWidth, ...props }) => (
   `}
 `;
 
-const Detail = ({ label, value, fullWidth, className }) => {
+const Detail = ({ label, value, fullWidth, className, dataCy }) => {
   if (!value && typeof value !== 'number') {
     return null;
   }
+
+  const labelCy = dataCy ? `${dataCy}-label` : null;
+  const valueCy = dataCy ? `${dataCy}-value` : null;
 
   return (
     <>
@@ -36,6 +39,7 @@ const Detail = ({ label, value, fullWidth, className }) => {
         className={className}
         component={TextListItemVariants.dt}
         fullWidth={fullWidth}
+        data-cy={labelCy}
       >
         {label}
       </DetailName>
@@ -43,6 +47,7 @@ const Detail = ({ label, value, fullWidth, className }) => {
         className={className}
         component={TextListItemVariants.dd}
         fullWidth={fullWidth}
+        data-cy={valueCy}
       >
         {value}
       </DetailValue>

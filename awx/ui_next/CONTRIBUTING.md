@@ -112,6 +112,9 @@ afterEach(() => {
 ...
 ```
 
+**Test Attributes** - 
+It should be noted that the `dataCy` prop, as well as its equivalent attribute `data-cy`, are used as flags for any UI test that wants to avoid relying on brittle CSS selectors such as `nth-of-type()`.
+
 ## Handling API Errors
 API requests can and will fail occasionally so they should include explicit error handling. The three _main_ categories of errors from our perspective are: content loading errors, form submission errors, and other errors. The patterns currently in place for these are described below:
 
