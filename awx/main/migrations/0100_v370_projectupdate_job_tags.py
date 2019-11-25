@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0098_v360_rename_cyberark_aim_credential_type'),
+        ('main', '0099_v361_license_cleanup'),
     ]
 
     operations = [
