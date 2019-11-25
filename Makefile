@@ -100,7 +100,7 @@ clean-languages:
 	find . -type f -regex ".*\.mo$$" -delete
 
 # Remove temporary build files, compiled Python files.
-clean: clean-ui clean-api clean-dist
+clean: clean-ui clean-api clean-awxkit clean-dist
 	rm -rf awx/public
 	rm -rf awx/lib/site-packages
 	rm -rf awx/job_status
@@ -116,6 +116,9 @@ clean-api:
 	find . -type d -name "__pycache__" -delete
 	rm -f awx/awx_test.sqlite3*
 	rm -rf requirements/vendor
+
+clean-awxkit:
+	rm -rf awxkit/*.egg-info awxkit/.tox
 
 # convenience target to assert environment variables are defined
 guard-%:
