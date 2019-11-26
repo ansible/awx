@@ -7,8 +7,9 @@ import { FormGroup } from '@patternfly/react-core';
 import { InstanceGroupsAPI } from '@api';
 import { getQSConfig, parseQueryString } from '@util/qs';
 import { FieldTooltip } from '@components/FormField';
-import Lookup from './NewLookup';
-import SelectList from './shared/SelectList';
+import Lookup from './Lookup';
+import OptionsList from './shared/OptionsList';
+import LookupErrorMessage from './shared/LookupErrorMessage';
 
 const QS_CONFIG = getQSConfig('instance_groups', {
   page: 1,
@@ -45,17 +46,12 @@ function InstanceGroupsLookup(props) {
       <Lookup
         id="org-instance-groups"
         header={i18n._(t`Instance Groups`)}
-        // name="instanceGroups"
         value={value}
         onChange={onChange}
-        // items={instanceGroups}
-        // count={count}
         qsConfig={QS_CONFIG}
         multiple
-        // columns={}
-        sortedColumnKey="name"
-        renderSelectList={({ state, dispatch, canDelete }) => (
-          <SelectList
+        renderOptionsList={({ state, dispatch, canDelete }) => (
+          <OptionsList
             value={state.selectedItems}
             options={instanceGroups}
             optionCount={count}
@@ -89,7 +85,7 @@ function InstanceGroupsLookup(props) {
           />
         )}
       />
-      {error ? <div>error {error.message}</div> : ''}
+      <LookupErrorMessage error={error} />
     </FormGroup>
   );
 }

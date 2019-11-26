@@ -10,8 +10,8 @@ import { FieldTooltip } from '@components/FormField';
 import { CredentialChip } from '@components/Chip';
 import VerticalSeperator from '@components/VerticalSeparator';
 import { getQSConfig, parseQueryString } from '@util/qs';
-import Lookup from './NewLookup';
-import SelectList from './shared/SelectList';
+import Lookup from './Lookup';
+import OptionsList from './shared/OptionsList';
 
 const QS_CONFIG = getQSConfig('credentials', {
   page: 1,
@@ -37,7 +37,6 @@ function MultiCredentialsLookup(props) {
   const [selectedType, setSelectedType] = useState(null);
   const [credentials, setCredentials] = useState([]);
   const [credentialsCount, setCredentialsCount] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -60,12 +59,10 @@ function MultiCredentialsLookup(props) {
       }
       try {
         const params = parseQueryString(QS_CONFIG, history.location.search);
-        setIsLoading(true);
         const { results, count } = await loadCredentials(
           params,
           selectedType.id
         );
-        setIsLoading(false);
         setCredentials(results);
         setCredentialsCount(count);
       } catch (err) {
@@ -74,7 +71,7 @@ function MultiCredentialsLookup(props) {
     })();
   }, [selectedType]);
 
-  const isMultiple = selectedType && selectedType.value === 'Vault';
+  const isMultiple = selectedType && selectedType.name === 'Vault';
   const renderChip = ({ item, removeItem, canDelete }) => (
     <CredentialChip
       key={item.id}
@@ -95,7 +92,7 @@ function MultiCredentialsLookup(props) {
         onChange={onChange}
         qsConfig={QS_CONFIG}
         renderItemChip={renderChip}
-        renderSelectList={({ state, dispatch, canDelete }) => {
+        renderOptionsList={({ state, dispatch, canDelete }) => {
           return (
             <Fragment>
               {credentialTypes && credentialTypes.length > 0 && (
@@ -107,7 +104,7 @@ function MultiCredentialsLookup(props) {
                     id="multiCredentialsLookUp-select"
                     label={i18n._(t`Selected Category`)}
                     data={credentialTypes.map(type => ({
-                      id: type.id,
+                      key: type.id,
                       value: type.id,
                       label: type.name,
                       isDisabled: false,
@@ -121,7 +118,7 @@ function MultiCredentialsLookup(props) {
                   />
                 </ToolbarItem>
               )}
-              <SelectList
+              <OptionsList
                 value={state.selectedItems}
                 options={credentials}
                 optionCount={credentialsCount}

@@ -38,7 +38,7 @@ class AnsibleSelect extends React.Component {
       >
         {data.map(option => (
           <FormSelectOption
-            key={option.id}
+            key={option.key}
             value={option.value}
             label={option.label}
             isDisabled={option.isDisabled}
@@ -50,7 +50,7 @@ class AnsibleSelect extends React.Component {
 }
 
 const Option = shape({
-  id: oneOfType([string, number]).isRequired,
+  key: oneOfType([string, number]).isRequired,
   value: oneOfType([string, number]).isRequired,
   label: string.isRequired,
   isDisabled: bool,

@@ -1,13 +1,17 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { string, func, bool } from 'prop-types';
+import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { string, func, bool } from 'prop-types';
 import { OrganizationsAPI } from '@api';
 import { Organization } from '@types';
 import { FormGroup } from '@patternfly/react-core';
-import Lookup from '@components/Lookup';
+import { getQSConfig, parseQueryString } from '@util/qs';
+import Lookup from './Lookup';
+import OptionsList from './shared/OptionsList';
+import LookupErrorMessage from './shared/LookupErrorMessage';
 
-const getOrganizations = async params => OrganizationsAPI.read(params);
+const QS_CONFIG = getQSConfig('organizations', {});
 
 function OrganizationLookup({
   helperTextInvalid,
@@ -17,7 +21,25 @@ function OrganizationLookup({
   onChange,
   required,
   value,
+  history,
 }) {
+  const [organizations, setOrganizations] = useState([]);
+  const [count, setCount] = useState(0);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    (async () => {
+      const params = parseQueryString(QS_CONFIG, history.location.search);
+      try {
+        const { data } = await OrganizationsAPI.read(params);
+        setOrganizations(data.results);
+        setCount(data.count);
+      } catch (err) {
+        setError(err);
+      }
+    })();
+  }, [history.location]);
+
   return (
     <FormGroup
       fieldId="organization"
@@ -28,15 +50,29 @@ function OrganizationLookup({
     >
       <Lookup
         id="organization"
-        lookupHeader={i18n._(t`Organization`)}
-        name="organization"
+        header={i18n._(t`Organization`)}
         value={value}
         onBlur={onBlur}
         onChange={onChange}
-        getItems={getOrganizations}
+        qsConfig={QS_CONFIG}
         required={required}
         sortedColumnKey="name"
+        renderOptionsList={({ state, dispatch, canDelete }) => (
+          <OptionsList
+            value={state.selectedItems}
+            options={organizations}
+            optionCount={count}
+            multiple={state.multiple}
+            header={i18n._(t`Organization`)}
+            name="organization"
+            qsConfig={QS_CONFIG}
+            readOnly={!canDelete}
+            selectItem={item => dispatch({ type: 'SELECT_ITEM', item })}
+            deselectItem={item => dispatch({ type: 'DESELECT_ITEM', item })}
+          />
+        )}
       />
+      <LookupErrorMessage error={error} />
     </FormGroup>
   );
 }
@@ -58,5 +94,5 @@ OrganizationLookup.defaultProps = {
   value: null,
 };
 
-export default withI18n()(OrganizationLookup);
 export { OrganizationLookup as _OrganizationLookup };
+export default withI18n()(withRouter(OrganizationLookup));

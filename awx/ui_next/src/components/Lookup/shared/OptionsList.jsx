@@ -16,7 +16,7 @@ import CheckboxListItem from '../../CheckboxListItem';
 import DataListToolbar from '../../DataListToolbar';
 import { QSConfig } from '@types';
 
-function SelectList({
+function OptionsList({
   value,
   options,
   optionCount,
@@ -71,7 +71,7 @@ function SelectList({
 const Item = shape({
   id: oneOfType([number, string]).isRequired,
 });
-SelectList.propTypes = {
+OptionsList.propTypes = {
   value: arrayOf(Item).isRequired,
   options: arrayOf(Item).isRequired,
   optionCount: number.isRequired,
@@ -82,9 +82,9 @@ SelectList.propTypes = {
   deselectItem: func.isRequired,
   renderItemChip: func,
 };
-SelectList.defaultProps = {
+OptionsList.defaultProps = {
   multiple: false,
   renderItemChip: null,
 };
 
-export default withI18n()(SelectList);
+export default withI18n()(OptionsList);

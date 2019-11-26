@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useReducer, useEffect } from 'react';
 import {
   string,
   bool,
@@ -20,7 +20,7 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
 
-import SelectList from './shared/SelectList';
+import reducer, { initReducer } from './shared/reducer';
 import { ChipGroup, Chip } from '../Chip';
 import { QSConfig } from '@types';
 
@@ -48,198 +48,118 @@ const ChipHolder = styled.div`
   border-bottom-right-radius: 3px;
 `;
 
-class Lookup extends React.Component {
-  constructor(props) {
-    super(props);
+function Lookup(props) {
+  const {
+    id,
+    header,
+    onChange,
+    onBlur,
+    value,
+    multiple,
+    required,
+    qsConfig,
+    renderItemChip,
+    renderOptionsList,
+    history,
+    i18n,
+  } = props;
 
-    this.assertCorrectValueType();
-    let selectedItems = [];
-    if (props.value) {
-      selectedItems = props.multiple ? [...props.value] : [props.value];
-    }
-    this.state = {
-      isModalOpen: false,
-      selectedItems,
-    };
-    this.handleModalToggle = this.handleModalToggle.bind(this);
-    this.addItem = this.addItem.bind(this);
-    this.removeItem = this.removeItem.bind(this);
-    this.saveModal = this.saveModal.bind(this);
-    this.clearQSParams = this.clearQSParams.bind(this);
-  }
+  const [state, dispatch] = useReducer(
+    reducer,
+    { value, multiple, required },
+    initReducer
+  );
 
-  assertCorrectValueType() {
-    const { multiple, value } = this.props;
-    if (!multiple && Array.isArray(value)) {
-      throw new Error(
-        'Lookup value must not be an array unless `multiple` is set'
-      );
-    }
-    if (multiple && !Array.isArray(value)) {
-      throw new Error('Lookup value must be an array if `multiple` is set');
-    }
-  }
+  useEffect(() => {
+    dispatch({ type: 'SET_MULTIPLE', value: multiple });
+  }, [multiple]);
 
-  removeItem(row) {
-    const { selectedItems } = this.state;
-    const { onToggleItem } = this.props;
-    if (onToggleItem) {
-      this.setState({ selectedItems: onToggleItem(selectedItems, row) });
-      return;
-    }
-    this.setState({
-      selectedItems: selectedItems.filter(item => item.id !== row.id),
-    });
-  }
+  useEffect(() => {
+    dispatch({ type: 'SET_VALUE', value });
+  }, [value]);
 
-  addItem(row) {
-    const { selectedItems } = this.state;
-    const { multiple, onToggleItem } = this.props;
-    if (onToggleItem) {
-      this.setState({ selectedItems: onToggleItem(selectedItems, row) });
-      return;
-    }
-    const index = selectedItems.findIndex(item => item.id === row.id);
-
-    if (!multiple) {
-      this.setState({ selectedItems: [row] });
-      return;
-    }
-    if (index > -1) {
-      return;
-    }
-    this.setState({ selectedItems: [...selectedItems, row] });
-  }
-
-  // TODO: cleanup
-  handleModalToggle() {
-    const { isModalOpen } = this.state;
-    const { value, multiple } = this.props;
-    // Resets the selected items from parent state whenever modal is opened
-    // This handles the case where the user closes/cancels the modal and
-    // opens it again
-    if (!isModalOpen) {
-      let selectedItems = [];
-      if (value) {
-        selectedItems = multiple ? [...value] : [value];
-      }
-      this.setState({ selectedItems });
-    } else {
-      this.clearQSParams();
-    }
-    this.setState(prevState => ({
-      isModalOpen: !prevState.isModalOpen,
-    }));
-  }
-
-  removeItemAndSave(item) {
-    const { value, onChange, multiple } = this.props;
-    if (multiple) {
-      onChange(value.filter(i => i.id !== item.id));
-    } else if (value.id === item.id) {
-      onChange(null);
-    }
-  }
-
-  saveModal() {
-    const { onChange, multiple } = this.props;
-    const { selectedItems } = this.state;
-    const value = multiple ? selectedItems : selectedItems[0] || null;
-
-    this.handleModalToggle();
-    onChange(value);
-  }
-
-  clearQSParams() {
-    const { qsConfig, history } = this.props;
+  const clearQSParams = () => {
     const parts = history.location.search.replace(/^\?/, '').split('&');
     const ns = qsConfig.namespace;
     const otherParts = parts.filter(param => !param.startsWith(`${ns}.`));
     history.push(`${history.location.pathname}?${otherParts.join('&')}`);
-  }
+  };
 
-  render() {
-    const { isModalOpen, selectedItems } = this.state;
-    const {
-      id,
-      lookupHeader,
-      value,
-      items,
-      count,
-      columns,
-      multiple,
-      name,
-      onBlur,
-      required,
-      qsConfig,
-      i18n,
-    } = this.props;
-    const header = lookupHeader || i18n._(t`Items`);
-    const canDelete = !required || (multiple && value.length > 1);
-    return (
-      <Fragment>
-        <InputGroup onBlur={onBlur}>
-          <SearchButton
-            aria-label="Search"
-            id={id}
-            onClick={this.handleModalToggle}
-            variant={ButtonVariant.tertiary}
-          >
-            <SearchIcon />
-          </SearchButton>
-          <ChipHolder className="pf-c-form-control">
-            <ChipGroup defaultIsOpen numChips={5}>
-              {(multiple ? value : [value]).map(chip => (
-                <Chip
-                  key={chip.id}
-                  onClick={() => this.removeItemAndSave(chip)}
-                  isReadOnly={!canDelete}
-                >
-                  {chip.name}
-                </Chip>
-              ))}
-            </ChipGroup>
-          </ChipHolder>
-        </InputGroup>
-        <Modal
-          className="awx-c-modal"
-          title={i18n._(t`Select ${header}`)}
-          isOpen={isModalOpen}
-          onClose={this.handleModalToggle}
-          actions={[
-            <Button
-              key="select"
-              variant="primary"
-              onClick={this.saveModal}
-              style={selectedItems.length === 0 ? { display: 'none' } : {}}
-            >
-              {i18n._(t`Select`)}
-            </Button>,
-            <Button
-              key="cancel"
-              variant="secondary"
-              onClick={this.handleModalToggle}
-            >
-              {i18n._(t`Cancel`)}
-            </Button>,
-          ]}
+  const save = () => {
+    const { selectedItems } = state;
+    const val = multiple ? selectedItems : selectedItems[0] || null;
+    onChange(val);
+    clearQSParams();
+    dispatch({ type: 'CLOSE_MODAL' });
+  };
+
+  const removeItem = item => {
+    if (multiple) {
+      onChange(value.filter(i => i.id !== item.id));
+    } else {
+      onChange(null);
+    }
+  };
+
+  const closeModal = () => {
+    clearQSParams();
+    dispatch({ type: 'CLOSE_MODAL' });
+  };
+
+  const { isModalOpen, selectedItems } = state;
+  const canDelete = !required || (multiple && value.length > 1);
+  return (
+    <Fragment>
+      <InputGroup onBlur={onBlur}>
+        <SearchButton
+          aria-label="Search"
+          id={id}
+          onClick={() => dispatch({ type: 'TOGGLE_MODAL' })}
+          variant={ButtonVariant.tertiary}
         >
-          <SelectList
-            value={selectedItems}
-            onChange={newVal => this.setState({ selectedItems: newVal })}
-            options={items}
-            optionCount={count}
-            columns={columns}
-            multiple={multiple}
-            header={lookupHeader}
-            name={name}
-            qsConfig={qsConfig}
-            readOnly={!canDelete}
-          />
-        </Modal>
-      </Fragment>
-    );
-  }
+          <SearchIcon />
+        </SearchButton>
+        <ChipHolder className="pf-c-form-control">
+          <ChipGroup>
+            {(multiple ? value : [value]).map(item =>
+              renderItemChip({
+                item,
+                removeItem,
+                canDelete,
+              })
+            )}
+          </ChipGroup>
+        </ChipHolder>
+      </InputGroup>
+      <Modal
+        className="awx-c-modal"
+        title={i18n._(t`Select ${header || i18n._(t`Items`)}`)}
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        actions={[
+          <Button
+            key="select"
+            variant="primary"
+            onClick={save}
+            style={
+              required && selectedItems.length === 0 ? { display: 'none' } : {}
+            }
+          >
+            {i18n._(t`Select`)}
+          </Button>,
+          <Button key="cancel" variant="secondary" onClick={closeModal}>
+            {i18n._(t`Cancel`)}
+          </Button>,
+        ]}
+      >
+        {renderOptionsList({
+          state,
+          dispatch,
+          canDelete,
+        })}
+      </Modal>
+    </Fragment>
+  );
 }
 
 const Item = shape({
@@ -248,25 +168,33 @@ const Item = shape({
 
 Lookup.propTypes = {
   id: string,
-  items: arrayOf(shape({})).isRequired,
-  count: number.isRequired,
-  // TODO: change to `header`
-  lookupHeader: string,
-  name: string,
+  header: string,
   onChange: func.isRequired,
   value: oneOfType([Item, arrayOf(Item)]),
   multiple: bool,
   required: bool,
+  onBlur: func,
   qsConfig: QSConfig.isRequired,
+  renderItemChip: func,
+  renderOptionsList: func.isRequired,
 };
 
 Lookup.defaultProps = {
   id: 'lookup-search',
-  lookupHeader: null,
-  name: null,
+  header: null,
   value: null,
   multiple: false,
   required: false,
+  onBlur: () => {},
+  renderItemChip: ({ item, removeItem, canDelete }) => (
+    <Chip
+      key={item.id}
+      onClick={() => removeItem(item)}
+      isReadOnly={!canDelete}
+    >
+      {item.name}
+    </Chip>
+  ),
 };
 
 export { Lookup as _Lookup };
