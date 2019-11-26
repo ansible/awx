@@ -71,10 +71,11 @@ def run_module(request):
             resp.status_code = django_response.status_code
 
             if request.config.getoption('verbose') > 0:
-                logger.info('{} {} by {}, code:{}'.format(
+                logger.info(
+                    '%s %s by %s, code:%s',
                     method, '/api/' + url.split('/api/')[1],
                     request_user.username, resp.status_code
-                ))
+                )
 
             return resp
 
