@@ -186,7 +186,7 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
 
         if (_.has(schedule, 'summary_fields.unified_job_template.unified_job_type') &&
             schedule.summary_fields.unified_job_template.unified_job_type === 'system_job'){
-            let scheduleJobType = _.get(schedule.summary_fields.unified_job_template, 'job_type')
+            let scheduleJobType = _.get(schedule.summary_fields.unified_job_template, 'job_type');
             if (scheduleJobType !== 'cleanup_tokens' && scheduleJobType !== 'cleanup_sessions') {
                 $scope.askDaysToKeep = true;
             }
