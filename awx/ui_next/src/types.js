@@ -229,3 +229,23 @@ export const User = shape({
   ldap_dn: string,
   last_login: string,
 });
+
+export const Group = shape({
+  id: number.isRequired,
+  type: oneOf(['group']),
+  url: string,
+  related: shape({}),
+  summary_fields: shape({}),
+  created: string,
+  modified: string,
+  name: string.isRequired,
+  description: string,
+  inventory: number,
+  variables: string,
+  has_active_failures: bool,
+  total_hosts: number,
+  hosts_with_active_failures: number,
+  total_groups: number,
+  groups_with_active_failures: number,
+  has_inventory_sources: bool,
+});

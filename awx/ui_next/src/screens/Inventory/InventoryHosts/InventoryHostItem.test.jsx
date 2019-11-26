@@ -20,7 +20,7 @@ const mockHost = {
   },
 };
 
-describe.only('<InventoryHostItem />', () => {
+describe('<InventoryHostItem />', () => {
   beforeEach(() => {
     toggleHost = jest.fn();
   });
