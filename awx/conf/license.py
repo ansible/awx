@@ -1,13 +1,12 @@
 # Copyright (c) 2016 Ansible, Inc.
 # All Rights Reserved.
 
-# Tower
-from awx.main.utils.common import get_licenser
 
 __all__ = ['get_license']
 
 
 def _get_validated_license_data():
+    from awx.main.utils.common import get_licenser
     return get_licenser().validate()
 
 
