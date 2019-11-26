@@ -18,12 +18,6 @@ const QS_CONFIG = getQSConfig('notification', {
   order_by: 'name',
 });
 
-const COLUMNS = [
-  { key: 'name', name: 'Name', isSortable: true, isSearchable: true },
-  { key: 'modified', name: 'Modified', isSortable: true, isNumeric: true },
-  { key: 'created', name: 'Created', isSortable: true, isNumeric: true },
-];
-
 class NotificationList extends Component {
   constructor(props) {
     super(props);
@@ -204,7 +198,35 @@ class NotificationList extends Component {
           itemCount={itemCount}
           pluralizedItemName={i18n._(t`Notifications`)}
           qsConfig={QS_CONFIG}
-          toolbarColumns={COLUMNS}
+          toolbarSearchColumns={[
+            {
+              name: i18n._(t`Name`),
+              key: 'name',
+              isDefault: true
+            },
+            {
+              name: i18n._(t`Modified`),
+              key: 'modified',
+            },
+            {
+              name: i18n._(t`Created`),
+              key: 'created',
+            },
+          ]}
+          toolbarSortColumns={[
+            {
+              name: i18n._(t`Name`),
+              key: 'name',
+            },
+            {
+              name: i18n._(t`Modified`),
+              key: 'modified',
+            },
+            {
+              name: i18n._(t`Created`),
+              key: 'created',
+            },
+          ]}
           renderItem={notification => (
             <NotificationListItem
               key={notification.id}

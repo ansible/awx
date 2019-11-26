@@ -8,14 +8,13 @@ import {
   ToolbarGroup as PFToolbarGroup,
   ToolbarItem,
 } from '@patternfly/react-core';
-
 import styled from 'styled-components';
 import ExpandCollapse from '../ExpandCollapse';
 import Search from '../Search';
 import Sort from '../Sort';
 import VerticalSeparator from '../VerticalSeparator';
 
-import { QSConfig } from '@types';
+import { SearchColumns, SortColumns, QSConfig } from '@types';
 
 const AWXToolbar = styled.div`
   --awx-toolbar--BackgroundColor: var(--pf-global--BackgroundColor--light-100);
@@ -86,7 +85,8 @@ const AdditionalControlsWrapper = styled.div`
 class DataListToolbar extends React.Component {
   render() {
     const {
-      columns,
+      searchColumns,
+      sortColumns,
       showSelectAll,
       isAllSelected,
       isCompact,
@@ -96,8 +96,6 @@ class DataListToolbar extends React.Component {
       onCompact,
       onExpand,
       onSelectAll,
-      sortOrder,
-      sortedColumnKey,
       additionalControls,
       i18n,
       qsConfig,
@@ -124,9 +122,8 @@ class DataListToolbar extends React.Component {
             <ToolbarItem css="flex-grow: 1;">
               <Search
                 qsConfig={qsConfig}
-                columns={columns}
+                columns={searchColumns}
                 onSearch={onSearch}
-                sortedColumnKey={sortedColumnKey}
               />
             </ToolbarItem>
             <VerticalSeparator />
@@ -134,10 +131,9 @@ class DataListToolbar extends React.Component {
           <ColumnRight fillWidth={fillWidth}>
             <ToolbarItem>
               <Sort
-                columns={columns}
+                qsConfig={qsConfig}
+                columns={sortColumns}
                 onSort={onSort}
-                sortOrder={sortOrder}
-                sortedColumnKey={sortedColumnKey}
               />
             </ToolbarItem>
             {showExpandCollapse && (
@@ -165,7 +161,8 @@ class DataListToolbar extends React.Component {
 
 DataListToolbar.propTypes = {
   qsConfig: QSConfig.isRequired,
-  columns: PropTypes.arrayOf(PropTypes.object).isRequired,
+  searchColumns: SearchColumns.isRequired,
+  sortColumns: SortColumns.isRequired,
   showSelectAll: PropTypes.bool,
   isAllSelected: PropTypes.bool,
   isCompact: PropTypes.bool,
@@ -175,8 +172,6 @@ DataListToolbar.propTypes = {
   onSearch: PropTypes.func,
   onSelectAll: PropTypes.func,
   onSort: PropTypes.func,
-  sortOrder: PropTypes.string,
-  sortedColumnKey: PropTypes.string,
   additionalControls: PropTypes.arrayOf(PropTypes.node),
 };
 
@@ -190,8 +185,6 @@ DataListToolbar.defaultProps = {
   onSearch: null,
   onSelectAll: null,
   onSort: null,
-  sortOrder: 'ascending',
-  sortedColumnKey: 'name',
   additionalControls: [],
 };
 

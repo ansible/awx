@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withI18n } from '@lingui/react';
+import { withRouter } from 'react-router-dom';
 import { t } from '@lingui/macro';
 import {
   Button,
@@ -18,6 +19,11 @@ import {
 } from '@patternfly/react-icons';
 
 import styled from 'styled-components';
+
+import {
+  parseQueryString
+} from '@util/qs';
+import { SortColumns, QSConfig } from '@types';
 
 const Dropdown = styled(PFDropdown)`
   &&& {
@@ -68,8 +74,31 @@ class Sort extends React.Component {
   constructor(props) {
     super(props);
 
+    let sortKey;
+    let sortOrder;
+    let isNumeric;
+
+    const { qsConfig, location } = this.props;
+    const queryParams = parseQueryString(qsConfig, location.search);
+    if (queryParams.order_by && queryParams.order_by.startsWith('-')) {
+      sortKey = queryParams.order_by.substr(1);
+      sortOrder = 'descending';
+    } else if (queryParams.order_by) {
+      sortKey = queryParams.order_by;
+      sortOrder = 'ascending';
+    }
+
+    if (qsConfig.integerFields.filter(field => field === sortKey).length) {
+      isNumeric = true;
+    } else {
+      isNumeric = false;
+    }
+
     this.state = {
       isSortDropdownOpen: false,
+      sortKey,
+      sortOrder,
+      isNumeric
     };
 
     this.handleDropdownToggle = this.handleDropdownToggle.bind(this);
@@ -82,34 +111,44 @@ class Sort extends React.Component {
   }
 
   handleDropdownSelect({ target }) {
-    const { columns, onSort, sortOrder } = this.props;
+    const { columns, onSort, qsConfig } = this.props;
+    const { sortOrder } = this.state;
     const { innerText } = target;
 
-    const [{ key: searchKey }] = columns.filter(
+    const [{ key: sortKey }] = columns.filter(
       ({ name }) => name === innerText
     );
 
-    this.setState({ isSortDropdownOpen: false });
-    onSort(searchKey, sortOrder);
+    let isNumeric;
+
+    if (qsConfig.integerFields.filter(field => field === sortKey).length) {
+      isNumeric = true;
+    } else {
+      isNumeric = false;
+    }
+
+    this.setState({ isSortDropdownOpen: false, sortKey, isNumeric });
+    onSort(sortKey, sortOrder);
   }
 
   handleSort() {
-    const { onSort, sortedColumnKey, sortOrder } = this.props;
+    const { onSort } = this.props;
+    const { sortKey, sortOrder } = this.state;
     const newSortOrder = sortOrder === 'ascending' ? 'descending' : 'ascending';
-
-    onSort(sortedColumnKey, newSortOrder);
+    this.setState({ sortOrder: newSortOrder });
+    onSort(sortKey, newSortOrder);
   }
 
   render() {
     const { up } = DropdownPosition;
-    const { columns, sortedColumnKey, sortOrder, i18n } = this.props;
-    const { isSortDropdownOpen } = this.state;
-    const [{ name: sortedColumnName, isNumeric }] = columns.filter(
-      ({ key }) => key === sortedColumnKey
+    const { columns, i18n } = this.props;
+    const { isSortDropdownOpen, sortKey, sortOrder, isNumeric } = this.state;
+    const [{ name: sortedColumnName }] = columns.filter(
+      ({ key }) => key === sortKey
     );
 
     const sortDropdownItems = columns
-      .filter(({ key, isSortable }) => isSortable && key !== sortedColumnKey)
+      .filter(({ key }) => key !== sortKey)
       .map(({ key, name }) => (
         <DropdownItem key={key} component="button">
           {name}
@@ -168,16 +207,13 @@ class Sort extends React.Component {
 }
 
 Sort.propTypes = {
-  columns: PropTypes.arrayOf(PropTypes.object).isRequired,
-  onSort: PropTypes.func,
-  sortOrder: PropTypes.string,
-  sortedColumnKey: PropTypes.string,
+  qsConfig: QSConfig.isRequired,
+  columns: SortColumns.isRequired,
+  onSort: PropTypes.func
 };
 
 Sort.defaultProps = {
-  onSort: null,
-  sortOrder: 'ascending',
-  sortedColumnKey: 'name',
+  onSort: null
 };
 
-export default withI18n()(Sort);
+export default withI18n()(withRouter(Sort));

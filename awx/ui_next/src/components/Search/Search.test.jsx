@@ -8,7 +8,7 @@ describe('<Search />', () => {
   const QS_CONFIG = {
     namespace: 'organization',
     dateFields: ['modified', 'created'],
-    defaultParams: { page: 1, page_size: 5, order_by: 'name' },
+    defaulkntParams: { page: 1, page_size: 5, order_by: 'name' },
     integerFields: ['page', 'page_size'],
   };
 
@@ -20,7 +20,7 @@ describe('<Search />', () => {
 
   test('it triggers the expected callbacks', () => {
     const columns = [
-      { name: 'Name', key: 'name', isSortable: true, isSearchable: true },
+      { name: 'Name', key: 'name', isDefault: true }
     ];
 
     const searchBtn = 'button[aria-label="Search submit button"]';
@@ -31,7 +31,6 @@ describe('<Search />', () => {
     search = mountWithContexts(
       <Search
         qsConfig={QS_CONFIG}
-        sortedColumnKey="name"
         columns={columns}
         onSearch={onSearch}
       />
@@ -47,13 +46,12 @@ describe('<Search />', () => {
 
   test('handleDropdownToggle properly updates state', async () => {
     const columns = [
-      { name: 'Name', key: 'name', isSortable: true, isSearchable: true },
+      { name: 'Name', key: 'name', isDefault: true }
     ];
     const onSearch = jest.fn();
     const wrapper = mountWithContexts(
       <Search
         qsConfig={QS_CONFIG}
-        sortedColumnKey="name"
         columns={columns}
         onSearch={onSearch}
       />
@@ -65,19 +63,13 @@ describe('<Search />', () => {
 
   test('handleDropdownSelect properly updates state', async () => {
     const columns = [
-      { name: 'Name', key: 'name', isSortable: true, isSearchable: true },
-      {
-        name: 'Description',
-        key: 'description',
-        isSortable: true,
-        isSearchable: true,
-      },
+      { name: 'Name', key: 'name', isDefault: true },
+      { name: 'Description', key: 'description' },
     ];
     const onSearch = jest.fn();
     const wrapper = mountWithContexts(
       <Search
         qsConfig={QS_CONFIG}
-        sortedColumnKey="name"
         columns={columns}
         onSearch={onSearch}
       />

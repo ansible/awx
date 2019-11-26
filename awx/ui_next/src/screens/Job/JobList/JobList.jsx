@@ -163,18 +163,25 @@ class JobList extends Component {
             pluralizedItemName="Jobs"
             qsConfig={QS_CONFIG}
             onRowClick={this.handleSelect}
-            toolbarColumns={[
+            toolbarSearchColumns={[
               {
                 name: i18n._(t`Name`),
                 key: 'name',
-                isSortable: true,
-                isSearchable: true,
+                isDefault: true
               },
               {
                 name: i18n._(t`Finished`),
                 key: 'finished',
-                isSortable: true,
-                isNumeric: true,
+              },
+            ]}
+            toolbarSortColumns={[
+              {
+                name: i18n._(t`Name`),
+                key: 'name',
+              },
+              {
+                name: i18n._(t`Finished`),
+                key: 'finished',
               },
             ]}
             renderToolbar={props => (

@@ -249,3 +249,18 @@ export const Group = shape({
   inventory: number,
   variables: string,
 });
+
+export const SearchColumns = arrayOf(
+  shape({
+    name: string.isRequired,
+    key: string.isRequired,
+    isDefault: bool,
+  })
+);
+
+export const SortColumns = arrayOf(
+  shape({
+    name: string.isRequired,
+    key: string.isRequired,
+  })
+);

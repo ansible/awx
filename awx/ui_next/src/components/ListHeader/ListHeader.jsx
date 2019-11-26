@@ -1,8 +1,7 @@
 import React, { Fragment } from 'react';
-import PropTypes, { arrayOf, shape, string, bool } from 'prop-types';
+import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import styled from 'styled-components';
-
 import DataListToolbar from '@components/DataListToolbar';
 import FilterTags from '@components/FilterTags';
 
@@ -13,7 +12,7 @@ import {
   replaceParams,
   removeParams,
 } from '@util/qs';
-import { QSConfig } from '@types';
+import { QSConfig, SearchColumns, SortColumns } from '@types';
 
 const EmptyStateControlsWrapper = styled.div`
   display: flex;
@@ -34,15 +33,6 @@ class ListHeader extends React.Component {
     this.handleSort = this.handleSort.bind(this);
     this.handleRemove = this.handleRemove.bind(this);
     this.handleRemoveAll = this.handleRemoveAll.bind(this);
-  }
-
-  getSortOrder() {
-    const { qsConfig, location } = this.props;
-    const queryParams = parseQueryString(qsConfig, location.search);
-    if (queryParams.order_by && queryParams.order_by.startsWith('-')) {
-      return [queryParams.order_by.substr(1), 'descending'];
-    }
-    return [queryParams.order_by, 'ascending'];
   }
 
   handleSearch(key, value) {
@@ -83,12 +73,12 @@ class ListHeader extends React.Component {
     const {
       emptyStateControls,
       itemCount,
-      columns,
+      searchColumns,
+      sortColumns,
       renderToolbar,
       qsConfig,
       location,
     } = this.props;
-    const [orderBy, sortOrder] = this.getSortOrder();
     const params = parseQueryString(qsConfig, location.search);
     const isEmpty = itemCount === 0 && Object.keys(params).length === 0;
     return (
@@ -108,9 +98,8 @@ class ListHeader extends React.Component {
         ) : (
           <Fragment>
             {renderToolbar({
-              sortedColumnKey: orderBy,
-              sortOrder,
-              columns,
+              searchColumns,
+              sortColumns,
               onSearch: this.handleSearch,
               onSort: this.handleSort,
               qsConfig,
@@ -131,14 +120,8 @@ class ListHeader extends React.Component {
 ListHeader.propTypes = {
   itemCount: PropTypes.number.isRequired,
   qsConfig: QSConfig.isRequired,
-  columns: arrayOf(
-    shape({
-      name: string.isRequired,
-      key: string.isRequired,
-      isSortable: bool,
-      isSearchable: bool,
-    })
-  ).isRequired,
+  searchColumns: SearchColumns.isRequired,
+  sortColumns: SortColumns.isRequired,
   renderToolbar: PropTypes.func,
 };
 

@@ -14,7 +14,7 @@ import {
 } from '@patternfly/react-core';
 import { SearchIcon } from '@patternfly/react-icons';
 
-import { QSConfig } from '@types';
+import { QSConfig, SearchColumns } from '@types';
 
 import styled from 'styled-components';
 
@@ -82,10 +82,11 @@ class Search extends React.Component {
   constructor(props) {
     super(props);
 
-    const { sortedColumnKey } = this.props;
+    const { columns } = this.props;
+
     this.state = {
       isSearchDropdownOpen: false,
-      searchKey: sortedColumnKey,
+      searchKey: columns.find(col => col.isDefault).key,
       searchValue: '',
     };
 
@@ -142,7 +143,7 @@ class Search extends React.Component {
     );
 
     const searchDropdownItems = columns
-      .filter(({ key, isSearchable }) => isSearchable && key !== searchKey)
+      .filter(({ key }) => key !== searchKey)
       .map(({ key, name }) => (
         <DropdownItem key={key} component="button">
           {name}
@@ -214,14 +215,12 @@ class Search extends React.Component {
 
 Search.propTypes = {
   qsConfig: QSConfig.isRequired,
-  columns: PropTypes.arrayOf(PropTypes.object).isRequired,
-  onSearch: PropTypes.func,
-  sortedColumnKey: PropTypes.string,
+  columns: SearchColumns.isRequired,
+  onSearch: PropTypes.func
 };
 
 Search.defaultProps = {
   onSearch: null,
-  sortedColumnKey: 'name',
 };
 
 export default withI18n()(Search);

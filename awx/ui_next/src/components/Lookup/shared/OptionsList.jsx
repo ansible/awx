@@ -14,7 +14,7 @@ import SelectedList from '../../SelectedList';
 import PaginatedDataList from '../../PaginatedDataList';
 import CheckboxListItem from '../../CheckboxListItem';
 import DataListToolbar from '../../DataListToolbar';
-import { QSConfig } from '@types';
+import { QSConfig, SearchColumns, SortColumns } from '@types';
 
 function OptionsList({
   value,
@@ -80,7 +80,8 @@ OptionsList.propTypes = {
   value: arrayOf(Item).isRequired,
   options: arrayOf(Item).isRequired,
   optionCount: number.isRequired,
-  columns: arrayOf(shape({})),
+  searchColumns: SearchColumns.isRequired,
+  sortColumns: SortColumns.isRequired,
   multiple: bool,
   qsConfig: QSConfig.isRequired,
   selectItem: func.isRequired,
@@ -90,7 +91,6 @@ OptionsList.propTypes = {
 OptionsList.defaultProps = {
   multiple: false,
   renderItemChip: null,
-  columns: [],
 };
 
 export default withI18n()(OptionsList);

@@ -156,24 +156,33 @@ class ProjectsList extends Component {
               pluralizedItemName={i18n._(t`Projects`)}
               qsConfig={QS_CONFIG}
               onRowClick={this.handleSelect}
-              toolbarColumns={[
+              toolbarSearchColumns={[
                 {
                   name: i18n._(t`Name`),
                   key: 'name',
-                  isSortable: true,
-                  isSearchable: true,
+                  isDefault: true
                 },
                 {
                   name: i18n._(t`Modified`),
                   key: 'modified',
-                  isSortable: true,
-                  isNumeric: true,
                 },
                 {
                   name: i18n._(t`Created`),
                   key: 'created',
-                  isSortable: true,
-                  isNumeric: true,
+                },
+              ]}
+              toolbarSortColumns={[
+                {
+                  name: i18n._(t`Name`),
+                  key: 'name',
+                },
+                {
+                  name: i18n._(t`Modified`),
+                  key: 'modified',
+                },
+                {
+                  name: i18n._(t`Created`),
+                  key: 'created',
                 },
               ]}
               renderToolbar={props => (

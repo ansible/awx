@@ -64,26 +64,24 @@ function InstanceGroupsLookup(props) {
             value={state.selectedItems}
             options={instanceGroups}
             optionCount={count}
-            columns={[
+            searchColumns={[
               {
                 name: i18n._(t`Name`),
                 key: 'name',
-                isSortable: true,
-                isSearchable: true,
               },
               {
                 name: i18n._(t`Modified`),
                 key: 'modified',
-                isSortable: false,
-                isNumeric: true,
               },
               {
                 name: i18n._(t`Created`),
                 key: 'created',
-                isSortable: false,
-                isNumeric: true,
               },
             ]}
+            sortColumns={[{
+              name: i18n._(t`Name`),
+              key: 'name'
+            }]}
             multiple={state.multiple}
             header={i18n._(t`Instance Groups`)}
             name="instanceGroups"

@@ -142,21 +142,33 @@ class AddResourceRole extends React.Component {
     } = this.state;
     const { onClose, roles, i18n } = this.props;
 
-    const userColumns = [
+    const userSearchColumns = [
       {
         name: i18n._(t`Username`),
         key: 'username',
-        isSortable: true,
-        isSearchable: true,
+        isDefault: true
       },
     ];
 
-    const teamColumns = [
+    const userSortColumns = [
       {
-        name: i18n._(t`Name`),
+        name: i18n._(t`Username`),
+        key: 'username',
+      },
+    ];
+
+    const teamSearchColumns = [
+      {
+        name: i18n._(t`name`),
         key: 'name',
-        isSortable: true,
-        isSearchable: true,
+        isDefault: true
+      },
+    ];
+
+    const teamSortColumns = [
+      {
+        name: i18n._(t`name`),
+        key: 'name',
       },
     ];
 
@@ -207,7 +219,8 @@ class AddResourceRole extends React.Component {
           <Fragment>
             {selectedResource === 'users' && (
               <SelectResourceStep
-                columns={userColumns}
+                searchColumns={userSearchColumns}
+                sortColumns={userSortColumns}
                 displayKey="username"
                 onRowClick={this.handleResourceCheckboxClick}
                 onSearch={readUsers}
@@ -218,7 +231,8 @@ class AddResourceRole extends React.Component {
             )}
             {selectedResource === 'teams' && (
               <SelectResourceStep
-                columns={teamColumns}
+                searchColumns={teamSearchColumns}
+                sortColumns={teamSortColumns}
                 onRowClick={this.handleResourceCheckboxClick}
                 onSearch={readTeams}
                 selectedLabel={i18n._(t`Selected`)}

@@ -23,11 +23,13 @@ describe('<DataListToolbar />', () => {
   const onSort = jest.fn();
   const onSelectAll = jest.fn();
 
-  test('it triggers the expected callbacks', () => {
-    const columns = [
-      { name: 'Name', key: 'name', isSortable: true, isSearchable: true },
+  test('it triggers the expected callbacks', () => {  
+    const searchColumns = [
+      { name: 'Name', key: 'name', isDefault: true }
     ];
-
+    const sortColumns = [
+      { name: 'Name', key: 'name' }
+    ];
     const search = 'button[aria-label="Search submit button"]';
     const searchTextInput = 'input[aria-label="Search text input"]';
     const selectAll = 'input[aria-label="Select all"]';
@@ -38,9 +40,8 @@ describe('<DataListToolbar />', () => {
         qsConfig={QS_CONFIG}
         isAllSelected={false}
         showExpandCollapse
-        sortedColumnKey="name"
-        sortOrder="ascending"
-        columns={columns}
+        searchColumns={searchColumns}
+        sortColumns={sortColumns}
         onSearch={onSearch}
         onSort={onSort}
         onSelectAll={onSelectAll}
@@ -74,19 +75,28 @@ describe('<DataListToolbar />', () => {
     const searchDropdownMenuItems =
       'DropdownMenu > ul[aria-labelledby="awx-search"]';
 
-    const multipleColumns = [
-      { name: 'Foo', key: 'foo', isSortable: true, isSearchable: true },
-      { name: 'Bar', key: 'bar', isSortable: true, isSearchable: true },
-      { name: 'Bakery', key: 'bakery', isSortable: true },
-      { name: 'Baz', key: 'baz' },
+    const NEW_QS_CONFIG = {
+      namespace: 'organization',
+      dateFields: ['modified', 'created'],
+      defaultParams: { page: 1, page_size: 5, order_by: 'foo' },
+      integerFields: ['page', 'page_size'],
+    };
+
+    const searchColumns = [
+      { name: 'Foo', key: 'foo', isDefault: true },
+      { name: 'Bar', key: 'bar' }
+    ];
+    const sortColumns = [
+      { name: 'Foo', key: 'foo' },
+      { name: 'Bar', key: 'bar' },
+      { name: 'Bakery', key: 'Bakery' }
     ];
 
     toolbar = mountWithContexts(
       <DataListToolbar
-        qsConfig={QS_CONFIG}
-        sortedColumnKey="foo"
-        sortOrder="ascending"
-        columns={multipleColumns}
+        qsConfig={NEW_QS_CONFIG}
+        searchColumns={searchColumns}
+        sortColumns={sortColumns}
         onSort={onSort}
       />
     );
@@ -106,10 +116,9 @@ describe('<DataListToolbar />', () => {
     searchDropdownItems.at(0).simulate('click', mockedSortEvent);
     toolbar = mountWithContexts(
       <DataListToolbar
-        qsConfig={QS_CONFIG}
-        sortedColumnKey="foo"
-        sortOrder="descending"
-        columns={multipleColumns}
+        qsConfig={NEW_QS_CONFIG}
+        searchColumns={searchColumns}
+        sortColumns={sortColumns}
         onSort={onSort}
       />
     );
@@ -145,24 +154,57 @@ describe('<DataListToolbar />', () => {
   });
 
   test('it displays correct sort icon', () => {
+    const NUM_QS_CONFIG = {
+      namespace: 'organization',
+      dateFields: ['modified', 'created'],
+      defaultParams: { page: 1, page_size: 5, order_by: 'id' },
+      integerFields: ['page', 'page_size', 'id'],
+    };
+
+    const NUM_DESC_QS_CONFIG = {
+      namespace: 'organization',
+      dateFields: ['modified', 'created'],
+      defaultParams: { page: 1, page_size: 5, order_by: '-id' },
+      integerFields: ['page', 'page_size', 'id'],
+    };
+
+    const ALPH_QS_CONFIG = {
+      namespace: 'organization',
+      dateFields: ['modified', 'created'],
+      defaultParams: { page: 1, page_size: 5, order_by: 'name' },
+      integerFields: ['page', 'page_size', 'id'],
+    };
+
+    const ALPH_DESC_QS_CONFIG = {
+      namespace: 'organization',
+      dateFields: ['modified', 'created'],
+      defaultParams: { page: 1, page_size: 5, order_by: '-name' },
+      integerFields: ['page', 'page_size', 'id'],
+    };
+
     const downNumericIconSelector = 'SortNumericDownIcon';
     const upNumericIconSelector = 'SortNumericUpIcon';
     const downAlphaIconSelector = 'SortAlphaDownIcon';
     const upAlphaIconSelector = 'SortAlphaUpIcon';
 
     const numericColumns = [
-      { name: 'ID', key: 'id', isSortable: true, isNumeric: true },
+      { name: 'ID', key: 'id', isDefault: true },
     ];
+
     const alphaColumns = [
-      { name: 'Name', key: 'name', isSortable: true, isNumeric: false },
+      { name: 'Name', key: 'name', isDefault: true },
+    ];
+
+    const searchColumns = [
+      { name: 'Name', key: 'name', isDefault: true },
+      { name: 'ID', key: 'id' }
     ];
 
     toolbar = mountWithContexts(
       <DataListToolbar
-        qsConfig={QS_CONFIG}
-        sortedColumnKey="id"
-        sortOrder="descending"
-        columns={numericColumns}
+        qsConfig={NUM_DESC_QS_CONFIG}
+        searchColumns={searchColumns}
+        sortColumns={numericColumns}
       />
     );
 
@@ -171,10 +213,9 @@ describe('<DataListToolbar />', () => {
 
     toolbar = mountWithContexts(
       <DataListToolbar
-        qsConfig={QS_CONFIG}
-        sortedColumnKey="id"
-        sortOrder="ascending"
-        columns={numericColumns}
+        qsConfig={NUM_QS_CONFIG}
+        searchColumns={searchColumns}
+        sortColumns={numericColumns}
       />
     );
 
@@ -183,10 +224,9 @@ describe('<DataListToolbar />', () => {
 
     toolbar = mountWithContexts(
       <DataListToolbar
-        qsConfig={QS_CONFIG}
-        sortedColumnKey="name"
-        sortOrder="descending"
-        columns={alphaColumns}
+        qsConfig={ALPH_DESC_QS_CONFIG}
+        searchColumns={searchColumns}
+        sortColumns={alphaColumns}
       />
     );
 
@@ -195,10 +235,9 @@ describe('<DataListToolbar />', () => {
 
     toolbar = mountWithContexts(
       <DataListToolbar
-        qsConfig={QS_CONFIG}
-        sortedColumnKey="name"
-        sortOrder="ascending"
-        columns={alphaColumns}
+        qsConfig={ALPH_QS_CONFIG}
+        searchColumns={searchColumns}
+        sortColumns={alphaColumns}
       />
     );
 
@@ -207,14 +246,18 @@ describe('<DataListToolbar />', () => {
   });
 
   test('should render additionalControls', () => {
-    const columns = [
-      { name: 'Name', key: 'name', isSortable: true, isSearchable: true },
+    const searchColumns = [
+      { name: 'Name', key: 'name', isDefault: true }
+    ];
+    const sortColumns = [
+      { name: 'Name', key: 'name', isDefault: true }
     ];
 
     toolbar = mountWithContexts(
       <DataListToolbar
         qsConfig={QS_CONFIG}
-        columns={columns}
+        searchColumns={searchColumns}
+        sortColumns={sortColumns}
         onSearch={onSearch}
         onSort={onSort}
         onSelectAll={onSelectAll}
@@ -232,18 +275,19 @@ describe('<DataListToolbar />', () => {
   });
 
   test('it triggers the expected callbacks', () => {
-    const columns = [
-      { name: 'Name', key: 'name', isSortable: true, isSearchable: true },
+    const searchColumns = [
+      { name: 'Name', key: 'name', isDefault: true }
     ];
-
+    const sortColumns = [
+      { name: 'Name', key: 'name' }
+    ];
     toolbar = mountWithContexts(
       <DataListToolbar
         qsConfig={QS_CONFIG}
         isAllSelected
         showExpandCollapse
-        sortedColumnKey="name"
-        sortOrder="ascending"
-        columns={columns}
+        searchColumns={searchColumns}
+        sortColumns={sortColumns}
         onSearch={onSearch}
         onSort={onSort}
         onSelectAll={onSelectAll}
