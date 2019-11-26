@@ -32,13 +32,13 @@ def set_pythonpath(venv_libdir, env):
 
 class IsolatedManager(object):
 
-    def __init__(self, cancelled_callback=None, check_callback=None, pod_manager=None):
+    def __init__(self, canceled_callback=None, check_callback=None, pod_manager=None):
         """
-        :param cancelled_callback:  a callable - which returns `True` or `False`
+        :param canceled_callback:  a callable - which returns `True` or `False`
                                     - signifying if the job has been prematurely
-                                      cancelled
+                                      canceled
         """
-        self.cancelled_callback = cancelled_callback
+        self.canceled_callback = canceled_callback
         self.check_callback = check_callback
         self.started_at = None
         self.captured_command_artifact = False
@@ -105,7 +105,7 @@ class IsolatedManager(object):
             'envvars': env,
             'finished_callback': finished_callback,
             'verbosity': verbosity,
-            'cancel_callback': self.cancelled_callback,
+            'cancel_callback': self.canceled_callback,
             'settings': {
                 'job_timeout': settings.AWX_ISOLATED_LAUNCH_TIMEOUT,
                 'pexpect_timeout': getattr(settings, 'PEXPECT_TIMEOUT', 5),
@@ -209,14 +209,14 @@ class IsolatedManager(object):
         dispatcher = CallbackQueueDispatcher()
 
         while status == 'failed':
-            canceled = self.cancelled_callback() if self.cancelled_callback else False
+            canceled = self.canceled_callback() if self.canceled_callback else False
             if not canceled and time.time() - last_check < interval:
-                # If the job isn't cancelled, but we haven't waited `interval` seconds, wait longer
+                # If the job isn't canceled, but we haven't waited `interval` seconds, wait longer
                 time.sleep(1)
                 continue
 
             if canceled:
-                logger.warning('Isolated job {} was manually cancelled.'.format(self.instance.id))
+                logger.warning('Isolated job {} was manually canceled.'.format(self.instance.id))
 
             logger.debug('Checking on isolated job {} with `check_isolated.yml`.'.format(self.instance.id))
             runner_obj = self.run_management_playbook('check_isolated.yml',

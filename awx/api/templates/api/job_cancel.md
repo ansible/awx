@@ -1,7 +1,7 @@
 {% ifmeth GET %}
-# Determine if a Job can be cancelled
+# Determine if a Job can be canceled
 
-Make a GET request to this resource to determine if the job can be cancelled.
+Make a GET request to this resource to determine if the job can be canceled.
 The response will include the following field:
 
 * `can_cancel`: Indicates whether this job can be canceled (boolean, read-only)

@@ -646,7 +646,7 @@ export default ['moment', '$timeout', '$window', '$filter', 'TemplatesStrings',
                                 if(d.job.status === "successful"){
                                     return "#5cb85c";
                                 }
-                                else if (d.job.status === "failed" || d.job.status === "error" || d.job.status === "cancelled") {
+                                else if (d.job.status === "failed" || d.job.status === "error" || d.job.status === "canceled") {
                                     return "#d9534f";
                                 }
                                 else {
@@ -913,7 +913,7 @@ export default ['moment', '$timeout', '$window', '$filter', 'TemplatesStrings',
                                         if(d.job.status === "successful"){
                                             return "#5cb85c";
                                         }
-                                        else if (d.job.status === "failed" || d.job.status === "error" || d.job.status === "cancelled") {
+                                        else if (d.job.status === "failed" || d.job.status === "error" || d.job.status === "canceled") {
                                             return "#d9534f";
                                         }
                                         else {
