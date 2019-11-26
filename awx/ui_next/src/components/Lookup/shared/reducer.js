@@ -1,7 +1,6 @@
 // import { useReducer, useEffect } from 'react';
 
 export default function reducer(state, action) {
-  // console.log(action, state);
   switch (action.type) {
     case 'SELECT_ITEM':
       return selectItem(state, action.item);
@@ -91,18 +90,3 @@ function assertCorrectValueType(value, multiple) {
     throw new Error('Lookup value must be an array if `multiple` is set');
   }
 }
-//
-// export function useLookup(config) {
-//   const { value, multiple, required, onChange, history } = config;
-//   const [state, dispatch] = useReducer(
-//     config.reducer || reducer,
-//     {
-//       value,
-//       multiple,
-//       required,
-//     },
-//     config.initReducer || initReducer
-//   );
-//
-//   return [state, dispatch];
-// }

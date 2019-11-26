@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { arrayOf, string, func, object } from 'prop-types';
+import { arrayOf, string, func, object, bool } from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -18,7 +18,15 @@ const QS_CONFIG = getQSConfig('instance_groups', {
 });
 
 function InstanceGroupsLookup(props) {
-  const { value, onChange, tooltip, className, history, i18n } = props;
+  const {
+    value,
+    onChange,
+    tooltip,
+    className,
+    required,
+    history,
+    i18n,
+  } = props;
   const [instanceGroups, setInstanceGroups] = useState([]);
   const [count, setCount] = useState(0);
   const [error, setError] = useState(null);
@@ -50,6 +58,7 @@ function InstanceGroupsLookup(props) {
         onChange={onChange}
         qsConfig={QS_CONFIG}
         multiple
+        required={required}
         renderOptionsList={({ state, dispatch, canDelete }) => (
           <OptionsList
             value={state.selectedItems}
@@ -95,11 +104,13 @@ InstanceGroupsLookup.propTypes = {
   tooltip: string,
   onChange: func.isRequired,
   className: string,
+  required: bool,
 };
 
 InstanceGroupsLookup.defaultProps = {
   tooltip: '',
   className: '',
+  required: false,
 };
 
 export default withI18n()(withRouter(InstanceGroupsLookup));

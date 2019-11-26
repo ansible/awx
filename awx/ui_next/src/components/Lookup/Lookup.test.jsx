@@ -98,7 +98,7 @@ describe('<Lookup multiple/>', () => {
     wrapper = mountWithContexts(
       <Lookup
         multiple
-        lookupHeader="Foo Bar"
+        header="Foo Bar"
         name="foobar"
         value={mockSelected}
         onLookupSave={onChange}
@@ -240,7 +240,7 @@ describe('<Lookup />', () => {
     document.body.innerHTML = '';
     wrapper = mountWithContexts(
       <Lookup
-        lookupHeader="Foo Bar"
+        header="Foo Bar"
         name="foobar"
         value={mockSelected}
         onLookupSave={onChange}
@@ -340,7 +340,7 @@ describe('<Lookup />', () => {
       <_Lookup
         multiple
         name="foo"
-        lookupHeader="Foo Bar"
+        header="Foo Bar"
         onLookupSave={() => {}}
         value={mockData}
         columns={mockColumns}
@@ -369,7 +369,7 @@ describe('<Lookup />', () => {
       <_Lookup
         multiple
         name="foo"
-        lookupHeader="Foo Bar"
+        header="Foo Bar"
         onLookupSave={() => {}}
         value={mockData}
         columns={mockColumns}

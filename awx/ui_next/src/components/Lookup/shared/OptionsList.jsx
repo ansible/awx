@@ -29,6 +29,7 @@ function OptionsList({
   selectItem,
   deselectItem,
   renderItemChip,
+  isLoading,
   i18n,
 }) {
   return (
@@ -49,6 +50,7 @@ function OptionsList({
         pluralizedItemName={header}
         qsConfig={qsConfig}
         toolbarColumns={columns}
+        hasContentLoading={isLoading}
         renderItem={item => (
           <CheckboxListItem
             key={item.id}
@@ -75,7 +77,7 @@ OptionsList.propTypes = {
   value: arrayOf(Item).isRequired,
   options: arrayOf(Item).isRequired,
   optionCount: number.isRequired,
-  columns: arrayOf(shape({})).isRequired,
+  columns: arrayOf(shape({})),
   multiple: bool,
   qsConfig: QSConfig.isRequired,
   selectItem: func.isRequired,
@@ -85,6 +87,7 @@ OptionsList.propTypes = {
 OptionsList.defaultProps = {
   multiple: false,
   renderItemChip: null,
+  columns: [],
 };
 
 export default withI18n()(OptionsList);

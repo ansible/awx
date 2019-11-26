@@ -61,6 +61,7 @@ function InventoryLookup({
         value={value}
         onChange={onChange}
         onBlur={onBlur}
+        required={required}
         qsConfig={QS_CONFIG}
         renderOptionsList={({ state, dispatch, canDelete }) => (
           <OptionsList

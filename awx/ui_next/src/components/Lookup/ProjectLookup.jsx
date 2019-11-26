@@ -57,7 +57,7 @@ function ProjectLookup({
       {tooltip && <FieldTooltip content={tooltip} />}
       <Lookup
         id="project"
-        lookupHeader={i18n._(t`Project`)}
+        header={i18n._(t`Project`)}
         name="project"
         value={value}
         onBlur={onBlur}

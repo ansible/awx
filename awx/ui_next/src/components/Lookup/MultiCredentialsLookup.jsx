@@ -86,7 +86,7 @@ function MultiCredentialsLookup(props) {
       {tooltip && <FieldTooltip content={tooltip} />}
       <Lookup
         id="multiCredential"
-        lookupHeader={i18n._(t`Credentials`)}
+        header={i18n._(t`Credentials`)}
         value={value}
         multiple
         onChange={onChange}
