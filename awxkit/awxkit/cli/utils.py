@@ -22,7 +22,7 @@ STATUS_COLORS = {
     'successful': 'green',
     'failed': 'red',
     'error': 'red',
-    'cancelled': 'grey',
+    'canceled': 'grey',
 }
 
 

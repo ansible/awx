@@ -1336,7 +1336,7 @@ class BaseTask(object):
 
                 ansible_runner.utils.dump_artifacts(params)
                 isolated_manager_instance = isolated_manager.IsolatedManager(
-                    cancelled_callback=lambda: self.update_model(self.instance.pk).cancel_flag,
+                    canceled_callback=lambda: self.update_model(self.instance.pk).cancel_flag,
                     check_callback=self.check_handler,
                     pod_manager=pod_manager
                 )
@@ -2154,7 +2154,7 @@ class RunProjectUpdate(BaseTask):
             try:
                 instance.refresh_from_db(fields=['cancel_flag'])
                 if instance.cancel_flag:
-                    logger.debug("ProjectUpdate({0}) was cancelled".format(instance.pk))
+                    logger.debug("ProjectUpdate({0}) was canceled".format(instance.pk))
                     return
                 fcntl.lockf(self.lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
                 break

@@ -1,7 +1,7 @@
 # Cancel Project Update
 
 Make a GET request to this resource to determine if the project update can be
-cancelled.  The response will include the following field:
+canceled.  The response will include the following field:
 
 * `can_cancel`: Indicates whether this update can be canceled (boolean,
   read-only)

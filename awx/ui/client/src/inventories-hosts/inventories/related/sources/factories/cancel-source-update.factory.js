@@ -29,7 +29,7 @@ export default
                             Rest.post()
                             .then(() => {
                                 Wait('stop');
-                                //Alert('Inventory Sync Cancelled', 'Request to cancel the sync process was submitted to the task manger. ' +
+                                //Alert('Inventory Sync Canceled', 'Request to cancel the sync process was submitted to the task manger. ' +
                                 //    'Click the <i class="fa fa-refresh fa-lg"></i> button to monitor the status.', 'alert-info');
                             })
                             .catch(({data, status}) => {
