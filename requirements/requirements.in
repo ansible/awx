@@ -1,6 +1,6 @@
 ansible-runner==1.4.4
 appdirs==1.4.2
-asgi-amqp==1.1.3
+asgi-amqp==1.1.4
 azure-keyvault==1.1.0
 boto==2.47.0
 channels==1.1.8
