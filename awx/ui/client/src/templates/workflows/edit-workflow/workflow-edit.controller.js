@@ -533,9 +533,24 @@ export default [
         }
 
         if(workflowJobTemplateData.inventory) {
-            OrgAdminLookup.checkForRoleLevelAdminAccess(workflowJobTemplateData.inventory, 'workflow_admin_role')
-            .then(function(canEditInventory){
-                $scope.canEditInventory = canEditInventory;
+            let params = {
+              role_level: 'use_role',
+              id: workflowJobTemplateData.inventory
+            };
+            Rest.setUrl(GetBasePath('inventory'));
+            Rest.get({ params: params })
+              .then(({ data }) => {
+                if (data.count && data.count > 0) {
+                  $scope.canEditInventory = true;
+                } else {
+                  $scope.canEditInventory = false;
+                }
+              })
+              .catch(({ data, status }) => {
+                ProcessErrors(null, data, status, null, {
+                  hdr: 'Error!',
+                  msg: 'Failed to get inventory data based on role_level. Return status: ' + status
+              });
             });
         }
         else {
