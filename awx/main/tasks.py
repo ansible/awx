@@ -2731,10 +2731,11 @@ class RunSystemJob(BaseTask):
                 json_vars = {}
             else:
                 json_vars = json.loads(system_job.extra_vars)
-            if 'days' in json_vars:
-                args.extend(['--days', str(json_vars.get('days', 60))])
-            if 'dry_run' in json_vars and json_vars['dry_run']:
-                args.extend(['--dry-run'])
+            if system_job.job_type in ('cleanup_jobs', 'cleanup_activitystream'):
+                if 'days' in json_vars:
+                    args.extend(['--days', str(json_vars.get('days', 60))])
+                if 'dry_run' in json_vars and json_vars['dry_run']:
+                    args.extend(['--dry-run'])
             if system_job.job_type == 'cleanup_jobs':
                 args.extend(['--jobs', '--project-updates', '--inventory-updates',
                              '--management-jobs', '--ad-hoc-commands', '--workflow-jobs',
