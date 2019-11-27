@@ -187,11 +187,13 @@ class AddResourceRole extends React.Component {
             <SelectableCard
               isSelected={selectedResource === 'users'}
               label={i18n._(t`Users`)}
+              dataCy="add-role-users"
               onClick={() => this.handleResourceSelect('users')}
             />
             <SelectableCard
               isSelected={selectedResource === 'teams'}
               label={i18n._(t`Teams`)}
+              dataCy="add-role-teams"
               onClick={() => this.handleResourceSelect('teams')}
             />
           </div>
