@@ -1,3 +1,4 @@
+---
 files:
     awx/ui/:
         labels: component:ui

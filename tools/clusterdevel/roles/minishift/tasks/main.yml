@@ -49,12 +49,12 @@
     - name: Get Project Detail
       shell: "oc get project {{ awx_dev_project }}"
       register: project_details
-      ignore_errors: yes
+      ignore_errors: true
 
     - name: Get Postgres Service Detail
       shell: "oc describe svc postgresql -n {{ awx_dev_project }}"
       register: postgres_svc_details
-      ignore_errors: yes
+      ignore_errors: true
 
     - name: Create AWX Openshift Project
       shell: "oc new-project {{ awx_dev_project }}"

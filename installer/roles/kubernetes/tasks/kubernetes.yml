@@ -2,7 +2,7 @@
 - name: Get Namespace Detail
   shell: "kubectl get namespace {{ kubernetes_namespace }}"
   register: namespace_details
-  ignore_errors: yes
+  ignore_errors: true
 
 - name: Create AWX Kubernetes Project
   shell: "kubectl create namespace {{ kubernetes_namespace }}"
@@ -12,4 +12,3 @@
   set_fact:
     postgresql_service_name: "{{ kubernetes_deployment_name }}-postgresql"
   when: "pg_hostname is not defined or pg_hostname == ''"
-

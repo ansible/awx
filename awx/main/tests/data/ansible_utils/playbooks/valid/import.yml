@@ -1,1 +1,2 @@
+---
 - import_playbook: foo

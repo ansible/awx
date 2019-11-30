@@ -13,17 +13,17 @@
   tasks:
     - name: synchronize job environment with isolated host
       synchronize:
-        copy_links: yes
+        copy_links: true
         src: "{{ src }}"
         dest: "{{ dest }}"
       when: ansible_kubectl_config is not defined
 
     - name: synchronize job environment with remote job container
       synchronize:
-        copy_links: yes
+        copy_links: true
         src: "{{ src }}"
         dest: "{{ dest }}"
-        set_remote_user: no
+        set_remote_user: false
         rsync_opts:
           - "--rsh=$RSH"
       environment:
@@ -51,4 +51,4 @@
         content: "{{secret}}"
         path: "{{src}}/env/ssh_key"
       when: key.stat.exists
-      no_log: True
+      no_log: true

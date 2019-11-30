@@ -18,4 +18,3 @@ memcached_image: "memcached"
 memcached_version: "alpine"
 memcached_hostname: "memcached"
 memcached_port: "11211"
-

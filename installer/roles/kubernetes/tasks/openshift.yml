@@ -2,7 +2,7 @@
 - name: Get Project Detail
   shell: "{{ openshift_oc_bin }} get project {{ openshift_project }}"
   register: project_details
-  ignore_errors: yes
+  ignore_errors: true
 
 - name: Create AWX Openshift Project
   shell: "{{ openshift_oc_bin }} new-project {{ openshift_project }}"
@@ -13,7 +13,7 @@
     - name: Check PVC status
       command: "{{ openshift_oc_bin }} get pvc {{ openshift_pg_pvc_name }} -n {{ openshift_project }} -o=jsonpath='{.status.phase}'"
       register: pg_pvc_status
-      ignore_errors: yes
+      ignore_errors: true
 
     - name: Ensure PostgreSQL PVC is available
       assert:

@@ -1,3 +1,4 @@
+---
 version: '2'
 services:
   # Tower Development Cluster
