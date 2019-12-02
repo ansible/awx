@@ -10,7 +10,7 @@ import WorkflowHelpDetails from './WorkflowHelpDetails';
 const SVG = styled.svg`
   display: flex;
   height: 100%;
-  background-color: #F6F6F6;
+  background-color: #f6f6f6;
 
   .WorkflowChart-tooltip {
     padding-left: 5px;
@@ -36,34 +36,36 @@ const SVG = styled.svg`
   }
 
   .WorkflowChart-action--add:hover {
-    background-color: #58B957;
+    background-color: #58b957;
   }
 
-  .WorkflowChart-action--edit:hover,.WorkflowChart-action--link:hover,.WorkflowChart-action--details:hover {
-    background-color: #0279BC;
+  .WorkflowChart-action--edit:hover,
+  .WorkflowChart-action--link:hover,
+  .WorkflowChart-action--details:hover {
+    background-color: #0279bc;
   }
 
   .WorkflowChart-action--delete:hover {
-    background-color: #D9534F;
+    background-color: #d9534f;
   }
 
   .WorkflowChart-tooltipArrows {
-    width 10px;
+    width: 10px;
   }
 
   .WorkflowChart-tooltipArrows--outer {
-    position:absolute;
+    position: absolute;
     top: calc(50% - 10px);
     width: 0;
     height: 0;
-    border-right: 10px solid #C4C4C4;
+    border-right: 10px solid #c4c4c4;
     border-top: 10px solid transparent;
     border-bottom: 10px solid transparent;
     margin: auto;
   }
 
   .WorkflowChart-tooltipArrows--inner {
-    position:absolute;
+    position: absolute;
     top: calc(50% - 10px);
     left: 6px;
     width: 0;
@@ -76,13 +78,25 @@ const SVG = styled.svg`
 
   .WorkflowChart-tooltipActions {
     background-color: white;
-    border: 1px solid #C4C4C4;
+    border: 1px solid #c4c4c4;
     border-radius: 2px;
     padding: 5px;
   }
 
   .WorkflowChart-tooltipContents {
     display: flex;
+  }
+
+  .WorkflowChart-nameText {
+    font-size: 13px;
+    padding: 0px 10px;
+    text-align: center;
+    p {
+      margin-top: 20px;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
   }
 `;
 
@@ -487,20 +501,17 @@ function Graph({ links, nodes, readOnly, i18n }) {
           });
 
         nodeRef
-          .append('text')
-          .attr('x', () => {
-            return nodeW / 2;
-          })
-          .attr('y', () => {
-            return nodeH / 2;
-          })
-          .attr('dy', '.35em')
-          .attr('text-anchor', 'middle')
-          .attr('class', 'WorkflowChart-defaultText WorkflowChart-nameText')
-          .text(d =>
-            d.unifiedJobTemplate && d.unifiedJobTemplate.name
-              ? d.unifiedJobTemplate.name
-              : 'NO NAME'
+          .append('foreignObject')
+          .attr('width', nodeW)
+          .attr('height', nodeH)
+          .attr('class', 'WorkflowChart-nameText')
+          .html(
+            d =>
+              `<p>${
+                d.unifiedJobTemplate
+                  ? d.unifiedJobTemplate.name
+                  : i18n._(t`DELETED`)
+              }</p>`
           );
 
         nodeRef
