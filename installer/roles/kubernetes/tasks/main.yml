@@ -185,14 +185,44 @@
   include_tasks: ssl_cert_gen.yml
   when: "rabbitmq_use_ssl|default(False)|bool"
 
-- name: Get Kubernetes API version
+- name: Get Kubernetes Config
   command: |
-    {{ kubectl_or_oc }} version -o json
+    {{ kubectl_or_oc }} config view -o json
+  register: kube_config_cmd
+  no_log: yes
+
+- name: Convert kube config to dictionary
+  set_fact:
+    kube_config: "{{ kube_config_cmd.stdout | from_json }}"
+  no_log: yes
+
+- name: Extract current context from kube config
+  set_fact:
+    current_kube_context: "{{ kube_config['current-context'] }}"
+
+- name: Find cluster for current context
+  set_fact:
+    kube_cluster: |
+      {{ (kube_config.contexts |
+          selectattr("name", "equalto", current_kube_context) |
+          list)[0].context.cluster }}
+
+- name: Find server for current context
+  set_fact:
+    kube_server: |
+      {{ (kube_config.clusters |
+          selectattr("name", "equalto", kube_cluster|trim) |
+          list)[0].cluster.server }}
+
+- name: Get kube version from api server
+  uri:
+    url: "{{ kube_server | trim }}/version"
+    validate_certs: no
   register: kube_version
 
 - name: Extract server version from command output
   set_fact:
-    kube_api_version: "{{ (kube_version.stdout | from_json).serverVersion.gitVersion[1:] }}"
+    kube_api_version: "{{ kube_version.json.gitVersion[1:] }}"
 
 - name: Determine StatefulSet api version
   set_fact:
