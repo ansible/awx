@@ -39,7 +39,7 @@ function Toolbar({ history, i18n, template }) {
         }}
       >
         <div style={{ display: 'flex' }}>
-          <b>Workflow Visualizer</b>
+          <b>{i18n._(t`Workflow Visualizer`)}</b>
           <VerticalSeparator />
           <b>{template.name}</b>
         </div>
@@ -51,7 +51,7 @@ function Toolbar({ history, i18n, template }) {
             alignItems: 'center',
           }}
         >
-          <div>Total Nodes</div>
+          <div>{i18n._(t`Total Nodes`)}</div>
           <Badge isRead>0</Badge>
           <VerticalSeparator />
           <Button variant="plain">
@@ -74,7 +74,7 @@ function Toolbar({ history, i18n, template }) {
           </Button>
           <VerticalSeparator />
           <Button variant="primary" onClick={handleVisualizerCancel}>
-            Save
+            {i18n._(t`Save`)}
           </Button>
           <VerticalSeparator />
           <Button
