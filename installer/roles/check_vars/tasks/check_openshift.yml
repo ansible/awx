@@ -46,10 +46,3 @@
     - docker_registry_password is defined and docker_registry_password != ''
     msg: "Set the value of 'docker_registry_password' in the inventory file."
   when: dockerhub_base is not defined
-
-- name: pg_admin_password should be defined
-  assert:
-    that:
-      - pg_admin_password is defined and pg_admin_password != ''
-  when:
-    - pg_hostname is not defined or pg_hostname == ''
