@@ -444,9 +444,10 @@ register(
     label=_('Primary Galaxy Server URL'),
     help_text=_(
         'For organizations that run their own Galaxy service, this gives the option to specify a '
-        'host as the primary galaxy server. Requirements will be downloaded from the primary if the '
-        'specific role or collection is available there. If the content is not avilable in the primary, '
-        'or if this field is left blank, it will default to galaxy.ansible.com.'
+        'host as the primary galaxy server. Collection requirements will be downloaded from the primary if the '
+        'specific collection is available there. If the collection is not avilable in the primary, '
+        'or if this field is left blank, it will default to galaxy.ansible.com. '
+        'Roles will always be downloaded from the public Galaxy server.'
     ),
     category=_('Jobs'),
     category_slug='jobs'

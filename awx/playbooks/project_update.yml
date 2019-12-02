@@ -122,7 +122,11 @@
           register: doesRequirementsExist
 
         - name: fetch galaxy roles from requirements.yml
-          command: ansible-galaxy role install -r roles/requirements.yml -p {{roles_destination|quote}}{{ ' -' + 'v' * ansible_verbosity if ansible_verbosity else '' }}
+          command: >
+            ansible-galaxy role install -r roles/requirements.yml
+            --roles-path {{roles_destination|quote}}
+            --server https://galaxy.ansible.com/
+            {{ ' -' + 'v' * ansible_verbosity if ansible_verbosity else '' }}
           args:
             chdir: "{{project_path|quote}}"
           register: galaxy_result
@@ -143,7 +147,10 @@
           register: doesCollectionRequirementsExist
 
         - name: fetch galaxy collections from collections/requirements.yml
-          command: ansible-galaxy collection install -r collections/requirements.yml -p {{collections_destination|quote}}{{ ' -' + 'v' * ansible_verbosity if ansible_verbosity else '' }}
+          command: >
+            ansible-galaxy collection install -r collections/requirements.yml
+            --collections-path {{collections_destination|quote}}
+            {{ ' -' + 'v' * ansible_verbosity if ansible_verbosity else '' }}
           args:
             chdir: "{{project_path|quote}}"
           register: galaxy_collection_result
