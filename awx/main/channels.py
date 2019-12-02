@@ -54,9 +54,6 @@ class RedisGroupBroadcastChannelLayer(RedisChannelLayer):
                     logger.warn(logmsg)
                     continue
 
-                # HACK: Carry over to handle our v1 channels "API"
-                if 'accept' in payload:
-                    return
                 (group, message) = unwrap_broadcast_msg(payload)
 
                 await channel_layer.group_send(group, {"type": "internal.message", "text": message})

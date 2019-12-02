@@ -6,9 +6,10 @@ import logging
 from django.utils.encoding import smart_str
 from django.http.cookie import parse_cookie
 from django.core.serializers.json import DjangoJSONEncoder
-from channels.consumer import SyncConsumer
-from channels.generic.websocket import JsonWebsocketConsumer
+
+from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.layers import get_channel_layer
+from channels.db import database_sync_to_async
 
 from asgiref.sync import async_to_sync
 
@@ -19,8 +20,8 @@ logger = logging.getLogger('awx.main.consumers')
 XRF_KEY = '_auth_user_xrf'
 
 
-class EventConsumer(JsonWebsocketConsumer):
-    def connect(self):
+class EventConsumer(AsyncJsonWebsocketConsumer):
+    async def connect(self):
         user = self.scope['user']
         secret = None
         for k, v in self.scope['headers']:
@@ -28,11 +29,11 @@ class EventConsumer(JsonWebsocketConsumer):
                 secret = v.decode("utf-8")
                 break
         if secret:
-            self.accept()
-            async_to_sync(self.channel_layer.group_add)(BROADCAST_GROUP, self.channel_name)
+            await self.accept()
+            await self.channel_layer.group_add(BROADCAST_GROUP, self.channel_name)
         elif user:
-            self.accept()
-            self.send_json({"accept": True, "user": user.id})
+            await self.accept()
+            await self.send_json({"accept": True, "user": user.id})
             # store the valid CSRF token from the cookie so we can compare it later
             # on ws_receive
             cookie_token = self.scope['cookies'].get('csrftoken')
@@ -42,14 +43,18 @@ class EventConsumer(JsonWebsocketConsumer):
             logger.error("Request user is not authenticated to use websocket.")
             # TODO: Carry over from channels 1 implementation
             # We should never .accept() the client and close without sending a close message
-            self.accept()
-            self.send({"close": True})
-            self.close()
+            await self.accept()
+            await self.send({"close": True})
+            await self.close()
 
-    def disconnect(self, code):
+    async def disconnect(self, code):
         pass
 
-    def receive_json(self, data):
+    @database_sync_to_async
+    def user_can_see_object_id(self, user_access):
+        return user_access.get_queryset().filter(pk=oid).exists()
+
+    async def receive_json(self, data):
         from awx.main.access import consumer_access
         user = self.scope['user']
         xrftoken = data.get('xrftoken')
@@ -61,7 +66,7 @@ class EventConsumer(JsonWebsocketConsumer):
             logger.error(
             "access denied to channel, XRF mismatch for {}".format(user.username)
             )
-            self.send_json({"error": "access denied to channel"})
+            await self.send_json({"error": "access denied to channel"})
 
         if 'groups' in data:
             groups = data['groups']
@@ -72,11 +77,11 @@ class EventConsumer(JsonWebsocketConsumer):
                         access_cls = consumer_access(group_name)
                         if access_cls is not None:
                             user_access = access_cls(user)
-                            if not user_access.get_queryset().filter(pk=oid).exists():
-                                self.send_json({"error": "access denied to channel {0} for resource id {1}".format(group_name, oid)})
+                            if not self.user_can_see_object_id(user_access):
+                                await self.send_json({"error": "access denied to channel {0} for resource id {1}".format(group_name, oid)})
                                 continue
 
-                        async_to_sync(self.channel_layer.group_add)(
+                        await self.channel_layer.group_add(
                             name,
                             self.channel_name
                         )
@@ -85,14 +90,13 @@ class EventConsumer(JsonWebsocketConsumer):
                         logger.warn("Non-priveleged client asked to join broadcast group!")
                         return
 
-                    async_to_sync(self.channel_layer.group_add)(
+                    await self.channel_layer.group_add(
                         group_name,
                         self.channel_name
                     )
 
-
-    def internal_message(self, event):
-        self.send(event['text'])
+    async def internal_message(self, event):
+        await self.send(event['text'])
 
 
 def emit_channel_notification(group, payload):
