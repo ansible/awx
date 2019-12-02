@@ -13,25 +13,41 @@ from channels.db import database_sync_to_async
 
 from asgiref.sync import async_to_sync
 
-from awx.main.channels import wrap_broadcast_msg, BROADCAST_GROUP
+from awx.main.channels import wrap_broadcast_msg
 
 
 logger = logging.getLogger('awx.main.consumers')
 XRF_KEY = '_auth_user_xrf'
+BROADCAST_GROUP = 'broadcast-group_send'
 
 
-class EventConsumer(AsyncJsonWebsocketConsumer):
+class BroadcastConsumer(AsyncJsonWebsocketConsumer):
     async def connect(self):
-        user = self.scope['user']
         secret = None
         for k, v in self.scope['headers']:
             if k.decode("utf-8") == 'secret':
                 secret = v.decode("utf-8")
                 break
-        if secret:
+        if secret == 'abc123':
+            # TODO: log ip of connected client
+            logger.info("Client connected")
             await self.accept()
             await self.channel_layer.group_add(BROADCAST_GROUP, self.channel_name)
-        elif user:
+        else:
+            await self.close()
+
+    async def disconnect(self, code):
+        # TODO: log ip of disconnected client
+        logger.info("Client disconnected")
+
+    async def internal_message(self, event):
+        await self.send(event['text'])
+
+
+class EventConsumer(AsyncJsonWebsocketConsumer):
+    async def connect(self):
+        user = self.scope['user']
+        if user:
             await self.accept()
             await self.send_json({"accept": True, "user": user.id})
             # store the valid CSRF token from the cookie so we can compare it later
@@ -46,9 +62,6 @@ class EventConsumer(AsyncJsonWebsocketConsumer):
             await self.accept()
             await self.send({"close": True})
             await self.close()
-
-    async def disconnect(self, code):
-        pass
 
     @database_sync_to_async
     def user_can_see_object_id(self, user_access):
@@ -109,6 +122,14 @@ def emit_channel_notification(group, payload):
     channel_layer = get_channel_layer()
 
     async_to_sync(channel_layer.group_send)(
+        group,
+        {
+            "type": "internal.message",
+            "text": payload
+        },
+    )
+
+    async_to_sync(channel_layer.group_send)(
         BROADCAST_GROUP,
         {
             "type": "internal.message",
@@ -116,10 +137,3 @@ def emit_channel_notification(group, payload):
         },
     )
 
-    async_to_sync(channel_layer.group_send)(
-        group,
-        {
-            "type": "internal.message",
-            "text": payload
-        },
-    )

@@ -14,7 +14,6 @@ from django.core.serializers.json import DjangoJSONEncoder
 
 
 logger = logging.getLogger('awx.main')
-BROADCAST_GROUP = 'broadcast-group_send'
 
 
 def wrap_broadcast_msg(group, message):
@@ -41,7 +40,7 @@ class RedisGroupBroadcastChannelLayer(RedisChannelLayer):
 
     async def run(self, host, port, secret='abc123'):
         channel_layer = get_channel_layer()
-        uri = "ws://{}:{}/websocket/".format(host, port)
+        uri = "ws://{}:{}/websocket/broadcast/".format(host, port)
         # TODO: Better loop and disconect/reconnect handling
         async with websockets.connect(uri, extra_headers={'secret': secret}) as websocket:
             while True:
