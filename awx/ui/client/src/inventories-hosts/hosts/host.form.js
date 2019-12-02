@@ -45,14 +45,11 @@ function(i18n) {
                     label: i18n._('Host Name'),
                     type: 'text',
                     required: true,
-                    awPopOver: "<p>" +
-                    i18n._("Provide a host name, ip address, or ip address:port. Examples include:") +
-                        "</p>" +
-                        "<blockquote>myserver.domain.com<br/>" +
-                        "127.0.0.1<br />" +
-                        "10.1.0.140:25<br />" +
-                        "server.example.com:25" +
-                        "</blockquote>",
+                    awPopOver: i18n._('Provide a host name, ip address, or ip address:port! Examples include: <br>' +
+                        '<div>myserver.domain.com<br>' +
+                        '127.0.0.1<br>' +
+                        '10.1.0.140:25<br>' +
+                        'server.example.com:25</div>'),
                     dataTitle: i18n._('Host Name'),
                     dataPlacement: 'right',
                     dataContainer: 'body',
@@ -71,9 +68,9 @@ function(i18n) {
                     "default": "---",
                     awPopOver: "<p>" + i18n._("Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two.") + "</p>" +
                         "JSON:<br />\n" +
-                        "<blockquote>{<br />&emsp;&quot;somevar&quot;: &quot;somevalue&quot;,<br />&emsp;&quot;password&quot;: &quot;magic&quot;<br /> }</blockquote>\n" +
+                        "<div>{<br />&emsp;&quot;somevar&quot;: &quot;somevalue&quot;,<br />&emsp;&quot;password&quot;: &quot;magic&quot;<br /> }</div>\n" +
                         "YAML:<br />\n" +
-                        "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n" +
+                        "<div>---<br />somevar: somevalue<br />password: magic<br /></div> <br>\n" +
                         '<p>' + i18n.sprintf(i18n._('View JSON examples at %s'), '<a href=&quot;http://www.json.org&quot; target=&quot;_blank&quot;>www.json.org</a>') + '</p>' +
                         '<p>' + i18n.sprintf(i18n._('View YAML examples at %s'), '<a href=&quot;http://docs.ansible.com/YAMLSyntax.html&quot; target=&quot;_blank&quot;>docs.ansible.com</a>') + '</p>',
                 }
