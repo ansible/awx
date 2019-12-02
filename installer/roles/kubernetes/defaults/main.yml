@@ -27,6 +27,7 @@ task_cpu_request: 1500
 rabbitmq_mem_request: 2
 rabbitmq_cpu_request: 500
 
+memcached_hostname: localhost
 memcached_mem_request: 1
 memcached_cpu_request: 500
 
