@@ -15,6 +15,8 @@ import RoutedTabs from '@components/RoutedTabs';
 
 import JobDetail from './JobDetail';
 import JobOutput from './JobOutput';
+import WorkflowDetail from './WorkflowDetail';
+import WorkflowOutput from './WorkflowOutput';
 import { JOB_TYPE_URL_SEGMENTS } from '../../constants';
 
 const CardHeader = styled(PFCardHeader)`
@@ -139,12 +141,12 @@ class Job extends Component {
               <Route
                 key="details"
                 path="/jobs/:type/:id/details"
-                render={() => <JobDetail type={match.params.type} job={job} />}
+                render={() => match.params.type === 'workflow' ? <WorkflowDetail job={job} /> : <JobDetail type={match.params.type} job={job} />}
               />,
               <Route
                 key="output"
                 path="/jobs/:type/:id/output"
-                render={() => <JobOutput type={match.params.type} job={job} />}
+                render={() => match.params.type === 'workflow' ? <WorkflowOutput job={job} /> : <JobOutput type={match.params.type} job={job} />}
               />,
               <Route
                 key="not-found"
