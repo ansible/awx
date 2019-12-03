@@ -186,7 +186,10 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
 
         if (_.has(schedule, 'summary_fields.unified_job_template.unified_job_type') &&
             schedule.summary_fields.unified_job_template.unified_job_type === 'system_job'){
-            $scope.cleanupJob = true;
+            let scheduleJobType = _.get(schedule.summary_fields.unified_job_template, 'job_type');
+            if (scheduleJobType !== 'cleanup_tokens' && scheduleJobType !== 'cleanup_sessions') {
+                $scope.askDaysToKeep = true;
+            }
         }
 
         $scope.schedule_obj = scheduleResolve;
@@ -256,7 +259,7 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
         $scope.noVars = true;
         scheduler.scope.timeZones = timezonesResolve;
         scheduler.scope.schedulerTimeZone = scheduleResolve.timezone;
-        if ($scope.cleanupJob){
+        if ($scope.askDaysToKeep){
             $scope.schedulerPurgeDays = Number(schedule.extra_data.days);
         }
 

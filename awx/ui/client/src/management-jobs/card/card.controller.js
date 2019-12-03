@@ -31,7 +31,6 @@ export default
                 };
                 getManagementJobs();
 
-                $scope.cleanupJob = true;
                 // This handles the case where the user refreshes the management job notifications page.
                 if($state.current.name === 'managementJobsList.notifications') {
                     $scope.activeCard = parseInt($state.params.management_id);
