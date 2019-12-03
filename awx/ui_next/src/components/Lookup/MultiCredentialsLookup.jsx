@@ -32,7 +32,7 @@ async function loadCredentials(params, selectedCredentialTypeId) {
 }
 
 function MultiCredentialsLookup(props) {
-  const { history, tooltip, value, onChange, onError, i18n } = props;
+  const { tooltip, value, onChange, onError, history, i18n } = props;
   const [credentialTypes, setCredentialTypes] = useState([]);
   const [selectedType, setSelectedType] = useState(null);
   const [credentials, setCredentials] = useState([]);
@@ -50,7 +50,7 @@ function MultiCredentialsLookup(props) {
         onError(err);
       }
     })();
-  }, []);
+  }, [onError]);
 
   useEffect(() => {
     (async () => {
@@ -69,7 +69,7 @@ function MultiCredentialsLookup(props) {
         onError(err);
       }
     })();
-  }, [selectedType]);
+  }, [selectedType, history.location.search, onError]);
 
   const isMultiple = selectedType && selectedType.name === 'Vault';
   const renderChip = ({ item, removeItem, canDelete }) => (

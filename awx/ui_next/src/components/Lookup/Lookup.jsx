@@ -30,6 +30,7 @@ const SearchButton = styled(Button)`
       var(--pf-global--BorderColor--200);
   }
 `;
+SearchButton.displayName = 'SearchButton';
 
 const InputGroup = styled(PFInputGroup)`
   ${props =>
@@ -120,7 +121,7 @@ function Lookup(props) {
           <SearchIcon />
         </SearchButton>
         <ChipHolder className="pf-c-form-control">
-          <ChipGroup>
+          <ChipGroup numChips={5}>
             {(multiple ? value : [value]).map(item =>
               renderItemChip({
                 item,
