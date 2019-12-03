@@ -3,10 +3,12 @@ import { t } from '@lingui/macro';
 
 import { CardBody, Button } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';
-import { withRouter } from 'react-router-dom';
+import { withRouter, Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { VariablesInput } from '@components/CodeMirrorInput';
 import ContentError from '@components/ContentError';
+import AlertModal from '@components/AlertModal';
+import { formatDateString } from '@util/dates';
 
 import { GroupsAPI } from '@api';
 import { DetailList, Detail } from '@components/DetailList';
@@ -21,6 +23,8 @@ const ActionButtonWrapper = styled.div`
 `;
 function InventoryGroupDetail({ i18n, history, match, inventoryGroup }) {
   const [error, setError] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
   const handleDelete = async () => {
     try {
       await GroupsAPI.destroy(inventoryGroup.id);
@@ -29,9 +33,41 @@ function InventoryGroupDetail({ i18n, history, match, inventoryGroup }) {
       setError(err);
     }
   };
-
   if (error) {
     return <ContentError />;
+  }
+  if (isDeleteModalOpen) {
+    return (
+      <AlertModal
+        variant="danger"
+        title={i18n._(t`Delete Inventory Group`)}
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        actions={[
+          <Button
+            key="delete"
+            variant="danger"
+            aria-label={i18n._(t`confirm delete`)}
+            onClick={handleDelete}
+          >
+            {i18n._(t`Delete`)}
+          </Button>,
+          <Button
+            key="cancel"
+            variant="secondary"
+            aria-label={i18n._(t`cancel delete`)}
+            onClick={() => setIsDeleteModalOpen(false)}
+          >
+            {i18n._(t`Cancel`)}
+          </Button>,
+        ]}
+      >
+        {i18n._(t`Are you sure you want to delete:`)}
+        <br />
+        <strong>{inventoryGroup.name}</strong>
+        <br />
+      </AlertModal>
+    );
   }
   return (
     <CardBody style={{ paddingTop: '20px' }}>
@@ -41,23 +77,47 @@ function InventoryGroupDetail({ i18n, history, match, inventoryGroup }) {
           label={i18n._(t`Description`)}
           value={inventoryGroup.description}
         />
+        <Detail
+          fullWidth
+          label={i18n._(t`Variables`)}
+          value={
+            <VariablesInput
+              css="margin: 20px 0"
+              id="inventoryGroup-variables"
+              readOnly
+              value={inventoryGroup.variables}
+              rows={4}
+              label=""
+            />
+          }
+        />
       </DetailList>
-      <VariablesInput
-        css="margin: 20px 0"
-        id="inventoryGroup-variables"
-        readOnly
-        value={inventoryGroup.variables}
-        rows={4}
-        label={i18n._(t`Variables`)}
-      />
       <DetailList>
         <Detail
           label={i18n._(t`Created`)}
-          value={`${inventoryGroup.created} by ${inventoryGroup.summary_fields.created_by.username}`}
+          value={
+            <span>
+              {i18n._(t`${formatDateString(inventoryGroup.created)} by`)}{' '}
+              <Link
+                to={`/users/${inventoryGroup.summary_fields.created_by.id}`}
+              >
+                {inventoryGroup.summary_fields.created_by.username}
+              </Link>
+            </span>
+          }
         />
         <Detail
           label={i18n._(t`Modified`)}
-          value={`${inventoryGroup.modified} by ${inventoryGroup.summary_fields.modified_by.username}`}
+          value={
+            <span>
+              {i18n._(t`${formatDateString(inventoryGroup.modified)} by`)}{' '}
+              <Link
+                to={`/users/${inventoryGroup.summary_fields.modified_by.id}`}
+              >
+                {inventoryGroup.summary_fields.modified_by.username}
+              </Link>
+            </span>
+          }
         />
       </DetailList>
       <ActionButtonWrapper>
@@ -75,7 +135,7 @@ function InventoryGroupDetail({ i18n, history, match, inventoryGroup }) {
         <Button
           variant="danger"
           aria-label={i18n._(t`Delete`)}
-          onClick={handleDelete}
+          onClick={() => setIsDeleteModalOpen(true)}
         >
           {i18n._(t`Delete`)}
         </Button>

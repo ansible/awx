@@ -51,14 +51,24 @@ function InventoryGroups({ i18n, match, setBreadcrumb, inventory }) {
           key="edit"
           path="/inventories/inventory/:id/groups/:groupId/edit"
           render={() => {
-            return <InventoryGroupEdit inventoryGroup={inventoryGroup} />;
+            return (
+              <InventoryGroupEdit
+                inventory={inventory}
+                inventoryGroup={inventoryGroup}
+              />
+            );
           }}
         />,
         <Route
           key="details"
           path="/inventories/inventory/:id/groups/:groupId/details"
           render={() => {
-            return <InventoryGroupDetail inventoryGroup={inventoryGroup} />;
+            return (
+              <InventoryGroupDetail
+                inventory={inventory}
+                inventoryGroup={inventoryGroup}
+              />
+            );
           }}
         />,
         <Route

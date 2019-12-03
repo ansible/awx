@@ -13,14 +13,16 @@ const inventoryGroup = {
   description: 'Bar',
   variables: 'bizz: buzz',
   id: 1,
-  created: '10:00',
-  modified: '12:00',
+  created: '2019-12-02T15:58:16.276813Z',
+  modified: '2019-12-03T20:33:46.207654Z',
   summary_fields: {
     created_by: {
       username: 'James',
+      id: 13,
     },
     modified_by: {
       username: 'Bond',
+      id: 14,
     },
   },
 };
@@ -49,8 +51,10 @@ describe('<InventoryGroupDetail />', () => {
   test('InventoryGroupDetail renders successfully', () => {
     expect(wrapper.length).toBe(1);
   });
-  test('should call api to delete the group', () => {
+  test('should open delete modal and then call api to delete the group', () => {
     wrapper.find('button[aria-label="Delete"]').simulate('click');
+    expect(wrapper.find('Modal').length).toBe(1);
+    wrapper.find('button[aria-label="confirm delete"]').simulate('click');
     expect(GroupsAPI.destroy).toBeCalledWith(1);
   });
   test('should navigate user to edit form on edit button click', async () => {
@@ -67,12 +71,8 @@ describe('<InventoryGroupDetail />', () => {
     expect(wrapper.find('Detail[label="Description"]').prop('value')).toBe(
       'Bar'
     );
-    expect(wrapper.find('Detail[label="Created"]').prop('value')).toBe(
-      '10:00 by James'
-    );
-    expect(wrapper.find('Detail[label="Modified"]').prop('value')).toBe(
-      '12:00 by Bond'
-    );
+    expect(wrapper.find('Detail[label="Created"]').length).toBe(1);
+    expect(wrapper.find('Detail[label="Modified"]').length).toBe(1);
     expect(wrapper.find('VariablesInput').prop('value')).toBe('bizz: buzz');
   });
 });

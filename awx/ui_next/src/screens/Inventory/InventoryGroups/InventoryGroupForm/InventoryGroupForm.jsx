@@ -2,10 +2,9 @@ import React from 'react';
 import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { Formik } from 'formik';
-import { Form, Card, CardBody, CardHeader } from '@patternfly/react-core';
+import { Form, Card, CardBody } from '@patternfly/react-core';
 import { t } from '@lingui/macro';
 
-import CardCloseButton from '@components/CardCloseButton';
 import FormRow from '@components/FormRow';
 import FormField from '@components/FormField';
 import FormActionGroup from '@components/FormActionGroup/FormActionGroup';
@@ -18,7 +17,6 @@ function InventoryGroupForm({
   group = {},
   handleSubmit,
   handleCancel,
-  match,
 }) {
   const initialValues = {
     name: group.name || '',
@@ -28,11 +26,6 @@ function InventoryGroupForm({
 
   return (
     <Card className="awx-c-card">
-      <CardHeader>
-        <CardCloseButton
-          linkTo={`/inventories/inventory/${match.params.id}/groups`}
-        />
-      </CardHeader>
       <CardBody>
         <Formik
           initialValues={initialValues}
