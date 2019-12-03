@@ -156,7 +156,13 @@ function AddEditCredentialsController (
             if (credential.get('credential_type') === credentialType.get('id')) {
                 vm.inputSources.items = credential.get('related.input_sources.results');
             }
-            vm.isTestable = (isEditable && credentialType.get('kind') === 'external');
+
+            if (mode === 'add') {
+                vm.isTestable = (models.me.get('is_superuser') && credentialType.get('kind') === 'external');
+            } else {
+                vm.isTestable = (isEditable && credentialType.get('kind') === 'external');
+            }
+
             vm.getSubmitData = getSubmitData;
             vm.checkForm = check;
 
