@@ -2504,33 +2504,49 @@ class RunInventoryUpdate(BaseTask):
         if inventory_update.inventory_source:
             source_project = inventory_update.inventory_source.source_project
         if (inventory_update.source=='scm' and inventory_update.launch_type!='scm' and source_project):
-            # In project sync, pulling galaxy roles is not needed
-            local_project_sync = source_project.create_project_update(
-                _eager_fields=dict(
-                    launch_type="sync",
-                    job_type='run',
-                    job_tags='update_{},install_collections'.format(source_project.scm_type),  # roles are never valid for inventory
-                    status='running',
-                    execution_node=inventory_update.execution_node,
-                    instance_group = inventory_update.instance_group,
-                    celery_task_id=inventory_update.celery_task_id))
-            # associate the inventory update before calling run() so that a
-            # cancel() call on the inventory update can cancel the project update
-            local_project_sync.scm_inventory_updates.add(inventory_update)
+            sync_needs, _ = source_project.get_sync_needs(source_project.scm_branch)
+            if 'install_roles' in sync_needs:
+                # Pulling galaxy roles has no effect for inventory updates
+                sync_needs.remove('install_roles')
+            if sync_needs:
+                local_project_sync = source_project.create_project_update(
+                    _eager_fields=dict(
+                        launch_type="sync",
+                        job_type='run',
+                        job_tags=','.join(sync_needs),
+                        status='running',
+                        execution_node=inventory_update.execution_node,
+                        instance_group = inventory_update.instance_group,
+                        celery_task_id=inventory_update.celery_task_id))
+                # associate the inventory update before calling run() so that a
+                # cancel() call on the inventory update can cancel the project update
+                local_project_sync.scm_inventory_updates.add(inventory_update)
 
-            project_update_task = local_project_sync._get_task_class()
-            try:
-                sync_task = project_update_task(job_private_data_dir=private_data_dir)
-                sync_task.run(local_project_sync.id)
-                local_project_sync.refresh_from_db()
-                inventory_update.inventory_source.scm_last_revision = local_project_sync.scm_revision
-                inventory_update.inventory_source.save(update_fields=['scm_last_revision'])
-            except Exception:
-                inventory_update = self.update_model(
-                    inventory_update.pk, status='failed',
-                    job_explanation=('Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' %
-                                     ('project_update', local_project_sync.name, local_project_sync.id)))
-                raise
+                project_update_task = local_project_sync._get_task_class()
+                try:
+                    sync_task = project_update_task(job_private_data_dir=private_data_dir)
+                    sync_task.run(local_project_sync.id)
+                    local_project_sync.refresh_from_db()
+                    inventory_update.inventory_source.scm_last_revision = local_project_sync.scm_revision
+                    inventory_update.inventory_source.save(update_fields=['scm_last_revision'])
+                except Exception:
+                    inventory_update = self.update_model(
+                        inventory_update.pk, status='failed',
+                        job_explanation=('Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' %
+                                         ('project_update', local_project_sync.name, local_project_sync.id)))
+                    raise
+            else:
+                # local tree is up-to-date with project
+                logger.info('Skipping project sync for {} because commit is locally available'.format(inventory_update.log_format))
+                if source_project.scm_revision != inventory_update.inventory_source.scm_last_revision:
+                    inventory_update.inventory_source.scm_last_revision = source_project.scm_revision
+                    inventory_update.inventory_source.save(update_fields=['scm_last_revision'])
+                # Make copy of source tree
+                RunProjectUpdate.make_local_copy(
+                    source_project.get_project_path(check_if_exists=False),
+                    os.path.join(private_data_dir, 'project'),
+                    source_project.scm_type, source_project.scm_revision
+                )
         elif inventory_update.source == 'scm' and inventory_update.launch_type == 'scm' and source_project:
             # This follows update, not sync, so make copy here
             project_path = source_project.get_project_path(check_if_exists=False)
