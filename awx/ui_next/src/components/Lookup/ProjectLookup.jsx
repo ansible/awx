@@ -40,6 +40,9 @@ function ProjectLookup({
         const { data } = await ProjectsAPI.read(params);
         setProjects(data.results);
         setCount(data.count);
+        if (data.count === 1) {
+          onChange(data.results[0]);
+        }
       } catch (err) {
         setError(err);
       }

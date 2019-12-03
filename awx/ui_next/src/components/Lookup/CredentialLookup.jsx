@@ -46,7 +46,7 @@ function CredentialLookup({
         }
       }
     })();
-  });
+  }, [credentialTypeId, history.location.search]);
 
   return (
     <FormGroup
@@ -63,6 +63,7 @@ function CredentialLookup({
         onBlur={onBlur}
         onChange={onChange}
         required={required}
+        qsConfig={QS_CONFIG}
         renderOptionsList={({ state, dispatch, canDelete }) => (
           <OptionsList
             value={state.selectedItems}
