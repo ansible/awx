@@ -16,6 +16,11 @@ describe('<JobListItem />', () => {
           id: 1,
           name: 'Job',
           type: 'project update',
+          summary_fields: {
+            user_capabilities: {
+              start: true,
+            },
+          },
         }}
         detailUrl="/organization/1"
         isSelected

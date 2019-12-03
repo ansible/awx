@@ -11,7 +11,7 @@ AWX/|RHAT| host, and that your authentication credentials are correct, run:
 
     awx config
 
-.. note:: for help configurating authentication settings with the awx CLI, see :ref:`authentication`.
+.. note:: For help configuring authentication settings with the awx CLI, see :ref:`authentication`.
 
 Printing the History of a Particular Job
 ----------------------------------------
@@ -57,5 +57,11 @@ Importing an SSH Key
 
     awx credentials create --credential_type 'Machine' \
         --name 'My SSH Key' --user 'alice' \
-        --inputs "{'username': 'server-login', 'ssh_key_data': '@~/.ssh/id_rsa`}"
+        --inputs '{"username": "server-login", "ssh_key_data": "@~/.ssh/id_rsa"}'
 
+Backup/Restore
+--------------
+
+The AWX CLI doesn't currently have official support for backing up and restoring resources (similar to `tower-cli send` and `tower-cli receive`).
+
+If you rely on this functionality, you should continue to use `tower-cli` at this time.

@@ -45,7 +45,6 @@ from polymorphic.models import PolymorphicModel
 from awx.main.access import get_user_capabilities
 from awx.main.constants import (
     SCHEDULEABLE_PROVIDERS,
-    ANSI_SGR_PATTERN,
     ACTIVE_STATES,
     CENSOR_VALUE,
 )
@@ -70,7 +69,8 @@ from awx.main.utils import (
     get_type_for_model, get_model_for_type,
     camelcase_to_underscore, getattrd, parse_yaml_or_json,
     has_model_field_prefetched, extract_ansible_vars, encrypt_dict,
-    prefetch_page_capabilities, get_external_account)
+    prefetch_page_capabilities, get_external_account, truncate_stdout,
+)
 from awx.main.utils.filters import SmartFilter
 from awx.main.redact import UriCleaner, REPLACE_STR
 
@@ -116,7 +116,7 @@ SUMMARIZABLE_FK_FIELDS = {
     'project': DEFAULT_SUMMARY_FIELDS + ('status', 'scm_type'),
     'source_project': DEFAULT_SUMMARY_FIELDS + ('status', 'scm_type'),
     'project_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed',),
-    'credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'credential_type_id'),
+    'credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'kubernetes', 'credential_type_id'),
     'job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'elapsed', 'type'),
     'job_template': DEFAULT_SUMMARY_FIELDS,
     'workflow_job_template': DEFAULT_SUMMARY_FIELDS,
@@ -135,10 +135,12 @@ SUMMARIZABLE_FK_FIELDS = {
     'source_script': ('name', 'description'),
     'role': ('id', 'role_field'),
     'notification_template': DEFAULT_SUMMARY_FIELDS,
-    'instance_group': {'id', 'name', 'controller_id'},
+    'instance_group': ('id', 'name', 'controller_id', 'is_containerized'),
     'insights_credential': DEFAULT_SUMMARY_FIELDS,
     'source_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'credential_type_id'),
     'target_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'credential_type_id'),
+    'webhook_credential': DEFAULT_SUMMARY_FIELDS,
+    'approved_or_denied_by': ('id', 'username', 'first_name', 'last_name'),
 }
 
 
@@ -1261,6 +1263,7 @@ class OrganizationSerializer(BaseSerializer):
             notification_templates_started = self.reverse('api:organization_notification_templates_started_list', kwargs={'pk': obj.pk}),
             notification_templates_success = self.reverse('api:organization_notification_templates_success_list', kwargs={'pk': obj.pk}),
             notification_templates_error = self.reverse('api:organization_notification_templates_error_list', kwargs={'pk': obj.pk}),
+            notification_templates_approvals = self.reverse('api:organization_notification_templates_approvals_list', kwargs={'pk': obj.pk}),
             object_roles = self.reverse('api:organization_object_roles_list', kwargs={'pk': obj.pk}),
             access_list = self.reverse('api:organization_access_list', kwargs={'pk': obj.pk}),
             instance_groups = self.reverse('api:organization_instance_groups_list', kwargs={'pk': obj.pk}),
@@ -1469,7 +1472,7 @@ class ProjectUpdateSerializer(UnifiedJobSerializer, ProjectOptionsSerializer):
 
     class Meta:
         model = ProjectUpdate
-        fields = ('*', 'project', 'job_type', '-controller_node')
+        fields = ('*', 'project', 'job_type', 'job_tags', '-controller_node')
 
     def get_related(self, obj):
         res = super(ProjectUpdateSerializer, self).get_related(obj)
@@ -2453,12 +2456,18 @@ class CredentialTypeSerializer(BaseSerializer):
             raise PermissionDenied(
                 detail=_("Modifications not allowed for managed credential types")
             )
+
+        old_inputs = {}
+        if self.instance:
+            old_inputs = copy.deepcopy(self.instance.inputs)
+
+        ret = super(CredentialTypeSerializer, self).validate(attrs)
+
         if self.instance and self.instance.credentials.exists():
-            if 'inputs' in attrs and attrs['inputs'] != self.instance.inputs:
+            if 'inputs' in attrs and old_inputs != self.instance.inputs:
                 raise PermissionDenied(
                     detail= _("Modifications to inputs are not allowed for credential types that are in use")
                 )
-        ret = super(CredentialTypeSerializer, self).validate(attrs)
 
         if 'kind' in attrs and attrs['kind'] not in ('cloud', 'net'):
             raise serializers.ValidationError({
@@ -2513,7 +2522,7 @@ class CredentialSerializer(BaseSerializer):
 
     class Meta:
         model = Credential
-        fields = ('*', 'organization', 'credential_type', 'inputs', 'kind', 'cloud')
+        fields = ('*', 'organization', 'credential_type', 'inputs', 'kind', 'cloud', 'kubernetes')
         extra_kwargs = {
             'credential_type': {
                 'label': _('Credential Type'),
@@ -2825,6 +2834,25 @@ class JobTemplateMixin(object):
         d['recent_jobs'] = self._recent_jobs(obj)
         return d
 
+    def validate(self, attrs):
+        webhook_service = attrs.get('webhook_service', getattr(self.instance, 'webhook_service', None))
+        webhook_credential = attrs.get('webhook_credential', getattr(self.instance, 'webhook_credential', None))
+
+        if webhook_credential:
+            if webhook_credential.credential_type.kind != 'token':
+                raise serializers.ValidationError({
+                    'webhook_credential': _("Must be a Personal Access Token."),
+                })
+
+            msg = {'webhook_credential': _("Must match the selected webhook service.")}
+            if webhook_service:
+                if webhook_credential.credential_type.namespace != '{}_token'.format(webhook_service):
+                    raise serializers.ValidationError(msg)
+            else:
+                raise serializers.ValidationError(msg)
+
+        return super().validate(attrs)
+
 
 class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobOptionsSerializer):
     show_capabilities = ['start', 'schedule', 'copy', 'edit', 'delete']
@@ -2837,30 +2865,39 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
 
     class Meta:
         model = JobTemplate
-        fields = ('*', 'host_config_key', 'ask_scm_branch_on_launch', 'ask_diff_mode_on_launch', 'ask_variables_on_launch',
-                  'ask_limit_on_launch', 'ask_tags_on_launch',
-                  'ask_skip_tags_on_launch', 'ask_job_type_on_launch', 'ask_verbosity_on_launch', 'ask_inventory_on_launch',
-                  'ask_credential_on_launch', 'survey_enabled', 'become_enabled', 'diff_mode',
-                  'allow_simultaneous', 'custom_virtualenv', 'job_slice_count')
+        fields = (
+            '*', 'host_config_key', 'ask_scm_branch_on_launch', 'ask_diff_mode_on_launch',
+            'ask_variables_on_launch', 'ask_limit_on_launch', 'ask_tags_on_launch',
+            'ask_skip_tags_on_launch', 'ask_job_type_on_launch', 'ask_verbosity_on_launch',
+            'ask_inventory_on_launch', 'ask_credential_on_launch', 'survey_enabled',
+            'become_enabled', 'diff_mode', 'allow_simultaneous', 'custom_virtualenv',
+            'job_slice_count', 'webhook_service', 'webhook_credential',
+        )
 
     def get_related(self, obj):
         res = super(JobTemplateSerializer, self).get_related(obj)
-        res.update(dict(
-            jobs = self.reverse('api:job_template_jobs_list', kwargs={'pk': obj.pk}),
-            schedules = self.reverse('api:job_template_schedules_list', kwargs={'pk': obj.pk}),
-            activity_stream = self.reverse('api:job_template_activity_stream_list', kwargs={'pk': obj.pk}),
-            launch = self.reverse('api:job_template_launch', kwargs={'pk': obj.pk}),
-            notification_templates_started = self.reverse('api:job_template_notification_templates_started_list', kwargs={'pk': obj.pk}),
-            notification_templates_success = self.reverse('api:job_template_notification_templates_success_list', kwargs={'pk': obj.pk}),
-            notification_templates_error = self.reverse('api:job_template_notification_templates_error_list', kwargs={'pk': obj.pk}),
-            access_list = self.reverse('api:job_template_access_list',      kwargs={'pk': obj.pk}),
-            survey_spec = self.reverse('api:job_template_survey_spec', kwargs={'pk': obj.pk}),
-            labels = self.reverse('api:job_template_label_list', kwargs={'pk': obj.pk}),
-            object_roles = self.reverse('api:job_template_object_roles_list', kwargs={'pk': obj.pk}),
-            instance_groups = self.reverse('api:job_template_instance_groups_list', kwargs={'pk': obj.pk}),
-            slice_workflow_jobs = self.reverse('api:job_template_slice_workflow_jobs_list', kwargs={'pk': obj.pk}),
-            copy = self.reverse('api:job_template_copy', kwargs={'pk': obj.pk}),
-        ))
+        res.update(
+            jobs=self.reverse('api:job_template_jobs_list', kwargs={'pk': obj.pk}),
+            schedules=self.reverse('api:job_template_schedules_list', kwargs={'pk': obj.pk}),
+            activity_stream=self.reverse('api:job_template_activity_stream_list', kwargs={'pk': obj.pk}),
+            launch=self.reverse('api:job_template_launch', kwargs={'pk': obj.pk}),
+            webhook_key=self.reverse('api:webhook_key', kwargs={'model_kwarg': 'job_templates', 'pk': obj.pk}),
+            webhook_receiver=(
+                self.reverse('api:webhook_receiver_{}'.format(obj.webhook_service),
+                             kwargs={'model_kwarg': 'job_templates', 'pk': obj.pk})
+                if obj.webhook_service else ''
+            ),
+            notification_templates_started=self.reverse('api:job_template_notification_templates_started_list', kwargs={'pk': obj.pk}),
+            notification_templates_success=self.reverse('api:job_template_notification_templates_success_list', kwargs={'pk': obj.pk}),
+            notification_templates_error=self.reverse('api:job_template_notification_templates_error_list', kwargs={'pk': obj.pk}),
+            access_list=self.reverse('api:job_template_access_list',      kwargs={'pk': obj.pk}),
+            survey_spec=self.reverse('api:job_template_survey_spec', kwargs={'pk': obj.pk}),
+            labels=self.reverse('api:job_template_label_list', kwargs={'pk': obj.pk}),
+            object_roles=self.reverse('api:job_template_object_roles_list', kwargs={'pk': obj.pk}),
+            instance_groups=self.reverse('api:job_template_instance_groups_list', kwargs={'pk': obj.pk}),
+            slice_workflow_jobs=self.reverse('api:job_template_slice_workflow_jobs_list', kwargs={'pk': obj.pk}),
+            copy=self.reverse('api:job_template_copy', kwargs={'pk': obj.pk}),
+        )
         if obj.host_config_key:
             res['callback'] = self.reverse('api:job_template_callback', kwargs={'pk': obj.pk})
         return res
@@ -2887,7 +2924,6 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
 
     def validate_extra_vars(self, value):
         return vars_validate_or_raise(value)
-
 
     def get_summary_fields(self, obj):
         summary_fields = super(JobTemplateSerializer, self).get_summary_fields(obj)
@@ -2929,9 +2965,11 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
 
     class Meta:
         model = Job
-        fields = ('*', 'job_template', 'passwords_needed_to_start',
-                  'allow_simultaneous', 'artifacts', 'scm_revision',
-                  'instance_group', 'diff_mode', 'job_slice_number', 'job_slice_count')
+        fields = (
+            '*', 'job_template', 'passwords_needed_to_start', 'allow_simultaneous',
+            'artifacts', 'scm_revision', 'instance_group', 'diff_mode', 'job_slice_number',
+            'job_slice_count', 'webhook_service', 'webhook_credential', 'webhook_guid',
+        )
 
     def get_related(self, obj):
         res = super(JobSerializer, self).get_related(obj)
@@ -3319,27 +3357,37 @@ class WorkflowJobTemplateSerializer(JobTemplateMixin, LabelsListMixin, UnifiedJo
 
     class Meta:
         model = WorkflowJobTemplate
-        fields = ('*', 'extra_vars', 'organization', 'survey_enabled', 'allow_simultaneous',
-                  'ask_variables_on_launch', 'inventory', 'limit', 'scm_branch',
-                  'ask_inventory_on_launch', 'ask_scm_branch_on_launch', 'ask_limit_on_launch',)
+        fields = (
+            '*', 'extra_vars', 'organization', 'survey_enabled', 'allow_simultaneous',
+            'ask_variables_on_launch', 'inventory', 'limit', 'scm_branch',
+            'ask_inventory_on_launch', 'ask_scm_branch_on_launch', 'ask_limit_on_launch',
+            'webhook_service', 'webhook_credential',
+        )
 
     def get_related(self, obj):
         res = super(WorkflowJobTemplateSerializer, self).get_related(obj)
-        res.update(dict(
+        res.update(
             workflow_jobs = self.reverse('api:workflow_job_template_jobs_list', kwargs={'pk': obj.pk}),
             schedules = self.reverse('api:workflow_job_template_schedules_list', kwargs={'pk': obj.pk}),
             launch = self.reverse('api:workflow_job_template_launch', kwargs={'pk': obj.pk}),
+            webhook_key=self.reverse('api:webhook_key', kwargs={'model_kwarg': 'workflow_job_templates', 'pk': obj.pk}),
+            webhook_receiver=(
+                self.reverse('api:webhook_receiver_{}'.format(obj.webhook_service),
+                             kwargs={'model_kwarg': 'workflow_job_templates', 'pk': obj.pk})
+                if obj.webhook_service else ''
+            ),
             workflow_nodes = self.reverse('api:workflow_job_template_workflow_nodes_list', kwargs={'pk': obj.pk}),
             labels = self.reverse('api:workflow_job_template_label_list', kwargs={'pk': obj.pk}),
             activity_stream = self.reverse('api:workflow_job_template_activity_stream_list', kwargs={'pk': obj.pk}),
             notification_templates_started = self.reverse('api:workflow_job_template_notification_templates_started_list', kwargs={'pk': obj.pk}),
             notification_templates_success = self.reverse('api:workflow_job_template_notification_templates_success_list', kwargs={'pk': obj.pk}),
             notification_templates_error = self.reverse('api:workflow_job_template_notification_templates_error_list', kwargs={'pk': obj.pk}),
+            notification_templates_approvals = self.reverse('api:workflow_job_template_notification_templates_approvals_list', kwargs={'pk': obj.pk}),
             access_list = self.reverse('api:workflow_job_template_access_list', kwargs={'pk': obj.pk}),
             object_roles = self.reverse('api:workflow_job_template_object_roles_list', kwargs={'pk': obj.pk}),
             survey_spec = self.reverse('api:workflow_job_template_survey_spec', kwargs={'pk': obj.pk}),
             copy = self.reverse('api:workflow_job_template_copy', kwargs={'pk': obj.pk}),
-        ))
+        )
         if obj.organization:
             res['organization'] = self.reverse('api:organization_detail',   kwargs={'pk': obj.organization.pk})
         return res
@@ -3380,10 +3428,11 @@ class WorkflowJobSerializer(LabelsListMixin, UnifiedJobSerializer):
 
     class Meta:
         model = WorkflowJob
-        fields = ('*', 'workflow_job_template', 'extra_vars', 'allow_simultaneous',
-                  'job_template', 'is_sliced_job',
-                  '-execution_node', '-event_processing_finished', '-controller_node',
-                  'inventory', 'limit', 'scm_branch',)
+        fields = (
+            '*', 'workflow_job_template', 'extra_vars', 'allow_simultaneous', 'job_template',
+            'is_sliced_job', '-execution_node', '-event_processing_finished', '-controller_node',
+            'inventory', 'limit', 'scm_branch', 'webhook_service', 'webhook_credential', 'webhook_guid',
+        )
 
     def get_related(self, obj):
         res = super(WorkflowJobSerializer, self).get_related(obj)
@@ -3459,6 +3508,8 @@ class WorkflowApprovalSerializer(UnifiedJobSerializer):
                                                              kwargs={'pk': obj.workflow_approval_template.pk})
         res['approve'] = self.reverse('api:workflow_approval_approve', kwargs={'pk': obj.pk})
         res['deny'] = self.reverse('api:workflow_approval_deny', kwargs={'pk': obj.pk})
+        if obj.approved_or_denied_by:
+            res['approved_or_denied_by'] = self.reverse('api:user_detail', kwargs={'pk': obj.approved_or_denied_by.pk})
         return res
 
 
@@ -3490,7 +3541,7 @@ class WorkflowApprovalTemplateSerializer(UnifiedJobTemplateSerializer):
         if 'last_job' in res:
             del res['last_job']
 
-        res.update(dict(jobs = self.reverse('api:workflow_approval_template_jobs_list', kwargs={'pk': obj.pk}),))
+        res.update(jobs = self.reverse('api:workflow_approval_template_jobs_list', kwargs={'pk': obj.pk}))
         return res
 
 
@@ -3809,25 +3860,17 @@ class JobEventSerializer(BaseSerializer):
         return d
 
     def to_representation(self, obj):
-        ret = super(JobEventSerializer, self).to_representation(obj)
-        # Show full stdout for event detail view, truncate only for list view.
-        if hasattr(self.context.get('view', None), 'retrieve'):
-            return ret
+        data = super(JobEventSerializer, self).to_representation(obj)
         # Show full stdout for playbook_on_* events.
         if obj and obj.event.startswith('playbook_on'):
-            return ret
+            return data
+        # If the view logic says to not trunctate (request was to the detail view or a param was used)
+        if self.context.get('no_truncate', False):
+            return data
         max_bytes = settings.EVENT_STDOUT_MAX_BYTES_DISPLAY
-        if max_bytes > 0 and 'stdout' in ret and len(ret['stdout']) >= max_bytes:
-            ret['stdout'] = ret['stdout'][:(max_bytes - 1)] + u'\u2026'
-            set_count = 0
-            reset_count = 0
-            for m in ANSI_SGR_PATTERN.finditer(ret['stdout']):
-                if m.string[m.start():m.end()] == u'\u001b[0m':
-                    reset_count += 1
-                else:
-                    set_count += 1
-            ret['stdout'] += u'\u001b[0m' * (set_count - reset_count)
-        return ret
+        if 'stdout' in data:
+            data['stdout'] = truncate_stdout(data['stdout'], max_bytes)
+        return data
 
 
 class JobEventWebSocketSerializer(JobEventSerializer):
@@ -3922,22 +3965,14 @@ class AdHocCommandEventSerializer(BaseSerializer):
         return res
 
     def to_representation(self, obj):
-        ret = super(AdHocCommandEventSerializer, self).to_representation(obj)
-        # Show full stdout for event detail view, truncate only for list view.
-        if hasattr(self.context.get('view', None), 'retrieve'):
-            return ret
+        data = super(AdHocCommandEventSerializer, self).to_representation(obj)
+        # If the view logic says to not trunctate (request was to the detail view or a param was used)
+        if self.context.get('no_truncate', False):
+            return data
         max_bytes = settings.EVENT_STDOUT_MAX_BYTES_DISPLAY
-        if max_bytes > 0 and 'stdout' in ret and len(ret['stdout']) >= max_bytes:
-            ret['stdout'] = ret['stdout'][:(max_bytes - 1)] + u'\u2026'
-            set_count = 0
-            reset_count = 0
-            for m in ANSI_SGR_PATTERN.finditer(ret['stdout']):
-                if m.string[m.start():m.end()] == u'\u001b[0m':
-                    reset_count += 1
-                else:
-                    set_count += 1
-            ret['stdout'] += u'\u001b[0m' * (set_count - reset_count)
-        return ret
+        if 'stdout' in data:
+            data['stdout'] = truncate_stdout(data['stdout'], max_bytes)
+        return data
 
 
 class AdHocCommandEventWebSocketSerializer(AdHocCommandEventSerializer):
@@ -4309,13 +4344,30 @@ class NotificationTemplateSerializer(BaseSerializer):
         error_list = []
         collected_messages = []
 
+        def check_messages(messages):
+            for message_type in messages:
+                if message_type not in ('message', 'body'):
+                    error_list.append(_("Message type '{}' invalid, must be either 'message' or 'body'").format(message_type))
+                    continue
+                message = messages[message_type]
+                if message is None:
+                    continue
+                if not isinstance(message, str):
+                    error_list.append(_("Expected string for '{}', found {}, ").format(message_type, type(message)))
+                    continue
+                if message_type == 'message':
+                    if '\n' in message:
+                        error_list.append(_("Messages cannot contain newlines (found newline in {} event)".format(event)))
+                        continue
+                collected_messages.append(message)
+
         # Validate structure / content types
         if not isinstance(messages, dict):
             error_list.append(_("Expected dict for 'messages' field, found {}".format(type(messages))))
         else:
             for event in messages:
-                if event not in ['started', 'success', 'error']:
-                    error_list.append(_("Event '{}' invalid, must be one of 'started', 'success', or 'error'").format(event))
+                if event not in ('started', 'success', 'error', 'workflow_approval'):
+                    error_list.append(_("Event '{}' invalid, must be one of 'started', 'success', 'error', or 'workflow_approval'").format(event))
                     continue
                 event_messages = messages[event]
                 if event_messages is None:
@@ -4323,21 +4375,21 @@ class NotificationTemplateSerializer(BaseSerializer):
                 if not isinstance(event_messages, dict):
                     error_list.append(_("Expected dict for event '{}', found {}").format(event, type(event_messages)))
                     continue
-                for message_type in event_messages:
-                    if message_type not in ['message', 'body']:
-                        error_list.append(_("Message type '{}' invalid, must be either 'message' or 'body'").format(message_type))
-                        continue
-                    message = event_messages[message_type]
-                    if message is None:
-                        continue
-                    if not isinstance(message, str):
-                        error_list.append(_("Expected string for '{}', found {}, ").format(message_type, type(message)))
-                        continue
-                    if message_type == 'message':
-                        if '\n' in message:
-                            error_list.append(_("Messages cannot contain newlines (found newline in {} event)".format(event)))
+                if event == 'workflow_approval':
+                    for subevent in event_messages:
+                        if subevent not in ('running', 'approved', 'timed_out', 'denied'):
+                            error_list.append(_("Workflow Approval event '{}' invalid, must be one of "
+                                                "'running', 'approved', 'timed_out', or 'denied'").format(subevent))
                             continue
-                    collected_messages.append(message)
+                        subevent_messages = event_messages[subevent]
+                        if subevent_messages is None:
+                            continue
+                        if not isinstance(subevent_messages, dict):
+                            error_list.append(_("Expected dict for workflow approval event '{}', found {}").format(subevent, type(subevent_messages)))
+                            continue
+                        check_messages(subevent_messages)
+                else:
+                    check_messages(event_messages)
 
         # Subclass to return name of undefined field
         class DescriptiveUndefined(StrictUndefined):
@@ -4376,6 +4428,8 @@ class NotificationTemplateSerializer(BaseSerializer):
         if notification_type == 'webhook':
             for event in messages:
                 if not messages[event]:
+                    continue
+                if not isinstance(messages[event], dict):
                     continue
                 body = messages[event].get('body', {})
                 if body:
@@ -4466,8 +4520,18 @@ class NotificationSerializer(BaseSerializer):
                   'notification_type', 'recipients', 'subject', 'body')
 
     def get_body(self, obj):
-        if obj.notification_type == 'webhook' and 'body' in obj.body:
-            return obj.body['body']
+        if obj.notification_type in ('webhook', 'pagerduty'):
+            if isinstance(obj.body, dict):
+                if 'body' in obj.body:
+                    return obj.body['body']
+            elif isinstance(obj.body, str):
+                # attempt to load json string
+                try:
+                    potential_body = json.loads(obj.body)
+                    if isinstance(potential_body, dict):
+                        return potential_body
+                except json.JSONDecodeError:
+                    pass
         return obj.body
 
     def get_related(self, obj):
@@ -4600,6 +4664,10 @@ class ScheduleSerializer(LaunchConfigurationBaseSerializer, SchedulePreviewSeria
 
     def get_summary_fields(self, obj):
         summary_fields = super(ScheduleSerializer, self).get_summary_fields(obj)
+
+        if isinstance(obj.unified_job_template, SystemJobTemplate):
+            summary_fields['unified_job_template']['job_type'] = obj.unified_job_template.job_type
+
         if 'inventory' in summary_fields:
             return summary_fields
 
@@ -4688,6 +4756,11 @@ class InstanceGroupSerializer(BaseSerializer):
                     'Isolated groups have a designated controller group.'),
         read_only=True
     )
+    is_containerized = serializers.BooleanField(
+        help_text=_('Indicates whether instances in this group are containerized.'
+                    'Containerized groups have a designated Openshift or Kubernetes cluster.'),
+        read_only=True
+    )
     # NOTE: help_text is duplicated from field definitions, no obvious way of
     # both defining field details here and also getting the field's help_text
     policy_instance_percentage = serializers.IntegerField(
@@ -4713,8 +4786,9 @@ class InstanceGroupSerializer(BaseSerializer):
         fields = ("id", "type", "url", "related", "name", "created", "modified",
                   "capacity", "committed_capacity", "consumed_capacity",
                   "percent_capacity_remaining", "jobs_running", "jobs_total",
-                  "instances", "controller", "is_controller", "is_isolated",
-                  "policy_instance_percentage", "policy_instance_minimum", "policy_instance_list")
+                  "instances", "controller", "is_controller", "is_isolated", "is_containerized", "credential",
+                  "policy_instance_percentage", "policy_instance_minimum", "policy_instance_list",
+                  "pod_spec_override", "summary_fields")
 
     def get_related(self, obj):
         res = super(InstanceGroupSerializer, self).get_related(obj)
@@ -4722,6 +4796,9 @@ class InstanceGroupSerializer(BaseSerializer):
         res['instances'] = self.reverse('api:instance_group_instance_list', kwargs={'pk': obj.pk})
         if obj.controller_id:
             res['controller'] = self.reverse('api:instance_group_detail', kwargs={'pk': obj.controller_id})
+        if obj.credential:
+            res['credential'] = self.reverse('api:credential_detail', kwargs={'pk': obj.credential_id})
+
         return res
 
     def validate_policy_instance_list(self, value):
@@ -4734,11 +4811,28 @@ class InstanceGroupSerializer(BaseSerializer):
                 raise serializers.ValidationError(_('Isolated instances may not be added or removed from instances groups via the API.'))
             if self.instance and self.instance.controller_id is not None:
                 raise serializers.ValidationError(_('Isolated instance group membership may not be managed via the API.'))
+        if value and self.instance and self.instance.is_containerized:
+            raise serializers.ValidationError(_('Containerized instances may not be managed via the API'))
+        return value
+
+    def validate_policy_instance_percentage(self, value):
+        if value and self.instance and self.instance.is_containerized:
+            raise serializers.ValidationError(_('Containerized instances may not be managed via the API'))
+        return value
+
+    def validate_policy_instance_minimum(self, value):
+        if value and self.instance and self.instance.is_containerized:
+            raise serializers.ValidationError(_('Containerized instances may not be managed via the API'))
         return value
 
     def validate_name(self, value):
         if self.instance and self.instance.name == 'tower' and value != 'tower':
             raise serializers.ValidationError(_('tower instance group name may not be changed.'))
+        return value
+
+    def validate_credential(self, value):
+        if value and not value.kubernetes:
+            raise serializers.ValidationError(_('Only Kubernetes credentials can be associated with an Instance Group'))
         return value
 
     def get_capacity_dict(self):

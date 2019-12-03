@@ -1,4 +1,5 @@
 [ansible-nightly]
-baseurl=https://releases.ansible.com/ansible/rpm/nightly/devel/epel-7-$basearch
+name=ansible-nightly
+baseurl=https://releases.ansible.com/ansible/rpm/nightly/devel/epel-8-$basearch
 gpgcheck=0
 enabled=1

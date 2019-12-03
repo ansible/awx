@@ -74,7 +74,6 @@ class SelectResourceStep extends React.Component {
       onRowClick,
       selectedLabel,
       selectedResourceRows,
-      itemName,
       i18n,
     } = this.props;
 
@@ -94,13 +93,11 @@ class SelectResourceStep extends React.Component {
                 label={selectedLabel}
                 onRemove={onRowClick}
                 selected={selectedResourceRows}
-                showOverflowAfter={5}
               />
             )}
             <PaginatedDataList
               items={resources}
               itemCount={count}
-              itemName={itemName}
               qsConfig={this.qsConfig}
               toolbarColumns={columns}
               renderItem={item => (
@@ -132,7 +129,6 @@ SelectResourceStep.propTypes = {
   selectedLabel: PropTypes.string,
   selectedResourceRows: PropTypes.arrayOf(PropTypes.object),
   sortedColumnKey: PropTypes.string,
-  itemName: PropTypes.string,
 };
 
 SelectResourceStep.defaultProps = {
@@ -141,7 +137,6 @@ SelectResourceStep.defaultProps = {
   selectedLabel: null,
   selectedResourceRows: [],
   sortedColumnKey: 'name',
-  itemName: 'item',
 };
 
 export { SelectResourceStep as _SelectResourceStep };

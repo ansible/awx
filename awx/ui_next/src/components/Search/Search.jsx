@@ -14,6 +14,8 @@ import {
 } from '@patternfly/react-core';
 import { SearchIcon } from '@patternfly/react-icons';
 
+import { QSConfig } from '@types';
+
 import styled from 'styled-components';
 
 const TextInput = styled(PFTextInput)`
@@ -44,6 +46,8 @@ const Dropdown = styled(PFDropdown)`
 
       ::before {
         border-color: var(--pf-global--BorderColor--200);
+        border-top-left-radius: 3px;
+        border-bottom-left-radius: 3px;
       }
 
       > span {
@@ -64,6 +68,8 @@ const Dropdown = styled(PFDropdown)`
 const NoOptionDropdown = styled.div`
   align-self: stretch;
   border: 1px solid var(--pf-global--BorderColor--200);
+  border-top-left-radius: 3px;
+  border-bottom-left-radius: 3px;
   padding: 3px 7px;
   white-space: nowrap;
 `;
@@ -106,10 +112,19 @@ class Search extends React.Component {
     e.preventDefault();
 
     const { searchKey, searchValue } = this.state;
-    const { onSearch } = this.props;
+    const { onSearch, qsConfig } = this.props;
 
-    // TODO: probably not _always_ add icontains.  I don't think icontains works for numbers.
-    onSearch(`${searchKey}__icontains`, searchValue);
+    const isNonStringField =
+      qsConfig.integerFields.filter(field => field === searchKey).length ||
+      qsConfig.dateFields.filter(field => field === searchKey).length;
+
+    // TODO: this will probably become more sophisticated, where date
+    // fields and string fields are passed to a formatter
+    const actualSearchKey = isNonStringField
+      ? searchKey
+      : `${searchKey}__icontains`;
+
+    onSearch(actualSearchKey, searchValue);
 
     this.setState({ searchValue: '' });
   }
@@ -198,6 +213,7 @@ class Search extends React.Component {
 }
 
 Search.propTypes = {
+  qsConfig: QSConfig.isRequired,
   columns: PropTypes.arrayOf(PropTypes.object).isRequired,
   onSearch: PropTypes.func,
   sortedColumnKey: PropTypes.string,

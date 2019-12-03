@@ -483,6 +483,12 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
         choices=PROJECT_UPDATE_JOB_TYPE_CHOICES,
         default='check',
     )
+    job_tags = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+        help_text=_('Parts of the project update playbook that will be run.'),
+    )
     scm_revision = models.CharField(
         max_length=1024,
         blank=True,
@@ -587,3 +593,24 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
         if not selected_groups:
             return self.global_instance_groups
         return selected_groups
+
+    def save(self, *args, **kwargs):
+        added_update_fields = []
+        if not self.job_tags:
+            job_tags = ['update_{}'.format(self.scm_type)]
+            if self.job_type == 'run':
+                job_tags.append('install_roles')
+                job_tags.append('install_collections')
+            self.job_tags = ','.join(job_tags)
+            added_update_fields.append('job_tags')
+        if self.scm_delete_on_update and 'delete' not in self.job_tags and self.job_type == 'check':
+            self.job_tags = ','.join([self.job_tags, 'delete'])
+            added_update_fields.append('job_tags')
+        elif (not self.scm_delete_on_update) and 'delete' in self.job_tags:
+            job_tags = self.job_tags.split(',')
+            job_tags.remove('delete')
+            self.job_tags = ','.join(job_tags)
+            added_update_fields.append('job_tags')
+        if 'update_fields' in kwargs:
+            kwargs['update_fields'].extend(added_update_fields)
+        return super(ProjectUpdate, self).save(*args, **kwargs)

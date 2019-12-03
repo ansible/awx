@@ -1,7 +1,6 @@
-Scheduled Jobs
-==============
+## Scheduled Jobs
 
-awx allows jobs to run on a schedule (with optional recurrence rules) via
+AWX allows jobs to run on a schedule (with optional recurrence rules) via
 an `HTTP POST` to a variety of API endpoints:
 
     HTTP POST
@@ -23,9 +22,10 @@ an `HTTP POST` to a variety of API endpoints:
 specific example above would run a job every day - for seven consecutive days - starting
 on January 15th, 2030 at noon (UTC).
 
-Specifying Timezones
-====================
-`DTSTART` values provided to awx _must_ provide timezone information (they may
+
+## Specifying Timezones
+
+`DTSTART` values provided to AWX _must_ provide timezone information (they may
 not be naive dates).
 
 For UTC dates, `DTSTART` values should be denoted with the `Z` suffix:
@@ -48,9 +48,9 @@ A list of _valid_ zone identifiers (which can vary by system) can be found at:
     ]
 
 
-UNTIL and Timezones
-===================
-`DTSTART` values provided to awx _must_ provide timezone information (they may
+## UNTIL and Timezones
+
+`DTSTART` values provided to AWX _must_ provide timezone information (they may
 not be naive dates).
 
 Additionally, RFC5545 specifies that:
@@ -73,9 +73,9 @@ Not Valid:
     `DTSTART;TZID=America/New_York:20180601T120000 RRULE:FREQ=DAILY;INTERVAL=1;UNTIL=20180606T170000`
 
 
-Previewing Schedules
-====================
-awx provides an endpoint for previewing the future dates and times for
+## Previewing Schedules
+
+AWX provides an endpoint for previewing the future dates and times for
 a specified `RRULE`.  A list of the next _ten_ occurrences will be returned in
 local and UTC time:
 
@@ -107,10 +107,9 @@ local and UTC time:
     }
 
 
-RRULE Limitations
-=================
+## RRULE Limitations
 
-The following aspects of `RFC5545` are _not_ supported by awx schedules:
+The following aspects of `RFC5545` are _not_ supported by AWX schedules:
 
 * Strings with more than a single `DTSTART:` component
 * Strings with more than a single `RRULE` component
@@ -123,8 +122,7 @@ The following aspects of `RFC5545` are _not_ supported by awx schedules:
 * The use of `COUNT=` in an `RRULE` with a value over 999
 
 
-Implementation Details
-======================
+## Implementation Details
 
 Any time an `awx.model.Schedule` is saved with a valid `rrule` value, the
 `dateutil` library is used to burst out a list of all occurrences.  From here,
@@ -135,7 +133,7 @@ the following dates are saved in the database:
 * `main_schedule.dtend` - the _last_ datetime in the list of all occurrences (coerced to UTC)
 * `main_schedule.next_run` - the _next_ datetime in list after `utcnow()` (coerced to UTC)
 
-awx makes use of [Celery Periodic Tasks
+AWX makes use of [Celery Periodic Tasks
 (celerybeat)](http://docs.celeryproject.org/en/latest/userguide/periodic-tasks.html)
 to run a periodic task that discovers new jobs that need to run at a regular
 interval (by default, every 30 seconds).  When this task starts, it queries the

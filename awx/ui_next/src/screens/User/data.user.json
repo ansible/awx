@@ -1,0 +1,35 @@
+{
+  "id": 1,
+  "type": "user",
+  "url": "/api/v2/users/1/",
+  "related": {
+      "teams": "/api/v2/users/1/teams/",
+      "organizations": "/api/v2/users/1/organizations/",
+      "admin_of_organizations": "/api/v2/users/1/admin_of_organizations/",
+      "projects": "/api/v2/users/1/projects/",
+      "credentials": "/api/v2/users/1/credentials/",
+      "roles": "/api/v2/users/1/roles/",
+      "activity_stream": "/api/v2/users/1/activity_stream/",
+      "access_list": "/api/v2/users/1/access_list/",
+      "tokens": "/api/v2/users/1/tokens/",
+      "authorized_tokens": "/api/v2/users/1/authorized_tokens/",
+      "personal_tokens": "/api/v2/users/1/personal_tokens/"
+  },
+  "summary_fields": {
+      "user_capabilities": {
+          "edit": true,
+          "delete": false
+      }
+  },
+  "created": "2019-10-28T15:01:07.218634Z",
+  "username": "admin",
+  "first_name": "Admin",
+  "last_name": "User",
+  "email": "admin@ansible.com",
+  "is_superuser": true,
+  "is_system_auditor": false,
+  "ldap_dn": "",
+  "last_login": "2019-11-04T23:12:36.777783Z",
+  "external_account": null,
+  "auth": []
+}

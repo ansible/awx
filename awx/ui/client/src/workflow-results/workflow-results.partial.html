@@ -177,7 +177,7 @@
 
                     <!-- CREATED BY DETAIL -->
                     <div class="WorkflowResults-resultRow"
-                        ng-show="workflow.summary_fields.created_by.username">
+                        ng-show="workflow.summary_fields.created_by.username && !launched_by_webhook_link">
                         <label class="WorkflowResults-resultRowLabel">
                             {{ strings.labels.LAUNCHED_BY }}
                         </label>
@@ -192,7 +192,7 @@
 
                     <!-- SCHEDULED BY DETAIL -->
                     <div class="WorkflowResults-resultRow toggle-show"
-                        ng-show="workflow.summary_fields.schedule.name">
+                        ng-show="workflow.summary_fields.schedule.name && !launched_by_webhook_link">
                         <label
                             class="WorkflowResults-resultRowLabel">
                             {{ strings.labels.LAUNCHED_BY }}
@@ -202,6 +202,23 @@
                                 aw-tool-tip="{{ strings.tooltips.EDIT_SCHEDULE }}"
                                 data-placement="top">
                                 {{ workflow.summary_fields.schedule.name }}
+                            </a>
+                        </div>
+                    </div>
+
+
+                    <!-- LAUNCHED BY WEBHOOK DETAIL -->
+                    <div class="WorkflowResults-resultRow toggle-show"
+                        ng-show="launched_by_webhook_link">
+                        <label
+                            class="WorkflowResults-resultRowLabel">
+                            {{ strings.labels.LAUNCHED_BY }}
+                        </label>
+                        <div class="WorkflowResults-resultRowText">
+                            <a href="{{ launched_by_webhook_link }}"
+                                aw-tool-tip="{{ strings.tooltips.WEBHOOK_WORKFLOW_JOB_TEMPLATE }}"
+                                data-placement="top">
+                                {{ strings.details.WEBHOOK }}
                             </a>
                         </div>
                     </div>

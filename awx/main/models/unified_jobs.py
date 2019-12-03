@@ -532,6 +532,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         ('scheduled', _('Scheduled')),      # Job was started from a schedule.
         ('dependency', _('Dependency')),    # Job was started as a dependency of another job.
         ('workflow', _('Workflow')),        # Job was started from a workflow job.
+        ('webhook', _('Webhook')),          # Job was started from a webhook event.
         ('sync', _('Sync')),                # Job was started from a project sync.
         ('scm', _('SCM Update'))            # Job was created as an Inventory SCM sync.
     ]
@@ -711,6 +712,10 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
 
     @classmethod
     def supports_isolation(cls):
+        return False
+
+    @property
+    def can_run_containerized(self):
         return False
 
     def _get_parent_field_name(self):
@@ -1206,6 +1211,8 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
 
     def websocket_emit_status(self, status):
         connection.on_commit(lambda: self._websocket_emit_status(status))
+        if hasattr(self, 'update_webhook_status'):
+            connection.on_commit(lambda: self.update_webhook_status(status))
 
     def notification_data(self):
         return dict(id=self.id,
@@ -1422,3 +1429,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
 
     def is_isolated(self):
         return bool(self.controller_node)
+
+    @property
+    def is_containerized(self):
+        return False

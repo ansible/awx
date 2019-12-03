@@ -8,6 +8,41 @@ function InstancesController ($scope, $state, $http, $transitions, models, strin
     vm.policy_instance_list = instanceGroup.get('policy_instance_list');
     vm.isSuperuser = $scope.$root.user_is_superuser;
 
+    let tabs = {};
+    let addInstancesRoute ="";
+    if ($state.is("instanceGroups.instances")) {
+        tabs={ state: {
+                    details: {
+                        _go: 'instanceGroups.edit'
+                    },
+                    instances: {
+                        _active: true,
+                        _go: 'instanceGroups.instances'
+                    },
+                    jobs: {
+                        _go: 'instanceGroups.jobs'
+                    }
+                }
+            };
+        addInstancesRoute = 'instanceGroups.instances.modal.add';
+    } else if ($state.is("instanceGroups.containerGroupInstances")) {
+        tabs={
+            state: {
+                details: {
+                    _go: 'instanceGroups.editContainerGroup'
+                },
+                instances: {
+                    _active: true,
+                    _go: 'instanceGroups.containerGroupInstances'
+                },
+                jobs: {
+                    _go: 'instanceGroups.containerGroupJobs'
+                }
+            }
+        };
+        addInstancesRoute = 'instanceGroups.containerGroupInstances.modal.add';
+    }
+
     vm.list = {
         name: 'instances',
         iterator: 'instance',
@@ -20,6 +55,12 @@ function InstancesController ($scope, $state, $http, $transitions, models, strin
         label: `${strings.get('sort.NAME_ASCENDING')}`,
         value: 'hostname'
     };
+
+    vm.addInstances = () => {
+
+        return $state.go(`${addInstancesRoute}`);
+    };
+
 
     vm.toolbarSortValue = toolbarSortDefault;
     vm.toolbarSortOptions = [
@@ -64,21 +105,14 @@ function InstancesController ($scope, $state, $http, $transitions, models, strin
         }, { notify: false, location: 'replace' });
     };
 
-    vm.tab = {
-        details: {
-            _go: 'instanceGroups.edit',
-            _params: { instance_group_id: vm.instance_group_id }
-        },
-        instances: {
-            _active: true,
-            _go: 'instanceGroups.instances',
-            _params: { instance_group_id: vm.instance_group_id }
-        },
-        jobs: {
-            _go: 'instanceGroups.jobs',
-            _params: { instance_group_id: vm.instance_group_id }
-        }
-    };
+    const tabObj = {};
+    const params = { instance_group_id: instanceGroup.get('id') };
+
+    tabObj.details = { _go: tabs.state.details._go, _params: params };
+    tabObj.instances = { _go: tabs.state.instances._go, _params: params, _active: true };
+    tabObj.jobs = { _go: tabs.state.jobs._go, _params: params };
+    vm.tab = tabObj;
+
 
     vm.tooltips = {
         add: strings.get('tooltips.ASSOCIATE_INSTANCES')
@@ -107,7 +141,6 @@ function InstancesController ($scope, $state, $http, $transitions, models, strin
             url: instance.url,
             data
         };
-
         $http(req).then(vm.onSaveSuccess)
             .catch(({data, status}) => {
                 ProcessErrors($scope, data, status, null, {
@@ -157,7 +190,7 @@ InstancesController.$inject = [
     'resolvedModels',
     'InstanceGroupsStrings',
     'Dataset',
-    'ProcessErrors'
+    'ProcessErrors',
 ];
 
 export default InstancesController;

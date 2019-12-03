@@ -170,7 +170,7 @@ export default ['i18n', function(i18n) {
                             awToolTip: i18n._('Grant Permission'),
                             actionClass: 'at-Button--add',
                             actionId: 'button-add',
-                            ngShow: '(team_obj.summary_fields.user_capabilities.edit || canAdd)'
+                            ngShow: '(team_obj.summary_fields.user_capabilities.edit || canEditOrg)'
                         }
                     }
                 }

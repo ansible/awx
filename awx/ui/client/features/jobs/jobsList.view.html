@@ -34,7 +34,7 @@
                         header-value="{{ job.id }} - {{ job.name }}"
                         header-state="{{ vm.getSref(job) }}"
                         header-tag="{{ vm.jobTypes[job.type] }}"
-                        secondary-tag="{{ vm.getSliceJobDetails(job) }}">
+                        secondary-tag="{{ vm.getSecondaryTagLabel(job) }}">
                     </at-row-item>
                     <div class="at-Row-actions">
                         <at-relaunch job="job" ng-show="job.summary_fields.user_capabilities.start">

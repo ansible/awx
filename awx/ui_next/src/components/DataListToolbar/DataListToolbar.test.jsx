@@ -5,12 +5,23 @@ import DataListToolbar from './DataListToolbar';
 describe('<DataListToolbar />', () => {
   let toolbar;
 
+  const QS_CONFIG = {
+    namespace: 'organization',
+    dateFields: ['modified', 'created'],
+    defaultParams: { page: 1, page_size: 5, order_by: 'name' },
+    integerFields: ['page', 'page_size'],
+  };
+
   afterEach(() => {
     if (toolbar) {
       toolbar.unmount();
       toolbar = null;
     }
   });
+
+  const onSearch = jest.fn();
+  const onSort = jest.fn();
+  const onSelectAll = jest.fn();
 
   test('it triggers the expected callbacks', () => {
     const columns = [
@@ -22,12 +33,9 @@ describe('<DataListToolbar />', () => {
     const selectAll = 'input[aria-label="Select all"]';
     const sort = 'button[aria-label="Sort"]';
 
-    const onSearch = jest.fn();
-    const onSort = jest.fn();
-    const onSelectAll = jest.fn();
-
     toolbar = mountWithContexts(
       <DataListToolbar
+        qsConfig={QS_CONFIG}
         isAllSelected={false}
         showExpandCollapse
         sortedColumnKey="name"
@@ -73,10 +81,9 @@ describe('<DataListToolbar />', () => {
       { name: 'Baz', key: 'baz' },
     ];
 
-    const onSort = jest.fn();
-
     toolbar = mountWithContexts(
       <DataListToolbar
+        qsConfig={QS_CONFIG}
         sortedColumnKey="foo"
         sortOrder="ascending"
         columns={multipleColumns}
@@ -96,9 +103,10 @@ describe('<DataListToolbar />', () => {
     let searchDropdownItems = toolbar.find(searchDropdownMenuItems).children();
     expect(searchDropdownItems.length).toBe(1);
     const mockedSortEvent = { target: { innerText: 'Bar' } };
-    sortDropdownItems.at(0).simulate('click', mockedSortEvent);
+    searchDropdownItems.at(0).simulate('click', mockedSortEvent);
     toolbar = mountWithContexts(
       <DataListToolbar
+        qsConfig={QS_CONFIG}
         sortedColumnKey="foo"
         sortOrder="descending"
         columns={multipleColumns}
@@ -151,6 +159,7 @@ describe('<DataListToolbar />', () => {
 
     toolbar = mountWithContexts(
       <DataListToolbar
+        qsConfig={QS_CONFIG}
         sortedColumnKey="id"
         sortOrder="descending"
         columns={numericColumns}
@@ -162,6 +171,7 @@ describe('<DataListToolbar />', () => {
 
     toolbar = mountWithContexts(
       <DataListToolbar
+        qsConfig={QS_CONFIG}
         sortedColumnKey="id"
         sortOrder="ascending"
         columns={numericColumns}
@@ -173,6 +183,7 @@ describe('<DataListToolbar />', () => {
 
     toolbar = mountWithContexts(
       <DataListToolbar
+        qsConfig={QS_CONFIG}
         sortedColumnKey="name"
         sortOrder="descending"
         columns={alphaColumns}
@@ -184,6 +195,7 @@ describe('<DataListToolbar />', () => {
 
     toolbar = mountWithContexts(
       <DataListToolbar
+        qsConfig={QS_CONFIG}
         sortedColumnKey="name"
         sortOrder="ascending"
         columns={alphaColumns}
@@ -198,12 +210,10 @@ describe('<DataListToolbar />', () => {
     const columns = [
       { name: 'Name', key: 'name', isSortable: true, isSearchable: true },
     ];
-    const onSearch = jest.fn();
-    const onSort = jest.fn();
-    const onSelectAll = jest.fn();
 
     toolbar = mountWithContexts(
       <DataListToolbar
+        qsConfig={QS_CONFIG}
         columns={columns}
         onSearch={onSearch}
         onSort={onSort}
@@ -219,5 +229,28 @@ describe('<DataListToolbar />', () => {
     const button = toolbar.find('#test');
     expect(button).toHaveLength(1);
     expect(button.text()).toEqual('click');
+  });
+
+  test('it triggers the expected callbacks', () => {
+    const columns = [
+      { name: 'Name', key: 'name', isSortable: true, isSearchable: true },
+    ];
+
+    toolbar = mountWithContexts(
+      <DataListToolbar
+        qsConfig={QS_CONFIG}
+        isAllSelected
+        showExpandCollapse
+        sortedColumnKey="name"
+        sortOrder="ascending"
+        columns={columns}
+        onSearch={onSearch}
+        onSort={onSort}
+        onSelectAll={onSelectAll}
+        showSelectAll
+      />
+    );
+    const checkbox = toolbar.find('Checkbox');
+    expect(checkbox.prop('isChecked')).toBe(true);
   });
 });

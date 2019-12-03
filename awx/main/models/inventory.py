@@ -61,6 +61,7 @@ from awx.main.models.notifications import (
 )
 from awx.main.models.credential.injectors import _openstack_data
 from awx.main.utils import _inventory_updates, region_sorting, get_licenser
+from awx.main.utils.safe_yaml import sanitize_jinja
 
 
 __all__ = ['Inventory', 'Host', 'Group', 'InventorySource', 'InventoryUpdate',
@@ -753,6 +754,13 @@ class Host(CommonModelNameNotUnique, RelatedJobsMixin):
                 from awx.main.tasks import update_host_smart_inventory_memberships
                 update_host_smart_inventory_memberships.delay()
             connection.on_commit(on_commit)
+
+    def clean_name(self):
+        try:
+            sanitize_jinja(self.name)
+        except ValueError as e:
+            raise ValidationError(str(e) + ": {}".format(self.name))
+        return self.name
 
     def save(self, *args, **kwargs):
         self._update_host_smart_inventory_memeberships()
@@ -2036,9 +2044,25 @@ class azure_rm(PluginFileInjector):
         for key, loc in old_filterables:
             value = source_vars.get(key, None)
             if value and isinstance(value, str):
-                user_filters.append('{} not in {}'.format(
-                    loc, value.split(',')
-                ))
+                # tags can be list of key:value pairs
+                #  e.g. 'Creator:jmarshall, peanutbutter:jelly'
+                # or tags can be a list of keys
+                #  e.g. 'Creator, peanutbutter'
+                if key == "tags":
+                    # grab each key value pair
+                    for kvpair in value.split(','):
+                        # split into key and value
+                        kv = kvpair.split(':')
+                        # filter out any host that does not have key
+                        # in their tags.keys() variable
+                        user_filters.append('"{}" not in tags.keys()'.format(kv[0].strip()))
+                        # if a value is provided, check that the key:value pair matches
+                        if len(kv) > 1:
+                            user_filters.append('tags["{}"] != "{}"'.format(kv[0].strip(), kv[1].strip()))
+                else:
+                    user_filters.append('{} not in {}'.format(
+                        loc, value.split(',')
+                    ))
         if user_filters:
             ret.setdefault('exclude_host_filters', [])
             ret['exclude_host_filters'].extend(user_filters)

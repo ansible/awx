@@ -322,7 +322,7 @@ function projectsListController (
                 if (data.related.current_update) {
                     cancelSCMUpdate(data);
                 } else {
-                    Alert(vm.strings.get('update.UPDATE_NOT_FOUND'), vm.strings.get('update.NO_RUNNING_UPDATE') + project.name, 'alert-info', undefined, undefined, undefined, undefined, true);
+                    Alert(vm.strings.get('update.UPDATE_NOT_FOUND'), vm.strings.get('update.NO_RUNNING_UPDATE') + $filter('sanitize')(project.name), 'alert-info', undefined, undefined, undefined, undefined, true);
                 }
             })
             .catch(createErrorHandler('get project', 'GET'));

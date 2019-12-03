@@ -32,8 +32,8 @@ class Jobs extends Component {
     const breadcrumbConfig = {
       '/jobs': i18n._(t`Jobs`),
       [`/jobs/${type}/${job.id}`]: `${job.name}`,
-      [`/jobs/${type}/${job.id}/details`]: i18n._(t`Details`),
       [`/jobs/${type}/${job.id}/output`]: i18n._(t`Output`),
+      [`/jobs/${type}/${job.id}/details`]: i18n._(t`Details`),
     };
 
     this.setState({ breadcrumbConfig });

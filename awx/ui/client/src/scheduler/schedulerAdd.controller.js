@@ -347,7 +347,10 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
         }
     } else if (base === 'system_job_templates') {
         schedule_url = GetBasePath(base) + $stateParams.id + '/schedules/';
-        $scope.cleanupJob = true;
+        let parentJobType = _.get($scope.parentObject, 'job_type');
+        if (parentJobType !== 'cleanup_tokens' && parentJobType !== 'cleanup_sessions') {
+            $scope.askDaysToKeep = true;
+        }
     }
 
     Wait('start');

@@ -189,6 +189,36 @@ export default [ 'ProcessErrors', 'CredentialTypeModel', 'TemplatesStrings', '$f
                         modal.show($filter('sanitize')(vm.promptDataClone.templateName));
                         vm.promptData.triggerModalOpen = false;
 
+                        vm._savedPromptData = {
+                            1: _.cloneDeep(vm.promptDataClone)
+                        };
+                        Object.keys(vm.steps).forEach(step => {
+                            if (!vm.steps[step].tab) {
+                                return;
+                            }
+                            vm.steps[step].tab._onClickActivate = () => {
+                                if (vm._savedPromptData[vm.steps[step].tab.order]) {
+                                    vm.promptDataClone = vm._savedPromptData[vm.steps[step].tab.order];  
+                                }
+                                Object.keys(vm.steps).forEach(tabStep => {
+                                    if (!vm.steps[tabStep].tab) {
+                                        return;
+                                    }
+                                    if (vm.steps[tabStep].tab.order < vm.steps[step].tab.order) {
+                                        vm.steps[tabStep].tab._disabled = false;
+                                        vm.steps[tabStep].tab._active = false;
+                                    } else if (vm.steps[tabStep].tab.order === vm.steps[step].tab.order) {
+                                        vm.steps[tabStep].tab._disabled = false;
+                                        vm.steps[tabStep].tab._active = true;
+                                    } else {
+                                        vm.steps[tabStep].tab._disabled = true;
+                                        vm.steps[tabStep].tab._active = false;
+                                    }
+                                });
+                                scope.$broadcast('promptTabChange', { step });
+                            };
+                        });
+
                         modal.onClose = () => {
                             scope.$emit('launchModalOpen', false);
                         };
@@ -203,6 +233,38 @@ export default [ 'ProcessErrors', 'CredentialTypeModel', 'TemplatesStrings', '$f
             }, true);
         };
 
+        function getSelectedTags(tagId) {
+            const selectedTags = [];
+            const choiceElements = $(tagId).siblings(".select2").first()
+                .find(".select2-selection__choice");
+            choiceElements.each((index, option) => {
+                selectedTags.push({
+                    value: option.title,
+                    name: option.title,
+                    label: option.title
+                });
+            });
+            return selectedTags;
+        }
+
+        function consolidateTags (tags, otherTags) {
+            const seen = [];
+            const consolidated = [];
+            tags.forEach(tag => {
+                if (!seen.includes(tag.value)) {
+                    seen.push(tag.value);
+                    consolidated.push(tag);
+                }
+            });
+            otherTags.forEach(tag => {
+                if (!seen.includes(tag.value)) {
+                    seen.push(tag.value);
+                    consolidated.push(tag);
+                }
+            });
+            return consolidated;
+        }
+
         vm.next = (currentTab) => {
             if(_.has(vm, 'steps.other_prompts.tab._active') && vm.steps.other_prompts.tab._active === true){
                 try {
@@ -213,20 +275,56 @@ export default [ 'ProcessErrors', 'CredentialTypeModel', 'TemplatesStrings', '$f
                     event.preventDefault();
                     return;
                 }
+
+                // The current tag input state lives somewhere in the associated select2
+                // widgetry and isn't directly tied to the vm, so extract the tag values
+                // and update the vm to keep it in sync.
+                if (vm.promptDataClone.launchConf.ask_tags_on_launch) {
+                    vm.promptDataClone.prompts.tags.value = consolidateTags(
+                        angular.copy(vm.promptDataClone.prompts.tags.value),
+                        getSelectedTags("#job_launch_job_tags")
+                    );
+                }
+                if (vm.promptDataClone.launchConf.ask_skip_tags_on_launch) {
+                    vm.promptDataClone.prompts.skipTags.value = consolidateTags(
+                        angular.copy(vm.promptDataClone.prompts.skipTags.value),
+                        getSelectedTags("#job_launch_skip_tags")
+                    );
+                }
             }
+
+            let nextStep;
             Object.keys(vm.steps).forEach(step => {
-                if(vm.steps[step].tab) {
-                    if(vm.steps[step].tab.order === currentTab.order) {
-                        vm.steps[step].tab._active = false;
-                        vm.steps[step].tab._disabled = true;
-                    } else if(vm.steps[step].tab.order === currentTab.order + 1) {
-                        activeTab = currentTab;
-                        vm.steps[step].tab._active = true;
-                        vm.steps[step].tab._disabled = false;
-                        scope.$broadcast('promptTabChange', { step });
-                    }
+                if (!vm.steps[step].tab) {
+                    return;
+                }
+                if (vm.steps[step].tab.order === currentTab.order + 1) {
+                    nextStep = step;
                 }
             });
+
+            if (!nextStep) {
+                return;
+            }
+
+            // Save the current promptData state in case we need to revert
+            vm._savedPromptData[currentTab.order] = _.cloneDeep(vm.promptDataClone);
+            Object.keys(vm.steps).forEach(tabStep => {
+                if (!vm.steps[tabStep].tab) {
+                    return;
+                }
+                if (vm.steps[tabStep].tab.order < vm.steps[nextStep].tab.order) {
+                    vm.steps[tabStep].tab._disabled = false;
+                    vm.steps[tabStep].tab._active = false;
+                } else if (vm.steps[tabStep].tab.order === vm.steps[nextStep].tab.order) {
+                    vm.steps[tabStep].tab._disabled = false;
+                    vm.steps[tabStep].tab._active = true;
+                } else {
+                    vm.steps[tabStep].tab._disabled = true;
+                    vm.steps[tabStep].tab._active = false;
+                }
+            });
+            scope.$broadcast('promptTabChange', { step: nextStep });
         };
 
         vm.keypress = (event) => {

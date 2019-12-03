@@ -48,6 +48,8 @@ from awx.main.models.mixins import (
     TaskManagerJobMixin,
     CustomVirtualEnvMixin,
     RelatedJobsMixin,
+    WebhookMixin,
+    WebhookTemplateMixin,
 )
 
 
@@ -187,7 +189,7 @@ class JobOptions(BaseModel):
         return needed
 
 
-class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, ResourceMixin, CustomVirtualEnvMixin, RelatedJobsMixin):
+class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, ResourceMixin, CustomVirtualEnvMixin, RelatedJobsMixin, WebhookTemplateMixin):
     '''
     A job template is a reusable job definition for applying a project (with
     playbook) to an inventory source with a given credential.
@@ -484,7 +486,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         return UnifiedJob.objects.filter(unified_job_template=self)
 
 
-class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskManagerJobMixin, CustomVirtualEnvMixin):
+class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskManagerJobMixin, CustomVirtualEnvMixin, WebhookMixin):
     '''
     A job applies a project (with playbook) to an inventory source with a given
     credential.  It represents a single invocation of ansible-playbook with the
@@ -627,15 +629,17 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
 
     @property
     def task_impact(self):
-        # NOTE: We sorta have to assume the host count matches and that forks default to 5
-        from awx.main.models.inventory import Host
         if self.launch_type == 'callback':
             count_hosts = 2
         else:
-            count_hosts = Host.objects.filter(inventory__jobs__pk=self.pk).count()
-            if self.job_slice_count > 1:
-                # Integer division intentional
-                count_hosts = (count_hosts + self.job_slice_count - self.job_slice_number) // self.job_slice_count
+            # If for some reason we can't count the hosts then lets assume the impact as forks
+            if self.inventory is not None:
+                count_hosts = self.inventory.hosts.count()
+                if self.job_slice_count > 1:
+                    # Integer division intentional
+                    count_hosts = (count_hosts + self.job_slice_count - self.job_slice_number) // self.job_slice_count
+            else:
+                count_hosts = 5 if self.forks == 0 else self.forks
         return min(count_hosts, 5 if self.forks == 0 else self.forks) + 1
 
     @property
@@ -715,6 +719,14 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         if artifacts.get('_ansible_no_log', False):
             return "$hidden due to Ansible no_log flag$"
         return artifacts
+
+    @property
+    def can_run_containerized(self):
+        return any([ig for ig in self.preferred_instance_groups if ig.is_containerized])
+
+    @property
+    def is_containerized(self):
+        return bool(self.instance_group and self.instance_group.is_containerized)
 
     @property
     def preferred_instance_groups(self):
@@ -888,6 +900,9 @@ class LaunchTimeConfigBase(BaseModel):
                         data[prompt_name] = self.display_extra_vars()
                     else:
                         data[prompt_name] = self.extra_vars
+                    # Depending on model, field type may save and return as string
+                    if isinstance(data[prompt_name], str):
+                        data[prompt_name] = parse_yaml_or_json(data[prompt_name])
                 if self.survey_passwords and not display:
                     data['survey_passwords'] = self.survey_passwords
             else:
@@ -1091,8 +1106,8 @@ class SystemJobOptions(BaseModel):
     SYSTEM_JOB_TYPE = [
         ('cleanup_jobs', _('Remove jobs older than a certain number of days')),
         ('cleanup_activitystream', _('Remove activity stream entries older than a certain number of days')),
-        ('clearsessions', _('Removes expired browser sessions from the database')),
-        ('cleartokens', _('Removes expired OAuth 2 access tokens and refresh tokens'))
+        ('cleanup_sessions', _('Removes expired browser sessions from the database')),
+        ('cleanup_tokens', _('Removes expired OAuth 2 access tokens and refresh tokens'))
     ]
 
     class Meta:
@@ -1167,18 +1182,19 @@ class SystemJobTemplate(UnifiedJobTemplate, SystemJobOptions):
             for key in unallowed_vars:
                 rejected[key] = data.pop(key)
 
-        if 'days' in data:
-            try:
-                if type(data['days']) is bool:
-                    raise ValueError
-                if float(data['days']) != int(data['days']):
-                    raise ValueError
-                days = int(data['days'])
-                if days < 0:
-                    raise ValueError
-            except ValueError:
-                errors_list.append(_("days must be a positive integer."))
-                rejected['days'] = data.pop('days')
+        if self.job_type in ('cleanup_jobs', 'cleanup_activitystream'):
+            if 'days' in data:
+                try:
+                    if isinstance(data['days'], (bool, type(None))):
+                        raise ValueError
+                    if float(data['days']) != int(data['days']):
+                        raise ValueError
+                    days = int(data['days'])
+                    if days < 0:
+                        raise ValueError
+                except ValueError:
+                    errors_list.append(_("days must be a positive integer."))
+                    rejected['days'] = data.pop('days')
 
         if errors_list:
             errors['extra_vars'] = errors_list

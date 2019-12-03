@@ -1,4 +1,5 @@
 import Base from '../Base';
+import RelaunchMixin from '../mixins/Relaunch.mixin';
 
 const BASE_URLS = {
   playbook: '/jobs/',
@@ -9,7 +10,7 @@ const BASE_URLS = {
   workflow: '/workflow_jobs/',
 };
 
-class Jobs extends Base {
+class Jobs extends RelaunchMixin(Base) {
   constructor(http) {
     super(http);
     this.baseUrl = '/api/v2/jobs/';
@@ -19,12 +20,12 @@ class Jobs extends Base {
     return this.http.get(`/api/v2${BASE_URLS[type]}${id}/`);
   }
 
-  readEvents(id, jobType = 'job', params = {}) {
+  readEvents(id, type = 'playbook', params = {}) {
     let endpoint;
-    if (jobType === 'job') {
-      endpoint = `${this.baseUrl}${id}/job_events/`;
+    if (type === 'playbook') {
+      endpoint = `/api/v2${BASE_URLS[type]}${id}/job_events/`;
     } else {
-      endpoint = `${this.baseUrl}${id}/events/`;
+      endpoint = `/api/v2${BASE_URLS[type]}${id}/events/`;
     }
     return this.http.get(endpoint, { params });
   }

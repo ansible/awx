@@ -11,8 +11,10 @@ class Command(BaseCommand):
     help = 'Gather AWX analytics data'
 
     def add_arguments(self, parser):
+        parser.add_argument('--dry-run', dest='dry-run', action='store_true',
+                            help='Gather analytics without shipping. Works even if analytics are disabled in settings.')
         parser.add_argument('--ship', dest='ship', action='store_true',
-                            help='Enable to ship metrics via insights-client')
+                            help='Enable to ship metrics to the Red Hat Cloud')
 
     def init_logging(self):
         self.logger = logging.getLogger('awx.main.analytics')
@@ -23,9 +25,14 @@ class Command(BaseCommand):
         self.logger.propagate = False
 
     def handle(self, *args, **options):
-        tgz = gather(collection_type='manual')
         self.init_logging()
+        opt_ship = options.get('ship')
+        opt_dry_run = options.get('dry-run')
+        if opt_ship and opt_dry_run:
+            self.logger.error('Both --ship and --dry-run cannot be processed at the same time.')
+            return
+        tgz = gather(collection_type='manual' if not opt_dry_run else 'dry-run')
         if tgz:
             self.logger.debug(tgz)
-        if options.get('ship'):
+        if opt_ship:
             ship(tgz)

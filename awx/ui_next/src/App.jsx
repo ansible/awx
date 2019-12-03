@@ -1,4 +1,5 @@
 import React, { Component, Fragment } from 'react';
+import { withRouter } from 'react-router-dom';
 import { global_breakpoint_md } from '@patternfly/react-tokens';
 import {
   Nav,
@@ -66,8 +67,9 @@ class App extends Component {
 
   // eslint-disable-next-line class-methods-use-this
   async handleLogout() {
+    const { history } = this.props;
     await RootAPI.logout();
-    window.location.replace('/#/login');
+    history.replace('/login');
   }
 
   handleAboutOpen() {
@@ -95,7 +97,13 @@ class App extends Component {
         MeAPI.read(),
       ]);
       const {
-        data: { ansible_version, custom_virtualenvs, version },
+        data: {
+          ansible_version,
+          custom_virtualenvs,
+          project_base_dir,
+          project_local_paths,
+          version,
+        },
       } = configRes;
       const {
         data: {
@@ -103,7 +111,14 @@ class App extends Component {
         },
       } = meRes;
 
-      this.setState({ ansible_version, custom_virtualenvs, version, me });
+      this.setState({
+        ansible_version,
+        custom_virtualenvs,
+        project_base_dir,
+        project_local_paths,
+        version,
+        me,
+      });
     } catch (err) {
       this.setState({ configError: err });
     }
@@ -113,6 +128,8 @@ class App extends Component {
     const {
       ansible_version,
       custom_virtualenvs,
+      project_base_dir,
+      project_local_paths,
       isAboutModalOpen,
       isNavOpen,
       me,
@@ -167,7 +184,14 @@ class App extends Component {
       <Fragment>
         <Page usecondensed="True" header={header} sidebar={sidebar}>
           <ConfigProvider
-            value={{ ansible_version, custom_virtualenvs, me, version }}
+            value={{
+              ansible_version,
+              custom_virtualenvs,
+              project_base_dir,
+              project_local_paths,
+              me,
+              version,
+            }}
           >
             {render({ routeGroups })}
           </ConfigProvider>
@@ -193,4 +217,4 @@ class App extends Component {
 }
 
 export { App as _App };
-export default withI18n()(App);
+export default withI18n()(withRouter(App));

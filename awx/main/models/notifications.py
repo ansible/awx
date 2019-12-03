@@ -17,7 +17,7 @@ from jinja2.exceptions import TemplateSyntaxError, UndefinedError, SecurityError
 
 # AWX
 from awx.api.versioning import reverse
-from awx.main.models.base import CommonModelNameNotUnique, CreatedModifiedModel
+from awx.main.models.base import CommonModelNameNotUnique, CreatedModifiedModel, prevent_search
 from awx.main.utils import encrypt_field, decrypt_field, set_environ
 from awx.main.notifications.email_backend import CustomEmailBackend
 from awx.main.notifications.slack_backend import SlackBackend
@@ -70,10 +70,10 @@ class NotificationTemplate(CommonModelNameNotUnique):
         choices=NOTIFICATION_TYPE_CHOICES,
     )
 
-    notification_configuration = JSONField(blank=False)
+    notification_configuration = prevent_search(JSONField(blank=False))
 
     def default_messages():
-        return {'started': None, 'success': None, 'error': None}
+        return {'started': None, 'success': None, 'error': None, 'workflow_approval': None}
 
     messages = JSONField(
         null=True,
@@ -92,25 +92,6 @@ class NotificationTemplate(CommonModelNameNotUnique):
     def get_message(self, condition):
         return self.messages.get(condition, {})
 
-    def build_notification_message(self, event_type, context):
-        env = sandbox.ImmutableSandboxedEnvironment()
-        templates = self.get_message(event_type)
-        msg_template = templates.get('message', {})
-
-        try:
-            notification_subject = env.from_string(msg_template).render(**context)
-        except (TemplateSyntaxError, UndefinedError, SecurityError):
-            notification_subject = ''
-
-
-        msg_body = templates.get('body', {})
-        try:
-            notification_body = env.from_string(msg_body).render(**context)
-        except (TemplateSyntaxError, UndefinedError, SecurityError):
-            notification_body = ''
-
-        return (notification_subject, notification_body)
-
     def get_absolute_url(self, request=None):
         return reverse('api:notification_template_detail', kwargs={'pk': self.pk}, request=request)
 
@@ -128,18 +109,33 @@ class NotificationTemplate(CommonModelNameNotUnique):
             old_messages = old_nt.messages
             new_messages = self.messages
 
+            def merge_messages(local_old_messages, local_new_messages, local_event):
+                if local_new_messages.get(local_event, {}) and local_old_messages.get(local_event, {}):
+                    local_old_event_msgs = local_old_messages[local_event]
+                    local_new_event_msgs = local_new_messages[local_event]
+                    for msg_type in ['message', 'body']:
+                        if msg_type not in local_new_event_msgs and local_old_event_msgs.get(msg_type, None):
+                            local_new_event_msgs[msg_type] = local_old_event_msgs[msg_type]
             if old_messages is not None and new_messages is not None:
-                for event in ['started', 'success', 'error']:
+                for event in ('started', 'success', 'error', 'workflow_approval'):
                     if not new_messages.get(event, {}) and old_messages.get(event, {}):
                         new_messages[event] = old_messages[event]
                         continue
-                    if new_messages.get(event, {}) and old_messages.get(event, {}):
-                        old_event_msgs = old_messages[event]
-                        new_event_msgs = new_messages[event]
-                        for msg_type in ['message', 'body']:
-                            if msg_type not in new_event_msgs and old_event_msgs.get(msg_type, None):
-                                new_event_msgs[msg_type] = old_event_msgs[msg_type]
+
+                    if event == 'workflow_approval' and old_messages.get('workflow_approval', None):
+                        new_messages.setdefault('workflow_approval', {})
+                        for subevent in ('running', 'approved', 'timed_out', 'denied'):
+                            old_wfa_messages = old_messages['workflow_approval']
+                            new_wfa_messages = new_messages['workflow_approval']
+                            if not new_wfa_messages.get(subevent, {}) and old_wfa_messages.get(subevent, {}):
+                                new_wfa_messages[subevent] = old_wfa_messages[subevent]
+                                continue
+                            if old_wfa_messages:
+                                merge_messages(old_wfa_messages, new_wfa_messages, subevent)
+                    else:
+                        merge_messages(old_messages, new_messages, event)
                     new_messages.setdefault(event, None)
+
 
         for field in filter(lambda x: self.notification_class.init_parameters[x]['type'] == "password",
                             self.notification_class.init_parameters):
@@ -169,12 +165,12 @@ class NotificationTemplate(CommonModelNameNotUnique):
     def recipients(self):
         return self.notification_configuration[self.notification_class.recipient_parameter]
 
-    def generate_notification(self, subject, message):
+    def generate_notification(self, msg, body):
         notification = Notification(notification_template=self,
                                     notification_type=self.notification_type,
                                     recipients=smart_str(self.recipients),
-                                    subject=subject,
-                                    body=message)
+                                    subject=msg,
+                                    body=body)
         notification.save()
         return notification
 
@@ -273,6 +269,7 @@ class JobNotificationMixin(object):
                             'timeout', 'use_fact_cache', 'launch_type', 'status', 'failed', 'started', 'finished',
                             'elapsed', 'job_explanation', 'execution_node', 'controller_node', 'allow_simultaneous',
                             'scm_revision', 'diff_mode', 'job_slice_number', 'job_slice_count', 'custom_virtualenv',
+                            'approval_status', 'approval_node_name', 'workflow_url',
                             {'host_status_counts': ['skipped', 'ok', 'changed', 'failures', 'dark']},
                             {'playbook_counts': ['play_count', 'task_count']},
                             {'summary_fields': [{'inventory': ['id', 'name', 'description', 'has_active_failures',
@@ -370,7 +367,10 @@ class JobNotificationMixin(object):
                            'verbosity': 0},
                    'job_friendly_name': 'Job',
                    'url': 'https://towerhost/#/jobs/playbook/1010',
-                   'job_summary_dict': """{'url': 'https://towerhost/$/jobs/playbook/13',
+                   'approval_status': 'approved',
+                   'approval_node_name': 'Approve Me',
+                   'workflow_url': 'https://towerhost/#/workflows/1010',
+                   'job_metadata': """{'url': 'https://towerhost/$/jobs/playbook/13',
  'traceback': '',
  'status': 'running',
  'started': '2019-08-07T21:46:38.362630+00:00',
@@ -389,14 +389,14 @@ class JobNotificationMixin(object):
         return context
 
     def context(self, serialized_job):
-        """Returns a context that can be used for rendering notification messages.
-        Context contains whitelisted content retrieved from a serialized job object
+        """Returns a dictionary that can be used for rendering notification messages.
+        The context will contain whitelisted content retrieved from a serialized job object
         (see JobNotificationMixin.JOB_FIELDS_WHITELIST), the job's friendly name,
         and a url to the job run."""
         context = {'job': {},
                    'job_friendly_name': self.get_notification_friendly_name(),
                    'url': self.get_ui_url(),
-                   'job_summary_dict': json.dumps(self.notification_data(), indent=4)}
+                   'job_metadata': json.dumps(self.notification_data(), indent=4)}
 
         def build_context(node, fields, whitelisted_fields):
             for safe_field in whitelisted_fields:
@@ -434,32 +434,33 @@ class JobNotificationMixin(object):
         context = self.context(job_serialization)
 
         msg_template = body_template = None
+        msg = body = ''
 
+        # Use custom template if available
         if nt.messages:
-            templates = nt.messages.get(self.STATUS_TO_TEMPLATE_TYPE[status], {}) or {}
-            msg_template = templates.get('message', {})
-            body_template = templates.get('body', {})
+            template = nt.messages.get(self.STATUS_TO_TEMPLATE_TYPE[status], {}) or {}
+            msg_template = template.get('message', None)
+            body_template = template.get('body', None)
+        # If custom template not provided, look up default template
+        default_template = nt.notification_class.default_messages[self.STATUS_TO_TEMPLATE_TYPE[status]]
+        if not msg_template:
+            msg_template = default_template.get('message', None)
+        if not body_template:
+            body_template = default_template.get('body', None)
 
         if msg_template:
             try:
-                notification_subject = env.from_string(msg_template).render(**context)
+                msg = env.from_string(msg_template).render(**context)
             except (TemplateSyntaxError, UndefinedError, SecurityError):
-                notification_subject = ''
-        else:
-            notification_subject = u"{} #{} '{}' {}: {}".format(self.get_notification_friendly_name(),
-                                                                self.id,
-                                                                self.name,
-                                                                status,
-                                                                self.get_ui_url())
-        notification_body = self.notification_data()
-        notification_body['friendly_name'] = self.get_notification_friendly_name()
+                msg = ''
+
         if body_template:
             try:
-                notification_body['body'] = env.from_string(body_template).render(**context)
+                body = env.from_string(body_template).render(**context)
             except (TemplateSyntaxError, UndefinedError, SecurityError):
-                notification_body['body'] = ''
+                body = ''
 
-        return (notification_subject, notification_body)
+        return (msg, body)
 
     def send_notification_templates(self, status):
         from awx.main.tasks import send_notifications  # avoid circular import
@@ -475,16 +476,13 @@ class JobNotificationMixin(object):
             return
 
         for nt in set(notification_templates.get(self.STATUS_TO_TEMPLATE_TYPE[status], [])):
-            try:
-                (notification_subject, notification_body) = self.build_notification_message(nt, status)
-            except AttributeError:
-                raise NotImplementedError("build_notification_message() does not exist" % status)
+            (msg, body) = self.build_notification_message(nt, status)
 
             # Use kwargs to force late-binding
             # https://stackoverflow.com/a/3431699/10669572
-            def send_it(local_nt=nt, local_subject=notification_subject, local_body=notification_body):
+            def send_it(local_nt=nt, local_msg=msg, local_body=body):
                 def _func():
-                    send_notifications.delay([local_nt.generate_notification(local_subject, local_body).id],
+                    send_notifications.delay([local_nt.generate_notification(local_msg, local_body).id],
                                              job_id=self.id)
                 return _func
             connection.on_commit(send_it())

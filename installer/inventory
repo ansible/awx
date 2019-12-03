@@ -22,15 +22,21 @@ dockerhub_base=ansible
 # kubernetes_namespace=awx
 # tiller_namespace=kube-system
 # Optional Kubernetes Variables
+# pg_image_registry=docker.io
+# pg_serviceaccount=awx
+# pg_volume_capacity=5
 # pg_persistence_storageClass=StorageClassName
 # pg_cpu_limit=1000
 # pg_mem_limit=2
 
-# Kubernetes Ingress Annotations
-# You can use the variables below to pass annotations to Kubernetes Ingress
-# The example below shows an annotation to be used with Traefik but other Ingress controllers are also supported.
-#kubernetes_ingress_hostname=awx.example.org
-#kubernetes_ingress_annotations={'kubernetes.io/ingress.class': 'traefik', 'traefik.ingress.kubernetes.io/redirect-entry-point': 'https'}
+# Kubernetes Ingress Configuration
+# You can use the variables below to configure Kubernetes Ingress
+# Set hostname
+# kubernetes_ingress_hostname=awx.example.org
+# Add annotations. The example below shows an annotation to be used with Traefik but other Ingress controllers are also supported
+# kubernetes_ingress_annotations={'kubernetes.io/ingress.class': 'traefik', 'traefik.ingress.kubernetes.io/redirect-entry-point': 'https'}
+# Specify a secret for TLS termination
+# kubernetes_ingress_tls_secret=awx-cert
 
 # Kubernetes and Openshift Install Resource Requests
 # These are the request and limit values for a pod's container for task/web/rabbitmq/memcached/management.
@@ -57,11 +63,11 @@ dockerhub_base=ansible
 # Common Docker parameters
 awx_task_hostname=awx
 awx_web_hostname=awxweb
-postgres_data_dir=/tmp/pgdocker
+postgres_data_dir="~/.awx/pgdocker"
 host_port=80
 host_port_ssl=443
 #ssl_certificate=
-docker_compose_dir=/tmp/awxcompose
+docker_compose_dir="~/.awx/awxcompose"
 
 # Required for Openshift when building the image on your own
 # Optional for Openshift if using Dockerhub or another prebuilt registry
@@ -84,10 +90,13 @@ pg_username=awx
 # pg_password should be random 10 character alphanumeric string, when postgresql is running on kubernetes
 # NB: it's a limitation of the "official" postgres helm chart
 pg_password=awxpass
-pg_admin_password=postgrespass
 pg_database=awx
 pg_port=5432
 #pg_sslmode=require
+
+# The following variable is only required when using the provided
+# containerized postgres deployment on OpenShift
+# pg_admin_password=postgrespass
 
 # RabbitMQ Configuration
 rabbitmq_password=awxpass
@@ -136,6 +145,9 @@ secret_key=awxsecret
 # AWX project data folder. If you need access to the location where AWX stores the projects
 # it manages from the docker host, you can set this to turn it into a volume for the container.
 #project_data_dir=/var/lib/awx/projects
+
+# AWX custom virtual environment folder. Only usable for local isntall.
+#custom_venv_dir=/opt/my-envs/
 
 # CA Trust directory. If you need to provide custom CA certificates, supplying
 # this variable causes this directory on the host to be bind mounted over

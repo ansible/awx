@@ -11,12 +11,25 @@
     secret: "{{ lookup('pipe', 'cat ' + src + '/env/ssh_key') }}"
 
   tasks:
-
     - name: synchronize job environment with isolated host
       synchronize:
-        copy_links: true
-        src: "{{src}}"
-        dest: "{{dest}}"
+        copy_links: yes
+        src: "{{ src }}"
+        dest: "{{ dest }}"
+      when: ansible_kubectl_config is not defined
+
+    - name: synchronize job environment with remote job container
+      synchronize:
+        copy_links: yes
+        src: "{{ src }}"
+        dest: "{{ dest }}"
+        set_remote_user: no
+        rsync_opts:
+          - "--rsh=$RSH"
+      environment:
+        RSH: "oc rsh --config={{ ansible_kubectl_config }}"
+      delegate_to: localhost
+      when: ansible_kubectl_config is defined
 
     - local_action: stat path="{{src}}/env/ssh_key"
       register: key
@@ -26,7 +39,7 @@
       when: key.stat.exists
 
     - name: spawn the playbook
-      command: "ansible-runner start {{src}} -p {{playbook}} -i {{ident}}"
+      command: "ansible-runner start {{src}} -p '{{playbook}}' -i {{ident}}"
       when: playbook is defined
 
     - name: spawn the adhoc command

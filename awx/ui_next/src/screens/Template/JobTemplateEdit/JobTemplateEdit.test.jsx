@@ -1,4 +1,6 @@
 import React from 'react';
+import { act } from 'react-dom/test-utils';
+import { createMemoryHistory } from 'history';
 import { sleep } from '@testUtils/testUtils';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
 import { JobTemplatesAPI, LabelsAPI, ProjectsAPI } from '@api';
@@ -33,6 +35,18 @@ const mockJobTemplate = {
     },
     labels: {
       results: [{ name: 'Sushi', id: 1 }, { name: 'Major', id: 2 }],
+    },
+    inventory: {
+      id: 2,
+      organization_id: 1,
+    },
+    credentials: [
+      { id: 1, kind: 'cloud', name: 'Foo' },
+      { id: 2, kind: 'ssh', name: 'Bar' },
+    ],
+    project: {
+      id: 15,
+      name: 'Boo',
     },
   },
 };
@@ -154,51 +168,54 @@ describe('<JobTemplateEdit />', () => {
   });
 
   test('initially renders successfully', async () => {
-    const wrapper = mountWithContexts(
-      <JobTemplateEdit template={mockJobTemplate} />
-    );
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <JobTemplateEdit template={mockJobTemplate} />
+      );
+    });
     await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
   });
 
-  test('handleSubmit should call api update', async done => {
-    const wrapper = mountWithContexts(
-      <JobTemplateEdit template={mockJobTemplate} />
-    );
+  test('handleSubmit should call api update', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <JobTemplateEdit template={mockJobTemplate} />
+      );
+    });
     await waitForElement(wrapper, 'JobTemplateForm', e => e.length === 1);
     const updatedTemplateData = {
       name: 'new name',
       description: 'new description',
       job_type: 'check',
     };
-    const newLabels = [
-      { associate: true, id: 3 },
-      { associate: true, id: 3 },
-      { name: 'Maple', organization: 1 },
-      { name: 'Tree', organization: 1 },
-    ];
-    const removedLabels = [
-      { disassociate: true, id: 1 },
-      { disassociate: true, id: 2 },
+    const labels = [
+      { id: 3, name: 'Foo', isNew: true },
+      { id: 4, name: 'Bar', isNew: true },
+      { id: 5, name: 'Maple' },
+      { id: 6, name: 'Tree' },
     ];
     JobTemplatesAPI.update.mockResolvedValue({
       data: { ...updatedTemplateData },
     });
     const formik = wrapper.find('Formik').instance();
-    const changeState = new Promise(resolve => {
-      formik.setState(
-        {
-          values: {
+    const changeState = await act(
+      () =>
+        new Promise(resolve => {
+          const values = {
             ...mockJobTemplate,
             ...updatedTemplateData,
-            newLabels,
-            removedLabels,
-          },
-        },
-        () => resolve()
-      );
-    });
+            labels,
+            instanceGroups: [],
+          };
+          formik.setState({ values }, () => resolve());
+        })
+    );
     await changeState;
-    wrapper.find('button[aria-label="Save"]').simulate('click');
+    await act(async () => {
+      wrapper.find('button[aria-label="Save"]').simulate('click');
+    });
     await sleep(0);
 
     expect(JobTemplatesAPI.update).toHaveBeenCalledWith(1, {
@@ -208,25 +225,73 @@ describe('<JobTemplateEdit />', () => {
     expect(JobTemplatesAPI.disassociateLabel).toHaveBeenCalledTimes(2);
     expect(JobTemplatesAPI.associateLabel).toHaveBeenCalledTimes(2);
     expect(JobTemplatesAPI.generateLabel).toHaveBeenCalledTimes(2);
-    done();
   });
 
-  test('should navigate to job template detail when cancel is clicked', async done => {
-    const history = { push: jest.fn() };
-    const wrapper = mountWithContexts(
-      <JobTemplateEdit template={mockJobTemplate} />,
-      { context: { router: { history } } }
-    );
+  test('should navigate to job template detail when cancel is clicked', async () => {
+    const history = createMemoryHistory({});
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <JobTemplateEdit template={mockJobTemplate} />,
+        { context: { router: { history } } }
+      );
+    });
     const cancelButton = await waitForElement(
       wrapper,
       'button[aria-label="Cancel"]',
       e => e.length === 1
     );
-    expect(history.push).not.toHaveBeenCalled();
-    cancelButton.prop('onClick')();
-    expect(history.push).toHaveBeenCalledWith(
+    await act(async () => {
+      cancelButton.prop('onClick')();
+    });
+    expect(history.location.pathname).toEqual(
       '/templates/job_template/1/details'
     );
-    done();
+  });
+  test('should not call ProjectsAPI.readPlaybooks if there is no project', async () => {
+    const history = createMemoryHistory({});
+    const noProjectTemplate = {
+      id: 1,
+      name: 'Foo',
+      description: 'Bar',
+      job_type: 'run',
+      inventory: 2,
+      playbook: 'Baz',
+      type: 'job_template',
+      forks: 0,
+      limit: '',
+      verbosity: '0',
+      job_slice_count: 1,
+      timeout: 0,
+      job_tags: '',
+      skip_tags: '',
+      diff_mode: false,
+      allow_callbacks: false,
+      allow_simultaneous: false,
+      use_fact_cache: false,
+      host_config_key: '',
+      summary_fields: {
+        user_capabilities: {
+          edit: true,
+        },
+        labels: {
+          results: [{ name: 'Sushi', id: 1 }, { name: 'Major', id: 2 }],
+        },
+        inventory: {
+          id: 2,
+          organization_id: 1,
+        },
+        credentials: [
+          { id: 1, kind: 'cloud', name: 'Foo' },
+          { id: 2, kind: 'ssh', name: 'Bar' },
+        ],
+      },
+    };
+    await act(async () =>
+      mountWithContexts(<JobTemplateEdit template={noProjectTemplate} />, {
+        context: { router: { history } },
+      })
+    );
+    expect(ProjectsAPI.readPlaybooks).not.toBeCalled();
   });
 });

@@ -213,6 +213,18 @@ function JobRenderService ($q, $compile, $sce, $window) {
         const record = this.createRecord(event, lines);
 
         if (lines.length === 1 && lines[0] === '') {
+            // runner_on_start, runner_on_ok, and a few other events have an actual line count
+            // of 1 (stdout = '') and a claimed line count of 0 (end_line - start_line = 0).
+            // Since a zero-length string has an actual line count of 1, they'll still get
+            // rendered as blank lines unless we intercept them and add some special
+            // handling to remove them.
+            //
+            // Although we're not going to render the blank line, the actual line count of
+            // the zero-length stdout string, which is 1, has already been recorded at this
+            // point so we must also go back and set the event's recorded line length to 0
+            // in order to avoid deleting too many lines when we need to pop or shift a
+            // page that contains this event off of the view.
+            this.records[record.uuid].lineCount = 0;
             return { html: '', count: 0 };
         }
 
@@ -473,7 +485,7 @@ function JobRenderService ($q, $compile, $sce, $window) {
     this.shift = lines => {
         // We multiply by two here under the assumption that one element and one text node
         // is generated for each line of output.
-        const count = 2 * lines;
+        const count = (2 * lines) + 1;
         const elements = this.el.contents().slice(0, count);
 
         return this.remove(elements);
@@ -482,7 +494,7 @@ function JobRenderService ($q, $compile, $sce, $window) {
     this.pop = lines => {
         // We multiply by two here under the assumption that one element and one text node
         // is generated for each line of output.
-        const count = 2 * lines;
+        const count = (2 * lines) + 1;
         const elements = this.el.contents().slice(-count);
 
         return this.remove(elements);
@@ -558,7 +570,7 @@ function JobRenderService ($q, $compile, $sce, $window) {
         }
 
         const max = this.state.tail;
-        const min = max - count;
+        const min = max - count + 1;
 
         let lines = 0;
 
@@ -589,7 +601,7 @@ function JobRenderService ($q, $compile, $sce, $window) {
         }
 
         const min = this.state.head;
-        const max = min + count;
+        const max = min + count - 1;
 
         let lines = 0;
 

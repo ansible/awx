@@ -159,7 +159,7 @@
                                  $state.reload();
                              } else if (res && res.data && res.data.status && res.data.status === "failed") {
                                  ngToast.danger({
-                                     content: `<div><i class="fa fa-exclamation-triangle Toast-successIcon"></i> <b>${name}:</b> Notification failed.</div><div>${res.data.error}</div>`
+                                     content: `<div><i class="fa fa-exclamation-triangle Toast-successIcon"></i> <b>${name}:</b> Notification failed.</div><div>${$filter('sanitize')(res.data.error)}</div>`
                                  });
                                  $state.reload();
                              } else if (res && res.data && res.data.status && res.data.status === "pending" && pending_retries > 0) {

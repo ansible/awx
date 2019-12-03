@@ -34,6 +34,7 @@ services:
     working_dir: "/awx_devel"
     volumes:
       - "../:/awx_devel"
+      - "../awx/projects/:/var/lib/awx/projects/"
     privileged: true
   # A useful container that simply passes through log messages to the console
   # helpful for testing awx/tower logging

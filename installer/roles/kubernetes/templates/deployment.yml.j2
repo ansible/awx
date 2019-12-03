@@ -39,7 +39,7 @@ data:
       [rabbitmq_management,rabbitmq_peer_discovery_k8s].
   rabbitmq_definitions.json: |
       {
-        "users":[{"name": "{{ rabbitmq_user }}", "password": "{{ rabbitmq_password }}", "tags": ""}],
+        "users":[{"name": "{{ rabbitmq_user }}", "password": "{{ rabbitmq_password }}", "tags": "administrator"}],
         "permissions":[
           {"user":"{{ rabbitmq_user }}","vhost":"awx","configure":".*","write":".*","read":".*"}
         ],
@@ -61,6 +61,20 @@ data:
       queue_master_locator=min-masters
       ## enable guest user
       loopback_users.guest = false
+{% if rabbitmq_use_ssl|default(False)|bool %}
+      ssl_options.cacertfile=/etc/pki/rabbitmq/ca.crt
+      ssl_options.certfile=/etc/pki/rabbitmq/server-combined.pem
+      ssl_options.verify=verify_peer
+{% endif %}
+  rabbitmq-env.conf: |
+      NODENAME=${RABBITMQ_NODENAME}
+      USE_LONGNAME=true
+{% if rabbitmq_use_ssl|default(False)|bool %}
+      ERL_SSL_PATH=$(erl -eval 'io:format("~p", [code:lib_dir(ssl, ebin)]),halt().' -noshell)
+      SSL_ADDITIONAL_ERL_ARGS="-pa '$ERL_SSL_PATH' -proto_dist inet_tls -ssl_dist_opt server_certfile /etc/pki/rabbitmq/server-combined.pem -ssl_dist_opt server_secure_renegotiate true client_secure_renegotiate true"
+      SERVER_ADDITIONAL_ERL_ARGS="$SERVER_ADDITIONAL_ERL_ARGS $SSL_ADDITIONAL_ERL_ARGS"
+      CTL_ERL_ARGS="$SSL_ADDITIONAL_ERL_ARGS"
+{% endif %}
 
 {% if kubernetes_context is defined %}
 ---
@@ -117,7 +131,7 @@ userNames:
 {% endif %}
 
 ---
-apiVersion: apps/v1beta1
+apiVersion: {{ kubernetes_statefulset_api_version }}
 kind: StatefulSet
 metadata:
   name: {{ kubernetes_deployment_name }}
@@ -125,6 +139,11 @@ metadata:
 spec:
   serviceName: {{ kubernetes_deployment_name }}
   replicas: 1
+{% if kubernetes_statefulset_api_version == "apps/v1" %}
+  selector:
+    matchLabels:
+      app: {{ kubernetes_deployment_name }}
+{% endif %}
   template:
     metadata:
       labels:
@@ -156,7 +175,7 @@ spec:
               {{ custom_venvs_path }}/{{ custom_venv.name }}/bin/pip install -U \
                 {% for module in custom_venv.python_modules %}{{ module }} {% endfor %} &&
 {% endif %}
-              deactivate && 
+              deactivate &&
 {% endfor %}
               :
           volumeMounts:
@@ -187,6 +206,11 @@ spec:
             - name: {{ kubernetes_deployment_name }}-application-config
               mountPath: "/etc/tower/settings.py"
               subPath: settings.py
+              readOnly: true
+
+            - name: {{ kubernetes_deployment_name }}-nginx-config
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
               readOnly: true
 
             - name: "{{ kubernetes_deployment_name }}-application-credentials"
@@ -269,12 +293,14 @@ spec:
               containerPort: 5672
           livenessProbe:
             exec:
-              command: ["rabbitmqctl", "status"]
+              command:
+              - /usr/local/bin/healthchecks/rabbit_health_node.py
             initialDelaySeconds: 30
             timeoutSeconds: 10
           readinessProbe:
             exec:
-              command: ["rabbitmqctl", "status"]
+              command:
+              - /usr/local/bin/healthchecks/rabbit_health_node.py
             initialDelaySeconds: 10
             timeoutSeconds: 10
           env:
@@ -293,9 +319,22 @@ spec:
                   key: rabbitmq_erlang_cookie
             - name: K8S_SERVICE_NAME
               value: "rabbitmq"
+            - name: RABBITMQ_USER
+              value: {{ rabbitmq_user }}
+            - name: RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ kubernetes_deployment_name }}-secrets"
+                  key: rabbitmq_password
           volumeMounts:
             - name: rabbitmq-config
               mountPath: /etc/rabbitmq
+            - name: rabbitmq-healthchecks
+              mountPath: /usr/local/bin/healthchecks
+{% if rabbitmq_use_ssl|default(False)|bool %}
+            - name: "{{ kubernetes_deployment_name }}-rabbitmq-certs-vol"
+              mountPath: /etc/pki/rabbitmq
+{% endif %}
           resources:
             requests:
               memory: "{{ rabbitmq_mem_request }}Gi"
@@ -351,7 +390,7 @@ spec:
             type: Directory
 {% endif %}
 {% if custom_venvs is defined %}
-        - name: custom-venvs 
+        - name: custom-venvs
           emptyDir: {}
 {% endif %}
         - name: {{ kubernetes_deployment_name }}-application-config
@@ -360,6 +399,13 @@ spec:
             items:
               - key: {{ kubernetes_deployment_name }}_settings
                 path: settings.py
+
+        - name: {{ kubernetes_deployment_name }}-nginx-config
+          configMap:
+            name: {{ kubernetes_deployment_name }}-config
+            items:
+              - key: {{ kubernetes_deployment_name }}_nginx_conf
+                path: nginx.conf
 
         - name: "{{ kubernetes_deployment_name }}-application-credentials"
           secret:
@@ -387,6 +433,58 @@ spec:
               path: enabled_plugins
             - key: rabbitmq_definitions.json
               path: rabbitmq_definitions.json
+            - key: rabbitmq-env.conf
+              path: rabbitmq-env.conf
+
+{% if rabbitmq_use_ssl|default(False)|bool %}
+        - name: "{{ kubernetes_deployment_name }}-rabbitmq-certs-vol"
+          secret:
+            secretName: "{{ kubernetes_deployment_name }}-rabbitmq-certs"
+            items:
+              - key: rabbitmq_ssl_cert
+                path: 'server.crt'
+              - key: rabbitmq_ssl_key
+                path: 'server.key'
+              - key: rabbitmq_ssl_cacert
+                path: 'ca.crt'
+              - key: rabbitmq_ssl_combined
+                path: 'server-combined.pem'
+{% endif %}
+        - name: rabbitmq-healthchecks
+          configMap:
+            name: {{ kubernetes_deployment_name }}-healthchecks
+            items:
+            - key: rabbit_health_node.py
+              path: rabbit_health_node.py
+            defaultMode: 0755
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ kubernetes_deployment_name }}-healthchecks
+  namespace: {{ kubernetes_namespace }}
+data:
+  rabbit_health_node.py: |
+    #!/usr/bin/env python
+    try:
+      from http.client import HTTPConnection
+    except ImportError:
+      from httplib import HTTPConnection
+    import sys
+    import os
+    import base64
+    authsecret = base64.b64encode(os.getenv('RABBITMQ_USER') + ':' + os.getenv('RABBITMQ_PASSWORD'))
+    conn=HTTPConnection('localhost:15672')
+    conn.request('GET', '/api/healthchecks/node', headers={'Authorization': 'Basic %s' % authsecret})
+    r1 = conn.getresponse()
+    if r1.status != 200:
+      sys.stderr.write('Received http error %i\\n' % (r1.status))
+      sys.exit(1)
+    body = r1.read()
+    if body != '{"status":"ok"}':
+      sys.stderr.write('Received body: %s' % body)
+      sys.exit(2)
+    sys.exit(0)
 ---
 apiVersion: v1
 kind: Service
@@ -433,6 +531,12 @@ metadata:
 {% endfor %}
 
 spec:
+{% if kubernetes_ingress_tls_secret is defined %}
+  tls:
+  - hosts:
+    - {{ kubernetes_ingress_hostname }}
+    secretName: {{ kubernetes_ingress_tls_secret }}
+{% endif %}
   rules:
   - host: {{ kubernetes_ingress_hostname }}
     http:

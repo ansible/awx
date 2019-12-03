@@ -1,0 +1,34 @@
+- hosts: localhost
+  gather_facts: false
+  connection: local
+  vars:
+    collection_package: awx
+    collection_namespace: awx
+    collection_version: 0.0.1  # not for updating, pass in extra_vars
+
+  tasks:
+  - name: Do file content replacements for non-default namespace or package name
+    block:
+    - name: Find all module files
+      find:
+        paths: "{{ playbook_dir }}/plugins/modules"
+        patterns: "*.py"
+      register: module_files
+
+    - name: Change files to support desired namespace and package names
+      replace:
+        path: "{{ item.path }}"
+        regexp: '^extends_documentation_fragment: awx.awx.auth$'
+        replace: 'extends_documentation_fragment: {{ collection_namespace }}.{{ collection_package }}.auth'
+      with_items: "{{ module_files.files }}"
+
+    - name: Change files to support desired namespace and package names
+      replace:
+        path: "{{ playbook_dir }}/plugins/inventory/tower.py"
+        regexp: "^    NAME = 'awx.awx.tower'  # REPLACE$"
+        replace: "    NAME = '{{ collection_namespace }}.{{ collection_package }}.tower'  # REPLACE"
+    when:
+      - (collection_package != 'awx') or (collection_namespace != 'awx')
+
+  - name: Template the galaxy.yml file
+    template: src={{ playbook_dir }}/galaxy.yml.j2 dest={{ playbook_dir }}/galaxy.yml

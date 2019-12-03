@@ -23,8 +23,12 @@ services:
       - "{{ docker_compose_dir }}/SECRET_KEY:/etc/tower/SECRET_KEY"
       - "{{ docker_compose_dir }}/environment.sh:/etc/tower/conf.d/environment.sh"
       - "{{ docker_compose_dir }}/credentials.py:/etc/tower/conf.d/credentials.py"
+      - "{{ docker_compose_dir }}/nginx.conf:/etc/nginx/nginx.conf:ro"
     {% if project_data_dir is defined %}
       - "{{ project_data_dir +':/var/lib/awx/projects:rw' }}"
+    {% endif %}
+    {% if custom_venv_dir is defined %}
+      - "{{ custom_venv_dir +':'+ custom_venv_dir +':rw' }}"
     {% endif %}
     {% if ca_trust_dir is defined %}
       - "{{ ca_trust_dir +':/etc/pki/ca-trust/source/anchors:ro' }}"
@@ -74,6 +78,9 @@ services:
       - "{{ docker_compose_dir }}/credentials.py:/etc/tower/conf.d/credentials.py"
     {% if project_data_dir is defined %}
       - "{{ project_data_dir +':/var/lib/awx/projects:rw' }}"
+    {% endif %}
+    {% if custom_venv_dir is defined %}
+      - "{{ custom_venv_dir +':'+ custom_venv_dir +':rw' }}"
     {% endif %}
     {% if ca_trust_dir is defined %}
       - "{{ ca_trust_dir +':/etc/pki/ca-trust/source/anchors:ro' }}"
@@ -128,7 +135,7 @@ services:
 
   {% if pg_hostname is not defined %}
   postgres:
-    image: postgres:10
+    image: {{ postgresql_image }}
     container_name: awx_postgres
     restart: unless-stopped
     volumes:

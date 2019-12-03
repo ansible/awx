@@ -82,6 +82,16 @@ def find_commands(management_dir):
     return commands
 
 
+def oauth2_getattribute(self, attr):
+    # Custom method to override
+    # oauth2_provider.settings.OAuth2ProviderSettings.__getattribute__
+    from django.conf import settings
+    val = settings.OAUTH2_PROVIDER.get(attr)
+    if val is None:
+        val = object.__getattribute__(self, attr)
+    return val
+
+
 def prepare_env():
     # Update the default settings environment variable based on current mode.
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'awx.settings.%s' % MODE)
@@ -93,6 +103,12 @@ def prepare_env():
     # Monkeypatch Django find_commands to also work with .pyc files.
     import django.core.management
     django.core.management.find_commands = find_commands
+
+    # Monkeypatch Oauth2 toolkit settings class to check for settings
+    # in django.conf settings each time, not just once during import
+    import oauth2_provider.settings
+    oauth2_provider.settings.OAuth2ProviderSettings.__getattribute__ = oauth2_getattribute
+
     # Use the AWX_TEST_DATABASE_* environment variables to specify the test
     # database settings to use when management command is run as an external
     # program via unit tests.

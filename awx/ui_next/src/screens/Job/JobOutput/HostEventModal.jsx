@@ -1,10 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Button,
-  Modal as PFModal,
-  Tab,
-  Tabs as PFTabs,
-} from '@patternfly/react-core';
+import { Modal as PFModal, Tab, Tabs as PFTabs } from '@patternfly/react-core';
 import CodeMirrorInput from '@components/CodeMirrorInput';
 import ContentEmpty from '@components/ContentEmpty';
 import PropTypes from 'prop-types';
@@ -32,7 +27,7 @@ const Modal = styled(PFModal)`
 const HostNameDetailValue = styled.div`
   align-items: center;
   display: inline-flex;
-  > div {
+  .at-c-statusIcon {
     margin-right: 10px;
   }
 `;
@@ -125,7 +120,7 @@ function HostEventModal({ onClose, hostEvent = {}, isOpen = false, i18n }) {
 
   useEffect(() => {
     setHostStatus(processEventStatus(hostEvent));
-  }, []);
+  }, [setHostStatus, hostEvent]);
 
   const handleTabClick = (event, tabIndex) => {
     setActiveTabKey(tabIndex);
@@ -141,11 +136,6 @@ function HostEventModal({ onClose, hostEvent = {}, isOpen = false, i18n }) {
       isOpen={isOpen}
       onClose={onClose}
       title={i18n._(t`Host Details`)}
-      actions={[
-        <Button key="cancel" variant="secondary" onClick={onClose}>
-          {i18n._(t`Close`)}
-        </Button>,
-      ]}
     >
       <Tabs
         aria-label={i18n._(t`Tabs`)}

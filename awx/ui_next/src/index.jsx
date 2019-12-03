@@ -13,6 +13,7 @@ import Applications from '@screens/Application';
 import Credentials from '@screens/Credential';
 import CredentialTypes from '@screens/CredentialType';
 import Dashboard from '@screens/Dashboard';
+import Hosts from '@screens/Host';
 import InstanceGroups from '@screens/InstanceGroup';
 import Inventories from '@screens/Inventory';
 import InventoryScripts from '@screens/InventoryScript';
@@ -43,7 +44,6 @@ export function main(render) {
   const el = document.getElementById('app');
   document.title = `Ansible ${BrandName}`;
 
-  const defaultRedirect = () => <Redirect to="/home" />;
   const removeTrailingSlash = (
     <Route
       exact
@@ -56,31 +56,38 @@ export function main(render) {
       }) => <Redirect to={`${pathname.slice(0, -1)}${search}${hash}`} />}
     />
   );
-  const loginRoutes = (
-    <Switch>
-      {removeTrailingSlash}
-      <Route
-        path="/login"
-        render={() => <Login isAuthenticated={isAuthenticated} />}
-      />
-      <Redirect to="/login" />
-    </Switch>
-  );
+
+  const defaultRedirect = () => {
+    if (isAuthenticated(document.cookie)) {
+      return <Redirect to="/home" />;
+    }
+    return (
+      <Switch>
+        {removeTrailingSlash}
+        <Route
+          path="/login"
+          render={() => <Login isAuthenticated={isAuthenticated} />}
+        />
+        <Redirect to="/login" />
+      </Switch>
+    );
+  };
 
   return render(
     <RootProvider>
       <I18n>
         {({ i18n }) => (
           <Background>
-            {!isAuthenticated(document.cookie) ? (
-              loginRoutes
-            ) : (
-              <Switch>
-                {removeTrailingSlash}
-                <Route path="/login" render={defaultRedirect} />
-                <Route exact path="/" render={defaultRedirect} />
-                <Route
-                  render={() => (
+            <Switch>
+              {removeTrailingSlash}
+              <Route path="/login" render={defaultRedirect} />
+              <Route exact path="/" render={defaultRedirect} />
+              <Route
+                render={() => {
+                  if (!isAuthenticated(document.cookie)) {
+                    return <Redirect to="/login" />;
+                  }
+                  return (
                     <App
                       navLabel={i18n._(t`Primary Navigation`)}
                       routeGroups={[
@@ -133,6 +140,11 @@ export function main(render) {
                               title: i18n._(t`Inventories`),
                               path: '/inventories',
                               component: Inventories,
+                            },
+                            {
+                              title: i18n._(t`Hosts`),
+                              path: '/hosts',
+                              component: Hosts,
                             },
                             {
                               title: i18n._(t`Inventory Scripts`),
@@ -250,10 +262,10 @@ export function main(render) {
                         return <Switch>{routeList}</Switch>;
                       }}
                     />
-                  )}
-                />
-              </Switch>
-            )}
+                  );
+                }}
+              />
+            </Switch>
           </Background>
         )}
       </I18n>

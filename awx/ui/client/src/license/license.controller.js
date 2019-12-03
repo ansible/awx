@@ -187,10 +187,6 @@ export default
                 payload = $scope.newLicense.file;
             } else if ($scope.selectedLicense.fullLicense) {
                 payload = $scope.selectedLicense.fullLicense;
-                if ($scope.rhCreds.username && $scope.rhCreds.password) {
-                    payload.rh_password = $scope.rhCreds.password;
-                    payload.rh_username = $scope.rhCreds.username;
-                }
             }
             
             CheckLicense.post(payload, $scope.newLicense.eula)
@@ -229,9 +225,8 @@ export default
                                 }, 4000);
                             }
                         });
-                }).catch(({data, status}) => {
-                    Wait('stop');
-                    ProcessErrors($scope, data, status, null, {
+                }).catch((err) => {
+                    ProcessErrors($scope, err, null, null, {
                         hdr: i18n._('Error Applying License')
                     });
                 });

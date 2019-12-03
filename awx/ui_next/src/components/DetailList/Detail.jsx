@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import { node, bool } from 'prop-types';
 import { TextListItem, TextListItemVariants } from '@patternfly/react-core';
 import styled from 'styled-components';
@@ -25,19 +25,33 @@ const DetailValue = styled(({ fullWidth, ...props }) => (
   `}
 `;
 
-const Detail = ({ label, value, fullWidth }) => {
+const Detail = ({ label, value, fullWidth, className, dataCy }) => {
   if (!value && typeof value !== 'number') {
     return null;
   }
+
+  const labelCy = dataCy ? `${dataCy}-label` : null;
+  const valueCy = dataCy ? `${dataCy}-value` : null;
+
   return (
-    <Fragment>
-      <DetailName component={TextListItemVariants.dt} fullWidth={fullWidth}>
+    <>
+      <DetailName
+        className={className}
+        component={TextListItemVariants.dt}
+        fullWidth={fullWidth}
+        data-cy={labelCy}
+      >
         {label}
       </DetailName>
-      <DetailValue component={TextListItemVariants.dd} fullWidth={fullWidth}>
+      <DetailValue
+        className={className}
+        component={TextListItemVariants.dd}
+        fullWidth={fullWidth}
+        data-cy={valueCy}
+      >
         {value}
       </DetailValue>
-    </Fragment>
+    </>
   );
 };
 Detail.propTypes = {

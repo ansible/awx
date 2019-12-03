@@ -150,8 +150,8 @@ class JobList extends Component {
       selected,
     } = this.state;
     const { match, i18n } = this.props;
-    const isAllSelected = selected.length === jobs.length;
-    const itemName = i18n._(t`Job`);
+    const isAllSelected =
+      selected.length === jobs.length && selected.length > 0;
     return (
       <PageSection>
         <Card>
@@ -160,7 +160,7 @@ class JobList extends Component {
             hasContentLoading={hasContentLoading}
             items={jobs}
             itemCount={itemCount}
-            itemName={itemName}
+            pluralizedItemName="Jobs"
             qsConfig={QS_CONFIG}
             toolbarColumns={[
               {
@@ -183,12 +183,13 @@ class JobList extends Component {
                 showExpandCollapse
                 isAllSelected={isAllSelected}
                 onSelectAll={this.handleSelectAll}
+                qsConfig={QS_CONFIG}
                 additionalControls={[
                   <ToolbarDeleteButton
                     key="delete"
                     onDelete={this.handleJobDelete}
                     itemsToDelete={selected}
-                    itemName={itemName}
+                    pluralizedItemName="Jobs"
                   />,
                 ]}
               />

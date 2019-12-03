@@ -184,6 +184,8 @@ class Page(object):
            a __class__ instance if the request path is different than the caller's `endpoint`.
         """
         request_path = response.request.path_url
+        if request_path == '/migrations_notran/':
+            raise exc.IsMigrating('You have been redirected to the migration-in-progress page.')
         request_method = response.request.method.lower()
 
         self.last_elapsed = response.elapsed

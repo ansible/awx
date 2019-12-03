@@ -18,7 +18,7 @@ from awx import __version__ as awx_application_version
 from awx.api.versioning import reverse
 from awx.main.managers import InstanceManager, InstanceGroupManager
 from awx.main.fields import JSONField
-from awx.main.models.base import BaseModel, HasEditsMixin
+from awx.main.models.base import BaseModel, HasEditsMixin, prevent_search
 from awx.main.models.unified_jobs import UnifiedJob
 from awx.main.utils import get_cpu_capacity, get_mem_capacity, get_system_task_capacity
 from awx.main.models.mixins import RelatedJobsMixin
@@ -59,7 +59,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         null=True,
         editable=False,
     )
-    version = models.CharField(max_length=24, blank=True)
+    version = models.CharField(max_length=120, blank=True)
     capacity = models.PositiveIntegerField(
         default=100,
         editable=False,
@@ -176,6 +176,18 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
         null=True,
         on_delete=models.CASCADE
     )
+    credential = models.ForeignKey(
+        'Credential',
+        related_name='%(class)ss',
+        blank=True,
+        null=True,
+        default=None,
+        on_delete=models.SET_NULL,
+    )
+    pod_spec_override = prevent_search(models.TextField(
+        blank=True,
+        default='',
+    ))
     policy_instance_percentage = models.IntegerField(
         default=0,
         help_text=_("Percentage of Instances to automatically assign to this group")
@@ -218,6 +230,10 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
     def is_isolated(self):
         return bool(self.controller)
 
+    @property
+    def is_containerized(self):
+        return bool(self.credential and self.credential.kubernetes)
+
     '''
     RelatedJobsMixin
     '''
@@ -254,6 +270,11 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
                                       .filter(capacity__gt=0, enabled=True)
                                       .values_list('hostname', flat=True)))
 
+    def set_default_policy_fields(self):
+        self.policy_instance_list = []
+        self.policy_instance_minimum = 0
+        self.policy_instance_percentage = 0
+
 
 class TowerScheduleState(SingletonModel):
     schedule_last_run = models.DateTimeField(auto_now_add=True)
@@ -271,7 +292,10 @@ def schedule_policy_task():
 @receiver(post_save, sender=InstanceGroup)
 def on_instance_group_saved(sender, instance, created=False, raw=False, **kwargs):
     if created or instance.has_policy_changes():
-        schedule_policy_task()
+        if not instance.is_containerized:
+            schedule_policy_task()
+    elif created or instance.is_containerized:
+        instance.set_default_policy_fields()
 
 
 @receiver(post_save, sender=Instance)
@@ -282,7 +306,8 @@ def on_instance_saved(sender, instance, created=False, raw=False, **kwargs):
 
 @receiver(post_delete, sender=InstanceGroup)
 def on_instance_group_deleted(sender, instance, using, **kwargs):
-    schedule_policy_task()
+    if not instance.is_containerized:
+        schedule_policy_task()
 
 
 @receiver(post_delete, sender=Instance)

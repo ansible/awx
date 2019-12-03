@@ -251,10 +251,12 @@ function getHostLimitErrorDetails () {
 function getLaunchedByDetails () {
     const createdBy = resource.model.get('summary_fields.created_by');
     const jobTemplate = resource.model.get('summary_fields.job_template');
+    const workflowJobTemplate = resource.model.get('summary_fields.workflow_job_template');
     const relatedSchedule = resource.model.get('related.schedule');
     const schedule = resource.model.get('summary_fields.schedule');
+    const launchType = resource.model.get('launch_type');
 
-    if (!createdBy && !schedule) {
+    if (!createdBy && !schedule && !launchType) {
         return null;
     }
 
@@ -264,7 +266,15 @@ function getLaunchedByDetails () {
     let tooltip;
     let value;
 
-    if (createdBy) {
+    if (launchType === 'webhook' && jobTemplate) {
+        tooltip = strings.get('tooltips.WEBHOOK_JOB_TEMPLATE');
+        link = `/#/templates/job_template/${jobTemplate.id}`;
+        value = strings.get('details.WEBHOOK');
+    } else if (launchType === 'webhook' && workflowJobTemplate) {
+        tooltip = strings.get('tooltips.WEBHOOK_WORKFLOW_JOB_TEMPLATE');
+        link = `/#/templates/workflow_job_template/${workflowJobTemplate.id}`;
+        value = strings.get('details.WEBHOOK');
+    } else if (createdBy) {
         tooltip = strings.get('tooltips.USER');
         link = `/#/users/${createdBy.id}`;
         value = $filter('sanitize')(createdBy.username);
@@ -272,10 +282,12 @@ function getLaunchedByDetails () {
         tooltip = strings.get('tooltips.SCHEDULE');
         link = `/#/templates/job_template/${jobTemplate.id}/schedules/${schedule.id}`;
         value = $filter('sanitize')(schedule.name);
-    } else {
+    } else if (schedule) {
         tooltip = null;
         link = null;
         value = $filter('sanitize')(schedule.name);
+    } else {
+        return null;
     }
 
     return { label, link, tooltip, value };
@@ -543,13 +555,17 @@ function getInstanceGroupDetails () {
         return null;
     }
 
-    const label = strings.get('labels.INSTANCE_GROUP');
     const value = $filter('sanitize')(instanceGroup.name);
-    const link = `/#/instance_groups/${instanceGroup.id}`;
+
+    let label = strings.get('labels.INSTANCE_GROUP');
+    let link = `/#/instance_groups/${instanceGroup.id}`;
+    if (instanceGroup.is_containerized) {
+        label = strings.get('labels.CONTAINER_GROUP');
+        link = `/#/instance_groups/container_group/${instanceGroup.id}`;
+    }
 
     let isolated = null;
-
-    if (instanceGroup.is_isolated) {
+    if (instanceGroup.controller_id) {
         isolated = strings.get('details.ISOLATED');
     }
 

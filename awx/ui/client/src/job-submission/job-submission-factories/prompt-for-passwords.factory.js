@@ -10,7 +10,7 @@ export default
 
             scope.passwords = params.passwords;
 
-            html += "<div class=\"alert alert-info\">Launching this job requires the passwords listed below. Enter and confirm each password before continuing.</div>\n";
+            html += "<div class=\"alert alert-info\">Launching this job requires the passwords listed below. Enter each password before continuing.</div>\n";
 
             scope.passwords.forEach(function(password) {
                 // Prompt for password

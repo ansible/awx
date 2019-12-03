@@ -18,6 +18,7 @@ COMPOSE_TAG ?= $(GIT_BRANCH)
 COMPOSE_HOST ?= $(shell hostname)
 
 VENV_BASE ?= /venv
+COLLECTION_VENV ?= /awx_devel/awx_collection_test_venv
 SCL_PREFIX ?=
 CELERY_SCHEDULE_FILE ?= /var/lib/awx/beat.db
 
@@ -99,20 +100,25 @@ clean-languages:
 	find . -type f -regex ".*\.mo$$" -delete
 
 # Remove temporary build files, compiled Python files.
-clean: clean-ui clean-dist
+clean: clean-ui clean-api clean-awxkit clean-dist
 	rm -rf awx/public
 	rm -rf awx/lib/site-packages
 	rm -rf awx/job_status
 	rm -rf awx/job_output
 	rm -rf reports
-	rm -f awx/awx_test.sqlite3*
-	rm -rf requirements/vendor
 	rm -rf tmp
 	rm -rf $(I18N_FLAG_FILE)
 	mkdir tmp
+
+clean-api:
 	rm -rf build $(NAME)-$(VERSION) *.egg-info
 	find . -type f -regex ".*\.py[co]$$" -delete
 	find . -type d -name "__pycache__" -delete
+	rm -f awx/awx_test.sqlite3*
+	rm -rf requirements/vendor
+
+clean-awxkit:
+	rm -rf awxkit/*.egg-info awxkit/.tox
 
 # convenience target to assert environment variables are defined
 guard-%:
@@ -186,14 +192,14 @@ requirements_awx: virtualenv_awx
 	    cat requirements/requirements.txt requirements/requirements_git.txt | $(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) --no-binary $(SRC_ONLY_PKGS) --ignore-installed -r /dev/stdin ; \
 	fi
 	echo "include-system-site-packages = true" >> $(VENV_BASE)/awx/lib/python$(PYTHON_VERSION)/pyvenv.cfg
-	#$(VENV_BASE)/awx/bin/pip uninstall --yes -r requirements/requirements_tower_uninstall.txt
+	$(VENV_BASE)/awx/bin/pip uninstall --yes -r requirements/requirements_tower_uninstall.txt
 
 requirements_awx_dev:
 	$(VENV_BASE)/awx/bin/pip install -r requirements/requirements_dev.txt
 
 requirements: requirements_ansible requirements_awx
 
-requirements_dev: requirements requirements_awx_dev requirements_ansible_dev
+requirements_dev: requirements_awx requirements_ansible_py3 requirements_awx_dev requirements_ansible_dev
 
 requirements_test: requirements
 
@@ -361,7 +367,7 @@ check: flake8 pep8 # pyflakes pylint
 
 awx-link:
 	cp -R /tmp/awx.egg-info /awx_devel/ || true
-	sed -i "s/placeholder/$(shell git describe --long | sed 's/\./\\./g')/" /awx_devel/awx.egg-info/PKG-INFO
+	sed -i "s/placeholder/$(shell cat VERSION)/" /awx_devel/awx.egg-info/PKG-INFO
 	cp -f /tmp/awx.egg-link /venv/awx/lib/python$(PYTHON_VERSION)/site-packages/awx.egg-link
 
 TEST_DIRS ?= awx/main/tests/unit awx/main/tests/functional awx/conf/tests awx/sso/tests
@@ -374,6 +380,37 @@ test:
 	PYTHONDONTWRITEBYTECODE=1 py.test -p no:cacheprovider -n auto $(TEST_DIRS)
 	cd awxkit && $(VENV_BASE)/awx/bin/tox -re py2,py3
 	awx-manage check_migrations --dry-run --check  -n 'vNNN_missing_migration_file'
+
+prepare_collection_venv:
+	rm -rf $(COLLECTION_VENV)
+	mkdir $(COLLECTION_VENV)
+	$(VENV_BASE)/awx/bin/pip install --target=$(COLLECTION_VENV) git+https://github.com/ansible/tower-cli.git
+
+COLLECTION_TEST_DIRS ?= awx_collection/test/awx
+COLLECTION_PACKAGE ?= awx
+COLLECTION_NAMESPACE ?= awx
+
+test_collection:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/awx/bin/activate; \
+	fi; \
+	PYTHONPATH=$(COLLECTION_VENV):/awx_devel/awx_collection:$PYTHONPATH py.test $(COLLECTION_TEST_DIRS)
+
+flake8_collection:
+	flake8 awx_collection/  # Different settings, in main exclude list
+
+test_collection_all: prepare_collection_venv test_collection flake8_collection
+
+test_collection_sanity:
+	rm -rf sanity
+	mkdir -p sanity/ansible_collections/awx
+	cp -Ra awx_collection sanity/ansible_collections/awx/awx  # symlinks do not work
+	cd sanity/ansible_collections/awx/awx && git init && git add . # requires both this file structure and a git repo, so there you go
+	cd sanity/ansible_collections/awx/awx && ansible-test sanity
+
+build_collection:
+	ansible-playbook -i localhost, awx_collection/template_galaxy.yml -e collection_package=$(COLLECTION_PACKAGE) -e collection_namespace=$(COLLECTION_NAMESPACE) -e collection_version=$(VERSION)
+	ansible-galaxy collection build awx_collection --output-path=awx_collection
 
 test_unit:
 	@if [ "$(VENV_BASE)" ]; then \
@@ -516,6 +553,12 @@ jshint: $(UI_DEPS_FLAG_FILE)
 	$(NPM_BIN) run --prefix awx/ui jshint
 	$(NPM_BIN) run --prefix awx/ui lint
 
+ui-zuul-lint-and-test: $(UI_DEPS_FLAG_FILE)
+	$(NPM_BIN) run --prefix awx/ui jshint
+	$(NPM_BIN) run --prefix awx/ui lint
+	$(NPM_BIN) --prefix awx/ui run test:ci
+	$(NPM_BIN) --prefix awx/ui run unit
+
 # END UI TASKS
 # --------------------------------------
 
@@ -529,6 +572,12 @@ ui-next-lint:
 
 ui-next-test:
 	$(NPM_BIN) --prefix awx/ui_next install
+	$(NPM_BIN) run --prefix awx/ui_next test
+
+ui-next-zuul-lint-and-test:
+	$(NPM_BIN) --prefix awx/ui_next install
+	$(NPM_BIN) run --prefix awx/ui_next lint
+	$(NPM_BIN) run --prefix awx/ui_next prettier-check
 	$(NPM_BIN) run --prefix awx/ui_next test
 
 # END UI NEXT TASKS

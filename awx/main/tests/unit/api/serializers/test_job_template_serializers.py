@@ -29,6 +29,7 @@ def job_template(mocker):
     mock_jt.pk = 5
     mock_jt.host_config_key = '9283920492'
     mock_jt.validation_errors = mock_JT_resource_data
+    mock_jt.webhook_service = ''
     return mock_jt
 
 
@@ -50,6 +51,7 @@ class TestJobTemplateSerializerGetRelated():
         'schedules',
         'activity_stream',
         'launch',
+        'webhook_key',
         'notification_templates_started',
         'notification_templates_success',
         'notification_templates_error',

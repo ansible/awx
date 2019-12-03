@@ -45,7 +45,7 @@ const Item = shape({
 
 class MultiSelect extends Component {
   static propTypes = {
-    associatedItems: arrayOf(Item).isRequired,
+    value: arrayOf(Item).isRequired,
     options: arrayOf(Item),
     onAddNewItem: func,
     onRemoveItem: func,
@@ -65,13 +65,11 @@ class MultiSelect extends Component {
     super(props);
     this.state = {
       input: '',
-      chipItems: this.getInitialChipItems(),
       isExpanded: false,
     };
-    this.handleAddItem = this.handleAddItem.bind(this);
+    this.handleKeyDown = this.handleKeyDown.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
-    this.handleSelection = this.handleSelection.bind(this);
-    this.removeChip = this.removeChip.bind(this);
+    this.removeItem = this.removeItem.bind(this);
     this.handleClick = this.handleClick.bind(this);
     this.createNewItem = this.createNewItem.bind(this);
   }
@@ -84,33 +82,57 @@ class MultiSelect extends Component {
     document.removeEventListener('mousedown', this.handleClick, false);
   }
 
-  getInitialChipItems() {
-    const { associatedItems } = this.props;
-    return associatedItems.map(item => ({ ...item }));
-  }
-
   handleClick(e, option) {
     if (this.node && this.node.contains(e.target)) {
       if (option) {
-        this.handleSelection(e, option);
+        e.preventDefault();
+        this.addItem(option);
       }
     } else {
       this.setState({ input: '', isExpanded: false });
     }
   }
 
-  handleSelection(e, item) {
-    const { chipItems } = this.state;
-    const { onAddNewItem, onChange } = this.props;
-    e.preventDefault();
-
-    const items = chipItems.concat({ name: item.name, id: item.id });
-    this.setState({
-      chipItems: items,
-      isExpanded: false,
-    });
+  addItem(item) {
+    const { value, onAddNewItem, onChange } = this.props;
+    const items = value.concat(item);
     onAddNewItem(item);
     onChange(items);
+    this.close();
+  }
+
+  // TODO: UpArrow & DownArrow for menu navigation
+  handleKeyDown(event) {
+    const { value, options } = this.props;
+    const { input } = this.state;
+    if (event.key === 'Tab') {
+      this.close();
+      return;
+    }
+    if (!input || event.key !== 'Enter') {
+      return;
+    }
+
+    const isAlreadySelected = value.some(i => i.name === input);
+    if (isAlreadySelected) {
+      event.preventDefault();
+      this.close();
+      return;
+    }
+
+    const match = options.find(item => item.name === input);
+    const isNewItem = !match || !value.find(item => item.id === match.id);
+    if (isNewItem) {
+      event.preventDefault();
+      this.addItem(match || this.createNewItem(input));
+    }
+  }
+
+  close() {
+    this.setState({
+      isExpanded: false,
+      input: '',
+    });
   }
 
   createNewItem(name) {
@@ -124,66 +146,28 @@ class MultiSelect extends Component {
     };
   }
 
-  handleAddItem(event) {
-    const { input, chipItems } = this.state;
-    const { options, onAddNewItem, onChange } = this.props;
-    const match = options.find(item => item.name === input);
-    const isIncluded = chipItems.some(chipItem => chipItem.name === input);
-
-    if (!input) {
-      return;
-    }
-
-    if (isIncluded) {
-      // This event.preventDefault prevents the form from submitting
-      // if the user tries to create 2 chips of the same name
-      event.preventDefault();
-      this.setState({ input: '', isExpanded: false });
-      return;
-    }
-    const isNewItem = !match || !chipItems.find(item => item.id === match.id);
-    if (event.key === 'Enter' && isNewItem) {
-      event.preventDefault();
-      const items = chipItems.concat({ name: input, id: input });
-      const newItem = match || this.createNewItem(input);
-      this.setState({
-        chipItems: items,
-        isExpanded: false,
-        input: '',
-      });
-      onAddNewItem(newItem);
-      onChange(items);
-    } else if (!isNewItem || event.key === 'Tab') {
-      this.setState({ isExpanded: false, input: '' });
-    }
-  }
-
   handleInputChange(value) {
     this.setState({ input: value, isExpanded: true });
   }
 
-  removeChip(e, item) {
-    const { onRemoveItem, onChange } = this.props;
-    const { chipItems } = this.state;
-    const chips = chipItems.filter(chip => chip.id !== item.id);
+  removeItem(item) {
+    const { value, onRemoveItem, onChange } = this.props;
+    const remainingItems = value.filter(chip => chip.id !== item.id);
 
-    this.setState({ chipItems: chips });
     onRemoveItem(item);
-    onChange(chips);
-
-    e.preventDefault();
+    onChange(remainingItems);
   }
 
   render() {
-    const { options } = this.props;
-    const { chipItems, input, isExpanded } = this.state;
+    const { value, options } = this.props;
+    const { input, isExpanded } = this.state;
 
-    const list = options.map(option => (
+    const dropdownOptions = options.map(option => (
       <Fragment key={option.id}>
         {option.name.includes(input) ? (
           <DropdownItem
             component="button"
-            isDisabled={chipItems.some(item => item.id === option.id)}
+            isDisabled={value.some(item => item.id === option.id)}
             value={option.name}
             onClick={e => {
               this.handleClick(e, option);
@@ -195,21 +179,6 @@ class MultiSelect extends Component {
       </Fragment>
     ));
 
-    const chips = (
-      <ChipGroup>
-        {chipItems &&
-          chipItems.map(item => (
-            <Chip
-              key={item.id}
-              onClick={e => {
-                this.removeChip(e, item);
-              }}
-            >
-              {item.name}
-            </Chip>
-          ))}
-      </ChipGroup>
-    );
     return (
       <Fragment>
         <InputGroup>
@@ -222,21 +191,34 @@ class MultiSelect extends Component {
               type="text"
               aria-label="labels"
               value={input}
-              onClick={() => this.setState({ isExpanded: true })}
+              onFocus={() => this.setState({ isExpanded: true })}
               onChange={this.handleInputChange}
-              onKeyDown={this.handleAddItem}
+              onKeyDown={this.handleKeyDown}
             />
             <Dropdown
               type="button"
               isPlain
-              value={chipItems}
+              value={value}
               toggle={<DropdownToggle isPlain>Labels</DropdownToggle>}
-              // Above is not rendered but is a required prop from Patternfly
+              // Above is not visible but is a required prop from Patternfly
               isOpen={isExpanded}
-              dropdownItems={list}
+              dropdownItems={dropdownOptions}
             />
           </div>
-          <div css="margin: 10px">{chips}</div>
+          <div css="margin: 10px">
+            <ChipGroup defaultIsOpen numChips={5}>
+              {value.map(item => (
+                <Chip
+                  key={item.id}
+                  onClick={() => {
+                    this.removeItem(item);
+                  }}
+                >
+                  {item.name}
+                </Chip>
+              ))}
+            </ChipGroup>
+          </div>
         </InputGroup>
       </Fragment>
     );

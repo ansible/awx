@@ -1,90 +1,67 @@
-FROM centos:7
+FROM centos:8
 
 ARG UID=0
 
 # Add ansible-devel so that we get collections!
 ADD tools/docker-compose/ansible_nightly.repo /etc/yum.repos.d/ansible_nightly.repo
 
-RUN yum -y update && yum -y install epel-release && \
-    yum -y install https://centos7.iuscommunity.org/ius-release.rpm \
-    yum install https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
-
 # sync with installer/roles/image_build/templates/Dockerfile.j2
-RUN yum -y install acl \
-  alsa-lib \
+RUN dnf -y update && \
+  dnf -y install epel-release 'dnf-command(config-manager)' && \
+  dnf module -y enable 'postgresql:10' && \
+  dnf config-manager --set-enabled PowerTools && \
+  dnf -y install acl \
   ansible \
-  atk \
   bubblewrap \
-  cups-libs \
   curl \
-  cyrus-sasl \
-  cyrus-sasl-devel \
   gcc \
   gcc-c++ \
-  GConf2 \
-  git2u \
-  git2u-core \
-  gtk3 \
-  ipa-gothic-fonts \
-  krb5-devel \
-  krb5-libs \
+  git-core \
+  glibc-langpack-en \
   krb5-workstation \
   libcurl-devel \
   libffi-devel \
-  libselinux-python \
   libstdc++.so.6 \
   libtool-ltdl-devel \
-  libXcomposite \
-  libXcursor \
-  libXdamage \
-  libXext \
-  libXi \
-  libxml2-devel \
-  libXrandr \
-  libXScrnSaver \
-  libxslt-devel \
-  libXtst \
+  libcgroup-tools \
   make \
   mercurial \
-  mg \
   nginx \
   nodejs \
+  nss \
   openldap-devel \
   openssh-server \
   patch \
-  postgresql10 \
-  postgresql10-contrib \
-  postgresql10-devel \
-  python-devel \
-  python-pip \
-  python-psutil \
-  python-psycopg2 \
-  python-setuptools \
-  python36-devel \
-  python36-setuptools \
+  @postgresql:10 \
+  postgresql-devel \
+  python3-devel \
+  python3-libselinux \
+  python3-pip \
+  python3-psycopg2 \
+  python3-setuptools \
   rsync \
-  setools-libs \
   subversion \
   sudo \
   swig \
   tmux \
   unzip \
-  vim \
+  vim-minimal \
   xmlsec1 \
   xmlsec1-devel \
   xmlsec1-openssl \
   xmlsec1-openssl-devel \
-  xorg-x11-fonts-100dpi \
-  xorg-x11-fonts-75dpi \
-  xorg-x11-fonts-cyrillic \
-  xorg-x11-fonts-misc \
-  xorg-x11-fonts-Type1 \
-  xorg-x11-utils \
-  yum-utils
+  dnf-utils
+
+# UI tests only, do not put in installer/roles/image_build/templates/Dockerfile.j2
+RUN dnf -y install \
+  gtk3 \
+  alsa-lib \
+  libX11-xcb \
+  libXScrnSaver
 
 ENV PATH="/usr/pgsql-10/bin:${PATH}"
 
-RUN yum install -y https://github.com/krallin/tini/releases/download/v0.18.0/tini_0.18.0.rpm
+RUN dnf install -y https://github.com/krallin/tini/releases/download/v0.18.0/tini_0.18.0.rpm
 
 RUN /usr/bin/ssh-keygen -q -t rsa -N "" -f /root/.ssh/id_rsa
 RUN mkdir -p /data/db
@@ -95,9 +72,10 @@ ADD tools/docker-compose/awx.egg-info /tmp/awx.egg-info
 
 RUN openssl req -nodes -newkey rsa:2048 -keyout /etc/nginx/nginx.key -out /etc/nginx/nginx.csr -subj "/C=US/ST=North Carolina/L=Durham/O=Ansible/OU=AWX Development/CN=awx.localhost"
 RUN openssl x509 -req -days 365 -in /etc/nginx/nginx.csr -signkey /etc/nginx/nginx.key -out /etc/nginx/nginx.crt
+RUN chmod 640 /etc/nginx/nginx.{csr,key,crt}
 
 RUN python3 -m ensurepip && pip3 install virtualenv flake8
-RUN pip install supervisor
+RUN pip3 install supervisor
 
 ADD Makefile /tmp/Makefile
 RUN mkdir /tmp/requirements
@@ -116,34 +94,23 @@ RUN cd /tmp && VENV_BASE="/venv" make requirements_dev
 RUN npm install -g n
 RUN n 10.15.0
 
-# Install a newer SQLite to make Django happy (centos7 has a really old one,
-# and we can probably stop doing this in centos8)
-RUN curl -O "https://sqlite.org/2019/sqlite-autoconf-3290000.tar.gz"
-RUN tar zxvf sqlite-autoconf-3290000.tar.gz
-RUN cd sqlite-autoconf-3290000 && ./configure && make && make install
-RUN mv -f /usr/local/lib/libsqlite3.so.0 /lib64/
-RUN mv -f /usr/local/lib/libsqlite3.so.0.8.6 /lib64/
+# Install OpenShift CLI
+RUN cd /usr/local/bin && \
+    curl -L https://github.com/openshift/origin/releases/download/v3.9.0/openshift-origin-client-tools-v3.9.0-191fece-linux-64bit.tar.gz | \
+    tar -xz --strip-components=1 --wildcards --no-anchored 'oc'
 
-RUN yum -y remove cyrus-sasl-devel \
+ADD tools/docker-compose/google-cloud-sdk.repo /etc/yum.repos.d/
+RUN dnf install -y kubectl
+
+RUN dnf -y remove *-devel \
   gcc \
   gcc-c++ \
-  krb5-devel \
-  libtool-ltdl-devel \
-  libxml2-devel \
-  libxslt-devel \
-  openldap-devel \
-  postgresql10-devel \
-  python-devel \
-  python36-devel \
-  nodejs \
-  xmlsec1-devel \
-  xmlsec1-openssl-devel
+  nodejs
 
-RUN yum -y clean all
+RUN dnf -y clean all
 
 RUN rm -rf /root/.cache
 
-RUN localedef -c -i en_US -f UTF-8 en_US.UTF-8
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8

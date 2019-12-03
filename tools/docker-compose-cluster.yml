@@ -51,7 +51,6 @@ services:
     volumes:
       - "../:/awx_devel"
     ports:
-      - "6899:6899"
       - "7899-7999:7899-7999"
   awx_3:
     user: ${CURRENT_UID}
@@ -66,12 +65,12 @@ services:
       RABBITMQ_PASS: guest
       RABBITMQ_VHOST: /
       SDB_HOST: 0.0.0.0
-      SDB_PORT: 7899
+      SDB_PORT: 8899
       AWX_GROUP_QUEUES: charlie,tower
     volumes:
       - "../:/awx_devel"
     ports:
-      - "7899-7999:7899-7999"
+      - "8899-8999:8899-8999"
   rabbitmq_1:
     image: ${DEV_DOCKER_TAG_BASE}/rabbit_cluster_node:latest
     hostname: rabbitmq_1
@@ -91,13 +90,8 @@ services:
       - CLUSTERED=true
       - CLUSTER_WITH=rabbitmq_1
   postgres:
-    image: centos/postgresql-10-centos7
+    image: postgres:10
     container_name: tools_postgres_1
-    environment:
-      POSTGRESQL_USER: awx
-      POSTGRESQL_PASSWORD: awxpass
-      POSTGRESQL_DATABASE: awx
-      POSTGRESQL_ADMIN_PASSWORD: postgrespass
   memcached:
     image: memcached:alpine
     container_name: tools_memcached_1

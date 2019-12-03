@@ -3,6 +3,7 @@ import functools
 import json
 import os
 import re
+import sys
 import yaml
 
 from distutils.util import strtobool
@@ -18,6 +19,13 @@ UNIQUENESS_RULES = {
     'users': ('id', 'username'),
     'instances': ('id', 'hostname'),
 }
+
+
+def pk_or_name_list(v2, model_name, value, page=None):
+    return [
+        pk_or_name(v2, model_name, v.strip(), page=page)
+        for v in value.split(',')
+    ]
 
 
 def pk_or_name(v2, model_name, value, page=None):
@@ -39,6 +47,11 @@ def pk_or_name(v2, model_name, value, page=None):
 
     if model_name in UNIQUENESS_RULES:
         identity = UNIQUENESS_RULES[model_name][-1]
+
+    # certain related fields follow a pattern of <foo>_<model> e.g.,
+    # insights_credential, target_credential etc...
+    if not page and '_' in model_name:
+        return pk_or_name(v2, model_name.split('_')[-1], value, page)
 
     if page:
         results = page.get(**{identity: value})
@@ -62,6 +75,8 @@ def pk_or_name(v2, model_name, value, page=None):
 
 
 class ResourceOptionsParser(object):
+
+    deprecated = False
 
     def __init__(self, v2, page, resource, parser):
         """Used to submit an OPTIONS request to the appropriate endpoint
@@ -89,9 +104,13 @@ class ResourceOptionsParser(object):
         self.handle_custom_actions()
 
     def get_allowed_options(self):
-        self.allowed_options = self.page.connection.options(
-            self.page.endpoint + '1'
-        ).headers['Allow'].split(', ')
+        options = self.page.connection.options(
+            self.page.endpoint + '1/'
+        )
+        warning = options.headers.get('Warning', '')
+        if '299' in warning and 'deprecated' in warning:
+            self.deprecated = True
+        self.allowed_options = options.headers.get('Allow', '').split(', ')
 
     def build_list_actions(self):
         action_map = {
@@ -165,8 +184,7 @@ class ResourceOptionsParser(object):
                     # (to make things like SSH key data easier to work with)
                     if isinstance(v, six.text_type) and v.startswith('@'):
                         path = os.path.expanduser(v[1:])
-                        if os.path.exists(path):
-                            parsed[k] = open(path).read()
+                        parsed[k] = open(path).read()
 
                 return parsed
 
@@ -183,6 +201,7 @@ class ResourceOptionsParser(object):
                     'boolean': strtobool,
                     'id': functools.partial(pk_or_name, self.v2, k),
                     'json': json_or_yaml,
+                    'list_of_ids': functools.partial(pk_or_name_list, self.v2, k),
                 }.get(param['type'], str),
             }
             meta_map = {
@@ -190,6 +209,7 @@ class ResourceOptionsParser(object):
                 'integer': 'INTEGER',
                 'boolean': 'BOOLEAN',
                 'id': 'ID',  # foreign key
+                'list_of_ids': '[ID, ID, ...]',
                 'json': 'JSON/YAML',
             }
             if param.get('choices', []):
@@ -197,14 +217,19 @@ class ResourceOptionsParser(object):
                 # if there are choices, try to guess at the type (we can't
                 # just assume it's a list of str, but the API doesn't actually
                 # explicitly tell us in OPTIONS all the time)
-                if isinstance(kwargs['choices'][0], int):
+                sphinx = 'sphinx-build' in ' '.join(sys.argv)
+                if isinstance(kwargs['choices'][0], int) and not sphinx:
                     kwargs['type'] = int
-                kwargs['choices'] = [str(choice) for choice in kwargs['choices']]
+                else:
+                    kwargs['choices'] = [str(choice) for choice in kwargs['choices']]
             elif param['type'] in meta_map:
                 kwargs['metavar'] = meta_map[param['type']]
 
                 if param['type'] == 'id' and not kwargs.get('help'):
                     kwargs['help'] = 'the ID of the associated  {}'.format(k)
+
+                if param['type'] == 'list_of_ids':
+                    kwargs['help'] = 'a list of comma-delimited {} to associate (IDs or unique names)'.format(k)
 
                 if param['type'] == 'json' and method != 'list':
                     help_parts = []
@@ -256,4 +281,4 @@ class ResourceOptionsParser(object):
                 continue
             if action.action not in self.parser.choices:
                 self.parser.add_parser(action.action, help='')
-            action(self.page).add_arguments(self.parser)
+            action(self.page).add_arguments(self.parser, self)

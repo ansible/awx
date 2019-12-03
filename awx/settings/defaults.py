@@ -49,12 +49,6 @@ else:
 DEBUG = True
 SQL_DEBUG = DEBUG
 
-ADMINS = (
-    # ('Your Name', 'your_email@domain.com'),
-)
-
-MANAGERS = ADMINS
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -66,6 +60,12 @@ DATABASES = {
         },
     }
 }
+
+AWX_CONTAINER_GROUP_K8S_API_TIMEOUT = 10
+AWX_CONTAINER_GROUP_POD_LAUNCH_RETRIES = 100
+AWX_CONTAINER_GROUP_POD_LAUNCH_RETRY_DELAY = 5
+AWX_CONTAINER_GROUP_DEFAULT_NAMESPACE = 'default'
+AWX_CONTAINER_GROUP_DEFAULT_IMAGE = 'ansible/ansible-runner'
 
 # Internationalization
 # https://docs.djangoproject.com/en/dev/topics/i18n/
@@ -338,7 +338,8 @@ OAUTH2_PROVIDER_ACCESS_TOKEN_MODEL = 'main.OAuth2AccessToken'
 OAUTH2_PROVIDER_REFRESH_TOKEN_MODEL = 'oauth2_provider.RefreshToken'
 
 OAUTH2_PROVIDER = {'ACCESS_TOKEN_EXPIRE_SECONDS': 31536000000,
-                   'AUTHORIZATION_CODE_EXPIRE_SECONDS': 600}
+                   'AUTHORIZATION_CODE_EXPIRE_SECONDS': 600,
+                   'REFRESH_TOKEN_EXPIRE_SECONDS': 2628000}
 ALLOW_OAUTH2_FOR_EXTERNAL_USERS = False
 
 # LDAP server (default to None to skip using LDAP authentication).
@@ -375,33 +376,10 @@ AUTH_BASIC_ENABLED = True
 # If set, serve only minified JS for UI.
 USE_MINIFIED_JS = False
 
-# Email address that error messages come from.
-SERVER_EMAIL = 'root@localhost'
-
-# Default email address to use for various automated correspondence from
-# the site managers.
-DEFAULT_FROM_EMAIL = 'tower@localhost'
-
-# Subject-line prefix for email messages send with django.core.mail.mail_admins
-# or ...mail_managers.  Make sure to include the trailing space.
-EMAIL_SUBJECT_PREFIX = '[Tower] '
-
-# The email backend to use. For possible shortcuts see django.core.mail.
-# The default is to use the SMTP backend.
-# Third-party backends can be specified by providing a Python path
-# to a module that defines an EmailBackend class.
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-
-# Host for sending email.
-EMAIL_HOST = 'localhost'
-
-# Port for sending email.
-EMAIL_PORT = 25
-
-# Optional SMTP authentication information for EMAIL_HOST.
-EMAIL_HOST_USER = ''
-EMAIL_HOST_PASSWORD = ''
-EMAIL_USE_TLS = False
+# Default to skipping isolated host key checking (the initial connection will
+# hang on an interactive "The authenticity of host example.org can't be
+# established" message)
+AWX_ISOLATED_HOST_KEY_CHECKING = False
 
 # The number of seconds to sleep between status checks for jobs running on isolated nodes
 AWX_ISOLATED_CHECK_INTERVAL = 30
@@ -445,10 +423,6 @@ CELERYBEAT_SCHEDULE = {
         'schedule': timedelta(seconds=30),
         'options': {'expires': 20,}
     },
-    'admin_checks': {
-        'task': 'awx.main.tasks.run_administrative_checks',
-        'schedule': timedelta(days=30)
-    },
     'cluster_heartbeat': {
         'task': 'awx.main.tasks.cluster_node_heartbeat',
         'schedule': timedelta(seconds=60),
@@ -460,12 +434,17 @@ CELERYBEAT_SCHEDULE = {
     },
     'gather_analytics': {
         'task': 'awx.main.tasks.gather_analytics',
-        'schedule': crontab(hour=0)
+        'schedule': crontab(hour='*/6')
     },
     'task_manager': {
         'task': 'awx.main.scheduler.tasks.run_task_manager',
         'schedule': timedelta(seconds=20),
         'options': {'expires': 20}
+    },
+    'k8s_reaper': {
+        'task': 'awx.main.tasks.awx_k8s_reaper',
+        'schedule': timedelta(seconds=60),
+        'options': {'expires': 50,}
     },
     # 'isolated_heartbeat': set up at the end of production.py and development.py
 }
@@ -599,6 +578,9 @@ AWX_REBUILD_SMART_MEMBERSHIP = False
 # By default, allow arbitrary Jinja templating in extra_vars defined on a Job Template
 ALLOW_JINJA_IN_EXTRA_VARS = 'template'
 
+# Run project updates with extra verbosity
+PROJECT_UPDATE_VVV = False
+
 # Enable dynamically pulling roles from a requirement.yml file
 # when updating SCM projects
 # Note: This setting may be overridden by database settings.
@@ -608,6 +590,28 @@ AWX_ROLES_ENABLED = True
 # when updating SCM projects
 # Note: This setting may be overridden by database settings.
 AWX_COLLECTIONS_ENABLED = True
+
+# Settings for primary galaxy server, should be set in the UI
+PRIMARY_GALAXY_URL = ''
+PRIMARY_GALAXY_USERNAME = ''
+PRIMARY_GALAXY_TOKEN = ''
+PRIMARY_GALAXY_PASSWORD = ''
+PRIMARY_GALAXY_AUTH_URL = ''
+
+# Settings for the public galaxy server(s).
+PUBLIC_GALAXY_ENABLED = True
+PUBLIC_GALAXY_SERVER = {
+    'id': 'galaxy',
+    'url': 'https://galaxy.ansible.com'
+}
+
+# Applies to any galaxy server
+GALAXY_IGNORE_CERTS = False
+
+# List of dicts of fallback (additional) Galaxy servers.  If configured, these
+# will be higher precedence than public Galaxy, but lower than primary Galaxy.
+# Available options: 'id', 'url', 'username', 'password', 'token', 'auth_url'
+FALLBACK_GALAXY_SERVERS = []
 
 # Enable bubblewrap support for running jobs (playbook runs only).
 # Note: This setting may be overridden by database settings.
@@ -629,6 +633,18 @@ AWX_PROOT_SHOW_PATHS = []
 # inventory scripts).
 # Note: This setting may be overridden by database settings.
 AWX_PROOT_BASE_PATH = "/tmp"
+
+# Disable resource profiling by default
+AWX_RESOURCE_PROFILING_ENABLED = False
+
+# Interval (in seconds) between polls for cpu usage
+AWX_RESOURCE_PROFILING_CPU_POLL_INTERVAL = '0.25'
+
+# Interval (in seconds) between polls for memory usage
+AWX_RESOURCE_PROFILING_MEMORY_POLL_INTERVAL = '0.25'
+
+# Interval (in seconds) between polls for PID count
+AWX_RESOURCE_PROFILING_PID_POLL_INTERVAL = '0.25'
 
 # User definable ansible callback plugins
 # Note: This setting may be overridden by database settings.
@@ -930,9 +946,6 @@ ORG_ADMINS_CAN_SEE_ALL_USERS = True
 MANAGE_ORGANIZATION_AUTH = True
 
 # Note: This setting may be overridden by database settings.
-TOWER_ADMIN_ALERTS = True
-
-# Note: This setting may be overridden by database settings.
 TOWER_URL_BASE = "https://towerhost"
 
 INSIGHTS_URL_BASE = "https://example.org"
@@ -1011,11 +1024,6 @@ LOGGING = {
             'class': 'awx.main.utils.handlers.AWXProxyHandler',
             'formatter': 'json',
             'filters': ['external_log_enabled', 'dynamic_level_filter'],
-        },
-        'mail_admins': {
-            'level': 'ERROR',
-            'filters': ['require_debug_false'],
-            'class': 'django.utils.log.AdminEmailHandler',
         },
         'tower_warnings': {
             # don't define a level here, it's set by settings.LOG_AGGREGATOR_LEVEL
@@ -1098,6 +1106,14 @@ LOGGING = {
             'handlers': ['console', 'file', 'tower_warnings'],
             'level': 'WARNING',
         },
+        'celery': {  # for celerybeat connection warnings
+            'handlers': ['console', 'file', 'tower_warnings'],
+            'level': 'WARNING',
+        },
+        'kombu': {
+            'handlers': ['console', 'file', 'tower_warnings'],
+            'level': 'WARNING',
+        },
         'rest_framework.request': {
             'handlers': ['console', 'file', 'tower_warnings'],
             'level': 'WARNING',
@@ -1176,6 +1192,8 @@ LOGGING = {
         },
     }
 }
+LOG_AGGREGATOR_AUDIT = False
+
 # Apply coloring to messages logged to the console
 COLOR_LOGS = False
 

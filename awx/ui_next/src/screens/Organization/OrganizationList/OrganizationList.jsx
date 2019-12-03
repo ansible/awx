@@ -18,7 +18,7 @@ import OrganizationListItem from './OrganizationListItem';
 
 const QS_CONFIG = getQSConfig('organization', {
   page: 1,
-  page_size: 5,
+  page_size: 20,
   order_by: 'name',
 });
 
@@ -142,7 +142,8 @@ class OrganizationsList extends Component {
 
     const canAdd =
       actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
-    const isAllSelected = selected.length === organizations.length;
+    const isAllSelected =
+      selected.length === organizations.length && selected.length > 0;
 
     return (
       <Fragment>
@@ -153,7 +154,7 @@ class OrganizationsList extends Component {
               hasContentLoading={hasContentLoading}
               items={organizations}
               itemCount={itemCount}
-              itemName="organization"
+              pluralizedItemName="Organizations"
               qsConfig={QS_CONFIG}
               toolbarColumns={[
                 {
@@ -181,12 +182,13 @@ class OrganizationsList extends Component {
                   showSelectAll
                   isAllSelected={isAllSelected}
                   onSelectAll={this.handleSelectAll}
+                  qsConfig={QS_CONFIG}
                   additionalControls={[
                     <ToolbarDeleteButton
                       key="delete"
                       onDelete={this.handleOrgDelete}
                       itemsToDelete={selected}
-                      itemName="Organization"
+                      pluralizedItemName="Organizations"
                     />,
                     canAdd ? (
                       <ToolbarAddButton key="add" linkTo={`${match.url}/add`} />

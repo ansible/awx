@@ -85,14 +85,35 @@ def test_update_credential_type_in_use_xfail(patch, delete, admin):
     Credential(credential_type=_type, name='My Custom Cred').save()
 
     url = reverse('api:credential_type_detail', kwargs={'pk': _type.pk})
-    response = patch(url, {'name': 'Some Other Name'}, admin)
-    assert response.status_code == 200
+    patch(url, {'name': 'Some Other Name'}, admin, expect=200)
 
     url = reverse('api:credential_type_detail', kwargs={'pk': _type.pk})
-    response = patch(url, {'inputs': {}}, admin)
-    assert response.status_code == 403
+    response = patch(url, {'inputs': {}}, admin, expect=403)
+    assert response.data['detail'] == 'Modifications to inputs are not allowed for credential types that are in use'
 
-    assert delete(url, admin).status_code == 403
+    response = delete(url, admin, expect=403)
+    assert response.data['detail'] == 'Credential types that are in use cannot be deleted'
+
+
+@pytest.mark.django_db
+def test_update_credential_type_unvalidated_inputs(post, patch, admin):
+    simple_inputs = {'fields': [
+        {'id': 'api_token', 'label': 'fooo'}
+    ]}
+    response = post(
+        url=reverse('api:credential_type_list'),
+        data={'name': 'foo', 'kind': 'cloud', 'inputs': simple_inputs},
+        user=admin,
+        expect=201
+    )
+    # validation adds the type field to the input
+    _type = CredentialType.objects.get(pk=response.data['id'])
+    Credential(credential_type=_type, name='My Custom Cred').save()
+
+    # should not raise an error because we should only compare
+    # post-validation values to other post-validation values
+    url = reverse('api:credential_type_detail', kwargs={'pk': _type.id})
+    patch(url, {'inputs': simple_inputs}, admin, expect=200)
 
 
 @pytest.mark.django_db
@@ -460,3 +481,12 @@ def test_create_with_undefined_template_variable_xfail(post, admin):
     }, admin)
     assert response.status_code == 400
     assert "'api_tolkien' is undefined" in json.dumps(response.data)
+
+
+@pytest.mark.django_db
+def test_credential_type_rbac_external_test(post, alice, admin, credentialtype_external):
+    # only admins may use the credential type test endpoint
+    url = reverse('api:credential_type_external_test', kwargs={'pk': credentialtype_external.pk})
+    data = {'inputs': {}, 'metadata': {}}
+    assert post(url, data, admin).status_code == 202
+    assert post(url, data, alice).status_code == 403

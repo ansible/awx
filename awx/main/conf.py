@@ -2,12 +2,14 @@
 import json
 import logging
 import os
+from distutils.version import LooseVersion as Version
 
 # Django
 from django.utils.translation import ugettext_lazy as _
 
 # Django REST Framework
 from rest_framework import serializers
+from rest_framework.fields import FloatField
 
 # Tower
 from awx.conf import fields, register, register_validate
@@ -48,15 +50,6 @@ register(
     label=_('Organization Admins Can Manage Users and Teams'),
     help_text=_('Controls whether any Organization Admin has the privileges to create and manage users and teams. '
                 'You may want to disable this ability if you are using an LDAP or SAML integration.'),
-    category=_('System'),
-    category_slug='system',
-)
-
-register(
-    'TOWER_ADMIN_ALERTS',
-    field_class=fields.BooleanField,
-    label=_('Enable Administrator Alerts'),
-    help_text=_('Email Admin users for system events that may require attention.'),
     category=_('System'),
     category_slug='system',
 )
@@ -299,6 +292,16 @@ register(
 )
 
 register(
+    'AWX_ISOLATED_HOST_KEY_CHECKING',
+    field_class=fields.BooleanField,
+    label=_('Isolated host key checking'),
+    help_text=_('When set to True, AWX will enforce strict host key checking for communication with isolated nodes.'),
+    category=_('Jobs'),
+    category_slug='jobs',
+    default=False
+)
+
+register(
     'AWX_ISOLATED_KEY_GENERATION',
     field_class=fields.BooleanField,
     default=True,
@@ -336,6 +339,53 @@ register(
 )
 
 register(
+    'AWX_RESOURCE_PROFILING_ENABLED',
+    field_class=fields.BooleanField,
+    default=False,
+    label=_('Enable detailed resource profiling on all playbook runs'),
+    help_text=_('If set, detailed resource profiling data will be collected on all jobs. '
+                'This data can be gathered with `sosreport`.'),  # noqa
+    category=_('Jobs'),
+    category_slug='jobs',
+)
+
+register(
+    'AWX_RESOURCE_PROFILING_CPU_POLL_INTERVAL',
+    field_class=FloatField,
+    default='0.25',
+    label=_('Interval (in seconds) between polls for cpu usage.'),
+    help_text=_('Interval (in seconds) between polls for cpu usage. '
+                'Setting this lower than the default will affect playbook performance.'),
+    category=_('Jobs'),
+    category_slug='jobs',
+    required=False,
+)
+
+register(
+    'AWX_RESOURCE_PROFILING_MEMORY_POLL_INTERVAL',
+    field_class=FloatField,
+    default='0.25',
+    label=_('Interval (in seconds) between polls for memory usage.'),
+    help_text=_('Interval (in seconds) between polls for memory usage. '
+                'Setting this lower than the default will affect playbook performance.'),
+    category=_('Jobs'),
+    category_slug='jobs',
+    required=False,
+)
+
+register(
+    'AWX_RESOURCE_PROFILING_PID_POLL_INTERVAL',
+    field_class=FloatField,
+    default='0.25',
+    label=_('Interval (in seconds) between polls for PID count.'),
+    help_text=_('Interval (in seconds) between polls for PID count. '
+                'Setting this lower than the default will affect playbook performance.'),
+    category=_('Jobs'),
+    category_slug='jobs',
+    required=False,
+)
+
+register(
     'AWX_TASK_ENV',
     field_class=fields.KeyValueField,
     default={},
@@ -350,10 +400,19 @@ register(
     'INSIGHTS_TRACKING_STATE',
     field_class=fields.BooleanField,
     default=False,
-    label=_('Gather data for Automation Insights'),
-    help_text=_('Enables Tower to gather data on automation and send it to Red Hat Insights.'),
+    label=_('Gather data for Automation Analytics'),
+    help_text=_('Enables Tower to gather data on automation and send it to Red Hat.'),
     category=_('System'),
     category_slug='system',
+)
+
+register(
+    'PROJECT_UPDATE_VVV',
+    field_class=fields.BooleanField,
+    label=_('Run Project Updates With Higher Verbosity'),
+    help_text=_('Adds the CLI -vvv flag to ansible-playbook runs of project_update.yml used for project updates.'),
+    category=_('Jobs'),
+    category_slug='jobs',
 )
 
 register(
@@ -374,6 +433,96 @@ register(
     help_text=_('Allows collections to be dynamically downloaded from a requirements.yml file for SCM projects.'),
     category=_('Jobs'),
     category_slug='jobs',
+)
+
+register(
+    'PRIMARY_GALAXY_URL',
+    field_class=fields.URLField,
+    required=False,
+    allow_blank=True,
+    label=_('Primary Galaxy Server URL'),
+    help_text=_(
+        'For organizations that run their own Galaxy service, this gives the option to specify a '
+        'host as the primary galaxy server. Requirements will be downloaded from the primary if the '
+        'specific role or collection is available there. If the content is not avilable in the primary, '
+        'or if this field is left blank, it will default to galaxy.ansible.com.'
+    ),
+    category=_('Jobs'),
+    category_slug='jobs'
+)
+
+register(
+    'PRIMARY_GALAXY_USERNAME',
+    field_class=fields.CharField,
+    required=False,
+    allow_blank=True,
+    label=_('Primary Galaxy Server Username'),
+    help_text=_('For using a galaxy server at higher precedence than the public Ansible Galaxy. '
+                'The username to use for basic authentication against the Galaxy instance, '
+                'this is mutually exclusive with PRIMARY_GALAXY_TOKEN.'),
+    category=_('Jobs'),
+    category_slug='jobs'
+)
+
+register(
+    'PRIMARY_GALAXY_PASSWORD',
+    field_class=fields.CharField,
+    encrypted=True,
+    required=False,
+    allow_blank=True,
+    label=_('Primary Galaxy Server Password'),
+    help_text=_('For using a galaxy server at higher precedence than the public Ansible Galaxy. '
+                'The password to use for basic authentication against the Galaxy instance, '
+                'this is mutually exclusive with PRIMARY_GALAXY_TOKEN.'),
+    category=_('Jobs'),
+    category_slug='jobs'
+)
+
+register(
+    'PRIMARY_GALAXY_TOKEN',
+    field_class=fields.CharField,
+    encrypted=True,
+    required=False,
+    allow_blank=True,
+    label=_('Primary Galaxy Server Token'),
+    help_text=_('For using a galaxy server at higher precedence than the public Ansible Galaxy. '
+                'The token to use for connecting with the Galaxy instance, '
+                'this is mutually exclusive with corresponding username and password settings.'),
+    category=_('Jobs'),
+    category_slug='jobs'
+)
+
+register(
+    'PRIMARY_GALAXY_AUTH_URL',
+    field_class=fields.CharField,
+    required=False,
+    allow_blank=True,
+    label=_('Primary Galaxy Authentication URL'),
+    help_text=_('For using a galaxy server at higher precedence than the public Ansible Galaxy. '
+                'The token_endpoint of a Keycloak server.'),
+    category=_('Jobs'),
+    category_slug='jobs'
+)
+
+register(
+    'PUBLIC_GALAXY_ENABLED',
+    field_class=fields.BooleanField,
+    default=True,
+    label=_('Allow Access to Public Galaxy'),
+    help_text=_('Allow or deny access to the public Ansible Galaxy during project updates.'),
+    category=_('Jobs'),
+    category_slug='jobs'
+)
+
+register(
+    'GALAXY_IGNORE_CERTS',
+    field_class=fields.BooleanField,
+    default=False,
+    label=_('Ignore Ansible Galaxy SSL Certificate Verification'),
+    help_text=_('If set to true, certificate validation will not be done when'
+                'installing content from any Galaxy server.'),
+    category=_('Jobs'),
+    category_slug='jobs'
 )
 
 register(
@@ -616,6 +765,16 @@ register(
     category=_('Logging'),
     category_slug='logging',
 )
+register(
+    'LOG_AGGREGATOR_AUDIT',
+    field_class=fields.BooleanField,
+    allow_null=True,
+    default=False,
+    label=_('Enabled external log aggregation auditing'),
+    help_text=_('When enabled, all external logs emitted by Tower will also be written to /var/log/tower/external.log.  This is an experimental setting intended to be used for debugging external log aggregation issues (and may be subject to change in the future).'),  # noqa
+    category=_('Logging'),
+    category_slug='logging',
+)
 
 
 register(
@@ -646,4 +805,75 @@ def logging_validate(serializer, attrs):
     return attrs
 
 
+def galaxy_validate(serializer, attrs):
+    """Ansible Galaxy config options have mutual exclusivity rules, these rules
+    are enforced here on serializer validation so that users will not be able
+    to save settings which obviously break all project updates.
+    """
+    prefix = 'PRIMARY_GALAXY_'
+
+    from awx.main.constants import GALAXY_SERVER_FIELDS
+    if not any('{}{}'.format(prefix, subfield.upper()) in attrs for subfield in GALAXY_SERVER_FIELDS):
+        return attrs
+
+    def _new_value(setting_name):
+        if setting_name in attrs:
+            return attrs[setting_name]
+        elif not serializer.instance:
+            return ''
+        return getattr(serializer.instance, setting_name, '')
+
+    galaxy_data = {}
+    for subfield in GALAXY_SERVER_FIELDS:
+        galaxy_data[subfield] = _new_value('{}{}'.format(prefix, subfield.upper()))
+    errors = {}
+    if not galaxy_data['url']:
+        for k, v in galaxy_data.items():
+            if v:
+                setting_name = '{}{}'.format(prefix, k.upper())
+                errors.setdefault(setting_name, [])
+                errors[setting_name].append(_(
+                    'Cannot provide field if PRIMARY_GALAXY_URL is not set.'
+                ))
+    for k in GALAXY_SERVER_FIELDS:
+        if galaxy_data[k]:
+            setting_name = '{}{}'.format(prefix, k.upper())
+            if (not serializer.instance) or (not getattr(serializer.instance, setting_name, '')):
+                # new auth is applied, so check if compatible with version
+                from awx.main.utils import get_ansible_version
+                current_version = get_ansible_version()
+                min_version = '2.9'
+                if Version(current_version) < Version(min_version):
+                    errors.setdefault(setting_name, [])
+                    errors[setting_name].append(_(
+                        'Galaxy server settings are not available until Ansible {min_version}, '
+                        'you are running {current_version}.'
+                    ).format(min_version=min_version, current_version=current_version))
+    if (galaxy_data['password'] or galaxy_data['username']) and (galaxy_data['token'] or galaxy_data['auth_url']):
+        for k in ('password', 'username', 'token', 'auth_url'):
+            setting_name = '{}{}'.format(prefix, k.upper())
+            if setting_name in attrs:
+                errors.setdefault(setting_name, [])
+                errors[setting_name].append(_(
+                    'Setting Galaxy token and authentication URL is mutually exclusive with username and password.'
+                ))
+    if bool(galaxy_data['username']) != bool(galaxy_data['password']):
+        msg = _('If authenticating via username and password, both must be provided.')
+        for k in ('username', 'password'):
+            setting_name = '{}{}'.format(prefix, k.upper())
+            errors.setdefault(setting_name, [])
+            errors[setting_name].append(msg)
+    if bool(galaxy_data['token']) != bool(galaxy_data['auth_url']):
+        msg = _('If authenticating via token, both token and authentication URL must be provided.')
+        for k in ('token', 'auth_url'):
+            setting_name = '{}{}'.format(prefix, k.upper())
+            errors.setdefault(setting_name, [])
+            errors[setting_name].append(msg)
+
+    if errors:
+        raise serializers.ValidationError(errors)
+    return attrs
+
+
 register_validate('logging', logging_validate)
+register_validate('jobs', galaxy_validate)

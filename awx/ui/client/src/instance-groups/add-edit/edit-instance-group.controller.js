@@ -2,6 +2,14 @@ function EditController ($rootScope, $state, models, strings) {
     const vm = this || {};
     const { instanceGroup } = models;
 
+    if (instanceGroup.get('is_containerized')) {
+        return $state.go(
+            'instanceGroups.editContainerGroup',
+            { instance_group_id: instanceGroup.get('id') },
+            { reload: true }
+        );
+    }
+
     $rootScope.breadcrumb.instance_group_name = instanceGroup.get('name');
 
     vm.mode = 'edit';
@@ -9,8 +17,8 @@ function EditController ($rootScope, $state, models, strings) {
     vm.panelTitle = instanceGroup.get('name');
 
     vm.docs = {
-        url: 'https://docs.ansible.com/ansible-tower/latest/html/administration/clustering.html',
-        help_text: vm.strings.get('tooltips.DOCS_HELP_TEXT')
+        url: 'https://docs.ansible.com/ansible-tower/latest/html/userguide/instance_groups.html',
+        help_text: vm.strings.get('tooltips.IG_DOCS_HELP_TEXT')
     };
 
     vm.tab = {

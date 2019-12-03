@@ -127,7 +127,7 @@ class Sort extends React.Component {
 
     return (
       <React.Fragment>
-        {sortDropdownItems.length > 1 && (
+        {sortDropdownItems.length > 0 && (
           <React.Fragment>
             <SortBy>{i18n._(t`Sort By`)}</SortBy>
             <Dropdown

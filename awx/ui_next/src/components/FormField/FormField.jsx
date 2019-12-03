@@ -10,7 +10,16 @@ const QuestionCircleIcon = styled(PFQuestionCircleIcon)`
 `;
 
 function FormField(props) {
-  const { id, name, label, tooltip, validate, isRequired, ...rest } = props;
+  const {
+    id,
+    name,
+    label,
+    tooltip,
+    tooltipMaxWidth,
+    validate,
+    isRequired,
+    ...rest
+  } = props;
 
   return (
     <Field
@@ -29,7 +38,11 @@ function FormField(props) {
             label={label}
           >
             {tooltip && (
-              <Tooltip position="right" content={tooltip}>
+              <Tooltip
+                content={tooltip}
+                maxWidth={tooltipMaxWidth}
+                position="right"
+              >
                 <QuestionCircleIcon />
               </Tooltip>
             )}
@@ -58,6 +71,7 @@ FormField.propTypes = {
   validate: PropTypes.func,
   isRequired: PropTypes.bool,
   tooltip: PropTypes.node,
+  tooltipMaxWidth: PropTypes.string,
 };
 
 FormField.defaultProps = {
@@ -65,6 +79,7 @@ FormField.defaultProps = {
   validate: () => {},
   isRequired: false,
   tooltip: null,
+  tooltipMaxWidth: '',
 };
 
 export default FormField;

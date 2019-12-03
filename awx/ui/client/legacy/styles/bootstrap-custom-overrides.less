@@ -4,6 +4,13 @@ body {
     color: @default-data-txt;
     background-color: @default-secondary-bg;
     font-size: 0.88rem;
+    /*
+    * Bootstrap fix that's causing a right margin and padding
+    * to appear whenever a modal is opened
+    * https://github.com/twbs/bootstrap/issues/27071
+    */
+    margin-right: 0px !important;
+    padding-right: 0px !important;
 }
 
 .dropdown-toggle::after {

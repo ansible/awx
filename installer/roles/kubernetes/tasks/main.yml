@@ -67,8 +67,7 @@
           -e POSTGRESQL_MAX_CONNECTIONS={{ pg_max_connections|default(1024) }} \
           -e POSTGRESQL_USER={{ pg_username }} \
           -e POSTGRESQL_PASSWORD={{ pg_password | quote }} \
-          -e POSTGRESQL_ADMIN_PASSWORD={{ pg_admin_password | quote }} \
-          -e POSTGRESQL_DATABASE={{ pg_database }} \
+          -e POSTGRESQL_DATABASE={{ pg_database | quote }} \
           -e POSTGRESQL_VERSION=10 \
           -n {{ kubernetes_namespace }}
       register: openshift_pg_activate
@@ -113,6 +112,62 @@
     seconds: "{{ postgress_activate_wait }}"
   when: openshift_pg_activate.changed or kubernetes_pg_activate.changed
 
+- name: Check postgres version and upgrade Postgres if necessary
+  block:
+    - name: Check if Postgres 9.6 is being used
+      shell: |
+        POD=$({{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
+          get pods -l=name=postgresql --field-selector status.phase=Running -o jsonpath="{.items[0].metadata.name}")
+        oc exec $POD -n {{ kubernetes_namespace }} -- bash -c "psql -tAc 'select version()'"
+      register: pg_version
+    - name: Upgrade postgres if necessary
+      block:
+        - name: Set new pg image
+          shell: |
+            IMAGE=registry.access.redhat.com/rhscl/postgresql-10-rhel7
+            {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} set image dc/postgresql postgresql=$IMAGE
+
+        - name: Wait for change to take affect
+          pause:
+            seconds: 5
+
+        - name: Set env var for pg upgrade
+          shell: |
+            {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} set env dc/postgresql POSTGRESQL_UPGRADE=copy
+
+        - name: Wait for change to take affect
+          pause:
+            seconds: 5
+
+        - name: Set env var for new pg version
+          shell: |
+            {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} set env dc/postgresql POSTGRESQL_VERSION=10
+
+        - name: Wait for Postgres to redeploy
+          pause:
+            seconds: "{{ postgress_activate_wait }}"
+
+        - name: Wait for Postgres to finish upgrading
+          shell: |
+            POD=$({{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
+              get pods -l=name=postgresql -o jsonpath="{.items[0].metadata.name}")
+            {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} logs $POD | grep 'Upgrade DONE'
+          register: pg_upgrade_logs
+          retries: 360
+          delay: 10
+          until: pg_upgrade_logs is success
+
+        - name: Unset upgrade env var
+          shell: |
+            {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} set env dc/postgresql POSTGRESQL_UPGRADE-
+
+        - name: Wait for Postgres to redeploy
+          pause:
+            seconds: "{{ postgress_activate_wait }}"
+      when: "pg_version is success and '9.6' in pg_version.stdout"
+  when:
+    - pg_hostname is not defined or pg_hostname == ''
+
 - name: Set image names if using custom registry
   block:
     - name: Set task image name
@@ -125,6 +180,53 @@
         kubernetes_web_image: "{{ docker_registry }}/{{ docker_registry_repository }}/{{ web_image }}"
       when: kubernetes_web_image is not defined
   when: docker_registry is defined
+
+- name: Generate SSL certificates for RabbitMQ, if needed
+  include_tasks: ssl_cert_gen.yml
+  when: "rabbitmq_use_ssl|default(False)|bool"
+
+- name: Get Kubernetes Config
+  command: |
+    {{ kubectl_or_oc }} config view -o json
+  register: kube_config_cmd
+  no_log: yes
+
+- name: Convert kube config to dictionary
+  set_fact:
+    kube_config: "{{ kube_config_cmd.stdout | from_json }}"
+  no_log: yes
+
+- name: Extract current context from kube config
+  set_fact:
+    current_kube_context: "{{ kube_config['current-context'] }}"
+
+- name: Find cluster for current context
+  set_fact:
+    kube_cluster: |
+      {{ (kube_config.contexts |
+          selectattr("name", "equalto", current_kube_context) |
+          list)[0].context.cluster }}
+
+- name: Find server for current context
+  set_fact:
+    kube_server: |
+      {{ (kube_config.clusters |
+          selectattr("name", "equalto", kube_cluster|trim) |
+          list)[0].cluster.server }}
+
+- name: Get kube version from api server
+  uri:
+    url: "{{ kube_server | trim }}/version"
+    validate_certs: no
+  register: kube_version
+
+- name: Extract server version from command output
+  set_fact:
+    kube_api_version: "{{ kube_version.json.gitVersion[1:] }}"
+
+- name: Determine StatefulSet api version
+  set_fact:
+    kubernetes_statefulset_api_version: "{{ 'apps/v1' if kube_api_version is version('1.9', '>=') else 'apps/v1beta1' }}"
 
 - name: Render deployment templates
   set_fact:

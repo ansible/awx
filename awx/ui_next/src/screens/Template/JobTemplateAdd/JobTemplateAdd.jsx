@@ -18,10 +18,11 @@ function JobTemplateAdd({ history, i18n }) {
 
   async function handleSubmit(values) {
     const {
-      newLabels,
-      removedLabels,
-      addedInstanceGroups,
-      removedInstanceGroups,
+      labels,
+      organizationId,
+      instanceGroups,
+      initialInstanceGroups,
+      credentials,
       ...remainingValues
     } = values;
 
@@ -31,8 +32,9 @@ function JobTemplateAdd({ history, i18n }) {
         data: { id, type },
       } = await JobTemplatesAPI.create(remainingValues);
       await Promise.all([
-        submitLabels(id, newLabels, removedLabels),
-        submitInstanceGroups(id, addedInstanceGroups, removedInstanceGroups),
+        submitLabels(id, labels, organizationId),
+        submitInstanceGroups(id, instanceGroups),
+        submitCredentials(id, credentials),
       ]);
       history.push(`/templates/${type}/${id}/details`);
     } catch (error) {
@@ -40,22 +42,17 @@ function JobTemplateAdd({ history, i18n }) {
     }
   }
 
-  function submitLabels(id, newLabels = [], removedLabels = []) {
-    const disassociationPromises = removedLabels.map(label =>
-      JobTemplatesAPI.disassociateLabel(id, label)
-    );
-    const associationPromises = newLabels
-      .filter(label => !label.organization)
-      .map(label => JobTemplatesAPI.associateLabel(id, label));
-    const creationPromises = newLabels
-      .filter(label => label.organization)
-      .map(label => JobTemplatesAPI.generateLabel(id, label));
+  function submitLabels(templateId, labels = [], organizationId) {
+    const associationPromises = labels
+      .filter(label => !label.isNew)
+      .map(label => JobTemplatesAPI.associateLabel(templateId, label));
+    const creationPromises = labels
+      .filter(label => label.isNew)
+      .map(label =>
+        JobTemplatesAPI.generateLabel(templateId, label, organizationId)
+      );
 
-    return Promise.all([
-      ...disassociationPromises,
-      ...associationPromises,
-      ...creationPromises,
-    ]);
+    return Promise.all([...associationPromises, ...creationPromises]);
   }
 
   function submitInstanceGroups(templateId, addedGroups = []) {
@@ -63,6 +60,13 @@ function JobTemplateAdd({ history, i18n }) {
       JobTemplatesAPI.associateInstanceGroup(templateId, group.id)
     );
     return Promise.all(associatePromises);
+  }
+
+  function submitCredentials(templateId, credentials = []) {
+    const associateCredentials = credentials.map(cred =>
+      JobTemplatesAPI.associateCredentials(templateId, cred.id)
+    );
+    return Promise.all(associateCredentials);
   }
 
   function handleCancel() {

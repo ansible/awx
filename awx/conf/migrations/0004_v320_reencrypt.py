@@ -2,7 +2,6 @@
 from __future__ import unicode_literals
 
 from django.db import migrations
-from awx.conf.migrations import _reencrypt
 
 
 class Migration(migrations.Migration):
@@ -12,5 +11,8 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(_reencrypt.replace_aesecb_fernet),
+        # This list is intentionally empty.
+        # Tower 3.2 included several data migrations that are no longer
+        # necessary (this list is now empty because Tower 3.2 is past EOL and
+        # cannot be directly upgraded to modern versions of Tower)
     ]

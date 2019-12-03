@@ -11,12 +11,19 @@ import styled from 'styled-components';
 import CardCloseButton from '@components/CardCloseButton';
 import RoutedTabs from '@components/RoutedTabs';
 import ContentError from '@components/ContentError';
-import { OrganizationAccess } from './OrganizationAccess';
+import NotificationList from '@components/NotificationList/NotificationList';
+import { ResourceAccessList } from '@components/ResourceAccessList';
 import OrganizationDetail from './OrganizationDetail';
 import OrganizationEdit from './OrganizationEdit';
-import OrganizationNotifications from './OrganizationNotifications';
 import OrganizationTeams from './OrganizationTeams';
 import { OrganizationsAPI } from '@api';
+
+const CardHeader = styled(PFCardHeader)`
+  --pf-c-card--first-child--PaddingTop: 0;
+  --pf-c-card--child--PaddingLeft: 0;
+  --pf-c-card--child--PaddingRight: 0;
+  position: relative;
+`;
 
 class Organization extends Component {
   constructor(props) {
@@ -133,13 +140,6 @@ class Organization extends Component {
       });
     }
 
-    const CardHeader = styled(PFCardHeader)`
-      --pf-c-card--first-child--PaddingTop: 0;
-      --pf-c-card--child--PaddingLeft: 0;
-      --pf-c-card--child--PaddingRight: 0;
-      position: relative;
-    `;
-
     let cardHeader = (
       <CardHeader style={{ padding: 0 }}>
         <RoutedTabs
@@ -216,7 +216,10 @@ class Organization extends Component {
               <Route
                 path="/organizations/:id/access"
                 render={() => (
-                  <OrganizationAccess organization={organization} />
+                  <ResourceAccessList
+                    resource={organization}
+                    apiModel={OrganizationsAPI}
+                  />
                 )}
               />
             )}
@@ -228,9 +231,10 @@ class Organization extends Component {
               <Route
                 path="/organizations/:id/notifications"
                 render={() => (
-                  <OrganizationNotifications
+                  <NotificationList
                     id={Number(match.params.id)}
                     canToggleNotifications={canToggleNotifications}
+                    apiModel={OrganizationsAPI}
                   />
                 )}
               />

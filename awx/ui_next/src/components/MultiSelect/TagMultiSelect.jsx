@@ -33,7 +33,7 @@ function TagMultiSelect({ onChange, value }) {
           setOptions(options.concat(newItem));
         }
       }}
-      associatedItems={stringToArray(value)}
+      value={stringToArray(value)}
       options={options}
       createNewItem={name => ({ id: name, name })}
     />

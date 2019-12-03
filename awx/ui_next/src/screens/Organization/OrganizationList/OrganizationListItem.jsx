@@ -7,12 +7,16 @@ import {
   DataListItem,
   DataListItemRow,
   DataListItemCells,
+  Tooltip,
 } from '@patternfly/react-core';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
+import { PencilAltIcon } from '@patternfly/react-icons';
 
+import ActionButtonCell from '@components/ActionButtonCell';
 import DataListCell from '@components/DataListCell';
 import DataListCheck from '@components/DataListCheck';
+import ListActionButton from '@components/ListActionButton';
 import VerticalSeparator from '@components/VerticalSeparator';
 import { Organization } from '@types';
 
@@ -66,11 +70,7 @@ class OrganizationListItem extends React.Component {
                   </Link>
                 </span>
               </DataListCell>,
-              <DataListCell
-                key="related-field-counts"
-                righthalf="true"
-                width={2}
-              >
+              <DataListCell key="related-field-counts">
                 <ListGroup>
                   {i18n._(t`Members`)}
                   <Badge isRead>
@@ -84,6 +84,22 @@ class OrganizationListItem extends React.Component {
                   </Badge>
                 </ListGroup>
               </DataListCell>,
+              <ActionButtonCell lastcolumn="true" key="action">
+                {organization.summary_fields.user_capabilities.edit && (
+                  <Tooltip
+                    content={i18n._(t`Edit Organization`)}
+                    position="top"
+                  >
+                    <ListActionButton
+                      variant="plain"
+                      component={Link}
+                      to={`/organizations/${organization.id}/edit`}
+                    >
+                      <PencilAltIcon />
+                    </ListActionButton>
+                  </Tooltip>
+                )}
+              </ActionButtonCell>,
             ]}
           />
         </DataListItemRow>

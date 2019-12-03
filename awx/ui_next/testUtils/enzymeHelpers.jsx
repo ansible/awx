@@ -5,6 +5,7 @@
 import React from 'react';
 import { shape, object, string, arrayOf } from 'prop-types';
 import { mount, shallow } from 'enzyme';
+import { MemoryRouter, Router } from 'react-router-dom';
 import { I18nProvider } from '@lingui/react';
 import { ConfigProvider } from '../src/contexts/Config';
 
@@ -13,13 +14,13 @@ const intlProvider = new I18nProvider(
   {
     language,
     catalogs: {
-      [language]: {}
-    }
+      [language]: {},
+    },
   },
   {}
 );
 const {
-  linguiPublisher: { i18n: originalI18n }
+  linguiPublisher: { i18n: originalI18n },
 } = intlProvider.getChildContext();
 
 const defaultContexts = {
@@ -34,13 +35,14 @@ const defaultContexts = {
     ansible_version: null,
     custom_virtualenvs: [],
     version: null,
-    toJSON: () => '/config/'
+    toJSON: () => '/config/',
   },
   router: {
-    history: {
+    history_: {
       push: () => {},
       replace: () => {},
       createHref: () => {},
+      listen: () => {},
       location: {
         hash: '',
         pathname: '',
@@ -61,33 +63,38 @@ const defaultContexts = {
         isExact: false,
         path: '',
         url: '',
-      }
+      },
     },
     toJSON: () => '/router/',
   },
 };
 
-function wrapContexts (node, context) {
-  const { config } = context;
+function wrapContexts(node, context) {
+  const { config, router } = context;
   class Wrap extends React.Component {
-    render () {
+    render() {
       // eslint-disable-next-line react/no-this-in-sfc
       const { children, ...props } = this.props;
       const component = React.cloneElement(children, props);
+      if (router.history) {
+        return (
+          <ConfigProvider value={config}>
+            <Router history={router.history}>{component}</Router>
+          </ConfigProvider>
+        );
+      }
       return (
         <ConfigProvider value={config}>
-          {component}
+          <MemoryRouter>{component}</MemoryRouter>
         </ConfigProvider>
       );
     }
   }
 
-  return (
-    <Wrap>{node}</Wrap>
-  );
+  return <Wrap>{node}</Wrap>;
 }
 
-function applyDefaultContexts (context) {
+function applyDefaultContexts(context) {
   if (!context) {
     return defaultContexts;
   }
@@ -101,16 +108,16 @@ function applyDefaultContexts (context) {
   return newContext;
 }
 
-export function shallowWithContexts (node, options = {}) {
+export function shallowWithContexts(node, options = {}) {
   const context = applyDefaultContexts(options.context);
   return shallow(wrapContexts(node, context));
 }
 
-export function mountWithContexts (node, options = {}) {
+export function mountWithContexts(node, options = {}) {
   const context = applyDefaultContexts(options.context);
   const childContextTypes = {
     linguiPublisher: shape({
-      i18n: object.isRequired
+      i18n: object.isRequired,
     }).isRequired,
     config: shape({
       ansible_version: string,
@@ -122,9 +129,9 @@ export function mountWithContexts (node, options = {}) {
         location: shape({}),
         match: shape({}),
       }).isRequired,
-      history: shape({}).isRequired,
+      history: shape({}),
     }),
-    ...options.childContextTypes
+    ...options.childContextTypes,
   };
   return mount(wrapContexts(node, context), { context, childContextTypes });
 }
@@ -136,11 +143,15 @@ export function mountWithContexts (node, options = {}) {
  * @param[selector] - The selector of the element(s) to wait for.
  * @param[callback] - Callback to poll - by default this checks for a node count of 1.
  */
-export function waitForElement (wrapper, selector, callback = el => el.length === 1) {
+export function waitForElement(
+  wrapper,
+  selector,
+  callback = el => el.length === 1
+) {
   const interval = 100;
   return new Promise((resolve, reject) => {
     let attempts = 30;
-    (function pollElement () {
+    (function pollElement() {
       wrapper.update();
       const el = wrapper.find(selector);
       if (callback(el)) {
@@ -151,6 +162,6 @@ export function waitForElement (wrapper, selector, callback = el => el.length ==
         return reject(new Error(message));
       }
       return setTimeout(pollElement, interval);
-    }());
+    })();
   });
 }

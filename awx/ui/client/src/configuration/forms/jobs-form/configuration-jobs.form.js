@@ -58,10 +58,38 @@ export default ['i18n', function(i18n) {
                 type: 'text',
                 reset: 'ANSIBLE_FACT_CACHE_TIMEOUT',
             },
+            PROJECT_UPDATE_VVV: {
+                type: 'toggleSwitch',
+            },
             AWX_ROLES_ENABLED: {
                 type: 'toggleSwitch',
             },
             AWX_COLLECTIONS_ENABLED: {
+                type: 'toggleSwitch',
+            },
+            PRIMARY_GALAXY_URL: {
+                type: 'text',
+                reset: 'PRIMARY_GALAXY_URL',
+            },
+            PRIMARY_GALAXY_USERNAME: {
+                type: 'text',
+                reset: 'PRIMARY_GALAXY_USERNAME',
+            },
+            PRIMARY_GALAXY_PASSWORD: {
+                type: 'sensitive',
+                hasShowInputButton: true,
+                reset: 'PRIMARY_GALAXY_PASSWORD',
+            },
+            PRIMARY_GALAXY_TOKEN: {
+                type: 'sensitive',
+                hasShowInputButton: true,
+                reset: 'PRIMARY_GALAXY_TOKEN',
+            },
+            PRIMARY_GALAXY_AUTH_URL: {
+                type: 'text',
+                reset: 'PRIMARY_GALAXY_AUTH_URL',
+            },
+            PUBLIC_GALAXY_ENABLED: {
                 type: 'toggleSwitch',
             },
             AWX_TASK_ENV: {
@@ -70,6 +98,9 @@ export default ['i18n', function(i18n) {
                 rows: 6,
                 codeMirror: true,
                 class: 'Form-textAreaLabel Form-formGroup--fullWidth'
+            },
+            AWX_ISOLATED_HOST_KEY_CHECKING: {
+                type: 'toggleSwitch',
             },
             AWX_ISOLATED_CHECK_INTERVAL: {
                 type: 'text',
@@ -82,6 +113,9 @@ export default ['i18n', function(i18n) {
             AWX_ISOLATED_CONNECTION_TIMEOUT: {
                 type: 'text',
                 reset: 'AWX_ISOLATED_CONNECTION_TIMEOUT'
+            },
+            AWX_RESOURCE_PROFILING_ENABLED: {
+                type: 'toggleSwitch',
             }
         },
         buttons: {

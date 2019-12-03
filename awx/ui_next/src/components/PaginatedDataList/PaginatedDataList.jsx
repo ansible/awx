@@ -15,9 +15,8 @@ import DataListToolbar from '@components/DataListToolbar';
 import {
   encodeNonDefaultQueryString,
   parseQueryString,
-  addParams,
+  replaceParams,
 } from '@util/qs';
-import { pluralize, ucFirst } from '@util/strings';
 
 import { QSConfig } from '@types';
 
@@ -34,16 +33,14 @@ class PaginatedDataList extends React.Component {
     const { history, qsConfig } = this.props;
     const { search } = history.location;
     const oldParams = parseQueryString(qsConfig, search);
-    this.pushHistoryState(addParams(qsConfig, oldParams, { page: pageNumber }));
+    this.pushHistoryState(replaceParams(oldParams, { page: pageNumber }));
   }
 
   handleSetPageSize(event, pageSize) {
     const { history, qsConfig } = this.props;
     const { search } = history.location;
     const oldParams = parseQueryString(qsConfig, search);
-    this.pushHistoryState(
-      addParams(qsConfig, oldParams, { page_size: pageSize })
-    );
+    this.pushHistoryState(replaceParams(oldParams, { page_size: pageSize }));
   }
 
   pushHistoryState(params) {
@@ -63,8 +60,7 @@ class PaginatedDataList extends React.Component {
       qsConfig,
       renderItem,
       toolbarColumns,
-      itemName,
-      itemNamePlural,
+      pluralizedItemName,
       showPageSizeOptions,
       location,
       i18n,
@@ -82,16 +78,11 @@ class PaginatedDataList extends React.Component {
         ];
     const queryParams = parseQueryString(qsConfig, location.search);
 
-    const itemDisplayName = ucFirst(pluralize(itemName));
-    const itemDisplayNamePlural = ucFirst(
-      itemNamePlural || pluralize(itemName)
-    );
-
-    const dataListLabel = i18n._(t`${itemDisplayName} List`);
+    const dataListLabel = i18n._(t`${pluralizedItemName} List`);
     const emptyContentMessage = i18n._(
-      t`Please add ${itemDisplayNamePlural} to populate this list `
+      t`Please add ${pluralizedItemName} to populate this list `
     );
-    const emptyContentTitle = i18n._(t`No ${itemDisplayNamePlural} Found `);
+    const emptyContentTitle = i18n._(t`No ${pluralizedItemName} Found `);
 
     let Content;
     if (hasContentLoading && items.length <= 0) {
@@ -108,47 +99,36 @@ class PaginatedDataList extends React.Component {
       );
     }
 
-    if (items.length <= 0) {
-      return (
-        <Fragment>
-          <ListHeader
-            emptyStateControls={emptyStateControls}
-            itemCount={itemCount}
-            columns={columns}
-            qsConfig={qsConfig}
-          />
-          {Content}
-        </Fragment>
-      );
-    }
-
     return (
       <Fragment>
         <ListHeader
           itemCount={itemCount}
           renderToolbar={renderToolbar}
+          emptyStateControls={emptyStateControls}
           columns={columns}
           qsConfig={qsConfig}
         />
         {Content}
-        <Pagination
-          variant="bottom"
-          itemCount={itemCount}
-          page={queryParams.page || 1}
-          perPage={queryParams.page_size}
-          perPageOptions={
-            showPageSizeOptions
-              ? [
-                  { title: '5', value: 5 },
-                  { title: '10', value: 10 },
-                  { title: '20', value: 20 },
-                  { title: '50', value: 50 },
-                ]
-              : []
-          }
-          onSetPage={this.handleSetPage}
-          onPerPageSelect={this.handleSetPageSize}
-        />
+        {items.length ? (
+          <Pagination
+            variant="bottom"
+            itemCount={itemCount}
+            page={queryParams.page || 1}
+            perPage={queryParams.page_size}
+            perPageOptions={
+              showPageSizeOptions
+                ? [
+                    { title: '5', value: 5 },
+                    { title: '10', value: 10 },
+                    { title: '20', value: 20 },
+                    { title: '50', value: 50 },
+                  ]
+                : []
+            }
+            onSetPage={this.handleSetPage}
+            onPerPageSelect={this.handleSetPageSize}
+          />
+        ) : null}
       </Fragment>
     );
   }
@@ -163,8 +143,7 @@ const Item = PropTypes.shape({
 PaginatedDataList.propTypes = {
   items: PropTypes.arrayOf(Item).isRequired,
   itemCount: PropTypes.number.isRequired,
-  itemName: PropTypes.string,
-  itemNamePlural: PropTypes.string,
+  pluralizedItemName: PropTypes.string,
   qsConfig: QSConfig.isRequired,
   renderItem: PropTypes.func,
   toolbarColumns: arrayOf(
@@ -184,8 +163,7 @@ PaginatedDataList.defaultProps = {
   hasContentLoading: false,
   contentError: null,
   toolbarColumns: [],
-  itemName: 'item',
-  itemNamePlural: '',
+  pluralizedItemName: 'Items',
   showPageSizeOptions: true,
   renderItem: item => <PaginatedDataListItem key={item.id} item={item} />,
   renderToolbar: props => <DataListToolbar {...props} />,

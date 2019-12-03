@@ -3,35 +3,69 @@ import { Link } from 'react-router-dom';
 import {
   DataListItem,
   DataListItemRow,
-  DataListItemCells,
+  DataListItemCells as PFDataListItemCells,
   Tooltip,
-  Button as PFButton,
 } from '@patternfly/react-core';
 import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
-import { RocketIcon } from '@patternfly/react-icons';
-import styled from 'styled-components';
+import {
+  ExclamationTriangleIcon,
+  PencilAltIcon,
+  RocketIcon,
+} from '@patternfly/react-icons';
 
+import ActionButtonCell from '@components/ActionButtonCell';
 import DataListCell from '@components/DataListCell';
 import DataListCheck from '@components/DataListCheck';
 import LaunchButton from '@components/LaunchButton';
+import ListActionButton from '@components/ListActionButton';
 import VerticalSeparator from '@components/VerticalSeparator';
 import { Sparkline } from '@components/Sparkline';
 import { toTitleCase } from '@util/strings';
 
-const StyledButton = styled(PFButton)`
-  padding: 5px 8px;
-  border: none;
-  &:hover {
-    background-color: #0066cc;
-    color: white;
+import styled from 'styled-components';
+
+const rightStyle = `
+@media screen and (max-width: 768px) {
+  && {
+    padding-top: 0px;
+    flex: 0 0 33%;
+    padding-right: 20px;
+  }
+}
+`;
+
+const DataListItemCells = styled(PFDataListItemCells)`
+  display: flex;
+  @media screen and (max-width: 768px) {
+    flex-wrap: wrap;
+    justify-content: space-between;
   }
 `;
+
+const LeftDataListCell = styled(DataListCell)`
+  @media screen and (max-width: 768px) {
+    && {
+      padding-bottom: 16px;
+      flex: 1 1 100%;
+    }
+  }
+`;
+const RightDataListCell = styled(DataListCell)`
+  ${rightStyle}
+`;
+const RightActionButtonCell = styled(ActionButtonCell)`
+  ${rightStyle}
+`;
+
 class TemplateListItem extends Component {
   render() {
     const { i18n, template, isSelected, onSelect } = this.props;
     const canLaunch = template.summary_fields.user_capabilities.start;
-
+    const missingResourceIcon =
+      (!template.summary_fields.inventory &&
+        !template.ask_inventory_on_launch) ||
+      !template.summary_fields.project;
     return (
       <DataListItem
         aria-labelledby={`check-action-${template.id}`}
@@ -46,37 +80,70 @@ class TemplateListItem extends Component {
           />
           <DataListItemCells
             dataListCells={[
-              <DataListCell key="divider">
+              <LeftDataListCell key="divider">
                 <VerticalSeparator />
                 <span>
                   <Link to={`/templates/${template.type}/${template.id}`}>
                     <b>{template.name}</b>
                   </Link>
                 </span>
-              </DataListCell>,
-              <DataListCell key="type">
+                {missingResourceIcon && (
+                  <Tooltip
+                    content={i18n._(
+                      t`Resources are missing from this template.`
+                    )}
+                    position="right"
+                  >
+                    <ExclamationTriangleIcon css="color: #c9190b; margin-left: 20px;" />
+                  </Tooltip>
+                )}
+              </LeftDataListCell>,
+              <RightDataListCell
+                css="padding-left: 40px;"
+                righthalf="true"
+                key="type"
+              >
                 {toTitleCase(template.type)}
-              </DataListCell>,
-              <DataListCell key="sparkline">
+              </RightDataListCell>,
+              <RightDataListCell
+                css="flex: 1;"
+                righthalf="true"
+                key="sparkline"
+              >
                 <Sparkline jobs={template.summary_fields.recent_jobs} />
-              </DataListCell>,
-              <DataListCell lastcolumn="true" key="launch">
+              </RightDataListCell>,
+              <RightActionButtonCell
+                css="max-width: 80px;"
+                righthalf="true"
+                lastcolumn="true"
+                key="launch"
+              >
                 {canLaunch && template.type === 'job_template' && (
-                  <Tooltip content={i18n._(t`Launch`)} position="top">
-                    <LaunchButton
-                      component={Link}
-                      to="/templates"
-                      templateId={template.id}
-                    >
-                      {handleLaunch => (
-                        <StyledButton variant="plain" onClick={handleLaunch}>
+                  <Tooltip content={i18n._(t`Launch Template`)} position="top">
+                    <LaunchButton resource={template}>
+                      {({ handleLaunch }) => (
+                        <ListActionButton
+                          variant="plain"
+                          onClick={handleLaunch}
+                        >
                           <RocketIcon />
-                        </StyledButton>
+                        </ListActionButton>
                       )}
                     </LaunchButton>
                   </Tooltip>
                 )}
-              </DataListCell>,
+                {template.summary_fields.user_capabilities.edit && (
+                  <Tooltip content={i18n._(t`Edit Template`)} position="top">
+                    <ListActionButton
+                      variant="plain"
+                      component={Link}
+                      to={`/templates/${template.type}/${template.id}/edit`}
+                    >
+                      <PencilAltIcon />
+                    </ListActionButton>
+                  </Tooltip>
+                )}
+              </RightActionButtonCell>,
             ]}
           />
         </DataListItemRow>

@@ -64,7 +64,7 @@ def build_safe_env(env):
     for k, v in safe_env.items():
         if k == 'AWS_ACCESS_KEY_ID':
             continue
-        elif k.startswith('ANSIBLE_') and not k.startswith('ANSIBLE_NET'):
+        elif k.startswith('ANSIBLE_') and not k.startswith('ANSIBLE_NET') and not k.startswith('ANSIBLE_GALAXY_SERVER'):
             continue
         elif hidden_re.search(k):
             safe_env[k] = HIDDEN_PASSWORD
@@ -86,6 +86,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         unique_together = (('organization', 'name', 'credential_type'))
 
     PASSWORD_FIELDS = ['inputs']
+    FIELDS_TO_PRESERVE_AT_COPY = ['input_sources']
 
     credential_type = models.ForeignKey(
         'CredentialType',
@@ -135,6 +136,10 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
     def cloud(self):
         return self.credential_type.kind == 'cloud'
 
+    @property
+    def kubernetes(self):
+        return self.credential_type.kind == 'kubernetes'
+
     def get_absolute_url(self, request=None):
         return reverse('api:credential_detail', kwargs={'pk': self.pk}, request=request)
 
@@ -151,7 +156,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
     @property
     def has_encrypted_ssh_key_data(self):
         try:
-            ssh_key_data = decrypt_field(self, 'ssh_key_data')
+            ssh_key_data = self.get_input('ssh_key_data')
         except AttributeError:
             return False
 
@@ -322,8 +327,10 @@ class CredentialType(CommonModelNameNotUnique):
         ('net', _('Network')),
         ('scm', _('Source Control')),
         ('cloud', _('Cloud')),
+        ('token', _('Personal Access Token')),
         ('insights', _('Insights')),
         ('external', _('External')),
+        ('kubernetes', _('Kubernetes')),
     )
 
     kind = models.CharField(
@@ -633,9 +640,6 @@ ManagedCredentialType(
             'secret': True,
             'ask_at_runtime': True
         }],
-        'dependencies': {
-            'ssh_key_unlock': ['ssh_key_data'],
-        }
     }
 )
 
@@ -667,9 +671,6 @@ ManagedCredentialType(
             'type': 'string',
             'secret': True
         }],
-        'dependencies': {
-            'ssh_key_unlock': ['ssh_key_data'],
-        }
     }
 )
 
@@ -738,7 +739,6 @@ ManagedCredentialType(
             'secret': True,
         }],
         'dependencies': {
-            'ssh_key_unlock': ['ssh_key_data'],
             'authorize_password': ['authorize'],
         },
         'required': ['username'],
@@ -976,6 +976,40 @@ ManagedCredentialType(
 )
 
 ManagedCredentialType(
+    namespace='github_token',
+    kind='token',
+    name=ugettext_noop('GitHub Personal Access Token'),
+    managed_by_tower=True,
+    inputs={
+        'fields': [{
+            'id': 'token',
+            'label': ugettext_noop('Token'),
+            'type': 'string',
+            'secret': True,
+            'help_text': ugettext_noop('This token needs to come from your profile settings in GitHub')
+        }],
+        'required': ['token'],
+    },
+)
+
+ManagedCredentialType(
+    namespace='gitlab_token',
+    kind='token',
+    name=ugettext_noop('GitLab Personal Access Token'),
+    managed_by_tower=True,
+    inputs={
+        'fields': [{
+            'id': 'token',
+            'label': ugettext_noop('Token'),
+            'type': 'string',
+            'secret': True,
+            'help_text': ugettext_noop('This token needs to come from your profile settings in GitLab')
+        }],
+        'required': ['token'],
+    },
+)
+
+ManagedCredentialType(
     namespace='insights',
     kind='insights',
     name=ugettext_noop('Insights'),
@@ -1090,12 +1124,46 @@ ManagedCredentialType(
 )
 
 
+ManagedCredentialType(
+    namespace='kubernetes_bearer_token',
+    kind='kubernetes',
+    name=ugettext_noop('OpenShift or Kubernetes API Bearer Token'),
+    inputs={
+        'fields': [{
+            'id': 'host',
+            'label': ugettext_noop('OpenShift or Kubernetes API Endpoint'),
+            'type': 'string',
+            'help_text': ugettext_noop('The OpenShift or Kubernetes API Endpoint to authenticate with.')
+        },{
+            'id': 'bearer_token',
+            'label': ugettext_noop('API authentication bearer token.'),
+            'type': 'string',
+            'secret': True,
+        },{
+            'id': 'verify_ssl',
+            'label': ugettext_noop('Verify SSL'),
+            'type': 'boolean',
+            'default': True,
+        },{
+            'id': 'ssl_ca_cert',
+            'label': ugettext_noop('Certificate Authority data'),
+            'type': 'string',
+            'secret': True,
+            'multiline': True,
+        }],
+        'required': ['host', 'bearer_token'],
+    }
+)
+
+
 class CredentialInputSource(PrimordialModel):
 
     class Meta:
         app_label = 'main'
         unique_together = (('target_credential', 'input_field_name'),)
         ordering = ('target_credential', 'source_credential', 'input_field_name',)
+
+    FIELDS_TO_PRESERVE_AT_COPY = ['source_credential', 'metadata', 'input_field_name']
 
     target_credential = models.ForeignKey(
         'Credential',

@@ -3,8 +3,9 @@ import os
 from six import PY3, with_metaclass
 
 from awxkit import api, config
+from awxkit.utils import to_str
 from awxkit.api.pages import Page
-from awxkit.cli.format import format_response, add_authentication_arguments
+from awxkit.cli.format import FORMATTERS, format_response, add_authentication_arguments
 from awxkit.cli.utils import CustomRegistryMeta, cprint
 
 
@@ -98,7 +99,11 @@ class Login(CustomCommand):
                 'red'
             )
         else:
-            print('export TOWER_TOKEN={}'.format(token))
+            fmt = client.get_config('format')
+            if fmt == 'human':
+                print('export TOWER_TOKEN={}'.format(token))
+            else:
+                print(to_str(FORMATTERS[fmt]({'token': token}, '.')).strip())
 
 
 class Config(CustomCommand):

@@ -619,6 +619,7 @@ class BaseCommandEvent(CreatedModifiedModel):
             kwargs.pop('created', None)
 
         sanitize_event_keys(kwargs, cls.VALID_KEYS)
+        kwargs.pop('workflow_job_id', None)
         event = cls.objects.create(**kwargs)
         if isinstance(event, AdHocCommandEvent):
             analytics_logger.info(

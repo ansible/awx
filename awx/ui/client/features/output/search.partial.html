@@ -7,7 +7,7 @@
             ng-disabled="vm.disabled"
             ng-class="{ 'at-Input--rejected': vm.rejected }"
             ng-model="vm.value"
-            ng-attr-placeholder="{{ vm.running ?
+            ng-attr-placeholder="{{ vm.isJobActive ?
                 vm.strings.get('search.PLACEHOLDER_RUNNING') :
                 vm.strings.get('search.PLACEHOLDER_DEFAULT') }}">
         <span class="input-group-btn input-group-append">

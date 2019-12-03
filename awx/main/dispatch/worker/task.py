@@ -4,6 +4,7 @@ import importlib
 import sys
 import traceback
 
+from kubernetes.config import kube_config
 
 from awx.main.tasks import dispatch_startup, inform_cluster_of_shutdown
 
@@ -107,6 +108,14 @@ class TaskWorker(BaseWorker):
             for callback in body.get('errbacks', []) or []:
                 callback['uuid'] = body['uuid']
                 self.perform_work(callback)
+        finally:
+            # It's frustrating that we have to do this, but the python k8s
+            # client leaves behind cacert files in /tmp, so we must clean up
+            # the tmpdir per-dispatcher process every time a new task comes in
+            try:
+                kube_config._cleanup_temp_files()
+            except Exception:
+                logger.exception('failed to cleanup k8s client tmp files')
 
         for callback in body.get('callbacks', []) or []:
             callback['uuid'] = body['uuid']

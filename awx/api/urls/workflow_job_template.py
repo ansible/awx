@@ -1,7 +1,7 @@
 # Copyright (c) 2017 Ansible, Inc.
 # All Rights Reserved.
 
-from django.conf.urls import url
+from django.conf.urls import include, url
 
 from awx.api.views import (
     WorkflowJobTemplateList,
@@ -16,6 +16,7 @@ from awx.api.views import (
     WorkflowJobTemplateNotificationTemplatesErrorList,
     WorkflowJobTemplateNotificationTemplatesStartedList,
     WorkflowJobTemplateNotificationTemplatesSuccessList,
+    WorkflowJobTemplateNotificationTemplatesApprovalList,
     WorkflowJobTemplateAccessList,
     WorkflowJobTemplateObjectRolesList,
     WorkflowJobTemplateLabelList,
@@ -38,9 +39,12 @@ urls = [
         name='workflow_job_template_notification_templates_error_list'),
     url(r'^(?P<pk>[0-9]+)/notification_templates_success/$', WorkflowJobTemplateNotificationTemplatesSuccessList.as_view(),
         name='workflow_job_template_notification_templates_success_list'),
+    url(r'^(?P<pk>[0-9]+)/notification_templates_approvals/$', WorkflowJobTemplateNotificationTemplatesApprovalList.as_view(),
+        name='workflow_job_template_notification_templates_approvals_list'),
     url(r'^(?P<pk>[0-9]+)/access_list/$', WorkflowJobTemplateAccessList.as_view(), name='workflow_job_template_access_list'),
     url(r'^(?P<pk>[0-9]+)/object_roles/$', WorkflowJobTemplateObjectRolesList.as_view(), name='workflow_job_template_object_roles_list'),
     url(r'^(?P<pk>[0-9]+)/labels/$', WorkflowJobTemplateLabelList.as_view(), name='workflow_job_template_label_list'),
+    url(r'^(?P<pk>[0-9]+)/', include('awx.api.urls.webhooks'), {'model_kwarg': 'workflow_job_templates'}),
 ]
 
 __all__ = ['urls']

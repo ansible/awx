@@ -9,7 +9,8 @@ import FilterTags from '@components/FilterTags';
 import {
   encodeNonDefaultQueryString,
   parseQueryString,
-  addParams,
+  mergeParams,
+  replaceParams,
   removeParams,
 } from '@util/qs';
 import { QSConfig } from '@types';
@@ -45,16 +46,14 @@ class ListHeader extends React.Component {
   }
 
   handleSearch(key, value) {
-    const { history, qsConfig } = this.props;
-    const { search } = history.location;
-    const oldParams = parseQueryString(qsConfig, search);
-    this.pushHistoryState(addParams(qsConfig, oldParams, { [key]: value }));
+    const { location, qsConfig } = this.props;
+    const oldParams = parseQueryString(qsConfig, location.search);
+    this.pushHistoryState(mergeParams(oldParams, { [key]: value }));
   }
 
   handleRemove(key, value) {
-    const { history, qsConfig } = this.props;
-    const { search } = history.location;
-    const oldParams = parseQueryString(qsConfig, search);
+    const { location, qsConfig } = this.props;
+    const oldParams = parseQueryString(qsConfig, location.search);
     this.pushHistoryState(removeParams(qsConfig, oldParams, { [key]: value }));
   }
 
@@ -63,11 +62,10 @@ class ListHeader extends React.Component {
   }
 
   handleSort(key, order) {
-    const { history, qsConfig } = this.props;
-    const { search } = history.location;
-    const oldParams = parseQueryString(qsConfig, search);
+    const { location, qsConfig } = this.props;
+    const oldParams = parseQueryString(qsConfig, location.search);
     this.pushHistoryState(
-      addParams(qsConfig, oldParams, {
+      replaceParams(oldParams, {
         order_by: order === 'ascending' ? key : `-${key}`,
         page: null,
       })
@@ -88,11 +86,14 @@ class ListHeader extends React.Component {
       columns,
       renderToolbar,
       qsConfig,
+      location,
     } = this.props;
     const [orderBy, sortOrder] = this.getSortOrder();
+    const params = parseQueryString(qsConfig, location.search);
+    const isEmpty = itemCount === 0 && Object.keys(params).length === 0;
     return (
       <Fragment>
-        {itemCount === 0 ? (
+        {isEmpty ? (
           <Fragment>
             <EmptyStateControlsWrapper>
               {emptyStateControls}
@@ -112,6 +113,7 @@ class ListHeader extends React.Component {
               columns,
               onSearch: this.handleSearch,
               onSort: this.handleSort,
+              qsConfig,
             })}
             <FilterTags
               itemCount={itemCount}

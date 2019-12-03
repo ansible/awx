@@ -54,7 +54,8 @@ INI_TEST_VARS = {
     },
     'azure_rm': {
         'use_private_ip': True,
-        'resource_groups': 'foo_resources,bar_resources'
+        'resource_groups': 'foo_resources,bar_resources',
+        'tags': 'Creator:jmarshall, peanutbutter:jelly'
     },
     'satellite6': {
         'satellite6_group_patterns': 'foo_group_patterns',
@@ -264,6 +265,7 @@ def test_inventory_update_injected_content(this_kind, script_or_plugin, inventor
         assert envvars.pop('ANSIBLE_INVENTORY_ENABLED') == ('auto' if use_plugin else 'script')
         set_files = bool(os.getenv("MAKE_INVENTORY_REFERENCE_FILES", 'false').lower()[0] not in ['f', '0'])
         env, content = read_content(private_data_dir, envvars, inventory_update)
+        env.pop('ANSIBLE_COLLECTIONS_PATHS', None)  # collection paths not relevant to this test
         base_dir = os.path.join(DATA, script_or_plugin)
         if not os.path.exists(base_dir):
             os.mkdir(base_dir)

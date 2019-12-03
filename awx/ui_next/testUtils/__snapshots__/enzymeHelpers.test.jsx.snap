@@ -45,14 +45,19 @@ exports[`mountWithContexts injected I18nProvider should mount and render deeply 
 exports[`mountWithContexts injected Router should mount and render 1`] = `
 <div>
   <Link
-    replace={false}
     to="/"
   >
-    <a
-      onClick={[Function]}
+    <LinkAnchor
+      href="/"
+      navigate={[Function]}
     >
-      home
-    </a>
+      <a
+        href="/"
+        onClick={[Function]}
+      >
+        home
+      </a>
+    </LinkAnchor>
   </Link>
 </div>
 `;

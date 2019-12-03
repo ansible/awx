@@ -1,6 +1,7 @@
-ansible-runner==1.3.4
+ansible-runner==1.4.4
+ansiconv==1.0.0
 appdirs==1.4.2
-asgi-amqp==1.1.3
+asgi-amqp==1.1.4
 azure-keyvault==1.1.0
 boto==2.47.0
 channels==1.1.8
@@ -16,6 +17,7 @@ django-jsonfield==1.2.0
 django-oauth-toolkit==1.1.3
 django-polymorphic==2.0.2
 django-pglocks==1.0.2
+django-qsstats-magic==1.1.0
 django-radius==1.3.3
 django-solo==1.1.3
 django-split-settings==0.3.0
@@ -27,6 +29,7 @@ irc==16.2
 jinja2==2.10.1
 jsonschema==2.6.0
 Markdown==2.6.11    # used for formatting API help
+openshift==0.9.0
 ordereddict==1.1
 prometheus_client==0.6.0
 psutil==5.4.3

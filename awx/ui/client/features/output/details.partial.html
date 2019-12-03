@@ -5,7 +5,7 @@
     <!-- LEFT PANE HEADER ACTIONS -->
     <div class="JobResults-panelHeaderButtonActions">
         <!-- RELAUNCH ACTION -->
-        <at-relaunch job="vm.job"></at-relaunch>
+        <at-relaunch ng-if="vm.job" job="vm.job"></at-relaunch>
 
         <!-- CANCEL ACTION -->
         <button

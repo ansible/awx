@@ -1,20 +1,20 @@
 Background Tasks in AWX
 =======================
 
-In this document, we will go into a bit of detail about how and when AWX runs Python code _in the background_ (_i.e._, _outside_ of the context of an HTTP request), such as:
+In this document, we will go into a bit of detail about how and when AWX runs Python code _in the background_ (_i.e._, **outside** of the context of an HTTP request), such as:
 
 * Any time a Job is launched in AWX (a Job Template, an Ad Hoc Command, a Project
   Update, an Inventory Update, a System Job), a background process retrieves
   metadata _about_ that job from the database and forks some process (_e.g._,
   `ansible-playbook`, `awx-manage inventory_import`)
-* Certain expensive or time-consuming tasks run in the background
+* Certain expensive or time-consuming tasks running in the background
   asynchronously (_e.g._, when deleting an inventory).
 * AWX runs a variety of periodic background tasks on a schedule.  Some examples
   are:
     - AWX's "Task Manager/Scheduler" wakes up periodically and looks for
-      `pending` jobs that have been launched and are ready to start running.
+      `pending` jobs that have been launched and are ready to start running
     - AWX periodically runs code that looks for scheduled jobs and launches
-      them.
+      them
     - AWX runs a variety of periodic tasks that clean up temporary files, and
       performs various administrative checks
     - Every node in an AWX cluster runs a periodic task that serves as

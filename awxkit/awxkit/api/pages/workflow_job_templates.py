@@ -36,9 +36,15 @@ class WorkflowJobTemplate(HasCopy, HasCreate, HasNotifications, HasSurvey, Unifi
 
         optional_fields = (
             "allow_simultaneous",
-            "ask_variables_on_launch", "ask_inventory_on_launch", "ask_scm_branch_on_launch", "ask_limit_on_launch",
-            "limit", "scm_branch",
-            "survey_enabled"
+            "ask_variables_on_launch",
+            "ask_inventory_on_launch",
+            "ask_scm_branch_on_launch",
+            "ask_limit_on_launch",
+            "limit",
+            "scm_branch",
+            "survey_enabled",
+            "webhook_service",
+            "webhook_credential",
         )
         update_payload(payload, optional_fields, kwargs)
 
@@ -53,6 +59,15 @@ class WorkflowJobTemplate(HasCopy, HasCreate, HasNotifications, HasSurvey, Unifi
 
         if kwargs.get('inventory'):
             payload.inventory = kwargs.get('inventory').id
+
+        if kwargs.get('webhook_credential'):
+            webhook_cred = kwargs.get('webhook_credential')
+            if isinstance(webhook_cred, int):
+                payload.update(webhook_credential=int(webhook_cred))
+            elif hasattr(webhook_cred, 'id'):
+                payload.update(webhook_credential=webhook_cred.id)
+            else:
+                raise AttributeError("Webhook credential must either be integer of pkid or Credential object")
 
         return payload
 

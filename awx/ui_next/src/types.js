@@ -4,6 +4,7 @@ import {
   number,
   string,
   bool,
+  objectOf,
   oneOf,
   oneOfType,
 } from 'prop-types';
@@ -71,11 +72,6 @@ export const JobTemplate = shape({
   project: number,
 });
 
-export const Project = shape({
-  id: number.isRequired,
-  name: string.isRequired,
-});
-
 export const Inventory = shape({
   id: number.isRequired,
   name: string,
@@ -109,6 +105,51 @@ export const Credential = shape({
   kind: string,
 });
 
+export const Project = shape({
+  id: number.isRequired,
+  type: oneOf(['project']),
+  url: string,
+  related: shape(),
+  summary_fields: shape({
+    organization: Organization,
+    credential: Credential,
+    last_job: shape({}),
+    last_update: shape({}),
+    created_by: shape({}),
+    modified_by: shape({}),
+    object_roles: shape({}),
+    user_capabilities: objectOf(bool),
+  }),
+  created: string,
+  name: string.isRequired,
+  description: string,
+  scm_type: oneOf(['', 'git', 'hg', 'svn', 'insights']),
+  scm_url: string,
+  scm_branch: string,
+  scm_refspec: string,
+  scm_clean: bool,
+  scm_delete_on_update: bool,
+  credential: number,
+  status: oneOf([
+    'new',
+    'pending',
+    'waiting',
+    'running',
+    'successful',
+    'failed',
+    'error',
+    'canceled',
+    'never updated',
+    'ok',
+    'missing',
+  ]),
+  organization: number,
+  scm_update_on_launch: bool,
+  scm_update_cache_timeout: number,
+  allow_override: bool,
+  custom_virtualenv: string,
+});
+
 export const Job = shape({
   status: string,
   started: string,
@@ -133,4 +174,58 @@ export const Job = shape({
   job_slice_count: number,
   extra_vars: string,
   artifacts: shape({}),
+});
+
+export const Host = shape({
+  id: number.isRequired,
+  type: oneOf(['host']),
+  url: string,
+  related: shape(),
+  summary_fields: shape({
+    inventory: Inventory,
+    last_job: Job,
+    last_job_host_summary: shape({}),
+    created_by: shape({}),
+    modified_by: shape({}),
+    user_capabilities: objectOf(bool),
+    groups: shape({}),
+    recent_jobs: arrayOf(Job),
+  }),
+  created: string,
+  modified: string,
+  name: string.isRequired,
+  description: string,
+  inventory: number.isRequired,
+  enabled: bool,
+  instance_id: string,
+  variables: string,
+  has_active_failures: bool,
+  has_inventory_sources: bool,
+  last_job: number,
+  last_job_host_summary: number,
+});
+
+export const Team = shape({
+  id: number.isRequired,
+  name: string.isRequired,
+  organization: number,
+});
+
+export const User = shape({
+  id: number.isRequired,
+  type: oneOf(['user']),
+  url: string,
+  related: shape(),
+  summary_fields: shape({
+    user_capabilities: objectOf(bool),
+  }),
+  created: string,
+  username: string,
+  first_name: string,
+  last_name: string,
+  email: string.isRequired,
+  is_superuser: bool,
+  is_system_auditor: bool,
+  ldap_dn: string,
+  last_login: string,
 });

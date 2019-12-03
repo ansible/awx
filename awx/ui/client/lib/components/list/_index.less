@@ -202,6 +202,7 @@
 .at-Row-toggle {
     align-self: flex-start;
     margin-right: @at-space-4x;
+    margin-left: 15px;
 }
 
 .at-Row-actions {
@@ -239,6 +240,10 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+.at-Row-rightSide{
+    justify-content: flex-end;
 }
 
 .at-Row-container--wrapped {
@@ -288,6 +293,8 @@
     line-height: @at-line-height-list-row-item-tag;
     word-break: keep-all;
     display: inline-flex;
+    margin-right: 10px;
+    margin-left: 10px;
 }
 
 .at-RowItem-tag--primary {
@@ -377,31 +384,5 @@
     .at-RowItem-label {
         width: auto;
         margin-right: @at-margin-right-list-row-item-inline-label;
-    }
-}
-
-@media screen and (max-width: @at-breakpoint-instances-wrap) {
-    .at-Row-items--instances {
-        margin-bottom: @at-padding-bottom-instances-wrap;
-    }
-}
-
-@media screen and (max-width: @at-breakpoint-compact-list) {
-    .at-Row-actions {
-        align-items: center;
-    }
-
-    .at-RowAction {
-        margin: @at-margin-list-row-action-mobile;
-    }
-
-    .at-RowItem--inline {
-        display: flex;
-        margin-right: inherit;
-
-        .at-RowItem-label {
-            width: @at-width-list-row-item-label;
-            margin-right: inherit;
-        }
     }
 }

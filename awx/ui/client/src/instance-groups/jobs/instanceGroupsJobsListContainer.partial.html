@@ -3,7 +3,7 @@
 
     <at-tab-group class="at-TabGroup--padBelow">
         <at-tab state="vm.tab.details">{{:: vm.strings.get('tab.DETAILS') }}</at-tab>
-        <at-tab state="vm.tab.instances">{{:: vm.strings.get('tab.INSTANCES') }}</at-tab>
+        <at-tab ng-if="$state.is('instanceGroups.jobs')" state="vm.tab.instances">{{:: vm.strings.get('tab.INSTANCES') }}</at-tab>
         <at-tab state="vm.tab.jobs">{{:: vm.strings.get('tab.JOBS') }}</at-tab>
     </at-tab-group>
     <div ui-view="jobsList"></div>

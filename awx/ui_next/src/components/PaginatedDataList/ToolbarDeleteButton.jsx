@@ -1,12 +1,19 @@
 import React, { Fragment } from 'react';
-import { func, bool, number, string, arrayOf, shape } from 'prop-types';
+import {
+  func,
+  bool,
+  number,
+  string,
+  arrayOf,
+  shape,
+  checkPropTypes,
+} from 'prop-types';
 import { Button, Tooltip } from '@patternfly/react-core';
 import { TrashAltIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import AlertModal from '../AlertModal';
-import { pluralize } from '../../util/strings';
 
 const DeleteButton = styled(Button)`
   padding: 5px 8px;
@@ -23,9 +30,40 @@ const DeleteButton = styled(Button)`
   }
 `;
 
+const requireNameOrUsername = props => {
+  const { name, username } = props;
+  if (!name && !username) {
+    return new Error(
+      `One of 'name' or 'username' is required by ItemToDelete component.`
+    );
+  }
+  if (name) {
+    checkPropTypes(
+      {
+        name: string,
+      },
+      { name: props.name },
+      'prop',
+      'ItemToDelete'
+    );
+  }
+  if (username) {
+    checkPropTypes(
+      {
+        username: string,
+      },
+      { username: props.username },
+      'prop',
+      'ItemToDelete'
+    );
+  }
+  return null;
+};
+
 const ItemToDelete = shape({
   id: number.isRequired,
-  name: string.isRequired,
+  name: requireNameOrUsername,
+  username: requireNameOrUsername,
   summary_fields: shape({
     user_capabilities: shape({
       delete: bool.isRequired,
@@ -41,11 +79,11 @@ class ToolbarDeleteButton extends React.Component {
   static propTypes = {
     onDelete: func.isRequired,
     itemsToDelete: arrayOf(ItemToDelete).isRequired,
-    itemName: string,
+    pluralizedItemName: string,
   };
 
   static defaultProps = {
-    itemName: 'item',
+    pluralizedItemName: 'Items',
   };
 
   constructor(props) {
@@ -75,7 +113,7 @@ class ToolbarDeleteButton extends React.Component {
   }
 
   renderTooltip() {
-    const { itemsToDelete, itemName, i18n } = this.props;
+    const { itemsToDelete, pluralizedItemName, i18n } = this.props;
 
     const itemsUnableToDelete = itemsToDelete
       .filter(cannotDelete)
@@ -85,9 +123,7 @@ class ToolbarDeleteButton extends React.Component {
       return (
         <div>
           {i18n._(
-            t`You do not have permission to delete the following ${pluralize(
-              itemName
-            )}: ${itemsUnableToDelete}`
+            t`You do not have permission to delete the following ${pluralizedItemName}: ${itemsUnableToDelete}`
           )}
         </div>
       );
@@ -99,7 +135,7 @@ class ToolbarDeleteButton extends React.Component {
   }
 
   render() {
-    const { itemsToDelete, itemName, i18n } = this.props;
+    const { itemsToDelete, pluralizedItemName, i18n } = this.props;
     const { isModalOpen } = this.state;
 
     const isDisabled =
@@ -125,11 +161,7 @@ class ToolbarDeleteButton extends React.Component {
         {isModalOpen && (
           <AlertModal
             variant="danger"
-            title={
-              itemsToDelete === 1
-                ? i18n._(t`Delete ${itemName}`)
-                : i18n._(t`Delete ${pluralize(itemName)}`)
-            }
+            title={pluralizedItemName}
             isOpen={isModalOpen}
             onClose={this.handleCancelDelete}
             actions={[
@@ -155,7 +187,7 @@ class ToolbarDeleteButton extends React.Component {
             <br />
             {itemsToDelete.map(item => (
               <span key={item.id}>
-                <strong>{item.name}</strong>
+                <strong>{item.name || item.username}</strong>
                 <br />
               </span>
             ))}

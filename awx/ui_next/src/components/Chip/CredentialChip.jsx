@@ -4,7 +4,7 @@ import { toTitleCase } from '@util/strings';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import Chip from './Chip';
-import { Credential } from '../../types';
+import { Credential } from '@types';
 
 function CredentialChip({ credential, i18n, ...props }) {
   let type;

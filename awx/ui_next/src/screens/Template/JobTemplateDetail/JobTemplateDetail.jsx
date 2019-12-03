@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { Link, withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import {
@@ -17,6 +17,7 @@ import LaunchButton from '@components/LaunchButton';
 import ContentLoading from '@components/ContentLoading';
 import { ChipGroup, Chip, CredentialChip } from '@components/Chip';
 import { DetailList, Detail } from '@components/DetailList';
+import { formatDateString } from '@util/dates';
 import { JobTemplatesAPI } from '@api';
 
 const ButtonGroup = styled.div`
@@ -25,6 +26,12 @@ const ButtonGroup = styled.div`
   margin-top: 20px;
   & > :not(:first-child) {
     margin-left: 20px;
+  }
+`;
+
+const MissingDetail = styled(Detail)`
+  dd& {
+    color: red;
   }
 `;
 class JobTemplateDetail extends Component {
@@ -59,6 +66,7 @@ class JobTemplateDetail extends Component {
   render() {
     const {
       template: {
+        ask_inventory_on_launch,
         allow_simultaneous,
         become_enabled,
         created,
@@ -69,12 +77,10 @@ class JobTemplateDetail extends Component {
         job_slice_count,
         job_tags,
         job_type,
-        inventory,
         name,
         limit,
         modified,
         playbook,
-        project,
         skip_tags,
         timeout,
         summary_fields,
@@ -106,6 +112,32 @@ class JobTemplateDetail extends Component {
     const renderOptionsField =
       become_enabled || host_config_key || allow_simultaneous || use_fact_cache;
 
+    let createdBy = '';
+    if (created) {
+      if (summary_fields.created_by && summary_fields.created_by.username) {
+        createdBy = i18n._(
+          t`${formatDateString(created)} by ${
+            summary_fields.created_by.username
+          }`
+        );
+      } else {
+        createdBy = formatDateString(created);
+      }
+    }
+
+    let modifiedBy = '';
+    if (modified) {
+      if (summary_fields.modified_by && summary_fields.modified_by.username) {
+        modifiedBy = i18n._(
+          t`${formatDateString(modified)} by ${
+            summary_fields.modified_by.username
+          }`
+        );
+      } else {
+        modifiedBy = formatDateString(modified);
+      }
+    }
+
     const renderOptions = (
       <TextList component={TextListVariants.ul}>
         {become_enabled && (
@@ -131,6 +163,28 @@ class JobTemplateDetail extends Component {
       </TextList>
     );
 
+    const renderMissingDataDetail = value => (
+      <MissingDetail label={value} value={i18n._(t`Deleted`)} />
+    );
+
+    const inventoryValue = (kind, id) => {
+      const inventorykind =
+        kind === 'smart' ? (kind = 'smart_inventory') : (kind = 'inventory');
+
+      return ask_inventory_on_launch ? (
+        <Fragment>
+          <Link to={`/inventories/${inventorykind}/${id}/details`}>
+            {summary_fields.inventory.name}
+          </Link>
+          <span> {i18n._(t`(Prompt on Launch)`)}</span>
+        </Fragment>
+      ) : (
+        <Link to={`/inventories/${inventorykind}/${id}/details`}>
+          {summary_fields.inventory.name}
+        </Link>
+      );
+    };
+
     if (contentError) {
       return <ContentError error={contentError} />;
     }
@@ -143,20 +197,39 @@ class JobTemplateDetail extends Component {
       isInitialized && (
         <CardBody css="padding-top: 20px;">
           <DetailList gutter="sm">
-            <Detail label={i18n._(t`Name`)} value={name} />
+            <Detail
+              label={i18n._(t`Name`)}
+              value={name}
+              dataCy="jt-detail-name"
+            />
             <Detail label={i18n._(t`Description`)} value={description} />
             <Detail label={i18n._(t`Job Type`)} value={job_type} />
-            {inventory && (
+
+            {summary_fields.inventory ? (
               <Detail
                 label={i18n._(t`Inventory`)}
-                value={summary_fields.inventory.name}
+                value={inventoryValue(
+                  summary_fields.inventory.kind,
+                  summary_fields.inventory.id
+                )}
               />
+            ) : (
+              !ask_inventory_on_launch &&
+              renderMissingDataDetail(i18n._(t`Inventory`))
             )}
-            {project && (
+            {summary_fields.project ? (
               <Detail
                 label={i18n._(t`Project`)}
-                value={summary_fields.project.name}
+                value={
+                  <Link to={`/projects/${summary_fields.project.id}/details`}>
+                    {summary_fields.project
+                      ? summary_fields.project.name
+                      : i18n._(t`Deleted`)}
+                  </Link>
+                }
               />
+            ) : (
+              renderMissingDataDetail(i18n._(t`Project`))
             )}
             <Detail label={i18n._(t`Playbook`)} value={playbook} />
             <Detail label={i18n._(t`Forks`)} value={forks || '0'} />
@@ -166,14 +239,18 @@ class JobTemplateDetail extends Component {
               value={verbosityDetails[0].details}
             />
             <Detail label={i18n._(t`Timeout`)} value={timeout || '0'} />
-            <Detail
-              label={i18n._(t`Created`)}
-              value={`${created} by ${summary_fields.created_by.username}`} // TODO: link to user in users
-            />
-            <Detail
-              label={i18n._(t`Last Modified`)}
-              value={`${modified} by ${summary_fields.modified_by.username}`} // TODO: link to user in users
-            />
+            {createdBy && (
+              <Detail
+                label={i18n._(t`Created`)}
+                value={createdBy} // TODO: link to user in users
+              />
+            )}
+            {modifiedBy && (
+              <Detail
+                label={i18n._(t`Last Modified`)}
+                value={modifiedBy} // TODO: link to user in users
+              />
+            )}
             <Detail
               label={i18n._(t`Show Changes`)}
               value={diff_mode ? 'On' : 'Off'}
@@ -200,7 +277,7 @@ class JobTemplateDetail extends Component {
                   fullWidth
                   label={i18n._(t`Credentials`)}
                   value={
-                    <ChipGroup showOverflowAfter={5}>
+                    <ChipGroup numChips={5}>
                       {summary_fields.credentials.map(c => (
                         <CredentialChip key={c.id} credential={c} isReadOnly />
                       ))}
@@ -213,7 +290,7 @@ class JobTemplateDetail extends Component {
                 fullWidth
                 label={i18n._(t`Labels`)}
                 value={
-                  <ChipGroup showOverflowAfter={5}>
+                  <ChipGroup numChips={5}>
                     {summary_fields.labels.results.map(l => (
                       <Chip key={l.id} isReadOnly>
                         {l.name}
@@ -228,7 +305,7 @@ class JobTemplateDetail extends Component {
                 fullWidth
                 label={i18n._(t`Instance Groups`)}
                 value={
-                  <ChipGroup showOverflowAfter={5}>
+                  <ChipGroup numChips={5}>
                     {instanceGroups.map(ig => (
                       <Chip key={ig.id} isReadOnly>
                         {ig.name}
@@ -243,7 +320,7 @@ class JobTemplateDetail extends Component {
                 fullWidth
                 label={i18n._(t`Job tags`)}
                 value={
-                  <ChipGroup showOverflowAfter={5}>
+                  <ChipGroup numChips={5}>
                     {job_tags.split(',').map(jobTag => (
                       <Chip key={jobTag} isReadOnly>
                         {jobTag}
@@ -258,7 +335,7 @@ class JobTemplateDetail extends Component {
                 fullWidth
                 label={i18n._(t`Skip tags`)}
                 value={
-                  <ChipGroup showOverflowAfter={5}>
+                  <ChipGroup numChips={5}>
                     {skip_tags.split(',').map(skipTag => (
                       <Chip key={skipTag} isReadOnly>
                         {skipTag}
@@ -280,14 +357,8 @@ class JobTemplateDetail extends Component {
               </Button>
             )}
             {canLaunch && (
-              <LaunchButton
-                variant="secondary"
-                component={Link}
-                to="/templates"
-                templateId={template.id}
-                aria-label={i18n._(t`Launch`)}
-              >
-                {handleLaunch => (
+              <LaunchButton resource={template} aria-label={i18n._(t`Launch`)}>
+                {({ handleLaunch }) => (
                   <Button
                     variant="secondary"
                     type="submit"
@@ -298,14 +369,6 @@ class JobTemplateDetail extends Component {
                 )}
               </LaunchButton>
             )}
-            <Button
-              variant="secondary"
-              component={Link}
-              to="/templates"
-              aria-label={i18n._(t`Close`)}
-            >
-              {i18n._(t`Close`)}
-            </Button>
           </ButtonGroup>
         </CardBody>
       )

@@ -1,0 +1,558 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
+<DeleteRoleConfirmationModal
+  i18n={"/i18n/"}
+  onCancel={[Function]}
+  onConfirm={[Function]}
+  role={
+    Object {
+      "id": 3,
+      "name": "Member",
+      "resource_name": "Org",
+      "resource_type": "organization",
+      "team_id": 5,
+      "team_name": "The Team",
+    }
+  }
+  username="jane"
+>
+  <_default
+    actions={
+      Array [
+        <Unknown
+          aria-label="Confirm delete"
+          onClick={[Function]}
+          variant="danger"
+        >
+          Delete
+        </Unknown>,
+        <Unknown
+          onClick={[Function]}
+          variant="secondary"
+        >
+          Cancel
+        </Unknown>,
+      ]
+    }
+    isOpen={true}
+    onClose={[Function]}
+    title="Remove {0} Access"
+    variant="danger"
+  >
+    <Modal
+      actions={
+        Array [
+          <Unknown
+            aria-label="Confirm delete"
+            onClick={[Function]}
+            variant="danger"
+          >
+            Delete
+          </Unknown>,
+          <Unknown
+            onClick={[Function]}
+            variant="secondary"
+          >
+            Cancel
+          </Unknown>,
+        ]
+      }
+      appendTo={
+        <body
+          class="pf-c-backdrop__open"
+        >
+          <div>
+            <div
+              class="pf-c-backdrop"
+            >
+              <div
+                class="pf-l-bullseye"
+              >
+                <div
+                  aria-describedby="pf-modal-0"
+                  aria-label="Remove {0} Access"
+                  aria-modal="true"
+                  class="pf-c-modal-box awx-c-modal at-c-alertModal at-c-alertModal--danger"
+                  role="dialog"
+                >
+                  <button
+                    aria-label="Close"
+                    class="pf-c-button pf-m-plain"
+                    type="button"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      fill="currentColor"
+                      height="1em"
+                      role="img"
+                      style="vertical-align: -0.125em;"
+                      viewBox="0 0 352 512"
+                      width="1em"
+                    >
+                      <path
+                        d="M242.72 256l100.07-100.07c12.28-12.28 12.28-32.19 0-44.48l-22.24-22.24c-12.28-12.28-32.19-12.28-44.48 0L176 189.28 75.93 89.21c-12.28-12.28-32.19-12.28-44.48 0L9.21 111.45c-12.28 12.28-12.28 32.19 0 44.48L109.28 256 9.21 356.07c-12.28 12.28-12.28 32.19 0 44.48l22.24 22.24c12.28 12.28 32.2 12.28 44.48 0L176 322.72l100.07 100.07c12.28 12.28 32.2 12.28 44.48 0l22.24-22.24c12.28-12.28 12.28-32.19 0-44.48L242.72 256z"
+                        transform=""
+                      />
+                    </svg>
+                  </button>
+                  <h1
+                    class="pf-c-title pf-m-2xl"
+                  >
+                     
+                    Remove {0} Access
+                     
+                  </h1>
+                  <div
+                    class="pf-c-modal-box__body"
+                    id="pf-modal-0"
+                  >
+                    Are you sure you want to remove {0} access from {1}?  Doing so affects all members of the team.
+                    <br />
+                    <br />
+                    If you only want to remove access for this particular user, please remove them from the team.
+                    <svg
+                      aria-hidden="true"
+                      class="at-c-alertModal__icon"
+                      fill="currentColor"
+                      height="1em"
+                      role="img"
+                      style="vertical-align: -0.125em;"
+                      viewBox="0 0 512 512"
+                      width="1em"
+                    >
+                      <path
+                        d="M504 256c0 136.997-111.043 248-248 248S8 392.997 8 256C8 119.083 119.043 8 256 8s248 111.083 248 248zm-248 50c-25.405 0-46 20.595-46 46s20.595 46 46 46 46-20.595 46-46-20.595-46-46-46zm-43.673-165.346l7.418 136c.347 6.364 5.609 11.346 11.982 11.346h48.546c6.373 0 11.635-4.982 11.982-11.346l7.418-136c.375-6.874-5.098-12.654-11.982-12.654h-63.383c-6.884 0-12.356 5.78-11.981 12.654z"
+                        transform=""
+                      />
+                    </svg>
+                  </div>
+                  <div
+                    class="pf-c-modal-box__footer"
+                  >
+                    <button
+                      aria-label="Confirm delete"
+                      class="pf-c-button pf-m-danger"
+                      type="button"
+                    >
+                      Delete
+                    </button>
+                    <button
+                      class="pf-c-button pf-m-secondary"
+                      type="button"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </body>
+      }
+      ariaDescribedById=""
+      className="awx-c-modal at-c-alertModal at-c-alertModal--danger"
+      hideTitle={false}
+      isFooterLeftAligned={false}
+      isLarge={false}
+      isOpen={true}
+      isSmall={false}
+      onClose={[Function]}
+      showClose={true}
+      title="Remove {0} Access"
+    >
+      <Portal
+        containerInfo={
+          <div>
+            <div
+              class="pf-c-backdrop"
+            >
+              <div
+                class="pf-l-bullseye"
+              >
+                <div
+                  aria-describedby="pf-modal-0"
+                  aria-label="Remove {0} Access"
+                  aria-modal="true"
+                  class="pf-c-modal-box awx-c-modal at-c-alertModal at-c-alertModal--danger"
+                  role="dialog"
+                >
+                  <button
+                    aria-label="Close"
+                    class="pf-c-button pf-m-plain"
+                    type="button"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      fill="currentColor"
+                      height="1em"
+                      role="img"
+                      style="vertical-align: -0.125em;"
+                      viewBox="0 0 352 512"
+                      width="1em"
+                    >
+                      <path
+                        d="M242.72 256l100.07-100.07c12.28-12.28 12.28-32.19 0-44.48l-22.24-22.24c-12.28-12.28-32.19-12.28-44.48 0L176 189.28 75.93 89.21c-12.28-12.28-32.19-12.28-44.48 0L9.21 111.45c-12.28 12.28-12.28 32.19 0 44.48L109.28 256 9.21 356.07c-12.28 12.28-12.28 32.19 0 44.48l22.24 22.24c12.28 12.28 32.2 12.28 44.48 0L176 322.72l100.07 100.07c12.28 12.28 32.2 12.28 44.48 0l22.24-22.24c12.28-12.28 12.28-32.19 0-44.48L242.72 256z"
+                        transform=""
+                      />
+                    </svg>
+                  </button>
+                  <h1
+                    class="pf-c-title pf-m-2xl"
+                  >
+                     
+                    Remove {0} Access
+                     
+                  </h1>
+                  <div
+                    class="pf-c-modal-box__body"
+                    id="pf-modal-0"
+                  >
+                    Are you sure you want to remove {0} access from {1}?  Doing so affects all members of the team.
+                    <br />
+                    <br />
+                    If you only want to remove access for this particular user, please remove them from the team.
+                    <svg
+                      aria-hidden="true"
+                      class="at-c-alertModal__icon"
+                      fill="currentColor"
+                      height="1em"
+                      role="img"
+                      style="vertical-align: -0.125em;"
+                      viewBox="0 0 512 512"
+                      width="1em"
+                    >
+                      <path
+                        d="M504 256c0 136.997-111.043 248-248 248S8 392.997 8 256C8 119.083 119.043 8 256 8s248 111.083 248 248zm-248 50c-25.405 0-46 20.595-46 46s20.595 46 46 46 46-20.595 46-46-20.595-46-46-46zm-43.673-165.346l7.418 136c.347 6.364 5.609 11.346 11.982 11.346h48.546c6.373 0 11.635-4.982 11.982-11.346l7.418-136c.375-6.874-5.098-12.654-11.982-12.654h-63.383c-6.884 0-12.356 5.78-11.981 12.654z"
+                        transform=""
+                      />
+                    </svg>
+                  </div>
+                  <div
+                    class="pf-c-modal-box__footer"
+                  >
+                    <button
+                      aria-label="Confirm delete"
+                      class="pf-c-button pf-m-danger"
+                      type="button"
+                    >
+                      Delete
+                    </button>
+                    <button
+                      class="pf-c-button pf-m-secondary"
+                      type="button"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      >
+        <ModalContent
+          actions={
+            Array [
+              <Unknown
+                aria-label="Confirm delete"
+                onClick={[Function]}
+                variant="danger"
+              >
+                Delete
+              </Unknown>,
+              <Unknown
+                onClick={[Function]}
+                variant="secondary"
+              >
+                Cancel
+              </Unknown>,
+            ]
+          }
+          ariaDescribedById=""
+          className="awx-c-modal at-c-alertModal at-c-alertModal--danger"
+          hideTitle={false}
+          id="pf-modal-0"
+          isFooterLeftAligned={false}
+          isLarge={false}
+          isOpen={true}
+          isSmall={false}
+          onClose={[Function]}
+          showClose={true}
+          title="Remove {0} Access"
+        >
+          <Backdrop>
+            <div
+              className="pf-c-backdrop"
+            >
+              <FocusTrap
+                _createFocusTrap={[Function]}
+                active={true}
+                className="pf-l-bullseye"
+                focusTrapOptions={
+                  Object {
+                    "clickOutsideDeactivates": true,
+                  }
+                }
+                paused={false}
+                tag="div"
+              >
+                <div
+                  className="pf-l-bullseye"
+                >
+                  <ModalBox
+                    className="awx-c-modal at-c-alertModal at-c-alertModal--danger"
+                    id="pf-modal-0"
+                    isLarge={false}
+                    isSmall={false}
+                    style={Object {}}
+                    title="Remove {0} Access"
+                  >
+                    <div
+                      aria-describedby="pf-modal-0"
+                      aria-label="Remove {0} Access"
+                      aria-modal="true"
+                      className="pf-c-modal-box awx-c-modal at-c-alertModal at-c-alertModal--danger"
+                      role="dialog"
+                      style={Object {}}
+                    >
+                      <ModalBoxCloseButton
+                        onClose={[Function]}
+                      >
+                        <Component
+                          aria-label="Close"
+                          className=""
+                          onClick={[Function]}
+                          variant="plain"
+                        >
+                          <ComponentWithOuia
+                            component={[Function]}
+                            componentProps={
+                              Object {
+                                "aria-label": "Close",
+                                "children": <TimesIcon
+                                  color="currentColor"
+                                  noVerticalAlign={false}
+                                  size="sm"
+                                  title={null}
+                                />,
+                                "className": "",
+                                "onClick": [Function],
+                                "variant": "plain",
+                              }
+                            }
+                            consumerContext={null}
+                          >
+                            <Button
+                              aria-label="Close"
+                              className=""
+                              onClick={[Function]}
+                              ouiaContext={
+                                Object {
+                                  "isOuia": false,
+                                  "ouiaId": null,
+                                }
+                              }
+                              variant="plain"
+                            >
+                              <button
+                                aria-disabled={null}
+                                aria-label="Close"
+                                className="pf-c-button pf-m-plain"
+                                disabled={false}
+                                onClick={[Function]}
+                                tabIndex={null}
+                                type="button"
+                              >
+                                <TimesIcon
+                                  color="currentColor"
+                                  noVerticalAlign={false}
+                                  size="sm"
+                                  title={null}
+                                >
+                                  <svg
+                                    aria-hidden={true}
+                                    aria-labelledby={null}
+                                    fill="currentColor"
+                                    height="1em"
+                                    role="img"
+                                    style={
+                                      Object {
+                                        "verticalAlign": "-0.125em",
+                                      }
+                                    }
+                                    viewBox="0 0 352 512"
+                                    width="1em"
+                                  >
+                                    <path
+                                      d="M242.72 256l100.07-100.07c12.28-12.28 12.28-32.19 0-44.48l-22.24-22.24c-12.28-12.28-32.19-12.28-44.48 0L176 189.28 75.93 89.21c-12.28-12.28-32.19-12.28-44.48 0L9.21 111.45c-12.28 12.28-12.28 32.19 0 44.48L109.28 256 9.21 356.07c-12.28 12.28-12.28 32.19 0 44.48l22.24 22.24c12.28 12.28 32.2 12.28 44.48 0L176 322.72l100.07 100.07c12.28 12.28 32.2 12.28 44.48 0l22.24-22.24c12.28-12.28 12.28-32.19 0-44.48L242.72 256z"
+                                      transform=""
+                                    />
+                                  </svg>
+                                </TimesIcon>
+                              </button>
+                            </Button>
+                          </ComponentWithOuia>
+                        </Component>
+                      </ModalBoxCloseButton>
+                      <ModalBoxHeader
+                        hideTitle={false}
+                      >
+                        <Title
+                          className=""
+                          headingLevel="h1"
+                          size="2xl"
+                        >
+                          <h1
+                            className="pf-c-title pf-m-2xl"
+                          >
+                             
+                            Remove {0} Access
+                             
+                          </h1>
+                        </Title>
+                      </ModalBoxHeader>
+                      <ModalBoxBody
+                        id="pf-modal-0"
+                      >
+                        <div
+                          className="pf-c-modal-box__body"
+                          id="pf-modal-0"
+                        >
+                          Are you sure you want to remove {0} access from {1}?  Doing so affects all members of the team.
+                          <br />
+                          <br />
+                          If you only want to remove access for this particular user, please remove them from the team.
+                          <ExclamationCircleIcon
+                            className="at-c-alertModal__icon"
+                            color="currentColor"
+                            noVerticalAlign={false}
+                            size="sm"
+                            title={null}
+                          >
+                            <svg
+                              aria-hidden={true}
+                              aria-labelledby={null}
+                              className="at-c-alertModal__icon"
+                              fill="currentColor"
+                              height="1em"
+                              role="img"
+                              style={
+                                Object {
+                                  "verticalAlign": "-0.125em",
+                                }
+                              }
+                              viewBox="0 0 512 512"
+                              width="1em"
+                            >
+                              <path
+                                d="M504 256c0 136.997-111.043 248-248 248S8 392.997 8 256C8 119.083 119.043 8 256 8s248 111.083 248 248zm-248 50c-25.405 0-46 20.595-46 46s20.595 46 46 46 46-20.595 46-46-20.595-46-46-46zm-43.673-165.346l7.418 136c.347 6.364 5.609 11.346 11.982 11.346h48.546c6.373 0 11.635-4.982 11.982-11.346l7.418-136c.375-6.874-5.098-12.654-11.982-12.654h-63.383c-6.884 0-12.356 5.78-11.981 12.654z"
+                                transform=""
+                              />
+                            </svg>
+                          </ExclamationCircleIcon>
+                        </div>
+                      </ModalBoxBody>
+                      <ModalBoxFooter
+                        isLeftAligned={false}
+                      >
+                        <div
+                          className="pf-c-modal-box__footer"
+                        >
+                          <Component
+                            aria-label="Confirm delete"
+                            key="delete"
+                            onClick={[Function]}
+                            variant="danger"
+                          >
+                            <ComponentWithOuia
+                              component={[Function]}
+                              componentProps={
+                                Object {
+                                  "aria-label": "Confirm delete",
+                                  "children": "Delete",
+                                  "onClick": [Function],
+                                  "variant": "danger",
+                                }
+                              }
+                              consumerContext={null}
+                            >
+                              <Button
+                                aria-label="Confirm delete"
+                                onClick={[Function]}
+                                ouiaContext={
+                                  Object {
+                                    "isOuia": false,
+                                    "ouiaId": null,
+                                  }
+                                }
+                                variant="danger"
+                              >
+                                <button
+                                  aria-disabled={null}
+                                  aria-label="Confirm delete"
+                                  className="pf-c-button pf-m-danger"
+                                  disabled={false}
+                                  onClick={[Function]}
+                                  tabIndex={null}
+                                  type="button"
+                                >
+                                  Delete
+                                </button>
+                              </Button>
+                            </ComponentWithOuia>
+                          </Component>
+                          <Component
+                            key="cancel"
+                            onClick={[Function]}
+                            variant="secondary"
+                          >
+                            <ComponentWithOuia
+                              component={[Function]}
+                              componentProps={
+                                Object {
+                                  "children": "Cancel",
+                                  "onClick": [Function],
+                                  "variant": "secondary",
+                                }
+                              }
+                              consumerContext={null}
+                            >
+                              <Button
+                                onClick={[Function]}
+                                ouiaContext={
+                                  Object {
+                                    "isOuia": false,
+                                    "ouiaId": null,
+                                  }
+                                }
+                                variant="secondary"
+                              >
+                                <button
+                                  aria-disabled={null}
+                                  aria-label={null}
+                                  className="pf-c-button pf-m-secondary"
+                                  disabled={false}
+                                  onClick={[Function]}
+                                  tabIndex={null}
+                                  type="button"
+                                >
+                                  Cancel
+                                </button>
+                              </Button>
+                            </ComponentWithOuia>
+                          </Component>
+                        </div>
+                      </ModalBoxFooter>
+                    </div>
+                  </ModalBox>
+                </div>
+              </FocusTrap>
+            </div>
+          </Backdrop>
+        </ModalContent>
+      </Portal>
+    </Modal>
+  </_default>
+</DeleteRoleConfirmationModal>
+`;

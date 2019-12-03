@@ -22,6 +22,7 @@ from rest_framework.request import clone_request
 # AWX
 from awx.main.fields import JSONField, ImplicitRoleField
 from awx.main.models import InventorySource, NotificationTemplate
+from awx.main.scheduler.kubernetes import PodManager
 
 
 class Metadata(metadata.SimpleMetadata):
@@ -157,9 +158,16 @@ class Metadata(metadata.SimpleMetadata):
             isinstance(field, JSONField) or
             isinstance(model_field, JSONField) or
             isinstance(field, DRFJSONField) or
-            isinstance(getattr(field, 'model_field', None), JSONField)
+            isinstance(getattr(field, 'model_field', None), JSONField) or
+            field.field_name == 'credential_passwords'
         ):
             field_info['type'] = 'json'
+        elif (
+            isinstance(field, ManyRelatedField) and
+            field.field_name == 'credentials'
+            # launch-time credentials
+        ):
+            field_info['type'] = 'list_of_ids'
         elif isinstance(model_field, BooleanField):
             field_info['type'] = 'boolean'
 
@@ -199,6 +207,9 @@ class Metadata(metadata.SimpleMetadata):
             for field, meta in list(actions[method].items()):
                 if not isinstance(meta, dict):
                     continue
+
+                if field == "pod_spec_override":
+                    meta['default'] = PodManager().pod_definition
 
                 # Add type choices if available from the serializer.
                 if field == 'type' and hasattr(serializer, 'get_type_choices'):

@@ -50,12 +50,20 @@ describe('<JobTemplateDetail />', () => {
     jest.clearAllMocks();
   });
 
-  test('initially renders succesfully', () => {
+  test('Can load with missing summary fields', async () => {
+    const mockTemplate = { ...template };
+    mockTemplate.summary_fields = { user_capabilities: {} };
+
     const wrapper = mountWithContexts(
-      <JobTemplateDetail template={template} />
+      <JobTemplateDetail template={mockTemplate} />
     );
-    expect(wrapper).toMatchSnapshot();
+    await waitForElement(
+      wrapper,
+      'Detail[label="Description"]',
+      el => el.length === 1
+    );
   });
+
   test('When component mounts API is called to get instance groups', async done => {
     const wrapper = mountWithContexts(
       <JobTemplateDetail template={template} />
@@ -74,6 +82,7 @@ describe('<JobTemplateDetail />', () => {
     expect(JobTemplatesAPI.readInstanceGroups).toHaveBeenCalledTimes(1);
     done();
   });
+
   test('Edit button is absent when user does not have edit privilege', async done => {
     const regularUser = {
       forks: 1,

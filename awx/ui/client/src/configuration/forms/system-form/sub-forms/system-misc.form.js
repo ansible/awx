@@ -15,9 +15,6 @@ export default ['i18n', function(i18n) {
                 type: 'text',
                 reset: 'TOWER_URL_BASE',
             },
-            TOWER_ADMIN_ALERTS: {
-                type: 'toggleSwitch',
-            },
             ORG_ADMINS_CAN_SEE_ALL_USERS: {
                 type: 'toggleSwitch',
             },
@@ -46,6 +43,10 @@ export default ['i18n', function(i18n) {
             ACCESS_TOKEN_EXPIRE_SECONDS: {
                 type: 'text',
                 reset: 'ACCESS_TOKEN_EXPIRE_SECONDS'
+            },
+            REFRESH_TOKEN_EXPIRE_SECONDS: {
+                type: 'text',
+                reset: 'REFRESH_TOKEN_EXPIRE_SECONDS'
             },
             AUTHORIZATION_CODE_EXPIRE_SECONDS: {
                 type: 'text',

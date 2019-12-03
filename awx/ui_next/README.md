@@ -27,3 +27,16 @@ To run a single test (in this case the login page test):
 * `npm test -- src/screens/Login/Login.test.jsx`
 
 **note:** Once the test watcher is up and running you can hit `a` to run all the tests
+
+
+## CI Container
+
+To run:
+
+```shell
+cd awx/awx/ui_next
+docker build -t awx-ui-next .
+docker run --name tools_ui_next_1 --network tools_default --link 'tools_awx_1:awx' -e TARGET_HOST=awx -p '3001:3001' --rm -v $(pwd)/src:/ui_next/src awx-ui-next
+```
+
+**note:** This is for CI, test systems, zuul, etc. For local development, see [usage](https://github.com/ansible/awx/blob/devel/awx/ui_next/README.md#usage) 

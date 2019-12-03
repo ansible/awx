@@ -10,12 +10,12 @@ export default [
     'Wait', 'Empty', 'ToJSON', 'initSurvey', '$state', 'CreateSelect2',
     'ParseVariableString', 'TemplatesService', 'Rest', 'ToggleNotification',
     'OrgAdminLookup', 'availableLabels', 'selectedLabels', 'workflowJobTemplateData', 'i18n',
-    'workflowLaunch', '$transitions', 'WorkflowJobTemplateModel', 'Inventory', 'isNotificationAdmin',
+    'workflowLaunch', '$transitions', 'WorkflowJobTemplateModel', 'Inventory', 'isNotificationAdmin', 'webhookKey', '$compile', '$location', 'GetChoices',
     function($scope, $stateParams, WorkflowForm, GenerateForm, Alert,
         ProcessErrors, GetBasePath, $q, ParseTypeChange, Wait, Empty,
         ToJSON, SurveyControllerInit, $state, CreateSelect2, ParseVariableString,
         TemplatesService, Rest, ToggleNotification, OrgAdminLookup, availableLabels, selectedLabels, workflowJobTemplateData, i18n,
-        workflowLaunch, $transitions, WorkflowJobTemplate, Inventory, isNotificationAdmin
+        workflowLaunch, $transitions, WorkflowJobTemplate, Inventory, isNotificationAdmin, webhookKey, $compile, $location, GetChoices
     ) {
 
         // To toggle notifications a user needs to have a read role on the WFJT
@@ -61,6 +61,179 @@ export default [
         if (Inventory){
             $scope.inventory = Inventory.id;
             $scope.inventory_name = Inventory.name;
+        }
+
+        $scope.webhook_service_options = null;
+        $scope.webhook_service = workflowJobTemplateData.webhook_service;
+        $scope.webhook_url = '';
+        $scope.webhook_url_help = i18n._('Webhook services can launch jobs with this job template by making a POST request to this URL.');
+        $scope.webhook_key_help = i18n._('Webhook services can use this as a shared secret.');
+        $scope.currentlySavedWebhookKey = webhookKey;
+        $scope.webhook_key = webhookKey;
+
+        // populate webhook service choices
+        GetChoices({
+            scope: $scope,
+            url: GetBasePath('workflow_job_templates'),
+            field: 'webhook_service',
+            variable: 'webhook_service_options',
+        });
+
+        // set initial val for webhook checkbox
+        if (workflowJobTemplateData.webhook_service) {
+            $scope.enable_webhook = true;
+        } else {
+            $scope.enable_webhook = false;
+        }
+
+        // set domain / base url
+        $scope.baseURL = $location.protocol() + '://' + $location.host() + (($location.port()) ? ':' + $location.port() : '');
+
+        //
+        // webhook credential - all handlers, dynamic state, etc. live here
+        //
+
+        $scope.webhookCredential = {
+            id: _.get(workflowJobTemplateData, ['summary_fields', 'webhook_credential', 'id']),
+            name: _.get(workflowJobTemplateData, ['summary_fields', 'webhook_credential', 'name']),
+            isModalOpen: false,
+            isModalReady: false,
+            modalSelectedId: null,
+            modalSelectedName: null,
+            modalBaseParams: {
+                order_by: 'name',
+                page_size: 5,
+                credential_type__namespace: `${workflowJobTemplateData.webhook_service}_token`,
+            },
+            modalTitle: i18n._('Select Webhook Credential'),
+        };
+
+        $scope.handleWebhookCredentialLookupClick = () => {
+            $scope.webhookCredential.modalSelectedId = $scope.webhookCredential.id;
+            $scope.webhookCredential.isModalOpen = true;
+        };
+
+        $scope.handleWebhookCredentialTagDelete = () => {
+            $scope.webhookCredential.id = null;
+            $scope.webhookCredential.name = null;
+        };
+
+        $scope.handleWebhookCredentialModalClose = () => {
+            $scope.webhookCredential.isModalOpen = false;
+            $scope.webhookCredential.isModalReady = false;
+        };
+
+        $scope.handleWebhookCredentialModalReady = () => {
+            $scope.webhookCredential.isModalReady = true;
+        };
+
+        $scope.handleWebhookCredentialModalItemSelect = (item) => {
+            $scope.webhookCredential.modalSelectedId = item.id;
+            $scope.webhookCredential.modalSelectedName = item.name;
+        };
+
+        $scope.handleWebhookCredentialModalCancel = () => {
+            $scope.webhookCredential.isModalOpen = false;
+            $scope.webhookCredential.isModalReady = false;
+            $scope.webhookCredential.modalSelectedId = null;
+            $scope.webhookCredential.modalSelectedName = null;
+        };
+
+        $scope.handleWebhookCredentialSelect = () => {
+            $scope.webhookCredential.isModalOpen = false;
+            $scope.webhookCredential.isModalReady = false;
+            $scope.webhookCredential.id = $scope.webhookCredential.modalSelectedId;
+            $scope.webhookCredential.name = $scope.webhookCredential.modalSelectedName;
+            $scope.webhookCredential.modalSelectedId = null;
+            $scope.webhookCredential.modalSelectedName = null;
+        };
+
+        $scope.handleWebhookKeyButtonClick = () => {
+            Rest.setUrl(workflowJobTemplateData.related.webhook_key);
+            Wait('start');
+            Rest.post({})
+                .then(({ data }) => {
+                    $scope.currentlySavedWebhookKey = data.webhook_key;
+                    $scope.webhook_key = data.webhook_key;
+                })
+                .catch(({ data }) => {
+                    const errorMsg = `Failed to generate new webhook key. POST returned status: ${status}`;
+                    ProcessErrors($scope, data, status, form, { hdr: 'Error!', msg: errorMsg });
+                })
+                .finally(() => {
+                    Wait('stop');
+                });
+        };
+
+        $('#content-container').append($compile(`
+            <at-dialog
+                title="webhookCredential.modalTitle"
+                on-close="handleWebhookCredentialModalClose"
+                ng-if="webhookCredential.isModalOpen"
+                ng-show="webhookCredential.isModalOpen && webhookCredential.isModalReady"
+            >
+                <at-lookup-list
+                    ng-show="webhookCredential.isModalOpen && webhookCredential.isModalReady"
+                    resource-name="credential"
+                    base-params="webhookCredential.modalBaseParams"
+                    selected-id="webhookCredential.modalSelectedId"
+                    on-ready="handleWebhookCredentialModalReady"
+                    on-item-select="handleWebhookCredentialModalItemSelect"
+                />
+                <at-action-group col="12" pos="right">
+                    <at-action-button
+                        variant="tertiary"
+                        ng-click="handleWebhookCredentialModalCancel()"
+                    >
+                        ${i18n._('CANCEL')}
+                    </at-action-button>
+                    <at-action-button
+                        variant="primary"
+                        ng-click="handleWebhookCredentialSelect()"
+                    >
+                        ${i18n._('SELECT')}
+                    </at-action-button>
+                </at-action-group>
+            </at-dialog>`)($scope));
+
+        $scope.$watch('webhook_service', (newValue, oldValue) => {
+            const newServiceValue = newValue && typeof newValue === 'object' ? newValue.value : newValue;
+            const oldServiceValue = oldValue && typeof oldValue === 'object' ? oldValue.value : oldValue;
+            if (newServiceValue) {
+                $scope.webhook_url = `${$scope.baseURL}${workflowJobTemplateData.url}${newServiceValue}/`;
+                $scope.enable_webhook = true;
+            } else {
+                $scope.webhook_url = '';
+                $scope.webhook_key = '';
+            }
+            if (newServiceValue !== oldServiceValue || newServiceValue === newValue) {
+                $scope.webhook_service = { value: newServiceValue };
+                sync_webhook_service_select2();
+                $scope.webhookCredential.modalBaseParams.credential_type__namespace = newServiceValue ?
+                    `${newServiceValue}_token` : null;
+                if (newServiceValue !== newValue || newValue === null) {
+                    $scope.webhookCredential.id = null;
+                    $scope.webhookCredential.name = null;
+                }
+                if (newServiceValue !== newValue) {
+                    if (newServiceValue === workflowJobTemplateData.webhook_service) {
+                        $scope.webhook_key = $scope.currentlySavedWebhookKey;
+                    } else {
+                        $scope.webhook_key = i18n._('A NEW WEBHOOK KEY WILL BE GENERATED ON SAVE');
+                    }
+                }
+            }
+        });
+
+        function sync_webhook_service_select2() {
+            CreateSelect2({
+                element:'#webhook-service-select',
+                addNew: false,
+                multiple: false,
+                scope: $scope,
+                options: 'webhook_service_options',
+                model: 'webhook_service'
+            });
         }
 
         $scope.openWorkflowMaker = function() {
@@ -123,6 +296,25 @@ export default [
                 .filter("[data-select2-tag=true]")
                 .filter("[data-label-is-present=true]")
                 .map((i, val) => ({name: $(val).text()}));
+
+
+                delete data.webhook_url;
+                delete data.webhook_key;
+                delete data.enable_webhook;
+                data.webhook_credential = $scope.webhookCredential.id;
+
+                if (!data.webhook_service) {
+                    data.webhook_credential = null;
+                }
+
+                if (!$scope.enable_webhook) {
+                    data.webhook_service = '';
+                    data.webhook_credential = null;
+                }
+
+                if (data.webhook_service && typeof data.webhook_service === 'object') {
+                    data.webhook_service = data.webhook_service.value;
+                }
 
                 TemplatesService.updateWorkflowJobTemplate({
                     id: id,
@@ -341,9 +533,24 @@ export default [
         }
 
         if(workflowJobTemplateData.inventory) {
-            OrgAdminLookup.checkForRoleLevelAdminAccess(workflowJobTemplateData.inventory, 'workflow_admin_role')
-            .then(function(canEditInventory){
-                $scope.canEditInventory = canEditInventory;
+            let params = {
+              role_level: 'use_role',
+              id: workflowJobTemplateData.inventory
+            };
+            Rest.setUrl(GetBasePath('inventory'));
+            Rest.get({ params: params })
+              .then(({ data }) => {
+                if (data.count && data.count > 0) {
+                  $scope.canEditInventory = true;
+                } else {
+                  $scope.canEditInventory = false;
+                }
+              })
+              .catch(({ data, status }) => {
+                ProcessErrors(null, data, status, null, {
+                  hdr: 'Error!',
+                  msg: 'Failed to get inventory data based on role_level. Return status: ' + status
+              });
             });
         }
         else {

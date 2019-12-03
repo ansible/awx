@@ -250,8 +250,7 @@ describe('HostEventModal', () => {
     const wrapper = mountWithContexts(
       <HostEventModal hostEvent={hostEvent} onClose={onClose} isOpen />
     );
-    const closeButton = wrapper.find('ModalBoxFooter Button');
-    closeButton.simulate('click');
+    wrapper.find('button[aria-label="Close"]').simulate('click');
     expect(onClose).toBeCalled();
   });
 

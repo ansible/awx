@@ -96,6 +96,8 @@ export default [
                     // OAUTH2_PROVIDER key
                     data.ACCESS_TOKEN_EXPIRE_SECONDS = data
                         .OAUTH2_PROVIDER.ACCESS_TOKEN_EXPIRE_SECONDS;
+                    data.REFRESH_TOKEN_EXPIRE_SECONDS = data
+                        .OAUTH2_PROVIDER.REFRESH_TOKEN_EXPIRE_SECONDS;
                     data.AUTHORIZATION_CODE_EXPIRE_SECONDS = data
                         .OAUTH2_PROVIDER.AUTHORIZATION_CODE_EXPIRE_SECONDS;
                     var currentKeys = _.keys(data);
@@ -225,11 +227,12 @@ export default [
         $scope.resetValue = function(key) {
             Wait('start');
             var payload = {};
-            if (key === 'ACCESS_TOKEN_EXPIRE_SECONDS' || key === 'AUTHORIZATION_CODE_EXPIRE_SECONDS') {
+            if (key === 'ACCESS_TOKEN_EXPIRE_SECONDS'  || key === 'REFRESH_TOKEN_EXPIRE_SECONDS' || key === 'AUTHORIZATION_CODE_EXPIRE_SECONDS') {
                 // the reset for these two keys needs to be nested under OAUTH2_PROVIDER
                 if (payload.OAUTH2_PROVIDER === undefined) {
                     payload.OAUTH2_PROVIDER = {
                         ACCESS_TOKEN_EXPIRE_SECONDS: $scope.ACCESS_TOKEN_EXPIRE_SECONDS,
+                        REFRESH_TOKEN_EXPIRE_SECONDS: $scope.REFRESH_TOKEN_EXPIRE_SECONDS,
                         AUTHORIZATION_CODE_EXPIRE_SECONDS: $scope.AUTHORIZATION_CODE_EXPIRE_SECONDS
                     };
                 }
@@ -314,11 +317,12 @@ export default [
             var keys = _.keys(formDefs[formTracker.getCurrent()].fields);
             var payload = {};
             _.each(keys, function(key) {
-                if (key === 'ACCESS_TOKEN_EXPIRE_SECONDS' || key === 'AUTHORIZATION_CODE_EXPIRE_SECONDS') {
+                if (key === 'ACCESS_TOKEN_EXPIRE_SECONDS'  || key === 'REFRESH_TOKEN_EXPIRE_SECONDS' || key === 'AUTHORIZATION_CODE_EXPIRE_SECONDS') {
                     // These two values need to be POSTed nested under the OAUTH2_PROVIDER key
                     if (payload.OAUTH2_PROVIDER === undefined) {
                         payload.OAUTH2_PROVIDER = {
                             ACCESS_TOKEN_EXPIRE_SECONDS: $scope.ACCESS_TOKEN_EXPIRE_SECONDS,
+                            REFRESH_TOKEN_EXPIRE_SECONDS: $scope.REFRESH_TOKEN_EXPIRE_SECONDS,
                             AUTHORIZATION_CODE_EXPIRE_SECONDS: $scope.AUTHORIZATION_CODE_EXPIRE_SECONDS
                         };
                     }
@@ -539,11 +543,12 @@ export default [
             var payload = {};
             clearApiErrors();
             _.each(keys, function(key) {
-                if (key === 'ACCESS_TOKEN_EXPIRE_SECONDS' || key === 'AUTHORIZATION_CODE_EXPIRE_SECONDS') {
+                if (key === 'ACCESS_TOKEN_EXPIRE_SECONDS'  || key === 'REFRESH_TOKEN_EXPIRE_SECONDS' || key === 'AUTHORIZATION_CODE_EXPIRE_SECONDS') {
                     // the reset for these two keys needs to be nested under OAUTH2_PROVIDER
                     if (payload.OAUTH2_PROVIDER === undefined) {
                         payload.OAUTH2_PROVIDER = {
                             ACCESS_TOKEN_EXPIRE_SECONDS: $scope.ACCESS_TOKEN_EXPIRE_SECONDS,
+                            REFRESH_TOKEN_EXPIRE_SECONDS: $scope.REFRESH_TOKEN_EXPIRE_SECONDS,
                             AUTHORIZATION_CODE_EXPIRE_SECONDS: $scope.AUTHORIZATION_CODE_EXPIRE_SECONDS
                         };
                     }

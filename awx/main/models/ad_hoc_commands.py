@@ -150,6 +150,14 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
     def supports_isolation(cls):
         return True
 
+    @property
+    def is_containerized(self):
+        return bool(self.instance_group and self.instance_group.is_containerized)
+
+    @property
+    def can_run_containerized(self):
+        return True
+
     def get_absolute_url(self, request=None):
         return reverse('api:ad_hoc_command_detail', kwargs={'pk': self.pk}, request=request)
 

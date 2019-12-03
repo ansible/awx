@@ -22,6 +22,13 @@ const CardBody = styled(PFCardBody)`
 
 const Expandable = styled(PFExpandable)`
   text-align: left;
+
+  & .pf-c-expandable__toggle {
+    padding-left: 10px;
+    margin-left: 5px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
 `;
 
 class ErrorDetail extends Component {

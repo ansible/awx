@@ -82,9 +82,12 @@ def test_default_cred_types():
         'cloudforms',
         'conjur',
         'gce',
+        'github_token',
+        'gitlab_token',
         'hashivault_kv',
         'hashivault_ssh',
         'insights',
+        'kubernetes_bearer_token',
         'net',
         'openstack',
         'rhv',
@@ -137,7 +140,6 @@ def test_credential_creation(organization_factory):
     [PKCS8_PRIVATE_KEY, None, True],  # unencrypted PKCS8 key, no unlock pass
     [PKCS8_PRIVATE_KEY, 'passme', False],  # unencrypted PKCS8 key, unlock pass
     [None, None, True],  # no key, no unlock pass
-    [None, 'super-secret', False],  # no key, unlock pass
     ['INVALID-KEY-DATA', None, False],  # invalid key data
     [EXAMPLE_PRIVATE_KEY.replace('=', '\u003d'), None, True],  # automatically fix JSON-encoded GCE keys
 ])

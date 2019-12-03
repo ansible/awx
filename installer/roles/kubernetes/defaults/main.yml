@@ -27,10 +27,11 @@ task_cpu_request: 1500
 rabbitmq_mem_request: 2
 rabbitmq_cpu_request: 500
 
+memcached_hostname: localhost
 memcached_mem_request: 1
 memcached_cpu_request: 500
 
-kubernetes_rabbitmq_version: "3.7.4"
+kubernetes_rabbitmq_version: "3.7.21"
 kubernetes_rabbitmq_image: "ansible/awx_rabbitmq"
 
 kubernetes_memcached_version: "latest"
@@ -45,7 +46,16 @@ kubernetes_deployment_replica_size: 1
 
 postgress_activate_wait: 60
 
+restore_backup_file: "./tower-openshift-backup-latest.tar.gz"
+
 insights_url_base: "https://example.org"
+automation_analytics_url: "https://example.org"
+insights_agent_mime: "application/example"
 
 custom_venvs_path: "/opt/custom-venvs"
 custom_venvs_python: "python2"
+
+ca_trust_bundle: "/etc/pki/tls/certs/ca-bundle.crt"
+rabbitmq_use_ssl: False
+
+container_groups_image: "ansible/ansible-runner"

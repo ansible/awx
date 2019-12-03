@@ -1,29 +1,35 @@
 # Python
-import os
-import json
 from copy import copy, deepcopy
+import json
+import logging
+import os
 
+import requests
 
 # Django
 from django.apps import apps
 from django.conf import settings
-from django.db import models
-from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User # noqa
-from django.utils.translation import ugettext_lazy as _
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
+from django.db import models
 from django.db.models.query import QuerySet
+from django.utils.crypto import get_random_string
+from django.utils.translation import ugettext_lazy as _
 
 # AWX
 from awx.main.models.base import prevent_search
 from awx.main.models.rbac import (
     Role, RoleAncestorEntry, get_roles_on_resource
 )
-from awx.main.utils import parse_yaml_or_json, get_custom_venv_choices
+from awx.main.utils import parse_yaml_or_json, get_custom_venv_choices, get_licenser
 from awx.main.utils.encryption import decrypt_value, get_encryption_key, is_encrypted
 from awx.main.utils.polymorphic import build_polymorphic_ctypes_map
 from awx.main.fields import JSONField, AskForField
 from awx.main.constants import ACTIVE_STATES
+
+
+logger = logging.getLogger('awx.main.models.mixins')
 
 
 __all__ = ['ResourceMixin', 'SurveyJobTemplateMixin', 'SurveyJobMixin',
@@ -247,7 +253,7 @@ class SurveyJobTemplateMixin(models.Model):
                 else:
                     choice_list = copy(survey_element['choices'])
                     if isinstance(choice_list, str):
-                        choice_list = choice_list.split('\n')
+                        choice_list = [choice for choice in choice_list.splitlines() if choice.strip() != '']
                     for val in data[survey_element['variable']]:
                         if val not in choice_list:
                             errors.append("Value %s for '%s' expected to be one of %s." % (val, survey_element['variable'],
@@ -255,7 +261,7 @@ class SurveyJobTemplateMixin(models.Model):
         elif survey_element['type'] == 'multiplechoice':
             choice_list = copy(survey_element['choices'])
             if isinstance(choice_list, str):
-                choice_list = choice_list.split('\n')
+                choice_list = [choice for choice in choice_list.splitlines() if choice.strip() != '']
             if survey_element['variable'] in data:
                 if data[survey_element['variable']] not in choice_list:
                     errors.append("Value %s for '%s' expected to be one of %s." % (data[survey_element['variable']],
@@ -483,3 +489,139 @@ class RelatedJobsMixin(object):
             raise RuntimeError("Programmer error. Expected _get_active_jobs() to return a QuerySet.")
 
         return [dict(id=t[0], type=mapping[t[1]]) for t in jobs.values_list('id', 'polymorphic_ctype_id')]
+
+
+class WebhookTemplateMixin(models.Model):
+    class Meta:
+        abstract = True
+
+    SERVICES = [
+        ('github', "GitHub"),
+        ('gitlab', "GitLab"),
+    ]
+
+    webhook_service = models.CharField(
+        max_length=16,
+        choices=SERVICES,
+        blank=True,
+        help_text=_('Service that webhook requests will be accepted from')
+    )
+    webhook_key = prevent_search(models.CharField(
+        max_length=64,
+        blank=True,
+        help_text=_('Shared secret that the webhook service will use to sign requests')
+    ))
+    webhook_credential = models.ForeignKey(
+        'Credential',
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name='%(class)ss',
+        help_text=_('Personal Access Token for posting back the status to the service API')
+    )
+
+    def rotate_webhook_key(self):
+        self.webhook_key = get_random_string(length=50)
+
+    def save(self, *args, **kwargs):
+        update_fields = kwargs.get('update_fields')
+
+        if not self.pk or self._values_have_edits({'webhook_service': self.webhook_service}):
+            if self.webhook_service:
+                self.rotate_webhook_key()
+            else:
+                self.webhook_key = ''
+
+            if update_fields and 'webhook_service' in update_fields:
+                update_fields.add('webhook_key')
+
+        super().save(*args, **kwargs)
+
+
+class WebhookMixin(models.Model):
+    class Meta:
+        abstract = True
+
+    SERVICES = WebhookTemplateMixin.SERVICES
+
+    webhook_service = models.CharField(
+        max_length=16,
+        choices=SERVICES,
+        blank=True,
+        help_text=_('Service that webhook requests will be accepted from')
+    )
+    webhook_credential = models.ForeignKey(
+        'Credential',
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name='%(class)ss',
+        help_text=_('Personal Access Token for posting back the status to the service API')
+    )
+    webhook_guid = models.CharField(
+        blank=True,
+        max_length=128,
+        help_text=_('Unique identifier of the event that triggered this webhook')
+    )
+
+    def update_webhook_status(self, status):
+        if not self.webhook_credential:
+            logger.debug("No credential configured to post back webhook status, skipping.")
+            return
+
+        status_api = self.extra_vars_dict.get('tower_webhook_status_api')
+        if not status_api:
+            logger.debug("Webhook event did not have a status API endpoint associated, skipping.")
+            return
+
+        service_header = {
+            'github': ('Authorization', 'token {}'),
+            'gitlab': ('PRIVATE-TOKEN', '{}'),
+        }
+        service_statuses = {
+            'github': {
+                'pending': 'pending',
+                'successful': 'success',
+                'failed': 'failure',
+                'canceled': 'failure',  # GitHub doesn't have a 'canceled' status :(
+                'error': 'error',
+            },
+            'gitlab': {
+                'pending': 'pending',
+                'running': 'running',
+                'successful': 'success',
+                'failed': 'failed',
+                'error': 'failed',  # GitLab doesn't have an 'error' status distinct from 'failed' :(
+                'canceled': 'canceled',
+            },
+        }
+
+        statuses = service_statuses[self.webhook_service]
+        if status not in statuses:
+            logger.debug("Skipping webhook job status change: '{}'".format(status))
+            return
+        try:
+            license_type = get_licenser().validate().get('license_type')
+            data = {
+                'state': statuses[status],
+                'context': 'ansible/awx' if license_type == 'open' else 'ansible/tower',
+                'target_url': self.get_ui_url(),
+            }
+            k, v = service_header[self.webhook_service]
+            headers = {
+                k: v.format(self.webhook_credential.get_input('token')),
+                'Content-Type': 'application/json'
+            }
+            response = requests.post(status_api, data=json.dumps(data), headers=headers, timeout=30)
+        except Exception:
+            logger.exception("Posting webhook status caused an error.")
+            return
+
+        if response.status_code < 400:
+            logger.debug("Webhook status update sent.")
+        else:
+            logger.error(
+                "Posting webhook status failed, code: {}\n"
+                "{}\n"
+                "Payload sent: {}".format(response.status_code, response.text, json.dumps(data))
+            )

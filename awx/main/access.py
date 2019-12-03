@@ -465,7 +465,7 @@ class BaseAccess(object):
                 else:
                     relationship = 'members'
                 return access_method(obj, parent_obj, relationship, skip_sub_obj_read_check=True, data={})
-        except (ParseError, ObjectDoesNotExist):
+        except (ParseError, ObjectDoesNotExist, PermissionDenied):
             return False
         return False
 
@@ -661,7 +661,7 @@ class UserAccess(BaseAccess):
         if obj.is_superuser and super_users.count() == 1:
             # cannot delete the last active superuser
             return False
-        if self.user.is_superuser:
+        if self.can_admin(obj, None, allow_orphans=True):
             return True
         return False
 
@@ -1660,26 +1660,19 @@ class JobAccess(BaseAccess):
         except JobLaunchConfig.DoesNotExist:
             config = None
 
+        if obj.job_template and (self.user not in obj.job_template.execute_role):
+            return False
+
         # Check if JT execute access (and related prompts) is sufficient
-        if obj.job_template is not None:
-            if config is None:
-                prompts_access = False
-            elif not config.has_user_prompts(obj.job_template):
-                prompts_access = True
-            elif obj.created_by_id != self.user.pk and vars_are_encrypted(config.extra_data):
-                prompts_access = False
-                if self.save_messages:
-                    self.messages['detail'] = _('Job was launched with secret prompts provided by another user.')
-            else:
-                prompts_access = (
-                    JobLaunchConfigAccess(self.user).can_add({'reference_obj': config}) and
-                    not config.has_unprompted(obj.job_template)
-                )
-            jt_access = self.user in obj.job_template.execute_role
-            if prompts_access and jt_access:
+        if config and obj.job_template:
+            if not config.has_user_prompts(obj.job_template):
                 return True
-            elif not jt_access:
-                return False
+            elif obj.created_by_id != self.user.pk and vars_are_encrypted(config.extra_data):
+                # never allowed, not even for org admins
+                raise PermissionDenied(_('Job was launched with secret prompts provided by another user.'))
+            elif not config.has_unprompted(obj.job_template):
+                if JobLaunchConfigAccess(self.user).can_add({'reference_obj': config}):
+                    return True
 
         org_access = bool(obj.inventory) and self.user in obj.inventory.organization.inventory_admin_role
         project_access = obj.project is None or self.user in obj.project.admin_role
@@ -2098,23 +2091,20 @@ class WorkflowJobAccess(BaseAccess):
                 self.messages['detail'] = _('Workflow Job was launched with unknown prompts.')
             return False
 
+        # execute permission to WFJT is mandatory for any relaunch
+        if self.user not in template.execute_role:
+            return False
+
         # Check if access to prompts to prevent relaunch
         if config.prompts_dict():
             if obj.created_by_id != self.user.pk and vars_are_encrypted(config.extra_data):
-                if self.save_messages:
-                    self.messages['detail'] = _('Job was launched with secret prompts provided by another user.')
-                return False
+                raise PermissionDenied(_("Job was launched with secret prompts provided by another user."))
             if not JobLaunchConfigAccess(self.user).can_add({'reference_obj': config}):
-                if self.save_messages:
-                    self.messages['detail'] = _('Job was launched with prompts you lack access to.')
-                return False
+                raise PermissionDenied(_('Job was launched with prompts you lack access to.'))
             if config.has_unprompted(template):
-                if self.save_messages:
-                    self.messages['detail'] = _('Job was launched with prompts no longer accepted.')
-                return False
+                raise PermissionDenied(_('Job was launched with prompts no longer accepted.'))
 
-        # execute permission to WFJT is mandatory for any relaunch
-        return (self.user in template.execute_role)
+        return True  # passed config checks
 
     def can_recreate(self, obj):
         node_qs = obj.workflow_job_nodes.all().prefetch_related('inventory', 'credentials', 'unified_job_template')

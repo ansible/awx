@@ -15,7 +15,7 @@ from .format import (add_authentication_arguments,
 from .options import ResourceOptionsParser, UNIQUENESS_RULES
 from .resource import parse_resource, is_control_resource
 from awxkit import api, config, utils, exceptions, WSClient  # noqa
-from awxkit.cli.utils import HelpfulArgumentParser, cprint, disable_color
+from awxkit.cli.utils import HelpfulArgumentParser, cprint, disable_color, colored
 from awxkit.awx.utils import uses_sessions  # noqa
 
 
@@ -233,6 +233,12 @@ class CLI(object):
 
         # parse the action from OPTIONS
         parser = ResourceOptionsParser(self.v2, page, self.resource, subparsers)
+        if parser.deprecated:
+            description = 'This resource has been deprecated and will be removed in a future release.'
+            if not from_sphinx:
+                description = colored(description, 'yellow')
+            self.subparsers[self.resource].description = description
+
         if from_sphinx:
             # Our Sphinx plugin runs `parse_action` for *every* available
             # resource + action in the API so that it can generate usage

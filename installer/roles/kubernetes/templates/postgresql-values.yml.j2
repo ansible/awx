@@ -31,3 +31,18 @@ master:
 {{ affinity | to_nice_yaml(indent=2) | indent(width=4, indentfirst=True) }}
 {% endif %}
 {% endif %}
+{% if pg_image_registry is defined %}
+image:
+  registry: {{ pg_image_registry }}
+volumePermissions:
+  image:
+    registry: {{ pg_image_registry }}
+metrics:
+  image:
+    registry: {{ pg_image_registry }}
+{% endif %}
+{% if pg_serviceaccount is defined %}
+serviceAccount:
+  enabled: true
+  name: {{ pg_serviceaccount }}
+{% endif %}

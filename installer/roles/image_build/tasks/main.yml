@@ -124,16 +124,17 @@
   delegate_to: localhost
 
 - name: Stage launch_awx_task
-  copy:
-    src: launch_awx_task.sh
+  template:
+    src: launch_awx_task.sh.j2
     dest: "{{ docker_base_path }}/launch_awx_task.sh"
     mode: '0700'
   delegate_to: localhost
 
-- name: Stage nginx.conf
-  template:
-    src: nginx.conf.j2
-    dest: "{{ docker_base_path }}/nginx.conf"
+- name: Stage google-cloud-sdk.repo
+  copy:
+    src: google-cloud-sdk.repo
+    dest: "{{ docker_base_path }}/google-cloud-sdk.repo"
+    mode: '0700'
   delegate_to: localhost
 
 - name: Stage supervisor.conf
@@ -170,18 +171,6 @@
   copy:
     src: ../Makefile
     dest: "{{ docker_base_path }}/Makefile"
-  delegate_to: localhost
-
-- name: Stage ansible repo
-  copy:
-    src: 'ansible.repo'
-    dest: '{{ docker_base_path }}/ansible.repo'
-  delegate_to: localhost
-
-- name: Stage ansible repo key
-  copy:
-    src: 'RPM-GPG-KEY-ansible-release'
-    dest: '{{ docker_base_path }}/RPM-GPG-KEY-ansible-release'
   delegate_to: localhost
 
 - name: Build base web image

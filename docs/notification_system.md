@@ -9,7 +9,8 @@ A Notification Template is an instance of a notification type (Email, Slack, Web
 At a high level, the typical notification task flow is:
 
 * User creates a `NotificationTemplate` at `/api/v2/notification_templates/`.
-* User assigns the notification to any of the various objects that support it (all variants of Job Templates as well as organizations and projects) and at the appropriate trigger level for which they want the notification (error, success, or any). For example, a user may wish to assign a particular Notification Template to trigger when `Job Template 1` fails.
+* User assigns the notification to any of the various objects that support it (all variants of Job Templates as well as organizations and projects) and at the appropriate trigger level for which they want the notification (error, success, or start). For example, a user may wish to assign a particular Notification Template to trigger when `Job Template 1` fails.
+
 
 ## Templated notification messages
 
@@ -53,11 +54,13 @@ Notification templates assigned at certain levels will inherit notifications def
 * Inventory Updates will use notifications defined on the Organization it is in.
 * Ad-hoc commands will use notifications defined on the Organization with which that inventory is associated.
 
+
 ## Workflow
 
 When a job starts, succeeds or fails, the running, success or error handler, respectively, will pull a list of relevant notifications using the procedure defined above. It then creates a Notification Object for each one containing relevant details about the job and then **sends** it to the destination (email addresses, Slack channel(s), SMS numbers, etc.). These Notification objects are available as related resources on job types (Jobs, Inventory Updates, Project Updates), and also at `/api/v2/notifications`. You may also see what notifications have been sent by examining its related resources.
 
 Notifications can succeed or fail but that will _not_ cause its associated job to succeed or fail. The status of the notification can be viewed at its detail endpoint: `/api/v2/notifications/<n>`
+
 
 ## Testing Notifications Before Using Them
 
@@ -65,7 +68,7 @@ Once a Notification Template has been created, its configuration can be tested b
 
 # Notification Types
 
-The currently defined Notification Types are:
+The currently-defined Notification Types are:
 
 * Email
 * Slack
@@ -97,7 +100,7 @@ The following should be performed for good acceptance:
 
 Set up a local SMTP mail service. Some options are listed below:
 
-* Postfix service on galaxy: https://galaxy.ansible.com/debops/postfix/
+* Postfix service on Galaxy: https://galaxy.ansible.com/debops/postfix/
 * Mailtrap has a good free plan that should provide all of the features necessary: https://mailtrap.io/
 * Another option is to use a Docker container: `docker run --network="tools_default" -p 25:25 -e maildomain=mail.example.com -e smtp_user=user:pwd --name postfix -d catatnight/postfix`
 
@@ -214,17 +217,17 @@ There are a few modern IRC servers to choose from. [InspIRCd](http://www.inspirc
 
 ## Webhook
 
-The webhook notification type in Ansible Tower provides a simple interface for sending `POST`s to a predefined web service. Tower will `POST` to this address using `application/json` content type with the data payload containing all relevant details in json format.
+The webhook notification type in Ansible Tower provides a simple interface for sending `POST`s to a predefined web service. Tower will `POST` to this address using `application/json` content type with the data payload containing all relevant details in JSON format.
 
 The parameters are fairly straightforward:
 
 * `url`: The full URL that will be `POST`ed to
-* `headers`: Headers in json form where the keys and values are strings. For example: `{"Authentication": "988881adc9fc3655077dc2d4d757d480b5ea0e11", "MessageType": "Test"}`
+* `headers`: Headers in JSON form where the keys and values are strings. For example: `{"Authentication": "988881adc9fc3655077dc2d4d757d480b5ea0e11", "MessageType": "Test"}`
 
 ### Test Considerations
 
 * Test HTTP service and HTTPS, also specifically test HTTPS with a self signed cert.
-* Verify that the headers and payload are present, that the payload is json, and the content type is specifically `application/json`
+* Verify that the headers and payload are present, that the payload is JSON, and the content type is specifically `application/json`
 
 ### Test Service
 
@@ -240,7 +243,7 @@ Note that this won't respond correctly to the notification, so it will yield an 
 
 https://gist.github.com/matburt/73bfbf85c2443f39d272
 
-The link below shows how to define an endpoint and parse headers and json content. It doesn't show how to configure Flask for HTTPS, but is fairly straightforward:
+The link below shows how to define an endpoint and parse headers and JSON content. It doesn't show how to configure Flask for HTTPS, but is fairly straightforward:
 http://flask.pocoo.org/snippets/111/
 
 You can also link an `httpbin` service to the development environment for testing webhooks using:

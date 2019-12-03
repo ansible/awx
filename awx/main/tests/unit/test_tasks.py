@@ -130,6 +130,8 @@ def test_send_notifications_list(mock_notifications_filter, mock_job_get, mocker
     ('VMWARE_PASSWORD', 'SECRET'),
     ('API_SECRET', 'SECRET'),
     ('CALLBACK_CONNECTION', 'amqp://tower:password@localhost:5672/tower'),
+    ('ANSIBLE_GALAXY_SERVER_PRIMARY_GALAXY_PASSWORD', 'SECRET'),
+    ('ANSIBLE_GALAXY_SERVER_PRIMARY_GALAXY_TOKEN', 'SECRET'),
 ])
 def test_safe_env_filtering(key, value):
     assert build_safe_env({key: value})[key] == tasks.HIDDEN_PASSWORD
@@ -366,6 +368,7 @@ class TestGenericRun():
 
         task = tasks.RunJob()
         task.update_model = mock.Mock(return_value=job)
+        task.model.objects.get = mock.Mock(return_value=job)
         task.build_private_data_files = mock.Mock(side_effect=OSError())
 
         with mock.patch('awx.main.tasks.copy_tree'):
@@ -385,6 +388,7 @@ class TestGenericRun():
 
         task = tasks.RunJob()
         task.update_model = mock.Mock(wraps=update_model_wrapper)
+        task.model.objects.get = mock.Mock(return_value=job)
         task.build_private_data_files = mock.Mock()
 
         with mock.patch('awx.main.tasks.copy_tree'):
@@ -469,6 +473,36 @@ class TestGenericRun():
         assert '/AWX_VENV_PATH' in process_isolation_params['process_isolation_ro_paths']
         assert 2 == len(process_isolation_params['process_isolation_ro_paths'])
 
+
+    @mock.patch('os.makedirs')
+    def test_build_params_resource_profiling(self, os_makedirs):
+        job = Job(project=Project(), inventory=Inventory())
+        task = tasks.RunJob()
+        task.should_use_resource_profiling = lambda job: True
+        task.instance = job
+
+        resource_profiling_params = task.build_params_resource_profiling(task.instance, '/fake_private_data_dir')
+        assert resource_profiling_params['resource_profiling'] is True
+        assert resource_profiling_params['resource_profiling_base_cgroup'] == 'ansible-runner'
+        assert resource_profiling_params['resource_profiling_cpu_poll_interval'] == '0.25'
+        assert resource_profiling_params['resource_profiling_memory_poll_interval'] == '0.25'
+        assert resource_profiling_params['resource_profiling_pid_poll_interval'] == '0.25'
+        assert resource_profiling_params['resource_profiling_results_dir'] == '/fake_private_data_dir/artifacts/playbook_profiling'
+
+
+    @pytest.mark.parametrize("scenario, profiling_enabled", [
+                             ('global_setting', True),
+                             ('default', False)])
+    def test_should_use_resource_profiling(self, scenario, profiling_enabled, settings):
+        job = Job(project=Project(), inventory=Inventory())
+        task = tasks.RunJob()
+        task.instance = job
+
+        if scenario == 'global_setting':
+            settings.AWX_RESOURCE_PROFILING_ENABLED = True
+
+        assert task.should_use_resource_profiling(task.instance) == profiling_enabled
+
     def test_created_by_extra_vars(self):
         job = Job(created_by=User(pk=123, username='angry-spud'))
 
@@ -546,6 +580,7 @@ class TestAdhocRun(TestJobExecution):
 
         task = tasks.RunAdHocCommand()
         task.update_model = mock.Mock(wraps=adhoc_update_model_wrapper)
+        task.model.objects.get = mock.Mock(return_value=adhoc_job)
         task.build_inventory = mock.Mock()
 
         with pytest.raises(Exception):
