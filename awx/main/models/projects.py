@@ -5,6 +5,7 @@
 import datetime
 import os
 import urllib.parse as urlparse
+import logging
 
 # Django
 from django.conf import settings
@@ -15,6 +16,9 @@ from django.utils.text import slugify
 from django.core.exceptions import ValidationError
 from django.utils.timezone import now, make_aware, get_default_timezone
 
+# GitPython
+import git
+from gitdb.exc import BadName as BadGitName
 
 # AWX
 from awx.api.versioning import reverse
@@ -45,6 +49,9 @@ from awx.main.models.rbac import (
 from awx.main.fields import JSONField
 
 __all__ = ['Project', 'ProjectUpdate']
+
+
+logger = logging.getLogger('awx.main.models.project')
 
 
 class ProjectOptions(models.Model):
@@ -238,6 +245,54 @@ class ProjectOptions(models.Model):
         if not proj_path:
             return None
         return proj_path + '.lock'
+
+    def get_sync_needs(self, job_branch):
+        '''Running on some particular instance, return what tags need to be
+        ran from the playbook in order to get the source tree up-to-date
+        '''
+        # manual projects are not synced, user has responsibility for that
+        if not self.scm_type:
+            # Galaxy requirements are not supported for manual projects
+            return []
+
+        project_path = self.get_project_path(check_if_exists=False)
+        job_revision = self.scm_revision
+        sync_needs = []
+        all_sync_needs = ['update_{}'.format(self.scm_type), 'install_roles', 'install_collections']
+        if not os.path.exists(project_path):
+            logger.debug('Performing fresh clone of {} on this instance.'.format(self))
+            sync_needs = all_sync_needs
+        elif not self.scm_revision:
+            logger.debug('Revision not known for {}, will sync with remote'.format(self))
+            sync_needs = all_sync_needs
+        elif self.scm_type == 'git':
+            git_repo = git.Repo(project_path)
+            try:
+                desired_revision = self.scm_revision
+                if job_branch and job_branch != self.scm_branch:  # branch override
+                    desired_revision = job_branch  # could be commit or not, but will try as commit
+                current_revision = git_repo.head.commit.hexsha
+                if desired_revision == current_revision:
+                    job_revision = desired_revision
+                else:
+                    sync_needs = all_sync_needs
+            except (ValueError, BadGitName):
+                logger.debug('Needed commit for {} not in local source tree, will sync with remote'.format(self))
+                sync_needs = all_sync_needs
+        else:
+            sync_needs = all_sync_needs
+
+        if not sync_needs:
+            # see if we need a sync because of presence of roles
+            galaxy_req_path = os.path.join(project_path, 'roles', 'requirements.yml')
+            if os.path.exists(galaxy_req_path):
+                sync_needs.append('install_roles')
+
+            galaxy_collections_req_path = os.path.join(project_path, 'collections', 'requirements.yml')
+            if os.path.exists(galaxy_collections_req_path):
+                sync_needs.append('install_collections')
+
+        return sync_needs, job_revision
 
 
 class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEnvMixin, RelatedJobsMixin):
