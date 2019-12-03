@@ -280,14 +280,21 @@ def credentialtype_external():
         }],
         'required': ['url', 'token', 'key'],
     }
-    external_type = CredentialType(
-        kind='external',
-        managed_by_tower=True,
-        name='External Service',
-        inputs=external_type_inputs
-    )
-    external_type.save()
-    return external_type
+
+    class MockPlugin(object):
+        def backend(self, **kwargs):
+            return 'secret'
+
+    with mock.patch('awx.main.models.credential.CredentialType.plugin', new_callable=PropertyMock) as mock_plugin:
+        mock_plugin.return_value = MockPlugin()
+        external_type = CredentialType(
+            kind='external',
+            managed_by_tower=True,
+            name='External Service',
+            inputs=external_type_inputs
+        )
+        external_type.save()
+        yield external_type
 
 
 @pytest.fixture

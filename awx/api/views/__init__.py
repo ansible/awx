@@ -1385,6 +1385,7 @@ class CredentialExternalTest(SubDetailAPIView):
 
     model = models.Credential
     serializer_class = serializers.EmptySerializer
+    obj_permission_type = 'use'
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
