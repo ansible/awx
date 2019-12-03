@@ -72,6 +72,8 @@ function OptionsList({
 
 const Item = shape({
   id: oneOfType([number, string]).isRequired,
+  url: string.isRequired,
+  name: string.isRequired,
 });
 OptionsList.propTypes = {
   value: arrayOf(Item).isRequired,

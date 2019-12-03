@@ -109,6 +109,12 @@ function Lookup(props) {
 
   const { isModalOpen, selectedItems } = state;
   const canDelete = !required || (multiple && value.length > 1);
+  let items = [];
+  if (multiple) {
+    items = value;
+  } else if (value) {
+    items.push(value);
+  }
   return (
     <Fragment>
       <InputGroup onBlur={onBlur}>
@@ -122,7 +128,7 @@ function Lookup(props) {
         </SearchButton>
         <ChipHolder className="pf-c-form-control">
           <ChipGroup numChips={5}>
-            {(multiple ? value : [value]).map(item =>
+            {items.map(item =>
               renderItemChip({
                 item,
                 removeItem,

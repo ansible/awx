@@ -47,7 +47,7 @@ function ProjectLookup({
         setError(err);
       }
     })();
-  }, [history.location]);
+  }, [onChange, history.location]);
 
   return (
     <FormGroup
