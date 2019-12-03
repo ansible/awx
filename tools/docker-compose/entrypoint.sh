@@ -11,4 +11,4 @@ EOF
   rm /tmp/passwd
 fi
 
-exec $@
+exec "$@"
