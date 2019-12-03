@@ -102,10 +102,7 @@ RUN cd /usr/local/bin && \
 ADD tools/docker-compose/google-cloud-sdk.repo /etc/yum.repos.d/
 RUN dnf install -y kubectl
 
-RUN dnf -y remove *-devel \
-  gcc \
-  gcc-c++ \
-  nodejs
+RUN dnf -y remove nodejs
 
 RUN dnf -y clean all
 
