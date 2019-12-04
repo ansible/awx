@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import PropTypes, { arrayOf, shape, string, bool } from 'prop-types';
 import { DataList } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';

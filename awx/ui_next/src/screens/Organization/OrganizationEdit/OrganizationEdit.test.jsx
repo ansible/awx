@@ -7,8 +7,6 @@ import OrganizationEdit from './OrganizationEdit';
 
 jest.mock('@api');
 
-const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-
 describe('<OrganizationEdit />', () => {
   const mockData = {
     name: 'Foo',
