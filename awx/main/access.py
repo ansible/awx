@@ -907,7 +907,7 @@ class HostAccess(BaseAccess):
     model = Host
     select_related = ('created_by', 'modified_by', 'inventory',
                       'last_job__job_template', 'last_job_host_summary__job',)
-    prefetch_related = ('groups',)
+    prefetch_related = ('groups', 'inventory_sources')
 
     def filtered_queryset(self):
         return self.model.objects.filter(inventory__in=Inventory.accessible_pk_qs(self.user, 'read_role'))

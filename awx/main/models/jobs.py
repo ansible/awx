@@ -1060,7 +1060,7 @@ class JobHostSummary(CreatedModifiedModel):
     processed = models.PositiveIntegerField(default=0, editable=False)
     rescued = models.PositiveIntegerField(default=0, editable=False)
     skipped = models.PositiveIntegerField(default=0, editable=False)
-    failed = models.BooleanField(default=False, editable=False)
+    failed = models.BooleanField(default=False, editable=False, db_index=True)
 
     def __str__(self):
         host = getattr_dne(self, 'host')
@@ -1095,7 +1095,6 @@ class JobHostSummary(CreatedModifiedModel):
             update_fields.append('last_job_host_summary_id')
         if update_fields:
             self.host.save(update_fields=update_fields)
-        #self.host.update_computed_fields()
 
 
 class SystemJobOptions(BaseModel):

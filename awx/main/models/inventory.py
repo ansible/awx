@@ -4,7 +4,6 @@
 # Python
 import datetime
 import time
-import itertools
 import logging
 import re
 import copy
@@ -339,139 +338,17 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
 
         return data
 
-    def update_host_computed_fields(self):
-        '''
-        Update computed fields for all hosts in this inventory.
-        '''
-        hosts_to_update = {}
-        hosts_qs = self.hosts
-        # Define queryset of all hosts with active failures.
-        hosts_with_active_failures = hosts_qs.filter(last_job_host_summary__isnull=False, last_job_host_summary__failed=True).values_list('pk', flat=True)
-        # Find all hosts that need the has_active_failures flag set.
-        hosts_to_set = hosts_qs.filter(has_active_failures=False, pk__in=hosts_with_active_failures)
-        for host_pk in hosts_to_set.values_list('pk', flat=True):
-            host_updates = hosts_to_update.setdefault(host_pk, {})
-            host_updates['has_active_failures'] = True
-        # Find all hosts that need the has_active_failures flag cleared.
-        hosts_to_clear = hosts_qs.filter(has_active_failures=True).exclude(pk__in=hosts_with_active_failures)
-        for host_pk in hosts_to_clear.values_list('pk', flat=True):
-            host_updates = hosts_to_update.setdefault(host_pk, {})
-            host_updates['has_active_failures'] = False
-        # Define queryset of all hosts with cloud inventory sources.
-        hosts_with_cloud_inventory = hosts_qs.filter(inventory_sources__source__in=CLOUD_INVENTORY_SOURCES).values_list('pk', flat=True)
-        # Find all hosts that need the has_inventory_sources flag set.
-        hosts_to_set = hosts_qs.filter(has_inventory_sources=False, pk__in=hosts_with_cloud_inventory)
-        for host_pk in hosts_to_set.values_list('pk', flat=True):
-            host_updates = hosts_to_update.setdefault(host_pk, {})
-            host_updates['has_inventory_sources'] = True
-        # Find all hosts that need the has_inventory_sources flag cleared.
-        hosts_to_clear = hosts_qs.filter(has_inventory_sources=True).exclude(pk__in=hosts_with_cloud_inventory)
-        for host_pk in hosts_to_clear.values_list('pk', flat=True):
-            host_updates = hosts_to_update.setdefault(host_pk, {})
-            host_updates['has_inventory_sources'] = False
-        # Now apply updates to hosts where needed (in batches).
-        all_update_pks = list(hosts_to_update.keys())
-
-        def _chunk(items, chunk_size):
-            for i, group in itertools.groupby(enumerate(items), lambda x: x[0] // chunk_size):
-                yield (g[1] for g in group)
-
-        for update_pks in _chunk(all_update_pks, 500):
-            for host in hosts_qs.filter(pk__in=update_pks):
-                host_updates = hosts_to_update[host.pk]
-                for field, value in host_updates.items():
-                    setattr(host, field, value)
-                host.save(update_fields=host_updates.keys())
-
-    def update_group_computed_fields(self):
-        '''
-        Update computed fields for all active groups in this inventory.
-        '''
-        group_children_map = self.get_group_children_map()
-        group_hosts_map = self.get_group_hosts_map()
-        active_host_pks = set(self.hosts.values_list('pk', flat=True))
-        failed_host_pks = set(self.hosts.filter(last_job_host_summary__failed=True).values_list('pk', flat=True))
-        # active_group_pks = set(self.groups.values_list('pk', flat=True))
-        failed_group_pks = set() # Update below as we check each group.
-        groups_with_cloud_pks = set(self.groups.filter(inventory_sources__source__in=CLOUD_INVENTORY_SOURCES).values_list('pk', flat=True))
-        groups_to_update = {}
-
-        # Build list of group pks to check, starting with the groups at the
-        # deepest level within the tree.
-        root_group_pks = set(self.root_groups.values_list('pk', flat=True))
-        group_depths = {} # pk: max_depth
-
-        def update_group_depths(group_pk, current_depth=0):
-            max_depth = group_depths.get(group_pk, -1)
-            # Arbitrarily limit depth to avoid hitting Python recursion limit (which defaults to 1000).
-            if current_depth > 100:
-                return
-            if current_depth > max_depth:
-                group_depths[group_pk] = current_depth
-            for child_pk in group_children_map.get(group_pk, set()):
-                update_group_depths(child_pk, current_depth + 1)
-        for group_pk in root_group_pks:
-            update_group_depths(group_pk)
-        group_pks_to_check = [x[1] for x in sorted([(v,k) for k,v in group_depths.items()], reverse=True)]
-
-        for group_pk in group_pks_to_check:
-            # Get all children and host pks for this group.
-            parent_pks_to_check = set([group_pk])
-            parent_pks_checked = set()
-            child_pks = set()
-            host_pks = set()
-            while parent_pks_to_check:
-                for parent_pk in list(parent_pks_to_check):
-                    c_ids = group_children_map.get(parent_pk, set())
-                    child_pks.update(c_ids)
-                    parent_pks_to_check.remove(parent_pk)
-                    parent_pks_checked.add(parent_pk)
-                    parent_pks_to_check.update(c_ids - parent_pks_checked)
-                    h_ids = group_hosts_map.get(parent_pk, set())
-                    host_pks.update(h_ids)
-            # Define updates needed for this group.
-            group_updates = groups_to_update.setdefault(group_pk, {})
-            group_updates.update({
-                'total_hosts': len(active_host_pks & host_pks),
-                'has_active_failures': bool(failed_host_pks & host_pks),
-                'hosts_with_active_failures': len(failed_host_pks & host_pks),
-                'total_groups': len(child_pks),
-                'groups_with_active_failures': len(failed_group_pks & child_pks),
-                'has_inventory_sources': bool(group_pk in groups_with_cloud_pks),
-            })
-            if group_updates['has_active_failures']:
-                failed_group_pks.add(group_pk)
-
-        # Now apply updates to each group as needed (in batches).
-        all_update_pks = list(groups_to_update.keys())
-        for offset in range(0, len(all_update_pks), 500):
-            update_pks = all_update_pks[offset:(offset + 500)]
-            for group in self.groups.filter(pk__in=update_pks):
-                group_updates = groups_to_update[group.pk]
-                for field, value in list(group_updates.items()):
-                    if getattr(group, field) != value:
-                        setattr(group, field, value)
-                    else:
-                        group_updates.pop(field)
-                if group_updates:
-                    group.save(update_fields=group_updates.keys())
-
-    def update_computed_fields(self, update_groups=True, update_hosts=True):
+    def update_computed_fields(self):
         '''
         Update model fields that are computed from database relationships.
         '''
         logger.debug("Going to update inventory computed fields, pk={0}".format(self.pk))
         start_time = time.time()
-        if update_hosts:
-            self.update_host_computed_fields()
-        if update_groups:
-            self.update_group_computed_fields()
         active_hosts = self.hosts
-        failed_hosts = active_hosts.filter(has_active_failures=True)
+        failed_hosts = active_hosts.filter(last_job_host_summary__failed=True)
         active_groups = self.groups
         if self.kind == 'smart':
             active_groups = active_groups.none()
-        failed_groups = active_groups.filter(has_active_failures=True)
         if self.kind == 'smart':
             active_inventory_sources = self.inventory_sources.none()
         else:
@@ -482,7 +359,6 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
             'total_hosts': active_hosts.count(),
             'hosts_with_active_failures': failed_hosts.count(),
             'total_groups': active_groups.count(),
-            'groups_with_active_failures': failed_groups.count(),
             'has_inventory_sources': bool(active_inventory_sources.count()),
             'total_inventory_sources': active_inventory_sources.count(),
             'inventory_sources_with_failures': failed_inventory_sources.count(),
@@ -545,7 +421,7 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
         if (self.kind == 'smart' and 'host_filter' in kwargs.get('update_fields', ['host_filter']) and
                 connection.vendor != 'sqlite'):
             # Minimal update of host_count for smart inventory host filter changes
-            self.update_computed_fields(update_groups=False, update_hosts=False)
+            self.update_computed_fields()
 
     def delete(self, *args, **kwargs):
         self._update_host_smart_inventory_memeberships()
@@ -631,18 +507,6 @@ class Host(CommonModelNameNotUnique, RelatedJobsMixin):
         editable=False,
         on_delete=models.SET_NULL,
     )
-    has_active_failures  = models.BooleanField(
-        default=False,
-        editable=False,
-        help_text=_('This field is deprecated and will be removed in a future release. '
-                    'Flag indicating whether the last job failed for this host.'),
-    )
-    has_inventory_sources = models.BooleanField(
-        default=False,
-        editable=False,
-        help_text=_('This field is deprecated and will be removed in a future release. '
-                    'Flag indicating whether this host was created/updated from any external inventory sources.'),
-    )
     inventory_sources = models.ManyToManyField(
         'InventorySource',
         related_name='hosts',
@@ -673,34 +537,6 @@ class Host(CommonModelNameNotUnique, RelatedJobsMixin):
     def get_absolute_url(self, request=None):
         return reverse('api:host_detail', kwargs={'pk': self.pk}, request=request)
 
-    def update_computed_fields(self, update_inventory=True, update_groups=True):
-        '''
-        Update model fields that are computed from database relationships.
-        '''
-        has_active_failures = bool(self.last_job_host_summary and
-                                   self.last_job_host_summary.failed)
-        active_inventory_sources = self.inventory_sources.filter(source__in=CLOUD_INVENTORY_SOURCES)
-        computed_fields = {
-            'has_active_failures': has_active_failures,
-            'has_inventory_sources': bool(active_inventory_sources.count()),
-        }
-        for field, value in computed_fields.items():
-            if getattr(self, field) != value:
-                setattr(self, field, value)
-            else:
-                computed_fields.pop(field)
-        if computed_fields:
-            self.save(update_fields=computed_fields.keys())
-        # Groups and inventory may also need to be updated when host fields
-        # change.
-        # NOTE: I think this is no longer needed
-        # if update_groups:
-        #     for group in self.all_groups:
-        #         group.update_computed_fields()
-        # if update_inventory:
-        #     self.inventory.update_computed_fields(update_groups=False,
-        #                                           update_hosts=False)
-        # Rebuild summary fields cache
     variables_dict = VarsDictProperty('variables')
 
     @property
@@ -815,42 +651,6 @@ class Group(CommonModelNameNotUnique, RelatedJobsMixin):
         blank=True,
         help_text=_('Hosts associated directly with this group.'),
     )
-    total_hosts = models.PositiveIntegerField(
-        default=0,
-        editable=False,
-        help_text=_('This field is deprecated and will be removed in a future release. '
-                    'Total number of hosts directly or indirectly in this group.'),
-    )
-    has_active_failures = models.BooleanField(
-        default=False,
-        editable=False,
-        help_text=_('This field is deprecated and will be removed in a future release. '
-                    'Flag indicating whether this group has any hosts with active failures.'),
-    )
-    hosts_with_active_failures = models.PositiveIntegerField(
-        default=0,
-        editable=False,
-        help_text=_('This field is deprecated and will be removed in a future release. '
-                    'Number of hosts in this group with active failures.'),
-    )
-    total_groups = models.PositiveIntegerField(
-        default=0,
-        editable=False,
-        help_text=_('This field is deprecated and will be removed in a future release. '
-                    'Total number of child groups contained within this group.'),
-    )
-    groups_with_active_failures = models.PositiveIntegerField(
-        default=0,
-        editable=False,
-        help_text=_('This field is deprecated and will be removed in a future release. '
-                    'Number of child groups within this group that have active failures.'),
-    )
-    has_inventory_sources = models.BooleanField(
-        default=False,
-        editable=False,
-        help_text=_('This field is deprecated and will be removed in a future release. '
-                    'Flag indicating whether this group was created/updated from any external inventory sources.'),
-    )
     inventory_sources = models.ManyToManyField(
         'InventorySource',
         related_name='groups',
@@ -924,32 +724,6 @@ class Group(CommonModelNameNotUnique, RelatedJobsMixin):
             with disable_activity_stream():
                 mark_actual()
             activity_stream_delete(None, self)
-
-    def update_computed_fields(self):
-        '''
-        Update model fields that are computed from database relationships.
-        '''
-        active_hosts = self.all_hosts
-        failed_hosts = active_hosts.filter(last_job_host_summary__failed=True)
-        active_groups = self.all_children
-        # FIXME: May not be accurate unless we always update groups depth-first.
-        failed_groups = active_groups.filter(has_active_failures=True)
-        active_inventory_sources = self.inventory_sources.filter(source__in=CLOUD_INVENTORY_SOURCES)
-        computed_fields = {
-            'total_hosts': active_hosts.count(),
-            'has_active_failures': bool(failed_hosts.count()),
-            'hosts_with_active_failures': failed_hosts.count(),
-            'total_groups': active_groups.count(),
-            'groups_with_active_failures': failed_groups.count(),
-            'has_inventory_sources': bool(active_inventory_sources.count()),
-        }
-        for field, value in computed_fields.items():
-            if getattr(self, field) != value:
-                setattr(self, field, value)
-            else:
-                computed_fields.pop(field)
-        if computed_fields:
-            self.save(update_fields=computed_fields.keys())
 
     variables_dict = VarsDictProperty('variables')
 
@@ -1556,7 +1330,7 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, CustomVirtualE
                 self.update()
         if not getattr(_inventory_updates, 'is_updating', False):
             if self.inventory is not None:
-                self.inventory.update_computed_fields(update_groups=False, update_hosts=False)
+                self.inventory.update_computed_fields()
 
     def _get_current_status(self):
         if self.source:
