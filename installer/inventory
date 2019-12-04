@@ -146,7 +146,7 @@ secret_key=awxsecret
 # it manages from the docker host, you can set this to turn it into a volume for the container.
 #project_data_dir=/var/lib/awx/projects
 
-# AWX custom virtual environment folder. Only usable for local isntall.
+# AWX custom virtual environment folder. Only usable for local install.
 #custom_venv_dir=/opt/my-envs/
 
 # CA Trust directory. If you need to provide custom CA certificates, supplying
