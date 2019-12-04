@@ -1,5 +1,5 @@
 import React from 'react';
-
+import { act } from 'react-dom/test-utils';
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import { sleep } from '@testUtils/testUtils';
 import { OrganizationsAPI } from '@api';
@@ -30,18 +30,20 @@ describe('<OrganizationForm />', () => {
     jest.clearAllMocks();
   });
 
-  test('should request related instance groups from api', () => {
-    mountWithContexts(
-      <OrganizationForm
-        organization={mockData}
-        handleSubmit={jest.fn()}
-        handleCancel={jest.fn()}
-        me={meConfig.me}
-      />,
-      {
-        context: { network },
-      }
-    );
+  test('should request related instance groups from api', async () => {
+    await act(async () => {
+      mountWithContexts(
+        <OrganizationForm
+          organization={mockData}
+          handleSubmit={jest.fn()}
+          handleCancel={jest.fn()}
+          me={meConfig.me}
+        />,
+        {
+          context: { network },
+        }
+      );
+    });
 
     expect(OrganizationsAPI.readInstanceGroups).toHaveBeenCalledTimes(1);
   });
@@ -53,34 +55,39 @@ describe('<OrganizationForm />', () => {
         results: mockInstanceGroups,
       },
     });
-    const wrapper = mountWithContexts(
-      <OrganizationForm
-        organization={mockData}
-        handleSubmit={jest.fn()}
-        handleCancel={jest.fn()}
-        me={meConfig.me}
-      />,
-      {
-        context: { network },
-      }
-    );
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <OrganizationForm
+          organization={mockData}
+          handleSubmit={jest.fn()}
+          handleCancel={jest.fn()}
+          me={meConfig.me}
+        />,
+        {
+          context: { network },
+        }
+      );
+    });
 
-    await sleep(0);
     expect(OrganizationsAPI.readInstanceGroups).toHaveBeenCalled();
     expect(wrapper.find('OrganizationForm').state().instanceGroups).toEqual(
       mockInstanceGroups
     );
   });
 
-  test('changing instance group successfully sets instanceGroups state', () => {
-    const wrapper = mountWithContexts(
-      <OrganizationForm
-        organization={mockData}
-        handleSubmit={jest.fn()}
-        handleCancel={jest.fn()}
-        me={meConfig.me}
-      />
-    );
+  test('changing instance group successfully sets instanceGroups state', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <OrganizationForm
+          organization={mockData}
+          handleSubmit={jest.fn()}
+          handleCancel={jest.fn()}
+          me={meConfig.me}
+        />
+      );
+    });
 
     const lookup = wrapper.find('InstanceGroupsLookup');
     expect(lookup.length).toBe(1);
@@ -102,15 +109,18 @@ describe('<OrganizationForm />', () => {
     ]);
   });
 
-  test('changing inputs should update form values', () => {
-    const wrapper = mountWithContexts(
-      <OrganizationForm
-        organization={mockData}
-        handleSubmit={jest.fn()}
-        handleCancel={jest.fn()}
-        me={meConfig.me}
-      />
-    );
+  test('changing inputs should update form values', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <OrganizationForm
+          organization={mockData}
+          handleSubmit={jest.fn()}
+          handleCancel={jest.fn()}
+          me={meConfig.me}
+        />
+      );
+    });
 
     const form = wrapper.find('Formik');
     wrapper.find('input#org-name').simulate('change', {
@@ -127,21 +137,24 @@ describe('<OrganizationForm />', () => {
     expect(form.state('values').max_hosts).toEqual('134');
   });
 
-  test('AnsibleSelect component renders if there are virtual environments', () => {
+  test('AnsibleSelect component renders if there are virtual environments', async () => {
     const config = {
       custom_virtualenvs: ['foo', 'bar'],
     };
-    const wrapper = mountWithContexts(
-      <OrganizationForm
-        organization={mockData}
-        handleSubmit={jest.fn()}
-        handleCancel={jest.fn()}
-        me={meConfig.me}
-      />,
-      {
-        context: { config },
-      }
-    );
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <OrganizationForm
+          organization={mockData}
+          handleSubmit={jest.fn()}
+          handleCancel={jest.fn()}
+          me={meConfig.me}
+        />,
+        {
+          context: { config },
+        }
+      );
+    });
     expect(wrapper.find('FormSelect')).toHaveLength(1);
     expect(wrapper.find('FormSelectOption')).toHaveLength(3);
     expect(
@@ -154,14 +167,17 @@ describe('<OrganizationForm />', () => {
 
   test('calls handleSubmit when form submitted', async () => {
     const handleSubmit = jest.fn();
-    const wrapper = mountWithContexts(
-      <OrganizationForm
-        organization={mockData}
-        handleSubmit={handleSubmit}
-        handleCancel={jest.fn()}
-        me={meConfig.me}
-      />
-    );
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <OrganizationForm
+          organization={mockData}
+          handleSubmit={handleSubmit}
+          handleCancel={jest.fn()}
+          me={meConfig.me}
+        />
+      );
+    });
     expect(handleSubmit).not.toHaveBeenCalled();
     wrapper.find('button[aria-label="Save"]').simulate('click');
     await sleep(1);
@@ -194,18 +210,20 @@ describe('<OrganizationForm />', () => {
     OrganizationsAPI.update.mockResolvedValue(1, mockDataForm);
     OrganizationsAPI.associateInstanceGroup.mockResolvedValue('done');
     OrganizationsAPI.disassociateInstanceGroup.mockResolvedValue('done');
-    const wrapper = mountWithContexts(
-      <OrganizationForm
-        organization={mockData}
-        handleSubmit={handleSubmit}
-        handleCancel={jest.fn()}
-        me={meConfig.me}
-      />,
-      {
-        context: { network },
-      }
-    );
-    await sleep(0);
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <OrganizationForm
+          organization={mockData}
+          handleSubmit={handleSubmit}
+          handleCancel={jest.fn()}
+          me={meConfig.me}
+        />,
+        {
+          context: { network },
+        }
+      );
+    });
     wrapper.find('InstanceGroupsLookup').prop('onChange')(
       [{ name: 'One', id: 1 }, { name: 'Three', id: 3 }],
       'instanceGroups'
@@ -219,15 +237,17 @@ describe('<OrganizationForm />', () => {
   test('handleSubmit is called with max_hosts value if it is in range', async () => {
     const handleSubmit = jest.fn();
 
-    // normal mount
-    const wrapper = mountWithContexts(
-      <OrganizationForm
-        organization={mockData}
-        handleSubmit={handleSubmit}
-        handleCancel={jest.fn()}
-        me={meConfig.me}
-      />
-    );
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <OrganizationForm
+          organization={mockData}
+          handleSubmit={handleSubmit}
+          handleCancel={jest.fn()}
+          me={meConfig.me}
+        />
+      );
+    });
     wrapper.find('button[aria-label="Save"]').simulate('click');
     await sleep(0);
     expect(handleSubmit).toHaveBeenCalledWith(
@@ -245,32 +265,38 @@ describe('<OrganizationForm />', () => {
   test('handleSubmit does not get called if max_hosts value is out of range', async () => {
     const handleSubmit = jest.fn();
 
-    // not mount with Negative value
+    // mount with negative value
+    let wrapper1;
     const mockDataNegative = JSON.parse(JSON.stringify(mockData));
     mockDataNegative.max_hosts = -5;
-    const wrapper1 = mountWithContexts(
-      <OrganizationForm
-        organization={mockDataNegative}
-        handleSubmit={handleSubmit}
-        handleCancel={jest.fn()}
-        me={meConfig.me}
-      />
-    );
+    await act(async () => {
+      wrapper1 = mountWithContexts(
+        <OrganizationForm
+          organization={mockDataNegative}
+          handleSubmit={handleSubmit}
+          handleCancel={jest.fn()}
+          me={meConfig.me}
+        />
+      );
+    });
     wrapper1.find('button[aria-label="Save"]').simulate('click');
     await sleep(0);
     expect(handleSubmit).not.toHaveBeenCalled();
 
-    // not mount with Out of Range value
+    // mount with out of range value
+    let wrapper2;
     const mockDataOoR = JSON.parse(JSON.stringify(mockData));
     mockDataOoR.max_hosts = 999999999999;
-    const wrapper2 = mountWithContexts(
-      <OrganizationForm
-        organization={mockDataOoR}
-        handleSubmit={handleSubmit}
-        handleCancel={jest.fn()}
-        me={meConfig.me}
-      />
-    );
+    await act(async () => {
+      wrapper2 = mountWithContexts(
+        <OrganizationForm
+          organization={mockDataOoR}
+          handleSubmit={handleSubmit}
+          handleCancel={jest.fn()}
+          me={meConfig.me}
+        />
+      );
+    });
     wrapper2.find('button[aria-label="Save"]').simulate('click');
     await sleep(0);
     expect(handleSubmit).not.toHaveBeenCalled();
@@ -282,14 +308,17 @@ describe('<OrganizationForm />', () => {
     // mount with String value (default to zero)
     const mockDataString = JSON.parse(JSON.stringify(mockData));
     mockDataString.max_hosts = 'Bee';
-    const wrapper = mountWithContexts(
-      <OrganizationForm
-        organization={mockDataString}
-        handleSubmit={handleSubmit}
-        handleCancel={jest.fn()}
-        me={meConfig.me}
-      />
-    );
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <OrganizationForm
+          organization={mockDataString}
+          handleSubmit={handleSubmit}
+          handleCancel={jest.fn()}
+          me={meConfig.me}
+        />
+      );
+    });
     wrapper.find('button[aria-label="Save"]').simulate('click');
     await sleep(0);
     expect(handleSubmit).toHaveBeenCalledWith(
@@ -304,17 +333,20 @@ describe('<OrganizationForm />', () => {
     );
   });
 
-  test('calls "handleCancel" when Cancel button is clicked', () => {
+  test('calls "handleCancel" when Cancel button is clicked', async () => {
     const handleCancel = jest.fn();
 
-    const wrapper = mountWithContexts(
-      <OrganizationForm
-        organization={mockData}
-        handleSubmit={jest.fn()}
-        handleCancel={handleCancel}
-        me={meConfig.me}
-      />
-    );
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <OrganizationForm
+          organization={mockData}
+          handleSubmit={jest.fn()}
+          handleCancel={handleCancel}
+          me={meConfig.me}
+        />
+      );
+    });
     expect(handleCancel).not.toHaveBeenCalled();
     wrapper.find('button[aria-label="Cancel"]').prop('onClick')();
     expect(handleCancel).toBeCalled();

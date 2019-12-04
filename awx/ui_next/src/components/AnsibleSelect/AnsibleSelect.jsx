@@ -25,7 +25,7 @@ class AnsibleSelect extends React.Component {
   }
 
   render() {
-    const { id, data, i18n, isValid, onBlur, value } = this.props;
+    const { id, data, i18n, isValid, onBlur, value, className } = this.props;
 
     return (
       <FormSelect
@@ -35,6 +35,7 @@ class AnsibleSelect extends React.Component {
         onBlur={onBlur}
         aria-label={i18n._(t`Select Input`)}
         isValid={isValid}
+        className={className}
       >
         {data.map(option => (
           <FormSelectOption
@@ -60,6 +61,7 @@ AnsibleSelect.defaultProps = {
   data: [],
   isValid: true,
   onBlur: () => {},
+  className: '',
 };
 
 AnsibleSelect.propTypes = {
@@ -69,6 +71,7 @@ AnsibleSelect.propTypes = {
   onBlur: func,
   onChange: func.isRequired,
   value: oneOfType([string, number]).isRequired,
+  className: string,
 };
 
 export { AnsibleSelect as _AnsibleSelect };
