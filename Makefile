@@ -116,6 +116,7 @@ clean-api:
 	find . -type d -name "__pycache__" -delete
 	rm -f awx/awx_test.sqlite3*
 	rm -rf requirements/vendor
+	rm -rf awx/projects
 
 clean-awxkit:
 	rm -rf awxkit/*.egg-info awxkit/.tox
@@ -618,28 +619,34 @@ docker-auth:
 		echo "$(IMAGE_REPOSITORY_AUTH)" | docker login -u oauth2accesstoken --password-stdin $(IMAGE_REPOSITORY_BASE); \
 	fi;
 
+# This directory is bind-mounted inside of the development container and
+# needs to be pre-created for permissions to be set correctly. Otherwise,
+# Docker will create this directory as root.
+awx/projects:
+	@mkdir -p $@
+
 # Docker isolated rampart
-docker-compose-isolated:
+docker-compose-isolated: awx/projects
 	CURRENT_UID=$(shell id -u) TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose.yml -f tools/docker-isolated-override.yml up
 
 # Docker Compose Development environment
-docker-compose: docker-auth
+docker-compose: docker-auth awx/projects
 	CURRENT_UID=$(shell id -u) OS="$(shell docker info | grep 'Operating System')" TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose.yml up --no-recreate awx
 
-docker-compose-cluster: docker-auth
+docker-compose-cluster: docker-auth awx/projects
 	CURRENT_UID=$(shell id -u) TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose-cluster.yml up
 
-docker-compose-credential-plugins: docker-auth
+docker-compose-credential-plugins: docker-auth awx/projects
 	echo -e "\033[0;31mTo generate a CyberArk Conjur API key: docker exec -it tools_conjur_1 conjurctl account create quick-start\033[0m"
 	CURRENT_UID=$(shell id -u) TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose.yml -f tools/docker-credential-plugins-override.yml up --no-recreate awx
 
-docker-compose-test: docker-auth
+docker-compose-test: docker-auth awx/projects
 	cd tools && CURRENT_UID=$(shell id -u) OS="$(shell docker info | grep 'Operating System')" TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose run --rm --service-ports awx /bin/bash
 
-docker-compose-runtest:
+docker-compose-runtest: awx/projects
 	cd tools && CURRENT_UID=$(shell id -u) TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose run --rm --service-ports awx /start_tests.sh
 
-docker-compose-build-swagger:
+docker-compose-build-swagger: awx/projects
 	cd tools && CURRENT_UID=$(shell id -u) TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose run --rm --service-ports awx /start_tests.sh swagger
 
 detect-schema-change: genschema
@@ -647,7 +654,7 @@ detect-schema-change: genschema
 	# Ignore differences in whitespace with -b
 	diff -u -b reference-schema.json schema.json
 
-docker-compose-clean:
+docker-compose-clean: awx/projects
 	cd tools && CURRENT_UID=$(shell id -u) TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose run --rm -w /awx_devel --service-ports awx make clean
 	cd tools && TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose rm -sf
 
@@ -676,10 +683,10 @@ docker-clean:
 docker-refresh: docker-clean docker-compose
 
 # Docker Development Environment with Elastic Stack Connected
-docker-compose-elk: docker-auth
+docker-compose-elk: docker-auth awx/projects
 	CURRENT_UID=$(shell id -u) TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose.yml -f tools/elastic/docker-compose.logstash-link.yml -f tools/elastic/docker-compose.elastic-override.yml up --no-recreate
 
-docker-compose-cluster-elk: docker-auth
+docker-compose-cluster-elk: docker-auth awx/projects
 	TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose-cluster.yml -f tools/elastic/docker-compose.logstash-link-cluster.yml -f tools/elastic/docker-compose.elastic-override.yml up --no-recreate
 
 prometheus:
