@@ -37,6 +37,7 @@ function MultiCredentialsLookup(props) {
   const [selectedType, setSelectedType] = useState(null);
   const [credentials, setCredentials] = useState([]);
   const [credentialsCount, setCredentialsCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -56,6 +57,7 @@ function MultiCredentialsLookup(props) {
         return;
       }
       try {
+        setIsLoading(true);
         const params = parseQueryString(QS_CONFIG, history.location.search);
         const { results, count } = await loadCredentials(
           params,
@@ -63,6 +65,7 @@ function MultiCredentialsLookup(props) {
         );
         setCredentials(results);
         setCredentialsCount(count);
+        setIsLoading(false);
       } catch (err) {
         onError(err);
       }
@@ -133,6 +136,7 @@ function MultiCredentialsLookup(props) {
                 name="credentials"
                 qsConfig={QS_CONFIG}
                 readOnly={!canDelete}
+                isLoading={isLoading}
                 selectItem={item => {
                   if (isMultiple) {
                     return dispatch({ type: 'SELECT_ITEM', item });
