@@ -2,7 +2,7 @@
 import os
 import json
 import logging
-import websockets
+import aiohttp
 import asyncio
 
 from channels_redis.core import RedisChannelLayer
@@ -36,25 +36,41 @@ class RedisGroupBroadcastChannelLayer(RedisChannelLayer):
 
         loop = asyncio.get_event_loop()
         for host in self.broadcast_hosts:
-            loop.create_task(self.run(host, settings.WEBSOCKETS_PORT))
+            loop.create_task(self.connect(host, settings.WEBSOCKETS_PORT))
 
-    async def run(self, host, port, secret='abc123'):
+    async def connect(self, host, port, secret='abc123', attempt=0):
+        if attempt > 0:
+            await asyncio.sleep(5)
         channel_layer = get_channel_layer()
-        uri = "ws://{}:{}/websocket/broadcast/".format(host, port)
-        # TODO: Better loop and disconect/reconnect handling
-        async with websockets.connect(uri, extra_headers={'secret': secret}) as websocket:
-            while True:
-                try:
-                    payload = json.loads(await websocket.recv())
-                except json.JSONDecodeError:
-                    logmsg = "Failed to decode broadcast message"
-                    if logger.isEnabledFor(logging.DEBUG):
-                        logmsg = "{} {}".format(logmsg, payload)
-                    logger.warn(logmsg)
-                    continue
+        uri = "http://{}:{}/websocket/broadcast/".format(host, port)
+        timeout = aiohttp.ClientTimeout(total=10)
+        try:
+            async with aiohttp.ClientSession(headers={'secret': secret}, timeout=timeout) as session:
+                async with session.ws_connect(uri) as websocket:
+                    # TODO: Surface a health status of the broadcast interconnect
+                    async for msg in websocket:
+                        if msg.type == aiohttp.WSMsgType.ERROR:
+                            break
+                        elif msg.type == aiohttp.WSMsgType.TEXT:
+                            try:
+                                payload = json.loads(msg.data)
+                            except json.JSONDecodeError:
+                                logmsg = "Failed to decode broadcast message"
+                                if logger.isEnabledFor(logging.DEBUG):
+                                    logmsg = "{} {}".format(logmsg, payload)
+                                logger.warn(logmsg)
+                                continue
 
-                (group, message) = unwrap_broadcast_msg(payload)
+                            (group, message) = unwrap_broadcast_msg(payload)
 
-                await channel_layer.group_send(group, {"type": "internal.message", "text": message})
+                            await channel_layer.group_send(group, {"type": "internal.message", "text": message})
+        except Exception as e:
+            # Early on, this is our canary. I'm not sure what exceptions we can really encounter.
+            # Does aiohttp throws an exception if a disconnect happens?
+            logger.warn("Websocket broadcast client exception {}".format(e))
+        finally:
+            # Reconnect
+            loop = asyncio.get_event_loop()
+            loop.create_task(self.connect(host, port, secret, attempt=attempt+1))
 
 

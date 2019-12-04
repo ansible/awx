@@ -50,6 +50,6 @@ tacacs_plus==1.0
 twilio==6.10.4
 uWSGI==2.0.17
 uwsgitop==0.10.0
-websockets>=8.1<9.0 # Tested with 8; 9 isn't out yet but may work when it is out
+aiohttp>=3.6.2
 pip==9.0.1
 setuptools==36.0.1
