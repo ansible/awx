@@ -71,7 +71,7 @@ function CredentialLookup({
             optionCount={count}
             header={label}
             qsConfig={QS_CONFIG}
-            readOnly={canDelete}
+            readOnly={!canDelete}
             selectItem={item => dispatch({ type: 'SELECT_ITEM', item })}
             deselectItem={item => dispatch({ type: 'DESELECT_ITEM', item })}
           />

@@ -43,9 +43,7 @@ function MultiCredentialsLookup(props) {
       try {
         const types = await loadCredentialTypes();
         setCredentialTypes(types);
-        setSelectedType(
-          types.find(type => type.name === 'Machine') || types[0]
-        );
+        setSelectedType(types.find(type => type.kind === 'ssh') || types[0]);
       } catch (err) {
         onError(err);
       }
@@ -71,7 +69,7 @@ function MultiCredentialsLookup(props) {
     })();
   }, [selectedType, history.location.search, onError]);
 
-  const isMultiple = selectedType && selectedType.name === 'Vault';
+  const isMultiple = selectedType && selectedType.kind === 'vault';
   const renderChip = ({ item, removeItem, canDelete }) => (
     <CredentialChip
       key={item.id}

@@ -129,6 +129,24 @@ describe('Lookup reducer', () => {
       });
     });
 
+    it('should set null value to empty array', () => {
+      const state = {
+        isModalOpen: false,
+        selectedItems: [{ id: 1 }],
+        value: null,
+        multiple: false,
+      };
+      const result = reducer(state, {
+        type: 'TOGGLE_MODAL',
+      });
+      expect(result).toEqual({
+        isModalOpen: true,
+        selectedItems: [],
+        value: null,
+        multiple: false,
+      });
+    });
+
     it('should open the modal (multiple)', () => {
       const state = {
         isModalOpen: false,

@@ -1,5 +1,3 @@
-// import { useReducer, useEffect } from 'react';
-
 export default function reducer(state, action) {
   switch (action.type) {
     case 'SELECT_ITEM':
@@ -51,10 +49,16 @@ function toggleModal(state) {
   if (isModalOpen) {
     return closeModal(state);
   }
+  let selectedItems = [];
+  if (multiple) {
+    selectedItems = [...value];
+  } else if (value) {
+    selectedItems.push(value);
+  }
   return {
     ...state,
     isModalOpen: !isModalOpen,
-    selectedItems: multiple ? [...value] : [value],
+    selectedItems,
   };
 }
 
