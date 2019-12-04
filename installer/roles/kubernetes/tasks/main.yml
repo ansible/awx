@@ -32,7 +32,7 @@
       {{ kubernetes_deployment_name }} \
       -n {{ kubernetes_namespace }} -o=jsonpath='{.status.replicas}'
   register: deployment_details
-  ignore_errors: yes
+  ignore_errors: true
 
 - name: Set expected post-deployment Replicas value
   set_fact:
@@ -48,7 +48,7 @@
 - name: Get Postgres Service Detail
   shell: "{{ kubectl_or_oc }} describe svc {{ postgresql_service_name }} -n {{ kubernetes_namespace }}"
   register: postgres_svc_details
-  ignore_errors: yes
+  ignore_errors: true
   when: "pg_hostname is not defined or pg_hostname == ''"
 
 - name: Deploy PostgreSQL (OpenShift)
@@ -71,7 +71,7 @@
           -e POSTGRESQL_VERSION=10 \
           -n {{ kubernetes_namespace }}
       register: openshift_pg_activate
-      no_log: yes
+      no_log: true
   when:
     - pg_hostname is not defined or pg_hostname == ''
     - postgres_svc_details is defined and postgres_svc_details.rc != 0
@@ -82,7 +82,7 @@
     - name: Template PostgreSQL Deployment (Kubernetes)
       set_fact:
         pg_values: "{{ lookup('template', 'postgresql-values.yml.j2') }}"
-      no_log: yes
+      no_log: true
 
     - name: Deploy and Activate Postgres (Kubernetes)
       shell: |
@@ -94,7 +94,7 @@
           --values - \
           stable/postgresql
       register: kubernetes_pg_activate
-      no_log: yes
+      no_log: true
   when:
     - pg_hostname is not defined or pg_hostname == ''
     - postgres_svc_details is defined and postgres_svc_details.rc != 0
@@ -235,7 +235,7 @@
     - 'configmap'
     - 'deployment'
     - 'secret'
-  no_log: yes
+  no_log: true
 
 - name: Apply Deployment
   shell: |
@@ -244,7 +244,7 @@
     - "{{ configmap }}"
     - "{{ deployment }}"
     - "{{ secret }}"
-  no_log: yes
+  no_log: true
 
 - name: Delete any existing management pod
   shell: |
@@ -278,21 +278,21 @@
     {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} exec ansible-tower-management -- \
       bash -c "echo 'from django.contrib.auth.models import User; nsu = User.objects.filter(is_superuser=True).count(); exit(0 if nsu > 0 else 1)' | awx-manage shell"
   register: super_check
-  ignore_errors: yes
+  ignore_errors: true
   changed_when: super_check.rc > 0
 
 - name: create django super user if it does not exist
   shell: |
     {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} exec ansible-tower-management -- \
       bash -c "echo \"from django.contrib.auth.models import User; User.objects.create_superuser('{{ admin_user }}', '{{ admin_email }}', '{{ admin_password }}')\" | awx-manage shell"
-  no_log: yes
+  no_log: true
   when: super_check.rc > 0
 
 - name: update django super user password
   shell: |
     {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} exec ansible-tower-management -- \
       bash -c "awx-manage update_password --username='{{ admin_user }}' --password='{{ admin_password }}'"
-  no_log: yes
+  no_log: true
   register: result
   changed_when: "'Password updated' in result.stdout"
 

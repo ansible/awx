@@ -37,7 +37,7 @@
   shell: make clean
   args:
     chdir: ..
-  ignore_errors: yes
+  ignore_errors: true
   when: not sdist.stat.exists
   delegate_to: localhost
 
@@ -46,7 +46,7 @@
     build:
       path: "{{ role_path }}/files"
       dockerfile: Dockerfile.sdist
-      pull: no
+      pull: false
       args:
         http_proxy: "{{ http_proxy | default('') }}"
         https_proxy: "{{ https_proxy | default('') }}"
@@ -178,7 +178,7 @@
     build:
       path: "{{ docker_base_path }}"
       dockerfile: Dockerfile
-      pull: no
+      pull: false
       args:
         http_proxy: "{{ http_proxy | default('') }}"
         https_proxy: "{{ https_proxy | default('') }}"
@@ -186,7 +186,7 @@
     name: "{{ web_image }}"
     tag: "{{ awx_version }}"
     source: 'build'
-    force_source: yes
+    force_source: true
   delegate_to: localhost
 
 - name: Build base task image
@@ -194,7 +194,7 @@
     build:
       path: "{{ docker_base_path }}"
       dockerfile: Dockerfile.task
-      pull: no
+      pull: false
       args:
         http_proxy: "{{ http_proxy | default('') }}"
         https_proxy: "{{ https_proxy | default('') }}"
@@ -202,7 +202,7 @@
     name: "{{ task_image }}"
     tag: "{{ awx_version }}"
     source: 'build'
-    force_source: yes
+    force_source: true
   delegate_to: localhost
 
 - name: Tag task and web images as latest

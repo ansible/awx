@@ -1,0 +1,12 @@
+---
+ignore: |
+  .tox
+  awx/main/tests/data/inventory/plugins/**
+  # vault files
+  awx/main/tests/data/ansible_utils/playbooks/valid/vault.yml
+  awx/ui/test/e2e/tests/smoke-vars.yml
+
+extends: default
+
+rules:
+  line-length: disable

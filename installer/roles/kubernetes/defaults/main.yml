@@ -1,6 +1,6 @@
 ---
 dockerhub_version: "{{ lookup('file', playbook_dir + '/../VERSION') }}"
-create_preload_data: True
+create_preload_data: true
 
 admin_user: 'admin'
 admin_email: 'root@localhost'
@@ -37,7 +37,7 @@ kubernetes_rabbitmq_image: "ansible/awx_rabbitmq"
 kubernetes_memcached_version: "latest"
 kubernetes_memcached_image: "memcached"
 
-openshift_pg_emptydir: no
+openshift_pg_emptydir: false
 openshift_pg_pvc_name: postgresql
 
 kubernetes_deployment_name: awx
@@ -56,6 +56,6 @@ custom_venvs_path: "/opt/custom-venvs"
 custom_venvs_python: "python2"
 
 ca_trust_bundle: "/etc/pki/tls/certs/ca-bundle.crt"
-rabbitmq_use_ssl: False
+rabbitmq_use_ssl: false
 
 container_groups_image: "ansible/ansible-runner"

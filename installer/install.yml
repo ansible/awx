@@ -2,8 +2,8 @@
 - name: Build and deploy AWX
   hosts: all
   roles:
-    - { role: check_vars }
-    - { role: image_build, when: "dockerhub_base is not defined" }
-    - { role: image_push, when: "docker_registry is defined and dockerhub_base is not defined" }
-    - { role: kubernetes, when: "openshift_host is defined or kubernetes_context is defined" }
-    - { role: local_docker, when: "openshift_host is not defined and kubernetes_context is not defined" }
+    - {role: check_vars}
+    - {role: image_build, when: "dockerhub_base is not defined"}
+    - {role: image_push, when: "docker_registry is defined and dockerhub_base is not defined"}
+    - {role: kubernetes, when: "openshift_host is defined or kubernetes_context is defined"}
+    - {role: local_docker, when: "openshift_host is not defined and kubernetes_context is not defined"}

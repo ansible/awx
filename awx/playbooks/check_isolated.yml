@@ -18,8 +18,8 @@
         src: "{{src}}/artifacts/"
         dest: "{{src}}/artifacts/"
         mode: pull
-        delete: yes
-        recursive: yes
+        delete: true
+        recursive: true
       when: ansible_kubectl_config is not defined
 
     - name: Copy daemon log from the isolated host
@@ -34,9 +34,9 @@
         src: "{{src}}/artifacts/"
         dest: "{{src}}/artifacts/"
         mode: pull
-        delete: yes
-        recursive: yes
-        set_remote_user: no
+        delete: true
+        recursive: true
+        set_remote_user: false
         rsync_opts:
           - "--rsh=$RSH"
       environment:
@@ -49,7 +49,7 @@
         src: "{{src}}/daemon.log"
         dest: "{{src}}/daemon.log"
         mode: pull
-        set_remote_user: no
+        set_remote_user: false
         rsync_opts:
           - "--rsh=$RSH"
       environment:
