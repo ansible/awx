@@ -79,6 +79,7 @@ class JobTemplateForm extends Component {
     };
     this.handleProjectValidation = this.handleProjectValidation.bind(this);
     this.loadRelatedInstanceGroups = this.loadRelatedInstanceGroups.bind(this);
+    this.handleProjectUpdate = this.handleProjectUpdate.bind(this);
     this.setContentError = this.setContentError.bind(this);
   }
 
@@ -118,6 +119,12 @@ class JobTemplateForm extends Component {
       }
       return undefined;
     };
+  }
+
+  handleProjectUpdate(project) {
+    const { setFieldValue } = this.props;
+    setFieldValue('project', project.id);
+    this.setState({ project });
   }
 
   setContentError(contentError) {
@@ -257,10 +264,7 @@ class JobTemplateForm extends Component {
                   you want this job to execute.`)}
                 isValid={!form.touched.project || !form.errors.project}
                 helperTextInvalid={form.errors.project}
-                onChange={value => {
-                  form.setFieldValue('project', value.id);
-                  this.setState({ project: value });
-                }}
+                onChange={this.handleProjectUpdate}
                 required
               />
             )}
