@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import PropTypes, { arrayOf, shape, string, bool } from 'prop-types';
 import { DataList } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';
@@ -25,32 +25,8 @@ import PaginatedDataListItem from './PaginatedDataListItem';
 class PaginatedDataList extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      height: 0,
-    };
-    this.ref = React.createRef();
     this.handleSetPage = this.handleSetPage.bind(this);
     this.handleSetPageSize = this.handleSetPageSize.bind(this);
-  }
-
-  componentDidUpdate(prevProps) {
-    const { items } = this.props;
-    if (prevProps.items !== items) {
-      this.findHeight();
-    }
-  }
-
-  findHeight() {
-    if (!this.ref || !this.ref.current) {
-      return;
-    }
-    const { state } = this;
-    const height = this.ref.current.scrollHeight;
-    if (height && height !== state.height) {
-      this.setState({
-        height: this.ref.current.scrollHeight,
-      });
-    }
   }
 
   handleSetPage(event, pageNumber) {
@@ -90,7 +66,6 @@ class PaginatedDataList extends React.Component {
       i18n,
       renderToolbar,
     } = this.props;
-    const { height } = this.state;
     const columns = toolbarColumns.length
       ? toolbarColumns
       : [
@@ -110,14 +85,8 @@ class PaginatedDataList extends React.Component {
     const emptyContentTitle = i18n._(t`No ${pluralizedItemName} Found `);
 
     let Content;
-    if (hasContentLoading) {
-      Content = (
-        <ContentLoading
-          css={`
-            min-height: ${height}px;
-          `}
-        />
-      );
+    if (hasContentLoading && items.length <= 0) {
+      Content = <ContentLoading />;
     } else if (contentError) {
       Content = <ContentError error={contentError} />;
     } else if (items.length <= 0) {
@@ -131,7 +100,7 @@ class PaginatedDataList extends React.Component {
     }
 
     return (
-      <div ref={this.ref}>
+      <Fragment>
         <ListHeader
           itemCount={itemCount}
           renderToolbar={renderToolbar}
@@ -160,7 +129,7 @@ class PaginatedDataList extends React.Component {
             onPerPageSelect={this.handleSetPageSize}
           />
         ) : null}
-      </div>
+      </Fragment>
     );
   }
 }
