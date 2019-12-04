@@ -79,6 +79,7 @@ class JobTemplateForm extends Component {
     };
     this.handleProjectValidation = this.handleProjectValidation.bind(this);
     this.loadRelatedInstanceGroups = this.loadRelatedInstanceGroups.bind(this);
+    this.setContentError = this.setContentError.bind(this);
   }
 
   componentDidMount() {
@@ -117,6 +118,10 @@ class JobTemplateForm extends Component {
       }
       return undefined;
     };
+  }
+
+  setContentError(contentError) {
+    this.setState({ contentError });
   }
 
   render() {
@@ -285,7 +290,7 @@ class JobTemplateForm extends Component {
                     form={form}
                     field={field}
                     onBlur={() => form.setFieldTouched('playbook')}
-                    onError={err => this.setState({ contentError: err })}
+                    onError={this.setContentError}
                   />
                 </FormGroup>
               );
@@ -305,7 +310,7 @@ class JobTemplateForm extends Component {
                 <LabelSelect
                   value={field.value}
                   onChange={labels => setFieldValue('labels', labels)}
-                  onError={err => this.setState({ contentError: err })}
+                  onError={this.setContentError}
                 />
               </FormGroup>
             )}
@@ -321,7 +326,7 @@ class JobTemplateForm extends Component {
                 onChange={newCredentials =>
                   setFieldValue('credentials', newCredentials)
                 }
-                onError={err => this.setState({ contentError: err })}
+                onError={this.setContentError}
                 tooltip={i18n._(
                   t`Select credentials that allow Tower to access the nodes this job will be ran against. You can only select one credential of each type. For machine credentials (SSH), checking "Prompt on launch" without selecting credentials will require you to select a machine credential at run time. If you select credentials and check "Prompt on launch", the selected credential(s) become the defaults that can be updated at run time.`
                 )}
