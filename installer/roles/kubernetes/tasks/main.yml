@@ -189,12 +189,12 @@
   command: |
     {{ kubectl_or_oc }} config view -o json
   register: kube_config_cmd
-  no_log: yes
+  no_log: true
 
 - name: Convert kube config to dictionary
   set_fact:
     kube_config: "{{ kube_config_cmd.stdout | from_json }}"
-  no_log: yes
+  no_log: true
 
 - name: Extract current context from kube config
   set_fact:
@@ -217,7 +217,7 @@
 - name: Get kube version from api server
   uri:
     url: "{{ kube_server | trim }}/version"
-    validate_certs: no
+    validate_certs: false
   register: kube_version
 
 - name: Extract server version from command output
