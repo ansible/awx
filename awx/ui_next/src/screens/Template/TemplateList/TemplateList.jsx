@@ -4,7 +4,11 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
 
-import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '@api';
+import {
+  JobTemplatesAPI,
+  UnifiedJobTemplatesAPI,
+  WorkflowJobTemplatesAPI,
+} from '@api';
 import AlertModal from '@components/AlertModal';
 import DatalistToolbar from '@components/DataListToolbar';
 import ErrorDetail from '@components/ErrorDetail';
@@ -106,19 +110,34 @@ class TemplatesList extends Component {
 
   async loadTemplates() {
     const { location } = this.props;
-    const { actions: cachedActions } = this.state;
+    const {
+      jtActions: cachedJTActions,
+      wfjtActions: cachedWFJTActions,
+    } = this.state;
     const params = parseQueryString(QS_CONFIG, location.search);
 
-    let optionsPromise;
-    if (cachedActions) {
-      optionsPromise = Promise.resolve({ data: { actions: cachedActions } });
+    let jtOptionsPromise;
+    if (cachedJTActions) {
+      jtOptionsPromise = Promise.resolve({
+        data: { actions: cachedJTActions },
+      });
     } else {
-      optionsPromise = JobTemplatesAPI.readOptions();
+      jtOptionsPromise = JobTemplatesAPI.readOptions();
+    }
+
+    let wfjtOptionsPromise;
+    if (cachedWFJTActions) {
+      wfjtOptionsPromise = Promise.resolve({
+        data: { actions: cachedWFJTActions },
+      });
+    } else {
+      wfjtOptionsPromise = WorkflowJobTemplatesAPI.readOptions();
     }
 
     const promises = Promise.all([
-      JobTemplatesAPI.read(params),
-      optionsPromise,
+      UnifiedJobTemplatesAPI.read(params),
+      jtOptionsPromise,
+      wfjtOptionsPromise,
     ]);
 
     this.setState({ contentError: null, hasContentLoading: true });
@@ -129,12 +148,16 @@ class TemplatesList extends Component {
           data: { count, results },
         },
         {
-          data: { actions },
+          data: { actions: jtActions },
+        },
+        {
+          data: { actions: wfjtActions },
         },
       ] = await promises;
 
       this.setState({
-        actions,
+        jtActions,
+        wfjtActions,
         itemCount: count,
         templates: results,
         selected: [],
@@ -154,27 +177,31 @@ class TemplatesList extends Component {
       templates,
       itemCount,
       selected,
-      actions,
+      jtActions,
+      wfjtActions,
     } = this.state;
     const { match, i18n } = this.props;
-    const canAdd =
-      actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
+    const canAddJT =
+      jtActions && Object.prototype.hasOwnProperty.call(jtActions, 'POST');
+    const canAddWFJT =
+      wfjtActions && Object.prototype.hasOwnProperty.call(wfjtActions, 'POST');
+    const addButtonOptions = [];
+    if (canAddJT) {
+      addButtonOptions.push({
+        label: i18n._(t`Template`),
+        url: `${match.url}/job_template/add/`,
+      });
+    }
+    if (canAddWFJT) {
+      addButtonOptions.push({
+        label: i18n._(t`Workflow Template`),
+        url: `${match.url}/workflow_job_template/add/`,
+      });
+    }
     const isAllSelected =
       selected.length === templates.length && selected.length > 0;
     const addButton = (
-      <AddDropDownButton
-        key="add"
-        dropdownItems={[
-          {
-            label: i18n._(t`Template`),
-            url: `${match.url}/template/add/`,
-          },
-          {
-            label: i18n._(t`Workflow Template`),
-            url: `${match.url}/_workflow/add/`,
-          },
-        ]}
-      />
+      <AddDropDownButton key="add" dropdownItems={addButtonOptions} />
     );
     return (
       <PageSection>
@@ -221,7 +248,7 @@ class TemplatesList extends Component {
                     itemsToDelete={selected}
                     pluralizedItemName="Templates"
                   />,
-                  canAdd && addButton,
+                  (canAddJT || canAddWFJT) && addButton,
                 ]}
               />
             )}
@@ -235,7 +262,7 @@ class TemplatesList extends Component {
                 isSelected={selected.some(row => row.id === template.id)}
               />
             )}
-            emptyStateControls={canAdd && addButton}
+            emptyStateControls={(canAddJT || canAddWFJT) && addButton}
           />
         </Card>
         <AlertModal

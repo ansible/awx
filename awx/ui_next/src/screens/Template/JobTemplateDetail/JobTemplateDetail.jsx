@@ -350,7 +350,7 @@ class JobTemplateDetail extends Component {
             {summary_fields.user_capabilities.edit && (
               <Button
                 component={Link}
-                to={`/templates/${match.params.templateType}/${match.params.id}/edit`}
+                to={`/templates/job_template/${match.params.id}/edit`}
                 aria-label={i18n._(t`Edit`)}
               >
                 {i18n._(t`Edit`)}
