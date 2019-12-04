@@ -86,7 +86,14 @@ def oauth2_getattribute(self, attr):
     # Custom method to override
     # oauth2_provider.settings.OAuth2ProviderSettings.__getattribute__
     from django.conf import settings
-    val = settings.OAUTH2_PROVIDER.get(attr)
+    val = None
+    if 'migrate' not in sys.argv:
+        # certain Django OAuth Toolkit migrations actually reference
+        # setting lookups for references to model classes (e.g.,
+        # oauth2_settings.REFRESH_TOKEN_MODEL)
+        # If we're doing an OAuth2 setting lookup *while running* a migration,
+        # don't do our usual "Configure Tower in Tower" database setting lookup
+        val = settings.OAUTH2_PROVIDER.get(attr)
     if val is None:
         val = object.__getattribute__(self, attr)
     return val
