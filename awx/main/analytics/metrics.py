@@ -46,6 +46,8 @@ INSTANCE_MEMORY = Gauge('awx_instance_memory', 'RAM (Kb) on each node in a Tower
 INSTANCE_INFO = Info('awx_instance', 'Info about each node in a Tower system', ['hostname', 'instance_uuid',])
 INSTANCE_LAUNCH_TYPE = Gauge('awx_instance_launch_type_total', 'Type of Job launched', ['node', 'launch_type',])
 INSTANCE_STATUS = Gauge('awx_instance_status_total', 'Status of Job launched', ['node', 'status',])
+INSTANCE_CONSUMED_CAPACITY = Gauge('awx_instance_consumed_capacity', 'Consumed capacity of each node in a Tower system', ['hostname', 'instance_uuid',])
+INSTANCE_REMAINING_CAPACITY = Gauge('awx_instance_remaining_capacity', 'Remaining capacity of each node in a Tower system', ['hostname', 'instance_uuid',])
 
 LICENSE_INSTANCE_TOTAL = Gauge('awx_license_instance_total', 'Total number of managed hosts provided by your license')
 LICENSE_INSTANCE_FREE = Gauge('awx_license_instance_free', 'Number of remaining managed hosts provided by your license')
@@ -104,6 +106,8 @@ def metrics():
         INSTANCE_CAPACITY.labels(hostname=hostname, instance_uuid=uuid).set(instance_data[uuid]['capacity'])
         INSTANCE_CPU.labels(hostname=hostname, instance_uuid=uuid).set(instance_data[uuid]['cpu'])
         INSTANCE_MEMORY.labels(hostname=hostname, instance_uuid=uuid).set(instance_data[uuid]['memory'])
+        INSTANCE_CONSUMED_CAPACITY.labels(hostname=hostname, instance_uuid=uuid).set(instance_data[uuid]['consumed_capacity'])
+        INSTANCE_REMAINING_CAPACITY.labels(hostname=hostname, instance_uuid=uuid).set(instance_data[uuid]['remaining_capacity'])
         INSTANCE_INFO.labels(hostname=hostname, instance_uuid=uuid).info({
             'enabled': str(instance_data[uuid]['enabled']),
             'last_isolated_check': getattr(instance_data[uuid], 'last_isolated_check', 'None'),

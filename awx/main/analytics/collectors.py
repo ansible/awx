@@ -174,7 +174,11 @@ def instance_info(since, include_hostnames=False):
             'memory': instance['memory'],
             'managed_by_policy': instance['managed_by_policy'],
             'last_isolated_check': _get_isolated_datetime(instance['last_isolated_check']),
-            'enabled': instance['enabled']
+            'enabled': instance['enabled'],
+            'consumed_capacity': sum(x.task_impact for x in models.UnifiedJob.objects.filter(execution_node=instance['hostname'],
+                                     status__in=('running', 'waiting'))),
+            'remaining_capacity': instance['capacity'] - sum(x.task_impact for x in models.UnifiedJob.objects.filter(execution_node=instance['hostname'],
+                                                             status__in=('running', 'waiting')))
         }
         if include_hostnames is True:
             instance_info['hostname'] = instance['hostname']
