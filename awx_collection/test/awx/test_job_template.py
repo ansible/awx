@@ -20,7 +20,7 @@ def test_create_job_template(run_module, admin_user, project, inventory):
     result = run_module('tower_job_template', module_args, admin_user)
 
     jt = JobTemplate.objects.get(name='foo')
-    assert jt.extra_vars
+    assert jt.extra_vars == '{"foo": "bar"}'
 
     assert result == {
         "job_template": "foo",
