@@ -18,12 +18,10 @@
                   </div>
             </div>
             <div class="Modal-body">
-                <div ng-show="toDelete.total_groups > 0 || toDelete.total_hosts > 0">
+                <div ng-show="toDelete.groupCount > 0 || toDelete.hostCount > 0">
                     <div>
                         <p class="Prompt-bodyQuery">Deleting group <em>{{ toDelete.name }}</em>.
-                        <span ng-show="toDelete.total_groups > 0 && toDelete.total_hosts > 0"> <translate>This group contains</translate> {{ toDelete.total_groups }} {{:: strings.deleteModal.group }} <translate>and</translate> {{ toDelete.total_hosts }} {{:: strings.deleteModal.host }}. </span>
-                        <span ng-show="toDelete.total_groups == 0 && toDelete.total_hosts > 0"> <translate>This group contains</translate> {{ toDelete.total_hosts }} {{:: strings.deleteModal.host }}. </span>
-                        <span ng-show="toDelete.total_groups > 0 && toDelete.total_hosts == 0"> <translate>This group contains</translate> {{ toDelete.total_groups }} {{:: strings.deleteModal.group }}. </span>
+                        <span> <translate>This group contains at least one group or host</translate>.</span>
                         <translate>Delete or promote the group's children?</translate></p>
                         <div style="margin: 15px auto;">
 
@@ -43,13 +41,13 @@
                     </div>
 
                 </div>
-                <div ng-show="toDelete.total_groups == 0 && toDelete.total_hosts == 0">
+                <div ng-show="toDelete.groupCount == 0 && toDelete.hostCount == 0">
                     <div class="Prompt-bodyQuery" translate>Are you sure you want to permanently delete the group below from the inventory?</div>
                     <div class="Prompt-bodyTarget">{{ toDelete.name }}</div>
                 </div>
                 <div class="Modal-footer">
                   <a href="#" data-target="#group-delete-modal" data-dismiss="modal" id="prompt_cancel_btn_groups_list" class="btn Modal-defaultButton Modal-footerButton" translate>CANCEL</a>
-                  <a href="" ng-class="promptActionBtnClass" ng-click="confirmDelete()" id="prompt_action_btn_groups_list" ng-disabled="!deleteOption && (toDelete.total_groups > 0 || toDelete.total_hosts > 0)" class="btn Modal-footerButton Modal-errorButton" translate>DELETE</a>
+                  <a href="" ng-class="promptActionBtnClass" ng-click="confirmDelete()" id="prompt_action_btn_groups_list" ng-disabled="!deleteOption && (toDelete.groupCount > 0 || toDelete.hostCount > 0)" class="btn Modal-footerButton Modal-errorButton" translate>DELETE</a>
               </div>
             </div>
         </div>
