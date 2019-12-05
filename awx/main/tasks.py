@@ -2215,25 +2215,28 @@ class RunProjectUpdate(BaseTask):
             copy_tree(project_path, destination_folder)
 
     def post_run_hook(self, instance, status):
-        if self.playbook_new_revision:
-            instance.scm_revision = self.playbook_new_revision
-            instance.save(update_fields=['scm_revision'])
-        if self.job_private_data_dir:
-            # copy project folder before resetting to default branch
-            # because some git-tree-specific resources (like submodules) might matter
-            self.make_local_copy(
-                instance.get_project_path(check_if_exists=False), os.path.join(self.job_private_data_dir, 'project'),
-                instance.scm_type, instance.scm_revision
-            )
-            if self.original_branch:
-                # for git project syncs, non-default branches can be problems
-                # restore to branch the repo was on before this run
-                try:
-                    self.original_branch.checkout()
-                except Exception:
-                    # this could have failed due to dirty tree, but difficult to predict all cases
-                    logger.exception('Failed to restore project repo to prior state after {}'.format(instance.log_format))
-        self.release_lock(instance)
+        # To avoid hangs, very important to release lock even if errors happen here
+        try:
+            if self.playbook_new_revision:
+                instance.scm_revision = self.playbook_new_revision
+                instance.save(update_fields=['scm_revision'])
+            if self.job_private_data_dir:
+                # copy project folder before resetting to default branch
+                # because some git-tree-specific resources (like submodules) might matter
+                self.make_local_copy(
+                    instance.get_project_path(check_if_exists=False), os.path.join(self.job_private_data_dir, 'project'),
+                    instance.scm_type, instance.scm_revision
+                )
+                if self.original_branch:
+                    # for git project syncs, non-default branches can be problems
+                    # restore to branch the repo was on before this run
+                    try:
+                        self.original_branch.checkout()
+                    except Exception:
+                        # this could have failed due to dirty tree, but difficult to predict all cases
+                        logger.exception('Failed to restore project repo to prior state after {}'.format(instance.log_format))
+        finally:
+            self.release_lock(instance)
         p = instance.project
         if instance.job_type == 'check' and status not in ('failed', 'canceled',):
             if self.playbook_new_revision:
