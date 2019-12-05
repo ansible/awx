@@ -199,8 +199,6 @@ export const Host = shape({
   enabled: bool,
   instance_id: string,
   variables: string,
-  has_active_failures: bool,
-  has_inventory_sources: bool,
   last_job: number,
   last_job_host_summary: number,
 });
@@ -242,10 +240,4 @@ export const Group = shape({
   description: string,
   inventory: number,
   variables: string,
-  has_active_failures: bool,
-  total_hosts: number,
-  hosts_with_active_failures: number,
-  total_groups: number,
-  groups_with_active_failures: number,
-  has_inventory_sources: bool,
 });

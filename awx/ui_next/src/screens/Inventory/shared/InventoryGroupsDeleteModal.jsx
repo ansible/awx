@@ -1,37 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
+import { func, bool, arrayOf, object } from 'prop-types';
 import AlertModal from '@components/AlertModal';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Button, Radio } from '@patternfly/react-core';
 import styled from 'styled-components';
 
-const ListItem = styled.div`
-  padding: 24px 1px;
-
-  dl {
-    display: flex;
-    font-weight: 600;
-  }
-  dt {
-    color: var(--pf-global--danger-color--100);
-    margin-right: 10px;
-  }
-  .pf-c-radio {
-    margin-top: 10px;
-  }
+const ListItem = styled.li`
+  display: flex;
+  font-weight: 600;
+  color: var(--pf-global--danger-color--100);
 `;
-
-const ContentWrapper = styled.div`
-  ${ListItem} + ${ListItem} {
-    border-top-width: 1px;
-    border-top-style: solid;
-    border-top-color: #d7d7d7;
-  }
-  ${ListItem}:last-child {
-    padding-bottom: 0;
-  }
- `;
 
 const InventoryGroupsDeleteModal = ({
   onClose,
@@ -40,65 +20,7 @@ const InventoryGroupsDeleteModal = ({
   groups,
   i18n,
 }) => {
-  const [deleteList, setDeleteList] = useState([]);
-
-  useEffect(() => {
-    const groupIds = groups.reduce((obj, group) => {
-      if (group.total_groups > 0 || group.total_hosts > 0) {
-        return { ...obj, [group.id]: null };
-      }
-      return { ...obj, [group.id]: 'delete' };
-    }, {});
-
-    setDeleteList(groupIds);
-  }, [groups]);
-
-  const handleChange = (groupId, radioOption) => {
-    setDeleteList({ ...deleteList, [groupId]: radioOption });
-  };
-
-  const content = groups
-    .map(group => {
-      if (group.total_groups > 0 || group.total_hosts > 0) {
-        return (
-          <ListItem key={group.id}>
-            <dl>
-              <dt>{group.name}</dt>
-              <dd>
-                {i18n._(
-                  t`(${group.total_groups} Groups and ${group.total_hosts} Hosts)`
-                )}
-              </dd>
-            </dl>
-            <Radio
-              key="radio-delete"
-              label={i18n._(t`Delete All Groups and Hosts`)}
-              id={`radio-delete-${group.id}`}
-              name={`radio-${group.id}`}
-              onChange={() => handleChange(group.id, 'delete')}
-            />
-            <Radio
-              key="radio-promote"
-              label={i18n._(t`Promote Child Groups and Hosts`)}
-              id={`radio-promote-${group.id}`}
-              name={`radio-${group.id}`}
-              onChange={() => handleChange(group.id, 'promote')}
-            />
-          </ListItem>
-        );
-      }
-      return (
-        <ListItem key={group.id}>
-          <dl>
-            <dt>{group.name}</dt>
-            <dd>{i18n._(t`(No Child Groups or Hosts)`)}</dd>
-          </dl>
-        </ListItem>
-      );
-    })
-    .reduce((array, el) => {
-      return array.concat(el);
-    }, []);
+  const [radioOption, setRadioOption] = useState(null);
 
   return ReactDOM.createPortal(
     <AlertModal
@@ -111,12 +33,10 @@ const InventoryGroupsDeleteModal = ({
       actions={[
         <Button
           aria-label={i18n._(t`Delete`)}
-          onClick={() => onDelete(deleteList)}
+          onClick={() => onDelete(radioOption)}
           variant="danger"
           key="delete"
-          isDisabled={Object.keys(deleteList).some(
-            group => deleteList[group] === null
-          )}
+          isDisabled={radioOption === null}
         >
           {i18n._(t`Delete`)}
         </Button>,
@@ -135,10 +55,43 @@ const InventoryGroupsDeleteModal = ({
           groups.length > 1 ? i18n._(t`groups`) : i18n._(t`group`)
         } below?`
       )}
-      <ContentWrapper>{content}</ContentWrapper>
+      <div css="padding: 24px 0;">
+        {groups.map(group => {
+          return <ListItem key={group.id}>{group.name}</ListItem>;
+        })}
+      </div>
+      <div css="padding-left: 1px;">
+        <Radio
+          id="radio-delete"
+          key="radio-delete"
+          label={i18n._(t`Delete All Groups and Hosts`)}
+          name="option"
+          onChange={() => setRadioOption('delete')}
+        />
+        <Radio
+          css="margin-top: 5px;"
+          id="radio-promote"
+          key="radio-promote"
+          label={i18n._(t`Promote Child Groups and Hosts`)}
+          name="option"
+          onChange={() => setRadioOption('promote')}
+        />
+      </div>
     </AlertModal>,
     document.body
   );
+};
+
+InventoryGroupsDeleteModal.propTypes = {
+  onClose: func.isRequired,
+  onDelete: func.isRequired,
+  isModalOpen: bool,
+  groups: arrayOf(object),
+};
+
+InventoryGroupsDeleteModal.defaultProps = {
+  isModalOpen: false,
+  groups: [],
 };
 
 export default withI18n()(InventoryGroupsDeleteModal);

@@ -131,46 +131,37 @@ function InventoryGroups({ i18n, location, match }) {
     return i18n._(t`Select a row to delete`);
   };
 
-  const promoteGroups = list => {
-    const promotePromises = Object.keys(list)
-      .filter(groupId => list[groupId] === 'promote')
-      .map(groupId => InventoriesAPI.promoteGroup(inventoryId, +groupId));
-
-    return Promise.all(promotePromises);
-  };
-
-  const deleteGroups = list => {
-    const deletePromises = Object.keys(list)
-      .filter(groupId => list[groupId] === 'delete')
-      .map(groupId => GroupsAPI.destroy(+groupId));
-
-    return Promise.all(deletePromises);
-  };
-
-  const handleDelete = async list => {
+  const handleDelete = async option => {
     setIsLoading(true);
 
     try {
-      await Promise.all([promoteGroups(list), deleteGroups(list)]);
+      /* eslint-disable no-await-in-loop, no-restricted-syntax */
+      /* Delete groups sequentially to avoid api integrity errors */
+      for (const group of selected) {
+        if (option === 'delete') {
+          await GroupsAPI.destroy(+group.id);
+        } else if (option === 'promote') {
+          await InventoriesAPI.promoteGroup(inventoryId, +group.id);
+        }
+      }
+      /* eslint-enable no-await-in-loop, no-restricted-syntax */
     } catch (error) {
       setDeletionError(error);
-    } finally {
-      toggleModal();
-      setSelected([]);
-
-      try {
-        const {
-          data: { count, results },
-        } = await fetchGroups(inventoryId, location.search);
-
-        setGroups(results);
-        setGroupCount(count);
-      } catch (error) {
-        setContentError(error);
-      } finally {
-        setIsLoading(false);
-      }
     }
+
+    toggleModal();
+
+    try {
+      const {
+        data: { count, results },
+      } = await fetchGroups(inventoryId, location.search);
+      setGroups(results);
+      setGroupCount(count);
+    } catch (error) {
+      setContentError(error);
+    }
+
+    setIsLoading(false);
   };
 
   const canAdd =

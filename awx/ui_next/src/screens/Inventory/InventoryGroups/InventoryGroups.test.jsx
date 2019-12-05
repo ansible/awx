@@ -1,6 +1,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { MemoryRouter, Route } from 'react-router-dom';
+import { Route } from 'react-router-dom';
+import { createMemoryHistory } from 'history';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
 import { InventoriesAPI, GroupsAPI } from '@api';
 import InventoryGroups from './InventoryGroups';
@@ -67,15 +68,20 @@ describe('<InventoryGroups />', () => {
         },
       },
     });
-
+    const history = createMemoryHistory({
+      initialEntries: ['/inventories/inventory/3/groups'],
+    });
     await act(async () => {
       wrapper = mountWithContexts(
-        <MemoryRouter initialEntries={['/inventories/inventory/3/groups']}>
-          <Route
-            path="/inventories/inventory/:id/groups"
-            component={() => <InventoryGroups />}
-          />
-        </MemoryRouter>
+        <Route
+          path="/inventories/inventory/:id/groups"
+          component={() => <InventoryGroups />}
+        />,
+        {
+          context: {
+            router: { history, route: { location: history.location } },
+          },
+        }
       );
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
@@ -194,6 +200,10 @@ describe('<InventoryGroups />', () => {
       'InventoryGroupsDeleteModal',
       el => el.props().isModalOpen === true
     );
+    await act(async () => {
+      wrapper.find('Radio[id="radio-delete"]').invoke('onChange')();
+    });
+    wrapper.update();
     await act(async () => {
       wrapper
         .find('ModalBoxFooter Button[aria-label="Delete"]')
