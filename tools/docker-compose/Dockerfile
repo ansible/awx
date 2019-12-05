@@ -16,6 +16,7 @@ RUN dnf -y update && \
   curl \
   gcc \
   gcc-c++ \
+  gettext \
   git-core \
   glibc-langpack-en \
   krb5-workstation \
