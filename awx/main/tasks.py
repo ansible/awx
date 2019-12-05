@@ -2214,7 +2214,10 @@ class RunProjectUpdate(BaseTask):
             project_path = instance.project.get_project_path(check_if_exists=False)
             if os.path.exists(project_path):
                 git_repo = git.Repo(project_path)
-                self.original_branch = git_repo.active_branch
+                if git_repo.head.is_detached:
+                    self.original_branch = git_repo.head.commit
+                else:
+                    self.original_branch = git_repo.active_branch
 
     @staticmethod
     def make_local_copy(project_path, destination_folder, scm_type, scm_revision):
