@@ -3,8 +3,8 @@
 
 
 class CustomNotificationBase(object):
-    DEFAULT_MSG = '{{ job_friendly_name }} #{{ job.id }} "{{ job.name }}" {{ job.status }}: {{ url }}'
-    DEFAULT_BODY = '{{ job_friendly_name }} #{{ job.id }} had status {{ job.status }}, view details at {{ url }}\n\n{{ job_metadata }}'
+    DEFAULT_MSG = "{{ job_friendly_name }} #{{ job.id }} '{{ job.name }}' {{ job.status }}: {{ url }}"
+    DEFAULT_BODY = "{{ job_friendly_name }} #{{ job.id }} had status {{ job.status }}, view details at {{ url }}\n\n{{ job_metadata }}"
 
     DEFAULT_APPROVAL_RUNNING_MSG = 'The approval node "{{ approval_node_name }}" needs review. This node can be viewed at: {{ workflow_url }}'
     DEFAULT_APPROVAL_RUNNING_BODY = ('The approval node "{{ approval_node_name }}" needs review. '
