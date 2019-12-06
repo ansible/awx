@@ -634,7 +634,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         else:
             # If for some reason we can't count the hosts then lets assume the impact as forks
             if self.inventory is not None:
-                count_hosts = self.inventory.hosts.count()
+                count_hosts = self.inventory.total_hosts
                 if self.job_slice_count > 1:
                     # Integer division intentional
                     count_hosts = (count_hosts + self.job_slice_count - self.job_slice_number) // self.job_slice_count
