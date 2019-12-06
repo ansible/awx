@@ -126,6 +126,8 @@ class IsolatedManager(object):
         params['private_data_dir'] = iso_dir
         if idle_timeout:
             params['settings']['idle_timeout'] = idle_timeout
+        else:
+            params['settings'].pop('idle_timeout', None)
         params.update(**kw)
         if all([
             getattr(settings, 'AWX_ISOLATED_KEY_GENERATION', False) is True,
