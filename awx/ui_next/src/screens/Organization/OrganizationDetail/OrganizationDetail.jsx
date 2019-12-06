@@ -79,7 +79,11 @@ class OrganizationDetail extends Component {
     return (
       <CardBody>
         <DetailList>
-          <Detail label={i18n._(t`Name`)} value={name} />
+          <Detail
+            label={i18n._(t`Name`)}
+            value={name}
+            dataCy="organization-detail-name"
+          />
           <Detail label={i18n._(t`Description`)} value={description} />
           <Detail label={i18n._(t`Max Hosts`)} value={`${max_hosts}`} />
           <Detail

@@ -23,7 +23,11 @@ class TeamDetail extends Component {
     return (
       <CardBody>
         <DetailList>
-          <Detail label={i18n._(t`Name`)} value={name} />
+          <Detail
+            label={i18n._(t`Name`)}
+            value={name}
+            dataCy="team-detail-name"
+          />
           <Detail label={i18n._(t`Description`)} value={description} />
           <Detail
             label={i18n._(t`Organization`)}

@@ -91,7 +91,11 @@ function ProjectDetail({ project, i18n }) {
   return (
     <CardBody css="padding-top: 20px">
       <DetailList gutter="sm">
-        <Detail label={i18n._(t`Name`)} value={name} />
+        <Detail
+          label={i18n._(t`Name`)}
+          value={name}
+          dataCy="project-detail-name"
+        />
         <Detail label={i18n._(t`Description`)} value={description} />
         {summary_fields.organization && (
           <Detail
