@@ -2,17 +2,16 @@ import React, { Fragment } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
+import { secondsToHHMMSS } from '@util/dates';
 
 const GridDL = styled.dl`
   display: grid;
   grid-template-columns: max-content;
   column-gap: 15px;
   row-gap: 0px;
-
   dt {
     grid-column-start: 1;
   }
-
   dd {
     grid-column-start: 2;
   }
@@ -76,19 +75,38 @@ function WorkflowHelpDetails({ d, i18n }) {
     } else {
       // todo: this scenario (deleted)
     }
+
+    if (d.job) {
+      rows.push({
+        label: i18n._(t`Job Status`),
+        value: d.job.status,
+      });
+
+      if (d.job.elapsed) {
+        rows.push({
+          label: i18n._(t`Elapsed`),
+          value: secondsToHHMMSS(d.job.elapsed),
+        });
+      }
+    }
   }
 
   return (
-    <GridDL>
-      {rows.map(row => (
-        <Fragment key={row.label}>
-          <dt>
-            <b>{row.label}</b>
-          </dt>
-          <dd>{row.value}</dd>
-        </Fragment>
-      ))}
-    </GridDL>
+    <Fragment>
+      <GridDL>
+        {rows.map(row => (
+          <Fragment key={row.label}>
+            <dt>
+              <b>{row.label}</b>
+            </dt>
+            <dd>{row.value}</dd>
+          </Fragment>
+        ))}
+      </GridDL>
+      {d.job && (
+        <p css="margin-top: 10px">{i18n._(t`Click to view job details`)}</p>
+      )}
+    </Fragment>
   );
 }
 

@@ -16,7 +16,7 @@ import RoutedTabs from '@components/RoutedTabs';
 import JobDetail from './JobDetail';
 import JobOutput from './JobOutput';
 import WorkflowDetail from './WorkflowDetail';
-import WorkflowOutput from './WorkflowOutput';
+import {WorkflowOutput} from './WorkflowOutput';
 import { JOB_TYPE_URL_SEGMENTS } from '../../constants';
 
 const CardHeader = styled(PFCardHeader)`

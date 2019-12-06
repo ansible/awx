@@ -4,9 +4,10 @@ import { t } from '@lingui/macro';
 import styled from 'styled-components';
 import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
-import Graph from './Graph';
-import StartScreen from './StartScreen';
-import Toolbar from './Toolbar';
+import {WorkflowWrapper} from '@components/Workflow';
+import VisualizerGraph from './VisualizerGraph';
+import VisualizerStartScreen from './VisualizerStartScreen';
+import VisualizerToolbar from './VisualizerToolbar';
 import { WorkflowJobTemplatesAPI } from '@api';
 
 const CenteredContent = styled.div`
@@ -15,12 +16,6 @@ const CenteredContent = styled.div`
   height: 100%;
   align-items: center;
   justify-content: center;
-`;
-
-const VisualizerLayout = styled.div`
-  display: flex;
-  flex-flow: column;
-  height: 100%;
 `;
 
 const fetchWorkflowNodes = async (templateId, pageNo = 1, nodes = []) => {
@@ -187,18 +182,18 @@ function Visualizer({ template, i18n }) {
   }
 
   return (
-    <VisualizerLayout>
-      <Toolbar template={template} />
+    <WorkflowWrapper>
+      <VisualizerToolbar template={template} />
       {graphLinks.length > 0 ? (
-        <Graph
+        <VisualizerGraph
           links={graphLinks}
           nodes={graphNodes}
           readOnly={!template.summary_fields.user_capabilities.edit}
         />
       ) : (
-        <StartScreen />
+        <VisualizerStartScreen />
       )}
-    </VisualizerLayout>
+    </WorkflowWrapper>
   );
 }
 

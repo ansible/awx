@@ -5,8 +5,9 @@ import styled from 'styled-components';
 import { CardBody as PFCardBody } from '@patternfly/react-core';
 import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
+import { WorkflowWrapper } from '@components/Workflow';
 import { WorkflowJobsAPI } from '@api';
-import Graph from './Graph';
+import WorkflowOutputGraph from './WorkflowOutputGraph';
 
 const CardBody = styled(PFCardBody)`
   height: calc(100vh - 240px);
@@ -183,11 +184,13 @@ function WorkflowOutput({ job, i18n }) {
 
   return (
     <CardBody>
-      <Toolbar>Toolbar</Toolbar>
-      <Graph
-        links={graphLinks}
-        nodes={graphNodes}
-      />
+      <WorkflowWrapper>
+        <Toolbar>Toolbar</Toolbar>
+        <WorkflowOutputGraph
+          links={graphLinks}
+          nodes={graphNodes}
+        />
+      </WorkflowWrapper>
     </CardBody>
   );
 }
