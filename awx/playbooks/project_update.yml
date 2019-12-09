@@ -115,7 +115,8 @@
         - update_insights
 
     - name: Repository Version
-      debug: msg="Repository Version {{ scm_version }}"
+      debug:
+        msg: "Repository Version {{ scm_version }}"
       tags:
         - update_git
         - update_hg
@@ -130,7 +131,8 @@
 
     - block:
         - name: detect requirements.yml
-          stat: path={{project_path|quote}}/roles/requirements.yml
+          stat:
+            path: '{{project_path|quote}}/roles/requirements.yml'
           register: doesRequirementsExist
 
         - name: fetch galaxy roles from requirements.yml
@@ -149,7 +151,8 @@
 
     - block:
         - name: detect collections/requirements.yml
-          stat: path={{project_path|quote}}/collections/requirements.yml
+          stat:
+            path: '{{project_path|quote}}/collections/requirements.yml'
           register: doesCollectionRequirementsExist
 
         - name: fetch galaxy collections from collections/requirements.yml
