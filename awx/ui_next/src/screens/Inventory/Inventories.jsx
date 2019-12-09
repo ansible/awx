@@ -61,9 +61,11 @@ class Inventories extends Component {
         t`Create New Group`
       ),
       [`/inventories/inventory/${inventory.id}/groups/${group &&
-        group.id}/details`]: i18n._(t`Details`),
+        group.id}`]: `${group && group.name}`,
       [`/inventories/inventory/${inventory.id}/groups/${group &&
-        group.id}/edit`]: `${group && group.name}`,
+        group.id}/details`]: i18n._(t`Group Details`),
+      [`/inventories/inventory/${inventory.id}/groups/${group &&
+        group.id}/edit`]: i18n._(t`Edit Details`),
     };
     this.setState({ breadcrumbConfig });
   };

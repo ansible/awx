@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { withI18n } from '@lingui/react';
 import { withRouter } from 'react-router-dom';
 import { GroupsAPI } from '@api';
+import { Card } from '@patternfly/react-core';
 
-import ContentError from '@components/ContentError';
 import InventoryGroupForm from '../InventoryGroupForm/InventoryGroupForm';
 
 function InventoryGroupsAdd({ history, inventory, setBreadcrumb }) {
@@ -21,15 +21,14 @@ function InventoryGroupsAdd({ history, inventory, setBreadcrumb }) {
   const handleCancel = () => {
     history.push(`/inventories/inventory/${inventory.id}/groups`);
   };
-  if (error) {
-    return <ContentError />;
-  }
   return (
-    <InventoryGroupForm
-      error={error}
-      handleCancel={handleCancel}
-      handleSubmit={handleSubmit}
-    />
+    <Card>
+      <InventoryGroupForm
+        error={error}
+        handleCancel={handleCancel}
+        handleSubmit={handleSubmit}
+      />
+    </Card>
   );
 }
 export default withI18n()(withRouter(InventoryGroupsAdd));

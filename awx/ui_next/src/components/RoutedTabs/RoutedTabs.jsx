@@ -3,6 +3,7 @@ import { shape, string, number, arrayOf } from 'prop-types';
 import { Tab, Tabs as PFTabs } from '@patternfly/react-core';
 import { withRouter } from 'react-router-dom';
 import styled from 'styled-components';
+import { CaretLeftIcon } from '@patternfly/react-icons';
 
 const Tabs = styled(PFTabs)`
   --pf-c-tabs__button--PaddingLeft: 20px;
@@ -62,7 +63,15 @@ function RoutedTabs(props) {
           eventKey={tab.id}
           key={tab.id}
           link={tab.link}
-          title={tab.name}
+          title={
+            tab.isNestedTabs ? (
+              <>
+                <CaretLeftIcon /> {tab.name}
+              </>
+            ) : (
+              tab.name
+            )
+          }
         />
       ))}
     </Tabs>

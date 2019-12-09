@@ -14,11 +14,15 @@ function InventoryGroupEdit({ history, inventoryGroup, inventory, match }) {
     } catch (err) {
       setError(err);
     } finally {
-      history.push(`/inventories/inventory/${inventory.id}/groups`);
+      history.push(
+        `/inventories/inventory/${inventory.id}/groups/${inventoryGroup.id}/details`
+      );
     }
   };
   const handleCancel = () => {
-    history.push(`/inventories/inventory/${inventory.id}/groups`);
+    history.push(
+      `/inventories/inventory/${inventory.id}/groups/${inventoryGroup.id}/details`
+    );
   };
   return (
     <InventoryGroupForm

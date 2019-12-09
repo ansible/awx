@@ -1,8 +1,9 @@
 import React from 'react';
 import { GroupsAPI } from '@api';
-import { MemoryRouter, Route } from 'react-router-dom';
-import { act } from 'react-dom/test-utils';
+import { Route } from 'react-router-dom';
+import { createMemoryHistory } from 'history';
 
+import { act } from 'react-dom/test-utils';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
 
 import InventoryGroupDetail from './InventoryGroupDetail';
@@ -28,19 +29,24 @@ const inventoryGroup = {
 };
 describe('<InventoryGroupDetail />', () => {
   let wrapper;
+  let history;
   beforeEach(async () => {
     await act(async () => {
+      history = createMemoryHistory({
+        initialEntries: ['/inventories/inventory/1/groups/1/edit'],
+      });
       wrapper = mountWithContexts(
-        <MemoryRouter
-          initialEntries={['/inventories/inventory/1/groups/1/edit']}
-        >
-          <Route
-            path="/inventories/inventory/:id/groups/:groupId"
-            component={() => (
-              <InventoryGroupDetail inventoryGroup={inventoryGroup} />
-            )}
-          />
-        </MemoryRouter>
+        <Route
+          path="/inventories/inventory/:id/groups/:groupId"
+          component={() => (
+            <InventoryGroupDetail inventoryGroup={inventoryGroup} />
+          )}
+        />,
+        {
+          context: {
+            router: { history, route: { location: history.location } },
+          },
+        }
       );
       await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     });
@@ -51,20 +57,22 @@ describe('<InventoryGroupDetail />', () => {
   test('InventoryGroupDetail renders successfully', () => {
     expect(wrapper.length).toBe(1);
   });
-  test('should open delete modal and then call api to delete the group', () => {
-    wrapper.find('button[aria-label="Delete"]').simulate('click');
+  test('should open delete modal and then call api to delete the group', async () => {
+    await act(async () => {
+      wrapper.find('button[aria-label="Delete"]').simulate('click');
+    });
+    await waitForElement(wrapper, 'Modal', el => el.length === 1);
     expect(wrapper.find('Modal').length).toBe(1);
-    wrapper.find('button[aria-label="confirm delete"]').simulate('click');
+    await act(async () => {
+      wrapper.find('button[aria-label="confirm delete"]').simulate('click');
+    });
     expect(GroupsAPI.destroy).toBeCalledWith(1);
   });
   test('should navigate user to edit form on edit button click', async () => {
     wrapper.find('button[aria-label="Edit"]').prop('onClick');
-    expect(
-      wrapper
-        .find('Router')
-        .at(1)
-        .prop('history').location.pathname
-    ).toEqual('/inventories/inventory/1/groups/1/edit');
+    expect(history.location.pathname).toEqual(
+      '/inventories/inventory/1/groups/1/edit'
+    );
   });
   test('details shoudld render with the proper values', () => {
     expect(wrapper.find('Detail[label="Name"]').prop('value')).toBe('Foo');

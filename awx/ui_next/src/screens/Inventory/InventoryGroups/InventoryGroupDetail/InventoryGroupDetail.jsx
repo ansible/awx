@@ -5,14 +5,21 @@ import { CardBody, Button } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';
 import { withRouter, Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { VariablesInput } from '@components/CodeMirrorInput';
-import ContentError from '@components/ContentError';
+import { VariablesInput as CodeMirrorInput } from '@components/CodeMirrorInput';
+import ErrorDetail from '@components/ErrorDetail';
 import AlertModal from '@components/AlertModal';
 import { formatDateString } from '@util/dates';
 
 import { GroupsAPI } from '@api';
 import { DetailList, Detail } from '@components/DetailList';
 
+const VariablesInput = styled(CodeMirrorInput)`
+  .pf-c-form__label {
+    font-weight: 600;
+    font-size: 16px;
+  }
+  margin: 20px 0;
+`;
 const ActionButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
@@ -26,6 +33,7 @@ function InventoryGroupDetail({ i18n, history, match, inventoryGroup }) {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const handleDelete = async () => {
+    setIsDeleteModalOpen(false);
     try {
       await GroupsAPI.destroy(inventoryGroup.id);
       history.push(`/inventories/inventory/${match.params.id}/groups`);
@@ -34,7 +42,17 @@ function InventoryGroupDetail({ i18n, history, match, inventoryGroup }) {
     }
   };
   if (error) {
-    return <ContentError />;
+    return (
+      <AlertModal
+        variant="danger"
+        title={i18n._(t`Error!`)}
+        isOpen={error}
+        onClose={() => setError(false)}
+      >
+        {i18n._(t`Failed to delete group ${inventoryGroup.name}.`)}
+        <ErrorDetail error={error} />
+      </AlertModal>
+    );
   }
   if (isDeleteModalOpen) {
     return (
@@ -77,21 +95,14 @@ function InventoryGroupDetail({ i18n, history, match, inventoryGroup }) {
           label={i18n._(t`Description`)}
           value={inventoryGroup.description}
         />
-        <Detail
-          fullWidth
-          label={i18n._(t`Variables`)}
-          value={
-            <VariablesInput
-              css="margin: 20px 0"
-              id="inventoryGroup-variables"
-              readOnly
-              value={inventoryGroup.variables}
-              rows={4}
-              label=""
-            />
-          }
-        />
       </DetailList>
+      <VariablesInput
+        id="inventoryGroup-variables"
+        readOnly
+        value={inventoryGroup.variables}
+        rows={4}
+        label={i18n._(t`Variables`)}
+      />
       <DetailList>
         <Detail
           label={i18n._(t`Created`)}

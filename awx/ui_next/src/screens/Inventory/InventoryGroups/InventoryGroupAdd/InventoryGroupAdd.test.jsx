@@ -13,7 +13,7 @@ describe('<InventoryGroupAdd />', () => {
   let history;
   beforeEach(async () => {
     history = createMemoryHistory({
-      initialEntries: ['/inventories/1/groups'],
+      initialEntries: ['/inventories/inventory/1/groups'],
     });
     await act(async () => {
       wrapper = mountWithContexts(
@@ -34,14 +34,16 @@ describe('<InventoryGroupAdd />', () => {
   afterEach(() => {
     wrapper.unmount();
   });
-  test('InventoryGroupEdit renders successfully', () => {
+  test('InventoryGroupAdd renders successfully', () => {
     expect(wrapper.length).toBe(1);
   });
   test('cancel should navigate user to Inventory Groups List', async () => {
     await act(async () => {
       waitForElement(wrapper, 'isLoading', el => el.length === 0);
     });
-    expect(history.location.pathname).toEqual('/inventories/1/groups');
+    expect(history.location.pathname).toEqual(
+      '/inventories/inventory/1/groups'
+    );
   });
   test('handleSubmit should call api', async () => {
     await act(async () => {
