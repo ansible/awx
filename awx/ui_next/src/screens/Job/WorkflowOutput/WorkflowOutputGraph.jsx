@@ -1,14 +1,22 @@
 import React, { Fragment, useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
+import { withI18n } from '@lingui/react';
+import { t } from '@lingui/macro';
 import { WorkflowHelp, WorkflowHelpDetails } from '@components/Workflow';
 import { secondsToHHMMSS } from '@util/dates';
-import { calcZoomAndFit, constants as wfConstants, drawLinkLine, drawNodeTypeLetter, drawRootNode, enterLinks, enterNodes, layoutGraph } from '@util/workflow';
+import {
+  calcZoomAndFit,
+  constants as wfConstants,
+  drawLinkLine,
+  drawNodeTypeLetter,
+  drawRootNode,
+  enterLinks,
+  enterNodes,
+  layoutGraph,
+} from '@util/workflow';
 import { JOB_TYPE_URL_SEGMENTS } from '../../../constants';
 
-function Graph({
-  links,
-  nodes,
-}) {
+function Graph({ links, nodes, i18n }) {
   const [helpText, setHelpText] = useState();
   const svgRef = useRef(null);
   const gRef = useRef(null);
@@ -65,15 +73,23 @@ function Graph({
           .attr('height', wfConstants.nodeH)
           .attr('rx', 2)
           .attr('ry', 2)
-          .attr('stroke', (d) => {
+          .attr('stroke', d => {
             if (d.job) {
-              if (d.job.status === 'failed' || d.job.status === 'error' || d.job.status === 'canceled') {
+              if (
+                d.job.status === 'failed' ||
+                d.job.status === 'error' ||
+                d.job.status === 'canceled'
+              ) {
                 return '#d9534f';
-              } else if (d.job.status === 'successful' || d.job.status === 'ok') {
+              }
+              if (
+                d.job.status === 'successful' ||
+                d.job.status === 'ok'
+              ) {
                 return '#5cb85c';
               }
             }
-            
+
             return '#93969A';
           })
           .attr('stroke-width', '2px')
@@ -91,39 +107,49 @@ function Graph({
           .attr('width', wfConstants.nodeW)
           .attr('height', wfConstants.nodeH)
           .attr('class', 'WorkflowGraph-nodeContents')
-          .html(
-            d => {
-              if (d.job) {
-                let elapsed;
-                if (d.job.elapsed) {
-                  elapsed = `<div class="WorkflowGraph-elapsedWrapper">
-                    <span class="WorkflowGraph-elapsedText">${secondsToHHMMSS(d.job.elapsed)}</span>
+          .html(d => {
+            if (d.job) {
+              let elapsed;
+              if (d.job.elapsed) {
+                elapsed = `<div class="WorkflowGraph-elapsedWrapper">
+                    <span class="WorkflowGraph-elapsedText">${secondsToHHMMSS(
+                      d.job.elapsed
+                    )}</span>
                   </div>`;
-                }
-                let jobStatus;
-                if (d.job.status === 'running') {
-                  jobStatus = `<div class="WorkflowGraph-jobStatus WorkflowGraph-jobStatus--running"></div>`;
-                } else if (d.job.status === 'new' ||
+              }
+              let jobStatus;
+              if (d.job.status === 'running') {
+                jobStatus = `<div class="WorkflowGraph-jobStatus WorkflowGraph-jobStatus--running"></div>`;
+              } else if (
+                d.job.status === 'new' ||
                 d.job.status === 'pending' ||
                 d.job.status === 'waiting' ||
-                d.job.status === 'never updated') {
-                  jobStatus = `<div class="WorkflowGraph-jobStatus WorkflowGraph-jobStatus--waiting"></div>`;
-                } else if (d.job.status === 'failed' || d.job.status === 'error' || d.job.status === 'canceled') {
-                  jobStatus = `
+                d.job.status === 'never updated'
+              ) {
+                jobStatus = `<div class="WorkflowGraph-jobStatus WorkflowGraph-jobStatus--waiting"></div>`;
+              } else if (
+                d.job.status === 'failed' ||
+                d.job.status === 'error' ||
+                d.job.status === 'canceled'
+              ) {
+                jobStatus = `
                     <div class="WorkflowGraph-jobStatus WorkflowGraph-jobStatus--split">
                       <div class="WorkflowGraph-jobStatus--whiteTop"></div>
                       <div class="WorkflowGraph-jobStatus--fail"></div>
                     </div>
                   `;
-                } else if (d.job.status === 'successful' || d.job.status === 'ok') {
-                  jobStatus = `
+              } else if (
+                d.job.status === 'successful' ||
+                d.job.status === 'ok'
+              ) {
+                jobStatus = `
                     <div class="WorkflowGraph-jobStatus WorkflowGraph-jobStatus--split">
                       <div class="WorkflowGraph-jobStatus--success"></div>
                       <div class="WorkflowGraph-jobStatus--whiteBottom"></div>
                     </div>
                   `;
-                }
-                return `
+              }
+              return `
                   <div class="WorkflowGraph-jobTopLine">
                     ${jobStatus}
                     <p class="WorkflowGraph-ellipsisText">${
@@ -134,16 +160,14 @@ function Graph({
                   </div>
                   ${elapsed}
                 `;
-              } else {
-                return `<p class="WorkflowGraph-nameText WorkflowGraph-ellipsisText">${
-                  d.unifiedJobTemplate
-                    ? d.unifiedJobTemplate.name
-                    : i18n._(t`DELETED`)
-                }</p>`;
-              }
             }
 
-          );
+            return `<p class="WorkflowGraph-nameText WorkflowGraph-ellipsisText">${
+              d.unifiedJobTemplate
+                ? d.unifiedJobTemplate.name
+                : i18n._(t`DELETED`)
+            }</p>`;
+          });
 
         nodeRef
           .append('rect')
@@ -153,17 +177,24 @@ function Graph({
           .style('opacity', '0')
           .on('mouseenter', d => {
             if (d.job) {
-              nodeRef.select('.WorkflowGraph-nodeOverlay').style('cursor', 'pointer');
+              nodeRef
+                .select('.WorkflowGraph-nodeOverlay')
+                .style('cursor', 'pointer');
             }
             setHelpText(d);
           })
           .on('mouseleave', () => {
-            nodeRef.select('.WorkflowGraph-nodeOverlay').style('cursor', 'default');
+            nodeRef
+              .select('.WorkflowGraph-nodeOverlay')
+              .style('cursor', 'default');
             setHelpText(null);
           })
-          .on('click', (d) => {
+          .on('click', d => {
             if (d.job) {
-              window.open(`/#/jobs/${JOB_TYPE_URL_SEGMENTS[d.job.type]}/${d.job.id}`,'_blank');
+              window.open(
+                `/#/jobs/${JOB_TYPE_URL_SEGMENTS[d.job.type]}/${d.job.id}`,
+                '_blank'
+              );
             }
           });
 
@@ -173,7 +204,7 @@ function Graph({
 
     // This will make sure that all the link elements appear before the nodes in the dom
     svgGroup.selectAll('.WorkflowGraph-node').order();
-  }, [links, nodes]);
+  }, [links, nodes, i18n]);
 
   // Attempt to zoom the graph to fit the available screen space
   useEffect(() => {
@@ -190,16 +221,18 @@ function Graph({
     // For some reason the root width needs to be added?
     gBoundingClientRect.width += wfConstants.rootW;
 
-    const svgElement = document.getElementById("workflow-svg");
+    const svgElement = document.getElementById('workflow-svg');
     const svgBoundingClientRect = svgElement.getBoundingClientRect();
 
-    const [scaleToFit, yTranslate] = calcZoomAndFit(svgBoundingClientRect, gBoundingClientRect, gBBoxDimensions);
+    const [scaleToFit, yTranslate] = calcZoomAndFit(
+      svgBoundingClientRect,
+      gBoundingClientRect,
+      gBBoxDimensions
+    );
 
     d3.select(svgRef.current).call(
       zoomRef.transform,
-      d3.zoomIdentity
-        .translate(0, yTranslate)
-        .scale(scaleToFit)
+      d3.zoomIdentity.translate(0, yTranslate).scale(scaleToFit)
     );
     // We only want this to run once (when the component mounts)
     // but this rule will throw a warning if we don't include
@@ -226,4 +259,4 @@ function Graph({
   );
 }
 
-export default Graph;
+export default withI18n()(Graph);

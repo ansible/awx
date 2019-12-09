@@ -164,7 +164,7 @@ function WorkflowOutput({ job, i18n }) {
       }
     }
     fetchData();
-  }, [job.unified_job_template, i18n]);
+  }, [job.id, job.unified_job_template, i18n]);
 
   if (isLoading) {
     return (
@@ -186,10 +186,7 @@ function WorkflowOutput({ job, i18n }) {
     <CardBody>
       <WorkflowWrapper>
         <Toolbar>Toolbar</Toolbar>
-        <WorkflowOutputGraph
-          links={graphLinks}
-          nodes={graphNodes}
-        />
+        <WorkflowOutputGraph links={graphLinks} nodes={graphNodes} />
       </WorkflowWrapper>
     </CardBody>
   );

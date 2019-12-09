@@ -4,7 +4,7 @@ import { t } from '@lingui/macro';
 import styled from 'styled-components';
 import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
-import {WorkflowWrapper} from '@components/Workflow';
+import { WorkflowWrapper } from '@components/Workflow';
 import VisualizerGraph from './VisualizerGraph';
 import VisualizerStartScreen from './VisualizerStartScreen';
 import VisualizerToolbar from './VisualizerToolbar';

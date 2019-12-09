@@ -6,27 +6,24 @@ export const constants = {
   nodeW: 180,
   nodeH: 60,
   rootW: 72,
-  rootH: 40
+  rootH: 40,
 };
 
-export function calcZoomAndFit(svgBoundingClientRect, gBoundingClientRect, gBBoxDimensions) {
-  const scaleNeededForMaxHeight =
-    svgBoundingClientRect.height / gBoundingClientRect.height;
-  const scaleNeededForMaxWidth =
-    svgBoundingClientRect.width / gBoundingClientRect.width;
-  const lowerScale = Math.min(
-    scaleNeededForMaxHeight,
-    scaleNeededForMaxWidth
-  );
+export function calcZoomAndFit(svgBounds, gBounds, gBBoxDimensions) {
+  const scaleNeededForMaxHeight = svgBounds.height / gBounds.height;
+  const scaleNeededForMaxWidth = svgBounds.width / gBounds.width;
+  const lowerScale = Math.min(scaleNeededForMaxHeight, scaleNeededForMaxWidth);
 
   let scaleToFit;
   let yTranslate;
   if (lowerScale < 0.1 || lowerScale > 2) {
     scaleToFit = lowerScale < 0.1 ? 0.1 : 2;
-    yTranslate = svgBoundingClientRect.height / 2 - (constants.nodeH * scaleToFit) / 2;
+    yTranslate = svgBounds.height / 2 - (constants.nodeH * scaleToFit) / 2;
   } else {
     scaleToFit = Math.floor(lowerScale * 1000) / 1000;
-    yTranslate = (svgBoundingClientRect.height - gBoundingClientRect.height*scaleToFit)/2 - gBBoxDimensions.y*scaleToFit;
+    yTranslate =
+      (svgBounds.height - gBounds.height * scaleToFit) / 2 -
+      gBBoxDimensions.y * scaleToFit;
   }
 
   return [scaleToFit, yTranslate];
@@ -34,9 +31,9 @@ export function calcZoomAndFit(svgBoundingClientRect, gBoundingClientRect, gBBox
 
 export function normalizeY(nodePositions, y) {
   return y - nodePositions[1].y;
-};
+}
 
-export function lineData(d, nodePositions) {
+export function lineData(link, nodePositions) {
   const line = d3
     .line()
     .x(d => {
@@ -47,17 +44,17 @@ export function lineData(d, nodePositions) {
     });
 
   const sourceX =
-    nodePositions[d.source.id].x + nodePositions[d.source.id].width + 1;
+    nodePositions[link.source.id].x + nodePositions[link.source.id].width + 1;
   let sourceY =
-    normalizeY(nodePositions, nodePositions[d.source.id].y) +
-    nodePositions[d.source.id].height / 2;
-  const targetX = nodePositions[d.target.id].x - 1;
+    normalizeY(nodePositions, nodePositions[link.source.id].y) +
+    nodePositions[link.source.id].height / 2;
+  const targetX = nodePositions[link.target.id].x - 1;
   const targetY =
-    normalizeY(nodePositions, nodePositions[d.target.id].y) +
-    nodePositions[d.target.id].height / 2;
+    normalizeY(nodePositions, nodePositions[link.target.id].y) +
+    nodePositions[link.target.id].height / 2;
 
   // There's something off with the math on the root node...
-  if (d.source.id === 1) {
+  if (link.source.id === 1) {
     sourceY += 10;
   }
 
@@ -71,7 +68,7 @@ export function lineData(d, nodePositions) {
       y: targetY,
     },
   ]);
-};
+}
 
 export function getLinkOverlayPoints(d, nodePositions) {
   const sourceX =
@@ -118,7 +115,7 @@ export function getLinkOverlayPoints(d, nodePositions) {
   ].join(',');
 
   return [pt1, pt2, pt3, pt4].join(' ');
-};
+}
 
 export function layoutGraph(nodes, links) {
   const g = new dagre.graphlib.Graph();
@@ -131,9 +128,17 @@ export function layoutGraph(nodes, links) {
 
   nodes.forEach(node => {
     if (node.id === 1) {
-      g.setNode(node.id, { label: '', width: constants.rootW, height: constants.rootH });
+      g.setNode(node.id, {
+        label: '',
+        width: constants.rootW,
+        height: constants.rootH,
+      });
     } else {
-      g.setNode(node.id, { label: '', width: constants.nodeW, height: constants.nodeH });
+      g.setNode(node.id, {
+        label: '',
+        width: constants.nodeW,
+        height: constants.nodeH,
+      });
     }
   });
 
@@ -144,7 +149,7 @@ export function layoutGraph(nodes, links) {
   dagre.layout(g);
 
   return g;
-};
+}
 
 export function drawRootNode(nodeRef) {
   nodeRef
@@ -164,7 +169,7 @@ export function drawRootNode(nodeRef) {
     .attr('fill', 'white')
     .attr('class', 'WorkflowGraph-startText')
     .text('START');
-};
+}
 
 export function drawLinkLine(linkEnter, nodePositions) {
   linkEnter
@@ -185,7 +190,7 @@ export function drawLinkLine(linkEnter, nodePositions) {
       }
       return '#D7D7D7';
     });
-};
+}
 
 export function drawNodeTypeLetter(nodeRef) {
   nodeRef
@@ -252,47 +257,43 @@ export function drawNodeTypeLetter(nodeRef) {
         ? null
         : 'none';
     });
-  };
+}
 
-  export function enterLinks(svgGroup, links) {
-    const linkRefs = svgGroup
-      .selectAll('.WorkflowGraph-link')
-      .data(links, d => {
-        return `${d.source.id}-${d.target.id}`;
-      });
+export function enterLinks(svgGroup, links) {
+  const linkRefs = svgGroup.selectAll('.WorkflowGraph-link').data(links, d => {
+    return `${d.source.id}-${d.target.id}`;
+  });
 
-    // Remove any stale links
-    linkRefs.exit().remove();
+  // Remove any stale links
+  linkRefs.exit().remove();
 
-    return linkRefs
-      .enter()
-      .append('g')
-      .attr('class', 'WorkflowGraph-link')
-      .attr('id', d => `link-${d.source.id}-${d.target.id}`)
-      .attr('stroke-width', '2px');
-  };
+  return linkRefs
+    .enter()
+    .append('g')
+    .attr('class', 'WorkflowGraph-link')
+    .attr('id', d => `link-${d.source.id}-${d.target.id}`)
+    .attr('stroke-width', '2px');
+}
 
-  export function enterNodes(svgGroup, nodes, nodePositions) {
-    const nodeRefs = svgGroup
-      .selectAll('.WorkflowGraph-node')
-      .data(nodes, d => {
-        return d.id;
-      });
+export function enterNodes(svgGroup, nodes, nodePositions) {
+  const nodeRefs = svgGroup.selectAll('.WorkflowGraph-node').data(nodes, d => {
+    return d.id;
+  });
 
-    // Remove any stale nodes
-    nodeRefs.exit().remove();
-    
-    return nodeRefs
-      .enter()
-      .append('g')
-      .attr('class', 'WorkflowGraph-node')
-      .attr('id', d => `node-${d.id}`)
-      .attr(
-        'transform',
-        d =>
-          `translate(${nodePositions[d.id].x},${normalizeY(
-            nodePositions,
-            nodePositions[d.id].y
-          )})`
-      );
-  };
+  // Remove any stale nodes
+  nodeRefs.exit().remove();
+
+  return nodeRefs
+    .enter()
+    .append('g')
+    .attr('class', 'WorkflowGraph-node')
+    .attr('id', d => `node-${d.id}`)
+    .attr(
+      'transform',
+      d =>
+        `translate(${nodePositions[d.id].x},${normalizeY(
+          nodePositions,
+          nodePositions[d.id].y
+        )})`
+    );
+}

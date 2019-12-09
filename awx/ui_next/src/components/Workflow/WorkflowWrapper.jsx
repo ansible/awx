@@ -9,12 +9,16 @@ const WorkflowWrapperDiv = styled.div`
   svg {
     display: flex;
     height: 100%;
-    background-color: #F6F6F6;
+    background-color: #f6f6f6;
   }
 
   @keyframes pulse {
-    from {-webkit-transform:scale(1);}
-    to {-webkit-transform:scale(0);}
+    from {
+      -webkit-transform: scale(1);
+    }
+    to {
+      -webkit-transform: scale(0);
+    }
   }
 
   .WorkflowGraph-nodeContents {
@@ -95,7 +99,7 @@ const WorkflowWrapperDiv = styled.div`
   .WorkflowGraph-elapsedText {
     font-size: 12px;
     font-weight: bold;
-    background-color: #EDEDED;
+    background-color: #ededed;
     padding: 3px 12px;
     border-radius: 14px;
   }
@@ -177,11 +181,7 @@ const WorkflowWrapperDiv = styled.div`
 `;
 
 function WorkflowWrapper({ children }) {
-  return (
-    <WorkflowWrapperDiv>
-      {children}
-    </WorkflowWrapperDiv>
-  );
+  return <WorkflowWrapperDiv>{children}</WorkflowWrapperDiv>;
 }
 
 export default WorkflowWrapper;

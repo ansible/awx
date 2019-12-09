@@ -2,7 +2,18 @@ import React, { Fragment, useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { calcZoomAndFit, constants, drawLinkLine, drawNodeTypeLetter, drawRootNode, enterLinks, enterNodes, getLinkOverlayPoints, layoutGraph, normalizeY } from '@util/workflow';
+import {
+  calcZoomAndFit,
+  constants,
+  drawLinkLine,
+  drawNodeTypeLetter,
+  drawRootNode,
+  enterLinks,
+  enterNodes,
+  getLinkOverlayPoints,
+  layoutGraph,
+  normalizeY,
+} from '@util/workflow';
 import { WorkflowHelp, WorkflowHelpDetails } from '@components/Workflow';
 
 function Graph({ links, nodes, readOnly, i18n }) {
@@ -372,16 +383,18 @@ function Graph({ links, nodes, readOnly, i18n }) {
     // For some reason the root width needs to be added?
     gBoundingClientRect.width += constants.rootW;
 
-    const svgElement = document.getElementById("workflow-svg");
+    const svgElement = document.getElementById('workflow-svg');
     const svgBoundingClientRect = svgElement.getBoundingClientRect();
 
-    const [scaleToFit, yTranslate] = calcZoomAndFit(svgBoundingClientRect, gBoundingClientRect, gBBoxDimensions);
+    const [scaleToFit, yTranslate] = calcZoomAndFit(
+      svgBoundingClientRect,
+      gBoundingClientRect,
+      gBBoxDimensions
+    );
 
     d3.select(svgRef.current).call(
       zoomRef.transform,
-      d3.zoomIdentity
-        .translate(0, yTranslate)
-        .scale(scaleToFit)
+      d3.zoomIdentity.translate(0, yTranslate).scale(scaleToFit)
     );
     // We only want this to run once (when the component mounts)
     // but this rule will throw a warning if we don't include
