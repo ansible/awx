@@ -281,15 +281,18 @@ class TestTaskImpact:
             return job
         return r
 
-    def test_limit_task_impact(self, job_host_limit):
+    def test_limit_task_impact(self, job_host_limit, run_computed_fields_right_away):
         job = job_host_limit(5, 2)
+        job.inventory.refresh_from_db()  # FIXME: computed fields operates on reloaded inventory
+        assert job.inventory.total_hosts == 5
         assert job.task_impact == 2 + 1  # forks becomes constraint
 
-    def test_host_task_impact(self, job_host_limit):
+    def test_host_task_impact(self, job_host_limit, run_computed_fields_right_away):
         job = job_host_limit(3, 5)
+        job.inventory.refresh_from_db()  # FIXME: computed fields operates on reloaded inventory
         assert job.task_impact == 3 + 1  # hosts becomes constraint
 
-    def test_shard_task_impact(self, slice_job_factory):
+    def test_shard_task_impact(self, slice_job_factory, run_computed_fields_right_away):
         # factory creates on host per slice
         workflow_job = slice_job_factory(3, jt_kwargs={'forks': 50}, spawn=True)
         # arrange the jobs by their number
@@ -308,4 +311,5 @@ class TestTaskImpact:
             len(jobs[0].inventory.get_script_data(slice_number=i + 1, slice_count=3)['all']['hosts'])
             for i in range(3)
         ] == [2, 1, 1]
+        jobs[0].inventory.refresh_from_db()  # FIXME: computed fields operates on reloaded inventory
         assert [job.task_impact for job in jobs] == [3, 2, 2]
