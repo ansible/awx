@@ -123,6 +123,22 @@ def project_playbooks():
 
 
 @pytest.fixture
+def run_computed_fields_right_away(request):
+
+    def run_me(inventory_id, should_update_hosts=True):
+        i = Inventory.objects.get(id=inventory_id)
+        i.update_computed_fields(update_hosts=should_update_hosts)
+
+    mocked = mock.patch(
+        'awx.main.signals.update_inventory_computed_fields.delay',
+        new=run_me
+    )
+    mocked.start()
+
+    request.addfinalizer(mocked.stop)
+
+
+@pytest.fixture
 @mock.patch.object(Project, "update", lambda self, **kwargs: None)
 def project(instance, organization):
     prj = Project.objects.create(name="test-proj",
