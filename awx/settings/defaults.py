@@ -1235,3 +1235,7 @@ MIDDLEWARE = [
     'awx.main.middleware.URLModificationMiddleware',
     'awx.main.middleware.SessionTimeoutMiddleware',
 ]
+
+# Secret header value to exchange for websockets responsible for distributing websocket messages.
+# This needs to be kept secret and randomly generated
+BROADCAST_WEBSOCKETS_SECRET = ''

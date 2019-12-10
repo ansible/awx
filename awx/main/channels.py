@@ -8,6 +8,7 @@ import asyncio
 from channels_redis.core import RedisChannelLayer
 from channels.layers import get_channel_layer
 
+from django.utils.encoding import force_bytes
 from django.conf import settings
 from django.apps import apps
 from django.core.serializers.json import DjangoJSONEncoder
@@ -39,13 +40,17 @@ class RedisGroupBroadcastChannelLayer(RedisChannelLayer):
             loop.create_task(self.connect(host, settings.WEBSOCKETS_PORT))
 
     async def connect(self, host, port, secret='abc123', attempt=0):
+        from awx.main.consumers import WebsocketSecretAuthHelper # noqa
+
         if attempt > 0:
             await asyncio.sleep(5)
         channel_layer = get_channel_layer()
         uri = "http://{}:{}/websocket/broadcast/".format(host, port)
         timeout = aiohttp.ClientTimeout(total=10)
+
+        secret_val = WebsocketSecretAuthHelper.construct_secret()
         try:
-            async with aiohttp.ClientSession(headers={'secret': secret}, timeout=timeout) as session:
+            async with aiohttp.ClientSession(headers={'secret': secret_val}, timeout=timeout) as session:
                 async with session.ws_connect(uri) as websocket:
                     # TODO: Surface a health status of the broadcast interconnect
                     async for msg in websocket:

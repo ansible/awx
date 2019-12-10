@@ -2,10 +2,16 @@
 import os
 import json
 import logging
+import codecs
+import datetime
+import hmac
 
+from django.utils.encoding import force_bytes
 from django.utils.encoding import smart_str
 from django.http.cookie import parse_cookie
 from django.core.serializers.json import DjangoJSONEncoder
+from django.conf import settings
+from django.utils.encoding import force_bytes
 
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.layers import get_channel_layer
@@ -21,20 +27,90 @@ XRF_KEY = '_auth_user_xrf'
 BROADCAST_GROUP = 'broadcast-group_send'
 
 
-class BroadcastConsumer(AsyncJsonWebsocketConsumer):
-    async def connect(self):
-        secret = None
-        for k, v in self.scope['headers']:
+class WebsocketSecretAuthHelper:
+    """
+    Middlewareish for websockets to verify node websocket broadcast interconnect.
+
+    Note: The "ish" is due to the channels routing interface. Routing occurs 
+    _after_ authentication; making it hard to apply this auth to _only_ a subset of
+    websocket endpoints.
+    """
+
+    @classmethod
+    def construct_secret(cls):
+        nonce_serialized = "{}".format(int((datetime.datetime.utcnow()-datetime.datetime.fromtimestamp(0)).total_seconds()))
+        payload_dict = {
+            'secret': settings.BROADCAST_WEBSOCKETS_SECRET,
+            'nonce': nonce_serialized
+        }
+        payload_serialized = json.dumps(payload_dict)
+
+        secret_serialized = hmac.new(force_bytes(settings.BROADCAST_WEBSOCKETS_SECRET),
+                                     msg=force_bytes(payload_serialized),
+                                     digestmod='sha256').hexdigest()
+
+        return 'HMAC-SHA256 {}:{}'.format(nonce_serialized, secret_serialized)
+
+
+    @classmethod
+    def verify_secret(cls, s, nonce_tolerance=300):
+        hex_decoder = codecs.getdecoder("hex_codec")
+
+        try:
+            (prefix, payload) = s.split(' ')
+            if prefix != 'HMAC-SHA256':
+                raise ValueError('Unsupported encryption algorithm')
+            (nonce_parsed, secret_parsed) = payload.split(':')
+        except Exception:
+            raise ValueError("Failed to parse secret")
+
+        try:
+            payload_expected = {
+                'secret': settings.BROADCAST_WEBSOCKETS_SECRET,
+                'nonce': nonce_parsed,
+            }
+            payload_serialized = json.dumps(payload_expected)
+        except Exception:
+            raise ValueError("Failed to create hash to compare to secret.")
+
+        secret_serialized = hmac.new(force_bytes(settings.BROADCAST_WEBSOCKETS_SECRET),
+                                     msg=force_bytes(payload_serialized),
+                                     digestmod='sha256').hexdigest()
+
+        if secret_serialized != secret_parsed:
+            raise ValueError("Invalid secret")
+
+        # Avoid timing attack and check the nonce after all the heavy lifting
+        now = datetime.datetime.utcnow()
+        nonce_parsed = datetime.datetime.fromtimestamp(int(nonce_parsed))
+        if (now-nonce_parsed).total_seconds() > nonce_tolerance:
+            raise ValueError("Potential replay attack or machine(s) time out of sync.")
+
+        return True
+
+    @classmethod
+    def is_authorized(cls, scope):
+        secret = ''
+        for k, v in scope['headers']:
             if k.decode("utf-8") == 'secret':
                 secret = v.decode("utf-8")
                 break
-        if secret == 'abc123':
-            # TODO: log ip of connected client
-            logger.info("Client connected")
-            await self.accept()
-            await self.channel_layer.group_add(BROADCAST_GROUP, self.channel_name)
-        else:
+        WebsocketSecretAuthHelper.verify_secret(secret)
+
+
+class BroadcastConsumer(AsyncJsonWebsocketConsumer):
+
+    async def connect(self):
+        try:
+            WebsocketSecretAuthHelper.is_authorized(self.scope)
+        except Exception:
             await self.close()
+            return
+
+        # TODO: log ip of connected client
+        logger.info("Client connected")
+        await self.accept()
+        await self.channel_layer.group_add(BROADCAST_GROUP, self.channel_name)
 
     async def disconnect(self, code):
         # TODO: log ip of disconnected client
