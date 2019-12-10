@@ -51,8 +51,6 @@ class SelectResourceStep extends React.Component {
       const { data } = await onSearch(queryParams);
       const { count, results } = data;
 
-      debugger;
-
       this.setState({
         resources: results,
         count,
