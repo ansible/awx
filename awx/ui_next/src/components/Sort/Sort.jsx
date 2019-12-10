@@ -1,15 +1,16 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { withRouter } from 'react-router-dom';
 import { t } from '@lingui/macro';
 import {
   Button,
-  Dropdown as PFDropdown,
+  ButtonVariant,
+  Dropdown,
   DropdownPosition,
   DropdownToggle,
   DropdownItem,
-  Tooltip,
+  InputGroup,
 } from '@patternfly/react-core';
 import {
   SortAlphaDownIcon,
@@ -18,57 +19,10 @@ import {
   SortNumericUpIcon,
 } from '@patternfly/react-icons';
 
-import styled from 'styled-components';
-
 import {
   parseQueryString
 } from '@util/qs';
 import { SortColumns, QSConfig } from '@types';
-
-const Dropdown = styled(PFDropdown)`
-  &&& {
-    > button {
-      min-height: 30px;
-      min-width: 70px;
-      height: 30px;
-      padding: 0 10px;
-      margin: 0px;
-
-      > span {
-        /* text element within dropdown */
-        width: auto;
-      }
-
-      > svg {
-        /* caret icon */
-        margin: 0px;
-        padding-top: 3px;
-        padding-left: 3px;
-      }
-    }
-  }
-`;
-
-const IconWrapper = styled.span`
-  > svg {
-    font-size: 18px;
-  }
-`;
-
-const SortButton = styled(Button)`
-  padding: 5px 8px;
-  margin-top: 3px;
-
-  &:hover {
-    background-color: #0166cc;
-    color: white;
-  }
-`;
-
-const SortBy = styled.span`
-  margin-right: 15px;
-  font-size: var(--pf-global--FontSize--md);
-`;
 
 class Sort extends React.Component {
   constructor(props) {
@@ -165,12 +119,10 @@ class Sort extends React.Component {
     }
 
     return (
-      <React.Fragment>
+      <Fragment>
         {sortDropdownItems.length > 0 && (
-          <React.Fragment>
-            <SortBy>{i18n._(t`Sort By`)}</SortBy>
+          <InputGroup>
             <Dropdown
-              style={{ marginRight: '10px' }}
               onToggle={this.handleDropdownToggle}
               onSelect={this.handleDropdownSelect}
               direction={up}
@@ -185,23 +137,16 @@ class Sort extends React.Component {
               }
               dropdownItems={sortDropdownItems}
             />
-          </React.Fragment>
+            <Button
+              variant={ButtonVariant.control}
+              aria-label={i18n._(t`Reverse Sort Order`)}
+              onClick={this.handleSort}
+            >
+              <SortIcon />
+            </Button>
+          </InputGroup>
         )}
-        <Tooltip
-          content={<div>{i18n._(t`Reverse Sort Order`)}</div>}
-          position="top"
-        >
-          <SortButton
-            onClick={this.handleSort}
-            variant="plain"
-            aria-label={i18n._(t`Sort`)}
-          >
-            <IconWrapper>
-              <SortIcon style={{ verticalAlign: '-0.225em' }} />
-            </IconWrapper>
-          </SortButton>
-        </Tooltip>
-      </React.Fragment>
+      </Fragment>
     );
   }
 }

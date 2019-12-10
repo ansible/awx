@@ -1,20 +1,12 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
-import { Button } from '@patternfly/react-core';
+import { DataToolbarGroup, DataToolbarItem } from '@patternfly/react-core/dist/esm/experimental';
 import { parseQueryString } from '@util/qs';
-import { ChipGroup as _ChipGroup, Chip } from '@components/Chip';
+import { Button, Chip, ChipGroup, ChipGroupToolbarItem } from '@patternfly/react-core';
 import VerticalSeparator from '@components/VerticalSeparator';
-
-const FilterTagsRow = styled.div`
-  display: flex;
-  padding: 15px 20px;
-  border-top: 1px solid #d2d2d2;
-  font-size: 14px;
-  align-items: center;
-`;
 
 const ResultCount = styled.span`
   font-weight: bold;
@@ -22,12 +14,6 @@ const ResultCount = styled.span`
 
 const FilterLabel = styled.span`
   padding-right: 20px;
-`;
-
-const ChipGroup = styled(_ChipGroup)`
-  li.pf-m-overflow {
-    display: none;
-  }
 `;
 
 // remove non-default query params so they don't show up as filter tags
@@ -45,7 +31,7 @@ const FilterTags = ({
   onRemoveAll,
 }) => {
   const queryParams = parseQueryString(qsConfig, location.search);
-  const queryParamsArr = [];
+  const queryParamsByKey = {};
   const nonDefaultParams = filterDefaultParams(
     Object.keys(queryParams),
     qsConfig
@@ -56,45 +42,45 @@ const FilterTags = ({
       .split('_')
       .map(word => `${word.charAt(0).toUpperCase()}${word.slice(1)}`)
       .join(' ');
+      queryParamsByKey[key] = { label, tags: [] };
 
     if (Array.isArray(queryParams[key])) {
       queryParams[key].forEach(val =>
-        queryParamsArr.push({ key, value: val, label })
+        queryParamsByKey[key].tags.push(val)
       );
     } else {
-      queryParamsArr.push({ key, value: queryParams[key], label });
+      queryParamsByKey[key].tags.push(queryParams[key]);
     }
   });
 
   return (
-    queryParamsArr.length > 0 && (
-      <FilterTagsRow>
-        <ResultCount>{i18n._(t`${itemCount} results`)}</ResultCount>
-        <VerticalSeparator />
-        <FilterLabel>{i18n._(t`Active Filters:`)}</FilterLabel>
-        <ChipGroup defaultIsOpen>
-          {queryParamsArr.map(({ key, label, value }) => (
-            <Chip
-              className="searchTagChip"
-              key={`${key}__${value}`}
-              isReadOnly={false}
-              onClick={() => onRemove(key, value)}
-            >
-              <b>{label}:</b>&nbsp;{value}
-            </Chip>
-          ))}
-          <div className="pf-c-chip pf-m-overflow">
-            <Button
-              variant="plain"
-              type="button"
-              aria-label={i18n._(t`Clear all search filters`)}
-              onClick={onRemoveAll}
-            >
-              <span className="pf-c-chip__text">{i18n._(t`Clear all`)}</span>
+    Object.keys(queryParamsByKey).length > 0 && (
+      <Fragment>
+        <DataToolbarGroup>
+          <ResultCount>{i18n._(t`${itemCount} results`)}</ResultCount>
+        </DataToolbarGroup>
+        <DataToolbarGroup>
+          <FilterLabel>{i18n._(t`Active Filters:`)}</FilterLabel>
+          <DataToolbarItem variant="chip-group">
+            {Object.keys(queryParamsByKey).map(key => (
+              <ChipGroup withToolbar key={`${key}-group`}>
+                <ChipGroupToolbarItem key={key} categoryName={queryParamsByKey[key].label}>
+                  {queryParamsByKey[key].tags.map(chip => (
+                      <Chip key={chip} onClick={() => onRemove(key, chip)}>
+                        {chip}
+                      </Chip>
+                  ))}
+                </ChipGroupToolbarItem>
+              </ChipGroup>
+            ))}
+          </DataToolbarItem>
+          <DataToolbarItem>
+            <Button variant="link" onClick={onRemoveAll} isInline>
+              {i18n._(t`Clear all search filters`)}
             </Button>
-          </div>
-        </ChipGroup>
-      </FilterTagsRow>
+          </DataToolbarItem>
+        </DataToolbarGroup>
+      </Fragment>
     )
   );
 };

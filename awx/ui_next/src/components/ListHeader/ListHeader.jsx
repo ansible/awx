@@ -2,8 +2,8 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import styled from 'styled-components';
+import { DataToolbar, DataToolbarContent } from '@patternfly/react-core/dist/esm/experimental';
 import DataListToolbar from '@components/DataListToolbar';
-import FilterTags from '@components/FilterTags';
 
 import {
   encodeNonDefaultQueryString,
@@ -84,33 +84,32 @@ class ListHeader extends React.Component {
     return (
       <Fragment>
         {isEmpty ? (
-          <Fragment>
-            <EmptyStateControlsWrapper>
-              {emptyStateControls}
-            </EmptyStateControlsWrapper>
-            <FilterTags
-              itemCount={itemCount}
-              qsConfig={qsConfig}
-              onRemove={this.handleRemove}
-              onRemoveAll={this.handleRemoveAll}
-            />
-          </Fragment>
+          <DataToolbar id={`${qsConfig.namespace}-list-toolbar`}
+            clearAllFilters={this.handleRemoveAll}
+            collapseListedFiltersBreakpoint="md"
+          >
+            <DataToolbarContent>
+              <EmptyStateControlsWrapper>
+                {emptyStateControls}
+              </EmptyStateControlsWrapper>
+            </DataToolbarContent>
+          </DataToolbar>
         ) : (
-          <Fragment>
-            {renderToolbar({
-              searchColumns,
-              sortColumns,
-              onSearch: this.handleSearch,
-              onSort: this.handleSort,
-              qsConfig,
-            })}
-            <FilterTags
-              itemCount={itemCount}
-              qsConfig={qsConfig}
-              onRemove={this.handleRemove}
-              onRemoveAll={this.handleRemoveAll}
-            />
-          </Fragment>
+          <DataToolbar id={`${qsConfig.namespace}-list-toolbar`}
+            clearAllFilters={this.handleRemoveAll}
+            collapseListedFiltersBreakpoint="xl"
+          >
+            <DataToolbarContent>
+              {renderToolbar({
+                searchColumns,
+                sortColumns,
+                onSearch: this.handleSearch,
+                onSort: this.handleSort,
+                onRemove: this.handleRemove,
+                qsConfig,
+              })}
+            </DataToolbarContent>
+          </DataToolbar>
         )}
       </Fragment>
     );

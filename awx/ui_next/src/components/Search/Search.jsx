@@ -2,80 +2,33 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
+import { withRouter } from 'react-router-dom';
 import {
-  Button as PFButton,
-  Dropdown as PFDropdown,
+  Button,
+  ButtonVariant,
+  Dropdown,
   DropdownPosition,
   DropdownToggle,
   DropdownItem,
-  Form,
-  FormGroup,
-  TextInput as PFTextInput,
+  InputGroup,
+  TextInput,
 } from '@patternfly/react-core';
+import {
+  DataToolbarGroup,
+  DataToolbarItem,
+  DataToolbarFilter
+} from '@patternfly/react-core/dist/esm/experimental';
 import { SearchIcon } from '@patternfly/react-icons';
-
+import { parseQueryString } from '@util/qs';
 import { QSConfig, SearchColumns } from '@types';
-
 import styled from 'styled-components';
-
-const TextInput = styled(PFTextInput)`
-  min-height: 0px;
-  height: 30px;
-  --pf-c-form-control--BorderTopColor: var(--pf-global--BorderColor--200);
-  --pf-c-form-control--BorderLeftColor: var(--pf-global--BorderColor--200);
-`;
-
-const Button = styled(PFButton)`
-  width: 34px;
-  padding: 0px;
-  ::after {
-    border: var(--pf-c-button--BorderWidth) solid
-      var(--pf-global--BorderColor--200);
-  }
-`;
-
-const Dropdown = styled(PFDropdown)`
-  &&& {
-    /* Higher specificity required because we are selecting unclassed elements */
-    > button {
-      min-height: 30px;
-      min-width: 70px;
-      height: 30px;
-      padding: 0 10px;
-      margin: 0px;
-
-      ::before {
-        border-color: var(--pf-global--BorderColor--200);
-        border-top-left-radius: 3px;
-        border-bottom-left-radius: 3px;
-      }
-
-      > span {
-        /* text element */
-        width: auto;
-      }
-
-      > svg {
-        /* caret icon */
-        margin: 0px;
-        padding-top: 3px;
-        padding-left: 3px;
-      }
-    }
-  }
-`;
 
 const NoOptionDropdown = styled.div`
   align-self: stretch;
-  border: 1px solid var(--pf-global--BorderColor--200);
-  border-top-left-radius: 3px;
-  border-bottom-left-radius: 3px;
-  padding: 3px 7px;
+  border: 1px solid var(--pf-global--BorderColor--300);
+  padding: 5px 15px;
   white-space: nowrap;
-`;
-
-const InputFormGroup = styled(FormGroup)`
-  flex: 1;
+  border-bottom-color: var(--pf-global--BorderColor--200);
 `;
 
 class Search extends React.Component {
@@ -94,6 +47,7 @@ class Search extends React.Component {
     this.handleDropdownToggle = this.handleDropdownToggle.bind(this);
     this.handleDropdownSelect = this.handleDropdownSelect.bind(this);
     this.handleSearch = this.handleSearch.bind(this);
+    this.handleTextKeyDown = this.handleTextKeyDown.bind(this);
   }
 
   handleDropdownToggle(isSearchDropdownOpen) {
@@ -134,9 +88,15 @@ class Search extends React.Component {
     this.setState({ searchValue });
   }
 
+  handleTextKeyDown(e) {
+    if (e.key && e.key === 'Enter') {
+      this.handleSearch(e);
+    }
+  }
+
   render() {
     const { up } = DropdownPosition;
-    const { columns, i18n } = this.props;
+    const { columns, i18n, onRemove, qsConfig, location } = this.props;
     const { isSearchDropdownOpen, searchKey, searchValue } = this.state;
     const { name: searchColumnName } = columns.find(
       ({ key }) => key === searchKey
@@ -150,65 +110,95 @@ class Search extends React.Component {
         </DropdownItem>
       ));
 
+    const filterDefaultParams = (paramsArr, config) => {
+      const defaultParamsKeys = Object.keys(config.defaultParams);
+      return paramsArr.filter(key => defaultParamsKeys.indexOf(key) === -1);
+    };
+
+    const getChipsByKey = () => {
+      const queryParams = parseQueryString(qsConfig, location.search);
+
+      const queryParamsByKey = {};
+      columns.forEach(({name, key}) => {
+        queryParamsByKey[key] = {key, label: name, chips: []};
+      });
+      const nonDefaultParams = filterDefaultParams(
+        Object.keys(queryParams),
+        qsConfig
+      );
+
+      nonDefaultParams.forEach(key => {
+        const columnKey = key
+          .replace('__icontains', '');
+        const label = key
+          .replace('__icontains', '')
+          .split('_')
+          .map(word => `${word.charAt(0).toUpperCase()}${word.slice(1)}`)
+          .join(' ');
+
+        queryParamsByKey[columnKey] = { key, label, chips: [] };
+
+        if (Array.isArray(queryParams[key])) {
+          queryParams[key].forEach(val =>
+            queryParamsByKey[columnKey].chips.push(val)
+          );
+        } else {
+          queryParamsByKey[columnKey].chips.push(queryParams[key]);
+        }
+      });
+
+      return queryParamsByKey;
+    }
+
+    const chipsByKey = getChipsByKey();
+
     return (
-      <Form autoComplete="off">
-        <div className="pf-c-input-group">
+      <DataToolbarGroup variant="filter-group">
+        <DataToolbarItem>
           {searchDropdownItems.length > 0 ? (
-            <FormGroup
-              fieldId="searchKeyDropdown"
-              label={
-                <span className="pf-screen-reader">
-                  {i18n._(t`Search key dropdown`)}
-                </span>
+          <Dropdown
+              onToggle={this.handleDropdownToggle}
+              onSelect={this.handleDropdownSelect}
+              direction={up}
+              toggle={
+                <DropdownToggle
+                  id="awx-search"
+                  onToggle={this.handleDropdownToggle}
+                  style={{ width: '100%' }}
+                >
+                  {searchColumnName}
+                </DropdownToggle>
               }
-            >
-              <Dropdown
-                onToggle={this.handleDropdownToggle}
-                onSelect={this.handleDropdownSelect}
-                direction={up}
-                isOpen={isSearchDropdownOpen}
-                toggle={
-                  <DropdownToggle
-                    id="awx-search"
-                    onToggle={this.handleDropdownToggle}
-                  >
-                    {searchColumnName}
-                  </DropdownToggle>
-                }
-                dropdownItems={searchDropdownItems}
-              />
-            </FormGroup>
-          ) : (
-            <NoOptionDropdown>{searchColumnName}</NoOptionDropdown>
-          )}
-          <InputFormGroup
-            fieldId="searchValueTextInput"
-            label={
-              <span className="pf-screen-reader">
-                {i18n._(t`Search value text input`)}
-              </span>
-            }
-            style={{ width: '100%' }}
-            suppressClassNameWarning
-          >
+              isOpen={isSearchDropdownOpen}
+              dropdownItems={searchDropdownItems}
+              style={{ width: '100%' }}
+          />) : (<NoOptionDropdown>{searchColumnName}</NoOptionDropdown>)}
+        </DataToolbarItem>
+        {columns.map(({key}) => (<DataToolbarFilter
+          chips={chipsByKey[key] ? chipsByKey[key].chips : []}
+          deleteChip={(unusedKey, val) => { onRemove(chipsByKey[key].key, val) }}
+          categoryName={chipsByKey[key] ? chipsByKey[key].label : key}
+          key={key}
+          showToolbarItem={searchKey === key}
+        >
+          <InputGroup>
             <TextInput
               type="search"
               aria-label={i18n._(t`Search text input`)}
               value={searchValue}
               onChange={this.handleSearchInputChange}
-              style={{ height: '30px' }}
+              onKeyDown={this.handleTextKeyDown}
             />
-          </InputFormGroup>
-          <Button
-            variant="tertiary"
-            type="submit"
-            aria-label={i18n._(t`Search submit button`)}
-            onClick={this.handleSearch}
-          >
-            <SearchIcon />
-          </Button>
-        </div>
-      </Form>
+            <Button
+              variant={ButtonVariant.control}
+              aria-label={i18n._(t`Search submit button`)}
+              onClick={this.handleSearch}
+            >
+              <SearchIcon />
+            </Button>
+          </InputGroup>
+        </DataToolbarFilter>))}
+      </DataToolbarGroup>
     );
   }
 }
@@ -216,11 +206,13 @@ class Search extends React.Component {
 Search.propTypes = {
   qsConfig: QSConfig.isRequired,
   columns: SearchColumns.isRequired,
-  onSearch: PropTypes.func
+  onSearch: PropTypes.func,
+  onRemove: PropTypes.func
 };
 
 Search.defaultProps = {
   onSearch: null,
+  onRemove: null
 };
 
-export default withI18n()(Search);
+export default withI18n()(withRouter(Search));
