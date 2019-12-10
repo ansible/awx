@@ -51,7 +51,7 @@ export const ScmCredentialFormField = withI18n()(
           value={credential.value}
           onChange={value => {
             onCredentialSelection('scm', value);
-            form.setFieldValue('credential', value.id);
+            form.setFieldValue('credential', value ? value.id : '');
           }}
         />
       )}

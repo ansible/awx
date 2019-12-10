@@ -79,6 +79,8 @@ class JobTemplateForm extends Component {
     };
     this.handleProjectValidation = this.handleProjectValidation.bind(this);
     this.loadRelatedInstanceGroups = this.loadRelatedInstanceGroups.bind(this);
+    this.handleProjectUpdate = this.handleProjectUpdate.bind(this);
+    this.setContentError = this.setContentError.bind(this);
   }
 
   componentDidMount() {
@@ -117,6 +119,16 @@ class JobTemplateForm extends Component {
       }
       return undefined;
     };
+  }
+
+  handleProjectUpdate(project) {
+    const { setFieldValue } = this.props;
+    setFieldValue('project', project.id);
+    this.setState({ project });
+  }
+
+  setContentError(contentError) {
+    this.setState({ contentError });
   }
 
   render() {
@@ -252,10 +264,7 @@ class JobTemplateForm extends Component {
                   you want this job to execute.`)}
                 isValid={!form.touched.project || !form.errors.project}
                 helperTextInvalid={form.errors.project}
-                onChange={value => {
-                  form.setFieldValue('project', value.id);
-                  this.setState({ project: value });
-                }}
+                onChange={this.handleProjectUpdate}
                 required
               />
             )}
@@ -285,7 +294,7 @@ class JobTemplateForm extends Component {
                     form={form}
                     field={field}
                     onBlur={() => form.setFieldTouched('playbook')}
-                    onError={err => this.setState({ contentError: err })}
+                    onError={this.setContentError}
                   />
                 </FormGroup>
               );
@@ -305,7 +314,7 @@ class JobTemplateForm extends Component {
                 <LabelSelect
                   value={field.value}
                   onChange={labels => setFieldValue('labels', labels)}
-                  onError={err => this.setState({ contentError: err })}
+                  onError={this.setContentError}
                 />
               </FormGroup>
             )}
@@ -317,11 +326,11 @@ class JobTemplateForm extends Component {
             fieldId="template-credentials"
             render={({ field }) => (
               <MultiCredentialsLookup
-                credentials={field.value}
+                value={field.value}
                 onChange={newCredentials =>
                   setFieldValue('credentials', newCredentials)
                 }
-                onError={err => this.setState({ contentError: err })}
+                onError={this.setContentError}
                 tooltip={i18n._(
                   t`Select credentials that allow Tower to access the nodes this job will be ran against. You can only select one credential of each type. For machine credentials (SSH), checking "Prompt on launch" without selecting credentials will require you to select a machine credential at run time. If you select credentials and check "Prompt on launch", the selected credential(s) become the defaults that can be updated at run time.`
                 )}

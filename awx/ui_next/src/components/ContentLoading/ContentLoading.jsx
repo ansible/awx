@@ -4,8 +4,8 @@ import { withI18n } from '@lingui/react';
 import { EmptyState, EmptyStateBody } from '@patternfly/react-core';
 
 // TODO: Better loading state - skeleton lines / spinner, etc.
-const ContentLoading = ({ i18n }) => (
-  <EmptyState>
+const ContentLoading = ({ className, i18n }) => (
+  <EmptyState className={className}>
     <EmptyStateBody>{i18n._(t`Loading...`)}</EmptyStateBody>
   </EmptyState>
 );

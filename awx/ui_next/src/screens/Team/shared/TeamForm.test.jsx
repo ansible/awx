@@ -30,15 +30,17 @@ describe('<TeamForm />', () => {
     jest.clearAllMocks();
   });
 
-  test('changing inputs should update form values', () => {
-    wrapper = mountWithContexts(
-      <TeamForm
-        team={mockData}
-        handleSubmit={jest.fn()}
-        handleCancel={jest.fn()}
-        me={meConfig.me}
-      />
-    );
+  test('changing inputs should update form values', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <TeamForm
+          team={mockData}
+          handleSubmit={jest.fn()}
+          handleCancel={jest.fn()}
+          me={meConfig.me}
+        />
+      );
+    });
 
     const form = wrapper.find('Formik');
     wrapper.find('input#team-name').simulate('change', {
@@ -78,17 +80,19 @@ describe('<TeamForm />', () => {
     expect(handleSubmit).toBeCalled();
   });
 
-  test('calls handleCancel when Cancel button is clicked', () => {
+  test('calls handleCancel when Cancel button is clicked', async () => {
     const handleCancel = jest.fn();
 
-    wrapper = mountWithContexts(
-      <TeamForm
-        team={mockData}
-        handleSubmit={jest.fn()}
-        handleCancel={handleCancel}
-        me={meConfig.me}
-      />
-    );
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <TeamForm
+          team={mockData}
+          handleSubmit={jest.fn()}
+          handleCancel={handleCancel}
+          me={meConfig.me}
+        />
+      );
+    });
     expect(handleCancel).not.toHaveBeenCalled();
     wrapper.find('button[aria-label="Cancel"]').prop('onClick')();
     expect(handleCancel).toBeCalled();

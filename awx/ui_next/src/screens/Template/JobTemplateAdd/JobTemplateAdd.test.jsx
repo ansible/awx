@@ -101,19 +101,21 @@ describe('<JobTemplateAdd />', () => {
     });
     await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
     const formik = wrapper.find('Formik').instance();
-    const changeState = new Promise(resolve => {
-      formik.setState(
-        {
-          values: {
-            ...jobTemplateData,
-            labels: [],
-            instanceGroups: [],
+    await act(async () => {
+      const changeState = new Promise(resolve => {
+        formik.setState(
+          {
+            values: {
+              ...jobTemplateData,
+              labels: [],
+              instanceGroups: [],
+            },
           },
-        },
-        () => resolve()
-      );
+          () => resolve()
+        );
+      });
+      await changeState;
     });
-    await changeState;
     wrapper.find('form').simulate('submit');
     await sleep(1);
     expect(JobTemplatesAPI.create).toHaveBeenCalledWith(jobTemplateData);

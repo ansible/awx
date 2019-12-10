@@ -27,22 +27,24 @@ describe('<OrganizationAdd />', () => {
 
   test('should navigate to organizations list when cancel is clicked', async () => {
     const history = createMemoryHistory({});
+    let wrapper;
     await act(async () => {
-      const wrapper = mountWithContexts(<OrganizationAdd />, {
+      wrapper = mountWithContexts(<OrganizationAdd />, {
         context: { router: { history } },
       });
-      wrapper.find('button[aria-label="Cancel"]').prop('onClick')();
+      wrapper.find('button[aria-label="Cancel"]').invoke('onClick')();
     });
     expect(history.location.pathname).toEqual('/organizations');
   });
 
   test('should navigate to organizations list when close (x) is clicked', async () => {
     const history = createMemoryHistory({});
+    let wrapper;
     await act(async () => {
-      const wrapper = mountWithContexts(<OrganizationAdd />, {
+      wrapper = mountWithContexts(<OrganizationAdd />, {
         context: { router: { history } },
       });
-      wrapper.find('button[aria-label="Close"]').prop('onClick')();
+      wrapper.find('button[aria-label="Close"]').invoke('onClick')();
     });
     expect(history.location.pathname).toEqual('/organizations');
   });
@@ -63,8 +65,9 @@ describe('<OrganizationAdd />', () => {
         ...orgData,
       },
     });
+    let wrapper;
     await act(async () => {
-      const wrapper = mountWithContexts(<OrganizationAdd />, {
+      wrapper = mountWithContexts(<OrganizationAdd />, {
         context: { router: { history } },
       });
       await waitForElement(wrapper, 'button[aria-label="Save"]');
@@ -92,23 +95,27 @@ describe('<OrganizationAdd />', () => {
         ...orgData,
       },
     });
+    let wrapper;
     await act(async () => {
-      const wrapper = mountWithContexts(<OrganizationAdd />);
-      await waitForElement(wrapper, 'button[aria-label="Save"]');
-      await wrapper.find('OrganizationForm').prop('handleSubmit')(
-        orgData,
-        [3],
-        []
-      );
+      wrapper = mountWithContexts(<OrganizationAdd />);
     });
+    await waitForElement(wrapper, 'button[aria-label="Save"]');
+    await wrapper.find('OrganizationForm').prop('handleSubmit')(
+      orgData,
+      [3],
+      []
+    );
     expect(OrganizationsAPI.associateInstanceGroup).toHaveBeenCalledWith(5, 3);
   });
 
   test('AnsibleSelect component renders if there are virtual environments', async () => {
+    const config = {
+      custom_virtualenvs: ['foo', 'bar'],
+    };
     let wrapper;
     await act(async () => {
       wrapper = mountWithContexts(<OrganizationAdd />, {
-        context: { config: { custom_virtualenvs: ['foo', 'bar'] } },
+        context: { config },
       }).find('AnsibleSelect');
     });
     expect(wrapper.find('FormSelect')).toHaveLength(1);
@@ -122,10 +129,13 @@ describe('<OrganizationAdd />', () => {
   });
 
   test('AnsibleSelect component does not render if there are 0 virtual environments', async () => {
+    const config = {
+      custom_virtualenvs: [],
+    };
     let wrapper;
     await act(async () => {
       wrapper = mountWithContexts(<OrganizationAdd />, {
-        context: { config: { custom_virtualenvs: [] } },
+        context: { config },
       }).find('AnsibleSelect');
     });
     expect(wrapper.find('FormSelect')).toHaveLength(0);

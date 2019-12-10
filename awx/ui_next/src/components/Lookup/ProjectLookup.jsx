@@ -1,59 +1,90 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { string, func, bool } from 'prop-types';
+import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { FormGroup } from '@patternfly/react-core';
 import { ProjectsAPI } from '@api';
 import { Project } from '@types';
-import Lookup from '@components/Lookup';
 import { FieldTooltip } from '@components/FormField';
+import { getQSConfig, parseQueryString } from '@util/qs';
+import Lookup from './Lookup';
+import OptionsList from './shared/OptionsList';
+import LookupErrorMessage from './shared/LookupErrorMessage';
 
-class ProjectLookup extends React.Component {
-  render() {
-    const {
-      helperTextInvalid,
-      i18n,
-      isValid,
-      onChange,
-      required,
-      tooltip,
-      value,
-      onBlur,
-    } = this.props;
+const QS_CONFIG = getQSConfig('project', {
+  page: 1,
+  page_size: 5,
+  order_by: 'name',
+});
 
-    const loadProjects = async params => {
-      const response = await ProjectsAPI.read(params);
-      const { results, count } = response.data;
-      if (count === 1) {
-        onChange(results[0], 'project');
+function ProjectLookup({
+  helperTextInvalid,
+  i18n,
+  isValid,
+  onChange,
+  required,
+  tooltip,
+  value,
+  onBlur,
+  history,
+}) {
+  const [projects, setProjects] = useState([]);
+  const [count, setCount] = useState(0);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    (async () => {
+      const params = parseQueryString(QS_CONFIG, history.location.search);
+      try {
+        const { data } = await ProjectsAPI.read(params);
+        setProjects(data.results);
+        setCount(data.count);
+        if (data.count === 1) {
+          onChange(data.results[0]);
+        }
+      } catch (err) {
+        setError(err);
       }
-      return response;
-    };
+    })();
+  }, [onChange, history.location]);
 
-    return (
-      <FormGroup
-        fieldId="project"
-        helperTextInvalid={helperTextInvalid}
-        isRequired={required}
-        isValid={isValid}
-        label={i18n._(t`Project`)}
-      >
-        {tooltip && <FieldTooltip content={tooltip} />}
-        <Lookup
-          id="project"
-          lookupHeader={i18n._(t`Project`)}
-          name="project"
-          value={value}
-          onBlur={onBlur}
-          onLookupSave={onChange}
-          getItems={loadProjects}
-          required={required}
-          sortedColumnKey="name"
-          qsNamespace="project"
-        />
-      </FormGroup>
-    );
-  }
+  return (
+    <FormGroup
+      fieldId="project"
+      helperTextInvalid={helperTextInvalid}
+      isRequired={required}
+      isValid={isValid}
+      label={i18n._(t`Project`)}
+    >
+      {tooltip && <FieldTooltip content={tooltip} />}
+      <Lookup
+        id="project"
+        header={i18n._(t`Project`)}
+        name="project"
+        value={value}
+        onBlur={onBlur}
+        onChange={onChange}
+        required={required}
+        qsConfig={QS_CONFIG}
+        renderOptionsList={({ state, dispatch, canDelete }) => (
+          <OptionsList
+            value={state.selectedItems}
+            options={projects}
+            optionCount={count}
+            multiple={state.multiple}
+            header={i18n._(t`Project`)}
+            name="project"
+            qsConfig={QS_CONFIG}
+            readOnly={!canDelete}
+            selectItem={item => dispatch({ type: 'SELECT_ITEM', item })}
+            deselectItem={item => dispatch({ type: 'DESELECT_ITEM', item })}
+          />
+        )}
+      />
+      <LookupErrorMessage error={error} />
+    </FormGroup>
+  );
 }
 
 ProjectLookup.propTypes = {
@@ -75,4 +106,5 @@ ProjectLookup.defaultProps = {
   onBlur: () => {},
 };
 
-export default withI18n()(ProjectLookup);
+export { ProjectLookup as _ProjectLookup };
+export default withI18n()(withRouter(ProjectLookup));

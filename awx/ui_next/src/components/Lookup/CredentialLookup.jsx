@@ -1,11 +1,20 @@
-import React from 'react';
-import { withI18n } from '@lingui/react';
+import React, { useEffect, useState } from 'react';
 import { bool, func, number, string, oneOfType } from 'prop-types';
+import { withRouter } from 'react-router-dom';
+import { withI18n } from '@lingui/react';
 import { CredentialsAPI } from '@api';
 import { Credential } from '@types';
-import { mergeParams } from '@util/qs';
+import { getQSConfig, parseQueryString, mergeParams } from '@util/qs';
 import { FormGroup } from '@patternfly/react-core';
 import Lookup from '@components/Lookup';
+import OptionsList from './shared/OptionsList';
+import LookupErrorMessage from './shared/LookupErrorMessage';
+
+const QS_CONFIG = getQSConfig('credentials', {
+  page: 1,
+  page_size: 5,
+  order_by: 'name',
+});
 
 function CredentialLookup({
   helperTextInvalid,
@@ -16,11 +25,28 @@ function CredentialLookup({
   required,
   credentialTypeId,
   value,
+  history,
 }) {
-  const getCredentials = async params =>
-    CredentialsAPI.read(
-      mergeParams(params, { credential_type: credentialTypeId })
-    );
+  const [credentials, setCredentials] = useState([]);
+  const [count, setCount] = useState(0);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    (async () => {
+      const params = parseQueryString(QS_CONFIG, history.location.search);
+      try {
+        const { data } = await CredentialsAPI.read(
+          mergeParams(params, { credential_type: credentialTypeId })
+        );
+        setCredentials(data.results);
+        setCount(data.count);
+      } catch (err) {
+        if (setError) {
+          setError(err);
+        }
+      }
+    })();
+  }, [credentialTypeId, history.location.search]);
 
   return (
     <FormGroup
@@ -32,15 +58,26 @@ function CredentialLookup({
     >
       <Lookup
         id="credential"
-        lookupHeader={label}
-        name="credential"
+        header={label}
         value={value}
         onBlur={onBlur}
-        onLookupSave={onChange}
-        getItems={getCredentials}
+        onChange={onChange}
         required={required}
-        sortedColumnKey="name"
+        qsConfig={QS_CONFIG}
+        renderOptionsList={({ state, dispatch, canDelete }) => (
+          <OptionsList
+            value={state.selectedItems}
+            options={credentials}
+            optionCount={count}
+            header={label}
+            qsConfig={QS_CONFIG}
+            readOnly={!canDelete}
+            selectItem={item => dispatch({ type: 'SELECT_ITEM', item })}
+            deselectItem={item => dispatch({ type: 'DESELECT_ITEM', item })}
+          />
+        )}
       />
+      <LookupErrorMessage error={error} />
     </FormGroup>
   );
 }
@@ -65,4 +102,4 @@ CredentialLookup.defaultProps = {
 };
 
 export { CredentialLookup as _CredentialLookup };
-export default withI18n()(CredentialLookup);
+export default withI18n()(withRouter(CredentialLookup));

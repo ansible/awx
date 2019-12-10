@@ -131,17 +131,19 @@ describe('<ProjectForm />', () => {
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     const formik = wrapper.find('Formik').instance();
-    const changeState = new Promise(resolve => {
-      formik.setState(
-        {
-          values: {
-            ...mockData,
+    await act(async () => {
+      const changeState = new Promise(resolve => {
+        formik.setState(
+          {
+            values: {
+              ...mockData,
+            },
           },
-        },
-        () => resolve()
-      );
+          () => resolve()
+        );
+      });
+      await changeState;
     });
-    await changeState;
     wrapper.update();
     expect(wrapper.find('FormGroup[label="SCM URL"]').length).toBe(1);
     expect(
@@ -191,18 +193,20 @@ describe('<ProjectForm />', () => {
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     const formik = wrapper.find('Formik').instance();
-    const changeState = new Promise(resolve => {
-      formik.setState(
-        {
-          values: {
-            ...mockData,
-            scm_type: 'insights',
+    await act(async () => {
+      const changeState = new Promise(resolve => {
+        formik.setState(
+          {
+            values: {
+              ...mockData,
+              scm_type: 'insights',
+            },
           },
-        },
-        () => resolve()
-      );
+          () => resolve()
+        );
+      });
+      await changeState;
     });
-    await changeState;
     wrapper.update();
     expect(wrapper.find('FormGroup[label="Insights Credential"]').length).toBe(
       1
