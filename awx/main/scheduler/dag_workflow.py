@@ -96,6 +96,7 @@ class WorkflowDAG(SimpleDAG):
             else:
                 if self._are_relevant_parents_finished(n):
                     nodes_found.append(n)
+                #BECCAH TODO somewhere around here add in ANY and ALL logic
         return [n['node_object'] for n in nodes_found]
 
     def cancel_node_jobs(self):
@@ -185,6 +186,7 @@ class WorkflowDAG(SimpleDAG):
     Return a boolean
     '''
     def _should_mark_node_dnr(self, node, parent_nodes):
+        #BECCAH TODO Gonna have to update this too
         for p in parent_nodes:
             if p.do_not_run is True:
                 pass

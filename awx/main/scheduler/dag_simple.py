@@ -89,8 +89,8 @@ class SimpleDAG(object):
                 run_status(n['node_object']),
                 color
             )
-        for label, edges in self.node_from_edges_by_label.iteritems():
-            for from_node, to_nodes in edges.iteritems():
+        for label, edges in self.node_from_edges_by_label.items():
+            for from_node, to_nodes in edges.items():
                 for to_node in to_nodes:
                     doc += "%s -> %s [ label=\"%s\" ];\n" % (
                         run_status(self.nodes[from_node]['node_object']),

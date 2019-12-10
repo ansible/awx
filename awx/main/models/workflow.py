@@ -129,7 +129,7 @@ class WorkflowNodeBase(CreatedModifiedModel, LaunchTimeConfig):
 class WorkflowJobTemplateNode(WorkflowNodeBase):
     FIELDS_TO_PRESERVE_AT_COPY = [
         'unified_job_template', 'workflow_job_template', 'success_nodes', 'failure_nodes',
-        'always_nodes', 'credentials', 'inventory', 'extra_data', 'survey_passwords',
+        'always_nodes', 'parent_nodes', 'credentials', 'inventory', 'extra_data', 'survey_passwords',
         'char_prompts'
     ]
     REENCRYPTION_BLACKLIST_AT_COPY = ['extra_data', 'survey_passwords']
