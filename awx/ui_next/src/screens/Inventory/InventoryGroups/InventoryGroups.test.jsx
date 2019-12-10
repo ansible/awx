@@ -4,7 +4,7 @@ import { Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
 import { InventoriesAPI, GroupsAPI } from '@api';
-import InventoryGroups from './InventoryGroups';
+import InventoryGroupsList from './InventoryGroupsList';
 
 jest.mock('@api');
 
@@ -50,7 +50,7 @@ const mockGroups = [
   },
 ];
 
-describe('<InventoryGroups />', () => {
+describe('<InventoryGroupsList />', () => {
   let wrapper;
 
   beforeEach(async () => {
@@ -75,7 +75,7 @@ describe('<InventoryGroups />', () => {
       wrapper = mountWithContexts(
         <Route
           path="/inventories/inventory/:id/groups"
-          component={() => <InventoryGroups />}
+          component={() => <InventoryGroupsList />}
         />,
         {
           context: {
@@ -88,7 +88,7 @@ describe('<InventoryGroups />', () => {
   });
 
   test('initially renders successfully', () => {
-    expect(wrapper.find('InventoryGroups').length).toBe(1);
+    expect(wrapper.find('InventoryGroupsList').length).toBe(1);
   });
 
   test('should fetch groups from api and render them in the list', async () => {
@@ -147,7 +147,7 @@ describe('<InventoryGroups />', () => {
       Promise.reject(new Error())
     );
     await act(async () => {
-      wrapper = mountWithContexts(<InventoryGroups />);
+      wrapper = mountWithContexts(<InventoryGroupsList />);
     });
     await waitForElement(wrapper, 'ContentError', el => el.length === 1);
   });

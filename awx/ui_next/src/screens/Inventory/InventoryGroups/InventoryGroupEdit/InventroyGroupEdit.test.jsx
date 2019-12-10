@@ -1,8 +1,9 @@
 import React from 'react';
+import { Route } from 'react-router-dom';
 import { GroupsAPI } from '@api';
 import { createMemoryHistory } from 'history';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import { mountWithContexts } from '@testUtils/enzymeHelpers';
 
 import InventoryGroupEdit from './InventoryGroupEdit';
 
@@ -19,13 +20,19 @@ describe('<InventoryGroupEdit />', () => {
   let history;
   beforeEach(async () => {
     history = createMemoryHistory({
-      initialEntries: ['/inventories/1/groups'],
+      initialEntries: ['/inventories/inventory/1/groups/2/edit'],
     });
     await act(async () => {
       wrapper = mountWithContexts(
-        <InventoryGroupEdit
-          setBreadcrumb={jest.fn()}
-          inventory={{ inventory: { id: 1 } }}
+        <Route
+          path="/inventories/inventory/:id/groups/:groupId/edit"
+          component={() => (
+            <InventoryGroupEdit
+              setBreadcrumb={() => {}}
+              inventory={{ id: 1 }}
+              inventoryGroup={{ id: 2 }}
+            />
+          )}
         />,
         {
           context: {
@@ -35,6 +42,7 @@ describe('<InventoryGroupEdit />', () => {
                 match: {
                   params: { groupId: 13 },
                 },
+                location: history.location,
               },
             },
           },
@@ -49,11 +57,12 @@ describe('<InventoryGroupEdit />', () => {
     expect(wrapper.length).toBe(1);
   });
   test('cancel should navigate user to Inventory Groups List', async () => {
-    await waitForElement(wrapper, 'isLoading', el => el.length === 0);
-    expect(history.location.pathname).toEqual('/inventories/1/groups');
+    wrapper.find('button[aria-label="Cancel"]').simulate('click');
+    expect(history.location.pathname).toEqual(
+      '/inventories/inventory/1/groups/2'
+    );
   });
   test('handleSubmit should call api', async () => {
-    await waitForElement(wrapper, 'isLoading', el => el.length === 0);
     wrapper.find('InventoryGroupForm').prop('handleSubmit')({
       name: 'Bar',
       description: 'Ansible',

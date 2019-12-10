@@ -45,26 +45,20 @@ describe('<InventoryGroup />', () => {
         }
       );
     });
+    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
   });
   afterEach(() => {
     wrapper.unmount();
   });
   test('renders successfully', async () => {
-    await act(async () => {
-      waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
-    });
     expect(wrapper.length).toBe(1);
-    expect(wrapper.find('button[aria-label="Return to Groups"]').length).toBe(
-      1
-    );
   });
-  test('expect Return to Groups tab to exist', async () => {
-    await act(async () => {
-      waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
-    });
-    expect(wrapper.length).toBe(1);
+  test('expect all tabs to exist, including Return to Groups', async () => {
     expect(wrapper.find('button[aria-label="Return to Groups"]').length).toBe(
       1
     );
+    expect(wrapper.find('button[aria-label="Details"]').length).toBe(1);
+    expect(wrapper.find('button[aria-label="Related Groups"]').length).toBe(1);
+    expect(wrapper.find('button[aria-label="Hosts"]').length).toBe(1);
   });
 });

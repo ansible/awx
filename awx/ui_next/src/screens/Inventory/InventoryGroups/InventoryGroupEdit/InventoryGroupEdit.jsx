@@ -11,19 +11,20 @@ function InventoryGroupEdit({ history, inventoryGroup, inventory, match }) {
   const handleSubmit = async values => {
     try {
       await GroupsAPI.update(match.params.groupId, values);
+      history.push(
+        `/inventories/inventory/${inventory.id}/groups/${inventoryGroup.id}`
+      );
     } catch (err) {
       setError(err);
-    } finally {
-      history.push(
-        `/inventories/inventory/${inventory.id}/groups/${inventoryGroup.id}/details`
-      );
     }
   };
+
   const handleCancel = () => {
     history.push(
-      `/inventories/inventory/${inventory.id}/groups/${inventoryGroup.id}/details`
+      `/inventories/inventory/${inventory.id}/groups/${inventoryGroup.id}`
     );
   };
+
   return (
     <InventoryGroupForm
       error={error}

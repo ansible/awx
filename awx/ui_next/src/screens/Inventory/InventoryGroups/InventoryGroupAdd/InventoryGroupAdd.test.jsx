@@ -1,8 +1,10 @@
 import React from 'react';
+import { Route } from 'react-router-dom';
+
 import { GroupsAPI } from '@api';
 import { createMemoryHistory } from 'history';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import { mountWithContexts } from '@testUtils/enzymeHelpers';
 
 import InventoryGroupAdd from './InventoryGroupAdd';
 
@@ -13,19 +15,19 @@ describe('<InventoryGroupAdd />', () => {
   let history;
   beforeEach(async () => {
     history = createMemoryHistory({
-      initialEntries: ['/inventories/inventory/1/groups'],
+      initialEntries: ['/inventories/inventory/1/groups/add'],
     });
     await act(async () => {
       wrapper = mountWithContexts(
-        <InventoryGroupAdd
-          setBreadcrumb={() => {}}
-          inventory={{ inventory: { id: 1 } }}
+        <Route
+          path="/inventories/inventory/:id/groups/add"
+          component={() => (
+            <InventoryGroupAdd setBreadcrumb={() => {}} inventory={{ id: 1 }} />
+          )}
         />,
         {
           context: {
-            router: {
-              history,
-            },
+            router: { history, route: { location: history.location } },
           },
         }
       );
@@ -38,17 +40,12 @@ describe('<InventoryGroupAdd />', () => {
     expect(wrapper.length).toBe(1);
   });
   test('cancel should navigate user to Inventory Groups List', async () => {
-    await act(async () => {
-      waitForElement(wrapper, 'isLoading', el => el.length === 0);
-    });
+    wrapper.find('button[aria-label="Cancel"]').simulate('click');
     expect(history.location.pathname).toEqual(
       '/inventories/inventory/1/groups'
     );
   });
   test('handleSubmit should call api', async () => {
-    await act(async () => {
-      waitForElement(wrapper, 'isLoading', el => el.length === 0);
-    });
     await act(async () => {
       wrapper.find('InventoryGroupForm').prop('handleSubmit')({
         name: 'Bar',

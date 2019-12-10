@@ -7,8 +7,10 @@ import { Card } from '@patternfly/react-core';
 import InventoryGroupForm from '../InventoryGroupForm/InventoryGroupForm';
 
 function InventoryGroupsAdd({ history, inventory, setBreadcrumb }) {
-  useEffect(() => setBreadcrumb(inventory), [inventory, setBreadcrumb]);
   const [error, setError] = useState(null);
+
+  useEffect(() => setBreadcrumb(inventory), [inventory, setBreadcrumb]);
+
   const handleSubmit = async values => {
     values.inventory = inventory.id;
     try {
@@ -18,9 +20,11 @@ function InventoryGroupsAdd({ history, inventory, setBreadcrumb }) {
       setError(err);
     }
   };
+
   const handleCancel = () => {
     history.push(`/inventories/inventory/${inventory.id}/groups`);
   };
+
   return (
     <Card>
       <InventoryGroupForm

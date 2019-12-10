@@ -14,8 +14,8 @@ import InventoryGroupDetail from '../InventoryGroupDetail/InventoryGroupDetail';
 
 function InventoryGroups({ i18n, match, setBreadcrumb, inventory, history }) {
   const [inventoryGroup, setInventoryGroup] = useState(null);
-  const [hasContentLoading, setContentLoading] = useState(true);
-  const [hasContentError, setHasContentError] = useState(false);
+  const [hasContentLoading, setHasContentLoading] = useState(true);
+  const [contentError, setHasContentError] = useState(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -26,12 +26,18 @@ function InventoryGroups({ i18n, match, setBreadcrumb, inventory, history }) {
       } catch (err) {
         setHasContentError(err);
       } finally {
-        setContentLoading(false);
+        setHasContentLoading(false);
       }
     };
 
     loadData();
-  }, [match.params.groupId, setBreadcrumb, inventory]);
+  }, [
+    history.location.pathname,
+    match.params.groupId,
+    inventory,
+    setBreadcrumb,
+  ]);
+
   const tabsArray = [
     {
       name: i18n._(t`Return to Groups`),
@@ -46,7 +52,7 @@ function InventoryGroups({ i18n, match, setBreadcrumb, inventory, history }) {
       id: 0,
     },
     {
-      name: i18n._(t`RelatedGroups`),
+      name: i18n._(t`Related Groups`),
       link: `/inventories/inventory/${inventory.id}/groups/${inventoryGroup &&
         inventoryGroup.id}/nested_groups`,
       id: 1,
@@ -58,26 +64,28 @@ function InventoryGroups({ i18n, match, setBreadcrumb, inventory, history }) {
       id: 2,
     },
   ];
-  if (hasContentError) {
-    return <ContentError />;
+  if (contentError) {
+    return <ContentError error={contentError} />;
   }
   if (hasContentLoading) {
     return <ContentLoading />;
   }
-  let cardHeader = hasContentLoading ? null : (
-    <CardHeader style={{ padding: 0 }}>
-      <RoutedTabs history={history} tabsArray={tabsArray} />
-      <CardCloseButton
-        linkTo={`/inventories/inventory/${inventory.id}/group`}
-      />
-    </CardHeader>
-  );
+
+  let cardHeader = null;
   if (
-    !history.location.pathname.includes('groups/') ||
-    history.location.pathname.endsWith('edit')
+    history.location.pathname.includes('groups/') &&
+    !history.location.pathname.endsWith('edit')
   ) {
-    cardHeader = null;
+    cardHeader = (
+      <CardHeader style={{ padding: 0 }}>
+        <RoutedTabs history={history} tabsArray={tabsArray} />
+        <CardCloseButton
+          linkTo={`/inventories/inventory/${inventory.id}/group`}
+        />
+      </CardHeader>
+    );
   }
+
   return (
     <>
       {cardHeader}

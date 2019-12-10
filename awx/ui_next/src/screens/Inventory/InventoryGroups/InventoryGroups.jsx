@@ -11,37 +11,32 @@ import InventoryGroupsList from './InventoryGroupsList';
 function InventoryGroups({ setBreadcrumb, inventory, location, match }) {
   return (
     <Switch>
-      {[
-        <Route
-          key="list"
-          path="/inventories/inventory/:id/groups"
-          render={() => {
-            return <InventoryGroupsList location={location} match={match} />;
-          }}
-        />,
-        <Route
-          key="add"
-          path="/inventories/inventory/:id/groups/add"
-          render={() => {
-            return (
-              <InventoryGroupAdd
-                setBreadcrumb={setBreadcrumb}
-                inventory={inventory}
-              />
-            );
-          }}
-        />,
-        <Route
-          key="details"
-          path="/inventories/inventory/:id/groups/:groupId/"
-          render={() => (
-            <InventoryGroup
-              inventory={inventory}
+      <Route
+        key="add"
+        path="/inventories/inventory/:id/groups/add"
+        render={() => {
+          return (
+            <InventoryGroupAdd
               setBreadcrumb={setBreadcrumb}
+              inventory={inventory}
             />
-          )}
-        />,
-      ]}
+          );
+        }}
+      />
+      <Route
+        key="details"
+        path="/inventories/inventory/:id/groups/:groupId/"
+        render={() => (
+          <InventoryGroup inventory={inventory} setBreadcrumb={setBreadcrumb} />
+        )}
+      />
+      <Route
+        key="list"
+        path="/inventories/inventory/:id/groups"
+        render={() => {
+          return <InventoryGroupsList location={location} match={match} />;
+        }}
+      />
     </Switch>
   );
 }

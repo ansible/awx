@@ -33,7 +33,7 @@ describe('<InventoryGroupDetail />', () => {
   beforeEach(async () => {
     await act(async () => {
       history = createMemoryHistory({
-        initialEntries: ['/inventories/inventory/1/groups/1/edit'],
+        initialEntries: ['/inventories/inventory/1/groups/1/details'],
       });
       wrapper = mountWithContexts(
         <Route
@@ -69,7 +69,7 @@ describe('<InventoryGroupDetail />', () => {
     expect(GroupsAPI.destroy).toBeCalledWith(1);
   });
   test('should navigate user to edit form on edit button click', async () => {
-    wrapper.find('button[aria-label="Edit"]').prop('onClick');
+    wrapper.find('button[aria-label="Edit"]').simulate('click');
     expect(history.location.pathname).toEqual(
       '/inventories/inventory/1/groups/1/edit'
     );

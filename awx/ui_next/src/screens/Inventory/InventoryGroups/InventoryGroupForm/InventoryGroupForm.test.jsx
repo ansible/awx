@@ -26,7 +26,6 @@ describe('<InventoryGroupForm />', () => {
     expect(wrapper.length).toBe(1);
   });
   test('should render values for the fields that have them', () => {
-    expect(wrapper.length).toBe(1);
     expect(wrapper.find("FormGroup[label='Name']").length).toBe(1);
     expect(wrapper.find("FormGroup[label='Description']").length).toBe(1);
     expect(wrapper.find("VariablesField[label='Variables']").length).toBe(1);
