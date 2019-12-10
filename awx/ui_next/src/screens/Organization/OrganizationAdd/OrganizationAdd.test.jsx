@@ -9,10 +9,6 @@ jest.mock('@api');
 
 describe('<OrganizationAdd />', () => {
   test('handleSubmit should post to api', async () => {
-    let wrapper;
-    await act(async () => {
-      wrapper = mountWithContexts(<OrganizationAdd />);
-    });
     const updatedOrgData = {
       name: 'new name',
       description: 'new description',
