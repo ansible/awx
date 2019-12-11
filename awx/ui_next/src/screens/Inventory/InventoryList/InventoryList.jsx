@@ -146,7 +146,8 @@ class InventoriesList extends Component {
     const { match, i18n } = this.props;
     const canAdd =
       actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
-    const isAllSelected = selected.length === inventories.length;
+    const isAllSelected =
+      selected.length === inventories.length && selected.length !== 0;
     const addButton = (
       <AddDropDownButton
         key="add"
