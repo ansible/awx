@@ -35,18 +35,6 @@ describe('<HostAdd />', () => {
     expect(history.location.pathname).toEqual('/hosts');
   });
 
-  test('should navigate to hosts list when close (x) is clicked', async () => {
-    const history = createMemoryHistory({});
-    let wrapper;
-    await act(async () => {
-      wrapper = mountWithContexts(<HostAdd />, {
-        context: { router: { history } },
-      });
-    });
-    wrapper.find('button[aria-label="Close"]').invoke('onClick')();
-    expect(history.location.pathname).toEqual('/hosts');
-  });
-
   test('successful form submission should trigger redirect', async () => {
     const history = createMemoryHistory({});
     const hostData = {

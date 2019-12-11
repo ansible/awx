@@ -65,11 +65,7 @@ describe('<HostForm />', () => {
     expect(handleSubmit).not.toHaveBeenCalled();
     wrapper.find('button[aria-label="Save"]').simulate('click');
     await sleep(1);
-    expect(handleSubmit).toHaveBeenCalledWith({
-      name: 'Foo',
-      description: 'Bar',
-      variables: '---',
-    });
+    expect(handleSubmit).toHaveBeenCalled();
   });
 
   test('calls "handleCancel" when Cancel button is clicked', () => {
