@@ -52,7 +52,7 @@ function fetchLocaleStrings (callback) {
 }
 
 function fetchConfig (callback) {
-    const request = $.ajax(`/api`);
+    const request = $.ajax('/api/');
 
     request.done(res => {
         angular.module('awApp').constant('ConfigSettings', res);
