@@ -1,57 +1,40 @@
 export default
-    function LoadConfig($log, $rootScope, $http, Store) {
+    function LoadConfig($rootScope, Store, ConfigSettings) {
         return function() {
 
             var configSettings = {};
 
-            var configInit = function() {
-                // Auto-resolving what used to be found when attempting to load local_setting.json
-                if ($rootScope.loginConfig) {
-                    $rootScope.loginConfig.resolve('config loaded');
-                }
-                global.$AnsibleConfig = configSettings;
-                Store('AnsibleConfig', global.$AnsibleConfig);
-                $rootScope.$emit('ConfigReady');
+            if(ConfigSettings.custom_logo) {
+                configSettings.custom_logo = true;
+                $rootScope.custom_logo = ConfigSettings.custom_logo;
+            } else {
+                configSettings.custom_logo = false;
+            }
 
-                // Load new hardcoded settings from above
-                $rootScope.$emit('LoadConfig');
-            };
+            if(ConfigSettings.custom_login_info) {
+                configSettings.custom_login_info = ConfigSettings.custom_login_info;
+                $rootScope.custom_login_info = ConfigSettings.custom_login_info;
+            } else {
+                configSettings.custom_login_info = false;
+            }
 
-            // Retrieve the custom logo information - update configSettings from above
-            $http({
-                method: 'GET',
-                url: '/api/',
-            })
-                .then(function({data}) {
-                    if(data.custom_logo) {
-                        configSettings.custom_logo = true;
-                        $rootScope.custom_logo = data.custom_logo;
-                    } else {
-                        configSettings.custom_logo = false;
-                    }
+            if (ConfigSettings.login_redirect_override) {
+                configSettings.login_redirect_override = ConfigSettings.login_redirect_override;
+            }
 
-                    if(data.custom_login_info) {
-                        configSettings.custom_login_info = data.custom_login_info;
-                        $rootScope.custom_login_info = data.custom_login_info;
-                    } else {
-                        configSettings.custom_login_info = false;
-                    }
+            // Auto-resolving what used to be found when attempting to load local_setting.json
+            if ($rootScope.loginConfig) {
+                $rootScope.loginConfig.resolve('config loaded');
+            }
+            global.$AnsibleConfig = configSettings;
+            Store('AnsibleConfig', global.$AnsibleConfig);
+            $rootScope.$emit('ConfigReady');
 
-                    if (data.login_redirect_override) {
-                        configSettings.login_redirect_override = data.login_redirect_override;
-                    }
-
-                    configInit();
-
-                }).catch(({error}) => {
-                    $log.debug(error);
-                    configInit();
-                });
+            // Load new hardcoded settings from above
+            $rootScope.$emit('LoadConfig');
 
         };
     }
 
 LoadConfig.$inject =
-    [   '$log', '$rootScope', '$http',
-        'Store'
-    ];
+    [ '$rootScope', 'Store', 'ConfigSettings' ];
