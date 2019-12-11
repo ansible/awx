@@ -375,13 +375,7 @@ angular
                     if (!/^\/(login|logout)/.test($location.path())) {
                         $rootScope.preAuthUrl = $location.path();
                     }
-                    if ($location.path() !== '/login') {
-                        if (global.$AnsibleConfig.login_redirect_override) {
-                            window.location.replace(global.$AnsibleConfig.login_redirect_override);
-                        } else {
-                            $location.path('/login');
-                        }
-                    }
+                    $location.path('/login');
                 } else {
                     var lastUser = $cookies.getObject('current_user'),
                         timestammp = Store('sessionTime');
