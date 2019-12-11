@@ -3,6 +3,8 @@ global.$AnsibleConfig = null;
 // Provided via Webpack DefinePlugin in webpack.config.js
 global.$ENV = {};
 
+global.$ConfigResponse = {};
+
 var urlPrefix;
 
 if ($basePath) {
