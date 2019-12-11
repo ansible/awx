@@ -375,7 +375,13 @@ angular
                     if (!/^\/(login|logout)/.test($location.path())) {
                         $rootScope.preAuthUrl = $location.path();
                     }
-                    $location.path('/login');
+                    if ($location.path() !== '/login') {
+                        if (global.$AnsibleConfig.login_redirect_override) {
+                            window.location.replace(global.$AnsibleConfig.login_redirect_override);
+                        } else {
+                            $location.path('/login');
+                        }
+                    }
                 } else {
                     var lastUser = $cookies.getObject('current_user'),
                         timestammp = Store('sessionTime');
@@ -383,7 +389,11 @@ angular
                         var stime = timestammp[lastUser.id].time,
                             now = new Date().getTime();
                         if ((stime - now) <= 0) {
-                            $location.path('/login');
+                            if (global.$AnsibleConfig.login_redirect_override) {
+                                window.location.replace(global.$AnsibleConfig.login_redirect_override);
+                            } else {
+                                $location.path('/login');
+                            }
                         }
                     }
                     // If browser refresh, set the user_is_superuser value

@@ -11,7 +11,11 @@ export default {
     route: '/logout',
     controller: ['Authorization', '$state', function(Authorization, $state) {
         Authorization.logout().then( () =>{
-            $state.go('signIn');
+            if (global.$AnsibleConfig.login_redirect_override) {
+                window.location.replace(global.$AnsibleConfig.login_redirect_override);
+            } else {
+                $state.go('signIn');
+            }
         });
 
     }],

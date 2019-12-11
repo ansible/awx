@@ -2,7 +2,6 @@ export default
     function LoadConfig($log, $rootScope, $http, Store) {
         return function() {
 
-
             var configSettings = {};
 
             var configInit = function() {
@@ -10,12 +9,11 @@ export default
                 if ($rootScope.loginConfig) {
                     $rootScope.loginConfig.resolve('config loaded');
                 }
+                global.$AnsibleConfig = configSettings;
+                Store('AnsibleConfig', global.$AnsibleConfig);
                 $rootScope.$emit('ConfigReady');
 
                 // Load new hardcoded settings from above
-
-                global.$AnsibleConfig = configSettings;
-                Store('AnsibleConfig', global.$AnsibleConfig);
                 $rootScope.$emit('LoadConfig');
             };
 
@@ -37,6 +35,10 @@ export default
                         $rootScope.custom_login_info = data.custom_login_info;
                     } else {
                         configSettings.custom_login_info = false;
+                    }
+
+                    if (data.login_redirect_override) {
+                        configSettings.login_redirect_override = data.login_redirect_override;
                     }
 
                     configInit();
