@@ -15,7 +15,7 @@ function bootstrap (callback) {
             angular.module('I18N').constant('LOCALE', locale);
         }
 
-        fetchConfig((config) => {
+        fetchConfig(() => {
             angular.element(document).ready(() => callback());
         });
     });
