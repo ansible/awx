@@ -1,25 +1,25 @@
 export default
-    function LoadConfig($rootScope, Store, ConfigSettings) {
+    function LoadConfig($rootScope, Store) {
         return function() {
 
             var configSettings = {};
 
-            if(ConfigSettings.custom_logo) {
+            if(global.$ConfigResponse.custom_logo) {
                 configSettings.custom_logo = true;
-                $rootScope.custom_logo = ConfigSettings.custom_logo;
+                $rootScope.custom_logo = global.$ConfigResponse.custom_logo;
             } else {
                 configSettings.custom_logo = false;
             }
 
-            if(ConfigSettings.custom_login_info) {
-                configSettings.custom_login_info = ConfigSettings.custom_login_info;
-                $rootScope.custom_login_info = ConfigSettings.custom_login_info;
+            if(global.$ConfigResponse.custom_login_info) {
+                configSettings.custom_login_info = global.$ConfigResponse.custom_login_info;
+                $rootScope.custom_login_info = global.$ConfigResponse.custom_login_info;
             } else {
                 configSettings.custom_login_info = false;
             }
 
-            if (ConfigSettings.login_redirect_override) {
-                configSettings.login_redirect_override = ConfigSettings.login_redirect_override;
+            if (global.$ConfigResponse.login_redirect_override) {
+                configSettings.login_redirect_override = global.$ConfigResponse.login_redirect_override;
             }
 
             // Auto-resolving what used to be found when attempting to load local_setting.json
@@ -37,4 +37,4 @@ export default
     }
 
 LoadConfig.$inject =
-    [ '$rootScope', 'Store', 'ConfigSettings' ];
+    [ '$rootScope', 'Store' ];

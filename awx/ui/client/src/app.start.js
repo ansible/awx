@@ -55,7 +55,7 @@ function fetchConfig (callback) {
     const request = $.ajax('/api/');
 
     request.done(res => {
-        angular.module('awApp').constant('ConfigSettings', res);
+        global.$ConfigResponse = res;
         if (res.login_redirect_override) {
             if (!document.cookie.split(';').filter((item) => item.includes('userLoggedIn=true')).length && !window.location.href.includes('/#/login')) {
                 window.location.replace(res.login_redirect_override);
