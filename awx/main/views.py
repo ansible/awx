@@ -98,5 +98,6 @@ def handle_csp_violation(request):
     logger.error(json.loads(request.body))
     return HttpResponse(content=None)
 
+
 def handle_login_redirect(request):
     return HttpResponseRedirect("/#/login")
