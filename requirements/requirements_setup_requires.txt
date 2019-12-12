@@ -7,3 +7,14 @@ virtualenv
 m2r
 twine  # from python-daemon
 wheel==0.33.6
+cffi>=1.1
+wheel>=0.33.6
+backports.functools_lru_cache
+more-itertools==5.0.0
+poetry
+functools32<4.0.0,>=3.2.3; python_version >= "2.7" and python_version < "2.8"
+flit; python_version >= "3.5"
+twine; python_version >= "3.6"
+incremental>=16.10.1; python_version >= "3.6"
+lxml>=3.0; python_version >= "3.6"
+pkgconfig; python_version >= "3.6"
