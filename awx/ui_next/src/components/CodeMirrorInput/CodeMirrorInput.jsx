@@ -83,7 +83,7 @@ function CodeMirrorInput({
 }
 CodeMirrorInput.propTypes = {
   value: string.isRequired,
-  onChange: func.isRequired,
+  onChange: func,
   mode: oneOf(['javascript', 'yaml', 'jinja2']).isRequired,
   readOnly: bool,
   hasErrors: bool,
@@ -91,6 +91,7 @@ CodeMirrorInput.propTypes = {
 };
 CodeMirrorInput.defaultProps = {
   readOnly: false,
+  onChange: () => {},
   rows: 6,
   hasErrors: false,
 };

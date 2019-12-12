@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
-import { Card, CardHeader, PageSection } from '@patternfly/react-core';
+import { Card, PageSection } from '@patternfly/react-core';
 import { Switch, Route, Redirect, withRouter, Link } from 'react-router-dom';
+import { TabbedCardHeader } from '@components/Card';
 import CardCloseButton from '@components/CardCloseButton';
 import ContentError from '@components/ContentError';
 import RoutedTabs from '@components/RoutedTabs';
@@ -51,10 +52,10 @@ function Inventory({ history, i18n, location, match, setBreadcrumb }) {
   ];
 
   let cardHeader = hasContentLoading ? null : (
-    <CardHeader style={{ padding: 0 }}>
+    <TabbedCardHeader style={{ padding: 0 }}>
       <RoutedTabs history={history} tabsArray={tabsArray} />
       <CardCloseButton linkTo="/inventories" />
-    </CardHeader>
+    </TabbedCardHeader>
   );
 
   if (

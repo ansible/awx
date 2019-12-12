@@ -58,7 +58,9 @@ function InventoryEdit({ history, i18n, inventory }) {
     } = values;
     try {
       await InventoriesAPI.update(inventory.id, {
-        insights_credential: insights_credential.id,
+        insights_credential: insights_credential
+          ? insights_credential.id
+          : null,
         organization: organization.id,
         ...remainingValues,
       });
@@ -76,13 +78,13 @@ function InventoryEdit({ history, i18n, inventory }) {
         );
         await Promise.all([...associatePromises, ...disassociatePromises]);
       }
+      const url =
+        history.location.pathname.search('smart') > -1
+          ? `/inventories/smart_inventory/${inventory.id}/details`
+          : `/inventories/inventory/${inventory.id}/details`;
+      history.push(`${url}`);
     } catch (err) {
       setError(err);
-    } finally {
-      const url = history.location.pathname.search('smart')
-        ? `/inventories/smart_inventory/${inventory.id}/details`
-        : `/inventories/inventory/${inventory.id}/details`;
-      history.push(`${url}`);
     }
   };
   if (contentLoading) {
