@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, withRouter } from 'react-router-dom';
+import { Link, useRouteMatch } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { CardBody as PFCardBody, Button } from '@patternfly/react-core';
@@ -16,10 +16,10 @@ const CardBody = styled(PFCardBody)`
   padding-top: 20px;
 `;
 
-function OrganizationDetail({ i18n, match, organization }) {
+function OrganizationDetail({ i18n, organization }) {
   const {
     params: { id },
-  } = match;
+  } = useRouteMatch();
   const {
     name,
     description,
@@ -104,4 +104,4 @@ function OrganizationDetail({ i18n, match, organization }) {
   );
 }
 
-export default withI18n()(withRouter(OrganizationDetail));
+export default withI18n()(OrganizationDetail);

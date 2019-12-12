@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { withRouter } from 'react-router-dom';
+import { useLocation, useRouteMatch } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
@@ -22,7 +22,9 @@ const QS_CONFIG = getQSConfig('organization', {
   order_by: 'name',
 });
 
-function OrganizationsList({ i18n, location, match }) {
+function OrganizationsList({ i18n }) {
+  const location = useLocation();
+  const match = useRouteMatch();
   const [contentError, setContentError] = useState(null);
   const [deletionError, setDeletionError] = useState(null);
   const [hasContentLoading, setHasContentLoading] = useState(true);
@@ -185,4 +187,4 @@ function OrganizationsList({ i18n, location, match }) {
 }
 
 export { OrganizationsList as _OrganizationsList };
-export default withI18n()(withRouter(OrganizationsList));
+export default withI18n()(OrganizationsList);

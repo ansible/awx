@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { withRouter } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 import { OrganizationsAPI } from '@api';
 import PaginatedDataList from '@components/PaginatedDataList';
@@ -12,7 +12,8 @@ const QS_CONFIG = getQSConfig('team', {
   order_by: 'name',
 });
 
-function OrganizationTeams({ id, location }) {
+function OrganizationTeams({ id }) {
+  const location = useLocation();
   const [contentError, setContentError] = useState(null);
   const [hasContentLoading, setHasContentLoading] = useState(false);
   const [itemCount, setItemCount] = useState(0);
@@ -54,4 +55,4 @@ OrganizationTeams.propTypes = {
 };
 
 export { OrganizationTeams as _OrganizationTeams };
-export default withRouter(OrganizationTeams);
+export default OrganizationTeams;

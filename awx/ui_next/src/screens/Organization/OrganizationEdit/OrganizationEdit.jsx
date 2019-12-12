@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { withRouter } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { CardBody } from '@patternfly/react-core';
 
 import { OrganizationsAPI } from '@api';
@@ -8,8 +8,9 @@ import { Config } from '@contexts/Config';
 
 import OrganizationForm from '../shared/OrganizationForm';
 
-function OrganizationEdit({ history, organization }) {
+function OrganizationEdit({ organization }) {
   const detailsUrl = `/organizations/${organization.id}/details`;
+  const history = useHistory();
   const [formError, setFormError] = useState(null);
 
   const handleSubmit = async (
@@ -65,4 +66,4 @@ OrganizationEdit.contextTypes = {
 };
 
 export { OrganizationEdit as _OrganizationEdit };
-export default withRouter(OrganizationEdit);
+export default OrganizationEdit;

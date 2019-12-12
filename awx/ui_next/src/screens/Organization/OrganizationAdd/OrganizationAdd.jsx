@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { withRouter } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
@@ -16,7 +16,8 @@ import { Config } from '@contexts/Config';
 import CardCloseButton from '@components/CardCloseButton';
 import OrganizationForm from '../shared/OrganizationForm';
 
-function OrganizationAdd({ history, i18n }) {
+function OrganizationAdd({ i18n }) {
+  const history = useHistory();
   const [formError, setFormError] = useState(null);
 
   const handleSubmit = async (values, groupsToAssociate) => {
@@ -67,4 +68,4 @@ OrganizationAdd.contextTypes = {
 };
 
 export { OrganizationAdd as _OrganizationAdd };
-export default withI18n()(withRouter(OrganizationAdd));
+export default withI18n()(OrganizationAdd);

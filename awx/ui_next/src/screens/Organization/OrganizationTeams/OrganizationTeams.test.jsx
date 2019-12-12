@@ -1,6 +1,5 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { shallow } from 'enzyme';
 
 import { OrganizationsAPI } from '@api';
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
@@ -32,14 +31,16 @@ describe('<OrganizationTeams />', () => {
     jest.clearAllMocks();
   });
 
-  test('renders succesfully', () => {
-    shallow(
-      <OrganizationTeams
-        id={1}
-        searchString=""
-        location={{ search: '', pathname: '/organizations/1/teams' }}
-      />
-    );
+  test('renders succesfully', async () => {
+    await act(async () => {
+      mountWithContexts(
+        <OrganizationTeams
+          id={1}
+          searchString=""
+          location={{ search: '', pathname: '/organizations/1/teams' }}
+        />
+      );
+    });
   });
 
   test('should load teams on mount', async () => {
