@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
 
@@ -12,64 +12,41 @@ const QS_CONFIG = getQSConfig('team', {
   order_by: 'name',
 });
 
-class OrganizationTeams extends React.Component {
-  constructor(props) {
-    super(props);
+function OrganizationTeams({ id, location }) {
+  const [contentError, setContentError] = useState(null);
+  const [hasContentLoading, setHasContentLoading] = useState(false);
+  const [itemCount, setItemCount] = useState(0);
+  const [teams, setTeams] = useState([]);
 
-    this.loadOrganizationTeamsList = this.loadOrganizationTeamsList.bind(this);
+  useEffect(() => {
+    (async () => {
+      const params = parseQueryString(QS_CONFIG, location.search);
+      setContentError(null);
+      setHasContentLoading(true);
+      try {
+        const {
+          data: { count = 0, results = [] },
+        } = await OrganizationsAPI.readTeams(id, params);
+        setItemCount(count);
+        setTeams(results);
+      } catch (error) {
+        setContentError(error);
+      } finally {
+        setHasContentLoading(false);
+      }
+    })();
+  }, [id, location]);
 
-    this.state = {
-      contentError: null,
-      hasContentLoading: true,
-      itemCount: 0,
-      teams: [],
-    };
-  }
-
-  componentDidMount() {
-    this.loadOrganizationTeamsList();
-  }
-
-  componentDidUpdate(prevProps) {
-    const { location } = this.props;
-    if (location !== prevProps.location) {
-      this.loadOrganizationTeamsList();
-    }
-  }
-
-  async loadOrganizationTeamsList() {
-    const { id, location } = this.props;
-    const params = parseQueryString(QS_CONFIG, location.search);
-
-    this.setState({ hasContentLoading: true, contentError: null });
-    try {
-      const {
-        data: { count = 0, results = [] },
-      } = await OrganizationsAPI.readTeams(id, params);
-      this.setState({
-        itemCount: count,
-        teams: results,
-      });
-    } catch (err) {
-      this.setState({ contentError: err });
-    } finally {
-      this.setState({ hasContentLoading: false });
-    }
-  }
-
-  render() {
-    const { contentError, hasContentLoading, teams, itemCount } = this.state;
-    return (
-      <PaginatedDataList
-        contentError={contentError}
-        hasContentLoading={hasContentLoading}
-        items={teams}
-        itemCount={itemCount}
-        pluralizedItemName="Teams"
-        qsConfig={QS_CONFIG}
-      />
-    );
-  }
+  return (
+    <PaginatedDataList
+      contentError={contentError}
+      hasContentLoading={hasContentLoading}
+      items={teams}
+      itemCount={itemCount}
+      pluralizedItemName="Teams"
+      qsConfig={QS_CONFIG}
+    />
+  );
 }
 
 OrganizationTeams.propTypes = {
