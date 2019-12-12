@@ -57,7 +57,7 @@ function InventoryGroupDetail({ i18n, history, match, inventoryGroup }) {
         </span>
       );
     } else {
-      createdBy = i18n._(t`${formatDateString(inventoryGroup.created)} by`);
+      createdBy = formatDateString(inventoryGroup.created);
     }
   }
 
@@ -71,7 +71,7 @@ function InventoryGroupDetail({ i18n, history, match, inventoryGroup }) {
         </span>
       );
     } else {
-      modifiedBy = i18n._(t`${formatDateString(inventoryGroup.modified)} by`);
+      modifiedBy = formatDateString(inventoryGroup.modified);
     }
   }
 

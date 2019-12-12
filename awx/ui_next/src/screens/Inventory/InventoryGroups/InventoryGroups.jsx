@@ -3,9 +3,9 @@ import { withI18n } from '@lingui/react';
 
 import { Switch, Route, withRouter } from 'react-router-dom';
 
-import InventoryGroupAdd from './InventoryGroupAdd/InventoryGroupAdd';
+import InventoryGroupAdd from '../InventoryGroupAdd/InventoryGroupAdd';
 
-import InventoryGroup from './InventoryGroup/InventoryGroup';
+import InventoryGroup from '../InventoryGroup/InventoryGroup';
 import InventoryGroupsList from './InventoryGroupsList';
 
 function InventoryGroups({ setBreadcrumb, inventory, location, match }) {
