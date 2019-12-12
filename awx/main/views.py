@@ -4,7 +4,7 @@
 import json
 
 # Django
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.utils.html import format_html
 from django.utils.translation import ugettext_lazy as _
@@ -97,3 +97,7 @@ def handle_csp_violation(request):
     logger = logging.getLogger('awx')
     logger.error(json.loads(request.body))
     return HttpResponse(content=None)
+
+
+def handle_login_redirect(request):
+    return HttpResponseRedirect("/#/login")

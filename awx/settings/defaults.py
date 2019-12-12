@@ -379,6 +379,10 @@ TACACSPLUS_AUTH_PROTOCOL = 'ascii'
 # Note: This setting may be overridden by database settings.
 AUTH_BASIC_ENABLED = True
 
+# If set, specifies a URL that unauthenticated users will be redirected to
+# when trying to access a UI page that requries authentication.
+LOGIN_REDIRECT_OVERRIDE = None
+
 # If set, serve only minified JS for UI.
 USE_MINIFIED_JS = False
 
