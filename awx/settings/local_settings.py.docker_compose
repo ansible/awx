@@ -53,8 +53,6 @@ if "pytest" in sys.modules:
 # Default to "just works" for single tower docker
 BROKER_URL = os.environ.get('BROKER_URL', "redis://redis_1:6379")
 
-WEBSOCKETS_PORT = "8013"
-
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "awx.main.channels.RedisGroupBroadcastChannelLayer",
@@ -244,3 +242,4 @@ TEST_AZURE_USERNAME = ''
 TEST_AZURE_KEY_DATA = ''
 
 BROADCAST_WEBSOCKETS_SECRET = '🤖starscream🤖'
+BROADCAST_WEBSOCKETS_PORT = 8013

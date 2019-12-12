@@ -27,17 +27,25 @@ def unwrap_broadcast_msg(payload):
     return (payload['group'], payload['message'])
 
 
+def get_broadcast_hosts():
+    Instance = apps.get_model('main', 'Instance')
+    return [h[0] for h in Instance.objects.filter(rampart_groups__controller__isnull=True)
+                                          .exclude(hostname=Instance.objects.me().hostname)
+                                          .order_by('hostname')
+                                          .values_list('hostname')
+                                          .distinct()]
+
+
 class RedisGroupBroadcastChannelLayer(RedisChannelLayer):
     def __init__(self, *args, **kwargs):
         super(RedisGroupBroadcastChannelLayer, self).__init__(*args, **kwargs)
-        Instance = apps.get_model('main', 'Instance')
 
-        self.broadcast_hosts = [h[0] for h in Instance.objects.all().exclude(hostname=Instance.objects.me().hostname).values_list('hostname')]
+        self.broadcast_hosts = get_broadcast_hosts()
         self.broadcast_websockets = set()
 
         loop = asyncio.get_event_loop()
         for host in self.broadcast_hosts:
-            loop.create_task(self.connect(host, settings.WEBSOCKETS_PORT))
+            loop.create_task(self.connect(host, settings.BROADCAST_WEBSOCKETS_PORT))
 
     async def connect(self, host, port, secret='abc123', attempt=0):
         from awx.main.consumers import WebsocketSecretAuthHelper # noqa
@@ -45,13 +53,14 @@ class RedisGroupBroadcastChannelLayer(RedisChannelLayer):
         if attempt > 0:
             await asyncio.sleep(5)
         channel_layer = get_channel_layer()
-        uri = "http://{}:{}/websocket/broadcast/".format(host, port)
+        uri = "https://{}:{}/websocket/broadcast/".format(host, port)
         timeout = aiohttp.ClientTimeout(total=10)
 
         secret_val = WebsocketSecretAuthHelper.construct_secret()
         try:
-            async with aiohttp.ClientSession(headers={'secret': secret_val}, timeout=timeout) as session:
-                async with session.ws_connect(uri) as websocket:
+            async with aiohttp.ClientSession(headers={'secret': secret_val},
+                                             timeout=timeout) as session:
+                async with session.ws_connect(uri, ssl=settings.BROADCAST_WEBSOCKETS_VERIFY_CERT) as websocket:
                     # TODO: Surface a health status of the broadcast interconnect
                     async for msg in websocket:
                         if msg.type == aiohttp.WSMsgType.ERROR:

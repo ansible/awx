@@ -965,8 +965,6 @@ CHANNEL_LAYER_RECEIVE_MAX_RETRY = 10
 
 ASGI_APPLICATION = "awx.main.routing.application"
 
-WEBSOCKETS_PORT = "80"
-
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "awx.main.channels.RedisGroupBroadcastChannelLayer",
@@ -1239,3 +1237,10 @@ MIDDLEWARE = [
 # Secret header value to exchange for websockets responsible for distributing websocket messages.
 # This needs to be kept secret and randomly generated
 BROADCAST_WEBSOCKETS_SECRET = ''
+
+# Port for broadcast websockets to connect to
+# Note: that the clients will follow redirect responses
+BROADCAST_WEBSOCKETS_PORT = 443
+
+# Whether or not broadcast websockets should check nginx certs when interconnecting
+BROADCAST_WEBSOCKETS_VERIFY_CERT = False
