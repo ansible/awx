@@ -137,7 +137,7 @@ virtualenv_ansible:
 		fi; \
 		if [ ! -d "$(VENV_BASE)/ansible" ]; then \
 			virtualenv -p python $(VENV_BASE)/ansible && \
-			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) pip==19.3.1 setuptools==42.0.1 wheel==0.33.6 && \
+			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) pip==19.3.1 setuptools==41.6.0 wheel==0.33.6 && \
 			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) flit poetry twine; \  # undeclared setup_requires
 		fi; \  # TODO: re-enable system site packages
 	fi
@@ -149,7 +149,7 @@ virtualenv_ansible_py3:
 		fi; \
 		if [ ! -d "$(VENV_BASE)/ansible" ]; then \
 			$(PYTHON) -m venv $(VENV_BASE)/ansible && \
-			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) pip==19.3.1 setuptools==42.0.1 wheel==0.33.6 && \
+			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) pip==19.3.1 setuptools==41.6.0 wheel==0.33.6 && \
 			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) flit poetry twine; \  # undeclared setup_requires
 		fi; \  # TODO: re-enable system site packages
 	fi

@@ -45,4 +45,4 @@ twilio
 uWSGI
 uwsgitop
 pip==19.3.1  # see UPGRADE BLOCKERs
-setuptools==42.0.1  # see UPGRADE BLOCKERs
+setuptools==41.6.0  # see UPGRADE BLOCKERs

@@ -54,7 +54,7 @@ pycurl==7.43.0.1    # higher versions will not install without SSL backend speci
 # AWX usage
 psutil==5.4.3    # same as AWX requirement
 pip==19.3.1  # see upgrade blockers
-setuptools==42.0.1  # see upgrade blockers
+setuptools==41.6.0  # see upgrade blockers
 # VMware
 pyvmomi==6.7.3
 # WinRM
