@@ -121,15 +121,13 @@ function InventoryGroups({ i18n, match, setBreadcrumb, inventory, history }) {
           path="*"
           render={() => {
             return (
-              !hasContentLoading && (
-                <ContentError>
-                  {inventory && (
-                    <Link to={`/inventories/inventory/${inventory.id}/details`}>
-                      {i18n._(t`View Inventory Details`)}
-                    </Link>
-                  )}
-                </ContentError>
-              )
+              <ContentError>
+                {inventory && (
+                  <Link to={`/inventories/inventory/${inventory.id}/details`}>
+                    {i18n._(t`View Inventory Details`)}
+                  </Link>
+                )}
+              </ContentError>
             );
           }}
         />

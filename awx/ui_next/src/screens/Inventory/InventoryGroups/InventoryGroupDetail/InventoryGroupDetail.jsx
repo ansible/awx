@@ -31,6 +31,8 @@ const ActionButtonWrapper = styled.div`
 function InventoryGroupDetail({ i18n, history, match, inventoryGroup }) {
   const {
     summary_fields: { created_by, modified_by },
+    created,
+    modified,
   } = inventoryGroup;
   const [error, setError] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -45,8 +47,36 @@ function InventoryGroupDetail({ i18n, history, match, inventoryGroup }) {
     }
   };
 
+  let createdBy = '';
+  if (created) {
+    if (created_by && created_by.username) {
+      createdBy = (
+        <span>
+          {i18n._(t`${formatDateString(inventoryGroup.created)} by`)}{' '}
+          <Link to={`/users/${created_by.id}`}>{created_by.username}</Link>
+        </span>
+      );
+    } else {
+      createdBy = i18n._(t`${formatDateString(inventoryGroup.created)} by`);
+    }
+  }
+
+  let modifiedBy = '';
+  if (modified) {
+    if (modified_by && modified_by.username) {
+      modifiedBy = (
+        <span>
+          {i18n._(t`${formatDateString(inventoryGroup.modified)} by`)}{' '}
+          <Link to={`/users/${modified_by.id}`}>{modified_by.username}</Link>
+        </span>
+      );
+    } else {
+      modifiedBy = i18n._(t`${formatDateString(inventoryGroup.modified)} by`);
+    }
+  }
+
   return (
-    <CardBody style={{ paddingTop: '20px' }}>
+    <CardBody css="padding-top: 20px">
       <DetailList gutter="sm">
         <Detail label={i18n._(t`Name`)} value={inventoryGroup.name} />
         <Detail
@@ -62,31 +92,9 @@ function InventoryGroupDetail({ i18n, history, match, inventoryGroup }) {
         label={i18n._(t`Variables`)}
       />
       <DetailList>
-        {created_by && created_by.username && (
-          <Detail
-            label={i18n._(t`Created`)}
-            value={
-              <span>
-                {i18n._(t`${formatDateString(inventoryGroup.created)} by`)}{' '}
-                <Link to={`/users/${created_by.id}`}>
-                  {created_by.username}
-                </Link>
-              </span>
-            }
-          />
-        )}
-        {modified_by && modified_by.username && (
-          <Detail
-            label={i18n._(t`Modified`)}
-            value={
-              <span>
-                {i18n._(t`${formatDateString(inventoryGroup.modified)} by`)}{' '}
-                <Link to={`/users/${modified_by.id}`}>
-                  {modified_by.username}
-                </Link>
-              </span>
-            }
-          />
+        {createdBy && <Detail label={i18n._(t`Created`)} value={createdBy} />}
+        {modifiedBy && (
+          <Detail label={i18n._(t`Modified`)} value={modifiedBy} />
         )}
       </DetailList>
       <ActionButtonWrapper>

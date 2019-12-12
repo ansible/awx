@@ -16,7 +16,7 @@ import styled from 'styled-components';
 import InventoryGroupItem from './InventoryGroupItem';
 import InventoryGroupsDeleteModal from '../shared/InventoryGroupsDeleteModal';
 
-const QS_CONFIG = getQSConfig('host', {
+const QS_CONFIG = getQSConfig('group', {
   page: 1,
   page_size: 20,
   order_by: 'name',
