@@ -15,7 +15,9 @@ function bootstrap (callback) {
             angular.module('I18N').constant('LOCALE', locale);
         }
 
-        angular.element(document).ready(() => callback());
+        fetchConfig(() => {
+            angular.element(document).ready(() => callback());
+        });
     });
 }
 
@@ -47,6 +49,25 @@ function fetchLocaleStrings (callback) {
     });
 
     request.fail(() => callback({ code: DEFAULT_LOCALE }));
+}
+
+function fetchConfig (callback) {
+    const request = $.ajax('/api/');
+
+    request.done(res => {
+        global.$ConfigResponse = res;
+        if (res.login_redirect_override) {
+            if (!document.cookie.split(';').filter((item) => item.includes('userLoggedIn=true')).length && !window.location.href.includes('/#/login')) {
+                window.location.replace(res.login_redirect_override);
+            } else {
+                callback();
+            }
+        } else {
+            callback();
+        }
+    });
+
+    request.fail(() => callback());
 }
 
 /**

@@ -3,6 +3,8 @@ global.$AnsibleConfig = null;
 // Provided via Webpack DefinePlugin in webpack.config.js
 global.$ENV = {};
 
+global.$ConfigResponse = {};
+
 var urlPrefix;
 
 if ($basePath) {
@@ -383,7 +385,11 @@ angular
                         var stime = timestammp[lastUser.id].time,
                             now = new Date().getTime();
                         if ((stime - now) <= 0) {
-                            $location.path('/login');
+                            if (global.$AnsibleConfig.login_redirect_override) {
+                                window.location.replace(global.$AnsibleConfig.login_redirect_override);
+                            } else {
+                                $location.path('/login');
+                            }
                         }
                     }
                     // If browser refresh, set the user_is_superuser value
