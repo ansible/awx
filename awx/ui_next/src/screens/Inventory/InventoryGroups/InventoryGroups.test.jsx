@@ -1,5 +1,4 @@
 import React from 'react';
-import { Route } from 'react-router-dom';
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
@@ -15,12 +14,8 @@ describe('<InventoryGroups />', () => {
 
     await act(async () => {
       wrapper = mountWithContexts(
-        <Route
-          path="/inventories/inventory/:id/groups"
-          component={() => (
-            <InventoryGroups setBreadcrumb={() => {}} inventory={inventory} />
-          )}
-        />,
+        <InventoryGroups setBreadcrumb={() => {}} inventory={inventory} />,
+
         {
           context: {
             router: { history, route: { location: history.location } },
@@ -39,12 +34,7 @@ describe('<InventoryGroups />', () => {
     let wrapper;
     await act(async () => {
       wrapper = mountWithContexts(
-        <Route
-          path="/inventories/inventory/:id/groups/add"
-          component={() => (
-            <InventoryGroups setBreadcrumb={() => {}} inventory={inventory} />
-          )}
-        />,
+        <InventoryGroups setBreadcrumb={() => {}} inventory={inventory} />,
         {
           context: {
             router: { history, route: { location: history.location } },
