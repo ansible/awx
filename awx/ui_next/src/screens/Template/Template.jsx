@@ -120,7 +120,7 @@ class Template extends Component {
       tab.id = n;
     });
 
-    let cardHeader = hasContentLoading ? null : (
+    let cardHeader = (
       <CardHeader style={{ padding: 0 }}>
         <RoutedTabs history={history} tabsArray={tabsArray} />
         <CardCloseButton linkTo="/templates" />
