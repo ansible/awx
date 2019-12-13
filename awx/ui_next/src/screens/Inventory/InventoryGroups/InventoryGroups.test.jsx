@@ -1,9 +1,10 @@
 import React from 'react';
-import { Route } from 'react-router-dom';
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
 import InventoryGroups from './InventoryGroups';
+
+jest.mock('@api');
 
 describe('<InventoryGroups />', () => {
   test('initially renders successfully', async () => {
@@ -15,12 +16,8 @@ describe('<InventoryGroups />', () => {
 
     await act(async () => {
       wrapper = mountWithContexts(
-        <Route
-          path="/inventories/inventory/:id/groups"
-          component={() => (
-            <InventoryGroups setBreadcrumb={() => {}} inventory={inventory} />
-          )}
-        />,
+        <InventoryGroups setBreadcrumb={() => {}} inventory={inventory} />,
+
         {
           context: {
             router: { history, route: { location: history.location } },
@@ -39,12 +36,7 @@ describe('<InventoryGroups />', () => {
     let wrapper;
     await act(async () => {
       wrapper = mountWithContexts(
-        <Route
-          path="/inventories/inventory/:id/groups/add"
-          component={() => (
-            <InventoryGroups setBreadcrumb={() => {}} inventory={inventory} />
-          )}
-        />,
+        <InventoryGroups setBreadcrumb={() => {}} inventory={inventory} />,
         {
           context: {
             router: { history, route: { location: history.location } },
