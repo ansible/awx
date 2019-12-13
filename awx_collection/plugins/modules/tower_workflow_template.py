@@ -86,11 +86,48 @@ extends_documentation_fragment: awx.awx.auth
 
 
 EXAMPLES = '''
-- tower_workflow_template:
+- name: 'Create Sample JSON file'
+  copy:
+    dest: 'my_workflow.json'
+    content: |
+      ---
+      - project: 'my_project'
+        success:
+          - job_template: 'Deploy Host'
+            success:
+              job_template: 'Configure Host'
+        failure:
+          - job_template: 'Clean up'
+        always:
+          - inventory_source: 'Local'
+
+- name: Create workflow template
+  tower_workflow_template:
     name: Workflow Template
     description: My very first Workflow Template
     organization: My optional Organization
-    schema: "{{ lookup('file', 'my_workflow.json') }}"
+    schema:
+      - job_template: "my-job-1"
+        success:
+          - job_template: "my-job-2"
+
+- name: Create workflow template with survey
+  tower_workflow_template:
+    name: workflow-1
+    survey_spec:
+      name: test survey
+      description: test description
+      spec:
+        - index: 0
+          question_name: "my question"
+          default: "mydef"
+          variable: "myvar"
+          type: "text"
+          required: false
+    schema:
+      - job_template: "my-job-1"
+        success:
+          - job_template: "my-job-2"
 
 - tower_workflow_template:
     name: Workflow Template
