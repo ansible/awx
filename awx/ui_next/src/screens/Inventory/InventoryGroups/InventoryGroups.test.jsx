@@ -4,6 +4,8 @@ import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
 import InventoryGroups from './InventoryGroups';
 
+jest.mock('@api');
+
 describe('<InventoryGroups />', () => {
   test('initially renders successfully', async () => {
     let wrapper;
