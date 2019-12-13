@@ -161,7 +161,7 @@ class InventoryModule(BaseInventoryPlugin):
         inventory_url = '/api/v2/inventories/{inv_id}/script/?hostvars=1&towervars=1&all=1'.format(inv_id=inventory_id)
         inventory_url = urljoin(tower_host, inventory_url)
 
-        inventory = self.make_request(request_handler, inventory_url)
+        inventory = make_request(request_handler, inventory_url)
         # To start with, create all the groups.
         for group_name in inventory:
             if group_name != '_meta':
@@ -191,7 +191,7 @@ class InventoryModule(BaseInventoryPlugin):
         # Fetch extra variables if told to do so
         if self.get_option('include_metadata'):
             config_url = urljoin(tower_host, '/api/v2/config/')
-            config_data = self.make_request(request_handler, config_url)
+            config_data = make_request(request_handler, config_url)
             server_data = {}
             server_data['license_type'] = config_data.get('license_info', {}).get('license_type', 'unknown')
             for key in ('version', 'ansible_version'):
