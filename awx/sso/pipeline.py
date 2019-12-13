@@ -78,7 +78,7 @@ def _update_m2m_from_expression(user, related, expr, remove=True):
         related.remove(user)
 
 
-def _update_org_from_attr(user, related, attr, remove, remove_admins, remove_auditors):
+def _update_org_from_attr(user, related, attr):
     from awx.main.models import Organization
 
     org_ids = []
@@ -89,17 +89,8 @@ def _update_org_from_attr(user, related, attr, remove, remove_admins, remove_aud
         org_ids.append(org.id)
         getattr(org, related).members.add(user)
 
-    if remove:
-        [o.member_role.members.remove(user) for o in
-            Organization.objects.filter(Q(member_role__members=user) & ~Q(id__in=org_ids))]
-
-    if remove_admins:
-        [o.admin_role.members.remove(user) for o in
-            Organization.objects.filter(Q(admin_role__members=user) & ~Q(id__in=org_ids))]
-
-    if remove_auditors:
-        [o.auditor_role.members.remove(user) for o in
-            Organization.objects.filter(Q(auditor_role__members=user) & ~Q(id__in=org_ids))]
+    [getattr(o, related).members.remove(user) for o in
+        Organization.objects.filter(Q(**{f'{related}__members': user}) & ~Q(id__in=org_ids))]
 
 def update_user_orgs(backend, details, user=None, *args, **kwargs):
     '''
@@ -165,9 +156,12 @@ def update_user_orgs_by_saml_attr(backend, details, user=None, *args, **kwargs):
     attr_admin_values = kwargs.get('response', {}).get('attributes', {}).get(org_map.get('saml_admin_attr'), [])
     attr_auditor_values = kwargs.get('response', {}).get('attributes', {}).get(org_map.get('saml_auditor_attr'), [])
 
-    _update_org_from_attr(user, "member_role", attr_values, remove, False, False)
-    _update_org_from_attr(user, "admin_role", attr_admin_values, False, remove_admins, False)
-    _update_org_from_attr(user, "auditor_role", attr_auditor_values, False, False, remove_auditors)
+    if remove:
+        _update_org_from_attr(user, "member_role", attr_values)
+    if remove_admins:
+        _update_org_from_attr(user, "admin_role", attr_admin_values)
+    if remove_auditors:
+        _update_org_from_attr(user, "auditor_role", attr_auditor_values)
 
 
 def update_user_teams_by_saml_attr(backend, details, user=None, *args, **kwargs):
