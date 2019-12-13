@@ -33,6 +33,9 @@ function InventoryGroupDetail({ i18n, history, match, inventoryGroup }) {
     summary_fields: { created_by, modified_by },
     created,
     modified,
+    name,
+    description,
+    variables,
   } = inventoryGroup;
   const [error, setError] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -78,16 +81,13 @@ function InventoryGroupDetail({ i18n, history, match, inventoryGroup }) {
   return (
     <CardBody css="padding-top: 20px">
       <DetailList gutter="sm">
-        <Detail label={i18n._(t`Name`)} value={inventoryGroup.name} />
-        <Detail
-          label={i18n._(t`Description`)}
-          value={inventoryGroup.description}
-        />
+        <Detail label={i18n._(t`Name`)} value={name} />
+        <Detail label={i18n._(t`Description`)} value={description} />
       </DetailList>
       <VariablesInput
         id="inventoryGroup-variables"
         readOnly
-        value={inventoryGroup.variables}
+        value={variables}
         rows={4}
         label={i18n._(t`Variables`)}
       />

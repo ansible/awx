@@ -4,7 +4,7 @@ import { withRouter } from 'react-router-dom';
 import { GroupsAPI } from '@api';
 import { Card } from '@patternfly/react-core';
 
-import InventoryGroupForm from '../InventoryGroupForm/InventoryGroupForm';
+import InventoryGroupForm from '../shared/InventoryGroupForm';
 
 function InventoryGroupsAdd({ history, inventory, setBreadcrumb }) {
   const [error, setError] = useState(null);

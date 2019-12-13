@@ -14,8 +14,8 @@ import InventoryGroupDetail from '../InventoryGroupDetail/InventoryGroupDetail';
 
 function InventoryGroups({ i18n, match, setBreadcrumb, inventory, history }) {
   const [inventoryGroup, setInventoryGroup] = useState(null);
-  const [hasContentLoading, setHasContentLoading] = useState(true);
-  const [contentError, setHasContentError] = useState(null);
+  const [contentLoading, setContentLoading] = useState(true);
+  const [contentError, setContentError] = useState(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -24,9 +24,9 @@ function InventoryGroups({ i18n, match, setBreadcrumb, inventory, history }) {
         setInventoryGroup(data);
         setBreadcrumb(inventory, data);
       } catch (err) {
-        setHasContentError(err);
+        setContentError(err);
       } finally {
-        setHasContentLoading(false);
+        setContentLoading(false);
       }
     };
 
@@ -64,11 +64,31 @@ function InventoryGroups({ i18n, match, setBreadcrumb, inventory, history }) {
       id: 2,
     },
   ];
+
+  // In cases where a user manipulates the url such that they try to navigate to a Inventory Group
+  // that is not associated with the Inventory Id in the Url this Content Error is thrown.
+  // Inventory Groups have a 1: 1 relationship to Inventories thus their Ids must corrolate.
+
+  if (contentLoading) {
+    return <ContentLoading />;
+  }
+
+  if (
+    inventoryGroup.summary_fields.inventory.id !== parseInt(match.params.id, 10)
+  ) {
+    return (
+      <ContentError>
+        {inventoryGroup && (
+          <Link to={`/inventories/inventory/${inventory.id}/groups`}>
+            {i18n._(t`View Inventory Groups`)}
+          </Link>
+        )}
+      </ContentError>
+    );
+  }
+
   if (contentError) {
     return <ContentError error={contentError} />;
-  }
-  if (hasContentLoading) {
-    return <ContentLoading />;
   }
 
   let cardHeader = null;
@@ -80,12 +100,11 @@ function InventoryGroups({ i18n, match, setBreadcrumb, inventory, history }) {
       <CardHeader style={{ padding: 0 }}>
         <RoutedTabs history={history} tabsArray={tabsArray} />
         <CardCloseButton
-          linkTo={`/inventories/inventory/${inventory.id}/group`}
+          linkTo={`/inventories/inventory/${inventory.id}/groups`}
         />
       </CardHeader>
     );
   }
-
   return (
     <>
       {cardHeader}

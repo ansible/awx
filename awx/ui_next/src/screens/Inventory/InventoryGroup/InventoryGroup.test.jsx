@@ -1,5 +1,6 @@
 import React from 'react';
 import { GroupsAPI } from '@api';
+import { Route } from 'react-router-dom';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
@@ -14,6 +15,7 @@ GroupsAPI.readDetail.mockResolvedValue({
     description: 'Bar',
     variables: 'bizz: buzz',
     summary_fields: {
+      inventory: { id: 1 },
       created_by: { id: 1, name: 'Athena' },
       modified_by: { id: 1, name: 'Apollo' },
     },
@@ -29,7 +31,12 @@ describe('<InventoryGroup />', () => {
     });
     await act(async () => {
       wrapper = mountWithContexts(
-        <InventoryGroup inventory={inventory} setBreadcrumb={() => {}} />,
+        <Route
+          path="/inventories/inventory/:id/groups"
+          component={() => (
+            <InventoryGroup setBreadcrumb={() => {}} inventory={inventory} />
+          )}
+        />,
         {
           context: {
             router: {

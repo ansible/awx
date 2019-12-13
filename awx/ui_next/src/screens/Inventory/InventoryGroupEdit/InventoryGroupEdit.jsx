@@ -3,7 +3,7 @@ import { withI18n } from '@lingui/react';
 import { withRouter } from 'react-router-dom';
 import { GroupsAPI } from '@api';
 
-import InventoryGroupForm from '../InventoryGroupForm/InventoryGroupForm';
+import InventoryGroupForm from '../shared/InventoryGroupForm';
 
 function InventoryGroupEdit({ history, inventoryGroup, inventory, match }) {
   const [error, setError] = useState(null);

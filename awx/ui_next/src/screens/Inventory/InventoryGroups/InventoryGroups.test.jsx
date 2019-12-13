@@ -1,81 +1,25 @@
 import React from 'react';
-import { act } from 'react-dom/test-utils';
 import { Route } from 'react-router-dom';
+import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
-import { InventoriesAPI, GroupsAPI } from '@api';
-import InventoryGroupsList from './InventoryGroupsList';
+import InventoryGroups from './InventoryGroups';
 
-jest.mock('@api');
-
-const mockGroups = [
-  {
-    id: 1,
-    type: 'group',
-    name: 'foo',
-    inventory: 1,
-    url: '/api/v2/groups/1',
-    summary_fields: {
-      user_capabilities: {
-        delete: true,
-        edit: true,
-      },
-    },
-  },
-  {
-    id: 2,
-    type: 'group',
-    name: 'bar',
-    inventory: 1,
-    url: '/api/v2/groups/2',
-    summary_fields: {
-      user_capabilities: {
-        delete: true,
-        edit: true,
-      },
-    },
-  },
-  {
-    id: 3,
-    type: 'group',
-    name: 'baz',
-    inventory: 1,
-    url: '/api/v2/groups/3',
-    summary_fields: {
-      user_capabilities: {
-        delete: false,
-        edit: false,
-      },
-    },
-  },
-];
-
-describe('<InventoryGroupsList />', () => {
-  let wrapper;
-
-  beforeEach(async () => {
-    InventoriesAPI.readGroups.mockResolvedValue({
-      data: {
-        count: mockGroups.length,
-        results: mockGroups,
-      },
-    });
-    InventoriesAPI.readGroupsOptions.mockResolvedValue({
-      data: {
-        actions: {
-          GET: {},
-          POST: {},
-        },
-      },
-    });
+describe('<InventoryGroups />', () => {
+  test('initially renders successfully', async () => {
+    let wrapper;
     const history = createMemoryHistory({
-      initialEntries: ['/inventories/inventory/3/groups'],
+      initialEntries: ['/inventories/inventory/1/groups'],
     });
+    const inventory = { id: 1, name: 'Foo' };
+
     await act(async () => {
       wrapper = mountWithContexts(
         <Route
           path="/inventories/inventory/:id/groups"
-          component={() => <InventoryGroupsList />}
+          component={() => (
+            <InventoryGroups setBreadcrumb={() => {}} inventory={inventory} />
+          )}
         />,
         {
           context: {
@@ -84,134 +28,30 @@ describe('<InventoryGroupsList />', () => {
         }
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
-  });
-
-  test('initially renders successfully', () => {
+    expect(wrapper.length).toBe(1);
     expect(wrapper.find('InventoryGroupsList').length).toBe(1);
   });
-
-  test('should fetch groups from api and render them in the list', async () => {
-    expect(InventoriesAPI.readGroups).toHaveBeenCalled();
-    expect(wrapper.find('InventoryGroupItem').length).toBe(3);
-  });
-
-  test('should check and uncheck the row item', async () => {
-    expect(
-      wrapper.find('PFDataListCheck[id="select-group-1"]').props().checked
-    ).toBe(false);
-
+  test('test that InventoryGroupsAdd renders', async () => {
+    const history = createMemoryHistory({
+      initialEntries: ['/inventories/inventory/1/groups/add'],
+    });
+    const inventory = { id: 1, name: 'Foo' };
+    let wrapper;
     await act(async () => {
-      wrapper.find('PFDataListCheck[id="select-group-1"]').invoke('onChange')(
-        true
-      );
-    });
-    wrapper.update();
-    expect(
-      wrapper.find('PFDataListCheck[id="select-group-1"]').props().checked
-    ).toBe(true);
-
-    await act(async () => {
-      wrapper.find('PFDataListCheck[id="select-group-1"]').invoke('onChange')(
-        false
-      );
-    });
-    wrapper.update();
-    expect(
-      wrapper.find('PFDataListCheck[id="select-group-1"]').props().checked
-    ).toBe(false);
-  });
-
-  test('should check all row items when select all is checked', async () => {
-    wrapper.find('PFDataListCheck').forEach(el => {
-      expect(el.props().checked).toBe(false);
-    });
-    await act(async () => {
-      wrapper.find('Checkbox#select-all').invoke('onChange')(true);
-    });
-    wrapper.update();
-    wrapper.find('PFDataListCheck').forEach(el => {
-      expect(el.props().checked).toBe(true);
-    });
-    await act(async () => {
-      wrapper.find('Checkbox#select-all').invoke('onChange')(false);
-    });
-    wrapper.update();
-    wrapper.find('PFDataListCheck').forEach(el => {
-      expect(el.props().checked).toBe(false);
-    });
-  });
-
-  test('should show content error when api throws error on initial render', async () => {
-    InventoriesAPI.readGroupsOptions.mockImplementation(() =>
-      Promise.reject(new Error())
-    );
-    await act(async () => {
-      wrapper = mountWithContexts(<InventoryGroupsList />);
-    });
-    await waitForElement(wrapper, 'ContentError', el => el.length === 1);
-  });
-
-  test('should show content error if groups are not successfully fetched from api', async () => {
-    InventoriesAPI.readGroups.mockImplementation(() =>
-      Promise.reject(new Error())
-    );
-    await act(async () => {
-      wrapper.find('PFDataListCheck[id="select-group-1"]').invoke('onChange')();
-    });
-    wrapper.update();
-    await act(async () => {
-      wrapper.find('Toolbar Button[aria-label="Delete"]').invoke('onClick')();
-    });
-    await waitForElement(
-      wrapper,
-      'InventoryGroupsDeleteModal',
-      el => el.props().isModalOpen === true
-    );
-    await act(async () => {
-      wrapper
-        .find('ModalBoxFooter Button[aria-label="Delete"]')
-        .invoke('onClick')();
-    });
-    await waitForElement(wrapper, 'ContentError', el => el.length === 1);
-  });
-
-  test('should show error modal when group is not successfully deleted from api', async () => {
-    GroupsAPI.destroy.mockRejectedValue(
-      new Error({
-        response: {
-          config: {
-            method: 'delete',
-            url: '/api/v2/groups/1',
+      wrapper = mountWithContexts(
+        <Route
+          path="/inventories/inventory/:id/groups/add"
+          component={() => (
+            <InventoryGroups setBreadcrumb={() => {}} inventory={inventory} />
+          )}
+        />,
+        {
+          context: {
+            router: { history, route: { location: history.location } },
           },
-          data: 'An error occurred',
-        },
-      })
-    );
-    await act(async () => {
-      wrapper.find('PFDataListCheck[id="select-group-1"]').invoke('onChange')();
+        }
+      );
     });
-    wrapper.update();
-    await act(async () => {
-      wrapper.find('Toolbar Button[aria-label="Delete"]').invoke('onClick')();
-    });
-    await waitForElement(
-      wrapper,
-      'InventoryGroupsDeleteModal',
-      el => el.props().isModalOpen === true
-    );
-    await act(async () => {
-      wrapper.find('Radio[id="radio-delete"]').invoke('onChange')();
-    });
-    wrapper.update();
-    await act(async () => {
-      wrapper
-        .find('ModalBoxFooter Button[aria-label="Delete"]')
-        .invoke('onClick')();
-    });
-    await waitForElement(wrapper, { title: 'Error!', variant: 'danger' });
-    await act(async () => {
-      wrapper.find('ModalBoxCloseButton').invoke('onClose')();
-    });
+    expect(wrapper.find('InventoryGroupsAdd').length).toBe(1);
   });
 });
