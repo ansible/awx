@@ -159,6 +159,8 @@ class EventConsumer(AsyncJsonWebsocketConsumer):
 
         if 'groups' in data:
             groups = data['groups']
+            new_groups = set()
+            current_groups = set(self.scope['session'].pop('groups') if 'groups' in self.scope['session'] else [])
             for group_name,v in groups.items():
                 if type(v) is list:
                     for oid in v:
@@ -170,19 +172,29 @@ class EventConsumer(AsyncJsonWebsocketConsumer):
                                 await self.send_json({"error": "access denied to channel {0} for resource id {1}".format(group_name, oid)})
                                 continue
 
-                        await self.channel_layer.group_add(
-                            name,
-                            self.channel_name
-                        )
+                        new_groups.add(name)
                 else:
                     if group_name == BROADCAST_GROUP:
                         logger.warn("Non-priveleged client asked to join broadcast group!")
                         return
 
-                    await self.channel_layer.group_add(
-                        group_name,
-                        self.channel_name
-                    )
+                    new_groups.add(name)
+
+            old_groups = current_groups - new_groups
+            for group_name in old_groups:
+                await self.channel_layer.group_discard(
+                    group_name,
+                    self.channel_name,
+                )
+
+            new_groups_exclusive = new_groups - current_groups
+            for group_name in new_groups_exclusive:
+                await self.channel_layer.group_add(
+                    group_name,
+                    self.channel_name
+                )
+            logger.debug(f"Channel {self.channel_name} left groups {old_groups} and joined {new_groups_exclusive}")
+            self.scope['session']['groups'] = new_groups
 
     async def internal_message(self, event):
         await self.send(event['text'])
