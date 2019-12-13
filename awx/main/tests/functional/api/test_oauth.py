@@ -69,7 +69,7 @@ def test_token_creation_disabled_for_external_accounts(oauth_application, post, 
 
 
 @pytest.mark.django_db
-def test_existing_token_disabled_for_external_accounts(oauth_application, get, post, admin):
+def test_existing_token_enabled_for_external_accounts(oauth_application, get, post, admin):
     UserEnterpriseAuth(user=admin, provider='radius').save()
     url = drf_reverse('api:oauth_authorization_root_view') + 'token/'
     with override_settings(RADIUS_SERVER='example.org', ALLOW_OAUTH2_FOR_EXTERNAL_USERS=True):
@@ -98,9 +98,9 @@ def test_existing_token_disabled_for_external_accounts(oauth_application, get, p
             resp = get(
                 drf_reverse('api:user_me_list', kwargs={'version': 'v2'}),
                 HTTP_AUTHORIZATION='Bearer ' + token,
-                status=401
+                status=200
             )
-            assert b'To establish a login session' in resp.content
+            assert json.loads(resp.content)['results'][0]['username'] == 'admin'
 
 
 @pytest.mark.django_db
