@@ -52,7 +52,7 @@ class ErrorDetail extends Component {
   renderNetworkError() {
     const { error } = this.props;
     const { response } = error;
-
+    console.log(response);
     const message =
       typeof response.data === 'string' ? response.data : response.data.detail;
 
