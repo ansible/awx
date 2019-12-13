@@ -29,8 +29,12 @@
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
+import json
 import os
 import traceback
+from ansible.module_utils._text import to_native
+from ansible.module_utils.urls import Request, urllib_error, ConnectionError, socket, httplib
+from ansible.errors import AnsibleParserError
 
 TOWER_CLI_IMP_ERR = None
 try:
@@ -46,8 +50,30 @@ except ImportError:
 from ansible.module_utils.basic import AnsibleModule, missing_required_lib
 
 
+def make_request(self, request_handler, tower_url):
+    '''
+    Makes the request to given URL, handles errors, returns JSON
+    '''
+    try:
+        response = request_handler.get(tower_url)
+    except (ConnectionError, urllib_error.URLError, socket.error, httplib.HTTPException) as e:
+        n_error_msg = 'Connection to remote host failed: {err}'.format(err=to_native(e))
+        # If Tower gives a readable error message, display that message to the user.
+        if callable(getattr(e, 'read', None)):
+            n_error_msg += ' with message: {err_msg}'.format(err_msg=to_native(e.read()))
+        raise AnsibleParserError(n_error_msg)
+
+    # Attempt to parse JSON.
+    try:
+        return json.loads(response.read())
+    except (ValueError, TypeError) as e:
+        # If the JSON parse fails, print the ValueError
+        raise AnsibleParserError('Failed to parse json from host: {err}'.format(err=to_native(e)))
+
+
 def tower_auth_config(module):
-    '''tower_auth_config attempts to load the tower-cli.cfg file
+    '''
+    `tower_auth_config` attempts to load the tower-cli.cfg file
     specified from the `tower_config_file` parameter. If found,
     if returns the contents of the file as a dictionary, else
     it will attempt to fetch values from the module params and

@@ -98,15 +98,15 @@ inventory_id: the_ID_of_targeted_ansible_tower_inventory
 # ansible-inventory -i @tower_inventory --list
 '''
 
-import re
 import os
-import json
+import re
 from ansible.module_utils import six
-from ansible.module_utils.urls import Request, urllib_error, ConnectionError, socket, httplib
+from ansible.module_utils.urls import Request
 from ansible.module_utils._text import to_text, to_native
-from ansible.errors import AnsibleParserError, AnsibleOptionsError
+from ansible.errors import AnsibleOptionsError
 from ansible.plugins.inventory import BaseInventoryPlugin
 from ansible.config.manager import ensure_type
+from ..module_utils.ansible_tower import make_request
 
 # Python 2/3 Compatibility
 try:
@@ -120,25 +120,6 @@ class InventoryModule(BaseInventoryPlugin):
     # Stays backward compatible with tower inventory script.
     # If the user supplies '@tower_inventory' as path, the plugin will read from environment variables.
     no_config_file_supplied = False
-
-    def make_request(self, request_handler, tower_url):
-        """Makes the request to given URL, handles errors, returns JSON
-        """
-        try:
-            response = request_handler.get(tower_url)
-        except (ConnectionError, urllib_error.URLError, socket.error, httplib.HTTPException) as e:
-            n_error_msg = 'Connection to remote host failed: {err}'.format(err=to_native(e))
-            # If Tower gives a readable error message, display that message to the user.
-            if callable(getattr(e, 'read', None)):
-                n_error_msg += ' with message: {err_msg}'.format(err_msg=to_native(e.read()))
-            raise AnsibleParserError(n_error_msg)
-
-        # Attempt to parse JSON.
-        try:
-            return json.loads(response.read())
-        except (ValueError, TypeError) as e:
-            # If the JSON parse fails, print the ValueError
-            raise AnsibleParserError('Failed to parse json from host: {err}'.format(err=to_native(e)))
 
     def verify_file(self, path):
         if path.endswith('@tower_inventory'):
