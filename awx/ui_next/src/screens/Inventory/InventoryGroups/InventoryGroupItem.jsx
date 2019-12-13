@@ -27,7 +27,7 @@ function InventoryGroupItem({
   onSelect,
 }) {
   const labelId = `check-action-${group.id}`;
-  const detailUrl = `/inventories/inventory/${inventoryId}/groups/${group.id}/detail`;
+  const detailUrl = `/inventories/inventory/${inventoryId}/groups/${group.id}/details`;
   const editUrl = `/inventories/inventory/${inventoryId}/groups/${group.id}/edit`;
 
   return (

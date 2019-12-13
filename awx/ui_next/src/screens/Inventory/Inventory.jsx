@@ -57,7 +57,11 @@ function Inventory({ history, i18n, location, match, setBreadcrumb }) {
     </CardHeader>
   );
 
-  if (location.pathname.endsWith('edit') || location.pathname.endsWith('add')) {
+  if (
+    location.pathname.endsWith('edit') ||
+    location.pathname.endsWith('add') ||
+    location.pathname.includes('groups/')
+  ) {
     cardHeader = null;
   }
 
@@ -123,7 +127,15 @@ function Inventory({ history, i18n, location, match, setBreadcrumb }) {
             <Route
               key="groups"
               path="/inventories/inventory/:id/groups"
-              render={() => <InventoryGroups inventory={inventory} />}
+              render={() => (
+                <InventoryGroups
+                  location={location}
+                  match={match}
+                  history={history}
+                  setBreadcrumb={setBreadcrumb}
+                  inventory={inventory}
+                />
+              )}
             />,
             <Route
               key="hosts"

@@ -15,7 +15,7 @@ import CredentialTypes from '@screens/CredentialType';
 import Dashboard from '@screens/Dashboard';
 import Hosts from '@screens/Host';
 import InstanceGroups from '@screens/InstanceGroup';
-import Inventories from '@screens/Inventory';
+import Inventory from '@screens/Inventory';
 import InventoryScripts from '@screens/InventoryScript';
 import { Jobs } from '@screens/Job';
 import Login from '@screens/Login';
@@ -139,7 +139,7 @@ export function main(render) {
                             {
                               title: i18n._(t`Inventories`),
                               path: '/inventories',
-                              component: Inventories,
+                              component: Inventory,
                             },
                             {
                               title: i18n._(t`Hosts`),

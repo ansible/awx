@@ -15,7 +15,7 @@ import { getAddedAndRemoved } from '../../../util/lists';
 function InventoryEdit({ history, i18n, inventory }) {
   const [error, setError] = useState(null);
   const [associatedInstanceGroups, setInstanceGroups] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [contentLoading, setContentLoading] = useState(true);
   const [credentialTypeId, setCredentialTypeId] = useState(null);
 
   useEffect(() => {
@@ -39,11 +39,11 @@ function InventoryEdit({ history, i18n, inventory }) {
       } catch (err) {
         setError(err);
       } finally {
-        setIsLoading(false);
+        setContentLoading(false);
       }
     };
     loadData();
-  }, [inventory.id, isLoading, inventory, credentialTypeId]);
+  }, [inventory.id, contentLoading, inventory, credentialTypeId]);
 
   const handleCancel = () => {
     history.push('/inventories');
@@ -85,7 +85,7 @@ function InventoryEdit({ history, i18n, inventory }) {
       history.push(`${url}`);
     }
   };
-  if (isLoading) {
+  if (contentLoading) {
     return <ContentLoading />;
   }
   if (error) {
