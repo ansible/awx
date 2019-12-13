@@ -717,11 +717,7 @@ class UnifiedJobSerializer(BaseSerializer):
 
     class Meta:
         model = UnifiedJob
-        fields = ('*', 'unified_job_template', 'launch_type', 'status',
-                  'failed', 'started', 'finished', 'elapsed', 'job_args',
-                  'job_cwd', 'job_env', 'job_explanation',
-                  'execution_node', 'controller_node',
-                  'result_traceback', 'event_processing_finished')
+        fields = ('*', 'unified_job_template', 'launch_type', 'status', 'failed', 'started', 'finished', 'elapsed', 'job_args', 'job_cwd', 'job_env', 'job_explanation', 'execution_node', 'controller_node', 'result_traceback', 'event_processing_finished')
         extra_kwargs = {
             'unified_job_template': {
                 'source': 'unified_job_template_id',
