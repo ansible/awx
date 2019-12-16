@@ -1,9 +1,10 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 const Outer = styled.div`
   position: relative;
   height: 0;
+  pointer-events: none;
 `;
 
 const Inner = styled.div`
@@ -19,11 +20,9 @@ const Inner = styled.div`
 
 function WorkflowHelp({ children }) {
   return (
-    <Fragment>
-      <Outer>
-        <Inner>{children}</Inner>
-      </Outer>
-    </Fragment>
+    <Outer>
+      <Inner>{children}</Inner>
+    </Outer>
   );
 }
 

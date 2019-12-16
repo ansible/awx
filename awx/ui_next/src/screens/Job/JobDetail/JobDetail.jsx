@@ -23,7 +23,7 @@ import {
   InventoriesAPI,
   AdHocCommandsAPI,
 } from '@api';
-import { JOB_TYPE_URL_SEGMENTS } from '../../../constants';
+import { JOB_TYPE_URL_SEGMENTS } from '@constants';
 
 const ActionButtonWrapper = styled.div`
   display: flex;

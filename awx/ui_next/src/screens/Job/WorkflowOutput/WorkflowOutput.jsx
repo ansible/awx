@@ -1,22 +1,23 @@
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
+import { CardBody as PFCardBody } from '@patternfly/react-core';
 import { layoutGraph } from '@util/workflow';
 import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
-import NodeDeleteModal from './Modals/NodeDeleteModal';
-import VisualizerGraph from './VisualizerGraph';
-import VisualizerStartScreen from './VisualizerStartScreen';
-import VisualizerToolbar from './VisualizerToolbar';
-import { WorkflowJobTemplatesAPI } from '@api';
+import { WorkflowJobsAPI } from '@api';
+import WorkflowOutputGraph from './WorkflowOutputGraph';
 
-const CenteredContent = styled.div`
+const CardBody = styled(PFCardBody)`
+  height: calc(100vh - 240px);
   display: flex;
-  flex-flow: column;
-  height: 100%;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+`;
+
+const Toolbar = styled.div`
+  height: 50px;
+  background-color: grey;
 `;
 
 const Wrapper = styled.div`
@@ -25,15 +26,15 @@ const Wrapper = styled.div`
   height: 100%;
 `;
 
-const fetchWorkflowNodes = async (templateId, pageNo = 1, nodes = []) => {
+const fetchWorkflowNodes = async (jobId, pageNo = 1, nodes = []) => {
   try {
-    const { data } = await WorkflowJobTemplatesAPI.readNodes(templateId, {
+    const { data } = await WorkflowJobsAPI.readNodes(jobId, {
       page_size: 200,
       page: pageNo,
     });
     if (data.next) {
       return await fetchWorkflowNodes(
-        templateId,
+        jobId,
         pageNo + 1,
         nodes.concat(data.results)
       );
@@ -44,83 +45,12 @@ const fetchWorkflowNodes = async (templateId, pageNo = 1, nodes = []) => {
   }
 };
 
-function Visualizer({ template, i18n }) {
+function WorkflowOutput({ job, i18n }) {
   const [contentError, setContentError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [graphLinks, setGraphLinks] = useState([]);
-  // We'll also need to store the original set of nodes...
   const [graphNodes, setGraphNodes] = useState([]);
   const [nodePositions, setNodePositions] = useState(null);
-  const [nodeToDelete, setNodeToDelete] = useState(null);
-
-  const deleteNode = () => {
-    const nodeId = nodeToDelete.id;
-    const newGraphNodes = [...graphNodes];
-    const newGraphLinks = [...graphLinks];
-
-    // Remove the node from the array
-    for (let i = newGraphNodes.length; i--; ) {
-      if (newGraphNodes[i].id === nodeId) {
-        newGraphNodes.splice(i, 1);
-        i = 0;
-      }
-    }
-
-    // Update the links
-    const parents = [];
-    const children = [];
-    const linkParentMapping = {};
-
-    // Remove any links that reference this node
-    for (let i = newGraphLinks.length; i--; ) {
-      const link = newGraphLinks[i];
-
-      if (!linkParentMapping[link.target.id]) {
-        linkParentMapping[link.target.id] = [];
-      }
-
-      linkParentMapping[link.target.id].push(link.source.id);
-
-      if (link.source.id === nodeId || link.target.id === nodeId) {
-        if (link.source.id === nodeId) {
-          children.push({ id: link.target.id, edgeType: link.edgeType });
-        } else if (link.target.id === nodeId) {
-          parents.push(link.source.id);
-        }
-        newGraphLinks.splice(i, 1);
-      }
-    }
-
-    // Add the new links
-    parents.forEach(parentId => {
-      children.forEach(child => {
-        if (parentId === 1) {
-          // We only want to create a link from the start node to this node if it
-          // doesn't have any other parents
-          if (linkParentMapping[child.id].length === 1) {
-            newGraphLinks.push({
-              source: { id: parentId },
-              target: { id: child.id },
-              edgeType: 'always',
-              type: 'link',
-            });
-          }
-        } else if (!linkParentMapping[child.id].includes(parentId)) {
-          newGraphLinks.push({
-            source: { id: parentId },
-            target: { id: child.id },
-            edgeType: child.edgeType,
-            type: 'link',
-          });
-        }
-      });
-    });
-    // need to track that this node has been deleted if it's not new
-
-    setNodeToDelete(null);
-    setGraphNodes(newGraphNodes);
-    setGraphLinks(newGraphLinks);
-  };
 
   useEffect(() => {
     const buildGraphArrays = nodes => {
@@ -232,7 +162,7 @@ function Visualizer({ template, i18n }) {
 
     async function fetchData() {
       try {
-        const nodes = await fetchWorkflowNodes(template.id);
+        const nodes = await fetchWorkflowNodes(job.id);
         buildGraphArrays(nodes);
       } catch (error) {
         setContentError(error);
@@ -241,7 +171,7 @@ function Visualizer({ template, i18n }) {
       }
     }
     fetchData();
-  }, [template.id, i18n]);
+  }, [job.id, job.unified_job_template, i18n]);
 
   // Update positions of nodes/links
   useEffect(() => {
@@ -259,43 +189,34 @@ function Visualizer({ template, i18n }) {
 
   if (isLoading) {
     return (
-      <CenteredContent>
+      <CardBody>
         <ContentLoading />
-      </CenteredContent>
+      </CardBody>
     );
   }
 
   if (contentError) {
     return (
-      <CenteredContent>
+      <CardBody>
         <ContentError error={contentError} />
-      </CenteredContent>
+      </CardBody>
     );
   }
 
   return (
-    <Fragment>
+    <CardBody>
       <Wrapper>
-        <VisualizerToolbar template={template} />
-        {graphLinks.length > 0 ? (
-          <VisualizerGraph
+        <Toolbar>Toolbar</Toolbar>
+        {nodePositions && (
+          <WorkflowOutputGraph
             links={graphLinks}
             nodes={graphNodes}
             nodePositions={nodePositions}
-            readOnly={!template.summary_fields.user_capabilities.edit}
-            onDeleteNodeClick={setNodeToDelete}
           />
-        ) : (
-          <VisualizerStartScreen />
         )}
       </Wrapper>
-      <NodeDeleteModal
-        nodeToDelete={nodeToDelete}
-        onConfirm={deleteNode}
-        onCancel={() => setNodeToDelete(null)}
-      />
-    </Fragment>
+    </CardBody>
   );
 }
 
-export default withI18n()(Visualizer);
+export default withI18n()(WorkflowOutput);
