@@ -1244,3 +1244,6 @@ BROADCAST_WEBSOCKETS_PORT = 443
 
 # Whether or not broadcast websockets should check nginx certs when interconnecting
 BROADCAST_WEBSOCKETS_VERIFY_CERT = False
+
+# Connect to other AWX nodes using http or https
+BROADCAST_WEBSOCKETS_PROTOCOL = 'https'

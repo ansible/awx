@@ -53,7 +53,7 @@ class RedisGroupBroadcastChannelLayer(RedisChannelLayer):
         if attempt > 0:
             await asyncio.sleep(5)
         channel_layer = get_channel_layer()
-        uri = "https://{}:{}/websocket/broadcast/".format(host, port)
+        uri = f"{settings.BROADCAST_WEBSOCKETS_PROTOCOL}://{host}:{port}/websocket/broadcast/"
         timeout = aiohttp.ClientTimeout(total=10)
 
         secret_val = WebsocketSecretAuthHelper.construct_secret()
