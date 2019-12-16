@@ -156,6 +156,7 @@ class EventConsumer(AsyncJsonWebsocketConsumer):
             "access denied to channel, XRF mismatch for {}".format(user.username)
             )
             await self.send_json({"error": "access denied to channel"})
+            return
 
         if 'groups' in data:
             groups = data['groups']
