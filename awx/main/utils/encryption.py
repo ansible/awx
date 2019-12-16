@@ -82,6 +82,7 @@ def encrypt_field(instance, field_name, ask=False, subfield=None, secret_key=Non
     # symmetric key is based):
     #
     # $ awx-manage regenerate_secret_key
+    # $ setup.sh -k
     #
     # ...so you'll need to *also* add code to support the
     # migration/re-encryption of these values (the code in question lives in
