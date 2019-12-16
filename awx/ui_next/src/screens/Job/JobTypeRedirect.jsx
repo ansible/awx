@@ -4,7 +4,7 @@ import { PageSection, Card } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';
 import { UnifiedJobsAPI } from '@api';
 import ContentError from '@components/ContentError';
-import { JOB_TYPE_URL_SEGMENTS } from '../../constants';
+import { JOB_TYPE_URL_SEGMENTS } from '@constants';
 
 const NOT_FOUND = 'not found';
 

@@ -25,6 +25,16 @@ import {
   InventoriesAPI,
   AdHocCommandsAPI,
 } from '@api';
+import { JOB_TYPE_URL_SEGMENTS } from '@constants';
+
+const ActionButtonWrapper = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+  & > :not(:first-child) {
+    margin-left: 20px;
+  }
+`;
 
 const VariablesInput = styled(_VariablesInput)`
   .pf-c-form__label {
