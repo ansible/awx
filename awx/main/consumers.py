@@ -123,7 +123,7 @@ class BroadcastConsumer(AsyncJsonWebsocketConsumer):
 class EventConsumer(AsyncJsonWebsocketConsumer):
     async def connect(self):
         user = self.scope['user']
-        if user:
+        if user and not user.is_anonymous:
             await self.accept()
             await self.send_json({"accept": True, "user": user.id})
             # store the valid CSRF token from the cookie so we can compare it later
@@ -136,7 +136,7 @@ class EventConsumer(AsyncJsonWebsocketConsumer):
             # TODO: Carry over from channels 1 implementation
             # We should never .accept() the client and close without sending a close message
             await self.accept()
-            await self.send({"close": True})
+            await self.send_json({"close": True})
             await self.close()
 
     @database_sync_to_async
