@@ -42,11 +42,11 @@ bcrypt==3.1.7             # via paramiko
 boto3==1.9.223
 boto==2.47.0
 botocore==1.12.253        # via boto3, s3transfer
-cachetools==3.1.1         # via google-auth
+cachetools==3.1.1; python_version < "3" # via google-auth
 certifi==2019.11.28       # via msrest, requests
 cffi==1.13.2              # via bcrypt, cryptography, pynacl
 chardet==3.0.4            # via requests
-colorama==0.4.1           # via azure-cli-core, knack
+colorama==0.4.3           # via azure-cli-core, knack
 cryptography==2.8         # via adal, azure-keyvault, azure-storage, openstacksdk, paramiko, pyopenssl, requests-credssp, requests-kerberos, requests-ntlm
 decorator==4.4.1          # via dogpile.cache, openstacksdk
 docutils==0.15.2          # via botocore
@@ -80,7 +80,7 @@ openstacksdk==0.31.1
 os-service-types==1.7.0   # via keystoneauth1, openstacksdk
 ovirt-engine-sdk-python==4.3.0
 packaging==19.2
-paramiko==2.7.0           # via azure-cli-core, ncclient
+paramiko==2.7.1           # via azure-cli-core, ncclient
 pbr==5.4.4                # via keystoneauth1, openstacksdk, os-service-types, stevedore
 psutil==5.4.3
 pyasn1-modules==0.2.7     # via google-auth
@@ -111,10 +111,9 @@ stevedore==1.31.0         # via keystoneauth1
 tabulate==0.8.2           # via azure-cli-core, knack
 typing==3.7.4.1; python_version < "3" # via msrest
 urllib3==1.25.7           # via botocore, requests
-# wheel==0.30.0             # via azure-cli-core
+wheel==0.33.6
 xmltodict==0.12.0         # via pywinrm
 
 # The following packages are considered to be unsafe in a requirements file:
 pip==19.3.1
 setuptools==41.6.0
-wheel==0.33.6
