@@ -1,20 +1,10 @@
 import React from 'react';
 import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
-import { t } from '@lingui/macro';
-import {
-  PageSection,
-  Card,
-  CardHeader,
-  CardBody,
-  Tooltip,
-} from '@patternfly/react-core';
-
+import { PageSection, Card, CardBody } from '@patternfly/react-core';
 import { HostsAPI } from '@api';
 import { Config } from '@contexts/Config';
-import CardCloseButton from '@components/CardCloseButton';
-
-import HostForm from '../shared/HostForm';
+import HostForm from '../shared';
 
 class HostAdd extends React.Component {
   constructor(props) {
@@ -41,16 +31,10 @@ class HostAdd extends React.Component {
 
   render() {
     const { error } = this.state;
-    const { i18n } = this.props;
 
     return (
       <PageSection>
         <Card>
-          <CardHeader className="at-u-textRight">
-            <Tooltip content={i18n._(t`Close`)} position="top">
-              <CardCloseButton onClick={this.handleCancel} />
-            </Tooltip>
-          </CardHeader>
           <CardBody>
             <Config>
               {({ me }) => (
