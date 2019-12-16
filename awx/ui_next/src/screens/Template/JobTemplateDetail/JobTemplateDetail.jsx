@@ -195,7 +195,7 @@ class JobTemplateDetail extends Component {
 
     return (
       isInitialized && (
-        <CardBody css="padding-top: 20px;">
+        <CardBody>
           <DetailList gutter="sm">
             <Detail
               label={i18n._(t`Name`)}

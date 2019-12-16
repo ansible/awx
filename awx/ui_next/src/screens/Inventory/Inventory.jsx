@@ -52,7 +52,7 @@ function Inventory({ history, i18n, location, match, setBreadcrumb }) {
   ];
 
   let cardHeader = hasContentLoading ? null : (
-    <TabbedCardHeader style={{ padding: 0 }}>
+    <TabbedCardHeader>
       <RoutedTabs history={history} tabsArray={tabsArray} />
       <CardCloseButton linkTo="/inventories" />
     </TabbedCardHeader>

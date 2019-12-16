@@ -46,7 +46,7 @@ function HostDetail({ host, i18n }) {
   }
 
   return (
-    <CardBody css="padding-top: 20px">
+    <CardBody>
       <DetailList gutter="sm">
         <Detail label={i18n._(t`Name`)} value={name} />
         <Detail label={i18n._(t`Description`)} value={description} />

@@ -2,25 +2,14 @@ import React, { Component } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Switch, Route, withRouter, Redirect, Link } from 'react-router-dom';
-import {
-  Card,
-  CardHeader as PFCardHeader,
-  PageSection,
-} from '@patternfly/react-core';
-import styled from 'styled-components';
+import { Card, PageSection } from '@patternfly/react-core';
 import CardCloseButton from '@components/CardCloseButton';
+import { TabbedCardHeader } from '@components/Card';
 import RoutedTabs from '@components/RoutedTabs';
 import ContentError from '@components/ContentError';
 import TeamDetail from './TeamDetail';
 import TeamEdit from './TeamEdit';
 import { TeamsAPI } from '@api';
-
-const CardHeader = styled(PFCardHeader)`
-  --pf-c-card--first-child--PaddingTop: 0;
-  --pf-c-card--child--PaddingLeft: 0;
-  --pf-c-card--child--PaddingRight: 0;
-  position: relative;
-`;
 
 class Team extends Component {
   constructor(props) {
@@ -81,7 +70,7 @@ class Team extends Component {
     ];
 
     let cardHeader = (
-      <CardHeader style={{ padding: 0 }}>
+      <TabbedCardHeader>
         <RoutedTabs
           match={match}
           history={history}
@@ -89,7 +78,7 @@ class Team extends Component {
           tabsArray={tabsArray}
         />
         <CardCloseButton linkTo="/teams" />
-      </CardHeader>
+      </TabbedCardHeader>
     );
 
     if (!isInitialized) {

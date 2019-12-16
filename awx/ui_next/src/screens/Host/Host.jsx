@@ -2,12 +2,8 @@ import React, { Component } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Switch, Route, withRouter, Redirect, Link } from 'react-router-dom';
-import {
-  Card,
-  CardHeader as PFCardHeader,
-  PageSection,
-} from '@patternfly/react-core';
-import styled from 'styled-components';
+import { Card, PageSection } from '@patternfly/react-core';
+import { TabbedCardHeader } from '@components/Card';
 import CardCloseButton from '@components/CardCloseButton';
 import RoutedTabs from '@components/RoutedTabs';
 import ContentError from '@components/ContentError';
@@ -17,13 +13,6 @@ import HostEdit from './HostEdit';
 import HostGroups from './HostGroups';
 import HostCompletedJobs from './HostCompletedJobs';
 import { HostsAPI } from '@api';
-
-const CardHeader = styled(PFCardHeader)`
-  --pf-c-card--first-child--PaddingTop: 0;
-  --pf-c-card--child--PaddingLeft: 0;
-  --pf-c-card--child--PaddingRight: 0;
-  position: relative;
-`;
 
 class Host extends Component {
   constructor(props) {
@@ -89,7 +78,7 @@ class Host extends Component {
     ];
 
     let cardHeader = (
-      <CardHeader style={{ padding: 0 }}>
+      <TabbedCardHeader>
         <RoutedTabs
           match={match}
           history={history}
@@ -97,7 +86,7 @@ class Host extends Component {
           tabsArray={tabsArray}
         />
         <CardCloseButton linkTo="/hosts" />
-      </CardHeader>
+      </TabbedCardHeader>
     );
 
     if (!isInitialized) {

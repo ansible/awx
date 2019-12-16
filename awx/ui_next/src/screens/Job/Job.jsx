@@ -2,13 +2,9 @@ import React, { Component } from 'react';
 import { Route, withRouter, Switch, Redirect, Link } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import styled from 'styled-components';
-import {
-  Card,
-  CardHeader as PFCardHeader,
-  PageSection,
-} from '@patternfly/react-core';
+import { Card, PageSection } from '@patternfly/react-core';
 import { JobsAPI } from '@api';
+import { TabbedCardHeader } from '@components/Card';
 import ContentError from '@components/ContentError';
 import CardCloseButton from '@components/CardCloseButton';
 import RoutedTabs from '@components/RoutedTabs';
@@ -16,13 +12,6 @@ import RoutedTabs from '@components/RoutedTabs';
 import JobDetail from './JobDetail';
 import JobOutput from './JobOutput';
 import { JOB_TYPE_URL_SEGMENTS } from '../../constants';
-
-const CardHeader = styled(PFCardHeader)`
-  --pf-c-card--first-child--PaddingTop: 0;
-  --pf-c-card--child--PaddingLeft: 0;
-  --pf-c-card--child--PaddingRight: 0;
-  position: relative;
-`;
 
 class Job extends Component {
   constructor(props) {
@@ -81,10 +70,10 @@ class Job extends Component {
     ];
 
     let cardHeader = (
-      <CardHeader>
+      <TabbedCardHeader>
         <RoutedTabs match={match} history={history} tabsArray={tabsArray} />
         <CardCloseButton linkTo="/jobs" />
-      </CardHeader>
+      </TabbedCardHeader>
     );
 
     if (!isInitialized) {

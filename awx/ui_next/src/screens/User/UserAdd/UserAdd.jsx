@@ -41,7 +41,7 @@ function UserAdd({ history, i18n }) {
   return (
     <PageSection>
       <Card>
-        <CardHeader css="text-align: right">
+        <CardHeader className="at-u-textRight">
           <Tooltip content={i18n._(t`Close`)} position="top">
             <CardCloseButton onClick={handleCancel} />
           </Tooltip>

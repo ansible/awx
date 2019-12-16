@@ -8,7 +8,7 @@ import { DetailList } from '@components/DetailList';
 class WorkflowJobTemplateDetail extends Component {
   render() {
     return (
-      <CardBody css="padding-top: 20px;">
+      <CardBody>
         <DetailList gutter="sm" />
       </CardBody>
     );
