@@ -39,7 +39,7 @@ function getStatusDetails (jobStatus) {
         value = choices[unmapped];
     }
 
-    return { label, icon, value };
+    return { unmapped, label, icon, value };
 }
 
 function getStartDetails (started) {
