@@ -52,7 +52,7 @@
     "react-hot-loader": "^4.3.3",
     "sass-loader": "^7.1.0",
     "style-loader": "^0.23.0",
-    "webpack": "^4.23.1",
+    "webpack": "^4.41.2",
     "webpack-cli": "^3.0.8",
     "webpack-dev-server": "^3.1.14"
   },
