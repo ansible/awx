@@ -80,8 +80,8 @@ OptionsList.propTypes = {
   value: arrayOf(Item).isRequired,
   options: arrayOf(Item).isRequired,
   optionCount: number.isRequired,
-  searchColumns: SearchColumns.isRequired,
-  sortColumns: SortColumns.isRequired,
+  searchColumns: SearchColumns,
+  sortColumns: SortColumns,
   multiple: bool,
   qsConfig: QSConfig.isRequired,
   selectItem: func.isRequired,
@@ -91,6 +91,8 @@ OptionsList.propTypes = {
 OptionsList.defaultProps = {
   multiple: false,
   renderItemChip: null,
+  searchColumns: [],
+  sortColumns: []
 };
 
 export default withI18n()(OptionsList);

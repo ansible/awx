@@ -47,6 +47,7 @@ class DataListToolbar extends React.Component {
       isCompact,
       onSort,
       onSearch,
+      onReplaceSearch,
       onRemove,
       onCompact,
       onExpand,
@@ -78,6 +79,7 @@ class DataListToolbar extends React.Component {
               qsConfig={qsConfig}
               columns={searchColumns}
               onSearch={onSearch}
+              onReplaceSearch={onReplaceSearch}
               onRemove={onRemove}
             />
           </DataToolbarItem>
@@ -124,6 +126,7 @@ DataListToolbar.propTypes = {
   onCompact: PropTypes.func,
   onExpand: PropTypes.func,
   onSearch: PropTypes.func,
+  onReplaceSearch: PropTypes.func,
   onSelectAll: PropTypes.func,
   onSort: PropTypes.func,
   additionalControls: PropTypes.arrayOf(PropTypes.node),
@@ -136,6 +139,7 @@ DataListToolbar.defaultProps = {
   onCompact: null,
   onExpand: null,
   onSearch: null,
+  onReplaceSearch: null,
   onSelectAll: null,
   onSort: null,
   additionalControls: [],

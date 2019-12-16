@@ -30,6 +30,7 @@ class ListHeader extends React.Component {
     super(props);
 
     this.handleSearch = this.handleSearch.bind(this);
+    this.handleReplaceSearch = this.handleReplaceSearch.bind(this);
     this.handleSort = this.handleSort.bind(this);
     this.handleRemove = this.handleRemove.bind(this);
     this.handleRemoveAll = this.handleRemoveAll.bind(this);
@@ -41,9 +42,18 @@ class ListHeader extends React.Component {
     this.pushHistoryState(mergeParams(oldParams, { [key]: value }));
   }
 
-  handleRemove(key, value) {
+  handleReplaceSearch(key, value) {
     const { location, qsConfig } = this.props;
     const oldParams = parseQueryString(qsConfig, location.search);
+    this.pushHistoryState(replaceParams(oldParams, { [key]: value }));
+  }
+
+  handleRemove(key, value) {
+    const { location, qsConfig } = this.props;
+    let oldParams = parseQueryString(qsConfig, location.search);
+    if (parseInt(value, 10)) {
+      oldParams = removeParams(qsConfig, oldParams, { [key]: parseInt(value, 10) });
+    }
     this.pushHistoryState(removeParams(qsConfig, oldParams, { [key]: value }));
   }
 
@@ -104,6 +114,7 @@ class ListHeader extends React.Component {
                 searchColumns,
                 sortColumns,
                 onSearch: this.handleSearch,
+                onReplaceSearch: this.handleReplaceSearch,
                 onSort: this.handleSort,
                 onRemove: this.handleRemove,
                 qsConfig,
