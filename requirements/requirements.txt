@@ -9,7 +9,7 @@ argparse==1.4.0           # via uwsgitop
 asgiref==3.2.3            # via channels, channels-redis, daphne
 asn1crypto==0.24.0        # via cryptography
 async-timeout==3.0.1      # via aiohttp, aioredis
-attrs==19.1.0             # via aiohttp, automat, service-identity, twisted
+attrs==19.1.0             # via aiohttp, automat, twisted
 autobahn==19.5.1          # via daphne
 automat==0.7.0            # via twisted
 azure-common==1.1.21      # via azure-keyvault
@@ -25,8 +25,8 @@ channels-redis==2.4.1
 channels==2.3.1
 chardet==3.0.4            # via aiohttp, requests
 constantly==15.1.0        # via twisted
-cryptography==2.6.1       # via adal, azure-keyvault, pyopenssl, service-identity
-daphne==2.3.0
+cryptography==2.6.1       # via adal, azure-keyvault
+daphne==2.3.0             # via channels
 defusedxml==0.5.0         # via python3-openid, python3-saml, social-auth-core
 dictdiffer==0.8.0         # via openshift
 django-auth-ldap==1.7.0
@@ -53,7 +53,7 @@ google-auth==1.6.3        # via kubernetes
 hiredis==1.0.1            # via aioredis
 hyperlink==19.0.0         # via twisted
 idna-ssl==1.1.0           # via aiohttp
-idna==2.8                 # via hyperlink, idna-ssl, requests, twisted, yarl
+idna==2.8                 # via hyperlink, idna-ssl, requests, yarl
 incremental==17.5.0       # via twisted
 inflect==2.1.0            # via jaraco.itertools
 irc==16.2
@@ -88,13 +88,12 @@ prometheus_client==0.6.0
 psutil==5.4.3
 psycopg2==2.8.2
 ptyprocess==0.6.0         # via pexpect
-pyasn1-modules==0.2.5     # via google-auth, python-ldap, service-identity
-pyasn1==0.4.5             # via pyasn1-modules, python-ldap, rsa, service-identity
+pyasn1-modules==0.2.5     # via google-auth, python-ldap
+pyasn1==0.4.5             # via pyasn1-modules, python-ldap, rsa
 pycparser==2.19           # via cffi
 pygerduty==0.37.0
 pyhamcrest==1.9.0         # via twisted
 pyjwt==1.7.1              # via adal, social-auth-core, twilio
-pyopenssl==19.0.0         # via twisted
 pyparsing==2.2.0
 pyrad==2.1                # via django-radius
 pysocks==1.7.0            # via twilio
@@ -114,9 +113,8 @@ requests-oauthlib==1.2.0  # via kubernetes, msrest, social-auth-core
 requests==2.21.0
 rsa==4.0                  # via google-auth
 ruamel.yaml==0.15.99      # via openshift
-service-identity==18.1.0  # via twisted
 simplejson==3.16.0        # via uwsgitop
-six==1.12.0               # via ansible-runner, autobahn, automat, cryptography, django-extensions, google-auth, irc, isodate, jaraco.classes, jaraco.collections, jaraco.itertools, jaraco.logging, jaraco.stream, kubernetes, openshift, pygerduty, pyhamcrest, pyopenssl, pyrad, python-dateutil, python-memcached, slackclient, social-auth-app-django, social-auth-core, tacacs-plus, tempora, twilio, txaio, websocket-client
+six==1.12.0               # via ansible-runner, autobahn, automat, cryptography, django-extensions, google-auth, irc, isodate, jaraco.classes, jaraco.collections, jaraco.itertools, jaraco.logging, jaraco.stream, kubernetes, openshift, pygerduty, pyhamcrest, pyrad, python-dateutil, python-memcached, slackclient, social-auth-app-django, social-auth-core, tacacs-plus, tempora, twilio, txaio, websocket-client
 slackclient==1.1.2
 smmap2==2.0.5             # via gitdb2
 social-auth-app-django==2.1.0
@@ -125,7 +123,7 @@ sqlparse==0.3.0           # via django
 tacacs_plus==1.0
 tempora==1.14.1           # via irc, jaraco.logging
 twilio==6.10.4
-twisted[tls]==19.2.0
+twisted==19.2.0           # via daphne
 txaio==18.8.1             # via autobahn
 typing-extensions==3.7.4.1  # via aiohttp
 typing==3.6.6             # via django-extensions

@@ -3,11 +3,9 @@ ansiconv==1.0.0
 appdirs==1.4.2
 azure-keyvault==1.1.0
 boto==2.47.0
-channels==2.3.1
-channels-redis==2.4.1
+channels>=2.3.1
+channels-redis>=2.4.1
 celery==4.3.0
-daphne==2.3.0
-twisted[tls]>=17.1   # from daphne, see https://github.com/django/daphne/pull/257
 Django==2.2.4
 django-auth-ldap==1.7.0
 django-cors-headers==2.4.0
@@ -42,7 +40,7 @@ python-radius==1.0
 python3-saml==1.4.0
 social-auth-core==3.0.0
 social-auth-app-django==2.1.0
-redis==3.3.11
+redis>=3.3.11
 requests==2.21.0
 requests-futures==0.9.7
 slackclient==1.1.2
