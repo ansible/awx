@@ -6,7 +6,7 @@ boto  # replacement candidate https://github.com/ansible/awx/issues/2115
 channels==1.1.8  # UPGRADE BLOCKER: Last before backwards-incompatible channels 2 upgrade
 celery==4.3.0  # see library notes
 daphne==1.4.2  # UPGRADE BLOCKER: last before channels 2 but not pinned by other deps
-Django==2.2.7  # see UPGRADE BLOCKERs
+django==2.2.8  # see UPGRADE BLOCKERs
 django-auth-ldap
 django-cors-headers
 django-crum
