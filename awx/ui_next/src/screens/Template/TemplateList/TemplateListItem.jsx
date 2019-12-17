@@ -88,14 +88,16 @@ class TemplateListItem extends Component {
                   </Link>
                 </span>
                 {missingResourceIcon && (
-                  <Tooltip
-                    content={i18n._(
-                      t`Resources are missing from this template.`
-                    )}
-                    position="right"
-                  >
-                    <ExclamationTriangleIcon css="color: #c9190b; margin-left: 20px;" />
-                  </Tooltip>
+                  <span>
+                    <Tooltip
+                      content={i18n._(
+                        t`Resources are missing from this template.`
+                      )}
+                      position="right"
+                    >
+                      <ExclamationTriangleIcon css="color: #c9190b; margin-left: 20px;" />
+                    </Tooltip>
+                  </span>
                 )}
               </LeftDataListCell>,
               <RightDataListCell
