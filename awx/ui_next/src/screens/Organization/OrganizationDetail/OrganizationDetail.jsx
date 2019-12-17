@@ -2,19 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { Link, useRouteMatch } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { CardBody as PFCardBody, Button } from '@patternfly/react-core';
-import styled from 'styled-components';
-
+import { CardBody, Button } from '@patternfly/react-core';
 import { OrganizationsAPI } from '@api';
-import { DetailList, Detail } from '@components/DetailList';
+import { DetailList, Detail, UserDateDetail } from '@components/DetailList';
 import { ChipGroup, Chip } from '@components/Chip';
 import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
-import { formatDateString } from '@util/dates';
-
-const CardBody = styled(PFCardBody)`
-  padding-top: 20px;
-`;
 
 function OrganizationDetail({ i18n, organization }) {
   const {
@@ -72,10 +65,15 @@ function OrganizationDetail({ i18n, organization }) {
           label={i18n._(t`Ansible Environment`)}
           value={custom_virtualenv}
         />
-        <Detail label={i18n._(t`Created`)} value={formatDateString(created)} />
-        <Detail
+        <UserDateDetail
+          label={i18n._(t`Created`)}
+          date={created}
+          user={summary_fields.created_by}
+        />
+        <UserDateDetail
           label={i18n._(t`Last Modified`)}
-          value={formatDateString(modified)}
+          date={modified}
+          user={summary_fields.modified_by}
         />
         {instanceGroups && instanceGroups.length > 0 && (
           <Detail
