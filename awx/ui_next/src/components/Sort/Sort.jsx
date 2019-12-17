@@ -23,6 +23,15 @@ import {
   parseQueryString
 } from '@util/qs';
 import { SortColumns, QSConfig } from '@types';
+import styled from 'styled-components';
+
+const NoOptionDropdown = styled.div`
+  align-self: stretch;
+  border: 1px solid var(--pf-global--BorderColor--300);
+  padding: 5px 15px;
+  white-space: nowrap;
+  border-bottom-color: var(--pf-global--BorderColor--200);
+`;
 
 class Sort extends React.Component {
   constructor(props) {
@@ -120,9 +129,9 @@ class Sort extends React.Component {
 
     return (
       <Fragment>
-        {sortDropdownItems.length > 0 && (
+        {sortedColumnName && (
           <InputGroup>
-            <Dropdown
+            {sortDropdownItems.length > 0 && (<Dropdown
               onToggle={this.handleDropdownToggle}
               onSelect={this.handleDropdownSelect}
               direction={up}
@@ -136,7 +145,9 @@ class Sort extends React.Component {
                 </DropdownToggle>
               }
               dropdownItems={sortDropdownItems}
-            />
+            />) || (
+              <NoOptionDropdown>{sortedColumnName}</NoOptionDropdown>
+            )}
             <Button
               variant={ButtonVariant.control}
               aria-label={i18n._(t`Reverse Sort Order`)}
