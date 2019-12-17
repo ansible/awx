@@ -56,16 +56,13 @@ function InventoryDetail({ inventory, i18n }) {
             )
           }
         />
-      </DetailList>
-      {inventory.variables && (
-        <VariablesDetail
-          id="job-artifacts"
-          label={i18n._(t`Variables`)}
-          value={inventory.variables}
-          rows={4}
-        />
-      )}
-      <DetailList>
+        {inventory.variables && (
+          <VariablesDetail
+            label={i18n._(t`Variables`)}
+            value={inventory.variables}
+            rows={4}
+          />
+        )}
         <UserDateDetail
           label={i18n._(t`Created`)}
           date={inventory.created}

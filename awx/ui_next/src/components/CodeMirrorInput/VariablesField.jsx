@@ -7,7 +7,6 @@ import YamlJsonToggle from './YamlJsonToggle';
 import { yamlToJson, jsonToYaml } from '../../util/yaml';
 
 const YAML_MODE = 'yaml';
-const JSON_MODE = 'javascript';
 
 function VariablesField({ id, name, label, readOnly }) {
   // TODO: detect initial mode
