@@ -1,29 +1,58 @@
 import React from 'react';
-
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
-
+import { createMemoryHistory } from 'history';
 import Credentials from './Credentials';
 
 describe('<Credentials />', () => {
-  let pageWrapper;
-  let pageSections;
-  let title;
-
-  beforeEach(() => {
-    pageWrapper = mountWithContexts(<Credentials />);
-    pageSections = pageWrapper.find('PageSection');
-    title = pageWrapper.find('Title');
-  });
+  let wrapper;
 
   afterEach(() => {
-    pageWrapper.unmount();
+    wrapper.unmount();
   });
 
-  test('initially renders without crashing', () => {
-    expect(pageWrapper.length).toBe(1);
-    expect(pageSections.length).toBe(2);
-    expect(title.length).toBe(1);
-    expect(title.props().size).toBe('2xl');
-    expect(pageSections.first().props().variant).toBe('light');
+  test('initially renders succesfully', () => {
+    wrapper = mountWithContexts(<Credentials />);
+  });
+
+  test('should display credential list breadcrumb heading', () => {
+    const history = createMemoryHistory({
+      initialEntries: ['/credentials'],
+    });
+
+    wrapper = mountWithContexts(<Credentials />, {
+      context: {
+        router: {
+          history,
+          route: {
+            location: history.location,
+          },
+        },
+      },
+    });
+
+    expect(wrapper.find('Crumb').length).toBe(1);
+    expect(wrapper.find('BreadcrumbHeading').text()).toBe('Credentials');
+  });
+
+  test('should display create new credential breadcrumb heading', () => {
+    const history = createMemoryHistory({
+      initialEntries: ['/credentials/add'],
+    });
+
+    wrapper = mountWithContexts(<Credentials />, {
+      context: {
+        router: {
+          history,
+          route: {
+            location: history.location,
+          },
+        },
+      },
+    });
+
+    expect(wrapper.find('Crumb').length).toBe(2);
+    expect(wrapper.find('BreadcrumbHeading').text()).toBe(
+      'Create New Credential'
+    );
   });
 });
