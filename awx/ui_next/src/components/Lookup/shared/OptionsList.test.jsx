@@ -17,7 +17,8 @@ describe('<OptionsList />', () => {
         value={[]}
         options={options}
         optionCount={3}
-        columns={[]}
+        searchColumns={[]}
+        sortColumns={[]}
         qsConfig={qsConfig}
         selectItem={() => {}}
         deselectItem={() => {}}
@@ -39,7 +40,8 @@ describe('<OptionsList />', () => {
         value={[options[1]]}
         options={options}
         optionCount={3}
-        columns={[]}
+        searchColumns={[]}
+        sortColumns={[]}
         qsConfig={qsConfig}
         selectItem={() => {}}
         deselectItem={() => {}}

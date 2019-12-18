@@ -122,14 +122,25 @@ function MultiCredentialsLookup(props) {
                 value={state.selectedItems}
                 options={credentials}
                 optionCount={credentialsCount}
-                columns={[
+                searchColumns={[
                   {
                     name: i18n._(t`Name`),
                     key: 'name',
-                    isSortable: true,
-                    isSearchable: true,
+                    isDefault: true
+                  },
+                  {
+                    name: i18n._(t`Created by (username)`),
+                    key: 'created_by__username',
+                  },
+                  {
+                    name: i18n._(t`Modified by (username)`),
+                    key: 'modified_by__username',
                   },
                 ]}
+                sortColumns={[{
+                  name: i18n._(t`Name`),
+                  key: 'name'
+                }]}
                 multiple={isMultiple}
                 header={i18n._(t`Credentials`)}
                 name="credentials"

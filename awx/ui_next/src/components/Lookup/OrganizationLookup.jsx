@@ -77,16 +77,18 @@ function OrganizationLookup({
                 isDefault: true
               },
               {
-                name: i18n._(t`Team name`),
-                key: 'teams__name',
-              }
-            ]}
-            sortColumns={[
+                name: i18n._(t`Created by (username)`),
+                key: 'created_by__username',
+              },
               {
-                name: i18n._(t`Name`),
-                key: 'name',
+                name: i18n._(t`Modified by (username)`),
+                key: 'modified_by__username',
               },
             ]}
+            sortColumns={[{
+              name: i18n._(t`Name`),
+              key: 'name'
+            }]}
             readOnly={!canDelete}
             selectItem={item => dispatch({ type: 'SELECT_ITEM', item })}
             deselectItem={item => dispatch({ type: 'DESELECT_ITEM', item })}
