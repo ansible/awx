@@ -20,6 +20,7 @@ from rest_framework.fields import JSONField as DRFJSONField
 from rest_framework.request import clone_request
 
 # AWX
+from awx.api.fields import ChoiceNullField
 from awx.main.fields import JSONField, ImplicitRoleField
 from awx.main.models import InventorySource, NotificationTemplate
 from awx.main.scheduler.kubernetes import PodManager
@@ -96,7 +97,13 @@ class Metadata(metadata.SimpleMetadata):
             field_info['children'] = self.get_serializer_info(field)
 
         if not isinstance(field, (RelatedField, ManyRelatedField)) and hasattr(field, 'choices'):
-            field_info['choices'] = [(choice_value, choice_name) for choice_value, choice_name in field.choices.items()]
+            choices = [
+                (choice_value, choice_name) for choice_value, choice_name in field.choices.items()
+            ]
+            if not any(choice in ('', None) for choice, _ in choices):
+                if field.allow_blank or (field.allow_null and not isinstance(field, ChoiceNullField)):
+                    choices = [("", "---------")] + choices
+            field_info['choices'] = choices
 
         # Indicate if a field is write-only.
         if getattr(field, 'write_only', False):
