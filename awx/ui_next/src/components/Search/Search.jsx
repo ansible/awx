@@ -20,7 +20,7 @@ import {
   DataToolbarGroup,
   DataToolbarItem,
   DataToolbarFilter
-} from '@patternfly/react-core/dist/esm/experimental';
+} from '@patternfly/react-core/dist/umd/experimental';
 import { SearchIcon } from '@patternfly/react-icons';
 import { parseQueryString } from '@util/qs';
 import { QSConfig, SearchColumns } from '@types';
@@ -135,7 +135,7 @@ class Search extends React.Component {
       ));
 
     const filterDefaultParams = (paramsArr, config) => {
-      const defaultParamsKeys = Object.keys(config.defaultParams);
+      const defaultParamsKeys = Object.keys(config.defaultParams || {});
       return paramsArr.filter(key => defaultParamsKeys.indexOf(key) === -1);
     };
 
@@ -147,7 +147,7 @@ class Search extends React.Component {
         queryParamsByKey[key] = {key, label: name, chips: []};
       });
       const nonDefaultParams = filterDefaultParams(
-        Object.keys(queryParams),
+        Object.keys(queryParams || {}),
         qsConfig
       );
 

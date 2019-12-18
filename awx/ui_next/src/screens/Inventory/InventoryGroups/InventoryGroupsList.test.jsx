@@ -161,7 +161,7 @@ describe('<InventoryGroupsList />', () => {
     });
     wrapper.update();
     await act(async () => {
-      wrapper.find('Toolbar Button[aria-label="Delete"]').invoke('onClick')();
+      wrapper.find('DataToolbar Button[aria-label="Delete"]').invoke('onClick')();
     });
     await waitForElement(
       wrapper,
@@ -193,7 +193,7 @@ describe('<InventoryGroupsList />', () => {
     });
     wrapper.update();
     await act(async () => {
-      wrapper.find('Toolbar Button[aria-label="Delete"]').invoke('onClick')();
+      wrapper.find('DataToolbar Button[aria-label="Delete"]').invoke('onClick')();
     });
     await waitForElement(
       wrapper,

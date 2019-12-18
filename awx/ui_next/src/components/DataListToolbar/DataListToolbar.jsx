@@ -7,7 +7,7 @@ import {
 } from '@patternfly/react-core';
 import styled from 'styled-components';
 import { SearchIcon } from '@patternfly/react-icons';
-import { DataToolbarGroup, DataToolbarToggleGroup, DataToolbarItem } from '@patternfly/react-core/dist/esm/experimental';
+import { DataToolbar, DataToolbarContent, DataToolbarGroup, DataToolbarToggleGroup, DataToolbarItem } from '@patternfly/react-core/dist/umd/experimental';
 import ExpandCollapse from '../ExpandCollapse';
 import Search from '../Search';
 import Sort from '../Sort';
@@ -40,6 +40,7 @@ const DataToolbarSeparator = styled(DataToolbarItem)`
 class DataListToolbar extends React.Component {
   render() {
     const {
+      clearAllFilters,
       searchColumns,
       sortColumns,
       showSelectAll,
@@ -59,64 +60,70 @@ class DataListToolbar extends React.Component {
 
     const showExpandCollapse = onCompact && onExpand;
     return (
-      <Fragment>
-        {showSelectAll && (
-          <DataToolbarGroup>
-            <DataToolbarItem>
-              <Checkbox
-                isChecked={isAllSelected}
-                onChange={onSelectAll}
-                aria-label={i18n._(t`Select all`)}
-                id="select-all"
-              />
-            </DataToolbarItem>
-            <DataToolbarSeparator variant="separator" />
-          </DataToolbarGroup>
-        )}
-        <DataToolbarToggleGroup toggleIcon={<SearchIcon />} breakpoint="xl">
-          <DataToolbarItem>
-            <Search
-              qsConfig={qsConfig}
-              columns={searchColumns}
-              onSearch={onSearch}
-              onReplaceSearch={onReplaceSearch}
-              onRemove={onRemove}
-            />
-          </DataToolbarItem>
-          <DataToolbarItem>
-            <Sort
-              qsConfig={qsConfig}
-              columns={sortColumns}
-              onSort={onSort}
-            />
-          </DataToolbarItem>
-        </DataToolbarToggleGroup>
-        <DataToolbarGroup>
-          {showExpandCollapse && (
-            <Fragment>
+      <DataToolbar id={`${qsConfig.namespace}-list-toolbar`}
+        clearAllFilters={clearAllFilters}
+        collapseListedFiltersBreakpoint="xl"
+      >
+        <DataToolbarContent>
+          {showSelectAll && (
+            <DataToolbarGroup>
               <DataToolbarItem>
-                <ExpandCollapse
-                  isCompact={isCompact}
-                  onCompact={onCompact}
-                  onExpand={onExpand}
+                <Checkbox
+                  isChecked={isAllSelected}
+                  onChange={onSelectAll}
+                  aria-label={i18n._(t`Select all`)}
+                  id="select-all"
                 />
               </DataToolbarItem>
-            </Fragment>
+              <DataToolbarSeparator variant="separator" />
+            </DataToolbarGroup>
           )}
-        </DataToolbarGroup>
-        <AdditionalControlsDataToolbarGroup>
-          <DataToolbarItem>
-            <AdditionalControlsWrapper>
-              {additionalControls}
-            </AdditionalControlsWrapper>
-          </DataToolbarItem>
-        </AdditionalControlsDataToolbarGroup>
-      </Fragment>
+          <DataToolbarToggleGroup toggleIcon={<SearchIcon />} breakpoint="xl">
+            <DataToolbarItem>
+              <Search
+                qsConfig={qsConfig}
+                columns={searchColumns}
+                onSearch={onSearch}
+                onReplaceSearch={onReplaceSearch}
+                onRemove={onRemove}
+              />
+            </DataToolbarItem>
+            <DataToolbarItem>
+              <Sort
+                qsConfig={qsConfig}
+                columns={sortColumns}
+                onSort={onSort}
+              />
+            </DataToolbarItem>
+          </DataToolbarToggleGroup>
+          <DataToolbarGroup>
+            {showExpandCollapse && (
+              <Fragment>
+                <DataToolbarItem>
+                  <ExpandCollapse
+                    isCompact={isCompact}
+                    onCompact={onCompact}
+                    onExpand={onExpand}
+                  />
+                </DataToolbarItem>
+              </Fragment>
+            )}
+          </DataToolbarGroup>
+          <AdditionalControlsDataToolbarGroup>
+            <DataToolbarItem>
+              <AdditionalControlsWrapper>
+                {additionalControls}
+              </AdditionalControlsWrapper>
+            </DataToolbarItem>
+          </AdditionalControlsDataToolbarGroup>
+        </DataToolbarContent>
+      </DataToolbar>
     );
   }
 }
 
 DataListToolbar.propTypes = {
+  clearAllFilters: PropTypes.func,
   qsConfig: QSConfig.isRequired,
   searchColumns: SearchColumns.isRequired,
   sortColumns: SortColumns.isRequired,
@@ -133,6 +140,7 @@ DataListToolbar.propTypes = {
 };
 
 DataListToolbar.defaultProps = {
+  clearAllFilters: null,
   showSelectAll: false,
   isAllSelected: false,
   isCompact: false,

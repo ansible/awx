@@ -2,7 +2,7 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import styled from 'styled-components';
-import { DataToolbar, DataToolbarContent } from '@patternfly/react-core/dist/esm/experimental';
+import { DataToolbar, DataToolbarContent } from '@patternfly/react-core/dist/umd/experimental';
 import DataListToolbar from '@components/DataListToolbar';
 
 import {
@@ -105,22 +105,18 @@ class ListHeader extends React.Component {
             </DataToolbarContent>
           </DataToolbar>
         ) : (
-          <DataToolbar id={`${qsConfig.namespace}-list-toolbar`}
-            clearAllFilters={this.handleRemoveAll}
-            collapseListedFiltersBreakpoint="xl"
-          >
-            <DataToolbarContent>
-              {renderToolbar({
-                searchColumns,
-                sortColumns,
-                onSearch: this.handleSearch,
-                onReplaceSearch: this.handleReplaceSearch,
-                onSort: this.handleSort,
-                onRemove: this.handleRemove,
-                qsConfig,
-              })}
-            </DataToolbarContent>
-          </DataToolbar>
+          <Fragment>
+            {renderToolbar({
+              searchColumns,
+              sortColumns,
+              onSearch: this.handleSearch,
+              onReplaceSearch: this.handleReplaceSearch,
+              onSort: this.handleSort,
+              onRemove: this.handleRemove,
+              clearAllFilters: this.handleRemoveAll,
+              qsConfig,
+            })}
+          </Fragment>
         )}
       </Fragment>
     );

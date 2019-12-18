@@ -125,27 +125,11 @@ function OrganizationsList({ i18n }) {
                 key: 'name',
                 isDefault: true
               },
-              {
-                name: i18n._(t`Modified`),
-                key: 'modified',
-              },
-              {
-                name: i18n._(t`Created`),
-                key: 'created',
-              },
             ]}
             toolbarSortColumns={[
               {
                 name: i18n._(t`Name`),
                 key: 'name',
-              },
-              {
-                name: i18n._(t`Modified`),
-                key: 'modified',
-              },
-              {
-                name: i18n._(t`Created`),
-                key: 'created',
               },
             ]}
             renderToolbar={props => (

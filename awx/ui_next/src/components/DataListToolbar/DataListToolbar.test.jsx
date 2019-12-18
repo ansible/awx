@@ -20,10 +20,11 @@ describe('<DataListToolbar />', () => {
   });
 
   const onSearch = jest.fn();
+  const onReplaceSearch = jest.fn();
   const onSort = jest.fn();
   const onSelectAll = jest.fn();
 
-  test('it triggers the expected callbacks', () => {  
+  test('it triggers the expected callbacks', () => {
     const searchColumns = [
       { name: 'Name', key: 'name', isDefault: true }
     ];
@@ -43,6 +44,7 @@ describe('<DataListToolbar />', () => {
         searchColumns={searchColumns}
         sortColumns={sortColumns}
         onSearch={onSearch}
+        onReplaceSearch={onReplaceSearch}
         onSort={onSort}
         onSelectAll={onSelectAll}
         showSelectAll
@@ -259,6 +261,7 @@ describe('<DataListToolbar />', () => {
         searchColumns={searchColumns}
         sortColumns={sortColumns}
         onSearch={onSearch}
+        onReplaceSearch={onReplaceSearch}
         onSort={onSort}
         onSelectAll={onSelectAll}
         additionalControls={[
@@ -289,6 +292,7 @@ describe('<DataListToolbar />', () => {
         searchColumns={searchColumns}
         sortColumns={sortColumns}
         onSearch={onSearch}
+        onReplaceSearch={onReplaceSearch}
         onSort={onSort}
         onSelectAll={onSelectAll}
         showSelectAll

@@ -150,7 +150,7 @@ class Sort extends React.Component {
             )}
             <Button
               variant={ButtonVariant.control}
-              aria-label={i18n._(t`Reverse Sort Order`)}
+              aria-label={i18n._(t`Sort`)}
               onClick={this.handleSort}
             >
               <SortIcon />
