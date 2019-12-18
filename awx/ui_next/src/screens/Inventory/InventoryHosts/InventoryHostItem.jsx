@@ -23,6 +23,7 @@ import { Host } from '@types';
 function InventoryHostItem(props) {
   const {
     detailUrl,
+    editUrl,
     host,
     i18n,
     isSelected,
@@ -79,7 +80,7 @@ function InventoryHostItem(props) {
                   <ListActionButton
                     variant="plain"
                     component={Link}
-                    to={`/hosts/${host.id}/edit`}
+                    to={`${editUrl}`}
                   >
                     <PencilAltIcon />
                   </ListActionButton>

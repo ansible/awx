@@ -1,4 +1,5 @@
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
 import { TeamsAPI } from '@api';
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
@@ -19,25 +20,29 @@ describe('<TeamEdit />', () => {
     },
   };
 
-  test('handleSubmit should call api update', () => {
+  test('handleSubmit should call api update', async () => {
     const wrapper = mountWithContexts(<TeamEdit team={mockData} />);
 
     const updatedTeamData = {
       name: 'new name',
       description: 'new description',
     };
-    wrapper.find('TeamForm').prop('handleSubmit')(updatedTeamData);
+    await act(async () => {
+      wrapper.find('TeamForm').invoke('handleSubmit')(updatedTeamData);
+    });
 
     expect(TeamsAPI.update).toHaveBeenCalledWith(1, updatedTeamData);
   });
 
-  test('should navigate to team detail when cancel is clicked', () => {
+  test('should navigate to team detail when cancel is clicked', async () => {
     const history = createMemoryHistory({});
     const wrapper = mountWithContexts(<TeamEdit team={mockData} />, {
       context: { router: { history } },
     });
 
-    wrapper.find('button[aria-label="Cancel"]').prop('onClick')();
+    await act(async () => {
+      wrapper.find('button[aria-label="Cancel"]').invoke('onClick')();
+    });
 
     expect(history.location.pathname).toEqual('/teams/1/details');
   });

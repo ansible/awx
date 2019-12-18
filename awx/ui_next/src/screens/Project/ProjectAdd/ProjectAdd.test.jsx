@@ -98,17 +98,19 @@ describe('<ProjectAdd />', () => {
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     const formik = wrapper.find('Formik').instance();
-    const changeState = new Promise(resolve => {
-      formik.setState(
-        {
-          values: {
-            ...projectData,
+    await act(async () => {
+      const changeState = new Promise(resolve => {
+        formik.setState(
+          {
+            values: {
+              ...projectData,
+            },
           },
-        },
-        () => resolve()
-      );
+          () => resolve()
+        );
+      });
+      await changeState;
     });
-    await changeState;
     await act(async () => {
       wrapper.find('form').simulate('submit');
     });
@@ -146,7 +148,9 @@ describe('<ProjectAdd />', () => {
         context: { router: { history } },
       }).find('ProjectAdd CardHeader');
     });
-    wrapper.find('CardCloseButton').simulate('click');
+    await act(async () => {
+      wrapper.find('CardCloseButton').simulate('click');
+    });
     expect(history.location.pathname).toEqual('/projects');
   });
 
@@ -158,7 +162,9 @@ describe('<ProjectAdd />', () => {
       });
     });
     await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
-    wrapper.find('ProjectAdd button[aria-label="Cancel"]').simulate('click');
+    await act(async () => {
+      wrapper.find('ProjectAdd button[aria-label="Cancel"]').simulate('click');
+    });
     expect(history.location.pathname).toEqual('/projects');
   });
 });

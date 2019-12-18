@@ -12,6 +12,7 @@ describe('CheckboxListItem', () => {
         label="Buzz"
         isSelected={false}
         onSelect={() => {}}
+        onDeselect={() => {}}
       />
     );
     expect(wrapper).toHaveLength(1);

@@ -6,7 +6,7 @@ import { CardBody } from '@patternfly/react-core';
 import { HostsAPI } from '@api';
 import { Config } from '@contexts/Config';
 
-import HostForm from '../shared/HostForm';
+import HostForm from '../shared';
 
 class HostEdit extends Component {
   constructor(props) {

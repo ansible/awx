@@ -12,6 +12,7 @@ def test_create_job_template(run_module, admin_user, project, inventory):
     module_args = {
         'name': 'foo', 'playbook': 'helloworld.yml',
         'project': project.name, 'inventory': inventory.name,
+        'extra_vars': {'foo': 'bar'},
         'job_type': 'run',
         'state': 'present'
     }
@@ -19,6 +20,7 @@ def test_create_job_template(run_module, admin_user, project, inventory):
     result = run_module('tower_job_template', module_args, admin_user)
 
     jt = JobTemplate.objects.get(name='foo')
+    assert jt.extra_vars == '{"foo": "bar"}'
 
     assert result == {
         "job_template": "foo",

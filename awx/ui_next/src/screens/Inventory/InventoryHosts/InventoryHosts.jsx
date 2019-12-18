@@ -178,7 +178,8 @@ function InventoryHosts({ i18n, location, match }) {
           <InventoryHostItem
             key={o.id}
             host={o}
-            detailUrl={`/hosts/${o.id}/details`}
+            detailUrl={`/inventories/inventory/${match.params.id}/hosts/${o.id}/details`}
+            editUrl={`/inventories/inventory/${match.params.id}/hosts/${o.id}/edit`}
             isSelected={selected.some(row => row.id === o.id)}
             onSelect={() => handleSelect(o)}
             toggleHost={handleToggle}

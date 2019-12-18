@@ -33,7 +33,7 @@ const Label = styled.div`
 
 class SelectableCard extends Component {
   render() {
-    const { label, onClick, isSelected } = this.props;
+    const { label, onClick, isSelected, dataCy } = this.props;
 
     return (
       <SelectableItem
@@ -41,6 +41,7 @@ class SelectableCard extends Component {
         onKeyPress={onClick}
         role="button"
         tabIndex="0"
+        data-cy={dataCy}
         isSelected={isSelected}
       >
         <Indicator isSelected={isSelected} />

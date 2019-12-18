@@ -214,7 +214,7 @@ describe('UsersList with full permissions', () => {
     );
   });
 
-  test('api is called to delete users for each selected user.', () => {
+  test('api is called to delete users for each selected user.', async () => {
     UsersAPI.destroy = jest.fn();
     wrapper.find('UsersList').setState({
       users: mockUsers,
@@ -223,7 +223,7 @@ describe('UsersList with full permissions', () => {
       isModalOpen: true,
       selected: mockUsers,
     });
-    wrapper.find('ToolbarDeleteButton').prop('onDelete')();
+    await wrapper.find('ToolbarDeleteButton').prop('onDelete')();
     expect(UsersAPI.destroy).toHaveBeenCalledTimes(2);
   });
 

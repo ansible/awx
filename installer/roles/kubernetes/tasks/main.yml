@@ -314,4 +314,4 @@
     {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
       scale {{ deployment_object }} {{ kubernetes_deployment_name }} --replicas=0
     {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
-      scale {{ deployment_object }} {{ kubernetes_deployment_name }} --replicas={{ kubernetes_deployment_replica_size }}
+      scale {{ deployment_object }} {{ kubernetes_deployment_name }} --replicas={{ replicas | default(kubernetes_deployment_replica_size) }}

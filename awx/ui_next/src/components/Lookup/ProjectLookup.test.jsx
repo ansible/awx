@@ -1,4 +1,5 @@
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import { sleep } from '@testUtils/testUtils';
 import { ProjectsAPI } from '@api';
@@ -15,9 +16,11 @@ describe('<ProjectLookup />', () => {
       },
     });
     const onChange = jest.fn();
-    mountWithContexts(<ProjectLookup onChange={onChange} />);
+    await act(async () => {
+      mountWithContexts(<ProjectLookup onChange={onChange} />);
+    });
     await sleep(0);
-    expect(onChange).toHaveBeenCalledWith({ id: 1 }, 'project');
+    expect(onChange).toHaveBeenCalledWith({ id: 1 });
   });
 
   test('should not auto-select project when multiple available', async () => {
@@ -28,7 +31,9 @@ describe('<ProjectLookup />', () => {
       },
     });
     const onChange = jest.fn();
-    mountWithContexts(<ProjectLookup onChange={onChange} />);
+    await act(async () => {
+      mountWithContexts(<ProjectLookup onChange={onChange} />);
+    });
     await sleep(0);
     expect(onChange).not.toHaveBeenCalled();
   });

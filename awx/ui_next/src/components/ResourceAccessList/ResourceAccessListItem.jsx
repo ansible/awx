@@ -79,10 +79,10 @@ class ResourceAccessListItem extends React.Component {
               <DataListCell key="name">
                 {accessRecord.username && (
                   <TextContent>
-                    {accessRecord.url ? (
+                    {accessRecord.id ? (
                       <Text component={TextVariants.h6}>
                         <Link
-                          to={{ pathname: accessRecord.url }}
+                          to={{ pathname: `/users/${accessRecord.id}/details` }}
                           css="font-weight: bold"
                         >
                           {accessRecord.username}

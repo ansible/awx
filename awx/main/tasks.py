@@ -264,6 +264,12 @@ def apply_cluster_membership_policies():
 
 
 @task(queue='tower_broadcast_all', exchange_type='fanout')
+def set_migration_flag():
+    logger.debug('Received migration-in-progress signal, will serve redirect.')
+    cache.set('migration_in_progress', True)
+
+
+@task(queue='tower_broadcast_all', exchange_type='fanout')
 def handle_setting_changes(setting_keys):
     orig_len = len(setting_keys)
     for i in range(orig_len):
@@ -2183,7 +2189,10 @@ class RunProjectUpdate(BaseTask):
             project_path = instance.project.get_project_path(check_if_exists=False)
             if os.path.exists(project_path):
                 git_repo = git.Repo(project_path)
-                self.original_branch = git_repo.active_branch
+                if git_repo.head.is_detached:
+                    self.original_branch = git_repo.head.commit
+                else:
+                    self.original_branch = git_repo.active_branch
 
     @staticmethod
     def make_local_copy(project_path, destination_folder, scm_type, scm_revision):

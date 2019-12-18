@@ -111,7 +111,14 @@ class PageHeaderToolbar extends Component {
                   </DropdownToggle>
                 }
                 dropdownItems={[
-                  <DropdownItem key="user" href="#/home">
+                  <DropdownItem
+                    key="user"
+                    href={
+                      loggedInUser
+                        ? `#/users/${loggedInUser.id}/details`
+                        : '#/home'
+                    }
+                  >
                     {i18n._(t`User Details`)}
                   </DropdownItem>,
                   <DropdownItem
