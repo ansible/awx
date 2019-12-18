@@ -70,6 +70,23 @@ function OrganizationLookup({
             header={i18n._(t`Organization`)}
             name="organization"
             qsConfig={QS_CONFIG}
+            searchColumns={[
+              {
+                name: i18n._(t`Name`),
+                key: 'name',
+                isDefault: true
+              },
+              {
+                name: i18n._(t`Team name`),
+                key: 'teams__name',
+              }
+            ]}
+            sortColumns={[
+              {
+                name: i18n._(t`Name`),
+                key: 'name',
+              },
+            ]}
             readOnly={!canDelete}
             selectItem={item => dispatch({ type: 'SELECT_ITEM', item })}
             deselectItem={item => dispatch({ type: 'DESELECT_ITEM', item })}

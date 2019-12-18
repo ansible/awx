@@ -163,27 +163,48 @@ class ProjectsList extends Component {
                   isDefault: true
                 },
                 {
-                  name: i18n._(t`Modified`),
-                  key: 'modified',
+                  name: i18n._(t`Type`),
+                  options: [
+                    [
+                      ``,
+                      i18n._(t`Manual`)
+                    ],
+                    [
+                      `git`,
+                      i18n._(t`Git`)
+                    ],
+                    [
+                      `hg`,
+                      i18n._(t`Mercurial`)
+                    ],
+                    [
+                      `svn`,
+                      i18n._(t`Subversion`)
+                    ],
+                    [
+                      `insights`,
+                      i18n._(t`Red Hat Insights`)
+                    ]
+                  ]
                 },
                 {
-                  name: i18n._(t`Created`),
-                  key: 'created',
+                  name: i18n._(t`SCM URL`),
+                  key: 'scm_url',
+                },
+                {
+                  name: i18n._(t`Modified by (username)`),
+                  key: 'modified_by__username',
+                },
+                {
+                  name: i18n._(t`Created by (username)`),
+                  key: 'created_by__username',
                 },
               ]}
               toolbarSortColumns={[
                 {
                   name: i18n._(t`Name`),
                   key: 'name',
-                },
-                {
-                  name: i18n._(t`Modified`),
-                  key: 'modified',
-                },
-                {
-                  name: i18n._(t`Created`),
-                  key: 'created',
-                },
+                }
               ]}
               renderToolbar={props => (
                 <DataListToolbar

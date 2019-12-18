@@ -177,6 +177,33 @@ function InventoryGroupsList({ i18n, location, match }) {
         itemCount={groupCount}
         qsConfig={QS_CONFIG}
         onRowClick={handleSelect}
+        toolbarSearchColumns={[
+          {
+            name: i18n._(t`Name`),
+            key: 'name',
+            isDefault: true
+          },
+          {
+            name: i18n._(t`Is root group`),
+            key: 'parents__isnull',
+            isDefault: true,
+            isBoolean: true
+          },
+          {
+            name: i18n._(t`Created by (username)`),
+            key: 'created_by__username',
+          },
+          {
+            name: i18n._(t`Modified by (username)`),
+            key: 'modified_by__username',
+          },
+        ]}
+        toolbarSortColumns={[
+          {
+            name: i18n._(t`Name`),
+            key: 'name'
+          }
+        ]}
         renderItem={item => (
           <InventoryGroupItem
             key={item.id}

@@ -131,26 +131,27 @@ function InventoryHosts({ i18n, location, match }) {
         itemCount={hostCount}
         pluralizedItemName={i18n._(t`Hosts`)}
         qsConfig={QS_CONFIG}
-        onRowClick={handleSelect}
-        toolbarColumns={[
+        onRowClick={this.handleSelect}
+        toolbarSearchColumns={[
           {
             name: i18n._(t`Name`),
             key: 'name',
-            isSortable: true,
-            isSearchable: true,
+            isDefault: true
           },
           {
-            name: i18n._(t`Modified`),
-            key: 'modified',
-            isSortable: true,
-            isNumeric: true,
+            name: i18n._(t`Created by (username)`),
+            key: 'created_by__username',
           },
           {
-            name: i18n._(t`Created`),
-            key: 'created',
-            isSortable: true,
-            isNumeric: true,
+            name: i18n._(t`Modified by (username)`),
+            key: 'modified_by__username',
           },
+        ]}
+        toolbarSortColumns={[
+          {
+            name: i18n._(t`Name`),
+            key: 'name'
+          }
         ]}
         renderToolbar={props => (
           <DataListToolbar

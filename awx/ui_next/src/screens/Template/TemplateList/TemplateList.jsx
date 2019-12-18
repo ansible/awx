@@ -221,12 +221,30 @@ class TemplatesList extends Component {
                 isDefault: true
               },
               {
-                name: i18n._(t`Modified`),
-                key: 'modified',
+                name: i18n._(t`Type`),
+                key: 'type',
+                options: [
+                  [
+                    `job_template`,
+                    i18n._(t`Job Template`)
+                  ],
+                  [
+                    `workflow_job_template`,
+                    i18n._(t`Workflow Template`)
+                  ],
+                ]
               },
               {
-                name: i18n._(t`Created`),
-                key: 'created',
+                name: i18n._(t`Playbook name`),
+                key: 'job_template__playbook',
+              },
+              {
+                name: i18n._(t`Created by (username)`),
+                key: 'created_by__username',
+              },
+              {
+                name: i18n._(t`Modified by (username)`),
+                key: 'modified_by__username',
               },
             ]}
             toolbarSortColumns={[
@@ -235,12 +253,8 @@ class TemplatesList extends Component {
                 key: 'name',
               },
               {
-                name: i18n._(t`Modified`),
-                key: 'modified',
-              },
-              {
-                name: i18n._(t`Created`),
-                key: 'created',
+                name: i18n._(t`Type`),
+                key: 'type',
               },
             ]}
             renderToolbar={props => (

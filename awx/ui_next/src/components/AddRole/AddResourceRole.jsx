@@ -148,6 +148,14 @@ class AddResourceRole extends React.Component {
         key: 'username',
         isDefault: true
       },
+      {
+        name: i18n._(t`First name`),
+        key: 'first_name',
+      },
+      {
+        name: i18n._(t`Last name`),
+        key: 'last_name',
+      }
     ];
 
     const userSortColumns = [
@@ -155,11 +163,19 @@ class AddResourceRole extends React.Component {
         name: i18n._(t`Username`),
         key: 'username',
       },
+      {
+        name: i18n._(t`First name`),
+        key: 'first_name',
+      },
+      {
+        name: i18n._(t`Last name`),
+        key: 'last_name',
+      }
     ];
 
     const teamSearchColumns = [
       {
-        name: i18n._(t`name`),
+        name: i18n._(t`Name`),
         key: 'name',
         isDefault: true
       },
@@ -167,7 +183,7 @@ class AddResourceRole extends React.Component {
 
     const teamSortColumns = [
       {
-        name: i18n._(t`name`),
+        name: i18n._(t`Name`),
         key: 'name',
       },
     ];

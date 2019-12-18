@@ -28,7 +28,7 @@ const QS_CONFIG = getQSConfig('job', {
   page_size: 20,
   order_by: '-finished',
   not__launch_type: 'sync',
-});
+}, ['page', 'page_size', 'id']);
 
 class JobList extends Component {
   constructor(props) {
@@ -170,14 +170,94 @@ class JobList extends Component {
                 isDefault: true
               },
               {
-                name: i18n._(t`Finished`),
-                key: 'finished',
+                name: i18n._(t`ID`),
+                key: 'id'
               },
+              {
+                name: i18n._(t`Label name`),
+                key: 'label__name'
+              },
+              {
+                name: i18n._(t`Job type`),
+                key: `type`,
+                options: [
+                  [
+                    `project_update`,
+                    i18n._(t`SCM Update`)
+                  ],
+                  [
+                    `inventory_update`,
+                    i18n._(t`Inventory Sync`)
+                  ],
+                  [
+                    `job`,
+                    i18n._(t`Playbook Run`)
+                  ],
+                  [
+                    `ad_hoc_command`,
+                    i18n._(t`Command`)
+                  ],
+                  [
+                    `system_job`,
+                    i18n._(t`Management Job`)
+                  ],
+                  [
+                    `workflow_job`,
+                    i18n._(t`Workflow Job`)
+                  ]
+                ]
+              },
+              {
+                name: i18n._(t`Created by (username)`),
+                key: 'created_by__username'
+              },
+              {
+                name: i18n._(t`Status`),
+                key: 'status',
+                options: [
+                  [
+                    `new`,
+                    i18n._(t`New`)
+                  ],
+                  [
+                    `pending`,
+                    i18n._(t`Pending`)
+                  ],
+                  [
+                    `waiting`,
+                    i18n._(t`Waiting`)
+                  ],
+                  [
+                    `running`,
+                    i18n._(t`Running`)
+                  ],
+                  [
+                    `successful`,
+                    i18n._(t`Successful`)
+                  ],
+                  [
+                    `failed`,
+                    i18n._(t`Failed`)
+                  ],
+                  [
+                    `error`,
+                    i18n._(t`Error`)
+                  ],
+                  [
+                    `canceled`,
+                    i18n._(t`Canceled`)
+                  ]
+                ]
+              }
             ]}
             toolbarSortColumns={[
               {
                 name: i18n._(t`Name`),
                 key: 'name',
+              },
+              {
+                name: i18n._(t`ID`),
+                key: 'id',
               },
               {
                 name: i18n._(t`Finished`),

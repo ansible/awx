@@ -161,26 +161,14 @@ class TeamsList extends Component {
                   isDefault: true
                 },
                 {
-                  name: i18n._(t`Modified`),
-                  key: 'modified',
-                },
-                {
-                  name: i18n._(t`Created`),
-                  key: 'created',
+                  name: i18n._(t`Organization name`),
+                  key: 'organization__name',
                 },
               ]}
               toolbarSortColumns={[
                 {
                   name: i18n._(t`Name`),
                   key: 'name',
-                },
-                {
-                  name: i18n._(t`Modified`),
-                  key: 'modified',
-                },
-                {
-                  name: i18n._(t`Created`),
-                  key: 'created',
                 },
               ]}
               renderToolbar={props => (
