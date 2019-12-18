@@ -1,4 +1,5 @@
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 
 import { OrganizationsAPI } from '@api';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
@@ -35,30 +36,42 @@ describe('<OrganizationDetail />', () => {
     jest.clearAllMocks();
   });
 
-  test('initially renders succesfully', () => {
-    mountWithContexts(<OrganizationDetail organization={mockOrganization} />);
+  test('initially renders succesfully', async () => {
+    await act(async () => {
+      mountWithContexts(<OrganizationDetail organization={mockOrganization} />);
+    });
   });
 
-  test('should request instance groups from api', () => {
-    mountWithContexts(<OrganizationDetail organization={mockOrganization} />);
+  test('should request instance groups from api', async () => {
+    await act(async () => {
+      mountWithContexts(<OrganizationDetail organization={mockOrganization} />);
+    });
     expect(OrganizationsAPI.readInstanceGroups).toHaveBeenCalledTimes(1);
   });
 
-  test('should handle setting instance groups to state', async done => {
-    const wrapper = mountWithContexts(
-      <OrganizationDetail organization={mockOrganization} />
-    );
-    const component = await waitForElement(wrapper, 'OrganizationDetail');
-    expect(component.state().instanceGroups).toEqual(
-      mockInstanceGroups.data.results
-    );
-    done();
+  test('should render the expected instance group', async () => {
+    let component;
+    await act(async () => {
+      component = mountWithContexts(
+        <OrganizationDetail organization={mockOrganization} />
+      );
+    });
+    await waitForElement(component, 'ContentLoading', el => el.length === 0);
+    expect(
+      component
+        .find('Chip')
+        .findWhere(el => el.text() === 'One')
+        .exists()
+    ).toBe(true);
   });
 
-  test('should render Details', async done => {
-    const wrapper = mountWithContexts(
-      <OrganizationDetail organization={mockOrganization} />
-    );
+  test('should render Details', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <OrganizationDetail organization={mockOrganization} />
+      );
+    });
     const testParams = [
       { label: 'Name', value: 'Foo' },
       { label: 'Description', value: 'Bar' },
@@ -74,30 +87,34 @@ describe('<OrganizationDetail />', () => {
       expect(detail.find('dt').text()).toBe(label);
       expect(detail.find('dd').text()).toBe(value);
     }
-    done();
   });
 
-  test('should show edit button for users with edit permission', async done => {
-    const wrapper = mountWithContexts(
-      <OrganizationDetail organization={mockOrganization} />
-    );
+  test('should show edit button for users with edit permission', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <OrganizationDetail organization={mockOrganization} />
+      );
+    });
     const editButton = await waitForElement(
       wrapper,
       'OrganizationDetail Button'
     );
     expect(editButton.text()).toEqual('Edit');
     expect(editButton.prop('to')).toBe('/organizations/undefined/edit');
-    done();
   });
 
-  test('should hide edit button for users without edit permission', async done => {
+  test('should hide edit button for users without edit permission', async () => {
     const readOnlyOrg = { ...mockOrganization };
     readOnlyOrg.summary_fields.user_capabilities.edit = false;
-    const wrapper = mountWithContexts(
-      <OrganizationDetail organization={readOnlyOrg} />
-    );
+
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <OrganizationDetail organization={readOnlyOrg} />
+      );
+    });
     await waitForElement(wrapper, 'OrganizationDetail');
     expect(wrapper.find('OrganizationDetail Button').length).toBe(0);
-    done();
   });
 });

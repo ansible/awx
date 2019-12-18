@@ -1,5 +1,5 @@
 import React from 'react';
-import { shallow } from 'enzyme';
+import { act } from 'react-dom/test-utils';
 
 import { OrganizationsAPI } from '@api';
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
@@ -31,20 +31,24 @@ describe('<OrganizationTeams />', () => {
     jest.clearAllMocks();
   });
 
-  test('renders succesfully', () => {
-    shallow(
-      <OrganizationTeams
-        id={1}
-        searchString=""
-        location={{ search: '', pathname: '/organizations/1/teams' }}
-      />
-    );
+  test('renders succesfully', async () => {
+    await act(async () => {
+      mountWithContexts(
+        <OrganizationTeams
+          id={1}
+          searchString=""
+          location={{ search: '', pathname: '/organizations/1/teams' }}
+        />
+      );
+    });
   });
 
-  test('should load teams on mount', () => {
-    mountWithContexts(<OrganizationTeams id={1} searchString="" />).find(
-      'OrganizationTeams'
-    );
+  test('should load teams on mount', async () => {
+    await act(async () => {
+      mountWithContexts(<OrganizationTeams id={1} searchString="" />).find(
+        'OrganizationTeams'
+      );
+    });
     expect(OrganizationsAPI.readTeams).toHaveBeenCalledWith(1, {
       page: 1,
       page_size: 5,
@@ -53,10 +57,10 @@ describe('<OrganizationTeams />', () => {
   });
 
   test('should pass fetched teams to PaginatedDatalist', async () => {
-    const wrapper = mountWithContexts(
-      <OrganizationTeams id={1} searchString="" />
-    );
-
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<OrganizationTeams id={1} searchString="" />);
+    });
     await sleep(0);
     wrapper.update();
 
