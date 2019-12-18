@@ -46,8 +46,8 @@ function OrganizationEdit({ organization }) {
         {({ me }) => (
           <OrganizationForm
             organization={organization}
-            handleSubmit={handleSubmit}
-            handleCancel={handleCancel}
+            onSubmit={handleSubmit}
+            onCancel={handleCancel}
             me={me || {}}
           />
         )}

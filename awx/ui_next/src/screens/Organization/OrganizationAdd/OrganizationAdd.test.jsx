@@ -8,7 +8,7 @@ import { OrganizationsAPI } from '@api';
 jest.mock('@api');
 
 describe('<OrganizationAdd />', () => {
-  test('handleSubmit should post to api', async () => {
+  test('onSubmit should post to api', async () => {
     const updatedOrgData = {
       name: 'new name',
       description: 'new description',
@@ -16,11 +16,7 @@ describe('<OrganizationAdd />', () => {
     };
     await act(async () => {
       const wrapper = mountWithContexts(<OrganizationAdd />);
-      wrapper.find('OrganizationForm').prop('handleSubmit')(
-        updatedOrgData,
-        [],
-        []
-      );
+      wrapper.find('OrganizationForm').prop('onSubmit')(updatedOrgData, [], []);
     });
     expect(OrganizationsAPI.create).toHaveBeenCalledWith(updatedOrgData);
   });
@@ -32,6 +28,9 @@ describe('<OrganizationAdd />', () => {
       wrapper = mountWithContexts(<OrganizationAdd />, {
         context: { router: { history } },
       });
+    });
+    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await act(async () => {
       wrapper.find('button[aria-label="Cancel"]').invoke('onClick')();
     });
     expect(history.location.pathname).toEqual('/organizations');
@@ -71,16 +70,12 @@ describe('<OrganizationAdd />', () => {
         context: { router: { history } },
       });
       await waitForElement(wrapper, 'button[aria-label="Save"]');
-      await wrapper.find('OrganizationForm').prop('handleSubmit')(
-        orgData,
-        [3],
-        []
-      );
+      await wrapper.find('OrganizationForm').prop('onSubmit')(orgData, [3], []);
     });
     expect(history.location.pathname).toEqual('/organizations/5');
   });
 
-  test('handleSubmit should post instance groups', async () => {
+  test('onSubmit should post instance groups', async () => {
     const orgData = {
       name: 'new name',
       description: 'new description',
@@ -100,15 +95,17 @@ describe('<OrganizationAdd />', () => {
       wrapper = mountWithContexts(<OrganizationAdd />);
     });
     await waitForElement(wrapper, 'button[aria-label="Save"]');
-    await wrapper.find('OrganizationForm').prop('handleSubmit')(
-      orgData,
-      [3],
-      []
-    );
+    await wrapper.find('OrganizationForm').prop('onSubmit')(orgData, [3], []);
     expect(OrganizationsAPI.associateInstanceGroup).toHaveBeenCalledWith(5, 3);
   });
 
   test('AnsibleSelect component renders if there are virtual environments', async () => {
+    const mockInstanceGroups = [{ name: 'One', id: 1 }, { name: 'Two', id: 2 }];
+    OrganizationsAPI.readInstanceGroups.mockReturnValue({
+      data: {
+        results: mockInstanceGroups,
+      },
+    });
     const config = {
       custom_virtualenvs: ['foo', 'bar'],
     };
@@ -116,8 +113,9 @@ describe('<OrganizationAdd />', () => {
     await act(async () => {
       wrapper = mountWithContexts(<OrganizationAdd />, {
         context: { config },
-      }).find('AnsibleSelect');
+      });
     });
+    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     expect(wrapper.find('FormSelect')).toHaveLength(1);
     expect(wrapper.find('FormSelectOption')).toHaveLength(3);
     expect(
@@ -129,6 +127,12 @@ describe('<OrganizationAdd />', () => {
   });
 
   test('AnsibleSelect component does not render if there are 0 virtual environments', async () => {
+    const mockInstanceGroups = [{ name: 'One', id: 1 }, { name: 'Two', id: 2 }];
+    OrganizationsAPI.readInstanceGroups.mockReturnValue({
+      data: {
+        results: mockInstanceGroups,
+      },
+    });
     const config = {
       custom_virtualenvs: [],
     };
@@ -136,8 +140,9 @@ describe('<OrganizationAdd />', () => {
     await act(async () => {
       wrapper = mountWithContexts(<OrganizationAdd />, {
         context: { config },
-      }).find('AnsibleSelect');
+      });
     });
-    expect(wrapper.find('FormSelect')).toHaveLength(0);
+    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    expect(wrapper.find('AnsibleSelect FormSelect')).toHaveLength(0);
   });
 });
