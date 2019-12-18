@@ -6,23 +6,39 @@ import { CardBody } from '@patternfly/react-core';
 import { DetailList, Detail, UserDateDetail } from '@components/DetailList';
 import { ChipGroup, Chip } from '@components/Chip';
 import { VariablesDetail } from '@components/CodeMirrorInput';
+import ContentError from '@components/ContentError';
+import ContentLoading from '@components/ContentLoading';
 import { InventoriesAPI } from '@api';
 import { Inventory } from '../../../types';
 
 function InventoryDetail({ inventory, i18n }) {
   const [instanceGroups, setInstanceGroups] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [hasContentLoading, setHasContentLoading] = useState(false);
+  const [contentError, setContentError] = useState(null);
 
   useEffect(() => {
     (async () => {
-      setIsLoading(true);
-      const { data } = await InventoriesAPI.readInstanceGroups(inventory.id);
-      setInstanceGroups(data.results);
-      setIsLoading(false);
+      setHasContentLoading(true);
+      try {
+        const { data } = await InventoriesAPI.readInstanceGroups(inventory.id);
+        setInstanceGroups(data.results);
+      } catch (err) {
+        setContentError(err);
+      } finally {
+        setHasContentLoading(false);
+      }
     })();
   }, [inventory.id]);
 
   const { organization } = inventory.summary_fields;
+
+  if (hasContentLoading) {
+    return <ContentLoading />;
+  }
+
+  if (contentError) {
+    return <ContentError error={contentError} />;
+  }
 
   return (
     <CardBody>
@@ -43,17 +59,13 @@ function InventoryDetail({ inventory, i18n }) {
           fullWidth
           label={i18n._(t`Instance Groups`)}
           value={
-            isLoading ? (
-              'loading...'
-            ) : (
-              <ChipGroup numChips={5}>
-                {instanceGroups.map(ig => (
-                  <Chip key={ig.id} isReadOnly>
-                    {ig.name}
-                  </Chip>
-                ))}
-              </ChipGroup>
-            )
+            <ChipGroup numChips={5}>
+              {instanceGroups.map(ig => (
+                <Chip key={ig.id} isReadOnly>
+                  {ig.name}
+                </Chip>
+              ))}
+            </ChipGroup>
           }
         />
         {inventory.variables && (
