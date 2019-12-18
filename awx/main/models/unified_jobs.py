@@ -630,7 +630,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         help_text=_("The date and time the job finished execution."),
         db_index=True,
     )
-    canceled = models.DateTimeField(
+    canceled_on = models.DateTimeField(
         null=True,
         default=None,
         editable=False,
@@ -1373,6 +1373,11 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
                     cancel_fields.append('job_explanation')
                 self.save(update_fields=cancel_fields)
                 self.websocket_emit_status("canceled")
+                if self.cancel_flag and not self.canceled_on:
+                    # Record the `finished` or 'canceled' time.
+                    self.canceled_on = now()
+                    if 'canceled_on' not in update_fields:
+                        update_fields.append('canceled_on')
         return self.cancel_flag
 
     @property
