@@ -32,6 +32,7 @@ __metaclass__ = type
 import json
 import os
 import traceback
+
 from ansible.module_utils._text import to_native
 from ansible.module_utils.urls import urllib_error, ConnectionError, socket, httplib
 from ansible.errors import AnsibleParserError
@@ -50,7 +51,7 @@ except ImportError:
 from ansible.module_utils.basic import AnsibleModule, missing_required_lib
 
 
-def make_request(module, request_handler, tower_url):
+def make_request(request_handler, tower_url):
     '''
     Makes the request to given URL, handles errors, returns JSON
     '''

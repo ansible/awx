@@ -100,12 +100,14 @@ inventory_id: the_ID_of_targeted_ansible_tower_inventory
 
 import os
 import re
+
 from ansible.module_utils import six
 from ansible.module_utils.urls import Request
 from ansible.module_utils._text import to_text, to_native
 from ansible.errors import AnsibleOptionsError
 from ansible.plugins.inventory import BaseInventoryPlugin
 from ansible.config.manager import ensure_type
+
 from ..module_utils.ansible_tower import make_request
 
 # Python 2/3 Compatibility
