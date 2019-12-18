@@ -112,7 +112,7 @@ afterEach(() => {
 ...
 ```
 
-**Test Attributes** - 
+**Test Attributes** -
 It should be noted that the `dataCy` prop, as well as its equivalent attribute `data-cy`, are used as flags for any UI test that wants to avoid relying on brittle CSS selectors such as `nth-of-type()`.
 
 ## Handling API Errors
@@ -296,7 +296,7 @@ The lingui library provides various React helpers for dealing with both marking 
 
 **Note:** Variables that are put inside the t-marked template tag will not be translated.  If you have a variable string with text that needs translating, you must wrap it in ```i18n._(t``)``` where it is defined.
 
-**Note:** We do not use the `I18n` consumer, `i18nMark` function, or `<Trans>` component lingui gives us access to in this repo.  i18nMark does not actually replace the string in the UI (leading to the potential for untranslated bugs), and the other helpers are redundant.  Settling on a consistent, single pattern helps us ease the mental overhead of the need to understand the ins and outs of the lingui API.
+**Note:** We try to avoid the `I18n` consumer, `i18nMark` function, or `<Trans>` component lingui gives us access to in this repo.  i18nMark does not actually replace the string in the UI (leading to the potential for untranslated bugs), and the other helpers are redundant.  Settling on a consistent, single pattern helps us ease the mental overhead of the need to understand the ins and outs of the lingui API.
 
 You can learn more about the ways lingui and its React helpers at [this link](https://lingui.js.org/tutorials/react-patterns.html).  
 

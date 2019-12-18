@@ -1,20 +1,25 @@
 import React from 'react';
 import { node, string } from 'prop-types';
+import { Trans } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 import { formatDateString } from '@util/dates';
 import Detail from './Detail';
 import { SummaryFieldUser } from '../../types';
 
 function UserDateDetail({ label, date, user }) {
+  const dateStr = formatDateString(date);
+  const username = user ? user.username : '';
   return (
     <Detail
       label={label}
       value={
-        <span>
-          {formatDateString(date)}
-          {user && ' by '}
-          {user && <Link to={`/users/${user.id}`}>{user.username}</Link>}
-        </span>
+        user ? (
+          <Trans>
+            {dateStr} by <Link to={`/users/${user.id}`}>{username}</Link>
+          </Trans>
+        ) : (
+          dateStr
+        )
       }
     />
   );

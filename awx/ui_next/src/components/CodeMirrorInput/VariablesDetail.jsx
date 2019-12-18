@@ -14,6 +14,10 @@ function VariablesDetail({ value, label, rows }) {
   const [currentValue, setCurrentValue] = useState(value);
   const [error, setError] = useState(null);
 
+  if (!value) {
+    return null;
+  }
+
   return (
     <>
       <DetailName

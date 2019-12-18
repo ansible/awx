@@ -68,13 +68,11 @@ function InventoryDetail({ inventory, i18n }) {
             </ChipGroup>
           }
         />
-        {inventory.variables && (
-          <VariablesDetail
-            label={i18n._(t`Variables`)}
-            value={inventory.variables}
-            rows={4}
-          />
-        )}
+        <VariablesDetail
+          label={i18n._(t`Variables`)}
+          value={inventory.variables}
+          rows={4}
+        />
         <UserDateDetail
           label={i18n._(t`Created`)}
           date={inventory.created}

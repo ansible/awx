@@ -4,10 +4,9 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
 import { Project } from '@types';
-import { formatDateString } from '@util/dates';
 import { Config } from '@contexts/Config';
 import { Button, CardBody, List, ListItem } from '@patternfly/react-core';
-import { DetailList, Detail } from '@components/DetailList';
+import { DetailList, Detail, UserDateDetail } from '@components/DetailList';
 import { CredentialChip } from '@components/Chip';
 import { toTitleCase } from '@util/strings';
 
@@ -62,30 +61,6 @@ function ProjectDetail({ project, i18n }) {
         )}
       </List>
     );
-  }
-
-  let createdBy = '';
-  if (created) {
-    if (summary_fields.created_by && summary_fields.created_by.username) {
-      createdBy = i18n._(
-        t`${formatDateString(created)} by ${summary_fields.created_by.username}`
-      );
-    } else {
-      createdBy = formatDateString(created);
-    }
-  }
-
-  let modifiedBy = '';
-  if (modified) {
-    if (summary_fields.modified_by && summary_fields.modified_by.username) {
-      modifiedBy = i18n._(
-        t`${formatDateString(modified)} by ${
-          summary_fields.modified_by.username
-        }`
-      );
-    } else {
-      modifiedBy = formatDateString(modified);
-    }
   }
 
   return (
@@ -150,10 +125,16 @@ function ProjectDetail({ project, i18n }) {
           )}
         </Config>
         <Detail label={i18n._(t`Playbook Directory`)} value={local_path} />
-        {/* TODO: Link to user in users */}
-        <Detail label={i18n._(t`Created`)} value={createdBy} />
-        {/* TODO: Link to user in users */}
-        <Detail label={i18n._(t`Last Modified`)} value={modifiedBy} />
+        <UserDateDetail
+          label={i18n._(t`Created`)}
+          date={created}
+          user={summary_fields.created_by}
+        />
+        <UserDateDetail
+          label={i18n._(t`Last Modified`)}
+          date={modified}
+          user={summary_fields.modified_by}
+        />
       </DetailList>
       <ActionButtonWrapper>
         {summary_fields.user_capabilities &&
