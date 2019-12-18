@@ -28,7 +28,7 @@ DEV_DOCKER_TAG_BASE ?= gcr.io/ansible-tower-engineering
 SRC_ONLY_PKGS ?= cffi,pycparser,psycopg2,twilio
 # These should be upgraded in the AWX and Ansible venv before attempting
 # to install the actual requirements
-VENV_BOOTSTRAP ?= pip==19.3.1 setuptools==41.6.0 wheel==0.33.6
+VENV_BOOTSTRAP ?= pip==19.3.1 setuptools==41.6.0
 
 # Determine appropriate shasum command
 UNAME_S := $(shell uname -s)
@@ -157,8 +157,8 @@ virtualenv_ansible_py3:
 		fi; \
 	fi
 
-# poetry and flit are needed for offline install of certain packages
-# but are not declared in setup_requires due to complex reasons
+# flit is needed for offline install of certain packages, specifically ptyprocess
+# it is needed for setup, but not always recognized as a setup dependency
 # similar to pip, setuptools, and wheel, these are all needed here as a bootstrapping issues
 virtualenv_awx:
 	if [ "$(VENV_BASE)" ]; then \
@@ -168,7 +168,7 @@ virtualenv_awx:
 		if [ ! -d "$(VENV_BASE)/awx" ]; then \
 			virtualenv -p $(PYTHON) $(VENV_BASE)/awx; \
 			$(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) $(VENV_BOOTSTRAP) && \
-			$(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) poetry==0.12.17 flit; \
+			$(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) flit; \
 		fi; \
 	fi
 

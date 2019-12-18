@@ -129,7 +129,7 @@ This breaks a very large amount of AWX code that assumes these fields
 are returned as dicts. Upgrading this library will require a refactor
 to accomidate this change.
 
-### pip and setuptools and wheel
+### pip and setuptools
 
 The offline installer needs to have functionality confirmed before upgrading these.
 Versions need to match the versions used in the pip bootstrapping step
