@@ -50,8 +50,8 @@ function OrganizationAdd({ i18n }) {
           <Config>
             {({ me }) => (
               <OrganizationForm
-                handleSubmit={handleSubmit}
-                handleCancel={handleCancel}
+                onSubmit={handleSubmit}
+                onCancel={handleCancel}
                 me={me || {}}
               />
             )}
