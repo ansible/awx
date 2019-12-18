@@ -125,7 +125,7 @@ def main():
         user=dict(),
         team=dict(),
         role=dict(choices=["admin", "read", "member", "execute", "adhoc", "update", "use", "auditor", "project_admin", "inventory_admin", "credential_admin",
-                           "workflow_admin", "notification_admin", "job_template_admin"]),
+                           "workflow_admin", "notification_admin", "job_template_admin"], required=True),
         target_team=dict(),
         inventory=dict(),
         job_template=dict(),

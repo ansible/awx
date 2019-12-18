@@ -35,7 +35,7 @@ options:
     job_type:
       description:
         - The job type to use for the job template.
-      required: True
+      required: False
       choices: ["run", "check"]
       type: str
     inventory:
