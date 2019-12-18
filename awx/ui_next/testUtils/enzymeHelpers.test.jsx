@@ -146,11 +146,8 @@ describe('waitForElement', () => {
     } catch (err) {
       error = err;
     } finally {
-      expect(error).toEqual(
-        new Error(
-          'Expected condition for <#does-not-exist> not met: el => el.length === 1'
-        )
-      );
+      expect(error.message).toContain('Expected condition for <#does-not-exist> not met');
+      expect(error.message).toContain('el.length === 1');
       done();
     }
   });

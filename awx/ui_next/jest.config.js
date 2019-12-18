@@ -1,6 +1,7 @@
 module.exports = {
   collectCoverageFrom: [
-    'src/**/*.{js,jsx}'
+    'src/**/*.{js,jsx}',
+    'testUtils/**/*.{js,jsx}'
   ],
   coveragePathIgnorePatterns: [
     '<rootDir>/src/locales',
