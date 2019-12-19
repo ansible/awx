@@ -71,6 +71,10 @@ function InstanceGroupsLookup(props) {
                 isDefault: true
               },
               {
+                name: i18n._(t`Credential name`),
+                key: 'credential__name'
+              },
+              {
                 name: i18n._(t`Created by (username)`),
                 key: 'created_by__username',
               },

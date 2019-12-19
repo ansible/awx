@@ -83,10 +83,12 @@ function InventoryLookup({
                 key: 'modified_by__username',
               },
             ]}
-            sortColumns={[{
-              name: i18n._(t`Name`),
-              key: 'name'
-            }]}
+            sortColumns={[
+              {
+                name: i18n._(t`Name`),
+                key: 'name',
+              },
+            ]}
             multiple={state.multiple}
             header={i18n._(t`Inventory`)}
             name="inventory"

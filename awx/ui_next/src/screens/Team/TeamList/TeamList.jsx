@@ -164,6 +164,14 @@ class TeamsList extends Component {
                   name: i18n._(t`Organization name`),
                   key: 'organization__name',
                 },
+                {
+                  name: i18n._(t`Created by (username)`),
+                  key: 'created_by__username',
+                },
+                {
+                  name: i18n._(t`Modified by (username)`),
+                  key: 'modified_by__username',
+                },
               ]}
               toolbarSortColumns={[
                 {

@@ -181,26 +181,18 @@ class InventoriesList extends Component {
                 isDefault: true
               },
               {
-                name: i18n._(t`Modified`),
-                key: 'modified',
+                name: i18n._(t`Created by (username)`),
+                key: 'created_by__username',
               },
               {
-                name: i18n._(t`Created`),
-                key: 'created',
+                name: i18n._(t`Modified by (username)`),
+                key: 'modified_by__username',
               },
             ]}
             toolbarSortColumns={[
               {
                 name: i18n._(t`Name`),
                 key: 'name',
-              },
-              {
-                name: i18n._(t`Modified`),
-                key: 'modified',
-              },
-              {
-                name: i18n._(t`Created`),
-                key: 'created',
               },
             ]}
             renderToolbar={props => (

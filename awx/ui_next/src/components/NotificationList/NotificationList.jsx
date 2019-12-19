@@ -11,6 +11,7 @@ import PaginatedDataList from '@components/PaginatedDataList';
 import { getQSConfig, parseQueryString } from '@util/qs';
 
 import { NotificationTemplatesAPI } from '@api';
+import { type } from 'os';
 
 const QS_CONFIG = getQSConfig('notification', {
   page: 1,
@@ -205,26 +206,34 @@ class NotificationList extends Component {
               isDefault: true
             },
             {
-              name: i18n._(t`Modified`),
-              key: 'modified',
+              name: i18n._(t`Type`),
+              key: 'type',
+              options: [
+                ['email', i18n._(t`Email`)],
+                ['grafana', i18n._(t`Grafana`)],
+                ['hipchat', i18n._(t`Hipchat`)],
+                ['irc', i18n._(t`IRC`)],
+                ['mattermost', i18n._(t`Mattermost`)],
+                ['pagerduty', i18n._(t`Pagerduty`)],
+                ['rocketchat', i18n._(t`Rocket.Chat`)],
+                ['slack', i18n._(t`Slack`)],
+                ['twilio', i18n._(t`Twilio`)],
+                ['webhook', i18n._(t`Webhook`)],
+              ]
             },
             {
-              name: i18n._(t`Created`),
-              key: 'created',
+              name: i18n._(t`Created by (username)`),
+              key: 'created_by__username',
+            },
+            {
+              name: i18n._(t`Modified by (username)`),
+              key: 'modified_by__username',
             },
           ]}
           toolbarSortColumns={[
             {
               name: i18n._(t`Name`),
               key: 'name',
-            },
-            {
-              name: i18n._(t`Modified`),
-              key: 'modified',
-            },
-            {
-              name: i18n._(t`Created`),
-              key: 'created',
             },
           ]}
           renderItem={notification => (
