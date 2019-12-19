@@ -50,7 +50,7 @@ class HostListItem extends React.Component {
           />
           <DataListItemCells
             dataListCells={[
-              <DataListCell key="divider">
+              <DataListCell key="name">
                 <VerticalSeparator />
                 <Link to={`${detailUrl}`}>
                   <b>{host.name}</b>

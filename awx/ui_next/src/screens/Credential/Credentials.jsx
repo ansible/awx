@@ -1,26 +1,27 @@
-import React, { Component, Fragment } from 'react';
+import React from 'react';
+import { Route, Switch } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import {
-  PageSection,
-  PageSectionVariants,
-  Title,
-} from '@patternfly/react-core';
 
-class Credentials extends Component {
-  render() {
-    const { i18n } = this.props;
-    const { light } = PageSectionVariants;
+import Breadcrumbs from '@components/Breadcrumbs/Breadcrumbs';
+import { CredentialList } from './CredentialList';
+import CredentialAdd from './CredentialAdd';
 
-    return (
-      <Fragment>
-        <PageSection variant={light} className="pf-m-condensed">
-          <Title size="2xl">{i18n._(t`Credentials`)}</Title>
-        </PageSection>
-        <PageSection />
-      </Fragment>
-    );
-  }
+function Credentials({ i18n }) {
+  const breadcrumbConfig = {
+    '/credentials': i18n._(t`Credentials`),
+    '/credentials/add': i18n._(t`Create New Credential`),
+  };
+
+  return (
+    <>
+      <Breadcrumbs breadcrumbConfig={breadcrumbConfig} />
+      <Switch>
+        <Route path="/credentials/add" render={() => <CredentialAdd />} />
+        <Route path="/credentials" render={() => <CredentialList />} />
+      </Switch>
+    </>
+  );
 }
 
 export default withI18n()(Credentials);
