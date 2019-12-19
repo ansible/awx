@@ -3,7 +3,7 @@ import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import { getQSConfig } from '@util/qs';
 import OptionsList from './OptionsList';
 
-const qsConfig = getQSConfig('test', {});
+const qsConfig = getQSConfig('test', { order_by: 'foo' });
 
 describe('<OptionsList />', () => {
   it('should display list of options', () => {
@@ -17,8 +17,8 @@ describe('<OptionsList />', () => {
         value={[]}
         options={options}
         optionCount={3}
-        searchColumns={[]}
-        sortColumns={[]}
+        searchColumns={[{name: 'Foo', key: 'foo', isDefault: true}]}
+        sortColumns={[{ name: 'Foo', key: 'foo' }]}
         qsConfig={qsConfig}
         selectItem={() => {}}
         deselectItem={() => {}}
@@ -40,8 +40,8 @@ describe('<OptionsList />', () => {
         value={[options[1]]}
         options={options}
         optionCount={3}
-        searchColumns={[]}
-        sortColumns={[]}
+        searchColumns={[{name: 'Foo', key: 'foo', isDefault: true}]}
+        sortColumns={[{ name: 'Foo', key: 'foo' }]}
         qsConfig={qsConfig}
         selectItem={() => {}}
         deselectItem={() => {}}

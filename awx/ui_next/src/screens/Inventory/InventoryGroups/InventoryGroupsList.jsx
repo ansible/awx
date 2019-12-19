@@ -186,7 +186,6 @@ function InventoryGroupsList({ i18n, location, match }) {
           {
             name: i18n._(t`Is root group`),
             key: 'parents__isnull',
-            isDefault: true,
             isBoolean: true
           },
           {

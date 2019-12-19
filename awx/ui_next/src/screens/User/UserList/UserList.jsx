@@ -173,7 +173,6 @@ class UsersList extends Component {
                 {
                   name: i18n._(t`Username`),
                   key: 'username',
-                  isDefault: true
                 },
                 {
                   name: i18n._(t`First name`),

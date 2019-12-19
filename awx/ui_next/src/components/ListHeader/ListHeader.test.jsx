@@ -1,7 +1,6 @@
 import React from 'react';
 import { createMemoryHistory } from 'history';
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
-import { sleep } from '@testUtils/testUtils';
 import ListHeader from './ListHeader';
 
 describe('ListHeader', () => {
@@ -21,7 +20,7 @@ describe('ListHeader', () => {
           { name: 'foo', key: 'foo', isDefault: true},
         ]}
         sortColumns={[
-          { name: 'foo', key: 'foo', isDefault: true},
+          { name: 'foo', key: 'foo'},
         ]}
         renderToolbar={renderToolbarFn}
       />
@@ -42,7 +41,7 @@ describe('ListHeader', () => {
           { name: 'foo', key: 'foo', isDefault: true},
         ]}
         sortColumns={[
-          { name: 'foo', key: 'foo', isDefault: true},
+          { name: 'foo', key: 'foo'},
         ]}
       />,
       { context: { router: { history } } }

@@ -1,5 +1,6 @@
 import {
   shape,
+  exact,
   arrayOf,
   number,
   string,
@@ -251,15 +252,17 @@ export const Group = shape({
 });
 
 export const SearchColumns = arrayOf(
-  shape({
+  exact({
     name: string.isRequired,
     key: string.isRequired,
     isDefault: bool,
+    isBoolean: bool,
+    options: arrayOf(arrayOf(string, string))
   })
 );
 
 export const SortColumns = arrayOf(
-  shape({
+  exact({
     name: string.isRequired,
     key: string.isRequired,
   })
