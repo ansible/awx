@@ -100,6 +100,7 @@ function CredentialList({ i18n }) {
 
       setCredentials(results);
       setCredentialCount(count);
+      setSelected([]);
     } catch (error) {
       setContentError(error);
     }
