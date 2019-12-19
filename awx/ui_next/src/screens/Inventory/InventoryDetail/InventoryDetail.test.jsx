@@ -1,8 +1,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import { InventoriesAPI, CredentialTypesAPI } from '@api';
-import { sleep } from '@testUtils/testUtils';
 import InventoryDetail from './InventoryDetail';
 
 jest.mock('@api');
