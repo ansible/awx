@@ -1,9 +1,16 @@
 import { t } from '@lingui/macro';
 
 export function required(message, i18n) {
+  const errorMessage = message || i18n._(t`This field must not be blank`);
   return value => {
     if (typeof value === 'string' && !value.trim()) {
-      return message || i18n._(t`This field must not be blank`);
+      return errorMessage;
+    }
+    if (typeof value === 'number' && !Number.isNaN(value)) {
+      return undefined;
+    }
+    if (!value) {
+      return errorMessage;
     }
     return undefined;
   };

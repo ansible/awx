@@ -27,6 +27,16 @@ describe('validators', () => {
     });
   });
 
+  test('required interprets undefined as empty value', () => {
+    expect(required(null, i18n)(undefined)).toEqual({
+      id: 'This field must not be blank',
+    });
+  });
+
+  test('required interprets 0 as non-empty value', () => {
+    expect(required(null, i18n)(0)).toBeUndefined();
+  });
+
   test('maxLength accepts value below max', () => {
     expect(maxLength(10, i18n)('snazzy')).toBeUndefined();
   });
