@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { CardBody } from '@components/Card';
+import { Button } from '@patternfly/react-core';
+import { CardBody, CardActionsRow } from '@components/Card';
 import { DetailList, Detail, UserDateDetail } from '@components/DetailList';
 import { ChipGroup, Chip } from '@components/Chip';
 import { VariablesDetail } from '@components/CodeMirrorInput';
@@ -84,6 +85,16 @@ function InventoryDetail({ inventory, i18n }) {
           user={inventory.summary_fields.modified_by}
         />
       </DetailList>
+      {inventory.summary_fields.user_capabilities.edit && (
+        <CardActionsRow>
+          <Button
+            component={Link}
+            to={`/inventories/inventory/${inventory.id}/edit`}
+          >
+            {i18n._(t`Edit`)}
+          </Button>
+        </CardActionsRow>
+      )}
     </CardBody>
   );
 }
