@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { withI18n } from '@lingui/react';
 import { withRouter } from 'react-router-dom';
 import { t } from '@lingui/macro';
-import { CardHeader, CardBody, Tooltip } from '@patternfly/react-core';
+import { CardHeader, Tooltip } from '@patternfly/react-core';
 import { object } from 'prop-types';
 
+import { CardBody } from '@components/Card';
 import CardCloseButton from '@components/CardCloseButton';
 import { InventoriesAPI, CredentialTypesAPI } from '@api';
 import ContentLoading from '@components/ContentLoading';

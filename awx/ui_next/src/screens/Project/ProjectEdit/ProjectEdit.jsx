@@ -3,16 +3,14 @@ import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
-import {
-  Card as _Card,
-  CardBody,
-  CardHeader,
-  Tooltip,
-} from '@patternfly/react-core';
+import { Card as _Card, CardHeader, Tooltip } from '@patternfly/react-core';
+import { CardBody } from '@components/Card';
 import CardCloseButton from '@components/CardCloseButton';
 import ProjectForm from '../shared/ProjectForm';
 import { ProjectsAPI } from '@api';
 
+// TODO: we are doing this in multiple add/edit screens -- move to
+// common component?
 const Card = styled(_Card)`
   --pf-c-card--child--PaddingLeft: 0;
   --pf-c-card--child--PaddingRight: 0;

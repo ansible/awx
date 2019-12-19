@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { CardBody } from '@patternfly/react-core';
+import { CardBody } from '@components/Card';
 import { DetailList, Detail, UserDateDetail } from '@components/DetailList';
 import { ChipGroup, Chip } from '@components/Chip';
 import { VariablesDetail } from '@components/CodeMirrorInput';
@@ -13,7 +13,7 @@ import { Inventory } from '../../../types';
 
 function InventoryDetail({ inventory, i18n }) {
   const [instanceGroups, setInstanceGroups] = useState([]);
-  const [hasContentLoading, setHasContentLoading] = useState(false);
+  const [hasContentLoading, setHasContentLoading] = useState(true);
   const [contentError, setContentError] = useState(null);
 
   useEffect(() => {

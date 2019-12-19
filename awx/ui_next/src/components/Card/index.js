@@ -1,2 +1,2 @@
-// eslint-disable-next-line import/prefer-default-export
 export { default as TabbedCardHeader } from './TabbedCardHeader';
+export { default as CardBody } from './CardBody';

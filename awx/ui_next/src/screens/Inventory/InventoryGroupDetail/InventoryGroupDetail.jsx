@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { t } from '@lingui/macro';
 
-import { CardBody, Button } from '@patternfly/react-core';
+import { Button } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';
 import { withRouter } from 'react-router-dom';
 import styled from 'styled-components';
 import { VariablesDetail } from '@components/CodeMirrorInput';
+import { CardBody } from '@components/Card';
 import ErrorDetail from '@components/ErrorDetail';
 import AlertModal from '@components/AlertModal';
 

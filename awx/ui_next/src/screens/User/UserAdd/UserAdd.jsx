@@ -5,11 +5,11 @@ import { t } from '@lingui/macro';
 import styled from 'styled-components';
 import {
   Card as _Card,
-  CardBody,
   CardHeader,
   PageSection,
   Tooltip,
 } from '@patternfly/react-core';
+import { CardBody } from '@components/Card';
 import CardCloseButton from '@components/CardCloseButton';
 import UserForm from '../shared/UserForm';
 import { UsersAPI } from '@api';

@@ -2,7 +2,6 @@ import React, { Component, Fragment } from 'react';
 import { Link, withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import {
-  CardBody,
   Button,
   TextList,
   TextListItem,
@@ -12,6 +11,7 @@ import {
 import styled from 'styled-components';
 import { t } from '@lingui/macro';
 
+import { CardBody } from '@components/Card';
 import ContentError from '@components/ContentError';
 import LaunchButton from '@components/LaunchButton';
 import ContentLoading from '@components/ContentLoading';

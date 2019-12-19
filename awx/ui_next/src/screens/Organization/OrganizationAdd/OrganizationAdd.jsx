@@ -3,16 +3,11 @@ import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import {
-  PageSection,
-  Card,
-  CardHeader,
-  CardBody,
-  Tooltip,
-} from '@patternfly/react-core';
+import { PageSection, Card, CardHeader, Tooltip } from '@patternfly/react-core';
 
 import { OrganizationsAPI } from '@api';
 import { Config } from '@contexts/Config';
+import { CardBody } from '@components/Card';
 import CardCloseButton from '@components/CardCloseButton';
 import OrganizationForm from '../shared/OrganizationForm';
 

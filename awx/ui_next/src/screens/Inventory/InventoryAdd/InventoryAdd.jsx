@@ -2,14 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { withI18n } from '@lingui/react';
 import { withRouter } from 'react-router-dom';
 import { t } from '@lingui/macro';
-import {
-  PageSection,
-  Card,
-  CardHeader,
-  CardBody,
-  Tooltip,
-} from '@patternfly/react-core';
-
+import { PageSection, Card, CardHeader, Tooltip } from '@patternfly/react-core';
+import { CardBody } from '@components/Card';
 import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
 

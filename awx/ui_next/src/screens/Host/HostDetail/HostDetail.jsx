@@ -4,7 +4,8 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
 import { Host } from '@types';
-import { Button, CardBody } from '@patternfly/react-core';
+import { Button } from '@patternfly/react-core';
+import { CardBody } from '@components/Card';
 import { DetailList, Detail, UserDateDetail } from '@components/DetailList';
 import { VariablesDetail } from '@components/CodeMirrorInput';
 

@@ -8,7 +8,7 @@ import {
 } from 'react-virtualized';
 
 import React, { Component } from 'react';
-import { CardBody } from '@patternfly/react-core';
+import { CardBody } from '@components/Card';
 
 import { JobsAPI } from '@api';
 import ContentError from '@components/ContentError';

@@ -5,12 +5,12 @@ import { t } from '@lingui/macro';
 import styled from 'styled-components';
 import {
   Card as _Card,
-  CardBody,
   CardHeader,
   PageSection,
   Tooltip,
 } from '@patternfly/react-core';
 import CardCloseButton from '@components/CardCloseButton';
+import { CardBody } from '@components/Card';
 import ProjectForm from '../shared/ProjectForm';
 import { ProjectsAPI } from '@api';
 
