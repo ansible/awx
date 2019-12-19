@@ -98,13 +98,15 @@ describe('<ProjectDetail />', () => {
       `${mockProject.scm_update_cache_timeout} Seconds`
     );
     assertDetail('Ansible Environment', mockProject.custom_virtualenv);
-    assertDetail(
-      'Created',
-      `10/10/2019, 1:15:06 AM by ${mockProject.summary_fields.created_by.username}`
+    const dateDetails = wrapper.find('UserDateDetail');
+    expect(dateDetails).toHaveLength(2);
+    expect(dateDetails.at(0).prop('label')).toEqual('Created');
+    expect(dateDetails.at(0).prop('date')).toEqual(
+      '2019-10-10T01:15:06.780472Z'
     );
-    assertDetail(
-      'Last Modified',
-      `10/10/2019, 1:15:06 AM by ${mockProject.summary_fields.modified_by.username}`
+    expect(dateDetails.at(1).prop('label')).toEqual('Last Modified');
+    expect(dateDetails.at(1).prop('date')).toEqual(
+      '2019-10-10T01:15:06.780490Z'
     );
     expect(
       wrapper

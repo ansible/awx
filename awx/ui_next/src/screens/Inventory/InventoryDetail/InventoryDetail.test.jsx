@@ -1,7 +1,8 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
 import { InventoriesAPI, CredentialTypesAPI } from '@api';
+import { sleep } from '@testUtils/testUtils';
 import InventoryDetail from './InventoryDetail';
 
 jest.mock('@api');
@@ -83,6 +84,7 @@ describe('<InventoryDetail />', () => {
         <InventoryDetail inventory={mockInventory} />
       );
     });
+    wrapper.update();
     expectDetailToMatch(wrapper, 'Name', mockInventory.name);
     expectDetailToMatch(wrapper, 'Activity', 'Coming soon');
     expectDetailToMatch(wrapper, 'Description', mockInventory.description);
