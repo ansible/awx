@@ -1,9 +1,9 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { CredentialsAPI, CredentialTypesAPI } from '@api';
+import { CredentialsAPI } from '@api';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
 import { CredentialList } from '.';
-import { mockCredentials, mockCredentialTypes } from '../shared';
+import mockCredentials from '../shared';
 
 jest.mock('@api');
 
@@ -12,9 +12,6 @@ describe('<CredentialList />', () => {
 
   beforeEach(async () => {
     CredentialsAPI.read.mockResolvedValueOnce({ data: mockCredentials });
-    CredentialTypesAPI.read.mockResolvedValueOnce({
-      data: mockCredentialTypes,
-    });
     CredentialsAPI.readOptions.mockResolvedValue({
       data: {
         actions: {
@@ -101,9 +98,6 @@ describe('<CredentialList />', () => {
 
   test('should call api delete credentials for each selected credential', async () => {
     CredentialsAPI.read.mockResolvedValueOnce({ data: mockCredentials });
-    CredentialTypesAPI.read.mockResolvedValueOnce({
-      data: mockCredentialTypes,
-    });
     CredentialsAPI.destroy = jest.fn();
 
     await act(async () => {

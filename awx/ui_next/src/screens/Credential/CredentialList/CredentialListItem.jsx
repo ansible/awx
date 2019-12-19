@@ -52,7 +52,9 @@ function CredentialListItem({
                 <b>{credential.name}</b>
               </Link>
             </DataListCell>,
-            <DataListCell key="type">{credential.kind}</DataListCell>,
+            <DataListCell key="type">
+              {credential.summary_fields.credential_type.name}
+            </DataListCell>,
             <ActionButtonCell lastcolumn="true" key="action">
               {canEdit && (
                 <Tooltip content={i18n._(t`Edit Credential`)} position="top">

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { CredentialsAPI, CredentialTypesAPI } from '@api';
+import { CredentialsAPI } from '@api';
 import { Card, PageSection } from '@patternfly/react-core';
 import AlertModal from '@components/AlertModal';
 import ErrorDetail from '@components/ErrorDetail';
@@ -14,31 +14,17 @@ import PaginatedDataList, {
 import { getQSConfig, parseQueryString } from '@util/qs';
 import { CredentialListItem } from '.';
 
-const QS_CONFIG = getQSConfig('project', {
+const QS_CONFIG = getQSConfig('credential', {
   page: 1,
   page_size: 20,
   order_by: 'name',
 });
-
-const assignCredentialKinds = (credentials, credentialTypes) => {
-  const typesById = credentialTypes.reduce((accumulator, type) => {
-    accumulator[type.id] = type.name;
-    return accumulator;
-  }, {});
-
-  credentials.forEach(credential => {
-    credential.kind = typesById[credential.credential_type];
-  });
-
-  return credentials;
-};
 
 function CredentialList({ i18n }) {
   const [actions, setActions] = useState(null);
   const [contentError, setContentError] = useState(null);
   const [credentialCount, setCredentialCount] = useState(0);
   const [credentials, setCredentials] = useState([]);
-  const [credentialTypes, setCredentialTypes] = useState(null);
   const [deletionError, setDeletionError] = useState(null);
   const [hasContentLoading, setHasContentLoading] = useState(true);
   const [selected, setSelected] = useState([]);
@@ -57,19 +43,14 @@ function CredentialList({ i18n }) {
         {
           data: { actions: optionActions },
         },
-        {
-          data: { results: credentialTypeResults },
-        },
       ] = await Promise.all([
         CredentialsAPI.read(params),
         loadCredentialActions(),
-        loadCredentialTypes(),
       ]);
 
-      setActions(optionActions);
+      setCredentials(results);
       setCredentialCount(count);
-      setCredentials(assignCredentialKinds(results, credentialTypeResults));
-      setCredentialTypes(credentialTypeResults);
+      setActions(optionActions);
     } catch (error) {
       setContentError(error);
     } finally {
@@ -80,13 +61,6 @@ function CredentialList({ i18n }) {
   useEffect(() => {
     loadCredentials(location);
   }, [location]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const loadCredentialTypes = () => {
-    if (credentialTypes) {
-      return Promise.resolve({ data: { results: credentialTypes } });
-    }
-    return CredentialTypesAPI.read({ page_size: 200 });
-  };
 
   const loadCredentialActions = () => {
     if (actions) {
@@ -124,7 +98,7 @@ function CredentialList({ i18n }) {
         data: { count, results },
       } = await CredentialsAPI.read(params);
 
-      setCredentials(assignCredentialKinds(results, credentialTypes));
+      setCredentials(results);
       setCredentialCount(count);
     } catch (error) {
       setContentError(error);
